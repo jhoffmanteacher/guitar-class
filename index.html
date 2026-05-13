@@ -147,6 +147,42 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .coming{text-align:center;padding:48px 20px;color:var(--text2)}
 .coming .big{font-size:36px;margin-bottom:12px}
 .coming p{font-size:14px;line-height:1.6}
+
+/* ── Teacher dashboard ── */
+.t-main{max-width:900px;margin:0 auto;padding:24px 16px 60px}
+.t-header{margin-bottom:20px}
+.t-title{font-size:18px;font-weight:500;margin-bottom:3px}
+.t-sub{font-size:13px;color:var(--text2)}
+.t-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:20px}
+.t-scard{background:var(--bg3);border-radius:var(--radius);padding:12px 14px}
+.t-scard-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:4px}
+.t-scard-val{font-size:22px;font-weight:500}
+.t-week-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.t-wtab{font-size:12px;padding:4px 12px;border-radius:20px;border:0.5px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer}
+.t-wtab.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+.t-wtab.locked{opacity:.4;cursor:default}
+.t-grid-wrap{overflow-x:auto;border:0.5px solid var(--border2);border-radius:var(--radius)}
+.t-grid-wrap table{width:100%;border-collapse:collapse;font-size:12px}
+.t-grid-wrap thead th{padding:9px 8px;text-align:center;background:var(--bg2);border-bottom:0.5px solid var(--border2);font-weight:500;color:var(--text2);font-size:11px;vertical-align:bottom;line-height:1.3;white-space:normal;min-width:60px}
+.t-grid-wrap thead th.nc{text-align:left;min-width:130px;width:130px;font-size:12px;color:var(--text)}
+.t-grid-wrap tbody tr{border-bottom:0.5px solid var(--border)}
+.t-grid-wrap tbody tr:last-child{border-bottom:none}
+.t-grid-wrap tbody tr:hover td{background:var(--bg2)}
+.t-grid-wrap td{padding:8px;text-align:center;vertical-align:middle}
+.t-grid-wrap td.nc{text-align:left;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+.tck{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:4px}
+.tck.yes{background:var(--green-bg);color:var(--green-text)}
+.tck.no{background:var(--bg3);color:var(--text3)}
+.ppill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500;white-space:nowrap}
+.pp-hi{background:var(--green-bg);color:var(--green-text)}
+.pp-mid{background:var(--amber-bg);color:var(--amber-text)}
+.pp-lo{background:#fde8e8;color:#a32d2d}
+.t-legend{display:flex;gap:14px;margin-top:10px;font-size:11px;color:var(--text2);align-items:center;flex-wrap:wrap}
+.t-leg{display:flex;align-items:center;gap:5px}
+.t-loading{text-align:center;padding:48px 20px;color:var(--text2);font-size:14px}
+.t-denied{max-width:400px;margin:80px auto;padding:0 20px;text-align:center}
+.t-denied h2{font-size:20px;font-weight:500;margin-bottom:10px}
+.t-denied p{font-size:14px;color:var(--text2);line-height:1.6}
 </style>
 </head>
 <body>
@@ -364,6 +400,39 @@ const firebaseConfig = {
   </div>
 </div>
 
+<!-- Teacher dashboard -->
+<div id="teacher-app" style="display:none">
+  <div class="t-main">
+    <div class="t-header">
+      <div class="t-title">Class progress</div>
+      <div class="t-sub">Sequoia High School — Beginning Guitar · Year 1 · Teacher view</div>
+    </div>
+    <div class="t-summary" id="t-summary"></div>
+    <div class="t-week-tabs" id="t-week-tabs"></div>
+    <div id="t-grid-container"><div class="t-loading">Loading student data…</div></div>
+    <div class="t-legend">
+      <div class="t-leg">
+        <span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span> Checked off by student
+      </div>
+      <div class="t-leg">
+        <span class="tck no" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px">
+          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </span> Not yet
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Teacher access denied -->
+<div id="teacher-denied" style="display:none">
+  <div class="t-denied">
+    <h2>Access denied</h2>
+    <p>The teacher dashboard is only available to authorised accounts. Please sign in with your school Google account.</p>
+  </div>
+</div>
+
 <script>
 /* ── Firebase init ── */
 firebase.initializeApp(firebaseConfig);
@@ -383,12 +452,18 @@ function signOut(){ auth.signOut(); }
 auth.onAuthStateChanged(async user=>{
   if(user){
     currentUser = user;
-    await loadProgress();
-    showApp(user);
+    if(IS_TEACHER_MODE){
+      showTeacherApp(user);
+    } else {
+      await loadProgress();
+      showApp(user);
+    }
   } else {
     currentUser = null; progress = {};
     document.getElementById('auth-wall').style.display='block';
     document.getElementById('app').style.display='none';
+    document.getElementById('teacher-app').style.display='none';
+    document.getElementById('teacher-denied').style.display='none';
     document.getElementById('user-area').innerHTML=
       '<button class="btn-sign" onclick="signIn()">Sign in with Google</button>';
   }
@@ -420,7 +495,11 @@ function saveProgress(){
   setSaveMsg('Saving…');
   saveTimer = setTimeout(async()=>{
     try{
-      await db.collection('progress').doc(currentUser.uid).set({skills:progress},{merge:true});
+      await db.collection('progress').doc(currentUser.uid).set({
+        skills:progress,
+        name:currentUser.displayName||'',
+        email:currentUser.email||''
+      },{merge:true});
       setSaveMsg('Saved ✓');
       setTimeout(()=>setSaveMsg(''),2000);
     } catch(e){ setSaveMsg('Save failed — check connection'); }
@@ -682,6 +761,142 @@ function toggleSkill(sid,wid){
   document.querySelectorAll('.wpill').forEach(b=>{if(b.dataset.id===wid)b.classList.add('active');});
   saveProgress();
 }
+
+/* ══════════════════════════════════════════════
+   TEACHER DASHBOARD
+   Access: ?teacher=true in the URL
+   Only jhoffman@seq.org can load student data.
+   ══════════════════════════════════════════════ */
+const TEACHER_EMAIL = 'jhoffman@seq.org';
+const IS_TEACHER_MODE = new URLSearchParams(window.location.search).has('teacher');
+
+let teacherWeekId = null;
+let allStudents = [];
+
+function showTeacherApp(user){
+  document.getElementById('auth-wall').style.display='none';
+  document.getElementById('app').style.display='none';
+  if(user.email !== TEACHER_EMAIL){
+    document.getElementById('teacher-denied').style.display='block';
+    const av = user.photoURL
+      ? `<img src="${user.photoURL}" class="avatar" alt="">`
+      : `<div class="avatar-init">${(user.displayName||'?')[0].toUpperCase()}</div>`;
+    document.getElementById('user-area').innerHTML=
+      `${av}<span class="user-name">${user.displayName||user.email}</span>
+       <button class="btn-out" onclick="signOut()">Sign out</button>`;
+    return;
+  }
+  document.getElementById('teacher-app').style.display='block';
+  const av = user.photoURL
+    ? `<img src="${user.photoURL}" class="avatar" alt="">`
+    : `<div class="avatar-init">${(user.displayName||'?')[0].toUpperCase()}</div>`;
+  document.getElementById('user-area').innerHTML=
+    `${av}<span class="user-name">${user.displayName||user.email}</span>
+     <button class="btn-out" onclick="signOut()">Sign out</button>`;
+  renderTeacherWeekTabs();
+  const firstWeek = WEEKS.find(w=>!w.locked && w.skills && w.skills.length>0);
+  if(firstWeek){ teacherWeekId=firstWeek.id; activateTeacherWeekTab(firstWeek.id); }
+  loadAllStudents();
+}
+
+function renderTeacherWeekTabs(){
+  const c=document.getElementById('t-week-tabs');
+  c.innerHTML='';
+  WEEKS.forEach(w=>{
+    if(!w.skills||w.skills.length===0) return;
+    const btn=document.createElement('button');
+    btn.className='t-wtab'+(w.locked?' locked':'')+(w.id===teacherWeekId?' on':'');
+    btn.textContent=w.label;
+    btn.dataset.id=w.id;
+    if(!w.locked) btn.onclick=()=>{ teacherWeekId=w.id; activateTeacherWeekTab(w.id); renderTeacherGrid(); };
+    c.appendChild(btn);
+  });
+}
+
+function activateTeacherWeekTab(id){
+  document.querySelectorAll('.t-wtab').forEach(b=>b.classList.toggle('on',b.dataset.id===id));
+}
+
+async function loadAllStudents(){
+  try{
+    const snap = await db.collection('progress').get();
+    allStudents = [];
+    snap.forEach(doc=>{
+      allStudents.push({ uid:doc.id, skills:doc.data().skills||{}, name:doc.data().name||'', email:doc.data().email||'' });
+    });
+    // fetch display names from auth isn't possible client-side for other users,
+    // so we store name/email when each student saves progress
+    renderTeacherGrid();
+    renderTeacherSummary();
+  } catch(e){
+    document.getElementById('t-grid-container').innerHTML=
+      '<div class="t-loading">Could not load student data. Check your Firebase security rules — see the instructions at the bottom of this file.</div>';
+  }
+}
+
+function renderTeacherSummary(){
+  const w=WEEKS.find(x=>x.id===teacherWeekId);
+  if(!w||!w.skills) return;
+  const total=allStudents.length;
+  const complete=allStudents.filter(s=>w.skills.every(sk=>s.skills[sk.id])).length;
+  const none=allStudents.filter(s=>w.skills.every(sk=>!s.skills[sk.id])).length;
+  const inprog=total-complete-none;
+  document.getElementById('t-summary').innerHTML=`
+    <div class="t-scard"><div class="t-scard-lbl">Students</div><div class="t-scard-val">${total}</div></div>
+    <div class="t-scard"><div class="t-scard-lbl">All done</div><div class="t-scard-val">${complete}</div></div>
+    <div class="t-scard"><div class="t-scard-lbl">In progress</div><div class="t-scard-val">${inprog}</div></div>
+    <div class="t-scard"><div class="t-scard-lbl">Not started</div><div class="t-scard-val">${none}</div></div>`;
+}
+
+function renderTeacherGrid(){
+  renderTeacherSummary();
+  const w=WEEKS.find(x=>x.id===teacherWeekId);
+  if(!w||!w.skills||w.skills.length===0){
+    document.getElementById('t-grid-container').innerHTML='<div class="t-loading">No skills for this week yet.</div>';
+    return;
+  }
+  if(allStudents.length===0){
+    document.getElementById('t-grid-container').innerHTML='<div class="t-loading">No student data yet — students need to sign in and check off skills first.</div>';
+    return;
+  }
+  // Sort students by progress descending
+  const sorted=[...allStudents].sort((a,b)=>{
+    const da=w.skills.filter(s=>a.skills[s.id]).length;
+    const db2=w.skills.filter(s=>b.skills[s.id]).length;
+    return db2-da;
+  });
+  const checkSvg=`<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const minusSvg=`<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+
+  const headerCells=w.skills.map(s=>`<th title="${s.text}">${abbreviate(s.text)}</th>`).join('');
+  const rows=sorted.map(stu=>{
+    const done=w.skills.filter(s=>stu.skills[s.id]).length;
+    const total=w.skills.length;
+    const pct=Math.round(done/total*100);
+    const pillClass=pct===100?'pp-hi':pct>=50?'pp-mid':'pp-lo';
+    const displayName = stu.name || stu.email || stu.uid.slice(0,8)+'…';
+    const cells=w.skills.map(s=>{
+      const yes=!!stu.skills[s.id];
+      return `<td><span class="tck ${yes?'yes':'no'}" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px">${yes?checkSvg:minusSvg}</span></td>`;
+    }).join('');
+    return `<tr><td class="nc" title="${displayName}">${displayName}</td>${cells}<td><span class="ppill ${pillClass}">${done} / ${total}</span></td></tr>`;
+  }).join('');
+
+  document.getElementById('t-grid-container').innerHTML=`
+    <div class="t-grid-wrap">
+      <table>
+        <thead><tr><th class="nc">Student</th>${headerCells}<th>Progress</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function abbreviate(text){
+  // Shorten skill text to ~3 words for column headers (full text is in title attr)
+  const words=text.split(' ');
+  if(words.length<=4) return text;
+  return words.slice(0,3).join(' ')+'…';
+}
 </script>
 
 <!--
@@ -707,12 +922,35 @@ function toggleSkill(sid,wid){
 ║    Left menu → Build → Firestore Database → Create database          ║
 ║    Choose "Start in test mode" → select a region → Done             ║
 ║                                                                      ║
+║  STEP 4b — Set secure Firestore rules (IMPORTANT)                   ║
+║    Left menu → Build → Firestore Database → Rules tab               ║
+║    Replace everything with the rules below, then click Publish:     ║
+║                                                                      ║
+║    rules_version = '2';                                              ║
+║    service cloud.firestore {                                         ║
+║      match /databases/{database}/documents {                         ║
+║        match /progress/{userId} {                                    ║
+║          // Students: read & write only their own doc                ║
+║          allow read, write: if request.auth != null                  ║
+║            && request.auth.uid == userId;                            ║
+║          // Teacher: read any doc (write not needed)                 ║
+║          allow read: if request.auth != null                         ║
+║            && request.auth.token.email == "jhoffman@seq.org";       ║
+║        }                                                             ║
+║      }                                                               ║
+║    }                                                                 ║
+║                                                                      ║
 ║  STEP 5 — Host on GitHub Pages (free permanent URL)                  ║
 ║    a) Go to github.com → sign in or create a free account           ║
 ║    b) Click "New repository" → name it: guitar-class                ║
 ║    c) Upload this file, rename it: index.html                        ║
 ║    d) Go to Settings → Pages → Deploy from branch: main / root      ║
 ║    e) Your URL will be: https://YOURNAME.github.io/guitar-class      ║
+║                                                                      ║
+║  TEACHER DASHBOARD URL:                                              ║
+║    https://YOURNAME.github.io/guitar-class?teacher=true             ║
+║    Only jhoffman@seq.org can see student data.                       ║
+║    Any other signed-in account sees "Access denied."                 ║
 ║                                                                      ║
 ║  ADDING A NEW WEEK LATER:                                            ║
 ║    1. Come back to Claude and paste or attach this file              ║
