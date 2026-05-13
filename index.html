@@ -13,6 +13,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Guitar Class</title>
+<script type="text/javascript">
+function googleTranslateElementInit(){
+  new google.translate.TranslateElement({
+    pageLanguage:'en',
+    includedLanguages:'es',
+    layout:google.translate.TranslateElement.InlineLayout.NONE,
+    autoDisplay:false
+  },'google_translate_element');
+}
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -46,6 +57,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .btn-sign:hover{background:var(--bg3)}
 .btn-out{padding:5px 12px;font-size:12px;border:0.5px solid var(--border);border-radius:20px;background:transparent;color:var(--text2);cursor:pointer}
 .btn-out:hover{background:var(--bg3)}
+.btn-translate{padding:5px 12px;font-size:12px;border:0.5px solid var(--border2);border-radius:20px;background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:5px}
+.btn-translate:hover{background:var(--bg3)}
+.btn-translate.active{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-text)}
+#google_translate_element{display:none}
 .auth-wall{max-width:400px;margin:80px auto;padding:0 20px;text-align:center}
 .auth-wall h1{font-size:22px;font-weight:500;margin-bottom:10px}
 .auth-wall p{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:28px}
@@ -311,14 +326,22 @@ const firebaseConfig = {
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
+<!-- ── Google Translate hidden widget ── -->
+<div id="google_translate_element"></div>
+
 <!-- ── Header ── -->
 <header class="header">
   <div>
     <div class="header-title">Sequoia High School Beginning Guitar</div>
-    <div class="header-sub">Year 1 Skills Tracker</div>
+    <div class="header-sub">Year 1 · Resources and Skills Tracker</div>
   </div>
-  <div class="user-area" id="user-area">
-    <button class="btn-sign" onclick="signIn()">Sign in with Google</button>
+  <div style="display:flex;align-items:center;gap:8px">
+    <button class="btn-translate" id="btn-translate" onclick="toggleTranslate()" title="Translate to Spanish">
+      <span>🌐</span><span id="translate-label">Español</span>
+    </button>
+    <div class="user-area" id="user-area">
+      <button class="btn-sign" onclick="signIn()">Sign in with Google</button>
+    </div>
   </div>
 </header>
 
@@ -607,6 +630,43 @@ function buildChecklist(w){
 }
 
 /* ── Toggle skill ── */
+/* ── Translate toggle ── */
+let isSpanish = false;
+function toggleTranslate(){
+  const btn = document.getElementById('btn-translate');
+  const lbl = document.getElementById('translate-label');
+  if(!isSpanish){
+    // Switch to Spanish via Google Translate cookie
+    const select = document.querySelector('.goog-te-combo');
+    if(select){
+      select.value = 'es';
+      select.dispatchEvent(new Event('change'));
+    } else {
+      // Fallback: set cookie directly and reload
+      document.cookie = 'googtrans=/en/es; path=/';
+      location.reload();
+      return;
+    }
+    btn.classList.add('active');
+    lbl.textContent = 'English';
+    isSpanish = true;
+  } else {
+    // Switch back to English
+    const select = document.querySelector('.goog-te-combo');
+    if(select){
+      select.value = 'en';
+      select.dispatchEvent(new Event('change'));
+    } else {
+      document.cookie = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      location.reload();
+      return;
+    }
+    btn.classList.remove('active');
+    lbl.textContent = 'Español';
+    isSpanish = false;
+  }
+}
+
 function toggleSkill(sid,wid){
   progress[sid]=!progress[sid];
   const el=document.getElementById(`chk-${sid}`);
