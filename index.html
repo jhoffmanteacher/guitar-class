@@ -220,8 +220,71 @@ const WEEKS = [
     ]
   },
 
-  /* ── WEEK 4 — placeholder ── */
-  {id:'w4',label:'Wk 4',locked:true,unit:'Unit 1 · First Sounds',title:'Week 4',subtitle:'Coming soon',comingSoon:true,skills:[]},
+  /* ── WEEK 4 — FULL CONTENT ── */
+  {
+    id:'w4', label:'Wk 4', locked:false,
+    unit:'Unit 1 · First Sounds', title:'Week 4',
+    subtitle:'Chord diagrams · Em & Am · Basic downstroke strumming',
+    objective:'I CAN read a chord diagram, switch between Em and Am, and strum a downstroke pattern in time.',
+    skillFocus:'Reading chord diagrams · First chords: Em & Am · Basic downstroke strumming · Partner feedback',
+    comingSoon:false,
+    stations:{
+      a:{
+        title:'Teacher station — chord diagrams & hand position', time:'12 min',
+        steps:[
+          {text:'Explain chord diagrams: vertical lines = strings, horizontal lines = frets, dots = where fingers go, numbers = which finger to use, X = don\'t play, O = open string.',hint:'Draw a blank diagram on the board and build Em together dot by dot.'},
+          {text:'Teach Em: fingers 2 & 3 on strings 5 & 4 at fret 2. Strum all 6 strings. Listen for a full, clean sound.',hint:'Arch the fingers — make sure open strings ring out.'},
+          {text:'Teach Am: fingers 1, 2, & 3 on strings 2, 4, & 3 at fret 1 & 2. Strum strings 5–1 only (mute string 6).',hint:'Check that the first finger isn\'t accidentally touching string 1.'},
+          {text:'Practice the switch: Em → Am → Em → Am. Count "1, 2, 3, 4" for each chord. Teacher counts aloud.',hint:'Look ahead — think about the next chord before you need it.'},
+          {text:'Partner check: one student plays, one watches hand position and gives one piece of feedback.'}
+        ]
+      },
+      b:{
+        title:'Computer station — watch & respond', time:'12 min',
+        steps:[
+          {text:'Watch: <a href="https://www.youtube.com/watch?v=47FXbQFd5ng" target="_blank">6 Levels of Chords on Guitar – Simen Otnes</a> (first 5 min).',hint:'Headphones on. What makes a chord sound clean vs. buzzy?'},
+          {text:'Watch: <a href="https://www.youtube.com/watch?v=hzC0orOGARw" target="_blank">5 Essential Strumming Patterns – JustinGuitar</a>.',hint:'Write down: what does it mean to "strum from the wrist"?'},
+          {text:'In your notes: draw a chord diagram for Em and Am from memory. Label the finger numbers.',hint:'Don\'t look! Then check yourself against the lesson materials.'},
+          {text:'Bonus: Watch <a href="https://www.youtube.com/watch?v=JBKIamtI_Qc" target="_blank">First Chords + Strumming – Marty Music</a> and try to strum along.'}
+        ]
+      },
+      c:{
+        title:'Practice station — independent drill', time:'12 min',
+        steps:[
+          {text:'Tune your guitar. Then place your fingers on Em. Play each string one at a time — every note should ring clean.',hint:'Any buzzing? Arch your fingers more and press closer to the fret.'},
+          {text:'Now form Am. Check each string individually. Fix any buzzes before strumming.',hint:'Make sure your index finger is not muting string 1.'},
+          {text:'Downstroke strum: Em for 4 beats, Am for 4 beats. Count aloud. Metronome at 60 BPM.',hint:'Keep your strumming arm moving — a smooth motion sounds better than stopping between chords.'},
+          {text:'Try "Horse with No Name": the whole song is just Em and Am alternating every 2 beats. Play along at a slow tempo.',hint:'The chord switch is the challenge — the strumming is simple. Focus on the switch.'},
+          {text:'Goal: switch Em–Am cleanly 8 times in a row in tempo. Mark it done on your checklist when you can do it!'}
+        ]
+      }
+    },
+    songs:[
+      {name:'"Horse with No Name" — America',meta:'Em–Am, basic downstroke strumming',type:'Core',core:true},
+      {name:'"Lose Yourself" — Eminem',meta:'Em intro riff adapted for chords',type:'Hip-Hop',core:false},
+      {name:'"About a Girl" — Nirvana',meta:'Em–G simplified',type:'Grunge',core:false},
+      {name:'"Three Little Birds" — Bob Marley',meta:'Simplified Am strum',type:'Reggae',core:false}
+    ],
+    videos:[
+      {name:'6 Levels of Chords on Guitar',url:'https://www.youtube.com/watch?v=47FXbQFd5ng',source:'Simen Otnes / Play With a Plan',rec:true},
+      {name:'5 Essential Strumming Patterns',url:'https://www.youtube.com/watch?v=hzC0orOGARw',source:'JustinGuitar',rec:false},
+      {name:'First Chords + Strumming',url:'https://www.youtube.com/watch?v=JBKIamtI_Qc',source:'Marty Music',rec:false}
+    ],
+    assessment:{
+      goal:'Switch between Em and Am cleanly 8 times in a row at 60 BPM.',
+      performance:'Partner check: one student plays Em–Am, partner watches and gives one piece of feedback on hand position.',
+      selfCheck:'Can you read a chord diagram? Can you form Em and Am with no buzzing? Can you switch between them in tempo?',
+      standards:['Pr.4','Pr.5','Pr.6']
+    },
+    skills:[
+      {id:'w4-s1',text:'Read a chord diagram (strings, frets, fingers, X and O)'},
+      {id:'w4-s2',text:'Form Em with clean tone — no buzzing'},
+      {id:'w4-s3',text:'Form Am with clean tone — no buzzing'},
+      {id:'w4-s4',text:'Switch Em → Am → Em smoothly in tempo'},
+      {id:'w4-s5',text:'Strum a basic downstroke pattern while counting aloud'},
+      {id:'w4-s6',text:'Play Em–Am switch cleanly x8 at 60 BPM (assessment goal)'}
+    ]
+  },
 
   /* ── WEEKS 5–6 — placeholder ── */
   {id:'w5',label:'Wk 5–6',locked:true,unit:'Unit 2 · Building a Chord Vocabulary',title:'Weeks 5–6',subtitle:'Coming soon',comingSoon:true,skills:[]}
