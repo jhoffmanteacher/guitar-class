@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!--
+  ╔══════════════════════════════════════════════════════════════════╗
+  ║  GUITAR CLASS STUDENT DASHBOARD                                  ║
+  ║  HOW TO ADD A NEW WEEK:                                          ║
+  ║  Bring this file back to Claude and say "add week X"             ║
+  ║  Claude updates the WEEKS array → re-upload to GitHub → done    ║
+  ║  See full Firebase + GitHub setup instructions at bottom.        ║
+  ╚══════════════════════════════════════════════════════════════════╝
+-->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guitar Class</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f7f6f3;--bg3:#eeecea;
+  --text:#1a1a18;--text2:#6b6b65;--text3:#aaaaa3;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
+  --blue-bg:#e6f1fb;--blue-text:#185fa5;
+  --green-bg:#eaf3de;--green-text:#3b6d11;
+  --amber-bg:#faeeda;--amber-text:#854f0b;
+  --radius:10px;--radius-sm:6px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1e1e1c;--bg2:#272724;--bg3:#313130;
+    --text:#e8e6df;--text2:#888880;--text3:#555550;
+    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+    --blue-bg:#0c3a6b;--blue-text:#93c4f0;
+    --green-bg:#1e4208;--green-text:#a8d070;
+    --amber-bg:#4a2a04;--amber-text:#f0b84a;
+  }
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg2);color:var(--text);min-height:100vh}
+.header{background:var(--bg);border-bottom:0.5px solid var(--border2);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20}
+.header-title{font-size:15px;font-weight:500}
+.header-sub{font-size:12px;color:var(--text2);margin-top:1px}
+.user-area{display:flex;align-items:center;gap:10px}
+.avatar{width:32px;height:32px;border-radius:50%;object-fit:cover}
+.avatar-init{width:32px;height:32px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--text2)}
+.user-name{font-size:13px;color:var(--text2)}
+.btn-sign{padding:6px 14px;font-size:13px;border:0.5px solid var(--border2);border-radius:20px;background:transparent;color:var(--text);cursor:pointer}
+.btn-sign:hover{background:var(--bg3)}
+.btn-out{padding:5px 12px;font-size:12px;border:0.5px solid var(--border);border-radius:20px;background:transparent;color:var(--text2);cursor:pointer}
+.btn-out:hover{background:var(--bg3)}
+.auth-wall{max-width:400px;margin:80px auto;padding:0 20px;text-align:center}
+.auth-wall h1{font-size:22px;font-weight:500;margin-bottom:10px}
+.auth-wall p{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:28px}
+.btn-google{display:inline-flex;align-items:center;gap:10px;padding:10px 20px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);font-size:14px;cursor:pointer}
+.btn-google:hover{background:var(--bg3)}
+.btn-google svg{width:18px;height:18px;flex-shrink:0}
+.main{max-width:760px;margin:0 auto;padding:24px 16px 60px}
+.sec-label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:8px}
+.week-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px}
+.wpill{padding:5px 14px;font-size:13px;border:0.5px solid var(--border2);border-radius:20px;background:var(--bg);color:var(--text2);cursor:pointer;transition:all 0.15s;position:relative}
+.wpill:hover:not(.locked){border-color:var(--text2);color:var(--text)}
+.wpill.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+.wpill.locked{opacity:.35;cursor:default}
+.wpill.incomplete::after{content:'';width:6px;height:6px;border-radius:50%;background:var(--amber-text);position:absolute;top:3px;right:3px}
+.week-panel{display:none}.week-panel.active{display:block}
+.obj-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
+.obj-unit{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:5px}
+.obj-main{font-size:15px;font-weight:500;line-height:1.5;margin-bottom:5px}
+.obj-sub{font-size:13px;color:var(--text2);line-height:1.6}
+.tabs{display:flex;border-bottom:0.5px solid var(--border2);margin-bottom:16px;overflow-x:auto}
+.tab{padding:8px 16px;font-size:13px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;flex-shrink:0}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--text);font-weight:500;border-bottom-color:var(--text)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.st-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.stc{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:border-color 0.15s}
+.stc:hover{border-color:var(--border2)}
+.stc.active{border:1.5px solid var(--blue-text)}
+.st-ico{font-size:20px;margin-bottom:8px}
+.st-badge{font-size:10px;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:6px}
+.ba{background:var(--blue-bg);color:var(--blue-text)}
+.bb{background:var(--green-bg);color:var(--green-text)}
+.bc{background:var(--amber-bg);color:var(--amber-text)}
+.st-name{font-size:13px;font-weight:500;margin-bottom:2px}
+.st-desc{font-size:12px;color:var(--text2)}
+.dp{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
+.dp.hidden{display:none}
+.dp-head{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:12px;border-bottom:0.5px solid var(--border)}
+.dp-title{font-size:14px;font-weight:500}
+.dp-time{font-size:12px;color:var(--text2);margin-left:auto}
+.steps{list-style:none}
+.step{display:flex;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)}
+.step:last-child{border-bottom:none}
+.sn{width:20px;height:20px;border-radius:50%;background:var(--bg2);font-size:11px;font-weight:500;color:var(--text2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.st{font-size:13px;line-height:1.5}
+.sh{font-size:12px;color:var(--text2);margin-top:3px}
+.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:4px 16px;margin-bottom:12px}
+.song-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)}
+.song-row:last-child{border-bottom:none}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.dc{background:var(--blue-text)}.dch{background:var(--text3)}
+.sname{font-size:13px;font-weight:500}
+.smeta{font-size:12px;color:var(--text2);margin-top:1px}
+.stag{font-size:10px;padding:2px 8px;border-radius:10px;margin-left:auto;flex-shrink:0;white-space:nowrap;background:var(--bg2);color:var(--text2)}
+.stag-core{background:var(--blue-bg);color:var(--blue-text)}
+.legend{display:flex;gap:14px;margin-bottom:8px}
+.leg{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
+.vid-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)}
+.vid-row:last-child{border-bottom:none}
+.vname{font-size:13px;font-weight:500}
+.vname a{color:var(--blue-text);text-decoration:none}
+.vname a:hover{text-decoration:underline}
+.vsrc{font-size:12px;color:var(--text2);margin-top:1px}
+.vrec{font-size:10px;padding:2px 7px;border-radius:10px;background:var(--amber-bg);color:var(--amber-text);margin-top:3px;display:inline-block}
+.ablock{background:var(--bg2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px}
+.albl{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:4px}
+.atxt{font-size:13px;line-height:1.6}
+.spill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;border:0.5px solid var(--border2);color:var(--text2);margin:2px 2px 0 0}
+.cl-intro{background:var(--bg2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--text2);line-height:1.6}
+.skill-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border)}
+.skill-item:last-child{border-bottom:none}
+.skchk{width:20px;height:20px;border:0.5px solid var(--border2);border-radius:4px;flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.skchk.done{background:var(--green-bg);border-color:var(--green-text)}
+.ckico{display:none}
+.skchk.done .ckico{display:block}
+.sktxt{font-size:13px;line-height:1.5}
+.skwk{font-size:10px;padding:1px 7px;border-radius:10px;background:var(--bg3);color:var(--text2);margin-left:auto;flex-shrink:0;white-space:nowrap}
+.prog-wrap{margin:14px 0 4px}
+.prog-row{display:flex;align-items:center;gap:8px}
+.prog-bg{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--green-text);border-radius:3px;transition:width 0.3s}
+.prog-lbl{font-size:12px;color:var(--text2);min-width:36px;text-align:right}
+.save-ind{font-size:11px;color:var(--text3);text-align:right;margin-top:8px;min-height:16px}
+.coming{text-align:center;padding:48px 20px;color:var(--text2)}
+.coming .big{font-size:36px;margin-bottom:12px}
+.coming p{font-size:14px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     WEEK DATA — Claude updates this array when you add weeks
+     ══════════════════════════════════════════════════════ -->
+<script>
+const WEEKS = [
+
+  /* ── WEEK 1 — placeholder ── */
+  {
+    id:'w1', label:'Wk 1', locked:false,
+    unit:'Unit 1 · First Sounds', title:'Week 1',
+    subtitle:'Introduction & goal-setting',
+    objective:'I CAN describe my guitar goals and share a song that means something to me.',
+    skillFocus:'Introduction · Goal-setting · "What Is Your Guitar Adventure?" pre-assessment',
+    comingSoon:true, skills:[]
+  },
+
+  /* ── WEEKS 2–3 — FULL CONTENT ── */
+  {
+    id:'w2', label:'Wk 2–3', locked:false,
+    unit:'Unit 1 · First Sounds', title:'Weeks 2–3',
+    subtitle:'Posture · Hand position · Single notes · Down-up strumming',
+    objective:'I CAN tune my guitar, play single notes cleanly, and strum down-up in time.',
+    skillFocus:'Parts of the guitar · Posture & hand position · Holding a pick · Standard tuning · Single notes · Down-up strumming',
+    comingSoon:false,
+    stations:{
+      a:{
+        title:'Teacher station — posture, notes & pick technique', time:'12 min',
+        steps:[
+          {text:'Name the parts of the guitar together. Teacher points to headstock, nut, frets, body, sound hole, bridge — students call out each name.',hint:'Goal: know the names so you can follow instructions all year.'},
+          {text:'Check posture: sit toward the front of the chair, back straight, guitar body on right leg, neck tilted slightly up.',hint:'Shoulders relaxed — tension is the enemy of playing.'},
+          {text:'Hold a pick: pinch between thumb and side of index finger, about 3–4mm of tip showing. Teacher checks each student\'s grip.'},
+          {text:'Play single notes on strings 1–6, one at a time. Downstroke. Listen for a clean tone — no buzzing.',hint:'Finger just behind the fret, not on top of it.'},
+          {text:'Try the "Seven Nation Army" riff together slowly. Teacher models, students copy. Tone first, speed later.'}
+        ]
+      },
+      b:{
+        title:'Computer station — watch & respond', time:'12 min',
+        steps:[
+          {text:'Watch: <a href="https://www.youtube.com/watch?v=rrB97F0Qu6g" target="_blank">How to Actually Get Good at Guitar – Simen Otnes</a> (first 5 min).',hint:'Headphones on. What habits does he say matter most for beginners?'},
+          {text:'Watch: <a href="https://www.youtube.com/watch?v=8-grcbKnbps" target="_blank">How to Hold a Guitar Pick – JustinGuitar</a>.',hint:'Write down: what are the two most common pick-holding mistakes?'},
+          {text:'In your notes: write out the 6 string names from memory, low to high. Mnemonic: Eddie Ate Dynamite, Good Bye Eddie.'},
+          {text:'Bonus: Watch <a href="https://www.youtube.com/watch?v=wvgJ0lt4spY" target="_blank">Beginner Open Strings Lesson</a>. Air-strum the down-up pattern shown.'}
+        ]
+      },
+      c:{
+        title:'Practice station — independent drill', time:'12 min',
+        steps:[
+          {text:'Tune your guitar using a clip tuner. Goal: all 6 strings in tune in under 2 minutes.',hint:'Low to high: E A D G B e. Green light = in tune.'},
+          {text:'Play single notes across all 6 strings, open and frets 1–4. Say the string name aloud as you play. Zero buzzing.',hint:'Buzzing? Press closer to the fret, arch your finger, check your thumb.'},
+          {text:'Down-up strumming on one open string: count aloud "1 and 2 and 3 and 4 and…" Match each word to a strum. Metronome at 60 BPM.'},
+          {text:'Try the "Seven Nation Army" riff: E string, frets 7–7–10–7–5–3–2. Slow and clean.',hint:'Slow and clean beats fast and buzzy every time.'}
+        ]
+      }
+    },
+    songs:[
+      {name:'"Seven Nation Army" — White Stripes',meta:'Single notes + down-up strumming',type:'Core',core:true},
+      {name:'"Jaws" theme',meta:'Two-note riff, great for single note practice',type:'Core',core:true},
+      {name:'"Smoke on the Water" — Deep Purple',meta:'Simplified open strings',type:'Rock',core:false},
+      {name:'"Love Me Do" — Beatles',meta:'Simplified melody on 2 strings',type:'Pop',core:false},
+      {name:'"Está Dañada" — Ivan Cornejo',meta:'Melody on 2 strings',type:'Sierreño',core:false},
+      {name:'"Sakura" — Japanese folk',meta:'Melody on 2 strings',type:'World',core:false}
+    ],
+    videos:[
+      {name:'How to Actually Get Good at Guitar',url:'https://www.youtube.com/watch?v=rrB97F0Qu6g',source:'Simen Otnes / Play With a Plan',rec:true},
+      {name:'How to Hold a Guitar Pick',url:'https://www.youtube.com/watch?v=8-grcbKnbps',source:'JustinGuitar',rec:false},
+      {name:'Beginner Open Strings Lesson',url:'https://www.youtube.com/watch?v=wvgJ0lt4spY',source:'YouTube',rec:false},
+      {name:'Your First Guitar Lesson',url:'https://www.youtube.com/watch?v=ely9LaJJJr4',source:'Marty Music',rec:false}
+    ],
+    assessment:{
+      goal:'Tune guitar to standard tuning independently in under 2 minutes.',
+      performance:'Whole-class unison open string rhythm exercise. Everyone plays together — no one is on the spot.',
+      selfCheck:'Can you tune all 6 strings without help? Can you play a single note with no buzzing? Can you strum down-up while counting aloud?',
+      standards:['Pr.4','Pr.5']
+    },
+    skills:[
+      {id:'w2-s1',text:'Name the main parts of the guitar'},
+      {id:'w2-s2',text:'Demonstrate correct sitting posture & hand position'},
+      {id:'w2-s3',text:'Hold a pick with correct angle, grip & motion'},
+      {id:'w2-s4',text:'Tune to standard tuning independently in under 2 minutes'},
+      {id:'w2-s5',text:'Play single notes cleanly across strings'},
+      {id:'w2-s6',text:'Perform basic down-up strumming in time'}
+    ]
+  },
+
+  /* ── WEEK 4 — placeholder ── */
+  {id:'w4',label:'Wk 4',locked:true,unit:'Unit 1 · First Sounds',title:'Week 4',subtitle:'Coming soon',comingSoon:true,skills:[]},
+
+  /* ── WEEKS 5–6 — placeholder ── */
+  {id:'w5',label:'Wk 5–6',locked:true,unit:'Unit 2 · Building a Chord Vocabulary',title:'Weeks 5–6',subtitle:'Coming soon',comingSoon:true,skills:[]}
+
+]; /* end WEEKS */
+
+/* ══════════════════════════════════════════════════════
+   FIREBASE CONFIG — replace with your own values.
+   See setup instructions at the bottom of this file.
+   ══════════════════════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey: "AIzaSyB2QKByMeNpV_CaCgvf-oS9HuBDF29dfzU",
+  authDomain: "guitar-class-2fd21.firebaseapp.com",
+  projectId: "guitar-class-2fd21",
+  storageBucket: "guitar-class-2fd21.firebasestorage.app",
+  messagingSenderId: "182670968497",
+  appId: "1:182670968497:web:6e2596b9a0262e70e4c490",
+  measurementId: "G-M0QVQKTH3C"
+};
+</script>
+
+<!-- Firebase SDKs (loaded from Google CDN — always up to date) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<!-- ── Header ── -->
+<header class="header">
+  <div>
+    <div class="header-title">Guitar Class</div>
+    <div class="header-sub">Year 1 · Complete Beginners</div>
+  </div>
+  <div class="user-area" id="user-area">
+    <button class="btn-sign" onclick="signIn()">Sign in with Google</button>
+  </div>
+</header>
+
+<!-- ── Auth wall ── -->
+<div id="auth-wall" class="auth-wall">
+  <h1>Welcome to Guitar Class</h1>
+  <p>Sign in with your school Google account to access your weekly materials and track your progress across any device.</p>
+  <button class="btn-google" onclick="signIn()">
+    <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+    Sign in with Google
+  </button>
+</div>
+
+<!-- ── App ── -->
+<div id="app" style="display:none">
+  <div class="main">
+    <div class="sec-label">Select a week</div>
+    <div class="week-pills" id="week-pills"></div>
+    <div id="week-panels"></div>
+  </div>
+</div>
+
+<script>
+/* ── Firebase init ── */
+firebase.initializeApp(FIREBASE_CONFIG);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+let currentUser = null;
+let progress    = {};
+let saveTimer   = null;
+
+/* ── Auth ── */
+function signIn(){
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    .catch(e=>alert('Sign-in error: '+e.message));
+}
+function signOut(){ auth.signOut(); }
+
+auth.onAuthStateChanged(async user=>{
+  if(user){
+    currentUser = user;
+    await loadProgress();
+    showApp(user);
+  } else {
+    currentUser = null; progress = {};
+    document.getElementById('auth-wall').style.display='block';
+    document.getElementById('app').style.display='none';
+    document.getElementById('user-area').innerHTML=
+      '<button class="btn-sign" onclick="signIn()">Sign in with Google</button>';
+  }
+});
+
+function showApp(user){
+  document.getElementById('auth-wall').style.display='none';
+  document.getElementById('app').style.display='block';
+  const av = user.photoURL
+    ? `<img src="${user.photoURL}" class="avatar" alt="">`
+    : `<div class="avatar-init">${(user.displayName||'?')[0].toUpperCase()}</div>`;
+  document.getElementById('user-area').innerHTML=
+    `${av}<span class="user-name">${user.displayName||user.email}</span>
+     <button class="btn-out" onclick="signOut()">Sign out</button>`;
+  renderAll();
+}
+
+/* ── Firestore ── */
+async function loadProgress(){
+  try{
+    const doc = await db.collection('progress').doc(currentUser.uid).get();
+    progress = doc.exists ? (doc.data().skills||{}) : {};
+  } catch(e){ progress={}; }
+}
+
+function saveProgress(){
+  if(!currentUser) return;
+  clearTimeout(saveTimer);
+  setSaveMsg('Saving…');
+  saveTimer = setTimeout(async()=>{
+    try{
+      await db.collection('progress').doc(currentUser.uid).set({skills:progress},{merge:true});
+      setSaveMsg('Saved ✓');
+      setTimeout(()=>setSaveMsg(''),2000);
+    } catch(e){ setSaveMsg('Save failed — check connection'); }
+  },800);
+}
+function setSaveMsg(msg){ document.querySelectorAll('.save-ind').forEach(el=>el.textContent=msg); }
+
+/* ── Render all ── */
+function renderAll(){
+  renderPills();
+  renderPanels();
+  const first = WEEKS.find(w=>!w.locked);
+  if(first) activateWeek(first.id);
+}
+
+function renderPills(){
+  const c = document.getElementById('week-pills');
+  c.innerHTML='';
+  WEEKS.forEach(w=>{
+    const btn = document.createElement('button');
+    btn.className='wpill'+(w.locked?' locked':'');
+    btn.dataset.id=w.id;
+    btn.textContent=w.label;
+    if(!w.locked && w.skills && w.skills.length>0){
+      const done=w.skills.filter(s=>progress[s.id]).length;
+      if(done<w.skills.length) btn.classList.add('incomplete');
+    }
+    if(!w.locked) btn.onclick=()=>activateWeek(w.id);
+    c.appendChild(btn);
+  });
+}
+
+function activateWeek(id){
+  document.querySelectorAll('.wpill').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
+  document.querySelectorAll('.week-panel').forEach(p=>p.classList.toggle('active',p.dataset.id===id));
+}
+
+function renderPanels(){
+  const c=document.getElementById('week-panels');
+  c.innerHTML='';
+  WEEKS.forEach(w=>{
+    const div=document.createElement('div');
+    div.className='week-panel'; div.dataset.id=w.id;
+    div.innerHTML = w.comingSoon ? buildComingSoon(w) : buildWeek(w);
+    c.appendChild(div);
+  });
+}
+
+/* ── Coming soon ── */
+function buildComingSoon(w){
+  return `<div class="obj-card">
+    <div class="obj-unit">${w.unit}</div>
+    <div class="obj-main">${w.title}</div>
+    <div class="obj-sub">${w.subtitle}</div>
+  </div>
+  <div class="coming">
+    <div class="big">🎸</div>
+    <p>This week's content will appear here when it's ready.<br>Check back soon!</p>
+  </div>`;
+}
+
+/* ── Full week ── */
+function buildWeek(w){
+  return `<div class="obj-card">
+    <div class="obj-unit">${w.unit}</div>
+    <div class="obj-main">${w.objective}</div>
+    <div class="obj-sub">${w.skillFocus}</div>
+  </div>
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(this,'${w.id}','stations')">Stations</div>
+    <div class="tab" onclick="switchTab(this,'${w.id}','songs')">Songs</div>
+    <div class="tab" onclick="switchTab(this,'${w.id}','videos')">Videos</div>
+    <div class="tab" onclick="switchTab(this,'${w.id}','assess')">Assessment</div>
+    <div class="tab" onclick="switchTab(this,'${w.id}','checklist')">My checklist</div>
+  </div>
+  <div id="${w.id}-stations" class="tab-panel active">${buildStations(w)}</div>
+  <div id="${w.id}-songs"    class="tab-panel">${buildSongs(w)}</div>
+  <div id="${w.id}-videos"   class="tab-panel">${buildVideos(w)}</div>
+  <div id="${w.id}-assess"   class="tab-panel">${buildAssess(w)}</div>
+  <div id="${w.id}-checklist" class="tab-panel">${buildChecklist(w)}</div>`;
+}
+
+function switchTab(el,wid,tab){
+  const panel=document.querySelector(`.week-panel[data-id="${wid}"]`);
+  panel.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  panel.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById(`${wid}-${tab}`).classList.add('active');
+}
+
+/* ── Stations ── */
+function buildStations(w){
+  const stepsHtml=steps=>steps.map((s,i)=>`
+    <li class="step">
+      <div class="sn">${i+1}</div>
+      <div class="st">${s.text}${s.hint?`<div class="sh">${s.hint}</div>`:''}</div>
+    </li>`).join('');
+  const dp=(id,cls,badge,badgeClass,s)=>`
+    <div class="dp${cls}" id="${w.id}-dp-${id}">
+      <div class="dp-head">
+        <span class="st-badge ${badgeClass}">${badge}</span>
+        <div class="dp-title">${s.title}</div>
+        <div class="dp-time">${s.time}</div>
+      </div>
+      <ul class="steps">${stepsHtml(s.steps)}</ul>
+    </div>`;
+  return `
+    <div class="st-grid">
+      <div class="stc active" id="${w.id}-sc-a" onclick="openSt('${w.id}','a')">
+        <div class="st-ico">👤</div>
+        <span class="st-badge ba">Station A</span>
+        <div class="st-name">Teacher station</div>
+        <div class="st-desc">Small group with teacher</div>
+      </div>
+      <div class="stc" id="${w.id}-sc-b" onclick="openSt('${w.id}','b')">
+        <div class="st-ico">💻</div>
+        <span class="st-badge bb">Station B</span>
+        <div class="st-name">Computer station</div>
+        <div class="st-desc">Watch & respond independently</div>
+      </div>
+      <div class="stc" id="${w.id}-sc-c" onclick="openSt('${w.id}','c')">
+        <div class="st-ico">🎸</div>
+        <span class="st-badge bc">Station C</span>
+        <div class="st-name">Practice station</div>
+        <div class="st-desc">Independent drill</div>
+      </div>
+    </div>
+    ${dp('a','','Station A','ba',w.stations.a)}
+    ${dp('b',' hidden','Station B','bb',w.stations.b)}
+    ${dp('c',' hidden','Station C','bc',w.stations.c)}`;
+}
+
+function openSt(wid,s){
+  ['a','b','c'].forEach(x=>{
+    document.getElementById(`${wid}-sc-${x}`).classList.toggle('active',x===s);
+    document.getElementById(`${wid}-dp-${x}`).classList.toggle('hidden',x!==s);
+  });
+}
+
+/* ── Songs ── */
+function buildSongs(w){
+  const rows=w.songs.map(s=>`
+    <div class="song-row">
+      <div class="dot ${s.core?'dc':'dch'}"></div>
+      <div><div class="sname">${s.name}</div><div class="smeta">${s.meta}</div></div>
+      <span class="stag ${s.core?'stag-core':''}">${s.type}</span>
+    </div>`).join('');
+  return `<div class="legend">
+    <div class="leg"><div class="dot dc" style="margin-top:0"></div>Core — everyone</div>
+    <div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu — pick 1</div>
+  </div>
+  <div class="card">${rows}</div>
+  <div class="ablock">
+    <div class="albl">Performance & community</div>
+    <div class="atxt">${w.assessment.performance}</div>
+  </div>`;
+}
+
+/* ── Videos ── */
+function buildVideos(w){
+  const rows=w.videos.map(v=>`
+    <div class="vid-row">
+      <div>
+        <div class="vname"><a href="${v.url}" target="_blank">${v.name}</a></div>
+        <div class="vsrc">${v.source}</div>
+        ${v.rec?'<span class="vrec">★ Recommended</span>':''}
+      </div>
+    </div>`).join('');
+  return `<div class="card">${rows}</div>`;
+}
+
+/* ── Assessment ── */
+function buildAssess(w){
+  const a=w.assessment;
+  return `
+    <div class="ablock"><div class="albl">Assessment goal</div><div class="atxt">${a.goal}</div></div>
+    <div class="ablock"><div class="albl">Self-check</div><div class="atxt">${a.selfCheck}</div></div>
+    <div class="ablock"><div class="albl">NAfME standards</div><div>${a.standards.map(s=>`<span class="spill">${s}</span>`).join('')}</div></div>`;
+}
+
+/* ── Checklist ── */
+function buildChecklist(w){
+  if(!w.skills||w.skills.length===0) return '<p style="font-size:13px;color:var(--text2);padding:12px 0">No skills listed for this week yet.</p>';
+  const done=w.skills.filter(s=>progress[s.id]).length;
+  const pct=Math.round(done/w.skills.length*100);
+  const items=w.skills.map(s=>{
+    const ck=progress[s.id]?' done':'';
+    return `<div class="skill-item">
+      <div class="skchk${ck}" id="chk-${s.id}" onclick="toggleSkill('${s.id}','${w.id}')">
+        <svg class="ckico" width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M2 6l3 3 5-5" stroke="var(--green-text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="sktxt">${s.text}</div>
+      <span class="skwk">${w.label}</span>
+    </div>`;
+  }).join('');
+  return `<div class="cl-intro">Check off each skill as you can do it consistently. Incomplete skills stay visible here — you can always come back to them from any device.</div>
+  <div class="card">${items}</div>
+  <div class="prog-wrap">
+    <div class="prog-row">
+      <div class="prog-bg"><div class="prog-fill" id="pf-${w.id}" style="width:${pct}%"></div></div>
+      <div class="prog-lbl" id="pl-${w.id}">${done} / ${w.skills.length}</div>
+    </div>
+  </div>
+  <div class="save-ind" id="si-${w.id}"></div>`;
+}
+
+/* ── Toggle skill ── */
+function toggleSkill(sid,wid){
+  progress[sid]=!progress[sid];
+  const el=document.getElementById(`chk-${sid}`);
+  el.classList.toggle('done',progress[sid]);
+  const w=WEEKS.find(x=>x.id===wid);
+  const done=w.skills.filter(s=>progress[s.id]).length;
+  const pct=Math.round(done/w.skills.length*100);
+  const bar=document.getElementById(`pf-${wid}`);
+  const lbl=document.getElementById(`pl-${wid}`);
+  if(bar) bar.style.width=pct+'%';
+  if(lbl) lbl.textContent=done+' / '+w.skills.length;
+  renderPills();
+  document.querySelectorAll('.wpill').forEach(b=>{if(b.dataset.id===wid)b.classList.add('active');});
+  saveProgress();
+}
+</script>
+
+<!--
+╔══════════════════════════════════════════════════════════════════════╗
+║                 FIREBASE SETUP — ONE TIME, ~15 MINUTES              ║
+╠══════════════════════════════════════════════════════════════════════╣
+║                                                                      ║
+║  STEP 1 — Create a Firebase project                                  ║
+║    Go to: https://console.firebase.google.com                        ║
+║    Click "Add project" → name it "guitar-class" → Create            ║
+║                                                                      ║
+║  STEP 2 — Get your config values                                     ║
+║    In the left menu: gear icon ⚙ → Project settings                 ║
+║    Scroll to "Your apps" → click the </> web icon                   ║
+║    Register the app (any nickname) → copy the firebaseConfig object  ║
+║    Paste the 6 values into FIREBASE_CONFIG at the top of this file  ║
+║                                                                      ║
+║  STEP 3 — Enable Google sign-in                                      ║
+║    Left menu → Build → Authentication → Get started                 ║
+║    Click "Google" → Enable → add your email as support → Save       ║
+║                                                                      ║
+║  STEP 4 — Create the database                                        ║
+║    Left menu → Build → Firestore Database → Create database          ║
+║    Choose "Start in test mode" → select a region → Done             ║
+║                                                                      ║
+║  STEP 5 — Host on GitHub Pages (free permanent URL)                  ║
+║    a) Go to github.com → sign in or create a free account           ║
+║    b) Click "New repository" → name it: guitar-class                ║
+║    c) Upload this file, rename it: index.html                        ║
+║    d) Go to Settings → Pages → Deploy from branch: main / root      ║
+║    e) Your URL will be: https://YOURNAME.github.io/guitar-class      ║
+║                                                                      ║
+║  ADDING A NEW WEEK LATER:                                            ║
+║    1. Come back to Claude and paste or attach this file              ║
+║    2. Say "add week X to my dashboard"                               ║
+║    3. Claude updates the WEEKS array at the top                      ║
+║    4. Download the updated file                                      ║
+║    5. Upload to GitHub replacing index.html — same URL, new content  ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝
+-->
+</body>
+</html>
