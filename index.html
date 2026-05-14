@@ -149,7 +149,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .coming p{font-size:14px;line-height:1.6}
 
 /* ── Two-column layout ── */
-.app-layout{display:grid;grid-template-columns:minmax(0,1fr) 400px;min-height:calc(100vh - 53px);align-items:start}
+.app-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;min-height:calc(100vh - 53px);align-items:start}
 .main{max-width:none;margin:0;padding:24px 20px 60px}
 .resource-panel{border-left:0.5px solid var(--border2);background:var(--bg2);padding:16px 14px;position:sticky;top:53px;height:calc(100vh - 53px);overflow-y:auto;display:flex;flex-direction:column;gap:10px}
 .rp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
@@ -267,7 +267,8 @@ const WEEKS = [
           {text:'Tune your guitar using a clip tuner. Goal: all 6 strings in tune in under 2 minutes.',hint:'Low to high: E A D G B e. Green light = in tune.'},
           {text:'Play single notes across all 6 strings, open and frets 1–4. Say the string name aloud as you play. Zero buzzing.',hint:'Buzzing? Press closer to the fret, arch your finger, check your hand position.'},
           {text:'Down-up strumming on one open string: count aloud "1 and 2 and 3 and 4 and…" Match each word to a strum. Metronome at 60 BPM.'},
-          {text:'Try the "Seven Nation Army" riff: E string, frets 7–7–10–7–5–3–2. Slow and clean.',hint:'Slow and clean beats fast and buzzy every time.'}
+          {text:'Try the "Seven Nation Army" riff: E string, frets 7–7–10–7–5–3–2. Slow and clean.',hint:'Slow and clean beats fast and buzzy every time.'},
+          {text:'Reference the <button class="rp-trigger" onclick="loadPanel(\'gdoc\',\'https://docs.google.com/document/d/18eZNbdQrIctws5BLYlKOgypDFy2cfo1M/preview\',\'Weeks 2–3 Skills Handout\',\'Reference handout\')">Weeks 2–3 Skills Handout</button> if you need a reminder on any technique.'}
         ]
       }
     },
@@ -337,7 +338,7 @@ const WEEKS = [
           {text:'Downstroke strum: Em for 4 beats, Am for 4 beats. Count aloud. Metronome at 60 BPM.',hint:'Keep your strumming arm moving — a smooth motion sounds better than stopping between chords.'},
           {text:'Try "Horse with No Name": the whole song is just Em and Am alternating every 2 beats. Play along at a slow tempo.',hint:'The chord switch is the challenge — the strumming is simple. Focus on the switch.'},
           {text:'Goal: switch Em–Am cleanly 8 times in a row in tempo. Mark it done on your checklist when you can do it!'}
-        ]{text:'Open the <button class="rp-trigger" onclick="loadPanel(\'gdoc\',\'https://docs.google.com/document/d/18eZNbdQrIctws5BLYlKOgypDFy2cfo1M/preview\',\'Weeks 2–3 Skills Handout\',\'Reference handout\')">Weeks 2–3 Skills Handout</button> as a reference while you practice.'}
+        ]
       }
     },
     songs:[
@@ -623,15 +624,13 @@ function buildWeek(w){
   <div class="tabs">
     <div class="tab active" onclick="switchTab(this,'${w.id}','stations')">Stations</div>
     <div class="tab" onclick="switchTab(this,'${w.id}','songs')">Songs</div>
-    <div class="tab" onclick="switchTab(this,'${w.id}','videos')">Videos</div>
-    <div class="tab" onclick="switchTab(this,'${w.id}','assess')">Assessment</div>
     <div class="tab" onclick="switchTab(this,'${w.id}','checklist')">My checklist</div>
+    <div class="tab" onclick="switchTab(this,'${w.id}','assess')">Assessment</div>
   </div>
   <div id="${w.id}-stations" class="tab-panel active">${buildStations(w)}</div>
   <div id="${w.id}-songs"    class="tab-panel">${buildSongs(w)}</div>
-  <div id="${w.id}-videos"   class="tab-panel">${buildVideos(w)}</div>
-  <div id="${w.id}-assess"   class="tab-panel">${buildAssess(w)}</div>
-  <div id="${w.id}-checklist" class="tab-panel">${buildChecklist(w)}</div>`;
+  <div id="${w.id}-checklist" class="tab-panel">${buildChecklist(w)}</div>
+  <div id="${w.id}-assess"   class="tab-panel">${buildAssess(w)}</div>`;
 }
 
 function switchTab(el,wid,tab){
