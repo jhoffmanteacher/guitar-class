@@ -149,9 +149,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .coming p{font-size:14px;line-height:1.6}
 
 /* ── Two-column layout ── */
-.app-layout{display:grid;grid-template-columns:minmax(0,1fr) 320px;min-height:calc(100vh - 53px);align-items:start}
-.main{max-width:none;margin:0;padding:24px 20px 60px}
-.resource-panel{border-left:0.5px solid var(--border2);background:var(--bg2);padding:16px 14px;position:sticky;top:53px;height:calc(100vh - 53px);overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.app-layout{display:flex;min-height:calc(100vh - 53px);align-items:start}
+.main{flex:1;min-width:320px;padding:24px 20px 60px;overflow-x:hidden}
+.resize-handle{width:5px;flex-shrink:0;cursor:col-resize;background:transparent;position:sticky;top:53px;height:calc(100vh - 53px);transition:background 0.15s;z-index:10;position:relative}
+.resize-handle:hover,.resize-handle.dragging{background:var(--blue-bg)}
+.resize-handle::after{content:'';position:absolute;top:50%;left:1px;transform:translateY(-50%);height:40px;width:3px;border-radius:2px;background:var(--border2)}
+.resize-handle:hover::after,.resize-handle.dragging::after{background:var(--blue-text)}
+.resource-panel{flex-shrink:0;width:320px;min-width:180px;max-width:60vw;border-left:0.5px solid var(--border2);background:var(--bg2);padding:16px 14px;position:sticky;top:53px;height:calc(100vh - 53px);overflow-y:auto;display:flex;flex-direction:column;gap:10px}
 .rp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
 .rp-label{font-size:10px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--text3)}
 .rp-actions{display:flex;align-items:center;gap:6px}
@@ -430,6 +434,7 @@ const firebaseConfig = {
       <div class="week-pills" id="week-pills"></div>
       <div id="week-panels"></div>
     </div>
+    <div class="resize-handle" id="resize-handle"></div>
     <div class="resource-panel" id="resource-panel">
       <div class="rp-header">
         <span class="rp-label">Resources</span>
@@ -999,6 +1004,54 @@ function clearPanel(){
   wrap.innerHTML='';
   empty.style.display='';
 }
+
+/* ── Resizable panels ── */
+(function(){
+  const handle=document.getElementById('resize-handle');
+  const panel=document.getElementById('resource-panel');
+  if(!handle||!panel) return;
+  let dragging=false, startX=0, startW=0;
+  handle.addEventListener('mousedown',e=>{
+    dragging=true;
+    startX=e.clientX;
+    startW=panel.offsetWidth;
+    handle.classList.add('dragging');
+    document.body.style.cursor='col-resize';
+    document.body.style.userSelect='none';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!dragging) return;
+    const delta=startX-e.clientX;
+    const newW=Math.min(Math.max(startW+delta, 180), window.innerWidth*0.6);
+    panel.style.width=newW+'px';
+  });
+  document.addEventListener('mouseup',()=>{
+    if(!dragging) return;
+    dragging=false;
+    handle.classList.remove('dragging');
+    document.body.style.cursor='';
+    document.body.style.userSelect='';
+  });
+  // Touch support
+  handle.addEventListener('touchstart',e=>{
+    dragging=true;
+    startX=e.touches[0].clientX;
+    startW=panel.offsetWidth;
+    handle.classList.add('dragging');
+    e.preventDefault();
+  },{passive:false});
+  document.addEventListener('touchmove',e=>{
+    if(!dragging) return;
+    const delta=startX-e.touches[0].clientX;
+    const newW=Math.min(Math.max(startW+delta, 180), window.innerWidth*0.6);
+    panel.style.width=newW+'px';
+  });
+  document.addEventListener('touchend',()=>{
+    dragging=false;
+    handle.classList.remove('dragging');
+  });
+})();
 </script>
 
 <!--
