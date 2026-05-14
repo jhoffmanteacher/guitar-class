@@ -168,11 +168,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .rp-empty{border:1px dashed var(--border2);border-radius:var(--radius);flex:1;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text3);background:var(--bg)}
 .rp-empty-ico{font-size:24px}
 .rp-empty-txt{font-size:12px;text-align:center;line-height:1.5}
-.rp-content{display:none;flex-direction:column;gap:0;flex:1}
+.rp-content{display:none;flex-direction:column;gap:0;flex:1;min-height:0}
 .rp-content.visible{display:flex}
-.rp-iframe-wrap{border-radius:var(--radius);overflow:hidden;border:0.5px solid var(--border);background:#000;flex-shrink:1}
-.rp-iframe-wrap iframe{display:block;width:100%;border:none}
-.rp-meta{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:11px 13px;margin-top:8px}
+.rp-iframe-wrap{border-radius:var(--radius);overflow:hidden;border:0.5px solid var(--border);background:#000;flex:1;min-height:0;display:flex;flex-direction:column}
+.rp-iframe-wrap iframe{display:block;width:100%;border:none;flex:1;min-height:0}
+.rp-meta{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:11px 13px;margin-top:8px;flex-shrink:0}
 .rp-meta-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
 .rp-meta-sub{font-size:11px;color:var(--text2)}
 .rp-link{color:var(--blue-text);text-decoration:none;cursor:pointer;border-bottom:0.5px solid transparent;transition:border-color 0.1s}
@@ -978,17 +978,15 @@ function loadPanel(type, url, title, subtitle){
   meta.innerHTML=`<div class="rp-meta-title">${title}</div><div class="rp-meta-sub">${subtitle}</div>`;
 
   if(type==='youtube'){
-    // Convert any YouTube URL to embed format
     let embedUrl=url;
     const ytMatch=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
     if(ytMatch) embedUrl=`https://www.youtube.com/embed/${ytMatch[1]}?rel=0&modestbranding=1`;
-    wrap.innerHTML=`<iframe src="${embedUrl}" height="100%" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;
+    wrap.innerHTML=`<iframe src="${embedUrl}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;
   } else if(type==='pdf'){
-    wrap.innerHTML=`<iframe src="${url}" height="100%"></iframe>`;
+    wrap.innerHTML=`<iframe src="${url}"></iframe>`;
   } else if(type==='gdoc'){
-    // Google Doc embed — append /preview if not already present
     const embedUrl=url.includes('/preview')?url:url.replace(/\/edit.*$/,'/preview');
-    wrap.innerHTML=`<iframe src="${embedUrl}" height="100%"></iframe>`;
+    wrap.innerHTML=`<iframe src="${embedUrl}"></iframe>`;
   }
 }
 
