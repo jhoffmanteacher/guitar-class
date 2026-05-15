@@ -4,9 +4,17 @@
 <!--
   ╔════════════════════════════════════════════════════════════════════╗
   ║  GUITAR CLASS STUDENT DASHBOARD                                    ║
+  ║                                                                    ║
+  ║  THREE FILES — upload all three to GitHub:                         ║
+  ║    index.html        ← this file (rarely changes)                  ║
+  ║    config.js         ← edit this to add/update weeks               ║
+  ║    firebase-config.js ← edit this to change keys or teacher email  ║
+  ║                                                                    ║
   ║  HOW TO ADD A NEW WEEK:                                            ║
-  ║  Bring this file back to Claude and say "add week X"               ║
-  ║  Claude updates the WEEKS array → re-upload to GitHub → done       ║
+  ║    1. Open config.js                                               ║
+  ║    2. Copy the template block at the bottom                        ║
+  ║    3. Fill in your content, save, upload to GitHub → done          ║
+  ║                                                                    ║
   ║  See full Firebase + GitHub setup instructions at bottom.          ║
   ╚════════════════════════════════════════════════════════════════════╝
 -->
@@ -46,7 +54,7 @@ function googleTranslateElementInit(){
   }
 }
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg2);color:var(--text);min-height:100vh}
-.header{background:#E8DEFF;border-bottom:0.5px solid rgba(112, 80, 255, 0.16);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20}
+.header{background:var(--bg);border-bottom:0.5px solid var(--border2);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20}
 .header-title{font-size:15px;font-weight:500}
 .header-sub{font-size:12px;color:var(--text2);margin-top:1px}
 .user-area{display:flex;align-items:center;gap:10px}
@@ -148,18 +156,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .coming .big{font-size:36px;margin-bottom:12px}
 .coming p{font-size:14px;line-height:1.6}
 
-/* ── Module dropdown ── */
-.module-select-wrap{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.module-select-label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);white-space:nowrap}
-.module-select{font-size:13px;padding:6px 12px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);cursor:pointer;flex:1;max-width:320px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b6b65' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
-.module-select:focus{outline:none;border-color:var(--blue-text)}
-
 /* ── Two-column layout ── */
 .app-layout{display:flex;min-height:calc(100vh - 53px);align-items:start}
 .main{flex:1;min-width:320px;padding:24px 20px 60px;overflow-x:hidden}
-.resize-handle{width:10px;flex-shrink:0;cursor:col-resize;background:transparent;position:sticky;top:53px;height:calc(100vh - 53px);transition:background 0.15s;z-index:10;position:relative;touch-action:none}
+.resize-handle{width:5px;flex-shrink:0;cursor:col-resize;background:transparent;position:sticky;top:53px;height:calc(100vh - 53px);transition:background 0.15s;z-index:10;position:relative}
 .resize-handle:hover,.resize-handle.dragging{background:var(--blue-bg)}
-.resize-handle::after{content:'';position:absolute;top:50%;left:3px;transform:translateY(-50%);height:40px;width:3px;border-radius:2px;background:var(--border2)}
+.resize-handle::after{content:'';position:absolute;top:50%;left:1px;transform:translateY(-50%);height:40px;width:3px;border-radius:2px;background:var(--border2)}
 .resize-handle:hover::after,.resize-handle.dragging::after{background:var(--blue-text)}
 .resource-panel{flex-shrink:0;width:320px;min-width:180px;max-width:60vw;border-left:0.5px solid var(--border2);background:var(--bg2);padding:16px 14px;position:sticky;top:53px;height:calc(100vh - 53px);overflow-y:auto;display:flex;flex-direction:column;gap:10px}
 .rp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
@@ -228,251 +230,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 <body>
 
 <!-- ══════════════════════════════════════════════════════
-     WEEK DATA — Claude updates this array when you add weeks
+     Content and Firebase config live in separate files.
+     Edit config.js to add/update weeks.
+     Edit firebase-config.js to change Firebase keys or teacher email.
+     This file (index.html) rarely needs to change.
      ══════════════════════════════════════════════════════ -->
-<script>
-
-/* ══════════════════════════════════════════════════════
-   MODULE + WEEK DATA
-   9 modules × 4 weeks each. Module 1 has full content.
-   Remaining weeks are placeholders — paste Google Doc
-   links into handoutUrl fields as you create them.
-   ══════════════════════════════════════════════════════ */
-
-/* Helper — placeholder week */
-function pw(id,label,modName,modNum){
-  return {
-    id, label, locked:false,
-    module:modName, moduleNum:modNum,
-    unit:`Module ${modNum} · ${modName}`, title:label,
-    subtitle:'Coming soon', objective:'', skillFocus:'',
-    comingSoon:true, skills:[],
-    handoutUrl:'' /* ← paste Google Doc share link here when ready */
-  };
-}
-
-const MODULES = [
-  { num:1, label:'Module 1', name:'First Sounds', handoutUrl:'https://docs.google.com/document/d/1wKmQRDFbKsIci94PNRzoQkXoTVO6A017ELIZYvLtyCE/preview' },
-  { num:2, label:'Module 2', name:'Building a Chord Vocabulary', handoutUrl:'https://docs.google.com/document/d/1KM2rgUYa3NEpDr4E65YmcTE_g6Fxs_rbIjP-U1wjcnA/preview' },
-  { num:3, label:'Module 3', name:'Rhythm & Strumming Patterns', handoutUrl:'https://docs.google.com/document/d/1S0gxHXkbgZRJT5VhR9nGz6O2imjEF9uQ_jNAYFaTc6I/preview' },
-  { num:4, label:'Module 4', name:'Melody & Single-Note Playing', handoutUrl:'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/preview' },
-  { num:5, label:'Module 5', name:'Song Structure & Form', handoutUrl:'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/preview' },
-  { num:6, label:'Module 6', name:'Barre Chords & Power Chords', handoutUrl:'https://docs.google.com/document/d/1mBqrpsG2rkiVPWrF-zo0fxlgA1YQN33GyxmgsXqCY0g/preview' },
-  { num:7, label:'Module 7', name:'Improvisation & Expression', handoutUrl:'https://docs.google.com/document/d/1w1GM5ZkoFNn0QBGOkstSXGyRZIU8ml2-W9_FtgTkMYg/preview' },
-  { num:8, label:'Module 8', name:'Ensemble & Performance', handoutUrl:'https://docs.google.com/document/d/1mxqrOHsRRRG1smLq2pfi0NplUBCOsflrZ6O13PBo06k/preview' },
-  { num:9, label:'Module 9', name:'Composition & Creativity', handoutUrl:'https://docs.google.com/document/d/1FuhujeyL43MygvyYDTj6znTk8ZZPc0icFZzFtZPRxDs/preview' },
-];
-
-const WEEKS = [
-
-  /* ══════════ MODULE 1 — First Sounds ══════════ */
-
-  /* ── Set 1 — placeholder ── */
-  {
-    id:'w1', label:'Set 1', locked:false,
-    module:'First Sounds', moduleNum:1,
-    unit:'Module 1 · First Sounds', title:'Set 1',
-    subtitle:'Introduction & goal-setting',
-    objective:'I CAN describe my guitar goals and share a song that means something to me.',
-    skillFocus:'Introduction · Goal-setting · "What Is Your Guitar Adventure?" pre-assessment',
-    comingSoon:true, skills:[],
-    handoutUrl:'' /* ← paste Google Doc link here */
-  },
-
-  /* ── Set 2 — FULL CONTENT ── */
-  {
-    id:'w2', label:'Set 2', locked:false,
-    module:'First Sounds', moduleNum:1,
-    unit:'Module 1 · First Sounds', title:'Set 2',
-    subtitle:'Posture · Hand position · Single notes · Down-up strumming',
-    objective:'I CAN tune my guitar, play single notes cleanly, and strum down-up in time.',
-    skillFocus:'Parts of the guitar · Posture & hand position · Holding a pick · Standard tuning · Single notes · Down-up strumming',
-    comingSoon:false,
-    handoutUrl:'https://docs.google.com/document/d/18eZNbdQrIctws5BLYlKOgypDFy2cfo1M/preview',
-    stations:{
-      a:{
-        title:'Teacher station — posture, notes & pick technique', time:'12 min',
-        steps:[
-          {text:'Name the parts of the guitar together. Teacher points to headstock, nut, frets, body, sound hole, bridge — students call out each name.',hint:'Goal: know the names so you can find them by feel.'},
-          {text:'Check posture: sit toward the front of the chair, back straight, guitar body on right leg, neck tilted slightly up.',hint:'Shoulders relaxed — tension is the enemy of playing.'},
-          {text:'Hold a pick: pinch between thumb and side of index finger, about 3–4mm of tip showing. Teacher checks each student\'s grip.'},
-          {text:'Play single notes on strings 1–6, one at a time. Downstroke. Listen for a clean tone — no buzzing.',hint:'Finger just behind the fret, not on top of it.'},
-          {text:'Try the "Seven Nation Army" riff together slowly. Teacher models, students copy. Tone first, speed later.'}
-        ]
-      },
-      b:{
-        title:'Computer station — watch & respond', time:'12 min',
-        steps:[
-          {text:'Watch: <a href="https://www.youtube.com/watch?v=rrB97F0Qu6g" target="_blank">How to Actually Get Good at Guitar – Simen Otnes</a> (first 5 min).',hint:'Headphones on. What habits will help you get better?'},
-          {text:'Watch: <a href="https://www.youtube.com/watch?v=8-grcbKnbps" target="_blank">How to Hold a Guitar Pick – JustinGuitar</a>.',hint:'Write down: what are the two most common pick-holding mistakes?'},
-          {text:'In your notes: write out the 6 string names from memory, low to high. Mnemonic: Eddie Ate Dynamite, Good Bye Eddie.'},
-          {text:'Bonus: Watch <a href="https://www.youtube.com/watch?v=wvgJ0lt4spY" target="_blank">Beginner Open Strings Lesson</a>. Air-strum the down-up pattern shown.'}
-        ]
-      },
-      c:{
-        title:'Practice station — independent drill', time:'12 min',
-        steps:[
-          {text:'Tune your guitar using a clip tuner or <a href="https://chromewebstore.google.com/detail/guitarapp-guitar-tuner/niafepdbinnnbgigcnhefoconkcljifd" target="_blank" rel="noopener">install the guitar tuning app</a>. Goal: all 6 strings in tune in under 2 minutes.',hint:'Low to high: E A D G B e. Green light = in tune.'},
-          {text:'Play single notes across all 6 strings, open and frets 1–4. Say the string name aloud as you play. Zero buzzing.',hint:'Buzzing? Press closer to the fret, arch your finger, check your hand position.'},
-          {text:'Down-up strumming on one open string: count aloud "1 and 2 and 3 and 4 and…" Match each word to a strum. Metronome at 60 BPM.'},
-          {text:'Try the "Seven Nation Army" riff: E string, frets 7–7–10–7–5–3–2. Slow and clean.',hint:'Slow and clean beats fast and buzzy every time.'}
-        ]
-      }
-    },
-    songs:[
-      {name:'"Seven Nation Army" — White Stripes',meta:'Single notes + down-up strumming',type:'Core',core:true},
-      {name:'"Jaws" theme',meta:'Two-note riff, great for single note practice',type:'Core',core:true},
-      {name:'"Smoke on the Water" — Deep Purple',meta:'Simplified open strings',type:'Rock',core:false},
-      {name:'"Love Me Do" — Beatles',meta:'Simplified melody on 2 strings',type:'Pop',core:false},
-      {name:'"Está Dañada" — Ivan Cornejo',meta:'Melody on 2 strings',type:'Sierreño',core:false},
-      {name:'"Sakura" — Japanese folk',meta:'Melody on 2 strings',type:'World',core:false}
-    ],
-    videos:[
-      {name:'How to Actually Get Good at Guitar',url:'https://www.youtube.com/watch?v=rrB97F0Qu6g',source:'Simen Otnes / Play With a Plan',rec:true},
-      {name:'How to Hold a Guitar Pick',url:'https://www.youtube.com/watch?v=8-grcbKnbps',source:'JustinGuitar',rec:false},
-      {name:'Beginner Open Strings Lesson',url:'https://www.youtube.com/watch?v=wvgJ0lt4spY',source:'YouTube',rec:false},
-      {name:'Your First Guitar Lesson',url:'https://www.youtube.com/watch?v=ely9LaJJJr4',source:'Marty Music',rec:false}
-    ],
-    assessment:{
-      goal:'Tune guitar to standard tuning independently in under 2 minutes.',
-      performance:'Whole-class unison open string rhythm exercise. Everyone plays together — no one is on the spot.',
-      selfCheck:'Can you tune all 6 strings without help? Can you play a single note with no buzzing? Can you strum down-up while counting aloud?',
-      standards:['Pr.4','Pr.5']
-    },
-    skills:[
-      {id:'w2-s1',text:'Name the main parts of the guitar'},
-      {id:'w2-s2',text:'Demonstrate correct sitting posture & hand position'},
-      {id:'w2-s3',text:'Hold a pick with correct angle, grip & motion'},
-      {id:'w2-s4',text:'Tune to standard tuning independently in under 2 minutes'},
-      {id:'w2-s5',text:'Play single notes cleanly across strings'},
-      {id:'w2-s6',text:'Perform basic down-up strumming in time'}
-    ]
-  },
-
-  /* ── Set 3 — FULL CONTENT ── */
-  {
-    id:'w4', label:'Set 3', locked:false,
-    module:'First Sounds', moduleNum:1,
-    unit:'Module 1 · First Sounds', title:'Set 3',
-    subtitle:'Chord diagrams · Em & Am · Basic downstroke strumming',
-    objective:'I CAN read a chord diagram, switch between Em and Am, and strum a downstroke pattern in time.',
-    skillFocus:'Reading chord diagrams · First chords: Em & Am · Basic downstroke strumming · Partner feedback',
-    comingSoon:false,
-    handoutUrl:'' /* ← paste Google Doc link here */,
-    stations:{
-      a:{
-        title:'Teacher station — chord diagrams & hand position', time:'12 min',
-        steps:[
-          {text:'Explain chord diagrams: vertical lines = strings, horizontal lines = frets, dots = where fingers go, numbers = which finger to use, X = don\'t play, O = open string.',hint:'Draw a blank diagram on the board and build Em together dot by dot.'},
-          {text:'Teach Em: fingers 2 & 3 on strings 5 & 4 at fret 2. Strum all 6 strings. Listen for a full, clean sound.',hint:'Arch the fingers — make sure open strings ring out.'},
-          {text:'Teach Am: fingers 1, 2, & 3 on strings 2, 4, & 3 at fret 1 & 2. Strum strings 5–1 only (mute string 6).',hint:'Check that the first finger isn\'t accidentally touching string 1.'},
-          {text:'Practice the switch: Em → Am → Em → Am. Count "1, 2, 3, 4" for each chord. Teacher counts aloud.',hint:'Look ahead — think about the next chord before you need it.'},
-          {text:'Partner check: one student plays, one watches hand position and gives one piece of feedback.'}
-        ]
-      },
-      b:{
-        title:'Computer station — watch & respond', time:'12 min',
-        steps:[
-          {text:'Watch: <a href="https://www.youtube.com/watch?v=47FXbQFd5ng" target="_blank">6 Levels of Chords on Guitar – Simen Otnes</a> (first 5 min).',hint:'Headphones on. What makes a chord sound clean vs. buzzy?'},
-          {text:'Watch: <a href="https://www.youtube.com/watch?v=hzC0orOGARw" target="_blank">5 Essential Strumming Patterns – JustinGuitar</a>.',hint:'Write down: what does it mean to "strum from the wrist"?'},
-          {text:'In your notes: draw a chord diagram for Em and Am from memory. Label the finger numbers.',hint:'Don\'t look! Then check yourself against the lesson materials.'},
-          {text:'Bonus: Watch <a href="https://www.youtube.com/watch?v=JBKIamtI_Qc" target="_blank">First Chords + Strumming – Marty Music</a> and try to strum along.'}
-        ]
-      },
-      c:{
-        title:'Practice station — independent drill', time:'12 min',
-        steps:[
-          {text:'Tune your guitar. Then place your fingers on Em. Play each string one at a time — every note should ring clean.',hint:'Any buzzing? Arch your fingers more and press closer to the fret.'},
-          {text:'Now form Am. Check each string individually. Fix any buzzes before strumming.',hint:'Make sure your index finger is not muting string 1.'},
-          {text:'Downstroke strum: Em for 4 beats, Am for 4 beats. Count aloud. Metronome at 60 BPM.',hint:'Keep your strumming arm moving — a smooth motion sounds better than stopping between chords.'},
-          {text:'Try "Horse with No Name": the whole song is just Em and Am alternating every 2 beats. Play along at a slow tempo.',hint:'The chord switch is the challenge — the strumming is simple. Focus on the switch.'},
-          {text:'Goal: switch Em–Am cleanly 8 times in a row in tempo. Mark it done on your checklist when you can do it!'}
-        ]
-      }
-    },
-    songs:[
-      {name:'"Horse with No Name" — America',meta:'Em–Am, basic downstroke strumming',type:'Core',core:true},
-      {name:'"Lose Yourself" — Eminem',meta:'Em intro riff adapted for chords',type:'Hip-Hop',core:false},
-      {name:'"Bésame Mucho"',meta:'Em–Am melody adaptation',type:'Latin',core:false},
-      {name:'"Sultans of Swing" intro — Dire Straits',meta:'Em position single notes',type:'Rock',core:false}
-    ],
-    videos:[
-      {name:'6 Levels of Chords on Guitar',url:'https://www.youtube.com/watch?v=47FXbQFd5ng',source:'Simen Otnes',rec:true},
-      {name:'5 Essential Strumming Patterns',url:'https://www.youtube.com/watch?v=hzC0orOGARw',source:'JustinGuitar',rec:false},
-      {name:'First Chords + Strumming',url:'https://www.youtube.com/watch?v=JBKIamtI_Qc',source:'Marty Music',rec:false}
-    ],
-    assessment:{
-      goal:'Switch Em–Am cleanly 8 times in a row at 60 BPM.',
-      performance:'Whole-class chord switch exercise — teacher calls the changes, everyone plays together.',
-      selfCheck:'Can you form Em and Am without looking at your fingers? Can you switch on the beat?',
-      standards:['Pr.4','Pr.5']
-    },
-    skills:[
-      {id:'w4-s1',text:'Read a chord diagram correctly'},
-      {id:'w4-s2',text:'Form Em with correct finger placement'},
-      {id:'w4-s3',text:'Form Am with correct finger placement'},
-      {id:'w4-s4',text:'Strum downstrokes in time at 60 BPM'},
-      {id:'w4-s5',text:'Give and receive one piece of partner feedback'},
-      {id:'w4-s6',text:'Play Em–Am switch cleanly x8 at 60 BPM (assessment goal)'}
-    ]
-  },
-
-  /* ══════════ MODULE 2 — Building a Chord Vocabulary ══════════ */
-  pw('m2w1','Set 1','Building a Chord Vocabulary',2),
-  pw('m2w2','Set 2','Building a Chord Vocabulary',2),
-  pw('m2w3','Set 3','Building a Chord Vocabulary',2),
-
-  /* ══════════ MODULE 3 — Rhythm & Strumming Patterns ══════════ */
-  pw('m3w1','Set 1','Rhythm & Strumming Patterns',3),
-  pw('m3w2','Set 2','Rhythm & Strumming Patterns',3),
-  pw('m3w3','Set 3','Rhythm & Strumming Patterns',3),
-
-  /* ══════════ MODULE 4 — Melody & Single-Note Playing ══════════ */
-  pw('m4w1','Set 1','Melody & Single-Note Playing',4),
-  pw('m4w2','Set 2','Melody & Single-Note Playing',4),
-  pw('m4w3','Set 3','Melody & Single-Note Playing',4),
-
-  /* ══════════ MODULE 5 — Song Structure & Form ══════════ */
-  pw('m5w1','Set 1','Song Structure & Form',5),
-  pw('m5w2','Set 2','Song Structure & Form',5),
-  pw('m5w3','Set 3','Song Structure & Form',5),
-
-  /* ══════════ MODULE 6 — Barre Chords & Power Chords ══════════ */
-  pw('m6w1','Set 1','Barre Chords & Power Chords',6),
-  pw('m6w2','Set 2','Barre Chords & Power Chords',6),
-  pw('m6w3','Set 3','Barre Chords & Power Chords',6),
-
-  /* ══════════ MODULE 7 — Improvisation & Expression ══════════ */
-  pw('m7w1','Set 1','Improvisation & Expression',7),
-  pw('m7w2','Set 2','Improvisation & Expression',7),
-  pw('m7w3','Set 3','Improvisation & Expression',7),
-
-  /* ══════════ MODULE 8 — Ensemble & Performance ══════════ */
-  pw('m8w1','Set 1','Ensemble & Performance',8),
-  pw('m8w2','Set 2','Ensemble & Performance',8),
-  pw('m8w3','Set 3','Ensemble & Performance',8),
-
-  /* ══════════ MODULE 9 — Composition & Creativity ══════════ */
-  pw('m9w1','Set 1','Composition & Creativity',9),
-  pw('m9w2','Set 2','Composition & Creativity',9),
-  pw('m9w3','Set 3','Composition & Creativity',9),
-
-]; /* end WEEKS */
-
-/* ══════════════════════════════════════════════════════
-   FIREBASE CONFIG — replace with your own values.
-   See setup instructions at the bottom of this file.
-   ══════════════════════════════════════════════════════ */
-const firebaseConfig = {
-  apiKey: "AIzaSyB2QKByMeNpV_CaCgvf-oS9HuBDF29dfzU",
-  authDomain: "guitar-class-2fd21.firebaseapp.com",
-  projectId: "guitar-class-2fd21",
-  storageBucket: "guitar-class-2fd21.firebasestorage.app",
-  messagingSenderId: "182670968497",
-  appId: "1:182670968497:web:6e2596b9a0262e70e4c490",
-  measurementId: "G-M0QVQKTH3C"
-};
-</script>
+<script src="firebase-config.js"></script>
+<script src="config.js"></script>
 
 <!-- Firebase SDKs (loaded from Google CDN — always up to date) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -512,11 +276,7 @@ const firebaseConfig = {
 <div id="app" style="display:none">
   <div class="app-layout">
     <div class="main">
-      <div class="module-select-wrap">
-        <label class="module-select-label" for="module-select">Module</label>
-        <select class="module-select" id="module-select" onchange="onModuleChange(this.value)"></select>
-      </div>
-      <div class="sec-label" style="margin-top:12px">Select a set</div>
+      <div class="sec-label">Select a week</div>
       <div class="week-pills" id="week-pills"></div>
       <div id="week-panels"></div>
     </div>
@@ -626,20 +386,11 @@ function showApp(user){
 }
 
 /* ── Firestore ── */
-let lastModuleNum = 1;
-let lastWeekId = null;
-
 async function loadProgress(){
   try{
     const doc = await db.collection('progress').doc(currentUser.uid).get();
-    if(doc.exists){
-      progress = doc.data().skills||{};
-      lastModuleNum = doc.data().lastModule||1;
-      lastWeekId    = doc.data().lastWeek||null;
-    } else {
-      progress={}; lastModuleNum=1; lastWeekId=null;
-    }
-  } catch(e){ progress={}; lastModuleNum=1; lastWeekId=null; }
+    progress = doc.exists ? (doc.data().skills||{}) : {};
+  } catch(e){ progress={}; }
 }
 
 function saveProgress(){
@@ -651,9 +402,7 @@ function saveProgress(){
       await db.collection('progress').doc(currentUser.uid).set({
         skills:progress,
         name:currentUser.displayName||'',
-        email:currentUser.email||'',
-        lastModule:lastModuleNum,
-        lastWeek:lastWeekId
+        email:currentUser.email||''
       },{merge:true});
       setSaveMsg('Saved ✓');
       setTimeout(()=>setSaveMsg(''),2000);
@@ -664,39 +413,16 @@ function setSaveMsg(msg){ document.querySelectorAll('.save-ind').forEach(el=>el.
 
 /* ── Render all ── */
 function renderAll(){
-  renderModuleDropdown();
+  renderPills();
   renderPanels();
-  // Restore last position or default to module 1, first unlocked week
-  const targetModule = lastModuleNum||1;
-  renderPills(targetModule);
-  const targetWeek = lastWeekId
-    ? WEEKS.find(w=>w.id===lastWeekId && w.moduleNum===targetModule)
-    : null;
-  const firstInModule = WEEKS.find(w=>w.moduleNum===targetModule && !w.locked);
-  const toActivate = targetWeek || firstInModule;
-  if(toActivate) activateWeek(toActivate.id);
-}
-
-function renderModuleDropdown(){
-  const sel = document.getElementById('module-select');
-  sel.innerHTML = MODULES.map(m=>
-    `<option value="${m.num}"${m.num===lastModuleNum?' selected':''}>${m.label} — ${m.name}</option>`
-  ).join('');
-}
-
-function onModuleChange(numStr){
-  const num = parseInt(numStr);
-  lastModuleNum = num;
-  renderPills(num);
-  const first = WEEKS.find(w=>w.moduleNum===num && !w.locked);
+  const first = WEEKS.find(w=>!w.locked);
   if(first) activateWeek(first.id);
-  saveProgress();
 }
 
-function renderPills(moduleNum){
+function renderPills(){
   const c = document.getElementById('week-pills');
   c.innerHTML='';
-  WEEKS.filter(w=>w.moduleNum===moduleNum).forEach(w=>{
+  WEEKS.forEach(w=>{
     const btn = document.createElement('button');
     btn.className='wpill'+(w.locked?' locked':'');
     btn.dataset.id=w.id;
@@ -711,10 +437,8 @@ function renderPills(moduleNum){
 }
 
 function activateWeek(id){
-  lastWeekId = id;
   document.querySelectorAll('.wpill').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   document.querySelectorAll('.week-panel').forEach(p=>p.classList.toggle('active',p.dataset.id===id));
-  saveProgress();
 }
 
 function renderPanels(){
@@ -743,30 +467,21 @@ function buildComingSoon(w){
 
 /* ── Full week ── */
 function buildWeek(w){
-  const mod = MODULES.find(m=>m.num===w.moduleNum);
-  const modBtn = mod && mod.handoutUrl
-    ? `<div style="margin-top:10px">
-        <button class="rp-trigger" onclick="loadPanel('gdoc','${mod.handoutUrl}','Module ${w.moduleNum} — ${mod.name}','Module overview')">
-          &#x1F4C4; Open Module ${w.moduleNum} Overview
-        </button>
-       </div>`
-    : '';
   return `<div class="obj-card">
     <div class="obj-unit">${w.unit}</div>
     <div class="obj-main">${w.objective}</div>
     <div class="obj-sub">${w.skillFocus}</div>
-    ${modBtn}
   </div>
   <div class="tabs">
     <div class="tab active" onclick="switchTab(this,'${w.id}','stations')">Stations</div>
     <div class="tab" onclick="switchTab(this,'${w.id}','songs')">Songs</div>
-    <div class="tab" onclick="switchTab(this,'${w.id}','assess')">Self-Assessment</div>
     <div class="tab" onclick="switchTab(this,'${w.id}','checklist')">My checklist</div>
+    <div class="tab" onclick="switchTab(this,'${w.id}','assess')">Assessment</div>
   </div>
   <div id="${w.id}-stations" class="tab-panel active">${buildStations(w)}</div>
   <div id="${w.id}-songs"    class="tab-panel">${buildSongs(w)}</div>
-  <div id="${w.id}-assess"   class="tab-panel">${buildAssess(w)}</div>
-  <div id="${w.id}-checklist" class="tab-panel">${buildChecklist(w)}</div>`;
+  <div id="${w.id}-checklist" class="tab-panel">${buildChecklist(w)}</div>
+  <div id="${w.id}-assess"   class="tab-panel">${buildAssess(w)}</div>`;
 }
 
 function switchTab(el,wid,tab){
@@ -950,7 +665,7 @@ function toggleSkill(sid,wid){
   const lbl=document.getElementById(`pl-${wid}`);
   if(bar) bar.style.width=pct+'%';
   if(lbl) lbl.textContent=done+' / '+w.skills.length;
-  renderPills(lastModuleNum);
+  renderPills();
   document.querySelectorAll('.wpill').forEach(b=>{if(b.dataset.id===wid)b.classList.add('active');});
   saveProgress();
 }
@@ -960,7 +675,6 @@ function toggleSkill(sid,wid){
    Access: ?teacher=true in the URL
    Only jhoffman@seq.org can load student data.
    ══════════════════════════════════════════════ */
-const TEACHER_EMAIL = 'jhoffman@seq.org';
 const IS_TEACHER_MODE = new URLSearchParams(window.location.search).has('teacher');
 
 let teacherWeekId = null;
@@ -1139,42 +853,46 @@ function clearPanel(){
   const handle=document.getElementById('resize-handle');
   const panel=document.getElementById('resource-panel');
   if(!handle||!panel) return;
-  let dragging=false, startX=0, startW=0, pointerId=null;
-  const updateWidth = x => {
-    const delta = startX - x;
-    const newW = Math.min(Math.max(startW + delta, 180), window.innerWidth * 0.6);
-    panel.style.width = newW + 'px';
-  };
-  const endDrag = () => {
-    if(!dragging) return;
-    dragging = false;
-    pointerId = null;
-    handle.classList.remove('dragging');
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-  };
-  handle.addEventListener('pointerdown', e => {
-    dragging = true;
-    pointerId = e.pointerId;
-    startX = e.clientX;
-    startW = panel.offsetWidth;
+  let dragging=false, startX=0, startW=0;
+  handle.addEventListener('mousedown',e=>{
+    dragging=true;
+    startX=e.clientX;
+    startW=panel.offsetWidth;
     handle.classList.add('dragging');
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-    handle.setPointerCapture(pointerId);
+    document.body.style.cursor='col-resize';
+    document.body.style.userSelect='none';
     e.preventDefault();
   });
-  document.addEventListener('pointermove', e => {
-    if(!dragging || e.pointerId !== pointerId) return;
-    updateWidth(e.clientX);
+  document.addEventListener('mousemove',e=>{
+    if(!dragging) return;
+    const delta=startX-e.clientX;
+    const newW=Math.min(Math.max(startW+delta, 180), window.innerWidth*0.6);
+    panel.style.width=newW+'px';
   });
-  document.addEventListener('pointerup', e => {
-    if(!dragging || e.pointerId !== pointerId) return;
-    endDrag();
+  document.addEventListener('mouseup',()=>{
+    if(!dragging) return;
+    dragging=false;
+    handle.classList.remove('dragging');
+    document.body.style.cursor='';
+    document.body.style.userSelect='';
   });
-  document.addEventListener('pointercancel', e => {
-    if(!dragging || e.pointerId !== pointerId) return;
-    endDrag();
+  // Touch support
+  handle.addEventListener('touchstart',e=>{
+    dragging=true;
+    startX=e.touches[0].clientX;
+    startW=panel.offsetWidth;
+    handle.classList.add('dragging');
+    e.preventDefault();
+  },{passive:false});
+  document.addEventListener('touchmove',e=>{
+    if(!dragging) return;
+    const delta=startX-e.touches[0].clientX;
+    const newW=Math.min(Math.max(startW+delta, 180), window.innerWidth*0.6);
+    panel.style.width=newW+'px';
+  });
+  document.addEventListener('touchend',()=>{
+    dragging=false;
+    handle.classList.remove('dragging');
   });
 })();
 </script>
