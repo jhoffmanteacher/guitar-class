@@ -148,6 +148,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .coming .big{font-size:36px;margin-bottom:12px}
 .coming p{font-size:14px;line-height:1.6}
 
+/* ── Module dropdown ── */
+.module-select-wrap{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.module-select-label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);white-space:nowrap}
+.module-select{font-size:13px;padding:6px 12px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);cursor:pointer;flex:1;max-width:320px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b6b65' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.module-select:focus{outline:none;border-color:var(--blue-text)}
+
 /* ── Two-column layout ── */
 .app-layout{display:flex;min-height:calc(100vh - 53px);align-items:start}
 .main{flex:1;min-width:320px;padding:24px 20px 60px;overflow-x:hidden}
@@ -225,26 +231,64 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
      WEEK DATA — Claude updates this array when you add weeks
      ══════════════════════════════════════════════════════ -->
 <script>
+
+/* ══════════════════════════════════════════════════════
+   MODULE + WEEK DATA
+   9 modules × 4 weeks each. Module 1 has full content.
+   Remaining weeks are placeholders — paste Google Doc
+   links into handoutUrl fields as you create them.
+   ══════════════════════════════════════════════════════ */
+
+/* Helper — placeholder week */
+function pw(id,label,modName,modNum){
+  return {
+    id, label, locked:false,
+    module:modName, moduleNum:modNum,
+    unit:`Module ${modNum} · ${modName}`, title:label,
+    subtitle:'Coming soon', objective:'', skillFocus:'',
+    comingSoon:true, skills:[],
+    handoutUrl:'' /* ← paste Google Doc share link here when ready */
+  };
+}
+
+const MODULES = [
+  { num:1, label:'Module 1', name:'First Sounds' },
+  { num:2, label:'Module 2', name:'Building a Chord Vocabulary' },
+  { num:3, label:'Module 3', name:'Rhythm & Strumming Patterns' },
+  { num:4, label:'Module 4', name:'Melody & Single-Note Playing' },
+  { num:5, label:'Module 5', name:'Song Structure & Form' },
+  { num:6, label:'Module 6', name:'Barre Chords & Power Chords' },
+  { num:7, label:'Module 7', name:'Improvisation & Expression' },
+  { num:8, label:'Module 8', name:'Ensemble & Performance' },
+  { num:9, label:'Module 9', name:'Composition & Creativity' },
+];
+
 const WEEKS = [
 
-  /* ── WEEK 1 — placeholder ── */
+  /* ══════════ MODULE 1 — First Sounds ══════════ */
+
+  /* ── Week 1 — placeholder ── */
   {
-    id:'w1', label:'Wk 1', locked:false,
-    unit:'Unit 1 · First Sounds', title:'Week 1',
+    id:'w1', label:'Week 1', locked:false,
+    module:'First Sounds', moduleNum:1,
+    unit:'Module 1 · First Sounds', title:'Week 1',
     subtitle:'Introduction & goal-setting',
     objective:'I CAN describe my guitar goals and share a song that means something to me.',
     skillFocus:'Introduction · Goal-setting · "What Is Your Guitar Adventure?" pre-assessment',
-    comingSoon:true, skills:[]
+    comingSoon:true, skills:[],
+    handoutUrl:'' /* ← paste Google Doc link here */
   },
 
-  /* ── WEEKS 2–3 — FULL CONTENT ── */
+  /* ── Weeks 2–3 — FULL CONTENT ── */
   {
-    id:'w2', label:'Wk 2–3', locked:false,
-    unit:'Unit 1 · First Sounds', title:'Weeks 2–3',
+    id:'w2', label:'Weeks 2–3', locked:false,
+    module:'First Sounds', moduleNum:1,
+    unit:'Module 1 · First Sounds', title:'Weeks 2–3',
     subtitle:'Posture · Hand position · Single notes · Down-up strumming',
     objective:'I CAN tune my guitar, play single notes cleanly, and strum down-up in time.',
     skillFocus:'Parts of the guitar · Posture & hand position · Holding a pick · Standard tuning · Single notes · Down-up strumming',
     comingSoon:false,
+    handoutUrl:'https://docs.google.com/document/d/18eZNbdQrIctws5BLYlKOgypDFy2cfo1M/preview',
     stations:{
       a:{
         title:'Teacher station — posture, notes & pick technique', time:'12 min',
@@ -306,14 +350,16 @@ const WEEKS = [
     ]
   },
 
-  /* ── WEEK 4 — FULL CONTENT ── */
+  /* ── Week 4 — FULL CONTENT ── */
   {
-    id:'w4', label:'Wk 4', locked:false,
-    unit:'Unit 1 · First Sounds', title:'Week 4',
+    id:'w4', label:'Week 4', locked:false,
+    module:'First Sounds', moduleNum:1,
+    unit:'Module 1 · First Sounds', title:'Week 4',
     subtitle:'Chord diagrams · Em & Am · Basic downstroke strumming',
     objective:'I CAN read a chord diagram, switch between Em and Am, and strum a downstroke pattern in time.',
     skillFocus:'Reading chord diagrams · First chords: Em & Am · Basic downstroke strumming · Partner feedback',
     comingSoon:false,
+    handoutUrl:'' /* ← paste Google Doc link here */,
     stations:{
       a:{
         title:'Teacher station — chord diagrams & hand position', time:'12 min',
@@ -348,32 +394,77 @@ const WEEKS = [
     songs:[
       {name:'"Horse with No Name" — America',meta:'Em–Am, basic downstroke strumming',type:'Core',core:true},
       {name:'"Lose Yourself" — Eminem',meta:'Em intro riff adapted for chords',type:'Hip-Hop',core:false},
-      {name:'"About a Girl" — Nirvana',meta:'Em–G simplified',type:'Grunge',core:false},
-      {name:'"Three Little Birds" — Bob Marley',meta:'Simplified Am strum',type:'Reggae',core:false}
+      {name:'"Bésame Mucho"',meta:'Em–Am melody adaptation',type:'Latin',core:false},
+      {name:'"Sultans of Swing" intro — Dire Straits',meta:'Em position single notes',type:'Rock',core:false}
     ],
     videos:[
-      {name:'6 Levels of Chords on Guitar',url:'https://www.youtube.com/watch?v=47FXbQFd5ng',source:'Simen Otnes / Play With a Plan',rec:true},
+      {name:'6 Levels of Chords on Guitar',url:'https://www.youtube.com/watch?v=47FXbQFd5ng',source:'Simen Otnes',rec:true},
       {name:'5 Essential Strumming Patterns',url:'https://www.youtube.com/watch?v=hzC0orOGARw',source:'JustinGuitar',rec:false},
       {name:'First Chords + Strumming',url:'https://www.youtube.com/watch?v=JBKIamtI_Qc',source:'Marty Music',rec:false}
     ],
     assessment:{
-      goal:'Switch between Em and Am cleanly 8 times in a row at 60 BPM.',
-      performance:'Partner check: one student plays Em–Am, partner watches and gives one piece of feedback on hand position.',
-      selfCheck:'Can you read a chord diagram? Can you form Em and Am with no buzzing? Can you switch between them in tempo?',
-      standards:['Pr.4','Pr.5','Pr.6']
+      goal:'Switch Em–Am cleanly 8 times in a row at 60 BPM.',
+      performance:'Whole-class chord switch exercise — teacher calls the changes, everyone plays together.',
+      selfCheck:'Can you form Em and Am without looking at your fingers? Can you switch on the beat?',
+      standards:['Pr.4','Pr.5']
     },
     skills:[
-      {id:'w4-s1',text:'Read a chord diagram (strings, frets, fingers, X and O)'},
-      {id:'w4-s2',text:'Form Em with clean tone — no buzzing'},
-      {id:'w4-s3',text:'Form Am with clean tone — no buzzing'},
-      {id:'w4-s4',text:'Switch Em → Am → Em smoothly in tempo'},
-      {id:'w4-s5',text:'Strum a basic downstroke pattern while counting aloud'},
+      {id:'w4-s1',text:'Read a chord diagram correctly'},
+      {id:'w4-s2',text:'Form Em with correct finger placement'},
+      {id:'w4-s3',text:'Form Am with correct finger placement'},
+      {id:'w4-s4',text:'Strum downstrokes in time at 60 BPM'},
+      {id:'w4-s5',text:'Give and receive one piece of partner feedback'},
       {id:'w4-s6',text:'Play Em–Am switch cleanly x8 at 60 BPM (assessment goal)'}
     ]
   },
 
-  /* ── WEEKS 5–6 — placeholder ── */
-  {id:'w5',label:'Wk 5–6',locked:true,unit:'Unit 2 · Building a Chord Vocabulary',title:'Weeks 5–6',subtitle:'Coming soon',comingSoon:true,skills:[]}
+  /* ══════════ MODULE 2 — Building a Chord Vocabulary ══════════ */
+  pw('m2w1','Week 1','Building a Chord Vocabulary',2),
+  pw('m2w2','Week 2','Building a Chord Vocabulary',2),
+  pw('m2w3','Week 3','Building a Chord Vocabulary',2),
+  pw('m2w4','Week 4','Building a Chord Vocabulary',2),
+
+  /* ══════════ MODULE 3 — Rhythm & Strumming Patterns ══════════ */
+  pw('m3w1','Week 1','Rhythm & Strumming Patterns',3),
+  pw('m3w2','Week 2','Rhythm & Strumming Patterns',3),
+  pw('m3w3','Week 3','Rhythm & Strumming Patterns',3),
+  pw('m3w4','Week 4','Rhythm & Strumming Patterns',3),
+
+  /* ══════════ MODULE 4 — Melody & Single-Note Playing ══════════ */
+  pw('m4w1','Week 1','Melody & Single-Note Playing',4),
+  pw('m4w2','Week 2','Melody & Single-Note Playing',4),
+  pw('m4w3','Week 3','Melody & Single-Note Playing',4),
+  pw('m4w4','Week 4','Melody & Single-Note Playing',4),
+
+  /* ══════════ MODULE 5 — Song Structure & Form ══════════ */
+  pw('m5w1','Week 1','Song Structure & Form',5),
+  pw('m5w2','Week 2','Song Structure & Form',5),
+  pw('m5w3','Week 3','Song Structure & Form',5),
+  pw('m5w4','Week 4','Song Structure & Form',5),
+
+  /* ══════════ MODULE 6 — Barre Chords & Power Chords ══════════ */
+  pw('m6w1','Week 1','Barre Chords & Power Chords',6),
+  pw('m6w2','Week 2','Barre Chords & Power Chords',6),
+  pw('m6w3','Week 3','Barre Chords & Power Chords',6),
+  pw('m6w4','Week 4','Barre Chords & Power Chords',6),
+
+  /* ══════════ MODULE 7 — Improvisation & Expression ══════════ */
+  pw('m7w1','Week 1','Improvisation & Expression',7),
+  pw('m7w2','Week 2','Improvisation & Expression',7),
+  pw('m7w3','Week 3','Improvisation & Expression',7),
+  pw('m7w4','Week 4','Improvisation & Expression',7),
+
+  /* ══════════ MODULE 8 — Ensemble & Performance ══════════ */
+  pw('m8w1','Week 1','Ensemble & Performance',8),
+  pw('m8w2','Week 2','Ensemble & Performance',8),
+  pw('m8w3','Week 3','Ensemble & Performance',8),
+  pw('m8w4','Week 4','Ensemble & Performance',8),
+
+  /* ══════════ MODULE 9 — Composition & Creativity ══════════ */
+  pw('m9w1','Week 1','Composition & Creativity',9),
+  pw('m9w2','Week 2','Composition & Creativity',9),
+  pw('m9w3','Week 3','Composition & Creativity',9),
+  pw('m9w4','Week 4','Composition & Creativity',9),
 
 ]; /* end WEEKS */
 
@@ -430,7 +521,11 @@ const firebaseConfig = {
 <div id="app" style="display:none">
   <div class="app-layout">
     <div class="main">
-      <div class="sec-label">Select a week</div>
+      <div class="module-select-wrap">
+        <label class="module-select-label" for="module-select">Module</label>
+        <select class="module-select" id="module-select" onchange="onModuleChange(this.value)"></select>
+      </div>
+      <div class="sec-label" style="margin-top:12px">Select a week</div>
       <div class="week-pills" id="week-pills"></div>
       <div id="week-panels"></div>
     </div>
@@ -540,11 +635,20 @@ function showApp(user){
 }
 
 /* ── Firestore ── */
+let lastModuleNum = 1;
+let lastWeekId = null;
+
 async function loadProgress(){
   try{
     const doc = await db.collection('progress').doc(currentUser.uid).get();
-    progress = doc.exists ? (doc.data().skills||{}) : {};
-  } catch(e){ progress={}; }
+    if(doc.exists){
+      progress = doc.data().skills||{};
+      lastModuleNum = doc.data().lastModule||1;
+      lastWeekId    = doc.data().lastWeek||null;
+    } else {
+      progress={}; lastModuleNum=1; lastWeekId=null;
+    }
+  } catch(e){ progress={}; lastModuleNum=1; lastWeekId=null; }
 }
 
 function saveProgress(){
@@ -556,7 +660,9 @@ function saveProgress(){
       await db.collection('progress').doc(currentUser.uid).set({
         skills:progress,
         name:currentUser.displayName||'',
-        email:currentUser.email||''
+        email:currentUser.email||'',
+        lastModule:lastModuleNum,
+        lastWeek:lastWeekId
       },{merge:true});
       setSaveMsg('Saved ✓');
       setTimeout(()=>setSaveMsg(''),2000);
@@ -567,16 +673,39 @@ function setSaveMsg(msg){ document.querySelectorAll('.save-ind').forEach(el=>el.
 
 /* ── Render all ── */
 function renderAll(){
-  renderPills();
+  renderModuleDropdown();
   renderPanels();
-  const first = WEEKS.find(w=>!w.locked);
-  if(first) activateWeek(first.id);
+  // Restore last position or default to module 1, first unlocked week
+  const targetModule = lastModuleNum||1;
+  renderPills(targetModule);
+  const targetWeek = lastWeekId
+    ? WEEKS.find(w=>w.id===lastWeekId && w.moduleNum===targetModule)
+    : null;
+  const firstInModule = WEEKS.find(w=>w.moduleNum===targetModule && !w.locked);
+  const toActivate = targetWeek || firstInModule;
+  if(toActivate) activateWeek(toActivate.id);
 }
 
-function renderPills(){
+function renderModuleDropdown(){
+  const sel = document.getElementById('module-select');
+  sel.innerHTML = MODULES.map(m=>
+    `<option value="${m.num}"${m.num===lastModuleNum?' selected':''}>${m.label} — ${m.name}</option>`
+  ).join('');
+}
+
+function onModuleChange(numStr){
+  const num = parseInt(numStr);
+  lastModuleNum = num;
+  renderPills(num);
+  const first = WEEKS.find(w=>w.moduleNum===num && !w.locked);
+  if(first) activateWeek(first.id);
+  saveProgress();
+}
+
+function renderPills(moduleNum){
   const c = document.getElementById('week-pills');
   c.innerHTML='';
-  WEEKS.forEach(w=>{
+  WEEKS.filter(w=>w.moduleNum===moduleNum).forEach(w=>{
     const btn = document.createElement('button');
     btn.className='wpill'+(w.locked?' locked':'');
     btn.dataset.id=w.id;
@@ -591,8 +720,10 @@ function renderPills(){
 }
 
 function activateWeek(id){
+  lastWeekId = id;
   document.querySelectorAll('.wpill').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   document.querySelectorAll('.week-panel').forEach(p=>p.classList.toggle('active',p.dataset.id===id));
+  saveProgress();
 }
 
 function renderPanels(){
@@ -819,7 +950,7 @@ function toggleSkill(sid,wid){
   const lbl=document.getElementById(`pl-${wid}`);
   if(bar) bar.style.width=pct+'%';
   if(lbl) lbl.textContent=done+' / '+w.skills.length;
-  renderPills();
+  renderPills(lastModuleNum);
   document.querySelectorAll('.wpill').forEach(b=>{if(b.dataset.id===wid)b.classList.add('active');});
   saveProgress();
 }
