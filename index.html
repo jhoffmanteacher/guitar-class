@@ -252,15 +252,15 @@ function pw(id,label,modName,modNum){
 }
 
 const MODULES = [
-  { num:1, label:'Module 1', name:'First Sounds' },
-  { num:2, label:'Module 2', name:'Building a Chord Vocabulary' },
-  { num:3, label:'Module 3', name:'Rhythm & Strumming Patterns' },
-  { num:4, label:'Module 4', name:'Melody & Single-Note Playing' },
-  { num:5, label:'Module 5', name:'Song Structure & Form' },
-  { num:6, label:'Module 6', name:'Barre Chords & Power Chords' },
-  { num:7, label:'Module 7', name:'Improvisation & Expression' },
-  { num:8, label:'Module 8', name:'Ensemble & Performance' },
-  { num:9, label:'Module 9', name:'Composition & Creativity' },
+  { num:1, label:'Module 1', name:'First Sounds', handoutUrl:'https://docs.google.com/document/d/1wKmQRDFbKsIci94PNRzoQkXoTVO6A017ELIZYvLtyCE/preview' },
+  { num:2, label:'Module 2', name:'Building a Chord Vocabulary', handoutUrl:'https://docs.google.com/document/d/1KM2rgUYa3NEpDr4E65YmcTE_g6Fxs_rbIjP-U1wjcnA/preview' },
+  { num:3, label:'Module 3', name:'Rhythm & Strumming Patterns', handoutUrl:'https://docs.google.com/document/d/1S0gxHXkbgZRJT5VhR9nGz6O2imjEF9uQ_jNAYFaTc6I/preview' },
+  { num:4, label:'Module 4', name:'Melody & Single-Note Playing', handoutUrl:'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/preview' },
+  { num:5, label:'Module 5', name:'Song Structure & Form', handoutUrl:'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/preview' },
+  { num:6, label:'Module 6', name:'Barre Chords & Power Chords', handoutUrl:'https://docs.google.com/document/d/1mBqrpsG2rkiVPWrF-zo0fxlgA1YQN33GyxmgsXqCY0g/preview' },
+  { num:7, label:'Module 7', name:'Improvisation & Expression', handoutUrl:'https://docs.google.com/document/d/1w1GM5ZkoFNn0QBGOkstSXGyRZIU8ml2-W9_FtgTkMYg/preview' },
+  { num:8, label:'Module 8', name:'Ensemble & Performance', handoutUrl:'https://docs.google.com/document/d/1mxqrOHsRRRG1smLq2pfi0NplUBCOsflrZ6O13PBo06k/preview' },
+  { num:9, label:'Module 9', name:'Composition & Creativity', handoutUrl:'https://docs.google.com/document/d/1FuhujeyL43MygvyYDTj6znTk8ZZPc0icFZzFtZPRxDs/preview' },
 ];
 
 const WEEKS = [
@@ -525,7 +525,7 @@ const firebaseConfig = {
         <label class="module-select-label" for="module-select">Module</label>
         <select class="module-select" id="module-select" onchange="onModuleChange(this.value)"></select>
       </div>
-      <div class="sec-label" style="margin-top:12px">Select a week</div>
+      <div class="sec-label" style="margin-top:12px">Select a set</div>
       <div class="week-pills" id="week-pills"></div>
       <div id="week-panels"></div>
     </div>
@@ -752,21 +752,30 @@ function buildComingSoon(w){
 
 /* ── Full week ── */
 function buildWeek(w){
+  const mod = MODULES.find(m=>m.num===w.moduleNum);
+  const modBtn = mod && mod.handoutUrl
+    ? `<div style="margin-top:10px">
+        <button class="rp-trigger" onclick="loadPanel('gdoc','${mod.handoutUrl}','Module ${w.moduleNum} — ${mod.name}','Module overview')">
+          &#x1F4C4; Open Module ${w.moduleNum} Overview
+        </button>
+       </div>`
+    : '';
   return `<div class="obj-card">
     <div class="obj-unit">${w.unit}</div>
     <div class="obj-main">${w.objective}</div>
     <div class="obj-sub">${w.skillFocus}</div>
+    ${modBtn}
   </div>
   <div class="tabs">
     <div class="tab active" onclick="switchTab(this,'${w.id}','stations')">Stations</div>
     <div class="tab" onclick="switchTab(this,'${w.id}','songs')">Songs</div>
+    <div class="tab" onclick="switchTab(this,'${w.id}','assess')">Self-Assessment</div>
     <div class="tab" onclick="switchTab(this,'${w.id}','checklist')">My checklist</div>
-    <div class="tab" onclick="switchTab(this,'${w.id}','assess')">Assessment</div>
   </div>
   <div id="${w.id}-stations" class="tab-panel active">${buildStations(w)}</div>
   <div id="${w.id}-songs"    class="tab-panel">${buildSongs(w)}</div>
-  <div id="${w.id}-checklist" class="tab-panel">${buildChecklist(w)}</div>
-  <div id="${w.id}-assess"   class="tab-panel">${buildAssess(w)}</div>`;
+  <div id="${w.id}-assess"   class="tab-panel">${buildAssess(w)}</div>
+  <div id="${w.id}-checklist" class="tab-panel">${buildChecklist(w)}</div>`;
 }
 
 function switchTab(el,wid,tab){
