@@ -516,13 +516,7 @@ function buildStations(w){
     </div>`;
   return `
     <div class="st-grid">
-      <div class="stc active" id="${w.id}-sc-a" onclick="openSt('${w.id}','a')">
-        <div class="st-ico">👤</div>
-        <span class="st-badge ba">Station A</span>
-        <div class="st-name">Teacher station</div>
-        <div class="st-desc">Small group with teacher</div>
-      </div>
-      <div class="stc" id="${w.id}-sc-b" onclick="openSt('${w.id}','b')">
+      <div class="stc active" id="${w.id}-sc-b" onclick="openSt('${w.id}','b')">
         <div class="st-ico">💻</div>
         <span class="st-badge bb">Station B</span>
         <div class="st-name">Computer station</div>
@@ -535,13 +529,12 @@ function buildStations(w){
         <div class="st-desc">Independent drill</div>
       </div>
     </div>
-    ${dp('a','','Station A','ba',w.stations.a)}
-    ${dp('b',' hidden','Station B','bb',w.stations.b)}
+    ${dp('b','','Station B','bb',w.stations.b)}
     ${dp('c',' hidden','Station C','bc',w.stations.c)}`;
 }
 
 function openSt(wid,s){
-  ['a','b','c'].forEach(x=>{
+  ['b','c'].forEach(x=>{
     document.getElementById(`${wid}-sc-${x}`).classList.toggle('active',x===s);
     document.getElementById(`${wid}-dp-${x}`).classList.toggle('hidden',x!==s);
   });
