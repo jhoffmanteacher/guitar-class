@@ -66,11 +66,11 @@ const WEEKS = [
           },
           {
             text: 'Watch: <a href="https://www.youtube.com/watch?v=8-grcbKnbps" target="_blank">How to Hold a Guitar Pick – JustinGuitar</a> (0:00–2:30).',
-            hint: 'Watch through 1:00, then pause. Try to match his grip — pick between thumb and side of index finger, 3–4mm of tip showing. Hit play and watch the rest. Does your grip match?'
+            hint: 'As you watch: notice where the pick tip sits. Grab your pick and try to match his grip exactly.'
           },
           {
             text: 'Watch: <a href="https://www.youtube.com/watch?v=wvgJ0lt4spY" target="_blank">Beginner Open Strings – JustinGuitar</a> (0:00–2:00).',
-            hint: 'Watch through 0:45, then pause. Air-strum the down-up pattern he just showed — count "1 and 2 and 3 and 4 and" out loud. Hit play and strum along with him.'
+            hint: 'Air-strum along with the down-up pattern as he plays it. Try to stay in sync with him.'
           }
         ]
       },
@@ -149,15 +149,15 @@ const WEEKS = [
         steps: [
           {
             text: 'Watch: <a href="https://www.youtube.com/watch?v=47FXbQFd5ng" target="_blank">6 Levels of Chords on Guitar – Simen Otnes</a> (0:00–4:00).',
-            hint: 'As you watch: listen for what he says causes buzzing. Pause at any point where he demos a chord — form it on your guitar and check your own tone before hitting play again.'
+            hint: 'As you watch: listen for what he says causes buzzing. Think about whether that applies to your own hand position.'
           },
           {
             text: 'Watch: <a href="https://www.youtube.com/watch?v=hzC0orOGARw" target="_blank">5 Essential Strumming Patterns – JustinGuitar</a> (0:00–3:00).',
-            hint: 'Watch through 1:00, then pause. Air-strum Pattern 1 — keep your arm moving even on beats you don\'t hit. Hit play and strum along for the rest.'
+            hint: 'As you watch: air-strum along with Pattern 1. Try to keep your arm moving even on beats you don\'t hit.'
           },
           {
             text: 'Watch: <a href="https://www.youtube.com/watch?v=JBKIamtI_Qc" target="_blank">First Chords + Strumming – Marty Music</a> (2:00–5:00).',
-            hint: 'Watch through 3:00, then pause. Form Em or Am and strum — listen for clean tone. Hit play and play along quietly for the rest.'
+            hint: 'As you watch: form Em or Am on your guitar and strum along quietly. Focus on clean tone, not speed.'
           }
         ]
       },
