@@ -88,7 +88,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .stc{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:border-color 0.15s}
 .stc:hover{border-color:var(--border2)}
 .stc.active{border:1.5px solid var(--blue-text)}
-.st-ico{font-size:20px;margin-bottom:8px}
+.st-ico{font-size:28px;margin-bottom:8px}
 .st-badge{font-size:10px;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:6px}
 .ba{background:var(--blue-bg);color:var(--blue-text)}
 .bb{background:var(--green-bg);color:var(--green-text)}
@@ -106,6 +106,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .sn{width:20px;height:20px;border-radius:50%;background:var(--bg2);font-size:11px;font-weight:500;color:var(--text2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
 .st{font-size:13px;line-height:1.5}
 .sh{font-size:12px;color:var(--text2);margin-top:3px}
+.sh-list{font-size:12px;color:var(--text2);margin-top:5px;padding-left:16px;display:flex;flex-direction:column;gap:3px}
+.sh-list li{line-height:1.5}
 .card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:4px 16px;margin-bottom:12px}
 .song-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)}
 .song-row:last-child{border-bottom:none}
@@ -534,9 +536,14 @@ function buildStations(w){
       const safe=label.replace(/'/g,"\\'");
       return `<button class="rp-trigger" onclick="loadPanel('youtube','${url}','${safe}','YouTube')">&#x25B6; ${label}</button>`;
     });
+    const hintHtml = s.hint ? (() => {
+      const bullets = s.hint.split(/(?<=\.(?=\s))(?=\s*[A-Z])|\n/).map(b=>b.trim()).filter(Boolean);
+      if(bullets.length <= 1) return `<div class="sh">${s.hint}</div>`;
+      return `<ul class="sh-list">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
+    })() : '';
     return `<li class="step">
       <div class="sn">${i+1}</div>
-      <div class="st">${text}${s.hint?`<div class="sh">${s.hint}</div>`:''}</div>
+      <div class="st">${text}${hintHtml}</div>
     </li>`;
   }).join('');
   const dp=(id,cls,badge,badgeClass,s)=>`
