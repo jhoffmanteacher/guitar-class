@@ -275,7 +275,7 @@ const WEEKS = [
 //
 //   stations: {
 //     b: {
-//       title: 'Computer station — watch & listen',
+//       title: 'Computer station — Watch/Listen/Practice',
 //       time: '12 min',
 //       steps: [
 //         {
