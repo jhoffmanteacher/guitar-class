@@ -4,10 +4,9 @@
 <!--
   ╔════════════════════════════════════════════════════════════════════╗
   ║  GUITAR CLASS STUDENT DASHBOARD                                    ║
-  ║  HOW TO ADD A NEW WEEK:                                            ║
-  ║  Bring this file back to Claude and say "add week X"               ║
-  ║  Claude updates the WEEKS array → re-upload to GitHub → done       ║
-  ║  See full Firebase + GitHub setup instructions at bottom.          ║
+  ║  FILES: index.html  +  config.js  +  firebase-config.js           ║
+  ║  HOW TO ADD OR EDIT CONTENT: edit config.js only                  ║
+  ║  HOW TO UPDATE THE SITE: upload changed files to GitHub           ║
   ╚════════════════════════════════════════════════════════════════════╝
 -->
 <meta charset="UTF-8">
@@ -154,12 +153,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .module-select{font-size:13px;padding:6px 12px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);cursor:pointer;flex:1;max-width:320px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b6b65' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 .module-select:focus{outline:none;border-color:var(--blue-text)}
 
-/* ── Module dropdown ── */
-.module-select-wrap{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.module-select-label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);white-space:nowrap}
-.module-select{font-size:13px;padding:6px 12px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);cursor:pointer;flex:1;max-width:320px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b6b65' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
-.module-select:focus{outline:none;border-color:var(--blue-text)}
-
 /* ── Two-column layout ── */
 .app-layout{display:flex;min-height:calc(100vh - 53px);align-items:start}
 .main{flex:1;min-width:320px;padding:24px 20px 60px;overflow-x:hidden}
@@ -233,193 +226,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════════════════
-     WEEK DATA — Claude updates this array when you add weeks
-     ══════════════════════════════════════════════════════ -->
-<script>
-const WEEKS = [
-
-  /* ── MODULE 1, SET 1 — placeholder ── */
-  {
-    id:'w1', label:'Set 1', locked:false,
-    module:'First Sounds', moduleNum:1,
-    unit:'Module 1 · First Sounds', title:'Set 1',
-    subtitle:'Introduction & goal-setting',
-    objective:'I CAN describe my guitar goals and share a song that means something to me.',
-    skillFocus:'Introduction · Goal-setting · "What Is Your Guitar Adventure?" pre-assessment',
-    comingSoon:true, skills:[]
-  },
-
-  /* ── MODULE 1, SET 2 — FULL CONTENT ── */
-  {
-    id:'w2', label:'Set 2', locked:false,
-    module:'First Sounds', moduleNum:1,
-    unit:'Module 1 · First Sounds', title:'Set 2',
-    subtitle:'Posture · Hand position · Single notes · Down-up strumming',
-    objective:'I CAN tune my guitar, play single notes cleanly, and strum down-up in time.',
-    skillFocus:'Parts of the guitar · Posture & hand position · Holding a pick · Standard tuning · Single notes · Down-up strumming',
-    comingSoon:false,
-    stations:{
-      b:{
-        title:'Computer station — watch & respond', time:'12 min',
-        steps:[
-          {text:'Watch: <a href="https://www.youtube.com/watch?v=rrB97F0Qu6g" target="_blank">How to Actually Get Good at Guitar – Simen Otnes</a> (first 5 min).',hint:'Headphones on. What habits will help you get better?'},
-          {text:'Watch: <a href="https://www.youtube.com/watch?v=8-grcbKnbps" target="_blank">How to Hold a Guitar Pick – JustinGuitar</a>.',hint:'Write down: what are the two most common pick-holding mistakes?'},
-          {text:'In your notes: write out the 6 string names from memory, low to high. Mnemonic: Eddie Ate Dynamite, Good Bye Eddie.'},
-          {text:'Bonus: Watch <a href="https://www.youtube.com/watch?v=wvgJ0lt4spY" target="_blank">Beginner Open Strings Lesson</a>. Air-strum the down-up pattern shown.'}
-        ]
-      },
-      c:{
-        title:'Practice station — independent drill', time:'12 min',
-        steps:[
-          {text:'Tune your guitar using a clip tuner or <a href="https://chromewebstore.google.com/detail/guitarapp-guitar-tuner/niafepdbinnnbgigcnhefoconkcljifd" target="_blank" rel="noopener">install the guitar tuning app</a>. Goal: all 6 strings in tune in under 2 minutes.',hint:'Low to high: E A D G B e. Green light = in tune.'},
-          {text:'Play single notes across all 6 strings, open and frets 1–4. Say the string name aloud as you play. Zero buzzing.',hint:'Buzzing? Press closer to the fret, arch your finger, check your hand position.'},
-          {text:'Down-up strumming on one open string: count aloud "1 and 2 and 3 and 4 and…" Match each word to a strum. Metronome at 60 BPM.'},
-          {text:'Try the "Seven Nation Army" riff: E string, frets 7–7–10–7–5–3–2. Slow and clean.',hint:'Slow and clean beats fast and buzzy every time.'}
-        ]
-      }
-    },
-    songs:[
-      {name:'"Seven Nation Army" — The White Stripes',meta:'E string riff, frets 7-7-10-7-5-3-2',type:'Core',core:true},
-      {name:'"Smoke on the Water" — Deep Purple',meta:'Simple 3-note riff on D string',type:'Classic Rock',core:false},
-      {name:'"Come As You Are" — Nirvana',meta:'Single-note intro riff',type:'Grunge',core:false},
-      {name:'"Day Tripper" — The Beatles',meta:'E string riff, beginner version',type:'Classic',core:false}
-    ],
-    videos:[
-      {name:'How to Actually Get Good at Guitar',url:'https://www.youtube.com/watch?v=rrB97F0Qu6g',source:'Simen Otnes / Play With a Plan',rec:true},
-      {name:'How to Hold a Guitar Pick',url:'https://www.youtube.com/watch?v=8-grcbKnbps',source:'JustinGuitar',rec:false},
-      {name:'Beginner Open Strings Lesson',url:'https://www.youtube.com/watch?v=wvgJ0lt4spY',source:'JustinGuitar',rec:false}
-    ],
-    assessment:{
-      goal:'Play single notes cleanly on all 6 strings and strum down-up in time at 60 BPM.',
-      performance:'Teacher check: play the "Seven Nation Army" riff — clean tone, no buzzing.',
-      selfCheck:'Can you name all 6 strings? Can you tune your guitar? Can you play single notes with no buzzing?',
-      standards:['Pr.4','Pr.5','Pr.6']
-    },
-    skills:[
-      {id:'w2-s1',text:'Name all 6 strings from memory (E A D G B e)'},
-      {id:'w2-s2',text:'Tune all 6 strings with a tuner in under 2 minutes'},
-      {id:'w2-s3',text:'Play single notes on all 6 strings with no buzzing'},
-      {id:'w2-s4',text:'Hold the pick correctly — 3–4mm of tip showing'},
-      {id:'w2-s5',text:'Strum down-up in time while counting aloud at 60 BPM'},
-      {id:'w2-s6',text:'Play the "Seven Nation Army" riff cleanly (assessment goal)'}
-    ]
-  },
-
-  /* ── MODULE 1, SET 3 — FULL CONTENT ── */
-  {
-    id:'w4', label:'Set 3', locked:false,
-    module:'First Sounds', moduleNum:1,
-    unit:'Module 1 · First Sounds', title:'Set 3',
-    subtitle:'Reading chord diagrams · Em & Am · Downstroke strumming',
-    objective:'I CAN read a chord diagram, play Em and Am cleanly, and switch between them in time.',
-    skillFocus:'Reading chord diagrams · First chords: Em & Am · Basic downstroke strumming · Partner feedback',
-    comingSoon:false,
-    stations:{
-      b:{
-        title:'Computer station — watch & respond', time:'12 min',
-        steps:[
-          {text:'Watch: <a href="https://www.youtube.com/watch?v=47FXbQFd5ng" target="_blank">6 Levels of Chords on Guitar – Simen Otnes</a> (first 5 min).',hint:'Headphones on. What makes a chord sound clean vs. buzzy?'},
-          {text:'Watch: <a href="https://www.youtube.com/watch?v=hzC0orOGARw" target="_blank">5 Essential Strumming Patterns – JustinGuitar</a>.',hint:'Write down: what does it mean to "strum from the wrist"?'},
-          {text:'In your notes: draw a chord diagram for Em and Am from memory. Label the finger numbers.',hint:'Don't look! Then check yourself against the lesson materials.'},
-          {text:'Bonus: Watch <a href="https://www.youtube.com/watch?v=JBKIamtI_Qc" target="_blank">First Chords + Strumming – Marty Music</a> and try to strum along.'}
-        ]
-      },
-      c:{
-        title:'Practice station — independent drill', time:'12 min',
-        steps:[
-          {text:'Tune your guitar. Then place your fingers on Em. Play each string one at a time — every note should ring clean.',hint:'Any buzzing? Arch your fingers more and press closer to the fret.'},
-          {text:'Now form Am. Check each string individually. Fix any buzzes before strumming.',hint:'Make sure your index finger is not muting string 1.'},
-          {text:'Downstroke strum: Em for 4 beats, Am for 4 beats. Count aloud. Metronome at 60 BPM.',hint:'Keep your strumming arm moving — a smooth motion sounds better than stopping between chords.'},
-          {text:'Try "Horse with No Name": the whole song is just Em and Am alternating every 2 beats. Play along at a slow tempo.',hint:'The chord switch is the challenge — the strumming is simple. Focus on the switch.'},
-          {text:'Goal: switch Em–Am cleanly 8 times in a row in tempo. Mark it done on your checklist when you can do it!'}
-        ]
-      }
-    },
-    songs:[
-      {name:'"Horse with No Name" — America',meta:'Em–Am, basic downstroke strumming',type:'Core',core:true},
-      {name:'"Lose Yourself" — Eminem',meta:'Em intro riff adapted for chords',type:'Hip-Hop',core:false},
-      {name:'"About a Girl" — Nirvana',meta:'Em–G simplified',type:'Grunge',core:false},
-      {name:'"Three Little Birds" — Bob Marley',meta:'Simplified Am strum',type:'Reggae',core:false}
-    ],
-    videos:[
-      {name:'6 Levels of Chords on Guitar',url:'https://www.youtube.com/watch?v=47FXbQFd5ng',source:'Simen Otnes / Play With a Plan',rec:true},
-      {name:'5 Essential Strumming Patterns',url:'https://www.youtube.com/watch?v=hzC0orOGARw',source:'JustinGuitar',rec:false},
-      {name:'First Chords + Strumming',url:'https://www.youtube.com/watch?v=JBKIamtI_Qc',source:'Marty Music',rec:false}
-    ],
-    assessment:{
-      goal:'Switch between Em and Am cleanly 8 times in a row at 60 BPM.',
-      performance:'Partner check: one student plays Em–Am, partner watches and gives one piece of feedback on hand position.',
-      selfCheck:'Can you read a chord diagram? Can you form Em and Am with no buzzing? Can you switch between them in tempo?',
-      standards:['Pr.4','Pr.5','Pr.6']
-    },
-    skills:[
-      {id:'w4-s1',text:'Read a chord diagram (strings, frets, fingers, X and O)'},
-      {id:'w4-s2',text:'Form Em with clean tone — no buzzing'},
-      {id:'w4-s3',text:'Form Am with clean tone — no buzzing'},
-      {id:'w4-s4',text:'Switch Em → Am → Em smoothly in tempo'},
-      {id:'w4-s5',text:'Strum a basic downstroke pattern while counting aloud'},
-      {id:'w4-s6',text:'Play Em–Am switch cleanly x8 at 60 BPM (assessment goal)'}
-    ]
-  },
-
-]; /* ── placeholder helper — adds locked sets for future modules ── */
-function pw(id,label,module,moduleNum){
-  return {id,label,locked:true,module,moduleNum,
-    unit:`Module ${moduleNum} · ${module}`,title:label,
-    subtitle:'Coming soon',comingSoon:true,skills:[]};
-}
-const PLACEHOLDER_WEEKS = [
-  /* ══════════ MODULE 2 — Building a Chord Vocabulary ══════════ */
-  pw('m2w1','Set 1','Building a Chord Vocabulary',2),
-  pw('m2w2','Set 2','Building a Chord Vocabulary',2),
-  pw('m2w3','Set 3','Building a Chord Vocabulary',2),
-  /* ══════════ MODULE 3 — Rhythm & Strumming Patterns ══════════ */
-  pw('m3w1','Set 1','Rhythm & Strumming Patterns',3),
-  pw('m3w2','Set 2','Rhythm & Strumming Patterns',3),
-  pw('m3w3','Set 3','Rhythm & Strumming Patterns',3),
-  /* ══════════ MODULE 4 — Melody & Single-Note Playing ══════════ */
-  pw('m4w1','Set 1','Melody & Single-Note Playing',4),
-  pw('m4w2','Set 2','Melody & Single-Note Playing',4),
-  pw('m4w3','Set 3','Melody & Single-Note Playing',4),
-  /* ══════════ MODULE 5 — Song Structure & Form ══════════ */
-  pw('m5w1','Set 1','Song Structure & Form',5),
-  pw('m5w2','Set 2','Song Structure & Form',5),
-  pw('m5w3','Set 3','Song Structure & Form',5),
-  /* ══════════ MODULE 6 — Barre Chords & Power Chords ══════════ */
-  pw('m6w1','Set 1','Barre Chords & Power Chords',6),
-  pw('m6w2','Set 2','Barre Chords & Power Chords',6),
-  pw('m6w3','Set 3','Barre Chords & Power Chords',6),
-  /* ══════════ MODULE 7 — Improvisation & Expression ══════════ */
-  pw('m7w1','Set 1','Improvisation & Expression',7),
-  pw('m7w2','Set 2','Improvisation & Expression',7),
-  pw('m7w3','Set 3','Improvisation & Expression',7),
-  /* ══════════ MODULE 8 — Ensemble & Performance ══════════ */
-  pw('m8w1','Set 1','Ensemble & Performance',8),
-  pw('m8w2','Set 2','Ensemble & Performance',8),
-  pw('m8w3','Set 3','Ensemble & Performance',8),
-  /* ══════════ MODULE 9 — Composition & Creativity ══════════ */
-  pw('m9w1','Set 1','Composition & Creativity',9),
-  pw('m9w2','Set 2','Composition & Creativity',9),
-  pw('m9w3','Set 3','Composition & Creativity',9),
-]; /* end PLACEHOLDER_WEEKS */
-WEEKS.push(...PLACEHOLDER_WEEKS);
-const ALL_WEEKS = WEEKS; /* alias */
-
-/* ══════════════════════════════════════════════════════
-   FIREBASE CONFIG — replace with your own values.
-   See setup instructions at the bottom of this file.
-   ══════════════════════════════════════════════════════ */
-const firebaseConfig = {
-  apiKey: "AIzaSyB2QKByMeNpV_CaCgvf-oS9HuBDF29dfzU",
-  authDomain: "guitar-class-2fd21.firebaseapp.com",
-  projectId: "guitar-class-2fd21",
-  storageBucket: "guitar-class-2fd21.firebasestorage.app",
-  messagingSenderId: "182670968497",
-  appId: "1:182670968497:web:6e2596b9a0262e70e4c490",
-  measurementId: "G-M0QVQKTH3C"
-};
-</script>
+<!-- ── Content + Firebase config (edit these files for changes) ── -->
+<script src="firebase-config.js"></script>
+<script src="config.js"></script>
 
 <!-- Firebase SDKs (loaded from Google CDN — always up to date) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -573,9 +382,6 @@ function showApp(user){
 }
 
 /* ── Firestore ── */
-let lastModuleNum = 1;
-let lastWeekId = null;
-
 async function loadProgress(){
   try{
     const doc = await db.collection('progress').doc(currentUser.uid).get();
@@ -610,6 +416,9 @@ function saveProgress(){
 function setSaveMsg(msg){ document.querySelectorAll('.save-ind').forEach(el=>el.textContent=msg); }
 
 /* ── Render all ── */
+let lastModuleNum = 1;
+let lastWeekId = null;
+
 function renderAll(){
   renderPanels();
   populateModuleDropdown();
@@ -635,7 +444,6 @@ function onModuleChange(moduleNum, restoreWeekId){
   lastModuleNum = moduleNum;
   document.getElementById('module-select').value = moduleNum;
   renderPills(moduleNum);
-  // Activate: restored week first, else first unlocked in module
   const moduleWeeks = WEEKS.filter(w=>w.moduleNum===moduleNum);
   const target = restoreWeekId && moduleWeeks.find(w=>w.id===restoreWeekId)
     ? restoreWeekId
@@ -745,7 +553,7 @@ function buildStations(w){
         <div class="st-ico">💻</div>
         <span class="st-badge bb">Station B</span>
         <div class="st-name">Computer station</div>
-        <div class="st-desc">Watch &amp; respond independently</div>
+        <div class="st-desc">Watch &amp; listen independently</div>
       </div>
       <div class="stc" id="${w.id}-sc-c" onclick="openSt('${w.id}','c')">
         <div class="st-ico">🎸</div>
@@ -883,7 +691,7 @@ function toggleSkill(sid,wid){
   const lbl=document.getElementById(`pl-${wid}`);
   if(bar) bar.style.width=pct+'%';
   if(lbl) lbl.textContent=done+' / '+w.skills.length;
-  renderPills();
+  renderPills(lastModuleNum);
   document.querySelectorAll('.wpill').forEach(b=>{if(b.dataset.id===wid)b.classList.add('active');});
   saveProgress();
 }
@@ -893,7 +701,7 @@ function toggleSkill(sid,wid){
    Access: ?teacher=true in the URL
    Only jhoffman@seq.org can load student data.
    ══════════════════════════════════════════════ */
-const TEACHER_EMAIL = 'jhoffman@seq.org';
+// TEACHER_EMAIL is loaded from firebase-config.js
 const IS_TEACHER_MODE = new URLSearchParams(window.location.search).has('teacher');
 
 let teacherWeekId = null;
@@ -1169,12 +977,11 @@ function clearPanel(){
 ║    Only jhoffman@seq.org can see student data.                       ║
 ║    Any other signed-in account sees "Access denied."                 ║
 ║                                                                      ║
-║  ADDING A NEW WEEK LATER:                                            ║
-║    1. Come back to Claude and paste or attach this file              ║
-║    2. Say "add week X to my dashboard"                               ║
-║    3. Claude updates the WEEKS array at the top                      ║
-║    4. Download the updated file                                      ║
-║    5. Upload to GitHub replacing index.html — same URL, new content  ║
+║  ADDING A NEW SET LATER:                                             ║
+║    1. Open config.js in any text editor                              ║
+║    2. Copy the template at the bottom of config.js                   ║
+║    3. Fill in your content and save                                  ║
+║    4. Upload config.js to GitHub — index.html stays the same         ║
 ║                                                                      ║
 ╚════════════════════════════════════════════════════════════════════╝
 -->

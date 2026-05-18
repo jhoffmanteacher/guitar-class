@@ -1,10 +1,8 @@
 // ============================================================
 //  FIREBASE CONFIG  —  set once, then leave it alone
-//  Upload this file to GitHub alongside index.html
+//  Upload this file to GitHub alongside index.html + config.js
 // ============================================================
 
-// Your Firebase project credentials.
-// Find these in: Firebase Console → Project Settings → Your apps → SDK setup
 const firebaseConfig = {
   apiKey:            "AIzaSyB2QKByMeNpV_CaCgvf-oS9HuBDF29dfzU",
   authDomain:        "guitar-class-2fd21.firebaseapp.com",
