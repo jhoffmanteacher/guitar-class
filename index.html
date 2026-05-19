@@ -653,9 +653,9 @@ function buildComingSoon(w){
 
 function buildWeek(w){
   const handoutLink = w.handoutUrl
-    ? `<a href="${w.handoutUrl}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--blue-text);text-decoration:none;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border)">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M8 1h3m0 0v3m0-3L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Module ${w.moduleNum} handout</a>`
+    ? `<button onclick="loadPanel('gdoc','${w.handoutUrl}','Module ${w.moduleNum} handout','')" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--blue-text);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border);width:100%">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M4 5h4M4 7h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Module ${w.moduleNum} handout</button>`
     : '';
   return `<div class="obj-card">
     <div class="obj-unit">${w.unit}</div>
@@ -736,9 +736,9 @@ function openSt(wid,s){
 
 /* ── Songs ── */
 function buildSongs(w){
-  const rows=w.songs.map(s=>{
+  const rows=w.songs.map((s,i)=>{
     const nameEl = s.url
-      ? `<button class="rp-trigger" onclick="loadPanel('youtube','${s.url}','${s.name.replace(/'/g,"\\'")}','${s.type}')">${s.name}</button>`
+      ? `<button class="rp-trigger" onclick="loadSong('${w.id}',${i})">${s.name}</button>`
       : s.name;
     return `<div class="song-row">
       <div class="dot ${s.core?'dc':'dch'}"></div>
@@ -751,6 +751,14 @@ function buildSongs(w){
     <div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu — pick 1</div>
   </div>
   <div class="card">${rows}</div>`;
+}
+
+function loadSong(wid, idx){
+  const w=WEEKS.find(x=>x.id===wid);
+  if(!w) return;
+  const s=w.songs[idx];
+  if(!s||!s.url) return;
+  loadPanel('youtube', s.url, s.name, s.type);
 }
 
 /* ── Videos ── */
