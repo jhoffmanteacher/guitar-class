@@ -130,15 +130,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .albl{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:4px}
 .atxt{font-size:13px;line-height:1.6}
 .spill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;border:0.5px solid var(--border2);color:var(--text2);margin:2px 2px 0 0}
+
+/* ── Checklist — two-column ── */
 .cl-intro{background:var(--bg2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--text2);line-height:1.6}
-.skill-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:0.5px solid var(--border)}
-.skill-item:last-child{border-bottom:none}
-.skchk{width:20px;height:20px;border:0.5px solid var(--border2);border-radius:4px;flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
-.skchk.done{background:var(--green-bg);border-color:var(--green-text)}
-.ckico{display:none}
-.skchk.done .ckico{display:block}
-.sktxt{font-size:13px;line-height:1.5}
-.skwk{font-size:10px;padding:1px 7px;border-radius:10px;background:var(--bg3);color:var(--text2);margin-left:auto;flex-shrink:0;white-space:nowrap}
+.cl-grid-wrap{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px}
+.cl-header{display:grid;grid-template-columns:1fr 82px 82px}
+.cl-header-skill{padding:8px 14px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);background:var(--bg2);font-weight:500}
+.cl-header-working{padding:8px 4px;text-align:center;font-size:11px;font-weight:500;line-height:1.4;background:var(--amber-bg);color:var(--amber-text)}
+.cl-header-gotit{padding:8px 4px;text-align:center;font-size:11px;font-weight:500;line-height:1.4;background:var(--green-bg);color:var(--green-text)}
+.skill-row{display:grid;grid-template-columns:1fr 82px 82px;border-top:0.5px solid var(--border)}
+.sktxt{padding:10px 14px;font-size:13px;line-height:1.5;color:var(--text);display:flex;align-items:center}
+.skchk-cell{display:flex;align-items:center;justify-content:center;cursor:pointer;border-left:0.5px solid var(--border);min-height:44px}
+.skchk-cell.working-col{background:rgba(250,238,218,0.3)}
+.skchk-cell.gotit-col{background:rgba(234,243,222,0.3)}
+@media(prefers-color-scheme:dark){
+  .skchk-cell.working-col{background:rgba(74,42,4,0.3)}
+  .skchk-cell.gotit-col{background:rgba(30,66,8,0.3)}
+}
+.skchk-cell:hover{filter:brightness(0.93)}
+.skbox{width:22px;height:22px;border-radius:5px;border:0.5px solid var(--border2);background:var(--bg);display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.skchk-cell.working-col.active .skbox{background:var(--amber-bg);border-color:var(--amber-text)}
+.skchk-cell.gotit-col.active .skbox{background:var(--green-bg);border-color:var(--green-text)}
 .prog-wrap{margin:14px 0 4px}
 .prog-row{display:flex;align-items:center;gap:8px}
 .prog-bg{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
@@ -146,6 +158,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .prog-lbl{font-size:12px;color:var(--text2);min-width:36px;text-align:right}
 .save-ind{font-size:11px;color:var(--text3);text-align:right;margin-top:8px;min-height:16px}
 .checklist-inline{margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border)}
+
 .coming{text-align:center;padding:48px 20px;color:var(--text2)}
 .coming .big{font-size:36px;margin-bottom:12px}
 .coming p{font-size:14px;line-height:1.6}
@@ -188,7 +201,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .rp-trigger{display:inline-flex;align-items:center;gap:4px;color:var(--blue-text);cursor:pointer;font-size:13px;font-weight:500;background:none;border:none;padding:0;font-family:inherit;text-align:left;line-height:1.5}
 .rp-trigger:hover{text-decoration:underline}
 
-
+/* ── Floating practice tools ── */
+.fab-group{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;align-items:flex-end;gap:10px;z-index:100}
+.fab{display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:999px;border:0.5px solid;font-size:13px;font-weight:500;cursor:pointer;transition:opacity 0.15s;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,0.10);font-family:inherit}
+.fab-metro{background:var(--blue-bg);border-color:var(--blue-text);color:var(--blue-text)}
+.fab-timer{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
+.fab:hover{opacity:0.82}
+.fab svg{width:15px;height:15px;flex-shrink:0}
+.tool-popup{background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius);padding:16px;width:240px;position:fixed;right:24px;z-index:101;box-shadow:0 4px 20px rgba(0,0,0,0.13);display:none}
+.tool-popup.open{display:block}
+.tp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.tp-title{font-size:13px;font-weight:500}
+.tp-close{background:none;border:none;cursor:pointer;font-size:18px;color:var(--text3);line-height:1;padding:0 2px;font-family:inherit}
+.tp-close:hover{color:var(--text)}
+.bpm-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.bpm-num{font-size:28px;font-weight:500;min-width:48px;color:var(--text)}
+.bpm-lbl{font-size:11px;color:var(--text2)}
+.bpm-slider{flex:1;accent-color:var(--blue-text);cursor:pointer}
+.tp-ctrl{display:flex;gap:5px}
+.tp-btn{flex:1;padding:7px 0;border-radius:var(--radius-sm);border:0.5px solid var(--border2);background:var(--bg2);font-size:12px;cursor:pointer;color:var(--text);font-family:inherit}
+.tp-btn:hover{background:var(--bg3)}
+.tp-btn.primary{background:var(--blue-bg);border-color:var(--blue-text);color:var(--blue-text);font-weight:500}
+.tp-btn.primary-g{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text);font-weight:500}
+.tp-btn.primary:hover,.tp-btn.primary-g:hover{opacity:0.85}
+.timer-display{font-size:34px;font-weight:500;text-align:center;letter-spacing:2px;margin:4px 0 12px;color:var(--text)}
+.timer-presets{display:flex;gap:5px;margin-bottom:12px}
+.timer-presets button{flex:1;padding:5px 0;border-radius:var(--radius-sm);border:0.5px solid var(--border2);background:var(--bg2);font-size:12px;cursor:pointer;color:var(--text);font-family:inherit}
+.timer-presets button:hover{background:var(--bg3)}
+.timer-presets button.sel{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
 
 /* ── Teacher dashboard ── */
 .t-main{max-width:900px;margin:0 auto;padding:24px 16px 60px}
@@ -229,16 +269,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 </head>
 <body>
 
-<!-- ── Content + Firebase config (edit these files for changes) ── -->
+<!-- ── Content + Firebase config ── -->
 <script src="firebase-config.js"></script>
 <script src="config.js"></script>
 
-<!-- Firebase SDKs (loaded from Google CDN — always up to date) -->
+<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-<!-- ── Google Translate hidden widget ── -->
 <div id="google_translate_element"></div>
 
 <!-- ── Header ── -->
@@ -249,7 +288,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
   </div>
   <div style="display:flex;align-items:center;gap:8px">
     <button class="btn-translate" id="btn-translate" onclick="toggleTranslate()" title="Translate to Spanish">
-      <span>🌐</span><span id="translate-label">Español</span>
+      <span>&#x1F310;</span><span id="translate-label">Español</span>
     </button>
     <div class="user-area" id="user-area">
       <button class="btn-sign" onclick="signIn()">Sign in with Google</button>
@@ -303,6 +342,61 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
   </div>
 </div>
 
+<!-- ── Floating practice tools ── -->
+<div class="fab-group" id="fab-group" style="display:none">
+
+  <!-- Metronome popup -->
+  <div class="tool-popup" id="metro-popup">
+    <div class="tp-head">
+      <span class="tp-title">&#x1F3B5; Metronome</span>
+      <button class="tp-close" onclick="closePopup('metro')">&#x2715;</button>
+    </div>
+    <div class="bpm-row">
+      <div>
+        <div class="bpm-num" id="bpm-display">60</div>
+        <div class="bpm-lbl">BPM</div>
+      </div>
+      <input class="bpm-slider" type="range" min="40" max="220" value="60" step="1" id="bpm-slider" oninput="onBpmSlider(this.value)">
+    </div>
+    <div class="tp-ctrl">
+      <button class="tp-btn" onclick="nudgeBpm(-5)">&#x2212;5</button>
+      <button class="tp-btn" onclick="nudgeBpm(-1)">&#x2212;1</button>
+      <button class="tp-btn primary" id="metro-btn" onclick="toggleMetro()">&#x25B6; Start</button>
+      <button class="tp-btn" onclick="nudgeBpm(1)">+1</button>
+      <button class="tp-btn" onclick="nudgeBpm(5)">+5</button>
+    </div>
+  </div>
+
+  <!-- Timer popup -->
+  <div class="tool-popup" id="timer-popup">
+    <div class="tp-head">
+      <span class="tp-title">&#x23F1; Practice Timer</span>
+      <button class="tp-close" onclick="closePopup('timer')">&#x2715;</button>
+    </div>
+    <div class="timer-display" id="timer-display">5:00</div>
+    <div class="timer-presets">
+      <button onclick="setTimer(3)" id="tp-3">3 min</button>
+      <button onclick="setTimer(5)" id="tp-5" class="sel">5 min</button>
+      <button onclick="setTimer(10)" id="tp-10">10 min</button>
+      <button onclick="setTimer(12)" id="tp-12">12 min</button>
+    </div>
+    <div class="tp-ctrl">
+      <button class="tp-btn" onclick="resetTimer()">Reset</button>
+      <button class="tp-btn primary-g" id="timer-btn" onclick="toggleTimer()">&#x25B6; Start</button>
+    </div>
+  </div>
+
+  <!-- FABs — timer on top, metronome on bottom -->
+  <div class="fab fab-timer" onclick="togglePopup('timer')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6M12 3v2"/></svg>
+    Timer
+  </div>
+  <div class="fab fab-metro" onclick="togglePopup('metro')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 3 19 21 12 17 5 21 12 3"/><line x1="12" y1="10" x2="12" y2="17"/></svg>
+    Metronome
+  </div>
+</div>
+
 <!-- Teacher dashboard -->
 <div id="teacher-app" style="display:none">
   <div class="t-main">
@@ -317,7 +411,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
       <div class="t-leg">
         <span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px">
           <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </span> Checked off by student
+        </span> I've got it!
+      </div>
+      <div class="t-leg">
+        <span class="tck" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:var(--amber-bg);color:var(--amber-text);">
+          <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.8"/></svg>
+        </span> Still working on it
       </div>
       <div class="t-leg">
         <span class="tck no" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px">
@@ -328,7 +427,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
   </div>
 </div>
 
-<!-- Teacher access denied -->
 <div id="teacher-denied" style="display:none">
   <div class="t-denied">
     <h2>Access denied</h2>
@@ -342,7 +440,7 @@ firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db   = firebase.firestore();
 let currentUser = null;
-let progress    = {};
+let progress    = {};  // skillId -> 'none'|'working'|'gotit'
 let saveTimer   = null;
 
 /* ── Auth ── */
@@ -367,6 +465,7 @@ auth.onAuthStateChanged(async user=>{
     document.getElementById('app').style.display='none';
     document.getElementById('teacher-app').style.display='none';
     document.getElementById('teacher-denied').style.display='none';
+    document.getElementById('fab-group').style.display='none';
     document.getElementById('user-area').innerHTML=
       '<button class="btn-sign" onclick="signIn()">Sign in with Google</button>';
   }
@@ -375,6 +474,7 @@ auth.onAuthStateChanged(async user=>{
 function showApp(user){
   document.getElementById('auth-wall').style.display='none';
   document.getElementById('app').style.display='block';
+  document.getElementById('fab-group').style.display='flex';
   const av = user.photoURL
     ? `<img src="${user.photoURL}" class="avatar" alt="">`
     : `<div class="avatar-init">${(user.displayName||'?')[0].toUpperCase()}</div>`;
@@ -384,12 +484,18 @@ function showApp(user){
   renderAll();
 }
 
-/* ── Firestore ── */
+/* ── Firestore (with backwards-compat for old boolean format) ── */
 async function loadProgress(){
   try{
     const doc = await db.collection('progress').doc(currentUser.uid).get();
     if(doc.exists){
-      progress = doc.data().skills||{};
+      const raw = doc.data().skills||{};
+      progress = {};
+      Object.keys(raw).forEach(k=>{
+        if(raw[k]===true)                          progress[k]='gotit';
+        else if(raw[k]==='working'||raw[k]==='gotit') progress[k]=raw[k];
+        else                                          progress[k]='none';
+      });
       lastModuleNum = doc.data().lastModule||1;
       lastWeekId    = doc.data().lastWeek||null;
     } else {
@@ -418,15 +524,14 @@ function saveProgress(){
 }
 function setSaveMsg(msg){ document.querySelectorAll('.save-ind').forEach(el=>el.textContent=msg); }
 
-/* ── Render all ── */
+/* ── Render ── */
 let lastModuleNum = 1;
 let lastWeekId = null;
 
 function renderAll(){
   renderPanels();
   populateModuleDropdown();
-  const restoreModule = lastModuleNum || 1;
-  onModuleChange(restoreModule, lastWeekId);
+  onModuleChange(lastModuleNum||1, lastWeekId);
 }
 
 function populateModuleDropdown(){
@@ -463,7 +568,7 @@ function renderPills(moduleNum){
     btn.dataset.id=w.id;
     btn.textContent=w.label;
     if(!w.locked && w.skills && w.skills.length>0){
-      const done=w.skills.filter(s=>progress[s.id]).length;
+      const done=w.skills.filter(s=>progress[s.id]==='gotit').length;
       if(done<w.skills.length) btn.classList.add('incomplete');
     }
     if(!w.locked) btn.onclick=()=>{ lastWeekId=w.id; activateWeek(w.id); saveProgress(); };
@@ -488,7 +593,6 @@ function renderPanels(){
   });
 }
 
-/* ── Coming soon ── */
 function buildComingSoon(w){
   return `<div class="obj-card">
     <div class="obj-unit">${w.unit}</div>
@@ -496,12 +600,11 @@ function buildComingSoon(w){
     <div class="obj-sub">${w.subtitle}</div>
   </div>
   <div class="coming">
-    <div class="big">🎸</div>
-    <p>This week's content will appear here when it's ready.<br>Check back soon!</p>
+    <div class="big">&#x1F3B8;</div>
+    <p>This set's content will appear here when it's ready.<br>Check back soon!</p>
   </div>`;
 }
 
-/* ── Full week ── */
 function buildWeek(w){
   return `<div class="obj-card">
     <div class="obj-unit">${w.unit}</div>
@@ -531,20 +634,16 @@ function switchTab(el,wid,tab){
 /* ── Stations ── */
 function buildStations(w){
   const stepsHtml=steps=>steps.map((s,i)=>{
-    // Replace any <a href="...youtube..."> links with panel-loading buttons
     const text=s.text.replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"[^>]*>([^<]*)<\/a>/g,(match,url,label)=>{
       const safe=label.replace(/'/g,"\\'");
       return `<button class="rp-trigger" onclick="loadPanel('youtube','${url}','${safe}','YouTube')">&#x25B6; ${label}</button>`;
     });
-    const hintHtml = s.hint ? (() => {
+    const hintHtml = s.hint ? (()=>{
       const bullets = s.hint.split(/(?<=\.(?=\s))(?=\s*[A-Z])|\n/).map(b=>b.trim()).filter(Boolean);
       if(bullets.length <= 1) return `<div class="sh">${s.hint}</div>`;
       return `<ul class="sh-list">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
     })() : '';
-    return `<li class="step">
-      <div class="sn">${i+1}</div>
-      <div class="st">${text}${hintHtml}</div>
-    </li>`;
+    return `<li class="step"><div class="sn">${i+1}</div><div class="st">${text}${hintHtml}</div></li>`;
   }).join('');
   const dp=(id,cls,badge,badgeClass,s)=>`
     <div class="dp${cls}" id="${w.id}-dp-${id}">
@@ -558,13 +657,13 @@ function buildStations(w){
   return `
     <div class="st-grid">
       <div class="stc" id="${w.id}-sc-b" onclick="openSt('${w.id}','b')">
-        <div class="st-ico">💻</div>
+        <div class="st-ico">&#x1F4BB;</div>
         <span class="st-badge bb">Station B</span>
         <div class="st-name">Computer station</div>
         <div class="st-desc">Watch · Listen · Practice</div>
       </div>
       <div class="stc" id="${w.id}-sc-c" onclick="openSt('${w.id}','c')">
-        <div class="st-ico">🎸</div>
+        <div class="st-ico">&#x1F3B8;</div>
         <span class="st-badge bc">Station C</span>
         <div class="st-name">Practice station</div>
         <div class="st-desc">Independent drill</div>
@@ -595,7 +694,7 @@ function buildSongs(w){
   </div>
   <div class="card">${rows}</div>
   <div class="ablock">
-    <div class="albl">Performance & community</div>
+    <div class="albl">Performance &amp; community</div>
     <div class="atxt">${w.assessment.performance}</div>
   </div>`;
 }
@@ -622,25 +721,34 @@ function buildAssess(w){
     <div class="ablock"><div class="albl">NAfME standards</div><div>${a.standards.map(s=>`<span class="spill">${s}</span>`).join('')}</div></div>`;
 }
 
-/* ── Checklist ── */
+/* ── Checklist — two-column ── */
 function buildChecklist(w){
-  if(!w.skills||w.skills.length===0) return '<p style="font-size:13px;color:var(--text2);padding:12px 0">No skills listed for this week yet.</p>';
-  const done=w.skills.filter(s=>progress[s.id]).length;
+  if(!w.skills||w.skills.length===0) return '<p style="font-size:13px;color:var(--text2);padding:12px 0">No skills listed for this set yet.</p>';
+  const done=w.skills.filter(s=>progress[s.id]==='gotit').length;
   const pct=Math.round(done/w.skills.length*100);
-  const items=w.skills.map(s=>{
-    const ck=progress[s.id]?' done':'';
-    return `<div class="skill-item">
-      <div class="skchk${ck}" id="chk-${s.id}" onclick="toggleSkill('${s.id}','${w.id}')">
-        <svg class="ckico" width="12" height="12" viewBox="0 0 12 12" fill="none">
-          <path d="M2 6l3 3 5-5" stroke="var(--green-text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
+  const wkSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="var(--amber-text)" stroke-width="1.5"/><path d="M6 4v2.2l1.4 1.4" stroke="var(--amber-text)" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+  const giSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green-text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const rows=w.skills.map(s=>{
+    const st=progress[s.id]||'none';
+    return `<div class="skill-row">
       <div class="sktxt">${s.text}</div>
-      <span class="skwk">${w.label}</span>
+      <div class="skchk-cell working-col${st==='working'?' active':''}" onclick="toggleSkill('${s.id}','${w.id}','working')" title="Still working on it">
+        <div class="skbox">${st==='working'?wkSvg:''}</div>
+      </div>
+      <div class="skchk-cell gotit-col${st==='gotit'?' active':''}" onclick="toggleSkill('${s.id}','${w.id}','gotit')" title="I've got it!">
+        <div class="skbox">${st==='gotit'?giSvg:''}</div>
+      </div>
     </div>`;
   }).join('');
-  return `<div class="cl-intro">Check off each skill as you can do it consistently. Incomplete skills stay visible here — you can always come back to them from any device.</div>
-  <div class="card">${items}</div>
+  return `<div class="cl-intro">Check each skill as you practice. Use "Still working on it" while you're learning, then mark "I've got it!" once you can do it consistently.</div>
+  <div class="cl-grid-wrap">
+    <div class="cl-header">
+      <div class="cl-header-skill">Skill</div>
+      <div class="cl-header-working">Still<br>working on it</div>
+      <div class="cl-header-gotit">I've<br>got it!</div>
+    </div>
+    ${rows}
+  </div>
   <div class="prog-wrap">
     <div class="prog-row">
       <div class="prog-bg"><div class="prog-fill" id="pf-${w.id}" style="width:${pct}%"></div></div>
@@ -651,128 +759,220 @@ function buildChecklist(w){
 }
 
 /* ── Toggle skill ── */
+function toggleSkill(sid, wid, which){
+  const cur = progress[sid]||'none';
+  if(which==='working'){
+    if(cur==='gotit')    progress[sid]='working';
+    else if(cur==='working') progress[sid]='none';
+    else                 progress[sid]='working';
+  } else {
+    // gotit column
+    if(cur==='gotit') progress[sid]='working';
+    else              progress[sid]='gotit';
+  }
+  const wkSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="var(--amber-text)" stroke-width="1.5"/><path d="M6 4v2.2l1.4 1.4" stroke="var(--amber-text)" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+  const giSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green-text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const w=WEEKS.find(x=>x.id===wid);
+  // Update all rendered instances of this checklist (stations tab + checklist tab)
+  document.querySelectorAll(`.week-panel[data-id="${wid}"] .skill-row`).forEach(row=>{
+    const wkCell = row.querySelector('.working-col');
+    const giCell = row.querySelector('.gotit-col');
+    if(!wkCell||!giCell) return;
+    // figure out which skill this row is by its onclick
+    const onclick = wkCell.getAttribute('onclick')||'';
+    const m = onclick.match(/'([^']+)'/);
+    if(!m || m[1]!==sid) return;
+    const st = progress[sid]||'none';
+    wkCell.classList.toggle('active', st==='working');
+    giCell.classList.toggle('active', st==='gotit');
+    wkCell.querySelector('.skbox').innerHTML = st==='working' ? wkSvg : '';
+    giCell.querySelector('.skbox').innerHTML = st==='gotit'   ? giSvg : '';
+  });
+  const done=w.skills.filter(s=>progress[s.id]==='gotit').length;
+  const pct=Math.round(done/w.skills.length*100);
+  document.querySelectorAll(`#pf-${wid}`).forEach(el=>el.style.width=pct+'%');
+  document.querySelectorAll(`#pl-${wid}`).forEach(el=>el.textContent=done+' / '+w.skills.length);
+  renderPills(lastModuleNum);
+  document.querySelectorAll('.wpill').forEach(b=>{if(b.dataset.id===wid)b.classList.add('active');});
+  saveProgress();
+}
+
 /* ── Translate toggle ── */
 let isSpanish = false;
 function toggleTranslate(){
   const btn = document.getElementById('btn-translate');
   const lbl = document.getElementById('translate-label');
   if(!isSpanish){
-    // Switch to Spanish via Google Translate cookie
     const select = document.querySelector('.goog-te-combo');
-    if(select){
-      select.value = 'es';
-      select.dispatchEvent(new Event('change'));
-    } else {
-      // Fallback: set cookie directly and reload
-      document.cookie = 'googtrans=/en/es; path=/';
-      location.reload();
-      return;
-    }
-    btn.classList.add('active');
-    lbl.textContent = 'English';
-    isSpanish = true;
+    if(select){ select.value='es'; select.dispatchEvent(new Event('change')); }
+    else { document.cookie='googtrans=/en/es; path=/'; location.reload(); return; }
+    btn.classList.add('active'); lbl.textContent='English'; isSpanish=true;
   } else {
-    // Switch back to English
     const select = document.querySelector('.goog-te-combo');
-    if(select){
-      select.value = 'en';
-      select.dispatchEvent(new Event('change'));
-    } else {
-      document.cookie = 'googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-      location.reload();
-      return;
-    }
-    btn.classList.remove('active');
-    lbl.textContent = 'Español';
-    isSpanish = false;
+    if(select){ select.value='en'; select.dispatchEvent(new Event('change')); }
+    else { document.cookie='googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'; location.reload(); return; }
+    btn.classList.remove('active'); lbl.textContent='Español'; isSpanish=false;
   }
 }
 
-function toggleSkill(sid,wid){
-  progress[sid]=!progress[sid];
-  const el=document.getElementById(`chk-${sid}`);
-  el.classList.toggle('done',progress[sid]);
-  const w=WEEKS.find(x=>x.id===wid);
-  const done=w.skills.filter(s=>progress[s.id]).length;
-  const pct=Math.round(done/w.skills.length*100);
-  const bar=document.getElementById(`pf-${wid}`);
-  const lbl=document.getElementById(`pl-${wid}`);
-  if(bar) bar.style.width=pct+'%';
-  if(lbl) lbl.textContent=done+' / '+w.skills.length;
-  renderPills(lastModuleNum);
-  document.querySelectorAll('.wpill').forEach(b=>{if(b.dataset.id===wid)b.classList.add('active');});
-  saveProgress();
+/* ══════════════════════════════════════════════
+   FLOATING TOOLS — Metronome & Timer
+   ══════════════════════════════════════════════ */
+let metroRunning=false, metroInterval=null, audioCtx=null;
+
+function getAudioCtx(){
+  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  return audioCtx;
 }
+function beep(freq,dur){
+  const ctx=getAudioCtx();
+  const o=ctx.createOscillator(), g=ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.frequency.value=freq;
+  g.gain.setValueAtTime(0.4,ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
+  o.start(); o.stop(ctx.currentTime+dur);
+}
+function tick(){ beep(880,0.06); }
+function getBpm(){ return parseInt(document.getElementById('bpm-slider').value); }
+function onBpmSlider(val){
+  document.getElementById('bpm-display').textContent=val;
+  if(metroRunning){ stopMetro(); startMetro(); }
+}
+function nudgeBpm(d){
+  const s=document.getElementById('bpm-slider');
+  s.value=Math.min(220,Math.max(40,getBpm()+d));
+  document.getElementById('bpm-display').textContent=s.value;
+  if(metroRunning){ stopMetro(); startMetro(); }
+}
+function startMetro(){
+  tick();
+  metroInterval=setInterval(tick,Math.round(60000/getBpm()));
+  metroRunning=true;
+  document.getElementById('metro-btn').innerHTML='&#x23F8; Stop';
+}
+function stopMetro(){
+  clearInterval(metroInterval); metroRunning=false;
+  document.getElementById('metro-btn').innerHTML='&#x25B6; Start';
+}
+function toggleMetro(){ if(metroRunning) stopMetro(); else startMetro(); }
+
+/* ── Timer ── */
+let timerRunning=false, timerInterval=null, timerSecs=300, timerSelected=5;
+function setTimer(mins){
+  timerSelected=mins; timerSecs=mins*60;
+  if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; }
+  updateTimerDisplay();
+  [3,5,10,12].forEach(m=>{ const el=document.getElementById('tp-'+m); if(el) el.classList.toggle('sel',m===mins); });
+}
+function updateTimerDisplay(){
+  const m=Math.floor(timerSecs/60), s=timerSecs%60;
+  document.getElementById('timer-display').textContent=m+':'+(s<10?'0':'')+s;
+}
+function resetTimer(){
+  if(timerRunning){ clearInterval(timerInterval); timerRunning=false; }
+  timerSecs=timerSelected*60; updateTimerDisplay();
+  document.getElementById('timer-btn').innerHTML='&#x25B6; Start';
+}
+function toggleTimer(){
+  if(timerRunning){
+    clearInterval(timerInterval); timerRunning=false;
+    document.getElementById('timer-btn').innerHTML='&#x25B6; Start';
+  } else {
+    timerRunning=true;
+    document.getElementById('timer-btn').innerHTML='&#x23F8; Pause';
+    timerInterval=setInterval(()=>{
+      if(timerSecs>0){ timerSecs--; updateTimerDisplay(); }
+      else {
+        clearInterval(timerInterval); timerRunning=false;
+        document.getElementById('timer-btn').innerHTML='&#x25B6; Start';
+        [0,0.35,0.7].forEach(d=>setTimeout(()=>beep(660,0.3),d*1000));
+      }
+    },1000);
+  }
+}
+
+/* ── Popup logic ── */
+function togglePopup(which){
+  const metro=document.getElementById('metro-popup');
+  const timer=document.getElementById('timer-popup');
+  if(which==='metro'){
+    const open=metro.classList.contains('open');
+    metro.classList.toggle('open',!open);
+    timer.classList.remove('open');
+    metro.style.bottom='136px';
+  } else {
+    const open=timer.classList.contains('open');
+    timer.classList.toggle('open',!open);
+    metro.classList.remove('open');
+    timer.style.bottom='80px';
+  }
+}
+function closePopup(which){
+  document.getElementById(which+'-popup').classList.remove('open');
+  if(which==='metro') stopMetro();
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.tool-popup')&&!e.target.closest('.fab')){
+    document.getElementById('metro-popup').classList.remove('open');
+    document.getElementById('timer-popup').classList.remove('open');
+  }
+});
 
 /* ══════════════════════════════════════════════
    TEACHER DASHBOARD
-   Access: ?teacher=true in the URL
-   Only jhoffman@seq.org can load student data.
    ══════════════════════════════════════════════ */
-// TEACHER_EMAIL is loaded from firebase-config.js
-const IS_TEACHER_MODE = new URLSearchParams(window.location.search).has('teacher');
-
-let teacherWeekId = null;
-let allStudents = [];
+const IS_TEACHER_MODE=new URLSearchParams(window.location.search).has('teacher');
+let teacherWeekId=null, allStudents=[];
 
 function showTeacherApp(user){
   document.getElementById('auth-wall').style.display='none';
   document.getElementById('app').style.display='none';
-  if(user.email !== TEACHER_EMAIL){
+  if(user.email!==TEACHER_EMAIL){
     document.getElementById('teacher-denied').style.display='block';
-    const av = user.photoURL
-      ? `<img src="${user.photoURL}" class="avatar" alt="">`
-      : `<div class="avatar-init">${(user.displayName||'?')[0].toUpperCase()}</div>`;
-    document.getElementById('user-area').innerHTML=
-      `${av}<span class="user-name">${user.displayName||user.email}</span>
-       <button class="btn-out" onclick="signOut()">Sign out</button>`;
+    const av=user.photoURL?`<img src="${user.photoURL}" class="avatar" alt="">`:`<div class="avatar-init">${(user.displayName||'?')[0].toUpperCase()}</div>`;
+    document.getElementById('user-area').innerHTML=`${av}<span class="user-name">${user.displayName||user.email}</span><button class="btn-out" onclick="signOut()">Sign out</button>`;
     return;
   }
   document.getElementById('teacher-app').style.display='block';
-  const av = user.photoURL
-    ? `<img src="${user.photoURL}" class="avatar" alt="">`
-    : `<div class="avatar-init">${(user.displayName||'?')[0].toUpperCase()}</div>`;
-  document.getElementById('user-area').innerHTML=
-    `${av}<span class="user-name">${user.displayName||user.email}</span>
-     <button class="btn-out" onclick="signOut()">Sign out</button>`;
+  const av=user.photoURL?`<img src="${user.photoURL}" class="avatar" alt="">`:`<div class="avatar-init">${(user.displayName||'?')[0].toUpperCase()}</div>`;
+  document.getElementById('user-area').innerHTML=`${av}<span class="user-name">${user.displayName||user.email}</span><button class="btn-out" onclick="signOut()">Sign out</button>`;
   renderTeacherWeekTabs();
-  const firstWeek = WEEKS.find(w=>!w.locked && w.skills && w.skills.length>0);
+  const firstWeek=WEEKS.find(w=>!w.locked&&w.skills&&w.skills.length>0);
   if(firstWeek){ teacherWeekId=firstWeek.id; activateTeacherWeekTab(firstWeek.id); }
   loadAllStudents();
 }
 
 function renderTeacherWeekTabs(){
-  const c=document.getElementById('t-week-tabs');
-  c.innerHTML='';
+  const c=document.getElementById('t-week-tabs'); c.innerHTML='';
   WEEKS.forEach(w=>{
     if(!w.skills||w.skills.length===0) return;
     const btn=document.createElement('button');
     btn.className='t-wtab'+(w.locked?' locked':'')+(w.id===teacherWeekId?' on':'');
-    btn.textContent=w.label;
-    btn.dataset.id=w.id;
+    btn.textContent=w.label; btn.dataset.id=w.id;
     if(!w.locked) btn.onclick=()=>{ teacherWeekId=w.id; activateTeacherWeekTab(w.id); renderTeacherGrid(); };
     c.appendChild(btn);
   });
 }
-
-function activateTeacherWeekTab(id){
-  document.querySelectorAll('.t-wtab').forEach(b=>b.classList.toggle('on',b.dataset.id===id));
-}
+function activateTeacherWeekTab(id){ document.querySelectorAll('.t-wtab').forEach(b=>b.classList.toggle('on',b.dataset.id===id)); }
 
 async function loadAllStudents(){
   try{
-    const snap = await db.collection('progress').get();
-    allStudents = [];
+    const snap=await db.collection('progress').get();
+    allStudents=[];
     snap.forEach(doc=>{
-      allStudents.push({ uid:doc.id, skills:doc.data().skills||{}, name:doc.data().name||'', email:doc.data().email||'' });
+      const raw=doc.data().skills||{};
+      const skills={};
+      Object.keys(raw).forEach(k=>{
+        if(raw[k]===true) skills[k]='gotit';
+        else if(raw[k]==='working'||raw[k]==='gotit') skills[k]=raw[k];
+        else skills[k]='none';
+      });
+      allStudents.push({uid:doc.id,skills,name:doc.data().name||'',email:doc.data().email||''});
     });
-    // fetch display names from auth isn't possible client-side for other users,
-    // so we store name/email when each student saves progress
-    renderTeacherGrid();
-    renderTeacherSummary();
+    renderTeacherGrid(); renderTeacherSummary();
   } catch(e){
-    document.getElementById('t-grid-container').innerHTML=
-      '<div class="t-loading">Could not load student data. Check your Firebase security rules — see the instructions at the bottom of this file.</div>';
+    document.getElementById('t-grid-container').innerHTML='<div class="t-loading">Could not load student data. Check your Firebase security rules.</div>';
   }
 }
 
@@ -780,8 +980,8 @@ function renderTeacherSummary(){
   const w=WEEKS.find(x=>x.id===teacherWeekId);
   if(!w||!w.skills) return;
   const total=allStudents.length;
-  const complete=allStudents.filter(s=>w.skills.every(sk=>s.skills[sk.id])).length;
-  const none=allStudents.filter(s=>w.skills.every(sk=>!s.skills[sk.id])).length;
+  const complete=allStudents.filter(s=>w.skills.every(sk=>s.skills[sk.id]==='gotit')).length;
+  const none=allStudents.filter(s=>w.skills.every(sk=>!s.skills[sk.id]||s.skills[sk.id]==='none')).length;
   const inprog=total-complete-none;
   document.getElementById('t-summary').innerHTML=`
     <div class="t-scard"><div class="t-scard-lbl">Students</div><div class="t-scard-val">${total}</div></div>
@@ -793,37 +993,27 @@ function renderTeacherSummary(){
 function renderTeacherGrid(){
   renderTeacherSummary();
   const w=WEEKS.find(x=>x.id===teacherWeekId);
-  if(!w||!w.skills||w.skills.length===0){
-    document.getElementById('t-grid-container').innerHTML='<div class="t-loading">No skills for this week yet.</div>';
-    return;
-  }
-  if(allStudents.length===0){
-    document.getElementById('t-grid-container').innerHTML='<div class="t-loading">No student data yet — students need to sign in and check off skills first.</div>';
-    return;
-  }
-  // Sort students by progress descending
-  const sorted=[...allStudents].sort((a,b)=>{
-    const da=w.skills.filter(s=>a.skills[s.id]).length;
-    const db2=w.skills.filter(s=>b.skills[s.id]).length;
-    return db2-da;
-  });
+  if(!w||!w.skills||w.skills.length===0){ document.getElementById('t-grid-container').innerHTML='<div class="t-loading">No skills for this set yet.</div>'; return; }
+  if(allStudents.length===0){ document.getElementById('t-grid-container').innerHTML='<div class="t-loading">No student data yet — students need to sign in and check off skills first.</div>'; return; }
+  const sorted=[...allStudents].sort((a,b)=>w.skills.filter(s=>b.skills[s.id]==='gotit').length-w.skills.filter(s=>a.skills[s.id]==='gotit').length);
   const checkSvg=`<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  const workSvg=`<svg width="9" height="9" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.8"/></svg>`;
   const minusSvg=`<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
-
   const headerCells=w.skills.map(s=>`<th title="${s.text}">${abbreviate(s.text)}</th>`).join('');
   const rows=sorted.map(stu=>{
-    const done=w.skills.filter(s=>stu.skills[s.id]).length;
+    const done=w.skills.filter(s=>stu.skills[s.id]==='gotit').length;
     const total=w.skills.length;
     const pct=Math.round(done/total*100);
     const pillClass=pct===100?'pp-hi':pct>=50?'pp-mid':'pp-lo';
-    const displayName = stu.name || stu.email || stu.uid.slice(0,8)+'…';
+    const displayName=stu.name||stu.email||stu.uid.slice(0,8)+'…';
     const cells=w.skills.map(s=>{
-      const yes=!!stu.skills[s.id];
-      return `<td><span class="tck ${yes?'yes':'no'}" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px">${yes?checkSvg:minusSvg}</span></td>`;
+      const st=stu.skills[s.id]||'none';
+      if(st==='gotit')   return `<td><span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px">${checkSvg}</span></td>`;
+      if(st==='working') return `<td><span class="tck" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--amber-bg);color:var(--amber-text)">${workSvg}</span></td>`;
+      return `<td><span class="tck no" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px">${minusSvg}</span></td>`;
     }).join('');
     return `<tr><td class="nc" title="${displayName}">${displayName}</td>${cells}<td><span class="ppill ${pillClass}">${done} / ${total}</span></td></tr>`;
   }).join('');
-
   document.getElementById('t-grid-container').innerHTML=`
     <div class="t-grid-wrap">
       <table>
@@ -834,29 +1024,25 @@ function renderTeacherGrid(){
 }
 
 function abbreviate(text){
-  // Shorten skill text to ~3 words for column headers (full text is in title attr)
   const words=text.split(' ');
   if(words.length<=4) return text;
   return words.slice(0,3).join(' ')+'…';
 }
 
 /* ── Resource Panel ── */
-function loadPanel(type, url, title, subtitle){
+function loadPanel(type,url,title,subtitle){
   const empty=document.getElementById('rp-empty');
   const content=document.getElementById('rp-content');
   const wrap=document.getElementById('rp-iframe-wrap');
   const meta=document.getElementById('rp-meta');
   const newtab=document.getElementById('rp-newtab');
   const close=document.getElementById('rp-close');
-
   empty.style.display='none';
   content.classList.add('visible');
   newtab.classList.add('visible');
   close.classList.add('visible');
   newtab.href=url;
-
   meta.innerHTML=`<div class="rp-meta-title">${title}</div><div class="rp-meta-sub">${subtitle}</div>`;
-
   if(type==='youtube'){
     let embedUrl=url;
     const ytMatch=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
@@ -869,9 +1055,7 @@ function loadPanel(type, url, title, subtitle){
     wrap.innerHTML=`<iframe src="${embedUrl}"></iframe>`;
   }
 }
-
 function clearPanel(){
-  const empty=document.getElementById('rp-empty');
   const content=document.getElementById('rp-content');
   const wrap=document.getElementById('rp-iframe-wrap');
   const newtab=document.getElementById('rp-newtab');
@@ -880,7 +1064,7 @@ function clearPanel(){
   newtab.classList.remove('visible');
   close.classList.remove('visible');
   wrap.innerHTML='';
-  empty.style.display='';
+  document.getElementById('rp-empty').style.display='';
 }
 
 /* ── Resizable panels ── */
@@ -888,47 +1072,13 @@ function clearPanel(){
   const handle=document.getElementById('resize-handle');
   const panel=document.getElementById('resource-panel');
   if(!handle||!panel) return;
-  let dragging=false, startX=0, startW=0;
-  handle.addEventListener('mousedown',e=>{
-    dragging=true;
-    startX=e.clientX;
-    startW=panel.offsetWidth;
-    handle.classList.add('dragging');
-    document.body.style.cursor='col-resize';
-    document.body.style.userSelect='none';
-    e.preventDefault();
-  });
-  document.addEventListener('mousemove',e=>{
-    if(!dragging) return;
-    const delta=startX-e.clientX;
-    const newW=Math.min(Math.max(startW+delta, 180), window.innerWidth*0.6);
-    panel.style.width=newW+'px';
-  });
-  document.addEventListener('mouseup',()=>{
-    if(!dragging) return;
-    dragging=false;
-    handle.classList.remove('dragging');
-    document.body.style.cursor='';
-    document.body.style.userSelect='';
-  });
-  // Touch support
-  handle.addEventListener('touchstart',e=>{
-    dragging=true;
-    startX=e.touches[0].clientX;
-    startW=panel.offsetWidth;
-    handle.classList.add('dragging');
-    e.preventDefault();
-  },{passive:false});
-  document.addEventListener('touchmove',e=>{
-    if(!dragging) return;
-    const delta=startX-e.touches[0].clientX;
-    const newW=Math.min(Math.max(startW+delta, 180), window.innerWidth*0.6);
-    panel.style.width=newW+'px';
-  });
-  document.addEventListener('touchend',()=>{
-    dragging=false;
-    handle.classList.remove('dragging');
-  });
+  let dragging=false,startX=0,startW=0;
+  handle.addEventListener('mousedown',e=>{ dragging=true; startX=e.clientX; startW=panel.offsetWidth; handle.classList.add('dragging'); document.body.style.cursor='col-resize'; document.body.style.userSelect='none'; e.preventDefault(); });
+  document.addEventListener('mousemove',e=>{ if(!dragging) return; panel.style.width=Math.min(Math.max(startW+(startX-e.clientX),180),window.innerWidth*0.6)+'px'; });
+  document.addEventListener('mouseup',()=>{ if(!dragging) return; dragging=false; handle.classList.remove('dragging'); document.body.style.cursor=''; document.body.style.userSelect=''; });
+  handle.addEventListener('touchstart',e=>{ dragging=true; startX=e.touches[0].clientX; startW=panel.offsetWidth; handle.classList.add('dragging'); e.preventDefault(); },{passive:false});
+  document.addEventListener('touchmove',e=>{ if(!dragging) return; panel.style.width=Math.min(Math.max(startW+(startX-e.touches[0].clientX),180),window.innerWidth*0.6)+'px'; });
+  document.addEventListener('touchend',()=>{ dragging=false; handle.classList.remove('dragging'); });
 })();
 </script>
 
@@ -936,61 +1086,33 @@ function clearPanel(){
 ╔════════════════════════════════════════════════════════════════════╗
 ║                 FIREBASE SETUP — ONE TIME, ~15 MINUTES              ║
 ╠════════════════════════════════════════════════════════════════════╣
-║                                                                      ║
 ║  STEP 1 — Create a Firebase project                                  ║
-║    Go to: https://console.firebase.google.com                        ║
-║    Click "Add project" → name it "guitar-class" → Create            ║
-║                                                                      ║
-║  STEP 2 — Get your config values                                     ║
-║    In the left menu: gear icon ⚙ → Project settings                 ║
-║    Scroll to "Your apps" → click the </> web icon                   ║
-║    Register the app (any nickname) → copy the firebaseConfig object  ║
-║    Paste the 6 values into FIREBASE_CONFIG at the top of this file  ║
-║                                                                      ║
+║    https://console.firebase.google.com → Add project → guitar-class ║
+║  STEP 2 — Get config values                                          ║
+║    Gear icon → Project settings → Web app → copy firebaseConfig     ║
+║    Paste values into firebase-config.js                              ║
 ║  STEP 3 — Enable Google sign-in                                      ║
-║    Left menu → Build → Authentication → Get started                 ║
-║    Click "Google" → Enable → add your email as support → Save       ║
-║                                                                      ║
-║  STEP 4 — Create the database                                        ║
-║    Left menu → Build → Firestore Database → Create database          ║
-║    Choose "Start in test mode" → select a region → Done             ║
-║                                                                      ║
-║  STEP 4b — Set secure Firestore rules (IMPORTANT)                   ║
-║    Left menu → Build → Firestore Database → Rules tab               ║
-║    Replace everything with the rules below, then click Publish:     ║
-║                                                                      ║
+║    Build → Authentication → Google → Enable                         ║
+║  STEP 4 — Create Firestore database                                  ║
+║    Build → Firestore Database → Start in test mode                  ║
+║  STEP 4b — Set security rules                                        ║
 ║    rules_version = '2';                                              ║
 ║    service cloud.firestore {                                         ║
 ║      match /databases/{database}/documents {                         ║
 ║        match /progress/{userId} {                                    ║
-║          // Students: read & write only their own doc                ║
 ║          allow read, write: if request.auth != null                  ║
 ║            && request.auth.uid == userId;                            ║
-║          // Teacher: read any doc (write not needed)                 ║
 ║          allow read: if request.auth != null                         ║
 ║            && request.auth.token.email == "jhoffman@seq.org";       ║
 ║        }                                                             ║
 ║      }                                                               ║
 ║    }                                                                 ║
-║                                                                      ║
-║  STEP 5 — Host on GitHub Pages (free permanent URL)                  ║
-║    a) Go to github.com → sign in or create a free account           ║
-║    b) Click "New repository" → name it: guitar-class                ║
-║    c) Upload this file, rename it: index.html                        ║
-║    d) Go to Settings → Pages → Deploy from branch: main / root      ║
-║    e) Your URL will be: https://YOURNAME.github.io/guitar-class      ║
-║                                                                      ║
-║  TEACHER DASHBOARD URL:                                              ║
-║    https://YOURNAME.github.io/guitar-class?teacher=true             ║
-║    Only jhoffman@seq.org can see student data.                       ║
-║    Any other signed-in account sees "Access denied."                 ║
-║                                                                      ║
-║  ADDING A NEW SET LATER:                                             ║
-║    1. Open config.js in any text editor                              ║
-║    2. Copy the template at the bottom of config.js                   ║
-║    3. Fill in your content and save                                  ║
-║    4. Upload config.js to GitHub — index.html stays the same         ║
-║                                                                      ║
+║  STEP 5 — Host on GitHub Pages                                       ║
+║    Upload index.html + config.js + firebase-config.js to a repo     ║
+║    Settings → Pages → Deploy from main / root                       ║
+║    URL: https://YOURNAME.github.io/guitar-class                      ║
+║  TEACHER DASHBOARD: add ?teacher=true to the URL                    ║
+║  ADDING CONTENT: edit config.js only, re-upload to GitHub           ║
 ╚════════════════════════════════════════════════════════════════════╝
 -->
 </body>
