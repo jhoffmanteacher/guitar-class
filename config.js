@@ -15,15 +15,18 @@
 //  HOW TO MARK A SET AS "COMING SOON":
 //  Set  comingSoon: true  and leave  skills: []
 //
-//  STATION NOTES:
-//  Each set only has stations b and c (no station a).
-//  Station B = Computer station (videos, listening, thinking)
-//  Station C = Practice station (independent drill)
+//  HANDOUT LINKS:
+//  Add  handoutUrl: 'https://docs.google.com/...'  to link the
+//  module handout from the objective card. One per module —
+//  copy the same URL to all sets within that module.
 //
-//  SKILL TAGS ON STEPS:
+//  STATION SKILL TAGS:
 //  Add  skills: [1, 2]  to any step to show skill number badges.
 //  Numbers correspond to the position in the skills array (1-based).
-//  Leave out the skills property if a step doesn't map to a skill.
+//
+//  SONG LINKS:
+//  Add  url: 'https://youtube.com/watch?v=...'  to any song to
+//  make the song title a clickable link that opens in the resource panel.
 //
 // ============================================================
 
@@ -41,6 +44,7 @@ const WEEKS = [
     subtitle: 'Introduction & goal-setting',
     objective: 'I CAN describe my guitar goals and share a song that means something to me.',
     skillFocus: 'Introduction · Goal-setting · "What Is Your Guitar Adventure?" pre-assessment',
+    handoutUrl: 'https://docs.google.com/document/d/1wKmQRDFbKsIci94PNRzoQkXoTVO6A017ELIZYvLtyCE/edit',
     comingSoon: true,
     skills: []
   },
@@ -58,6 +62,7 @@ const WEEKS = [
     subtitle: 'Posture · Hand position · Single notes · Down-up strumming',
     objective: 'I CAN tune my guitar, play single notes cleanly, and strum down-up in time.',
     skillFocus: 'Parts of the guitar · Posture & hand position · Holding a pick · Standard tuning · Single notes · Down-up strumming',
+    handoutUrl: 'https://docs.google.com/document/d/1wKmQRDFbKsIci94PNRzoQkXoTVO6A017ELIZYvLtyCE/edit',
     comingSoon: false,
 
     stations: {
@@ -110,10 +115,10 @@ const WEEKS = [
     },
 
     songs: [
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'E string riff, frets 7-7-10-7-5-3-2', type: 'Core',         core: true  },
-      { name: '"Smoke on the Water" — Deep Purple',       meta: 'Simple 3-note riff on D string',      type: 'Classic Rock', core: false },
-      { name: '"Come As You Are" — Nirvana',              meta: 'Single-note intro riff',              type: 'Grunge',       core: false },
-      { name: '"Day Tripper" — The Beatles',              meta: 'E string riff, beginner version',     type: 'Classic',      core: false }
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'E string riff, frets 7-7-10-7-5-3-2', type: 'Core',         core: true,  url: 'https://www.youtube.com/watch?v=0J2QdDbelmY' },
+      { name: '"Smoke on the Water" — Deep Purple',       meta: 'Simple 3-note riff on D string',      type: 'Classic Rock', core: false, url: 'https://www.youtube.com/watch?v=Q2FzZSBD5LE' },
+      { name: '"Come As You Are" — Nirvana',              meta: 'Single-note intro riff',              type: 'Grunge',       core: false, url: 'https://www.youtube.com/watch?v=vabnZ9-ex7o' },
+      { name: '"Day Tripper" — The Beatles',              meta: 'E string riff, beginner version',     type: 'Classic',      core: false, url: 'https://www.youtube.com/watch?v=AYZlME0mQB8' }
     ],
 
     videos: [
@@ -152,6 +157,7 @@ const WEEKS = [
     subtitle: 'Reading chord diagrams · Em & Am · Downstroke strumming',
     objective: 'I CAN read a chord diagram, play Em and Am cleanly, and switch between them in time.',
     skillFocus: 'Reading chord diagrams · First chords: Em & Am · Basic downstroke strumming · Partner feedback',
+    handoutUrl: 'https://docs.google.com/document/d/1wKmQRDFbKsIci94PNRzoQkXoTVO6A017ELIZYvLtyCE/edit',
     comingSoon: false,
 
     stations: {
@@ -209,10 +215,10 @@ const WEEKS = [
     },
 
     songs: [
-      { name: '"Horse with No Name" — America',  meta: 'Em–Am, basic downstroke strumming',  type: 'Core',    core: true  },
-      { name: '"Lose Yourself" — Eminem',         meta: 'Em intro riff adapted for chords',  type: 'Hip-Hop', core: false },
-      { name: '"About a Girl" — Nirvana',         meta: 'Em–G simplified',                   type: 'Grunge',  core: false },
-      { name: '"Three Little Birds" — Bob Marley',meta: 'Simplified Am strum',               type: 'Reggae',  core: false }
+      { name: '"Horse with No Name" — America',   meta: 'Em–Am, basic downstroke strumming',  type: 'Core',    core: true,  url: 'https://www.youtube.com/watch?v=na47wMFfQCo' },
+      { name: '"Lose Yourself" — Eminem',          meta: 'Em intro riff adapted for chords',   type: 'Hip-Hop', core: false, url: 'https://www.youtube.com/watch?v=eRhEcKHU5LY' },
+      { name: '"About a Girl" — Nirvana',          meta: 'Em–G simplified',                    type: 'Grunge',  core: false, url: 'https://www.youtube.com/watch?v=_24pJQUj7zg' },
+      { name: '"Three Little Birds" — Bob Marley', meta: 'Simplified Am strum',                type: 'Reggae',  core: false, url: 'https://www.youtube.com/watch?v=HNBCVM4KbUM' }
     ],
 
     videos: [
@@ -240,37 +246,37 @@ const WEEKS = [
 
 
   // ── MODULES 2–9 — placeholder sets (locked) ──────────────
-  { id:'m2w1', label:'Set 1', locked:true, module:'Building a Chord Vocabulary',  moduleNum:2, unit:'Module 2 · Building a Chord Vocabulary',  title:'Set 1', subtitle:'Coming soon', comingSoon:true, skills:[] },
-  { id:'m2w2', label:'Set 2', locked:true, module:'Building a Chord Vocabulary',  moduleNum:2, unit:'Module 2 · Building a Chord Vocabulary',  title:'Set 2', subtitle:'Coming soon', comingSoon:true, skills:[] },
-  { id:'m2w3', label:'Set 3', locked:true, module:'Building a Chord Vocabulary',  moduleNum:2, unit:'Module 2 · Building a Chord Vocabulary',  title:'Set 3', subtitle:'Coming soon', comingSoon:true, skills:[] },
+  { id:'m2w1', label:'Set 1', locked:true, module:'Building a Chord Vocabulary',  moduleNum:2, unit:'Module 2 · Building a Chord Vocabulary',  title:'Set 1', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1KM2rgUYa3NEpDr4E65YmcTE_g6Fxs_rbIjP-U1wjcnA/edit', comingSoon:true, skills:[] },
+  { id:'m2w2', label:'Set 2', locked:true, module:'Building a Chord Vocabulary',  moduleNum:2, unit:'Module 2 · Building a Chord Vocabulary',  title:'Set 2', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1KM2rgUYa3NEpDr4E65YmcTE_g6Fxs_rbIjP-U1wjcnA/edit', comingSoon:true, skills:[] },
+  { id:'m2w3', label:'Set 3', locked:true, module:'Building a Chord Vocabulary',  moduleNum:2, unit:'Module 2 · Building a Chord Vocabulary',  title:'Set 3', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1KM2rgUYa3NEpDr4E65YmcTE_g6Fxs_rbIjP-U1wjcnA/edit', comingSoon:true, skills:[] },
 
-  { id:'m3w1', label:'Set 1', locked:true, module:'Rhythm & Strumming Patterns',  moduleNum:3, unit:'Module 3 · Rhythm & Strumming Patterns',  title:'Set 1', subtitle:'Coming soon', comingSoon:true, skills:[] },
-  { id:'m3w2', label:'Set 2', locked:true, module:'Rhythm & Strumming Patterns',  moduleNum:3, unit:'Module 3 · Rhythm & Strumming Patterns',  title:'Set 2', subtitle:'Coming soon', comingSoon:true, skills:[] },
-  { id:'m3w3', label:'Set 3', locked:true, module:'Rhythm & Strumming Patterns',  moduleNum:3, unit:'Module 3 · Rhythm & Strumming Patterns',  title:'Set 3', subtitle:'Coming soon', comingSoon:true, skills:[] },
+  { id:'m3w1', label:'Set 1', locked:true, module:'Rhythm & Strumming Patterns',  moduleNum:3, unit:'Module 3 · Rhythm & Strumming Patterns',  title:'Set 1', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1S0gxHXkbgZRJT5VhR9nGz6O2imjEF9uQ_jNAYFaTc6I/edit', comingSoon:true, skills:[] },
+  { id:'m3w2', label:'Set 2', locked:true, module:'Rhythm & Strumming Patterns',  moduleNum:3, unit:'Module 3 · Rhythm & Strumming Patterns',  title:'Set 2', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1S0gxHXkbgZRJT5VhR9nGz6O2imjEF9uQ_jNAYFaTc6I/edit', comingSoon:true, skills:[] },
+  { id:'m3w3', label:'Set 3', locked:true, module:'Rhythm & Strumming Patterns',  moduleNum:3, unit:'Module 3 · Rhythm & Strumming Patterns',  title:'Set 3', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1S0gxHXkbgZRJT5VhR9nGz6O2imjEF9uQ_jNAYFaTc6I/edit', comingSoon:true, skills:[] },
 
-  { id:'m4w1', label:'Set 1', locked:true, module:'Melody & Single-Note Playing', moduleNum:4, unit:'Module 4 · Melody & Single-Note Playing', title:'Set 1', subtitle:'Coming soon', comingSoon:true, skills:[] },
-  { id:'m4w2', label:'Set 2', locked:true, module:'Melody & Single-Note Playing', moduleNum:4, unit:'Module 4 · Melody & Single-Note Playing', title:'Set 2', subtitle:'Coming soon', comingSoon:true, skills:[] },
-  { id:'m4w3', label:'Set 3', locked:true, module:'Melody & Single-Note Playing', moduleNum:4, unit:'Module 4 · Melody & Single-Note Playing', title:'Set 3', subtitle:'Coming soon', comingSoon:true, skills:[] },
+  { id:'m4w1', label:'Set 1', locked:true, module:'Melody & Single-Note Playing', moduleNum:4, unit:'Module 4 · Melody & Single-Note Playing', title:'Set 1', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/edit', comingSoon:true, skills:[] },
+  { id:'m4w2', label:'Set 2', locked:true, module:'Melody & Single-Note Playing', moduleNum:4, unit:'Module 4 · Melody & Single-Note Playing', title:'Set 2', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/edit', comingSoon:true, skills:[] },
+  { id:'m4w3', label:'Set 3', locked:true, module:'Melody & Single-Note Playing', moduleNum:4, unit:'Module 4 · Melody & Single-Note Playing', title:'Set 3', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/edit', comingSoon:true, skills:[] },
 
-  { id:'m5w1', label:'Set 1', locked:true, module:'Song Structure & Form',        moduleNum:5, unit:'Module 5 · Song Structure & Form',        title:'Set 1', subtitle:'Coming soon', comingSoon:true, skills:[] },
-  { id:'m5w2', label:'Set 2', locked:true, module:'Song Structure & Form',        moduleNum:5, unit:'Module 5 · Song Structure & Form',        title:'Set 2', subtitle:'Coming soon', comingSoon:true, skills:[] },
-  { id:'m5w3', label:'Set 3', locked:true, module:'Song Structure & Form',        moduleNum:5, unit:'Module 5 · Song Structure & Form',        title:'Set 3', subtitle:'Coming soon', comingSoon:true, skills:[] },
+  { id:'m5w1', label:'Set 1', locked:true, module:'Song Structure & Form',        moduleNum:5, unit:'Module 5 · Song Structure & Form',        title:'Set 1', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/edit', comingSoon:true, skills:[] },
+  { id:'m5w2', label:'Set 2', locked:true, module:'Song Structure & Form',        moduleNum:5, unit:'Module 5 · Song Structure & Form',        title:'Set 2', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/edit', comingSoon:true, skills:[] },
+  { id:'m5w3', label:'Set 3', locked:true, module:'Song Structure & Form',        moduleNum:5, unit:'Module 5 · Song Structure & Form',        title:'Set 3', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/edit', comingSoon:true, skills:[] },
 
-  { id:'m6w1', label:'Set 1', locked:true, module:'Barre Chords & Power Chords',  moduleNum:6, unit:'Module 6 · Barre Chords & Power Chords',  title:'Set 1', subtitle:'Coming soon', comingSoon:true, skills:[] },
-  { id:'m6w2', label:'Set 2', locked:true, module:'Barre Chords & Power Chords',  moduleNum:6, unit:'Module 6 · Barre Chords & Power Chords',  title:'Set 2', subtitle:'Coming soon', comingSoon:true, skills:[] },
-  { id:'m6w3', label:'Set 3', locked:true, module:'Barre Chords & Power Chords',  moduleNum:6, unit:'Module 6 · Barre Chords & Power Chords',  title:'Set 3', subtitle:'Coming soon', comingSoon:true, skills:[] },
+  { id:'m6w1', label:'Set 1', locked:true, module:'Barre Chords & Power Chords',  moduleNum:6, unit:'Module 6 · Barre Chords & Power Chords',  title:'Set 1', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1mBqrpsG2rkiVPWrF-zo0fxlgA1YQN33GyxmgsXqCY0g/edit', comingSoon:true, skills:[] },
+  { id:'m6w2', label:'Set 2', locked:true, module:'Barre Chords & Power Chords',  moduleNum:6, unit:'Module 6 · Barre Chords & Power Chords',  title:'Set 2', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1mBqrpsG2rkiVPWrF-zo0fxlgA1YQN33GyxmgsXqCY0g/edit', comingSoon:true, skills:[] },
+  { id:'m6w3', label:'Set 3', locked:true, module:'Barre Chords & Power Chords',  moduleNum:6, unit:'Module 6 · Barre Chords & Power Chords',  title:'Set 3', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1mBqrpsG2rkiVPWrF-zo0fxlgA1YQN33GyxmgsXqCY0g/edit', comingSoon:true, skills:[] },
 
-  { id:'m7w1', label:'Set 1', locked:true, module:'Improvisation & Expression',   moduleNum:7, unit:'Module 7 · Improvisation & Expression',   title:'Set 1', subtitle:'Coming soon', comingSoon:true, skills:[] },
-  { id:'m7w2', label:'Set 2', locked:true, module:'Improvisation & Expression',   moduleNum:7, unit:'Module 7 · Improvisation & Expression',   title:'Set 2', subtitle:'Coming soon', comingSoon:true, skills:[] },
-  { id:'m7w3', label:'Set 3', locked:true, module:'Improvisation & Expression',   moduleNum:7, unit:'Module 7 · Improvisation & Expression',   title:'Set 3', subtitle:'Coming soon', comingSoon:true, skills:[] },
+  { id:'m7w1', label:'Set 1', locked:true, module:'Improvisation & Expression',   moduleNum:7, unit:'Module 7 · Improvisation & Expression',   title:'Set 1', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1w1GM5ZkoFNn0QBGOkstSXGyRZIU8ml2-W9_FtgTkMYg/edit', comingSoon:true, skills:[] },
+  { id:'m7w2', label:'Set 2', locked:true, module:'Improvisation & Expression',   moduleNum:7, unit:'Module 7 · Improvisation & Expression',   title:'Set 2', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1w1GM5ZkoFNn0QBGOkstSXGyRZIU8ml2-W9_FtgTkMYg/edit', comingSoon:true, skills:[] },
+  { id:'m7w3', label:'Set 3', locked:true, module:'Improvisation & Expression',   moduleNum:7, unit:'Module 7 · Improvisation & Expression',   title:'Set 3', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1w1GM5ZkoFNn0QBGOkstSXGyRZIU8ml2-W9_FtgTkMYg/edit', comingSoon:true, skills:[] },
 
-  { id:'m8w1', label:'Set 1', locked:true, module:'Ensemble & Performance',       moduleNum:8, unit:'Module 8 · Ensemble & Performance',       title:'Set 1', subtitle:'Coming soon', comingSoon:true, skills:[] },
-  { id:'m8w2', label:'Set 2', locked:true, module:'Ensemble & Performance',       moduleNum:8, unit:'Module 8 · Ensemble & Performance',       title:'Set 2', subtitle:'Coming soon', comingSoon:true, skills:[] },
-  { id:'m8w3', label:'Set 3', locked:true, module:'Ensemble & Performance',       moduleNum:8, unit:'Module 8 · Ensemble & Performance',       title:'Set 3', subtitle:'Coming soon', comingSoon:true, skills:[] },
+  { id:'m8w1', label:'Set 1', locked:true, module:'Ensemble & Performance',       moduleNum:8, unit:'Module 8 · Ensemble & Performance',       title:'Set 1', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1mxqrOHsRRRG1smLq2pfi0NplUBCOsflrZ6O13PBo06k/edit', comingSoon:true, skills:[] },
+  { id:'m8w2', label:'Set 2', locked:true, module:'Ensemble & Performance',       moduleNum:8, unit:'Module 8 · Ensemble & Performance',       title:'Set 2', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1mxqrOHsRRRG1smLq2pfi0NplUBCOsflrZ6O13PBo06k/edit', comingSoon:true, skills:[] },
+  { id:'m8w3', label:'Set 3', locked:true, module:'Ensemble & Performance',       moduleNum:8, unit:'Module 8 · Ensemble & Performance',       title:'Set 3', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1mxqrOHsRRRG1smLq2pfi0NplUBCOsflrZ6O13PBo06k/edit', comingSoon:true, skills:[] },
 
-  { id:'m9w1', label:'Set 1', locked:true, module:'Composition & Creativity',     moduleNum:9, unit:'Module 9 · Composition & Creativity',     title:'Set 1', subtitle:'Coming soon', comingSoon:true, skills:[] },
-  { id:'m9w2', label:'Set 2', locked:true, module:'Composition & Creativity',     moduleNum:9, unit:'Module 9 · Composition & Creativity',     title:'Set 2', subtitle:'Coming soon', comingSoon:true, skills:[] },
-  { id:'m9w3', label:'Set 3', locked:true, module:'Composition & Creativity',     moduleNum:9, unit:'Module 9 · Composition & Creativity',     title:'Set 3', subtitle:'Coming soon', comingSoon:true, skills:[] },
+  { id:'m9w1', label:'Set 1', locked:true, module:'Composition & Creativity',     moduleNum:9, unit:'Module 9 · Composition & Creativity',     title:'Set 1', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1FuhujeyL43MygvyYDTj6znTk8ZZPc0icFZzFtZPRxDs/edit', comingSoon:true, skills:[] },
+  { id:'m9w2', label:'Set 2', locked:true, module:'Composition & Creativity',     moduleNum:9, unit:'Module 9 · Composition & Creativity',     title:'Set 2', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1FuhujeyL43MygvyYDTj6znTk8ZZPc0icFZzFtZPRxDs/edit', comingSoon:true, skills:[] },
+  { id:'m9w3', label:'Set 3', locked:true, module:'Composition & Creativity',     moduleNum:9, unit:'Module 9 · Composition & Creativity',     title:'Set 3', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1FuhujeyL43MygvyYDTj6znTk8ZZPc0icFZzFtZPRxDs/edit', comingSoon:true, skills:[] },
 
 ]; // end WEEKS — do not remove this line
 
@@ -288,6 +294,7 @@ const WEEKS = [
 //   subtitle: 'One-line summary of the set',
 //   objective: 'I CAN ...',
 //   skillFocus: 'Topic · Topic · Topic',
+//   handoutUrl: 'https://docs.google.com/document/d/YOUR_DOC_ID/edit',
 //   comingSoon: false,
 //
 //   stations: {
@@ -298,7 +305,7 @@ const WEEKS = [
 //         {
 //           text: 'Watch: <a href="https://youtube.com/..." target="_blank">Video Title – Channel</a> (0:00–3:00).',
 //           hint: 'As you watch: [what to think about or physically try].',
-//           skills: [1, 2]   // optional — which checklist skill numbers this step covers
+//           skills: [1, 2]   // which checklist skill numbers this step covers
 //         }
 //       ]
 //     },
@@ -311,8 +318,14 @@ const WEEKS = [
 //     }
 //   },
 //
-//   songs: [ ... ],
+//   songs: [
+//     { name: '"Song Title" — Artist', meta: 'What skill it practices', type: 'Core', core: true,  url: 'https://youtube.com/watch?v=...' },
+//     { name: '"Song Title" — Artist', meta: 'What skill it practices', type: 'Rock', core: false, url: 'https://youtube.com/watch?v=...' }
+//   ],
+//
 //   videos: [ ... ],
-//   assessment: { ... },
-//   skills: [ ... ]
+//   assessment: { goal: '...', performance: '...', selfCheck: '...', standards: ['Pr.4'] },
+//   skills: [
+//     { id: 'm2w1-s1', text: 'Skill description shown on the checklist' }
+//   ]
 // },
