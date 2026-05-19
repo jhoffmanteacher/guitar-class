@@ -20,6 +20,11 @@
 //  Station B = Computer station (videos, listening, thinking)
 //  Station C = Practice station (independent drill)
 //
+//  SKILL TAGS ON STEPS:
+//  Add  skills: [1, 2]  to any step to show skill number badges.
+//  Numbers correspond to the position in the skills array (1-based).
+//  Leave out the skills property if a step doesn't map to a skill.
+//
 // ============================================================
 
 const WEEKS = [
@@ -62,15 +67,18 @@ const WEEKS = [
         steps: [
           {
             text: 'Watch: <a href="https://www.youtube.com/watch?v=rrB97F0Qu6g" target="_blank">How to Actually Get Good at Guitar – Simen Otnes</a> (0:00–3:30).',
-            hint: 'As you watch, think about: what is one habit he says makes the biggest difference?'
+            hint: 'As you watch, think about: what is one habit he says makes the biggest difference?',
+            skills: [1, 2]
           },
           {
             text: 'Watch: <a href="https://www.youtube.com/watch?v=8-grcbKnbps" target="_blank">How to Hold a Guitar Pick – JustinGuitar</a> (0:00–2:30).',
-            hint: 'Watch through 1:00, then pause. Try to match his grip — pick between thumb and side of index finger, 3–4mm of tip showing. Hit play and watch the rest. Does your grip match?'
+            hint: 'Watch through 1:00, then pause. Try to match his grip — pick between thumb and side of index finger, 3–4mm of tip showing. Hit play and watch the rest. Does your grip match?',
+            skills: [3]
           },
           {
             text: 'Watch: <a href="https://www.youtube.com/watch?v=wvgJ0lt4spY" target="_blank">Beginner Open Strings – JustinGuitar</a> (0:00–2:00).',
-            hint: 'Watch through 0:45, then pause. Air-strum the down-up pattern he just showed — count "1 and 2 and 3 and 4 and" out loud. Hit play and strum along with him.'
+            hint: 'Watch through 0:45, then pause. Air-strum the down-up pattern he just showed — count "1 and 2 and 3 and 4 and" out loud. Hit play and strum along with him.',
+            skills: [5, 6]
           }
         ]
       },
@@ -80,18 +88,22 @@ const WEEKS = [
         steps: [
           {
             text: 'Tune your guitar using a clip tuner or <a href="https://chromewebstore.google.com/detail/guitarapp-guitar-tuner/niafepdbinnnbgigcnhefoconkcljifd" target="_blank" rel="noopener">install the guitar tuning app</a>. Goal: all 6 strings in tune in under 2 minutes.',
-            hint: 'Low to high: E A D G B e. Green light = in tune.'
+            hint: 'Low to high: E A D G B e. Green light = in tune.',
+            skills: [4]
           },
           {
             text: 'Play single notes across all 6 strings, open and frets 1–4. Say the string name aloud as you play. Zero buzzing.',
-            hint: 'Buzzing? Press closer to the fret, arch your finger, check your hand position.'
+            hint: 'Buzzing? Press closer to the fret, arch your finger, check your hand position.',
+            skills: [5]
           },
           {
-            text: 'Down-up strumming on one open string: count aloud "1 and 2 and 3 and 4 and…" Match each word to a strum. Metronome at 60 BPM.'
+            text: 'Down-up strumming on one open string: count aloud "1 and 2 and 3 and 4 and…" Match each word to a strum. Metronome at 60 BPM.',
+            skills: [6]
           },
           {
             text: 'Try the "Seven Nation Army" riff: E string, frets 7–7–10–7–5–3–2. Slow and clean.',
-            hint: 'Slow and clean beats fast and buzzy every time.'
+            hint: 'Slow and clean beats fast and buzzy every time.',
+            skills: [6]
           }
         ]
       }
@@ -120,10 +132,10 @@ const WEEKS = [
     skills: [
       { id: 'w2-s1', text: 'Name all 6 strings from memory (E A D G B e)' },
       { id: 'w2-s2', text: 'Tune all 6 strings with a tuner in under 2 minutes' },
-      { id: 'w2-s3', text: 'Play single notes on all 6 strings with no buzzing' },
-      { id: 'w2-s4', text: 'Hold the pick correctly — 3–4mm of tip showing' },
-      { id: 'w2-s5', text: 'Strum down-up in time while counting aloud at 60 BPM' },
-      { id: 'w2-s6', text: 'Play the "Seven Nation Army" riff cleanly (assessment goal)' }
+      { id: 'w2-s3', text: 'Hold the pick correctly — 3–4mm of tip showing' },
+      { id: 'w2-s4', text: 'Tune all 6 strings with a tuner in under 2 minutes' },
+      { id: 'w2-s5', text: 'Play single notes on all 6 strings with no buzzing' },
+      { id: 'w2-s6', text: 'Strum down-up in time while counting aloud at 60 BPM' }
     ]
   },
 
@@ -149,15 +161,18 @@ const WEEKS = [
         steps: [
           {
             text: 'Watch: <a href="https://www.youtube.com/watch?v=47FXbQFd5ng" target="_blank">6 Levels of Chords on Guitar – Simen Otnes</a> (0:00–4:00).',
-            hint: 'As you watch, think about: what does he say causes buzzing? Pause at any point where he demos a chord — form it on your guitar and check your own tone before hitting play again.'
+            hint: 'As you watch, think about: what does he say causes buzzing? Pause at any point where he demos a chord — form it on your guitar and check your own tone before hitting play again.',
+            skills: [1, 2]
           },
           {
             text: 'Watch: <a href="https://www.youtube.com/watch?v=hzC0orOGARw" target="_blank">5 Essential Strumming Patterns – JustinGuitar</a> (0:00–3:00).',
-            hint: 'As you watch, think about: what does it mean to keep your arm moving? Watch through 1:00, then pause. Air-strum Pattern 1. Hit play and strum along for the rest.'
+            hint: 'As you watch, think about: what does it mean to keep your arm moving? Watch through 1:00, then pause. Air-strum Pattern 1. Hit play and strum along for the rest.',
+            skills: [5]
           },
           {
             text: 'Watch: <a href="https://www.youtube.com/watch?v=JBKIamtI_Qc" target="_blank">First Chords + Strumming – Marty Music</a> (2:00–5:00).',
-            hint: 'Watch through 3:00, then pause. Form Em or Am and strum — listen for clean tone. Hit play and play along quietly for the rest.'
+            hint: 'Watch through 3:00, then pause. Form Em or Am and strum — listen for clean tone. Hit play and play along quietly for the rest.',
+            skills: [3, 4, 5]
           }
         ]
       },
@@ -167,22 +182,27 @@ const WEEKS = [
         steps: [
           {
             text: 'Tune your guitar. Then place your fingers on Em. Play each string one at a time — every note should ring clean.',
-            hint: 'Any buzzing? Arch your fingers more and press closer to the fret.'
+            hint: 'Any buzzing? Arch your fingers more and press closer to the fret.',
+            skills: [2]
           },
           {
             text: 'Now form Am. Check each string individually. Fix any buzzes before strumming.',
-            hint: 'Make sure your index finger is not muting string 1.'
+            hint: 'Make sure your index finger is not muting string 1.',
+            skills: [3]
           },
           {
             text: 'Downstroke strum: Em for 4 beats, Am for 4 beats. Count aloud. Metronome at 60 BPM.',
-            hint: 'Keep your strumming arm moving — a smooth motion sounds better than stopping between chords.'
+            hint: 'Keep your strumming arm moving — a smooth motion sounds better than stopping between chords.',
+            skills: [4, 5]
           },
           {
             text: 'Try "Horse with No Name": the whole song is just Em and Am alternating every 2 beats. Play along at a slow tempo.',
-            hint: 'The chord switch is the challenge — the strumming is simple. Focus on the switch.'
+            hint: 'The chord switch is the challenge — the strumming is simple. Focus on the switch.',
+            skills: [4]
           },
           {
-            text: 'Goal: switch Em–Am cleanly 8 times in a row in tempo. Mark it done on your checklist when you can do it!'
+            text: 'Goal: switch Em–Am cleanly 8 times in a row in tempo. Mark it done on your checklist when you can do it!',
+            skills: [6]
           }
         ]
       }
@@ -220,9 +240,6 @@ const WEEKS = [
 
 
   // ── MODULES 2–9 — placeholder sets (locked) ──────────────
-  // To unlock a set: change  locked: true  →  locked: false
-  // To add full content: copy the template below and fill it in
-
   { id:'m2w1', label:'Set 1', locked:true, module:'Building a Chord Vocabulary',  moduleNum:2, unit:'Module 2 · Building a Chord Vocabulary',  title:'Set 1', subtitle:'Coming soon', comingSoon:true, skills:[] },
   { id:'m2w2', label:'Set 2', locked:true, module:'Building a Chord Vocabulary',  moduleNum:2, unit:'Module 2 · Building a Chord Vocabulary',  title:'Set 2', subtitle:'Coming soon', comingSoon:true, skills:[] },
   { id:'m2w3', label:'Set 3', locked:true, module:'Building a Chord Vocabulary',  moduleNum:2, unit:'Module 2 · Building a Chord Vocabulary',  title:'Set 3', subtitle:'Coming soon', comingSoon:true, skills:[] },
@@ -261,17 +278,17 @@ const WEEKS = [
 // ── TEMPLATE — copy this block to add a new set ─────────────
 //
 // {
-//   id: 'm2w1',           // unique id, no spaces (module 2, set 1 = m2w1)
-//   label: 'Set 1',       // short label shown on the pill button
-//   locked: false,        // true = greyed out, students can't open it
-//   module: 'Building a Chord Vocabulary',  // module name (must match other sets in this module)
-//   moduleNum: 2,         // module number (1–9)
+//   id: 'm2w1',
+//   label: 'Set 1',
+//   locked: false,
+//   module: 'Building a Chord Vocabulary',
+//   moduleNum: 2,
 //   unit: 'Module 2 · Building a Chord Vocabulary',
 //   title: 'Set 1',
 //   subtitle: 'One-line summary of the set',
 //   objective: 'I CAN ...',
 //   skillFocus: 'Topic · Topic · Topic',
-//   comingSoon: false,    // set to true to show placeholder instead of content
+//   comingSoon: false,
 //
 //   stations: {
 //     b: {
@@ -280,7 +297,8 @@ const WEEKS = [
 //       steps: [
 //         {
 //           text: 'Watch: <a href="https://youtube.com/..." target="_blank">Video Title – Channel</a> (0:00–3:00).',
-//           hint: 'As you watch: [what to think about or physically try].'
+//           hint: 'As you watch: [what to think about or physically try].',
+//           skills: [1, 2]   // optional — which checklist skill numbers this step covers
 //         }
 //       ]
 //     },
@@ -288,30 +306,13 @@ const WEEKS = [
 //       title: 'Practice station — independent drill',
 //       time: '12 min',
 //       steps: [
-//         { text: 'Practice task here.', hint: 'Optional tip.' }
+//         { text: 'Practice task here.', hint: 'Optional tip.', skills: [3] }
 //       ]
 //     }
 //   },
 //
-//   songs: [
-//     { name: '"Song Title" — Artist', meta: 'What skill it practices', type: 'Core', core: true  },
-//     { name: '"Song Title" — Artist', meta: 'What skill it practices', type: 'Rock', core: false }
-//   ],
-//
-//   videos: [
-//     { name: 'Video Title', url: 'https://youtube.com/...', source: 'Channel Name', rec: true  },
-//     { name: 'Video Title', url: 'https://youtube.com/...', source: 'Channel Name', rec: false }
-//   ],
-//
-//   assessment: {
-//     goal:        'What students need to demonstrate.',
-//     performance: 'How the in-class assessment works.',
-//     selfCheck:   'Can you...? Can you...? Can you...?',
-//     standards:   ['Pr.4', 'Pr.5']
-//   },
-//
-//   skills: [
-//     { id: 'm2w1-s1', text: 'Skill description shown on the checklist' },
-//     { id: 'm2w1-s2', text: 'Another skill' }
-//   ]
+//   songs: [ ... ],
+//   videos: [ ... ],
+//   assessment: { ... },
+//   skills: [ ... ]
 // },
