@@ -203,13 +203,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 
 /* ── Floating practice tools ── */
 .fab-group{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;align-items:flex-end;gap:10px;z-index:100}
+.fab-buttons{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .fab{display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:999px;border:0.5px solid;font-size:13px;font-weight:500;cursor:pointer;transition:opacity 0.15s;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,0.10);font-family:inherit}
 .fab-metro{background:var(--blue-bg);border-color:var(--blue-text);color:var(--blue-text)}
 .fab-timer{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
+.fab-tune{background:#eeedfe;border-color:#534ab7;color:#3c3489}
 .fab:hover{opacity:0.82}
 .fab svg{width:15px;height:15px;flex-shrink:0}
-.tool-popup{background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius);padding:16px;width:240px;position:fixed;right:24px;z-index:101;box-shadow:0 4px 20px rgba(0,0,0,0.13);display:none}
+.tool-popup{background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius);padding:16px;width:240px;box-shadow:0 4px 20px rgba(0,0,0,0.13);display:none}
 .tool-popup.open{display:block}
+.tuner-note{font-size:48px;font-weight:500;text-align:center;line-height:1;color:var(--text);min-height:56px;margin-bottom:2px}
+.tuner-freq{font-size:12px;color:var(--text2);text-align:center;min-height:18px;margin-bottom:10px}
+.tuner-gauge{position:relative;height:36px;margin-bottom:4px}
+.tuner-track{position:absolute;bottom:0;left:8px;right:8px;height:4px;border-radius:2px;background:var(--bg3)}
+.tuner-center{position:absolute;left:50%;bottom:-3px;width:2px;height:10px;background:var(--border2);border-radius:1px;transform:translateX(-50%)}
+.tuner-needle{position:absolute;bottom:0;width:3px;height:26px;border-radius:2px 2px 0 0;transform-origin:bottom center;transform:translateX(-50%);transition:left 0.1s,background 0.15s;left:50%;background:var(--border2)}
+.tuner-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);padding:0 8px;margin-bottom:8px}
+.tuner-status{text-align:center;font-size:12px;font-weight:500;min-height:18px;margin-bottom:10px;color:var(--text2)}
+.tuner-status.in-tune{color:var(--green-text)}
+.tuner-status.sharp{color:var(--amber-text)}
+.tuner-status.flat{color:var(--blue-text)}
 .tp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .tp-title{font-size:13px;font-weight:500}
 .tp-close{background:none;border:none;cursor:pointer;font-size:18px;color:var(--text3);line-height:1;padding:0 2px;font-family:inherit}
@@ -223,10 +236,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .tp-btn:hover{background:var(--bg3)}
 .tp-btn.primary{background:var(--blue-bg);border-color:var(--blue-text);color:var(--blue-text);font-weight:500}
 .tp-btn.primary-g{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text);font-weight:500}
-.tp-btn.primary:hover,.tp-btn.primary-g:hover{opacity:0.85}
+.tp-btn.primary-t{width:100%;padding:7px 0;border-radius:var(--radius-sm);border:0.5px solid #534ab7;background:#eeedfe;color:#3c3489;font-weight:500;font-size:12px;cursor:pointer;font-family:inherit}
+.tp-btn.primary:hover,.tp-btn.primary-g:hover,.tp-btn.primary-t:hover{opacity:0.85}
 .timer-display{font-size:34px;font-weight:500;text-align:center;letter-spacing:2px;margin:4px 0 12px;color:var(--text)}
-.timer-presets{display:flex;gap:5px;margin-bottom:12px}
-.timer-presets button{flex:1;padding:5px 0;border-radius:var(--radius-sm);border:0.5px solid var(--border2);background:var(--bg2);font-size:12px;cursor:pointer;color:var(--text);font-family:inherit}
+.metro-dot{width:28px;height:28px;border-radius:50%;background:var(--blue-bg);border:2px solid var(--blue-text);margin:0 auto 14px;transition:background 0.05s,transform 0.05s}
+.metro-dot.flash{background:var(--blue-text);transform:scale(1.25)}
+.timer-presets{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.timer-presets button{flex:1;min-width:44px;padding:5px 4px;border-radius:var(--radius-sm);border:0.5px solid var(--border2);background:var(--bg2);font-size:11px;cursor:pointer;color:var(--text);font-family:inherit;white-space:nowrap}
 .timer-presets button:hover{background:var(--bg3)}
 .timer-presets button.sel{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
 
@@ -351,6 +367,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
       <span class="tp-title">&#x1F3B5; Metronome</span>
       <button class="tp-close" onclick="closePopup('metro')">&#x2715;</button>
     </div>
+    <div class="metro-dot" id="metro-dot"></div>
     <div class="bpm-row">
       <div>
         <div class="bpm-num" id="bpm-display">60</div>
@@ -373,12 +390,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
       <span class="tp-title">&#x23F1; Practice Timer</span>
       <button class="tp-close" onclick="closePopup('timer')">&#x2715;</button>
     </div>
-    <div class="timer-display" id="timer-display">5:00</div>
+    <div class="timer-display" id="timer-display">0:30</div>
     <div class="timer-presets">
-      <button onclick="setTimer(3)" id="tp-3">3 min</button>
-      <button onclick="setTimer(5)" id="tp-5" class="sel">5 min</button>
-      <button onclick="setTimer(10)" id="tp-10">10 min</button>
-      <button onclick="setTimer(12)" id="tp-12">12 min</button>
+      <button onclick="setTimerSecs(30)"  id="tp-30"  class="sel">0:30</button>
+      <button onclick="setTimerSecs(60)"  id="tp-60" >1 min</button>
+      <button onclick="setTimerSecs(120)" id="tp-120">2 min</button>
+      <button onclick="setTimerSecs(180)" id="tp-180">3 min</button>
+      <button onclick="setTimerSecs(240)" id="tp-240">4 min</button>
+      <button onclick="setTimerSecs(300)" id="tp-300">5 min</button>
     </div>
     <div class="tp-ctrl">
       <button class="tp-btn" onclick="resetTimer()">Reset</button>
@@ -386,14 +405,39 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
     </div>
   </div>
 
-  <!-- FABs — timer on top, metronome on bottom -->
-  <div class="fab fab-timer" onclick="togglePopup('timer')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6M12 3v2"/></svg>
-    Timer
+  <!-- Tuner popup -->
+  <div class="tool-popup" id="tuner-popup">
+    <div class="tp-head">
+      <span class="tp-title">&#x1F3B8; Tuner</span>
+      <button class="tp-close" onclick="closePopup('tuner')">&#x2715;</button>
+    </div>
+    <div class="tuner-note" id="tuner-note">—</div>
+    <div class="tuner-freq" id="tuner-freq">Tap Start to listen</div>
+    <div class="tuner-gauge">
+      <div class="tuner-track">
+        <div class="tuner-center"></div>
+        <div class="tuner-needle" id="tuner-needle"></div>
+      </div>
+    </div>
+    <div class="tuner-labels"><span>flat</span><span>in tune</span><span>sharp</span></div>
+    <div class="tuner-status" id="tuner-status"></div>
+    <button class="tp-btn primary-t" id="tuner-btn" onclick="toggleTuner()">&#x25B6; Start</button>
   </div>
-  <div class="fab fab-metro" onclick="togglePopup('metro')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 3 19 21 12 17 5 21 12 3"/><line x1="12" y1="10" x2="12" y2="17"/></svg>
-    Metronome
+
+  <!-- FAB buttons -->
+  <div class="fab-buttons">
+    <div class="fab fab-tune" onclick="togglePopup('tuner')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+      Tuner
+    </div>
+    <div class="fab fab-timer" onclick="togglePopup('timer')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6M12 3v2"/></svg>
+      Timer
+    </div>
+    <div class="fab fab-metro" onclick="togglePopup('metro')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 3 19 21 12 17 5 21 12 3"/><line x1="12" y1="10" x2="12" y2="17"/></svg>
+      Metronome
+    </div>
   </div>
 </div>
 
@@ -833,7 +877,11 @@ function beep(freq,dur){
   g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
   o.start(); o.stop(ctx.currentTime+dur);
 }
-function tick(){ beep(880,0.06); }
+function tick(){
+  beep(880,0.06);
+  const dot=document.getElementById('metro-dot');
+  if(dot){ dot.classList.add('flash'); setTimeout(()=>dot.classList.remove('flash'),80); }
+}
 function getBpm(){ return parseInt(document.getElementById('bpm-slider').value); }
 function onBpmSlider(val){
   document.getElementById('bpm-display').textContent=val;
@@ -858,12 +906,12 @@ function stopMetro(){
 function toggleMetro(){ if(metroRunning) stopMetro(); else startMetro(); }
 
 /* ── Timer ── */
-let timerRunning=false, timerInterval=null, timerSecs=300, timerSelected=5;
-function setTimer(mins){
-  timerSelected=mins; timerSecs=mins*60;
+let timerRunning=false, timerInterval=null, timerSecs=30, timerSelected=30;
+function setTimerSecs(secs){
+  timerSelected=secs; timerSecs=secs;
   if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; }
   updateTimerDisplay();
-  [3,5,10,12].forEach(m=>{ const el=document.getElementById('tp-'+m); if(el) el.classList.toggle('sel',m===mins); });
+  [30,60,120,180,240,300].forEach(s=>{ const el=document.getElementById('tp-'+s); if(el) el.classList.toggle('sel',s===secs); });
 }
 function updateTimerDisplay(){
   const m=Math.floor(timerSecs/60), s=timerSecs%60;
@@ -871,7 +919,7 @@ function updateTimerDisplay(){
 }
 function resetTimer(){
   if(timerRunning){ clearInterval(timerInterval); timerRunning=false; }
-  timerSecs=timerSelected*60; updateTimerDisplay();
+  timerSecs=timerSelected; updateTimerDisplay();
   document.getElementById('timer-btn').innerHTML='&#x25B6; Start';
 }
 function toggleTimer(){
@@ -892,32 +940,141 @@ function toggleTimer(){
   }
 }
 
-/* ── Popup logic ── */
+/* ── Popup logic — each popup toggles independently ── */
 function togglePopup(which){
-  const metro=document.getElementById('metro-popup');
-  const timer=document.getElementById('timer-popup');
-  if(which==='metro'){
-    const open=metro.classList.contains('open');
-    metro.classList.toggle('open',!open);
-    timer.classList.remove('open');
-    metro.style.bottom='136px';
-  } else {
-    const open=timer.classList.contains('open');
-    timer.classList.toggle('open',!open);
-    metro.classList.remove('open');
-    timer.style.bottom='80px';
-  }
+  const el=document.getElementById(which+'-popup');
+  el.classList.toggle('open');
 }
 function closePopup(which){
   document.getElementById(which+'-popup').classList.remove('open');
   if(which==='metro') stopMetro();
+  if(which==='tuner') stopTuner();
 }
 document.addEventListener('click',e=>{
-  if(!e.target.closest('.tool-popup')&&!e.target.closest('.fab')){
-    document.getElementById('metro-popup').classList.remove('open');
-    document.getElementById('timer-popup').classList.remove('open');
+  if(!e.target.closest('.tool-popup')&&!e.target.closest('.fab')&&!e.target.closest('.fab-buttons')){
+    ['metro','timer','tuner'].forEach(w=>{
+      const el=document.getElementById(w+'-popup');
+      if(el) el.classList.remove('open');
+    });
+    stopMetro();
+    stopTuner();
   }
 });
+
+/* ══════════════════════════════════════════════
+   TUNER
+   ══════════════════════════════════════════════ */
+const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+let tunerRunning=false, tunerStream=null, tunerCtx=null, tunerAnalyser=null, tunerRaf=null;
+
+function freqToNoteInfo(freq){
+  const n=Math.round(12*Math.log2(freq/440))+69;
+  const name=NOTES[((n%12)+12)%12];
+  const exact=440*Math.pow(2,(n-69)/12);
+  const cents=Math.round(1200*Math.log2(freq/exact));
+  return {name,cents,hz:Math.round(freq*10)/10};
+}
+
+function autoCorrelate(buf,sampleRate){
+  const SIZE=buf.length;
+  let rms=0;
+  for(let i=0;i<SIZE;i++) rms+=buf[i]*buf[i];
+  rms=Math.sqrt(rms/SIZE);
+  if(rms<0.01) return -1;
+  let r1=0,r2=SIZE-1;
+  for(let i=0;i<SIZE/2;i++) if(Math.abs(buf[i])<0.2){r1=i;break;}
+  for(let i=1;i<SIZE/2;i++) if(Math.abs(buf[SIZE-i])<0.2){r2=SIZE-i;break;}
+  const buf2=buf.slice(r1,r2);
+  const c=new Float32Array(buf2.length*2);
+  for(let i=0;i<buf2.length;i++) for(let j=0;j<buf2.length;j++) c[i+j]+=buf2[i]*buf2[j];
+  const d=c.slice(buf2.length);
+  let maxpos=0,maxval=-Infinity;
+  for(let i=1;i<d.length;i++) if(d[i]>maxval){maxval=d[i];maxpos=i;}
+  let T0=maxpos;
+  const x1=d[T0-1],x2=d[T0],x3=d[T0+1];
+  const a=(x1+x3-2*x2)/2, b=(x3-x1)/2;
+  if(a) T0-=b/(2*a);
+  return sampleRate/T0;
+}
+
+function tunerLoop(){
+  if(!tunerRunning) return;
+  const buf=new Float32Array(tunerAnalyser.fftSize);
+  tunerAnalyser.getFloatTimeDomainData(buf);
+  const freq=autoCorrelate(buf,tunerCtx.sampleRate);
+  const noteEl=document.getElementById('tuner-note');
+  const freqEl=document.getElementById('tuner-freq');
+  const needle=document.getElementById('tuner-needle');
+  const status=document.getElementById('tuner-status');
+  if(freq>0 && freq>60 && freq<1400){
+    const info=freqToNoteInfo(freq);
+    noteEl.textContent=info.name;
+    freqEl.textContent=info.hz+' Hz';
+    const clamped=Math.max(-50,Math.min(50,info.cents));
+    needle.style.left=(50+clamped)+'%';
+    const abs=Math.abs(clamped);
+    if(abs<8){
+      needle.style.background='var(--green-text)';
+      status.textContent='In tune ✓';
+      status.className='tuner-status in-tune';
+    } else if(clamped>0){
+      needle.style.background='var(--amber-text)';
+      status.textContent='Sharp — tune down';
+      status.className='tuner-status sharp';
+    } else {
+      needle.style.background='var(--blue-text)';
+      status.textContent='Flat — tune up';
+      status.className='tuner-status flat';
+    }
+  } else {
+    noteEl.textContent='—';
+    freqEl.textContent='Play a string…';
+    needle.style.left='50%';
+    needle.style.background='var(--border2)';
+    status.textContent='';
+    status.className='tuner-status';
+  }
+  tunerRaf=requestAnimationFrame(tunerLoop);
+}
+
+async function startTuner(){
+  try{
+    tunerStream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+    tunerCtx=new(window.AudioContext||window.webkitAudioContext)();
+    tunerAnalyser=tunerCtx.createAnalyser();
+    tunerAnalyser.fftSize=2048;
+    const src=tunerCtx.createMediaStreamSource(tunerStream);
+    src.connect(tunerAnalyser);
+    tunerRunning=true;
+    document.getElementById('tuner-btn').innerHTML='&#x23F9; Stop';
+    document.getElementById('tuner-freq').textContent='Listening…';
+    tunerLoop();
+  } catch(e){
+    document.getElementById('tuner-freq').textContent='Mic access denied';
+  }
+}
+
+function stopTuner(){
+  tunerRunning=false;
+  if(tunerRaf) cancelAnimationFrame(tunerRaf);
+  if(tunerStream) tunerStream.getTracks().forEach(t=>t.stop());
+  if(tunerCtx) tunerCtx.close();
+  tunerStream=null; tunerCtx=null; tunerAnalyser=null;
+  const noteEl=document.getElementById('tuner-note');
+  const freqEl=document.getElementById('tuner-freq');
+  const needle=document.getElementById('tuner-needle');
+  const status=document.getElementById('tuner-status');
+  const btn=document.getElementById('tuner-btn');
+  if(noteEl) noteEl.textContent='—';
+  if(freqEl) freqEl.textContent='Tap Start to listen';
+  if(needle){ needle.style.left='50%'; needle.style.background='var(--border2)'; }
+  if(status){ status.textContent=''; status.className='tuner-status'; }
+  if(btn) btn.innerHTML='&#x25B6; Start';
+}
+
+function toggleTuner(){
+  if(tunerRunning) stopTuner(); else startTuner();
+}
 
 /* ══════════════════════════════════════════════
    TEACHER DASHBOARD
