@@ -131,7 +131,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .albl{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:4px}
 .atxt{font-size:13px;line-height:1.6}
 .spill{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;border:0.5px solid var(--border2);color:var(--text2);margin:2px 2px 0 0}
-
 /* ── Checklist — two-column ── */
 .cl-intro{background:var(--bg2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--text2);line-height:1.6}
 .cl-grid-wrap{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px}
@@ -159,17 +158,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .prog-lbl{font-size:12px;color:var(--text2);min-width:36px;text-align:right}
 .save-ind{font-size:11px;color:var(--text3);text-align:right;margin-top:8px;min-height:16px}
 .checklist-inline{margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border)}
-
 .coming{text-align:center;padding:48px 20px;color:var(--text2)}
 .coming .big{font-size:36px;margin-bottom:12px}
 .coming p{font-size:14px;line-height:1.6}
-
 /* ── Module dropdown ── */
 .module-select-wrap{display:flex;align-items:center;gap:10px;margin-bottom:8px}
 .module-select-label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);white-space:nowrap}
 .module-select{font-size:13px;padding:6px 12px;border:0.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);cursor:pointer;flex:1;max-width:320px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b6b65' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 .module-select:focus{outline:none;border-color:var(--blue-text)}
-
 /* ── Two-column layout ── */
 .app-layout{display:flex;min-height:calc(100vh - 53px);align-items:start}
 .main{flex:1;min-width:320px;padding:24px 20px 60px;overflow-x:hidden}
@@ -205,7 +201,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .rp-link:hover{border-bottom-color:var(--blue-text)}
 .rp-trigger{display:inline-flex;align-items:center;gap:4px;color:var(--blue-text);cursor:pointer;font-size:13px;font-weight:500;background:none;border:none;padding:0;font-family:inherit;text-align:left;line-height:1.5}
 .rp-trigger:hover{text-decoration:underline}
-
+/* ── Iframe drag shield — blocks iframe from stealing mouse events during resize ── */
+.iframe-drag-shield{display:none;position:absolute;inset:0;z-index:9999;cursor:col-resize}
+.iframe-drag-shield.active{display:block}
 /* ── Floating practice tools ── */
 .fab-group{position:fixed;bottom:24px;right:345px;display:flex;flex-direction:column;align-items:flex-end;gap:10px;z-index:100}
 .fab-buttons{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
@@ -250,7 +248,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .timer-presets button{flex:1;min-width:44px;padding:5px 4px;border-radius:var(--radius-sm);border:0.5px solid var(--border2);background:var(--bg2);font-size:11px;cursor:pointer;color:var(--text);font-family:inherit;white-space:nowrap}
 .timer-presets button:hover{background:var(--bg3)}
 .timer-presets button.sel{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
-
 /* ── Teacher dashboard ── */
 .t-main{max-width:900px;margin:0 auto;padding:24px 16px 60px}
 .t-header{margin-bottom:20px}
@@ -289,19 +286,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 </style>
 </head>
 <body>
-
-<!-- ── Content + Firebase config ── -->
 <script src="firebase-config.js"></script>
 <script src="config.js"></script>
-
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-
 <div id="google_translate_element"></div>
-
-<!-- ── Header ── -->
 <header class="header">
   <div>
     <div class="header-title">Sequoia High School Beginning Guitar</div>
@@ -316,8 +306,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
     </div>
   </div>
 </header>
-
-<!-- ── Auth wall ── -->
 <div id="auth-wall" class="auth-wall">
   <h1>Welcome to Guitar Class</h1>
   <p>Sign in with your school Google account to access your weekly materials and track your progress across any device.</p>
@@ -326,8 +314,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
     Sign in with Google
   </button>
 </div>
-
-<!-- ── App ── -->
 <div id="app" style="display:none">
   <div class="app-layout">
     <div class="main">
@@ -338,11 +324,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
       <div class="sec-label" style="margin-top:12px">Select a set</div>
       <div class="week-pills" id="week-pills"></div>
       <div id="week-panels"></div>
-
-      <!-- Floating practice tools — anchored to bottom-right of left panel -->
       <div class="fab-group" id="fab-group" style="display:none">
-
-        <!-- Metronome popup -->
         <div class="tool-popup" id="metro-popup">
           <div class="tp-head">
             <span class="tp-title">&#x1F3B5; Metronome</span>
@@ -364,8 +346,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
             <button class="tp-btn" onclick="nudgeBpm(5)">+5</button>
           </div>
         </div>
-
-        <!-- Timer popup -->
         <div class="tool-popup" id="timer-popup">
           <div class="tp-head">
             <span class="tp-title">&#x23F1; Practice Timer</span>
@@ -385,8 +365,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
             <button class="tp-btn primary-g" id="timer-btn" onclick="toggleTimer()">&#x25B6; Start</button>
           </div>
         </div>
-
-        <!-- Tuner popup -->
         <div class="tool-popup" id="tuner-popup">
           <div class="tp-head">
             <span class="tp-title">&#x1F3B8; Tuner</span>
@@ -404,8 +382,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
           <div class="tuner-status" id="tuner-status"></div>
           <button class="tp-btn primary-t" id="tuner-btn" onclick="toggleTuner()">&#x25B6; Start</button>
         </div>
-
-        <!-- FAB buttons -->
         <div class="fab-buttons">
           <div class="fab fab-tune" onclick="togglePopup('tuner')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
@@ -445,8 +421,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
     </div>
   </div>
 </div>
-
-<!-- Teacher dashboard -->
 <div id="teacher-app" style="display:none">
   <div class="t-main">
     <div class="t-header">
@@ -457,39 +431,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
     <div class="t-week-tabs" id="t-week-tabs"></div>
     <div id="t-grid-container"><div class="t-loading">Loading student data…</div></div>
     <div class="t-legend">
-      <div class="t-leg">
-        <span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px">
-          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </span> I've got it!
-      </div>
-      <div class="t-leg">
-        <span class="tck" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:var(--amber-bg);color:var(--amber-text);">
-          <svg width="9" height="9" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.8"/></svg>
-        </span> Still working on it
-      </div>
-      <div class="t-leg">
-        <span class="tck no" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px">
-          <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        </span> Not yet
-      </div>
+      <div class="t-leg"><span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> I've got it!</div>
+      <div class="t-leg"><span class="tck" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:var(--amber-bg);color:var(--amber-text);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.8"/></svg></span> Still working on it</div>
+      <div class="t-leg"><span class="tck no" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span> Not yet</div>
     </div>
   </div>
 </div>
-
 <div id="teacher-denied" style="display:none">
   <div class="t-denied">
     <h2>Access denied</h2>
     <p>The teacher dashboard is only available to authorised accounts. Please sign in with your school Google account.</p>
   </div>
 </div>
-
 <script>
 /* ── Firebase init ── */
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db   = firebase.firestore();
 let currentUser = null;
-let progress    = {};  // skillId -> 'none'|'working'|'gotit'
+let progress    = {};
 let saveTimer   = null;
 
 /* ── Auth ── */
@@ -502,12 +462,8 @@ function signOut(){ auth.signOut(); }
 auth.onAuthStateChanged(async user=>{
   if(user){
     currentUser = user;
-    if(IS_TEACHER_MODE){
-      showTeacherApp(user);
-    } else {
-      await loadProgress();
-      showApp(user);
-    }
+    if(IS_TEACHER_MODE){ showTeacherApp(user); }
+    else { await loadProgress(); showApp(user); }
   } else {
     currentUser = null; progress = {};
     document.getElementById('auth-wall').style.display='block';
@@ -515,8 +471,7 @@ auth.onAuthStateChanged(async user=>{
     document.getElementById('teacher-app').style.display='none';
     document.getElementById('teacher-denied').style.display='none';
     document.getElementById('fab-group').style.display='none';
-    document.getElementById('user-area').innerHTML=
-      '<button class="btn-sign" onclick="signIn()">Sign in with Google</button>';
+    document.getElementById('user-area').innerHTML='<button class="btn-sign" onclick="signIn()">Sign in with Google</button>';
   }
 });
 
@@ -525,16 +480,12 @@ function showApp(user){
   document.getElementById('app').style.display='block';
   document.getElementById('fab-group').style.display='flex';
   setTimeout(()=>{ const h=document.getElementById('resize-handle'),p=document.getElementById('resource-panel'),f=document.getElementById('fab-group'); if(h&&p&&f) f.style.right=(p.offsetWidth+h.offsetWidth+16)+'px'; },0);
-  const av = user.photoURL
-    ? `<img src="${user.photoURL}" class="avatar" alt="">`
-    : `<div class="avatar-init">${(user.displayName||'?')[0].toUpperCase()}</div>`;
-  document.getElementById('user-area').innerHTML=
-    `${av}<span class="user-name">${user.displayName||user.email}</span>
-     <button class="btn-out" onclick="signOut()">Sign out</button>`;
+  const av = user.photoURL ? `<img src="${user.photoURL}" class="avatar" alt="">` : `<div class="avatar-init">${(user.displayName||'?')[0].toUpperCase()}</div>`;
+  document.getElementById('user-area').innerHTML=`${av}<span class="user-name">${user.displayName||user.email}</span><button class="btn-out" onclick="signOut()">Sign out</button>`;
   renderAll();
 }
 
-/* ── Firestore (with backwards-compat for old boolean format) ── */
+/* ── Firestore ── */
 async function loadProgress(){
   try{
     const doc = await db.collection('progress').doc(currentUser.uid).get();
@@ -542,15 +493,13 @@ async function loadProgress(){
       const raw = doc.data().skills||{};
       progress = {};
       Object.keys(raw).forEach(k=>{
-        if(raw[k]===true)                          progress[k]='gotit';
+        if(raw[k]===true) progress[k]='gotit';
         else if(raw[k]==='working'||raw[k]==='gotit') progress[k]=raw[k];
-        else                                          progress[k]='none';
+        else progress[k]='none';
       });
       lastModuleNum = doc.data().lastModule||1;
       lastSetId     = doc.data().lastSet||null;
-    } else {
-      progress={}; lastModuleNum=1; lastSetId=null;
-    }
+    } else { progress={}; lastModuleNum=1; lastSetId=null; }
   } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; }
 }
 
@@ -561,11 +510,8 @@ function saveProgress(){
   saveTimer = setTimeout(async()=>{
     try{
       await db.collection('progress').doc(currentUser.uid).set({
-        skills:progress,
-        lastModule:lastModuleNum,
-        lastSet:lastSetId||null,
-        name:currentUser.displayName||'',
-        email:currentUser.email||''
+        skills:progress, lastModule:lastModuleNum, lastSet:lastSetId||null,
+        name:currentUser.displayName||'', email:currentUser.email||''
       },{merge:true});
       setSaveMsg('Saved ✓');
       setTimeout(()=>setSaveMsg(''),2000);
@@ -578,11 +524,7 @@ function setSaveMsg(msg){ document.querySelectorAll('.save-ind').forEach(el=>el.
 let lastModuleNum = 1;
 let lastSetId = null;
 
-function renderAll(){
-  renderPanels();
-  populateModuleDropdown();
-  onModuleChange(lastModuleNum||1, lastSetId);
-}
+function renderAll(){ renderPanels(); populateModuleDropdown(); onModuleChange(lastModuleNum||1, lastSetId); }
 
 function populateModuleDropdown(){
   const sel = document.getElementById('module-select');
@@ -604,8 +546,7 @@ function onModuleChange(moduleNum, restoreSetId){
   renderPills(moduleNum);
   const moduleSets = SETS.filter(w=>w.moduleNum===moduleNum);
   const target = restoreSetId && moduleSets.find(w=>w.id===restoreSetId)
-    ? restoreSetId
-    : (moduleSets.find(w=>!w.locked)||moduleSets[0]).id;
+    ? restoreSetId : (moduleSets.find(w=>!w.locked)||moduleSets[0]).id;
   activateSet(target);
 }
 
@@ -644,29 +585,15 @@ function renderPanels(){
 }
 
 function buildComingSoon(w){
-  return `<div class="obj-card">
-    <div class="obj-unit">${w.unit}</div>
-    <div class="obj-main">${w.title}</div>
-    <div class="obj-sub">${w.subtitle}</div>
-  </div>
-  <div class="coming">
-    <div class="big">&#x1F3B8;</div>
-    <p>This set's content will appear here when it's ready.<br>Check back soon!</p>
-  </div>`;
+  return `<div class="obj-card"><div class="obj-unit">${w.unit}</div><div class="obj-main">${w.title}</div><div class="obj-sub">${w.subtitle}</div></div>
+  <div class="coming"><div class="big">&#x1F3B8;</div><p>This set's content will appear here when it's ready.<br>Check back soon!</p></div>`;
 }
 
 function buildSet(w){
   const handoutLink = w.handoutUrl
-    ? `<button onclick="loadPanel('gdoc','${w.handoutUrl}','Module ${w.moduleNum} handout','')" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--blue-text);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border);width:100%">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M4 5h4M4 7h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-        Module ${w.moduleNum} handout</button>`
+    ? `<button onclick="loadPanel('gdoc','${w.handoutUrl}','Module ${w.moduleNum} handout','')" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--blue-text);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border);width:100%"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M4 5h4M4 7h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Module ${w.moduleNum} handout</button>`
     : '';
-  return `<div class="obj-card">
-    <div class="obj-unit">${w.unit}</div>
-    <div class="obj-main">${w.objective}</div>
-    <div class="obj-sub">${w.skillFocus}</div>
-    ${handoutLink}
-  </div>
+  return `<div class="obj-card"><div class="obj-unit">${w.unit}</div><div class="obj-main">${w.objective}</div><div class="obj-sub">${w.skillFocus}</div>${handoutLink}</div>
   <div class="tabs">
     <div class="tab active" onclick="switchTab(this,'${w.id}','stations')">Stations</div>
     <div class="tab" onclick="switchTab(this,'${w.id}','songs')">Songs</div>
@@ -699,32 +626,23 @@ function buildStations(w){
       if(bullets.length <= 1) return `<div class="sh">${s.hint}</div>`;
       return `<ul class="sh-list">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
     })() : '';
-    const skillBadges = (s.skills&&s.skills.length)
-      ? s.skills.map(n=>`<span class="skill-badge">Skill ${n}</span>`).join('')
-      : '';
+    const skillBadges = (s.skills&&s.skills.length) ? s.skills.map(n=>`<span class="skill-badge">Skill ${n}</span>`).join('') : '';
     return `<li class="step"><div class="st">${text}${skillBadges?`<span style="margin-left:6px">${skillBadges}</span>`:''}${hintHtml}</div></li>`;
   }).join('');
   const dp=(id,cls,badge,badgeClass,s)=>`
     <div class="dp${cls}" id="${w.id}-dp-${id}">
-      <div class="dp-head">
-        <span class="st-badge ${badgeClass}">${badge}</span>
-        <div class="dp-title">${s.title}</div>
-      </div>
+      <div class="dp-head"><span class="st-badge ${badgeClass}">${badge}</span><div class="dp-title">${s.title}</div></div>
       <ul class="steps">${stepsHtml(s.steps)}</ul>
     </div>`;
   return `
     <div class="st-grid">
       <div class="stc" id="${w.id}-sc-b" onclick="openSt('${w.id}','b')">
-        <div class="st-ico">&#x1F4BB;</div>
-        <span class="st-badge bb">Station B</span>
-        <div class="st-name">Computer station</div>
-        <div class="st-desc">Watch · Listen · Practice</div>
+        <div class="st-ico">&#x1F4BB;</div><span class="st-badge bb">Station B</span>
+        <div class="st-name">Computer station</div><div class="st-desc">Watch · Listen · Practice</div>
       </div>
       <div class="stc" id="${w.id}-sc-c" onclick="openSt('${w.id}','c')">
-        <div class="st-ico">&#x1F3B8;</div>
-        <span class="st-badge bc">Station C</span>
-        <div class="st-name">Practice station</div>
-        <div class="st-desc">Independent drill</div>
+        <div class="st-ico">&#x1F3B8;</div><span class="st-badge bc">Station C</span>
+        <div class="st-name">Practice station</div><div class="st-desc">Independent drill</div>
       </div>
     </div>
     ${dp('b',' hidden','Station B','bb',w.stations.b)}
@@ -741,53 +659,33 @@ function openSt(wid,s){
 /* ── Songs ── */
 function buildSongs(w){
   const rows=w.songs.map((s,i)=>{
-    const nameEl = s.url
-      ? `<button class="rp-trigger" onclick="loadSong('${w.id}',${i})">${s.name}</button>`
-      : s.name;
-    return `<div class="song-row">
-      <div class="dot ${s.core?'dc':'dch'}"></div>
-      <div><div class="sname">${nameEl}</div><div class="smeta">${s.meta}</div></div>
-      <span class="stag ${s.core?'stag-core':''}">${s.type}</span>
-    </div>`;
+    const nameEl = s.url ? `<button class="rp-trigger" onclick="loadSong('${w.id}',${i})">${s.name}</button>` : s.name;
+    return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div><div class="sname">${nameEl}</div><div class="smeta">${s.meta}</div></div><span class="stag ${s.core?'stag-core':''}">${s.type}</span></div>`;
   }).join('');
-  return `<div class="legend">
-    <div class="leg"><div class="dot dc" style="margin-top:0"></div>Core — everyone</div>
-    <div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu — pick 1</div>
-  </div>
-  <div class="card">${rows}</div>`;
+  return `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>Core — everyone</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu — pick 1</div></div><div class="card">${rows}</div>`;
 }
 
 function loadSong(wid, idx){
-  const w=SETS.find(x=>x.id===wid);
-  if(!w) return;
-  const s=w.songs[idx];
-  if(!s||!s.url) return;
+  const w=SETS.find(x=>x.id===wid); if(!w) return;
+  const s=w.songs[idx]; if(!s||!s.url) return;
   loadPanel('youtube', s.url, s.name, s.type);
 }
 
 /* ── Videos ── */
 function buildVideos(w){
-  const rows=w.videos.map(v=>`
-    <div class="vid-row">
-      <div>
-        <div class="vname"><button class="rp-trigger" onclick="loadPanel('youtube','${v.url}','${v.name.replace(/'/g,"\\'")}','${v.source.replace(/'/g,"\\'")}')">&#x25B6; ${v.name}</button></div>
-        <div class="vsrc">${v.source}</div>
-        ${v.rec?'<span class="vrec">&#x2605; Recommended</span>':''}
-      </div>
-    </div>`).join('');
+  const rows=w.videos.map(v=>`<div class="vid-row"><div><div class="vname"><button class="rp-trigger" onclick="loadPanel('youtube','${v.url}','${v.name.replace(/'/g,"\\'")}','${v.source.replace(/'/g,"\\'")}')">&#x25B6; ${v.name}</button></div><div class="vsrc">${v.source}</div>${v.rec?'<span class="vrec">&#x2605; Recommended</span>':''}</div></div>`).join('');
   return `<div class="card">${rows}</div>`;
 }
 
 /* ── Assessment ── */
 function buildAssess(w){
   const a=w.assessment;
-  return `
-    <div class="ablock"><div class="albl">Assessment goal</div><div class="atxt">${a.goal}</div></div>
+  return `<div class="ablock"><div class="albl">Assessment goal</div><div class="atxt">${a.goal}</div></div>
     <div class="ablock"><div class="albl">Self-check</div><div class="atxt">${a.selfCheck}</div></div>
     <div class="ablock"><div class="albl">NAfME standards</div><div>${a.standards.map(s=>`<span class="spill">${s}</span>`).join('')}</div></div>`;
 }
 
-/* ── Checklist — two-column ── */
+/* ── Checklist ── */
 function buildChecklist(w){
   if(!w.skills||w.skills.length===0) return '<p style="font-size:13px;color:var(--text2);padding:12px 0">No skills listed for this set yet.</p>';
   const done=w.skills.filter(s=>progress[s.id]==='gotit').length;
@@ -798,29 +696,16 @@ function buildChecklist(w){
     const st=progress[s.id]||'none';
     return `<div class="skill-row">
       <div class="sktxt"><div class="sn" style="flex-shrink:0;margin-top:0;margin-right:8px">${i+1}</div>${s.text}</div>
-      <div class="skchk-cell working-col${st==='working'?' active':''}" onclick="toggleSkill('${s.id}','${w.id}','working')" title="Still working on it">
-        <div class="skbox">${st==='working'?wkSvg:''}</div>
-      </div>
-      <div class="skchk-cell gotit-col${st==='gotit'?' active':''}" onclick="toggleSkill('${s.id}','${w.id}','gotit')" title="I've got it!">
-        <div class="skbox">${st==='gotit'?giSvg:''}</div>
-      </div>
+      <div class="skchk-cell working-col${st==='working'?' active':''}" onclick="toggleSkill('${s.id}','${w.id}','working')" title="Still working on it"><div class="skbox">${st==='working'?wkSvg:''}</div></div>
+      <div class="skchk-cell gotit-col${st==='gotit'?' active':''}" onclick="toggleSkill('${s.id}','${w.id}','gotit')" title="I've got it!"><div class="skbox">${st==='gotit'?giSvg:''}</div></div>
     </div>`;
   }).join('');
   return `<div class="cl-intro">Check each skill as you practice. Use "Still working on it" while you're learning, then mark "I've got it!" once you can do it consistently.</div>
   <div class="cl-grid-wrap">
-    <div class="cl-header">
-      <div class="cl-header-skill">Skill</div>
-      <div class="cl-header-working">Still<br>working on it</div>
-      <div class="cl-header-gotit">I've<br>got it!</div>
-    </div>
+    <div class="cl-header"><div class="cl-header-skill">Skill</div><div class="cl-header-working">Still<br>working on it</div><div class="cl-header-gotit">I've<br>got it!</div></div>
     ${rows}
   </div>
-  <div class="prog-wrap">
-    <div class="prog-row">
-      <div class="prog-bg"><div class="prog-fill" id="pf-${w.id}" style="width:${pct}%"></div></div>
-      <div class="prog-lbl" id="pl-${w.id}">${done} / ${w.skills.length}</div>
-    </div>
-  </div>
+  <div class="prog-wrap"><div class="prog-row"><div class="prog-bg"><div class="prog-fill" id="pf-${w.id}" style="width:${pct}%"></div></div><div class="prog-lbl" id="pl-${w.id}">${done} / ${w.skills.length}</div></div></div>
   <div class="save-ind" id="si-${w.id}"></div>`;
 }
 
@@ -828,12 +713,12 @@ function buildChecklist(w){
 function toggleSkill(sid, wid, which){
   const cur = progress[sid]||'none';
   if(which==='working'){
-    if(cur==='gotit')    progress[sid]='working';
+    if(cur==='gotit') progress[sid]='working';
     else if(cur==='working') progress[sid]='none';
-    else                 progress[sid]='working';
+    else progress[sid]='working';
   } else {
     if(cur==='gotit') progress[sid]='working';
-    else              progress[sid]='gotit';
+    else progress[sid]='gotit';
   }
   const wkSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="var(--amber-text)" stroke-width="1.5"/><path d="M6 4v2.2l1.4 1.4" stroke="var(--amber-text)" stroke-width="1.5" stroke-linecap="round"/></svg>`;
   const giSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green-text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -882,218 +767,170 @@ function toggleTranslate(){
    FLOATING TOOLS — Metronome & Timer
    ══════════════════════════════════════════════ */
 let metroRunning=false, metroInterval=null, audioCtx=null;
-
-function getAudioCtx(){
-  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-  return audioCtx;
-}
-function beep(freq,dur){
-  const ctx=getAudioCtx();
-  const o=ctx.createOscillator(), g=ctx.createGain();
-  o.connect(g); g.connect(ctx.destination);
-  o.frequency.value=freq;
-  g.gain.setValueAtTime(0.4,ctx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur);
-  o.start(); o.stop(ctx.currentTime+dur);
-}
-function tick(){
-  beep(880,0.06);
-  const dot=document.getElementById('metro-dot');
-  if(dot){ dot.classList.add('flash'); setTimeout(()=>dot.classList.remove('flash'),80); }
-}
+function getAudioCtx(){ if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+function beep(freq,dur){ const ctx=getAudioCtx(); const o=ctx.createOscillator(),g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=freq; g.gain.setValueAtTime(0.4,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur); o.start(); o.stop(ctx.currentTime+dur); }
+function tick(){ beep(880,0.06); const dot=document.getElementById('metro-dot'); if(dot){ dot.classList.add('flash'); setTimeout(()=>dot.classList.remove('flash'),80); } }
 function getBpm(){ return parseInt(document.getElementById('bpm-slider').value); }
-function onBpmSlider(val){
-  document.getElementById('bpm-display').textContent=val;
-  if(metroRunning){ stopMetro(); startMetro(); }
-}
-function nudgeBpm(d){
-  const s=document.getElementById('bpm-slider');
-  s.value=Math.min(220,Math.max(40,getBpm()+d));
-  document.getElementById('bpm-display').textContent=s.value;
-  if(metroRunning){ stopMetro(); startMetro(); }
-}
-function startMetro(){
-  tick();
-  metroInterval=setInterval(tick,Math.round(60000/getBpm()));
-  metroRunning=true;
-  document.getElementById('metro-btn').innerHTML='&#x23F8; Stop';
-}
-function stopMetro(){
-  clearInterval(metroInterval); metroRunning=false;
-  document.getElementById('metro-btn').innerHTML='&#x25B6; Start';
-}
+function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; if(metroRunning){ stopMetro(); startMetro(); } }
+function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Math.min(220,Math.max(40,getBpm()+d)); document.getElementById('bpm-display').textContent=s.value; if(metroRunning){ stopMetro(); startMetro(); } }
+function startMetro(){ tick(); metroInterval=setInterval(tick,Math.round(60000/getBpm())); metroRunning=true; document.getElementById('metro-btn').innerHTML='&#x23F8; Stop'; }
+function stopMetro(){ clearInterval(metroInterval); metroRunning=false; document.getElementById('metro-btn').innerHTML='&#x25B6; Start'; }
 function toggleMetro(){ if(metroRunning) stopMetro(); else startMetro(); }
 
 /* ── Timer ── */
 let timerRunning=false, timerInterval=null, timerSecs=30, timerSelected=30;
-function setTimerSecs(secs){
-  timerSelected=secs; timerSecs=secs;
-  if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; }
-  updateTimerDisplay();
-  [30,60,120,180,240,300].forEach(s=>{ const el=document.getElementById('tp-'+s); if(el) el.classList.toggle('sel',s===secs); });
-}
-function updateTimerDisplay(){
-  const m=Math.floor(timerSecs/60), s=timerSecs%60;
-  document.getElementById('timer-display').textContent=m+':'+(s<10?'0':'')+s;
-}
-function resetTimer(){
-  if(timerRunning){ clearInterval(timerInterval); timerRunning=false; }
-  timerSecs=timerSelected; updateTimerDisplay();
-  document.getElementById('timer-btn').innerHTML='&#x25B6; Start';
-}
-function toggleTimer(){
-  if(timerRunning){
-    clearInterval(timerInterval); timerRunning=false;
-    document.getElementById('timer-btn').innerHTML='&#x25B6; Start';
-  } else {
-    timerRunning=true;
-    document.getElementById('timer-btn').innerHTML='&#x23F8; Pause';
-    timerInterval=setInterval(()=>{
-      if(timerSecs>0){ timerSecs--; updateTimerDisplay(); }
-      else {
-        clearInterval(timerInterval); timerRunning=false;
-        document.getElementById('timer-btn').innerHTML='&#x25B6; Start';
-        [0,0.35,0.7].forEach(d=>setTimeout(()=>beep(660,0.3),d*1000));
-      }
-    },1000);
-  }
-}
+function setTimerSecs(secs){ timerSelected=secs; timerSecs=secs; if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; } updateTimerDisplay(); [30,60,120,180,240,300].forEach(s=>{ const el=document.getElementById('tp-'+s); if(el) el.classList.toggle('sel',s===secs); }); }
+function updateTimerDisplay(){ const m=Math.floor(timerSecs/60),s=timerSecs%60; document.getElementById('timer-display').textContent=m+':'+(s<10?'0':'')+s; }
+function resetTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; } timerSecs=timerSelected; updateTimerDisplay(); document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; }
+function toggleTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; } else { timerRunning=true; document.getElementById('timer-btn').innerHTML='&#x23F8; Pause'; timerInterval=setInterval(()=>{ if(timerSecs>0){ timerSecs--; updateTimerDisplay(); } else { clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; [0,0.35,0.7].forEach(d=>setTimeout(()=>beep(660,0.3),d*1000)); } },1000); } }
 
 /* ── Popup logic ── */
-function togglePopup(which){
-  const el=document.getElementById(which+'-popup');
-  el.classList.toggle('open');
-}
-function closePopup(which){
-  document.getElementById(which+'-popup').classList.remove('open');
-  if(which==='metro') stopMetro();
-  if(which==='tuner') stopTuner();
-}
+function togglePopup(which){ document.getElementById(which+'-popup').classList.toggle('open'); }
+function closePopup(which){ document.getElementById(which+'-popup').classList.remove('open'); if(which==='metro') stopMetro(); if(which==='tuner') stopTuner(); }
 document.addEventListener('click',e=>{
   if(!e.target.closest('.tool-popup')&&!e.target.closest('.fab')&&!e.target.closest('.fab-buttons')){
-    ['metro','timer','tuner'].forEach(w=>{
-      const el=document.getElementById(w+'-popup');
-      if(el) el.classList.remove('open');
-    });
-    stopMetro();
-    stopTuner();
+    ['metro','timer','tuner'].forEach(w=>{ const el=document.getElementById(w+'-popup'); if(el) el.classList.remove('open'); });
+    stopMetro(); stopTuner();
   }
 });
 
 /* ══════════════════════════════════════════════
-   TUNER
+   TUNER — robust autocorrelation with smoothing
    ══════════════════════════════════════════════ */
-const NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-let tunerRunning=false, tunerStream=null, tunerCtx=null, tunerAnalyser=null, tunerRaf=null;
+const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+let tunerRunning = false, tunerStream = null, tunerCtx = null,
+    tunerAnalyser = null, tunerRaf = null, tunerLastNote = null,
+    tunerStableCount = 0;
 
-function freqToNoteInfo(freq){
-  const n=Math.round(12*Math.log2(freq/440))+69;
-  const name=NOTES[((n%12)+12)%12];
-  const exact=440*Math.pow(2,(n-69)/12);
-  const cents=Math.round(1200*Math.log2(freq/exact));
-  return {name,cents,hz:Math.round(freq*10)/10};
+function freqToNoteInfo(freq) {
+  const n    = Math.round(12 * Math.log2(freq / 440)) + 69;
+  const name = NOTES[((n % 12) + 12) % 12];
+  const exact = 440 * Math.pow(2, (n - 69) / 12);
+  const cents = Math.round(1200 * Math.log2(freq / exact));
+  return { name, cents, hz: Math.round(freq * 10) / 10 };
 }
 
-function autoCorrelate(buf,sampleRate){
-  const SIZE=buf.length;
-  let rms=0;
-  for(let i=0;i<SIZE;i++) rms+=buf[i]*buf[i];
-  rms=Math.sqrt(rms/SIZE);
-  if(rms<0.01) return -1;
-  let r1=0,r2=SIZE-1;
-  for(let i=0;i<SIZE/2;i++) if(Math.abs(buf[i])<0.2){r1=i;break;}
-  for(let i=1;i<SIZE/2;i++) if(Math.abs(buf[SIZE-i])<0.2){r2=SIZE-i;break;}
-  const buf2=buf.slice(r1,r2);
-  const c=new Float32Array(buf2.length*2);
-  for(let i=0;i<buf2.length;i++) for(let j=0;j<buf2.length;j++) c[i+j]+=buf2[i]*buf2[j];
-  const d=c.slice(buf2.length);
-  let maxpos=0,maxval=-Infinity;
-  for(let i=1;i<d.length;i++) if(d[i]>maxval){maxval=d[i];maxpos=i;}
-  let T0=maxpos;
-  const x1=d[T0-1],x2=d[T0],x3=d[T0+1];
-  const a=(x1+x3-2*x2)/2, b=(x3-x1)/2;
-  if(a) T0-=b/(2*a);
-  return sampleRate/T0;
+function autoCorrelate(buf, sampleRate) {
+  const SIZE = buf.length;
+  let rms = 0;
+  for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+  rms = Math.sqrt(rms / SIZE);
+  if (rms < 0.015) return -1;
+
+  let r1 = 0, r2 = SIZE - 1;
+  for (let i = 0; i < SIZE / 2; i++) { if (Math.abs(buf[i]) > 0.2) { r1 = i; break; } }
+  for (let i = 1; i < SIZE / 2; i++) { if (Math.abs(buf[SIZE - i]) > 0.2) { r2 = SIZE - i; break; } }
+  const buf2 = buf.slice(r1, r2);
+  const len  = buf2.length;
+
+  // Normalized autocorrelation (NSDF style)
+  const c = new Float32Array(len);
+  for (let lag = 0; lag < len; lag++) {
+    let num = 0, denom = 0;
+    for (let i = 0; i < len - lag; i++) {
+      num   += buf2[i] * buf2[i + lag];
+      denom += buf2[i] * buf2[i] + buf2[i + lag] * buf2[i + lag];
+    }
+    c[lag] = denom === 0 ? 0 : 2 * num / denom;
+  }
+
+  let firstDip = -1;
+  for (let i = 1; i < len; i++) { if (c[i] < 0) { firstDip = i; break; } }
+  if (firstDip === -1) return -1;
+
+  let maxVal = -Infinity, maxPos = -1;
+  for (let i = firstDip; i < len; i++) { if (c[i] > maxVal) { maxVal = c[i]; maxPos = i; } }
+  if (maxVal < 0.5 || maxPos === -1) return -1;
+
+  // Parabolic interpolation for sub-sample accuracy
+  const x1 = c[maxPos - 1] || 0, x2 = c[maxPos], x3 = c[maxPos + 1] || 0;
+  const a = (x1 + x3 - 2 * x2) / 2, b = (x3 - x1) / 2;
+  const T0 = a ? maxPos - b / (2 * a) : maxPos;
+
+  const freq = sampleRate / T0;
+  if (freq < 70 || freq > 1400) return -1;
+  return freq;
 }
 
-function tunerLoop(){
-  if(!tunerRunning) return;
-  const buf=new Float32Array(tunerAnalyser.fftSize);
+function tunerLoop() {
+  if (!tunerRunning) return;
+  const buf = new Float32Array(tunerAnalyser.fftSize);
   tunerAnalyser.getFloatTimeDomainData(buf);
-  const freq=autoCorrelate(buf,tunerCtx.sampleRate);
-  const noteEl=document.getElementById('tuner-note');
-  const freqEl=document.getElementById('tuner-freq');
-  const needle=document.getElementById('tuner-needle');
-  const status=document.getElementById('tuner-status');
-  if(freq>0 && freq>60 && freq<1400){
-    const info=freqToNoteInfo(freq);
-    noteEl.textContent=info.name;
-    freqEl.textContent=info.hz+' Hz';
-    const clamped=Math.max(-50,Math.min(50,info.cents));
-    needle.style.left=(50+clamped)+'%';
-    const abs=Math.abs(clamped);
-    if(abs<8){
-      needle.style.background='var(--green-text)';
-      status.textContent='In tune ✓';
-      status.className='tuner-status in-tune';
-    } else if(clamped>0){
-      needle.style.background='var(--amber-text)';
-      status.textContent='Sharp — tune down';
-      status.className='tuner-status sharp';
-    } else {
-      needle.style.background='var(--blue-text)';
-      status.textContent='Flat — tune up';
-      status.className='tuner-status flat';
+  const freq = autoCorrelate(buf, tunerCtx.sampleRate);
+  const noteEl = document.getElementById('tuner-note');
+  const freqEl = document.getElementById('tuner-freq');
+  const needle = document.getElementById('tuner-needle');
+  const statusEl = document.getElementById('tuner-status');
+
+  if (freq > 0) {
+    const info = freqToNoteInfo(freq);
+    if (info.name === tunerLastNote) { tunerStableCount++; }
+    else { tunerLastNote = info.name; tunerStableCount = 0; }
+
+    if (tunerStableCount >= 3) {
+      noteEl.textContent = info.name;
+      freqEl.textContent = info.hz + ' Hz';
+      const clamped = Math.max(-50, Math.min(50, info.cents));
+      needle.style.left = (50 + clamped) + '%';
+      const abs = Math.abs(clamped);
+      if (abs < 8) {
+        needle.style.background = 'var(--green-text)';
+        statusEl.textContent = 'In tune ✓'; statusEl.className = 'tuner-status in-tune';
+      } else if (clamped > 0) {
+        needle.style.background = 'var(--amber-text)';
+        statusEl.textContent = 'Sharp — tune down'; statusEl.className = 'tuner-status sharp';
+      } else {
+        needle.style.background = 'var(--blue-text)';
+        statusEl.textContent = 'Flat — tune up'; statusEl.className = 'tuner-status flat';
+      }
     }
   } else {
-    noteEl.textContent='—';
-    freqEl.textContent='Play a string…';
-    needle.style.left='50%';
-    needle.style.background='var(--border2)';
-    status.textContent='';
-    status.className='tuner-status';
+    tunerStableCount = 0; tunerLastNote = null;
+    noteEl.textContent = '—'; freqEl.textContent = 'Play a string…';
+    needle.style.left = '50%'; needle.style.background = 'var(--border2)';
+    statusEl.textContent = ''; statusEl.className = 'tuner-status';
   }
-  tunerRaf=requestAnimationFrame(tunerLoop);
+  tunerRaf = requestAnimationFrame(tunerLoop);
 }
 
-async function startTuner(){
-  try{
-    tunerStream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
-    tunerCtx=new(window.AudioContext||window.webkitAudioContext)();
-    tunerAnalyser=tunerCtx.createAnalyser();
-    tunerAnalyser.fftSize=2048;
-    const src=tunerCtx.createMediaStreamSource(tunerStream);
+async function startTuner() {
+  try {
+    tunerStream   = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    tunerCtx      = new (window.AudioContext || window.webkitAudioContext)();
+    tunerAnalyser = tunerCtx.createAnalyser();
+    tunerAnalyser.fftSize = 4096;
+    tunerAnalyser.smoothingTimeConstant = 0;
+    const src = tunerCtx.createMediaStreamSource(tunerStream);
     src.connect(tunerAnalyser);
-    tunerRunning=true;
-    document.getElementById('tuner-btn').innerHTML='&#x23F9; Stop';
-    document.getElementById('tuner-freq').textContent='Listening…';
+    tunerRunning = true; tunerLastNote = null; tunerStableCount = 0;
+    document.getElementById('tuner-btn').innerHTML = '&#x23F9; Stop';
+    document.getElementById('tuner-freq').textContent = 'Listening…';
     tunerLoop();
-  } catch(e){
-    document.getElementById('tuner-freq').textContent='Mic access denied';
+  } catch(e) {
+    document.getElementById('tuner-freq').textContent = 'Mic access denied';
   }
 }
 
-function stopTuner(){
-  tunerRunning=false;
-  if(tunerRaf) cancelAnimationFrame(tunerRaf);
-  if(tunerStream) tunerStream.getTracks().forEach(t=>t.stop());
-  if(tunerCtx) tunerCtx.close();
-  tunerStream=null; tunerCtx=null; tunerAnalyser=null;
-  const noteEl=document.getElementById('tuner-note');
-  const freqEl=document.getElementById('tuner-freq');
-  const needle=document.getElementById('tuner-needle');
-  const status=document.getElementById('tuner-status');
-  const btn=document.getElementById('tuner-btn');
-  if(noteEl) noteEl.textContent='—';
-  if(freqEl) freqEl.textContent='Tap Start to listen';
-  if(needle){ needle.style.left='50%'; needle.style.background='var(--border2)'; }
-  if(status){ status.textContent=''; status.className='tuner-status'; }
-  if(btn) btn.innerHTML='&#x25B6; Start';
+function stopTuner() {
+  tunerRunning = false;
+  if (tunerRaf)    cancelAnimationFrame(tunerRaf);
+  if (tunerStream) tunerStream.getTracks().forEach(t => t.stop());
+  if (tunerCtx)    tunerCtx.close();
+  tunerStream = null; tunerCtx = null; tunerAnalyser = null;
+  tunerLastNote = null; tunerStableCount = 0;
+  const noteEl = document.getElementById('tuner-note');
+  const freqEl = document.getElementById('tuner-freq');
+  const needle = document.getElementById('tuner-needle');
+  const statusEl = document.getElementById('tuner-status');
+  const btn = document.getElementById('tuner-btn');
+  if (noteEl)   noteEl.textContent = '—';
+  if (freqEl)   freqEl.textContent = 'Tap Start to listen';
+  if (needle)   { needle.style.left = '50%'; needle.style.background = 'var(--border2)'; }
+  if (statusEl) { statusEl.textContent = ''; statusEl.className = 'tuner-status'; }
+  if (btn)      btn.innerHTML = '&#x25B6; Start';
 }
 
-function toggleTuner(){
-  if(tunerRunning) stopTuner(); else startTuner();
-}
+function toggleTuner() { if (tunerRunning) stopTuner(); else startTuner(); }
 
 /* ══════════════════════════════════════════════
    TEACHER DASHBOARD
@@ -1153,8 +990,7 @@ async function loadAllStudents(){
 }
 
 function renderTeacherSummary(){
-  const w=SETS.find(x=>x.id===teacherSetId);
-  if(!w||!w.skills) return;
+  const w=SETS.find(x=>x.id===teacherSetId); if(!w||!w.skills) return;
   const total=allStudents.length;
   const complete=allStudents.filter(s=>w.skills.every(sk=>s.skills[sk.id]==='gotit')).length;
   const none=allStudents.filter(s=>w.skills.every(sk=>!s.skills[sk.id]||s.skills[sk.id]==='none')).length;
@@ -1190,20 +1026,10 @@ function renderTeacherGrid(){
     }).join('');
     return `<tr><td class="nc" title="${displayName}">${displayName}</td>${cells}<td><span class="ppill ${pillClass}">${done} / ${total}</span></td></tr>`;
   }).join('');
-  document.getElementById('t-grid-container').innerHTML=`
-    <div class="t-grid-wrap">
-      <table>
-        <thead><tr><th class="nc">Student</th>${headerCells}<th>Progress</th></tr></thead>
-        <tbody>${rows}</tbody>
-      </table>
-    </div>`;
+  document.getElementById('t-grid-container').innerHTML=`<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th>${headerCells}<th>Progress</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
-function abbreviate(text){
-  const words=text.split(' ');
-  if(words.length<=4) return text;
-  return words.slice(0,3).join(' ')+'…';
-}
+function abbreviate(text){ const words=text.split(' '); if(words.length<=4) return text; return words.slice(0,3).join(' ')+'…'; }
 
 /* ── Resource Panel ── */
 function loadPanel(type,url,title,subtitle){
@@ -1214,9 +1040,7 @@ function loadPanel(type,url,title,subtitle){
   const newtab=document.getElementById('rp-newtab');
   const close=document.getElementById('rp-close');
   empty.style.display='none';
-  content.classList.add('visible');
-  newtab.classList.add('visible');
-  close.classList.add('visible');
+  content.classList.add('visible'); newtab.classList.add('visible'); close.classList.add('visible');
   newtab.href=url;
   meta.innerHTML=`<div class="rp-meta-title">${title}</div><div class="rp-meta-sub">${subtitle}</div>`;
   if(type==='youtube'){
@@ -1239,19 +1063,25 @@ function clearPanel(){
   const wrap=document.getElementById('rp-iframe-wrap');
   const newtab=document.getElementById('rp-newtab');
   const close=document.getElementById('rp-close');
-  content.classList.remove('visible');
-  newtab.classList.remove('visible');
-  close.classList.remove('visible');
-  wrap.className='rp-iframe-wrap';
-  wrap.innerHTML='';
+  content.classList.remove('visible'); newtab.classList.remove('visible'); close.classList.remove('visible');
+  wrap.className='rp-iframe-wrap'; wrap.innerHTML='';
   document.getElementById('rp-empty').style.display='';
 }
 
-/* ── Resizable panels ── */
+/* ══════════════════════════════════════════════
+   RESIZABLE PANELS — smooth drag + iframe shield
+   ══════════════════════════════════════════════ */
 (function(){
   const handle = document.getElementById('resize-handle');
   const panel  = document.getElementById('resource-panel');
   if (!handle || !panel) return;
+
+  // Invisible overlay that sits on top of iframes during drag,
+  // preventing them from swallowing mouse events
+  const shield = document.createElement('div');
+  shield.className = 'iframe-drag-shield';
+  panel.style.position = 'relative';
+  panel.appendChild(shield);
 
   let dragging = false, startX = 0, startW = 0;
   let rafPending = false;
@@ -1265,7 +1095,7 @@ function clearPanel(){
     if (!dragging) return;
     const newW = Math.min(Math.max(startW + (startX - clientX), 180), window.innerWidth * 0.6);
     panel.style.width = newW + 'px';
-    // Only reposition FABs once per animation frame to avoid layout thrash
+    // Throttle FAB repositioning to one layout reflow per animation frame
     if (!rafPending) {
       rafPending = true;
       requestAnimationFrame(() => { positionFabs(); rafPending = false; });
@@ -1275,6 +1105,7 @@ function clearPanel(){
   function onEnd() {
     if (!dragging) return;
     dragging = false;
+    shield.classList.remove('active');
     handle.classList.remove('dragging');
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
@@ -1284,6 +1115,7 @@ function clearPanel(){
     dragging = true;
     startX = e.clientX;
     startW = panel.offsetWidth;
+    shield.classList.add('active');
     handle.classList.add('dragging');
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
@@ -1297,6 +1129,7 @@ function clearPanel(){
     dragging = true;
     startX = e.touches[0].clientX;
     startW = panel.offsetWidth;
+    shield.classList.add('active');
     handle.classList.add('dragging');
     e.preventDefault();
   }, { passive: false });
@@ -1308,7 +1141,6 @@ function clearPanel(){
   window.addEventListener('resize', positionFabs);
 })();
 </script>
-
 <!--
 ╔════════════════════════════════════════════════════════════════════╗
 ║                 FIREBASE SETUP — ONE TIME, ~15 MINUTES              ║
