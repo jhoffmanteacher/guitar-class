@@ -3,38 +3,11 @@
 //  This is the only file you need to edit for course content.
 //  Upload to GitHub alongside index.html + firebase-config.js
 // ============================================================
-//
-//  HOW TO ADD A NEW SET:
-//  1. Copy the set block template at the bottom of this file
-//  2. Fill in your content
-//  3. Save and upload to GitHub — done!
-//
-//  HOW TO UNLOCK A SET:
-//  Change  locked: true  →  locked: false
-//
-//  HOW TO MARK A SET AS "COMING SOON":
-//  Set  comingSoon: true  and leave  skills: []
-//
-//  HANDOUT LINKS:
-//  Add  handoutUrl: 'https://docs.google.com/...'  to link the
-//  module handout from the objective card. One per module —
-//  copy the same URL to all sets within that module.
-//
-//  STATION SKILL TAGS:
-//  Add  skills: [1, 2]  to any step to show skill number badges.
-//  Numbers correspond to the position in the skills array (1-based).
-//
-//  SONG LINKS:
-//  Add  url: 'https://youtube.com/watch?v=...'  to any song to
-//  make the song title a clickable link that opens in the resource panel.
-//
-// ============================================================
 
 const WEEKS = [
 
   // ── MODULE 1: Introduction to Yourself & the Guitar ──────
 
-  // MODULE 1, SET 1 — Days 1–2: My Guitar Adventure
   {
     id: 'w1',
     label: 'Set 1',
@@ -50,24 +23,6 @@ const WEEKS = [
     comingSoon: false,
 
     stations: {
-      a: {
-        title: 'Teacher station — class discussion & sharing',
-        time: '15 min',
-        steps: [
-          {
-            text: 'Introduce yourself and share: why do you want to learn guitar? What song means something to you?',
-            hint: 'There are no wrong answers. This is about you and your musical story.'
-          },
-          {
-            text: 'Listen as classmates share their songs. Notice: what genres come up? What moods?',
-            hint: 'You\'ll be hearing and playing some of these songs all semester.'
-          },
-          {
-            text: 'Class discussion: what does it mean to "get good" at guitar? What would that look like for you?',
-            hint: 'Think about your own goal — it can be big or small.'
-          }
-        ]
-      },
       b: {
         title: 'Computer station — Watch · Listen · Reflect',
         time: '12 min',
@@ -78,7 +33,7 @@ const WEEKS = [
             skills: [1]
           },
           {
-            text: 'Find a YouTube clip of the song you shared (or the one a classmate shared that you liked). Listen and notice: what is the guitar doing?',
+            text: 'Find a YouTube clip of the song you shared (or one a classmate shared that you liked). Listen and notice: what is the guitar doing?',
             hint: 'Is it strumming chords? Playing a melody? Both? Just listen — you don\'t need to know the names yet.'
           }
         ]
@@ -125,7 +80,6 @@ const WEEKS = [
   },
 
 
-  // MODULE 1, SET 2 — Days 3–5: Parts, Posture, Tuning, First Notes
   {
     id: 'w2',
     label: 'Set 2',
@@ -141,32 +95,6 @@ const WEEKS = [
     comingSoon: false,
 
     stations: {
-      a: {
-        title: 'Teacher station — parts, posture & pick technique',
-        time: '12 min',
-        steps: [
-          {
-            text: 'Name the parts of the guitar together: body, neck, headstock, frets, strings, tuning pegs, nut, saddle, bridge.',
-            hint: 'Point to each part on your own guitar as the teacher names them.',
-            skills: [1]
-          },
-          {
-            text: 'Check posture: sit with the guitar resting on your right leg (or left if left-handed), back straight, neck angled slightly upward.',
-            hint: 'The guitar should feel stable without you gripping it tight.',
-            skills: [2]
-          },
-          {
-            text: 'Hold the pick: pinch it between thumb and side of index finger, 3–4mm of tip showing. Practice a slow downstroke on any open string.',
-            hint: 'If the pick feels floppy, grip a little firmer. If it snags, loosen up.',
-            skills: [3]
-          },
-          {
-            text: 'Learn the string names: E A D G B e (thickest to thinnest). Use a tuner app or clip-on tuner to tune all 6 strings.',
-            hint: 'Memory trick: "Eddie Ate Dynamite, Good Bye Eddie."',
-            skills: [4, 5]
-          }
-        ]
-      },
       b: {
         title: 'Computer station — Watch · Listen · Practice',
         time: '12 min',
@@ -212,7 +140,7 @@ const WEEKS = [
     },
 
     songs: [
-      { name: '"Happy Birthday"', meta: 'Play melody on open strings — first real song!', type: 'Core', core: true, url: '' },
+      { name: '"Happy Birthday"', meta: 'Play melody on open strings — first real song!', type: 'Core', core: true },
       { name: '"Vampire" — Olivia Rodrigo', meta: 'Listen and identify guitar sounds in the recording', type: 'Core', core: true },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', type: 'Core', core: true },
       { name: '"Ode to Joy"', meta: 'E string only — great first melody', type: 'Choice', core: false },
@@ -242,7 +170,6 @@ const WEEKS = [
 
   // ── MODULE 2: Notes on the E & A Strings ─────────────────
 
-  // MODULE 2, SET 1 — Week 2: Note Names on E & A Strings
   {
     id: 'm2w1',
     label: 'Set 1',
@@ -258,32 +185,6 @@ const WEEKS = [
     comingSoon: false,
 
     stations: {
-      a: {
-        title: 'Teacher station — musical alphabet & fretboard map',
-        time: '12 min',
-        steps: [
-          {
-            text: 'Learn the musical alphabet: A B C D E F G — then it repeats. No sharps or flats today, just natural notes.',
-            hint: 'Say it aloud a few times. Notice: there\'s no "H." After G, you go back to A.',
-            skills: [1]
-          },
-          {
-            text: 'Map the E string together: E (open) · F (fret 1) · G (fret 3) · A (fret 5) · B (fret 7) · C (fret 8). Point to each as you name it.',
-            hint: 'Notice the pattern skips fret 2, 4, 6 — those are sharps/flats we\'ll learn later.',
-            skills: [1, 2]
-          },
-          {
-            text: 'Map the A string: A (open) · B (fret 2) · C (fret 3) · D (fret 5) · E (fret 7) · F (fret 8). Teacher calls out a note — you find it.',
-            hint: 'Look for landmarks: fret 5 of E = A (same as open A string).',
-            skills: [1, 3]
-          },
-          {
-            text: 'Partner quiz: one person says a note name, the other points to it on the fretboard. Switch after 5 notes each.',
-            hint: 'No peeking at the chart after the first round!',
-            skills: [2, 3, 4]
-          }
-        ]
-      },
       b: {
         title: 'Computer station — Watch · Listen · Practice',
         time: '12 min',
@@ -310,8 +211,8 @@ const WEEKS = [
         time: '12 min',
         steps: [
           {
-            text: 'Tune your guitar. Using your note-name chart, play every natural note on the E string slowly, one at a time: E · F · G · A · B · C.',
-            hint: 'Say the note name out loud as you play it. Hearing + saying + playing locks it in faster.',
+            text: 'Tune your guitar. Using your note-name chart, play every natural note on the E string slowly: E · F · G · A · B · C. Say each name aloud.',
+            hint: 'Hearing + saying + playing locks it in faster.',
             skills: [2]
           },
           {
@@ -357,7 +258,6 @@ const WEEKS = [
   },
 
 
-  // MODULE 2, SET 2 — Weeks 3–4: Finger Placement, Clean Tone, TAB Reading
   {
     id: 'm2w2',
     label: 'Set 2',
@@ -373,32 +273,6 @@ const WEEKS = [
     comingSoon: false,
 
     stations: {
-      a: {
-        title: 'Teacher station — clean tone & TAB reading',
-        time: '12 min',
-        steps: [
-          {
-            text: 'Finger placement rules: press just behind the fret (not on top of it), use your fingertip (not the pad), and curve your fingers.',
-            hint: 'If you hear buzzing, 99% of the time it\'s one of these three things.',
-            skills: [1, 2]
-          },
-          {
-            text: 'One finger per fret: index = fret 1, middle = fret 2, ring = fret 3, pinky = fret 4. Keep unused fingers hovering close.',
-            hint: 'This is called "position playing." It\'ll feel awkward at first — that\'s normal.',
-            skills: [2, 3]
-          },
-          {
-            text: 'Thumb check: thumb goes on the back of the neck, roughly behind your middle finger. If your thumb is hooked over the top, fret buzz is almost guaranteed.',
-            hint: 'Imagine a straight line from your elbow through your wrist to your knuckles.',
-            skills: [6]
-          },
-          {
-            text: 'Intro to TAB: the 6 lines represent the 6 strings (bottom = low E). Numbers show which fret to press. Read "Happy Birthday" TAB together.',
-            hint: 'TAB tells you WHERE to play, not how long to hold it. Listen to the rhythm too.',
-            skills: [4, 5]
-          }
-        ]
-      },
       b: {
         title: 'Computer station — Watch · Listen · Practice',
         time: '12 min',
@@ -430,7 +304,7 @@ const WEEKS = [
             skills: [1, 2, 3, 6]
           },
           {
-            text: 'Using TAB, play "Happy Birthday" on E & A strings from memory. Set the metronome to 60 BPM — one note per beat.',
+            text: 'Using TAB, play "Happy Birthday" on E & A strings. Set the metronome to 60 BPM — one note per beat.',
             hint: 'If you buzz on a note, stop, fix your finger position, then continue. Don\'t just play through the buzz.',
             skills: [4, 5]
           },
@@ -474,16 +348,16 @@ const WEEKS = [
 
 
   // ── MODULES 3–9 — placeholder sets (locked) ──────────────
-  { id:'m3w1', label:'Set 1', locked:true, module:'Power Chords',                 moduleNum:3, unit:'Module 3 · Power Chords',                 title:'Set 1', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1S0gxHXkbgZRJT5VhR9nGz6O2imjEF9uQ_jNAYFaTc6I/edit', comingSoon:true, skills:[] },
-  { id:'m3w2', label:'Set 2', locked:true, module:'Power Chords',                 moduleNum:3, unit:'Module 3 · Power Chords',                 title:'Set 2', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1S0gxHXkbgZRJT5VhR9nGz6O2imjEF9uQ_jNAYFaTc6I/edit', comingSoon:true, skills:[] },
+  { id:'m3w1', label:'Set 1', locked:true, module:'Two-Finger Power Chords',                moduleNum:3, unit:'Module 3 · Two-Finger Power Chords',                title:'Set 1', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1S0gxHXkbgZRJT5VhR9nGz6O2imjEF9uQ_jNAYFaTc6I/edit', comingSoon:true, skills:[] },
+  { id:'m3w2', label:'Set 2', locked:true, module:'Two-Finger Power Chords',                moduleNum:3, unit:'Module 3 · Two-Finger Power Chords',                title:'Set 2', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1S0gxHXkbgZRJT5VhR9nGz6O2imjEF9uQ_jNAYFaTc6I/edit', comingSoon:true, skills:[] },
 
-  { id:'m4w1', label:'Set 1', locked:true, module:'Melody & Single-Note Playing', moduleNum:4, unit:'Module 4 · Melody & Single-Note Playing', title:'Set 1', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/edit', comingSoon:true, skills:[] },
-  { id:'m4w2', label:'Set 2', locked:true, module:'Melody & Single-Note Playing', moduleNum:4, unit:'Module 4 · Melody & Single-Note Playing', title:'Set 2', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/edit', comingSoon:true, skills:[] },
-  { id:'m4w3', label:'Set 3', locked:true, module:'Melody & Single-Note Playing', moduleNum:4, unit:'Module 4 · Melody & Single-Note Playing', title:'Set 3', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/edit', comingSoon:true, skills:[] },
+  { id:'m4w1', label:'Set 1', locked:true, module:'Major / Minor / Blues Pentatonic Scales', moduleNum:4, unit:'Module 4 · Major / Minor / Blues Pentatonic Scales', title:'Set 1', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/edit', comingSoon:true, skills:[] },
+  { id:'m4w2', label:'Set 2', locked:true, module:'Major / Minor / Blues Pentatonic Scales', moduleNum:4, unit:'Module 4 · Major / Minor / Blues Pentatonic Scales', title:'Set 2', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/edit', comingSoon:true, skills:[] },
+  { id:'m4w3', label:'Set 3', locked:true, module:'Major / Minor / Blues Pentatonic Scales', moduleNum:4, unit:'Module 4 · Major / Minor / Blues Pentatonic Scales', title:'Set 3', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/edit', comingSoon:true, skills:[] },
 
-  { id:'m5w1', label:'Set 1', locked:true, module:'Song Structure & Form',        moduleNum:5, unit:'Module 5 · Song Structure & Form',        title:'Set 1', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/edit', comingSoon:true, skills:[] },
-  { id:'m5w2', label:'Set 2', locked:true, module:'Song Structure & Form',        moduleNum:5, unit:'Module 5 · Song Structure & Form',        title:'Set 2', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/edit', comingSoon:true, skills:[] },
-  { id:'m5w3', label:'Set 3', locked:true, module:'Song Structure & Form',        moduleNum:5, unit:'Module 5 · Song Structure & Form',        title:'Set 3', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/edit', comingSoon:true, skills:[] },
+  { id:'m5w1', label:'Set 1', locked:true, module:'Open Chords',                            moduleNum:5, unit:'Module 5 · Open Chords',                            title:'Set 1', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/edit', comingSoon:true, skills:[] },
+  { id:'m5w2', label:'Set 2', locked:true, module:'Open Chords',                            moduleNum:5, unit:'Module 5 · Open Chords',                            title:'Set 2', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/edit', comingSoon:true, skills:[] },
+  { id:'m5w3', label:'Set 3', locked:true, module:'Open Chords',                            moduleNum:5, unit:'Module 5 · Open Chords',                            title:'Set 3', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/edit', comingSoon:true, skills:[] },
 
   { id:'m6w1', label:'Set 1', locked:true, module:'Barre Chords & Power Chords',  moduleNum:6, unit:'Module 6 · Barre Chords & Power Chords',  title:'Set 1', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1mBqrpsG2rkiVPWrF-zo0fxlgA1YQN33GyxmgsXqCY0g/edit', comingSoon:true, skills:[] },
   { id:'m6w2', label:'Set 2', locked:true, module:'Barre Chords & Power Chords',  moduleNum:6, unit:'Module 6 · Barre Chords & Power Chords',  title:'Set 2', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1mBqrpsG2rkiVPWrF-zo0fxlgA1YQN33GyxmgsXqCY0g/edit', comingSoon:true, skills:[] },
@@ -502,60 +376,3 @@ const WEEKS = [
   { id:'m9w3', label:'Set 3', locked:true, module:'Composition & Creativity',     moduleNum:9, unit:'Module 9 · Composition & Creativity',     title:'Set 3', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1FuhujeyL43MygvyYDTj6znTk8ZZPc0icFZzFtZPRxDs/edit', comingSoon:true, skills:[] },
 
 ]; // end WEEKS — do not remove this line
-
-
-// ── TEMPLATE — copy this block to add a new set ─────────────
-//
-// {
-//   id: 'm2w1',
-//   label: 'Set 1',
-//   locked: false,
-//   module: 'Module Name Here',
-//   moduleNum: 2,
-//   unit: 'Module 2 · Module Name Here',
-//   title: 'Set 1',
-//   subtitle: 'One-line summary of the set',
-//   objective: 'I CAN ...',
-//   skillFocus: 'Topic · Topic · Topic',
-//   handoutUrl: 'https://docs.google.com/document/d/YOUR_DOC_ID/edit',
-//   comingSoon: false,
-//
-//   stations: {
-//     a: {
-//       title: 'Teacher station — small group',
-//       time: '12 min',
-//       steps: [
-//         { text: 'Instruction here.', hint: 'Optional tip.', skills: [1, 2] }
-//       ]
-//     },
-//     b: {
-//       title: 'Computer station — Watch · Listen · Practice',
-//       time: '12 min',
-//       steps: [
-//         {
-//           text: 'Watch: <a href="https://youtube.com/..." target="_blank">Video Title – Channel</a> (0:00–3:00).',
-//           hint: 'As you watch: [what to think about or physically try].',
-//           skills: [1, 2]
-//         }
-//       ]
-//     },
-//     c: {
-//       title: 'Practice station — independent drill',
-//       time: '12 min',
-//       steps: [
-//         { text: 'Practice task here.', hint: 'Optional tip.', skills: [3] }
-//       ]
-//     }
-//   },
-//
-//   songs: [
-//     { name: '"Song Title" — Artist', meta: 'What skill it practices', type: 'Core',   core: true,  url: 'https://youtube.com/watch?v=...' },
-//     { name: '"Song Title" — Artist', meta: 'What skill it practices', type: 'Choice', core: false, url: 'https://youtube.com/watch?v=...' }
-//   ],
-//
-//   assessment: { goal: '...', performance: '...', selfCheck: '...', standards: ['Pr.4a'] },
-//
-//   skills: [
-//     { id: 'm2w1-s1', text: 'Skill description shown on the checklist' }
-//   ]
-// },
