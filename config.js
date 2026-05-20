@@ -92,7 +92,7 @@ const WEEKS = [
         time: '12 min',
         steps: [
           {
-            text: 'Tune your guitar using a clip tuner or <a href="https://chromewebstore.google.com/detail/guitarapp-guitar-tuner/niafepdbinnnbgigcnhefoconkcljifd" target="_blank" rel="noopener">install the guitar tuning app</a>. Goal: all 6 strings in tune in under 2 minutes.',
+            text: 'Tune your guitar using a clip tuner or the widget below. Goal: all 6 strings in tune in under 2 minutes.',
             hint: 'Low to high: E A D G B e. Green light = in tune.',
             skills: [4]
           },
