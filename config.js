@@ -71,8 +71,8 @@ const WEEKS = [
         time: '12 min',
         steps: [
           {
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=rrB97F0Qu6g" target="_blank">How to Actually Get Good at Guitar – Simen Otnes</a> (0:00–3:30).',
-            hint: 'As you watch, think about: what is one habit he says makes the biggest difference?',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=n-NeP6CTHTc" target="_blank">Beginner Practice Routine Grade 1 – JustinGuitar</a> (0:00–3:00).',
+            hint: 'As you watch, think about: what should you practice every single day, even if only for a few minutes?',
             skills: [1, 2]
           },
           {
@@ -122,7 +122,7 @@ const WEEKS = [
     ],
 
     videos: [
-      { name: 'How to Actually Get Good at Guitar', url: 'https://www.youtube.com/watch?v=rrB97F0Qu6g', source: 'Simen Otnes / Play With a Plan', rec: true  },
+      { name: 'Beginner Practice Routine Grade 1',  url: 'https://www.youtube.com/watch?v=n-NeP6CTHTc', source: 'JustinGuitar',                   rec: true  },
       { name: 'How to Hold a Guitar Pick',          url: 'https://www.youtube.com/watch?v=8-grcbKnbps', source: 'JustinGuitar',                   rec: false },
       { name: 'Beginner Open Strings Lesson',       url: 'https://www.youtube.com/watch?v=wvgJ0lt4spY', source: 'JustinGuitar',                   rec: false }
     ],
@@ -166,8 +166,8 @@ const WEEKS = [
         time: '12 min',
         steps: [
           {
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=47FXbQFd5ng" target="_blank">6 Levels of Chords on Guitar – Simen Otnes</a> (0:00–4:00).',
-            hint: 'As you watch, think about: what does he say causes buzzing? Pause at any point where he demos a chord — form it on your guitar and check your own tone before hitting play again.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=47FXbQFd5ng" target="_blank">6 Levels of Chords on Guitar – JustinGuitar</a> (0:00–4:00).',
+            hint: 'As you watch, think about: what makes a chord sound clean vs. buzzy? Pause when he demos a chord and try it yourself before hitting play again.',
             skills: [1, 2]
           },
           {
@@ -222,7 +222,7 @@ const WEEKS = [
     ],
 
     videos: [
-      { name: '6 Levels of Chords on Guitar',  url: 'https://www.youtube.com/watch?v=47FXbQFd5ng', source: 'Simen Otnes / Play With a Plan', rec: true  },
+      { name: '6 Levels of Chords on Guitar',  url: 'https://www.youtube.com/watch?v=47FXbQFd5ng', source: 'JustinGuitar',                   rec: true  },
       { name: '5 Essential Strumming Patterns', url: 'https://www.youtube.com/watch?v=hzC0orOGARw', source: 'JustinGuitar',                  rec: false },
       { name: 'First Chords + Strumming',       url: 'https://www.youtube.com/watch?v=JBKIamtI_Qc', source: 'Marty Music',                  rec: false }
     ],

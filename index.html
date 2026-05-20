@@ -190,10 +190,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .rp-empty{border:1px dashed var(--border2);border-radius:var(--radius);flex:1;min-height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text3);background:var(--bg)}
 .rp-empty-ico{font-size:24px}
 .rp-empty-txt{font-size:12px;text-align:center;line-height:1.5}
-.rp-content{display:none;flex-direction:column;gap:0;flex:1;min-height:0}
-.rp-content.visible{display:flex}
-.rp-iframe-wrap{border-radius:var(--radius);overflow:hidden;border:0.5px solid var(--border);background:#000;flex:1;min-height:0;position:relative;width:100%}
-.rp-iframe-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.rp-content{display:none;flex-direction:column;gap:0}
+.rp-content.visible{display:flex;flex-direction:column}
+.rp-content.visible:has(.rp-doc){flex:1;min-height:0}
+.rp-iframe-wrap{border-radius:var(--radius);overflow:hidden;border:0.5px solid var(--border);background:#000;width:100%}
+.rp-iframe-wrap.rp-youtube{position:relative;padding-bottom:56.25%}
+.rp-iframe-wrap.rp-youtube iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.rp-iframe-wrap.rp-doc{flex:1;min-height:200px;position:relative}
+.rp-iframe-wrap.rp-doc iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
 .rp-meta{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:11px 13px;margin-top:8px;flex-shrink:0}
 .rp-meta-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
 .rp-meta-sub{font-size:11px;color:var(--text2)}
@@ -1222,11 +1226,14 @@ function loadPanel(type,url,title,subtitle){
     let embedUrl=url;
     const ytMatch=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
     if(ytMatch) embedUrl=`https://www.youtube.com/embed/${ytMatch[1]}?rel=0&modestbranding=1`;
+    wrap.className='rp-iframe-wrap rp-youtube';
     wrap.innerHTML=`<iframe src="${embedUrl}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;
   } else if(type==='pdf'){
+    wrap.className='rp-iframe-wrap rp-doc';
     wrap.innerHTML=`<iframe src="${url}"></iframe>`;
   } else if(type==='gdoc'){
     const embedUrl=url.includes('/preview')?url:url.replace(/\/edit.*$/,'/preview');
+    wrap.className='rp-iframe-wrap rp-doc';
     wrap.innerHTML=`<iframe src="${embedUrl}"></iframe>`;
   }
 }
@@ -1238,6 +1245,7 @@ function clearPanel(){
   content.classList.remove('visible');
   newtab.classList.remove('visible');
   close.classList.remove('visible');
+  wrap.className='rp-iframe-wrap';
   wrap.innerHTML='';
   document.getElementById('rp-empty').style.display='';
 }
