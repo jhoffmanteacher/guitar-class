@@ -287,7 +287,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 </head>
 <body>
 <script src="firebase-config.js"></script>
-<script src="config.js"></script>
+<script src="config-main.js"></script>
+<script src="module-1.js"></script>
+<script src="module-2.js"></script>
+<script src="module-3.js"></script>
+<script src="module-4.js"></script>
+<script src="module-5.js"></script>
+<script src="module-6.js"></script>
+<script src="module-7.js"></script>
+<script src="module-8.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -810,45 +818,63 @@ function freqToNoteInfo(freq) {
   return { name, cents, hz: Math.round(freq * 10) / 10 };
 }
 
-function autoCorrelate(buf, sampleRate) {
-  const SIZE = buf.length;
+// Harmonic Product Spectrum — multiplies downsampled FFT magnitudes to find
+// the true fundamental even when harmonics are stronger than the fundamental.
+// This is the key fix for guitar low strings (E2=82Hz, A2=110Hz, D3=147Hz).
+function detectPitchHPS(timeDomainBuf, sampleRate) {
+  const N = timeDomainBuf.length;
+
+  // Silence check
   let rms = 0;
-  for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
-  rms = Math.sqrt(rms / SIZE);
-  if (rms < 0.015) return -1;
+  for (let i = 0; i < N; i++) rms += timeDomainBuf[i] * timeDomainBuf[i];
+  rms = Math.sqrt(rms / N);
+  if (rms < 0.01) return -1;
 
-  let r1 = 0, r2 = SIZE - 1;
-  for (let i = 0; i < SIZE / 2; i++) { if (Math.abs(buf[i]) > 0.2) { r1 = i; break; } }
-  for (let i = 1; i < SIZE / 2; i++) { if (Math.abs(buf[SIZE - i]) > 0.2) { r2 = SIZE - i; break; } }
-  const buf2 = buf.slice(r1, r2);
-  const len  = buf2.length;
-
-  // Normalized autocorrelation (NSDF style)
-  const c = new Float32Array(len);
-  for (let lag = 0; lag < len; lag++) {
-    let num = 0, denom = 0;
-    for (let i = 0; i < len - lag; i++) {
-      num   += buf2[i] * buf2[i + lag];
-      denom += buf2[i] * buf2[i] + buf2[i + lag] * buf2[i + lag];
-    }
-    c[lag] = denom === 0 ? 0 : 2 * num / denom;
+  // Apply Hann window before FFT
+  const windowed = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    windowed[i] = timeDomainBuf[i] * (0.5 - 0.5 * Math.cos(2 * Math.PI * i / (N - 1)));
   }
 
-  let firstDip = -1;
-  for (let i = 1; i < len; i++) { if (c[i] < 0) { firstDip = i; break; } }
-  if (firstDip === -1) return -1;
+  // Simple DFT magnitude for the frequency range we care about (60–1400 Hz).
+  // We only compute bins in that range to keep it fast.
+  const freqMin = 60, freqMax = 1400;
+  const binMin = Math.floor(freqMin * N / sampleRate);
+  const binMax = Math.ceil(freqMax * N / sampleRate);
+  const mag = new Float32Array(binMax + 1);
 
-  let maxVal = -Infinity, maxPos = -1;
-  for (let i = firstDip; i < len; i++) { if (c[i] > maxVal) { maxVal = c[i]; maxPos = i; } }
-  if (maxVal < 0.5 || maxPos === -1) return -1;
+  for (let k = binMin; k <= binMax; k++) {
+    let re = 0, im = 0;
+    const step = 2 * Math.PI * k / N;
+    for (let n = 0; n < N; n++) {
+      re += windowed[n] * Math.cos(step * n);
+      im -= windowed[n] * Math.sin(step * n);
+    }
+    mag[k] = Math.sqrt(re * re + im * im);
+  }
 
-  // Parabolic interpolation for sub-sample accuracy
-  const x1 = c[maxPos - 1] || 0, x2 = c[maxPos], x3 = c[maxPos + 1] || 0;
-  const a = (x1 + x3 - 2 * x2) / 2, b = (x3 - x1) / 2;
-  const T0 = a ? maxPos - b / (2 * a) : maxPos;
+  // Harmonic Product Spectrum: multiply mag[k] * mag[2k] * mag[3k] * mag[4k]
+  const numHarmonics = 4;
+  let bestVal = -1, bestBin = -1;
+  for (let k = binMin; k <= Math.floor(binMax / numHarmonics); k++) {
+    let product = mag[k];
+    for (let h = 2; h <= numHarmonics; h++) {
+      const hk = Math.round(k * h);
+      if (hk <= binMax) product *= mag[hk];
+    }
+    if (product > bestVal) { bestVal = product; bestBin = k; }
+  }
+  if (bestBin < binMin) return -1;
 
-  const freq = sampleRate / T0;
-  if (freq < 70 || freq > 1400) return -1;
+  // Parabolic interpolation for sub-bin accuracy
+  const prev = mag[bestBin - 1] || 0;
+  const curr = mag[bestBin];
+  const next = mag[bestBin + 1] || 0;
+  const denom = prev - 2 * curr + next;
+  const refinedBin = denom !== 0 ? bestBin - 0.5 * (next - prev) / denom : bestBin;
+  const freq = refinedBin * sampleRate / N;
+
+  if (freq < freqMin || freq > freqMax) return -1;
   return freq;
 }
 
@@ -856,7 +882,7 @@ function tunerLoop() {
   if (!tunerRunning) return;
   const buf = new Float32Array(tunerAnalyser.fftSize);
   tunerAnalyser.getFloatTimeDomainData(buf);
-  const freq = autoCorrelate(buf, tunerCtx.sampleRate);
+  const freq = detectPitchHPS(buf, tunerCtx.sampleRate);
   const noteEl = document.getElementById('tuner-note');
   const freqEl = document.getElementById('tuner-freq');
   const needle = document.getElementById('tuner-needle');
@@ -890,7 +916,9 @@ function tunerLoop() {
     needle.style.left = '50%'; needle.style.background = 'var(--border2)';
     statusEl.textContent = ''; statusEl.className = 'tuner-status';
   }
-  tunerRaf = requestAnimationFrame(tunerLoop);
+  // Run at ~10 fps — plenty for a tuner and avoids maxing out the CPU
+  // with the DFT computation on every animation frame.
+  setTimeout(() => { tunerRaf = requestAnimationFrame(tunerLoop); }, 100);
 }
 
 async function startTuner() {
@@ -898,7 +926,8 @@ async function startTuner() {
     tunerStream   = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
     tunerCtx      = new (window.AudioContext || window.webkitAudioContext)();
     tunerAnalyser = tunerCtx.createAnalyser();
-    tunerAnalyser.fftSize = 4096;
+    // Large buffer = better frequency resolution for low guitar strings
+    tunerAnalyser.fftSize = 8192;
     tunerAnalyser.smoothingTimeConstant = 0;
     const src = tunerCtx.createMediaStreamSource(tunerStream);
     src.connect(tunerAnalyser);
@@ -907,7 +936,7 @@ async function startTuner() {
     document.getElementById('tuner-freq').textContent = 'Listening…';
     tunerLoop();
   } catch(e) {
-    document.getElementById('tuner-freq').textContent = 'Mic access denied';
+    document.getElementById('tuner-freq').textContent = 'Mic access denied — check browser permissions';
   }
 }
 
