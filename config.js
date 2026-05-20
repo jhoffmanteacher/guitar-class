@@ -4,7 +4,7 @@
 //  Upload to GitHub alongside index.html + firebase-config.js
 // ============================================================
 
-const WEEKS = [
+const SETS = [
 
   // ── MODULE 1: Introduction to Yourself & the Guitar ──────
 
@@ -375,6 +375,4 @@ const WEEKS = [
   { id:'m9w2', label:'Set 2', locked:true, module:'Composition & Creativity',     moduleNum:9, unit:'Module 9 · Composition & Creativity',     title:'Set 2', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1FuhujeyL43MygvyYDTj6znTk8ZZPc0icFZzFtZPRxDs/edit', comingSoon:true, skills:[] },
   { id:'m9w3', label:'Set 3', locked:true, module:'Composition & Creativity',     moduleNum:9, unit:'Module 9 · Composition & Creativity',     title:'Set 3', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1FuhujeyL43MygvyYDTj6znTk8ZZPc0icFZzFtZPRxDs/edit', comingSoon:true, skills:[] },
 
-]; // end WEEKS — do not remove this line
-
-const SETS = WEEKS; // alias used by index.html
+]; // end SETS — do not remove this line
