@@ -803,12 +803,12 @@ document.addEventListener('click',e=>{
 });
 
 /* ══════════════════════════════════════════════
-   TUNER — robust autocorrelation with smoothing
+   TUNER — HPS via Web Audio FFT + YIN smoothing
    ══════════════════════════════════════════════ */
 const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 let tunerRunning = false, tunerStream = null, tunerCtx = null,
-    tunerAnalyser = null, tunerRaf = null, tunerLastNote = null,
-    tunerStableCount = 0;
+    tunerAnalyser = null, tunerFreqAnalyser = null, tunerRaf = null,
+    tunerLastNote = null, tunerStableCount = 0, tunerSmoothedFreq = 0;
 
 function freqToNoteInfo(freq) {
   const n    = Math.round(12 * Math.log2(freq / 440)) + 69;
@@ -818,88 +818,130 @@ function freqToNoteInfo(freq) {
   return { name, cents, hz: Math.round(freq * 10) / 10 };
 }
 
-// Harmonic Product Spectrum — multiplies downsampled FFT magnitudes to find
-// the true fundamental even when harmonics are stronger than the fundamental.
-// This is the key fix for guitar low strings (E2=82Hz, A2=110Hz, D3=147Hz).
-function detectPitchHPS(timeDomainBuf, sampleRate) {
-  const N = timeDomainBuf.length;
+// YIN pitch detection — accurate and fast on time-domain data.
+// Works well on low strings because it finds the true period directly.
+function detectPitchYIN(buf, sampleRate) {
+  const W = buf.length;
+  const half = Math.floor(W / 2);
 
   // Silence check
   let rms = 0;
-  for (let i = 0; i < N; i++) rms += timeDomainBuf[i] * timeDomainBuf[i];
-  rms = Math.sqrt(rms / N);
-  if (rms < 0.01) return -1;
+  for (let i = 0; i < W; i++) rms += buf[i] * buf[i];
+  if (Math.sqrt(rms / W) < 0.008) return -1;
 
-  // Apply Hann window before FFT
-  const windowed = new Float32Array(N);
-  for (let i = 0; i < N; i++) {
-    windowed[i] = timeDomainBuf[i] * (0.5 - 0.5 * Math.cos(2 * Math.PI * i / (N - 1)));
-  }
-
-  // Simple DFT magnitude for the frequency range we care about (60–1400 Hz).
-  // We only compute bins in that range to keep it fast.
-  const freqMin = 60, freqMax = 1400;
-  const binMin = Math.floor(freqMin * N / sampleRate);
-  const binMax = Math.ceil(freqMax * N / sampleRate);
-  const mag = new Float32Array(binMax + 1);
-
-  for (let k = binMin; k <= binMax; k++) {
-    let re = 0, im = 0;
-    const step = 2 * Math.PI * k / N;
-    for (let n = 0; n < N; n++) {
-      re += windowed[n] * Math.cos(step * n);
-      im -= windowed[n] * Math.sin(step * n);
+  // YIN difference function
+  const d = new Float32Array(half);
+  d[0] = 1;
+  let runSum = 0;
+  for (let tau = 1; tau < half; tau++) {
+    let s = 0;
+    for (let i = 0; i < half; i++) {
+      const diff = buf[i] - buf[i + tau];
+      s += diff * diff;
     }
-    mag[k] = Math.sqrt(re * re + im * im);
+    d[tau] = s;
+    runSum += s;
+    d[tau] *= tau / runSum;
   }
 
-  // Harmonic Product Spectrum: multiply mag[k] * mag[2k] * mag[3k] * mag[4k]
-  const numHarmonics = 4;
-  let bestVal = -1, bestBin = -1;
+  // Find first dip below threshold
+  const threshold = 0.12;
+  for (let tau = 2; tau < half; tau++) {
+    if (d[tau] < threshold) {
+      while (tau + 1 < half && d[tau + 1] < d[tau]) tau++;
+      // Parabolic interpolation for sub-sample accuracy
+      const x0 = tau > 1 ? d[tau - 1] : d[tau];
+      const x2 = tau < half - 1 ? d[tau + 1] : d[tau];
+      const refined = tau + (x2 - x0) / (2 * (2 * d[tau] - x0 - x2));
+      const freq = sampleRate / refined;
+      return (freq >= 60 && freq <= 1400) ? freq : -1;
+    }
+  }
+  return -1;
+}
+
+// HPS via the Web Audio AnalyserNode FFT — fast because the browser does
+// the FFT in native code. Multiplies downsampled magnitude spectra to pull
+// out the true fundamental even when harmonics dominate (common on low strings).
+function detectPitchHPS(freqData, sampleRate, fftSize) {
+  const binHz = sampleRate / fftSize;
+  const binMin = Math.max(1, Math.floor(60 / binHz));
+  const binMax = Math.ceil(1400 / binHz);
+  const numHarmonics = 5;
+
+  let bestVal = -Infinity, bestBin = -1;
   for (let k = binMin; k <= Math.floor(binMax / numHarmonics); k++) {
-    let product = mag[k];
-    for (let h = 2; h <= numHarmonics; h++) {
+    let product = 1;
+    for (let h = 1; h <= numHarmonics; h++) {
       const hk = Math.round(k * h);
-      if (hk <= binMax) product *= mag[hk];
+      if (hk < freqData.length) {
+        // freqData is dB; convert to linear magnitude
+        product *= Math.pow(10, freqData[hk] / 20);
+      }
     }
     if (product > bestVal) { bestVal = product; bestBin = k; }
   }
   if (bestBin < binMin) return -1;
 
-  // Parabolic interpolation for sub-bin accuracy
-  const prev = mag[bestBin - 1] || 0;
-  const curr = mag[bestBin];
-  const next = mag[bestBin + 1] || 0;
+  // Parabolic interpolation
+  const prev = bestBin > 0 ? Math.pow(10, freqData[bestBin - 1] / 20) : 0;
+  const curr = Math.pow(10, freqData[bestBin] / 20);
+  const next = bestBin < freqData.length - 1 ? Math.pow(10, freqData[bestBin + 1] / 20) : 0;
   const denom = prev - 2 * curr + next;
-  const refinedBin = denom !== 0 ? bestBin - 0.5 * (next - prev) / denom : bestBin;
-  const freq = refinedBin * sampleRate / N;
-
-  if (freq < freqMin || freq > freqMax) return -1;
-  return freq;
+  const refined = denom !== 0 ? bestBin - 0.5 * (next - prev) / denom : bestBin;
+  const freq = refined * binHz;
+  return (freq >= 60 && freq <= 1400) ? freq : -1;
 }
 
 function tunerLoop() {
   if (!tunerRunning) return;
-  const buf = new Float32Array(tunerAnalyser.fftSize);
-  tunerAnalyser.getFloatTimeDomainData(buf);
-  const freq = detectPitchHPS(buf, tunerCtx.sampleRate);
-  const noteEl = document.getElementById('tuner-note');
-  const freqEl = document.getElementById('tuner-freq');
-  const needle = document.getElementById('tuner-needle');
+
+  // Get time-domain data for YIN
+  const timeBuf = new Float32Array(tunerAnalyser.fftSize);
+  tunerAnalyser.getFloatTimeDomainData(timeBuf);
+
+  // Get frequency-domain data for HPS
+  const freqBuf = new Float32Array(tunerFreqAnalyser.frequencyBinCount);
+  tunerFreqAnalyser.getFloatFrequencyData(freqBuf);
+
+  // Run both detectors; prefer HPS for low strings, YIN as fallback
+  const freqHPS = detectPitchHPS(freqBuf, tunerCtx.sampleRate, tunerFreqAnalyser.fftSize);
+  const freqYIN = detectPitchYIN(timeBuf, tunerCtx.sampleRate);
+
+  // Pick the best candidate — if both fire, prefer HPS; if HPS misses, use YIN
+  let freq = -1;
+  if (freqHPS > 0 && freqYIN > 0) {
+    // They agree within a semitone — use HPS (more precise via interpolation)
+    freq = Math.abs(Math.log2(freqHPS / freqYIN)) < (1/12) ? freqHPS : freqYIN;
+  } else if (freqHPS > 0) {
+    freq = freqHPS;
+  } else if (freqYIN > 0) {
+    freq = freqYIN;
+  }
+
+  const noteEl   = document.getElementById('tuner-note');
+  const freqEl   = document.getElementById('tuner-freq');
+  const needle   = document.getElementById('tuner-needle');
   const statusEl = document.getElementById('tuner-status');
 
   if (freq > 0) {
-    const info = freqToNoteInfo(freq);
+    // Exponential smoothing on raw frequency — reduces jitter without lag
+    tunerSmoothedFreq = tunerSmoothedFreq > 0
+      ? tunerSmoothedFreq * 0.7 + freq * 0.3
+      : freq;
+
+    const info = freqToNoteInfo(tunerSmoothedFreq);
+
+    // Require 3 consecutive frames on the same note before displaying
     if (info.name === tunerLastNote) { tunerStableCount++; }
     else { tunerLastNote = info.name; tunerStableCount = 0; }
 
-    if (tunerStableCount >= 3) {
+    if (tunerStableCount >= 2) {
       noteEl.textContent = info.name;
       freqEl.textContent = info.hz + ' Hz';
       const clamped = Math.max(-50, Math.min(50, info.cents));
       needle.style.left = (50 + clamped) + '%';
-      const abs = Math.abs(clamped);
-      if (abs < 8) {
+      if (Math.abs(clamped) < 8) {
         needle.style.background = 'var(--green-text)';
         statusEl.textContent = 'In tune ✓'; statusEl.className = 'tuner-status in-tune';
       } else if (clamped > 0) {
@@ -911,27 +953,38 @@ function tunerLoop() {
       }
     }
   } else {
-    tunerStableCount = 0; tunerLastNote = null;
+    tunerStableCount = 0; tunerLastNote = null; tunerSmoothedFreq = 0;
     noteEl.textContent = '—'; freqEl.textContent = 'Play a string…';
     needle.style.left = '50%'; needle.style.background = 'var(--border2)';
     statusEl.textContent = ''; statusEl.className = 'tuner-status';
   }
-  // Run at ~10 fps — plenty for a tuner and avoids maxing out the CPU
-  // with the DFT computation on every animation frame.
-  setTimeout(() => { tunerRaf = requestAnimationFrame(tunerLoop); }, 100);
+  setTimeout(() => { tunerRaf = requestAnimationFrame(tunerLoop); }, 80);
 }
 
 async function startTuner() {
   try {
-    tunerStream   = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-    tunerCtx      = new (window.AudioContext || window.webkitAudioContext)();
+    // Disable browser audio processing that distorts low-frequency guitar signals
+    tunerStream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+      video: false
+    });
+    tunerCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = tunerCtx.createMediaStreamSource(tunerStream);
+
+    // Time-domain analyser for YIN (large buffer = better low-freq resolution)
     tunerAnalyser = tunerCtx.createAnalyser();
-    // Large buffer = better frequency resolution for low guitar strings
     tunerAnalyser.fftSize = 8192;
     tunerAnalyser.smoothingTimeConstant = 0;
-    const src = tunerCtx.createMediaStreamSource(tunerStream);
+
+    // Frequency-domain analyser for HPS (separate node, same source)
+    tunerFreqAnalyser = tunerCtx.createAnalyser();
+    tunerFreqAnalyser.fftSize = 8192;
+    tunerFreqAnalyser.smoothingTimeConstant = 0.5;
+
     src.connect(tunerAnalyser);
-    tunerRunning = true; tunerLastNote = null; tunerStableCount = 0;
+    src.connect(tunerFreqAnalyser);
+
+    tunerRunning = true; tunerLastNote = null; tunerStableCount = 0; tunerSmoothedFreq = 0;
     document.getElementById('tuner-btn').innerHTML = '&#x23F9; Stop';
     document.getElementById('tuner-freq').textContent = 'Listening…';
     tunerLoop();
@@ -945,8 +998,8 @@ function stopTuner() {
   if (tunerRaf)    cancelAnimationFrame(tunerRaf);
   if (tunerStream) tunerStream.getTracks().forEach(t => t.stop());
   if (tunerCtx)    tunerCtx.close();
-  tunerStream = null; tunerCtx = null; tunerAnalyser = null;
-  tunerLastNote = null; tunerStableCount = 0;
+  tunerStream = null; tunerCtx = null; tunerAnalyser = null; tunerFreqAnalyser = null;
+  tunerLastNote = null; tunerStableCount = 0; tunerSmoothedFreq = 0;
   const noteEl = document.getElementById('tuner-note');
   const freqEl = document.getElementById('tuner-freq');
   const needle = document.getElementById('tuner-needle');
