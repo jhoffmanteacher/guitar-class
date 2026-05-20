@@ -547,11 +547,11 @@ async function loadProgress(){
         else                                          progress[k]='none';
       });
       lastModuleNum = doc.data().lastModule||1;
-      lastWeekId    = doc.data().lastWeek||null;
+      lastSetId     = doc.data().lastSet||null;
     } else {
-      progress={}; lastModuleNum=1; lastWeekId=null;
+      progress={}; lastModuleNum=1; lastSetId=null;
     }
-  } catch(e){ progress={}; lastModuleNum=1; lastWeekId=null; }
+  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; }
 }
 
 function saveProgress(){
@@ -563,7 +563,7 @@ function saveProgress(){
       await db.collection('progress').doc(currentUser.uid).set({
         skills:progress,
         lastModule:lastModuleNum,
-        lastWeek:lastWeekId||null,
+        lastSet:lastSetId||null,
         name:currentUser.displayName||'',
         email:currentUser.email||''
       },{merge:true});
@@ -576,20 +576,20 @@ function setSaveMsg(msg){ document.querySelectorAll('.save-ind').forEach(el=>el.
 
 /* ── Render ── */
 let lastModuleNum = 1;
-let lastWeekId = null;
+let lastSetId = null;
 
 function renderAll(){
   renderPanels();
   populateModuleDropdown();
-  onModuleChange(lastModuleNum||1, lastWeekId);
+  onModuleChange(lastModuleNum||1, lastSetId);
 }
 
 function populateModuleDropdown(){
   const sel = document.getElementById('module-select');
   sel.innerHTML='';
-  const modules = [...new Set(WEEKS.map(w=>w.moduleNum))].sort((a,b)=>a-b);
+  const modules = [...new Set(SETS.map(w=>w.moduleNum))].sort((a,b)=>a-b);
   modules.forEach(num=>{
-    const w = WEEKS.find(x=>x.moduleNum===num);
+    const w = SETS.find(x=>x.moduleNum===num);
     const opt = document.createElement('option');
     opt.value = num;
     opt.textContent = `Module ${num} — ${w.module}`;
@@ -597,22 +597,22 @@ function populateModuleDropdown(){
   });
 }
 
-function onModuleChange(moduleNum, restoreWeekId){
+function onModuleChange(moduleNum, restoreSetId){
   moduleNum = parseInt(moduleNum);
   lastModuleNum = moduleNum;
   document.getElementById('module-select').value = moduleNum;
   renderPills(moduleNum);
-  const moduleWeeks = WEEKS.filter(w=>w.moduleNum===moduleNum);
-  const target = restoreWeekId && moduleWeeks.find(w=>w.id===restoreWeekId)
-    ? restoreWeekId
-    : (moduleWeeks.find(w=>!w.locked)||moduleWeeks[0]).id;
-  activateWeek(target);
+  const moduleSets = SETS.filter(w=>w.moduleNum===moduleNum);
+  const target = restoreSetId && moduleSets.find(w=>w.id===restoreSetId)
+    ? restoreSetId
+    : (moduleSets.find(w=>!w.locked)||moduleSets[0]).id;
+  activateSet(target);
 }
 
 function renderPills(moduleNum){
   const c = document.getElementById('week-pills');
   c.innerHTML='';
-  WEEKS.filter(w=>w.moduleNum===moduleNum).forEach(w=>{
+  SETS.filter(w=>w.moduleNum===moduleNum).forEach(w=>{
     const btn = document.createElement('button');
     btn.className='wpill'+(w.locked?' locked':'');
     btn.dataset.id=w.id;
@@ -621,13 +621,13 @@ function renderPills(moduleNum){
       const done=w.skills.filter(s=>progress[s.id]==='gotit').length;
       if(done<w.skills.length) btn.classList.add('incomplete');
     }
-    if(!w.locked) btn.onclick=()=>{ lastWeekId=w.id; activateWeek(w.id); saveProgress(); };
+    if(!w.locked) btn.onclick=()=>{ lastSetId=w.id; activateSet(w.id); saveProgress(); };
     c.appendChild(btn);
   });
 }
 
-function activateWeek(id){
-  lastWeekId = id;
+function activateSet(id){
+  lastSetId = id;
   document.querySelectorAll('.wpill').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   document.querySelectorAll('.week-panel').forEach(p=>p.classList.toggle('active',p.dataset.id===id));
 }
@@ -635,10 +635,10 @@ function activateWeek(id){
 function renderPanels(){
   const c=document.getElementById('week-panels');
   c.innerHTML='';
-  WEEKS.forEach(w=>{
+  SETS.forEach(w=>{
     const div=document.createElement('div');
     div.className='week-panel'; div.dataset.id=w.id;
-    div.innerHTML = w.comingSoon ? buildComingSoon(w) : buildWeek(w);
+    div.innerHTML = w.comingSoon ? buildComingSoon(w) : buildSet(w);
     c.appendChild(div);
   });
 }
@@ -655,7 +655,7 @@ function buildComingSoon(w){
   </div>`;
 }
 
-function buildWeek(w){
+function buildSet(w){
   const handoutLink = w.handoutUrl
     ? `<button onclick="loadPanel('gdoc','${w.handoutUrl}','Module ${w.moduleNum} handout','')" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--blue-text);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border);width:100%">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M4 5h4M4 7h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
@@ -758,7 +758,7 @@ function buildSongs(w){
 }
 
 function loadSong(wid, idx){
-  const w=WEEKS.find(x=>x.id===wid);
+  const w=SETS.find(x=>x.id===wid);
   if(!w) return;
   const s=w.songs[idx];
   if(!s||!s.url) return;
@@ -832,19 +832,16 @@ function toggleSkill(sid, wid, which){
     else if(cur==='working') progress[sid]='none';
     else                 progress[sid]='working';
   } else {
-    // gotit column
     if(cur==='gotit') progress[sid]='working';
     else              progress[sid]='gotit';
   }
   const wkSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="var(--amber-text)" stroke-width="1.5"/><path d="M6 4v2.2l1.4 1.4" stroke="var(--amber-text)" stroke-width="1.5" stroke-linecap="round"/></svg>`;
   const giSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green-text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  const w=WEEKS.find(x=>x.id===wid);
-  // Update all rendered instances of this checklist (stations tab + checklist tab)
+  const w=SETS.find(x=>x.id===wid);
   document.querySelectorAll(`.week-panel[data-id="${wid}"] .skill-row`).forEach(row=>{
     const wkCell = row.querySelector('.working-col');
     const giCell = row.querySelector('.gotit-col');
     if(!wkCell||!giCell) return;
-    // figure out which skill this row is by its onclick
     const onclick = wkCell.getAttribute('onclick')||'';
     const m = onclick.match(/'([^']+)'/);
     if(!m || m[1]!==sid) return;
@@ -962,7 +959,7 @@ function toggleTimer(){
   }
 }
 
-/* ── Popup logic — each popup toggles independently ── */
+/* ── Popup logic ── */
 function togglePopup(which){
   const el=document.getElementById(which+'-popup');
   el.classList.toggle('open');
@@ -1102,7 +1099,7 @@ function toggleTuner(){
    TEACHER DASHBOARD
    ══════════════════════════════════════════════ */
 const IS_TEACHER_MODE=new URLSearchParams(window.location.search).has('teacher');
-let teacherWeekId=null, allStudents=[];
+let teacherSetId=null, allStudents=[];
 
 function showTeacherApp(user){
   document.getElementById('auth-wall').style.display='none';
@@ -1116,24 +1113,24 @@ function showTeacherApp(user){
   document.getElementById('teacher-app').style.display='block';
   const av=user.photoURL?`<img src="${user.photoURL}" class="avatar" alt="">`:`<div class="avatar-init">${(user.displayName||'?')[0].toUpperCase()}</div>`;
   document.getElementById('user-area').innerHTML=`${av}<span class="user-name">${user.displayName||user.email}</span><button class="btn-out" onclick="signOut()">Sign out</button>`;
-  renderTeacherWeekTabs();
-  const firstWeek=WEEKS.find(w=>!w.locked&&w.skills&&w.skills.length>0);
-  if(firstWeek){ teacherWeekId=firstWeek.id; activateTeacherWeekTab(firstWeek.id); }
+  renderTeacherSetTabs();
+  const firstSet=SETS.find(w=>!w.locked&&w.skills&&w.skills.length>0);
+  if(firstSet){ teacherSetId=firstSet.id; activateTeacherSetTab(firstSet.id); }
   loadAllStudents();
 }
 
-function renderTeacherWeekTabs(){
+function renderTeacherSetTabs(){
   const c=document.getElementById('t-week-tabs'); c.innerHTML='';
-  WEEKS.forEach(w=>{
+  SETS.forEach(w=>{
     if(!w.skills||w.skills.length===0) return;
     const btn=document.createElement('button');
-    btn.className='t-wtab'+(w.locked?' locked':'')+(w.id===teacherWeekId?' on':'');
+    btn.className='t-wtab'+(w.locked?' locked':'')+(w.id===teacherSetId?' on':'');
     btn.textContent=w.label; btn.dataset.id=w.id;
-    if(!w.locked) btn.onclick=()=>{ teacherWeekId=w.id; activateTeacherWeekTab(w.id); renderTeacherGrid(); };
+    if(!w.locked) btn.onclick=()=>{ teacherSetId=w.id; activateTeacherSetTab(w.id); renderTeacherGrid(); };
     c.appendChild(btn);
   });
 }
-function activateTeacherWeekTab(id){ document.querySelectorAll('.t-wtab').forEach(b=>b.classList.toggle('on',b.dataset.id===id)); }
+function activateTeacherSetTab(id){ document.querySelectorAll('.t-wtab').forEach(b=>b.classList.toggle('on',b.dataset.id===id)); }
 
 async function loadAllStudents(){
   try{
@@ -1156,7 +1153,7 @@ async function loadAllStudents(){
 }
 
 function renderTeacherSummary(){
-  const w=WEEKS.find(x=>x.id===teacherWeekId);
+  const w=SETS.find(x=>x.id===teacherSetId);
   if(!w||!w.skills) return;
   const total=allStudents.length;
   const complete=allStudents.filter(s=>w.skills.every(sk=>s.skills[sk.id]==='gotit')).length;
@@ -1171,7 +1168,7 @@ function renderTeacherSummary(){
 
 function renderTeacherGrid(){
   renderTeacherSummary();
-  const w=WEEKS.find(x=>x.id===teacherWeekId);
+  const w=SETS.find(x=>x.id===teacherSetId);
   if(!w||!w.skills||w.skills.length===0){ document.getElementById('t-grid-container').innerHTML='<div class="t-loading">No skills for this set yet.</div>'; return; }
   if(allStudents.length===0){ document.getElementById('t-grid-container').innerHTML='<div class="t-loading">No student data yet — students need to sign in and check off skills first.</div>'; return; }
   const sorted=[...allStudents].sort((a,b)=>w.skills.filter(s=>b.skills[s.id]==='gotit').length-w.skills.filter(s=>a.skills[s.id]==='gotit').length);
