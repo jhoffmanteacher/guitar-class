@@ -1,5 +1,5 @@
 // ============================================================
-//  MODULE 1 — Introduction to Yourself & the Guitar
+//  MODULE 1 — Introductions: You and The Guitar
 //  Edit this file to change Module 1 content.
 //  Upload to GitHub alongside index.html + firebase-config.js
 // ============================================================
@@ -10,9 +10,9 @@ SETS.push(
     id: 'w1',
     label: 'Set 1',
     locked: false,
-    module: 'Introduction to Yourself & the Guitar',
+    module: 'Introductions: You and The Guitar',
     moduleNum: 1,
-    unit: 'Module 1 · Introduction to Yourself & the Guitar',
+    unit: 'Module 1 · Introductions: You and The Guitar',
     title: 'Set 1',
     subtitle: 'My Guitar Adventure · Goal-setting · Sharing',
     objective: 'I CAN describe why I want to play guitar and share a song that means something to me.',
@@ -81,9 +81,9 @@ SETS.push(
     id: 'w2',
     label: 'Set 2',
     locked: false,
-    module: 'Introduction to Yourself & the Guitar',
+    module: 'Introductions: You and The Guitar',
     moduleNum: 1,
-    unit: 'Module 1 · Introduction to Yourself & the Guitar',
+    unit: 'Module 1 · Introductions: You and The Guitar',
     title: 'Set 2',
     subtitle: 'Parts of the guitar · Posture · Tuning · First melody',
     objective: 'I CAN name 5+ parts of the guitar, tune all 6 strings, and play a short open-string melody at 60 BPM.',
