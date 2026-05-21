@@ -58,9 +58,14 @@ SETS.push(
 
     songs: [
       { name: 'Student choice — any song that means something to them', meta: 'Listening & sharing day · No playing required', type: 'Choice', core: false },
-      { name: '"Happy Birthday"', meta: 'Course song thread — you\'ll play this all semester', type: 'Core', core: true },
-      { name: '"Vampire" — Olivia Rodrigo', meta: 'Listen and identify guitar sounds', type: 'Core', core: true },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', type: 'Core', core: true }
+      { name: '"Happy Birthday"', meta: 'Course song thread — you\'ll play this all semester', type: 'Core', core: true,
+        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
+      { name: '"Vampire" — Olivia Rodrigo', meta: 'Listen and identify guitar sounds', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=RlPNh_PBZb4',
+        tutorialUrl: 'https://www.youtube.com/watch?v=AmfDC2xL7xg' },
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
+        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' }
     ],
 
     assessment: {
@@ -137,14 +142,25 @@ SETS.push(
     },
 
     songs: [
-      { name: '"Happy Birthday"', meta: 'Play melody on open strings — first real song!', type: 'Core', core: true },
-      { name: '"Vampire" — Olivia Rodrigo', meta: 'Listen and identify guitar sounds in the recording', type: 'Core', core: true },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', type: 'Core', core: true },
-      { name: '"Ode to Joy"', meta: 'E string only — great first melody', type: 'Choice', core: false },
-      { name: '"Mary Had a Little Lamb"', meta: 'E & A strings', type: 'Choice', core: false },
-      { name: '"Jingle Bells"', meta: 'Open strings only', type: 'Choice', core: false },
-      { name: '"Twinkle Twinkle"', meta: 'E & A strings', type: 'Choice', core: false },
-      { name: '"The Simpsons Theme"', meta: 'E string only', type: 'Choice', core: false }
+      { name: '"Happy Birthday"', meta: 'Play melody on open strings — first real song!', type: 'Core', core: true,
+        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
+      { name: '"Vampire" — Olivia Rodrigo', meta: 'Listen and identify guitar sounds in the recording', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=RlPNh_PBZb4',
+        tutorialUrl: 'https://www.youtube.com/watch?v=AmfDC2xL7xg' },
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
+        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
+      { name: '"Ode to Joy"', meta: 'E string only — great first melody', type: 'Choice', core: false,
+        tutorialUrl: 'https://www.youtube.com/watch?v=PRZh_Wv3IQQ' },
+      { name: '"Mary Had a Little Lamb"', meta: 'E & A strings', type: 'Choice', core: false,
+        tutorialUrl: 'https://www.youtube.com/watch?v=8gK9n9vrt3g' },
+      { name: '"Jingle Bells"', meta: 'Open strings only', type: 'Choice', core: false,
+        tutorialUrl: 'https://www.youtube.com/watch?v=qM_Yar0xqRk' },
+      { name: '"Twinkle Twinkle"', meta: 'E & A strings', type: 'Choice', core: false,
+        tutorialUrl: 'https://www.youtube.com/watch?v=NPS5xuRCA6w' },
+      { name: '"The Simpsons Theme"', meta: 'E string only', type: 'Choice', core: false,
+        originalUrl: 'https://www.youtube.com/watch?v=aPzS3QYb868',
+        tutorialUrl: 'https://www.youtube.com/watch?v=lGwNWYzYuIk' }
     ],
 
     assessment: {

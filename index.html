@@ -116,8 +116,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .dc{background:var(--blue-text)}.dch{background:var(--text3)}
 .sname{font-size:13px;font-weight:500}
 .smeta{font-size:12px;color:var(--text2);margin-top:1px}
-.stag{font-size:10px;padding:2px 8px;border-radius:10px;margin-left:auto;flex-shrink:0;white-space:nowrap;background:var(--bg2);color:var(--text2)}
+.stag{font-size:10px;padding:2px 8px;border-radius:10px;flex-shrink:0;white-space:nowrap;background:var(--bg2);color:var(--text2)}
 .stag-core{background:var(--blue-bg);color:var(--blue-text)}
+.song-vids{display:flex;gap:6px;margin-left:auto;flex-shrink:0;align-items:center}
+.song-vid-btn{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 9px;border-radius:10px;background:var(--blue-bg);color:var(--blue-text);border:none;cursor:pointer;font-family:inherit;white-space:nowrap}
+.song-vid-btn:hover{filter:brightness(0.95)}
+.song-vid-btn.tut{background:var(--bg3);color:var(--text2)}
 .legend{display:flex;gap:14px;margin-bottom:8px}
 .leg{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2)}
 .vid-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)}
@@ -719,7 +723,11 @@ function openSt(wid,s){
 function buildSongs(w){
   const rows=w.songs.map((s,i)=>{
     const nameEl = s.url ? `<button class="rp-trigger" onclick="loadSong('${w.id}',${i})">${s.name}</button>` : s.name;
-    return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div><div class="sname">${nameEl}</div><div class="smeta">${s.meta}</div></div><span class="stag ${s.core?'stag-core':''}">${s.type}</span></div>`;
+    const vids = [];
+    if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="loadSongVid('${w.id}',${i},'original')" title="Opens in YouTube">&#x25B6; Original <span style="font-size:9px;opacity:0.7">&#x2197;</span></button>`);
+    if(s.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="loadSongVid('${w.id}',${i},'tutorial')">&#x25B6; Tutorial</button>`);
+    const vidsEl = vids.length ? `<div class="song-vids">${vids.join('')}</div>` : '';
+    return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div><div class="sname">${nameEl}</div><div class="smeta">${s.meta}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${s.type}</span></div>`;
   }).join('');
   return `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>Core — everyone</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu — pick 1</div></div><div class="card">${rows}</div>`;
 }
@@ -728,6 +736,18 @@ function loadSong(wid, idx){
   const w=SETS.find(x=>x.id===wid); if(!w) return;
   const s=w.songs[idx]; if(!s||!s.url) return;
   loadPanel('youtube', s.url, s.name, s.type);
+}
+
+function loadSongVid(wid, idx, kind){
+  const w=SETS.find(x=>x.id===wid); if(!w) return;
+  const s=w.songs[idx]; if(!s) return;
+  const url = kind==='tutorial' ? s.tutorialUrl : s.originalUrl;
+  if(!url) return;
+  if(kind==='original'){
+    window.open(url, '_blank', 'noopener');
+    return;
+  }
+  loadPanel('youtube', url, s.name, 'Solo tutorial');
 }
 
 /* ── Videos ── */
