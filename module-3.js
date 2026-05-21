@@ -49,17 +49,31 @@ SETS.push(
           {
             text: 'Tune your guitar. Fret an E5 power chord (low E string, open root + 2nd fret A string). Strum just those two strings — no others. Get a clean, buzz-free sound.',
             hint: 'Use your index finger on the root and your ring finger on the 5th. Keep your pinky close. Palm-mute the strings below with the edge of your picking hand.',
-            skills: [1, 3]
+            skills: [1, 3],
+            chords: [
+              { name: 'E5', chord: [[6,0],[5,2,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 0 }
+            ]
           },
           {
             text: 'Slide the same shape to: A5 (5th fret E string), G5 (3rd fret E string), D5 (5th fret A string), C5 (3rd fret A string). Say the chord name aloud each time.',
             hint: 'Keep the same finger shape and just move it up and down the neck. The relationship between the two fingers never changes.',
-            skills: [2, 4]
+            skills: [2, 4],
+            chords: [
+              { name: 'G5', chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
+              { name: 'A5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 },
+              { name: 'C5', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
+              { name: 'D5', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,'x'],[2,'x'],[1,'x']], position: 5 }
+            ]
           },
           {
             text: 'Play the "All Along the Watchtower" power chord loop: Am5–G5–F5–G5, one strum per beat at 60 BPM.',
             hint: 'Am5 = 5th fret E string, G5 = 3rd fret E string, F5 = 1st fret E string. Shift smoothly — aim to land exactly on beat 1.',
-            skills: [2, 5, 6]
+            skills: [2, 5, 6],
+            chords: [
+              { name: 'Am5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 },
+              { name: 'G5',  chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
+              { name: 'F5',  chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 0 }
+            ]
           }
         ]
       }
