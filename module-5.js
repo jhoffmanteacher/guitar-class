@@ -28,17 +28,30 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/hzC0orOGARw" target="_blank">How to Read Chord Diagrams – JustinGuitar</a> (full video).',
             hint: 'Pause when he shows a diagram and look at it yourself. What does the X mean? What does the O mean? What do the numbers in the dots tell you?',
-            skills: [1, 2]
+            skills: [1, 2],
+            response: { type: 'mc', prompt: 'On a chord diagram, an X above a string means:', choices: [
+              'Do not play that string',
+              'Play that string with your thumb',
+              'Play it muted (palm-mute)',
+              'It is optional'
+            ] }
           },
           {
             text: 'Watch: <a href="https://youtu.be/JBKIamtI_Qc" target="_blank">Your First Chords Am and Em – Marty Music</a> (0:00–5:00).',
             hint: 'Try placing your fingers as he shows Am, then strum it before watching more. Does every string ring? If not, check which finger is accidentally muting a string.',
-            skills: [3, 4]
+            skills: [3, 4],
+            response: { type: 'short', placeholder: 'When you strummed Am, did every string ring clean? If not, which one was muted and why?' }
           },
           {
             text: 'Watch: <a href="https://youtu.be/47FXbQFd5ng" target="_blank">Open Chord Shapes – Simen Otnes</a> (0:00–3:00).',
             hint: 'Focus on how relaxed his fretting hand looks. Tension is the enemy of clean chord tone. Breathe and let your arm weight do the work.',
-            skills: [3, 4]
+            skills: [3, 4],
+            response: { type: 'mc', prompt: 'According to the video, what is the enemy of clean chord tone?', choices: [
+              'Tension in the fretting hand',
+              'Strumming too loudly',
+              'Old guitar strings',
+              'Using a thick pick'
+            ] }
           }
         ]
       },
@@ -130,17 +143,25 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/hzC0orOGARw" target="_blank">C G Am F Chord Transitions – JustinGuitar</a> (full video).',
             hint: 'He shows the "perfect" chord change technique. Watch how he prepares the next chord shape before strumming it. Anticipation is the secret.',
-            skills: [1, 2, 3, 4]
+            skills: [1, 2, 3, 4],
+            response: { type: 'mc', prompt: 'What is the "secret" to clean chord changes, according to the video?', choices: [
+              'Prepare (anticipate) the next chord shape before you strum it',
+              'Strum harder so any missed notes are hidden',
+              'Use only your index finger',
+              'Memorize each chord with your eyes closed'
+            ] }
           },
           {
             text: 'Watch: <a href="https://youtu.be/dJfV7DsTThc" target="_blank">F Chord Simplified – Marty Music</a> (full video).',
             hint: 'The F chord is the #1 stumbling block for beginners. The simplified version (xx3211) avoids the full barre. Use this until it\'s clean, then worry about the barre version.',
-            skills: [2]
+            skills: [2],
+            response: { type: 'short', placeholder: 'Which version of the F chord are you starting with (full barre or simplified)? Why?' }
           },
           {
             text: 'Listen to "Let It Be" by The Beatles. Can you hear the C–G–Am–F chord pattern in the verse? Count the bars — how many strums per chord?',
             hint: 'You don\'t need to play along yet. Just listen and map out when the chords change. This trains your ear to recognize the I–V–vi–IV progression.',
-            skills: [5]
+            skills: [5],
+            response: { type: 'short', placeholder: 'About how many strums (or beats) does each chord get before it changes?' }
           }
         ]
       },
@@ -235,17 +256,25 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/hzC0orOGARw" target="_blank">D A Em Bm Open Chords – JustinGuitar</a> (full video).',
             hint: 'D major has a triangular finger shape — notice how his three fingers are stacked in a triangle on strings 1, 2, and 3. Try to copy that exact shape.',
-            skills: [1, 2, 3, 4]
+            skills: [1, 2, 3, 4],
+            response: { type: 'mc', prompt: 'The D major chord uses which finger shape on strings 1, 2, and 3?', choices: [
+              'A triangle shape',
+              'A straight line across one fret',
+              'A square shape',
+              'All open strings'
+            ] }
           },
           {
             text: 'Watch: <a href="https://youtu.be/JBKIamtI_Qc" target="_blank">Bm Chord for Beginners – Marty Music</a> (full video).',
             hint: 'Bm is the trickiest chord in this group. The partial barre version (xx4432) is the most accessible. Don\'t try the full barre version yet — focus on getting a clean sound first.',
-            skills: [4]
+            skills: [4],
+            response: { type: 'short', placeholder: 'Which Bm version are you starting with (partial barre or full)? What\'s the hardest part for you?' }
           },
           {
             text: 'Listen to "Country Roads" by John Denver or "Sweet Home Alabama." Can you hear when the D and A chords arrive? Tap along and try to feel the chord changes.',
             hint: 'These songs use chords from Group 2. Your ear already knows what these chords sound like — you\'re just learning to play them now.',
-            skills: [5]
+            skills: [5],
+            response: { type: 'short', placeholder: 'Which song did you listen to? Describe one moment where you clearly heard a chord change.' }
           }
         ]
       },
@@ -338,17 +367,25 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/hzC0orOGARw" target="_blank">E Major and B7 Chords – JustinGuitar</a> (full video).',
             hint: 'E major uses all four fingers — it\'s a full chord. B7 is also four fingers but in a different arrangement. Take them one at a time. The B7 chord has a distinctive jazz/blues sound.',
-            skills: [1, 2]
+            skills: [1, 2],
+            response: { type: 'short', placeholder: 'Describe the sound of the B7 chord. What musical mood does it suggest?' }
           },
           {
             text: 'Watch: <a href="https://youtu.be/rrB97F0Qu6g" target="_blank">How to Practice for Performance – Simen Otnes</a> (full video).',
             hint: 'Key idea: practice doesn\'t make perfect — practice makes permanent. Are you practicing your mistakes or your solutions? This matters most before a performance.',
-            skills: [5]
+            skills: [5],
+            response: { type: 'mc', prompt: 'What is the KEY idea from this video about practice?', choices: [
+              'Practice makes permanent — so practice the solution, not the mistake',
+              'Practice makes perfect — repetition is all that matters',
+              'You only need to practice the day before a performance',
+              'Speed matters more than accuracy'
+            ] }
           },
           {
             text: 'Look up a chord chart for your showcase song (or one you\'ve been working on). Map out which chord groups you\'ll use. Are there any chords you need to review?',
             hint: 'Being intentional about your practice is a skill. Know exactly which transitions are rough and spend most of your time there — not on the parts you already know.',
-            skills: [5, 6]
+            skills: [5, 6],
+            response: { type: 'short', placeholder: 'Which song are you working on? Which chord transition feels the roughest right now?' }
           }
         ]
       },

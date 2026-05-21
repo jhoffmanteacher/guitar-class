@@ -28,17 +28,30 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/XxICTF-NIZ8" target="_blank">Minor Pentatonic Scale – JustinGuitar</a> (0:00–5:00).',
             hint: 'Follow along on your guitar as he shows the pattern. Pause and find each note before he names it.',
-            skills: [1, 2]
+            skills: [1, 2],
+            response: { type: 'mc', prompt: 'For A minor pentatonic Pattern 1, where does your 1st finger sit on the low E string?', choices: [
+              '5th fret',
+              '3rd fret',
+              'The open string',
+              '7th fret'
+            ] }
           },
           {
             text: 'Watch: <a href="https://youtu.be/dJfV7DsTThc" target="_blank">Blues Scale Explained – Marty Music</a> (0:00–4:00).',
             hint: 'Focus on the Pattern 1 shape — how does it sit on the neck? Notice where the root note is.',
-            skills: [1, 3]
+            skills: [1, 3],
+            response: { type: 'short', placeholder: 'Describe the Pattern 1 shape. Where is the root note?' }
           },
           {
             text: 'Try positioning Pattern 1 as C major pentatonic: place your 4th finger on the 8th fret of string 6 (the note C). Play the pattern up and down slowly.',
             hint: 'Major pentatonic: 4th finger on root. Minor pentatonic: 1st finger on root. Same pattern — different finger on the starting note.',
-            skills: [3, 4]
+            skills: [3, 4],
+            response: { type: 'mc', prompt: 'For MAJOR pentatonic in Pattern 1, which finger plays the root note?', choices: [
+              '4th finger (pinky)',
+              '1st finger (index)',
+              '2nd finger (middle)',
+              'It does not matter which finger'
+            ] }
           }
         ]
       },
@@ -130,17 +143,30 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/RMdkevqJDDk" target="_blank">Pentatonic Scale Across Strings – Simen Otnes</a> (0:00–4:00).',
             hint: 'Notice how he varies his attack — some notes are loud, some soft. That\'s dynamics. Try to copy his feel, not just his notes.',
-            skills: [1, 2]
+            skills: [1, 2],
+            response: { type: 'short', placeholder: 'In your own words: what are dynamics, and how did he use them?' }
           },
           {
             text: 'Watch: <a href="https://youtu.be/3x6k7zHkqmA" target="_blank">Hammer-Ons and Pull-Offs – JustinGuitar</a> (full video).',
             hint: 'These are your first "expressive" techniques. A hammer-on connects two notes with one pick stroke — it changes the shape (envelope) of the notes.',
-            skills: [3]
+            skills: [3],
+            response: { type: 'mc', prompt: 'A hammer-on connects two notes using how many pick strokes?', choices: [
+              'One pick stroke',
+              'Two pick strokes',
+              'Zero pick strokes',
+              'Depends on the speed'
+            ] }
           },
           {
             text: 'Experiment with timbre: play a note close to the bridge, then the same note near the neck. Hear the difference? Bright vs warm. Try to match the mood of a song you know.',
             hint: 'There\'s no wrong answer here. Your picking hand position is a real-time tone control. Move it consciously.',
-            skills: [2, 4]
+            skills: [2, 4],
+            response: { type: 'mc', prompt: 'Which picking position sounds BRIGHTER?', choices: [
+              'Close to the bridge',
+              'Close to the neck',
+              'Right over the soundhole',
+              'They sound exactly the same'
+            ] }
           }
         ]
       },
@@ -233,17 +259,30 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/XxICTF-NIZ8" target="_blank">Full Pentatonic Box 1 – JustinGuitar</a> (5:00–end).',
             hint: 'This time focus on the theory section. How does he explain the relationship between major and minor pentatonic? Can you see the relative major/minor connection?',
-            skills: [1, 2]
+            skills: [1, 2],
+            response: { type: 'short', placeholder: 'Explain the relative major/minor connection in your own words.' }
           },
           {
             text: 'Watch: <a href="https://youtu.be/GI7s3ZwXOJg" target="_blank">Vibrato Technique – Simen Otnes</a> (full video).',
             hint: 'Vibrato is a small, controlled pitch wobble on a sustained note. Try it on the 5th fret, string 1. Rock your finger back and forth gently. It takes weeks to develop — just start!',
-            skills: [3]
+            skills: [3],
+            response: { type: 'mc', prompt: 'Vibrato is best described as:', choices: [
+              'A small, controlled pitch wobble on a sustained note',
+              'Playing two notes at the same time',
+              'Bending the string up a whole step',
+              'Sliding between two frets quickly'
+            ] }
           },
           {
             text: 'Theory check: the blues scale adds one note to the minor pentatonic — the ♭5 (flat 5). In A minor, that\'s the note Eb. Find it on the fretboard between the 4th and 5th scale degrees.',
             hint: 'In Pattern 1 for A minor, the ♭5 sits between the 4 and 5 on the D string. It\'s a "passing tone" — it creates tension that wants to resolve.',
-            skills: [4, 5]
+            skills: [4, 5],
+            response: { type: 'mc', prompt: 'What is the "blue note" added to the minor pentatonic to make a blues scale?', choices: [
+              'The ♭5 (flat 5)',
+              'The major 3rd',
+              'The ♭7 (flat 7)',
+              'The 2nd'
+            ] }
           }
         ]
       },

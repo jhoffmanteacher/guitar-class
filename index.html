@@ -108,6 +108,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .sh{font-size:12px;color:var(--text2);margin-top:3px}
 .sh-list{font-size:12px;color:var(--text2);margin-top:5px;padding-left:16px;display:flex;flex-direction:column;gap:3px}
 .sh-list li{line-height:1.5}
+.step-resp{margin-top:8px}
+.step-resp-prompt{font-size:12px;font-weight:500;color:var(--text);margin-bottom:5px}
+.step-resp-input{width:100%;min-height:54px;padding:7px 9px;font-family:inherit;font-size:12.5px;line-height:1.45;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:6px;resize:vertical;box-sizing:border-box}
+.step-resp-input:focus{outline:none;border-color:var(--blue-text);box-shadow:0 0 0 2px var(--blue-bg)}
+.step-resp-mc{display:flex;flex-direction:column;gap:5px}
+.step-resp-mc-opt{display:flex;align-items:flex-start;gap:7px;padding:5px 8px;font-size:12.5px;line-height:1.4;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:var(--bg)}
+.step-resp-mc-opt:hover{background:var(--bg2)}
+.step-resp-mc-opt input{margin-top:2px;cursor:pointer}
+.step-resp-mc-opt input:checked + span{color:var(--blue-text);font-weight:500}
+.step-resp-saved{font-size:10.5px;color:var(--text2);margin-top:3px;min-height:13px}
 .skill-badge{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:20px;border-radius:10px;background:var(--blue-bg);border:0.5px solid var(--blue-text);font-size:10px;font-weight:500;color:var(--blue-text);flex-shrink:0;margin-left:5px;vertical-align:middle;padding:0 7px;white-space:nowrap}
 .card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:4px 16px;margin-bottom:12px}
 .song-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)}
@@ -468,7 +478,11 @@ const auth = firebase.auth();
 const db   = firebase.firestore();
 let currentUser = null;
 let progress    = {};
+let responses   = {};
 let saveTimer   = null;
+let respSaveTimer = null;
+const escAttr = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const escHtml = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
 /* ── Auth ── */
 function signIn(){
@@ -487,7 +501,7 @@ auth.onAuthStateChanged(async user=>{
     if(IS_TEACHER_MODE){ showTeacherApp(user); }
     else { await loadProgress(); showApp(user); }
   } else {
-    currentUser = null; progress = {};
+    currentUser = null; progress = {}; responses = {};
     document.getElementById('auth-wall').style.display='block';
     document.getElementById('app').style.display='none';
     document.getElementById('teacher-app').style.display='none';
@@ -521,8 +535,29 @@ async function loadProgress(){
       });
       lastModuleNum = doc.data().lastModule||1;
       lastSetId     = doc.data().lastSet||null;
-    } else { progress={}; lastModuleNum=1; lastSetId=null; }
-  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; }
+      responses     = doc.data().responses || {};
+    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; }
+  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; responses={}; }
+}
+
+function onResponseChange(key, value){
+  responses[key] = value;
+  saveResponses();
+}
+function saveResponses(){
+  if(!currentUser) return;
+  clearTimeout(respSaveTimer);
+  setSaveMsg('Saving…');
+  respSaveTimer = setTimeout(async()=>{
+    try{
+      await db.collection('progress').doc(currentUser.uid).set({
+        responses:responses,
+        name:currentUser.displayName||'', email:currentUser.email||''
+      },{merge:true});
+      setSaveMsg('Saved ✓');
+      setTimeout(()=>setSaveMsg(''),2000);
+    } catch(e){ setSaveMsg('Save failed — check connection'); }
+  },800);
 }
 
 function saveProgress(){
@@ -675,7 +710,7 @@ function switchTab(el,wid,tab){
 
 /* ── Stations ── */
 function buildStations(w){
-  const stepsHtml=steps=>steps.map((s,i)=>{
+  const stepsHtml=(steps,stationId)=>steps.map((s,i)=>{
     const text=s.text.replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"[^>]*>([^<]*)<\/a>/g,(match,url,label)=>{
       const safe=label.replace(/'/g,"\\'");
       return `<button class="rp-trigger" onclick="loadPanel('youtube','${url}','${safe}','YouTube')">&#x25B6; ${label}</button>`;
@@ -689,12 +724,29 @@ function buildStations(w){
     const chordsHtml = (s.chords&&s.chords.length)
       ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}<div class="chord-box-label">${c.name}</div></div>`).join('')}</div>`
       : '';
-    return `<li class="step"><div class="st">${text}${skillBadges?`<span style="margin-left:6px">${skillBadges}</span>`:''}${hintHtml}${chordsHtml}</div></li>`;
+    const respHtml = s.response ? (()=>{
+      const key = `${w.id}-${stationId}-${i}`;
+      const stored = responses[key] || '';
+      const promptHtml = s.response.prompt ? `<div class="step-resp-prompt">${escHtml(s.response.prompt)}</div>` : '';
+      if(s.response.type === 'short'){
+        const ph = s.response.placeholder || 'Type your answer here…';
+        return `<div class="step-resp">${promptHtml}<textarea class="step-resp-input" rows="2" placeholder="${escAttr(ph)}" oninput="onResponseChange('${key}', this.value)">${escHtml(stored)}</textarea></div>`;
+      }
+      if(s.response.type === 'mc' && Array.isArray(s.response.choices)){
+        const opts = s.response.choices.map(c=>{
+          const checked = stored===c ? 'checked' : '';
+          return `<label class="step-resp-mc-opt"><input type="radio" name="resp-${key}" ${checked} onchange="onResponseChange('${key}', '${escAttr(c)}')"><span>${escHtml(c)}</span></label>`;
+        }).join('');
+        return `<div class="step-resp">${promptHtml}<div class="step-resp-mc">${opts}</div></div>`;
+      }
+      return '';
+    })() : '';
+    return `<li class="step"><div class="st">${text}${skillBadges?`<span style="margin-left:6px">${skillBadges}</span>`:''}${hintHtml}${chordsHtml}${respHtml}</div></li>`;
   }).join('');
   const dp=(id,cls,badge,badgeClass,s)=>`
     <div class="dp${cls}" id="${w.id}-dp-${id}">
       <div class="dp-head"><span class="st-badge ${badgeClass}">${badge}</span><div class="dp-title">${s.title}</div></div>
-      <ul class="steps">${stepsHtml(s.steps)}</ul>
+      <ul class="steps">${stepsHtml(s.steps, id)}</ul>
     </div>`;
   return `
     <div class="st-grid">

@@ -28,17 +28,30 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/RQcEJMYSGfI" target="_blank">Power Chords – Simen Otnes</a> (full video).',
             hint: 'Pause after the shape explanation and try the power chord on your guitar before he plays along. Make sure both notes ring clean.',
-            skills: [1, 2]
+            skills: [1, 2],
+            response: { type: 'mc', prompt: 'A power chord is made up of which two notes?', choices: [
+              'The root and the 5th',
+              'The root, the 3rd, and the 5th',
+              'The root and the octave (same note, higher)',
+              'All six open strings'
+            ] }
           },
           {
             text: 'Watch: <a href="https://youtu.be/3CIbdUaHMhw" target="_blank">Power Chords 101 – JustinGuitar</a> (0:00–4:00).',
             hint: 'Focus on his right-hand muting technique. How does he stop the strings he isn\'t playing from ringing?',
-            skills: [1, 3]
+            skills: [1, 3],
+            response: { type: 'short', placeholder: 'Describe his right-hand muting technique in your own words.' }
           },
           {
             text: 'Watch: <a href="https://youtu.be/dJfV7DsTThc" target="_blank">Power Chords for Beginners – Marty Music</a> (0:00–3:00).',
             hint: 'Notice how he moves the same shape to different positions on the neck. Try sliding your shape to A5 and G5.',
-            skills: [2, 4]
+            skills: [2, 4],
+            response: { type: 'mc', prompt: 'If you play the same power chord shape with your index finger on the 5th fret of the low E string, what chord is it?', choices: [
+              'A5',
+              'G5',
+              'C5',
+              'E5'
+            ] }
           }
         ]
       },
@@ -144,17 +157,25 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/hzC0orOGARw" target="_blank">How to Practice with a Metronome – JustinGuitar</a> (0:00–4:00).',
             hint: 'His tip about setting the metronome 10 BPM slower than you think you need is key. Slow is smooth, smooth is fast.',
-            skills: [1, 2]
+            skills: [1, 2],
+            response: { type: 'mc', prompt: 'According to the video, where should you set the metronome when learning something new?', choices: [
+              'About 10 BPM slower than you think you need',
+              'As fast as you can possibly play',
+              'It doesn\'t matter — pick any tempo',
+              'Always 120 BPM'
+            ] }
           },
           {
             text: 'Watch: <a href="https://youtu.be/JBKIamtI_Qc" target="_blank">Power Chord Song Examples – Marty Music</a> (full video).',
             hint: 'Pick one song you recognize and try to play along. Match the strum timing to what you hear.',
-            skills: [3, 4]
+            skills: [3, 4],
+            response: { type: 'short', placeholder: 'Which song did you try to play along with? What was hardest about it?' }
           },
           {
             text: 'Watch: <a href="https://youtu.be/Oqn1pflxC_Q" target="_blank">Increasing Speed on Guitar – Simen Otnes</a> (0:00–3:00).',
             hint: 'Notice his method for building tempo gradually. Try it: play your "Watchtower" loop at 60 BPM, then bump to 65, then 70.',
-            skills: [1, 2]
+            skills: [1, 2],
+            response: { type: 'short', placeholder: 'In one sentence, describe his method for building up tempo gradually.' }
           }
         ]
       },

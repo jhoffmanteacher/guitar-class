@@ -28,11 +28,18 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/rrB97F0Qu6g" target="_blank">How to Actually Get Good at Guitar – Simen Otnes</a> (0:00–3:30).',
             hint: 'As you watch, think about: what is one habit he says makes the biggest difference? Does it match what you thought?',
-            skills: [1]
+            skills: [1],
+            response: { type: 'short', placeholder: 'In one sentence: what habit did he say matters most, and did it match what you thought?' }
           },
           {
             text: 'Find a YouTube clip of the song you shared (or one a classmate shared that you liked). Listen and notice: what is the guitar doing?',
-            hint: 'Is it strumming chords? Playing a melody? Both? Just listen — you don\'t need to know the names yet.'
+            hint: 'Is it strumming chords? Playing a melody? Both? Just listen — you don\'t need to know the names yet.',
+            response: { type: 'mc', prompt: 'In the clip you watched, what was the guitar doing?', choices: [
+              'Strumming chords',
+              'Playing a melody (single notes)',
+              'Both strumming and single notes',
+              'Mostly rhythm or percussive sounds'
+            ] }
           }
         ]
       },
@@ -104,17 +111,25 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/8-grcbKnbps" target="_blank">How to Hold a Guitar Pick – JustinGuitar</a> (full video).',
             hint: 'Pause after each tip and check your own grip. Adjust before continuing.',
-            skills: [3]
+            skills: [3],
+            response: { type: 'short', placeholder: 'What is one thing about your pick grip you will adjust after watching?' }
           },
           {
             text: 'Watch: <a href="https://youtu.be/ely9LaJJJr4" target="_blank">Your First Guitar Lesson – Marty Music</a> (0:00–5:00).',
             hint: 'Focus on posture and right-hand motion. Pause and try each thing he shows.',
-            skills: [2, 3]
+            skills: [2, 3],
+            response: { type: 'short', placeholder: 'Name one posture or right-hand change you noticed you need to make.' }
           },
           {
             text: 'Watch: <a href="https://youtu.be/9SgCKECFEjA" target="_blank">How to Tune a Guitar – JustinGuitar</a> (0:00–3:00).',
             hint: 'Follow along and tune your guitar while you watch.',
-            skills: [4, 5]
+            skills: [4, 5],
+            response: { type: 'mc', prompt: 'From thickest string to thinnest, the standard tuning is:', choices: [
+              'E  A  D  G  B  E (thickest to thinnest)',
+              'E  B  G  D  A  E',
+              'G  D  A  E  B  E',
+              'I am not sure yet'
+            ] }
           }
         ]
       },

@@ -28,17 +28,25 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/PNik7GWWBGA" target="_blank">Notes on the Low E String – JustinGuitar</a> (full video).',
             hint: 'Play along on your guitar as he goes through each note. Pause and find each note before he names it.',
-            skills: [1, 2]
+            skills: [1, 2],
+            response: { type: 'mc', prompt: 'On the low E string, which note is at fret 5?', choices: [
+              'A',
+              'D',
+              'G',
+              'F'
+            ] }
           },
           {
             text: 'Watch: <a href="https://youtu.be/k2jBLNzfEow" target="_blank">Fretboard Notes Made Easy – Marty Music</a> (0:00–4:00).',
             hint: 'Focus on the E and A strings only for now. What patterns does he point out?',
-            skills: [1, 3]
+            skills: [1, 3],
+            response: { type: 'short', placeholder: 'Describe one pattern he points out for finding notes on the E or A string.' }
           },
           {
             text: 'Listen to "Happy Birthday" — can you identify which notes of the melody live on the E or A string? Hum along and try to find the notes.',
             hint: 'Don\'t worry about playing it yet — just train your ear to connect sounds to strings.',
-            skills: [5]
+            skills: [5],
+            response: { type: 'short', placeholder: 'Which note(s) did you find first? Where on the fretboard?' }
           }
         ]
       },
@@ -132,17 +140,30 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/RMdkevqJDDk" target="_blank">Beginner Finger Exercises – Simen Otnes</a> (0:00–4:00).',
             hint: 'Try each exercise slowly on your guitar as he demonstrates. Slow and clean beats fast and buzzy every time.',
-            skills: [1, 2, 3]
+            skills: [1, 2, 3],
+            response: { type: 'short', placeholder: 'Which exercise felt hardest, and what do you think makes it hard?' }
           },
           {
             text: 'Watch: <a href="https://youtu.be/3x6k7zHkqmA" target="_blank">How to Avoid Fret Buzz – JustinGuitar</a> (full video).',
             hint: 'Play a note on your guitar and see if you can diagnose your own buzz using his checklist.',
-            skills: [1, 2]
+            skills: [1, 2],
+            response: { type: 'mc', prompt: 'Which is the MOST common cause of fret buzz for beginners?', choices: [
+              'Pressing the string too lightly, or too far from the fret',
+              'Using the wrong pick',
+              'The guitar being out of tune',
+              'Strumming too quietly'
+            ] }
           },
           {
             text: 'Watch: <a href="https://youtu.be/o56KBAO3OC4" target="_blank">How to Read Guitar TAB – Marty Music</a> (0:00–4:00).',
             hint: 'Pause when he shows a TAB example. Find those notes on your guitar before hitting play.',
-            skills: [4]
+            skills: [4],
+            response: { type: 'mc', prompt: 'On a TAB diagram, the TOP line represents which string?', choices: [
+              'The high E (thinnest) string',
+              'The low E (thickest) string',
+              'The A string',
+              'It depends on the song'
+            ] }
           }
         ]
       },
