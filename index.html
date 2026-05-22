@@ -311,6 +311,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .chord-link:hover{background:var(--blue-bg)}
 .string-link{display:inline;color:var(--green-text);cursor:pointer;border-bottom:0.5px dotted var(--green-text);font-weight:500;padding:0 1px;border-radius:2px;transition:background 0.1s}
 .string-link:hover{background:var(--green-bg)}
+.note-link{display:inline;color:var(--amber-text);cursor:pointer;border-bottom:0.5px dotted var(--amber-text);font-weight:500;padding:0 1px;border-radius:2px;transition:background 0.1s}
+.note-link:hover{background:var(--amber-bg)}
 .chord-popup{position:absolute;z-index:1000;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius);padding:10px 12px;box-shadow:0 4px 18px rgba(0,0,0,0.20);pointer-events:none;display:none;flex-direction:column;align-items:center;gap:4px;max-width:220px}
 .chord-popup.visible{display:flex}
 .chord-popup-name{font-size:13px;font-weight:600;color:var(--text)}
@@ -713,6 +715,32 @@ function localStringSvg(kind){
   return chordDiagramSVG(cfg).replace(/width="\d+"\s+height="\d+"/, '');
 }
 
+/* Single-note diagrams — one fretted (or open) note on one string,
+   all others muted. Reuses chordDiagramSVG. For frets > 4 we shift
+   the position window so the dot stays visible. */
+const STRING_KIND_TO_NUM = { lowE:6, A:5, D:4, G:3, B:2, highE:1 };
+const STRING_SHORT_LABEL = { lowE:'low E', A:'A', D:'D', G:'G', B:'B', highE:'high E' };
+function ordinal(n){
+  const s = ['th','st','nd','rd'], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+function noteFullLabel(note, fret, kind){
+  const str = STRING_SHORT_LABEL[kind] || kind;
+  return fret === 0 ? `${note} · ${str} open` : `${note} · ${str} string, ${ordinal(fret)} fret`;
+}
+function localNoteSvg(kind, fret){
+  const num = STRING_KIND_TO_NUM[kind];
+  if (!num) return null;
+  const fr = Number(fret);
+  if (isNaN(fr) || fr < 0) return null;
+  const position = fr > 4 ? fr - 2 : 0;
+  const chord = [];
+  for (let s = 6; s >= 1; s--) {
+    chord.push(s === num ? [s, fr, ''] : [s, 'x', '']);
+  }
+  return chordDiagramSVG({ position, chord }).replace(/width="\d+"\s+height="\d+"/, '');
+}
+
 /* String reference patterns:
    - "low E" / "high E" (case-insensitive on low/high, captures both as one unit)
    - A letter or list of letters followed by "string"/"strings", e.g.
@@ -762,7 +790,36 @@ function findStringMatches(text){
 const CHORD_NAMES = ['F#m','C#m','Em','Am','Dm','Bm','B7','A5','E5','G5','D5','C5','C','G','D','A','E','F'];
 const CHORD_RE = new RegExp('(^|[^A-Za-z0-9#])(' + CHORD_NAMES.join('|') + ')(?![A-Za-z0-9#])', 'g');
 const CHORD_SKIP_TAGS = new Set(['A','BUTTON','SCRIPT','STYLE','TEXTAREA','INPUT','LABEL','SELECT']);
-const CHORD_SKIP_CLASSES = ['skill-badge','chord-link','string-link','rp-trigger','chord-box-label','chord-diagrams','read-aloud-btn','step-resp-mc-opt'];
+const CHORD_SKIP_CLASSES = ['skill-badge','chord-link','string-link','note-link','rp-trigger','chord-box-label','chord-diagrams','read-aloud-btn','step-resp-mc-opt'];
+
+/* Single-note references: "1st fret (F)", "5th fret (A)", "open (E)" etc.
+   The letter inside parens is the NOTE — not a chord. We use the most
+   recent string reference earlier in the same text as the string context. */
+const NOTE_CTX_RE = /\b(?:(\d+)(?:st|nd|rd|th)?\s+fret|(open))\s*\(\s*([A-G][#b]?)\s*\)/gi;
+function findNoteMatches(text, stringMatches){
+  const out = [];
+  const re = new RegExp(NOTE_CTX_RE.source, 'gi');
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    const fret = m[2] ? 0 : parseInt(m[1], 10);
+    const note = m[3];
+    /* Wrap just the note letter inside the parens, not the whole "Nth fret" phrase */
+    const innerStart = m.index + m[0].indexOf(note, m[0].lastIndexOf('('));
+    const innerEnd = innerStart + note.length;
+    /* Find most recent string reference ending before this match */
+    const ctx = stringMatches
+      .filter(s => s.end <= m.index)
+      .sort((a, b) => b.end - a.end)[0];
+    if (!ctx) {
+      /* No string context — still record so chord-detection skips this letter,
+         but mark kind=null so we render plain text rather than the wrong chord. */
+      out.push({ start: innerStart, end: innerEnd, kind: null, fret, note });
+    } else {
+      out.push({ start: innerStart, end: innerEnd, kind: ctx.kind, fret, note });
+    }
+  }
+  return out;
+}
 
 function wrapChordLinksIn(rootEl){
   if (!rootEl) return;
@@ -788,7 +845,10 @@ function wrapChordLinksIn(rootEl){
     /* String references first — they take priority over chord matches */
     const stringMatches = findStringMatches(text);
 
-    /* Chord matches — skip any that overlap a string match */
+    /* Note references — "1st fret (F)", "open (E)" with string context */
+    const noteMatches = findNoteMatches(text, stringMatches);
+
+    /* Chord matches — skip any that overlap a string or note match */
     const chordMatches = [];
     const re = new RegExp(CHORD_RE.source, 'g');
     let m;
@@ -797,13 +857,15 @@ function wrapChordLinksIn(rootEl){
       const start = m.index + prefix.length;
       const end = start + chord.length;
       if (stringMatches.some(s => s.start < end && start < s.end)) continue;
+      if (noteMatches.some(s => s.start < end && start < s.end)) continue;
       chordMatches.push({ start, end, chord });
     }
 
-    if (!stringMatches.length && !chordMatches.length) return;
+    if (!stringMatches.length && !chordMatches.length && !noteMatches.length) return;
 
     const all = [
       ...stringMatches.map(x => ({ start:x.start, end:x.end, type:'string', kind:x.kind })),
+      ...noteMatches.filter(x => x.kind).map(x => ({ start:x.start, end:x.end, type:'note', kind:x.kind, fret:x.fret, note:x.note })),
       ...chordMatches.map(x => ({ start:x.start, end:x.end, type:'chord',  chord:x.chord }))
     ].sort((a,b) => a.start - b.start);
 
@@ -818,6 +880,15 @@ function wrapChordLinksIn(rootEl){
         span.textContent = text.slice(item.start, item.end);
         span.addEventListener('click', onStringLinkClick);
         span.addEventListener('mouseenter', onStringLinkHover);
+        span.addEventListener('mouseleave', hideChordPopup);
+      } else if (item.type === 'note') {
+        span.className = 'note-link';
+        span.dataset.string = item.kind;
+        span.dataset.fret = String(item.fret);
+        span.dataset.note = item.note;
+        span.textContent = text.slice(item.start, item.end);
+        span.addEventListener('click', onNoteLinkClick);
+        span.addEventListener('mouseenter', onNoteLinkHover);
         span.addEventListener('mouseleave', hideChordPopup);
       } else {
         span.className = 'chord-link';
@@ -893,6 +964,30 @@ function onStringLinkHover(){
   if (!svg) return;
   const label = STRING_LABELS[kind] || kind;
   popup.innerHTML = `<div class="chord-popup-name">${label}</div><div class="chord-popup-svg">${svg}</div><div class="chord-popup-hint">Click to open</div>`;
+  popup.classList.add('visible');
+  positionChordPopup(popup, this);
+}
+function onNoteLinkClick(e){
+  e.preventDefault(); e.stopPropagation();
+  const kind = this.dataset.string;
+  const fret = Number(this.dataset.fret);
+  const note = this.dataset.note;
+  if (!kind || isNaN(fret) || !note) return;
+  hideChordPopup();
+  const label = noteFullLabel(note, fret, kind);
+  /* Encode payload in the URL slot as "kind|fret|note" */
+  loadPanel('note', `${kind}|${fret}|${note}`, label, 'Single note');
+}
+function onNoteLinkHover(){
+  const kind = this.dataset.string;
+  const fret = Number(this.dataset.fret);
+  const note = this.dataset.note;
+  if (!kind || isNaN(fret) || !note) return;
+  const popup = ensureChordPopup();
+  const svg = localNoteSvg(kind, fret);
+  if (!svg) return;
+  const hint = noteFullLabel(note, fret, kind);
+  popup.innerHTML = `<div class="chord-popup-name">${note}</div><div class="chord-popup-svg">${svg}</div><div class="chord-popup-hint">${escHtml(hint)} · Click to open</div>`;
   popup.classList.add('visible');
   positionChordPopup(popup, this);
 }
@@ -1698,6 +1793,19 @@ function loadPanel(type,url,title,subtitle){
       wrap.innerHTML = `<div class="rp-chord-err">Unknown string: ${escHtml(kind)}</div>`;
       newtab.classList.remove('visible');
     }
+  } else if(type==='note'){
+    /* For note type, `url` carries "kind|fret|note" */
+    const [kind, fretStr, note] = String(url).split('|');
+    const fret = Number(fretStr);
+    wrap.className='rp-iframe-wrap rp-chord';
+    const svg = localNoteSvg(kind, fret);
+    if (svg){
+      wrap.innerHTML = `<div class="rp-chord-svg">${svg}</div>`;
+      newtab.classList.remove('visible');
+    } else {
+      wrap.innerHTML = `<div class="rp-chord-err">No diagram for ${escHtml(note||'')}</div>`;
+      newtab.classList.remove('visible');
+    }
   }
 }
 function clearPanel(){
@@ -1719,10 +1827,13 @@ function clearPanel(){
   if (!handle || !panel) return;
 
   // Invisible overlay that sits on top of iframes during drag,
-  // preventing them from swallowing mouse events
+  // preventing them from swallowing mouse events.
+  // NOTE: do NOT override panel.style.position — the panel uses
+  // position:sticky (CSS) so it stays visible while the main column
+  // scrolls. Sticky already establishes a containing block for the
+  // absolutely-positioned shield, so no override is needed.
   const shield = document.createElement('div');
   shield.className = 'iframe-drag-shield';
-  panel.style.position = 'relative';
   panel.appendChild(shield);
 
   let dragging = false, startX = 0, startW = 0;
