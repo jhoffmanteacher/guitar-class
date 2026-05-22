@@ -240,6 +240,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .tuner-status.in-tune{color:var(--green-text)}
 .tuner-status.sharp{color:var(--amber-text)}
 .tuner-status.flat{color:var(--blue-text)}
+.tuner-strings{display:flex;gap:3px;margin-bottom:10px}
+.ts-btn{flex:1;padding:4px 0;border-radius:var(--radius-sm);border:0.5px solid var(--border2);background:var(--bg2);font-size:11px;cursor:pointer;color:var(--text2);font-family:inherit;min-width:0}
+.ts-btn:hover{background:var(--bg3)}
+.ts-btn.active{background:#eeedfe;border-color:#534ab7;color:#3c3489;font-weight:500}
 .tp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .tp-title{font-size:13px;font-weight:500}
 .tp-close{background:none;border:none;cursor:pointer;font-size:18px;color:var(--text3);line-height:1;padding:0 2px;font-family:inherit}
@@ -397,6 +401,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
           <div class="tp-head">
             <span class="tp-title">&#x1F3B8; Tuner</span>
             <button class="tp-close" onclick="closePopup('tuner')">&#x2715;</button>
+          </div>
+          <div class="tuner-strings" id="tuner-strings">
+            <button class="ts-btn active" data-string="auto" onclick="selectTunerString('auto')">Auto</button>
+            <button class="ts-btn" data-string="E2" onclick="selectTunerString('E2')">E</button>
+            <button class="ts-btn" data-string="A2" onclick="selectTunerString('A2')">A</button>
+            <button class="ts-btn" data-string="D3" onclick="selectTunerString('D3')">D</button>
+            <button class="ts-btn" data-string="G3" onclick="selectTunerString('G3')">G</button>
+            <button class="ts-btn" data-string="B3" onclick="selectTunerString('B3')">B</button>
+            <button class="ts-btn" data-string="E4" onclick="selectTunerString('E4')">e</button>
           </div>
           <div class="tuner-note" id="tuner-note">—</div>
           <div class="tuner-freq" id="tuner-freq">Tap Start to listen</div>
@@ -929,9 +942,20 @@ document.addEventListener('click',e=>{
    TUNER — HPS via Web Audio FFT + YIN smoothing
    ══════════════════════════════════════════════ */
 const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const STRING_TARGETS = { 'E2': 82.41, 'A2': 110.00, 'D3': 146.83, 'G3': 196.00, 'B3': 246.94, 'E4': 329.63 };
 let tunerRunning = false, tunerStream = null, tunerCtx = null,
     tunerAnalyser = null, tunerFreqAnalyser = null, tunerRaf = null,
-    tunerLastNote = null, tunerStableCount = 0, tunerSmoothedFreq = 0;
+    tunerHP = null, tunerLP = null,
+    tunerLastNote = null, tunerStableCount = 0, tunerSmoothedFreq = 0,
+    tunerTargetString = 'auto';
+
+function selectTunerString(s) {
+  tunerTargetString = s;
+  document.querySelectorAll('#tuner-strings .ts-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.string === s);
+  });
+  tunerSmoothedFreq = 0; tunerStableCount = 0; tunerLastNote = null;
+}
 
 function freqToNoteInfo(freq) {
   const n    = Math.round(12 * Math.log2(freq / 440)) + 69;
@@ -947,10 +971,10 @@ function detectPitchYIN(buf, sampleRate) {
   const W = buf.length;
   const half = Math.floor(W / 2);
 
-  // Silence check
+  // Silence check (lowered so sustained/decaying notes still register)
   let rms = 0;
   for (let i = 0; i < W; i++) rms += buf[i] * buf[i];
-  if (Math.sqrt(rms / W) < 0.008) return -1;
+  if (Math.sqrt(rms / W) < 0.004) return -1;
 
   // YIN difference function
   const d = new Float32Array(half);
@@ -967,8 +991,8 @@ function detectPitchYIN(buf, sampleRate) {
     d[tau] *= tau / runSum;
   }
 
-  // Find first dip below threshold
-  const threshold = 0.12;
+  // Find first dip below threshold (raised slightly to catch quieter pitches)
+  const threshold = 0.15;
   for (let tau = 2; tau < half; tau++) {
     if (d[tau] < threshold) {
       while (tau + 1 < half && d[tau + 1] < d[tau]) tau++;
@@ -1042,27 +1066,58 @@ function tunerLoop() {
     freq = freqYIN;
   }
 
+  // Per-string lock: reject pitches outside ±2 semitones of the target string,
+  // and snap octave errors (common on low E/A) toward the target.
+  if (freq > 0 && tunerTargetString !== 'auto') {
+    const target = STRING_TARGETS[tunerTargetString];
+    // Try the detected freq and its ±1 octave neighbours; keep whichever is closest to target.
+    const candidates = [freq, freq * 2, freq / 2];
+    let best = freq, bestDist = Math.abs(Math.log2(freq / target));
+    for (const c of candidates) {
+      const d = Math.abs(Math.log2(c / target));
+      if (d < bestDist) { best = c; bestDist = d; }
+    }
+    // Reject if still further than 2 semitones from target.
+    freq = bestDist < (2 / 12) ? best : -1;
+  }
+
   const noteEl   = document.getElementById('tuner-note');
   const freqEl   = document.getElementById('tuner-freq');
   const needle   = document.getElementById('tuner-needle');
   const statusEl = document.getElementById('tuner-status');
 
   if (freq > 0) {
-    // Exponential smoothing on raw frequency — reduces jitter without lag
-    tunerSmoothedFreq = tunerSmoothedFreq > 0
-      ? tunerSmoothedFreq * 0.7 + freq * 0.3
-      : freq;
+    // Adaptive smoothing: heavy when the new reading is near the smoothed value
+    // (locked), fast when it jumps (new note played).
+    if (tunerSmoothedFreq > 0) {
+      const drift = Math.abs(Math.log2(freq / tunerSmoothedFreq));
+      const a = drift < (1/12) ? 0.15 : 0.5;
+      tunerSmoothedFreq = tunerSmoothedFreq * (1 - a) + freq * a;
+    } else {
+      tunerSmoothedFreq = freq;
+    }
 
-    const info = freqToNoteInfo(tunerSmoothedFreq);
+    // In string-locked mode, compute cents directly from the target so the
+    // displayed note never flickers between neighbours.
+    let displayName, displayCents, displayHz;
+    if (tunerTargetString !== 'auto') {
+      const target = STRING_TARGETS[tunerTargetString];
+      displayName = tunerTargetString.replace(/\d/, '');
+      displayCents = Math.round(1200 * Math.log2(tunerSmoothedFreq / target));
+      displayHz = Math.round(tunerSmoothedFreq * 10) / 10;
+    } else {
+      const info = freqToNoteInfo(tunerSmoothedFreq);
+      displayName = info.name; displayCents = info.cents; displayHz = info.hz;
+    }
 
-    // Require 3 consecutive frames on the same note before displaying
-    if (info.name === tunerLastNote) { tunerStableCount++; }
-    else { tunerLastNote = info.name; tunerStableCount = 0; }
+    // Only require 1 consecutive frame on the same note before displaying.
+    if (displayName === tunerLastNote) { tunerStableCount++; }
+    else { tunerLastNote = displayName; tunerStableCount = 0; }
 
-    if (tunerStableCount >= 2) {
-      noteEl.textContent = info.name;
-      freqEl.textContent = info.hz + ' Hz';
-      const clamped = Math.max(-50, Math.min(50, info.cents));
+    if (tunerStableCount >= 1 || tunerTargetString !== 'auto') {
+      noteEl.textContent = displayName;
+      freqEl.textContent = displayHz + ' Hz';
+      const clamped = Math.max(-50, Math.min(50, displayCents));
       needle.style.left = (50 + clamped) + '%';
       if (Math.abs(clamped) < 8) {
         needle.style.background = 'var(--green-text)';
@@ -1076,12 +1131,16 @@ function tunerLoop() {
       }
     }
   } else {
-    tunerStableCount = 0; tunerLastNote = null; tunerSmoothedFreq = 0;
-    noteEl.textContent = '—'; freqEl.textContent = 'Play a string…';
-    needle.style.left = '50%'; needle.style.background = 'var(--border2)';
-    statusEl.textContent = ''; statusEl.className = 'tuner-status';
+    // No pitch this frame — keep the last reading briefly; only clear on sustained silence.
+    tunerStableCount--;
+    if (tunerStableCount < -8) {
+      tunerStableCount = 0; tunerLastNote = null; tunerSmoothedFreq = 0;
+      noteEl.textContent = '—'; freqEl.textContent = 'Play a string…';
+      needle.style.left = '50%'; needle.style.background = 'var(--border2)';
+      statusEl.textContent = ''; statusEl.className = 'tuner-status';
+    }
   }
-  setTimeout(() => { tunerRaf = requestAnimationFrame(tunerLoop); }, 80);
+  setTimeout(() => { tunerRaf = requestAnimationFrame(tunerLoop); }, 60);
 }
 
 async function startTuner() {
@@ -1094,6 +1153,14 @@ async function startTuner() {
     tunerCtx = new (window.AudioContext || window.webkitAudioContext)();
     const src = tunerCtx.createMediaStreamSource(tunerStream);
 
+    // Bandpass via highpass (kills sub-bass rumble / AC hum) into lowpass
+    // (kills cymbal-like hiss and high inharmonic content). Restricts the
+    // signal to the guitar's useful range before pitch detection.
+    tunerHP = tunerCtx.createBiquadFilter();
+    tunerHP.type = 'highpass'; tunerHP.frequency.value = 70;  tunerHP.Q.value = 0.7;
+    tunerLP = tunerCtx.createBiquadFilter();
+    tunerLP.type = 'lowpass';  tunerLP.frequency.value = 1500; tunerLP.Q.value = 0.7;
+
     // Time-domain analyser for YIN (large buffer = better low-freq resolution)
     tunerAnalyser = tunerCtx.createAnalyser();
     tunerAnalyser.fftSize = 8192;
@@ -1104,8 +1171,10 @@ async function startTuner() {
     tunerFreqAnalyser.fftSize = 8192;
     tunerFreqAnalyser.smoothingTimeConstant = 0.5;
 
-    src.connect(tunerAnalyser);
-    src.connect(tunerFreqAnalyser);
+    src.connect(tunerHP);
+    tunerHP.connect(tunerLP);
+    tunerLP.connect(tunerAnalyser);
+    tunerLP.connect(tunerFreqAnalyser);
 
     tunerRunning = true; tunerLastNote = null; tunerStableCount = 0; tunerSmoothedFreq = 0;
     document.getElementById('tuner-btn').innerHTML = '&#x23F9; Stop';
@@ -1122,6 +1191,7 @@ function stopTuner() {
   if (tunerStream) tunerStream.getTracks().forEach(t => t.stop());
   if (tunerCtx)    tunerCtx.close();
   tunerStream = null; tunerCtx = null; tunerAnalyser = null; tunerFreqAnalyser = null;
+  tunerHP = null; tunerLP = null;
   tunerLastNote = null; tunerStableCount = 0; tunerSmoothedFreq = 0;
   const noteEl = document.getElementById('tuner-note');
   const freqEl = document.getElementById('tuner-freq');

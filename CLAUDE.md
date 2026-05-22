@@ -28,3 +28,12 @@ When you need to clarify something with Jose, use the **AskUserQuestion** tool t
 - 2–4 options per question, mutually exclusive
 - One question per turn unless the choices are truly independent
 - Use this for design choices, scope decisions, style preferences — anywhere a free-text question would normally appear
+
+## Switching topics — prompt to start a fresh chat
+When Jose asks for something that is clearly a **new, unrelated topic** from what we've been working on (e.g., we just finished a feature on Module 5 and he now asks about a different part of the site, a different project, or general Claude Code questions), use **AskUserQuestion** to ask whether he'd like to start a fresh conversation before continuing. A fresh chat keeps context focused and responses faster.
+
+Phrase it like: "Looks like we're switching topics — want to start a fresh chat for this, or keep going here?"
+
+- Only ask once per topic switch, not every message.
+- Don't ask for natural follow-ups on the same topic (bug fixes, tweaks, refinements to what we just built).
+- If he says "keep going," don't ask again unless the topic shifts a second time.
