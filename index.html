@@ -77,6 +77,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .week-panel{display:none}.week-panel.active{display:block}
 .obj-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
 .obj-unit{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:5px}
+.obj-set{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:10px;padding-bottom:10px;border-bottom:0.5px solid var(--border)}
+.obj-set-tag{font-size:14px;font-weight:600;color:var(--text)}
+.obj-set-sub{font-size:13px;color:var(--text2);line-height:1.4}
 .obj-main{font-size:15px;font-weight:500;line-height:1.5;margin-bottom:5px}
 .obj-sub{font-size:13px;color:var(--text2);line-height:1.6}
 .tabs{display:flex;border-bottom:0.5px solid var(--border2);margin-bottom:16px;overflow-x:auto}
@@ -1138,7 +1141,10 @@ function buildSet(w){
   const handoutLink = w.handoutUrl
     ? `<button onclick="loadPanel('gdoc','${w.handoutUrl}','Module ${w.moduleNum} handout','')" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--blue-text);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border);width:100%"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M4 5h4M4 7h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Module ${w.moduleNum} handout</button>`
     : '';
-  return `<div class="obj-card"><div class="obj-unit">${w.unit}</div><div class="obj-main">${w.objective}</div><div class="obj-sub">${w.skillFocus}</div>${handoutLink}</div>
+  const setHeader = (w.title || w.subtitle)
+    ? `<div class="obj-set">${w.title?`<span class="obj-set-tag">${w.title}</span>`:''}${w.subtitle?`<span class="obj-set-sub">${w.subtitle}</span>`:''}</div>`
+    : '';
+  return `<div class="obj-card"><div class="obj-unit">${w.unit}</div>${setHeader}<div class="obj-main">${w.objective}</div><div class="obj-sub">${w.skillFocus}</div>${handoutLink}</div>
   <div class="tabs">
     <div class="tab active" onclick="switchTab(this,'${w.id}','stations')">Stations</div>
     <div class="tab" onclick="switchTab(this,'${w.id}','songs')">Songs</div>
