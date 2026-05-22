@@ -175,7 +175,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .prog-fill{height:100%;background:var(--green-text);border-radius:3px;transition:width 0.3s}
 .prog-lbl{font-size:12px;color:var(--text2);min-width:36px;text-align:right}
 .save-ind{font-size:11px;color:var(--text3);text-align:right;margin-top:8px;min-height:16px}
-.checklist-inline{margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border)}
 .coming{text-align:center;padding:48px 20px;color:var(--text2)}
 .coming .big{font-size:36px;margin-bottom:12px}
 .coming p{font-size:14px;line-height:1.6}
@@ -1151,7 +1150,7 @@ function buildSet(w){
     <div class="tab" onclick="switchTab(this,'${w.id}','checklist')">My checklist</div>
     <div class="tab" onclick="switchTab(this,'${w.id}','assess')">Assessment</div>
   </div>
-  <div id="${w.id}-stations" class="tab-panel active">${buildStations(w)}<div class="checklist-inline">${buildChecklist(w)}</div></div>
+  <div id="${w.id}-stations" class="tab-panel active">${buildStations(w)}</div>
   <div id="${w.id}-songs"    class="tab-panel">${buildSongs(w)}</div>
   <div id="${w.id}-checklist" class="tab-panel">${buildChecklist(w)}</div>
   <div id="${w.id}-assess"   class="tab-panel">${buildAssess(w)}</div>`;
