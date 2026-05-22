@@ -306,6 +306,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .chord-box{display:flex;flex-direction:column;align-items:center;gap:2px}
 .chord-box svg{display:block}
 .chord-box-label{font-size:11px;font-weight:600;color:var(--text);font-family:-apple-system,sans-serif;margin-top:2px}
+/* ── Auto chord links inside step text ── */
+.chord-link{display:inline;color:var(--blue-text);cursor:pointer;border-bottom:0.5px dotted var(--blue-text);font-weight:500;padding:0 1px;border-radius:2px;transition:background 0.1s}
+.chord-link:hover{background:var(--blue-bg)}
+.string-link{display:inline;color:var(--green-text);cursor:pointer;border-bottom:0.5px dotted var(--green-text);font-weight:500;padding:0 1px;border-radius:2px;transition:background 0.1s}
+.string-link:hover{background:var(--green-bg)}
+.chord-popup{position:absolute;z-index:1000;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius);padding:10px 12px;box-shadow:0 4px 18px rgba(0,0,0,0.20);pointer-events:none;display:none;flex-direction:column;align-items:center;gap:4px;max-width:220px}
+.chord-popup.visible{display:flex}
+.chord-popup-name{font-size:13px;font-weight:600;color:var(--text)}
+.chord-popup img{display:block;width:180px;height:auto;background:var(--bg)}
+.chord-popup-svg{width:130px;display:flex;justify-content:center}
+.chord-popup-svg svg{width:100%;height:auto;display:block}
+.chord-popup-hint{font-size:10px;color:var(--text3);margin-top:2px}
+.rp-iframe-wrap.rp-chord{background:var(--bg);padding:20px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);border:0.5px solid var(--border);min-height:240px}
+.rp-iframe-wrap.rp-chord img{display:block;max-width:280px;width:100%;height:auto}
+.rp-iframe-wrap.rp-chord .rp-chord-svg{width:100%;max-width:240px;display:flex;justify-content:center}
+.rp-iframe-wrap.rp-chord .rp-chord-svg svg{width:100%;height:auto}
+.rp-iframe-wrap.rp-chord .rp-chord-err{font-size:12px;color:var(--text2);text-align:center;line-height:1.5}
+/* ── Read Aloud button (ELD) ── */
+.read-aloud-btn{display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:3px 10px;font-size:11px;color:var(--text2);background:var(--bg2);border:0.5px solid var(--border);border-radius:12px;cursor:pointer;font-family:inherit;line-height:1.4;vertical-align:middle}
+.read-aloud-btn:hover{background:var(--bg3);color:var(--text)}
+.read-aloud-btn.speaking{background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-text)}
 </style>
 </head>
 <body>
@@ -632,6 +653,325 @@ function chordDiagramSVG(cfg){
 }
 function renderChordBoxes(){} /* legacy no-op — diagrams now render inline */
 
+/* ══════════════════════════════════════════════
+   AUTO CHORD LINKS — scan step text for chord
+   names, wrap them in clickable spans that load
+   a chord diagram in the resource panel.
+   ══════════════════════════════════════════════ */
+/* Local chord-shape library — fed into chordDiagramSVG() so diagrams
+   render from the project itself, no external image service required.
+   Format per entry: { position, chord:[[stringNum, fret, finger], …] }
+   string 6 = low E, 1 = high E   ·   fret 'x' = mute, 0 = open */
+const CHORD_DIAGRAMS = {
+  'E'  : { position:0, chord:[[6,0,0],[5,2,2],[4,2,3],[3,1,1],[2,0,0],[1,0,0]] },
+  'Em' : { position:0, chord:[[6,0,0],[5,2,2],[4,2,3],[3,0,0],[2,0,0],[1,0,0]] },
+  'A'  : { position:0, chord:[[6,'x',''],[5,0,0],[4,2,1],[3,2,2],[2,2,3],[1,0,0]] },
+  'Am' : { position:0, chord:[[6,'x',''],[5,0,0],[4,2,2],[3,2,3],[2,1,1],[1,0,0]] },
+  'D'  : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,2,1],[2,3,3],[1,2,2]] },
+  'Dm' : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,2,2],[2,3,3],[1,1,1]] },
+  'G'  : { position:0, chord:[[6,3,2],[5,2,1],[4,0,0],[3,0,0],[2,0,0],[1,3,3]] },
+  'C'  : { position:0, chord:[[6,'x',''],[5,3,3],[4,2,2],[3,0,0],[2,1,1],[1,0,0]] },
+  'F'  : { position:0, chord:[[6,'x',''],[5,'x',''],[4,3,3],[3,2,2],[2,1,1],[1,1,1]] },
+  'Bm' : { position:2, chord:[[6,'x',''],[5,2,1],[4,4,3],[3,4,4],[2,3,2],[1,2,1]] },
+  'B7' : { position:0, chord:[[6,'x',''],[5,2,2],[4,1,1],[3,2,3],[2,0,0],[1,2,4]] },
+  'F#m': { position:2, chord:[[6,2,1],[5,4,3],[4,4,4],[3,2,1],[2,2,1],[1,2,1]] },
+  'C#m': { position:4, chord:[[6,'x',''],[5,4,1],[4,6,3],[3,6,4],[2,5,2],[1,4,1]] },
+  'E5' : { position:0, chord:[[6,0,0],[5,2,1],[4,2,2],[3,'x',''],[2,'x',''],[1,'x','']] },
+  'A5' : { position:0, chord:[[6,'x',''],[5,0,0],[4,2,1],[3,2,2],[2,'x',''],[1,'x','']] },
+  'D5' : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,2,1],[2,3,2],[1,'x','']] },
+  'G5' : { position:3, chord:[[6,3,1],[5,5,3],[4,5,4],[3,'x',''],[2,'x',''],[1,'x','']] },
+  'C5' : { position:3, chord:[[6,'x',''],[5,3,1],[4,5,3],[3,5,4],[2,'x',''],[1,'x','']] }
+};
+/* Strip the SVG's fixed width/height so it scales to its container via viewBox */
+function localChordSvg(chord){
+  const cfg = CHORD_DIAGRAMS[chord];
+  if (!cfg) return null;
+  return chordDiagramSVG(cfg).replace(/width="\d+"\s+height="\d+"/, '');
+}
+
+/* Single-string diagrams — one open string, the others muted. Reused via
+   the same chordDiagramSVG renderer for consistency. */
+const STRING_DIAGRAMS = {
+  'lowE' : { position:0, chord:[[6,0,0],[5,'x',''],[4,'x',''],[3,'x',''],[2,'x',''],[1,'x','']] },
+  'A'    : { position:0, chord:[[6,'x',''],[5,0,0],[4,'x',''],[3,'x',''],[2,'x',''],[1,'x','']] },
+  'D'    : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,'x',''],[2,'x',''],[1,'x','']] },
+  'G'    : { position:0, chord:[[6,'x',''],[5,'x',''],[4,'x',''],[3,0,0],[2,'x',''],[1,'x','']] },
+  'B'    : { position:0, chord:[[6,'x',''],[5,'x',''],[4,'x',''],[3,'x',''],[2,0,0],[1,'x','']] },
+  'highE': { position:0, chord:[[6,'x',''],[5,'x',''],[4,'x',''],[3,'x',''],[2,'x',''],[1,0,0]] }
+};
+const STRING_LABELS = {
+  'lowE' : 'Low E (6th string)',
+  'A'    : 'A (5th string)',
+  'D'    : 'D (4th string)',
+  'G'    : 'G (3rd string)',
+  'B'    : 'B (2nd string)',
+  'highE': 'High E (1st string)'
+};
+function localStringSvg(kind){
+  const cfg = STRING_DIAGRAMS[kind];
+  if (!cfg) return null;
+  return chordDiagramSVG(cfg).replace(/width="\d+"\s+height="\d+"/, '');
+}
+
+/* String reference patterns:
+   - "low E" / "high E" (case-insensitive on low/high, captures both as one unit)
+   - A letter or list of letters followed by "string"/"strings", e.g.
+     "E string", "E and A strings", "E, A, and D strings"
+   Letters E/A/D/G/B are case-sensitive (uppercase) to match how
+   teachers write them in the modules. */
+const STR_SEP = '(?:\\s*(?:,|&|\\band\\b|\\bor\\b)\\s*)+';
+const STRING_PHRASE_RE_SRC = '\\b[EADGB](?:' + STR_SEP + '[EADGB])*\\s+strings?\\b';
+const LOWHIGH_E_RE_SRC = '\\b(low|high)\\s+E\\b';
+
+function findStringMatches(text){
+  const matches = [];
+  let m;
+
+  const re1 = new RegExp(LOWHIGH_E_RE_SRC, 'gi');
+  while ((m = re1.exec(text)) !== null) {
+    const kind = m[1].toLowerCase() === 'low' ? 'lowE' : 'highE';
+    matches.push({ start: m.index, end: m.index + m[0].length, kind });
+  }
+
+  const re2 = new RegExp(STRING_PHRASE_RE_SRC, 'gi');
+  while ((m = re2.exec(text)) !== null) {
+    const phraseStart = m.index;
+    const phrase = m[0];
+    const letterRe = /[EADGB]/g; // case-sensitive — only uppercase
+    let lm;
+    while ((lm = letterRe.exec(phrase)) !== null) {
+      const letter = lm[0];
+      const absStart = phraseStart + lm.index;
+      /* Skip if already covered by a "low E" / "high E" phrase */
+      if (matches.some(x => x.start <= absStart && absStart < x.end)) continue;
+      const kind = letter === 'E' ? 'lowE' : letter; // ambiguous "E string" defaults to low E
+      matches.push({ start: absStart, end: absStart + 1, kind });
+    }
+  }
+
+  matches.sort((a,b) => a.start - b.start);
+  const dedup = [];
+  let lastEnd = -1;
+  matches.forEach(x => {
+    if (x.start >= lastEnd) { dedup.push(x); lastEnd = x.end; }
+  });
+  return dedup;
+}
+
+/* Longest names first so the alternation matches them before the 1-char names */
+const CHORD_NAMES = ['F#m','C#m','Em','Am','Dm','Bm','B7','A5','E5','G5','D5','C5','C','G','D','A','E','F'];
+const CHORD_RE = new RegExp('(^|[^A-Za-z0-9#])(' + CHORD_NAMES.join('|') + ')(?![A-Za-z0-9#])', 'g');
+const CHORD_SKIP_TAGS = new Set(['A','BUTTON','SCRIPT','STYLE','TEXTAREA','INPUT','LABEL','SELECT']);
+const CHORD_SKIP_CLASSES = ['skill-badge','chord-link','string-link','rp-trigger','chord-box-label','chord-diagrams','read-aloud-btn','step-resp-mc-opt'];
+
+function wrapChordLinksIn(rootEl){
+  if (!rootEl) return;
+  const walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT, {
+    acceptNode(node){
+      if (!node.nodeValue || !/[A-G]/.test(node.nodeValue)) return NodeFilter.FILTER_REJECT;
+      let p = node.parentNode;
+      while (p && p !== rootEl) {
+        if (CHORD_SKIP_TAGS.has(p.tagName)) return NodeFilter.FILTER_REJECT;
+        if (p.classList && CHORD_SKIP_CLASSES.some(c => p.classList.contains(c))) return NodeFilter.FILTER_REJECT;
+        p = p.parentNode;
+      }
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const textNodes = [];
+  let n;
+  while ((n = walker.nextNode())) textNodes.push(n);
+
+  textNodes.forEach(node => {
+    const text = node.nodeValue;
+
+    /* String references first — they take priority over chord matches */
+    const stringMatches = findStringMatches(text);
+
+    /* Chord matches — skip any that overlap a string match */
+    const chordMatches = [];
+    const re = new RegExp(CHORD_RE.source, 'g');
+    let m;
+    while ((m = re.exec(text)) !== null) {
+      const prefix = m[1], chord = m[2];
+      const start = m.index + prefix.length;
+      const end = start + chord.length;
+      if (stringMatches.some(s => s.start < end && start < s.end)) continue;
+      chordMatches.push({ start, end, chord });
+    }
+
+    if (!stringMatches.length && !chordMatches.length) return;
+
+    const all = [
+      ...stringMatches.map(x => ({ start:x.start, end:x.end, type:'string', kind:x.kind })),
+      ...chordMatches.map(x => ({ start:x.start, end:x.end, type:'chord',  chord:x.chord }))
+    ].sort((a,b) => a.start - b.start);
+
+    const frag = document.createDocumentFragment();
+    let cursor = 0;
+    all.forEach(item => {
+      if (item.start > cursor) frag.appendChild(document.createTextNode(text.slice(cursor, item.start)));
+      const span = document.createElement('span');
+      if (item.type === 'string') {
+        span.className = 'string-link';
+        span.dataset.string = item.kind;
+        span.textContent = text.slice(item.start, item.end);
+        span.addEventListener('click', onStringLinkClick);
+        span.addEventListener('mouseenter', onStringLinkHover);
+        span.addEventListener('mouseleave', hideChordPopup);
+      } else {
+        span.className = 'chord-link';
+        span.dataset.chord = item.chord;
+        span.textContent = item.chord;
+        span.addEventListener('click', onChordLinkClick);
+        span.addEventListener('mouseenter', onChordLinkHover);
+        span.addEventListener('mouseleave', hideChordPopup);
+      }
+      frag.appendChild(span);
+      cursor = item.end;
+    });
+    if (cursor < text.length) frag.appendChild(document.createTextNode(text.slice(cursor)));
+    node.parentNode.replaceChild(frag, node);
+  });
+}
+
+function onChordLinkClick(e){
+  e.preventDefault(); e.stopPropagation();
+  const chord = this.dataset.chord;
+  if (!chord) return;
+  hideChordPopup();
+  /* For chord type, the 2nd arg carries the chord NAME (loadPanel renders it locally) */
+  loadPanel('chord', chord, chord, 'Guitar chord diagram');
+}
+
+/* Floating hover preview — one shared popup element reused for every link */
+let chordPopupEl = null;
+function ensureChordPopup(){
+  if (chordPopupEl) return chordPopupEl;
+  chordPopupEl = document.createElement('div');
+  chordPopupEl.className = 'chord-popup';
+  document.body.appendChild(chordPopupEl);
+  return chordPopupEl;
+}
+function positionChordPopup(popup, linkEl){
+  const rect = linkEl.getBoundingClientRect();
+  const popW = popup.offsetWidth || 220;
+  const popH = popup.offsetHeight || 220;
+  let left = rect.left + window.scrollX + (rect.width / 2) - (popW / 2);
+  let top  = rect.bottom + window.scrollY + 6;
+  left = Math.max(8, Math.min(left, window.scrollX + window.innerWidth - popW - 8));
+  /* Flip above the link if there isn't room below */
+  if (rect.bottom + popH + 12 > window.innerHeight) {
+    top = rect.top + window.scrollY - popH - 6;
+  }
+  popup.style.left = left + 'px';
+  popup.style.top  = top  + 'px';
+}
+function onChordLinkHover(){
+  const chord = this.dataset.chord;
+  if (!chord) return;
+  const popup = ensureChordPopup();
+  const svg = localChordSvg(chord);
+  if (!svg) return;
+  popup.innerHTML = `<div class="chord-popup-name">${chord}</div><div class="chord-popup-svg">${svg}</div><div class="chord-popup-hint">Click to open</div>`;
+  popup.classList.add('visible');
+  positionChordPopup(popup, this);
+}
+function onStringLinkClick(e){
+  e.preventDefault(); e.stopPropagation();
+  const kind = this.dataset.string;
+  if (!kind) return;
+  hideChordPopup();
+  const label = STRING_LABELS[kind] || kind;
+  loadPanel('string', kind, label, 'Open string');
+}
+function onStringLinkHover(){
+  const kind = this.dataset.string;
+  if (!kind) return;
+  const popup = ensureChordPopup();
+  const svg = localStringSvg(kind);
+  if (!svg) return;
+  const label = STRING_LABELS[kind] || kind;
+  popup.innerHTML = `<div class="chord-popup-name">${label}</div><div class="chord-popup-svg">${svg}</div><div class="chord-popup-hint">Click to open</div>`;
+  popup.classList.add('visible');
+  positionChordPopup(popup, this);
+}
+function hideChordPopup(){
+  if (chordPopupEl) chordPopupEl.classList.remove('visible');
+}
+/* Hide popup if user scrolls or resizes */
+window.addEventListener('scroll', hideChordPopup, true);
+window.addEventListener('resize', hideChordPopup);
+
+function wrapAllChordLinks(){
+  document.querySelectorAll('.dp .step .st').forEach(wrapChordLinksIn);
+}
+
+/* ══════════════════════════════════════════════
+   READ ALOUD — ELD support via speechSynthesis
+   ══════════════════════════════════════════════ */
+let cachedVoices = [];
+function loadVoices(){
+  if (!window.speechSynthesis) return;
+  cachedVoices = window.speechSynthesis.getVoices() || [];
+}
+if (window.speechSynthesis){
+  loadVoices();
+  window.speechSynthesis.onvoiceschanged = loadVoices;
+}
+
+function pickEnglishVoice(){
+  if (!cachedVoices.length) loadVoices();
+  const en = cachedVoices.filter(v => /^en[-_]/i.test(v.lang));
+  return en.find(v => /natural|neural|google|samantha|enhanced|premium/i.test(v.name))
+      || en.find(v => /female|woman|samantha|karen|moira|tessa/i.test(v.name))
+      || en[0]
+      || cachedVoices[0]
+      || null;
+}
+
+function resetAllReadAloudBtns(){
+  document.querySelectorAll('.read-aloud-btn').forEach(b => {
+    b.innerHTML = '&#x1F50A;';
+    b.classList.remove('speaking');
+    delete b.dataset.speaking;
+  });
+}
+
+function readAloudStep(btn){
+  const synth = window.speechSynthesis;
+  if (!synth){ alert('Read-aloud is not supported in this browser.'); return; }
+
+  const wasSpeakingThis = btn.dataset.speaking === 'true';
+  if (synth.speaking || synth.pending){
+    synth.cancel();
+    resetAllReadAloudBtns();
+    if (wasSpeakingThis) return;
+  }
+
+  const stEl = btn.closest('.st');
+  if (!stEl) return;
+  const clone = stEl.cloneNode(true);
+  clone.querySelectorAll('.read-aloud-btn, .chord-diagrams, .skill-badge, .step-resp-saved').forEach(el => el.remove());
+  const text = (clone.textContent || '').replace(/\s+/g, ' ').trim();
+  if (!text) return;
+
+  const utter = new SpeechSynthesisUtterance(text);
+  const voice = pickEnglishVoice();
+  if (voice) utter.voice = voice;
+  utter.lang = (voice && voice.lang) || 'en-US';
+  utter.rate = 0.95;
+  utter.pitch = 1.0;
+  utter.onend = () => { btn.innerHTML = '&#x1F50A;'; btn.classList.remove('speaking'); delete btn.dataset.speaking; };
+  utter.onerror = utter.onend;
+
+  resetAllReadAloudBtns();
+  btn.innerHTML = '&#x23F9; Stop';
+  btn.classList.add('speaking');
+  btn.dataset.speaking = 'true';
+  synth.speak(utter);
+}
+
 function populateModuleDropdown(){
   const sel = document.getElementById('module-select');
   sel.innerHTML='';
@@ -689,6 +1029,8 @@ function renderPanels(){
     div.innerHTML = w.comingSoon ? buildComingSoon(w) : buildSet(w);
     c.appendChild(div);
   });
+  /* Scan all station step text for chord names and wrap matches in clickable spans */
+  wrapAllChordLinks();
 }
 
 function buildComingSoon(w){
@@ -754,7 +1096,8 @@ function buildStations(w){
       }
       return '';
     })() : '';
-    return `<li class="step"><div class="st">${text}${skillBadges?`<span style="margin-left:6px">${skillBadges}</span>`:''}${hintHtml}${chordsHtml}${respHtml}</div></li>`;
+    const readBtn = `<button class="read-aloud-btn" type="button" onclick="event.stopPropagation();readAloudStep(this)" title="Read this step aloud" aria-label="Read aloud">&#x1F50A;</button>`;
+    return `<li class="step"><div class="st">${text}${skillBadges?`<span style="margin-left:6px">${skillBadges}</span>`:''}${hintHtml}${chordsHtml}${respHtml} ${readBtn}</div></li>`;
   }).join('');
   const dp=(id,cls,badge,badgeClass,s)=>`
     <div class="dp${cls}" id="${w.id}-dp-${id}">
@@ -1331,6 +1674,30 @@ function loadPanel(type,url,title,subtitle){
     const embedUrl=url.includes('/preview')?url:url.replace(/\/edit.*$/,'/preview');
     wrap.className='rp-iframe-wrap rp-doc';
     wrap.innerHTML=`<iframe src="${embedUrl}"></iframe>`;
+  } else if(type==='chord'){
+    /* For chord type, `url` carries the chord NAME — render the diagram locally */
+    const chordName = url;
+    wrap.className='rp-iframe-wrap rp-chord';
+    const svg = localChordSvg(chordName);
+    if (svg){
+      wrap.innerHTML = `<div class="rp-chord-svg">${svg}</div>`;
+      newtab.classList.remove('visible'); // local render — no external URL to open
+    } else {
+      wrap.innerHTML = `<div class="rp-chord-err">No diagram available for "${escHtml(chordName)}".</div>`;
+      newtab.classList.remove('visible');
+    }
+  } else if(type==='string'){
+    /* For string type, `url` carries the string KIND (lowE/A/D/G/B/highE) */
+    const kind = url;
+    wrap.className='rp-iframe-wrap rp-chord';
+    const svg = localStringSvg(kind);
+    if (svg){
+      wrap.innerHTML = `<div class="rp-chord-svg">${svg}</div>`;
+      newtab.classList.remove('visible');
+    } else {
+      wrap.innerHTML = `<div class="rp-chord-err">Unknown string: ${escHtml(kind)}</div>`;
+      newtab.classList.remove('visible');
+    }
   }
 }
 function clearPanel(){
