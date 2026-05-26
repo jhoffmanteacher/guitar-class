@@ -181,7 +181,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .cl-header-working{padding:8px 4px;text-align:center;font-size:11px;font-weight:500;line-height:1.4;background:var(--amber-bg);color:var(--amber-text)}
 .cl-header-gotit{padding:8px 4px;text-align:center;font-size:11px;font-weight:500;line-height:1.4;background:var(--green-bg);color:var(--green-text)}
 .skill-row{display:grid;grid-template-columns:1fr 82px 82px;border-top:0.5px solid var(--border)}
-.sktxt{padding:10px 14px;font-size:13px;line-height:1.5;color:var(--text);display:flex;align-items:center}
+.sktxt{padding:10px 14px;font-size:13px;line-height:1.5;color:var(--text);display:flex;align-items:flex-start}
+.sk-body{flex:1;min-width:0}
+.sk-toggle{background:none;border:none;padding:4px 0 0;margin:0;font:inherit;font-size:11px;color:var(--text2);cursor:pointer;display:inline-flex;align-items:center;gap:4px;line-height:1.3}
+.sk-toggle:hover{color:var(--blue-text)}
+.sk-toggle-arrow{display:inline-block;transition:transform 0.15s}
+.sk-toggle[aria-expanded="true"] .sk-toggle-arrow{transform:rotate(180deg)}
+.sk-helper{margin-top:6px;padding:6px 10px;font-size:12px;color:var(--text2);background:var(--bg2);border-left:2px solid var(--border);border-radius:0 4px 4px 0;line-height:1.5}
+.sk-helper[hidden]{display:none}
 .skchk-cell{display:flex;align-items:center;justify-content:center;cursor:pointer;border-left:0.5px solid var(--border);min-height:44px}
 .skchk-cell.working-col{background:rgba(250,238,218,0.3)}
 .skchk-cell.gotit-col{background:rgba(234,243,222,0.3)}
@@ -1307,7 +1314,7 @@ function buildSet(w){
   <div class="tabs">
     <div class="tab active" onclick="switchTab(this,'${w.id}','stations')">Stations</div>
     <div class="tab" onclick="switchTab(this,'${w.id}','songs')">Songs</div>
-    <div class="tab" onclick="switchTab(this,'${w.id}','checklist')">My checklist</div>
+    <div class="tab" onclick="switchTab(this,'${w.id}','checklist')">My skills checklist</div>
   </div>
   <div id="${w.id}-stations" class="tab-panel active">${buildStations(w)}</div>
   <div id="${w.id}-songs"    class="tab-panel">${buildSongs(w)}</div>
@@ -1506,8 +1513,11 @@ function buildChecklist(w){
   const giSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green-text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const rows=w.skills.map((s,i)=>{
     const st=progress[s.id]||'none';
+    const helper = s.gotItWhen ? `
+        <button type="button" class="sk-toggle" onclick="toggleGotIt('${s.id}', this)" aria-expanded="false" aria-controls="gi-${s.id}"><span class="sk-toggle-arrow">▾</span> What does this look like?</button>
+        <div class="sk-helper" id="gi-${s.id}" hidden><strong>You've got it when:</strong> ${s.gotItWhen}</div>` : '';
     return `<div class="skill-row">
-      <div class="sktxt"><div class="sn" style="flex-shrink:0;margin-top:0;margin-right:8px">${i+1}</div>${s.text}</div>
+      <div class="sktxt"><div class="sn" style="flex-shrink:0;margin-top:0;margin-right:8px">${i+1}</div><div class="sk-body"><div class="sk-label">${s.text}</div>${helper}</div></div>
       <div class="skchk-cell working-col${st==='working'?' active':''}" onclick="toggleSkill('${s.id}','${w.id}','working')" title="Still working on it"><div class="skbox">${st==='working'?wkSvg:''}</div></div>
       <div class="skchk-cell gotit-col${st==='gotit'?' active':''}" onclick="toggleSkill('${s.id}','${w.id}','gotit')" title="I've got it!"><div class="skbox">${st==='gotit'?giSvg:''}</div></div>
     </div>`;
@@ -1519,6 +1529,20 @@ function buildChecklist(w){
   </div>
   <div class="prog-wrap"><div class="prog-row"><div class="prog-bg"><div class="prog-fill" id="pf-${w.id}" style="width:${pct}%"></div></div><div class="prog-lbl" id="pl-${w.id}">${done} / ${w.skills.length}</div></div></div>
   <div class="save-ind" id="si-${w.id}"></div>`;
+}
+
+/* ── Toggle "What does this look like?" helper ── */
+function toggleGotIt(sid, btn){
+  const panel = document.getElementById('gi-'+sid);
+  if(!panel) return;
+  const isOpen = !panel.hasAttribute('hidden');
+  if(isOpen){
+    panel.setAttribute('hidden','');
+    btn.setAttribute('aria-expanded','false');
+  } else {
+    panel.removeAttribute('hidden');
+    btn.setAttribute('aria-expanded','true');
+  }
 }
 
 /* ── Toggle skill ── */

@@ -123,11 +123,16 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm2w1-s1', text: 'Recite the musical alphabet (A B C D E F G) from memory' },
-      { id: 'm2w1-s2', text: 'Name all natural notes on the E string (frets 0–12)' },
-      { id: 'm2w1-s3', text: 'Name all natural notes on the A string (frets 0–12)' },
-      { id: 'm2w1-s4', text: 'Point to any named note on E or A string when called out' },
-      { id: 'm2w1-s5', text: 'Read a basic fretboard note-name chart' }
+      { id: 'm2w1-s1', text: 'Recite the musical alphabet (A B C D E F G) from memory',
+        gotItWhen: 'you can say A B C D E F G — and what comes after G — without pausing or looking at anything.' },
+      { id: 'm2w1-s2', text: 'Name all natural notes on the E string (frets 0–12)',
+        gotItWhen: 'someone calls out any fret 0–12 on the low E and you can say the note name instantly, without counting up from E.' },
+      { id: 'm2w1-s3', text: 'Name all natural notes on the A string (frets 0–12)',
+        gotItWhen: 'same as above, but for the A string — frets 0–12, any fret called out, instant answer.' },
+      { id: 'm2w1-s4', text: 'Point to any named note on E or A string when called out',
+        gotItWhen: 'the teacher says a note name and you can put your finger on it within 3 seconds without looking at a chart.' },
+      { id: 'm2w1-s5', text: 'Read a basic fretboard note-name chart',
+        gotItWhen: 'you can use the chart to look up a note you don\'t know yet — you understand what the rows and columns mean.' }
     ]
   },
 
@@ -253,12 +258,18 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm2w2-s1', text: 'Press notes cleanly — no buzzing — by pressing just behind the fret' },
-      { id: 'm2w2-s2', text: 'Use correct finger per fret (index=1, middle=2, ring=3, pinky=4)' },
-      { id: 'm2w2-s3', text: 'Keep unused fingers hovering close to the strings' },
-      { id: 'm2w2-s4', text: 'Read a basic TAB (strings, fret numbers, left-to-right order)' },
-      { id: 'm2w2-s5', text: 'Play a 4-bar melody in time at 60 BPM' },
-      { id: 'm2w2-s6', text: 'Keep thumb behind the neck throughout' }
+      { id: 'm2w2-s1', text: 'Press notes cleanly — no buzzing — by pressing just behind the fret',
+        gotItWhen: 'you play frets 1–5 on the E string and every note sustains cleanly — no buzzing, no muffling.' },
+      { id: 'm2w2-s2', text: 'Use correct finger per fret (index=1, middle=2, ring=3, pinky=4)',
+        gotItWhen: 'your index finger always plays fret 1, middle plays fret 2, ring plays fret 3, pinky plays fret 4 — without having to think about it.' },
+      { id: 'm2w2-s3', text: 'Keep unused fingers hovering close to the strings',
+        gotItWhen: 'your fingers that aren\'t pressing a note stay within about a centimeter of the strings, ready to drop down.' },
+      { id: 'm2w2-s4', text: 'Read a basic TAB (strings, fret numbers, left-to-right order)',
+        gotItWhen: 'you can look at a TAB, identify which string and fret each number refers to, and find those notes on your guitar.' },
+      { id: 'm2w2-s5', text: 'Play a 4-bar melody in time at 60 BPM',
+        gotItWhen: 'you can play the Happy Birthday phrase all the way through at 60 BPM without stopping to find a note.' },
+      { id: 'm2w2-s6', text: 'Keep thumb behind the neck throughout',
+        gotItWhen: 'your thumb stays roughly behind your middle finger on the back of the neck — not hooked over the top.' }
     ]
   }
 
