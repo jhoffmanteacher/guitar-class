@@ -98,6 +98,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .mr-legend-dot.lvl1{background:var(--amber-bg);border:0.5px solid var(--amber-text)}
 .mr-legend-dot.lvl2{background:var(--blue-bg);border:0.5px solid var(--blue-text)}
 .mr-legend-dot.lvl3{background:var(--green-bg);border:0.5px solid var(--green-text)}
+.mr-play{background:var(--bg);border:0.5px solid #c5c0ee;border-radius:var(--radius);padding:14px 16px;margin-top:18px}
+.mr-play-tag{display:inline-flex;align-items:center;gap:5px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;font-weight:600;color:#5b4dc4;background:#EEEDFE;border:0.5px solid #c5c0ee;border-radius:14px;padding:3px 11px;margin-bottom:10px}
+.mr-play-prompt{font-size:13px;line-height:1.5;color:var(--text);margin-bottom:12px}
+.mr-play-label{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:6px;display:block}
+.mr-play-song{width:100%;box-sizing:border-box;border:0.5px solid var(--border2);border-radius:var(--radius);padding:8px 12px;font-size:13px;font-family:inherit;color:var(--text);background:var(--bg)}
+.mr-play-song:focus{outline:none;border-color:#7F77DD}
+.mr-play-rate{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
+.mr-play-rate-label{font-size:13px;color:var(--text);font-weight:500}
 .week-panel{display:none}.week-panel.active{display:block}
 .obj-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
 .obj-unit{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:5px}
@@ -106,10 +114,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .obj-set-sub{font-size:13px;color:var(--text2);line-height:1.4}
 .obj-main{font-size:15px;font-weight:500;line-height:1.5;margin-bottom:5px}
 .obj-sub{font-size:13px;color:var(--text2);line-height:1.6}
-.tabs{display:flex;border-bottom:0.5px solid var(--border2);margin-bottom:16px;overflow-x:auto}
-.tab{padding:8px 16px;font-size:13px;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;flex-shrink:0}
-.tab:hover{color:var(--text)}
-.tab.active{color:var(--text);font-weight:500;border-bottom-color:var(--text)}
+.tabs{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding:2px 1px 4px;flex-wrap:wrap}
+.tabs > .tab{padding:7px 16px;font-size:13px;color:var(--text2);cursor:pointer;border:0.5px solid var(--border2);border-radius:20px;background:var(--bg);white-space:nowrap;flex-shrink:0;transition:background 0.15s,border-color 0.15s,color 0.15s;font-weight:500;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
+.tabs > .tab:hover{border-color:var(--text2);color:var(--text)}
+.tabs > .tab.tab-stations.active{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-text)}
+.tabs > .tab.tab-songs.active{background:var(--green-bg);color:var(--green-text);border-color:var(--green-text)}
+.tabs > .tab.tab-checklist.active{background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-text)}
 .tab-panel{display:none}.tab-panel.active{display:block}
 .st-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
 .stc{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:border-color 0.15s}
@@ -347,13 +357,46 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .string-link:hover{background:var(--green-bg)}
 .note-link{display:inline;color:var(--amber-text);cursor:pointer;border-bottom:0.5px dotted var(--amber-text);font-weight:500;padding:0 1px;border-radius:2px;transition:background 0.1s}
 .note-link:hover{background:var(--amber-bg)}
+/* ── Inline TAB diagram ── */
+.tab{background:var(--bg2);border:0.5px solid var(--border);border-radius:8px;padding:8px 10px;margin:8px 0 4px;display:inline-block;max-width:100%}
+.tab-caption{font-size:11.5px;color:var(--text2);margin-bottom:6px;font-weight:500}
+.tab-phrase{margin-top:8px}
+.tab-phrase:first-of-type{margin-top:0}
+.tab-phrase-label{font-size:11px;color:var(--text2);font-style:italic;margin-bottom:2px;padding-left:2px}
+.tab-board{background:var(--bg);border:0.5px solid var(--border);border-radius:6px;padding:5px 8px;overflow-x:auto;display:inline-block;max-width:100%}
+.tab-grid{display:grid;align-items:center;gap:0;min-width:max-content}
+.tab-str-label{font-family:'Courier New',ui-monospace,monospace;font-size:10px;font-weight:700;color:var(--text);text-align:right;padding-right:5px;line-height:1}
+.tab-cell{position:relative;height:11px;display:flex;align-items:center;justify-content:center}
+.tab-cell::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--text3);z-index:0}
+.tab-cell .tab-fret{position:relative;z-index:1;background:var(--bg);padding:0 3px;color:var(--blue-text);font-weight:700;font-size:10px;font-family:'Courier New',ui-monospace,monospace;line-height:1}
+.tab-note-btn{font-family:inherit;font-size:10px;font-weight:600;padding:2px 3px;margin:2px 0 0;background:var(--bg2);border:0.5px solid var(--border);border-radius:3px;color:var(--text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:1px;white-space:nowrap;line-height:1}
+.tab-note-btn:hover{background:var(--blue-bg);border-color:var(--blue-text);color:var(--blue-text)}
+.tab-note-btn:active{transform:scale(0.94)}
+.tab-spkr{font-size:8px;color:var(--blue-text);opacity:0.85}
+.tab-note-btn:hover .tab-spkr{color:var(--blue-text);opacity:1}
+@media (max-width:600px){
+  .tab-str-label{font-size:9px;padding-right:3px}
+  .tab-cell{height:10px}
+  .tab-cell .tab-fret{font-size:9px;padding:0 2px}
+  .tab-note-btn{font-size:9px;padding:2px 2px}
+  .tab-spkr{font-size:7.5px}
+}
+/* Expandable TAB choice (used when a step offers multiple TABs) */
+.tab-choice-group{display:flex;flex-direction:column;gap:6px;margin:8px 0 4px}
+.tab-choice-btn{font-family:inherit;font-size:12px;font-weight:500;padding:6px 10px;background:var(--bg2);border:0.5px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;text-align:left;display:inline-flex;align-items:center;gap:8px;width:max-content;max-width:100%;line-height:1.2}
+.tab-choice-btn:hover{background:var(--blue-bg);border-color:var(--blue-text);color:var(--blue-text)}
+.tab-choice-icon{font-size:9px;color:var(--blue-text);display:inline-block;transition:transform 0.15s}
+.tab-choice-btn.expanded .tab-choice-icon{transform:rotate(90deg)}
+.tab-choice-content{display:none}
+.tab-choice-content.expanded{display:block;margin-top:2px}
+.tab-choice-content .tab{margin-top:0}
 .chord-popup{position:absolute;z-index:1000;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius);padding:10px 12px;box-shadow:0 4px 18px rgba(0,0,0,0.20);pointer-events:none;display:none;flex-direction:column;align-items:center;gap:4px;max-width:220px}
 .chord-popup.wide{max-width:360px}
 .chord-popup.visible{display:flex}
 .chord-popup-name{font-size:13px;font-weight:600;color:var(--text)}
 .chord-popup img{display:block;width:180px;height:auto;background:var(--bg)}
 .chord-popup-svg{width:130px;display:flex;justify-content:center}
-.chord-popup.wide .chord-popup-svg{width:320px}
+.chord-popup.wide .chord-popup-svg{width:280px}
 .chord-popup-svg svg{width:100%;height:auto;display:block}
 .chord-popup-hint{font-size:10px;color:var(--text3);margin-top:2px}
 .rp-iframe-wrap.rp-chord{background:var(--bg);padding:20px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);border:0.5px solid var(--border);min-height:240px}
@@ -605,7 +648,7 @@ async function loadProgress(){
         if(raw[k]===true) progress[k]='gotit';
         else if(raw[k]==='working'||raw[k]==='gotit') progress[k]=raw[k];
         else if(raw[k]==='1'||raw[k]==='2'||raw[k]==='3') progress[k]=raw[k];
-        else if(k.endsWith('-reflection') && raw[k] && typeof raw[k]==='object') progress[k]=raw[k];
+        else if((k.endsWith('-reflection')||k.endsWith('-performance')) && raw[k] && typeof raw[k]==='object') progress[k]=raw[k];
         else progress[k]='none';
       });
       lastModuleNum = doc.data().lastModule||1;
@@ -776,9 +819,9 @@ function localNoteSvg(kind, fret, note){
   const fr = Number(fret);
   if (isNaN(fr) || fr < 0) return null;
 
-  const W = 480, H = 150;
-  const padL = 56, padR = 18, padT = 14, padB = 26;
-  const openW = 26;
+  const W = 280, H = 80;
+  const padL = 36, padR = 10, padT = 7, padB = 16;
+  const openW = 16;
   const maxFret = Math.max(8, fr + 1);
   const fretAreaW = W - padL - padR - openW;
   const fretW = fretAreaW / maxFret;
@@ -793,43 +836,93 @@ function localNoteSvg(kind, fret, note){
   FRETBOARD_INLAYS.filter(f => f <= maxFret).forEach(f => {
     const cx = nutX + (f - 0.5) * fretW;
     const cy = padT + boxH / 2;
-    s += `<circle cx="${cx}" cy="${cy}" r="3.5" fill="var(--text3)" opacity="0.35"/>`;
+    s += `<circle cx="${cx}" cy="${cy}" r="2" fill="var(--text3)" opacity="0.35"/>`;
     if (f === 12) {
-      s += `<circle cx="${cx}" cy="${cy - 14}" r="3.5" fill="var(--text3)" opacity="0.35"/>`;
-      s += `<circle cx="${cx}" cy="${cy + 14}" r="3.5" fill="var(--text3)" opacity="0.35"/>`;
+      s += `<circle cx="${cx}" cy="${cy - 8}" r="2" fill="var(--text3)" opacity="0.35"/>`;
+      s += `<circle cx="${cx}" cy="${cy + 8}" r="2" fill="var(--text3)" opacity="0.35"/>`;
     }
   });
 
   /* Fret wires */
   for (let f = 1; f <= maxFret; f++) {
     const x = fretX(f);
-    s += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${padT + boxH}" stroke="var(--text3)" stroke-width="0.9"/>`;
+    s += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${padT + boxH}" stroke="var(--text3)" stroke-width="0.7"/>`;
   }
   /* Nut */
-  s += `<rect x="${nutX - 2}" y="${padT - 2}" width="4" height="${boxH + 4}" fill="var(--text)" rx="0.5"/>`;
+  s += `<rect x="${nutX - 1.5}" y="${padT - 1.5}" width="3" height="${boxH + 3}" fill="var(--text)" rx="0.5"/>`;
 
   /* Strings + labels */
   for (let n = 1; n <= 6; n++) {
     const y = padT + (n - 1) * strGap;
-    s += `<line x1="${padL}" y1="${y}" x2="${fretX(maxFret)}" y2="${y}" stroke="var(--text3)" stroke-width="0.9"/>`;
-    s += `<text x="${padL - 8}" y="${y}" text-anchor="end" dominant-baseline="central" font-size="11" fill="var(--text2)">${STRING_NUM_TO_LABEL[n]}</text>`;
+    s += `<line x1="${padL}" y1="${y}" x2="${fretX(maxFret)}" y2="${y}" stroke="var(--text3)" stroke-width="0.7"/>`;
+    s += `<text x="${padL - 5}" y="${y}" text-anchor="end" dominant-baseline="central" font-size="8" fill="var(--text2)">${STRING_NUM_TO_LABEL[n]}</text>`;
   }
 
   /* Fret numbers below */
   for (let f = 0; f <= maxFret; f++) {
     const cx = f === 0 ? padL + openW / 2 : nutX + (f - 0.5) * fretW;
-    s += `<text x="${cx}" y="${padT + boxH + 16}" text-anchor="middle" font-size="10" fill="var(--text2)">${f}</text>`;
+    s += `<text x="${cx}" y="${padT + boxH + 10}" text-anchor="middle" font-size="7.5" fill="var(--text2)">${f}</text>`;
   }
 
   /* Target note dot */
   const targetY = padT + (sNum - 1) * strGap;
   const targetX = fr === 0 ? padL + openW / 2 : nutX + (fr - 0.5) * fretW;
-  s += `<circle cx="${targetX}" cy="${targetY}" r="11" fill="var(--text)"/>`;
+  s += `<circle cx="${targetX}" cy="${targetY}" r="6.5" fill="var(--text)"/>`;
   if (note) {
-    s += `<text x="${targetX}" y="${targetY}" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="600" fill="var(--bg)">${escHtml(note)}</text>`;
+    s += `<text x="${targetX}" y="${targetY}" text-anchor="middle" dominant-baseline="central" font-size="7.5" font-weight="600" fill="var(--bg)">${escHtml(note)}</text>`;
   }
 
   return s + '</svg>';
+}
+
+/* ── Inline TAB renderer ──
+   spec = { caption, notes: [{ string, fret, note, midi }, ...] }
+     OR  { caption, phrases: [{ label, notes: [...] }, ...] }
+   string is the TAB label: 'e' (high), 'B', 'G', 'D', 'A', 'E' (low).
+   Renders all 6 string lines so students see real TAB layout, with
+   fret numbers placed on the relevant string and a row of clickable
+   note-name buttons below that play the corresponding pitch. */
+const TAB_STRINGS = ['e','B','G','D','A','E'];
+function renderTabBlock(notes){
+  if (!notes || !notes.length) return '';
+  const cols = notes.length;
+  const rows = TAB_STRINGS.map(strLabel => {
+    const cells = [`<div class="tab-str-label">${strLabel}</div>`];
+    notes.forEach(n => {
+      if (n.string === strLabel) {
+        cells.push(`<div class="tab-cell"><span class="tab-fret">${escHtml(String(n.fret))}</span></div>`);
+      } else {
+        cells.push('<div class="tab-cell"></div>');
+      }
+    });
+    return cells.join('');
+  }).join('');
+  const noteBtns = ['<div></div>'];
+  notes.forEach(n => {
+    noteBtns.push(`<button type="button" class="tab-note-btn" onclick="playNote(${Number(n.midi)})" title="Play ${escAttr(n.note)}">${escHtml(n.note)}<span class="tab-spkr">&#x1F50A;</span></button>`);
+  });
+  return `
+    <div class="tab-board">
+      <div class="tab-grid" style="grid-template-columns:22px repeat(${cols},30px)">
+        ${rows}
+        ${noteBtns.join('')}
+      </div>
+    </div>`;
+}
+function buildTab(spec){
+  if (!spec) return '';
+  const caption = spec.caption ? `<div class="tab-caption">${escHtml(spec.caption)}</div>` : '';
+  if (spec.phrases && spec.phrases.length) {
+    const blocks = spec.phrases.map(p => `
+      <div class="tab-phrase">
+        ${p.label ? `<div class="tab-phrase-label">${escHtml(p.label)}</div>` : ''}
+        ${renderTabBlock(p.notes)}
+      </div>`).join('');
+    return `<div class="tab">${caption}${blocks}</div>`;
+  }
+  const body = renderTabBlock(spec.notes);
+  if (!body) return '';
+  return `<div class="tab">${caption}${body}</div>`;
 }
 
 /* String reference patterns:
@@ -881,7 +974,7 @@ function findStringMatches(text){
 const CHORD_NAMES = ['F#m','C#m','Em','Am','Dm','Bm','B7','A5','E5','G5','D5','C5','C','G','D','A','E','F'];
 const CHORD_RE = new RegExp('(^|[^A-Za-z0-9#])(' + CHORD_NAMES.join('|') + ')(?![A-Za-z0-9#])', 'g');
 const CHORD_SKIP_TAGS = new Set(['A','BUTTON','SCRIPT','STYLE','TEXTAREA','INPUT','LABEL','SELECT']);
-const CHORD_SKIP_CLASSES = ['skill-badge','chord-link','string-link','note-link','rp-trigger','chord-box-label','chord-diagrams','read-aloud-btn','step-resp-mc-opt'];
+const CHORD_SKIP_CLASSES = ['skill-badge','chord-link','string-link','note-link','rp-trigger','chord-box-label','chord-diagrams','read-aloud-btn','step-resp-mc-opt','tab'];
 
 /* Natural-note fret positions on each string (frets 0–12). Used to
    auto-map sequences like "E · F · G · A · B · C · D · E" to single-note
@@ -1025,8 +1118,6 @@ function wrapChordLinksIn(rootEl){
         span.dataset.string = item.kind;
         span.textContent = text.slice(item.start, item.end);
         span.addEventListener('click', onStringLinkClick);
-        span.addEventListener('mouseenter', onStringLinkHover);
-        span.addEventListener('mouseleave', hideChordPopup);
       } else if (item.type === 'note') {
         span.className = 'note-link';
         span.dataset.string = item.kind;
@@ -1312,9 +1403,9 @@ function buildSet(w){
     : '';
   return `<div class="obj-card"><div class="obj-unit">${w.unit}</div>${setHeader}<div class="obj-main">${w.objective}</div><div class="obj-sub">${w.skillFocus}</div>${handoutLink}</div>
   <div class="tabs">
-    <div class="tab active" onclick="switchTab(this,'${w.id}','stations')">Stations</div>
-    <div class="tab" onclick="switchTab(this,'${w.id}','songs')">Songs</div>
-    <div class="tab" onclick="switchTab(this,'${w.id}','checklist')">My skills checklist</div>
+    <div class="tab tab-stations active" onclick="switchTab(this,'${w.id}','stations')">Stations</div>
+    <div class="tab tab-songs" onclick="switchTab(this,'${w.id}','songs')">Songs</div>
+    <div class="tab tab-checklist" onclick="switchTab(this,'${w.id}','checklist')">My skills checklist</div>
   </div>
   <div id="${w.id}-stations" class="tab-panel active">${buildStations(w)}</div>
   <div id="${w.id}-songs"    class="tab-panel">${buildSongs(w)}</div>
@@ -1345,6 +1436,7 @@ function buildStations(w){
     const chordsHtml = (s.chords&&s.chords.length)
       ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}<div class="chord-box-label">${c.name}</div></div>`).join('')}</div>`
       : '';
+    const tabHtml = s.tab ? buildTab(s.tab) : '';
     const respHtml = s.response ? (()=>{
       const key = `${w.id}-${stationId}-${i}`;
       const stored = responses[key] || '';
@@ -1363,7 +1455,7 @@ function buildStations(w){
       return '';
     })() : '';
     const readBtn = `<button class="read-aloud-btn" type="button" onclick="event.stopPropagation();readAloudStep(this)" title="Read this step aloud" aria-label="Read aloud">&#x1F50A;</button>`;
-    return `<li class="step"><div class="st">${text}${skillBadges?`<span style="margin-left:6px">${skillBadges}</span>`:''}${hintHtml}${chordsHtml}${respHtml} ${readBtn}</div></li>`;
+    return `<li class="step"><div class="st">${text}${skillBadges?`<span style="margin-left:6px">${skillBadges}</span>`:''}${hintHtml}${chordsHtml}${tabHtml}${respHtml} ${readBtn}</div></li>`;
   }).join('');
   const dp=(id,cls,badge,badgeClass,s)=>`
     <div class="dp${cls}" id="${w.id}-dp-${id}">
@@ -1442,6 +1534,8 @@ function buildAssess(w){
 function buildModuleReview(mr){
   const savedKey=`mr${mr.moduleNum}-reflection`;
   const saved=progress[savedKey]||{};
+  const perfKey=`mr${mr.moduleNum}-performance`;
+  const perf=progress[perfKey]||{};
   const mrId=`mr${mr.moduleNum}`;
   const rows=mr.skills.map(s=>{
     const lvl=progress[s.id];
@@ -1451,6 +1545,18 @@ function buildModuleReview(mr){
       <div class="mr-rating">${btn(1)}${btn(2)}${btn(3)}</div>
     </div>`;
   }).join('');
+  const pLvl=perf.level;
+  const pBtn=(n)=>`<button class="mr-rb lvl${n}${pLvl===String(n)?' active':''}" onclick="setPerformanceLevel(${mr.moduleNum},'${n}')">${n}</button>`;
+  const playHtml=`<div class="mr-play">
+      <span class="mr-play-tag">&#x1F3B8; Play it!</span>
+      <div class="mr-play-prompt">Perform the class song from this module &mdash; or a song of your choice that shows off these skills.</div>
+      <label class="mr-play-label" for="${mrId}-song">Song I played</label>
+      <input type="text" id="${mrId}-song" class="mr-play-song" placeholder="e.g. Happy Birthday" oninput="savePerformance(${mr.moduleNum})" value="${escAttr(perf.song||'')}">
+      <div class="mr-play-rate">
+        <span class="mr-play-rate-label">How did it go?</span>
+        <div class="mr-rating">${pBtn(1)}${pBtn(2)}${pBtn(3)}</div>
+      </div>
+    </div>`;
   const performanceHtml=`<div class="ablock" style="margin-top:18px"><div class="albl">How this is assessed in class</div><div class="atxt">Sign up when you are ready for the teacher to assess you on the skills above.</div></div>`;
   return `
     <div class="obj-card">
@@ -1472,6 +1578,7 @@ function buildModuleReview(mr){
       <div class="albl">What's still hard?</div>
       <textarea id="${mrId}-hard" class="reflection-ta" placeholder="e.g. My ring finger keeps slipping off the fret…" oninput="saveReflection(${mr.moduleNum})">${saved.hard||''}</textarea>
     </div>
+    ${playHtml}
     ${performanceHtml}
     <div class="ablock" style="margin-top:12px">
       <div class="albl">NAfME standards</div>
@@ -1501,6 +1608,29 @@ function setSkillLevel(sid, mrId, level){
       b.classList.toggle('active', lvl === n);
     });
   });
+  saveProgress();
+}
+
+function savePerformance(moduleNum){
+  const key=`mr${moduleNum}-performance`;
+  const songEl=document.getElementById(`mr${moduleNum}-song`);
+  const cur=progress[key]||{};
+  progress[key]={song:songEl?songEl.value:'', level:cur.level||null};
+  saveProgress();
+}
+
+function setPerformanceLevel(moduleNum, level){
+  const key=`mr${moduleNum}-performance`;
+  const cur=progress[key]||{};
+  const newLvl=(cur.level===level)?null:level;
+  progress[key]={song:cur.song||'', level:newLvl};
+  const rate=document.querySelector(`.week-panel[data-id="mr${moduleNum}"] .mr-play-rate .mr-rating`);
+  if(rate){
+    rate.querySelectorAll('.mr-rb').forEach(b=>{
+      const n=b.classList.contains('lvl1')?'1':b.classList.contains('lvl2')?'2':'3';
+      b.classList.toggle('active', newLvl===n);
+    });
+  }
   saveProgress();
 }
 
@@ -1607,6 +1737,27 @@ function toggleTranslate(){
 let metroRunning=false, metroInterval=null, audioCtx=null;
 function getAudioCtx(){ if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
 function beep(freq,dur){ const ctx=getAudioCtx(); const o=ctx.createOscillator(),g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=freq; g.gain.setValueAtTime(0.4,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur); o.start(); o.stop(ctx.currentTime+dur); }
+/* Reusable single-note player. Triangle oscillator with a soft
+   attack/hold/decay envelope so the result sounds plucky rather
+   than a steady beep. midi=69 → A4 (440Hz). */
+function playNote(midi){
+  const ctx = getAudioCtx();
+  if (ctx.state === 'suspended') ctx.resume();
+  const freq = 440 * Math.pow(2, (midi - 69) / 12);
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = 'triangle';
+  o.frequency.value = freq;
+  o.connect(g); g.connect(ctx.destination);
+  const t0 = ctx.currentTime;
+  const peak = 0.35;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(peak, t0 + 0.01);
+  g.gain.setValueAtTime(peak, t0 + 1.0);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.5);
+  o.start(t0);
+  o.stop(t0 + 1.55);
+}
 function tick(){ beep(880,0.06); const dot=document.getElementById('metro-dot'); if(dot){ dot.classList.add('flash'); setTimeout(()=>dot.classList.remove('flash'),80); } }
 function getBpm(){ return parseInt(document.getElementById('bpm-slider').value); }
 function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; if(metroRunning){ stopMetro(); startMetro(); } }
