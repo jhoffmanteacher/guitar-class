@@ -15,8 +15,8 @@ SETS.push(
     unit: 'Module 2 · Notes on the E & A Strings',
     title: 'Set 1',
     subtitle: 'Musical alphabet · Note names on E & A · Fretboard reading',
-    objective: 'I CAN name all notes on the E and A strings (frets 0–8) and identify them on a fretboard diagram.',
-    skillFocus: 'Musical alphabet (A–G) · Natural notes on E string (frets 0–8) · Natural notes on A string (frets 0–8) · Reading a note-name chart',
+    objective: 'I CAN name all notes on the E and A strings (frets 0–12) and identify them on a fretboard diagram.',
+    skillFocus: 'Musical alphabet (A–G) · Natural notes on E string (frets 0–12) · Natural notes on A string (frets 0–12) · Reading a note-name chart',
     handoutUrl: 'https://docs.google.com/document/d/1KM2rgUYa3NEpDr4E65YmcTE_g6Fxs_rbIjP-U1wjcnA/edit',
     comingSoon: false,
 
@@ -47,7 +47,7 @@ SETS.push(
             response: { type: 'short', placeholder: 'Which note(s) did you find first? Where on the fretboard?' }
           },
           {
-            text: 'Play along drill: open your note-name chart. Play every natural note on the low E string slowly, frets 0–8: E · F · G · A · B · C · D · E. Say each name out loud as you play it. Do it twice.',
+            text: 'Play along drill: open your note-name chart. Play every natural note on the low E string slowly, frets 0–12: E · F · G · A · B · C · D · E. Say each name out loud as you play it. Do it twice.',
             hint: 'Slow is fine. Accuracy and saying the name out loud matter more than speed.',
             skills: [2],
             response: { type: 'mc', prompt: 'On the low E string, what note is at fret 3?', choices: [
@@ -58,7 +58,7 @@ SETS.push(
             ] }
           },
           {
-            text: 'Now do the same on the A string: A · B · C · D · E · F (frets 0–8). Play up, then back down. Say each name aloud.',
+            text: 'Now do the same on the A string: A · B · C · D · E · F · G · A (frets 0–12). Play up, then back down. Say each name aloud.',
             hint: 'Notice that fret 5 of the A string is the same note as the open D string. That connection will help you later.',
             skills: [3],
             response: { type: 'short', placeholder: 'What did you notice about any of the notes? Did any two notes feel or sound similar?' }
@@ -68,12 +68,12 @@ SETS.push(
       c: {
         title: 'Practice station — fretboard drill',        steps: [
           {
-            text: 'Tune your guitar. Using your note-name chart, play every natural note on the E string slowly: E · F · G · A · B · C. Say each name aloud.',
+            text: 'Tune your guitar. Using your note-name chart, play every natural note on the low E string slowly: E · F · G · A · B · C · D · E. Say each name aloud.',
             hint: 'Hearing + saying + playing locks it in faster.',
             skills: [2]
           },
           {
-            text: 'Now do the same on the A string: A · B · C · D · E · F. Play up to fret 8, then back down.',
+            text: 'Now do the same on the A string: A · B · C · D · E · F · G · A. Play up to fret 12, then back down.',
             hint: 'Keep the metronome at 60 BPM. One note per beat.',
             skills: [3]
           },
@@ -116,7 +116,7 @@ SETS.push(
     ],
 
     assessment: {
-      goal: 'Names all notes on E string (frets 0–8) · Names all notes on A string (frets 0–8) · Points to a named note on the fretboard · Reads a basic fretboard note chart · Identifies notes in a familiar song',
+      goal: 'Names all notes on E string (frets 0–12) · Names all notes on A string (frets 0–12) · Points to a named note on the fretboard · Reads a basic fretboard note chart · Identifies notes in a familiar song',
       performance: 'Partner quiz: one student names a note, partner finds it on the fretboard. Then switch.',
       selfCheck: 'Can you name every natural note on the E string without looking? Can you find any note the teacher calls out on E or A?',
       standards: ['Re.7a', 'Pr.4a']
@@ -124,8 +124,8 @@ SETS.push(
 
     skills: [
       { id: 'm2w1-s1', text: 'Recite the musical alphabet (A B C D E F G) from memory' },
-      { id: 'm2w1-s2', text: 'Name all natural notes on the E string (frets 0–8)' },
-      { id: 'm2w1-s3', text: 'Name all natural notes on the A string (frets 0–8)' },
+      { id: 'm2w1-s2', text: 'Name all natural notes on the E string (frets 0–12)' },
+      { id: 'm2w1-s3', text: 'Name all natural notes on the A string (frets 0–12)' },
       { id: 'm2w1-s4', text: 'Point to any named note on E or A string when called out' },
       { id: 'm2w1-s5', text: 'Read a basic fretboard note-name chart' }
     ]
@@ -269,8 +269,8 @@ MODULE_REVIEWS[2] = {
   module: 'Notes on the E & A Strings',
   skills: [
     { id: 'mr2-s1', text: 'I can recite the musical alphabet (A B C D E F G) from memory' },
-    { id: 'mr2-s2', text: 'I can name all natural notes on the E string (frets 0–8)' },
-    { id: 'mr2-s3', text: 'I can name all natural notes on the A string (frets 0–8)' },
+    { id: 'mr2-s2', text: 'I can name all natural notes on the E string (frets 0–12)' },
+    { id: 'mr2-s3', text: 'I can name all natural notes on the A string (frets 0–12)' },
     { id: 'mr2-s4', text: 'I can press notes cleanly with no fret buzz' },
     { id: 'mr2-s5', text: 'I can read a basic TAB and play a 4-bar melody in time at 60 BPM' }
   ],

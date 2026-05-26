@@ -876,6 +876,57 @@ const CHORD_RE = new RegExp('(^|[^A-Za-z0-9#])(' + CHORD_NAMES.join('|') + ')(?!
 const CHORD_SKIP_TAGS = new Set(['A','BUTTON','SCRIPT','STYLE','TEXTAREA','INPUT','LABEL','SELECT']);
 const CHORD_SKIP_CLASSES = ['skill-badge','chord-link','string-link','note-link','rp-trigger','chord-box-label','chord-diagrams','read-aloud-btn','step-resp-mc-opt'];
 
+/* Natural-note fret positions on each string (frets 0–12). Used to
+   auto-map sequences like "E · F · G · A · B · C · D · E" to single-note
+   popups, with each letter landing on its actual fret on the contextual
+   string. Positions are listed low→high so a walking sequence picks the
+   next available fret above the previous one. */
+const STRING_NOTE_FRETS = {
+  lowE:  { E:[0,12], F:[1], G:[3], A:[5], B:[7], C:[8], D:[10] },
+  A:     { A:[0,12], B:[2], C:[3], D:[5], E:[7], F:[8], G:[10] },
+  D:     { D:[0,12], E:[2], F:[3], G:[5], A:[7], B:[9], C:[10] },
+  G:     { G:[0,12], A:[2], B:[4], C:[5], D:[7], E:[9], F:[10] },
+  B:     { B:[0,12], C:[1], D:[3], E:[5], F:[6], G:[8], A:[10] },
+  highE: { E:[0,12], F:[1], G:[3], A:[5], B:[7], C:[8], D:[10] }
+};
+
+/* Sequence of 3+ standalone natural-note letters joined by " · " (middle dot).
+   The lookarounds keep "G · Down-up" or chord names like "Am" from matching. */
+const NOTE_SEQ_RE = /(?<![A-Za-z0-9])[A-G](?:\s*[·•]\s*[A-G](?![A-Za-z0-9])){2,}/g;
+function findNoteSequenceMatches(text, stringMatches){
+  const out = [];
+  const re = new RegExp(NOTE_SEQ_RE.source, 'g');
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    const seqStart = m.index;
+    const ctx = stringMatches
+      .filter(s => s.end <= seqStart)
+      .sort((a, b) => b.end - a.end)[0];
+    if (!ctx) continue;
+    const fretMap = STRING_NOTE_FRETS[ctx.kind];
+    if (!fretMap) continue;
+    let lastFret = -1;
+    const letterRe = /[A-G]/g;
+    let lm;
+    while ((lm = letterRe.exec(m[0])) !== null) {
+      const letter = lm[0];
+      const positions = fretMap[letter];
+      if (!positions) continue;
+      const fret = positions.find(p => p > lastFret);
+      if (fret === undefined) continue;
+      out.push({
+        start: seqStart + lm.index,
+        end:   seqStart + lm.index + 1,
+        kind:  ctx.kind,
+        fret,
+        note:  letter
+      });
+      lastFret = fret;
+    }
+  }
+  return out;
+}
+
 /* Single-note references: "1st fret (F)", "5th fret (A)", "open (E)" etc.
    The letter inside parens is the NOTE — not a chord. We use the most
    recent string reference earlier in the same text as the string context. */
@@ -931,6 +982,10 @@ function wrapChordLinksIn(rootEl){
 
     /* Note references — "1st fret (F)", "open (E)" with string context */
     const noteMatches = findNoteMatches(text, stringMatches);
+
+    /* Bare note sequences — "E · F · G · A · B · C · D · E" with string context */
+    const noteSeqMatches = findNoteSequenceMatches(text, stringMatches);
+    noteSeqMatches.forEach(x => noteMatches.push(x));
 
     /* Chord matches — skip any that overlap a string or note match */
     const chordMatches = [];
