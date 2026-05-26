@@ -925,6 +925,14 @@ function buildTab(spec){
   return `<div class="tab">${caption}${body}</div>`;
 }
 
+function toggleTabChoice(btn){
+  const expanded = btn.classList.toggle('expanded');
+  const content = btn.nextElementSibling;
+  if (content && content.classList.contains('tab-choice-content')){
+    content.classList.toggle('expanded', expanded);
+  }
+}
+
 /* String reference patterns:
    - "low E" / "high E" (case-insensitive on low/high, captures both as one unit)
    - A letter or list of letters followed by "string"/"strings", e.g.
@@ -1437,6 +1445,12 @@ function buildStations(w){
       ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}<div class="chord-box-label">${c.name}</div></div>`).join('')}</div>`
       : '';
     const tabHtml = s.tab ? buildTab(s.tab) : '';
+    const tabsHtml = (s.tabs && s.tabs.length)
+      ? `<div class="tab-choice-group">${s.tabs.map(t => {
+          const title = t.title || t.caption || 'TAB';
+          return `<div class="tab-choice"><button type="button" class="tab-choice-btn" onclick="toggleTabChoice(this)"><span class="tab-choice-icon">&#x25B6;</span><span>Show TAB: ${escHtml(title)}</span></button><div class="tab-choice-content">${buildTab(t)}</div></div>`;
+        }).join('')}</div>`
+      : '';
     const respHtml = s.response ? (()=>{
       const key = `${w.id}-${stationId}-${i}`;
       const stored = responses[key] || '';
@@ -1455,7 +1469,7 @@ function buildStations(w){
       return '';
     })() : '';
     const readBtn = `<button class="read-aloud-btn" type="button" onclick="event.stopPropagation();readAloudStep(this)" title="Read this step aloud" aria-label="Read aloud">&#x1F50A;</button>`;
-    return `<li class="step"><div class="st">${text}${skillBadges?`<span style="margin-left:6px">${skillBadges}</span>`:''}${hintHtml}${chordsHtml}${tabHtml}${respHtml} ${readBtn}</div></li>`;
+    return `<li class="step"><div class="st">${text}${skillBadges?`<span style="margin-left:6px">${skillBadges}</span>`:''}${hintHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div></li>`;
   }).join('');
   const dp=(id,cls,badge,badgeClass,s)=>`
     <div class="dp${cls}" id="${w.id}-dp-${id}">
