@@ -341,15 +341,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .note-link{display:inline;color:var(--amber-text);cursor:pointer;border-bottom:0.5px dotted var(--amber-text);font-weight:500;padding:0 1px;border-radius:2px;transition:background 0.1s}
 .note-link:hover{background:var(--amber-bg)}
 .chord-popup{position:absolute;z-index:1000;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius);padding:10px 12px;box-shadow:0 4px 18px rgba(0,0,0,0.20);pointer-events:none;display:none;flex-direction:column;align-items:center;gap:4px;max-width:220px}
+.chord-popup.wide{max-width:360px}
 .chord-popup.visible{display:flex}
 .chord-popup-name{font-size:13px;font-weight:600;color:var(--text)}
 .chord-popup img{display:block;width:180px;height:auto;background:var(--bg)}
 .chord-popup-svg{width:130px;display:flex;justify-content:center}
+.chord-popup.wide .chord-popup-svg{width:320px}
 .chord-popup-svg svg{width:100%;height:auto;display:block}
 .chord-popup-hint{font-size:10px;color:var(--text3);margin-top:2px}
 .rp-iframe-wrap.rp-chord{background:var(--bg);padding:20px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius);border:0.5px solid var(--border);min-height:240px}
 .rp-iframe-wrap.rp-chord img{display:block;max-width:280px;width:100%;height:auto}
 .rp-iframe-wrap.rp-chord .rp-chord-svg{width:100%;max-width:240px;display:flex;justify-content:center}
+.rp-iframe-wrap.rp-chord.wide .rp-chord-svg{max-width:460px}
 .rp-iframe-wrap.rp-chord .rp-chord-svg svg{width:100%;height:auto}
 .rp-iframe-wrap.rp-chord .rp-chord-err{font-size:12px;color:var(--text2);text-align:center;line-height:1.5}
 /* ── Read Aloud button (ELD) ── */
@@ -744,11 +747,14 @@ function localStringSvg(kind){
   return chordDiagramSVG(cfg).replace(/width="\d+"\s+height="\d+"/, '');
 }
 
-/* Single-note diagrams — one fretted (or open) note on one string,
-   all others muted. Reuses chordDiagramSVG. For frets > 4 we shift
-   the position window so the dot stays visible. */
+/* Single-note diagrams — one fretted (or open) note shown on a
+   horizontal fretboard view. Strings drawn top→bottom: high E (top)
+   to low E (bottom), matching the standard view when looking at your
+   guitar. Open notes sit to the LEFT of the nut. */
 const STRING_KIND_TO_NUM = { lowE:6, A:5, D:4, G:3, B:2, highE:1 };
 const STRING_SHORT_LABEL = { lowE:'low E', A:'A', D:'D', G:'G', B:'B', highE:'high E' };
+const STRING_NUM_TO_LABEL = { 1:'high E', 2:'B', 3:'G', 4:'D', 5:'A', 6:'low E' };
+const FRETBOARD_INLAYS = [3, 5, 7, 9, 12];
 function ordinal(n){
   const s = ['th','st','nd','rd'], v = n % 100;
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
@@ -757,17 +763,66 @@ function noteFullLabel(note, fret, kind){
   const str = STRING_SHORT_LABEL[kind] || kind;
   return fret === 0 ? `${note} · ${str} open` : `${note} · ${str} string, ${ordinal(fret)} fret`;
 }
-function localNoteSvg(kind, fret){
-  const num = STRING_KIND_TO_NUM[kind];
-  if (!num) return null;
+function localNoteSvg(kind, fret, note){
+  const sNum = STRING_KIND_TO_NUM[kind];
+  if (!sNum) return null;
   const fr = Number(fret);
   if (isNaN(fr) || fr < 0) return null;
-  const position = fr > 4 ? fr - 2 : 0;
-  const chord = [];
-  for (let s = 6; s >= 1; s--) {
-    chord.push(s === num ? [s, fr, ''] : [s, 'x', '']);
+
+  const W = 480, H = 150;
+  const padL = 56, padR = 18, padT = 14, padB = 26;
+  const openW = 26;
+  const maxFret = Math.max(8, fr + 1);
+  const fretAreaW = W - padL - padR - openW;
+  const fretW = fretAreaW / maxFret;
+  const boxH = H - padT - padB;
+  const strGap = boxH / 5;
+  const nutX = padL + openW;
+  const fretX = f => nutX + f * fretW;
+
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">`;
+
+  /* Inlay dots between fret wires (standard guitar inlay positions) */
+  FRETBOARD_INLAYS.filter(f => f <= maxFret).forEach(f => {
+    const cx = nutX + (f - 0.5) * fretW;
+    const cy = padT + boxH / 2;
+    s += `<circle cx="${cx}" cy="${cy}" r="3.5" fill="var(--text3)" opacity="0.35"/>`;
+    if (f === 12) {
+      s += `<circle cx="${cx}" cy="${cy - 14}" r="3.5" fill="var(--text3)" opacity="0.35"/>`;
+      s += `<circle cx="${cx}" cy="${cy + 14}" r="3.5" fill="var(--text3)" opacity="0.35"/>`;
+    }
+  });
+
+  /* Fret wires */
+  for (let f = 1; f <= maxFret; f++) {
+    const x = fretX(f);
+    s += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${padT + boxH}" stroke="var(--text3)" stroke-width="0.9"/>`;
   }
-  return chordDiagramSVG({ position, chord }).replace(/width="\d+"\s+height="\d+"/, '');
+  /* Nut */
+  s += `<rect x="${nutX - 2}" y="${padT - 2}" width="4" height="${boxH + 4}" fill="var(--text)" rx="0.5"/>`;
+
+  /* Strings + labels */
+  for (let n = 1; n <= 6; n++) {
+    const y = padT + (n - 1) * strGap;
+    s += `<line x1="${padL}" y1="${y}" x2="${fretX(maxFret)}" y2="${y}" stroke="var(--text3)" stroke-width="0.9"/>`;
+    s += `<text x="${padL - 8}" y="${y}" text-anchor="end" dominant-baseline="central" font-size="11" fill="var(--text2)">${STRING_NUM_TO_LABEL[n]}</text>`;
+  }
+
+  /* Fret numbers below */
+  for (let f = 0; f <= maxFret; f++) {
+    const cx = f === 0 ? padL + openW / 2 : nutX + (f - 0.5) * fretW;
+    s += `<text x="${cx}" y="${padT + boxH + 16}" text-anchor="middle" font-size="10" fill="var(--text2)">${f}</text>`;
+  }
+
+  /* Target note dot */
+  const targetY = padT + (sNum - 1) * strGap;
+  const targetX = fr === 0 ? padL + openW / 2 : nutX + (fr - 0.5) * fretW;
+  s += `<circle cx="${targetX}" cy="${targetY}" r="11" fill="var(--text)"/>`;
+  if (note) {
+    s += `<text x="${targetX}" y="${targetY}" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="600" fill="var(--bg)">${escHtml(note)}</text>`;
+  }
+
+  return s + '</svg>';
 }
 
 /* String reference patterns:
@@ -973,6 +1028,7 @@ function onChordLinkHover(){
   const popup = ensureChordPopup();
   const svg = localChordSvg(chord);
   if (!svg) return;
+  popup.classList.remove('wide');
   popup.innerHTML = `<div class="chord-popup-name">${chord}</div><div class="chord-popup-svg">${svg}</div><div class="chord-popup-hint">Click to open</div>`;
   popup.classList.add('visible');
   positionChordPopup(popup, this);
@@ -992,6 +1048,7 @@ function onStringLinkHover(){
   const svg = localStringSvg(kind);
   if (!svg) return;
   const label = STRING_LABELS[kind] || kind;
+  popup.classList.remove('wide');
   popup.innerHTML = `<div class="chord-popup-name">${label}</div><div class="chord-popup-svg">${svg}</div><div class="chord-popup-hint">Click to open</div>`;
   popup.classList.add('visible');
   positionChordPopup(popup, this);
@@ -1013,9 +1070,10 @@ function onNoteLinkHover(){
   const note = this.dataset.note;
   if (!kind || isNaN(fret) || !note) return;
   const popup = ensureChordPopup();
-  const svg = localNoteSvg(kind, fret);
+  const svg = localNoteSvg(kind, fret, note);
   if (!svg) return;
   const hint = noteFullLabel(note, fret, kind);
+  popup.classList.add('wide');
   popup.innerHTML = `<div class="chord-popup-name">${note}</div><div class="chord-popup-svg">${svg}</div><div class="chord-popup-hint">${escHtml(hint)} · Click to open</div>`;
   popup.classList.add('visible');
   positionChordPopup(popup, this);
@@ -1916,8 +1974,8 @@ function loadPanel(type,url,title,subtitle){
     /* For note type, `url` carries "kind|fret|note" */
     const [kind, fretStr, note] = String(url).split('|');
     const fret = Number(fretStr);
-    wrap.className='rp-iframe-wrap rp-chord';
-    const svg = localNoteSvg(kind, fret);
+    wrap.className='rp-iframe-wrap rp-chord wide';
+    const svg = localNoteSvg(kind, fret, note);
     if (svg){
       wrap.innerHTML = `<div class="rp-chord-svg">${svg}</div>`;
       newtab.classList.remove('visible');

@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Single-note fretboard view — demo</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f7f6f3;--bg3:#eeecea;
+  --text:#1a1a18;--text2:#6b6b65;--text3:#aaaaa3;
+  --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
+  --blue-bg:#e6f1fb;--blue-text:#185fa5;
+  --green-bg:#eaf3de;--green-text:#3b6d11;
+  --amber-bg:#faeeda;--amber-text:#854f0b;
+  --radius:10px;--radius-sm:6px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#1e1e1c;--bg2:#272724;--bg3:#313130;
+    --text:#e8e6df;--text2:#888880;--text3:#555550;
+    --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
+    --blue-bg:#0c3a6b;--blue-text:#93c4f0;
+    --green-bg:#1e4208;--green-text:#a8d070;
+  }
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg2);color:var(--text);min-height:100vh;padding:30px 20px}
+.wrap{max-width:880px;margin:0 auto}
+h1{font-size:20px;font-weight:500;margin-bottom:6px}
+.sub{font-size:13px;color:var(--text2);margin-bottom:30px;line-height:1.5}
+.card{background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius);padding:18px 20px 22px;margin-bottom:22px}
+.card-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
+.card-meta{font-size:12px;color:var(--text2);margin-bottom:14px}
+.card-svg{display:flex;justify-content:center;background:var(--bg2);border-radius:var(--radius-sm);padding:14px}
+.card-svg svg{display:block;max-width:100%;height:auto}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+@media(max-width:680px){.row{grid-template-columns:1fr}}
+.compare-label{font-size:11px;text-transform:uppercase;letter-spacing:0.05em;color:var(--text2);margin-bottom:8px;padding-left:2px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;padding:14px 16px;background:var(--bg);border-radius:var(--radius);border:0.5px solid var(--border)}
+.controls label{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px}
+.controls select{font-size:13px;padding:4px 8px;border:0.5px solid var(--border2);border-radius:var(--radius-sm);background:var(--bg);color:var(--text)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Single-note fretboard view — demo</h1>
+  <p class="sub">
+    Module 2 references single notes (E and A strings, frets 0–8), but the current popup
+    shows a chord diagram with 5 muted strings. Below are three proposed alternatives
+    rendered as horizontal fretboards. Pick the one you like best — I'll wire it into
+    <code>localNoteSvg</code> in index.html.
+  </p>
+
+  <div class="controls">
+    <label>Example note —
+      <select id="noteSel">
+        <option value="lowE|0|E">low E, open (E)</option>
+        <option value="lowE|3|G" selected>low E, 3rd fret (G)</option>
+        <option value="lowE|5|A">low E, 5th fret (A)</option>
+        <option value="lowE|7|B">low E, 7th fret (B)</option>
+        <option value="A|0|A">A, open (A)</option>
+        <option value="A|3|C">A, 3rd fret (C)</option>
+        <option value="A|5|D">A, 5th fret (D)</option>
+        <option value="A|7|E">A, 7th fret (E)</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="row">
+    <div>
+      <div class="compare-label">Current (chord-diagram style)</div>
+      <div class="card">
+        <div class="card-title" id="curTitle"></div>
+        <div class="card-meta">Reuses the chord-diagram grid — 5 strings muted with × marks.</div>
+        <div class="card-svg" id="cur"></div>
+      </div>
+    </div>
+    <div>
+      <div class="compare-label">Option A — minimal fretboard</div>
+      <div class="card">
+        <div class="card-title" id="aTitle"></div>
+        <div class="card-meta">Horizontal fretboard, one dot on the target string/fret. Other strings visible but muted.</div>
+        <div class="card-svg" id="optA"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <div class="compare-label">Option B — target string highlighted</div>
+      <div class="card">
+        <div class="card-title" id="bTitle"></div>
+        <div class="card-meta">Same as A, but the target string is drawn thicker so the eye lands on it first.</div>
+        <div class="card-svg" id="optB"></div>
+      </div>
+    </div>
+    <div>
+      <div class="compare-label">Option C — single string, all naturals labeled</div>
+      <div class="card">
+        <div class="card-title" id="cTitle"></div>
+        <div class="card-meta">Only the target string. Every natural note (frets 0–8) is shown as a ghost dot with its letter; the target note is filled in. Matches Module 2's "name every note on the E string" objective.</div>
+        <div class="card-svg" id="optC"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* String-kind helpers — same convention as index.html.
+   String numbers: 6 = low E, 5 = A, 4 = D, 3 = G, 2 = B, 1 = high E */
+const STRING_KIND_TO_NUM = { lowE:6, A:5, D:4, G:3, B:2, highE:1 };
+const STRING_LABELS_FULL = { lowE:'low E', A:'A', D:'D', G:'G', B:'B', highE:'high E' };
+
+/* Natural notes on each string, frets 0–11 */
+const STRING_NOTES = {
+  6: ['E','F',null,'G',null,'A',null,'B','C',null,'D',null],  // low E
+  5: ['A',null,'B','C',null,'D',null,'E','F',null,'G',null],  // A
+  4: ['D',null,'E','F',null,'G',null,'A',null,'B','C',null],  // D
+  3: ['G',null,'A',null,'B','C',null,'D',null,'E','F',null],  // G
+  2: ['B','C',null,'D',null,'E','F',null,'G',null,'A',null],  // B
+  1: ['E','F',null,'G',null,'A',null,'B','C',null,'D',null]   // high E
+};
+
+function ordinal(n){
+  const s = ['th','st','nd','rd'], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+function noteLabel(note, fret, kind){
+  const str = STRING_LABELS_FULL[kind] || kind;
+  return fret === 0 ? `${note} · ${str} open` : `${note} · ${str} string, ${ordinal(fret)} fret`;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   CURRENT: chord-diagram-style single note (copied from index.html)
+   ────────────────────────────────────────────────────────────── */
+function chordDiagramSVG(cfg){
+  const W=180,H=210,padL=28,padR=28,padT=40,padB=8;
+  const NUM_FRETS=4;
+  const boxW=W-padL-padR,boxH=H-padT-padB;
+  const strGap=boxW/5,fretGap=boxH/NUM_FRETS;
+  const pos=cfg.position||0,isOpen=pos===0;
+  const dotR=Math.min(strGap,fretGap)*0.36;
+  const ind={},chordArr=cfg.chord||[];
+  chordArr.forEach(([s,fr,fg])=>{ind[s]={fret:fr,finger:fg};});
+  let s=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`;
+  for(let n=6;n>=1;n--){
+    const xi=6-n,x=padL+xi*strGap,st=ind[n];
+    if(st){
+      if(st.fret==='x') s+=`<text x="${x}" y="${padT-14}" text-anchor="middle" dominant-baseline="middle" font-size="20" fill="var(--text2)" font-family="sans-serif">×</text>`;
+      else if(st.fret===0) s+=`<circle cx="${x}" cy="${padT-16}" r="6" fill="none" stroke="var(--text2)" stroke-width="1.8"/>`;
+    }
+    s+=`<line x1="${x}" y1="${padT}" x2="${x}" y2="${padT+NUM_FRETS*fretGap}" stroke="var(--text3)" stroke-width="1.4"/>`;
+  }
+  if(isOpen) s+=`<rect x="${padL-2}" y="${padT-5}" width="${boxW+4}" height="5" fill="var(--text)" rx="1.5"/>`;
+  else s+=`<text x="${padL-8}" y="${padT+fretGap*0.55}" text-anchor="end" dominant-baseline="middle" font-size="14" fill="var(--text2)" font-family="sans-serif">${pos}fr</text>`;
+  for(let f=1;f<=NUM_FRETS;f++){
+    const y=padT+f*fretGap;
+    s+=`<line x1="${padL}" y1="${y}" x2="${padL+boxW}" y2="${y}" stroke="var(--text3)" stroke-width="1.2"/>`;
+  }
+  chordArr.forEach(([n,fr])=>{
+    if(typeof fr!=='number'||fr<=0) return;
+    const row=isOpen?fr:(fr-pos+1);
+    if(row<1||row>NUM_FRETS) return;
+    const xi=6-n,cx=padL+xi*strGap,cy=padT+(row-0.5)*fretGap;
+    s+=`<circle cx="${cx}" cy="${cy}" r="${dotR}" fill="var(--text)"/>`;
+  });
+  return s+'</svg>';
+}
+function currentNoteSvg(kind, fret){
+  const num = STRING_KIND_TO_NUM[kind];
+  const fr = Number(fret);
+  const position = fr > 4 ? fr - 2 : 0;
+  const chord = [];
+  for (let s = 6; s >= 1; s--) chord.push(s === num ? [s, fr, ''] : [s, 'x', '']);
+  return chordDiagramSVG({ position, chord });
+}
+
+/* ──────────────────────────────────────────────────────────────
+   NEW: horizontal fretboard renderer
+   - Renders frets 0..maxFret as horizontal bands
+   - Strings drawn top-to-bottom: high E (top) → low E (bottom)
+     [standard fretboard view when looking AT your guitar]
+   - String labels on the left, fret numbers below
+   - Open notes sit to the LEFT of the nut
+   ────────────────────────────────────────────────────────────── */
+
+/* Build inlay marks at the standard guitar positions */
+const INLAY_FRETS = [3, 5, 7, 9, 12];
+
+function fretboardBase(maxFret, opts = {}){
+  const {
+    highlightString = null,   // string number 1..6 to draw thicker
+    showStringLabels = true,
+    soloString = null         // if set, only that string is drawn
+  } = opts;
+
+  /* Geometry */
+  const W = 480, H = 150;
+  const padL = showStringLabels ? 56 : 18;
+  const padR = 18, padT = 14, padB = 26;
+  const openW = 26;  // space to left of nut for open-note markers
+  const fretAreaW = W - padL - padR - openW;
+  const fretW = fretAreaW / maxFret;
+  const boxH = H - padT - padB;
+  const strGap = boxH / 5;
+
+  /* Visible string indices: 1=top (high E) ... 6=bottom (low E) */
+  const stringIdxs = soloString ? [soloString] : [1,2,3,4,5,6];
+  /* For solo: single string centered vertically */
+  const yFor = (sNum) => {
+    if (soloString) return padT + boxH / 2;
+    /* visual row 0 = top = string 1 (high E) */
+    const row = sNum - 1;
+    return padT + row * strGap;
+  };
+
+  const nutX = padL + openW;
+  const fretX = (f) => nutX + f * fretW;
+
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">`;
+
+  /* Inlay dots (centered between fret wires) */
+  INLAY_FRETS.filter(f => f <= maxFret).forEach(f => {
+    const cx = nutX + (f - 0.5) * fretW;
+    const cy = padT + boxH / 2;
+    s += `<circle cx="${cx}" cy="${cy}" r="3.5" fill="var(--text3)" opacity="0.35"/>`;
+    if (f === 12) {
+      s += `<circle cx="${cx}" cy="${cy - 14}" r="3.5" fill="var(--text3)" opacity="0.35"/>`;
+      s += `<circle cx="${cx}" cy="${cy + 14}" r="3.5" fill="var(--text3)" opacity="0.35"/>`;
+    }
+  });
+
+  /* Fret wires */
+  for (let f = 1; f <= maxFret; f++) {
+    const x = fretX(f);
+    s += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${padT + boxH}" stroke="var(--text3)" stroke-width="0.9"/>`;
+  }
+  /* Nut */
+  s += `<rect x="${nutX - 2}" y="${padT - 2}" width="4" height="${boxH + 4}" fill="var(--text)" rx="0.5"/>`;
+
+  /* Strings */
+  stringIdxs.forEach(sNum => {
+    const y = yFor(sNum);
+    const isTarget = sNum === highlightString;
+    const stroke = isTarget ? 'var(--text)' : 'var(--text3)';
+    const sw = isTarget ? 1.6 : 0.9;
+    s += `<line x1="${padL}" y1="${y}" x2="${fretX(maxFret)}" y2="${y}" stroke="${stroke}" stroke-width="${sw}"/>`;
+    if (showStringLabels) {
+      const name = ['','high E','B','G','D','A','low E'][sNum];
+      const weight = isTarget ? '600' : '400';
+      const color = isTarget ? 'var(--text)' : 'var(--text2)';
+      s += `<text x="${padL - 8}" y="${y}" text-anchor="end" dominant-baseline="central" font-size="11" font-weight="${weight}" fill="${color}">${name}</text>`;
+    }
+  });
+
+  /* Fret numbers below */
+  for (let f = 0; f <= maxFret; f++) {
+    let cx;
+    if (f === 0) cx = padL + openW / 2;        // "0" centered in open zone
+    else cx = nutX + (f - 0.5) * fretW;        // others centered between wires
+    s += `<text x="${cx}" y="${padT + boxH + 16}" text-anchor="middle" font-size="10" fill="var(--text2)">${f}</text>`;
+  }
+
+  return { svg: s, yFor, fretX, nutX, openW, padL };
+}
+
+/* OPTION A — minimal: horizontal fretboard, one dot */
+function noteFretboardA(kind, fret, note){
+  const sNum = STRING_KIND_TO_NUM[kind];
+  const fr = Number(fret);
+  const maxFret = Math.max(8, fr + 1);
+  const ctx = fretboardBase(maxFret, { showStringLabels:true });
+  let s = ctx.svg;
+  const y = ctx.yFor(sNum);
+  let cx;
+  if (fr === 0) cx = ctx.padL + ctx.openW / 2;
+  else cx = ctx.nutX + (fr - 0.5) * (ctx.fretX(1) - ctx.nutX);
+  /* Filled dot with note letter inside */
+  s += `<circle cx="${cx}" cy="${y}" r="11" fill="var(--text)"/>`;
+  s += `<text x="${cx}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="600" fill="var(--bg)">${note}</text>`;
+  return s + '</svg>';
+}
+
+/* OPTION B — same as A but target string is highlighted */
+function noteFretboardB(kind, fret, note){
+  const sNum = STRING_KIND_TO_NUM[kind];
+  const fr = Number(fret);
+  const maxFret = Math.max(8, fr + 1);
+  const ctx = fretboardBase(maxFret, { showStringLabels:true, highlightString:sNum });
+  let s = ctx.svg;
+  const y = ctx.yFor(sNum);
+  let cx;
+  if (fr === 0) cx = ctx.padL + ctx.openW / 2;
+  else cx = ctx.nutX + (fr - 0.5) * (ctx.fretX(1) - ctx.nutX);
+  s += `<circle cx="${cx}" cy="${y}" r="11" fill="var(--blue-text)"/>`;
+  s += `<text x="${cx}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="11" font-weight="600" fill="var(--bg)">${note}</text>`;
+  return s + '</svg>';
+}
+
+/* OPTION C — solo string with every natural labeled, target highlighted */
+function noteFretboardC(kind, fret, note){
+  const sNum = STRING_KIND_TO_NUM[kind];
+  const fr = Number(fret);
+  const maxFret = 8;
+  const ctx = fretboardBase(maxFret, { showStringLabels:true, soloString:sNum });
+  let s = ctx.svg;
+  const y = ctx.yFor(sNum);
+  const notesOnString = STRING_NOTES[sNum];
+
+  /* Ghost dots for every natural note */
+  for (let f = 0; f <= maxFret; f++) {
+    const noteHere = notesOnString[f];
+    if (!noteHere) continue;
+    let cx;
+    if (f === 0) cx = ctx.padL + ctx.openW / 2;
+    else cx = ctx.nutX + (f - 0.5) * (ctx.fretX(1) - ctx.nutX);
+    const isTarget = (f === fr);
+    if (isTarget) {
+      s += `<circle cx="${cx}" cy="${y}" r="12" fill="var(--blue-text)"/>`;
+      s += `<text x="${cx}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="var(--bg)">${noteHere}</text>`;
+    } else {
+      s += `<circle cx="${cx}" cy="${y}" r="10" fill="none" stroke="var(--text3)" stroke-width="1"/>`;
+      s += `<text x="${cx}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="10" font-weight="500" fill="var(--text2)">${noteHere}</text>`;
+    }
+  }
+  return s + '</svg>';
+}
+
+/* ──────────────────────────────────────────────────────────────
+   Wire up the demo controls
+   ────────────────────────────────────────────────────────────── */
+function render(){
+  const [kind, fretStr, note] = document.getElementById('noteSel').value.split('|');
+  const fret = Number(fretStr);
+  const label = noteLabel(note, fret, kind);
+
+  ['curTitle','aTitle','bTitle','cTitle'].forEach(id => {
+    document.getElementById(id).textContent = label;
+  });
+
+  document.getElementById('cur').innerHTML  = currentNoteSvg(kind, fret);
+  document.getElementById('optA').innerHTML = noteFretboardA(kind, fret, note);
+  document.getElementById('optB').innerHTML = noteFretboardB(kind, fret, note);
+  document.getElementById('optC').innerHTML = noteFretboardC(kind, fret, note);
+}
+document.getElementById('noteSel').addEventListener('change', render);
+render();
+</script>
+</body>
+</html>

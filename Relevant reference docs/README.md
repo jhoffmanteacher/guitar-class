@@ -12,3 +12,7 @@ Source-of-truth documents that live outside the repo. Update them in place; Clau
 ## Other reference files in this folder
 
 - `L07_Open_Chord_Groups_Diagrams.pdf` — open chord group diagrams used in Module 7.
+
+## Design prototypes
+
+- `fretboard-demo.html` — side-by-side comparison of the old chord-diagram-style single-note view vs. three horizontal-fretboard alternatives (A: minimal, B: highlighted string, C: full string with naturals labeled). Option A is what's currently live in `index.html` (`localNoteSvg`). Open with Live Server to revisit the alternatives.
