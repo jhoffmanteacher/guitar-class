@@ -1442,7 +1442,6 @@ function buildStations(w){
       if(bullets.length <= 1) return `<div class="sh">${s.hint}</div>`;
       return `<ul class="sh-list">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
     })() : '';
-    const skillBadges = (s.skills&&s.skills.length) ? s.skills.map(n=>`<span class="skill-badge">Skill ${n}</span>`).join('') : '';
     const chordsHtml = (s.chords&&s.chords.length)
       ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}<div class="chord-box-label">${c.name}</div></div>`).join('')}</div>`
       : '';
@@ -1471,7 +1470,7 @@ function buildStations(w){
       return '';
     })() : '';
     const readBtn = `<button class="read-aloud-btn" type="button" onclick="event.stopPropagation();readAloudStep(this)" title="Read this step aloud" aria-label="Read aloud">&#x1F50A;</button>`;
-    return `<li class="step"><div class="st">${text}${skillBadges?`<span style="margin-left:6px">${skillBadges}</span>`:''}${hintHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div></li>`;
+    return `<li class="step"><div class="sn">${i+1}</div><div class="st">${text}${hintHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div></li>`;
   }).join('');
   const dp=(id,cls,badge,badgeClass,s)=>`
     <div class="dp${cls}" id="${w.id}-dp-${id}">
