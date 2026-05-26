@@ -11,3 +11,14 @@ SETS.push(
   { id:'m7w3', label:'Set 3', locked:true, module:'Tab Notation and Barre Chords', moduleNum:7, unit:'Module 7 · Tab Notation and Barre Chords', title:'Set 3', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1w1GM5ZkoFNn0QBGOkstSXGyRZIU8ml2-W9_FtgTkMYg/edit', comingSoon:true, skills:[] }
 
 ); // end module-7.js
+
+MODULE_REVIEWS[7] = {
+  moduleNum: 7,
+  module: 'Tab Notation and Barre Chords',
+  skills: [
+    { id: 'mr7-s1', text: 'I can read multi-line TAB with rhythm notation' },
+    { id: 'mr7-s2', text: 'I can form a clean E-shape barre chord' },
+    { id: 'mr7-s3', text: 'I can form a clean A-shape barre chord' }
+  ],
+  standards: ['Pr.4a', 'Pr.5a', 'Re.7a']
+};

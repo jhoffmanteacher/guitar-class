@@ -74,6 +74,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .wpill.active{background:var(--text);color:var(--bg);border-color:var(--text)}
 .wpill.locked{opacity:.35;cursor:default}
 .wpill.incomplete::after{content:'';width:6px;height:6px;border-radius:50%;background:var(--amber-text);position:absolute;top:3px;right:3px}
+.wpill.review-pill{border-style:dashed}
+.wpill.review-pill.active{background:#EEEDFE;color:#3C3489;border-color:#7F77DD;border-style:solid}
+.reflection-ta{width:100%;box-sizing:border-box;border:0.5px solid var(--border2);border-radius:var(--radius);padding:10px 13px;font-size:13px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:500;color:var(--text);background:var(--bg);resize:vertical;min-height:68px;line-height:1.5}
+.reflection-ta::placeholder{color:var(--text2);font-weight:400}
+.reflection-ta:focus{outline:none;border-color:var(--text2)}
+.week-panel[data-id^="mr"] .albl{color:var(--text);font-weight:600}
+.mr-tag{display:inline-block;font-size:11px;font-weight:500;color:#5b4dc4;background:#EEEDFE;border:0.5px solid #c5c0ee;border-radius:14px;padding:3px 11px;margin-bottom:10px}
+.mr-skills{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:10px}
+.mr-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-top:0.5px solid var(--border)}
+.mr-row:first-child{border-top:none}
+.mr-skill-text{font-size:13px;line-height:1.5;color:var(--text);flex:1;font-weight:500}
+.mr-rating{display:flex;gap:6px;flex-shrink:0}
+.mr-rb{width:34px;height:34px;border:0.5px solid var(--border2);border-radius:8px;background:var(--bg);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;transition:all 0.12s}
+.mr-rb.lvl1{color:var(--amber-text);border-color:var(--amber-text);background:var(--amber-bg)}
+.mr-rb.lvl2{color:var(--blue-text);border-color:var(--blue-text);background:var(--blue-bg)}
+.mr-rb.lvl3{color:var(--green-text);border-color:var(--green-text);background:var(--green-bg)}
+.mr-rb:hover{filter:brightness(0.95)}
+.mr-rb.active{font-weight:700;border-width:1.5px;box-shadow:inset 0 0 0 1px currentColor}
+.mr-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--text2);margin:0 0 6px 4px}
+.mr-legend-item{display:inline-flex;align-items:center;gap:6px}
+.mr-legend-dot{width:11px;height:11px;border-radius:3px;display:inline-block;flex-shrink:0}
+.mr-legend-dot.lvl1{background:var(--amber-bg);border:0.5px solid var(--amber-text)}
+.mr-legend-dot.lvl2{background:var(--blue-bg);border:0.5px solid var(--blue-text)}
+.mr-legend-dot.lvl3{background:var(--green-bg);border:0.5px solid var(--green-text)}
 .week-panel{display:none}.week-panel.active{display:block}
 .obj-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
 .obj-unit{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:5px}
@@ -570,6 +594,8 @@ async function loadProgress(){
       Object.keys(raw).forEach(k=>{
         if(raw[k]===true) progress[k]='gotit';
         else if(raw[k]==='working'||raw[k]==='gotit') progress[k]=raw[k];
+        else if(raw[k]==='1'||raw[k]==='2'||raw[k]==='3') progress[k]=raw[k];
+        else if(k.endsWith('-reflection') && raw[k] && typeof raw[k]==='object') progress[k]=raw[k];
         else progress[k]='none';
       });
       lastModuleNum = doc.data().lastModule||1;
@@ -1089,7 +1115,8 @@ function onModuleChange(moduleNum, restoreSetId){
   document.getElementById('module-select').value = moduleNum;
   renderPills(moduleNum);
   const moduleSets = SETS.filter(w=>w.moduleNum===moduleNum);
-  const target = restoreSetId && moduleSets.find(w=>w.id===restoreSetId)
+  const isReviewId = restoreSetId === `mr${moduleNum}` && MODULE_REVIEWS[moduleNum];
+  const target = restoreSetId && (moduleSets.find(w=>w.id===restoreSetId) || isReviewId)
     ? restoreSetId : (moduleSets.find(w=>!w.locked)||moduleSets[0]).id;
   activateSet(target);
 }
@@ -1109,6 +1136,19 @@ function renderPills(moduleNum){
     if(!w.locked) btn.onclick=()=>{ lastSetId=w.id; activateSet(w.id); saveProgress(); };
     c.appendChild(btn);
   });
+
+  // Divider + Module Review pill
+  if(MODULE_REVIEWS[moduleNum]){
+    const div = document.createElement('div');
+    div.style.cssText='width:1px;height:18px;background:var(--border2);margin:0 4px;align-self:center;flex-shrink:0';
+    c.appendChild(div);
+    const rbtn = document.createElement('button');
+    rbtn.className='wpill review-pill';
+    rbtn.dataset.id=`mr${moduleNum}`;
+    rbtn.textContent='Module review';
+    rbtn.onclick=()=>{ lastSetId=`mr${moduleNum}`; activateSet(`mr${moduleNum}`); saveProgress(); };
+    c.appendChild(rbtn);
+  }
 }
 
 function activateSet(id){
@@ -1125,6 +1165,13 @@ function renderPanels(){
     const div=document.createElement('div');
     div.className='week-panel'; div.dataset.id=w.id;
     div.innerHTML = w.comingSoon ? buildComingSoon(w) : buildSet(w);
+    c.appendChild(div);
+  });
+  // Module review panels
+  Object.values(MODULE_REVIEWS).forEach(mr=>{
+    const div=document.createElement('div');
+    div.className='week-panel'; div.dataset.id=`mr${mr.moduleNum}`;
+    div.innerHTML=buildModuleReview(mr);
     c.appendChild(div);
   });
   /* Scan all station step text for chord names and wrap matches in clickable spans */
@@ -1148,12 +1195,10 @@ function buildSet(w){
     <div class="tab active" onclick="switchTab(this,'${w.id}','stations')">Stations</div>
     <div class="tab" onclick="switchTab(this,'${w.id}','songs')">Songs</div>
     <div class="tab" onclick="switchTab(this,'${w.id}','checklist')">My checklist</div>
-    <div class="tab" onclick="switchTab(this,'${w.id}','assess')">Assessment</div>
   </div>
   <div id="${w.id}-stations" class="tab-panel active">${buildStations(w)}</div>
   <div id="${w.id}-songs"    class="tab-panel">${buildSongs(w)}</div>
-  <div id="${w.id}-checklist" class="tab-panel">${buildChecklist(w)}</div>
-  <div id="${w.id}-assess"   class="tab-panel">${buildAssess(w)}</div>`;
+  <div id="${w.id}-checklist" class="tab-panel">${buildChecklist(w)}</div>`;
 }
 
 function switchTab(el,wid,tab){
@@ -1273,6 +1318,72 @@ function buildAssess(w){
     <div class="ablock"><div class="albl">NAfME standards</div><div>${a.standards.map(s=>`<span class="spill">${s}</span>`).join('')}</div></div>`;
 }
 
+/* ── Module Review (self-assessment) ── */
+function buildModuleReview(mr){
+  const savedKey=`mr${mr.moduleNum}-reflection`;
+  const saved=progress[savedKey]||{};
+  const mrId=`mr${mr.moduleNum}`;
+  const rows=mr.skills.map(s=>{
+    const lvl=progress[s.id];
+    const btn=(n)=>`<button class="mr-rb lvl${n}${lvl===String(n)?' active':''}" onclick="setSkillLevel('${s.id}','${mrId}','${n}')">${n}</button>`;
+    return `<div class="mr-row">
+      <div class="mr-skill-text">${s.text}</div>
+      <div class="mr-rating">${btn(1)}${btn(2)}${btn(3)}</div>
+    </div>`;
+  }).join('');
+  const performanceHtml=`<div class="ablock" style="margin-top:18px"><div class="albl">How this is assessed in class</div><div class="atxt">Sign up when you are ready for the teacher to assess you on the skills above.</div></div>`;
+  return `
+    <div class="obj-card">
+      <span class="mr-tag">Module ${mr.moduleNum} self-assessment</span>
+      <div class="obj-main">${mr.module}</div>
+      <div class="obj-sub">Rate yourself on the module's key skills, then reflect.</div>
+    </div>
+    <div class="mr-skills">${rows}</div>
+    <div class="mr-legend">
+      <span class="mr-legend-item"><span class="mr-legend-dot lvl1"></span>1 = Still learning</span>
+      <span class="mr-legend-item"><span class="mr-legend-dot lvl2"></span>2 = Getting it</span>
+      <span class="mr-legend-item"><span class="mr-legend-dot lvl3"></span>3 = Got it</span>
+    </div>
+    <div class="ablock" style="margin-top:18px">
+      <div class="albl">What clicked this module?</div>
+      <textarea id="${mrId}-clicked" class="reflection-ta" placeholder="e.g. TAB finally made sense when I slowed it down…" oninput="saveReflection(${mr.moduleNum})">${saved.clicked||''}</textarea>
+    </div>
+    <div class="ablock" style="margin-top:12px">
+      <div class="albl">What's still hard?</div>
+      <textarea id="${mrId}-hard" class="reflection-ta" placeholder="e.g. My ring finger keeps slipping off the fret…" oninput="saveReflection(${mr.moduleNum})">${saved.hard||''}</textarea>
+    </div>
+    ${performanceHtml}
+    <div class="ablock" style="margin-top:12px">
+      <div class="albl">NAfME standards</div>
+      <div>${mr.standards.map(s=>`<span class="spill">${s}</span>`).join('')}</div>
+    </div>
+    <div class="save-ind" id="${mrId}-save-ind" style="margin-top:10px"></div>`;
+}
+
+function saveReflection(moduleNum){
+  const clicked=document.getElementById(`mr${moduleNum}-clicked`).value;
+  const hard=document.getElementById(`mr${moduleNum}-hard`).value;
+  const key=`mr${moduleNum}-reflection`;
+  progress[key]={clicked,hard};
+  saveProgress();
+}
+
+function setSkillLevel(sid, mrId, level){
+  progress[sid] = (progress[sid] === level) ? 'none' : level;
+  const lvl = progress[sid];
+  document.querySelectorAll(`.week-panel[data-id="${mrId}"] .mr-row`).forEach(row=>{
+    const btns = row.querySelectorAll('.mr-rb');
+    if(!btns.length) return;
+    const onclick = btns[0].getAttribute('onclick') || '';
+    if(!onclick.includes(`'${sid}'`)) return;
+    btns.forEach(b=>{
+      const n = b.classList.contains('lvl1') ? '1' : b.classList.contains('lvl2') ? '2' : '3';
+      b.classList.toggle('active', lvl === n);
+    });
+  });
+  saveProgress();
+}
+
 /* ── Checklist ── */
 function buildChecklist(w){
   if(!w.skills||w.skills.length===0) return '<p style="font-size:13px;color:var(--text2);padding:12px 0">No skills listed for this set yet.</p>';
@@ -1324,10 +1435,12 @@ function toggleSkill(sid, wid, which){
     wkCell.querySelector('.skbox').innerHTML = st==='working' ? wkSvg : '';
     giCell.querySelector('.skbox').innerHTML = st==='gotit'   ? giSvg : '';
   });
-  const done=w.skills.filter(s=>progress[s.id]==='gotit').length;
-  const pct=Math.round(done/w.skills.length*100);
-  document.querySelectorAll(`#pf-${wid}`).forEach(el=>el.style.width=pct+'%');
-  document.querySelectorAll(`#pl-${wid}`).forEach(el=>el.textContent=done+' / '+w.skills.length);
+  if(w){
+    const done=w.skills.filter(s=>progress[s.id]==='gotit').length;
+    const pct=Math.round(done/w.skills.length*100);
+    document.querySelectorAll(`#pf-${wid}`).forEach(el=>el.style.width=pct+'%');
+    document.querySelectorAll(`#pl-${wid}`).forEach(el=>el.textContent=done+' / '+w.skills.length);
+  }
   renderPills(lastModuleNum);
   document.querySelectorAll('.wpill').forEach(b=>{if(b.dataset.id===wid)b.classList.add('active');});
   saveProgress();

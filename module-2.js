@@ -22,9 +22,7 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',
-        time: '12 min',
-        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/PNik7GWWBGA" target="_blank">Notes on the Low E String – JustinGuitar</a> (full video).',
             hint: 'Play along on your guitar as he goes through each note. Pause and find each note before he names it.',
@@ -47,13 +45,28 @@ SETS.push(
             hint: 'Don\'t worry about playing it yet — just train your ear to connect sounds to strings.',
             skills: [5],
             response: { type: 'short', placeholder: 'Which note(s) did you find first? Where on the fretboard?' }
+          },
+          {
+            text: 'Play along drill: open your note-name chart. Play every natural note on the low E string slowly, frets 0–8: E · F · G · A · B · C · D · E. Say each name out loud as you play it. Do it twice.',
+            hint: 'Slow is fine. Accuracy and saying the name out loud matter more than speed.',
+            skills: [2],
+            response: { type: 'mc', prompt: 'On the low E string, what note is at fret 3?', choices: [
+              'G',
+              'F',
+              'A',
+              'D'
+            ] }
+          },
+          {
+            text: 'Now do the same on the A string: A · B · C · D · E · F (frets 0–8). Play up, then back down. Say each name aloud.',
+            hint: 'Notice that fret 5 of the A string is the same note as the open D string. That connection will help you later.',
+            skills: [3],
+            response: { type: 'short', placeholder: 'What did you notice about any of the notes? Did any two notes feel or sound similar?' }
           }
         ]
       },
       c: {
-        title: 'Practice station — fretboard drill',
-        time: '12 min',
-        steps: [
+        title: 'Practice station — fretboard drill',        steps: [
           {
             text: 'Tune your guitar. Using your note-name chart, play every natural note on the E string slowly: E · F · G · A · B · C. Say each name aloud.',
             hint: 'Hearing + saying + playing locks it in faster.',
@@ -135,7 +148,6 @@ SETS.push(
     stations: {
       b: {
         title: 'Computer station — Watch · Listen · Practice',
-        time: '12 min',
         steps: [
           {
             text: 'Watch: <a href="https://youtu.be/RMdkevqJDDk" target="_blank">Beginner Finger Exercises – Simen Otnes</a> (0:00–4:00).',
@@ -164,13 +176,27 @@ SETS.push(
               'The A string',
               'It depends on the song'
             ] }
+          },
+          {
+            text: 'Fret buzz self-check: play frets 1–4 on the low E string, one at a time. Press lightly until you hear buzz, then press just enough to stop it. That is the minimum pressure needed.',
+            hint: 'Most beginners press too hard. Finding the minimum pressure is a real technique.',
+            skills: [1, 2],
+            response: { type: 'mc', prompt: 'Where should your fingertip press to get the cleanest tone?', choices: [
+              'Just behind the fret (toward the nut)',
+              'On top of the fret wire',
+              'In the middle of the fret space',
+              'As close to the nut as possible'
+            ] }
+          },
+          {
+            text: 'Try reading the TAB for "Ode to Joy" or "Mary Had a Little Lamb" from the songs section. Play it through at least once — slow and clean.',
+            hint: 'If you get stuck on a note, use your note-name chart to find it. TAB numbers = fret numbers.',
+            skills: [4, 5]
           }
         ]
       },
       c: {
-        title: 'Practice station — melodies & TAB',
-        time: '12 min',
-        steps: [
+        title: 'Practice station — melodies & TAB',        steps: [
           {
             text: 'Finger workout: play each fret on the E string (frets 1–5) using one finger per fret. Then do the same on the A string. Keep your thumb behind the neck.',
             hint: 'Go as slow as you need. Every note should ring cleanly with no buzz.',
@@ -237,3 +263,16 @@ SETS.push(
   }
 
 ); // end module-2.js
+
+MODULE_REVIEWS[2] = {
+  moduleNum: 2,
+  module: 'Notes on the E & A Strings',
+  skills: [
+    { id: 'mr2-s1', text: 'I can recite the musical alphabet (A B C D E F G) from memory' },
+    { id: 'mr2-s2', text: 'I can name all natural notes on the E string (frets 0–8)' },
+    { id: 'mr2-s3', text: 'I can name all natural notes on the A string (frets 0–8)' },
+    { id: 'mr2-s4', text: 'I can press notes cleanly with no fret buzz' },
+    { id: 'mr2-s5', text: 'I can read a basic TAB and play a 4-bar melody in time at 60 BPM' }
+  ],
+  standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Re.7a']
+};

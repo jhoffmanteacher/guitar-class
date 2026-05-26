@@ -22,9 +22,7 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',
-        time: '12 min',
-        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/XxICTF-NIZ8" target="_blank">Minor Pentatonic Scale – JustinGuitar</a> (0:00–5:00).',
             hint: 'Follow along on your guitar as he shows the pattern. Pause and find each note before he names it.',
@@ -56,9 +54,7 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — pattern drill & first improvisation',
-        time: '12 min',
-        steps: [
+        title: 'Practice station — pattern drill & first improvisation',        steps: [
           {
             text: 'Set metronome to 60 BPM. Play Pentatonic Pattern 1 ascending (low to high) and descending (high to low), one note per beat. Use alternate picking (down-up-down-up).',
             hint: 'Go as slow as you need. Every note should ring cleanly. Say each note aloud as you play it to connect your ear to your fingers.',
@@ -137,9 +133,7 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',
-        time: '12 min',
-        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/RMdkevqJDDk" target="_blank">Pentatonic Scale Across Strings – Simen Otnes</a> (0:00–4:00).',
             hint: 'Notice how he varies his attack — some notes are loud, some soft. That\'s dynamics. Try to copy his feel, not just his notes.',
@@ -171,9 +165,7 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — phrasing & D/G strings',
-        time: '12 min',
-        steps: [
+        title: 'Practice station — phrasing & D/G strings',        steps: [
           {
             text: '"The One-Note Solo": choose one note in the Am pentatonic pattern. Play only that note over 8 bars, varying the rhythm, dynamics, and tone. Record it if you can and listen back.',
             hint: 'This sounds easy but isn\'t. Can you make one note interesting for 8 whole bars? The way you play it matters more than how many notes you play.',
@@ -253,9 +245,7 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',
-        time: '12 min',
-        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/XxICTF-NIZ8" target="_blank">Full Pentatonic Box 1 – JustinGuitar</a> (5:00–end).',
             hint: 'This time focus on the theory section. How does he explain the relationship between major and minor pentatonic? Can you see the relative major/minor connection?',
@@ -287,9 +277,7 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — theory in action & original solo',
-        time: '12 min',
-        steps: [
+        title: 'Practice station — theory in action & original solo',        steps: [
           {
             text: 'Write out the C major pentatonic scale degrees: 1 (C), 2 (D), 3 (E), 5 (G), 6 (A). Then write A minor pentatonic: 1 (A), ♭3 (C), 4 (D), 5 (E), ♭7 (G). Notice: same notes, different starting point — these are relative scales!',
             hint: 'C major pentatonic and A minor pentatonic share exactly the same five notes. Your hand position is the same — only which note you treat as "home" (the root) changes.',
@@ -357,3 +345,16 @@ SETS.push(
   }
 
 ); // end module-4.js
+
+MODULE_REVIEWS[4] = {
+  moduleNum: 4,
+  module: 'Major / Minor / Blues Pentatonic Scales',
+  skills: [
+    { id: 'mr4-s1', text: 'I can play Pentatonic Pattern 1 ascending and descending from memory' },
+    { id: 'mr4-s2', text: 'I can use alternate picking (down-up) consistently through the pattern' },
+    { id: 'mr4-s3', text: 'I can position Pattern 1 for both major and minor pentatonic' },
+    { id: 'mr4-s4', text: 'I can improvise a call-and-response phrase that resolves on the root' },
+    { id: 'mr4-s5', text: 'I can compose and perform an original 4-bar solo over a course song' }
+  ],
+  standards: ['Cr.1a', 'Cr.2a', 'Pr.4a', 'Pr.5a', 'Pr.5b', 'Pr.6a']
+};

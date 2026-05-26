@@ -11,3 +11,14 @@ SETS.push(
   { id:'m6w3', label:'Set 3', locked:true, module:'Strumming Patterns with Chords', moduleNum:6, unit:'Module 6 · Strumming Patterns with Chords', title:'Set 3', subtitle:'Coming soon', handoutUrl:'https://docs.google.com/document/d/1mBqrpsG2rkiVPWrF-zo0fxlgA1YQN33GyxmgsXqCY0g/edit', comingSoon:true, skills:[] }
 
 ); // end module-6.js
+
+MODULE_REVIEWS[6] = {
+  moduleNum: 6,
+  module: 'Strumming Patterns with Chords',
+  skills: [
+    { id: 'mr6-s1', text: 'I can hold a steady down-up strum pattern at 70+ BPM' },
+    { id: 'mr6-s2', text: 'I can play 2+ different strum patterns over the same chord progression' },
+    { id: 'mr6-s3', text: 'I can keep time while changing chords mid-pattern' }
+  ],
+  standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
+};

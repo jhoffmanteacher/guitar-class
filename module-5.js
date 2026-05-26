@@ -22,9 +22,7 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',
-        time: '12 min',
-        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/hzC0orOGARw" target="_blank">How to Read Chord Diagrams – JustinGuitar</a> (full video).',
             hint: 'Pause when he shows a diagram and look at it yourself. What does the X mean? What does the O mean? What do the numbers in the dots tell you?',
@@ -56,9 +54,7 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — chord shapes & first strums',
-        time: '12 min',
-        steps: [
+        title: 'Practice station — chord shapes & first strums',        steps: [
           {
             text: 'Fret Am: index finger on string 2 fret 1, middle on string 4 fret 2, ring on string 3 fret 2. Strum strings 1–5 (not the low E). Every string should ring cleanly.',
             hint: 'Press just behind the frets, not on them. Curve your fingers so they don\'t accidentally touch neighboring strings. Check each string individually by plucking it.',
@@ -137,9 +133,7 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',
-        time: '12 min',
-        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/hzC0orOGARw" target="_blank">C G Am F Chord Transitions – JustinGuitar</a> (full video).',
             hint: 'He shows the "perfect" chord change technique. Watch how he prepares the next chord shape before strumming it. Anticipation is the secret.',
@@ -166,9 +160,7 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — chord transitions & strumming',
-        time: '12 min',
-        steps: [
+        title: 'Practice station — chord transitions & strumming',        steps: [
           {
             text: 'Practice the Am-to-C pivot: in Am, your index finger stays on string 2, fret 1. In C, it also stays on string 2, fret 1. That\'s your pivot finger! Keep it down and move the other fingers.',
             hint: 'Common-finger pivots cut your transition time in half. Look for other chords in this group that share a finger position.',
@@ -250,9 +242,7 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',
-        time: '12 min',
-        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/hzC0orOGARw" target="_blank">D A Em Bm Open Chords – JustinGuitar</a> (full video).',
             hint: 'D major has a triangular finger shape — notice how his three fingers are stacked in a triangle on strings 1, 2, and 3. Try to copy that exact shape.',
@@ -279,9 +269,7 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — Group 2 chords & cross-group connections',
-        time: '12 min',
-        steps: [
+        title: 'Practice station — Group 2 chords & cross-group connections',        steps: [
           {
             text: 'Work on D major: fingers in a triangle on strings 1 (fret 2), 2 (fret 3), and 3 (fret 2). Strum strings 1–4 only. Check that string 1 (high E) rings clearly.',
             hint: 'The D chord is tricky because string 1 is easy to accidentally mute. Curve your fingers and make sure your fingertips arch away from that string.',
@@ -361,9 +349,7 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',
-        time: '12 min',
-        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/hzC0orOGARw" target="_blank">E Major and B7 Chords – JustinGuitar</a> (full video).',
             hint: 'E major uses all four fingers — it\'s a full chord. B7 is also four fingers but in a different arrangement. Take them one at a time. The B7 chord has a distinctive jazz/blues sound.',
@@ -390,9 +376,7 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — Group 3 chords & showcase prep',
-        time: '12 min',
-        steps: [
+        title: 'Practice station — Group 3 chords & showcase prep',        steps: [
           {
             text: 'Fret E major: index on string 3 fret 1, middle on string 5 fret 2, ring on string 4 fret 2. Strum all 6 strings. This is a full, open, rich chord — let every string ring!',
             hint: 'E major is one of the most satisfying open chords to play. If any string buzzes, check your index finger — it tends to accidentally mute string 2.',
@@ -457,3 +441,16 @@ SETS.push(
   }
 
 ); // end module-5.js
+
+MODULE_REVIEWS[5] = {
+  moduleNum: 5,
+  module: 'Open Chords',
+  skills: [
+    { id: 'mr5-s1', text: 'I can read a chord diagram (X, O, dots, finger numbers)' },
+    { id: 'mr5-s2', text: 'I can fret Group 1 chords (C, G, Am, F) with clean tone' },
+    { id: 'mr5-s3', text: 'I can fret Group 2 chords (D, A, Em, Bm) with clean tone' },
+    { id: 'mr5-s4', text: 'I can switch between open chords on beat 1 at 70+ BPM' },
+    { id: 'mr5-s5', text: 'I can perform a chosen song using 4+ open chords for the semester showcase' }
+  ],
+  standards: ['Pr.4a', 'Pr.5a', 'Pr.5b', 'Pr.6a', 'Re.7a', 'Re.9a', 'Cn.11b']
+};

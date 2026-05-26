@@ -22,9 +22,7 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Reflect',
-        time: '12 min',
-        steps: [
+        title: 'Computer station — Watch · Listen · Reflect',        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/rrB97F0Qu6g" target="_blank">How to Actually Get Good at Guitar – Simen Otnes</a> (0:00–3:30).',
             hint: 'As you watch, think about: what is one habit he says makes the biggest difference? Does it match what you thought?',
@@ -44,9 +42,7 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — explore the guitar',
-        time: '12 min',
-        steps: [
+        title: 'Practice station — explore the guitar',        steps: [
           {
             text: 'Pick up the guitar. Hold it in a comfortable position. Strum all 6 strings slowly with your thumb — just listen to the sound.',
             hint: 'Don\'t worry about pressing any frets yet. Just get used to holding it.'
@@ -105,38 +101,36 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',
-        time: '12 min',
-        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/8-grcbKnbps" target="_blank">How to Hold a Guitar Pick – JustinGuitar</a> (full video).',
-            hint: 'Pause after each tip and check your own grip. Adjust before continuing.',
-            skills: [3],
-            response: { type: 'short', placeholder: 'What is one thing about your pick grip you will adjust after watching?' }
+            text: 'Watch: <a href="https://youtu.be/rrB97F0Qu6g" target="_blank">How to Actually Get Good at Guitar – Simen Otnes</a> (first 5 min).',
+            hint: 'Headphones on. What habits will help you get better?'
           },
           {
-            text: 'Watch: <a href="https://youtu.be/ely9LaJJJr4" target="_blank">Your First Guitar Lesson – Marty Music</a> (0:00–5:00).',
-            hint: 'Focus on posture and right-hand motion. Pause and try each thing he shows.',
-            skills: [2, 3],
-            response: { type: 'short', placeholder: 'Name one posture or right-hand change you noticed you need to make.' }
+            text: 'Watch: <a href="https://youtu.be/8-grcbKnbps" target="_blank">How to Hold a Guitar Pick – JustinGuitar</a>.',
+            hint: 'Write down: what are the two most common pick-holding mistakes?'
           },
           {
-            text: 'Watch: <a href="https://youtu.be/9SgCKECFEjA" target="_blank">How to Tune a Guitar – JustinGuitar</a> (0:00–3:00).',
-            hint: 'Follow along and tune your guitar while you watch.',
-            skills: [4, 5],
-            response: { type: 'mc', prompt: 'From thickest string to thinnest, the standard tuning is:', choices: [
-              'E  A  D  G  B  E (thickest to thinnest)',
-              'E  B  G  D  A  E',
-              'G  D  A  E  B  E',
-              'I am not sure yet'
+            text: 'In your notes: write out the 6 string names from memory, low to high. Mnemonic: Eddie Ate Dynamite, Good Bye Eddie.'
+          },
+          {
+            text: 'Pick up your guitar. Play each open string one at a time — low E to high e. Say the string name out loud as you pluck it. Do this 3 times through.',
+            hint: 'Hearing + saying + playing locks it in faster than just watching.',
+            response: { type: 'mc', prompt: 'Say the string names low to high — which comes right after G?', choices: [
+              'B',
+              'A',
+              'D',
+              'e'
             ] }
+          },
+          {
+            text: 'Try the "Seven Nation Army" riff on your guitar: low E string, frets 7 · 7 · 10 · 7 · 5 · 3 · 2. Go as slow as you need. How far can you get before the station rotates?',
+            hint: 'Slow and clean beats fast and buzzy. One note at a time.'
           }
         ]
       },
       c: {
-        title: 'Practice station — open-string melody',
-        time: '12 min',
-        steps: [
+        title: 'Practice station — open-string melody',        steps: [
           {
             text: 'Tune your guitar first. Then practice playing single notes on the low E string: open (E), 1st fret (F), 3rd fret (G), 5th fret (A).',
             hint: 'Press just behind the fret, not on it. One clean note at a time.',
@@ -196,3 +190,15 @@ SETS.push(
   }
 
 ); // end module-1.js
+
+MODULE_REVIEWS[1] = {
+  moduleNum: 1,
+  module: 'Introductions: You and The Guitar',
+  skills: [
+    { id: 'mr1-s1', text: 'I can describe why I want to learn guitar' },
+    { id: 'mr1-s2', text: 'I can name 5+ parts of the guitar' },
+    { id: 'mr1-s3', text: 'I can tune all 6 strings with a tuner' },
+    { id: 'mr1-s4', text: 'I can play a short open-string melody on the E string at 60 BPM' }
+  ],
+  standards: ['Pr.1a', 'Pr.4a', 'Pr.5a', 'Cn.11a']
+};

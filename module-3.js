@@ -22,9 +22,7 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',
-        time: '12 min',
-        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/RQcEJMYSGfI" target="_blank">Power Chords – Simen Otnes</a> (full video).',
             hint: 'Pause after the shape explanation and try the power chord on your guitar before he plays along. Make sure both notes ring clean.',
@@ -56,9 +54,7 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — power chord drill',
-        time: '12 min',
-        steps: [
+        title: 'Practice station — power chord drill',        steps: [
           {
             text: 'Tune your guitar. Fret an E5 power chord (low E string, open root + 2nd fret A string). Strum just those two strings — no others. Get a clean, buzz-free sound.',
             hint: 'Use your index finger on the root and your ring finger on the 5th. Keep your pinky close. Palm-mute the strings below with the edge of your picking hand.',
@@ -151,9 +147,7 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',
-        time: '12 min',
-        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/hzC0orOGARw" target="_blank">How to Practice with a Metronome – JustinGuitar</a> (0:00–4:00).',
             hint: 'His tip about setting the metronome 10 BPM slower than you think you need is key. Slow is smooth, smooth is fast.',
@@ -180,9 +174,7 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — metronome & chord changes',
-        time: '12 min',
-        steps: [
+        title: 'Practice station — metronome & chord changes',        steps: [
           {
             text: 'Set metronome to 60 BPM. Play the "Watchtower" loop (Am5–G5–F5–G5) four times through. Each chord lasts one bar (4 beats). Change on beat 1 every time.',
             hint: 'If you miss beat 1, keep going — don\'t stop. Staying in time matters more than the perfect change right now.',
@@ -249,3 +241,16 @@ SETS.push(
   }
 
 ); // end module-3.js
+
+MODULE_REVIEWS[3] = {
+  moduleNum: 3,
+  module: 'Two-Finger Power Chords',
+  skills: [
+    { id: 'mr3-s1', text: 'I can fret a clean 2-finger power chord (root + 5th) with no buzz' },
+    { id: 'mr3-s2', text: 'I can move the power chord shape along the E and A strings' },
+    { id: 'mr3-s3', text: 'I can mute unused strings cleanly' },
+    { id: 'mr3-s4', text: 'I can change power chords on beat 1 at 70+ BPM' },
+    { id: 'mr3-s5', text: 'I can play an 8-bar power chord progression in time' }
+  ],
+  standards: ['Pr.4a', 'Pr.5a', 'Pr.5b', 'Pr.6a', 'Re.7a']
+};
