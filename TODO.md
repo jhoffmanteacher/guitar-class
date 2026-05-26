@@ -6,7 +6,11 @@ Tracking the rest of the Module 2 changes we chunked out. Chunk 1 ("You've got i
 
 ## Chunk 2 — Audio utility + Interactive Fretboard Diagram
 
-### Part A: Web Audio note player (foundation for everything else)
+### Part A: Web Audio note player (foundation for everything else) — ARCHIVED
+
+**Status:** Built but parked on `feature/interactive-fretboard` (commit `aeed5c0`). Part B was the consumer that got archived; Part A came along for the ride since it has no visible effect on its own. If we later do Part C or Chunk 3, cherry-pick just the `playNote()` function out of that branch into main first.
+
+Original spec (for reference if rebuilding):
 
 - Build a reusable `playNote(midiNumber)` function using the browser's Web Audio API — no external audio files.
 - Use a triangle wave oscillator with a short envelope (attack 0.01s, hold ~1s, decay 0.5s).
@@ -17,7 +21,13 @@ Tracking the rest of the Module 2 changes we chunked out. Chunk 1 ("You've got i
   - A string (frets 0–12): A2=45, A#2=46, B2=47, C3=48, C#3=49, D3=50, D#3=51, E3=52, F3=53, F#3=54, G3=55, G#3=56, A3=57
 - Inline 🔊 button style: ~18px, `var(--blue-text)`, no border, transparent background.
 
-### Part B: Interactive Fretboard Diagram (Module 2, Set 1)
+### Part B: Interactive Fretboard Diagram (Module 2, Set 1) — ARCHIVED
+
+**Status:** Built but parked. Lives on the `feature/interactive-fretboard` branch (commit `aeed5c0`). Not merged into main. Decided we don't need it right now; revisit if a real classroom need shows up.
+
+To resurrect: ask Claude to "bring back the interactive fretboard branch" and it'll merge or cherry-pick the work.
+
+Original spec (for reference if rebuilding):
 
 - Add an interactive fretboard rendered inside Module 2 Set 1's computer station.
 - Show low E string (bottom row) and A string (top row), **frets 0–12** (extended from the spec's 0–8 to match the rest of Module 2).

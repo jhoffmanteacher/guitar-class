@@ -183,6 +183,28 @@ SETS.push(
             ] }
           },
           {
+            text: 'Read this TAB: the opening of "Happy Birthday" written out on the low E string. Look at the fret numbers on the bottom line and try to play it. Click any note name below the TAB to hear how it should sound.',
+            hint: 'Read left-to-right, one note per beat. The numbers tell you which fret to press on the low E string.',
+            skills: [4, 5],
+            tab: {
+              caption: '"Happy Birthday" — first two phrases · Low E string',
+              notes: [
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 2, note: 'F#', midi: 42 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                { string: 'E', fret: 4, note: 'G#', midi: 44 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 2, note: 'F#', midi: 42 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 7, note: 'B',  midi: 47 },
+                { string: 'E', fret: 5, note: 'A',  midi: 45 }
+              ]
+            }
+          },
+          {
             text: 'Fret buzz self-check: play frets 1–4 on the low E string, one at a time. Press lightly until you hear buzz, then press just enough to stop it. That is the minimum pressure needed.',
             hint: 'Most beginners press too hard. Finding the minimum pressure is a real technique.',
             skills: [1, 2],
@@ -194,9 +216,44 @@ SETS.push(
             ] }
           },
           {
-            text: 'Try reading the TAB for "Ode to Joy" or "Mary Had a Little Lamb" from the songs section. Play it through at least once — slow and clean.',
+            text: 'Try reading the TAB for "Ode to Joy" or "Mary Had a Little Lamb" from the songs section. Play it through at least once — slow and clean. Click a song below to open its TAB.',
             hint: 'If you get stuck on a note, use your note-name chart to find it. TAB numbers = fret numbers.',
-            skills: [4, 5]
+            skills: [4, 5],
+            tabs: [
+              {
+                title: '"Ode to Joy" — opening phrase',
+                caption: 'A string · frets 3–10 · go slow',
+                notes: [
+                  { string: 'A', fret: 7,  note: 'E',  midi: 52 },
+                  { string: 'A', fret: 7,  note: 'E',  midi: 52 },
+                  { string: 'A', fret: 8,  note: 'F',  midi: 53 },
+                  { string: 'A', fret: 10, note: 'G',  midi: 55 },
+                  { string: 'A', fret: 10, note: 'G',  midi: 55 },
+                  { string: 'A', fret: 8,  note: 'F',  midi: 53 },
+                  { string: 'A', fret: 7,  note: 'E',  midi: 52 },
+                  { string: 'A', fret: 5,  note: 'D',  midi: 50 },
+                  { string: 'A', fret: 3,  note: 'C',  midi: 48 },
+                  { string: 'A', fret: 3,  note: 'C',  midi: 48 },
+                  { string: 'A', fret: 5,  note: 'D',  midi: 50 },
+                  { string: 'A', fret: 7,  note: 'E',  midi: 52 },
+                  { string: 'A', fret: 7,  note: 'E',  midi: 52 },
+                  { string: 'A', fret: 5,  note: 'D',  midi: 50 }
+                ]
+              },
+              {
+                title: '"Mary Had a Little Lamb" — opening phrase',
+                caption: 'A string · frets 3–7 · 7 notes',
+                notes: [
+                  { string: 'A', fret: 7, note: 'E', midi: 52 },
+                  { string: 'A', fret: 5, note: 'D', midi: 50 },
+                  { string: 'A', fret: 3, note: 'C', midi: 48 },
+                  { string: 'A', fret: 5, note: 'D', midi: 50 },
+                  { string: 'A', fret: 7, note: 'E', midi: 52 },
+                  { string: 'A', fret: 7, note: 'E', midi: 52 },
+                  { string: 'A', fret: 7, note: 'E', midi: 52 }
+                ]
+              }
+            ]
           }
         ]
       },
@@ -208,14 +265,87 @@ SETS.push(
             skills: [1, 2, 3, 6]
           },
           {
-            text: 'Using TAB, play "Happy Birthday" on E & A strings. Set the metronome to 60 BPM — one note per beat.',
+            text: 'Using TAB, play "Happy Birthday" on E & A strings. Set the metronome to 60 BPM — one note per beat. Click any note name to hear how it should sound.',
             hint: 'If you buzz on a note, stop, fix your finger position, then continue. Don\'t just play through the buzz.',
-            skills: [4, 5]
+            skills: [4, 5],
+            tab: {
+              caption: '"Happy Birthday" — full melody · E & A strings · 60 BPM',
+              phrases: [
+                {
+                  label: '"Hap-py birth-day to you · Hap-py birth-day to you"',
+                  notes: [
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'E', fret: 2, note: 'F#', midi: 42 },
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                    { string: 'E', fret: 4, note: 'G#', midi: 44 },
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'E', fret: 2, note: 'F#', midi: 42 },
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'A', fret: 2, note: 'B',  midi: 47 },
+                    { string: 'A', fret: 0, note: 'A',  midi: 45 }
+                  ]
+                },
+                {
+                  label: '"Hap-py birth-day dear ___ · Hap-py birth-day to you"',
+                  notes: [
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'A', fret: 7, note: 'E',  midi: 52 },
+                    { string: 'A', fret: 4, note: 'C#', midi: 49 },
+                    { string: 'A', fret: 0, note: 'A',  midi: 45 },
+                    { string: 'E', fret: 4, note: 'G#', midi: 44 },
+                    { string: 'E', fret: 2, note: 'F#', midi: 42 },
+                    { string: 'A', fret: 5, note: 'D',  midi: 50 },
+                    { string: 'A', fret: 5, note: 'D',  midi: 50 },
+                    { string: 'A', fret: 4, note: 'C#', midi: 49 },
+                    { string: 'A', fret: 0, note: 'A',  midi: 45 },
+                    { string: 'A', fret: 2, note: 'B',  midi: 47 },
+                    { string: 'A', fret: 0, note: 'A',  midi: 45 }
+                  ]
+                }
+              ]
+            }
           },
           {
-            text: 'Choice: use TAB to learn the main riff of "Seven Nation Army" (E string) or "Smoke on the Water" (E string). Play it in time.',
+            text: 'Choice: use TAB to learn the main riff of "Seven Nation Army" (E string) or "Smoke on the Water" (E string). Play it in time. Click a song below to open its TAB.',
             hint: 'Both riffs use notes you already know. The challenge is keeping them clean at tempo.',
-            skills: [4, 5]
+            skills: [4, 5],
+            tabs: [
+              {
+                title: '"Seven Nation Army" — main riff',
+                caption: 'Low E string · frets 2–10 · 7 notes',
+                notes: [
+                  { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+                  { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+                  { string: 'E', fret: 10, note: 'D',  midi: 50 },
+                  { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+                  { string: 'E', fret: 5,  note: 'A',  midi: 45 },
+                  { string: 'E', fret: 3,  note: 'G',  midi: 43 },
+                  { string: 'E', fret: 2,  note: 'F#', midi: 42 }
+                ]
+              },
+              {
+                title: '"Smoke on the Water" — main riff',
+                caption: 'Low E string · single-note version · 12 notes',
+                notes: [
+                  { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                  { string: 'E', fret: 3, note: 'G',  midi: 43 },
+                  { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                  { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                  { string: 'E', fret: 3, note: 'G',  midi: 43 },
+                  { string: 'E', fret: 6, note: 'A#', midi: 46 },
+                  { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                  { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                  { string: 'E', fret: 3, note: 'G',  midi: 43 },
+                  { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                  { string: 'E', fret: 3, note: 'G',  midi: 43 },
+                  { string: 'E', fret: 0, note: 'E',  midi: 40 }
+                ]
+              }
+            ]
           }
         ]
       }
