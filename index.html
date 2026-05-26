@@ -1126,6 +1126,8 @@ function wrapChordLinksIn(rootEl){
         span.dataset.string = item.kind;
         span.textContent = text.slice(item.start, item.end);
         span.addEventListener('click', onStringLinkClick);
+        span.addEventListener('mouseenter', onStringLinkHover);
+        span.addEventListener('mouseleave', hideChordPopup);
       } else if (item.type === 'note') {
         span.className = 'note-link';
         span.dataset.string = item.kind;
