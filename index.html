@@ -45,9 +45,13 @@ function googleTranslateElementInit(){
   }
 }
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg2);color:var(--text);min-height:100vh}
-.header{background:var(--bg);border-bottom:0.5px solid var(--border2);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20}
-.header-title{font-size:15px;font-weight:500}
-.header-sub{font-size:12px;color:var(--text2);margin-top:1px}
+.header{background:#4d1964;color:#fff;border-bottom:0.5px solid rgba(255,255,255,0.18);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20}
+.header-title{font-family:Calibri,"Segoe UI",sans-serif;font-size:16pt;font-weight:600;color:#fff;line-height:1.15}
+.header-sub{font-family:Calibri,"Segoe UI",sans-serif;font-size:12pt;color:rgba(255,255,255,0.85);margin-top:2px;line-height:1.15}
+.header .btn-sign,.header .btn-out,.header .btn-translate{color:#fff;border-color:rgba(255,255,255,0.45);background:transparent}
+.header .btn-sign:hover,.header .btn-out:hover,.header .btn-translate:hover{background:rgba(255,255,255,0.12)}
+.header .btn-translate.active{background:rgba(255,255,255,0.18);color:#fff;border-color:#fff}
+.header .user-name{color:rgba(255,255,255,0.9)}
 .user-area{display:flex;align-items:center;gap:10px}
 .avatar{width:32px;height:32px;border-radius:50%;object-fit:cover}
 .avatar-init{width:32px;height:32px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--text2)}
@@ -465,8 +469,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 <div id="google_translate_element"></div>
 <header class="header">
   <div>
-    <div class="header-title">Sequoia High School Beginning Guitar</div>
-    <div class="header-sub">Year 1 · Resources and Skills Tracker</div>
+    <div class="header-title">Sequoia High School - Beginning Guitar</div>
+    <div class="header-sub">Independent Practice and Skills Tracker</div>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
     <button class="btn-translate" id="btn-translate" onclick="toggleTranslate()" title="Translate to Spanish">
@@ -593,7 +597,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
       </div>
       <div class="rp-empty" id="rp-empty">
         <div class="rp-empty-ico">&#x1F4CB;</div>
-        <div class="rp-empty-txt">Click a video or handout<br>on the left to load it here</div>
+        <div class="rp-empty-txt">Click a video on the left<br>to load it here</div>
       </div>
       <div class="rp-content" id="rp-content">
         <div class="rp-iframe-wrap" id="rp-iframe-wrap"></div>
@@ -1004,12 +1008,18 @@ function localNoteSvg(kind, fret, note){
     s += `<text x="${cx}" y="${padT + boxH + 10}" text-anchor="middle" font-size="7.5" fill="var(--text2)">${f}</text>`;
   }
 
-  /* Target note dot */
+  /* Target note dot — filled for fretted notes, hollow (outline) for open strings */
   const targetY = padT + (sNum - 1) * strGap;
   const targetX = fr === 0 ? padL + openW / 2 : nutX + (fr - 0.5) * fretW;
-  s += `<circle cx="${targetX}" cy="${targetY}" r="6.5" fill="var(--text)"/>`;
+  const isOpenNote = fr === 0;
+  if (isOpenNote) {
+    s += `<circle cx="${targetX}" cy="${targetY}" r="6.5" fill="none" stroke="var(--text)" stroke-width="1.4"/>`;
+  } else {
+    s += `<circle cx="${targetX}" cy="${targetY}" r="6.5" fill="var(--text)"/>`;
+  }
   if (note) {
-    s += `<text x="${targetX}" y="${targetY}" text-anchor="middle" dominant-baseline="central" font-size="7.5" font-weight="600" fill="var(--bg)">${escHtml(note)}</text>`;
+    const textFill = isOpenNote ? 'var(--text)' : 'var(--bg)';
+    s += `<text x="${targetX}" y="${targetY}" text-anchor="middle" dominant-baseline="central" font-size="7.5" font-weight="600" fill="${textFill}">${escHtml(note)}</text>`;
   }
 
   return s + '</svg>';
@@ -1574,13 +1584,10 @@ function buildComingSoon(w){
 }
 
 function buildSet(w){
-  const handoutLink = w.handoutUrl
-    ? `<button onclick="loadPanel('gdoc','${w.handoutUrl}','Module ${w.moduleNum} handout','')" style="display:inline-flex;align-items:center;gap:4px;font-size:12px;color:var(--blue-text);background:none;border:none;cursor:pointer;font-family:inherit;padding:0;margin-top:8px;padding-top:8px;border-top:0.5px solid var(--border);width:100%"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M4 5h4M4 7h2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Module ${w.moduleNum} handout</button>`
-    : '';
   const setHeader = (w.title || w.subtitle)
     ? `<div class="obj-set">${w.title?`<span class="obj-set-tag">${w.title}</span>`:''}${w.subtitle?`<span class="obj-set-sub">${w.subtitle}</span>`:''}</div>`
     : '';
-  return `<div class="obj-card"><div class="obj-unit">${w.unit}</div>${setHeader}<div class="obj-main">${w.objective}</div><div class="obj-sub">${w.skillFocus}</div>${handoutLink}</div>
+  return `<div class="obj-card"><div class="obj-unit">${w.unit}</div>${setHeader}<div class="obj-main">${w.objective}</div><div class="obj-sub">${w.skillFocus}</div></div>
   <div class="tabs">
     <div class="tab tab-stations active" onclick="switchTab(this,'${w.id}','stations')">Stations</div>
     <div class="tab tab-songs" onclick="switchTab(this,'${w.id}','songs')">Songs</div>
