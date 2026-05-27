@@ -16,7 +16,7 @@ SETS.push(
     title: 'Set 1',
     subtitle: 'Musical alphabet · Note names on E & A · Fretboard reading',
     objective: 'I CAN name all notes on the E and A strings (frets 0–12) and identify them on a fretboard diagram.',
-    skillFocus: 'Musical alphabet (A–G) · Natural notes on E string (frets 0–12) · Natural notes on A string (frets 0–12) · Reading a note-name chart',
+    skillFocus: 'Musical alphabet <span class="nolink">(A–G)</span> · Natural notes on E string (frets 0–12) · Natural notes on A string (frets 0–12) · Reading a note-name chart',
     handoutUrl: 'https://docs.google.com/document/d/1KM2rgUYa3NEpDr4E65YmcTE_g6Fxs_rbIjP-U1wjcnA/edit',
     comingSoon: false,
 
