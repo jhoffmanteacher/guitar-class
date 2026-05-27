@@ -101,6 +101,7 @@ body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
 .mr-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-top:0.5px solid var(--border)}
 .mr-row:first-child{border-top:none}
 .mr-skill-text{font-size:15px;line-height:1.5;color:var(--text);flex:1;font-weight:500}
+.mr-q-num{color:var(--text2);font-weight:600;margin-right:2px}
 .mr-rating{display:flex;gap:6px;flex-shrink:0}
 .mr-rb{width:34px;height:34px;border:0.5px solid var(--border2);border-radius:8px;background:var(--bg);font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;transition:all 0.12s}
 .mr-rb.lvl1{color:var(--amber-text);border-color:var(--amber-text);background:var(--amber-bg)}
@@ -1753,23 +1754,29 @@ function buildModuleReview(mr){
   const perfKey=`mr${mr.moduleNum}-performance`;
   const perf=progress[perfKey]||{};
   const mrId=`mr${mr.moduleNum}`;
+  let qNum = 0;
   const rows=mr.skills.map(s=>{
+    qNum++;
     const lvl=progress[s.id];
     const btn=(n)=>`<button class="mr-rb lvl${n}${lvl===String(n)?' active':''}" onclick="setSkillLevel('${s.id}','${mrId}','${n}')">${n}</button>`;
     return `<div class="mr-row">
-      <div class="mr-skill-text">${s.text}</div>
+      <div class="mr-skill-text"><span class="mr-q-num">${qNum}.</span> ${s.text}</div>
       <div class="mr-rating">${btn(1)}${btn(2)}${btn(3)}</div>
     </div>`;
   }).join('');
+  const clickedNum = ++qNum;
+  const hardNum = ++qNum;
+  const playNum = ++qNum;
+  const recNum = ++qNum;
   const pLvl=perf.level;
   const pBtn=(n)=>`<button class="mr-rb lvl${n}${pLvl===String(n)?' active':''}" onclick="setPerformanceLevel(${mr.moduleNum},'${n}')">${n}</button>`;
   const recHtml=`<div class="mr-rec" data-module="${mr.moduleNum}">
-        <label class="mr-play-label">Record yourself playing</label>
+        <label class="mr-play-label"><span class="mr-q-num">${recNum}.</span> Record yourself playing</label>
         <div class="mr-play-prompt">Once you've recorded, listen back to what you played and reflect on what can be improved.</div>
         <div class="mr-rec-body" id="${mrId}-rec-body">${renderRecBody(mr.moduleNum)}</div>
       </div>`;
   const playHtml=`<div class="mr-play">
-      <span class="mr-play-tag">&#x1F3B8; Play it!</span>
+      <span class="mr-play-tag">&#x1F3B8; <span class="mr-q-num">${playNum}.</span> Play it!</span>
       <div class="mr-play-prompt">Perform the class song from this module &mdash; or a song of your choice that shows off these skills.</div>
       <label class="mr-play-label" for="${mrId}-song">Song I played</label>
       <input type="text" id="${mrId}-song" class="mr-play-song" oninput="savePerformance(${mr.moduleNum})" value="${escAttr(perf.song||'')}">
@@ -1779,7 +1786,7 @@ function buildModuleReview(mr){
       </div>
       ${recHtml}
     </div>`;
-  const performanceHtml=`<div class="ablock" style="margin-top:18px"><div class="albl">How this is assessed in class</div><div class="atxt">Sign up when you are ready for the teacher to assess you on the skills above.</div></div>`;
+  const performanceHtml=`<div class="ablock" style="margin-top:18px"><div class="albl">Module ${mr.moduleNum} Assessment</div><div class="atxt">Sign up when you are ready for the teacher to assess you on the skills above.</div></div>`;
   return `
     <div class="mr-locked-banner">
       <span class="mr-locked-banner-icon">&#x1F512;</span>
@@ -1797,11 +1804,11 @@ function buildModuleReview(mr){
       <span class="mr-legend-item"><span class="mr-legend-dot lvl3"></span>3 = Got it</span>
     </div>
     <div class="ablock" style="margin-top:18px">
-      <div class="albl">What clicked this module?</div>
+      <div class="albl"><span class="mr-q-num">${clickedNum}.</span> What clicked this module?</div>
       <textarea id="${mrId}-clicked" class="reflection-ta" placeholder="e.g. TAB finally made sense when I slowed it down…" oninput="saveReflection(${mr.moduleNum})">${saved.clicked||''}</textarea>
     </div>
     <div class="ablock" style="margin-top:12px">
-      <div class="albl">What's still hard?</div>
+      <div class="albl"><span class="mr-q-num">${hardNum}.</span> What's still hard?</div>
       <textarea id="${mrId}-hard" class="reflection-ta" placeholder="e.g. My ring finger keeps slipping off the fret…" oninput="saveReflection(${mr.moduleNum})">${saved.hard||''}</textarea>
     </div>
     ${playHtml}
