@@ -369,6 +369,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .tab-cell{position:relative;height:11px;display:flex;align-items:center;justify-content:center}
 .tab-cell::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--text3);z-index:0}
 .tab-cell .tab-fret{position:relative;z-index:1;background:var(--bg);padding:0 3px;color:var(--blue-text);font-weight:700;font-size:10px;font-family:'Courier New',ui-monospace,monospace;line-height:1}
+.play-seq-btn{font-family:inherit;font-size:13px;font-weight:600;padding:3px 9px;margin-left:6px;background:transparent;border:1px solid var(--blue-text);border-radius:14px;color:var(--blue-text);cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;line-height:1;vertical-align:baseline}
+.play-seq-btn:hover{background:var(--blue-bg)}
+.play-seq-btn:active{transform:scale(0.96)}
+.play-seq-btn.playing{background:var(--blue-text);color:#fff}
 .tab-note-btn{font-family:inherit;font-size:10px;font-weight:600;padding:2px 3px;margin:2px 0 0;background:var(--bg2);border:0.5px solid var(--border);border-radius:3px;color:var(--text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:1px;white-space:nowrap;line-height:1}
 .tab-note-btn:hover{background:var(--blue-bg);border-color:var(--blue-text);color:var(--blue-text)}
 .tab-note-btn:active{transform:scale(0.94)}
@@ -1445,6 +1449,13 @@ function buildStations(w){
     const chordsHtml = (s.chords&&s.chords.length)
       ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}<div class="chord-box-label">${c.name}</div></div>`).join('')}</div>`
       : '';
+    const playSeqHtml = s.playSeq ? (()=>{
+      const ps = s.playSeq;
+      const label = ps.label || 'Play all';
+      const bpm = ps.bpm || 60;
+      const midis = JSON.stringify(ps.notes);
+      return ` <button type="button" class="play-seq-btn" onclick="playSequence(${midis}, ${bpm}, this)" title="Play all notes at ${bpm} BPM">&#x25B6; ${escHtml(label)}</button>`;
+    })() : '';
     const tabHtml = s.tab ? buildTab(s.tab) : '';
     const tabsHtml = (s.tabs && s.tabs.length)
       ? `<div class="tab-choice-group">${s.tabs.map(t => {
@@ -1470,7 +1481,7 @@ function buildStations(w){
       return '';
     })() : '';
     const readBtn = `<button class="read-aloud-btn" type="button" onclick="event.stopPropagation();readAloudStep(this)" title="Read this step aloud" aria-label="Read aloud">&#x1F50A;</button>`;
-    return `<li class="step"><div class="sn">${i+1}</div><div class="st">${text}${hintHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div></li>`;
+    return `<li class="step"><div class="sn">${i+1}</div><div class="st">${text}${playSeqHtml}${hintHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div></li>`;
   }).join('');
   const dp=(id,cls,badge,badgeClass,s)=>`
     <div class="dp${cls}" id="${w.id}-dp-${id}">
@@ -1752,26 +1763,68 @@ function toggleTranslate(){
 let metroRunning=false, metroInterval=null, audioCtx=null;
 function getAudioCtx(){ if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
 function beep(freq,dur){ const ctx=getAudioCtx(); const o=ctx.createOscillator(),g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=freq; g.gain.setValueAtTime(0.4,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur); o.start(); o.stop(ctx.currentTime+dur); }
-/* Reusable single-note player. Triangle oscillator with a soft
-   attack/hold/decay envelope so the result sounds plucky rather
-   than a steady beep. midi=69 → A4 (440Hz). */
+/* Reusable single-note player. Karplus-Strong plucked-string
+   synthesis: a short noise burst is fed into a feedback delay
+   line whose length equals one period of the target pitch. A
+   one-pole lowpass in the loop causes harmonics to decay over
+   time — high notes fade faster than low notes, like a real
+   guitar string. midi=69 → A4 (440Hz). */
 function playNote(midi){
   const ctx = getAudioCtx();
   if (ctx.state === 'suspended') ctx.resume();
   const freq = 440 * Math.pow(2, (midi - 69) / 12);
-  const o = ctx.createOscillator();
+  const sr = ctx.sampleRate;
+  const period = Math.max(2, Math.floor(sr / freq));
+  const total = Math.floor(sr * 2.5);
+  const ring = new Float32Array(period);
+  let prev = 0;
+  for (let i = 0; i < period; i++){
+    const noise = Math.random() * 2 - 1;
+    prev = 0.5 * (noise + prev);
+    ring[i] = prev;
+  }
+  const buffer = ctx.createBuffer(1, total, sr);
+  const data = buffer.getChannelData(0);
+  const decay = 0.992;
+  let idx = 0;
+  for (let i = 0; i < total; i++){
+    data[i] = ring[idx];
+    const next = (idx + 1) % period;
+    ring[idx] = decay * 0.5 * (ring[idx] + ring[next]);
+    idx = next;
+  }
+  const src = ctx.createBufferSource();
+  src.buffer = buffer;
   const g = ctx.createGain();
-  o.type = 'triangle';
-  o.frequency.value = freq;
-  o.connect(g); g.connect(ctx.destination);
-  const t0 = ctx.currentTime;
-  const peak = 0.35;
-  g.gain.setValueAtTime(0.0001, t0);
-  g.gain.exponentialRampToValueAtTime(peak, t0 + 0.01);
-  g.gain.setValueAtTime(peak, t0 + 1.0);
-  g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.5);
-  o.start(t0);
-  o.stop(t0 + 1.55);
+  g.gain.value = 0.6;
+  src.connect(g);
+  g.connect(ctx.destination);
+  src.start();
+}
+let playSeqState = null;
+function playSequence(midis, bpm, btnEl){
+  const stop = () => {
+    if(!playSeqState) return;
+    playSeqState.timeouts.forEach(clearTimeout);
+    if(playSeqState.btn){
+      playSeqState.btn.innerHTML = '&#x25B6; Play all';
+      playSeqState.btn.classList.remove('playing');
+    }
+    playSeqState = null;
+  };
+  if(playSeqState){
+    const wasSame = playSeqState.btn === btnEl;
+    stop();
+    if(wasSame) return;
+  }
+  const interval = 60000 / (bpm || 60);
+  const timeouts = midis.map((m, i) => setTimeout(() => playNote(m), i * interval));
+  timeouts.push(setTimeout(stop, midis.length * interval));
+  playSeqState = { timeouts, btn: btnEl };
+  if(btnEl){
+    btnEl.innerHTML = '&#x23F8; Stop';
+    btnEl.classList.add('playing');
+  }
 }
 function tick(){ beep(880,0.06); const dot=document.getElementById('metro-dot'); if(dot){ dot.classList.add('flash'); setTimeout(()=>dot.classList.remove('flash'),80); } }
 function getBpm(){ return parseInt(document.getElementById('bpm-slider').value); }

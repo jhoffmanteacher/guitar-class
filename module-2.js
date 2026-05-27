@@ -50,6 +50,7 @@ SETS.push(
             text: 'Play along drill: open your note-name chart. Play every natural note on the low E string slowly, frets 0–12: E · F · G · A · B · C · D · E. Say each name out loud as you play it. Do it twice.',
             hint: 'Slow is fine. Accuracy and saying the name out loud matter more than speed.',
             skills: [2],
+            playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] },
             response: { type: 'mc', prompt: 'On the low E string, what note is at fret 3?', choices: [
               'G',
               'F',
@@ -61,6 +62,7 @@ SETS.push(
             text: 'Now do the same on the A string: A · B · C · D · E · F · G · A (frets 0–12). Play up, then back down. Say each name aloud.',
             hint: 'Notice that fret 5 of the A string is the same note as the open D string. That connection will help you later.',
             skills: [3],
+            playSeq: { label: 'Play all', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] },
             response: { type: 'short', placeholder: 'What did you notice about any of the notes? Did any two notes feel or sound similar?' }
           }
         ]
@@ -70,12 +72,14 @@ SETS.push(
           {
             text: 'Tune your guitar. Using your note-name chart, play every natural note on the low E string slowly: E · F · G · A · B · C · D · E. Say each name aloud.',
             hint: 'Hearing + saying + playing locks it in faster.',
-            skills: [2]
+            skills: [2],
+            playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] }
           },
           {
             text: 'Now do the same on the A string: A · B · C · D · E · F · G · A. Play up to fret 12, then back down.',
             hint: 'Keep the metronome at 60 BPM. One note per beat.',
-            skills: [3]
+            skills: [3],
+            playSeq: { label: 'Play all', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] }
           },
           {
             text: 'Choice song: listen to "Seven Nation Army" or "Smoke on the Water" and try to pick out the main riff by ear on the E string.',
