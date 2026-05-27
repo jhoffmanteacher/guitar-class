@@ -450,7 +450,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 <div id="google_translate_element"></div>
 <header class="header">
   <div>
@@ -618,7 +617,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db   = firebase.firestore();
-const storage = firebase.storage();
 let currentUser = null;
 let progress    = {};
 let responses   = {};
@@ -675,7 +673,7 @@ async function loadProgress(){
         if(raw[k]===true) progress[k]='gotit';
         else if(raw[k]==='working'||raw[k]==='gotit') progress[k]=raw[k];
         else if(raw[k]==='1'||raw[k]==='2'||raw[k]==='3') progress[k]=raw[k];
-        else if((k.endsWith('-reflection')||k.endsWith('-performance')||k.endsWith('-recording')) && raw[k] && typeof raw[k]==='object') progress[k]=raw[k];
+        else if((k.endsWith('-reflection')||k.endsWith('-performance')) && raw[k] && typeof raw[k]==='object') progress[k]=raw[k];
         else progress[k]='none';
       });
       lastModuleNum = doc.data().lastModule||1;
@@ -1712,11 +1710,9 @@ function buildModuleReview(mr){
   }).join('');
   const pLvl=perf.level;
   const pBtn=(n)=>`<button class="mr-rb lvl${n}${pLvl===String(n)?' active':''}" onclick="setPerformanceLevel(${mr.moduleNum},'${n}')">${n}</button>`;
-  const recKey=`mr${mr.moduleNum}-recording`;
-  const rec=progress[recKey]||{};
   const recHtml=`<div class="mr-rec" data-module="${mr.moduleNum}">
         <label class="mr-play-label">Record yourself playing</label>
-        <div class="mr-rec-body" id="${mrId}-rec-body">${renderRecBody(mr.moduleNum, rec)}</div>
+        <div class="mr-rec-body" id="${mrId}-rec-body">${renderRecBody(mr.moduleNum)}</div>
       </div>`;
   const playHtml=`<div class="mr-play">
       <span class="mr-play-tag">&#x1F3B8; Play it!</span>
@@ -1814,8 +1810,9 @@ const recState = {};
 const REC_MAX_SECS = 90;
 
 /* Renders the current state of one module-review's recording widget.
-   `saved` is the persisted { url, savedAt } object from progress. */
-function renderRecBody(moduleNum, saved){
+   Recordings are kept only in-memory for the current browser tab —
+   nothing is uploaded. Students can play back and Download. */
+function renderRecBody(moduleNum){
   const s = recState[moduleNum] || {};
   if (s.recording){
     return `<div class="mr-rec-active">
@@ -1829,22 +1826,10 @@ function renderRecBody(moduleNum, saved){
     return `<div class="mr-rec-preview">
       <audio controls src="${s.pendingBlobUrl}" class="mr-rec-audio"></audio>
       <div class="mr-rec-actions">
-        <button type="button" class="mr-rec-btn primary" onclick="saveRec(${moduleNum})">&#x2191; Save to my profile</button>
         <button type="button" class="mr-rec-btn" onclick="downloadRec(${moduleNum})">&#x2B07; Download</button>
         <button type="button" class="mr-rec-btn" onclick="discardRec(${moduleNum})">&#x21BB; Re-record</button>
       </div>
-      <div class="mr-rec-status" id="mr${moduleNum}-rec-status">${s.statusMsg||'Listen back, then save or re-record.'}</div>
-    </div>`;
-  }
-  if (saved && saved.url){
-    const when = saved.savedAt ? new Date(saved.savedAt).toLocaleDateString() : '';
-    return `<div class="mr-rec-saved">
-      <audio controls src="${escAttr(saved.url)}" class="mr-rec-audio"></audio>
-      <div class="mr-rec-actions">
-        <button type="button" class="mr-rec-btn" onclick="startRec(${moduleNum})">&#x1F399; Record new</button>
-        <a class="mr-rec-btn" href="${escAttr(saved.url)}" target="_blank" rel="noopener">&#x2B07; Open</a>
-      </div>
-      <div class="mr-rec-status">Saved${when?` ${when}`:''} &#x2713;</div>
+      <div class="mr-rec-status">Listen back as often as you like. Download to keep a copy.</div>
     </div>`;
   }
   return `<div class="mr-rec-idle">
@@ -1856,8 +1841,7 @@ function renderRecBody(moduleNum, saved){
 function refreshRecUI(moduleNum){
   const host = document.getElementById(`mr${moduleNum}-rec-body`);
   if (!host) return;
-  const saved = progress[`mr${moduleNum}-recording`] || {};
-  host.innerHTML = renderRecBody(moduleNum, saved);
+  host.innerHTML = renderRecBody(moduleNum);
 }
 
 async function startRec(moduleNum){
@@ -1926,30 +1910,6 @@ function downloadRec(moduleNum){
   document.body.appendChild(a);
   a.click();
   a.remove();
-}
-
-async function saveRec(moduleNum){
-  const s = recState[moduleNum];
-  if (!s || !s.pendingBlob) return;
-  if (!currentUser){ alert('You need to be signed in to save recordings.'); return; }
-  const statusEl = document.getElementById(`mr${moduleNum}-rec-status`);
-  const setStatus = msg => { if (statusEl) statusEl.textContent = msg; s.statusMsg = msg; };
-  setStatus('Uploading…');
-  try {
-    const path = `recordings/${currentUser.uid}/mr${moduleNum}.webm`;
-    const ref = storage.ref().child(path);
-    await ref.put(s.pendingBlob, { contentType: s.pendingBlob.type || 'audio/webm' });
-    const url = await ref.getDownloadURL();
-    const key = `mr${moduleNum}-recording`;
-    progress[key] = { url, savedAt: Date.now() };
-    saveProgress();
-    URL.revokeObjectURL(s.pendingBlobUrl);
-    delete recState[moduleNum];
-    refreshRecUI(moduleNum);
-  } catch (err) {
-    console.error('recording upload failed', err);
-    setStatus('Upload failed — use Download to save locally instead. (' + (err.code || err.message || 'error') + ')');
-  }
 }
 
 /* ── Checklist ── */
