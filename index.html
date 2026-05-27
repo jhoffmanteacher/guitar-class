@@ -74,8 +74,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .wpill.active{background:var(--text);color:var(--bg);border-color:var(--text)}
 .wpill.locked{opacity:.35;cursor:default}
 .wpill.incomplete::after{content:'';width:6px;height:6px;border-radius:50%;background:var(--amber-text);position:absolute;top:3px;right:3px}
-.wpill.review-pill{border-style:dashed}
-.wpill.review-pill.active{background:#EEEDFE;color:#3C3489;border-color:#7F77DD;border-style:solid}
+.wpill.review-pill{border-style:dashed;border-color:#5b4dc4;color:#3C3489;background:rgba(238,237,254,0.45)}
+.wpill.review-pill:hover{background:#EEEDFE;border-color:#3C3489;color:#2a2363}
+.wpill.review-pill.active{background:#3C3489;color:#fff;border-color:#3C3489;border-style:solid}
+.wpill.review-pill.locked::before{content:'\1F512';margin-right:5px;font-size:11px;opacity:.85}
+.week-panel.mr-locked .mr-rb,
+.week-panel.mr-locked .reflection-ta,
+.week-panel.mr-locked .mr-play-song,
+.week-panel.mr-locked .mr-rec-btn,
+.week-panel.mr-locked .mr-rec-stop{pointer-events:none;opacity:.55}
+.week-panel.mr-locked .reflection-ta,
+.week-panel.mr-locked .mr-play-song{background:var(--bg3)}
+.mr-locked-banner{display:none}
+.week-panel.mr-locked .mr-locked-banner{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:0.5px solid #c5c0ee;background:#EEEDFE;border-radius:var(--radius);color:#3C3489;font-size:13px;line-height:1.5;margin-bottom:14px}
+.mr-locked-banner-icon{font-size:16px;line-height:1.4;flex-shrink:0}
 .reflection-ta{width:100%;box-sizing:border-box;border:0.5px solid var(--border2);border-radius:var(--radius);padding:10px 13px;font-size:13px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:500;color:var(--text);background:var(--bg);resize:vertical;min-height:68px;line-height:1.5}
 .reflection-ta::placeholder{color:var(--text2);font-weight:400}
 .reflection-ta:focus{outline:none;border-color:var(--text2)}
@@ -1471,6 +1483,15 @@ function populateModuleDropdown(){
   });
 }
 
+function isModuleReviewLocked(moduleNum){
+  const sets = SETS.filter(w=>w.moduleNum===moduleNum);
+  if(!sets.length) return true;
+  if(sets.some(w=>w.locked||w.comingSoon)) return true;
+  const allSkills = sets.flatMap(w=>w.skills||[]);
+  if(!allSkills.length) return true;
+  return !allSkills.every(s=>progress[s.id]==='gotit');
+}
+
 function onModuleChange(moduleNum, restoreSetId){
   moduleNum = parseInt(moduleNum);
   lastModuleNum = moduleNum;
@@ -1504,12 +1525,19 @@ function renderPills(moduleNum){
     const div = document.createElement('div');
     div.style.cssText='width:1px;height:18px;background:var(--border2);margin:0 4px;align-self:center;flex-shrink:0';
     c.appendChild(div);
+    const locked = isModuleReviewLocked(moduleNum);
     const rbtn = document.createElement('button');
-    rbtn.className='wpill review-pill';
+    rbtn.className='wpill review-pill'+(locked?' locked':'');
     rbtn.dataset.id=`mr${moduleNum}`;
     rbtn.textContent='Module review';
+    rbtn.title = locked
+      ? 'Preview only — finish marking every skill on both sets as "got it" to unlock this self-assessment.'
+      : '';
     rbtn.onclick=()=>{ lastSetId=`mr${moduleNum}`; activateSet(`mr${moduleNum}`); saveProgress(); };
     c.appendChild(rbtn);
+    // Sync preview/locked state onto the review's panel so its inputs disable themselves
+    const panel = document.querySelector(`.week-panel[data-id="mr${moduleNum}"]`);
+    if(panel) panel.classList.toggle('mr-locked', locked);
   }
 }
 
@@ -1727,6 +1755,10 @@ function buildModuleReview(mr){
     </div>`;
   const performanceHtml=`<div class="ablock" style="margin-top:18px"><div class="albl">How this is assessed in class</div><div class="atxt">Sign up when you are ready for the teacher to assess you on the skills above.</div></div>`;
   return `
+    <div class="mr-locked-banner">
+      <span class="mr-locked-banner-icon">&#x1F512;</span>
+      <div><strong>Preview only.</strong> Mark every skill on both sets as &ldquo;I&rsquo;ve got it!&rdquo; to unlock this self-assessment.</div>
+    </div>
     <div class="obj-card">
       <span class="mr-tag">Module ${mr.moduleNum} self-assessment</span>
       <div class="obj-main">${mr.module}</div>
@@ -1755,7 +1787,13 @@ function buildModuleReview(mr){
     <div class="save-ind" id="${mrId}-save-ind" style="margin-top:10px"></div>`;
 }
 
+function isReviewPanelLocked(mrId){
+  const panel = document.querySelector(`.week-panel[data-id="${mrId}"]`);
+  return !!(panel && panel.classList.contains('mr-locked'));
+}
+
 function saveReflection(moduleNum){
+  if(isReviewPanelLocked(`mr${moduleNum}`)) return;
   const clicked=document.getElementById(`mr${moduleNum}-clicked`).value;
   const hard=document.getElementById(`mr${moduleNum}-hard`).value;
   const key=`mr${moduleNum}-reflection`;
@@ -1764,6 +1802,7 @@ function saveReflection(moduleNum){
 }
 
 function setSkillLevel(sid, mrId, level){
+  if(isReviewPanelLocked(mrId)) return;
   progress[sid] = (progress[sid] === level) ? 'none' : level;
   const lvl = progress[sid];
   document.querySelectorAll(`.week-panel[data-id="${mrId}"] .mr-row`).forEach(row=>{
@@ -1780,6 +1819,7 @@ function setSkillLevel(sid, mrId, level){
 }
 
 function savePerformance(moduleNum){
+  if(isReviewPanelLocked(`mr${moduleNum}`)) return;
   const key=`mr${moduleNum}-performance`;
   const songEl=document.getElementById(`mr${moduleNum}-song`);
   const cur=progress[key]||{};
@@ -1788,6 +1828,7 @@ function savePerformance(moduleNum){
 }
 
 function setPerformanceLevel(moduleNum, level){
+  if(isReviewPanelLocked(`mr${moduleNum}`)) return;
   const key=`mr${moduleNum}-performance`;
   const cur=progress[key]||{};
   const newLvl=(cur.level===level)?null:level;
