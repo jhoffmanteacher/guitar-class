@@ -44,7 +44,7 @@ function googleTranslateElementInit(){
     --amber-bg:#4a2a04;--amber-text:#f0b84a;
   }
 }
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg2);color:var(--text);min-height:100vh}
+body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg2);color:var(--text);min-height:100vh}
 .header{background:#4d1964;color:#fff;border-bottom:0.5px solid rgba(255,255,255,0.18);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20}
 .header-title{font-family:Calibri,"Segoe UI",sans-serif;font-size:16pt;font-weight:600;color:#fff;line-height:1.15}
 .header-sub{font-family:Calibri,"Segoe UI",sans-serif;font-size:12pt;color:rgba(255,255,255,0.85);margin-top:2px;line-height:1.15}
@@ -92,7 +92,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .mr-locked-banner{display:none}
 .week-panel.mr-locked .mr-locked-banner{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:0.5px solid #c5c0ee;background:#EEEDFE;border-radius:var(--radius);color:#3C3489;font-size:13px;line-height:1.5;margin-bottom:14px}
 .mr-locked-banner-icon{font-size:16px;line-height:1.4;flex-shrink:0}
-.reflection-ta{width:100%;box-sizing:border-box;border:0.5px solid var(--border2);border-radius:var(--radius);padding:10px 13px;font-size:13px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:500;color:var(--text);background:var(--bg);resize:vertical;min-height:68px;line-height:1.5}
+.reflection-ta{width:100%;box-sizing:border-box;border:0.5px solid var(--border2);border-radius:var(--radius);padding:10px 13px;font-size:13px;font-family:inherit;font-weight:500;color:var(--text);background:var(--bg);resize:vertical;min-height:68px;line-height:1.5}
 .reflection-ta::placeholder{color:var(--text2);font-weight:400}
 .reflection-ta:focus{outline:none;border-color:var(--text2)}
 .week-panel[data-id^="mr"] .albl{color:var(--text);font-weight:600}
@@ -382,7 +382,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
 .chord-diagrams{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;background:var(--bg2);border-radius:var(--radius-sm)}
 .chord-box{display:flex;flex-direction:column;align-items:center;gap:2px}
 .chord-box svg{display:block}
-.chord-box-label{font-size:11px;font-weight:600;color:var(--text);font-family:-apple-system,sans-serif;margin-top:2px}
+.chord-box-label{font-size:11px;font-weight:600;color:var(--text);font-family:inherit;margin-top:2px}
 /* ── Auto chord links inside step text ── */
 .chord-link{display:inline;color:var(--blue-text);cursor:pointer;border-bottom:0.5px dotted var(--blue-text);font-weight:500;padding:0 1px;border-radius:2px;transition:background 0.1s}
 .chord-link:hover{background:var(--blue-bg)}
@@ -1092,6 +1092,11 @@ function toggleTabChoice(btn){
 const STR_SEP = '(?:\\s*(?:,|&|\\band\\b|\\bor\\b)\\s*)+';
 const STRING_PHRASE_RE_SRC = '\\b[EADGB](?:' + STR_SEP + '[EADGB])*\\s+strings?\\b';
 const LOWHIGH_E_RE_SRC = '\\b(low|high)\\s+E\\b';
+/* Standard tuning notation "E A D G B e" — six string names in order with
+   lowercase e for the high E. Separators can be spaces, commas, or "·". */
+const TUNING_SEP = '[\\s·,]+';
+const TUNING_RE_SRC = '\\bE' + TUNING_SEP + 'A' + TUNING_SEP + 'D' + TUNING_SEP + 'G' + TUNING_SEP + 'B' + TUNING_SEP + 'e\\b';
+const TUNING_LETTER_KIND = { E:'lowE', A:'A', D:'D', G:'G', B:'B', e:'highE' };
 
 function findStringMatches(text){
   const matches = [];
@@ -1116,6 +1121,19 @@ function findStringMatches(text){
       if (matches.some(x => x.start <= absStart && absStart < x.end)) continue;
       const kind = letter === 'E' ? 'lowE' : letter; // ambiguous "E string" defaults to low E
       matches.push({ start: absStart, end: absStart + 1, kind });
+    }
+  }
+
+  const re3 = new RegExp(TUNING_RE_SRC, 'g');
+  while ((m = re3.exec(text)) !== null) {
+    const phraseStart = m.index;
+    const phrase = m[0];
+    const letterRe = /[EADGBe]/g;
+    let lm;
+    while ((lm = letterRe.exec(phrase)) !== null) {
+      const absStart = phraseStart + lm.index;
+      if (matches.some(x => x.start <= absStart && absStart < x.end)) continue;
+      matches.push({ start: absStart, end: absStart + 1, kind: TUNING_LETTER_KIND[lm[0]] });
     }
   }
 
@@ -1747,6 +1765,7 @@ function buildModuleReview(mr){
   const pBtn=(n)=>`<button class="mr-rb lvl${n}${pLvl===String(n)?' active':''}" onclick="setPerformanceLevel(${mr.moduleNum},'${n}')">${n}</button>`;
   const recHtml=`<div class="mr-rec" data-module="${mr.moduleNum}">
         <label class="mr-play-label">Record yourself playing</label>
+        <div class="mr-play-prompt">Once you've recorded, listen back to what you played and reflect on what can be improved.</div>
         <div class="mr-rec-body" id="${mrId}-rec-body">${renderRecBody(mr.moduleNum)}</div>
       </div>`;
   const playHtml=`<div class="mr-play">
