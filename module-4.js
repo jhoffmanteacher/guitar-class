@@ -56,14 +56,32 @@ SETS.push(
       c: {
         title: 'Practice station — pattern drill & first improvisation',        steps: [
           {
-            text: 'Set metronome to 60 BPM. Play Pentatonic Pattern 1 ascending (low to high) and descending (high to low), one note per beat. Use alternate picking (down-up-down-up).',
+            text: 'Set metronome to 60 BPM. Play Pentatonic Pattern 1 ascending (low to high), one note per beat. Use alternate picking (down-up-down-up). Click "Play all" to hear it.',
             hint: 'Go as slow as you need. Every note should ring cleanly. Say each note aloud as you play it to connect your ear to your fingers.',
-            skills: [1, 2, 5]
+            skills: [1, 2, 5],
+            playSeq: { label: 'Play all', bpm: 60, notes: [45, 48, 50, 52, 55, 57, 60, 62, 64, 67, 69, 72] }
           },
           {
-            text: 'Position Pattern 1 for A minor pentatonic (1st finger on 5th fret, string 6). Play up and down. Then shift to E minor pentatonic (open string root). Notice the pattern is the same!',
+            text: 'Position Pattern 1 for A minor pentatonic (1st finger on 5th fret, string 6). Use the TAB below as a map. Play up and down. Then shift to E minor pentatonic (open string root). Notice the pattern is the same!',
             hint: 'A minor: your hand sits around frets 5–8. E minor: your hand starts at the open string and you\'ll use frets 3 and 5 instead of 1st finger.',
-            skills: [3, 4]
+            skills: [3, 4],
+            tab: {
+              caption: 'A minor pentatonic Pattern 1 · ascending across all 6 strings',
+              notes: [
+                { string: 'E', fret: 5, note: 'A', midi: 45 },
+                { string: 'E', fret: 8, note: 'C', midi: 48 },
+                { string: 'A', fret: 5, note: 'D', midi: 50 },
+                { string: 'A', fret: 7, note: 'E', midi: 52 },
+                { string: 'D', fret: 5, note: 'G', midi: 55 },
+                { string: 'D', fret: 7, note: 'A', midi: 57 },
+                { string: 'G', fret: 5, note: 'C', midi: 60 },
+                { string: 'G', fret: 7, note: 'D', midi: 62 },
+                { string: 'B', fret: 5, note: 'E', midi: 64 },
+                { string: 'B', fret: 8, note: 'G', midi: 67 },
+                { string: 'e', fret: 5, note: 'A', midi: 69 },
+                { string: 'e', fret: 8, note: 'C', midi: 72 }
+              ]
+            }
           },
           {
             text: 'Pick two notes from the pattern on the same string. Play them in any order, varying the rhythm. This is your first improvisation! Aim for 4–5 note ideas, then pause.',
@@ -108,12 +126,18 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm4w1-s1', text: 'Play Pentatonic Pattern 1 ascending and descending from memory' },
-      { id: 'm4w1-s2', text: 'Use alternate picking (down-up) consistently through the pattern' },
-      { id: 'm4w1-s3', text: 'Position Pattern 1 as a minor pentatonic scale (1st finger on root)' },
-      { id: 'm4w1-s4', text: 'Position Pattern 1 as a major pentatonic scale (4th finger on root)' },
-      { id: 'm4w1-s5', text: 'Play the pattern in time at 60 BPM with a metronome' },
-      { id: 'm4w1-s6', text: 'Improvise a short 2-bar musical idea using 2–3 notes from the pattern' }
+      { id: 'm4w1-s1', text: 'Play Pentatonic Pattern 1 ascending and descending from memory',
+        gotItWhen: 'you can play the full pattern up and back down without looking at a diagram, with no missed notes or hesitations.' },
+      { id: 'm4w1-s2', text: 'Use alternate picking (down-up) consistently through the pattern',
+        gotItWhen: 'your pick alternates down-up-down-up automatically — you don\'t have to think about which direction comes next.' },
+      { id: 'm4w1-s3', text: 'Position Pattern 1 as a minor pentatonic scale (1st finger on root)',
+        gotItWhen: 'someone names a minor key (Am, Em, Gm…) and you can place your 1st finger on the right fret of the low E and play the pattern from there.' },
+      { id: 'm4w1-s4', text: 'Position Pattern 1 as a major pentatonic scale (4th finger on root)',
+        gotItWhen: 'someone names a major key (C, G, D…) and you can place your 4th finger on the right fret of the low E and play the pattern from there.' },
+      { id: 'm4w1-s5', text: 'Play the pattern in time at 60 BPM with a metronome',
+        gotItWhen: 'every note lands on a beat at 60 BPM and you can play the whole pattern without stopping or losing the click.' },
+      { id: 'm4w1-s6', text: 'Improvise a short 2-bar musical idea using 2–3 notes from the pattern',
+        gotItWhen: 'you can play a 2-bar phrase that feels intentional — not random — using just 2 or 3 notes from the pattern.' }
     ]
   },
 
@@ -177,9 +201,16 @@ SETS.push(
             skills: [5, 6]
           },
           {
-            text: 'Learn the natural notes on the D string (frets 0–8): D E F G A B C. Then the G string: G A B C D E F. Play each slowly and say the name aloud.',
+            text: 'Learn the natural notes on the D string: D · E · F · G · A · B · C (frets 0–10). Play each slowly and say the name aloud. Click "Play all" to hear the sequence at 60 BPM.',
             hint: 'Same musical alphabet pattern you know from E and A strings. Find the pattern — it repeats!',
-            skills: [7]
+            skills: [7],
+            playSeq: { label: 'Play all', bpm: 60, notes: [50, 52, 53, 55, 57, 59, 60] }
+          },
+          {
+            text: 'Now do the same on the G string: G · A · B · C · D · E · F (frets 0–10). Play each slowly and say the name aloud.',
+            hint: 'Notice the same pattern of whole and half steps — the musical alphabet behaves the same way on every string.',
+            skills: [7],
+            playSeq: { label: 'Play all', bpm: 60, notes: [55, 57, 59, 60, 62, 64, 65] }
           }
         ]
       }
@@ -219,13 +250,20 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm4w2-s1', text: 'Vary dynamics consciously: play the same note at p, mf, and f' },
-      { id: 'm4w2-s2', text: 'Change timbre by moving picking hand between bridge and neck' },
-      { id: 'm4w2-s3', text: 'Perform a hammer-on and a pull-off' },
-      { id: 'm4w2-s4', text: 'Use "envelope": vary attack and note length intentionally' },
-      { id: 'm4w2-s5', text: 'Play a one-note solo that uses dynamics and rhythm for expression' },
-      { id: 'm4w2-s6', text: 'Improvise a call-and-response phrase (call ends off root; response lands on root)' },
-      { id: 'm4w2-s7', text: 'Name all natural notes on the D string (frets 0–8) and G string (frets 0–8)' }
+      { id: 'm4w2-s1', text: 'Vary dynamics consciously: play the same note at p, mf, and f',
+        gotItWhen: 'you play the same note three times in a row and a listener can clearly hear that you got louder each time.' },
+      { id: 'm4w2-s2', text: 'Change timbre by moving picking hand between bridge and neck',
+        gotItWhen: 'a listener can hear the difference between your "bright" (near the bridge) and "warm" (near the neck) tones without you saying anything.' },
+      { id: 'm4w2-s3', text: 'Perform a hammer-on and a pull-off',
+        gotItWhen: 'you can produce the second note with no pick stroke — and it rings as clearly as a picked note.' },
+      { id: 'm4w2-s4', text: 'Use "envelope": vary attack and note length intentionally',
+        gotItWhen: 'you can play a short, sharp note and a long, sustained note on demand, and the difference is obvious to a listener.' },
+      { id: 'm4w2-s5', text: 'Play a one-note solo that uses dynamics and rhythm for expression',
+        gotItWhen: 'you can play one note for 8 bars and still hold someone\'s attention — because you change something each time.' },
+      { id: 'm4w2-s6', text: 'Improvise a call-and-response phrase (call ends off root; response lands on root)',
+        gotItWhen: 'a listener can hear the question (call) and the answer (response) — the call feels unresolved, the response feels like it arrives.' },
+      { id: 'm4w2-s7', text: 'Name all natural notes on the D string (frets 0–8) and G string (frets 0–8)',
+        gotItWhen: 'someone calls out any fret 0–10 on D or G and you can name the note instantly without counting up from the open string.' }
     ]
   },
 
@@ -334,13 +372,20 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm4w3-s1', text: 'Explain what a major pentatonic scale is (degrees 1 2 3 5 6)' },
-      { id: 'm4w3-s2', text: 'Explain what a minor pentatonic scale is (degrees 1 ♭3 4 5 ♭7)' },
-      { id: 'm4w3-s3', text: 'Add vibrato on at least one sustained note' },
-      { id: 'm4w3-s4', text: 'Identify and play the ♭5 blues note within Pattern 1' },
-      { id: 'm4w3-s5', text: 'Explain how C major pentatonic and A minor pentatonic are relative scales' },
-      { id: 'm4w3-s6', text: 'Compose and write out a 4-bar original solo using scale degrees' },
-      { id: 'm4w3-s7', text: 'Perform the original solo over a course song backing track from memory' }
+      { id: 'm4w3-s1', text: 'Explain what a major pentatonic scale is (degrees 1 2 3 5 6)',
+        gotItWhen: 'you can list the scale degrees from memory and name the 5 notes in any major key when asked.' },
+      { id: 'm4w3-s2', text: 'Explain what a minor pentatonic scale is (degrees 1 ♭3 4 5 ♭7)',
+        gotItWhen: 'you can list the minor pentatonic degrees from memory and explain why two of them are flatted compared to the major scale.' },
+      { id: 'm4w3-s3', text: 'Add vibrato on at least one sustained note',
+        gotItWhen: 'your finger rocks back and forth on a sustained note and the pitch wobbles intentionally — not from shaking nerves.' },
+      { id: 'm4w3-s4', text: 'Identify and play the ♭5 blues note within Pattern 1',
+        gotItWhen: 'you can find the ♭5 anywhere in Pattern 1 and use it as a passing tone — not a landing point.' },
+      { id: 'm4w3-s5', text: 'Explain how C major pentatonic and A minor pentatonic are relative scales',
+        gotItWhen: 'you can explain that they share the same 5 notes — only the root changes — and prove it on the fretboard.' },
+      { id: 'm4w3-s6', text: 'Compose and write out a 4-bar original solo using scale degrees',
+        gotItWhen: 'you have 4 bars written down in scale-degree numbers and you can play exactly what you wrote — not improvise something different.' },
+      { id: 'm4w3-s7', text: 'Perform the original solo over a course song backing track from memory',
+        gotItWhen: 'you can play your 4-bar solo all the way through with the backing track without checking your written notes.' }
     ]
   }
 

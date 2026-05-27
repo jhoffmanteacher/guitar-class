@@ -122,12 +122,18 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm3w1-s1', text: 'Fret a clean 2-finger power chord (root + 5th) with no buzzing' },
-      { id: 'm3w1-s2', text: 'Move the power chord shape along the E string (E5, G5, A5, B5)' },
-      { id: 'm3w1-s3', text: 'Mute unused strings with palm and fretting hand' },
-      { id: 'm3w1-s4', text: 'Move the power chord shape along the A string (A5, C5, D5)' },
-      { id: 'm3w1-s5', text: 'Play a power chord on the beat with a single down-strum' },
-      { id: 'm3w1-s6', text: 'Read a basic power chord TAB or chord symbol (e.g. A5, G5)' }
+      { id: 'm3w1-s1', text: 'Fret a clean 2-finger power chord (root + 5th) with no buzzing',
+        gotItWhen: 'both notes ring clearly when you strum, with no buzz and no muffled strings — and it sounds the same every time you play it.' },
+      { id: 'm3w1-s2', text: 'Move the power chord shape along the E string (E5, G5, A5, B5)',
+        gotItWhen: 'you can move the same shape to any of those positions on call and name the chord without counting frets.' },
+      { id: 'm3w1-s3', text: 'Mute unused strings with palm and fretting hand',
+        gotItWhen: 'you can strum hard across all 6 strings and only the two intentional notes ring — the other 4 stay silent.' },
+      { id: 'm3w1-s4', text: 'Move the power chord shape along the A string (A5, C5, D5)',
+        gotItWhen: 'you can shift the shape to the A-string root without your palm mute breaking — and the low E string stays silent.' },
+      { id: 'm3w1-s5', text: 'Play a power chord on the beat with a single down-strum',
+        gotItWhen: 'your strum lands on beat 1 with the metronome and the chord rings cleanly — no early or late attacks.' },
+      { id: 'm3w1-s6', text: 'Read a basic power chord TAB or chord symbol (e.g. A5, G5)',
+        gotItWhen: 'you can see "A5" or "G5" on a chart and instantly know which fret your index finger goes on, on which string.' }
     ]
   },
 
@@ -231,12 +237,18 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm3w2-s1', text: 'Change power chords on beat 1 at 70+ BPM' },
-      { id: 'm3w2-s2', text: 'Play a full 8-bar power chord progression in time' },
-      { id: 'm3w2-s3', text: 'Play a straight-eighths strumming pattern with power chords' },
-      { id: 'm3w2-s4', text: 'Apply power chords on both E and A string roots in the same song' },
-      { id: 'm3w2-s5', text: 'Optional: add 3rd finger octave doubling to the power chord shape' },
-      { id: 'm3w2-s6', text: 'Self-evaluate timing with the metronome and adjust tempo intentionally' }
+      { id: 'm3w2-s1', text: 'Change power chords on beat 1 at 70+ BPM',
+        gotItWhen: 'your chord changes land exactly on beat 1 with the metronome at 70 BPM and you don\'t need to pause or restart.' },
+      { id: 'm3w2-s2', text: 'Play a full 8-bar power chord progression in time',
+        gotItWhen: 'you can play through 8 bars without stopping, even if a chord change is rough — you keep going to the next downbeat.' },
+      { id: 'm3w2-s3', text: 'Play a straight-eighths strumming pattern with power chords',
+        gotItWhen: 'you can play down-down-up-down-up across a bar and count "1 + 2 + 3 + 4 +" aloud without losing the strum.' },
+      { id: 'm3w2-s4', text: 'Apply power chords on both E and A string roots in the same song',
+        gotItWhen: 'you can switch between an E-root and an A-root power chord mid-song without your palm mute breaking or the wrong strings ringing.' },
+      { id: 'm3w2-s5', text: 'Optional: add 3rd finger octave doubling to the power chord shape',
+        gotItWhen: 'your pinky lands two frets above your ring finger and all three notes ring cleanly — no buzz, no muffled string.' },
+      { id: 'm3w2-s6', text: 'Self-evaluate timing with the metronome and adjust tempo intentionally',
+        gotItWhen: 'you can tell whether you\'re ahead, behind, or with the click — and you can pick a tempo where you sound clean instead of pushing too fast.' }
     ]
   }
 

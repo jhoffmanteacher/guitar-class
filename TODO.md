@@ -12,6 +12,18 @@ Tracking the rest of the Module 2 changes we chunked out.
 
 ---
 
+## Module-2 form/function applied across all modules — DONE
+
+Brought modules 1, 3, 4, 5 in line with Module 2's structure:
+
+- `gotItWhen:` descriptors on every skill (~65 skills total across the 4 modules).
+- Module 1 Set 2: `playSeq` on the E-string note drill (open E · F · G · A), inline `tab:` for the Seven Nation Army riff.
+- Module 4 Set 1: `playSeq` for A minor pentatonic Pattern 1 ascending, inline `tab:` showing the full Pattern 1 across all 6 strings.
+- Module 4 Set 2: D-string note drill split into D-string + G-string steps, each with its own `playSeq`.
+- Modules 3 & 5: descriptors only — chord-based content, no single-note drills to wire up.
+
+---
+
 ## Chunk 2 — Audio utility + Interactive Fretboard Diagram
 
 ### Part A: Web Audio note player — DONE

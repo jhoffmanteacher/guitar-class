@@ -79,9 +79,12 @@ SETS.push(
     },
 
     skills: [
-      { id: 'w1-s1', text: 'I can describe why I want to learn guitar' },
-      { id: 'w1-s2', text: 'I can name one song that matters to me' },
-      { id: 'w1-s3', text: 'I participated in class sharing and listened respectfully' }
+      { id: 'w1-s1', text: 'I can describe why I want to learn guitar',
+        gotItWhen: 'you can answer "why guitar?" in one or two sentences without hesitating — and the answer is yours, not someone else\'s.' },
+      { id: 'w1-s2', text: 'I can name one song that matters to me',
+        gotItWhen: 'you can name the song instantly and say one thing about why it matters to you — no thinking required.' },
+      { id: 'w1-s3', text: 'I participated in class sharing and listened respectfully',
+        gotItWhen: 'you spoke up at least once, and you can recall something a classmate shared without checking your notes.' }
     ]
   },
 
@@ -124,8 +127,20 @@ SETS.push(
             ] }
           },
           {
-            text: 'Try the "Seven Nation Army" riff on your guitar: low E string, frets 7 · 7 · 10 · 7 · 5 · 3 · 2. Go as slow as you need. How far can you get before the station rotates?',
-            hint: 'Slow and clean beats fast and buzzy. One note at a time.'
+            text: 'Try the "Seven Nation Army" riff on your guitar: low E string, frets 7 · 7 · 10 · 7 · 5 · 3 · 2. Go as slow as you need. How far can you get before the station rotates? Click any note name below the TAB to hear how it should sound.',
+            hint: 'Slow and clean beats fast and buzzy. One note at a time.',
+            tab: {
+              caption: '"Seven Nation Army" — main riff · Low E string · 7 notes',
+              notes: [
+                { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+                { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+                { string: 'E', fret: 10, note: 'D',  midi: 50 },
+                { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+                { string: 'E', fret: 5,  note: 'A',  midi: 45 },
+                { string: 'E', fret: 3,  note: 'G',  midi: 43 },
+                { string: 'E', fret: 2,  note: 'F#', midi: 42 }
+              ]
+            }
           }
         ]
       },
@@ -134,7 +149,8 @@ SETS.push(
           {
             text: 'Tune your guitar first. Then practice playing single notes on the low E string: open (E), 1st fret (F), 3rd fret (G), 5th fret (A).',
             hint: 'Press just behind the fret, not on it. One clean note at a time.',
-            skills: [5, 6]
+            skills: [5, 6],
+            playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45] }
           },
           {
             text: 'Try "Happy Birthday" on open strings only — your teacher will give you the note sequence. Set your metronome to 60 BPM.',
@@ -180,12 +196,18 @@ SETS.push(
     },
 
     skills: [
-      { id: 'w2-s1', text: 'Name 5+ parts of the guitar (body, neck, headstock, frets, strings, tuning pegs, nut, saddle, bridge)' },
-      { id: 'w2-s2', text: 'Hold the guitar with correct sitting posture' },
-      { id: 'w2-s3', text: 'Hold the pick correctly — 3–4mm of tip showing' },
-      { id: 'w2-s4', text: 'Name all 6 strings from memory (E A D G B e)' },
-      { id: 'w2-s5', text: 'Tune all 6 strings with a tuner' },
-      { id: 'w2-s6', text: 'Play a short open-string melody on the E string at 60 BPM' }
+      { id: 'w2-s1', text: 'Name 5+ parts of the guitar (body, neck, headstock, frets, strings, tuning pegs, nut, saddle, bridge)',
+        gotItWhen: 'you can point to and name each part on a real guitar without checking a diagram.' },
+      { id: 'w2-s2', text: 'Hold the guitar with correct sitting posture',
+        gotItWhen: 'you can play for 5 minutes straight without slouching, lifting your shoulders, or letting the guitar slip off your leg.' },
+      { id: 'w2-s3', text: 'Hold the pick correctly — 3–4mm of tip showing',
+        gotItWhen: 'your pick stays put when you strum, only a small tip pokes past your thumb, and your wrist stays relaxed.' },
+      { id: 'w2-s4', text: 'Name all 6 strings from memory (E A D G B e)',
+        gotItWhen: 'you can say E-A-D-G-B-e low to high — and high to low — without pausing or saying the mnemonic out loud.' },
+      { id: 'w2-s5', text: 'Tune all 6 strings with a tuner',
+        gotItWhen: 'you can take an out-of-tune guitar and get all 6 strings to green on the tuner in under 2 minutes without help.' },
+      { id: 'w2-s6', text: 'Play a short open-string melody on the E string at 60 BPM',
+        gotItWhen: 'you can play the melody all the way through at 60 BPM with the metronome without stopping or losing the beat.' }
     ]
   }
 

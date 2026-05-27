@@ -108,12 +108,18 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm5w1-s1', text: 'Read a chord diagram: identify X (mute), O (open), dots (finger placement), and numbers (which finger)' },
-      { id: 'm5w1-s2', text: 'Explain the difference between a chord chart, TAB, and standard notation' },
-      { id: 'm5w1-s3', text: 'Fret Am cleanly — every string rings with no buzzing' },
-      { id: 'm5w1-s4', text: 'Fret Em cleanly — all 6 strings ring open and full' },
-      { id: 'm5w1-s5', text: 'Strum 4 down-strums per bar in time at 60 BPM' },
-      { id: 'm5w1-s6', text: 'Identify and fret any chord shown on a chord chart' }
+      { id: 'm5w1-s1', text: 'Read a chord diagram: identify X (mute), O (open), dots (finger placement), and numbers (which finger)',
+        gotItWhen: 'someone hands you a chord diagram you\'ve never seen and you can put your fingers on the right strings, frets, and finger numbers without asking.' },
+      { id: 'm5w1-s2', text: 'Explain the difference between a chord chart, TAB, and standard notation',
+        gotItWhen: 'you can look at all three and say which is which — and explain in one sentence what each one tells you.' },
+      { id: 'm5w1-s3', text: 'Fret Am cleanly — every string rings with no buzzing',
+        gotItWhen: 'you pluck each of the 5 strings in Am individually and every one rings clear — no buzz, no muffled string.' },
+      { id: 'm5w1-s4', text: 'Fret Em cleanly — all 6 strings ring open and full',
+        gotItWhen: 'you strum all 6 strings and the chord sounds full and open — no string is accidentally muted by a neighboring finger.' },
+      { id: 'm5w1-s5', text: 'Strum 4 down-strums per bar in time at 60 BPM',
+        gotItWhen: 'your strums land on beats 1, 2, 3, 4 with the metronome at 60 BPM and you can keep it going for at least 8 bars without drifting.' },
+      { id: 'm5w1-s6', text: 'Identify and fret any chord shown on a chord chart',
+        gotItWhen: 'you can read any chord diagram in the songbook and play it without having to look up the chord name.' }
     ]
   },
 
@@ -217,12 +223,18 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm5w2-s1', text: 'Fret C major with clean tone on the B string' },
-      { id: 'm5w2-s2', text: 'Fret F major (simplified xx3211) with no buzzing' },
-      { id: 'm5w2-s3', text: 'Fret G major (3 or 4 finger version) cleanly' },
-      { id: 'm5w2-s4', text: 'Use the common-finger pivot between Am and C' },
-      { id: 'm5w2-s5', text: 'Play a down-up strum pattern in time at 60+ BPM' },
-      { id: 'm5w2-s6', text: 'Switch between any two chords in Group 1 on beat 1 at 70 BPM' }
+      { id: 'm5w2-s1', text: 'Fret C major with clean tone on the B string',
+        gotItWhen: 'you strum C and the B string (fret 1) rings clearly — your index finger doesn\'t mute the high E or buzz against the fret.' },
+      { id: 'm5w2-s2', text: 'Fret F major (simplified xx3211) with no buzzing',
+        gotItWhen: 'all four notes in the simplified F ring cleanly when you strum strings 4–1 — and your index finger doesn\'t collapse on the barre.' },
+      { id: 'm5w2-s3', text: 'Fret G major (3 or 4 finger version) cleanly',
+        gotItWhen: 'every string rings in your G chord — including the open D and G in the middle, which beginners tend to accidentally mute.' },
+      { id: 'm5w2-s4', text: 'Use the common-finger pivot between Am and C',
+        gotItWhen: 'when you switch Am ↔ C your index finger stays planted on string 2 fret 1 — you don\'t lift it and put it back down.' },
+      { id: 'm5w2-s5', text: 'Play a down-up strum pattern in time at 60+ BPM',
+        gotItWhen: 'your wrist swings like a pendulum — downstrokes on the numbers, upstrokes on the "and" — and you can keep it going without thinking about which way is next.' },
+      { id: 'm5w2-s6', text: 'Switch between any two chords in Group 1 on beat 1 at 70 BPM',
+        gotItWhen: 'the teacher names any two chords from C, G, Am, F and you can switch between them on beat 1 at 70 BPM without breaking the strum.' }
     ]
   },
 
@@ -324,12 +336,18 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm5w3-s1', text: 'Fret D major cleanly — triangular shape, strings 1–4' },
-      { id: 'm5w3-s2', text: 'Fret A major cleanly — 3 fingers on 2nd fret' },
-      { id: 'm5w3-s3', text: 'Fret Bm with partial barre shape (xx4432)' },
-      { id: 'm5w3-s4', text: 'Switch D to A in time at 70 BPM' },
-      { id: 'm5w3-s5', text: 'Connect Group 1 and Group 2 chords in a song (e.g., G to D, Am to Em)' },
-      { id: 'm5w3-s6', text: 'Play a full song using Group 2 chords with a strum pattern' }
+      { id: 'm5w3-s1', text: 'Fret D major cleanly — triangular shape, strings 1–4',
+        gotItWhen: 'all four strings in D ring clearly — especially the high E (string 1), which is the one beginners most often mute accidentally.' },
+      { id: 'm5w3-s2', text: 'Fret A major cleanly — 3 fingers on 2nd fret',
+        gotItWhen: 'your three fingers all fit on the 2nd fret without colliding, and strings 1–5 ring cleanly when you strum.' },
+      { id: 'm5w3-s3', text: 'Fret Bm with partial barre shape (xx4432)',
+        gotItWhen: 'you can play the partial-barre Bm and all four notes ring — no buzz from the index finger barre across strings 1 and 2.' },
+      { id: 'm5w3-s4', text: 'Switch D to A in time at 70 BPM',
+        gotItWhen: 'you can switch D ↔ A on beat 1 at 70 BPM without breaking your strum or pausing to position fingers.' },
+      { id: 'm5w3-s5', text: 'Connect Group 1 and Group 2 chords in a song (e.g., G to D, Am to Em)',
+        gotItWhen: 'you can play through a real song that mixes Group 1 and Group 2 chords without slowing down at the cross-group changes.' },
+      { id: 'm5w3-s6', text: 'Play a full song using Group 2 chords with a strum pattern',
+        gotItWhen: 'you can play "Country Roads" or "Stand By Me" from start to finish with a steady down-up strum pattern at 70 BPM.' }
     ]
   },
 
@@ -431,12 +449,18 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm5w4-s1', text: 'Fret E major open chord cleanly — all 6 strings ring' },
-      { id: 'm5w4-s2', text: 'Fret B7 open chord cleanly — 4 fingers, strings 1–5' },
-      { id: 'm5w4-s3', text: 'Identify F#m and C#m shapes on a chord diagram' },
-      { id: 'm5w4-s4', text: 'Demonstrate 3+ chord types from across the semester' },
-      { id: 'm5w4-s5', text: 'Perform a chosen song all the way through without stopping' },
-      { id: 'm5w4-s6', text: 'Maintain a steady strum pattern throughout a full song' }
+      { id: 'm5w4-s1', text: 'Fret E major open chord cleanly — all 6 strings ring',
+        gotItWhen: 'you strum all 6 strings and the chord rings full and rich — string 2 (the one your index finger sits next to) doesn\'t buzz or mute.' },
+      { id: 'm5w4-s2', text: 'Fret B7 open chord cleanly — 4 fingers, strings 1–5',
+        gotItWhen: 'all four fingers land at once and strings 1–5 ring clearly — the low E stays silent (no extra ring underneath).' },
+      { id: 'm5w4-s3', text: 'Identify F#m and C#m shapes on a chord diagram',
+        gotItWhen: 'you can see an F#m or C#m diagram and explain which version (partial barre or full barre) and which finger goes where, even if you can\'t play it cleanly yet.' },
+      { id: 'm5w4-s4', text: 'Demonstrate 3+ chord types from across the semester',
+        gotItWhen: 'you can play at least one chord from each of Groups 1, 2, and 3 cleanly on demand — and name the group each belongs to.' },
+      { id: 'm5w4-s5', text: 'Perform a chosen song all the way through without stopping',
+        gotItWhen: 'you can play your showcase song start to finish — even with mistakes, you keep going and stay in time.' },
+      { id: 'm5w4-s6', text: 'Maintain a steady strum pattern throughout a full song',
+        gotItWhen: 'your strum pattern stays consistent across the whole song — it doesn\'t fall apart during the hard chord changes.' }
     ]
   }
 
