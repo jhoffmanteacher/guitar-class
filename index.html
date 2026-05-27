@@ -1767,24 +1767,20 @@ function buildModuleReview(mr){
   const clickedNum = ++qNum;
   const hardNum = ++qNum;
   const playNum = ++qNum;
-  const recNum = ++qNum;
   const pLvl=perf.level;
   const pBtn=(n)=>`<button class="mr-rb lvl${n}${pLvl===String(n)?' active':''}" onclick="setPerformanceLevel(${mr.moduleNum},'${n}')">${n}</button>`;
-  const recHtml=`<div class="mr-rec" data-module="${mr.moduleNum}">
-        <label class="mr-play-label"><span class="mr-q-num">${recNum}.</span> Record yourself playing</label>
-        <div class="mr-play-prompt">Once you've recorded, listen back to what you played and reflect on what can be improved.</div>
-        <div class="mr-rec-body" id="${mrId}-rec-body">${renderRecBody(mr.moduleNum)}</div>
-      </div>`;
   const playHtml=`<div class="mr-play">
-      <span class="mr-play-tag">&#x1F3B8; <span class="mr-q-num">${playNum}.</span> Play it!</span>
-      <div class="mr-play-prompt">Perform the class song from this module &mdash; or a song of your choice that shows off these skills.</div>
+      <span class="mr-play-tag">&#x1F3B8; <span class="mr-q-num">${playNum}.</span> Play it &amp; Record it!</span>
+      <div class="mr-play-prompt">Perform the class song from this module &mdash; or a song of your choice that shows off these skills. Then listen back to your recording and reflect on what could be improved.</div>
       <label class="mr-play-label" for="${mrId}-song">Song I played</label>
       <input type="text" id="${mrId}-song" class="mr-play-song" oninput="savePerformance(${mr.moduleNum})" value="${escAttr(perf.song||'')}">
+      <div class="mr-rec" data-module="${mr.moduleNum}">
+        <div class="mr-rec-body" id="${mrId}-rec-body">${renderRecBody(mr.moduleNum)}</div>
+      </div>
       <div class="mr-play-rate">
         <span class="mr-play-rate-label">How did it go?</span>
         <div class="mr-rating">${pBtn(1)}${pBtn(2)}${pBtn(3)}</div>
       </div>
-      ${recHtml}
     </div>`;
   const performanceHtml=`<div class="ablock" style="margin-top:18px"><div class="albl">Module ${mr.moduleNum} Assessment</div><div class="atxt">Sign up when you are ready for the teacher to assess you on the skills above.</div></div>`;
   return `
