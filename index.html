@@ -149,6 +149,17 @@ body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
 .obj-set-sub{font-size:15px;color:var(--text2);line-height:1.4}
 .obj-main{font-size:17px;font-weight:500;line-height:1.5;margin-bottom:5px}
 .obj-sub{font-size:15px;color:var(--text2);line-height:1.6}
+/* Set-header redesign (applied to buildSet + buildComingSoon cards) */
+.obj-card.set-head{border-left:3px solid var(--blue-text);border-top-left-radius:0;border-bottom-left-radius:0}
+.obj-card.set-head .obj-set{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:0;border-bottom:none}
+.obj-card.set-head .obj-set-tag{display:inline-block;background:var(--blue-bg);color:var(--blue-text);font-size:11px;font-weight:500;letter-spacing:.4px;padding:3px 10px;border-radius:999px;text-transform:uppercase}
+.obj-card.set-head .obj-unit{font-size:12px;color:var(--text3);text-transform:none;letter-spacing:0;margin-bottom:0;line-height:1.3}
+.obj-card.set-head .obj-main{font-size:20px;font-weight:500;line-height:1.4;margin-bottom:0}
+.obj-card.set-head .obj-i-can{color:var(--blue-text)}
+.obj-skill-label{font-size:12px;color:var(--text3);letter-spacing:.4px;text-transform:uppercase;margin-top:16px;margin-bottom:8px}
+.obj-skill-chips{display:flex;flex-wrap:wrap;gap:6px}
+.obj-chip{display:inline-block;background:var(--bg3);color:var(--text);font-size:12px;padding:4px 10px;border-radius:999px;line-height:1.4}
+@media (max-width:420px){.obj-card.set-head .obj-main{font-size:18px}}
 .tabs{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding:2px 1px 4px;flex-wrap:wrap}
 .tabs > .tab{padding:7px 16px;font-size:15px;color:var(--text2);cursor:pointer;border:0.5px solid var(--border2);border-radius:20px;background:var(--bg);white-space:nowrap;flex-shrink:0;transition:background 0.15s,border-color 0.15s,color 0.15s;font-weight:500;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
 .tabs > .tab:hover{border-color:var(--text2);color:var(--text)}
@@ -1425,7 +1436,7 @@ function wrapAllChordLinks(){
   /* Step-response prompts (the question text above MC/short-answer inputs) */
   document.querySelectorAll('.dp .step .step-resp-prompt').forEach(wrapChordLinksIn);
   /* Objectives at the top of each set */
-  document.querySelectorAll('.obj-card .obj-main, .obj-card .obj-sub, .obj-card .obj-set-sub').forEach(wrapChordLinksIn);
+  document.querySelectorAll('.obj-card .obj-main, .obj-card .obj-sub, .obj-card .obj-set-sub, .obj-card .obj-chip').forEach(wrapChordLinksIn);
   /* Song list — names and meta lines often mention chords ("uses G and C") */
   document.querySelectorAll('.song-row .sname, .song-row .smeta').forEach(wrapChordLinksIn);
   /* Skills checklist — skill labels and helper text */
@@ -1597,16 +1608,31 @@ function renderPanels(){
   wrapAllChordLinks();
 }
 
+function buildSetHeader(w){
+  const pill = w.title ? `<span class="obj-set-tag">${w.title}</span>` : '';
+  const crumb = w.unit ? `<span class="obj-unit">${w.unit}</span>` : '';
+  return (pill || crumb) ? `<div class="obj-set">${pill}${crumb}</div>` : '';
+}
+
 function buildComingSoon(w){
-  return `<div class="obj-card"><div class="obj-unit">${w.unit}</div><div class="obj-main">${w.title}</div><div class="obj-sub">${w.subtitle}</div></div>
+  const header = buildSetHeader(w);
+  const sub = w.subtitle ? `<div class="obj-main">${w.subtitle}</div>` : '';
+  return `<div class="obj-card set-head">${header}${sub}</div>
   <div class="coming"><div class="big">&#x1F3B8;</div><p>This set's content will appear here when it's ready.<br>Check back soon!</p></div>`;
 }
 
 function buildSet(w){
-  const setHeader = (w.title || w.subtitle)
-    ? `<div class="obj-set">${w.title?`<span class="obj-set-tag">${w.title}</span>`:''}${w.subtitle?`<span class="obj-set-sub">${w.subtitle}</span>`:''}</div>`
+  const header = buildSetHeader(w);
+  const objHtml = (w.objective||'').replace(/^(I\s+CAN)(:?)\s+/i, '<span class="obj-i-can">$1$2</span> ');
+  const chips = (w.skillFocus||'').split(' · ')
+    .map(s => s.trim())
+    .filter(Boolean)
+    .map(s => `<span class="obj-chip">${s}</span>`)
+    .join('');
+  const skills = chips
+    ? `<div class="obj-skill-label">Skill focus</div><div class="obj-skill-chips">${chips}</div>`
     : '';
-  return `<div class="obj-card"><div class="obj-unit">${w.unit}</div>${setHeader}<div class="obj-main">${w.objective}</div><div class="obj-sub">${w.skillFocus}</div></div>
+  return `<div class="obj-card set-head">${header}<div class="obj-main">${objHtml}</div>${skills}</div>
   <div class="tabs">
     <div class="tab tab-stations active" onclick="switchTab(this,'${w.id}','stations')">Stations</div>
     <div class="tab tab-songs" onclick="switchTab(this,'${w.id}','songs')">Songs</div>
