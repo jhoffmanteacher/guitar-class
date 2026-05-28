@@ -197,17 +197,27 @@ SETS.push(
 
     skills: [
       { id: 'w2-s1', text: 'Name 5+ parts of the guitar (body, neck, headstock, frets, strings, tuning pegs, nut, saddle, bridge)',
-        gotItWhen: 'you can point to and name each part on a real guitar without checking a diagram.' },
+        gotItWhen: 'you can point to and name each part on a real guitar without checking a diagram.',
+        practice: { type: 'mc', prompt: 'Which of these is NOT a part of the guitar?',
+          choices: ['Nut', 'Saddle', 'Hinge', 'Fret'], answer: 2 } },
       { id: 'w2-s2', text: 'Hold the guitar with correct sitting posture',
         gotItWhen: 'you can play for 5 minutes straight without slouching, lifting your shoulders, or letting the guitar slip off your leg.' },
       { id: 'w2-s3', text: 'Hold the pick correctly — 3–4mm of tip showing',
-        gotItWhen: 'your pick stays put when you strum, only a small tip pokes past your thumb, and your wrist stays relaxed.' },
+        gotItWhen: 'your pick stays put when you strum, only a small tip pokes past your thumb, and your wrist stays relaxed.',
+        practice: { type: 'mc', prompt: 'How much pick tip should show past your thumb?',
+          choices: ['Just 1 mm', '3–4 mm', 'About a centimeter', 'All of the pick'], answer: 1 } },
       { id: 'w2-s4', text: 'Name all 6 strings from memory (E A D G B e)',
-        gotItWhen: 'you can say E-A-D-G-B-e low to high — and high to low — without pausing or saying the mnemonic out loud.' },
+        gotItWhen: 'you can say E-A-D-G-B-e low to high — and high to low — without pausing or saying the mnemonic out loud.',
+        practice: { type: 'mc', prompt: 'Strings low to high are E A D G B e. Which string sits between A and G?',
+          choices: ['B', 'D', 'High e', 'Low E'], answer: 1 } },
       { id: 'w2-s5', text: 'Tune all 6 strings with a tuner',
-        gotItWhen: 'you can take an out-of-tune guitar and get all 6 strings to green on the tuner in under 2 minutes without help.' },
+        gotItWhen: 'you can take an out-of-tune guitar and get all 6 strings to green on the tuner in under 2 minutes without help.',
+        practice: { type: 'playSeq', label: 'Hear all 6 strings in tune', bpm: 50,
+          notes: [40, 45, 50, 55, 59, 64] } },
       { id: 'w2-s6', text: 'Play a short open-string melody on the E string at 60 BPM',
-        gotItWhen: 'you can play the melody all the way through at 60 BPM with the metronome without stopping or losing the beat.' }
+        gotItWhen: 'you can play the melody all the way through at 60 BPM with the metronome without stopping or losing the beat.',
+        practice: { type: 'playSeq', label: 'E string warm-up melody', bpm: 60,
+          notes: [40, 41, 43, 45, 43, 41, 40] } }
     ]
   }
 
