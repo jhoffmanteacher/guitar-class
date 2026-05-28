@@ -160,12 +160,31 @@ body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
 .obj-skill-chips{display:flex;flex-wrap:wrap;gap:6px}
 .obj-chip{display:inline-block;background:var(--bg3);color:var(--text);font-size:12px;padding:4px 10px;border-radius:999px;line-height:1.4}
 @media (max-width:420px){.obj-card.set-head .obj-main{font-size:18px}}
-.tabs{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding:2px 1px 4px;flex-wrap:wrap}
-.tabs > .tab{padding:7px 16px;font-size:15px;color:var(--text2);cursor:pointer;border:0.5px solid var(--border2);border-radius:20px;background:var(--bg);white-space:nowrap;flex-shrink:0;transition:background 0.15s,border-color 0.15s,color 0.15s;font-weight:500;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
-.tabs > .tab:hover{border-color:var(--text2);color:var(--text)}
-.tabs > .tab.tab-stations.active{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-text)}
-.tabs > .tab.tab-songs.active{background:var(--green-bg);color:var(--green-text);border-color:var(--green-text)}
-.tabs > .tab.tab-checklist.active{background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-text)}
+.tabs{margin-bottom:16px}
+.tabs-songbar{display:flex;justify-content:flex-end;margin-bottom:10px}
+.tabs-songs{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;font-size:12.5px;color:var(--text2);background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;cursor:pointer;font-weight:500;font-family:inherit;line-height:1.2;transition:background 0.15s,border-color 0.15s,color 0.15s}
+.tabs-songs::before{content:'Reference';font-size:10.5px;font-weight:700;letter-spacing:0.08em;color:var(--text3);padding-right:7px;border-right:1px solid var(--border);margin-right:2px;text-transform:uppercase}
+.tabs-songs:hover{background:var(--green-bg);color:var(--green-text);border-color:var(--green-text)}
+.tabs-songs.active{background:var(--green-bg);color:var(--green-text);border-color:var(--green-text)}
+.tabs-main{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;gap:0}
+.tabs-card{display:flex;flex-direction:column;gap:2px;padding:14px 16px;border:1.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);cursor:pointer;transition:border-color 0.15s,background 0.15s;font-family:inherit;text-align:left}
+.tabs-card:hover{border-color:var(--text2)}
+.tabs-card .tabs-card-title{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:700;color:var(--text)}
+.tabs-card .tabs-card-num{width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:var(--bg3);color:var(--text2);font-size:14px;font-weight:700;flex-shrink:0}
+.tabs-card .tabs-card-sub{font-size:12.5px;color:var(--text2);margin-left:35px}
+.tabs-card.tab-stations.active{border-color:var(--blue-text);background:var(--blue-bg)}
+.tabs-card.tab-stations.active .tabs-card-title{color:var(--blue-text)}
+.tabs-card.tab-stations.active .tabs-card-num{background:var(--blue-text);color:#fff}
+.tabs-card.tab-checklist.active{border-color:var(--amber-text);background:var(--amber-bg)}
+.tabs-card.tab-checklist.active .tabs-card-title{color:var(--amber-text)}
+.tabs-card.tab-checklist.active .tabs-card-num{background:var(--amber-text);color:#fff}
+.tabs-arrow{display:flex;align-items:center;justify-content:center;padding:0 14px;color:var(--text3);font-size:22px;font-weight:700;user-select:none}
+@media (max-width:560px){
+  .tabs-main{grid-template-columns:1fr}
+  .tabs-arrow{padding:6px 0;transform:rotate(90deg)}
+  .tabs-card{padding:11px 14px}
+  .tabs-card .tabs-card-title{font-size:15px}
+}
 .tab-panel{display:none}.tab-panel.active{display:block}
 .st-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
 .stc{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:border-color 0.15s}
@@ -1700,9 +1719,20 @@ function buildSet(w){
     : '';
   return `<div class="obj-card set-head">${header}<div class="obj-main">${objHtml}</div>${skills}</div>
   <div class="tabs">
-    <div class="tab tab-stations active" onclick="switchTab(this,'${w.id}','stations')">Stations</div>
-    <div class="tab tab-songs" onclick="switchTab(this,'${w.id}','songs')">Songs</div>
-    <div class="tab tab-checklist" onclick="switchTab(this,'${w.id}','checklist')">My skills checklist</div>
+    <div class="tabs-songbar">
+      <button type="button" class="tabs-songs tab-songs" onclick="switchTab(this,'${w.id}','songs')">&#9835; Songs</button>
+    </div>
+    <div class="tabs-main">
+      <button type="button" class="tabs-card tab-stations active" onclick="switchTab(this,'${w.id}','stations')">
+        <span class="tabs-card-title"><span class="tabs-card-num">1</span>Stations</span>
+        <span class="tabs-card-sub">Practice activities for this week</span>
+      </button>
+      <div class="tabs-arrow" aria-hidden="true">&rarr;</div>
+      <button type="button" class="tabs-card tab-checklist" onclick="switchTab(this,'${w.id}','checklist')">
+        <span class="tabs-card-title"><span class="tabs-card-num">2</span>My skills checklist</span>
+        <span class="tabs-card-sub">Track what you can do</span>
+      </button>
+    </div>
   </div>
   <div id="${w.id}-stations" class="tab-panel active">${buildStations(w)}</div>
   <div id="${w.id}-songs"    class="tab-panel">${buildSongs(w)}</div>
@@ -1711,7 +1741,7 @@ function buildSet(w){
 
 function switchTab(el,wid,tab){
   const panel=document.querySelector(`.week-panel[data-id="${wid}"]`);
-  panel.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  panel.querySelectorAll('.tabs > .tabs-main > .tabs-card, .tabs > .tabs-songbar > .tabs-songs').forEach(t=>t.classList.remove('active'));
   panel.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById(`${wid}-${tab}`).classList.add('active');
