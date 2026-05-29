@@ -60,6 +60,12 @@ Shipped. Lives in `module-2.js` (Set 2 stations b + c) with the `buildTab()` hel
 
 ---
 
+## Module 6 — Upgrade to Advanced Strumming
+
+Module 6 currently covers basic strumming, but it's placed late in the semester — students are ready for more by then. Goal is to replace or supplement the basic strumming content with more advanced strumming techniques (patterns, dynamics, muting, syncopation, etc.). Exact scope TBD.
+
+---
+
 ## General notes (apply to all remaining chunks)
 
 - Backward-compatible — no other modules should change.
