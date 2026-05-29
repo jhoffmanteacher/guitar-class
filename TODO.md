@@ -8,6 +8,7 @@ All planned work is shipped. Only the interactive fretboard remains parked on a 
 - Chunk 2 Part C — "Play all" buttons on Module 2 Set 1 note-name drills (both stations, E + A strings)
 - Chunk 3 — Inline TAB display (Module 2 Set 2 Computer + Practice stations, with clickable 🔊 note names)
 - Module-2 form/function applied to Modules 1, 3, 4, 5
+- Modules 6–8 YouTube URLs verified (spot-checked 8 across all three files via oEmbed; all valid and matched intended songs)
 
 **Still pending:** nothing.
 
