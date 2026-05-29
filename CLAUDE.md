@@ -29,6 +29,18 @@ When you need to clarify something with Jose, use the **AskUserQuestion** tool t
 - One question per turn unless the choices are truly independent
 - Use this for design choices, scope decisions, style preferences — anywhere a free-text question would normally appear
 
+## Lessons learned
+
+### Never invent YouTube IDs from memory
+When adding `originalUrl` / `tutorialUrl` / lesson video links in any module file:
+- **Do not** write a YouTube ID based on recall — even for famous songs or well-known channels (JustinGuitar, Marty Music, etc.). Training-data recall of 11-character video IDs is unreliable and most invented IDs are 404s.
+- **Always** find the real video via `WebSearch`, then verify the chosen URL before writing it to a module file.
+- Verify with YouTube's oEmbed endpoint: `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=<ID>&format=json` → returns JSON title/author for valid videos, 404 for invalid/removed. Use `WebFetch` against the oEmbed URL with a tight prompt like: `If JSON with a title, return: TITLE=<title>|AUTHOR=<author_name>. If 404: INVALID`
+- Batch verifications in parallel `WebFetch` calls — it's cheap and catches mistakes before they ship.
+- If you can't find or verify a real URL for a given video slot, drop the link rather than inventing one. Pre-existing URLs in `module-1.js` through `module-5.js` are presumed valid (they were checked); reuse them when the topic fits.
+
+(Context: in May 2026 I drafted Modules 6–8 from recall and ~60 of the URLs were 404s. Search-and-verify is the only safe pattern.)
+
 ## Switching topics — prompt to start a fresh chat
 When Jose asks for something that is clearly a **new, unrelated topic** from what we've been working on (e.g., we just finished a feature on Module 5 and he now asks about a different part of the site, a different project, or general Claude Code questions), use **AskUserQuestion** to ask whether he'd like to start a fresh conversation before continuing. A fresh chat keeps context focused and responses faster.
 

@@ -1,14 +1,15 @@
-# Module 2 — Remaining Changes
+# Module 2 — Remaining Changes ✅ COMPLETE
 
-Tracking the rest of the Module 2 changes we chunked out.
+All planned work is shipped. Only the interactive fretboard remains parked on a branch (see below).
 
 **Done:**
 - Chunk 1 — "You've got it when..." descriptors
 - Chunk 2 Part A — Web Audio `playNote()` (shipped via the TAB work, not the archived branch)
 - Chunk 2 Part C — "Play all" buttons on Module 2 Set 1 note-name drills (both stations, E + A strings)
 - Chunk 3 — Inline TAB display (Module 2 Set 2 Computer + Practice stations, with clickable 🔊 note names)
+- Module-2 form/function applied to Modules 1, 3, 4, 5
 
-**Still pending:** nothing — Module 2 list is clear apart from the archived fretboard.
+**Still pending:** nothing.
 
 ---
 
