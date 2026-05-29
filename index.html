@@ -166,21 +166,26 @@ body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
 .tabs-songs::before{content:'Reference';font-size:10.5px;font-weight:700;letter-spacing:0.08em;color:var(--text3);padding-right:7px;border-right:1px solid var(--border);margin-right:2px;text-transform:uppercase}
 .tabs-songs:hover{background:var(--green-bg);color:var(--green-text);border-color:var(--green-text)}
 .tabs-songs.active{background:var(--green-bg);color:var(--green-text);border-color:var(--green-text)}
-.tabs-main{display:grid;grid-template-columns:1fr auto 1fr;align-items:stretch;gap:0}
+.tabs-main{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:0}
 .tabs-card{display:flex;flex-direction:column;gap:2px;padding:14px 16px;border:1.5px solid var(--border2);border-radius:var(--radius);background:var(--bg);cursor:pointer;transition:border-color 0.15s,background 0.15s;font-family:inherit;text-align:left}
 .tabs-card:hover{border-color:var(--text2)}
 .tabs-card .tabs-card-title{display:flex;align-items:center;gap:9px;font-size:16px;font-weight:700;color:var(--text)}
 .tabs-card .tabs-card-num{width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:var(--bg3);color:var(--text2);font-size:14px;font-weight:700;flex-shrink:0}
 .tabs-card .tabs-card-sub{font-size:12.5px;color:var(--text2);margin-left:35px}
-.tabs-card.tab-stations.active{border-color:var(--blue-text);background:var(--blue-bg)}
-.tabs-card.tab-stations.active .tabs-card-title{color:var(--blue-text)}
-.tabs-card.tab-stations.active .tabs-card-num{background:var(--blue-text);color:#fff}
+.tabs-stations-col{display:flex;flex-direction:column;gap:8px}
+.tabs-card.tab-station-b.active{border-color:var(--blue-text);background:var(--blue-bg)}
+.tabs-card.tab-station-b.active .tabs-card-title{color:var(--blue-text)}
+.tabs-card.tab-station-b.active .tabs-card-num{background:var(--blue-text);color:#fff}
+.tabs-card.tab-station-c.active{border-color:var(--green-text);background:var(--green-bg)}
+.tabs-card.tab-station-c.active .tabs-card-title{color:var(--green-text)}
+.tabs-card.tab-station-c.active .tabs-card-num{background:var(--green-text);color:#fff}
 .tabs-card.tab-checklist.active{border-color:var(--amber-text);background:var(--amber-bg)}
 .tabs-card.tab-checklist.active .tabs-card-title{color:var(--amber-text)}
 .tabs-card.tab-checklist.active .tabs-card-num{background:var(--amber-text);color:#fff}
 .tabs-arrow{display:flex;align-items:center;justify-content:center;padding:0 14px;color:var(--text3);font-size:22px;font-weight:700;user-select:none}
 @media (max-width:560px){
   .tabs-main{grid-template-columns:1fr}
+  .tabs-stations-col{flex-direction:row}
   .tabs-arrow{padding:6px 0;transform:rotate(90deg)}
   .tabs-card{padding:11px 14px}
   .tabs-card .tabs-card-title{font-size:15px}
@@ -210,7 +215,8 @@ body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
 .sh{font-size:14px;color:var(--text2);margin-top:3px}
 .sh-list{font-size:14px;color:var(--text2);margin-top:5px;padding-left:16px;display:flex;flex-direction:column;gap:3px}
 .sh-list li{line-height:1.5}
-.step-resp{margin-top:8px}
+.step-resp{margin-top:10px;background:var(--blue-bg);border-radius:8px;padding:10px 12px}
+.step-resp-label{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--blue-text);margin-bottom:6px}
 .step-resp-prompt{font-size:14px;font-weight:500;color:var(--text);margin-bottom:5px}
 .step-resp-input{width:100%;min-height:54px;padding:7px 9px;font-family:inherit;font-size:14.5px;line-height:1.45;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:6px;resize:vertical;box-sizing:border-box}
 .step-resp-input:focus{outline:none;border-color:var(--blue-text);box-shadow:0 0 0 2px var(--blue-bg)}
@@ -1546,11 +1552,30 @@ if (window.speechSynthesis){
 function pickEnglishVoice(){
   if (!cachedVoices.length) loadVoices();
   const en = cachedVoices.filter(v => /^en[-_]/i.test(v.lang));
-  return en.find(v => /natural|neural|google|samantha|enhanced|premium/i.test(v.name))
-      || en.find(v => /female|woman|samantha|karen|moira|tessa/i.test(v.name))
-      || en[0]
-      || cachedVoices[0]
-      || null;
+
+  // Ranked preference list — first match wins
+  const ranked = [
+    // Chrome / Edge neural voices (highest quality in browser)
+    v => v.name === 'Google US English',
+    v => v.name === 'Google UK English Female',
+    v => v.name === 'Microsoft Aria Online (Natural) - English (United States)',
+    v => v.name === 'Microsoft Jenny Online (Natural) - English (United States)',
+    v => /Microsoft.*Online.*Natural.*English/i.test(v.name),
+    // macOS / iOS enhanced system voices
+    v => v.name === 'Samantha' && v.localService,
+    v => /\(Enhanced\)|\(Premium\)/i.test(v.name),
+    v => /^(Samantha|Karen|Moira|Tessa|Fiona|Serena)$/i.test(v.name),
+    // Generic neural/premium keywords
+    v => /neural|natural|enhanced|premium/i.test(v.name),
+    // Any remaining English voice
+    v => true,
+  ];
+
+  for (const test of ranked) {
+    const match = en.find(test);
+    if (match) return match;
+  }
+  return cachedVoices[0] || null;
 }
 
 function resetAllReadAloudBtns(){
@@ -1583,7 +1608,7 @@ function readAloudStep(btn){
   const voice = pickEnglishVoice();
   if (voice) utter.voice = voice;
   utter.lang = (voice && voice.lang) || 'en-US';
-  utter.rate = 0.95;
+  utter.rate = 0.90;
   utter.pitch = 1.0;
   utter.onend = () => { btn.innerHTML = '&#x1F50A;'; btn.classList.remove('speaking'); delete btn.dataset.speaking; };
   utter.onerror = utter.onend;
@@ -1723,32 +1748,39 @@ function buildSet(w){
       <button type="button" class="tabs-songs tab-songs" onclick="switchTab(this,'${w.id}','songs')">&#9835; Songs</button>
     </div>
     <div class="tabs-main">
-      <button type="button" class="tabs-card tab-stations active" onclick="switchTab(this,'${w.id}','stations')">
-        <span class="tabs-card-title"><span class="tabs-card-num">1</span>Stations</span>
-        <span class="tabs-card-sub">Practice activities for this week</span>
-      </button>
+      <div class="tabs-stations-col">
+        <button type="button" class="tabs-card tab-station-b active" onclick="switchTab(this,'${w.id}','station-b')">
+          <span class="tabs-card-title"><span class="tabs-card-num">1</span>Station B</span>
+          <span class="tabs-card-sub">Watch &middot; Listen &middot; Practice</span>
+        </button>
+        <button type="button" class="tabs-card tab-station-c" onclick="switchTab(this,'${w.id}','station-c')">
+          <span class="tabs-card-title"><span class="tabs-card-num">2</span>Station C</span>
+          <span class="tabs-card-sub">Independent drill</span>
+        </button>
+      </div>
       <div class="tabs-arrow" aria-hidden="true">&rarr;</div>
       <button type="button" class="tabs-card tab-checklist" onclick="switchTab(this,'${w.id}','checklist')">
-        <span class="tabs-card-title"><span class="tabs-card-num">2</span>My skills checklist</span>
+        <span class="tabs-card-title"><span class="tabs-card-num">3</span>My skills checklist</span>
         <span class="tabs-card-sub">Track what you can do</span>
       </button>
     </div>
   </div>
-  <div id="${w.id}-stations" class="tab-panel active">${buildStations(w)}</div>
+  <div id="${w.id}-station-b" class="tab-panel active">${buildStations(w,'b')}</div>
+  <div id="${w.id}-station-c" class="tab-panel">${buildStations(w,'c')}</div>
   <div id="${w.id}-songs"    class="tab-panel">${buildSongs(w)}</div>
   <div id="${w.id}-checklist" class="tab-panel">${buildChecklist(w)}</div>`;
 }
 
 function switchTab(el,wid,tab){
   const panel=document.querySelector(`.week-panel[data-id="${wid}"]`);
-  panel.querySelectorAll('.tabs > .tabs-main > .tabs-card, .tabs > .tabs-songbar > .tabs-songs').forEach(t=>t.classList.remove('active'));
+  panel.querySelectorAll('.tabs > .tabs-main .tabs-card, .tabs > .tabs-songbar > .tabs-songs').forEach(t=>t.classList.remove('active'));
   panel.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById(`${wid}-${tab}`).classList.add('active');
 }
 
 /* ── Stations ── */
-function buildStations(w){
+function buildStations(w, stationId){
   const stepsHtml=(steps,stationId)=>steps.map((s,i)=>{
     const text=s.text.replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"[^>]*>([^<]*)<\/a>/g,(match,url,label)=>{
       const safe=label.replace(/'/g,"\\'");
@@ -1787,16 +1819,17 @@ function buildStations(w){
       const key = `${w.id}-${stationId}-${i}`;
       const stored = responses[key] || '';
       const promptHtml = s.response.prompt ? `<div class="step-resp-prompt">${escHtml(s.response.prompt)}</div>` : '';
+      const labelHtml = `<div class="step-resp-label">&#x270F;&#xFE0F; Your response</div>`;
       if(s.response.type === 'short'){
         const ph = s.response.placeholder || 'Type your answer here…';
-        return `<div class="step-resp">${promptHtml}<textarea class="step-resp-input" rows="2" placeholder="${escAttr(ph)}" oninput="onResponseChange('${key}', this.value)">${escHtml(stored)}</textarea></div>`;
+        return `<div class="step-resp">${labelHtml}${promptHtml}<textarea class="step-resp-input" rows="2" placeholder="${escAttr(ph)}" oninput="onResponseChange('${key}', this.value)">${escHtml(stored)}</textarea></div>`;
       }
       if(s.response.type === 'mc' && Array.isArray(s.response.choices)){
         const opts = s.response.choices.map(c=>{
           const checked = stored===c ? 'checked' : '';
           return `<label class="step-resp-mc-opt"><input type="radio" name="resp-${key}" ${checked} onchange="onResponseChange('${key}', '${escAttr(c)}')"><span>${escHtml(c)}</span></label>`;
         }).join('');
-        return `<div class="step-resp">${promptHtml}<div class="step-resp-mc">${opts}</div></div>`;
+        return `<div class="step-resp">${labelHtml}${promptHtml}<div class="step-resp-mc">${opts}</div></div>`;
       }
       return '';
     })() : '';
@@ -1808,6 +1841,12 @@ function buildStations(w){
       <div class="dp-head"><span class="st-badge ${badgeClass}">${badge}</span><div class="dp-title">${s.title}</div></div>
       <ul class="steps">${stepsHtml(s.steps, id)}</ul>
     </div>`;
+  if(stationId){
+    const s = stationId === 'b' ? w.stations.b : w.stations.c;
+    const badge = stationId === 'b' ? 'Station B' : 'Station C';
+    const badgeClass = stationId === 'b' ? 'bb' : 'bc';
+    return dp(stationId, '', badge, badgeClass, s);
+  }
   return `
     <div class="st-grid">
       <div class="stc" id="${w.id}-sc-b" onclick="openSt('${w.id}','b')">
