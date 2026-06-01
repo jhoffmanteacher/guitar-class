@@ -48,6 +48,9 @@ SETS.push(
             hint: 'Don\'t worry about pressing any frets yet. Just get used to holding it.'
           },
           {
+            text: 'Do you prefer to have your foot elevated or on the ground?'
+          },
+          {
             text: 'Try tapping the body, plucking one string at a time, and strumming. What differences do you notice?',
             hint: 'Curiosity is your best tool right now.'
           },
