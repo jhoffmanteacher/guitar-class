@@ -252,6 +252,8 @@ body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
 .ablock{background:var(--bg2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px}
 .albl{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:4px}
 .atxt{font-size:15px;line-height:1.6}
+.mr-assess-list{margin:8px 0 0;padding-left:22px}
+.mr-assess-list li{margin-bottom:4px}
 .spill{display:inline-block;font-size:13px;padding:2px 8px;border-radius:10px;border:0.5px solid var(--border2);color:var(--text2);margin:2px 2px 0 0}
 /* ── Checklist — two-column ── */
 .cl-intro{background:var(--bg2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:15px;color:var(--text2);line-height:1.6}
@@ -1950,7 +1952,10 @@ function buildModuleReview(mr){
         <div class="mr-rating">${pBtn(1)}${pBtn(2)}${pBtn(3)}</div>
       </div>
     </div>`;
-  const performanceHtml=`<div class="ablock" style="margin-top:18px"><div class="albl">Module ${mr.moduleNum} Assessment</div><div class="atxt">Sign up when you are ready for the teacher to assess you on the skills above.</div></div>`;
+  const assessBody = (mr.assessItems && mr.assessItems.length)
+    ? `Sign up when you are ready for the module assessment. It is on these skills:<ul class="mr-assess-list">${mr.assessItems.map(i=>`<li>${i}</li>`).join('')}</ul>`
+    : 'Sign up when you are ready for the teacher to assess you on the skills above.';
+  const performanceHtml=`<div class="ablock" style="margin-top:18px"><div class="albl">Module ${mr.moduleNum} Assessment</div><div class="atxt">${assessBody}</div></div>`;
   return `
     <div class="mr-locked-banner">
       <span class="mr-locked-banner-icon">&#x1F512;</span>

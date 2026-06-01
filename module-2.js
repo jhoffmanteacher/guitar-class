@@ -422,11 +422,14 @@ MODULE_REVIEWS[2] = {
   moduleNum: 2,
   module: 'Notes on the E & A Strings',
   skills: [
-    { id: 'mr2-s1', text: 'I can recite the musical alphabet (A B C D E F G) from memory' },
     { id: 'mr2-s2', text: 'I can name all natural notes on the E string (frets 0–12)' },
     { id: 'mr2-s3', text: 'I can name all natural notes on the A string (frets 0–12)' },
     { id: 'mr2-s4', text: 'I can press notes cleanly with no fret buzz' },
     { id: 'mr2-s5', text: 'I can read a basic TAB and play a 4-bar melody in time at 60 BPM' }
+  ],
+  assessItems: [
+    'Name the notes on the E and A strings from memory through fret 12',
+    'Play “All Along the Watchtower” bass-note using only the E string from memory with clean tone and correct fingering'
   ],
   standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Re.7a']
 };

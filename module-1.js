@@ -240,5 +240,9 @@ MODULE_REVIEWS[1] = {
     { id: 'mr1-s3', text: 'I can tune all 6 strings with a tuner' },
     { id: 'mr1-s4', text: 'I can play a short open-string melody on the E string at 60 BPM' }
   ],
+  assessItems: [
+    'Tune your guitar in 2 minutes',
+    'Name all 6 strings'
+  ],
   standards: ['Pr.1a', 'Pr.4a', 'Pr.5a', 'Cn.11a']
 };
