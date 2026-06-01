@@ -24,10 +24,10 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Reflect',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/rrB97F0Qu6g" target="_blank">How to Actually Get Good at Guitar – Simen Otnes</a> (0:00–3:30).',
-            hint: 'As you watch, think about: what is one habit he says makes the biggest difference? Does it match what you thought?',
+            text: 'Watch: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">How to Practice Guitar – JustinGuitar</a> (Lesson 1 Practice Routine).',
+            hint: 'As you watch, think about: what is one practice habit he says makes the biggest difference? Does it match what you thought?',
             skills: [1],
-            response: { type: 'short', placeholder: 'In one sentence: what habit did he say matters most, and did it match what you thought?' }
+            response: { type: 'short', placeholder: 'In one sentence: what practice habit did he say matters most, and did it match what you thought?' }
           },
           {
             text: 'Find a YouTube clip of the song you shared (or one a classmate shared that you liked). Listen and notice: what is the guitar doing?',
@@ -106,8 +106,16 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/rrB97F0Qu6g" target="_blank">How to Actually Get Good at Guitar – Simen Otnes</a> (first 5 min).',
-            hint: 'Headphones on. What habits will help you get better?'
+            text: 'Watch: <a href="https://youtu.be/X2EmpWr9vUc" target="_blank">How to Tune Your Guitar For Beginners – JustinGuitar</a>.',
+            hint: 'Headphones on. Notice the order of the strings and what "in tune" sounds like.'
+          },
+          {
+            text: 'Watch: <a href="https://youtu.be/1ANma3HMfSU" target="_blank">Parts of the Guitar – Guitar Center</a>.',
+            hint: 'Write down 5 parts you can now name from memory.'
+          },
+          {
+            text: 'Watch: <a href="https://youtu.be/C-mt8td1teU" target="_blank">How to Hold the Guitar – JustinGuitar</a>.',
+            hint: 'Notice where the guitar rests and how the back stays straight.'
           },
           {
             text: 'Watch: <a href="https://youtu.be/8-grcbKnbps" target="_blank">How to Hold a Guitar Pick – JustinGuitar</a>.',
