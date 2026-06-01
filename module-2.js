@@ -24,9 +24,9 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/PNik7GWWBGA" target="_blank">Notes on the Low E String – JustinGuitar</a> (full video).',
-            hint: 'Play along on your guitar as he goes through each note. Pause and find each note before he names it.',
-            skills: [1, 2],
+            text: 'Watch: <a href="https://youtu.be/HJcuGbOLPKI" target="_blank">Notes on the A and Low E String – GuitarLessons.com</a>.',
+            hint: 'Play along on your guitar as he goes through each note on both strings. Pause and find each note before he names it.',
+            skills: [1, 2, 3],
             response: { type: 'mc', prompt: 'On the low E string, which note is at fret 5?', choices: [
               'A',
               'D',

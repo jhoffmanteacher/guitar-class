@@ -125,6 +125,11 @@ SETS.push(
             text: 'In your notes: write out the 6 string names from memory, low to high. Mnemonic: Eddie Ate Dynamite, Good Bye Eddie.'
           },
           {
+            text: 'Watch: <a href="https://youtu.be/x-x7AwQGzMI" target="_blank">How to Play Single Notes – Good Guitarist</a>.',
+            hint: 'Watch his picking hand and how light his fretting touch is. Clean single notes are the whole goal of your first melody.',
+            skills: [6]
+          },
+          {
             text: 'Pick up your guitar. Play each open string one at a time — low E to high e. Say the string name out loud as you pluck it. Do this 3 times through.',
             hint: 'Hearing + saying + playing locks it in faster than just watching.',
             response: { type: 'mc', prompt: 'Say the string names low to high — which comes right after G?', choices: [
