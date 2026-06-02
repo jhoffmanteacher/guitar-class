@@ -161,12 +161,17 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — open-string melody',        steps: [
+        title: 'Practice station — Challenges',        steps: [
           {
-            text: 'Tune your guitar first. Then practice playing single notes on the low E string: open (E), 1st fret (F), 3rd fret (G), 5th fret (A).',
-            hint: 'Press just behind the fret, not on it. One clean note at a time.',
-            skills: [5, 6],
-            playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45] }
+            text: 'Challenge 1 — Tune Challenge: get all 6 strings to green on the tuner. Beat the clock — can you do it in under 2 minutes? Log your time so you can beat it next session.',
+            hint: 'Tune low to high: E A D G B e. Slow and steady beats rushing past the note. Use the play button to hear the target pitches.',
+            skills: [5],
+            playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
+          },
+          {
+            text: 'Challenge 2 — One Minute, Perfect Notes: pluck each open string low to high (E A D G B e) and say its name out loud. For one minute, count how many ring perfectly clean — no buzz, no muting. Log your score out of 6 so you can beat it next time.',
+            hint: 'These are open strings — press nothing. Let each string ring fully before moving to the next.',
+            skills: [6]
           },
           {
             text: 'Try "Happy Birthday" on open strings only — your teacher will give you the note sequence. Set your metronome to 60 BPM.',
@@ -174,9 +179,20 @@ SETS.push(
             skills: [6]
           },
           {
-            text: 'Choice: try one of the open-string melodies from the choice menu — Ode to Joy, Mary Had a Little Lamb, or Twinkle Twinkle.',
-            hint: 'Use TAB or letter names. Ask a classmate for help if you get stuck.',
-            skills: [6]
+            text: 'Challenge 3 — Riff Time (give it a go!): play the "Seven Nation Army" riff on the low E string — slow and clean. No score on this one, just go for it. Click any note name below the TAB to hear how it should sound.',
+            hint: 'Slow and clean beats fast and buzzy. One note at a time.',
+            tab: {
+              caption: '"Seven Nation Army" — main riff · Low E string · 7 notes',
+              notes: [
+                { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+                { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+                { string: 'E', fret: 10, note: 'D',  midi: 50 },
+                { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+                { string: 'E', fret: 5,  note: 'A',  midi: 45 },
+                { string: 'E', fret: 3,  note: 'G',  midi: 43 },
+                { string: 'E', fret: 2,  note: 'F#', midi: 42 }
+              ]
+            }
           }
         ]
       }
