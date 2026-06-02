@@ -56,18 +56,18 @@ SETS.push(
       c: {
         title: 'Practice station — strumming hand drill',        steps: [
           {
-            text: 'Mute all the strings with your fretting hand (lay it lightly across the strings). Set metronome to 60 BPM. Practice just the down-up motion: down on 1, up on +, down on 2, up on +, etc. Count out loud.',
+            text: 'Challenge 1 — Pendulum Motion: mute the strings with your fretting hand and, at 60 BPM, strum just the down-up motion — down on each beat, up on each "+", counting aloud. Win: a free, even swing with no forearm tension — pure rhythm, no notes.',
             hint: 'No chord, no notes — just the rhythm. Your wrist should swing freely like a pendulum. If your forearm is tense, slow down.',
             skills: [1, 3]
           },
           {
-            text: 'Now fret Em (the easiest chord). Strum down-up at 60 BPM for 8 bars. Goal: every strum is even — same volume, same timing.',
+            text: 'Challenge 2 — Even Eighths on Em: fret Em and strum down-up at 60 BPM for 8 bars. Win: every strum even — same volume, same timing — with upstrokes brushing only the top 3–4 strings.',
             hint: 'It\'s normal for upstrokes to feel weaker at first. They should brush only the top 3–4 strings, not the whole chord.',
             skills: [2, 4],
             playSeq: { label: 'Hear the 8th-note pulse', bpm: 60, notes: [60, 60, 60, 60, 60, 60, 60, 60] }
           },
           {
-            text: 'Switch between Em and Am every 2 bars while keeping the down-up strum going. Even if the chord change is rough, do NOT stop the strum hand.',
+            text: 'Challenge 3 — Keep It Going: switch Em ↔ Am every 2 bars while the down-up strum never stops. Win: the strum hand keeps swinging right through every chord change — let the chord catch up.',
             hint: 'The #1 beginner mistake is stopping the strum to fix the chord. Keep the wrist moving — let the chord catch up.',
             skills: [4, 5, 6]
           }
@@ -185,18 +185,18 @@ SETS.push(
       c: {
         title: 'Practice station — D-DU-UDU pattern drill',        steps: [
           {
-            text: 'Mute the strings. Set metronome to 60 BPM. Strum the pattern: D (1) — D-U (2-+) — U (skip 3) — D-U (3-+, where the D is missing) — wait. Easier mental version: "Down, Down-Up, Up-Down-Up". Repeat.',
+            text: 'Challenge 1 — Learn the Groove: mute the strings and, at 60 BPM, strum the pattern "Down, Down-Up, Up-Down-Up" (D-DU-UDU). Win: the wrist keeps moving on the skipped downstroke — the pick just misses on purpose.',
             hint: 'The trickiest part is keeping the wrist moving on the skipped downstroke. The wrist still goes down — the pick just misses the strings on purpose.',
             skills: [1, 2, 3]
           },
           {
-            text: 'Now fret Em. Apply the D-DU-UDU pattern at 60 BPM for 8 bars. Count out loud: "1, 2-+, +-3-+" (or just "Down, Down-Up, Up-Down-Up").',
+            text: 'Challenge 2 — Pattern on Em: fret Em and play D-DU-UDU at 60 BPM for 8 bars, counting aloud and accenting beats 2 and 4. Win: 8 clean bars with a clear "snare hit" feel on 2 and 4.',
             hint: 'Add accents on beats 2 and 4 — those downstrokes should be a little louder. Feel the "snare hit" on those beats.',
             skills: [2, 4, 5],
             playSeq: { label: 'Hear Em with accent on 2 and 4', bpm: 60, notes: [40, 40, 47, 40, 40, 47] }
           },
           {
-            text: 'Loop the chord change G → D every 2 bars while playing the D-DU-UDU pattern. Goal: the pattern stays exactly the same — only the chord changes.',
+            text: 'Challenge 3 — Hold the Pattern: loop G → D every 2 bars while playing D-DU-UDU. Win: the pattern stays identical through the change — only the chord moves (drop to 50 BPM if it falls apart).',
             hint: 'If the pattern falls apart during the chord change, slow to 50 BPM. The pattern is the GROOVE — losing it is worse than missing a note in the chord.',
             skills: [4, 5, 6]
           }
@@ -308,17 +308,17 @@ SETS.push(
       c: {
         title: 'Practice station — try three styles',        steps: [
           {
-            text: 'FOLK strum (gentle, even): hold G chord. Strum all downstrokes, one per beat, at 70 BPM. Quiet and steady — think campfire singalong.',
+            text: 'Challenge 1 — Folk Feel: hold G and strum all downstrokes, one per beat, at 70 BPM — quiet and steady, campfire style. Win: even, soft, supportive strumming with no accents sticking out.',
             hint: 'Folk is about supporting the singer, not standing out. Soft attack, even volume, no accents.',
             skills: [1, 4]
           },
           {
-            text: 'ROCK strum (heavy downstrokes): same G chord, same tempo. All downstrokes, but DIG IN — heavier on every beat. Then try down-up-down-up but accent every down.',
+            text: 'Challenge 2 — Rock Feel: same G at the same tempo, but dig in — heavy downstrokes, then down-up-down-up accenting every down. Win: a chunky, driving sound using arm weight, not just wrist.',
             hint: 'Rock strumming uses arm weight more than wrist. Let the pick go deeper into the strings. Aim for a "chunky" sound.',
             skills: [2, 4]
           },
           {
-            text: 'REGGAE strum: hold G chord. SKIP the downstroke on every beat — only strum UP on the "+ (and)". So you hear: rest-up-rest-up-rest-up-rest-up. This is the classic reggae "chop".',
+            text: 'Challenge 3 — Reggae Chop (give it a go!): hold G, skip every downbeat, and strum UP only on each "+" — rest-up-rest-up. No score — play along with "Three Little Birds" to lock in the offbeat feel.',
             hint: 'Counter-intuitive at first — your hand goes down on the beats but doesn\'t hit the strings. Listen to "Three Little Birds" while you do this to lock in the feel.',
             skills: [3, 4],
             playSeq: { label: 'Hear the reggae offbeat (up-strums only)', bpm: 70, notes: [55, 55, 55, 55] }

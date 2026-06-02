@@ -70,19 +70,19 @@ SETS.push(
       c: {
         title: 'Practice station — fretboard drill',        steps: [
           {
-            text: 'Tune up. Now play every natural note up the low E string and back down — E · F · G · A · B · C · D · E — saying each name aloud. Goal: get through it once with no chart and no mistakes.',
+            text: 'Challenge 1 — Low E Run: play every natural note up the low E string and back down — E · F · G · A · B · C · D · E — saying each name aloud. Win: one lap, chart-free, with no mistakes.',
             hint: 'Hearing + saying + playing locks it in. Peek at the chart only if you\'re truly stuck.',
             skills: [2],
             playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] }
           },
           {
-            text: 'Same on the A string, chart-free: A · B · C · D · E · F · G · A, up to fret 12 and back. One note per beat.',
+            text: 'Challenge 2 — A String Run: same on the A string, chart-free — A · B · C · D · E · F · G · A, up to fret 12 and back, one note per beat. Win: a clean lap with the metronome and no stalls.',
             hint: 'Keep the metronome at 60 BPM. If you stall on a note, that\'s the one to drill.',
             skills: [3],
             playSeq: { label: 'Play all', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] }
           },
           {
-            text: 'Choice song: listen to "Seven Nation Army" or "Smoke on the Water" and try to pick out the main riff by ear on the E string.',
+            text: 'Challenge 3 — Name That Riff (give it a go!): pick out the "Seven Nation Army" or "Smoke on the Water" main riff by ear on the low E string. No score — just go for it.',
             hint: 'Use the note-name chart. Don\'t worry about getting it perfect — the attempt trains your ear.',
             skills: [5]
           }
@@ -270,12 +270,12 @@ SETS.push(
       c: {
         title: 'Practice station — melodies & TAB',        steps: [
           {
-            text: 'Finger workout: play each fret on the E string (frets 1–5) using one finger per fret. Then do the same on the A string. Keep your thumb behind the neck.',
+            text: 'Challenge 1 — Finger Workout: play frets 1–5 on the low E string, one finger per fret, then do the same on the A string. Keep your thumb behind the neck. Win: every note rings clean with no buzz.',
             hint: 'Go as slow as you need. Every note should ring cleanly with no buzz.',
             skills: [1, 2, 3, 6]
           },
           {
-            text: 'Using TAB, play "Happy Birthday" on E & A strings. Set the metronome to 60 BPM — one note per beat. Click any note name to hear how it should sound.',
+            text: 'Challenge 2 — Play the Tune: using the TAB, play "Happy Birthday" on the E & A strings at 60 BPM, one note per beat. Win: the whole melody start to finish, in time, no buzz. Click any note name to hear how it should sound.',
             hint: 'If you buzz on a note, stop, fix your finger position, then continue. Don\'t just play through the buzz.',
             skills: [4, 5],
             tab: {
@@ -320,7 +320,7 @@ SETS.push(
             }
           },
           {
-            text: 'Choice: use TAB to learn the main riff of "Seven Nation Army" (E string) or "Smoke on the Water" (E string). Play it in time. Click a song below to open its TAB.',
+            text: 'Challenge 3 — Riff Time (give it a go!): use the TAB to play the "Seven Nation Army" or "Smoke on the Water" main riff on the low E string, in time. No score — just go for it. Click a song below to open its TAB.',
             hint: 'Both riffs use notes you already know. The challenge is keeping them clean at tempo.',
             skills: [4, 5],
             tabs: [

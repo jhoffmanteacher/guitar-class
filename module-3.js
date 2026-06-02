@@ -56,7 +56,7 @@ SETS.push(
       c: {
         title: 'Practice station — power chord drill',        steps: [
           {
-            text: 'Tune your guitar. Fret an E5 power chord (low E string, open root + 2nd fret A string). Strum just those two strings — no others. Get a clean, buzz-free sound.',
+            text: 'Challenge 1 — Clean E5: fret an E5 power chord (low E open root + 2nd fret A string) and strum just those two strings — no others. Win: a clean, buzz-free E5 with nothing else ringing.',
             hint: 'Use your index finger on the root and your ring finger on the 5th. Keep your pinky close. Palm-mute the strings below with the edge of your picking hand.',
             skills: [1, 3],
             chords: [
@@ -64,7 +64,7 @@ SETS.push(
             ]
           },
           {
-            text: 'Slide the same shape to: A5 (5th fret E string), G5 (3rd fret E string), D5 (5th fret A string), C5 (3rd fret A string). Say the chord name aloud each time.',
+            text: 'Challenge 2 — Shape Shifter: slide the same shape to A5 (5th fret E), G5 (3rd fret E), D5 (5th fret A), and C5 (3rd fret A), saying each name aloud. Win: hit all four cleanly without losing the shape.',
             hint: 'Keep the same finger shape and just move it up and down the neck. The relationship between the two fingers never changes.',
             skills: [2, 4],
             chords: [
@@ -75,7 +75,7 @@ SETS.push(
             ]
           },
           {
-            text: 'Play the "All Along the Watchtower" power chord loop: Am5–G5–F5–G5, one strum per beat at 60 BPM.',
+            text: 'Challenge 3 — Watchtower Loop: play Am5–G5–F5–G5, one strum per beat at 60 BPM. Win: four times through, changing on beat 1 every time, with no stops.',
             hint: 'Am5 = 5th fret E string, G5 = 3rd fret E string, F5 = 1st fret E string. Shift smoothly — aim to land exactly on beat 1.',
             skills: [2, 5, 6],
             chords: [
@@ -190,17 +190,17 @@ SETS.push(
       c: {
         title: 'Practice station — metronome & chord changes',        steps: [
           {
-            text: 'Set metronome to 60 BPM. Play the "Watchtower" loop (Am5–G5–F5–G5) four times through. Each chord lasts one bar (4 beats). Change on beat 1 every time.',
+            text: 'Challenge 1 — Loop in Time: play the "Watchtower" loop (Am5–G5–F5–G5) at 60 BPM, each chord one bar (4 beats), four times through. Win: every chord change lands on beat 1, with no stops.',
             hint: 'If you miss beat 1, keep going — don\'t stop. Staying in time matters more than the perfect change right now.',
             skills: [1, 2]
           },
           {
-            text: 'Try the straight-eighths strumming pattern: down-down-up-down-up on each bar. Count "1 + 2 + 3 + 4 +" as you strum.',
+            text: 'Challenge 2 — Eighth-Note Strum: play the loop with straight eighths (down-down-up-down-up), counting "1 + 2 + 3 + 4 +". Win: keep it clean and steady, then beat your tempo — push past 70 BPM.',
             hint: 'Start at 60 BPM. If it feels easy, bump up 5 BPM. Your goal this week: play the loop cleanly at 70+ BPM.',
             skills: [3, 4]
           },
           {
-            text: 'Choice: Try a 3rd finger octave doubling — add your pinky two frets above your ring finger to make a 3-note power chord. Does it change the sound?',
+            text: 'Challenge 3 — Octave Add-On (give it a go!): add your pinky two frets above your ring finger to make a 3-note power chord. No score — just try it and notice how the sound changes.',
             hint: 'This is optional. If your power chord sounds clean as is, keep it. Only add the 3rd finger if you can do it without buzzing.',
             skills: [5]
           }
