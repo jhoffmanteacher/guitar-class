@@ -47,8 +47,8 @@ SETS.push(
             response: { type: 'short', placeholder: 'Which note(s) did you find first? Where on the fretboard?' }
           },
           {
-            text: 'Play along drill: open your note-name chart. Play every natural note on the low E string slowly, frets 0–12: E · F · G · A · B · C · D · E. Say each name out loud as you play it. Do it twice.',
-            hint: 'Slow is fine. Accuracy and saying the name out loud matter more than speed.',
+            text: 'Play-along preview: keep your note-name chart open and play up the low E string slowly with the audio, frets 0–12 — E · F · G · A · B · C · D · E — saying each name aloud. Lean on the chart here; you\'ll do it from memory at the practice station.',
+            hint: 'Slow is fine. Right now the goal is connecting each name to its spot — use the chart freely.',
             skills: [2],
             playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] },
             response: { type: 'mc', prompt: 'On the low E string, what note is at fret 3?', choices: [
@@ -59,8 +59,8 @@ SETS.push(
             ] }
           },
           {
-            text: 'Now do the same on the A string: A · B · C · D · E · F · G · A (frets 0–12). Play up, then back down. Say each name aloud.',
-            hint: 'Notice that fret 5 of the A string is the same note as the open D string. That connection will help you later.',
+            text: 'Same idea on the A string, still with your chart: A · B · C · D · E · F · G · A (frets 0–12), up then back down, names aloud.',
+            hint: 'Notice fret 5 of the A string is the same note as the open D string — that connection helps later.',
             skills: [3],
             playSeq: { label: 'Play all', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] },
             response: { type: 'short', placeholder: 'What did you notice about any of the notes? Did any two notes feel or sound similar?' }
@@ -70,14 +70,14 @@ SETS.push(
       c: {
         title: 'Practice station — fretboard drill',        steps: [
           {
-            text: 'Tune your guitar. Using your note-name chart, play every natural note on the low E string slowly: E · F · G · A · B · C · D · E. Say each name aloud.',
-            hint: 'Hearing + saying + playing locks it in faster.',
+            text: 'Tune up. Now play every natural note up the low E string and back down — E · F · G · A · B · C · D · E — saying each name aloud. Goal: get through it once with no chart and no mistakes.',
+            hint: 'Hearing + saying + playing locks it in. Peek at the chart only if you\'re truly stuck.',
             skills: [2],
             playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] }
           },
           {
-            text: 'Now do the same on the A string: A · B · C · D · E · F · G · A. Play up to fret 12, then back down.',
-            hint: 'Keep the metronome at 60 BPM. One note per beat.',
+            text: 'Same on the A string, chart-free: A · B · C · D · E · F · G · A, up to fret 12 and back. One note per beat.',
+            hint: 'Keep the metronome at 60 BPM. If you stall on a note, that\'s the one to drill.',
             skills: [3],
             playSeq: { label: 'Play all', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] }
           },

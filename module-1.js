@@ -133,7 +133,7 @@ SETS.push(
             skills: [6]
           },
           {
-            text: 'Pick up your guitar. Play each open string one at a time — low E to high e. Say the string name out loud as you pluck it. Do this 3 times through.',
+            text: 'Quick try: play each open string once, low E to high e, saying the name out loud as you pluck. Just a preview — you\'ll drill these for real at the practice station.',
             hint: 'Hearing + saying + playing locks it in faster than just watching.',
             response: { type: 'mc', prompt: 'Say the string names low to high — which comes right after G?', choices: [
               'B',
@@ -143,8 +143,9 @@ SETS.push(
             ] }
           },
           {
-            text: 'Try the "Seven Nation Army" riff on your guitar: low E string, frets 7 · 7 · 10 · 7 · 5 · 3 · 2. Go as slow as you need. How far can you get before the station rotates? Click any note name below the TAB to hear how it should sound.',
-            hint: 'Slow and clean beats fast and buzzy. One note at a time.',
+            text: 'Preview the "Seven Nation Army" riff: click the note names below the TAB to hear how it should sound, then try just the first few notes to get the feel. You\'ll play the whole riff at the practice station.',
+            hint: 'Listen first, then match it — one note at a time.',
+            response: { type: 'short', placeholder: 'How did the riff sound, and which note was hardest to find?' },
             tab: {
               caption: '"Seven Nation Army" — main riff · Low E string · 7 notes',
               notes: [
