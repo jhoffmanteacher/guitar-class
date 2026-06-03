@@ -96,7 +96,7 @@ SETS.push(
       { name: '"Vampire" — Olivia Rodrigo', meta: 'Identify bass notes of intro on A string', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=RlPNh_PBZb4',
         tutorialUrl: 'https://www.youtube.com/watch?v=AmfDC2xL7xg' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Identify bass notes of riff on E & A', type: 'Core', core: true,
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Identify bass notes of riff on low E string', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"Seven Nation Army" — The White Stripes', meta: 'E string riff — ear training & note ID', type: 'Choice', core: false,
@@ -320,42 +320,22 @@ SETS.push(
             }
           },
           {
-            text: 'Challenge 3 — Riff Time (give it a go!): use the TAB to play the "Seven Nation Army" or "Smoke on the Water" main riff on the low E string, in time. No score — just go for it. Click a song below to open its TAB.',
-            hint: 'Both riffs use notes you already know. The challenge is keeping them clean at tempo.',
-            skills: [4, 5],
-            tabs: [
-              {
-                title: '"Seven Nation Army" — main riff',
-                caption: 'Low E string · frets 2–10 · 7 notes',
-                notes: [
-                  { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-                  { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-                  { string: 'E', fret: 10, note: 'D',  midi: 50 },
-                  { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-                  { string: 'E', fret: 5,  note: 'A',  midi: 45 },
-                  { string: 'E', fret: 3,  note: 'G',  midi: 43 },
-                  { string: 'E', fret: 2,  note: 'F#', midi: 42 }
-                ]
-              },
-              {
-                title: '"Smoke on the Water" — main riff',
-                caption: 'Low E string · single-note version · 12 notes',
-                notes: [
-                  { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                  { string: 'E', fret: 3, note: 'G',  midi: 43 },
-                  { string: 'E', fret: 5, note: 'A',  midi: 45 },
-                  { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                  { string: 'E', fret: 3, note: 'G',  midi: 43 },
-                  { string: 'E', fret: 6, note: 'A#', midi: 46 },
-                  { string: 'E', fret: 5, note: 'A',  midi: 45 },
-                  { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                  { string: 'E', fret: 3, note: 'G',  midi: 43 },
-                  { string: 'E', fret: 5, note: 'A',  midi: 45 },
-                  { string: 'E', fret: 3, note: 'G',  midi: 43 },
-                  { string: 'E', fret: 0, note: 'E',  midi: 40 }
-                ]
-              }
-            ]
+            text: 'Challenge 3 — Watchtower Bass Riff (your assessment piece): using the TAB, play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. Win: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound.',
+            hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A). Thumb stays behind the neck; let each note ring fully before the next. Drill it until you can run it with your eyes closed — that is the unit-end test.',
+            skills: [1, 2, 4, 5, 6],
+            tab: {
+              caption: '"All Along the Watchtower" — bass-note riff · Low E string · loops · 60 BPM',
+              notes: [
+                { string: 'E', fret: 5, note: 'A', midi: 45 },
+                { string: 'E', fret: 3, note: 'G', midi: 43 },
+                { string: 'E', fret: 1, note: 'F', midi: 41 },
+                { string: 'E', fret: 3, note: 'G', midi: 43 },
+                { string: 'E', fret: 5, note: 'A', midi: 45 },
+                { string: 'E', fret: 3, note: 'G', midi: 43 },
+                { string: 'E', fret: 1, note: 'F', midi: 41 },
+                { string: 'E', fret: 3, note: 'G', midi: 43 }
+              ]
+            }
           }
         ]
       }
@@ -367,7 +347,7 @@ SETS.push(
       { name: '"Vampire" — Olivia Rodrigo', meta: 'Play simplified intro riff on E string', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=RlPNh_PBZb4',
         tutorialUrl: 'https://www.youtube.com/watch?v=AmfDC2xL7xg' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Play bass-note riff on E & A strings', type: 'Core', core: true,
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Play bass-note riff on low E string from memory', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"Seven Nation Army" — The White Stripes', meta: 'E string TAB — great first riff', type: 'Choice', core: false,
@@ -391,7 +371,7 @@ SETS.push(
     ],
 
     assessment: {
-      goal: 'Unit-end: Play "Happy Birthday" using only E & A strings from memory with clean tone and correct fingering. Name any 5 notes called out by the teacher on the fretboard.',
+      goal: 'Unit-end: Play "All Along the Watchtower" bass-note riff using only the low E string from memory with clean tone and correct fingering. Name any 5 notes called out by the teacher on the fretboard.',
       performance: 'Individual or partner check: play 4 bars of a melody from TAB with clean tone. Teacher listens and gives one piece of feedback.',
       selfCheck: 'Can you press a note cleanly with no buzzing? Can you read a basic TAB? Can you play a 4-bar melody in time at 60 BPM?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Re.7a']
