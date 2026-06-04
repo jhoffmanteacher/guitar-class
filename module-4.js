@@ -50,6 +50,20 @@ SETS.push(
               '2nd finger (middle)',
               'It does not matter which finger'
             ] }
+          },
+          {
+            text: 'Match the mood — scale choice changes the feel. Listen to two short solos: <a href="https://www.youtube.com/watch?v=BycLmWI97Nc" target="_blank" data-ext="1">Clip A — "La Bamba"</a> (major pentatonic) then <a href="https://www.youtube.com/watch?v=kpC69qIe02E" target="_blank" data-ext="1">Clip B — "The Thrill Is Gone"</a> (minor / blues). Notice how the major-pentatonic solo sounds brighter and happier, while the minor / blues solo sounds darker and moodier.',
+            hint: 'Major pentatonic = brighter, sunnier. Minor / blues = darker, sadder, more "bluesy." Same instrument — the scale choice sets the mood.',
+            response: { type: 'mc', prompt: 'Which solo sounds darker / more "blues"?', choices: [
+              'Clip A (major pentatonic)',
+              'Clip B (minor / blues)',
+              'No difference'
+            ] }
+          },
+          {
+            text: 'In one word each, name the mood you heard in the two clips above.',
+            hint: 'There\'s no wrong answer — trust your ear. Words like "bright," "happy," "dark," "sad," or "moody" all work.',
+            response: { type: 'short', prompt: 'In one word, describe the mood of each clip.', placeholder: 'Clip A: ____   ·   Clip B: ____' }
           }
         ]
       },
