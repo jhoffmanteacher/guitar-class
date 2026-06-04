@@ -1784,8 +1784,12 @@ function switchTab(el,wid,tab){
 /* ── Stations ── */
 function buildStations(w, stationId){
   const stepsHtml=(steps,stationId)=>steps.map((s,i)=>{
-    const text=s.text.replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"[^>]*>([^<]*)<\/a>/g,(match,url,label)=>{
+    const text=s.text.replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
       const safe=label.replace(/'/g,"\\'");
+      // data-ext links can't be embedded (official recordings block it) — open on YouTube in a new tab.
+      if(/data-ext/.test(attrs)){
+        return `<button class="rp-trigger" onclick="window.open('${url}','_blank','noopener')" title="Opens on YouTube in a new tab">&#x25B6; ${label} <span style="font-size:11px;opacity:0.6">&#x2197;</span></button>`;
+      }
       return `<button class="rp-trigger" onclick="loadPanel('youtube','${url}','${safe}','YouTube')">&#x25B6; ${label}</button>`;
     });
     const hintHtml = s.hint ? (()=>{
