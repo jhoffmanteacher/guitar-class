@@ -38,6 +38,15 @@ SETS.push(
               'Both strumming and single notes',
               'Mostly rhythm or percussive sounds'
             ] }
+          },
+          {
+            text: 'Ear training — acoustic vs. electric. Listen to two short clips of the SAME song, "All Along the Watchtower": <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank" data-ext="1">Clip A — Bob Dylan</a> then <a href="https://www.youtube.com/watch?v=TLV4_xaYynY" target="_blank" data-ext="1">Clip B — Jimi Hendrix</a>. One is played on an acoustic guitar, the other on an electric. Just listen for the difference in tone.',
+            hint: 'Acoustic guitars sound warm, woody, and natural. Electric guitars sound brighter and can be distorted or "fuzzy." Same song — very different guitar sound.',
+            response: { type: 'mc', prompt: 'Which clip is the electric guitar?', choices: [
+              'Clip A',
+              'Clip B',
+              'They sound identical'
+            ] }
           }
         ]
       },
