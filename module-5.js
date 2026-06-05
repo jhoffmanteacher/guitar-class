@@ -205,7 +205,7 @@ SETS.push(
         title: 'Practice station — chord transitions & strumming',
         sections: [
           {
-            title: 'Spiral review — name the root of each chord (Module 2 notes)',
+            title: 'Name the root note of each chord before you strum',
             steps: [
           {
             text: 'Challenge — Name the Root: before you strum each chord, find and say its ROOT — the note the chord is named after, on the lowest string you strum. C = C (A string, 3rd fret) · G = G (low E, 3rd fret) · Am = A (A string, open) · F = F (D string, 3rd fret). Win: name all four roots correctly, then play the chord.',

@@ -354,7 +354,7 @@ SETS.push(
         title: 'Practice station — full progressions & performance',
         sections: [
           {
-            title: 'Spiral review — these are your Module 5 chords (fret them clean first)',
+            title: 'Fret each chord clean before you fingerpick it',
             steps: [
           {
             text: 'Challenge — Clean Shapes First: before you fingerpick the progression, strum each chord once (Am, C, D, F) and check every string rings — these are the exact open chords you learned in Module 5. Win: all four shapes clean on a strum before you pick a single note through them.',

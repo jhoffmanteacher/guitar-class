@@ -382,7 +382,7 @@ SETS.push(
             ]
           },
           {
-            title: 'Spiral review — solo over the groove (Module 4 pentatonic)',
+            title: 'Solo over the groove with Pentatonic Pattern 1',
             steps: [
           {
             text: 'Challenge — Trade Off (give it a go!): partner up. One of you strums a progression (try Am–G–C or G–D–Em–C) with any pattern from this module; the other solos over it using Pentatonic Pattern 1 from Module 4. Swap after 8 bars. No score — aim for one clear musical idea, not a flurry of notes.',

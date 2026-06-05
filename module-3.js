@@ -96,7 +96,7 @@ SETS.push(
             ]
           },
           {
-            title: 'Spiral review — name the root as you climb (Module 2 notes)',
+            title: 'Name the root as you climb the neck (E & A strings)',
             steps: [
           {
             text: 'Challenge — Name & Climb (E string): walk the power chord UP the low E string and say each root aloud as you land it — E5 (open), F5 (1), G5 (3), A5 (5), B5 (7), C5 (8), D5 (10), E5 (12). Win: name every root correctly, chart-free, all the way to the 12th fret.',

@@ -267,7 +267,7 @@ SETS.push(
             ]
           },
           {
-            title: 'Spiral review — your barre contains a power chord (Module 3)',
+            title: 'Find the power chord hiding inside your F barre',
             steps: [
           {
             text: 'Challenge — Spot the Power Chord: form your F major barre, then look at just strings 6 and 5 — low E (fret 1) + A (fret 3). That is exactly the F5 power chord you learned in Module 3. The barre just stacks the rest of the chord on top. Win: play F5 alone, then add the barre fingers to make full F — and hear the power chord living inside it.',
@@ -454,7 +454,7 @@ SETS.push(
             ]
           },
           {
-            title: 'Spiral review — strum the barres with a Module 6 pattern',
+            title: 'Strum the barre chords with a D-DU-UDU pattern',
             steps: [
           {
             text: 'Challenge — Groove the Barres: take a barre progression (F–C–G–D, or Am–G–F as barres) and play it with the D-DU-UDU pattern from Module 6 instead of one strum per bar. Win: the strum pattern stays steady and even while you switch barre shapes — the groove doesn\'t break at the chord change.',
