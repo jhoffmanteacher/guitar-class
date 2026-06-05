@@ -248,7 +248,7 @@ SETS.push(
             hint: 'Roll your index finger slightly toward its outer edge — that side is bonier and gives a cleaner bar. If some strings buzz, press harder with your thumb on the back.',
             skills: [1, 2],
             chords: [
-              { name: 'A barre', chord: [[6,5,'1'],[5,5,'1'],[4,5,'1'],[3,5,'1'],[2,5,'1'],[1,5,'1']], position: 5 }
+              { name: '', chord: [[6,5,'1'],[5,5,'1'],[4,5,'1'],[3,5,'1'],[2,5,'1'],[1,5,'1']], position: 5 }
             ]
           }
             ]

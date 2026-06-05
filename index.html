@@ -1848,7 +1848,7 @@ function buildStations(w, stationId){
       return `<ul class="sh-list">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
     })() : '';
     const chordsHtml = (s.chords&&s.chords.length)
-      ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}<div class="chord-box-label">${c.name}</div></div>`).join('')}</div>`
+      ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}${c.name?`<div class="chord-box-label">${c.name}</div>`:''}</div>`).join('')}</div>`
       : '';
     const playSeqHtml = s.playSeq ? (()=>{
       const ps = s.playSeq;
