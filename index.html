@@ -157,8 +157,8 @@ body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
 .obj-card.set-head .obj-main{font-size:20px;font-weight:500;line-height:1.4;margin-bottom:0}
 .obj-card.set-head .obj-i-can{color:var(--blue-text)}
 .obj-skill-label{font-size:12px;color:var(--text3);letter-spacing:.4px;text-transform:uppercase;margin-top:16px;margin-bottom:8px}
-.obj-skill-chips{display:flex;flex-wrap:wrap;gap:6px}
-.obj-chip{display:inline-block;background:var(--bg3);color:var(--text);font-size:12px;padding:4px 10px;border-radius:999px;line-height:1.4}
+.obj-skill-list{list-style:disc;margin:0;padding-left:20px}
+.obj-skill-item{color:var(--text);font-size:13px;line-height:1.6}
 @media (max-width:420px){.obj-card.set-head .obj-main{font-size:18px}}
 .tabs{margin-bottom:16px}
 .tabs-songbar{display:flex;justify-content:flex-end;margin-bottom:10px}
@@ -1579,7 +1579,7 @@ function wrapAllChordLinks(){
   /* Step-response prompts (the question text above MC/short-answer inputs) */
   document.querySelectorAll('.dp .step .step-resp-prompt').forEach(wrapChordLinksIn);
   /* Objectives at the top of each set */
-  document.querySelectorAll('.obj-card .obj-main, .obj-card .obj-sub, .obj-card .obj-set-sub, .obj-card .obj-chip').forEach(wrapChordLinksIn);
+  document.querySelectorAll('.obj-card .obj-main, .obj-card .obj-sub, .obj-card .obj-set-sub, .obj-card .obj-skill-item').forEach(wrapChordLinksIn);
   /* Song list — names and meta lines often mention chords ("uses G and C") */
   document.querySelectorAll('.song-row .sname, .song-row .smeta').forEach(wrapChordLinksIn);
   /* Skills checklist — skill labels and helper text */
@@ -1786,13 +1786,13 @@ function buildComingSoon(w){
 function buildSet(w){
   const header = buildSetHeader(w);
   const objHtml = (w.objective||'').replace(/^(I\s+CAN)(:?)\s+/i, '<span class="obj-i-can">$1$2</span> ');
-  const chips = (w.skillFocus||'').split(' · ')
+  const items = (w.skillFocus||'').split(' · ')
     .map(s => s.trim())
     .filter(Boolean)
-    .map(s => `<span class="obj-chip">${s}</span>`)
+    .map(s => `<li class="obj-skill-item">${s}</li>`)
     .join('');
-  const skills = chips
-    ? `<div class="obj-skill-label">Skill focus</div><div class="obj-skill-chips">${chips}</div>`
+  const skills = items
+    ? `<div class="obj-skill-label">Skill focus</div><ul class="obj-skill-list">${items}</ul>`
     : '';
   return `<div class="obj-card set-head">${header}<div class="obj-main">${objHtml}</div>${skills}</div>
   <div class="tabs">
