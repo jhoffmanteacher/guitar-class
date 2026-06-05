@@ -867,7 +867,7 @@ let lastSetId = null;
 function renderAll(){ renderPanels(); populateModuleDropdown(); onModuleChange(lastModuleNum||1, lastSetId); renderChordBoxes(); }
 
 function chordDiagramSVG(cfg){
-  const W=88,H=104,padL=14,padR=14,padT=20,padB=4;
+  const W=96,H=104,padL=22,padR=14,padT=20,padB=4;
   const NUM_FRETS=4;
   const boxW=W-padL-padR,boxH=H-padT-padB;
   const strGap=boxW/5,fretGap=boxH/NUM_FRETS;
