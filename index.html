@@ -1385,6 +1385,10 @@ function findNoteMatches(text, stringMatches){
 
 function wrapChordLinksIn(rootEl){
   if (!rootEl) return;
+  /* Module 7 (barre chords): each step already shows accurate inline chord
+     diagrams, and the shared chord library renders OPEN shapes that don't match
+     the barre lesson — so skip all auto-link pop-ups inside Module 7 panels. */
+  if (rootEl.closest && rootEl.closest('.week-panel[data-module="7"]')) return;
   const walker = document.createTreeWalker(rootEl, NodeFilter.SHOW_TEXT, {
     acceptNode(node){
       if (!node.nodeValue || !/[A-G]/.test(node.nodeValue)) return NodeFilter.FILTER_REJECT;
@@ -1751,14 +1755,14 @@ function renderPanels(){
   c.innerHTML='';
   SETS.forEach(w=>{
     const div=document.createElement('div');
-    div.className='week-panel'; div.dataset.id=w.id;
+    div.className='week-panel'; div.dataset.id=w.id; div.dataset.module=w.moduleNum;
     div.innerHTML = w.comingSoon ? buildComingSoon(w) : buildSet(w);
     c.appendChild(div);
   });
   // Module review panels
   Object.values(MODULE_REVIEWS).forEach(mr=>{
     const div=document.createElement('div');
-    div.className='week-panel'; div.dataset.id=`mr${mr.moduleNum}`;
+    div.className='week-panel'; div.dataset.id=`mr${mr.moduleNum}`; div.dataset.module=mr.moduleNum;
     div.innerHTML=buildModuleReview(mr);
     c.appendChild(div);
   });
