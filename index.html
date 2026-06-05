@@ -226,6 +226,15 @@ body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
 .step-resp-mc-opt input{margin-top:2px;cursor:pointer}
 .step-resp-mc-opt input:checked + span{color:var(--blue-text);font-weight:500}
 .step-resp-saved{font-size:12.5px;color:var(--text2);margin-top:3px;min-height:13px}
+/* ── Per-step "Mark done" toggle + collapsed (completed) state ── */
+.step-done-row{margin-top:8px}
+.step-done-btn{display:inline-flex;align-items:center;gap:5px;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--green-text);background:var(--green-bg);border:1px solid var(--green-text);border-radius:14px;padding:3px 12px;cursor:pointer}
+.step-done-btn:hover{filter:brightness(0.97)}
+/* When a step is marked done: hide its body, dim + strike the text, tint the number */
+.step-done .step-body,.step-done .read-aloud-btn{display:none}
+.step-done .st-text{text-decoration:line-through;color:var(--text2);opacity:.65}
+.step-done .sn{background:var(--green-bg);color:var(--green-text)}
+.step-done{padding-top:5px;padding-bottom:5px}
 .skill-badge{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:20px;border-radius:10px;background:var(--blue-bg);border:0.5px solid var(--blue-text);font-size:12px;font-weight:500;color:var(--blue-text);flex-shrink:0;margin-left:5px;vertical-align:middle;padding:0 7px;white-space:nowrap}
 .card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:4px 16px;margin-bottom:12px}
 .song-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)}
@@ -714,8 +723,10 @@ const db   = firebase.firestore();
 let currentUser = null;
 let progress    = {};
 let responses   = {};
+let completed   = {};
 let saveTimer   = null;
 let respSaveTimer = null;
+let compSaveTimer = null;
 const escAttr = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const escHtml = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
@@ -736,7 +747,7 @@ auth.onAuthStateChanged(async user=>{
     if(IS_TEACHER_MODE){ showTeacherApp(user); }
     else { await loadProgress(); showApp(user); }
   } else {
-    currentUser = null; progress = {}; responses = {};
+    currentUser = null; progress = {}; responses = {}; completed = {};
     document.getElementById('auth-wall').style.display='block';
     document.getElementById('app').style.display='none';
     document.getElementById('teacher-app').style.display='none';
@@ -773,8 +784,9 @@ async function loadProgress(){
       lastModuleNum = doc.data().lastModule||1;
       lastSetId     = doc.data().lastSet||null;
       responses     = doc.data().responses || {};
-    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; }
-  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; responses={}; }
+      completed     = doc.data().completed || {};
+    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; }
+  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; }
 }
 
 function onResponseChange(key, value){
@@ -789,6 +801,26 @@ function saveResponses(){
     try{
       await db.collection('progress').doc(currentUser.uid).set({
         responses:responses,
+        name:currentUser.displayName||'', email:currentUser.email||''
+      },{merge:true});
+      setSaveMsg('Saved ✓');
+      setTimeout(()=>setSaveMsg(''),2000);
+    } catch(e){ setSaveMsg('Save failed — check connection'); }
+  },800);
+}
+
+function onCompleteChange(key, isDone){
+  if(isDone) completed[key] = true; else delete completed[key];
+  saveCompleted();
+}
+function saveCompleted(){
+  if(!currentUser) return;
+  clearTimeout(compSaveTimer);
+  setSaveMsg('Saving…');
+  compSaveTimer = setTimeout(async()=>{
+    try{
+      await db.collection('progress').doc(currentUser.uid).set({
+        completed:completed,
         name:currentUser.displayName||'', email:currentUser.email||''
       },{merge:true});
       setSaveMsg('Saved ✓');
@@ -1840,7 +1872,10 @@ function buildStations(w, stationId){
       return '';
     })() : '';
     const readBtn = `<button class="read-aloud-btn" type="button" onclick="event.stopPropagation();readAloudStep(this)" title="Read this step aloud" aria-label="Read aloud">&#x1F50A;</button>`;
-    return `<li class="step"><div class="sn">${i+1}</div><div class="st">${text}${playSeqHtml}${hintHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div></li>`;
+    const doneKey = `${w.id}-${stationId}-${i}`;
+    const isDone = completed[doneKey] === true;
+    const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${isDone ? '&#x2713; Done' : 'Mark done'}</button></div>`;
+    return `<li class="step${isDone ? ' step-done' : ''}"><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${hintHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div>${doneBtn}</div></li>`;
   }).join('');
   const dp=(id,cls,badge,badgeClass,s)=>`
     <div class="dp${cls}" id="${w.id}-dp-${id}">
@@ -1866,6 +1901,15 @@ function buildStations(w, stationId){
     </div>
     ${dp('b',' hidden','Station B','bb',w.stations.b)}
     ${dp('c',' hidden','Station C','bc',w.stations.c)}`;
+}
+
+function toggleStepDone(btn, key){
+  const li = btn.closest('.step');
+  const nowDone = !li.classList.contains('step-done');
+  li.classList.toggle('step-done', nowDone);
+  btn.setAttribute('aria-pressed', nowDone);
+  btn.innerHTML = nowDone ? '&#x2713; Done' : 'Mark done';
+  onCompleteChange(key, nowDone);
 }
 
 function openSt(wid,s){
