@@ -57,6 +57,16 @@ SETS.push(
         title: 'Practice station — riffs from TAB',
         sections: [
           {
+            title: 'Warm-up — tune & tone check (Modules 1–2)',
+            steps: [
+              {
+                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open and at the 1st–3rd fret, listening for buzz. Win: in tune, and every note clean before today\'s work.',
+                hint: 'Tuning (Module 1) and clean notes (Module 2) are skills you keep forever. Reading TAB today is faster when you also name the notes you land on — that\'s your Module 2 fretboard map.',
+                playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
+              }
+            ]
+          },
+          {
             title: 'Read a riff with stacked TAB (double-stops)',
             steps: [
           {
@@ -257,6 +267,20 @@ SETS.push(
             ]
           },
           {
+            title: 'Spiral review — your barre contains a power chord (Module 3)',
+            steps: [
+          {
+            text: 'Challenge — Spot the Power Chord: form your F major barre, then look at just strings 6 and 5 — low E (fret 1) + A (fret 3). That is exactly the F5 power chord you learned in Module 3. The barre just stacks the rest of the chord on top. Win: play F5 alone, then add the barre fingers to make full F — and hear the power chord living inside it.',
+            hint: 'Barre chords feel less scary once you see them as a power chord you already know, plus a few extra notes. And just like a power chord, you name the barre by its root on string 6 — that\'s your Module 2 + Module 3 skills combining.',
+            skills: [3, 4],
+            chords: [
+              { name: 'F5 power chord (Module 3)', chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 0 },
+              { name: 'F major (full E-shape barre)', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
+            ]
+          }
+            ]
+          },
+          {
             title: 'Slide the E-shape: F, G, A',
             steps: [
           {
@@ -426,6 +450,16 @@ SETS.push(
               { name: 'G (E-shape, 3rd)', chord: [[6,3,'1'],[5,5,'3'],[4,5,'4'],[3,4,'2'],[2,3,'1'],[1,3,'1']], position: 3 },
               { name: 'D (A-shape, 5th)', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,7,'3'],[2,7,'3'],[1,5,'1']], position: 5 }
             ]
+          }
+            ]
+          },
+          {
+            title: 'Spiral review — strum the barres with a Module 6 pattern',
+            steps: [
+          {
+            text: 'Challenge — Groove the Barres: take a barre progression (F–C–G–D, or Am–G–F as barres) and play it with the D-DU-UDU pattern from Module 6 instead of one strum per bar. Win: the strum pattern stays steady and even while you switch barre shapes — the groove doesn\'t break at the chord change.',
+            hint: 'You spent Module 6 making that strum automatic — now layer it onto the harder barre chords. If the pattern falls apart at a change, slow the metronome until barre + strum hold together.',
+            skills: [5, 6]
           }
             ]
           }

@@ -57,6 +57,16 @@ SETS.push(
         title: 'Practice station — finger assignments',
         sections: [
           {
+            title: 'Warm-up — tune & tone check (Modules 1–2)',
+            steps: [
+              {
+                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open and at the 1st–3rd fret, listening for buzz. Win: in tune, and every note clean before today\'s work.',
+                hint: 'Tuning (Module 1) and clean notes (Module 2) matter even more in fingerpicking — every note is exposed, so an out-of-tune or buzzing string is easy to hear.',
+                playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
+              }
+            ]
+          },
+          {
             title: 'Set up a relaxed fingerpicking hand',
             steps: [
           {
@@ -343,6 +353,16 @@ SETS.push(
       c: {
         title: 'Practice station — full progressions & performance',
         sections: [
+          {
+            title: 'Spiral review — these are your Module 5 chords (fret them clean first)',
+            steps: [
+          {
+            text: 'Challenge — Clean Shapes First: before you fingerpick the progression, strum each chord once (Am, C, D, F) and check every string rings — these are the exact open chords you learned in Module 5. Win: all four shapes clean on a strum before you pick a single note through them.',
+            hint: 'Fingerpicking exposes every note, so a chord that was "good enough" for strumming in Module 5 needs to be truly clean here. Fix the fretting hand first; then the picking hand has something solid to work over.',
+            skills: [1]
+          }
+            ]
+          },
           {
             title: 'Fingerpick a full chord progression',
             steps: [

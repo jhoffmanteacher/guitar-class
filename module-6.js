@@ -57,6 +57,16 @@ SETS.push(
         title: 'Practice station — strumming hand drill',
         sections: [
           {
+            title: 'Warm-up — tune & tone check (Modules 1–2)',
+            steps: [
+              {
+                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open and at the 1st–3rd fret, listening for buzz. Win: in tune, and every note clean before today\'s work.',
+                hint: 'Tuning (Module 1) and clean, buzz-free notes (Module 2) are skills you keep forever. 60 seconds here makes everything today sound better.',
+                playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
+              }
+            ]
+          },
+          {
             title: 'Build the down-up pendulum motion',
             steps: [
           {
@@ -368,6 +378,16 @@ SETS.push(
             hint: 'Counter-intuitive at first — your hand goes down on the beats but doesn\'t hit the strings. Listen to "Three Little Birds" while you do this to lock in the feel.',
             skills: [3, 4],
             playSeq: { label: 'Hear the reggae offbeat (up-strums only)', bpm: 70, notes: [55, 55, 55, 55] }
+          }
+            ]
+          },
+          {
+            title: 'Spiral review — solo over the groove (Module 4 pentatonic)',
+            steps: [
+          {
+            text: 'Challenge — Trade Off (give it a go!): partner up. One of you strums a progression (try Am–G–C or G–D–Em–C) with any pattern from this module; the other solos over it using Pentatonic Pattern 1 from Module 4. Swap after 8 bars. No score — aim for one clear musical idea, not a flurry of notes.',
+            hint: 'Am–G–C fits A minor pentatonic; a major-key progression fits major pentatonic. This is the payoff: the scale you learned in Module 4 lives on top of the chords you strum here. Leave space — silence is part of a solo.',
+            playSeq: { label: 'Backing roots — Am · G · C', bpm: 70, notes: [45, 43, 48] }
           }
             ]
           }

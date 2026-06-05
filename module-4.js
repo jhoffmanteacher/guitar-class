@@ -71,6 +71,16 @@ SETS.push(
         title: 'Practice station — pattern drill & first improvisation',
         sections: [
           {
+            title: 'Warm-up — tune & tone check (Modules 1–2)',
+            steps: [
+              {
+                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open and at the 1st–3rd fret, listening for buzz. Win: in tune, and every note clean before today\'s work.',
+                hint: 'Tuning (Module 1) and clean, buzz-free notes (Module 2) are skills you keep forever. As you climb the pentatonic pattern today, keep naming the notes too — that\'s your Module 2 fretboard map in action.',
+                playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
+              }
+            ]
+          },
+          {
             title: 'Play Pattern 1 with alternate picking',
             steps: [
           {

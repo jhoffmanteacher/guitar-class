@@ -71,6 +71,16 @@ SETS.push(
         title: 'Practice station — fretboard drill',
         sections: [
           {
+            title: 'Warm-up — tune up first (Module 1 review)',
+            steps: [
+              {
+                text: 'Before today\'s notes: tune all 6 strings to green, low to high — E A D G B e — and say each string name as you go. Beat your time from last session. Click "Hear all 6 strings" for the target pitches.',
+                hint: 'Tuning and the string names are Module 1 skills you keep forever — do this every class before you play. Slow and steady beats rushing past the note.',
+                playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
+              }
+            ]
+          },
+          {
             title: 'Name every note on the low E string (frets 0–12)',
             steps: [
               {

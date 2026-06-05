@@ -57,6 +57,16 @@ SETS.push(
         title: 'Practice station — chord shapes & first strums',
         sections: [
           {
+            title: 'Warm-up — tune & tone check (Modules 1–2)',
+            steps: [
+              {
+                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open and at the 1st–3rd fret, listening for buzz. Win: in tune, and every note clean before today\'s work.',
+                hint: 'Tuning (Module 1) and clean, buzz-free notes (Module 2 — press just behind the fret) are skills you keep forever. Clean open strings are exactly what makes a chord ring.',
+                playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
+              }
+            ]
+          },
+          {
             title: 'Fret Am cleanly',
             steps: [
           {
@@ -194,6 +204,16 @@ SETS.push(
       c: {
         title: 'Practice station — chord transitions & strumming',
         sections: [
+          {
+            title: 'Spiral review — name the root of each chord (Module 2 notes)',
+            steps: [
+          {
+            text: 'Challenge — Name the Root: before you strum each chord, find and say its ROOT — the note the chord is named after, on the lowest string you strum. C = C (A string, 3rd fret) · G = G (low E, 3rd fret) · Am = A (A string, open) · F = F (D string, 3rd fret). Win: name all four roots correctly, then play the chord.',
+            hint: 'Knowing where a chord\'s root lives on the neck is the same Module 2 note-name skill — and it is exactly what makes barre chords easy in Module 7. The root tells you the chord\'s name.',
+            skills: [1]
+          }
+            ]
+          },
           {
             title: 'Use a common-finger pivot (Am ↔ C)',
             steps: [
