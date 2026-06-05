@@ -1241,7 +1241,7 @@ function toggleTabChoice(btn){
    Letters E/A/D/G/B are case-sensitive (uppercase) to match how
    teachers write them in the modules. */
 const STR_SEP = '(?:\\s*(?:,|&|\\band\\b|\\bor\\b)\\s*)+';
-const STRING_PHRASE_RE_SRC = '\\b[EADGB](?:' + STR_SEP + '[EADGB])*\\s+strings?\\b';
+const STRING_PHRASE_RE_SRC = '\\b[EADGB](?:' + STR_SEP + '[EADGB])*(?:\\s+|-)strings?\\b';
 const LOWHIGH_E_RE_SRC = '\\b(low|high)\\s+E\\b';
 /* Standard tuning notation "E A D G B e" — six string names in order with
    lowercase e for the high E. Separators can be spaces, commas, or "·". */
@@ -1299,7 +1299,7 @@ function findStringMatches(text){
 
 /* Longest names first so the alternation matches them before the 1-char names */
 const CHORD_NAMES = ['F#m','C#m','Em','Am','Dm','Bm','B7','A5','E5','G5','D5','C5','C','G','D','A','E','F'];
-const CHORD_RE = new RegExp('(^|[^A-Za-z0-9#])(' + CHORD_NAMES.join('|') + ')(?![A-Za-z0-9#])(?![ -][Ss]hape)', 'g');
+const CHORD_RE = new RegExp('(^|[^A-Za-z0-9#])(' + CHORD_NAMES.join('|') + ')(?![A-Za-z0-9#])(?![ -][Ss]hape)(?![ -][Mm]inor)(?![ -][Pp]entatonic)(?![ -][Ss]cale)(?![ -][Mm]ajor[ -](?:pentatonic|scale))', 'g');
 const CHORD_SKIP_TAGS = new Set(['A','BUTTON','SCRIPT','STYLE','TEXTAREA','INPUT','LABEL','SELECT']);
 const CHORD_SKIP_CLASSES = ['skill-badge','chord-link','string-link','note-link','rp-trigger','chord-box-label','chord-diagrams','read-aloud-btn','step-resp-mc-opt','tab','nolink'];
 
