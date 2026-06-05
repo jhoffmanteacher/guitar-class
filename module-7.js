@@ -54,7 +54,11 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — riffs from TAB',        steps: [
+        title: 'Practice station — riffs from TAB',
+        sections: [
+          {
+            title: 'Read a riff with stacked TAB (double-stops)',
+            steps: [
           {
             text: 'Challenge 1 — Smoke on the Water: play the main riff with index + ring locked as a unit on the A + D strings — 0/0 — 3/3 — 5/5 — 0/0 — 3/3 — 6/6 — 5/5. Win: both notes ring at the same volume, clean through the whole riff. Use the TAB below.',
             hint: 'Use your index and ring finger together — keep them locked in shape and slide as a unit. Both notes should ring at the same volume.',
@@ -78,7 +82,12 @@ SETS.push(
                 { string: 'A', fret: 5, note: 'D',  midi: 50 }
               ]
             }
+          }
+            ]
           },
+          {
+            title: 'Read rhythm in TAB',
+            steps: [
           {
             text: 'Challenge 2 — Crazy Train: play the intro riff on the E and A strings with alternate picking, watching the 8th vs. quarter notes in the TAB. Win: clean and even at 60 BPM before you speed it up.',
             hint: 'Use alternate picking (down-up-down-up). The riff is fast — start at 60 BPM and only speed up when it\'s clean.',
@@ -96,11 +105,18 @@ SETS.push(
                 { string: 'E', fret: 0, note: 'E',  midi: 40 }
               ]
             }
+          }
+            ]
           },
+          {
+            title: 'Find & read a TAB on your own',
+            steps: [
           {
             text: 'Challenge 3 — Find a Riff (give it a go!): pick "Iron Man" or "Sunshine of Your Love", find a TAB online, and play through it once. No score — see which rhythm symbols you can spot above the numbers.',
             hint: 'Most beginner TAB sites (Songsterr, Ultimate Guitar) show the rhythm. Look for the stem marks above each number.',
             skills: [3, 6]
+          }
+            ]
           }
         ]
       }
@@ -212,7 +228,11 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — building the barre',        steps: [
+        title: 'Practice station — building the barre',
+        sections: [
+          {
+            title: 'Bar all 6 strings with your index finger',
+            steps: [
           {
             text: 'Challenge 1 — Just the Bar: lay your index finger flat across all 6 strings at the 5th fret — bar only, no other fingers — and strum. Win: all 6 strings ring, rolling the index slightly onto its bonier edge.',
             hint: 'Roll your index finger slightly toward its outer edge — that side is bonier and gives a cleaner bar. If some strings buzz, press harder with your thumb on the back.',
@@ -220,7 +240,12 @@ SETS.push(
             chords: [
               { name: 'A barre (index bar only)', chord: [[6,5,'1'],[5,5,'1'],[4,5,'1'],[3,5,'1'],[2,5,'1'],[1,5,'1']], position: 5 }
             ]
+          }
+            ]
           },
+          {
+            title: 'Form the E-shape barre',
+            steps: [
           {
             text: 'Challenge 2 — E-Shape Barre: add the E-shape on top of the bar at the 5th fret for A major (ring str 5/fret 7, pinky str 4/fret 7, middle str 3/fret 6) and strum all 6. Win: a full, clean A major barre — master it here before tackling F.',
             hint: 'It\'s the open E major shape moved up — index finger replaces the "nut". Practice this at the 5th fret BEFORE attempting F at fret 1.',
@@ -228,7 +253,12 @@ SETS.push(
             chords: [
               { name: 'A major (E-shape barre, 5th fret)', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,6,'2'],[2,5,'1'],[1,5,'1']], position: 5 }
             ]
+          }
+            ]
           },
+          {
+            title: 'Slide the E-shape: F, G, A',
+            steps: [
           {
             text: 'Challenge 3 — F, G, A Slide: slide the same shape to fret 1 (F), fret 3 (G), and fret 5 (A) — same shape, three chords. Win: G and A ringing clean, then F — the hardest — without buzzing.',
             hint: 'F is the hardest position — don\'t panic if it buzzes. Get G and A clean first, then come back to F. The shape is the same.',
@@ -237,6 +267,8 @@ SETS.push(
               { name: 'F major (E-shape barre, 1st fret)', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
               { name: 'G major (E-shape barre, 3rd fret)', chord: [[6,3,'1'],[5,5,'3'],[4,5,'4'],[3,4,'2'],[2,3,'1'],[1,3,'1']], position: 3 },
               { name: 'A major (E-shape barre, 5th fret)', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,6,'2'],[2,5,'1'],[1,5,'1']], position: 5 }
+            ]
+          }
             ]
           }
         ]
@@ -351,7 +383,11 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — A-shape and combining',        steps: [
+        title: 'Practice station — A-shape and combining',
+        sections: [
+          {
+            title: 'Form the A-shape barre',
+            steps: [
           {
             text: 'Challenge 1 — A-Shape B Major: index bars all 6 strings at fret 2, fingers on strings 4/3/2 at fret 4, strum strings 5–1 (let the index mute string 6). Win: a clean B major with the string-5 bass ringing and no low E.',
             hint: 'Avoid the low E string (string 6) — your index finger mutes it for you. Aim your strum from string 5 downward.',
@@ -359,7 +395,12 @@ SETS.push(
             chords: [
               { name: 'B major (A-shape barre, 2nd fret)', chord: [[6,'x'],[5,2,'1'],[4,4,'3'],[3,4,'3'],[2,4,'3'],[1,2,'1']], position: 2 }
             ]
+          }
+            ]
           },
+          {
+            title: 'Slide the A-shape: C, D, E',
+            steps: [
           {
             text: 'Challenge 2 — A-Shape Slide: slide the A-shape to C (3rd fret), D (5th fret), and E (7th fret), strumming strings 5–1 only. Win: name each by its string-5 root and play all three clean.',
             hint: 'The A-shape is named by the root note on string 5. Apply your Module 2 A-string note knowledge: fret 3 of A = C, fret 5 of A = D, fret 7 of A = E.',
@@ -369,7 +410,12 @@ SETS.push(
               { name: 'D (A-shape barre, 5th fret)', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,7,'3'],[2,7,'3'],[1,5,'1']], position: 5 },
               { name: 'E (A-shape barre, 7th fret)', chord: [[6,'x'],[5,7,'1'],[4,9,'3'],[3,9,'3'],[2,9,'3'],[1,7,'1']], position: 7 }
             ]
+          }
+            ]
           },
+          {
+            title: 'Combine E-shape & A-shape barres',
+            steps: [
           {
             text: 'Challenge 3 — Shape Combo: alternate E-shape and A-shape — F (E, 1st), C (A, 3rd), G (E, 3rd), D (A, 5th), 2 bars each at 60 BPM. Win: smooth switches between the two shapes, landing each change on beat 1.',
             hint: 'You\'re alternating between E-shape and A-shape with each chord change. This is what real songs ask for. Notice that some chord changes are tiny hand moves — barely shift positions.',
@@ -379,6 +425,8 @@ SETS.push(
               { name: 'C (A-shape, 3rd)', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,5,'3'],[2,5,'3'],[1,3,'1']], position: 3 },
               { name: 'G (E-shape, 3rd)', chord: [[6,3,'1'],[5,5,'3'],[4,5,'4'],[3,4,'2'],[2,3,'1'],[1,3,'1']], position: 3 },
               { name: 'D (A-shape, 5th)', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,7,'3'],[2,7,'3'],[1,5,'1']], position: 5 }
+            ]
+          }
             ]
           }
         ]

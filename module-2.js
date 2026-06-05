@@ -68,23 +68,48 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — fretboard drill',        steps: [
+        title: 'Practice station — fretboard drill',
+        sections: [
           {
-            text: 'Challenge 1 — Low E Run: play every natural note up the low E string and back down — E · F · G · A · B · C · D · E — saying each name aloud. Win: one lap, chart-free, with no mistakes.',
-            hint: 'Hearing + saying + playing locks it in. Peek at the chart only if you\'re truly stuck.',
-            skills: [2],
-            playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] }
+            title: 'Name every note on the low E string (frets 0–12)',
+            steps: [
+              {
+                text: 'Challenge 1 — Low E Run: play every natural note up the low E string and back down — E · F · G · A · B · C · D · E — saying each name aloud. Win: one lap, chart-free, with no mistakes.',
+                hint: 'Hearing + saying + playing locks it in. Peek at the chart only if you\'re truly stuck.',
+                skills: [2],
+                playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] }
+              },
+              {
+                text: 'Quick check — name the note before you play it:',
+                skills: [2],
+                response: { type: 'mc', prompt: 'Low E string — what note is at fret 7?', choices: ['A', 'B', 'C', 'G'] }
+              },
+              {
+                text: 'Name That Riff (give it a go!): pick out the "Seven Nation Army" or "Smoke on the Water" main riff by ear on the low E string. No score — just go for it.',
+                hint: 'Use the note-name chart. Don\'t worry about getting it perfect — the attempt trains your ear.',
+                skills: [5]
+              }
+            ]
           },
           {
-            text: 'Challenge 2 — A String Run: same on the A string, chart-free — A · B · C · D · E · F · G · A, up to fret 12 and back, one note per beat. Win: a clean lap with the metronome and no stalls.',
-            hint: 'Keep the metronome at 60 BPM. If you stall on a note, that\'s the one to drill.',
-            skills: [3],
-            playSeq: { label: 'Play all', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] }
-          },
-          {
-            text: 'Challenge 3 — Name That Riff (give it a go!): pick out the "Seven Nation Army" or "Smoke on the Water" main riff by ear on the low E string. No score — just go for it.',
-            hint: 'Use the note-name chart. Don\'t worry about getting it perfect — the attempt trains your ear.',
-            skills: [5]
+            title: 'Name every note on the A string (frets 0–12)',
+            steps: [
+              {
+                text: 'Challenge 2 — A String Run: same on the A string, chart-free — A · B · C · D · E · F · G · A, up to fret 12 and back, one note per beat. Win: a clean lap with the metronome and no stalls.',
+                hint: 'Keep the metronome at 60 BPM. If you stall on a note, that\'s the one to drill.',
+                skills: [3],
+                playSeq: { label: 'Play all', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] }
+              },
+              {
+                text: 'Quick check — name the note before you play it:',
+                skills: [3],
+                response: { type: 'mc', prompt: 'A string — what note is at fret 3?', choices: ['B', 'C', 'D', 'A'] }
+              },
+              {
+                text: 'Partner self-quiz: have a partner call out any fret 0–12 on the A string. Say the note within 3 seconds. Go 10 rounds, then switch.',
+                hint: 'No chart. If you stall on a note, loop just that part of the string until it\'s automatic.'
+              }
+            ]
           }
         ]
       }
@@ -268,11 +293,58 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — melodies & TAB',        steps: [
+        title: 'Practice station — melodies & TAB',
+        sections: [
+          {
+            title: 'Press notes cleanly with no fret buzz',
+            steps: [
           {
             text: 'Challenge 1 — Finger Workout: play frets 1–5 on the low E string, one finger per fret, then do the same on the A string. Keep your thumb behind the neck. Win: every note rings clean with no buzz.',
             hint: 'Go as slow as you need. Every note should ring cleanly with no buzz.',
             skills: [1, 2, 3, 6]
+          },
+          {
+            text: 'Minimum-pressure drill: play frets 1–4 on the low E string one at a time. Press lightly until it buzzes, then add just enough to make it ring clean. That is your target pressure.',
+            hint: 'Press just behind the fret, on your fingertip, thumb behind the neck. Most beginners press far too hard.',
+            skills: [1, 2]
+          },
+          {
+            text: 'One-finger-per-fret check: index=1, middle=2, ring=3, pinky=4 up the low E string. Every note rings — nothing buzzes or mutes. Click to hear the clean target tone.',
+            hint: 'Keep unused fingers hovering close, ready to drop down.',
+            skills: [2, 3],
+            playSeq: { label: 'Target tone (frets 1–4)', bpm: 60, notes: [41, 42, 43, 44] }
+          },
+          {
+            text: 'Quick check:',
+            skills: [1, 2],
+            response: { type: 'mc', prompt: 'Where should your fingertip press for the cleanest tone?', choices: [
+              'Just behind the fret (toward the nut)',
+              'On top of the fret wire',
+              'In the middle of the fret space',
+              'As close to the nut as possible'
+            ] }
+          }
+            ]
+          },
+          {
+            title: 'Read TAB & play a 4-bar melody in time at 60 BPM',
+            steps: [
+          {
+            text: 'Warm-up read — play this melody straight from the TAB at 60 BPM, one note per beat. Click any note name to hear how it should sound.',
+            hint: 'Read left-to-right. The numbers are fret numbers on the A string. If you buzz, fix the finger before moving on.',
+            skills: [4, 5],
+            tab: {
+              caption: '"Mary Had a Little Lamb" — A string · frets 3–7 · 60 BPM',
+              notes: [
+                { string: 'A', fret: 7, note: 'E', midi: 52 },
+                { string: 'A', fret: 5, note: 'D', midi: 50 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'A', fret: 5, note: 'D', midi: 50 },
+                { string: 'A', fret: 7, note: 'E', midi: 52 },
+                { string: 'A', fret: 7, note: 'E', midi: 52 },
+                { string: 'A', fret: 7, note: 'E', midi: 52 }
+              ]
+            }
           },
           {
             text: 'Challenge 2 — Play the Tune: using the TAB, play "Happy Birthday" on the E & A strings at 60 BPM, one note per beat. Win: the whole melody start to finish, in time, no buzz. Click any note name to hear how it should sound.',
@@ -336,6 +408,13 @@ SETS.push(
                 { string: 'E', fret: 3, note: 'G', midi: 43 }
               ]
             }
+          },
+          {
+            text: 'Quick check on reading TAB:',
+            skills: [4],
+            response: { type: 'mc', prompt: 'In TAB the bottom line is the low E string and the line above it is the A string. A "3" on the A-string line is which note?', choices: ['B', 'C', 'D', 'G'] }
+          }
+            ]
           }
         ]
       }

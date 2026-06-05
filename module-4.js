@@ -68,13 +68,22 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — pattern drill & first improvisation',        steps: [
+        title: 'Practice station — pattern drill & first improvisation',
+        sections: [
+          {
+            title: 'Play Pattern 1 with alternate picking',
+            steps: [
           {
             text: 'Challenge 1 — Pattern 1 Climb: play Pentatonic Pattern 1 ascending at 60 BPM, one note per beat, alternate picking (down-up-down-up). Win: every note rings clean with no missed picks. Click "Play all" to hear it.',
             hint: 'Go as slow as you need. Every note should ring cleanly. Say each note aloud as you play it to connect your ear to your fingers.',
             skills: [1, 2, 5],
             playSeq: { label: 'Play all', bpm: 60, notes: [45, 48, 50, 52, 55, 57, 60, 62, 64, 67, 69, 72] }
+          }
+            ]
           },
+          {
+            title: 'Position Pattern 1 for major & minor',
+            steps: [
           {
             text: 'Challenge 2 — Move the Box: play Pattern 1 as A minor pentatonic (1st finger, 5th fret, string 6) up and down using the TAB map, then shift it to E minor pentatonic (open-string root). Win: both positions clean — same shape, two spots on the neck.',
             hint: 'A minor: your hand sits around frets 5–8. E minor: your hand starts at the open string and you\'ll use frets 3 and 5 instead of 1st finger.',
@@ -96,11 +105,18 @@ SETS.push(
                 { string: 'e', fret: 8, note: 'C', midi: 72 }
               ]
             }
+          }
+            ]
           },
+          {
+            title: 'Improvise your first solo',
+            steps: [
           {
             text: 'Challenge 3 — First Solo (give it a go!): pick two notes from the pattern on one string and play them in any order, varying the rhythm — your first improvisation. No score — aim for 4–5 short ideas, then pause and leave some space.',
             hint: 'You don\'t need to play a lot of notes. A short, clear idea is better than a stream of notes. Leave space — silence is part of music.',
             skills: [6]
+          }
+            ]
           }
         ]
       }
@@ -209,17 +225,31 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — phrasing & D/G strings',        steps: [
+        title: 'Practice station — phrasing & D/G strings',
+        sections: [
+          {
+            title: 'Play an expressive one-note solo',
+            steps: [
           {
             text: 'Challenge 1 — The One-Note Solo: choose one note in the Am pentatonic pattern and play only that note for 8 bars, varying rhythm, dynamics, and tone. Win: make one note stay interesting for all 8 bars — record it and listen back.',
             hint: 'This sounds easy but isn\'t. Can you make one note interesting for 8 whole bars? The way you play it matters more than how many notes you play.',
             skills: [1, 2, 5]
+          }
+            ]
           },
+          {
+            title: 'Improvise a call-and-response phrase',
+            steps: [
           {
             text: 'Challenge 2 — Call & Response: play a 2-bar idea (call), pause 1 bar, then answer with a 2-bar idea (response). Win: the call ends on a non-root note (unresolved) and the response lands on the root (arrives home).',
             hint: 'Think of it like a musical question and answer. The call feels unresolved; the response feels like it arrives somewhere.',
             skills: [5, 6]
+          }
+            ]
           },
+          {
+            title: 'Name the notes on the D & G strings',
+            steps: [
           {
             text: 'Challenge 3 — D String Map: play the natural notes on the D string — D · E · F · G · A · B · C (frets 0–10) — slowly, saying each name aloud. Win: a clean lap up and back, chart-free. Click "Play all" to hear it at 60 BPM.',
             hint: 'Same musical alphabet pattern you know from E and A strings. Find the pattern — it repeats!',
@@ -231,6 +261,8 @@ SETS.push(
             hint: 'Notice the same pattern of whole and half steps — the musical alphabet behaves the same way on every string.',
             skills: [7],
             playSeq: { label: 'Play all', bpm: 60, notes: [55, 57, 59, 60, 62, 64, 65] }
+          }
+            ]
           }
         ]
       }
@@ -343,21 +375,37 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — theory in action & original solo',        steps: [
+        title: 'Practice station — theory in action & original solo',
+        sections: [
+          {
+            title: 'Understand relative major & minor scales',
+            steps: [
           {
             text: 'Challenge 1 — Relative Scales: write out C major pentatonic (1 C, 2 D, 3 E, 5 G, 6 A), then A minor pentatonic (1 A, ♭3 C, 4 D, 5 E, ♭7 G). Win: spot that they share the same five notes — only which note is "home" changes.',
             hint: 'C major pentatonic and A minor pentatonic share exactly the same five notes. Your hand position is the same — only which note you treat as "home" (the root) changes.',
             skills: [1, 2]
+          }
+            ]
           },
+          {
+            title: 'Compose a 4-bar solo',
+            steps: [
           {
             text: 'Challenge 2 — Compose It: write a 4-bar solo as scale-degree numbers (e.g. 1 3 5 3 | 6 5 3 1 | …), then play exactly what you wrote, varying the rhythms. Win: a deliberate 4-bar line you can play back the same way twice.',
             hint: 'Write first, then play! It\'s okay if it sounds simple. The goal is to make a deliberate musical decision, not to improvise randomly.',
             skills: [6, 7]
+          }
+            ]
           },
+          {
+            title: 'Perform your original solo',
+            steps: [
           {
             text: 'Challenge 3 — Perform It (give it a go!): play your 4-bar solo over the "All Along the Watchtower" or "Vampire" backing track, working in at least one hammer-on, pull-off, or vibrato. No score — just tell a story, don\'t run scales.',
             hint: 'Include at least one technique (hammer-on, pull-off, or vibrato) in your solo. Don\'t just run scales — tell a story!',
             skills: [3, 6, 7]
+          }
+            ]
           }
         ]
       }

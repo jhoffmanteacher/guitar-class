@@ -51,7 +51,11 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — explore the guitar',        steps: [
+        title: 'Practice station — explore the guitar',
+        sections: [
+          {
+            title: 'Get comfortable holding & exploring the guitar',
+            steps: [
           {
             text: 'Pick up the guitar. Hold it in a comfortable position. Strum all 6 strings slowly with your thumb — just listen to the sound.',
             hint: 'Don\'t worry about pressing any frets yet. Just get used to holding it.'
@@ -62,10 +66,17 @@ SETS.push(
           {
             text: 'Try tapping the body, plucking one string at a time, and strumming. What differences do you notice?',
             hint: 'Curiosity is your best tool right now.'
+          }
+            ]
           },
+          {
+            title: 'Describe why I want to learn guitar',
+            steps: [
           {
             text: 'Write or sketch your guitar goal on a sticky note or in your journal. We\'ll revisit this at the end of the semester.',
             hint: 'It can be a song you want to play, a skill you want to build, or just a feeling.'
+          }
+            ]
           }
         ]
       }
@@ -171,13 +182,22 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — Challenges',        steps: [
+        title: 'Practice station — Challenges',
+        sections: [
+          {
+            title: 'Tune all 6 strings with a tuner',
+            steps: [
           {
             text: 'Challenge 1 — Tune Challenge: get all 6 strings to green on the tuner. Beat the clock — can you do it in under 2 minutes? Log your time so you can beat it next session.',
             hint: 'Tune low to high: E A D G B e. Slow and steady beats rushing past the note. Use the play button to hear the target pitches.',
             skills: [5],
             playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
+          }
+            ]
           },
+          {
+            title: 'Play a melody on the open strings at 60 BPM',
+            steps: [
           {
             text: 'Challenge 2 — One Minute, Perfect Notes: pluck each open string low to high (E A D G B e) and say its name out loud. For one minute, count how many ring perfectly clean — no buzz, no muting. Log your score out of 6 so you can beat it next time.',
             hint: 'These are open strings — press nothing. Let each string ring fully before moving to the next.',
@@ -203,6 +223,8 @@ SETS.push(
                 { string: 'E', fret: 2,  note: 'F#', midi: 42 }
               ]
             }
+          }
+            ]
           }
         ]
       }

@@ -54,23 +54,39 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — finger assignments',        steps: [
+        title: 'Practice station — finger assignments',
+        sections: [
+          {
+            title: 'Set up a relaxed fingerpicking hand',
+            steps: [
           {
             text: 'Challenge 1 — Hand Shape: put the pick down, rest your thumb on the low E and i-m-a on the G, B, and high e strings, and hold for 30 seconds. Win: a relaxed, arched wrist with curved fingers — like holding an apple.',
             hint: 'Your wrist should be arched (curved) — not flat against the guitar body. Fingers curved as if you\'re holding an apple. Relax.',
             skills: [1, 2]
+          }
+            ]
           },
+          {
+            title: 'Pluck p-i-m-a — thumb bass, i-m-a treble',
+            steps: [
           {
             text: 'Challenge 2 — p-i-m-a Plucks: pluck once with each finger in order — p (low E), i (G), m (B), a (high e) — saying each letter aloud, 8 times at 60 BPM. Win: the same volume from every finger, even the weaker ring (a).',
             hint: 'No strumming, no pick. Each finger gets ONE string. Aim for the same volume from each finger — the ring finger (a) is usually the weakest at first.',
             skills: [3, 4, 5],
             playSeq: { label: 'Hear p-i-m-a on open strings', bpm: 60, notes: [40, 55, 59, 64] }
+          }
+            ]
           },
+          {
+            title: 'Move the thumb between bass strings',
+            steps: [
           {
             text: 'Challenge 3 — Moving Bass: pluck the A string with p then G-B-e with i-m-a, then the D string with p, fingers staying put. Win: only the thumb moves to find each bass note — the i-m-a fingers stay anchored.',
             hint: 'This is how you change chords later — the thumb finds the bass note of the chord (root) while the fingers stay anchored on the treble strings.',
             skills: [2, 3, 6],
             playSeq: { label: 'Thumb shifts: E · A · D bass with i-m-a above', bpm: 60, notes: [40, 55, 59, 64, 45, 55, 59, 64, 50, 55, 59, 64] }
+          }
+            ]
           }
         ]
       }
@@ -184,25 +200,41 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — the 6-note pattern',        steps: [
+        title: 'Practice station — the 6-note pattern',
+        sections: [
+          {
+            title: 'Play the p-i-m-a-m-i pattern on Em',
+            steps: [
           {
             text: 'Challenge 1 — Em Pattern: fret Em and play the 6-note pattern p-i-m-a-m-i at 60 BPM, one note per click, for 8 bars. Win: a steady, even pulse with every note ringing clean.',
             hint: 'Count "1 + 2 + 3 + 4 +" and play 6 notes per bar — meaning some notes fall on numbers, some on "+"s. Don\'t worry about exact counting yet; just keep the pulse steady.',
             skills: [1, 2, 3],
             playSeq: { label: 'Em p-i-m-a-m-i pattern at 60 BPM', bpm: 60,
               notes: [40, 55, 59, 64, 59, 55] }
+          }
+            ]
           },
+          {
+            title: 'Play the pattern on Am (move the thumb)',
+            steps: [
           {
             text: 'Challenge 2 — Am Pattern: play the same 6-note pattern over Am — thumb on the A string (Am\'s root), i-m-a still on G-B-e — 8 times. Win: only the thumb moves to the new bass; the fingers stay anchored.',
             hint: 'The only thing that changes between Em and Am is which bass string the thumb plays. Fingers stay anchored on G, B, high e.',
             skills: [3, 4, 6],
             playSeq: { label: 'Am p-i-m-a-m-i pattern', bpm: 60,
               notes: [45, 57, 60, 64, 60, 57] }
+          }
+            ]
           },
+          {
+            title: 'Build up your tempo (70+ BPM)',
+            steps: [
           {
             text: 'Challenge 3 — Beat Your Tempo: play the Em pattern at 70 BPM, then try 80. Win: clean at 70+ with the "a" finger landing right on its beat — drop back to 60 if it falls apart.',
             hint: 'The most common mistake: the "a" finger lags. Pay extra attention to your ring finger — it needs to land exactly on its beat, no later.',
             skills: [2, 5]
+          }
+            ]
           }
         ]
       }
@@ -309,23 +341,39 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — full progressions & performance',        steps: [
+        title: 'Practice station — full progressions & performance',
+        sections: [
+          {
+            title: 'Fingerpick a full chord progression',
+            steps: [
           {
             text: 'Challenge 1 — Full Progression: play the 6-note arpeggio over a 4-chord progression — Am–C–D–F or C–Am–F–G — 1 bar each at 60 BPM. Win: the thumb finds each chord\'s root bass while the fingers stay on G-B-e.',
             hint: 'For each chord, the thumb plays the ROOT bass note (Am = A string, C = A string, D = D string, F = D string). Fingers always on G-B-e.',
             skills: [1, 3, 4],
             playSeq: { label: 'Am · C · D · F bass roots', bpm: 60,
               notes: [45, 48, 50, 53] }
+          }
+            ]
           },
+          {
+            title: 'Try Travis picking',
+            steps: [
           {
             text: 'Challenge 2 — Travis Thumb: warm up Travis picking on C — thumb alternating the A string (beats 1 & 3) and G string (beats 2 & 4), thumb-only at 60 BPM. Win: a steady, even alternating thumb — then add an i-pluck on the B string on each "+".',
             hint: 'Just the thumb! Once that\'s steady, add an i-pluck on the B string on the "+" of each beat. Travis picking adds fingers ON TOP of an already-grooving thumb.',
             skills: [2, 5]
+          }
+            ]
           },
+          {
+            title: 'Perform a fingerpicked song',
+            steps: [
           {
             text: 'Challenge 3 — Perform It (give it a go!): pick one song — "House of the Rising Sun", "Hallelujah", "Vampire" (verse), or a choice-list song — and play it through 3 times without stopping, even with mistakes. No score — practice the recovery; keep going no matter what.',
             hint: 'For your performance, keep going no matter what. Mistakes in performance are normal. Stopping is what makes them sound bad. Practice the recovery.',
             skills: [4, 5, 6]
+          }
+            ]
           }
         ]
       }

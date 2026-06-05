@@ -54,7 +54,11 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — power chord drill',        steps: [
+        title: 'Practice station — power chord drill',
+        sections: [
+          {
+            title: 'Fret a clean power chord & mute unused strings',
+            steps: [
           {
             text: 'Challenge 1 — Clean E5: fret an E5 power chord (low E open root + 2nd fret A string) and strum just those two strings — no others. Win: a clean, buzz-free E5 with nothing else ringing.',
             hint: 'Use your index finger on the root and your ring finger on the 5th. Keep your pinky close. Palm-mute the strings below with the edge of your picking hand.',
@@ -62,7 +66,12 @@ SETS.push(
             chords: [
               { name: 'E5', chord: [[6,0],[5,2,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 0 }
             ]
+          }
+            ]
           },
+          {
+            title: 'Move the power chord shape along the E & A strings',
+            steps: [
           {
             text: 'Challenge 2 — Shape Shifter: slide the same shape to A5 (5th fret E), G5 (3rd fret E), D5 (5th fret A), and C5 (3rd fret A), saying each name aloud. Win: hit all four cleanly without losing the shape.',
             hint: 'Keep the same finger shape and just move it up and down the neck. The relationship between the two fingers never changes.',
@@ -73,7 +82,12 @@ SETS.push(
               { name: 'C5', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
               { name: 'D5', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,'x'],[2,'x'],[1,'x']], position: 5 }
             ]
+          }
+            ]
           },
+          {
+            title: 'Play a power chord progression in time',
+            steps: [
           {
             text: 'Challenge 3 — Watchtower Loop: play Am5–G5–F5–G5, one strum per beat at 60 BPM. Win: four times through, changing on beat 1 every time, with no stops.',
             hint: 'Am5 = 5th fret E string, G5 = 3rd fret E string, F5 = 1st fret E string. Shift smoothly — aim to land exactly on beat 1.',
@@ -82,6 +96,8 @@ SETS.push(
               { name: 'Am5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 },
               { name: 'G5',  chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
               { name: 'F5',  chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 0 }
+            ]
+          }
             ]
           }
         ]
@@ -188,21 +204,37 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — metronome & chord changes',        steps: [
+        title: 'Practice station — metronome & chord changes',
+        sections: [
+          {
+            title: 'Change power chords on beat 1 at 70+ BPM',
+            steps: [
           {
             text: 'Challenge 1 — Loop in Time: play the "Watchtower" loop (Am5–G5–F5–G5) at 60 BPM, each chord one bar (4 beats), four times through. Win: every chord change lands on beat 1, with no stops.',
             hint: 'If you miss beat 1, keep going — don\'t stop. Staying in time matters more than the perfect change right now.',
             skills: [1, 2]
+          }
+            ]
           },
+          {
+            title: 'Play an 8-bar progression with a steady strum',
+            steps: [
           {
             text: 'Challenge 2 — Eighth-Note Strum: play the loop with straight eighths (down-down-up-down-up), counting "1 + 2 + 3 + 4 +". Win: keep it clean and steady, then beat your tempo — push past 70 BPM.',
             hint: 'Start at 60 BPM. If it feels easy, bump up 5 BPM. Your goal this week: play the loop cleanly at 70+ BPM.',
             skills: [3, 4]
+          }
+            ]
           },
+          {
+            title: 'Optional: add octave doubling',
+            steps: [
           {
             text: 'Challenge 3 — Octave Add-On (give it a go!): add your pinky two frets above your ring finger to make a 3-note power chord. No score — just try it and notice how the sound changes.',
             hint: 'This is optional. If your power chord sounds clean as is, keep it. Only add the 3rd finger if you can do it without buzzing.',
             skills: [5]
+          }
+            ]
           }
         ]
       }

@@ -514,6 +514,20 @@ body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
 .tab-choice-content{display:none}
 .tab-choice-content.expanded{display:block;margin-top:2px}
 .tab-choice-content .tab{margin-top:0}
+/* Station C — collapsible skill sections (guided by the module review) */
+.sc-sections{display:flex;flex-direction:column;gap:8px}
+.sc-sec{border:0.5px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg)}
+.sc-sec.open{border-color:var(--green-text)}
+.sc-sec-head{width:100%;font-family:inherit;font-size:15px;font-weight:500;text-align:left;padding:11px 14px;background:var(--bg2);border:0;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:10px;line-height:1.3}
+.sc-sec-head:hover{background:var(--green-bg)}
+.sc-sec.open .sc-sec-head{background:var(--green-bg);color:var(--green-text)}
+.sc-sec-chev{font-size:11px;color:var(--green-text);flex-shrink:0;transition:transform 0.15s}
+.sc-sec.open .sc-sec-chev{transform:rotate(90deg)}
+.sc-sec-title{display:flex;align-items:center;gap:8px}
+.sc-sec-num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;font-size:12px;font-weight:600;border-radius:50%;background:var(--green-text);color:#fff}
+.sc-sec-body{display:none;padding:4px 14px 6px}
+.sc-sec.open .sc-sec-body{display:block}
+.sc-sec-body .steps{margin:0}
 .chord-popup{position:absolute;z-index:1000;background:var(--bg);border:0.5px solid var(--border2);border-radius:var(--radius);padding:10px 12px;box-shadow:0 4px 18px rgba(0,0,0,0.20);pointer-events:none;display:none;flex-direction:column;align-items:center;gap:4px;max-width:220px}
 .chord-popup.wide{max-width:360px}
 .chord-popup.visible{display:flex}
@@ -1815,7 +1829,7 @@ function switchTab(el,wid,tab){
 
 /* ── Stations ── */
 function buildStations(w, stationId){
-  const stepsHtml=(steps,stationId)=>steps.map((s,i)=>{
+  const stepsHtml=(steps,ns)=>steps.map((s,i)=>{
     const text=s.text.replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
       const safe=label.replace(/'/g,"\\'");
       // data-ext links can't be embedded (official recordings block it) — open on YouTube in a new tab.
@@ -1838,7 +1852,7 @@ function buildStations(w, stationId){
       const defBpm = ps.bpm || 60;
       const minBpm = ps.minBpm || 40;
       const maxBpm = ps.maxBpm || 120;
-      const key = `bpm:${w.id}:${stationId}:${i}`;
+      const key = `bpm:${w.id}:${ns}:${i}`;
       const bpm = readStoredBpm(key, defBpm);
       const midis = JSON.stringify(ps.notes);
       return ` <span class="bpm-control-group">` +
@@ -1846,15 +1860,15 @@ function buildStations(w, stationId){
         renderBpmControl(key, bpm, minBpm, maxBpm) +
         `</span>`;
     })() : '';
-    const tabHtml = s.tab ? buildTab(s.tab, { keyPrefix: `bpm:${w.id}:${stationId}:${i}:tab` }) : '';
+    const tabHtml = s.tab ? buildTab(s.tab, { keyPrefix: `bpm:${w.id}:${ns}:${i}:tab` }) : '';
     const tabsHtml = (s.tabs && s.tabs.length)
       ? `<div class="tab-choice-group">${s.tabs.map((t, tIdx) => {
           const title = t.title || t.caption || 'TAB';
-          return `<div class="tab-choice"><button type="button" class="tab-choice-btn" onclick="toggleTabChoice(this)"><span class="tab-choice-icon">&#x25B6;</span><span>Show TAB: ${escHtml(title)}</span></button><div class="tab-choice-content">${buildTab(t, { keyPrefix: `bpm:${w.id}:${stationId}:${i}:tab:${tIdx}` })}</div></div>`;
+          return `<div class="tab-choice"><button type="button" class="tab-choice-btn" onclick="toggleTabChoice(this)"><span class="tab-choice-icon">&#x25B6;</span><span>Show TAB: ${escHtml(title)}</span></button><div class="tab-choice-content">${buildTab(t, { keyPrefix: `bpm:${w.id}:${ns}:${i}:tab:${tIdx}` })}</div></div>`;
         }).join('')}</div>`
       : '';
     const respHtml = s.response ? (()=>{
-      const key = `${w.id}-${stationId}-${i}`;
+      const key = `${w.id}-${ns}-${i}`;
       const stored = responses[key] || '';
       const promptHtml = s.response.prompt ? `<div class="step-resp-prompt">${escHtml(s.response.prompt)}</div>` : '';
       const labelHtml = `<div class="step-resp-label">&#x270F;&#xFE0F; Your response</div>`;
@@ -1872,16 +1886,32 @@ function buildStations(w, stationId){
       return '';
     })() : '';
     const readBtn = `<button class="read-aloud-btn" type="button" onclick="event.stopPropagation();readAloudStep(this)" title="Read this step aloud" aria-label="Read aloud">&#x1F50A;</button>`;
-    const doneKey = `${w.id}-${stationId}-${i}`;
+    const doneKey = `${w.id}-${ns}-${i}`;
     const isDone = completed[doneKey] === true;
     const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${isDone ? '&#x2713; Done' : 'Mark done'}</button></div>`;
     return `<li class="step${isDone ? ' step-done' : ''}"><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${hintHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div>${doneBtn}</div></li>`;
   }).join('');
-  const dp=(id,cls,badge,badgeClass,s)=>`
+  const sectionsHtml=(sections,baseNs)=>sections.map((sec,gi)=>{
+    const ns = `${baseNs}-sec${gi}`;
+    const open = gi===0 ? ' open' : '';
+    return `<div class="sc-sec${open}">
+      <button type="button" class="sc-sec-head" aria-expanded="${gi===0}" onclick="toggleStationSection(this)">
+        <span class="sc-sec-chev">&#x25B6;</span>
+        <span class="sc-sec-title"><span class="sc-sec-num">${gi+1}</span>${sec.title}</span>
+      </button>
+      <div class="sc-sec-body"><ul class="steps">${stepsHtml(sec.steps, ns)}</ul></div>
+    </div>`;
+  }).join('');
+  const dp=(id,cls,badge,badgeClass,s)=>{
+    const body = (s.sections && s.sections.length)
+      ? `<div class="sc-sections">${sectionsHtml(s.sections, id)}</div>`
+      : `<ul class="steps">${stepsHtml(s.steps, id)}</ul>`;
+    return `
     <div class="dp${cls}" id="${w.id}-dp-${id}">
       <div class="dp-head"><span class="st-badge ${badgeClass}">${badge}</span><div class="dp-title">${s.title}</div></div>
-      <ul class="steps">${stepsHtml(s.steps, id)}</ul>
+      ${body}
     </div>`;
+  };
   if(stationId){
     const s = stationId === 'b' ? w.stations.b : w.stations.c;
     const badge = stationId === 'b' ? 'Station B' : 'Station C';
@@ -1910,6 +1940,13 @@ function toggleStepDone(btn, key){
   btn.setAttribute('aria-pressed', nowDone);
   btn.innerHTML = nowDone ? '&#x2713; Done' : 'Mark done';
   onCompleteChange(key, nowDone);
+}
+
+function toggleStationSection(btn){
+  const item = btn.closest('.sc-sec');
+  const open = item.classList.toggle('open');
+  btn.setAttribute('aria-expanded', open);
+  renderChordBoxes();
 }
 
 function openSt(wid,s){

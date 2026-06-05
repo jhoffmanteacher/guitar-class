@@ -54,21 +54,37 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — chord shapes & first strums',        steps: [
+        title: 'Practice station — chord shapes & first strums',
+        sections: [
+          {
+            title: 'Fret Am cleanly',
+            steps: [
           {
             text: 'Challenge 1 — Clean Am: fret Am (index str 2/fret 1, middle str 4/fret 2, ring str 3/fret 2) and strum strings 1–5 (not the low E). Win: every string rings cleanly — check each one by plucking it.',
             hint: 'Press just behind the frets, not on them. Curve your fingers so they don\'t accidentally touch neighboring strings. Check each string individually by plucking it.',
             skills: [3, 5]
+          }
+            ]
           },
+          {
+            title: 'Fret Em cleanly',
+            steps: [
           {
             text: 'Challenge 2 — Clean Em: fret Em (middle str 5/fret 2, ring str 4/fret 2) and strum all 6 strings. Win: a full, open, buzz-free Em — this is your warm-up chord.',
             hint: 'Em is the easiest chord on guitar. Use it to warm up before harder chords. It should sound full and open.',
             skills: [4, 5]
+          }
+            ]
           },
+          {
+            title: 'Switch Am ↔ Em on beat 1',
+            steps: [
           {
             text: 'Challenge 3 — Am ↔ Em Switch: at 60 BPM, 4 down-strums per bar, play 2 bars of Am then 2 bars of Em and repeat. Win: change chords right on beat 1 every time — keep strumming through any fumble.',
             hint: 'Even if the chord isn\'t perfect, keep strumming in time. Stopping to fix a note is the #1 habit to avoid. Fix it between bars, not mid-bar.',
             skills: [5, 6]
+          }
+            ]
           }
         ]
       }
@@ -176,21 +192,37 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — chord transitions & strumming',        steps: [
+        title: 'Practice station — chord transitions & strumming',
+        sections: [
+          {
+            title: 'Use a common-finger pivot (Am ↔ C)',
+            steps: [
           {
             text: 'Challenge 1 — Pivot Finger: switch Am ↔ C keeping your index finger planted on string 2, fret 1, moving only the other fingers. Win: clean changes both ways without ever lifting the pivot finger.',
             hint: 'Common-finger pivots cut your transition time in half. Look for other chords in this group that share a finger position.',
             skills: [4, 6]
+          }
+            ]
           },
+          {
+            title: 'Play the C–G–Am–F loop in time',
+            steps: [
           {
             text: 'Challenge 2 — C–G–Am–F Loop: at 60 BPM, play 2 bars each of C, G, Am, F and repeat. Win: change on beat 1 every time — then bump up 5 BPM and hold it clean.',
             hint: 'If you miss a change, keep going. You can slow to 50 BPM if needed. Gradually increase by 5 BPM each time through.',
             skills: [1, 2, 3, 5]
+          }
+            ]
           },
+          {
+            title: 'Play a down-up strum pattern',
+            steps: [
           {
             text: 'Challenge 3 — Down-Up Strum: play the loop strumming down on 1 2 3 4 and up on each "+", counting "1 + 2 + 3 + 4 +" aloud. Win: a steady, relaxed pendulum with lighter upstrokes and no stumbles.',
             hint: 'Start slower than you think you need to. The upstroke should be lighter than the downstroke. Your wrist should move like a relaxed pendulum.',
             skills: [5, 6]
+          }
+            ]
           }
         ]
       }
@@ -303,21 +335,37 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — Group 2 chords & cross-group connections',        steps: [
+        title: 'Practice station — Group 2 chords & cross-group connections',
+        sections: [
+          {
+            title: 'Fret D major cleanly',
+            steps: [
           {
             text: 'Challenge 1 — Clean D: fret D major (triangle: str 1/fret 2, str 2/fret 3, str 3/fret 2) and strum strings 1–4 only. Win: all four ring — especially string 1 (high E), which loves to get muted.',
             hint: 'The D chord is tricky because string 1 is easy to accidentally mute. Curve your fingers and make sure your fingertips arch away from that string.',
             skills: [1]
+          }
+            ]
           },
+          {
+            title: 'Connect Group 1 & Group 2 chords',
+            steps: [
           {
             text: 'Challenge 2 — Cross-Group Changes: at 60 BPM, switch G→D, Am→Em, and C→A, 2 bars each. Win: each change lands on beat 1, using fingers that stay close as you switch.',
             hint: 'Look for fingers that stay close or in the same area as you switch. Planning your hand movement before you lift your fingers saves time.',
             skills: [2, 3, 5, 6]
+          }
+            ]
           },
+          {
+            title: 'Play a full song',
+            steps: [
           {
             text: 'Challenge 3 — Play a Song (give it a go!): play through "Country Roads" or "Stand By Me" (G–Em–C–D) with a simple down-strum. No score — if a change is rough, isolate just those two chords.',
             hint: 'You now have enough chords to play hundreds of songs! If a chord change is rough, slow down and isolate just those two chords — don\'t practice the whole song broken.',
             skills: [5, 6]
+          }
+            ]
           }
         ]
       }
@@ -426,21 +474,37 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — Group 3 chords & showcase prep',        steps: [
+        title: 'Practice station — Group 3 chords & showcase prep',
+        sections: [
+          {
+            title: 'Fret E major cleanly',
+            steps: [
           {
             text: 'Challenge 1 — Clean E: fret E major (index str 3/fret 1, middle str 5/fret 2, ring str 4/fret 2) and strum all 6 strings. Win: a full, rich chord with every string ringing — watch your index on string 2.',
             hint: 'E major is one of the most satisfying open chords to play. If any string buzzes, check your index finger — it tends to accidentally mute string 2.',
             skills: [1, 3]
+          }
+            ]
           },
+          {
+            title: 'Fret B7 cleanly',
+            steps: [
           {
             text: 'Challenge 2 — Four-Finger B7: fret B7 (index str 4/fret 1, middle str 5/fret 2, ring str 3/fret 2, pinky str 1/fret 2) and strum strings 1–5. Win: all four fingers down and every played string clean — then play E→B7→E and hear it pull home.',
             hint: 'B7 is a dominant 7th chord — it has a slightly tense sound that wants to resolve to E. Play E then B7 then E again and hear how it pulls back.',
             skills: [2, 3]
+          }
+            ]
           },
+          {
+            title: 'Perform your showcase song',
+            steps: [
           {
             text: 'Challenge 3 — Showcase Run (give it a go!): play your performance song start to finish 3 times without stopping, even through mistakes, and time yourself. No score — this trains your recovery, not perfection.',
             hint: 'Don\'t stop when you make a mistake in performance practice. The goal is to keep going. You can fix mistakes in slow practice — performance practice trains your recovery.',
             skills: [5, 6]
+          }
+            ]
           }
         ]
       }
