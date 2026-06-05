@@ -1,3 +1,23 @@
+# Site health pass — Chromebook performance, accessibility, dead-link audit 🔲 TODO
+
+Scoped 2026-06-05. Students access the site on **Chromebooks** (not phones), so optimize for that. Three pieces:
+
+## 1. Loading speed
+- The heavy content (YouTube videos) is already click-to-load — iframes are injected into `#rp-iframe-wrap` only when a student clicks a video button (`loadPanel('youtube', …)` in `index.html`). So videos are NOT the bottleneck.
+- What loads up front and blocks first paint: the Google Translate script in `<head>` (`index.html:25`), then ~245KB of synchronous JS at the top of `<body>` — `config-main.js`, `module-1.js`…`module-8.js`, plus the 3 Firebase SDK scripts (`index.html:557–569`). On a weak Chromebook CPU these parse before the header even renders.
+- Plan: make these non-blocking. Add `async` to the Google Translate script. For the local + Firebase scripts, add `defer` — but the inline bootstrap `<script>` at `index.html:732` runs `firebase.initializeApp(...)` immediately and depends on Firebase being loaded first, so deferring the SDK would break it. Safe fix: extract that inline script (lines 732–3092) into an external `app.js` and load it with `defer` after `module-8.js`; deferred external scripts keep global scope (so the `onclick="…"` handlers in the HTML still work) and run in order after parse. Verify in Live Server before pushing.
+
+## 2. Accessibility suggestions (audit, then apply the easy wins)
+- Check color contrast (the purple header `#4d1964` on white, and the muted `--text2`/`--text3` grays).
+- Add text alternatives / `aria-label`s to icon-only buttons (the FAB tuner/timer/metronome, the ✕ close buttons, the play-triangle video buttons).
+- Keyboard navigation: confirm every clickable `<div>` (e.g. the `.fab` buttons use `onclick` on a div) is reachable by Tab and operable by Enter/Space — convert to `<button>` or add `role`/`tabindex` where needed.
+- Confirm a visible focus outline exists for keyboard users.
+
+## 3. Dead YouTube link audit
+- ~222 unique YouTube IDs across `module-1.js`…`module-8.js`. Verify each via the oEmbed endpoint (`https://www.youtube.com/oembed?url=…&format=json` → JSON for valid, 404 for dead), batched in parallel `WebFetch` calls per the CLAUDE.md rule. Replace or drop any dead ones (search-and-verify; never invent IDs).
+
+---
+
 # Module 2 — Remaining Changes ✅ COMPLETE
 
 All planned work is shipped. Only the interactive fretboard remains parked on a branch (see below).
