@@ -66,7 +66,7 @@ Google account names can contain arbitrary characters. Low likelihood, but it's 
 two-minute fix: wrap all three in the existing escape helpers everywhere the user
 header is rendered (three call sites).
 
-## 1.4 ⚡ Make the Google Translate script non-blocking
+## 1.4 ⚡ Make the Google Translate script non-blocking ✅ DONE (June 2026)
 **File:** `index.html` (~line 25)
 
 The only remaining render-blocking script is
