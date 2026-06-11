@@ -18,9 +18,18 @@ function signIn(){
     .catch(e=>alert('Sign-in error: '+e.message));
 }
 function signOut(){ auth.signOut(); }
+
+// Dev bypass is for local UI testing only. Only show/allow it when the site is
+// running on localhost — never on the live (GitHub Pages) site.
+const IS_LOCALHOST = ['localhost','127.0.0.1','[::1]'].includes(location.hostname);
 function devBypass(){
+  if(!IS_LOCALHOST){ console.warn('Dev bypass is disabled outside localhost.'); return; }
   currentUser = {uid:'dev-user',displayName:'Dev User',email:'dev@test.local',photoURL:null};
   showApp(currentUser);
+}
+if(IS_LOCALHOST){
+  const _devBtn = document.getElementById('dev-bypass-btn');
+  if(_devBtn) _devBtn.style.display='';
 }
 
 auth.onAuthStateChanged(async user=>{
