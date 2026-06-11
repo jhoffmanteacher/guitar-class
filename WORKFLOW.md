@@ -24,7 +24,8 @@
 
 ## PHASE 1 — Finish Module 2 (the template)
 
-### [~] Session 1.1 — Module 2 text upgrade  ← IN PROGRESS
+### [x] Session 1.1 — Module 2 text upgrade
+✅ done 2026-06-11 — # hint, quick-check spread (5/10 vs 8/2) + buzz-diagnosis MC, self-contained gotItWhen, partner solo fallback, per-activity time chips + Timer ref, Stuck?/Level up on all 5 challenges (new `stuck:`/`levelUp:` step props), assessment-piece naming on Set 1 Ch2, exit-ticket step on all 4 stations, module review expanded + forward link. New render: `time`/`stuck`/`levelUp`/`forward` fields in `app.js`, styled in `styles.css`.
 Stuck?/Level up lines on every challenge · # (sharp) explainer hint where the Happy
 Birthday TAB first appears (both stations) · quick-check hygiene (no verbatim repeats;
 spread fret sampling across 2/8/10/12; computer vs practice stations sample different

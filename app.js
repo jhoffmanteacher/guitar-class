@@ -1160,6 +1160,10 @@ function buildStations(w, stationId){
       if(bullets.length <= 1) return `<div class="sh">${s.hint}</div>`;
       return `<ul class="sh-list">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
     })() : '';
+    const branchHtml = (s.stuck || s.levelUp) ? `<div class="step-branches">`
+      + (s.stuck ? `<div class="step-branch step-stuck"><span class="step-branch-tag">&#x1FA9C; Stuck?</span> ${s.stuck}</div>` : '')
+      + (s.levelUp ? `<div class="step-branch step-levelup"><span class="step-branch-tag">&#x1F336;&#xFE0F; Level up</span> ${s.levelUp}</div>` : '')
+      + `</div>` : '';
     const chordsHtml = (s.chords&&s.chords.length)
       ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}${c.name?`<div class="chord-box-label">${c.name}</div>`:''}</div>`).join('')}</div>`
       : '';
@@ -1207,7 +1211,7 @@ function buildStations(w, stationId){
     const doneKey = `${w.id}-${ns}-${i}`;
     const isDone = completed[doneKey] === true;
     const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${isDone ? '&#x2713; Done' : 'Mark done'}</button></div>`;
-    return `<li class="step${isDone ? ' step-done' : ''}"><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span>${timeHtml}<div class="step-body">${playSeqHtml}${hintHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div>${doneBtn}</div></li>`;
+    return `<li class="step${isDone ? ' step-done' : ''}"><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span>${timeHtml}<div class="step-body">${playSeqHtml}${hintHtml}${branchHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div>${doneBtn}</div></li>`;
   }).join('');
   const sectionsHtml=(sections,baseNs)=>sections.map((sec,gi)=>{
     const ns = `${baseNs}-sec${gi}`;
