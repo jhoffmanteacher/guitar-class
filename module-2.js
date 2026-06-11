@@ -25,6 +25,7 @@ SETS.push(
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/B-eIyx08X10?t=146" target="_blank">Learn the Notes on the E &amp; A Strings – Quail Studios Guitar</a> (starts at 2:26).',
+            time: '4 min',
             hint: 'Play along on your guitar as he goes through each note on both strings. Pause and find each note before he names it.',
             skills: [1, 2, 3],
             response: { type: 'mc', prompt: 'On the low E string, which note is at fret 5?', choices: [
@@ -36,30 +37,34 @@ SETS.push(
           },
           {
             text: 'Watch: <a href="https://youtu.be/k2jBLNzfEow" target="_blank">Fretboard Notes Made Easy – Marty Music</a> (0:00–4:00).',
+            time: '4 min',
             hint: 'Focus on the E and A strings only for now. What patterns does he point out?',
             skills: [1, 3],
             response: { type: 'short', placeholder: 'Describe one pattern he points out for finding notes on the E or A string.' }
           },
           {
             text: 'Listen to "Happy Birthday" — can you identify which notes of the melody live on the E or A string? Hum along and try to find the notes.',
+            time: '2 min',
             hint: 'Don\'t worry about playing it yet — just train your ear to connect sounds to strings.',
             skills: [5],
             response: { type: 'short', placeholder: 'Which note(s) did you find first? Where on the fretboard?' }
           },
           {
             text: 'Play-along preview: keep your note-name chart open and play up the low E string slowly with the audio, frets 0–12 — E · F · G · A · B · C · D · E — saying each name aloud. Lean on the chart here; you\'ll do it from memory at the practice station.',
+            time: '3 min',
             hint: 'Slow is fine. Right now the goal is connecting each name to its spot — use the chart freely.',
             skills: [2],
             playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] },
-            response: { type: 'mc', prompt: 'On the low E string, what note is at fret 3?', choices: [
-              'G',
-              'F',
-              'A',
-              'D'
+            response: { type: 'mc', prompt: 'On the low E string, what note is at fret 10?', choices: [
+              'C',
+              'D',
+              'E',
+              'B'
             ] }
           },
           {
             text: 'Same idea on the A string, still with your chart: A · B · C · D · E · F · G · A (frets 0–12), up then back down, names aloud.',
+            time: '3 min',
             hint: 'Notice fret 5 of the A string is the same note as the open D string — that connection helps later.',
             skills: [3],
             playSeq: { label: 'Play all', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] },
@@ -75,6 +80,7 @@ SETS.push(
             steps: [
               {
                 text: 'Before today\'s notes: tune all 6 strings to green, low to high — E A D G B e — and say each string name as you go. Beat your time from last session. Click "Hear all 6 strings" for the target pitches.',
+                time: '2 min',
                 hint: 'Tuning and the string names are Module 1 skills you keep forever — do this every class before you play. Slow and steady beats rushing past the note.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
@@ -85,17 +91,20 @@ SETS.push(
             steps: [
               {
                 text: 'Challenge 1 — Low E Run: play every natural note up the low E string and back down — E · F · G · A · B · C · D · E — saying each name aloud. Win: one lap, chart-free, with no mistakes.',
-                hint: 'Hearing + saying + playing locks it in. Peek at the chart only if you\'re truly stuck.',
+                time: '4 min',
+                hint: 'Hearing + saying + playing locks it in. Peek at the chart only if you\'re truly stuck. Set the ⏱ Timer (bottom of the screen) to 2 min and count how many clean laps you fit before it beeps — beat that number next class.',
                 skills: [2],
                 playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] }
               },
               {
                 text: 'Quick check — name the note before you play it:',
+                time: '1 min',
                 skills: [2],
-                response: { type: 'mc', prompt: 'Low E string — what note is at fret 7?', choices: ['A', 'B', 'C', 'G'] }
+                response: { type: 'mc', prompt: 'Low E string — what note is at fret 8?', choices: ['A', 'C', 'D', 'B'] }
               },
               {
                 text: 'Name That Riff (give it a go!): pick out the "Seven Nation Army" or "Smoke on the Water" main riff by ear on the low E string. No score — just go for it.',
+                time: '3 min',
                 hint: 'Use the note-name chart. Don\'t worry about getting it perfect — the attempt trains your ear.',
                 skills: [5]
               }
@@ -106,18 +115,21 @@ SETS.push(
             steps: [
               {
                 text: 'Challenge 2 — A String Run: same on the A string, chart-free — A · B · C · D · E · F · G · A, up to fret 12 and back, one note per beat. Win: a clean lap with the metronome and no stalls.',
+                time: '4 min',
                 hint: 'Keep the metronome at 60 BPM. If you stall on a note, that\'s the one to drill.',
                 skills: [3],
                 playSeq: { label: 'Play all', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] }
               },
               {
                 text: 'Quick check — name the note before you play it:',
+                time: '1 min',
                 skills: [3],
-                response: { type: 'mc', prompt: 'A string — what note is at fret 3?', choices: ['B', 'C', 'D', 'A'] }
+                response: { type: 'mc', prompt: 'A string — what note is at fret 2?', choices: ['A', 'B', 'C', 'D'] }
               },
               {
                 text: 'Partner self-quiz: have a partner call out any fret 0–12 on the A string. Say the note within 3 seconds. Go 10 rounds, then switch.',
-                hint: 'No chart. If you stall on a note, loop just that part of the string until it\'s automatic.'
+                time: '3 min',
+                hint: 'No chart. If you stall on a note, loop just that part of the string until it\'s automatic. No partner? Write frets 0–12 on small scraps of paper, shuffle them, then flip one at a time and name it within 3 seconds.'
               }
             ]
           }
@@ -171,7 +183,7 @@ SETS.push(
         practice: { type: 'playSeq', label: 'Play E string 0–12', bpm: 60,
           notes: [40, 41, 43, 45, 47, 48, 50, 52] } },
       { id: 'm2w1-s3', text: 'Name all natural notes on the A string (frets 0–12)',
-        gotItWhen: 'same as above, but for the A string — frets 0–12, any fret called out, instant answer.',
+        gotItWhen: 'someone calls out any fret 0–12 on the A string and you can say the note name instantly, without counting up from A.',
         practice: { type: 'playSeq', label: 'Play A string 0–12', bpm: 60,
           notes: [45, 46, 48, 50, 52, 53, 55, 57] } },
       { id: 'm2w1-s4', text: 'Point to any named note on E or A string when called out',
@@ -201,12 +213,14 @@ SETS.push(
         steps: [
           {
             text: 'Watch: <a href="https://youtu.be/RMdkevqJDDk" target="_blank">Beginner Finger Exercises – Simen Otnes</a> (0:00–4:00).',
+            time: '4 min',
             hint: 'Try each exercise slowly on your guitar as he demonstrates. Slow and clean beats fast and buzzy every time.',
             skills: [1, 2, 3],
             response: { type: 'short', placeholder: 'Which exercise felt hardest, and what do you think makes it hard?' }
           },
           {
             text: 'Watch: <a href="https://youtu.be/3x6k7zHkqmA" target="_blank">How to Avoid Fret Buzz – JustinGuitar</a> (full video).',
+            time: '3 min',
             hint: 'Play a note on your guitar and see if you can diagnose your own buzz using his checklist.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'Which is the MOST common cause of fret buzz for beginners?', choices: [
@@ -218,6 +232,7 @@ SETS.push(
           },
           {
             text: 'Watch: <a href="https://youtu.be/o56KBAO3OC4" target="_blank">How to Read Guitar TAB – Marty Music</a> (0:00–4:00).',
+            time: '4 min',
             hint: 'Pause when he shows a TAB example. Find those notes on your guitar before hitting play.',
             skills: [4],
             response: { type: 'mc', prompt: 'On a TAB diagram, the TOP line represents which string?', choices: [
@@ -229,7 +244,8 @@ SETS.push(
           },
           {
             text: 'Read this TAB: the opening of "Happy Birthday" written out on the low E string. Look at the fret numbers on the bottom line and try to play it. Click any note name below the TAB to hear how it should sound.',
-            hint: 'Read left-to-right, one note per beat. The numbers tell you which fret to press on the low E string.',
+            time: '3 min',
+            hint: 'Read left-to-right, one note per beat. The numbers tell you which fret to press on the low E string. Seeing a # (sharp)? It just means one fret higher than the plain note — F# is one fret above F. We\'ll dig into sharps and flats later; for now, just trust the fret numbers.',
             skills: [4, 5],
             tab: {
               caption: '"Happy Birthday" — first two phrases · Low E string',
@@ -251,6 +267,7 @@ SETS.push(
           },
           {
             text: 'Fret buzz self-check: play frets 1–4 on the low E string, one at a time. Press lightly until you hear buzz, then press just enough to stop it. That is the minimum pressure needed.',
+            time: '2 min',
             hint: 'Most beginners press too hard. Finding the minimum pressure is a real technique.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'Where should your fingertip press to get the cleanest tone?', choices: [
@@ -262,6 +279,7 @@ SETS.push(
           },
           {
             text: 'Try reading the TAB for "Ode to Joy" or "Mary Had a Little Lamb" from the songs section. Play it through at least once — slow and clean. Click a song below to open its TAB.',
+            time: '3 min',
             hint: 'If you get stuck on a note, use your note-name chart to find it. TAB numbers = fret numbers.',
             skills: [4, 5],
             tabs: [
@@ -310,28 +328,32 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 1 — Finger Workout: play frets 1–5 on the low E string, one finger per fret, then do the same on the A string. Keep your thumb behind the neck. Win: every note rings clean with no buzz.',
+            time: '3 min',
             hint: 'Go as slow as you need. Every note should ring cleanly with no buzz.',
             skills: [1, 2, 3, 6]
           },
           {
             text: 'Minimum-pressure drill: play frets 1–4 on the low E string one at a time. Press lightly until it buzzes, then add just enough to make it ring clean. That is your target pressure.',
+            time: '2 min',
             hint: 'Press just behind the fret, on your fingertip, thumb behind the neck. Most beginners press far too hard.',
             skills: [1, 2]
           },
           {
             text: 'One-finger-per-fret check: index=1, middle=2, ring=3, pinky=4 up the low E string. Every note rings — nothing buzzes or mutes. Click to hear the clean target tone.',
+            time: '2 min',
             hint: 'Keep unused fingers hovering close, ready to drop down.',
             skills: [2, 3],
             playSeq: { label: 'Target tone (frets 1–4)', bpm: 60, notes: [41, 42, 43, 44] }
           },
           {
             text: 'Quick check:',
+            time: '1 min',
             skills: [1, 2],
-            response: { type: 'mc', prompt: 'Where should your fingertip press for the cleanest tone?', choices: [
-              'Just behind the fret (toward the nut)',
-              'On top of the fret wire',
-              'In the middle of the fret space',
-              'As close to the nut as possible'
+            response: { type: 'mc', prompt: 'A note still buzzes even though you\'re pressing just behind the fret. What\'s the most likely cause?', choices: [
+              'Too little pressure, or a fingertip leaning over and muting the string',
+              'Pressing too hard on the string',
+              'The string is too new',
+              'Holding the pick too tightly'
             ] }
           }
             ]
@@ -341,6 +363,7 @@ SETS.push(
             steps: [
           {
             text: 'Warm-up read — play this melody straight from the TAB at 60 BPM, one note per beat. Click any note name to hear how it should sound.',
+            time: '2 min',
             hint: 'Read left-to-right. The numbers are fret numbers on the A string. If you buzz, fix the finger before moving on.',
             skills: [4, 5],
             tab: {
@@ -358,6 +381,7 @@ SETS.push(
           },
           {
             text: 'Challenge 2 — Play the Tune: using the TAB, play "Happy Birthday" on the E & A strings at 60 BPM, one note per beat. Win: the whole melody start to finish, in time, no buzz. Click any note name to hear how it should sound.',
+            time: '4 min',
             hint: 'If you buzz on a note, stop, fix your finger position, then continue. Don\'t just play through the buzz.',
             skills: [4, 5],
             tab: {
@@ -403,6 +427,7 @@ SETS.push(
           },
           {
             text: 'Challenge 3 — Watchtower Bass Riff (your assessment piece): using the TAB, play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. Win: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound.',
+            time: '5 min',
             hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A). Thumb stays behind the neck; let each note ring fully before the next. Drill it until you can run it with your eyes closed — that is the unit-end test.',
             skills: [1, 2, 4, 5, 6],
             tab: {
@@ -421,6 +446,7 @@ SETS.push(
           },
           {
             text: 'Quick check on reading TAB:',
+            time: '1 min',
             skills: [4],
             response: { type: 'mc', prompt: 'In TAB the bottom line is the low E string and the line above it is the A string. A "3" on the A-string line is which note?', choices: ['B', 'C', 'D', 'G'] }
           }
@@ -491,14 +517,18 @@ MODULE_REVIEWS[2] = {
   moduleNum: 2,
   module: 'Notes on the E & A Strings',
   skills: [
+    { id: 'mr2-s1', text: 'I can recite the musical alphabet (A–G) from memory, including what comes after G' },
     { id: 'mr2-s2', text: 'I can name all natural notes on the E string (frets 0–12)' },
     { id: 'mr2-s3', text: 'I can name all natural notes on the A string (frets 0–12)' },
     { id: 'mr2-s4', text: 'I can press notes cleanly with no fret buzz' },
+    { id: 'mr2-s6', text: 'I can use one finger per fret (index=1, middle=2, ring=3, pinky=4)' },
+    { id: 'mr2-s7', text: 'I can read a basic fretboard note-name chart' },
     { id: 'mr2-s5', text: 'I can read a basic TAB and play a 4-bar melody in time at 60 BPM' }
   ],
   assessItems: [
     'Name the notes on the E and A strings from memory through fret 12',
     'Play “All Along the Watchtower” bass-note using only the E string from memory with clean tone and correct fingering'
   ],
+  forward: 'The E &amp; A notes you just learned become the <strong>roots of every power chord in Module 3</strong> — when you play an A5 or G5, you\'re landing on the exact frets you just memorized. Knowing the fretboard is what lets you move chords around freely.',
   standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Re.7a']
 };

@@ -1202,11 +1202,12 @@ function buildStations(w, stationId){
       }
       return '';
     })() : '';
+    const timeHtml = s.time ? `<span class="step-time" title="Suggested time">&#x23F1;&#xFE0F; ${escHtml(s.time)}</span>` : '';
     const readBtn = `<button class="read-aloud-btn" type="button" onclick="event.stopPropagation();readAloudStep(this)" title="Read this step aloud" aria-label="Read aloud">&#x1F50A;</button>`;
     const doneKey = `${w.id}-${ns}-${i}`;
     const isDone = completed[doneKey] === true;
     const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${isDone ? '&#x2713; Done' : 'Mark done'}</button></div>`;
-    return `<li class="step${isDone ? ' step-done' : ''}"><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${hintHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div>${doneBtn}</div></li>`;
+    return `<li class="step${isDone ? ' step-done' : ''}"><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span>${timeHtml}<div class="step-body">${playSeqHtml}${hintHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div>${doneBtn}</div></li>`;
   }).join('');
   const sectionsHtml=(sections,baseNs)=>sections.map((sec,gi)=>{
     const ns = `${baseNs}-sec${gi}`;
@@ -1358,6 +1359,9 @@ function buildModuleReview(mr){
     ? `Sign up when you are ready for the module assessment. It is on these skills:<ul class="mr-assess-list">${mr.assessItems.map(i=>`<li>${i}</li>`).join('')}</ul>`
     : 'Sign up when you are ready for the teacher to assess you on the skills above.';
   const performanceHtml=`<div class="ablock" style="margin-top:18px"><div class="albl">Module ${mr.moduleNum} Assessment</div><div class="atxt">${assessBody}</div></div>`;
+  const forwardHtml = mr.forward
+    ? `<div class="ablock mr-forward" style="margin-top:12px"><div class="albl">&#x1F517; Why this matters</div><div class="atxt">${mr.forward}</div></div>`
+    : '';
   return `
     <div class="mr-locked-banner">
       <span class="mr-locked-banner-icon">&#x1F512;</span>
@@ -1384,6 +1388,7 @@ function buildModuleReview(mr){
     </div>
     ${playHtml}
     ${performanceHtml}
+    ${forwardHtml}
     <div class="ablock" style="margin-top:12px">
       <div class="albl">NAfME standards</div>
       <div>${mr.standards.map(s=>`<span class="spill">${s}</span>`).join('')}</div>
