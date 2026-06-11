@@ -75,7 +75,7 @@ function googleTranslateElementInit(){
     <div class="main">
       <div class="module-select-wrap">
         <label class="module-select-label" for="module-select">Module</label>
-        <select class="module-select" id="module-select" onchange="onModuleChange(this.value)"></select>
+        <select class="module-select" id="module-select" onchange="onModuleChange(this.value); saveProgress()"></select>
       </div>
       <div class="sec-label" style="margin-top:12px">Select a set</div>
       <div class="week-pills" id="week-pills"></div>

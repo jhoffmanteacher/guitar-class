@@ -1868,8 +1868,10 @@ function toggleMetro(){ if(metroRunning) stopMetro(); else startMetro(); }
 let timerRunning=false, timerInterval=null, timerSecs=30, timerSelected=30;
 function setTimerSecs(secs){ timerSelected=secs; timerSecs=secs; if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; } updateTimerDisplay(); [30,60,120,180,240,300].forEach(s=>{ const el=document.getElementById('tp-'+s); if(el) el.classList.toggle('sel',s===secs); }); }
 function updateTimerDisplay(){ const m=Math.floor(timerSecs/60),s=timerSecs%60; document.getElementById('timer-display').textContent=m+':'+(s<10?'0':'')+s; }
+// Flash the display when time's up — visible across a loud room without headphones.
+function flashTimerDisplay(){ const el=document.getElementById('timer-display'); if(!el) return; el.classList.remove('timer-done-flash'); void el.offsetWidth; el.classList.add('timer-done-flash'); setTimeout(()=>el.classList.remove('timer-done-flash'),2400); }
 function resetTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; } timerSecs=timerSelected; updateTimerDisplay(); document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; }
-function toggleTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; } else { timerRunning=true; document.getElementById('timer-btn').innerHTML='&#x23F8; Pause'; timerInterval=setInterval(()=>{ if(timerSecs>0){ timerSecs--; updateTimerDisplay(); } else { clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; [0,0.35,0.7].forEach(d=>setTimeout(()=>beep(660,0.3),d*1000)); } },1000); } }
+function toggleTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; } else { timerRunning=true; document.getElementById('timer-btn').innerHTML='&#x23F8; Pause'; timerInterval=setInterval(()=>{ if(timerSecs>0){ timerSecs--; updateTimerDisplay(); } else { clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; [0,0.35,0.7].forEach(d=>setTimeout(()=>beep(660,0.3),d*1000)); flashTimerDisplay(); } },1000); } }
 
 /* ── Popup logic ── */
 function setFabExpanded(which, isOpen){ const f=document.getElementById('fab-'+which); if(f) f.setAttribute('aria-expanded', isOpen?'true':'false'); }
@@ -2399,7 +2401,7 @@ function clearPanel(){
     e.preventDefault();
   }, { passive: false });
 
-  document.addEventListener('touchmove', e => { if (dragging) onMove(e.touches[0].clientX); });
+  document.addEventListener('touchmove', e => { if (dragging){ e.preventDefault(); onMove(e.touches[0].clientX); } }, { passive: false });
   document.addEventListener('touchend', onEnd);
 
   positionFabs();

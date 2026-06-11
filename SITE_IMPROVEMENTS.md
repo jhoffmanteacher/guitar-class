@@ -127,12 +127,13 @@ No code changes required, but worth a guided session:
   restricting it is free hardening).
 - Consider Firebase App Check later — optional, skip if it adds friction.
 
-## 1.9 📱 Small UX polish (grab-bag, low priority)
-- Persist the last-selected module/set per student (a field in their Firestore doc or
-  `sessionStorage`) so reloading doesn't reset to Module 1.
-- The timer end "beep" plays 3 beeps — consider also flashing the timer display so it's
-  noticeable in a loud classroom with no headphones.
-- Confirm the resource-panel `resize-handle` works by touch on convertible Chromebooks.
+## 1.9 📱 Small UX polish (grab-bag, low priority) ✅ DONE (June 2026)
+- Persist the last-selected module/set per student — already saved to Firestore
+  (`lastModule`/`lastSet`); now also saves when only the module dropdown changes.
+- The timer end "beep" now also flashes the timer display green so it's noticeable in
+  a loud classroom with no headphones.
+- The resource-panel `resize-handle` already supported touch; added `preventDefault`
+  during a touch-drag so the page no longer scrolls while resizing on Chromebooks.
 
 ---
 
