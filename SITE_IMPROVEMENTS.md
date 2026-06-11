@@ -118,14 +118,14 @@ blank globe and link previews are bare.
   `app.js` runs, show "The sign-in service couldn't load on this network" instead of
   a silently broken page.
 
-## 1.8 🛡️ Firebase hygiene (one-time console checks, Claude can guide)
+## 1.8 🛡️ Firebase hygiene (one-time console checks, Claude can guide) ✅ DONE (June 2026)
 No code changes required, but worth a guided session:
-- Confirm Firestore rules in production match the rules in the `index.html` comment
-  (per-student read/write on own doc; teacher read via `jhoffman@seq.org`).
-- In Google Cloud console, restrict the Firebase web API key to the
-  `jhoffmanteacher.github.io` referrer (the key being public is normal for Firebase;
-  restricting it is free hardening).
-- Consider Firebase App Check later — optional, skip if it adds friction.
+- ✅ Confirmed Firestore rules in production match the rules in the `index.html` comment
+  (per-student read/write on own doc; teacher read via `jhoffman@seq.org`). Already correct.
+- ✅ Restricted the Firebase web API key (Application restrictions → Websites) to the
+  `jhoffmanteacher.github.io/*` and `guitar-class-2fd21.firebaseapp.com/*` referrers.
+  API restrictions left at "Don't restrict key". Sign-in re-tested on the live site — works.
+- Firebase App Check — deferred (optional; revisit only if abuse shows up).
 
 ## 1.9 📱 Small UX polish (grab-bag, low priority) ✅ DONE (June 2026)
 - Persist the last-selected module/set per student — already saved to Firestore
