@@ -31,7 +31,7 @@ unprofessional to students/parents.
 - Also make `devBypass()` itself refuse to run off-localhost (belt and suspenders).
 - Test: Live Server → button appears and works; GitHub Pages → button gone.
 
-## 1.2 ♿ Accessibility pass (Chromebook keyboard + screen reader) — HIGH PRIORITY
+## 1.2 ♿ Accessibility pass (Chromebook keyboard + screen reader) — HIGH PRIORITY ✅ DONE (June 2026)
 **Files:** `index.html`, `app.js`, `styles.css`
 (This absorbs item 2 of the existing `TODO.md` health pass.)
 

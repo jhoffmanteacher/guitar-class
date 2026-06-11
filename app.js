@@ -1836,13 +1836,18 @@ function resetTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunn
 function toggleTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; } else { timerRunning=true; document.getElementById('timer-btn').innerHTML='&#x23F8; Pause'; timerInterval=setInterval(()=>{ if(timerSecs>0){ timerSecs--; updateTimerDisplay(); } else { clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; [0,0.35,0.7].forEach(d=>setTimeout(()=>beep(660,0.3),d*1000)); } },1000); } }
 
 /* ── Popup logic ── */
-function togglePopup(which){ document.getElementById(which+'-popup').classList.toggle('open'); }
-function closePopup(which){ document.getElementById(which+'-popup').classList.remove('open'); if(which==='metro') stopMetro(); if(which==='tuner') stopTuner(); }
+function setFabExpanded(which, isOpen){ const f=document.getElementById('fab-'+which); if(f) f.setAttribute('aria-expanded', isOpen?'true':'false'); }
+function togglePopup(which){ const open=document.getElementById(which+'-popup').classList.toggle('open'); setFabExpanded(which, open); }
+function closePopup(which){ document.getElementById(which+'-popup').classList.remove('open'); setFabExpanded(which, false); if(which==='metro') stopMetro(); if(which==='tuner') stopTuner(); }
 document.addEventListener('click',e=>{
   if(!e.target.closest('.tool-popup')&&!e.target.closest('.fab')&&!e.target.closest('.fab-buttons')){
-    ['metro','timer','tuner'].forEach(w=>{ const el=document.getElementById(w+'-popup'); if(el) el.classList.remove('open'); });
-    stopMetro(); stopTuner();
+    ['metro','timer','tuner'].forEach(closePopup);
   }
+});
+// Escape closes any open tool popup (a11y)
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Escape') return;
+  ['metro','timer','tuner'].forEach(w=>{ const el=document.getElementById(w+'-popup'); if(el&&el.classList.contains('open')) closePopup(w); });
 });
 
 /* ══════════════════════════════════════════════
