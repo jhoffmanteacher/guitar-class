@@ -4,12 +4,12 @@
 
 ## 1. 🗂️ Split `index.html` into Separate CSS/JS Files
 
-- [ ] Create a new file: `styles.css`
-- [ ] Cut everything between `<style>` and `</style>` from `index.html` and paste it into `styles.css`
-- [ ] Replace the `<style>` block in `index.html` with: `<link rel="stylesheet" href="styles.css">`
-- [ ] Create a new file: `app.js`
-- [ ] Cut all JavaScript between the main `<script>` and `</script>` tags in `index.html` and paste it into `app.js`
-- [ ] Replace that `<script>` block in `index.html` with: `<script src="app.js"></script>`
+- [x] Create a new file: `styles.css`
+- [x] Cut everything between `<style>` and `</style>` from `index.html` and paste it into `styles.css`
+- [x] Replace the `<style>` block in `index.html` with: `<link rel="stylesheet" href="styles.css">`
+- [x] Create a new file: `app.js`
+- [x] Cut all JavaScript between the main `<script>` and `</script>` tags in `index.html` and paste it into `app.js`
+- [x] Replace that `<script>` block in `index.html` with: `<script src="app.js"></script>`
 - [ ] Test with Live Server — dev bypass should still work, all tabs and progress should load normally
 
 ---
