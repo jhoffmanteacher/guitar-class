@@ -1,5 +1,9 @@
 # Guitar Class Website — Code Improvements
 
+> ✅ **COMPLETED & ARCHIVED — June 2026.** All four improvements below were finished and
+> pushed to GitHub. Kept here as a record of the work and the reasoning behind it
+> (see the note under #4 about why `defer` was chosen over full lazy-loading).
+
 ---
 
 ## 1. 🗂️ Split `index.html` into Separate CSS/JS Files
