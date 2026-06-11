@@ -41,7 +41,7 @@ SETS.push(
             response: { type: 'short', placeholder: 'Describe his right-hand muting technique in your own words.' }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/dJfV7DsTThc" target="_blank">Power Chords for Beginners – Marty Music</a> (0:00–3:00).',
+            text: 'Watch: <a href="https://youtu.be/DVveuwoVmmY" target="_blank">Power Chords for Beginners – Marty Music</a> (0:00–3:00).',
             hint: 'Notice how he moves the same shape to different positions on the neck. Try sliding your shape to A5 and G5.',
             skills: [2, 4],
             response: { type: 'mc', prompt: 'If you play the same power chord shape with your index finger on the 5th fret of the low E string, what chord is it?', choices: [
