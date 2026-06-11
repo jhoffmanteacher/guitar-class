@@ -1,7 +1,16 @@
 /* ── Firebase init ── */
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db   = firebase.firestore();
+// The Firebase SDK + config load as separate <script>s. On some school
+// networks a content filter blocks gstatic.com, so they may never arrive —
+// guard against that instead of crashing the whole page silently.
+let auth = null, db = null;
+const firebaseReady = typeof firebase !== 'undefined' && typeof firebaseConfig !== 'undefined';
+if (firebaseReady) {
+  firebase.initializeApp(firebaseConfig);
+  auth = firebase.auth();
+  db   = firebase.firestore();
+} else {
+  showFirebaseLoadError();
+}
 let currentUser = null;
 let progress    = {};
 let responses   = {};
@@ -21,9 +30,29 @@ function userHeaderHtml(user){
 }
 
 /* ── Auth ── */
+function showAuthError(msg){
+  const el = document.getElementById('auth-error');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.display = msg ? '' : 'none';
+}
+// Shown when the Firebase SDK/config never loaded (e.g. blocked on school Wi-Fi).
+function showFirebaseLoadError(){
+  const wall = document.getElementById('auth-wall');
+  if(!wall) return;
+  wall.innerHTML =
+    '<h1>Can’t reach the sign-in service</h1>' +
+    '<p>The sign-in service couldn’t load on this network — the school Wi-Fi or content filter may be blocking it. Try again, switch to a different network, or let your teacher know.</p>' +
+    '<button class="btn-google" onclick="location.reload()">Try again</button>';
+}
 function signIn(){
+  showAuthError('');
   auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
-    .catch(e=>alert('Sign-in error: '+e.message));
+    .catch(e=>{
+      // The student just closed/cancelled the popup — not an error worth nagging about.
+      if(e && (e.code==='auth/popup-closed-by-user' || e.code==='auth/cancelled-popup-request')) return;
+      showAuthError('Sign-in didn’t work — make sure pop-ups are allowed and you’re using your school Google account, then try again.');
+    });
 }
 function signOut(){ auth.signOut(); }
 
@@ -40,7 +69,7 @@ if(IS_LOCALHOST){
   if(_devBtn) _devBtn.style.display='';
 }
 
-auth.onAuthStateChanged(async user=>{
+if(auth) auth.onAuthStateChanged(async user=>{
   if(user){
     currentUser = user;
     if(IS_TEACHER_MODE){ showTeacherApp(user); }

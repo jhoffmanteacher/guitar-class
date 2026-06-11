@@ -103,7 +103,7 @@ blank globe and link previews are bare.
   shared in Google Classroom.
 - Optional: a more descriptive `<title>` — "Guitar Class · Sequoia HS".
 
-## 1.7 🧽 Clean up stale comments and add error states
+## 1.7 🧽 Clean up stale comments and add error states ✅ DONE (June 2026)
 **Files:** `index.html`, `app.js`
 
 - The big comment blocks at the top and bottom of `index.html` still say

@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
 <!--
-  ╔════════════════════════════════════════════════════════════════════╗
-  ║  GUITAR CLASS STUDENT DASHBOARD                                    ║
-  ║  FILES: index.html  +  config.js  +  firebase-config.js           ║
-  ║  HOW TO ADD OR EDIT CONTENT: edit config.js only                  ║
-  ║  HOW TO UPDATE THE SITE: upload changed files to GitHub           ║
-  ╚════════════════════════════════════════════════════════════════════╝
+  GUITAR CLASS STUDENT DASHBOARD
+  Files: index.html · styles.css · app.js · firebase-config.js ·
+         config-main.js · module-1.js … module-8.js
+  To add or edit content: edit config-main.js and the module-N.js files.
+  To update the live site: push the changed files to GitHub (see CLAUDE.md).
 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -69,6 +68,7 @@ function googleTranslateElementInit(){
     Sign in with Google
   </button>
   <button id="dev-bypass-btn" onclick="devBypass()" style="display:none;margin-top:14px;padding:7px 18px;font-size:14px;border:1px dashed #aaa;border-radius:20px;background:transparent;color:#888;cursor:pointer">Dev bypass</button>
+  <div id="auth-error" class="auth-error" role="alert" style="display:none"></div>
 </div>
 <div id="app" style="display:none">
   <div class="app-layout">
@@ -235,11 +235,11 @@ function googleTranslateElementInit(){
 ║      }                                                               ║
 ║    }                                                                 ║
 ║  STEP 5 — Host on GitHub Pages                                       ║
-║    Upload index.html + config.js + firebase-config.js to a repo     ║
+║    Upload all the .html / .css / .js files to a repo                ║
 ║    Settings → Pages → Deploy from main / root                       ║
 ║    URL: https://YOURNAME.github.io/guitar-class                      ║
 ║  TEACHER DASHBOARD: add ?teacher=true to the URL                    ║
-║  ADDING CONTENT: edit config.js only, re-upload to GitHub           ║
+║  ADDING CONTENT: edit config-main.js + module-N.js (see CLAUDE.md)  ║
 ╚════════════════════════════════════════════════════════════════════╝
 -->
 </body>
