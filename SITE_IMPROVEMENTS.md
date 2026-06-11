@@ -91,7 +91,7 @@ On a slow school network this delays first paint until Google responds.
   exists, remove the link and flag it in the report for Jose to choose a song.
 - Suggested cadence: re-run at the start of each semester.
 
-## 1.6 🏷️ Add favicon + meta tags
+## 1.6 🏷️ Add favicon + meta tags ✅ DONE (June 2026)
 **File:** `index.html`, plus a small `favicon.svg` (or `.png`)
 
 The site currently has **no favicon and no meta description**, so browser tabs show a
