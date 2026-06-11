@@ -16,9 +16,9 @@
 
 ## 2. ⚡ Fix Script Loading Order
 
-- [ ] Open `index.html` and find the `<script>` tags near the top of `<body>`
-- [ ] Move the three Firebase scripts (`firebase-app-compat.js`, `firebase-auth-compat.js`, `firebase-firestore-compat.js`) **above** all the module scripts (`module-1.js` through `module-8.js`)
-- [ ] Final order should be:
+- [x] Open `index.html` and find the `<script>` tags near the top of `<body>`
+- [x] Move the three Firebase scripts (`firebase-app-compat.js`, `firebase-auth-compat.js`, `firebase-firestore-compat.js`) **above** all the module scripts (`module-1.js` through `module-8.js`)
+- [x] Final order should be:
   - `firebase-config.js`
   - `firebase-app-compat.js`
   - `firebase-auth-compat.js`
@@ -26,16 +26,16 @@
   - `config-main.js`
   - `module-1.js` through `module-8.js`
   - `app.js` (or the main script block, if not yet split out)
-- [ ] Test with Live Server — sign-in and progress saving should still work
+- [x] Test with Live Server — sign-in and progress saving should still work
 
 ---
 
 ## 3. 🧹 Remove Stale Files & Clean Up the Repo
 
-- [ ] Delete `index (3).html` from the project folder — it's an old downloaded copy, not the real file
-- [ ] Check for any other duplicate or downloaded files (e.g. `index (1).html`, `index (2).html`) and delete those too
-- [ ] Push the cleanup to GitHub with a commit message like: `chore: remove stale index copies`
-- [ ] Confirm on GitHub.com that only the correct files remain
+- [x] Delete `index (3).html` from the project folder — it's an old downloaded copy, not the real file
+- [x] Check for any other duplicate or downloaded files (e.g. `index (1).html`, `index (2).html`) and delete those too
+- [x] Push the cleanup to GitHub with a commit message like: `chore: remove stale index copies`
+- [x] Confirm on GitHub.com that only the correct files remain
 
 ---
 
