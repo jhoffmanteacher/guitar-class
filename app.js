@@ -11,6 +11,14 @@ let respSaveTimer = null;
 let compSaveTimer = null;
 const escAttr = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const escHtml = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+// Builds the signed-in user header. Escapes name/email/photoURL — Google
+// account values are user-controlled and go into innerHTML.
+function userHeaderHtml(user){
+  const av = user.photoURL
+    ? `<img src="${escAttr(user.photoURL)}" class="avatar" alt="">`
+    : `<div class="avatar-init">${escHtml((user.displayName||'?')[0].toUpperCase())}</div>`;
+  return `${av}<span class="user-name">${escHtml(user.displayName||user.email)}</span><button class="btn-out" onclick="signOut()">Sign out</button>`;
+}
 
 /* ── Auth ── */
 function signIn(){
@@ -53,8 +61,7 @@ function showApp(user){
   document.getElementById('app').style.display='block';
   document.getElementById('fab-group').style.display='flex';
   setTimeout(()=>{ const h=document.getElementById('resize-handle'),p=document.getElementById('resource-panel'),f=document.getElementById('fab-group'); if(h&&p&&f) f.style.right=(p.offsetWidth+h.offsetWidth+16)+'px'; },0);
-  const av = user.photoURL ? `<img src="${user.photoURL}" class="avatar" alt="">` : `<div class="avatar-init">${(user.displayName||'?')[0].toUpperCase()}</div>`;
-  document.getElementById('user-area').innerHTML=`${av}<span class="user-name">${user.displayName||user.email}</span><button class="btn-out" onclick="signOut()">Sign out</button>`;
+  document.getElementById('user-area').innerHTML=userHeaderHtml(user);
   renderAll();
 }
 
@@ -2130,13 +2137,11 @@ function showTeacherApp(user){
   document.getElementById('app').style.display='none';
   if(user.email!==TEACHER_EMAIL){
     document.getElementById('teacher-denied').style.display='block';
-    const av=user.photoURL?`<img src="${user.photoURL}" class="avatar" alt="">`:`<div class="avatar-init">${(user.displayName||'?')[0].toUpperCase()}</div>`;
-    document.getElementById('user-area').innerHTML=`${av}<span class="user-name">${user.displayName||user.email}</span><button class="btn-out" onclick="signOut()">Sign out</button>`;
+    document.getElementById('user-area').innerHTML=userHeaderHtml(user);
     return;
   }
   document.getElementById('teacher-app').style.display='block';
-  const av=user.photoURL?`<img src="${user.photoURL}" class="avatar" alt="">`:`<div class="avatar-init">${(user.displayName||'?')[0].toUpperCase()}</div>`;
-  document.getElementById('user-area').innerHTML=`${av}<span class="user-name">${user.displayName||user.email}</span><button class="btn-out" onclick="signOut()">Sign out</button>`;
+  document.getElementById('user-area').innerHTML=userHeaderHtml(user);
   renderTeacherSetTabs();
   const firstSet=SETS.find(w=>!w.locked&&w.skills&&w.skills.length>0);
   if(firstSet){ teacherSetId=firstSet.id; activateTeacherSetTab(firstSet.id); }
@@ -2211,7 +2216,7 @@ function renderTeacherGrid(){
       if(st==='working') return `<td><span class="tck" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--amber-bg);color:var(--amber-text)">${workSvg}</span></td>`;
       return `<td><span class="tck no" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px">${minusSvg}</span></td>`;
     }).join('');
-    return `<tr><td class="nc" title="${displayName}">${displayName}</td>${cells}<td><span class="ppill ${pillClass}">${done} / ${total}</span></td></tr>`;
+    return `<tr><td class="nc" title="${escAttr(displayName)}">${escHtml(displayName)}</td>${cells}<td><span class="ppill ${pillClass}">${done} / ${total}</span></td></tr>`;
   }).join('');
   document.getElementById('t-grid-container').innerHTML=`<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th>${headerCells}<th>Progress</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }

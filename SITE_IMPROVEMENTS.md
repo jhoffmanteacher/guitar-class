@@ -56,7 +56,7 @@ can't be reached with Tab or activated with Enter/Space.
 - Test with keyboard only: Tab through header → module select → set pills → steps →
   tools; everything operable without a mouse.
 
-## 1.3 🧹 Escape user-provided values in the header (XSS hardening)
+## 1.3 🧹 Escape user-provided values in the header (XSS hardening) ✅ DONE (June 2026)
 **File:** `app.js` (~lines 47–48, 2120, 2125)
 
 `user.displayName`, `user.email`, and `user.photoURL` are interpolated into
