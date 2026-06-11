@@ -39,24 +39,18 @@
 
 ---
 
-## 4. 🚀 Lazy-Load Modules for Faster Startup
+## 4. 🚀 Faster Startup — `defer` the Scripts
 
-- [ ] Remove the individual `<script src="module-1.js">` through `<script src="module-8.js">` tags from `index.html`
-- [ ] In `app.js` (or the main script), add a function that loads a module's JS file on demand:
-  ```js
-  function loadModule(num) {
-    return new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = `module-${num}.js`;
-      script.onload = resolve;
-      script.onerror = reject;
-      document.head.appendChild(script);
-    });
-  }
-  ```
-- [ ] Call `loadModule(n)` only when the student navigates to that module, not on page load
-- [ ] Make sure already-loaded modules aren't loaded twice (track which ones have been loaded)
-- [ ] Test each module tab to confirm content still renders correctly after lazy loading
+> **Decision (June 2026):** True lazy-loading was considered but rejected as too risky.
+> The app's startup (`renderAll`) assumes the entire `SETS` array is already built, so
+> loading modules on demand would require rewriting the boot sequence. Instead we used
+> `defer`, which gets most of the startup speed-up with almost no risk and keeps the
+> existing architecture intact.
+
+- [x] Add `defer` to all the Firebase, `config-main.js`, and `module-1.js`–`module-8.js` script tags so they no longer block the page from rendering
+- [x] Add `defer` to `app.js` too (required — keeps it running after the Firebase/module scripts, preserving load order)
+- [x] Page now paints first, then scripts run in order right before the app initializes
+- [ ] Test with Live Server — sign-in/dev bypass, all module tabs, tools, and progress saving should still work
 
 ---
 
