@@ -460,6 +460,17 @@ SETS.push(
             skills: [5, 6]
           }
             ]
+          },
+          {
+            title: '🌶️ Level-up — the Sweet Child O\' Mine intro riff (stretch goal)',
+            steps: [
+          {
+            text: '🌶️ Give it a go: learn the most famous riff in the course. The "Sweet Child O\' Mine" intro lives up high on the D, G, and B strings around the 12th–15th frets, picked one note at a time. Watch <a href="https://youtu.be/t3yol_zrt7g" target="_blank">How to Play the Intro for Sweet Child O\' Mine – JustinGuitar</a>, learn just the first bar, and play it slowly. No score, no rush — this is a late-semester stretch goal you can keep chipping at.',
+            time: '5 min',
+            hint: 'Heads up: the lesson teaches it in E♭ tuning (a half-step down), so on your standard-tuned guitar it will sound a half-step higher than the video — that\'s part of the challenge, not a mistake. The frets and finger shapes are exactly the same. Loop just the first bar until it\'s clean before adding more.',
+            skills: [3, 6]
+          }
+            ]
           }
         ]
       }

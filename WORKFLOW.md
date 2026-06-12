@@ -4,19 +4,31 @@
 > `MODULE_2_TEMPLATE.md`. Once this is in the repo, move those three to `archive/` —
 > everything actionable from them is consolidated here.
 >
+> **Companion file:** `SONG_SWAP.md` is Jose's song-replacement worksheet — he
+> maintains it himself. Don't merge it into this file. Consult it whenever a session
+> touches a module's song list, and verify any new song links per CLAUDE.md.
+>
 > **Context for Claude Code:** the course has NOT started yet. The strategy is:
 > perfect Module 2 as the template → propagate its patterns to all other modules →
-> site-wide code work → launch checks. All CLAUDE.md rules apply to every session
-> (verify YouTube links via oEmbed before writing, never from memory; vanilla JS; CSS
-> variables only; test locally before push; ask Jose multiple-choice questions for
-> judgment calls).
+> site-wide code work → launch checks → feature builds. All CLAUDE.md rules apply to
+> every session (verify YouTube links via oEmbed before writing, never from memory;
+> vanilla JS; CSS variables only; test locally before push; ask Jose multiple-choice
+> questions for judgment calls).
 >
 > **How to use:** one session = one numbered item. At the start of a session Jose will
-> say e.g. "do Session 2.1 in WORKFLOW.md." Before editing, present a plan; for any
-> session that changes step text, show ONE complete example for voice approval before
-> writing the rest. End every session: test locally with Jose, then push with a clear
-> commit message, then check the box and add a one-line note under the item
-> (e.g. "✅ done 2026-06-15 — note: chose simplified F").
+> say e.g. "do Session 2.1 in WORKFLOW.md." Working rules for every session:
+> 1. Before editing, present a plan.
+> 2. **Before generating or overwriting any file, ask Jose at least one
+>    multiple-choice question** about scope or approach (AskUserQuestion tool).
+> 3. **For any big change** (new feature, redesign, anything touching 3+ files or
+>    rewriting step text), show ONE complete example first — a rewritten step, a
+>    mock-up, or a code sketch — and ask a multiple-choice question about it
+>    ("on the right track?") before doing the rest.
+> 4. New-chat prompts follow CLAUDE.md's topic-switch rule (suggest a fresh chat only
+>    when the topic genuinely changes, not mid-feature).
+> 5. End every session: test locally with Jose, then push with a clear commit message,
+>    then check the box and add a one-line note under the item
+>    (e.g. "✅ done 2026-06-15 — note: chose simplified F").
 
 **Status legend:** [ ] not started · [~] in progress · [x] done
 
@@ -127,6 +139,7 @@ correct replacement for the mislabeled one, report before editing.
 > named in a challenge; quick-check hygiene; solo fallbacks; PR ladder where a tempo
 > skill exists; self-contained gotItWhens; module review expanded with a forward link.
 > Always show one rewritten example for voice approval before doing the rest.
+> Song lists: check `SONG_SWAP.md` before touching any module's songs.
 
 ### [ ] Session 3.1 — Module 5 part 1: chord diagrams
 Module 5 teaches ~12 chords with ZERO inline diagrams. Study `chordDiagramSVG` +
@@ -170,6 +183,8 @@ with the monospace pattern line (`D   D U   U D U` over `1 + 2 + 3 + 4 +`); if J
 wants more, build a `strumPattern:` step property rendering a small SVG arrow diagram
 (new code, CSS vars); add `chords:` diagrams for the chords used (Em, Am, …); update
 objective/skillFocus/gotItWhen to the new scope; standard scope on top.
+*Forward link: the looper (Session 6.1) will give this module its play-along backing —
+write strumming challenges so a "play over the looper" variant can slot in later.*
 **Files:** `module-6.js`, possibly `app.js` (strumPattern renderer).
 
 ### [ ] Session 3.6 — Module 8 (fingerpicking)
@@ -183,6 +198,8 @@ Standard scope. Specifics: structure the improv steps with constraints ("Rule of
 improvise with only 3 notes of the pattern for 4 bars, then add one"); Set 3's
 compose-a-solo gets a capture step (write your 4-bar solo as TAB numbers in a `short`
 response so it reaches Firestore/dashboard).
+*Forward link: the looper (Session 6.1) will give the improv challenges a backing
+track — write them so "over the looper" can replace "over a teacher-played chord."*
 **Files:** `module-4.js`.
 
 ### [ ] Session 3.8 — Module 1 (keep its warmth)
@@ -224,7 +241,7 @@ on tool popups · full keyboard-only walkthrough as the test.
 Extract every YouTube ID across all 8 module files (~222 unique). Verify each via
 oEmbed in parallel batches. Report ✅/❌ with file+line. Replace dead ones via
 search-and-verify; anything without a good replacement gets flagged for Jose to choose
-a song. Re-run each semester.
+a song (log swaps in `SONG_SWAP.md`). Re-run each semester.
 **Files:** all `module-N.js`.
 
 ### [ ] Session 4.3 — Firebase hygiene (guided, mostly console work)
@@ -240,6 +257,31 @@ get lost in a loud room) · verify the resource-panel resize handle works by tou
 convertible Chromebooks.
 **Files:** `app.js`, `styles.css`.
 
+### [ ] Session 4.5 — 🖨 Per-set print/handout export
+For days the Chromebooks or wifi fail: any set should print as a clean one-pager.
+Add an `@media print` stylesheet — hide chrome (header, module pills, fabs, response
+inputs/textareas, read-aloud + play buttons, resource panel), expand BOTH station
+panels regardless of which is open, render `tab:` blocks in monospace and `chords:`
+diagrams as their SVGs, keep hints and Stuck?/Level up lines. Add a small
+"🖨 Print this set" button near the set title that calls `window.print()` (and
+temporarily opens both stations). Show Jose one printed example set (PDF from print
+preview, portrait letter) for approval before styling the rest.
+**Files:** `styles.css`, `app.js`, possibly `index.html`.
+
+### [ ] Session 4.6 — 📴 Offline resilience (light PWA)
+The app already degrades gracefully when Firebase is blocked; make the static shell
+load instantly on weak school wifi and survive brief outages. Add `sw.js` caching
+`index.html`, `app.js`, `styles.css`, `config-main.js`, and all `module-N.js`
+(stale-while-revalidate), register it in `app.js`, and add a minimal `manifest.json`
+(name, theme color, icon from the SVG favicon). CRITICAL: include a version string in
+`sw.js` and bump it on every push so students never get a stale site — add "bump SW
+version" to the push routine (update the CLAUDE.md table in the same session). Be
+honest in the UI: offline = practice content works, progress saving resumes when the
+connection returns (the existing save indicator already says this). Test: load once on
+Live Server won't work for SW (needs the deployed origin or `localhost` http) — test
+on localhost, then on the live site: load, go offline (DevTools), reload.
+**Files:** new `sw.js`, new `manifest.json`, `index.html`, `app.js`, `CLAUDE.md`.
+
 ---
 
 ## PHASE 5 — Ongoing / recurring (Jose-led, Claude Code assists)
@@ -254,12 +296,66 @@ convertible Chromebooks.
 - [ ] "Start here" onboarding blurb for new students (sign-in, how the tracker works,
       headphone norms).
 - [ ] Song refresh each semester: swap in 2–3 student-requested songs (verify links
-      per CLAUDE.md); pull from the 🎤 request slot.
+      per CLAUDE.md; track candidates and decisions in `SONG_SWAP.md`); pull from the
+      🎤 request slot.
 - [ ] Reflection prompts: add 1–2 listening/reflection responses per set in Modules
       6–8 to match Module 1–2 richness (Jose writes prompts, Claude Code wires).
 - [ ] ⚠️ Review Module 4 Set 1 video (`m_IiyJu60-c` — "Major Pentatonic Scale – Marty
       Music", swapped in 2.2 on 2026-06-11): watch it through and confirm it fits the
       beginner Pattern-1 station before the course starts. Code comment flags it too.
+
+---
+
+## PHASE 6 — Feature builds  *(start only after Phase 3 is complete; can interleave with Phase 4)*
+
+> These are new capabilities, not content passes. Order matters: 6.1 is smallest and
+> unblocks challenges written in Sessions 3.5/3.7; 6.2 gives Jose day-one teaching
+> value; 6.3 depends on skill ids being stable across ALL modules (i.e. Phase 3 done
+> and frozen). Every session here is a "big change" — per the working rules, show one
+> working example (mock-up or single wired instance) and ask a multiple-choice
+> question about it before building the rest.
+
+### [ ] Session 6.1 — 🔁 Backing-track looper
+The Karplus-Strong engine already plays sequences (`playSequence` in `app.js`); extend
+it to loop continuously at a chosen BPM so it works as a backing track for improv and
+strumming practice — no recordings needed.
+- Code: add a loop mode to `playSequence` (or a sibling `playLoop`) with a hard stop
+  button; small UI with a preset picker + BPM control.
+- Presets (propose first, Jose approves): Am pentatonic vamp (Am root pulse) for
+  Module 4 · 12-bar blues in E root cycle (E–E–E–E A–A–E–E B–A–E–E) for Module 4 blues
+  steps · Em–Am vamp for Module 6 strumming.
+- Surface: ask Jose (multiple choice) — a `looper:` step property rendered inline
+  (like `playSeq`) vs a global tool popup next to the metronome vs both.
+- Content wiring: update the Module 4/6 improv + strumming challenges (written in
+  3.5/3.7 with this in mind) to say "over the looper."
+**Files:** `app.js`, `styles.css`, `module-4.js`, `module-6.js`.
+
+### [ ] Session 6.2 — 📋 Teacher dashboard: exit tickets + PR scores
+Exit tickets and PR-ladder responses already save to Firestore (`responses`), but the
+teacher dashboard only shows skill checkmarks — Jose can't see what students wrote.
+Add a "what students wrote" view: per student, their latest exit-ticket text and PR
+scores (max BPM numbers), newest first, filterable by module/set.
+- Ask Jose (multiple choice): extra expandable column in the existing grid vs a
+  separate "Responses" tab on the dashboard.
+- Read-only; reuse the existing teacher auth gating (jhoffman@seq.org).
+- Mind Firestore read costs: fetch once per dashboard load, no live listeners.
+- PR scores get a small trend treatment if cheap (e.g. "60 → 80 BPM"), otherwise just
+  the latest number — don't gold-plate.
+**Files:** `app.js` (teacher dashboard section), `styles.css`.
+
+### [ ] Session 6.3 — 🎸 Song Journey view
+The course's best idea — one song growing across modules — is invisible to students.
+Add a "Song Journey" tab/page per core thread song (e.g. Seven Nation Army: M1 riff →
+M3 power chords → M4 pentatonic solo → M5 strummed version) showing each stage as a
+card with the student's existing done-checkmarks pulled from `progress`.
+- Data: a small `SONG_JOURNEYS` array in `config-main.js` — song → ordered list of
+  `{moduleNum, setId, skillIds, label}`. Claude Code proposes the journey maps from
+  the actual module content first; Jose approves before any UI work.
+- Render read-only — checkmarks still live in the modules; each stage card links to
+  its module/set so students can jump there.
+- Depends on Phase 3 being complete: skill ids and song threads must be stable, or
+  the maps go stale immediately.
+**Files:** `config-main.js`, `app.js`, `styles.css`.
 
 ---
 

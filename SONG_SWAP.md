@@ -20,10 +20,12 @@
 >   Choice) & S3 (barre)
 > - **Tu Boda** (Core): M6 S3 (corrido strum) · M7 S3 (barre) · M8 S2–S3 (sierreño pick)
 >
-> **Still TODO (deferred, need more than a song entry):** the M7 🌶️ intro-riff
-> *stretch-goal step* (new step text — `t3yol_zrt7g`, the E♭ riff lesson, is freed and
-> reserved for it) and the M8 Sailor Song fingerpicking *TAB* (confirm the pattern from
-> the verified tutorial first). Plus every Core Song 2 slot once the song is chosen.
+> **Still TODO:** the M8 Sailor Song fingerpicking *TAB* (confirm the pattern from
+> the verified tutorial first); the curriculum-map Google Doc; and every Core Song 2
+> slot once the song is chosen.
+> ✅ **DONE 2026-06-12:** the M7 🌶️ intro-riff *stretch-goal step* — added as a new
+> activity at the end of M7 Set 3's practice station, linking `t3yol_zrt7g` (the E♭
+> riff lesson) with the E♭-tuning hint built in.
 >
 > ---
 >
@@ -149,8 +151,9 @@ Also note here the confirmed key/progression for Tu Boda and Sailor Song (Core S
 
 > **Sessions B–E note (2026-06-12):** all four sessions' song-array swaps were done in
 > one pass under the executed decision above. The per-session checklists below are kept
-> for reference; the only unfinished items are the two **deferred** pieces (M7 stretch-goal
-> step, M8 picking TAB) and the Core Song 2 fill-in once Jose picks the song.
+> for reference; the only unfinished items are the M8 picking TAB, the curriculum-map
+> Google Doc, and the Core Song 2 fill-in once Jose picks the song. (The M7 🌶️
+> stretch-goal step was completed 2026-06-12.)
 
 ## [x] Session B — Modules 1 & 2
 
