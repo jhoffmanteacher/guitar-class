@@ -47,7 +47,8 @@ m2w1-s3 · solo fallback for the partner quiz · time budget line per station.
   persists to Firestore and the teacher dashboard.)
 **Files:** `module-2.js` only.
 
-### [ ] Session 1.3 — Random-recall drills + fretboard branch decision
+### [x] Session 1.3 — Random-recall drills + fretboard branch decision
+✅ done 2026-06-11 — Content: added "Challenge 3 — Shuffle Run" to Set 1 practice (random fret order via shuffled scraps, name + play within 3s, win = 10 in a row; Stuck? = frets 0–7 first; Level up = A string / reverse 12→0). Branch decision: reviewed `origin/feature/interactive-fretboard` (tip `aeed5c0`) — it diverged **72 commits** ago and predates `app.js` (logic was still inline in `index.html`), so it's a real port, not a clean merge. **Decision: leave parked / defer resurrection** until after template propagation (Phase 3), where it would serve Modules 2/3/4/7 at once. Not merged this session — flag for Jose.
 The gotItWhen for note names demands random access ("any fret, instantly, without
 counting up from E") but the drills are sequential laps. Two parts:
 - Content now: add a "Shuffle Run" challenge (random fret order, name + play within

@@ -141,6 +141,14 @@ SETS.push(
                 text: 'Partner self-quiz: have a partner call out any fret 0–12 on the A string. Say the note within 3 seconds. Go 10 rounds, then switch.',
                 time: '3 min',
                 hint: 'No chart. If you stall on a note, loop just that part of the string until it\'s automatic. No partner? Write frets 0–12 on small scraps of paper, shuffle them, then flip one at a time and name it within 3 seconds.'
+              },
+              {
+                text: 'Challenge 3 — Shuffle Run: write frets 0–12 on scraps of paper (or use the corners of your handout), shuffle them, then draw one at a time and — on the low E string — name it AND play it within 3 seconds. Win: 10 in a row with no counting up from E.',
+                time: '4 min',
+                hint: 'The 3-second limit is the real test — this is random access, not a memorized lap, which is exactly what "name any fret instantly" means.',
+                stuck: 'Put only frets 0–7 in the pile first; add 8–12 once you hit 10 in a row.',
+                levelUp: 'Run the Shuffle on the A string too, or name a full lap going down the string (12 → 0) without counting.',
+                skills: [2, 3]
               }
             ]
           },
