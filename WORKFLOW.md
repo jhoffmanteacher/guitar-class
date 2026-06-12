@@ -141,7 +141,8 @@ correct replacement for the mislabeled one, report before editing.
 > Always show one rewritten example for voice approval before doing the rest.
 > Song lists: check `SONG_SWAP.md` before touching any module's songs.
 
-### [ ] Session 3.1 — Module 5 part 1: chord diagrams
+### [x] Session 3.1 — Module 5 part 1: chord diagrams
+✅ done 2026-06-12 — Added 14 inline `chords:` diagrams at each chord's first use per set (S1 Am/Em · S2 C/G/Am/F · S3 D/A/Em/Bm · S4 E/B7/F#m/C#m), matching each step's taught fingering; no step text changed. F = simplified xx3211. **Voicing decision (Jose):** partial-barre Bm (xx4432), F#m, C#m through Modules 5–6; full barre starts in Module 7. Switched the shared pop-up library (`CHORD_DIAGRAMS` in `app.js`) Bm/F#m/C#m to those partial shapes — safe because Module 7 already skips these auto-link pop-ups (`wrapChordLinksIn`, app.js:704) and renders full-barre inline. F#m/C#m are identify-only in S4 (no hands-on challenge) so their diagrams ride the Group-3 watch step, self-labeled. No shapes were missing from the library. **Forward note for Session 3.3:** Module 7's inline Bm/F#m/C#m diagrams must be full barre (already the design). **Files:** `module-5.js`, `app.js`.
 Module 5 teaches ~12 chords with ZERO inline diagrams. Study `chordDiagramSVG` +
 `CHORD_SHAPES` in `app.js` and the `chords:` usage in modules 3/7. Add a diagram at
 each chord's first introduction per set (S1: Am, Em · S2: C, F, Am, G · S3: D, A, Em,
