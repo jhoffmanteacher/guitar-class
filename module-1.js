@@ -86,9 +86,7 @@ SETS.push(
       { name: 'Student choice — any song that means something to them', meta: 'Listening & sharing day · No playing required', type: 'Choice', core: false },
       { name: '"Happy Birthday"', meta: 'Course song thread — you\'ll play this all semester', type: 'Core', core: true,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Vampire" — Olivia Rodrigo', meta: 'Listen and identify guitar sounds', type: 'Core', core: true,
-        originalUrl: 'https://www.youtube.com/watch?v=RlPNh_PBZb4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=AmfDC2xL7xg' },
+      { name: 'Core Song 2 — TBD', meta: 'Listen and identify guitar sounds — find the guitar in the mix', type: 'Core', core: true },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' }
@@ -233,9 +231,9 @@ SETS.push(
     songs: [
       { name: '"Happy Birthday"', meta: 'Play melody on open strings — first real song!', type: 'Core', core: true,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Vampire" — Olivia Rodrigo', meta: 'Listen and identify guitar sounds in the recording', type: 'Core', core: true,
-        originalUrl: 'https://www.youtube.com/watch?v=RlPNh_PBZb4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=AmfDC2xL7xg' },
+      { name: '"Sailor Song" — Gigi Perez', meta: 'Listen — fingerpicked vs. strummed guitar', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=1lrFsXkT_rM',
+        tutorialUrl: 'https://www.youtube.com/watch?v=rpoyXduMZZw' },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },

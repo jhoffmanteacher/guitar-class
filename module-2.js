@@ -179,9 +179,9 @@ SETS.push(
     songs: [
       { name: '"Happy Birthday"', meta: 'Identify which notes live on E & A strings', type: 'Core', core: true,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Vampire" — Olivia Rodrigo', meta: 'Identify bass notes of intro on A string', type: 'Core', core: true,
-        originalUrl: 'https://www.youtube.com/watch?v=RlPNh_PBZb4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=AmfDC2xL7xg' },
+      { name: '"Stand By Me" — Ben E. King', meta: 'Identify the bass line notes on E & A strings', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=hwZNL7QVJjE',
+        tutorialUrl: 'https://www.youtube.com/watch?v=TXLElO_YYiY' },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Identify bass notes of riff on low E string', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
@@ -496,17 +496,17 @@ SETS.push(
             response: { type: 'short', prompt: 'Personal record: once it loops clean at 60, raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 100 — beat it next class' }
           },
           {
-            text: 'Bonus riff — "Vampire" (Olivia Rodrigo) intro on the low E string: play the four bass notes under the intro chords — F · A · A# · A# — one per beat at 60 BPM. Click any note name to hear how it should sound.',
+            text: 'Bonus riff — "Sweet Child O\' Mine" (Guns N\' Roses) bass roots on the E & A strings: play the root note under each verse chord — D · C · G · D — one per bar at 60 BPM. Click any note name to hear how it should sound.',
             time: '3 min',
-            hint: 'These are the root notes of the intro chords (F, A7, B♭, B♭m). The A# (fret 6) is one fret above A — the same "# = one fret higher" idea from the Happy Birthday TAB.',
+            hint: 'These are the roots of the D–C–G verse loop. Heads up: the original recording is tuned a half-step lower, so your notes will sound slightly higher than the record — that\'s normal, not a mistake. The famous intro riff comes later in the course (Module 7 stretch goal!).',
             skills: [4, 5],
             tab: {
-              caption: '"Vampire" — simplified intro bass riff · Low E string · 60 BPM',
+              caption: '"Sweet Child O\' Mine" — verse bass roots · E & A strings · 60 BPM',
               notes: [
-                { string: 'E', fret: 1, note: 'F',  midi: 41 },
-                { string: 'E', fret: 5, note: 'A',  midi: 45 },
-                { string: 'E', fret: 6, note: 'A#', midi: 46 },
-                { string: 'E', fret: 6, note: 'A#', midi: 46 }
+                { string: 'A', fret: 5, note: 'D', midi: 50 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'E', fret: 3, note: 'G', midi: 43 },
+                { string: 'A', fret: 5, note: 'D', midi: 50 }
               ]
             }
           },
@@ -535,9 +535,9 @@ SETS.push(
     songs: [
       { name: '"Happy Birthday"', meta: 'Play full melody on E & A strings from TAB', type: 'Core', core: true,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Vampire" — Olivia Rodrigo', meta: 'Play simplified intro riff on E string', type: 'Core', core: true,
-        originalUrl: 'https://www.youtube.com/watch?v=RlPNh_PBZb4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=AmfDC2xL7xg' },
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Play verse bass roots on E & A strings · intro riff = Module 7 stretch goal', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
+        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Play bass-note riff on low E string from memory', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },

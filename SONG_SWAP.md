@@ -1,6 +1,33 @@
 # SONG_SWAP.md — Course Song Thread Replacement Plan
 
-> **Decided 2026-06-11 (chat session with Jose).** "Vampire" (Olivia Rodrigo) is removed
+> **⚡ EXECUTED 2026-06-12 (decision change by Jose).** Vampire is now removed from
+> **every** module. Rather than mapping each old Vampire slot to one specific song,
+> Jose chose: **(1)** drop a `Core Song 2 — TBD` placeholder into every former Vampire
+> slot (links removed, Vampire-specific chords/scales genericized to "TBD" until the
+> song is picked), then **(2)** keep Core Song 2 exactly where it now sits and **add**
+> the four other thread songs into the sets where they fit best (alongside Core Song 2).
+> Net result vs. the original slot table below: the table's "one song per slot" mapping
+> was relaxed — modules can now carry both Core Song 2 *and* Sweet Child / Stand By Me /
+> Tu Boda / Sailor Song. What actually shipped:
+>
+> - **Core Song 2 — TBD** placeholders: M1 S1 · M3 S2 · M4 S1–S3 · M5 S1–S2 & S4 ·
+>   M6 S2 · M7 S2–S3 · M8 S1–S3 *(no links/chords yet — needs the mini Session-A pass
+>   once Jose picks the song)*
+> - **Sailor Song** (Core): M1 S2 (listen) · M8 S1–S3 (fingerpicked)
+> - **Stand By Me** (Core): M2 S1 (bass line) · M5 S3 (cross-group)
+> - **Sweet Child O' Mine** (Core): M2 S2 (bonus riff + bass-root TAB) · M3 S2 (power
+>   chords) · M4 S1 & S3 (pentatonic solo) · M5 S4 (showcase) · M7 S2 (promoted from
+>   Choice) & S3 (barre)
+> - **Tu Boda** (Core): M6 S3 (corrido strum) · M7 S3 (barre) · M8 S2–S3 (sierreño pick)
+>
+> **Still TODO (deferred, need more than a song entry):** the M7 🌶️ intro-riff
+> *stretch-goal step* (new step text — `t3yol_zrt7g`, the E♭ riff lesson, is freed and
+> reserved for it) and the M8 Sailor Song fingerpicking *TAB* (confirm the pattern from
+> the verified tutorial first). Plus every Core Song 2 slot once the song is chosen.
+>
+> ---
+>
+> **Original plan (2026-06-11) — kept for reference.** "Vampire" (Olivia Rodrigo) is removed
 > from the course song thread — it lives in F major with B♭/B♭m, is piano-driven, and
 > shifts feel mid-song, so it never threaded cleanly across the 8 modules.
 >
@@ -120,7 +147,12 @@ Also note here the confirmed key/progression for Tu Boda and Sailor Song (Core S
 
 **Files:** none (research only — results recorded in this table; push the updated plan).
 
-## [ ] Session B — Modules 1 & 2
+> **Sessions B–E note (2026-06-12):** all four sessions' song-array swaps were done in
+> one pass under the executed decision above. The per-session checklists below are kept
+> for reference; the only unfinished items are the two **deferred** pieces (M7 stretch-goal
+> step, M8 picking TAB) and the Core Song 2 fill-in once Jose picks the song.
+
+## [x] Session B — Modules 1 & 2
 
 - M1 S1: swap Vampire Core entry → **Core Song 2 (TBD)** ("Listen — find the guitar
   in the mix"). ⚠️ Blocked until Jose picks the song + its links are verified — if
@@ -158,7 +190,7 @@ Also note here the confirmed key/progression for Tu Boda and Sailor Song (Core S
 
 **Files:** `module-1.js`, `module-2.js`.
 
-## [ ] Session C — Modules 3 & 4
+## [x] Session C — Modules 3 & 4
 
 - M3 S2: swap Vampire ("Chorus power chords: C–G–Am–F") → Sweet Child
   ("Verse: D5–C5–G5 power chord loop"). Consider a `chords:` block reusing the
@@ -172,7 +204,7 @@ Also note here the confirmed key/progression for Tu Boda and Sailor Song (Core S
 
 **Files:** `module-3.js`, `module-4.js`.
 
-## [ ] Session D — Modules 5 & 6
+## [x] Session D — Modules 5 & 6
 
 - M5 S1/S2: swap Vampire entries → **Core Song 2 (TBD)** (verse/chorus loop, chords
   per its confirmed key — ⚠️ blocked until the song is picked + verified). M5 S3:
@@ -186,7 +218,7 @@ Also note here the confirmed key/progression for Tu Boda and Sailor Song (Core S
 
 **Files:** `module-5.js`, `module-6.js`.
 
-## [ ] Session E — Modules 7 & 8 + curriculum map + final sweep
+## [~] Session E — Modules 7 & 8 + curriculum map + final sweep
 
 - M7 S2/S3: swap Vampire entries → Sweet Child as Core (move it up from the S2
   Choice list; barre the D–C–G verse). Add a 🌶️ Level-up line to a Set 2 or 3

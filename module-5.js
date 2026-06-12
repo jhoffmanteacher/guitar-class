@@ -103,9 +103,7 @@ SETS.push(
     songs: [
       { name: '"Happy Birthday"', meta: 'Read chord diagrams for C–G–Am chord version', type: 'Core', core: true,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Vampire" — Olivia Rodrigo', meta: 'Verse: C–G–Am–F · Read from chord chart', type: 'Core', core: true,
-        originalUrl: 'https://www.youtube.com/watch?v=RlPNh_PBZb4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=AmfDC2xL7xg' },
+      { name: 'Core Song 2 — TBD', meta: 'Verse chords · read from chord chart (chords TBD)', type: 'Core', core: true },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · Read from chord chart', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
@@ -251,9 +249,7 @@ SETS.push(
     songs: [
       { name: '"Happy Birthday"', meta: 'Full strum arrangement — C–G–Am–F version', type: 'Core', core: true,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Vampire" — Olivia Rodrigo', meta: 'Verse and chorus: C–G–Am–F full chord strum', type: 'Core', core: true,
-        originalUrl: 'https://www.youtube.com/watch?v=RlPNh_PBZb4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=AmfDC2xL7xg' },
+      { name: 'Core Song 2 — TBD', meta: 'Verse and chorus full chord strum (chords TBD)', type: 'Core', core: true },
       { name: '"Let It Be" — The Beatles', meta: 'C–G–Am–F — iconic I–V–vi–IV song', type: 'Choice', core: false,
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
         tutorialUrl: 'https://www.youtube.com/watch?v=gGt0akED_UU' },
@@ -279,7 +275,7 @@ SETS.push(
 
     assessment: {
       goal: 'Frets C, F, Am, G with clean tone · Switches C to G in time at 70 BPM · Switches Am to F in time at 70 BPM · Uses common-finger pivot (Am–C) · Strums a down-up pattern in time · Plays a full verse of a C–G–Am–F song',
-      performance: 'Class or partner: play a full verse of "Vampire" or "Let It Be" with open chords and down-up strum. Teacher listens for clean transitions.',
+      performance: 'Class or partner: play a full verse of Core Song 2 or "Let It Be" with open chords and down-up strum. Teacher listens for clean transitions.',
       selfCheck: 'Can you switch from Am to C without lifting your index finger? Can you play the C–G–Am–F loop at 70 BPM without stopping?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
     },
@@ -398,6 +394,9 @@ SETS.push(
       { name: '"Seven Nation Army" — The White Stripes', meta: 'Adapted to D–A–Em strummed version', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
+      { name: '"Stand By Me" — Ben E. King', meta: 'G–Em–C–D · THE Group 1↔2 cross-group song', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=hwZNL7QVJjE',
+        tutorialUrl: 'https://www.youtube.com/watch?v=TXLElO_YYiY' },
       { name: '"Country Roads" — John Denver', meta: 'G–Em–C–D — perfect cross-group song', type: 'Choice', core: false,
         originalUrl: 'https://www.youtube.com/watch?v=1vrEljMfXYo',
         tutorialUrl: 'https://www.youtube.com/watch?v=TRP3eHbIZnw' },
@@ -533,9 +532,10 @@ SETS.push(
     songs: [
       { name: '"Happy Birthday"', meta: 'Full chord arrangement — all groups reviewed', type: 'Core', core: true,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Vampire" — Olivia Rodrigo', meta: 'Full song performance', type: 'Core', core: true,
-        originalUrl: 'https://www.youtube.com/watch?v=RlPNh_PBZb4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=AmfDC2xL7xg' },
+      { name: 'Core Song 2 — TBD', meta: 'Full song performance', type: 'Core', core: true },
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Full song showcase · D–C–G', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
+        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full performance with open chords', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
