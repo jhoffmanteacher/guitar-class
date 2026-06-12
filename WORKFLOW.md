@@ -60,7 +60,8 @@ counting up from E") but the drills are sequential laps. Two parts:
   serves Modules 3 (power-chord roots), 4 (D/G strings), and 7 (barre roots).
 **Files:** `module-2.js`; possibly merge of the feature branch.
 
-### [ ] Session 1.4 — Module 2 review + freeze the template
+### [x] Session 1.4 — Module 2 review + freeze the template
+✅ done 2026-06-11 — Expanded `MODULE_REVIEWS[2]` to 10 "I can" lines covering all 11 Module 2 skills in gotItWhen language (added point-to-named-note, hovering fingers, thumb-behind-neck; read-TAB + play-melody stay combined); forward link to Module 3 was added in 1.1. Walked Appendix A: fixed the one "(full video)" label → (0:00–4:00) with an active during-watching job. **One documented exception:** Set 2 computer station keeps 3 short timestamped videos vs the ≤2 guideline — each anchors a distinct skill (finger independence / clean tone / TAB) and has a during-watching job, and the station is balanced by 3 hands-on TAB steps; flagged for Jose to cut one if it runs long in practice. Added the ★ TEMPLATE MODULE header comment to `module-2.js`. **Module 2 is frozen as the model.**
 - Expand `MODULE_REVIEWS[2]`: "I can" lines for ALL Module 2 skills in gotItWhen
   language; end with a forward link ("the E & A notes you just learned become the
   ROOTS of every power chord in Module 3").

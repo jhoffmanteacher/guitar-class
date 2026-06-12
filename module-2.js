@@ -2,6 +2,16 @@
 //  MODULE 2 — Notes on the E & A Strings
 //  Edit this file to change Module 2 content.
 //  Upload to GitHub alongside index.html + firebase-config.js
+//
+//  ★ TEMPLATE MODULE — pattern source for all other modules.
+//    When building or upgrading another module, copy the patterns
+//    here (named challenges w/ Win:, Stuck?/Level up, per-activity
+//    time chips, exit tickets, PR ladders, self-contained gotItWhens,
+//    forward link in the module review). See WORKFLOW.md Appendix A
+//    for the full checklist. Frozen 2026-06-11 after Session 1.4.
+//    Known open item: Set 2 computer station keeps 3 short timestamped
+//    videos (vs the ≤2 guideline) — each anchors a distinct skill and
+//    carries an active during-watching job; revisit if it runs long.
 // ============================================================
 
 SETS.push(
@@ -248,9 +258,9 @@ SETS.push(
             response: { type: 'short', placeholder: 'Which exercise felt hardest, and what do you think makes it hard?' }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/3x6k7zHkqmA" target="_blank">How to Avoid Fret Buzz – JustinGuitar</a> (full video).',
+            text: 'Watch: <a href="https://youtu.be/3x6k7zHkqmA" target="_blank">How to Avoid Fret Buzz – JustinGuitar</a> (0:00–4:00).',
             time: '3 min',
-            hint: 'Play a note on your guitar and see if you can diagnose your own buzz using his checklist.',
+            hint: 'As he lists each cause, pause and test it on your own guitar — find your buzz before he names the fix.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'Which is the MOST common cause of fret buzz for beginners?', choices: [
               'Pressing the string too lightly, or too far from the fret',
@@ -586,9 +596,12 @@ MODULE_REVIEWS[2] = {
     { id: 'mr2-s1', text: 'I can recite the musical alphabet (A–G) from memory, including what comes after G' },
     { id: 'mr2-s2', text: 'I can name all natural notes on the E string (frets 0–12)' },
     { id: 'mr2-s3', text: 'I can name all natural notes on the A string (frets 0–12)' },
+    { id: 'mr2-s8', text: 'I can put my finger on any note called out on the E or A string within 3 seconds, no chart' },
+    { id: 'mr2-s7', text: 'I can read a basic fretboard note-name chart' },
     { id: 'mr2-s4', text: 'I can press notes cleanly with no fret buzz' },
     { id: 'mr2-s6', text: 'I can use one finger per fret (index=1, middle=2, ring=3, pinky=4)' },
-    { id: 'mr2-s7', text: 'I can read a basic fretboard note-name chart' },
+    { id: 'mr2-s9', text: 'I can keep my unused fingers hovering close to the strings, ready to drop down' },
+    { id: 'mr2-s10', text: 'I can keep my thumb behind the neck (not hooked over the top) the whole time I play' },
     { id: 'mr2-s5', text: 'I can read a basic TAB and play a 4-bar melody in time at 60 BPM' }
   ],
   assessItems: [
