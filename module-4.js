@@ -35,7 +35,8 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/dJfV7DsTThc" target="_blank">Blues Scale Explained – Marty Music</a> (0:00–4:00).',
+            // FLAG (review): swapped 2026-06-11 from mislabeled dJfV7DsTThc ("Blues Scale Explained" was actually a Dorian/lead-theory video). Confirm this Marty major-pentatonic video fits Set 1 before the course starts.
+            text: 'Watch: <a href="https://youtu.be/m_IiyJu60-c" target="_blank">Major Pentatonic Scale – Marty Music</a> (0:00–4:00).',
             hint: 'Focus on the Pattern 1 shape — how does it sit on the neck? Notice where the root note is.',
             skills: [1, 3],
             response: { type: 'short', placeholder: 'Describe the Pattern 1 shape. Where is the root note?' }
