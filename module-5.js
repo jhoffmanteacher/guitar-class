@@ -72,7 +72,10 @@ SETS.push(
           {
             text: 'Challenge 1 — Clean Am: fret Am (index str 2/fret 1, middle str 4/fret 2, ring str 3/fret 2) and strum strings 1–5 (not the low E). Win: every string rings cleanly — check each one by plucking it.',
             hint: 'Press just behind the frets, not on them. Curve your fingers so they don\'t accidentally touch neighboring strings. Check each string individually by plucking it.',
-            skills: [3, 5]
+            skills: [3, 5],
+            chords: [
+              { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
+            ]
           }
             ]
           },
@@ -82,7 +85,10 @@ SETS.push(
           {
             text: 'Challenge 2 — Clean Em: fret Em (middle str 5/fret 2, ring str 4/fret 2) and strum all 6 strings. Win: a full, open, buzz-free Em — this is your warm-up chord.',
             hint: 'Em is the easiest chord on guitar. Use it to warm up before harder chords. It should sound full and open.',
-            skills: [4, 5]
+            skills: [4, 5],
+            chords: [
+              { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 }
+            ]
           }
             ]
           },
@@ -208,7 +214,13 @@ SETS.push(
           {
             text: 'Challenge — Name the Root: before you strum each chord, find and say its ROOT — the note the chord is named after, on the lowest string you strum. C = C (A string, 3rd fret) · G = G (low E, 3rd fret) · Am = A (A string, open) · F = F (D string, 3rd fret). Win: name all four roots correctly, then play the chord.',
             hint: 'Knowing where a chord\'s root lives on the neck is the same Module 2 note-name skill — and it is exactly what makes barre chords easy in Module 7. The root tells you the chord\'s name.',
-            skills: [1]
+            skills: [1],
+            chords: [
+              { name: 'C',  chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
+              { name: 'G',  chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
+              { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
+              { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
+            ]
           }
             ]
           },
@@ -340,6 +352,9 @@ SETS.push(
             text: 'Watch: <a href="https://youtu.be/JBKIamtI_Qc" target="_blank">Bm Chord for Beginners – Marty Music</a> (full video).',
             hint: 'Bm is the trickiest chord in this group. The partial barre version (xx4432) is the most accessible. Don\'t try the full barre version yet — focus on getting a clean sound first.',
             skills: [4],
+            chords: [
+              { name: 'Bm', chord: [[6,'x'],[5,'x'],[4,4,'4'],[3,4,'3'],[2,3,'2'],[1,2,'1']], position: 2 }
+            ],
             response: { type: 'short', placeholder: 'Which Bm version are you starting with (partial barre or full)? What\'s the hardest part for you?' }
           },
           {
@@ -359,7 +374,10 @@ SETS.push(
           {
             text: 'Challenge 1 — Clean D: fret D major (triangle: str 1/fret 2, str 2/fret 3, str 3/fret 2) and strum strings 1–4 only. Win: all four ring — especially string 1 (high E), which loves to get muted.',
             hint: 'The D chord is tricky because string 1 is easy to accidentally mute. Curve your fingers and make sure your fingertips arch away from that string.',
-            skills: [1]
+            skills: [1],
+            chords: [
+              { name: 'D', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 }
+            ]
           }
             ]
           },
@@ -369,7 +387,11 @@ SETS.push(
           {
             text: 'Challenge 2 — Cross-Group Changes: at 60 BPM, switch G→D, Am→Em, and C→A, 2 bars each. Win: each change lands on beat 1, using fingers that stay close as you switch.',
             hint: 'Look for fingers that stay close or in the same area as you switch. Planning your hand movement before you lift your fingers saves time.',
-            skills: [2, 3, 5, 6]
+            skills: [2, 3, 5, 6],
+            chords: [
+              { name: 'A',  chord: [[6,'x'],[5,0],[4,2,'1'],[3,2,'2'],[2,2,'3'],[1,0]], position: 0 },
+              { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 }
+            ]
           }
             ]
           },
@@ -471,6 +493,10 @@ SETS.push(
             text: 'Watch: <a href="https://youtu.be/hzC0orOGARw" target="_blank">E Major and B7 Chords – JustinGuitar</a> (full video).',
             hint: 'E major uses all four fingers — it\'s a full chord. B7 is also four fingers but in a different arrangement. Take them one at a time. The B7 chord has a distinctive jazz/blues sound.',
             skills: [1, 2],
+            chords: [
+              { name: 'F#m', chord: [[6,'x'],[5,'x'],[4,4,'3'],[3,2,'1'],[2,2,'1'],[1,2,'1']], position: 2 },
+              { name: 'C#m', chord: [[6,'x'],[5,'x'],[4,6,'4'],[3,6,'3'],[2,5,'2'],[1,4,'1']], position: 4 }
+            ],
             response: { type: 'short', placeholder: 'Describe the sound of the B7 chord. What musical mood does it suggest?' }
           },
           {
@@ -501,7 +527,10 @@ SETS.push(
           {
             text: 'Challenge 1 — Clean E: fret E major (index str 3/fret 1, middle str 5/fret 2, ring str 4/fret 2) and strum all 6 strings. Win: a full, rich chord with every string ringing — watch your index on string 2.',
             hint: 'E major is one of the most satisfying open chords to play. If any string buzzes, check your index finger — it tends to accidentally mute string 2.',
-            skills: [1, 3]
+            skills: [1, 3],
+            chords: [
+              { name: 'E', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,1,'1'],[2,0],[1,0]], position: 0 }
+            ]
           }
             ]
           },
@@ -511,7 +540,10 @@ SETS.push(
           {
             text: 'Challenge 2 — Four-Finger B7: fret B7 (index str 4/fret 1, middle str 5/fret 2, ring str 3/fret 2, pinky str 1/fret 2) and strum strings 1–5. Win: all four fingers down and every played string clean — then play E→B7→E and hear it pull home.',
             hint: 'B7 is a dominant 7th chord — it has a slightly tense sound that wants to resolve to E. Play E then B7 then E again and hear how it pulls back.',
-            skills: [2, 3]
+            skills: [2, 3],
+            chords: [
+              { name: 'B7', chord: [[6,'x'],[5,2,'2'],[4,1,'1'],[3,2,'3'],[2,0],[1,2,'4']], position: 0 }
+            ]
           }
             ]
           },

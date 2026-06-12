@@ -234,10 +234,13 @@ const CHORD_DIAGRAMS = {
   'G'  : { position:0, chord:[[6,3,2],[5,2,1],[4,0,0],[3,0,0],[2,0,0],[1,3,3]] },
   'C'  : { position:0, chord:[[6,'x',''],[5,3,3],[4,2,2],[3,0,0],[2,1,1],[1,0,0]] },
   'F'  : { position:0, chord:[[6,'x',''],[5,'x',''],[4,3,3],[3,2,2],[2,1,1],[1,1,1]] },
-  'Bm' : { position:2, chord:[[6,'x',''],[5,2,1],[4,4,3],[3,4,4],[2,3,2],[1,2,1]] },
+  /* Bm / F#m / C#m: partial-barre (beginner) shapes — these are what Modules 5–6
+     teach. Module 7 (barre chords) skips these auto-link pop-ups entirely (see
+     wrapChordLinksIn) and renders full-barre shapes inline instead. */
+  'Bm' : { position:2, chord:[[6,'x',''],[5,'x',''],[4,4,4],[3,4,3],[2,3,2],[1,2,1]] },
   'B7' : { position:0, chord:[[6,'x',''],[5,2,2],[4,1,1],[3,2,3],[2,0,0],[1,2,4]] },
-  'F#m': { position:2, chord:[[6,2,1],[5,4,3],[4,4,4],[3,2,1],[2,2,1],[1,2,1]] },
-  'C#m': { position:4, chord:[[6,'x',''],[5,4,1],[4,6,3],[3,6,4],[2,5,2],[1,4,1]] },
+  'F#m': { position:2, chord:[[6,'x',''],[5,'x',''],[4,4,3],[3,2,1],[2,2,1],[1,2,1]] },
+  'C#m': { position:4, chord:[[6,'x',''],[5,'x',''],[4,6,4],[3,6,3],[2,5,2],[1,4,1]] },
   'E5' : { position:0, chord:[[6,0,0],[5,2,3],[4,'x',''],[3,'x',''],[2,'x',''],[1,'x','']] },
   'G5' : { position:3, chord:[[6,3,1],[5,5,3],[4,'x',''],[3,'x',''],[2,'x',''],[1,'x','']] },
   'A5' : { position:5, chord:[[6,5,1],[5,7,3],[4,'x',''],[3,'x',''],[2,'x',''],[1,'x','']] },
