@@ -35,7 +35,8 @@ in a Set 1 challenge like Set 2's Challenge 3 does · self-contained gotItWhen f
 m2w1-s3 · solo fallback for the partner quiz · time budget line per station.
 **Files:** `module-2.js` only.
 
-### [ ] Session 1.2 — Vampire TAB + PR ladders
+### [x] Session 1.2 — Vampire TAB + PR ladders
+✅ done 2026-06-11 — Verified "vampire" is F major, intro F–A7–B♭–B♭m; added a simplified intro bass riff on the low E string (F·A·A#·A#, frets 1·5·6·6) as a `tab:` step in Set 2 practice, so the Core song is now playable in-app. Added PR-ladder `short` responses ("fastest CLEAN lap, +10 at a time") to Low E Run, A String Run, and the Watchtower riff.
 - Core songs must be playable in-app. "Vampire" (Set 2 Core) has no `tab:`. Find the
   simplified E-string intro riff, verify the tutorial source, and draft it as a `tab:`
   step (follow the Happy Birthday/Watchtower format) for Jose's review. If it can't be

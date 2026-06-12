@@ -101,7 +101,8 @@ SETS.push(
                 stuck: 'Master frets 0–5 only (E–A) chart-free first, then add 7–12 once those are automatic.',
                 levelUp: 'One clean lap at 80 BPM, or start at fret 12 and name your way down.',
                 skills: [2],
-                playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] }
+                playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] },
+                response: { type: 'short', prompt: 'Personal record: win at 60, then raise the metronome +10 at a time. What\'s your fastest CLEAN lap today (BPM)?', placeholder: 'e.g. 90 — that\'s the number to beat next class' }
               },
               {
                 text: 'Quick check — name the note before you play it:',
@@ -127,7 +128,8 @@ SETS.push(
                 stuck: 'Drop to 50 BPM and win there first, or cover frets 0–5 (A–D) before adding the rest.',
                 levelUp: 'Lap it at 80 BPM, or have a partner call out random frets for you to name on the spot.',
                 skills: [3],
-                playSeq: { label: 'Play all', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] }
+                playSeq: { label: 'Play all', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] },
+                response: { type: 'short', prompt: 'Personal record: win at 60, then raise the metronome +10 at a time. Your fastest CLEAN A-string lap today (BPM)?', placeholder: 'e.g. 80 — beat it next class' }
               },
               {
                 text: 'Quick check — name the note before you play it:',
@@ -471,6 +473,22 @@ SETS.push(
                 { string: 'E', fret: 3, note: 'G', midi: 43 },
                 { string: 'E', fret: 1, note: 'F', midi: 41 },
                 { string: 'E', fret: 3, note: 'G', midi: 43 }
+              ]
+            },
+            response: { type: 'short', prompt: 'Personal record: once it loops clean at 60, raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 100 — beat it next class' }
+          },
+          {
+            text: 'Bonus riff — "Vampire" (Olivia Rodrigo) intro on the low E string: play the four bass notes under the intro chords — F · A · A# · A# — one per beat at 60 BPM. Click any note name to hear how it should sound.',
+            time: '3 min',
+            hint: 'These are the root notes of the intro chords (F, A7, B♭, B♭m). The A# (fret 6) is one fret above A — the same "# = one fret higher" idea from the Happy Birthday TAB.',
+            skills: [4, 5],
+            tab: {
+              caption: '"Vampire" — simplified intro bass riff · Low E string · 60 BPM',
+              notes: [
+                { string: 'E', fret: 1, note: 'F',  midi: 41 },
+                { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                { string: 'E', fret: 6, note: 'A#', midi: 46 },
+                { string: 'E', fret: 6, note: 'A#', midi: 46 }
               ]
             }
           },
