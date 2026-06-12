@@ -81,7 +81,7 @@ SETS.push(
             response: { type: 'short', placeholder: 'What did you notice about any of the notes? Did any two notes feel or sound similar?' }
           },
           {
-            text: 'Exit ticket — before you rotate: which note or fret felt fuzziest today? Type it below — that\'s your first 2 minutes of practice next class.',
+            text: 'Station Wrap-Up — take a beat to reflect: which note or fret felt fuzziest today, and what (if anything) started to make it click?',
             time: '1 min',
             response: { type: 'short', placeholder: 'e.g. fret 8 on the low E — kept mixing up B and C' }
           }
@@ -163,10 +163,10 @@ SETS.push(
             ]
           },
           {
-            title: 'Exit ticket — before you rotate',
+            title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Which fret made you stop and count today? Name it below — start your next class right there.',
+                text: 'Which fret made you stop and count today? Write it below — that\'s your first thing to drill next time you practice.',
                 time: '1 min',
                 response: { type: 'short', placeholder: 'e.g. A string fret 7 — I keep guessing D vs E' }
               }
@@ -358,7 +358,7 @@ SETS.push(
             ]
           },
           {
-            text: 'Exit ticket — before you rotate: what tripped you up most today — reading the TAB, or getting a clean note with no buzz? Jot it down for next class.',
+            text: 'Station Wrap-Up — take a beat to reflect: what tripped you up most today — reading the TAB, or getting a clean note with no buzz? What felt easier than you expected?',
             time: '1 min',
             response: { type: 'short', placeholder: 'e.g. reading TAB was fine, but fret 1 kept buzzing' }
           }
@@ -519,10 +519,10 @@ SETS.push(
             ]
           },
           {
-            title: 'Exit ticket — before you rotate',
+            title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Which part of your Watchtower assessment riff still needs work? Write it below — that\'s your warm-up target next class.',
+                text: 'Which part of your Watchtower assessment riff still needs work? Write it below — that\'s your warm-up target next time you practice.',
                 time: '1 min',
                 response: { type: 'short', placeholder: 'e.g. the F-to-G change on frets 1 and 3 is shaky' }
               }
