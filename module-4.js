@@ -142,8 +142,7 @@ SETS.push(
             title: 'Improvise your first solo',
             steps: [
           {
-            // LOOPER (Session 6.1): when the looper ships, "a teacher-played Am, or the class looper" becomes "the Am looper" here.
-            text: 'Challenge 3 — Rule of 3 (give it a go!): improvise using ONLY 3 notes of Pattern 1 for 4 bars over a backing track (a teacher-played Am, or the class looper). Once those 3 feel like home, add a 4th note and play 4 more bars. No score — aim for short, intentional ideas with space between them.',
+            text: 'Challenge 3 — Rule of 3 (give it a go!): improvise using ONLY 3 notes of Pattern 1 for 4 bars over a backing track (a teacher-played Am, or one you queue up). Once those 3 feel like home, add a 4th note and play 4 more bars. No score — aim for short, intentional ideas with space between them.',
             time: '4 min',
             hint: 'Limiting yourself to 3 notes forces you to make music with phrasing and rhythm, not note-count. A short, clear idea with silence around it beats a stream of notes.',
             stuck: 'Pick just 2 notes on one string and trade them back and forth, changing only the rhythm — that\'s already improvising.',
@@ -326,8 +325,7 @@ SETS.push(
             title: 'Improvise a call-and-response phrase',
             steps: [
           {
-            // LOOPER (Session 6.1): "over a backing track (teacher Am, or the class looper)" becomes "over the Am looper" once the looper ships.
-            text: 'Challenge 2 — Call & Response (your assessment piece): over a backing track (a teacher-played Am, or the class looper), play a 2-bar idea (call), pause 1 bar, then answer with a 2-bar idea (response). Win: the call ends on a non-root note (unresolved) and the response lands on the root (arrives home).',
+            text: 'Challenge 2 — Call & Response (your assessment piece): over a backing track (a teacher-played Am, or one you queue up), play a 2-bar idea (call), pause 1 bar, then answer with a 2-bar idea (response). Win: the call ends on a non-root note (unresolved) and the response lands on the root (arrives home).',
             time: '4 min',
             hint: 'Think of it like a musical question and answer. The call feels unresolved; the response feels like it arrives somewhere.',
             stuck: 'Use just 2–3 notes for both call and response — end the response on A (the root) every time so the "answer" always lands home.',
@@ -532,8 +530,7 @@ SETS.push(
             title: 'Perform your original solo',
             steps: [
           {
-            // LOOPER (Session 6.1): the looper can serve as the backing track here in place of a recorded song track.
-            text: 'Challenge 3 — Perform It (your assessment piece — give it a go!): play your 4-bar solo over a backing track ("All Along the Watchtower", Core Song 2, or the class looper), working in at least one hammer-on, pull-off, or vibrato. No score — just tell a story, don\'t run scales.',
+            text: 'Challenge 3 — Perform It (your assessment piece — give it a go!): play your 4-bar solo over a backing track ("All Along the Watchtower", Core Song 2, or one you queue up), working in at least one hammer-on, pull-off, or vibrato. No score — just tell a story, don\'t run scales.',
             time: '6 min',
             hint: 'Include at least one technique (hammer-on, pull-off, or vibrato) in your solo. Don\'t just run scales — tell a story! No one to play for? Record yourself on the Chromebook over the backing track and watch it back — performing for the camera counts, and the playback shows you exactly where to tighten up.',
             stuck: 'Drop the backing track and play your written 4 bars alone, slowly, until they\'re solid — then add the track back and just one technique.',

@@ -336,20 +336,10 @@ on localhost, then on the live site: load, go offline (DevTools), reload.
 > working example (mock-up or single wired instance) and ask a multiple-choice
 > question about it before building the rest.
 
-### [ ] Session 6.1 — 🔁 Backing-track looper
-The Karplus-Strong engine already plays sequences (`playSequence` in `app.js`); extend
-it to loop continuously at a chosen BPM so it works as a backing track for improv and
-strumming practice — no recordings needed.
-- Code: add a loop mode to `playSequence` (or a sibling `playLoop`) with a hard stop
-  button; small UI with a preset picker + BPM control.
-- Presets (propose first, Jonathan approves): Am pentatonic vamp (Am root pulse) for
-  Module 4 · 12-bar blues in E root cycle (E–E–E–E A–A–E–E B–A–E–E) for Module 4 blues
-  steps · Em–Am vamp for Module 6 strumming.
-- Surface: ask Jonathan (multiple choice) — a `looper:` step property rendered inline
-  (like `playSeq`) vs a global tool popup next to the metronome vs both.
-- Content wiring: update the Module 4/6 improv + strumming challenges (written in
-  3.5/3.7 with this in mind) to say "over the looper."
-**Files:** `app.js`, `styles.css`, `module-4.js`, `module-6.js`.
+### ~~Session 6.1 — 🔁 Backing-track looper~~ (dropped)
+~~Backing-track looper~~ — built & demoed 2026-06-13 (Karplus-Strong loop engine, tool
+popup + inline buttons, Am/blues/Em–Am presets), cut after listening to it; not wanted.
+Do not rebuild.
 
 ### [ ] Session 6.2 — 📋 Teacher dashboard: exit tickets + PR scores
 Exit tickets and PR-ladder responses already save to Firestore (`responses`), but the
