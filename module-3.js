@@ -24,25 +24,34 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/RQcEJMYSGfI" target="_blank">Power Chords – Simen Otnes</a> (full video).',
-            hint: 'Pause after the shape explanation and try the power chord on your guitar before he plays along. Make sure both notes ring clean.',
+            text: 'Power chord shape — see it move: here are E5, G5, and A5. It\'s the SAME two-finger shape (index on the root, ring two frets up) just slid to a new fret. Press ▶ to hear the root climb E → G → A, then build each shape on your guitar.',
+            time: '4 min',
+            hint: 'Your index finger names the chord — it sits on the root. The ring finger always lands two frets higher, on the next string. Pause and match each diagram before moving on.',
             skills: [1, 2],
-            response: { type: 'mc', prompt: 'A power chord is made up of which two notes?', choices: [
-              'The root and the 5th',
-              'The root, the 3rd, and the 5th',
-              'The root and the octave (same note, higher)',
-              'All six open strings'
+            chords: [
+              { name: 'E5', chord: [[6,0],[5,2,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 0 },
+              { name: 'G5', chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
+              { name: 'A5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 }
+            ],
+            playSeq: { label: 'Hear the roots climb (E · G · A)', bpm: 60, notes: [40, 43, 45] },
+            response: { type: 'mc', prompt: 'E5, G5, and A5 are played with…', choices: [
+              'Three completely different shapes',
+              'The same shape moved to different frets',
+              'All your fingers on different strings',
+              'Only open strings'
             ] }
           },
           {
             text: 'Watch: <a href="https://youtu.be/3CIbdUaHMhw" target="_blank">Power Chords 101 – JustinGuitar</a> (0:00–4:00).',
-            hint: 'Focus on his right-hand muting technique. How does he stop the strings he isn\'t playing from ringing?',
+            time: '4 min',
+            hint: 'Focus on his right-hand muting technique — how does he stop the strings he isn\'t playing from ringing? Try it on your guitar as he shows it.',
             skills: [1, 3],
             response: { type: 'short', placeholder: 'Describe his right-hand muting technique in your own words.' }
           },
           {
             text: 'Watch: <a href="https://youtu.be/DVveuwoVmmY" target="_blank">Power Chords for Beginners – Marty Music</a> (0:00–3:00).',
-            hint: 'Notice how he moves the same shape to different positions on the neck. Try sliding your shape to A5 and G5.',
+            time: '3 min',
+            hint: 'Notice how he moves the same shape to different positions. As he does, slide your own shape along to A5 and G5 with him.',
             skills: [2, 4],
             response: { type: 'mc', prompt: 'If you play the same power chord shape with your index finger on the 5th fret of the low E string, what chord is it?', choices: [
               'A5',
@@ -50,6 +59,11 @@ SETS.push(
               'C5',
               'E5'
             ] }
+          },
+          {
+            text: 'Station Wrap-Up — take a beat to reflect: which felt harder today — getting both notes to ring clean, or stopping the other strings from sounding? What started to help?',
+            time: '1 min',
+            response: { type: 'short', placeholder: 'e.g. muting — my strumming hand kept letting the high strings ring' }
           }
         ]
       },
@@ -61,6 +75,7 @@ SETS.push(
             steps: [
               {
                 text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open and at the 1st–3rd fret, listening for buzz. Win: in tune, and every note clean before today\'s work.',
+                time: '2 min',
                 hint: 'Tuning (Module 1) and clean, buzz-free notes (Module 2 — press just behind the fret) are skills you keep forever. 60 seconds here makes everything today sound better.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
@@ -71,11 +86,22 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 1 — Clean E5: fret an E5 power chord (low E open root + 2nd fret A string) and strum just those two strings — no others. Win: a clean, buzz-free E5 with nothing else ringing.',
+            time: '3 min',
             hint: 'Use your index finger on the root and your ring finger on the 5th. Keep your pinky close. Palm-mute the strings below with the edge of your picking hand.',
+            stuck: 'Pluck the two notes one at a time first — make sure each rings alone — then strum them together.',
+            levelUp: 'Lift right off and re-fret the chord 5 times in a row, clean every single time.',
             skills: [1, 3],
             chords: [
               { name: 'E5', chord: [[6,0],[5,2,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 0 }
             ]
+          },
+          {
+            text: 'Challenge 2 — Mute Check: fret your E5 and strum hard across ALL six strings. Win: strum all six strings but only the two power-chord notes ring — the other four stay silent.',
+            time: '3 min',
+            hint: 'Let your fretting ring finger lean to deaden the strings above, and rest the side of your strumming hand lightly on the strings below the chord. A hard strum should still sound like just two notes.',
+            stuck: 'Mute with the fretting hand first — let a finger lightly touch the strings you\'re not playing — then add the side of your strumming hand.',
+            levelUp: 'Do the same on G5 and A5, where your hand has to shift up the neck and re-find the mute.',
+            skills: [3]
           }
             ]
           },
@@ -83,8 +109,11 @@ SETS.push(
             title: 'Move the power chord shape along the E & A strings',
             steps: [
           {
-            text: 'Challenge 2 — Shape Shifter: slide the same shape to A5 (5th fret E), G5 (3rd fret E), D5 (5th fret A), and C5 (3rd fret A), saying each name aloud. Win: hit all four cleanly without losing the shape.',
-            hint: 'Keep the same finger shape and just move it up and down the neck. The relationship between the two fingers never changes.',
+            text: 'Challenge 3 — Shape Shifter: slide the same shape to A5 (5th fret E), G5 (3rd fret E), D5 (5th fret A), and C5 (3rd fret A), saying each name aloud. Win: hit all four cleanly without losing the shape.',
+            time: '4 min',
+            hint: 'Keep the same finger shape and just move it along the neck. The gap between your two fingers never changes.',
+            stuck: 'Park on just G5 and A5 (both E-string) and switch between them until it\'s smooth, then add the A-string chords.',
+            levelUp: 'Have a partner call out a random chord (E5, A5, C5, D5…) and find it within 3 seconds, no counting frets.',
             skills: [2, 4],
             chords: [
               { name: 'G5', chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
@@ -99,8 +128,11 @@ SETS.push(
             title: 'Name the root as you climb the neck (E & A strings)',
             steps: [
           {
-            text: 'Challenge — Name & Climb (E string): walk the power chord UP the low E string and say each root aloud as you land it — E5 (open), F5 (1), G5 (3), A5 (5), B5 (7), C5 (8), D5 (10), E5 (12). Win: name every root correctly, chart-free, all the way to the 12th fret.',
+            text: 'Challenge 4 — Name & Climb (E string): walk the power chord UP the low E string and say each root aloud as you land it — E5 (open), F5 (1), G5 (3), A5 (5), B5 (7), C5 (8), D5 (10), E5 (12). Win: name every root correctly, chart-free, all the way to the 12th fret.',
+            time: '3 min',
             hint: 'You learned every note on the low E string in Module 2 — this is that same map. The root is wherever your index finger sits. Hit the natural notes; skip the sharps for now.',
+            stuck: 'Do frets 0–7 only first (E5–B5), then add 8–12 once those are automatic.',
+            levelUp: 'Name your way back DOWN the string (12 → 0) without counting, or do the lap at 80 BPM.',
             skills: [2],
             chords: [
               { name: 'E5', chord: [[6,0],[5,2,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 0 },
@@ -114,8 +146,11 @@ SETS.push(
             ]
           },
           {
-            text: 'Challenge — Name & Climb (A string): now do the same up the A string — A5 (open), B5 (2), C5 (3), D5 (5), E5 (7), F5 (8), G5 (10), A5 (12). Win: name every root correctly, and notice the same note names land in different spots than they did on the E string.',
+            text: 'Challenge 5 — Name & Climb (A string): now do the same up the A string — A5 (open), B5 (2), C5 (3), D5 (5), E5 (7), F5 (8), G5 (10), A5 (12). Win: name every root correctly, and notice the same note names land in different spots than they did on the E string.',
+            time: '3 min',
             hint: 'These are the A-string notes from Module 2. Keep the low E muted so only the power chord rings. Same note, new home — that\'s how the fretboard works.',
+            stuck: 'Cover frets 0–5 (A5–D5) chart-free first, then add the rest.',
+            levelUp: 'Have a partner call out random frets on either string for you to find and name on the spot.',
             skills: [4],
             chords: [
               { name: 'A5', chord: [[6,'x'],[5,0],[4,2,'3'],[3,'x'],[2,'x'],[1,'x']], position: 0 },
@@ -134,15 +169,29 @@ SETS.push(
             title: 'Play a power chord progression in time',
             steps: [
           {
-            text: 'Challenge 3 — Watchtower Loop: play Am5–G5–F5–G5, one strum per beat at 60 BPM. Win: four times through, changing on beat 1 every time, with no stops.',
-            hint: 'Am5 = 5th fret E string, G5 = 3rd fret E string, F5 = 1st fret E string. Shift smoothly — aim to land exactly on beat 1.',
+            text: 'Challenge 6 — Watchtower Loop (your assessment piece): play Am5–G5–F5–G5, one strum per beat at 60 BPM. Win: four times through, changing on beat 1 every time, with no stops.',
+            time: '5 min',
+            hint: 'Am5 = 5th fret E string, G5 = 3rd fret E string, F5 = 1st fret E string. Shift smoothly — aim to land exactly on beat 1. This is the loop the whole class plays for the Set 1 check-off.',
+            stuck: 'Loop just Am5–G5 (frets 5 and 3) until that change is clean, then add F5.',
+            levelUp: 'Play it with an eighth-note strum (down-down-up-down-up), or push past 70 BPM.',
             skills: [2, 5, 6],
             chords: [
               { name: 'Am5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 },
               { name: 'G5',  chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
               { name: 'F5',  chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 0 }
-            ]
+            ],
+            response: { type: 'short', prompt: 'Personal record: win at 60, then raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 80 — beat it next class' }
           }
+            ]
+          },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
+              {
+                text: 'Which power chord change or muting move still feels shaky? Write it below — that\'s your warm-up target next time you practice.',
+                time: '1 min',
+                response: { type: 'short', placeholder: 'e.g. the G5-to-F5 change drops a beat; high strings still ring sometimes' }
+              }
             ]
           }
         ]
@@ -225,7 +274,8 @@ SETS.push(
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/hzC0orOGARw" target="_blank">How to Practice with a Metronome – JustinGuitar</a> (0:00–4:00).',
-            hint: 'His tip about setting the metronome 10 BPM slower than you think you need is key. Slow is smooth, smooth is fast.',
+            time: '4 min',
+            hint: 'His tip about setting the metronome 10 BPM slower than you think you need is key. As he explains it, set your own metronome and tap along. Slow is smooth, smooth is fast.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'According to the video, where should you set the metronome when learning something new?', choices: [
               'About 10 BPM slower than you think you need',
@@ -235,16 +285,23 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/JBKIamtI_Qc" target="_blank">Power Chord Song Examples – Marty Music</a> (full video).',
-            hint: 'Pick one song you recognize and try to play along. Match the strum timing to what you hear.',
+            text: 'Watch: <a href="https://youtu.be/JBKIamtI_Qc" target="_blank">Power Chord Song Examples – Marty Music</a> (0:00–3:00).',
+            time: '3 min',
+            hint: 'Pick one song you recognize and try to play along as it plays. Match the strum timing to what you hear.',
             skills: [3, 4],
             response: { type: 'short', placeholder: 'Which song did you try to play along with? What was hardest about it?' }
           },
           {
             text: 'Watch: <a href="https://youtu.be/Oqn1pflxC_Q" target="_blank">Increasing Speed on Guitar – Simen Otnes</a> (0:00–3:00).',
-            hint: 'Notice his method for building tempo gradually. Try it: play your "Watchtower" loop at 60 BPM, then bump to 65, then 70.',
+            time: '3 min',
+            hint: 'Notice his method for building tempo gradually. As he describes it, try it: play your "Watchtower" loop at 60 BPM, then bump to 65, then 70.',
             skills: [1, 2],
             response: { type: 'short', placeholder: 'In one sentence, describe his method for building up tempo gradually.' }
+          },
+          {
+            text: 'Station Wrap-Up — take a beat to reflect: at what tempo does your loop start to fall apart, and which part breaks down first — the change, the strum, or the muting?',
+            time: '1 min',
+            response: { type: 'short', placeholder: 'e.g. around 75 BPM the F5 change gets late' }
           }
         ]
       },
@@ -256,7 +313,10 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 1 — Loop in Time: play the "Watchtower" loop (Am5–G5–F5–G5) at 60 BPM, each chord one bar (4 beats), four times through. Win: every chord change lands on beat 1, with no stops.',
+            time: '4 min',
             hint: 'If you miss beat 1, keep going — don\'t stop. Staying in time matters more than the perfect change right now.',
+            stuck: 'Drop to 50 BPM and nail it there first; play through a missed change instead of stopping to fix it.',
+            levelUp: 'Bump to 70 BPM, or change chords every two beats instead of every bar so the moves come twice as fast.',
             skills: [1, 2]
           }
             ]
@@ -265,9 +325,13 @@ SETS.push(
             title: 'Play an 8-bar progression with a steady strum',
             steps: [
           {
-            text: 'Challenge 2 — Eighth-Note Strum: play the loop with straight eighths (down-down-up-down-up), counting "1 + 2 + 3 + 4 +". Win: keep it clean and steady, then beat your tempo — push past 70 BPM.',
-            hint: 'Start at 60 BPM. If it feels easy, bump up 5 BPM. Your goal this week: play the loop cleanly at 70+ BPM.',
-            skills: [3, 4]
+            text: 'Challenge 2 — Eighth-Note Strum (your assessment piece): play the loop with straight eighths (down-down-up-down-up), counting "1 + 2 + 3 + 4 +". Win: eight bars clean and steady, then beat your tempo — push past 70 BPM toward the 80 BPM unit goal.',
+            time: '4 min',
+            hint: 'Start at 60 BPM. If it feels easy, bump up 5 BPM. The unit-end check is an 8-bar progression at 80 BPM with clean muting — this is that piece.',
+            stuck: 'Strum down-only on each beat first ("1 2 3 4"), then add the up-strums one at a time.',
+            levelUp: 'Hold it clean at 80 BPM, or play it straight through a full song excerpt from the songs list.',
+            skills: [3, 4],
+            response: { type: 'short', prompt: 'Personal record: once it\'s clean at 60, raise the metronome +5 at a time. Your fastest CLEAN tempo today (BPM)?', placeholder: 'e.g. 75 — beat it next class' }
           }
             ]
           },
@@ -276,9 +340,20 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 3 — Octave Add-On (give it a go!): add your pinky two frets above your ring finger to make a 3-note power chord. No score — just try it and notice how the sound changes.',
+            time: '3 min',
             hint: 'This is optional. If your power chord sounds clean as is, keep it. Only add the 3rd finger if you can do it without buzzing.',
             skills: [5]
           }
+            ]
+          },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
+              {
+                text: 'What\'s your current top clean tempo on the loop, and what\'s the one thing holding you back from going faster — a specific change, the strum, or muting? Name it below.',
+                time: '1 min',
+                response: { type: 'short', placeholder: 'e.g. 75 BPM — the eighth-note up-strums get sloppy' }
+              }
             ]
           }
         ]
@@ -350,11 +425,21 @@ MODULE_REVIEWS[3] = {
   moduleNum: 3,
   module: 'Two-Finger Power Chords',
   skills: [
-    { id: 'mr3-s1', text: 'I can fret a clean 2-finger power chord (root + 5th) with no buzz' },
-    { id: 'mr3-s2', text: 'I can move the power chord shape along the E and A strings' },
-    { id: 'mr3-s3', text: 'I can mute unused strings cleanly' },
-    { id: 'mr3-s4', text: 'I can change power chords on beat 1 at 70+ BPM' },
-    { id: 'mr3-s5', text: 'I can play an 8-bar power chord progression in time' }
+    { id: 'mr3-s1', text: 'I can fret a clean 2-finger power chord (root + 5th) with both notes ringing and no buzz' },
+    { id: 'mr3-s2', text: 'I can move the same shape along the low E string and name each chord without counting frets' },
+    { id: 'mr3-s3', text: 'I can move the shape along the A string and keep the low E string silent' },
+    { id: 'mr3-s4', text: 'I can strum hard across all six strings and have only the two power-chord notes ring' },
+    { id: 'mr3-s5', text: 'I can read a power chord symbol like "A5" and instantly know which fret and string my index finger goes to' },
+    { id: 'mr3-s6', text: 'I can play a power chord exactly on beat 1 with the metronome — no early or late attacks' },
+    { id: 'mr3-s7', text: 'I can change power chords on beat 1 at 70+ BPM without stopping' },
+    { id: 'mr3-s8', text: 'I can play an 8-bar progression with a straight-eighths strum, counting "1 + 2 + 3 + 4 +"' },
+    { id: 'mr3-s9', text: 'I can tell whether I\'m ahead, behind, or with the click and pick a tempo where I play clean' },
+    { id: 'mr3-s10', text: 'I can add my pinky an octave up for a fuller 3-note power chord when I want one (optional stretch)' }
   ],
+  assessItems: [
+    'Fret and move a clean 2-finger power chord along the E and A strings, muting the unused strings',
+    'Perform an 8-bar power chord progression at 80 BPM with the metronome — at least 3 different chords and clean muting'
+  ],
+  forward: 'The two-finger shape and the muting you just locked in are the backbone of rhythm guitar — and the E &amp; A string roots you slide between become your <strong>home base for the pentatonic patterns in Module 4</strong>, where you\'ll play lead lines and solos over these very same power chords.',
   standards: ['Pr.4a', 'Pr.5a', 'Pr.5b', 'Pr.6a', 'Re.7a']
 };

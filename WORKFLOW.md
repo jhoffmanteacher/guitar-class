@@ -170,7 +170,8 @@ root" insight its own ear/quiz step instead of leaving it inside a video; video 
 (9 watch steps).
 **Files:** `module-7.js`.
 
-### [ ] Session 3.4 — Module 3 (power chords)
+### [x] Session 3.4 — Module 3 (power chords)
+✅ done 2026-06-13 — Set 1 computer station: replaced the Simen Otnes shape video with an interactive **E5→G5→A5** step (chord diagrams + a ▶ "hear the roots climb E·G·A" `playSeq`), folding its tip into the hint; now 2 videos + 1 interactive. Set 1 practice: split fretting and muting into their own challenges — added **Challenge 2 — Mute Check** ("strum all six strings but only the two power-chord notes ring"); renumbered to 6 challenges; added Stuck?/Level up + `time:` chips to every challenge; named the Watchtower Loop the assessment piece with a PR ladder. Set 2 computer station: **kept at 3 videos** (Jose's call), but added time chips, during-watching jobs, fixed the Marty "(full video)" → 0:00–3:00, added a Station Wrap-Up. Set 2 practice: Stuck?/Level up + time chips on each challenge, named the Eighth-Note Strum the assessment piece with a PR ladder toward the 80 BPM unit goal. **Station Wrap-Up** exit tickets on all 4 stations. Expanded `MODULE_REVIEWS[3]` 5→10 gotItWhen "I can" lines + `assessItems` + forward link to Module 4 (pentatonic/lead). No songs touched (Set 2 "Core Song 2 — TBD" stays Jose's `SONG_SWAP.md` item); no new video URLs. **Files:** `module-3.js`.
 Standard scope. Specifics: computer station is the pure 3-videos formula — replace one
 video with an interactive `tab:` of E5 → G5 → A5 with `playSeq`; muting gets its own
 named challenge ("Win: strum all 6 strings but only the two power-chord notes ring");
