@@ -396,6 +396,10 @@ body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
 .timer-display{font-size:36px;font-weight:500;text-align:center;letter-spacing:2px;margin:4px 0 12px;color:var(--text);border-radius:8px}
 @keyframes timerDoneFlash{0%,100%{background:transparent;color:var(--text)}50%{background:var(--green-text);color:var(--bg)}}
 .timer-done-flash{animation:timerDoneFlash 0.6s ease-in-out 4}
+/* When the timer hits zero, also pulse the always-visible timer FAB — students
+   who closed the popup (most of them) still get a visual cue in a loud room. */
+@keyframes fabTimerDone{0%,100%{background:var(--green-bg);color:var(--green-text);transform:scale(1)}50%{background:var(--green-text);color:var(--bg);transform:scale(1.08)}}
+.fab-timer-done{animation:fabTimerDone 0.6s ease-in-out 6}
 .metro-dot{width:28px;height:28px;border-radius:50%;background:var(--blue-bg);border:2px solid var(--blue-text);margin:0 auto 14px;transition:background 0.05s,transform 0.05s}
 .metro-dot.flash{background:var(--blue-text);transform:scale(1.25)}
 .timer-presets{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
@@ -576,13 +580,22 @@ body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
   #google_translate_element,.btn-translate,.user-area,
   .step-done-row,.mr-rec,.mr-locked-banner{display:none !important}
 
-  /* Only the active set prints; expand BOTH stations, drop songs/checklist */
+  /* Only the active set prints; expand BOTH stations + the checklist, drop songs */
   .week-panel{display:none !important}
   .week-panel.active{display:block !important}
   .tab-panel{display:none !important}
   .week-panel.active .tab-panel.tp-station-b,
-  .week-panel.active .tab-panel.tp-station-c{display:block !important}
-  .tab-panel.tp-station-c{page-break-before:always}
+  .week-panel.active .tab-panel.tp-station-c,
+  .week-panel.active .tab-panel.tp-checklist{display:block !important}
+  .tab-panel.tp-station-c,.tab-panel.tp-checklist{page-break-before:always}
+
+  /* Checklist prints as a clean blank tick-sheet — drop the interactive toggles,
+     "Practice this" expandos, and the live progress bar (those are screen-only). */
+  .tp-checklist .sk-toggle,.tp-checklist .sk-helper,
+  .tp-checklist .sk-practice-btn,.tp-checklist .sk-practice-panel,
+  .tp-checklist .cl-intro,.tp-checklist .prog-wrap,
+  .tp-checklist .save-ind{display:none !important}
+  .tp-checklist .skbox{border:1px solid var(--text2) !important}
 
   /* Reveal collapsed station-C skill sections + their bodies */
   .sc-sec-body,.sk-helper,.sk-practice-panel{display:block !important}

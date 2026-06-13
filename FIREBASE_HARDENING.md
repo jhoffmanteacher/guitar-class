@@ -50,15 +50,22 @@ live site so a copied key can't be abused.
 2. **APIs & Services → Credentials**.
 3. Find the **Browser key (auto created by Firebase)** → click it.
 4. Under **Application restrictions**, choose **Websites** (HTTP referrers).
-5. Add these referrers (the site is a GitHub *project* page, so it lives under
-   the `/guitar-class/` path, not the domain root):
-   - `jhoffmanteacher.github.io/guitar-class/*`
+5. Add these referrers — **domain-level only, no path**:
+   - `jhoffmanteacher.github.io/*`
+   - `guitar-class-2fd21.firebaseapp.com/*`  (the auth-handler domain — needed for Google sign-in)
    - `localhost/*`  (so local testing keeps working)
 6. **Save.** Changes can take a few minutes to take effect.
 7. Test: open the live site in an incognito window, sign in, mark a skill — it
    should still save. Then confirm the key is rejected elsewhere (optional).
 
-> Note: a Firebase web API key is *identifier*, not a secret — referrer
+> ⚠️ **Do NOT restrict by path** (e.g. `…/guitar-class/*`). The site lives under
+> the `/guitar-class/` project-page path, but it's tempting to mirror that here —
+> don't. Browsers only send the **domain** as the referrer on the cross-site calls
+> Firebase auth makes (not the full path), so a path-restricted key rejects every
+> sign-in and the app shows a generic "make sure pop-ups are allowed" error.
+> *(This exact mistake broke sign-in on 2026-06-13 — fixed by dropping the path.)*
+
+> Note: a Firebase web API key is an *identifier*, not a secret — referrer
 > restriction is the right control, and Firestore rules (step 1) are what
 > actually protect the data.
 
@@ -79,7 +86,9 @@ that are annoying to debug.
       *(verified 2026-06-13 — already locked down, not test mode)*
 - [x] Teacher email in the rules matches your real teacher sign-in.
       *(verified 2026-06-13 — `?teacher=true` showed the dashboard, not denied)*
-- [x] Browser API key restricted to `jhoffmanteacher.github.io/guitar-class/*` +
-      `localhost/*`. *(done 2026-06-13 — `firebaseapp.com/*` auth domain kept)*
-- [ ] Signed in on the live site and confirmed progress still saves.
-      *(do after ~5 min, incognito — last verification)*
+- [x] Browser API key restricted to domain-level referrers:
+      `jhoffmanteacher.github.io/*` + `guitar-class-2fd21.firebaseapp.com/*` +
+      `localhost/*`. *(set 2026-06-13; a path restriction `…/guitar-class/*` was
+      tried first and broke sign-in — reverted to domain-level same day)*
+- [x] Signed in on the live site and confirmed progress still saves.
+      *(confirmed 2026-06-13 — after reverting the key to domain-level referrers)*

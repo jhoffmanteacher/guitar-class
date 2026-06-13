@@ -1273,11 +1273,11 @@ function buildStations(w, stationId){
   }
   return `
     <div class="st-grid">
-      <div class="stc" id="${w.id}-sc-b" onclick="openSt('${w.id}','b')">
+      <div class="stc" id="${w.id}-sc-b" role="button" tabindex="0" aria-label="Open Station B — Computer station" onclick="openSt('${w.id}','b')">
         <div class="st-ico">&#x1F4BB;</div><span class="st-badge bb">Station B</span>
         <div class="st-name">Computer station</div><div class="st-desc">Watch · Listen · Practice</div>
       </div>
-      <div class="stc" id="${w.id}-sc-c" onclick="openSt('${w.id}','c')">
+      <div class="stc" id="${w.id}-sc-c" role="button" tabindex="0" aria-label="Open Station C — Practice station" onclick="openSt('${w.id}','c')">
         <div class="st-ico">&#x1F3B8;</div><span class="st-badge bc">Station C</span>
         <div class="st-name">Practice station</div><div class="st-desc">Independent drill</div>
       </div>
@@ -1614,8 +1614,8 @@ function buildChecklist(w){
     const practicePanel = s.practice ? renderPracticePanel(s.practice, s.id, w.id) : '';
     return `<div class="skill-row">
       <div class="sktxt"><div class="sn" style="flex-shrink:0;margin-top:0;margin-right:8px">${i+1}</div><div class="sk-body"><div class="sk-label">${s.text}</div>${helper}${practiceBtn}</div></div>
-      <div class="skchk-cell working-col${st==='working'?' active':''}" onclick="toggleSkill('${s.id}','${w.id}','working')" title="Still working on it"><div class="skbox">${st==='working'?wkSvg:''}</div></div>
-      <div class="skchk-cell gotit-col${st==='gotit'?' active':''}" onclick="toggleSkill('${s.id}','${w.id}','gotit')" title="I've got it!"><div class="skbox">${st==='gotit'?giSvg:''}</div></div>
+      <div class="skchk-cell working-col${st==='working'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='working'}" aria-label="Still working on it: ${escAttr(s.text)}" onclick="toggleSkill('${s.id}','${w.id}','working')" title="Still working on it"><div class="skbox">${st==='working'?wkSvg:''}</div></div>
+      <div class="skchk-cell gotit-col${st==='gotit'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='gotit'}" aria-label="I've got it: ${escAttr(s.text)}" onclick="toggleSkill('${s.id}','${w.id}','gotit')" title="I've got it!"><div class="skbox">${st==='gotit'?giSvg:''}</div></div>
       ${practicePanel}
     </div>`;
   }).join('');
@@ -1910,8 +1910,10 @@ function setTimerSecs(secs){ timerSelected=secs; timerSecs=secs; if(timerRunning
 function updateTimerDisplay(){ const m=Math.floor(timerSecs/60),s=timerSecs%60; document.getElementById('timer-display').textContent=m+':'+(s<10?'0':'')+s; }
 // Flash the display when time's up — visible across a loud room without headphones.
 function flashTimerDisplay(){ const el=document.getElementById('timer-display'); if(!el) return; el.classList.remove('timer-done-flash'); void el.offsetWidth; el.classList.add('timer-done-flash'); setTimeout(()=>el.classList.remove('timer-done-flash'),2400); }
+// Pulse the floating timer button too — it's visible even when the popup is closed.
+function flashTimerFab(){ const el=document.getElementById('fab-timer'); if(!el) return; el.classList.remove('fab-timer-done'); void el.offsetWidth; el.classList.add('fab-timer-done'); setTimeout(()=>el.classList.remove('fab-timer-done'),3600); }
 function resetTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; } timerSecs=timerSelected; updateTimerDisplay(); document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; }
-function toggleTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; } else { timerRunning=true; document.getElementById('timer-btn').innerHTML='&#x23F8; Pause'; timerInterval=setInterval(()=>{ if(timerSecs>0){ timerSecs--; updateTimerDisplay(); } else { clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; [0,0.35,0.7].forEach(d=>setTimeout(()=>beep(660,0.3),d*1000)); flashTimerDisplay(); } },1000); } }
+function toggleTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; } else { timerRunning=true; document.getElementById('timer-btn').innerHTML='&#x23F8; Pause'; timerInterval=setInterval(()=>{ if(timerSecs>0){ timerSecs--; updateTimerDisplay(); } else { clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; [0,0.35,0.7].forEach(d=>setTimeout(()=>beep(660,0.3),d*1000)); flashTimerDisplay(); flashTimerFab(); } },1000); } }
 
 /* ── Popup logic ── */
 function setFabExpanded(which, isOpen){ const f=document.getElementById('fab-'+which); if(f) f.setAttribute('aria-expanded', isOpen?'true':'false'); }
@@ -1926,6 +1928,17 @@ document.addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
   ['metro','timer','tuner'].forEach(w=>{ const el=document.getElementById(w+'-popup'); if(el&&el.classList.contains('open')) closePopup(w); });
+});
+// Keyboard activation for non-<button> controls that carry role="button"
+// (the skill checkboxes and station cards are <div>s for layout reasons).
+// Enter or Space fires their click, so keyboard-only students can mark skills
+// and open stations. Space is prevented from scrolling the page.
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter'&&e.key!==' '&&e.key!=='Spacebar') return;
+  const el=e.target.closest('[role="button"]');
+  if(!el||el.tagName==='BUTTON'||el.tagName==='A') return;
+  e.preventDefault();
+  el.click();
 });
 
 /* ══════════════════════════════════════════════
