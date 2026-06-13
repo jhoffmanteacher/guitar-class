@@ -93,6 +93,23 @@ function showApp(user){
   setTimeout(()=>{ const h=document.getElementById('resize-handle'),p=document.getElementById('resource-panel'),f=document.getElementById('fab-group'); if(h&&p&&f) f.style.right=(p.offsetWidth+h.offsetWidth+16)+'px'; },0);
   document.getElementById('user-area').innerHTML=userHeaderHtml(user);
   renderAll();
+  maybeShowWelcome();
+}
+
+/* "Start here" onboarding card (Phase 5): show once on first load, then leave a
+   "Start here" link in the main column so a student can reopen it anytime.
+   localStorage may be unavailable in private mode — fall back to showing it. */
+function maybeShowWelcome(){
+  let seen=false;
+  try{ seen = localStorage.getItem('gc-welcomed')==='1'; }catch(e){}
+  if(!seen) openWelcome();
+}
+function openWelcome(){
+  const o=document.getElementById('welcome-overlay'); if(o) o.style.display='flex';
+}
+function dismissWelcome(){
+  const o=document.getElementById('welcome-overlay'); if(o) o.style.display='none';
+  try{ localStorage.setItem('gc-welcomed','1'); }catch(e){}
 }
 
 /* ── Firestore ── */
@@ -1928,6 +1945,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
   ['metro','timer','tuner'].forEach(w=>{ const el=document.getElementById(w+'-popup'); if(el&&el.classList.contains('open')) closePopup(w); });
+  const wo=document.getElementById('welcome-overlay'); if(wo&&wo.style.display!=='none') dismissWelcome();
 });
 // Keyboard activation for non-<button> controls that carry role="button"
 // (the skill checkboxes and station cards are <div>s for layout reasons).

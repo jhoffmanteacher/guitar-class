@@ -73,8 +73,34 @@ function googleTranslateElementInit(){
   <div id="auth-error" class="auth-error" role="alert" style="display:none"></div>
 </div>
 <div id="app" style="display:none">
+  <div class="welcome-overlay" id="welcome-overlay" role="dialog" aria-modal="true" aria-labelledby="welcome-title" style="display:none" onclick="if(event.target===this)dismissWelcome()">
+    <div class="welcome-card">
+      <button class="welcome-close" onclick="dismissWelcome()" aria-label="Close welcome">&#x2715;</button>
+      <h2 id="welcome-title">&#x1F44B; Start here</h2>
+      <p class="welcome-lead"><strong>Welcome to Guitar Class!</strong> This is your home base for independent practice. Here's how it works:</p>
+      <div class="welcome-row">
+        <span class="welcome-ico">&#x1F511;</span>
+        <div><strong>Signing in</strong><br>You're in with your <strong>school Google account</strong>. Your progress saves automatically and follows you to any device &mdash; Chromebook, phone, or home computer. Just sign in again and pick up where you left off.</div>
+      </div>
+      <div class="welcome-row">
+        <span class="welcome-ico">&#x1F3AF;</span>
+        <div><strong>Finding your work</strong><br>Pick your <strong>Module</strong> from the dropdown, then tap a <strong>Set</strong>. Each set has stations to work through, a few <strong>songs</strong> to play along with, and a <strong>skills checklist</strong> at the bottom.</div>
+      </div>
+      <div class="welcome-row">
+        <span class="welcome-ico">&#x2705;</span>
+        <div><strong>Tracking your progress</strong><br>As you practice, update each skill: <em>Still working on it</em> while you're learning, then <em>I've got it!</em> once you can do it consistently. No grade, no penalty &mdash; it just helps you and Mr.&nbsp;Hoffman see how you're growing.</div>
+      </div>
+      <div class="welcome-row">
+        <span class="welcome-ico">&#x1F3A7;</span>
+        <div><strong>Headphone norms</strong><br>This is a shared room, so <strong>headphones stay on</strong> during independent practice. Keep the volume where <em>you</em> can hear clearly but your neighbors can't &mdash; if the person next to you can hear your video, turn it down. The Tuner, Timer, and Metronome are the floating buttons in the corner.</div>
+      </div>
+      <p class="welcome-note">&#x1F310; Need Spanish? Tap <strong>Espa&ntilde;ol</strong> at the top anytime.</p>
+      <button class="welcome-go" onclick="dismissWelcome()">Got it &mdash; let's play &#x1F3B8;</button>
+    </div>
+  </div>
   <div class="app-layout">
     <div class="main">
+      <button type="button" class="start-here-link" id="start-here-link" onclick="openWelcome()">&#x1F44B; Start here</button>
       <div class="module-select-wrap">
         <label class="module-select-label" for="module-select">Module</label>
         <select class="module-select" id="module-select" onchange="onModuleChange(this.value); saveProgress()"></select>

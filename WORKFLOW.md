@@ -246,6 +246,7 @@ on tool popups · full keyboard-only walkthrough as the test.
 **Files:** `index.html`, `app.js`, `styles.css`.
 
 ### [ ] Session 4.2 — 🔗 Full dead-link audit
+⏸ **Deferred 2026-06-13 (do later)** — consciously punted; treat as a recurring start-of-semester task, not an open Phase 4 blocker.
 Extract every YouTube ID across all 8 module files (~222 unique). Verify each via
 oEmbed in parallel batches. Report ✅/❌ with file+line. Replace dead ones via
 search-and-verify; anything without a good replacement gets flagged for Jonathan to choose
@@ -307,8 +308,11 @@ on localhost, then on the live site: load, go offline (DevTools), reload.
       code task).
 - [ ] End-of-semester set: design the Module 1 goal-revisit / final reflection /
       performance rubric (seeded by Session 3.2's showcase step).
-- [ ] "Start here" onboarding blurb for new students (sign-in, how the tracker works,
-      headphone norms).
+- [x] "Start here" onboarding blurb for new students (sign-in, how the tracker works,
+      headphone norms). ✅ 2026-06-13 — built as a dismissible welcome card shown once on
+      first load (localStorage `gc-welcomed`), with a "👋 Start here" link above the Module
+      selector to reopen it. Closes via ✕, "Got it" button, backdrop click, or Escape;
+      hidden in print. **Files:** `index.html`, `styles.css`, `app.js`.
 - [ ] Song refresh each semester: swap in 2–3 student-requested songs (verify links
       per CLAUDE.md; track candidates and decisions in `SONG_SWAP.md`); pull from the
       🎤 request slot.
