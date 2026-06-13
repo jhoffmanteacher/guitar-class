@@ -2257,7 +2257,7 @@ function renderTeacherSetTabs(){
     const btn=document.createElement('button');
     btn.className='t-wtab'+(w.locked?' locked':'')+(w.id===teacherSetId?' on':'');
     btn.textContent=w.label; btn.dataset.id=w.id;
-    if(!w.locked) btn.onclick=()=>{ teacherSetId=w.id; activateTeacherSetTab(w.id); renderTeacherGrid(); };
+    if(!w.locked) btn.onclick=()=>{ teacherSetId=w.id; activateTeacherSetTab(w.id); renderTeacherBody(); };
     c.appendChild(btn);
   });
 }
@@ -2275,9 +2275,9 @@ async function loadAllStudents(){
         else if(raw[k]==='working'||raw[k]==='gotit') skills[k]=raw[k];
         else skills[k]='none';
       });
-      allStudents.push({uid:doc.id,skills,name:doc.data().name||'',email:doc.data().email||''});
+      allStudents.push({uid:doc.id,skills,name:doc.data().name||'',email:doc.data().email||'',responses:doc.data().responses||{}});
     });
-    renderTeacherGrid(); renderTeacherSummary();
+    renderTeacherBody(); renderTeacherSummary();
   } catch(e){
     document.getElementById('t-grid-container').innerHTML='<div class="t-loading">Could not load student data. Check your Firebase security rules.</div>';
   }
@@ -2324,6 +2324,70 @@ function renderTeacherGrid(){
 }
 
 function abbreviate(text){ const words=text.split(' '); if(words.length<=4) return text; return words.slice(0,3).join(' ')+'…'; }
+
+/* ── Teacher view toggle: skill grid ⇄ student responses (Session 6.2) ──
+   Read-only. Uses the same one-shot student fetch (no extra reads). */
+let teacherView='skills';
+function setTeacherView(v){
+  teacherView=v;
+  document.querySelectorAll('.t-vt').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
+  const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
+  renderTeacherBody();
+}
+function renderTeacherBody(){ if(teacherView==='responses') renderTeacherResponses(); else renderTeacherGrid(); }
+
+/* Enumerate every short free-text response slot in a set, in display order,
+   rebuilding the exact keys the student app saves under
+   (`${set}-${station}[-sec{n}]-${stepIndex}`). Tags PR (BPM) prompts. */
+function setShortResponses(w){
+  const out=[];
+  ['b','c'].forEach(stationId=>{
+    const stn=w.stations&&w.stations[stationId]; if(!stn) return;
+    const pushStep=(st,ns,i)=>{
+      if(!st.response||st.response.type!=='short') return;
+      const prompt=st.response.prompt||'';
+      const isPR=/personal record/i.test(prompt)||/\bBPM\b/i.test(prompt);
+      let label;
+      const chal=(st.text||'').match(/Challenge\s*\d+\s*[—–-]\s*([^:(]+)/);
+      const ph=st.response.placeholder||'';
+      if(isPR) label=chal?('PR — '+chal[1].trim()):'Personal record (BPM)';
+      else if(/wrap-?up|reflect/i.test(st.text||'')) label='Wrap-up reflection';
+      else if(prompt) label=prompt.replace(/\s+/g,' ').slice(0,70);
+      else if(ph && !/^e\.g\./i.test(ph)) label=ph.replace(/\s+/g,' ').slice(0,70); // placeholder is the question, not an example
+      else label=chal?chal[1].trim():'Written response';
+      out.push({key:`${w.id}-${ns}-${i}`, label, isPR});
+    };
+    if(stn.sections) stn.sections.forEach((sec,gi)=>(sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i)));
+    else if(stn.steps) stn.steps.forEach((st,i)=>pushStep(st,stationId,i));
+  });
+  return out;
+}
+function renderTeacherResponses(){
+  const w=SETS.find(x=>x.id===teacherSetId);
+  const box=document.getElementById('t-grid-container');
+  if(!w){ box.innerHTML='<div class="t-loading">Pick a set.</div>'; return; }
+  if(allStudents.length===0){ box.innerHTML='<div class="t-loading">No student data yet — students need to sign in and write a response first.</div>'; return; }
+  const slots=setShortResponses(w);
+  if(slots.length===0){ box.innerHTML='<div class="t-loading">This set has no written-response prompts.</div>'; return; }
+  const sorted=[...allStudents].sort((a,b)=>(a.name||a.email||a.uid).localeCompare(b.name||b.email||b.uid));
+  const prNum=v=>{ const m=String(v).match(/\d{2,3}/); return m?m[0]:null; };
+  let withAny=0;
+  const cards=sorted.map(stu=>{
+    const items=slots.map(sl=>{
+      const val=(stu.responses&&stu.responses[sl.key]||'').trim();
+      if(!val) return '';
+      if(sl.isPR){ const n=prNum(val); return `<div class="tr-item"><span class="tr-pr">&#x1F3AF; ${escHtml(sl.label)}</span><span class="tr-prval">${n?escHtml(n)+' BPM':escHtml(val)}</span></div>`; }
+      return `<div class="tr-item"><span class="tr-lbl">&#x270D; ${escHtml(sl.label)}</span><span class="tr-txt">${escHtml(val)}</span></div>`;
+    }).filter(Boolean).join('');
+    if(!items) return '';
+    withAny++;
+    const name=stu.name||stu.email||stu.uid.slice(0,8)+'…';
+    return `<div class="tr-card"><div class="tr-name">${escHtml(name)}</div>${items}</div>`;
+  }).filter(Boolean).join('');
+  box.innerHTML = withAny
+    ? `<div class="tr-meta">${withAny} of ${allStudents.length} students have written something for ${escHtml(w.label)} · sorted by name</div><div class="tr-list">${cards}</div>`
+    : `<div class="t-loading">No one has written a response for ${escHtml(w.label)} yet.</div>`;
+}
 
 /* ── Resource Panel ── */
 function loadPanel(type,url,title,subtitle){

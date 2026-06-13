@@ -341,18 +341,19 @@ on localhost, then on the live site: load, go offline (DevTools), reload.
 popup + inline buttons, Am/blues/Em–Am presets), cut after listening to it; not wanted.
 Do not rebuild.
 
-### [ ] Session 6.2 — 📋 Teacher dashboard: exit tickets + PR scores
-Exit tickets and PR-ladder responses already save to Firestore (`responses`), but the
-teacher dashboard only shows skill checkmarks — Jonathan can't see what students wrote.
-Add a "what students wrote" view: per student, their latest exit-ticket text and PR
-scores (max BPM numbers), newest first, filterable by module/set.
-- Ask Jonathan (multiple choice): extra expandable column in the existing grid vs a
-  separate "Responses" tab on the dashboard.
-- Read-only; reuse the existing teacher auth gating (jhoffman@seq.org).
-- Mind Firestore read costs: fetch once per dashboard load, no live listeners.
-- PR scores get a small trend treatment if cheap (e.g. "60 → 80 BPM"), otherwise just
-  the latest number — don't gold-plate.
-**Files:** `app.js` (teacher dashboard section), `styles.css`.
+### [x] Session 6.2 — 📋 Teacher dashboard: exit tickets + PR scores
+✅ 2026-06-13 — Added a "Skills grid ⇄ ✍ Responses" toggle to the teacher dashboard.
+Surface (Jonathan picked): a separate Responses view (cards, not an expandable grid
+column). Per the selected set, each student card shows their written answers — PR
+prompts ("Personal record") render as 🎯 with the BPM number extracted; other shorts
+render as ✍ labeled by prompt/placeholder/"Wrap-up reflection". Students who wrote
+nothing are skipped; meta line counts who responded. **No extra Firestore reads** —
+extended the existing one-shot `loadAllStudents()` fetch to also read the `responses`
+field. Read-only, reuses the per-set tabs + `jhoffman@seq.org` gating. Only the latest
+value is stored, so PR shows the latest number (no fake trend). Verified locally
+(headless Chrome, mock students): PR extraction, skip-empty, view toggle, skills-grid
+regression, and non-teacher denial all pass. **Files:** `index.html`, `app.js`,
+`styles.css`.
 
 ### [ ] Session 6.3 — 🎸 Song Journey view
 The course's best idea — one song growing across modules — is invisible to students.

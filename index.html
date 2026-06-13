@@ -221,9 +221,13 @@ function googleTranslateElementInit(){
       <div class="t-sub">Sequoia High School — Beginning Guitar · Year 1 · Teacher view</div>
     </div>
     <div class="t-summary" id="t-summary"></div>
+    <div class="t-viewtoggle" id="t-viewtoggle">
+      <button class="t-vt on" data-view="skills" onclick="setTeacherView('skills')">Skills grid</button>
+      <button class="t-vt" data-view="responses" onclick="setTeacherView('responses')">&#x270D; Responses</button>
+    </div>
     <div class="t-week-tabs" id="t-week-tabs"></div>
     <div id="t-grid-container"><div class="t-loading">Loading student data…</div></div>
-    <div class="t-legend">
+    <div class="t-legend" id="t-legend">
       <div class="t-leg"><span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span> I've got it!</div>
       <div class="t-leg"><span class="tck" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:var(--amber-bg);color:var(--amber-text);"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.8"/></svg></span> Still working on it</div>
       <div class="t-leg"><span class="tck no" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px"><svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span> Not yet</div>
