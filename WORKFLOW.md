@@ -161,7 +161,8 @@ across sets so students beat their own record; Set 4 "showcase preparation" gets
 explicit step revisiting the Module 1 goal ("re-read what you wrote; what changed?").
 **Files:** `module-5.js`.
 
-### [ ] Session 3.3 — Module 7 (barre chords — the morale module)
+### [x] Session 3.3 — Module 7 (barre chords — the morale module)
+✅ done 2026-06-12 — Video diet: cut one video from each of the 3 computer stations (Set 1 "Complete Beginner's Guide", Set 2 "Get Good at Guitar / Simen Otnes", Set 3 "Easiest F Chord rewatch"), folding each one's tip into a hint; 9→6 watch steps, all ≤2 per station, every link now timestamped (0 "full video"). Barre focus: staged **partial→full Stuck ladders** (bar + root → add strings → full barre) + **honest fatigue hints** (cramping normal, shake out, short tries beat a long grind) on all 12 graded challenges (12 stuck / 12 levelUp). Pulled the **E-shape ↔ A-shape "two homes for every chord"** insight out of a video into its own hands-on ear/play step ("Two Homes for F", Set 3 practice, both F diagrams). Added **One-Minute Barre Changes** PR drill (F↔G) + PR ladders on the Smoke riff (BPM) and the F–C–G–D switch (BPM) — 3 recorded-score responses. Per-step time chips (27) + Timer refs; **Station Wrap-Up** on all 6 stations; named assessment pieces (F-G-A Slide, Shape Combo); expanded `MODULE_REVIEWS[7]` 3→7 gotItWhen lines + `assessItems` + Module 8 forward link. Diagrams are full-barre majors (F/G/A E-shape, B/C/D A-shape) per the [[barre-chord-voicing-rule]] — no partial shapes in M7. **Files:** `module-7.js`.
 Standard scope. Specifics: barre is the frustration peak — Stuck? ladders matter most
 here (partial barre → add strings one at a time → full barre) plus an honest fatigue
 hint (shake out the hand, short sets); give the E-shape → A-shape "same shape, new
