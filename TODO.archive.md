@@ -1,3 +1,18 @@
+# 📦 ARCHIVED — TODO closed 2026-06-13
+
+All tasks below are closed: done, superseded by Phase 4 work, or consciously dropped.
+No active tasks remain — see **WORKFLOW.md** for the live plan. Disposition of the
+items that were still open:
+- **Tone-check removal** — ✅ done (2026-06-13).
+- **Station C "run the progression multiple times" tracking** (Jose) — dropped, not pursued.
+- **Site health pass** — superseded: accessibility shipped (Phase 4.1), the loading-speed
+  `app.js` extraction is done, and the dead-link audit is deferred as the recurring Phase 4.2.
+- **Module 6 → advanced strumming** — dropped (idea only, never scoped).
+- Everything lower in the file (Module 2 changes, Chunk 2/3, interactive fretboard) was
+  already done or archived on a branch.
+
+---
+
 # Warm-up "tune & tone check" — remove the tone check ✅ DONE
 
 ✅ 2026-06-13 — Removed the tone check from every Station C warm-up. Scrubbed across
@@ -10,7 +25,7 @@ were left intact.)
 
 ---
 
-## Station C — "run the progression multiple times" tracking 🔲 TODO
+## Station C — "run the progression multiple times" tracking ✅ CLOSED
 
 Idea (Jose): students should loop each Station C practice progression several times so
 they reach all the level-ups (the `levelUp:` 🌶️ lines, tempo/PR ladders, and "give it
@@ -40,7 +55,7 @@ Build notes:
 
 ---
 
-# Site health pass — Chromebook performance, accessibility, dead-link audit 🔲 TODO
+# Site health pass — Chromebook performance, accessibility, dead-link audit ✅ CLOSED
 
 Scoped 2026-06-05. Students access the site on **Chromebooks** (not phones), so optimize for that. Three pieces:
 
