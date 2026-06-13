@@ -152,7 +152,8 @@ simplified — diagram must match); Bm/F#m/C#m simplified vs barre. Diagrams mus
 what the step text teaches. No step-text changes this session.
 **Files:** `module-5.js`, possibly `app.js` (shapes only).
 
-### [ ] Session 3.2 — Module 5 part 2: full template pass
+### [x] Session 3.2 — Module 5 part 2: full template pass
+✅ done 2026-06-12 — Video diet: cut Set 1 from 3→2 videos (dropped the Simen Otnes "Open Chord Shapes" relaxation clip, folded its tip into the Clean Am hint); all 8 remaining videos now carry timestamp ranges + during-watching jobs (0 "full video" left). Added Stuck?/Level up to every graded challenge, per-step `time:` chips (38) + a ⏱ Timer ref in each set's loop challenge, and **Station Wrap-Up** exit tickets on all 8 stations (reflective on B, next-steps on C). **One-Minute Changes** PR drill added to every set (Am↔Em · C↔G · G↔D · E↔B7), score saved to a `short` response so students beat their own record set-to-set. Set 4: added the Module-1 goal-revisit step ("re-read My Guitar Adventure — what changed?") at the computer station (Jose's pick) and renamed the Showcase Run as the named assessment piece (Challenge 4). Expanded `MODULE_REVIEWS[5]` from 5 generic → 8 gotItWhen "I can" lines + `assessItems` + forward link to Module 6 (strumming). **Files:** `module-5.js`.
 Standard scope (above). Module 5 specifics: heaviest video load in the course (9 watch
 steps) — cut hardest here; add the one-minute-changes challenge (classic chord-change
 speed test) as a PR drill with the score typed into a `short` response, recurring
