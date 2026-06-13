@@ -96,8 +96,7 @@ function showApp(user){
   maybeShowWelcome();
 }
 
-/* "Start here" onboarding card (Phase 5): show once on first load, then leave a
-   "Start here" link in the main column so a student can reopen it anytime.
+/* "Start here" onboarding card (Phase 5): shown once on first load only.
    localStorage may be unavailable in private mode — fall back to showing it. */
 function maybeShowWelcome(){
   let seen=false;
@@ -1140,7 +1139,8 @@ function buildComingSoon(w){
 function buildSet(w){
   // Small "Set N" pill, then the topic as the large title, then generalized
   // skill bullets (the old "I CAN…" objective line is no longer shown).
-  const pill = w.title ? `<div class="obj-set"><span class="obj-set-tag">${w.title}</span></div>` : '';
+  const printBtn = `<button type="button" class="print-set-btn" onclick="printSet('${w.id}')" title="Print this set as a one-page handout">&#x1F5A8; Print this set</button>`;
+  const pill = `<div class="obj-set">${w.title ? `<span class="obj-set-tag">${w.title}</span>` : ''}${printBtn}</div>`;
   const titleHtml = w.unit ? `<div class="obj-main obj-topic">${w.unit}</div>` : '';
   const items = (w.skillFocus||'').split(' · ')
     .map(s => s.trim())
@@ -1151,7 +1151,6 @@ function buildSet(w){
   return `<div class="obj-card set-head">${pill}${titleHtml}${skills}</div>
   <div class="tabs">
     <div class="tabs-songbar">
-      <button type="button" class="print-set-btn" onclick="printSet('${w.id}')" title="Print this set as a one-page handout">&#x1F5A8; Print this set</button>
       <button type="button" class="tabs-songs tab-songs" onclick="switchTab(this,'${w.id}','songs')">&#9835; Songs</button>
     </div>
     <div class="tabs-main">

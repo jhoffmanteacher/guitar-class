@@ -61,8 +61,6 @@ body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
 .welcome-go:hover{opacity:0.88}
 .welcome-close{position:absolute;top:14px;right:14px;width:30px;height:30px;border:0;border-radius:50%;background:var(--bg3);color:var(--text2);font-size:15px;cursor:pointer;line-height:1}
 .welcome-close:hover{background:var(--border2)}
-.start-here-link{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;margin-bottom:14px;border:0.5px solid var(--border2);border-radius:20px;background:transparent;color:var(--text2);font-size:13.5px;font-family:inherit;cursor:pointer}
-.start-here-link:hover{background:var(--bg3);color:var(--text)}
 .main{max-width:760px;margin:0 auto;padding:24px 16px 60px}
 .sec-label{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:8px}
 .week-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px}
@@ -147,6 +145,7 @@ body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
 /* Set-header redesign (applied to buildSet + buildComingSoon cards) */
 .obj-card.set-head{border-left:3px solid var(--blue-text);border-top-left-radius:0;border-bottom-left-radius:0}
 .obj-card.set-head .obj-set{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;padding-bottom:0;border-bottom:none}
+.obj-card.set-head .obj-set .print-set-btn{margin-left:auto}
 .obj-card.set-head .obj-topic{margin-bottom:12px}
 .obj-card.set-head .obj-set-tag{display:inline-block;background:var(--blue-bg);color:var(--blue-text);font-size:11px;font-weight:500;letter-spacing:.4px;padding:3px 10px;border-radius:999px;text-transform:uppercase}
 .obj-card.set-head .obj-unit{font-size:12px;color:var(--text3);text-transform:none;letter-spacing:0;margin-bottom:0;line-height:1.3}
@@ -607,7 +606,7 @@ body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
   .resource-panel,.resize-handle,.iframe-drag-shield,
   .fab-group,.tabs,.save-ind,.read-aloud-btn,
   #google_translate_element,.btn-translate,.user-area,
-  .welcome-overlay,.start-here-link,
+  .welcome-overlay,.print-set-btn,
   .step-done-row,.mr-rec,.mr-locked-banner{display:none !important}
 
   /* Only the active set prints; expand BOTH stations + the checklist, drop songs */
