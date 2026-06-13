@@ -1,3 +1,33 @@
+## Station C — "run the progression multiple times" tracking 🔲 TODO
+
+Idea (Jose): students should loop each Station C practice progression several times so
+they reach all the level-ups (the `levelUp:` 🌶️ lines, tempo/PR ladders, and "give it
+a go" stretch challenges) and practice each a couple of times — "reps over speed,"
+matching the curriculum-map philosophy.
+
+Open design questions (confirm before building — ask Jose multiple-choice per CLAUDE.md):
+- Tracking mechanism: (a) level-up checklist — each challenge's `levelUp:` becomes
+  checkable with a ×2 "did it twice" target; (b) simple lap counter per Station C;
+  (c) both.
+- Rollout: pilot one module (e.g. Module 3) / all Station Cs at once / build one, Jose
+  reviews, then propagate.
+
+Build notes:
+- Extend the existing `progress` object + Firestore sync (`saveProgress` / `completed`
+  in app.js) rather than adding new storage — stays backward-compatible.
+- There's already a per-step "Mark done" toggle (`toggleStepDone` / `completed{}`) and
+  a 1/2/3 self-rating in the module review (`setSkillLevel`). A ×2 level-up tracker is a
+  close cousin of these — reuse the pattern, don't reinvent.
+- Needs a visible "where am I" display so reps don't read as busywork — show which
+  level-ups are cleared and the ×2 progress.
+- Surface in the teacher dashboard alongside the existing skill grid (note: exit-ticket
+  + PR-score surfacing is already a separate TODO — WORKFLOW.md Session 6.2; this could
+  ride along with it).
+- This is a "big change" per WORKFLOW.md working-rule 3 → show ONE wired example +
+  ask a multiple-choice question before building the rest.
+
+---
+
 # Site health pass — Chromebook performance, accessibility, dead-link audit 🔲 TODO
 
 Scoped 2026-06-05. Students access the site on **Chromebooks** (not phones), so optimize for that. Three pieces:

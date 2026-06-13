@@ -1,10 +1,10 @@
 # Guitar Class Website — Claude Instructions
 
 ## Who I'm working with
-Jose Rosario is new to Claude Code and git. He prefers plain-English instructions and wants Claude to handle all git mechanics without him needing to remember commands.
+Jonathan Rosario is new to Claude Code and git. He prefers plain-English instructions and wants Claude to handle all git mechanics without him needing to remember commands.
 
 ## Plain-English workflow
-| Jose says | Claude does |
+| Jonathan says | Claude does |
 |---|---|
 | "Let's test these changes locally" | Start Live Server (VS Code extension, right-click index.html → Open with Live Server) |
 | "Push to GitHub" | git add relevant files, git commit with a clear message, git push, confirm success |
@@ -23,7 +23,7 @@ A "Dev bypass" button exists on the auth wall (below "Sign in with Google"). It 
 Windows, VS Code, PowerShell. No changes needed — Claude Code already defaults to PowerShell on Windows.
 
 ## How to ask follow-up questions
-When you need to clarify something with Jose, use the **AskUserQuestion** tool to present a multiple-choice picker rather than a free-text question. He prefers to click an option than to type a freeform answer.
+When you need to clarify something with Jonathan, use the **AskUserQuestion** tool to present a multiple-choice picker rather than a free-text question. He prefers to click an option than to type a freeform answer.
 
 - 2–4 options per question, mutually exclusive
 - One question per turn unless the choices are truly independent
@@ -42,7 +42,7 @@ When adding `originalUrl` / `tutorialUrl` / lesson video links in any module fil
 (Context: in May 2026 I drafted Modules 6–8 from recall and ~60 of the URLs were 404s. Search-and-verify is the only safe pattern.)
 
 ## Switching topics — prompt to start a fresh chat
-When Jose asks for something that is clearly a **new, unrelated topic** from what we've been working on (e.g., we just finished a feature on Module 5 and he now asks about a different part of the site, a different project, or general Claude Code questions), use **AskUserQuestion** to ask whether he'd like to start a fresh conversation before continuing. A fresh chat keeps context focused and responses faster.
+When Jonathan asks for something that is clearly a **new, unrelated topic** from what we've been working on (e.g., we just finished a feature on Module 5 and he now asks about a different part of the site, a different project, or general Claude Code questions), use **AskUserQuestion** to ask whether he'd like to start a fresh conversation before continuing. A fresh chat keeps context focused and responses faster.
 
 Phrase it like: "Looks like we're switching topics — want to start a fresh chat for this, or keep going here?"
 

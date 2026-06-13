@@ -4,7 +4,7 @@
 > `MODULE_2_TEMPLATE.md`. Once this is in the repo, move those three to `archive/` —
 > everything actionable from them is consolidated here.
 >
-> **Companion file:** `SONG_SWAP.md` is Jose's song-replacement worksheet — he
+> **Companion file:** `SONG_SWAP.md` is Jonathan's song-replacement worksheet — he
 > maintains it himself. Don't merge it into this file. Consult it whenever a session
 > touches a module's song list, and verify any new song links per CLAUDE.md.
 >
@@ -12,13 +12,13 @@
 > perfect Module 2 as the template → propagate its patterns to all other modules →
 > site-wide code work → launch checks → feature builds. All CLAUDE.md rules apply to
 > every session (verify YouTube links via oEmbed before writing, never from memory;
-> vanilla JS; CSS variables only; test locally before push; ask Jose multiple-choice
+> vanilla JS; CSS variables only; test locally before push; ask Jonathan multiple-choice
 > questions for judgment calls).
 >
-> **How to use:** one session = one numbered item. At the start of a session Jose will
+> **How to use:** one session = one numbered item. At the start of a session Jonathan will
 > say e.g. "do Session 2.1 in WORKFLOW.md." Working rules for every session:
 > 1. Before editing, present a plan.
-> 2. **Before generating or overwriting any file, ask Jose at least one
+> 2. **Before generating or overwriting any file, ask Jonathan at least one
 >    multiple-choice question** about scope or approach (AskUserQuestion tool).
 > 3. **For any big change** (new feature, redesign, anything touching 3+ files or
 >    rewriting step text), show ONE complete example first — a rewritten step, a
@@ -26,7 +26,7 @@
 >    ("on the right track?") before doing the rest.
 > 4. New-chat prompts follow CLAUDE.md's topic-switch rule (suggest a fresh chat only
 >    when the topic genuinely changes, not mid-feature).
-> 5. End every session: test locally with Jose, then push with a clear commit message,
+> 5. End every session: test locally with Jonathan, then push with a clear commit message,
 >    then check the box and add a one-line note under the item
 >    (e.g. "✅ done 2026-06-15 — note: chose simplified F").
 
@@ -51,8 +51,8 @@ m2w1-s3 · solo fallback for the partner quiz · time budget line per station.
 ✅ done 2026-06-11 — Verified "vampire" is F major, intro F–A7–B♭–B♭m; added a simplified intro bass riff on the low E string (F·A·A#·A#, frets 1·5·6·6) as a `tab:` step in Set 2 practice, so the Core song is now playable in-app. Added PR-ladder `short` responses ("fastest CLEAN lap, +10 at a time") to Low E Run, A String Run, and the Watchtower riff.
 - Core songs must be playable in-app. "Vampire" (Set 2 Core) has no `tab:`. Find the
   simplified E-string intro riff, verify the tutorial source, and draft it as a `tab:`
-  step (follow the Happy Birthday/Watchtower format) for Jose's review. If it can't be
-  done well, ask Jose: add TAB / demote to Choice / swap the song.
+  step (follow the Happy Birthday/Watchtower format) for Jonathan's review. If it can't be
+  done well, ask Jonathan: add TAB / demote to Choice / swap the song.
 - Add personal-record tempo ladders to Low E Run, A String Run, and the Watchtower
   riff: "Win at 60 BPM, then +10 at a time to find your fastest CLEAN lap. Type your
   max BPM below — that's the number to beat next class." (`short` response so it
@@ -60,20 +60,20 @@ m2w1-s3 · solo fallback for the partner quiz · time budget line per station.
 **Files:** `module-2.js` only.
 
 ### [x] Session 1.3 — Random-recall drills + fretboard branch decision
-✅ done 2026-06-11 — Content: added "Challenge 3 — Shuffle Run" to Set 1 practice (random fret order via shuffled scraps, name + play within 3s, win = 10 in a row; Stuck? = frets 0–7 first; Level up = A string / reverse 12→0). Branch decision: reviewed `origin/feature/interactive-fretboard` (tip `aeed5c0`) — it diverged **72 commits** ago and predates `app.js` (logic was still inline in `index.html`), so it's a real port, not a clean merge. **Decision: leave parked / defer resurrection** until after template propagation (Phase 3), where it would serve Modules 2/3/4/7 at once. Not merged this session — flag for Jose.
+✅ done 2026-06-11 — Content: added "Challenge 3 — Shuffle Run" to Set 1 practice (random fret order via shuffled scraps, name + play within 3s, win = 10 in a row; Stuck? = frets 0–7 first; Level up = A string / reverse 12→0). Branch decision: reviewed `origin/feature/interactive-fretboard` (tip `aeed5c0`) — it diverged **72 commits** ago and predates `app.js` (logic was still inline in `index.html`), so it's a real port, not a clean merge. **Decision: leave parked / defer resurrection** until after template propagation (Phase 3), where it would serve Modules 2/3/4/7 at once. Not merged this session — flag for Jonathan.
 The gotItWhen for note names demands random access ("any fret, instantly, without
 counting up from E") but the drills are sequential laps. Two parts:
 - Content now: add a "Shuffle Run" challenge (random fret order, name + play within
   3 seconds, win = 10 in a row) plus reverse-lap / mid-string-entry Level up variants.
 - Code decision: the parked `feature/interactive-fretboard` branch (commit `aeed5c0`)
   has a clickable E+A fretboard with a random-fret quiz mode — exactly this drill.
-  Review the branch, report its state to Jose (rebase effort, what works), and ask:
+  Review the branch, report its state to Jonathan (rebase effort, what works), and ask:
   resurrect now / resurrect after propagation / leave parked. If resurrected, it later
   serves Modules 3 (power-chord roots), 4 (D/G strings), and 7 (barre roots).
 **Files:** `module-2.js`; possibly merge of the feature branch.
 
 ### [x] Session 1.4 — Module 2 review + freeze the template
-✅ done 2026-06-11 — Expanded `MODULE_REVIEWS[2]` to 10 "I can" lines covering all 11 Module 2 skills in gotItWhen language (added point-to-named-note, hovering fingers, thumb-behind-neck; read-TAB + play-melody stay combined); forward link to Module 3 was added in 1.1. Walked Appendix A: fixed the one "(full video)" label → (0:00–4:00) with an active during-watching job. **One documented exception:** Set 2 computer station keeps 3 short timestamped videos vs the ≤2 guideline — each anchors a distinct skill (finger independence / clean tone / TAB) and has a during-watching job, and the station is balanced by 3 hands-on TAB steps; flagged for Jose to cut one if it runs long in practice. Added the ★ TEMPLATE MODULE header comment to `module-2.js`. **Module 2 is frozen as the model.**
+✅ done 2026-06-11 — Expanded `MODULE_REVIEWS[2]` to 10 "I can" lines covering all 11 Module 2 skills in gotItWhen language (added point-to-named-note, hovering fingers, thumb-behind-neck; read-TAB + play-melody stay combined); forward link to Module 3 was added in 1.1. Walked Appendix A: fixed the one "(full video)" label → (0:00–4:00) with an active during-watching job. **One documented exception:** Set 2 computer station keeps 3 short timestamped videos vs the ≤2 guideline — each anchors a distinct skill (finger independence / clean tone / TAB) and has a during-watching job, and the station is balanced by 3 hands-on TAB steps; flagged for Jonathan to cut one if it runs long in practice. Added the ★ TEMPLATE MODULE header comment to `module-2.js`. **Module 2 is frozen as the model.**
 - Expand `MODULE_REVIEWS[2]`: "I can" lines for ALL Module 2 skills in gotItWhen
   language; end with a forward link ("the E & A notes you just learned become the
   ROOTS of every power chord in Module 3").
@@ -142,18 +142,18 @@ correct replacement for the mislabeled one, report before editing.
 > Song lists: check `SONG_SWAP.md` before touching any module's songs.
 
 ### [x] Session 3.1 — Module 5 part 1: chord diagrams
-✅ done 2026-06-12 — Added 14 inline `chords:` diagrams at each chord's first use per set (S1 Am/Em · S2 C/G/Am/F · S3 D/A/Em/Bm · S4 E/B7/F#m/C#m), matching each step's taught fingering; no step text changed. F = simplified xx3211. **Voicing decision (Jose):** partial-barre Bm (xx4432), F#m, C#m through Modules 5–6; full barre starts in Module 7. Switched the shared pop-up library (`CHORD_DIAGRAMS` in `app.js`) Bm/F#m/C#m to those partial shapes — safe because Module 7 already skips these auto-link pop-ups (`wrapChordLinksIn`, app.js:704) and renders full-barre inline. F#m/C#m are identify-only in S4 (no hands-on challenge) so their diagrams ride the Group-3 watch step, self-labeled. No shapes were missing from the library. **Forward note for Session 3.3:** Module 7's inline Bm/F#m/C#m diagrams must be full barre (already the design). **Files:** `module-5.js`, `app.js`.
+✅ done 2026-06-12 — Added 14 inline `chords:` diagrams at each chord's first use per set (S1 Am/Em · S2 C/G/Am/F · S3 D/A/Em/Bm · S4 E/B7/F#m/C#m), matching each step's taught fingering; no step text changed. F = simplified xx3211. **Voicing decision (Jonathan):** partial-barre Bm (xx4432), F#m, C#m through Modules 5–6; full barre starts in Module 7. Switched the shared pop-up library (`CHORD_DIAGRAMS` in `app.js`) Bm/F#m/C#m to those partial shapes — safe because Module 7 already skips these auto-link pop-ups (`wrapChordLinksIn`, app.js:704) and renders full-barre inline. F#m/C#m are identify-only in S4 (no hands-on challenge) so their diagrams ride the Group-3 watch step, self-labeled. No shapes were missing from the library. **Forward note for Session 3.3:** Module 7's inline Bm/F#m/C#m diagrams must be full barre (already the design). **Files:** `module-5.js`, `app.js`.
 Module 5 teaches ~12 chords with ZERO inline diagrams. Study `chordDiagramSVG` +
 `CHORD_SHAPES` in `app.js` and the `chords:` usage in modules 3/7. Add a diagram at
 each chord's first introduction per set (S1: Am, Em · S2: C, F, Am, G · S3: D, A, Em,
-Bm · S4: E, B7, F#m, C#m). List any shapes missing from `CHORD_SHAPES`. Ask Jose
+Bm · S4: E, B7, F#m, C#m). List any shapes missing from `CHORD_SHAPES`. Ask Jonathan
 (multiple choice) about voicings: F simplified xx3211 vs barre (Set 2 text teaches
 simplified — diagram must match); Bm/F#m/C#m simplified vs barre. Diagrams must match
 what the step text teaches. No step-text changes this session.
 **Files:** `module-5.js`, possibly `app.js` (shapes only).
 
 ### [x] Session 3.2 — Module 5 part 2: full template pass
-✅ done 2026-06-12 — Video diet: cut Set 1 from 3→2 videos (dropped the Simen Otnes "Open Chord Shapes" relaxation clip, folded its tip into the Clean Am hint); all 8 remaining videos now carry timestamp ranges + during-watching jobs (0 "full video" left). Added Stuck?/Level up to every graded challenge, per-step `time:` chips (38) + a ⏱ Timer ref in each set's loop challenge, and **Station Wrap-Up** exit tickets on all 8 stations (reflective on B, next-steps on C). **One-Minute Changes** PR drill added to every set (Am↔Em · C↔G · G↔D · E↔B7), score saved to a `short` response so students beat their own record set-to-set. Set 4: added the Module-1 goal-revisit step ("re-read My Guitar Adventure — what changed?") at the computer station (Jose's pick) and renamed the Showcase Run as the named assessment piece (Challenge 4). Expanded `MODULE_REVIEWS[5]` from 5 generic → 8 gotItWhen "I can" lines + `assessItems` + forward link to Module 6 (strumming). **Files:** `module-5.js`.
+✅ done 2026-06-12 — Video diet: cut Set 1 from 3→2 videos (dropped the Simen Otnes "Open Chord Shapes" relaxation clip, folded its tip into the Clean Am hint); all 8 remaining videos now carry timestamp ranges + during-watching jobs (0 "full video" left). Added Stuck?/Level up to every graded challenge, per-step `time:` chips (38) + a ⏱ Timer ref in each set's loop challenge, and **Station Wrap-Up** exit tickets on all 8 stations (reflective on B, next-steps on C). **One-Minute Changes** PR drill added to every set (Am↔Em · C↔G · G↔D · E↔B7), score saved to a `short` response so students beat their own record set-to-set. Set 4: added the Module-1 goal-revisit step ("re-read My Guitar Adventure — what changed?") at the computer station (Jonathan's pick) and renamed the Showcase Run as the named assessment piece (Challenge 4). Expanded `MODULE_REVIEWS[5]` from 5 generic → 8 gotItWhen "I can" lines + `assessItems` + forward link to Module 6 (strumming). **Files:** `module-5.js`.
 Standard scope (above). Module 5 specifics: heaviest video load in the course (9 watch
 steps) — cut hardest here; add the one-minute-changes challenge (classic chord-change
 speed test) as a PR drill with the score typed into a `short` response, recurring
@@ -171,19 +171,19 @@ root" insight its own ear/quiz step instead of leaving it inside a video; video 
 **Files:** `module-7.js`.
 
 ### [x] Session 3.4 — Module 3 (power chords)
-✅ done 2026-06-13 — Set 1 computer station: replaced the Simen Otnes shape video with an interactive **E5→G5→A5** step (chord diagrams + a ▶ "hear the roots climb E·G·A" `playSeq`), folding its tip into the hint; now 2 videos + 1 interactive. Set 1 practice: split fretting and muting into their own challenges — added **Challenge 2 — Mute Check** ("strum all six strings but only the two power-chord notes ring"); renumbered to 6 challenges; added Stuck?/Level up + `time:` chips to every challenge; named the Watchtower Loop the assessment piece with a PR ladder. Set 2 computer station: **kept at 3 videos** (Jose's call), but added time chips, during-watching jobs, fixed the Marty "(full video)" → 0:00–3:00, added a Station Wrap-Up. Set 2 practice: Stuck?/Level up + time chips on each challenge, named the Eighth-Note Strum the assessment piece with a PR ladder toward the 80 BPM unit goal. **Station Wrap-Up** exit tickets on all 4 stations. Expanded `MODULE_REVIEWS[3]` 5→10 gotItWhen "I can" lines + `assessItems` + forward link to Module 4 (pentatonic/lead). No songs touched (Set 2 "Core Song 2 — TBD" stays Jose's `SONG_SWAP.md` item); no new video URLs. **Files:** `module-3.js`.
+✅ done 2026-06-13 — Set 1 computer station: replaced the Simen Otnes shape video with an interactive **E5→G5→A5** step (chord diagrams + a ▶ "hear the roots climb E·G·A" `playSeq`), folding its tip into the hint; now 2 videos + 1 interactive. Set 1 practice: split fretting and muting into their own challenges — added **Challenge 2 — Mute Check** ("strum all six strings but only the two power-chord notes ring"); renumbered to 6 challenges; added Stuck?/Level up + `time:` chips to every challenge; named the Watchtower Loop the assessment piece with a PR ladder. Set 2 computer station: **kept at 3 videos** (Jonathan's call), but added time chips, during-watching jobs, fixed the Marty "(full video)" → 0:00–3:00, added a Station Wrap-Up. Set 2 practice: Stuck?/Level up + time chips on each challenge, named the Eighth-Note Strum the assessment piece with a PR ladder toward the 80 BPM unit goal. **Station Wrap-Up** exit tickets on all 4 stations. Expanded `MODULE_REVIEWS[3]` 5→10 gotItWhen "I can" lines + `assessItems` + forward link to Module 4 (pentatonic/lead). No songs touched (Set 2 "Core Song 2 — TBD" stays Jonathan's `SONG_SWAP.md` item); no new video URLs. **Files:** `module-3.js`.
 Standard scope. Specifics: computer station is the pure 3-videos formula — replace one
 video with an interactive `tab:` of E5 → G5 → A5 with `playSeq`; muting gets its own
 named challenge ("Win: strum all 6 strings but only the two power-chord notes ring");
 `playSeq` for root movement.
 **Files:** `module-3.js`.
 
-### [ ] Session 3.5 — Module 6 (strumming — REDESIGN, not just a pass)  *(Jose-led)*
-Jose decides scope first: upgrade to advanced strumming (syncopation/16ths, accents,
+### [ ] Session 3.5 — Module 6 (strumming — REDESIGN, not just a pass)  *(Jonathan-led)*
+Jonathan decides scope first: upgrade to advanced strumming (syncopation/16ths, accents,
 percussive muting), which songs anchor each set, whether basic strumming shifts
 earlier. Then apply: keep Set 1's body-first ladder (tap → muted → one chord →
 changes) and extend it upward as named challenges; add a strum-pattern visual — start
-with the monospace pattern line (`D   D U   U D U` over `1 + 2 + 3 + 4 +`); if Jose
+with the monospace pattern line (`D   D U   U D U` over `1 + 2 + 3 + 4 +`); if Jonathan
 wants more, build a `strumPattern:` step property rendering a small SVG arrow diagram
 (new code, CSS vars); add `chords:` diagrams for the chords used (Em, Am, …); update
 objective/skillFocus/gotItWhen to the new scope; standard scope on top.
@@ -191,7 +191,8 @@ objective/skillFocus/gotItWhen to the new scope; standard scope on top.
 write strumming challenges so a "play over the looper" variant can slot in later.*
 **Files:** `module-6.js`, possibly `app.js` (strumPattern renderer).
 
-### [ ] Session 3.6 — Module 8 (fingerpicking)
+### [x] Session 3.6 — Module 8 (fingerpicking)
+✅ done 2026-06-13 — Added clickable arpeggio `tab:` steps as a new hands-on step on every computer station (Set 1 open-string p-i-m-a · Set 2 Em · Set 3 C; Am arpeggio rides Set 2 practice Ch2), so Am/C are both interactive. Inserted **Challenge 3 — The Pinch** (thumb + "a" finger as one sound) in Set 3 between Full Progression and Travis Thumb; renumbered Set 3 to 5 challenges. Video diet: every "(full video)" → 0:00–N range + a during-watching job (all 6 watch steps; 4 unique IDs re-verified live via oEmbed). Added Stuck?/Level up to all 11 challenges, `time:` chips + ⏱ Timer refs, **Station Wrap-Up** exit tickets on all 6 stations, PR ladders (typed max-BPM) on Set 1 Plucks / Set 2 Beat Your Tempo / Set 3 Full Progression, named assessment piece per set, solo fallback folded into the Perform It hint. Expanded `MODULE_REVIEWS[8]` 3→9 "I can" lines + `assessItems` + a lifelong-playing forward link (final module — no Module 9). Songs untouched (Core Song 2 — TBD stays Jonathan's `SONG_SWAP.md` item); no new URLs invented. **Files:** `module-8.js`.
 Standard scope. Specifics: write the p-i-m-a arpeggio patterns over Am/C as clickable
 `tab:` steps (they exist only in prose); insert an intermediate "pinch" challenge
 (thumb + finger together) between basic arpeggio and Travis picking in Set 3.
@@ -216,11 +217,11 @@ line at the computer station (this is where students learn the routine).
 ### [ ] Session 3.9 — Cross-module features + consistency sweep
 - Answer keys: add `answer:` + a one-line explanation to FACTUAL step MCs across all
   modules (reflection MCs stay unkeyed); wire the rendering in `app.js` (gentle ✓/✗ +
-  explanation, matching the skills-practice quiz pattern). Jose marks which questions
+  explanation, matching the skills-practice quiz pattern). Jonathan marks which questions
   are factual; Claude Code proposes the list first.
 - Distractor pass: flag giveaway distractors module by module; propose replacements
-  encoding real misconceptions for Jose's approval.
-- Song difficulty dots: add ● / ●● / ●●● to every Choice song (propose ratings, Jose
+  encoding real misconceptions for Jonathan's approval.
+- Song difficulty dots: add ● / ●● / ●●● to every Choice song (propose ratings, Jonathan
   adjusts) + a "🎤 Class request — suggest a song!" slot per module; small render
   tweak in `app.js`.
 - Style the Stuck?/Level up lines distinctly (e.g. 🪜 / 🌶️ prefixes) — one CSS/render
@@ -244,7 +245,7 @@ on tool popups · full keyboard-only walkthrough as the test.
 ### [ ] Session 4.2 — 🔗 Full dead-link audit
 Extract every YouTube ID across all 8 module files (~222 unique). Verify each via
 oEmbed in parallel batches. Report ✅/❌ with file+line. Replace dead ones via
-search-and-verify; anything without a good replacement gets flagged for Jose to choose
+search-and-verify; anything without a good replacement gets flagged for Jonathan to choose
 a song (log swaps in `SONG_SWAP.md`). Re-run each semester.
 **Files:** all `module-N.js`.
 
@@ -268,7 +269,7 @@ inputs/textareas, read-aloud + play buttons, resource panel), expand BOTH statio
 panels regardless of which is open, render `tab:` blocks in monospace and `chords:`
 diagrams as their SVGs, keep hints and Stuck?/Level up lines. Add a small
 "🖨 Print this set" button near the set title that calls `window.print()` (and
-temporarily opens both stations). Show Jose one printed example set (PDF from print
+temporarily opens both stations). Show Jonathan one printed example set (PDF from print
 preview, portrait letter) for approval before styling the rest.
 **Files:** `styles.css`, `app.js`, possibly `index.html`.
 
@@ -288,7 +289,7 @@ on localhost, then on the live site: load, go offline (DevTools), reload.
 
 ---
 
-## PHASE 5 — Ongoing / recurring (Jose-led, Claude Code assists)
+## PHASE 5 — Ongoing / recurring (Jonathan-led, Claude Code assists)
 
 - [ ] Handout audit: open all 22 Google Doc `handoutUrl`s in incognito — confirm
       students won't hit a permission wall; check content still matches each set.
@@ -303,7 +304,7 @@ on localhost, then on the live site: load, go offline (DevTools), reload.
       per CLAUDE.md; track candidates and decisions in `SONG_SWAP.md`); pull from the
       🎤 request slot.
 - [ ] Reflection prompts: add 1–2 listening/reflection responses per set in Modules
-      6–8 to match Module 1–2 richness (Jose writes prompts, Claude Code wires).
+      6–8 to match Module 1–2 richness (Jonathan writes prompts, Claude Code wires).
 - [ ] ⚠️ Review Module 4 Set 1 video (`m_IiyJu60-c` — "Major Pentatonic Scale – Marty
       Music", swapped in 2.2 on 2026-06-11): watch it through and confirm it fits the
       beginner Pattern-1 station before the course starts. Code comment flags it too.
@@ -313,7 +314,7 @@ on localhost, then on the live site: load, go offline (DevTools), reload.
 ## PHASE 6 — Feature builds  *(start only after Phase 3 is complete; can interleave with Phase 4)*
 
 > These are new capabilities, not content passes. Order matters: 6.1 is smallest and
-> unblocks challenges written in Sessions 3.5/3.7; 6.2 gives Jose day-one teaching
+> unblocks challenges written in Sessions 3.5/3.7; 6.2 gives Jonathan day-one teaching
 > value; 6.3 depends on skill ids being stable across ALL modules (i.e. Phase 3 done
 > and frozen). Every session here is a "big change" — per the working rules, show one
 > working example (mock-up or single wired instance) and ask a multiple-choice
@@ -325,10 +326,10 @@ it to loop continuously at a chosen BPM so it works as a backing track for impro
 strumming practice — no recordings needed.
 - Code: add a loop mode to `playSequence` (or a sibling `playLoop`) with a hard stop
   button; small UI with a preset picker + BPM control.
-- Presets (propose first, Jose approves): Am pentatonic vamp (Am root pulse) for
+- Presets (propose first, Jonathan approves): Am pentatonic vamp (Am root pulse) for
   Module 4 · 12-bar blues in E root cycle (E–E–E–E A–A–E–E B–A–E–E) for Module 4 blues
   steps · Em–Am vamp for Module 6 strumming.
-- Surface: ask Jose (multiple choice) — a `looper:` step property rendered inline
+- Surface: ask Jonathan (multiple choice) — a `looper:` step property rendered inline
   (like `playSeq`) vs a global tool popup next to the metronome vs both.
 - Content wiring: update the Module 4/6 improv + strumming challenges (written in
   3.5/3.7 with this in mind) to say "over the looper."
@@ -336,10 +337,10 @@ strumming practice — no recordings needed.
 
 ### [ ] Session 6.2 — 📋 Teacher dashboard: exit tickets + PR scores
 Exit tickets and PR-ladder responses already save to Firestore (`responses`), but the
-teacher dashboard only shows skill checkmarks — Jose can't see what students wrote.
+teacher dashboard only shows skill checkmarks — Jonathan can't see what students wrote.
 Add a "what students wrote" view: per student, their latest exit-ticket text and PR
 scores (max BPM numbers), newest first, filterable by module/set.
-- Ask Jose (multiple choice): extra expandable column in the existing grid vs a
+- Ask Jonathan (multiple choice): extra expandable column in the existing grid vs a
   separate "Responses" tab on the dashboard.
 - Read-only; reuse the existing teacher auth gating (jhoffman@seq.org).
 - Mind Firestore read costs: fetch once per dashboard load, no live listeners.
@@ -354,7 +355,7 @@ M3 power chords → M4 pentatonic solo → M5 strummed version) showing each sta
 card with the student's existing done-checkmarks pulled from `progress`.
 - Data: a small `SONG_JOURNEYS` array in `config-main.js` — song → ordered list of
   `{moduleNum, setId, skillIds, label}`. Claude Code proposes the journey maps from
-  the actual module content first; Jose approves before any UI work.
+  the actual module content first; Jonathan approves before any UI work.
 - Render read-only — checkmarks still live in the modules; each stage card links to
   its module/set so students can jump there.
 - Depends on Phase 3 being complete: skill ids and song threads must be stable, or

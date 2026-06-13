@@ -24,8 +24,9 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/YZkkUjDDamA" target="_blank">Beginner Fingerpicking Made Easy: Pinch, Pluck, & Play! – Marty Music</a> (full video).',
-            hint: 'Pay close attention to his RIGHT HAND shape — wrist arched, fingers curved like he\'s holding a small ball. The thumb sits FORWARD of the fingers, not under them.',
+            text: 'Watch: <a href="https://youtu.be/YZkkUjDDamA" target="_blank">Beginner Fingerpicking Made Easy: Pinch, Pluck, & Play! – Marty Music</a> (0:00–5:00). As you watch, copy his RIGHT-HAND shape on your own guitar — thumb resting on the low E, fingers curved over the treble strings.',
+            time: '5 min',
+            hint: 'Watch the right hand: wrist arched, fingers curved like he\'s holding a small ball. The thumb sits FORWARD of the fingers, not tucked under them.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'In classical fingerpicking notation, which finger is "p"?', choices: [
               'Index finger',
@@ -35,8 +36,9 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/K2Z3RZc5t-A" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (full video).',
-            hint: 'Justin shows the "p-i-m-a" assignment: thumb handles strings 6, 5, 4 (the bass) and i-m-a handle strings 3, 2, 1 (treble). One finger per string is the goal.',
+            text: 'Watch: <a href="https://youtu.be/K2Z3RZc5t-A" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (0:00–4:00). Pause when he assigns the fingers and place yours the same way: p on the bass, i-m-a on G-B-e.',
+            time: '4 min',
+            hint: 'Justin\'s assignment: thumb handles strings 6, 5, 4 (the bass) and i-m-a handle strings 3, 2, 1 (treble). One finger per string is the goal.',
             skills: [2, 3],
             response: { type: 'mc', prompt: 'Which finger normally plucks the B string (string 2)?', choices: [
               'p (thumb)',
@@ -47,9 +49,30 @@ SETS.push(
           },
           {
             text: 'Listen to "Dust in the Wind" by Kansas. Pay attention to the picking pattern — you can clearly hear the alternating bass (thumb) underneath the melody (fingers).',
+            time: '3 min',
             hint: 'This song is the textbook example of fingerpicking. The bass moves on every beat, the fingers play between the beats.',
             skills: [4, 5],
             response: { type: 'short', placeholder: 'In "Dust in the Wind", describe what you hear the THUMB doing vs. what the FINGERS are doing.' }
+          },
+          {
+            text: 'Now try it: pluck p-i-m-a on open strings — low E (p), G (i), B (m), high e (a). Click any note below the TAB to hear it, then play the staircase on your own guitar, one finger per string.',
+            time: '4 min',
+            hint: 'No pick, no chord yet — just the right hand. Each pluck lands on its own string, reading left to right. Aim for the same volume from every finger.',
+            skills: [3, 4, 5],
+            tab: {
+              caption: 'p-i-m-a on open strings · low E · G · B · high e',
+              notes: [
+                { string: 'E', fret: 0, note: 'E', midi: 40 },
+                { string: 'G', fret: 0, note: 'G', midi: 55 },
+                { string: 'B', fret: 0, note: 'B', midi: 59 },
+                { string: 'e', fret: 0, note: 'e', midi: 64 }
+              ]
+            }
+          },
+          {
+            text: 'Station Wrap-Up — take a beat to reflect: which finger felt the most awkward today, and what helped it land more evenly?',
+            time: '1 min',
+            response: { type: 'short', placeholder: 'e.g. the ring (a) finger was weakest — slowing down and watching it helped' }
           }
         ]
       },
@@ -61,6 +84,7 @@ SETS.push(
             steps: [
               {
                 text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open and at the 1st–3rd fret, listening for buzz. Win: in tune, and every note clean before today\'s work.',
+                time: '2 min',
                 hint: 'Tuning (Module 1) and clean notes (Module 2) matter even more in fingerpicking — every note is exposed, so an out-of-tune or buzzing string is easy to hear.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
@@ -71,7 +95,10 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 1 — Hand Shape: put the pick down, rest your thumb on the low E and i-m-a on the G, B, and high e strings, and hold for 30 seconds. Win: a relaxed, arched wrist with curved fingers — like holding an apple.',
+            time: '2 min',
             hint: 'Your wrist should be arched (curved) — not flat against the guitar body. Fingers curved as if you\'re holding an apple. Relax.',
+            stuck: 'Drop your hand to your side and shake it loose, then place it back on the strings without tensing up — relaxed first, accurate second.',
+            levelUp: 'Hold the shape, look away, then pluck each string in turn by feel alone — no peeking.',
             skills: [1, 2]
           }
             ]
@@ -80,10 +107,14 @@ SETS.push(
             title: 'Pluck p-i-m-a — thumb bass, i-m-a treble',
             steps: [
           {
-            text: 'Challenge 2 — p-i-m-a Plucks: pluck once with each finger in order — p (low E), i (G), m (B), a (high e) — saying each letter aloud, 8 times at 60 BPM. Win: the same volume from every finger, even the weaker ring (a).',
-            hint: 'No strumming, no pick. Each finger gets ONE string. Aim for the same volume from each finger — the ring finger (a) is usually the weakest at first.',
+            text: 'Challenge 2 — p-i-m-a Plucks (your assessment piece): pluck once with each finger in order — p (low E), i (G), m (B), a (high e) — saying each letter aloud, 8 times at 60 BPM. Win: the same volume from every finger, even the weaker ring (a). This is the open-string check the whole class plays for the Set 1 check-off.',
+            time: '4 min',
+            hint: 'No strumming, no pick. Each finger gets ONE string. Aim for the same volume from each finger — the ring finger (a) is usually the weakest at first. Set the ⏱ Timer for 2 minutes and loop it.',
+            stuck: 'Pluck just p then i, over and over, until those two are even — then add m, then a.',
+            levelUp: 'Run it backwards (a-m-i-p), or close your eyes and keep every finger on its string.',
             skills: [3, 4, 5],
-            playSeq: { label: 'Hear p-i-m-a on open strings', bpm: 60, notes: [40, 55, 59, 64] }
+            playSeq: { label: 'Hear p-i-m-a on open strings', bpm: 60, notes: [40, 55, 59, 64] },
+            response: { type: 'short', prompt: 'Personal record: win at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, even p-i-m-a lap today (BPM)?', placeholder: 'e.g. 80 — beat it next class' }
           }
             ]
           },
@@ -92,10 +123,23 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 3 — Moving Bass: pluck the A string with p then G-B-e with i-m-a, then the D string with p, fingers staying put. Win: only the thumb moves to find each bass note — the i-m-a fingers stay anchored.',
+            time: '3 min',
             hint: 'This is how you change chords later — the thumb finds the bass note of the chord (root) while the fingers stay anchored on the treble strings.',
+            stuck: 'Move just the thumb E → A → D with the fingers resting (not plucking) on G-B-e, until the thumb finds each bass without looking.',
+            levelUp: 'Call out the bass string a beat before you play it, or shift E → A → D → A → E in a continuous loop without stopping.',
             skills: [2, 3, 6],
             playSeq: { label: 'Thumb shifts: E · A · D bass with i-m-a above', bpm: 60, notes: [40, 55, 59, 64, 45, 55, 59, 64, 50, 55, 59, 64] }
           }
+            ]
+          },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
+              {
+                text: 'Which still needs work — keeping the wrist arched, or getting even volume from all four fingers? Write it below — that\'s your warm-up target next time you practice.',
+                time: '1 min',
+                response: { type: 'short', placeholder: 'e.g. the ring finger is still quieter than the others; wrist flattens when I speed up' }
+              }
             ]
           }
         ]
@@ -181,7 +225,8 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/K2Z3RZc5t-A" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (rewatch with the 6-note pattern in mind).',
+            text: 'Watch: <a href="https://youtu.be/K2Z3RZc5t-A" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (revisit 0:00–4:00). This time, watch one full pattern cycle and count the notes out loud with him.',
+            time: '4 min',
             hint: 'The "p-i-m-a-m-i" cycle (6 notes per bar) is one of the most-used patterns in folk and pop. It creates a flowing, arpeggiated feel under a chord.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'In the 6-note pattern "p-i-m-a-m-i", how many times does each finger play in one cycle?', choices: [
@@ -192,13 +237,15 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/YZkkUjDDamA" target="_blank">Beginner Fingerpicking Made Easy – Marty Music</a> (rewatch the pattern walkthrough).',
+            text: 'Watch: <a href="https://youtu.be/YZkkUjDDamA" target="_blank">Beginner Fingerpicking Made Easy – Marty Music</a> (revisit 0:00–3:00 for the pattern walkthrough). Mute the strings with your fretting hand and tap the FINGER ORDER on the guitar top as he plays.',
+            time: '3 min',
             hint: 'Marty\'s "pinch and pluck" demonstration breaks the pattern into chunks. Focus on the FINGER ORDER — once it\'s automatic, your speed will follow.',
             skills: [3, 4],
             response: { type: 'short', placeholder: 'When the chord changes, does the picking pattern change too, or stay the same?' }
           },
           {
             text: 'Listen to "Nothing Else Matters" by Metallica. The intro is entirely fingerpicked open chords. Tap along — can you feel the 6-note pulse?',
+            time: '3 min',
             hint: 'James Hetfield famously taught himself this with no plan. He uses thumb-finger-thumb-finger patterns. Notice the constant thumb motion.',
             skills: [4, 5],
             response: { type: 'mc', prompt: 'In a typical fingerpicked arpeggio, what role does the THUMB usually play?', choices: [
@@ -207,6 +254,28 @@ SETS.push(
               'It doesn\'t play at all in arpeggios',
               'It plays the highest notes'
             ] }
+          },
+          {
+            text: 'Now try it: fret Em and play the 6-note p-i-m-a-m-i arpeggio. Click any note below the TAB to hear it, then play the staircase yourself — thumb on the low E (Em\'s root), i-m-a on G-B-e, then back down m-i.',
+            time: '4 min',
+            hint: 'Em is all open strings on the treble side, so you can focus entirely on the picking hand. Read the TAB left to right — the bass note starts it, then the fingers climb and come back.',
+            skills: [1, 2, 3],
+            tab: {
+              caption: 'Em arpeggio · p-i-m-a-m-i · thumb on the low E',
+              notes: [
+                { string: 'E', fret: 0, note: 'E', midi: 40 },
+                { string: 'G', fret: 0, note: 'G', midi: 55 },
+                { string: 'B', fret: 0, note: 'B', midi: 59 },
+                { string: 'e', fret: 0, note: 'e', midi: 64 },
+                { string: 'B', fret: 0, note: 'B', midi: 59 },
+                { string: 'G', fret: 0, note: 'G', midi: 55 }
+              ]
+            }
+          },
+          {
+            text: 'Station Wrap-Up — take a beat to reflect: did the pattern start to feel automatic, or were you still thinking through each finger? What would make it smoother?',
+            time: '1 min',
+            response: { type: 'short', placeholder: 'e.g. still counting each finger — slowing the metronome down helped it flow' }
           }
         ]
       },
@@ -218,7 +287,10 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 1 — Em Pattern: fret Em and play the 6-note pattern p-i-m-a-m-i at 60 BPM, one note per click, for 8 bars. Win: a steady, even pulse with every note ringing clean.',
+            time: '4 min',
             hint: 'Count "1 + 2 + 3 + 4 +" and play 6 notes per bar — meaning some notes fall on numbers, some on "+"s. Don\'t worry about exact counting yet; just keep the pulse steady.',
+            stuck: 'Drop the metronome and play the pattern as slowly as you need to — get the finger order automatic first, speed comes after.',
+            levelUp: 'Play 8 bars without a single uneven note, or close your eyes and keep the pulse rock-steady.',
             skills: [1, 2, 3],
             playSeq: { label: 'Em p-i-m-a-m-i pattern at 60 BPM', bpm: 60,
               notes: [40, 55, 59, 64, 59, 55] }
@@ -229,11 +301,23 @@ SETS.push(
             title: 'Play the pattern on Am (move the thumb)',
             steps: [
           {
-            text: 'Challenge 2 — Am Pattern: play the same 6-note pattern over Am — thumb on the A string (Am\'s root), i-m-a still on G-B-e — 8 times. Win: only the thumb moves to the new bass; the fingers stay anchored.',
-            hint: 'The only thing that changes between Em and Am is which bass string the thumb plays. Fingers stay anchored on G, B, high e.',
+            text: 'Challenge 2 — Am Pattern: fret Am and play the 6-note pattern over it — thumb on the A string (Am\'s root), i-m-a still on G-B-e — 8 times. Win: only the thumb moves to the new bass; the fingers stay anchored. Click any note below the TAB to hear it.',
+            time: '4 min',
+            hint: 'The only change from Em is which bass string the thumb plays. Fingers stay parked on G, B, high e.',
+            stuck: 'Drop the pattern — just pluck the Am bass (p) and let it ring, then add i-m-a one finger at a time.',
+            levelUp: 'Switch Em → Am every 2 bars without breaking the pulse — only the thumb relocates.',
             skills: [3, 4, 6],
-            playSeq: { label: 'Am p-i-m-a-m-i pattern', bpm: 60,
-              notes: [45, 57, 60, 64, 60, 57] }
+            tab: {
+              caption: 'Am arpeggio · p-i-m-a-m-i · thumb on the A string',
+              notes: [
+                { string: 'A', fret: 0, note: 'A', midi: 45 },
+                { string: 'G', fret: 2, note: 'A', midi: 57 },
+                { string: 'B', fret: 1, note: 'C', midi: 60 },
+                { string: 'e', fret: 0, note: 'E', midi: 64 },
+                { string: 'B', fret: 1, note: 'C', midi: 60 },
+                { string: 'G', fret: 2, note: 'A', midi: 57 }
+              ]
+            }
           }
             ]
           },
@@ -241,10 +325,24 @@ SETS.push(
             title: 'Build up your tempo (70+ BPM)',
             steps: [
           {
-            text: 'Challenge 3 — Beat Your Tempo: play the Em pattern at 70 BPM, then try 80. Win: clean at 70+ with the "a" finger landing right on its beat — drop back to 60 if it falls apart.',
-            hint: 'The most common mistake: the "a" finger lags. Pay extra attention to your ring finger — it needs to land exactly on its beat, no later.',
-            skills: [2, 5]
+            text: 'Challenge 3 — Beat Your Tempo (your assessment piece): play the Em pattern at 70 BPM, then try 80. Win: clean at 70+ with the "a" finger landing right on its beat — drop back to 60 if it falls apart. This steady-pattern check is the Set 2 check-off.',
+            time: '4 min',
+            hint: 'The most common mistake: the "a" finger lags. Pay extra attention to your ring finger — it needs to land exactly on its beat, no later. Set the ⏱ Timer for 2 minutes and loop it.',
+            stuck: 'Go back to 60 BPM and stay there until it\'s effortless — a clean 60 beats a sloppy 80 every time.',
+            levelUp: 'Push past 80 BPM, or play the pattern over Am at the same tempo with the thumb relocating.',
+            skills: [2, 5],
+            response: { type: 'short', prompt: 'Personal record: win at 70 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, even pattern today (BPM)?', placeholder: 'e.g. 90 — beat it next class' }
           }
+            ]
+          },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
+              {
+                text: 'What\'s your honest top clean tempo right now, and which finger gives out first when you push it? Write it below — that\'s your warm-up target next time.',
+                time: '1 min',
+                response: { type: 'short', placeholder: 'e.g. clean to 80, then the ring finger starts dragging behind the beat' }
+              }
             ]
           }
         ]
@@ -331,8 +429,9 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/XQiaCSabQaE" target="_blank">A Total Beginners Guide To Travis Picking – Andy Guitar</a> (full video).',
-            hint: 'Travis picking uses an ALTERNATING thumb: bass note on beat 1, different bass note on beat 3. The fingers fill in between. It\'s the foundation of country, folk, and a lot of pop.',
+            text: 'Watch: <a href="https://youtu.be/XQiaCSabQaE" target="_blank">A Total Beginners Guide To Travis Picking – Andy Guitar</a> (0:00–4:00). As you watch, tap the alternating thumb on your knee — bass on 1, the other bass on 3 — before you ever add the fingers.',
+            time: '4 min',
+            hint: 'Travis picking uses an ALTERNATING thumb: bass note on beat 1, a different bass note on beat 3. The fingers fill in between. It\'s the foundation of country, folk, and a lot of pop.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'In Travis picking, what does the THUMB do?', choices: [
               'Plays the same bass note over and over',
@@ -342,16 +441,40 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/7silbMA9UME" target="_blank">Nothing Else Matters Guitar Lesson Part 1 – Marty Music</a> (full video).',
+            text: 'Watch: <a href="https://youtu.be/7silbMA9UME" target="_blank">Nothing Else Matters Guitar Lesson Part 1 – Marty Music</a> (0:00–4:00). Watch one chord change closely — notice when his fretting hand starts moving toward the next shape.',
+            time: '4 min',
             hint: 'The hardest part: keeping the picking pattern PERFECTLY STEADY through a chord change. Anticipate the next chord — start moving your fretting hand on the LAST note of the current bar.',
             skills: [3, 4],
             response: { type: 'short', placeholder: 'When you fingerpick from Am to C, when (which note in the bar) does your fretting hand start preparing for the next chord?' }
           },
           {
             text: 'Listen to one of: "House of the Rising Sun", "Dust in the Wind", or "Hallelujah". Listen to a full verse. Can you hear when the chord changes? Does the pattern ever break?',
+            time: '3 min',
             hint: 'In professional recordings the pattern almost never breaks at a chord change — that\'s your standard. It\'s a high bar but worth aiming for.',
             skills: [4, 5],
             response: { type: 'short', placeholder: 'Which song did you listen to? Did the picking pattern stay completely steady through every chord change?' }
+          },
+          {
+            text: 'Now try it: fret C and play the 6-note arpeggio over it. Click any note below the TAB to hear it, then play the staircase — thumb on the A string\'s 3rd fret (C\'s root), i-m-a on G-B-e, then back down m-i.',
+            time: '4 min',
+            hint: 'C uses the same picking pattern as Em and Am — only the thumb\'s bass note changes. Read the TAB left to right and match each pluck.',
+            skills: [1, 3, 4],
+            tab: {
+              caption: 'C arpeggio · p-i-m-a-m-i · thumb on the A string (3rd fret)',
+              notes: [
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
+                { string: 'G', fret: 0, note: 'G', midi: 55 },
+                { string: 'B', fret: 1, note: 'C', midi: 60 },
+                { string: 'e', fret: 0, note: 'E', midi: 64 },
+                { string: 'B', fret: 1, note: 'C', midi: 60 },
+                { string: 'G', fret: 0, note: 'G', midi: 55 }
+              ]
+            }
+          },
+          {
+            text: 'Station Wrap-Up — take a beat to reflect: across the whole module, which is harder for you — keeping the picking pattern steady, or changing chords cleanly underneath it? What\'s your plan for the harder one?',
+            time: '1 min',
+            response: { type: 'short', placeholder: 'e.g. chord changes break my pattern — I\'ll practice moving the fretting hand a beat early' }
           }
         ]
       },
@@ -362,8 +485,11 @@ SETS.push(
             title: 'Fret each chord clean before you fingerpick it',
             steps: [
           {
-            text: 'Challenge — Clean Shapes First: before you fingerpick the progression, strum each chord once (Am, C, D, F) and check every string rings — these are the exact open chords you learned in Module 5. Win: all four shapes clean on a strum before you pick a single note through them.',
+            text: 'Challenge 1 — Clean Shapes First: before you fingerpick the progression, strum each chord once (Am, C, D, F) and check every string rings — these are the exact open chords you learned in Module 5. Win: all four shapes clean on a strum before you pick a single note through them.',
+            time: '3 min',
             hint: 'Fingerpicking exposes every note, so a chord that was "good enough" for strumming in Module 5 needs to be truly clean here. Fix the fretting hand first; then the picking hand has something solid to work over.',
+            stuck: 'Whichever shape buzzes, fix just that one — adjust your finger angle so the fingertip (not the pad) presses just behind the fret.',
+            levelUp: 'Fret each shape, lift off, and re-fret it cleanly 5 times in a row before moving to the next chord.',
             skills: [1]
           }
             ]
@@ -372,11 +498,28 @@ SETS.push(
             title: 'Fingerpick a full chord progression',
             steps: [
           {
-            text: 'Challenge 1 — Full Progression: play the 6-note arpeggio over a 4-chord progression — Am–C–D–F or C–Am–F–G — 1 bar each at 60 BPM. Win: the thumb finds each chord\'s root bass while the fingers stay on G-B-e.',
+            text: 'Challenge 2 — Full Progression: play the 6-note arpeggio over a 4-chord progression — Am–C–D–F or C–Am–F–G — 1 bar each at 60 BPM. Win: the thumb finds each chord\'s root bass while the fingers stay on G-B-e.',
+            time: '4 min',
             hint: 'For each chord, the thumb plays the ROOT bass note (Am = A string, C = A string, D = D string, F = D string). Fingers always on G-B-e.',
+            stuck: 'Drop to two chords (Am–C) and loop just that change until the pattern doesn\'t break, then add D and F.',
+            levelUp: 'Run the full four-chord loop without a single broken pattern, or nudge the metronome to 70 BPM.',
             skills: [1, 3, 4],
             playSeq: { label: 'Am · C · D · F bass roots', bpm: 60,
-              notes: [45, 48, 50, 53] }
+              notes: [45, 48, 50, 53] },
+            response: { type: 'short', prompt: 'Personal record: win at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN lap of the progression today (BPM)?', placeholder: 'e.g. 75 — beat it next class' }
+          }
+            ]
+          },
+          {
+            title: 'Pinch the thumb and a finger together',
+            steps: [
+          {
+            text: 'Challenge 3 — The Pinch: fret C and "pinch" two strings at once — thumb on the A string (root) and your "a" finger on the high e, plucked at the SAME instant, on each beat for 8 beats. Win: both notes sound together as one, perfectly in sync — not one slightly before the other.',
+            time: '4 min',
+            hint: 'A pinch is the bridge between arpeggios and Travis picking — thumb and finger move toward each other and meet. Listen for ONE sound, not a flam (two close hits).',
+            stuck: 'Pluck the bass and the treble separately first, slowly, then bring them closer until they land together.',
+            levelUp: 'Pinch on beats 1 & 3 and fill beats 2 & 4 with a single i-pluck on the B string — that\'s the Travis groove starting to form.',
+            skills: [2, 4]
           }
             ]
           },
@@ -384,8 +527,11 @@ SETS.push(
             title: 'Try Travis picking',
             steps: [
           {
-            text: 'Challenge 2 — Travis Thumb: warm up Travis picking on C — thumb alternating the A string (beats 1 & 3) and G string (beats 2 & 4), thumb-only at 60 BPM. Win: a steady, even alternating thumb — then add an i-pluck on the B string on each "+".',
+            text: 'Challenge 4 — Travis Thumb: warm up Travis picking on C — thumb alternating the A string (beats 1 & 3) and G string (beats 2 & 4), thumb-only at 60 BPM. Win: a steady, even alternating thumb — then add an i-pluck on the B string on each "+".',
+            time: '4 min',
             hint: 'Just the thumb! Once that\'s steady, add an i-pluck on the B string on the "+" of each beat. Travis picking adds fingers ON TOP of an already-grooving thumb.',
+            stuck: 'Thumb only, no fingers, as slow as you need — get the alternating bass rock-steady before adding anything on top.',
+            levelUp: 'Add the i-pluck on every "+", or carry the alternating thumb through a C → Am change without it stumbling.',
             skills: [2, 5]
           }
             ]
@@ -394,10 +540,23 @@ SETS.push(
             title: 'Perform a fingerpicked song',
             steps: [
           {
-            text: 'Challenge 3 — Perform It (give it a go!): pick one song — "House of the Rising Sun", "Hallelujah", Core Song 2 (verse), or a choice-list song — and play it through 3 times without stopping, even with mistakes. No score — practice the recovery; keep going no matter what.',
-            hint: 'For your performance, keep going no matter what. Mistakes in performance are normal. Stopping is what makes them sound bad. Practice the recovery.',
+            text: 'Challenge 5 — Perform It (your assessment piece — give it a go!): pick one song — "House of the Rising Sun", "Hallelujah", Core Song 2 (verse), or a choice-list song — and play it through 3 times without stopping, even with mistakes. No score — practice the recovery; keep going no matter what.',
+            time: '6 min',
+            hint: 'For your performance, keep going no matter what. Mistakes in performance are normal. Stopping is what makes them sound bad. Practice the recovery. No one to play for? Record yourself on the Chromebook and watch it back — performing for the camera counts, and the playback shows you exactly where the pattern broke.',
+            stuck: 'Pick the shortest, slowest song you know (Hallelujah is forgiving) and play just the verse — finishing matters more than difficulty.',
+            levelUp: 'Perform standing up, or play it for a real audience and keep going through any mistake.',
             skills: [4, 5, 6]
           }
+            ]
+          },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
+              {
+                text: 'You\'ve reached the last module — what fingerpicking skill are you proudest of, and what\'s the one song you want to keep working on after this class? Write it below.',
+                time: '1 min',
+                response: { type: 'short', placeholder: 'e.g. proud of clean arpeggios; want to keep working on Blackbird' }
+              }
             ]
           }
         ]
@@ -470,9 +629,20 @@ MODULE_REVIEWS[8] = {
   moduleNum: 8,
   module: 'Finger Picking',
   skills: [
-    { id: 'mr8-s1', text: 'I can use my thumb (p) for bass strings and i-m-a fingers for treble strings' },
-    { id: 'mr8-s2', text: 'I can play a basic fingerpicking pattern (e.g. Travis or PIMA) cleanly' },
-    { id: 'mr8-s3', text: 'I can fingerpick through a full chord progression in time' }
+    { id: 'mr8-s1', text: 'I can hold a relaxed fingerpicking hand — wrist arched, fingers curved — for 30 seconds without it collapsing flat' },
+    { id: 'mr8-s2', text: 'I can assign p to the bass strings and i-m-a to G-B-e, and put any finger on its string without looking' },
+    { id: 'mr8-s3', text: 'I can pluck p-i-m-a in order on open strings at 60 BPM with even volume on every finger, including the ring (a)' },
+    { id: 'mr8-s4', text: 'I can play the 6-note p-i-m-a-m-i arpeggio from memory while holding a chord, every note ringing clean' },
+    { id: 'mr8-s5', text: 'I can move only my thumb to the new bass note at a chord change while i-m-a stay anchored on G-B-e' },
+    { id: 'mr8-s6', text: 'I can keep the pattern steady at 70 BPM for at least 4 bars without speeding up or slowing down' },
+    { id: 'mr8-s7', text: 'I can fingerpick a full 4-chord progression without the pattern breaking at any chord change' },
+    { id: 'mr8-s8', text: 'I can pinch the thumb and a finger together as one sound, and demonstrate Travis picking with an alternating-bass thumb' },
+    { id: 'mr8-s9', text: 'I can perform a full fingerpicked song start to finish, recovering from any mistake without stopping' }
   ],
+  assessItems: [
+    'Fingerpick a 4-chord progression with the 6-note arpeggio, keeping the pattern unbroken through every chord change',
+    'Perform one full fingerpicked song from the song list start to finish, recovering from any mistakes without stopping'
+  ],
+  forward: 'That\'s the whole toolkit — notes, chords, power chords, lead, barre, strumming, and now fingerpicking. <strong>Everything from here is just songs.</strong> Keep a running list of tunes you want to learn, revisit your Module 1 goal to see how far you\'ve come, and remember: the players you admire are just people who kept practicing past this point. Pick a song, learn it, repeat — that\'s a lifetime of guitar.',
   standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
 };
