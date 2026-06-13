@@ -316,8 +316,11 @@ on localhost, then on the live site: load, go offline (DevTools), reload.
 - [ ] Song refresh each semester: swap in 2–3 student-requested songs (verify links
       per CLAUDE.md; track candidates and decisions in `SONG_SWAP.md`); pull from the
       🎤 request slot.
-- [ ] Reflection prompts: add 1–2 listening/reflection responses per set in Modules
-      6–8 to match Module 1–2 richness (Jonathan writes prompts, Claude Code wires).
+- [x] Reflection prompts: add 1–2 listening/reflection responses per set in Modules
+      6–8 to match Module 1–2 richness. ✅ 2026-06-13 — audit found Modules 7 & 8 already
+      had per-set "take a beat to reflect" wrap-ups + listening reflections; Module 6 was
+      the gap. Added a tailored reflective wrap-up step to station B of all three M6 sets
+      (Claude wrote the prompts at Jonathan's request). **Files:** `module-6.js`.
 - [ ] ⚠️ Review Module 4 Set 1 video (`m_IiyJu60-c` — "Major Pentatonic Scale – Marty
       Music", swapped in 2.2 on 2026-06-11): watch it through and confirm it fits the
       beginner Pattern-1 station before the course starts. Code comment flags it too.

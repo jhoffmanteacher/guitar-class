@@ -50,6 +50,11 @@ SETS.push(
               '8',
               '16'
             ] }
+          },
+          {
+            text: 'Station Wrap-Up — take a beat to reflect: which was harder to keep steady today — your strum hand swinging non-stop like a pendulum, or counting "1 + 2 + 3 + 4 +" out loud the whole time? What started to make it click?',
+            time: '1 min',
+            response: { type: 'short', placeholder: 'e.g. my hand kept freezing on the chord change — slowing to 50 BPM helped it keep swinging' }
           }
         ]
       },
@@ -205,6 +210,11 @@ SETS.push(
               '8',
               '16'
             ] }
+          },
+          {
+            text: 'Station Wrap-Up — take a beat to reflect: in the D-DU-UDU pattern, what trips you up more right now — skipping a strum while the wrist keeps moving, or landing the accents on beats 2 and 4? What helped today?',
+            time: '1 min',
+            response: { type: 'short', placeholder: 'e.g. I keep actually hitting the strings on the skip — pulling the pick back just slightly fixed it' }
           }
         ]
       },
@@ -342,6 +352,11 @@ SETS.push(
             hint: 'It\'s almost entirely the strum pattern. Reggae emphasizes the offbeats (the "+"); rock emphasizes the downbeats (the numbers).',
             skills: [4, 5],
             response: { type: 'short', placeholder: 'In one sentence: what is the biggest difference between the reggae strum and the rock strum?' }
+          },
+          {
+            text: 'Station Wrap-Up — take a beat to reflect: of the three feels you tried — folk, rock, reggae — which was hardest to make sound convincing on your guitar, and what gave it away as "not quite right"?',
+            time: '1 min',
+            response: { type: 'short', placeholder: 'e.g. reggae — my offbeat upstrokes were too heavy, so it sounded like rock with gaps' }
           }
         ]
       },
