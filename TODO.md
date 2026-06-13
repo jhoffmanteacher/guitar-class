@@ -1,3 +1,22 @@
+# Warm-up "tune & tone check" — remove or revise the tone check 🔲 TODO
+
+Raised by Jonathan 2026-06-13. The practice-station warm-up that opens every Station C
+currently reads "tune all 6 strings to green … then play each string open and at the
+1st–3rd fret, listening for buzz." The **tone check** half (the buzz-listening) needs to
+be removed or revised.
+
+- Decide scope first (ask Jonathan multiple-choice per CLAUDE.md): remove the tone-check
+  sentence entirely vs. revise it (e.g. shorten it, or replace with a different readiness
+  cue).
+- It's a copy-paste warm-up repeated across many sets/modules — find every instance and
+  change them consistently (the text "listening for buzz" / "every note clean before
+  today's work" is the marker). Confirm the exact wording with Jonathan before a
+  site-wide find-and-replace.
+- Files: `module-1.js` … `module-8.js` (the warm-up step appears in each module's
+  Station C; Module 4 Sets 1–3 were just added in Session 3.7).
+
+---
+
 ## Station C — "run the progression multiple times" tracking 🔲 TODO
 
 Idea (Jose): students should loop each Station C practice progression several times so
