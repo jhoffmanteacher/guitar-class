@@ -251,8 +251,9 @@ search-and-verify; anything without a good replacement gets flagged for Jonathan
 a song (log swaps in `SONG_SWAP.md`). Re-run each semester.
 **Files:** all `module-N.js`.
 
-### [~] Session 4.3 — Firebase hygiene (guided, mostly console work)
-🚧 draft 2026-06-13 (one-pass) — Wrote `FIREBASE_HARDENING.md`: a click-by-click console guide covering (1) verifying production Firestore rules match the documented own-doc + teacher-read block (with a "still in test mode?" warning), (2) restricting the browser API key to `jhoffmanteacher.github.io/*` + `localhost/*` in Google Cloud Console, and (3) App Check (skip unless abuse appears), plus a done-when checklist. **No code — Jonathan runs these steps in the console** (they need his Google login). Revisit by walking the checklist together before launch.
+### [x] Session 4.3 — Firebase hygiene (guided, mostly console work)
+✅ done 2026-06-13 — Walked the `FIREBASE_HARDENING.md` checklist with Jonathan at the console. **(1) Firestore rules:** verified live — already locked to the documented own-doc + teacher-read block, NOT test mode. **(2) Teacher email:** confirmed `jhoffman@seq.org` works — `?teacher=true` loaded the dashboard, not the denied screen (matches `firebase-config.js:17` + `app.js:2209`). **(3) API key:** was already restricted to Websites; tightened `jhoffmanteacher.github.io/*` → `jhoffmanteacher.github.io/guitar-class/*` (project-page path) + added `localhost/*`, kept the `guitar-class-2fd21.firebaseapp.com/*` auth-domain referrer. **(4) App Check:** skipped per plan. Also corrected the guide's two stale facts (project ID is `guitar-class-2fd21`, deploy URL is the `/guitar-class/` project-page path). **One open item:** final incognito "does it still save" test after key propagation (~5 min) — last checkbox in the guide. **Files:** `FIREBASE_HARDENING.md` (doc only).
+🚧 *prior draft note:* Wrote `FIREBASE_HARDENING.md` (one-pass 2026-06-13) covering rules verification, API-key restriction, App Check, and a done-when checklist. No code — console work needing Jonathan's Google login.
 Verify Firestore rules in production match the documented rules (students read/write
 own doc; teacher read via jhoffman@seq.org) · restrict the web API key to the
 `jhoffmanteacher.github.io` referrer in Google Cloud console · App Check optional,

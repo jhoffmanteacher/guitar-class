@@ -11,7 +11,8 @@ is the click-by-click guide. Do it once, the week before students arrive.
 The app assumes: a student can read/write **only their own** progress doc, and
 the teacher account can **read** everyone's.
 
-1. Go to <https://console.firebase.google.com> → your **guitar-class** project.
+1. Go to <https://console.firebase.google.com> → your **guitar-class-2fd21**
+   project (that's the real project ID — see `firebase-config.js`).
 2. **Build → Firestore Database → Rules** tab.
 3. Confirm the rules read exactly like this (this is the same block documented in
    `index.html` at the bottom):
@@ -44,13 +45,14 @@ the teacher account can **read** everyone's.
 Right now the API key in `firebase-config.js` works from anywhere. Lock it to the
 live site so a copied key can't be abused.
 
-1. Go to <https://console.cloud.google.com> → pick the **guitar-class** project
-   (same project as Firebase).
+1. Go to <https://console.cloud.google.com> → pick the **guitar-class-2fd21**
+   project (same project as Firebase).
 2. **APIs & Services → Credentials**.
 3. Find the **Browser key (auto created by Firebase)** → click it.
 4. Under **Application restrictions**, choose **Websites** (HTTP referrers).
-5. Add these referrers:
-   - `jhoffmanteacher.github.io/*`
+5. Add these referrers (the site is a GitHub *project* page, so it lives under
+   the `/guitar-class/` path, not the domain root):
+   - `jhoffmanteacher.github.io/guitar-class/*`
    - `localhost/*`  (so local testing keeps working)
 6. **Save.** Changes can take a few minutes to take effect.
 7. Test: open the live site in an incognito window, sign in, mark a skill — it
@@ -73,7 +75,11 @@ that are annoying to debug.
 
 ## Done when…
 
-- [ ] Firestore rules published and match the block above (not test mode).
-- [ ] Teacher email in the rules matches your real teacher sign-in.
-- [ ] Browser API key restricted to `jhoffmanteacher.github.io/*` + `localhost/*`.
+- [x] Firestore rules published and match the block above (not test mode).
+      *(verified 2026-06-13 — already locked down, not test mode)*
+- [x] Teacher email in the rules matches your real teacher sign-in.
+      *(verified 2026-06-13 — `?teacher=true` showed the dashboard, not denied)*
+- [x] Browser API key restricted to `jhoffmanteacher.github.io/guitar-class/*` +
+      `localhost/*`. *(done 2026-06-13 — `firebaseapp.com/*` auth domain kept)*
 - [ ] Signed in on the live site and confirmed progress still saves.
+      *(do after ~5 min, incognito — last verification)*
