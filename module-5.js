@@ -16,7 +16,7 @@ SETS.push(
     title: 'Set 1',
     subtitle: 'Reading chord diagrams · Am and Em · First strumming',
     objective: 'I CAN read a chord diagram and fret Am and Em cleanly with a 4-beat strum pattern.',
-    skillFocus: 'Chord diagram anatomy (dots, finger numbers, X and O) · Chord chart vs TAB · Am and Em shapes · Simple down-strum: 4 strums per bar',
+    skillFocus: 'Reading chord diagrams · Fretting the Am and Em chords · Playing a simple down-strum',
     handoutUrl: 'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/edit',
     comingSoon: false,
 
@@ -203,7 +203,7 @@ SETS.push(
     title: 'Set 2',
     subtitle: 'Chord Group 1: C, F, Am, G · Down-up strumming · Smooth transitions',
     objective: 'I CAN fret C, F, Am, and G cleanly and switch between them at 70 BPM with a down-up strum pattern.',
-    skillFocus: 'C major shape · F major simplified (xx3211) · G major (3 or 4 finger) · Common-finger pivot (Am to C) · Down-up strum patterns · 8 chord changes per minute goal',
+    skillFocus: 'Fretting the C, F, and G chords · Switching chords smoothly · Playing down-up strum patterns',
     handoutUrl: 'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/edit',
     comingSoon: false,
 
@@ -404,7 +404,7 @@ SETS.push(
     title: 'Set 3',
     subtitle: 'Chord Group 2: D, A, Em, Bm · Connecting chord groups',
     objective: 'I CAN fret D, A, Em, and Bm cleanly and connect Group 1 and Group 2 chords in a song.',
-    skillFocus: 'D major triangular shape · A major (3 fingers on 2nd fret) · Bm partial barre (xx4432) · Moving between chord groups · Am–Em, G–D, C–A transitions',
+    skillFocus: 'Fretting the D, A, and Bm chords · Connecting chord groups in a song',
     handoutUrl: 'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/edit',
     comingSoon: false,
 
@@ -595,7 +595,7 @@ SETS.push(
     title: 'Set 4',
     subtitle: 'Chord Group 3: E, B7, F#m, C#m · Semester showcase preparation',
     objective: 'I CAN fret E and B7 open chords, identify F#m and C#m shapes, and perform a chosen song with 4+ chord types.',
-    skillFocus: 'E major full open chord · B7 four-finger open chord · F#m partial barre intro · C#m barre chord intro · Review all chord groups 1–3 · Semester performance preparation',
+    skillFocus: 'Fretting the E and B7 chords · Recognizing the F#m and C#m shapes · Performing a song with several chords',
     handoutUrl: 'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/edit',
     comingSoon: false,
 

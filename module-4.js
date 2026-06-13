@@ -16,7 +16,7 @@ SETS.push(
     title: 'Set 1',
     subtitle: 'Pentatonic Pattern 1 · Major & minor positioning · Improvising on E & A strings',
     objective: 'I CAN play Pentatonic Pattern 1 ascending and descending, and position it for major and minor keys.',
-    skillFocus: 'What is a scale? · Pentatonic Pattern 1 fingering · Major vs minor positioning (4th finger vs 1st finger on root) · Alternate picking · Improvise a 2-bar phrase over a backing track',
+    skillFocus: 'Playing Pentatonic Pattern 1 · Positioning it for major and minor keys · Improvising with the scale',
     handoutUrl: 'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/edit',
     comingSoon: false,
 
@@ -232,7 +232,7 @@ SETS.push(
     title: 'Set 2',
     subtitle: 'Tone parameters · Phrasing strategies · Notes on D & G strings',
     objective: 'I CAN use dynamics, timbre, and note shape to play expressively, and phrase a solo using call-and-response.',
-    skillFocus: 'Dynamics (p, mf, f) · Timbre (bridge vs neck) · Envelope (attack, sustain, release) · Phrasing: one/two/three-note solos · Call-and-response · Notes on strings 4 (D) and 3 (G)',
+    skillFocus: 'Playing expressively with dynamics and tone · Phrasing a solo with call-and-response · Notes on the D and G strings',
     handoutUrl: 'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/edit',
     comingSoon: false,
 
@@ -441,7 +441,7 @@ SETS.push(
     title: 'Set 3',
     subtitle: 'Scale theory · Blues scale · Compose an original solo',
     objective: 'I CAN explain how the pentatonic scale is built, add the blues note, and compose an original 4-bar solo.',
-    skillFocus: 'Major scale construction (whole/half steps) · Major pentatonic = scale degrees 1 2 3 5 6 · Minor pentatonic = 1 ♭3 4 5 ♭7 · Blues scale: add ♭5 · Transposition · Compose and perform a 4-bar original solo',
+    skillFocus: 'How pentatonic and blues scales are built · Transposing to new keys · Composing and performing your own solo',
     handoutUrl: 'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/edit',
     comingSoon: false,
 

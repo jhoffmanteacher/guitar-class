@@ -234,7 +234,8 @@ line at the computer station (this is where students learn the routine).
 
 ## PHASE 4 — Pre-launch hardening (the week before students arrive)
 
-### [ ] Session 4.1 — ♿ Accessibility pass
+### [~] Session 4.1 — ♿ Accessibility pass
+🚧 draft 2026-06-13 (one-pass; revise later) — Audit found most of this already in place: the three `.fab`s are already `<button>`s with `aria-expanded`/`aria-controls`; site-wide `:focus-visible` rule exists (styles.css:3) and the outline-killing `.bpm-slider:focus{outline:none}` already has a `:focus-visible` companion; `--text3` is already `#767670` (meets ~4.5:1); Escape-to-close on tool popups already wired (app.js); icon-only controls (✕ close, 🔊 read-aloud) already have `aria-label`s, and the note/play-seq buttons carry visible text + `title`. **New this pass:** made the resource-panel resize handle keyboard-operable — `role="separator"`, `aria-orientation`, `aria-label`, `tabindex=0`, and ←/→/Home/End width nudging (app.js, end of resize IIFE). **Still TODO when we revise:** full keyboard-only walkthrough as the acceptance test.
 Convert the three `.fab` tool divs to `<button>` (adjust CSS so they render
 identically) · `aria-label`s on all icon-only controls (✕ closes, 🔊 note buttons,
 ▶ play-sequence) · site-wide `:focus-visible` style (several rules currently kill
@@ -250,20 +251,23 @@ search-and-verify; anything without a good replacement gets flagged for Jonathan
 a song (log swaps in `SONG_SWAP.md`). Re-run each semester.
 **Files:** all `module-N.js`.
 
-### [ ] Session 4.3 — Firebase hygiene (guided, mostly console work)
+### [~] Session 4.3 — Firebase hygiene (guided, mostly console work)
+🚧 draft 2026-06-13 (one-pass) — Wrote `FIREBASE_HARDENING.md`: a click-by-click console guide covering (1) verifying production Firestore rules match the documented own-doc + teacher-read block (with a "still in test mode?" warning), (2) restricting the browser API key to `jhoffmanteacher.github.io/*` + `localhost/*` in Google Cloud Console, and (3) App Check (skip unless abuse appears), plus a done-when checklist. **No code — Jonathan runs these steps in the console** (they need his Google login). Revisit by walking the checklist together before launch.
 Verify Firestore rules in production match the documented rules (students read/write
 own doc; teacher read via jhoffman@seq.org) · restrict the web API key to the
 `jhoffmanteacher.github.io` referrer in Google Cloud console · App Check optional,
 skip if it adds friction.
 **Files:** none (console); Claude Code guides.
 
-### [ ] Session 4.4 — UX polish grab-bag (optional)
+### [~] Session 4.4 — UX polish grab-bag (optional)
+🚧 draft 2026-06-13 (one-pass) — Two of three already done: the timer **flashes at zero** (`flashTimerDisplay` + `timerDoneFlash` keyframes) and the resize handle **already has touch handlers** (touchstart/move/end). **New this pass:** last module/set now also persist to `localStorage` (`saveLocalPlace`/`restoreLocalPlace`) on top of Firestore, so a returning student lands where they left off instantly — before Firestore loads, on a flaky connection, and in dev-bypass mode. **Revisit:** confirm touch-resize on a real convertible Chromebook; decide whether the timer also needs a louder/visual end-of-timer cue.
 Persist last-selected module/set per student · flash the timer display at zero (beeps
 get lost in a loud room) · verify the resource-panel resize handle works by touch on
 convertible Chromebooks.
 **Files:** `app.js`, `styles.css`.
 
-### [ ] Session 4.5 — 🖨 Per-set print/handout export
+### [~] Session 4.5 — 🖨 Per-set print/handout export
+🚧 draft 2026-06-13 (one-pass) — Added a "🖨 Print this set" button to each set's tab bar (`printSet()` → `window.print()`), tagged the four tab-panels (`tp-station-b/-c/-songs/-checklist`), and wrote an `@media print` block (styles.css): hides all chrome (header, pills, fabs, resource panel, tab bar, response inputs, play/read-aloud buttons, save indicator), force-shows **both** station panels regardless of which tab is open, hides songs+checklist, expands collapsed Station-C sections + step bodies, keeps `tab:`/`chords:` SVGs and Stuck?/Level up, forces light colors with `print-color-adjust:exact`, single-column layout, page-break before Station C, and a print-only "Guitar Class — Sequoia HS" header. **TODO when we revise (per the original spec): show Jonathan one printed example set (PDF from print preview, portrait letter) for approval before considering it final** — and decide whether the handout should include the songs list and/or checklist (currently excluded).
 For days the Chromebooks or wifi fail: any set should print as a clean one-pager.
 Add an `@media print` stylesheet — hide chrome (header, module pills, fabs, response
 inputs/textareas, read-aloud + play buttons, resource panel), expand BOTH station
@@ -274,7 +278,8 @@ temporarily opens both stations). Show Jonathan one printed example set (PDF fro
 preview, portrait letter) for approval before styling the rest.
 **Files:** `styles.css`, `app.js`, possibly `index.html`.
 
-### [ ] Session 4.6 — 📴 Offline resilience (light PWA)
+### [~] Session 4.6 — 📴 Offline resilience (light PWA)
+🚧 draft 2026-06-13 (one-pass) — Added `sw.js` (stale-while-revalidate cache of the static shell: index/styles/app/config-main/firebase-config + all 8 module files + manifest + icon; cross-origin Firebase/YouTube/Translate/gstatic requests are never intercepted, so auth + saving behave unchanged; navigation falls back to cached `index.html`). Registered it in `app.js` (only on `http(s)`, so it's a harmless no-op on Live Server's `file://`-style preview). Added `manifest.json` (name, theme `#4d1964`, standalone, portrait) + `icon.svg` (guitar on the brand purple), linked both in `index.html`. **CRITICAL routine added:** `CACHE_VERSION` in `sw.js` (currently `guitar-class-v1-2026-06-13`) — and CLAUDE.md's push table now says **bump it on every code push** or returning students get a stale site. **TODO when we revise: real-device test — the SW registers on Live Server (http://localhost) and on the deployed site, but NOT if index.html is opened directly via file://. Test on localhost first, then on the live GitHub Pages site (load, go offline in DevTools, reload). Bump `CACHE_VERSION` whenever a cached file changes.**
 The app already degrades gracefully when Firebase is blocked; make the static shell
 load instantly on weak school wifi and survive brief outages. Add `sw.js` caching
 `index.html`, `app.js`, `styles.css`, `config-main.js`, and all `module-N.js`

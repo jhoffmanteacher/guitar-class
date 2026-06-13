@@ -1,0 +1,19 @@
+{
+  "name": "Guitar Class · Sequoia HS",
+  "short_name": "Guitar Class",
+  "description": "Sequoia High School Beginning Guitar — independent practice and skills tracker.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#4d1964",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

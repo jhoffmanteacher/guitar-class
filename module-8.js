@@ -16,7 +16,7 @@ SETS.push(
     title: 'Set 1',
     subtitle: 'Hand position · p-i-m-a · Thumb on bass · Fingers on treble',
     objective: 'I CAN hold a relaxed fingerpicking hand position and pluck the bass strings with my thumb and the treble strings with i-m-a fingers.',
-    skillFocus: 'p (thumb) = bass strings (6, 5, 4) · i (index) = G string · m (middle) = B string · a (ring) = high e string · Rest stroke vs. free stroke · Fingernail vs. fingertip · Wrist arched, fingers curved · Anchor or no anchor',
+    skillFocus: 'A relaxed fingerpicking hand position · Thumb on the bass strings, fingers on the treble · Rest stroke vs. free stroke',
     handoutUrl: 'https://docs.google.com/document/d/1mxqrOHsRRRG1smLq2pfi0NplUBCOsflrZ6O13PBo06k/edit',
     comingSoon: false,
 
@@ -217,7 +217,7 @@ SETS.push(
     title: 'Set 2',
     subtitle: 'Basic PIMA pattern · The classic arpeggio · Over a single chord',
     objective: 'I CAN play a basic p-i-m-a-m-i fingerpicking arpeggio pattern cleanly over a single open chord at 70 BPM.',
-    skillFocus: 'The classic 6-note PIMA arpeggio (p-i-m-a-m-i) · 8th-note timing · Even volume across fingers · Free stroke technique · Holding a chord while picking through it',
+    skillFocus: 'Playing a PIMA arpeggio pattern · Keeping even timing and volume · Picking through a held chord',
     handoutUrl: 'https://docs.google.com/document/d/1mxqrOHsRRRG1smLq2pfi0NplUBCOsflrZ6O13PBo06k/edit',
     comingSoon: false,
 
@@ -421,7 +421,7 @@ SETS.push(
     title: 'Set 3',
     subtitle: 'Fingerpick a full progression · Travis picking intro · Performance song',
     objective: 'I CAN fingerpick through a full chord progression in time and perform one fingerpicked song from start to finish.',
-    skillFocus: 'Picking through 4-chord progressions · Travis picking intro (alternating bass thumb) · Smooth chord transitions without breaking the pattern · Choosing a fingerpicked song for performance',
+    skillFocus: 'Fingerpicking through a chord progression · An intro to Travis picking · Performing a fingerpicked song',
     handoutUrl: 'https://docs.google.com/document/d/1mxqrOHsRRRG1smLq2pfi0NplUBCOsflrZ6O13PBo06k/edit',
     comingSoon: false,
 

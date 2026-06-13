@@ -131,17 +131,20 @@ body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
 .obj-sub{font-size:15px;color:var(--text2);line-height:1.6}
 /* Set-header redesign (applied to buildSet + buildComingSoon cards) */
 .obj-card.set-head{border-left:3px solid var(--blue-text);border-top-left-radius:0;border-bottom-left-radius:0}
-.obj-card.set-head .obj-set{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:0;border-bottom:none}
+.obj-card.set-head .obj-set{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;padding-bottom:0;border-bottom:none}
+.obj-card.set-head .obj-topic{margin-bottom:12px}
 .obj-card.set-head .obj-set-tag{display:inline-block;background:var(--blue-bg);color:var(--blue-text);font-size:11px;font-weight:500;letter-spacing:.4px;padding:3px 10px;border-radius:999px;text-transform:uppercase}
 .obj-card.set-head .obj-unit{font-size:12px;color:var(--text3);text-transform:none;letter-spacing:0;margin-bottom:0;line-height:1.3}
 .obj-card.set-head .obj-main{font-size:20px;font-weight:500;line-height:1.4;margin-bottom:0}
 .obj-card.set-head .obj-i-can{color:var(--blue-text)}
 .obj-skill-label{font-size:12px;color:var(--text3);letter-spacing:.4px;text-transform:uppercase;margin-top:16px;margin-bottom:8px}
 .obj-skill-list{list-style:disc;margin:0;padding-left:20px}
-.obj-skill-item{color:var(--text);font-size:13px;line-height:1.6}
+.obj-skill-item{color:var(--text);font-size:15px;line-height:1.6}
 @media (max-width:420px){.obj-card.set-head .obj-main{font-size:18px}}
 .tabs{margin-bottom:16px}
-.tabs-songbar{display:flex;justify-content:flex-end;margin-bottom:10px}
+.tabs-songbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px}
+.print-set-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;font-size:12.5px;font-weight:500;font-family:inherit;line-height:1.2;color:var(--text2);background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;cursor:pointer;transition:background 0.15s,border-color 0.15s,color 0.15s}
+.print-set-btn:hover{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-text)}
 .tabs-songs{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;font-size:12.5px;color:var(--text2);background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;cursor:pointer;font-weight:500;font-family:inherit;line-height:1.2;transition:background 0.15s,border-color 0.15s,color 0.15s}
 .tabs-songs::before{content:'Reference';font-size:10.5px;font-weight:700;letter-spacing:0.08em;color:var(--text3);padding-right:7px;border-right:1px solid var(--border);margin-right:2px;text-transform:uppercase}
 .tabs-songs:hover{background:var(--green-bg);color:var(--green-text);border-color:var(--green-text)}
@@ -543,3 +546,68 @@ body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
 .read-aloud-btn{display:inline-flex;align-items:center;gap:4px;margin-top:8px;padding:3px 10px;font-size:13px;color:var(--text2);background:var(--bg2);border:0.5px solid var(--border);border-radius:12px;cursor:pointer;font-family:inherit;line-height:1.4;vertical-align:middle}
 .read-aloud-btn:hover{background:var(--bg3);color:var(--text)}
 .read-aloud-btn.speaking{background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-text)}
+
+/* ════════════════════════════════════════════════════════════════
+   PRINT / HANDOUT  (Session 4.5)
+   "🖨 Print this set" produces a clean one-pager for days the
+   Chromebooks or Wi-Fi fail. Only the active set prints; both station
+   panels expand regardless of which tab is open; all interactive
+   chrome is hidden. tab: blocks + chords: diagrams keep their SVGs;
+   hints and Stuck?/Level up lines stay.
+   ════════════════════════════════════════════════════════════════ */
+@media print {
+  /* Force light rendering + print background tints (badges, TAB headers). */
+  :root{
+    --bg:#ffffff;--bg2:#f7f6f3;--bg3:#eeecea;
+    --text:#1a1a18;--text2:#555550;--text3:#6b6b65;
+    --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.2);
+    --blue-bg:#e6f1fb;--blue-text:#185fa5;
+    --green-bg:#eaf3de;--green-text:#3b6d11;
+    --amber-bg:#faeeda;--amber-text:#854f0b;
+  }
+  *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
+  @page{size:portrait;margin:14mm}
+  body{background:#fff !important}
+
+  /* Hide all on-screen chrome */
+  .header,.module-select-wrap,.sec-label,.week-pills,
+  .resource-panel,.resize-handle,.iframe-drag-shield,
+  .fab-group,.tabs,.save-ind,.read-aloud-btn,
+  #google_translate_element,.btn-translate,.user-area,
+  .step-done-row,.mr-rec,.mr-locked-banner{display:none !important}
+
+  /* Only the active set prints; expand BOTH stations, drop songs/checklist */
+  .week-panel{display:none !important}
+  .week-panel.active{display:block !important}
+  .tab-panel{display:none !important}
+  .week-panel.active .tab-panel.tp-station-b,
+  .week-panel.active .tab-panel.tp-station-c{display:block !important}
+  .tab-panel.tp-station-c{page-break-before:always}
+
+  /* Reveal collapsed station-C skill sections + their bodies */
+  .sc-sec-body,.sk-helper,.sk-practice-panel{display:block !important}
+  .dp.hidden{display:block !important}
+
+  /* Expand any collapsed step bodies so TAB/chords/hints all show */
+  .step-body{display:block !important}
+  .step-done .st-text{text-decoration:none;color:var(--text);opacity:1}
+
+  /* Drop interactive bits inside steps; keep the static content */
+  .step-resp-input,.step-resp-mc,.play-seq-btn,.bpm-control-group,
+  .tab-controls,.tab-note-btn .tab-spkr,.rp-trigger .tab-spkr{display:none !important}
+  /* Video buttons become plain text labels */
+  .rp-trigger{color:var(--text) !important;border:none !important;background:none !important;padding:0 !important}
+
+  /* Layout: single column, no sticky, allow full height */
+  .app-layout{display:block !important}
+  .main{max-width:100% !important;width:100% !important;flex:none !important;padding:0 !important;overflow:visible !important}
+
+  /* Avoid awkward breaks mid-step / mid-diagram */
+  .step,.tab,.chord-diagrams,.obj-card,.sc-sec{break-inside:avoid;page-break-inside:avoid}
+
+  /* Print-only set title so the handout is labelled */
+  .week-panel.active::before{
+    content:'Guitar Class — Sequoia HS';
+    display:block;font-size:11pt;color:#555;margin-bottom:6px
+  }
+}

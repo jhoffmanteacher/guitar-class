@@ -16,7 +16,7 @@ SETS.push(
     title: 'Set 1',
     subtitle: 'Multi-line TAB · Rhythm in TAB · Riffs that mix notes and chords',
     objective: 'I CAN read multi-line TAB with rhythm symbols and play a real riff that combines single notes and chord stabs.',
-    skillFocus: 'TAB stacked-number reading (chords vs. melody) · Rhythm notation above TAB (whole, half, quarter, eighth) · Slides, hammer-ons, pull-offs in TAB · Reading riffs that mix notes and chords',
+    skillFocus: 'Reading multi-line TAB and rhythm symbols · Playing slides, hammer-ons, and pull-offs · Playing a riff of notes and chords',
     handoutUrl: 'https://docs.google.com/document/d/1w1GM5ZkoFNn0QBGOkstSXGyRZIU8ml2-W9_FtgTkMYg/edit',
     comingSoon: false,
 
@@ -220,7 +220,7 @@ SETS.push(
     title: 'Set 2',
     subtitle: 'E-shape barre chords · F, F#, G barre · Moving the shape up the neck',
     objective: 'I CAN form a clean E-shape barre chord and move it up the neck to play F, F#, G, A, and B major.',
-    skillFocus: 'Index finger barre across all 6 strings · The "E shape" moved up · Thumb position behind the neck · Naming barre chords by the root on string 6 · F major barre · Moving to F#, G, A, B',
+    skillFocus: 'Forming a clean E-shape barre chord · Moving the barre up the neck · Naming barre chords by their root',
     handoutUrl: 'https://docs.google.com/document/d/1w1GM5ZkoFNn0QBGOkstSXGyRZIU8ml2-W9_FtgTkMYg/edit',
     comingSoon: false,
 
@@ -419,7 +419,7 @@ SETS.push(
     title: 'Set 3',
     subtitle: 'A-shape barre chords · Bb, B, C barre · Combining E-shape and A-shape',
     objective: 'I CAN form a clean A-shape barre chord and combine E-shape and A-shape barre chords in a real song.',
-    skillFocus: 'A-shape barre (root on string 5) · Naming barre chords by the root on string 5 · The "ring finger sub-barre" · Bb, B, C major as A-shape · Combining E-shape and A-shape for any chord progression',
+    skillFocus: 'Forming a clean A-shape barre chord · Naming A-shape chords by their root · Combining E-shape and A-shape chords in a song',
     handoutUrl: 'https://docs.google.com/document/d/1w1GM5ZkoFNn0QBGOkstSXGyRZIU8ml2-W9_FtgTkMYg/edit',
     comingSoon: false,
 

@@ -62,6 +62,7 @@ const IS_LOCALHOST = ['localhost','127.0.0.1','[::1]'].includes(location.hostnam
 function devBypass(){
   if(!IS_LOCALHOST){ console.warn('Dev bypass is disabled outside localhost.'); return; }
   currentUser = {uid:'dev-user',displayName:'Dev User',email:'dev@test.local',photoURL:null};
+  restoreLocalPlace();
   showApp(currentUser);
 }
 if(IS_LOCALHOST){
@@ -112,8 +113,27 @@ async function loadProgress(){
       lastSetId     = doc.data().lastSet||null;
       responses     = doc.data().responses || {};
       completed     = doc.data().completed || {};
-    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; }
-  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; }
+    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; restoreLocalPlace(); }
+  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; restoreLocalPlace(); }
+}
+
+/* Last-place persistence (Session 4.4): Firestore is the source of truth, but
+   we also stash the last module/set in localStorage so a returning student
+   lands where they left off instantly — even before Firestore loads, on a
+   flaky connection, or in dev-bypass mode. */
+function restoreLocalPlace(){
+  try{
+    const m = parseInt(localStorage.getItem('gc-lastModule'));
+    const s = localStorage.getItem('gc-lastSet');
+    if(m) lastModuleNum = m;
+    if(s) lastSetId = s;
+  }catch(e){/* localStorage may be unavailable (private mode) — ignore */}
+}
+function saveLocalPlace(){
+  try{
+    localStorage.setItem('gc-lastModule', String(lastModuleNum||1));
+    if(lastSetId) localStorage.setItem('gc-lastSet', lastSetId);
+  }catch(e){/* ignore */}
 }
 
 function onResponseChange(key, value){
@@ -158,6 +178,7 @@ function saveCompleted(){
 
 function saveProgress(){
   if(!currentUser) return;
+  saveLocalPlace();
   clearTimeout(saveTimer);
   setSaveMsg('Saving…');
   saveTimer = setTimeout(async()=>{
@@ -1100,19 +1121,20 @@ function buildComingSoon(w){
 }
 
 function buildSet(w){
-  const header = buildSetHeader(w);
-  const objHtml = (w.objective||'').replace(/^(I\s+CAN)(:?)\s+/i, '<span class="obj-i-can">$1$2</span> ');
+  // Small "Set N" pill, then the topic as the large title, then generalized
+  // skill bullets (the old "I CAN…" objective line is no longer shown).
+  const pill = w.title ? `<div class="obj-set"><span class="obj-set-tag">${w.title}</span></div>` : '';
+  const titleHtml = w.unit ? `<div class="obj-main obj-topic">${w.unit}</div>` : '';
   const items = (w.skillFocus||'').split(' · ')
     .map(s => s.trim())
     .filter(Boolean)
     .map(s => `<li class="obj-skill-item">${s}</li>`)
     .join('');
-  const skills = items
-    ? `<div class="obj-skill-label">Skill focus</div><ul class="obj-skill-list">${items}</ul>`
-    : '';
-  return `<div class="obj-card set-head">${header}<div class="obj-main">${objHtml}</div>${skills}</div>
+  const skills = items ? `<ul class="obj-skill-list">${items}</ul>` : '';
+  return `<div class="obj-card set-head">${pill}${titleHtml}${skills}</div>
   <div class="tabs">
     <div class="tabs-songbar">
+      <button type="button" class="print-set-btn" onclick="printSet('${w.id}')" title="Print this set as a one-page handout">&#x1F5A8; Print this set</button>
       <button type="button" class="tabs-songs tab-songs" onclick="switchTab(this,'${w.id}','songs')">&#9835; Songs</button>
     </div>
     <div class="tabs-main">
@@ -1133,10 +1155,10 @@ function buildSet(w){
       </button>
     </div>
   </div>
-  <div id="${w.id}-station-b" class="tab-panel active">${buildStations(w,'b')}</div>
-  <div id="${w.id}-station-c" class="tab-panel">${buildStations(w,'c')}</div>
-  <div id="${w.id}-songs"    class="tab-panel">${buildSongs(w)}</div>
-  <div id="${w.id}-checklist" class="tab-panel">${buildChecklist(w)}</div>`;
+  <div id="${w.id}-station-b" class="tab-panel tp-station-b active">${buildStations(w,'b')}</div>
+  <div id="${w.id}-station-c" class="tab-panel tp-station-c">${buildStations(w,'c')}</div>
+  <div id="${w.id}-songs"    class="tab-panel tp-songs">${buildSongs(w)}</div>
+  <div id="${w.id}-checklist" class="tab-panel tp-checklist">${buildChecklist(w)}</div>`;
 }
 
 function switchTab(el,wid,tab){
@@ -1146,6 +1168,12 @@ function switchTab(el,wid,tab){
   el.classList.add('active');
   document.getElementById(`${wid}-${tab}`).classList.add('active');
 }
+
+/* Print one set as a clean one-pager (for days the Chromebooks/Wi-Fi fail).
+   The @media print stylesheet does the heavy lifting — it force-shows BOTH
+   station panels (regardless of which tab is open) and hides the songs/
+   checklist tabs and all on-screen chrome — so this just fires the dialog. */
+function printSet(wid){ window.print(); }
 
 /* ── Stations ── */
 function buildStations(w, stationId){
@@ -2418,4 +2446,33 @@ function clearPanel(){
 
   positionFabs();
   window.addEventListener('resize', positionFabs);
+
+  /* ── Resize handle: keyboard support (a11y) ──
+     The handle is a focusable separator; ←/→ nudge the panel width,
+     Home/End jump to the min/max so it's usable without a mouse. */
+  handle.setAttribute('role', 'separator');
+  handle.setAttribute('aria-orientation', 'vertical');
+  handle.setAttribute('aria-label', 'Resize the resources panel');
+  handle.setAttribute('tabindex', '0');
+  handle.addEventListener('keydown', e => {
+    const cur = panel.offsetWidth, max = window.innerWidth * 0.6, step = 24;
+    let next = null;
+    if (e.key === 'ArrowLeft')      next = Math.min(cur + step, max); // widen panel (handle moves left)
+    else if (e.key === 'ArrowRight') next = Math.max(cur - step, 180);
+    else if (e.key === 'Home')       next = max;
+    else if (e.key === 'End')        next = 180;
+    if (next !== null) { e.preventDefault(); panel.style.width = next + 'px'; positionFabs(); }
+  });
 })();
+
+/* ════════════════════════════════════════════════
+   Service worker — light PWA / offline resilience.
+   Registers on any http(s) origin (incl. Live Server's
+   http://localhost and the live GitHub Pages site); skipped
+   when the file is opened directly via file://. See sw.js + CLAUDE.md.
+   ════════════════════════════════════════════════ */
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {/* offline support is best-effort */});
+  });
+}

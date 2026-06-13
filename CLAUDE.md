@@ -7,8 +7,16 @@ Jonathan Rosario is new to Claude Code and git. He prefers plain-English instruc
 | Jonathan says | Claude does |
 |---|---|
 | "Let's test these changes locally" | Start Live Server (VS Code extension, right-click index.html → Open with Live Server) |
-| "Push to GitHub" | git add relevant files, git commit with a clear message, git push, confirm success |
-| "Save progress with a note: [message]" | Commit with that message and push |
+| "Push to GitHub" | **First bump the service-worker cache version** (see below), then git add relevant files, git commit with a clear message, git push, confirm success |
+| "Save progress with a note: [message]" | Bump the SW cache version, commit with that message, push |
+
+### ⚠️ Bump the service-worker version on EVERY push
+The site is a light PWA: `sw.js` caches the static shell so it loads offline.
+Before any push that changes `index.html`, `styles.css`, `app.js`,
+`config-main.js`, or a `module-N.js`, update `CACHE_VERSION` in `sw.js`
+(e.g. bump `-v1-` → `-v2-` and/or the date). If you skip this, returning
+students may keep getting the OLD cached site. Doc-only changes (`*.md`) don't
+need a bump.
 
 ## Project: what this is
 Plain static HTML/JS/CSS site — no build step, no Jekyll, no Node framework. Content lives in `index.html` and per-module JS files (`module-1.js` through `module-8.js`, `config-main.js`). Uses Firebase for auth and Firestore for student progress. Deployed by pushing to GitHub.

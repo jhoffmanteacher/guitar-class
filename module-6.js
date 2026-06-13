@@ -16,7 +16,7 @@ SETS.push(
     title: 'Set 1',
     subtitle: 'The down-up foundation · 8th-note pulse · Counting "1 + 2 + 3 + 4 +"',
     objective: 'I CAN play a steady down-up 8th-note strum pattern over open chords at 70+ BPM without losing the beat.',
-    skillFocus: 'Wrist as pendulum · Down on the number, up on the "and" · Counting 8th notes aloud · Keeping the strum moving even through chord changes · Strum-hand independence',
+    skillFocus: 'Keeping a steady down-up strum · Counting 8th notes · Strumming through chord changes',
     handoutUrl: 'https://docs.google.com/document/d/1mBqrpsG2rkiVPWrF-zo0fxlgA1YQN33GyxmgsXqCY0g/edit',
     comingSoon: false,
 
@@ -171,7 +171,7 @@ SETS.push(
     title: 'Set 2',
     subtitle: 'The "D-DU-UDU" pattern · Rests and accents · Adding groove',
     objective: 'I CAN play the classic D-DU-UDU strum pattern at 70+ BPM and apply it to a real song with chord changes.',
-    skillFocus: 'Skipping strums (rests) while keeping wrist motion · Accent on beats 2 and 4 · The "missing" downstroke · D-DU-UDU pattern · Reading strum-pattern notation (D/U arrows)',
+    skillFocus: 'Playing the D-DU-UDU strum pattern · Adding accents and rests · Reading strum-pattern notation',
     handoutUrl: 'https://docs.google.com/document/d/1mBqrpsG2rkiVPWrF-zo0fxlgA1YQN33GyxmgsXqCY0g/edit',
     comingSoon: false,
 
@@ -313,7 +313,7 @@ SETS.push(
     title: 'Set 3',
     subtitle: 'Multiple strum patterns · Folk, rock, reggae styles · Choosing the right groove',
     objective: 'I CAN play 2+ different strum patterns over the same chord progression and choose a pattern that fits a song\'s style.',
-    skillFocus: 'Folk strum (gentle, even) · Rock strum (heavier downstrokes) · Reggae strum (upstrokes on the "and") · Matching pattern to song style · Switching patterns mid-song',
+    skillFocus: 'Playing different strum styles · Matching a pattern to the song · Switching patterns mid-song',
     handoutUrl: 'https://docs.google.com/document/d/1mBqrpsG2rkiVPWrF-zo0fxlgA1YQN33GyxmgsXqCY0g/edit',
     comingSoon: false,
 
