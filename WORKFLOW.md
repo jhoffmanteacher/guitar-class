@@ -355,19 +355,8 @@ value is stored, so PR shows the latest number (no fake trend). Verified locally
 regression, and non-teacher denial all pass. **Files:** `index.html`, `app.js`,
 `styles.css`.
 
-### [ ] Session 6.3 — 🎸 Song Journey view
-The course's best idea — one song growing across modules — is invisible to students.
-Add a "Song Journey" tab/page per core thread song (e.g. Seven Nation Army: M1 riff →
-M3 power chords → M4 pentatonic solo → M5 strummed version) showing each stage as a
-card with the student's existing done-checkmarks pulled from `progress`.
-- Data: a small `SONG_JOURNEYS` array in `config-main.js` — song → ordered list of
-  `{moduleNum, setId, skillIds, label}`. Claude Code proposes the journey maps from
-  the actual module content first; Jonathan approves before any UI work.
-- Render read-only — checkmarks still live in the modules; each stage card links to
-  its module/set so students can jump there.
-- Depends on Phase 3 being complete: skill ids and song threads must be stable, or
-  the maps go stale immediately.
-**Files:** `config-main.js`, `app.js`, `styles.css`.
+### ~~Session 6.3 — 🎸 Song Journey view~~ (dropped)
+~~Song Journey view~~ — cut 2026-06-13 before any work; not wanted. Do not build.
 
 ---
 
