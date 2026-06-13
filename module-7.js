@@ -24,9 +24,10 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/4-JTCASlh-w" target="_blank">How To Read TAB and Chord Boxes (BC-108) – JustinGuitar</a> (full video).',
-            hint: 'You\'ve been reading single-note TAB since Module 1. This time, pay attention to when numbers are STACKED vertically — that means play them at the same time (a chord).',
-            skills: [1, 2],
+            text: 'Watch: <a href="https://youtu.be/4-JTCASlh-w" target="_blank">How To Read TAB and Chord Boxes (BC-108) – JustinGuitar</a> (0:00–4:00).',
+            time: '4 min',
+            hint: 'You\'ve read single-note TAB since Module 1. Watch for two things now: numbers STACKED vertically mean play them together (a chord), and the rhythm symbols above the numbers — plain stems for quarter notes, flags/beams for 8ths — tell you how long each note lasts.',
+            skills: [1, 2, 3],
             response: { type: 'mc', prompt: 'When two or more numbers in a TAB line up VERTICALLY on top of each other, you should:', choices: [
               'Play them at the same time (as a chord)',
               'Play them one after another, lowest first',
@@ -35,13 +36,8 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/yDRMxDkSQ34" target="_blank">How to Read Guitar TAB: A Complete Beginner\'s Guide</a> (full video).',
-            hint: 'TAB often has rhythm symbols above each note: stems mean quarter notes, flagged/beamed stems mean 8ths and 16ths, hollow notes mean half/whole notes. Pause and copy the examples shown.',
-            skills: [2, 3],
-            response: { type: 'short', placeholder: 'In your own words, how do you tell a quarter note from an eighth note in TAB?' }
-          },
-          {
-            text: 'Watch: <a href="https://youtu.be/tCQ0r7vqkFQ" target="_blank">Smoke On The Water Guitar Lesson – Marty Music</a> (full video). This is the riff you\'ll learn in the Practice station.',
+            text: 'Watch: <a href="https://youtu.be/tCQ0r7vqkFQ" target="_blank">Smoke On The Water Guitar Lesson – Marty Music</a> (0:00–4:00). This is the riff you\'ll learn in the Practice station.',
+            time: '4 min',
             hint: 'Notice that the riff uses 2-note "power chord" intervals played together — perfect example of stacked TAB numbers.',
             skills: [4, 5],
             response: { type: 'mc', prompt: 'The "Smoke on the Water" main riff uses which two strings most?', choices: [
@@ -50,6 +46,11 @@ SETS.push(
               'Strings 5 and 4 (A and D)',
               'Strings 3 and 2 (G and B)'
             ] }
+          },
+          {
+            text: 'Station Wrap-Up — take a beat to reflect: TAB packs a lot into one line (which string, which fret, chord-or-melody, how long the note lasts). Which part still slows you down most when you sight-read a new riff?',
+            time: '1 min',
+            response: { type: 'short', placeholder: 'e.g. the rhythm symbols — I can find the notes but not the timing' }
           }
         ]
       },
@@ -61,6 +62,7 @@ SETS.push(
             steps: [
               {
                 text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open and at the 1st–3rd fret, listening for buzz. Win: in tune, and every note clean before today\'s work.',
+                time: '2 min',
                 hint: 'Tuning (Module 1) and clean notes (Module 2) are skills you keep forever. Reading TAB today is faster when you also name the notes you land on — that\'s your Module 2 fretboard map.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
@@ -71,8 +73,12 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 1 — Smoke on the Water: play the main riff with index + ring locked as a unit on the A + D strings — 0/0 — 3/3 — 5/5 — 0/0 — 3/3 — 6/6 — 5/5. Win: both notes ring at the same volume, clean through the whole riff. Use the TAB below.',
+            time: '4 min',
             hint: 'Use your index and ring finger together — keep them locked in shape and slide as a unit. Both notes should ring at the same volume.',
+            stuck: 'Lock the two fingers into one shape and move them as a block — don\'t re-place them each time. Get the 0/0 → 3/3 slide clean before adding the rest.',
+            levelUp: 'Play it at 90 BPM, or tack on the high-octave answer phrase that closes the full riff.',
             skills: [1, 4, 5],
+            response: { type: 'short', prompt: 'Personal record — win at 70 BPM, then +10 at a time. Your fastest CLEAN "Smoke" lap today (BPM)?', placeholder: 'e.g. 100 — beat it next class' },
             tab: {
               caption: '"Smoke on the Water" — main riff · A + D strings together',
               notes: [
@@ -100,7 +106,10 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 2 — Crazy Train: play the intro riff on the E and A strings with alternate picking, watching the 8th vs. quarter notes in the TAB. Win: clean and even at 60 BPM before you speed it up.',
-            hint: 'Use alternate picking (down-up-down-up). The riff is fast — start at 60 BPM and only speed up when it\'s clean.',
+            time: '4 min',
+            hint: 'Use alternate picking (down-up-down-up). The riff is fast — start at 60 BPM and only speed up when it\'s clean. Set the ⏱ Timer for 2 minutes and loop it.',
+            stuck: 'Drop to 50 BPM and keep strict down-up-down-up picking — even and slow beats fast and sloppy. Loop just the first 4 notes until they\'re automatic.',
+            levelUp: 'Push to 80 BPM, or play it twice through with no stumble.',
             skills: [2, 3, 5],
             tab: {
               caption: '"Crazy Train" — intro riff · low E and A strings',
@@ -123,9 +132,20 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 3 — Find a Riff (give it a go!): pick "Iron Man" or "Sunshine of Your Love", find a TAB online, and play through it once. No score — see which rhythm symbols you can spot above the numbers.',
+            time: '3 min',
             hint: 'Most beginner TAB sites (Songsterr, Ultimate Guitar) show the rhythm. Look for the stem marks above each number.',
             skills: [3, 6]
           }
+            ]
+          },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
+              {
+                text: 'Which riff move tripped your fingers most today — a stretch, a string change, or the picking hand? Name it; that\'s your first loop next class.',
+                time: '1 min',
+                response: { type: 'short', placeholder: 'e.g. the string jump from A to E in Crazy Train' }
+              }
             ]
           }
         ]
@@ -208,8 +228,9 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/4cR1sa1_d_8" target="_blank">The Easiest F Chord Guitar Lesson You\'ll Find – JustinGuitar</a> (full video).',
-            hint: 'The F barre chord is famously hard. Pay attention to his THUMB — it should be on the BACK of the neck, not poking over the top. That\'s where the squeezing power comes from.',
+            text: 'Watch: <a href="https://youtu.be/4cR1sa1_d_8" target="_blank">The Easiest F Chord Guitar Lesson You\'ll Find – JustinGuitar</a> (0:00–4:00).',
+            time: '4 min',
+            hint: 'The F barre is famously hard — it\'s the LOWEST barre, where the strings are tightest, so it\'s the toughest spot (G and A higher up are easier). Watch his THUMB: on the BACK of the neck behind your index is where the squeezing power comes from.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'For the cleanest E-shape barre, where should your THUMB go?', choices: [
               'Wrapped over the top of the neck',
@@ -219,21 +240,16 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/74pHRVA39Q4" target="_blank">Marty Schwartz Teaches Barre Chord Tricks For Beginners</a> (full video).',
+            text: 'Watch: <a href="https://youtu.be/74pHRVA39Q4" target="_blank">Marty Schwartz Teaches Barre Chord Tricks For Beginners</a> (0:00–4:00).',
+            time: '4 min',
             hint: 'The "E shape" is literally the E major open chord, but you slide your fingers up the neck and use your INDEX finger to "be the nut" (the bar).',
             skills: [2, 3],
             response: { type: 'short', placeholder: 'Why is it called an "E-shape" barre chord? What does the shape have in common with the open E major chord?' }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/rrB97F0Qu6g" target="_blank">How to Actually Get Good at Guitar – Simen Otnes</a> (0:00–5:00).',
-            hint: 'F is hard because it\'s the LOWEST barre chord — the strings are tightest there. Higher up the neck (G, A, B) is actually easier. Apply Simen\'s "deliberate practice" idea: focus on the hardest 4 bars, not the whole song.',
-            skills: [3, 4],
-            response: { type: 'mc', prompt: 'Where on the neck is the E-shape barre chord USUALLY the hardest to play cleanly?', choices: [
-              'High up the neck (e.g., 12th fret)',
-              'In the middle (5th–7th fret)',
-              'The 1st fret (F) — strings are tightest there',
-              'It is equally hard everywhere'
-            ] }
+            text: 'Station Wrap-Up — barre chords are a strength skill that takes weeks, not minutes. What is one small thing that improved today, even if the whole chord isn\'t ringing yet?',
+            time: '1 min',
+            response: { type: 'short', placeholder: 'e.g. the low strings ring now — just the B string left to fix' }
           }
         ]
       },
@@ -245,7 +261,10 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 1 — Just the Bar: lay your index finger flat across all 6 strings at the 5th fret — bar only, no other fingers — and strum. Win: all 6 strings ring, rolling the index slightly onto its bonier edge.',
-            hint: 'Roll your index finger slightly toward its outer edge — that side is bonier and gives a cleaner bar. If some strings buzz, press harder with your thumb on the back.',
+            time: '3 min',
+            hint: 'Roll your index finger slightly toward its outer edge — that side is bonier and gives a cleaner bar. The power comes from the thumb on the back of the neck, not from squeezing the whole hand.',
+            stuck: 'Line the bar up right behind the fret. If the B string buzzes, it\'s usually sitting in a knuckle crease — shift the finger a hair up or down. Get just the top 3 strings ringing first, then chase the rest.',
+            levelUp: 'Bar at the 1st fret (the hardest spot) and get all 6 ringing, or bar and slide cleanly up to the 7th fret and back.',
             skills: [1, 2],
             chords: [
               { name: '', chord: [[6,5,'1'],[5,5,'1'],[4,5,'1'],[3,5,'1'],[2,5,'1'],[1,5,'1']], position: 5 }
@@ -258,7 +277,10 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 2 — E-Shape Barre: add the E-shape on top of the bar at the 5th fret for A major (ring str 5/fret 7, pinky str 4/fret 7, middle str 3/fret 6) and strum all 6. Win: a full, clean A major barre — master it here before tackling F.',
-            hint: 'It\'s the open E major shape moved up — index finger replaces the "nut". Practice this at the 5th fret BEFORE attempting F at fret 1.',
+            time: '4 min',
+            hint: 'It\'s the open E major shape moved up — index finger replaces the "nut". Practice this at the 5th fret BEFORE attempting F at fret 1. If your hand cramps, that\'s normal — shake it out and come back.',
+            stuck: 'Stage it: (1) get the bar across fret 5 clean, (2) add ring + pinky on strings 5–4, (3) add the middle on string 3 last — pluck each string to find the muffled one before moving on. Short tries beat one long grind.',
+            levelUp: 'Slide the whole shape up to the 7th fret (B major) and keep every string ringing.',
             skills: [2, 3, 4],
             chords: [
               { name: 'A major', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,6,'2'],[2,5,'1'],[1,5,'1']], position: 5 }
@@ -271,7 +293,10 @@ SETS.push(
             steps: [
           {
             text: 'Challenge — Spot the Power Chord: form your F major barre, then look at just strings 6 and 5 — low E (fret 1) + A (fret 3). That is exactly the F5 power chord you learned in Module 3. The barre just stacks the rest of the chord on top. Win: play F5 alone, then add the barre fingers to make full F — and hear the power chord living inside it.',
+            time: '3 min',
             hint: 'Barre chords feel less scary once you see them as a power chord you already know, plus a few extra notes. And just like a power chord, you name the barre by its root on string 6 — that\'s your Module 2 + Module 3 skills combining.',
+            stuck: 'If full F won\'t ring yet, fall back to just the F5 power chord (strings 6–5) and add one string at a time upward — the full bar comes last.',
+            levelUp: 'Do the same reveal at G (fret 3): play G5, then stack the full G barre on top and hear the power chord inside it.',
             skills: [3, 4],
             chords: [
               { name: 'F5', chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 0 },
@@ -284,8 +309,11 @@ SETS.push(
             title: 'Slide the E-shape: F, G, A',
             steps: [
           {
-            text: 'Challenge 3 — F, G, A Slide: slide the same shape to fret 1 (F), fret 3 (G), and fret 5 (A) — same shape, three chords. Win: G and A ringing clean, then F — the hardest — without buzzing.',
-            hint: 'F is the hardest position — don\'t panic if it buzzes. Get G and A clean first, then come back to F. The shape is the same.',
+            text: 'Challenge 3 — F, G, A Slide (your assessment piece): slide the same shape to fret 1 (F), fret 3 (G), and fret 5 (A) — same shape, three chords. Win: G and A ringing clean, then F — the hardest — without buzzing.',
+            time: '5 min',
+            hint: 'F is the hardest position — don\'t panic if it buzzes. Barre chords are a hand-strength skill: if your hand cramps, shake it out and rest — short, frequent tries beat one long painful grind, and the strength comes within a couple of weeks.',
+            stuck: 'Build the barre in stages: (1) bar + just the low-E root, (2) add strings 5–4, (3) add the B and high E last — win each stage before stacking the next. Start at G or A (frets 3–5) where the strings are looser, then bring the shape down to F.',
+            levelUp: 'Add B at the 7th fret as a 4th chord, or switch F→G→A in time at 70 BPM.',
             skills: [4, 5, 6],
             chords: [
               { name: 'F major', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
@@ -293,6 +321,30 @@ SETS.push(
               { name: 'A major', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,6,'2'],[2,5,'1'],[1,5,'1']], position: 5 }
             ]
           }
+            ]
+          },
+          {
+            title: 'One-Minute Barre Changes — beat your record',
+            steps: [
+              {
+                text: 'Challenge 4 — One-Minute Barre Changes (F ↔ G): set the ⏱ Timer for 60 seconds and slide your E-shape barre between F (fret 1) and G (fret 3) as many times as you can — only changes where all 6 strings ring count. Win: type your count below and beat it next class. (Even 6–8 clean ones is a real win for barres.)',
+                time: '3 min',
+                hint: 'It\'s the same shape sliding two frets — keep the bar pressed and glide, don\'t lift and re-place. Quality over speed.',
+                stuck: 'Keep the bar lightly down the whole time so you never fully reset the shape — just shift two frets. Slow down until both chords ring.',
+                levelUp: 'Add A (fret 5) and cycle F→G→A, or run it with a down-up strum.',
+                skills: [4, 6],
+                response: { type: 'short', prompt: 'Personal record — clean F↔G barre changes in 60 seconds. Your count today?', placeholder: 'e.g. 8 — beat it next class' }
+              }
+            ]
+          },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
+              {
+                text: 'Which string in your barre is most likely to buzz right now — the B string, the high E, or the G? Name it; isolating that one string is your first job next class.',
+                time: '1 min',
+                response: { type: 'short', placeholder: 'e.g. the B string — it sits in my finger crease' }
+              }
             ]
           }
         ]
@@ -375,7 +427,8 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/C7k0CWgI-xI" target="_blank">A Shape Major Barre Chords on Guitar – JustinGuitar</a> (full video).',
+            text: 'Watch: <a href="https://youtu.be/C7k0CWgI-xI" target="_blank">A Shape Major Barre Chords on Guitar – JustinGuitar</a> (0:00–4:00).',
+            time: '4 min',
             hint: 'The A-shape uses the open A major chord, moved up the neck. Some players bar strings 2, 3, 4 with their RING finger only — it\'s a different technique from the E-shape.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'The A-shape barre chord places its ROOT note on which string?', choices: [
@@ -386,21 +439,16 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/74pHRVA39Q4" target="_blank">Marty Schwartz Teaches Barre Chord Tricks For Beginners</a> (full video — rewatch with A-shape focus).',
+            text: 'Watch: <a href="https://youtu.be/74pHRVA39Q4" target="_blank">Marty Schwartz Teaches Barre Chord Tricks For Beginners</a> (0:00–4:00 — rewatch with A-shape focus).',
+            time: '4 min',
             hint: 'B major is a great A-shape practice chord — it lives at the 2nd fret with the root on string 5. Listen for the muted high E (string 1) — that\'s normal for an A-shape barre.',
             skills: [3, 4],
             response: { type: 'short', placeholder: 'When you play an A-shape barre, what should happen to string 1 (the high e)? Is it played or muted? Why?' }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/4cR1sa1_d_8" target="_blank">The Easiest F Chord Guitar Lesson – JustinGuitar</a> (rewatch with new ears).',
-            hint: 'The big payoff: knowing both shapes means you can play ANY major chord in TWO places on the neck. F as E-shape (1st fret) or F as A-shape (8th fret). Same chord, different sound.',
-            skills: [5, 6],
-            response: { type: 'mc', prompt: 'If you know the E-shape barre AND the A-shape barre, how many ways can you play F major somewhere on the neck?', choices: [
-              'Only one',
-              'At least two (string 6 root and string 5 root)',
-              'Only the open shape',
-              'It depends on the song'
-            ] }
+            text: 'Station Wrap-Up — you now know both barre shapes. Which feels harder right now — the E-shape (root on string 6) or the A-shape (root on string 5) — and what makes it tougher for your hand?',
+            time: '1 min',
+            response: { type: 'short', placeholder: 'e.g. the A-shape — barring 4-3-2 with my ring finger is awkward' }
           }
         ]
       },
@@ -412,7 +460,10 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 1 — A-Shape B Major: index bars all 6 strings at fret 2, fingers on strings 4/3/2 at fret 4, strum strings 5–1 (let the index mute string 6). Win: a clean B major with the string-5 bass ringing and no low E.',
+            time: '4 min',
             hint: 'Avoid the low E string (string 6) — your index finger mutes it for you. Aim your strum from string 5 downward.',
+            stuck: 'Stage it: (1) bar fret 2 and get strings 5 and 1 ringing, (2) add the ring-finger sub-barre on strings 4-3-2 at fret 4 last. The ring finger is the tricky part — arch it so the high E still rings. Cramping is normal; shake it out.',
+            levelUp: 'Slide the whole A-shape up to C (3rd fret) and keep it clean.',
             skills: [1, 2, 3],
             chords: [
               { name: 'B major', chord: [[6,'x'],[5,2,'1'],[4,4,'3'],[3,4,'3'],[2,4,'3'],[1,2,'1']], position: 2 }
@@ -425,7 +476,10 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 2 — A-Shape Slide: slide the A-shape to C (3rd fret), D (5th fret), and E (7th fret), strumming strings 5–1 only. Win: name each by its string-5 root and play all three clean.',
+            time: '4 min',
             hint: 'The A-shape is named by the root note on string 5. Apply your Module 2 A-string note knowledge: fret 3 of A = C, fret 5 of A = D, fret 7 of A = E.',
+            stuck: 'Higher frets (D, E) are easier — the strings are looser, so win those first, then bring the shape down to C. Keep the bar pressed and slide rather than lifting between chords.',
+            levelUp: 'Run C→D→E in time at 70 BPM, or add F at the 8th fret.',
             skills: [3, 4],
             chords: [
               { name: 'C', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,5,'3'],[2,5,'3'],[1,3,'1']], position: 3 },
@@ -436,12 +490,33 @@ SETS.push(
             ]
           },
           {
+            title: 'Every chord has two homes (E-shape ↔ A-shape)',
+            steps: [
+          {
+            text: 'Challenge 3 — Two Homes for F: play F as an E-shape barre (index on string 6, fret 1), then play the SAME chord as an A-shape barre (index on string 5, fret 8). Same note name, two places on the neck. Pluck both and listen — same chord, slightly different colour. Win: find and play both Fs, and say WHY they are both F (read the root: low E + 1 fret = F; A string + 8 frets = F).',
+            time: '4 min',
+            hint: 'This is your Module 2 fretboard map paying off: the root note names the chord, so wherever an F lives on string 6 or string 5, an F barre lives there too. Knowing both homes means you are never far from any chord.',
+            stuck: 'Find the root note first, then build the shape around it. Low E + 1 fret = F (E-shape home); A string + 8 frets = F (A-shape home). The shape follows the root.',
+            levelUp: 'Find both homes for G (E-shape fret 3, A-shape fret 10) and for C (A-shape fret 3, E-shape fret 8).',
+            skills: [5, 6],
+            chords: [
+              { name: 'F (E-shape)', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
+              { name: 'F (A-shape)', chord: [[6,'x'],[5,8,'1'],[4,10,'3'],[3,10,'3'],[2,10,'3'],[1,8,'1']], position: 8 }
+            ]
+          }
+            ]
+          },
+          {
             title: 'Combine E-shape & A-shape barres',
             steps: [
           {
-            text: 'Challenge 3 — Shape Combo: alternate E-shape and A-shape — F (E, 1st), C (A, 3rd), G (E, 3rd), D (A, 5th), 2 bars each at 60 BPM. Win: smooth switches between the two shapes, landing each change on beat 1.',
+            text: 'Challenge 4 — Shape Combo (your assessment piece): alternate E-shape and A-shape — F (E, 1st), C (A, 3rd), G (E, 3rd), D (A, 5th), 2 bars each at 60 BPM. Win: smooth switches between the two shapes, landing each change on beat 1.',
+            time: '5 min',
             hint: 'You\'re alternating between E-shape and A-shape with each chord change. This is what real songs ask for. Notice that some chord changes are tiny hand moves — barely shift positions.',
+            stuck: 'Drill one pair at a time — F→C, then G→D — before running all four. Some moves are tiny (G E-shape fret 3 → D A-shape fret 5 is a short hop). Drop to 50 BPM if the changes fall apart.',
+            levelUp: 'Run it with the D-DU-UDU strum, or push to 75 BPM.',
             skills: [5, 6],
+            response: { type: 'short', prompt: 'Personal record — win the F–C–G–D switch at 60 BPM, then +5 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 70 — beat it next class' },
             chords: [
               { name: 'F', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
               { name: 'C', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,5,'3'],[2,5,'3'],[1,3,'1']], position: 3 },
@@ -456,7 +531,10 @@ SETS.push(
             steps: [
           {
             text: 'Challenge — Groove the Barres: take a barre progression (F–C–G–D, or Am–G–F as barres) and play it with the D-DU-UDU pattern from Module 6 instead of one strum per bar. Win: the strum pattern stays steady and even while you switch barre shapes — the groove doesn\'t break at the chord change.',
+            time: '4 min',
             hint: 'You spent Module 6 making that strum automatic — now layer it onto the harder barre chords. If the pattern falls apart at a change, slow the metronome until barre + strum hold together.',
+            stuck: 'Strip it back: play the progression as one strum per bar until the changes are clean, THEN layer the D-DU-UDU pattern on top. Add the rhythm only once the chords land.',
+            levelUp: 'Push the tempo, or accent beats 2 and 4 for a backbeat feel.',
             skills: [5, 6]
           }
             ]
@@ -470,6 +548,16 @@ SETS.push(
             hint: 'Heads up: the lesson teaches it in E♭ tuning (a half-step down), so on your standard-tuned guitar it will sound a half-step higher than the video — that\'s part of the challenge, not a mistake. The frets and finger shapes are exactly the same. Loop just the first bar until it\'s clean before adding more.',
             skills: [3, 6]
           }
+            ]
+          },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
+              {
+                text: 'You\'ve reached the hardest hands-on skill in the course — give yourself credit for that. Which barre (E-shape or A-shape, and at which chord) most needs another week of short daily tries? Write it; that\'s your standing warm-up from here.',
+                time: '1 min',
+                response: { type: 'short', placeholder: 'e.g. the F barre at fret 1 — a few clean tries every day' }
+              }
             ]
           }
         ]
@@ -544,9 +632,18 @@ MODULE_REVIEWS[7] = {
   moduleNum: 7,
   module: 'TAB Notation and Barre Chords',
   skills: [
-    { id: 'mr7-s1', text: 'I can read multi-line TAB with rhythm notation' },
-    { id: 'mr7-s2', text: 'I can form a clean E-shape barre chord' },
-    { id: 'mr7-s3', text: 'I can form a clean A-shape barre chord' }
+    { id: 'mr7-s1', text: 'I can read multi-line TAB — stacked numbers as chords, plus the rhythm symbols (quarter, 8th, half) above the notes' },
+    { id: 'mr7-s2', text: 'I can recognise hammer-on (h), pull-off (p), and slide (/ \\) markings in TAB and play them' },
+    { id: 'mr7-s3', text: 'I can bar all 6 strings with my index finger so every string rings' },
+    { id: 'mr7-s4', text: 'I can form an E-shape barre and play F, G, and A cleanly, naming each by its root on string 6' },
+    { id: 'mr7-s5', text: 'I can form an A-shape barre and play B, C, and D cleanly, naming each by its root on string 5' },
+    { id: 'mr7-s6', text: 'I can find both "homes" for a chord — its E-shape (string-6 root) and A-shape (string-5 root) — and switch between the two shapes in a progression' },
+    { id: 'mr7-s7', text: 'I can play a full song using only barre chords' }
   ],
+  assessItems: [
+    'Play F barre → slide to G → slide to A, one clean strum each (E-shape, root on string 6)',
+    'Play a 4-chord progression mixing E-shape and A-shape barres (e.g. F–C–G–D), 2 bars each, at 60 BPM'
+  ],
+  forward: 'Module 8 hands the spotlight to your <strong>picking hand</strong>. Every barre and open shape you can now hold becomes a chord frame that fingerpicking decorates one string at a time — the fretting work you just did is exactly what makes those patterns sound full.',
   standards: ['Pr.4a', 'Pr.5a', 'Re.7a']
 };
