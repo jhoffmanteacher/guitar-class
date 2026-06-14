@@ -39,12 +39,11 @@
 This is the at-a-glance list; full detail is in the numbered sessions below.
 
 **🔨 Build work (actual remaining coding):**
-- **3.8 — Module 1 "keep its warmth"** — smallest & self-contained: soft `Win:` lines,
-  guitar-care step, headphones norm, confirm Set 2 melody TAB. *Ready to start.*
 - **3.5 — Module 6 strumming REDESIGN** *(needs Jonathan's scope decision first)* —
   advanced strumming, anchor songs, optional `strumPattern:` SVG renderer.
 - **3.9 — Cross-module sweep** — factual-MC answer keys, distractor pass, song
   difficulty dots + 🎤 request slot, style Stuck?/Level up lines, voice sweep.
+- *(3.8 Module 1 — ✅ done 2026-06-14.)*
 
 **✅ Built — awaiting Jonathan's real-world sign-off (no coding left):**
 - **4.4** touch-resize on a real Chromebook · **4.5** print one set & eyeball it ·
@@ -234,12 +233,17 @@ response so it reaches Firestore/dashboard).
 track — write them so "over the looper" can replace "over a teacher-played chord."*
 **Files:** `module-4.js`.
 
-### [ ] Session 3.8 — Module 1 (keep its warmth)
-Light-touch standard scope. Specifics: add soft Win: lines (the only module with
-none); confirm the Set 2 first-melody TAB renders with `playSeq`; add a 30-second
-guitar-care/handling step (sets week-1 classroom norms); add a headphones/volume norm
-line at the computer station (this is where students learn the routine).
-**Files:** `module-1.js`.
+### [x] Session 3.8 — Module 1 (keep its warmth)
+✅ done 2026-06-14 — Added 8 concrete `Win:` lines (Module 1 had zero) across both
+sets' challenges (Jonathan's pick: concrete, like Modules 2–8). **Videos** (verified via
+oEmbed; Jonathan asked for Marty Music / JustinGuitar): replaced the Set 2 "Parts of the
+Guitar" video — was **Guitar Center** — with JustinGuitar's *Beginner Guide To Guitar
+Anatomy* (`zpRoq0jcWfQ`); added Marty Music's *Caring for Your Acoustic Guitar*
+(`PyWZYHy17As`) to Set 1's computer station. Added a **headphones/volume norm** as the
+first step of Set 1's computer station, and a **safe-handling** step + Win in Set 1's
+"explore the guitar" section (week-1 norms at first contact). Confirmed the Set 2
+Seven-Nation-Army first-melody `tab:` renders with clickable notes + `playSeq` (browser-
+verified, 0 console errors). **Files:** `module-1.js`.
 
 ### [ ] Session 3.9 — Cross-module features + consistency sweep
 - Answer keys: add `answer:` + a one-line explanation to FACTUAL step MCs across all

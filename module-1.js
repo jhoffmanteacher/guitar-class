@@ -24,10 +24,18 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Reflect',        steps: [
           {
+            text: 'Headphone routine (every computer-station day): plug in, keep the volume low enough that the classmate beside you can\'t hear it, and slip one earcup off when the teacher is talking. This is our shared-room norm all semester.',
+            hint: 'If the person next to you can hear your video, it\'s too loud — comfortable for you, quiet for everyone else.'
+          },
+          {
             text: 'Watch: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">How to Practice Guitar – JustinGuitar</a> (Lesson 1 Practice Routine).',
             hint: 'As you watch, think about: what is one practice habit he says makes the biggest difference? Does it match what you thought?',
             skills: [1],
             response: { type: 'short', placeholder: 'In one sentence: what practice habit did he say matters most, and did it match what you thought?' }
+          },
+          {
+            text: 'Watch: <a href="https://youtu.be/PyWZYHy17As" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a>.',
+            hint: 'Your guitar is shared gear — notice how he handles and stores it. You\'ll practice the safe set-down at the hands-on station next.'
           },
           {
             text: 'Find a YouTube clip of the song you shared (or one a classmate shared that you liked). Listen and notice: what is the guitar doing?',
@@ -57,14 +65,18 @@ SETS.push(
             title: 'Get comfortable holding & exploring the guitar',
             steps: [
           {
-            text: 'Pick up the guitar. Hold it in a comfortable position. Strum all 6 strings slowly with your thumb — just listen to the sound.',
+            text: 'Safe handling (every class): when you\'re not playing, rest the guitar flat on its back across your lap or lay it in the case/stand — never lean it loose against a chair or wall where it can slip. Carry it with one hand on the neck and one on the body. Win: you can set the guitar down and pick it up without it ever wobbling or tipping.',
+            hint: 'A guitar that falls can crack its neck. Thirty seconds of care keeps the class set playable all year.'
+          },
+          {
+            text: 'Pick up the guitar. Hold it in a comfortable position. Strum all 6 strings slowly with your thumb — just listen to the sound. Win: the guitar sits steady on your leg and all 6 strings ring when you strum.',
             hint: 'Don\'t worry about pressing any frets yet. Just get used to holding it.'
           },
           {
-            text: 'Do you prefer to have your foot elevated or on the ground?'
+            text: 'Do you prefer to have your foot elevated or on the ground? Try both and keep whichever lets you sit upright without gripping the neck to hold the guitar up.'
           },
           {
-            text: 'Try tapping the body, plucking one string at a time, and strumming. What differences do you notice?',
+            text: 'Try tapping the body, plucking one string at a time, and strumming. What differences do you notice? Win: you can make at least three different sounds and say how they differ.',
             hint: 'Curiosity is your best tool right now.'
           }
             ]
@@ -73,7 +85,7 @@ SETS.push(
             title: 'Describe why I want to learn guitar',
             steps: [
           {
-            text: 'Write or sketch your guitar goal on a sticky note or in your journal. We\'ll revisit this at the end of the semester.',
+            text: 'Write or sketch your guitar goal on a sticky note or in your journal. We\'ll revisit this at the end of the semester. Win: you wrote or sketched a goal you can explain in one sentence.',
             hint: 'It can be a song you want to play, a skill you want to build, or just a feeling.'
           }
             ]
@@ -131,7 +143,7 @@ SETS.push(
             hint: 'Headphones on. Notice the order of the strings and what "in tune" sounds like.'
           },
           {
-            text: 'Watch: <a href="https://youtu.be/1ANma3HMfSU" target="_blank">Parts of the Guitar – Guitar Center</a>.',
+            text: 'Watch: <a href="https://youtu.be/zpRoq0jcWfQ" target="_blank">Beginner Guide To Guitar Anatomy – JustinGuitar</a>.',
             hint: 'Write down 5 parts you can now name from memory.'
           },
           {
@@ -186,7 +198,7 @@ SETS.push(
             title: 'Tune all 6 strings with a tuner',
             steps: [
           {
-            text: 'Challenge 1 — Tune Challenge: get all 6 strings to green on the tuner. Beat the clock — can you do it in under 2 minutes? Log your time so you can beat it next session.',
+            text: 'Challenge 1 — Tune Challenge: get all 6 strings to green on the tuner. Beat the clock — can you do it in under 2 minutes? Win: all 6 strings green in under 2 minutes. Log your time so you can beat it next session.',
             hint: 'Tune low to high: E A D G B e. Slow and steady beats rushing past the note. Use the play button to hear the target pitches.',
             skills: [5],
             playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -197,17 +209,17 @@ SETS.push(
             title: 'Play a melody on the open strings at 60 BPM',
             steps: [
           {
-            text: 'Challenge 2 — One Minute, Perfect Notes: pluck each open string low to high (E A D G B e) and say its name out loud. For one minute, count how many ring perfectly clean — no buzz, no muting. Log your score out of 6 so you can beat it next time.',
+            text: 'Challenge 2 — One Minute, Perfect Notes: pluck each open string low to high (E A D G B e) and say its name out loud. For one minute, count how many ring perfectly clean — no buzz, no muting. Win: all 6 strings ring clean — no buzz, no muting. Log your score out of 6 so you can beat it next time.',
             hint: 'These are open strings — press nothing. Let each string ring fully before moving to the next.',
             skills: [6]
           },
           {
-            text: 'Try "Happy Birthday" on open strings only — your teacher will give you the note sequence. Set your metronome to 60 BPM.',
+            text: 'Try "Happy Birthday" on open strings only — your teacher will give you the note sequence. Set your metronome to 60 BPM. Win: play it start to finish at 60 BPM without stopping.',
             hint: 'Go slow. Clean notes matter more than speed right now.',
             skills: [6]
           },
           {
-            text: 'Challenge 3 — Riff Time (give it a go!): play the "Seven Nation Army" riff on the low E string — slow and clean. No score on this one, just go for it. Click any note name below the TAB to hear how it should sound.',
+            text: 'Challenge 3 — Riff Time (give it a go!): play the "Seven Nation Army" riff on the low E string — slow and clean. Win: all 7 notes in the right order, each ringing clean — speed comes later. No score on this one, just go for it. Click any note name below the TAB to hear how it should sound.',
             hint: 'Slow and clean beats fast and buzzy. One note at a time.',
             tab: {
               caption: '"Seven Nation Army" — main riff · Low E string · 7 notes',
