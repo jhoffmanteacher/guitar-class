@@ -151,14 +151,14 @@ SETS.push(
             hint: 'Notice where the guitar rests and how the back stays straight.'
           },
           {
-            text: 'Watch: <a href="https://youtu.be/8-grcbKnbps" target="_blank">How to Hold a Guitar Pick – JustinGuitar</a>.',
+            text: 'Watch: <a href="https://youtu.be/1JBxNFEg0nU" target="_blank">Picks: How to Choose & Hold One (BC-107) – JustinGuitar</a>.',
             hint: 'Write down: what are the two most common pick-holding mistakes?'
           },
           {
             text: 'In your notes: write out the 6 string names from memory, low to high. Mnemonic: Eddie Ate Dynamite, Good Bye Eddie.'
           },
           {
-            text: 'Watch: <a href="https://youtu.be/x-x7AwQGzMI" target="_blank">How to Play Single Notes – Good Guitarist</a>.',
+            text: 'Watch: <a href="https://youtu.be/Z1ETtvhPqdQ" target="_blank">Picking Individual Strings (BC-166) – JustinGuitar</a>.',
             hint: 'Watch his picking hand and how light his fretting touch is. Clean single notes are the whole goal of your first melody.',
             skills: [6]
           },

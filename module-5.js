@@ -24,7 +24,7 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/hzC0orOGARw" target="_blank">How to Read Chord Diagrams – JustinGuitar</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/4-JTCASlh-w" target="_blank">How to Read TAB & Chord Boxes – JustinGuitar</a> (0:00–4:00).',
             time: '4 min',
             hint: 'Pause when he shows a diagram and look at it yourself. What does the X mean? What does the O mean? What do the numbers in the dots tell you?',
             skills: [1, 2],
@@ -36,7 +36,7 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/JBKIamtI_Qc" target="_blank">Your First Chords Am and Em – Marty Music</a> (0:00–5:00).',
+            text: 'Watch: <a href="https://youtu.be/HNSaXAe8tyg" target="_blank">Your Very First Chords: Em & Asus2 – Marty Music</a> (0:00–5:00).',
             time: '5 min',
             hint: 'Try placing your fingers as he shows Am, then strum it before watching more. Does every string ring? If not, check which finger is accidentally muting a string. Keep your fretting hand relaxed — tension is the enemy of clean tone.',
             skills: [3, 4],
@@ -211,7 +211,7 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/hzC0orOGARw" target="_blank">C G Am F Chord Transitions – JustinGuitar</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/RBYqdBqogo4" target="_blank">The C Chord (BC-132) – JustinGuitar</a> (0:00–4:00).',
             time: '4 min',
             hint: 'He shows the "perfect" chord change technique. Watch how he prepares the next chord shape before strumming it. Anticipation is the secret.',
             skills: [1, 2, 3, 4],
@@ -412,7 +412,7 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/hzC0orOGARw" target="_blank">D A Em Bm Open Chords – JustinGuitar</a> (0:00–5:00).',
+            text: 'Watch: <a href="https://youtu.be/yh6sPqDEZCY" target="_blank">The D Chord – JustinGuitar</a> (0:00–5:00).',
             time: '5 min',
             hint: 'D major has a triangular finger shape — notice how his three fingers are stacked in a triangle on strings 1, 2, and 3. Try to copy that exact shape.',
             skills: [1, 2, 3, 4],
@@ -424,7 +424,7 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/JBKIamtI_Qc" target="_blank">Bm Chord for Beginners – Marty Music</a> (0:00–3:00).',
+            text: 'Watch: <a href="https://youtu.be/IxXG5S8vSd8" target="_blank">Fail-Proof Easy Barre Chords (start here for Bm) – JustinGuitar</a> (0:00–3:00).',
             time: '3 min',
             hint: 'Bm is the trickiest chord in this group. The partial barre version (xx4432) is the most accessible. Don\'t try the full barre version yet — focus on getting a clean sound first.',
             skills: [4],
@@ -603,7 +603,7 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/hzC0orOGARw" target="_blank">E Major and B7 Chords – JustinGuitar</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/8H393ryDkuY" target="_blank">The E Chord (BC-113) – JustinGuitar</a> (0:00–4:00).',
             time: '4 min',
             hint: 'E major uses all four fingers — it\'s a full chord. B7 is also four fingers but in a different arrangement. Take them one at a time. The B7 chord has a distinctive jazz/blues sound.',
             skills: [1, 2],
@@ -614,7 +614,7 @@ SETS.push(
             response: { type: 'short', placeholder: 'Describe the sound of the B7 chord. What musical mood does it suggest?' }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/rrB97F0Qu6g" target="_blank">How to Practice for Performance – Simen Otnes</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">How to Practice Effectively – JustinGuitar</a> (0:00–4:00).',
             time: '4 min',
             hint: 'Key idea: practice doesn\'t make perfect — practice makes permanent. Are you practicing your mistakes or your solutions? This matters most before a performance.',
             skills: [5],

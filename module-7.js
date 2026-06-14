@@ -240,7 +240,7 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/74pHRVA39Q4" target="_blank">Marty Schwartz Teaches Barre Chord Tricks For Beginners</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/MpMhueVEz2g" target="_blank">Basic Barre Chords #1 — the E shape (CH-006) – JustinGuitar</a> (0:00–4:00).',
             time: '4 min',
             hint: 'The "E shape" is literally the E major open chord, but you slide your fingers up the neck and use your INDEX finger to "be the nut" (the bar).',
             skills: [2, 3],
@@ -439,7 +439,7 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/74pHRVA39Q4" target="_blank">Marty Schwartz Teaches Barre Chord Tricks For Beginners</a> (0:00–4:00 — rewatch with A-shape focus).',
+            text: 'Watch: <a href="https://youtu.be/MpMhueVEz2g" target="_blank">Basic Barre Chords (CH-006) – JustinGuitar</a> (0:00–4:00 — rewatch with A-shape focus).',
             time: '4 min',
             hint: 'B major is a great A-shape practice chord — it lives at the 2nd fret with the root on string 5. Listen for the muted high E (string 1) — that\'s normal for an A-shape barre.',
             skills: [3, 4],

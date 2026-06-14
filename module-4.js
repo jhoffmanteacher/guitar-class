@@ -24,7 +24,7 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/XxICTF-NIZ8" target="_blank">Minor Pentatonic Scale – JustinGuitar</a> (0:00–5:00). As you watch, follow along on your guitar — pause and find each note BEFORE he names it.',
+            text: 'Watch: <a href="https://youtu.be/G-X1RemAzks" target="_blank">Minor Pentatonic Scale, Pattern 1 (BC-176) – JustinGuitar</a> (0:00–5:00). As you watch, follow along on your guitar — pause and find each note BEFORE he names it.',
             time: '5 min',
             hint: 'Follow along on your guitar as he shows the pattern. Pause and find each note before he names it.',
             skills: [1, 2],
@@ -239,14 +239,14 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/RMdkevqJDDk" target="_blank">Pentatonic Scale Across Strings – Simen Otnes</a> (0:00–4:00). As you watch, copy his FEEL on one note — play it loud, then soft — before you worry about the actual notes.',
+            text: 'Watch: <a href="https://youtu.be/G-X1RemAzks" target="_blank">Minor Pentatonic Pattern 1 (BC-176) – JustinGuitar</a> (0:00–4:00). As you watch, copy his FEEL on one note — play it loud, then soft — before you worry about the actual notes.',
             time: '4 min',
             hint: 'Notice how he varies his attack — some notes are loud, some soft. That\'s dynamics. Try to copy his feel, not just his notes.',
             skills: [1, 2],
             response: { type: 'short', placeholder: 'In your own words: what are dynamics, and how did he use them?' }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/3x6k7zHkqmA" target="_blank">Hammer-Ons and Pull-Offs – JustinGuitar</a> (0:00–3:00). As you watch, try one hammer-on on your own guitar — pick the open D string, then hammer your finger onto the 2nd fret without picking again.',
+            text: 'Watch: <a href="https://youtu.be/7hDdZAjKBjY" target="_blank">Hammer-Ons & Pull-Offs Explained – JustinGuitar</a> (0:00–3:00). As you watch, try one hammer-on on your own guitar — pick the open D string, then hammer your finger onto the 2nd fret without picking again.',
             time: '3 min',
             hint: 'These are your first "expressive" techniques. A hammer-on connects two notes with one pick stroke — it changes the shape (envelope) of the notes.',
             skills: [3],
@@ -447,14 +447,14 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/XxICTF-NIZ8" target="_blank">Full Pentatonic Box 1 – JustinGuitar</a> (5:00–end). As you watch the theory section, keep one finger on your low E root and notice it never moves — only which note you call "home" changes.',
+            text: 'Watch: <a href="https://youtu.be/m_IiyJu60-c" target="_blank">Major & Minor Pentatonic Connection – Marty Music</a> (5:00–end). As you watch the theory section, keep one finger on your low E root and notice it never moves — only which note you call "home" changes.',
             time: '5 min',
             hint: 'This time focus on the theory section. How does he explain the relationship between major and minor pentatonic? Can you see the relative major/minor connection?',
             skills: [1, 2],
             response: { type: 'short', placeholder: 'Explain the relative major/minor connection in your own words.' }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/GI7s3ZwXOJg" target="_blank">Vibrato Technique – Simen Otnes</a> (0:00–3:00). As you watch, try it yourself on the 5th fret of string 1 — rock the finger back and forth gently and listen for the pitch to wobble.',
+            text: 'Watch: <a href="https://youtu.be/WNWqobkgdBA" target="_blank">Vibrato Technique (Hand Movement, TE-103) – JustinGuitar</a> (0:00–3:00). As you watch, try it yourself on the 5th fret of string 1 — rock the finger back and forth gently and listen for the pitch to wobble.',
             time: '3 min',
             hint: 'Vibrato is a small, controlled pitch wobble on a sustained note. Try it on the 5th fret, string 1. Rock your finger back and forth gently. It takes weeks to develop — just start!',
             skills: [3],

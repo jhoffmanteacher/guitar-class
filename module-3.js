@@ -42,7 +42,7 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/3CIbdUaHMhw" target="_blank">Power Chords 101 – JustinGuitar</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/ZBYoI7e3v5Y" target="_blank">Your Ultimate Power Chords Guide for Beginners – JustinGuitar</a> (0:00–4:00).',
             time: '4 min',
             hint: 'Focus on his right-hand muting technique — how does he stop the strings he isn\'t playing from ringing? Try it on your guitar as he shows it.',
             skills: [1, 3],
@@ -273,7 +273,7 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/hzC0orOGARw" target="_blank">How to Practice with a Metronome – JustinGuitar</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/sNa44EmrsDc" target="_blank">How & Why to Use a Metronome – JustinGuitar</a> (0:00–4:00).',
             time: '4 min',
             hint: 'His tip about setting the metronome 10 BPM slower than you think you need is key. As he explains it, set your own metronome and tap along. Slow is smooth, smooth is fast.',
             skills: [1, 2],
@@ -285,14 +285,14 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/JBKIamtI_Qc" target="_blank">Power Chord Song Examples – Marty Music</a> (0:00–3:00).',
+            text: 'Watch: <a href="https://youtu.be/m3dYOsXbWII" target="_blank">Easy Power-Chord Songs Everyone Should Know – Marty Music</a> (0:00–3:00).',
             time: '3 min',
             hint: 'Pick one song you recognize and try to play along as it plays. Match the strum timing to what you hear.',
             skills: [3, 4],
             response: { type: 'short', placeholder: 'Which song did you try to play along with? What was hardest about it?' }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/Oqn1pflxC_Q" target="_blank">Increasing Speed on Guitar – Simen Otnes</a> (0:00–3:00).',
+            text: 'Watch: <a href="https://youtu.be/q8SHmo1-dac" target="_blank">3 Tips to NAIL Alternate Picking (build speed) – JustinGuitar</a> (0:00–3:00).',
             time: '3 min',
             hint: 'Notice his method for building tempo gradually. As he describes it, try it: play your "Watchtower" loop at 60 BPM, then bump to 65, then 70.',
             skills: [1, 2],

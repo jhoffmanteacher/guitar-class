@@ -34,7 +34,7 @@ SETS.push(
       b: {
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/B-eIyx08X10?t=146" target="_blank">Learn the Notes on the E &amp; A Strings – Quail Studios Guitar</a> (starts at 2:26).',
+            text: 'Watch: <a href="https://youtu.be/Abrd0c92xRE" target="_blank">Open Notes On The Guitar – JustinGuitar</a>.',
             time: '4 min',
             hint: 'Play along on your guitar as he goes through each note on both strings. Pause and find each note before he names it.',
             skills: [1, 2, 3],
@@ -46,7 +46,7 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/k2jBLNzfEow" target="_blank">Fretboard Notes Made Easy – Marty Music</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard – Marty Music</a> (0:00–4:00).',
             time: '4 min',
             hint: 'Focus on the E and A strings only for now. What patterns does he point out?',
             skills: [1, 3],
@@ -251,14 +251,14 @@ SETS.push(
         title: 'Computer station — Watch · Listen · Practice',
         steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/RMdkevqJDDk" target="_blank">Beginner Finger Exercises – Simen Otnes</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym: Strength & Dexterity (TE-001) – JustinGuitar</a> (0:00–4:00).',
             time: '4 min',
             hint: 'Try each exercise slowly on your guitar as he demonstrates. Slow and clean beats fast and buzzy every time.',
             skills: [1, 2, 3],
             response: { type: 'short', placeholder: 'Which exercise felt hardest, and what do you think makes it hard?' }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/3x6k7zHkqmA" target="_blank">How to Avoid Fret Buzz – JustinGuitar</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/IscDj_-Nr0s" target="_blank">Finger Placement to Avoid Fret Buzz (BC-106) – JustinGuitar</a> (0:00–4:00).',
             time: '3 min',
             hint: 'As he lists each cause, pause and test it on your own guitar — find your buzz before he names the fix.',
             skills: [1, 2],
@@ -270,7 +270,7 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/o56KBAO3OC4" target="_blank">How to Read Guitar TAB – Marty Music</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/FofCWizp43Y" target="_blank">How to Read Guitar TAB – JustinGuitar</a> (0:00–4:00).',
             time: '4 min',
             hint: 'Pause when he shows a TAB example. Find those notes on your guitar before hitting play.',
             skills: [4],
