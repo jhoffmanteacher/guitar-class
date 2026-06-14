@@ -473,9 +473,9 @@ MODULE_REVIEWS[6] = {
   moduleNum: 6,
   module: 'Strumming Patterns with Chords',
   skills: [
-    { id: 'mr6-s1', text: 'I can hold a steady down-up strum pattern at 70+ BPM' },
-    { id: 'mr6-s2', text: 'I can play 2+ different strum patterns over the same chord progression' },
-    { id: 'mr6-s3', text: 'I can keep time while changing chords mid-pattern' }
+    { id: 'mr6-s1', text: 'I can hold a steady down-up strum pattern at 70+ BPM', set: 'm6w1' },
+    { id: 'mr6-s2', text: 'I can play 2+ different strum patterns over the same chord progression', set: 'm6w3' },
+    { id: 'mr6-s3', text: 'I can keep time while changing chords mid-pattern', set: 'm6w2' }
   ],
   standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
 };

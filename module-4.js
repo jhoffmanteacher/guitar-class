@@ -622,16 +622,12 @@ MODULE_REVIEWS[4] = {
   moduleNum: 4,
   module: 'Major / Minor / Blues Pentatonic Scales',
   skills: [
-    { id: 'mr4-s1', text: 'I can play Pentatonic Pattern 1 ascending AND descending from memory — no diagram, no missed notes or hesitations' },
-    { id: 'mr4-s2', text: 'I can use alternate picking (down-up) automatically at 60 BPM, every note on a beat, without losing the click' },
-    { id: 'mr4-s3', text: 'I can position Pattern 1 as a MINOR scale (1st finger on root) or a MAJOR scale (4th finger on root) on demand from any named key' },
-    { id: 'mr4-s4', text: 'I can name the natural notes on the D and G strings instantly, without counting up from the open string' },
-    { id: 'mr4-s5', text: 'I can vary dynamics on purpose (p / mf / f) and change timbre by moving my picking hand from bridge to neck — a listener hears both' },
-    { id: 'mr4-s6', text: 'I can perform a hammer-on and a pull-off, and add an intentional vibrato on a sustained note' },
-    { id: 'mr4-s7', text: 'I can improvise a call-and-response phrase where the call hangs unresolved and the response lands home on the root' },
-    { id: 'mr4-s8', text: 'I can explain how major (1 2 3 5 6) and minor (1 ♭3 4 5 ♭7) pentatonic are built, that they\'re relative (same 5 notes), and where the ♭5 blue note goes' },
-    { id: 'mr4-s9', text: 'I can compose a 4-bar solo in scale-degree numbers and play exactly what I wrote — the same way twice' },
-    { id: 'mr4-s10', text: 'I can perform my original 4-bar solo over a backing track from memory, working in at least one hammer-on, pull-off, or vibrato' }
+    { id: 'mr4-s1', text: 'I can play Pentatonic Pattern 1 ascending AND descending from memory — no diagram, no missed notes or hesitations', set: 'm4w1' },
+    { id: 'mr4-s2', text: 'I can use alternate picking (down-up) automatically at 60 BPM, every note on a beat, without losing the click', set: 'm4w1' },
+    { id: 'mr4-s3', text: 'I can position Pattern 1 as a MINOR scale (1st finger on root) or a MAJOR scale (4th finger on root) on demand from any named key', set: 'm4w1' },
+    { id: 'mr4-s6', text: 'I can perform a hammer-on and a pull-off, and add an intentional vibrato on a sustained note', set: 'm4w2' },
+    { id: 'mr4-s8', text: 'I can explain how major (1 2 3 5 6) and minor (1 ♭3 4 5 ♭7) pentatonic are built, that they\'re relative (same 5 notes), and where the ♭5 blue note goes', set: 'm4w3' },
+    { id: 'mr4-s10', text: 'I can perform my original 4-bar solo over a backing track from memory, working in at least one hammer-on, pull-off, or vibrato', set: 'm4w3' }
   ],
   assessItems: [
     'Position Pattern 1 for any named major or minor key and play it ascending and descending in time, with alternate picking',

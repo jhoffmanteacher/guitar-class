@@ -629,15 +629,12 @@ MODULE_REVIEWS[8] = {
   moduleNum: 8,
   module: 'Finger Picking',
   skills: [
-    { id: 'mr8-s1', text: 'I can hold a relaxed fingerpicking hand — wrist arched, fingers curved — for 30 seconds without it collapsing flat' },
-    { id: 'mr8-s2', text: 'I can assign p to the bass strings and i-m-a to G-B-e, and put any finger on its string without looking' },
-    { id: 'mr8-s3', text: 'I can pluck p-i-m-a in order on open strings at 60 BPM with even volume on every finger, including the ring (a)' },
-    { id: 'mr8-s4', text: 'I can play the 6-note p-i-m-a-m-i arpeggio from memory while holding a chord, every note ringing clean' },
-    { id: 'mr8-s5', text: 'I can move only my thumb to the new bass note at a chord change while i-m-a stay anchored on G-B-e' },
-    { id: 'mr8-s6', text: 'I can keep the pattern steady at 70 BPM for at least 4 bars without speeding up or slowing down' },
-    { id: 'mr8-s7', text: 'I can fingerpick a full 4-chord progression without the pattern breaking at any chord change' },
-    { id: 'mr8-s8', text: 'I can pinch the thumb and a finger together as one sound, and demonstrate Travis picking with an alternating-bass thumb' },
-    { id: 'mr8-s9', text: 'I can perform a full fingerpicked song start to finish, recovering from any mistake without stopping' }
+    { id: 'mr8-s1', text: 'I can hold a relaxed fingerpicking hand — wrist arched, fingers curved — for 30 seconds without it collapsing flat', set: 'm8w1' },
+    { id: 'mr8-s2', text: 'I can assign p to the bass strings and i-m-a to G-B-e, and put any finger on its string without looking', set: 'm8w1' },
+    { id: 'mr8-s3', text: 'I can pluck p-i-m-a in order on open strings at 60 BPM with even volume on every finger, including the ring (a)', set: 'm8w2' },
+    { id: 'mr8-s4', text: 'I can play the 6-note p-i-m-a-m-i arpeggio from memory while holding a chord, every note ringing clean', set: 'm8w2' },
+    { id: 'mr8-s7', text: 'I can fingerpick a full 4-chord progression without the pattern breaking at any chord change', set: 'm8w3' },
+    { id: 'mr8-s9', text: 'I can perform a full fingerpicked song start to finish, recovering from any mistake without stopping', set: 'm8w3' }
   ],
   assessItems: [
     'Fingerpick a 4-chord progression with the 6-note arpeggio, keeping the pattern unbroken through every chord change',

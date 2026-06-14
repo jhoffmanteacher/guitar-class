@@ -785,14 +785,12 @@ MODULE_REVIEWS[5] = {
   moduleNum: 5,
   module: 'Open Chords',
   skills: [
-    { id: 'mr5-s1', text: 'I can read any chord diagram and place my fingers on the right strings, frets, and finger numbers without asking' },
-    { id: 'mr5-s2', text: 'I can fret Am and Em cleanly — every string in each rings with no buzz' },
-    { id: 'mr5-s3', text: 'I can fret Group 1 chords (C, G, Am, and the simplified F) with clean tone' },
-    { id: 'mr5-s4', text: 'I can fret Group 2 chords (D, A, Em, and a partial-barre Bm) with clean tone' },
-    { id: 'mr5-s5', text: 'I can fret E and B7, and identify the F#m and C#m barre shapes on a diagram' },
-    { id: 'mr5-s6', text: 'I can keep a steady 4-beat down-strum, and a down-up (1 + 2 + 3 + 4 +) pattern, through a chord change' },
-    { id: 'mr5-s7', text: 'I can change between two open chords on beat 1 — and I know my best one-minute-changes count' },
-    { id: 'mr5-s8', text: 'I can perform a chosen song start to finish using 4+ chords from across the semester for the showcase' }
+    { id: 'mr5-s1', text: 'I can read any chord diagram and place my fingers on the right strings, frets, and finger numbers without asking', set: 'm5w1' },
+    { id: 'mr5-s2', text: 'I can fret Am and Em cleanly — every string in each rings with no buzz', set: 'm5w1' },
+    { id: 'mr5-s3', text: 'I can fret Group 1 chords (C, G, Am, and the simplified F) with clean tone', set: 'm5w2' },
+    { id: 'mr5-s6', text: 'I can keep a steady 4-beat down-strum, and a down-up (1 + 2 + 3 + 4 +) pattern, through a chord change', set: 'm5w2' },
+    { id: 'mr5-s4', text: 'I can fret Group 2 chords (D, A, Em, and a partial-barre Bm) with clean tone', set: 'm5w3' },
+    { id: 'mr5-s8', text: 'I can perform a chosen song start to finish using 4+ chords from across the semester for the showcase', set: 'm5w4' }
   ],
   assessItems: [
     'Perform one complete song using at least 4 chords from the semester, with clean tone and smooth transitions',

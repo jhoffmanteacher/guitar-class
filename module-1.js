@@ -301,10 +301,10 @@ MODULE_REVIEWS[1] = {
   moduleNum: 1,
   module: 'Introductions: You and The Guitar',
   skills: [
-    { id: 'mr1-s1', text: 'I can describe why I want to learn guitar' },
-    { id: 'mr1-s2', text: 'I can name 5+ parts of the guitar' },
-    { id: 'mr1-s3', text: 'I can tune all 6 strings with a tuner' },
-    { id: 'mr1-s4', text: 'I can play a short open-string melody on the E string at 60 BPM' }
+    { id: 'mr1-s1', text: 'I can describe why I want to learn guitar', set: 'w1' },
+    { id: 'mr1-s2', text: 'I can name 5+ parts of the guitar', set: 'w2' },
+    { id: 'mr1-s3', text: 'I can tune all 6 strings with a tuner', set: 'w2' },
+    { id: 'mr1-s4', text: 'I can play a short open-string melody on the E string at 60 BPM', set: 'w2' }
   ],
   assessItems: [
     'Tune your guitar in 2 minutes',

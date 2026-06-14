@@ -632,13 +632,12 @@ MODULE_REVIEWS[7] = {
   moduleNum: 7,
   module: 'TAB Notation and Barre Chords',
   skills: [
-    { id: 'mr7-s1', text: 'I can read multi-line TAB — stacked numbers as chords, plus the rhythm symbols (quarter, 8th, half) above the notes' },
-    { id: 'mr7-s2', text: 'I can recognise hammer-on (h), pull-off (p), and slide (/ \\) markings in TAB and play them' },
-    { id: 'mr7-s3', text: 'I can bar all 6 strings with my index finger so every string rings' },
-    { id: 'mr7-s4', text: 'I can form an E-shape barre and play F, G, and A cleanly, naming each by its root on string 6' },
-    { id: 'mr7-s5', text: 'I can form an A-shape barre and play B, C, and D cleanly, naming each by its root on string 5' },
-    { id: 'mr7-s6', text: 'I can find both "homes" for a chord — its E-shape (string-6 root) and A-shape (string-5 root) — and switch between the two shapes in a progression' },
-    { id: 'mr7-s7', text: 'I can play a full song using only barre chords' }
+    { id: 'mr7-s1', text: 'I can read multi-line TAB — stacked numbers as chords, plus the rhythm symbols (quarter, 8th, half) above the notes', set: 'm7w1' },
+    { id: 'mr7-s2', text: 'I can recognise hammer-on (h), pull-off (p), and slide (/ \\) markings in TAB and play them', set: 'm7w1' },
+    { id: 'mr7-s3', text: 'I can bar all 6 strings with my index finger so every string rings', set: 'm7w2' },
+    { id: 'mr7-s4', text: 'I can form an E-shape barre and play F, G, and A cleanly, naming each by its root on string 6', set: 'm7w2' },
+    { id: 'mr7-s5', text: 'I can form an A-shape barre and play B, C, and D cleanly, naming each by its root on string 5', set: 'm7w3' },
+    { id: 'mr7-s6', text: 'I can find both "homes" for a chord — its E-shape (string-6 root) and A-shape (string-5 root) — and switch between the two shapes in a progression', set: 'm7w3' }
   ],
   assessItems: [
     'Play F barre → slide to G → slide to A, one clean strum each (E-shape, root on string 6)',
