@@ -34,6 +34,32 @@
 
 ---
 
+## 📍 WHAT'S LEFT — the live to-do list  *(updated 2026-06-14)*
+
+This is the at-a-glance list; full detail is in the numbered sessions below.
+
+**🔨 Build work (actual remaining coding):**
+- **3.8 — Module 1 "keep its warmth"** — smallest & self-contained: soft `Win:` lines,
+  guitar-care step, headphones norm, confirm Set 2 melody TAB. *Ready to start.*
+- **3.5 — Module 6 strumming REDESIGN** *(needs Jonathan's scope decision first)* —
+  advanced strumming, anchor songs, optional `strumPattern:` SVG renderer.
+- **3.9 — Cross-module sweep** — factual-MC answer keys, distractor pass, song
+  difficulty dots + 🎤 request slot, style Stuck?/Level up lines, voice sweep.
+
+**✅ Built — awaiting Jonathan's real-world sign-off (no coding left):**
+- **4.4** touch-resize on a real Chromebook · **4.5** print one set & eyeball it ·
+  **4.6** live-site offline reload (PWA) · **4.3** trailing incognito "does it still save" test.
+
+**🔁 Deferred / recurring (Jonathan-led, by design never "done"):**
+- **4.2** dead-link audit (re-run each semester) · Phase 5: handout audit · Spanish
+  spot-check · end-of-semester set · song refresh · ⚠️ review Module 4 Set 1 video.
+
+**Done or dropped:** Phases 1–3 (except 3.5/3.8/3.9), 4.1, 5 onboarding + reflection
+prompts, 6.2. Dropped: 6.1 looper, 6.3 Song Journey. *(The `TODO.md` items —
+tone-check removal, etc. — are all closed in `TODO.archive.md`.)*
+
+---
+
 ## PHASE 1 — Finish Module 2 (the template)
 
 ### [x] Session 1.1 — Module 2 text upgrade
