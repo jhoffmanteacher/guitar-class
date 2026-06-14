@@ -593,16 +593,12 @@ MODULE_REVIEWS[2] = {
   moduleNum: 2,
   module: 'Notes on the E & A Strings',
   skills: [
-    { id: 'mr2-s1', text: 'I can recite the musical alphabet (A–G) from memory, including what comes after G' },
-    { id: 'mr2-s2', text: 'I can name all natural notes on the E string (frets 0–12)' },
-    { id: 'mr2-s3', text: 'I can name all natural notes on the A string (frets 0–12)' },
-    { id: 'mr2-s8', text: 'I can put my finger on any note called out on the E or A string within 3 seconds, no chart' },
-    { id: 'mr2-s7', text: 'I can read a basic fretboard note-name chart' },
-    { id: 'mr2-s4', text: 'I can press notes cleanly with no fret buzz' },
-    { id: 'mr2-s6', text: 'I can use one finger per fret (index=1, middle=2, ring=3, pinky=4)' },
-    { id: 'mr2-s9', text: 'I can keep my unused fingers hovering close to the strings, ready to drop down' },
-    { id: 'mr2-s10', text: 'I can keep my thumb behind the neck (not hooked over the top) the whole time I play' },
-    { id: 'mr2-s5', text: 'I can read a basic TAB and play a 4-bar melody in time at 60 BPM' }
+    { id: 'mr2-s1', text: 'I can recite the musical alphabet (A–G) from memory, including what comes after G', set: 'm2w1' },
+    { id: 'mr2-s2', text: 'I can name all natural notes on the E string (frets 0–12)', set: 'm2w1' },
+    { id: 'mr2-s3', text: 'I can name all natural notes on the A string (frets 0–12)', set: 'm2w1' },
+    { id: 'mr2-s4', text: 'I can press notes cleanly with no fret buzz', set: 'm2w2' },
+    { id: 'mr2-s6', text: 'I can use one finger per fret (index=1, middle=2, ring=3, pinky=4)', set: 'm2w2' },
+    { id: 'mr2-s5', text: 'I can read a basic TAB and play a 4-bar melody in time at 60 BPM', set: 'm2w2' }
   ],
   assessItems: [
     'Name the notes on the E and A strings from memory through fret 12',

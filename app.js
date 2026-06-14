@@ -1383,8 +1383,11 @@ function buildModuleReview(mr){
     qNum++;
     const lvl=progress[s.id];
     const btn=(n)=>`<button class="mr-rb lvl${n}${lvl===String(n)?' active':''}" onclick="setSkillLevel('${s.id}','${mrId}','${n}')">${n}</button>`;
+    const reviewLink = s.set
+      ? `<button type="button" class="mr-review-link" onclick="goToSet('${s.set}')" title="Go back to the lesson for this skill">&#8617; Review this</button>`
+      : '';
     return `<div class="mr-row">
-      <div class="mr-skill-text"><span class="mr-q-num">${qNum}.</span> ${s.text}</div>
+      <div class="mr-skill-text"><span class="mr-q-num">${qNum}.</span> ${s.text}${reviewLink}</div>
       <div class="mr-rating">${btn(1)}${btn(2)}${btn(3)}</div>
     </div>`;
   }).join('');
@@ -1409,7 +1412,10 @@ function buildModuleReview(mr){
   const assessBody = (mr.assessItems && mr.assessItems.length)
     ? `Sign up when you are ready for the module assessment. It is on these skills:<ul class="mr-assess-list">${mr.assessItems.map(i=>`<li>${i}</li>`).join('')}</ul>`
     : 'Sign up when you are ready for the teacher to assess you on the skills above.';
-  const performanceHtml=`<div class="ablock" style="margin-top:18px"><div class="albl">Module ${mr.moduleNum} Assessment</div><div class="atxt">${assessBody}</div></div>`;
+  const performanceHtml=`<div class="mr-assess-box">
+      <div class="mr-assess-head"><span class="mr-assess-icon">&#x1F4DD;</span> Module ${mr.moduleNum} Assessment</div>
+      <div class="mr-assess-body">${assessBody}</div>
+    </div>`;
   const forwardHtml = mr.forward
     ? `<div class="ablock mr-forward" style="margin-top:12px"><div class="albl">&#x1F517; Why this matters</div><div class="atxt">${mr.forward}</div></div>`
     : '';
@@ -1445,6 +1451,16 @@ function buildModuleReview(mr){
       <div>${mr.standards.map(s=>`<span class="spill">${s}</span>`).join('')}</div>
     </div>
     <div class="save-ind" id="${mrId}-save-ind" style="margin-top:10px"></div>`;
+}
+
+/* Jump from a module-review skill back to the lesson set that teaches it. */
+function goToSet(setId){
+  lastSetId = setId;
+  activateSet(setId);
+  saveProgress();
+  const pill = document.querySelector(`.wpill[data-id="${setId}"]`);
+  if(pill) pill.scrollIntoView({block:'nearest', inline:'nearest'});
+  window.scrollTo({top:0, behavior:'smooth'});
 }
 
 function isReviewPanelLocked(mrId){

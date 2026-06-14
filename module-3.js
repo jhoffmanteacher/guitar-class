@@ -425,16 +425,12 @@ MODULE_REVIEWS[3] = {
   moduleNum: 3,
   module: 'Two-Finger Power Chords',
   skills: [
-    { id: 'mr3-s1', text: 'I can fret a clean 2-finger power chord (root + 5th) with both notes ringing and no buzz' },
-    { id: 'mr3-s2', text: 'I can move the same shape along the low E string and name each chord without counting frets' },
-    { id: 'mr3-s3', text: 'I can move the shape along the A string and keep the low E string silent' },
-    { id: 'mr3-s4', text: 'I can strum hard across all six strings and have only the two power-chord notes ring' },
-    { id: 'mr3-s5', text: 'I can read a power chord symbol like "A5" and instantly know which fret and string my index finger goes to' },
-    { id: 'mr3-s6', text: 'I can play a power chord exactly on beat 1 with the metronome — no early or late attacks' },
-    { id: 'mr3-s7', text: 'I can change power chords on beat 1 at 70+ BPM without stopping' },
-    { id: 'mr3-s8', text: 'I can play an 8-bar progression with a straight-eighths strum, counting "1 + 2 + 3 + 4 +"' },
-    { id: 'mr3-s9', text: 'I can tell whether I\'m ahead, behind, or with the click and pick a tempo where I play clean' },
-    { id: 'mr3-s10', text: 'I can add my pinky an octave up for a fuller 3-note power chord when I want one (optional stretch)' }
+    { id: 'mr3-s1', text: 'I can fret a clean 2-finger power chord (root + 5th) with both notes ringing and no buzz', set: 'm3w1' },
+    { id: 'mr3-s2', text: 'I can move the same shape along the low E string and name each chord without counting frets', set: 'm3w1' },
+    { id: 'mr3-s3', text: 'I can move the shape along the A string and keep the low E string silent', set: 'm3w1' },
+    { id: 'mr3-s5', text: 'I can read a power chord symbol like "A5" and instantly know which fret and string my index finger goes to', set: 'm3w1' },
+    { id: 'mr3-s7', text: 'I can change power chords on beat 1 at 70+ BPM without stopping', set: 'm3w2' },
+    { id: 'mr3-s8', text: 'I can play an 8-bar progression with a straight-eighths strum, counting "1 + 2 + 3 + 4 +"', set: 'm3w2' }
   ],
   assessItems: [
     'Fret and move a clean 2-finger power chord along the E and A strings, muting the unused strings',
