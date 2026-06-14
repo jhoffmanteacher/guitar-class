@@ -53,9 +53,16 @@ This is the at-a-glance list; full detail is in the numbered sessions below.
 - **4.2** dead-link audit (re-run each semester) · Phase 5: handout audit · Spanish
   spot-check · end-of-semester set · song refresh · ⚠️ review Module 4 Set 1 video.
 
-**Done or dropped:** Phases 1–3 (except 3.5/3.8/3.9), 4.1, 5 onboarding + reflection
-prompts, 6.2. Dropped: 6.1 looper, 6.3 Song Journey. *(The `TODO.md` items —
-tone-check removal, etc. — are all closed in `TODO.archive.md`.)*
+**Recent polish (not a numbered session):**
+- **Module-review trim pass** — ✅ done 2026-06-14 — cut every module review to 5–6 core
+  "I can" lines, added per-skill "↩ Review this" links back to the teaching set (new
+  `set:` field on each review skill), and moved the Module Assessment into a standout
+  `.mr-assess-box`. `app.js` (`buildModuleReview`, new `goToSet`), `styles.css`, all
+  `module-*.js` reviews. See the **Module review** standard below for the pattern.
+
+**Done or dropped:** Phases 1–3 (except 3.5/3.9), 4.1, 5 onboarding + reflection
+prompts, 6.2. Dropped: 6.1 looper, 6.3 Song Journey. *(The old `TODO.md` items —
+tone-check removal, etc. — are all closed in `archive/TODO.archive.md`.)*
 
 ---
 
@@ -417,6 +424,10 @@ question repeated verbatim within a set · hints ≤2 sentences; *why* in the hi
 carry ●/●●/●●● difficulty dots · every gotItWhen self-contained, observable,
 time-bound where possible ★ · no orphan skill ids.
 
-**Module review:** "I can" lines cover every skill, in gotItWhen language · ends with
-a forward link ("why this matters in Module N+1") · references the Module 1 goal where
-natural.
+**Module review:** a tight **5–6 core "I can" lines** in gotItWhen language — NOT every
+micro-skill (trim redundant/minor ones; the full skill list lives in the per-set
+checklists, the review is the highlight reel) · keep original `mr*-s*` ids on the
+survivors so saved progress isn't lost · every line carries a `set:` id and renders a
+"↩ Review this" link back to the set that teaches it · the **Module Assessment** sits in
+its own standout box (`.mr-assess-box`), not a plain `ablock` · ends with a forward link
+("why this matters in Module N+1") · references the Module 1 goal where natural.
