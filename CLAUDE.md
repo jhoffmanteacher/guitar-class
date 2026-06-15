@@ -18,6 +18,21 @@ Before any push that changes `index.html`, `styles.css`, `app.js`,
 students may keep getting the OLD cached site. Doc-only changes (`*.md`) don't
 need a bump.
 
+### Update the changelog on notable pushes
+When a push includes a **notable, student-facing change**, add a dated entry to
+the **top** of `CHANGELOG.md` (newest first) in the same push — no need to ask.
+Write it in plain English from the student's point of view (*what changed and why
+it's better*), not in terms of file names or function names. Match the existing
+entry style (`## YYYY-MM-DD — Title`, then `### Added` / `### Changed` sections).
+
+- **Add an entry for:** a new feature, a module's content reworked, a visible UX
+  change, or a bug fix students would notice.
+- **Skip it for:** internal-doc edits (`WORKFLOW.md` and other `*.md`), pure
+  refactors with no visible effect, and planning/cleanup work. The full technical
+  history lives in `WORKFLOW.md` and the git log — the changelog is the highlight
+  reel. (`CHANGELOG.md` is excluded from the published site, so it's an internal
+  record, but keep it readable as if a student might see it.)
+
 ## Project: what this is
 Plain static HTML/JS/CSS site — no build step, no Jekyll, no Node framework. Content lives in `index.html` and per-module JS files (`module-1.js` through `module-8.js`, `config-main.js`). Uses Firebase for auth and Firestore for student progress. Deployed by pushing to GitHub.
 

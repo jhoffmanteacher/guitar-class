@@ -5,6 +5,34 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-06-14 — Module 6 (Strumming) brought up to the course template
+
+Module 6 now teaches with the same structure and supports as every other module.
+
+### Added
+- **Chord diagrams** at each chord's first use (Em/Am, G/D, C) on the computer
+  stations, so students can see the shape, not just read its name.
+- **Strum-pattern visuals** — a monospace down/up line aligned over the
+  "1 + 2 + 3 + 4 +" count on the down-up, D-DU-UDU, folk, rock, and reggae
+  challenges, so the rhythm is something you can *see*.
+- **"Stuck?" and "Level up" tips** on every graded challenge, **time budgets**
+  on each step, **Timer** references, and a **warm-up spiral** at the top of
+  every set.
+- **Personal-record ladders** (type your fastest clean BPM and beat it next
+  class) and a **named assessment piece** per set — including a new
+  "Two Feels, One Song" challenge that practices switching strum styles mid-song.
+- A fuller **Module 6 review** (six "I can" lines, an assessment box, and a
+  forward link into the barre-chord module).
+
+### Changed
+- Every lesson video now points at a specific timestamp range with a clear
+  "job while you watch," instead of linking the whole video.
+
+### Behind the scenes
+- Finished the pre-launch checklist (live sign-in save test, printable handouts,
+  accessibility) and tidied the repo so internal planning docs are no longer
+  served on the public site.
+
 ## 2026-06-14 — Performance pass
 
 A deep-dive optimization pass focused on first load on slow school Wi-Fi /
