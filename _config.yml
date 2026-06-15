@@ -1,0 +1,17 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# GitHub Pages config for the Guitar Class site.
+#
+# This is a plain static HTML/JS/CSS site — we do NOT use Jekyll templating.
+# The ONLY purpose of this file is to keep internal planning & reference docs
+# OUT of the published site. Everything listed below stays in the git repo
+# (still visible on github.com), it just isn't served at
+#   https://jhoffmanteacher.github.io/guitar-class/
+#
+# To publish one of these later, remove it from the exclude list and push.
+# The live site itself only needs: index.html, app.js, config-main.js,
+# module-*.js, styles.css, sw.js, manifest.json, icon.svg, firebase-config.js.
+# ─────────────────────────────────────────────────────────────────────────────
+exclude:
+  - "*.md"                      # WORKFLOW, SONG_SWAP, CHANGELOG, CLAUDE — internal notes
+  - "archive/"                  # superseded planning docs
+  - "Relevant reference docs/"  # curriculum Google-Doc links + archived prototypes
