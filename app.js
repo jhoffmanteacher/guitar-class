@@ -7,9 +7,36 @@ const firebaseReady = typeof firebase !== 'undefined' && typeof firebaseConfig !
 if (firebaseReady) {
   firebase.initializeApp(firebaseConfig);
   auth = firebase.auth();
-  db   = firebase.firestore();
+  // NOTE: db (Firestore) is intentionally NOT initialized here. The Firestore
+  // SDK (~100 KB) is loaded on demand by ensureDb() the first time we read or
+  // write progress — i.e. only after sign-in — so the sign-in screen paints
+  // without it. See index.html.
 } else {
   showFirebaseLoadError();
+}
+
+/* ── Firestore SDK: load on demand ──
+   Loads firebase-firestore-compat.js (once) and initializes `db`. Called
+   before any read/write. signIn() pre-warms this during the Google popup so
+   it's usually ready by the time onAuthStateChanged fires. */
+let _firestoreLoad = null;
+function loadFirestoreSdk(){
+  if(_firestoreLoad) return _firestoreLoad;
+  _firestoreLoad = new Promise((resolve,reject)=>{
+    const s = document.createElement('script');
+    s.src = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js';
+    s.onload  = ()=>resolve();
+    s.onerror = ()=>{ _firestoreLoad=null; reject(new Error('Firestore SDK failed to load')); };
+    document.head.appendChild(s);
+  });
+  return _firestoreLoad;
+}
+async function ensureDb(){
+  if(db) return db;
+  if(!firebaseReady) return null;
+  await loadFirestoreSdk();
+  db = firebase.firestore();
+  return db;
 }
 let currentUser = null;
 let progress    = {};
@@ -93,6 +120,10 @@ function showFirebaseLoadError(){
 }
 function signIn(){
   showAuthError('');
+  // Pre-warm the Firestore SDK while the student is in the Google popup, so it's
+  // ready to load progress the moment they're back. Errors are ignored — the
+  // real load attempt (ensureDb) will surface any problem.
+  loadFirestoreSdk().catch(()=>{});
   auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
     .catch(e=>{
       // The student just closed/cancelled the popup — not an error worth nagging about.
@@ -160,6 +191,7 @@ function dismissWelcome(){
 /* ── Firestore ── */
 async function loadProgress(){
   try{
+    await ensureDb();
     const doc = await db.collection('progress').doc(currentUser.uid).get();
     if(doc.exists){
       const raw = doc.data().skills||{};
@@ -220,6 +252,7 @@ function saveResponses(){
   setSaveMsg('Saving…');
   respSaveTimer = setTimeout(async()=>{
     try{
+      await ensureDb();
       await db.collection('progress').doc(currentUser.uid).set({
         responses:responses,
         name:currentUser.displayName||'', email:currentUser.email||''
@@ -240,6 +273,7 @@ function saveCompleted(){
   setSaveMsg('Saving…');
   compSaveTimer = setTimeout(async()=>{
     try{
+      await ensureDb();
       await db.collection('progress').doc(currentUser.uid).set({
         completed:completed,
         name:currentUser.displayName||'', email:currentUser.email||''
@@ -257,6 +291,7 @@ function saveProgress(){
   setSaveMsg('Saving…');
   saveTimer = setTimeout(async()=>{
     try{
+      await ensureDb();
       await db.collection('progress').doc(currentUser.uid).set({
         skills:progress, lastModule:lastModuleNum, lastSet:lastSetId||null,
         name:currentUser.displayName||'', email:currentUser.email||''
@@ -2352,6 +2387,7 @@ function activateTeacherSetTab(id){ document.querySelectorAll('.t-wtab').forEach
 
 async function loadAllStudents(){
   try{
+    await ensureDb();
     const snap=await db.collection('progress').get();
     allStudents=[];
     snap.forEach(doc=>{

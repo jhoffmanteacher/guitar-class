@@ -37,7 +37,10 @@ function googleTranslateElementInit(){
 <script defer src="firebase-config.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<!-- The Firestore SDK (~100 KB) is NOT loaded here. It's only needed AFTER a
+     student signs in (to load/save progress), so it's fetched on demand by
+     ensureDb() in app.js — keeping it off the initial sign-in-screen paint.
+     signIn() pre-warms it during the Google popup so it's ready on return. -->
 <script defer src="config-main.js"></script>
 <!-- module-N.js files are NO LONGER loaded here. They're fetched on demand
      the first time a student opens that module (see loadModuleData in app.js),
