@@ -516,7 +516,7 @@ SETS.push(
             title: 'Solo over the groove with Pentatonic Pattern 1',
             steps: [
           {
-            text: 'Challenge 5 — Trade Off (give it a go!): partner up. One of you strums a progression (try Am–G–C or G–D–Em–C) with any pattern from this module; the other solos over it using Pentatonic Pattern 1 from Module 4. Swap after 8 bars. Solo option: loop the backing roots below (or record yourself strumming 8 bars) and solo over your own track. No score — aim for one clear musical idea, not a flurry of notes.',
+            text: 'Challenge 5 — Trade Off (give it a go!): partner up. One of you strums a progression (try Am–G–C or G–D–Em–C) with any pattern from this module. The other solos over it using Pentatonic Pattern 1 from Module 4. Swap after 8 bars. On your own? Loop the backing roots below (or record yourself strumming 8 bars) and solo over your own track. No score — aim for one clear musical idea, not a flurry of notes.',
             time: '5 min',
             hint: 'Am–G–C fits A minor pentatonic; a major-key progression fits major pentatonic. This is the payoff: the scale you learned in Module 4 lives on top of the chords you strum here. Leave space — silence is part of a solo.',
             playSeq: { label: 'Backing roots — Am · G · C', bpm: 70, notes: [45, 43, 48] }
@@ -603,6 +603,6 @@ MODULE_REVIEWS[6] = {
     'Play Em for 4 bars, then Am for 4 bars, with a non-stop down-up strum at 60 BPM',
     'Take G–D–Em–C and play it two ways — folk, then rock — switching feel with no break at the seam'
   ],
-  forward: 'Module 7 is the <strong>barre-chord</strong> module — and every steady strum hand you just built is what carries you through it. The rhythm keeps going even while your fretting hand fights the hardest shapes in the course; the groove you own now is what makes a clamped, buzzy first barre still sound like music.',
+  forward: 'Module 7 is the <strong>barre-chord</strong> module — and every steady strum hand you just built is what carries you through it. The rhythm keeps going even while your fretting hand fights the hardest shapes in the course. The groove you own now is what makes a clamped, buzzy first barre still sound like music.',
   standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
 };

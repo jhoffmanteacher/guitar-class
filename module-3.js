@@ -447,6 +447,6 @@ MODULE_REVIEWS[3] = {
     'Fret and move a clean 2-finger power chord along the E and A strings, muting the unused strings',
     'Perform an 8-bar power chord progression at 80 BPM with the metronome — at least 3 different chords and clean muting'
   ],
-  forward: 'The two-finger shape and the muting you just locked in are the backbone of rhythm guitar — and the E &amp; A string roots you slide between become your <strong>home base for the pentatonic patterns in Module 4</strong>, where you\'ll play lead lines and solos over these very same power chords.',
+  forward: 'The two-finger shape and the muting you just locked in are the backbone of rhythm guitar. The E &amp; A string roots you slide between also become your <strong>home base for the pentatonic patterns in Module 4</strong> — that\'s where you\'ll play lead lines and solos over these very same power chords.',
   standards: ['Pr.4a', 'Pr.5a', 'Pr.5b', 'Pr.6a', 'Re.7a']
 };

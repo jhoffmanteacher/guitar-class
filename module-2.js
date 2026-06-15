@@ -142,7 +142,7 @@ SETS.push(
             title: 'Name every note on the A string (frets 0–12)',
             steps: [
               {
-                text: 'Challenge 2 — A String Run (your Set 1 check-off): same on the A string, chart-free — A · B · C · D · E · F · G · A, up to fret 12 and back, one note per beat. Win: a clean lap with the metronome and no stalls. Being able to name any fret a partner calls out on demand is exactly what the Set 1 check-off tests.',
+                text: 'Challenge 2 — A String Run (your Set 1 check-off): same on the A string, chart-free — A · B · C · D · E · F · G · A, up to fret 12 and back, one note per beat. Win: a clean lap with the metronome and no stalls. The Set 1 check-off tests exactly this: a partner calls out any fret, and you name it on the spot.',
                 time: '4 min',
                 hint: 'Keep the metronome at 60 BPM. If you stall on a note, that\'s the one to drill.',
                 stuck: 'Drop to 50 BPM and win there first, or cover frets 0–5 (A–D) before adding the rest.',
@@ -168,7 +168,7 @@ SETS.push(
               {
                 text: 'Challenge 3 — Shuffle Run: write frets 0–12 on scraps of paper (or use the corners of your handout), shuffle them, then draw one at a time and — on the low E string — name it AND play it within 3 seconds. Win: 10 in a row with no counting up from E.',
                 time: '4 min',
-                hint: 'The 3-second limit is the real test — this is random access, not a memorized lap, which is exactly what "name any fret instantly" means.',
+                hint: 'The 3-second limit is the real test. You\'re jumping to random frets, not running a memorized lap — that\'s what "name any fret instantly" really means.',
                 stuck: 'Put only frets 0–7 in the pile first; add 8–12 once you hit 10 in a row.',
                 levelUp: 'Run the Shuffle on the A string too, or name a full lap going down the string (12 → 0) without counting.',
                 skills: [2, 3]
@@ -303,7 +303,7 @@ SETS.push(
           {
             text: 'Read this TAB: the opening of "Happy Birthday" written out on the low E string. Look at the fret numbers on the bottom line and try to play it. Click any note name below the TAB to hear how it should sound.',
             time: '3 min',
-            hint: 'Read left-to-right, one note per beat. The numbers tell you which fret to press on the low E string. Seeing a # (sharp)? It just means one fret higher than the plain note — F# is one fret above F. We\'ll dig into sharps and flats later; for now, just trust the fret numbers.',
+            hint: 'Read left-to-right, one note per beat. The numbers tell you which fret to press on the low E string. See a # (sharp)? It just means one fret higher than the plain note — F# is one fret above F. We\'ll cover sharps and flats later. For now, just trust the fret numbers.',
             skills: [4, 5],
             tab: {
               caption: '"Happy Birthday" — first two phrases · Low E string',
@@ -501,7 +501,7 @@ SETS.push(
           {
             text: 'Challenge 3 — Watchtower Bass Riff (your assessment piece): using the TAB, play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. Win: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound.',
             time: '5 min',
-            hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A). Thumb stays behind the neck; let each note ring fully before the next. Drill it until you can run it with your eyes closed — that is the unit-end test.',
+            hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A). Keep your thumb behind the neck. Let each note ring fully before the next. Drill it until you can run it with your eyes closed — that\'s the unit-end test.',
             stuck: 'Loop just F–G (frets 1–3) until the finger change is clean, then add the A on fret 5.',
             levelUp: 'Run the whole riff with your eyes closed — that\'s the real "from memory" test.',
             skills: [1, 2, 4, 5, 6],

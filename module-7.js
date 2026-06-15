@@ -26,7 +26,7 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/4-JTCASlh-w" target="_blank">How To Read TAB and Chord Boxes (BC-108) – JustinGuitar</a> (0:00–4:00).',
             time: '4 min',
-            hint: 'You\'ve read single-note TAB since Module 1. Watch for two things now: numbers STACKED vertically mean play them together (a chord), and the rhythm symbols above the numbers — plain stems for quarter notes, flags/beams for 8ths — tell you how long each note lasts.',
+            hint: 'You\'ve read single-note TAB since Module 1. Watch for two new things now. First: numbers STACKED vertically mean play them together (a chord). Second: the symbols above the numbers tell you how long each note lasts — plain stems are quarter notes, flags and beams are 8th notes.',
             skills: [1, 2, 3],
             response: { type: 'mc', prompt: 'When two or more numbers in a TAB line up VERTICALLY on top of each other, you should:',
               answer: 0,
@@ -236,7 +236,7 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/4cR1sa1_d_8" target="_blank">The Easiest F Chord Guitar Lesson You\'ll Find – JustinGuitar</a> (0:00–4:00).',
             time: '4 min',
-            hint: 'The F barre is famously hard — it\'s the LOWEST barre, where the strings are tightest, so it\'s the toughest spot (G and A higher up are easier). Watch his THUMB: on the BACK of the neck behind your index is where the squeezing power comes from.',
+            hint: 'The F barre is famously hard. It\'s the lowest barre, where the strings are tightest, so it\'s the toughest spot — G and A higher up are easier. Watch his THUMB: keep it on the BACK of the neck, behind your index. That\'s where the squeezing power comes from.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'For the cleanest E-shape barre, where should your THUMB go?',
               answer: 1,
@@ -320,7 +320,7 @@ SETS.push(
           {
             text: 'Challenge 3 — F, G, A Slide (your assessment piece): slide the same shape to fret 1 (F), fret 3 (G), and fret 5 (A) — same shape, three chords. Win: G and A ringing clean, then F — the hardest — without buzzing.',
             time: '5 min',
-            hint: 'F is the hardest position — don\'t panic if it buzzes. Barre chords are a hand-strength skill: if your hand cramps, shake it out and rest — short, frequent tries beat one long painful grind, and the strength comes within a couple of weeks.',
+            hint: 'F is the hardest position — don\'t panic if it buzzes. Barre chords are a hand-strength skill. If your hand cramps, shake it out and rest. Short, frequent tries beat one long painful grind, and the strength comes within a couple of weeks.',
             stuck: 'Build the barre in stages: (1) bar + just the low-E root, (2) add strings 5–4, (3) add the B and high E last — win each stage before stacking the next. Start at G or A (frets 3–5) where the strings are looser, then bring the shape down to F.',
             levelUp: 'Add B at the 7th fret as a 4th chord, or switch F→G→A in time at 70 BPM.',
             skills: [4, 5, 6],

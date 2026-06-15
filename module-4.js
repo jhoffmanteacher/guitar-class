@@ -63,15 +63,15 @@ SETS.push(
             ] }
           },
           {
-            text: 'Match the mood — scale choice changes the feel. Listen to two short solos: <a href="https://www.youtube.com/watch?v=BycLmWI97Nc" target="_blank" data-ext="1">Clip A — "La Bamba"</a> (major pentatonic) then <a href="https://www.youtube.com/watch?v=kpC69qIe02E" target="_blank" data-ext="1">Clip B — "The Thrill Is Gone"</a> (minor / blues). Notice how the major-pentatonic solo sounds brighter and happier, while the minor / blues solo sounds darker and moodier.',
+            text: 'Match the mood — scale choice changes the feel. Listen to two short solos: <a href="https://www.youtube.com/watch?v=BycLmWI97Nc" target="_blank" data-ext="1">Clip 1 — "La Bamba"</a> (major pentatonic) then <a href="https://www.youtube.com/watch?v=kpC69qIe02E" target="_blank" data-ext="1">Clip 2 — "The Thrill Is Gone"</a> (minor / blues). Notice how the major-pentatonic solo sounds brighter and happier, while the minor / blues solo sounds darker and moodier.',
             time: '3 min',
             hint: 'Major pentatonic = brighter, sunnier. Minor / blues = darker, sadder, more "bluesy." Same instrument — the scale choice sets the mood.',
             response: { type: 'mc', prompt: 'Which solo sounds darker / more "blues"?',
               answer: 1,
-              explain: 'Clip B ("The Thrill Is Gone") uses the minor / blues scale — darker and moodier. Clip A ("La Bamba") is major pentatonic — brighter and sunnier.',
+              explain: 'Clip 2 ("The Thrill Is Gone") uses the minor / blues scale — darker and moodier. Clip 1 ("La Bamba") is major pentatonic — brighter and sunnier.',
               choices: [
-              'Clip A (major pentatonic)',
-              'Clip B (minor / blues)',
+              'Clip 1 (major pentatonic)',
+              'Clip 2 (minor / blues)',
               'No difference'
             ] }
           },
@@ -79,7 +79,7 @@ SETS.push(
             text: 'In one word each, name the mood you heard in the two clips above.',
             time: '1 min',
             hint: 'There\'s no wrong answer — trust your ear. Words like "bright," "happy," "dark," "sad," or "moody" all work.',
-            response: { type: 'short', prompt: 'In one word, describe the mood of each clip.', placeholder: 'Clip A: ____   ·   Clip B: ____' }
+            response: { type: 'short', prompt: 'In one word, describe the mood of each clip.', placeholder: 'Clip 1: ____   ·   Clip 2: ____' }
           },
           {
             text: 'Station Wrap-Up — take a beat to reflect: when you positioned Pattern 1 today, what told you whether you were set up for MAJOR or MINOR — the finger on the root, or the sound? Which felt more reliable?',
@@ -287,7 +287,7 @@ SETS.push(
           {
             text: 'Now try it: the natural notes on the D string. Click any note below the TAB to hear it, then play and NAME each one up the string — D · E · F · G · A · B · C. You\'ll drill this chart-free at the practice station.',
             time: '4 min',
-            hint: 'Same musical alphabet you know from the E and A strings — the gap between E–F and B–C is one fret (a half step); everything else is two frets (a whole step).',
+            hint: 'It\'s the same musical alphabet you know from the E and A strings. The gap between E–F and B–C is one fret (a half step). Every other gap is two frets (a whole step).',
             skills: [7],
             tab: {
               caption: 'D string natural notes · D E F G A B C (frets 0–10)',
@@ -553,7 +553,7 @@ SETS.push(
           {
             text: 'Challenge 3 — Perform It (your assessment piece — give it a go!): play your 4-bar solo over a backing track ("All Along the Watchtower", Core Song 2, or one you queue up), working in at least one hammer-on, pull-off, or vibrato. No score — just tell a story, don\'t run scales.',
             time: '6 min',
-            hint: 'Include at least one technique (hammer-on, pull-off, or vibrato) in your solo. Don\'t just run scales — tell a story! No one to play for? Record yourself on the Chromebook over the backing track and watch it back — performing for the camera counts, and the playback shows you exactly where to tighten up.',
+            hint: 'Include at least one technique (hammer-on, pull-off, or vibrato) in your solo. Don\'t just run scales — tell a story! No one to play for? Record yourself on the Chromebook over the backing track and watch it back. Playing for the camera counts, and the playback shows you exactly where to tighten up.',
             stuck: 'Drop the backing track and play your written 4 bars alone, slowly, until they\'re solid — then add the track back and just one technique.',
             levelUp: 'Perform it standing, play it for a partner or the class, or transpose your solo to E minor and play it from the open-string box.',
             skills: [3, 6, 7]
@@ -654,6 +654,6 @@ MODULE_REVIEWS[4] = {
     'Position Pattern 1 for any named major or minor key and play it ascending and descending in time, with alternate picking',
     'Perform an original 4-bar solo over a course-song backing track using the minor pentatonic box, working in at least one hammer-on, pull-off, or vibrato — and name the scale and root you used'
   ],
-  forward: 'Those single pentatonic notes you\'ve been soloing with don\'t disappear in <strong>Module 5</strong> — you stack them. The open chords you\'ll build there (Am, C, G, D…) are made of these same notes, and the clean fretting and finger independence you sharpened soloing here are exactly what makes a chord ring without buzzing. You\'ll go from playing one note at a time to playing five at once.',
+  forward: 'Those single pentatonic notes you\'ve been soloing with don\'t disappear in <strong>Module 5</strong> — you stack them. The open chords you\'ll build there (Am, C, G, D…) are made of these same notes. And the clean fretting and finger independence you sharpened here are exactly what makes a chord ring without buzzing. You\'ll go from playing one note at a time to playing five at once.',
   standards: ['Cr.1a', 'Cr.2a', 'Pr.4a', 'Pr.5a', 'Pr.5b', 'Pr.6a']
 };

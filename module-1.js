@@ -25,8 +25,8 @@ SETS.push(
         title: 'Computer station — Watch · Listen · Reflect',
         steps: [
           {
-            text: 'Headphone routine (every computer-station day): plug in, keep the volume low enough that the classmate beside you can\'t hear it, and slip one earcup off when the teacher is talking. This is our shared-room norm all semester.',
-            hint: 'If the person next to you can hear your video, it\'s too loud — comfortable for you, quiet for everyone else.'
+            text: 'Headphone routine (every computer-station day): plug in. Keep the volume low — the classmate next to you should not hear it. Slip one earcup off when the teacher is talking. We do this all semester.',
+            hint: 'If the person next to you can hear your video, it\'s too loud. Comfortable for you, quiet for everyone else.'
           },
           {
             text: 'Watch: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">How to Practice Guitar – JustinGuitar</a> (Lesson 1 Practice Routine).',
@@ -49,14 +49,14 @@ SETS.push(
             ] }
           },
           {
-            text: 'Ear training — acoustic vs. electric. Listen to two short clips of the SAME song, "All Along the Watchtower": <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank" data-ext="1">Clip A — Bob Dylan</a> then <a href="https://www.youtube.com/watch?v=TLV4_xaYynY" target="_blank" data-ext="1">Clip B — Jimi Hendrix</a>. One is played on an acoustic guitar, the other on an electric. Just listen for the difference in tone.',
-            hint: 'Acoustic guitars sound warm, woody, and natural. Electric guitars sound brighter and can be distorted or "fuzzy." Same song — very different guitar sound.',
+            text: 'Ear training — acoustic vs. electric. Two short clips play the SAME song, "All Along the Watchtower": <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank" data-ext="1">Clip 1 — Bob Dylan</a> and <a href="https://www.youtube.com/watch?v=TLV4_xaYynY" target="_blank" data-ext="1">Clip 2 — Jimi Hendrix</a>. One uses an acoustic guitar, the other an electric. Listen for the difference in tone.',
+            hint: 'Acoustic guitars sound warm and woody. Electric guitars sound brighter and can be distorted or "fuzzy." Same song, very different sound.',
             response: { type: 'mc', prompt: 'Which clip is the electric guitar?',
               answer: 1,
-              explain: 'Clip B is Jimi Hendrix\'s electric version — brighter, with distortion. Clip A is Bob Dylan\'s warmer, woodier acoustic.',
+              explain: 'Clip 2 is Jimi Hendrix\'s electric version — brighter, with distortion. Clip 1 is Bob Dylan\'s warmer, woodier acoustic.',
               choices: [
-              'Clip A',
-              'Clip B',
+              'Clip 1',
+              'Clip 2',
               'They sound identical'
             ] }
           }
@@ -69,15 +69,15 @@ SETS.push(
             title: 'Get comfortable holding & exploring the guitar',
             steps: [
           {
-            text: 'Safe handling (every class): when you\'re not playing, rest the guitar flat on its back across your lap or lay it in the case/stand — never lean it loose against a chair or wall where it can slip. Carry it with one hand on the neck and one on the body. Win: you can set the guitar down and pick it up without it ever wobbling or tipping.',
-            hint: 'A guitar that falls can crack its neck. Thirty seconds of care keeps the class set playable all year.'
+            text: 'Safe handling (every class): when you\'re not playing, rest the guitar flat on its back across your lap, or lay it in the case or stand. Never lean it against a chair or wall — it can slip and fall. Carry it with one hand on the neck and one on the body. Win: you can set the guitar down and pick it up without it wobbling or tipping.',
+            hint: 'A guitar that falls can crack its neck. A little care keeps the class set playable all year.'
           },
           {
             text: 'Pick up the guitar. Hold it in a comfortable position. Strum all 6 strings slowly with your thumb — just listen to the sound. Win: the guitar sits steady on your leg and all 6 strings ring when you strum.',
             hint: 'Don\'t worry about pressing any frets yet. Just get used to holding it.'
           },
           {
-            text: 'Do you prefer to have your foot elevated or on the ground? Try both and keep whichever lets you sit upright without gripping the neck to hold the guitar up.'
+            text: 'Try playing with your foot up on a stool, then flat on the ground. Keep whichever one lets you sit up straight without gripping the neck to hold the guitar up.'
           },
           {
             text: 'Try tapping the body, plucking one string at a time, and strumming. What differences do you notice? Win: you can make at least three different sounds and say how they differ.',

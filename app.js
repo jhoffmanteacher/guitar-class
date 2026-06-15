@@ -817,6 +817,20 @@ function findNoteMatches(text, stringMatches){
   return out;
 }
 
+/* Distinguish the grammatical article "A" ("A guitar…", "A hard strum…")
+   from the chord/note A. The indefinite article only capitalises at the
+   START of a sentence and is always followed by a lowercase word, whereas
+   musical "A" refs sit mid-sentence ("switch to A in time", "F · G · A
+   roots", "the A blues scale", "→A"). We keep "A major" linked since that's
+   a real chord. */
+function isIndefiniteArticleA(text, start, end){
+  const after = text.slice(end).match(/^\s+([a-z]+)/);
+  if (!after) return false;                 // followed by punctuation/capital/arrow → chord
+  if (/^maj(or)?$/.test(after[1])) return false;  // "A major" is a chord, keep it
+  const before = text.slice(0, start).replace(/\s+$/, '');
+  return before === '' || /[.!?:;]$/.test(before);  // only at a sentence boundary
+}
+
 function wrapChordLinksIn(rootEl){
   if (!rootEl) return;
   /* Module 7 (barre chords): each step already shows accurate inline chord
@@ -862,6 +876,7 @@ function wrapChordLinksIn(rootEl){
       const end = start + chord.length;
       if (stringMatches.some(s => s.start < end && start < s.end)) continue;
       if (noteMatches.some(s => s.start < end && start < s.end)) continue;
+      if (chord === 'A' && isIndefiniteArticleA(text, start, end)) continue;
       chordMatches.push({ start, end, chord });
     }
 

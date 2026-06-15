@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-06-15 — Easier-to-read instructions
+
+A readability pass across the whole site to make directions clearer.
+
+### Changed
+- **All modules:** long, complex sentences in the instructions and hints were
+  broken into shorter, more direct ones. Same friendly tone and the same
+  information — just easier to follow at a glance.
+- **Modules 1 & 4:** the two listening clips are now labeled **Clip 1** and
+  **Clip 2** (instead of "Clip A" / "Clip B"), so the labels can't be mistaken
+  for chord names.
+
+### Fixed
+- A grammatical "A" at the start of a sentence (like "A guitar that falls…") no
+  longer pops up an A-chord diagram by mistake. Real chord references (A, A
+  major, etc.) still link as before.
+
 ## 2026-06-14 — Modules 1–3 proofread fixes
 
 A pass over the first three modules caught a couple of things that could trip you up.
