@@ -85,10 +85,15 @@ This is the at-a-glance list; full detail is in the numbered sessions below.
   ~174K vs ~151K). The modular "lighter" win needs a **bundler** to tree-shake, which this
   project deliberately doesn't have. Did the defer above instead. Don't revisit unless a
   build step is ever introduced.
-- **Consolidate Firestore writers** — merge `saveProgress` / `saveResponses` /
-  `saveCompleted` (`app.js`) into one debounced writer that batches whatever's dirty
-  (currently 3 separate 800ms timers, each doing a full `.set(merge)` with name/email).
-  Low effort, low risk cleanup.
+- **Consolidate Firestore writers** — ✅ done 2026-06-14 — `saveProgress` /
+  `saveResponses` / `saveCompleted` now route through one debounced writer
+  (`queueSave` → `flushSave`, single `saveTimer`, a `_dirtyKeys` set). Categories
+  (skills · place · responses · completed) are marked dirty and flushed together in
+  ONE `.set(merge:true)`, with the payload built from live state at flush time (so it
+  always sends current values; failures re-mark dirty for the next save). Was: 3
+  independent 800ms timers that could fire near-simultaneous writes. `app.js` only.
+  Verified headless: 3 rapid savers → 1 write carrying all categories, `merge:true`
+  preserved, zero errors. Bumped CACHE_VERSION v16→v17.
 
 **Done or dropped:** Phases 1–3 (except 3.5/3.9), 4.1, 5 onboarding + reflection
 prompts, 6.2. Dropped: 6.1 looper, 6.3 Song Journey. *(The old `TODO.md` items —
