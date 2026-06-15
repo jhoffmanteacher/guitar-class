@@ -25,7 +25,6 @@ SETS.push(
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/n45PDizCRLw" target="_blank">Your FIRST Strumming Pattern EVER! – JustinGuitar</a> (0:00–4:00). Job while you watch: keep your eyes on his strumming wrist and count how many times it changes direction in one bar.',
-            time: '4 min',
             hint: 'Pay close attention to his wrist — it never stops moving, even when he isn\'t hitting the strings. The pendulum motion is the secret.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'What is the SINGLE most important habit for good strumming?',
@@ -40,7 +39,6 @@ SETS.push(
           },
           {
             text: 'Watch: <a href="https://youtu.be/NCV9IgeSYuU" target="_blank">Beginner Guitar Strumming Patterns You MUST Know! – Marty Music</a> (0:00–3:00). Job while you watch: count "1 + 2 + 3 + 4 +" out loud with him for the first pattern and notice which counts get a down and which get an up.',
-            time: '3 min',
             hint: 'Count out loud with him: "1 + 2 + 3 + 4 +". Saying the count is the fastest way to internalize the pulse.',
             skills: [3],
             response: { type: 'short', placeholder: 'When you count "1 + 2 + 3 + 4 +", which counts are the downstrokes? Which are the upstrokes?' }
@@ -61,7 +59,6 @@ SETS.push(
           },
           {
             text: 'Meet your two chords for today: <strong>Em</strong> and <strong>Am</strong> (from Module 5). Form each shape from the diagram and strum once to make sure every string rings — you\'ll switch between these two all class.',
-            time: '2 min',
             hint: 'Em uses two fingers; Am adds a third. The diagrams show exactly where each finger goes. Clean chords now make the strumming sound good later.',
             chords: [
               { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 },
@@ -70,7 +67,6 @@ SETS.push(
           },
           {
             text: 'Station Wrap-Up — take a beat to reflect: which was harder to keep steady today — your strum hand swinging non-stop like a pendulum, or counting "1 + 2 + 3 + 4 +" out loud the whole time? What started to make it click?',
-            time: '1 min',
             response: { type: 'short', placeholder: 'e.g. my hand kept freezing on the chord change — slowing to 50 BPM helped it keep swinging' }
           }
         ]
@@ -93,7 +89,6 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 1 — Pendulum Motion: mute the strings with your fretting hand and, at 60 BPM, strum just the down-up motion — down on each beat, up on each "+", counting aloud. You\'ve got it when: a free, even swing with no forearm tension — pure rhythm, no notes.<div class="strum-line">D   U   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
-            time: '3 min',
             hint: 'No chord, no notes — just the rhythm. Your wrist should swing freely like a pendulum. If your forearm is tense, slow down.',
             stuck: 'Drop to 50 BPM and let your hand bounce loose, like shaking water off your fingers — the down-up should feel automatic before you add any pressure.',
             levelUp: 'Push to 80 BPM, or keep the swing perfectly even with your eyes closed for 8 bars.',
@@ -106,7 +101,6 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 2 — Even Eighths on Em: fret Em and strum down-up at 60 BPM for 8 bars. You\'ve got it when: every strum even — same volume, same timing — with upstrokes brushing only the top 3–4 strings.',
-            time: '3 min',
             hint: 'It\'s normal for upstrokes to feel weaker at first. They should brush only the top 3–4 strings, not the whole chord.',
             stuck: 'Lighten the pick on the way up so it grazes just the thin strings. If the chord buzzes, recheck your Em fingers before worrying about the strum.',
             levelUp: 'Bump to 75 BPM, or hold the 8 bars without letting your eyes drop to your strumming hand.',
@@ -123,7 +117,6 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 3 — Em ↔ Am Switch (your assessment piece): switch Em ↔ Am every 2 bars while the down-up strum never stops. Set the ⏱ Timer for 3 minutes and loop it. You\'ve got it when: the strum hand keeps swinging right through every chord change — let the chord catch up.',
-            time: '4 min',
             hint: 'The #1 beginner mistake is stopping the strum to fix the chord. Keep the wrist moving — let the chord catch up.',
             stuck: 'Park on a finger Em and Am share and pivot around it — don\'t lift every finger at once. Drop to 50 BPM so the change has room.',
             levelUp: 'Switch every bar instead of every 2 bars, or climb to 75 BPM with the strum still unbroken.',
@@ -219,7 +212,6 @@ SETS.push(
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/6LmQCdt_ZhQ" target="_blank">The Most Common Strumming Pattern of All Time! – JustinGuitar</a> (0:00–4:00). Job while you watch: air-strum along and find the one downstroke he skips — the wrist still swings down, but the pick misses on purpose.',
-            time: '4 min',
             hint: 'Justin calls this "old faithful" — D-DU-UDU. Listen for which strums he skips: the wrist still moves, but the pick doesn\'t hit the strings on those beats.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'In the D-DU-UDU pattern, on which count is the strum SKIPPED (no strings hit, but wrist still moves)?',
@@ -234,7 +226,6 @@ SETS.push(
           },
           {
             text: 'Watch: <a href="https://youtu.be/0JDGO0n6tjw" target="_blank">Step-by-Step Easy Strumming Patterns – Marty Music</a> (0:00–3:00). Job while you watch: clap a little louder on beats 2 and 4 along with him, and feel how that "backbeat" makes the pattern groove.',
-            time: '3 min',
             hint: 'Marty stacks patterns from easiest to harder, accenting beats 2 and 4 as he goes. The accents give the strum a "backbeat" feel, like a drummer\'s snare.',
             skills: [3, 4],
             response: { type: 'short', placeholder: 'Why might emphasizing beats 2 and 4 (instead of 1 and 3) make a strum pattern sound more "groovy"?' }
@@ -255,7 +246,6 @@ SETS.push(
           },
           {
             text: 'Today\'s pattern lands on <strong>G</strong> and <strong>D</strong>. Form each shape from the diagram and strum once cleanly before you add the D-DU-UDU rhythm.',
-            time: '2 min',
             hint: 'G is a full six-string chord; D skips the two lowest strings (the X marks). Get them ringing clean first — the rhythm is easier when the chord isn\'t fighting you.',
             chords: [
               { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
@@ -264,7 +254,6 @@ SETS.push(
           },
           {
             text: 'Station Wrap-Up — take a beat to reflect: in the D-DU-UDU pattern, what trips you up more right now — skipping a strum while the wrist keeps moving, or landing the accents on beats 2 and 4? What helped today?',
-            time: '1 min',
             response: { type: 'short', placeholder: 'e.g. I keep actually hitting the strings on the skip — pulling the pick back just slightly fixed it' }
           }
         ]
@@ -287,7 +276,6 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 1 — Learn the Groove: mute the strings and, at 60 BPM, strum the pattern "Down, Down-Up, Up-Down-Up" (D-DU-UDU). You\'ve got it when: the wrist keeps moving on the skipped downstroke — the pick just misses on purpose.<div class="strum-line">D   ·   D   U   ·   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
-            time: '3 min',
             hint: 'The trickiest part is keeping the wrist moving on the skipped downstroke. The wrist still goes down — the pick just misses the strings on purpose.',
             stuck: 'Say it out loud — "down, down-up, up-down-up" — and air-strum with no pick first. The · dots above are the beats your hand passes but doesn\'t hit.',
             levelUp: 'Run it at 75 BPM, or accent the very first down of each bar so the pattern has a clear "top".',
@@ -300,7 +288,6 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 2 — Pattern on Em: fret Em and play D-DU-UDU at 60 BPM for 8 bars, counting aloud and accenting beats 2 and 4. You\'ve got it when: 8 clean bars with a clear "snare hit" feel on 2 and 4.',
-            time: '3 min',
             hint: 'Add accents on beats 2 and 4 — those downstrokes should be a little louder. Feel the "snare hit" on those beats.',
             stuck: 'Drop the accents for now and just nail the D-DU-UDU shape clean for 8 bars; add the louder 2-and-4 hits once the pattern runs on autopilot.',
             levelUp: 'Move it to G or D, or push to 75 BPM with the backbeat still landing.',
@@ -314,7 +301,6 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 3 — G → D, Pattern Locked (your assessment piece): loop G → D every 2 bars playing D-DU-UDU, and set the ⏱ Timer for 3 minutes to keep going. You\'ve got it when: the pattern stays identical through the change — only the chord moves (drop to 50 BPM if it falls apart).',
-            time: '4 min',
             hint: 'If the pattern falls apart during the chord change, slow to 50 BPM. The pattern is the GROOVE — losing it is worse than missing a note in the chord.',
             stuck: 'Change the chord on the LAST upstroke of the bar, while your hand is already moving up — that\'s the free moment to jump from G to D. Loop just 2 bars until the seam disappears.',
             levelUp: 'Add a third chord (G → D → Em), or run it at 75 BPM with no break at the change.',
@@ -403,7 +389,6 @@ SETS.push(
         title: 'Computer station — Watch · Listen · Practice',        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/CjM5fyXoV8w" target="_blank">Learn ANY Strumming Pattern with this Exercise – JustinGuitar</a> (0:00–4:00). Job while you watch: pick ONE pattern he shows and tap it on your leg until you can keep it going without looking.',
-            time: '4 min',
             hint: 'Notice how each pattern Justin demonstrates has a different feel — folk feels gentle, rock feels driving, reggae feels bouncy. The pattern is the GENRE in many cases.',
             skills: [1, 2, 3],
             response: { type: 'mc', prompt: 'Which strum-pattern feature most defines REGGAE rhythm?',
@@ -418,7 +403,6 @@ SETS.push(
           },
           {
             text: 'Watch: <a href="https://youtu.be/NCV9IgeSYuU" target="_blank">Beginner Guitar Strumming Patterns You MUST Know! – Marty Music</a> (0:00–3:00). Job while you watch: this time ignore the patterns themselves — just notice how he decides WHICH pattern fits a song.',
-            time: '3 min',
             hint: 'Marty walks through several patterns. There is no single "correct" one — listen to a song and feel which fits. The original recording usually tells you exactly what to do.',
             skills: [4, 5],
             response: { type: 'short', placeholder: 'Pick a song you like. Describe the strum pattern in your own words — is it gentle, driving, choppy? What gives it that feel?' }
@@ -431,7 +415,6 @@ SETS.push(
           },
           {
             text: 'The progressions today add one new shape: <strong>C</strong>. Form it from the diagram and strum the top five strings (the low E is muted) until it rings clean.',
-            time: '2 min',
             hint: 'C skips the lowest string (the X on string 6). Your ring finger reaches to the 3rd fret of the A string — a big stretch at first.',
             chords: [
               { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 }
@@ -439,7 +422,6 @@ SETS.push(
           },
           {
             text: 'Station Wrap-Up — take a beat to reflect: of the three feels you tried — folk, rock, reggae — which was hardest to make sound convincing on your guitar, and what gave it away as "not quite right"?',
-            time: '1 min',
             response: { type: 'short', placeholder: 'e.g. reggae — my offbeat upstrokes were too heavy, so it sounded like rock with gaps' }
           }
         ]
@@ -462,7 +444,6 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 1 — Folk Feel: hold G and strum all downstrokes, one per beat, at 70 BPM — quiet and steady, campfire style. You\'ve got it when: even, soft, supportive strumming with no accents sticking out.<div class="strum-line">D       D       D       D\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
-            time: '3 min',
             hint: 'Folk is about supporting the singer, not standing out. Soft attack, even volume, no accents.',
             stuck: 'Strum from the wrist only and let the pick barely graze the strings — imagine someone is singing and you must not cover them up.',
             levelUp: 'Add a gentle up-strum on the "+" of beats 2 and 4 for a fuller campfire feel.',
@@ -475,7 +456,6 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 2 — Rock Feel: same G at the same tempo, but dig in — heavy down-up-down-up accenting every down. You\'ve got it when: a chunky, driving sound using arm weight, not just wrist.<div class="strum-line">D   U   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
-            time: '3 min',
             hint: 'Rock strumming uses arm weight more than wrist. Let the pick go deeper into the strings. Aim for a "chunky" sound.',
             stuck: 'Strum from the elbow, not just the wrist — rock needs weight. Keep the accents on the downs and let the ups stay light.',
             levelUp: 'Push to 90 BPM, or palm-mute the low strings with the side of your hand for a tighter chug.',
@@ -488,7 +468,6 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 3 — Reggae Chop (give it a go!): hold G, skip every downbeat, and strum UP only on each "+" — rest-up-rest-up. No score — play along with "Three Little Birds" to lock in the offbeat feel.<div class="strum-line">·   U   ·   U   ·   U   ·   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
-            time: '3 min',
             hint: 'Counter-intuitive at first — your hand goes down on the beats but doesn\'t hit the strings. Listen to "Three Little Birds" while you do this to lock in the feel.',
             stuck: 'Keep your hand swinging down on every number, but lift the pick away so it only catches the strings on the way back up. Count "rest-UP-rest-UP" out loud.',
             levelUp: 'Mute with your fretting hand right after each up-strum for the crisp, clipped "chk" of a real reggae chop.',
@@ -502,7 +481,6 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 4 — Two Feels, One Song (your assessment piece): take G–D–Em–C and play 8 bars folk, then switch to rock for 8 bars — same chords, two clearly different feels, no break at the switch. Set the ⏱ Timer for 3 minutes and loop it.',
-            time: '4 min',
             hint: 'The switch is the skill. Change the feel on the downbeat of a new bar so the transition lands cleanly.',
             stuck: 'Keep the chords and tempo identical — change ONLY your strum hand. Drill just the 2-bar seam where folk becomes rock until it\'s smooth.',
             levelUp: 'Add reggae as a third 8-bar section, or switch feels every 4 bars instead of every 8.',
@@ -517,7 +495,6 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 5 — Trade Off (give it a go!): partner up. One of you strums a progression (try Am–G–C or G–D–Em–C) with any pattern from this module. The other solos over it using Pentatonic Pattern 1 from Module 4. Swap after 8 bars. On your own? Loop the backing roots below (or record yourself strumming 8 bars) and solo over your own track. No score — aim for one clear musical idea, not a flurry of notes.',
-            time: '5 min',
             hint: 'Am–G–C fits A minor pentatonic; a major-key progression fits major pentatonic. This is the payoff: the scale you learned in Module 4 lives on top of the chords you strum here. Leave space — silence is part of a solo.',
             playSeq: { label: 'Backing roots — Am · G · C', bpm: 70, notes: [45, 43, 48] }
           }

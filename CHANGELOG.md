@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-06-15 — No more time limits on activities
+
+### Changed
+- **All modules:** the little "⏱ X min" time tags on every step are gone. They
+  read like time limits, and the class is meant to be self-paced — everyone
+  moves through the activities at their own speed. (The optional Timer tool is
+  still there for "beat your record" practice drills if you want it.)
+
 ## 2026-06-15 — Clearer challenge labels
 
 ### Changed

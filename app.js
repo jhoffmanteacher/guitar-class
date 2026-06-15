@@ -1350,12 +1350,11 @@ function buildStations(w, stationId){
       }
       return '';
     })() : '';
-    const timeHtml = s.time ? `<span class="step-time" title="Suggested time">&#x23F1;&#xFE0F; ${escHtml(s.time)}</span>` : '';
     const readBtn = `<button class="read-aloud-btn" type="button" onclick="event.stopPropagation();readAloudStep(this)" title="Read this step aloud" aria-label="Read aloud">&#x1F50A;</button>`;
     const doneKey = `${w.id}-${ns}-${i}`;
     const isDone = completed[doneKey] === true;
     const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${isDone ? '&#x2713; Done' : 'Mark done'}</button></div>`;
-    return `<li class="step${isDone ? ' step-done' : ''}"><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span>${timeHtml}<div class="step-body">${playSeqHtml}${hintHtml}${branchHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div>${doneBtn}</div></li>`;
+    return `<li class="step${isDone ? ' step-done' : ''}"><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${hintHtml}${branchHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div>${doneBtn}</div></li>`;
   }).join('');
   const sectionsHtml=(sections,baseNs)=>sections.map((sec,gi)=>{
     const ns = `${baseNs}-sec${gi}`;
