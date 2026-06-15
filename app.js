@@ -89,8 +89,7 @@ async function ensureModuleRendered(num){
   // Idempotent: already-wrapped spans are skipped (see CHORD_SKIP_CLASSES).
   wrapAllChordLinks();
 }
-let respSaveTimer = null;
-let compSaveTimer = null;
+let _dirtyKeys = new Set();   // which categories need writing: skills · place · responses · completed
 const escAttr = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const escHtml = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 // Builds the signed-in user header. Escapes name/email/photoURL — Google
@@ -246,61 +245,50 @@ function onStepMcSelect(key, btn){
   group.querySelectorAll('.step-mc-opt').forEach(b=>b.classList.remove('correct','incorrect'));
   btn.classList.add(btn.dataset.correct === '1' ? 'correct' : 'incorrect');
 }
-function saveResponses(){
+/* ── Unified progress writer ──
+   skills, last-place, responses, and completed all live in the SAME Firestore
+   doc, so instead of three independent debounced writers (which could fire
+   several near-simultaneous .set() calls), we mark which categories are dirty
+   and flush them together in ONE write. The payload is built from live state at
+   flush time, so it always sends the current values. saveProgress /
+   saveResponses / saveCompleted are kept as named entry points (called from
+   inline handlers and all over app.js). */
+function queueSave(...keys){
   if(!currentUser) return;
-  clearTimeout(respSaveTimer);
+  keys.forEach(k=>_dirtyKeys.add(k));
+  if(_dirtyKeys.has('place')) saveLocalPlace();   // local mirror, immediate
+  clearTimeout(saveTimer);
   setSaveMsg('Saving…');
-  respSaveTimer = setTimeout(async()=>{
-    try{
-      await ensureDb();
-      await db.collection('progress').doc(currentUser.uid).set({
-        responses:responses,
-        name:currentUser.displayName||'', email:currentUser.email||''
-      },{merge:true});
-      setSaveMsg('Saved ✓');
-      setTimeout(()=>setSaveMsg(''),2000);
-    } catch(e){ setSaveMsg('Save failed — check connection'); }
-  },800);
+  saveTimer = setTimeout(flushSave, 800);
 }
+async function flushSave(){
+  if(!currentUser) return;
+  const keys = _dirtyKeys; _dirtyKeys = new Set();
+  if(!keys.size) return;
+  const payload = { name:currentUser.displayName||'', email:currentUser.email||'' };
+  if(keys.has('skills'))    payload.skills    = progress;
+  if(keys.has('place')){    payload.lastModule = lastModuleNum; payload.lastSet = lastSetId||null; }
+  if(keys.has('responses')) payload.responses = responses;
+  if(keys.has('completed')) payload.completed = completed;
+  try{
+    await ensureDb();
+    await db.collection('progress').doc(currentUser.uid).set(payload,{merge:true});
+    setSaveMsg('Saved ✓');
+    setTimeout(()=>setSaveMsg(''),2000);
+  } catch(e){
+    keys.forEach(k=>_dirtyKeys.add(k));   // keep dirty so the next save retries
+    setSaveMsg('Save failed — check connection');
+  }
+}
+function saveResponses(){ queueSave('responses'); }
 
 function onCompleteChange(key, isDone){
   if(isDone) completed[key] = true; else delete completed[key];
   saveCompleted();
 }
-function saveCompleted(){
-  if(!currentUser) return;
-  clearTimeout(compSaveTimer);
-  setSaveMsg('Saving…');
-  compSaveTimer = setTimeout(async()=>{
-    try{
-      await ensureDb();
-      await db.collection('progress').doc(currentUser.uid).set({
-        completed:completed,
-        name:currentUser.displayName||'', email:currentUser.email||''
-      },{merge:true});
-      setSaveMsg('Saved ✓');
-      setTimeout(()=>setSaveMsg(''),2000);
-    } catch(e){ setSaveMsg('Save failed — check connection'); }
-  },800);
-}
+function saveCompleted(){ queueSave('completed'); }
 
-function saveProgress(){
-  if(!currentUser) return;
-  saveLocalPlace();
-  clearTimeout(saveTimer);
-  setSaveMsg('Saving…');
-  saveTimer = setTimeout(async()=>{
-    try{
-      await ensureDb();
-      await db.collection('progress').doc(currentUser.uid).set({
-        skills:progress, lastModule:lastModuleNum, lastSet:lastSetId||null,
-        name:currentUser.displayName||'', email:currentUser.email||''
-      },{merge:true});
-      setSaveMsg('Saved ✓');
-      setTimeout(()=>setSaveMsg(''),2000);
-    } catch(e){ setSaveMsg('Save failed — check connection'); }
-  },800);
-}
+function saveProgress(){ queueSave('skills','place'); }
 function setSaveMsg(msg){ document.querySelectorAll('.save-ind').forEach(el=>el.textContent=msg); }
 
 /* ── Render ── */
