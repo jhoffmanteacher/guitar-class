@@ -14,3 +14,18 @@
 
 const SETS = [];
 const MODULE_REVIEWS = {};
+
+// Lightweight module index so the Module dropdown can populate WITHOUT loading
+// every module's data file. Each module-N.js is fetched on demand the first
+// time its module is opened (see loadModuleData in app.js). Keep the `name`
+// values in sync with each file's `module:` field.
+const MODULE_MANIFEST = [
+  { num: 1, name: 'Introductions: You and The Guitar' },
+  { num: 2, name: 'Notes on the E & A Strings' },
+  { num: 3, name: 'Two-Finger Power Chords' },
+  { num: 4, name: 'Major / Minor / Blues Pentatonic Scales' },
+  { num: 5, name: 'Open Chords' },
+  { num: 6, name: 'Strumming Patterns with Chords' },
+  { num: 7, name: 'TAB Notation and Barre Chords' },
+  { num: 8, name: 'Finger Picking' }
+];

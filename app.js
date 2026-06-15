@@ -16,6 +16,52 @@ let progress    = {};
 let responses   = {};
 let completed   = {};
 let saveTimer   = null;
+
+/* ── Lazy module loading ──
+   Module data files (module-N.js) are no longer loaded up front. Each is
+   fetched on demand the first time its module is opened, then its panels are
+   built into the DOM. This keeps first load light on weak Wi-Fi / slow
+   Chromebooks: we parse one module's data and build one module's panels
+   instead of all eight. The service worker still precaches every module file,
+   so opening a not-yet-loaded module while offline keeps working. */
+const _moduleLoads = {};           // num -> Promise (dedupes concurrent loads)
+const _modulesRendered = new Set();
+function loadModuleData(num){
+  num = parseInt(num);
+  if(_moduleLoads[num]) return _moduleLoads[num];
+  _moduleLoads[num] = new Promise((resolve,reject)=>{
+    const s = document.createElement('script');
+    s.src = `module-${num}.js`;
+    s.onload  = ()=>resolve();
+    s.onerror = ()=>{ delete _moduleLoads[num]; reject(new Error('module '+num+' failed to load')); };
+    document.head.appendChild(s);
+  });
+  return _moduleLoads[num];
+}
+// Build (once) the set + review panels for one module and wire chord links.
+async function ensureModuleRendered(num){
+  num = parseInt(num);
+  if(_modulesRendered.has(num)) return;
+  await loadModuleData(num);
+  if(_modulesRendered.has(num)) return;   // guard against a concurrent caller
+  _modulesRendered.add(num);
+  const c = document.getElementById('week-panels');
+  SETS.filter(w=>w.moduleNum===num).forEach(w=>{
+    const div=document.createElement('div');
+    div.className='week-panel'; div.dataset.id=w.id; div.dataset.module=w.moduleNum;
+    div.innerHTML = w.comingSoon ? buildComingSoon(w) : buildSet(w);
+    c.appendChild(div);
+  });
+  if(MODULE_REVIEWS[num]){
+    const mr=MODULE_REVIEWS[num];
+    const div=document.createElement('div');
+    div.className='week-panel'; div.dataset.id=`mr${mr.moduleNum}`; div.dataset.module=mr.moduleNum;
+    div.innerHTML=buildModuleReview(mr);
+    c.appendChild(div);
+  }
+  // Idempotent: already-wrapped spans are skipped (see CHORD_SKIP_CLASSES).
+  wrapAllChordLinks();
+}
 let respSaveTimer = null;
 let compSaveTimer = null;
 const escAttr = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -226,7 +272,7 @@ function setSaveMsg(msg){ document.querySelectorAll('.save-ind').forEach(el=>el.
 let lastModuleNum = 1;
 let lastSetId = null;
 
-function renderAll(){ renderPanels(); populateModuleDropdown(); onModuleChange(lastModuleNum||1, lastSetId); renderChordBoxes(); }
+function renderAll(){ populateModuleDropdown(); onModuleChange(lastModuleNum||1, lastSetId); renderChordBoxes(); }
 
 function chordDiagramSVG(cfg){
   const W=96,H=104,padL=22,padR=14,padT=20,padB=4;
@@ -1038,14 +1084,14 @@ function readAloudStep(btn){
 }
 
 function populateModuleDropdown(){
+  // Built from the lightweight manifest so we don't need every module's data
+  // file loaded just to list the modules.
   const sel = document.getElementById('module-select');
   sel.innerHTML='';
-  const modules = [...new Set(SETS.map(w=>w.moduleNum))].sort((a,b)=>a-b);
-  modules.forEach(num=>{
-    const w = SETS.find(x=>x.moduleNum===num);
+  MODULE_MANIFEST.forEach(m=>{
     const opt = document.createElement('option');
-    opt.value = num;
-    opt.textContent = `Module ${num} — ${w.module}`;
+    opt.value = m.num;
+    opt.textContent = `Module ${m.num} — ${m.name}`;
     sel.appendChild(opt);
   });
 }
@@ -1059,12 +1105,15 @@ function isModuleReviewLocked(moduleNum){
   return !allSkills.every(s=>progress[s.id]==='gotit');
 }
 
-function onModuleChange(moduleNum, restoreSetId){
+async function onModuleChange(moduleNum, restoreSetId){
   moduleNum = parseInt(moduleNum);
   lastModuleNum = moduleNum;
   document.getElementById('module-select').value = moduleNum;
-  renderPills(moduleNum);
+  // Fetch + build this module's panels on first visit before showing them.
+  await ensureModuleRendered(moduleNum);
   const moduleSets = SETS.filter(w=>w.moduleNum===moduleNum);
+  if(!moduleSets.length) return;   // load failed (e.g. offline + not precached)
+  renderPills(moduleNum);
   const isReviewId = restoreSetId === `mr${moduleNum}` && MODULE_REVIEWS[moduleNum];
   const target = restoreSetId && (moduleSets.find(w=>w.id===restoreSetId) || isReviewId)
     ? restoreSetId : (moduleSets.find(w=>!w.locked)||moduleSets[0]).id;
@@ -1115,25 +1164,8 @@ function activateSet(id){
   renderChordBoxes();
 }
 
-function renderPanels(){
-  const c=document.getElementById('week-panels');
-  c.innerHTML='';
-  SETS.forEach(w=>{
-    const div=document.createElement('div');
-    div.className='week-panel'; div.dataset.id=w.id; div.dataset.module=w.moduleNum;
-    div.innerHTML = w.comingSoon ? buildComingSoon(w) : buildSet(w);
-    c.appendChild(div);
-  });
-  // Module review panels
-  Object.values(MODULE_REVIEWS).forEach(mr=>{
-    const div=document.createElement('div');
-    div.className='week-panel'; div.dataset.id=`mr${mr.moduleNum}`; div.dataset.module=mr.moduleNum;
-    div.innerHTML=buildModuleReview(mr);
-    c.appendChild(div);
-  });
-  /* Scan all station step text for chord names and wrap matches in clickable spans */
-  wrapAllChordLinks();
-}
+/* Set/review panels are now built per-module, on demand, by
+   ensureModuleRendered() (defined near the top of this file). */
 
 function buildSetHeader(w){
   const pill = w.title ? `<span class="obj-set-tag">${w.title}</span>` : '';
@@ -2286,7 +2318,7 @@ function toggleTuner() { if (tunerRunning) stopTuner(); else startTuner(); }
 const IS_TEACHER_MODE=new URLSearchParams(window.location.search).has('teacher');
 let teacherSetId=null, allStudents=[];
 
-function showTeacherApp(user){
+async function showTeacherApp(user){
   document.getElementById('auth-wall').style.display='none';
   document.getElementById('app').style.display='none';
   if(user.email!==TEACHER_EMAIL){
@@ -2296,6 +2328,9 @@ function showTeacherApp(user){
   }
   document.getElementById('teacher-app').style.display='block';
   document.getElementById('user-area').innerHTML=userHeaderHtml(user);
+  // The teacher grid spans every set, so load all module data first. Sequential
+  // keeps SETS in module order so the week tabs render 1→8 left to right.
+  for(const m of MODULE_MANIFEST){ try{ await loadModuleData(m.num); }catch(e){} }
   renderTeacherSetTabs();
   const firstSet=SETS.find(w=>!w.locked&&w.skills&&w.skills.length>0);
   if(firstSet){ teacherSetId=firstSet.id; activateTeacherSetTab(firstSet.id); }

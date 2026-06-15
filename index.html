@@ -39,14 +39,10 @@ function googleTranslateElementInit(){
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script defer src="config-main.js"></script>
-<script defer src="module-1.js"></script>
-<script defer src="module-2.js"></script>
-<script defer src="module-3.js"></script>
-<script defer src="module-4.js"></script>
-<script defer src="module-5.js"></script>
-<script defer src="module-6.js"></script>
-<script defer src="module-7.js"></script>
-<script defer src="module-8.js"></script>
+<!-- module-N.js files are NO LONGER loaded here. They're fetched on demand
+     the first time a student opens that module (see loadModuleData in app.js),
+     so first load only parses one module's data instead of all eight. The
+     service worker still precaches every module file for offline use. -->
 <div id="google_translate_element"></div>
 <header class="header">
   <div>
