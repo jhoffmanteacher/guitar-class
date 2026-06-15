@@ -51,6 +51,22 @@ clear, **do the work and report back** — don't pause for "want me to do this?"
 - When in doubt, pick the sensible default, proceed, and say what you did and why —
   he can always tell you to change course.
 
+#### Programming & HTML edits — never ask, just do them
+Editing the site's code is the core of the job and is fully reversible (git tracks
+everything), so **don't ask permission before making code changes**. Just write the
+HTML / CSS / JS, then explain what you changed.
+
+- **Just do it, no asking**, for: editing `index.html`, `styles.css`, `app.js`,
+  `config-main.js`, `sw.js`, or any `module-N.js`; adding/fixing/refactoring markup,
+  styles, or scripts; answering an HTML/CSS/JS question by going ahead and
+  implementing it; creating helper/test files; running Live Server or local checks.
+- Treat "can you...", "how do I...", and "should this be..." about code as **"do it,"
+  not "ask me first."** Implement the change and show the result rather than asking
+  whether to proceed.
+- The only code-related pause points stay the same: a genuine design fork (use
+  AskUserQuestion) or an outward-facing action (pushing to GitHub, deleting files,
+  touching the live site).
+
 ## Lessons learned
 
 ### Never invent YouTube IDs from memory

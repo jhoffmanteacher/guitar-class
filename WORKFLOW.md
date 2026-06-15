@@ -38,11 +38,11 @@
 
 This is the at-a-glance list; full detail is in the numbered sessions below.
 
-**🔨 Build work (actual remaining coding):**
-- **3.5 — Module 6 strumming REDESIGN** *(needs Jonathan's scope decision first)* —
-  advanced strumming, anchor songs, optional `strumPattern:` SVG renderer.
+**🔨 Build work (actual remaining coding):** — *none left.*
+- *(3.5 Module 6 — ✅ done 2026-06-14; scope: template pass only, not a redesign.)*
 - *(3.9 Cross-module sweep — ✅ done 2026-06-14.)*
 - *(3.8 Module 1 — ✅ done 2026-06-14.)*
+- **Phase 3 is now complete — every module has had its template pass.**
 
 **✅ Built — awaiting Jonathan's real-world sign-off (no coding left):**
 - **4.4** touch-resize on a real Chromebook · **4.5** print one set & eyeball it ·
@@ -245,7 +245,23 @@ named challenge ("Win: strum all 6 strings but only the two power-chord notes ri
 `playSeq` for root movement.
 **Files:** `module-3.js`.
 
-### [ ] Session 3.5 — Module 6 (strumming — REDESIGN, not just a pass)  *(Jonathan-led)*
+### [x] Session 3.5 — Module 6 (strumming — REDESIGN, not just a pass)  *(Jonathan-led)*
+✅ done 2026-06-14 — **Scope decision (Jonathan): template pass only** — kept the existing
+down-up → D-DU-UDU → folk/rock/reggae arc; no advanced-technique redesign, no resequencing,
+no SVG `strumPattern:` renderer. Applied the frozen Appendix A template to all 3 sets:
+every "(full video)" → 0:00–N timestamp range + a during-watching job (0 "full video" left);
+added one interactive computer-station step per set (chord diagrams at first use — Em/Am S1,
+G/D S2, C S3); added warm-up spirals to Sets 2 & 3 (Set 1 already had one); Stuck?/Level up
+on all 10 graded challenges; per-step `time:` chips (23) + ⏱ Timer refs; named an assessment
+piece per set (Em↔Am Switch · G→D Pattern Locked · **Two Feels, One Song** — a new Set 3
+challenge with a `short` capture); PR-ladder BPM `short` responses on Sets 1 & 2; solo
+fallback folded into the Set 3 Trade Off. New **monospace strum-pattern line** (`D U D U…`
+over `1 + 2 + 3 + 4 +`, skips shown as ·) on 5 challenges via a small `.strum-line` CSS class
+— *not* the SVG renderer (the rejected option), so no new `app.js` code. Expanded
+`MODULE_REVIEWS[6]` 3→6 "I can" lines (kept original `mr6-s1/-s2/-s3` ids) + `assessItems`
++ forward link to Module 7 (barre). Verified headless: strum-line renders with the count
+aligned underneath, chord diagrams + warm-ups + Stuck/Level up + PR ladders all display,
+0 console errors. **Files:** `module-6.js`, `styles.css`.
 Jonathan decides scope first: upgrade to advanced strumming (syncopation/16ths, accents,
 percussive muting), which songs anchor each set, whether basic strumming shifts
 earlier. Then apply: keep Set 1's body-first ladder (tap → muted → one chord →

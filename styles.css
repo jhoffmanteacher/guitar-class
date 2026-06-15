@@ -515,6 +515,10 @@ body{font-family:Calibri,"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
 .tab-head .tab-kind{font-size:10px;font-weight:700;letter-spacing:0.1em;background:rgba(255,255,255,0.22);padding:2px 7px;border-radius:10px;text-transform:uppercase;flex-shrink:0}
 .tab-body{padding:10px 14px 12px}
 .tab-caption{font-size:13px;color:var(--text2);margin-bottom:6px;font-weight:500}
+/* Strum-pattern line — monospace D/U arrows aligned over the count (Module 6) */
+.strum-line{font-family:'Courier New',ui-monospace,monospace;white-space:pre;display:inline-block;background:var(--bg2);border:0.5px solid var(--border);border-radius:var(--radius-sm);padding:7px 11px;margin:8px 0 2px;font-size:14px;font-weight:700;line-height:1.5;letter-spacing:1px;color:var(--text);overflow-x:auto;max-width:100%}
+.strum-line .su-count{font-weight:600;color:var(--text2)}
+.strum-line .su-skip{color:var(--text3)}
 .tab-phrase{margin-top:8px}
 .tab-phrase:first-of-type{margin-top:0}
 .tab-phrase-label{font-size:13px;color:var(--text2);font-style:italic;margin-bottom:2px;padding-left:2px}
