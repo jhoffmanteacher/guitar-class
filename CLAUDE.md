@@ -1,7 +1,7 @@
 # Guitar Class Website — Claude Instructions
 
 ## Who I'm working with
-Jonathan Rosario is new to Claude Code and git. He prefers plain-English instructions and wants Claude to handle all git mechanics without him needing to remember commands.
+Jonathan Rosario prefers plain-English instructions and wants Claude to handle all git mechanics without him needing to remember commands.
 
 ## Plain-English workflow
 | Jonathan says | Claude does |
@@ -28,7 +28,7 @@ VS Code **Live Server** extension. Right-click `index.html` → "Open with Live 
 A "Dev bypass" button exists on the auth wall (below "Sign in with Google"). It skips Firebase auth and loads the app with a mock user (`Dev User / dev@test.local`). Progress won't save to Firestore in bypass mode — it's for UI/layout testing only.
 
 ## Shell
-Windows, VS Code, PowerShell. No changes needed — Claude Code already defaults to PowerShell on Windows.
+Jonathan works on both Windows and macOS machines, so **don't assume a shell** — check the platform the current session reports and use matching syntax: **PowerShell** on Windows, **zsh/bash** on macOS. Claude Code already launches the right shell for each machine; just match command syntax (paths, env vars, command chaining) to whatever platform this session is running on.
 
 ## How to ask follow-up questions
 When you need to clarify something with Jonathan, use the **AskUserQuestion** tool to present a multiple-choice picker rather than a free-text question. He prefers to click an option than to type a freeform answer.
