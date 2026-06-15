@@ -489,11 +489,13 @@ quick-checks sample different content than the practice station · closes with t
 exit-ticket reflection.
 
 **Practice station:** opens with the warm-up spiral ★ · named, verb-first challenges
-with Win: conditions ★ · Stuck? + Level up on every challenge · at least one drill
-matching the recall direction of the gotItWhen (random access if the skill demands it)
-· at least one PR ladder with a recorded score · one challenge named "(your assessment
-piece)" ★ · partner steps have a solo fallback · time budget at top; timer referenced
-in ≥1 challenge · closes with the exit-ticket reflection.
+with "You've got it when:" conditions ★ · Stuck? + Level up on every challenge · at
+least one drill matching the recall direction of the gotItWhen (random access if the
+skill demands it) · at least one PR ladder with a recorded score · one challenge named
+"(your assessment piece)" ★ · partner steps have a solo fallback · **NO time limits or
+per-step time budgets — the class is self-paced** (the optional ⏱ Timer *tool* may be
+referenced for "beat your record" drills, but never as a cap) · closes with the
+exit-ticket reflection.
 
 **Content quality:** every new chord/shape/pattern gets `chords:` or `tab:` at first
 use · leaked future concepts get a one-line "just-enough" preview (the F# rule) · MC
