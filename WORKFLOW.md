@@ -44,9 +44,10 @@ This is the at-a-glance list; full detail is in the numbered sessions below.
 - *(3.8 Module 1 — ✅ done 2026-06-14.)*
 - **Phase 3 is now complete — every module has had its template pass.**
 
-**✅ Built — awaiting Jonathan's real-world sign-off (no coding left):**
-- **4.4** touch-resize on a real Chromebook · **4.5** print one set & eyeball it ·
-  **4.6** live-site offline reload (PWA) · **4.3** trailing incognito "does it still save" test.
+**✅ Built & signed off — no real-world sign-offs left:**
+- **4.3** incognito save test — ✅ verified 2026-06-14 · **4.5** print one set — ✅ signed off
+  2026-06-14 · **4.4** touch-resize — ✅ closed 2026-06-14 (N/A, non-touch Chromebooks) ·
+  **4.6** offline reload — ✅ closed 2026-06-14 (manual test deferred, non-blocking).
 
 **🔁 Deferred / recurring (Jonathan-led, by design never "done"):**
 - **4.2** dead-link audit (re-run each semester) · Phase 5: handout audit · Spanish
@@ -270,8 +271,9 @@ with the monospace pattern line (`D   D U   U D U` over `1 + 2 + 3 + 4 +`); if J
 wants more, build a `strumPattern:` step property rendering a small SVG arrow diagram
 (new code, CSS vars); add `chords:` diagrams for the chords used (Em, Am, …); update
 objective/skillFocus/gotItWhen to the new scope; standard scope on top.
-*Forward link: the looper (Session 6.1) will give this module its play-along backing —
-write strumming challenges so a "play over the looper" variant can slot in later.*
+*~~Forward link: the looper (Session 6.1) will give this module its play-along backing.~~
+Looper (6.1) was dropped — the "play along with the recording" steps (e.g. Set 3 Reggae
+Chop over "Three Little Birds") are the permanent backing; no looper hook needed.*
 **Files:** `module-6.js`, possibly `app.js` (strumPattern renderer).
 
 ### [x] Session 3.6 — Module 8 (fingerpicking)
@@ -282,13 +284,14 @@ Standard scope. Specifics: write the p-i-m-a arpeggio patterns over Am/C as clic
 **Files:** `module-8.js`.
 
 ### [x] Session 3.7 — Module 4 (pentatonic/improv)
-✅ done 2026-06-13 — Rule-of-3 improv constraint applied (Set 1 "First Solo" → "Rule of 3": 3 notes for 4 bars, then add a 4th); Set 3 "Compose It" gained a `short` capture so the 4-bar solo (scale-degree numbers) saves to Firestore/dashboard. Looper-ready phrasing on all 3 improv challenges (Set 1 Rule of 3, Set 2 Call & Response, Set 3 Perform It) — each carries a `// LOOPER (Session 6.1)` swap-point comment. Standard pass: the two `(full video)` links (Set 2 Hammer-Ons, Set 3 Vibrato) → 0:00–3:00 + during-watching jobs (no URLs swapped); one interactive per computer station (Set 1 `playSeq` C major pentatonic · Set 2 clickable D-string note `tab:` scaffold · Set 3 `playSeq` A blues scale / blue note); warm-up spiral added to Sets 2 & 3; Stuck?/Level up on all 10 challenges; `time:` chips + Timer refs everywhere; Station Wrap-Up on all 6 stations; PR ladders on Set 1 Pattern 1 Climb (BPM) + Set 2 D-string map; assessment piece named per set (Pattern 1 Climb / Call & Response / Perform It — Jonathan's pick: technical climb for Set 1); solo fallback (record yourself) folded into Set 3 Perform It. Expanded `MODULE_REVIEWS[4]` 5→10 "I can" lines + `assessItems` + forward link to Module 5 (open chords). **One deviation:** Set 3 has no tempo PR ladder (performance/composition isn't a BPM skill) — the compose `short` capture is its recorded artifact instead. Songs untouched (Core Song 2 — TBD stays a `SONG_SWAP.md` item); no new video URLs invented. **Files:** `module-4.js`.
+✅ done 2026-06-13 — Rule-of-3 improv constraint applied (Set 1 "First Solo" → "Rule of 3": 3 notes for 4 bars, then add a 4th); Set 3 "Compose It" gained a `short` capture so the 4-bar solo (scale-degree numbers) saves to Firestore/dashboard. Backing-track phrasing on all 3 improv challenges (Set 1 Rule of 3, Set 2 Call & Response, Set 3 Perform It) — each says "over a backing track (a teacher-played Am, or one you queue up)" / "record yourself". *(Correction 2026-06-14: an earlier draft of this note claimed each carried a `// LOOPER (Session 6.1)` swap-point comment — no such comment exists in `module-4.js`, and 6.1 was dropped, so the backing-track phrasing IS the permanent design.)* Standard pass: the two `(full video)` links (Set 2 Hammer-Ons, Set 3 Vibrato) → 0:00–3:00 + during-watching jobs (no URLs swapped); one interactive per computer station (Set 1 `playSeq` C major pentatonic · Set 2 clickable D-string note `tab:` scaffold · Set 3 `playSeq` A blues scale / blue note); warm-up spiral added to Sets 2 & 3; Stuck?/Level up on all 10 challenges; `time:` chips + Timer refs everywhere; Station Wrap-Up on all 6 stations; PR ladders on Set 1 Pattern 1 Climb (BPM) + Set 2 D-string map; assessment piece named per set (Pattern 1 Climb / Call & Response / Perform It — Jonathan's pick: technical climb for Set 1); solo fallback (record yourself) folded into Set 3 Perform It. Expanded `MODULE_REVIEWS[4]` 5→10 "I can" lines + `assessItems` + forward link to Module 5 (open chords). **One deviation:** Set 3 has no tempo PR ladder (performance/composition isn't a BPM skill) — the compose `short` capture is its recorded artifact instead. Songs untouched (Core Song 2 — TBD stays a `SONG_SWAP.md` item); no new video URLs invented. **Files:** `module-4.js`.
 Standard scope. Specifics: structure the improv steps with constraints ("Rule of 3 —
 improvise with only 3 notes of the pattern for 4 bars, then add one"); Set 3's
 compose-a-solo gets a capture step (write your 4-bar solo as TAB numbers in a `short`
 response so it reaches Firestore/dashboard).
-*Forward link: the looper (Session 6.1) will give the improv challenges a backing
-track — write them so "over the looper" can replace "over a teacher-played chord."*
+*~~Forward link: the looper (Session 6.1) will give the improv challenges a backing track.~~
+Looper (6.1) was dropped — "over a backing track (a teacher-played Am, or one you queue up)"
+and the record-yourself fallback are the permanent design; nothing left to swap in.*
 **Files:** `module-4.js`.
 
 ### [x] Session 3.8 — Module 1 (keep its warmth)
@@ -358,7 +361,7 @@ a song (log swaps in `SONG_SWAP.md`). Re-run each semester.
 
 ### [x] Session 4.3 — Firebase hygiene (guided, mostly console work)
 ⚠️ **2026-06-13 follow-up — the API-key path restriction broke sign-in; reverted.** The tightening below to `jhoffmanteacher.github.io/guitar-class/*` (a *path* restriction) blocked all Google sign-in: browsers send only the **domain** as the referrer on Firebase's cross-site auth calls, so a path-restricted key rejects them and the app shows the generic "make sure pop-ups are allowed" error. Fix = restrict by **domain only**: `jhoffmanteacher.github.io/*` + `guitar-class-2fd21.firebaseapp.com/*` + `localhost/*`. `FIREBASE_HARDENING.md` updated with a "do NOT restrict by path" warning.
-✅ done 2026-06-13 — Walked the `FIREBASE_HARDENING.md` checklist with Jonathan at the console. **(1) Firestore rules:** verified live — already locked to the documented own-doc + teacher-read block, NOT test mode. **(2) Teacher email:** confirmed `jhoffman@seq.org` works — `?teacher=true` loaded the dashboard, not the denied screen (matches `firebase-config.js:17` + `app.js:2209`). **(3) API key:** was already restricted to Websites; ~~tightened `jhoffmanteacher.github.io/*` → `jhoffmanteacher.github.io/guitar-class/*` (project-page path)~~ **[reverted — see warning above]** + added `localhost/*`, kept the `guitar-class-2fd21.firebaseapp.com/*` auth-domain referrer. **(4) App Check:** skipped per plan. Also corrected the guide's two stale facts (project ID is `guitar-class-2fd21`, deploy URL is the `/guitar-class/` project-page path). **One open item:** final incognito "does it still save" test after key propagation (~5 min) — last checkbox in the guide. **Files:** `FIREBASE_HARDENING.md` (doc only).
+✅ done 2026-06-13 — Walked the `FIREBASE_HARDENING.md` checklist with Jonathan at the console. **(1) Firestore rules:** verified live — already locked to the documented own-doc + teacher-read block, NOT test mode. **(2) Teacher email:** confirmed `jhoffman@seq.org` works — `?teacher=true` loaded the dashboard, not the denied screen (matches `firebase-config.js:17` + `app.js:2209`). **(3) API key:** was already restricted to Websites; ~~tightened `jhoffmanteacher.github.io/*` → `jhoffmanteacher.github.io/guitar-class/*` (project-page path)~~ **[reverted — see warning above]** + added `localhost/*`, kept the `guitar-class-2fd21.firebaseapp.com/*` auth-domain referrer. **(4) App Check:** skipped per plan. Also corrected the guide's two stale facts (project ID is `guitar-class-2fd21`, deploy URL is the `/guitar-class/` project-page path). ~~**One open item:** final incognito "does it still save" test after key propagation (~5 min) — last checkbox in the guide.~~ **✅ verified 2026-06-14 — incognito Google sign-in saves and persists on the live site; the domain-only key restriction holds.** **Files:** `FIREBASE_HARDENING.md` (doc only).
 🚧 *prior draft note:* Wrote `FIREBASE_HARDENING.md` (one-pass 2026-06-13) covering rules verification, API-key restriction, App Check, and a done-when checklist. No code — console work needing Jonathan's Google login.
 Verify Firestore rules in production match the documented rules (students read/write
 own doc; teacher read via jhoffman@seq.org) · restrict the web API key to the
@@ -366,15 +369,16 @@ own doc; teacher read via jhoffman@seq.org) · restrict the web API key to the
 skip if it adds friction.
 **Files:** none (console); Claude Code guides.
 
-### [~] Session 4.4 — UX polish grab-bag (optional)
-🚧 draft 2026-06-13 (one-pass) — Two of three already done: the timer **flashes at zero** (`flashTimerDisplay` + `timerDoneFlash` keyframes) and the resize handle **already has touch handlers** (touchstart/move/end). **New this pass:** last module/set now also persist to `localStorage` (`saveLocalPlace`/`restoreLocalPlace`) on top of Firestore, so a returning student lands where they left off instantly — before Firestore loads, on a flaky connection, and in dev-bypass mode. **Update 2026-06-13:** louder end-of-timer cue decided + built — when the timer hits zero it now also pulses the always-visible floating **timer FAB** green (`flashTimerFab` + `fabTimerDone` keyframes, 6× ~3.6s), so students who closed the popup (most of them) still get a visual cue in a loud room. **One open item left:** confirm touch-resize on a real convertible Chromebook (physical test — Jonathan).
+### [x] Session 4.4 — UX polish grab-bag (optional)
+🚧 draft 2026-06-13 (one-pass) — Two of three already done: the timer **flashes at zero** (`flashTimerDisplay` + `timerDoneFlash` keyframes) and the resize handle **already has touch handlers** (touchstart/move/end). **New this pass:** last module/set now also persist to `localStorage` (`saveLocalPlace`/`restoreLocalPlace`) on top of Firestore, so a returning student lands where they left off instantly — before Firestore loads, on a flaky connection, and in dev-bypass mode. **Update 2026-06-13:** louder end-of-timer cue decided + built — when the timer hits zero it now also pulses the always-visible floating **timer FAB** green (`flashTimerFab` + `fabTimerDone` keyframes, 6× ~3.6s), so students who closed the popup (most of them) still get a visual cue in a loud room. ~~**One open item left:** confirm touch-resize on a real convertible Chromebook (physical test — Jonathan).~~ **✅ closed 2026-06-14 — N/A: Jonathan's student Chromebooks aren't touch/convertible, so touch-resize isn't needed. The handle still works fine by mouse/trackpad (the touch handlers are harmless on non-touch devices).**
 Persist last-selected module/set per student · flash the timer display at zero (beeps
 get lost in a loud room) · verify the resource-panel resize handle works by touch on
 convertible Chromebooks.
 **Files:** `app.js`, `styles.css`.
 
-### [~] Session 4.5 — 🖨 Per-set print/handout export
-🚧 draft 2026-06-13 (one-pass) — Added a "🖨 Print this set" button to each set's tab bar (`printSet()` → `window.print()`), tagged the four tab-panels (`tp-station-b/-c/-songs/-checklist`), and wrote an `@media print` block (styles.css): hides all chrome (header, pills, fabs, resource panel, tab bar, response inputs, play/read-aloud buttons, save indicator), force-shows **both** station panels regardless of which tab is open, hides songs+checklist, expands collapsed Station-C sections + step bodies, keeps `tab:`/`chords:` SVGs and Stuck?/Level up, forces light colors with `print-color-adjust:exact`, single-column layout, page-break before Station C, and a print-only "Guitar Class — Sequoia HS" header. **Update 2026-06-13:** content decided + built — the handout now prints **stations + the skills checklist** (songs stay excluded: they're mostly clickable video links, useless on paper). The checklist prints on its own page as a clean blank tick-sheet (interactive toggles, "Practice this" expandos, the cl-intro line, and the live progress bar are all hidden; the two tick-boxes get a crisp 1px border). **One open item left:** Jonathan prints one example set from preview (portrait letter) and eyeballs it for approval.
+### [x] Session 4.5 — 🖨 Per-set print/handout export
+✅ **signed off 2026-06-14** — Jonathan printed an example set from preview (portrait letter) and approved the handout. No changes needed; the `@media print` layout below is final.
+🚧 draft 2026-06-13 (one-pass) — Added a "🖨 Print this set" button to each set's tab bar (`printSet()` → `window.print()`), tagged the four tab-panels (`tp-station-b/-c/-songs/-checklist`), and wrote an `@media print` block (styles.css): hides all chrome (header, pills, fabs, resource panel, tab bar, response inputs, play/read-aloud buttons, save indicator), force-shows **both** station panels regardless of which tab is open, hides songs+checklist, expands collapsed Station-C sections + step bodies, keeps `tab:`/`chords:` SVGs and Stuck?/Level up, forces light colors with `print-color-adjust:exact`, single-column layout, page-break before Station C, and a print-only "Guitar Class — Sequoia HS" header. **Update 2026-06-13:** content decided + built — the handout now prints **stations + the skills checklist** (songs stay excluded: they're mostly clickable video links, useless on paper). The checklist prints on its own page as a clean blank tick-sheet (interactive toggles, "Practice this" expandos, the cl-intro line, and the live progress bar are all hidden; the two tick-boxes get a crisp 1px border). ~~**One open item left:** Jonathan prints one example set from preview (portrait letter) and eyeballs it for approval.~~ **✅ done 2026-06-14 — approved, no changes needed.**
 For days the Chromebooks or wifi fail: any set should print as a clean one-pager.
 Add an `@media print` stylesheet — hide chrome (header, module pills, fabs, response
 inputs/textareas, read-aloud + play buttons, resource panel), expand BOTH station
@@ -385,7 +389,8 @@ temporarily opens both stations). Show Jonathan one printed example set (PDF fro
 preview, portrait letter) for approval before styling the rest.
 **Files:** `styles.css`, `app.js`, possibly `index.html`.
 
-### [~] Session 4.6 — 📴 Offline resilience (light PWA)
+### [x] Session 4.6 — 📴 Offline resilience (light PWA)
+⏸ **Manual offline test deferred 2026-06-14 (Jonathan's call) — non-blocking, not worth worrying about.** The SW is already live and helping load speed/caching; the offline-reload sign-off was only a real-device confirmation. Skipping it has near-zero downside: if offline reload ever failed, a student with dead wifi just sees the normal browser "no connection" page (same as any non-PWA site) — no broken site for online students, no data loss (saving queues + resumes). The one thing that actually matters — **bump `CACHE_VERSION` on every push** so returning students never get a stale cache — is already in the push routine (CLAUDE.md table; on v18 as of 2026-06-14). Re-run the offline test later only if it ever feels worth it.
 🚧 draft 2026-06-13 (one-pass) — Added `sw.js` (stale-while-revalidate cache of the static shell: index/styles/app/config-main/firebase-config + all 8 module files + manifest + icon; cross-origin Firebase/YouTube/Translate/gstatic requests are never intercepted, so auth + saving behave unchanged; navigation falls back to cached `index.html`). Registered it in `app.js` (only on `http(s)`, so it's a harmless no-op on Live Server's `file://`-style preview). Added `manifest.json` (name, theme `#4d1964`, standalone, portrait) + `icon.svg` (guitar on the brand purple), linked both in `index.html`. **CRITICAL routine added:** `CACHE_VERSION` in `sw.js` (currently `guitar-class-v1-2026-06-13`) — and CLAUDE.md's push table now says **bump it on every code push** or returning students get a stale site. **TODO when we revise: real-device test — the SW registers on Live Server (http://localhost) and on the deployed site, but NOT if index.html is opened directly via file://. Test on localhost first, then on the live GitHub Pages site (load, go offline in DevTools, reload). Bump `CACHE_VERSION` whenever a cached file changes.**
 The app already degrades gracefully when Firebase is blocked; make the static shell
 load instantly on weak school wifi and survive brief outages. Add `sw.js` caching
@@ -441,11 +446,12 @@ on localhost, then on the live site: load, go offline (DevTools), reload.
 
 ## PHASE 6 — Feature builds  *(start only after Phase 3 is complete; can interleave with Phase 4)*
 
-> These are new capabilities, not content passes. Order matters: 6.1 is smallest and
-> unblocks challenges written in Sessions 3.5/3.7; 6.2 gives Jonathan day-one teaching
-> value; 6.3 depends on skill ids being stable across ALL modules (i.e. Phase 3 done
-> and frozen). Every session here is a "big change" — per the working rules, show one
-> working example (mock-up or single wired instance) and ask a multiple-choice
+> These are new capabilities, not content passes. **Phase 6 is now closed: 6.2 shipped;
+> 6.1 (looper) and 6.3 (Song Journey) were both dropped.** (Historical ordering rationale:
+> 6.1 was meant to unblock the improv/strumming challenges in 3.5/3.7, but those ship fine
+> with teacher-played / queued / recorded backing instead.) Every session here was a "big
+> change" — per the working rules, each showed one working example (mock-up or single wired
+> instance) with a multiple-choice
 > question about it before building the rest.
 
 ### ~~Session 6.1 — 🔁 Backing-track looper~~ (dropped)
