@@ -145,7 +145,7 @@ SETS.push(
     songs: [
       { name: '"House of the Rising Sun" — The Animals', meta: 'Am–C–D–F · classic fingerpicked arpeggios', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=N4bFqW_eu2I',
-        tutorialUrl: 'https://www.youtube.com/watch?v=mWJ6oRTyjnE' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=q9dyAQLYybU' },
       { name: '"Dust in the Wind" — Kansas', meta: 'Travis picking · gold standard for fingerpicking', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=tH2w6Oxx0kQ',
         tutorialUrl: 'https://www.youtube.com/watch?v=u_D7GsckLYA' },
@@ -345,7 +345,7 @@ SETS.push(
     songs: [
       { name: '"House of the Rising Sun" — The Animals', meta: 'Am–C–D–F · pure 6-note arpeggios per chord', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=N4bFqW_eu2I',
-        tutorialUrl: 'https://www.youtube.com/watch?v=mWJ6oRTyjnE' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=q9dyAQLYybU' },
       { name: '"Hallelujah" — Leonard Cohen / Jeff Buckley', meta: 'C–Am–F–G · gentle p-i-m-a arpeggios', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=ttEMYvpoR-k',
         tutorialUrl: 'https://www.youtube.com/watch?v=eFLJUspLfnk' },
@@ -551,7 +551,7 @@ SETS.push(
     songs: [
       { name: '"House of the Rising Sun" — The Animals', meta: 'Am–C–D–F–Am–C–E–E · the classic fingerpicked song', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=N4bFqW_eu2I',
-        tutorialUrl: 'https://www.youtube.com/watch?v=mWJ6oRTyjnE' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=q9dyAQLYybU' },
       { name: '"Hallelujah" — Leonard Cohen / Jeff Buckley', meta: 'C–Am–F–G · slow tempo, perfect performance choice', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=ttEMYvpoR-k',
         tutorialUrl: 'https://www.youtube.com/watch?v=eFLJUspLfnk' },

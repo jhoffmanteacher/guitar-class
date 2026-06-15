@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-06-15 — Fixed a broken song tutorial video
+
+### Fixed
+- **Modules 6 & 8:** the "How to play" tutorial link for **"House of the Rising
+  Sun"** had gone dead (the video was taken down), so clicking it led nowhere.
+  Swapped in JustinGuitar's beginner lesson, which walks through the same
+  fingerpicked/arpeggio pattern. Every other video link on the site was
+  re-checked at the same time — all 230 are working.
+
 ## 2026-06-15 — No more time limits on activities
 
 ### Changed

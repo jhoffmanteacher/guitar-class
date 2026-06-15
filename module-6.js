@@ -528,7 +528,7 @@ SETS.push(
         tutorialUrl: 'https://www.youtube.com/watch?v=szdTIPVLwa4' },
       { name: '"House of the Rising Sun" — The Animals', meta: 'Am–C–D–F · arpeggiated strum challenge', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=N4bFqW_eu2I',
-        tutorialUrl: 'https://www.youtube.com/watch?v=mWJ6oRTyjnE' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=q9dyAQLYybU' },
       { name: '"Buffalo Soldier" — Bob Marley', meta: 'Bm–G–D–A · reggae offbeat practice', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=uMUQMSXLlHM',
         tutorialUrl: 'https://www.youtube.com/watch?v=rNSq3E3KfMk' }

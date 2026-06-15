@@ -351,8 +351,9 @@ used on text (≈`#767670` reaches 4.5:1) or reserve it for decoration · Escape
 on tool popups · full keyboard-only walkthrough as the test.
 **Files:** `index.html`, `app.js`, `styles.css`.
 
-### [ ] Session 4.2 — 🔗 Full dead-link audit
-⏸ **Deferred 2026-06-13 (do later)** — consciously punted; treat as a recurring start-of-semester task, not an open Phase 4 blocker.
+### [x] Session 4.2 — 🔗 Full dead-link audit
+✅ done 2026-06-15 — Swept all 230 unique YouTube IDs across `module-1..8.js` + `config-main.js` via a `curl`/oEmbed loop (200 = live, 404 = dead). **Result: 229/230 live, 1 dead.** The dead one — `mWJ6oRTyjnE`, the "House of the Rising Sun" tutorial reused in `module-6.js` (×1, Level-2 strum choice) and `module-8.js` (×3, Core fingerpicking) — was replaced with JustinGuitar's verified BS-610 lesson `q9dyAQLYybU` ("House Of The Rising Sun – Animals (Songs Guitar Lesson BS-610)"), which teaches the same arpeggiated fingerpicking pattern, so it fits both contexts. Bumped `CACHE_VERSION` v22→v23 + logged a CHANGELOG entry. **Files:** `module-6.js`, `module-8.js`, `sw.js`, `CHANGELOG.md`. **Still recurring:** re-run each semester (links rot over time).
+⏸ *(prior)* **Deferred 2026-06-13 (do later)** — consciously punted; treat as a recurring start-of-semester task, not an open Phase 4 blocker.
 Extract every YouTube ID across all 8 module files (~222 unique). Verify each via
 oEmbed in parallel batches. Report ✅/❌ with file+line. Replace dead ones via
 search-and-verify; anything without a good replacement gets flagged for Jonathan to choose
