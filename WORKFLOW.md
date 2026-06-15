@@ -50,7 +50,8 @@ This is the at-a-glance list; full detail is in the numbered sessions below.
 
 **🔁 Deferred / recurring (Jonathan-led, by design never "done"):**
 - **4.2** dead-link audit (re-run each semester) · Phase 5: handout audit · Spanish
-  spot-check · end-of-semester set · song refresh · ⚠️ review Module 4 Set 1 video.
+  spot-check · end-of-semester set · song refresh · ⚠️ review Module 4 Set 1 video ·
+  review 3.9 song difficulty dots · review 3.9 distractor swaps.
 
 **Recent polish (not a numbered session):**
 - **Module-review trim pass** — ✅ done 2026-06-14 — cut every module review to 5–6 core
@@ -372,6 +373,15 @@ on localhost, then on the live site: load, go offline (DevTools), reload.
       had per-set "take a beat to reflect" wrap-ups + listening reflections; Module 6 was
       the gap. Added a tailored reflective wrap-up step to station B of all three M6 sets
       (Claude wrote the prompts at Jonathan's request). **Files:** `module-6.js`.
+- [ ] Review Session 3.9 song difficulty dots: Claude rated **109 Choice songs** ●/●●/●●●
+      per module context (in `module-*.js` as `level: 1|2|3`). Skim each module's Set 2+
+      song lists and adjust any that feel off — tell Claude the song + new level, or edit
+      the `level:` value directly. (Ratings are first-pass; you're the final call.)
+- [ ] Review Session 3.9 distractor swaps: Claude replaced 3 joke MC options with real
+      misconceptions — confirm they read well, especially **m6 reggae** (`Fast, constant
+      16th-note strumming throughout`) and the **m7 stacked-TAB pair** (`Play only the
+      lowest-numbered string` / `Roll across them slowly, one note at a time`); the third
+      is m2 `H`→`G#`. Easy to revert per-option if any miss.
 - [ ] ⚠️ Review Module 4 Set 1 video (`m_IiyJu60-c` — "Major Pentatonic Scale – Marty
       Music", swapped in 2.2 on 2026-06-11): watch it through and confirm it fits the
       beginner Pattern-1 station before the course starts. Code comment flags it too.
