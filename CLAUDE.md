@@ -37,6 +37,20 @@ When you need to clarify something with Jonathan, use the **AskUserQuestion** to
 - One question per turn unless the choices are truly independent
 - Use this for design choices, scope decisions, style preferences — anywhere a free-text question would normally appear
 
+### Don't ask "should I proceed?" — just proceed
+Jonathan doesn't want to be asked yes/no permission to keep going. Once a task is
+clear, **do the work and report back** — don't pause for "want me to do this?",
+"should I continue?", "ready for the next step?", or "shall I implement it?".
+
+- **Just proceed** on: the obvious next step of the task at hand, multi-step work,
+  refactors, fixes, edits, running local tests/verification, and anything reversible.
+- **Still pause** only for: genuine forks where the choice changes the outcome (use
+  AskUserQuestion with options, not a yes/no), or **irreversible / outward-facing**
+  actions — pushing to GitHub, deleting files, anything that touches the live site.
+  (Pushing already requires Jonathan to say "push to GitHub," per the workflow table.)
+- When in doubt, pick the sensible default, proceed, and say what you did and why —
+  he can always tell you to change course.
+
 ## Lessons learned
 
 ### Never invent YouTube IDs from memory

@@ -54,11 +54,32 @@ This is the at-a-glance list; full detail is in the numbered sessions below.
   review 3.9 song difficulty dots · review 3.9 distractor swaps.
 
 **Recent polish (not a numbered session):**
+- **Perf: lazy-load modules** — ✅ done 2026-06-14 — module-`N`.js files are no longer
+  loaded by `index.html`; each is fetched on demand the first time its module is opened
+  and only that module's panels are built into the DOM (was: all 8 files parsed + all 16
+  sets' DOM built + a full chord-link regex sweep on every load). Dropdown now populates
+  from a new `MODULE_MANIFEST` in `config-main.js`. Teacher view still loads all modules
+  (sequentially, to keep set order). SW still precaches every module for offline. Files:
+  `index.html`, `config-main.js`, `app.js` (`loadModuleData`/`ensureModuleRendered`, async
+  `onModuleChange`/`showTeacherApp`, `renderPanels` removed). Verified headless: cold load
+  fetches 0 modules, lands on M1 fetching only `module-1.js`, M5/M7 load on demand,
+  re-show doesn't refetch, teacher loads all 8 in order, zero console errors.
 - **Module-review trim pass** — ✅ done 2026-06-14 — cut every module review to 5–6 core
   "I can" lines, added per-skill "↩ Review this" links back to the teaching set (new
   `set:` field on each review skill), and moved the Module Assessment into a standout
   `.mr-assess-box`. `app.js` (`buildModuleReview`, new `goToSet`), `styles.css`, all
   `module-*.js` reviews. See the **Module review** standard below for the pattern.
+
+**⚡ Performance backlog (deferred from the 2026-06-14 deep dive — do later):**
+- **Modular Firebase SDK** — swap the 3 heavy `*-compat` SDKs (`index.html`) for
+  tree-shaken ESM imports from gstatic (no bundler needed). Compat `firestore` is the
+  single biggest download and is cross-origin (never SW-cached, so re-fetched on every
+  cold device). Touches auth + Firestore calls in `app.js` — test sign-in + save/load
+  carefully. Biggest *network* win.
+- **Consolidate Firestore writers** — merge `saveProgress` / `saveResponses` /
+  `saveCompleted` (`app.js`) into one debounced writer that batches whatever's dirty
+  (currently 3 separate 800ms timers, each doing a full `.set(merge)` with name/email).
+  Low effort, low risk cleanup.
 
 **Done or dropped:** Phases 1–3 (except 3.5/3.9), 4.1, 5 onboarding + reflection
 prompts, 6.2. Dropped: 6.1 looper, 6.3 Song Journey. *(The old `TODO.md` items —
