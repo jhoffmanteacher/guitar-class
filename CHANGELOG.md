@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-06-15 — Clearer challenge labels
+
+### Changed
+- **All modules:** every practice challenge's success line is now labeled
+  **"You've got it when:"** instead of **"Win:"** — clearer about what it means
+  (how you know you've nailed it) and friendlier in tone.
+
+### Fixed
+- A couple more spots where a sentence-leading "A" (like "A note still buzzes…")
+  could pop up an A-chord diagram by mistake — reworded so they read as plain
+  English.
+
 ## 2026-06-15 — Easier-to-read instructions
 
 A readability pass across the whole site to make directions clearer.

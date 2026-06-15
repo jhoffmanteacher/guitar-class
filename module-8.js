@@ -89,7 +89,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. Win: in tune before today\'s work.',
+                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 time: '2 min',
                 hint: 'Tuning (Module 1) matters even more in fingerpicking — every note is exposed, so an out-of-tune string is easy to hear.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -100,7 +100,7 @@ SETS.push(
             title: 'Set up a relaxed fingerpicking hand',
             steps: [
           {
-            text: 'Challenge 1 — Hand Shape: put the pick down, rest your thumb on the low E and i-m-a on the G, B, and high e strings, and hold for 30 seconds. Win: a relaxed, arched wrist with curved fingers — like holding an apple.',
+            text: 'Challenge 1 — Hand Shape: put the pick down, rest your thumb on the low E and i-m-a on the G, B, and high e strings, and hold for 30 seconds. You\'ve got it when: a relaxed, arched wrist with curved fingers — like holding an apple.',
             time: '2 min',
             hint: 'Your wrist should be arched (curved) — not flat against the guitar body. Fingers curved as if you\'re holding an apple. Relax.',
             stuck: 'Drop your hand to your side and shake it loose, then place it back on the strings without tensing up — relaxed first, accurate second.',
@@ -113,7 +113,7 @@ SETS.push(
             title: 'Pluck p-i-m-a — thumb bass, i-m-a treble',
             steps: [
           {
-            text: 'Challenge 2 — p-i-m-a Plucks (your assessment piece): pluck once with each finger in order — p (low E), i (G), m (B), a (high e) — saying each letter aloud, 8 times at 60 BPM. Win: the same volume from every finger, even the weaker ring (a). This is the open-string check the whole class plays for the Set 1 check-off.',
+            text: 'Challenge 2 — p-i-m-a Plucks (your assessment piece): pluck once with each finger in order — p (low E), i (G), m (B), a (high e) — saying each letter aloud, 8 times at 60 BPM. You\'ve got it when: the same volume from every finger, even the weaker ring (a). This is the open-string check the whole class plays for the Set 1 check-off.',
             time: '4 min',
             hint: 'No strumming, no pick. Each finger gets ONE string. Aim for the same volume from each finger — the ring finger (a) is usually the weakest at first. Set the ⏱ Timer for 2 minutes and loop it.',
             stuck: 'Pluck just p then i, over and over, until those two are even — then add m, then a.',
@@ -128,7 +128,7 @@ SETS.push(
             title: 'Move the thumb between bass strings',
             steps: [
           {
-            text: 'Challenge 3 — Moving Bass: pluck the A string with p then G-B-e with i-m-a, then the D string with p, fingers staying put. Win: only the thumb moves to find each bass note — the i-m-a fingers stay anchored.',
+            text: 'Challenge 3 — Moving Bass: pluck the A string with p then G-B-e with i-m-a, then the D string with p, fingers staying put. You\'ve got it when: only the thumb moves to find each bass note — the i-m-a fingers stay anchored.',
             time: '3 min',
             hint: 'This is how you change chords later — the thumb finds the bass note of the chord (root) while the fingers stay anchored on the treble strings.',
             stuck: 'Move just the thumb E → A → D with the fingers resting (not plucking) on G-B-e, until the thumb finds each bass without looking.',
@@ -298,7 +298,7 @@ SETS.push(
             title: 'Play the p-i-m-a-m-i pattern on Em',
             steps: [
           {
-            text: 'Challenge 1 — Em Pattern: fret Em and play the 6-note pattern p-i-m-a-m-i at 60 BPM, one note per click, for 8 bars. Win: a steady, even pulse with every note ringing clean.',
+            text: 'Challenge 1 — Em Pattern: fret Em and play the 6-note pattern p-i-m-a-m-i at 60 BPM, one note per click, for 8 bars. You\'ve got it when: a steady, even pulse with every note ringing clean.',
             time: '4 min',
             hint: 'Count "1 + 2 + 3 + 4 +" and play 6 notes per bar — meaning some notes fall on numbers, some on "+"s. Don\'t worry about exact counting yet; just keep the pulse steady.',
             stuck: 'Drop the metronome and play the pattern as slowly as you need to — get the finger order automatic first, speed comes after.',
@@ -313,7 +313,7 @@ SETS.push(
             title: 'Play the pattern on Am (move the thumb)',
             steps: [
           {
-            text: 'Challenge 2 — Am Pattern: fret Am and play the 6-note pattern over it — thumb on the A string (Am\'s root), i-m-a still on G-B-e — 8 times. Win: only the thumb moves to the new bass; the fingers stay anchored. Click any note below the TAB to hear it.',
+            text: 'Challenge 2 — Am Pattern: fret Am and play the 6-note pattern over it — thumb on the A string (Am\'s root), i-m-a still on G-B-e — 8 times. You\'ve got it when: only the thumb moves to the new bass; the fingers stay anchored. Click any note below the TAB to hear it.',
             time: '4 min',
             hint: 'The only change from Em is which bass string the thumb plays. Fingers stay parked on G, B, high e.',
             stuck: 'Drop the pattern — just pluck the Am bass (p) and let it ring, then add i-m-a one finger at a time.',
@@ -337,7 +337,7 @@ SETS.push(
             title: 'Build up your tempo (70+ BPM)',
             steps: [
           {
-            text: 'Challenge 3 — Beat Your Tempo (your assessment piece): play the Em pattern at 70 BPM, then try 80. Win: clean at 70+ with the "a" finger landing right on its beat — drop back to 60 if it falls apart. This steady-pattern check is the Set 2 check-off.',
+            text: 'Challenge 3 — Beat Your Tempo (your assessment piece): play the Em pattern at 70 BPM, then try 80. You\'ve got it when: clean at 70+ with the "a" finger landing right on its beat — drop back to 60 if it falls apart. This steady-pattern check is the Set 2 check-off.',
             time: '4 min',
             hint: 'The most common mistake: the "a" finger lags. Pay extra attention to your ring finger — it needs to land exactly on its beat, no later. Set the ⏱ Timer for 2 minutes and loop it.',
             stuck: 'Go back to 60 BPM and stay there until it\'s effortless — a clean 60 beats a sloppy 80 every time.',
@@ -500,7 +500,7 @@ SETS.push(
             title: 'Fret each chord clean before you fingerpick it',
             steps: [
           {
-            text: 'Challenge 1 — Clean Shapes First: before you fingerpick the progression, strum each chord once (Am, C, D, F) and check every string rings — these are the exact open chords you learned in Module 5. Win: all four shapes clean on a strum before you pick a single note through them.',
+            text: 'Challenge 1 — Clean Shapes First: before you fingerpick the progression, strum each chord once (Am, C, D, F) and check every string rings — these are the exact open chords you learned in Module 5. You\'ve got it when: all four shapes clean on a strum before you pick a single note through them.',
             time: '3 min',
             hint: 'Fingerpicking exposes every note, so a chord that was "good enough" for strumming in Module 5 needs to be truly clean here. Fix the fretting hand first; then the picking hand has something solid to work over.',
             stuck: 'Whichever shape buzzes, fix just that one — adjust your finger angle so the fingertip (not the pad) presses just behind the fret.',
@@ -513,7 +513,7 @@ SETS.push(
             title: 'Fingerpick a full chord progression',
             steps: [
           {
-            text: 'Challenge 2 — Full Progression: play the 6-note arpeggio over a 4-chord progression — Am–C–D–F or C–Am–F–G — 1 bar each at 60 BPM. Win: the thumb finds each chord\'s root bass while the fingers stay on G-B-e.',
+            text: 'Challenge 2 — Full Progression: play the 6-note arpeggio over a 4-chord progression — Am–C–D–F or C–Am–F–G — 1 bar each at 60 BPM. You\'ve got it when: the thumb finds each chord\'s root bass while the fingers stay on G-B-e.',
             time: '4 min',
             hint: 'For each chord, the thumb plays the ROOT bass note (Am = A string, C = A string, D = D string, F = D string). Fingers always on G-B-e.',
             stuck: 'Drop to two chords (Am–C) and loop just that change until the pattern doesn\'t break, then add D and F.',
@@ -529,7 +529,7 @@ SETS.push(
             title: 'Pinch the thumb and a finger together',
             steps: [
           {
-            text: 'Challenge 3 — The Pinch: fret C and "pinch" two strings at once — thumb on the A string (root) and your "a" finger on the high e, plucked at the SAME instant, on each beat for 8 beats. Win: both notes sound together as one, perfectly in sync — not one slightly before the other.',
+            text: 'Challenge 3 — The Pinch: fret C and "pinch" two strings at once — thumb on the A string (root) and your "a" finger on the high e, plucked at the SAME instant, on each beat for 8 beats. You\'ve got it when: both notes sound together as one, perfectly in sync — not one slightly before the other.',
             time: '4 min',
             hint: 'A pinch is the bridge between arpeggios and Travis picking — thumb and finger move toward each other and meet. Listen for ONE sound, not a flam (two close hits).',
             stuck: 'Pluck the bass and the treble separately first, slowly, then bring them closer until they land together.',
@@ -542,7 +542,7 @@ SETS.push(
             title: 'Try Travis picking',
             steps: [
           {
-            text: 'Challenge 4 — Travis Thumb: warm up Travis picking on C — thumb alternating the A string (beats 1 & 3) and G string (beats 2 & 4), thumb-only at 60 BPM. Win: a steady, even alternating thumb — then add an i-pluck on the B string on each "+".',
+            text: 'Challenge 4 — Travis Thumb: warm up Travis picking on C — thumb alternating the A string (beats 1 & 3) and G string (beats 2 & 4), thumb-only at 60 BPM. You\'ve got it when: a steady, even alternating thumb — then add an i-pluck on the B string on each "+".',
             time: '4 min',
             hint: 'Just the thumb! Once that\'s steady, add an i-pluck on the B string on the "+" of each beat. Travis picking adds fingers ON TOP of an already-grooving thumb.',
             stuck: 'Thumb only, no fingers, as slow as you need — get the alternating bass rock-steady before adding anything on top.',

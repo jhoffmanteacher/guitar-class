@@ -95,7 +95,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. Win: in tune before today\'s work.',
+                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 time: '2 min',
                 hint: 'Tuning (Module 1) is a skill you keep forever. As you climb the pentatonic pattern today, keep naming the notes too — that\'s your Module 2 fretboard map in action.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -106,7 +106,7 @@ SETS.push(
             title: 'Play Pattern 1 with alternate picking',
             steps: [
           {
-            text: 'Challenge 1 — Pattern 1 Climb (your assessment piece): play Pentatonic Pattern 1 ascending at 60 BPM, one note per beat, alternate picking (down-up-down-up). Win: every note rings clean with no missed picks. This is the unison lap the whole class plays for the Set 1 check-off. Click "Play all" to hear it.',
+            text: 'Challenge 1 — Pattern 1 Climb (your assessment piece): play Pentatonic Pattern 1 ascending at 60 BPM, one note per beat, alternate picking (down-up-down-up). You\'ve got it when: every note rings clean with no missed picks. This is the unison lap the whole class plays for the Set 1 check-off. Click "Play all" to hear it.',
             time: '4 min',
             hint: 'Go as slow as you need. Every note should ring cleanly. Say each note aloud as you play it to connect your ear to your fingers. Set the ⏱ Timer for 2 minutes and loop it.',
             stuck: 'Drop to the lowest two strings only (E and A) and climb just those until they\'re clean, then add the rest one string at a time.',
@@ -121,7 +121,7 @@ SETS.push(
             title: 'Position Pattern 1 for major & minor',
             steps: [
           {
-            text: 'Challenge 2 — Move the Box: play Pattern 1 as A minor pentatonic (1st finger, 5th fret, string 6) up and down using the TAB map, then shift it to E minor pentatonic (open-string root). Win: both positions clean — same shape, two spots on the neck.',
+            text: 'Challenge 2 — Move the Box: play Pattern 1 as A minor pentatonic (1st finger, 5th fret, string 6) up and down using the TAB map, then shift it to E minor pentatonic (open-string root). You\'ve got it when: both positions clean — same shape, two spots on the neck.',
             time: '4 min',
             hint: 'A minor: your hand sits around frets 5–8. E minor: your hand starts at the open string and you\'ll use frets 3 and 5 instead of 1st finger.',
             stuck: 'Stay on A minor only until the shape is automatic, then slide the whole hand down to find E minor — it\'s the exact same finger pattern, just moved.',
@@ -316,7 +316,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. Win: in tune before today\'s work.',
+                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 time: '2 min',
                 hint: 'Tuning (Module 1) is a skill you keep forever. Today you\'re adding expression on top of clean notes — so the notes have to be clean first.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -327,7 +327,7 @@ SETS.push(
             title: 'Play an expressive one-note solo',
             steps: [
           {
-            text: 'Challenge 1 — The One-Note Solo: choose one note in the Am pentatonic pattern and play only that note for 8 bars, varying rhythm, dynamics, and tone. Win: make one note stay interesting for all 8 bars — record it and listen back.',
+            text: 'Challenge 1 — The One-Note Solo: choose one note in the Am pentatonic pattern and play only that note for 8 bars, varying rhythm, dynamics, and tone. You\'ve got it when: make one note stay interesting for all 8 bars — record it and listen back.',
             time: '4 min',
             hint: 'This sounds easy but isn\'t. Can you make one note interesting for 8 whole bars? The way you play it matters more than how many notes you play.',
             stuck: 'Just change ONE thing per bar — louder, then softer, then short, then long. That\'s already a one-note solo.',
@@ -340,7 +340,7 @@ SETS.push(
             title: 'Improvise a call-and-response phrase',
             steps: [
           {
-            text: 'Challenge 2 — Call & Response (your assessment piece): over a backing track (a teacher-played Am, or one you queue up), play a 2-bar idea (call), pause 1 bar, then answer with a 2-bar idea (response). Win: the call ends on a non-root note (unresolved) and the response lands on the root (arrives home).',
+            text: 'Challenge 2 — Call & Response (your assessment piece): over a backing track (a teacher-played Am, or one you queue up), play a 2-bar idea (call), pause 1 bar, then answer with a 2-bar idea (response). You\'ve got it when: the call ends on a non-root note (unresolved) and the response lands on the root (arrives home).',
             time: '4 min',
             hint: 'Think of it like a musical question and answer. The call feels unresolved; the response feels like it arrives somewhere.',
             stuck: 'Use just 2–3 notes for both call and response — end the response on A (the root) every time so the "answer" always lands home.',
@@ -353,7 +353,7 @@ SETS.push(
             title: 'Name the notes on the D & G strings',
             steps: [
           {
-            text: 'Challenge 3 — D String Map: play the natural notes on the D string — D · E · F · G · A · B · C (frets 0–10) — slowly, saying each name aloud. Win: a clean lap up and back, chart-free. Click "Play all" to hear it at 60 BPM.',
+            text: 'Challenge 3 — D String Map: play the natural notes on the D string — D · E · F · G · A · B · C (frets 0–10) — slowly, saying each name aloud. You\'ve got it when: a clean lap up and back, chart-free. Click "Play all" to hear it at 60 BPM.',
             time: '3 min',
             hint: 'Same musical alphabet pattern you know from E and A strings. Find the pattern — it repeats! Set the ⏱ Timer for 2 minutes and see how many chart-free laps you get.',
             stuck: 'Cover the chart and name just the dots first (frets 0, 2, 3, 5, 7) — find E–F and B–C, the two one-fret jumps, and the rest falls into place.',
@@ -363,7 +363,7 @@ SETS.push(
             response: { type: 'short', prompt: 'Personal record: win at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, chart-free lap naming + playing the D string (BPM)?', placeholder: 'e.g. 80 — beat it next class' }
           },
           {
-            text: 'Challenge 4 — G String Map: same on the G string — G · A · B · C · D · E · F (frets 0–10), slowly, names aloud. Win: a clean lap up and back, chart-free.',
+            text: 'Challenge 4 — G String Map: same on the G string — G · A · B · C · D · E · F (frets 0–10), slowly, names aloud. You\'ve got it when: a clean lap up and back, chart-free.',
             time: '3 min',
             hint: 'Notice the same pattern of whole and half steps — the musical alphabet behaves the same way on every string.',
             stuck: 'Find the two half steps first — B–C (frets 4–5) and E–F (frets 9–10) — then fill in the whole-step gaps between them.',
@@ -513,7 +513,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. Win: in tune before today\'s work.',
+                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 time: '2 min',
                 hint: 'Tuning (Module 1) is a skill you keep forever. Today you compose and perform — a clean, in-tune guitar is what makes a simple solo sound finished.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -524,7 +524,7 @@ SETS.push(
             title: 'Understand relative major & minor scales',
             steps: [
           {
-            text: 'Challenge 1 — Relative Scales: write out C major pentatonic (1 C, 2 D, 3 E, 5 G, 6 A), then A minor pentatonic (1 A, ♭3 C, 4 D, 5 E, ♭7 G). Win: spot that they share the same five notes — only which note is "home" changes.',
+            text: 'Challenge 1 — Relative Scales: write out C major pentatonic (1 C, 2 D, 3 E, 5 G, 6 A), then A minor pentatonic (1 A, ♭3 C, 4 D, 5 E, ♭7 G). You\'ve got it when: spot that they share the same five notes — only which note is "home" changes.',
             time: '3 min',
             hint: 'C major pentatonic and A minor pentatonic share exactly the same five notes. Your hand position is the same — only which note you treat as "home" (the root) changes.',
             stuck: 'List the five notes once (A C D E G). Now circle A and call it minor; circle C and call it major. Same notes, different home.',
@@ -537,7 +537,7 @@ SETS.push(
             title: 'Compose a 4-bar solo',
             steps: [
           {
-            text: 'Challenge 2 — Compose It: write a 4-bar solo as scale-degree numbers (e.g. 1 3 5 3 | 6 5 3 1 | …), then play exactly what you wrote, varying the rhythms. Win: a deliberate 4-bar line you can play back the same way twice. Type your 4 bars into the box below so you have them next class.',
+            text: 'Challenge 2 — Compose It: write a 4-bar solo as scale-degree numbers (e.g. 1 3 5 3 | 6 5 3 1 | …), then play exactly what you wrote, varying the rhythms. You\'ve got it when: a deliberate 4-bar line you can play back the same way twice. Type your 4 bars into the box below so you have them next class.',
             time: '5 min',
             hint: 'Write first, then play! It\'s okay if it sounds simple. The goal is to make a deliberate musical decision, not to improvise randomly.',
             stuck: 'Start with just bar 1 — pick 4 scale degrees you like, play them, and only move on once that bar sounds good. Repeat it for bar 3 if you\'re stuck for ideas.',

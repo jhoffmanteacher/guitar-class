@@ -81,7 +81,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. Win: in tune before today\'s work.',
+                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 time: '2 min',
                 hint: 'Tuning (Module 1) is a skill you keep forever. 60 seconds here makes everything today sound better.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -92,7 +92,7 @@ SETS.push(
             title: 'Fret a clean power chord & mute unused strings',
             steps: [
           {
-            text: 'Challenge 1 — Clean E5: fret an E5 power chord (low E open root + 2nd fret A string) and strum just those two strings — no others. Win: a clean, buzz-free E5 with nothing else ringing.',
+            text: 'Challenge 1 — Clean E5: fret an E5 power chord (low E open root + 2nd fret A string) and strum just those two strings — no others. You\'ve got it when: a clean, buzz-free E5 with nothing else ringing.',
             time: '3 min',
             hint: 'Use your index finger on the root and your ring finger on the 5th. Keep your pinky close. Palm-mute the strings below with the edge of your picking hand.',
             stuck: 'Pluck the two notes one at a time first — make sure each rings alone — then strum them together.',
@@ -103,7 +103,7 @@ SETS.push(
             ]
           },
           {
-            text: 'Challenge 2 — Mute Check: fret your E5 and strum hard across ALL six strings. Win: strum all six strings but only the two power-chord notes ring — the other four stay silent.',
+            text: 'Challenge 2 — Mute Check: fret your E5 and strum hard across ALL six strings. You\'ve got it when: strum all six strings but only the two power-chord notes ring — the other four stay silent.',
             time: '3 min',
             hint: 'Let your fretting ring finger lean to deaden the strings above, and rest the side of your strumming hand lightly on the strings below the chord. A hard strum should still sound like just two notes.',
             stuck: 'Mute with the fretting hand first — let a finger lightly touch the strings you\'re not playing — then add the side of your strumming hand.',
@@ -116,7 +116,7 @@ SETS.push(
             title: 'Move the power chord shape along the E & A strings',
             steps: [
           {
-            text: 'Challenge 3 — Shape Shifter: slide the same shape to A5 (5th fret E), G5 (3rd fret E), D5 (5th fret A), and C5 (3rd fret A), saying each name aloud. Win: hit all four cleanly without losing the shape.',
+            text: 'Challenge 3 — Shape Shifter: slide the same shape to A5 (5th fret E), G5 (3rd fret E), D5 (5th fret A), and C5 (3rd fret A), saying each name aloud. You\'ve got it when: hit all four cleanly without losing the shape.',
             time: '4 min',
             hint: 'Keep the same finger shape and just move it along the neck. The gap between your two fingers never changes.',
             stuck: 'Park on just G5 and A5 (both E-string) and switch between them until it\'s smooth, then add the A-string chords.',
@@ -135,7 +135,7 @@ SETS.push(
             title: 'Name the root as you climb the neck (E & A strings)',
             steps: [
           {
-            text: 'Challenge 4 — Name & Climb (E string): walk the power chord UP the low E string and say each root aloud as you land it — E5 (open), F5 (1), G5 (3), A5 (5), B5 (7), C5 (8), D5 (10), E5 (12). Win: name every root correctly, chart-free, all the way to the 12th fret.',
+            text: 'Challenge 4 — Name & Climb (E string): walk the power chord UP the low E string and say each root aloud as you land it — E5 (open), F5 (1), G5 (3), A5 (5), B5 (7), C5 (8), D5 (10), E5 (12). You\'ve got it when: name every root correctly, chart-free, all the way to the 12th fret.',
             time: '3 min',
             hint: 'You learned every note on the low E string in Module 2 — this is that same map. The root is wherever your index finger sits. Hit the natural notes; skip the sharps for now.',
             stuck: 'Do frets 0–7 only first (E5–B5), then add 8–12 once those are automatic.',
@@ -153,7 +153,7 @@ SETS.push(
             ]
           },
           {
-            text: 'Challenge 5 — Name & Climb (A string): now do the same up the A string — A5 (open), B5 (2), C5 (3), D5 (5), E5 (7), F5 (8), G5 (10), A5 (12). Win: name every root correctly, and notice the same note names land in different spots than they did on the E string.',
+            text: 'Challenge 5 — Name & Climb (A string): now do the same up the A string — A5 (open), B5 (2), C5 (3), D5 (5), E5 (7), F5 (8), G5 (10), A5 (12). You\'ve got it when: name every root correctly, and notice the same note names land in different spots than they did on the E string.',
             time: '3 min',
             hint: 'These are the A-string notes from Module 2. Keep the low E muted so only the power chord rings. Same note, new home — that\'s how the fretboard works.',
             stuck: 'Cover frets 0–5 (A5–D5) chart-free first, then add the rest.',
@@ -176,7 +176,7 @@ SETS.push(
             title: 'Play a power chord progression in time',
             steps: [
           {
-            text: 'Challenge 6 — Watchtower Loop (your assessment piece): play A5–G5–F5–G5, one strum per beat at 60 BPM. Win: four times through, changing on beat 1 every time, with no stops.',
+            text: 'Challenge 6 — Watchtower Loop (your assessment piece): play A5–G5–F5–G5, one strum per beat at 60 BPM. You\'ve got it when: four times through, changing on beat 1 every time, with no stops.',
             time: '5 min',
             hint: 'A5 = 5th fret E string, G5 = 3rd fret E string, F5 = 1st fret E string. Shift smoothly — aim to land exactly on beat 1. (The original song uses an Am chord, but as a power chord it\'s just A5 — no major or minor.) This is the loop the whole class plays for the Set 1 check-off.',
             stuck: 'Loop just A5–G5 (frets 5 and 3) until that change is clean, then add F5.',
@@ -323,7 +323,7 @@ SETS.push(
             title: 'Change power chords on beat 1 at 70+ BPM',
             steps: [
           {
-            text: 'Challenge 1 — Loop in Time: play the "Watchtower" loop (A5–G5–F5–G5) at 60 BPM, each chord one bar (4 beats), four times through. Win: every chord change lands on beat 1, with no stops.',
+            text: 'Challenge 1 — Loop in Time: play the "Watchtower" loop (A5–G5–F5–G5) at 60 BPM, each chord one bar (4 beats), four times through. You\'ve got it when: every chord change lands on beat 1, with no stops.',
             time: '4 min',
             hint: 'If you miss beat 1, keep going — don\'t stop. Staying in time matters more than the perfect change right now.',
             stuck: 'Drop to 50 BPM and nail it there first; play through a missed change instead of stopping to fix it.',
@@ -336,7 +336,7 @@ SETS.push(
             title: 'Play an 8-bar progression with a steady strum',
             steps: [
           {
-            text: 'Challenge 2 — Eighth-Note Strum (your assessment piece): play the loop with straight eighths (down-down-up-down-up), counting "1 + 2 + 3 + 4 +". Win: eight bars clean and steady, then beat your tempo — push past 70 BPM toward the 80 BPM unit goal.',
+            text: 'Challenge 2 — Eighth-Note Strum (your assessment piece): play the loop with straight eighths (down-down-up-down-up), counting "1 + 2 + 3 + 4 +". You\'ve got it when: eight bars clean and steady, then beat your tempo — push past 70 BPM toward the 80 BPM unit goal.',
             time: '4 min',
             hint: 'Start at 60 BPM. If it feels easy, bump up 5 BPM. The unit-end check is an 8-bar progression at 80 BPM with clean muting — this is that piece.',
             stuck: 'Strum down-only on each beat first ("1 2 3 4"), then add the up-strums one at a time.',

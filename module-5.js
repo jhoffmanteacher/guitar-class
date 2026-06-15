@@ -59,7 +59,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. Win: in tune before today\'s work.',
+                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 time: '2 min',
                 hint: 'Tuning (Module 1) is a skill you keep forever. Clean open strings are exactly what makes a chord ring.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -70,7 +70,7 @@ SETS.push(
             title: 'Fret Am cleanly',
             steps: [
           {
-            text: 'Challenge 1 — Clean Am: fret Am (index str 2/fret 1, middle str 4/fret 2, ring str 3/fret 2) and strum strings 1–5 (not the low E). Win: every string rings cleanly — check each one by plucking it.',
+            text: 'Challenge 1 — Clean Am: fret Am (index str 2/fret 1, middle str 4/fret 2, ring str 3/fret 2) and strum strings 1–5 (not the low E). You\'ve got it when: every string rings cleanly — check each one by plucking it.',
             time: '3 min',
             hint: 'Press just behind the frets, not on them. Curve your fingers so they don\'t accidentally touch neighboring strings, and keep your hand relaxed — tension is the enemy of clean tone. Check each string individually by plucking it.',
             stuck: 'Get strings 2 and 3 ringing first (index + ring), then add the middle finger. Most buzz comes from a finger lying too flat — sit up on the very tip.',
@@ -86,7 +86,7 @@ SETS.push(
             title: 'Fret Em cleanly',
             steps: [
           {
-            text: 'Challenge 2 — Clean Em: fret Em (middle str 5/fret 2, ring str 4/fret 2) and strum all 6 strings. Win: a full, open, buzz-free Em — this is your warm-up chord.',
+            text: 'Challenge 2 — Clean Em: fret Em (middle str 5/fret 2, ring str 4/fret 2) and strum all 6 strings. You\'ve got it when: a full, open, buzz-free Em — this is your warm-up chord.',
             time: '2 min',
             hint: 'Em is the easiest chord on guitar. Use it to warm up before harder chords. It should sound full and open.',
             stuck: 'If a string buzzes, check that both fingers are arched up on their tips and not leaning on the open strings next door.',
@@ -102,7 +102,7 @@ SETS.push(
             title: 'Switch Am ↔ Em on beat 1',
             steps: [
           {
-            text: 'Challenge 3 — Am ↔ Em Switch: at 60 BPM, 4 down-strums per bar, play 2 bars of Am then 2 bars of Em and repeat. Win: change chords right on beat 1 every time — keep strumming through any fumble.',
+            text: 'Challenge 3 — Am ↔ Em Switch: at 60 BPM, 4 down-strums per bar, play 2 bars of Am then 2 bars of Em and repeat. You\'ve got it when: change chords right on beat 1 every time — keep strumming through any fumble.',
             time: '3 min',
             hint: 'Even if the chord isn\'t perfect, keep strumming in time. Stopping to fix a note is the #1 habit to avoid. Fix it between bars, not mid-bar. Set the ⏱ Timer for 2 minutes and loop the switch until it beeps.',
             stuck: 'Your index finger barely moves between Am and Em — anchor it and let the others follow. Drop to 50 BPM if 60 feels rushed.',
@@ -115,7 +115,7 @@ SETS.push(
             title: 'One-Minute Changes — beat your record',
             steps: [
               {
-                text: 'Challenge 4 — One-Minute Changes (Am ↔ Em): set the ⏱ Timer for 60 seconds and switch Am→Em→Am→Em as many times as you can. Every CLEAN change counts; a buzzy or missed one doesn\'t. Win: count your clean changes and type the number below — beat it next class. (Over 20 is solid for week one.)',
+                text: 'Challenge 4 — One-Minute Changes (Am ↔ Em): set the ⏱ Timer for 60 seconds and switch Am→Em→Am→Em as many times as you can. Every CLEAN change counts; a buzzy or missed one doesn\'t. You\'ve got it when: count your clean changes and type the number below — beat it next class. (Over 20 is solid for week one.)',
                 time: '3 min',
                 hint: 'This is the classic chord-change speed test. Quality first: a clean change you can count beats a blurry one you can\'t.',
                 stuck: 'Keep your index finger planted (it barely moves between Am and Em) and move only the other fingers. Slow down until every change rings.',
@@ -256,7 +256,7 @@ SETS.push(
             title: 'Name the root note of each chord before you strum',
             steps: [
           {
-            text: 'Challenge — Name the Root: before you strum each chord, find and say its ROOT — the note the chord is named after, on the lowest string you strum. C = C (A string, 3rd fret) · G = G (low E, 3rd fret) · Am = A (A string, open) · F = F (D string, 3rd fret). Win: name all four roots correctly, then play the chord.',
+            text: 'Challenge — Name the Root: before you strum each chord, find and say its ROOT — the note the chord is named after, on the lowest string you strum. C = C (A string, 3rd fret) · G = G (low E, 3rd fret) · Am = A (A string, open) · F = F (D string, 3rd fret). You\'ve got it when: name all four roots correctly, then play the chord.',
             time: '2 min',
             hint: 'Knowing where a chord\'s root lives on the neck is the same Module 2 note-name skill — and it is exactly what makes barre chords easy in Module 7. The root tells you the chord\'s name.',
             stuck: 'Use the Module 2 note map — the root is the lowest string you actually strum. Find that one note first, then build the shape around it.',
@@ -275,7 +275,7 @@ SETS.push(
             title: 'Use a common-finger pivot (Am ↔ C)',
             steps: [
           {
-            text: 'Challenge 1 — Pivot Finger: switch Am ↔ C keeping your index finger planted on string 2, fret 1, moving only the other fingers. Win: clean changes both ways without ever lifting the pivot finger.',
+            text: 'Challenge 1 — Pivot Finger: switch Am ↔ C keeping your index finger planted on string 2, fret 1, moving only the other fingers. You\'ve got it when: clean changes both ways without ever lifting the pivot finger.',
             time: '3 min',
             hint: 'Common-finger pivots cut your transition time in half. Look for other chords in this group that share a finger position.',
             stuck: 'Rest your index lightly on string 2 / fret 1 and refuse to lift it — move only the middle and ring fingers.',
@@ -288,7 +288,7 @@ SETS.push(
             title: 'Play the C–G–Am–F loop in time',
             steps: [
           {
-            text: 'Challenge 2 — C–G–Am–F Loop: at 60 BPM, play 2 bars each of C, G, Am, F and repeat. Win: change on beat 1 every time — then bump up 5 BPM and hold it clean.',
+            text: 'Challenge 2 — C–G–Am–F Loop: at 60 BPM, play 2 bars each of C, G, Am, F and repeat. You\'ve got it when: change on beat 1 every time — then bump up 5 BPM and hold it clean.',
             time: '4 min',
             hint: 'If you miss a change, keep going. You can slow to 50 BPM if needed. Gradually increase by 5 BPM each time through. Set the ⏱ Timer for 3 minutes and see how clean the loop gets before it beeps.',
             stuck: 'Loop just the two chords that trip you (often G→Am or Am→F) on their own before running the whole circle.',
@@ -301,7 +301,7 @@ SETS.push(
             title: 'Play a down-up strum pattern',
             steps: [
           {
-            text: 'Challenge 3 — Down-Up Strum: play the loop strumming down on 1 2 3 4 and up on each "+", counting "1 + 2 + 3 + 4 +" aloud. Win: a steady, relaxed pendulum with lighter upstrokes and no stumbles.',
+            text: 'Challenge 3 — Down-Up Strum: play the loop strumming down on 1 2 3 4 and up on each "+", counting "1 + 2 + 3 + 4 +" aloud. You\'ve got it when: a steady, relaxed pendulum with lighter upstrokes and no stumbles.',
             time: '3 min',
             hint: 'Start slower than you think you need to. The upstroke should be lighter than the downstroke. Your wrist should move like a relaxed pendulum.',
             stuck: 'Keep your strumming hand moving down-up-down-up nonstop — just miss the strings on the beats you don\'t want. The motion never stops.',
@@ -314,7 +314,7 @@ SETS.push(
             title: 'One-Minute Changes — beat your record',
             steps: [
               {
-                text: 'Challenge 4 — One-Minute Changes (C ↔ G): set the ⏱ Timer for 60 seconds and switch C→G→C→G as many times as you can — only CLEAN changes count. Win: type your count below and aim to beat your Set 1 number.',
+                text: 'Challenge 4 — One-Minute Changes (C ↔ G): set the ⏱ Timer for 60 seconds and switch C→G→C→G as many times as you can — only CLEAN changes count. You\'ve got it when: type your count below and aim to beat your Set 1 number.',
                 time: '3 min',
                 hint: 'C and G share no easy anchor finger, so pre-shape the next chord in the air before you land it. Quality first — slow down until each one rings.',
                 stuck: 'Break it down: park your hand over G, then practice just dropping into C and back. Speed comes after the path is clean.',
@@ -463,7 +463,7 @@ SETS.push(
             title: 'Fret D major cleanly',
             steps: [
           {
-            text: 'Challenge 1 — Clean D: fret D major (triangle: str 1/fret 2, str 2/fret 3, str 3/fret 2) and strum strings 1–4 only. Win: all four ring — especially string 1 (high E), which loves to get muted.',
+            text: 'Challenge 1 — Clean D: fret D major (triangle: str 1/fret 2, str 2/fret 3, str 3/fret 2) and strum strings 1–4 only. You\'ve got it when: all four ring — especially string 1 (high E), which loves to get muted.',
             time: '3 min',
             hint: 'The D chord is tricky because string 1 is easy to accidentally mute. Curve your fingers and make sure your fingertips arch away from that string.',
             stuck: 'Get strings 1 and 2 ringing first, then add string 3. Arch the ring finger up high so it clears the high E.',
@@ -479,7 +479,7 @@ SETS.push(
             title: 'Connect Group 1 & Group 2 chords',
             steps: [
           {
-            text: 'Challenge 2 — Cross-Group Changes: at 60 BPM, switch G→D, Am→Em, and C→A, 2 bars each. Win: each change lands on beat 1, using fingers that stay close as you switch.',
+            text: 'Challenge 2 — Cross-Group Changes: at 60 BPM, switch G→D, Am→Em, and C→A, 2 bars each. You\'ve got it when: each change lands on beat 1, using fingers that stay close as you switch.',
             time: '4 min',
             hint: 'Look for fingers that stay close or in the same area as you switch. Planning your hand movement before you lift your fingers saves time. Set the ⏱ Timer for 3 minutes and run the pairs until it beeps.',
             stuck: 'Take one pair at a time. For G→D, notice all your fingers shift toward the high strings together — move them as one unit, not finger by finger.',
@@ -507,7 +507,7 @@ SETS.push(
             title: 'One-Minute Changes — beat your record',
             steps: [
               {
-                text: 'Challenge 4 — One-Minute Changes (G ↔ D): set the ⏱ Timer for 60 seconds and switch G→D→G→D as many times as you can — only CLEAN changes count. This is a cross-group jump, so it\'s a real test. Win: type your count below and aim to beat your Set 2 number.',
+                text: 'Challenge 4 — One-Minute Changes (G ↔ D): set the ⏱ Timer for 60 seconds and switch G→D→G→D as many times as you can — only CLEAN changes count. This is a cross-group jump, so it\'s a real test. You\'ve got it when: type your count below and aim to beat your Set 2 number.',
                 time: '3 min',
                 hint: 'G and D both sit up near the high strings — let your whole hand travel as one shape rather than placing finger by finger.',
                 stuck: 'Park your hand over G, then practice just dropping into D and back. Slow until each one rings, then let speed come.',
@@ -665,7 +665,7 @@ SETS.push(
             title: 'Fret E major cleanly',
             steps: [
           {
-            text: 'Challenge 1 — Clean E: fret E major (index str 3/fret 1, middle str 5/fret 2, ring str 4/fret 2) and strum all 6 strings. Win: a full, rich chord with every string ringing — watch your index on string 2.',
+            text: 'Challenge 1 — Clean E: fret E major (index str 3/fret 1, middle str 5/fret 2, ring str 4/fret 2) and strum all 6 strings. You\'ve got it when: a full, rich chord with every string ringing — watch your index on string 2.',
             time: '3 min',
             hint: 'E major is one of the most satisfying open chords to play. If any string buzzes, check your index finger — it tends to accidentally mute string 2.',
             stuck: 'E is the Em shape plus one finger — play a clean Em first, then add the index on string 3, fret 1.',
@@ -681,7 +681,7 @@ SETS.push(
             title: 'Fret B7 cleanly',
             steps: [
           {
-            text: 'Challenge 2 — Four-Finger B7: fret B7 (index str 4/fret 1, middle str 5/fret 2, ring str 3/fret 2, pinky str 1/fret 2) and strum strings 1–5. Win: all four fingers down and every played string clean — then play E→B7→E and hear it pull home.',
+            text: 'Challenge 2 — Four-Finger B7: fret B7 (index str 4/fret 1, middle str 5/fret 2, ring str 3/fret 2, pinky str 1/fret 2) and strum strings 1–5. You\'ve got it when: all four fingers down and every played string clean — then play E→B7→E and hear it pull home.',
             time: '3 min',
             hint: 'B7 is a dominant 7th chord — it has a slightly tense sound that wants to resolve to E. Play E then B7 then E again and hear how it pulls back.',
             stuck: 'Place the fingers one at a time in order — index, middle, ring, then pinky — and check that the open string 2 still rings between them.',
@@ -697,7 +697,7 @@ SETS.push(
             title: 'One-Minute Changes — beat your record',
             steps: [
               {
-                text: 'Challenge 3 — One-Minute Changes (E ↔ B7): set the ⏱ Timer for 60 seconds and switch E→B7→E→B7 as many times as you can — only CLEAN changes count (all four B7 fingers down, strings 1–5 ringing). Win: type your count below and aim to beat your Set 3 number.',
+                text: 'Challenge 3 — One-Minute Changes (E ↔ B7): set the ⏱ Timer for 60 seconds and switch E→B7→E→B7 as many times as you can — only CLEAN changes count (all four B7 fingers down, strings 1–5 ringing). You\'ve got it when: type your count below and aim to beat your Set 3 number.',
                 time: '3 min',
                 hint: 'These two share no fingers, so this is the hardest pair yet. Pre-shape B7 in the air before you land it, and keep string 2 open.',
                 stuck: 'Drill just dropping into B7 from E and back, slowly, until all four fingers land together. Speed comes after the landing is clean.',

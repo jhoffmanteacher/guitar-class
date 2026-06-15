@@ -5,7 +5,7 @@
 //
 //  ★ TEMPLATE MODULE — pattern source for all other modules.
 //    When building or upgrading another module, copy the patterns
-//    here (named challenges w/ Win:, Stuck?/Level up, per-activity
+//    here (named challenges w/ "You've got it when:", Stuck?/Level up, per-activity
 //    time chips, exit tickets, PR ladders, self-contained gotItWhens,
 //    forward link in the module review). See WORKFLOW.md Appendix A
 //    for the full checklist. Frozen 2026-06-11 after Session 1.4.
@@ -112,7 +112,7 @@ SETS.push(
             title: 'Name every note on the low E string (frets 0–12)',
             steps: [
               {
-                text: 'Challenge 1 — Low E Run: play every natural note up the low E string and back down — E · F · G · A · B · C · D · E — saying each name aloud. Win: one lap, chart-free, with no mistakes.',
+                text: 'Challenge 1 — Low E Run: play every natural note up the low E string and back down — E · F · G · A · B · C · D · E — saying each name aloud. You\'ve got it when: one lap, chart-free, with no mistakes.',
                 time: '4 min',
                 hint: 'Hearing + saying + playing locks it in. Peek at the chart only if you\'re truly stuck. Set the ⏱ Timer (bottom of the screen) to 2 min and count how many clean laps you fit before it beeps — beat that number next class.',
                 stuck: 'Master frets 0–5 only (E–A) chart-free first, then add 7–12 once those are automatic.',
@@ -142,7 +142,7 @@ SETS.push(
             title: 'Name every note on the A string (frets 0–12)',
             steps: [
               {
-                text: 'Challenge 2 — A String Run (your Set 1 check-off): same on the A string, chart-free — A · B · C · D · E · F · G · A, up to fret 12 and back, one note per beat. Win: a clean lap with the metronome and no stalls. The Set 1 check-off tests exactly this: a partner calls out any fret, and you name it on the spot.',
+                text: 'Challenge 2 — A String Run (your Set 1 check-off): same on the A string, chart-free — A · B · C · D · E · F · G · A, up to fret 12 and back, one note per beat. You\'ve got it when: a clean lap with the metronome and no stalls. The Set 1 check-off tests exactly this: a partner calls out any fret, and you name it on the spot.',
                 time: '4 min',
                 hint: 'Keep the metronome at 60 BPM. If you stall on a note, that\'s the one to drill.',
                 stuck: 'Drop to 50 BPM and win there first, or cover frets 0–5 (A–D) before adding the rest.',
@@ -166,7 +166,7 @@ SETS.push(
                 hint: 'No chart. If you stall on a note, loop just that part of the string until it\'s automatic. No partner? Write frets 0–12 on small scraps of paper, shuffle them, then flip one at a time and name it within 3 seconds.'
               },
               {
-                text: 'Challenge 3 — Shuffle Run: write frets 0–12 on scraps of paper (or use the corners of your handout), shuffle them, then draw one at a time and — on the low E string — name it AND play it within 3 seconds. Win: 10 in a row with no counting up from E.',
+                text: 'Challenge 3 — Shuffle Run: write frets 0–12 on scraps of paper (or use the corners of your handout), shuffle them, then draw one at a time and — on the low E string — name it AND play it within 3 seconds. You\'ve got it when: 10 in a row with no counting up from E.',
                 time: '4 min',
                 hint: 'The 3-second limit is the real test. You\'re jumping to random frets, not running a memorized lap — that\'s what "name any fret instantly" really means.',
                 stuck: 'Put only frets 0–7 in the pile first; add 8–12 once you hit 10 in a row.',
@@ -393,7 +393,7 @@ SETS.push(
             title: 'Press notes cleanly with no fret buzz',
             steps: [
           {
-            text: 'Challenge 1 — Finger Workout: play frets 1–5 on the low E string, one finger per fret, then do the same on the A string. Keep your thumb behind the neck. Win: every note rings clean with no buzz.',
+            text: 'Challenge 1 — Finger Workout: play frets 1–5 on the low E string, one finger per fret, then do the same on the A string. Keep your thumb behind the neck. You\'ve got it when: every note rings clean with no buzz.',
             time: '3 min',
             hint: 'Go as slow as you need. Every note should ring cleanly with no buzz.',
             stuck: 'Use just frets 1–3 with three fingers first, then add the pinky on frets 4–5.',
@@ -417,7 +417,7 @@ SETS.push(
             text: 'Quick check:',
             time: '1 min',
             skills: [1, 2],
-            response: { type: 'mc', prompt: 'A note still buzzes even though you\'re pressing just behind the fret. What\'s the most likely cause?',
+            response: { type: 'mc', prompt: 'The note still buzzes even though you\'re pressing just behind the fret. What\'s the most likely cause?',
               answer: 0,
               explain: 'With good placement, buzz usually means too little pressure or a fingertip leaning over and deadening the string. Pressing harder isn\'t the fix — a vertical fingertip is.',
               choices: [
@@ -451,7 +451,7 @@ SETS.push(
             }
           },
           {
-            text: 'Challenge 2 — Play the Tune: using the TAB, play "Happy Birthday" on the E & A strings at 60 BPM, one note per beat. Win: the whole melody start to finish, in time, no buzz. Click any note name to hear how it should sound.',
+            text: 'Challenge 2 — Play the Tune: using the TAB, play "Happy Birthday" on the E & A strings at 60 BPM, one note per beat. You\'ve got it when: the whole melody start to finish, in time, no buzz. Click any note name to hear how it should sound.',
             time: '4 min',
             hint: 'If you buzz on a note, stop, fix your finger position, then continue. Don\'t just play through the buzz.',
             stuck: 'Play just the first phrase ("Hap-py birth-day to you") until it\'s smooth, then add the second.',
@@ -499,7 +499,7 @@ SETS.push(
             }
           },
           {
-            text: 'Challenge 3 — Watchtower Bass Riff (your assessment piece): using the TAB, play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. Win: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound.',
+            text: 'Challenge 3 — Watchtower Bass Riff (your assessment piece): using the TAB, play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. You\'ve got it when: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound.',
             time: '5 min',
             hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A). Keep your thumb behind the neck. Let each note ring fully before the next. Drill it until you can run it with your eyes closed — that\'s the unit-end test.',
             stuck: 'Loop just F–G (frets 1–3) until the finger change is clean, then add the A on fret 5.',
