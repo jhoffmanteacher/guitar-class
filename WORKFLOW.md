@@ -70,12 +70,21 @@ This is the at-a-glance list; full detail is in the numbered sessions below.
   `.mr-assess-box`. `app.js` (`buildModuleReview`, new `goToSet`), `styles.css`, all
   `module-*.js` reviews. See the **Module review** standard below for the pattern.
 
-**⚡ Performance backlog (deferred from the 2026-06-14 deep dive — do later):**
-- **Modular Firebase SDK** — swap the 3 heavy `*-compat` SDKs (`index.html`) for
-  tree-shaken ESM imports from gstatic (no bundler needed). Compat `firestore` is the
-  single biggest download and is cross-origin (never SW-cached, so re-fetched on every
-  cold device). Touches auth + Firestore calls in `app.js` — test sign-in + save/load
-  carefully. Biggest *network* win.
+**⚡ Performance backlog (from the 2026-06-14 deep dive):**
+- **Perf: defer the Firestore SDK** — ✅ done 2026-06-14 — `firebase-firestore-compat.js`
+  (~100 KB gzip, two-thirds of the Firebase payload) is no longer loaded by `index.html`.
+  It's fetched on demand by a new `ensureDb()` the first time we read/write progress (only
+  after sign-in); `signIn()` pre-warms it during the Google popup. The sign-in screen now
+  paints with only app+auth (~50 KB) instead of ~151 KB. Stayed on **compat** (no auth-API
+  rewrite, no risk to the referrer-restricted key). Files: `index.html`, `app.js`, `sw.js`
+  (v15→v16). Verified headless: Firestore absent at paint, `ensureDb` loads it on demand +
+  dedupes, app renders without it, zero errors. *(⚠️ still worth a real Google sign-in test
+  on the live site — automated OAuth can't be driven, but the auth flow itself was untouched.)*
+- **~~Modular Firebase SDK~~ — evaluated & rejected 2026-06-14.** Measured gstatic gzip
+  sizes: modular via CDN is *bigger* (app 22.5K vs 10K, auth ≈, firestore 111.6K vs 101K =
+  ~174K vs ~151K). The modular "lighter" win needs a **bundler** to tree-shake, which this
+  project deliberately doesn't have. Did the defer above instead. Don't revisit unless a
+  build step is ever introduced.
 - **Consolidate Firestore writers** — merge `saveProgress` / `saveResponses` /
   `saveCompleted` (`app.js`) into one debounced writer that batches whatever's dirty
   (currently 3 separate 800ms timers, each doing a full `.set(merge)` with name/email).
