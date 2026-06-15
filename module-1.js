@@ -22,7 +22,8 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Reflect',        steps: [
+        title: 'Computer station — Watch · Listen · Reflect',
+        steps: [
           {
             text: 'Headphone routine (every computer-station day): plug in, keep the volume low enough that the classmate beside you can\'t hear it, and slip one earcup off when the teacher is talking. This is our shared-room norm all semester.',
             hint: 'If the person next to you can hear your video, it\'s too loud — comfortable for you, quiet for everyone else.'
@@ -140,7 +141,8 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',
+        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/X2EmpWr9vUc" target="_blank">How to Tune Your Guitar For Beginners – JustinGuitar</a>.',
             hint: 'Headphones on. Notice the order of the strings and what "in tune" sounds like.'
@@ -269,7 +271,7 @@ SETS.push(
     ],
 
     assessment: {
-      goal: 'Names 5+ parts of the guitar · Holds guitar with correct posture · Holds pick with correct grip · Tunes all 6 strings · Plays a short open-string melody on E string at 60 BPM',
+      goal: 'Names 5+ parts of the guitar · Holds guitar with correct posture · Holds pick with correct grip · Tunes all 6 strings · Plays a short melody on the E string at 60 BPM',
       performance: 'Whole-class unison open-string exercise. Everyone plays together — no one is on the spot.',
       selfCheck: 'Can you name 5 parts of the guitar? Can you tune all 6 strings with a tuner? Can you play a single note cleanly with no buzzing?',
       standards: ['Pr.4a', 'Pr.5a']
@@ -294,7 +296,7 @@ SETS.push(
         gotItWhen: 'you can take an out-of-tune guitar and get all 6 strings to green on the tuner in under 2 minutes without help.',
         practice: { type: 'playSeq', label: 'Hear all 6 strings in tune', bpm: 50,
           notes: [40, 45, 50, 55, 59, 64] } },
-      { id: 'w2-s6', text: 'Play a short open-string melody on the E string at 60 BPM',
+      { id: 'w2-s6', text: 'Play a short melody on the E string at 60 BPM',
         gotItWhen: 'you can play the melody all the way through at 60 BPM with the metronome without stopping or losing the beat.',
         practice: { type: 'playSeq', label: 'E string warm-up melody', bpm: 60,
           notes: [40, 41, 43, 45, 43, 41, 40] } }
@@ -310,7 +312,7 @@ MODULE_REVIEWS[1] = {
     { id: 'mr1-s1', text: 'I can describe why I want to learn guitar', set: 'w1' },
     { id: 'mr1-s2', text: 'I can name 5+ parts of the guitar', set: 'w2' },
     { id: 'mr1-s3', text: 'I can tune all 6 strings with a tuner', set: 'w2' },
-    { id: 'mr1-s4', text: 'I can play a short open-string melody on the E string at 60 BPM', set: 'w2' }
+    { id: 'mr1-s4', text: 'I can play a short melody on the E string at 60 BPM', set: 'w2' }
   ],
   assessItems: [
     'Tune your guitar in 2 minutes',

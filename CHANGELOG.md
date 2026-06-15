@@ -5,6 +5,25 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-06-14 — Modules 1–3 proofread fixes
+
+A pass over the first three modules caught a couple of things that could trip you up.
+
+### Fixed
+- **Module 2:** the "Play A string" listen button was sounding a wrong note (a
+  B-flat where it should have been a B). It now plays the correct pitch, so the
+  notes you hear match the notes you're learning.
+- **Module 3:** the F5 power-chord diagram was drawn in the wrong spot on the
+  neck — it now shows in the right position.
+
+### Changed
+- **Module 3:** the Watchtower loop chord is now labeled **A5** instead of
+  "Am5." A power chord has no major or minor — it's just A5 — with a quick note
+  that the original song's chord is Am. The "Smells Like Teen Spirit" chord list
+  was also corrected.
+- **Module 1:** clearer wording — "a short melody on the E string" (the old
+  phrasing called it an "open-string" melody even though it uses fretted notes).
+
 ## 2026-06-14 — Module 6 (Strumming) brought up to the course template
 
 Module 6 now teaches with the same structure and supports as every other module.

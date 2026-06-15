@@ -22,7 +22,8 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',
+        steps: [
           {
             text: 'Power chord shape — see it move: here are E5, G5, and A5. It\'s the SAME two-finger shape (index on the root, ring two frets up) just slid to a new fret. Press ▶ to hear the root climb E → G → A, then build each shape on your guitar.',
             time: '4 min',
@@ -175,16 +176,16 @@ SETS.push(
             title: 'Play a power chord progression in time',
             steps: [
           {
-            text: 'Challenge 6 — Watchtower Loop (your assessment piece): play Am5–G5–F5–G5, one strum per beat at 60 BPM. Win: four times through, changing on beat 1 every time, with no stops.',
+            text: 'Challenge 6 — Watchtower Loop (your assessment piece): play A5–G5–F5–G5, one strum per beat at 60 BPM. Win: four times through, changing on beat 1 every time, with no stops.',
             time: '5 min',
-            hint: 'Am5 = 5th fret E string, G5 = 3rd fret E string, F5 = 1st fret E string. Shift smoothly — aim to land exactly on beat 1. This is the loop the whole class plays for the Set 1 check-off.',
-            stuck: 'Loop just Am5–G5 (frets 5 and 3) until that change is clean, then add F5.',
+            hint: 'A5 = 5th fret E string, G5 = 3rd fret E string, F5 = 1st fret E string. Shift smoothly — aim to land exactly on beat 1. (The original song uses an Am chord, but as a power chord it\'s just A5 — no major or minor.) This is the loop the whole class plays for the Set 1 check-off.',
+            stuck: 'Loop just A5–G5 (frets 5 and 3) until that change is clean, then add F5.',
             levelUp: 'Play it with an eighth-note strum (down-down-up-down-up), or push past 70 BPM.',
             skills: [2, 5, 6],
             chords: [
-              { name: 'Am5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 },
+              { name: 'A5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 },
               { name: 'G5',  chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
-              { name: 'F5',  chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 0 }
+              { name: 'F5',  chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 1 }
             ],
             response: { type: 'short', prompt: 'Personal record: win at 60, then raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 80 — beat it next class' }
           }
@@ -205,7 +206,7 @@ SETS.push(
     },
 
     songs: [
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Power chord loop: Am5–G5–F5–G5 · Play as a class', type: 'Core', core: true,
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Power chord loop: A5–G5–F5–G5 · Play as a class', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"Happy Birthday"', meta: 'Power chord version — chords only, no melody yet', type: 'Core', core: true,
@@ -213,7 +214,7 @@ SETS.push(
       { name: '"Seven Nation Army" — The White Stripes', meta: 'Iconic single power-chord riff on E string', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Smells Like Teen Spirit" — Nirvana', meta: 'E A D C# power chord progression', type: 'Choice', core: false, level: 2,
+      { name: '"Smells Like Teen Spirit" — Nirvana', meta: 'F Bb Ab Db power chord progression', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=hTWKbfoikeg',
         tutorialUrl: 'https://www.youtube.com/watch?v=HfhZbd5w-iY' },
       { name: '"Basket Case" — Green Day', meta: 'Eb Bb C G power chord sequence', type: 'Choice', core: false, level: 2,
@@ -232,7 +233,7 @@ SETS.push(
 
     assessment: {
       goal: 'Frets a clean 2-finger power chord · Moves shape along E string without buzzing · Moves shape along A string · Mutes unused strings cleanly · Plays a chord on the beat · Reads a power chord TAB',
-      performance: 'Whole-class unison: everyone plays Am5–G5–F5–G5 loop together at 60 BPM. Teacher listens for muting and timing.',
+      performance: 'Whole-class unison: everyone plays A5–G5–F5–G5 loop together at 60 BPM. Teacher listens for muting and timing.',
       selfCheck: 'Can you fret a power chord with no buzzing from unused strings? Can you move the shape to 3 different positions without pausing?',
       standards: ['Pr.4a', 'Pr.5a', 'Re.7a']
     },
@@ -277,7 +278,8 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',
+        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/sNa44EmrsDc" target="_blank">How & Why to Use a Metronome – JustinGuitar</a> (0:00–4:00).',
             time: '4 min',
@@ -321,7 +323,7 @@ SETS.push(
             title: 'Change power chords on beat 1 at 70+ BPM',
             steps: [
           {
-            text: 'Challenge 1 — Loop in Time: play the "Watchtower" loop (Am5–G5–F5–G5) at 60 BPM, each chord one bar (4 beats), four times through. Win: every chord change lands on beat 1, with no stops.',
+            text: 'Challenge 1 — Loop in Time: play the "Watchtower" loop (A5–G5–F5–G5) at 60 BPM, each chord one bar (4 beats), four times through. Win: every chord change lands on beat 1, with no stops.',
             time: '4 min',
             hint: 'If you miss beat 1, keep going — don\'t stop. Staying in time matters more than the perfect change right now.',
             stuck: 'Drop to 50 BPM and nail it there first; play through a missed change instead of stopping to fix it.',
@@ -411,7 +413,7 @@ SETS.push(
         gotItWhen: 'your chord changes land exactly on beat 1 with the metronome at 70 BPM and you don\'t need to pause or restart.' },
       { id: 'm3w2-s2', text: 'Play a full 8-bar power chord progression in time',
         gotItWhen: 'you can play through 8 bars without stopping, even if a chord change is rough — you keep going to the next downbeat.',
-        practice: { type: 'playSeq', label: 'Watchtower roots (Am · G · F · G)', bpm: 70,
+        practice: { type: 'playSeq', label: 'Watchtower roots (A · G · F · G)', bpm: 70,
           notes: [45, 43, 41, 43] } },
       { id: 'm3w2-s3', text: 'Play a straight-eighths strumming pattern with power chords',
         gotItWhen: 'you can play down-down-up-down-up across a bar and count "1 + 2 + 3 + 4 +" aloud without losing the strum.' },

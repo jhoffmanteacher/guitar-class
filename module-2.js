@@ -32,7 +32,8 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',
+        steps: [
           {
             text: 'Watch: <a href="https://youtu.be/Abrd0c92xRE" target="_blank">Open Notes On The Guitar – JustinGuitar</a>.',
             time: '4 min',
@@ -236,7 +237,7 @@ SETS.push(
       { id: 'm2w1-s3', text: 'Name all natural notes on the A string (frets 0–12)',
         gotItWhen: 'someone calls out any fret 0–12 on the A string and you can say the note name instantly, without counting up from A.',
         practice: { type: 'playSeq', label: 'Play A string 0–12', bpm: 60,
-          notes: [45, 46, 48, 50, 52, 53, 55, 57] } },
+          notes: [45, 47, 48, 50, 52, 53, 55, 57] } },
       { id: 'm2w1-s4', text: 'Point to any named note on E or A string when called out',
         gotItWhen: 'the teacher says a note name and you can put your finger on it within 3 seconds without looking at a chart.' },
       { id: 'm2w1-s5', text: 'Read a basic fretboard note-name chart',
