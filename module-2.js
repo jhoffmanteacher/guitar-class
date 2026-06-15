@@ -38,7 +38,10 @@ SETS.push(
             time: '4 min',
             hint: 'Play along on your guitar as he goes through each note on both strings. Pause and find each note before he names it.',
             skills: [1, 2, 3],
-            response: { type: 'mc', prompt: 'On the low E string, which note is at fret 5?', choices: [
+            response: { type: 'mc', prompt: 'On the low E string, which note is at fret 5?',
+              answer: 0,
+              explain: 'Fret 5 of the low E is A — the same pitch as the open A string right next to it.',
+              choices: [
               'A',
               'D',
               'G',
@@ -65,7 +68,10 @@ SETS.push(
             hint: 'Slow is fine. Right now the goal is connecting each name to its spot — use the chart freely.',
             skills: [2],
             playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] },
-            response: { type: 'mc', prompt: 'On the low E string, what note is at fret 10?', choices: [
+            response: { type: 'mc', prompt: 'On the low E string, what note is at fret 10?',
+              answer: 1,
+              explain: 'Counting the naturals up the low E (E F G A B C D), fret 10 lands on D — fret 12 is E again, the octave.',
+              choices: [
               'C',
               'D',
               'E',
@@ -118,7 +124,10 @@ SETS.push(
                 text: 'Quick check — name the note before you play it:',
                 time: '1 min',
                 skills: [2],
-                response: { type: 'mc', prompt: 'Low E string — what note is at fret 8?', choices: ['A', 'C', 'D', 'B'] }
+                response: { type: 'mc', prompt: 'Low E string — what note is at fret 8?',
+                  answer: 1,
+                  explain: 'Fret 7 is B, and C is just one fret up at 8 — there\'s no sharp between B and C.',
+                  choices: ['A', 'C', 'D', 'B'] }
               },
               {
                 text: 'Name That Riff (give it a go!): pick out the "Seven Nation Army" or "Smoke on the Water" main riff by ear on the low E string. No score — just go for it.',
@@ -145,7 +154,10 @@ SETS.push(
                 text: 'Quick check — name the note before you play it:',
                 time: '1 min',
                 skills: [3],
-                response: { type: 'mc', prompt: 'A string — what note is at fret 2?', choices: ['A', 'B', 'C', 'D'] }
+                response: { type: 'mc', prompt: 'A string — what note is at fret 2?',
+                  answer: 1,
+                  explain: 'From open A, one fret up is A#, and two frets up is B. So fret 2 on the A string is B.',
+                  choices: ['A', 'B', 'C', 'D'] }
               },
               {
                 text: 'Partner self-quiz: have a partner call out any fret 0–12 on the A string. Say the note within 3 seconds. Go 10 rounds, then switch.',
@@ -185,22 +197,22 @@ SETS.push(
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Identify bass notes of riff on low E string', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'E string riff — ear training & note ID', type: 'Choice', core: false,
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'E string riff — ear training & note ID', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Smoke on the Water" — Deep Purple', meta: 'E string — classic note recognition', type: 'Choice', core: false,
+      { name: '"Smoke on the Water" — Deep Purple', meta: 'E string — classic note recognition', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=Q2FzZSBD5LE',
         tutorialUrl: 'https://www.youtube.com/watch?v=QkT5yLP5VQA' },
-      { name: '"Another One Bites the Dust" — Queen', meta: 'A string bass notes', type: 'Choice', core: false,
+      { name: '"Another One Bites the Dust" — Queen', meta: 'A string bass notes', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=rY0WxgSXdEE',
         tutorialUrl: 'https://www.youtube.com/watch?v=vhLJOOF-id4' },
-      { name: '"Eye of the Tiger" — Survivor', meta: 'Riff on E & A — note identification', type: 'Choice', core: false,
+      { name: '"Eye of the Tiger" — Survivor', meta: 'Riff on E & A — note identification', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=btPJPFnesV4',
         tutorialUrl: 'https://www.youtube.com/watch?v=LAXq-nbsGfs' },
-      { name: '"Beat It" — Michael Jackson', meta: 'Intro riff on E string', type: 'Choice', core: false,
+      { name: '"Beat It" — Michael Jackson', meta: 'Intro riff on E string', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=oRdxUFDoQe0',
         tutorialUrl: 'https://www.youtube.com/watch?v=B5M5tVc7XZA' },
-      { name: '"Day Tripper" — The Beatles', meta: 'Partial riff on E string', type: 'Choice', core: false,
+      { name: '"Day Tripper" — The Beatles', meta: 'Partial riff on E string', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=AYZlME0mQB8',
         tutorialUrl: 'https://www.youtube.com/watch?v=UkBVfOlPBrI' }
     ],
@@ -216,7 +228,7 @@ SETS.push(
       { id: 'm2w1-s1', text: 'Recite the musical alphabet (A B C D E F G) from memory',
         gotItWhen: 'you can say A B C D E F G — and what comes after G — without pausing or looking at anything.',
         practice: { type: 'mc', prompt: 'What note comes after G?',
-          choices: ['H', 'A', 'A#', 'It starts over at C'], answer: 1 } },
+          choices: ['G#', 'A', 'A#', 'It starts over at C'], answer: 1 } },
       { id: 'm2w1-s2', text: 'Name all natural notes on the E string (frets 0–12)',
         gotItWhen: 'someone calls out any fret 0–12 on the low E and you can say the note name instantly, without counting up from E.',
         practice: { type: 'playSeq', label: 'Play E string 0–12', bpm: 60,
@@ -262,7 +274,10 @@ SETS.push(
             time: '3 min',
             hint: 'As he lists each cause, pause and test it on your own guitar — find your buzz before he names the fix.',
             skills: [1, 2],
-            response: { type: 'mc', prompt: 'Which is the MOST common cause of fret buzz for beginners?', choices: [
+            response: { type: 'mc', prompt: 'Which is the MOST common cause of fret buzz for beginners?',
+              answer: 0,
+              explain: 'Light or too-far-from-the-fret pressure can\'t fully close the string — the #1 beginner cause. A wrong pick, bad tuning, or low volume won\'t make a note buzz.',
+              choices: [
               'Pressing the string too lightly, or too far from the fret',
               'Using the wrong pick',
               'The guitar being out of tune',
@@ -274,7 +289,10 @@ SETS.push(
             time: '4 min',
             hint: 'Pause when he shows a TAB example. Find those notes on your guitar before hitting play.',
             skills: [4],
-            response: { type: 'mc', prompt: 'On a TAB diagram, the TOP line represents which string?', choices: [
+            response: { type: 'mc', prompt: 'On a TAB diagram, the TOP line represents which string?',
+              answer: 0,
+              explain: 'TAB lines mirror the strings by pitch: the TOP line is the thinnest, highest string (high e); the BOTTOM line is the low E.',
+              choices: [
               'The high E (thinnest) string',
               'The low E (thickest) string',
               'The A string',
@@ -309,7 +327,10 @@ SETS.push(
             time: '2 min',
             hint: 'Most beginners press too hard. Finding the minimum pressure is a real technique.',
             skills: [1, 2],
-            response: { type: 'mc', prompt: 'Where should your fingertip press to get the cleanest tone?', choices: [
+            response: { type: 'mc', prompt: 'Where should your fingertip press to get the cleanest tone?',
+              answer: 0,
+              explain: 'Press just behind the fret (toward the nut) with your fingertip — close to the wire without sitting on it gives the cleanest, buzz-free note.',
+              choices: [
               'Just behind the fret (toward the nut)',
               'On top of the fret wire',
               'In the middle of the fret space',
@@ -395,7 +416,10 @@ SETS.push(
             text: 'Quick check:',
             time: '1 min',
             skills: [1, 2],
-            response: { type: 'mc', prompt: 'A note still buzzes even though you\'re pressing just behind the fret. What\'s the most likely cause?', choices: [
+            response: { type: 'mc', prompt: 'A note still buzzes even though you\'re pressing just behind the fret. What\'s the most likely cause?',
+              answer: 0,
+              explain: 'With good placement, buzz usually means too little pressure or a fingertip leaning over and deadening the string. Pressing harder isn\'t the fix — a vertical fingertip is.',
+              choices: [
               'Too little pressure, or a fingertip leaning over and muting the string',
               'Pressing too hard on the string',
               'The string is too new',
@@ -514,7 +538,10 @@ SETS.push(
             text: 'Quick check on reading TAB:',
             time: '1 min',
             skills: [4],
-            response: { type: 'mc', prompt: 'In TAB the bottom line is the low E string and the line above it is the A string. A "3" on the A-string line is which note?', choices: ['B', 'C', 'D', 'G'] }
+            response: { type: 'mc', prompt: 'In TAB the bottom line is the low E string and the line above it is the A string. A "3" on the A-string line is which note?',
+              answer: 1,
+              explain: 'From open A: A(0)–A#(1)–B(2)–C(3). A "3" on the A-string line is C.',
+              choices: ['B', 'C', 'D', 'G'] }
           }
             ]
           },
@@ -541,22 +568,22 @@ SETS.push(
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Play bass-note riff on low E string from memory', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'E string TAB — great first riff', type: 'Choice', core: false,
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'E string TAB — great first riff', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Smoke on the Water" — Deep Purple', meta: 'E string TAB — iconic beginner riff', type: 'Choice', core: false,
+      { name: '"Smoke on the Water" — Deep Purple', meta: 'E string TAB — iconic beginner riff', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=Q2FzZSBD5LE',
         tutorialUrl: 'https://www.youtube.com/watch?v=QkT5yLP5VQA' },
-      { name: '"Sunshine of Your Love" — Cream', meta: 'Riff on E string', type: 'Choice', core: false,
+      { name: '"Sunshine of Your Love" — Cream', meta: 'Riff on E string', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=HbqQL0J_Vr0',
         tutorialUrl: 'https://www.youtube.com/watch?v=rK14ZU4V6tA' },
-      { name: '"Come As You Are" — Nirvana', meta: 'Partial riff on A string', type: 'Choice', core: false,
+      { name: '"Come As You Are" — Nirvana', meta: 'Partial riff on A string', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=vabnZ9-ex7o',
         tutorialUrl: 'https://www.youtube.com/watch?v=G14kHAijVHM' },
-      { name: '"Crazy Train" — Ozzy Osbourne', meta: 'Intro notes on E string', type: 'Choice', core: false,
+      { name: '"Crazy Train" — Ozzy Osbourne', meta: 'Intro notes on E string', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=FVovq9TGBw0',
         tutorialUrl: 'https://www.youtube.com/watch?v=JoL3YrtcwuQ' },
-      { name: '"Iron Man" — Black Sabbath', meta: 'Opening notes on E string', type: 'Choice', core: false,
+      { name: '"Iron Man" — Black Sabbath', meta: 'Opening notes on E string', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=qRcYjJQ0JHg',
         tutorialUrl: 'https://www.youtube.com/watch?v=id9iJ_c3JHM' }
     ],

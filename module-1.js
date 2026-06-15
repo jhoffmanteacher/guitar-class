@@ -50,7 +50,10 @@ SETS.push(
           {
             text: 'Ear training — acoustic vs. electric. Listen to two short clips of the SAME song, "All Along the Watchtower": <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank" data-ext="1">Clip A — Bob Dylan</a> then <a href="https://www.youtube.com/watch?v=TLV4_xaYynY" target="_blank" data-ext="1">Clip B — Jimi Hendrix</a>. One is played on an acoustic guitar, the other on an electric. Just listen for the difference in tone.',
             hint: 'Acoustic guitars sound warm, woody, and natural. Electric guitars sound brighter and can be distorted or "fuzzy." Same song — very different guitar sound.',
-            response: { type: 'mc', prompt: 'Which clip is the electric guitar?', choices: [
+            response: { type: 'mc', prompt: 'Which clip is the electric guitar?',
+              answer: 1,
+              explain: 'Clip B is Jimi Hendrix\'s electric version — brighter, with distortion. Clip A is Bob Dylan\'s warmer, woodier acoustic.',
+              choices: [
               'Clip A',
               'Clip B',
               'They sound identical'
@@ -165,7 +168,10 @@ SETS.push(
           {
             text: 'Quick try: play each open string once, low E to high e, saying the name out loud as you pluck. Just a preview — you\'ll drill these for real at the practice station.',
             hint: 'Hearing + saying + playing locks it in faster than just watching.',
-            response: { type: 'mc', prompt: 'Say the string names low to high — which comes right after G?', choices: [
+            response: { type: 'mc', prompt: 'Say the string names low to high — which comes right after G?',
+              answer: 0,
+              explain: 'Low to high it\'s E A D G B e — so B follows G. (Try "Eddie Ate Dynamite, Good Bye Eddie.")',
+              choices: [
               'B',
               'A',
               'D',
@@ -249,15 +255,15 @@ SETS.push(
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Ode to Joy"', meta: 'E string only — great first melody', type: 'Choice', core: false,
+      { name: '"Ode to Joy"', meta: 'E string only — great first melody', type: 'Choice', core: false, level: 1,
         tutorialUrl: 'https://www.youtube.com/watch?v=PRZh_Wv3IQQ' },
-      { name: '"Mary Had a Little Lamb"', meta: 'E & A strings', type: 'Choice', core: false,
+      { name: '"Mary Had a Little Lamb"', meta: 'E & A strings', type: 'Choice', core: false, level: 1,
         tutorialUrl: 'https://www.youtube.com/watch?v=8gK9n9vrt3g' },
-      { name: '"Jingle Bells"', meta: 'Open strings only', type: 'Choice', core: false,
+      { name: '"Jingle Bells"', meta: 'Open strings only', type: 'Choice', core: false, level: 1,
         tutorialUrl: 'https://www.youtube.com/watch?v=qM_Yar0xqRk' },
-      { name: '"Twinkle Twinkle"', meta: 'E & A strings', type: 'Choice', core: false,
+      { name: '"Twinkle Twinkle"', meta: 'E & A strings', type: 'Choice', core: false, level: 1,
         tutorialUrl: 'https://www.youtube.com/watch?v=NPS5xuRCA6w' },
-      { name: '"The Simpsons Theme"', meta: 'E string only', type: 'Choice', core: false,
+      { name: '"The Simpsons Theme"', meta: 'E string only', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=aPzS3QYb868',
         tutorialUrl: 'https://www.youtube.com/watch?v=lGwNWYzYuIk' }
     ],

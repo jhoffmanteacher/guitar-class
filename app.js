@@ -156,6 +156,18 @@ function onResponseChange(key, value){
   responses[key] = value;
   saveResponses();
 }
+/* Graded in-step MC (factual, has answer:). Stores the choice TEXT (so the
+   teacher dashboard reads it unchanged); recolors and reveals the explanation. */
+function onStepMcSelect(key, btn){
+  const choice = btn.dataset.choice;
+  responses[key] = choice;
+  saveResponses();
+  const group = btn.closest('.step-mc-keyed');
+  if(!group) return;
+  group.classList.add('answered');
+  group.querySelectorAll('.step-mc-opt').forEach(b=>b.classList.remove('correct','incorrect'));
+  btn.classList.add(btn.dataset.correct === '1' ? 'correct' : 'incorrect');
+}
 function saveResponses(){
   if(!currentUser) return;
   clearTimeout(respSaveTimer);
@@ -1245,7 +1257,22 @@ function buildStations(w, stationId){
         return `<div class="step-resp">${labelHtml}${promptHtml}<textarea class="step-resp-input" rows="2" placeholder="${escAttr(ph)}" oninput="onResponseChange('${key}', this.value)">${escHtml(stored)}</textarea></div>`;
       }
       if(s.response.type === 'mc' && Array.isArray(s.response.choices)){
-        const opts = s.response.choices.map(c=>{
+        const r = s.response;
+        // Factual MCs carry answer: (index) + explain: — render as graded buttons.
+        if(typeof r.answer === 'number'){
+          const ansChoice = r.choices[r.answer];
+          const answered = stored !== '';
+          const opts = r.choices.map(c=>{
+            let cls = 'step-mc-opt';
+            if(c === ansChoice) cls += ' is-answer';
+            if(answered && c === stored) cls += (c === ansChoice) ? ' correct' : ' incorrect';
+            return `<button type="button" class="${cls}" data-choice="${escAttr(c)}" data-correct="${c===ansChoice?'1':'0'}" onclick="onStepMcSelect('${key}', this)"><span class="step-mc-text">${escHtml(c)}</span><span class="step-mc-check">&#x2713;</span></button>`;
+          }).join('');
+          const explainHtml = r.explain ? `<div class="step-mc-explain">${escHtml(r.explain)}</div>` : '';
+          return `<div class="step-resp">${labelHtml}${promptHtml}<div class="step-resp-mc step-mc-keyed${answered?' answered':''}">${opts}</div>${explainHtml}</div>`;
+        }
+        // Reflection / observation MCs stay unkeyed — record the pick only.
+        const opts = r.choices.map(c=>{
           const checked = stored===c ? 'checked' : '';
           return `<label class="step-resp-mc-opt"><input type="radio" name="resp-${key}" ${checked} onchange="onResponseChange('${key}', '${escAttr(c)}')"><span>${escHtml(c)}</span></label>`;
         }).join('');
@@ -1327,6 +1354,14 @@ function openSt(wid,s){
 }
 
 /* ── Songs ── */
+const DIFF_LABELS = {1:'Beginner',2:'Intermediate',3:'Advanced'};
+function diffDotsHtml(level){
+  if(!level) return '';
+  const lbl = DIFF_LABELS[level] || '';
+  const filled = '●'.repeat(level);            // ●
+  const empty  = '○'.repeat(Math.max(0,3-level)); // ○
+  return `<span class="song-diff diff-${level}" title="Difficulty: ${lbl}" aria-label="Difficulty: ${lbl}">${filled}<span class="song-diff-empty">${empty}</span></span> `;
+}
 function buildSongs(w){
   const rows=w.songs.map((s,i)=>{
     const nameEl = s.url ? `<button class="rp-trigger" onclick="loadSong('${w.id}',${i})">${s.name}</button>` : s.name;
@@ -1334,9 +1369,11 @@ function buildSongs(w){
     if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="loadSongVid('${w.id}',${i},'original')" title="Opens in YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:11px;opacity:0.6">&#x2197;</span></button>`);
     if(s.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="loadSongVid('${w.id}',${i},'tutorial')"><span class="svb-play">&#x25B6;</span>Tutorial</button>`);
     const vidsEl = vids.length ? `<div class="song-vids">${vids.join('')}</div>` : '';
-    return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div><div class="sname">${nameEl}</div><div class="smeta">${s.meta}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${s.type}</span></div>`;
+    return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div><div class="sname">${nameEl}</div><div class="smeta">${diffDotsHtml(s.level)}${s.meta}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${s.type}</span></div>`;
   }).join('');
-  return `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>Core — everyone</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu — pick 1</div></div><div class="card">${rows}</div>`;
+  const requestSlot = `<div class="song-row song-request"><div class="song-request-ico">&#x1F3A4;</div><div><div class="sname">Class request — suggest a song!</div><div class="smeta">Got a song you want to learn? Tell Mr. Hoffman and it might join the Choice menu next semester.</div></div></div>`;
+  const diffLegend = `<div class="leg"><span class="song-diff diff-1">&#x25CF;<span class="song-diff-empty">&#x25CB;&#x25CB;</span></span>&#x2192;<span class="song-diff diff-3">&#x25CF;&#x25CF;&#x25CF;</span> easier &#x2192; harder</div>`;
+  return `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>Core — everyone</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu — pick 1</div>${diffLegend}</div><div class="card">${rows}${requestSlot}</div>`;
 }
 
 function loadSong(wid, idx){

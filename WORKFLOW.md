@@ -41,8 +41,7 @@ This is the at-a-glance list; full detail is in the numbered sessions below.
 **🔨 Build work (actual remaining coding):**
 - **3.5 — Module 6 strumming REDESIGN** *(needs Jonathan's scope decision first)* —
   advanced strumming, anchor songs, optional `strumPattern:` SVG renderer.
-- **3.9 — Cross-module sweep** — factual-MC answer keys, distractor pass, song
-  difficulty dots + 🎤 request slot, style Stuck?/Level up lines, voice sweep.
+- *(3.9 Cross-module sweep — ✅ done 2026-06-14.)*
 - *(3.8 Module 1 — ✅ done 2026-06-14.)*
 
 **✅ Built — awaiting Jonathan's real-world sign-off (no coding left):**
@@ -252,7 +251,22 @@ first step of Set 1's computer station, and a **safe-handling** step + Win in Se
 Seven-Nation-Army first-melody `tab:` renders with clickable notes + `playSeq` (browser-
 verified, 0 console errors). **Files:** `module-1.js`.
 
-### [ ] Session 3.9 — Cross-module features + consistency sweep
+### [x] Session 3.9 — Cross-module features + consistency sweep
+✅ done 2026-06-14 — **Answer keys:** new graded render for in-step MCs (`onStepMcSelect` +
+`.step-mc-keyed`/`.step-mc-explain` in `app.js`/`styles.css`) — pick → green/amber +
+✓ on the correct option + one-line explanation; stores the choice TEXT so the teacher
+dashboard is unchanged. Added `answer:`+`explain:` to **39 factual MCs** across all 8
+modules; left 1 unkeyed (module-1 "what was the guitar doing?" — student's own clip).
+**Distractors:** fixed 3 joke giveaways → real misconceptions (m2 `H`→`G#`; m6 reggae
+`No strumming`→`Fast 16th-note strumming`; m7 stacked-TAB `Skip them`/`Pick whichever`→
+`Play only the lowest string`/`Roll across slowly`). **Song dots:** `level:` (1/2/3) on
+**109 Choice-song entries**, rated per-module-context; rendered as ●/●●/●●● (green/amber/
+red) via `diffDotsHtml` + legend; added a **🎤 Class request** slot to every module's song
+list. **Stuck?/Level up styling:** already done (🪜/🌶️ + blue/green) — no change.
+**Voice sweep:** challenge format already consistent (frozen-template pattern); tightened
+the one genuine hint outlier (m8 Set 3 perform-it). Verified in headless Chrome (graded
+MC feedback, dots, 🎤 slot, 0 console errors); 39 answer indices range-validated.
+**Files:** `app.js`, `styles.css`, all `module-*.js`.
 - Answer keys: add `answer:` + a one-line explanation to FACTUAL step MCs across all
   modules (reflection MCs stay unkeyed); wire the rendering in `app.js` (gentle ✓/✗ +
   explanation, matching the skills-practice quiz pattern). Jonathan marks which questions
