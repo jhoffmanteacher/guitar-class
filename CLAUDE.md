@@ -7,16 +7,39 @@ Jonathan Hoffman prefers plain-English instructions and wants Claude to handle a
 | Jonathan says | Claude does |
 |---|---|
 | "Let's test these changes locally" | Start Live Server (VS Code extension, right-click index.html → Open with Live Server) |
-| "Push to GitHub" | **First bump the service-worker cache version** (see below), then git add relevant files, git commit with a clear message, git push, confirm success |
-| "Save progress with a note: [message]" | Bump the SW cache version, commit with that message, push |
+| "Push to GitHub" | **First run the pre-push checks** (see below), fix anything they flag, then git add relevant files, git commit with a clear message, git push, confirm success |
+| "Save progress with a note: [message]" | Run the pre-push checks, commit with that message, push |
 
-### ⚠️ Bump the service-worker version on EVERY push
-The site is a light PWA: `sw.js` caches the static shell so it loads offline.
-Before any push that changes `index.html`, `styles.css`, `app.js`,
-`config-main.js`, or a `module-N.js`, update `CACHE_VERSION` in `sw.js`
-(e.g. bump `-v1-` → `-v2-` and/or the date). If you skip this, returning
-students may keep getting the OLD cached site. Doc-only changes (`*.md`) don't
-need a bump.
+### ⚠️ Run the pre-push checks before EVERY code push
+Before any push that changes `index.html`, `styles.css`, `app.js`, `tuner.js`,
+`teacher.js`, `config-main.js`, or a `module-N.js`, run:
+
+```
+node tools/checks.mjs
+```
+
+It does three jobs automatically and exits non-zero if anything's wrong (so
+don't push until it passes):
+
+1. **Validates module data** — loads every `module-N.js` and checks each Set
+   has the fields the app needs, so a stray comma or missing field is caught
+   here instead of breaking the live site.
+2. **Link-checks** all external YouTube / Google-Docs URLs (YouTube via the
+   oEmbed endpoint — see "Lessons learned" below). Flags dead links to fix.
+3. **Bumps the service-worker cache version** — `CACHE_VERSION` in `sw.js` is
+   now a content *fingerprint* of the cached shell files, so the script updates
+   it automatically whenever a shell file changed and leaves it alone when
+   nothing did. **No more bumping it by hand, and it can't be forgotten.**
+
+Notes:
+- The site is a light PWA: `sw.js` caches the static shell so it loads offline.
+  If the version didn't change, returning students would keep the OLD cached
+  site — which is exactly what the automatic bump prevents.
+- Doc-only pushes (`*.md`) don't touch the shell, so the script correctly makes
+  no bump — but it's still safe (and fast, with `--skip-links`) to run.
+- Flags: `--skip-links` skips the slow link check (fast validate + bump only);
+  `--check` verifies without changing files (used to confirm the version is
+  current). The link check hits ~240 URLs and takes a few seconds.
 
 ### Update the changelog on notable pushes
 When a push includes a **notable, student-facing change**, add a dated entry to
