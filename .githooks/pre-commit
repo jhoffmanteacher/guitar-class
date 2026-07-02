@@ -1,0 +1,41 @@
+#!/bin/sh
+# ════════════════════════════════════════════════════════════════════
+#  Guitar Class — pre-commit safeguard
+#
+#  Belt-and-suspenders on top of the manual "run checks before push"
+#  workflow. Runs the FAST, OFFLINE, read-only checks so a broken commit
+#  is caught the moment it's made:
+#
+#    • validates every module-N.js (a stray comma / missing field fails)
+#    • confirms sw.js's CACHE_VERSION matches the current shell files
+#
+#  It changes NO files and hits NO network. The slow link-check and the
+#  automatic sw.js version bump still happen at push time when you run the
+#  full  `node tools/checks.mjs`  (see CLAUDE.md).
+#
+#  Bypass once with:  git commit --no-verify
+# ════════════════════════════════════════════════════════════════════
+
+# Find the repo root so this works no matter where git invokes it from.
+ROOT=$(git rev-parse --show-toplevel)
+
+# If node isn't on PATH, don't block the commit — just warn. The explicit
+# push-time check is the real gate; a missing toolchain shouldn't wedge work.
+if ! command -v node >/dev/null 2>&1; then
+  printf '\033[33m!\033[0m pre-commit: node not found on PATH — skipping checks (run "node tools/checks.mjs" before pushing)\n'
+  exit 0
+fi
+
+node "$ROOT/tools/checks.mjs" --check --skip-links
+status=$?
+
+if [ "$status" -ne 0 ]; then
+  printf '\n\033[31m✗ pre-commit checks failed — commit aborted.\033[0m\n'
+  printf '  Fix the problems above, or run the full checks to auto-fix the\n'
+  printf '  service-worker version:\n\n'
+  printf '      node tools/checks.mjs\n\n'
+  printf '  then stage the changes and commit again.\n'
+  printf '  (To bypass just this once: git commit --no-verify)\n'
+fi
+
+exit $status

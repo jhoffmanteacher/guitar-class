@@ -41,6 +41,22 @@ Notes:
   `--check` verifies without changing files (used to confirm the version is
   current). The link check hits ~240 URLs and takes a few seconds.
 
+### Automatic pre-commit safeguard (belt-and-suspenders)
+A tracked git hook at `.githooks/pre-commit` runs the **fast, offline, read-only**
+checks (`node tools/checks.mjs --check --skip-links`) on every `git commit`: it
+validates the module data and confirms `sw.js`'s `CACHE_VERSION` is current. It
+changes no files and hits no network. If something's wrong it **aborts the commit**
+and tells you to run the full `node tools/checks.mjs` (which auto-fixes the SW
+version). The slow link-check and the SW bump still belong to the explicit
+push-time run — the hook is just a second net so a broken commit can't slip through.
+
+- **Bypass once:** `git commit --no-verify`.
+- **Per-machine, one-time setup:** the hook lives in the repo, but git only uses it
+  after `core.hooksPath` is pointed at `.githooks`. Already done on the Mac. On the
+  **Windows machine** (or any fresh clone), run once:
+  `git config core.hooksPath .githooks`. If Claude notices commits aren't being
+  checked on a machine, set this automatically — it's safe and reversible.
+
 ### Update the changelog on notable pushes
 When a push includes a **notable, student-facing change**, add a dated entry to
 the **top** of `CHANGELOG.md` (newest first) in the same push — no need to ask.
