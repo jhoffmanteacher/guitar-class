@@ -5,6 +5,25 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-02 — Refreshed the songs you'll play all semester
+
+### Added
+- Three new songs join the course thread — the ones you'll return to as your
+  skills grow: **"Oye Mi Amor" (Maná)**, **"Let It Be" (The Beatles)**, and
+  **"the cure" (Olivia Rodrigo)**. Each shows up across several modules — you'll
+  first *listen* for the guitar, then solo over it, strum it, and finally
+  fingerpick or barre it as you level up. Every "coming soon" song slot that used
+  to just say *"Core Song 2 — TBD"* is now a real, playable song with an official
+  video and a beginner tutorial.
+
+### Changed
+- The core songs everyone learns together are now: Seven Nation Army, All Along
+  the Watchtower, Sweet Child O' Mine, Oye Mi Amor, Let It Be, and "the cure."
+- A few songs that used to be "everyone" songs — **Stand By Me, Tu Boda, Sailor
+  Song, and House of the Rising Sun** — moved to the **Choice menu** instead, so
+  they're still there to pick and play, now with a difficulty dot to help you
+  choose. Nothing was removed.
+
 ## 2026-07-02 — A gentler catch when something goes wrong
 
 ### Added

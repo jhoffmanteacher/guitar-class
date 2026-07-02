@@ -1,5 +1,32 @@
 # SONG_SWAP.md — Course Song Thread Replacement Plan
 
+> **✅ SUPERSEDED 2026-07-02 — the "Core Song 2 — TBD" question is now closed.**
+> Jonathan refreshed the course's core song thread to a fixed **6-song list**, replacing
+> the DtMF / Tu Boda / Stand By Me / Sailor Song plan described below. What actually
+> shipped on 2026-07-02 (all links oEmbed-verified):
+>
+> **The 6 core songs (the thread):**
+> 1. Seven Nation Army — The White Stripes *(already threaded)*
+> 2. All Along the Watchtower — Dylan / Hendrix *(already threaded)*
+> 3. Sweet Child O' Mine (standard tuning) — Guns N' Roses *(already threaded)*
+> 4. **Oye Mi Amor — Maná** — M3 (riff/power chords) · M5 (showcase) · M6 (syncopated
+>    Latin strum) · M7 (barre Bm). `UlkG3DmZJEI` / `F4BbTdP2v70`
+> 5. **Let It Be — The Beatles** — M5 (full-chord strum) · M8 (fingerpicked).
+>    `CGj85pVzRJs` / `_Kw4subj5z8`
+> 6. **"the cure" — Olivia Rodrigo** — M1 (listening) · M4 (minor-pentatonic solos) ·
+>    M8 (soft fingerpicked). `B402rKl4bUg` / `adW_zSkClaY`
+>
+> All 14 `Core Song 2 — TBD` placeholders were filled with these songs. **Tu Boda,
+> Stand By Me, Sailor Song, and House of the Rising Sun were demoted from Core to
+> Choice** (kept on the Songs tab with difficulty dots, not deleted). Barre voicing
+> follows the standing rule: partial-barre Bm through M5–M6, full barre from M7.
+> **Dust in the Wind and Hallelujah** (M8) were also demoted Core → Choice on the same
+> day, so Module 8's Core songs are exactly the thread songs ("the cure", Let It Be).
+>
+> The plan text below is kept for historical reference only.
+>
+> ---
+>
 > **⚡ EXECUTED 2026-06-12 (decision change by Jonathan).** Vampire is now removed from
 > **every** module. Rather than mapping each old Vampire slot to one specific song,
 > Jonathan chose: **(1)** drop a `Core Song 2 — TBD` placeholder into every former Vampire

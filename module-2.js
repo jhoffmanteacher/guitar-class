@@ -177,7 +177,7 @@ SETS.push(
     songs: [
       { name: '"Happy Birthday"', meta: 'Identify which notes live on E & A strings', type: 'Core', core: true,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Stand By Me" — Ben E. King', meta: 'Identify the bass line notes on E & A strings', type: 'Core', core: true,
+      { name: '"Stand By Me" — Ben E. King', meta: 'Identify the bass line notes on E & A strings', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=hwZNL7QVJjE',
         tutorialUrl: 'https://www.youtube.com/watch?v=TXLElO_YYiY' },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Identify bass notes of riff on low E string', type: 'Core', core: true,

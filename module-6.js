@@ -314,7 +314,9 @@ SETS.push(
     },
 
     songs: [
-      { name: 'Core Song 2 — TBD', meta: 'Syncopated D-DU-UDU pattern on the verse (chords TBD)', type: 'Core', core: true },
+      { name: '"Oye Mi Amor" — Maná', meta: 'Syncopated Latin strum on the verse · Bm (partial barre)–G', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
+        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
       { name: '"Happy Birthday"', meta: 'Apply D-DU-UDU to C–G–Am–F arrangement', type: 'Core', core: true,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
       { name: '"I\'m Yours" — Jason Mraz', meta: 'G–D–Em–C · iconic D-DU-UDU strum', type: 'Core', core: true,
@@ -360,7 +362,7 @@ SETS.push(
       { id: 'm6w2-s4', text: 'Keep the D-DU-UDU pattern going through a chord change',
         gotItWhen: 'when you switch from G to D (or any two chords) the pattern doesn\'t change at all — only the chord underneath does.' },
       { id: 'm6w2-s5', text: 'Apply the D-DU-UDU pattern to a verse of a real song',
-        gotItWhen: 'you can play the verse of "I\'m Yours" or Core Song 2 with the D-DU-UDU pattern from start to finish — even if a chord is imperfect, the pattern holds.',
+        gotItWhen: 'you can play the verse of "I\'m Yours" or "Oye Mi Amor" with the D-DU-UDU pattern from start to finish — even if a chord is imperfect, the pattern holds.',
         practice: { type: 'playSeq', label: '"I\'m Yours" verse roots (G · D · Em · C)', bpm: 70,
           notes: [43, 50, 40, 48] } },
       { id: 'm6w2-s6', text: 'Read a strum-pattern chart (D/U arrows or symbols)',
@@ -514,7 +516,7 @@ SETS.push(
       { name: '"Bad Moon Rising" — CCR', meta: 'D–A–G · driving rock-style strum', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=5BmEGm-mraE',
         tutorialUrl: 'https://www.youtube.com/watch?v=liBI2yT_fpw' },
-      { name: '"Tu Boda" — Oscar Maydon × Fuerza Regida', meta: 'Corrido / sierreño strum · current Spanish-language style', type: 'Core', core: true,
+      { name: '"Tu Boda" — Oscar Maydon × Fuerza Regida', meta: 'Corrido / sierreño strum · current Spanish-language style', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=_ymicn0_GYc',
         tutorialUrl: 'https://www.youtube.com/watch?v=AlElh28IumI' },
       { name: '"Wagon Wheel" — Old Crow Medicine Show', meta: 'G–D–Em–C · folk strum classic', type: 'Choice', core: false, level: 2,
