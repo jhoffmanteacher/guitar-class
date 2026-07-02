@@ -1,8 +1,8 @@
 # SONG_SWAP.md — Course Song Thread Replacement Plan
 
-> **⚡ EXECUTED 2026-06-12 (decision change by Jose).** Vampire is now removed from
+> **⚡ EXECUTED 2026-06-12 (decision change by Jonathan).** Vampire is now removed from
 > **every** module. Rather than mapping each old Vampire slot to one specific song,
-> Jose chose: **(1)** drop a `Core Song 2 — TBD` placeholder into every former Vampire
+> Jonathan chose: **(1)** drop a `Core Song 2 — TBD` placeholder into every former Vampire
 > slot (links removed, Vampire-specific chords/scales genericized to "TBD" until the
 > song is picked), then **(2)** keep Core Song 2 exactly where it now sits and **add**
 > the four other thread songs into the sets where they fit best (alongside Core Song 2).
@@ -12,7 +12,7 @@
 >
 > - **Core Song 2 — TBD** placeholders: M1 S1 · M3 S2 · M4 S1–S3 · M5 S1–S2 & S4 ·
 >   M6 S2 · M7 S2–S3 · M8 S1–S3 *(no links/chords yet — needs the mini Session-A pass
->   once Jose picks the song)*
+>   once Jonathan picks the song)*
 > - **Sailor Song** (Core): M1 S2 (listen) · M8 S1–S3 (fingerpicked)
 > - **Stand By Me** (Core): M2 S1 (bass line) · M5 S3 (cross-group)
 > - **Sweet Child O' Mine** (Core): M2 S2 (bonus riff + bass-root TAB) · M3 S2 (power
@@ -37,7 +37,7 @@
 > 1. Happy Birthday *(unchanged)*
 > 2. All Along the Watchtower — Dylan / Hendrix *(unchanged)*
 > 3. **"Stand By Me" — Ben E. King** *(play in G: G–Em–C–D)*
-> 4. **Core Song 2 — TBD** *(Jose is picking a new current/Spanish song; DtMF was dropped 2026-06-12. Fills the genre-listening / minor-pentatonic / strum-loop slots — see notes)*
+> 4. **Core Song 2 — TBD** *(Jonathan is picking a new current/Spanish song; DtMF was dropped 2026-06-12. Fills the genre-listening / minor-pentatonic / strum-loop slots — see notes)*
 > 5. **"Tu Boda" — Oscar Maydon × Fuerza Regida** *(current · Spanish · sierreño)*
 > 6. **"Sweet Child O' Mine" — Guns N' Roses** *(classic rock · verse D–C–G)*
 >
@@ -48,10 +48,10 @@
 > **How to use:** one session = one lettered item below. Start a session with
 > "do Session A in SONG_SWAP.md." All CLAUDE.md rules apply — especially:
 > **never write a YouTube ID from memory; search-and-verify via oEmbed first.**
-> The Module 2 example edit in Session B was voice-approved by Jose on 2026-06-11 —
+> The Module 2 example edit in Session B was voice-approved by Jonathan on 2026-06-11 —
 > match its voice everywhere. For any other session that changes step text, show ONE
 > complete example for approval before writing the rest. End every session: Live Server
-> test with Jose → push → check the box.
+> test with Jonathan → push → check the box.
 
 **Status legend:** [ ] not started · [~] in progress · [x] done
 
@@ -80,8 +80,8 @@
   tuning — don't trust the title). Keep `t3yol_zrt7g` and repurpose it as the link
   for the Module 7 🌶️ intro-riff stretch-goal step, where tuning down is part of
   the challenge.
-- **Tu Boda lyric check:** ✅ **CONFIRMED by Jose 2026-06-12** — classroom-appropriate, cleared to ship.
-- **Core Song 2 (TBD):** DtMF was dropped 2026-06-12; Jose is choosing a replacement
+- **Tu Boda lyric check:** ✅ **CONFIRMED by Jonathan 2026-06-12** — classroom-appropriate, cleared to ship.
+- **Core Song 2 (TBD):** DtMF was dropped 2026-06-12; Jonathan is choosing a replacement
   current/Spanish song. **Before Sessions B/D/E can write its slots, the picked song
   needs a mini Session-A pass:** find + oEmbed-verify its `originalUrl` / `tutorialUrl`
   and confirm its key/progression from the tutorial video. It must fit these roles:
@@ -92,7 +92,7 @@
   … `module-8.js`. Every hit is either a songs-array entry (swap it per the slot
   table) or step text / assessment text mentioning a Vampire backing track or riff
   (rewrite to the new song for that module). Default = remove Vampire entirely.
-  (Alternative if Jose changes his mind: demote to a ●●● Choice song in Module 5
+  (Alternative if Jonathan changes his mind: demote to a ●●● Choice song in Module 5
   only.)
 - **Difficulty dots & 🎤 slot:** when touching a songs array, this is a free moment
   to apply WORKFLOW.md Session 3.9's ●/●●/●●● dots to Choice songs in that file.
@@ -134,7 +134,7 @@ Sweet Child original in `module-7.js` (`1w7OgIMMRc4`) plus the riff lesson
 | Song | originalUrl (verified) | tutorialUrl (verified) |
 |---|---|---|
 | Stand By Me | `https://www.youtube.com/watch?v=hwZNL7QVJjE` — *Ben E. King – Stand By Me (Audio)* (existing ID, still live; reupload channel "Soulful Sounds" — fine but swap for an official if it ever 404s) | `https://www.youtube.com/watch?v=TXLElO_YYiY` — *Good Guitarist, "Easy 4-Chord Song, No Capo"* (existing ID, standard tuning) |
-| ~~DtMF~~ → **Core Song 2 (TBD)** | _Pending — DtMF dropped 2026-06-12; Jose picking a new current/Spanish song. Re-run the verify-and-record step for the chosen song before its slots ship._ | _Pending (same)._ |
+| ~~DtMF~~ → **Core Song 2 (TBD)** | _Pending — DtMF dropped 2026-06-12; Jonathan picking a new current/Spanish song. Re-run the verify-and-record step for the chosen song before its slots ship._ | _Pending (same)._ |
 | Tu Boda | `https://www.youtube.com/watch?v=_ymicn0_GYc` — *Oscar Maydon x Fuerza Regida – Tu Boda [Official Video]* — **official Rancho Humilde channel** | `https://www.youtube.com/watch?v=AlElh28IumI` — *"Tu Boda · Tutorial GUITARRA Acústica · Letra y Acordes"* by **GuitarEP** (acoustic, chords + lyrics) |
 | Sailor Song | `https://www.youtube.com/watch?v=1lrFsXkT_rM` — *Gigi Perez – Sailor Song (Official Music Video)* — **official geeguscrustVEVO channel** | `https://www.youtube.com/watch?v=rpoyXduMZZw` — *"Sailor Song · Beginner Guitar Lesson · Chords, Strumming & Printable Guide"* by for3v3rfaithful |
 | Sweet Child O' Mine | `https://www.youtube.com/watch?v=1w7OgIMMRc4` — *Guns N' Roses – Sweet Child O' Mine (Official Music Video)* — **GunsNRosesVEVO** (existing ID, re-verified) | `https://www.youtube.com/watch?v=0ASVeXINKYM` — *"Sweet Child O' Mine · [Beginner Strumming & Easy Chords]"* by The Stellar Guitarist (open-chord acoustic = **standard tuning**, not the E♭ riff lesson) |
@@ -143,7 +143,7 @@ Sweet Child original in `module-7.js` (`1w7OgIMMRc4`) plus the riff lesson
 
 Also note here the confirmed key/progression for Tu Boda and Sailor Song (Core Song 2 TBD):
 
-- **Core Song 2 (TBD):** key/progression pending until Jose picks the song.
+- **Core Song 2 (TBD):** key/progression pending until Jonathan picks the song.
 - **Tu Boda:** ✅ **lyric check CONFIRMED 2026-06-12 — cleared to ship.** Chord sites report key of **E♭ minor**; a common guitar chart uses **F♯ – A♯7 – B – Bm** (sierreño / corrido feel, requinto-led). *(Confirm the actual key from the tutorial video before Session B/D/E writes any `chords:`.)*
 - **Sailor Song:** **capo IV, played with G-shapes** (sounds in **B major**); core chords are **Emaj7 – G♯m – B** (concert), with an **Emaj7 → B** bridge. The verse is genuinely fingerpicked — good fit for the Module 8 picked-verse slot.
 
@@ -152,13 +152,13 @@ Also note here the confirmed key/progression for Tu Boda and Sailor Song (Core S
 > **Sessions B–E note (2026-06-12):** all four sessions' song-array swaps were done in
 > one pass under the executed decision above. The per-session checklists below are kept
 > for reference; the only unfinished items are the M8 picking TAB, the curriculum-map
-> Google Doc, and the Core Song 2 fill-in once Jose picks the song. (The M7 🌶️
+> Google Doc, and the Core Song 2 fill-in once Jonathan picks the song. (The M7 🌶️
 > stretch-goal step was completed 2026-06-12.)
 
 ## [x] Session B — Modules 1 & 2
 
 - M1 S1: swap Vampire Core entry → **Core Song 2 (TBD)** ("Listen — find the guitar
-  in the mix"). ⚠️ Blocked until Jose picks the song + its links are verified — if
+  in the mix"). ⚠️ Blocked until Jonathan picks the song + its links are verified — if
   it's not picked yet, do the Sailor Song swap and leave M1 S1 for a follow-up.
   M1 S2: swap → Sailor Song ("Listen — fingerpicked vs. strummed guitar"). Adjust
   the S1 listening step's MC question if it references Vampire.
@@ -238,7 +238,7 @@ Also note here the confirmed key/progression for Tu Boda and Sailor Song (Core S
   the Course Song Thread list — strike the placeholders in slots 4–6 and enter
   Stand By Me / Core Song 2 (TBD) / Tu Boda / Sweet Child O' Mine / Sailor Song (note: thread
   grows from 6 to 7 named songs counting Sailor Song, or fold Sailor Song into the
-  Module 8 row — Jose's call in-session).
+  Module 8 row — Jonathan's call in-session).
 - **Final sweep:** `grep -i "vampire\|olivia rodrigo"` across all module files +
   `index.html` — zero hits should remain. Full Live Server click-through of every
   module's songs tab and new TAB steps, desktop + narrow width. Push with message

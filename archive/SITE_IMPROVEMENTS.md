@@ -88,7 +88,7 @@ On a slow school network this delays first paint until Google responds.
   batched in parallel WebFetch calls per the CLAUDE.md rule.
 - Produce a report: ✅ valid / ❌ dead-or-private, with file + line for each dead one.
 - Replace dead links via search-and-verify (never from memory); if no good replacement
-  exists, remove the link and flag it in the report for Jose to choose a song.
+  exists, remove the link and flag it in the report for Jonathan to choose a song.
 - Suggested cadence: re-run at the start of each semester.
 
 ## 1.6 🏷️ Add favicon + meta tags ✅ DONE (June 2026)
@@ -137,7 +137,7 @@ No code changes required, but worth a guided session:
 
 ---
 
-# SECTION 2 — CONTENT CHANGES (for Jose, over time)
+# SECTION 2 — CONTENT CHANGES (for Jonathan, over time)
 
 No coding needed — these are edits to `module-N.js` text fields, Google Docs, or
 decisions to make. Claude Code can do the typing once you decide the content.

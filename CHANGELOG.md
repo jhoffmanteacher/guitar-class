@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-02 — A gentler catch when something goes wrong
+
+### Added
+- If the page ever hits a glitch, instead of quietly half-loading and leaving
+  you stuck, a small message now pops up: *"Something hiccuped — your saved
+  progress is safe, please refresh."* Your work is stored on the server, so a
+  refresh always picks up right where you left off.
+
 ## 2026-06-15 — Fixed a broken song tutorial video
 
 ### Fixed

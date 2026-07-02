@@ -6,7 +6,7 @@
 > here gives you a stronger pattern to copy into every other module.
 >
 > Part 1 = specific Module 2 changes. Part 2 = the distilled template checklist.
-> **[J]** = Jose writes/decides · **[CC]** = Claude Code implements · **[J+CC]** = both.
+> **[J]** = Jonathan writes/decides · **[CC]** = Claude Code implements · **[J+CC]** = both.
 
 ---
 

@@ -4,7 +4,7 @@ All tasks below are closed: done, superseded by Phase 4 work, or consciously dro
 No active tasks remain — see **WORKFLOW.md** for the live plan. Disposition of the
 items that were still open:
 - **Tone-check removal** — ✅ done (2026-06-13).
-- **Station C "run the progression multiple times" tracking** (Jose) — dropped, not pursued.
+- **Station C "run the progression multiple times" tracking** (Jonathan) — dropped, not pursued.
 - **Site health pass** — superseded: accessibility shipped (Phase 4.1), the loading-speed
   `app.js` extraction is done, and the dead-link audit is deferred as the recurring Phase 4.2.
 - **Module 6 → advanced strumming** — dropped (idea only, never scoped).
@@ -27,16 +27,16 @@ were left intact.)
 
 ## Station C — "run the progression multiple times" tracking ✅ CLOSED
 
-Idea (Jose): students should loop each Station C practice progression several times so
+Idea (Jonathan): students should loop each Station C practice progression several times so
 they reach all the level-ups (the `levelUp:` 🌶️ lines, tempo/PR ladders, and "give it
 a go" stretch challenges) and practice each a couple of times — "reps over speed,"
 matching the curriculum-map philosophy.
 
-Open design questions (confirm before building — ask Jose multiple-choice per CLAUDE.md):
+Open design questions (confirm before building — ask Jonathan multiple-choice per CLAUDE.md):
 - Tracking mechanism: (a) level-up checklist — each challenge's `levelUp:` becomes
   checkable with a ×2 "did it twice" target; (b) simple lap counter per Station C;
   (c) both.
-- Rollout: pilot one module (e.g. Module 3) / all Station Cs at once / build one, Jose
+- Rollout: pilot one module (e.g. Module 3) / all Station Cs at once / build one, Jonathan
   reviews, then propagate.
 
 Build notes:

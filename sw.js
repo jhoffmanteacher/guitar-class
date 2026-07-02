@@ -14,7 +14,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-v23-2026-06-15';
+const CACHE_VERSION = 'guitar-class-2026-07-02-112fa7186f';
 
 // Static shell — everything needed to render the practice content offline.
 const ASSETS = [
@@ -22,6 +22,8 @@ const ASSETS = [
   './index.html',
   './styles.css',
   './app.js',
+  './tuner.js',
+  './teacher.js',
   './config-main.js',
   './firebase-config.js',
   './manifest.json',

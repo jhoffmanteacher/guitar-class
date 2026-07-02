@@ -1,7 +1,7 @@
 # Guitar Class Website — Claude Instructions
 
 ## Who I'm working with
-Jonathan Rosario prefers plain-English instructions and wants Claude to handle all git mechanics without him needing to remember commands.
+Jonathan Hoffman prefers plain-English instructions and wants Claude to handle all git mechanics without him needing to remember commands.
 
 ## Plain-English workflow
 | Jonathan says | Claude does |

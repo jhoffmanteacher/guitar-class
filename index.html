@@ -10,6 +10,25 @@
 -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Content-Security-Policy: limits where the page may load code from and,
+     crucially, where it may SEND data (connect-src) or embed frames from.
+     Inline handlers/styles still need 'unsafe-inline'; the real protection
+     here is that an injected script can't phone home to an arbitrary origin
+     or frame in a hostile page. Allowed third parties: Google/Firebase (auth
+     + Firestore + Translate), YouTube (lesson embeds), Google Docs (handouts). -->
+<meta http-equiv="Content-Security-Policy" content="
+  default-src 'self';
+  base-uri 'self';
+  object-src 'none';
+  img-src 'self' data: https:;
+  media-src 'self' blob:;
+  worker-src 'self' blob:;
+  font-src 'self' data: https://fonts.gstatic.com https://www.gstatic.com;
+  style-src 'self' 'unsafe-inline' https://www.gstatic.com https://fonts.googleapis.com https://translate.googleapis.com https://www.google.com;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.gstatic.com https://apis.google.com https://translate.google.com https://translate.googleapis.com https://www.google.com;
+  connect-src 'self' https://*.googleapis.com https://*.google.com https://*.gstatic.com https://*.firebaseio.com wss://*.firebaseio.com https://*.firebaseapp.com;
+  frame-src 'self' https://*.firebaseapp.com https://accounts.google.com https://content.googleapis.com https://www.youtube.com https://www.youtube-nocookie.com https://youtube.com https://docs.google.com https://drive.google.com https://www.google.com;
+">
 <title>Guitar Class · Sequoia HS</title>
 <meta name="description" content="Sequoia High School Beginning Guitar — independent practice and skills tracker.">
 <meta name="theme-color" content="#4d1964">
@@ -239,6 +258,10 @@ function googleTranslateElementInit(){
   </div>
 </div>
 <script defer src="app.js"></script>
+<!-- Split out of app.js for maintainability. Load AFTER app.js; both attach
+     global functions used by onclick handlers / the auth flow at event time. -->
+<script defer src="tuner.js"></script>
+<script defer src="teacher.js"></script>
 <!--
 ╔════════════════════════════════════════════════════════════════════╗
 ║                 FIREBASE SETUP — ONE TIME, ~15 MINUTES              ║

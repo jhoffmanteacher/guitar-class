@@ -4,8 +4,8 @@
 > Goal: keep the locked module/skill sequence, but make every set deeper and more
 > student-friendly. Companion to `SITE_IMPROVEMENTS.md` (which covers code).
 >
-> Shorthand used below: **[J]** = decision/writing for Jose · **[CC]** = Claude Code can
-> implement once content is decided · **[J+CC]** = Jose decides, Claude Code wires it in.
+> Shorthand used below: **[J]** = decision/writing for Jonathan · **[CC]** = Claude Code can
+> implement once content is decided · **[J+CC]** = Jonathan decides, Claude Code wires it in.
 
 ---
 

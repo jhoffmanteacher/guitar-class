@@ -1,3 +1,41 @@
+/* ── Global safety net ──
+   If a script throws or a promise rejects unhandled, a student shouldn't be
+   left staring at a half-broken page with no idea what happened. Show one
+   small, dismissable banner pointing them to a refresh (their saved progress
+   lives in Firestore, so a reload is safe), and log details to the console
+   for troubleshooting. Guarded so the handler can never spiral on itself. */
+(function(){
+  let shown = false;
+  function showBanner(){
+    if (shown) return; shown = true;
+    try {
+      const d = document.createElement('div');
+      d.setAttribute('role','alert');
+      d.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;'
+        + 'max-width:520px;margin:0 auto;padding:12px 44px 12px 16px;border-radius:12px;'
+        + 'background:#4d1964;color:#fff;font:14px/1.45 system-ui,-apple-system,sans-serif;'
+        + 'box-shadow:0 6px 24px rgba(0,0,0,.28)';
+      const msg = document.createElement('span');
+      msg.textContent = 'Something hiccuped. Your saved progress is safe — please refresh the page to keep going. ';
+      const refresh = document.createElement('button');
+      refresh.textContent = 'Refresh';
+      refresh.style.cssText = 'margin-left:4px;padding:3px 12px;border:0;border-radius:14px;'
+        + 'background:#fff;color:#4d1964;font-weight:600;cursor:pointer';
+      refresh.onclick = () => location.reload();
+      const close = document.createElement('button');
+      close.setAttribute('aria-label','Dismiss');
+      close.textContent = '×';
+      close.style.cssText = 'position:absolute;top:8px;right:12px;background:none;border:0;'
+        + 'color:#fff;font-size:20px;line-height:1;cursor:pointer';
+      close.onclick = () => d.remove();
+      d.append(msg, refresh, close);
+      (document.body || document.documentElement).appendChild(d);
+    } catch(_) { /* never let the safety net crash */ }
+  }
+  window.addEventListener('error', e => { console.error('[guitar-class] error:', e.error || e.message); showBanner(); });
+  window.addEventListener('unhandledrejection', e => { console.error('[guitar-class] unhandled rejection:', e.reason); showBanner(); });
+})();
+
 /* ── Firebase init ── */
 // The Firebase SDK + config load as separate <script>s. On some school
 // networks a content filter blocks gstatic.com, so they may never arrive —
@@ -2079,440 +2117,6 @@ document.addEventListener('keydown',e=>{
   e.preventDefault();
   el.click();
 });
-
-/* ══════════════════════════════════════════════
-   TUNER — HPS via Web Audio FFT + YIN smoothing
-   ══════════════════════════════════════════════ */
-const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-const STRING_TARGETS = { 'E2': 82.41, 'A2': 110.00, 'D3': 146.83, 'G3': 196.00, 'B3': 246.94, 'E4': 329.63 };
-let tunerRunning = false, tunerStream = null, tunerCtx = null,
-    tunerAnalyser = null, tunerFreqAnalyser = null, tunerRaf = null,
-    tunerHP = null, tunerLP = null,
-    tunerLastNote = null, tunerStableCount = 0, tunerSmoothedFreq = 0,
-    tunerTargetString = 'auto';
-
-function selectTunerString(s) {
-  tunerTargetString = s;
-  document.querySelectorAll('#tuner-strings .ts-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.string === s);
-  });
-  tunerSmoothedFreq = 0; tunerStableCount = 0; tunerLastNote = null;
-}
-
-function freqToNoteInfo(freq) {
-  const n    = Math.round(12 * Math.log2(freq / 440)) + 69;
-  const name = NOTES[((n % 12) + 12) % 12];
-  const exact = 440 * Math.pow(2, (n - 69) / 12);
-  const cents = Math.round(1200 * Math.log2(freq / exact));
-  return { name, cents, hz: Math.round(freq * 10) / 10 };
-}
-
-// YIN pitch detection — accurate and fast on time-domain data.
-// Works well on low strings because it finds the true period directly.
-function detectPitchYIN(buf, sampleRate) {
-  const W = buf.length;
-  const half = Math.floor(W / 2);
-
-  // Silence check (lowered so sustained/decaying notes still register)
-  let rms = 0;
-  for (let i = 0; i < W; i++) rms += buf[i] * buf[i];
-  if (Math.sqrt(rms / W) < 0.004) return -1;
-
-  // YIN difference function
-  const d = new Float32Array(half);
-  d[0] = 1;
-  let runSum = 0;
-  for (let tau = 1; tau < half; tau++) {
-    let s = 0;
-    for (let i = 0; i < half; i++) {
-      const diff = buf[i] - buf[i + tau];
-      s += diff * diff;
-    }
-    d[tau] = s;
-    runSum += s;
-    d[tau] *= tau / runSum;
-  }
-
-  // Find first dip below threshold (raised slightly to catch quieter pitches)
-  const threshold = 0.15;
-  for (let tau = 2; tau < half; tau++) {
-    if (d[tau] < threshold) {
-      while (tau + 1 < half && d[tau + 1] < d[tau]) tau++;
-      // Parabolic interpolation for sub-sample accuracy
-      const x0 = tau > 1 ? d[tau - 1] : d[tau];
-      const x2 = tau < half - 1 ? d[tau + 1] : d[tau];
-      const refined = tau + (x2 - x0) / (2 * (2 * d[tau] - x0 - x2));
-      const freq = sampleRate / refined;
-      return (freq >= 60 && freq <= 1400) ? freq : -1;
-    }
-  }
-  return -1;
-}
-
-// HPS via the Web Audio AnalyserNode FFT — fast because the browser does
-// the FFT in native code. Multiplies downsampled magnitude spectra to pull
-// out the true fundamental even when harmonics dominate (common on low strings).
-function detectPitchHPS(freqData, sampleRate, fftSize) {
-  const binHz = sampleRate / fftSize;
-  const binMin = Math.max(1, Math.floor(60 / binHz));
-  const binMax = Math.ceil(1400 / binHz);
-  const numHarmonics = 5;
-
-  let bestVal = -Infinity, bestBin = -1;
-  for (let k = binMin; k <= Math.floor(binMax / numHarmonics); k++) {
-    let product = 1;
-    for (let h = 1; h <= numHarmonics; h++) {
-      const hk = Math.round(k * h);
-      if (hk < freqData.length) {
-        // freqData is dB; convert to linear magnitude
-        product *= Math.pow(10, freqData[hk] / 20);
-      }
-    }
-    if (product > bestVal) { bestVal = product; bestBin = k; }
-  }
-  if (bestBin < binMin) return -1;
-
-  // Parabolic interpolation
-  const prev = bestBin > 0 ? Math.pow(10, freqData[bestBin - 1] / 20) : 0;
-  const curr = Math.pow(10, freqData[bestBin] / 20);
-  const next = bestBin < freqData.length - 1 ? Math.pow(10, freqData[bestBin + 1] / 20) : 0;
-  const denom = prev - 2 * curr + next;
-  const refined = denom !== 0 ? bestBin - 0.5 * (next - prev) / denom : bestBin;
-  const freq = refined * binHz;
-  return (freq >= 60 && freq <= 1400) ? freq : -1;
-}
-
-function tunerLoop() {
-  if (!tunerRunning) return;
-
-  // Get time-domain data for YIN
-  const timeBuf = new Float32Array(tunerAnalyser.fftSize);
-  tunerAnalyser.getFloatTimeDomainData(timeBuf);
-
-  // Get frequency-domain data for HPS
-  const freqBuf = new Float32Array(tunerFreqAnalyser.frequencyBinCount);
-  tunerFreqAnalyser.getFloatFrequencyData(freqBuf);
-
-  // Run both detectors; prefer HPS for low strings, YIN as fallback
-  const freqHPS = detectPitchHPS(freqBuf, tunerCtx.sampleRate, tunerFreqAnalyser.fftSize);
-  const freqYIN = detectPitchYIN(timeBuf, tunerCtx.sampleRate);
-
-  // Pick the best candidate — if both fire, prefer HPS; if HPS misses, use YIN
-  let freq = -1;
-  if (freqHPS > 0 && freqYIN > 0) {
-    // They agree within a semitone — use HPS (more precise via interpolation)
-    freq = Math.abs(Math.log2(freqHPS / freqYIN)) < (1/12) ? freqHPS : freqYIN;
-  } else if (freqHPS > 0) {
-    freq = freqHPS;
-  } else if (freqYIN > 0) {
-    freq = freqYIN;
-  }
-
-  // Per-string lock: reject pitches outside ±2 semitones of the target string,
-  // and snap octave errors (common on low E/A) toward the target.
-  if (freq > 0 && tunerTargetString !== 'auto') {
-    const target = STRING_TARGETS[tunerTargetString];
-    // Try the detected freq and its ±1 octave neighbours; keep whichever is closest to target.
-    const candidates = [freq, freq * 2, freq / 2];
-    let best = freq, bestDist = Math.abs(Math.log2(freq / target));
-    for (const c of candidates) {
-      const d = Math.abs(Math.log2(c / target));
-      if (d < bestDist) { best = c; bestDist = d; }
-    }
-    // Reject if still further than 2 semitones from target.
-    freq = bestDist < (2 / 12) ? best : -1;
-  }
-
-  const noteEl   = document.getElementById('tuner-note');
-  const freqEl   = document.getElementById('tuner-freq');
-  const needle   = document.getElementById('tuner-needle');
-  const statusEl = document.getElementById('tuner-status');
-
-  if (freq > 0) {
-    // Adaptive smoothing: heavy when the new reading is near the smoothed value
-    // (locked), fast when it jumps (new note played).
-    if (tunerSmoothedFreq > 0) {
-      const drift = Math.abs(Math.log2(freq / tunerSmoothedFreq));
-      const a = drift < (1/12) ? 0.15 : 0.5;
-      tunerSmoothedFreq = tunerSmoothedFreq * (1 - a) + freq * a;
-    } else {
-      tunerSmoothedFreq = freq;
-    }
-
-    // In string-locked mode, compute cents directly from the target so the
-    // displayed note never flickers between neighbours.
-    let displayName, displayCents, displayHz;
-    if (tunerTargetString !== 'auto') {
-      const target = STRING_TARGETS[tunerTargetString];
-      displayName = tunerTargetString.replace(/\d/, '');
-      displayCents = Math.round(1200 * Math.log2(tunerSmoothedFreq / target));
-      displayHz = Math.round(tunerSmoothedFreq * 10) / 10;
-    } else {
-      const info = freqToNoteInfo(tunerSmoothedFreq);
-      displayName = info.name; displayCents = info.cents; displayHz = info.hz;
-    }
-
-    // Only require 1 consecutive frame on the same note before displaying.
-    if (displayName === tunerLastNote) { tunerStableCount++; }
-    else { tunerLastNote = displayName; tunerStableCount = 0; }
-
-    if (tunerStableCount >= 1 || tunerTargetString !== 'auto') {
-      noteEl.textContent = displayName;
-      freqEl.textContent = displayHz + ' Hz';
-      const clamped = Math.max(-50, Math.min(50, displayCents));
-      needle.style.left = (50 + clamped) + '%';
-      if (Math.abs(clamped) < 8) {
-        needle.style.background = 'var(--green-text)';
-        statusEl.textContent = 'In tune ✓'; statusEl.className = 'tuner-status in-tune';
-      } else if (clamped > 0) {
-        needle.style.background = 'var(--amber-text)';
-        statusEl.textContent = 'Sharp — tune down'; statusEl.className = 'tuner-status sharp';
-      } else {
-        needle.style.background = 'var(--blue-text)';
-        statusEl.textContent = 'Flat — tune up'; statusEl.className = 'tuner-status flat';
-      }
-    }
-  } else {
-    // No pitch this frame — keep the last reading briefly; only clear on sustained silence.
-    tunerStableCount--;
-    if (tunerStableCount < -8) {
-      tunerStableCount = 0; tunerLastNote = null; tunerSmoothedFreq = 0;
-      noteEl.textContent = '—'; freqEl.textContent = 'Play a string…';
-      needle.style.left = '50%'; needle.style.background = 'var(--border2)';
-      statusEl.textContent = ''; statusEl.className = 'tuner-status';
-    }
-  }
-  setTimeout(() => { tunerRaf = requestAnimationFrame(tunerLoop); }, 60);
-}
-
-async function startTuner() {
-  try {
-    // Disable browser audio processing that distorts low-frequency guitar signals
-    tunerStream = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
-      video: false
-    });
-    tunerCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const src = tunerCtx.createMediaStreamSource(tunerStream);
-
-    // Bandpass via highpass (kills sub-bass rumble / AC hum) into lowpass
-    // (kills cymbal-like hiss and high inharmonic content). Restricts the
-    // signal to the guitar's useful range before pitch detection.
-    tunerHP = tunerCtx.createBiquadFilter();
-    tunerHP.type = 'highpass'; tunerHP.frequency.value = 70;  tunerHP.Q.value = 0.7;
-    tunerLP = tunerCtx.createBiquadFilter();
-    tunerLP.type = 'lowpass';  tunerLP.frequency.value = 1500; tunerLP.Q.value = 0.7;
-
-    // Time-domain analyser for YIN (large buffer = better low-freq resolution)
-    tunerAnalyser = tunerCtx.createAnalyser();
-    tunerAnalyser.fftSize = 8192;
-    tunerAnalyser.smoothingTimeConstant = 0;
-
-    // Frequency-domain analyser for HPS (separate node, same source)
-    tunerFreqAnalyser = tunerCtx.createAnalyser();
-    tunerFreqAnalyser.fftSize = 8192;
-    tunerFreqAnalyser.smoothingTimeConstant = 0.5;
-
-    src.connect(tunerHP);
-    tunerHP.connect(tunerLP);
-    tunerLP.connect(tunerAnalyser);
-    tunerLP.connect(tunerFreqAnalyser);
-
-    tunerRunning = true; tunerLastNote = null; tunerStableCount = 0; tunerSmoothedFreq = 0;
-    document.getElementById('tuner-btn').innerHTML = '&#x23F9; Stop';
-    document.getElementById('tuner-freq').textContent = 'Listening…';
-    tunerLoop();
-  } catch(e) {
-    document.getElementById('tuner-freq').textContent = 'Mic access denied — check browser permissions';
-  }
-}
-
-function stopTuner() {
-  tunerRunning = false;
-  if (tunerRaf)    cancelAnimationFrame(tunerRaf);
-  if (tunerStream) tunerStream.getTracks().forEach(t => t.stop());
-  if (tunerCtx)    tunerCtx.close();
-  tunerStream = null; tunerCtx = null; tunerAnalyser = null; tunerFreqAnalyser = null;
-  tunerHP = null; tunerLP = null;
-  tunerLastNote = null; tunerStableCount = 0; tunerSmoothedFreq = 0;
-  const noteEl = document.getElementById('tuner-note');
-  const freqEl = document.getElementById('tuner-freq');
-  const needle = document.getElementById('tuner-needle');
-  const statusEl = document.getElementById('tuner-status');
-  const btn = document.getElementById('tuner-btn');
-  if (noteEl)   noteEl.textContent = '—';
-  if (freqEl)   freqEl.textContent = 'Tap Start to listen';
-  if (needle)   { needle.style.left = '50%'; needle.style.background = 'var(--border2)'; }
-  if (statusEl) { statusEl.textContent = ''; statusEl.className = 'tuner-status'; }
-  if (btn)      btn.innerHTML = '&#x25B6; Start';
-}
-
-function toggleTuner() { if (tunerRunning) stopTuner(); else startTuner(); }
-
-/* ══════════════════════════════════════════════
-   TEACHER DASHBOARD
-   ══════════════════════════════════════════════ */
-const IS_TEACHER_MODE=new URLSearchParams(window.location.search).has('teacher');
-let teacherSetId=null, allStudents=[];
-
-async function showTeacherApp(user){
-  document.getElementById('auth-wall').style.display='none';
-  document.getElementById('app').style.display='none';
-  if(user.email!==TEACHER_EMAIL){
-    document.getElementById('teacher-denied').style.display='block';
-    document.getElementById('user-area').innerHTML=userHeaderHtml(user);
-    return;
-  }
-  document.getElementById('teacher-app').style.display='block';
-  document.getElementById('user-area').innerHTML=userHeaderHtml(user);
-  // The teacher grid spans every set, so load all module data first. Sequential
-  // keeps SETS in module order so the week tabs render 1→8 left to right.
-  for(const m of MODULE_MANIFEST){ try{ await loadModuleData(m.num); }catch(e){} }
-  renderTeacherSetTabs();
-  const firstSet=SETS.find(w=>!w.locked&&w.skills&&w.skills.length>0);
-  if(firstSet){ teacherSetId=firstSet.id; activateTeacherSetTab(firstSet.id); }
-  loadAllStudents();
-}
-
-function renderTeacherSetTabs(){
-  const c=document.getElementById('t-week-tabs'); c.innerHTML='';
-  SETS.forEach(w=>{
-    if(!w.skills||w.skills.length===0) return;
-    const btn=document.createElement('button');
-    btn.className='t-wtab'+(w.locked?' locked':'')+(w.id===teacherSetId?' on':'');
-    btn.textContent=w.label; btn.dataset.id=w.id;
-    if(!w.locked) btn.onclick=()=>{ teacherSetId=w.id; activateTeacherSetTab(w.id); renderTeacherBody(); };
-    c.appendChild(btn);
-  });
-}
-function activateTeacherSetTab(id){ document.querySelectorAll('.t-wtab').forEach(b=>b.classList.toggle('on',b.dataset.id===id)); }
-
-async function loadAllStudents(){
-  try{
-    await ensureDb();
-    const snap=await db.collection('progress').get();
-    allStudents=[];
-    snap.forEach(doc=>{
-      const raw=doc.data().skills||{};
-      const skills={};
-      Object.keys(raw).forEach(k=>{
-        if(raw[k]===true) skills[k]='gotit';
-        else if(raw[k]==='working'||raw[k]==='gotit') skills[k]=raw[k];
-        else skills[k]='none';
-      });
-      allStudents.push({uid:doc.id,skills,name:doc.data().name||'',email:doc.data().email||'',responses:doc.data().responses||{}});
-    });
-    renderTeacherBody(); renderTeacherSummary();
-  } catch(e){
-    document.getElementById('t-grid-container').innerHTML='<div class="t-loading">Could not load student data. Check your Firebase security rules.</div>';
-  }
-}
-
-function renderTeacherSummary(){
-  const w=SETS.find(x=>x.id===teacherSetId); if(!w||!w.skills) return;
-  const total=allStudents.length;
-  const complete=allStudents.filter(s=>w.skills.every(sk=>s.skills[sk.id]==='gotit')).length;
-  const none=allStudents.filter(s=>w.skills.every(sk=>!s.skills[sk.id]||s.skills[sk.id]==='none')).length;
-  const inprog=total-complete-none;
-  document.getElementById('t-summary').innerHTML=`
-    <div class="t-scard"><div class="t-scard-lbl">Students</div><div class="t-scard-val">${total}</div></div>
-    <div class="t-scard"><div class="t-scard-lbl">All done</div><div class="t-scard-val">${complete}</div></div>
-    <div class="t-scard"><div class="t-scard-lbl">In progress</div><div class="t-scard-val">${inprog}</div></div>
-    <div class="t-scard"><div class="t-scard-lbl">Not started</div><div class="t-scard-val">${none}</div></div>`;
-}
-
-function renderTeacherGrid(){
-  renderTeacherSummary();
-  const w=SETS.find(x=>x.id===teacherSetId);
-  if(!w||!w.skills||w.skills.length===0){ document.getElementById('t-grid-container').innerHTML='<div class="t-loading">No skills for this set yet.</div>'; return; }
-  if(allStudents.length===0){ document.getElementById('t-grid-container').innerHTML='<div class="t-loading">No student data yet — students need to sign in and check off skills first.</div>'; return; }
-  const sorted=[...allStudents].sort((a,b)=>w.skills.filter(s=>b.skills[s.id]==='gotit').length-w.skills.filter(s=>a.skills[s.id]==='gotit').length);
-  const checkSvg=`<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  const workSvg=`<svg width="9" height="9" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.8"/></svg>`;
-  const minusSvg=`<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
-  const headerCells=w.skills.map(s=>`<th title="${s.text}">${abbreviate(s.text)}</th>`).join('');
-  const rows=sorted.map(stu=>{
-    const done=w.skills.filter(s=>stu.skills[s.id]==='gotit').length;
-    const total=w.skills.length;
-    const pct=Math.round(done/total*100);
-    const pillClass=pct===100?'pp-hi':pct>=50?'pp-mid':'pp-lo';
-    const displayName=stu.name||stu.email||stu.uid.slice(0,8)+'…';
-    const cells=w.skills.map(s=>{
-      const st=stu.skills[s.id]||'none';
-      if(st==='gotit')   return `<td><span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px">${checkSvg}</span></td>`;
-      if(st==='working') return `<td><span class="tck" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--amber-bg);color:var(--amber-text)">${workSvg}</span></td>`;
-      return `<td><span class="tck no" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px">${minusSvg}</span></td>`;
-    }).join('');
-    return `<tr><td class="nc" title="${escAttr(displayName)}">${escHtml(displayName)}</td>${cells}<td><span class="ppill ${pillClass}">${done} / ${total}</span></td></tr>`;
-  }).join('');
-  document.getElementById('t-grid-container').innerHTML=`<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th>${headerCells}<th>Progress</th></tr></thead><tbody>${rows}</tbody></table></div>`;
-}
-
-function abbreviate(text){ const words=text.split(' '); if(words.length<=4) return text; return words.slice(0,3).join(' ')+'…'; }
-
-/* ── Teacher view toggle: skill grid ⇄ student responses (Session 6.2) ──
-   Read-only. Uses the same one-shot student fetch (no extra reads). */
-let teacherView='skills';
-function setTeacherView(v){
-  teacherView=v;
-  document.querySelectorAll('.t-vt').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
-  const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
-  renderTeacherBody();
-}
-function renderTeacherBody(){ if(teacherView==='responses') renderTeacherResponses(); else renderTeacherGrid(); }
-
-/* Enumerate every short free-text response slot in a set, in display order,
-   rebuilding the exact keys the student app saves under
-   (`${set}-${station}[-sec{n}]-${stepIndex}`). Tags PR (BPM) prompts. */
-function setShortResponses(w){
-  const out=[];
-  ['b','c'].forEach(stationId=>{
-    const stn=w.stations&&w.stations[stationId]; if(!stn) return;
-    const pushStep=(st,ns,i)=>{
-      if(!st.response||st.response.type!=='short') return;
-      const prompt=st.response.prompt||'';
-      const isPR=/personal record/i.test(prompt)||/\bBPM\b/i.test(prompt);
-      let label;
-      const chal=(st.text||'').match(/Challenge\s*\d+\s*[—–-]\s*([^:(]+)/);
-      const ph=st.response.placeholder||'';
-      if(isPR) label=chal?('PR — '+chal[1].trim()):'Personal record (BPM)';
-      else if(/wrap-?up|reflect/i.test(st.text||'')) label='Wrap-up reflection';
-      else if(prompt) label=prompt.replace(/\s+/g,' ').slice(0,70);
-      else if(ph && !/^e\.g\./i.test(ph)) label=ph.replace(/\s+/g,' ').slice(0,70); // placeholder is the question, not an example
-      else label=chal?chal[1].trim():'Written response';
-      out.push({key:`${w.id}-${ns}-${i}`, label, isPR});
-    };
-    if(stn.sections) stn.sections.forEach((sec,gi)=>(sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i)));
-    else if(stn.steps) stn.steps.forEach((st,i)=>pushStep(st,stationId,i));
-  });
-  return out;
-}
-function renderTeacherResponses(){
-  const w=SETS.find(x=>x.id===teacherSetId);
-  const box=document.getElementById('t-grid-container');
-  if(!w){ box.innerHTML='<div class="t-loading">Pick a set.</div>'; return; }
-  if(allStudents.length===0){ box.innerHTML='<div class="t-loading">No student data yet — students need to sign in and write a response first.</div>'; return; }
-  const slots=setShortResponses(w);
-  if(slots.length===0){ box.innerHTML='<div class="t-loading">This set has no written-response prompts.</div>'; return; }
-  const sorted=[...allStudents].sort((a,b)=>(a.name||a.email||a.uid).localeCompare(b.name||b.email||b.uid));
-  const prNum=v=>{ const m=String(v).match(/\d{2,3}/); return m?m[0]:null; };
-  let withAny=0;
-  const cards=sorted.map(stu=>{
-    const items=slots.map(sl=>{
-      const val=(stu.responses&&stu.responses[sl.key]||'').trim();
-      if(!val) return '';
-      if(sl.isPR){ const n=prNum(val); return `<div class="tr-item"><span class="tr-pr">&#x1F3AF; ${escHtml(sl.label)}</span><span class="tr-prval">${n?escHtml(n)+' BPM':escHtml(val)}</span></div>`; }
-      return `<div class="tr-item"><span class="tr-lbl">&#x270D; ${escHtml(sl.label)}</span><span class="tr-txt">${escHtml(val)}</span></div>`;
-    }).filter(Boolean).join('');
-    if(!items) return '';
-    withAny++;
-    const name=stu.name||stu.email||stu.uid.slice(0,8)+'…';
-    return `<div class="tr-card"><div class="tr-name">${escHtml(name)}</div>${items}</div>`;
-  }).filter(Boolean).join('');
-  box.innerHTML = withAny
-    ? `<div class="tr-meta">${withAny} of ${allStudents.length} students have written something for ${escHtml(w.label)} · sorted by name</div><div class="tr-list">${cards}</div>`
-    : `<div class="t-loading">No one has written a response for ${escHtml(w.label)} yet.</div>`;
-}
 
 /* ── Resource Panel ── */
 function loadPanel(type,url,title,subtitle){
