@@ -309,6 +309,35 @@ SETS.push(
             ]
           },
           {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — Let It Be, verse: play C · G · Am · F with a down-strum, four beats per chord at 60 BPM. You\'ve got it when: one full verse loop, every change landing on beat 1.',
+                hint: 'Look ahead — start forming the next chord on beat 4 of the current one. The strum keeps moving even while fingers travel.',
+                stuck: 'Isolate the roughest pair (probably C → F) and loop just those two, four beats each.',
+                levelUp: 'Add the chorus turnaround — Am · G · F · C — or drop to two beats per chord at the same 60 BPM.',
+                skills: [3, 6],
+                chords: [
+                  { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
+                  { name: 'F', chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
+                ],
+                response: { type: 'short', prompt: 'Which chord change still fights you in Let It Be?', placeholder: 'e.g. C to F — fingers arrive late' }
+              },
+              {
+                text: 'Challenge — Watchtower, open-chord version: the same loop you\'ve played as bass notes and power chords, now as full open chords — Am · G · F · G — two beats per chord at 60 BPM. You\'ve got it when: four loops, and you can hear that it\'s the SAME song you played in Units 2 and 3.',
+                hint: 'This is the third time this song has met you — bass line, power chords, now open chords. Notice the roots are identical every time.',
+                stuck: 'Strum only beat 1 of each chord and use beats 2–4 to travel to the next shape.',
+                levelUp: 'One beat per chord, or alternate: one loop open chords, one loop power chords, without stopping.',
+                skills: [3, 6],
+                chords: [
+                  { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
+                  { name: 'F', chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
+                ],
+                response: { type: 'short', prompt: 'Bass line, power chords, or open chords — which Watchtower is your favorite so far?', placeholder: 'e.g. open chords — it finally sounds full' }
+              }
+            ]
+          },
+          {
             title: 'Station Wrap-Up',
             steps: [
               {
@@ -680,6 +709,23 @@ SETS.push(
             hint: 'Don\'t stop when you make a mistake in performance practice. The goal is to keep going. You can fix mistakes in slow practice — performance practice trains your recovery.',
             skills: [5, 6]
           }
+            ]
+          },
+          {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — Oye Mi Amor, strummed: play the chorus as open chords — A · D · E · D — four beats per chord at 60 BPM with a straight down-strum, singing or humming the hook if you dare. You\'ve got it when: four loops with every change on beat 1 and the E chord ringing all six strings.',
+                hint: 'A, D, and E are the classic three-chord family — thousands of songs live here. Maná gives it the energy.',
+                stuck: 'E is the six-string test — place it string by string, strum, fix, repeat, before running the loop.',
+                levelUp: 'Try the down-down-up split strum on each chord, or run the loop at two beats per chord.',
+                skills: [5, 6],
+                chords: [
+                  { name: 'A', chord: [[6,'x'],[5,0],[4,2,'1'],[3,2,'2'],[2,2,'3'],[1,0]], position: 0 },
+                  { name: 'E', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,1,'1'],[2,0],[1,0]], position: 0 }
+                ],
+                response: { type: 'short', prompt: 'Which core song do you most want to play start-to-finish at the showcase?', placeholder: 'e.g. Oye Mi Amor, all of it' }
+              }
             ]
           },
           {
