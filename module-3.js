@@ -181,6 +181,31 @@ SETS.push(
             ]
           },
           {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — Seven Nation Army, verse riff: play the riff as two-string power chords sliding along the A string, one chord per riff note at 60 BPM. You\'ve got it when: two clean laps in a row, both strings of every chord ringing.',
+                hint: 'It\'s one shape sliding — keep your grip and let your arm do the moving.',
+                stuck: 'Play roots-only (your Module 2 line), then add the second string back one chord at a time.',
+                levelUp: 'Palm-mute the whole lap for the verse sound, then open up for a chorus lap.',
+                skills: [2, 5, 6],
+                tab: {
+                  caption: '"Seven Nation Army" — verse riff as power chords · 60 BPM',
+                  notes: [
+                    { frets: [['D', 9],  ['A', 7]],  note: 'E5', midi: [59, 52] },
+                    { frets: [['D', 9],  ['A', 7]],  note: 'E5', midi: [59, 52] },
+                    { frets: [['D', 12], ['A', 10]], note: 'G5', midi: [62, 55] },
+                    { frets: [['D', 9],  ['A', 7]],  note: 'E5', midi: [59, 52] },
+                    { frets: [['D', 7],  ['A', 5]],  note: 'D5', midi: [57, 50] },
+                    { frets: [['D', 5],  ['A', 3]],  note: 'C5', midi: [55, 48] },
+                    { frets: [['D', 4],  ['A', 2]],  note: 'B5', midi: [54, 47] }
+                  ]
+                },
+                response: { type: 'short', prompt: 'Which slide was hardest to land clean, and what fixed it?', placeholder: 'e.g. E5 up to G5 — smaller jumps helped' }
+              }
+            ]
+          },
+          {
             title: 'Station Wrap-Up',
             steps: [
               {
@@ -336,6 +361,62 @@ SETS.push(
             hint: 'This is optional. If your power chord sounds clean as is, keep it. Only add the 3rd finger if you can do it without buzzing.',
             skills: [5]
           }
+            ]
+          },
+          {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — Watchtower, verse: play the "All Along the Watchtower" loop as power chords rooted on the low E string — A5 · G5 · F5 · G5 — two beats per chord at 60 BPM. You\'ve got it when: four clean laps, every change landing on the beat.',
+                hint: 'Same three roots you played in Module 2 — now each one carries its fifth along for the ride.',
+                stuck: 'Drop to roots-only for a lap, then add the second string back on just the A5.',
+                levelUp: 'One beat per chord instead of two — same 60 BPM, twice the changes.',
+                skills: [3, 4],
+                tab: {
+                  caption: '"All Along the Watchtower" — verse loop as power chords · 60 BPM',
+                  notes: [
+                    { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+                    { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] },
+                    { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+                    { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
+                  ]
+                },
+                response: { type: 'short', prompt: 'Clean laps in a row at 60 BPM — your count?', placeholder: 'e.g. 3 — F5 keeps buzzing' }
+              },
+              {
+                text: 'Challenge — "the cure" as power chords ◐: this gentle acoustic song isn\'t usually played this way — that\'s the point. Play its progression as power chords — A5 · C5 · D5 · F5 — two beats per chord at 60 BPM, quietly. You\'ve got it when: two laps clean AND soft — power chords don\'t have to be loud.',
+                hint: 'You already know these roots from Module 2. The challenge here is touch: light pick, both strings ringing, no bark.',
+                stuck: 'Roots-only at a whisper first — get the dynamics, then add the fifths.',
+                levelUp: 'Add G5 before looping back to A5, or play one lap loud and one lap soft and hear the difference.',
+                skills: [3, 4],
+                tab: {
+                  caption: '"the cure" — progression as power chords (teaching arrangement) · 60 BPM',
+                  notes: [
+                    { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+                    { frets: [['D', 5], ['A', 3]], note: 'C5', midi: [55, 48] },
+                    { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+                    { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] }
+                  ]
+                },
+                response: { type: 'short', prompt: 'Loud vs. soft power chords — which was harder to keep clean?', placeholder: 'e.g. soft — I kept muting the D string' }
+              },
+              {
+                text: 'Challenge — Oye Mi Amor, chorus riff: play Maná\'s chorus as power chords — A5 · D5 · E5 · D5 — two beats per chord at 60 BPM. The E5 uses the open low E string. You\'ve got it when: four laps with the open-string E5 ringing as clean as the fretted chords.',
+                hint: 'The open E5 is a gift — no fretting hand needed on the root. Use that free moment to set up your jump back to A5.',
+                stuck: 'Loop just D5 → E5 → D5 until the open-chord landing is automatic.',
+                levelUp: 'Palm-mute the A5 and D5 but let the E5 ring open — instant dynamics, very Oye Mi Amor.',
+                skills: [3, 4],
+                tab: {
+                  caption: '"Oye Mi Amor" — chorus riff as power chords (teaching arrangement) · 60 BPM',
+                  notes: [
+                    { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
+                    { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
+                    { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40] },
+                    { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] }
+                  ]
+                },
+                response: { type: 'short', prompt: 'Which song did you land power chords in today, and at what BPM?', placeholder: 'e.g. Oye Mi Amor at 60 — clean' }
+              }
             ]
           },
           {

@@ -162,6 +162,31 @@ SETS.push(
             ]
           },
           {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — Seven Nation Army, chart-free: play the riff on the low E string and say each note name out loud as you play it — B · B · D · B · A · G · F#. You\'ve got it when: one clean lap, no chart, every note named correctly.',
+                hint: 'You played this riff in Module 1 with the TAB in front of you. Today the win is knowing WHERE you are — name it, then play it.',
+                stuck: 'Do it in two halves: name-and-play B B D B, then A G F#. Join them once each half is automatic.',
+                levelUp: 'Close your eyes for a lap, or play it one octave-position up starting at fret 7 of the A string.',
+                skills: [2, 3],
+                tab: {
+                  caption: '"Seven Nation Army" — riff · Low E string · say each note name',
+                  notes: [
+                    { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+                    { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+                    { string: 'E', fret: 10, note: 'D',  midi: 50 },
+                    { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+                    { string: 'E', fret: 5,  note: 'A',  midi: 45 },
+                    { string: 'E', fret: 3,  note: 'G',  midi: 43 },
+                    { string: 'E', fret: 2,  note: 'F#', midi: 42 }
+                  ]
+                },
+                response: { type: 'short', prompt: 'Chart-free lap — clean or not yet? What note still needs a look at the chart?', placeholder: 'e.g. clean! / still peeking at the G' }
+              }
+            ]
+          },
+          {
             title: 'Station Wrap-Up',
             steps: [
               {
@@ -513,6 +538,66 @@ SETS.push(
               explain: 'From open A: A(0)–A#(1)–B(2)–C(3). A "3" on the A-string line is C.',
               choices: ['B', 'C', 'D', 'G'] }
           }
+            ]
+          },
+          {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — Watchtower bass line: play the "All Along the Watchtower" bass loop on the low E string — A · G · F · G — one note per beat at 60 BPM, four laps without stopping. You\'ve got it when: four laps, every note landing on the click.',
+                hint: 'Three notes carry this whole song. Keep your eyes one note ahead of your pick.',
+                stuck: 'Loop just A → G until the shift is smooth, then add the F.',
+                levelUp: 'Say each note name out loud while playing, or double the loop to eight laps without a stumble.',
+                skills: [1, 2, 4, 5, 6],
+                tab: {
+                  caption: '"All Along the Watchtower" — bass loop · Low E string · 60 BPM',
+                  notes: [
+                    { string: 'E', fret: 5, note: 'A', midi: 45 },
+                    { string: 'E', fret: 3, note: 'G', midi: 43 },
+                    { string: 'E', fret: 1, note: 'F', midi: 41 },
+                    { string: 'E', fret: 3, note: 'G', midi: 43 }
+                  ]
+                },
+                response: { type: 'short', prompt: 'How many clean laps in a row did you get at 60 BPM?', placeholder: 'e.g. 4 — beat it next class' }
+              },
+              {
+                text: 'Challenge — Seven Nation Army, true pitch: play the riff where the record actually lives — on the A string — E · E · G · E · D · C · B at 60 BPM. You\'ve got it when: two clean laps, and you can say which string version sounds like the recording.',
+                hint: 'Same riff, new string, new note names. Notice how the shape of the moves feels the same even though every name changed.',
+                stuck: 'Go back to your low-E version for one lap to remind your hand of the moves, then bring it up to the A string.',
+                levelUp: 'Alternate laps: one on low E, one on the A string, without stopping between.',
+                skills: [1, 2, 4, 5, 6],
+                tab: {
+                  caption: '"Seven Nation Army" — riff at true pitch · A string · 60 BPM',
+                  notes: [
+                    { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                    { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                    { string: 'A', fret: 10, note: 'G', midi: 55 },
+                    { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                    { string: 'A', fret: 5,  note: 'D', midi: 50 },
+                    { string: 'A', fret: 3,  note: 'C', midi: 48 },
+                    { string: 'A', fret: 2,  note: 'B', midi: 47 }
+                  ]
+                },
+                response: { type: 'short', prompt: 'Which version do you like playing more — low E or A string — and why?', placeholder: 'e.g. A string, it sounds like the song' }
+              },
+              {
+                text: 'Challenge — "the cure," root line: play the roots of Olivia Rodrigo\'s "the cure" across both strings — A · C · D · F · G — two beats per note at 60 BPM. You\'ve got it when: two clean laps crossing between the A and E strings without looking down.',
+                hint: 'This is the skeleton of the song — next unit these exact roots become power chords. Learn where they live now and Unit 3 is half done.',
+                stuck: 'Split it by string: A · C · D on the A string first, then F · G on the low E, then join them.',
+                levelUp: 'Play the lap while a partner (or the play button) keeps the beat, or say each note name as you land it.',
+                skills: [1, 2, 4, 5, 6],
+                tab: {
+                  caption: '"the cure" — root line (teaching arrangement, no capo) · 60 BPM',
+                  notes: [
+                    { string: 'A', fret: 0, note: 'A', midi: 45 },
+                    { string: 'A', fret: 3, note: 'C', midi: 48 },
+                    { string: 'A', fret: 5, note: 'D', midi: 50 },
+                    { string: 'E', fret: 1, note: 'F', midi: 41 },
+                    { string: 'E', fret: 3, note: 'G', midi: 43 }
+                  ]
+                },
+                response: { type: 'short', prompt: 'Which string crossing tripped you up — D down to F, or F up to G?', placeholder: 'e.g. D to F — big jump' }
+              }
             ]
           },
           {
