@@ -401,7 +401,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Loud vs. soft power chords — which was harder to keep clean?', placeholder: 'e.g. soft — I kept muting the D string' }
               },
               {
-                text: 'Challenge — Oye Mi Amor, chorus riff: play Maná\'s chorus as power chords — A5 · D5 · E5 · D5 — two beats per chord at 60 BPM. The E5 uses the open low E string. You\'ve got it when: four laps with the open-string E5 ringing as clean as the fretted chords.',
+                text: 'Challenge — Oye Mi Amor, chorus riff: play Maná\'s chorus as power chords — A5 · D5 · E5 · D5 — two beats per chord at 60 BPM. The E5 uses the open low E string. You\'ve got it when: four laps with the open-string E5 ringing as clean as the fretted chords. <a href="tabs/oye-mi-amor.html#layer-2" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
                 hint: 'The open E5 is a gift — no fretting hand needed on the root. Use that free moment to set up your jump back to A5.',
                 stuck: 'Loop just D5 → E5 → D5 until the open-chord landing is automatic.',
                 levelUp: 'Palm-mute the A5 and D5 but let the E5 ring open — instant dynamics, very Oye Mi Amor.',
@@ -436,10 +436,10 @@ SETS.push(
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full power chord loop at 70+ BPM with metronome', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-3',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Electric riff → power-chord version', type: 'Core', core: true,
+      { name: '"Oye Mi Amor" — Maná', meta: 'Electric riff → power-chord version', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html#layer-2',
         originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
         tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Verse: D5–C5–G5 power chord loop', type: 'Core', core: true,
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Verse: D5–C5–G5 power chord loop', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html#layer-3',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
       { name: '"Happy Birthday"', meta: 'Full power chord arrangement', type: 'Core', core: true,

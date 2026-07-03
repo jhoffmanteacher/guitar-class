@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oye Mi Amor — Song Journey · Mr. Hoffman's Guitar Class</title>
+<meta name="description" content="One song, five layers: follow Oye Mi Amor from listening to full barre chords as your skills grow.">
+<!-- Same Firebase project + sign-in session as the class site (same origin),
+     so a student signed in there is already signed in here. Firestore SDK
+     loads later, only once we know someone is signed in. -->
+<script defer src="../firebase-config.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<style>
+  :root{
+    --bg:#ffffff; --bg2:#f6f7f9; --bg3:#eef0f3;
+    --text:#1c2230; --text2:#5b6472; --text3:#98a0ad;
+    --border:#e3e6eb; --border2:#d3d8df;
+    --l1:#7c5cbf; --l2:#2f7fbf; --l3:#c2703d; --l4:#3f9464; --l5:#b04a6e;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;padding:20px 16px 64px}
+  .wrap{max-width:760px;margin:0 auto}
+  a{color:var(--l2)}
+  .crumb{font-size:13px;color:var(--text2);margin-bottom:18px;display:flex;justify-content:space-between;gap:12px}
+  #save-msg{color:var(--text3);white-space:nowrap}
+  header.song{border-bottom:1px solid var(--border2);padding-bottom:18px;margin-bottom:8px}
+  .song-kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
+  h1{font-size:30px;font-weight:650;margin:4px 0 2px}
+  .song-artist{font-size:15px;color:var(--text2)}
+  .thread-badge{display:inline-block;margin-top:10px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:12px;background:var(--bg3);color:var(--text2)}
+  .journey-note{font-size:14px;color:var(--text2);margin:16px 0 26px;max-width:60ch}
+  .songmap{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:30px;font-size:14px}
+  .songmap b{font-weight:600}
+  .layer{border:1px solid var(--border);border-radius:12px;margin-bottom:22px;overflow:hidden}
+  .layer-head{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);border-bottom:1px solid var(--border)}
+  .layer-num{width:26px;height:26px;border-radius:50%;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+  .layer h2{font-size:17px;font-weight:600}
+  .layer-unit{margin-left:auto;font-size:12px;color:var(--text2);white-space:nowrap}
+  .layer-body{padding:16px}
+  .layer-body p{font-size:14.5px;margin-bottom:12px;max-width:62ch}
+  .l1 .layer-num{background:var(--l1)} .l2 .layer-num{background:var(--l2)}
+  .l3 .layer-num{background:var(--l3)} .l4 .layer-num{background:var(--l4)}
+  .l5 .layer-num{background:var(--l5)}
+  pre.tab{background:#20242c;color:#e8eaee;border-radius:8px;padding:14px 16px;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;line-height:1.5;overflow-x:auto;margin-bottom:12px}
+  pre.tab .hl{color:#ffd479}
+  .playline{font-size:14.5px;background:var(--bg2);border-left:3px solid var(--border2);padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:12px}
+  .branch{font-size:13.5px;color:var(--text2);margin-bottom:6px}
+  .branch b{color:var(--text)}
+  .rate{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--border)}
+  .rate-label{font-size:13px;color:var(--text2)}
+  .rate button{font:inherit;font-size:13px;padding:5px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--bg);cursor:pointer}
+  .rate button.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+  .rate-key{font-size:12px;color:var(--text3)}
+  footer{margin-top:36px;font-size:12.5px;color:var(--text3);border-top:1px solid var(--border);padding-top:14px}
+  @media (max-width:480px){ h1{font-size:24px} pre.tab{font-size:11.5px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb"><a href="../index.html">&larr; Back to class site</a><span id="save-msg"></span></div>
+
+  <header class="song">
+    <div class="song-kicker">Song Journey</div>
+    <h1>Oye Mi Amor</h1>
+    <div class="song-artist">Maná</div>
+    <span class="thread-badge">&#x1F9F5; Thread song — it grows through Units 3–7</span>
+  </header>
+
+  <p class="journey-note">One song, five layers. As your skills grow this semester, you come back to this song with a new tool — and it gets bigger every time. Find your current layer below. Fast finisher? Scroll down one layer and try the next.</p>
+
+  <div class="songmap">
+    <b>Song map:</b> the chorus rides <b>A &middot; D &middot; E &middot; D</b>; the verse sits on <b>Bm &middot; G</b>.
+    Maná is one of the biggest rock bands in the Spanish-speaking world, and this song is their signature — you'll grow it from power chords all the way to full barre chords.
+    <br><em style="color:var(--text3);font-size:13px">All layers are teaching arrangements at 60 BPM — simplified for learning, not note-for-note transcriptions.</em>
+  </div>
+
+  <!-- LAYER 1 -->
+  <section class="layer l1" id="layer-1">
+    <div class="layer-head"><span class="layer-num">1</span><h2>Listen</h2><span class="layer-unit">Anytime</span></div>
+    <div class="layer-body">
+      <p>Before you play a note, feel the rhythm: the strumming pushes and pulls against the beat — that Latin-rock drive is the engine of the whole song. Listen once for the chords, once for the rhythm, once for where the hook lands.</p>
+      <div class="playline"><b>Do it:</b> listen to the first chorus. Tap along and try to feel exactly when the chords change — can you hear the D and A arrive?</div>
+      <div class="branch"><b>Respond:</b> does the strumming land squarely ON the beat, or does it push around it? How does that change the feel?</div>
+      <div class="branch"><b>Connect:</b> name another Spanish-language song you know with guitar front and center.</div>
+      <div class="rate" data-layer="1">
+        <span class="rate-label">Rate this layer:</span>
+        <button type="button" onclick="rate(this)">1</button>
+        <button type="button" onclick="rate(this)">2</button>
+        <button type="button" onclick="rate(this)">3</button>
+        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAYER 2 -->
+  <section class="layer l2" id="layer-2">
+    <div class="layer-head"><span class="layer-num">2</span><h2>Power Chords</h2><span class="layer-unit">Unit 3</span></div>
+    <div class="layer-body">
+      <p>Your first pass at the chorus: three power chords, and one of them is a gift — the E5 uses the open low E string, so your fretting hand gets a free moment to set up the jump back to A5.</p>
+<pre class="tab">        A5   D5   E5   D5   (loop)
+e |----------------------------------------|
+B |----------------------------------------|
+G |----------------------------------------|
+D |-------<span class="hl">7</span>---------<span class="hl">7</span>----------------------|
+A |--<span class="hl">7</span>----5----<span class="hl">2</span>----5----------------------|
+E |--5---------0---------------------------|</pre>
+      <div class="playline"><b>Play it:</b> two beats per chord at <b>60 BPM</b>, four laps, with the open-string E5 ringing as clean as the fretted chords.</div>
+      <div class="branch"><b>Stuck?</b> Loop just D5&nbsp;&rarr;&nbsp;E5&nbsp;&rarr;&nbsp;D5 until the open-chord landing is automatic.</div>
+      <div class="branch"><b>Level up:</b> palm-mute the A5 and D5 but let the E5 ring open — instant dynamics, very Oye Mi Amor.</div>
+      <div class="rate" data-layer="2">
+        <span class="rate-label">Rate this layer:</span>
+        <button type="button" onclick="rate(this)">1</button>
+        <button type="button" onclick="rate(this)">2</button>
+        <button type="button" onclick="rate(this)">3</button>
+        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAYER 3 -->
+  <section class="layer l3" id="layer-3">
+    <div class="layer-head"><span class="layer-num">3</span><h2>Open Chords</h2><span class="layer-unit">Unit 5</span></div>
+    <div class="layer-body">
+      <p>The chorus as full open chords — and two of the three are already old friends. The E chord is just the Em you know plus your index finger on string 3, fret 1: all six strings, the biggest sound on the guitar.</p>
+<pre class="tab">Chorus loop — 4 beats per chord · 60 BPM
+|  A           |  D           |  E           |  D           |
+   1  2  3  4     1  2  3  4     1  2  3  4     1  2  3  4</pre>
+      <div class="playline"><b>Play it:</b> down-strums, four beats per chord, four loops with every change landing on beat 1 and the E ringing all six strings. Sing or hum the hook if you dare.</div>
+      <div class="branch"><b>Stuck?</b> Loop just D&nbsp;&rarr;&nbsp;E — they share the same finger cluster, just moved one string group over.</div>
+      <div class="branch"><b>Level up:</b> two beats per chord instead of four — same 60 BPM, twice the changes.</div>
+      <div class="rate" data-layer="3">
+        <span class="rate-label">Rate this layer:</span>
+        <button type="button" onclick="rate(this)">1</button>
+        <button type="button" onclick="rate(this)">2</button>
+        <button type="button" onclick="rate(this)">3</button>
+        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAYER 4 -->
+  <section class="layer l4" id="layer-4">
+    <div class="layer-head"><span class="layer-num">4</span><h2>Latin Strum</h2><span class="layer-unit">Unit 6</span></div>
+    <div class="layer-body">
+      <p>Now the verse — Bm and G — with the rhythm that makes the song move. Use the small Bm (top four strings, xx4432; no barre yet) and the D-DU-UDU pattern, keeping your strum hand swinging like a pendulum through every change.</p>
+<pre class="tab">Verse — Bm (small shape) · G — the D-DU-UDU pattern
+D       D   U       U   D   U
+1   +   2   +   3   +   4   +</pre>
+      <div class="playline"><b>Play it:</b> one bar of Bm, one bar of G, the pattern never stopping, at <b>60 BPM</b> for eight bars. The wrist keeps traveling down-up even on the skipped strums.</div>
+      <div class="branch"><b>Stuck?</b> Mute the strings and strum just the pattern until it's automatic, then add the chords back.</div>
+      <div class="branch"><b>Level up:</b> accent the up-strums a little harder than the downs — that's the Latin push you heard in Layer 1.</div>
+      <div class="rate" data-layer="4">
+        <span class="rate-label">Rate this layer:</span>
+        <button type="button" onclick="rate(this)">1</button>
+        <button type="button" onclick="rate(this)">2</button>
+        <button type="button" onclick="rate(this)">3</button>
+        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAYER 5 -->
+  <section class="layer l5" id="layer-5">
+    <div class="layer-head"><span class="layer-num">5</span><h2>Full Barre</h2><span class="layer-unit">Unit 7</span></div>
+    <div class="layer-body">
+      <p>The graduation. Swap the small Bm for the full barre Bm — index finger flat across all strings at fret 2 (x24432) — and play the whole Bm–G progression the way Maná does. Same song, bigger sound, no training wheels.</p>
+<pre class="tab">Full barre Bm — index barres fret 2
+e |--2--|  ← barre
+B |--3--|
+G |--4--|
+D |--4--|
+A |--2--|  ← barre
+E |--x--|</pre>
+      <div class="playline"><b>Play it:</b> the verse with the full barre Bm and your D-DU-UDU pattern, then a chorus with open chords — the whole song, start to finish, is now yours.</div>
+      <div class="branch"><b>Stuck?</b> Check the barre alone first: press the index across fret 2 and pick each string — fix the dead ones before adding the other fingers.</div>
+      <div class="branch"><b>Level up:</b> play the chorus with barre shapes too, or perform the full song for a partner — verse, chorus, and all.</div>
+      <div class="rate" data-layer="5">
+        <span class="rate-label">Rate this layer:</span>
+        <button type="button" onclick="rate(this)">1</button>
+        <button type="button" onclick="rate(this)">2</button>
+        <button type="button" onclick="rate(this)">3</button>
+        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>Mr. Hoffman's Guitar Class &middot; Song Journey &middot; teaching arrangement for classroom use &middot; 60 BPM throughout</footer>
+</div>
+
+<script>
+/* ── Layer self-rating ──
+   Ratings save into the SAME Firestore doc the main app uses
+   (progress/{uid}), under songRatings.<song-id>.<layer> — so no new
+   collections and no security-rule changes. If the student isn't signed
+   in, or a school filter blocks the Firebase SDK, the highlight quietly
+   stays session-only (same behavior the page always had). */
+var SONG_ID = 'oye-mi-amor';
+var fbUser = null, fbDb = null, saveTimer = null, dirty = false;
+
+function rate(btn){
+  var group = btn.closest('.rate');
+  group.querySelectorAll('button').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  queueSave();
+}
+
+function currentRatings(){
+  var out = {};
+  document.querySelectorAll('.rate').forEach(function(g){
+    var on = g.querySelector('button.on');
+    if(on) out[g.dataset.layer] = parseInt(on.textContent, 10);
+  });
+  return out;
+}
+
+function applyRatings(saved){
+  Object.keys(saved || {}).forEach(function(layer){
+    var g = document.querySelector('.rate[data-layer="' + layer + '"]');
+    if(!g) return;
+    g.querySelectorAll('button').forEach(function(b){
+      b.classList.toggle('on', parseInt(b.textContent, 10) === saved[layer]);
+    });
+  });
+}
+
+function setSaveMsg(t){ document.getElementById('save-msg').textContent = t; }
+
+/* Debounced save, mirroring the app's queueSave/flushSave pattern: a burst
+   of clicks becomes one write, and a failed write stays dirty so the next
+   click retries it. */
+function queueSave(){
+  if(!fbUser) return;
+  dirty = true;
+  setSaveMsg('Saving…');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(flushSave, 800);
+}
+
+function flushSave(){
+  if(!fbUser || !dirty) return;
+  dirty = false;
+  var payload = { songRatings: {} };
+  payload.songRatings[SONG_ID] = currentRatings();
+  fbDb.collection('progress').doc(fbUser.uid).set(payload, { merge: true })
+    .then(function(){ setSaveMsg('Saved ✓'); setTimeout(function(){ setSaveMsg(''); }, 2000); })
+    .catch(function(){ dirty = true; setSaveMsg('Save failed — check connection'); });
+}
+
+function loadFirestoreSdk(){
+  return new Promise(function(resolve, reject){
+    if(firebase.firestore){ resolve(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js';
+    s.onload = resolve;
+    s.onerror = function(){ reject(new Error('Firestore SDK failed to load')); };
+    document.head.appendChild(s);
+  });
+}
+
+window.addEventListener('load', function(){
+  if(typeof firebase === 'undefined' || typeof firebaseConfig === 'undefined') return;
+  firebase.initializeApp(firebaseConfig);
+  firebase.auth().onAuthStateChanged(function(user){
+    if(!user){ setSaveMsg('Sign in on the class site to save your ratings'); return; }
+    loadFirestoreSdk().then(function(){
+      fbDb = firebase.firestore();
+      fbUser = user;
+      setSaveMsg('');
+      return fbDb.collection('progress').doc(user.uid).get();
+    }).then(function(doc){
+      var data = doc && doc.exists ? doc.data() : null;
+      applyRatings(data && data.songRatings && data.songRatings[SONG_ID]);
+    }).catch(function(){ /* offline first read is fine — clicks still queue saves */ });
+  });
+  // Best-effort flush if the tab closes inside the debounce window.
+  window.addEventListener('pagehide', function(){ if(dirty){ clearTimeout(saveTimer); flushSave(); } });
+});
+</script>
+</body>
+</html>

@@ -517,7 +517,7 @@ SETS.push(
             response: { type: 'short', prompt: 'Personal record: once it loops clean at 60, raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 100 — beat it next class' }
           },
           {
-            text: 'Bonus riff — "Sweet Child O\' Mine" (Guns N\' Roses) bass roots on the E & A strings: play the root note under each verse chord — D · C · G · D — one per bar at 60 BPM. Click any note name to hear how it should sound.',
+            text: 'Bonus riff — "Sweet Child O\' Mine" (Guns N\' Roses) bass roots on the E & A strings: play the root note under each verse chord — D · C · G · D — one per bar at 60 BPM. Click any note name to hear how it should sound. <a href="tabs/sweet-child-o-mine.html#layer-2" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
             hint: 'These are the roots of the D–C–G verse loop. Heads up: the original recording is tuned a half-step lower, so your notes will sound slightly higher than the record — that\'s normal, not a mistake. The famous intro riff comes later in the course (Module 7 stretch goal!).',
             skills: [4, 5],
             tab: {
@@ -616,7 +616,7 @@ SETS.push(
     songs: [
       { name: '"Happy Birthday"', meta: 'Play full melody on E & A strings from TAB', type: 'Core', core: true,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Play verse bass roots on E & A strings · intro riff = Module 7 stretch goal', type: 'Core', core: true,
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Play verse bass roots on E & A strings · intro riff = Module 7 stretch goal', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html#layer-2',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Play bass-note riff on low E string from memory', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-2',

@@ -314,7 +314,7 @@ SETS.push(
     },
 
     songs: [
-      { name: '"Oye Mi Amor" — Maná', meta: 'Syncopated Latin strum on the verse · Bm (partial barre)–G', type: 'Core', core: true,
+      { name: '"Oye Mi Amor" — Maná', meta: 'Syncopated Latin strum on the verse · Bm (partial barre)–G', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
         tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
       { name: '"Happy Birthday"', meta: 'Apply D-DU-UDU to C–G–Am–F arrangement', type: 'Core', core: true,
@@ -334,7 +334,7 @@ SETS.push(
       { name: '"Riptide" — Vance Joy', meta: 'Am–G–C · perfect groove pattern', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=uJ_1HMAGb4k',
         tutorialUrl: 'https://www.youtube.com/watch?v=4pmK0x6mY0I' },
-      { name: '"Let It Be" — The Beatles', meta: 'C–G–Am–F · slow, even pattern', type: 'Choice', core: false, level: 2,
+      { name: '"Let It Be" — The Beatles', meta: 'C–G–Am–F · slow, even pattern', type: 'Choice', core: false, level: 2, journeyUrl: 'tabs/let-it-be.html#layer-3',
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
         tutorialUrl: 'https://www.youtube.com/watch?v=gGt0akED_UU' }
     ],

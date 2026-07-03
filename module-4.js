@@ -207,7 +207,7 @@ SETS.push(
       { name: '"the cure" — Olivia Rodrigo', meta: 'Solo over the chorus · A minor pentatonic (Am–C–F)', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Solo over D–C–G · G major / E minor pentatonic', type: 'Core', core: true,
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Solo over D–C–G · G major / E minor pentatonic', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
       { name: '"Seven Nation Army" — The White Stripes', meta: 'Solo using E minor pentatonic (E & A strings)', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-4',
@@ -395,7 +395,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Sweet Child O\' Mine, solo-section feel: the famous outro solo lives in E minor pentatonic. Improvise four bars in the open position, then move the same shape up to the 12th fret and play four more — same pattern, one octave up, instant "solo voice." You\'ve got it when: both registers, phrases with space, landing on E in each.',
+                text: 'Challenge — Sweet Child O\' Mine, solo-section feel: the famous outro solo lives in E minor pentatonic. Improvise four bars in the open position, then move the same shape up to the 12th fret and play four more — same pattern, one octave up, instant "solo voice." You\'ve got it when: both registers, phrases with space, landing on E in each. <a href="tabs/sweet-child-o-mine.html#layer-4" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
                 hint: 'High on the neck IS the solo sound. Nothing about your ideas has to change — the register does the drama for you.',
                 stuck: 'Stay open-position and just VISIT the 12th fret for your last note of each phrase.',
                 levelUp: 'Slide between the two positions mid-phrase, or hold your longest note an extra bar and let it sing.',
@@ -622,7 +622,7 @@ SETS.push(
       { name: '"the cure" — Olivia Rodrigo', meta: 'Full solo · A minor pentatonic', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Full solo over D–C–G · G major / E minor pentatonic', type: 'Core', core: true,
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Full solo over D–C–G · G major / E minor pentatonic', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
       { name: '"Happy Birthday"', meta: 'Full melodic reharmonization using pentatonic', type: 'Core', core: true,

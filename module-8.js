@@ -559,7 +559,7 @@ SETS.push(
       { name: '"Hallelujah" — Leonard Cohen / Jeff Buckley', meta: 'C–Am–F–G · slow tempo, perfect performance choice', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=ttEMYvpoR-k',
         tutorialUrl: 'https://www.youtube.com/watch?v=eFLJUspLfnk' },
-      { name: '"Let It Be" — The Beatles', meta: 'Fingerpick the verse · C–G–Am–F', type: 'Core', core: true,
+      { name: '"Let It Be" — The Beatles', meta: 'Fingerpick the verse · C–G–Am–F', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
         tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8' },
       { name: '"Sailor Song" — Gigi Perez', meta: 'Fingerpicked verse · capo IV (G-shapes)', type: 'Choice', core: false, level: 3,

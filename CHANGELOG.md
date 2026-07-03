@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-03 — Three more Song Journeys: every thread song now has one
+
+### Added
+- **Song Journey pages for Sweet Child O' Mine, Oye Mi Amor, and Let It Be** —
+  every song that threads through multiple units now has its own journey page,
+  five in all. Each one is shaped around where its song actually lives in the
+  course:
+  - **Sweet Child O' Mine** grows through Units 2–5 (bass roots → power chords
+    → pentatonic solo → open chords), with the famous intro riff waiting as
+    the Module 7 stretch goal.
+  - **Oye Mi Amor** grows through Units 3–7 (power chords → open chords →
+    the Latin strum → the full barre Bm — the last layer is the graduation).
+  - **Let It Be** grows through Units 5–8 (open chords → down-up strum →
+    fingerpicking the verse), in four layers.
+  Every layer has TAB or a rhythm map, Stuck?/Level-up help, and a
+  rate-yourself button that saves when you're signed in.
+- **The modules link to all of them.** Challenges for these songs in
+  Modules 2–5 end with a "🧵 Song Journey" link to the layer you're on, and
+  every entry for these songs in the Songs lists (Modules 2–8) has the
+  🧵 Song Journey button.
+
 ## 2026-07-03 — Second Song Journey page: All Along the Watchtower
 
 ### Added

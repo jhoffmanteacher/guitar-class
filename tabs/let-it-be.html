@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Let It Be — Song Journey · Mr. Hoffman's Guitar Class</title>
+<meta name="description" content="One song, four layers: follow Let It Be from listening to fingerpicking as your skills grow.">
+<!-- Same Firebase project + sign-in session as the class site (same origin),
+     so a student signed in there is already signed in here. Firestore SDK
+     loads later, only once we know someone is signed in. -->
+<script defer src="../firebase-config.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<style>
+  :root{
+    --bg:#ffffff; --bg2:#f6f7f9; --bg3:#eef0f3;
+    --text:#1c2230; --text2:#5b6472; --text3:#98a0ad;
+    --border:#e3e6eb; --border2:#d3d8df;
+    --l1:#7c5cbf; --l2:#2f7fbf; --l3:#c2703d; --l4:#3f9464; --l5:#b04a6e;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;padding:20px 16px 64px}
+  .wrap{max-width:760px;margin:0 auto}
+  a{color:var(--l2)}
+  .crumb{font-size:13px;color:var(--text2);margin-bottom:18px;display:flex;justify-content:space-between;gap:12px}
+  #save-msg{color:var(--text3);white-space:nowrap}
+  header.song{border-bottom:1px solid var(--border2);padding-bottom:18px;margin-bottom:8px}
+  .song-kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
+  h1{font-size:30px;font-weight:650;margin:4px 0 2px}
+  .song-artist{font-size:15px;color:var(--text2)}
+  .thread-badge{display:inline-block;margin-top:10px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:12px;background:var(--bg3);color:var(--text2)}
+  .journey-note{font-size:14px;color:var(--text2);margin:16px 0 26px;max-width:60ch}
+  .songmap{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:30px;font-size:14px}
+  .songmap b{font-weight:600}
+  .layer{border:1px solid var(--border);border-radius:12px;margin-bottom:22px;overflow:hidden}
+  .layer-head{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);border-bottom:1px solid var(--border)}
+  .layer-num{width:26px;height:26px;border-radius:50%;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+  .layer h2{font-size:17px;font-weight:600}
+  .layer-unit{margin-left:auto;font-size:12px;color:var(--text2);white-space:nowrap}
+  .layer-body{padding:16px}
+  .layer-body p{font-size:14.5px;margin-bottom:12px;max-width:62ch}
+  .l1 .layer-num{background:var(--l1)} .l2 .layer-num{background:var(--l2)}
+  .l3 .layer-num{background:var(--l3)} .l4 .layer-num{background:var(--l4)}
+  .l5 .layer-num{background:var(--l5)}
+  pre.tab{background:#20242c;color:#e8eaee;border-radius:8px;padding:14px 16px;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;line-height:1.5;overflow-x:auto;margin-bottom:12px}
+  pre.tab .hl{color:#ffd479}
+  .playline{font-size:14.5px;background:var(--bg2);border-left:3px solid var(--border2);padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:12px}
+  .branch{font-size:13.5px;color:var(--text2);margin-bottom:6px}
+  .branch b{color:var(--text)}
+  .rate{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--border)}
+  .rate-label{font-size:13px;color:var(--text2)}
+  .rate button{font:inherit;font-size:13px;padding:5px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--bg);cursor:pointer}
+  .rate button.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+  .rate-key{font-size:12px;color:var(--text3)}
+  footer{margin-top:36px;font-size:12.5px;color:var(--text3);border-top:1px solid var(--border);padding-top:14px}
+  @media (max-width:480px){ h1{font-size:24px} pre.tab{font-size:11.5px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb"><a href="../index.html">&larr; Back to class site</a><span id="save-msg"></span></div>
+
+  <header class="song">
+    <div class="song-kicker">Song Journey</div>
+    <h1>Let It Be</h1>
+    <div class="song-artist">The Beatles</div>
+    <span class="thread-badge">&#x1F9F5; Thread song — it grows through Units 5–8</span>
+  </header>
+
+  <p class="journey-note">One song, four layers. As your skills grow this semester, you come back to this song with a new tool — and it gets more beautiful every time. Find your current layer below. Fast finisher? Scroll down one layer and try the next.</p>
+
+  <div class="songmap">
+    <b>Song map:</b> the verse is the most famous four-chord loop in pop — <b>C &middot; G &middot; Am &middot; F</b> (the I–V–vi–IV progression) —
+    and it's hiding inside dozens of other songs you already know. Learn it here once, and you've learned a hundred songs.
+    <br><em style="color:var(--text3);font-size:13px">All layers are teaching arrangements at 60 BPM — simplified for learning, not note-for-note transcriptions.</em>
+  </div>
+
+  <!-- LAYER 1 -->
+  <section class="layer l1" id="layer-1">
+    <div class="layer-head"><span class="layer-num">1</span><h2>Listen</h2><span class="layer-unit">Anytime</span></div>
+    <div class="layer-body">
+      <p>The original is piano, not guitar — which makes it perfect ear training: nothing to copy, just chords to hear. Listen for the C–G–Am–F pattern carrying the verse, and how little the song needs beyond it.</p>
+      <div class="playline"><b>Do it:</b> listen to the first verse. Count the bars — how many beats does each chord get before the next one arrives?</div>
+      <div class="branch"><b>Respond:</b> the loop is the same all verse long — so what keeps it from getting boring? What changes around it?</div>
+      <div class="branch"><b>Connect:</b> C–G–Am–F is the "axis of awesome" four-chord loop. Name another song you suspect uses the same four chords.</div>
+      <div class="rate" data-layer="1">
+        <span class="rate-label">Rate this layer:</span>
+        <button type="button" onclick="rate(this)">1</button>
+        <button type="button" onclick="rate(this)">2</button>
+        <button type="button" onclick="rate(this)">3</button>
+        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAYER 2 -->
+  <section class="layer l2" id="layer-2">
+    <div class="layer-head"><span class="layer-num">2</span><h2>Open Chords</h2><span class="layer-unit">Unit 5</span></div>
+    <div class="layer-body">
+      <p>Your first full pass: the verse as four open chords with a simple down-strum. Use the small F (top four strings, xx3211) — no barre needed.</p>
+<pre class="tab">Verse loop — 4 beats per chord · 60 BPM
+|  C           |  G           |  Am          |  F           |
+   1  2  3  4     1  2  3  4     1  2  3  4     1  2  3  4</pre>
+      <div class="playline"><b>Play it:</b> one down-strum per beat, four beats per chord, one full verse loop with every change landing on beat 1. Start forming the next chord on beat 4.</div>
+      <div class="branch"><b>Stuck?</b> Isolate the roughest pair (probably C&nbsp;&rarr;&nbsp;F) and loop just those two, four beats each.</div>
+      <div class="branch"><b>Level up:</b> add the chorus turnaround — Am &middot; G &middot; F &middot; C — or drop to two beats per chord at the same 60 BPM.</div>
+      <div class="rate" data-layer="2">
+        <span class="rate-label">Rate this layer:</span>
+        <button type="button" onclick="rate(this)">1</button>
+        <button type="button" onclick="rate(this)">2</button>
+        <button type="button" onclick="rate(this)">3</button>
+        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAYER 3 -->
+  <section class="layer l3" id="layer-3">
+    <div class="layer-head"><span class="layer-num">3</span><h2>Strum Pattern</h2><span class="layer-unit">Unit 6</span></div>
+    <div class="layer-body">
+      <p>Same four chords — now with a steady down-up 8th-note strum. The song is slow and forgiving, which makes it the perfect place to keep your strum hand swinging through every chord change.</p>
+<pre class="tab">Down-up 8th notes — the pendulum never stops
+D   U   D   U   D   U   D   U
+1   +   2   +   3   +   4   +</pre>
+      <div class="playline"><b>Play it:</b> down-up through the full C–G–Am–F loop at <b>60 BPM</b>, counting "1 + 2 + 3 + 4 +" aloud. The wrist keeps traveling even while your fingers change chords.</div>
+      <div class="branch"><b>Stuck?</b> Mute the strings and strum just the pattern for four bars, then add the chords back one at a time.</div>
+      <div class="branch"><b>Level up:</b> soften beats 2 and 4 to a brush — the gentle, even feel is what makes this song sound like itself.</div>
+      <div class="rate" data-layer="3">
+        <span class="rate-label">Rate this layer:</span>
+        <button type="button" onclick="rate(this)">1</button>
+        <button type="button" onclick="rate(this)">2</button>
+        <button type="button" onclick="rate(this)">3</button>
+        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAYER 4 -->
+  <section class="layer l4" id="layer-4">
+    <div class="layer-head"><span class="layer-num">4</span><h2>Fingerpick</h2><span class="layer-unit">Unit 8</span></div>
+    <div class="layer-body">
+      <p>The showcase version: put the pick down and play the verse with the 6-note p-i-m-a-m-i pattern — thumb on each chord's root bass, i-m-a fingers on the G, B, and high e strings. Suddenly it sounds like a lullaby.</p>
+<pre class="tab">p-i-m-a-m-i over each chord — thumb finds the root
+p = thumb on the bass root:  C &rarr; A string · G &rarr; low E · Am &rarr; A string · F &rarr; D string
+p    i    m    a    m    i
+1    +    2    +    3    +   (6 notes per bar)</pre>
+      <div class="playline"><b>Play it:</b> the pattern once per chord through C–G–Am–F at <b>60 BPM</b>, only the thumb moving between bass strings. Then the performance test: three times through without stopping — even with mistakes, keep going.</div>
+      <div class="branch"><b>Stuck?</b> Strum each chord once first to check every string rings, then pick. Fix the shape before the pattern.</div>
+      <div class="branch"><b>Level up:</b> pinch the root and high e together on beat 1 of each chord, or sing the verse over your own picking.</div>
+      <div class="rate" data-layer="4">
+        <span class="rate-label">Rate this layer:</span>
+        <button type="button" onclick="rate(this)">1</button>
+        <button type="button" onclick="rate(this)">2</button>
+        <button type="button" onclick="rate(this)">3</button>
+        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>Mr. Hoffman's Guitar Class &middot; Song Journey &middot; teaching arrangement for classroom use &middot; 60 BPM throughout</footer>
+</div>
+
+<script>
+/* ── Layer self-rating ──
+   Ratings save into the SAME Firestore doc the main app uses
+   (progress/{uid}), under songRatings.<song-id>.<layer> — so no new
+   collections and no security-rule changes. If the student isn't signed
+   in, or a school filter blocks the Firebase SDK, the highlight quietly
+   stays session-only (same behavior the page always had). */
+var SONG_ID = 'let-it-be';
+var fbUser = null, fbDb = null, saveTimer = null, dirty = false;
+
+function rate(btn){
+  var group = btn.closest('.rate');
+  group.querySelectorAll('button').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+  queueSave();
+}
+
+function currentRatings(){
+  var out = {};
+  document.querySelectorAll('.rate').forEach(function(g){
+    var on = g.querySelector('button.on');
+    if(on) out[g.dataset.layer] = parseInt(on.textContent, 10);
+  });
+  return out;
+}
+
+function applyRatings(saved){
+  Object.keys(saved || {}).forEach(function(layer){
+    var g = document.querySelector('.rate[data-layer="' + layer + '"]');
+    if(!g) return;
+    g.querySelectorAll('button').forEach(function(b){
+      b.classList.toggle('on', parseInt(b.textContent, 10) === saved[layer]);
+    });
+  });
+}
+
+function setSaveMsg(t){ document.getElementById('save-msg').textContent = t; }
+
+/* Debounced save, mirroring the app's queueSave/flushSave pattern: a burst
+   of clicks becomes one write, and a failed write stays dirty so the next
+   click retries it. */
+function queueSave(){
+  if(!fbUser) return;
+  dirty = true;
+  setSaveMsg('Saving…');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(flushSave, 800);
+}
+
+function flushSave(){
+  if(!fbUser || !dirty) return;
+  dirty = false;
+  var payload = { songRatings: {} };
+  payload.songRatings[SONG_ID] = currentRatings();
+  fbDb.collection('progress').doc(fbUser.uid).set(payload, { merge: true })
+    .then(function(){ setSaveMsg('Saved ✓'); setTimeout(function(){ setSaveMsg(''); }, 2000); })
+    .catch(function(){ dirty = true; setSaveMsg('Save failed — check connection'); });
+}
+
+function loadFirestoreSdk(){
+  return new Promise(function(resolve, reject){
+    if(firebase.firestore){ resolve(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js';
+    s.onload = resolve;
+    s.onerror = function(){ reject(new Error('Firestore SDK failed to load')); };
+    document.head.appendChild(s);
+  });
+}
+
+window.addEventListener('load', function(){
+  if(typeof firebase === 'undefined' || typeof firebaseConfig === 'undefined') return;
+  firebase.initializeApp(firebaseConfig);
+  firebase.auth().onAuthStateChanged(function(user){
+    if(!user){ setSaveMsg('Sign in on the class site to save your ratings'); return; }
+    loadFirestoreSdk().then(function(){
+      fbDb = firebase.firestore();
+      fbUser = user;
+      setSaveMsg('');
+      return fbDb.collection('progress').doc(user.uid).get();
+    }).then(function(doc){
+      var data = doc && doc.exists ? doc.data() : null;
+      applyRatings(data && data.songRatings && data.songRatings[SONG_ID]);
+    }).catch(function(){ /* offline first read is fine — clicks still queue saves */ });
+  });
+  // Best-effort flush if the tab closes inside the debounce window.
+  window.addEventListener('pagehide', function(){ if(dirty){ clearTimeout(saveTimer); flushSave(); } });
+});
+</script>
+</body>
+</html>

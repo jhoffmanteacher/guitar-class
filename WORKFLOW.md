@@ -482,12 +482,11 @@ per-layer self-rating buttons), not an in-app view. The same build added
 renderer, and rewrote Module 5 Set 3's song challenge around Oye Mi Amor with an
 E-chord preview (Jonathan's call, 2026-07-03; the old Country Roads / Stand By Me
 challenge is gone, though both remain as Choice songs in the songs list).
-**Open follow-ups:** remaining Song Journey pages (SNA pattern approved at merge —
-Watchtower shipped 2026-07-03, see below; candidates still open: Sweet Child O' Mine,
-Let It Be, Oye Mi Amor, plus picks for Modules 6–8 once their Take It to a Song
-sections exist) · broader supplementary-song decisions for the site (waiting on
-Jonathan's curriculum map). *Closed 2026-07-03: Firestore wiring for the rating
-buttons and module links to the SNA layer anchors both shipped.*
+**Open follow-ups:** possible future Song Journey pages for Modules 6–8 picks once
+their Take It to a Song sections exist (all current thread songs are covered — see
+below) · broader supplementary-song decisions for the site (waiting on Jonathan's
+curriculum map). *Closed 2026-07-03: Firestore wiring for the rating buttons and
+module links to the SNA layer anchors both shipped.*
 **Watchtower Song Journey — ✅ done 2026-07-03:** second page,
 `tabs/all-along-the-watchtower.html`, same 5-layer pattern (Listen Dylan-vs-Hendrix ·
 bass line 5-3-1-3 · power chords A5-G5-F5-G5 · Am pentatonic Pattern 1 solo · open
@@ -495,6 +494,20 @@ chords with small F) and the same Firestore rating save (`songRatings.all-along-
 Wired like SNA: per-layer 🧵 links on the Watchtower challenges in M1–M5 (incl. both
 assessment pieces) + `journeyUrl` on every Watchtower songs-list entry — M1–M5 with
 layer anchors, M6/M7 to the page top (those units go beyond the page's 5 layers).
+**Remaining three Song Journeys — ✅ done 2026-07-03:** `tabs/sweet-child-o-mine.html`
+(5 layers: Listen "Anytime" · bass roots U2 · power chords U3 · Em pentatonic
+open+12th U4 · open chords U5, with the M7 intro-riff stretch goal named in Layer 5),
+`tabs/oye-mi-amor.html` (5 layers: Listen · power chords U3 w/ open E5 · open chords
+U5 w/ E-preview · D-DU-UDU Latin strum U6 w/ partial Bm xx4432 · full barre Bm x24432
+U7), `tabs/let-it-be.html` (4 layers: Listen · open chords U5 small F · down-up strum
+U6 · p-i-m-a-m-i fingerpick U8 + the 3-times-through recovery test). Pattern change
+from SNA: songs that don't start in Unit 1 get a "Listen" Layer 1 labeled **Anytime**
+instead of a unit number, and layer counts vary (links say "Layer N of 4/5"
+accordingly). Same Firestore rating save under `songRatings.<page-slug>`. Wired: inline
+🧵 layer links on each song's challenges (SCOM M2/M4 · Oye M3/M5×2 · LIB M5 listen +
+challenge) + `journeyUrl` on every songs-list entry for these songs M2–M8 (layer
+anchors where the entry maps to a layer; page top for beyond-the-page entries: SCOM
+M7×2, Oye M5 Set 4 showcase). All five thread songs now have journey pages.
 
 ---
 
