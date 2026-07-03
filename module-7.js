@@ -552,7 +552,7 @@ SETS.push(
     },
 
     songs: [
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F · use barre shapes for all three', type: 'Core', core: true,
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F · use barre shapes for all three', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"Oye Mi Amor" — Maná', meta: 'Full barre-chord progression · Bm–G', type: 'Core', core: true,

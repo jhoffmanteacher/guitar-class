@@ -136,7 +136,7 @@ SETS.push(
       { name: '"Let It Be" — The Beatles', meta: 'Verse chords · read from chord chart · C–G–Am–F', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
         tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · Read from chord chart', type: 'Core', core: true,
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · Read from chord chart', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-5',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"Horse with No Name" — America', meta: 'Em–D6add9 — only 2 chords, great starter', type: 'Choice', core: false, level: 1,
@@ -324,7 +324,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which chord change still fights you in Let It Be?', placeholder: 'e.g. C to F — fingers arrive late' }
               },
               {
-                text: 'Challenge — Watchtower, open-chord version: the same loop you\'ve played as bass notes and power chords, now as full open chords — Am · G · F · G — two beats per chord at 60 BPM. You\'ve got it when: four loops, and you can hear that it\'s the SAME song you played in Units 2 and 3.',
+                text: 'Challenge — Watchtower, open-chord version: the same loop you\'ve played as bass notes and power chords, now as full open chords — Am · G · F · G — two beats per chord at 60 BPM. You\'ve got it when: four loops, and you can hear that it\'s the SAME song you played in Units 2 and 3. <a href="tabs/all-along-the-watchtower.html#layer-5" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
                 hint: 'This is the third time this song has met you — bass line, power chords, now open chords. Notice the roots are identical every time.',
                 stuck: 'Strum only beat 1 of each chord and use beats 2–4 to travel to the next shape.',
                 levelUp: 'One beat per chord, or alternate: one loop open chords, one loop power chords, without stopping.',
@@ -542,7 +542,7 @@ SETS.push(
     },
 
     songs: [
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–Em–D–A chord group 2 adaptation', type: 'Core', core: true,
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–Em–D–A chord group 2 adaptation', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-5',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"Seven Nation Army" — The White Stripes', meta: 'Adapted to D–A–Em strummed version', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-5',
@@ -761,7 +761,7 @@ SETS.push(
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Full song showcase · D–C–G', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full performance with open chords', type: 'Core', core: true,
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full performance with open chords', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-5',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"Hallelujah" — Leonard Cohen', meta: 'C–Am–F–G — beautiful showcase song', type: 'Choice', core: false, level: 2,

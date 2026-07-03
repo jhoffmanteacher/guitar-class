@@ -482,10 +482,19 @@ per-layer self-rating buttons), not an in-app view. The same build added
 renderer, and rewrote Module 5 Set 3's song challenge around Oye Mi Amor with an
 E-chord preview (Jonathan's call, 2026-07-03; the old Country Roads / Stand By Me
 challenge is gone, though both remain as Choice songs in the songs list).
-**Open follow-ups:** remaining 7 Song Journey pages (SNA pattern approved at merge) ·
-Firestore wiring for the rating buttons (currently a `setSkillLevel` TODO) · nothing
-in the modules links to the SNA page's layer anchors yet · broader
-supplementary-song decisions for the site.
+**Open follow-ups:** remaining Song Journey pages (SNA pattern approved at merge —
+Watchtower shipped 2026-07-03, see below; candidates still open: Sweet Child O' Mine,
+Let It Be, Oye Mi Amor, plus picks for Modules 6–8 once their Take It to a Song
+sections exist) · broader supplementary-song decisions for the site (waiting on
+Jonathan's curriculum map). *Closed 2026-07-03: Firestore wiring for the rating
+buttons and module links to the SNA layer anchors both shipped.*
+**Watchtower Song Journey — ✅ done 2026-07-03:** second page,
+`tabs/all-along-the-watchtower.html`, same 5-layer pattern (Listen Dylan-vs-Hendrix ·
+bass line 5-3-1-3 · power chords A5-G5-F5-G5 · Am pentatonic Pattern 1 solo · open
+chords with small F) and the same Firestore rating save (`songRatings.all-along-the-watchtower`).
+Wired like SNA: per-layer 🧵 links on the Watchtower challenges in M1–M5 (incl. both
+assessment pieces) + `journeyUrl` on every Watchtower songs-list entry — M1–M5 with
+layer anchors, M6/M7 to the page top (those units go beyond the page's 5 layers).
 
 ---
 

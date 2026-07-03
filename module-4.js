@@ -170,7 +170,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Describe your best phrase in words — what made it feel finished?', placeholder: 'e.g. two quick notes then a long E' }
               },
               {
-                text: 'Challenge — Solo over Watchtower: the song\'s loop is Am · G · F · G — and A minor pentatonic Pattern 1 (the box you just learned) fits every bar of it. Improvise four bars using only the three notes marked below, then four more adding a fourth note of your choice from Pattern 1. You\'ve got it when: eight bars where every phrase starts or ends on A.',
+                text: 'Challenge — Solo over Watchtower: the song\'s loop is Am · G · F · G — and A minor pentatonic Pattern 1 (the box you just learned) fits every bar of it. Improvise four bars using only the three notes marked below, then four more adding a fourth note of your choice from Pattern 1. You\'ve got it when: eight bars where every phrase starts or ends on A. <a href="tabs/all-along-the-watchtower.html#layer-4" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
                 hint: 'This is the same box from your Pattern 1 drill — you\'re not learning anything new, you\'re USING it. That\'s the whole point of today.',
                 stuck: 'Freeze the rhythm: only quarter notes, only the three marked notes, until an idea shows up on its own.',
                 levelUp: 'Start a phrase during the F bar and resolve it on the Am bar — that\'s real tension and release.',
@@ -201,7 +201,7 @@ SETS.push(
     },
 
     songs: [
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Solo using Am pentatonic Pattern 1 over E & A strings', type: 'Core', core: true,
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Solo using Am pentatonic Pattern 1 over E & A strings', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"the cure" — Olivia Rodrigo', meta: 'Solo over the chorus · A minor pentatonic (Am–C–F)', type: 'Core', core: true,
@@ -438,7 +438,7 @@ SETS.push(
     songs: [
       { name: '"Happy Birthday"', meta: 'One-note solo exercise over G major pentatonic pattern', type: 'Core', core: true,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full solo using Am pentatonic across 4 strings', type: 'Core', core: true,
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full solo using Am pentatonic across 4 strings', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"the cure" — Olivia Rodrigo', meta: 'Melodic solo over the verse · A minor pentatonic', type: 'Core', core: true,
@@ -616,7 +616,7 @@ SETS.push(
     },
 
     songs: [
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full solo over Am pentatonic — unit-end performance', type: 'Core', core: true,
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full solo over Am pentatonic — unit-end performance', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"the cure" — Olivia Rodrigo', meta: 'Full solo · A minor pentatonic', type: 'Core', core: true,

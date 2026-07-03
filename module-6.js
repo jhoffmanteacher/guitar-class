@@ -137,7 +137,7 @@ SETS.push(
       { name: '"Brown Eyed Girl" — Van Morrison', meta: 'G–C–G–D · classic 8th-note down-up strum', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=UfmkgQRmmeE',
         tutorialUrl: 'https://www.youtube.com/watch?v=v-EGJOz-Mek' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F · steady down-up over chord changes', type: 'Core', core: true,
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F · steady down-up over chord changes', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"Knockin\' on Heaven\'s Door" — Dylan', meta: 'G–D–Am–C · slow tempo, perfect for first strum patterns', type: 'Core', core: true,
@@ -507,7 +507,7 @@ SETS.push(
     },
 
     songs: [
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Try it folk-style, then rock-style — same chords, different feel', type: 'Core', core: true,
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Try it folk-style, then rock-style — same chords, different feel', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"Three Little Birds" — Bob Marley', meta: 'A–D–E · classic reggae offbeat strum', type: 'Core', core: true,

@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-03 — Second Song Journey page: All Along the Watchtower
+
+### Added
+- **All Along the Watchtower now has its own Song Journey page** — the second
+  song to get one, after Seven Nation Army. It follows the song through all
+  five units: listening to Dylan vs. Hendrix, the three-note bass line, power
+  chords, soloing with A minor pentatonic, and the full open-chord campfire
+  version — each layer with TAB, Stuck?/Level-up help, and a rate-yourself
+  button that saves when you're signed in.
+- **The modules link to it everywhere the song appears.** Watchtower challenges
+  in Modules 1–5 end with a "🧵 Song Journey" link that jumps to the layer
+  you're on, and the song's entry in every Songs list (Modules 1–7) has the
+  🧵 Song Journey button.
+
 ## 2026-07-03 — Song Journey: easier to find, and ratings now save
 
 ### Added
