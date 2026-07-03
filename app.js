@@ -635,8 +635,15 @@ function renderTabBlock(notes){
   const rows = TAB_STRINGS.map(strLabel => {
     const cells = [`<div class="tab-str-label">${strLabel}</div>`];
     notes.forEach(n => {
-      if (n.string === strLabel) {
-        cells.push(`<div class="tab-cell"><span class="tab-fret">${escHtml(String(n.fret))}</span></div>`);
+      let fret;
+      if (Array.isArray(n.frets)) {
+        const hit = n.frets.find(([s]) => s === strLabel);
+        if (hit) fret = hit[1];
+      } else if (n.string === strLabel) {
+        fret = n.fret;
+      }
+      if (fret !== undefined) {
+        cells.push(`<div class="tab-cell"><span class="tab-fret">${escHtml(String(fret))}</span></div>`);
       } else {
         cells.push('<div class="tab-cell"></div>');
       }
@@ -645,7 +652,9 @@ function renderTabBlock(notes){
   }).join('');
   const noteBtns = ['<div></div>'];
   notes.forEach(n => {
-    noteBtns.push(`<button type="button" class="tab-note-btn" onclick="playNote(${Number(n.midi)})" title="Play ${escAttr(n.note)}">${escHtml(n.note)}<span class="tab-spkr">&#x1F50A;</span></button>`);
+    const midis = (Array.isArray(n.midi) ? n.midi : [n.midi]).map(Number);
+    const midisAttr = escAttr(JSON.stringify(midis));
+    noteBtns.push(`<button type="button" class="tab-note-btn" data-midis="${midisAttr}" onclick="playBeat(this)" title="Play ${escAttr(n.note)}">${escHtml(n.note)}<span class="tab-spkr">&#x1F50A;</span></button>`);
   });
   return `
     <div class="tab-board">
@@ -668,10 +677,12 @@ function buildTab(spec, opts){
   let allMidis = [];
   if (spec.phrases && spec.phrases.length) {
     spec.phrases.forEach(p => {
-      if (p.notes && p.notes.length) allMidis = allMidis.concat(p.notes.map(n => Number(n.midi)));
+      if (p.notes && p.notes.length) allMidis = allMidis.concat(
+        p.notes.map(n => Array.isArray(n.midi) ? n.midi.map(Number) : Number(n.midi))
+      );
     });
   } else if (spec.notes && spec.notes.length) {
-    allMidis = spec.notes.map(n => Number(n.midi));
+    allMidis = spec.notes.map(n => Array.isArray(n.midi) ? n.midi.map(Number) : Number(n.midi));
   }
   let controlsHtml = '';
   if (allMidis.length && keyPrefix) {
@@ -2120,6 +2131,12 @@ function playNote(midi){
   g.connect(ctx.destination);
   src.start();
 }
+/* Play one TAB beat: 1 midi = single note, N midis = chord, all at once. */
+function playBeat(btnEl){
+  let midis = [];
+  try { midis = JSON.parse(btnEl.dataset.midis || '[]'); } catch (e) { return; }
+  midis.forEach(m => playNote(Number(m)));
+}
 let playSeqState = null;
 function playSequence(midis, bpm, btnEl){
   const stop = () => {
@@ -2137,7 +2154,9 @@ function playSequence(midis, bpm, btnEl){
     if(wasSame) return;
   }
   const interval = 60000 / (bpm || 60);
-  const timeouts = midis.map((m, i) => setTimeout(() => playNote(m), i * interval));
+  const timeouts = midis.map((m, i) => setTimeout(() => {
+    (Array.isArray(m) ? m : [m]).forEach(x => playNote(Number(x)));
+  }, i * interval));
   timeouts.push(setTimeout(stop, midis.length * interval));
   const idleHtml = btnEl ? btnEl.innerHTML : null;
   playSeqState = { timeouts, btn: btnEl, idleHtml };
