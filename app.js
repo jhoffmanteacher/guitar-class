@@ -13,14 +13,14 @@
       d.setAttribute('role','alert');
       d.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;'
         + 'max-width:520px;margin:0 auto;padding:12px 44px 12px 16px;border-radius:12px;'
-        + 'background:#4d1964;color:#fff;font:14px/1.45 system-ui,-apple-system,sans-serif;'
+        + 'background:#322b78;color:#fff;font:14px/1.45 system-ui,-apple-system,sans-serif;'
         + 'box-shadow:0 6px 24px rgba(0,0,0,.28)';
       const msg = document.createElement('span');
       msg.textContent = 'Something hiccuped. Your saved progress is safe — please refresh the page to keep going. ';
       const refresh = document.createElement('button');
       refresh.textContent = 'Refresh';
       refresh.style.cssText = 'margin-left:4px;padding:3px 12px;border:0;border-radius:14px;'
-        + 'background:#fff;color:#4d1964;font-weight:600;cursor:pointer';
+        + 'background:#fff;color:#322b78;font-weight:600;cursor:pointer';
       refresh.onclick = () => location.reload();
       const close = document.createElement('button');
       close.setAttribute('aria-label','Dismiss');
@@ -1117,9 +1117,14 @@ function pickEnglishVoice(){
   return cachedVoices[0] || null;
 }
 
+// Idle ("Listen") and active ("Stop") inner-markup for the read-aloud buttons.
+// Kept as constants so the SVG icon survives every state reset below.
+const READ_ALOUD_IDLE_HTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 8a5 5 0 0 1 0 8"/><path d="M19.5 5.5a9 9 0 0 1 0 13"/></svg><span>Listen</span>';
+const READ_ALOUD_STOP_HTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg><span>Stop</span>';
+
 function resetAllReadAloudBtns(){
   document.querySelectorAll('.read-aloud-btn').forEach(b => {
-    b.innerHTML = '&#x1F50A;';
+    b.innerHTML = READ_ALOUD_IDLE_HTML;
     b.classList.remove('speaking');
     delete b.dataset.speaking;
   });
@@ -1149,11 +1154,11 @@ function readAloudStep(btn){
   utter.lang = (voice && voice.lang) || 'en-US';
   utter.rate = 0.90;
   utter.pitch = 1.0;
-  utter.onend = () => { btn.innerHTML = '&#x1F50A;'; btn.classList.remove('speaking'); delete btn.dataset.speaking; };
+  utter.onend = () => { btn.innerHTML = READ_ALOUD_IDLE_HTML; btn.classList.remove('speaking'); delete btn.dataset.speaking; };
   utter.onerror = utter.onend;
 
   resetAllReadAloudBtns();
-  btn.innerHTML = '&#x23F9; Stop';
+  btn.innerHTML = READ_ALOUD_STOP_HTML;
   btn.classList.add('speaking');
   btn.dataset.speaking = 'true';
   synth.speak(utter);
@@ -1259,7 +1264,7 @@ function buildComingSoon(w){
 function buildSet(w){
   // Small "Set N" pill, then the topic as the large title, then generalized
   // skill bullets (the old "I CAN…" objective line is no longer shown).
-  const printBtn = `<button type="button" class="print-set-btn" onclick="printSet('${w.id}')" title="Print this set as a one-page handout">&#x1F5A8; Print this set</button>`;
+  const printBtn = `<button type="button" class="print-set-btn" onclick="printSet('${w.id}')" title="Print this set as a one-page handout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg>Print this set</button>`;
   const pill = `<div class="obj-set">${w.title ? `<span class="obj-set-tag">${w.title}</span>` : ''}${printBtn}</div>`;
   const titleHtml = w.unit ? `<div class="obj-main obj-topic">${w.unit}</div>` : '';
   const items = (w.skillFocus||'').split(' · ')
@@ -1388,7 +1393,7 @@ function buildStations(w, stationId){
       }
       return '';
     })() : '';
-    const readBtn = `<button class="read-aloud-btn" type="button" onclick="event.stopPropagation();readAloudStep(this)" title="Read this step aloud" aria-label="Read aloud">&#x1F50A;</button>`;
+    const readBtn = `<button class="read-aloud-btn" type="button" onclick="event.stopPropagation();readAloudStep(this)" title="Read this step aloud" aria-label="Read aloud">${READ_ALOUD_IDLE_HTML}</button>`;
     const doneKey = `${w.id}-${ns}-${i}`;
     const isDone = completed[doneKey] === true;
     const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${isDone ? '&#x2713; Done' : 'Mark done'}</button></div>`;

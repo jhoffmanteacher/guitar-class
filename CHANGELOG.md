@@ -5,6 +5,21 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-02 — A cleaner, more polished look
+
+### Changed
+- The whole site got a visual refresh so it looks sharper and reads the same on
+  every device — school computer, Chromebook, phone, or home laptop. Text now
+  uses each device's built-in system font instead of one that only some computers
+  had installed, so nothing looks "off" depending on where you sign in.
+- The purple header is now a single, consistent shade that matches the accent
+  colors used throughout the app, and it sits under a subtle shadow so the page
+  feels a little more like an app.
+- The **Listen** (read-aloud) and **Print this set** buttons now use crisp icons
+  that match the Tuner, Timer, and Metronome buttons, instead of stray emoji.
+- Card and divider lines are a touch crisper on lower-resolution screens like
+  Chromebooks, so everything stays clearly outlined.
+
 ## 2026-07-02 — Refreshed the songs you'll play all semester
 
 ### Added
