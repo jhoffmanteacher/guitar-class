@@ -128,6 +128,26 @@ SETS.push(
             ]
           }
             ]
+          },
+          {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — Watchtower, strummed for real: play Am · G · F (small F), four beats of down-up strumming per chord at 60 BPM, the pendulum swinging through both changes. You\'ve got it when: two full laps where the strum hand never stops — not even when the F lands late. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this song has grown with you since Unit 1</a>.',
+                hint: 'Same loop you strummed in Module 5 — the new skill is that your right hand is now the drummer. The chord change happens BETWEEN strums.',
+                stuck: 'Drop to just Am ↔ G until the strum survives that change, then add the F back.',
+                levelUp: 'Switch every 2 beats instead of 4, or count "1 + 2 + 3 + 4 +" out loud the whole time.',
+                skills: [2, 5]
+              },
+              {
+                text: 'Challenge — Knockin\' on Heaven\'s Door: play G · D · Am · C, four beats of down-up each at 60 BPM — the record is slow too, so this song never rushes you. You\'ve got it when: one full lap with even volume on downs and ups and every change landing on beat 1.',
+                hint: 'Dylan built this song to support a voice — soft, even 8ths are the whole job. If an upstroke snags, let the pick graze just the top 3–4 strings.',
+                stuck: 'Loop the G → D change alone — it\'s the only move where every finger travels.',
+                levelUp: 'Sing or hum a line over your own strumming, or bump to 70 BPM with the 8ths still even.',
+                skills: [2, 4],
+                response: { type: 'short', prompt: 'Personal record — full laps in a row with the strum hand never stopping. Your count today?', placeholder: 'e.g. 3 — beat it next class' }
+              }
+            ]
           }
         ]
       }
@@ -307,6 +327,30 @@ SETS.push(
             skills: [4, 5, 6],
             response: { type: 'short', prompt: 'Personal record — D-DU-UDU through the G→D change, win at 60 BPM then +10 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 80 — beat it next class' }
           }
+            ]
+          },
+          {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — I\'m Yours, verse: play G · D · Em · C with D-DU-UDU, one bar per chord at 60 BPM. This is THE song this pattern is famous for. You\'ve got it when: the verse loop start to finish with the pattern identical on every chord — even when a chord lands imperfect, the groove holds.',
+                hint: 'The pattern IS the song here. If it breaks at a change, the fix is Challenge 3\'s trick: jump chords on the last upstroke of the bar.',
+                stuck: 'Play the loop with one strum per bar until the changes are clean, then layer the pattern back on.',
+                levelUp: 'Accent beats 2 and 4 for the record\'s bounce, or push to 75 BPM.',
+                skills: [4, 5],
+                playSeq: { label: '"I\'m Yours" verse roots (G · D · Em · C)', bpm: 70, notes: [43, 50, 40, 48] }
+              },
+              {
+                text: 'Challenge — Oye Mi Amor, verse: the verse rides Bm · G — use the small Bm (top four strings, no barre) and play one bar of each with D-DU-UDU at 60 BPM. You\'ve got it when: four laps with the pattern unbroken and beats 2 and 4 accented so it pushes like the record. <a href="tabs/oye-mi-amor.html#layer-4" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
+                hint: 'The small Bm is the training-wheels version — the full barre Bm arrives in Module 7. For now the pattern matters more than the shape.',
+                stuck: 'Loop just the G → Bm change with one strum per bar until the landing is clean, then add the pattern.',
+                levelUp: 'Lean into the up-strums a little — that extra offbeat push is the Latin feel.',
+                skills: [3, 5],
+                chords: [
+                  { name: 'Bm', chord: [[6,'x'],[5,'x'],[4,4,'4'],[3,4,'3'],[2,3,'2'],[1,2,'1']], position: 2 }
+                ],
+                response: { type: 'short', prompt: 'Which fought you more — the small Bm shape, or keeping the pattern through the change?', placeholder: 'e.g. the Bm — my pinky keeps missing fret 4' }
+              }
             ]
           }
         ]
@@ -500,6 +544,26 @@ SETS.push(
             hint: 'Am–G–C fits A minor pentatonic; a major-key progression fits major pentatonic. This is the payoff: the scale you learned in Module 4 lives on top of the chords you strum here. Leave space — silence is part of a solo.',
             playSeq: { label: 'Backing roots — Am · G · C', bpm: 70, notes: [45, 43, 48] }
           }
+            ]
+          },
+          {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — Watchtower, two ways: play Am · G · F with a soft folk strum for 8 bars, then the same loop rock-style — dig in, accent the downs — for 8 bars, no break at the switch. You\'ve got it when: someone listening can tell the exact bar the feel changed — Dylan\'s version becoming Hendrix\'s, live from your chair. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: five layers deep and still growing</a>.',
+                hint: 'You heard exactly this in Module 1 — acoustic Dylan vs. electric Hendrix. Same chords, same tempo; ONLY your strum hand changes.',
+                stuck: 'Make the switch on beat 1 of a new bar and drill just the 2-bar seam where folk becomes rock.',
+                levelUp: 'Add the reggae chop as a third 8-bar section — three eras of the same song.',
+                skills: [5, 6],
+                response: { type: 'short', prompt: 'Which feel suited Watchtower better to your ear — folk or rock — and why?', placeholder: 'e.g. rock — the accents make the loop feel dangerous' }
+              },
+              {
+                text: 'Challenge — Three Little Birds, reggae chop: play A · D · E with up-strums only on the "+", one bar each at 70 BPM. You\'ve got it when: two laps where every hit is an offbeat — then play along with the record and disappear into it.',
+                hint: 'Your hand still travels down on every number — the pick just misses on purpose. The record is your metronome here; Marley\'s band never rushes.',
+                stuck: 'Mute the strings and chop the offbeat rhythm alone until it feels natural, then add the chords.',
+                levelUp: 'Clip each up-strum short with a quick fretting-hand mute — the crisp "chk" of a real reggae chop.',
+                skills: [3, 4]
+              }
             ]
           }
         ]

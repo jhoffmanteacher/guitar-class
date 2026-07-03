@@ -482,11 +482,10 @@ per-layer self-rating buttons), not an in-app view. The same build added
 renderer, and rewrote Module 5 Set 3's song challenge around Oye Mi Amor with an
 E-chord preview (Jonathan's call, 2026-07-03; the old Country Roads / Stand By Me
 challenge is gone, though both remain as Choice songs in the songs list).
-**Open follow-ups:** possible future Song Journey pages for Modules 6–8 picks once
-their Take It to a Song sections exist (all current thread songs are covered — see
-below) · broader supplementary-song decisions for the site (waiting on Jonathan's
-curriculum map). *Closed 2026-07-03: Firestore wiring for the rating buttons and
-module links to the SNA layer anchors both shipped.*
+**Open follow-ups:** broader supplementary-song decisions for the site (waiting on
+Jonathan's curriculum map). *Closed 2026-07-03: Firestore wiring for the rating
+buttons · module links to the SNA layer anchors · M6–8 Take It to a Song sections
+(see below) — all shipped.*
 **Watchtower Song Journey — ✅ done 2026-07-03:** second page,
 `tabs/all-along-the-watchtower.html`, same 5-layer pattern (Listen Dylan-vs-Hendrix ·
 bass line 5-3-1-3 · power chords A5-G5-F5-G5 · Am pentatonic Pattern 1 solo · open
@@ -508,6 +507,20 @@ accordingly). Same Firestore rating save under `songRatings.<page-slug>`. Wired:
 challenge) + `journeyUrl` on every songs-list entry for these songs M2–M8 (layer
 anchors where the entry maps to a layer; page top for beyond-the-page entries: SCOM
 M7×2, Oye M5 Set 4 showcase). All five thread songs now have journey pages.
+**M6–8 Take It to a Song — ✅ done 2026-07-03:** all 9 practice stations got the
+section (M2–5 pattern; placed before Station Wrap-Up in M7/M8, appended last in M6
+whose wrap-ups live at the computer station; in M7 Set 3 it sits before the 🌶️
+stretch-goal section). Songs used are each set's existing Core songs, thread songs
+first: M6S1 Watchtower down-up + Knockin' on Heaven's Door · M6S2 I'm Yours +
+Oye verse w/ small Bm (D-DU-UDU) · M6S3 Watchtower folk→rock (Dylan→Hendrix callback)
++ Three Little Birds reggae chop · M7S1 SNA real rhythm from TAB · M7S2 SCOM verse as
+one sliding E-shape (D fr10 · C fr8 · G fr3, high-frets-are-easier teaching point) ·
+M7S3 Oye full-barre Bm (x24432) + Watchtower all-barres (Am = E-shape minor fr5,
+matches m7w3-s6's gotItWhen) · M8S1 "the cure" first p-i-m-a on Am→C · M8S2 "the cure"
+verse p-i-m-a-m-i (Am·C·F) · M8S3 Let It Be fingerpicked (journey Layer 4 of 4).
+Steps reference existing set skills only — **no skills added, so `MODULE_MANIFEST`
+skillCounts unchanged.** Thread-song steps carry 🧵 journey links (layer anchors where
+they map: Oye M6→#layer-4, M7→#layer-5, Let It Be M8→#layer-4; page top otherwise).
 
 ---
 

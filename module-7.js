@@ -138,6 +138,19 @@ SETS.push(
             ]
           },
           {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — Seven Nation Army, the real rhythm: you\'ve played this riff since Unit 1 — but always one even note per beat. Listen to the recording, find the riff\'s TAB with rhythm stems (Songsterr shows them clearly), and play it the way the record actually goes — long notes held, quick notes tucked between beats. You\'ve got it when: you can play along with the record and stay locked with it. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: the riff that started it all</a>.',
+                hint: 'The frets haven\'t changed since Module 1 — only the rhythm reading is new. That\'s the whole point of this set: same notes, real music.',
+                stuck: 'Clap the record\'s rhythm first, no guitar. Add the frets back only once your hands know the shape of the timing.',
+                levelUp: 'Play it palm-muted for the verse and open for the chorus — rhythm AND dynamics from the same TAB.',
+                skills: [2, 6],
+                response: { type: 'short', prompt: 'What did the rhythm stems tell you that your ear had missed?', placeholder: 'e.g. the last three notes are quicker than I\'d been playing them' }
+              }
+            ]
+          },
+          {
             title: 'Station Wrap-Up',
             steps: [
               {
@@ -327,6 +340,23 @@ SETS.push(
                 levelUp: 'Add A (fret 5) and cycle F→G→A, or run it with a down-up strum.',
                 skills: [4, 6],
                 response: { type: 'short', prompt: 'Personal record — clean F↔G barre changes in 60 seconds. Your count today?', placeholder: 'e.g. 8 — beat it next class' }
+              }
+            ]
+          },
+          {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — Sweet Child O\' Mine, one-shape verse: the verse is D · C · G — and with the E-shape barre that\'s ONE shape sliding: D at fret 10, C at fret 8, G at fret 3. Play one clean strum per chord, then two bars each at 60 BPM. You\'ve got it when: all three ring clean — and the high frets prove the point: barres get EASIER up the neck. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is the Module 7 finale</a>.',
+                hint: 'Start at the top — win D at fret 10 where the strings are loosest, then walk the same shape down. Name each chord by its string-6 root: fret 10 = D, fret 8 = C, fret 3 = G.',
+                stuck: 'Play just the roots on string 6 first (10 → 8 → 3) so the slide distances live in your arm, then add the barre on top.',
+                levelUp: 'Run the loop with a down-up strum, or hum the verse melody over your own chords.',
+                skills: [5, 6],
+                chords: [
+                  { name: 'D (E-shape)', chord: [[6,10,'1'],[5,12,'3'],[4,12,'4'],[3,11,'2'],[2,10,'1'],[1,10,'1']], position: 10 },
+                  { name: 'C (E-shape)', chord: [[6,8,'1'],[5,10,'3'],[4,10,'4'],[3,9,'2'],[2,8,'1'],[1,8,'1']], position: 8 },
+                  { name: 'G (E-shape)', chord: [[6,3,'1'],[5,5,'3'],[4,5,'4'],[3,4,'2'],[2,3,'1'],[1,3,'1']], position: 3 }
+                ]
               }
             ]
           },
@@ -526,6 +556,32 @@ SETS.push(
             levelUp: 'Push the tempo, or accent beats 2 and 4 for a backbeat feel.',
             skills: [5, 6]
           }
+            ]
+          },
+          {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — Oye Mi Amor, full barre Bm: the verse\'s small Bm graduates today. Index bars fret 2 (strings 5–1), and you play Bm · G one bar each with your D-DU-UDU strum at 60 BPM. You\'ve got it when: four laps where the full Bm rings as clean as the G — the song\'s last training wheel is off. <a href="tabs/oye-mi-amor.html#layer-5" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
+                hint: 'It\'s built on the same fret-2 bar as your B major — the minor version just re-stacks the fingers on top. The index tip mutes string 6 for you.',
+                stuck: 'Whenever the barre buzzes, fall back to the small Bm for a lap, then trade back — alternate small and full until full wins.',
+                levelUp: 'Play the chorus (A · D · E · D) as barres too — the whole song with no open chords.',
+                skills: [1, 2],
+                chords: [
+                  { name: 'Bm (full barre)', chord: [[6,'x'],[5,2,'1'],[4,4,'3'],[3,4,'4'],[2,3,'2'],[1,2,'1']], position: 2 }
+                ]
+              },
+              {
+                text: 'Challenge — Watchtower, no open chords: play Am · G · F entirely as barres — Am is the E-shape minor at fret 5 (the bar plus your open-Em fingers), G and F are your E-shape majors at frets 3 and 1. Two beats per chord at 60 BPM. You\'ve got it when: four laps using ONLY barre chords — proof you no longer need the open shapes. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: from Layer 1 to every chord a barre</a>.',
+                hint: 'Minor E-shape = the major shape minus the middle finger; the bar covers the note it left behind. Read the roots on string 6: fret 5 = A, fret 3 = G, fret 1 = F.',
+                stuck: 'Win each chord alone (pluck all 6 strings), then pair Am → G, and add the F last — it\'s the tightest squeeze.',
+                levelUp: 'Run it with D-DU-UDU, or alternate one lap of open chords with one lap of barres and hear the difference.',
+                skills: [5, 6],
+                chords: [
+                  { name: 'Am (E-shape)', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,5,'1'],[2,5,'1'],[1,5,'1']], position: 5 }
+                ],
+                response: { type: 'short', prompt: 'Personal record — clean all-barre Watchtower laps in a row. Your count today?', placeholder: 'e.g. 2 — the F still buzzes' }
+              }
             ]
           },
           {

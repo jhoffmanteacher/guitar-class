@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-03 — "Take It to a Song" comes to Modules 6–8
+
+### Added
+- **Every practice station in Modules 6–8 now ends with a "Take It to a Song"
+  challenge** — the same real-song payoff Modules 2–5 already have. Each one
+  puts the skill you just drilled straight into a song from the class song
+  thread:
+  - **Module 6 (strumming):** strum Watchtower and Knockin' on Heaven's Door
+    with steady down-up 8ths; put the D-DU-UDU pattern on I'm Yours and the
+    Oye Mi Amor verse; then play Watchtower two ways — folk like Dylan, rock
+    like Hendrix — and give Three Little Birds the reggae chop.
+  - **Module 7 (TAB & barre chords):** play Seven Nation Army with the
+    record's real rhythm; slide one E-shape barre through the whole Sweet
+    Child O' Mine verse; graduate Oye Mi Amor to the full barre Bm; and play
+    Watchtower with no open chords at all.
+  - **Module 8 (fingerpicking):** fingerpick "the cure" from your very first
+    p-i-m-a plucks to its full verse loop, and turn Let It Be into a
+    fingerpicked lullaby.
+  Every challenge has the usual "you've got it when", Stuck?, and Level-up
+  help, and the thread-song ones link to their 🧵 Song Journey layer.
+
 ## 2026-07-03 — Three more Song Journeys: every thread song now has one
 
 ### Added

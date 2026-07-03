@@ -130,6 +130,23 @@ SETS.push(
             ]
           },
           {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — "the cure", first touch: fret Am and pluck p (A string) · i · m · a, one note per beat at 60 BPM — that soft broken-chord sound IS the verse feel of "the cure". Then change to C: your thumb\'s bass note doesn\'t even move — C\'s root lives on the A string too. You\'ve got it when: four clean p-i-m-a laps on Am and four on C, every note even.',
+                hint: 'Olivia\'s verse is fingerpicked for exactly this reason — soft and close. Wrist stays arched; only the fingers move.',
+                stuck: 'Run p-i-m-a on open strings first (no chord at all), then add the Am under it.',
+                levelUp: 'Add the F: the thumb travels to the D string — and now you have the song\'s whole verse loop (Am · C · F).',
+                skills: [5, 6],
+                playSeq: { label: '"the cure" feel — p-i-m-a on Am', bpm: 60, notes: [45, 57, 60, 64] },
+                chords: [
+                  { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
+                  { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 }
+                ]
+              }
+            ]
+          },
+          {
             title: 'Station Wrap-Up',
             steps: [
               {
@@ -332,6 +349,20 @@ SETS.push(
             ]
           },
           {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — "the cure", verse: play the 6-note p-i-m-a-m-i pattern over the verse loop — Am · C · F, one bar each at 60 BPM. Thumb: A string for Am and C, D string for F; i-m-a never leave G-B-e. You\'ve got it when: one full lap with the pattern unbroken at both changes.',
+                hint: 'Two of the three bass notes live on the SAME string — only the F asks the thumb to travel. The fingers never move at all.',
+                stuck: 'Loop Am → C until the thumb finds fret 3 without looking, then add the F.',
+                levelUp: 'Hum the melody over your own picking — this is the actual sound of the record.',
+                skills: [4, 6],
+                playSeq: { label: '"the cure" verse bass roots — Am · C · F', bpm: 60, notes: [45, 48, 53] },
+                response: { type: 'short', prompt: 'Which change broke the pattern more — Am→C or C→F?', placeholder: 'e.g. C→F — the thumb overshoots the D string' }
+              }
+            ]
+          },
+          {
             title: 'Station Wrap-Up',
             steps: [
               {
@@ -525,6 +556,19 @@ SETS.push(
             levelUp: 'Add the i-pluck on every "+", or carry the alternating thumb through a C → Am change without it stumbling.',
             skills: [2, 5]
           }
+            ]
+          },
+          {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — Let It Be, fingerpicked: play the four-chord verse — C · G · Am · F — with the 6-note pattern over each chord, one bar each at 60 BPM. Thumb roots: C and Am on the A string, G on the low E, F on the D string. You\'ve got it when: a full verse with the pattern unbroken — the same song you strummed in Units 5 and 6, now a lullaby. <a href="tabs/let-it-be.html#layer-4" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 4</a>.',
+                hint: 'Anticipate like Challenge 2 taught you: the fretting hand starts moving on the pattern\'s 6th note, so beat 1 always lands ready.',
+                stuck: 'Strum each chord once to check it rings, then loop just C → G — the only change where the thumb crosses to the low E.',
+                levelUp: 'Add a pinch (p + a together) on beat 1 of each chord and hear the verse bloom, or sing it over your own picking.',
+                skills: [1, 3],
+                playSeq: { label: '"Let It Be" verse bass roots — C · G · Am · F', bpm: 60, notes: [48, 43, 45, 53] }
+              }
             ]
           },
           {
