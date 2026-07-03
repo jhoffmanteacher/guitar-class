@@ -446,7 +446,8 @@ on localhost, then on the live site: load, go offline (DevTools), reload.
 ## PHASE 6 — Feature builds  *(start only after Phase 3 is complete; can interleave with Phase 4)*
 
 > These are new capabilities, not content passes. **Phase 6 is now closed: 6.2 shipped;
-> 6.1 (looper) and 6.3 (Song Journey) were both dropped.** (Historical ordering rationale:
+> 6.1 (looper) was dropped; 6.3 (Song Journey) was dropped here but later revived —
+> see 6.3 below.** (Historical ordering rationale:
 > 6.1 was meant to unblock the improv/strumming challenges in 3.5/3.7, but those ship fine
 > with teacher-played / queued / recorded backing instead.) Every session here was a "big
 > change" — per the working rules, each showed one working example (mock-up or single wired
@@ -472,8 +473,19 @@ value is stored, so PR shows the latest number (no fake trend). Verified locally
 regression, and non-teacher denial all pass. **Files:** `index.html`, `app.js`,
 `styles.css`.
 
-### ~~Session 6.3 — 🎸 Song Journey view~~ (dropped)
-~~Song Journey view~~ — cut 2026-06-13 before any work; not wanted. Do not build.
+### Session 6.3 — 🎸 Song Journey view (dropped 2026-06-13, revived 2026-07 as static pages)
+Cut 2026-06-13 before any work, then revived in the **"Take It to a Song" build**
+(branch `station-c-songs`, merged to main 2026-07-03) in a lighter form: static
+per-song pages under `tabs/` (first: `tabs/seven-nation-army.html`, 5 layers with
+per-layer self-rating buttons), not an in-app view. The same build added
+"Take It to a Song" sections to Modules 2–5, stacked (two-note) TAB columns in the
+renderer, and rewrote Module 5 Set 3's song challenge around Oye Mi Amor with an
+E-chord preview (Jonathan's call, 2026-07-03; the old Country Roads / Stand By Me
+challenge is gone, though both remain as Choice songs in the songs list).
+**Open follow-ups:** remaining 7 Song Journey pages (SNA pattern approved at merge) ·
+Firestore wiring for the rating buttons (currently a `setSkillLevel` TODO) · nothing
+in the modules links to the SNA page's layer anchors yet · broader
+supplementary-song decisions for the site.
 
 ---
 
