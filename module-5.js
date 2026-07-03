@@ -452,10 +452,10 @@ SETS.push(
             response: { type: 'short', placeholder: 'Which Bm version are you starting with (partial barre or full)? What\'s the hardest part for you?' }
           },
           {
-            text: 'Listen to "Country Roads" by John Denver or "Sweet Home Alabama." Can you hear when the D and A chords arrive? Tap along and try to feel the chord changes.',
-            hint: 'These songs use chords from Group 2. Your ear already knows what these chords sound like — you\'re just learning to play them now.',
+            text: 'Listen to "Oye Mi Amor" by Maná — the chorus rides on A, D, and E. Can you hear when the D and A chords arrive? Tap along and try to feel the chord changes.',
+            hint: 'A and D are Group 2 chords you\'re learning right now. Your ear already knows what they sound like — you\'re just learning to play them.',
             skills: [5],
-            response: { type: 'short', placeholder: 'Which song did you listen to? Describe one moment where you clearly heard a chord change.' }
+            response: { type: 'short', placeholder: 'Describe one moment where you clearly heard a chord change.' }
           },
           {
             text: 'Station Wrap-Up — take a beat to reflect: you now know two whole chord groups. Which Group 2 chord (D, A, Em, Bm) feels furthest from automatic, and what specifically trips it up?',
@@ -498,25 +498,33 @@ SETS.push(
             ]
           },
           {
-            title: 'Play a full song',
-            steps: [
-          {
-            text: 'Challenge 3 — Play a Song (give it a go!): play through "Country Roads" or "Stand By Me" (G–Em–C–D) with a simple down-strum. No score — if a change is rough, isolate just those two chords.',
-            hint: 'You now have enough chords to play hundreds of songs! If a chord change is rough, slow down and isolate just those two chords — don\'t practice the whole song broken.',
-            skills: [5, 6]
-          }
-            ]
-          },
-          {
             title: 'One-Minute Changes — beat your record',
             steps: [
               {
-                text: 'Challenge 4 — One-Minute Changes (G ↔ D): set the ⏱ Timer for 60 seconds and switch G→D→G→D as many times as you can — only CLEAN changes count. This is a cross-group jump, so it\'s a real test. You\'ve got it when: type your count below and aim to beat your Set 2 number.',
+                text: 'Challenge 3 — One-Minute Changes (G ↔ D): set the ⏱ Timer for 60 seconds and switch G→D→G→D as many times as you can — only CLEAN changes count. This is a cross-group jump, so it\'s a real test. You\'ve got it when: type your count below and aim to beat your Set 2 number.',
                 hint: 'G and D both sit up near the high strings — let your whole hand travel as one shape rather than placing finger by finger.',
                 stuck: 'Park your hand over G, then practice just dropping into D and back. Slow until each one rings, then let speed come.',
                 levelUp: 'Run Em↔A instead, or add a down-up strum on each chord.',
                 skills: [5, 6],
                 response: { type: 'short', prompt: 'Personal record — clean G↔D changes in 60 seconds. Your count today?', placeholder: 'e.g. 20 — beat it next class' }
+              }
+            ]
+          },
+          {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — Oye Mi Amor, first pass: the chorus is A · D · E · D, and two of those chords are already yours. E is officially a Set 4 chord — just-enough for now: it\'s the Em you know plus your index finger on string 3, fret 1. Play the loop, four beats per chord at 60 BPM with a down-strum. You\'ve got it when: two loops with every change landing on beat 1.',
+                hint: 'A and D are the Group 2 chords you\'ve drilled all set — the only new thing here is one finger. E gets the full treatment in Set 4; today is a preview.',
+                stuck: 'Fret Em, strum it, then add your index finger to string 3, fret 1 — that\'s E. Do that swap five times before running the loop.',
+                levelUp: 'Drop to two beats per chord at the same 60 BPM, or hum the chorus hook over your strumming.',
+                skills: [5, 6],
+                chords: [
+                  { name: 'D', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 },
+                  { name: 'A', chord: [[6,'x'],[5,0],[4,2,'1'],[3,2,'2'],[2,2,'3'],[1,0]], position: 0 },
+                  { name: 'E', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,1,'1'],[2,0],[1,0]], position: 0 }
+                ],
+                response: { type: 'short', prompt: 'After this preview, what\'s your first impression of the E chord?', placeholder: 'e.g. easier than F — it\'s just Em plus one finger' }
               }
             ]
           },
@@ -540,6 +548,9 @@ SETS.push(
       { name: '"Seven Nation Army" — The White Stripes', meta: 'Adapted to D–A–Em strummed version', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
+      { name: '"Oye Mi Amor" — Maná', meta: 'Chorus loop A–D–E · strummed first pass (E previewed)', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
+        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
       { name: '"Stand By Me" — Ben E. King', meta: 'G–Em–C–D · great Group 1↔2 cross-group song', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=hwZNL7QVJjE',
         tutorialUrl: 'https://www.youtube.com/watch?v=TXLElO_YYiY' },
@@ -589,10 +600,10 @@ SETS.push(
           notes: [50, 45, 50, 45] } },
       { id: 'm5w3-s5', text: 'Connect Group 1 and Group 2 chords in a song (e.g., G to D, Am to Em)',
         gotItWhen: 'you can play through a real song that mixes Group 1 and Group 2 chords without slowing down at the cross-group changes.',
-        practice: { type: 'playSeq', label: 'Country Roads progression (G · Em · C · D roots)', bpm: 70,
+        practice: { type: 'playSeq', label: 'Cross-group progression (G · Em · C · D roots)', bpm: 70,
           notes: [43, 40, 48, 50] } },
-      { id: 'm5w3-s6', text: 'Play a full song using Group 2 chords with a strum pattern',
-        gotItWhen: 'you can play "Country Roads" or "Stand By Me" from start to finish with a steady down-up strum pattern at 70 BPM.' }
+      { id: 'm5w3-s6', text: 'Play the "Oye Mi Amor" chorus using Group 2 chords with a strum pattern',
+        gotItWhen: 'you can loop the "Oye Mi Amor" chorus (A · D · E · D) with a steady down-strum at 60 BPM, every change landing on beat 1.' }
     ]
   },
 
