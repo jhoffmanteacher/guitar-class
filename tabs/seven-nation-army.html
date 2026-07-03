@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seven Nation Army — Song Journey · Mr. Hoffman's Guitar Class</title>
+<meta name="description" content="One song, five layers: follow Seven Nation Army from listening to open chords as your skills grow.">
+<style>
+  :root{
+    --bg:#ffffff; --bg2:#f6f7f9; --bg3:#eef0f3;
+    --text:#1c2230; --text2:#5b6472; --text3:#98a0ad;
+    --border:#e3e6eb; --border2:#d3d8df;
+    --l1:#7c5cbf; --l2:#2f7fbf; --l3:#c2703d; --l4:#3f9464; --l5:#b04a6e;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;padding:20px 16px 64px}
+  .wrap{max-width:760px;margin:0 auto}
+  a{color:var(--l2)}
+  .crumb{font-size:13px;color:var(--text2);margin-bottom:18px}
+  header.song{border-bottom:1px solid var(--border2);padding-bottom:18px;margin-bottom:8px}
+  .song-kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
+  h1{font-size:30px;font-weight:650;margin:4px 0 2px}
+  .song-artist{font-size:15px;color:var(--text2)}
+  .thread-badge{display:inline-block;margin-top:10px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:12px;background:var(--bg3);color:var(--text2)}
+  .journey-note{font-size:14px;color:var(--text2);margin:16px 0 26px;max-width:60ch}
+  .songmap{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:30px;font-size:14px}
+  .songmap b{font-weight:600}
+  .layer{border:1px solid var(--border);border-radius:12px;margin-bottom:22px;overflow:hidden}
+  .layer-head{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);border-bottom:1px solid var(--border)}
+  .layer-num{width:26px;height:26px;border-radius:50%;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+  .layer h2{font-size:17px;font-weight:600}
+  .layer-unit{margin-left:auto;font-size:12px;color:var(--text2);white-space:nowrap}
+  .layer-body{padding:16px}
+  .layer-body p{font-size:14.5px;margin-bottom:12px;max-width:62ch}
+  .l1 .layer-num{background:var(--l1)} .l2 .layer-num{background:var(--l2)}
+  .l3 .layer-num{background:var(--l3)} .l4 .layer-num{background:var(--l4)}
+  .l5 .layer-num{background:var(--l5)}
+  pre.tab{background:#20242c;color:#e8eaee;border-radius:8px;padding:14px 16px;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;line-height:1.5;overflow-x:auto;margin-bottom:12px}
+  pre.tab .hl{color:#ffd479}
+  .playline{font-size:14.5px;background:var(--bg2);border-left:3px solid var(--border2);padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:12px}
+  .branch{font-size:13.5px;color:var(--text2);margin-bottom:6px}
+  .branch b{color:var(--text)}
+  .rate{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--border)}
+  .rate-label{font-size:13px;color:var(--text2)}
+  .rate button{font:inherit;font-size:13px;padding:5px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--bg);cursor:pointer}
+  .rate button.on{background:var(--text);color:var(--bg);border-color:var(--text)}
+  .rate-key{font-size:12px;color:var(--text3)}
+  footer{margin-top:36px;font-size:12.5px;color:var(--text3);border-top:1px solid var(--border);padding-top:14px}
+  @media (max-width:480px){ h1{font-size:24px} pre.tab{font-size:11.5px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="crumb"><a href="../index.html">&larr; Back to class site</a></div>
+
+  <header class="song">
+    <div class="song-kicker">Song Journey</div>
+    <h1>Seven Nation Army</h1>
+    <div class="song-artist">The White Stripes</div>
+    <span class="thread-badge">&#x1F9F5; Thread song — it appears in all 5 units</span>
+  </header>
+
+  <p class="journey-note">One song, five layers. Every unit this semester, you come back to this song with a new skill — and it gets bigger every time. Find your current layer below. Fast finisher? Scroll down one layer and try the next.</p>
+
+  <div class="songmap">
+    <b>Song map:</b> Intro / Verse (riff &times;4, quiet) &rarr; Chorus (same riff, big) &rarr; Solo section (riff keeps looping underneath).
+    The whole song is one seven-note idea: <b>E &middot; E &middot; G &middot; E &middot; D &middot; C &middot; B</b>. Everything below is that idea at a different depth.
+    <br><em style="color:var(--text3);font-size:13px">All layers are teaching arrangements at 60 BPM — simplified for learning, not note-for-note transcriptions.</em>
+  </div>
+
+  <!-- LAYER 1 -->
+  <section class="layer l1" id="layer-1">
+    <div class="layer-head"><span class="layer-num">1</span><h2>Listen</h2><span class="layer-unit">Unit 1</span></div>
+    <div class="layer-body">
+      <p>Before you play a note, hear what makes this riff work: it repeats, it moves in one direction (down), and it leaves space. Listen once for the riff, once for the drums, once for how the chorus gets bigger without adding new notes.</p>
+      <div class="playline"><b>Do it:</b> listen to the song once through. Count how many times the riff repeats before the first chorus.</div>
+      <div class="branch"><b>Respond:</b> is the guitar sound clean or distorted? Does it change between verse and chorus?</div>
+      <div class="branch"><b>Connect:</b> name one other song built on a short repeating riff.</div>
+      <div class="rate" data-layer="1">
+        <span class="rate-label">Rate this layer:</span>
+        <button type="button" onclick="rate(this)">1</button>
+        <button type="button" onclick="rate(this)">2</button>
+        <button type="button" onclick="rate(this)">3</button>
+        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAYER 2 -->
+  <section class="layer l2" id="layer-2">
+    <div class="layer-head"><span class="layer-num">2</span><h2>Single Notes</h2><span class="layer-unit">Unit 2</span></div>
+    <div class="layer-body">
+      <p>The riff lives in two homes. You learned it first on the low E string (easy reach, one octave down). At true pitch it sits on the A string — that version sounds like the record.</p>
+<pre class="tab">Where you started — low E string (octave down)
+        B    B    D    B    A    G    F#
+e |--------------------------------------|
+B |--------------------------------------|
+G |--------------------------------------|
+D |--------------------------------------|
+A |--------------------------------------|
+E |--7----7----10---7----5----3----2-----|</pre>
+<pre class="tab">True pitch — A string
+        E    E    G    E    D    C    B
+e |--------------------------------------|
+B |--------------------------------------|
+G |--------------------------------------|
+D |--------------------------------------|
+A |--7----7----10---7----5----3----2-----|
+E |--------------------------------------|</pre>
+      <div class="playline"><b>Play it:</b> one note per beat at <b>60 BPM</b>, both positions, chart-free. Say the note names out loud — they change between positions even though the moves don't.</div>
+      <div class="branch"><b>Stuck?</b> Two halves: E&nbsp;E&nbsp;G&nbsp;E, then D&nbsp;C&nbsp;B. Join them when each is automatic.</div>
+      <div class="branch"><b>Level up:</b> alternate laps between the two positions without stopping.</div>
+      <div class="rate" data-layer="2">
+        <span class="rate-label">Rate this layer:</span>
+        <button type="button" onclick="rate(this)">1</button>
+        <button type="button" onclick="rate(this)">2</button>
+        <button type="button" onclick="rate(this)">3</button>
+        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAYER 3 -->
+  <section class="layer l3" id="layer-3">
+    <div class="layer-head"><span class="layer-num">3</span><h2>Power Chords</h2><span class="layer-unit">Unit 3</span></div>
+    <div class="layer-body">
+      <p>Same riff you played as single notes — now every root becomes a two-string power chord, one shape sliding along the A string.</p>
+<pre class="tab">        E5   E5   G5   E5   D5   C5   B5
+e |----------------------------------------|
+B |----------------------------------------|
+G |----------------------------------------|
+D |--<span class="hl">9</span>----<span class="hl">9</span>----<span class="hl">12</span>---<span class="hl">9</span>----<span class="hl">7</span>----<span class="hl">5</span>----<span class="hl">4</span>-----|
+A |--7----7----10---7----5----3----2-----|
+E |----------------------------------------|</pre>
+      <div class="playline"><b>Play it:</b> one chord per riff note at <b>60 BPM</b>, every string of every chord ringing clean. Palm-mute the verse, open up for the chorus.</div>
+      <div class="branch"><b>Stuck?</b> Play roots-only (your Layer 2 line) and add the second string back one chord at a time.</div>
+      <div class="branch"><b>Level up:</b> &#x25D0; Same trick on &ldquo;the cure&rdquo; — gentler song, same shapes.</div>
+      <div class="rate" data-layer="3">
+        <span class="rate-label">Rate this layer:</span>
+        <button type="button" onclick="rate(this)">1</button>
+        <button type="button" onclick="rate(this)">2</button>
+        <button type="button" onclick="rate(this)">3</button>
+        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAYER 4 -->
+  <section class="layer l4" id="layer-4">
+    <div class="layer-head"><span class="layer-num">4</span><h2>Pentatonic Solo</h2><span class="layer-unit">Unit 4</span></div>
+    <div class="layer-body">
+      <p>The riff is in E minor, so E minor pentatonic fits over every bar. Start with three notes only — Rule of 3 — and let space do half the work.</p>
+<pre class="tab">Your three starting notes — E minor pentatonic, open position
+        E         G         A
+e |----------------------------------|
+B |----------------------------------|
+G |----------------------------------|
+D |----------------------------------|
+A |--------------------0-------------|
+E |--0---------3---------------------|</pre>
+      <div class="playline"><b>Play it:</b> loop the riff in your head (or with a partner) and improvise 4 bars on those three notes. End every phrase on E — that's home.</div>
+      <div class="branch"><b>Stuck?</b> Quarter notes only, two-beat phrases, two-beat rests.</div>
+      <div class="branch"><b>Level up:</b> move the same shape to the 12th fret for the high &ldquo;solo voice&rdquo; register.</div>
+      <div class="rate" data-layer="4">
+        <span class="rate-label">Rate this layer:</span>
+        <button type="button" onclick="rate(this)">1</button>
+        <button type="button" onclick="rate(this)">2</button>
+        <button type="button" onclick="rate(this)">3</button>
+        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- LAYER 5 -->
+  <section class="layer l5" id="layer-5">
+    <div class="layer-head"><span class="layer-num">5</span><h2>Open Chords</h2><span class="layer-unit">Unit 5</span></div>
+    <div class="layer-body">
+      <p>The campfire version. The riff's notes become a chord loop you can strum and sing over — a teaching arrangement built from chords you know.</p>
+<pre class="tab">Campfire loop — 2 beats per chord · 60 BPM
+|  Em   Em  |  G    Em  |  D    C   |  C    (rest) |
+   1    2      3    4      1    2      3    4</pre>
+      <div class="playline"><b>Play it:</b> down-strums, two beats per chord, every change landing on its beat. Hum the riff over the top — same notes, bigger sound.</div>
+      <div class="branch"><b>Stuck?</b> Strum only beat 1 of each chord and travel on the silent beats.</div>
+      <div class="branch"><b>Level up:</b> split strum (down &middot; down-up) on each chord, or trade loops with a partner playing Layer 3 power chords — together you're the whole band.</div>
+      <div class="rate" data-layer="5">
+        <span class="rate-label">Rate this layer:</span>
+        <button type="button" onclick="rate(this)">1</button>
+        <button type="button" onclick="rate(this)">2</button>
+        <button type="button" onclick="rate(this)">3</button>
+        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>Mr. Hoffman's Guitar Class &middot; Song Journey &middot; teaching arrangement for classroom use &middot; 60 BPM throughout</footer>
+</div>
+
+<script>
+/* Layer self-rating — visual only for now.
+   TODO: wire to Firestore via the app's setSkillLevel(...) pattern
+   (auth state + per-student doc), matching how My Practice Routine
+   check-ins save. Until then the highlight is session-only. */
+function rate(btn){
+  var group = btn.closest('.rate');
+  group.querySelectorAll('button').forEach(function(b){ b.classList.remove('on'); });
+  btn.classList.add('on');
+}
+</script>
+</body>
+</html>
