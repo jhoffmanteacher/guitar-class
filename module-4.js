@@ -154,7 +154,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Solo over Seven Nation Army: loop the SNA riff in your head (or have a partner play it) and improvise using ONLY these three notes — low E, G, and open A — for four bars. Rule of 3: short ideas, space between them. You\'ve got it when: four bars of intentional phrases — not a stream of notes — that land back on E.',
+                text: 'Challenge — Solo over Seven Nation Army: loop the SNA riff in your head (or have a partner play it) and improvise using ONLY these three notes — low E, G, and open A — for four bars. Rule of 3: short ideas, space between them. You\'ve got it when: four bars of intentional phrases — not a stream of notes — that land back on E. <a href="tabs/seven-nation-army.html#layer-4" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
                 hint: 'E is home base for this song. End every phrase on it and you\'ll always sound like you meant it.',
                 stuck: 'Play just E and G, trading two-beat phrases with silence: play two beats, rest two beats.',
                 levelUp: 'Add the open D string as a fourth note, or trade fours with a partner playing the riff.',
@@ -210,7 +210,7 @@ SETS.push(
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Solo over D–C–G · G major / E minor pentatonic', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Solo using E minor pentatonic (E & A strings)', type: 'Core', core: true,
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'Solo using E minor pentatonic (E & A strings)', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"12-bar blues in E"', meta: 'E minor pentatonic — classic improv context', type: 'Choice', core: false, level: 1,
@@ -627,7 +627,7 @@ SETS.push(
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
       { name: '"Happy Birthday"', meta: 'Full melodic reharmonization using pentatonic', type: 'Core', core: true,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'E minor pentatonic solo', type: 'Core', core: true,
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'E minor pentatonic solo', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Purple Haze" — Jimi Hendrix', meta: 'E pentatonic box — full pattern', type: 'Choice', core: false, level: 3,

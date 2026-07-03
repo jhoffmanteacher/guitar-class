@@ -545,7 +545,7 @@ SETS.push(
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–Em–D–A chord group 2 adaptation', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Adapted to D–A–Em strummed version', type: 'Core', core: true,
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'Adapted to D–A–Em strummed version', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-5',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Oye Mi Amor" — Maná', meta: 'Chorus loop A–D–E · strummed first pass (E previewed)', type: 'Core', core: true,

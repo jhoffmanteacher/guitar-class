@@ -183,7 +183,7 @@ SETS.push(
             ] }
           },
           {
-            text: 'Preview the "Seven Nation Army" riff: click the note names below the TAB to hear how it should sound, then try just the first few notes to get the feel. You\'ll play the whole riff at the practice station.',
+            text: 'Preview the "Seven Nation Army" riff: click the note names below the TAB to hear how it should sound, then try just the first few notes to get the feel. You\'ll play the whole riff at the practice station. This song grows with you all semester — <a href="tabs/seven-nation-army.html#layer-1" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
             hint: 'Listen first, then match it — one note at a time.',
             response: { type: 'short', placeholder: 'How did the riff sound, and which note was hardest to find?' },
             tab: {

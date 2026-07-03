@@ -5,7 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
-## 2026-07-03 — Song Journey ratings now save
+## 2026-07-03 — Song Journey: easier to find, and ratings now save
+
+### Added
+- **The Seven Nation Army Song Journey page is now linked from the modules.**
+  Every Seven Nation Army challenge in Modules 1–4 ends with a "🧵 Song Journey"
+  link that jumps straight to the layer you're working on, and the song's entry
+  in each Songs list has a new 🧵 Song Journey button — so you can always see
+  where the song has been and where it's going next.
 
 ### Changed
 - The **rate-yourself buttons** on the Seven Nation Army Song Journey page now
