@@ -53,10 +53,21 @@ const MODULE_FILES = readdirSync(ROOT)
   .filter(f => /^module-\d+\.js$/.test(f))
   .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
+/* Song Journey pages aren't in the sw.js ASSETS precache list, but the SW
+   runtime-caches every same-origin page cache-first — so an edit to a tabs/
+   page only reaches returning students when CACHE_VERSION changes. Include
+   them in the fingerprint so that bump happens automatically. */
+let TAB_PAGES = [];
+try {
+  TAB_PAGES = readdirSync(join(ROOT, 'tabs'))
+    .filter(f => f.endsWith('.html')).sort().map(f => `tabs/${f}`);
+} catch { /* no tabs/ dir yet */ }
+
 const SHELL_FILES = [
   'index.html', 'styles.css', 'app.js', 'tuner.js', 'teacher.js', 'config-main.js',
   'firebase-config.js', 'manifest.json', 'icon.svg',
   ...MODULE_FILES,
+  ...TAB_PAGES,
 ];
 
 /* ════════════════════════════════════════════════════════════════════

@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Seven Nation Army — Song Journey · Mr. Hoffman's Guitar Class</title>
 <meta name="description" content="One song, five layers: follow Seven Nation Army from listening to open chords as your skills grow.">
+<!-- Same Firebase project + sign-in session as the class site (same origin),
+     so a student signed in there is already signed in here. Firestore SDK
+     loads later, only once we know someone is signed in. -->
+<script defer src="../firebase-config.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <style>
   :root{
     --bg:#ffffff; --bg2:#f6f7f9; --bg3:#eef0f3;
@@ -16,7 +22,8 @@
   body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;padding:20px 16px 64px}
   .wrap{max-width:760px;margin:0 auto}
   a{color:var(--l2)}
-  .crumb{font-size:13px;color:var(--text2);margin-bottom:18px}
+  .crumb{font-size:13px;color:var(--text2);margin-bottom:18px;display:flex;justify-content:space-between;gap:12px}
+  #save-msg{color:var(--text3);white-space:nowrap}
   header.song{border-bottom:1px solid var(--border2);padding-bottom:18px;margin-bottom:8px}
   .song-kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
   h1{font-size:30px;font-weight:650;margin:4px 0 2px}
@@ -51,7 +58,7 @@
 </head>
 <body>
 <div class="wrap">
-  <div class="crumb"><a href="../index.html">&larr; Back to class site</a></div>
+  <div class="crumb"><a href="../index.html">&larr; Back to class site</a><span id="save-msg"></span></div>
 
   <header class="song">
     <div class="song-kicker">Song Journey</div>
@@ -196,15 +203,93 @@ E |--0---------3---------------------|</pre>
 </div>
 
 <script>
-/* Layer self-rating — visual only for now.
-   TODO: wire to Firestore via the app's setSkillLevel(...) pattern
-   (auth state + per-student doc), matching how My Practice Routine
-   check-ins save. Until then the highlight is session-only. */
+/* ── Layer self-rating ──
+   Ratings save into the SAME Firestore doc the main app uses
+   (progress/{uid}), under songRatings.<song-id>.<layer> — so no new
+   collections and no security-rule changes. If the student isn't signed
+   in, or a school filter blocks the Firebase SDK, the highlight quietly
+   stays session-only (same behavior the page always had). */
+var SONG_ID = 'seven-nation-army';
+var fbUser = null, fbDb = null, saveTimer = null, dirty = false;
+
 function rate(btn){
   var group = btn.closest('.rate');
   group.querySelectorAll('button').forEach(function(b){ b.classList.remove('on'); });
   btn.classList.add('on');
+  queueSave();
 }
+
+function currentRatings(){
+  var out = {};
+  document.querySelectorAll('.rate').forEach(function(g){
+    var on = g.querySelector('button.on');
+    if(on) out[g.dataset.layer] = parseInt(on.textContent, 10);
+  });
+  return out;
+}
+
+function applyRatings(saved){
+  Object.keys(saved || {}).forEach(function(layer){
+    var g = document.querySelector('.rate[data-layer="' + layer + '"]');
+    if(!g) return;
+    g.querySelectorAll('button').forEach(function(b){
+      b.classList.toggle('on', parseInt(b.textContent, 10) === saved[layer]);
+    });
+  });
+}
+
+function setSaveMsg(t){ document.getElementById('save-msg').textContent = t; }
+
+/* Debounced save, mirroring the app's queueSave/flushSave pattern: a burst
+   of clicks becomes one write, and a failed write stays dirty so the next
+   click retries it. */
+function queueSave(){
+  if(!fbUser) return;
+  dirty = true;
+  setSaveMsg('Saving…');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(flushSave, 800);
+}
+
+function flushSave(){
+  if(!fbUser || !dirty) return;
+  dirty = false;
+  var payload = { songRatings: {} };
+  payload.songRatings[SONG_ID] = currentRatings();
+  fbDb.collection('progress').doc(fbUser.uid).set(payload, { merge: true })
+    .then(function(){ setSaveMsg('Saved ✓'); setTimeout(function(){ setSaveMsg(''); }, 2000); })
+    .catch(function(){ dirty = true; setSaveMsg('Save failed — check connection'); });
+}
+
+function loadFirestoreSdk(){
+  return new Promise(function(resolve, reject){
+    if(firebase.firestore){ resolve(); return; }
+    var s = document.createElement('script');
+    s.src = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js';
+    s.onload = resolve;
+    s.onerror = function(){ reject(new Error('Firestore SDK failed to load')); };
+    document.head.appendChild(s);
+  });
+}
+
+window.addEventListener('load', function(){
+  if(typeof firebase === 'undefined' || typeof firebaseConfig === 'undefined') return;
+  firebase.initializeApp(firebaseConfig);
+  firebase.auth().onAuthStateChanged(function(user){
+    if(!user){ setSaveMsg('Sign in on the class site to save your ratings'); return; }
+    loadFirestoreSdk().then(function(){
+      fbDb = firebase.firestore();
+      fbUser = user;
+      setSaveMsg('');
+      return fbDb.collection('progress').doc(user.uid).get();
+    }).then(function(doc){
+      var data = doc && doc.exists ? doc.data() : null;
+      applyRatings(data && data.songRatings && data.songRatings[SONG_ID]);
+    }).catch(function(){ /* offline first read is fine — clicks still queue saves */ });
+  });
+  // Best-effort flush if the tab closes inside the debounce window.
+  window.addEventListener('pagehide', function(){ if(dirty){ clearTimeout(saveTimer); flushSave(); } });
+});
 </script>
 </body>
 </html>

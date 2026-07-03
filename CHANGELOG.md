@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-03 — Song Journey ratings now save
+
+### Changed
+- The **rate-yourself buttons** on the Seven Nation Army Song Journey page now
+  **remember your answer**. If you're signed in on the class site, your 1–2–3
+  rating for each layer saves automatically (you'll see "Saved ✓" at the top)
+  and is highlighted again next time you open the page — on any device. Not
+  signed in? The page still works; it just tells you to sign in if you want
+  your ratings kept.
+
 ## 2026-07-03 — Every set now ends with a real song
 
 ### Added
