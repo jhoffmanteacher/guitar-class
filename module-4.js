@@ -151,6 +151,43 @@ SETS.push(
             ]
           },
           {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — Solo over Seven Nation Army: loop the SNA riff in your head (or have a partner play it) and improvise using ONLY these three notes — low E, G, and open A — for four bars. Rule of 3: short ideas, space between them. You\'ve got it when: four bars of intentional phrases — not a stream of notes — that land back on E.',
+                hint: 'E is home base for this song. End every phrase on it and you\'ll always sound like you meant it.',
+                stuck: 'Play just E and G, trading two-beat phrases with silence: play two beats, rest two beats.',
+                levelUp: 'Add the open D string as a fourth note, or trade fours with a partner playing the riff.',
+                skills: [6],
+                tab: {
+                  caption: 'Your three allowed notes — E minor pentatonic, open position',
+                  notes: [
+                    { string: 'E', fret: 0, note: 'E', midi: 40 },
+                    { string: 'E', fret: 3, note: 'G', midi: 43 },
+                    { string: 'A', fret: 0, note: 'A', midi: 45 }
+                  ]
+                },
+                response: { type: 'short', prompt: 'Describe your best phrase in words — what made it feel finished?', placeholder: 'e.g. two quick notes then a long E' }
+              },
+              {
+                text: 'Challenge — Solo over Watchtower: the song\'s loop is Am · G · F · G — and A minor pentatonic Pattern 1 (the box you just learned) fits every bar of it. Improvise four bars using only the three notes marked below, then four more adding a fourth note of your choice from Pattern 1. You\'ve got it when: eight bars where every phrase starts or ends on A.',
+                hint: 'This is the same box from your Pattern 1 drill — you\'re not learning anything new, you\'re USING it. That\'s the whole point of today.',
+                stuck: 'Freeze the rhythm: only quarter notes, only the three marked notes, until an idea shows up on its own.',
+                levelUp: 'Start a phrase during the F bar and resolve it on the Am bar — that\'s real tension and release.',
+                skills: [6],
+                tab: {
+                  caption: 'Your three starting notes — Am pentatonic Pattern 1 · 5th position',
+                  notes: [
+                    { string: 'A', fret: 7, note: 'E', midi: 52 },
+                    { string: 'D', fret: 5, note: 'G', midi: 55 },
+                    { string: 'D', fret: 7, note: 'A', midi: 57 }
+                  ]
+                },
+                response: { type: 'short', prompt: 'Which chord in the loop was easiest to solo over, and which fought you?', placeholder: 'e.g. Am easy, F felt weird' }
+              }
+            ]
+          },
+          {
             title: 'Station Wrap-Up',
             steps: [
               {
@@ -352,6 +389,37 @@ SETS.push(
             skills: [7],
             playSeq: { label: 'Play all', bpm: 60, notes: [55, 57, 59, 60, 62, 64, 65] }
           }
+            ]
+          },
+          {
+            title: 'Take It to a Song',
+            steps: [
+              {
+                text: 'Challenge — Sweet Child O\' Mine, solo-section feel: the famous outro solo lives in E minor pentatonic. Improvise four bars in the open position, then move the same shape up to the 12th fret and play four more — same pattern, one octave up, instant "solo voice." You\'ve got it when: both registers, phrases with space, landing on E in each.',
+                hint: 'High on the neck IS the solo sound. Nothing about your ideas has to change — the register does the drama for you.',
+                stuck: 'Stay open-position and just VISIT the 12th fret for your last note of each phrase.',
+                levelUp: 'Slide between the two positions mid-phrase, or hold your longest note an extra bar and let it sing.',
+                skills: [5, 6],
+                tab: {
+                  caption: 'Same shape, two homes — E at fret 0 and fret 12',
+                  notes: [
+                    { string: 'E', fret: 0,  note: 'E', midi: 40 },
+                    { string: 'E', fret: 3,  note: 'G', midi: 43 },
+                    { string: 'A', fret: 0,  note: 'A', midi: 45 },
+                    { string: 'e', fret: 12, note: 'E', midi: 76 },
+                    { string: 'e', fret: 15, note: 'G', midi: 79 }
+                  ]
+                },
+                response: { type: 'short', prompt: 'Open position vs. 12th fret — which felt more like "your" sound?', placeholder: 'e.g. 12th fret — felt like a real solo' }
+              },
+              {
+                text: 'Challenge — Solo over "the cure": Olivia\'s song is soft — so your solo has to be too. Improvise eight bars in Am pentatonic Pattern 1 at a whisper: light pick, slow phrases, lots of space. You\'ve got it when: eight bars where the quietest note is as clean as your loudest.',
+                hint: 'Playing quietly is a skill, not a limitation. Every buzz and mistake hides at loud volume and shows at soft — this is an honesty check.',
+                stuck: 'Rule of 3 at half speed: three notes, whisper volume, one phrase per two bars.',
+                levelUp: 'Build one long crescendo across all eight bars — start at a whisper, end singing, never harsh.',
+                skills: [5, 6],
+                response: { type: 'short', prompt: 'Rate your quiet control 1–3, and name one note that buzzed when soft.', placeholder: 'e.g. 2 — the G on the D string buzzes' }
+              }
             ]
           },
           {
