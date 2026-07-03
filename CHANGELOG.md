@@ -5,7 +5,29 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
-## 2026-07-03 — See where you are and how far you've come
+## 2026-07-03 — Every set now ends with a real song
+
+### Added
+- **"Take It to a Song" sections in Modules 2–5.** Almost every practice station
+  now finishes by putting the skill you just drilled into an actual song from the
+  class song thread — naming and playing the Seven Nation Army riff in time,
+  sliding power chords through All Along the Watchtower, improvising over a
+  backing groove, and strumming Let It Be and Oye Mi Amor with full open chords.
+  Each one tells you exactly what "you've got it" sounds like, and has the usual
+  Stuck? and Level-up help.
+- **TABs can now show two-note power chords** — both fret numbers stacked in one
+  column, and the ▶ Play button sounds both notes together, so what you hear
+  matches what you play.
+- **A new Song Journey page for Seven Nation Army** — one page that walks the
+  song in five layers, from the bare riff up to the full arrangement, with a
+  rate-yourself button on each layer. It's the first of its kind; more songs
+  will get their own journey pages soon.
+
+### Changed
+- **Module 5, Set 3's song challenge is now Oye Mi Amor.** Instead of a song
+  using chords you hadn't fully learned together, you now take the chorus
+  (A · D · E) for a first spin — with a sneak preview of the E chord: it's just
+  the Em you already know plus one finger. E still gets its full lesson in Set 4.
 
 ### Added
 - A row of **8 little progress bars** now sits next to the Module dropdown — one
