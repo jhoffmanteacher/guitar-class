@@ -35,6 +35,15 @@ Notes:
 - The site is a light PWA: `sw.js` caches the static shell so it loads offline.
   If the version didn't change, returning students would keep the OLD cached
   site — which is exactly what the automatic bump prevents.
+- **Editing a module's skills? Update `MODULE_MANIFEST` in `config-main.js`.**
+  The Module dropdown counts and the 8-segment progress strip read each module's
+  skill total from `MODULE_MANIFEST` (`skillCount` = number of set-level skills;
+  `skillIdRe` = regex matching that module's skill ids) *without* loading the
+  module file. So if you **add or remove a `skills:` entry** in a `module-N.js`,
+  bump that module's `skillCount` to match. The `checks.mjs` validation step
+  above verifies this automatically and **fails the push** if they drift (it also
+  checks that `skillIdRe` matches every skill id and doesn't collide with another
+  module), so you can't forget — but fix `config-main.js` when it flags you.
 - Doc-only pushes (`*.md`) don't touch the shell, so the script correctly makes
   no bump — but it's still safe (and fast, with `--skip-links`) to run.
 - Flags: `--skip-links` skips the slow link check (fast validate + bump only);

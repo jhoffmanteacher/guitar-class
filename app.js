@@ -1164,17 +1164,97 @@ function readAloudStep(btn){
   synth.speak(utter);
 }
 
+// Per-module completion from the student's own progress, derived from the
+// manifest (skillCount + skillIdRe) so it needs NO module data file loaded.
+// state: 'none' (untouched) · 'partial' (some got-it) · 'complete' (all got-it).
+function moduleCompletion(m){
+  const total = m.skillCount || 0;
+  if(!total) return { done:0, total:0, state:'none' };
+  const re = m._skillRe || (m._skillRe = new RegExp(m.skillIdRe));
+  let done = 0;
+  for(const k in progress){ if(progress[k]==='gotit' && re.test(k)) done++; }
+  if(done > total) done = total;
+  const state = done===0 ? 'none' : (done>=total ? 'complete' : 'partial');
+  return { done, total, state };
+}
+
 function populateModuleDropdown(){
   // Built from the lightweight manifest so we don't need every module's data
-  // file loaded just to list the modules.
+  // file loaded just to list the modules. Each option carries the student's
+  // done count; a ✓ appears only once every skill in the module is got-it.
+  // Untouched modules show just their name (no 0/N) — matches the "clean until
+  // started" treatment on the set pills and progress strip.
   const sel = document.getElementById('module-select');
+  const keep = sel.value;
   sel.innerHTML='';
   MODULE_MANIFEST.forEach(m=>{
     const opt = document.createElement('option');
     opt.value = m.num;
-    opt.textContent = `Module ${m.num} — ${m.name}`;
+    const { done, total, state } = moduleCompletion(m);
+    let tail = '';
+    if(state==='complete') tail = ` · ${total}/${total} ✓`;
+    else if(state==='partial') tail = ` · ${done}/${total}`;
+    opt.textContent = `Module ${m.num} — ${m.name}${tail}`;
     sel.appendChild(opt);
   });
+  if(keep) sel.value = keep;
+}
+
+// Wording for the progress-strip label, e.g. "2½ of 8 modules" (a module that's
+// partially done counts as a half).
+function fmtModuleProgress(complete, partial){
+  const val = complete + partial * 0.5;
+  const whole = Math.floor(val);
+  const half = (val - whole) >= 0.5;
+  const num = half ? (whole ? whole + '½' : '½') : String(whole);
+  return `${num} of ${MODULE_MANIFEST.length} modules`;
+}
+
+// The 8-segment "you are here / how far I've come" strip next to the Module
+// dropdown. Each segment is a real button that jumps to (and lazy-loads) its
+// module. Renders purely from manifest + progress — never forces a module load.
+function renderProgressStrip(){
+  const strip = document.getElementById('module-strip');
+  if(!strip) return;
+  strip.innerHTML='';
+  let complete = 0, partial = 0;
+  MODULE_MANIFEST.forEach(m=>{
+    const { done, total, state } = moduleCompletion(m);
+    if(state==='complete') complete++; else if(state==='partial') partial++;
+    const seg = document.createElement('button');
+    seg.type = 'button';
+    seg.className = 'mstrip-seg '+state+(m.num===lastModuleNum ? ' current' : '');
+    const word = state==='complete' ? 'complete'
+      : state==='partial' ? `in progress (${done} of ${total} skills)`
+      : 'not started';
+    seg.setAttribute('aria-label', `Module ${m.num} — ${m.name}, ${word}. Jump to module.`);
+    if(m.num===lastModuleNum) seg.setAttribute('aria-current','true');
+    seg.onclick = ()=>{ onModuleChange(m.num); saveProgress(); };
+    strip.appendChild(seg);
+  });
+  const label = document.getElementById('module-strip-label');
+  if(label) label.textContent = fmtModuleProgress(complete, partial);
+}
+
+// Footer "Report a problem" — build the mailto at click time so the body carries
+// wherever the student currently is (module + set). Returns true so the <a>'s
+// default action opens the student's mail client with it prefilled.
+function currentReportContext(){
+  const m = MODULE_MANIFEST.find(x=>x.num===lastModuleNum);
+  let loc = m ? `Module ${m.num} — ${m.name}` : `Module ${lastModuleNum||1}`;
+  if(lastSetId && String(lastSetId).startsWith('mr')){
+    loc += ', Module review';
+  } else {
+    const w = SETS.find(s=>s.id===lastSetId);
+    if(w) loc += `, ${w.label}`;   // module name already carries the topic
+  }
+  return loc;
+}
+function buildReportHref(a){
+  const subject = 'Guitar site — problem report';
+  const body = currentReportContext() + ':\n\n';
+  a.href = 'mailto:jhoffman@seq.org?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+  return true;
 }
 
 function isModuleReviewLocked(moduleNum){
@@ -1195,10 +1275,19 @@ async function onModuleChange(moduleNum, restoreSetId){
   const moduleSets = SETS.filter(w=>w.moduleNum===moduleNum);
   if(!moduleSets.length) return;   // load failed (e.g. offline + not precached)
   renderPills(moduleNum);
+  renderProgressStrip();   // refresh the "you are here" indicator
   const isReviewId = restoreSetId === `mr${moduleNum}` && MODULE_REVIEWS[moduleNum];
   const target = restoreSetId && (moduleSets.find(w=>w.id===restoreSetId) || isReviewId)
     ? restoreSetId : (moduleSets.find(w=>!w.locked)||moduleSets[0]).id;
   activateSet(target);
+}
+
+// Per-set completion tally from the student's own progress.
+// Returns {done, total}; total is 0 for sets with no trackable skills.
+function setCompletion(w){
+  const skills = (w.skills && w.skills.length) ? w.skills : [];
+  const done = skills.filter(s=>progress[s.id]==='gotit').length;
+  return { done, total: skills.length };
 }
 
 function renderPills(moduleNum){
@@ -1208,10 +1297,24 @@ function renderPills(moduleNum){
     const btn = document.createElement('button');
     btn.className='wpill'+(w.locked?' locked':'');
     btn.dataset.id=w.id;
-    btn.textContent=w.label;
-    if(!w.locked && w.skills && w.skills.length>0){
-      const done=w.skills.filter(s=>progress[s.id]==='gotit').length;
-      if(done<w.skills.length) btn.classList.add('incomplete');
+    const { done, total } = w.locked ? { done:0, total:0 } : setCompletion(w);
+    if(!w.locked && total>0 && done===total){
+      // All skills got-it: green treatment + leading ✓.
+      btn.classList.add('complete');
+      btn.innerHTML = `<span class="wpill-check" aria-hidden="true">✓</span>${w.label}`;
+      btn.setAttribute('aria-label', `${w.label} — all ${total} skills complete`);
+    } else if(!w.locked && done>0){
+      // Started but not finished: full name + a small fraction. Untouched sets
+      // stay clean (just the name) until the first skill is marked got-it.
+      btn.classList.add('incomplete');
+      const frac = document.createElement('span');
+      frac.className = 'wpill-frac';
+      frac.textContent = ` · ${done}/${total}`;
+      btn.textContent = w.label;
+      btn.appendChild(frac);
+      btn.setAttribute('aria-label', `${w.label} — ${done} of ${total} skills done`);
+    } else {
+      btn.textContent = w.label;
     }
     if(!w.locked) btn.onclick=()=>{ lastSetId=w.id; activateSet(w.id); saveProgress(); };
     c.appendChild(btn);
@@ -1948,6 +2051,10 @@ function toggleSkill(sid, wid, which){
   }
   renderPills(lastModuleNum);
   document.querySelectorAll('.wpill').forEach(b=>{if(b.dataset.id===wid)b.classList.add('active');});
+  // Live-update the module dropdown counts + progress strip so marking a skill
+  // reflects immediately without leaving the set.
+  populateModuleDropdown();
+  renderProgressStrip();
   saveProgress();
 }
 

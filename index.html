@@ -121,8 +121,9 @@ function googleTranslateElementInit(){
       <div class="module-select-wrap">
         <label class="module-select-label" for="module-select">Module</label>
         <select class="module-select" id="module-select" onchange="onModuleChange(this.value); saveProgress()"></select>
+        <div class="module-strip" id="module-strip" role="group" aria-label="Module progress — jump to a module"></div>
+        <span class="module-strip-label" id="module-strip-label"></span>
       </div>
-      <div class="sec-label" style="margin-top:12px">Select a set</div>
       <div class="week-pills" id="week-pills"></div>
       <div id="week-panels"></div>
       <div class="fab-group" id="fab-group" style="display:none">
@@ -230,6 +231,10 @@ function googleTranslateElementInit(){
       </div>
     </div>
   </div>
+  <footer class="student-footer">
+    <span class="sf-left">Sequoia HS Music · Mr. Hoffman</span>
+    <a class="sf-report" id="sf-report" href="mailto:jhoffman@seq.org" onclick="return buildReportHref(this)">Report a problem</a>
+  </footer>
 </div>
 <div id="teacher-app" style="display:none">
   <div class="t-main">

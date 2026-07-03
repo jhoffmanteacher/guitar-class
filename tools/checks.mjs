@@ -135,6 +135,39 @@ function validateModules() {
       { warn(`Module ${m.num} ("${m.name}") is in the dropdown manifest but has no Sets yet`); warnings++; }
   }
 
+  // The nav layer (progress strip, dropdown counts) reads per-module skill totals
+  // from MODULE_MANIFEST's skillCount + skillIdRe WITHOUT loading module files, so
+  // those two fields duplicate data that lives in the module files. Verify they
+  // still match the real set-skills — see the sync rule in CLAUDE.md.
+  const skillsByModule = new Map();     // moduleNum → [skill id, …]
+  for (const s of allSets) {
+    const n = Number(s.moduleNum);
+    if (!skillsByModule.has(n)) skillsByModule.set(n, []);
+    const ids = (Array.isArray(s.skills) ? s.skills : []).map(sk => sk && sk.id).filter(Boolean);
+    skillsByModule.get(n).push(...ids);
+  }
+  for (const m of manifest) {
+    if (!modulesWithSets.has(m.num)) continue;     // no sets yet (warned above)
+    const ids = skillsByModule.get(m.num) || [];
+    if (m.skillCount === undefined) { err(`Module ${m.num}: MODULE_MANIFEST is missing "skillCount"`); problems++; }
+    else if (ids.length !== m.skillCount)
+      { err(`Module ${m.num}: MODULE_MANIFEST skillCount=${m.skillCount} but module-${m.num}.js has ${ids.length} set-skills — update config-main.js`); problems++; }
+    if (m.skillIdRe === undefined) { err(`Module ${m.num}: MODULE_MANIFEST is missing "skillIdRe"`); problems++; continue; }
+    let re = null;
+    try { re = new RegExp(m.skillIdRe); }
+    catch { err(`Module ${m.num}: skillIdRe "${m.skillIdRe}" is not a valid regex`); problems++; }
+    if (re) {
+      const bad = ids.find(id => !re.test(id));
+      if (bad) { err(`Module ${m.num}: skillIdRe "${m.skillIdRe}" doesn't match skill id "${bad}"`); problems++; }
+      // A regex that also matches another module's ids would double-count at runtime.
+      for (const [other, otherIds] of skillsByModule) {
+        if (other === m.num) continue;
+        const clash = otherIds.find(id => re.test(id));
+        if (clash) { err(`Module ${m.num}: skillIdRe "${m.skillIdRe}" also matches Module ${other}'s skill "${clash}" — would double-count`); problems++; break; }
+      }
+    }
+  }
+
   if (problems === 0) ok(`${allSets.length} Sets across ${MODULE_FILES.length} modules — all valid`);
   return allSets;
 }

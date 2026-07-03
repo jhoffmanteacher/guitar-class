@@ -5,6 +5,29 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-03 — See where you are and how far you've come
+
+### Added
+- A row of **8 little progress bars** now sits next to the Module dropdown — one
+  per module, showing your own progress at a glance: solid green when you've got
+  every skill in a module, light green when you're partway, and plain when you
+  haven't started. Your current module is highlighted, and a running tally
+  ("2½ of 8 modules") sums it up. Each bar is clickable, so you can jump straight
+  to any module.
+- The **Module dropdown** now shows how many skills you've marked in each module,
+  e.g. "Module 5 — Open Chords · 7/24", with a ✓ once you've finished them all.
+- The **set buttons** (Set 1, Set 2…) now show your progress too: a green ✓ when
+  a set is fully done, or a small count like "· 3/6" once you've started it. These
+  update instantly as you mark skills — no need to reload.
+- A slim **footer** with a **Report a problem** link. It opens an email to
+  Mr. Hoffman already filled in with which module and set you're on, so you don't
+  have to explain where you were.
+
+### Changed
+- Tidied the top of the practice area — the set buttons now sit right under the
+  Module row (the redundant "Select a set" label is gone), giving a little more
+  room for the lesson itself on smaller screens.
+
 ## 2026-07-02 — A cleaner, more polished look
 
 ### Changed
