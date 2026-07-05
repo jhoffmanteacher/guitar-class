@@ -288,7 +288,13 @@ Same procedure each session. Do NOT start these until Jonathan has read
   listen-only cards + SNA card in Set 2; 60 BPM kept as practice-only (off the
   assessment bar); "the cure" full chords + lyric-review note; **My Practice
   Routine** ungraded check-in added (Week 1). checks.mjs green, pushed.
-- [ ] **Session C** — Module 2 fixes
+- [x] **Session C** — Module 2 fixes
+  ✅ 2026-07-05 — SNA re-tagged Choice→Core in both sets; "the cure" bassline
+  card added to Set 2; Oye Mi Amor added as a listen-only Core card in Set 1
+  (Latin representation, no invented U2 bassline); Happy Birthday Core→Supp
+  (consistency); **My Practice Routine** check-in added; Watchtower rehearsal
+  labeled in-class + s4 reworded to "sight-read a 2-bar TAB line". checks.mjs
+  green, pushed.
 - [ ] **Session D** — Module 3 fixes
 - [ ] **Session E** — Module 4 fixes
 - [ ] **Session F** — Module 5 fixes

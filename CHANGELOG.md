@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-05 — Module 2 lines up with the core song thread
+
+### Added
+- **Seven Nation Army is now a core song in Module 2**, not a side option — the
+  low-E riff you learn here is part of the thread you carry all semester.
+- **"the cure" joins Module 2** as a bassline you play on single notes, and
+  **Oye Mi Amor** shows up as a listen-ahead card so our Latin core song stays in
+  view even before you play it.
+- **The "My Practice Routine" weekly check-in continues into Module 2** — same
+  quick, never-graded plan, now asking how last week's practice actually went.
+
+### Changed
+- **The Watchtower bass riff is clearly labeled as your in-class assessment
+  piece**, so you know exactly what you'll be asked to play.
+- **"Happy Birthday" is framed as a supplemental song** rather than a core-thread
+  song (it's still a great melody to practice on E & A).
+
 ## 2026-07-05 — Module 1 tuned up to match the semester's song thread
 
 ### Added

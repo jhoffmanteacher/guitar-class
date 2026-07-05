@@ -187,6 +187,16 @@ SETS.push(
             ]
           },
           {
+            title: 'My Practice Routine — weekly check-in (never graded)',
+            steps: [
+              {
+                text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week\'s plan went. Same check-in as Module 1 — we keep it going all semester.',
+                hint: 'No wrong answers — even five minutes a day beats one long cram. You\'re building a habit you\'ll actually keep.',
+                response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went' }
+              }
+            ]
+          },
+          {
             title: 'Station Wrap-Up',
             steps: [
               {
@@ -200,7 +210,7 @@ SETS.push(
     },
 
     songs: [
-      { name: '"Happy Birthday"', meta: 'Identify which notes live on E & A strings', type: 'Core', core: true,
+      { name: '"Happy Birthday"', meta: 'Identify which notes live on E & A strings', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
       { name: '"Stand By Me" — Ben E. King', meta: 'Identify the bass line notes on E & A strings', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=hwZNL7QVJjE',
@@ -208,9 +218,12 @@ SETS.push(
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Identify bass notes of riff on low E string', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-2',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'E string riff — ear training & note ID', type: 'Choice', core: false, level: 1, journeyUrl: 'tabs/seven-nation-army.html#layer-2',
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'E string riff — ear training & note ID', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-2',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
+      { name: '"Oye Mi Amor" — Maná', meta: 'Listen ahead — our Latin core song, coming back later', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html',
+        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
+        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
       { name: '"Smoke on the Water" — Deep Purple', meta: 'E string — classic note recognition', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=Q2FzZSBD5LE',
         tutorialUrl: 'https://www.youtube.com/watch?v=QkT5yLP5VQA' },
@@ -496,8 +509,8 @@ SETS.push(
             }
           },
           {
-            text: 'Challenge 3 — Watchtower Bass Riff (your assessment piece): using the TAB, play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. You\'ve got it when: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html#layer-2" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-            hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A). Keep your thumb behind the neck. Let each note ring fully before the next. Drill it until you can run it with your eyes closed — that\'s the unit-end test.',
+            text: 'Challenge 3 — Watchtower Bass Riff (your in-class assessment piece): using the TAB, play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. You\'ve got it when: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html#layer-2" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+            hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A). Keep your thumb behind the neck. Let each note ring fully before the next. Drill it until you can run it with your eyes closed — that\'s what you play for the in-class unit-end assessment.',
             stuck: 'Loop just F–G (frets 1–3) until the finger change is clean, then add the A on fret 5.',
             levelUp: 'Run the whole riff with your eyes closed — that\'s the real "from memory" test.',
             skills: [1, 2, 4, 5, 6],
@@ -614,7 +627,7 @@ SETS.push(
     },
 
     songs: [
-      { name: '"Happy Birthday"', meta: 'Play full melody on E & A strings from TAB', type: 'Core', core: true,
+      { name: '"Happy Birthday"', meta: 'Play full melody on E & A strings from TAB', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Play verse bass roots on E & A strings · intro riff = Module 7 stretch goal', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html#layer-2',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
@@ -622,9 +635,13 @@ SETS.push(
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Play bass-note riff on low E string from memory', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-2',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'E string TAB — great first riff', type: 'Choice', core: false, level: 1, journeyUrl: 'tabs/seven-nation-army.html#layer-2',
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'E string TAB — great first riff', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-2',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Play the bassline as single-note roots (capo 1 · Am–C–Dm–F–G/B)', type: 'Core', core: true,
+        // lyric-review: explicit word in verse 3 — clean edit pending; don't feature the unedited original in a play-along step without flagging (SITE_ALIGNMENT 0.3)
+        originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
+        tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Smoke on the Water" — Deep Purple', meta: 'E string TAB — iconic beginner riff', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=Q2FzZSBD5LE',
         tutorialUrl: 'https://www.youtube.com/watch?v=QkT5yLP5VQA' },
@@ -656,8 +673,8 @@ SETS.push(
         gotItWhen: 'your index finger always plays fret 1, middle plays fret 2, ring plays fret 3, pinky plays fret 4 — without having to think about it.' },
       { id: 'm2w2-s3', text: 'Keep unused fingers hovering close to the strings',
         gotItWhen: 'your fingers that aren\'t pressing a note stay within about a centimeter of the strings, ready to drop down.' },
-      { id: 'm2w2-s4', text: 'Read a basic TAB (strings, fret numbers, left-to-right order)',
-        gotItWhen: 'you can look at a TAB, identify which string and fret each number refers to, and find those notes on your guitar.',
+      { id: 'm2w2-s4', text: 'Sight-read a basic 2-bar TAB line (strings, fret numbers, left-to-right order)',
+        gotItWhen: 'you can look at a short TAB line you haven\'t drilled, identify which string and fret each number refers to, and play it — that\'s sight-reading.',
         practice: { type: 'mc',
           prompt: 'In TAB, the bottom line is the low E string and the line above it is the A string. If you see a "3" on the A-string line, which note do you play?',
           choices: ['B', 'C', 'D', 'G'], answer: 1 } },

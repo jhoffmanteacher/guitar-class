@@ -139,7 +139,7 @@ not built here.
 
 ---
 
-## Module 2
+## Module 2 — ✅ resolved (Session C, 2026-07-05)
 ### A·1 Songs
 - [M2·songs] Seven Nation Army — site: `type:'Choice', core:false` in both `m2w1.songs` and `m2w2.songs` → it is one of the SIX core songs AND a featured core song for M2 (0.2); should be `type:'Core', core:true`.
 - [M2·songs] "the cure" — featured core song for M2 (0.2) and used in the `m2w2` "Take It to a Song" root-line step, but has NO entry in either set's `songs[]` list → missing from the song list.
