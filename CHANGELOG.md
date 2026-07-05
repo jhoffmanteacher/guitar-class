@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-05 — Module 1 tuned up to match the semester's song thread
+
+### Added
+- **Module 1 now introduces all of the semester's core songs on day one.** The
+  Set 1 listening list shows Seven Nation Army, Sweet Child O' Mine, Oye Mi Amor,
+  "the cure", and All Along the Watchtower as listen-and-explore cards, each
+  linking to its 🧵 Song Journey — so you meet the songs you'll grow into all
+  year right from the start.
+- **A "My Practice Routine" weekly check-in** — a quick, never-graded spot to jot
+  what you want to get better at, when and where you'll practice, and how last
+  week went. It's just for you, and it'll follow you into every module.
+
+### Changed
+- **Your first melodies are about clean, steady notes — not hitting a number.**
+  The open-string and "Happy Birthday" melodies no longer read as a 60-BPM test;
+  the metronome is there to help you stay steady, but the goal is notes that ring
+  clean. (60 BPM is still there to practice against when you're ready.)
+- **"Happy Birthday" is now framed as your first real song rather than a
+  core-thread song** — it's still one of the first things you'll play, just not
+  one of the songs the whole semester is built around.
+
 ## 2026-07-03 — "Take It to a Song" comes to Modules 6–8
 
 ### Added

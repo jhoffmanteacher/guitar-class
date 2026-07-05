@@ -282,7 +282,12 @@ Same procedure each session. Do NOT start these until Jonathan has read
 5. `node tools/checks.mjs` → Live Server test with Jonathan → push → check the
    box here AND mark the module's section in `AUDIT_REPORT.md` as `✅ resolved`.
 
-- [ ] **Session B** — Module 1 fixes
+- [x] **Session B** — Module 1 fixes
+  ✅ 2026-07-05 — Happy Birthday re-tagged Core→Supp; Set 1 now lists the full
+  featured core set (the cure, Watchtower, SNA, Sweet Child, Oye Mi Amor) as
+  listen-only cards + SNA card in Set 2; 60 BPM kept as practice-only (off the
+  assessment bar); "the cure" full chords + lyric-review note; **My Practice
+  Routine** ungraded check-in added (Week 1). checks.mjs green, pushed.
 - [ ] **Session C** — Module 2 fixes
 - [ ] **Session D** — Module 3 fixes
 - [ ] **Session E** — Module 4 fixes

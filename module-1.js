@@ -93,6 +93,16 @@ SETS.push(
             hint: 'It can be a song you want to play, a skill you want to build, or just a feeling.'
           }
             ]
+          },
+          {
+            title: 'My Practice Routine — weekly check-in (never graded)',
+            steps: [
+          {
+            text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to write your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week went (skip that part this first time). We\'ll revisit it every module to see how your plan is working.',
+            hint: 'No wrong answers — even five minutes a day beats one long cram. You\'re building a habit you\'ll actually keep.',
+            response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went' }
+          }
+            ]
           }
         ]
       }
@@ -100,14 +110,24 @@ SETS.push(
 
     songs: [
       { name: 'Student choice — any song that means something to them', meta: 'Listening & sharing day · No playing required', type: 'Choice', core: false },
-      { name: '"Happy Birthday"', meta: 'Course song thread — you\'ll play this all semester', type: 'Core', core: true,
-        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Listen — find the guitar in a current song (Am–C–F)', type: 'Core', core: true,
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Listen — find the guitar in a current song (capo 1 · Am–C–Dm–F–G/B)', type: 'Core', core: true,
+        // lyric-review: explicit word in verse 3 — clean edit pending; don't feature the unedited original in a play-along step without flagging (SITE_ALIGNMENT 0.3)
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-1',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' }
+        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'Listen — the low-E riff you\'ll build all semester', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-1',
+        originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
+        tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Listen — a riff-driven song we return to later', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html#layer-1',
+        originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
+        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
+      { name: '"Oye Mi Amor" — Maná', meta: 'Listen — our Latin core song, back all semester', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html#layer-1',
+        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
+        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
+      { name: '"Happy Birthday"', meta: 'First real song — open-string melody', type: 'Supp', core: false,
+        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' }
     ],
 
     assessment: {
@@ -136,7 +156,7 @@ SETS.push(
     unit: 'Module 1 · Introductions: You and The Guitar',
     title: 'Set 2',
     subtitle: 'Parts of the guitar · Posture · Tuning · First melody',
-    objective: 'I CAN name 5+ parts of the guitar, tune all 6 strings, and play a short open-string melody at 60 BPM.',
+    objective: 'I CAN name 5+ parts of the guitar, tune all 6 strings, and play a short open-string melody with clean, even notes.',
     skillFocus: 'Guitar parts, posture, and holding a pick · Naming and tuning the strings · Playing an open-string melody',
     handoutUrl: 'https://docs.google.com/document/d/1wKmQRDFbKsIci94PNRzoQkXoTVO6A017ELIZYvLtyCE/edit',
     comingSoon: false,
@@ -224,7 +244,7 @@ SETS.push(
             skills: [6]
           },
           {
-            text: 'Try "Happy Birthday" on open strings only — your teacher will give you the note sequence. Set your metronome to 60 BPM. You\'ve got it when: play it start to finish at 60 BPM without stopping.',
+            text: 'Try "Happy Birthday" on open strings only — your teacher will give you the note sequence. Practice with a metronome at 60 BPM to keep steady. You\'ve got it when: you can play it start to finish with clean notes and a steady pulse.',
             hint: 'Go slow. Clean notes matter more than speed right now.',
             skills: [6]
           },
@@ -251,7 +271,10 @@ SETS.push(
     },
 
     songs: [
-      { name: '"Happy Birthday"', meta: 'Play melody on open strings — first real song!', type: 'Core', core: true,
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'Play the low-E riff — your first core-thread riff', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-1',
+        originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
+        tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
+      { name: '"Happy Birthday"', meta: 'Play melody on open strings — first real song!', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
       { name: '"Sailor Song" — Gigi Perez', meta: 'Listen — fingerpicked vs. strummed guitar', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=1lrFsXkT_rM',
@@ -273,7 +296,7 @@ SETS.push(
     ],
 
     assessment: {
-      goal: 'Names 5+ parts of the guitar · Holds guitar with correct posture · Holds pick with correct grip · Tunes all 6 strings · Plays a short melody on the E string at 60 BPM',
+      goal: 'Names 5+ parts of the guitar · Holds guitar with correct posture · Holds pick with correct grip · Tunes all 6 strings · Plays a short melody on the E string with clean, steady notes',
       performance: 'Whole-class unison open-string exercise. Everyone plays together — no one is on the spot.',
       selfCheck: 'Can you name 5 parts of the guitar? Can you tune all 6 strings with a tuner? Can you play a single note cleanly with no buzzing?',
       standards: ['Pr.4a', 'Pr.5a']
@@ -298,8 +321,8 @@ SETS.push(
         gotItWhen: 'you can take an out-of-tune guitar and get all 6 strings to green on the tuner in under 2 minutes without help.',
         practice: { type: 'playSeq', label: 'Hear all 6 strings in tune', bpm: 50,
           notes: [40, 45, 50, 55, 59, 64] } },
-      { id: 'w2-s6', text: 'Play a short melody on the E string at 60 BPM',
-        gotItWhen: 'you can play the melody all the way through at 60 BPM with the metronome without stopping or losing the beat.',
+      { id: 'w2-s6', text: 'Play a short melody on the E string with clean, steady notes',
+        gotItWhen: 'you can play the melody all the way through with clean notes and a steady pulse — practice it at 60 BPM with the metronome to lock in the timing.',
         practice: { type: 'playSeq', label: 'E string warm-up melody', bpm: 60,
           notes: [40, 41, 43, 45, 43, 41, 40] } }
     ]
@@ -314,7 +337,7 @@ MODULE_REVIEWS[1] = {
     { id: 'mr1-s1', text: 'I can describe why I want to learn guitar', set: 'w1' },
     { id: 'mr1-s2', text: 'I can name 5+ parts of the guitar', set: 'w2' },
     { id: 'mr1-s3', text: 'I can tune all 6 strings with a tuner', set: 'w2' },
-    { id: 'mr1-s4', text: 'I can play a short melody on the E string at 60 BPM', set: 'w2' }
+    { id: 'mr1-s4', text: 'I can play a short melody on the E string with clean, steady notes', set: 'w2' }
   ],
   assessItems: [
     'Tune your guitar in 2 minutes',

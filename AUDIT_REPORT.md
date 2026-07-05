@@ -95,7 +95,7 @@ not built here.
 
 ---
 
-## Module 1
+## Module 1 — ✅ resolved (Session B, 2026-07-05)
 ### A·1 Songs
 - [M1·songs] "Happy Birthday" labeled `type:'Core', core:true` in w1 & w2 (meta "Course song thread — you'll play this all semester") → supplemental in map (0.1/0.3); it is NOT one of the six core songs.
 - [M1·songs] Featured core Seven Nation Army appears only in w2 *steps* (riff preview + Challenge 3) → absent from either set's `songs[]` list, so it never shows as a featured song card.
