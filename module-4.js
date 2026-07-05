@@ -742,7 +742,7 @@ MODULE_REVIEWS[4] = {
     { id: 'mr4-s3', text: 'I can position Pattern 1 as a MINOR scale (1st finger on root) or a MAJOR scale (4th finger on root) on demand from any named key', set: 'm4w1' },
     { id: 'mr4-s6', text: 'I can perform a hammer-on and a pull-off, and add an intentional vibrato on a sustained note', set: 'm4w2' },
     { id: 'mr4-s8', text: 'I can explain how major (1 2 3 5 6) and minor (1 ♭3 4 5 ♭7) pentatonic are built, that they\'re relative (same 5 notes), and where the ♭5 blue note goes', set: 'm4w3' },
-    { id: 'mr4-s10', text: 'I can perform my original 4-bar solo over a backing track from memory, working in at least one hammer-on, pull-off, or vibrato', set: 'm4w3' }
+    { id: 'mr4-s10', text: 'I can perform my original 4-bar solo over a backing track from memory — holding its pulse with no restarts, working in at least one hammer-on, pull-off, or vibrato, and naming my scale and phrasing strategy', set: 'm4w3' }
   ],
   assessItems: [
     'Position Pattern 1 for any named major or minor key and play it ascending and descending in time, with alternate picking',

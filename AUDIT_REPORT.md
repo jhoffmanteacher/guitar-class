@@ -17,7 +17,16 @@
 >
 > **How to read this:** skim the cross-module themes and the consolidated
 > questions first, then each module's `### Proposed fix list` — approving those
-> lists is what unlocks Sessions B–F. Nothing here is fixed yet.
+> lists is what unlocks Sessions B–F.
+>
+> **✅ STATUS (Session G, 2026-07-05): all fix passes complete.** Modules 1–5 each
+> show `✅ resolved` below. An independent per-module re-audit re-ran all four
+> A-checks against the fixed files: **every finding resolved, no regressions.**
+> Consciously deferred (not fixed in this plan): the Week-17 Semester Written
+> Check quiz module (separate roadmap item), the placeholder Choice-song lists
+> (pending Jonathan's curriculum-map swap), and the Sweet Child O' Mine E♭
+> original recording (awaiting standard-tuning play-along audio). The
+> per-module Proposed fix lists below are kept for the record.
 
 ---
 

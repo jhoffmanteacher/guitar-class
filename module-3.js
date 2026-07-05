@@ -491,7 +491,7 @@ SETS.push(
     },
 
     songs: [
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full power chord loop at 70+ BPM with metronome', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-3',
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full power chord loop · change on beat 1 at 60, hold 80 BPM', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-3',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"Oye Mi Amor" — Maná', meta: 'Electric riff → power-chord version', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html#layer-2',

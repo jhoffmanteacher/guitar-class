@@ -236,7 +236,7 @@ SETS.push(
             ]
           },
           {
-            title: 'Play a melody on the open strings at 60 BPM',
+            title: 'Play a melody on the open strings with clean, steady notes',
             steps: [
           {
             text: 'Challenge 2 — One Minute, Perfect Notes: pluck each open string low to high (E A D G B e) and say its name out loud. For one minute, count how many ring perfectly clean — no buzz, no muting. You\'ve got it when: all 6 strings ring clean — no buzz, no muting. Log your score out of 6 so you can beat it next time.',

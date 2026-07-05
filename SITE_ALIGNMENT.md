@@ -326,11 +326,19 @@ Same procedure each session. Do NOT start these until Jonathan has read
 
 ## SESSION G — Verification pass
 
-- [ ] **Session G** — Re-run the four A-checks against the fixed modules
+- [x] **Session G** — Re-run the four A-checks against the fixed modules
   (quick pass). Confirm `AUDIT_REPORT.md` shows every finding resolved or
   consciously deferred (each deferral needs a one-line reason). Run the full
   `node tools/checks.mjs` including the link check. Push. Report done to
   Jonathan with a short "what changed" summary he can skim.
+  ✅ 2026-07-05 — Independent per-module re-audit (fresh verifiers) re-ran all
+  four A-checks against the fixed Modules 1–5: **every finding RESOLVED, no
+  regressions, no new discrepancies.** Skill counts confirmed (9/11/12/20/24).
+  Applied 3 cosmetic tidies the verifiers caught (M1 Set-2 section title still
+  named 60 BPM; M3 Watchtower card meta still said "70+ BPM"; M4 mr4-s10 lacked
+  the phrasing-strategy/hold-pulse wording). Deferrals confirmed: Week-17 quiz
+  module (roadmap), placeholder Choice songs (pending curriculum swap), Sweet
+  Child E♭ (awaiting standard-tuning audio). Full checks.mjs green (253 links).
 
 ---
 
