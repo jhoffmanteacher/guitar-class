@@ -229,7 +229,7 @@ not built here.
 
 ---
 
-## Module 4
+## Module 4 — ✅ resolved (Session E, 2026-07-05)
 ### A·1 Songs
 - [M4·songs] **Oye Mi Amor is entirely ABSENT from all three sets** (song lists, TAB steps, "Take It to a Song") → per 0.2 it is a featured M4 core song that "always survives the cap," and per 0.7 it is the U4 Bm-pentatonic solo vehicle. Biggest song finding.
 - [M4·songs] `m4w2` + `m4w3` song lists label `"Happy Birthday"` as `type:'Core', core:true` → it is a U4 supplemental (reharmonization), NOT one of the six core songs → should be `type:'Supp'/core:false`.

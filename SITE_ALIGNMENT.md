@@ -303,7 +303,15 @@ Same procedure each session. Do NOT start these until Jonathan has read
   rhythm-reading skill (count stays 12); corrected Oye chorus to D5–A5–Bm5–G5;
   "the cure" now an optional stretch; Happy Birthday→Supp; My Practice Routine
   added. checks.mjs green, pushed.
-- [ ] **Session E** — Module 4 fixes
+- [x] **Session E** — Module 4 fixes
+  ✅ 2026-07-05 — Added Oye Mi Amor (absent before): Core card in all 3 sets +
+  a Bm-pentatonic solo step. New reusable app.js `backingUrl` feature (🎵 Backing
+  track button); embedded a verified jam track per core song (Am/Em/Bm by solo
+  key — also sidesteps Sweet Child E♭). Reframed Set 1 Ch.1 "assessment piece"→
+  skills-check warm-up; required phrasing strategy (call-and-response/four-phrase)
+  + "hold the pulse, no restarts" at the Set 3 assessment; Happy Birthday→Supp;
+  lyric notes; My Practice Routine added. Skill count unchanged (20). checks.mjs
+  green (253 links), pushed.
 - [ ] **Session F** — Module 5 fixes
 
 ---

@@ -1594,6 +1594,7 @@ function buildSongs(w){
     const vids = [];
     if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="loadSongVid('${w.id}',${i},'original')" title="Opens in YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:11px;opacity:0.6">&#x2197;</span></button>`);
     if(s.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="loadSongVid('${w.id}',${i},'tutorial')"><span class="svb-play">&#x25B6;</span>Tutorial</button>`);
+    if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="loadSongVid('${w.id}',${i},'backing')" title="Jam track to solo over"><span class="svb-play">&#x25B6;</span>&#x1F3B5; Backing track</button>`);
     // Song Journey pages are same-origin (tabs/*.html), opened in a new tab so app state stays put.
     if(s.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="One song, five layers">&#x1F9F5; Song Journey</button>`);
     const vidsEl = vids.length ? `<div class="song-vids">${vids.join('')}</div>` : '';
@@ -1613,13 +1614,13 @@ function loadSong(wid, idx){
 function loadSongVid(wid, idx, kind){
   const w=SETS.find(x=>x.id===wid); if(!w) return;
   const s=w.songs[idx]; if(!s) return;
-  const url = kind==='tutorial' ? s.tutorialUrl : s.originalUrl;
+  const url = kind==='tutorial' ? s.tutorialUrl : kind==='backing' ? s.backingUrl : s.originalUrl;
   if(!url) return;
   if(kind==='original'){
     window.open(url, '_blank', 'noopener');
     return;
   }
-  loadPanel('youtube', url, s.name, 'Solo tutorial');
+  loadPanel('youtube', url, s.name, kind==='backing' ? 'Backing track' : 'Solo tutorial');
 }
 
 /* ── Videos ── */

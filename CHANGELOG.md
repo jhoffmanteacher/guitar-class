@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-05 — Module 4 gets real backing tracks to solo over
+
+### Added
+- **Every core song now has a "🎵 Backing track" button** — one click and a jam
+  track in the right key starts playing, so you always have something to solo
+  over even when practicing solo. No more "have a partner play it."
+- **Oye Mi Amor joins Module 4** with its own B-minor pentatonic solo, so our
+  Latin core song is part of the improvising unit too.
+
+### Changed
+- **The Set 1 scale climb is now clearly a warm-up, not "the assessment."** Your
+  real Module 4 assessment is your improvised solo, played in time with the
+  backing track from start to finish.
+- **The end-of-unit solo now asks you to name your phrasing strategy** (call-and-
+  response or four-phrase) and to hold the track's pulse without restarting —
+  exactly what the solo is graded on.
+- **"Happy Birthday" is marked supplemental** rather than a core-thread song.
+
 ## 2026-07-05 — Module 3 power chords line up with the assessment
 
 ### Added

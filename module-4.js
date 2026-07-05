@@ -99,7 +99,7 @@ SETS.push(
             title: 'Play Pattern 1 with alternate picking',
             steps: [
           {
-            text: 'Challenge 1 — Pattern 1 Climb (your assessment piece): play Pentatonic Pattern 1 ascending at 60 BPM, one note per beat, alternate picking (down-up-down-up). You\'ve got it when: every note rings clean with no missed picks. This is the unison lap the whole class plays for the Set 1 check-off. Click "Play all" to hear it.',
+            text: 'Challenge 1 — Pattern 1 Climb (skills-check warm-up): play Pentatonic Pattern 1 ascending at 60 BPM, one note per beat, alternate picking (down-up-down-up). You\'ve got it when: every note rings clean with no missed picks. This is a warm-up drill — the unit assessment is your improvised solo, held to the backing track\'s pulse — but this is the unison lap the whole class plays for the Set 1 check-off. Click "Play all" to hear it.',
             hint: 'Go as slow as you need. Every note should ring cleanly. Say each note aloud as you play it to connect your ear to your fingers. Set the ⏱ Timer for 2 minutes and loop it.',
             stuck: 'Drop to the lowest two strings only (E and A) and climb just those until they\'re clean, then add the rest one string at a time.',
             levelUp: 'Play it descending too (top to bottom), or nudge the metronome to 80 BPM and keep the picking strictly down-up.',
@@ -142,7 +142,7 @@ SETS.push(
             title: 'Improvise your first solo',
             steps: [
           {
-            text: 'Challenge 3 — Rule of 3 (give it a go!): improvise using ONLY 3 notes of Pattern 1 for 4 bars over a backing track (a teacher-played Am, or one you queue up). Once those 3 feel like home, add a 4th note and play 4 more bars. No score — aim for short, intentional ideas with space between them.',
+            text: 'Challenge 3 — Rule of 3 (give it a go!): improvise using ONLY 3 notes of Pattern 1 for 4 bars over the Am backing track — hit ▶ &#x1F3B5; Backing track on the Watchtower or "the cure" card below (or use a teacher-played Am). Once those 3 feel like home, add a 4th note and play 4 more bars. No score — aim for short, intentional ideas with space between them.',
             hint: 'Limiting yourself to 3 notes forces you to make music with phrasing and rhythm, not note-count. A short, clear idea with silence around it beats a stream of notes.',
             stuck: 'Pick just 2 notes on one string and trade them back and forth, changing only the rhythm — that\'s already improvising.',
             levelUp: 'Add a 4th and 5th note, or end every phrase on the root (A) so each idea "arrives home."',
@@ -184,6 +184,32 @@ SETS.push(
                   ]
                 },
                 response: { type: 'short', prompt: 'Which chord in the loop was easiest to solo over, and which fought you?', placeholder: 'e.g. Am easy, F felt weird' }
+              },
+              {
+                text: 'Challenge — Solo over Oye Mi Amor: Maná\'s song lives in B minor, so B minor pentatonic Pattern 1 (root B, low E fret 7) is your box. Improvise four bars using only the three notes marked below, then four more adding a fourth note from the box. Hit ▶ &#x1F3B5; Backing track on the Oye Mi Amor card below to jam over. You\'ve got it when: eight bars where every phrase starts or ends on B. <a href="tabs/oye-mi-amor.html#layer-4" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
+                hint: 'It\'s the same Pattern 1 shape you drilled — just parked at the 7th fret with B as home. High up the neck already sounds like a solo.',
+                stuck: 'Trade just B and D (frets 7 and 10 on the low E) back and forth, changing only the rhythm, until an idea appears.',
+                levelUp: 'Slide the box up to the 12th-fret octave, or end every phrase on B so each idea arrives home.',
+                skills: [6],
+                tab: {
+                  caption: 'Your three starting notes — B minor pentatonic Pattern 1 · 7th position',
+                  notes: [
+                    { string: 'E', fret: 7,  note: 'B', midi: 47 },
+                    { string: 'E', fret: 10, note: 'D', midi: 50 },
+                    { string: 'A', fret: 7,  note: 'E', midi: 52 }
+                  ]
+                },
+                response: { type: 'short', prompt: 'Which note felt like "home" over the Bm track, and did your phrases land there?', placeholder: 'e.g. B at fret 7 — landed there most times' }
+              }
+            ]
+          },
+          {
+            title: 'My Practice Routine — weekly check-in (never graded)',
+            steps: [
+              {
+                text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week\'s plan went. Same check-in you\'ve kept since Module 1 — we keep it going all semester.',
+                hint: 'No wrong answers — even five minutes a day beats one long cram. You\'re building a habit you\'ll actually keep.',
+                response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went' }
               }
             ]
           },
@@ -203,16 +229,25 @@ SETS.push(
     songs: [
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Solo using Am pentatonic Pattern 1 over E & A strings', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Solo over the chorus · A minor pentatonic (Am–C–F)', type: 'Core', core: true,
+        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8',
+        backingUrl: 'https://www.youtube.com/watch?v=Vq8cApzOdy8' },
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Solo over the chorus · A minor pentatonic (capo 1 · Am–C–Dm–F–G/B)', type: 'Core', core: true,
+        // lyric-review: explicit word in verse 3 — clean edit pending (SITE_ALIGNMENT 0.3)
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
-        tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY',
+        backingUrl: 'https://www.youtube.com/watch?v=bs802M_jqtk' },
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Solo over D–C–G · G major / E minor pentatonic', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM',
+        backingUrl: 'https://www.youtube.com/watch?v=AFbg4SgEwBg' },
       { name: '"Seven Nation Army" — The White Stripes', meta: 'Solo using E minor pentatonic (E & A strings)', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
-        tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw',
+        backingUrl: 'https://www.youtube.com/watch?v=6WBzxOEH7hI' },
+      { name: '"Oye Mi Amor" — Maná', meta: 'Solo using Bm pentatonic Pattern 1 (root B, low E fret 7)', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html#layer-4',
+        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
+        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70',
+        backingUrl: 'https://www.youtube.com/watch?v=QLiLE_u_7QY' },
       { name: '"12-bar blues in E"', meta: 'E minor pentatonic — classic improv context', type: 'Choice', core: false, level: 1,
         tutorialUrl: 'https://www.youtube.com/watch?v=pJL2j2v6XZM' },
       { name: '"Pride and Joy" — Stevie Ray Vaughan', meta: 'E blues scale, E & A strings', type: 'Choice', core: false, level: 3,
@@ -361,7 +396,7 @@ SETS.push(
             title: 'Improvise a call-and-response phrase',
             steps: [
           {
-            text: 'Challenge 2 — Call & Response (your assessment piece): over a backing track (a teacher-played Am, or one you queue up), play a 2-bar idea (call), pause 1 bar, then answer with a 2-bar idea (response). You\'ve got it when: the call ends on a non-root note (unresolved) and the response lands on the root (arrives home).',
+            text: 'Challenge 2 — Call & Response (your assessment piece): over the Am backing track (▶ &#x1F3B5; Backing track on the Watchtower or "the cure" card below, or a teacher-played Am), play a 2-bar idea (call), pause 1 bar, then answer with a 2-bar idea (response). You\'ve got it when: the call ends on a non-root note (unresolved) and the response lands on the root (arrives home). This — call-and-response — is one of the two phrasing strategies you\'ll name at your Set 3 assessment.',
             hint: 'Think of it like a musical question and answer. The call feels unresolved; the response feels like it arrives somewhere.',
             stuck: 'Use just 2–3 notes for both call and response — end the response on A (the root) every time so the "answer" always lands home.',
             levelUp: 'Trade calls and responses with a partner (you call, they answer), or make the call longer than the response so the answer feels like a punchline.',
@@ -436,14 +471,21 @@ SETS.push(
     },
 
     songs: [
-      { name: '"Happy Birthday"', meta: 'One-note solo exercise over G major pentatonic pattern', type: 'Core', core: true,
+      { name: '"Happy Birthday"', meta: 'One-note solo exercise over G major pentatonic pattern (optional)', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full solo using Am pentatonic across 4 strings', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8',
+        backingUrl: 'https://www.youtube.com/watch?v=Vq8cApzOdy8' },
+      { name: '"Oye Mi Amor" — Maná', meta: 'Full solo using Bm pentatonic (root B, low E fret 7)', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html#layer-4',
+        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
+        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70',
+        backingUrl: 'https://www.youtube.com/watch?v=QLiLE_u_7QY' },
       { name: '"the cure" — Olivia Rodrigo', meta: 'Melodic solo over the verse · A minor pentatonic', type: 'Core', core: true,
+        // lyric-review: explicit word in verse 3 — clean edit pending (SITE_ALIGNMENT 0.3)
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
-        tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY',
+        backingUrl: 'https://www.youtube.com/watch?v=bs802M_jqtk' },
       { name: '"Comfortably Numb" — Pink Floyd', meta: 'Simplified solo — great for call-and-response phrasing', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=7kWl-ZGMwkQ',
         tutorialUrl: 'https://www.youtube.com/watch?v=tSgd3lAdM9o' },
@@ -594,7 +636,7 @@ SETS.push(
             title: 'Perform your original solo',
             steps: [
           {
-            text: 'Challenge 3 — Perform It (your assessment piece — give it a go!): play your 4-bar solo over a backing track ("All Along the Watchtower", "the cure", or one you queue up), working in at least one hammer-on, pull-off, or vibrato. No score — just tell a story, don\'t run scales.',
+            text: 'Challenge 3 — Perform It (your assessment piece — give it a go!): play your 4-bar solo over a core-song backing track — hit ▶ &#x1F3B5; Backing track on any core song card below (Watchtower, Oye Mi Amor, Seven Nation Army, Sweet Child, or "the cure") — working in at least one hammer-on, pull-off, or vibrato. You\'ve got it when: you hold the backing track\'s pulse start to finish with no restarts, and you can name your scale and your phrasing strategy (call-and-response or four-phrase). Tell a story, don\'t run scales.',
             hint: 'Include at least one technique (hammer-on, pull-off, or vibrato) in your solo. Don\'t just run scales — tell a story! No one to play for? Record yourself on the Chromebook over the backing track and watch it back. Playing for the camera counts, and the playback shows you exactly where to tighten up.',
             stuck: 'Drop the backing track and play your written 4 bars alone, slowly, until they\'re solid — then add the track back and just one technique.',
             levelUp: 'Perform it standing, play it for a partner or the class, or transpose your solo to E minor and play it from the open-string box.',
@@ -618,18 +660,27 @@ SETS.push(
     songs: [
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full solo over Am pentatonic — unit-end performance', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8',
+        backingUrl: 'https://www.youtube.com/watch?v=Vq8cApzOdy8' },
+      { name: '"Oye Mi Amor" — Maná', meta: 'Full solo over Bm pentatonic — unit-end performance', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html#layer-4',
+        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
+        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70',
+        backingUrl: 'https://www.youtube.com/watch?v=QLiLE_u_7QY' },
       { name: '"the cure" — Olivia Rodrigo', meta: 'Full solo · A minor pentatonic', type: 'Core', core: true,
+        // lyric-review: explicit word in verse 3 — clean edit pending (SITE_ALIGNMENT 0.3)
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
-        tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY',
+        backingUrl: 'https://www.youtube.com/watch?v=bs802M_jqtk' },
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Full solo over D–C–G · G major / E minor pentatonic', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
-      { name: '"Happy Birthday"', meta: 'Full melodic reharmonization using pentatonic', type: 'Core', core: true,
+        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM',
+        backingUrl: 'https://www.youtube.com/watch?v=AFbg4SgEwBg' },
+      { name: '"Happy Birthday"', meta: 'Full melodic reharmonization using pentatonic (optional)', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
       { name: '"Seven Nation Army" — The White Stripes', meta: 'E minor pentatonic solo', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
-        tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw',
+        backingUrl: 'https://www.youtube.com/watch?v=6WBzxOEH7hI' },
       { name: '"Purple Haze" — Jimi Hendrix', meta: 'E pentatonic box — full pattern', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=WGoDaYjdfSg',
         tutorialUrl: 'https://www.youtube.com/watch?v=gKhmARXdWGE' },
@@ -648,8 +699,8 @@ SETS.push(
     ],
 
     assessment: {
-      goal: 'Unit-end: Perform an original 4-bar solo over a teacher-chosen course song backing track using the full minor pentatonic box. Include at least one hammer-on, pull-off, or vibrato. Name the scale you used.',
-      performance: 'Individual: perform original 4-bar solo for the class or teacher. State which scale and root you used before playing.',
+      goal: 'Unit-end: Perform an original 4-bar solo over a course-song backing track, holding the track\'s pulse start to finish. Use the full minor pentatonic box, include at least one hammer-on, pull-off, or vibrato, and name both the scale AND your phrasing strategy (call-and-response or four-phrase).',
+      performance: 'Individual: perform original 4-bar solo for the class or teacher. State which scale, root, AND phrasing strategy (call-and-response or four-phrase) you used before playing.',
       selfCheck: 'Can you explain the difference between major and minor pentatonic? Can you add the blues note? Can you perform your original solo without looking at your notes?',
       standards: ['Cr.1a', 'Cr.2a', 'Pr.6a']
     },
@@ -675,8 +726,8 @@ SETS.push(
           choices: ['Which note feels like "home" (the root)', 'They use different hand shapes', 'A minor has 6 notes, C major has 5', 'They\'re played on different strings'], answer: 0 } },
       { id: 'm4w3-s6', text: 'Compose and write out a 4-bar original solo using scale degrees',
         gotItWhen: 'you have 4 bars written down in scale-degree numbers and you can play exactly what you wrote — not improvise something different.' },
-      { id: 'm4w3-s7', text: 'Perform the original solo over a course song backing track from memory',
-        gotItWhen: 'you can play your 4-bar solo all the way through with the backing track without checking your written notes.' }
+      { id: 'm4w3-s7', text: 'Perform the original solo over a course song backing track from memory, holding the track\'s pulse',
+        gotItWhen: 'you can play your 4-bar solo all the way through with the backing track — holding its pulse with no restarts — and name your scale and phrasing strategy (call-and-response or four-phrase).' }
     ]
   }
 
@@ -695,7 +746,7 @@ MODULE_REVIEWS[4] = {
   ],
   assessItems: [
     'Position Pattern 1 for any named major or minor key and play it ascending and descending in time, with alternate picking',
-    'Perform an original 4-bar solo over a course-song backing track using the minor pentatonic box, working in at least one hammer-on, pull-off, or vibrato — and name the scale and root you used'
+    'Perform an original 4-bar solo over a course-song backing track, holding its pulse with no restarts, using the minor pentatonic box and at least one hammer-on, pull-off, or vibrato — and name the scale, root, and your phrasing strategy (call-and-response or four-phrase)'
   ],
   forward: 'Those single pentatonic notes you\'ve been soloing with don\'t disappear in <strong>Module 5</strong> — you stack them. The open chords you\'ll build there (Am, C, G, D…) are made of these same notes. And the clean fretting and finger independence you sharpened here are exactly what makes a chord ring without buzzing. You\'ll go from playing one note at a time to playing five at once.',
   standards: ['Cr.1a', 'Cr.2a', 'Pr.4a', 'Pr.5a', 'Pr.5b', 'Pr.6a']
