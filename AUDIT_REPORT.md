@@ -179,7 +179,7 @@ not built here.
 
 ---
 
-## Module 3
+## Module 3 — ✅ resolved (Session D, 2026-07-05)
 ### A·1 Songs
 - [M3·songs] "Happy Birthday" labeled `type:'Core', core:true` in BOTH sets (m3w1, m3w2) → in V15 it is a ◐ SUPPLEMENTAL in U3, not core; also appears without any optional/stretch framing.
 - [M3·songs] Oye Mi Amor "Take It to a Song" (m3w2) plays A5–D5–E5–D5 → contradicts map 0.7 Oye U3 arrangement (Bm5–A5 verse → D5–A5–Bm5–G5 chorus); the map-promised **Bm5–A5 two-shape metronome drill** is absent — no Bm5 anywhere in the module.

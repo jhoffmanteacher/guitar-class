@@ -295,7 +295,14 @@ Same procedure each session. Do NOT start these until Jonathan has read
   (consistency); **My Practice Routine** check-in added; Watchtower rehearsal
   labeled in-class + s4 reworded to "sight-read a 2-bar TAB line". checks.mjs
   green, pushed.
-- [ ] **Session D** — Module 3 fixes
+- [x] **Session D** — Module 3 fixes
+  ✅ 2026-07-05 — Added the map's Oye Bm5–A5 two-shape drill (Bm5 as a 2-string
+  power chord, low-E fret 7), a Sweet Child in-class rehearsal step (D5·C5·G5 +
+  E♭ tuning note), and a Clap & Count rhythm step; fixed assessment BPM 70→60 +
+  added the "hold 80 BPM 15s" bar; swapped self-assessment skill for a
+  rhythm-reading skill (count stays 12); corrected Oye chorus to D5–A5–Bm5–G5;
+  "the cure" now an optional stretch; Happy Birthday→Supp; My Practice Routine
+  added. checks.mjs green, pushed.
 - [ ] **Session E** — Module 4 fixes
 - [ ] **Session F** — Module 5 fixes
 

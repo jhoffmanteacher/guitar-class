@@ -206,6 +206,16 @@ SETS.push(
             ]
           },
           {
+            title: 'My Practice Routine — weekly check-in (never graded)',
+            steps: [
+              {
+                text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week\'s plan went. Same check-in as Modules 1 and 2 — we keep it going all semester.',
+                hint: 'No wrong answers — even five minutes a day beats one long cram. You\'re building a habit you\'ll actually keep.',
+                response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went' }
+              }
+            ]
+          },
+          {
             title: 'Station Wrap-Up',
             steps: [
               {
@@ -222,7 +232,7 @@ SETS.push(
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Power chord loop: A5–G5–F5–G5 · Play as a class', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-3',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Happy Birthday"', meta: 'Power chord version — chords only, no melody yet', type: 'Core', core: true,
+      { name: '"Happy Birthday"', meta: 'Power chord version — chords only (optional)', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
       { name: '"Seven Nation Army" — The White Stripes', meta: 'Iconic single power-chord riff on E string', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-3',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
@@ -284,7 +294,7 @@ SETS.push(
     unit: 'Module 3 · Two-Finger Power Chords',
     title: 'Set 2',
     subtitle: 'Power chords with metronome · Chord changes · Strumming patterns',
-    objective: 'I CAN change power chords on beat 1 at 70+ BPM and play a full song excerpt in time.',
+    objective: 'I CAN change power chords on beat 1 at 60 BPM and hold a steady 8-bar progression up to 80 BPM.',
     skillFocus: 'Changing power chords in time · Building speed with a metronome · Playing a song progression',
     handoutUrl: 'https://docs.google.com/document/d/1S0gxHXkbgZRJT5VhR9nGz6O2imjEF9uQ_jNAYFaTc6I/edit',
     comingSoon: false,
@@ -329,7 +339,7 @@ SETS.push(
         title: 'Practice station — metronome & chord changes',
         sections: [
           {
-            title: 'Change power chords on beat 1 at 70+ BPM',
+            title: 'Change power chords on beat 1 at 60 BPM',
             steps: [
           {
             text: 'Challenge 1 — Loop in Time: play the "Watchtower" loop (A5–G5–F5–G5) at 60 BPM, each chord one bar (4 beats), four times through. You\'ve got it when: every chord change lands on beat 1, with no stops.',
@@ -341,11 +351,23 @@ SETS.push(
             ]
           },
           {
+            title: 'Read and clap the rhythm',
+            steps: [
+          {
+            text: 'Challenge — Clap & Count: before you play, read the rhythm. Clap and count a 4-bar line out loud — whole notes (hold 4 beats), quarter notes (one clap each), and straight eighths ("1 + 2 + 3 + 4 +"). You\'ve got it when: you can clap all 4 bars in time with the metronome at 70 BPM and name which notes are whole, quarter, and eighth.',
+            hint: 'Whole note = one clap held for a full bar. Eighth notes = two even claps per beat. The straight-eighths strum you play (down-down-up-down-up) is just eighth notes — same rhythm, on the guitar.',
+            stuck: 'Clap quarter notes on every beat first (1 2 3 4), then split one beat into eighths ("1 +") and feel the difference.',
+            levelUp: 'Clap one bar of eighths, one bar of quarters, alternating, without losing the count.',
+            skills: [6]
+          }
+            ]
+          },
+          {
             title: 'Play an 8-bar progression with a steady strum',
             steps: [
           {
-            text: 'Challenge 2 — Eighth-Note Strum (your assessment piece): play the loop with straight eighths (down-down-up-down-up), counting "1 + 2 + 3 + 4 +". You\'ve got it when: eight bars clean and steady, then beat your tempo — push past 70 BPM toward the 80 BPM unit goal.',
-            hint: 'Start at 60 BPM. If it feels easy, bump up 5 BPM. The unit-end check is an 8-bar progression at 80 BPM with clean muting — this is that piece.',
+            text: 'Challenge 2 — Eighth-Note Strum (your assessment piece): play the loop with straight eighths (down-down-up-down-up), counting "1 + 2 + 3 + 4 +". You\'ve got it when: eight bars clean and steady at 60, then climb the ladder and hold 80 BPM for at least 15 seconds — that\'s the unit bar.',
+            hint: 'Start at 60 BPM. If it feels easy, bump up 5 BPM. The unit-end check is an 8-bar progression changing on beat 1 at 60, then holding 80 BPM for 15 seconds with clean muting — this is that piece.',
             stuck: 'Strum down-only on each beat first ("1 2 3 4"), then add the up-strums one at a time.',
             levelUp: 'Hold it clean at 80 BPM, or play it straight through a full song excerpt from the songs list.',
             skills: [3, 4],
@@ -360,6 +382,42 @@ SETS.push(
             text: 'Challenge 3 — Octave Add-On (give it a go!): add your pinky two frets above your ring finger to make a 3-note power chord. No score — just try it and notice how the sound changes.',
             hint: 'This is optional. If your power chord sounds clean as is, keep it. Only add the 3rd finger if you can do it without buzzing.',
             skills: [5]
+          }
+            ]
+          },
+          {
+            title: 'Oye Mi Amor: Bm5–A5 two-shape metronome drill',
+            steps: [
+          {
+            text: 'Challenge — Bm5 ↔ A5 Two-Shape Drill: meet Bm5, a new power chord — root B on the low E string, 7th fret (the same shape you climbed to in Set 1). Rock between the Oye Mi Amor verse chords, Bm5 (fret 7) and A5 (fret 5), one strum per beat — it\'s the same shape sliding two frets. You\'ve got it when: you can switch Bm5↔A5 landing on beat 1, both notes clean, all the way up the tempo ladder: 60 → 70 → 80 BPM. <a href="tabs/oye-mi-amor.html#layer-2" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+            hint: 'A power chord has no major or minor — Bm5 is just B5 (B + F#). Keep the two-finger shape locked and let your whole arm slide the two frets between fret 7 and fret 5.',
+            stuck: 'Park on the slide: fret 5, fret 7, fret 5, fret 7 with no rhythm — make the 2-fret move automatic, then add the metronome at 60.',
+            levelUp: 'Hold it clean at 80 BPM, or add the chorus chords D5 and G5 for the full D5–A5–Bm5–G5 progression.',
+            skills: [1, 2],
+            chords: [
+              { name: 'Bm5', chord: [[6,7,'1'],[5,9,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 7 },
+              { name: 'A5',  chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 }
+            ],
+            playSeq: { label: 'Hear Bm5 → A5 (roots B · A)', bpm: 60, notes: [47, 45] },
+            response: { type: 'short', prompt: 'Your fastest CLEAN Bm5↔A5 today (BPM)?', placeholder: 'e.g. 70 — 80 next class' }
+          }
+            ]
+          },
+          {
+            title: 'Sweet Child O\' Mine — in-class assessment rehearsal',
+            steps: [
+          {
+            text: 'Challenge — Sweet Child Verse (in-class assessment rehearsal): play the Guns N\' Roses verse as power chords — D5 · C5 · G5, two beats per chord at 60 BPM. This is one of the songs you can bring to the in-class assessment. You\'ve got it when: four clean laps, every change on beat 1, muting tight. <a href="tabs/sweet-child-o-mine.html#layer-3" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+            hint: 'We play Sweet Child in standard tuning in class. (The famous recording is tuned a half-step down, so your D5–C5–G5 sound one fret higher than the record — that\'s expected; don\'t retune.) D5 and C5 are A-string roots; G5 drops to the low E string.',
+            stuck: 'Loop D5 → C5 (both A-string, 2 frets apart) until smooth, then add the jump to G5 on the low E string.',
+            levelUp: 'Push the tempo ladder to 70 then 80 BPM, or add a straight-eighths strum.',
+            skills: [3, 4],
+            chords: [
+              { name: 'D5', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,'x'],[2,'x'],[1,'x']], position: 5 },
+              { name: 'C5', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
+              { name: 'G5', chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 }
+            ],
+            response: { type: 'short', prompt: 'Clean laps of D5–C5–G5 at 60 BPM?', placeholder: 'e.g. 3 — the G5 jump lags' }
           }
             ]
           },
@@ -384,11 +442,11 @@ SETS.push(
                 response: { type: 'short', prompt: 'Clean laps in a row at 60 BPM — your count?', placeholder: 'e.g. 3 — F5 keeps buzzing' }
               },
               {
-                text: 'Challenge — "the cure" as power chords ◐: this gentle acoustic song isn\'t usually played this way — that\'s the point. Play its progression as power chords — A5 · C5 · D5 · F5 — two beats per chord at 60 BPM, quietly. You\'ve got it when: two laps clean AND soft — power chords don\'t have to be loud.',
+                // lyric-review: "the cure" clean edit pending (SITE_ALIGNMENT 0.3) — this step has no video link, but flag if audio is ever added
+                text: 'Challenge — "the cure" as power chords (◐ optional stretch — give it a go, no score!): this gentle acoustic song isn\'t usually played this way — that\'s the point. Play its progression as power chords — A5 · C5 · D5 · F5 — two beats per chord at 60 BPM, quietly. You\'ve got it when: two laps clean AND soft — power chords don\'t have to be loud.',
                 hint: 'You already know these roots from Module 2. The challenge here is touch: light pick, both strings ringing, no bark.',
                 stuck: 'Roots-only at a whisper first — get the dynamics, then add the fifths.',
                 levelUp: 'Add G5 before looping back to A5, or play one lap loud and one lap soft and hear the difference.',
-                skills: [3, 4],
                 tab: {
                   caption: '"the cure" — progression as power chords (teaching arrangement) · 60 BPM',
                   notes: [
@@ -401,18 +459,18 @@ SETS.push(
                 response: { type: 'short', prompt: 'Loud vs. soft power chords — which was harder to keep clean?', placeholder: 'e.g. soft — I kept muting the D string' }
               },
               {
-                text: 'Challenge — Oye Mi Amor, chorus riff: play Maná\'s chorus as power chords — A5 · D5 · E5 · D5 — two beats per chord at 60 BPM. The E5 uses the open low E string. You\'ve got it when: four laps with the open-string E5 ringing as clean as the fretted chords. <a href="tabs/oye-mi-amor.html#layer-2" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                hint: 'The open E5 is a gift — no fretting hand needed on the root. Use that free moment to set up your jump back to A5.',
-                stuck: 'Loop just D5 → E5 → D5 until the open-chord landing is automatic.',
-                levelUp: 'Palm-mute the A5 and D5 but let the E5 ring open — instant dynamics, very Oye Mi Amor.',
+                text: 'Challenge — Oye Mi Amor, chorus: play Maná\'s chorus as power chords — D5 · A5 · Bm5 · G5 — two beats per chord at 60 BPM. You\'ve got it when: four laps with every change on beat 1, and Bm5 (fret 7) ringing as clean as the rest. <a href="tabs/oye-mi-amor.html#layer-2" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                hint: 'You drilled Bm5↔A5 already — this adds D5 and G5 around them. D5 is an A-string root; A5, Bm5, and G5 are low-E-string roots.',
+                stuck: 'Split it: loop D5 → A5 until smooth, then Bm5 → G5, then join the two halves.',
+                levelUp: 'One beat per chord instead of two — same 60 BPM, twice the changes — or push the ladder to 70.',
                 skills: [3, 4],
                 tab: {
-                  caption: '"Oye Mi Amor" — chorus riff as power chords (teaching arrangement) · 60 BPM',
+                  caption: '"Oye Mi Amor" — chorus as power chords (teaching arrangement) · 60 BPM',
                   notes: [
-                    { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] },
-                    { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] },
-                    { frets: [['A', 2], ['E', 0]], note: 'E5', midi: [47, 40] },
-                    { frets: [['D', 7], ['A', 5]], note: 'D5', midi: [57, 50] }
+                    { frets: [['D', 7], ['A', 5]], note: 'D5',  midi: [57, 50] },
+                    { frets: [['A', 7], ['E', 5]], note: 'A5',  midi: [52, 45] },
+                    { frets: [['A', 9], ['E', 7]], note: 'Bm5', midi: [54, 47] },
+                    { frets: [['A', 5], ['E', 3]], note: 'G5',  midi: [50, 43] }
                   ]
                 },
                 response: { type: 'short', prompt: 'Which song did you land power chords in today, and at what BPM?', placeholder: 'e.g. Oye Mi Amor at 60 — clean' }
@@ -442,7 +500,7 @@ SETS.push(
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Verse: D5–C5–G5 power chord loop', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html#layer-3',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
-      { name: '"Happy Birthday"', meta: 'Full power chord arrangement', type: 'Core', core: true,
+      { name: '"Happy Birthday"', meta: 'Full power chord arrangement (optional)', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
       { name: '"Seven Nation Army" — The White Stripes', meta: 'Full riff with power chords', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-3',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
@@ -465,15 +523,15 @@ SETS.push(
     ],
 
     assessment: {
-      goal: 'Unit-end: Perform an 8-bar power chord song or progression of your choice at 80 BPM with the metronome. Must include at least 3 different power chords and clean string muting.',
+      goal: 'Unit-end: Perform an 8-bar power chord song or progression of your choice, changing on beat 1 at 60 BPM and holding 80 BPM for at least 15 seconds with the metronome. Must include at least 3 different power chords and clean string muting.',
       performance: 'Individual or partner check: play 8 bars of a power chord progression with the metronome. Teacher gives one piece of feedback.',
-      selfCheck: 'Can you change chords on beat 1 at 70 BPM without stopping? Can you play a full song excerpt from memory?',
+      selfCheck: 'Can you change chords on beat 1 at 60 BPM without stopping? Can you play a full song excerpt from memory?',
       standards: ['Pr.4a', 'Pr.5b', 'Pr.6a']
     },
 
     skills: [
-      { id: 'm3w2-s1', text: 'Change power chords on beat 1 at 70+ BPM',
-        gotItWhen: 'your chord changes land exactly on beat 1 with the metronome at 70 BPM and you don\'t need to pause or restart.' },
+      { id: 'm3w2-s1', text: 'Change power chords on beat 1 at 60 BPM',
+        gotItWhen: 'your chord changes land exactly on beat 1 with the metronome at 60 BPM and you don\'t need to pause or restart (70+ BPM is a stretch goal on the ladder).' },
       { id: 'm3w2-s2', text: 'Play a full 8-bar power chord progression in time',
         gotItWhen: 'you can play through 8 bars without stopping, even if a chord change is rough — you keep going to the next downbeat.',
         practice: { type: 'playSeq', label: 'Watchtower roots (A · G · F · G)', bpm: 70,
@@ -488,8 +546,10 @@ SETS.push(
         gotItWhen: 'your pinky lands two frets above your ring finger and all three notes ring cleanly — no buzz, no muffled string.',
         practice: { type: 'mc', prompt: 'You add your pinky two frets above your ring finger. What interval did you just add to the chord?',
           choices: ['A 3rd', 'A 5th', 'An octave (same note, higher)', 'A 7th'], answer: 2 } },
-      { id: 'm3w2-s6', text: 'Self-evaluate timing with the metronome and adjust tempo intentionally',
-        gotItWhen: 'you can tell whether you\'re ahead, behind, or with the click — and you can pick a tempo where you sound clean instead of pushing too fast.' }
+      { id: 'm3w2-s6', text: 'Clap and count a 4-bar rhythm, and name whole vs. eighth notes',
+        gotItWhen: 'you can clap a 4-bar line in time with the metronome and say which notes are whole, quarter, or eighth — and name your strum as "straight eighths".',
+        practice: { type: 'mc', prompt: 'A straight-eighths strum (down-down-up-down-up, counted "1 + 2 +") is made of which note value?',
+          choices: ['Whole notes', 'Quarter notes', 'Eighth notes', 'Half notes'], answer: 2 } }
     ]
   }
 
@@ -503,7 +563,7 @@ MODULE_REVIEWS[3] = {
     { id: 'mr3-s2', text: 'I can move the same shape along the low E string and name each chord without counting frets', set: 'm3w1' },
     { id: 'mr3-s3', text: 'I can move the shape along the A string and keep the low E string silent', set: 'm3w1' },
     { id: 'mr3-s5', text: 'I can read a power chord symbol like "A5" and instantly know which fret and string my index finger goes to', set: 'm3w1' },
-    { id: 'mr3-s7', text: 'I can change power chords on beat 1 at 70+ BPM without stopping', set: 'm3w2' },
+    { id: 'mr3-s7', text: 'I can change power chords on beat 1 at 60 BPM without stopping', set: 'm3w2' },
     { id: 'mr3-s8', text: 'I can play an 8-bar progression with a straight-eighths strum, counting "1 + 2 + 3 + 4 +"', set: 'm3w2' }
   ],
   assessItems: [

@@ -5,6 +5,26 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-05 — Module 3 power chords line up with the assessment
+
+### Added
+- **A new Oye Mi Amor Bm5–A5 drill** — meet Bm5 as a two-finger power chord and
+  rock between the two verse chords up a 60→70→80 tempo ladder, exactly the drill
+  the course plan calls for.
+- **A Sweet Child O' Mine rehearsal step** (D5·C5·G5) clearly marked as one of the
+  songs you can bring to the in-class check — with a note that we play it in
+  standard tuning even though the record is tuned down a half step.
+- **A "Clap & Count" rhythm step** so you read and clap whole, quarter, and eighth
+  notes before you play them — and can name your strum as "straight eighths".
+- **The "My Practice Routine" weekly check-in continues into Module 3.**
+
+### Changed
+- **The timing goals now match what you're actually assessed on:** change chords
+  on beat 1 at 60 BPM, then hold 80 BPM for 15 seconds — instead of a vague "70+".
+- **The Oye Mi Amor chorus is now the real chord order** (D5–A5–Bm5–G5).
+- **"the cure" as power chords is now a clearly optional, no-score stretch**, and
+  "Happy Birthday" is marked supplemental rather than a core-thread song.
+
 ## 2026-07-05 — Module 2 lines up with the core song thread
 
 ### Added
