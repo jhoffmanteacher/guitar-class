@@ -265,7 +265,7 @@ not built here.
 
 ---
 
-## Module 5
+## Module 5 — ✅ resolved (Session F, 2026-07-05)
 ### A·1 Songs
 - [M5·songs] "the cure" — Olivia Rodrigo is a **featured** M5 core song (0.2) but appears NOWHERE in Module 5 (no song-list entry, no step, no capo-1 loop) → missing featured core song.
 - [M5·songs] "Happy Birthday" tagged `type:'Core', core:true` in all four sets (m5w1–m5w4 songs) → it is SUPPLEMENTAL in the V15 six-song thread (0.1/0.3), so the Core badge mislabels it.

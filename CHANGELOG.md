@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-05 — Module 5 open chords, tuned to the songs you'll actually play
+
+### Added
+- **"the cure" comes to Module 5** with a capo-1 play-along — put a capo on the
+  first fret and loop Am–C–Dm–F–G up a tempo ladder, with every shape pre-loaded
+  on screen.
+- **The "My Practice Routine" weekly check-in continues into Module 5.**
+
+### Changed
+- **Oye Mi Amor now uses its real chords, D–A–Bm–G**, in both the Set 3 and Set 4
+  strum-alongs — the same progression you're asked to play from memory. Every
+  chord is one you've already learned by that point.
+- **Let It Be's C–G–Am–F verse is clearly marked as your in-class assessment
+  song**, and the strum goals now name 70 BPM — the tempo you're actually aiming
+  for.
+- **Seven Nation Army and Sweet Child are marked as optional in this unit**, and
+  "Happy Birthday" as supplemental, so the songs the unit is really built around
+  stand out.
+- **Your written "My Guitar Adventure" semester reflection is just for you** — a
+  check-in, not something graded as part of the showcase.
+
 ## 2026-07-05 — Module 4 gets real backing tracks to solo over
 
 ### Added

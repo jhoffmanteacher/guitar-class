@@ -312,7 +312,15 @@ Same procedure each session. Do NOT start these until Jonathan has read
   + "hold the pulse, no restarts" at the Set 3 assessment; Happy Birthday→Supp;
   lyric notes; My Practice Routine added. Skill count unchanged (20). checks.mjs
   green (253 links), pushed.
-- [ ] **Session F** — Module 5 fixes
+- [x] **Session F** — Module 5 fixes
+  ✅ 2026-07-05 — Added "the cure" (was absent): capo-1 play-along step (Am–C–Dm–
+  F–G, 60→70 ladder, pre-loaded shapes) + Core card. Retuned Oye Mi Amor to the
+  correct D–A–Bm–G everywhere (Set 3 + Set 4 steps, cards, m5w3-s6, listening
+  step) — Jonathan confirmed the chords. Written self-reflection reframed
+  ungraded; Let It Be labeled in-class rehearsal; 70 BPM named as a rung;
+  technique language added; Happy Birthday→Supp (3 sets), SNA→◐ optional, Sweet
+  Child→optional; Watchtower meta→Am–G–F; My Practice Routine added. Week-17 quiz
+  still a known gap. Skill count unchanged (24). checks.mjs green (253 links).
 
 ---
 

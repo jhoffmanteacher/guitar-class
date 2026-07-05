@@ -118,6 +118,16 @@ SETS.push(
             ]
           },
           {
+            title: 'My Practice Routine — weekly check-in (never graded)',
+            steps: [
+              {
+                text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week\'s plan went. Same check-in you\'ve kept since Module 1 — we keep it going all semester.',
+                hint: 'No wrong answers — even five minutes a day beats one long cram. You\'re building a habit you\'ll actually keep.',
+                response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went' }
+              }
+            ]
+          },
+          {
             title: 'Station Wrap-Up',
             steps: [
               {
@@ -131,7 +141,7 @@ SETS.push(
     },
 
     songs: [
-      { name: '"Happy Birthday"', meta: 'Read chord diagrams for C–G–Am chord version', type: 'Core', core: true,
+      { name: '"Happy Birthday"', meta: 'Read chord diagrams for C–G–Am chord version (optional)', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
       { name: '"Let It Be" — The Beatles', meta: 'Verse chords · read from chord chart · C–G–Am–F', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html#layer-2',
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
@@ -275,8 +285,8 @@ SETS.push(
             title: 'Play the C–G–Am–F loop in time',
             steps: [
           {
-            text: 'Challenge 2 — C–G–Am–F Loop: at 60 BPM, play 2 bars each of C, G, Am, F and repeat. You\'ve got it when: change on beat 1 every time — then bump up 5 BPM and hold it clean.',
-            hint: 'If you miss a change, keep going. You can slow to 50 BPM if needed. Gradually increase by 5 BPM each time through. Set the ⏱ Timer for 3 minutes and see how clean the loop gets before it beeps.',
+            text: 'Challenge 2 — C–G–Am–F Loop: at 60 BPM, play 2 bars each of C, G, Am, F and repeat. You\'ve got it when: change on beat 1 every time — then climb the ladder 60 → 65 → 70 and hold 70 BPM clean (that\'s the assessment tempo).',
+            hint: 'If you miss a change, keep going. You can slow to 50 BPM if needed. Gradually increase by 5 BPM each time through, aiming for a clean 70. Set the ⏱ Timer for 3 minutes and see how clean the loop gets before it beeps.',
             stuck: 'Loop just the two chords that trip you (often G→Am or Am→F) on their own before running the whole circle.',
             levelUp: 'Push toward 75 BPM, or strum down-up on each bar instead of straight downs.',
             skills: [1, 2, 3, 5]
@@ -287,8 +297,8 @@ SETS.push(
             title: 'Play a down-up strum pattern',
             steps: [
           {
-            text: 'Challenge 3 — Down-Up Strum: play the loop strumming down on 1 2 3 4 and up on each "+", counting "1 + 2 + 3 + 4 +" aloud. You\'ve got it when: a steady, relaxed pendulum with lighter upstrokes and no stumbles.',
-            hint: 'Start slower than you think you need to. The upstroke should be lighter than the downstroke. Your wrist should move like a relaxed pendulum.',
+            text: 'Challenge 3 — Down-Up Strum: play the loop strumming down on 1 2 3 4 and up on each "+", counting "1 + 2 + 3 + 4 +" aloud, building to 70 BPM. You\'ve got it when: a steady, relaxed pendulum at 70 BPM with lighter upstrokes and no stumbles.',
+            hint: 'Start slower than you think you need to, then climb to 70. The upstroke should be lighter than the downstroke. Your wrist should move like a relaxed pendulum.',
             stuck: 'Keep your strumming hand moving down-up-down-up nonstop — just miss the strings on the beats you don\'t want. The motion never stops.',
             levelUp: 'Drop the first upstroke (D · D U · U D U) for a more song-like feel.',
             skills: [5, 6]
@@ -312,8 +322,8 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Let It Be, verse: play C · G · Am · F with a down-strum, four beats per chord at 60 BPM. You\'ve got it when: one full verse loop, every change landing on beat 1. <a href="tabs/let-it-be.html#layer-2" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 4</a>.',
-                hint: 'Look ahead — start forming the next chord on beat 4 of the current one. The strum keeps moving even while fingers travel.',
+                text: 'Challenge — Let It Be, verse (in-class assessment rehearsal): play C · G · Am · F with a down-strum, four beats per chord, building from 60 to 70 BPM. This C–G–Am–F verse is the song you play from memory for the in-class assessment. You\'ve got it when: one full verse loop at 70 BPM, every change landing on beat 1. <a href="tabs/let-it-be.html#layer-2" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 4</a>.',
+                hint: 'Look ahead — start forming the next chord on beat 4 of the current one. Keep your fingers arched and your thumb behind the neck so every string rings. The strum keeps moving even while fingers travel.',
                 stuck: 'Isolate the roughest pair (probably C → F) and loop just those two, four beats each.',
                 levelUp: 'Add the chorus turnaround — Am · G · F · C — or drop to two beats per chord at the same 60 BPM.',
                 skills: [3, 6],
@@ -334,6 +344,22 @@ SETS.push(
                   { name: 'F', chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
                 ],
                 response: { type: 'short', prompt: 'Bass line, power chords, or open chords — which Watchtower is your favorite so far?', placeholder: 'e.g. open chords — it finally sounds full' }
+              },
+              {
+                // lyric-review: "the cure" clean edit pending (SITE_ALIGNMENT 0.3) — do not add the unedited original video link to this play-along step
+                text: 'Challenge — "the cure" capo-1 play-along: put a capo on fret 1, then loop Olivia\'s chords with a down-strum — Am · C · Dm · F, four beats each, then G to turn it around — climbing the tempo ladder 60 → 65 → 70 BPM. Shapes are pre-loaded below. You\'ve got it when: two clean loops at 70 BPM, every change on beat 1, the capo ringing clear.',
+                hint: 'The capo just moves everything up one fret — your shapes don\'t change. Dm is new: a small triangle on the top three strings. Keep your fingers arched and your thumb behind the neck.',
+                stuck: 'Take the capo off and get Am · C · Dm · F clean in open position first, then add the capo and the G turnaround.',
+                levelUp: 'Add the G/B bass turnaround (G shape, but catch the B on the A string), or switch to a down-up strum.',
+                skills: [5, 6],
+                chords: [
+                  { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
+                  { name: 'C',  chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
+                  { name: 'Dm', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'2'],[2,3,'3'],[1,1,'1']], position: 0 },
+                  { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
+                  { name: 'G',  chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
+                ],
+                response: { type: 'short', prompt: 'Your cleanest tempo on the "the cure" loop today (BPM)?', placeholder: 'e.g. 65 — 70 next class' }
               }
             ]
           },
@@ -351,11 +377,15 @@ SETS.push(
     },
 
     songs: [
-      { name: '"Happy Birthday"', meta: 'Full strum arrangement — C–G–Am–F version', type: 'Core', core: true,
+      { name: '"Happy Birthday"', meta: 'Full strum arrangement — C–G–Am–F version (optional)', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
       { name: '"Let It Be" — The Beatles', meta: 'Verse & chorus full chord strum · C–G–Am–F (I–V–vi–IV)', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html#layer-2',
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
         tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8' },
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Capo 1 play-along · Am–C–Dm–F–G/B', type: 'Core', core: true,
+        // lyric-review: explicit word in verse 3 — clean edit pending (SITE_ALIGNMENT 0.3)
+        originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
+        tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Let Her Go" — Passenger', meta: 'G–D–Em–C — same family of chords', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=RBumgq5yVrA',
         tutorialUrl: 'https://www.youtube.com/watch?v=u8eloQtLxhY' },
@@ -400,8 +430,8 @@ SETS.push(
         gotItWhen: 'when you switch Am ↔ C your index finger stays planted on string 2 fret 1 — you don\'t lift it and put it back down.',
         practice: { type: 'mc', prompt: 'When pivoting between Am and C, which finger STAYS planted on string 2 fret 1?',
           choices: ['Index (1)', 'Middle (2)', 'Ring (3)', 'Pinky (4)'], answer: 0 } },
-      { id: 'm5w2-s5', text: 'Play a down-up strum pattern in time at 60+ BPM',
-        gotItWhen: 'your wrist swings like a pendulum — downstrokes on the numbers, upstrokes on the "and" — and you can keep it going without thinking about which way is next.',
+      { id: 'm5w2-s5', text: 'Play a down-up folk strum in time, building to 70 BPM',
+        gotItWhen: 'your wrist swings like a pendulum — downstrokes on the numbers, upstrokes on the "and" — and you can hold it steady at 70 BPM without thinking about which way is next.',
         practice: { type: 'mc', prompt: 'In a down-up strum pattern, when do the UPSTROKES happen?',
           choices: ['On the numbers (1, 2, 3, 4)', 'On the "+" (and) between beats', 'Only on beat 4', 'Randomly'], answer: 1 } },
       { id: 'm5w2-s6', text: 'Switch between any two chords in Group 1 on beat 1 at 70 BPM',
@@ -452,8 +482,8 @@ SETS.push(
             response: { type: 'short', placeholder: 'Which Bm version are you starting with (partial barre or full)? What\'s the hardest part for you?' }
           },
           {
-            text: 'Listen to "Oye Mi Amor" by Maná — the chorus rides on A, D, and E. Can you hear when the D and A chords arrive? Tap along and try to feel the chord changes.',
-            hint: 'A and D are Group 2 chords you\'re learning right now. Your ear already knows what they sound like — you\'re just learning to play them.',
+            text: 'Listen to "Oye Mi Amor" by Maná — the chorus rides on D, A, Bm, and G. Can you hear when each chord arrives? Tap along and try to feel the chord changes.',
+            hint: 'D, A, and Bm are the Group 2 chords you\'re learning right now, and G you already know. Your ear already knows the sound — you\'re just learning to play them.',
             skills: [5],
             response: { type: 'short', placeholder: 'Describe one moment where you clearly heard a chord change.' }
           },
@@ -514,17 +544,18 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Oye Mi Amor, first pass: the chorus is A · D · E · D, and two of those chords are already yours. E is officially a Set 4 chord — just-enough for now: it\'s the Em you know plus your index finger on string 3, fret 1. Play the loop, four beats per chord at 60 BPM with a down-strum. You\'ve got it when: two loops with every change landing on beat 1. <a href="tabs/oye-mi-amor.html#layer-3" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-                hint: 'A and D are the Group 2 chords you\'ve drilled all set — the only new thing here is one finger. E gets the full treatment in Set 4; today is a preview.',
-                stuck: 'Fret Em, strum it, then add your index finger to string 3, fret 1 — that\'s E. Do that swap five times before running the loop.',
+                text: 'Challenge — Oye Mi Amor, chorus: the chorus is D · A · Bm · G — every chord is one you\'ve drilled this set (D, A, Bm from Group 2) plus G from Group 1. Play the loop, four beats per chord at 60 BPM with a down-strum. You\'ve got it when: two loops with every change landing on beat 1, the partial-barre Bm ringing clean. <a href="tabs/oye-mi-amor.html#layer-3" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+                hint: 'D, A, and Bm are your brand-new Group 2 chords — this is where they pay off. Bm is the partial-barre shape from the video (xx4432); keep that index barre light and your thumb behind the neck.',
+                stuck: 'Loop just D → A until it\'s smooth, then Bm → G, then join the halves. Bm is the hard one — pre-shape it in the air before you land it.',
                 levelUp: 'Drop to two beats per chord at the same 60 BPM, or hum the chorus hook over your strumming.',
                 skills: [5, 6],
                 chords: [
-                  { name: 'D', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 },
-                  { name: 'A', chord: [[6,'x'],[5,0],[4,2,'1'],[3,2,'2'],[2,2,'3'],[1,0]], position: 0 },
-                  { name: 'E', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,1,'1'],[2,0],[1,0]], position: 0 }
+                  { name: 'D',  chord: [[6,'x'],[5,'x'],[4,0],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 },
+                  { name: 'A',  chord: [[6,'x'],[5,0],[4,2,'1'],[3,2,'2'],[2,2,'3'],[1,0]], position: 0 },
+                  { name: 'Bm', chord: [[6,'x'],[5,'x'],[4,4,'4'],[3,4,'3'],[2,3,'2'],[1,2,'1']], position: 2 },
+                  { name: 'G',  chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
                 ],
-                response: { type: 'short', prompt: 'After this preview, what\'s your first impression of the E chord?', placeholder: 'e.g. easier than F — it\'s just Em plus one finger' }
+                response: { type: 'short', prompt: 'Which change was toughest — into Bm, or out of it?', placeholder: 'e.g. into Bm — the barre lags' }
               }
             ]
           },
@@ -542,13 +573,13 @@ SETS.push(
     },
 
     songs: [
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–Em–D–A chord group 2 adaptation', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-5',
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F · open-chord version', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-5',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Adapted to D–A–Em strummed version', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-5',
+      { name: '"Seven Nation Army" — The White Stripes', meta: '◐ optional stretch · D–A–Em strummed adaptation (Week 16)', type: 'Supp', core: false, journeyUrl: 'tabs/seven-nation-army.html#layer-5',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Chorus loop A–D–E · strummed first pass (E previewed)', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html#layer-3',
+      { name: '"Oye Mi Amor" — Maná', meta: 'Chorus loop D–A–Bm–G · strummed', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html#layer-3',
         originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
         tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
       { name: '"Stand By Me" — Ben E. King', meta: 'G–Em–C–D · great Group 1↔2 cross-group song', type: 'Choice', core: false, level: 1,
@@ -602,8 +633,8 @@ SETS.push(
         gotItWhen: 'you can play through a real song that mixes Group 1 and Group 2 chords without slowing down at the cross-group changes.',
         practice: { type: 'playSeq', label: 'Cross-group progression (G · Em · C · D roots)', bpm: 70,
           notes: [43, 40, 48, 50] } },
-      { id: 'm5w3-s6', text: 'Play the "Oye Mi Amor" chorus using Group 2 chords with a strum pattern',
-        gotItWhen: 'you can loop the "Oye Mi Amor" chorus (A · D · E · D) with a steady down-strum at 60 BPM, every change landing on beat 1.' }
+      { id: 'm5w3-s6', text: 'Play the "Oye Mi Amor" chorus (D–A–Bm–G) using Group 2 chords with a strum pattern',
+        gotItWhen: 'you can loop the "Oye Mi Amor" chorus (D · A · Bm · G) with a steady down-strum at 60 BPM, every change landing on beat 1 and the partial-barre Bm ringing clean.' }
     ]
   },
 
@@ -726,14 +757,16 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Oye Mi Amor, strummed: play the chorus as open chords — A · D · E · D — four beats per chord at 60 BPM with a straight down-strum, singing or humming the hook if you dare. You\'ve got it when: four loops with every change on beat 1 and the E chord ringing all six strings. <a href="tabs/oye-mi-amor.html#layer-3" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-                hint: 'A, D, and E are the classic three-chord family — thousands of songs live here. Maná gives it the energy.',
-                stuck: 'E is the six-string test — place it string by string, strum, fix, repeat, before running the loop.',
-                levelUp: 'Try the down-down-up split strum on each chord, or run the loop at two beats per chord.',
+                text: 'Challenge — Oye Mi Amor, strummed (showcase version): play the chorus as open chords — D · A · Bm · G — four beats per chord at 60 BPM with a straight down-strum, building toward 70, singing or humming the hook if you dare. You\'ve got it when: four loops with every change on beat 1 and the partial-barre Bm ringing clean. <a href="tabs/oye-mi-amor.html#layer-3" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+                hint: 'You met this loop in Set 3 — now make it showcase-clean. Bm is the partial barre; keep your fingers arched and your thumb behind the neck so the whole chord rings.',
+                stuck: 'Bm is the tough one — loop A → Bm on its own until the barre lands, then run the full D–A–Bm–G.',
+                levelUp: 'Try the down-down-up split strum on each chord, run it at two beats per chord, or push to 70 BPM.',
                 skills: [5, 6],
                 chords: [
-                  { name: 'A', chord: [[6,'x'],[5,0],[4,2,'1'],[3,2,'2'],[2,2,'3'],[1,0]], position: 0 },
-                  { name: 'E', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,1,'1'],[2,0],[1,0]], position: 0 }
+                  { name: 'D',  chord: [[6,'x'],[5,'x'],[4,0],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 },
+                  { name: 'A',  chord: [[6,'x'],[5,0],[4,2,'1'],[3,2,'2'],[2,2,'3'],[1,0]], position: 0 },
+                  { name: 'Bm', chord: [[6,'x'],[5,'x'],[4,4,'4'],[3,4,'3'],[2,3,'2'],[1,2,'1']], position: 2 },
+                  { name: 'G',  chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
                 ],
                 response: { type: 'short', prompt: 'Which core song do you most want to play start-to-finish at the showcase?', placeholder: 'e.g. Oye Mi Amor, all of it' }
               }
@@ -753,12 +786,12 @@ SETS.push(
     },
 
     songs: [
-      { name: '"Happy Birthday"', meta: 'Full chord arrangement — all groups reviewed', type: 'Core', core: true,
+      { name: '"Happy Birthday"', meta: 'Full chord arrangement — all groups reviewed (optional)', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Full-song showcase · Bm (partial barre)–G', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html',
+      { name: '"Oye Mi Amor" — Maná', meta: 'Full-song showcase · D–A–Bm–G', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html',
         originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
         tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Full song showcase · D–C–G', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html#layer-5',
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Optional showcase · D–C–G power chords (from Module 3)', type: 'Supp', core: false, journeyUrl: 'tabs/sweet-child-o-mine.html#layer-5',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full performance with open chords', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-5',
@@ -783,7 +816,7 @@ SETS.push(
     ],
 
     assessment: {
-      goal: 'Semester Showcase: Perform one complete song of your choice using at least 4 chords from the semester. Evaluated on chord accuracy, timing, smooth transitions, and musicality. Written self-reflection: My Guitar Adventure — Semester 1 Check-in.',
+      goal: 'Semester Showcase: Perform one complete song of your choice using at least 4 chords from the semester. Evaluated on chord accuracy, timing, smooth transitions, and musicality. (Separate and ungraded: your written "My Guitar Adventure — Semester 1 Check-in" reflection — just for you, not part of the showcase score.)',
       performance: 'Semester showcase performance. Student performs chosen song for class. Teacher evaluates chord accuracy, timing, transitions, and expression.',
       selfCheck: 'Can you play your showcase song all the way through without stopping? Can you name every chord in your song and which group it belongs to?',
       standards: ['Pr.4a', 'Pr.5b', 'Pr.6a', 'Re.9a']
@@ -807,7 +840,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'Which of these chords is from Group 2 (D, A, Em, Bm)?',
           choices: ['C major', 'G major', 'D major', 'F major'], answer: 2 } },
       { id: 'm5w4-s5', text: 'Perform a chosen song all the way through without stopping',
-        gotItWhen: 'you can play your showcase song start to finish — even with mistakes, you keep going and stay in time.' },
+        gotItWhen: 'you can play your showcase song start to finish — fingers arched, thumb behind the neck, the shapes held through the whole song — and even with mistakes you keep going and stay in time.' },
       { id: 'm5w4-s6', text: 'Maintain a steady strum pattern throughout a full song',
         gotItWhen: 'your strum pattern stays consistent across the whole song — it doesn\'t fall apart during the hard chord changes.' }
     ]
@@ -828,7 +861,7 @@ MODULE_REVIEWS[5] = {
   ],
   assessItems: [
     'Perform one complete song using at least 4 chords from the semester, with clean tone and smooth transitions',
-    'Written self-reflection: My Guitar Adventure — Semester 1 Check-in (what changed since the Module 1 goal)'
+    'Ungraded reflection (not scored): your written "My Guitar Adventure — Semester 1 Check-in" — what changed since the Module 1 goal'
   ],
   forward: 'Every chord you can now fret is a word — <strong>Module 6 is where you learn to speak in rhythm.</strong> The down-up pattern you started here grows into full strumming patterns, accents, and syncopation that turn these shapes into real songs.',
   standards: ['Pr.4a', 'Pr.5a', 'Pr.5b', 'Pr.6a', 'Re.7a', 'Re.9a', 'Cn.11b']
