@@ -3,11 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Let It Be — Song Journey · Mr. Hoffman's Guitar Class</title>
-<meta name="description" content="One song, five layers: follow Let It Be from listening to open chords as your skills grow.">
+<title>&ldquo;the cure&rdquo; — Song Journey · Mr. Hoffman's Guitar Class</title>
+<meta name="description" content="One song, five layers: follow Olivia Rodrigo's &quot;the cure&quot; from listening to the capo-1 open chords as your skills grow.">
 <!-- Same Firebase project + sign-in session as the class site (same origin),
      so a student signed in there is already signed in here. Firestore SDK
      loads later, only once we know someone is signed in. -->
+<!-- lyric-review: "the cure" clean edit pending (SITE_ALIGNMENT 0.3) — do NOT
+     add any audio or video link to this page until the clean edit exists.
+     Listening happens in class from the teacher-managed edit. -->
 <script defer src="../firebase-config.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -63,16 +66,17 @@
 
   <header class="song">
     <div class="song-kicker">Song Journey</div>
-    <h1>Let It Be</h1>
-    <div class="song-artist">The Beatles</div>
+    <h1>&ldquo;the cure&rdquo;</h1>
+    <div class="song-artist">Olivia Rodrigo</div>
     <span class="thread-badge">&#x1F9F5; Thread song — it appears in all 5 units</span>
   </header>
 
-  <p class="journey-note">One song, five layers. Every unit this semester, you come back to this song with a new skill — and it gets more beautiful every time. Find your current layer below. Fast finisher? Scroll down one layer and try the next.</p>
+  <p class="journey-note">One song, five layers. Every unit this semester, you come back to this song with a new skill — and it gets bigger every time. Find your current layer below. Fast finisher? Scroll down one layer and try the next.</p>
 
   <div class="songmap">
-    <b>Song map:</b> the verse is the most famous four-chord loop in pop — <b>C &middot; G &middot; Am &middot; F</b> (the I–V–vi–IV progression) —
-    and it's hiding inside dozens of other songs you already know. Learn it here once, and you've learned a hundred songs.
+    <b>Song map:</b> Verse (soft, guitar carries it) &rarr; Chorus (fuller, same chords) &rarr; Verse &rarr; Chorus &rarr; Outro.
+    The whole song lives in one chord family: <b>Am &middot; C &middot; Dm &middot; F &middot; G/B</b> — played with a <b>capo on fret 1</b> on the record.
+    Layers 2–4 use a teaching arrangement with <b>no capo</b>; the capo comes on in Layer 5, where the song goes native.
     <br><em style="color:var(--text3);font-size:13px">All layers are teaching arrangements at 60 BPM — simplified for learning, not note-for-note transcriptions.</em>
   </div>
 
@@ -80,10 +84,10 @@
   <section class="layer l1" id="layer-1">
     <div class="layer-head"><span class="layer-num">1</span><h2>Listen</h2><span class="layer-unit">Unit 1</span></div>
     <div class="layer-body">
-      <p>The original is piano, not guitar — which makes it perfect ear training: nothing to copy, just chords to hear. Listen for the C–G–Am–F pattern carrying the verse, and how little the song needs beyond it.</p>
-      <div class="playline"><b>Do it:</b> listen to the first verse. Count the bars — how many beats does each chord get before the next one arrives?</div>
-      <div class="branch"><b>Respond:</b> the loop is the same all verse long — so what keeps it from getting boring? What changes around it?</div>
-      <div class="branch"><b>Connect:</b> C–G–Am–F is the "axis of awesome" four-chord loop. Name another song you suspect uses the same four chords.</div>
+      <p>This is the newest song in the course — and the quietest. Find the guitar first: it's acoustic, clean, and close, like it's being played in the room with you. Listen once for the chords changing, once for how little else is happening, and once for how the chorus grows without ever getting loud.</p>
+      <div class="playline"><b>Do it:</b> listen in class (teacher's edit). Count the chord changes in one verse — how many different chords do you hear?</div>
+      <div class="branch"><b>Respond:</b> clean or distorted? Acoustic or electric? How is Olivia's guitar tone different from Seven Nation Army's?</div>
+      <div class="branch"><b>Connect:</b> name another current song where the guitar feels this close and quiet.</div>
       <div class="rate" data-layer="1">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" onclick="rate(this)">1</button>
@@ -98,18 +102,18 @@
   <section class="layer l2" id="layer-2">
     <div class="layer-head"><span class="layer-num">2</span><h2>Single Notes</h2><span class="layer-unit">Unit 2</span></div>
     <div class="layer-body">
-      <p>Every chord in the loop has a root, and the roots make a bassline you can play right now: <b>C &middot; G &middot; A &middot; F</b>. It crosses between the A and E strings — listen and you'll hear it walking under the piano the whole verse.</p>
-<pre class="tab">Root line — 4 beats per note · 60 BPM
-        C    G    A    F
-e |--------------------------|
-B |--------------------------|
-G |--------------------------|
-D |--------------------------|
-A |--3---------0-------------|
-E |-------3---------1--------|</pre>
-      <div class="playline"><b>Play it:</b> four beats per note at <b>60 BPM</b>, saying the note names out loud. You've got it when: two clean laps crossing between the A and E strings without looking down.</div>
-      <div class="branch"><b>Stuck?</b> Loop just the two string-cross moves — C&nbsp;&rarr;&nbsp;G and A&nbsp;&rarr;&nbsp;F — until each cross is automatic, then join the laps.</div>
-      <div class="branch"><b>Level up:</b> halve it to two beats per note, or find the same four roots using only the E string (frets 8&nbsp;&middot;&nbsp;3&nbsp;&middot;&nbsp;5&nbsp;&middot;&nbsp;1).</div>
+      <p>Every chord has a root note, and the roots make a bassline you can play right now: <b>A &middot; C &middot; D &middot; F &middot; G</b>. This line crosses between the A and E strings — your first song that makes you switch strings mid-phrase.</p>
+<pre class="tab">Root line — teaching arrangement, no capo · 2 beats per note
+        A    C    D    F    G
+e |--------------------------------|
+B |--------------------------------|
+G |--------------------------------|
+D |--------------------------------|
+A |--0----3----5-------------------|
+E |-----------------1----3---------|</pre>
+      <div class="playline"><b>Play it:</b> two beats per note at <b>60 BPM</b>. Say the note names out loud as you go. You've got it when: two clean laps crossing between the A and E strings without looking down.</div>
+      <div class="branch"><b>Stuck?</b> Two halves: A&nbsp;C&nbsp;D on the A string, then F&nbsp;G on the E string. Join them when the string cross is automatic.</div>
+      <div class="branch"><b>Level up:</b> find the same five roots using only the E string (frets 5&nbsp;&middot;&nbsp;8&nbsp;&middot;&nbsp;10&nbsp;&middot;&nbsp;1&nbsp;&middot;&nbsp;3) — same names, new map.</div>
       <div class="rate" data-layer="2">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" onclick="rate(this)">1</button>
@@ -124,18 +128,18 @@ E |-------3---------1--------|</pre>
   <section class="layer l3" id="layer-3">
     <div class="layer-head"><span class="layer-num">3</span><h2>Power Chords &nbsp;&#x25D0;</h2><span class="layer-unit">Unit 3</span></div>
     <div class="layer-body">
-      <div class="grain">&#x25D0; <b>Against the grain:</b> a gentle piano ballad played on power chords — not how the record goes, and that's the point. Optional stretch, no score. Give it a go.</div>
-      <p>Same roots as Layer 2, same frets — now each one carries its fifth along in the two-finger shape. Played soft and slow, the loop turns into something like a rock ballad.</p>
-<pre class="tab">        C5   G5   A5   F5
-e |--------------------------|
-B |--------------------------|
-G |--------------------------|
-D |--<span class="hl">5</span>---------<span class="hl">2</span>-------------|
-A |--3----<span class="hl">5</span>----0----<span class="hl">3</span>--------|
-E |-------3---------1--------|</pre>
-      <div class="playline"><b>Play it:</b> four beats per chord at <b>60 BPM</b>, soft down-strums, every change landing on beat 1. You've got it when: two laps clean AND soft.</div>
+      <div class="grain">&#x25D0; <b>Against the grain:</b> this gentle acoustic song isn't usually played with power chords — that's the point. Optional stretch, no score. Give it a go.</div>
+      <p>Same roots you played in Layer 2 — same frets, even — now each one carries its fifth along. Two-finger shape, and here's the twist: play it <em>quietly</em>. Power chords don't have to be loud.</p>
+<pre class="tab">        A5   C5   D5   F5   G5
+e |--------------------------------|
+B |--------------------------------|
+G |--------------------------------|
+D |--<span class="hl">2</span>----<span class="hl">5</span>----<span class="hl">7</span>-------------------|
+A |--0----3----5----<span class="hl">3</span>----<span class="hl">5</span>---------|
+E |-----------------1----3---------|</pre>
+      <div class="playline"><b>Play it:</b> two beats per chord at <b>60 BPM</b>, soft down-strums. You've got it when: two laps clean AND soft — every change landing on its beat.</div>
       <div class="branch"><b>Stuck?</b> Drop back to the Layer 2 root line for a lap, then add the second string back one chord at a time.</div>
-      <div class="branch"><b>Level up:</b> play one lap big and one lap gentle — hear how the same shapes carry two moods.</div>
+      <div class="branch"><b>Level up:</b> play one lap loud, one lap whisper-quiet — same shapes, two totally different songs.</div>
       <div class="rate" data-layer="3">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" onclick="rate(this)">1</button>
@@ -150,8 +154,8 @@ E |-------3---------1--------|</pre>
   <section class="layer l4" id="layer-4">
     <div class="layer-head"><span class="layer-num">4</span><h2>Pentatonic Solo</h2><span class="layer-unit">Unit 4</span></div>
     <div class="layer-body">
-      <p>The song is in C major, and C major shares every note with A minor pentatonic — the same Pattern 1 shape you already know, with a different home. End your phrases on C and the solo sounds hopeful, like the song.</p>
-<pre class="tab">Your three starting notes — Pattern 1 (5th position), home is C
+      <p>The teaching arrangement sits in A minor, so A minor pentatonic fits over every chord. Olivia's song is soft — so your solo has to be too. Start with three notes and let space do half the work.</p>
+<pre class="tab">Your three starting notes — A minor pentatonic, Pattern 1 (5th position)
         A         C         D
 e |----------------------------------|
 B |----------------------------------|
@@ -159,9 +163,9 @@ G |----------------------------------|
 D |----------------------------------|
 A |--------------------5-------------|
 E |--5-------8-----------------------|</pre>
-      <div class="playline"><b>Play it:</b> improvise 8 bars over the C–G–Am–F loop — slow phrases, lots of space, ending on C (E string, fret 8). That landing note is what makes it sound major.</div>
+      <div class="playline"><b>Play it:</b> improvise 8 bars over the chord loop at a whisper — light pick, slow phrases, lots of space. Start or end every phrase on A — that's home. You've got it when: your quietest note is as clean as your loudest.</div>
       <div class="branch"><b>Stuck?</b> Quarter notes only, two-beat phrases, two-beat rests.</div>
-      <div class="branch"><b>Level up:</b> try call-and-response — a 2-bar question ending anywhere, a 2-bar answer landing on C.</div>
+      <div class="branch"><b>Level up:</b> try call-and-response — a 2-bar question ending off the root, a 2-bar answer landing on A.</div>
       <div class="rate" data-layer="4">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" onclick="rate(this)">1</button>
@@ -176,13 +180,14 @@ E |--5-------8-----------------------|</pre>
   <section class="layer l5" id="layer-5">
     <div class="layer-head"><span class="layer-num">5</span><h2>Open Chords</h2><span class="layer-unit">Unit 5</span></div>
     <div class="layer-body">
-      <p>The song goes native: the verse as four open chords. Use the small F (top four strings, xx3211) — no barre needed.</p>
-<pre class="tab">Verse loop — 4 beats per chord · 60 BPM
-|  C           |  G           |  Am          |  F           |
-   1  2  3  4     1  2  3  4     1  2  3  4     1  2  3  4</pre>
-      <div class="playline"><b>Play it:</b> one down-strum per beat, four beats per chord, one full verse loop with every change landing on beat 1. Start forming the next chord on beat 4.</div>
-      <div class="branch"><b>Stuck?</b> Isolate the roughest pair (probably C&nbsp;&rarr;&nbsp;F) and loop just those two, four beats each.</div>
-      <div class="branch"><b>Level up:</b> keep the strum hand swinging down-up in 8th notes ("1 + 2 + 3 + 4 +") through every change, add the chorus turnaround — Am &middot; G &middot; F &middot; C — or trade loops with a partner soloing Layer 4 over you.</div>
+      <p>The song goes native. Capo on fret 1, and the shapes you know — Am, C, Dm, F — become the actual record. The G/B turnaround is just a G sound with its B note in the bass, closing the loop back to Am.</p>
+<pre class="tab">Capo 1 — shapes as written · 4 beats per chord · 60 &rarr; 65 &rarr; 70 BPM
+|  Am          |  C           |  Dm          |  F           |
+   1  2  3  4     1  2  3  4     1  2  3  4     1  2  3  4
+then G/B for 4 beats to turn it around, back to Am</pre>
+      <div class="playline"><b>Play it:</b> capo on, down-strums, four beats per chord, climbing the tempo ladder <b>60 &rarr; 65 &rarr; 70 BPM</b>. You've got it when: two clean loops at 70 BPM, every change on beat 1, the capo ringing clear.</div>
+      <div class="branch"><b>Stuck?</b> Strum only beat 1 of each chord and travel on the silent beats. Check the capo sits just behind fret 1 — buzzing usually means it slid.</div>
+      <div class="branch"><b>Level up:</b> folk strum (D-D-U-U-D-U) on each chord, or trade loops with a partner soloing Layer 4 over you — together you're the whole track.</div>
       <div class="rate" data-layer="5">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" onclick="rate(this)">1</button>
@@ -203,7 +208,7 @@ E |--5-------8-----------------------|</pre>
    collections and no security-rule changes. If the student isn't signed
    in, or a school filter blocks the Firebase SDK, the highlight quietly
    stays session-only (same behavior the page always had). */
-var SONG_ID = 'let-it-be';
+var SONG_ID = 'the-cure';
 var fbUser = null, fbDb = null, saveTimer = null, dirty = false;
 
 function rate(btn){

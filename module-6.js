@@ -22,7 +22,10 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        sections: [
+          {
+            title: 'Watch the lesson videos',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/n45PDizCRLw" target="_blank">Your FIRST Strumming Pattern EVER! – JustinGuitar</a> (0:00–4:00). Job while you watch: keep your eyes on his strumming wrist and count how many times it changes direction in one bar.',
             hint: 'Pay close attention to his wrist — it never stops moving, even when he isn\'t hitting the strings. The pendulum motion is the secret.',
@@ -42,7 +45,12 @@ SETS.push(
             hint: 'Count out loud with him: "1 + 2 + 3 + 4 +". Saying the count is the fastest way to internalize the pulse.',
             skills: [3],
             response: { type: 'short', placeholder: 'When you count "1 + 2 + 3 + 4 +", which counts are the downstrokes? Which are the upstrokes?' }
+          }
+            ]
           },
+          {
+            title: 'Feel the pulse in a real song',
+            steps: [
           {
             text: 'Listen to "Brown Eyed Girl" by Van Morrison. Tap along on your leg — down with your hand on the numbers, up on the "ands". Can you feel the 8th-note pulse?',
             hint: 'You don\'t need a guitar yet. Just train your body to feel the steady pulse before you add the strings.',
@@ -56,7 +64,12 @@ SETS.push(
               '8',
               '16'
             ] }
+          }
+            ]
           },
+          {
+            title: 'Form today\'s chords',
+            steps: [
           {
             text: 'Meet your two chords for today: <strong>Em</strong> and <strong>Am</strong> (from Module 5). Form each shape from the diagram and strum once to make sure every string rings — you\'ll switch between these two all class.',
             hint: 'Em uses two fingers; Am adds a third. The diagrams show exactly where each finger goes. Clean chords now make the strumming sound good later.',
@@ -64,10 +77,17 @@ SETS.push(
               { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 },
               { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
             ]
+          }
+            ]
           },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — take a beat to reflect: which was harder to keep steady today — your strum hand swinging non-stop like a pendulum, or counting "1 + 2 + 3 + 4 +" out loud the whole time? What started to make it click?',
             response: { type: 'short', placeholder: 'e.g. my hand kept freezing on the chord change — slowing to 50 BPM helped it keep swinging' }
+          }
+            ]
           }
         ]
       },
@@ -229,7 +249,10 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        sections: [
+          {
+            title: 'Watch the lesson videos',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/6LmQCdt_ZhQ" target="_blank">The Most Common Strumming Pattern of All Time! – JustinGuitar</a> (0:00–4:00). Job while you watch: air-strum along and find the one downstroke he skips — the wrist still swings down, but the pick misses on purpose.',
             hint: 'Justin calls this "old faithful" — D-DU-UDU. Listen for which strums he skips: the wrist still moves, but the pick doesn\'t hit the strings on those beats.',
@@ -249,7 +272,12 @@ SETS.push(
             hint: 'Marty stacks patterns from easiest to harder, accenting beats 2 and 4 as he goes. The accents give the strum a "backbeat" feel, like a drummer\'s snare.',
             skills: [3, 4],
             response: { type: 'short', placeholder: 'Why might emphasizing beats 2 and 4 (instead of 1 and 3) make a strum pattern sound more "groovy"?' }
+          }
+            ]
           },
+          {
+            title: 'Tap the pattern with a real song',
+            steps: [
           {
             text: 'Listen to "I\'m Yours" by Jason Mraz. Tap the D-DU-UDU pattern on your leg along with the song. Where does the pattern repeat?',
             hint: 'The pattern is one bar long and repeats throughout the whole song. Once you have it, you have most of his song.',
@@ -263,7 +291,12 @@ SETS.push(
               '8',
               '16'
             ] }
+          }
+            ]
           },
+          {
+            title: 'Form today\'s chords',
+            steps: [
           {
             text: 'Today\'s pattern lands on <strong>G</strong> and <strong>D</strong>. Form each shape from the diagram and strum once cleanly before you add the D-DU-UDU rhythm.',
             hint: 'G is a full six-string chord; D skips the two lowest strings (the X marks). Get them ringing clean first — the rhythm is easier when the chord isn\'t fighting you.',
@@ -271,10 +304,17 @@ SETS.push(
               { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
               { name: 'D', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 }
             ]
+          }
+            ]
           },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — take a beat to reflect: in the D-DU-UDU pattern, what trips you up more right now — skipping a strum while the wrist keeps moving, or landing the accents on beats 2 and 4? What helped today?',
             response: { type: 'short', placeholder: 'e.g. I keep actually hitting the strings on the skip — pulling the pick back just slightly fixed it' }
+          }
+            ]
           }
         ]
       },
@@ -432,7 +472,10 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        sections: [
+          {
+            title: 'Watch the lesson videos',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/CjM5fyXoV8w" target="_blank">Learn ANY Strumming Pattern with this Exercise – JustinGuitar</a> (0:00–4:00). Job while you watch: pick ONE pattern he shows and tap it on your leg until you can keep it going without looking.',
             hint: 'Notice how each pattern Justin demonstrates has a different feel — folk feels gentle, rock feels driving, reggae feels bouncy. The pattern is the GENRE in many cases.',
@@ -452,23 +495,40 @@ SETS.push(
             hint: 'Marty walks through several patterns. There is no single "correct" one — listen to a song and feel which fits. The original recording usually tells you exactly what to do.',
             skills: [4, 5],
             response: { type: 'short', placeholder: 'Pick a song you like. Describe the strum pattern in your own words — is it gentle, driving, choppy? What gives it that feel?' }
+          }
+            ]
           },
+          {
+            title: 'Compare reggae and rock feels',
+            steps: [
           {
             text: 'Compare two recordings: "Three Little Birds" (Bob Marley — reggae) and "Bad Moon Rising" (CCR — rock). Same speed-ish, very different feel. What makes the difference?',
             hint: 'It\'s almost entirely the strum pattern. Reggae emphasizes the offbeats (the "+"); rock emphasizes the downbeats (the numbers).',
             skills: [4, 5],
             response: { type: 'short', placeholder: 'In one sentence: what is the biggest difference between the reggae strum and the rock strum?' }
+          }
+            ]
           },
+          {
+            title: 'Form the new C chord',
+            steps: [
           {
             text: 'The progressions today add one new shape: <strong>C</strong>. Form it from the diagram and strum the top five strings (the low E is muted) until it rings clean.',
             hint: 'C skips the lowest string (the X on string 6). Your ring finger reaches to the 3rd fret of the A string — a big stretch at first.',
             chords: [
               { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 }
             ]
+          }
+            ]
           },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — take a beat to reflect: of the three feels you tried — folk, rock, reggae — which was hardest to make sound convincing on your guitar, and what gave it away as "not quite right"?',
             response: { type: 'short', placeholder: 'e.g. reggae — my offbeat upstrokes were too heavy, so it sounded like rock with gaps' }
+          }
+            ]
           }
         ]
       },

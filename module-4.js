@@ -22,7 +22,10 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        sections: [
+          {
+            title: 'Watch the lesson videos',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/G-X1RemAzks" target="_blank">Minor Pentatonic Scale, Pattern 1 (BC-176) – JustinGuitar</a> (0:00–5:00). As you watch, follow along on your guitar — pause and find each note BEFORE he names it.',
             hint: 'Follow along on your guitar as he shows the pattern. Pause and find each note before he names it.',
@@ -43,7 +46,12 @@ SETS.push(
             hint: 'Focus on the Pattern 1 shape — how does it sit on the neck? Notice where the root note is.',
             skills: [1, 3],
             response: { type: 'short', placeholder: 'Describe the Pattern 1 shape. Where is the root note?' }
+          }
+            ]
           },
+          {
+            title: 'Position the pattern yourself',
+            steps: [
           {
             text: 'Try positioning Pattern 1 as C major pentatonic: place your 4th finger on the 8th fret of string 6 (the note C). Play the pattern up and down slowly. Click "Hear C major pentatonic" below to check your ear against it.',
             hint: 'Major pentatonic: 4th finger on root. Minor pentatonic: 1st finger on root. Same pattern — different finger on the starting note.',
@@ -58,7 +66,12 @@ SETS.push(
               '2nd finger (middle)',
               'It does not matter which finger'
             ] }
+          }
+            ]
           },
+          {
+            title: 'Listen — major vs minor moods',
+            steps: [
           {
             text: 'Match the mood — scale choice changes the feel. Listen to two short solos: <a href="https://www.youtube.com/watch?v=BycLmWI97Nc" target="_blank" data-ext="1">Clip 1 — "La Bamba"</a> (major pentatonic) then <a href="https://www.youtube.com/watch?v=kpC69qIe02E" target="_blank" data-ext="1">Clip 2 — "The Thrill Is Gone"</a> (minor / blues). Notice how the major-pentatonic solo sounds brighter and happier, while the minor / blues solo sounds darker and moodier.',
             hint: 'Major pentatonic = brighter, sunnier. Minor / blues = darker, sadder, more "bluesy." Same instrument — the scale choice sets the mood.',
@@ -75,10 +88,17 @@ SETS.push(
             text: 'In one word each, name the mood you heard in the two clips above.',
             hint: 'There\'s no wrong answer — trust your ear. Words like "bright," "happy," "dark," "sad," or "moody" all work.',
             response: { type: 'short', prompt: 'In one word, describe the mood of each clip.', placeholder: 'Clip 1: ____   ·   Clip 2: ____' }
+          }
+            ]
           },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — take a beat to reflect: when you positioned Pattern 1 today, what told you whether you were set up for MAJOR or MINOR — the finger on the root, or the sound? Which felt more reliable?',
             response: { type: 'short', placeholder: 'e.g. I trusted the finger (4th = major, 1st = minor) more than my ear so far' }
+          }
+            ]
           }
         ]
       },
@@ -309,7 +329,10 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        sections: [
+          {
+            title: 'Watch the lesson videos',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/G-X1RemAzks" target="_blank">Minor Pentatonic Pattern 1 (BC-176) – JustinGuitar</a> (0:00–4:00). As you watch, copy his FEEL on one note — play it loud, then soft — before you worry about the actual notes.',
             hint: 'Notice how he varies his attack — some notes are loud, some soft. That\'s dynamics. Try to copy his feel, not just his notes.',
@@ -329,7 +352,12 @@ SETS.push(
               'Zero pick strokes',
               'Depends on the speed'
             ] }
+          }
+            ]
           },
+          {
+            title: 'Experiment with timbre',
+            steps: [
           {
             text: 'Experiment with timbre: play a note close to the bridge, then the same note near the neck. Hear the difference? Bright vs warm. Try to match the mood of a song you know.',
             hint: 'There\'s no wrong answer here. Your picking hand position is a real-time tone control. Move it consciously.',
@@ -343,7 +371,12 @@ SETS.push(
               'Right over the soundhole',
               'They sound exactly the same'
             ] }
+          }
+            ]
           },
+          {
+            title: 'Name the D-string notes',
+            steps: [
           {
             text: 'Now try it: the natural notes on the D string. Click any note below the TAB to hear it, then play and NAME each one up the string — D · E · F · G · A · B · C. You\'ll drill this chart-free at the practice station.',
             hint: 'It\'s the same musical alphabet you know from the E and A strings. The gap between E–F and B–C is one fret (a half step). Every other gap is two frets (a whole step).',
@@ -360,10 +393,17 @@ SETS.push(
                 { string: 'D', fret: 10, note: 'C', midi: 60 }
               ]
             }
+          }
+            ]
           },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — take a beat to reflect: which expressive tool felt most natural today — dynamics (loud/soft), timbre (bright/warm), or the hammer-on? Which one will you lean on in your solos?',
             response: { type: 'short', placeholder: 'e.g. dynamics came easily; hammer-ons still feel unreliable' }
+          }
+            ]
           }
         ]
       },
@@ -552,7 +592,10 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        sections: [
+          {
+            title: 'Watch the lesson videos',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/m_IiyJu60-c" target="_blank">Major & Minor Pentatonic Connection – Marty Music</a> (5:00–end). As you watch the theory section, keep one finger on your low E root and notice it never moves — only which note you call "home" changes.',
             hint: 'This time focus on the theory section. How does he explain the relationship between major and minor pentatonic? Can you see the relative major/minor connection?',
@@ -572,7 +615,12 @@ SETS.push(
               'Bending the string up a whole step',
               'Sliding between two frets quickly'
             ] }
+          }
+            ]
           },
+          {
+            title: 'Hear the blues note',
+            steps: [
           {
             text: 'Theory check: the blues scale adds one note to the minor pentatonic — the ♭5 (flat 5). In A minor, that\'s the note Eb. Click "Hear the A blues scale" below and listen for the extra note that wasn\'t in the plain minor pentatonic — that\'s the blue note.',
             hint: 'In Pattern 1 for A minor, the ♭5 sits between the 4 and 5 on the D string. It\'s a "passing tone" — it creates tension that wants to resolve.',
@@ -587,10 +635,17 @@ SETS.push(
               'The ♭7 (flat 7)',
               'The 2nd'
             ] }
+          }
+            ]
           },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — take a beat to reflect: you can now explain how the pentatonic is built, add the blues note, and use vibrato. Which piece of theory finally "clicked" today, and which still feels fuzzy?',
             response: { type: 'short', placeholder: 'e.g. relative major/minor clicked; the ♭5 blue note still feels random to me' }
+          }
+            ]
           }
         ]
       },

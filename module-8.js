@@ -22,7 +22,10 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        sections: [
+          {
+            title: 'Watch the lesson videos',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/YZkkUjDDamA" target="_blank">Beginner Fingerpicking Made Easy: Pinch, Pluck, & Play! – Marty Music</a> (0:00–5:00). As you watch, copy his RIGHT-HAND shape on your own guitar — thumb resting on the low E, fingers curved over the treble strings.',
             hint: 'Watch the right hand: wrist arched, fingers curved like he\'s holding a small ball. The thumb sits FORWARD of the fingers, not tucked under them.',
@@ -50,13 +53,23 @@ SETS.push(
               'm (middle)',
               'a (ring)'
             ] }
+          }
+            ]
           },
+          {
+            title: 'Listen for the thumb and fingers',
+            steps: [
           {
             text: 'Listen to "Dust in the Wind" by Kansas. Pay attention to the picking pattern — you can clearly hear the alternating bass (thumb) underneath the melody (fingers).',
             hint: 'This song is the textbook example of fingerpicking. The bass moves on every beat, the fingers play between the beats.',
             skills: [4, 5],
             response: { type: 'short', placeholder: 'In "Dust in the Wind", describe what you hear the THUMB doing vs. what the FINGERS are doing.' }
+          }
+            ]
           },
+          {
+            title: 'Try p-i-m-a on open strings',
+            steps: [
           {
             text: 'Now try it: pluck p-i-m-a on open strings — low E (p), G (i), B (m), high e (a). Click any note below the TAB to hear it, then play the staircase on your own guitar, one finger per string.',
             hint: 'No pick, no chord yet — just the right hand. Each pluck lands on its own string, reading left to right. Aim for the same volume from every finger.',
@@ -70,10 +83,17 @@ SETS.push(
                 { string: 'e', fret: 0, note: 'e', midi: 64 }
               ]
             }
+          }
+            ]
           },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — take a beat to reflect: which finger felt the most awkward today, and what helped it land more evenly?',
             response: { type: 'short', placeholder: 'e.g. the ring (a) finger was weakest — slowing down and watching it helped' }
+          }
+            ]
           }
         ]
       },
@@ -238,7 +258,10 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        sections: [
+          {
+            title: 'Watch the lesson videos',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/K2Z3RZc5t-A" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (revisit 0:00–4:00). This time, watch one full pattern cycle and count the notes out loud with him.',
             hint: 'The "p-i-m-a-m-i" cycle (6 notes per bar) is one of the most-used patterns in folk and pop. It creates a flowing, arpeggiated feel under a chord.',
@@ -258,7 +281,12 @@ SETS.push(
             hint: 'Marty\'s "pinch and pluck" demonstration breaks the pattern into chunks. Focus on the FINGER ORDER — once it\'s automatic, your speed will follow.',
             skills: [3, 4],
             response: { type: 'short', placeholder: 'When the chord changes, does the picking pattern change too, or stay the same?' }
+          }
+            ]
           },
+          {
+            title: 'Listen for the 6-note pulse',
+            steps: [
           {
             text: 'Listen to "Nothing Else Matters" by Metallica. The intro is entirely fingerpicked open chords. Tap along — can you feel the 6-note pulse?',
             hint: 'James Hetfield famously taught himself this with no plan. He uses thumb-finger-thumb-finger patterns. Notice the constant thumb motion.',
@@ -272,7 +300,12 @@ SETS.push(
               'It doesn\'t play at all in arpeggios',
               'It plays the highest notes'
             ] }
+          }
+            ]
           },
+          {
+            title: 'Try the pattern on Em',
+            steps: [
           {
             text: 'Now try it: fret Em and play the 6-note p-i-m-a-m-i arpeggio. Click any note below the TAB to hear it, then play the staircase yourself — thumb on the low E (Em\'s root), i-m-a on G-B-e, then back down m-i.',
             hint: 'Em is all open strings on the treble side, so you can focus entirely on the picking hand. Read the TAB left to right — the bass note starts it, then the fingers climb and come back.',
@@ -288,10 +321,17 @@ SETS.push(
                 { string: 'G', fret: 0, note: 'G', midi: 55 }
               ]
             }
+          }
+            ]
           },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — take a beat to reflect: did the pattern start to feel automatic, or were you still thinking through each finger? What would make it smoother?',
             response: { type: 'short', placeholder: 'e.g. still counting each finger — slowing the metronome down helped it flow' }
+          }
+            ]
           }
         ]
       },
@@ -455,7 +495,10 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        sections: [
+          {
+            title: 'Watch the lesson videos',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/rGt-lMXYzZc" target="_blank">Folk Fingerstyle Patterns #1 — Travis Picking (FO-101) – JustinGuitar</a> (0:00–4:00). As you watch, tap the alternating thumb on your knee — bass on 1, the other bass on 3 — before you ever add the fingers.',
             hint: 'Travis picking uses an ALTERNATING thumb: bass note on beat 1, a different bass note on beat 3. The fingers fill in between. It\'s the foundation of country, folk, and a lot of pop.',
@@ -475,13 +518,23 @@ SETS.push(
             hint: 'The hardest part: keeping the picking pattern PERFECTLY STEADY through a chord change. Anticipate the next chord — start moving your fretting hand on the LAST note of the current bar.',
             skills: [3, 4],
             response: { type: 'short', placeholder: 'When you fingerpick from Am to C, when (which note in the bar) does your fretting hand start preparing for the next chord?' }
+          }
+            ]
           },
+          {
+            title: 'Listen through a full verse',
+            steps: [
           {
             text: 'Listen to one of: "House of the Rising Sun", "Dust in the Wind", or "Hallelujah". Listen to a full verse. Can you hear when the chord changes? Does the pattern ever break?',
             hint: 'In professional recordings the pattern almost never breaks at a chord change — that\'s your standard. It\'s a high bar but worth aiming for.',
             skills: [4, 5],
             response: { type: 'short', placeholder: 'Which song did you listen to? Did the picking pattern stay completely steady through every chord change?' }
+          }
+            ]
           },
+          {
+            title: 'Try the arpeggio on C',
+            steps: [
           {
             text: 'Now try it: fret C and play the 6-note arpeggio over it. Click any note below the TAB to hear it, then play the staircase — thumb on the A string\'s 3rd fret (C\'s root), i-m-a on G-B-e, then back down m-i.',
             hint: 'C uses the same picking pattern as Em and Am — only the thumb\'s bass note changes. Read the TAB left to right and match each pluck.',
@@ -497,10 +550,17 @@ SETS.push(
                 { string: 'G', fret: 0, note: 'G', midi: 55 }
               ]
             }
+          }
+            ]
           },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — take a beat to reflect: across the whole module, which is harder for you — keeping the picking pattern steady, or changing chords cleanly underneath it? What\'s your plan for the harder one?',
             response: { type: 'short', placeholder: 'e.g. chord changes break my pattern — I\'ll practice moving the fretting hand a beat early' }
+          }
+            ]
           }
         ]
       },

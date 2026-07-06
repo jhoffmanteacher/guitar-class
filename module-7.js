@@ -22,7 +22,11 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',
+        sections: [
+          {
+            title: 'Watch: reading TAB and your riff',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/4-JTCASlh-w" target="_blank">How To Read TAB and Chord Boxes (BC-108) – JustinGuitar</a> (0:00–4:00).',
             hint: 'You\'ve read single-note TAB since Module 1. Watch for two new things now. First: numbers STACKED vertically mean play them together (a chord). Second: the symbols above the numbers tell you how long each note lasts — plain stems are quarter notes, flags and beams are 8th notes.',
@@ -50,10 +54,17 @@ SETS.push(
               'Strings 5 and 4 (A and D)',
               'Strings 3 and 2 (G and B)'
             ] }
+          }
+            ]
           },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — take a beat to reflect: TAB packs a lot into one line (which string, which fret, chord-or-melody, how long the note lasts). Which part still slows you down most when you sight-read a new riff?',
             response: { type: 'short', placeholder: 'e.g. the rhythm symbols — I can find the notes but not the timing' }
+          }
+            ]
           }
         ]
       },
@@ -237,7 +248,11 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',
+        sections: [
+          {
+            title: 'Watch: the E-shape barre chord',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/4cR1sa1_d_8" target="_blank">The Easiest F Chord Guitar Lesson You\'ll Find – JustinGuitar</a> (0:00–4:00).',
             hint: 'The F barre is famously hard. It\'s the lowest barre, where the strings are tightest, so it\'s the toughest spot — G and A higher up are easier. Watch his THUMB: keep it on the BACK of the neck, behind your index. That\'s where the squeezing power comes from.',
@@ -257,10 +272,17 @@ SETS.push(
             hint: 'The "E shape" is literally the E major open chord, but you slide your fingers up the neck and use your INDEX finger to "be the nut" (the bar).',
             skills: [2, 3],
             response: { type: 'short', placeholder: 'Why is it called an "E-shape" barre chord? What does the shape have in common with the open E major chord?' }
+          }
+            ]
           },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — barre chords are a strength skill that takes weeks, not minutes. What is one small thing that improved today, even if the whole chord isn\'t ringing yet?',
             response: { type: 'short', placeholder: 'e.g. the low strings ring now — just the B string left to fix' }
+          }
+            ]
           }
         ]
       },
@@ -449,7 +471,11 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',
+        sections: [
+          {
+            title: 'Watch: the A-shape barre chord',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/C7k0CWgI-xI" target="_blank">A Shape Major Barre Chords on Guitar – JustinGuitar</a> (0:00–4:00).',
             hint: 'The A-shape uses the open A major chord, moved up the neck. Some players bar strings 2, 3, 4 with their RING finger only — it\'s a different technique from the E-shape.',
@@ -469,10 +495,17 @@ SETS.push(
             hint: 'B major is a great A-shape practice chord — it lives at the 2nd fret with the root on string 5. Listen for the muted high E (string 1) — that\'s normal for an A-shape barre.',
             skills: [3, 4],
             response: { type: 'short', placeholder: 'When you play an A-shape barre, what should happen to string 1 (the high e)? Is it played or muted? Why?' }
+          }
+            ]
           },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — you now know both barre shapes. Which feels harder right now — the E-shape (root on string 6) or the A-shape (root on string 5) — and what makes it tougher for your hand?',
             response: { type: 'short', placeholder: 'e.g. the A-shape — barring 4-3-2 with my ring finger is awkward' }
+          }
+            ]
           }
         ]
       },

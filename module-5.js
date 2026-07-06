@@ -22,7 +22,10 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        sections: [
+          {
+            title: 'Watch the lesson videos',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/4-JTCASlh-w" target="_blank">How to Read TAB & Chord Boxes – JustinGuitar</a> (0:00–4:00).',
             hint: 'Pause when he shows a diagram and look at it yourself. What does the X mean? What does the O mean? What do the numbers in the dots tell you?',
@@ -43,9 +46,16 @@ SETS.push(
             skills: [3, 4],
             response: { type: 'short', placeholder: 'When you strummed Am, did every string ring clean? If not, which one was muted and why?' }
           },
+            ]
+          },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — take a beat to reflect: of everything on a chord diagram (X, O, dots, finger numbers), which part still feels least automatic when you sit down to read one?',
             response: { type: 'short', placeholder: 'e.g. I still pause on which number means which finger' }
+          }
+            ]
           }
         ]
       },
@@ -215,7 +225,10 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        sections: [
+          {
+            title: 'Watch the lesson videos',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/RBYqdBqogo4" target="_blank">The C Chord (BC-132) – JustinGuitar</a> (0:00–4:00).',
             hint: 'He shows the "perfect" chord change technique. Watch how he prepares the next chord shape before strumming it. Anticipation is the secret.',
@@ -236,15 +249,27 @@ SETS.push(
             skills: [2],
             response: { type: 'short', placeholder: 'Which version of the F chord are you starting with (full barre or simplified)? Why?' }
           },
+            ]
+          },
+          {
+            title: 'Listen for the chord changes',
+            steps: [
           {
             text: 'Listen to "Let It Be" by The Beatles. Can you hear the C–G–Am–F chord pattern in the verse? Count the bars — how many strums per chord? <a href="tabs/let-it-be.html#layer-1" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 4</a>.',
             hint: 'You don\'t need to play along yet. Just listen and map out when the chords change. This trains your ear to recognize the I–V–vi–IV progression.',
             skills: [5],
             response: { type: 'short', placeholder: 'About how many strums (or beats) does each chord get before it changes?' }
           },
+            ]
+          },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — take a beat to reflect: which of these four chords (C, G, Am, F) is fighting you most right now, and is it the shape itself or getting to it in time?',
             response: { type: 'short', placeholder: 'e.g. F — the shape is fine but I\'m slow getting into it' }
+          }
+            ]
           }
         ]
       },
@@ -457,7 +482,10 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        sections: [
+          {
+            title: 'Watch the lesson videos',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/yh6sPqDEZCY" target="_blank">The D Chord – JustinGuitar</a> (0:00–5:00).',
             hint: 'D major has a triangular finger shape — notice how his three fingers are stacked in a triangle on strings 1, 2, and 3. Try to copy that exact shape.',
@@ -481,15 +509,27 @@ SETS.push(
             ],
             response: { type: 'short', placeholder: 'Which Bm version are you starting with (partial barre or full)? What\'s the hardest part for you?' }
           },
+            ]
+          },
+          {
+            title: 'Listen for the chord changes',
+            steps: [
           {
             text: 'Listen to "Oye Mi Amor" by Maná — the chorus rides on D, A, Bm, and G. Can you hear when each chord arrives? Tap along and try to feel the chord changes.',
             hint: 'D, A, and Bm are the Group 2 chords you\'re learning right now, and G you already know. Your ear already knows the sound — you\'re just learning to play them.',
             skills: [5],
             response: { type: 'short', placeholder: 'Describe one moment where you clearly heard a chord change.' }
           },
+            ]
+          },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — take a beat to reflect: you now know two whole chord groups. Which Group 2 chord (D, A, Em, Bm) feels furthest from automatic, and what specifically trips it up?',
             response: { type: 'short', placeholder: 'e.g. D — string 1 keeps getting muted by my ring finger' }
+          }
+            ]
           }
         ]
       },
@@ -654,7 +694,10 @@ SETS.push(
 
     stations: {
       b: {
-        title: 'Computer station — Watch · Listen · Practice',        steps: [
+        title: 'Computer station — Watch · Listen · Practice',        sections: [
+          {
+            title: 'Watch the lesson videos',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/8H393ryDkuY" target="_blank">The E Chord (BC-113) – JustinGuitar</a> (0:00–4:00).',
             hint: 'E major uses all four fingers — it\'s a full chord. B7 is also four fingers but in a different arrangement. Take them one at a time. The B7 chord has a distinctive jazz/blues sound.',
@@ -679,6 +722,11 @@ SETS.push(
               'Speed matters more than accuracy'
             ] }
           },
+            ]
+          },
+          {
+            title: 'Plan your showcase practice',
+            steps: [
           {
             text: 'Look up a chord chart for your showcase song (or one you\'ve been working on). Map out which chord groups you\'ll use. Are there any chords you need to review?',
             hint: 'Being intentional about your practice is a skill. Know exactly which transitions are rough and spend most of your time there — not on the parts you already know.',
@@ -691,9 +739,16 @@ SETS.push(
             skills: [5],
             response: { type: 'short', placeholder: 'One thing you can do now that you couldn\'t in Module 1 — and one goal for the showcase.' }
           },
+            ]
+          },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — take a beat to reflect: with the showcase ahead, what will eat most of your practice time between now and then — a specific chord, a transition, or keeping the strum steady?',
             response: { type: 'short', placeholder: 'e.g. the B7→E change, and not rushing the strum' }
+          }
+            ]
           }
         ]
       },

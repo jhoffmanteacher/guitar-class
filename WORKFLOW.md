@@ -16,6 +16,10 @@
 ## Current focus
 
 - [ ] **Full website review** (Jonathan-led) — scope and plan TBD.
+- [x] **Station B collapsible sections** — make the Station B portions of each
+      set collapse/expand the same way the Station C portions do.
+      ✅ 2026-07-06: all 22 sets restructured into thematic sections (steps
+      unchanged, verified byte-identical); checks passed; pushed.
 
 ---
 

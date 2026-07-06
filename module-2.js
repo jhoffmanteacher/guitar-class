@@ -33,58 +33,78 @@ SETS.push(
     stations: {
       b: {
         title: 'Computer station — Watch · Listen · Practice',
-        steps: [
+        sections: [
           {
-            text: 'Watch: <a href="https://youtu.be/Abrd0c92xRE" target="_blank">Open Notes On The Guitar – JustinGuitar</a>.',
-            hint: 'Play along on your guitar as he goes through each note on both strings. Pause and find each note before he names it.',
-            skills: [1, 2, 3],
-            response: { type: 'mc', prompt: 'On the low E string, which note is at fret 5?',
-              answer: 0,
-              explain: 'Fret 5 of the low E is A — the same pitch as the open A string right next to it.',
-              choices: [
-              'A',
-              'D',
-              'G',
-              'F'
-            ] }
+            title: 'Watch the lesson videos',
+            steps: [
+              {
+                text: 'Watch: <a href="https://youtu.be/Abrd0c92xRE" target="_blank">Open Notes On The Guitar – JustinGuitar</a>.',
+                hint: 'Play along on your guitar as he goes through each note on both strings. Pause and find each note before he names it.',
+                skills: [1, 2, 3],
+                response: { type: 'mc', prompt: 'On the low E string, which note is at fret 5?',
+                  answer: 0,
+                  explain: 'Fret 5 of the low E is A — the same pitch as the open A string right next to it.',
+                  choices: [
+                  'A',
+                  'D',
+                  'G',
+                  'F'
+                ] }
+              },
+              {
+                text: 'Watch: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard – Marty Music</a> (0:00–4:00).',
+                hint: 'Focus on the E and A strings only for now. What patterns does he point out?',
+                skills: [1, 3],
+                response: { type: 'short', placeholder: 'Describe one pattern he points out for finding notes on the E or A string.' }
+              }
+            ]
           },
           {
-            text: 'Watch: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard – Marty Music</a> (0:00–4:00).',
-            hint: 'Focus on the E and A strings only for now. What patterns does he point out?',
-            skills: [1, 3],
-            response: { type: 'short', placeholder: 'Describe one pattern he points out for finding notes on the E or A string.' }
+            title: 'Listen and find notes by ear',
+            steps: [
+              {
+                text: 'Listen to "Happy Birthday" — can you identify which notes of the melody live on the E or A string? Hum along and try to find the notes.',
+                hint: 'Don\'t worry about playing it yet — just train your ear to connect sounds to strings.',
+                skills: [5],
+                response: { type: 'short', placeholder: 'Which note(s) did you find first? Where on the fretboard?' }
+              }
+            ]
           },
           {
-            text: 'Listen to "Happy Birthday" — can you identify which notes of the melody live on the E or A string? Hum along and try to find the notes.',
-            hint: 'Don\'t worry about playing it yet — just train your ear to connect sounds to strings.',
-            skills: [5],
-            response: { type: 'short', placeholder: 'Which note(s) did you find first? Where on the fretboard?' }
+            title: 'Play along with your note chart',
+            steps: [
+              {
+                text: 'Play-along preview: keep your note-name chart open and play up the low E string slowly with the audio, frets 0–12 — E · F · G · A · B · C · D · E — saying each name aloud. Lean on the chart here; you\'ll do it from memory at the practice station.',
+                hint: 'Slow is fine. Right now the goal is connecting each name to its spot — use the chart freely.',
+                skills: [2],
+                playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] },
+                response: { type: 'mc', prompt: 'On the low E string, what note is at fret 10?',
+                  answer: 1,
+                  explain: 'Counting the naturals up the low E (E F G A B C D), fret 10 lands on D — fret 12 is E again, the octave.',
+                  choices: [
+                  'C',
+                  'D',
+                  'E',
+                  'B'
+                ] }
+              },
+              {
+                text: 'Same idea on the A string, still with your chart: A · B · C · D · E · F · G · A (frets 0–12), up then back down, names aloud.',
+                hint: 'Notice fret 5 of the A string is the same note as the open D string — that connection helps later.',
+                skills: [3],
+                playSeq: { label: 'Play all', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] },
+                response: { type: 'short', placeholder: 'What did you notice about any of the notes? Did any two notes feel or sound similar?' }
+              }
+            ]
           },
           {
-            text: 'Play-along preview: keep your note-name chart open and play up the low E string slowly with the audio, frets 0–12 — E · F · G · A · B · C · D · E — saying each name aloud. Lean on the chart here; you\'ll do it from memory at the practice station.',
-            hint: 'Slow is fine. Right now the goal is connecting each name to its spot — use the chart freely.',
-            skills: [2],
-            playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] },
-            response: { type: 'mc', prompt: 'On the low E string, what note is at fret 10?',
-              answer: 1,
-              explain: 'Counting the naturals up the low E (E F G A B C D), fret 10 lands on D — fret 12 is E again, the octave.',
-              choices: [
-              'C',
-              'D',
-              'E',
-              'B'
-            ] }
-          },
-          {
-            text: 'Same idea on the A string, still with your chart: A · B · C · D · E · F · G · A (frets 0–12), up then back down, names aloud.',
-            hint: 'Notice fret 5 of the A string is the same note as the open D string — that connection helps later.',
-            skills: [3],
-            playSeq: { label: 'Play all', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] },
-            response: { type: 'short', placeholder: 'What did you notice about any of the notes? Did any two notes feel or sound similar?' }
-          },
-          {
-            text: 'Station Wrap-Up — take a beat to reflect: which note or fret felt fuzziest today, and what (if anything) started to make it click?',
-            response: { type: 'short', placeholder: 'e.g. fret 8 on the low E — kept mixing up B and C' }
+            title: 'Station Wrap-Up',
+            steps: [
+              {
+                text: 'Station Wrap-Up — take a beat to reflect: which note or fret felt fuzziest today, and what (if anything) started to make it click?',
+                response: { type: 'short', placeholder: 'e.g. fret 8 on the low E — kept mixing up B and C' }
+              }
+            ]
           }
         ]
       },
@@ -285,120 +305,135 @@ SETS.push(
     stations: {
       b: {
         title: 'Computer station — Watch · Listen · Practice',
-        steps: [
+        sections: [
           {
-            text: 'Watch: <a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym: Strength & Dexterity (TE-001) – JustinGuitar</a> (0:00–4:00).',
-            hint: 'Try each exercise slowly on your guitar as he demonstrates. Slow and clean beats fast and buzzy every time.',
-            skills: [1, 2, 3],
-            response: { type: 'short', placeholder: 'Which exercise felt hardest, and what do you think makes it hard?' }
-          },
-          {
-            text: 'Watch: <a href="https://youtu.be/IscDj_-Nr0s" target="_blank">Finger Placement to Avoid Fret Buzz (BC-106) – JustinGuitar</a> (0:00–4:00).',
-            hint: 'As he lists each cause, pause and test it on your own guitar — find your buzz before he names the fix.',
-            skills: [1, 2],
-            response: { type: 'mc', prompt: 'Which is the MOST common cause of fret buzz for beginners?',
-              answer: 0,
-              explain: 'Light or too-far-from-the-fret pressure can\'t fully close the string — the #1 beginner cause. A wrong pick, bad tuning, or low volume won\'t make a note buzz.',
-              choices: [
-              'Pressing the string too lightly, or too far from the fret',
-              'Using the wrong pick',
-              'The guitar being out of tune',
-              'Strumming too quietly'
-            ] }
-          },
-          {
-            text: 'Watch: <a href="https://youtu.be/FofCWizp43Y" target="_blank">How to Read Guitar TAB – JustinGuitar</a> (0:00–4:00).',
-            hint: 'Pause when he shows a TAB example. Find those notes on your guitar before hitting play.',
-            skills: [4],
-            response: { type: 'mc', prompt: 'On a TAB diagram, the TOP line represents which string?',
-              answer: 0,
-              explain: 'TAB lines mirror the strings by pitch: the TOP line is the thinnest, highest string (high e); the BOTTOM line is the low E.',
-              choices: [
-              'The high E (thinnest) string',
-              'The low E (thickest) string',
-              'The A string',
-              'It depends on the song'
-            ] }
-          },
-          {
-            text: 'Read this TAB: the opening of "Happy Birthday" written out on the low E string. Look at the fret numbers on the bottom line and try to play it. Click any note name below the TAB to hear how it should sound.',
-            hint: 'Read left-to-right, one note per beat. The numbers tell you which fret to press on the low E string. See a # (sharp)? It just means one fret higher than the plain note — F# is one fret above F. We\'ll cover sharps and flats later. For now, just trust the fret numbers.',
-            skills: [4, 5],
-            tab: {
-              caption: '"Happy Birthday" — first two phrases · Low E string',
-              notes: [
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 2, note: 'F#', midi: 42 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 5, note: 'A',  midi: 45 },
-                { string: 'E', fret: 4, note: 'G#', midi: 44 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 2, note: 'F#', midi: 42 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 7, note: 'B',  midi: 47 },
-                { string: 'E', fret: 5, note: 'A',  midi: 45 }
-              ]
-            }
-          },
-          {
-            text: 'Fret buzz self-check: play frets 1–4 on the low E string, one at a time. Press lightly until you hear buzz, then press just enough to stop it. That is the minimum pressure needed.',
-            hint: 'Most beginners press too hard. Finding the minimum pressure is a real technique.',
-            skills: [1, 2],
-            response: { type: 'mc', prompt: 'Where should your fingertip press to get the cleanest tone?',
-              answer: 0,
-              explain: 'Press just behind the fret (toward the nut) with your fingertip — close to the wire without sitting on it gives the cleanest, buzz-free note.',
-              choices: [
-              'Just behind the fret (toward the nut)',
-              'On top of the fret wire',
-              'In the middle of the fret space',
-              'As close to the nut as possible'
-            ] }
-          },
-          {
-            text: 'Try reading the TAB for "Ode to Joy" or "Mary Had a Little Lamb" from the songs section. Play it through at least once — slow and clean. Click a song below to open its TAB.',
-            hint: 'If you get stuck on a note, use your note-name chart to find it. TAB numbers = fret numbers.',
-            skills: [4, 5],
-            tabs: [
+            title: 'Watch the lesson videos',
+            steps: [
               {
-                title: '"Ode to Joy" — opening phrase',
-                caption: 'A string · frets 3–10 · go slow',
-                notes: [
-                  { string: 'A', fret: 7,  note: 'E',  midi: 52 },
-                  { string: 'A', fret: 7,  note: 'E',  midi: 52 },
-                  { string: 'A', fret: 8,  note: 'F',  midi: 53 },
-                  { string: 'A', fret: 10, note: 'G',  midi: 55 },
-                  { string: 'A', fret: 10, note: 'G',  midi: 55 },
-                  { string: 'A', fret: 8,  note: 'F',  midi: 53 },
-                  { string: 'A', fret: 7,  note: 'E',  midi: 52 },
-                  { string: 'A', fret: 5,  note: 'D',  midi: 50 },
-                  { string: 'A', fret: 3,  note: 'C',  midi: 48 },
-                  { string: 'A', fret: 3,  note: 'C',  midi: 48 },
-                  { string: 'A', fret: 5,  note: 'D',  midi: 50 },
-                  { string: 'A', fret: 7,  note: 'E',  midi: 52 },
-                  { string: 'A', fret: 7,  note: 'E',  midi: 52 },
-                  { string: 'A', fret: 5,  note: 'D',  midi: 50 }
-                ]
+                text: 'Watch: <a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym: Strength & Dexterity (TE-001) – JustinGuitar</a> (0:00–4:00).',
+                hint: 'Try each exercise slowly on your guitar as he demonstrates. Slow and clean beats fast and buzzy every time.',
+                skills: [1, 2, 3],
+                response: { type: 'short', placeholder: 'Which exercise felt hardest, and what do you think makes it hard?' }
               },
               {
-                title: '"Mary Had a Little Lamb" — opening phrase',
-                caption: 'A string · frets 3–7 · 7 notes',
-                notes: [
-                  { string: 'A', fret: 7, note: 'E', midi: 52 },
-                  { string: 'A', fret: 5, note: 'D', midi: 50 },
-                  { string: 'A', fret: 3, note: 'C', midi: 48 },
-                  { string: 'A', fret: 5, note: 'D', midi: 50 },
-                  { string: 'A', fret: 7, note: 'E', midi: 52 },
-                  { string: 'A', fret: 7, note: 'E', midi: 52 },
-                  { string: 'A', fret: 7, note: 'E', midi: 52 }
+                text: 'Watch: <a href="https://youtu.be/IscDj_-Nr0s" target="_blank">Finger Placement to Avoid Fret Buzz (BC-106) – JustinGuitar</a> (0:00–4:00).',
+                hint: 'As he lists each cause, pause and test it on your own guitar — find your buzz before he names the fix.',
+                skills: [1, 2],
+                response: { type: 'mc', prompt: 'Which is the MOST common cause of fret buzz for beginners?',
+                  answer: 0,
+                  explain: 'Light or too-far-from-the-fret pressure can\'t fully close the string — the #1 beginner cause. A wrong pick, bad tuning, or low volume won\'t make a note buzz.',
+                  choices: [
+                  'Pressing the string too lightly, or too far from the fret',
+                  'Using the wrong pick',
+                  'The guitar being out of tune',
+                  'Strumming too quietly'
+                ] }
+              },
+              {
+                text: 'Watch: <a href="https://youtu.be/FofCWizp43Y" target="_blank">How to Read Guitar TAB – JustinGuitar</a> (0:00–4:00).',
+                hint: 'Pause when he shows a TAB example. Find those notes on your guitar before hitting play.',
+                skills: [4],
+                response: { type: 'mc', prompt: 'On a TAB diagram, the TOP line represents which string?',
+                  answer: 0,
+                  explain: 'TAB lines mirror the strings by pitch: the TOP line is the thinnest, highest string (high e); the BOTTOM line is the low E.',
+                  choices: [
+                  'The high E (thinnest) string',
+                  'The low E (thickest) string',
+                  'The A string',
+                  'It depends on the song'
+                ] }
+              }
+            ]
+          },
+          {
+            title: 'Practice TAB reading and clean notes',
+            steps: [
+              {
+                text: 'Read this TAB: the opening of "Happy Birthday" written out on the low E string. Look at the fret numbers on the bottom line and try to play it. Click any note name below the TAB to hear how it should sound.',
+                hint: 'Read left-to-right, one note per beat. The numbers tell you which fret to press on the low E string. See a # (sharp)? It just means one fret higher than the plain note — F# is one fret above F. We\'ll cover sharps and flats later. For now, just trust the fret numbers.',
+                skills: [4, 5],
+                tab: {
+                  caption: '"Happy Birthday" — first two phrases · Low E string',
+                  notes: [
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'E', fret: 2, note: 'F#', midi: 42 },
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                    { string: 'E', fret: 4, note: 'G#', midi: 44 },
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'E', fret: 2, note: 'F#', midi: 42 },
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'E', fret: 7, note: 'B',  midi: 47 },
+                    { string: 'E', fret: 5, note: 'A',  midi: 45 }
+                  ]
+                }
+              },
+              {
+                text: 'Fret buzz self-check: play frets 1–4 on the low E string, one at a time. Press lightly until you hear buzz, then press just enough to stop it. That is the minimum pressure needed.',
+                hint: 'Most beginners press too hard. Finding the minimum pressure is a real technique.',
+                skills: [1, 2],
+                response: { type: 'mc', prompt: 'Where should your fingertip press to get the cleanest tone?',
+                  answer: 0,
+                  explain: 'Press just behind the fret (toward the nut) with your fingertip — close to the wire without sitting on it gives the cleanest, buzz-free note.',
+                  choices: [
+                  'Just behind the fret (toward the nut)',
+                  'On top of the fret wire',
+                  'In the middle of the fret space',
+                  'As close to the nut as possible'
+                ] }
+              },
+              {
+                text: 'Try reading the TAB for "Ode to Joy" or "Mary Had a Little Lamb" from the songs section. Play it through at least once — slow and clean. Click a song below to open its TAB.',
+                hint: 'If you get stuck on a note, use your note-name chart to find it. TAB numbers = fret numbers.',
+                skills: [4, 5],
+                tabs: [
+                  {
+                    title: '"Ode to Joy" — opening phrase',
+                    caption: 'A string · frets 3–10 · go slow',
+                    notes: [
+                      { string: 'A', fret: 7,  note: 'E',  midi: 52 },
+                      { string: 'A', fret: 7,  note: 'E',  midi: 52 },
+                      { string: 'A', fret: 8,  note: 'F',  midi: 53 },
+                      { string: 'A', fret: 10, note: 'G',  midi: 55 },
+                      { string: 'A', fret: 10, note: 'G',  midi: 55 },
+                      { string: 'A', fret: 8,  note: 'F',  midi: 53 },
+                      { string: 'A', fret: 7,  note: 'E',  midi: 52 },
+                      { string: 'A', fret: 5,  note: 'D',  midi: 50 },
+                      { string: 'A', fret: 3,  note: 'C',  midi: 48 },
+                      { string: 'A', fret: 3,  note: 'C',  midi: 48 },
+                      { string: 'A', fret: 5,  note: 'D',  midi: 50 },
+                      { string: 'A', fret: 7,  note: 'E',  midi: 52 },
+                      { string: 'A', fret: 7,  note: 'E',  midi: 52 },
+                      { string: 'A', fret: 5,  note: 'D',  midi: 50 }
+                    ]
+                  },
+                  {
+                    title: '"Mary Had a Little Lamb" — opening phrase',
+                    caption: 'A string · frets 3–7 · 7 notes',
+                    notes: [
+                      { string: 'A', fret: 7, note: 'E', midi: 52 },
+                      { string: 'A', fret: 5, note: 'D', midi: 50 },
+                      { string: 'A', fret: 3, note: 'C', midi: 48 },
+                      { string: 'A', fret: 5, note: 'D', midi: 50 },
+                      { string: 'A', fret: 7, note: 'E', midi: 52 },
+                      { string: 'A', fret: 7, note: 'E', midi: 52 },
+                      { string: 'A', fret: 7, note: 'E', midi: 52 }
+                    ]
+                  }
                 ]
               }
             ]
           },
           {
-            text: 'Station Wrap-Up — take a beat to reflect: what tripped you up most today — reading the TAB, or getting a clean note with no buzz? What felt easier than you expected?',
-            response: { type: 'short', placeholder: 'e.g. reading TAB was fine, but fret 1 kept buzzing' }
+            title: 'Station Wrap-Up',
+            steps: [
+              {
+                text: 'Station Wrap-Up — take a beat to reflect: what tripped you up most today — reading the TAB, or getting a clean note with no buzz? What felt easier than you expected?',
+                response: { type: 'short', placeholder: 'e.g. reading TAB was fine, but fret 1 kept buzzing' }
+              }
+            ]
           }
         ]
       },

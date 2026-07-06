@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-06 — Station B checklists now fold up, just like Station C
+
+### Changed
+- **Station B (the computer station) is now organized into collapsible
+  sections** in every set — Watch, Listen, Try it, and Wrap-Up steps are grouped
+  under headers you can open one at a time, exactly like Station C. The first
+  section starts open and the rest stay tucked away, so long step lists no
+  longer feel like a wall of text. The steps themselves are unchanged.
+
 ## 2026-07-05 — Module 5 open chords, tuned to the songs you'll actually play
 
 ### Added

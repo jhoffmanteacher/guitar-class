@@ -23,7 +23,10 @@ SETS.push(
     stations: {
       b: {
         title: 'Computer station — Watch · Listen · Reflect',
-        steps: [
+        sections: [
+          {
+            title: 'Watch the lesson videos',
+            steps: [
           {
             text: 'Headphone routine (every computer-station day): plug in. Keep the volume low — the classmate next to you should not hear it. Slip one earcup off when the teacher is talking. We do this all semester.',
             hint: 'If the person next to you can hear your video, it\'s too loud. Comfortable for you, quiet for everyone else.'
@@ -37,7 +40,12 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/PyWZYHy17As" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a>.',
             hint: 'Your guitar is shared gear — notice how he handles and stores it. You\'ll practice the safe set-down at the hands-on station next.'
+          }
+            ]
           },
+          {
+            title: 'Listening — find the guitar',
+            steps: [
           {
             text: 'Find a YouTube clip of the song you shared (or one a classmate shared that you liked). Listen and notice: what is the guitar doing?',
             hint: 'Is it strumming chords? Playing a melody? Both? Just listen — you don\'t need to know the names yet.',
@@ -47,7 +55,12 @@ SETS.push(
               'Both strumming and single notes',
               'Mostly rhythm or percussive sounds'
             ] }
+          }
+            ]
           },
+          {
+            title: 'Ear training — acoustic vs. electric',
+            steps: [
           {
             text: 'Ear training — acoustic vs. electric. Two short clips play the SAME song, "All Along the Watchtower": <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank" data-ext="1">Clip 1 — Bob Dylan</a> and <a href="https://www.youtube.com/watch?v=TLV4_xaYynY" target="_blank" data-ext="1">Clip 2 — Jimi Hendrix</a>. One uses an acoustic guitar, the other an electric. Listen for the difference in tone. This song grows with you all semester — <a href="tabs/all-along-the-watchtower.html#layer-1" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
             hint: 'Acoustic guitars sound warm and woody. Electric guitars sound brighter and can be distorted or "fuzzy." Same song, very different sound.',
@@ -59,6 +72,8 @@ SETS.push(
               'Clip 2',
               'They sound identical'
             ] }
+          }
+            ]
           }
         ]
       },
@@ -164,7 +179,10 @@ SETS.push(
     stations: {
       b: {
         title: 'Computer station — Watch · Listen · Practice',
-        steps: [
+        sections: [
+          {
+            title: 'Watch the lesson videos',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/X2EmpWr9vUc" target="_blank">How to Tune Your Guitar For Beginners – JustinGuitar</a>.',
             hint: 'Headphones on. Notice the order of the strings and what "in tune" sounds like.'
@@ -180,7 +198,12 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/1JBxNFEg0nU" target="_blank">Picks: How to Choose & Hold One (BC-107) – JustinGuitar</a>.',
             hint: 'Write down: what are the two most common pick-holding mistakes?'
+          }
+            ]
           },
+          {
+            title: 'String names & clean picking',
+            steps: [
           {
             text: 'In your notes: write out the 6 string names from memory, low to high. Mnemonic: Eddie Ate Dynamite, Good Bye Eddie.'
           },
@@ -201,7 +224,12 @@ SETS.push(
               'D',
               'e'
             ] }
+          }
+            ]
           },
+          {
+            title: 'Preview the "Seven Nation Army" riff',
+            steps: [
           {
             text: 'Preview the "Seven Nation Army" riff: click the note names below the TAB to hear how it should sound, then try just the first few notes to get the feel. You\'ll play the whole riff at the practice station. This song grows with you all semester — <a href="tabs/seven-nation-army.html#layer-1" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
             hint: 'Listen first, then match it — one note at a time.',
@@ -218,6 +246,8 @@ SETS.push(
                 { string: 'E', fret: 2,  note: 'F#', midi: 42 }
               ]
             }
+          }
+            ]
           }
         ]
       },

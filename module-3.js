@@ -23,7 +23,10 @@ SETS.push(
     stations: {
       b: {
         title: 'Computer station — Watch · Listen · Practice',
-        steps: [
+        sections: [
+          {
+            title: 'See the power chord shape move',
+            steps: [
           {
             text: 'Power chord shape — see it move: here are E5, G5, and A5. It\'s the SAME two-finger shape (index on the root, ring two frets up) just slid to a new fret. Press ▶ to hear the root climb E → G → A, then build each shape on your guitar.',
             hint: 'Your index finger names the chord — it sits on the root. The ring finger always lands two frets higher, on the next string. Pause and match each diagram before moving on.',
@@ -43,7 +46,12 @@ SETS.push(
               'All your fingers on different strings',
               'Only open strings'
             ] }
+          }
+            ]
           },
+          {
+            title: 'Watch the lesson videos',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/ZBYoI7e3v5Y" target="_blank">Your Ultimate Power Chords Guide for Beginners – JustinGuitar</a> (0:00–4:00).',
             hint: 'Focus on his right-hand muting technique — how does he stop the strings he isn\'t playing from ringing? Try it on your guitar as he shows it.',
@@ -63,10 +71,17 @@ SETS.push(
               'C5',
               'E5'
             ] }
+          }
+            ]
           },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — take a beat to reflect: which felt harder today — getting both notes to ring clean, or stopping the other strings from sounding? What started to help?',
             response: { type: 'short', placeholder: 'e.g. muting — my strumming hand kept letting the high strings ring' }
+          }
+            ]
           }
         ]
       },
@@ -302,7 +317,10 @@ SETS.push(
     stations: {
       b: {
         title: 'Computer station — Watch · Listen · Practice',
-        steps: [
+        sections: [
+          {
+            title: 'Watch the lesson videos',
+            steps: [
           {
             text: 'Watch: <a href="https://youtu.be/sNa44EmrsDc" target="_blank">How & Why to Use a Metronome – JustinGuitar</a> (0:00–4:00).',
             hint: 'His tip about setting the metronome 10 BPM slower than you think you need is key. As he explains it, set your own metronome and tap along. Slow is smooth, smooth is fast.',
@@ -328,10 +346,17 @@ SETS.push(
             hint: 'Notice his method for building tempo gradually. As he describes it, try it: play your "Watchtower" loop at 60 BPM, then bump to 65, then 70.',
             skills: [1, 2],
             response: { type: 'short', placeholder: 'In one sentence, describe his method for building up tempo gradually.' }
+          }
+            ]
           },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
           {
             text: 'Station Wrap-Up — take a beat to reflect: at what tempo does your loop start to fall apart, and which part breaks down first — the change, the strum, or the muting?',
             response: { type: 'short', placeholder: 'e.g. around 75 BPM the F5 change gets late' }
+          }
+            ]
           }
         ]
       },
