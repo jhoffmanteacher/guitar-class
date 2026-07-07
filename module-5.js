@@ -647,7 +647,7 @@ SETS.push(
 
     assessment: {
       goal: 'Frets D, A, Em, Bm with clean tone · Switches D to A in time · Switches Em to Bm in time · Connects Group 1 and Group 2 chords · Plays a song using Group 2 chords · Identifies chord group from a chord chart',
-      performance: 'Individual: play 8 bars using chords from both groups — teacher picks two chords and student plays them in sequence at 70 BPM.',
+      performance: 'Individual: play 8 bars using chords from both groups — teacher names three chords and the student plays them in sequence at 70 BPM.',
       selfCheck: 'Can you look at a chord chart and know immediately which "group" each chord belongs to? Can you switch D–A and Em–Bm at 70 BPM?',
       standards: ['Pr.4a', 'Pr.5a', 'Cn.11b']
     },

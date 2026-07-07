@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-07 — Unit checks now match exactly what you'll be graded on
+
+### Added
+- **Module 4 has a new "Cold Read" step:** read a short 1-bar pentatonic lick
+  straight from TAB and play it — no one plays it for you first. It's the new
+  second half of your pentatonic unit check, so now you get to rehearse it before
+  the real thing.
+
+### Changed
+- **Module 4's solo check is clearer about what counts:** you name your *phrasing
+  strategy* (call-and-response or four-phrase) — you're no longer asked to
+  announce the scale and root, which weren't part of the score.
+- **Module 2's end-of-unit check now spells out both parts:** play the
+  Watchtower low-E line (or the "the cure" root line) from memory at 60 BPM, and
+  name the E & A notes through fret 12 *plus* sight-read a short 2-bar line from
+  TAB.
+- **Module 3's rhythm clap-and-count now includes half notes**, so you read and
+  name all four note values — whole, half, quarter, and eighth.
+- **Module 5's open-chord check now says the teacher names three chords** (not
+  two) for your 8-bar progression at 70 BPM.
+
 ## 2026-07-06 — Station B checklists now fold up, just like Station C
 
 ### Changed

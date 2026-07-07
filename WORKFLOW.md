@@ -15,7 +15,14 @@
 
 ## Current focus
 
-- [ ] **Full website review** (Jonathan-led) — scope and plan TBD.
+- [~] **Full website review** (Jonathan-led) — scope and plan TBD.
+  - [x] **Assessment alignment, Modules 2–5 → LOCKED S1 wording** (`SITE_ALIGNMENT_2.md`).
+        ✅ 2026-07-07: re-audited M2–M5 against the locked Unit 2–5 assessment
+        wording; wrote `AUDIT_REPORT_2.md`; closed all 13 in-scope findings
+        (M4 pentatonic assessment reworded + new cold-read TAB-lick step & skill,
+        skillCount 20→21; M5 two→three chords; M2 assessment summary realigned;
+        M3 half notes added). Two items logged-only/deferred (M3 I–IV–V naming,
+        M5 Watchtower `Am–G–F–G` vs `Am–G–F`). Checks passed; pushed.
 - [x] **Station B collapsible sections** — make the Station B portions of each
       set collapse/expand the same way the Station C portions do.
       ✅ 2026-07-06: all 22 sets restructured into thematic sections (steps
@@ -43,5 +50,11 @@ archived (2026-07-05). Fold them into the review or handle them ad hoc:
       before the course starts.
 - [ ] Week 17 Semester Written Check quiz module (deferred from the alignment
       work — see `archive/SITE_ALIGNMENT.md`).
+- [ ] Module 3: name a taught three-chord progression as a **I–IV–V** (locked
+      Unit-3 Task 2 references the Roman-numeral framing; deferred 2026-07-07 —
+      see `AUDIT_REPORT_2.md`).
+- [ ] Module 5: reconcile open-chord Watchtower **`Am–G–F–G`** (L159/L362) vs
+      **`Am–G–F`** (L616 + reference fact) — decide if the extra G is an
+      intentional turnaround (deferred 2026-07-07 — see `AUDIT_REPORT_2.md`).
 - [ ] Supplemental/Choice song swap once Jonathan's curriculum map is final
       (don't polish the current placeholder lists).

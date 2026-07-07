@@ -695,8 +695,8 @@ SETS.push(
     ],
 
     assessment: {
-      goal: 'Unit-end: Play "All Along the Watchtower" bass-note riff using only the low E string from memory with clean tone and correct fingering. Name any 5 notes called out by the teacher on the fretboard.',
-      performance: 'Individual or partner check: play 4 bars of a melody from TAB with clean tone. Teacher listens and gives one piece of feedback.',
+      goal: 'Unit-end (two tasks): (1) Play the "All Along the Watchtower" bass-note line on the low E string from memory, to the metronome at 60 BPM, with clean tone and correct fingering — or the alternate single-note root line from "the cure." (2) Name notes on the E and A strings through fret 12, and sight-read a short 2-bar bass line from TAB.',
+      performance: 'Individual or partner check: play the Watchtower low-E line from memory at 60 BPM, then sight-read and play a short 2-bar bass line from TAB. Teacher listens and gives one piece of feedback.',
       selfCheck: 'Can you press a note cleanly with no buzzing? Can you read a basic TAB? Can you play a 4-bar melody in time at 60 BPM?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Re.7a']
     },
@@ -735,7 +735,8 @@ MODULE_REVIEWS[2] = {
   ],
   assessItems: [
     'Name the notes on the E and A strings from memory through fret 12',
-    'Play “All Along the Watchtower” bass-note using only the E string from memory with clean tone and correct fingering'
+    'Play “All Along the Watchtower” bass-note using only the E string from memory, to the metronome at 60 BPM, with clean tone and correct fingering',
+    'Sight-read a short 2-bar bass line from TAB and play it'
   ],
   forward: 'The E &amp; A notes you just learned become the <strong>roots of every power chord in Module 3</strong> — when you play an A5 or G5, you\'re landing on the exact frets you just memorized. Knowing the fretboard is what lets you move chords around freely.',
   standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Re.7a']

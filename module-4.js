@@ -688,10 +688,35 @@ SETS.push(
             ]
           },
           {
+            title: 'Read a lick cold',
+            steps: [
+          {
+            text: 'Challenge — Cold Read (Knowledge &amp; Reading): here\'s a 1-bar lick in the A minor pentatonic box you haven\'t drilled. DECODE it from the TAB first — name each string and fret, left to right — then play it. You\'ve got it when: you can read a short 1-bar pentatonic lick straight from TAB and play it accurately, without anyone demonstrating it first. At the unit assessment your teacher hands you a NEW 1-bar lick to read cold — this is Task 2.',
+            hint: 'Read before you press Play. Bottom TAB line = low E, top line = high e; the number is the fret. Say it out loud — "G string, fret 5, that\'s C" — as you go, then hit Play all to check yourself.',
+            stuck: 'Take it two notes at a time. Find the first note on the neck and play it, then the next — speed comes after the map is clear.',
+            levelUp: 'Read it backwards (right to left), or move the same shape to the E minor box (open-string root) and read it there.',
+            skills: [8],
+            tab: {
+              caption: 'Cold-read lick · A minor pentatonic box · one bar',
+              notes: [
+                { string: 'D', fret: 5, note: 'G', midi: 55 },
+                { string: 'D', fret: 7, note: 'A', midi: 57 },
+                { string: 'G', fret: 5, note: 'C', midi: 60 },
+                { string: 'G', fret: 7, note: 'D', midi: 62 },
+                { string: 'B', fret: 5, note: 'E', midi: 64 },
+                { string: 'G', fret: 7, note: 'D', midi: 62 },
+                { string: 'G', fret: 5, note: 'C', midi: 60 },
+                { string: 'D', fret: 7, note: 'A', midi: 57 }
+              ]
+            }
+          }
+            ]
+          },
+          {
             title: 'Perform your original solo',
             steps: [
           {
-            text: 'Challenge 3 — Perform It (your assessment piece — give it a go!): play your 4-bar solo over a core-song backing track — hit ▶ &#x1F3B5; Backing track on any core song card below (Watchtower, Oye Mi Amor, Seven Nation Army, Sweet Child, or "the cure") — working in at least one hammer-on, pull-off, or vibrato. You\'ve got it when: you hold the backing track\'s pulse start to finish with no restarts, and you can name your scale and your phrasing strategy (call-and-response or four-phrase). Tell a story, don\'t run scales.',
+            text: 'Challenge 3 — Perform It (your assessment piece — give it a go!): play your 4-bar solo over a core-song backing track — hit ▶ &#x1F3B5; Backing track on any core song card below (Watchtower, Oye Mi Amor, Seven Nation Army, Sweet Child, or "the cure") — working in at least one hammer-on, pull-off, or vibrato. You\'ve got it when: you hold the backing track\'s pulse start to finish with no restarts, and you can name your phrasing strategy (call-and-response or four-phrase). Tell a story, don\'t run scales.',
             hint: 'Include at least one technique (hammer-on, pull-off, or vibrato) in your solo. Don\'t just run scales — tell a story! No one to play for? Record yourself on the Chromebook over the backing track and watch it back. Playing for the camera counts, and the playback shows you exactly where to tighten up.',
             stuck: 'Drop the backing track and play your written 4 bars alone, slowly, until they\'re solid — then add the track back and just one technique.',
             levelUp: 'Perform it standing, play it for a partner or the class, or transpose your solo to E minor and play it from the open-string box.',
@@ -754,8 +779,8 @@ SETS.push(
     ],
 
     assessment: {
-      goal: 'Unit-end: Perform an original 4-bar solo over a course-song backing track, holding the track\'s pulse start to finish. Use the full minor pentatonic box, include at least one hammer-on, pull-off, or vibrato, and name both the scale AND your phrasing strategy (call-and-response or four-phrase).',
-      performance: 'Individual: perform original 4-bar solo for the class or teacher. State which scale, root, AND phrasing strategy (call-and-response or four-phrase) you used before playing.',
+      goal: 'Unit-end (two tasks): (1) Perform an original 4-bar solo over a course-song backing track, holding the track\'s pulse start to finish — use the full minor pentatonic box, include at least one hammer-on, pull-off, or vibrato, and follow a named phrasing strategy (call-and-response or four-phrase). (2) Read a short 1-bar pentatonic lick from TAB and play it.',
+      performance: 'Individual: perform your original 4-bar solo for the class or teacher, naming your phrasing strategy (call-and-response or four-phrase); then sight-read and play a short 1-bar pentatonic lick from TAB.',
       selfCheck: 'Can you explain the difference between major and minor pentatonic? Can you add the blues note? Can you perform your original solo without looking at your notes?',
       standards: ['Cr.1a', 'Cr.2a', 'Pr.6a']
     },
@@ -782,7 +807,9 @@ SETS.push(
       { id: 'm4w3-s6', text: 'Compose and write out a 4-bar original solo using scale degrees',
         gotItWhen: 'you have 4 bars written down in scale-degree numbers and you can play exactly what you wrote — not improvise something different.' },
       { id: 'm4w3-s7', text: 'Perform the original solo over a course song backing track from memory, holding the track\'s pulse',
-        gotItWhen: 'you can play your 4-bar solo all the way through with the backing track — holding its pulse with no restarts — and name your scale and phrasing strategy (call-and-response or four-phrase).' }
+        gotItWhen: 'you can play your 4-bar solo all the way through with the backing track — holding its pulse with no restarts — and name your phrasing strategy (call-and-response or four-phrase).' },
+      { id: 'm4w3-s8', text: 'Sight-read a short 1-bar pentatonic lick from TAB and play it',
+        gotItWhen: 'you can decode a 1-bar pentatonic lick straight from the TAB — one you haven\'t drilled — and play it accurately without anyone demonstrating it first.' }
     ]
   }
 
@@ -797,11 +824,13 @@ MODULE_REVIEWS[4] = {
     { id: 'mr4-s3', text: 'I can position Pattern 1 as a MINOR scale (1st finger on root) or a MAJOR scale (4th finger on root) on demand from any named key', set: 'm4w1' },
     { id: 'mr4-s6', text: 'I can perform a hammer-on and a pull-off, and add an intentional vibrato on a sustained note', set: 'm4w2' },
     { id: 'mr4-s8', text: 'I can explain how major (1 2 3 5 6) and minor (1 ♭3 4 5 ♭7) pentatonic are built, that they\'re relative (same 5 notes), and where the ♭5 blue note goes', set: 'm4w3' },
-    { id: 'mr4-s10', text: 'I can perform my original 4-bar solo over a backing track from memory — holding its pulse with no restarts, working in at least one hammer-on, pull-off, or vibrato, and naming my scale and phrasing strategy', set: 'm4w3' }
+    { id: 'mr4-s10', text: 'I can perform my original 4-bar solo over a backing track from memory — holding its pulse with no restarts, working in at least one hammer-on, pull-off, or vibrato, and naming my phrasing strategy', set: 'm4w3' },
+    { id: 'mr4-s11', text: 'I can read a short 1-bar pentatonic lick from TAB that I haven\'t practiced and play it accurately', set: 'm4w3' }
   ],
   assessItems: [
     'Position Pattern 1 for any named major or minor key and play it ascending and descending in time, with alternate picking',
-    'Perform an original 4-bar solo over a course-song backing track, holding its pulse with no restarts, using the minor pentatonic box and at least one hammer-on, pull-off, or vibrato — and name the scale, root, and your phrasing strategy (call-and-response or four-phrase)'
+    'Perform an original 4-bar solo over a course-song backing track, holding its pulse with no restarts, using the minor pentatonic box and at least one hammer-on, pull-off, or vibrato, following a named phrasing strategy (call-and-response or four-phrase)',
+    'Read a short 1-bar pentatonic lick from TAB and play it accurately'
   ],
   forward: 'Those single pentatonic notes you\'ve been soloing with don\'t disappear in <strong>Module 5</strong> — you stack them. The open chords you\'ll build there (Am, C, G, D…) are made of these same notes. And the clean fretting and finger independence you sharpened here are exactly what makes a chord ring without buzzing. You\'ll go from playing one note at a time to playing five at once.',
   standards: ['Cr.1a', 'Cr.2a', 'Pr.4a', 'Pr.5a', 'Pr.5b', 'Pr.6a']

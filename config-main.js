@@ -32,7 +32,7 @@ const MODULE_MANIFEST = [
   { num: 1, name: 'Introductions: You and The Guitar',        skillCount: 9,  skillIdRe: '^w\\d+-s\\d+$' },
   { num: 2, name: 'Notes on the E & A Strings',               skillCount: 11, skillIdRe: '^m2w\\d+-s\\d+$' },
   { num: 3, name: 'Two-Finger Power Chords',                  skillCount: 12, skillIdRe: '^m3w\\d+-s\\d+$' },
-  { num: 4, name: 'Major / Minor / Blues Pentatonic Scales',  skillCount: 20, skillIdRe: '^m4w\\d+-s\\d+$' },
+  { num: 4, name: 'Major / Minor / Blues Pentatonic Scales',  skillCount: 21, skillIdRe: '^m4w\\d+-s\\d+$' },
   { num: 5, name: 'Open Chords',                              skillCount: 24, skillIdRe: '^m5w\\d+-s\\d+$' },
   { num: 6, name: 'Strumming Patterns with Chords',           skillCount: 18, skillIdRe: '^m6w\\d+-s\\d+$' },
   { num: 7, name: 'TAB Notation and Barre Chords',            skillCount: 18, skillIdRe: '^m7w\\d+-s\\d+$' },

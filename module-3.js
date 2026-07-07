@@ -379,8 +379,8 @@ SETS.push(
             title: 'Read and clap the rhythm',
             steps: [
           {
-            text: 'Challenge — Clap & Count: before you play, read the rhythm. Clap and count a 4-bar line out loud — whole notes (hold 4 beats), quarter notes (one clap each), and straight eighths ("1 + 2 + 3 + 4 +"). You\'ve got it when: you can clap all 4 bars in time with the metronome at 70 BPM and name which notes are whole, quarter, and eighth.',
-            hint: 'Whole note = one clap held for a full bar. Eighth notes = two even claps per beat. The straight-eighths strum you play (down-down-up-down-up) is just eighth notes — same rhythm, on the guitar.',
+            text: 'Challenge — Clap & Count: before you play, read the rhythm. Clap and count a 4-bar line out loud — whole notes (hold 4 beats), half notes (hold 2 beats), quarter notes (one clap each), and straight eighths ("1 + 2 + 3 + 4 +"). You\'ve got it when: you can clap all 4 bars in time with the metronome at 70 BPM and name which notes are whole, half, quarter, and eighth.',
+            hint: 'Whole note = one clap held for a full bar. Half note = one clap held for two beats. Eighth notes = two even claps per beat. The straight-eighths strum you play (down-down-up-down-up) is just eighth notes — same rhythm, on the guitar.',
             stuck: 'Clap quarter notes on every beat first (1 2 3 4), then split one beat into eighths ("1 +") and feel the difference.',
             levelUp: 'Clap one bar of eighths, one bar of quarters, alternating, without losing the count.',
             skills: [6]
@@ -571,8 +571,8 @@ SETS.push(
         gotItWhen: 'your pinky lands two frets above your ring finger and all three notes ring cleanly — no buzz, no muffled string.',
         practice: { type: 'mc', prompt: 'You add your pinky two frets above your ring finger. What interval did you just add to the chord?',
           choices: ['A 3rd', 'A 5th', 'An octave (same note, higher)', 'A 7th'], answer: 2 } },
-      { id: 'm3w2-s6', text: 'Clap and count a 4-bar rhythm, and name whole vs. eighth notes',
-        gotItWhen: 'you can clap a 4-bar line in time with the metronome and say which notes are whole, quarter, or eighth — and name your strum as "straight eighths".',
+      { id: 'm3w2-s6', text: 'Clap and count a 4-bar rhythm, and name whole, half, quarter, and eighth notes',
+        gotItWhen: 'you can clap a 4-bar line in time with the metronome and say which notes are whole, half, quarter, or eighth — and name your strum as "straight eighths".',
         practice: { type: 'mc', prompt: 'A straight-eighths strum (down-down-up-down-up, counted "1 + 2 +") is made of which note value?',
           choices: ['Whole notes', 'Quarter notes', 'Eighth notes', 'Half notes'], answer: 2 } }
     ]
