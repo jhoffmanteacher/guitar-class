@@ -24,10 +24,22 @@
         skillCount 20→21; M5 two→three chords; M2 assessment summary realigned;
         M3 half notes added). Two items logged-only/deferred (M3 I–IV–V naming,
         M5 Watchtower `Am–G–F–G` vs `Am–G–F`). Checks passed; pushed.
+  - [x] **Post-lock cleanup** (`archive/SITE_ALIGNMENT_3.md`).
+        ✅ 2026-07-07: realigned Module 3's unit-assessment summary blocks to the
+        locked three-task structure; added a "Name your progression: I–IV–V" step
+        (M3 Set 2) and a "Week 17 — Call & Response over a backing track" step
+        (M5 Set 4) — both steps only, skillCounts unchanged (M3 12, M5 24);
+        harmonized the open-chord/barre Watchtower loop to `Am–G–F–G` in
+        Modules 5, 6 & 7 and recorded it as a settled fact in CLAUDE.md; verified
+        the Week 17 Written Check / duet are absent from the site. Checks passed.
 - [x] **Station B collapsible sections** — make the Station B portions of each
       set collapse/expand the same way the Station C portions do.
       ✅ 2026-07-06: all 22 sets restructured into thematic sections (steps
       unchanged, verified byte-identical); checks passed; pushed.
+
+> **Note (2026-07-07):** the Google Doc's rubric tab was regenerated to the
+> locked Unit 1–5 wording — the "rubric tab is STALE" caveat inside
+> `archive/SITE_ALIGNMENT_2.md` is obsolete (archive left as-is).
 
 ---
 
@@ -41,6 +53,9 @@ archived (2026-07-05). Fold them into the review or handle them ad hoc:
 - [ ] Spanish spot-check: review 2–3 sets in Español mode with a fluent speaker.
 - [ ] End-of-semester set: design the Module 1 goal-revisit / final reflection /
       performance rubric.
+      2026-07-07 review: largely covered already — Module 5 Set 4 has Group 3
+      chords, showcase prep, and the Module-1 goal-revisit reflection. Remaining
+      scope (if any) TBD by Jonathan.
 - [ ] Song refresh each semester: swap in 2–3 student-requested songs (verify
       links per CLAUDE.md); pull from the 🎤 request slot.
 - [ ] Review Claude's first-pass song difficulty dots (`level: 1|2|3` on ~109
@@ -49,13 +64,5 @@ archived (2026-07-05). Fold them into the review or handle them ad hoc:
 - [ ] ⚠️ Watch Module 4 Set 1's video (`m_IiyJu60-c`, "Major Pentatonic Scale –
       Marty Music") through and confirm it fits the beginner Pattern-1 station
       before the course starts.
-- [ ] Week 17 Semester Written Check quiz module (deferred from the alignment
-      work — see `archive/SITE_ALIGNMENT.md`).
-- [ ] Module 3: name a taught three-chord progression as a **I–IV–V** (locked
-      Unit-3 Task 2 references the Roman-numeral framing; deferred 2026-07-07 —
-      see `archive/AUDIT_REPORT_2.md`).
-- [ ] Module 5: reconcile open-chord Watchtower **`Am–G–F–G`** (L159/L362) vs
-      **`Am–G–F`** (L616 + reference fact) — decide if the extra G is an
-      intentional turnaround (deferred 2026-07-07 — see `archive/AUDIT_REPORT_2.md`).
 - [ ] Supplemental/Choice song swap once Jonathan's curriculum map is final
       (don't polish the current placeholder lists).

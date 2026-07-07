@@ -391,6 +391,18 @@ SETS.push(
             title: 'Play an 8-bar progression with a steady strum',
             steps: [
           {
+            text: 'Challenge — Name Your Progression: I–IV–V ("one–four–five"): musicians number chords by counting up the musical alphabet from the key\'s home note. In the key of A: A is I, count up to D for IV, and E for V — so A5–D5–E5 is a I–IV–V. Play A5–D5–E5, two bars each, one strum per beat at 60 BPM. You\'ve got it when: you can play the loop reading only the chord symbols AND say which chord is the I, the IV, and the V. At the unit check you\'ll read a three-chord (I–IV–V) progression from chord symbols with your named strum — this is that skill.',
+            hint: 'All three use the same two-finger shape: A5 root on the E string (fret 5), D5 root on the A string (fret 5) — same fret, string hop! — and E5 root on the A string (fret 7).',
+            stuck: 'Loop just A5→D5 (the same-fret hop) until it\'s clean, then add E5.',
+            levelUp: 'Transpose it — build a I–IV–V starting from G5 (G–C–D) and name each chord\'s number.',
+            skills: [2, 4],
+            chords: [
+              { name: 'A5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 },
+              { name: 'D5', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,'x'],[2,'x'],[1,'x']], position: 5 },
+              { name: 'E5', chord: [[6,'x'],[5,7,'1'],[4,9,'3'],[3,'x'],[2,'x'],[1,'x']], position: 7 }
+            ]
+          },
+          {
             text: 'Challenge 2 — Eighth-Note Strum (your assessment piece): play the loop with straight eighths (down-down-up-down-up), counting "1 + 2 + 3 + 4 +". You\'ve got it when: eight bars clean and steady at 60, then climb the ladder and hold 80 BPM for at least 15 seconds — that\'s the unit bar.',
             hint: 'Start at 60 BPM. If it feels easy, bump up 5 BPM. The unit-end check is an 8-bar progression changing on beat 1 at 60, then holding 80 BPM for 15 seconds with clean muting — this is that piece.',
             stuck: 'Strum down-only on each beat first ("1 2 3 4"), then add the up-strums one at a time.',
@@ -548,9 +560,9 @@ SETS.push(
     ],
 
     assessment: {
-      goal: 'Unit-end: Perform an 8-bar power chord song or progression of your choice, changing on beat 1 at 60 BPM and holding 80 BPM for at least 15 seconds with the metronome. Must include at least 3 different power chords and clean string muting.',
-      performance: 'Individual or partner check: play 8 bars of a power chord progression with the metronome. Teacher gives one piece of feedback.',
-      selfCheck: 'Can you change chords on beat 1 at 60 BPM without stopping? Can you play a full song excerpt from memory?',
+      goal: 'Unit-end (three tasks): (1) Play a core-song excerpt to the metronome — e.g., the Seven Nation Army riff, Oye Mi Amor\'s Bm5–A5, or Sweet Child\'s D5–C5–G5 — switching cleanly between two power chords with roots on the same fret of the E and A strings at 60 BPM, then holding 80 BPM for at least 15 seconds. (2) Read a three-chord (I–IV–V) progression from chord symbols / TAB using a named strumming pattern (straight-eighths or split strum), and name power chords from a chord chart. (3) Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes.',
+      performance: 'Individual: play a core-song excerpt with the metronome — changes on beat 1 at 60 BPM, then hold 80 BPM for 15 seconds; read a three-chord (I–IV–V) progression from chord symbols with your named strum; then clap and count a 4-bar rhythm. Teacher gives one piece of feedback.',
+      selfCheck: 'Can you change chords on beat 1 at 60 BPM and hold 80 BPM for 15 seconds? Can you read a I–IV–V progression from chord symbols and name power chords from a chart?',
       standards: ['Pr.4a', 'Pr.5b', 'Pr.6a']
     },
 
@@ -592,8 +604,9 @@ MODULE_REVIEWS[3] = {
     { id: 'mr3-s8', text: 'I can play an 8-bar progression with a straight-eighths strum, counting "1 + 2 + 3 + 4 +"', set: 'm3w2' }
   ],
   assessItems: [
-    'Fret and move a clean 2-finger power chord along the E and A strings, muting the unused strings',
-    'Perform an 8-bar power chord progression at 80 BPM with the metronome — at least 3 different chords and clean muting'
+    'Play a core-song excerpt (Seven Nation Army, Oye Mi Amor\'s Bm5–A5, or Sweet Child\'s D5–C5–G5) with changes on beat 1 at 60 BPM — including a clean switch between two power chords with roots on the same fret of the E and A strings — then hold 80 BPM for 15 seconds',
+    'Read a three-chord (I–IV–V) progression from chord symbols / TAB with a named strumming pattern, and name power chords from a chord chart',
+    'Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes'
   ],
   forward: 'The two-finger shape and the muting you just locked in are the backbone of rhythm guitar. The E &amp; A string roots you slide between also become your <strong>home base for the pentatonic patterns in Module 4</strong> — that\'s where you\'ll play lead lines and solos over these very same power chords.',
   standards: ['Pr.4a', 'Pr.5a', 'Pr.5b', 'Pr.6a', 'Re.7a']

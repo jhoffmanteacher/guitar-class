@@ -177,7 +177,7 @@ SETS.push(
       { name: '"Brown Eyed Girl" — Van Morrison', meta: 'G–C–G–D · classic 8th-note down-up strum', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=UfmkgQRmmeE',
         tutorialUrl: 'https://www.youtube.com/watch?v=v-EGJOz-Mek' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F · steady down-up over chord changes', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · steady down-up over chord changes', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"Knockin\' on Heaven\'s Door" — Dylan', meta: 'G–D–Am–C · slow tempo, perfect for first strum patterns', type: 'Core', core: true,

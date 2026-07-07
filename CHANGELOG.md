@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-07 — Module 3's unit check spells out all three parts
+
+### Added
+- **A new "Name your progression: I–IV–V" step in Module 3** — learn how
+  musicians number chords (A5–D5–E5 is a I–IV–V in A) and read a three-chord
+  progression straight from the symbols, exactly like the unit check asks.
+- **Module 5 gets a Week 17 "Call & Response" step** — improvise a
+  question-and-answer solo over any Module 4 backing track, the same way the
+  semester-wrap check works. Want a partner? Trade phrases as the level-up.
+
+### Changed
+- **Module 3's end-of-unit summary now matches the real check** — all three
+  parts, spelled out: a core-song excerpt with a clean same-fret switch between
+  E- and A-root power chords at 60 BPM (then 80 for 15 seconds), a I–IV–V read
+  from chord symbols with your named strum, and the clap-and-count rhythm.
+- **All Along the Watchtower's loop is written `Am–G–F–G` everywhere** — the
+  little G turnaround you hear on the record.
+
 ## 2026-07-07 — Unit checks now match exactly what you'll be graded on
 
 ### Added

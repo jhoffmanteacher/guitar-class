@@ -142,6 +142,16 @@ When adding `originalUrl` / `tutorialUrl` / lesson video links in any module fil
 
 (Context: in May 2026 I drafted Modules 6–8 from recall and ~60 of the URLs were 404s. Search-and-verify is the only safe pattern.)
 
+## Settled song facts — do not re-flag in audits
+These song arrangements are intentional and have been reconciled with the
+curriculum map. Do **not** flag them as drift in future alignment audits:
+
+- **Oye Mi Amor** — the chorus is `D–A–Bm–G`; the `D–A–G–A` turnaround at
+  phrase ends is a deliberate simplification.
+- **All Along the Watchtower** — the loop is `Am–G–F–G` (`A5–G5–F5–G5` as
+  power chords) — the record's turnaround. The map's "Am–G–F" is shorthand;
+  the site's four-chord loop is intentional (settled 2026-07-07).
+
 ## Switching topics — prompt to start a fresh chat
 When Jonathan asks for something that is clearly a **new, unrelated topic** from what we've been working on (e.g., we just finished a feature on Module 5 and he now asks about a different part of the site, a different project, or general Claude Code questions), use **AskUserQuestion** to ask whether he'd like to start a fresh conversation before continuing. A fresh chat keeps context focused and responses faster.
 
