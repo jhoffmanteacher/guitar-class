@@ -32,6 +32,13 @@
         harmonized the open-chord/barre Watchtower loop to `Am–G–F–G` in
         Modules 5, 6 & 7 and recorded it as a settled fact in CLAUDE.md; verified
         the Week 17 Written Check / duet are absent from the site. Checks passed.
+  - [x] **Strip week numbers from student-facing copy** (`archive/REMOVE_WEEK_REFS.md`).
+        ✅ 2026-07-07: removed the last three week references (all in `module-5.js`):
+        the Call & Response step title ("Week 17 —" dropped), its Challenge
+        parenthetical ("Week 17 check piece" → "semester-wrap check piece"), and the
+        Seven Nation Army tag ("(Week 16)" dropped). `grep -rinE "week [0-9]+"` over
+        `*.js`/`*.html` now returns zero. Steps/skillCounts unchanged; checks passed;
+        pushed.
 - [x] **Station B collapsible sections** — make the Station B portions of each
       set collapse/expand the same way the Station C portions do.
       ✅ 2026-07-06: all 22 sets restructured into thematic sections (steps

@@ -616,7 +616,7 @@ SETS.push(
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · open-chord version', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-5',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: '◐ optional stretch · D–A–Em strummed adaptation (Week 16)', type: 'Supp', core: false, journeyUrl: 'tabs/seven-nation-army.html#layer-5',
+      { name: '"Seven Nation Army" — The White Stripes', meta: '◐ optional stretch · D–A–Em strummed adaptation', type: 'Supp', core: false, journeyUrl: 'tabs/seven-nation-army.html#layer-5',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Oye Mi Amor" — Maná', meta: 'Chorus loop D–A–Bm–G · strummed', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html#layer-3',
@@ -828,10 +828,10 @@ SETS.push(
             ]
           },
           {
-            title: 'Week 17 — Call & Response over a backing track',
+            title: 'Call & Response over a backing track',
             steps: [
               {
-                text: 'Challenge — Call & Response (your Week 17 check piece): open Module 4 and pick any core-song backing track (the ▶ &#x1F3B5; Backing track button on the song cards) and improvise a call-and-response solo — play a 2-bar "question" phrase, leave a little space, then answer it with a 2-bar "response." Stay in the minor pentatonic box from Module 4. You\'ve got it when: you hold the track\'s pulse start to finish with no restarts, and your response phrase clearly answers your question phrase. This is scored the same way as your Module 4 solo (Accuracy + Consistency).',
+                text: 'Challenge — Call & Response (your semester-wrap check piece): open Module 4 and pick any core-song backing track (the ▶ &#x1F3B5; Backing track button on the song cards) and improvise a call-and-response solo — play a 2-bar "question" phrase, leave a little space, then answer it with a 2-bar "response." Stay in the minor pentatonic box from Module 4. You\'ve got it when: you hold the track\'s pulse start to finish with no restarts, and your response phrase clearly answers your question phrase. This is scored the same way as your Module 4 solo (Accuracy + Consistency).',
                 hint: 'Every skill here is a Module 4 skill — this is a victory lap. Open Module 4 and hit any ▶ &#x1F3B5; Backing track button on a core-song card. If the pentatonic box feels rusty, run the Module 4 scale-climb warm-up first, then come back.',
                 stuck: 'Play a 2-bar question, then answer with the SAME rhythm on different notes — copying the rhythm is the easiest way to make two phrases talk to each other.',
                 levelUp: 'Trade phrases with a partner over the same track — you play the call, they play the response, then swap roles.'

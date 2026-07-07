@@ -22,6 +22,9 @@ see `WORKFLOW.md` and the git commit log.
   from chord symbols with your named strum, and the clap-and-count rhythm.
 - **All Along the Watchtower's loop is written `Am–G–F–G` everywhere** — the
   little G turnaround you hear on the record.
+- **Week numbers are gone from the site** — the Call & Response step and one
+  song tag now say "semester wrap" instead. Your pace is your pace; the class
+  calendar lives in class.
 
 ## 2026-07-07 — Unit checks now match exactly what you'll be graded on
 
