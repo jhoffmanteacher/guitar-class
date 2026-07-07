@@ -371,7 +371,6 @@ SETS.push(
                 response: { type: 'short', prompt: 'Bass line, power chords, or open chords — which Watchtower is your favorite so far?', placeholder: 'e.g. open chords — it finally sounds full' }
               },
               {
-                // lyric-review: "the cure" clean edit pending (SITE_ALIGNMENT 0.3) — do not add the unedited original video link to this play-along step
                 text: 'Challenge — "the cure" capo-1 play-along: put a capo on fret 1, then loop Olivia\'s chords with a down-strum — Am · C · Dm · F, four beats each, then G to turn it around — climbing the tempo ladder 60 → 65 → 70 BPM. Shapes are pre-loaded below. You\'ve got it when: two clean loops at 70 BPM, every change on beat 1, the capo ringing clear.',
                 hint: 'The capo just moves everything up one fret — your shapes don\'t change. Dm is new: a small triangle on the top three strings. Keep your fingers arched and your thumb behind the neck.',
                 stuck: 'Take the capo off and get Am · C · Dm · F clean in open position first, then add the capo and the G turnaround.',
@@ -407,8 +406,7 @@ SETS.push(
       { name: '"Let It Be" — The Beatles', meta: 'Verse & chorus full chord strum · C–G–Am–F (I–V–vi–IV)', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html#layer-2',
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
         tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Capo 1 play-along · Am–C–Dm–F–G/B', type: 'Core', core: true,
-        // lyric-review: explicit word in verse 3 — clean edit pending (SITE_ALIGNMENT 0.3)
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Capo 1 play-along · Am–C–Dm–F–G/B', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html#layer-5',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Let Her Go" — Passenger', meta: 'G–D–Em–C — same family of chords', type: 'Choice', core: false, level: 2,

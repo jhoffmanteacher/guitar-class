@@ -251,8 +251,7 @@ SETS.push(
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8',
         backingUrl: 'https://www.youtube.com/watch?v=Vq8cApzOdy8' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Solo over the chorus · A minor pentatonic (capo 1 · Am–C–Dm–F–G/B)', type: 'Core', core: true,
-        // lyric-review: explicit word in verse 3 — clean edit pending (SITE_ALIGNMENT 0.3)
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Solo over the chorus · A minor pentatonic (capo 1 · Am–C–Dm–F–G/B)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY',
         backingUrl: 'https://www.youtube.com/watch?v=bs802M_jqtk' },
@@ -521,8 +520,7 @@ SETS.push(
         originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
         tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70',
         backingUrl: 'https://www.youtube.com/watch?v=QLiLE_u_7QY' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Melodic solo over the verse · A minor pentatonic', type: 'Core', core: true,
-        // lyric-review: explicit word in verse 3 — clean edit pending (SITE_ALIGNMENT 0.3)
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Melodic solo over the verse · A minor pentatonic', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY',
         backingUrl: 'https://www.youtube.com/watch?v=bs802M_jqtk' },
@@ -746,8 +744,7 @@ SETS.push(
         originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
         tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70',
         backingUrl: 'https://www.youtube.com/watch?v=QLiLE_u_7QY' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Full solo · A minor pentatonic', type: 'Core', core: true,
-        // lyric-review: explicit word in verse 3 — clean edit pending (SITE_ALIGNMENT 0.3)
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Full solo · A minor pentatonic', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html#layer-4',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY',
         backingUrl: 'https://www.youtube.com/watch?v=bs802M_jqtk' },

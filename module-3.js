@@ -479,8 +479,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Clean laps in a row at 60 BPM — your count?', placeholder: 'e.g. 3 — F5 keeps buzzing' }
               },
               {
-                // lyric-review: "the cure" clean edit pending (SITE_ALIGNMENT 0.3) — this step has no video link, but flag if audio is ever added
-                text: 'Challenge — "the cure" as power chords (◐ optional stretch — give it a go, no score!): this gentle acoustic song isn\'t usually played this way — that\'s the point. Play its progression as power chords — A5 · C5 · D5 · F5 — two beats per chord at 60 BPM, quietly. You\'ve got it when: two laps clean AND soft — power chords don\'t have to be loud.',
+                text: 'Challenge — "the cure" as power chords (◐ optional stretch — give it a go, no score!): this gentle acoustic song isn\'t usually played this way — that\'s the point. Play its progression as power chords — A5 · C5 · D5 · F5 — two beats per chord at 60 BPM, quietly. You\'ve got it when: two laps clean AND soft — power chords don\'t have to be loud. <a href="tabs/the-cure.html#layer-3" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
                 hint: 'You already know these roots from Module 2. The challenge here is touch: light pick, both strings ringing, no bark.',
                 stuck: 'Roots-only at a whisper first — get the dynamics, then add the fifths.',
                 levelUp: 'Add G5 before looping back to A5, or play one lap loud and one lap soft and hear the difference.',

@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-07 — "the cure" joins the Song Journey
+
+### Added
+- **"the cure" joins the Song Journey** — every "the cure" card now links to
+  its five-layer page, just like the other core songs, so you can see the whole
+  arc from listening to the capo-1 strum.
+
 ## 2026-07-07 — Module 3's unit check spells out all three parts
 
 ### Added

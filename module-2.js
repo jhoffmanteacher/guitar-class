@@ -673,8 +673,7 @@ SETS.push(
       { name: '"Seven Nation Army" — The White Stripes', meta: 'E string TAB — great first riff', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-2',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Play the bassline as single-note roots (capo 1 · Am–C–Dm–F–G/B)', type: 'Core', core: true,
-        // lyric-review: explicit word in verse 3 — clean edit pending; don't feature the unedited original in a play-along step without flagging (SITE_ALIGNMENT 0.3)
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Play the bassline as single-note roots (capo 1 · Am–C–Dm–F–G/B)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html#layer-2',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Smoke on the Water" — Deep Purple', meta: 'E string TAB — iconic beginner riff', type: 'Choice', core: false, level: 1,

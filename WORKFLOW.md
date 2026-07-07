@@ -39,6 +39,14 @@
         Seven Nation Army tag ("(Week 16)" dropped). `grep -rinE "week [0-9]+"` over
         `*.js`/`*.html` now returns zero. Steps/skillCounts unchanged; checks passed;
         pushed.
+  - [x] **Link the-cure Song Journey page** (`archive/LINK_THE_CURE.md`).
+        ✅ 2026-07-07: the-cure clean edit requirement dropped (Jonathan,
+        2026-07-07) — all nine guard comments removed; `tabs/the-cure.html` (formerly
+        orphaned) now linked from all eight "the cure" cards via `journeyUrl`
+        (m1→layer-1, m2→layer-2, m4 ×3→layer-4, m5→layer-5, m8 ×2→layer-5, closest
+        fit), plus an in-step Song Journey link on M3's ◐ power-chords stretch step
+        (→layer-3). No `skills:` changes → skillCounts unchanged; no new YouTube IDs.
+        Checks passed.
 - [x] **Station B collapsible sections** — make the Station B portions of each
       set collapse/expand the same way the Station C portions do.
       ✅ 2026-07-06: all 22 sets restructured into thematic sections (steps
