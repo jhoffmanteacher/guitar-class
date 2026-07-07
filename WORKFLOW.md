@@ -16,9 +16,10 @@
 ## Current focus
 
 - [~] **Full website review** (Jonathan-led) — scope and plan TBD.
-  - [x] **Assessment alignment, Modules 2–5 → LOCKED S1 wording** (`SITE_ALIGNMENT_2.md`).
+  - [x] **Assessment alignment, Modules 2–5 → LOCKED S1 wording**
+        (`archive/SITE_ALIGNMENT_2.md`).
         ✅ 2026-07-07: re-audited M2–M5 against the locked Unit 2–5 assessment
-        wording; wrote `AUDIT_REPORT_2.md`; closed all 13 in-scope findings
+        wording; wrote `archive/AUDIT_REPORT_2.md`; closed all 13 in-scope findings
         (M4 pentatonic assessment reworded + new cold-read TAB-lick step & skill,
         skillCount 20→21; M5 two→three chords; M2 assessment summary realigned;
         M3 half notes added). Two items logged-only/deferred (M3 I–IV–V naming,
@@ -52,9 +53,9 @@ archived (2026-07-05). Fold them into the review or handle them ad hoc:
       work — see `archive/SITE_ALIGNMENT.md`).
 - [ ] Module 3: name a taught three-chord progression as a **I–IV–V** (locked
       Unit-3 Task 2 references the Roman-numeral framing; deferred 2026-07-07 —
-      see `AUDIT_REPORT_2.md`).
+      see `archive/AUDIT_REPORT_2.md`).
 - [ ] Module 5: reconcile open-chord Watchtower **`Am–G–F–G`** (L159/L362) vs
       **`Am–G–F`** (L616 + reference fact) — decide if the extra G is an
-      intentional turnaround (deferred 2026-07-07 — see `AUDIT_REPORT_2.md`).
+      intentional turnaround (deferred 2026-07-07 — see `archive/AUDIT_REPORT_2.md`).
 - [ ] Supplemental/Choice song swap once Jonathan's curriculum map is final
       (don't polish the current placeholder lists).
