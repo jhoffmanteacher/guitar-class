@@ -17,7 +17,6 @@ SETS.push(
     subtitle: 'Multi-line TAB · Rhythm in TAB · Riffs that mix notes and chords',
     objective: 'I CAN read multi-line TAB with rhythm symbols and play a real riff that combines single notes and chord stabs.',
     skillFocus: 'Reading multi-line TAB and rhythm symbols · Playing slides, hammer-ons, and pull-offs · Playing a riff of notes and chords',
-    handoutUrl: 'https://docs.google.com/document/d/1w1GM5ZkoFNn0QBGOkstSXGyRZIU8ml2-W9_FtgTkMYg/preview',
     comingSoon: false,
 
     stations: {
@@ -243,7 +242,6 @@ SETS.push(
     subtitle: 'E-shape barre chords · F, F#, G barre · Moving the shape up the neck',
     objective: 'I CAN form a clean E-shape barre chord and move it up the neck to play F, F#, G, A, and B major.',
     skillFocus: 'Forming a clean E-shape barre chord · Moving the barre up the neck · Naming barre chords by their root',
-    handoutUrl: 'https://docs.google.com/document/d/1w1GM5ZkoFNn0QBGOkstSXGyRZIU8ml2-W9_FtgTkMYg/preview',
     comingSoon: false,
 
     stations: {
@@ -466,7 +464,6 @@ SETS.push(
     subtitle: 'A-shape barre chords · Bb, B, C barre · Combining E-shape and A-shape',
     objective: 'I CAN form a clean A-shape barre chord and combine E-shape and A-shape barre chords in a real song.',
     skillFocus: 'Forming a clean A-shape barre chord · Naming A-shape chords by their root · Combining E-shape and A-shape chords in a song',
-    handoutUrl: 'https://docs.google.com/document/d/1w1GM5ZkoFNn0QBGOkstSXGyRZIU8ml2-W9_FtgTkMYg/preview',
     comingSoon: false,
 
     stations: {

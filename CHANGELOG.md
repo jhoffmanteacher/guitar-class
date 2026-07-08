@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-07 — Everything you need lives right here
+
+### Changed
+- **Retired the old Google Docs handouts behind the scenes** — everything you
+  need is already built into the site, so there's nothing extra to open. Nothing
+  changes on your screen.
+
 ## 2026-07-07 — Song Journey links open at the top
 
 ### Changed

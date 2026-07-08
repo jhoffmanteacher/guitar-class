@@ -17,7 +17,6 @@ SETS.push(
     subtitle: 'Hand position · p-i-m-a · Thumb on bass · Fingers on treble',
     objective: 'I CAN hold a relaxed fingerpicking hand position and pluck the bass strings with my thumb and the treble strings with i-m-a fingers.',
     skillFocus: 'A relaxed fingerpicking hand position · Thumb on the bass strings, fingers on the treble · Rest stroke vs. free stroke',
-    handoutUrl: 'https://docs.google.com/document/d/1mxqrOHsRRRG1smLq2pfi0NplUBCOsflrZ6O13PBo06k/preview',
     comingSoon: false,
 
     stations: {
@@ -253,7 +252,6 @@ SETS.push(
     subtitle: 'Basic PIMA pattern · The classic arpeggio · Over a single chord',
     objective: 'I CAN play a basic p-i-m-a-m-i fingerpicking arpeggio pattern cleanly over a single open chord at 70 BPM.',
     skillFocus: 'Playing a PIMA arpeggio pattern · Keeping even timing and volume · Picking through a held chord',
-    handoutUrl: 'https://docs.google.com/document/d/1mxqrOHsRRRG1smLq2pfi0NplUBCOsflrZ6O13PBo06k/preview',
     comingSoon: false,
 
     stations: {
@@ -490,7 +488,6 @@ SETS.push(
     subtitle: 'Fingerpick a full progression · Travis picking intro · Performance song',
     objective: 'I CAN fingerpick through a full chord progression in time and perform one fingerpicked song from start to finish.',
     skillFocus: 'Fingerpicking through a chord progression · An intro to Travis picking · Performing a fingerpicked song',
-    handoutUrl: 'https://docs.google.com/document/d/1mxqrOHsRRRG1smLq2pfi0NplUBCOsflrZ6O13PBo06k/preview',
     comingSoon: false,
 
     stations: {

@@ -27,7 +27,6 @@ SETS.push(
     subtitle: 'Musical alphabet · Note names on E & A · Fretboard reading',
     objective: 'I CAN name all notes on the E and A strings (frets 0–12) and identify them on a fretboard diagram.',
     skillFocus: 'Natural notes on the E and A strings · Reading notes on a fretboard chart',
-    handoutUrl: 'https://docs.google.com/document/d/1KM2rgUYa3NEpDr4E65YmcTE_g6Fxs_rbIjP-U1wjcnA/preview',
     comingSoon: false,
 
     stations: {
@@ -299,7 +298,6 @@ SETS.push(
     subtitle: 'Finger placement · Clean tone · TAB reading · 4-bar melodies',
     objective: 'I CAN press notes cleanly with correct finger placement, read basic TAB, and play a 4-bar melody in time.',
     skillFocus: 'Fretting notes cleanly · Reading basic TAB · Playing a melody in time',
-    handoutUrl: 'https://docs.google.com/document/d/1KM2rgUYa3NEpDr4E65YmcTE_g6Fxs_rbIjP-U1wjcnA/preview',
     comingSoon: false,
 
     stations: {

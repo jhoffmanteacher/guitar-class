@@ -17,7 +17,6 @@ SETS.push(
     subtitle: 'Reading chord diagrams · Am and Em · First strumming',
     objective: 'I CAN read a chord diagram and fret Am and Em cleanly with a 4-beat strum pattern.',
     skillFocus: 'Reading chord diagrams · Fretting the Am and Em chords · Playing a simple down-strum',
-    handoutUrl: 'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/preview',
     comingSoon: false,
 
     stations: {
@@ -220,7 +219,6 @@ SETS.push(
     subtitle: 'Chord Group 1: C, F, Am, G · Down-up strumming · Smooth transitions',
     objective: 'I CAN fret C, F, Am, and G cleanly and switch between them at 70 BPM with a down-up strum pattern.',
     skillFocus: 'Fretting the C, F, and G chords · Switching chords smoothly · Playing down-up strum patterns',
-    handoutUrl: 'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/preview',
     comingSoon: false,
 
     stations: {
@@ -475,7 +473,6 @@ SETS.push(
     subtitle: 'Chord Group 2: D, A, Em, Bm · Connecting chord groups',
     objective: 'I CAN fret D, A, Em, and Bm cleanly and connect Group 1 and Group 2 chords in a song.',
     skillFocus: 'Fretting the D, A, and Bm chords · Connecting chord groups in a song',
-    handoutUrl: 'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/preview',
     comingSoon: false,
 
     stations: {
@@ -687,7 +684,6 @@ SETS.push(
     subtitle: 'Chord Group 3: E, B7, F#m, C#m · Semester showcase preparation',
     objective: 'I CAN fret E and B7 open chords, identify F#m and C#m shapes, and perform a chosen song with 4+ chord types.',
     skillFocus: 'Fretting the E and B7 chords · Recognizing the F#m and C#m shapes · Performing a song with several chords',
-    handoutUrl: 'https://docs.google.com/document/d/13XrZWodpEcCe_l5Rgi7nvbUL0Wv8A6SUOTysUazgHzc/preview',
     comingSoon: false,
 
     stations: {

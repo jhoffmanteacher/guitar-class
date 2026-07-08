@@ -17,7 +17,6 @@ SETS.push(
     subtitle: 'My Guitar Adventure · Goal-setting · Sharing',
     objective: 'I CAN describe why I want to play guitar and share a song that means something to me.',
     skillFocus: 'Setting your guitar goals · Sharing and discussing music',
-    handoutUrl: 'https://docs.google.com/document/d/1wKmQRDFbKsIci94PNRzoQkXoTVO6A017ELIZYvLtyCE/preview',
     comingSoon: false,
 
     stations: {
@@ -172,7 +171,6 @@ SETS.push(
     subtitle: 'Parts of the guitar · Posture · Tuning · First melody',
     objective: 'I CAN name 5+ parts of the guitar, tune all 6 strings, and play a short open-string melody with clean, even notes.',
     skillFocus: 'Guitar parts, posture, and holding a pick · Naming and tuning the strings · Playing an open-string melody',
-    handoutUrl: 'https://docs.google.com/document/d/1wKmQRDFbKsIci94PNRzoQkXoTVO6A017ELIZYvLtyCE/preview',
     comingSoon: false,
 
     stations: {

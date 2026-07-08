@@ -17,7 +17,6 @@ SETS.push(
     subtitle: 'Power chord shape · Moving on E & A strings · Muting',
     objective: 'I CAN fret a clean 2-finger power chord and move the shape along the E and A strings.',
     skillFocus: 'Fretting a clean power chord · Moving the shape along the E and A strings · Reading power-chord TAB',
-    handoutUrl: 'https://docs.google.com/document/d/1S0gxHXkbgZRJT5VhR9nGz6O2imjEF9uQ_jNAYFaTc6I/preview',
     comingSoon: false,
 
     stations: {
@@ -311,7 +310,6 @@ SETS.push(
     subtitle: 'Power chords with metronome · Chord changes · Strumming patterns',
     objective: 'I CAN change power chords on beat 1 at 60 BPM and hold a steady 8-bar progression up to 80 BPM.',
     skillFocus: 'Changing power chords in time · Building speed with a metronome · Playing a song progression',
-    handoutUrl: 'https://docs.google.com/document/d/1S0gxHXkbgZRJT5VhR9nGz6O2imjEF9uQ_jNAYFaTc6I/preview',
     comingSoon: false,
 
     stations: {
