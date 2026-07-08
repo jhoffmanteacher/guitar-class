@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-07 — Song Journey links open at the top
+
+### Changed
+- **Song Journey links now open at the top of the page** — you see the whole
+  five-layer arc from the start, then scroll to the layer you're working on,
+  instead of getting dropped into the middle of the page.
+
 ## 2026-07-07 — Handouts open in a clean read-only view
 
 ### Changed

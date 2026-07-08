@@ -62,7 +62,7 @@ SETS.push(
             title: 'Ear training — acoustic vs. electric',
             steps: [
           {
-            text: 'Ear training — acoustic vs. electric. Two short clips play the SAME song, "All Along the Watchtower": <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank" data-ext="1">Clip 1 — Bob Dylan</a> and <a href="https://www.youtube.com/watch?v=TLV4_xaYynY" target="_blank" data-ext="1">Clip 2 — Jimi Hendrix</a>. One uses an acoustic guitar, the other an electric. Listen for the difference in tone. This song grows with you all semester — <a href="tabs/all-along-the-watchtower.html#layer-1" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
+            text: 'Ear training — acoustic vs. electric. Two short clips play the SAME song, "All Along the Watchtower": <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank" data-ext="1">Clip 1 — Bob Dylan</a> and <a href="https://www.youtube.com/watch?v=TLV4_xaYynY" target="_blank" data-ext="1">Clip 2 — Jimi Hendrix</a>. One uses an acoustic guitar, the other an electric. Listen for the difference in tone. This song grows with you all semester — <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
             hint: 'Acoustic guitars sound warm and woody. Electric guitars sound brighter and can be distorted or "fuzzy." Same song, very different sound.',
             response: { type: 'mc', prompt: 'Which clip is the electric guitar?',
               answer: 1,
@@ -125,19 +125,19 @@ SETS.push(
 
     songs: [
       { name: 'Student choice — any song that means something to them', meta: 'Listening & sharing day · No playing required', type: 'Choice', core: false },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Listen — find the guitar in a current song (capo 1 · Am–C–Dm–F–G/B)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html#layer-1',
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Listen — find the guitar in a current song (capo 1 · Am–C–Dm–F–G/B)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-1',
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Listen — the low-E riff you\'ll build all semester', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-1',
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'Listen — the low-E riff you\'ll build all semester', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Listen — a riff-driven song we return to later', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html#layer-1',
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Listen — a riff-driven song we return to later', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Listen — our Latin core song, back all semester', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html#layer-1',
+      { name: '"Oye Mi Amor" — Maná', meta: 'Listen — our Latin core song, back all semester', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html',
         originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
         tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
       { name: '"Happy Birthday"', meta: 'First real song — open-string melody', type: 'Supp', core: false,
@@ -230,7 +230,7 @@ SETS.push(
             title: 'Preview the "Seven Nation Army" riff',
             steps: [
           {
-            text: 'Preview the "Seven Nation Army" riff: click the note names below the TAB to hear how it should sound, then try just the first few notes to get the feel. You\'ll play the whole riff at the practice station. This song grows with you all semester — <a href="tabs/seven-nation-army.html#layer-1" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
+            text: 'Preview the "Seven Nation Army" riff: click the note names below the TAB to hear how it should sound, then try just the first few notes to get the feel. You\'ll play the whole riff at the practice station. This song grows with you all semester — <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
             hint: 'Listen first, then match it — one note at a time.',
             response: { type: 'short', placeholder: 'How did the riff sound, and which note was hardest to find?' },
             tab: {
@@ -300,7 +300,7 @@ SETS.push(
     },
 
     songs: [
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Play the low-E riff — your first core-thread riff', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-1',
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'Play the low-E riff — your first core-thread riff', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Happy Birthday"', meta: 'Play melody on open strings — first real song!', type: 'Supp', core: false,
@@ -308,7 +308,7 @@ SETS.push(
       { name: '"Sailor Song" — Gigi Perez', meta: 'Listen — fingerpicked vs. strummed guitar', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=1lrFsXkT_rM',
         tutorialUrl: 'https://www.youtube.com/watch?v=rpoyXduMZZw' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-1',
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"Ode to Joy"', meta: 'E string only — great first melody', type: 'Choice', core: false, level: 1,

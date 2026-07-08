@@ -185,7 +185,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Seven Nation Army, chart-free: play the riff on the low E string and say each note name out loud as you play it — B · B · D · B · A · G · F#. You\'ve got it when: one clean lap, no chart, every note named correctly. <a href="tabs/seven-nation-army.html#layer-2" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text: 'Challenge — Seven Nation Army, chart-free: play the riff on the low E string and say each note name out loud as you play it — B · B · D · B · A · G · F#. You\'ve got it when: one clean lap, no chart, every note named correctly. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
                 hint: 'You played this riff in Module 1 with the TAB in front of you. Today the win is knowing WHERE you are — name it, then play it.',
                 stuck: 'Do it in two halves: name-and-play B B D B, then A G F#. Join them once each half is automatic.',
                 levelUp: 'Close your eyes for a lap, or play it one octave-position up starting at fret 7 of the A string.',
@@ -235,10 +235,10 @@ SETS.push(
       { name: '"Stand By Me" — Ben E. King', meta: 'Identify the bass line notes on E & A strings', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=hwZNL7QVJjE',
         tutorialUrl: 'https://www.youtube.com/watch?v=TXLElO_YYiY' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Identify bass notes of riff on low E string', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-2',
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Identify bass notes of riff on low E string', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'E string riff — ear training & note ID', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-2',
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'E string riff — ear training & note ID', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Oye Mi Amor" — Maná', meta: 'Listen ahead — our Latin core song, coming back later', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html',
@@ -544,7 +544,7 @@ SETS.push(
             }
           },
           {
-            text: 'Challenge 3 — Watchtower Bass Riff (your in-class assessment piece): using the TAB, play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. You\'ve got it when: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html#layer-2" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+            text: 'Challenge 3 — Watchtower Bass Riff (your in-class assessment piece): using the TAB, play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. You\'ve got it when: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
             hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A). Keep your thumb behind the neck. Let each note ring fully before the next. Drill it until you can run it with your eyes closed — that\'s what you play for the in-class unit-end assessment.',
             stuck: 'Loop just F–G (frets 1–3) until the finger change is clean, then add the A on fret 5.',
             levelUp: 'Run the whole riff with your eyes closed — that\'s the real "from memory" test.',
@@ -565,7 +565,7 @@ SETS.push(
             response: { type: 'short', prompt: 'Personal record: once it loops clean at 60, raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 100 — beat it next class' }
           },
           {
-            text: 'Bonus riff — "Sweet Child O\' Mine" (Guns N\' Roses) bass roots on the E & A strings: play the root note under each verse chord — D · C · G · D — one per bar at 60 BPM. Click any note name to hear how it should sound. <a href="tabs/sweet-child-o-mine.html#layer-2" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+            text: 'Bonus riff — "Sweet Child O\' Mine" (Guns N\' Roses) bass roots on the E & A strings: play the root note under each verse chord — D · C · G · D — one per bar at 60 BPM. Click any note name to hear how it should sound. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
             hint: 'These are the roots of the D–C–G verse loop. Heads up: the original recording is tuned a half-step lower, so your notes will sound slightly higher than the record — that\'s normal, not a mistake. The famous intro riff comes later in the course (Module 7 stretch goal!).',
             skills: [4, 5],
             tab: {
@@ -592,7 +592,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Watchtower bass line: play the "All Along the Watchtower" bass loop on the low E string — A · G · F · G — one note per beat at 60 BPM, four laps without stopping. You\'ve got it when: four laps, every note landing on the click. <a href="tabs/all-along-the-watchtower.html#layer-2" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text: 'Challenge — Watchtower bass line: play the "All Along the Watchtower" bass loop on the low E string — A · G · F · G — one note per beat at 60 BPM, four laps without stopping. You\'ve got it when: four laps, every note landing on the click. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
                 hint: 'Three notes carry this whole song. Keep your eyes one note ahead of your pick.',
                 stuck: 'Loop just A → G until the shift is smooth, then add the F.',
                 levelUp: 'Say each note name out loud while playing, or double the loop to eight laps without a stumble.',
@@ -609,7 +609,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'How many clean laps in a row did you get at 60 BPM?', placeholder: 'e.g. 4 — beat it next class' }
               },
               {
-                text: 'Challenge — Seven Nation Army, true pitch: play the riff where the record actually lives — on the A string — E · E · G · E · D · C · B at 60 BPM. You\'ve got it when: two clean laps, and you can say which string version sounds like the recording. <a href="tabs/seven-nation-army.html#layer-2" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text: 'Challenge — Seven Nation Army, true pitch: play the riff where the record actually lives — on the A string — E · E · G · E · D · C · B at 60 BPM. You\'ve got it when: two clean laps, and you can say which string version sounds like the recording. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
                 hint: 'Same riff, new string, new note names. Notice how the shape of the moves feels the same even though every name changed.',
                 stuck: 'Go back to your low-E version for one lap to remind your hand of the moves, then bring it up to the A string.',
                 levelUp: 'Alternate laps: one on low E, one on the A string, without stopping between.',
@@ -664,16 +664,16 @@ SETS.push(
     songs: [
       { name: '"Happy Birthday"', meta: 'Play full melody on E & A strings from TAB', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Play verse bass roots on E & A strings · intro riff = Module 7 stretch goal', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html#layer-2',
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Play verse bass roots on E & A strings · intro riff = Module 7 stretch goal', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Play bass-note riff on low E string from memory', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-2',
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Play bass-note riff on low E string from memory', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'E string TAB — great first riff', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-2',
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'E string TAB — great first riff', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Play the bassline as single-note roots (capo 1 · Am–C–Dm–F–G/B)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html#layer-2',
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Play the bassline as single-note roots (capo 1 · Am–C–Dm–F–G/B)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Smoke on the Water" — Deep Purple', meta: 'E string TAB — iconic beginner riff', type: 'Choice', core: false, level: 1,

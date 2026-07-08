@@ -153,10 +153,10 @@ SETS.push(
     songs: [
       { name: '"Happy Birthday"', meta: 'Read chord diagrams for C–G–Am chord version (optional)', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Let It Be" — The Beatles', meta: 'Verse chords · read from chord chart · C–G–Am–F', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html#layer-2',
+      { name: '"Let It Be" — The Beatles', meta: 'Verse chords · read from chord chart · C–G–Am–F', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
         tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · Read from chord chart', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-5',
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · Read from chord chart', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"Horse with No Name" — America', meta: 'Em–D6add9 — only 2 chords, great starter', type: 'Choice', core: false, level: 1,
@@ -255,7 +255,7 @@ SETS.push(
             title: 'Listen for the chord changes',
             steps: [
           {
-            text: 'Listen to "Let It Be" by The Beatles. Can you hear the C–G–Am–F chord pattern in the verse? Count the bars — how many strums per chord? <a href="tabs/let-it-be.html#layer-1" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 4</a>.',
+            text: 'Listen to "Let It Be" by The Beatles. Can you hear the C–G–Am–F chord pattern in the verse? Count the bars — how many strums per chord? <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 4</a>.',
             hint: 'You don\'t need to play along yet. Just listen and map out when the chords change. This trains your ear to recognize the I–V–vi–IV progression.',
             skills: [5],
             response: { type: 'short', placeholder: 'About how many strums (or beats) does each chord get before it changes?' }
@@ -347,7 +347,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Let It Be, verse (in-class assessment rehearsal): play C · G · Am · F with a down-strum, four beats per chord, building from 60 to 70 BPM. This C–G–Am–F verse is the song you play from memory for the in-class assessment. You\'ve got it when: one full verse loop at 70 BPM, every change landing on beat 1. <a href="tabs/let-it-be.html#layer-2" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 4</a>.',
+                text: 'Challenge — Let It Be, verse (in-class assessment rehearsal): play C · G · Am · F with a down-strum, four beats per chord, building from 60 to 70 BPM. This C–G–Am–F verse is the song you play from memory for the in-class assessment. You\'ve got it when: one full verse loop at 70 BPM, every change landing on beat 1. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 4</a>.',
                 hint: 'Look ahead — start forming the next chord on beat 4 of the current one. Keep your fingers arched and your thumb behind the neck so every string rings. The strum keeps moving even while fingers travel.',
                 stuck: 'Isolate the roughest pair (probably C → F) and loop just those two, four beats each.',
                 levelUp: 'Add the chorus turnaround — Am · G · F · C — or drop to two beats per chord at the same 60 BPM.',
@@ -359,7 +359,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which chord change still fights you in Let It Be?', placeholder: 'e.g. C to F — fingers arrive late' }
               },
               {
-                text: 'Challenge — Watchtower, open-chord version: the same loop you\'ve played as bass notes and power chords, now as full open chords — Am · G · F · G — two beats per chord at 60 BPM. You\'ve got it when: four loops, and you can hear that it\'s the SAME song you played in Units 2 and 3. <a href="tabs/all-along-the-watchtower.html#layer-5" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
+                text: 'Challenge — Watchtower, open-chord version: the same loop you\'ve played as bass notes and power chords, now as full open chords — Am · G · F · G — two beats per chord at 60 BPM. You\'ve got it when: four loops, and you can hear that it\'s the SAME song you played in Units 2 and 3. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
                 hint: 'This is the third time this song has met you — bass line, power chords, now open chords. Notice the roots are identical every time.',
                 stuck: 'Strum only beat 1 of each chord and use beats 2–4 to travel to the next shape.',
                 levelUp: 'One beat per chord, or alternate: one loop open chords, one loop power chords, without stopping.',
@@ -403,10 +403,10 @@ SETS.push(
     songs: [
       { name: '"Happy Birthday"', meta: 'Full strum arrangement — C–G–Am–F version (optional)', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Let It Be" — The Beatles', meta: 'Verse & chorus full chord strum · C–G–Am–F (I–V–vi–IV)', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html#layer-2',
+      { name: '"Let It Be" — The Beatles', meta: 'Verse & chorus full chord strum · C–G–Am–F (I–V–vi–IV)', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
         tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Capo 1 play-along · Am–C–Dm–F–G/B', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html#layer-5',
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Capo 1 play-along · Am–C–Dm–F–G/B', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Let Her Go" — Passenger', meta: 'G–D–Em–C — same family of chords', type: 'Choice', core: false, level: 2,
@@ -582,7 +582,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Oye Mi Amor, chorus: the chorus is D · A · Bm · G — every chord is one you\'ve drilled this set (D, A, Bm from Group 2) plus G from Group 1. Play the loop, four beats per chord at 60 BPM with a down-strum. You\'ve got it when: two loops with every change landing on beat 1, the partial-barre Bm ringing clean. <a href="tabs/oye-mi-amor.html#layer-3" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+                text: 'Challenge — Oye Mi Amor, chorus: the chorus is D · A · Bm · G — every chord is one you\'ve drilled this set (D, A, Bm from Group 2) plus G from Group 1. Play the loop, four beats per chord at 60 BPM with a down-strum. You\'ve got it when: two loops with every change landing on beat 1, the partial-barre Bm ringing clean. <a href="tabs/oye-mi-amor.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
                 hint: 'D, A, and Bm are your brand-new Group 2 chords — this is where they pay off. Bm is the partial-barre shape from the video (xx4432); keep that index barre light and your thumb behind the neck.',
                 stuck: 'Loop just D → A until it\'s smooth, then Bm → G, then join the halves. Bm is the hard one — pre-shape it in the air before you land it.',
                 levelUp: 'Drop to two beats per chord at the same 60 BPM, or hum the chorus hook over your strumming.',
@@ -611,13 +611,13 @@ SETS.push(
     },
 
     songs: [
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · open-chord version', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-5',
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · open-chord version', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: '◐ optional stretch · D–A–Em strummed adaptation', type: 'Supp', core: false, journeyUrl: 'tabs/seven-nation-army.html#layer-5',
+      { name: '"Seven Nation Army" — The White Stripes', meta: '◐ optional stretch · D–A–Em strummed adaptation', type: 'Supp', core: false, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Chorus loop D–A–Bm–G · strummed', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html#layer-3',
+      { name: '"Oye Mi Amor" — Maná', meta: 'Chorus loop D–A–Bm–G · strummed', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html',
         originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
         tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
       { name: '"Stand By Me" — Ben E. King', meta: 'G–Em–C–D · great Group 1↔2 cross-group song', type: 'Choice', core: false, level: 1,
@@ -810,7 +810,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Oye Mi Amor, strummed (showcase version): play the chorus as open chords — D · A · Bm · G — four beats per chord at 60 BPM with a straight down-strum, building toward 70, singing or humming the hook if you dare. You\'ve got it when: four loops with every change on beat 1 and the partial-barre Bm ringing clean. <a href="tabs/oye-mi-amor.html#layer-3" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+                text: 'Challenge — Oye Mi Amor, strummed (showcase version): play the chorus as open chords — D · A · Bm · G — four beats per chord at 60 BPM with a straight down-strum, building toward 70, singing or humming the hook if you dare. You\'ve got it when: four loops with every change on beat 1 and the partial-barre Bm ringing clean. <a href="tabs/oye-mi-amor.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
                 hint: 'You met this loop in Set 3 — now make it showcase-clean. Bm is the partial barre; keep your fingers arched and your thumb behind the neck so the whole chord rings.',
                 stuck: 'Bm is the tough one — loop A → Bm on its own until the barre lands, then run the full D–A–Bm–G.',
                 levelUp: 'Try the down-down-up split strum on each chord, run it at two beats per chord, or push to 70 BPM.',
@@ -855,10 +855,10 @@ SETS.push(
       { name: '"Oye Mi Amor" — Maná', meta: 'Full-song showcase · D–A–Bm–G', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html',
         originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
         tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Optional showcase · D–C–G power chords (from Module 3)', type: 'Supp', core: false, journeyUrl: 'tabs/sweet-child-o-mine.html#layer-5',
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Optional showcase · D–C–G power chords (from Module 3)', type: 'Supp', core: false, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full performance with open chords', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-5',
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full performance with open chords', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"Hallelujah" — Leonard Cohen', meta: 'C–Am–F–G — beautiful showcase song', type: 'Choice', core: false, level: 2,

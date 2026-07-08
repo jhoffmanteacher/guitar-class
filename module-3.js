@@ -181,7 +181,7 @@ SETS.push(
             title: 'Play a power chord progression in time',
             steps: [
           {
-            text: 'Challenge 6 — Watchtower Loop (your assessment piece): play A5–G5–F5–G5, one strum per beat at 60 BPM. You\'ve got it when: four times through, changing on beat 1 every time, with no stops. <a href="tabs/all-along-the-watchtower.html#layer-3" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+            text: 'Challenge 6 — Watchtower Loop (your assessment piece): play A5–G5–F5–G5, one strum per beat at 60 BPM. You\'ve got it when: four times through, changing on beat 1 every time, with no stops. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
             hint: 'A5 = 5th fret E string, G5 = 3rd fret E string, F5 = 1st fret E string. Shift smoothly — aim to land exactly on beat 1. (The original song uses an Am chord, but as a power chord it\'s just A5 — no major or minor.) This is the loop the whole class plays for the Set 1 check-off.',
             stuck: 'Loop just A5–G5 (frets 5 and 3) until that change is clean, then add F5.',
             levelUp: 'Play it with an eighth-note strum (down-down-up-down-up), or push past 70 BPM.',
@@ -199,7 +199,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Seven Nation Army, verse riff: play the riff as two-string power chords sliding along the A string, one chord per riff note at 60 BPM. You\'ve got it when: two clean laps in a row, both strings of every chord ringing. <a href="tabs/seven-nation-army.html#layer-3" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+                text: 'Challenge — Seven Nation Army, verse riff: play the riff as two-string power chords sliding along the A string, one chord per riff note at 60 BPM. You\'ve got it when: two clean laps in a row, both strings of every chord ringing. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
                 hint: 'It\'s one shape sliding — keep your grip and let your arm do the moving.',
                 stuck: 'Play roots-only (your Module 2 line), then add the second string back one chord at a time.',
                 levelUp: 'Palm-mute the whole lap for the verse sound, then open up for a chorus lap.',
@@ -244,12 +244,12 @@ SETS.push(
     },
 
     songs: [
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Power chord loop: A5–G5–F5–G5 · Play as a class', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-3',
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Power chord loop: A5–G5–F5–G5 · Play as a class', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"Happy Birthday"', meta: 'Power chord version — chords only (optional)', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Iconic single power-chord riff on E string', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-3',
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'Iconic single power-chord riff on E string', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Smells Like Teen Spirit" — Nirvana', meta: 'F Bb Ab Db power chord progression', type: 'Choice', core: false, level: 2,
@@ -426,7 +426,7 @@ SETS.push(
             title: 'Oye Mi Amor: Bm5–A5 two-shape metronome drill',
             steps: [
           {
-            text: 'Challenge — Bm5 ↔ A5 Two-Shape Drill: meet Bm5, a new power chord — root B on the low E string, 7th fret (the same shape you climbed to in Set 1). Rock between the Oye Mi Amor verse chords, Bm5 (fret 7) and A5 (fret 5), one strum per beat — it\'s the same shape sliding two frets. You\'ve got it when: you can switch Bm5↔A5 landing on beat 1, both notes clean, all the way up the tempo ladder: 60 → 70 → 80 BPM. <a href="tabs/oye-mi-amor.html#layer-2" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+            text: 'Challenge — Bm5 ↔ A5 Two-Shape Drill: meet Bm5, a new power chord — root B on the low E string, 7th fret (the same shape you climbed to in Set 1). Rock between the Oye Mi Amor verse chords, Bm5 (fret 7) and A5 (fret 5), one strum per beat — it\'s the same shape sliding two frets. You\'ve got it when: you can switch Bm5↔A5 landing on beat 1, both notes clean, all the way up the tempo ladder: 60 → 70 → 80 BPM. <a href="tabs/oye-mi-amor.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
             hint: 'A power chord has no major or minor — Bm5 is just B5 (B + F#). Keep the two-finger shape locked and let your whole arm slide the two frets between fret 7 and fret 5.',
             stuck: 'Park on the slide: fret 5, fret 7, fret 5, fret 7 with no rhythm — make the 2-fret move automatic, then add the metronome at 60.',
             levelUp: 'Hold it clean at 80 BPM, or add the chorus chords D5 and G5 for the full D5–A5–Bm5–G5 progression.',
@@ -444,7 +444,7 @@ SETS.push(
             title: 'Sweet Child O\' Mine — in-class assessment rehearsal',
             steps: [
           {
-            text: 'Challenge — Sweet Child Verse (in-class assessment rehearsal): play the Guns N\' Roses verse as power chords — D5 · C5 · G5, two beats per chord at 60 BPM. This is one of the songs you can bring to the in-class assessment. You\'ve got it when: four clean laps, every change on beat 1, muting tight. <a href="tabs/sweet-child-o-mine.html#layer-3" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+            text: 'Challenge — Sweet Child Verse (in-class assessment rehearsal): play the Guns N\' Roses verse as power chords — D5 · C5 · G5, two beats per chord at 60 BPM. This is one of the songs you can bring to the in-class assessment. You\'ve got it when: four clean laps, every change on beat 1, muting tight. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
             hint: 'We play Sweet Child in standard tuning in class. (The famous recording is tuned a half-step down, so your D5–C5–G5 sound one fret higher than the record — that\'s expected; don\'t retune.) D5 and C5 are A-string roots; G5 drops to the low E string.',
             stuck: 'Loop D5 → C5 (both A-string, 2 frets apart) until smooth, then add the jump to G5 on the low E string.',
             levelUp: 'Push the tempo ladder to 70 then 80 BPM, or add a straight-eighths strum.',
@@ -462,7 +462,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Watchtower, verse: play the "All Along the Watchtower" loop as power chords rooted on the low E string — A5 · G5 · F5 · G5 — two beats per chord at 60 BPM. You\'ve got it when: four clean laps, every change landing on the beat. <a href="tabs/all-along-the-watchtower.html#layer-3" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+                text: 'Challenge — Watchtower, verse: play the "All Along the Watchtower" loop as power chords rooted on the low E string — A5 · G5 · F5 · G5 — two beats per chord at 60 BPM. You\'ve got it when: four clean laps, every change landing on the beat. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
                 hint: 'Same three roots you played in Module 2 — now each one carries its fifth along for the ride.',
                 stuck: 'Drop to roots-only for a lap, then add the second string back on just the A5.',
                 levelUp: 'One beat per chord instead of two — same 60 BPM, twice the changes.',
@@ -479,7 +479,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Clean laps in a row at 60 BPM — your count?', placeholder: 'e.g. 3 — F5 keeps buzzing' }
               },
               {
-                text: 'Challenge — "the cure" as power chords (◐ optional stretch — give it a go, no score!): this gentle acoustic song isn\'t usually played this way — that\'s the point. Play its progression as power chords — A5 · C5 · D5 · F5 — two beats per chord at 60 BPM, quietly. You\'ve got it when: two laps clean AND soft — power chords don\'t have to be loud. <a href="tabs/the-cure.html#layer-3" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+                text: 'Challenge — "the cure" as power chords (◐ optional stretch — give it a go, no score!): this gentle acoustic song isn\'t usually played this way — that\'s the point. Play its progression as power chords — A5 · C5 · D5 · F5 — two beats per chord at 60 BPM, quietly. You\'ve got it when: two laps clean AND soft — power chords don\'t have to be loud. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
                 hint: 'You already know these roots from Module 2. The challenge here is touch: light pick, both strings ringing, no bark.',
                 stuck: 'Roots-only at a whisper first — get the dynamics, then add the fifths.',
                 levelUp: 'Add G5 before looping back to A5, or play one lap loud and one lap soft and hear the difference.',
@@ -495,7 +495,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Loud vs. soft power chords — which was harder to keep clean?', placeholder: 'e.g. soft — I kept muting the D string' }
               },
               {
-                text: 'Challenge — Oye Mi Amor, chorus: play Maná\'s chorus as power chords — D5 · A5 · Bm5 · G5 — two beats per chord at 60 BPM. You\'ve got it when: four laps with every change on beat 1, and Bm5 (fret 7) ringing as clean as the rest. <a href="tabs/oye-mi-amor.html#layer-2" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text: 'Challenge — Oye Mi Amor, chorus: play Maná\'s chorus as power chords — D5 · A5 · Bm5 · G5 — two beats per chord at 60 BPM. You\'ve got it when: four laps with every change on beat 1, and Bm5 (fret 7) ringing as clean as the rest. <a href="tabs/oye-mi-amor.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
                 hint: 'You drilled Bm5↔A5 already — this adds D5 and G5 around them. D5 is an A-string root; A5, Bm5, and G5 are low-E-string roots.',
                 stuck: 'Split it: loop D5 → A5 until smooth, then Bm5 → G5, then join the two halves.',
                 levelUp: 'One beat per chord instead of two — same 60 BPM, twice the changes — or push the ladder to 70.',
@@ -527,18 +527,18 @@ SETS.push(
     },
 
     songs: [
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full power chord loop · change on beat 1 at 60, hold 80 BPM', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html#layer-3',
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full power chord loop · change on beat 1 at 60, hold 80 BPM', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Electric riff → power-chord version', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html#layer-2',
+      { name: '"Oye Mi Amor" — Maná', meta: 'Electric riff → power-chord version', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html',
         originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
         tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Verse: D5–C5–G5 power chord loop', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html#layer-3',
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Verse: D5–C5–G5 power chord loop', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
       { name: '"Happy Birthday"', meta: 'Full power chord arrangement (optional)', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Full riff with power chords', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html#layer-3',
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'Full riff with power chords', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Blitzkrieg Bop" — Ramones', meta: 'A5 D5 E5 — fast and fun', type: 'Choice', core: false, level: 1,
