@@ -31,15 +31,13 @@ SETS.push(
             hint: 'If the person next to you can hear your video, it\'s too loud. Comfortable for you, quiet for everyone else.'
           },
           {
-            // TODO(fixit): timestamp — add verified (M:SS–M:SS) range for the practice-routine segment (Session 4)
             text: 'Watch: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">How to Practice Guitar – JustinGuitar</a> (Lesson 1 Practice Routine). While you watch, write down the ONE practice habit he says matters most — you\'ll try it out this week.',
             hint: 'As you watch, think about: what is one practice habit he says makes the biggest difference? Does it match what you thought? You\'ve got it when: you can name that one habit without looking back at your notes.',
             skills: [1],
             response: { type: 'short', placeholder: 'In one sentence: what practice habit did he say matters most, and did it match what you thought?' }
           },
           {
-            // TODO(fixit): timestamp — add verified (M:SS–M:SS) range for the handling/storing segment (Session 4)
-            text: 'Watch: <a href="https://youtu.be/PyWZYHy17As" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a>. While you watch, note two things that can damage a guitar and how to avoid each — this is shared gear, so it matters.',
+            text: 'Watch: <a href="https://youtu.be/PyWZYHy17As" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a> (you only need the first ~3 minutes — cleaning, humidity, and basic care; after that it\'s a string-changing demo you won\'t need yet). While you watch, note two things that can damage a guitar and how to avoid each — this is shared gear, so it matters.',
             hint: 'Your guitar is shared gear — notice how he handles and stores it. You\'ll practice the safe set-down at the hands-on station next. You\'ve got it when: you can name two ways to keep a guitar safe.',
             response: { type: 'mc', prompt: 'When you\'re done playing, what\'s the safest way to set the guitar down?',
               answer: 0,
@@ -204,8 +202,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            // TODO(fixit): timestamp — add verified (M:SS–M:SS) range for the tuning walkthrough (Session 4)
-            text: 'Watch: <a href="https://youtu.be/X2EmpWr9vUc" target="_blank">How to Tune Your Guitar For Beginners – JustinGuitar</a>. Have your tuner ready and follow along on your own guitar — match one string at a time as he goes.',
+            text: 'Watch: <a href="https://youtu.be/X2EmpWr9vUc?t=105" target="_blank">How to Tune Your Guitar For Beginners – JustinGuitar</a> (the link jumps to 1:45, where he shows how to use the tuner — the part before is about which tuner to buy, and you\'ve already got a classroom tuner; you can stop around 4:28). Have your tuner ready and follow along on your own guitar — match one string at a time as he goes.',
             hint: 'Headphones on. Notice the order of the strings and what "in tune" sounds like. You\'ve got it when: you can tell whether a note is too high or too low before the tuner shows you.',
             stuck: 'Pause after each string and tune just that one before moving on. If the tuner jumps around, pluck a little softer and let the note ring.',
             levelUp: 'Detune one string on purpose, then bring it back to green by ear first — check the tuner only to confirm.',
@@ -220,8 +217,7 @@ SETS.push(
             ] }
           },
           {
-            // TODO(fixit): timestamp — add verified (M:SS–M:SS) range for the parts walkthrough (Session 4)
-            text: 'Watch: <a href="https://youtu.be/zpRoq0jcWfQ" target="_blank">Beginner Guide To Guitar Anatomy – JustinGuitar</a>. As he names each part, point to it on your own guitar and say the name out loud.',
+            text: 'Watch: <a href="https://youtu.be/zpRoq0jcWfQ?t=16" target="_blank">Beginner Guide To Guitar Anatomy – JustinGuitar</a> (the parts walkthrough runs about 0:16–3:18; the later sections cover electric guitars, which aren\'t the ones we use — you can stop at 3:18). As he names each part, point to it on your own guitar and say the name out loud.',
             hint: 'Write down 5 parts you can now name from memory. You\'ve got it when: you can point to and name at least 5 parts without the video.',
             response: { type: 'mc', prompt: 'Which of these is NOT a part of the guitar?',
               answer: 0,
@@ -234,7 +230,6 @@ SETS.push(
             ] }
           },
           {
-            // TODO(fixit): timestamp — approved example (0.5) used (0:00–3:30) illustratively; verify real range in Session 4
             text: 'Watch: <a href="https://youtu.be/C-mt8td1teU" target="_blank">How to Hold the Guitar – JustinGuitar</a>. While you watch, set up in your chair and copy his position piece by piece — feet, guitar on leg, back, strumming arm.',
             hint: 'Notice where the guitar rests and how the back stays straight. You\'ve got it when: you can look away from the screen and your guitar stays put without your fretting hand holding it up.',
             stuck: 'Pause at each position checkpoint and match one thing at a time: feet flat first, then guitar on the right leg, then straighten the back. Ask a neighbor to compare you to the freeze-frame.',
@@ -250,7 +245,6 @@ SETS.push(
             ] }
           },
           {
-            // TODO(fixit): timestamp — add verified (M:SS–M:SS) range for the pick-grip demo (Session 4)
             text: 'Watch: <a href="https://youtu.be/1JBxNFEg0nU" target="_blank">Picks: How to Choose & Hold One (BC-107) – JustinGuitar</a>. Grab a pick and copy his grip as you watch — rest it on your bent index finger, then press your thumb on top.',
             hint: 'Write down: what are the two most common pick-holding mistakes? You\'ve got it when: only a small tip of the pick pokes past your thumb and it doesn\'t slip when you strum.',
             stuck: 'Hold the pick still and just brush it down across the strings with your whole forearm. If it flips or drops, let a little less tip show and relax your grip.',
@@ -276,7 +270,6 @@ SETS.push(
             levelUp: 'Say the six string names high to low (e B G D A E) without pausing.'
           },
           {
-            // TODO(fixit): timestamp — add verified (M:SS–M:SS) range for the picking demo (Session 4)
             text: 'Watch: <a href="https://youtu.be/Z1ETtvhPqdQ" target="_blank">Picking Individual Strings (BC-166) – JustinGuitar</a>. Copy him on your own guitar — pick one open string over and over, aiming for the same clean sound every time.',
             hint: 'Watch his picking hand and how light his fretting touch is. Clean single notes are the whole goal of your first melody. You\'ve got it when: you can pick a single string five times and it rings clean every time — no buzz, no catching a neighbor string.',
             stuck: 'Rest your picking hand lightly on the guitar and pick just the low E string slowly. If you hit two strings, aim a little more and use a smaller motion.',

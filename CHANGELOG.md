@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-08 — Module 1 videos point you to the part that matters
+
+### Changed
+- **Some Module 1 lesson videos now jump straight to the useful part.** The
+  tuning video opens right where he shows how to use a tuner (skipping the
+  "which tuner should I buy" section), and the guitar-anatomy video opens at the
+  parts walkthrough — with a note that the later electric-guitar sections aren't
+  the guitars we use. The guitar-care video now tells you that you only need its
+  first few minutes. Less time hunting for the right moment, more time playing.
+
 ## 2026-07-07 — Module 1 caught up to the rest of the course
 
 ### Changed

@@ -45,8 +45,27 @@
           Sets. **7 `TODO(fixit): timestamp` markers** left on the Watch steps
           for Session 4 to resolve with verified (M:SS–M:SS) ranges. No
           `FIXIT_FLAGS.md` items.
-    - [ ] **Session 4 — video liveness sweep + lesson timestamps** (own sitting).
-          Must resolve the 7 Module 1 `TODO(fixit): timestamp` markers.
+    - [x] **Session 4 — video liveness sweep + lesson timestamps.**
+          ✅ 2026-07-08: liveness sweep passed — all 245 external links reachable
+          (`checks.mjs`), and all 7 Module 1 lesson videos re-loaded live in-browser.
+          Resolved all 7 `TODO(fixit): timestamp` markers using **verified YouTube
+          chapter data** (pulled from each video's page data, not recall):
+          • **Jump-links added** where earlier/later content is skippable —
+            *Tune* (`?t=105`, walkthrough 1:45–4:28; before = "which tuner to buy,"
+            after = restringing), *Anatomy* (`?t=16`, parts 0:16–3:18; later sections
+            are electric-guitar parts), and *Caring* (range note: only the first ~3 min
+            of care tips matter; after 2:58 is a string-change demo).
+          • **Marker removed, watch-whole** for the cohesive single-topic clips —
+            *Practice* (5:14), *Holding* (2:43), *Picks* (8:35, no chapters — no time
+            invented), *Picking* (4:32).
+          Two content-fit notes for Jonathan (out of Session 4 scope, not changed):
+          (a) the *Holding* video is actually "Holding the Guitar with Your Fretting
+          Hand?" (2:43) — narrower than the step's "feet, leg, back, strumming arm"
+          full-posture promise; (b) the *Caring* video covers clean/humidity/strings,
+          not the "how to set the guitar down" its MC asks about. Both are still
+          relevant, just loose fits — candidates for a future video swap. The old
+          illustrative range for *Holding* (0:00–3:30) overran its 2:43 runtime, so
+          verifying was the right call. `checks.mjs` passed; SW version bumped.
   - [x] **Assessment alignment, Modules 2–5 → LOCKED S1 wording**
         (`archive/SITE_ALIGNMENT_2.md`).
         ✅ 2026-07-07: re-audited M2–M5 against the locked Unit 2–5 assessment
