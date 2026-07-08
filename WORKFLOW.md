@@ -131,3 +131,12 @@ archived (2026-07-05). Fold them into the review or handle them ad hoc:
       before the course starts.
 - [ ] Supplemental/Choice song swap once Jonathan's curriculum map is final
       (don't polish the current placeholder lists).
+- [ ] **Module 1 video-fit swaps** (flagged in Session 4, 2026-07-08 — kept for
+      later per Jonathan). Two lesson videos are relevant but loose fits for their
+      step; consider search-and-verify replacements:
+      (a) **Set 2 "Holding" step** links *"Holding the Guitar with Your Fretting
+      Hand?"* (`C-mt8td1teU`, 2:43) — narrower than the step's full-posture promise
+      (feet, guitar on leg, back, strumming arm).
+      (b) **Set 1 "Caring" step** links *Caring for Your Acoustic Guitar*
+      (`PyWZYHy17As`) — covers clean/humidity/strings, but its MC asks about the
+      safest way to *set the guitar down*, which the video doesn't cover.
