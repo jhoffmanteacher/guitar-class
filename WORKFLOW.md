@@ -33,8 +33,20 @@
           and 0 `docs.google.com` in `*.js`/`tabs/*.html`; skill-ID lists
           byte-identical to pre-edit; `checks.mjs` validates all 22 Sets. The 8
           Google Docs remain in Drive, untouched. Checks passed.
-    - [ ] **Session 3 — Module 1 template upgrade** (own sitting).
+    - [x] **Session 3 — Module 1 template upgrade.**
+          ✅ 2026-07-07: brought all Module 1 steps to the frozen Module 2 depth
+          (per the 0.5 approved worked example). Added `stuck:` (6→15),
+          `levelUp:` (0→17), and `response:` checks (6→13); every Watch step now
+          carries a during-watching job and every practice/challenge step a
+          "You've got it when." First-day tone kept gentle and social
+          ("ask a neighbor," "compare to the freeze-frame"). All 7 lesson videos
+          re-verified live via oEmbed. Skill IDs (`w1-s1..3`, `w2-s1..6`)
+          byte-identical; `skillCount` unchanged; `checks.mjs` validates all
+          Sets. **7 `TODO(fixit): timestamp` markers** left on the Watch steps
+          for Session 4 to resolve with verified (M:SS–M:SS) ranges. No
+          `FIXIT_FLAGS.md` items.
     - [ ] **Session 4 — video liveness sweep + lesson timestamps** (own sitting).
+          Must resolve the 7 Module 1 `TODO(fixit): timestamp` markers.
   - [x] **Assessment alignment, Modules 2–5 → LOCKED S1 wording**
         (`archive/SITE_ALIGNMENT_2.md`).
         ✅ 2026-07-07: re-audited M2–M5 against the locked Unit 2–5 assessment

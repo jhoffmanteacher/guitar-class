@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-07 — Module 1 caught up to the rest of the course
+
+### Changed
+- **Every Module 1 step now has the same support the later modules do** — a
+  "Stuck?" lifeline that shrinks the task when you're struggling, a "Level up"
+  when you want more of a challenge, and a "You've got it when…" so you can
+  check yourself without waiting for the teacher.
+- **The watch videos now give you a job while you watch** — something to look
+  for, try, or copy on your own guitar — instead of just pressing play. Twice as
+  many quick self-checks are sprinkled through the module, too.
+
 ## 2026-07-07 — Everything you need lives right here
 
 ### Changed
