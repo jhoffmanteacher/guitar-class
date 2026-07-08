@@ -419,6 +419,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .rp-looper-speed-btn:hover{background:var(--bg2)}
 .rp-looper-speed-btn.on{background:var(--text);color:var(--bg);border-color:var(--text)}
 .rp-looper-note{padding:8px 10px;font-size:12.5px;color:var(--amber-text);background:var(--amber-bg);border-radius:var(--radius-sm)}
+.rp-looper-saved-pill{display:inline-flex;align-items:center;gap:0;background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding-left:12px}
+.rp-looper-saved-load{padding:5px 4px;font-size:13px;font-family:inherit;border:none;background:transparent;color:var(--text);cursor:pointer}
+.rp-looper-saved-load:hover{text-decoration:underline}
+.rp-looper-saved-del{width:20px;height:20px;margin:0 3px;border-radius:50%;border:none;background:transparent;color:var(--text2);cursor:pointer;font-size:13px;line-height:1;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.rp-looper-saved-del:hover{background:var(--border2);color:var(--text)}
+.rp-looper-save-name{padding:5px 10px;font-size:13.5px;font-family:inherit;border:1px solid var(--border2);border-radius:14px;background:var(--bg);color:var(--text);min-width:140px}
+.rp-looper-save-name:focus{outline:none;border-color:var(--text2)}
+.rp-looper-saved-note{font-size:13px;color:var(--amber-text)}
 .rp-link{color:var(--blue-text);text-decoration:none;cursor:pointer;border-bottom:1px solid transparent;transition:border-color 0.1s}
 .rp-link:hover{border-bottom-color:var(--blue-text)}
 .rp-trigger{display:inline-flex;align-items:center;gap:4px;color:var(--blue-text);cursor:pointer;font-size:15px;font-weight:500;background:none;border:none;padding:0;font-family:inherit;text-align:left;line-height:1.5}

@@ -2,12 +2,27 @@
    Guitar Class — Backing-Track Looper (resource panel)
 
    Phase 1 (see LOOPER_SPEC.md): YouTube IFrame Player API, A/B loop with
-   ±1s nudge, loop toggle, jump-to-A, 0.5x/0.75x/1x speed. No presets, no
-   saved loops — those are Phase 2/3.
+   ±1s nudge, loop toggle, jump-to-A, 0.5x/0.75x/1x speed.
+   Phase 2: student-saved loops, persisted to the same Firestore progress
+   doc as skills/responses (loopsData / saveLoops() in app.js). No teacher
+   presets yet — that's Phase 3.
 
    Split out of app.js for maintainability. Loads AFTER app.js (which owns
-   loadPanel/clearPanel and calls into initLooper/teardownLooper here).
+   loadPanel/clearPanel/loopsData/saveLoops and calls into
+   initLooper/teardownLooper here).
    ════════════════════════════════════════════════════════════════════ */
+
+const LOOPER_MAX_SAVED = 5;
+
+function getSavedLoops(videoId){
+  return (typeof loopsData!=='undefined' && loopsData[videoId]) || [];
+}
+function setSavedLoops(videoId, list){
+  if(typeof loopsData==='undefined') return;
+  if(list.length) loopsData[videoId] = list;
+  else delete loopsData[videoId];
+  if(typeof saveLoops==='function') saveLoops();
+}
 
 let _ytApiPromise = null;
 let _looperState = null; // { player, ready, pollId, wrapEl, videoId, a, b, loop }
@@ -83,9 +98,10 @@ function initLooper(wrapEl, videoId){
         <button type="button" class="rp-looper-speed-btn" data-rate="0.75">0.75&times;</button>
         <button type="button" class="rp-looper-speed-btn on" data-rate="1">1&times;</button>
       </div>
+      <div class="rp-looper-row rp-looper-saved" data-el="saved-row"></div>
     </div>`;
 
-  const state = { player:null, ready:false, pollId:null, wrapEl, videoId, a:0, b:0, loop:false };
+  const state = { player:null, ready:false, pollId:null, wrapEl, videoId, a:0, b:0, loop:false, savedUi:'idle', pendingEntry:null };
   _looperState = state;
 
   const aTimeEl = wrapEl.querySelector('[data-el="a-time"]');
@@ -132,6 +148,123 @@ function initLooper(wrapEl, videoId){
       wrapEl.querySelectorAll('.rp-looper-speed-btn').forEach(b=>b.classList.toggle('on', b===btn));
     });
   });
+
+  function currentSpeedRate(){
+    const on = wrapEl.querySelector('.rp-looper-speed-btn.on');
+    return on ? Number(on.dataset.rate) : 1;
+  }
+  function applySpeed(rate){
+    if(!state.ready) return;
+    state.player.setPlaybackRate(rate);
+    wrapEl.querySelectorAll('.rp-looper-speed-btn').forEach(b=>b.classList.toggle('on', Number(b.dataset.rate)===rate));
+  }
+
+  function renderSavedRow(){
+    const row = wrapEl.querySelector('[data-el="saved-row"]');
+    if(!row) return;
+    const loops = getSavedLoops(videoId);
+    const pillsHtml = loops.map((loop, i)=>`
+      <span class="rp-looper-saved-pill">
+        <button type="button" class="rp-looper-saved-load" data-idx="${i}" title="Load: ${escHtml(loop.n)} (${fmtTime(loop.a)}–${fmtTime(loop.b)})">${escHtml(loop.n)}</button>
+        <button type="button" class="rp-looper-saved-del" data-idx="${i}" aria-label="Delete saved loop ${escHtml(loop.n)}">&times;</button>
+      </span>`).join('');
+
+    let trailingHtml = '';
+    if(typeof isDevBypassUser==='function' && isDevBypassUser()){
+      /* No Firestore write is possible for the dev-user — hide the save
+         affordance rather than let it fail silently (see CLAUDE.md). */
+    } else if(state.savedUi==='naming'){
+      trailingHtml = `
+        <input type="text" class="rp-looper-save-name" maxlength="24" placeholder="Name this loop">
+        <button type="button" class="rp-looper-btn" data-act="confirm-save">Save</button>
+        <button type="button" class="rp-looper-btn" data-act="cancel-save">Cancel</button>`;
+    } else if(state.savedUi==='confirmReplace'){
+      const oldest = loops[0];
+      trailingHtml = `
+        <span class="rp-looper-saved-note">${LOOPER_MAX_SAVED} saved already — replace oldest ("${escHtml(oldest ? oldest.n : '')}")?</span>
+        <button type="button" class="rp-looper-btn" data-act="confirm-replace">Replace</button>
+        <button type="button" class="rp-looper-btn" data-act="cancel-save">Cancel</button>`;
+    } else {
+      trailingHtml = `<button type="button" class="rp-looper-btn rp-looper-save" data-act="save-loop">&#x1F4BE; Save this loop</button>`;
+    }
+
+    row.innerHTML = pillsHtml + trailingHtml;
+    wireSavedRow();
+  }
+
+  function commitSavedLoop(rawName){
+    const name = (rawName||'').trim().slice(0,24) || 'Loop';
+    const entry = { n:name, a:state.a, b:state.b, r:currentSpeedRate() };
+    const list = getSavedLoops(videoId);
+    if(list.length >= LOOPER_MAX_SAVED){
+      state.pendingEntry = entry;
+      state.savedUi = 'confirmReplace';
+      renderSavedRow();
+      return;
+    }
+    setSavedLoops(videoId, [...list, entry]);
+    state.savedUi = 'idle';
+    renderSavedRow();
+  }
+
+  function wireSavedRow(){
+    const row = wrapEl.querySelector('[data-el="saved-row"]');
+    if(!row) return;
+    row.querySelectorAll('.rp-looper-saved-load').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const loop = getSavedLoops(videoId)[Number(btn.dataset.idx)];
+        if(!loop || !state.ready) return;
+        state.a = loop.a; state.b = loop.b;
+        refreshTimes();
+        setLoopEnabled(true);
+        state.player.seekTo(state.a, true);
+        if(loop.r) applySpeed(loop.r);
+      });
+    });
+    row.querySelectorAll('.rp-looper-saved-del').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const list = getSavedLoops(videoId).slice();
+        list.splice(Number(btn.dataset.idx), 1);
+        setSavedLoops(videoId, list);
+        renderSavedRow();
+      });
+    });
+    const saveBtn = row.querySelector('[data-act="save-loop"]');
+    if(saveBtn) saveBtn.addEventListener('click', ()=>{
+      if(!state.ready) return;
+      state.savedUi = 'naming';
+      renderSavedRow();
+      const input = row.querySelector('.rp-looper-save-name');
+      if(input) input.focus();
+    });
+    const cancelBtn = row.querySelector('[data-act="cancel-save"]');
+    if(cancelBtn) cancelBtn.addEventListener('click', ()=>{
+      state.pendingEntry = null;
+      state.savedUi = 'idle';
+      renderSavedRow();
+    });
+    const confirmSaveBtn = row.querySelector('[data-act="confirm-save"]');
+    if(confirmSaveBtn) confirmSaveBtn.addEventListener('click', ()=>{
+      const input = row.querySelector('.rp-looper-save-name');
+      commitSavedLoop(input ? input.value : '');
+    });
+    const nameInput = row.querySelector('.rp-looper-save-name');
+    if(nameInput) nameInput.addEventListener('keydown', e=>{
+      if(e.key==='Enter') commitSavedLoop(nameInput.value);
+      else if(e.key==='Escape'){ state.savedUi='idle'; renderSavedRow(); }
+    });
+    const confirmReplaceBtn = row.querySelector('[data-act="confirm-replace"]');
+    if(confirmReplaceBtn) confirmReplaceBtn.addEventListener('click', ()=>{
+      const list = getSavedLoops(videoId).slice();
+      list.shift();
+      if(state.pendingEntry) list.push(state.pendingEntry);
+      setSavedLoops(videoId, list);
+      state.pendingEntry = null;
+      state.savedUi = 'idle';
+      renderSavedRow();
+    });
+  }
+  renderSavedRow();
 
   loadYouTubeIframeApi().then(YT=>{
     if(_looperState !== state) return; // panel moved on while the API was loading

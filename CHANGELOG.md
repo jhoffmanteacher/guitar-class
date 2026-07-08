@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-08 — Save your favorite loops
+
+### Added
+- **The backing-track looper can now remember your loops.** Hit "💾 Save this
+  loop" to name and keep a section (with its speed) for next time — it shows
+  up as a pill you can tap to reload instantly, or delete with the ✕. You can
+  keep up to 5 loops per song; saving a 6th asks whether to replace your
+  oldest one.
+
 ## 2026-07-08 — Loop your backing tracks
 
 ### Added

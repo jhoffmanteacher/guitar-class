@@ -80,6 +80,7 @@ let currentUser = null;
 let progress    = {};
 let responses   = {};
 let completed   = {};
+let loopsData   = {};   // { videoId: [ {n, a, b, r} ] } — student-saved looper loops
 let saveTimer   = null;
 
 /* ── Lazy module loading ──
@@ -179,6 +180,10 @@ function devBypass(){
   restoreLocalPlace();
   showApp(currentUser);
 }
+// Dev bypass never signs in to Firebase Auth, so Firestore rules reject any
+// write under this uid — features that persist to Firestore (saved loops,
+// skills, etc.) should hide their save affordance rather than let it silently fail.
+function isDevBypassUser(){ return !!(currentUser && currentUser.uid==='dev-user'); }
 if(IS_LOCALHOST){
   const _devBtn = document.getElementById('dev-bypass-btn');
   if(_devBtn) _devBtn.style.display='';
@@ -190,7 +195,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     if(IS_TEACHER_MODE){ showTeacherApp(user); }
     else { await loadProgress(); showApp(user); }
   } else {
-    currentUser = null; progress = {}; responses = {}; completed = {};
+    currentUser = null; progress = {}; responses = {}; completed = {}; loopsData = {};
     document.getElementById('auth-wall').style.display='block';
     document.getElementById('app').style.display='none';
     document.getElementById('teacher-app').style.display='none';
@@ -244,8 +249,9 @@ async function loadProgress(){
       lastSetId     = doc.data().lastSet||null;
       responses     = doc.data().responses || {};
       completed     = doc.data().completed || {};
-    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; restoreLocalPlace(); }
-  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; restoreLocalPlace(); }
+      loopsData     = doc.data().loops || {};
+    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; loopsData={}; restoreLocalPlace(); }
+  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; loopsData={}; restoreLocalPlace(); }
 }
 
 /* Last-place persistence (Session 4.4): Firestore is the source of truth, but
@@ -308,6 +314,7 @@ async function flushSave(){
   if(keys.has('place')){    payload.lastModule = lastModuleNum; payload.lastSet = lastSetId||null; }
   if(keys.has('responses')) payload.responses = responses;
   if(keys.has('completed')) payload.completed = completed;
+  if(keys.has('loops'))     payload.loops     = loopsData;
   try{
     await ensureDb();
     await db.collection('progress').doc(currentUser.uid).set(payload,{merge:true});
@@ -319,6 +326,7 @@ async function flushSave(){
   }
 }
 function saveResponses(){ queueSave('responses'); }
+function saveLoops(){ queueSave('loops'); }
 
 function onCompleteChange(key, isDone){
   if(isDone) completed[key] = true; else delete completed[key];
