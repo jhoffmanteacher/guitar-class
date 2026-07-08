@@ -151,6 +151,12 @@ curriculum map. Do **not** flag them as drift in future alignment audits:
 - **All Along the Watchtower** — the loop is `Am–G–F–G` (`A5–G5–F5–G5` as
   power chords) — the record's turnaround. The map's "Am–G–F" is shorthand;
   the site's four-chord loop is intentional (settled 2026-07-07).
+- **Core/thread songs are exactly six** (settled 2026-07-08): Seven Nation Army,
+  All Along the Watchtower, Sweet Child O' Mine (standard tuning), Oye Mi Amor,
+  Let It Be, and "the cure" (Olivia Rodrigo). Just Like Heaven and Tu Boda are
+  **not** core — Tu Boda is a Choice song (Modules 6–8). The six Song Journey
+  pages in `tabs/` therefore cover the core list completely; do not flag
+  "missing" journey pages for any other song.
 
 ## Switching topics — prompt to start a fresh chat
 When Jonathan asks for something that is clearly a **new, unrelated topic** from what we've been working on (e.g., we just finished a feature on Module 5 and he now asks about a different part of the site, a different project, or general Claude Code questions), use **AskUserQuestion** to ask whether he'd like to start a fresh conversation before continuing. A fresh chat keeps context focused and responses faster.

@@ -39,14 +39,14 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/PyWZYHy17As" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a> (you only need the first ~3 minutes — cleaning, humidity, and basic care; after that it\'s a string-changing demo you won\'t need yet). While you watch, note two things that can damage a guitar and how to avoid each — this is shared gear, so it matters.',
             hint: 'Your guitar is shared gear — notice how he handles and stores it. You\'ll practice the safe set-down at the hands-on station next. You\'ve got it when: you can name two ways to keep a guitar safe.',
-            response: { type: 'mc', prompt: 'When you\'re done playing, what\'s the safest way to set the guitar down?',
+            response: { type: 'mc', prompt: 'Which of these does the video call out as a real danger to an acoustic guitar?',
               answer: 0,
-              explain: 'Lay it flat on its back, or put it in a case or stand. Leaning it against a chair or wall is how most classroom guitars get knocked over and cracked.',
+              explain: 'Wood shrinks and can crack when the air gets too dry — that\'s why guitars are stored in cases and kept away from heaters. Wiping the strings after playing keeps sweat from corroding them. Lots of practice, picks, and standing up are all totally safe.',
               choices: [
-              'Lay it flat on its back, or in a case or stand',
-              'Lean it against the nearest chair',
-              'Stand it upright on the floor and let go',
-              'Balance it on your lap and walk away'
+              'Dry air — low humidity can crack the wood',
+              'Playing it too many hours a day',
+              'Strumming with a pick instead of fingers',
+              'Practicing while standing up'
             ] }
           }
             ]
@@ -230,7 +230,7 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/C-mt8td1teU" target="_blank">How to Hold the Guitar – JustinGuitar</a>. While you watch, set up in your chair and copy his position piece by piece — feet, guitar on leg, back, strumming arm.',
+            text: 'Watch: <a href="https://youtu.be/MlV6WhM9YhE" target="_blank">How To Hold Your Guitar – JustinGuitar</a>. While you watch, set up in your chair and copy his position piece by piece — feet, guitar on leg, back, strumming arm.',
             hint: 'Notice where the guitar rests and how the back stays straight. You\'ve got it when: you can look away from the screen and your guitar stays put without your fretting hand holding it up.',
             stuck: 'Pause at each position checkpoint and match one thing at a time: feet flat first, then guitar on the right leg, then straighten the back. Ask a neighbor to compare you to the freeze-frame.',
             levelUp: 'Close your eyes for 10 seconds and keep the position. Or check a partner\'s posture against the video and name one fix.',

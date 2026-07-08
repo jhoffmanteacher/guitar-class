@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-08 — Better first-day videos in Module 1
+
+### Changed
+- **The "how to hold the guitar" step now links a full posture lesson** — feet,
+  guitar on leg, back, and strumming arm — instead of a clip that only covered
+  the fretting hand.
+- **The guitar-care quiz now asks about something the video actually teaches**
+  (keeping the wood safe from dry air). You'll still practice the safe way to
+  set a guitar down at the hands-on station.
+
 ## 2026-07-08 — Module 1 videos point you to the part that matters
 
 ### Changed

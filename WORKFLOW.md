@@ -16,8 +16,7 @@
 ## Current focus
 
 - [~] **Full website review** (Jonathan-led) — scope and plan TBD.
-  - [~] **SITE_FIXIT_JULY_2** (`SITE_FIXIT_JULY_2.md`, supersedes the retired
-        Round 1 `SITE_FIXIT_JULY.md`) — four-session fix-it. Round 1's `/preview`
+  - [x] **SITE_FIXIT_JULY_2** (doc retired after completion; superseded the retired Round 1 `SITE_FIXIT_JULY.md`) — four-session fix-it. Round 1's `/preview`
         handout swap is now reversed: the handout Docs are retired from the site
         entirely (Docs stay in Drive, untouched), and Song Journey links open at
         the page top instead of a mid-page layer anchor.
@@ -66,6 +65,27 @@
           relevant, just loose fits — candidates for a future video swap. The old
           illustrative range for *Holding* (0:00–3:30) overran its 2:43 runtime, so
           verifying was the right call. `checks.mjs` passed; SW version bumped.
+  - [x] **SITE_FIXIT_JULY_3** (`SITE_FIXIT_JULY_3.md`) — M1 video polish
+        (Holding swap, Caring MC rewrite) + WORKFLOW/CLAUDE.md cleanup.
+        ✅ 2026-07-08: swapped the Set 2 "Holding" video to JustinGuitar's
+        "How To Hold Your Guitar" (`MlV6WhM9YhE`, B1-102, 4:16 — found via the
+        lesson page since the live JustinGuitar page 403s bots; oEmbed-verified
+        author JustinGuitar, no skippable intro so watch-whole, no time invented);
+        rewrote the Set 1 "Caring" MC to ask about dry-air/humidity risk instead
+        of set-down safety. WORKFLOW.md: deleted the retired handout-audit bullet,
+        flipped SITE_FIXIT_JULY_2 and the Module 1 video-fit-swaps loose end to
+        `[x]`, fixed the dangling `archive/SITE_ALIGNMENT_3.md` reference,
+        unblocked the supplemental-swap loose end, and logged the three-item
+        roadmap below. CLAUDE.md: recorded the six-song core/thread list as a
+        settled fact. No `skills:` changes; `MODULE_MANIFEST`/`skillCount`
+        untouched; `checks.mjs` passed (245/245 links, SW bumped).
+  - [ ] **Song-list review session** — difficulty dots on ~109 Choice songs;
+        the 3 quiz distractor swaps (m6 reggae · m7 stacked-TAB pair · m2 H→G#);
+        Just Like Heaven keep-or-drop-as-Choice call; supplemental swaps now that
+        the map is locked.
+  - [ ] **Backing-track looper** — in-site player/looper for the Unit 4
+        call-and-response assessment tracks. Target: built before Unit 4
+        (~week 10 of the semester).
   - [x] **Assessment alignment, Modules 2–5 → LOCKED S1 wording**
         (`archive/SITE_ALIGNMENT_2.md`).
         ✅ 2026-07-07: re-audited M2–M5 against the locked Unit 2–5 assessment
@@ -74,7 +94,7 @@
         skillCount 20→21; M5 two→three chords; M2 assessment summary realigned;
         M3 half notes added). Two items logged-only/deferred (M3 I–IV–V naming,
         M5 Watchtower `Am–G–F–G` vs `Am–G–F`). Checks passed; pushed.
-  - [x] **Post-lock cleanup** (`archive/SITE_ALIGNMENT_3.md`).
+  - [x] **Post-lock cleanup** (instruction doc retired after execution — this entry is the record).
         ✅ 2026-07-07: realigned Module 3's unit-assessment summary blocks to the
         locked three-task structure; added a "Name your progression: I–IV–V" step
         (M3 Set 2) and a "Week 17 — Call & Response over a backing track" step
@@ -113,8 +133,6 @@
 Small recurring / deferred items that were still open when the old plan was
 archived (2026-07-05). Fold them into the review or handle them ad hoc:
 
-- [ ] Handout audit: open all 22 Google Doc `handoutUrl`s in incognito — no
-      permission walls; content still matches each set. (Re-run each semester.)
 - [ ] Spanish spot-check: review 2–3 sets in Español mode with a fluent speaker.
 - [ ] End-of-semester set: design the Module 1 goal-revisit / final reflection /
       performance rubric.
@@ -129,14 +147,10 @@ archived (2026-07-05). Fold them into the review or handle them ad hoc:
 - [ ] ⚠️ Watch Module 4 Set 1's video (`m_IiyJu60-c`, "Major Pentatonic Scale –
       Marty Music") through and confirm it fits the beginner Pattern-1 station
       before the course starts.
-- [ ] Supplemental/Choice song swap once Jonathan's curriculum map is final
-      (don't polish the current placeholder lists).
-- [ ] **Module 1 video-fit swaps** (flagged in Session 4, 2026-07-08 — kept for
-      later per Jonathan). Two lesson videos are relevant but loose fits for their
-      step; consider search-and-verify replacements:
-      (a) **Set 2 "Holding" step** links *"Holding the Guitar with Your Fretting
-      Hand?"* (`C-mt8td1teU`, 2:43) — narrower than the step's full-posture promise
-      (feet, guitar on leg, back, strumming arm).
-      (b) **Set 1 "Caring" step** links *Caring for Your Acoustic Guitar*
-      (`PyWZYHy17As`) — covers clean/humidity/strings, but its MC asks about the
-      safest way to *set the guitar down*, which the video doesn't cover.
+- [ ] Supplemental/Choice song swap — map locked 2026-07-07, so this is now unblocked; folded into the song-list review session below.
+- [x] **Module 1 video-fit swaps** (flagged in Session 4, 2026-07-08).
+      ✅ 2026-07-08 (SITE_FIXIT_JULY_3): resolved both. (a) Set 2 "Holding" step
+      now links "How To Hold Your Guitar" (`MlV6WhM9YhE`, JustinGuitar B1-102,
+      4:16) — full posture promise now matched. (b) Set 1 "Caring" step's MC
+      rewritten to ask about dry-air/humidity risk, which the video (kept as-is)
+      actually covers; set-down safety stays at the hands-on station.
