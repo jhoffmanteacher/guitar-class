@@ -16,18 +16,25 @@
 ## Current focus
 
 - [~] **Full website review** (Jonathan-led) — scope and plan TBD.
-  - [~] **SITE_FIXIT_JULY** (`SITE_FIXIT_JULY.md`) — three-session independence
-        fix-it (handout links, Module 1 template upgrade, video liveness sweep).
-    - [x] **Session 1 — handout links `/edit` → `/preview`.**
-          ✅ 2026-07-07: swapped all 22 `handoutUrl` links (8 unique Docs) from
-          `/edit` to `/preview` across `module-1..8.js`; grep confirms 0 `/edit`
-          hits and per-module counts match the plan's 0.1 table; all 8 unique
-          `/preview` URLs return HTTP 200. No docs links found in step `text:` or
-          `tabs/*.html`, so nothing else to sweep; no `FIXIT_FLAGS.md` items.
-          ⚠️ Drive-side follow-up (Jonathan): confirm each Doc is shared "Anyone
-          with the link: Viewer" so `/preview` works for students. Checks passed.
-    - [ ] **Session 2 — Module 1 template upgrade** (next sitting).
-    - [ ] **Session 3 — video liveness sweep + lesson timestamps.**
+  - [~] **SITE_FIXIT_JULY_2** (`SITE_FIXIT_JULY_2.md`, supersedes the retired
+        Round 1 `SITE_FIXIT_JULY.md`) — four-session fix-it. Round 1's `/preview`
+        handout swap is now reversed: the handout Docs are retired from the site
+        entirely (Docs stay in Drive, untouched), and Song Journey links open at
+        the page top instead of a mid-page layer anchor.
+    - [x] **Session 1 — Song Journey links open at page top.**
+          ✅ 2026-07-07: stripped all 74 `#layer-N` anchors from module-side
+          links (`journeyUrl:` + inline `href`) across `module-1..8.js`; `grep`
+          confirms 0 `#layer` in `*.js`, per-file `tabs/` counts byte-identical to
+          HEAD (no links lost), and `id="layer-N"` attrs in `tabs/*.html` untouched
+          (30). Checks passed.
+    - [x] **Session 2 — remove 22 dead handoutUrl fields.**
+          ✅ 2026-07-07: deleted all 22 `handoutUrl:` lines across `module-1..8.js`
+          (22 deletions, 0 insertions, 0 collateral). `grep` confirms 0 `handoutUrl`
+          and 0 `docs.google.com` in `*.js`/`tabs/*.html`; skill-ID lists
+          byte-identical to pre-edit; `checks.mjs` validates all 22 Sets. The 8
+          Google Docs remain in Drive, untouched. Checks passed.
+    - [ ] **Session 3 — Module 1 template upgrade** (own sitting).
+    - [ ] **Session 4 — video liveness sweep + lesson timestamps** (own sitting).
   - [x] **Assessment alignment, Modules 2–5 → LOCKED S1 wording**
         (`archive/SITE_ALIGNMENT_2.md`).
         ✅ 2026-07-07: re-audited M2–M5 against the locked Unit 2–5 assessment
