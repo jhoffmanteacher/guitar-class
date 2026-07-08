@@ -17,7 +17,7 @@ SETS.push(
     subtitle: 'Pentatonic Pattern 1 · Major & minor positioning · Improvising on E & A strings',
     objective: 'I CAN play Pentatonic Pattern 1 ascending and descending, and position it for major and minor keys.',
     skillFocus: 'Playing Pentatonic Pattern 1 · Positioning it for major and minor keys · Improvising with the scale',
-    handoutUrl: 'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/edit',
+    handoutUrl: 'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/preview',
     comingSoon: false,
 
     stations: {
@@ -323,7 +323,7 @@ SETS.push(
     subtitle: 'Tone parameters · Phrasing strategies · Notes on D & G strings',
     objective: 'I CAN use dynamics, timbre, and note shape to play expressively, and phrase a solo using call-and-response.',
     skillFocus: 'Playing expressively with dynamics and tone · Phrasing a solo with call-and-response · Notes on the D and G strings',
-    handoutUrl: 'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/edit',
+    handoutUrl: 'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/preview',
     comingSoon: false,
 
     stations: {
@@ -585,7 +585,7 @@ SETS.push(
     subtitle: 'Scale theory · Blues scale · Compose an original solo',
     objective: 'I CAN explain how the pentatonic scale is built, add the blues note, and compose an original 4-bar solo.',
     skillFocus: 'How pentatonic and blues scales are built · Transposing to new keys · Composing and performing your own solo',
-    handoutUrl: 'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/edit',
+    handoutUrl: 'https://docs.google.com/document/d/1Wmf3XYqMAKXoQ8ZxPv_Feb9HiySl_5xtYXWpQTv7a6w/preview',
     comingSoon: false,
 
     stations: {

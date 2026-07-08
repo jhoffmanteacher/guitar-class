@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-07 — Handouts open in a clean read-only view
+
+### Changed
+- **Every module's handout link now opens in a clean, read-only view** — no
+  more "request access" wall, and no chance of accidentally editing the master
+  copy. Just open, read, and follow along.
+
 ## 2026-07-07 — "the cure" joins the Song Journey
 
 ### Added
