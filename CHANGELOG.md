@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-08 — Loop your backing tracks
+
+### Added
+- **The 🎵 Backing track button now opens a looper** instead of a plain video.
+  Set a start (A) and end (B) point mid-song, nudge them by a second at a time,
+  and loop the section on repeat — no more fighting the YouTube seek bar mid-
+  practice. Slow the track down to 0.75× or 0.5× without changing its pitch.
+  If the looper can't load for any reason, you'll still get the plain video —
+  it never leaves you with a broken panel.
+
 ## 2026-07-08 — Better first-day videos in Module 1
 
 ### Changed

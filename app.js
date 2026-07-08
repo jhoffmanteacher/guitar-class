@@ -1620,7 +1620,11 @@ function loadSongVid(wid, idx, kind){
     window.open(url, '_blank', 'noopener');
     return;
   }
-  loadPanel('youtube', url, s.name, kind==='backing' ? 'Backing track' : 'Solo tutorial');
+  if(kind==='backing'){
+    loadPanel('looper', url, s.name, 'Backing track');
+    return;
+  }
+  loadPanel('youtube', url, s.name, 'Solo tutorial');
 }
 
 /* ── Videos ── */
@@ -2254,6 +2258,7 @@ document.addEventListener('keydown',e=>{
 
 /* ── Resource Panel ── */
 function loadPanel(type,url,title,subtitle){
+  if(typeof teardownLooper==='function') teardownLooper();
   const empty=document.getElementById('rp-empty');
   const content=document.getElementById('rp-content');
   const wrap=document.getElementById('rp-iframe-wrap');
@@ -2318,9 +2323,20 @@ function loadPanel(type,url,title,subtitle){
       wrap.innerHTML = `<div class="rp-chord-err">No diagram for ${escHtml(note||'')}</div>`;
       newtab.classList.remove('visible');
     }
+  } else if(type==='looper'){
+    /* Backing-track looper — A/B loop + speed control over a YouTube IFrame
+       Player. See looper.js (initLooper) and LOOPER_SPEC.md. */
+    const ytMatch=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+    if(ytMatch && typeof initLooper==='function'){
+      initLooper(wrap, ytMatch[1]);
+    } else {
+      wrap.className='rp-iframe-wrap rp-youtube';
+      wrap.innerHTML=`<iframe src="${url}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;
+    }
   }
 }
 function clearPanel(){
+  if(typeof teardownLooper==='function') teardownLooper();
   const content=document.getElementById('rp-content');
   const wrap=document.getElementById('rp-iframe-wrap');
   const newtab=document.getElementById('rp-newtab');

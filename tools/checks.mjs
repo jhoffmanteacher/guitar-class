@@ -64,7 +64,7 @@ try {
 } catch { /* no tabs/ dir yet */ }
 
 const SHELL_FILES = [
-  'index.html', 'styles.css', 'app.js', 'tuner.js', 'teacher.js', 'config-main.js',
+  'index.html', 'styles.css', 'app.js', 'tuner.js', 'teacher.js', 'looper.js', 'config-main.js',
   'firebase-config.js', 'manifest.json', 'icon.svg',
   ...MODULE_FILES,
   ...TAB_PAGES,
