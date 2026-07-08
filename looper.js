@@ -4,11 +4,14 @@
    Phase 1 (see LOOPER_SPEC.md): YouTube IFrame Player API, A/B loop with
    ±1s nudge, loop toggle, jump-to-A, 0.5x/0.75x/1x speed.
    Phase 2: student-saved loops, persisted to the same Firestore progress
-   doc as skills/responses (loopsData / saveLoops() in app.js). No teacher
-   presets yet — that's Phase 3.
+   doc as skills/responses (loopsData / saveLoops() in app.js).
+   Phase 3: teacher-authored preset pills (song card's `loops:` field, passed
+   in as `presets`) plus a teacher-only "Copy preset line" helper — reuses
+   the TEACHER_EMAIL identity check (not IS_TEACHER_MODE, which routes to
+   the separate dashboard and never shows this panel).
 
    Split out of app.js for maintainability. Loads AFTER app.js (which owns
-   loadPanel/clearPanel/loopsData/saveLoops and calls into
+   loadPanel/clearPanel/loopsData/saveLoops/currentUser and calls into
    initLooper/teardownLooper here).
    ════════════════════════════════════════════════════════════════════ */
 
@@ -71,12 +74,19 @@ function renderLooperFallback(wrapEl, videoId, note){
     (note ? `<div class="rp-looper-note">${note}</div>` : '');
 }
 
-function initLooper(wrapEl, videoId){
+function initLooper(wrapEl, videoId, presets){
   teardownLooper();
+  presets = Array.isArray(presets) ? presets : [];
   wrapEl.className = 'rp-iframe-wrap rp-looper';
+  const presetsRowHtml = presets.length ? `
+      <div class="rp-looper-row rp-looper-presets" data-el="presets-row">
+        <button type="button" class="rp-looper-preset-btn" data-preset="full">Full track</button>
+        ${presets.map((p,i)=>`<button type="button" class="rp-looper-preset-btn" data-preset="${i}">${escHtml(p.label)}</button>`).join('')}
+      </div>` : '';
   wrapEl.innerHTML = `
     <div class="rp-looper-player-wrap"><div class="rp-looper-yt-target"></div></div>
     <div class="rp-looper-controls">
+      ${presetsRowHtml}
       <div class="rp-looper-row rp-looper-ab">
         <button type="button" class="rp-looper-btn" data-act="set-a">Set A</button>
         <span class="rp-looper-time" data-el="a-time">A 0:00</span>
@@ -99,9 +109,10 @@ function initLooper(wrapEl, videoId){
         <button type="button" class="rp-looper-speed-btn on" data-rate="1">1&times;</button>
       </div>
       <div class="rp-looper-row rp-looper-saved" data-el="saved-row"></div>
+      <div class="rp-looper-row rp-looper-teacher" data-el="teacher-row"></div>
     </div>`;
 
-  const state = { player:null, ready:false, pollId:null, wrapEl, videoId, a:0, b:0, loop:false, savedUi:'idle', pendingEntry:null };
+  const state = { player:null, ready:false, pollId:null, wrapEl, videoId, a:0, b:0, loop:false, savedUi:'idle', pendingEntry:null, teacherUi:'idle' };
   _looperState = state;
 
   const aTimeEl = wrapEl.querySelector('[data-el="a-time"]');
@@ -146,6 +157,18 @@ function initLooper(wrapEl, videoId){
       if(!state.ready) return;
       state.player.setPlaybackRate(Number(btn.dataset.rate));
       wrapEl.querySelectorAll('.rp-looper-speed-btn').forEach(b=>b.classList.toggle('on', b===btn));
+    });
+  });
+  wrapEl.querySelectorAll('.rp-looper-preset-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(!state.ready) return;
+      if(btn.dataset.preset==='full'){ setLoopEnabled(false); return; }
+      const preset = presets[Number(btn.dataset.preset)];
+      if(!preset) return;
+      state.a = preset.a; state.b = preset.b;
+      refreshTimes();
+      setLoopEnabled(true);
+      state.player.seekTo(state.a, true);
     });
   });
 
@@ -265,6 +288,66 @@ function initLooper(wrapEl, videoId){
     });
   }
   renderSavedRow();
+
+  function isTeacherAccount(){
+    return !!(typeof currentUser!=='undefined' && currentUser
+      && typeof TEACHER_EMAIL!=='undefined' && currentUser.email===TEACHER_EMAIL);
+  }
+  function buildPresetSnippet(label){
+    const safe = String(label||'Loop').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return `{ label: '${safe}', a: ${Math.round(state.a)}, b: ${Math.round(state.b)} }`;
+  }
+  function renderTeacherRow(){
+    const row = wrapEl.querySelector('[data-el="teacher-row"]');
+    if(!row) return;
+    if(!isTeacherAccount()){ row.innerHTML=''; return; }
+    if(state.teacherUi==='naming'){
+      row.innerHTML = `
+        <input type="text" class="rp-looper-save-name" maxlength="40" placeholder="Preset label (e.g. Solo section)">
+        <button type="button" class="rp-looper-btn" data-act="confirm-copy">Copy</button>
+        <button type="button" class="rp-looper-btn" data-act="cancel-copy">Cancel</button>`;
+    } else if(state.teacherUi==='copied'){
+      row.innerHTML = `<span class="rp-looper-saved-note">Copied — paste into the song's loops: array.</span>`;
+    } else {
+      row.innerHTML = `<button type="button" class="rp-looper-btn" data-act="copy-preset">&#x1F4CB; Copy preset line</button>`;
+    }
+    wireTeacherRow();
+  }
+  function wireTeacherRow(){
+    const row = wrapEl.querySelector('[data-el="teacher-row"]');
+    if(!row) return;
+    const copyBtn = row.querySelector('[data-act="copy-preset"]');
+    if(copyBtn) copyBtn.addEventListener('click', ()=>{
+      if(!state.ready) return;
+      state.teacherUi = 'naming';
+      renderTeacherRow();
+      const input = row.querySelector('.rp-looper-save-name');
+      if(input) input.focus();
+    });
+    const cancelBtn = row.querySelector('[data-act="cancel-copy"]');
+    if(cancelBtn) cancelBtn.addEventListener('click', ()=>{
+      state.teacherUi = 'idle';
+      renderTeacherRow();
+    });
+    const confirmBtn = row.querySelector('[data-act="confirm-copy"]');
+    if(confirmBtn) confirmBtn.addEventListener('click', ()=>{
+      const input = row.querySelector('.rp-looper-save-name');
+      const snippet = buildPresetSnippet(input ? input.value : '');
+      const done = ()=>{
+        if(_looperState!==state) return;
+        state.teacherUi='copied'; renderTeacherRow();
+        setTimeout(()=>{ if(_looperState===state){ state.teacherUi='idle'; renderTeacherRow(); } }, 2000);
+      };
+      if(navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(snippet).then(done).catch(done);
+      else done();
+    });
+    const nameInput = row.querySelector('.rp-looper-save-name');
+    if(nameInput) nameInput.addEventListener('keydown', e=>{
+      if(e.key==='Enter'){ if(confirmBtn) confirmBtn.click(); }
+      else if(e.key==='Escape'){ state.teacherUi='idle'; renderTeacherRow(); }
+    });
+  }
+  renderTeacherRow();
 
   loadYouTubeIframeApi().then(YT=>{
     if(_looperState !== state) return; // panel moved on while the API was loading

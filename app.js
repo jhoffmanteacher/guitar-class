@@ -1629,7 +1629,7 @@ function loadSongVid(wid, idx, kind){
     return;
   }
   if(kind==='backing'){
-    loadPanel('looper', url, s.name, 'Backing track');
+    loadPanel('looper', url, s.name, 'Backing track', s.loops);
     return;
   }
   loadPanel('youtube', url, s.name, 'Solo tutorial');
@@ -2265,7 +2265,7 @@ document.addEventListener('keydown',e=>{
 });
 
 /* ── Resource Panel ── */
-function loadPanel(type,url,title,subtitle){
+function loadPanel(type,url,title,subtitle,extra){
   if(typeof teardownLooper==='function') teardownLooper();
   const empty=document.getElementById('rp-empty');
   const content=document.getElementById('rp-content');
@@ -2336,7 +2336,7 @@ function loadPanel(type,url,title,subtitle){
        Player. See looper.js (initLooper) and LOOPER_SPEC.md. */
     const ytMatch=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
     if(ytMatch && typeof initLooper==='function'){
-      initLooper(wrap, ytMatch[1]);
+      initLooper(wrap, ytMatch[1], extra);
     } else {
       wrap.className='rp-iframe-wrap rp-youtube';
       wrap.innerHTML=`<iframe src="${url}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;

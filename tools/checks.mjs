@@ -125,6 +125,21 @@ function validateModules() {
         { err(`${where}: "stations" should be an object`); problems++; }
       if (s.songs !== undefined && !Array.isArray(s.songs))
         { err(`${where}: "songs" should be an array`); problems++; }
+      if (Array.isArray(s.songs)) {
+        for (const song of s.songs) {
+          if (!song || song.loops === undefined) continue;
+          const songWhere = `${where} · song "${song.name || '??'}"`;
+          if (!song.backingUrl) { warn(`${songWhere}: "loops" set but no "backingUrl" — presets have no video to attach to`); warnings++; }
+          if (!Array.isArray(song.loops)) { err(`${songWhere}: "loops" should be an array`); problems++; continue; }
+          song.loops.forEach((loop, i) => {
+            const loopWhere = `${songWhere} · loops[${i}]`;
+            if (!loop || typeof loop !== 'object') { err(`${loopWhere}: not an object`); problems++; return; }
+            if (typeof loop.label !== 'string' || !loop.label) { err(`${loopWhere}: "label" should be a non-empty string`); problems++; }
+            if (typeof loop.a !== 'number' || loop.a < 0) { err(`${loopWhere}: "a" should be a number >= 0`); problems++; }
+            if (typeof loop.b !== 'number' || !(loop.b > loop.a)) { err(`${loopWhere}: "b" should be a number greater than "a"`); problems++; }
+          });
+        }
+      }
       if (s.skills !== undefined && !Array.isArray(s.skills))
         { err(`${where}: "skills" should be an array`); problems++; }
       if (!s.comingSoon && !s.objective)
