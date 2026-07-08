@@ -83,9 +83,6 @@
         the 3 quiz distractor swaps (m6 reggae · m7 stacked-TAB pair · m2 H→G#);
         Just Like Heaven keep-or-drop-as-Choice call; supplemental swaps now that
         the map is locked.
-  - [ ] **Backing-track looper** — in-site player/looper for the Unit 4
-        call-and-response assessment tracks. Target: built before Unit 4
-        (~week 10 of the semester).
   - [x] **Assessment alignment, Modules 2–5 → LOCKED S1 wording**
         (`archive/SITE_ALIGNMENT_2.md`).
         ✅ 2026-07-07: re-audited M2–M5 against the locked Unit 2–5 assessment

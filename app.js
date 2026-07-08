@@ -80,7 +80,6 @@ let currentUser = null;
 let progress    = {};
 let responses   = {};
 let completed   = {};
-let loopsData   = {};   // { videoId: [ {n, a, b, r} ] } — student-saved looper loops
 let saveTimer   = null;
 
 /* ── Lazy module loading ──
@@ -181,7 +180,7 @@ function devBypass(){
   showApp(currentUser);
 }
 // Dev bypass never signs in to Firebase Auth, so Firestore rules reject any
-// write under this uid — features that persist to Firestore (saved loops,
+// write under this uid — features that persist to Firestore (progress,
 // skills, etc.) should hide their save affordance rather than let it silently fail.
 function isDevBypassUser(){ return !!(currentUser && currentUser.uid==='dev-user'); }
 if(IS_LOCALHOST){
@@ -195,7 +194,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     if(IS_TEACHER_MODE){ showTeacherApp(user); }
     else { await loadProgress(); showApp(user); }
   } else {
-    currentUser = null; progress = {}; responses = {}; completed = {}; loopsData = {};
+    currentUser = null; progress = {}; responses = {}; completed = {};
     document.getElementById('auth-wall').style.display='block';
     document.getElementById('app').style.display='none';
     document.getElementById('teacher-app').style.display='none';
@@ -249,9 +248,8 @@ async function loadProgress(){
       lastSetId     = doc.data().lastSet||null;
       responses     = doc.data().responses || {};
       completed     = doc.data().completed || {};
-      loopsData     = doc.data().loops || {};
-    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; loopsData={}; restoreLocalPlace(); }
-  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; loopsData={}; restoreLocalPlace(); }
+    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; restoreLocalPlace(); }
+  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; restoreLocalPlace(); }
 }
 
 /* Last-place persistence (Session 4.4): Firestore is the source of truth, but
@@ -314,7 +312,6 @@ async function flushSave(){
   if(keys.has('place')){    payload.lastModule = lastModuleNum; payload.lastSet = lastSetId||null; }
   if(keys.has('responses')) payload.responses = responses;
   if(keys.has('completed')) payload.completed = completed;
-  if(keys.has('loops'))     payload.loops     = loopsData;
   try{
     await ensureDb();
     await db.collection('progress').doc(currentUser.uid).set(payload,{merge:true});
@@ -326,7 +323,6 @@ async function flushSave(){
   }
 }
 function saveResponses(){ queueSave('responses'); }
-function saveLoops(){ queueSave('loops'); }
 
 function onCompleteChange(key, isDone){
   if(isDone) completed[key] = true; else delete completed[key];
@@ -1602,7 +1598,7 @@ function buildSongs(w){
     const vids = [];
     if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="loadSongVid('${w.id}',${i},'original')" title="Opens in YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:11px;opacity:0.6">&#x2197;</span></button>`);
     if(s.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="loadSongVid('${w.id}',${i},'tutorial')"><span class="svb-play">&#x25B6;</span>Tutorial</button>`);
-    if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="loadSongVid('${w.id}',${i},'backing')" title="Jam track to solo over"><span class="svb-play">&#x25B6;</span>&#x1F3B5; Backing track</button>`);
+    if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="loadSongVid('${w.id}',${i},'backing')" title="Jam track to solo over"><span class="svb-play">&#x25B6;</span>&#x1F3B5; Backing track${s.backingKey?` (${s.backingKey})`:''}</button>`);
     // Song Journey pages are same-origin (tabs/*.html), opened in a new tab so app state stays put.
     if(s.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="One song, five layers">&#x1F9F5; Song Journey</button>`);
     const vidsEl = vids.length ? `<div class="song-vids">${vids.join('')}</div>` : '';
@@ -1629,7 +1625,7 @@ function loadSongVid(wid, idx, kind){
     return;
   }
   if(kind==='backing'){
-    loadPanel('looper', url, s.name, 'Backing track', s.loops);
+    loadPanel('youtube', url, s.name, 'Backing track — already loops, just hit play and solo');
     return;
   }
   loadPanel('youtube', url, s.name, 'Solo tutorial');
@@ -2265,8 +2261,7 @@ document.addEventListener('keydown',e=>{
 });
 
 /* ── Resource Panel ── */
-function loadPanel(type,url,title,subtitle,extra){
-  if(typeof teardownLooper==='function') teardownLooper();
+function loadPanel(type,url,title,subtitle){
   const empty=document.getElementById('rp-empty');
   const content=document.getElementById('rp-content');
   const wrap=document.getElementById('rp-iframe-wrap');
@@ -2331,20 +2326,9 @@ function loadPanel(type,url,title,subtitle,extra){
       wrap.innerHTML = `<div class="rp-chord-err">No diagram for ${escHtml(note||'')}</div>`;
       newtab.classList.remove('visible');
     }
-  } else if(type==='looper'){
-    /* Backing-track looper — A/B loop + speed control over a YouTube IFrame
-       Player. See looper.js (initLooper) and LOOPER_SPEC.md. */
-    const ytMatch=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-    if(ytMatch && typeof initLooper==='function'){
-      initLooper(wrap, ytMatch[1], extra);
-    } else {
-      wrap.className='rp-iframe-wrap rp-youtube';
-      wrap.innerHTML=`<iframe src="${url}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;
-    }
   }
 }
 function clearPanel(){
-  if(typeof teardownLooper==='function') teardownLooper();
   const content=document.getElementById('rp-content');
   const wrap=document.getElementById('rp-iframe-wrap');
   const newtab=document.getElementById('rp-newtab');

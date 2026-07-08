@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-08 — Backing tracks are simple videos again
+
+### Changed
+- **The 🎵 Backing track button now opens a plain video again**, like Original
+  and Tutorial do — no more A/B loop points or speed control. The jam tracks
+  already loop on their own, so just hit play and solo over them. The button
+  now shows the track's key, e.g. "🎵 Backing track (Am)", so you know what to
+  play in before you open it.
+
 ## 2026-07-08 — Save your favorite loops
 
 ### Added
