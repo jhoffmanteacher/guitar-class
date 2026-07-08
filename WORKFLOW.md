@@ -16,6 +16,18 @@
 ## Current focus
 
 - [~] **Full website review** (Jonathan-led) — scope and plan TBD.
+  - [~] **SITE_FIXIT_JULY** (`SITE_FIXIT_JULY.md`) — three-session independence
+        fix-it (handout links, Module 1 template upgrade, video liveness sweep).
+    - [x] **Session 1 — handout links `/edit` → `/preview`.**
+          ✅ 2026-07-07: swapped all 22 `handoutUrl` links (8 unique Docs) from
+          `/edit` to `/preview` across `module-1..8.js`; grep confirms 0 `/edit`
+          hits and per-module counts match the plan's 0.1 table; all 8 unique
+          `/preview` URLs return HTTP 200. No docs links found in step `text:` or
+          `tabs/*.html`, so nothing else to sweep; no `FIXIT_FLAGS.md` items.
+          ⚠️ Drive-side follow-up (Jonathan): confirm each Doc is shared "Anyone
+          with the link: Viewer" so `/preview` works for students. Checks passed.
+    - [ ] **Session 2 — Module 1 template upgrade** (next sitting).
+    - [ ] **Session 3 — video liveness sweep + lesson timestamps.**
   - [x] **Assessment alignment, Modules 2–5 → LOCKED S1 wording**
         (`archive/SITE_ALIGNMENT_2.md`).
         ✅ 2026-07-07: re-audited M2–M5 against the locked Unit 2–5 assessment
