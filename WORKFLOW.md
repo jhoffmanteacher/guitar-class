@@ -79,6 +79,17 @@
         roadmap below. CLAUDE.md: recorded the six-song core/thread list as a
         settled fact. No `skills:` changes; `MODULE_MANIFEST`/`skillCount`
         untouched; `checks.mjs` passed (245/245 links, SW bumped).
+  - [x] **LOOPER_REMOVAL** (`LOOPER_REMOVAL.md`, doc retired after execution) —
+        deprecated the A/B looper (no presets were ever populated) and rerouted
+        the 🎵 Backing track button to the plain video panel, labeled with the
+        track's key (e.g. "Backing track (Am)").
+        ✅ 2026-07-08/09: deleted `looper.js` and `LOOPER_SPEC.md`; removed the
+        `looper.js` script tag from `index.html` and its stale entry from
+        `checks.mjs`'s `SHELL_FILES` fingerprint list (harmless no-op while
+        present, cleaned up regardless); stripped the Firestore `loops`
+        plumbing from `app.js`; added `backingKey` to all 5 core-song entries
+        in `module-4.js`. All 5 oEmbed IDs re-verified live, no title/key
+        mismatches. `checks.mjs` passed; SW version bumped; pushed.
   - [ ] **Song-list review session** — difficulty dots on ~109 Choice songs;
         the 3 quiz distractor swaps (m6 reggae · m7 stacked-TAB pair · m2 H→G#);
         Just Like Heaven keep-or-drop-as-Choice call; supplemental swaps now that
