@@ -125,83 +125,15 @@ so a `data-resp-key` sync was added to `onResponseChange`/`onStepMcSelect` in
 `app.js` to keep an answer typed in either variant in sync across the toggle —
 carry this forward, it's now part of the renderer, not optional.
 
-### Session 2 — Pairing survey — DONE (2026-07-09), awaiting approval
-Full sweep of every "Take It to a Song" section, modules 2–8 (Module 1 has
-none). 28 core-six parent steps found; 22 ✅ recommended, 6 ❌ blocked or
-not viable. **STOP — Jonathan approves/edits the rows below before Session 3.**
-
-#### Module 2
-| Set | Parent Song | Layer | Candidate Alt | Response Overridable? | Rec | Rationale |
-|---|---|---|---|---|---|---|
-| Set 1 | Seven Nation Army (chart-free) | 2 — single notes | Luna | Yes, no override needed | ✅ | Luna's own Layer 2 is also single-note bass roots (F·Am); Watchtower/Sweet Child O' Mine also viable if you'd rather spread songs differently |
-| Set 2 | Watchtower bass line | 2 | Let It Be | — | ✅ **shipped** | Session 1 pilot, live in `5336eed` |
-| Set 2 | Seven Nation Army, true pitch (A string) | 2 | — | — | ❌ | Challenge's premise (same riff, alternate string) has no documented equivalent for another core song — needs new content design, not a text swap |
-| Set 2 | "the cure," root line | 2 | Sweet Child O' Mine | Needs `responsePrompt` override (names specific notes) | ✅ | SCoM's verse bass roots (D·C·G·D) cross E & A strings, same shape as "the cure"'s roots |
-| Set 2 | Luna, bass roots | 2 | — | — | ❌ | Only Sweet Child O' Mine is unused in this set, and it's the stronger fit for "the cure" above — reusing it here duplicates content in the same set |
-
-#### Module 3
-| Set | Parent Song | Layer | Candidate Alt | Response Overridable? | Rec | Rationale |
-|---|---|---|---|---|---|---|
-| Set 1 | Seven Nation Army | 3 — power chords | Watchtower | Yes, song-neutral | ✅ | Watchtower's Am–G–F–G loop is already this module's whole-class assessment riff |
-| Set 2 | Watchtower | 3 | Sweet Child O' Mine | Yes, song-neutral | ✅ | SCoM's D5–C5–G5 verse power-chord loop already documented in song list |
-| Set 2 | "the cure" (◐ optional stretch) | 3 ◐ | Let It Be | Yes, song-neutral | ✅ | Let It Be's own Layer 3 is also marked ◐ optional/stretch — same spirit |
-| Set 2 | Luna | 3 | Seven Nation Army | Yes, song-neutral | ✅ | SNA's Layer-3 riff/tab already exists verbatim in this module's Set 1 step |
-
-*Cross-module note: Set 1's SNA→Watchtower and Set 2's Watchtower→SCoM are a reversible pair — not a hard conflict (different Sets) but worth a variety check at build time.*
-
-#### Module 4
-| Set | Parent Song | Layer | Candidate Alt | Response Overridable? | Rec | Rationale |
-|---|---|---|---|---|---|---|
-| Set 1 | Seven Nation Army | 4 — pentatonic solo | Let It Be | Yes, song-neutral | ✅ | Let It Be's Layer 4 (Pattern 1 @ 5th pos., home C) unused elsewhere in this set |
-| Set 1 | Watchtower | 4 | "the cure" | Yes, free-text reflection | ✅ | "the cure" Layer 4 is Am pentatonic — same pattern shape, different root |
-| Set 1 | Luna | 4 | Sweet Child O' Mine | Yes, song-neutral enough | ✅ | SCoM Layer 4 confirmed (E minor pentatonic), unused elsewhere in this set |
-| Set 2 | Sweet Child O' Mine | 4 — dynamics/register solo | Watchtower | Yes, song-neutral | ✅ | Watchtower has a matching Layer 4, not used in this set's section |
-| Set 2 | "the cure" | 4 (implied — no Journey link on this step) | Seven Nation Army | Yes, song-neutral | ❌ | Pre-existing content gap: this step is missing its own `tabs/the-cure.html` Song Journey link — fix that first, independent of this feature |
-
-#### Module 5
-| Set | Parent Song | Layer | Candidate Alt | Response Overridable? | Rec | Rationale |
-|---|---|---|---|---|---|---|
-| Set 2 | Let It Be | 5 — open chords, verse | — | — | ❌ | **In-class assessment piece** — must stay fixed, no alt |
-| Set 2 | Watchtower | 5 — campfire loop | Seven Nation Army | Needs `responsePrompt` override | ✅ | Both have a matching Layer 5 "Open Chords" page, near-identical campfire loop |
-| Set 2 | "the cure" | 5 — capo-1 play-along | Sweet Child O' Mine | Needs `responsePrompt` override | ✅ | SCoM's Layer 5 is D–C–G, no capo — same campfire pattern |
-| Set 3 | Luna (vamp) | 5 | Watchtower | Already song-neutral | ✅ | Set 3's own song list already tags Watchtower "open-chord version" at this layer |
-| Set 4 | Luna (showcase) | 5 — full-song showcase | Watchtower | Prompt neutral, only placeholder needs a tweak | ✅ | Not the locked assessment piece (that's Set 2's Let It Be) — Watchtower already listed in this Set |
-
-*Note: Watchtower proposed as alt in both Set 3 and Set 4 — different Sets, likely fine, flagging for awareness.*
-
-#### Module 6
-| Set | Parent Song | Layer | Candidate Alt | Response Overridable? | Rec | Rationale |
-|---|---|---|---|---|---|---|
-| Set 1 | Watchtower ("strummed for real") | 5 — open chords + strum | Let It Be | No response field | ✅ | Let It Be's Layer 5 page already cites the exact down-up 8th-note strum as a level-up; C·G·Am·F roots reused from Session 1 pilot |
-| Set 3 | Watchtower ("two ways: folk vs. rock") | 5 — strum contrast | — | — | ❌ | Challenge is historically specific to Watchtower's Dylan-folk-vs-Hendrix-rock story — no equivalent dual-interpretation exists for another core song |
-
-*Set 2 has no core-six rows — its two songs (I'm Yours, Oye Mi Amor) aren't part of the six-song thread despite local `Core`/`Choice` tags.*
-
-#### Module 7
-| Set | Parent Song | Layer | Candidate Alt | Response Overridable? | Rec | Rationale |
-|---|---|---|---|---|---|---|
-| Set 1 | Seven Nation Army ("the real rhythm") | Barre chords / rhythm notation | Watchtower | Yes, song-neutral | ❌ | Needs a newly authored, verified real-record rhythm TAB — real research effort, not a mechanical pairing |
-| Set 2 | Sweet Child O' Mine ("one-shape verse," Module 7 finale) | Barre chords (E-shape slide) | Luna | No response field | ✅ | Luna's full-barre-F graduation already documented in this Set's `songs:` list and CLAUDE.md settled facts. Caveat: `tabs/luna.html` has no barre-chord layer yet — link still works (page-top only) but won't land on a matching section |
-| Set 3 | Watchtower ("no open chords") | Barre chords, full-song | Let It Be | Needs `responsePrompt` override (names Watchtower) | ✅ | Let It Be's C–G–Am–F converts to barre shapes exactly like Watchtower's Am–G–F |
-| Set 3 | Luna ("full barre F") | Barre chords, single chord | Let It Be | No response field | ✅ | Let It Be's F is also commonly taught as "little F → full barre F," same graduation story as Luna |
-
-*Conflict: Let It Be is proposed as alt for both Set 3 rows above — same song, same section, two different parent steps. Not a rule violation (the additive rule only blocks an alt song that already has its OWN step in that section), but pick one or keep both — your call. Oye Mi Amor's "full barre Bm" step was skipped (Choice song, not core six).*
-
-#### Module 8
-| Set | Parent Song | Layer | Candidate Alt | Response Overridable? | Rec | Rationale |
-|---|---|---|---|---|---|---|
-| Set 1 | "the cure" (p-i-m-a "first touch," Am→C) | Fingerpicking, single-chord intro | Let It Be | No response field | ✅ | Let It Be's chord set (C-G-Am-F) already includes Am and C — same drill drops in with settled chords |
-| Set 2 | "the cure" (p-i-m-a-m-i pattern, Am→C→F) | Fingerpicking, 6-note pattern | Watchtower | Needs `responsePrompt` override | ✅ | Watchtower's settled Am-G-F-G progression gives a comparable 3-of-4-chord subset to fingerpick |
-| Set 3 | Let It Be (full 4-chord fingerpicked verse) | Fingerpicking, full progression | "the cure" | No response field | ✅ | "the cure" progression already proven fingerpickable elsewhere in this module (Sets 1–2) |
-
-*Set 3's "Perform It" assessment step was excluded — student already freely picks their own song there. Cross-cutting note: none of the six core songs' Song Journey pages actually have a dedicated Fingerpicking layer — Module 8's "Layer N of N" link text is a module-internal label only (links land at page-top, no anchor, per the existing no-anchor rule), so "same layer" is read loosely for this module.*
-
-#### Open questions — resolved by Jonathan (2026-07-09)
-1. **Module 7 Set 3** (Let It Be proposed as alt for both the Watchtower step and the Luna step): **keep both.** Not a rule violation — different parent steps, same alt song, is fine.
-2. **Module 2 Set 2** (only Sweet Child O' Mine was open to pair, better fit for "the cure" than for Luna): **leave Luna unpaired** in this set. Sweet Child O' Mine stays paired with "the cure" as surveyed.
-3. **Pre-existing gaps surfaced, not caused by this feature** — fix separately or fold in during Session 3: Module 4 Set 2's "the cure" step is missing its own Song Journey link; `tabs/luna.html` has no barre-chord layer section yet (Module 7 alt link still works, just lands at page-top).
-
-**Session 2 is fully approved.** Session 3 builds all 22 ✅ rows above (skip the 6 ❌ rows and the two ❌-flagged pre-existing gaps, which are separate cleanup).
+### Session 2 — Pairing survey (no content written)
+1. Sweep every Take It to a Song section, modules 1–8. For each step, list:
+   module/set, parent song, layer, candidate alt song (core six, same layer,
+   not already a step in that set), and whether the response is safely
+   overridable.
+2. Output a markdown table with a ✅/❌ recommendation and one-line rationale
+   per row. Flag any pairing that would require a video or a keyed MC change
+   as ❌.
+3. **STOP — Jonathan approves/edits the pairing list before Session 3.**
 
 ### Session 3 — Build approved pairings
 1. Add `alt:` (+ parent `label:`) for each approved row only.
