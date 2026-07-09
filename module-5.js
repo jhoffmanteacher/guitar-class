@@ -510,8 +510,8 @@ SETS.push(
             title: 'Listen for the chord changes',
             steps: [
           {
-            text: 'Listen to "Oye Mi Amor" by Maná — the chorus rides on D, A, Bm, and G. Can you hear when each chord arrives? Tap along and try to feel the chord changes.',
-            hint: 'D, A, and Bm are the Group 2 chords you\'re learning right now, and G you already know. Your ear already knows the sound — you\'re just learning to play them.',
+            text: 'Listen to "Luna" by Peso Pluma & Junior H — the whole song rides two chords, F and Am, with Dm and C passing through the chorus. The pulse is in 2: tap just the big downbeats and feel the chord changes land right on them.',
+            hint: 'F and Am are chords you already know from Group 1 — Dm and C pass through briefly in the chorus. Your ear already knows the sound — you\'re just learning to place the changes.',
             skills: [5],
             response: { type: 'short', placeholder: 'Describe one moment where you clearly heard a chord change.' }
           },
@@ -579,18 +579,16 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Oye Mi Amor, chorus: the chorus is D · A · Bm · G — every chord is one you\'ve drilled this set (D, A, Bm from Group 2) plus G from Group 1. Play the loop, four beats per chord at 60 BPM with a down-strum. You\'ve got it when: two loops with every change landing on beat 1, the partial-barre Bm ringing clean. <a href="tabs/oye-mi-amor.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-                hint: 'D, A, and Bm are your brand-new Group 2 chords — this is where they pay off. Bm is the partial-barre shape from the video (xx4432); keep that index barre light and your thumb behind the neck.',
-                stuck: 'Loop just D → A until it\'s smooth, then Bm → G, then join the halves. Bm is the hard one — pre-shape it in the air before you land it.',
-                levelUp: 'Drop to two beats per chord at the same 60 BPM, or hum the chorus hook over your strumming.',
+                text: 'Challenge — Luna, the vamp: F · Am — two shapes, both from Group 1 and by now old friends, with the simplified F (xx3211). The song is in 6/8, so play two downbeat strums per bar — nothing syncopated — changing every bar at 60 BPM. You\'ve got it when: four laps with every change landing on the downbeat and the little F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
+                hint: 'F and Am are already in your hands from Group 1 — the only new part is the simplified F shape (xx3211) and locking the change to the 6/8 pulse.',
+                stuck: 'Loop just F → Am until the shape change is automatic, then add the metronome at 60 BPM.',
+                levelUp: 'Drop in the Dm–C passing chords from the chorus, or push the tempo to 70 BPM.',
                 skills: [5, 6],
                 chords: [
-                  { name: 'D',  chord: [[6,'x'],[5,'x'],[4,0],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 },
-                  { name: 'A',  chord: [[6,'x'],[5,0],[4,2,'1'],[3,2,'2'],[2,2,'3'],[1,0]], position: 0 },
-                  { name: 'Bm', chord: [[6,'x'],[5,'x'],[4,4,'4'],[3,4,'3'],[2,3,'2'],[1,2,'1']], position: 2 },
-                  { name: 'G',  chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
+                  { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
+                  { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
                 ],
-                response: { type: 'short', prompt: 'Which change was toughest — into Bm, or out of it?', placeholder: 'e.g. into Bm — the barre lags' }
+                response: { type: 'short', prompt: 'Which change was toughest — into F, or out of it?', placeholder: 'e.g. into F — the top-string barre lags' }
               }
             ]
           },
@@ -614,9 +612,9 @@ SETS.push(
       { name: '"Seven Nation Army" — The White Stripes', meta: '◐ optional stretch · D–A–Em strummed adaptation', type: 'Supp', core: false, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Chorus loop D–A–Bm–G · strummed', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html',
-        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
-        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
+      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Verse vamp F–Am (+ Dm–C) · strummed', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+        originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
+        tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
       { name: '"Stand By Me" — Ben E. King', meta: 'G–Em–C–D · great Group 1↔2 cross-group song', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=hwZNL7QVJjE',
         tutorialUrl: 'https://www.youtube.com/watch?v=TXLElO_YYiY' },
@@ -668,8 +666,8 @@ SETS.push(
         gotItWhen: 'you can play through a real song that mixes Group 1 and Group 2 chords without slowing down at the cross-group changes.',
         practice: { type: 'playSeq', label: 'Cross-group progression (G · Em · C · D roots)', bpm: 70,
           notes: [43, 40, 48, 50] } },
-      { id: 'm5w3-s6', text: 'Play the "Oye Mi Amor" chorus (D–A–Bm–G) using Group 2 chords with a strum pattern',
-        gotItWhen: 'you can loop the "Oye Mi Amor" chorus (D · A · Bm · G) with a steady down-strum at 60 BPM, every change landing on beat 1 and the partial-barre Bm ringing clean.' }
+      { id: 'm5w3-s6', text: 'Play the "Luna" vamp (F–Am, plus Dm–C) using Group 1 chords with a strum pattern',
+        gotItWhen: 'you can loop the "Luna" vamp (F · Am) with steady downbeat strums at 60 BPM, every change landing on the downbeat and the simplified F (xx3211) ringing clean.' }
     ]
   },
 
@@ -806,18 +804,18 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Oye Mi Amor, strummed (showcase version): play the chorus as open chords — D · A · Bm · G — four beats per chord at 60 BPM with a straight down-strum, building toward 70, singing or humming the hook if you dare. You\'ve got it when: four loops with every change on beat 1 and the partial-barre Bm ringing clean. <a href="tabs/oye-mi-amor.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-                hint: 'You met this loop in Set 3 — now make it showcase-clean. Bm is the partial barre; keep your fingers arched and your thumb behind the neck so the whole chord rings.',
-                stuck: 'Bm is the tough one — loop A → Bm on its own until the barre lands, then run the full D–A–Bm–G.',
-                levelUp: 'Try the down-down-up split strum on each chord, run it at two beats per chord, or push to 70 BPM.',
+                text: 'Challenge — Luna, strummed (showcase version): the full song is F · Am, with Dm · C arriving in the chorus — two downbeat strums per bar at 60 BPM, building toward 70, singing or humming "Luna, dile tú" if you dare. You\'ve got it when: a full verse and chorus with every change on the downbeat and the F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
+                hint: 'You met this vamp in Set 3 — now make it showcase-clean. F is the trickiest shape; keep your fingers arched and thumb behind the neck so all six strings ring.',
+                stuck: 'F is the tough one — loop Am → F on its own until the shape lands clean, then run the full F–Am (with Dm–C in the chorus).',
+                levelUp: 'Try the down-down-up split strum on each chord, or push to 70 BPM.',
                 skills: [5, 6],
                 chords: [
-                  { name: 'D',  chord: [[6,'x'],[5,'x'],[4,0],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 },
-                  { name: 'A',  chord: [[6,'x'],[5,0],[4,2,'1'],[3,2,'2'],[2,2,'3'],[1,0]], position: 0 },
-                  { name: 'Bm', chord: [[6,'x'],[5,'x'],[4,4,'4'],[3,4,'3'],[2,3,'2'],[1,2,'1']], position: 2 },
-                  { name: 'G',  chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
+                  { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
+                  { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
+                  { name: 'Dm', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'2'],[2,3,'3'],[1,1,'1']], position: 0 },
+                  { name: 'C',  chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 }
                 ],
-                response: { type: 'short', prompt: 'Which core song do you most want to play start-to-finish at the showcase?', placeholder: 'e.g. Oye Mi Amor, all of it' }
+                response: { type: 'short', prompt: 'Which core song do you most want to play start-to-finish at the showcase?', placeholder: 'e.g. Luna, all of it' }
               }
             ]
           },
@@ -848,9 +846,9 @@ SETS.push(
     songs: [
       { name: '"Happy Birthday"', meta: 'Full chord arrangement — all groups reviewed (optional)', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Full-song showcase · D–A–Bm–G', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html',
-        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
-        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
+      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Full-song showcase · F–Am–Dm–C', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+        originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
+        tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Optional showcase · D–C–G power chords (from Module 3)', type: 'Supp', core: false, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },

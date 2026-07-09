@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-09 — Luna joins the core six songs
+
+### Changed
+- **"Luna" by Peso Pluma & Junior H is now one of our six core songs**, taking
+  Oye Mi Amor's spot as the class's Latin song. You'll hear it starting in
+  Module 1, play its bass notes in Module 2, drill its power-chord version in
+  Module 3, solo over it in Module 4, strum it as open chords in Module 5,
+  and graduate to the full barre F chord in Module 7 — it has its own
+  five-layer Song Journey page, just like the other core songs.
+- **Oye Mi Amor moves to the Choice song list** in Modules 6 and 7 — its
+  lessons (the syncopated Latin strum and full-barre Bm) are still there for
+  anyone who wants to keep playing it, just no longer required.
+
 ## 2026-07-08 — Backing tracks are simple videos again
 
 ### Changed

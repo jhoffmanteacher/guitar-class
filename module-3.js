@@ -421,20 +421,20 @@ SETS.push(
             ]
           },
           {
-            title: 'Oye Mi Amor: Bm5–A5 two-shape metronome drill',
+            title: 'Luna: F5–A5 two-shape metronome drill',
             steps: [
           {
-            text: 'Challenge — Bm5 ↔ A5 Two-Shape Drill: meet Bm5, a new power chord — root B on the low E string, 7th fret (the same shape you climbed to in Set 1). Rock between the Oye Mi Amor verse chords, Bm5 (fret 7) and A5 (fret 5), one strum per beat — it\'s the same shape sliding two frets. You\'ve got it when: you can switch Bm5↔A5 landing on beat 1, both notes clean, all the way up the tempo ladder: 60 → 70 → 80 BPM. <a href="tabs/oye-mi-amor.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-            hint: 'A power chord has no major or minor — Bm5 is just B5 (B + F#). Keep the two-finger shape locked and let your whole arm slide the two frets between fret 7 and fret 5.',
-            stuck: 'Park on the slide: fret 5, fret 7, fret 5, fret 7 with no rhythm — make the 2-fret move automatic, then add the metronome at 60.',
-            levelUp: 'Hold it clean at 80 BPM, or add the chorus chords D5 and G5 for the full D5–A5–Bm5–G5 progression.',
+            text: 'Challenge — F5 ↔ A5 Two-Shape Drill: Luna\'s whole vamp is two power chords — F5 (root F, low E string, fret 1) and A5 (root A, fret 5) — the same two-finger shape sliding four frets. One strum per big beat: Luna is in 6/8, so strum just the downbeats, two per bar, nothing syncopated. You\'ve got it when: you can switch F5 ↔ A5 landing every downbeat clean, all the way up the tempo ladder: 60 → 70 → 80 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+            hint: 'A power chord has no major or minor — just root + 5th. Keep the two-finger shape locked and let your whole arm make the four-fret slide.',
+            stuck: 'Park on the slide: fret 1, fret 5, fret 1, fret 5 with no rhythm until the jump is automatic — then add the metronome at 60.',
+            levelUp: 'Palm-mute for a tight sierreño chug — then let it ring and hear why distortion isn\'t this song\'s home. That\'s what the ◐ means.',
             skills: [1, 2],
             chords: [
-              { name: 'Bm5', chord: [[6,7,'1'],[5,9,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 7 },
-              { name: 'A5',  chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 }
+              { name: 'F5', chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 1 },
+              { name: 'A5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 }
             ],
-            playSeq: { label: 'Hear Bm5 → A5 (roots B · A)', bpm: 60, notes: [47, 45] },
-            response: { type: 'short', prompt: 'Your fastest CLEAN Bm5↔A5 today (BPM)?', placeholder: 'e.g. 70 — 80 next class' }
+            playSeq: { label: 'Hear F5 → A5 (roots F · A)', bpm: 60, notes: [41, 45] },
+            response: { type: 'short', prompt: 'Your fastest CLEAN F5↔A5 today (BPM)?', placeholder: 'e.g. 70 — 80 next class' }
           }
             ]
           },
@@ -493,21 +493,19 @@ SETS.push(
                 response: { type: 'short', prompt: 'Loud vs. soft power chords — which was harder to keep clean?', placeholder: 'e.g. soft — I kept muting the D string' }
               },
               {
-                text: 'Challenge — Oye Mi Amor, chorus: play Maná\'s chorus as power chords — D5 · A5 · Bm5 · G5 — two beats per chord at 60 BPM. You\'ve got it when: four laps with every change on beat 1, and Bm5 (fret 7) ringing as clean as the rest. <a href="tabs/oye-mi-amor.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                hint: 'You drilled Bm5↔A5 already — this adds D5 and G5 around them. D5 is an A-string root; A5, Bm5, and G5 are low-E-string roots.',
-                stuck: 'Split it: loop D5 → A5 until smooth, then Bm5 → G5, then join the two halves.',
-                levelUp: 'One beat per chord instead of two — same 60 BPM, twice the changes — or push the ladder to 70.',
+                text: 'Challenge — Luna, full vamp: the whole song rides F5 ↔ A5. Play along with the teaching arrangement — two downbeat strums per bar, changing where the record changes. You\'ve got it when: a full verse and chorus without losing a downbeat, F5 ringing as clean as A5. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+                hint: 'This is the same F5↔A5 slide from the drill above — the only change is following where the record changes instead of a fixed count.',
+                stuck: 'Loop the F5↔A5 slide with no song for a few rounds first, then drop in following the record.',
+                levelUp: 'Add a light palm mute for the verse, then let it ring open for the chorus — instant dynamics.',
                 skills: [3, 4],
                 tab: {
-                  caption: '"Oye Mi Amor" — chorus as power chords (teaching arrangement) · 60 BPM',
+                  caption: '"Luna" — the vamp as power chords (teaching arrangement) · 60 BPM',
                   notes: [
-                    { frets: [['D', 7], ['A', 5]], note: 'D5',  midi: [57, 50] },
-                    { frets: [['A', 7], ['E', 5]], note: 'A5',  midi: [52, 45] },
-                    { frets: [['A', 9], ['E', 7]], note: 'Bm5', midi: [54, 47] },
-                    { frets: [['A', 5], ['E', 3]], note: 'G5',  midi: [50, 43] }
+                    { frets: [['A', 3], ['E', 1]], note: 'F5', midi: [48, 41] },
+                    { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] }
                   ]
                 },
-                response: { type: 'short', prompt: 'Which song did you land power chords in today, and at what BPM?', placeholder: 'e.g. Oye Mi Amor at 60 — clean' }
+                response: { type: 'short', prompt: 'Which song did you land power chords in today, and at what BPM?', placeholder: 'e.g. Luna at 60 — clean' }
               }
             ]
           },
@@ -528,9 +526,9 @@ SETS.push(
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full power chord loop · change on beat 1 at 60, hold 80 BPM', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Electric riff → power-chord version', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html',
-        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
-        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
+      { name: '"Luna" — Peso Pluma, Junior H', meta: '◐ Sierreño vamp → power-chord version (against the grain here)', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+        originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
+        tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Verse: D5–C5–G5 power chord loop', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
@@ -557,7 +555,7 @@ SETS.push(
     ],
 
     assessment: {
-      goal: 'Unit-end (three tasks): (1) Play a core-song excerpt to the metronome — e.g., the Seven Nation Army riff, Oye Mi Amor\'s Bm5–A5, or Sweet Child\'s D5–C5–G5 — switching cleanly between two power chords with roots on the same fret of the E and A strings at 60 BPM, then holding 80 BPM for at least 15 seconds. (2) Read a three-chord (I–IV–V) progression from chord symbols / TAB using a named strumming pattern (straight-eighths or split strum), and name power chords from a chord chart. (3) Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes.',
+      goal: 'Unit-end (three tasks): (1) Play a core-song excerpt to the metronome — e.g., the Seven Nation Army riff, All Along the Watchtower\'s A5–G5–F5, or Sweet Child\'s D5–C5–G5 — switching cleanly between two power chords with roots on the same fret of the E and A strings at 60 BPM, then holding 80 BPM for at least 15 seconds. (2) Read a three-chord (I–IV–V) progression from chord symbols / TAB using a named strumming pattern (straight-eighths or split strum), and name power chords from a chord chart. (3) Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes.',
       performance: 'Individual: play a core-song excerpt with the metronome — changes on beat 1 at 60 BPM, then hold 80 BPM for 15 seconds; read a three-chord (I–IV–V) progression from chord symbols with your named strum; then clap and count a 4-bar rhythm. Teacher gives one piece of feedback.',
       selfCheck: 'Can you change chords on beat 1 at 60 BPM and hold 80 BPM for 15 seconds? Can you read a I–IV–V progression from chord symbols and name power chords from a chart?',
       standards: ['Pr.4a', 'Pr.5b', 'Pr.6a']
@@ -601,7 +599,7 @@ MODULE_REVIEWS[3] = {
     { id: 'mr3-s8', text: 'I can play an 8-bar progression with a straight-eighths strum, counting "1 + 2 + 3 + 4 +"', set: 'm3w2' }
   ],
   assessItems: [
-    'Play a core-song excerpt (Seven Nation Army, Oye Mi Amor\'s Bm5–A5, or Sweet Child\'s D5–C5–G5) with changes on beat 1 at 60 BPM — including a clean switch between two power chords with roots on the same fret of the E and A strings — then hold 80 BPM for 15 seconds',
+    'Play a core-song excerpt (Seven Nation Army, All Along the Watchtower\'s A5–G5–F5, or Sweet Child\'s D5–C5–G5) with changes on beat 1 at 60 BPM — including a clean switch between two power chords with roots on the same fret of the E and A strings — then hold 80 BPM for 15 seconds',
     'Read a three-chord (I–IV–V) progression from chord symbols / TAB with a named strumming pattern, and name power chords from a chord chart',
     'Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes'
   ],

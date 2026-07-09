@@ -397,9 +397,12 @@ SETS.push(
       { name: '"Hey Jude" — The Beatles', meta: 'F major in the chorus · perfect E-shape barre application', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=A_MjCqQoLLA',
         tutorialUrl: 'https://www.youtube.com/watch?v=VyleoeWxbIQ' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Full barre Bm in the chorus (instead of the simplified shape)', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html',
+      { name: '"Oye Mi Amor" — Maná', meta: 'Full barre Bm in the chorus (instead of the simplified shape)', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
         tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
+      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Full barre F in the vamp (instead of the little F)', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+        originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
+        tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
       { name: '"Wonderwall" — Oasis', meta: 'Easier with barre chords once you have them down', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=6hzrDeceEKc',
         tutorialUrl: 'https://www.youtube.com/watch?v=5V81btmYxgE' },
@@ -592,7 +595,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Oye Mi Amor, full barre Bm: the verse\'s small Bm graduates today. Index bars fret 2 (strings 5–1), and you play Bm · G one bar each with your D-DU-UDU strum at 60 BPM. You\'ve got it when: four laps where the full Bm rings as clean as the G — the song\'s last training wheel is off. <a href="tabs/oye-mi-amor.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
+                text: 'Challenge — Oye Mi Amor, full barre Bm: the verse\'s small Bm graduates today. Index bars fret 2 (strings 5–1), and you play Bm · G one bar each with your D-DU-UDU strum at 60 BPM. You\'ve got it when: four laps where the full Bm rings as clean as the G — the song\'s last training wheel is off.',
                 hint: 'It\'s built on the same fret-2 bar as your B major — the minor version just re-stacks the fingers on top. The index tip mutes string 6 for you.',
                 stuck: 'Whenever the barre buzzes, fall back to the small Bm for a lap, then trade back — alternate small and full until full wins.',
                 levelUp: 'Play the chorus (A · D · E · D) as barres too — the whole song with no open chords.',
@@ -611,6 +614,12 @@ SETS.push(
                   { name: 'Am (E-shape)', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,5,'1'],[2,5,'1'],[1,5,'1']], position: 5 }
                 ],
                 response: { type: 'short', prompt: 'Personal record — clean all-barre Watchtower laps in a row. Your count today?', placeholder: 'e.g. 2 — the F still buzzes' }
+              },
+              {
+                text: 'Challenge — Luna, full barre F: the little F (xx3211) graduates today. Index bars fret 1 across all six strings — the toughest fret on the neck to barre — and you ride F ↔ Am with two downbeat strums per bar at 60 BPM. You\'ve got it when: four laps where all six strings of the F ring as clean as the Am — Luna\'s last training wheel is off. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: beyond Layer 5 — the barre upgrade</a>.',
+                hint: 'Roll the index onto its bony edge and pull back with the whole arm rather than squeezing with the thumb — fret 1 needs leverage, not force.',
+                stuck: 'Barre just the top two strings at fret 1 and add one string per day. The six-string F is a marathon, not a sprint.',
+                levelUp: 'Slide the same barre shape to fret 5 — that\'s A major, and suddenly every major chord on the neck is yours.'
               }
             ]
           },
@@ -641,7 +650,7 @@ SETS.push(
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · use barre shapes for all three', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Full barre-chord progression · Bm–G', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html',
+      { name: '"Oye Mi Amor" — Maná', meta: 'Full barre-chord progression · Bm–G', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
         tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Barre the D–C–G verse', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',

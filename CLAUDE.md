@@ -146,17 +146,22 @@ When adding `originalUrl` / `tutorialUrl` / lesson video links in any module fil
 These song arrangements are intentional and have been reconciled with the
 curriculum map. Do **not** flag them as drift in future alignment audits:
 
-- **Oye Mi Amor** — the chorus is `D–A–Bm–G`; the `D–A–G–A` turnaround at
-  phrase ends is a deliberate simplification.
 - **All Along the Watchtower** — the loop is `Am–G–F–G` (`A5–G5–F5–G5` as
   power chords) — the record's turnaround. The map's "Am–G–F" is shorthand;
   the site's four-chord loop is intentional (settled 2026-07-07).
 - **Core/thread songs are exactly six** (settled 2026-07-08): Seven Nation Army,
-  All Along the Watchtower, Sweet Child O' Mine (standard tuning), Oye Mi Amor,
-  Let It Be, and "the cure" (Olivia Rodrigo). Just Like Heaven and Tu Boda are
-  **not** core — Tu Boda is a Choice song (Modules 6–8). The six Song Journey
-  pages in `tabs/` therefore cover the core list completely; do not flag
-  "missing" journey pages for any other song.
+  All Along the Watchtower, Sweet Child O' Mine (standard tuning), Luna (Peso
+  Pluma & Junior H), Let It Be, and "the cure" (Olivia Rodrigo). Just Like
+  Heaven and Tu Boda are **not** core — Tu Boda is a Choice song (Modules
+  6–8). The six Song Journey pages in `tabs/` therefore cover the core list
+  completely; do not flag "missing" journey pages for any other song. Oye Mi
+  Amor is a Choice song (Modules 6–7 content retained, retagged 2026-07);
+  `tabs/oye-mi-amor.html` removed by design. `tabs/luna.html` is the sixth
+  Journey page.
+- **Luna** — F–Am vamp plus Dm–C; 6/8 felt in 2 (teach two downbeat strums
+  per bar, nothing syncopated); no capo — simplified F (xx3211) until Module
+  7's full barre; solos use D minor pentatonic Pattern 1 at fret 10; ◐ in
+  Module 3 (sierreño as power chords). Settled 2026-07-09.
 
 ## Switching topics — prompt to start a fresh chat
 When Jonathan asks for something that is clearly a **new, unrelated topic** from what we've been working on (e.g., we just finished a feature on Module 5 and he now asks about a different part of the site, a different project, or general Claude Code questions), use **AskUserQuestion** to ask whether he'd like to start a fresh conversation before continuing. A fresh chat keeps context focused and responses faster.

@@ -90,6 +90,24 @@
         plumbing from `app.js`; added `backingKey` to all 5 core-song entries
         in `module-4.js`. All 5 oEmbed IDs re-verified live, no title/key
         mismatches. `checks.mjs` passed; SW version bumped; pushed.
+  - [x] **SITE_LUNA_SWAP** (`SITE_LUNA_SWAP.md`, doc retired after execution) —
+        core-song swap: Luna (Peso Pluma & Junior H) replaces Oye Mi Amor in
+        Modules 1–5 and the Song Journey pages; Oye Mi Amor retagged to a
+        Choice song in Modules 6–7 (content retained). Matches curriculum
+        map V16.
+        ✅ 2026-07-09: replaced all in-place Oye content with Luna across
+        modules 1–5 (listen cards, M2 bass-roots step, M3 F5–A5 power-chord
+        drill + vamp, M4 Dm pentatonic solo + backing track, M5 open-chord
+        vamp + showcase — skill `m5w3-s6` id preserved); retagged both Oye
+        cards in modules 6–7 to `type: 'Choice', core: false` (`level: 2`/`3`)
+        with `journeyUrl` and Song Journey links stripped, and added a new
+        Luna full-barre step + Core card to Module 7 Set 2; created
+        `tabs/luna.html` (5-layer Song Journey page) and deleted
+        `tabs/oye-mi-amor.html`. `grep -i oye` across `*.js`/`*.html` now
+        returns hits only in modules 6–7's retagged Choice content. All 3
+        new YouTube IDs (original/tutorial/backing) oEmbed-verified live.
+        `MODULE_MANIFEST`/`skillCount` byte-identical throughout — no
+        `skills:` array changes. `checks.mjs` passed.
   - [ ] **Song-list review session** — difficulty dots on ~109 Choice songs;
         the 3 quiz distractor swaps (m6 reggae · m7 stacked-TAB pair · m2 H→G#);
         Just Like Heaven keep-or-drop-as-Choice call; supplemental swaps now that
@@ -156,6 +174,8 @@ archived (2026-07-05). Fold them into the review or handle them ad hoc:
       Marty Music") through and confirm it fits the beginner Pattern-1 station
       before the course starts.
 - [ ] Supplemental/Choice song swap — map locked 2026-07-07, so this is now unblocked; folded into the song-list review session below.
+- [ ] Luna requinto intro TAB — transcribe from Jonathan's uploaded official tab (Layer 2 stretch + M2 levelUp).
+- [ ] Difficulty-dot review: new level values on retagged Oye cards (M6: 2, M7: 3).
 - [x] **Module 1 video-fit swaps** (flagged in Session 4, 2026-07-08).
       ✅ 2026-07-08 (SITE_FIXIT_JULY_3): resolved both. (a) Set 2 "Holding" step
       now links "How To Hold Your Guitar" (`MlV6WhM9YhE`, JustinGuitar B1-102,

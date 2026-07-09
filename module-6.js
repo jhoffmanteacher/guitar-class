@@ -379,7 +379,7 @@ SETS.push(
                 playSeq: { label: '"I\'m Yours" verse roots (G · D · Em · C)', bpm: 70, notes: [43, 50, 40, 48] }
               },
               {
-                text: 'Challenge — Oye Mi Amor, verse: the verse rides Bm · G — use the small Bm (top four strings, no barre) and play one bar of each with D-DU-UDU at 60 BPM. You\'ve got it when: four laps with the pattern unbroken and beats 2 and 4 accented so it pushes like the record. <a href="tabs/oye-mi-amor.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
+                text: 'Challenge — Oye Mi Amor, verse: the verse rides Bm · G — use the small Bm (top four strings, no barre) and play one bar of each with D-DU-UDU at 60 BPM. You\'ve got it when: four laps with the pattern unbroken and beats 2 and 4 accented so it pushes like the record.',
                 hint: 'The small Bm is the training-wheels version — the full barre Bm arrives in Module 7. For now the pattern matters more than the shape.',
                 stuck: 'Loop just the G → Bm change with one strum per bar until the landing is clean, then add the pattern.',
                 levelUp: 'Lean into the up-strums a little — that extra offbeat push is the Latin feel.',
@@ -396,7 +396,7 @@ SETS.push(
     },
 
     songs: [
-      { name: '"Oye Mi Amor" — Maná', meta: 'Syncopated Latin strum on the verse · Bm (partial barre)–G', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html',
+      { name: '"Oye Mi Amor" — Maná', meta: 'Syncopated Latin strum on the verse · Bm (partial barre)–G', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
         tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
       { name: '"Happy Birthday"', meta: 'Apply D-DU-UDU to C–G–Am–F arrangement', type: 'Core', core: true,

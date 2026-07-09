@@ -205,20 +205,20 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which chord in the loop was easiest to solo over, and which fought you?', placeholder: 'e.g. Am easy, F felt weird' }
               },
               {
-                text: 'Challenge — Solo over Oye Mi Amor: Maná\'s song lives in B minor, so B minor pentatonic Pattern 1 (root B, low E fret 7) is your box. Improvise four bars using only the three notes marked below, then four more adding a fourth note from the box. Hit ▶ &#x1F3B5; Backing track on the Oye Mi Amor card below to jam over. You\'ve got it when: eight bars where every phrase starts or ends on B. <a href="tabs/oye-mi-amor.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
-                hint: 'It\'s the same Pattern 1 shape you drilled — just parked at the 7th fret with B as home. High up the neck already sounds like a solo.',
-                stuck: 'Trade just B and D (frets 7 and 10 on the low E) back and forth, changing only the rhythm, until an idea appears.',
-                levelUp: 'Slide the box up to the 12th-fret octave, or end every phrase on B so each idea arrives home.',
+                text: 'Challenge — Solo over Luna: Luna lives in F major, and F\'s relative minor is D — so D minor pentatonic Pattern 1 (root D, low E fret 10) is your box: the exact shape you\'ve been drilling, parked at the semester\'s highest position. Improvise four bars using only the three notes marked below, then four more adding a fourth note from the box. Hit ▶ &#x1F3B5; Backing track on the Luna card below to jam over. You\'ve got it when: eight bars where every phrase starts or ends on D. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
+                hint: 'Same Pattern 1 shape — just at fret 10. This high up, the frets sit closer together, so the stretch is easier than it looks.',
+                stuck: 'Trade just D and F (frets 10 and 13 on the low E) back and forth, changing only the rhythm, until an idea appears.',
+                levelUp: 'End every phrase on D so each idea arrives home — or lean on the F (fret 13) for extra sierreño ache.',
                 skills: [6],
                 tab: {
-                  caption: 'Your three starting notes — B minor pentatonic Pattern 1 · 7th position',
+                  caption: 'Your three starting notes — D minor pentatonic Pattern 1 · 10th position',
                   notes: [
-                    { string: 'E', fret: 7,  note: 'B', midi: 47 },
                     { string: 'E', fret: 10, note: 'D', midi: 50 },
-                    { string: 'A', fret: 7,  note: 'E', midi: 52 }
+                    { string: 'E', fret: 13, note: 'F', midi: 53 },
+                    { string: 'A', fret: 10, note: 'G', midi: 55 }
                   ]
                 },
-                response: { type: 'short', prompt: 'Which note felt like "home" over the Bm track, and did your phrases land there?', placeholder: 'e.g. B at fret 7 — landed there most times' }
+                response: { type: 'short', prompt: 'Which note felt like "home" over the Dm track, and did your phrases land there?', placeholder: 'e.g. D at fret 10 — landed there most times' }
               }
             ]
           },
@@ -266,11 +266,11 @@ SETS.push(
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw',
         backingUrl: 'https://www.youtube.com/watch?v=6WBzxOEH7hI',
         backingKey: 'Em' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Solo using Bm pentatonic Pattern 1 (root B, low E fret 7)', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html',
-        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
-        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70',
-        backingUrl: 'https://www.youtube.com/watch?v=QLiLE_u_7QY',
-        backingKey: 'Bm' },
+      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Solo using Dm pentatonic Pattern 1 (root D, low E fret 10)', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+        originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
+        tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok',
+        backingUrl: 'https://www.youtube.com/watch?v=wBxFnX_V9mQ',
+        backingKey: 'Dm' },
       { name: '"12-bar blues in E"', meta: 'E minor pentatonic — classic improv context', type: 'Choice', core: false, level: 1,
         tutorialUrl: 'https://www.youtube.com/watch?v=pJL2j2v6XZM' },
       { name: '"Pride and Joy" — Stevie Ray Vaughan', meta: 'E blues scale, E & A strings', type: 'Choice', core: false, level: 3,
@@ -520,11 +520,11 @@ SETS.push(
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8',
         backingUrl: 'https://www.youtube.com/watch?v=Vq8cApzOdy8',
         backingKey: 'Am' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Full solo using Bm pentatonic (root B, low E fret 7)', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html',
-        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
-        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70',
-        backingUrl: 'https://www.youtube.com/watch?v=QLiLE_u_7QY',
-        backingKey: 'Bm' },
+      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Full solo using Dm pentatonic (root D, low E fret 10)', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+        originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
+        tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok',
+        backingUrl: 'https://www.youtube.com/watch?v=wBxFnX_V9mQ',
+        backingKey: 'Dm' },
       { name: '"the cure" — Olivia Rodrigo', meta: 'Melodic solo over the verse · A minor pentatonic', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY',
@@ -719,7 +719,7 @@ SETS.push(
             title: 'Perform your original solo',
             steps: [
           {
-            text: 'Challenge 3 — Perform It (your assessment piece — give it a go!): play your 4-bar solo over a core-song backing track — hit ▶ &#x1F3B5; Backing track on any core song card below (Watchtower, Oye Mi Amor, Seven Nation Army, Sweet Child, or "the cure") — working in at least one hammer-on, pull-off, or vibrato. You\'ve got it when: you hold the backing track\'s pulse start to finish with no restarts, and you can name your phrasing strategy (call-and-response or four-phrase). Tell a story, don\'t run scales.',
+            text: 'Challenge 3 — Perform It (your assessment piece — give it a go!): play your 4-bar solo over a core-song backing track — hit ▶ &#x1F3B5; Backing track on any core song card below (Watchtower, Luna, Seven Nation Army, Sweet Child, or "the cure") — working in at least one hammer-on, pull-off, or vibrato. You\'ve got it when: you hold the backing track\'s pulse start to finish with no restarts, and you can name your phrasing strategy (call-and-response or four-phrase). Tell a story, don\'t run scales.',
             hint: 'Include at least one technique (hammer-on, pull-off, or vibrato) in your solo. Don\'t just run scales — tell a story! No one to play for? Record yourself on the Chromebook over the backing track and watch it back. Playing for the camera counts, and the playback shows you exactly where to tighten up.',
             stuck: 'Drop the backing track and play your written 4 bars alone, slowly, until they\'re solid — then add the track back and just one technique.',
             levelUp: 'Perform it standing, play it for a partner or the class, or transpose your solo to E minor and play it from the open-string box.',
@@ -746,11 +746,11 @@ SETS.push(
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8',
         backingUrl: 'https://www.youtube.com/watch?v=Vq8cApzOdy8',
         backingKey: 'Am' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Full solo over Bm pentatonic — unit-end performance', type: 'Core', core: true, journeyUrl: 'tabs/oye-mi-amor.html',
-        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
-        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70',
-        backingUrl: 'https://www.youtube.com/watch?v=QLiLE_u_7QY',
-        backingKey: 'Bm' },
+      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Full solo over Dm pentatonic — unit-end performance', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+        originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
+        tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok',
+        backingUrl: 'https://www.youtube.com/watch?v=wBxFnX_V9mQ',
+        backingKey: 'Dm' },
       { name: '"the cure" — Olivia Rodrigo', meta: 'Full solo · A minor pentatonic', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY',

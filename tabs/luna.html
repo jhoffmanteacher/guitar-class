@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Oye Mi Amor — Song Journey · Mr. Hoffman's Guitar Class</title>
-<meta name="description" content="One song, five layers: follow Oye Mi Amor from listening to full barre chords as your skills grow.">
+<title>Luna — Song Journey · Mr. Hoffman's Guitar Class</title>
+<meta name="description" content="One song, five layers: follow Luna from listening to full barre chords as your skills grow.">
 <!-- Same Firebase project + sign-in session as the class site (same origin),
      so a student signed in there is already signed in here. Firestore SDK
      loads later, only once we know someone is signed in. -->
@@ -42,6 +42,7 @@
   .l1 .layer-num{background:var(--l1)} .l2 .layer-num{background:var(--l2)}
   .l3 .layer-num{background:var(--l3)} .l4 .layer-num{background:var(--l4)}
   .l5 .layer-num{background:var(--l5)}
+  .grain{font-size:13px;color:var(--text2);background:var(--bg3);border-radius:8px;padding:8px 12px;margin-bottom:12px}
   pre.tab{background:#20242c;color:#e8eaee;border-radius:8px;padding:14px 16px;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;line-height:1.5;overflow-x:auto;margin-bottom:12px}
   pre.tab .hl{color:#ffd479}
   .playline{font-size:14.5px;background:var(--bg2);border-left:3px solid var(--border2);padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:12px}
@@ -62,27 +63,27 @@
 
   <header class="song">
     <div class="song-kicker">Song Journey</div>
-    <h1>Oye Mi Amor</h1>
-    <div class="song-artist">Maná</div>
-    <span class="thread-badge">&#x1F9F5; Thread song — it grows through Units 3–7</span>
+    <h1>Luna</h1>
+    <div class="song-artist">Peso Pluma &amp; Junior H</div>
+    <span class="thread-badge">&#x1F9F5; Thread song — it grows through Units 1–5</span>
   </header>
 
   <p class="journey-note">One song, five layers. As your skills grow this semester, you come back to this song with a new tool — and it gets bigger every time. Find your current layer below. Fast finisher? Scroll down one layer and try the next.</p>
 
   <div class="songmap">
-    <b>Song map:</b> the chorus rides <b>A &middot; D &middot; E &middot; D</b>; the verse sits on <b>Bm &middot; G</b>.
-    Maná is one of the biggest rock bands in the Spanish-speaking world, and this song is their signature — you'll grow it from power chords all the way to full barre chords.
-    <br><em style="color:var(--text3);font-size:13px">All layers are teaching arrangements at 60 BPM — simplified for learning, not note-for-note transcriptions.</em>
+    <b>Song map:</b> the whole song rides <b>F &middot; Am</b>; the chorus adds <b>Dm &middot; C</b>. It's in 6/8 — feel the pulse in 2 and strum the downbeats.
+    Peso Pluma and Junior H's "Luna" is one of the biggest sierreño-corridos hits of the era, sung over just an acoustic requinto and bass — which is why every layer here builds toward playing it clean and unplugged.
+    <br><em style="color:var(--text3);font-size:13px">All layers are teaching arrangements — simplified for learning, not note-for-note transcriptions. Tempo targets stay on the usual 60/70/80 downbeat BPM ladder, even though the record itself moves faster in 6/8.</em>
   </div>
 
   <!-- LAYER 1 -->
   <section class="layer l1" id="layer-1">
-    <div class="layer-head"><span class="layer-num">1</span><h2>Listen</h2><span class="layer-unit">Anytime</span></div>
+    <div class="layer-head"><span class="layer-num">1</span><h2>Listening</h2><span class="layer-unit">Unit 1</span></div>
     <div class="layer-body">
-      <p>Before you play a note, feel the rhythm: the strumming pushes and pulls against the beat — that Latin-rock drive is the engine of the whole song. Listen once for the chords, once for the rhythm, once for where the hook lands.</p>
-      <div class="playline"><b>Do it:</b> listen to the first chorus. Tap along and try to feel exactly when the chords change — can you hear the D and A arrive?</div>
-      <div class="branch"><b>Respond:</b> does the strumming land squarely ON the beat, or does it push around it? How does that change the feel?</div>
-      <div class="branch"><b>Connect:</b> name another Spanish-language song you know with guitar front and center.</div>
+      <p>Before you play a note, feel where the pulse lives. "Luna" is in 6/8 — count it out and you might land on 2 big beats or 6 small ones, and both are true at once: two big beats, each one dividing into three. Tap along with just the two big beats and let the requinto fill in the rest.</p>
+      <div class="playline"><b>Do it:</b> listen to the first verse. Tap only the two big downbeats per bar — resist the urge to tap all six.</div>
+      <div class="branch"><b>Respond:</b> what does the requinto (the melodic acoustic guitar) add to the song that strumming alone can't?</div>
+      <div class="branch"><b>Connect:</b> name another song where an acoustic guitar carries the hook, not just the rhythm.</div>
       <div class="rate" data-layer="1">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" onclick="rate(this)">1</button>
@@ -95,19 +96,20 @@
 
   <!-- LAYER 2 -->
   <section class="layer l2" id="layer-2">
-    <div class="layer-head"><span class="layer-num">2</span><h2>Power Chords</h2><span class="layer-unit">Unit 3</span></div>
+    <div class="layer-head"><span class="layer-num">2</span><h2>Single Notes</h2><span class="layer-unit">Unit 2</span></div>
     <div class="layer-body">
-      <p>Your first pass at the chorus: three power chords, and one of them is a gift — the E5 uses the open low E string, so your fretting hand gets a free moment to set up the jump back to A5.</p>
-<pre class="tab">        A5   D5   E5   D5   (loop)
-e |----------------------------------------|
-B |----------------------------------------|
-G |----------------------------------------|
-D |-------<span class="hl">7</span>---------<span class="hl">7</span>----------------------|
-A |--<span class="hl">7</span>----5----<span class="hl">2</span>----5----------------------|
-E |--5---------0---------------------------|</pre>
-      <div class="playline"><b>Play it:</b> two beats per chord at <b>60 BPM</b>, four laps, with the open-string E5 ringing as clean as the fretted chords.</div>
-      <div class="branch"><b>Stuck?</b> Loop just D5&nbsp;&rarr;&nbsp;E5&nbsp;&rarr;&nbsp;D5 until the open-chord landing is automatic.</div>
-      <div class="branch"><b>Level up:</b> palm-mute the A5 and D5 but let the E5 ring open — instant dynamics, very Oye Mi Amor.</div>
+      <p>Luna rides two chords — F and Am — so its bassline is just two notes: F (low E string, fret 1) and A (open A string). Two big beats each, right on the downbeats.</p>
+<pre class="tab">Bass roots — teaching arrangement &middot; 2 big beats per note
+   F    A
+e |----------------|
+B |----------------|
+G |----------------|
+D |----------------|
+A |---------0------|
+E |--1-------------|</pre>
+      <div class="playline"><b>Play it:</b> two big beats per note at <b>60 BPM</b>, four laps, F ringing with no buzz.</div>
+      <div class="branch"><b>Stuck?</b> Park on just the F — pluck, listen, adjust — until five ring in a row, then add the open A.</div>
+      <div class="branch"><b>Level up:</b> the simplified requinto intro line lands here soon — for now, hunt it by ear against the record.</div>
       <div class="rate" data-layer="2">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" onclick="rate(this)">1</button>
@@ -120,15 +122,20 @@ E |--5---------0---------------------------|</pre>
 
   <!-- LAYER 3 -->
   <section class="layer l3" id="layer-3">
-    <div class="layer-head"><span class="layer-num">3</span><h2>Open Chords</h2><span class="layer-unit">Unit 5</span></div>
+    <div class="layer-head"><span class="layer-num">3</span><h2>Power Chords &nbsp;&#x25D0;</h2><span class="layer-unit">Unit 3</span></div>
     <div class="layer-body">
-      <p>The chorus as full open chords — and two of the three are already old friends. The E chord is just the Em you know plus your index finger on string 3, fret 1: all six strings, the biggest sound on the guitar.</p>
-<pre class="tab">Chorus loop — 4 beats per chord · 60 BPM
-|  A           |  D           |  E           |  D           |
-   1  2  3  4     1  2  3  4     1  2  3  4     1  2  3  4</pre>
-      <div class="playline"><b>Play it:</b> down-strums, four beats per chord, four loops with every change landing on beat 1 and the E ringing all six strings. Sing or hum the hook if you dare.</div>
-      <div class="branch"><b>Stuck?</b> Loop just D&nbsp;&rarr;&nbsp;E — they share the same finger cluster, just moved one string group over.</div>
-      <div class="branch"><b>Level up:</b> two beats per chord instead of four — same 60 BPM, twice the changes.</div>
+      <div class="grain">&#x25D0; <b>Against the grain:</b> this sierreño ballad isn't usually played with power chords — that's the point. Rendering it with distortion goes against the grain of the song on purpose; optional stretch, no score.</div>
+      <p>Same two notes from Layer 2 — now each one carries its fifth along. F5 and A5, the same two-finger shape sliding four frets.</p>
+<pre class="tab">        F5   A5
+e |----------------|
+B |----------------|
+G |----------------|
+D |----------------|
+A |--<span class="hl">3</span>----<span class="hl">7</span>--------|
+E |--1----5----------|</pre>
+      <div class="playline"><b>Play it:</b> two downbeat strums per bar at <b>60 BPM</b> — nothing syncopated, changing every bar.</div>
+      <div class="branch"><b>Stuck?</b> Park on the slide: fret 1, fret 5, fret 1, fret 5 with no rhythm until the jump is automatic.</div>
+      <div class="branch"><b>Level up:</b> palm-mute for a tight sierreño chug, then let it ring and hear why distortion isn't this song's home.</div>
       <div class="rate" data-layer="3">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" onclick="rate(this)">1</button>
@@ -141,15 +148,20 @@ E |--5---------0---------------------------|</pre>
 
   <!-- LAYER 4 -->
   <section class="layer l4" id="layer-4">
-    <div class="layer-head"><span class="layer-num">4</span><h2>Latin Strum</h2><span class="layer-unit">Unit 6</span></div>
+    <div class="layer-head"><span class="layer-num">4</span><h2>Pentatonic Solo</h2><span class="layer-unit">Unit 4</span></div>
     <div class="layer-body">
-      <p>Now the verse — Bm and G — with the rhythm that makes the song move. Use the small Bm (top four strings, xx4432; no barre yet) and the D-DU-UDU pattern, keeping your strum hand swinging like a pendulum through every change.</p>
-<pre class="tab">Verse — Bm (small shape) · G — the D-DU-UDU pattern
-D       D   U       U   D   U
-1   +   2   +   3   +   4   +</pre>
-      <div class="playline"><b>Play it:</b> one bar of Bm, one bar of G, the pattern never stopping, at <b>60 BPM</b> for eight bars. The wrist keeps traveling down-up even on the skipped strums.</div>
-      <div class="branch"><b>Stuck?</b> Mute the strings and strum just the pattern until it's automatic, then add the chords back.</div>
-      <div class="branch"><b>Level up:</b> accent the up-strums a little harder than the downs — that's the Latin push you heard in Layer 1.</div>
+      <p>Luna lives in F major, and F's relative minor is D — so D minor pentatonic Pattern 1 (root D, low E fret 10) is your box, parked at the semester's highest position.</p>
+<pre class="tab">Your three starting notes — D minor pentatonic, Pattern 1 (10th position)
+        D         F         G
+e |----------------------------------|
+B |----------------------------------|
+G |----------------------------------|
+D |----------------------------------|
+A |--------------------10------------|
+E |--10------13-----------------------|</pre>
+      <div class="playline"><b>Play it:</b> improvise over the chord loop — hit &#x25B6; &#x1F3B5; Backing track on the Luna card in Module 4 to jam over. End every phrase on D so each idea arrives home.</div>
+      <div class="branch"><b>Stuck?</b> Trade just D and F (frets 10 and 13 on the low E) back and forth, changing only the rhythm, until an idea appears.</div>
+      <div class="branch"><b>Level up:</b> lean on the F (fret 13) for extra sierreño ache, or slide the whole box down to open position and compare the colour.</div>
       <div class="rate" data-layer="4">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" onclick="rate(this)">1</button>
@@ -162,19 +174,15 @@ D       D   U       U   D   U
 
   <!-- LAYER 5 -->
   <section class="layer l5" id="layer-5">
-    <div class="layer-head"><span class="layer-num">5</span><h2>Full Barre</h2><span class="layer-unit">Unit 7</span></div>
+    <div class="layer-head"><span class="layer-num">5</span><h2>Open Chords</h2><span class="layer-unit">Unit 5</span></div>
     <div class="layer-body">
-      <p>The graduation. Swap the small Bm for the full barre Bm — index finger flat across all strings at fret 2 (x24432) — and play the whole Bm–G progression the way Maná does. Same song, bigger sound, no training wheels.</p>
-<pre class="tab">Full barre Bm — index barres fret 2
-e |--2--|  ← barre
-B |--3--|
-G |--4--|
-D |--4--|
-A |--2--|  ← barre
-E |--x--|</pre>
-      <div class="playline"><b>Play it:</b> the verse with the full barre Bm and your D-DU-UDU pattern, then a chorus with open chords — the whole song, start to finish, is now yours.</div>
-      <div class="branch"><b>Stuck?</b> Check the barre alone first: press the index across fret 2 and pick each string — fix the dead ones before adding the other fingers.</div>
-      <div class="branch"><b>Level up:</b> play the chorus with barre shapes too, or perform the full song for a partner — verse, chorus, and all.</div>
+      <p>The whole song as open chords: F (the little shape, xx3211) and Am carry the verse, with Dm and C arriving in the chorus. Same 6/8 pulse — two downbeat strums per bar, nothing syncopated.</p>
+<pre class="tab">Verse vamp — 2 downbeats per bar &middot; 6/8 felt in 2 &middot; 60 BPM
+|  F      |  Am     |  F      |  Am     |
+   1  2      1  2      1  2      1  2</pre>
+      <div class="playline"><b>Play it:</b> down-strums, two beats per bar, four laps with every change landing on the downbeat and the little F ringing clean. In the chorus, swap in Dm &middot; C.</div>
+      <div class="branch"><b>Stuck?</b> Loop just F&nbsp;&rarr;&nbsp;Am until the shape change is automatic, then add the metronome at 60 BPM.</div>
+      <div class="branch"><b>Level up:</b> sing or hum "Luna, dile tú" over the loop, or push to a full verse and chorus without stopping. Module 7 upgrades the little F to the full barre — Luna's last training wheel.</div>
       <div class="rate" data-layer="5">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" onclick="rate(this)">1</button>
@@ -195,7 +203,7 @@ E |--x--|</pre>
    collections and no security-rule changes. If the student isn't signed
    in, or a school filter blocks the Firebase SDK, the highlight quietly
    stays session-only (same behavior the page always had). */
-var SONG_ID = 'oye-mi-amor';
+var SONG_ID = 'luna';
 var fbUser = null, fbDb = null, saveTimer = null, dirty = false;
 
 function rate(btn){
