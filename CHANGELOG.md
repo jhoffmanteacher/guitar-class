@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-09 — Proper home-screen icon on iPhones
+
+### Changed
+- **Adding the site to your phone's home screen now gives you a proper guitar
+  icon**, including on iPhones (iOS never picked up our old icon there — it
+  showed a page screenshot instead).
+
 ## 2026-07-09 — Song Journey pages now work offline
 
 ### Changed
