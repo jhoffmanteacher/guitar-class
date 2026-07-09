@@ -124,6 +124,49 @@
         nothing) and every touched file byte-identical to the pre-feature
         commit (`cf5cb7b`); `MODULE_MANIFEST`/`skillCount` was never touched
         by this feature. `checks.mjs` passed post-revert; pushed.
+  - [x] **SITE_FIXIT_JULY_4** (doc retired after completion) — fresh external
+        audit fix-it: offline Song Journey caching, a friendly 404 page, iOS
+        home-screen icons, and a targeted accessibility pass. Session 5
+        (Module 1 Challenge drills) was skipped — its premise didn't hold.
+    - [x] **Session 1 — pre-cache Song Journey pages.**
+          ✅ 2026-07-09 (`cdcad51`): added all six `tabs/*.html` pages to
+          `sw.js`'s `ASSETS`, covering the first-visit-offline case (runtime
+          stale-while-revalidate already covered repeat visits). Checks passed.
+    - [x] **Session 2 — friendly 404 page.**
+          ✅ 2026-07-09 (`7801084`): added `404.html` at repo root, matching
+          the site's look, not added to `sw.js` (must always come from the
+          network). Verified in-browser: renders styled, button returns to
+          `index.html`.
+    - [x] **Session 3 — home-screen icons (iOS + manifest spec fix).**
+          ✅ 2026-07-09 (`8ff39a9`): rendered `icon.svg` to PNG (180/192/512,
+          plus maskable variants padded to ~80% on a `#322b78` square) via an
+          in-browser canvas — no SVG-to-PNG tool was available locally. Added
+          `apple-touch-icon`, split the manifest's combined `any maskable`
+          entry into spec-correct separate any/maskable entries, added the
+          new PNGs to `sw.js`. Verified: valid JSON, no console errors,
+          renders in-browser. Note: the 512px PNGs landed at ~66–71KB (over
+          the doc's informal <30KB target) — no local compressor available.
+    - [x] **Session 4 — targeted accessibility pass.**
+          ✅ 2026-07-09 (`95035f4`): audit called aria coverage thin, but most
+          of the checklist (popups, keyboard activation, focus rings) was
+          already solid. Found and fixed two real bugs: `toggleSkill()`
+          updated the visual `.active` class/checkmark without syncing
+          `aria-pressed`, so screen readers could report stale toggle state;
+          and the "Saved ✓" status text had no `aria-live` region. Also added
+          a `<main>` landmark and made the header title the page's one
+          `<h1>` (previously the only `<h1>` lived in the hidden auth-wall,
+          so signed-in students had zero page heading) — auth-wall's heading
+          demoted to `<h2>`. No visual changes; verified with a real keyboard
+          walkthrough (tab order, popup Escape-to-close, skill-toggle
+          activation) plus a direct `aria-pressed`/class-sync check in
+          DevTools. `checks.mjs` passed (247/247 links).
+    - [ ] **Session 5 — Module 1 Challenge drills — skipped, premise false.**
+          🚫 2026-07-09: the doc claimed Module 1 has zero Challenge drills;
+          the actual file already has three in the house style (Challenge 1
+          — Tune Challenge, Challenge 2 — One Minute Perfect Notes, Challenge
+          3 — Riff Time), covering the same ground as the three drafts.
+          Jonathan chose to skip rather than add redundant content.
+          `module-1.js` untouched.
   - [ ] **Song-list review session** — difficulty dots on ~109 Choice songs;
         the 3 quiz distractor swaps (m6 reggae · m7 stacked-TAB pair · m2 H→G#);
         Just Like Heaven keep-or-drop-as-Choice call; supplemental swaps now that
