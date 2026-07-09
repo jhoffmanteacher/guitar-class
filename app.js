@@ -1724,7 +1724,7 @@ function buildModuleReview(mr){
       <div class="albl">NAfME standards</div>
       <div>${mr.standards.map(s=>`<span class="spill">${s}</span>`).join('')}</div>
     </div>
-    <div class="save-ind" id="${mrId}-save-ind" style="margin-top:10px"></div>`;
+    <div class="save-ind" id="${mrId}-save-ind" style="margin-top:10px" aria-live="polite"></div>`;
 }
 
 /* Jump from a module-review skill back to the lesson set that teaches it. */
@@ -1931,7 +1931,7 @@ function buildChecklist(w){
     ${rows}
   </div>
   <div class="prog-wrap"><div class="prog-row"><div class="prog-bg"><div class="prog-fill" id="pf-${w.id}" style="width:${pct}%"></div></div><div class="prog-lbl" id="pl-${w.id}">${done} / ${w.skills.length}</div></div></div>
-  <div class="save-ind" id="si-${w.id}"></div>`;
+  <div class="save-ind" id="si-${w.id}" aria-live="polite"></div>`;
 }
 
 /* ── Toggle "What does this look like?" helper ── */
@@ -2062,6 +2062,8 @@ function toggleSkill(sid, wid, which){
     const st = progress[sid]||'none';
     wkCell.classList.toggle('active', st==='working');
     giCell.classList.toggle('active', st==='gotit');
+    wkCell.setAttribute('aria-pressed', st==='working');
+    giCell.setAttribute('aria-pressed', st==='gotit');
     wkCell.querySelector('.skbox').innerHTML = st==='working' ? wkSvg : '';
     giCell.querySelector('.skbox').innerHTML = st==='gotit'   ? giSvg : '';
   });

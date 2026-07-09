@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-09 — Easier to use with a keyboard and screen reader
+
+### Changed
+- **Skill checkboxes now correctly announce their state to screen readers**
+  when toggled — previously the checkmark showed visually but assistive tech
+  could get out of sync.
+- **"Saved ✓" messages now announce themselves** to screen readers instead of
+  only appearing silently on screen.
+- Added a proper page heading and main content landmark so screen reader
+  users can jump straight to the lesson content.
+
 ## 2026-07-09 — Proper home-screen icon on iPhones
 
 ### Changed
