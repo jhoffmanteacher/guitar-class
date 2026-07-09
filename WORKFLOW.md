@@ -108,6 +108,22 @@
         new YouTube IDs (original/tutorial/backing) oEmbed-verified live.
         `MODULE_MANIFEST`/`skillCount` byte-identical throughout — no
         `skills:` array changes. `checks.mjs` passed.
+  - [x] **SONG_CHOICE_TOGGLE** (`SONG_CHOICE_TOGGLE.md`, doc deleted — **feature
+        cancelled, fully reverted**) — "Take It to a Song" alt-song toggle: let
+        a student pick between two core songs at the same skill layer via a
+        pill pair, swapping challenge text/hint/tab/response in place.
+        🚫 2026-07-09: Session 1 shipped (renderer + Watchtower/Let It Be pilot
+        in Module 2, pushed as `5336eed`), Session 2's pairing survey ran and
+        was approved (28 steps surveyed, 22 pairings approved, pushed as
+        `9b7c1f6`), and Session 3 built all 22 approved `alt:` pairings across
+        modules 2–8 — then Jonathan cancelled the feature before Session 3 was
+        pushed. Reverted via `git revert` (3 commits: `895485d`, `7521631`,
+        `b4386a2` — no force-push, full history preserved) plus a `git
+        checkout` discard of the uncommitted Session 3 module edits. Verified
+        zero remnants (`grep` for `alt:`/`songChoice` across `*.js` returns
+        nothing) and every touched file byte-identical to the pre-feature
+        commit (`cf5cb7b`); `MODULE_MANIFEST`/`skillCount` was never touched
+        by this feature. `checks.mjs` passed post-revert; pushed.
   - [ ] **Song-list review session** — difficulty dots on ~109 Choice songs;
         the 3 quiz distractor swaps (m6 reggae · m7 stacked-TAB pair · m2 H→G#);
         Just Like Heaven keep-or-drop-as-Choice call; supplemental swaps now that
