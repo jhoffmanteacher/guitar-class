@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-09 — Pick your song on some Take It to a Song challenges
+
+### Added
+- Some **Take It to a Song** challenges now let you choose between two songs
+  at the same skill level — look for a pair of song pills (e.g. 🎵 Watchtower
+  · 🎵 Let It Be) above the challenge text. Pick whichever song you'd rather
+  practice; your written answer and "Mark done" status carry over no matter
+  which one you pick. First one live: Module 2's bass-line challenge now
+  offers Let It Be as an alternative to Watchtower.
+
 ## 2026-07-09 — Luna joins the core six songs
 
 ### Changed

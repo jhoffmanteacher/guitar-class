@@ -271,9 +271,18 @@ function saveLocalPlace(){
   }catch(e){/* ignore */}
 }
 
-function onResponseChange(key, value){
+/* A step with an `alt:` song renders TWO independent response inputs (one
+   per song variant) that share one Firestore key — data-resp-key links them
+   so an answer typed in either variant stays in sync when the student toggles. */
+function onResponseChange(key, value, sourceEl){
   responses[key] = value;
   saveResponses();
+  document.querySelectorAll(`.step-resp-input[data-resp-key="${key}"]`).forEach(el => {
+    if (el !== sourceEl) el.value = value;
+  });
+  document.querySelectorAll(`input[type="radio"][data-resp-key="${key}"]`).forEach(r => {
+    r.checked = (r.value === value);
+  });
 }
 /* Graded in-step MC (factual, has answer:). Stores the choice TEXT (so the
    teacher dashboard reads it unchanged); recolors and reveals the explanation. */
@@ -281,11 +290,13 @@ function onStepMcSelect(key, btn){
   const choice = btn.dataset.choice;
   responses[key] = choice;
   saveResponses();
-  const group = btn.closest('.step-mc-keyed');
-  if(!group) return;
-  group.classList.add('answered');
-  group.querySelectorAll('.step-mc-opt').forEach(b=>b.classList.remove('correct','incorrect'));
-  btn.classList.add(btn.dataset.correct === '1' ? 'correct' : 'incorrect');
+  document.querySelectorAll(`.step-mc-keyed[data-resp-key="${key}"]`).forEach(group => {
+    group.classList.add('answered');
+    group.querySelectorAll('.step-mc-opt').forEach(b => {
+      b.classList.remove('correct','incorrect');
+      if (b.dataset.choice === choice) b.classList.add(b.dataset.correct === '1' ? 'correct' : 'incorrect');
+    });
+  });
 }
 /* ── Unified progress writer ──
    skills, last-place, responses, and completed all live in the SAME Firestore
@@ -719,6 +730,17 @@ function toggleTabChoice(btn){
   if (content && content.classList.contains('tab-choice-content')){
     content.classList.toggle('expanded', expanded);
   }
+}
+
+/* "Take It to a Song" alt toggle — swaps which song's challenge text/hint/
+   tab/response is shown for a step. UI state only: never touches Firestore,
+   never resets the step's done checkbox. */
+function toggleSongAlt(btn){
+  const stEl = btn.closest('.st');
+  if (!stEl) return;
+  const variant = btn.dataset.variant;
+  stEl.querySelectorAll(':scope > .song-alt-pills .song-alt-pill').forEach(p => p.classList.toggle('active', p === btn));
+  stEl.querySelectorAll(':scope > .song-variant').forEach(v => v.classList.toggle('active', v.dataset.variant === variant));
 }
 
 /* String reference patterns:
@@ -1159,7 +1181,7 @@ function readAloudStep(btn){
   const stEl = btn.closest('.st');
   if (!stEl) return;
   const clone = stEl.cloneNode(true);
-  clone.querySelectorAll('.read-aloud-btn, .chord-diagrams, .skill-badge, .step-resp-saved').forEach(el => el.remove());
+  clone.querySelectorAll('.read-aloud-btn, .chord-diagrams, .skill-badge, .step-resp-saved, .song-alt-pills, .song-variant:not(.active)').forEach(el => el.remove());
   const text = (clone.textContent || '').replace(/\s+/g, ' ').trim();
   if (!text) return;
 
@@ -1436,34 +1458,39 @@ function printSet(wid){ window.print(); }
 
 /* ── Stations ── */
 function buildStations(w, stationId){
-  const stepsHtml=(steps,ns)=>steps.map((s,i)=>{
-    const text=s.text.replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
-      const safe=label.replace(/'/g,"\\'");
-      // data-ext links can't be embedded (official recordings block it) — open on YouTube in a new tab.
-      if(/data-ext/.test(attrs)){
-        return `<button class="rp-trigger" onclick="window.open('${url}','_blank','noopener')" title="Opens on YouTube in a new tab">&#x25B6; ${label} <span style="font-size:11px;opacity:0.6">&#x2197;</span></button>`;
-      }
-      return `<button class="rp-trigger" onclick="loadPanel('youtube','${url}','${safe}','YouTube')">&#x25B6; ${label}</button>`;
-    });
-    const hintHtml = s.hint ? (()=>{
-      const bullets = s.hint.split(/(?<=\.(?=\s))(?=\s*[A-Z])|\n/).map(b=>b.trim()).filter(Boolean);
-      if(bullets.length <= 1) return `<div class="sh">${s.hint}</div>`;
+  const linkifyYoutube = (text) => text.replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
+    const safe=label.replace(/'/g,"\\'");
+    // data-ext links can't be embedded (official recordings block it) — open on YouTube in a new tab.
+    if(/data-ext/.test(attrs)){
+      return `<button class="rp-trigger" onclick="window.open('${url}','_blank','noopener')" title="Opens on YouTube in a new tab">&#x25B6; ${label} <span style="font-size:11px;opacity:0.6">&#x2197;</span></button>`;
+    }
+    return `<button class="rp-trigger" onclick="loadPanel('youtube','${url}','${safe}','YouTube')">&#x25B6; ${label}</button>`;
+  });
+  // Renders the hint/branches/chords/tab/response/read-aloud body for one song
+  // variant of a step (the parent step itself, or its optional `alt:` song).
+  // keyBase scopes BPM/tab sessionStorage keys so a step's two variants don't
+  // clash; the response Firestore key never varies by variant (see s.response
+  // below) so a student's saved answer persists across the song toggle.
+  const buildVariantBody = (sv, ns, i, keyBase) => {
+    const hintHtml = sv.hint ? (()=>{
+      const bullets = sv.hint.split(/(?<=\.(?=\s))(?=\s*[A-Z])|\n/).map(b=>b.trim()).filter(Boolean);
+      if(bullets.length <= 1) return `<div class="sh">${sv.hint}</div>`;
       return `<ul class="sh-list">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
     })() : '';
-    const branchHtml = (s.stuck || s.levelUp) ? `<div class="step-branches">`
-      + (s.stuck ? `<div class="step-branch step-stuck"><span class="step-branch-tag">&#x1FA9C; Stuck?</span> ${s.stuck}</div>` : '')
-      + (s.levelUp ? `<div class="step-branch step-levelup"><span class="step-branch-tag">&#x1F336;&#xFE0F; Level up</span> ${s.levelUp}</div>` : '')
+    const branchHtml = (sv.stuck || sv.levelUp) ? `<div class="step-branches">`
+      + (sv.stuck ? `<div class="step-branch step-stuck"><span class="step-branch-tag">&#x1FA9C; Stuck?</span> ${sv.stuck}</div>` : '')
+      + (sv.levelUp ? `<div class="step-branch step-levelup"><span class="step-branch-tag">&#x1F336;&#xFE0F; Level up</span> ${sv.levelUp}</div>` : '')
       + `</div>` : '';
-    const chordsHtml = (s.chords&&s.chords.length)
-      ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}${c.name?`<div class="chord-box-label">${c.name}</div>`:''}</div>`).join('')}</div>`
+    const chordsHtml = (sv.chords&&sv.chords.length)
+      ? `<div class="chord-diagrams">${sv.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}${c.name?`<div class="chord-box-label">${c.name}</div>`:''}</div>`).join('')}</div>`
       : '';
-    const playSeqHtml = s.playSeq ? (()=>{
-      const ps = s.playSeq;
+    const playSeqHtml = sv.playSeq ? (()=>{
+      const ps = sv.playSeq;
       const label = ps.label || 'Play all';
       const defBpm = ps.bpm || 60;
       const minBpm = ps.minBpm || 40;
       const maxBpm = ps.maxBpm || 120;
-      const key = `bpm:${w.id}:${ns}:${i}`;
+      const key = keyBase;
       const bpm = readStoredBpm(key, defBpm);
       const midis = JSON.stringify(ps.notes);
       return ` <span class="bpm-control-group">` +
@@ -1471,24 +1498,24 @@ function buildStations(w, stationId){
         renderBpmControl(key, bpm, minBpm, maxBpm) +
         `</span>`;
     })() : '';
-    const tabHtml = s.tab ? buildTab(s.tab, { keyPrefix: `bpm:${w.id}:${ns}:${i}:tab` }) : '';
-    const tabsHtml = (s.tabs && s.tabs.length)
-      ? `<div class="tab-choice-group">${s.tabs.map((t, tIdx) => {
+    const tabHtml = sv.tab ? buildTab(sv.tab, { keyPrefix: `${keyBase}:tab` }) : '';
+    const tabsHtml = (sv.tabs && sv.tabs.length)
+      ? `<div class="tab-choice-group">${sv.tabs.map((t, tIdx) => {
           const title = t.title || t.caption || 'TAB';
-          return `<div class="tab-choice"><button type="button" class="tab-choice-btn" onclick="toggleTabChoice(this)"><span class="tab-choice-icon">&#x25B6;</span><span>Show TAB: ${escHtml(title)}</span></button><div class="tab-choice-content">${buildTab(t, { keyPrefix: `bpm:${w.id}:${ns}:${i}:tab:${tIdx}` })}</div></div>`;
+          return `<div class="tab-choice"><button type="button" class="tab-choice-btn" onclick="toggleTabChoice(this)"><span class="tab-choice-icon">&#x25B6;</span><span>Show TAB: ${escHtml(title)}</span></button><div class="tab-choice-content">${buildTab(t, { keyPrefix: `${keyBase}:tab:${tIdx}` })}</div></div>`;
         }).join('')}</div>`
       : '';
-    const respHtml = s.response ? (()=>{
+    const respHtml = sv.response ? (()=>{
       const key = `${w.id}-${ns}-${i}`;
       const stored = responses[key] || '';
-      const promptHtml = s.response.prompt ? `<div class="step-resp-prompt">${escHtml(s.response.prompt)}</div>` : '';
+      const promptHtml = sv.response.prompt ? `<div class="step-resp-prompt">${escHtml(sv.response.prompt)}</div>` : '';
       const labelHtml = `<div class="step-resp-label">&#x270F;&#xFE0F; Your response</div>`;
-      if(s.response.type === 'short'){
-        const ph = s.response.placeholder || 'Type your answer here…';
-        return `<div class="step-resp">${labelHtml}${promptHtml}<textarea class="step-resp-input" rows="2" placeholder="${escAttr(ph)}" oninput="onResponseChange('${key}', this.value)">${escHtml(stored)}</textarea></div>`;
+      if(sv.response.type === 'short'){
+        const ph = sv.response.placeholder || 'Type your answer here…';
+        return `<div class="step-resp">${labelHtml}${promptHtml}<textarea class="step-resp-input" data-resp-key="${key}" rows="2" placeholder="${escAttr(ph)}" oninput="onResponseChange('${key}', this.value, this)">${escHtml(stored)}</textarea></div>`;
       }
-      if(s.response.type === 'mc' && Array.isArray(s.response.choices)){
-        const r = s.response;
+      if(sv.response.type === 'mc' && Array.isArray(sv.response.choices)){
+        const r = sv.response;
         // Factual MCs carry answer: (index) + explain: — render as graded buttons.
         if(typeof r.answer === 'number'){
           const ansChoice = r.choices[r.answer];
@@ -1500,22 +1527,48 @@ function buildStations(w, stationId){
             return `<button type="button" class="${cls}" data-choice="${escAttr(c)}" data-correct="${c===ansChoice?'1':'0'}" onclick="onStepMcSelect('${key}', this)"><span class="step-mc-text">${escHtml(c)}</span><span class="step-mc-check">&#x2713;</span></button>`;
           }).join('');
           const explainHtml = r.explain ? `<div class="step-mc-explain">${escHtml(r.explain)}</div>` : '';
-          return `<div class="step-resp">${labelHtml}${promptHtml}<div class="step-resp-mc step-mc-keyed${answered?' answered':''}">${opts}</div>${explainHtml}</div>`;
+          return `<div class="step-resp">${labelHtml}${promptHtml}<div class="step-resp-mc step-mc-keyed${answered?' answered':''}" data-resp-key="${key}">${opts}</div>${explainHtml}</div>`;
         }
         // Reflection / observation MCs stay unkeyed — record the pick only.
         const opts = r.choices.map(c=>{
           const checked = stored===c ? 'checked' : '';
-          return `<label class="step-resp-mc-opt"><input type="radio" name="resp-${key}" ${checked} onchange="onResponseChange('${key}', '${escAttr(c)}')"><span>${escHtml(c)}</span></label>`;
+          return `<label class="step-resp-mc-opt"><input type="radio" name="resp-${key}" value="${escAttr(c)}" data-resp-key="${key}" ${checked} onchange="onResponseChange('${key}', '${escAttr(c)}', this)"><span>${escHtml(c)}</span></label>`;
         }).join('');
         return `<div class="step-resp">${labelHtml}${promptHtml}<div class="step-resp-mc">${opts}</div></div>`;
       }
       return '';
     })() : '';
     const readBtn = `<button class="read-aloud-btn" type="button" onclick="event.stopPropagation();readAloudStep(this)" title="Read this step aloud" aria-label="Read aloud">${READ_ALOUD_IDLE_HTML}</button>`;
+    return `${playSeqHtml}${hintHtml}${branchHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}`;
+  };
+  const stepsHtml=(steps,ns)=>steps.map((s,i)=>{
+    const text = linkifyYoutube(s.text);
     const doneKey = `${w.id}-${ns}-${i}`;
     const isDone = completed[doneKey] === true;
     const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${isDone ? '&#x2713; Done' : 'Mark done'}</button></div>`;
-    return `<li class="step${isDone ? ' step-done' : ''}"><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${hintHtml}${branchHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div>${doneBtn}</div></li>`;
+    let stInner;
+    if(s.alt){
+      const parentLabel = s.label || 'Original';
+      const altLabel = s.alt.label || 'Alternate';
+      const altText = linkifyYoutube(s.alt.text);
+      const altResponse = s.response ? Object.assign({}, s.response, {
+        prompt: s.alt.responsePrompt || s.response.prompt,
+        placeholder: s.alt.responsePlaceholder || s.response.placeholder
+      }) : null;
+      const altSv = Object.assign({}, s.alt, { response: altResponse });
+      const pillsHtml = `<div class="song-alt-pills" role="group" aria-label="Choose a song">` +
+        `<button type="button" class="song-alt-pill active" data-variant="parent" onclick="toggleSongAlt(this)">&#x1F3B5; ${escHtml(parentLabel)}</button>` +
+        `<button type="button" class="song-alt-pill" data-variant="alt" onclick="toggleSongAlt(this)">&#x1F3B5; ${escHtml(altLabel)}</button>` +
+        `</div>`;
+      const parentBody = buildVariantBody(s, ns, i, `bpm:${w.id}:${ns}:${i}`);
+      const altBody = buildVariantBody(altSv, ns, i, `bpm:${w.id}:${ns}:${i}:alt`);
+      stInner = pillsHtml
+        + `<div class="song-variant song-variant-parent active" data-variant="parent"><span class="st-text">${text}</span><div class="step-body">${parentBody}</div></div>`
+        + `<div class="song-variant song-variant-alt" data-variant="alt"><span class="st-text">${altText}</span><div class="step-body">${altBody}</div></div>`;
+    } else {
+      stInner = `<span class="st-text">${text}</span><div class="step-body">${buildVariantBody(s, ns, i, `bpm:${w.id}:${ns}:${i}`)}</div>`;
+    }
+    return `<li class="step${isDone ? ' step-done' : ''}"><div class="sn">${i+1}</div><div class="st">${stInner}${doneBtn}</div></li>`;
   }).join('');
   const sectionsHtml=(sections,baseNs)=>sections.map((sec,gi)=>{
     const ns = `${baseNs}-sec${gi}`;

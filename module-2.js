@@ -595,6 +595,7 @@ SETS.push(
                 stuck: 'Loop just A → G until the shift is smooth, then add the F.',
                 levelUp: 'Say each note name out loud while playing, or double the loop to eight laps without a stumble.',
                 skills: [1, 2, 4, 5, 6],
+                label: 'Watchtower',
                 tab: {
                   caption: '"All Along the Watchtower" — bass loop · Low E string · 60 BPM',
                   notes: [
@@ -604,7 +605,23 @@ SETS.push(
                     { string: 'E', fret: 3, note: 'G', midi: 43 }
                   ]
                 },
-                response: { type: 'short', prompt: 'How many clean laps in a row did you get at 60 BPM?', placeholder: 'e.g. 4 — beat it next class' }
+                response: { type: 'short', prompt: 'How many clean laps in a row did you get at 60 BPM?', placeholder: 'e.g. 4 — beat it next class' },
+                alt: {
+                  label: 'Let It Be',
+                  text: 'Challenge — Let It Be bass line: play the "Let It Be" verse bass roots crossing the A and E strings — C · G · A · F — four beats per note at 60 BPM, two laps without stopping. You\'ve got it when: two clean laps, every string-cross landing clean. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                  hint: 'Every chord in the loop has a root note, and these four make the whole bassline — C · G · A · F. Two of them share a string, so watch for the jump.',
+                  stuck: 'Loop just the two string-cross moves — C → G and A → F — until each is automatic, then join all four.',
+                  levelUp: 'Say each note name out loud while you play, or find the same four roots using only the low E string (frets 8 · 3 · 5 · 1).',
+                  tab: {
+                    caption: '"Let It Be" — verse bass roots · crossing A & E strings · 60 BPM',
+                    notes: [
+                      { string: 'A', fret: 3, note: 'C', midi: 48 },
+                      { string: 'E', fret: 3, note: 'G', midi: 43 },
+                      { string: 'A', fret: 0, note: 'A', midi: 45 },
+                      { string: 'E', fret: 1, note: 'F', midi: 41 }
+                    ]
+                  }
+                }
               },
               {
                 text: 'Challenge — Seven Nation Army, true pitch: play the riff where the record actually lives — on the A string — E · E · G · E · D · C · B at 60 BPM. You\'ve got it when: two clean laps, and you can say which string version sounds like the recording. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
