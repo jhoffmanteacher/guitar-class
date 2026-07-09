@@ -3,8 +3,8 @@
 
    ⚠️  BUMP CACHE_VERSION ON EVERY PUSH that changes any cached file
        (index.html, styles.css, app.js, config-main.js, module-*.js,
-        manifest.json, icon.svg). If you forget, returning students may
-        keep getting the OLD site from their cache. See CLAUDE.md.
+        manifest.json, icon.svg, tabs/*.html). If you forget, returning
+        students may keep getting the OLD site from their cache. See CLAUDE.md.
 
    Strategy: stale-while-revalidate for same-origin GET requests —
    serve the cached copy instantly (fast on weak school Wi-Fi), then
@@ -35,7 +35,13 @@ const ASSETS = [
   './module-5.js',
   './module-6.js',
   './module-7.js',
-  './module-8.js'
+  './module-8.js',
+  './tabs/all-along-the-watchtower.html',
+  './tabs/let-it-be.html',
+  './tabs/luna.html',
+  './tabs/seven-nation-army.html',
+  './tabs/sweet-child-o-mine.html',
+  './tabs/the-cure.html'
 ];
 
 self.addEventListener('install', event => {

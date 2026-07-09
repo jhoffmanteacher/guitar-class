@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-09 — Song Journey pages now work offline
+
+### Changed
+- **Song Journey pages now work offline, even on flaky Wi-Fi.** If you add the
+  class site to your phone or laptop and later lose signal, all six songs'
+  Journey pages (Watchtower, Let It Be, Luna, Seven Nation Army, Sweet Child
+  O' Mine, and the cure) now load right away instead of showing a dead link.
+
 ## 2026-07-09 — Luna joins the core six songs
 
 ### Changed
