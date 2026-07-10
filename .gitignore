@@ -1,2 +1,3 @@
-# Claude Code local state — do not commit
-.claude/
+# Claude Code local state — do not commit (but DO share the project permissions file)
+.claude/*
+!.claude/settings.json
