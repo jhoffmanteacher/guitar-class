@@ -36,5 +36,9 @@ const MODULE_MANIFEST = [
   { num: 5, name: 'Open Chords',                              skillCount: 24, skillIdRe: '^m5w\\d+-s\\d+$' },
   { num: 6, name: 'Strumming Patterns with Chords',           skillCount: 18, skillIdRe: '^m6w\\d+-s\\d+$' },
   { num: 7, name: 'TAB Notation and Barre Chords',            skillCount: 18, skillIdRe: '^m7w\\d+-s\\d+$' },
-  { num: 8, name: 'Finger Picking',                           skillCount: 18, skillIdRe: '^m8w\\d+-s\\d+$' }
+  { num: 8, name: 'Finger Picking',                           skillCount: 18, skillIdRe: '^m8w\\d+-s\\d+$' },
+  { num: 9,  name: 'The Full Fretboard & Writing TAB',        skillCount: 18, skillIdRe: '^m9w\\d+-s\\d+$' },
+  { num: 10, name: 'Scales, Keys & Ear Training',             skillCount: 18, skillIdRe: '^m10w\\d+-s\\d+$' },
+  { num: 11, name: 'Chords, Keys & Harmony',                  skillCount: 18, skillIdRe: '^m11w\\d+-s\\d+$' },
+  { num: 12, name: 'Fingerstyle: Travis, Waltz & Requinto',   skillCount: 18, skillIdRe: '^m12w\\d+-s\\d+$' }
 ];

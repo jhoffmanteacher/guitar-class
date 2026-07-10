@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-10 — Module 9 is live: The Full Fretboard & Writing TAB
+
+### Added
+- **Module 9 — The Full Fretboard & Writing TAB.** Semester 2 starts here:
+  you'll finish naming every note on all six strings (not just the low E and
+  A from Module 2), learn the octave shortcut that turns one memorized note
+  into several, read TAB up the neck, and write your own TAB that someone
+  else could actually play. Three new sets, 18 new skills.
+
 ## 2026-07-10 — Luna's chords corrected, plus a bonus intro layer
 
 ### Added

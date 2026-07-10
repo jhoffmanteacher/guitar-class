@@ -661,6 +661,6 @@ MODULE_REVIEWS[8] = {
     'Fingerpick a 4-chord progression with the 6-note arpeggio, keeping the pattern unbroken through every chord change',
     'Perform one full fingerpicked song from the song list start to finish, recovering from any mistakes without stopping'
   ],
-  forward: 'That\'s the whole toolkit — notes, chords, power chords, lead, barre, strumming, and now fingerpicking. <strong>Everything from here is just songs.</strong> Keep a running list of tunes you want to learn, revisit your Module 1 goal to see how far you\'ve come, and remember: the players you admire are just people who kept practicing past this point. Pick a song, learn it, repeat — that\'s a lifetime of guitar.',
+  forward: 'You\'ve got the full first-year toolkit — notes, chords, power chords, lead, barre, strumming, and fingerpicking. <strong>Semester 2 goes deeper:</strong> Module 9 finishes the fretboard (all six strings) and teaches you to write your own TAB — the first step toward learning any song on your own.',
   standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
 };

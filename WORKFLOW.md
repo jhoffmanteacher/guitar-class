@@ -13,6 +13,32 @@
 
 ## Open work
 
+- [~] **Semester 2 build — Modules 9–12** (`MODULES_9_12.md`, decision-complete
+      spec, four sessions A–D). Session A ✅ 2026-07-10: built **Module 9 —
+      The Full Fretboard & Writing TAB** (3 sets, 18 skills — naturals on D/G,
+      naturals on B/high-e + the B-string bump, higher-position TAB reading +
+      writing your own TAB, slash chords). Added all four Module 9–12 rows to
+      `MODULE_MANIFEST` in this session (confirmed `checks.mjs` only *warns*,
+      doesn't fail, on a manifest row with no matching Sets yet — so no stub
+      files needed; later sessions just add their module file). Rewrote
+      `MODULE_REVIEWS[8].forward` (was "everything from here is just
+      songs," no longer true). oEmbed-verified all 3 reused videos; 2
+      VIDEO-TODO placeholders left for Jonathan (B-string octave-shape demo in
+      m9w2, writing-TAB demo in m9w3). Two Choice-song slots from the spec
+      doc couldn't be filled — "La Diabla" and "American Girl" don't exist
+      anywhere in the repo (grepped all module files) — dropped per the doc's
+      own never-invent-a-URL rule; Module 9 ships with 3 Choice songs instead
+      of 5, and the doc's assumed Spanish Choice slot (La Diabla) is empty.
+      Also corrected a stale filename in the doc (`tabs/sweet-child.html` →
+      the real `tabs/sweet-child-o-mine.html`), and substituted a real
+      existing video-tutorial reference for m9w1's "Take It to a Song" step
+      since no up-the-neck intro-riff TAB actually exists yet on that Journey
+      page to reuse (out of scope to add one — Journey pages are frozen).
+      `checks.mjs` passed (145 links, 3 expected warnings for Modules 10–12
+      not yet having Sets). Live-Server browser verification was **not**
+      performed (no running dev server in this environment) — Jonathan may
+      want to spot-check visually. Sessions B (Module 10), C (Module 11), D
+      (Module 12) still open.
 - [x] **Song-list review session** (doc retired after completion) —
       consolidated every module's per-set Choice-song lists into one
       module-level list per module (2–8; Module 1 untouched, out of scope),
