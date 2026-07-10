@@ -76,8 +76,3 @@
       station.
 - [ ] Spanish spot-check: review 2–3 sets in Español mode with a fluent
       speaker.
-
-## Recurring each semester
-
-- Song refresh: swap in 2–3 student-requested songs (verify links per
-  CLAUDE.md).
