@@ -158,10 +158,13 @@ curriculum map. Do **not** flag them as drift in future alignment audits:
   Amor is a Choice song (Modules 6–7 content retained, retagged 2026-07);
   `tabs/oye-mi-amor.html` removed by design. `tabs/luna.html` is the sixth
   Journey page.
-- **Luna** — F–Am vamp plus Dm–C; 6/8 felt in 2 (teach two downbeat strums
-  per bar, nothing syncopated); no capo — simplified F (xx3211) until Module
-  7's full barre; solos use D minor pentatonic Pattern 1 at fret 10; ◐ in
-  Module 3 (sierreño as power chords). Settled 2026-07-09.
+- **Luna** — F–Am vamp; Dm is a brief passing chord near the end of the verse
+  and in the closing bridge (not a chorus chord, and there is no C — verified
+  against the official Ultimate-Guitar chord chart/tab 2026-07-09, which some
+  sources voice as Dm9); 6/8 felt in 2 (teach two downbeat strums per bar,
+  nothing syncopated); no capo — simplified F (xx3211) until Module 7's full
+  barre; solos use D minor pentatonic Pattern 1 at fret 10; ◐ in Module 3
+  (sierreño as power chords). Settled 2026-07-09.
 
 ## Switching topics — prompt to start a fresh chat
 When Jonathan asks for something that is clearly a **new, unrelated topic** from what we've been working on (e.g., we just finished a feature on Module 5 and he now asks about a different part of the site, a different project, or general Claude Code questions), use **AskUserQuestion** to ask whether he'd like to start a fresh conversation before continuing. A fresh chat keeps context focused and responses faster.

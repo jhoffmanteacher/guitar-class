@@ -455,8 +455,8 @@ SETS.push(
             title: 'Listen for the chord changes',
             steps: [
           {
-            text: 'Listen to "Luna" by Peso Pluma & Junior H — the whole song rides two chords, F and Am, with Dm and C passing through the chorus. The pulse is in 2: tap just the big downbeats and feel the chord changes land right on them.',
-            hint: 'F and Am are chords you already know from Group 1 — Dm and C pass through briefly in the chorus. Your ear already knows the sound — you\'re just learning to place the changes.',
+            text: 'Listen to "Luna" by Peso Pluma & Junior H — the whole song rides two chords, F and Am, with Dm making a brief passing appearance near the end of the verse and again in the closing bridge (some charts voice it as Dm9). The pulse is in 2: tap just the big downbeats and feel the chord changes land right on them.',
+            hint: 'F and Am are chords you already know from Group 1 — Dm passes through briefly near the end of the verse and in the closing bridge. Your ear already knows the sound — you\'re just learning to place the changes.',
             skills: [5],
             response: { type: 'short', placeholder: 'Describe one moment where you clearly heard a chord change.' }
           },
@@ -527,7 +527,7 @@ SETS.push(
                 text: 'Challenge — Luna, the vamp: F · Am — two shapes, both from Group 1 and by now old friends, with the simplified F (xx3211). The song is in 6/8, so play two downbeat strums per bar — nothing syncopated — changing every bar at 60 BPM. You\'ve got it when: four laps with every change landing on the downbeat and the little F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
                 hint: 'F and Am are already in your hands from Group 1 — the only new part is the simplified F shape (xx3211) and locking the change to the 6/8 pulse.',
                 stuck: 'Loop just F → Am until the shape change is automatic, then add the metronome at 60 BPM.',
-                levelUp: 'Drop in the Dm–C passing chords from the chorus, or push the tempo to 70 BPM.',
+                levelUp: 'Drop in the passing Dm near the end of the verse (some charts voice it as Dm9), or push the tempo to 70 BPM.',
                 skills: [5, 6],
                 chords: [
                   { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
@@ -578,7 +578,7 @@ SETS.push(
         gotItWhen: 'you can play through a real song that mixes Group 1 and Group 2 chords without slowing down at the cross-group changes.',
         practice: { type: 'playSeq', label: 'Cross-group progression (G · Em · C · D roots)', bpm: 70,
           notes: [43, 40, 48, 50] } },
-      { id: 'm5w3-s6', text: 'Play the "Luna" vamp (F–Am, plus Dm–C) using Group 1 chords with a strum pattern',
+      { id: 'm5w3-s6', text: 'Play the "Luna" vamp (F–Am, plus a passing Dm) using Group 1 chords with a strum pattern',
         gotItWhen: 'you can loop the "Luna" vamp (F · Am) with steady downbeat strums at 60 BPM, every change landing on the downbeat and the simplified F (xx3211) ringing clean.' }
     ]
   },
@@ -716,16 +716,15 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Luna, strummed (showcase version): the full song is F · Am, with Dm · C arriving in the chorus — two downbeat strums per bar at 60 BPM, building toward 70, singing or humming "Luna, dile tú" if you dare. You\'ve got it when: a full verse and chorus with every change on the downbeat and the F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
+                text: 'Challenge — Luna, strummed (showcase version): the full song is F · Am, with Dm making a brief passing appearance near the end of the verse and in the closing bridge — two downbeat strums per bar at 60 BPM, building toward 70, singing or humming "Luna, dile tú" if you dare. You\'ve got it when: a full verse and chorus with every change on the downbeat and the F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
                 hint: 'You met this vamp in Set 3 — now make it showcase-clean. F is the trickiest shape; keep your fingers arched and thumb behind the neck so all six strings ring.',
-                stuck: 'F is the tough one — loop Am → F on its own until the shape lands clean, then run the full F–Am (with Dm–C in the chorus).',
+                stuck: 'F is the tough one — loop Am → F on its own until the shape lands clean, then run the full F–Am (with the passing Dm near the verse\'s end and in the closing bridge).',
                 levelUp: 'Try the down-down-up split strum on each chord, or push to 70 BPM.',
                 skills: [5, 6],
                 chords: [
                   { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
-                  { name: 'Dm', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'2'],[2,3,'3'],[1,1,'1']], position: 0 },
-                  { name: 'C',  chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 }
+                  { name: 'Dm', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'2'],[2,3,'3'],[1,1,'1']], position: 0 }
                 ],
                 response: { type: 'short', prompt: 'Which core song do you most want to play start-to-finish at the showcase?', placeholder: 'e.g. Luna, all of it' }
               }
@@ -799,7 +798,7 @@ MODULE_SONGS[5] = [
       { name: '"the cure" — Olivia Rodrigo', meta: 'Capo 1 play-along · Am–C–Dm–F–G/B', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
-      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Full-song showcase · F–Am–Dm–C', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Full-song showcase · F–Am–Dm', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
       { name: '"Happy Birthday"', meta: 'Full chord arrangement — all groups reviewed (optional)', type: 'Supp', core: false,

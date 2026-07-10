@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-10 — Luna's chords corrected, plus a bonus intro layer
+
+### Added
+- **"Luna" Song Journey now has a bonus Layer 6** teaching the song's
+  fingerpicked intro — rolling through the same little-F chord shape you
+  learn in Layer 5, one note at a time instead of strumming.
+
+### Changed
+- **Fixed "Luna"'s chorus chords**: the song is F and Am the whole way
+  through, with Dm making only a brief appearance near the end of the verse
+  and in the closing bridge — not "Dm and C in the chorus" as the site
+  previously taught. Corrected on Module 5's Luna challenges and the Song
+  Journey page.
+
 ## 2026-07-09 — One curated song list per module, plus new Spanish-language picks
 
 ### Added
