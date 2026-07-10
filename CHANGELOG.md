@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-10 — Module 12 is live: Fingerstyle: Travis, Waltz & Requinto — all Semester 2 modules complete
+
+### Added
+- **Module 12 — Fingerstyle: Travis, Waltz & Requinto.** The Semester 2
+  capstone: keep a Travis-style alternating thumb going while your fingers
+  pinch and fill on top, fingerpick in waltz time (3/4), and finally play
+  "the cure" and Luna's intro in their true fingerpicked, requinto-flavored
+  style — no more working against the grain. Ends with choosing and
+  rehearsing your own showcase pattern. Three new sets, 18 new skills.
+- **Modules 9–12 (Semester 2) are now all live** — The Full Fretboard &
+  Writing TAB, Scales/Keys/Ear Training, Chords/Keys/Harmony, and Fingerstyle
+  round out a full second semester: 12 modules, 203 skills, start to finish.
+
 ## 2026-07-10 — Module 11 is live: Chords, Keys & Harmony
 
 ### Added

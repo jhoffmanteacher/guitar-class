@@ -13,8 +13,8 @@
 
 ## Open work
 
-- [~] **Semester 2 build — Modules 9–12** (`MODULES_9_12.md`, decision-complete
-      spec, four sessions A–D). Session A ✅ 2026-07-10: built **Module 9 —
+- [x] **Semester 2 build — Modules 9–12** (`MODULES_9_12.md`, decision-complete
+      spec, four sessions A–D — all four complete). Session A ✅ 2026-07-10: built **Module 9 —
       The Full Fretboard & Writing TAB** (3 sets, 18 skills — naturals on D/G,
       naturals on B/high-e + the B-string bump, higher-position TAB reading +
       writing your own TAB, slash chords). Added all four Module 9–12 rows to
@@ -81,8 +81,35 @@
       module-5.js, module-8.js, and module-9.js rather than retyped.
       `checks.mjs` passed (145 links, 1 expected warning for Module 12 not
       yet having Sets). Live-Server browser verification **not** performed
-      (no running dev server in this environment). Session D (Module 12)
-      still open.
+      (no running dev server in this environment). Session D ✅ 2026-07-10:
+      built **Module 12 — Fingerstyle: Travis, Waltz & Requinto** (3 sets, 18
+      skills — alternating-thumb Travis picking + the pinch, the 3/4 waltz
+      pattern, and requinto-style melody-over-thumb texture; the capstone
+      builds past Module 8, no re-teaching). Manifest row for Module 12
+      already existed from Session A. All 8 songs in the doc's Module 12 song
+      list ("the cure," Let It Be, Luna, House of the Rising Sun, Tu Boda,
+      Sailor Song, Blackbird, Just Like Heaven) were found and copied
+      verbatim from module-8.js/module-9.js — first session with zero
+      dropped songs. All 3 REUSE videos oEmbed-verified live (`rGt-lMXYzZc`
+      "Folk Fingerstyle Patterns #1of2 [FO-101]", `K2Z3RZc5t-A` "Basic
+      Fingerstyle - Travis Finger Picking [FO-108]", `YZkkUjDDamA` "Beginner
+      Fingerpicking Made Easy: Pinch, Pluck, & Play!"); 2 VIDEO-TODO
+      placeholders left per the doc (m12w2's 3/4-pattern demo, m12w3's
+      requinto/sierreño intro — the latter explicitly flagged in the doc for
+      Jonathan to review before it goes live, being Spanish-lane content).
+      m12w3's Luna reference links to the Song Journey page (`tabs/luna.html`
+      Layer 6) directly rather than a YouTube video, per the doc. `checks.mjs`
+      now passes with **zero warnings** for the first time — all 12 modules
+      have Sets (34 Sets total, 203 skills across the manifest, 145 unique
+      links all reachable — no new unique URLs since every Module 12 link
+      reuses an existing Module 8/9 URL). Confirmed `MODULE_MANIFEST` has
+      exactly 12 entries and the "X of 12 modules" label in `app.js` derives
+      from `MODULE_MANIFEST.length` automatically — no hardcoded count to
+      fix. Progress-strip visual width at a ~380px viewport was **not**
+      checked (no browser/dev server in this environment) — Jonathan should
+      eyeball it; do not redesign the strip without his input. Live-Server
+      browser verification also not performed. **All four sessions of the
+      Modules 9–12 build are now complete** — Semester 2 is fully live.
 - [x] **Song-list review session** (doc retired after completion) —
       consolidated every module's per-set Choice-song lists into one
       module-level list per module (2–8; Module 1 untouched, out of scope),
