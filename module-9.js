@@ -219,8 +219,8 @@ SETS.push(
                   choices: ['The B string', 'The low E string', 'The G string', 'No other string'] }
               },
               {
-                text: 'Video coming soon — your teacher will demo this at Station A. <!-- VIDEO-TODO: octave shapes crossing onto the B string (the 3-fret shift) -->',
-                hint: 'Every octave shape you\'ve used so far has been "two strings down, two frets up." Crossing onto B (or e) adds one extra fret — your teacher will show you why at Station A.',
+                text: 'Watch: <a href="https://youtu.be/wElX3v3POWU" target="_blank">Finding Notes On The Guitar Neck Using Octaves – JustinGuitar</a>. Pay close attention to what changes when the shape crosses onto the B string — that\'s today\'s 3-fret bump.',
+                hint: 'Every octave shape you\'ve used so far has been "two strings down, two frets up." Crossing onto B (or e) adds one extra fret — watch for it in the video.',
                 skills: [4],
                 response: { type: 'mc', prompt: 'The octave shape coming FROM the D or G string onto the B or e string moves:',
                   answer: 1,
@@ -400,8 +400,8 @@ SETS.push(
                   choices: ['The low E string (thickest)', 'The high e string (thinnest)', 'Whichever string you like', 'The B string'] }
               },
               {
-                text: 'Video coming soon — your teacher will demo this at Station A. <!-- VIDEO-TODO: a lesson on writing your own guitar TAB / transcribing a riff to TAB -->',
-                hint: 'Writing TAB is the reverse skill of reading it — your teacher will model the process live before you try it yourself at Station C.',
+                text: 'Watch: <a href="https://youtu.be/AjwEjsh3QQw" target="_blank">Writing TABs – JustinGuitar</a>. This is the reverse skill of reading TAB — watch how he turns a riff he can already play into TAB someone else could read.',
+                hint: 'Writing TAB is the reverse skill of reading it — the video models the process before you try it yourself at Station C.',
                 skills: [2, 3],
                 response: { type: 'mc', prompt: 'Two numbers stacked in the same column of TAB mean:',
                   answer: 1,

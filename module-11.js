@@ -27,7 +27,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
               {
-                text: 'Video coming soon — your teacher will demo this at Station A. <!-- VIDEO-TODO: a beginner lesson on building the chords of a key / Roman numerals -->',
+                text: 'Watch: <a href="https://youtu.be/lhHSU4AnXSU" target="_blank">How to Find Guitar Chords in a Key? – JustinGuitar</a>. Watch how he builds a chord on every note of the scale — that\'s the "chord family" you\'ll be naming with Roman numerals today.',
                 hint: 'Every chord you\'ve ever strummed is built from a scale — today you learn the recipe that turns one scale into a whole family of chords.',
                 skills: [1],
                 response: { type: 'mc', prompt: 'A triad is built by stacking:',
@@ -36,7 +36,7 @@ SETS.push(
                   choices: ['Any three notes', 'Every other note of a scale: root, 3rd, 5th', 'Three notes on one string', 'The same note in three octaves'] }
               },
               {
-                text: 'Video coming soon — your teacher will demo this at Station A. <!-- VIDEO-TODO: a beginner triads lesson — root, 3rd, 5th -->',
+                text: 'Watch: <a href="https://youtu.be/BvD1yoWfis4" target="_blank">Triad Chords #1of3 – JustinGuitar</a>. Every chord you\'ve ever strummed is built from these same three notes — root, 3rd, 5th.',
                 hint: 'Notice the pattern: three of the seven chords in a key come out major, and three come out minor — no exceptions, in any key.',
                 skills: [2],
                 response: { type: 'mc', prompt: 'In any major key, chords I, IV, and V are major. Chords ii, iii, and vi are:',
@@ -213,7 +213,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
               {
-                text: 'Video coming soon — your teacher will demo this at Station A. <!-- VIDEO-TODO: finding the key of a song from its chords -->',
+                text: 'Watch (revisit): <a href="https://youtu.be/lhHSU4AnXSU" target="_blank">How to Find Guitar Chords in a Key? – JustinGuitar</a>. Same video as Set 1 — this time run the lookup backwards: given the chords, name the key.',
                 hint: 'You already know each key\'s chord family from Set 1 — this is just running that lookup backwards.',
                 skills: [1],
                 response: { type: 'mc', prompt: 'A song uses G, C, D, and Em. Its key is almost certainly:',

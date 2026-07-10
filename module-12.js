@@ -227,7 +227,7 @@ SETS.push(
                   choices: ['4 beats', '3 beats', '2 beats', '6 beats'] }
               },
               {
-                text: 'Video coming soon — your teacher will demo this at Station A. <!-- VIDEO-TODO: a beginner 3/4 (waltz) fingerpicking pattern lesson — bass on 1, plucks on 2 and 3 -->',
+                text: 'Watch: <a href="https://youtu.be/Z4ltlHtQUA0" target="_blank">Fingerpicking Pattern for 3/4 or 6/8 Time – MrPoloniaMusic</a>. Notice the bass note always lands on beat 1, with the fingers answering after.',
                 hint: 'The simplest 3/4 picking pattern: thumb states the bar on beat 1, fingers answer on 2 and 3.',
                 skills: [1, 2],
                 response: { type: 'mc', prompt: 'The simplest 3/4 picking pattern is:',

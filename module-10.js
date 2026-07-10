@@ -27,7 +27,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
               {
-                text: 'Video coming soon — your teacher will demo this at Station A. <!-- VIDEO-TODO: the major scale — why and how it\'s built (the W-W-H-W-W-W-H recipe) -->',
+                text: 'Watch: <a href="https://youtu.be/LmbMnc2vpFg" target="_blank">The Major Scale #1: How and Why – JustinGuitar</a>. Follow along as he lays out the whole/half-step recipe — the exact formula you\'ll use to build C and G major yourself.',
                 hint: 'The recipe is a formula — the exact same seven-step pattern of whole and half steps, starting from any note, builds that note\'s major scale.',
                 skills: [1],
                 response: { type: 'mc', prompt: 'The step recipe that builds EVERY major scale is:',
@@ -219,8 +219,8 @@ SETS.push(
                   choices: ['C minor', 'A minor', 'E minor', 'G minor'] }
               },
               {
-                text: 'Video coming soon — your teacher will demo this at Station A. <!-- VIDEO-TODO: a beginner lesson introducing the blues scale as minor pentatonic + b5 -->',
-                hint: 'The video you might expect here turned out to be a fast lick showcase, not a beginner intro — your teacher will demo the concept live instead.',
+                text: 'Watch: <a href="https://youtu.be/EILFkSGNkdA" target="_blank">The First Scale Beginners Should Learn for BLUES GUITAR – JustinGuitar</a>. Listen for the one extra note added to the minor pentatonic box you already know — that\'s the b5.',
+                hint: 'The blues scale is just minor pentatonic plus one extra note — listen for where it gets added in the video.',
                 skills: [4],
                 response: { type: 'mc', prompt: 'The blues scale is the minor pentatonic plus which extra note?',
                   answer: 1,
@@ -393,7 +393,7 @@ SETS.push(
                   choices: ['B minor', 'C minor', 'G minor', 'A major'] }
               },
               {
-                text: 'Video coming soon — your teacher will demo this at Station A. <!-- VIDEO-TODO: a beginner ear-training lesson — sing a note/pattern, then find it on the guitar -->',
+                text: 'Watch: <a href="https://youtu.be/bd8M2fhK6Z8" target="_blank">5\' Guitar Exercise: Find Melodies You Know – JustinGuitar</a>. This is the exact sing-it-then-find-it habit today\'s Station C drill is built around.',
                 hint: 'This is the single most useful guitar habit you can build: sing what you hear first, then let your hands catch up.',
                 skills: [3],
                 response: { type: 'mc', prompt: 'The best FIRST step to playing a melody by ear is:',
