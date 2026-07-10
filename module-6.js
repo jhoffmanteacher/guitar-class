@@ -644,8 +644,7 @@ MODULE_SONGS[6] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=zx3Tv5uBAaE' },
       { name: '"Buffalo Soldier" — Bob Marley', meta: 'Bm–G–D–A · reggae offbeat practice', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=uMUQMSXLlHM',
-        tutorialUrl: 'https://www.youtube.com/watch?v=rNSq3E3KfMk' },
-      { name: '🎤 Class request — a song you want to learn', meta: 'Bring a song you want to learn · we\'ll work it in as a class', type: 'Choice', core: false }
+        tutorialUrl: 'https://www.youtube.com/watch?v=rNSq3E3KfMk' }
     ];
 
 MODULE_REVIEWS[6] = {

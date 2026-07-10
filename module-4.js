@@ -742,8 +742,7 @@ MODULE_SONGS[4] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=dutLP1SoSLs' },
       { name: '"Purple Haze" — Jimi Hendrix', meta: 'E pentatonic box — full pattern', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=WGoDaYjdfSg',
-        tutorialUrl: 'https://www.youtube.com/watch?v=gKhmARXdWGE' },
-      { name: '🎤 Class request — a song you want to learn', meta: 'Bring a song you want to learn · we\'ll work it in as a class', type: 'Choice', core: false }
+        tutorialUrl: 'https://www.youtube.com/watch?v=gKhmARXdWGE' }
     ];
 
 MODULE_REVIEWS[4] = {

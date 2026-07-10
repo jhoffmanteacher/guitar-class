@@ -643,8 +643,7 @@ MODULE_SONGS[8] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=AlElh28IumI' },
       { name: '"Just Like Heaven" — The Cure', meta: 'Iconic arpeggiated intro riff — dreamy chord-picking', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=n3nPiBai66M',
-        tutorialUrl: 'https://www.youtube.com/watch?v=fEgsKS_IcQA' },
-      { name: '🎤 Class request — a song you want to learn', meta: 'Bring a song you want to learn · we\'ll work it in as a class', type: 'Choice', core: false }
+        tutorialUrl: 'https://www.youtube.com/watch?v=fEgsKS_IcQA' }
     ];
 
 MODULE_REVIEWS[8] = {

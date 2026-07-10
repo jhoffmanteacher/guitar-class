@@ -694,8 +694,7 @@ MODULE_SONGS[2] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=JoL3YrtcwuQ' },
       { name: '"Beat It" — Michael Jackson', meta: 'Intro riff on E string', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=oRdxUFDoQe0',
-        tutorialUrl: 'https://www.youtube.com/watch?v=B5M5tVc7XZA' },
-      { name: '🎤 Class request — a song you want to learn', meta: 'Bring a song you want to learn · we\'ll work it in as a class', type: 'Choice', core: false }
+        tutorialUrl: 'https://www.youtube.com/watch?v=B5M5tVc7XZA' }
     ];
 
 MODULE_REVIEWS[2] = {

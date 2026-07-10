@@ -13,8 +13,6 @@ see `WORKFLOW.md` and the git commit log.
   (Eslabon Armado × Peso Pluma) in Module 5 — every module now has at least
   one Spanish-language song to choose from.
 - **"Just Like Heaven" by The Cure** joins Module 8's fingerpicking song list.
-- **A "🎤 Class request" slot in every module's song list** — a standing spot
-  to bring in a song you want to learn as a class.
 
 ### Changed
 - **Each module now has one combined "🎵 Songs" list** instead of a separate,

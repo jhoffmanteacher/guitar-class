@@ -1631,10 +1631,6 @@ function buildModuleSongs(moduleNum){
   const list = (globalThis.MODULE_SONGS && MODULE_SONGS[moduleNum]) || [];
   if(!list.length) return '';
   const rows = list.map((s,i)=>{
-    // The 🎤 class-request entry renders as the dashed prompt row, not a song card.
-    if(typeof s.name === 'string' && s.name.indexOf('\u{1F3A4}') === 0){
-      return `<div class="song-row song-request"><div class="song-request-ico">&#x1F3A4;</div><div><div class="sname">${s.name.replace(/^\u{1F3A4}\s*/u,'')}</div><div class="smeta">${s.meta||''}</div></div></div>`;
-    }
     const vids = [];
     if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="loadModuleSongVid(${moduleNum},${i},'original')" title="Opens in YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:11px;opacity:0.6">&#x2197;</span></button>`);
     if(s.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="loadModuleSongVid(${moduleNum},${i},'tutorial')"><span class="svb-play">&#x25B6;</span>Tutorial</button>`);

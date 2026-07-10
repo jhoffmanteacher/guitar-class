@@ -824,8 +824,7 @@ MODULE_SONGS[5] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=eFLJUspLfnk' },
       { name: '"Shallow" — Lady Gaga', meta: 'Em–D–G–C–Am–D — challenge song', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=bo_efYhYU2A',
-        tutorialUrl: 'https://www.youtube.com/watch?v=wocQ8UHN5kQ' },
-      { name: '🎤 Class request — a song you want to learn', meta: 'Bring a song you want to learn · we\'ll work it in as a class', type: 'Choice', core: false }
+        tutorialUrl: 'https://www.youtube.com/watch?v=wocQ8UHN5kQ' }
     ];
 
 MODULE_REVIEWS[5] = {

@@ -34,16 +34,15 @@
     - **Session 2 — build.** Jonathan approved the survey as-written (no
       markup). Data layer: added a `MODULE_SONGS[N]` global per module
       (mirroring the existing `MODULE_REVIEWS[N]` pattern), migrated every
-      Core/Supp song + the approved 5 Choice keepers + a new "🎤 Class
-      request" slot into it, deleted the old per-set `songs:` arrays. Just
-      Like Heaven was added to Module 8 — since it had to land as a straight
-      swap (5 songs, not 6) and "Nothing Else Matters" (the instructed swap
-      target) turned out not to be one of Module 8's 5 keepers, Hallelujah
-      was dropped instead (same "moody arpeggiated ballad" job as JLH;
-      Hallelujah remains a keeper in Module 5). UI layer: new
-      `buildModuleSongs()` renders each module's list as a collapsible
-      section (closed by default) reusing the existing Station B/C
-      collapse mechanism and song-card markup; also fixed a latent crash
+      Core/Supp song + the approved 5 Choice keepers into it, deleted the
+      old per-set `songs:` arrays. Just Like Heaven was added to Module 8 —
+      since it had to land as a straight swap (5 songs, not 6) and "Nothing
+      Else Matters" (the instructed swap target) turned out not to be one of
+      Module 8's 5 keepers, Hallelujah was dropped instead (same "moody
+      arpeggiated ballad" job as JLH; Hallelujah remains a keeper in Module
+      5). UI layer: new `buildModuleSongs()` renders each module's list as a
+      collapsible section (closed by default) reusing the existing Station
+      B/C collapse mechanism and song-card markup; also fixed a latent crash
       (`buildSongs` was still called unconditionally on the now-removed
       per-set `songs:`, which would have broken every module 2–8 on open).
       Teacher view never rendered songs before or after — no change needed
@@ -52,6 +51,14 @@
       fewer redundant per-set duplicates). 3 quiz distractor swaps (m6
       reggae · m7 stacked-TAB pair · m2 H→G#) reviewed, none marked for
       revert — left as-is.
+    - **🎤 Class-request slot — added, then removed same day.** The build
+      originally included a data-driven "🎤 Class request" entry per module
+      (2–8), mirroring Module 1's older static request prompt. Jonathan asked
+      for it removed shortly after. ✅ 2026-07-09: pulled the entry from all
+      7 module files plus the now-dead render branch in `buildModuleSongs()`;
+      left Module 1's original, separate `buildSongs()` request row (June
+      2026, `72eeeca`) untouched — Jonathan scoped the removal to Modules
+      2–8 only. `checks.mjs` passed.
 - [ ] **Luna requinto intro TAB** — transcribe from Jonathan's uploaded
       official tab (Layer 2 stretch + M2 levelUp). Blocked on: tab file
       provided in-session.
@@ -67,4 +74,4 @@
 ## Recurring each semester
 
 - Song refresh: swap in 2–3 student-requested songs (verify links per
-  CLAUDE.md); pull from the 🎤 request slot.
+  CLAUDE.md).

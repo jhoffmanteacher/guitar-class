@@ -666,8 +666,7 @@ MODULE_SONGS[7] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=uGMybMuDKAU' },
       { name: '"Mad World" — Gary Jules / Tears for Fears', meta: 'Em–G–D–A · barre chord workout', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=etSbOs3aUqI',
-        tutorialUrl: 'https://www.youtube.com/watch?v=r-rvJsxhkQM' },
-      { name: '🎤 Class request — a song you want to learn', meta: 'Bring a song you want to learn · we\'ll work it in as a class', type: 'Choice', core: false }
+        tutorialUrl: 'https://www.youtube.com/watch?v=r-rvJsxhkQM' }
     ];
 
 MODULE_REVIEWS[7] = {

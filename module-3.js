@@ -559,8 +559,7 @@ MODULE_SONGS[3] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=9lFufklJ-nU' },
       { name: '"De Música Ligera" — Soda Stereo', meta: 'Bm–G–D–A riff, played as B5–G5–D5–A5 power chords', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=T_FkEw27XJ0',
-        tutorialUrl: 'https://www.youtube.com/watch?v=TRciSsMYuZ0' },
-      { name: '🎤 Class request — a song you want to learn', meta: 'Bring a song you want to learn · we\'ll work it in as a class', type: 'Choice', core: false }
+        tutorialUrl: 'https://www.youtube.com/watch?v=TRciSsMYuZ0' }
     ];
 
 MODULE_REVIEWS[3] = {
