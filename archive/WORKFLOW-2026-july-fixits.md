@@ -1,0 +1,212 @@
+# WORKFLOW archive — July 2026 fix-it era
+
+> Completed-work logs moved out of WORKFLOW.md on 2026-07-09. These are
+> records only; nothing here drives current work. The original spring/summer
+> buildout archive is `WORKFLOW-2026-buildout.md`.
+
+---
+
+- [x] **SITE_FIXIT_JULY_2** (doc retired after completion; superseded the retired Round 1 `SITE_FIXIT_JULY.md`) — four-session fix-it. Round 1's `/preview`
+      handout swap is now reversed: the handout Docs are retired from the site
+      entirely (Docs stay in Drive, untouched), and Song Journey links open at
+      the page top instead of a mid-page layer anchor.
+  - [x] **Session 1 — Song Journey links open at page top.**
+        ✅ 2026-07-07: stripped all 74 `#layer-N` anchors from module-side
+        links (`journeyUrl:` + inline `href`) across `module-1..8.js`; `grep`
+        confirms 0 `#layer` in `*.js`, per-file `tabs/` counts byte-identical to
+        HEAD (no links lost), and `id="layer-N"` attrs in `tabs/*.html` untouched
+        (30). Checks passed.
+  - [x] **Session 2 — remove 22 dead handoutUrl fields.**
+        ✅ 2026-07-07: deleted all 22 `handoutUrl:` lines across `module-1..8.js`
+        (22 deletions, 0 insertions, 0 collateral). `grep` confirms 0 `handoutUrl`
+        and 0 `docs.google.com` in `*.js`/`tabs/*.html`; skill-ID lists
+        byte-identical to pre-edit; `checks.mjs` validates all 22 Sets. The 8
+        Google Docs remain in Drive, untouched. Checks passed.
+  - [x] **Session 3 — Module 1 template upgrade.**
+        ✅ 2026-07-07: brought all Module 1 steps to the frozen Module 2 depth
+        (per the 0.5 approved worked example). Added `stuck:` (6→15),
+        `levelUp:` (0→17), and `response:` checks (6→13); every Watch step now
+        carries a during-watching job and every practice/challenge step a
+        "You've got it when." First-day tone kept gentle and social
+        ("ask a neighbor," "compare to the freeze-frame"). All 7 lesson videos
+        re-verified live via oEmbed. Skill IDs (`w1-s1..3`, `w2-s1..6`)
+        byte-identical; `skillCount` unchanged; `checks.mjs` validates all
+        Sets. **7 `TODO(fixit): timestamp` markers** left on the Watch steps
+        for Session 4 to resolve with verified (M:SS–M:SS) ranges. No
+        `FIXIT_FLAGS.md` items.
+  - [x] **Session 4 — video liveness sweep + lesson timestamps.**
+        ✅ 2026-07-08: liveness sweep passed — all 245 external links reachable
+        (`checks.mjs`), and all 7 Module 1 lesson videos re-loaded live in-browser.
+        Resolved all 7 `TODO(fixit): timestamp` markers using **verified YouTube
+        chapter data** (pulled from each video's page data, not recall):
+        • **Jump-links added** where earlier/later content is skippable —
+          *Tune* (`?t=105`, walkthrough 1:45–4:28; before = "which tuner to buy,"
+          after = restringing), *Anatomy* (`?t=16`, parts 0:16–3:18; later sections
+          are electric-guitar parts), and *Caring* (range note: only the first ~3 min
+          of care tips matter; after 2:58 is a string-change demo).
+        • **Marker removed, watch-whole** for the cohesive single-topic clips —
+          *Practice* (5:14), *Holding* (2:43), *Picks* (8:35, no chapters — no time
+          invented), *Picking* (4:32).
+        Two content-fit notes for Jonathan (out of Session 4 scope, not changed):
+        (a) the *Holding* video is actually "Holding the Guitar with Your Fretting
+        Hand?" (2:43) — narrower than the step's "feet, leg, back, strumming arm"
+        full-posture promise; (b) the *Caring* video covers clean/humidity/strings,
+        not the "how to set the guitar down" its MC asks about. Both are still
+        relevant, just loose fits — candidates for a future video swap. The old
+        illustrative range for *Holding* (0:00–3:30) overran its 2:43 runtime, so
+        verifying was the right call. `checks.mjs` passed; SW version bumped.
+- [x] **SITE_FIXIT_JULY_3** (`SITE_FIXIT_JULY_3.md`) — M1 video polish
+      (Holding swap, Caring MC rewrite) + WORKFLOW/CLAUDE.md cleanup.
+      ✅ 2026-07-08: swapped the Set 2 "Holding" video to JustinGuitar's
+      "How To Hold Your Guitar" (`MlV6WhM9YhE`, B1-102, 4:16 — found via the
+      lesson page since the live JustinGuitar page 403s bots; oEmbed-verified
+      author JustinGuitar, no skippable intro so watch-whole, no time invented);
+      rewrote the Set 1 "Caring" MC to ask about dry-air/humidity risk instead
+      of set-down safety. WORKFLOW.md: deleted the retired handout-audit bullet,
+      flipped SITE_FIXIT_JULY_2 and the Module 1 video-fit-swaps loose end to
+      `[x]`, fixed the dangling `archive/SITE_ALIGNMENT_3.md` reference,
+      unblocked the supplemental-swap loose end, and logged the three-item
+      roadmap below. CLAUDE.md: recorded the six-song core/thread list as a
+      settled fact. No `skills:` changes; `MODULE_MANIFEST`/`skillCount`
+      untouched; `checks.mjs` passed (245/245 links, SW bumped).
+- [x] **LOOPER_REMOVAL** (`LOOPER_REMOVAL.md`, doc retired after execution) —
+      deprecated the A/B looper (no presets were ever populated) and rerouted
+      the 🎵 Backing track button to the plain video panel, labeled with the
+      track's key (e.g. "Backing track (Am)").
+      ✅ 2026-07-08/09: deleted `looper.js` and `LOOPER_SPEC.md`; removed the
+      `looper.js` script tag from `index.html` and its stale entry from
+      `checks.mjs`'s `SHELL_FILES` fingerprint list (harmless no-op while
+      present, cleaned up regardless); stripped the Firestore `loops`
+      plumbing from `app.js`; added `backingKey` to all 5 core-song entries
+      in `module-4.js`. All 5 oEmbed IDs re-verified live, no title/key
+      mismatches. `checks.mjs` passed; SW version bumped; pushed.
+- [x] **SITE_LUNA_SWAP** (`SITE_LUNA_SWAP.md`, doc retired after execution) —
+      core-song swap: Luna (Peso Pluma & Junior H) replaces Oye Mi Amor in
+      Modules 1–5 and the Song Journey pages; Oye Mi Amor retagged to a
+      Choice song in Modules 6–7 (content retained). Matches curriculum
+      map V16.
+      ✅ 2026-07-09: replaced all in-place Oye content with Luna across
+      modules 1–5 (listen cards, M2 bass-roots step, M3 F5–A5 power-chord
+      drill + vamp, M4 Dm pentatonic solo + backing track, M5 open-chord
+      vamp + showcase — skill `m5w3-s6` id preserved); retagged both Oye
+      cards in modules 6–7 to `type: 'Choice', core: false` (`level: 2`/`3`)
+      with `journeyUrl` and Song Journey links stripped, and added a new
+      Luna full-barre step + Core card to Module 7 Set 2; created
+      `tabs/luna.html` (5-layer Song Journey page) and deleted
+      `tabs/oye-mi-amor.html`. `grep -i oye` across `*.js`/`*.html` now
+      returns hits only in modules 6–7's retagged Choice content. All 3
+      new YouTube IDs (original/tutorial/backing) oEmbed-verified live.
+      `MODULE_MANIFEST`/`skillCount` byte-identical throughout — no
+      `skills:` array changes. `checks.mjs` passed.
+- [x] **SONG_CHOICE_TOGGLE** (`SONG_CHOICE_TOGGLE.md`, doc deleted — **feature
+      cancelled, fully reverted**) — "Take It to a Song" alt-song toggle: let
+      a student pick between two core songs at the same skill layer via a
+      pill pair, swapping challenge text/hint/tab/response in place.
+      🚫 2026-07-09: Session 1 shipped (renderer + Watchtower/Let It Be pilot
+      in Module 2, pushed as `5336eed`), Session 2's pairing survey ran and
+      was approved (28 steps surveyed, 22 pairings approved, pushed as
+      `9b7c1f6`), and Session 3 built all 22 approved `alt:` pairings across
+      modules 2–8 — then Jonathan cancelled the feature before Session 3 was
+      pushed. Reverted via `git revert` (3 commits: `895485d`, `7521631`,
+      `b4386a2` — no force-push, full history preserved) plus a `git
+      checkout` discard of the uncommitted Session 3 module edits. Verified
+      zero remnants (`grep` for `alt:`/`songChoice` across `*.js` returns
+      nothing) and every touched file byte-identical to the pre-feature
+      commit (`cf5cb7b`); `MODULE_MANIFEST`/`skillCount` was never touched
+      by this feature. `checks.mjs` passed post-revert; pushed.
+- [x] **SITE_FIXIT_JULY_4** (doc retired after completion) — fresh external
+      audit fix-it: offline Song Journey caching, a friendly 404 page, iOS
+      home-screen icons, and a targeted accessibility pass. Session 5
+      (Module 1 Challenge drills) was skipped — its premise didn't hold.
+  - [x] **Session 1 — pre-cache Song Journey pages.**
+        ✅ 2026-07-09 (`cdcad51`): added all six `tabs/*.html` pages to
+        `sw.js`'s `ASSETS`, covering the first-visit-offline case (runtime
+        stale-while-revalidate already covered repeat visits). Checks passed.
+  - [x] **Session 2 — friendly 404 page.**
+        ✅ 2026-07-09 (`7801084`): added `404.html` at repo root, matching
+        the site's look, not added to `sw.js` (must always come from the
+        network). Verified in-browser: renders styled, button returns to
+        `index.html`.
+  - [x] **Session 3 — home-screen icons (iOS + manifest spec fix).**
+        ✅ 2026-07-09 (`8ff39a9`): rendered `icon.svg` to PNG (180/192/512,
+        plus maskable variants padded to ~80% on a `#322b78` square) via an
+        in-browser canvas — no SVG-to-PNG tool was available locally. Added
+        `apple-touch-icon`, split the manifest's combined `any maskable`
+        entry into spec-correct separate any/maskable entries, added the
+        new PNGs to `sw.js`. Verified: valid JSON, no console errors,
+        renders in-browser. Note: the 512px PNGs landed at ~66–71KB (over
+        the doc's informal <30KB target) — no local compressor available.
+  - [x] **Session 4 — targeted accessibility pass.**
+        ✅ 2026-07-09 (`95035f4`): audit called aria coverage thin, but most
+        of the checklist (popups, keyboard activation, focus rings) was
+        already solid. Found and fixed two real bugs: `toggleSkill()`
+        updated the visual `.active` class/checkmark without syncing
+        `aria-pressed`, so screen readers could report stale toggle state;
+        and the "Saved ✓" status text had no `aria-live` region. Also added
+        a `<main>` landmark and made the header title the page's one
+        `<h1>` (previously the only `<h1>` lived in the hidden auth-wall,
+        so signed-in students had zero page heading) — auth-wall's heading
+        demoted to `<h2>`. No visual changes; verified with a real keyboard
+        walkthrough (tab order, popup Escape-to-close, skill-toggle
+        activation) plus a direct `aria-pressed`/class-sync check in
+        DevTools. `checks.mjs` passed (247/247 links).
+  - [x] **Session 5 — Module 1 Challenge drills — skipped, premise false.**
+        🚫 2026-07-09: the doc claimed Module 1 has zero Challenge drills;
+        the actual file already has three in the house style (Challenge 1
+        — Tune Challenge, Challenge 2 — One Minute Perfect Notes, Challenge
+        3 — Riff Time), covering the same ground as the three drafts.
+        Jonathan chose to skip rather than add redundant content.
+        `module-1.js` untouched.
+- [x] **Assessment alignment, Modules 2–5 → LOCKED S1 wording**
+      (`archive/SITE_ALIGNMENT_2.md`).
+      ✅ 2026-07-07: re-audited M2–M5 against the locked Unit 2–5 assessment
+      wording; wrote `archive/AUDIT_REPORT_2.md`; closed all 13 in-scope findings
+      (M4 pentatonic assessment reworded + new cold-read TAB-lick step & skill,
+      skillCount 20→21; M5 two→three chords; M2 assessment summary realigned;
+      M3 half notes added). Two items logged-only/deferred (M3 I–IV–V naming,
+      M5 Watchtower `Am–G–F–G` vs `Am–G–F`). Checks passed; pushed.
+- [x] **Post-lock cleanup** (instruction doc retired after execution — this entry is the record).
+      ✅ 2026-07-07: realigned Module 3's unit-assessment summary blocks to the
+      locked three-task structure; added a "Name your progression: I–IV–V" step
+      (M3 Set 2) and a "Week 17 — Call & Response over a backing track" step
+      (M5 Set 4) — both steps only, skillCounts unchanged (M3 12, M5 24);
+      harmonized the open-chord/barre Watchtower loop to `Am–G–F–G` in
+      Modules 5, 6 & 7 and recorded it as a settled fact in CLAUDE.md; verified
+      the Week 17 Written Check / duet are absent from the site. Checks passed.
+- [x] **Strip week numbers from student-facing copy** (`archive/REMOVE_WEEK_REFS.md`).
+      ✅ 2026-07-07: removed the last three week references (all in `module-5.js`):
+      the Call & Response step title ("Week 17 —" dropped), its Challenge
+      parenthetical ("Week 17 check piece" → "semester-wrap check piece"), and the
+      Seven Nation Army tag ("(Week 16)" dropped). `grep -rinE "week [0-9]+"` over
+      `*.js`/`*.html` now returns zero. Steps/skillCounts unchanged; checks passed;
+      pushed.
+- [x] **Link the-cure Song Journey page** (`archive/LINK_THE_CURE.md`).
+      ✅ 2026-07-07: the-cure clean edit requirement dropped (Jonathan,
+      2026-07-07) — all nine guard comments removed; `tabs/the-cure.html` (formerly
+      orphaned) now linked from all eight "the cure" cards via `journeyUrl`
+      (m1→layer-1, m2→layer-2, m4 ×3→layer-4, m5→layer-5, m8 ×2→layer-5, closest
+      fit), plus an in-step Song Journey link on M3's ◐ power-chords stretch step
+      (→layer-3). No `skills:` changes → skillCounts unchanged; no new YouTube IDs.
+      Checks passed.
+- [x] **Station B collapsible sections** — make the Station B portions of each
+      set collapse/expand the same way the Station C portions do.
+      ✅ 2026-07-06: all 22 sets restructured into thematic sections (steps
+      unchanged, verified byte-identical); checks passed; pushed.
+
+> **Note (2026-07-07):** the Google Doc's rubric tab was regenerated to the
+> locked Unit 1–5 wording — the "rubric tab is STALE" caveat inside
+> `archive/SITE_ALIGNMENT_2.md` is obsolete (archive left as-is).
+
+- [x] **End-of-semester set** loose end.
+      2026-07-07 review: largely covered already — Module 5 Set 4 has Group 3
+      chords, showcase prep, and the Module-1 goal-revisit reflection. Remaining
+      scope (if any) TBD by Jonathan.
+      ✅ 2026-07-09: closed as covered by Module 5 Set 4 (Group 3 chords,
+      showcase prep, Module-1 goal-revisit reflection). Reopen only if Jonathan
+      names remaining scope.
+- [x] **Module 1 video-fit swaps** (flagged in Session 4, 2026-07-08).
+      ✅ 2026-07-08 (SITE_FIXIT_JULY_3): resolved both. (a) Set 2 "Holding" step
+      now links "How To Hold Your Guitar" (`MlV6WhM9YhE`, JustinGuitar B1-102,
+      4:16) — full posture promise now matched. (b) Set 1 "Caring" step's MC
+      rewritten to ask about dry-air/humidity risk, which the video (kept as-is)
+      actually covers; set-down safety stays at the hands-on station.
