@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-10 — Module 10 is live: Scales, Keys & Ear Training
+
+### Added
+- **Module 10 — Scales, Keys & Ear Training.** Learn the recipe that builds
+  every major scale, find the relative minor hiding inside any major key
+  (and hear why Luna's solo uses D minor pentatonic even though the song is
+  in F major), build the blues scale by adding one note to a pentatonic box
+  you already know, and start training your ear — transposing patterns to
+  new keys and echoing short phrases back by sound alone. Three new sets, 18
+  new skills.
+
 ## 2026-07-10 — Module 9 is live: The Full Fretboard & Writing TAB
 
 ### Added

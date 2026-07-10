@@ -37,8 +37,27 @@
       `checks.mjs` passed (145 links, 3 expected warnings for Modules 10–12
       not yet having Sets). Live-Server browser verification was **not**
       performed (no running dev server in this environment) — Jonathan may
-      want to spot-check visually. Sessions B (Module 10), C (Module 11), D
-      (Module 12) still open.
+      want to spot-check visually. Session B ✅ 2026-07-10: built **Module 10 —
+      Scales, Keys & Ear Training** (3 sets, 18 skills — the W-W-H major-scale
+      recipe, relative/parallel minor, the blues scale, transposing box 1,
+      major-vs-minor ear training). Manifest row for Module 10 already existed
+      from Session A. oEmbed-verified 3 video IDs; the JustinGuitar EXTRACT-tier
+      lesson page (major-scale-why-and-how-sc-202) is behind a Cloudflare bot
+      challenge that blocks `curl` outright (`cf-mitigated: challenge`, no
+      header combination got past it) — fell back to a VIDEO-TODO placeholder
+      per the doc's tier-3 protocol. Also dropped the doc's [VERIFY-THEN-USE]
+      Marty blues-scale candidate (`qwI_-x-QE1c`, "Ultimate E Blues Scale
+      Run") to a VIDEO-TODO — it oEmbed-verified fine but reads as a fast lick
+      showcase, not a beginner concept intro, so it failed the doc's own
+      too-advanced judgment call. One Choice-song slot from the spec doc
+      couldn't be filled — "good 4 u" doesn't exist anywhere in the repo
+      (grepped all module files) — dropped per the never-invent-a-URL rule;
+      Module 10 ships with 4 Choice songs instead of 5, but the Spanish slot
+      (Ella Baila Sola) *was* found in module-5.js and is intact.
+      `checks.mjs` passed (145 links, 2 expected warnings for Modules 11–12
+      not yet having Sets). Live-Server browser verification **not**
+      performed (no running dev server in this environment). Sessions C
+      (Module 11), D (Module 12) still open.
 - [x] **Song-list review session** (doc retired after completion) —
       consolidated every module's per-set Choice-song lists into one
       module-level list per module (2–8; Module 1 untouched, out of scope),
