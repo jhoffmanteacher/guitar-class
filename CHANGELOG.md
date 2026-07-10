@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-10 — Module 11 is live: Chords, Keys & Harmony
+
+### Added
+- **Module 11 — Chords, Keys & Harmony.** Learn how every chord family is
+  built from a scale, label a progression with Roman numerals (and see why
+  Luna's F–Am vamp isn't the "famous four" — it's I–iii), figure out a song's
+  key just by looking at its chord list, decode slash chords like G/B, and
+  turn one movable barre shape into twelve different chords you can name on
+  sight. Three new sets, 18 new skills.
+
 ## 2026-07-10 — Module 10 is live: Scales, Keys & Ear Training
 
 ### Added

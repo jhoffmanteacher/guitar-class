@@ -56,8 +56,33 @@
       (Ella Baila Sola) *was* found in module-5.js and is intact.
       `checks.mjs` passed (145 links, 2 expected warnings for Modules 11–12
       not yet having Sets). Live-Server browser verification **not**
-      performed (no running dev server in this environment). Sessions C
-      (Module 11), D (Module 12) still open.
+      performed (no running dev server in this environment). Session C ✅
+      2026-07-10: built **Module 11 — Chords, Keys & Harmony** (3 sets, 18
+      skills — triads & Roman numerals incl. Luna's F–Am as I–iii, finding a
+      song's key from its chord inventory, slash chords, movable E-shape/
+      A-shape barre chords as harmony tools, I–IV–V in any key). Manifest row
+      for Module 11 already existed from Session A. The doc's EXTRACT-tier
+      "How to Find Guitar Chords in a Key?" lesson page hit the same
+      Cloudflare bot-challenge wall Session B found (`curl` 403,
+      `cf-mitigated: challenge`) — both m11w1 video slots fell back to
+      VIDEO-TODO placeholders per the tier-3 protocol; m11w2's video slot did
+      the same, with its optional second slot filled by reusing the
+      already-verified Watchtower listen clip (`bT7Hj-ea0VE`) as a
+      "listen and decide by ear" step instead of leaving it empty. Three
+      Choice-song slots from the spec doc couldn't be filled — "No Se Va,"
+      "American Girl," and "good 4 u" don't exist anywhere in the repo
+      (grepped all module files; the latter two were already confirmed
+      absent in Sessions A/B) — dropped per the never-invent-a-URL rule;
+      Module 11 ships with 2 Choice songs instead of 5. Also substituted
+      Watchtower's Am–G–F loop (vi–V–IV in C) for the doc's "Take It to a
+      Song" step in m11w2, since it originally pointed at the now-dropped
+      "No Se Va." All chord-diagram specs (C/Dm/Em/F/G/Am/D/Bm, the G/B slash
+      chord, and the F/Bm barre shapes) were copied byte-identical from
+      module-5.js, module-8.js, and module-9.js rather than retyped.
+      `checks.mjs` passed (145 links, 1 expected warning for Module 12 not
+      yet having Sets). Live-Server browser verification **not** performed
+      (no running dev server in this environment). Session D (Module 12)
+      still open.
 - [x] **Song-list review session** (doc retired after completion) —
       consolidated every module's per-set Choice-song lists into one
       module-level list per module (2–8; Module 1 untouched, out of scope),
