@@ -59,9 +59,15 @@
       left Module 1's original, separate `buildSongs()` request row (June
       2026, `72eeeca`) untouched — Jonathan scoped the removal to Modules
       2–8 only. `checks.mjs` passed.
-- [ ] **Luna requinto intro TAB** — transcribe from Jonathan's uploaded
-      official tab (Layer 2 stretch + M2 levelUp). Blocked on: tab file
-      provided in-session.
+- [x] **Luna requinto intro TAB** — transcribed from Jonathan's uploaded
+      official tab/chord chart. ✅ 2026-07-10 (`840424f`). Also caught and
+      fixed a chord error the docs surfaced: the site taught "Dm–C in the
+      chorus," but the official chart has no C chord at all — Luna is F–Am
+      throughout with Dm only a brief passing chord near the end of the verse
+      and in the closing bridge. Corrected across Module 5's Luna challenges
+      and the Song Journey page; added the intro riff as a new bonus Layer 6
+      (rolled arpeggio through the Layer 5 little-F shape) rather than
+      folding it into Layer 5, so each layer still teaches one new tool.
 
 ## Jonathan — manual, before course start
 
