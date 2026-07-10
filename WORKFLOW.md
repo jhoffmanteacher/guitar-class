@@ -13,13 +13,45 @@
 
 ## Open work
 
-- [ ] **Song-list review session** (next Claude Code work — one instruction
-      doc). Scope: difficulty dots on ~109 Choice songs, incl. the retagged
-      Oye Mi Amor cards (M6: level 2, M7: level 3) · the 3 quiz distractor
-      swaps (m6 reggae · m7 stacked-TAB pair · m2 H→G#) · Just Like Heaven
-      keep-or-drop-as-Choice call · supplemental/Choice song swaps (unblocked
-      since the map locked 2026-07-07). Details in the buildout archive under
-      Phase 5.
+- [x] **Song-list review session** (doc retired after completion) —
+      consolidated every module's per-set Choice-song lists into one
+      module-level list per module (2–8; Module 1 untouched, out of scope),
+      rendered as a collapsible "🎵 Songs" section. ✅ 2026-07-09 (`d77732e`).
+    - **Session 1 — survey.** Inventoried all 8 modules' song lists (126
+      Choice entries across 21 per-set lists), proposed a 4–5-keeper cull per
+      module against appeal/skill-fit/diversity/no-duplicate-job criteria,
+      confirmed Oye Mi Amor's retagged levels (M6: 2, M7: 3), found Just Like
+      Heaven didn't exist anywhere in the codebase yet, and wrote the render
+      spec. Output: `SONG_CULL_SURVEY.md` (now retired — full per-module
+      keep/cut reasoning lives in this commit's diff and history).
+    - **Spanish-slots addendum.** Jonathan set a new rule — at least one
+      Spanish-language Choice song per module 2–8. Modules 4/6/7/8 already
+      had one (La Bamba · Oye Mi Amor + Tu Boda ×2 · Tu Boda); Modules 2, 3,
+      5 had none. Added La Bamba (swap for Eye of the Tiger, M2), De Música
+      Ligera (swap for Should I Stay or Should I Go, M3 — corrected from a
+      2-chord guess to the real Bm–G–D–A riff), and Ella Baila Sola (swap for
+      Hey Jude, M5), all oEmbed-verified.
+    - **Session 2 — build.** Jonathan approved the survey as-written (no
+      markup). Data layer: added a `MODULE_SONGS[N]` global per module
+      (mirroring the existing `MODULE_REVIEWS[N]` pattern), migrated every
+      Core/Supp song + the approved 5 Choice keepers + a new "🎤 Class
+      request" slot into it, deleted the old per-set `songs:` arrays. Just
+      Like Heaven was added to Module 8 — since it had to land as a straight
+      swap (5 songs, not 6) and "Nothing Else Matters" (the instructed swap
+      target) turned out not to be one of Module 8's 5 keepers, Hallelujah
+      was dropped instead (same "moody arpeggiated ballad" job as JLH;
+      Hallelujah remains a keeper in Module 5). UI layer: new
+      `buildModuleSongs()` renders each module's list as a collapsible
+      section (closed by default) reusing the existing Station B/C
+      collapse mechanism and song-card markup; also fixed a latent crash
+      (`buildSongs` was still called unconditionally on the now-removed
+      per-set `songs:`, which would have broken every module 2–8 on open).
+      Teacher view never rendered songs before or after — no change needed
+      there. Verified live in-browser (all 8 modules, zero console errors);
+      `checks.mjs` passed with 145 reachable links (down from ~240 — expected,
+      fewer redundant per-set duplicates). 3 quiz distractor swaps (m6
+      reggae · m7 stacked-TAB pair · m2 H→G#) reviewed, none marked for
+      revert — left as-is.
 - [ ] **Luna requinto intro TAB** — transcribe from Jonathan's uploaded
       official tab (Layer 2 stretch + M2 levelUp). Blocked on: tab file
       provided in-session.
