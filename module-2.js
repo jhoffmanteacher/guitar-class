@@ -228,38 +228,6 @@ SETS.push(
       }
     },
 
-    songs: [
-      { name: '"Happy Birthday"', meta: 'Identify which notes live on E & A strings', type: 'Supp', core: false,
-        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Stand By Me" — Ben E. King', meta: 'Identify the bass line notes on E & A strings', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=hwZNL7QVJjE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=TXLElO_YYiY' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Identify bass notes of riff on low E string', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
-        originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'E string riff — ear training & note ID', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
-        originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
-        tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Listen ahead — our Latin core song; you play its bass roots this module', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
-        originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
-        tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
-      { name: '"Smoke on the Water" — Deep Purple', meta: 'E string — classic note recognition', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=Q2FzZSBD5LE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=QkT5yLP5VQA' },
-      { name: '"Another One Bites the Dust" — Queen', meta: 'A string bass notes', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=rY0WxgSXdEE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=vhLJOOF-id4' },
-      { name: '"Eye of the Tiger" — Survivor', meta: 'Riff on E & A — note identification', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=btPJPFnesV4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=LAXq-nbsGfs' },
-      { name: '"Beat It" — Michael Jackson', meta: 'Intro riff on E string', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=oRdxUFDoQe0',
-        tutorialUrl: 'https://www.youtube.com/watch?v=B5M5tVc7XZA' },
-      { name: '"Day Tripper" — The Beatles', meta: 'Partial riff on E string', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=AYZlME0mQB8',
-        tutorialUrl: 'https://www.youtube.com/watch?v=UkBVfOlPBrI' }
-    ],
-
     assessment: {
       goal: 'Names all notes on E string (frets 0–12) · Names all notes on A string (frets 0–12) · Points to a named note on the fretboard · Reads a basic fretboard note chart · Identifies notes in a familiar song',
       performance: 'Partner quiz: one student names a note, partner finds it on the fretboard. Then switch.',
@@ -665,38 +633,6 @@ SETS.push(
       }
     },
 
-    songs: [
-      { name: '"Happy Birthday"', meta: 'Play full melody on E & A strings from TAB', type: 'Supp', core: false,
-        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Play verse bass roots on E & A strings · intro riff = Module 7 stretch goal', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
-        originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Play bass-note riff on low E string from memory', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
-        originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'E string TAB — great first riff', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
-        originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
-        tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Play the bassline as single-note roots (capo 1 · Am–C–Dm–F–G/B)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
-        originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
-        tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
-      { name: '"Smoke on the Water" — Deep Purple', meta: 'E string TAB — iconic beginner riff', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=Q2FzZSBD5LE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=QkT5yLP5VQA' },
-      { name: '"Sunshine of Your Love" — Cream', meta: 'Riff on E string', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=HbqQL0J_Vr0',
-        tutorialUrl: 'https://www.youtube.com/watch?v=rK14ZU4V6tA' },
-      { name: '"Come As You Are" — Nirvana', meta: 'Partial riff on A string', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=vabnZ9-ex7o',
-        tutorialUrl: 'https://www.youtube.com/watch?v=G14kHAijVHM' },
-      { name: '"Crazy Train" — Ozzy Osbourne', meta: 'Intro notes on E string', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=FVovq9TGBw0',
-        tutorialUrl: 'https://www.youtube.com/watch?v=JoL3YrtcwuQ' },
-      { name: '"Iron Man" — Black Sabbath', meta: 'Opening notes on E string', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=qRcYjJQ0JHg',
-        tutorialUrl: 'https://www.youtube.com/watch?v=id9iJ_c3JHM' }
-    ],
-
     assessment: {
       goal: 'Unit-end (two tasks): (1) Play the "All Along the Watchtower" bass-note line on the low E string from memory, to the metronome at 60 BPM, with clean tone and correct fingering — or the alternate single-note root line from "the cure." (2) Name notes on the E and A strings through fret 12, and sight-read a short 2-bar bass line from TAB.',
       performance: 'Individual or partner check: play the Watchtower low-E line from memory at 60 BPM, then sight-read and play a short 2-bar bass line from TAB. Teacher listens and gives one piece of feedback.',
@@ -724,6 +660,43 @@ SETS.push(
   }
 
 ); // end module-2.js
+
+globalThis.MODULE_SONGS = globalThis.MODULE_SONGS || {};
+MODULE_SONGS[2] = [
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Play bass-note riff on low E string from memory', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
+        originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
+        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'E string TAB — great first riff', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
+        originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
+        tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
+      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Listen ahead — our Latin core song; you play its bass roots this module', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+        originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
+        tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Play verse bass roots on E & A strings · intro riff = Module 7 stretch goal', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
+        originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
+        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Play the bassline as single-note roots (capo 1 · Am–C–Dm–F–G/B)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+        originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
+        tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
+      { name: '"Happy Birthday"', meta: 'Play full melody on E & A strings from TAB', type: 'Supp', core: false,
+        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
+      { name: '"Smoke on the Water" — Deep Purple', meta: 'E string TAB — iconic beginner riff', type: 'Choice', core: false, level: 1,
+        originalUrl: 'https://www.youtube.com/watch?v=Q2FzZSBD5LE',
+        tutorialUrl: 'https://www.youtube.com/watch?v=QkT5yLP5VQA' },
+      { name: '"La Bamba" — Ritchie Valens', meta: 'Iconic single-note intro riff · C–F–G roots', type: 'Choice', core: false, level: 2,
+        originalUrl: 'https://www.youtube.com/watch?v=BycLmWI97Nc',
+        tutorialUrl: 'https://www.youtube.com/watch?v=o-SdTXIAvTE' },
+      { name: '"Come As You Are" — Nirvana', meta: 'Partial riff on A string', type: 'Choice', core: false, level: 1,
+        originalUrl: 'https://www.youtube.com/watch?v=vabnZ9-ex7o',
+        tutorialUrl: 'https://www.youtube.com/watch?v=G14kHAijVHM' },
+      { name: '"Crazy Train" — Ozzy Osbourne', meta: 'Intro notes on E string', type: 'Choice', core: false, level: 2,
+        originalUrl: 'https://www.youtube.com/watch?v=FVovq9TGBw0',
+        tutorialUrl: 'https://www.youtube.com/watch?v=JoL3YrtcwuQ' },
+      { name: '"Beat It" — Michael Jackson', meta: 'Intro riff on E string', type: 'Choice', core: false, level: 2,
+        originalUrl: 'https://www.youtube.com/watch?v=oRdxUFDoQe0',
+        tutorialUrl: 'https://www.youtube.com/watch?v=B5M5tVc7XZA' },
+      { name: '🎤 Class request — a song you want to learn', meta: 'Bring a song you want to learn · we\'ll work it in as a class', type: 'Choice', core: false }
+    ];
 
 MODULE_REVIEWS[2] = {
   moduleNum: 2,

@@ -242,32 +242,6 @@ SETS.push(
       }
     },
 
-    songs: [
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Power chord loop: A5–G5–F5–G5 · Play as a class', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
-        originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Happy Birthday"', meta: 'Power chord version — chords only (optional)', type: 'Supp', core: false,
-        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Iconic single power-chord riff on E string', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
-        originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
-        tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Smells Like Teen Spirit" — Nirvana', meta: 'F Bb Ab Db power chord progression', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=hTWKbfoikeg',
-        tutorialUrl: 'https://www.youtube.com/watch?v=HfhZbd5w-iY' },
-      { name: '"Basket Case" — Green Day', meta: 'Eb Bb C G power chord sequence', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=NUTGr5t3MoY',
-        tutorialUrl: 'https://www.youtube.com/watch?v=bUjBfpaVILI' },
-      { name: '"My Generation" — The Who', meta: 'E5 simple — straightforward power chord song', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=qN5zw04WxCc',
-        tutorialUrl: 'https://www.youtube.com/watch?v=TuGRhu4mRYc' },
-      { name: '"Zombie" — The Cranberries', meta: 'Em C G D power chord version', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=6Ejga4kJUts',
-        tutorialUrl: 'https://www.youtube.com/watch?v=uGMybMuDKAU' },
-      { name: '"Should I Stay or Should I Go" — The Clash', meta: 'Power chord classic', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=xMaE6toi4mk',
-        tutorialUrl: 'https://www.youtube.com/watch?v=ZEU-42bzWyA' }
-    ],
-
     assessment: {
       goal: 'Frets a clean 2-finger power chord · Moves shape along E string without buzzing · Moves shape along A string · Mutes unused strings cleanly · Plays a chord on the beat · Reads a power chord TAB',
       performance: 'Whole-class unison: everyone plays A5–G5–F5–G5 loop together at 60 BPM. Teacher listens for muting and timing.',
@@ -522,38 +496,6 @@ SETS.push(
       }
     },
 
-    songs: [
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full power chord loop · change on beat 1 at 60, hold 80 BPM', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
-        originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Luna" — Peso Pluma, Junior H', meta: '◐ Sierreño vamp → power-chord version (against the grain here)', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
-        originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
-        tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Verse: D5–C5–G5 power chord loop', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
-        originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
-      { name: '"Happy Birthday"', meta: 'Full power chord arrangement (optional)', type: 'Supp', core: false,
-        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Full riff with power chords', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
-        originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
-        tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Blitzkrieg Bop" — Ramones', meta: 'A5 D5 E5 — fast and fun', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=268C3N2dDYk',
-        tutorialUrl: 'https://www.youtube.com/watch?v=9lFufklJ-nU' },
-      { name: '"Holiday" — Green Day', meta: 'F# B A E power chord sequence', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=A1OqtIqzScI',
-        tutorialUrl: 'https://www.youtube.com/watch?v=583Sr2GwyTQ' },
-      { name: '"Come as You Are" — Nirvana', meta: 'E string riff into power chords', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=vabnZ9-ex7o',
-        tutorialUrl: 'https://www.youtube.com/watch?v=G14kHAijVHM' },
-      { name: '"Master of Puppets" — Metallica', meta: 'Simplified intro power chord riff', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=hx27NL_iqEM',
-        tutorialUrl: 'https://www.youtube.com/watch?v=FvVrCKgEu4s' },
-      { name: '"21 Guns" — Green Day', meta: 'Dm Bb F C power chord version', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=r00ikilDxW4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=X5xRw9YjXLw' }
-    ],
-
     assessment: {
       goal: 'Unit-end (three tasks): (1) Play a core-song excerpt to the metronome — e.g., the Seven Nation Army riff, All Along the Watchtower\'s A5–G5–F5, or Sweet Child\'s D5–C5–G5 — switching cleanly between two power chords with roots on the same fret of the E and A strings at 60 BPM, then holding 80 BPM for at least 15 seconds. (2) Read a three-chord (I–IV–V) progression from chord symbols / TAB using a named strumming pattern (straight-eighths or split strum), and name power chords from a chord chart. (3) Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes.',
       performance: 'Individual: play a core-song excerpt with the metronome — changes on beat 1 at 60 BPM, then hold 80 BPM for 15 seconds; read a three-chord (I–IV–V) progression from chord symbols with your named strum; then clap and count a 4-bar rhythm. Teacher gives one piece of feedback.',
@@ -586,6 +528,40 @@ SETS.push(
   }
 
 ); // end module-3.js
+
+globalThis.MODULE_SONGS = globalThis.MODULE_SONGS || {};
+MODULE_SONGS[3] = [
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full power chord loop · change on beat 1 at 60, hold 80 BPM', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
+        originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
+        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'Full riff with power chords', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
+        originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
+        tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
+      { name: '"Luna" — Peso Pluma, Junior H', meta: '◐ Sierreño vamp → power-chord version (against the grain here)', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+        originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
+        tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Verse: D5–C5–G5 power chord loop', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
+        originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
+        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
+      { name: '"Happy Birthday"', meta: 'Full power chord arrangement (optional)', type: 'Supp', core: false,
+        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
+      { name: '"Smells Like Teen Spirit" — Nirvana', meta: 'F Bb Ab Db power chord progression', type: 'Choice', core: false, level: 2,
+        originalUrl: 'https://www.youtube.com/watch?v=hTWKbfoikeg',
+        tutorialUrl: 'https://www.youtube.com/watch?v=HfhZbd5w-iY' },
+      { name: '"Zombie" — The Cranberries', meta: 'Em C G D power chord version', type: 'Choice', core: false, level: 2,
+        originalUrl: 'https://www.youtube.com/watch?v=6Ejga4kJUts',
+        tutorialUrl: 'https://www.youtube.com/watch?v=uGMybMuDKAU' },
+      { name: '"Master of Puppets" — Metallica', meta: 'Simplified intro power chord riff', type: 'Choice', core: false, level: 3,
+        originalUrl: 'https://www.youtube.com/watch?v=hx27NL_iqEM',
+        tutorialUrl: 'https://www.youtube.com/watch?v=FvVrCKgEu4s' },
+      { name: '"Blitzkrieg Bop" — Ramones', meta: 'A5 D5 E5 — fast and fun', type: 'Choice', core: false, level: 1,
+        originalUrl: 'https://www.youtube.com/watch?v=268C3N2dDYk',
+        tutorialUrl: 'https://www.youtube.com/watch?v=9lFufklJ-nU' },
+      { name: '"De Música Ligera" — Soda Stereo', meta: 'Bm–G–D–A riff, played as B5–G5–D5–A5 power chords', type: 'Choice', core: false, level: 2,
+        originalUrl: 'https://www.youtube.com/watch?v=T_FkEw27XJ0',
+        tutorialUrl: 'https://www.youtube.com/watch?v=TRciSsMYuZ0' },
+      { name: '🎤 Class request — a song you want to learn', meta: 'Bring a song you want to learn · we\'ll work it in as a class', type: 'Choice', core: false }
+    ];
 
 MODULE_REVIEWS[3] = {
   moduleNum: 3,

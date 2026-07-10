@@ -149,32 +149,6 @@ SETS.push(
       }
     },
 
-    songs: [
-      { name: '"Happy Birthday"', meta: 'Read chord diagrams for C–G–Am chord version (optional)', type: 'Supp', core: false,
-        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Let It Be" — The Beatles', meta: 'Verse chords · read from chord chart · C–G–Am–F', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
-        originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
-        tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · Read from chord chart', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
-        originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Horse with No Name" — America', meta: 'Em–D6add9 — only 2 chords, great starter', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=2OTc4ZOsSSI',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Mwh9WILLlM0' },
-      { name: '"Knockin\' on Heaven\'s Door" — Dylan', meta: 'G–D–Am — simple and beautiful', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=rm9coqlk8fY',
-        tutorialUrl: 'https://www.youtube.com/watch?v=pWIL4N6QZ-Y' },
-      { name: '"Stand By Me" — Ben E. King', meta: 'G–Em–C–D — classic 4-chord song', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=hwZNL7QVJjE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=TXLElO_YYiY' },
-      { name: '"Brown Eyed Girl" — Van Morrison', meta: 'G–C–G–D · strum practice', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=UfmkgQRmmeE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=v-EGJOz-Mek' },
-      { name: '"What\'s Up" — 4 Non Blondes', meta: 'A–D–Em–D — great for building chord fluency', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=6NXnxTNIWkc',
-        tutorialUrl: 'https://www.youtube.com/watch?v=r5NMiCVB85Y' }
-    ],
-
     assessment: {
       goal: 'Reads a chord diagram correctly · Identifies X, O, and finger numbers on chart · Frets Am cleanly · Frets Em cleanly · Strums 4 beats per bar in time · Finds any chord shown on a chart',
       performance: 'Class: everyone strums Am for 4 bars, then Em for 4 bars, in time with teacher counting. Teacher listens for clean tone.',
@@ -398,35 +372,6 @@ SETS.push(
       }
     },
 
-    songs: [
-      { name: '"Happy Birthday"', meta: 'Full strum arrangement — C–G–Am–F version (optional)', type: 'Supp', core: false,
-        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Let It Be" — The Beatles', meta: 'Verse & chorus full chord strum · C–G–Am–F (I–V–vi–IV)', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
-        originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
-        tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Capo 1 play-along · Am–C–Dm–F–G/B', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
-        originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
-        tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
-      { name: '"Let Her Go" — Passenger', meta: 'G–D–Em–C — same family of chords', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=RBumgq5yVrA',
-        tutorialUrl: 'https://www.youtube.com/watch?v=u8eloQtLxhY' },
-      { name: '"No Woman No Cry" — Bob Marley', meta: 'C–G–Am–F — beautiful and rhythmic', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=IT8XvzIfi4U',
-        tutorialUrl: 'https://www.youtube.com/watch?v=qK4NutAn3rg' },
-      { name: '"With or Without You" — U2', meta: 'D–A–Bm–G — similar progression, different key', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=ujNeHIo7oTE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=XSOn0BQ4Rcc' },
-      { name: '"Africa" — Toto', meta: 'Simplified C–G–Am–F version', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=FTQbiNvZqaY',
-        tutorialUrl: 'https://www.youtube.com/watch?v=JFM7vN8AHLQ' },
-      { name: '"Riptide" — Vance Joy', meta: 'Am–G–C — three-chord wonder', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=uJ_1HMAGb4k',
-        tutorialUrl: 'https://www.youtube.com/watch?v=4pmK0x6mY0I' },
-      { name: '"Someone Like You" — Adele', meta: 'A–E–F#m–D — same structure, different key', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=hLQl3WQQoQ0',
-        tutorialUrl: 'https://www.youtube.com/watch?v=csNqCXc_Vng' }
-    ],
-
     assessment: {
       goal: 'Frets C, F, Am, G with clean tone · Switches C to G in time at 70 BPM · Switches Am to F in time at 70 BPM · Uses common-finger pivot (Am–C) · Strums a down-up pattern in time · Plays a full verse of a C–G–Am–F song',
       performance: 'Class or partner: play a full verse of "Let It Be" with open chords and down-up strum. Teacher listens for clean transitions.',
@@ -604,39 +549,6 @@ SETS.push(
         ]
       }
     },
-
-    songs: [
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · open-chord version', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
-        originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: '◐ optional stretch · D–A–Em strummed adaptation', type: 'Supp', core: false, journeyUrl: 'tabs/seven-nation-army.html',
-        originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
-        tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Verse vamp F–Am (+ Dm–C) · strummed', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
-        originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
-        tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
-      { name: '"Stand By Me" — Ben E. King', meta: 'G–Em–C–D · great Group 1↔2 cross-group song', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=hwZNL7QVJjE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=TXLElO_YYiY' },
-      { name: '"Country Roads" — John Denver', meta: 'G–Em–C–D — perfect cross-group song', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=1vrEljMfXYo',
-        tutorialUrl: 'https://www.youtube.com/watch?v=TRP3eHbIZnw' },
-      { name: '"Hey Jude" — The Beatles', meta: 'Simplified F–C–Bb (adapted to G–D–Em)', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=A_MjCqQoLLA',
-        tutorialUrl: 'https://www.youtube.com/watch?v=VyleoeWxbIQ' },
-      { name: '"Sweet Home Alabama" — Lynyrd Skynyrd', meta: 'D–C–G — classic rock chords', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=-35W_FWCT9Q',
-        tutorialUrl: 'https://www.youtube.com/watch?v=GafriAIHtZ4' },
-      { name: '"Tenerife Sea" — Ed Sheeran', meta: 'D–A–Bm–G — smooth chord flow', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=oJaTEvynJ8M',
-        tutorialUrl: 'https://www.youtube.com/watch?v=-AGGbJcUKSk' },
-      { name: '"More Than Words" — Extreme', meta: 'G–D–Em–Am–C–D — full chord workout', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=UrIiLvg58SY',
-        tutorialUrl: 'https://www.youtube.com/watch?v=REkxm9eRdwA' },
-      { name: '"Shallow" — Lady Gaga', meta: 'Em–D–G–C–Am–D — challenge song', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=bo_efYhYU2A',
-        tutorialUrl: 'https://www.youtube.com/watch?v=wocQ8UHN5kQ' }
-    ],
 
     assessment: {
       goal: 'Frets D, A, Em, Bm with clean tone · Switches D to A in time · Switches Em to Bm in time · Connects Group 1 and Group 2 chords · Plays a song using Group 2 chords · Identifies chord group from a chord chart',
@@ -843,36 +755,6 @@ SETS.push(
       }
     },
 
-    songs: [
-      { name: '"Happy Birthday"', meta: 'Full chord arrangement — all groups reviewed (optional)', type: 'Supp', core: false,
-        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Full-song showcase · F–Am–Dm–C', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
-        originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
-        tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Optional showcase · D–C–G power chords (from Module 3)', type: 'Supp', core: false, journeyUrl: 'tabs/sweet-child-o-mine.html',
-        originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full performance with open chords', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
-        originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Hallelujah" — Leonard Cohen', meta: 'C–Am–F–G — beautiful showcase song', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=ttEMYvpoR-k',
-        tutorialUrl: 'https://www.youtube.com/watch?v=eFLJUspLfnk' },
-      { name: '"Creep" — Radiohead', meta: 'G–B–C–Cm — emotional and memorable', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=XFkzRNyygfk',
-        tutorialUrl: 'https://www.youtube.com/watch?v=ZD2iYBg6faQ' },
-      { name: '"The Sound of Silence" — Simon & Garfunkel', meta: 'Am–G–C — quiet and expressive', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=l0q7MLPo-u8',
-        tutorialUrl: 'https://www.youtube.com/watch?v=HItFqkAznHw' },
-      { name: '"Iris" — Goo Goo Dolls', meta: 'Bm–D–G — powerful chorus chords', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=NdYWuo9OFAw',
-        tutorialUrl: 'https://www.youtube.com/watch?v=XWsBCiF3MTE' },
-      { name: '"Blackbird" — The Beatles', meta: 'Fingerpicking challenge — advanced option', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=Man4Xw8Xypo',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Qqw15309knU' },
-      { name: 'Student original using course skills', meta: 'Your own composition — any chords from the semester', type: 'Choice', core: false }
-    ],
-
     assessment: {
       goal: 'Semester Showcase: Perform one complete song of your choice using at least 4 chords from the semester. Evaluated on chord accuracy, timing, smooth transitions, and musicality. (Separate and ungraded: your written "My Guitar Adventure — Semester 1 Check-in" reflection — just for you, not part of the showcase score.)',
       performance: 'Semester showcase performance. Student performs chosen song for class. Teacher evaluates chord accuracy, timing, transitions, and expression.',
@@ -905,6 +787,46 @@ SETS.push(
   }
 
 ); // end module-5.js
+
+globalThis.MODULE_SONGS = globalThis.MODULE_SONGS || {};
+MODULE_SONGS[5] = [
+      { name: '"Let It Be" — The Beatles', meta: 'Verse & chorus full chord strum · C–G–Am–F (I–V–vi–IV)', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
+        originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
+        tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8' },
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full performance with open chords', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
+        originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
+        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Capo 1 play-along · Am–C–Dm–F–G/B', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+        originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
+        tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
+      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Full-song showcase · F–Am–Dm–C', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+        originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
+        tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
+      { name: '"Happy Birthday"', meta: 'Full chord arrangement — all groups reviewed (optional)', type: 'Supp', core: false,
+        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
+      { name: '"Seven Nation Army" — The White Stripes', meta: '◐ optional stretch · D–A–Em strummed adaptation', type: 'Supp', core: false, journeyUrl: 'tabs/seven-nation-army.html',
+        originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
+        tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Optional showcase · D–C–G power chords (from Module 3)', type: 'Supp', core: false, journeyUrl: 'tabs/sweet-child-o-mine.html',
+        originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
+        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
+      { name: '"Riptide" — Vance Joy', meta: 'Am–G–C — three-chord wonder', type: 'Choice', core: false, level: 1,
+        originalUrl: 'https://www.youtube.com/watch?v=uJ_1HMAGb4k',
+        tutorialUrl: 'https://www.youtube.com/watch?v=4pmK0x6mY0I' },
+      { name: '"No Woman No Cry" — Bob Marley', meta: 'C–G–Am–F — beautiful and rhythmic', type: 'Choice', core: false, level: 2,
+        originalUrl: 'https://www.youtube.com/watch?v=IT8XvzIfi4U',
+        tutorialUrl: 'https://www.youtube.com/watch?v=qK4NutAn3rg' },
+      { name: '"Ella Baila Sola" — Eslabon Armado × Peso Pluma', meta: 'Capo 1 · Em–D–C–B7 vamp — current sierreño hit', type: 'Choice', core: false, level: 2,
+        originalUrl: 'https://www.youtube.com/watch?v=lZiaYpD9ZrI',
+        tutorialUrl: 'https://www.youtube.com/watch?v=fciArjRISjc' },
+      { name: '"Hallelujah" — Leonard Cohen', meta: 'C–Am–F–G — beautiful showcase song', type: 'Choice', core: false, level: 2,
+        originalUrl: 'https://www.youtube.com/watch?v=ttEMYvpoR-k',
+        tutorialUrl: 'https://www.youtube.com/watch?v=eFLJUspLfnk' },
+      { name: '"Shallow" — Lady Gaga', meta: 'Em–D–G–C–Am–D — challenge song', type: 'Choice', core: false, level: 3,
+        originalUrl: 'https://www.youtube.com/watch?v=bo_efYhYU2A',
+        tutorialUrl: 'https://www.youtube.com/watch?v=wocQ8UHN5kQ' },
+      { name: '🎤 Class request — a song you want to learn', meta: 'Bring a song you want to learn · we\'ll work it in as a class', type: 'Choice', core: false }
+    ];
 
 MODULE_REVIEWS[5] = {
   moduleNum: 5,

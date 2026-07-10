@@ -172,33 +172,6 @@ SETS.push(
       }
     },
 
-    songs: [
-      { name: '"Brown Eyed Girl" — Van Morrison', meta: 'G–C–G–D · classic 8th-note down-up strum', type: 'Core', core: true,
-        originalUrl: 'https://www.youtube.com/watch?v=UfmkgQRmmeE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=v-EGJOz-Mek' },
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · steady down-up over chord changes', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
-        originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Knockin\' on Heaven\'s Door" — Dylan', meta: 'G–D–Am–C · slow tempo, perfect for first strum patterns', type: 'Core', core: true,
-        originalUrl: 'https://www.youtube.com/watch?v=rm9coqlk8fY',
-        tutorialUrl: 'https://www.youtube.com/watch?v=pWIL4N6QZ-Y' },
-      { name: '"Stand By Me" — Ben E. King', meta: 'G–Em–C–D · slow, even strum', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=hwZNL7QVJjE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=TXLElO_YYiY' },
-      { name: '"Three Little Birds" — Bob Marley', meta: 'A–D–E · light reggae upstrokes', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=HNBCVM4KbUM',
-        tutorialUrl: 'https://www.youtube.com/watch?v=61pk1YH9Lu0' },
-      { name: '"Bad Moon Rising" — CCR', meta: 'D–A–G · driving down-up rhythm', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=5BmEGm-mraE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=liBI2yT_fpw' },
-      { name: '"Achy Breaky Heart" — Billy Ray Cyrus', meta: 'A–E · only 2 chords, pure strum focus', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=byQIPdHMpjc',
-        tutorialUrl: 'https://www.youtube.com/watch?v=esZhlB61Uis' },
-      { name: '"You Are My Sunshine" — folk standard', meta: 'C–F–G · classic, simple, slow', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=ckKeQNCyPBU',
-        tutorialUrl: 'https://www.youtube.com/watch?v=APqpmK72lIs' }
-    ],
-
     assessment: {
       goal: 'Keeps a steady down-up 8th-note pulse for 8+ bars · Counts "1 + 2 + 3 + 4 +" aloud while strumming · Switches between Em and Am without stopping the strum hand · Strums evenly (downstrokes and upstrokes same volume)',
       performance: 'Class strums Em for 4 bars, then Am for 4 bars, with a steady down-up pulse at 60 BPM. Everyone counts aloud. Teacher listens for the strum hand never stopping.',
@@ -394,32 +367,6 @@ SETS.push(
         ]
       }
     },
-
-    songs: [
-      { name: '"Oye Mi Amor" — Maná', meta: 'Syncopated Latin strum on the verse · Bm (partial barre)–G', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
-        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
-      { name: '"Happy Birthday"', meta: 'Apply D-DU-UDU to C–G–Am–F arrangement', type: 'Core', core: true,
-        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"I\'m Yours" — Jason Mraz', meta: 'G–D–Em–C · iconic D-DU-UDU strum', type: 'Core', core: true,
-        originalUrl: 'https://www.youtube.com/watch?v=EkHTsc9PU2A',
-        tutorialUrl: 'https://www.youtube.com/watch?v=6ugeJWAMz6w' },
-      { name: '"Wonderwall" — Oasis', meta: 'Em7–G–D–C · classic strum pattern with accents', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=6hzrDeceEKc',
-        tutorialUrl: 'https://www.youtube.com/watch?v=5V81btmYxgE' },
-      { name: '"Free Fallin\'" — Tom Petty', meta: 'D–Dsus4–A · steady down-up with accents', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=1lWJXDG2i0A',
-        tutorialUrl: 'https://www.youtube.com/watch?v=HSwaGGa6HAM' },
-      { name: '"Hey Soul Sister" — Train', meta: 'C–G–Am–F · upbeat D-DU-UDU', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=kVpv8-5XWOI',
-        tutorialUrl: 'https://www.youtube.com/watch?v=iFMEYCSPpDg' },
-      { name: '"Riptide" — Vance Joy', meta: 'Am–G–C · perfect groove pattern', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=uJ_1HMAGb4k',
-        tutorialUrl: 'https://www.youtube.com/watch?v=4pmK0x6mY0I' },
-      { name: '"Let It Be" — The Beatles', meta: 'C–G–Am–F · slow, even pattern', type: 'Choice', core: false, level: 2, journeyUrl: 'tabs/let-it-be.html',
-        originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
-        tutorialUrl: 'https://www.youtube.com/watch?v=gGt0akED_UU' }
-    ],
 
     assessment: {
       goal: 'Plays the D-DU-UDU pattern cleanly at 70 BPM · Accents beats 2 and 4 (backbeat) · Keeps pattern steady through a chord change · Applies pattern to a real song',
@@ -627,36 +574,6 @@ SETS.push(
       }
     },
 
-    songs: [
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Try it folk-style, then rock-style — same chords, different feel', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
-        originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Three Little Birds" — Bob Marley', meta: 'A–D–E · classic reggae offbeat strum', type: 'Core', core: true,
-        originalUrl: 'https://www.youtube.com/watch?v=HNBCVM4KbUM',
-        tutorialUrl: 'https://www.youtube.com/watch?v=61pk1YH9Lu0' },
-      { name: '"Bad Moon Rising" — CCR', meta: 'D–A–G · driving rock-style strum', type: 'Core', core: true,
-        originalUrl: 'https://www.youtube.com/watch?v=5BmEGm-mraE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=liBI2yT_fpw' },
-      { name: '"Tu Boda" — Oscar Maydon × Fuerza Regida', meta: 'Corrido / sierreño strum · current Spanish-language style', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=_ymicn0_GYc',
-        tutorialUrl: 'https://www.youtube.com/watch?v=AlElh28IumI' },
-      { name: '"Wagon Wheel" — Old Crow Medicine Show', meta: 'G–D–Em–C · folk strum classic', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=1gX1EP6mG-E',
-        tutorialUrl: 'https://www.youtube.com/watch?v=zx3Tv5uBAaE' },
-      { name: '"Stir It Up" — Bob Marley', meta: 'A–D–E · slow reggae upstrokes', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=1hwL3S3Gtzs',
-        tutorialUrl: 'https://www.youtube.com/watch?v=IYmWSehv5KE' },
-      { name: '"Folsom Prison Blues" — Johnny Cash', meta: 'E–A–B · driving country/rock strum', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=AeZRYhLDLeU',
-        tutorialUrl: 'https://www.youtube.com/watch?v=szdTIPVLwa4' },
-      { name: '"House of the Rising Sun" — The Animals', meta: 'Am–C–D–F · arpeggiated strum challenge', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=N4bFqW_eu2I',
-        tutorialUrl: 'https://www.youtube.com/watch?v=q9dyAQLYybU' },
-      { name: '"Buffalo Soldier" — Bob Marley', meta: 'Bm–G–D–A · reggae offbeat practice', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=uMUQMSXLlHM',
-        tutorialUrl: 'https://www.youtube.com/watch?v=rNSq3E3KfMk' }
-    ],
-
     assessment: {
       goal: 'Plays folk, rock, and reggae strum styles on demand · Switches between two patterns mid-song · Chooses a pattern that fits a song\'s style · Applies pattern to a full chord progression',
       performance: 'Solo: pick one song and one strum style (folk, rock, or reggae). Play 8 bars with that pattern. Then switch to a different style for the next 8 bars. Same chords, two feels.',
@@ -687,6 +604,49 @@ SETS.push(
   }
 
 ); // end module-6.js
+
+globalThis.MODULE_SONGS = globalThis.MODULE_SONGS || {};
+MODULE_SONGS[6] = [
+      { name: '"Brown Eyed Girl" — Van Morrison', meta: 'G–C–G–D · classic 8th-note down-up strum', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=UfmkgQRmmeE',
+        tutorialUrl: 'https://www.youtube.com/watch?v=v-EGJOz-Mek' },
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · steady down-up over chord changes', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
+        originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
+        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
+      { name: '"Knockin\' on Heaven\'s Door" — Dylan', meta: 'G–D–Am–C · slow tempo, perfect for first strum patterns', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=rm9coqlk8fY',
+        tutorialUrl: 'https://www.youtube.com/watch?v=pWIL4N6QZ-Y' },
+      { name: '"Happy Birthday"', meta: 'Apply D-DU-UDU to C–G–Am–F arrangement', type: 'Core', core: true,
+        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
+      { name: '"I\'m Yours" — Jason Mraz', meta: 'G–D–Em–C · iconic D-DU-UDU strum', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=EkHTsc9PU2A',
+        tutorialUrl: 'https://www.youtube.com/watch?v=6ugeJWAMz6w' },
+      { name: '"Three Little Birds" — Bob Marley', meta: 'A–D–E · classic reggae offbeat strum', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=HNBCVM4KbUM',
+        tutorialUrl: 'https://www.youtube.com/watch?v=61pk1YH9Lu0' },
+      { name: '"Bad Moon Rising" — CCR', meta: 'D–A–G · driving rock-style strum', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=5BmEGm-mraE',
+        tutorialUrl: 'https://www.youtube.com/watch?v=liBI2yT_fpw' },
+      { name: '"Let It Be" — The Beatles', meta: 'C–G–Am–F · slow, even pattern', type: 'Choice', core: false, level: 2, journeyUrl: 'tabs/let-it-be.html',
+        originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
+        tutorialUrl: 'https://www.youtube.com/watch?v=gGt0akED_UU' },
+      { name: '"Oye Mi Amor" — Maná', meta: 'Syncopated Latin strum on the verse · Bm (partial barre)–G', type: 'Choice', core: false, level: 2,
+        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
+        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
+      { name: '"Tu Boda" — Oscar Maydon × Fuerza Regida', meta: 'Corrido / sierreño strum · current Spanish-language style', type: 'Choice', core: false, level: 3,
+        originalUrl: 'https://www.youtube.com/watch?v=_ymicn0_GYc',
+        tutorialUrl: 'https://www.youtube.com/watch?v=AlElh28IumI' },
+      { name: '"Wonderwall" — Oasis', meta: 'Em7–G–D–C · classic strum pattern with accents', type: 'Choice', core: false, level: 2,
+        originalUrl: 'https://www.youtube.com/watch?v=6hzrDeceEKc',
+        tutorialUrl: 'https://www.youtube.com/watch?v=5V81btmYxgE' },
+      { name: '"Wagon Wheel" — Old Crow Medicine Show', meta: 'G–D–Em–C · folk strum classic', type: 'Choice', core: false, level: 2,
+        originalUrl: 'https://www.youtube.com/watch?v=1gX1EP6mG-E',
+        tutorialUrl: 'https://www.youtube.com/watch?v=zx3Tv5uBAaE' },
+      { name: '"Buffalo Soldier" — Bob Marley', meta: 'Bm–G–D–A · reggae offbeat practice', type: 'Choice', core: false, level: 2,
+        originalUrl: 'https://www.youtube.com/watch?v=uMUQMSXLlHM',
+        tutorialUrl: 'https://www.youtube.com/watch?v=rNSq3E3KfMk' },
+      { name: '🎤 Class request — a song you want to learn', meta: 'Bring a song you want to learn · we\'ll work it in as a class', type: 'Choice', core: false }
+    ];
 
 MODULE_REVIEWS[6] = {
   moduleNum: 6,

@@ -5,6 +5,25 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-09 — One curated song list per module, plus new Spanish-language picks
+
+### Added
+- **Three new Spanish-language songs**: "La Bamba" (Ritchie Valens) in Module
+  2, "De Música Ligera" (Soda Stereo) in Module 3, and "Ella Baila Sola"
+  (Eslabon Armado × Peso Pluma) in Module 5 — every module now has at least
+  one Spanish-language song to choose from.
+- **"Just Like Heaven" by The Cure** joins Module 8's fingerpicking song list.
+- **A "🎤 Class request" slot in every module's song list** — a standing spot
+  to bring in a song you want to learn as a class.
+
+### Changed
+- **Each module now has one combined "🎵 Songs" list** instead of a separate,
+  shorter list buried in every individual set — easier to browse, and it
+  collapses out of the way when you don't need it.
+- **Trimmed each module's optional song picks down to a tighter, stronger
+  five** so the list is easier to choose from, cutting songs that were doing
+  the same job as a stronger pick already on the list.
+
 ## 2026-07-09 — Easier to use with a keyboard and screen reader
 
 ### Changed

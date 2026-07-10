@@ -173,33 +173,6 @@ SETS.push(
       }
     },
 
-    songs: [
-      { name: '"Smoke on the Water" — Deep Purple', meta: 'Iconic 2-note TAB riff · A + D strings', type: 'Core', core: true,
-        originalUrl: 'https://www.youtube.com/watch?v=Q2FzZSBD5LE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=tCQ0r7vqkFQ' },
-      { name: '"Crazy Train" — Ozzy Osbourne', meta: 'Fast intro riff · alternate picking practice', type: 'Core', core: true,
-        originalUrl: 'https://www.youtube.com/watch?v=FVovq9TGBw0',
-        tutorialUrl: 'https://www.youtube.com/watch?v=61YCfNHZuHE' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Single-note riff with rhythm variations', type: 'Core', core: true,
-        originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
-        tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Iron Man" — Black Sabbath', meta: 'Slow, heavy riff · perfect for rhythm reading', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=iFgqckcGpDA',
-        tutorialUrl: 'https://www.youtube.com/watch?v=TSxIMjP5lkM' },
-      { name: '"Sunshine of Your Love" — Cream', meta: 'Classic rock riff in E', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=HbqQL0J_Vr0',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Ouo2Ek2S_Lo' },
-      { name: '"Day Tripper" — The Beatles', meta: 'Iconic 8th-note riff', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=AYZlME0mQB8',
-        tutorialUrl: 'https://www.youtube.com/watch?v=aEop5yAw1wU' },
-      { name: '"Beat It" — Michael Jackson', meta: 'Intro riff in E minor', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=oRdxUFDoQe0',
-        tutorialUrl: 'https://www.youtube.com/watch?v=jJfwgrDcH3A' },
-      { name: '"Come As You Are" — Nirvana', meta: 'Low-string riff · clear rhythm', type: 'Choice', core: false, level: 1,
-        originalUrl: 'https://www.youtube.com/watch?v=vabnZ9-ex7o',
-        tutorialUrl: 'https://www.youtube.com/watch?v=3UV1CtIUOmU' }
-    ],
-
     assessment: {
       goal: 'Reads stacked-number TAB (chords) · Reads rhythm symbols above TAB · Plays a real riff that mixes notes and double-stops · Identifies hammer-on / pull-off / slide markings',
       performance: 'Class plays "Smoke on the Water" riff in unison at 70 BPM. Teacher listens for both notes ringing together evenly on every double-stop.',
@@ -392,36 +365,6 @@ SETS.push(
         ]
       }
     },
-
-    songs: [
-      { name: '"Hey Jude" — The Beatles', meta: 'F major in the chorus · perfect E-shape barre application', type: 'Core', core: true,
-        originalUrl: 'https://www.youtube.com/watch?v=A_MjCqQoLLA',
-        tutorialUrl: 'https://www.youtube.com/watch?v=VyleoeWxbIQ' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Full barre Bm in the chorus (instead of the simplified shape)', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
-        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
-      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Full barre F in the vamp (instead of the little F)', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
-        originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
-        tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
-      { name: '"Wonderwall" — Oasis', meta: 'Easier with barre chords once you have them down', type: 'Core', core: true,
-        originalUrl: 'https://www.youtube.com/watch?v=6hzrDeceEKc',
-        tutorialUrl: 'https://www.youtube.com/watch?v=5V81btmYxgE' },
-      { name: '"Hotel California" — Eagles', meta: 'Bm–F#–A–E·G–D–Em–F# · lots of barre practice', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=09839DpTctU',
-        tutorialUrl: 'https://www.youtube.com/watch?v=JIDdI-AtK-Q' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Barre the D–C–G verse · intro riff = late-semester stretch goal', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
-        originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
-      { name: '"21 Guns" — Green Day', meta: 'Dm–Bb–F–C · F barre in chorus', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=r00ikilDxW4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=YUw1eQUArTc' },
-      { name: '"Mad World" — Gary Jules / Tears for Fears', meta: 'Em–G–D–A · barre chord workout', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=etSbOs3aUqI',
-        tutorialUrl: 'https://www.youtube.com/watch?v=r-rvJsxhkQM' },
-      { name: '"Roxanne" — The Police', meta: 'G–Em–F#m–D7 · classic E-shape barre song', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=3T1c7GkzRQQ',
-        tutorialUrl: 'https://www.youtube.com/watch?v=3wUzjMcdYmk' }
-    ],
 
     assessment: {
       goal: 'Bars all 6 strings cleanly with index finger · Forms E-shape barre with no buzzing · Plays F, G, A barre chords cleanly · Names a barre chord by its root note on string 6 · Switches between two barre chords in time',
@@ -646,37 +589,6 @@ SETS.push(
       }
     },
 
-    songs: [
-      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · use barre shapes for all three', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
-        originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Full barre-chord progression · Bm–G', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
-        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Barre the D–C–G verse', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
-        originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
-      { name: '"Tu Boda" — Oscar Maydon × Fuerza Regida', meta: 'Barre-chord sierreño progression', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=_ymicn0_GYc',
-        tutorialUrl: 'https://www.youtube.com/watch?v=AlElh28IumI' },
-      { name: '"Happy Birthday"', meta: 'Play it entirely with barre chords this time', type: 'Core', core: true,
-        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Songbird" — Oasis', meta: 'G–Em–C–D · easy barre practice', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=0KJgBkreAuw' },
-      { name: '"Boulevard of Broken Dreams" — Green Day', meta: 'Em–G–D–A · power chord + barre combo', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=Soa3gO7tL-c',
-        tutorialUrl: 'https://www.youtube.com/watch?v=dxMFex_yAjQ' },
-      { name: '"Every Breath You Take" — The Police', meta: 'A–F#m–D–E · barre workout', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=OMOGaugKpzs',
-        tutorialUrl: 'https://www.youtube.com/watch?v=kiw_wzMx8UU' },
-      { name: '"Zombie" — The Cranberries', meta: 'Em–C–G–D · mix open and barre', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=6Ejga4kJUts',
-        tutorialUrl: 'https://www.youtube.com/watch?v=uGMybMuDKAU' },
-      { name: '"Photograph" — Ed Sheeran', meta: 'E–B–C#m–A · A-shape barre everywhere', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=nSDgHBxUbVQ',
-        tutorialUrl: 'https://www.youtube.com/watch?v=4FYojqHn4EI' }
-    ],
-
     assessment: {
       goal: 'Forms A-shape barre cleanly · Plays Bb, B, C as A-shape barre · Names an A-shape barre by its root on string 5 · Switches between E-shape and A-shape barre in a progression · Plays a full song using only barre chords',
       performance: 'Solo: play a 4-chord progression (e.g., F-C-G-D or Am-G-F-C) entirely with barre chords, 2 bars each, at 60 BPM. Teacher listens for clean tone on every chord.',
@@ -711,6 +623,52 @@ SETS.push(
   }
 
 ); // end module-7.js
+
+globalThis.MODULE_SONGS = globalThis.MODULE_SONGS || {};
+MODULE_SONGS[7] = [
+      { name: '"Smoke on the Water" — Deep Purple', meta: 'Iconic 2-note TAB riff · A + D strings', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=Q2FzZSBD5LE',
+        tutorialUrl: 'https://www.youtube.com/watch?v=tCQ0r7vqkFQ' },
+      { name: '"Crazy Train" — Ozzy Osbourne', meta: 'Fast intro riff · alternate picking practice', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=FVovq9TGBw0',
+        tutorialUrl: 'https://www.youtube.com/watch?v=61YCfNHZuHE' },
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'Single-note riff with rhythm variations', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
+        tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
+      { name: '"Hey Jude" — The Beatles', meta: 'F major in the chorus · perfect E-shape barre application', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=A_MjCqQoLLA',
+        tutorialUrl: 'https://www.youtube.com/watch?v=VyleoeWxbIQ' },
+      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Full barre F in the vamp (instead of the little F)', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+        originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
+        tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
+      { name: '"Wonderwall" — Oasis', meta: 'Easier with barre chords once you have them down', type: 'Core', core: true,
+        originalUrl: 'https://www.youtube.com/watch?v=6hzrDeceEKc',
+        tutorialUrl: 'https://www.youtube.com/watch?v=5V81btmYxgE' },
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Barre the D–C–G verse · intro riff = late-semester stretch goal', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
+        originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
+        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
+      { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · use barre shapes for all three', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
+        originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
+        tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
+      { name: '"Happy Birthday"', meta: 'Play it entirely with barre chords', type: 'Core', core: true,
+        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
+      { name: '"Oye Mi Amor" — Maná', meta: 'Full barre-chord progression · Bm–G', type: 'Choice', core: false, level: 3,
+        originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
+        tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
+      { name: '"Tu Boda" — Oscar Maydon × Fuerza Regida', meta: 'Barre-chord sierreño progression', type: 'Choice', core: false, level: 3,
+        originalUrl: 'https://www.youtube.com/watch?v=_ymicn0_GYc',
+        tutorialUrl: 'https://www.youtube.com/watch?v=AlElh28IumI' },
+      { name: '"Hotel California" — Eagles', meta: 'Bm–F#–A–E·G–D–Em–F# · lots of barre practice', type: 'Choice', core: false, level: 3,
+        originalUrl: 'https://www.youtube.com/watch?v=09839DpTctU',
+        tutorialUrl: 'https://www.youtube.com/watch?v=JIDdI-AtK-Q' },
+      { name: '"Zombie" — The Cranberries', meta: 'Em–C–G–D · mix open and barre', type: 'Choice', core: false, level: 2,
+        originalUrl: 'https://www.youtube.com/watch?v=6Ejga4kJUts',
+        tutorialUrl: 'https://www.youtube.com/watch?v=uGMybMuDKAU' },
+      { name: '"Mad World" — Gary Jules / Tears for Fears', meta: 'Em–G–D–A · barre chord workout', type: 'Choice', core: false, level: 2,
+        originalUrl: 'https://www.youtube.com/watch?v=etSbOs3aUqI',
+        tutorialUrl: 'https://www.youtube.com/watch?v=r-rvJsxhkQM' },
+      { name: '🎤 Class request — a song you want to learn', meta: 'Bring a song you want to learn · we\'ll work it in as a class', type: 'Choice', core: false }
+    ];
 
 MODULE_REVIEWS[7] = {
   moduleNum: 7,

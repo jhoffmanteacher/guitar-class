@@ -124,6 +124,17 @@ async function ensureModuleRendered(num){
     div.innerHTML=buildModuleReview(mr);
     c.appendChild(div);
   }
+  // Module-level "🎵 Songs" collapsible, appended after this module's panels
+  // (modules 2–8 only; module 1 keeps its per-set song tabs via buildSet).
+  if(num!==1){
+    const songsHtml = buildModuleSongs(num);
+    if(songsHtml){
+      const div=document.createElement('div');
+      div.className='module-songs'; div.dataset.module=num;
+      div.innerHTML=songsHtml;
+      c.appendChild(div);
+    }
+  }
   // Idempotent: already-wrapped spans are skipped (see CHORD_SKIP_CLASSES).
   wrapAllChordLinks();
 }
@@ -1360,6 +1371,9 @@ function activateSet(id){
   lastSetId = id;
   document.querySelectorAll('.wpill').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   document.querySelectorAll('.week-panel').forEach(p=>p.classList.toggle('active',p.dataset.id===id));
+  // Show the module-level Songs section only for the active set's module.
+  const activeMod = /^mr\d+$/.test(id) ? parseInt(id.slice(2)) : (SETS.find(x=>x.id===id)||{}).moduleNum;
+  document.querySelectorAll('.module-songs').forEach(el=>el.classList.toggle('active', parseInt(el.dataset.module)===activeMod));
   renderChordBoxes();
 }
 
@@ -1394,7 +1408,7 @@ function buildSet(w){
   return `<div class="obj-card set-head">${pill}${titleHtml}${skills}</div>
   <div class="tabs">
     <div class="tabs-songbar">
-      <button type="button" class="tabs-songs tab-songs" onclick="switchTab(this,'${w.id}','songs')">&#9835; Songs</button>
+      ${w.songs ? `<button type="button" class="tabs-songs tab-songs" onclick="switchTab(this,'${w.id}','songs')">&#9835; Songs</button>` : ''}
     </div>
     <div class="tabs-main">
       <div class="tabs-stations-col">
@@ -1416,7 +1430,7 @@ function buildSet(w){
   </div>
   <div id="${w.id}-station-b" class="tab-panel tp-station-b active">${buildStations(w,'b')}</div>
   <div id="${w.id}-station-c" class="tab-panel tp-station-c">${buildStations(w,'c')}</div>
-  <div id="${w.id}-songs"    class="tab-panel tp-songs">${buildSongs(w)}</div>
+  <div id="${w.id}-songs"    class="tab-panel tp-songs">${w.songs ? buildSongs(w) : ''}</div>
   <div id="${w.id}-checklist" class="tab-panel tp-checklist">${buildChecklist(w)}</div>`;
 }
 
@@ -1607,6 +1621,50 @@ function buildSongs(w){
   const requestSlot = `<div class="song-row song-request"><div class="song-request-ico">&#x1F3A4;</div><div><div class="sname">Class request — suggest a song!</div><div class="smeta">Got a song you want to learn? Tell Mr. Hoffman and it might join the Choice menu next semester.</div></div></div>`;
   const diffLegend = `<div class="leg"><span class="song-diff diff-1">&#x25CF;<span class="song-diff-empty">&#x25CB;&#x25CB;</span></span>&#x2192;<span class="song-diff diff-3">&#x25CF;&#x25CF;&#x25CF;</span> easier &#x2192; harder</div>`;
   return `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>Core — everyone</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu — pick 1</div>${diffLegend}</div><div class="card">${rows}${requestSlot}</div>`;
+}
+
+/* Module-level songs (modules 2–8): one consolidated "🎵 Songs" list per module,
+   read from MODULE_SONGS[num] and rendered as a collapsible .sc-sec section after
+   the module's set panels (see ensureModuleRendered). Module 1 keeps its per-set
+   lists via buildSongs above. Returns '' if the module has no song list. */
+function buildModuleSongs(moduleNum){
+  const list = (globalThis.MODULE_SONGS && MODULE_SONGS[moduleNum]) || [];
+  if(!list.length) return '';
+  const rows = list.map((s,i)=>{
+    // The 🎤 class-request entry renders as the dashed prompt row, not a song card.
+    if(typeof s.name === 'string' && s.name.indexOf('\u{1F3A4}') === 0){
+      return `<div class="song-row song-request"><div class="song-request-ico">&#x1F3A4;</div><div><div class="sname">${s.name.replace(/^\u{1F3A4}\s*/u,'')}</div><div class="smeta">${s.meta||''}</div></div></div>`;
+    }
+    const vids = [];
+    if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="loadModuleSongVid(${moduleNum},${i},'original')" title="Opens in YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:11px;opacity:0.6">&#x2197;</span></button>`);
+    if(s.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="loadModuleSongVid(${moduleNum},${i},'tutorial')"><span class="svb-play">&#x25B6;</span>Tutorial</button>`);
+    if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="loadModuleSongVid(${moduleNum},${i},'backing')" title="Jam track to solo over"><span class="svb-play">&#x25B6;</span>&#x1F3B5; Backing track${s.backingKey?` (${s.backingKey})`:''}</button>`);
+    if(s.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="One song, five layers">&#x1F9F5; Song Journey</button>`);
+    const vidsEl = vids.length ? `<div class="song-vids">${vids.join('')}</div>` : '';
+    return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div><div class="sname">${s.name}</div><div class="smeta">${diffDotsHtml(s.level)}${s.meta}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${s.type}</span></div>`;
+  }).join('');
+  const diffLegend = `<div class="leg"><span class="song-diff diff-1">&#x25CF;<span class="song-diff-empty">&#x25CB;&#x25CB;</span></span>&#x2192;<span class="song-diff diff-3">&#x25CF;&#x25CF;&#x25CF;</span> easier &#x2192; harder</div>`;
+  const legend = `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>Core — everyone</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu — pick 1</div>${diffLegend}</div>`;
+  // Collapsible section — reuses the Station B/C collapse (toggleStationSection);
+  // starts closed so it sits quietly below the set content.
+  return `<div class="sc-sec">
+      <button type="button" class="sc-sec-head" aria-expanded="false" onclick="toggleStationSection(this)">
+        <span class="sc-sec-chev">&#x25B6;</span>
+        <span class="sc-sec-title">&#x1F3B5; Songs</span>
+      </button>
+      <div class="sc-sec-body">${legend}<div class="card">${rows}</div></div>
+    </div>`;
+}
+
+// Video links for a module-level song (mirrors loadSongVid, but indexes MODULE_SONGS).
+function loadModuleSongVid(moduleNum, idx, kind){
+  const list = (globalThis.MODULE_SONGS && MODULE_SONGS[moduleNum]) || [];
+  const s = list[idx]; if(!s) return;
+  const url = kind==='tutorial' ? s.tutorialUrl : kind==='backing' ? s.backingUrl : s.originalUrl;
+  if(!url) return;
+  if(kind==='original'){ window.open(url, '_blank', 'noopener'); return; }
+  if(kind==='backing'){ loadPanel('youtube', url, s.name, 'Backing track — already loops, just hit play and solo'); return; }
+  loadPanel('youtube', url, s.name, 'Solo tutorial');
 }
 
 function loadSong(wid, idx){

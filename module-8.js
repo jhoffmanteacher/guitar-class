@@ -178,36 +178,6 @@ SETS.push(
       }
     },
 
-    songs: [
-      { name: '"House of the Rising Sun" — The Animals', meta: 'Am–C–D–F · classic fingerpicked arpeggios', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=N4bFqW_eu2I',
-        tutorialUrl: 'https://www.youtube.com/watch?v=q9dyAQLYybU' },
-      { name: '"Dust in the Wind" — Kansas', meta: 'Travis picking · gold standard for fingerpicking', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=tH2w6Oxx0kQ',
-        tutorialUrl: 'https://www.youtube.com/watch?v=u_D7GsckLYA' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Fingerpick the verse for a soft feel · Am–C–F', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
-        originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
-        tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
-      { name: '"Sailor Song" — Gigi Perez', meta: 'Fingerpicked verse · capo IV (G-shapes)', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=1lrFsXkT_rM',
-        tutorialUrl: 'https://www.youtube.com/watch?v=rpoyXduMZZw' },
-      { name: '"Hallelujah" — Leonard Cohen / Jeff Buckley', meta: 'C–Am–F–G · gentle fingerpicked arpeggios', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=ttEMYvpoR-k',
-        tutorialUrl: 'https://www.youtube.com/watch?v=eFLJUspLfnk' },
-      { name: '"Nothing Else Matters" — Metallica', meta: 'Em–D–C · open string fingerpicking intro', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=tAGnKpE4NCI',
-        tutorialUrl: 'https://www.youtube.com/watch?v=7silbMA9UME' },
-      { name: '"Stairway to Heaven" — Led Zeppelin', meta: 'Am–C–D–Fmaj7 · iconic fingerpicked intro', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=QkF3oxziUI4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=0RybdmubxzY' },
-      { name: '"Tears in Heaven" — Eric Clapton', meta: 'A–E–F#m–D · classic fingerstyle ballad', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=JxPj3GAYYZ0',
-        tutorialUrl: 'https://www.youtube.com/watch?v=iS9kWyI1dxw' },
-      { name: '"The Sound of Silence" — Simon & Garfunkel', meta: 'Am–G–C · gentle picking', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=l0q7MLPo-u8',
-        tutorialUrl: 'https://www.youtube.com/watch?v=HItFqkAznHw' }
-    ],
-
     assessment: {
       goal: 'Holds correct fingerpicking hand position · Assigns p to bass, i-m-a to G-B-e · Plucks each open string with the correct finger · Plays through p-i-m-a in order without looking',
       performance: 'Class plays p-i-m-a on open strings in unison at 60 BPM for 8 reps. Teacher walks the room and checks each student\'s hand position.',
@@ -412,39 +382,6 @@ SETS.push(
         ]
       }
     },
-
-    songs: [
-      { name: '"House of the Rising Sun" — The Animals', meta: 'Am–C–D–F · pure 6-note arpeggios per chord', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=N4bFqW_eu2I',
-        tutorialUrl: 'https://www.youtube.com/watch?v=q9dyAQLYybU' },
-      { name: '"Hallelujah" — Leonard Cohen / Jeff Buckley', meta: 'C–Am–F–G · gentle p-i-m-a arpeggios', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=ttEMYvpoR-k',
-        tutorialUrl: 'https://www.youtube.com/watch?v=eFLJUspLfnk' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Soft verse fingerpicked · Am–C–F', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
-        originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
-        tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
-      { name: '"Sailor Song" — Gigi Perez', meta: 'Fingerpicked verse · capo IV (G-shapes)', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=1lrFsXkT_rM',
-        tutorialUrl: 'https://www.youtube.com/watch?v=rpoyXduMZZw' },
-      { name: '"Tu Boda" — Oscar Maydon × Fuerza Regida', meta: 'Sierreño-style fingerpicking', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=_ymicn0_GYc',
-        tutorialUrl: 'https://www.youtube.com/watch?v=AlElh28IumI' },
-      { name: '"Wish You Were Here" — Pink Floyd', meta: 'Em–G–Am–C · fingerpicked arpeggios + strum', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=IXdNnw99-Ic',
-        tutorialUrl: 'https://www.youtube.com/watch?v=IzxMeQgtyYE' },
-      { name: '"Time of Your Life" — Green Day', meta: 'G–C–D · simple fingerpicked verse', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=CnQ8N1KacJc',
-        tutorialUrl: 'https://www.youtube.com/watch?v=uD_iA34SmgM' },
-      { name: '"Mad World" — Gary Jules / Tears for Fears', meta: 'Em–G–D–A · slow fingerpicked feel', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=etSbOs3aUqI',
-        tutorialUrl: 'https://www.youtube.com/watch?v=r-rvJsxhkQM' },
-      { name: '"Hotel California" — Eagles', meta: 'Bm–F#–A–E · classic 12-string fingerpicked intro', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=09839DpTctU',
-        tutorialUrl: 'https://www.youtube.com/watch?v=JIDdI-AtK-Q' },
-      { name: '"Blackbird" — The Beatles', meta: 'Advanced · alternating thumb + melody (CHALLENGE)', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=Man4Xw8Xypo',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Qqw15309knU' }
-    ],
 
     assessment: {
       goal: 'Plays p-i-m-a-m-i pattern cleanly over one chord · Even volume across all fingers · Pattern stays steady at 70 BPM · Adapts to a different chord by moving only the thumb',
@@ -653,39 +590,6 @@ SETS.push(
       }
     },
 
-    songs: [
-      { name: '"House of the Rising Sun" — The Animals', meta: 'Am–C–D–F–Am–C–E–E · the classic fingerpicked song', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=N4bFqW_eu2I',
-        tutorialUrl: 'https://www.youtube.com/watch?v=q9dyAQLYybU' },
-      { name: '"Hallelujah" — Leonard Cohen / Jeff Buckley', meta: 'C–Am–F–G · slow tempo, perfect performance choice', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=ttEMYvpoR-k',
-        tutorialUrl: 'https://www.youtube.com/watch?v=eFLJUspLfnk' },
-      { name: '"Let It Be" — The Beatles', meta: 'Fingerpick the verse · C–G–Am–F', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
-        originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
-        tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8' },
-      { name: '"Sailor Song" — Gigi Perez', meta: 'Fingerpicked verse · capo IV (G-shapes)', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=1lrFsXkT_rM',
-        tutorialUrl: 'https://www.youtube.com/watch?v=rpoyXduMZZw' },
-      { name: '"Tu Boda" — Oscar Maydon × Fuerza Regida', meta: 'Sierreño-style fingerpicking', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=_ymicn0_GYc',
-        tutorialUrl: 'https://www.youtube.com/watch?v=AlElh28IumI' },
-      { name: '"Dust in the Wind" — Kansas', meta: 'Pure Travis picking · advanced but iconic', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=tH2w6Oxx0kQ',
-        tutorialUrl: 'https://www.youtube.com/watch?v=u_D7GsckLYA' },
-      { name: '"Tears in Heaven" — Eric Clapton', meta: 'A–E–F#m–D · gentle fingerpicked ballad', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=JxPj3GAYYZ0',
-        tutorialUrl: 'https://www.youtube.com/watch?v=iS9kWyI1dxw' },
-      { name: '"Time of Your Life" — Green Day', meta: 'G–C–D · simple progression, easy to perform', type: 'Choice', core: false, level: 2,
-        originalUrl: 'https://www.youtube.com/watch?v=CnQ8N1KacJc',
-        tutorialUrl: 'https://www.youtube.com/watch?v=uD_iA34SmgM' },
-      { name: '"Landslide" — Fleetwood Mac', meta: 'C–G/B–Am–G · classic fingerpicked song', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=WM7-PYtXtJM',
-        tutorialUrl: 'https://www.youtube.com/watch?v=mLHQUDjQ23g' },
-      { name: '"Blackbird" — The Beatles', meta: 'Advanced fingerpicking · semester capstone challenge', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=Man4Xw8Xypo',
-        tutorialUrl: 'https://www.youtube.com/watch?v=Qqw15309knU' }
-    ],
-
     assessment: {
       goal: 'Fingerpicks through a full 4-chord progression · Pattern stays steady through chord changes · Demonstrates Travis picking (alternating bass thumb) · Performs one full fingerpicked song from start to finish',
       performance: 'Solo or paired: perform one full song from the song list using fingerpicking from start to finish. Teacher evaluates pattern consistency, chord changes, and timing.',
@@ -716,6 +620,32 @@ SETS.push(
   }
 
 ); // end module-8.js
+
+globalThis.MODULE_SONGS = globalThis.MODULE_SONGS || {};
+MODULE_SONGS[8] = [
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Fingerpick the verse for a soft feel · Am–C–F', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+        originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
+        tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
+      { name: '"Let It Be" — The Beatles', meta: 'Fingerpick the verse · C–G–Am–F', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
+        originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
+        tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8' },
+      { name: '"House of the Rising Sun" — The Animals', meta: 'Am–C–D–F–Am–C–E–E · the classic fingerpicked song', type: 'Choice', core: false, level: 2,
+        originalUrl: 'https://www.youtube.com/watch?v=N4bFqW_eu2I',
+        tutorialUrl: 'https://www.youtube.com/watch?v=q9dyAQLYybU' },
+      { name: '"Sailor Song" — Gigi Perez', meta: 'Fingerpicked verse · capo IV (G-shapes)', type: 'Choice', core: false, level: 3,
+        originalUrl: 'https://www.youtube.com/watch?v=1lrFsXkT_rM',
+        tutorialUrl: 'https://www.youtube.com/watch?v=rpoyXduMZZw' },
+      { name: '"Blackbird" — The Beatles', meta: 'Advanced fingerpicking · semester capstone challenge', type: 'Choice', core: false, level: 3,
+        originalUrl: 'https://www.youtube.com/watch?v=Man4Xw8Xypo',
+        tutorialUrl: 'https://www.youtube.com/watch?v=Qqw15309knU' },
+      { name: '"Tu Boda" — Oscar Maydon × Fuerza Regida', meta: 'Sierreño-style fingerpicking', type: 'Choice', core: false, level: 3,
+        originalUrl: 'https://www.youtube.com/watch?v=_ymicn0_GYc',
+        tutorialUrl: 'https://www.youtube.com/watch?v=AlElh28IumI' },
+      { name: '"Just Like Heaven" — The Cure', meta: 'Iconic arpeggiated intro riff — dreamy chord-picking', type: 'Choice', core: false, level: 2,
+        originalUrl: 'https://www.youtube.com/watch?v=n3nPiBai66M',
+        tutorialUrl: 'https://www.youtube.com/watch?v=fEgsKS_IcQA' },
+      { name: '🎤 Class request — a song you want to learn', meta: 'Bring a song you want to learn · we\'ll work it in as a class', type: 'Choice', core: false }
+    ];
 
 MODULE_REVIEWS[8] = {
   moduleNum: 8,
