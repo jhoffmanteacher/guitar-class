@@ -97,25 +97,25 @@
 
 ## 3. Bigger ideas — worth a dedicated session each
 
-### 3a. A real text-size and spacing system
+### 3a. ✅ DONE 2026-07-11 — A real text-size and spacing system (all 245 font-sizes converted to exact rem — device text-size settings now work; the 6-step visual snap was deliberately skipped to avoid unreviewable visual regressions)
 **What:** The stylesheet currently has **234 font-size declarations, all in pixels, zero in rem** — including oddballs like 12.5px and 15.5px. Pixel sizes ignore the "make text bigger" setting on phones and Chromebooks, which some students genuinely need. The fix: define ~6 named text sizes and ~6 named spacing steps as variables (in rem, headings scaling fluidly between phone and laptop), then sweep the whole stylesheet onto them. Tedious but mechanical; no visual redesign required — most sizes just snap to the nearest step.
 **Where:** `styles.css`, top-to-bottom sweep; the token block goes in `:root` (line 4).
 **Inspired by:** Stripe — hierarchy from a small disciplined scale, not dozens of one-off sizes.
 **Why students notice:** Students who bump up their device's text size finally get bigger text here too (an accessibility win), and the whole site gets subtly more consistent. Also makes every future change easier.
 
-### 3b. A practice streak with a weekly safety net
+### 3b. ❌ CUT by Jonathan 2026-07-11 — A practice streak with a weekly safety net (do not build)
 **What:** Track "days practiced" (a set completed, or a tuner/coach session, counts) in the existing Firestore progress record, and show a small flame + day count in the header. Crucially, include one automatic free pass per week so one busy school night doesn't erase a month — that forgiveness is what keeps it motivating instead of punishing.
 **Where:** `app.js` (progress save already writes to Firestore — add a field), header markup in `index.html`, styles in `styles.css`; localStorage fallback for dev-bypass mode.
 **Inspired by:** Duolingo — streaks are their strongest retention tool, and the "streak freeze" measurably kept discouraged users from quitting.
 **Why students notice:** Between-class practice is the whole ballgame for a guitar class, and this is the single best-proven nudge for it. Needs a real design conversation first (what counts as "practiced"? does the teacher dashboard show streaks?).
 
-### 3c. "One thing per screen" pass on the set pages
+### 3c. ✅ DONE 2026-07-11 — "One thing per screen" pass (structural: hints/stuck/level-up now fold behind tap-to-expand <details>, doers render first; the per-module editorial text trims were deliberately skipped — content stays intact)
 **What:** Set pages are long scrolls where instructions, videos, and drills compete. Restructure so each skill leads with the *thing you do* — the tab player, the "Check me" coach button, the chord diagram — with explanation text trimmed to 1–3 sentences and any background prose collapsed behind a tap-to-expand. No new tech; it's markup discipline in the builders plus edits to wordy steps in the module files.
 **Where:** `app.js` (`buildSet` / `buildStations`), content trims across `module-1.js`–`module-8.js`.
 **Inspired by:** Ableton — one instructional sentence, then a big interactive widget; you're making sound within seconds of arriving. Their minimalism is the whole reason total beginners don't bounce.
 **Why students notice:** A student with 4 minutes and a guitar on their lap gets to the *doing* immediately, on a phone screen, without reading past a wall of text. Biggest payoff of anything here, and the biggest job — it touches every module.
 
-### 3d. A beat cursor for strum patterns and play-alongs
+### 3d. ✅ DONE 2026-07-11 — A beat cursor for TAB play-alongs (each sounding column lights up during ▶ Play; strum-pattern text lines have no structured widget to cursor, so scope is TAB)
 **What:** During any "play along" moment, animate a small cursor stepping across the strum-pattern or TAB in time with the audio, and flash each beat as it sounds — the moving thing is always the thing making noise, and nothing else on the page moves.
 **Where:** `app.js` (`renderTabBlock` already plays notes — extend Play-All to highlight the current column), the strum-line rendering, CSS transforms only.
 **Inspired by:** Ableton — their only animation is the playhead sweeping the grid, perfectly synced to sound. It teaches rhythm without a word of text.

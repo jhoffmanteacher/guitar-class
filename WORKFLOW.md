@@ -132,6 +132,50 @@
       song-building drills. render-test asserts badge presence on m5w2
       and absence on untagged m5w1. DESIGN_UPGRADES.md 2f marked done;
       remaining there: tier 3 only.
+- [x] **Warm-up → Daily 5 + backing-track reference audit ✅ 2026-07-11**
+      (Jonathan's ask). (a) The ~19 generic 'Warm-up — tuning check
+      (Module 1)' Station C sections (modules 3–5, 7–12) now render as a
+      Daily 5 pointer card instead — RENDER-level swap in buildStations'
+      sectionsHtml: the section object stays in the module data so every
+      later section keeps its index (saved response/Mark-done keys are
+      sec-index-based; render-test asserts sec1 numbering survives).
+      First REAL section now opens by default. openDaily5Here() records
+      scrollY, opens/refreshes the panel, scrolls up; the panel gains a
+      '↩ Done — back to my set' button (daily5Return) that closes and
+      scrolls back. Variant warm-ups KEPT deliberately (module-specific
+      content fused in): m2w? 'tune up first (Module 1 review)', m6 ×2
+      'tune + recall…', m11w3 'tuning check + Finger Gym' — flag to
+      Jonathan if he wants those swapped too. Module 1 untouched (tuning
+      IS its content). Hidden steps carried no skills/responses (scanned).
+      (b) Backing-track reference audit: the 2026-07-09 song-list
+      consolidation deleted the per-set song cards these texts pointed
+      at ('▶ 🎵 Backing track on the Watchtower card below'). All 8
+      stale references (6 in module-4 incl. MODULE_REVIEWS[4].performance,
+      2 in module-5's m5w4 victory lap) fixed: improv steps now EMBED the
+      real jam-track URL as an in-step ▶ 🎵 button (step-text YouTube
+      anchors render as mini-player buttons; URLs reused verbatim from
+      MODULE_SONGS[4] — Am=Vq8cApzOdy8, Luna Dm=wBxFnX_V9mQ — no new
+      IDs invented), with 'more in the 🎵 Songs list at the bottom of
+      this module' wording where choice matters. Site-wide grep confirms
+      zero 'card below'/'song cards' references remain. Full link check
+      passes (160 reachable).
+- [x] **Design tier 3 ✅ 2026-07-11** (Jonathan: do all except 3b, which is
+      CUT — do not build the practice streak). 3a: all 245 font-size
+      declarations (styles.css + inline templates) converted px → exact
+      rem so device text-size settings work; the plan's 6-step visual
+      snap deliberately skipped (would visually change dozens of elements
+      unreviewably) — noted in DESIGN_UPGRADES.md as a possible later
+      cosmetic pass. 3c (structural form): stepsHtml reordered doers-
+      first (playSeq/chords/TAB/response, then prose); hint and stuck/
+      levelUp fold behind native <details class="step-fold"> chips;
+      beforeprint/afterprint handlers open/restore folds so printed
+      handouts show everything; the plan's editorial per-module text
+      trims deliberately skipped (content untouched). 3d: renderTabBlock
+      cells + note buttons carry data-seq (offset threaded across
+      phrases); playSequence sweeps .beat-now across the owning .tab
+      during playback, cleared in stopPlaySeq; playSeq buttons without a
+      TAB simply have no cursor. DESIGN_UPGRADES.md fully annotated —
+      every plan item now ✅ done or ❌ cut; the plan is closed.
 - [x] **Second review round ✅ 2026-07-11** — 8-angle adversarial review of
       9eee1d0..HEAD (Sem-2 content + 14-fix round + design pass): 24 raw
       findings → 16 deduped, ALL fixed and pushed. Correctness: stale-

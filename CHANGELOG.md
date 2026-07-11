@@ -5,6 +5,39 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — Warm-ups route through the Daily 5, and jam tracks are one tap away
+
+### Changed
+- **Practice stations no longer start with the same tuning drill.** The
+  generic "tune all 6 strings" warm-up at the top of most practice
+  stations is replaced by a pointer to **today's ⚡ Daily 5** — which
+  starts with the tune-up anyway, plus a finger warm-up and one drill
+  from your module. Open it with one tap, and a **"↩ Done — back to my
+  set"** button drops you right back where you were. (Warm-ups that
+  teach something module-specific — like Module 6's strum recall —
+  stay.)
+- **Jam tracks are now IN the step.** Improv challenges used to say
+  "hit ▶ Backing track on the card below" — pointing at song cards that
+  moved months ago. Every one of those steps now carries its own
+  ▶ 🎵 jam-track button right where you need it (and points to the
+  module's 🎵 Songs list for more).
+
+## 2026-07-11 — Cleaner steps, a moving beat cursor, and text that scales
+
+### Changed
+- **Steps lead with the doing.** Play buttons, chord diagrams, TAB, and
+  your response boxes now come first in every step; the hint and the
+  "Stuck?" / "Level up" coaching fold behind small tap-to-open chips —
+  there when you want them, never burying the thing you're supposed to
+  play. (Printed handouts still show everything.)
+- **The TAB follows along.** Press ▶ Play on any TAB and the sounding
+  column lights up as it plays — you can *see* where you are in the
+  line, which is half of learning to read rhythm.
+- **Your device's text-size setting works now.** If you make text bigger
+  on your phone or Chromebook, the whole site respects it — every text
+  size was converted from fixed pixels to scalable units, with zero
+  visual change at the default setting.
+
 ## 2026-07-11 — Follow-up fix round from a full review
 
 ### Changed

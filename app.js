@@ -26,7 +26,7 @@
       close.setAttribute('aria-label','Dismiss');
       close.textContent = '×';
       close.style.cssText = 'position:absolute;top:8px;right:12px;background:none;border:0;'
-        + 'color:#fff;font-size:20px;line-height:1;cursor:pointer';
+        + 'color:#fff;font-size:1.25rem;line-height:1;cursor:pointer';
       close.onclick = () => d.remove();
       d.append(msg, refresh, close);
       (document.body || document.documentElement).appendChild(d);
@@ -651,12 +651,13 @@ function localNoteSvg(kind, fret, note){
    fret numbers placed on the relevant string and a row of clickable
    note-name buttons below that play the corresponding pitch. */
 const TAB_STRINGS = ['e','B','G','D','A','E'];
-function renderTabBlock(notes){
+function renderTabBlock(notes, seqOffset){
   if (!notes || !notes.length) return '';
+  const off = seqOffset || 0;   // sequential index across phrases — the beat cursor's address
   const cols = notes.length;
   const rows = TAB_STRINGS.map(strLabel => {
     const cells = [`<div class="tab-str-label">${strLabel}</div>`];
-    notes.forEach(n => {
+    notes.forEach((n, ci) => {
       let fret;
       if (Array.isArray(n.frets)) {
         const hit = n.frets.find(([s]) => s === strLabel);
@@ -665,18 +666,18 @@ function renderTabBlock(notes){
         fret = n.fret;
       }
       if (fret !== undefined) {
-        cells.push(`<div class="tab-cell"><span class="tab-fret">${escHtml(String(fret))}</span></div>`);
+        cells.push(`<div class="tab-cell" data-seq="${off + ci}"><span class="tab-fret">${escHtml(String(fret))}</span></div>`);
       } else {
-        cells.push('<div class="tab-cell"></div>');
+        cells.push(`<div class="tab-cell" data-seq="${off + ci}"></div>`);
       }
     });
     return cells.join('');
   }).join('');
   const noteBtns = ['<div></div>'];
-  notes.forEach(n => {
+  notes.forEach((n, ci) => {
     const midis = (Array.isArray(n.midi) ? n.midi : [n.midi]).map(Number);
     const midisAttr = escAttr(JSON.stringify(midis));
-    noteBtns.push(`<button type="button" class="tab-note-btn" data-midis="${midisAttr}" onclick="playBeat(this)" title="Play ${escAttr(n.note)}">${escHtml(n.note)}<span class="tab-spkr">&#x1F50A;</span></button>`);
+    noteBtns.push(`<button type="button" class="tab-note-btn" data-seq="${off + ci}" data-midis="${midisAttr}" onclick="playBeat(this)" title="Play ${escAttr(n.note)}">${escHtml(n.note)}<span class="tab-spkr">&#x1F50A;</span></button>`);
   });
   return `
     <div class="tab-board">
@@ -730,11 +731,16 @@ function buildTab(spec, opts){
       `</span></div>`;
   }
   if (spec.phrases && spec.phrases.length) {
-    const blocks = spec.phrases.map(p => `
+    let seqOff = 0;
+    const blocks = spec.phrases.map(p => {
+      const block = `
       <div class="tab-phrase">
         ${p.label ? `<div class="tab-phrase-label">${escHtml(p.label)}</div>` : ''}
-        ${renderTabBlock(p.notes)}
-      </div>`).join('');
+        ${renderTabBlock(p.notes, seqOff)}
+      </div>`;
+      seqOff += (p.notes || []).length;
+      return block;
+    }).join('');
     return `<div class="tab">${headHtml}<div class="tab-body">${captionHtml}${controlsHtml}${blocks}</div></div>`;
   }
   const body = renderTabBlock(spec.notes);
@@ -1504,6 +1510,18 @@ function switchTab(el,wid,tab){
    station panels (regardless of which tab is open) and hides the songs/
    checklist tabs and all on-screen chrome — so this just fires the dialog. */
 function printSet(wid){ window.print(); }
+/* Printed handouts must show the collapsed hint/stuck/level-up prose —
+   closed <details> hide their content from print, so open them for the
+   print pass and restore afterwards. */
+let _printOpened = [];
+window.addEventListener('beforeprint', ()=>{
+  _printOpened = [...document.querySelectorAll('details.step-fold:not([open])')];
+  _printOpened.forEach(d=>d.setAttribute('open',''));
+});
+window.addEventListener('afterprint', ()=>{
+  _printOpened.forEach(d=>d.removeAttribute('open'));
+  _printOpened = [];
+});
 
 /* ── Stations ── */
 function buildStations(w, stationId){
@@ -1512,18 +1530,23 @@ function buildStations(w, stationId){
       const safe=label.replace(/'/g,"\\'");
       // data-ext links can't be embedded (official recordings block it) — open on YouTube in a new tab.
       if(/data-ext/.test(attrs)){
-        return `<button class="rp-trigger" onclick="window.open('${url}','_blank','noopener')" title="Opens on YouTube in a new tab">&#x25B6; ${label} <span style="font-size:11px;opacity:0.6">&#x2197;</span></button>`;
+        return `<button class="rp-trigger" onclick="window.open('${url}','_blank','noopener')" title="Opens on YouTube in a new tab">&#x25B6; ${label} <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`;
       }
       return `<button class="rp-trigger" onclick="loadPanel('youtube','${url}','${safe}','YouTube')">&#x25B6; ${label}</button>`;
     });
+    /* One-thing-per-screen: the challenge text and the DOER (play buttons,
+       diagrams, TAB, responses) stay visible; supporting prose (hint, stuck,
+       level-up) collapses behind native <details> — one tap away, never
+       competing with the thing the student is supposed to do. */
     const hintHtml = s.hint ? (()=>{
       const bullets = s.hint.split(/(?<=\.(?=\s))(?=\s*[A-Z])|\n/).map(b=>b.trim()).filter(Boolean);
-      if(bullets.length <= 1) return `<div class="sh">${s.hint}</div>`;
-      return `<ul class="sh-list">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
+      const inner = bullets.length <= 1 ? `<div class="sh">${s.hint}</div>`
+        : `<ul class="sh-list">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
+      return `<details class="step-fold step-hint-fold"><summary>&#x1F4A1; Hint</summary>${inner}</details>`;
     })() : '';
     const branchHtml = (s.stuck || s.levelUp) ? `<div class="step-branches">`
-      + (s.stuck ? `<div class="step-branch step-stuck"><span class="step-branch-tag">&#x1FA9C; Stuck?</span> ${s.stuck}</div>` : '')
-      + (s.levelUp ? `<div class="step-branch step-levelup"><span class="step-branch-tag">&#x1F336;&#xFE0F; Level up</span> ${s.levelUp}</div>` : '')
+      + (s.stuck ? `<details class="step-fold step-stuck-fold"><summary>&#x1FA9C; Stuck?</summary><div class="step-branch step-stuck">${s.stuck}</div></details>` : '')
+      + (s.levelUp ? `<details class="step-fold step-levelup-fold"><summary>&#x1F336;&#xFE0F; Level up</summary><div class="step-branch step-levelup">${s.levelUp}</div></details>` : '')
       + `</div>` : '';
     const chordsHtml = (s.chords&&s.chords.length)
       ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}${c.name?`<div class="chord-box-label">${c.name}</div>`:''}</div>`).join('')}</div>` + coachChordBtnRowHtml(s.chords)
@@ -1588,19 +1611,30 @@ function buildStations(w, stationId){
     const isDone = completed[doneKey] === true;
     const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${isDone ? '&#x2713; Done' : 'Mark done'}</button></div>`;
     const skillsAttr = (s.skills && s.skills.length) ? ` data-skills="${s.skills.join(',')}"` : '';
-    return `<li class="step${isDone ? ' step-done' : ''}"${skillsAttr}><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${hintHtml}${branchHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div>${doneBtn}</div></li>`;
+    return `<li class="step${isDone ? ' step-done' : ''}"${skillsAttr}><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml}${hintHtml}${branchHtml} ${readBtn}</div>${doneBtn}</div></li>`;
   }).join('');
-  const sectionsHtml=(sections,baseNs)=>sections.map((sec,gi)=>{
+  /* Generic tuning warm-up sections are superseded by the Daily 5 (which
+     starts with the tune-up): render a pointer card in their slot instead.
+     The section object STAYS in the data so every later section keeps its
+     index — saved responses and Mark-done state are keyed on it. */
+  const isTuningWarmup = sec => sec.title === 'Warm-up — tuning check (Module 1)' && w.moduleNum !== 1;
+  const sectionsHtml=(sections,baseNs)=>{
+    const firstReal = sections.findIndex(sec => !isTuningWarmup(sec));
+    return sections.map((sec,gi)=>{
+    if(isTuningWarmup(sec)){
+      return `<div class="daily5-inline">&#x26A1; <strong>Warm up first:</strong> today\u2019s Daily 5 has your tune-up, a finger warm-up, and one drill from this module \u2014 five minutes and your hands are ready. <button type="button" class="daily5-inline-btn" onclick="openDaily5Here()">&#x26A1; Open today\u2019s Daily 5</button></div>`;
+    }
     const ns = `${baseNs}-sec${gi}`;
-    const open = gi===0 ? ' open' : '';
+    const open = gi===firstReal ? ' open' : '';
     return `<div class="sc-sec${open}">
-      <button type="button" class="sc-sec-head" aria-expanded="${gi===0}" onclick="toggleStationSection(this)">
+      <button type="button" class="sc-sec-head" aria-expanded="${gi===firstReal}" onclick="toggleStationSection(this)">
         <span class="sc-sec-chev">&#x25B6;</span>
         <span class="sc-sec-title"><span class="sc-sec-num">${gi+1}</span>${sec.title}</span>
       </button>
       <div class="sc-sec-body"><ul class="steps">${stepsHtml(sec.steps, ns)}</ul></div>
     </div>`;
   }).join('');
+  };
   const dp=(id,cls,badge,badgeClass,s)=>{
     const body = (s.sections && s.sections.length)
       ? `<div class="sc-sections">${sectionsHtml(s.sections, id)}</div>`
@@ -1676,7 +1710,7 @@ function buildSongs(w){
   const rows=w.songs.map((s,i)=>{
     const nameEl = s.url ? `<button class="rp-trigger" onclick="loadSong('${w.id}',${i})">${s.name}</button>` : s.name;
     const vids = [];
-    if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="loadSongVid('${w.id}',${i},'original')" title="Opens in YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:11px;opacity:0.6">&#x2197;</span></button>`);
+    if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="loadSongVid('${w.id}',${i},'original')" title="Opens in YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
     if(s.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="loadSongVid('${w.id}',${i},'tutorial')"><span class="svb-play">&#x25B6;</span>Tutorial</button>`);
     if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="loadSongVid('${w.id}',${i},'backing')" title="Jam track to solo over"><span class="svb-play">&#x25B6;</span>&#x1F3B5; Backing track${s.backingKey?` (${s.backingKey})`:''}</button>`);
     // Song Journey pages are same-origin (tabs/*.html), opened in a new tab so app state stays put.
@@ -1698,7 +1732,7 @@ function buildModuleSongs(moduleNum){
   if(!list.length) return '';
   const rows = list.map((s,i)=>{
     const vids = [];
-    if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="loadModuleSongVid(${moduleNum},${i},'original')" title="Opens in YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:11px;opacity:0.6">&#x2197;</span></button>`);
+    if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="loadModuleSongVid(${moduleNum},${i},'original')" title="Opens in YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
     if(s.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="loadModuleSongVid(${moduleNum},${i},'tutorial')"><span class="svb-play">&#x25B6;</span>Tutorial</button>`);
     if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="loadModuleSongVid(${moduleNum},${i},'backing')" title="Jam track to solo over"><span class="svb-play">&#x25B6;</span>&#x1F3B5; Backing track${s.backingKey?` (${s.backingKey})`:''}</button>`);
     if(s.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="One song, five layers">&#x1F9F5; Song Journey</button>`);
@@ -1844,7 +1878,8 @@ function buildDaily5(){
   const challenge=`<details class="daily5-break"><summary>&#x1F3D4; On a break? The 15-Day Challenge</summary>
     <p class="daily5-break-note">Five minutes a day keeps your hands ready between Modules 8 and 9 (or any time off). One line a day:</p>
     <ol class="daily5-challenge">${WINTER_CHALLENGE.map(t=>`<li>${escHtml(t)}</li>`).join('')}</ol></details>`;
-  return `<div class="daily5-head"><span>&#x26A1; Daily 5 &mdash; today’s warm-up</span><button type="button" class="tp-close" onclick="toggleDaily5()" aria-label="Close Daily 5">&#x2715;</button></div>
+  const backBtn = _daily5ReturnY!=null ? `<button type="button" class="daily5-back" onclick="daily5Return()">&#x21A9; Done — back to my set</button>` : '';
+  return `<div class="daily5-head"><span>&#x26A1; Daily 5 &mdash; today’s warm-up</span><span style="display:flex;gap:10px;align-items:center">${backBtn}<button type="button" class="tp-close" onclick="toggleDaily5()" aria-label="Close Daily 5">&#x2715;</button></span></div>
     <ol class="routine-list">${items}</ol>${challenge}`;
 }
 function toggleDaily5(){
@@ -1852,8 +1887,23 @@ function toggleDaily5(){
   const btn=document.getElementById('daily5-btn');
   const open=p.hasAttribute('hidden');
   if(open){ closeTopPanels('daily5'); p.innerHTML=buildDaily5(); p.removeAttribute('hidden'); }
-  else { p.setAttribute('hidden',''); }
+  else { p.setAttribute('hidden',''); _daily5ReturnY=null; }
   if(btn) btn.setAttribute('aria-expanded', open?'true':'false');
+}
+/* Station C's warm-up card: open the Daily 5 (top of page) and remember where
+   the student was, so the panel can offer a one-tap trip back down. */
+let _daily5ReturnY=null;
+function openDaily5Here(){
+  _daily5ReturnY=window.scrollY;
+  const p=document.getElementById('daily5-panel');
+  if(p.hasAttribute('hidden')) toggleDaily5();
+  else p.innerHTML=buildDaily5();   // refresh so the return button appears
+  p.scrollIntoView({behavior:'smooth', block:'start'});
+}
+function daily5Return(){
+  const y=_daily5ReturnY; _daily5ReturnY=null;
+  toggleDaily5();   // close
+  if(y!=null) window.scrollTo({top:y, behavior:'smooth'});
 }
 
 /* ── Module Review (self-assessment) ── */
@@ -2117,7 +2167,7 @@ function downloadRec(moduleNum){
 
 /* ── Checklist ── */
 function buildChecklist(w){
-  if(!w.skills||w.skills.length===0) return '<p style="font-size:15px;color:var(--text2);padding:12px 0">No skills listed for this set yet.</p>';
+  if(!w.skills||w.skills.length===0) return '<p style="font-size:0.9375rem;color:var(--text2);padding:12px 0">No skills listed for this set yet.</p>';
   const done=w.skills.filter(s=>progress[s.id]==='gotit').length;
   const pct=Math.round(done/w.skills.length*100);
   const wkSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="var(--amber-text)" stroke-width="1.5"/><path d="M6 4v2.2l1.4 1.4" stroke="var(--amber-text)" stroke-width="1.5" stroke-linecap="round"/></svg>`;
@@ -2388,6 +2438,9 @@ function stopPlaySeq(){
     playSeqState.btn.innerHTML = playSeqState.idleHtml || '&#x25B6; Play all';
     playSeqState.btn.classList.remove('playing');
   }
+  if(playSeqState.tabRoot){
+    playSeqState.tabRoot.querySelectorAll('.beat-now').forEach(el=>el.classList.remove('beat-now'));
+  }
   playSeqState = null;
 }
 /* Kill every site-generated sound (demo sequences, chord strums, metronome
@@ -2409,12 +2462,19 @@ function playSequence(midis, bpm, btnEl){
   }
   if(window.coachMicLive) return;  // but no NEW demo audio while the Coach listens
   const interval = 60000 / (bpm || 60);
+  /* Beat cursor: when the button lives inside a TAB, highlight the sounding
+     column — the moving thing is the thing making noise (Ableton's rule). */
+  const tabRoot = btnEl ? btnEl.closest('.tab') : null;
   const timeouts = midis.map((m, i) => setTimeout(() => {
     (Array.isArray(m) ? m : [m]).forEach(x => playNote(Number(x)));
+    if(tabRoot){
+      tabRoot.querySelectorAll('.beat-now').forEach(el=>el.classList.remove('beat-now'));
+      tabRoot.querySelectorAll(`[data-seq="${i}"]`).forEach(el=>el.classList.add('beat-now'));
+    }
   }, i * interval));
   timeouts.push(setTimeout(stopPlaySeq, midis.length * interval));
   const idleHtml = btnEl ? btnEl.innerHTML : null;
-  playSeqState = { timeouts, btn: btnEl, idleHtml };
+  playSeqState = { timeouts, btn: btnEl, idleHtml, tabRoot };
   if(btnEl){
     btnEl.innerHTML = '&#x23F8; Stop';
     btnEl.classList.add('playing');
@@ -2871,7 +2931,7 @@ async function toggleSongsHub(){
     if(sg.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'journey')" title="One song, five layers">&#x1F9F5; Song Journey</button>`);
     if(sg.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="songsHubVid(${idx},'tutorial')"><span class="svb-play">&#x25B6;</span>Tutorial</button>`);
     if(sg.backingUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'backing')"><span class="svb-play">&#x25B6;</span>&#x1F3B5; Backing${sg.backingKey ? ` (${escHtml(sg.backingKey)})` : ''}</button>`);
-    if(sg.originalUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'original')" title="Opens on YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:11px;opacity:0.6">&#x2197;</span></button>`);
+    if(sg.originalUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'original')" title="Opens on YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
     return `<div class="song-row"><div class="dot ${sg.core ? 'dc' : 'dch'}"></div>
       <div><div class="sname">${escHtml(sg.name)}</div><div class="smeta">${sg.meta ? escHtml(sg.meta) + ' · ' : ''}Taught in: ${modBtns}</div></div>
       ${vids.length ? `<div class="song-vids">${vids.join('')}</div>` : ''}

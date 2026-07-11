@@ -162,14 +162,14 @@ SETS.push(
             title: 'Improvise your first solo',
             steps: [
           {
-            text: 'Challenge 3 — Rule of 3 (give it a go!): improvise using ONLY 3 notes of Pattern 1 for 4 bars over the Am backing track — hit ▶ &#x1F3B5; Backing track on the Watchtower or "the cure" card below. Once those 3 feel like home, add a 4th note and play 4 more bars. No score — aim for short, intentional ideas with space between them.',
+            text: 'Challenge 3 — Rule of 3 (give it a go!): improvise using ONLY 3 notes of Pattern 1 for 4 bars over the Am backing track — <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; Am jam track</a>. Once those 3 feel like home, add a 4th note and play 4 more bars. No score — aim for short, intentional ideas with space between them.',
             hint: 'Limiting yourself to 3 notes forces you to make music with phrasing and rhythm, not note-count. A short, clear idea with silence around it beats a stream of notes.',
             stuck: 'Pick just 2 notes on one string and trade them back and forth, changing only the rhythm — that\'s already improvising.',
             levelUp: 'Add a 4th and 5th note, or end every phrase on the root (A) so each idea "arrives home."',
             skills: [6]
           },
           {
-            text: 'Challenge 4 — The Four-Phrase Plan: use the SAME 3 notes from Rule of 3, but now shape a whole solo with four short phrases — about one bar each, silence between them (the space IS part of the plan). Give each phrase a job: <strong>Phrase 1 — say it</strong> (a tiny idea, 2–4 notes). <strong>Phrase 2 — repeat it</strong> (play that same idea again, maybe with one note changed). <strong>Phrase 3 — stretch it</strong> (take the idea higher, or keep the notes and change the rhythm). <strong>Phrase 4 — come home</strong> (end on the root, A, so the solo lands). Play it over the Am backing track (▶ &#x1F3B5; Backing track on the Watchtower or "the cure" card below). You\'ve got it when: four distinct phrases with space between them, and the last one lands on the root (A).',
+            text: 'Challenge 4 — The Four-Phrase Plan: use the SAME 3 notes from Rule of 3, but now shape a whole solo with four short phrases — about one bar each, silence between them (the space IS part of the plan). Give each phrase a job: <strong>Phrase 1 — say it</strong> (a tiny idea, 2–4 notes). <strong>Phrase 2 — repeat it</strong> (play that same idea again, maybe with one note changed). <strong>Phrase 3 — stretch it</strong> (take the idea higher, or keep the notes and change the rhythm). <strong>Phrase 4 — come home</strong> (end on the root, A, so the solo lands). Play it over the Am backing track — <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; Am jam track</a>. You\'ve got it when: four distinct phrases with space between them, and the last one lands on the root (A).',
             hint: 'This is Rule of 3 with a road map. Say-it / repeat-it / stretch-it / come-home turns three notes into a story with a beginning, middle, and ending — instead of a random string of notes.',
             stuck: 'Make Phrases 1 and 2 EXACTLY the same — note for note. Repeating an idea isn\'t cheating, it\'s how nearly every melody you know works. Your ear is waiting to hear it come back.',
             levelUp: 'Name the four jobs out loud — "say it… repeat it… stretch it… come home" — before you play each phrase, or run the whole plan over the Am backing track and hold the track\'s pulse start to finish.',
@@ -214,7 +214,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which chord in the loop was easiest to solo over, and which fought you?', placeholder: 'e.g. Am easy, F felt weird' }
               },
               {
-                text: 'Challenge — Solo over Luna: Luna lives in F major, and F\'s relative minor is D — so D minor pentatonic Pattern 1 (root D, low E fret 10) is your box: the exact shape you\'ve been drilling, parked at the course\'s highest position. Improvise four bars using only the three notes marked below, then four more adding a fourth note from the box. Hit ▶ &#x1F3B5; Backing track on the Luna card below to jam over. You\'ve got it when: eight bars where every phrase starts or ends on D. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
+                text: 'Challenge — Solo over Luna: Luna lives in F major, and F\'s relative minor is D — so D minor pentatonic Pattern 1 (root D, low E fret 10) is your box: the exact shape you\'ve been drilling, parked at the course\'s highest position. Improvise four bars using only the three notes marked below, then four more adding a fourth note from the box. Jam over <a href="https://www.youtube.com/watch?v=wBxFnX_V9mQ" target="_blank">▶ &#x1F3B5; Luna\'s Dm backing track</a>. You\'ve got it when: eight bars where every phrase starts or ends on D. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
                 hint: 'Same Pattern 1 shape — just at fret 10. This high up, the frets sit closer together, so the stretch is easier than it looks.',
                 stuck: 'Trade just D and F (frets 10 and 13 on the low E) back and forth, changing only the rhythm, until an idea appears.',
                 levelUp: 'End every phrase on D so each idea arrives home — or lean on the F (fret 13) for extra sierreño ache.',
@@ -256,7 +256,7 @@ SETS.push(
 
     assessment: {
       goal: 'Plays minor pentatonic ascending and descending · Plays major pentatonic on E & A strings · Uses alternate picking · Improvises a 2-bar phrase over a backing track · Identifies minor vs major pentatonic by ear',
-      performance: 'Solo: record yourself improvising 4 bars over the Am backing track (Watchtower or "the cure" card), then listen back. Goal is one clear phrase, not speed.',
+      performance: 'Solo: record yourself improvising 4 bars over the Am backing track (any core song\'s ▶ &#x1F3B5; Backing track button in the &#x1F3B5; Songs list at the bottom of Module 4), then listen back. Goal is one clear phrase, not speed.',
       selfCheck: 'Can you play Pattern 1 up and down without stopping? Can you position it for both Am and Em pentatonic?',
       standards: ['Cr.1a', 'Pr.4a', 'Pr.5a']
     },
@@ -406,7 +406,7 @@ SETS.push(
             title: 'Improvise a call-and-response phrase',
             steps: [
           {
-            text: 'Challenge 2 — Call & Response (your assessment piece): over the Am backing track (▶ &#x1F3B5; Backing track on the Watchtower or "the cure" card below), play a 2-bar idea (call), pause 1 bar, then answer with a 2-bar idea (response). You\'ve got it when: the call ends on a non-root note (unresolved) and the response lands on the root (arrives home). This — call-and-response — is one of the two phrasing strategies you\'ll name at your Set 3 assessment.',
+            text: 'Challenge 2 — Call & Response (your assessment piece): over the Am backing track (<a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; Am jam track</a>), play a 2-bar idea (call), pause 1 bar, then answer with a 2-bar idea (response). You\'ve got it when: the call ends on a non-root note (unresolved) and the response lands on the root (arrives home). This — call-and-response — is one of the two phrasing strategies you\'ll name at your Set 3 assessment.',
             hint: 'Think of it like a musical question and answer. The call feels unresolved; the response feels like it arrives somewhere.',
             stuck: 'Use just 2–3 notes for both call and response — end the response on A (the root) every time so the "answer" always lands home.',
             levelUp: 'Record a 2-bar call and answer it live over the playback, or make the call longer than the response so the answer feels like a punchline. (Someone around? Trade: you call, they answer.)',
@@ -661,7 +661,7 @@ SETS.push(
             title: 'Perform your original solo',
             steps: [
           {
-            text: 'Challenge 3 — Perform It (your assessment piece — give it a go!): play your 4-bar solo over a core-song backing track — hit ▶ &#x1F3B5; Backing track on any core song card below (Watchtower, Luna, Seven Nation Army, Sweet Child, or "the cure") — working in at least one hammer-on, pull-off, or vibrato. Record your take, say your phrasing strategy (call-and-response or four-phrase) out loud on the recording, and listen back. You\'ve got it when: you hold the backing track\'s pulse start to finish with no restarts, and you can name your phrasing strategy. Tell a story, don\'t run scales.',
+            text: 'Challenge 3 — Perform It (your assessment piece — give it a go!): play your 4-bar solo over a core-song backing track — start with <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a>, or pick any core song\'s ▶ &#x1F3B5; Backing track in the &#x1F3B5; Songs list at the bottom of this module — working in at least one hammer-on, pull-off, or vibrato. Record your take, say your phrasing strategy (call-and-response or four-phrase) out loud on the recording, and listen back. You\'ve got it when: you hold the backing track\'s pulse start to finish with no restarts, and you can name your phrasing strategy. Tell a story, don\'t run scales.',
             hint: 'Include at least one technique (hammer-on, pull-off, or vibrato) in your solo. Don\'t just run scales — tell a story! Playing for the camera counts as performing, and the playback shows you exactly where to tighten up.',
             stuck: 'Drop the backing track and play your written 4 bars alone, slowly, until they\'re solid — then add the track back and just one technique.',
             levelUp: 'Perform it standing, record a performance take, or play it for someone at home — or transpose your solo to E minor and play it from the open-string box.',
