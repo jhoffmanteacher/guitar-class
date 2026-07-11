@@ -16,14 +16,56 @@ let tunerRunning = false, tunerStream = null, tunerCtx = null,
     tunerAnalyser = null, tunerFreqAnalyser = null, tunerRaf = null,
     tunerHP = null, tunerLP = null,
     tunerLastNote = null, tunerStableCount = 0, tunerSmoothedFreq = 0,
-    tunerTargetString = 'auto';
+    tunerTargetString = 'auto',
+    tunerShownCents = null, tunerInTune = false;
+
+/* Anti-jitter layer: a short rolling-median window sits between the raw
+   per-frame detections and the smoothing/display code. A single bogus frame
+   (octave error, between-pluck noise) can never reach the needle — the
+   median ignores it. A genuinely NEW note (several consecutive far-away
+   readings) resets the window so the display still responds fast. */
+const TUNER_RMS_GATE = 0.006;   // below this the frame is treated as silence
+const TUNER_WINDOW   = 5;       // median window (frames, ~60ms apart)
+const TUNER_JUMP     = 1 / 12;  // "far away" = more than one semitone (log2)
+let tunerFreqWindow = [], tunerJumpCount = 0;
+
+function tunerMedian(arr) {
+  const s = [...arr].sort((a, b) => a - b);
+  return s[Math.floor(s.length / 2)];
+}
+// Push one raw detection; returns the median-stabilised frequency to use,
+// or -1 while a suspected outlier / not-yet-confirmed new note settles.
+function tunerStabilise(freq) {
+  if (tunerFreqWindow.length) {
+    const med = tunerMedian(tunerFreqWindow);
+    if (Math.abs(Math.log2(freq / med)) > TUNER_JUMP) {
+      // Far from the recent consensus: outlier, or a new note starting.
+      tunerJumpCount++;
+      if (tunerJumpCount >= 3) {         // three agreeing frames = real new note
+        tunerFreqWindow = [freq];
+        tunerJumpCount = 0;
+        return freq;
+      }
+      return -1;                          // lone outlier — swallow it
+    }
+  }
+  tunerJumpCount = 0;
+  tunerFreqWindow.push(freq);
+  if (tunerFreqWindow.length > TUNER_WINDOW) tunerFreqWindow.shift();
+  return tunerMedian(tunerFreqWindow);
+}
+function tunerResetSmoothing() {
+  tunerSmoothedFreq = 0; tunerStableCount = 0; tunerLastNote = null;
+  tunerFreqWindow = []; tunerJumpCount = 0;
+  tunerShownCents = null; tunerInTune = false;
+}
 
 function selectTunerString(s) {
   tunerTargetString = s;
   document.querySelectorAll('#tuner-strings .ts-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.string === s);
   });
-  tunerSmoothedFreq = 0; tunerStableCount = 0; tunerLastNote = null;
+  tunerResetSmoothing();
 }
 
 function freqToNoteInfo(freq) {
@@ -116,13 +158,19 @@ function tunerLoop() {
   const timeBuf = new Float32Array(tunerAnalyser.fftSize);
   tunerAnalyser.getFloatTimeDomainData(timeBuf);
 
+  // Volume gate BEFORE the detectors: between plucks the HPS would otherwise
+  // happily report a "pitch" from room noise — the single biggest jitter source.
+  let rmsSum = 0;
+  for (let i = 0; i < timeBuf.length; i++) rmsSum += timeBuf[i] * timeBuf[i];
+  const rms = Math.sqrt(rmsSum / timeBuf.length);
+
   // Get frequency-domain data for HPS
   const freqBuf = new Float32Array(tunerFreqAnalyser.frequencyBinCount);
   tunerFreqAnalyser.getFloatFrequencyData(freqBuf);
 
   // Run both detectors; prefer HPS for low strings, YIN as fallback
-  const freqHPS = detectPitchHPS(freqBuf, tunerCtx.sampleRate, tunerFreqAnalyser.fftSize);
-  const freqYIN = detectPitchYIN(timeBuf, tunerCtx.sampleRate);
+  const freqHPS = rms >= TUNER_RMS_GATE ? detectPitchHPS(freqBuf, tunerCtx.sampleRate, tunerFreqAnalyser.fftSize) : -1;
+  const freqYIN = rms >= TUNER_RMS_GATE ? detectPitchYIN(timeBuf, tunerCtx.sampleRate) : -1;
 
   // Pick the best candidate — if both fire, prefer HPS; if HPS misses, use YIN
   let freq = -1;
@@ -155,13 +203,21 @@ function tunerLoop() {
   const needle   = document.getElementById('tuner-needle');
   const statusEl = document.getElementById('tuner-status');
 
+  // Median-stabilise: lone outlier frames are swallowed here; a real new
+  // note (3 consecutive far readings) resets the window and passes through.
   if (freq > 0) {
-    // Adaptive smoothing: heavy when the new reading is near the smoothed value
-    // (locked), fast when it jumps (new note played).
+    const beforeReset = tunerFreqWindow.length;
+    freq = tunerStabilise(freq);
+    if (freq > 0 && tunerFreqWindow.length === 1 && beforeReset > 1) {
+      tunerSmoothedFreq = 0;   // window was reset — new note, restart the EMA too
+    }
+  }
+
+  if (freq > 0) {
+    // Gentle smoothing on top of the median (the median already killed outliers,
+    // so this only has to iron out sub-cent wobble).
     if (tunerSmoothedFreq > 0) {
-      const drift = Math.abs(Math.log2(freq / tunerSmoothedFreq));
-      const a = drift < (1/12) ? 0.15 : 0.5;
-      tunerSmoothedFreq = tunerSmoothedFreq * (1 - a) + freq * a;
+      tunerSmoothedFreq = tunerSmoothedFreq * 0.75 + freq * 0.25;
     } else {
       tunerSmoothedFreq = freq;
     }
@@ -179,22 +235,35 @@ function tunerLoop() {
       displayName = info.name; displayCents = info.cents; displayHz = info.hz;
     }
 
-    // Only require 1 consecutive frame on the same note before displaying.
+    // Require 2 consecutive frames on the same note name before switching the
+    // display (auto mode) so the readout can't flicker between neighbours.
     if (displayName === tunerLastNote) { tunerStableCount++; }
     else { tunerLastNote = displayName; tunerStableCount = 0; }
 
-    if (tunerStableCount >= 1 || tunerTargetString !== 'auto') {
+    if (tunerStableCount >= 2 || tunerTargetString !== 'auto') {
       noteEl.textContent = displayName;
       freqEl.textContent = displayHz + ' Hz';
+      // Needle hysteresis: ignore sub-2-cent wiggle so the needle settles
+      // instead of trembling (the CSS transition smooths what remains).
       const clamped = Math.max(-50, Math.min(50, displayCents));
-      needle.style.left = (50 + clamped) + '%';
-      if (Math.abs(clamped) < 8) {
+      if (tunerShownCents === null || Math.abs(clamped - tunerShownCents) >= 2 ||
+          (clamped === 0 && tunerShownCents !== 0)) {
+        tunerShownCents = clamped;
+        needle.style.left = (50 + clamped) + '%';
+      }
+      // Sticky in-tune band: enter green inside ±8 cents, only leave it
+      // outside ±11 — hovering on the boundary no longer flickers the verdict.
+      const shown = tunerShownCents;
+      if (tunerInTune ? Math.abs(shown) <= 11 : Math.abs(shown) < 8) {
+        tunerInTune = true;
         needle.style.background = 'var(--green-text)';
         statusEl.textContent = 'In tune ✓'; statusEl.className = 'tuner-status in-tune';
-      } else if (clamped > 0) {
+      } else if (shown > 0) {
+        tunerInTune = false;
         needle.style.background = 'var(--amber-text)';
         statusEl.textContent = 'Sharp — tune down'; statusEl.className = 'tuner-status sharp';
       } else {
+        tunerInTune = false;
         needle.style.background = 'var(--blue-text)';
         statusEl.textContent = 'Flat — tune up'; statusEl.className = 'tuner-status flat';
       }
@@ -203,7 +272,7 @@ function tunerLoop() {
     // No pitch this frame — keep the last reading briefly; only clear on sustained silence.
     tunerStableCount--;
     if (tunerStableCount < -8) {
-      tunerStableCount = 0; tunerLastNote = null; tunerSmoothedFreq = 0;
+      tunerResetSmoothing();
       noteEl.textContent = '—'; freqEl.textContent = 'Play a string…';
       needle.style.left = '50%'; needle.style.background = 'var(--border2)';
       statusEl.textContent = ''; statusEl.className = 'tuner-status';
@@ -245,7 +314,7 @@ async function startTuner() {
     tunerLP.connect(tunerAnalyser);
     tunerLP.connect(tunerFreqAnalyser);
 
-    tunerRunning = true; tunerLastNote = null; tunerStableCount = 0; tunerSmoothedFreq = 0;
+    tunerRunning = true; tunerResetSmoothing();
     document.getElementById('tuner-btn').innerHTML = '&#x23F9; Stop';
     document.getElementById('tuner-freq').textContent = 'Listening…';
     tunerLoop();
@@ -261,7 +330,7 @@ function stopTuner() {
   if (tunerCtx)    tunerCtx.close();
   tunerStream = null; tunerCtx = null; tunerAnalyser = null; tunerFreqAnalyser = null;
   tunerHP = null; tunerLP = null;
-  tunerLastNote = null; tunerStableCount = 0; tunerSmoothedFreq = 0;
+  tunerResetSmoothing();
   const noteEl = document.getElementById('tuner-note');
   const freqEl = document.getElementById('tuner-freq');
   const needle = document.getElementById('tuner-needle');

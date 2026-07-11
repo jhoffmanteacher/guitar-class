@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — The tuner settles down
+
+### Changed
+- **The tuner no longer jitters.** The needle used to tremble and the
+  note name could flicker even while a string rang steadily — it now
+  ignores room noise between plucks, throws away one-off glitch readings,
+  and holds its verdict at the in-tune boundary instead of flip-flopping.
+  It still snaps to a new string in a fraction of a second. Trust the
+  green.
+
 ## 2026-07-11 — You can now actually PLAY the blues
 
 ### Added

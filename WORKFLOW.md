@@ -134,10 +134,29 @@
       11 Set 3's bar map. MODULE_MANIFEST: 10 → 19, 11 → 20 (checks.mjs
       verifies, passes). M4's 12-bar Choice item and M10's levelUp left
       untouched per spec. All sections/skills/steps appended at array ends —
-      no index shifts. Next: Session F (self-assessment feedback layer —
-      sounds, animations, feedback card, checkable assessment list; ONE new
-      Firebase key `mr{N}-assess`, and assessItems become append-only from
-      F on).
+      no index shifts.
+      **Session F CUT by Jonathan 2026-07-11** (before implementation) — the
+      visual/audio self-assessment feedback layer was dropped in favor of a
+      future mic-listening rubric-feedback app (see memory: to be built
+      after tuner improvements). RESEARCH_UPGRADES.md carries a tombstone;
+      Session G's references to F's feedback UI were patched to plain
+      inline feedback. The `mr{N}-assess` Firebase key and the
+      assessItems-append-only rule therefore never took effect.
+      **Tuner-jitter fix ✅ 2026-07-11** (the Known-issues pass, pulled
+      forward as Session G's prerequisite): in `tuner.js` — RMS volume gate
+      (0.006) ahead of BOTH detectors (HPS previously ran ungated on
+      between-pluck room noise — the main jitter source), 5-frame rolling
+      median between raw detections and the display (lone octave-error
+      frames are swallowed; 3 consecutive >1-semitone frames = real new
+      note, window resets for fast response), EMA simplified to a gentle
+      0.25 on top of the median, 2-cent needle hysteresis + .18s ease-out
+      CSS transition, sticky in-tune verdict (enter <±8¢, exit >±11¢), and
+      2-frame note-name stability in auto mode. String-locked mode
+      unchanged. Verified via node VM simulation of the stabiliser
+      (steady-note deviation 3.9¢ max with injected octave outliers, zero
+      leaks; new-note tracking in 3 frames ≈0.2s; 2-frame harmonic bursts
+      swallowed with instant recovery). Real-mic spot-check on an actual
+      guitar still worth doing — synthetic signals aren't a guitar.
 
 - [x] **Semester 2 build — Modules 9–12** (`MODULES_9_12.md`, decision-complete
       spec, four sessions A–D — all four complete). Session A ✅ 2026-07-10: built **Module 9 —

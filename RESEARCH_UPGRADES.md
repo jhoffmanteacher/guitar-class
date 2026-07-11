@@ -352,108 +352,21 @@ scale was waiting for…") + WORKFLOW → commit `Session E — 12-bar blues for
 
 ---
 
-## SESSION F — Visual + audio self-assessment feedback (rubric & checkboxes)
-*(Jonathan's addition. Corroborated by Yousician's instant feedback loop and Fender
-Play's completion celebrations — the one thing every app platform has that a static
-site doesn't: the site reacting when you assess yourself.)*
+## SESSION F — (removed 2026-07-11)
 
-**The idea:** the self-assessment surfaces already exist — skill checkboxes with
-`gotItWhen` rubric text, the Module Review's 1–3 ratings, and the Module Assessment
-checklist. Right now they're silent form controls. This session makes them *respond*:
-a small synthesized sound vocabulary and micro-animations for individual checks, and a
-deterministic **feedback card** that turns a student's rubric ratings into plain-English
-coaching ("these two skills are your Station A list — here's the target for each").
-No AI, no mic analysis — pure functions over data the student already entered.
-
-**Anchor checks:** `grep -n "function toggleSkill" app.js` (skill checkbox handler) ·
-`grep -n "function setSkillLevel" app.js` and `grep -n "function setPerformanceLevel" app.js`
-(review rating handlers) · `grep -n "mr-assess-list" app.js` (assessment checklist currently
-renders as a plain `<ul>`) · `grep -n "function playNote" app.js` (Karplus-Strong plucked-
-string synth — the audio engine to reuse) · `grep -n "sk-helper" app.js` (hidden
-"You've got it when:" rubric helper per skill).
-
-**Build 1 — feedback sound engine (app.js).** One function `playFeedback(kind)` next to
-the metronome/audio block, reusing `playNote(midi)` (the existing plucked-string synth —
-it already sounds like a guitar, which beats any beep). **Synthesized only — NO audio
-files**, so the service-worker cache list doesn't grow (Assumption 6 holds). Vocabulary:
-
-- `'working'` — one soft E4 (midi 64): acknowledged, not celebratory.
-- `'gotit'` — rising major third, C5→E5 (midis 72, 76, ~120ms apart): small win.
-- `'rate1'` / `'rate2'` / `'rate3'` — single note that rises with the level
-  (G4 / B4 / D5 — midis 67, 71, 74): the rating *sounds* like what it means.
-- `'setDone'` — ascending C major arpeggio C5-E5-G5-C6 (midis 72, 76, 79, 84,
-  ~120ms apart): every skill in a set checked "got it."
-- `'reviewDone'` — the same arpeggio plus a held high C: module review fully rated.
-
-Rules: fire ONLY from click handlers (browser autoplay policy — `playNote` already
-resumes a suspended context, verify that survives); keep multi-note kinds under ~700ms;
-add a 🔊/🔇 **mute toggle** near the module dropdown persisted in
-`localStorage['fbSound']` (a device-level preference — deliberately NOT Firebase/progress;
-zero new write paths from this build). Default: sound on.
-
-**Build 2 — visual feedback layer (styles.css + app.js).**
-
-1. **Check pulse:** a brief scale-up/glow keyframe on the `.skbox` when a skill flips to
-   "got it," and on `.mr-rb` rating buttons when selected. Wrap ALL new animation in
-   `@media (prefers-reduced-motion: reduce)` so it disables cleanly.
-2. **Rubric tie-in:** when a student marks a skill **"Still working on it"**, auto-expand
-   that skill's hidden `sk-helper` ("You've got it when: …", id `gi-${s.id}`) — the rubric
-   target appears exactly when the student admits they're not there yet. Marking "got it"
-   leaves the helper alone.
-3. **Set completion moment:** when `toggleSkill` flips the LAST unchecked skill of a set
-   to "got it," show a one-time inline banner in that set ("🎉 Set complete — every skill
-   checked!") and fire `playFeedback('setDone')`. **Recompute from existing state** — do
-   not store a new "celebrated" flag anywhere; showing it once per page render is fine.
-
-**Build 3 — Module Review feedback card (app.js).** A pure function
-`buildReviewFeedback(mr)` reading ONLY existing progress keys (per-skill 1–3 ratings +
-performance level), rendered below the rating legend and re-rendered on every
-`setSkillLevel` / `setPerformanceLevel` call. Until every skill is rated it shows a
-neutral progress line ("Rated 4 of 8 — keep going"). Once complete:
-
-- **Got it (3s):** count + one congratulating line.
-- **Almost there (2s):** skill names, one encouraging line ("one focused practice away").
-- **Focus list (1s):** each skill by name with its existing "↩ Review this" link, plus —
-  where the source skill has `gotItWhen` (grep the module's SETS at execution time to map
-  review-skill → source skill) — one line: `Target: {gotItWhen}`. This is the rubric doing
-  the coaching, verbatim, no invented advice.
-- **All 3s:** celebratory variant + `playFeedback('reviewDone')` — fired from the rating
-  click that completed it, never on render.
-
-Zero new Firebase keys — the card is 100% derived. Tone guide: coach, not judge ("your
-Station A list," never "you failed these").
-
-**Build 4 — Module Assessment checklist becomes checkable (app.js + styles.css).** The
-`mr-assess-list` items ("check the recording against these skills") become tappable
-checkbox rows styled like the skill checklist. State saves to a new progress key
-`mr{N}-assess` as an array of booleans **indexed by item position**. ⚠️ This is the
-session's ONE new Firebase write path — document it in WORKFLOW.md, and it creates a new
-standing guardrail: **from this session on, `assessItems` arrays are append-only** (same
-index-shift hazard as Assumption 4; Session E's blues assessItem lands before this, so
-sequence order matters). All items checked → got-it pulse + one line: "Checklist clear —
-you've verified every skill on the recording." Locked review panels stay read-only
-(respect `isReviewPanelLocked`, as every other save path does).
-
-**Explicitly out of scope** (don't gold-plate): mic-based pitch/rhythm *scoring* of the
-student's playing (that's a Yousician-scale project — the tuner stays the only mic
-feature), confetti libraries or any external asset, teacher-facing dashboards, and
-sounds on ordinary navigation clicks. Feedback fires on self-assessment actions only.
-
-**Close-out:** checks.mjs (`--skip-links` is fine — no URLs this session) → Live Server
-with Dev bypass: sounds fire only on clicks and respect the mute toggle across reloads;
-reduced-motion kills animations; feedback card is correct at zero / partial / complete /
-all-3s ratings; assessment checkboxes survive a reload; locked reviews stay inert; one
-untouched module spot-checked → CHANGELOG ("The site now responds when you check off a
-skill — sounds, celebrations, and a personal focus list built from your own ratings…") +
-WORKFLOW (note the `mr{N}-assess` key and the new assessItems append-only rule) → commit
-`Session F — visual & audio self-assessment feedback` → push → report.
+*Cut by Jonathan on 2026-07-11 before implementation. The visual/audio
+self-assessment feedback layer was dropped in favor of a future mic-listening
+rubric-feedback app (see memory / future plans), to be built after the tuner
+improvements. The tuner-jitter fix from "Known issues" below shipped the same
+day as its own pass. Where Session G references F's feedback UI, sounds, or
+checklist, ship plain inline feedback instead.*
 
 ---
 
 ## SESSION G — "Listening Coach": the site hears you play and checks it
 *(Jonathan's addition — the Yousician core loop, scoped honestly for a static site.
 Three sittings: G1 engine + Note Coach, G2 Rhythm Coach, G3 Chord Coach experiment.
-Run AFTER Session F — the Coach reports its results through F's feedback UI and sounds.)*
+Session F was cut — where this doc references F's feedback UI or sounds, ship plain inline feedback instead.)*
 
 ### What's honestly buildable (read before starting)
 
@@ -475,7 +388,7 @@ vision. In-browser hand tracking exists (MediaPipe), but on school Chromebook ca
 at student desk angles, it would deliver *confidently wrong* feedback — worse than none.
 Do not build camera-based judgment. The honest substitute ships in G1: extend the
 existing Record Yourself widget to **video**, so the student (or Jonathan) is the vision
-system, guided by Session F's rubric checklist ("watch your recording and check each
+system, guided by the module's assessment checklist ("watch your recording and check each
 item"). That's the same watch-yourself loop Yousician can't do and teachers do best.
 
 **Privacy is the selling point, state it in the UI:** all analysis is on-device Web
@@ -485,17 +398,16 @@ in-memory per the existing Record Yourself design; keep it that way.)
 **Classroom reality:** a room of 20 guitars defeats any mic. The Coach is a
 practice-room / at-home / one-station tool. Every Coach UI gets one fixed line:
 *"Works best somewhere quiet, guitar close to the mic."* Feedback phrasing is
-Session F's coach-not-judge tone, and a low-confidence result always says
+coach-not-judge tone, and a low-confidence result always says
 "I couldn't hear that clearly — try again closer to the mic," never a wrong verdict.
 
-**Prerequisite:** fix the tuner jitter first (see Known issues below — smoothing,
-confidence gating, hysteresis). The Coach reuses the same detection path, so that fix
-is G's foundation, not a separate chore.
+**Prerequisite:** ✅ done 2026-07-11 — the tuner-jitter fix (volume gate, rolling
+median, needle + verdict hysteresis) shipped; the Coach reuses that same detection path.
 
 **Anchor checks (each sitting):** `grep -n "detectPitchYIN\|detectPitchHPS" tuner.js` ·
 `grep -n "getUserMedia" tuner.js` · `grep -n "playSequenceFromGroup" app.js` (playSeq
 buttons carry `data-midis` — the ready-made answer key) · `grep -n "renderRecBody" app.js`
-(Record Yourself widget) · `grep -n "playFeedback" app.js` (Session F landed) ·
+(Record Yourself widget) ·
 `grep -n "metroRunning" app.js` (metronome, G2's timing grid).
 
 ### G1 — shared engine + Note Coach + video self-review
@@ -516,12 +428,12 @@ per-note (green ✓ / red ✗ on a horizontal strip mirroring the playSeq layout
 plain-English line: "7 of 8 — your 4th note came out F instead of F♯ (fret 2, not 1)."
 **Compare pitch-class first, octave second** — HPS octave errors are the classic failure;
 an octave-off correct note counts as correct, with a small note. 3-clears-in-a-row gets
-Session F's `setDone` arpeggio. No Firebase writes in G1 — results are in-the-moment
+a small celebratory line. No Firebase writes in G1 — results are in-the-moment
 coaching, not stored grades.
 
 **Build 3 — video self-review.** Extend Record Yourself with a camera toggle
 (`getUserMedia` video+audio → same in-memory MediaRecorder path, playback + Download,
-nothing uploaded). Under playback, render Session F's assessment checklist with one new
+nothing uploaded). Under playback, render the module's assessment checklist (assessItems) with one new
 intro line: "Watch yourself like a coach would — check each item you SEE and HEAR."
 This is the "watching" feature, honestly built.
 
@@ -566,8 +478,8 @@ the tier ships smaller or not at all; a vendored-library decision goes to Jonath
 
 ## After Session G
 
-All five high-priority research items plus the self-assessment feedback layer (F) and
-the Listening Coach (G) are live. The remaining medium/low recommendations
+All five high-priority research items plus the Listening Coach (G) are live (Session F
+was cut 2026-07-11). The remaining medium/low recommendations
 (stored One-Minute-Changes scores, tempo-ladder playSeq, Song Journey anatomy sections,
 fretboard trainer game, bends, 7th/sus chord color, songwriting capstone, Choice-song
 style lanes, motivation layer) stay in the research artifact for a future round — do not
@@ -577,10 +489,11 @@ start them without Jonathan's go-ahead.
 
 ## Known issues (not part of Sessions A–E — needs its own pass)
 
-- **Tuner is jumpy** (noted 2026-07-10): the needle/readout jitters instead of settling on
-  a steady pitch, which makes it hard for students to trust. Likely fixes to investigate in
-  `tuner.js`: smooth the detected pitch over several analysis frames (rolling median or
-  average), ignore low-confidence/low-volume readings instead of displaying them, and add a
-  small hysteresis so the display doesn't flicker between adjacent readings. Improving this
-  matters for Session A too — the 10-Minute Routine and Daily 5 both start with a tuning
-  step that leans on the tuner.
+- ✅ **Tuner is jumpy** — FIXED 2026-07-11: RMS volume gate before both detectors
+  (between-pluck room noise no longer produces "pitches"), 5-frame rolling median
+  (a lone octave-error frame can never reach the needle; 3 consecutive far frames =
+  a real new note and reset fast), gentler EMA on top, 2-cent needle hysteresis +
+  a slightly longer CSS transition, sticky in-tune verdict (enter ±8¢, exit ±11¢),
+  and 2-frame note-name stability in auto mode. Verified with a synthetic-signal
+  simulation (steady-note deviation <4¢ with octave outliers injected; new note
+  tracked in 3 frames ≈ 0.2 s; 2-frame harmonic bursts swallowed).
