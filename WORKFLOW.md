@@ -157,6 +157,18 @@
       leaks; new-note tracking in 3 frames ≈0.2s; 2-frame harmonic bursts
       swallowed with instant recovery). Real-mic spot-check on an actual
       guitar still worth doing — synthetic signals aren't a guitar.
+      **Tuner round 2 ✅ 2026-07-11** (Jonathan live-tested on localhost
+      with a real guitar): (a) high strings were shy under the flat 0.006
+      gate — split into a two-tier gate (YIN 0.002 / HPS 0.006; YIN's dip
+      threshold is its own quality bar so it can listen deeper without
+      hallucinating; HPS stays hard-gated) and raised YIN's dip threshold
+      0.15 → 0.22 for shallow quiet-pluck dips — the median + note-stability
+      layers discard whatever marginal detections slip through; verdict
+      after testing: quiet high-e registers on a gentle pluck, silence still
+      shows "Play a string…". (b) Removed the tuner's Start/Stop button —
+      opening the popup starts the mic, closing stops it (wired in app.js
+      togglePopup; closePopup already stopped it); `toggleTuner()` and
+      `#tuner-btn` removed, no stragglers.
 
 - [x] **Semester 2 build — Modules 9–12** (`MODULES_9_12.md`, decision-complete
       spec, four sessions A–D — all four complete). Session A ✅ 2026-07-10: built **Module 9 —

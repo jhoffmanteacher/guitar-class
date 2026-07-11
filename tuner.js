@@ -24,7 +24,13 @@ let tunerRunning = false, tunerStream = null, tunerCtx = null,
    (octave error, between-pluck noise) can never reach the needle — the
    median ignores it. A genuinely NEW note (several consecutive far-away
    readings) resets the window so the display still responds fast. */
-const TUNER_RMS_GATE = 0.006;   // below this the frame is treated as silence
+/* Two-tier volume gate: YIN has its own internal quality bar (the dip
+   threshold), so it can safely listen at a lower level — that's what picks
+   up the quiet high strings (B, high e) without a hard pluck. HPS has no
+   quality bar and will hallucinate a pitch from room noise, so it stays
+   gated harder. */
+const TUNER_RMS_GATE_YIN = 0.002;  // quiet decaying high strings still register
+const TUNER_RMS_GATE_HPS = 0.006;  // noise-hallucination guard for HPS
 const TUNER_WINDOW   = 5;       // median window (frames, ~60ms apart)
 const TUNER_JUMP     = 1 / 12;  // "far away" = more than one semitone (log2)
 let tunerFreqWindow = [], tunerJumpCount = 0;
@@ -85,7 +91,7 @@ function detectPitchYIN(buf, sampleRate) {
   // Silence check (lowered so sustained/decaying notes still register)
   let rms = 0;
   for (let i = 0; i < W; i++) rms += buf[i] * buf[i];
-  if (Math.sqrt(rms / W) < 0.004) return -1;
+  if (Math.sqrt(rms / W) < 0.002) return -1;
 
   // YIN difference function
   const d = new Float32Array(half);
@@ -102,8 +108,11 @@ function detectPitchYIN(buf, sampleRate) {
     d[tau] *= tau / runSum;
   }
 
-  // Find first dip below threshold (raised slightly to catch quieter pitches)
-  const threshold = 0.15;
+  // Find first dip below threshold. 0.22 is deliberately permissive so quiet
+  // high-string plucks (whose dips are shallower against the noise floor)
+  // still qualify — the rolling median + note-stability layers downstream
+  // discard whatever marginal detections slip through.
+  const threshold = 0.22;
   for (let tau = 2; tau < half; tau++) {
     if (d[tau] < threshold) {
       while (tau + 1 < half && d[tau + 1] < d[tau]) tau++;
@@ -168,9 +177,11 @@ function tunerLoop() {
   const freqBuf = new Float32Array(tunerFreqAnalyser.frequencyBinCount);
   tunerFreqAnalyser.getFloatFrequencyData(freqBuf);
 
-  // Run both detectors; prefer HPS for low strings, YIN as fallback
-  const freqHPS = rms >= TUNER_RMS_GATE ? detectPitchHPS(freqBuf, tunerCtx.sampleRate, tunerFreqAnalyser.fftSize) : -1;
-  const freqYIN = rms >= TUNER_RMS_GATE ? detectPitchYIN(timeBuf, tunerCtx.sampleRate) : -1;
+  // Run both detectors; prefer HPS for low strings, YIN as fallback.
+  // In the quiet zone (0.003–0.006 RMS) only YIN listens — that's where the
+  // softly-plucked high strings live, and YIN's dip threshold keeps it honest.
+  const freqHPS = rms >= TUNER_RMS_GATE_HPS ? detectPitchHPS(freqBuf, tunerCtx.sampleRate, tunerFreqAnalyser.fftSize) : -1;
+  const freqYIN = rms >= TUNER_RMS_GATE_YIN ? detectPitchYIN(timeBuf, tunerCtx.sampleRate) : -1;
 
   // Pick the best candidate — if both fire, prefer HPS; if HPS misses, use YIN
   let freq = -1;
@@ -315,7 +326,6 @@ async function startTuner() {
     tunerLP.connect(tunerFreqAnalyser);
 
     tunerRunning = true; tunerResetSmoothing();
-    document.getElementById('tuner-btn').innerHTML = '&#x23F9; Stop';
     document.getElementById('tuner-freq').textContent = 'Listening…';
     tunerLoop();
   } catch(e) {
@@ -335,12 +345,11 @@ function stopTuner() {
   const freqEl = document.getElementById('tuner-freq');
   const needle = document.getElementById('tuner-needle');
   const statusEl = document.getElementById('tuner-status');
-  const btn = document.getElementById('tuner-btn');
   if (noteEl)   noteEl.textContent = '—';
-  if (freqEl)   freqEl.textContent = 'Tap Start to listen';
+  if (freqEl)   freqEl.textContent = 'Play a string…';
   if (needle)   { needle.style.left = '50%'; needle.style.background = 'var(--border2)'; }
   if (statusEl) { statusEl.textContent = ''; statusEl.className = 'tuner-status'; }
-  if (btn)      btn.innerHTML = '&#x25B6; Start';
 }
 
-function toggleTuner() { if (tunerRunning) stopTuner(); else startTuner(); }
+/* No Start/Stop button — opening the tuner popup starts listening, closing it
+   stops (wired in app.js togglePopup/closePopup). */

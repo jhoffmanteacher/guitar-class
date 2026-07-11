@@ -14,6 +14,12 @@ see `WORKFLOW.md` and the git commit log.
   and holds its verdict at the in-tune boundary instead of flip-flopping.
   It still snaps to a new string in a fraction of a second. Trust the
   green.
+- **The quiet strings register now.** The B and high-e strings no longer
+  need a hard pluck to show up — a normal, gentle pluck is enough (tested
+  on a real guitar).
+- **One tap, no Start button.** Opening the tuner starts it listening;
+  closing it stops. The Start/Stop button is gone because it was just an
+  extra tap between you and being in tune.
 
 ## 2026-07-11 — You can now actually PLAY the blues
 

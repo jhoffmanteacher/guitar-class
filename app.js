@@ -2391,7 +2391,12 @@ function toggleTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRun
 
 /* ── Popup logic ── */
 function setFabExpanded(which, isOpen){ const f=document.getElementById('fab-'+which); if(f) f.setAttribute('aria-expanded', isOpen?'true':'false'); }
-function togglePopup(which){ const open=document.getElementById(which+'-popup').classList.toggle('open'); setFabExpanded(which, open); }
+function togglePopup(which){
+  const open=document.getElementById(which+'-popup').classList.toggle('open');
+  setFabExpanded(which, open);
+  // The tuner has no Start/Stop button — opening it starts listening, closing stops.
+  if(which==='tuner'){ if(open){ startTuner(); } else { stopTuner(); } }
+}
 function closePopup(which){ document.getElementById(which+'-popup').classList.remove('open'); setFabExpanded(which, false); if(which==='metro') stopMetro(); if(which==='tuner') stopTuner(); }
 document.addEventListener('click',e=>{
   if(!e.target.closest('.tool-popup')&&!e.target.closest('.fab')&&!e.target.closest('.fab-buttons')){
