@@ -219,7 +219,6 @@ function showApp(user){
   document.getElementById('auth-wall').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('fab-group').style.display='flex';
-  setTimeout(()=>{ const h=document.getElementById('resize-handle'),p=document.getElementById('resource-panel'),f=document.getElementById('fab-group'); if(h&&p&&f) f.style.right=(p.offsetWidth+h.offsetWidth+16)+'px'; },0);
   document.getElementById('user-area').innerHTML=userHeaderHtml(user);
   renderAll();
   maybeShowWelcome();
@@ -431,20 +430,23 @@ const STRING_OPEN_MIDI = { 6:40, 5:45, 4:50, 3:55, 2:59, 1:64 };
 
 /* Given a chord name from CHORD_DIAGRAMS, return the MIDI pitch list
    in low→high order (string 6 to string 1), skipping muted ('x') strings. */
-function chordMidis(chordName){
-  const cfg = CHORD_DIAGRAMS[chordName];
-  if (!cfg) return [];
-  return cfg.chord
+function chordSpecMidis(chordArr){
+  return (chordArr || [])
     .slice()
     .sort((a, b) => b[0] - a[0])
-    .filter(([, fret]) => fret !== 'x')
+    .filter(([, fret]) => fret !== 'x' && fret != null)
     .map(([str, fret]) => STRING_OPEN_MIDI[str] + Number(fret));
+}
+function chordMidis(chordName){
+  const cfg = CHORD_DIAGRAMS[chordName];
+  return cfg ? chordSpecMidis(cfg.chord) : [];
 }
 
 /* Strum a chord one string at a time. ~35ms between strings approximates
    a moderate downstrum. btnEl, when supplied, gets a brief 'playing' class. */
 let chordStrumTimeouts = [];
 function strumChord(chordName, btnEl){
+  if(window.coachMicLive) return;  // demo audio would score itself while the Coach listens
   chordStrumTimeouts.forEach(clearTimeout);
   chordStrumTimeouts = [];
   const midis = chordMidis(chordName);
@@ -706,9 +708,18 @@ function buildTab(spec, opts){
     const maxBpm = spec.maxBpm || 120;
     const bpm = readStoredBpm(keyPrefix, defBpm);
     const midisAttr = JSON.stringify(allMidis);
+    /* The coach card shows this tab's exact fingering: collect the notes
+       (across phrases if any) in the same order as allMidis. */
+    let allTabNotes = [];
+    if (spec.phrases && spec.phrases.length) spec.phrases.forEach(p => { if (p.notes) allTabNotes = allTabNotes.concat(p.notes); });
+    else if (spec.notes) allTabNotes = spec.notes.slice();
+    const tabNotesJson = JSON.stringify(allTabNotes.map(n =>
+      n.frets ? { frets: n.frets, note: n.note, midi: n.midi }
+              : { string: n.string, fret: n.fret, note: n.note, midi: n.midi }));
     controlsHtml = `<div class="tab-controls"><span class="bpm-control-group">` +
       `<button type="button" class="play-seq-btn" data-midis="${escAttr(midisAttr)}" onclick="playSequenceFromGroup(this)" title="Play this tab">&#x25B6; Play tab</button>` +
       renderBpmControl(keyPrefix, bpm, minBpm, maxBpm) +
+      coachBtnHtml(midisAttr, tabNotesJson) +
       `</span></div>`;
   }
   if (spec.phrases && spec.phrases.length) {
@@ -1428,10 +1439,10 @@ function buildSet(w){
       </button>
     </div>
   </div>
-  <div id="${w.id}-station-b" class="tab-panel tp-station-b active">${buildStations(w,'b')}</div>
-  <div id="${w.id}-station-c" class="tab-panel tp-station-c">${buildStations(w,'c')}</div>
-  <div id="${w.id}-songs"    class="tab-panel tp-songs">${w.songs ? buildSongs(w) : ''}</div>
-  <div id="${w.id}-checklist" class="tab-panel tp-checklist">${buildChecklist(w)}</div>`;
+  <div id="${w.id}-station-b" class="tab-panel tp-station-b active">${buildStations(w,'b')}${panelFooter(w,'station-b')}</div>
+  <div id="${w.id}-station-c" class="tab-panel tp-station-c">${buildStations(w,'c')}${panelFooter(w,'station-c')}</div>
+  <div id="${w.id}-songs"    class="tab-panel tp-songs">${w.songs ? buildSongs(w) + panelFooter(w,'songs') : ''}</div>
+  <div id="${w.id}-checklist" class="tab-panel tp-checklist">${buildChecklist(w)}${panelFooter(w,'checklist')}</div>`;
 }
 
 function switchTab(el,wid,tab){
@@ -1469,7 +1480,7 @@ function buildStations(w, stationId){
       + (s.levelUp ? `<div class="step-branch step-levelup"><span class="step-branch-tag">&#x1F336;&#xFE0F; Level up</span> ${s.levelUp}</div>` : '')
       + `</div>` : '';
     const chordsHtml = (s.chords&&s.chords.length)
-      ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}${c.name?`<div class="chord-box-label">${c.name}</div>`:''}</div>`).join('')}</div>`
+      ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}${c.name?`<div class="chord-box-label">${c.name}</div>`:''}</div>`).join('')}</div>` + coachChordBtnRowHtml(s.chords)
       : '';
     const playSeqHtml = s.playSeq ? (()=>{
       const ps = s.playSeq;
@@ -1483,6 +1494,7 @@ function buildStations(w, stationId){
       return ` <span class="bpm-control-group">` +
         `<button type="button" class="play-seq-btn" data-midis="${escAttr(midis)}" onclick="playSequenceFromGroup(this)" title="Play all notes">&#x25B6; ${escHtml(label)}</button>` +
         renderBpmControl(key, bpm, minBpm, maxBpm) +
+        coachBtnHtml(midis) +
         `</span>`;
     })() : '';
     const tabHtml = s.tab ? buildTab(s.tab, { keyPrefix: `bpm:${w.id}:${ns}:${i}:tab` }) : '';
@@ -1529,7 +1541,8 @@ function buildStations(w, stationId){
     const doneKey = `${w.id}-${ns}-${i}`;
     const isDone = completed[doneKey] === true;
     const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${isDone ? '&#x2713; Done' : 'Mark done'}</button></div>`;
-    return `<li class="step${isDone ? ' step-done' : ''}"><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${hintHtml}${branchHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div>${doneBtn}</div></li>`;
+    const skillsAttr = (s.skills && s.skills.length) ? ` data-skills="${s.skills.join(',')}"` : '';
+    return `<li class="step${isDone ? ' step-done' : ''}"${skillsAttr}><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${hintHtml}${branchHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml} ${readBtn}</div>${doneBtn}</div></li>`;
   }).join('');
   const sectionsHtml=(sections,baseNs)=>sections.map((sec,gi)=>{
     const ns = `${baseNs}-sec${gi}`;
@@ -1546,9 +1559,16 @@ function buildStations(w, stationId){
     const body = (s.sections && s.sections.length)
       ? `<div class="sc-sections">${sectionsHtml(s.sections, id)}</div>`
       : `<ul class="steps">${stepsHtml(s.steps, id)}</ul>`;
+    /* Stations don't have to happen in one sitting: first pass should be
+       B→C (B teaches what C drills), but returning straight to C on a
+       later day is spaced practice — say so, so nobody feels off-track. */
+    const flexNote = (id==='c' && w.stations && w.stations.b)
+      ? `<div class="st-flex-note">&#x1F9ED; <strong>First time on this set?</strong> Do <button type="button" class="st-note-link" onclick="switchTabById('${w.id}','station-b')">Station B</button> first — watch the lessons, then come back here and drill. Back on another day just to practice? Perfect — split days are how skills stick.</div>`
+      : '';
     return `
     <div class="dp${cls}" id="${w.id}-dp-${id}">
       <div class="dp-head"><span class="st-badge ${badgeClass}">${badge}</span><div class="dp-title">${s.title}</div></div>
+      ${flexNote}
       ${body}
     </div>`;
   };
@@ -1720,7 +1740,7 @@ function routinePlaySeq(ps, key){
   const bpm=readStoredBpm(key, ps.bpm||60);
   return `<span class="bpm-control-group">`+
     `<button type="button" class="play-seq-btn" data-midis="${escAttr(JSON.stringify(ps.notes))}" onclick="playSequenceFromGroup(this)" title="Play it">&#x25B6; ${escHtml(ps.label||'Play it')}</button>`+
-    renderBpmControl(key, bpm, ps.minBpm||40, ps.maxBpm||120)+`</span>`;
+    renderBpmControl(key, bpm, ps.minBpm||40, ps.maxBpm||120)+coachBtnHtml(JSON.stringify(ps.notes))+`</span>`;
 }
 function buildModuleRoutine(moduleNum){
   const steps=moduleStepsFlat(moduleNum);
@@ -1793,7 +1813,7 @@ function toggleDaily5(){
   const p=document.getElementById('daily5-panel');
   const btn=document.getElementById('daily5-btn');
   const open=p.hasAttribute('hidden');
-  if(open){ p.innerHTML=buildDaily5(); p.removeAttribute('hidden'); }
+  if(open){ closeTopPanels('daily5'); p.innerHTML=buildDaily5(); p.removeAttribute('hidden'); }
   else { p.setAttribute('hidden',''); }
   if(btn) btn.setAttribute('aria-expanded', open?'true':'false');
 }
@@ -2071,9 +2091,12 @@ function buildChecklist(w){
         <div class="sk-helper" id="gi-${s.id}" hidden><strong>You've got it when:</strong> ${s.gotItWhen}</div>` : '';
     const practiceBtn = s.practice ? `
         <button type="button" class="sk-practice-btn" onclick="togglePracticePanel('${s.id}', this)" aria-expanded="false" aria-controls="pp-${s.id}"><span class="sk-practice-btn-arrow">▸</span> Practice this</button>` : '';
+    const skillNum = (s.id.match(/-s(\d+)$/) || [])[1];
+    const whereBtn = (skillNum && skillTaughtStation(w, Number(skillNum)))
+      ? `<button type="button" class="sk-where-btn" onclick="showSkillLesson('${w.id}', ${skillNum})" title="Jump to the steps that teach this">&#x1F4CD; Show me where</button>` : '';
     const practicePanel = s.practice ? renderPracticePanel(s.practice, s.id, w.id) : '';
     return `<div class="skill-row">
-      <div class="sktxt"><div class="sn" style="flex-shrink:0;margin-top:0;margin-right:8px">${i+1}</div><div class="sk-body"><div class="sk-label">${s.text}</div>${helper}${practiceBtn}</div></div>
+      <div class="sktxt"><div class="sn" style="flex-shrink:0;margin-top:0;margin-right:8px">${i+1}</div><div class="sk-body"><div class="sk-label">${s.text}</div>${helper}${practiceBtn}${whereBtn}</div></div>
       <div class="skchk-cell working-col${st==='working'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='working'}" aria-label="Still working on it: ${escAttr(s.text)}" onclick="toggleSkill('${s.id}','${w.id}','working')" title="Still working on it"><div class="skbox">${st==='working'?wkSvg:''}</div></div>
       <div class="skchk-cell gotit-col${st==='gotit'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='gotit'}" aria-label="I've got it: ${escAttr(s.text)}" onclick="toggleSkill('${s.id}','${w.id}','gotit')" title="I've got it!"><div class="skbox">${st==='gotit'?giSvg:''}</div></div>
       ${practicePanel}
@@ -2118,6 +2141,7 @@ function renderPracticePanel(practice, skillId, wid){
       `<div class="bpm-control-group">` +
         `<button type="button" class="play-seq-btn" data-midis="${escAttr(midis)}" onclick="playSequenceFromGroup(this)" title="Play all notes">&#x25B6; ${escHtml(label)}</button>` +
         renderBpmControl(key, bpm, minBpm, maxBpm) +
+        coachBtnHtml(midis) +
       `</div>` +
     `</div>`;
   }
@@ -2300,12 +2324,14 @@ function playNote(midi){
 }
 /* Play one TAB beat: 1 midi = single note, N midis = chord, all at once. */
 function playBeat(btnEl){
+  if(window.coachMicLive) return;  // demo audio would score itself while the Coach listens
   let midis = [];
   try { midis = JSON.parse(btnEl.dataset.midis || '[]'); } catch (e) { return; }
   midis.forEach(m => playNote(Number(m)));
 }
 let playSeqState = null;
 function playSequence(midis, bpm, btnEl){
+  if(window.coachMicLive) return;  // demo audio would score itself while the Coach listens
   const stop = () => {
     if(!playSeqState) return;
     playSeqState.timeouts.forEach(clearTimeout);
@@ -2361,14 +2387,41 @@ function onBpmSliderChange(slider){
     try{ sessionStorage.setItem(key, slider.value); }catch(e){}
   }
 }
+/* Read the BPM slider that shares a .bpm-control-group with this button.
+   Single reader for the group markup contract — playSequenceFromGroup and
+   the Listening Coach's coachOpen both use it. */
+function readGroupBpm(btn, def){
+  const group = btn.closest('.bpm-control-group');
+  const slider = group ? group.querySelector('.bpm-slider') : null;
+  const bpm = slider ? parseInt(slider.value, 10) : NaN;
+  return isNaN(bpm) ? (def || 60) : bpm;
+}
 function playSequenceFromGroup(btn){
   let midis;
   try{ midis = JSON.parse(btn.dataset.midis); }catch(e){ return; }
   if(!Array.isArray(midis) || !midis.length) return;
-  const group = btn.closest('.bpm-control-group');
-  const slider = group ? group.querySelector('.bpm-slider') : null;
-  const bpm = slider ? parseInt(slider.value, 10) : 60;
-  playSequence(midis, bpm, btn);
+  playSequence(midis, readGroupBpm(btn), btn);
+}
+/* ── Listening Coach hooks — coach.js owns the card/scoring; these just
+      emit the buttons next to playable content. midisJson is the same
+      JSON string the sibling ▶ Play button carries. tabNotesJson, when the
+      caller has a real TAB spec, carries [{string,fret,note,midi},…] so the
+      coach card can show WHERE to play each note; without it coach.js
+      derives a fingering itself. ── */
+function coachBtnHtml(midisJson, tabNotesJson){
+  const tabAttr = tabNotesJson ? ` data-tabnotes="${escAttr(tabNotesJson)}"` : '';
+  return `<button type="button" class="coach-btn" data-midis="${escAttr(midisJson)}"${tabAttr} onclick="coachOpen(this)" title="Play it into the mic and get feedback">&#x1F3A4; Check me</button>`;
+}
+/* Chord steps: build [{n:name, m:[midis]}] from the step's own diagram
+   specs (same fret math as chordMidis — frets are absolute). */
+function coachChordBtnRowHtml(chords){
+  const spec = (chords||[]).filter(c=>c && c.name && Array.isArray(c.chord)).map(c=>({
+    n: c.name,
+    m: chordSpecMidis(c.chord)
+  })).filter(c=>c.m.length);
+  if(!spec.length) return '';
+  const label = spec.length>1 ? 'Check my changes' : 'Strum check';
+  return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}" onclick="coachOpen(this)" title="Strum along with the count — the mic listens and gives feedback">&#x1F3A4; ${label}</button></div>`;
 }
 function tick(){ beep(880,0.06); const dot=document.getElementById('metro-dot'); if(dot){ dot.classList.add('flash'); setTimeout(()=>dot.classList.remove('flash'),80); } }
 function getBpm(){ return parseInt(document.getElementById('bpm-slider').value); }
@@ -2395,7 +2448,9 @@ function togglePopup(which){
   const open=document.getElementById(which+'-popup').classList.toggle('open');
   setFabExpanded(which, open);
   // The tuner has no Start/Stop button — opening it starts listening, closing stops.
-  if(which==='tuner'){ if(open){ startTuner(); } else { stopTuner(); } }
+  // One mic owner at a time: the tuner interrupts a live Listening Coach check
+  // and stops any running game mic; the games do the reverse themselves.
+  if(which==='tuner'){ if(open){ if(typeof coachInterrupt==='function') coachInterrupt(); if(typeof gamesStopMic==='function') gamesStopMic(); startTuner(); } else { stopTuner(); } }
 }
 function closePopup(which){ document.getElementById(which+'-popup').classList.remove('open'); setFabExpanded(which, false); if(which==='metro') stopMetro(); if(which==='tuner') stopTuner(); }
 document.addEventListener('click',e=>{
@@ -2408,6 +2463,7 @@ document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
   ['metro','timer','tuner'].forEach(w=>{ const el=document.getElementById(w+'-popup'); if(el&&el.classList.contains('open')) closePopup(w); });
   const wo=document.getElementById('welcome-overlay'); if(wo&&wo.style.display!=='none') dismissWelcome();
+  const vo=document.getElementById('video-overlay'); if(vo&&!vo.hidden) clearPanel();
 });
 // Keyboard activation for non-<button> controls that carry role="button"
 // (the skill checkboxes and station cards are <div>s for layout reasons).
@@ -2421,15 +2477,20 @@ document.addEventListener('keydown',e=>{
   el.click();
 });
 
-/* ── Resource Panel ── */
+/* ── Resource viewer (floating mini-player) ──
+   Same loadPanel(type,url,title,subtitle) contract as the old side panel,
+   so every rp-trigger / song / chord-link call site works unchanged — the
+   content opens in a draggable floating card and the page stays usable,
+   so a step's questions are visible while its video plays. */
 function loadPanel(type,url,title,subtitle){
-  const empty=document.getElementById('rp-empty');
+  const overlay=document.getElementById('video-overlay');
   const content=document.getElementById('rp-content');
   const wrap=document.getElementById('rp-iframe-wrap');
   const meta=document.getElementById('rp-meta');
   const newtab=document.getElementById('rp-newtab');
   const close=document.getElementById('rp-close');
-  empty.style.display='none';
+  overlay.hidden=false;
+  clampViewer(overlay);   // a drag on a bigger window could strand it off-screen
   content.classList.add('visible'); newtab.classList.add('visible'); close.classList.add('visible');
   newtab.href=url;
   meta.innerHTML=`<div class="rp-meta-title">${title}</div><div class="rp-meta-sub">${subtitle}</div>`;
@@ -2490,107 +2551,375 @@ function loadPanel(type,url,title,subtitle){
   }
 }
 function clearPanel(){
+  const overlay=document.getElementById('video-overlay');
   const content=document.getElementById('rp-content');
   const wrap=document.getElementById('rp-iframe-wrap');
   const newtab=document.getElementById('rp-newtab');
   const close=document.getElementById('rp-close');
   content.classList.remove('visible'); newtab.classList.remove('visible'); close.classList.remove('visible');
-  wrap.className='rp-iframe-wrap'; wrap.innerHTML='';
-  document.getElementById('rp-empty').style.display='';
+  wrap.className='rp-iframe-wrap'; wrap.innerHTML='';   // removing the iframe stops playback
+  if(overlay) overlay.hidden=true;
 }
 
-/* ══════════════════════════════════════════════
-   RESIZABLE PANELS — smooth drag + iframe shield
-   ══════════════════════════════════════════════ */
+/* Keep the mini-player inside the viewport (after drags / window resizes). */
+function clampViewer(box){
+  if(!box || !box.style.left) return;   // never dragged — still CSS-docked bottom-right
+  const w=box.offsetWidth||480, headroom=60;
+  box.style.left=Math.min(Math.max(parseFloat(box.style.left),8),Math.max(8,window.innerWidth-w-8))+'px';
+  box.style.top=Math.min(Math.max(parseFloat(box.style.top),8),Math.max(8,window.innerHeight-headroom))+'px';
+}
+
+/* Drag the mini-player by its header so it can sit wherever it doesn't
+   block the step being read. First drag converts the CSS right/bottom
+   docking into explicit left/top. While dragging, the iframe stops
+   swallowing pointer events (.dragging CSS). */
 (function(){
-  const handle = document.getElementById('resize-handle');
-  const panel  = document.getElementById('resource-panel');
-  if (!handle || !panel) return;
-
-  // Invisible overlay that sits on top of iframes during drag,
-  // preventing them from swallowing mouse events.
-  // NOTE: do NOT override panel.style.position — the panel uses
-  // position:sticky (CSS) so it stays visible while the main column
-  // scrolls. Sticky already establishes a containing block for the
-  // absolutely-positioned shield, so no override is needed.
-  const shield = document.createElement('div');
-  shield.className = 'iframe-drag-shield';
-  panel.appendChild(shield);
-
-  let dragging = false, startX = 0, startW = 0;
-  let rafPending = false;
-
-  function positionFabs() {
-    const fabs = document.getElementById('fab-group');
-    if (fabs) fabs.style.right = (panel.offsetWidth + handle.offsetWidth + 16) + 'px';
+  const box=document.getElementById('video-overlay');
+  if(!box) return;
+  const head=box.querySelector('.vm-head');
+  if(!head) return;
+  let dragging=false,dx=0,dy=0;
+  function start(x,y,target){
+    if(target.closest('button,a')) return false;
+    const r=box.getBoundingClientRect();
+    box.style.left=r.left+'px'; box.style.top=r.top+'px';
+    box.style.right='auto'; box.style.bottom='auto';
+    dx=x-r.left; dy=y-r.top;
+    dragging=true;
+    box.classList.add('dragging');
+    document.body.style.userSelect='none';
+    return true;
   }
+  function move(x,y){
+    if(!dragging) return;
+    box.style.left=Math.min(Math.max(x-dx,8),Math.max(8,window.innerWidth-box.offsetWidth-8))+'px';
+    box.style.top=Math.min(Math.max(y-dy,8),Math.max(8,window.innerHeight-60))+'px';
+  }
+  function end(){
+    if(!dragging) return;
+    dragging=false;
+    box.classList.remove('dragging');
+    document.body.style.userSelect='';
+  }
+  const onMouseMove=e=>move(e.clientX,e.clientY);
+  const onTouchMove=e=>{ e.preventDefault(); move(e.touches[0].clientX,e.touches[0].clientY); };
+  function attach(){
+    document.addEventListener('mousemove',onMouseMove);
+    document.addEventListener('mouseup',endDrag);
+    document.addEventListener('touchmove',onTouchMove,{passive:false});
+    document.addEventListener('touchend',endDrag);
+  }
+  function endDrag(){
+    end();
+    document.removeEventListener('mousemove',onMouseMove);
+    document.removeEventListener('mouseup',endDrag);
+    document.removeEventListener('touchmove',onTouchMove);
+    document.removeEventListener('touchend',endDrag);
+  }
+  head.addEventListener('mousedown',e=>{ if(start(e.clientX,e.clientY,e.target)){ e.preventDefault(); attach(); } });
+  head.addEventListener('touchstart',e=>{ if(start(e.touches[0].clientX,e.touches[0].clientY,e.target)){ e.preventDefault(); attach(); } },{passive:false});
+  window.addEventListener('resize',()=>clampViewer(box));
+})();
 
-  function onMove(clientX) {
-    if (!dragging) return;
-    const newW = Math.min(Math.max(startW + (startX - clientX), 180), window.innerWidth * 0.6);
-    panel.style.width = newW + 'px';
-    // Throttle FAB repositioning to one layout reflow per animation frame
-    if (!rafPending) {
-      rafPending = true;
-      requestAnimationFrame(() => { positionFabs(); rafPending = false; });
+/* ══════════════════════════════════════════════
+   NAVIGATION — panel footers, back-to-top,
+   checklist→lesson jumps, Songs hub, site search
+   ══════════════════════════════════════════════ */
+
+/* "Keep going" footer for each set tab-panel: the bottom of a long station
+   used to be a dead end — you had to scroll back up to continue. */
+function panelFooter(w, tab){
+  const btn = (label, onclick) =>
+    `<button type="button" class="panel-next-btn" onclick="${onclick}">${label} &rarr;</button>`;
+  let inner = '';
+  if(tab === 'station-b'){
+    inner = btn('Next: Station C — practice it', `switchTabById('${w.id}','station-c')`);
+  } else if(tab === 'station-c' || tab === 'songs'){
+    inner = btn('Next: My skills checklist', `switchTabById('${w.id}','checklist')`);
+  } else if(tab === 'checklist'){
+    const sets = SETS.filter(x => x.moduleNum === w.moduleNum && !x.comingSoon);
+    const i = sets.findIndex(x => x.id === w.id);
+    if(i >= 0 && i < sets.length - 1){
+      const next = sets[i + 1];
+      inner = btn(`Next: ${escHtml(next.label || 'the next set')}`, `goToSet('${next.id}')`);
+    } else if(MODULE_REVIEWS[w.moduleNum]){
+      inner = btn('Next: Module Review', `goToSet('mr${w.moduleNum}')`);
     }
   }
+  return inner ? `<div class="panel-next">${inner}</div>` : '';
+}
 
-  function onEnd() {
-    if (!dragging) return;
-    dragging = false;
-    shield.classList.remove('active');
-    handle.classList.remove('dragging');
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
+/* Switch a set's tab from anywhere (footer buttons, skill jumps) by finding
+   the real tabs-card button so active-state styling stays consistent. */
+function switchTabById(wid, tab, keepScroll){
+  const panel = document.getElementById(`${wid}-${tab}`);
+  if(!panel) return;
+  const wrap = panel.closest('.week-panel');
+  const cardBtn = wrap && wrap.querySelector(tab === 'songs' ? '.tabs-songs' : `.tabs-card.tab-${tab}`);
+  if(cardBtn) switchTab(cardBtn, wid, tab);
+  if(!keepScroll){
+    const tabs = wrap && wrap.querySelector('.tabs');
+    (tabs || panel).scrollIntoView({ block: 'start', behavior: 'smooth' });
   }
+}
 
-  handle.addEventListener('mousedown', e => {
-    dragging = true;
-    startX = e.clientX;
-    startW = panel.offsetWidth;
-    shield.classList.add('active');
-    handle.classList.add('dragging');
-    document.body.style.cursor = 'col-resize';
-    document.body.style.userSelect = 'none';
-    e.preventDefault();
+/* Which station (if any) teaches set-skill number n? Steps tag themselves
+   with skills:[n] in the module data. */
+function skillTaughtStation(w, n){
+  for(const st of ['b','c']){
+    const stn = w.stations && w.stations[st];
+    if(!stn) continue;
+    const sections = stn.sections || (stn.steps ? [{steps: stn.steps}] : []);
+    for(const sec of sections){
+      if((sec.steps || []).some(step => (step.skills || []).includes(n))) return st;
+    }
+  }
+  return null;
+}
+
+/* Checklist "Show me where": switch to the station that teaches the skill,
+   expand the sections holding its steps, scroll there and flash them. */
+function showSkillLesson(wid, n){
+  const w = SETS.find(x => x.id === wid);
+  if(!w) return;
+  const st = skillTaughtStation(w, Number(n));
+  if(!st) return;
+  switchTabById(wid, `station-${st}`, true);
+  const panel = document.getElementById(`${wid}-station-${st}`);
+  if(!panel) return;
+  const matches = [...panel.querySelectorAll('li.step[data-skills]')]
+    .filter(li => li.dataset.skills.split(',').includes(String(n)));
+  if(!matches.length) return;
+  matches.forEach(li => {
+    const sec = li.closest('.sc-sec');
+    if(sec && !sec.classList.contains('open')){
+      sec.classList.add('open');
+      const head = sec.querySelector('.sc-sec-head');
+      if(head) head.setAttribute('aria-expanded', 'true');
+    }
+    li.classList.remove('step-flash'); void li.offsetWidth;
+    li.classList.add('step-flash');
+    setTimeout(() => li.classList.remove('step-flash'), 2600);
   });
+  matches[0].scrollIntoView({ block: 'center', behavior: 'smooth' });
+}
 
-  document.addEventListener('mousemove', e => onMove(e.clientX));
-  document.addEventListener('mouseup', onEnd);
+/* Deep-link to one step (used by search results): activate module + set,
+   switch to its station tab, open the section, scroll + flash the step. */
+async function jumpToStep(moduleNum, wid, station, secIdx, stepIdx){
+  const sel = document.getElementById('module-select');
+  if(sel) sel.value = String(moduleNum);
+  await onModuleChange(moduleNum, wid);
+  saveProgress();
+  switchTabById(wid, `station-${station}`, true);
+  const panel = document.getElementById(`${wid}-station-${station}`);
+  if(!panel) return;
+  const sections = panel.querySelectorAll('.sc-sec');
+  let li = null;
+  if(sections.length && sections[secIdx]){
+    const sec = sections[secIdx];
+    if(!sec.classList.contains('open')){
+      sec.classList.add('open');
+      const head = sec.querySelector('.sc-sec-head');
+      if(head) head.setAttribute('aria-expanded', 'true');
+    }
+    li = sec.querySelectorAll(':scope .sc-sec-body > ul.steps > li.step')[stepIdx] ||
+         sec.querySelectorAll('li.step')[stepIdx];
+  } else {
+    li = panel.querySelectorAll('li.step')[stepIdx];
+  }
+  if(li){
+    li.classList.add('step-flash');
+    setTimeout(() => li.classList.remove('step-flash'), 2600);
+    li.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+}
 
-  handle.addEventListener('touchstart', e => {
-    dragging = true;
-    startX = e.touches[0].clientX;
-    startW = panel.offsetWidth;
-    shield.classList.add('active');
-    handle.classList.add('dragging');
-    e.preventDefault();
-  }, { passive: false });
+/* ── Back to top ── */
+function initBackToTop(){
+  const btn = document.getElementById('back-to-top');
+  if(!btn) return;
+  window.addEventListener('scroll', () => {
+    btn.classList.toggle('show', window.scrollY > 600);
+  }, { passive: true });
+}
+initBackToTop();
 
-  document.addEventListener('touchmove', e => { if (dragging){ e.preventDefault(); onMove(e.touches[0].clientX); } }, { passive: false });
-  document.addEventListener('touchend', onEnd);
-
-  positionFabs();
-  window.addEventListener('resize', positionFabs);
-
-  /* ── Resize handle: keyboard support (a11y) ──
-     The handle is a focusable separator; ←/→ nudge the panel width,
-     Home/End jump to the min/max so it's usable without a mouse. */
-  handle.setAttribute('role', 'separator');
-  handle.setAttribute('aria-orientation', 'vertical');
-  handle.setAttribute('aria-label', 'Resize the resources panel');
-  handle.setAttribute('tabindex', '0');
-  handle.addEventListener('keydown', e => {
-    const cur = panel.offsetWidth, max = window.innerWidth * 0.6, step = 24;
-    let next = null;
-    if (e.key === 'ArrowLeft')      next = Math.min(cur + step, max); // widen panel (handle moves left)
-    else if (e.key === 'ArrowRight') next = Math.max(cur - step, 180);
-    else if (e.key === 'Home')       next = max;
-    else if (e.key === 'End')        next = 180;
-    if (next !== null) { e.preventDefault(); panel.style.width = next + 'px'; positionFabs(); }
+/* ── Top-bar panels (Songs hub · Search) — one open at a time, and they
+      close Daily 5 / Games too so the top of the page stays tidy. ── */
+function closeTopPanels(except){
+  ['daily5', 'games', 'songs-hub', 'search'].forEach(k => {
+    if(k === except) return;
+    const p = document.getElementById(k + '-panel');
+    if(p && !p.hasAttribute('hidden')){
+      if(k === 'games' && typeof gamesClosePanel === 'function'){ gamesClosePanel(); return; }
+      p.setAttribute('hidden', '');
+      const b = document.getElementById(k + '-btn');
+      if(b) b.setAttribute('aria-expanded', 'false');
+    }
   });
-})();
+}
+
+/* Load every module's data (not its panels) — the Songs hub and search
+   need the whole catalogue. Modules are small and the SW precaches them. */
+function ensureAllModuleData(){
+  return Promise.all(MODULE_MANIFEST.map(m => loadModuleData(m.num).catch(() => {})));
+}
+
+/* ── ♪ Songs hub: every song on the site, deduped, core six first ── */
+async function toggleSongsHub(){
+  const p = document.getElementById('songs-hub-panel');
+  const btn = document.getElementById('songs-hub-btn');
+  if(!p) return;
+  const open = p.hasAttribute('hidden');
+  if(!open){ p.setAttribute('hidden', ''); if(btn) btn.setAttribute('aria-expanded', 'false'); return; }
+  closeTopPanels('songs-hub');
+  p.removeAttribute('hidden');
+  if(btn) btn.setAttribute('aria-expanded', 'true');
+  p.innerHTML = `<div class="daily5-head"><span>&#x266A; All the songs</span><button type="button" class="tp-close" onclick="toggleSongsHub()" aria-label="Close songs">&#x2715;</button></div><div class="coach-tip">Loading the song catalogue…</div>`;
+  await ensureAllModuleData();
+  const byName = new Map();
+  const noteSong = (song, moduleNum) => {
+    const e = byName.get(song.name) || { song, modules: new Set() };
+    e.modules.add(moduleNum);
+    if(song.journeyUrl && !e.song.journeyUrl) e.song = song;
+    byName.set(song.name, e);
+  };
+  SETS.filter(w => w.moduleNum === 1 && w.songs).forEach(w => w.songs.forEach(sg => noteSong(sg, 1)));
+  const MS = globalThis.MODULE_SONGS || {};
+  Object.keys(MS).forEach(m => MS[m].forEach(sg => noteSong(sg, Number(m))));
+  const entries = [...byName.values()];
+  entries.sort((a, b) => (b.song.core === true) - (a.song.core === true) || a.song.name.localeCompare(b.song.name));
+  const rows = entries.map(e => {
+    const sg = e.song;
+    const mods = [...e.modules].sort((a, b) => a - b);
+    const modBtns = mods.map(m =>
+      `<button type="button" class="sh-mod-btn" onclick="songHubGoModule(${m})" title="Open Module ${m}">M${m}</button>`).join('');
+    const vids = [];
+    if(sg.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="window.open('${escAttr(sg.journeyUrl)}','_blank','noopener')" title="One song, five layers">&#x1F9F5; Song Journey</button>`);
+    if(sg.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="loadPanel('youtube','${escAttr(sg.tutorialUrl)}','${escAttr(sg.name)}','Tutorial')"><span class="svb-play">&#x25B6;</span>Tutorial</button>`);
+    if(sg.backingUrl) vids.push(`<button class="song-vid-btn" onclick="loadPanel('youtube','${escAttr(sg.backingUrl)}','${escAttr(sg.name)}','Backing track — hit play and jam')"><span class="svb-play">&#x25B6;</span>&#x1F3B5; Backing${sg.backingKey ? ` (${escHtml(sg.backingKey)})` : ''}</button>`);
+    if(sg.originalUrl) vids.push(`<button class="song-vid-btn" onclick="window.open('${escAttr(sg.originalUrl)}','_blank','noopener')" title="Opens on YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:11px;opacity:0.6">&#x2197;</span></button>`);
+    return `<div class="song-row"><div class="dot ${sg.core ? 'dc' : 'dch'}"></div>
+      <div><div class="sname">${escHtml(sg.name)}</div><div class="smeta">${sg.meta ? escHtml(sg.meta) + ' · ' : ''}Taught in: ${modBtns}</div></div>
+      ${vids.length ? `<div class="song-vids">${vids.join('')}</div>` : ''}
+      <span class="stag ${sg.core ? 'stag-core' : ''}">${escHtml(sg.type || (sg.core ? 'Core' : 'Choice'))}</span></div>`;
+  }).join('');
+  p.innerHTML = `<div class="daily5-head"><span>&#x266A; All the songs</span><button type="button" class="tp-close" onclick="toggleSongsHub()" aria-label="Close songs">&#x2715;</button></div>
+    <div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>Core — everyone learns these</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu</div></div>
+    <div class="card">${rows}</div>`;
+}
+async function songHubGoModule(m){
+  const sel = document.getElementById('module-select');
+  if(sel) sel.value = String(m);
+  await onModuleChange(m);
+  saveProgress();
+  closeTopPanels('');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ── 🔍 Site search: steps, skills, and set titles across all modules ── */
+let searchIndex = null;
+async function buildSearchIndex(){
+  await ensureAllModuleData();
+  const ix = [];
+  SETS.forEach(w => {
+    if(w.comingSoon) return;
+    if(w.unit) ix.push({ kind: 'set', moduleNum: w.moduleNum, wid: w.id, label: w.label, text: w.unit });
+    (w.skills || []).forEach(sk => {
+      const num = (sk.id.match(/-s(\d+)$/) || [])[1];
+      ix.push({ kind: 'skill', moduleNum: w.moduleNum, wid: w.id, label: w.label, text: sk.text, skillNum: num ? Number(num) : null });
+    });
+    ['b', 'c'].forEach(st => {
+      const stn = w.stations && w.stations[st];
+      if(!stn) return;
+      const sections = stn.sections || (stn.steps ? [{title: '', steps: stn.steps}] : []);
+      sections.forEach((sec, secIdx) => (sec.steps || []).forEach((step, stepIdx) => {
+        const text = stripTags(step.text || '');
+        if(text) ix.push({ kind: 'step', moduleNum: w.moduleNum, wid: w.id, label: w.label, station: st, secIdx, stepIdx, secTitle: sec.title || '', text });
+      }));
+    });
+  });
+  return ix;
+}
+async function toggleSearch(){
+  const p = document.getElementById('search-panel');
+  const btn = document.getElementById('search-btn');
+  if(!p) return;
+  const open = p.hasAttribute('hidden');
+  if(!open){ p.setAttribute('hidden', ''); if(btn) btn.setAttribute('aria-expanded', 'false'); return; }
+  closeTopPanels('search');
+  p.removeAttribute('hidden');
+  if(btn) btn.setAttribute('aria-expanded', 'true');
+  p.innerHTML = `<div class="daily5-head"><span>&#x1F50D; Find it</span><button type="button" class="tp-close" onclick="toggleSearch()" aria-label="Close search">&#x2715;</button></div>
+    <input type="search" class="search-input" id="search-input" placeholder="Try &quot;F chord&quot;, &quot;folk strum&quot;, &quot;pentatonic&quot;…" oninput="runSearch(this.value)" aria-label="Search the whole site">
+    <div id="search-results" class="search-results"><div class="coach-tip">Loading the catalogue…</div></div>`;
+  const input = document.getElementById('search-input');
+  if(input) input.focus();
+  if(!searchIndex) searchIndex = await buildSearchIndex();
+  const res = document.getElementById('search-results');
+  if(res && res.querySelector('.coach-tip')) res.innerHTML = `<div class="coach-tip">Search every step, skill, and set across all ${MODULE_MANIFEST.length} modules.</div>`;
+}
+function runSearch(q){
+  const res = document.getElementById('search-results');
+  if(!res || !searchIndex) return;
+  q = (q || '').trim().toLowerCase();
+  if(q.length < 2){ res.innerHTML = `<div class="coach-tip">Type at least two letters…</div>`; return; }
+  const terms = q.split(/\s+/).filter(Boolean);
+  const scored = [];
+  for(const e of searchIndex){
+    const hay = e.text.toLowerCase();
+    if(!terms.every(t => hay.includes(t))) continue;
+    scored.push({ e, score: (e.kind === 'skill' ? 2 : e.kind === 'set' ? 1 : 0) + (hay.indexOf(terms[0]) < 40 ? 1 : 0) });
+    if(scored.length > 400) break;
+  }
+  scored.sort((a, b) => b.score - a.score || a.e.moduleNum - b.e.moduleNum);
+  const top = scored.slice(0, 25);
+  if(!top.length){ res.innerHTML = `<div class="coach-tip">No matches for &ldquo;${escHtml(q)}&rdquo; — try a shorter word.</div>`; return; }
+  const snippet = (text) => {
+    const at = text.toLowerCase().indexOf(terms[0]);
+    const start = Math.max(0, at - 30);
+    let cut = text.slice(start, start + 110);
+    if(start > 0) cut = '…' + cut;
+    if(start + 110 < text.length) cut += '…';
+    return escHtml(cut);
+  };
+  res.innerHTML = top.map(({e}) => {
+    const where = `Module ${e.moduleNum} · ${escHtml(e.label || '')}` +
+      (e.kind === 'step' ? ` · Station ${e.station.toUpperCase()}` : e.kind === 'skill' ? ' · Skill' : '');
+    const onclick = e.kind === 'step'
+      ? `searchGo(${e.moduleNum},'${e.wid}','${e.station}',${e.secIdx},${e.stepIdx})`
+      : e.kind === 'skill' && e.skillNum != null
+        ? `searchGoSkill(${e.moduleNum},'${e.wid}',${e.skillNum})`
+        : `searchGoSet(${e.moduleNum},'${e.wid}')`;
+    return `<button type="button" class="search-hit" onclick="${onclick}">
+      <span class="search-hit-where">${where}</span>
+      <span class="search-hit-text">${snippet(e.text)}</span>
+    </button>`;
+  }).join('');
+}
+async function searchGo(moduleNum, wid, station, secIdx, stepIdx){
+  closeTopPanels('');
+  await jumpToStep(moduleNum, wid, station, secIdx, stepIdx);
+}
+async function searchGoSkill(moduleNum, wid, skillNum){
+  closeTopPanels('');
+  const sel = document.getElementById('module-select');
+  if(sel) sel.value = String(moduleNum);
+  await onModuleChange(moduleNum, wid);
+  saveProgress();
+  const w = SETS.find(x => x.id === wid);
+  if(w && skillTaughtStation(w, skillNum)) showSkillLesson(wid, skillNum);
+  else switchTabById(wid, 'checklist');
+}
+async function searchGoSet(moduleNum, wid){
+  closeTopPanels('');
+  const sel = document.getElementById('module-select');
+  if(sel) sel.value = String(moduleNum);
+  await onModuleChange(moduleNum, wid);
+  saveProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 /* ════════════════════════════════════════════════
    Service worker — light PWA / offline resilience.

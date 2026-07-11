@@ -625,6 +625,48 @@ SETS.push(
                 hint: 'Fret 1 is the tightest squeeze on the neck — press right behind the fret wire with the tip of your index and the F will ring clean.',
                 stuck: 'Park on just the F: pluck, listen, adjust, until five ring in a row. Then add the open A — that one\'s free.',
                 levelUp: 'Trade the open A for fret 5 on the low E — same note, new position. The simplified requinto intro line is coming to this page soon.'
+              },
+              {
+                text: 'Challenge — Let It Be, bass line: play the roots of "Let It Be" (Beatles) on the low E & A strings — C · G · A · F, two beats each at 60 BPM. These four notes are the bass skeleton of the whole song — you\'ll play "Let It Be" as a core song starting in Module 5, so learn where its roots live now. You\'ve got it when: two clean laps of C–G–A–F, every note ringing, each landing on the beat.',
+                hint: 'C is A-string fret 3 (ring finger), G is low-E fret 3 (ring finger), A is the open A string, F is low-E fret 1 (index). Watch the crossings between the two strings and keep your thumb behind the neck. Click any note name to hear how it should sound.',
+                stuck: 'Split it by string: play C then A (both on the A string), then G then F (both on the low E), then join all four in order.',
+                levelUp: 'Say each root name out loud as you land it, or run four laps in a row without stopping.',
+                skills: [1, 2, 4, 5, 6],
+                tab: {
+                  caption: '"Let It Be" — bass roots · E & A strings · two beats each · 60 BPM',
+                  notes: [
+                    { string: 'A', fret: 3, note: 'C', midi: 48 },
+                    { string: 'A', fret: 3, note: 'C', midi: 48 },
+                    { string: 'E', fret: 3, note: 'G', midi: 43 },
+                    { string: 'E', fret: 3, note: 'G', midi: 43 },
+                    { string: 'A', fret: 0, note: 'A', midi: 45 },
+                    { string: 'A', fret: 0, note: 'A', midi: 45 },
+                    { string: 'E', fret: 1, note: 'F', midi: 41 },
+                    { string: 'E', fret: 1, note: 'F', midi: 41 }
+                  ]
+                },
+                response: { type: 'short', prompt: 'Which string crossing was trickiest — C down to G, or A down to F?', placeholder: 'e.g. A to F — the jump across strings' }
+              },
+              {
+                text: 'Challenge — Mystery TAB (sight-read it cold): here\'s a 2-bar melody you\'ve never heard. Do NOT press ▶ Play tab first. Read it straight off the page — work out each string and fret and play all the way through, one note per beat at 60 BPM — THEN press ▶ Play tab to check yourself. You\'ve got it when: you play it correctly on the first cold read, before ever hearing it. That\'s real sight-reading, and it\'s exactly what your module assessment asks for.',
+                hint: 'This is the whole point of sight-reading: playing music you don\'t already know by ear. Bottom line = low E, the line above it = A, the next one up = D. Every fret here is 0–3 on the A and D strings. Say each note name before you pluck it, then use ▶ Play tab as your answer key — only after you\'ve played it yourself.',
+                stuck: 'Break it into two 1-bar halves: read and play the first four notes clean, then the last four, then join them. Peeking at your note-name chart to find a fret is fine — hitting Play tab to hear the tune first is not (hearing it cold is the part you\'re testing).',
+                levelUp: 'Cover the note names and read from the fret numbers alone, or play it once, look away, and try to play it back from memory.',
+                skills: [4, 5],
+                tab: {
+                  caption: 'Mystery melody — sight-read cold · A & D strings · frets 0–3 · 60 BPM',
+                  notes: [
+                    { string: 'A', fret: 0, note: 'A', midi: 45 },
+                    { string: 'A', fret: 2, note: 'B', midi: 47 },
+                    { string: 'A', fret: 3, note: 'C', midi: 48 },
+                    { string: 'D', fret: 0, note: 'D', midi: 50 },
+                    { string: 'D', fret: 2, note: 'E', midi: 52 },
+                    { string: 'D', fret: 0, note: 'D', midi: 50 },
+                    { string: 'A', fret: 3, note: 'C', midi: 48 },
+                    { string: 'A', fret: 0, note: 'A', midi: 45 }
+                  ]
+                },
+                response: { type: 'short', prompt: 'First cold read — did your played version match the ▶ Play tab check? Which note (if any) did you misread?', placeholder: 'e.g. matched! / misread the D-string fret 2' }
               }
             ]
           },

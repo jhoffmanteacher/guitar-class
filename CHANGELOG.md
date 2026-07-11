@@ -5,6 +5,115 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — Getting around the site is much faster
+
+### Added
+- **No more dead ends.** Every station now ends with a "Next" button —
+  finish Station B and one tap takes you to Station C, then to your
+  skills checklist, then to the next set (or the Module Review). No more
+  scrolling back to the top to find where to click. A **↑ Top** button
+  also appears in the corner once you've scrolled down.
+- **📍 Show me where.** Every skill on your checklist now has a link that
+  jumps straight to the steps that teach it — they light up briefly so
+  you can't miss them. Not sure how to practice "folk strum"? One tap
+  shows you the lesson.
+- **🔍 Find.** A search button at the top of the page searches every
+  step, skill, and set across all twelve modules. Type "F chord" or
+  "pentatonic" and tap a result to jump right to that spot in the site.
+- **♪ Songs.** One button lists every song on the site — core songs
+  first — with each song's tutorial, backing track, Song Journey page,
+  and which modules teach it.
+- **Station C now says the quiet part out loud:** do Station B first on
+  your first pass, but coming back another day just to practice is not
+  cheating — split days are how skills stick.
+
+## 2026-07-11 — Skills you're tested on are now actually taught
+
+### Added
+- **Module 2:** two new challenges — play the **bass line of Let It Be**
+  (the real roots, on your two lowest strings — a head start on a song
+  you'll play for real in Module 5), and a **Mystery TAB** you've never
+  heard: read it cold, play it, THEN hit play to check yourself. That's
+  genuine sight-reading practice, which the module's assessment always
+  asked for but nothing let you practice.
+- **Module 3:** the **split strum** ("boom-chick" — bass note, then
+  strum) is now taught step-by-step with a listen-along demo, instead of
+  just being named in the set goal.
+- **Module 4:** the **four-phrase solo plan** is now an actual lesson —
+  say it, repeat it, stretch it, come home. Your skills checklist always
+  mentioned it; now the module teaches it.
+- **Module 5:** three additions — a **Mystery Chart** drill (name the
+  chord from an unlabelled diagram, exactly like the assessment), the
+  **folk strum** (D-DU-UDU) taught properly with the skipped-beat secret
+  explained, and a **waltz strum** for songs that count in three.
+
+## 2026-07-11 — Videos float over the page instead of living in a side panel
+
+### Changed
+- **The empty frame on the right is gone.** Videos, handouts, and chord
+  diagrams now open in a **floating mini-player** when you click them —
+  and the page stays fully usable behind it, so you can watch the lesson
+  while you read the step and type your answers. Drag it by its header
+  to wherever it's not in the way; the YouTube fullscreen button is
+  there when you want it big. Close with the ✕ or the Escape key
+  (closing stops the video). "Open in new tab" still works from the
+  player header.
+- With the side panel gone, your practice steps get a comfortable
+  centered column instead of being squeezed against a blank frame.
+
+## 2026-07-11 — Games: your guitar is the controller
+
+### Added
+- **A Games button now sits next to ⚡ Daily 5** at the top of the page.
+  It opens a games area with two mic-powered games — the floating corner
+  stays reserved for the Tuner, Timer, and Metronome.
+- **🎯 Note Hunt.** The game names a note — *"Find G on the A string"* —
+  you play it, and the mic tells you if you found it. Miss, and it
+  coaches you toward it: *"I heard A — go 2 frets down"*, or *"That's G
+  too, but an octave higher."* Ten notes per round, score your first-try
+  finds, and climb the levels: open strings → E·A → D·G → B·e → all six
+  strings (naturals, frets 0–10 — the same fretboard map Modules 9 and 10
+  build).
+- **🔁 Change Up.** Chord changes on the clock: pick a loop — two chords
+  back and forth (Am↔Em, G↔C…), then three (G–C–D…), then four
+  (C–G–Am–F, the Let It Be changes) — pick a tempo, and strum on every
+  beat while the chord switches each bar. The game grades every change:
+  did the new chord land on beat 1, and did it ring right? Nail 85% and
+  it offers you +10 BPM; struggle and it suggests backing off — and it
+  names the switch that's costing you (*"Drill just G → C"*). Your best
+  clean tempo per loop is remembered for the session.
+- Same privacy deal as the tuner and the Listening Coach: the mic only
+  runs inside a game, everything happens on your device, nothing is
+  recorded or uploaded.
+
+## 2026-07-11 — The site can hear you play now
+
+### Added
+- **🎤 Check me — the Listening Coach.** Next to every ▶ Play button
+  there's now a green **🎤 Check me** button. Tap it, get four count-in
+  clicks, and play the drill into your microphone — the site listens and
+  gives you a report card: **right notes, on the beat, steady tempo,
+  chord changes, and played-it-through**, each rated *Needs work* /
+  *You're getting it* / *Great*, with one plain sentence telling you what
+  to fix first. Wrong note? It names the note and the spot. Rushing? It
+  shows you the BPM you drifted to.
+- **🎤 Check my changes.** Chord steps get their own version: strum along
+  with the count and the Coach checks whether your chord changes are
+  landing on time (the thing that actually makes songs work).
+- **It's honest.** If the room is loud or the take is unclear, it says
+  "I couldn't hear that clearly — try again closer to the mic" instead of
+  guessing. And everything happens on your device: nothing is recorded,
+  nothing is uploaded, and the mic only runs during a check (you'll see
+  the red "mic on" dot).
+- Works everywhere drills live: practice steps, TABs, the 10-Minute
+  Routine, the Daily 5, and the skills-checklist practice panels.
+- **The card shows you the TAB.** Note checks display exactly where to
+  play each note — string and fret, same TAB grid as everywhere else on
+  the site — before and while you play. Drills that already have a TAB
+  use it as-is; the rest get a sensible fingering worked out for you
+  (Pattern 1 lands on the frets 5–8 box, first-position drills stay
+  down at the nut).
+
 ## 2026-07-11 — The tuner settles down
 
 ### Changed

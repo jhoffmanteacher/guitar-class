@@ -144,6 +144,25 @@ SETS.push(
                 response: { type: 'short', placeholder: 'e.g. Am keeps buzzing on string 3 — I\'ll start there' }
               }
             ]
+          },
+          {
+            title: 'Mystery Chart — name the shape with no label',
+            steps: [
+              {
+                text: 'Challenge — Mystery Chart: the two diagrams below have NO names. This is exactly the assessment task — naming chords on an unlabelled chart. Look at the FIRST (left) one only: which string is muted, which are open, and where do the fretted fingers sit? Read it, then answer which chord it is.',
+                hint: 'Read it the way Set 1 taught: check string 6 first (X or open?), then find the fretted dots. The first shape mutes the low E (X on string 6), leaves string 5 open, and frets strings 4 & 3 at fret 2 with a finger on string 2, fret 1. The second shape plays all six strings, with just two fingers at fret 2 on strings 5 & 4.',
+                stuck: 'Compare the two lowest strings. One diagram has an X on string 6 — don\'t play it; the other plays string 6 open. That single difference tells these two shapes apart.',
+                skills: [1, 6],
+                chords: [
+                  { chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
+                  { chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 }
+                ],
+                response: { type: 'mc', prompt: 'The FIRST (left) unlabelled diagram is which chord?',
+                  answer: 0,
+                  explain: 'It\'s Am. The giveaways: string 6 is muted (X), string 5 is open (that open A is the root the chord is named after), and the fingers sit on strings 4 & 3 at fret 2 plus string 2 at fret 1. The second diagram is Em — it plays all six strings with its two fingers on strings 5 & 4.',
+                  choices: ['Am', 'Em', 'C major', 'G major'] }
+              }
+            ]
           }
         ]
       }
@@ -375,6 +394,23 @@ SETS.push(
                 text: '⚡ Ear Spark (optional, 2 min): record yourself strumming C or Am, a few reps in a shuffled slip order. On playback, call each one bright or moody before checking — that\'s major vs minor, and you can already hear it. Got someone around? Have them strum behind your back and you call it live.'
               }
             ]
+          },
+          {
+            title: 'The folk strum (D–D–U–U–D–U)',
+            steps: [
+              {
+                text: 'Challenge — The Folk Strum: this is the campfire pattern the down-up strum skill is really testing. Over one bar, strum down, down-up, up-down-up — written D · D U · U D U. Count it out loud "1, 2-and, and-4-and": you strum on 1, on 2 and its "and," you SKIP the downstrum on beat 3, then catch the "and" of 3, then 4 and its "and." That skipped beat-3 down is the whole secret of the groove. Start on one chord (G is a great one). You\'ve got it when: it loops smoothly 4 times in a row on one chord without stopping.',
+                hint: 'Say the full count "1 2 and 3 and 4 and" while your hand swings nonstop. The six strums land on 1, 2, &(2), &(3), 4, &(4) — and beat 3\'s downstrum is the one you leave out. Upstrokes stay lighter than downstrokes.',
+                stuck: 'Keep your strumming hand moving down-up-down-up the entire bar — never stop the swing. On the beats you don\'t want (that missed beat-3 down), just let the hand pass and MISS the strings. The motion is constant; only the contact changes.',
+                levelUp: 'Now take it to a chord change: play the folk strum for one full bar on G, then one full bar on C, and loop G → C → G → C keeping the strum unbroken right through the switch.',
+                skills: [5, 6],
+                chords: [
+                  { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
+                  { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 }
+                ],
+                playSeq: { label: 'Hear G then C — the change to loop', bpm: 60, notes: [[43,47,50,55,59,67], [43,47,50,55,59,67], [48,52,55,60,64], [48,52,55,60,64]] }
+              }
+            ]
           }
         ]
       }
@@ -551,6 +587,22 @@ SETS.push(
               {
                 text: 'Crossing between Group 1 and Group 2, which single change still feels like reaching across the neck? Name it — that\'s your warm-up next session.',
                 response: { type: 'short', placeholder: 'e.g. C→A still feels like a big jump' }
+              }
+            ]
+          },
+          {
+            title: 'The waltz strum (3/4 time) — count in 3',
+            steps: [
+              {
+                text: 'Challenge — Waltz Strum: not every song is in 4. A waltz counts in THREE — "ONE-two-three, ONE-two-three." Play a firmer downstrum on beat 1 (dig in toward the low strings so the bass rings), then two lighter strums on 2 and 3 — down, down-up works nicely (D · D · U), or keep it simple with three downs (D · D · D). Beat 1 is the boss: it should clearly be the strongest of the three. This "in-3" feel is what drives waltz-time songs like the House of the Rising Sun groove. Use Em so the low strings ring full. You\'ve got it when: you keep it steady for 8 bars and beat 1 is unmistakably the strongest pulse in every bar.',
+                hint: 'Say "ONE-two-three" out loud with the ONE loudest. Let the pick fall a little heavier and more toward the bass strings on beat 1, then lift to lighter strums for 2 and 3. Three beats per bar, then straight back to a strong ONE — no beat 4 to wait for.',
+                stuck: 'Drop the strum entirely and just tap: one loud tap on 1, two soft taps on 2 and 3, over and over. Once that "ONE-two-three" pulse is in your foot, add the strums back on top of it.',
+                levelUp: 'Change chords every bar on beat 1 — one bar of Em, then Am, then G — keeping the strong-beat-1 waltz pulse unbroken through each change.',
+                skills: [5, 6],
+                chords: [
+                  { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 }
+                ],
+                playSeq: { label: 'Hear Em — the waltz chord', bpm: 60, notes: [40, 47, 52, 55, 59, 64] }
               }
             ]
           }

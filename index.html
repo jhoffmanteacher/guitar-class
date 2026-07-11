@@ -3,8 +3,8 @@
 <head>
 <!--
   GUITAR CLASS STUDENT DASHBOARD
-  Files: index.html · styles.css · app.js · firebase-config.js ·
-         config-main.js · module-1.js … module-9.js
+  Files: index.html · styles.css · app.js · tuner.js · coach.js ·
+         firebase-config.js · config-main.js · module-1.js … module-12.js
   To add or edit content: edit config-main.js and the module-N.js files.
   To update the live site: push the changed files to GitHub (see CLAUDE.md).
 -->
@@ -122,10 +122,16 @@ function googleTranslateElementInit(){
         <label class="module-select-label" for="module-select">Module</label>
         <select class="module-select" id="module-select" onchange="onModuleChange(this.value); saveProgress()"></select>
         <button type="button" class="daily5-btn" id="daily5-btn" onclick="toggleDaily5()" aria-expanded="false" aria-controls="daily5-panel">&#x26A1; Daily 5</button>
+        <button type="button" class="daily5-btn" id="games-btn" onclick="toggleGames()" aria-expanded="false" aria-controls="games-panel">&#x1F3AE; Games</button>
+        <button type="button" class="daily5-btn" id="songs-hub-btn" onclick="toggleSongsHub()" aria-expanded="false" aria-controls="songs-hub-panel">&#x266A; Songs</button>
+        <button type="button" class="daily5-btn" id="search-btn" onclick="toggleSearch()" aria-expanded="false" aria-controls="search-panel">&#x1F50D; Find</button>
         <div class="module-strip" id="module-strip" role="group" aria-label="Module progress — jump to a module"></div>
         <span class="module-strip-label" id="module-strip-label"></span>
       </div>
       <div class="daily5-panel" id="daily5-panel" hidden></div>
+      <div class="games-panel" id="games-panel" hidden></div>
+      <div class="daily5-panel" id="songs-hub-panel" hidden></div>
+      <div class="daily5-panel" id="search-panel" hidden></div>
       <div class="week-pills" id="week-pills"></div>
       <div id="week-panels"></div>
       <div class="fab-group" id="fab-group" style="display:none">
@@ -210,28 +216,28 @@ function googleTranslateElementInit(){
         </div>
       </div>
     </main>
-    <div class="resize-handle" id="resize-handle"></div>
-    <div class="resource-panel" id="resource-panel">
-      <div class="rp-header">
-        <span class="rp-label">Resources</span>
+  </div>
+  <!-- Resource viewer: videos/docs/diagrams open in a floating mini-player
+       so the step's questions stay visible and usable behind it. Drag by
+       the header; ✕ or Escape closes (removing the iframe stops video). -->
+  <div class="video-overlay" id="video-overlay" hidden>
+    <div class="video-modal" role="dialog" aria-label="Resource viewer">
+      <div class="vm-head">
+        <div class="rp-meta" id="rp-meta"></div>
         <div class="rp-actions">
           <a class="rp-newtab" id="rp-newtab" href="#" target="_blank" rel="noopener">
             <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M8 1h3m0 0v3m0-3L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Open in new tab
           </a>
-          <button class="rp-close" id="rp-close" onclick="clearPanel()" title="Close" aria-label="Close resources panel">&#x2715;</button>
+          <button class="rp-close" id="rp-close" onclick="clearPanel()" title="Close" aria-label="Close viewer">&#x2715;</button>
         </div>
-      </div>
-      <div class="rp-empty" id="rp-empty">
-        <div class="rp-empty-ico">&#x1F4CB;</div>
-        <div class="rp-empty-txt">Click a video on the left<br>to load it here</div>
       </div>
       <div class="rp-content" id="rp-content">
         <div class="rp-iframe-wrap" id="rp-iframe-wrap"></div>
-        <div class="rp-meta" id="rp-meta"></div>
       </div>
     </div>
   </div>
+  <button type="button" class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top" title="Back to top">&#x2191; Top</button>
   <footer class="student-footer">
     <span class="sf-left">Sequoia HS Music · Mr. Hoffman</span>
     <a class="sf-report" id="sf-report" href="mailto:jhoffman@seq.org" onclick="return buildReportHref(this)">Report a problem</a>
@@ -267,6 +273,7 @@ function googleTranslateElementInit(){
 <!-- Split out of app.js for maintainability. Load AFTER app.js; both attach
      global functions used by onclick handlers / the auth flow at event time. -->
 <script defer src="tuner.js"></script>
+<script defer src="coach.js"></script>
 <script defer src="teacher.js"></script>
 <!--
 ╔════════════════════════════════════════════════════════════════════╗

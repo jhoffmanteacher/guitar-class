@@ -166,6 +166,14 @@ SETS.push(
             stuck: 'Pick just 2 notes on one string and trade them back and forth, changing only the rhythm — that\'s already improvising.',
             levelUp: 'Add a 4th and 5th note, or end every phrase on the root (A) so each idea "arrives home."',
             skills: [6]
+          },
+          {
+            text: 'Challenge 4 — The Four-Phrase Plan: use the SAME 3 notes from Rule of 3, but now shape a whole solo with four short phrases — about one bar each, silence between them (the space IS part of the plan). Give each phrase a job: <strong>Phrase 1 — say it</strong> (a tiny idea, 2–4 notes). <strong>Phrase 2 — repeat it</strong> (play that same idea again, maybe with one note changed). <strong>Phrase 3 — stretch it</strong> (take the idea higher, or keep the notes and change the rhythm). <strong>Phrase 4 — come home</strong> (end on the root, A, so the solo lands). Play it over the Am backing track (▶ &#x1F3B5; Backing track on the Watchtower or "the cure" card below). You\'ve got it when: four distinct phrases with space between them, and the last one lands on the root (A).',
+            hint: 'This is Rule of 3 with a road map. Say-it / repeat-it / stretch-it / come-home turns three notes into a story with a beginning, middle, and ending — instead of a random string of notes.',
+            stuck: 'Make Phrases 1 and 2 EXACTLY the same — note for note. Repeating an idea isn\'t cheating, it\'s how nearly every melody you know works. Your ear is waiting to hear it come back.',
+            levelUp: 'Name the four jobs out loud — "say it… repeat it… stretch it… come home" — before you play each phrase, or run the whole plan over the Am backing track and hold the track\'s pulse start to finish.',
+            skills: [6],
+            response: { type: 'short', prompt: 'Describe your Phrase 1 "say it" idea in words — which notes, and its rhythm?', placeholder: 'e.g. A then C, two quick notes' }
           }
             ]
           },

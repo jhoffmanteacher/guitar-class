@@ -363,10 +363,25 @@ checklist, ship plain inline feedback instead.*
 
 ---
 
-## SESSION G — "Listening Coach": the site hears you play and checks it
-*(Jonathan's addition — the Yousician core loop, scoped honestly for a static site.
-Three sittings: G1 engine + Note Coach, G2 Rhythm Coach, G3 Chord Coach experiment.
-Session F was cut — where this doc references F's feedback UI or sounds, ship plain inline feedback instead.)*
+## SESSION G — ✅ SUPERSEDED & SHIPPED 2026-07-11 as the "Listening Coach" rubric app
+
+*(Jonathan replaced the three-sitting G1/G2/G3 plan with a single rubric-feedback
+app, built 2026-07-11 in one pass — see `coach.js` and WORKFLOW.md. What shipped:
+🎤 "Check me" on every ▶ Play control (playSeq steps, tabs, routine drills,
+skill-practice panels) and 🎤 "Check my changes / Strum check" under every step's
+chord diagrams. Count-in → on-device listening → report card scoring FIVE criteria
+on a three-level scale (Needs work / You're getting it / Great) with one plain
+sentence each: right notes, on the beat, steady tempo, chord changes, played it
+through. The honesty research below (reliability tiers, no camera judgment, no
+claimed chord names, "couldn't hear that clearly" gating, privacy line, quiet-room
+line) all carried into the build. G1's video self-review extension of Record
+Yourself did NOT ship — still available as a future add-on. The original plan is
+kept below for reference.)*
+
+*(Original Session G plan — the Yousician core loop, scoped honestly for a static
+site. Three sittings: G1 engine + Note Coach, G2 Rhythm Coach, G3 Chord Coach
+experiment. Session F was cut — where this doc references F's feedback UI or
+sounds, ship plain inline feedback instead.)*
 
 ### What's honestly buildable (read before starting)
 

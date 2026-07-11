@@ -64,7 +64,7 @@ try {
 } catch { /* no tabs/ dir yet */ }
 
 const SHELL_FILES = [
-  'index.html', 'styles.css', 'app.js', 'tuner.js', 'teacher.js', 'config-main.js',
+  'index.html', 'styles.css', 'app.js', 'tuner.js', 'coach.js', 'teacher.js', 'config-main.js',
   'firebase-config.js', 'manifest.json', 'icon.svg',
   ...MODULE_FILES,
   ...TAB_PAGES,
@@ -290,10 +290,32 @@ function fingerprint() {
   return h.digest('hex').slice(0, 10);
 }
 
+/* Parity guard: sw.js's hand-maintained ASSETS list drifts from reality in
+   two silent ways — a new shell file that never gets precached (breaks
+   offline), or a stale entry for a deleted file (cache.addAll rejects and
+   the whole SW install fails). Parse ASSETS out of sw.js and check both. */
+function checkSwAssets(src) {
+  const m = src.match(/const ASSETS = \[([\s\S]*?)\];/);
+  if (!m) { err('could not find ASSETS in sw.js'); problems++; return; }
+  const assets = [...m[1].matchAll(/'\.\/([^']+)'/g)].map(x => x[1]);
+  let bad = 0;
+  for (const a of assets) {
+    try { readFileSync(join(ROOT, a)); }
+    catch { err(`sw.js ASSETS lists './${a}' but the file doesn't exist — SW install would fail`); problems++; bad++; }
+  }
+  // Every fingerprinted shell file belongs in the precache (icons/manifest
+  // are listed in ASSETS too, but SHELL_FILES is the must-have core).
+  for (const f of SHELL_FILES) {
+    if (!assets.includes(f)) { err(`shell file '${f}' is missing from sw.js ASSETS — it won't be precached for offline`); problems++; bad++; }
+  }
+  if (bad === 0) ok(`sw.js ASSETS ↔ shell files in sync (${assets.length} assets)`);
+}
+
 function bumpServiceWorker() {
   head('3. Service-worker cache version');
   const swPath = join(ROOT, 'sw.js');
   const src = readFileSync(swPath, 'utf8');
+  checkSwAssets(src);
   const fp = fingerprint();
   const date = new Date().toISOString().slice(0, 10);
   const want = `guitar-class-${date}-${fp}`;
