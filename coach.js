@@ -573,7 +573,7 @@ function coachRenderReport(){
     ? `<div class="coach-streak">&#x1F525; That&rsquo;s ${streak} clean runs in a row — this one&rsquo;s yours.</div>` : '';
 
   coachBody().innerHTML =
-    `<div class="coach-overall">${overall}</div>
+    `<div class="coach-report"><div class="coach-overall">${overall}</div>
      ${coachStripHtml()}
      <div class="coach-crits">` +
     crits.map(c =>
@@ -591,7 +591,7 @@ function coachRenderReport(){
      <div class="coach-actions">
        <button type="button" class="coach-start" onclick="coachStartCheck()">&#x21BB; Try again</button>
        <button type="button" class="tp-btn" onclick="coachClose()">Done</button>
-     </div>`;
+     </div></div>`;
 }
 
 /* ── Criterion 1: Right notes / right chord sound ── */
@@ -769,17 +769,30 @@ function coachClose(){
 }
 function coachStopAll(){ coachClose(); }
 
-/* Called by app.js when the tuner opens: the tuner takes the mic. */
-function coachInterrupt(){
+/* Called by app.js when the tuner opens (the tuner takes the mic) and by the
+   hidden-tab handler below. */
+function coachInterrupt(msg){
   if (!coach) return;
   if (coach.phase === 'listening' || coach.phase === 'countin'){
     coach.timeouts.forEach(clearTimeout);
     coach.timeouts = [];
     if (coachRaf){ cancelAnimationFrame(coachRaf); coachRaf = null; }
     coachMicOff();
-    coachRenderReady('The tuner took over the mic — tune up, then start the check again.');
+    coachRenderReady(msg || 'The tuner took over the mic — tune up, then start the check again.');
   }
 }
+
+/* Privacy + battery: the mic (and its analysis loops) never runs in a tab the
+   student isn't looking at. Switching tabs or locking the phone shuts it all
+   down cleanly; the student restarts with one tap when they're back. */
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) return;
+  coachInterrupt('Paused — this tab went to the background, so the mic switched off. Start the check again when you\'re back.');
+  gamesStopMic();
+  if (typeof tunerRunning !== 'undefined' && tunerRunning && typeof closePopup === 'function'){
+    closePopup('tuner');
+  }
+});
 
 /* ════════════════════════════════════════════════════════════════════
    NOTE HUNT — fretboard trainer game (lives in the 🎮 Games panel).
@@ -1372,7 +1385,7 @@ function ccRenderDone(){
   ).join('');
   const rec = r >= 0.85 ? 'up' : r >= 0.5 ? 'same' : 'down';
   body.innerHTML =
-    `<div class="coach-overall">${verdict}</div>
+    `<div class="coach-report"><div class="coach-overall">${verdict}</div>
      <div class="coach-strip">${chips}</div>
      <div class="coach-crit-note">${escHtml(advice)}</div>
      <div class="coach-actions">
@@ -1381,7 +1394,7 @@ function ccRenderDone(){
        <button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="ccAgain(10)">&#x2B06; +10 BPM</button>
      </div>
      <button type="button" class="tp-btn cc-change-loop" onclick="ccSetup()">Pick a different loop</button>
-     ${COACH_FOOT_HTML}`;
+     ${COACH_FOOT_HTML}</div>`;
 }
 
 function ccAgain(d){

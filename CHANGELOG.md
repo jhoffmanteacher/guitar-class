@@ -5,6 +5,41 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — Every set now tells you which song it unlocks
+
+### Added
+- **🎸 Song badges.** Sets that build one of the six core songs now say
+  so right at the top — *"This set unlocks: Seven Nation Army · Luna"* —
+  with each name linking to that song's Journey page. Twenty-two sets
+  across the course carry badges, every one hand-checked against a real
+  drill in that set (no decorative claims).
+- **The check-off echoes it.** Mark a skill "I've got it!" in a badged
+  set and the checklist answers: *"🎸 You can now play more of Luna."*
+  Progress reads as songs growing, not boxes ticking.
+
+## 2026-07-11 — Design polish: friendlier on phones, kinder on eyes
+
+### Changed
+- **Dark mode looks finished.** The purple chips on Module Reviews, the
+  tuner button, and the welcome card used to glare bright-lavender on
+  dark phones — the whole purple family now adapts to dark mode like
+  the rest of the site's colors.
+- **Easier to tap.** The module progress strip, tuner string buttons,
+  set pills, and tool buttons all grew comfortable finger-sized tap
+  areas — fewer missed taps on phones.
+- **Small wins feel like wins.** The tuner's note pops green the
+  instant a string locks in tune; Coach and Change Up report cards
+  slide up like a graded paper; and checking off a module's last skill
+  fires a little burst on the progress strip.
+- **"3 skills left in Module 4."** The progress strip now tells you
+  exactly how close the current module is to done.
+- **The mic never runs in a hidden tab.** Switch tabs or lock your
+  phone mid-check and the mic shuts off (and the tuner closes) — start
+  again with one tap when you're back. Better privacy, better battery.
+- **Calmer for those who need it:** the site now honors your device's
+  "reduce motion" setting; faint gray labels darkened; buttons press
+  down satisfyingly under your thumb; the header fits small phones.
+
 ## 2026-07-11 — Bug-fix round for the new mic features and player
 
 ### Changed

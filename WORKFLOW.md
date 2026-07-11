@@ -94,6 +94,44 @@
       7th/sus chord color, songwriting capstone, Choice-song style lanes,
       motivation layer. Details in `archive/RESEARCH_UPGRADES.md`; do not
       start without Jonathan's go-ahead.
+- [x] **Design upgrades, batches 1+2 ✅ 2026-07-11** (from
+      DESIGN_UPGRADES.md, the parallel session's Ableton/Duolingo/Stripe
+      study; Jonathan picked batches 1 and 2). Quick wins 1a–1h: purple
+      family → --purple-* variables with dark-mode versions (all 15
+      hardcoded lavender/indigo sites swapped; review-pill.active and
+      similar use text-on-bg inversion for dark contrast);
+      prefers-reduced-motion blanket rule; finger-sized tap targets
+      (mstrip ::after hit area, wpill/ts-btn/tp-btn/tab-note-btn padding);
+      --text3 #767670→#63635d; --shadow-card/--shadow-raised applied to
+      popups/cards/modal; pressable primary CTAs (welcome-go, coach-start,
+      panel-next, rec primary); ≤480px header rule; bpm-slider dup scoped.
+      Success moments 2a–2e: tuner note pops green on the in-tune
+      transition (.in-tune/.in-tune-pop, cleared on leave/reset); coach +
+      Change Up reports wrapped in .coach-report slide-up; strip label
+      appends "N skills left in Module X" / "Module X complete!";
+      module-completion celebration (state-transition detected across
+      renderProgressStrip renders, never on first paint; seg pulse + 6
+      emoji particles, skipped under reduced-motion); hidden-tab handler
+      in coach.js kills mic + closes tuner on visibilitychange
+      (coachInterrupt gained a message param). All 6 VM suites (document
+      stubs gained addEventListener/hidden) + checks pass. REMAINING in
+      DESIGN_UPGRADES.md (items marked ✅ inline): 2f song badges (best
+      motivation-per-effort; needs per-set data fields) and tier 3
+      (rem text-size system, practice streak — needs design conversation,
+      one-thing-per-screen, beat cursor).
+      **2f song badges ✅ 2026-07-11** (same day, Jonathan's go-ahead):
+      optional `songThread: [{name, journey, note}]` field hand-curated on
+      22 sets across modules 1–9 + 12 — every entry evidence-backed by a
+      Journey link or named drill INSIDE that set (song-list mentions
+      don't qualify; the curation scan is in the session log). Rendered
+      as a "🎸 This set unlocks:" row on the set header (names link to
+      Journey pages, note in the tooltip) + a check-off echo under the
+      checklist progress bar ("You can now play more of X", aria-live,
+      rotates through the set's songs, 5s fade). M10/M11 deliberately
+      untagged — their core-song mentions are exercise vehicles, not
+      song-building drills. render-test asserts badge presence on m5w2
+      and absence on untagged m5w1. DESIGN_UPGRADES.md 2f marked done;
+      remaining there: tier 3 only.
 - [ ] **Video self-review** (last unbuilt Listening-Coach piece) — camera
       toggle on Record Yourself so students watch their own playback with
       the module's assessment checklist underneath; nothing uploads.

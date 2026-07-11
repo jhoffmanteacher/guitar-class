@@ -8,6 +8,7 @@ SETS.push(
 
   {
     id: 'm4w1',
+    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', note: 'solo over the riff — Layer 4' }, { name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'improvise over its backing track — Layer 4' }, { name: 'Luna', journey: 'tabs/luna.html', note: 'Layer 4 of its Song Journey' }],
     label: 'Set 1',
     locked: false,
     module: 'Major / Minor / Blues Pentatonic Scales',
@@ -284,6 +285,7 @@ SETS.push(
 
   {
     id: 'm4w2',
+    songThread: [{ name: 'Sweet Child O\' Mine', journey: 'tabs/sweet-child-o-mine.html', note: 'Layer 4 of its Song Journey' }],
     label: 'Set 2',
     locked: false,
     module: 'Major / Minor / Blues Pentatonic Scales',

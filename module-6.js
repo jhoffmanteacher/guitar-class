@@ -8,6 +8,7 @@ SETS.push(
 
   {
     id: 'm6w1',
+    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'your strumming patterns power this song' }],
     label: 'Set 1',
     locked: false,
     module: 'Strumming Patterns with Chords',
@@ -420,6 +421,7 @@ SETS.push(
 
   {
     id: 'm6w3',
+    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'five layers deep and still growing' }],
     label: 'Set 3',
     locked: false,
     module: 'Strumming Patterns with Chords',

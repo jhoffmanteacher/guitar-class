@@ -8,6 +8,7 @@ SETS.push(
 
   {
     id: 'w1',
+    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'Layer 1 of its Song Journey starts here' }],
     label: 'Set 1',
     locked: false,
     module: 'Introductions: You and The Guitar',
@@ -183,6 +184,7 @@ SETS.push(
 
   {
     id: 'w2',
+    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', note: 'Layer 1 of its Song Journey starts here' }],
     label: 'Set 2',
     locked: false,
     module: 'Introductions: You and The Guitar',

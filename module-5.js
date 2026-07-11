@@ -203,6 +203,7 @@ SETS.push(
 
   {
     id: 'm5w2',
+    songThread: [{ name: 'Let It Be', journey: 'tabs/let-it-be.html', note: 'the real chords — Layers 1 and 2' }, { name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'Layer 5 — the full song' }],
     label: 'Set 2',
     locked: false,
     module: 'Open Chords',
@@ -453,6 +454,7 @@ SETS.push(
 
   {
     id: 'm5w3',
+    songThread: [{ name: 'Luna', journey: 'tabs/luna.html', note: 'the F–Am vamp — Layer 5' }],
     label: 'Set 3',
     locked: false,
     module: 'Open Chords',
@@ -645,6 +647,7 @@ SETS.push(
 
   {
     id: 'm5w4',
+    songThread: [{ name: 'Luna', journey: 'tabs/luna.html', note: 'Layer 5 — perform it' }],
     label: 'Set 4',
     locked: false,
     module: 'Open Chords',

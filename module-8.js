@@ -424,6 +424,7 @@ SETS.push(
 
   {
     id: 'm8w3',
+    songThread: [{ name: 'Let It Be', journey: 'tabs/let-it-be.html', note: 'fingerpicked — Layer 4 of 4' }],
     label: 'Set 3',
     locked: false,
     module: 'Finger Picking',

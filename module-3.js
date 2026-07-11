@@ -8,6 +8,7 @@ SETS.push(
 
   {
     id: 'm3w1',
+    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', note: 'the riff as power chords — Layer 3' }, { name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'Layer 3 of its Song Journey' }],
     label: 'Set 1',
     locked: false,
     module: 'Two-Finger Power Chords',
@@ -283,6 +284,7 @@ SETS.push(
 
   {
     id: 'm3w2',
+    songThread: [{ name: 'Luna', journey: 'tabs/luna.html', note: 'the F5–A5 vamp — Layer 3' }, { name: 'Sweet Child O\' Mine', journey: 'tabs/sweet-child-o-mine.html', note: 'D5–C5–G5 — Layer 3 and your assessment piece' }, { name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'the A5–G5–F5 loop — Layer 3' }, { name: '"the cure"', journey: 'tabs/the-cure.html', note: 'Layer 3 of its Song Journey' }],
     label: 'Set 2',
     locked: false,
     module: 'Two-Finger Power Chords',

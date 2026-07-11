@@ -8,6 +8,7 @@ SETS.push(
 
   {
     id: 'm7w1',
+    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', note: 'the riff that started it all — now with barres' }],
     label: 'Set 1',
     locked: false,
     module: 'TAB Notation and Barre Chords',
@@ -229,6 +230,7 @@ SETS.push(
 
   {
     id: 'm7w2',
+    songThread: [{ name: 'Sweet Child O\' Mine', journey: 'tabs/sweet-child-o-mine.html', note: 'the Module 7 finale' }],
     label: 'Set 2',
     locked: false,
     module: 'TAB Notation and Barre Chords',
@@ -432,6 +434,7 @@ SETS.push(
 
   {
     id: 'm7w3',
+    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'every chord as a barre' }, { name: 'Luna', journey: 'tabs/luna.html', note: 'beyond Layer 5 — the barre upgrade' }],
     label: 'Set 3',
     locked: false,
     module: 'TAB Notation and Barre Chords',

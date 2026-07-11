@@ -1250,14 +1250,33 @@ function fmtModuleProgress(complete, partial){
 // The 8-segment "you are here / how far I've come" strip next to the Module
 // dropdown. Each segment is a real button that jumps to (and lazy-loads) its
 // module. Renders purely from manifest + progress — never forces a module load.
+let _moduleStripStates = {};   // num -> last seen state, to catch the just-completed moment
+function celebrateModuleComplete(seg){
+  seg.classList.add('celebrate');
+  setTimeout(()=>seg.classList.remove('celebrate'), 1300);
+  if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const r = seg.getBoundingClientRect();
+  ['\u{1F3B8}','\u{1F3B5}','\u2B50','\u{1F3B6}','\u{1F3B5}','\u2728'].forEach((ch, i)=>{
+    const el = document.createElement('span');
+    el.className = 'celebrate-particle';
+    el.textContent = ch;
+    el.style.left = (r.left + r.width/2 - 9 + (i - 2.5) * 14) + 'px';
+    el.style.top = (r.top - 4) + 'px';
+    el.style.animationDelay = (i * 60) + 'ms';
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 1900);
+  });
+}
 function renderProgressStrip(){
   const strip = document.getElementById('module-strip');
   if(!strip) return;
   strip.innerHTML='';
-  let complete = 0, partial = 0;
+  let complete = 0, partial = 0, currentInfo = null;
+  const firstRender = Object.keys(_moduleStripStates).length === 0;
   MODULE_MANIFEST.forEach(m=>{
     const { done, total, state } = moduleCompletion(m);
     if(state==='complete') complete++; else if(state==='partial') partial++;
+    if(m.num===lastModuleNum) currentInfo = { done, total, state, num: m.num };
     const seg = document.createElement('button');
     seg.type = 'button';
     seg.className = 'mstrip-seg '+state+(m.num===lastModuleNum ? ' current' : '');
@@ -1268,9 +1287,23 @@ function renderProgressStrip(){
     if(m.num===lastModuleNum) seg.setAttribute('aria-current','true');
     seg.onclick = ()=>{ onModuleChange(m.num); saveProgress(); };
     strip.appendChild(seg);
+    // Celebrate the moment a module flips to complete (never on first paint —
+    // returning students shouldn't get confetti for last month's work).
+    if(!firstRender && state==='complete' && _moduleStripStates[m.num] && _moduleStripStates[m.num] !== 'complete'){
+      celebrateModuleComplete(seg);
+    }
+    _moduleStripStates[m.num] = state;
   });
   const label = document.getElementById('module-strip-label');
-  if(label) label.textContent = fmtModuleProgress(complete, partial);
+  if(label){
+    let tail = '';
+    if(currentInfo){
+      tail = currentInfo.state === 'complete'
+        ? ` · Module ${currentInfo.num} complete!`
+        : ` · ${currentInfo.total - currentInfo.done} skill${currentInfo.total - currentInfo.done === 1 ? '' : 's'} left in Module ${currentInfo.num}`;
+    }
+    label.textContent = fmtModuleProgress(complete, partial) + tail;
+  }
 }
 
 // Footer "Report a problem" — build the mailto at click time so the body carries
@@ -1416,7 +1449,14 @@ function buildSet(w){
     .map(s => `<li class="obj-skill-item">${s}</li>`)
     .join('');
   const skills = items ? `<ul class="obj-skill-list">${items}</ul>` : '';
-  return `<div class="obj-card set-head">${pill}${titleHtml}${skills}</div>
+  /* Song-thread badge: the honest answer to "why am I doing this set?" —
+     each entry is hand-curated to a drill that genuinely builds that song. */
+  const thread = (w.songThread && w.songThread.length)
+    ? `<div class="song-thread">&#x1F3B8; This set unlocks: ${w.songThread.map(t => t.journey
+        ? `<a class="song-thread-link" href="${escAttr(t.journey)}" target="_blank" rel="noopener" title="${escAttr(t.note || 'Open the Song Journey')}">${escHtml(t.name)}</a>`
+        : `<span title="${escAttr(t.note || '')}">${escHtml(t.name)}</span>`).join('<span class="song-thread-sep"> · </span>')}</div>`
+    : '';
+  return `<div class="obj-card set-head">${pill}${titleHtml}${skills}${thread}</div>
   <div class="tabs">
     <div class="tabs-songbar">
       ${w.songs ? `<button type="button" class="tabs-songs tab-songs" onclick="switchTab(this,'${w.id}','songs')">&#9835; Songs</button>` : ''}
@@ -2108,6 +2148,7 @@ function buildChecklist(w){
     ${rows}
   </div>
   <div class="prog-wrap"><div class="prog-row"><div class="prog-bg"><div class="prog-fill" id="pf-${w.id}" style="width:${pct}%"></div></div><div class="prog-lbl" id="pl-${w.id}">${done} / ${w.skills.length}</div></div></div>
+  <div class="song-echo" id="se-${w.id}" aria-live="polite"></div>
   <div class="save-ind" id="si-${w.id}" aria-live="polite"></div>`;
 }
 
@@ -2250,6 +2291,18 @@ function toggleSkill(sid, wid, which){
     const pct=Math.round(done/w.skills.length*100);
     document.querySelectorAll(`#pf-${wid}`).forEach(el=>el.style.width=pct+'%');
     document.querySelectorAll(`#pl-${wid}`).forEach(el=>el.textContent=done+' / '+w.skills.length);
+    // Song-thread echo: a fresh "I've got it!" in a badged set names the song
+    // that just grew (rotates through the set's songs).
+    if(progress[sid]==='gotit' && w.songThread && w.songThread.length){
+      const echoEl = document.getElementById('se-'+wid);
+      if(echoEl){
+        const t = w.songThread[(done - 1 + w.songThread.length) % w.songThread.length];
+        echoEl.textContent = `\u{1F3B8} You can now play more of ${t.name}.`;
+        echoEl.classList.add('show');
+        clearTimeout(echoEl._echoT);
+        echoEl._echoT = setTimeout(()=>{ echoEl.classList.remove('show'); }, 5000);
+      }
+    }
   }
   renderPills(lastModuleNum);
   document.querySelectorAll('.wpill').forEach(b=>{if(b.dataset.id===wid)b.classList.add('active');});

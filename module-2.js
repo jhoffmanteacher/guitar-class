@@ -18,6 +18,7 @@ SETS.push(
 
   {
     id: 'm2w1',
+    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', note: 'the riff lives on your low E string — Layer 2' }],
     label: 'Set 1',
     locked: false,
     module: 'Notes on the E & A Strings',
@@ -265,6 +266,7 @@ SETS.push(
 
   {
     id: 'm2w2',
+    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'the bass-note line — Layer 2 and your assessment piece' }, { name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', note: 'Layer 2 — the riff, note by note' }, { name: 'Sweet Child O\' Mine', journey: 'tabs/sweet-child-o-mine.html', note: 'Layer 2 of its Song Journey' }, { name: 'Luna', journey: 'tabs/luna.html', note: 'Layer 2 of its Song Journey' }, { name: 'Let It Be', journey: 'tabs/let-it-be.html', note: 'the C–G–A–F bass skeleton you\'ll build on in Module 5' }],
     label: 'Set 2',
     locked: false,
     module: 'Notes on the E & A Strings',

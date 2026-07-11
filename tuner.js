@@ -266,15 +266,22 @@ function tunerLoop() {
       // outside ±11 — hovering on the boundary no longer flickers the verdict.
       const shown = tunerShownCents;
       if (tunerInTune ? Math.abs(shown) <= 11 : Math.abs(shown) < 8) {
+        if (!tunerInTune) {   // just locked in — give the moment a little pop
+          noteEl.classList.remove('in-tune-pop'); void noteEl.offsetWidth;
+          noteEl.classList.add('in-tune-pop');
+        }
         tunerInTune = true;
+        noteEl.classList.add('in-tune');
         needle.style.background = 'var(--green-text)';
         statusEl.textContent = 'In tune ✓'; statusEl.className = 'tuner-status in-tune';
       } else if (shown > 0) {
         tunerInTune = false;
+        noteEl.classList.remove('in-tune', 'in-tune-pop');
         needle.style.background = 'var(--amber-text)';
         statusEl.textContent = 'Sharp — tune down'; statusEl.className = 'tuner-status sharp';
       } else {
         tunerInTune = false;
+        noteEl.classList.remove('in-tune', 'in-tune-pop');
         needle.style.background = 'var(--blue-text)';
         statusEl.textContent = 'Flat — tune up'; statusEl.className = 'tuner-status flat';
       }
@@ -284,6 +291,7 @@ function tunerLoop() {
     tunerStableCount--;
     if (tunerStableCount < -8) {
       tunerResetSmoothing();
+      noteEl.classList.remove('in-tune', 'in-tune-pop');
       noteEl.textContent = '—'; freqEl.textContent = 'Play a string…';
       needle.style.left = '50%'; needle.style.background = 'var(--border2)';
       statusEl.textContent = ''; statusEl.className = 'tuner-status';

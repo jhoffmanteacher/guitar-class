@@ -168,6 +168,7 @@ SETS.push(
 
   {
     id: 'm9w1',
+    songThread: [{ name: 'Sweet Child O\' Mine', journey: 'tabs/sweet-child-o-mine.html', note: 'read its TAB anywhere on the neck' }],
     label: 'Set 1',
     locked: false,
     module: 'The Full Fretboard & Writing TAB',
@@ -351,6 +352,7 @@ SETS.push(
 
   {
     id: 'm9w2',
+    songThread: [{ name: 'Luna', journey: 'tabs/luna.html', note: 'its intro, up in higher positions' }],
     label: 'Set 2',
     locked: false,
     module: 'The Full Fretboard & Writing TAB',
@@ -532,6 +534,7 @@ SETS.push(
 
   {
     id: 'm9w3',
+    songThread: [{ name: 'Luna', journey: 'tabs/luna.html', note: 'read and write its lines in TAB' }],
     label: 'Set 3',
     locked: false,
     module: 'The Full Fretboard & Writing TAB',

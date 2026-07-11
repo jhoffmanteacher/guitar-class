@@ -407,6 +407,7 @@ SETS.push(
 
   {
     id: 'm12w3',
+    songThread: [{ name: 'Luna', journey: 'tabs/luna.html', note: 'Layer 6 — the fingerpicked requinto intro' }],
     label: 'Set 3',
     locked: false,
     module: 'Fingerstyle: Travis, Waltz & Requinto',
