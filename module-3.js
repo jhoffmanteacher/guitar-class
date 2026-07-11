@@ -91,7 +91,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 hint: 'Tuning (Module 1) is a skill you keep forever. 60 seconds here makes everything today sound better.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
@@ -126,7 +126,7 @@ SETS.push(
             text: 'Challenge 3 — Shape Shifter: slide the same shape to A5 (5th fret E), G5 (3rd fret E), D5 (5th fret A), and C5 (3rd fret A), saying each name aloud. You\'ve got it when: hit all four cleanly without losing the shape.',
             hint: 'Keep the same finger shape and just move it along the neck. The gap between your two fingers never changes.',
             stuck: 'Park on just G5 and A5 (both E-string) and switch between them until it\'s smooth, then add the A-string chords.',
-            levelUp: 'Have a partner call out a random chord (E5, A5, C5, D5…) and find it within 3 seconds, no counting frets.',
+            levelUp: 'Make quick flashcards (E5, A5, C5, D5…), shuffle them, and find each chord within 3 seconds of flipping a card — no counting frets. Got someone around? Have them call out chords instead.',
             skills: [2, 4],
             chords: [
               { name: 'G5', chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
@@ -161,7 +161,7 @@ SETS.push(
             text: 'Challenge 5 — Name & Climb (A string): now do the same up the A string — A5 (open), B5 (2), C5 (3), D5 (5), E5 (7), F5 (8), G5 (10), A5 (12). You\'ve got it when: name every root correctly, and notice the same note names land in different spots than they did on the E string.',
             hint: 'These are the A-string notes from Module 2. Keep the low E muted so only the power chord rings. Same note, new home — that\'s how the fretboard works.',
             stuck: 'Cover frets 0–5 (A5–D5) chart-free first, then add the rest.',
-            levelUp: 'Have a partner call out random frets on either string for you to find and name on the spot.',
+            levelUp: 'Write random frets (0–12) for either string on flashcards, shuffle, and name each root on the spot as you flip. Got someone around? Have them call out frets instead.',
             skills: [4],
             chords: [
               { name: 'A5', chord: [[6,'x'],[5,0],[4,2,'3'],[3,'x'],[2,'x'],[1,'x']], position: 0 },
@@ -181,7 +181,7 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 6 — Watchtower Loop (your assessment piece): play A5–G5–F5–G5, one strum per beat at 60 BPM. You\'ve got it when: four times through, changing on beat 1 every time, with no stops. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-            hint: 'A5 = 5th fret E string, G5 = 3rd fret E string, F5 = 1st fret E string. Shift smoothly — aim to land exactly on beat 1. (The original song uses an Am chord, but as a power chord it\'s just A5 — no major or minor.) This is the loop the whole class plays for the Set 1 check-off.',
+            hint: 'A5 = 5th fret E string, G5 = 3rd fret E string, F5 = 1st fret E string. Shift smoothly — aim to land exactly on beat 1. (The original song uses an Am chord, but as a power chord it\'s just A5 — no major or minor.) This is your Set 1 check-off loop — record a lap and listen back.',
             stuck: 'Loop just A5–G5 (frets 5 and 3) until that change is clean, then add F5.',
             levelUp: 'Play it with an eighth-note strum (down-down-up-down-up), or push past 70 BPM.',
             skills: [2, 5, 6],
@@ -190,7 +190,7 @@ SETS.push(
               { name: 'G5',  chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
               { name: 'F5',  chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 1 }
             ],
-            response: { type: 'short', prompt: 'Personal record: win at 60, then raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 80 — beat it next class' }
+            response: { type: 'short', prompt: 'Personal record: win at 60, then raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 80 — beat it next session' }
           }
             ]
           },
@@ -223,7 +223,7 @@ SETS.push(
             title: 'My Practice Routine — weekly check-in (never graded)',
             steps: [
               {
-                text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week\'s plan went. Same check-in as Modules 1 and 2 — we keep it going all semester.',
+                text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week\'s plan went. Same check-in as Modules 1 and 2 — you\'ll keep it going through the whole course.',
                 hint: 'No wrong answers — even five minutes a day beats one long cram. You\'re building a habit you\'ll actually keep.',
                 response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went' }
               }
@@ -244,7 +244,7 @@ SETS.push(
 
     assessment: {
       goal: 'Frets a clean 2-finger power chord · Moves shape along E string without buzzing · Moves shape along A string · Mutes unused strings cleanly · Plays a chord on the beat · Reads a power chord TAB',
-      performance: 'Whole-class unison: everyone plays A5–G5–F5–G5 loop together at 60 BPM. Teacher listens for muting and timing.',
+      performance: 'Record yourself playing the A5–G5–F5–G5 loop at 60 BPM, then listen back for muting and timing.',
       selfCheck: 'Can you fret a power chord with no buzzing from unused strings? Can you move the shape to 3 different positions without pausing?',
       standards: ['Pr.4a', 'Pr.5a', 'Re.7a']
     },
@@ -363,7 +363,7 @@ SETS.push(
             title: 'Play an 8-bar progression with a steady strum',
             steps: [
           {
-            text: 'Challenge — Name Your Progression: I–IV–V ("one–four–five"): musicians number chords by counting up the musical alphabet from the key\'s home note. In the key of A: A is I, count up to D for IV, and E for V — so A5–D5–E5 is a I–IV–V. Play A5–D5–E5, two bars each, one strum per beat at 60 BPM. You\'ve got it when: you can play the loop reading only the chord symbols AND say which chord is the I, the IV, and the V. At the unit check you\'ll read a three-chord (I–IV–V) progression from chord symbols with your named strum — this is that skill.',
+            text: 'Challenge — Name Your Progression: I–IV–V ("one–four–five"): musicians number chords by counting up the musical alphabet from the key\'s home note. In the key of A: A is I, count up to D for IV, and E for V — so A5–D5–E5 is a I–IV–V. Play A5–D5–E5, two bars each, one strum per beat at 60 BPM. You\'ve got it when: you can play the loop reading only the chord symbols AND say which chord is the I, the IV, and the V. At the module self-check you\'ll read a three-chord (I–IV–V) progression from chord symbols with your named strum — this is that skill.',
             hint: 'All three use the same two-finger shape: A5 root on the E string (fret 5), D5 root on the A string (fret 5) — same fret, string hop! — and E5 root on the A string (fret 7).',
             stuck: 'Loop just A5→D5 (the same-fret hop) until it\'s clean, then add E5.',
             levelUp: 'Transpose it — build a I–IV–V starting from G5 (G–C–D) and name each chord\'s number.',
@@ -375,12 +375,12 @@ SETS.push(
             ]
           },
           {
-            text: 'Challenge 2 — Eighth-Note Strum (your assessment piece): play the loop with straight eighths (down-down-up-down-up), counting "1 + 2 + 3 + 4 +". You\'ve got it when: eight bars clean and steady at 60, then climb the ladder and hold 80 BPM for at least 15 seconds — that\'s the unit bar.',
-            hint: 'Start at 60 BPM. If it feels easy, bump up 5 BPM. The unit-end check is an 8-bar progression changing on beat 1 at 60, then holding 80 BPM for 15 seconds with clean muting — this is that piece.',
+            text: 'Challenge 2 — Eighth-Note Strum (your assessment piece): play the loop with straight eighths (down-down-up-down-up), counting "1 + 2 + 3 + 4 +". You\'ve got it when: eight bars clean and steady at 60, then climb the ladder and hold 80 BPM for at least 15 seconds — that\'s the module bar.',
+            hint: 'Start at 60 BPM. If it feels easy, bump up 5 BPM. The module-end self-check is an 8-bar progression changing on beat 1 at 60, then holding 80 BPM for 15 seconds with clean muting — this is that piece.',
             stuck: 'Strum down-only on each beat first ("1 2 3 4"), then add the up-strums one at a time.',
             levelUp: 'Hold it clean at 80 BPM, or play it straight through a full song excerpt from the songs list.',
             skills: [3, 4],
-            response: { type: 'short', prompt: 'Personal record: once it\'s clean at 60, raise the metronome +5 at a time. Your fastest CLEAN tempo today (BPM)?', placeholder: 'e.g. 75 — beat it next class' }
+            response: { type: 'short', prompt: 'Personal record: once it\'s clean at 60, raise the metronome +5 at a time. Your fastest CLEAN tempo today (BPM)?', placeholder: 'e.g. 75 — beat it next session' }
           }
             ]
           },
@@ -408,16 +408,16 @@ SETS.push(
               { name: 'A5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 }
             ],
             playSeq: { label: 'Hear F5 → A5 (roots F · A)', bpm: 60, notes: [41, 45] },
-            response: { type: 'short', prompt: 'Your fastest CLEAN F5↔A5 today (BPM)?', placeholder: 'e.g. 70 — 80 next class' }
+            response: { type: 'short', prompt: 'Your fastest CLEAN F5↔A5 today (BPM)?', placeholder: 'e.g. 70 — 80 next session' }
           }
             ]
           },
           {
-            title: 'Sweet Child O\' Mine — in-class assessment rehearsal',
+            title: 'Sweet Child O\' Mine — assessment rehearsal',
             steps: [
           {
-            text: 'Challenge — Sweet Child Verse (in-class assessment rehearsal): play the Guns N\' Roses verse as power chords — D5 · C5 · G5, two beats per chord at 60 BPM. This is one of the songs you can bring to the in-class assessment. You\'ve got it when: four clean laps, every change on beat 1, muting tight. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-            hint: 'We play Sweet Child in standard tuning in class. (The famous recording is tuned a half-step down, so your D5–C5–G5 sound one fret higher than the record — that\'s expected; don\'t retune.) D5 and C5 are A-string roots; G5 drops to the low E string.',
+            text: 'Challenge — Sweet Child Verse (assessment rehearsal): play the Guns N\' Roses verse as power chords — D5 · C5 · G5, two beats per chord at 60 BPM. This is one of the songs you can use for the module self-assessment. You\'ve got it when: four clean laps, every change on beat 1, muting tight. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+            hint: 'On this site we play Sweet Child in standard tuning. (The famous recording is tuned a half-step down, so your D5–C5–G5 sound one fret higher than the record — that\'s expected; don\'t retune.) D5 and C5 are A-string roots; G5 drops to the low E string.',
             stuck: 'Loop D5 → C5 (both A-string, 2 frets apart) until smooth, then add the jump to G5 on the low E string.',
             levelUp: 'Push the tempo ladder to 70 then 80 BPM, or add a straight-eighths strum.',
             skills: [3, 4],
@@ -497,8 +497,8 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Unit-end (three tasks): (1) Play a core-song excerpt to the metronome — e.g., the Seven Nation Army riff, All Along the Watchtower\'s A5–G5–F5, or Sweet Child\'s D5–C5–G5 — switching cleanly between two power chords with roots on the same fret of the E and A strings at 60 BPM, then holding 80 BPM for at least 15 seconds. (2) Read a three-chord (I–IV–V) progression from chord symbols / TAB using a named strumming pattern (straight-eighths or split strum), and name power chords from a chord chart. (3) Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes.',
-      performance: 'Individual: play a core-song excerpt with the metronome — changes on beat 1 at 60 BPM, then hold 80 BPM for 15 seconds; read a three-chord (I–IV–V) progression from chord symbols with your named strum; then clap and count a 4-bar rhythm. Teacher gives one piece of feedback.',
+      goal: 'Module-end (three tasks): (1) Play a core-song excerpt to the metronome — e.g., the Seven Nation Army riff, All Along the Watchtower\'s A5–G5–F5, or Sweet Child\'s D5–C5–G5 — switching cleanly between two power chords with roots on the same fret of the E and A strings at 60 BPM, then holding 80 BPM for at least 15 seconds. (2) Read a three-chord (I–IV–V) progression from chord symbols / TAB using a named strumming pattern (straight-eighths or split strum), and name power chords from a chord chart. (3) Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes.',
+      performance: 'Record yourself: play a core-song excerpt with the metronome — changes on beat 1 at 60 BPM, then hold 80 BPM for 15 seconds; read a three-chord (I–IV–V) progression from chord symbols with your named strum; then clap and count a 4-bar rhythm. Listen back and note one thing to improve.',
       selfCheck: 'Can you change chords on beat 1 at 60 BPM and hold 80 BPM for 15 seconds? Can you read a I–IV–V progression from chord symbols and name power chords from a chart?',
       standards: ['Pr.4a', 'Pr.5b', 'Pr.6a']
     },
@@ -574,7 +574,7 @@ MODULE_REVIEWS[3] = {
     { id: 'mr3-s8', text: 'I can play an 8-bar progression with a straight-eighths strum, counting "1 + 2 + 3 + 4 +"', set: 'm3w2' }
   ],
   assessItems: [
-    'Play a core-song excerpt (Seven Nation Army, All Along the Watchtower\'s A5–G5–F5, or Sweet Child\'s D5–C5–G5) with changes on beat 1 at 60 BPM — including a clean switch between two power chords with roots on the same fret of the E and A strings — then hold 80 BPM for 15 seconds',
+    'Play a core-song excerpt (Seven Nation Army, All Along the Watchtower\'s A5–G5–F5, or Sweet Child\'s D5–C5–G5) with changes on beat 1 at 60 BPM — including a clean switch between two power chords with roots on the same fret of the E and A strings, with unused strings muted the whole way — then hold 80 BPM for 15 seconds',
     'Read a three-chord (I–IV–V) progression from chord symbols / TAB with a named strumming pattern, and name power chords from a chord chart',
     'Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes'
   ],

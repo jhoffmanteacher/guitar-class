@@ -101,7 +101,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -110,11 +110,12 @@ SETS.push(
             title: 'Build and play a chord family',
             steps: [
               {
-                text: 'Challenge 1 — Build the Family: write out the chord families of C major and G major on paper (six chords each), then play each family as open chords in order.',
+                text: 'Challenge 1 — Build the Family: write out the chord families of C major and G major (six chords each) — type them below — then play each family as open chords in order.',
                 hint: 'C family: C · Dm · Em · F · G · Am. G family: G · Am · Bm · C · D · Em. Notice how much they overlap — that\'s no accident.',
                 stuck: 'Just play the C family first and get it solid before adding G.',
-                levelUp: 'Play both families back to back without looking at your paper.',
+                levelUp: 'Play both families back to back without looking at what you wrote.',
                 skills: [4, 5],
+                response: { type: 'short', placeholder: 'C: C Dm Em F G Am · G: …' },
                 chords: [
                   { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'Dm', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'2'],[2,3,'3'],[1,1,'1']], position: 0 },
@@ -129,13 +130,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Numeral flashcards with a partner',
+            title: 'Numeral flashcards',
             steps: [
               {
-                text: 'Challenge 2 — Numeral Flashcards: partner up. One of you names a numeral in the key of C (like "the IV chord"), the other plays it — no hesitating. Switch roles every 5 rounds.',
+                text: 'Challenge 2 — Numeral Flashcards: make seven flashcards, one numeral each (I through vii°), shuffle the deck, flip the top card, and play that chord in the key of C — no hesitating. Run the deck twice. (Got a partner handy? Have them call the numerals instead.)',
                 hint: 'If you know the family in order (C Dm Em F G Am), the numeral just tells you which slot to reach for.',
                 stuck: 'Write the family out in numeral order on paper and keep it in view while you drill.',
-                levelUp: 'Switch to the key of G, or call numerals out of order.',
+                levelUp: 'Switch to the key of G, or time yourself through the deck and beat your best run.',
                 skills: [1, 2]
               }
             ]
@@ -144,10 +145,10 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Let It Be, numbered: strum the C–G–Am–F verse while a partner calls out numerals instead of chord names (I–V–vi–IV) — you have to know which chord each numeral means. You\'ve got it when: one full loop with every numeral landing on the right chord.',
+                text: 'Challenge — Let It Be, numbered: write I, V, vi, and IV on four slips, then strum the verse drawing a slip each bar (or call the numerals aloud in a random order you set beforehand) — you have to know which chord each numeral means, not just the C–G–Am–F letters. You\'ve got it when: one full loop with every numeral landing on the right chord. (A partner calling numerals works too.)',
                 hint: 'This is the same verse you\'ve strummed since Module 5 — today the only new part is thinking in numerals instead of letters.',
-                stuck: 'Have your partner call the chord NAME first, then the numeral, until the pairing sticks.',
-                levelUp: 'Switch roles, or call the numerals out of order and land back on I to finish.',
+                stuck: 'Say each chord\'s NAME out loud first, then its numeral, until the pairing sticks.',
+                levelUp: 'Shuffle the slips into a new order each loop, and always land back on I to finish.',
                 skills: [3],
                 chords: [
                   { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
@@ -173,7 +174,7 @@ SETS.push(
 
     assessment: {
       goal: 'Builds triads from a scale · Labels a progression with numerals · Lists a key\'s chord family',
-      performance: 'Teacher writes a 4-chord progression in C on the board; class labels it in numerals, then plays it.',
+      performance: 'Write yourself a 4-chord progression in C (any four family chords), label it in numerals, then play it.',
       selfCheck: 'What\'s the vi chord of G major? Can you explain why Am is lowercase?',
       standards: ['Pr.4a', 'Cn.10a', 'Re.9a']
     },
@@ -287,7 +288,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -308,11 +309,12 @@ SETS.push(
             title: 'Play and feel for home',
             steps: [
               {
-                text: 'Challenge 2 — Play and Feel: strum Am–G–F, stopping and holding each chord in turn, and vote (out loud or on paper) which one feels most like "home."',
+                text: 'Challenge 2 — Play and Feel: strum Am–G–F, stopping and holding each chord in turn, then say (or type below) which one feels most like "home."',
                 hint: 'Play the loop a few times through first — home only reveals itself once you can hear the whole shape of the progression.',
                 stuck: 'Play just Am, then G, then F in isolation and rate each one 1-10 for "does this feel finished."',
                 levelUp: 'Try the same drill on a progression you haven\'t analyzed yet.',
                 skills: [4],
+                response: { type: 'short', placeholder: 'e.g. Am — the loop only feels finished when it lands there' },
                 chords: [
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
@@ -370,7 +372,7 @@ SETS.push(
 
     assessment: {
       goal: 'Finds a key from a chord inventory · Recognizes I–IV–V and I–V–vi–IV · Decodes a slash chord',
-      performance: 'Key detective: teacher reveals a real song\'s chord list; class deduces the key and defends it.',
+      performance: 'Key detective: pull up the chord list of a real song you haven\'t analyzed yet; deduce the key and defend your answer.',
       selfCheck: 'A song uses D, G, A, and Bm — what key? What does the B in G/B do?',
       standards: ['Pr.4a', 'Cn.10a', 'Re.9a']
     },
@@ -483,7 +485,7 @@ SETS.push(
             title: 'Warm-up — tuning check + Finger Gym',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open — then run a quick Finger Gym stretch (<a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym – JustinGuitar</a>) before today\'s barre-heavy work. You\'ve got it when: in tune, hand warmed up, before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open — then run a quick Finger Gym stretch (<a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym – JustinGuitar</a>) before today\'s barre-heavy work. You\'ve got it when: in tune, hand warmed up, before today\'s work.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -492,10 +494,10 @@ SETS.push(
             title: 'Root-naming drill',
             steps: [
               {
-                text: 'Challenge 1 — Root-Naming Drill: teacher names a chord, you find BOTH barre locations for it — the E-shape fret on the low E string AND the A-shape fret on the A string.',
+                text: 'Challenge 1 — Root-Naming Drill: write a handful of chord names on slips, draw one, and find BOTH barre locations for it — the E-shape fret on the low E string AND the A-shape fret on the A string.',
                 hint: 'Every chord has (at least) two barre homes — one for each shape. Module 9\'s fretboard naming is the whole trick here.',
                 stuck: 'Find the E-shape location first, get comfortable, then add the A-shape hunt.',
-                levelUp: 'Race a partner to both locations, or add a third barre location further up the neck.',
+                levelUp: 'Time yourself to both locations and beat your own best (race a partner if one\'s around), or add a third barre location further up the neck.',
                 skills: [1, 2]
               }
             ]
@@ -504,7 +506,7 @@ SETS.push(
             title: 'Build I–IV–V in a named key',
             steps: [
               {
-                text: 'Challenge 2 — I–IV–V Builder: play I–IV–V in G (G open or fret-3 barre · C · D), then in A, then a key the teacher calls out. You\'ve got it when: clean changes in time at 60 BPM, using at least one barre shape.',
+                text: 'Challenge 2 — I–IV–V Builder: play I–IV–V in G (G open or fret-3 barre · C · D), then in A, then a key you draw at random from your chord slips. You\'ve got it when: clean changes in time at 60 BPM, using at least one barre shape.',
                 hint: 'Once you know I–IV–V\'s shape in one key, moving the whole progression to a new key is just sliding your hands.',
                 stuck: 'Stay in G until the changes are automatic, then move the whole progression up together.',
                 levelUp: 'Play I–IV–V in a key using barre shapes only — no open chords at all.',
@@ -543,7 +545,7 @@ SETS.push(
 
     assessment: {
       goal: 'Names any barre chord from its root fret · Moves one shape to three named roots · Plays I–IV–V in a named key',
-      performance: 'Teacher names a key; students play its I–IV–V using at least one barre shape, changes in time at 60 BPM.',
+      performance: 'Draw a key at random; play its I–IV–V using at least one barre shape, changes in time at 60 BPM.',
       selfCheck: 'Where are the two places to play C major as a barre? Which shape is friendlier to your hand today?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
     },
@@ -553,7 +555,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'E-shape barre, fret 8:', choices: ['C major', 'G major', 'A major', 'B major'], answer: 0 } },
       { id: 'm11w3-s2', text: 'Play the A-shape major barre and name its root from the A-string fret',
         practice: { type: 'mc', prompt: 'A-shape barre, fret 7:', choices: ['D major', 'E major', 'F major', 'G major'], answer: 1 } },
-      { id: 'm11w3-s3', text: 'Play a I–IV–V in a teacher-named key using barre and/or open shapes' },
+      { id: 'm11w3-s3', text: 'Play a I–IV–V in a randomly drawn key using barre and/or open shapes' },
       { id: 'm11w3-s4', text: 'Move one barre shape to three different named roots' },
       { id: 'm11w3-s5', text: 'Explain why one movable shape equals twelve chords',
         practice: { type: 'mc', prompt: 'To turn an E-shape G (fret 3) into an E-shape A, move:', choices: ['Up 2 frets', 'Down 2 frets', 'Up 1 string', 'Nowhere — re-finger it'], answer: 0 } },
@@ -594,11 +596,11 @@ MODULE_REVIEWS[11] = {
     { id: 'mr11-s3', text: 'I can figure out a song\'s key from the chords it uses', set: 'm11w2' },
     { id: 'mr11-s4', text: 'I can read a slash chord (like G/B) and know which note goes on the bottom', set: 'm11w2' },
     { id: 'mr11-s5', text: 'I can name a barre chord\'s root from either the E-shape or A-shape fret', set: 'm11w3' },
-    { id: 'mr11-s6', text: 'I can play a I–IV–V progression in a teacher-named key using open or barre shapes', set: 'm11w3' }
+    { id: 'mr11-s6', text: 'I can play a I–IV–V progression in a randomly drawn key using open or barre shapes', set: 'm11w3' }
   ],
   assessItems: [
     'Analyze a thread song\'s progression in Roman numerals and name its key',
-    'Play a I–IV–V progression in a teacher-named key — open or barre shapes'
+    'Play a I–IV–V progression in a key you draw at random — open or barre shapes'
   ],
   forward: 'You can name what every chord is DOING now, and one barre grip just became twelve chords. <strong>Module 12 is the victory lap:</strong> fingerstyle goes deep — alternating thumb, waltz patterns, and the requinto sound — everything you need to pick your showcase song.',
   standards: ['Pr.4a', 'Pr.6a', 'Cn.10a', 'Re.9a']

@@ -74,7 +74,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 hint: 'Tuning (Module 1) is a skill you keep forever. Reading TAB today is faster when you also name the notes you land on — that\'s your Module 2 fretboard map.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
@@ -89,7 +89,7 @@ SETS.push(
             stuck: 'Lock the two fingers into one shape and move them as a block — don\'t re-place them each time. Get the 0/0 → 3/3 slide clean before adding the rest.',
             levelUp: 'Play it at 90 BPM, or tack on the high-octave answer phrase that closes the full riff.',
             skills: [1, 4, 5],
-            response: { type: 'short', prompt: 'Personal record — win at 70 BPM, then +10 at a time. Your fastest CLEAN "Smoke" lap today (BPM)?', placeholder: 'e.g. 100 — beat it next class' },
+            response: { type: 'short', prompt: 'Personal record — win at 70 BPM, then +10 at a time. Your fastest CLEAN "Smoke" lap today (BPM)?', placeholder: 'e.g. 100 — beat it next session' },
             tab: {
               caption: '"Smoke on the Water" — main riff · A + D strings together',
               notes: [
@@ -164,7 +164,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Which riff move tripped your fingers most today — a stretch, a string change, or the picking hand? Name it; that\'s your first loop next class.',
+                text: 'Which riff move tripped your fingers most today — a stretch, a string change, or the picking hand? Name it; that\'s your first loop next session.',
                 response: { type: 'short', placeholder: 'e.g. the string jump from A to E in Crazy Train' }
               }
             ]
@@ -175,7 +175,7 @@ SETS.push(
 
     assessment: {
       goal: 'Reads stacked-number TAB (chords) · Reads rhythm symbols above TAB · Plays a real riff that mixes notes and double-stops · Identifies hammer-on / pull-off / slide markings',
-      performance: 'Class plays "Smoke on the Water" riff in unison at 70 BPM. Teacher listens for both notes ringing together evenly on every double-stop.',
+      performance: 'Record yourself playing the "Smoke on the Water" riff at 70 BPM, then listen back for both notes ringing together evenly on every double-stop.',
       selfCheck: 'Can you look at a new TAB and play it without someone telling you the rhythm? Can you tell a chord from a melody just by looking at the TAB?',
       standards: ['Re.7a', 'Pr.4a', 'Pr.5a']
     },
@@ -327,12 +327,12 @@ SETS.push(
             title: 'One-Minute Barre Changes — beat your record',
             steps: [
               {
-                text: 'Challenge 4 — One-Minute Barre Changes (F ↔ G): set the ⏱ Timer for 60 seconds and slide your E-shape barre between F (fret 1) and G (fret 3) as many times as you can — only changes where all 6 strings ring count. You\'ve got it when: type your count below and beat it next class. (Even 6–8 clean ones is a real win for barres.)',
+                text: 'Challenge 4 — One-Minute Barre Changes (F ↔ G): set the ⏱ Timer for 60 seconds and slide your E-shape barre between F (fret 1) and G (fret 3) as many times as you can — only changes where all 6 strings ring count. You\'ve got it when: type your count below and beat it next session. (Even 6–8 clean ones is a real win for barres.)',
                 hint: 'It\'s the same shape sliding two frets — keep the bar pressed and glide, don\'t lift and re-place. Quality over speed.',
                 stuck: 'Keep the bar lightly down the whole time so you never fully reset the shape — just shift two frets. Slow down until both chords ring.',
                 levelUp: 'Add A (fret 5) and cycle F→G→A, or run it with a down-up strum.',
                 skills: [4, 6],
-                response: { type: 'short', prompt: 'Personal record — clean F↔G barre changes in 60 seconds. Your count today?', placeholder: 'e.g. 8 — beat it next class' }
+                response: { type: 'short', prompt: 'Personal record — clean F↔G barre changes in 60 seconds. Your count today?', placeholder: 'e.g. 8 — beat it next session' }
               }
             ]
           },
@@ -357,7 +357,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Which string in your barre is most likely to buzz right now — the B string, the high E, or the G? Name it; isolating that one string is your first job next class.',
+                text: 'Which string in your barre is most likely to buzz right now — the B string, the high E, or the G? Name it; isolating that one string is your first job next session.',
                 response: { type: 'short', placeholder: 'e.g. the B string — it sits in my finger crease' }
               }
             ]
@@ -368,7 +368,7 @@ SETS.push(
 
     assessment: {
       goal: 'Bars all 6 strings cleanly with index finger · Forms E-shape barre with no buzzing · Plays F, G, A barre chords cleanly · Names a barre chord by its root note on string 6 · Switches between two barre chords in time',
-      performance: 'Solo: play F barre, slide to G barre, slide to A barre — one strum each, all clean. Teacher checks for buzz on the B and high E strings.',
+      performance: 'Solo: record yourself playing F barre, slide to G barre, slide to A barre — one strum each, all clean. Listen back and check for buzz on the B and high E strings.',
       selfCheck: 'Can your F barre ring without buzzing? Can you name the chord when you see an E-shape barre at the 7th fret? (Answer: B major.)',
       standards: ['Pr.4a', 'Pr.5a']
     },
@@ -389,7 +389,7 @@ SETS.push(
         practice: { type: 'playSeq', label: 'Hear F major (E-shape barre, arpeggiated)', bpm: 60,
           notes: [41, 48, 53, 57, 60, 65] } },
       { id: 'm7w2-s5', text: 'Name an E-shape barre chord by its root note on string 6',
-        gotItWhen: 'someone places your E-shape barre at any fret and you can name the chord instantly — because you know the notes on the low E string from Module 2.',
+        gotItWhen: 'you can slide your E-shape barre to any random fret and name the chord instantly — because you know the notes on the low E string from Module 2.',
         practice: { type: 'mc', prompt: 'If you play an E-shape barre chord with your index finger on the 7th fret of string 6, what chord is it?',
           choices: ['G major', 'A major', 'B major', 'C major'], answer: 2 } },
       { id: 'm7w2-s6', text: 'Switch between F, G, and A barre chords in time at 60 BPM',
@@ -512,7 +512,7 @@ SETS.push(
             stuck: 'Drill one pair at a time — F→C, then G→D — before running all four. Some moves are tiny (G E-shape fret 3 → D A-shape fret 5 is a short hop). Drop to 50 BPM if the changes fall apart.',
             levelUp: 'Run it with the D-DU-UDU strum, or push to 75 BPM.',
             skills: [5, 6],
-            response: { type: 'short', prompt: 'Personal record — win the F–C–G–D switch at 60 BPM, then +5 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 70 — beat it next class' },
+            response: { type: 'short', prompt: 'Personal record — win the F–C–G–D switch at 60 BPM, then +5 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 70 — beat it next session' },
             chords: [
               { name: 'F', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
               { name: 'C', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,5,'3'],[2,5,'3'],[1,3,'1']], position: 3 },
@@ -570,7 +570,7 @@ SETS.push(
             title: '🌶️ Level-up — the Sweet Child O\' Mine intro riff (stretch goal)',
             steps: [
           {
-            text: '🌶️ Give it a go: learn the most famous riff in the course. The "Sweet Child O\' Mine" intro lives up high on the D, G, and B strings around the 12th–15th frets, picked one note at a time. Watch <a href="https://youtu.be/t3yol_zrt7g" target="_blank">How to Play the Intro for Sweet Child O\' Mine – JustinGuitar</a>, learn just the first bar, and play it slowly. No score, no rush — this is a late-semester stretch goal you can keep chipping at.',
+            text: '🌶️ Give it a go: learn the most famous riff in the course. The "Sweet Child O\' Mine" intro lives up high on the D, G, and B strings around the 12th–15th frets, picked one note at a time. Watch <a href="https://youtu.be/t3yol_zrt7g" target="_blank">How to Play the Intro for Sweet Child O\' Mine – JustinGuitar</a>, learn just the first bar, and play it slowly. No score, no rush — this is a late-course stretch goal you can keep chipping at.',
             hint: 'Heads up: the lesson teaches it in E♭ tuning (a half-step down), so on your standard-tuned guitar it will sound a half-step higher than the video — that\'s part of the challenge, not a mistake. The frets and finger shapes are exactly the same. Loop just the first bar until it\'s clean before adding more.',
             skills: [3, 6]
           }
@@ -580,7 +580,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'You\'ve reached the hardest hands-on skill in the course — give yourself credit for that. Which barre (E-shape or A-shape, and at which chord) most needs another week of short daily tries? Write it; that\'s your standing warm-up from here.',
+                text: 'You\'ve reached the hardest hands-on skill in the course — give yourself credit for that. Which barre (E-shape or A-shape, and at which chord) most needs another week of short daily tries? Type it below; that\'s your standing warm-up from here.',
                 response: { type: 'short', placeholder: 'e.g. the F barre at fret 1 — a few clean tries every day' }
               }
             ]
@@ -591,7 +591,7 @@ SETS.push(
 
     assessment: {
       goal: 'Forms A-shape barre cleanly · Plays Bb, B, C as A-shape barre · Names an A-shape barre by its root on string 5 · Switches between E-shape and A-shape barre in a progression · Plays a full song using only barre chords',
-      performance: 'Solo: play a 4-chord progression (e.g., F-C-G-D or Am-G-F-C) entirely with barre chords, 2 bars each, at 60 BPM. Teacher listens for clean tone on every chord.',
+      performance: 'Solo: record yourself playing a 4-chord progression (e.g., F-C-G-D or Am-G-F-C) entirely with barre chords, 2 bars each, at 60 BPM. Listen back for clean tone on every chord.',
       selfCheck: 'Can you play the same chord (say F major) two different ways — as E-shape and as A-shape? Can you switch between the two shapes mid-song without thinking?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
     },
@@ -606,7 +606,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'In an A-shape barre chord, what happens to the low E string (string 6)?',
           choices: ['It rings as part of the chord', 'It is muted by the side of your index finger', 'You skip your strum carefully', 'You tune it to a different note'], answer: 1 } },
       { id: 'm7w3-s3', text: 'Name an A-shape barre chord by its root note on string 5',
-        gotItWhen: 'someone places your A-shape barre at any fret and you can name the chord by reading the note on string 5 (using your Module 2 knowledge).',
+        gotItWhen: 'you can slide your A-shape barre to any random fret and name the chord by reading the note on string 5 (using your Module 2 knowledge).',
         practice: { type: 'mc', prompt: 'If you play an A-shape barre chord with your index finger on the 5th fret of string 5, what chord is it?',
           choices: ['C major', 'D major', 'E major', 'A major'], answer: 1 } },
       { id: 'm7w3-s4', text: 'Play Bb, C, and D as A-shape barre chords',
@@ -644,7 +644,7 @@ MODULE_SONGS[7] = [
       { name: '"Wonderwall" — Oasis', meta: 'Easier with barre chords once you have them down', type: 'Core', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=6hzrDeceEKc',
         tutorialUrl: 'https://www.youtube.com/watch?v=5V81btmYxgE' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Barre the D–C–G verse · intro riff = late-semester stretch goal', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Barre the D–C–G verse · intro riff = late-course stretch goal', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · use barre shapes for all three', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',

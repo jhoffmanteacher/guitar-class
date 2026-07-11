@@ -115,7 +115,7 @@ SETS.push(
             steps: [
               {
                 text: 'Before today\'s notes: tune all 6 strings to green, low to high — E A D G B e — and say each string name as you go. Beat your time from last session. Click "Hear all 6 strings" for the target pitches.',
-                hint: 'Tuning and the string names are Module 1 skills you keep forever — do this every class before you play. Slow and steady beats rushing past the note.',
+                hint: 'Tuning and the string names are Module 1 skills you keep forever — do this every practice session before you play. Slow and steady beats rushing past the note.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -125,12 +125,12 @@ SETS.push(
             steps: [
               {
                 text: 'Challenge 1 — Low E Run: play every natural note up the low E string and back down — E · F · G · A · B · C · D · E — saying each name aloud. You\'ve got it when: one lap, chart-free, with no mistakes.',
-                hint: 'Hearing + saying + playing locks it in. Peek at the chart only if you\'re truly stuck. Set the ⏱ Timer (bottom of the screen) to 2 min and count how many clean laps you fit before it beeps — beat that number next class.',
+                hint: 'Hearing + saying + playing locks it in. Peek at the chart only if you\'re truly stuck. Set the ⏱ Timer (bottom of the screen) to 2 min and count how many clean laps you fit before it beeps — beat that number next session.',
                 stuck: 'Master frets 0–5 only (E–A) chart-free first, then add 7–12 once those are automatic.',
                 levelUp: 'One clean lap at 80 BPM, or start at fret 12 and name your way down.',
                 skills: [2],
                 playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] },
-                response: { type: 'short', prompt: 'Personal record: win at 60, then raise the metronome +10 at a time. What\'s your fastest CLEAN lap today (BPM)?', placeholder: 'e.g. 90 — that\'s the number to beat next class' }
+                response: { type: 'short', prompt: 'Personal record: win at 60, then raise the metronome +10 at a time. What\'s your fastest CLEAN lap today (BPM)?', placeholder: 'e.g. 90 — that\'s the number to beat next session' }
               },
               {
                 text: 'Quick check — name the note before you play it:',
@@ -151,13 +151,13 @@ SETS.push(
             title: 'Name every note on the A string (frets 0–12)',
             steps: [
               {
-                text: 'Challenge 2 — A String Run (your Set 1 check-off): same on the A string, chart-free — A · B · C · D · E · F · G · A, up to fret 12 and back, one note per beat. You\'ve got it when: a clean lap with the metronome and no stalls. The Set 1 check-off tests exactly this: a partner calls out any fret, and you name it on the spot.',
+                text: 'Challenge 2 — A String Run (your Set 1 check-off): same on the A string, chart-free — A · B · C · D · E · F · G · A, up to fret 12 and back, one note per beat. You\'ve got it when: a clean lap with the metronome and no stalls. The Set 1 check-off tests exactly this: draw any fret at random — shuffled paper slips 0–12 work great — and name the note within 3 seconds.',
                 hint: 'Keep the metronome at 60 BPM. If you stall on a note, that\'s the one to drill.',
                 stuck: 'Drop to 50 BPM and win there first, or cover frets 0–5 (A–D) before adding the rest.',
-                levelUp: 'Lap it at 80 BPM, or have a partner call out random frets for you to name on the spot.',
+                levelUp: 'Lap it at 80 BPM, or draw shuffled fret slips and name each on the spot. Got someone around? Have them call out random frets instead.',
                 skills: [3],
                 playSeq: { label: 'Play all', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] },
-                response: { type: 'short', prompt: 'Personal record: win at 60, then raise the metronome +10 at a time. Your fastest CLEAN A-string lap today (BPM)?', placeholder: 'e.g. 80 — beat it next class' }
+                response: { type: 'short', prompt: 'Personal record: win at 60, then raise the metronome +10 at a time. Your fastest CLEAN A-string lap today (BPM)?', placeholder: 'e.g. 80 — beat it next session' }
               },
               {
                 text: 'Quick check — name the note before you play it:',
@@ -168,11 +168,11 @@ SETS.push(
                   choices: ['A', 'B', 'C', 'D'] }
               },
               {
-                text: 'Partner self-quiz: have a partner call out any fret 0–12 on the A string. Say the note within 3 seconds. Go 10 rounds, then switch.',
-                hint: 'No chart. If you stall on a note, loop just that part of the string until it\'s automatic. No partner? Write frets 0–12 on small scraps of paper, shuffle them, then flip one at a time and name it within 3 seconds.'
+                text: 'Shuffle self-quiz: write frets 0–12 on small scraps of paper and shuffle them. Flip one at a time and say the A-string note within 3 seconds. Go 10 rounds. Got someone around? Have them call out random frets instead — same 3-second limit.',
+                hint: 'No chart. If you stall on a note, loop just that part of the string until it\'s automatic.'
               },
               {
-                text: 'Challenge 3 — Shuffle Run: write frets 0–12 on scraps of paper (or use the corners of your handout), shuffle them, then draw one at a time and — on the low E string — name it AND play it within 3 seconds. You\'ve got it when: 10 in a row with no counting up from E.',
+                text: 'Challenge 3 — Shuffle Run: write frets 0–12 on scraps of paper (or reuse your slips from the self-quiz above), shuffle them, then draw one at a time and — on the low E string — name it AND play it within 3 seconds. You\'ve got it when: 10 in a row with no counting up from E.',
                 hint: 'The 3-second limit is the real test. You\'re jumping to random frets, not running a memorized lap — that\'s what "name any fret instantly" really means.',
                 stuck: 'Put only frets 0–7 in the pile first; add 8–12 once you hit 10 in a row.',
                 levelUp: 'Run the Shuffle on the A string too, or name a full lap going down the string (12 → 0) without counting.',
@@ -209,7 +209,7 @@ SETS.push(
             title: 'My Practice Routine — weekly check-in (never graded)',
             steps: [
               {
-                text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week\'s plan went. Same check-in as Module 1 — we keep it going all semester.',
+                text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week\'s plan went. Same check-in as Module 1 — we keep it going for the whole course.',
                 hint: 'No wrong answers — even five minutes a day beats one long cram. You\'re building a habit you\'ll actually keep.',
                 response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went' }
               }
@@ -230,8 +230,8 @@ SETS.push(
 
     assessment: {
       goal: 'Names all notes on E string (frets 0–12) · Names all notes on A string (frets 0–12) · Points to a named note on the fretboard · Reads a basic fretboard note chart · Identifies notes in a familiar song',
-      performance: 'Partner quiz: one student names a note, partner finds it on the fretboard. Then switch.',
-      selfCheck: 'Can you name every natural note on the E string without looking? Can you find any note the teacher calls out on E or A?',
+      performance: 'Self-quiz with shuffled note-name slips: draw a note, find it on the E or A string within 3 seconds. Then reverse it: draw a fret, name the note. 10 in a row each way.',
+      selfCheck: 'Can you name every natural note on the E string without looking? Can you find any note on E or A within 3 seconds when a shuffled slip (or a friend) names it?',
       standards: ['Re.7a', 'Pr.4a']
     },
 
@@ -241,15 +241,15 @@ SETS.push(
         practice: { type: 'mc', prompt: 'What note comes after G?',
           choices: ['G#', 'A', 'A#', 'It starts over at C'], answer: 1 } },
       { id: 'm2w1-s2', text: 'Name all natural notes on the E string (frets 0–12)',
-        gotItWhen: 'someone calls out any fret 0–12 on the low E and you can say the note name instantly, without counting up from E.',
+        gotItWhen: 'you can draw any fret 0–12 at random — shuffled slip, or someone calling it out — and say the low-E note name instantly, without counting up from E.',
         practice: { type: 'playSeq', label: 'Play E string 0–12', bpm: 60,
           notes: [40, 41, 43, 45, 47, 48, 50, 52] } },
       { id: 'm2w1-s3', text: 'Name all natural notes on the A string (frets 0–12)',
-        gotItWhen: 'someone calls out any fret 0–12 on the A string and you can say the note name instantly, without counting up from A.',
+        gotItWhen: 'you can draw any fret 0–12 at random — shuffled slip, or someone calling it out — and say the A-string note name instantly, without counting up from A.',
         practice: { type: 'playSeq', label: 'Play A string 0–12', bpm: 60,
           notes: [45, 47, 48, 50, 52, 53, 55, 57] } },
       { id: 'm2w1-s4', text: 'Point to any named note on E or A string when called out',
-        gotItWhen: 'the teacher says a note name and you can put your finger on it within 3 seconds without looking at a chart.' },
+        gotItWhen: 'you draw a note name from your shuffled slips (or someone calls one out) and you can put your finger on it within 3 seconds without looking at a chart.' },
       { id: 'm2w1-s5', text: 'Read a basic fretboard note-name chart',
         gotItWhen: 'you can use the chart to look up a note you don\'t know yet — you understand what the rows and columns mean.' }
     ]
@@ -510,8 +510,8 @@ SETS.push(
             }
           },
           {
-            text: 'Challenge 3 — Watchtower Bass Riff (your in-class assessment piece): using the TAB, play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. You\'ve got it when: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-            hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A). Keep your thumb behind the neck. Let each note ring fully before the next. Drill it until you can run it with your eyes closed — that\'s what you play for the in-class unit-end assessment.',
+            text: 'Challenge 3 — Watchtower Bass Riff (your module assessment piece): using the TAB, play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. You\'ve got it when: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+            hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A). Keep your thumb behind the neck. Let each note ring fully before the next. Drill it until you can run it with your eyes closed — then record yourself playing it: that\'s your module-end assessment piece.',
             stuck: 'Loop just F–G (frets 1–3) until the finger change is clean, then add the A on fret 5.',
             levelUp: 'Run the whole riff with your eyes closed — that\'s the real "from memory" test.',
             skills: [1, 2, 4, 5, 6],
@@ -528,7 +528,7 @@ SETS.push(
                 { string: 'E', fret: 3, note: 'G', midi: 43 }
               ]
             },
-            response: { type: 'short', prompt: 'Personal record: once it loops clean at 60, raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 100 — beat it next class' }
+            response: { type: 'short', prompt: 'Personal record: once it loops clean at 60, raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 100 — beat it next session' }
           },
           {
             text: 'Bonus riff — "Sweet Child O\' Mine" (Guns N\' Roses) bass roots on the E & A strings: play the root note under each verse chord — D · C · G · D — one per bar at 60 BPM. Click any note name to hear how it should sound. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
@@ -572,7 +572,7 @@ SETS.push(
                     { string: 'E', fret: 3, note: 'G', midi: 43 }
                   ]
                 },
-                response: { type: 'short', prompt: 'How many clean laps in a row did you get at 60 BPM?', placeholder: 'e.g. 4 — beat it next class' }
+                response: { type: 'short', prompt: 'How many clean laps in a row did you get at 60 BPM?', placeholder: 'e.g. 4 — beat it next session' }
               },
               {
                 text: 'Challenge — Seven Nation Army, true pitch: play the riff where the record actually lives — on the A string — E · E · G · E · D · C · B at 60 BPM. You\'ve got it when: two clean laps, and you can say which string version sounds like the recording. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
@@ -598,7 +598,7 @@ SETS.push(
                 text: 'Challenge — "the cure," root line: play the roots of Olivia Rodrigo\'s "the cure" across both strings — A · C · D · F · G — two beats per note at 60 BPM. You\'ve got it when: two clean laps crossing between the A and E strings without looking down.',
                 hint: 'This is the skeleton of the song — next unit these exact roots become power chords. Learn where they live now and Unit 3 is half done.',
                 stuck: 'Split it by string: A · C · D on the A string first, then F · G on the low E, then join them.',
-                levelUp: 'Play the lap while a partner (or the play button) keeps the beat, or say each note name as you land it.',
+                levelUp: 'Play the lap with the play button keeping the beat, or say each note name as you land it. Got someone around? Have them clap the beat instead.',
                 skills: [1, 2, 4, 5, 6],
                 tab: {
                   caption: '"the cure" — root line (teaching arrangement, no capo) · 60 BPM',
@@ -634,8 +634,8 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Unit-end (two tasks): (1) Play the "All Along the Watchtower" bass-note line on the low E string from memory, to the metronome at 60 BPM, with clean tone and correct fingering — or the alternate single-note root line from "the cure." (2) Name notes on the E and A strings through fret 12, and sight-read a short 2-bar bass line from TAB.',
-      performance: 'Individual or partner check: play the Watchtower low-E line from memory at 60 BPM, then sight-read and play a short 2-bar bass line from TAB. Teacher listens and gives one piece of feedback.',
+      goal: 'Module-end (two tasks): (1) Play the "All Along the Watchtower" bass-note line on the low E string from memory, to the metronome at 60 BPM, with clean tone and correct fingering — or the alternate single-note root line from "the cure." (2) Name notes on the E and A strings through fret 12, and sight-read a short 2-bar bass line from TAB.',
+      performance: 'Self-check: record yourself playing the Watchtower low-E line from memory at 60 BPM, then sight-read and play a short 2-bar bass line from TAB. Listen back and name one thing to improve.',
       selfCheck: 'Can you press a note cleanly with no buzzing? Can you read a basic TAB? Can you play a 4-bar melody in time at 60 BPM?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Re.7a']
     },
@@ -710,7 +710,7 @@ MODULE_REVIEWS[2] = {
   ],
   assessItems: [
     'Name the notes on the E and A strings from memory through fret 12',
-    'Play “All Along the Watchtower” bass-note using only the E string from memory, to the metronome at 60 BPM, with clean tone and correct fingering',
+    'Play “All Along the Watchtower” bass-note line using only the E string — or the single-note root line from “the cure” — from memory, to the metronome at 60 BPM without stopping, with clean tone and correct fingering (one finger per fret, thumb behind the neck)',
     'Sight-read a short 2-bar bass line from TAB and play it'
   ],
   forward: 'The E &amp; A notes you just learned become the <strong>roots of every power chord in Module 3</strong> — when you play an A5 or G5, you\'re landing on the exact frets you just memorized. Knowing the fretboard is what lets you move chords around freely.',

@@ -101,7 +101,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 hint: 'Every note-naming drill today depends on your strings actually being in tune — check first.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
@@ -122,20 +122,20 @@ SETS.push(
                 text: 'Challenge 2 — G-String Naturals: same drill on the G string, low to high, 0 through 12.',
                 hint: 'G has fewer natural notes below fret 5 than D does — notice the pattern shift.',
                 stuck: 'Cover frets 0–5 (G–C) first, then add 5–12.',
-                levelUp: 'Race a partner — first to name a random fret correctly three times in a row wins.',
+                levelUp: 'Race the clock — time yourself naming a random fret correctly three times in a row, then beat that time. Got someone around? Race them instead.',
                 skills: [2],
                 playSeq: { label: 'G-string naturals, low to high', bpm: 60, notes: [55, 57, 59, 60, 62, 64, 65, 67] }
               }
             ]
           },
           {
-            title: 'Partner flash-drill',
+            title: 'Flashcard flash-drill',
             steps: [
               {
-                text: 'Challenge 3 — Flash Drill (your assessment piece): partner up. One of you names a note, the other finds it on the D or G string within 5 seconds. Switch roles every 5 rounds. You\'ve got it when: 8 out of 10 correct within 5 seconds each, on both strings.',
+                text: 'Challenge 3 — Flash Drill (your assessment piece): make flashcards — write each natural note name (A through G) on its own slip of paper, shuffle them face-down, and draw one at a time. Find each drawn note on the D or G string within 5 seconds, switching strings every 5 draws. You\'ve got it when: 8 out of 10 correct within 5 seconds each, on both strings. Got someone around? Have them call the notes instead of drawing cards.',
                 hint: 'If you\'re stuck, use the octave shape from a string you already know instead of counting up one fret at a time.',
                 stuck: 'Allow 10 seconds instead of 5 until it\'s automatic, then tighten the clock back up.',
-                levelUp: 'Call out sharps and flats too (F#, Bb), or drop to a 3-second limit.',
+                levelUp: 'Add sharp and flat cards too (F#, Bb), or drop to a 3-second limit.',
                 skills: [3, 4]
               }
             ]
@@ -167,7 +167,7 @@ SETS.push(
 
     assessment: {
       goal: 'Names naturals on D & G through fret 12 · Finds a named note within 5 seconds · Uses the octave shape as a shortcut',
-      performance: 'Teacher calls out four notes; students find each on the D or G string within 5 seconds while a partner checks.',
+      performance: 'Draw four note flashcards and find each on the D or G string within 5 seconds — film yourself, then check every spot against a fretboard chart.',
       selfCheck: 'Can you find C on the G string without counting up from open? Can you name the note two strings down and two frets up from any E-string note you know?',
       standards: ['Pr.4a', 'Pr.6a']
     },
@@ -178,7 +178,7 @@ SETS.push(
         practice: { type: 'playSeq', label: 'D-string naturals, low to high', bpm: 60, notes: [50, 52, 53, 55, 57, 59, 60, 62] } },
       { id: 'm9w1-s2', text: 'Name the natural notes on the G string, frets 0–12, in order',
         practice: { type: 'playSeq', label: 'G-string naturals, low to high', bpm: 60, notes: [55, 57, 59, 60, 62, 64, 65, 67] } },
-      { id: 'm9w1-s3', text: 'Find a teacher-named note on the D or G string within 5 seconds',
+      { id: 'm9w1-s3', text: 'Find any named note (drawn from a shuffled flashcard) on the D or G string within 5 seconds',
         practice: { type: 'mc', prompt: 'On the D string, G is at which fret?', choices: ['3', '5', '7', '9'], answer: 1 } },
       { id: 'm9w1-s4', text: 'Use the octave shape to find a D- or G-string note from an E- or A-string note I already know',
         practice: { type: 'mc', prompt: 'The octave shape from the low E and A strings moves you:',
@@ -284,7 +284,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -304,7 +304,7 @@ SETS.push(
                 text: 'Challenge 2 — High-e Naturals: same drill on the high e string, low to high, 0 through 12 — and notice these are the exact same note names as the low E string.',
                 hint: 'If you know the low E string from Module 2, you already know this string — just two octaves higher.',
                 stuck: 'Say the low-E note names first, then transfer them to the high e string fret by fret.',
-                levelUp: 'Race a partner naming random frets on the high e string.',
+                levelUp: 'Beat the clock naming random frets on the high e string — time three in a row, then shave seconds. Got a partner handy? Race them.',
                 skills: [2],
                 playSeq: { label: 'High-e naturals', bpm: 60, notes: [64, 65, 67, 69, 71, 72, 74, 76] }
               }
@@ -317,7 +317,7 @@ SETS.push(
                 text: 'Challenge 3 — Landmark Drill (your assessment piece): name every string at the fret-5 dot, then every string at the fret-7 dot. You\'ve got it when: all six strings named correctly at both dots, no chart, within 5 seconds each.',
                 hint: 'Dots are the fastest way to orient yourself anywhere on the neck — this drill is worth over-practicing.',
                 stuck: 'Do the fret-5 dot on all six strings first until it\'s solid, then add fret 7.',
-                levelUp: 'Add the fret-9 and fret-12 dots, or have a partner call random dot frets for you to name across all six strings.',
+                levelUp: 'Add the fret-9 and fret-12 dots, or write the dot frets on slips of paper and draw them at random to name across all six strings — or have someone call them out if a helper\'s around.',
                 skills: [3, 6]
               }
             ]
@@ -349,7 +349,7 @@ SETS.push(
 
     assessment: {
       goal: 'Names naturals on all six strings · Locates any named note on the neck · Plays a melody crossing 3+ strings cleanly',
-      performance: 'Teacher names one note (e.g., "find every C below fret 12") — students mark them across all six strings, partner-checked.',
+      performance: 'Draw one note card at random (e.g., C) and find every one below fret 12 across all six strings — then check your spots against a fretboard chart.',
       selfCheck: 'Can you name all six strings at the 5th-fret dot? Can you find B on three different strings?',
       standards: ['Pr.4a', 'Pr.6a']
     },
@@ -360,7 +360,7 @@ SETS.push(
       { id: 'm9w2-s2', text: 'Name the natural notes on the high e string and explain why they match the low E',
         practice: { type: 'mc', prompt: 'Why do the two E strings share the same note names?',
           choices: ['They\'re the two thickest strings', 'They\'re both tuned to E, two octaves apart', 'It\'s a coincidence', 'They don\'t — they\'re different'], answer: 1 } },
-      { id: 'm9w2-s3', text: 'Locate any teacher-named natural note on any of the six strings' },
+      { id: 'm9w2-s3', text: 'Locate any named natural note (drawn from a shuffled card) on any of the six strings' },
       { id: 'm9w2-s4', text: 'Use the 3-fret octave shift when crossing onto the B or high-e string',
         practice: { type: 'mc', prompt: 'You know G at D-string fret 5. Its octave on the B string is at fret:',
           choices: ['5', '7', '8', '10'], answer: 2 } },
@@ -401,7 +401,7 @@ SETS.push(
               },
               {
                 text: 'Watch: <a href="https://youtu.be/AjwEjsh3QQw" target="_blank">Writing TABs – JustinGuitar</a>. This is the reverse skill of reading TAB — watch how he turns a riff he can already play into TAB someone else could read.',
-                hint: 'Writing TAB is the reverse skill of reading it — the video models the process before you try it yourself at Station C.',
+                hint: 'Writing TAB is the reverse skill of reading it — the video models the process before you try it yourself at the practice station.',
                 skills: [2, 3],
                 response: { type: 'mc', prompt: 'Two numbers stacked in the same column of TAB mean:',
                   answer: 1,
@@ -459,13 +459,13 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — reading, writing, and swapping TAB',
+        title: 'Practice station — reading, writing, and cold-reading TAB',
         sections: [
           {
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -486,7 +486,7 @@ SETS.push(
             title: 'Write your own TAB from memory',
             steps: [
               {
-                text: 'Challenge 2 — Write It (your assessment piece): without looking anything up, write the "Seven Nation Army" riff to blank TAB on paper from memory — you played it chart-free back in Module 2. Then check yourself. You\'ve got it when: a partner can play your TAB back correctly without ever hearing you play it first.',
+                text: 'Challenge 2 — Write It (your assessment piece): without looking anything up, write the "Seven Nation Army" riff to blank TAB on paper from memory — you played it chart-free back in Module 2. Then check yourself. You\'ve got it when: you put the TAB away for a day, then play EXACTLY what\'s written on the page — as if you\'d never heard the riff — and it comes out right. (Someone around to trade with? Even better — see Challenge 4.)',
                 hint: 'Say each note name in your head as you write its fret — that\'s the same habit that made you fast at naming notes all module.',
                 stuck: 'Play the riff on your guitar first, one note at a time, writing down each fret as you go — then copy it clean.',
                 levelUp: 'Write a second 4-bar riff of your choice from memory, or write the riff transposed to a different starting fret.',
@@ -511,13 +511,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Partner TAB swap',
+            title: 'The TAB cold-read test',
             steps: [
               {
-                text: 'Challenge 4 — Swap It: trade your written TAB from Challenge 2 with a partner and play each other\'s TAB exactly as written, no explanation allowed. You\'ve got it when: you can play your partner\'s TAB on the first try.',
+                text: 'Challenge 4 — Cold-Read It: at least a day after writing your Challenge 2 TAB, take it back out and play it exactly as written — trust only the page, no memory allowed. You\'ve got it when: the riff comes out right on the first try, purely from what\'s on the paper. Got someone around who plays? Swap TABs and play each other\'s exactly as written, no explanation allowed — the ultimate readability test.',
                 hint: 'This is the real test of whether your spacing and fret numbers were actually readable — not just correct to you.',
-                stuck: 'If a partner\'s TAB is unreadable, ask them to just say the fret numbers out loud while you follow along on the page.',
-                levelUp: 'Swap with a second partner and try a fresh TAB cold.',
+                stuck: 'If your written TAB stumps you, say the fret numbers out loud in rhythm while following the page, then add the guitar.',
+                levelUp: 'Write and cold-read a second riff, or swap with a partner for a fresh TAB cold.',
                 skills: [6]
               }
             ]
@@ -537,7 +537,7 @@ SETS.push(
 
     assessment: {
       goal: 'Reads TAB above fret 5 · Writes a playable 4-bar TAB · Reads a slash chord from a chart',
-      performance: 'TAB swap: each student plays a partner\'s hand-written TAB cold. If the partner can play it, the TAB passes.',
+      performance: 'The cold-read test: play your own hand-written TAB at least a day after writing it, exactly as written. If the page alone reproduces the riff, the TAB passes. (Trading with a partner who plays it cold is the gold standard, if you can.)',
       selfCheck: 'Could a stranger play your TAB without hearing the song first? Can you explain what G/B means in one sentence?',
       standards: ['Pr.4a', 'Pr.6a', 'Cn.10a']
     },
@@ -545,7 +545,7 @@ SETS.push(
     skills: [
       { id: 'm9w3-s1', text: 'Read and play a TAB phrase written above fret 5' },
       { id: 'm9w3-s2', text: 'Write an accurate 4-bar TAB of a riff I can already play',
-        gotItWhen: 'a partner plays your TAB back correctly without ever hearing you play it first.' },
+        gotItWhen: 'you play it back correctly a day later, reading only what\'s on the page — or a partner can, without ever hearing you play it first.' },
       { id: 'm9w3-s3', text: 'Space my TAB so the rhythm is readable',
         practice: { type: 'mc', prompt: 'In hand-written TAB, rhythm is shown mainly by:',
           choices: ['Note-head shapes', 'The spacing between numbers', 'Color coding', 'It can\'t be shown'], answer: 1 } },
@@ -554,7 +554,7 @@ SETS.push(
       { id: 'm9w3-s5', text: 'Read a partial chord shape (X marks and small grids) from a chart',
         practice: { type: 'mc', prompt: 'An X above a string on a chord chart means:',
           choices: ['Play it open', 'Don\'t play that string', 'Bend that string', 'Play it twice'], answer: 1 } },
-      { id: 'm9w3-s6', text: 'Play a partner\'s hand-written TAB back correctly' }
+      { id: 'm9w3-s6', text: 'Play an unfamiliar hand-written TAB correctly on the first try — one I wrote days ago, or a partner\'s' }
     ]
   }
 
@@ -591,12 +591,12 @@ MODULE_REVIEWS[9] = {
     { id: 'mr9-s3', text: 'I can locate any named note anywhere on the neck, on any of the six strings', set: 'm9w2' },
     { id: 'mr9-s4', text: 'I can name the note at any dot-fret landmark (3, 5, 7, 9, 12) on all six strings', set: 'm9w2' },
     { id: 'mr9-s5', text: 'I can read a TAB phrase written above fret 5 without help', set: 'm9w3' },
-    { id: 'mr9-s6', text: 'I can write an accurate 4-bar TAB of a riff I already play, that a partner can play back', set: 'm9w3' }
+    { id: 'mr9-s6', text: 'I can write an accurate 4-bar TAB of a riff I already play, that reproduces the riff from the page alone', set: 'm9w3' }
   ],
   assessItems: [
-    'Name natural notes on all six strings through fret 12 — teacher picks the spots',
+    'Name natural notes on all six strings through fret 12 — draw shuffled flashcards to pick the spots',
     'Play a thread-song melody from TAB in a higher position',
-    'Hand in a 4-bar TAB you wrote yourself that a partner can play back'
+    'Finish a 4-bar TAB you wrote yourself that passes the cold-read test — a day later, the page alone reproduces the riff (or a partner plays it back correctly)'
   ],
   forward: 'The whole neck is yours now — and you can write down anything you figure out. <strong>Module 10 turns notes into keys:</strong> you\'ll learn the recipe that builds every scale, find the key of any song, and start trusting your ear.',
   standards: ['Pr.4a', 'Pr.6a', 'Cn.10a']

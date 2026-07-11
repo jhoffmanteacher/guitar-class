@@ -163,7 +163,7 @@ function showFirebaseLoadError(){
   if(!wall) return;
   wall.innerHTML =
     '<h1>Can’t reach the sign-in service</h1>' +
-    '<p>The sign-in service couldn’t load on this network — the school Wi-Fi or content filter may be blocking it. Try again, switch to a different network, or let your teacher know.</p>' +
+    '<p>The sign-in service couldn’t load on this network — a Wi-Fi or content filter may be blocking it. Try again or switch to a different network.</p>' +
     '<button class="btn-google" onclick="location.reload()">Try again</button>';
 }
 function signIn(){
@@ -1618,7 +1618,7 @@ function buildSongs(w){
     const vidsEl = vids.length ? `<div class="song-vids">${vids.join('')}</div>` : '';
     return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div><div class="sname">${nameEl}</div><div class="smeta">${diffDotsHtml(s.level)}${s.meta}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${s.type}</span></div>`;
   }).join('');
-  const requestSlot = `<div class="song-row song-request"><div class="song-request-ico">&#x1F3A4;</div><div><div class="sname">Class request — suggest a song!</div><div class="smeta">Got a song you want to learn? Tell Mr. Hoffman and it might join the Choice menu next semester.</div></div></div>`;
+  const requestSlot = `<div class="song-row song-request"><div class="song-request-ico">&#x1F3A4;</div><div><div class="sname">Your pick — bring your own song!</div><div class="smeta">Got a song you want to learn? Search YouTube for a beginner tutorial and use this module's skills on it.</div></div></div>`;
   const diffLegend = `<div class="leg"><span class="song-diff diff-1">&#x25CF;<span class="song-diff-empty">&#x25CB;&#x25CB;</span></span>&#x2192;<span class="song-diff diff-3">&#x25CF;&#x25CF;&#x25CF;</span> easier &#x2192; harder</div>`;
   return `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>Core — everyone</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu — pick 1</div>${diffLegend}</div><div class="card">${rows}${requestSlot}</div>`;
 }
@@ -1726,7 +1726,7 @@ function buildModuleReview(mr){
   const pBtn=(n)=>`<button class="mr-rb lvl${n}${pLvl===String(n)?' active':''}" onclick="setPerformanceLevel(${mr.moduleNum},'${n}')">${n}</button>`;
   const playHtml=`<div class="mr-play">
       <span class="mr-play-tag">&#x1F3B8; <span class="mr-q-num">${playNum}.</span> Play it &amp; Record it!</span>
-      <div class="mr-play-prompt">Perform the class song from this module &mdash; or a song of your choice that shows off these skills. Then listen back to your recording and reflect on what could be improved.</div>
+      <div class="mr-play-prompt">Perform a core song from this module &mdash; or a song of your choice that shows off these skills. Then listen back to your recording and reflect on what could be improved.</div>
       <label class="mr-play-label" for="${mrId}-song">Song I played</label>
       <input type="text" id="${mrId}-song" class="mr-play-song" oninput="savePerformance(${mr.moduleNum})" value="${escAttr(perf.song||'')}">
       <div class="mr-rec" data-module="${mr.moduleNum}">
@@ -1738,8 +1738,8 @@ function buildModuleReview(mr){
       </div>
     </div>`;
   const assessBody = (mr.assessItems && mr.assessItems.length)
-    ? `Sign up when you are ready for the module assessment. It is on these skills:<ul class="mr-assess-list">${mr.assessItems.map(i=>`<li>${i}</li>`).join('')}</ul>`
-    : 'Sign up when you are ready for the teacher to assess you on the skills above.';
+    ? `When you're ready, record yourself doing the module assessment, then check the recording against these skills:<ul class="mr-assess-list">${mr.assessItems.map(i=>`<li>${i}</li>`).join('')}</ul>`
+    : 'When you\'re ready, record yourself performing the skills above and self-check the recording.';
   const performanceHtml=`<div class="mr-assess-box">
       <div class="mr-assess-head"><span class="mr-assess-icon">&#x1F4DD;</span> Module ${mr.moduleNum} Assessment</div>
       <div class="mr-assess-body">${assessBody}</div>

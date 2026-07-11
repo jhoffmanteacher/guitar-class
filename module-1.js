@@ -14,9 +14,9 @@ SETS.push(
     moduleNum: 1,
     unit: 'Module 1 · Introductions: You and The Guitar',
     title: 'Set 1',
-    subtitle: 'My Guitar Adventure · Goal-setting · Sharing',
-    objective: 'I CAN describe why I want to play guitar and share a song that means something to me.',
-    skillFocus: 'Setting your guitar goals · Sharing and discussing music',
+    subtitle: 'My Guitar Adventure · Goal-setting · Your music',
+    objective: 'I CAN describe why I want to play guitar and explain what a song that means something to me is doing musically.',
+    skillFocus: 'Setting your guitar goals · Listening closely to music you love',
     comingSoon: false,
 
     stations: {
@@ -27,8 +27,8 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            text: 'Headphone routine (every computer-station day): plug in. Keep the volume low — the classmate next to you should not hear it. Slip one earcup off when the teacher is talking. We do this all semester.',
-            hint: 'If the person next to you can hear your video, it\'s too loud. Comfortable for you, quiet for everyone else.'
+            text: 'Sound setup (every lesson-video day): grab headphones if people are around you, or set a comfortable speaker volume if you\'re on your own. You\'ll bounce between videos and playing all course long, so make it easy to hear both.',
+            hint: 'Loud enough that you catch every detail, quiet enough that you can still hear your own guitar.'
           },
           {
             text: 'Watch: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">How to Practice Guitar – JustinGuitar</a> (Lesson 1 Practice Routine). While you watch, write down the ONE practice habit he says matters most — you\'ll try it out this week.',
@@ -37,8 +37,8 @@ SETS.push(
             response: { type: 'short', placeholder: 'In one sentence: what practice habit did he say matters most, and did it match what you thought?' }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/PyWZYHy17As" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a> (you only need the first ~3 minutes — cleaning, humidity, and basic care; after that it\'s a string-changing demo you won\'t need yet). While you watch, note two things that can damage a guitar and how to avoid each — this is shared gear, so it matters.',
-            hint: 'Your guitar is shared gear — notice how he handles and stores it. You\'ll practice the safe set-down at the hands-on station next. You\'ve got it when: you can name two ways to keep a guitar safe.',
+            text: 'Watch: <a href="https://youtu.be/PyWZYHy17As" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a> (you only need the first ~3 minutes — cleaning, humidity, and basic care; after that it\'s a string-changing demo you won\'t need yet). While you watch, note two things that can damage a guitar and how to avoid each — good habits now keep your guitar playable for years.',
+            hint: 'Notice how he handles and stores the guitar. You\'ll practice the safe set-down at the practice station next. You\'ve got it when: you can name two ways to keep a guitar safe.',
             response: { type: 'mc', prompt: 'Which of these does the video call out as a real danger to an acoustic guitar?',
               answer: 0,
               explain: 'Wood shrinks and can crack when the air gets too dry — that\'s why guitars are stored in cases and kept away from heaters. Wiping the strings after playing keeps sweat from corroding them. Lots of practice, picks, and standing up are all totally safe.',
@@ -55,7 +55,7 @@ SETS.push(
             title: 'Listening — find the guitar',
             steps: [
           {
-            text: 'Find a YouTube clip of the song you shared (or one a classmate shared that you liked). As you listen, follow the guitar only — tune out the singing and drums for 30 seconds and track what the guitar is doing. You\'ve got it when: you can describe the guitar\'s job in the song in one sentence.',
+            text: 'Find a YouTube clip of your song — the one that means something to you (any song you love with guitar in it works). As you listen, follow the guitar only — tune out the singing and drums for 30 seconds and track what the guitar is doing. You\'ve got it when: you can describe the guitar\'s job in the song in one sentence.',
             hint: 'Is it strumming chords? Playing a melody? Both? Just listen — you don\'t need to know the names yet.',
             levelUp: 'Listen a second time and try to tap along with just the guitar\'s rhythm, ignoring everything else.',
             response: { type: 'mc', prompt: 'In the clip you watched, what was the guitar doing?', choices: [
@@ -71,7 +71,7 @@ SETS.push(
             title: 'Ear training — acoustic vs. electric',
             steps: [
           {
-            text: 'Ear training — acoustic vs. electric. Two short clips play the SAME song, "All Along the Watchtower": <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank" data-ext="1">Clip 1 — Bob Dylan</a> and <a href="https://www.youtube.com/watch?v=TLV4_xaYynY" target="_blank" data-ext="1">Clip 2 — Jimi Hendrix</a>. As you listen, decide which clip sounds warm and woody and which sounds bright and fuzzy — that\'s the acoustic-vs-electric difference. This song grows with you all semester — <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
+            text: 'Ear training — acoustic vs. electric. Two short clips play the SAME song, "All Along the Watchtower": <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank" data-ext="1">Clip 1 — Bob Dylan</a> and <a href="https://www.youtube.com/watch?v=TLV4_xaYynY" target="_blank" data-ext="1">Clip 2 — Jimi Hendrix</a>. As you listen, decide which clip sounds warm and woody and which sounds bright and fuzzy — that\'s the acoustic-vs-electric difference. This song grows with you through the whole course — <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
             hint: 'Acoustic guitars sound warm and woody. Electric guitars sound brighter and can be distorted or "fuzzy." Same song, very different sound. You\'ve got it when: you can point to the electric clip and say one word for why it sounds different.',
             levelUp: 'Find another song you like that has both an acoustic and an electric version, and name which recording is which.',
             response: { type: 'mc', prompt: 'Which clip is the electric guitar?',
@@ -94,9 +94,9 @@ SETS.push(
             title: 'Get comfortable holding & exploring the guitar',
             steps: [
           {
-            text: 'Safe handling (every class): when you\'re not playing, rest the guitar flat on its back across your lap, or lay it in the case or stand. Never lean it against a chair or wall — it can slip and fall. Carry it with one hand on the neck and one on the body. You\'ve got it when: you can set the guitar down and pick it up without it wobbling or tipping.',
-            hint: 'A guitar that falls can crack its neck. A little care keeps the class set playable all year.',
-            stuck: 'Practice just the set-down first: two hands, lower it slowly onto its back, let go. Then just the pick-up. Ask a neighbor to watch and tell you if it wobbles.',
+            text: 'Safe handling (every session): when you\'re not playing, rest the guitar flat on its back across your lap, or lay it in the case or stand. Never lean it against a chair or wall — it can slip and fall. Carry it with one hand on the neck and one on the body. You\'ve got it when: you can set the guitar down and pick it up without it wobbling or tipping.',
+            hint: 'A guitar that falls can crack its neck. A little care keeps your guitar playable for years.',
+            stuck: 'Practice just the set-down first: two hands, lower it slowly onto its back, let go. Then just the pick-up. Watch the guitar as you release it — if it wobbles, slow the set-down way down.',
             levelUp: 'Set it down and pick it up three times in a row, smooth and quiet each time — no clunks against the chair.'
           },
           {
@@ -106,7 +106,7 @@ SETS.push(
             levelUp: 'Strum slowly from the low E to the high e and back, keeping every string ringing evenly — no string louder or quieter than the others.'
           },
           {
-            text: 'Try playing with your foot up on a stool, then flat on the ground. Keep whichever one lets you sit up straight without gripping the neck to hold the guitar up. You\'ve got it when: you can let go with your fretting hand and the guitar stays put on your leg.',
+            text: 'Try playing with your foot up on a stool, then flat on the ground. Keep whichever one lets you sit up straight without gripping the neck to hold the guitar up. You\'ve got it when: you can let go with your fretting hand and the guitar stays put on your leg.<span class="step-figure"><img src="img/posture-check.svg" alt="Diagram of two good sitting positions — foot on a stool and feet flat on the floor, both with a straight back and the guitar resting on the leg — plus the test: take your fretting hand off the neck and the guitar stays put."></span>',
             hint: 'The guitar should balance on your leg, not hang from your hand. Your fretting hand needs to be free to move.',
             stuck: 'Rest the narrow waist of the guitar in the dip of your leg so it settles in. If it slides, scoot it toward your body until it stops.',
             levelUp: 'Hold the position with both hands off the neck for 10 seconds while you sit up tall.'
@@ -123,9 +123,9 @@ SETS.push(
             title: 'Describe why I want to learn guitar',
             steps: [
           {
-            text: 'Write or sketch your guitar goal on a sticky note or in your journal. We\'ll revisit this at the end of the semester. You\'ve got it when: you wrote or sketched a goal you can explain in one sentence.',
+            text: 'Type your guitar goal in the box below — we\'ll revisit it at the end of the course. You\'ve got it when: you wrote a goal you can explain in one sentence.',
             hint: 'It can be a song you want to play, a skill you want to build, or just a feeling.',
-            response: { type: 'short', placeholder: 'My guitar goal for this year (one sentence): I want to…' }
+            response: { type: 'short', placeholder: 'My guitar goal (one sentence): I want to…' }
           }
             ]
           },
@@ -151,13 +151,13 @@ SETS.push(
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Listen — the low-E riff you\'ll build all semester', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'Listen — the low-E riff you\'ll build all course long', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Listen — a riff-driven song we return to later', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
-      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Listen — our Latin core song, back all semester', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Listen — our Latin core song, back all course long', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
       { name: '"Happy Birthday"', meta: 'First real song — open-string melody', type: 'Supp', core: false,
@@ -165,8 +165,8 @@ SETS.push(
     ],
 
     assessment: {
-      goal: 'Can describe why they want to learn guitar · Can name one song that matters to them · Participates in class sharing',
-      performance: 'Whole-class sharing circle — everyone shares, no one is on the spot. Listening and responding respectfully.',
+      goal: 'Can describe why they want to learn guitar · Can name one song that matters to them · Can describe what the guitar is doing in a song they love',
+      performance: 'Type your guitar goal and your song reflection into the response boxes, then say your "why guitar?" answer out loud in one or two sentences — if you can say it without hesitating, it\'s yours.',
       selfCheck: 'Can you name one reason you want to play? Can you name one song you\'d love to play by the end of the year?',
       standards: ['Pr.1a', 'Cn.11a']
     },
@@ -176,8 +176,8 @@ SETS.push(
         gotItWhen: 'you can answer "why guitar?" in one or two sentences without hesitating — and the answer is yours, not someone else\'s.' },
       { id: 'w1-s2', text: 'I can name one song that matters to me',
         gotItWhen: 'you can name the song instantly and say one thing about why it matters to you — no thinking required.' },
-      { id: 'w1-s3', text: 'I participated in class sharing and listened respectfully',
-        gotItWhen: 'you spoke up at least once, and you can recall something a classmate shared without checking your notes.' }
+      { id: 'w1-s3', text: 'I can describe what the guitar is doing in a song I love',
+        gotItWhen: 'you can name the song and describe the guitar\'s job in it in one sentence — strumming chords, playing a melody, or both.' }
     ]
   },
 
@@ -202,7 +202,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/X2EmpWr9vUc?t=105" target="_blank">How to Tune Your Guitar For Beginners – JustinGuitar</a> (the link jumps to 1:45, where he shows how to use the tuner — the part before is about which tuner to buy, and you\'ve already got a classroom tuner; you can stop around 4:28). Have your tuner ready and follow along on your own guitar — match one string at a time as he goes.',
+            text: 'Watch: <a href="https://youtu.be/X2EmpWr9vUc?t=105" target="_blank">How to Tune Your Guitar For Beginners – JustinGuitar</a> (the link jumps to 1:45, where he shows how to use the tuner — the part before is about which tuner to buy, and this site has a built-in tuner in the corner toolbar; you can stop around 4:28). Have your tuner ready and follow along on your own guitar — match one string at a time as he goes.',
             hint: 'Headphones on. Notice the order of the strings and what "in tune" sounds like. You\'ve got it when: you can tell whether a note is too high or too low before the tuner shows you.',
             stuck: 'Pause after each string and tune just that one before moving on. If the tuner jumps around, pluck a little softer and let the note ring.',
             levelUp: 'Detune one string on purpose, then bring it back to green by ear first — check the tuner only to confirm.',
@@ -232,8 +232,8 @@ SETS.push(
           {
             text: 'Watch: <a href="https://youtu.be/MlV6WhM9YhE" target="_blank">How To Hold Your Guitar – JustinGuitar</a>. While you watch, set up in your chair and copy his position piece by piece — feet, guitar on leg, back, strumming arm.',
             hint: 'Notice where the guitar rests and how the back stays straight. You\'ve got it when: you can look away from the screen and your guitar stays put without your fretting hand holding it up.',
-            stuck: 'Pause at each position checkpoint and match one thing at a time: feet flat first, then guitar on the right leg, then straighten the back. Ask a neighbor to compare you to the freeze-frame.',
-            levelUp: 'Close your eyes for 10 seconds and keep the position. Or check a partner\'s posture against the video and name one fix.',
+            stuck: 'Pause at each position checkpoint and match one thing at a time: feet flat first, then guitar on the right leg, then straighten the back. Prop up your phone and film a few seconds, then compare yourself to the freeze-frame.',
+            levelUp: 'Close your eyes for 10 seconds and keep the position. Or film 10 seconds of yourself playing and name one posture fix.',
             response: { type: 'mc', prompt: 'Where should the guitar\'s weight rest when you\'re sitting?',
               answer: 0,
               explain: 'The body of the guitar rests on your leg — your fretting hand should be free to move, not holding the neck up.',
@@ -265,9 +265,10 @@ SETS.push(
             title: 'String names & clean picking',
             steps: [
           {
-            text: 'In your notes: write out the 6 string names from memory, low to high. Mnemonic: Eddie Ate Dynamite, Good Bye Eddie. You\'ve got it when: you can write all six in order without peeking at the mnemonic.',
-            stuck: 'Write just the first letters — E A D G B E — using "Eddie Ate Dynamite, Good Bye Eddie." Cover it, then write them again from memory.',
-            levelUp: 'Say the six string names high to low (e B G D A E) without pausing.'
+            text: 'Type the 6 string names from memory, low to high, in the box below. Mnemonic: Eddie Ate Dynamite, Good Bye Eddie. You\'ve got it when: you can type all six in order without peeking at the mnemonic.',
+            stuck: 'Type just the first letters — E A D G B E — using "Eddie Ate Dynamite, Good Bye Eddie." Clear it, then type them again from memory.',
+            levelUp: 'Say the six string names high to low (e B G D A E) without pausing.',
+            response: { type: 'short', placeholder: 'The 6 strings, low to high: …' }
           },
           {
             text: 'Watch: <a href="https://youtu.be/Z1ETtvhPqdQ" target="_blank">Picking Individual Strings (BC-166) – JustinGuitar</a>. Copy him on your own guitar — pick one open string over and over, aiming for the same clean sound every time.',
@@ -281,7 +282,7 @@ SETS.push(
             text: 'Quick try: play each open string once, low E to high e, saying the name out loud as you pluck. Just a preview — you\'ll drill these for real at the practice station. You\'ve got it when: you can name each string out loud the instant you pluck it.',
             hint: 'Hearing + saying + playing locks it in faster than just watching.',
             stuck: 'Go low to high slowly, checking the mnemonic after each one: E, A, D, G, B, e. Do it twice before you speed up.',
-            levelUp: 'Have a partner pluck a string out of your sight — can you name it just from its pitch and thickness?',
+            levelUp: 'Look away, pluck a string at random, and name it from pitch and thickness alone before you peek. Got someone around? Have them pluck one out of your sight instead.',
             response: { type: 'mc', prompt: 'Say the string names low to high — which comes right after G?',
               answer: 0,
               explain: 'Low to high it\'s E A D G B e — so B follows G. (Try "Eddie Ate Dynamite, Good Bye Eddie.")',
@@ -298,7 +299,7 @@ SETS.push(
             title: 'Preview the "Seven Nation Army" riff',
             steps: [
           {
-            text: 'Preview the "Seven Nation Army" riff: click the note names below the TAB to hear how it should sound, then try just the first few notes to get the feel. You\'ll play the whole riff at the practice station. You\'ve got it when: you can match the first three notes to what you heard. This song grows with you all semester — <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
+            text: 'Preview the "Seven Nation Army" riff: click the note names below the TAB to hear how it should sound, then try just the first few notes to get the feel. You\'ll play the whole riff at the practice station. You\'ve got it when: you can match the first three notes to what you heard. This song grows with you through the whole course — <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
             hint: 'Listen first, then match it — one note at a time.',
             stuck: 'Just the first two notes: click a note name to hear it, then find it on the low E string. Nail those before adding the next.',
             levelUp: 'Play the first four notes in a row, in time, humming the riff as you go.',
@@ -330,7 +331,7 @@ SETS.push(
             text: 'Challenge 1 — Tune Challenge: get all 6 strings to green on the tuner. Beat the clock — can you do it in under 2 minutes? You\'ve got it when: all 6 strings green in under 2 minutes. Log your time so you can beat it next session.',
             hint: 'Tune low to high: E A D G B e. Slow and steady beats rushing past the note. Use the play button to hear the target pitches.',
             stuck: 'Tune just one string to green and leave it, then the next. Hit the play button to hear each target pitch first so your ear knows where it\'s headed.',
-            levelUp: 'Beat your own record: log this session\'s time and try to shave 15 seconds off it next class.',
+            levelUp: 'Beat your own record: log this session\'s time and try to shave 15 seconds off it next session.',
             skills: [5],
             playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
           }
@@ -347,7 +348,7 @@ SETS.push(
             skills: [6]
           },
           {
-            text: 'Try "Happy Birthday" on open strings only — your teacher will give you the note sequence. Practice with a metronome at 60 BPM to keep steady. You\'ve got it when: you can play it start to finish with clean notes and a steady pulse.',
+            text: 'Try "Happy Birthday" on open strings only — the tutorial video in the Songs tab walks you through the note sequence. Practice with a metronome at 60 BPM to keep steady. You\'ve got it when: you can play it start to finish with clean notes and a steady pulse.',
             hint: 'Go slow. Clean notes matter more than speed right now.',
             stuck: 'Learn it in two halves — get the first phrase clean before you add the second. Drop the metronome to 50 BPM until the notes are smooth.',
             levelUp: 'Nudge the metronome up to 70 BPM, keeping every note clean and in time.',
@@ -404,7 +405,7 @@ SETS.push(
 
     assessment: {
       goal: 'Names 5+ parts of the guitar · Holds guitar with correct posture · Holds pick with correct grip · Tunes all 6 strings · Plays a short melody on the E string with clean, steady notes',
-      performance: 'Whole-class unison open-string exercise. Everyone plays together — no one is on the spot.',
+      performance: 'Record yourself doing the full tune-up, then playing each open string cleanly low to high while naming it. Listen back and self-check: every string green, every note clean, every name right.',
       selfCheck: 'Can you name 5 parts of the guitar? Can you tune all 6 strings with a tuner? Can you play a single note cleanly with no buzzing?',
       standards: ['Pr.4a', 'Pr.5a']
     },
@@ -444,11 +445,13 @@ MODULE_REVIEWS[1] = {
     { id: 'mr1-s1', text: 'I can describe why I want to learn guitar', set: 'w1' },
     { id: 'mr1-s2', text: 'I can name 5+ parts of the guitar', set: 'w2' },
     { id: 'mr1-s3', text: 'I can tune all 6 strings with a tuner', set: 'w2' },
-    { id: 'mr1-s4', text: 'I can play a short melody on the E string with clean, steady notes', set: 'w2' }
+    { id: 'mr1-s4', text: 'I can play a short melody on the E string with clean, steady notes', set: 'w2' },
+    { id: 'mr1-s5', text: 'I can hold the guitar and pick correctly and make every open string ring clean', set: 'w2' }
   ],
   assessItems: [
-    'Tune your guitar in 2 minutes',
-    'Name all 6 strings'
+    'Tune all 6 strings to green in under 2 minutes',
+    'Name all 6 strings from memory — in order and at random',
+    'Play each open string cleanly with correct posture and pick grip — down-strokes from the wrist'
   ],
   standards: ['Pr.1a', 'Pr.4a', 'Pr.5a', 'Cn.11a']
 };

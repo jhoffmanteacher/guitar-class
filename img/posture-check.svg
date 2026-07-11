@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 336" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <!-- Sitting-posture check: two good options + the balance test. Side view, simple line art. -->
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#2e7d32"/>
+    </marker>
+    <!-- seated figure, feet flat: hip at (86,192), straight back, head, fretting arm to the neck -->
+    <g id="chair">
+      <line x1="56" y1="196" x2="120" y2="196" stroke="#8a867e" stroke-width="5" stroke-linecap="round"/>
+      <line x1="62" y1="198" x2="62" y2="270" stroke="#8a867e" stroke-width="4"/>
+      <line x1="114" y1="198" x2="114" y2="270" stroke="#8a867e" stroke-width="4"/>
+    </g>
+    <g id="guitar-flat">
+      <!-- neck first (behind body), then body resting on the thigh -->
+      <line x1="168" y1="152" x2="226" y2="126" stroke="#3a3a38" stroke-width="6" stroke-linecap="round"/>
+      <line x1="226" y1="126" x2="243" y2="118" stroke="#3a3a38" stroke-width="11" stroke-linecap="round"/>
+      <ellipse cx="148" cy="164" rx="30" ry="24" fill="#e8dcc8" stroke="#3a3a38" stroke-width="3"/>
+      <circle cx="150" cy="163" r="7" fill="#fdfcf9" stroke="#3a3a38" stroke-width="2"/>
+    </g>
+  </defs>
+
+  <!-- ===================== PANEL 1: foot on footstool ===================== -->
+  <g>
+    <rect x="8" y="8" width="248" height="320" rx="12" fill="#f7f6f3" stroke="#d9d6d0"/>
+    <text x="132" y="34" text-anchor="middle" font-size="15" font-weight="700" fill="#3a3a38">Option 1 &#8212; foot on a stool</text>
+
+    <line x1="24" y1="272" x2="240" y2="272" stroke="#b9b5ad" stroke-width="2"/>
+    <use href="#chair"/>
+    <!-- footstool -->
+    <rect x="136" y="238" width="46" height="9" rx="3" fill="#8a867e"/>
+    <line x1="142" y1="247" x2="142" y2="270" stroke="#8a867e" stroke-width="4"/>
+    <line x1="176" y1="247" x2="176" y2="270" stroke="#8a867e" stroke-width="4"/>
+
+    <!-- straight-back guide -->
+    <line x1="80" y1="70" x2="80" y2="196" stroke="#2e7d32" stroke-width="2" stroke-dasharray="5 5" opacity="0.8"/>
+
+    <!-- figure: head + neck + straight back, raised thigh to the stool -->
+    <circle cx="88" cy="92" r="13" fill="#f7f6f3" stroke="#3a3a38" stroke-width="3.5"/>
+    <path d="M87 105 L86 192" fill="none" stroke="#3a3a38" stroke-width="5" stroke-linecap="round"/>
+    <path d="M86 192 L150 176 L156 236" fill="none" stroke="#3a3a38" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="148" y1="237" x2="168" y2="237" stroke="#3a3a38" stroke-width="5" stroke-linecap="round"/>
+
+    <!-- guitar on the raised thigh -->
+    <line x1="166" y1="138" x2="224" y2="112" stroke="#3a3a38" stroke-width="6" stroke-linecap="round"/>
+    <line x1="224" y1="112" x2="241" y2="104" stroke="#3a3a38" stroke-width="11" stroke-linecap="round"/>
+    <ellipse cx="146" cy="150" rx="30" ry="24" fill="#e8dcc8" stroke="#3a3a38" stroke-width="3"/>
+    <circle cx="148" cy="149" r="7" fill="#fdfcf9" stroke="#3a3a38" stroke-width="2"/>
+    <!-- fretting arm reaching the neck -->
+    <path d="M88 118 L128 148 L188 126" fill="none" stroke="#3a3a38" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="192" cy="125" r="5.5" fill="#3a3a38"/>
+
+    <!-- labels -->
+    <text x="16" y="126" font-size="12" font-weight="600" fill="#2e7d32">back</text>
+    <text x="16" y="140" font-size="12" font-weight="600" fill="#2e7d32">straight</text>
+    <line x1="58" y1="130" x2="74" y2="128" stroke="#2e7d32" stroke-width="1.6" marker-end="url(#arr)"/>
+    <text x="132" y="296" text-anchor="middle" font-size="12.5" font-weight="600" fill="#5a564e">guitar rests on the raised leg</text>
+  </g>
+
+  <!-- ===================== PANEL 2: feet flat ===================== -->
+  <g transform="translate(262 0)">
+    <rect x="8" y="8" width="248" height="320" rx="12" fill="#f7f6f3" stroke="#d9d6d0"/>
+    <text x="132" y="34" text-anchor="middle" font-size="15" font-weight="700" fill="#3a3a38">Option 2 &#8212; feet flat</text>
+
+    <line x1="24" y1="272" x2="240" y2="272" stroke="#b9b5ad" stroke-width="2"/>
+    <use href="#chair"/>
+
+    <!-- straight-back guide -->
+    <line x1="80" y1="70" x2="80" y2="196" stroke="#2e7d32" stroke-width="2" stroke-dasharray="5 5" opacity="0.8"/>
+
+    <!-- figure: head + straight back, level thigh, shin down, flat foot -->
+    <circle cx="88" cy="92" r="13" fill="#f7f6f3" stroke="#3a3a38" stroke-width="3.5"/>
+    <path d="M87 105 L86 192" fill="none" stroke="#3a3a38" stroke-width="5" stroke-linecap="round"/>
+    <path d="M86 192 L152 190 L155 266" fill="none" stroke="#3a3a38" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="147" y1="268" x2="170" y2="268" stroke="#3a3a38" stroke-width="5" stroke-linecap="round"/>
+
+    <use href="#guitar-flat"/>
+    <!-- fretting arm reaching the neck -->
+    <path d="M88 118 L128 158 L190 140" fill="none" stroke="#3a3a38" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="194" cy="139" r="5.5" fill="#3a3a38"/>
+
+    <!-- labels -->
+    <text x="16" y="126" font-size="12" font-weight="600" fill="#2e7d32">sit up</text>
+    <text x="16" y="140" font-size="12" font-weight="600" fill="#2e7d32">tall</text>
+    <line x1="52" y1="130" x2="74" y2="128" stroke="#2e7d32" stroke-width="1.6" marker-end="url(#arr)"/>
+    <text x="132" y="296" text-anchor="middle" font-size="12.5" font-weight="600" fill="#5a564e">waist of the guitar in the leg&#8217;s dip</text>
+  </g>
+
+  <!-- ===================== PANEL 3: the test ===================== -->
+  <g transform="translate(524 0)">
+    <rect x="8" y="8" width="248" height="320" rx="12" fill="#eef5ee" stroke="#bcd6bc"/>
+    <text x="132" y="34" text-anchor="middle" font-size="15" font-weight="700" fill="#2e7d32">The test: let go!</text>
+
+    <line x1="24" y1="272" x2="240" y2="272" stroke="#b9b5ad" stroke-width="2"/>
+    <use href="#chair"/>
+
+    <!-- figure, feet-flat pose -->
+    <circle cx="88" cy="92" r="13" fill="#eef5ee" stroke="#3a3a38" stroke-width="3.5"/>
+    <path d="M87 105 L86 192" fill="none" stroke="#3a3a38" stroke-width="5" stroke-linecap="round"/>
+    <path d="M86 192 L152 190 L155 266" fill="none" stroke="#3a3a38" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="147" y1="268" x2="170" y2="268" stroke="#3a3a38" stroke-width="5" stroke-linecap="round"/>
+
+    <use href="#guitar-flat"/>
+    <!-- fretting arm lifted OFF the neck, open hand raised -->
+    <path d="M88 118 L56 142 L48 112" fill="none" stroke="#3a3a38" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="47" cy="105" r="6" fill="none" stroke="#3a3a38" stroke-width="3"/>
+
+    <!-- motion ticks: the hand just left the neck -->
+    <line x1="160" y1="132" x2="152" y2="122" stroke="#2e7d32" stroke-width="2" stroke-linecap="round"/>
+    <line x1="172" y1="128" x2="168" y2="116" stroke="#2e7d32" stroke-width="2" stroke-linecap="round"/>
+
+    <!-- check + caption -->
+    <circle cx="216" cy="196" r="15" fill="#2e7d32"/>
+    <path d="M208 196 L214 203 L225 189" fill="none" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="132" y="290" text-anchor="middle" font-size="12.5" font-weight="600" fill="#2e7d32">hand off the neck &#8212; the guitar</text>
+    <text x="132" y="306" text-anchor="middle" font-size="12.5" font-weight="600" fill="#2e7d32">stays put on your leg</text>
+  </g>
+</svg>

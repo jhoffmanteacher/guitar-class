@@ -92,7 +92,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 hint: 'Fingerpicking exposes every note — an out-of-tune string is easy to hear.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
@@ -178,7 +178,7 @@ SETS.push(
 
     assessment: {
       goal: 'Alternating thumb in steady quarters · Clean pinch on the downbeat · Pattern survives an Am↔C change',
-      performance: 'Class thumb-drums together at 60 BPM for 16 bars; teacher listens for anyone\'s thumb stopping when fills enter.',
+      performance: 'Record yourself thumb-drumming at 60 BPM for 16 bars; listen back for your thumb stopping when the fills enter.',
       selfCheck: 'Can your thumb keep going while you talk? Does the pinch land exactly together, or does one note leak first?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
     },
@@ -241,10 +241,10 @@ SETS.push(
             title: 'Listen for the waltz feel',
             steps: [
               {
-                text: 'Which class song has been our 3/4 (waltz) vehicle since Semester 1? Think back to Happy Birthday, strummed "in 3" in Module 6-era work — now you\'ll pick it in 3.',
+                text: 'Which course song has been our 3/4 (waltz) vehicle since the first half of the course? Think back to Happy Birthday, strummed "in 3" in Module 6-era work — now you\'ll pick it in 3.',
                 hint: 'Happy Birthday is a waltz — you strummed it "in 3" in Module 6-era work; now you pick it in 3.',
                 skills: [2, 6],
-                response: { type: 'mc', prompt: 'Which class song has been our 3/4 (waltz) vehicle since Semester 1?',
+                response: { type: 'mc', prompt: 'Which course song has been our 3/4 (waltz) vehicle since the first half of the course?',
                   answer: 1,
                   explain: 'Happy Birthday is a waltz — you strummed it "in 3" in Module 6-era work; now you pick it in 3.',
                   choices: ['Seven Nation Army', 'Happy Birthday', 'Beat It', 'Let It Be'] }
@@ -283,7 +283,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 hint: 'Fingerpicking exposes every note — an out-of-tune string is easy to hear.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
@@ -353,7 +353,7 @@ SETS.push(
 
     assessment: {
       goal: 'Picks a 3/4 pattern in time · Plays "the cure" or Let It Be fingerstyle with the pattern unbroken · Explains "native style"',
-      performance: 'Half the room picks in 4, half in 3, then swap — teacher checks that beat 1 always carries the bass.',
+      performance: 'Pick 8 bars in 4, then 8 bars in 3, then swap back and forth — record a pass and check that beat 1 always carries the bass.',
       selfCheck: 'Can you count aloud while picking in 3? Does your pattern survive the F chord?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Re.8a']
     },
@@ -392,12 +392,12 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
               {
-                text: 'Video coming soon — your teacher will demo this at Station A. <!-- VIDEO-TODO: requinto / sierreño-style guitar picking introduction — Spanish-lane content; Jonathan reviews before it goes live -->',
-                hint: 'Requinto sings the melodic lines you\'ve been hearing in Luna, Tu Boda, and La Diabla since Week 1\'s tone-ID days.',
+                text: 'Video coming soon — in the meantime, listen for the requinto lines in Luna and Tu Boda from this module\'s song list. <!-- VIDEO-TODO: requinto / sierreño-style guitar picking introduction — Spanish-lane content; Jonathan reviews before it goes live -->',
+                hint: 'Requinto sings the melodic lines you\'ve been hearing in Luna, Tu Boda, and La Diabla since the course\'s first tone-ID days.',
                 skills: [3],
                 response: { type: 'mc', prompt: 'In a sierreño group, the requinto is:',
                   answer: 1,
-                  explain: 'Requinto sings the melodic lines you\'ve been hearing in Luna, Tu Boda, and La Diabla since Week 1\'s tone-ID days.',
+                  explain: 'Requinto sings the melodic lines you\'ve been hearing in Luna, Tu Boda, and La Diabla since the course\'s first tone-ID days.',
                   choices: ['The bass', 'A smaller, higher-pitched guitar that carries the melody', 'The singer', 'A drum'] }
               },
               {
@@ -457,7 +457,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 hint: 'Fingerpicking exposes every note — an out-of-tune string is easy to hear.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
@@ -503,11 +503,12 @@ SETS.push(
             title: 'Choose your showcase pattern',
             steps: [
               {
-                text: 'Challenge 4 — Choose Your Pattern: run ALL patterns learned this semester (6-note · Travis · pinch · 3/4) over one chord, then pick one and write it down. You\'ve got it when: you\'ve named the pattern you\'ll perform with.',
+                text: 'Challenge 4 — Choose Your Pattern: run ALL patterns learned this course (6-note · Travis · pinch · 3/4) over one chord, then pick one and write it in the box below. You\'ve got it when: you\'ve named the pattern you\'ll perform with.',
                 hint: 'The smartest choice is the one you can keep unbroken at performance tempo TODAY — not the hardest one.',
                 stuck: 'If none feel ready, default to the 6-note pattern from Module 8 — it\'s the most forgiving.',
                 levelUp: 'Practice your chosen pattern at 10 BPM above your current comfortable tempo.',
-                skills: [5]
+                skills: [5],
+                response: { type: 'short', placeholder: 'e.g. Travis with a pinch on beat 1 — steady at 65 BPM today' }
               }
             ]
           },
@@ -518,7 +519,7 @@ SETS.push(
                 text: 'Challenge — Full-Verse Rehearsal (your assessment piece): play one complete fingerpicked verse of your showcase song, no stopping, mistakes recovered. You\'ve got it when: you reach the last bar without stopping.',
                 hint: 'Performances reward reliability, not difficulty — pick the pattern that never breaks, then make it musical.',
                 stuck: 'Slow the whole verse down until you can finish it clean, even at half speed.',
-                levelUp: 'Perform it for a partner or the whole station group.',
+                levelUp: 'Record a performance take, or play it for someone at home.',
                 skills: [6]
               }
             ]
@@ -538,7 +539,7 @@ SETS.push(
 
     assessment: {
       goal: 'Plays the Luna intro rolls · Blends melody over a steady thumb · Performs one full fingerpicked verse, recovering from mistakes',
-      performance: 'Mini-showcase: each student plays one verse for their station group; the group names one strength + one target.',
+      performance: 'Mini-showcase, solo edition: record one verse, listen back, and name one strength + one target yourself — and share the recording with someone if you like.',
       selfCheck: 'Can you keep the thumb going while the melody enters? Did you finish the verse even where you slipped?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Cn.11a']
     },
@@ -603,6 +604,6 @@ MODULE_REVIEWS[12] = {
     'Play one full fingerpicked verse with a steady thumb bass and a clean, unbroken finger pattern — flagship options: "the cure" (capo 1) or Let It Be',
     'Show your chosen showcase pattern and name it'
   ],
-  forward: 'Twelve modules — the whole toolkit, twice as deep as most first-year players ever get. <strong>Now comes the Semester Showcase:</strong> pick your song, pick your lane — strummed, fingerpicked, or riff + solo — and get it performance-ready. This website got you here; the stage is yours. And after the showcase? Keep the list of songs you want to learn, and go learn them — you know how now.',
+  forward: 'Twelve modules — the whole toolkit, twice as deep as most first-year players ever get. <strong>Now comes your capstone performance:</strong> pick your song, pick your lane — strummed, fingerpicked, or riff + solo — get it performance-ready, then record a full take or play it live for people you choose. This website got you here; the stage is yours. And after your capstone? Keep the list of songs you want to learn, and go learn them — you know how now.',
   standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Cn.11a']
 };

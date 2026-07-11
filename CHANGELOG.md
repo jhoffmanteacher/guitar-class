@@ -5,6 +5,30 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — The whole site now works fully self-paced
+
+### Changed
+- **Every lesson now works on your own** — no classroom required. Drills that
+  used to need a partner or teacher ("have a partner call out frets," "your
+  teacher will demo this") now come with a solo version first: homemade
+  flashcards, record-yourself-and-listen-back checks, beat-your-own-timer
+  challenges. If you *do* have someone around, the partner versions are still
+  there as options.
+- **Module assessments are now self-checks.** Instead of signing up for a
+  teacher assessment, you record yourself doing the assessment skills and
+  check the recording against the list. The same goes for every set's
+  performance check.
+- **Reflections now go straight into the page.** Anywhere you used to write in
+  a journal or on a sticky note, there's now a text box that saves with your
+  progress. (Writing TAB still happens on paper — that's the skill!)
+- **New posture diagram in Module 1** — a picture of both good sitting
+  positions (foot on a stool, feet flat) and the "let go and the guitar stays
+  put" balance test, right where you learn to hold the guitar.
+- **Module self-assessments now match the full course assessment goals** —
+  a few missing checks (posture and pick grip in Module 1, clean muting in
+  Module 3, clean tone in Module 4, the random-chords and chart-reading
+  checks in Module 5) were added to the module review checklists.
+
 ## 2026-07-10 — Module 12 is live: Fingerstyle: Travis, Waltz & Requinto — all Semester 2 modules complete
 
 ### Added

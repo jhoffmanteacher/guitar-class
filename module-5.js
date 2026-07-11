@@ -65,7 +65,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 hint: 'Tuning (Module 1) is a skill you keep forever. Clean open strings are exactly what makes a chord ring.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
@@ -117,12 +117,12 @@ SETS.push(
             title: 'One-Minute Changes — beat your record',
             steps: [
               {
-                text: 'Challenge 4 — One-Minute Changes (Am ↔ Em): set the ⏱ Timer for 60 seconds and switch Am→Em→Am→Em as many times as you can. Every CLEAN change counts; a buzzy or missed one doesn\'t. You\'ve got it when: count your clean changes and type the number below — beat it next class. (Over 20 is solid for week one.)',
+                text: 'Challenge 4 — One-Minute Changes (Am ↔ Em): set the ⏱ Timer for 60 seconds and switch Am→Em→Am→Em as many times as you can. Every CLEAN change counts; a buzzy or missed one doesn\'t. You\'ve got it when: count your clean changes and type the number below — beat it next session. (Over 20 is solid for your first day on chords.)',
                 hint: 'This is the classic chord-change speed test. Quality first: a clean change you can count beats a blurry one you can\'t.',
                 stuck: 'Keep your index finger planted (it barely moves between Am and Em) and move only the other fingers. Slow down until every change rings.',
                 levelUp: 'Add one strum on each chord before you switch, or swap in Am→C instead.',
                 skills: [5, 6],
-                response: { type: 'short', prompt: 'Personal record — clean Am↔Em changes in 60 seconds. Your count today?', placeholder: 'e.g. 22 — beat it next class' }
+                response: { type: 'short', prompt: 'Personal record — clean Am↔Em changes in 60 seconds. Your count today?', placeholder: 'e.g. 22 — beat it next session' }
               }
             ]
           },
@@ -130,7 +130,7 @@ SETS.push(
             title: 'My Practice Routine — weekly check-in (never graded)',
             steps: [
               {
-                text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week\'s plan went. Same check-in you\'ve kept since Module 1 — we keep it going all semester.',
+                text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week\'s plan went. Same check-in you\'ve kept since Module 1 — we keep it going through the whole course.',
                 hint: 'No wrong answers — even five minutes a day beats one long cram. You\'re building a habit you\'ll actually keep.',
                 response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went' }
               }
@@ -140,7 +140,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Which was harder today — getting each chord to ring clean, or switching between them in time? Write the one thing you\'ll drill first next class.',
+                text: 'Which was harder today — getting each chord to ring clean, or switching between them in time? Type the one thing you\'ll drill first next session.',
                 response: { type: 'short', placeholder: 'e.g. Am keeps buzzing on string 3 — I\'ll start there' }
               }
             ]
@@ -151,14 +151,14 @@ SETS.push(
 
     assessment: {
       goal: 'Reads a chord diagram correctly · Identifies X, O, and finger numbers on chart · Frets Am cleanly · Frets Em cleanly · Strums 4 beats per bar in time · Finds any chord shown on a chart',
-      performance: 'Class: everyone strums Am for 4 bars, then Em for 4 bars, in time with teacher counting. Teacher listens for clean tone.',
+      performance: 'Solo: record yourself strumming Am for 4 bars, then Em for 4 bars, counting aloud at 60 BPM. Listen back for clean tone on every string.',
       selfCheck: 'Can you read a chord diagram and find the right fingers without help? Can you strum Am and Em with no buzzing?',
       standards: ['Re.7a', 'Pr.4a']
     },
 
     skills: [
       { id: 'm5w1-s1', text: 'Read a chord diagram: identify X (mute), O (open), dots (finger placement), and numbers (which finger)',
-        gotItWhen: 'someone hands you a chord diagram you\'ve never seen and you can put your fingers on the right strings, frets, and finger numbers without asking.',
+        gotItWhen: 'you can open a chord diagram you\'ve never seen and put your fingers on the right strings, frets, and finger numbers without looking anything up.',
         practice: { type: 'mc', prompt: 'On a chord diagram, what does an "X" above a string mean?',
           choices: ['Play that string open', 'Mute it — don\'t play that string', 'That\'s where finger 1 goes', 'Play that string twice'], answer: 1 } },
       { id: 'm5w1-s2', text: 'Explain the difference between a chord chart, TAB, and standard notation',
@@ -311,7 +311,7 @@ SETS.push(
                 stuck: 'Break it down: park your hand over G, then practice just dropping into C and back. Speed comes after the path is clean.',
                 levelUp: 'Run Am↔F instead — the boss-level pair for this group.',
                 skills: [3, 6],
-                response: { type: 'short', prompt: 'Personal record — clean C↔G changes in 60 seconds. Your count today?', placeholder: 'e.g. 18 — beat it next class' }
+                response: { type: 'short', prompt: 'Personal record — clean C↔G changes in 60 seconds. Your count today?', placeholder: 'e.g. 18 — beat it next session' }
               }
             ]
           },
@@ -319,7 +319,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Let It Be, verse (in-class assessment rehearsal): play C · G · Am · F with a down-strum, four beats per chord, building from 60 to 70 BPM. This C–G–Am–F verse is the song you play from memory for the in-class assessment. You\'ve got it when: one full verse loop at 70 BPM, every change landing on beat 1. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 4</a>.',
+                text: 'Challenge — Let It Be, verse (assessment rehearsal): play C · G · Am · F with a down-strum, four beats per chord, building from 60 to 70 BPM. This C–G–Am–F verse is the song you play from memory for the module assessment — record a run and check it against the chart. You\'ve got it when: one full verse loop at 70 BPM, every change landing on beat 1. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 4</a>.',
                 hint: 'Look ahead — start forming the next chord on beat 4 of the current one. Keep your fingers arched and your thumb behind the neck so every string rings. The strum keeps moving even while fingers travel.',
                 stuck: 'Isolate the roughest pair (probably C → F) and loop just those two, four beats each.',
                 levelUp: 'Add the chorus turnaround — Am · G · F · C — or drop to two beats per chord at the same 60 BPM.',
@@ -355,7 +355,7 @@ SETS.push(
                   { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
                   { name: 'G',  chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
                 ],
-                response: { type: 'short', prompt: 'Your cleanest tempo on the "the cure" loop today (BPM)?', placeholder: 'e.g. 65 — 70 next class' }
+                response: { type: 'short', prompt: 'Your cleanest tempo on the "the cure" loop today (BPM)?', placeholder: 'e.g. 65 — 70 next session' }
               }
             ]
           },
@@ -363,7 +363,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Of C, G, Am, and F, which transition cost you the most clean changes in the minute drill? Name the two chords — that\'s your first loop next class.',
+                text: 'Of C, G, Am, and F, which transition cost you the most clean changes in the minute drill? Name the two chords — that\'s your first loop next session.',
                 response: { type: 'short', placeholder: 'e.g. Am→F — the F never lands in time' }
               }
             ]
@@ -374,7 +374,7 @@ SETS.push(
 
     assessment: {
       goal: 'Frets C, F, Am, G with clean tone · Switches C to G in time at 70 BPM · Switches Am to F in time at 70 BPM · Uses common-finger pivot (Am–C) · Strums a down-up pattern in time · Plays a full verse of a C–G–Am–F song',
-      performance: 'Class or partner: play a full verse of "Let It Be" with open chords and down-up strum. Teacher listens for clean transitions.',
+      performance: 'Solo: record a full verse of "Let It Be" with open chords and down-up strum, then listen back for clean transitions on every change.',
       selfCheck: 'Can you switch from Am to C without lifting your index finger? Can you play the C–G–Am–F loop at 70 BPM without stopping?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
     },
@@ -401,7 +401,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'In a down-up strum pattern, when do the UPSTROKES happen?',
           choices: ['On the numbers (1, 2, 3, 4)', 'On the "+" (and) between beats', 'Only on beat 4', 'Randomly'], answer: 1 } },
       { id: 'm5w2-s6', text: 'Switch between any two chords in Group 1 on beat 1 at 70 BPM',
-        gotItWhen: 'the teacher names any two chords from C, G, Am, F and you can switch between them on beat 1 at 70 BPM without breaking the strum.',
+        gotItWhen: 'you pick any two chords from C, G, Am, F at random (shuffle homemade flashcards or point blind at the chart) and can switch between them on beat 1 at 70 BPM without breaking the strum.',
         practice: { type: 'playSeq', label: 'C–G–Am–F progression (root notes)', bpm: 70,
           notes: [48, 43, 45, 53] } }
     ]
@@ -516,7 +516,7 @@ SETS.push(
                 stuck: 'Park your hand over G, then practice just dropping into D and back. Slow until each one rings, then let speed come.',
                 levelUp: 'Run Em↔A instead, or add a down-up strum on each chord.',
                 skills: [5, 6],
-                response: { type: 'short', prompt: 'Personal record — clean G↔D changes in 60 seconds. Your count today?', placeholder: 'e.g. 20 — beat it next class' }
+                response: { type: 'short', prompt: 'Personal record — clean G↔D changes in 60 seconds. Your count today?', placeholder: 'e.g. 20 — beat it next session' }
               }
             ]
           },
@@ -541,7 +541,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Crossing between Group 1 and Group 2, which single change still feels like reaching across the neck? Name it — that\'s your warm-up next class.',
+                text: 'Crossing between Group 1 and Group 2, which single change still feels like reaching across the neck? Name it — that\'s your warm-up next session.',
                 response: { type: 'short', placeholder: 'e.g. C→A still feels like a big jump' }
               }
             ]
@@ -552,7 +552,7 @@ SETS.push(
 
     assessment: {
       goal: 'Frets D, A, Em, Bm with clean tone · Switches D to A in time · Switches Em to Bm in time · Connects Group 1 and Group 2 chords · Plays a song using Group 2 chords · Identifies chord group from a chord chart',
-      performance: 'Individual: play 8 bars using chords from both groups — teacher names three chords and the student plays them in sequence at 70 BPM.',
+      performance: 'Solo: pick three chords at random (shuffle homemade flashcards or point blind at a chord chart) and play them in sequence for 8 bars at 70 BPM — record it and listen back for clean changes.',
       selfCheck: 'Can you look at a chord chart and know immediately which "group" each chord belongs to? Can you switch D–A and Em–Bm at 70 BPM?',
       standards: ['Pr.4a', 'Pr.5a', 'Cn.11b']
     },
@@ -591,7 +591,7 @@ SETS.push(
     moduleNum: 5,
     unit: 'Module 5 · Open Chords',
     title: 'Set 4',
-    subtitle: 'Chord Group 3: E, B7, F#m, C#m · Semester showcase preparation',
+    subtitle: 'Chord Group 3: E, B7, F#m, C#m · Course showcase preparation',
     objective: 'I CAN fret E and B7 open chords, identify F#m and C#m shapes, and perform a chosen song with 4+ chord types.',
     skillFocus: 'Fretting the E and B7 chords · Recognizing the F#m and C#m shapes · Performing a song with several chords',
     comingSoon: false,
@@ -639,7 +639,7 @@ SETS.push(
           },
           {
             text: 'Re-read what you wrote back in Module 1 — your "My Guitar Adventure" goal. You set it before you could play a single chord. What has changed? Name one thing you can do now that felt impossible then, and the one thing you still want by the showcase.',
-            hint: 'This is the same goal you\'ll reflect on in your semester self-check. Be specific — "I can switch C to G without stopping" beats "I got better."',
+            hint: 'This is the same goal you\'ll reflect on in your course self-check. Be specific — "I can switch C to G without stopping" beats "I got better."',
             skills: [5],
             response: { type: 'short', placeholder: 'One thing you can do now that you couldn\'t in Module 1 — and one goal for the showcase.' }
           },
@@ -698,7 +698,7 @@ SETS.push(
                 stuck: 'Drill just dropping into B7 from E and back, slowly, until all four fingers land together. Speed comes after the landing is clean.',
                 levelUp: 'Add a strum on each chord before switching, or run E→Am→B7.',
                 skills: [2, 3],
-                response: { type: 'short', prompt: 'Personal record — clean E↔B7 changes in 60 seconds. Your count today?', placeholder: 'e.g. 14 — beat it next class' }
+                response: { type: 'short', prompt: 'Personal record — clean E↔B7 changes in 60 seconds. Your count today?', placeholder: 'e.g. 14 — beat it next session' }
               }
             ]
           },
@@ -706,7 +706,7 @@ SETS.push(
             title: 'Perform your showcase song',
             steps: [
           {
-            text: 'Challenge 4 — Showcase Run (your assessment piece): play your semester showcase song — the one you\'ll perform for the class — start to finish 3 times without stopping, even through mistakes, and time yourself. No score — this trains your recovery, not perfection.',
+            text: 'Challenge 4 — Showcase Run (your assessment piece): play your course showcase song — the one you\'re building toward performing for someone (family, a friend, or a recording) — start to finish 3 times without stopping, even through mistakes, and time yourself. No score — this trains your recovery, not perfection.',
             hint: 'Don\'t stop when you make a mistake in performance practice. The goal is to keep going. You can fix mistakes in slow practice — performance practice trains your recovery.',
             skills: [5, 6]
           }
@@ -734,10 +734,10 @@ SETS.push(
             title: 'Call & Response over a backing track',
             steps: [
               {
-                text: 'Challenge — Call & Response (your semester-wrap check piece): open Module 4 and pick any core-song backing track (the ▶ &#x1F3B5; Backing track button on the song cards) and improvise a call-and-response solo — play a 2-bar "question" phrase, leave a little space, then answer it with a 2-bar "response." Stay in the minor pentatonic box from Module 4. You\'ve got it when: you hold the track\'s pulse start to finish with no restarts, and your response phrase clearly answers your question phrase. This is scored the same way as your Module 4 solo (Accuracy + Consistency).',
+                text: 'Challenge — Call & Response (your course-wrap check piece): open Module 4 and pick any core-song backing track (the ▶ &#x1F3B5; Backing track button on the song cards) and improvise a call-and-response solo — play a 2-bar "question" phrase, leave a little space, then answer it with a 2-bar "response." Stay in the minor pentatonic box from Module 4. You\'ve got it when: you hold the track\'s pulse start to finish with no restarts, and your response phrase clearly answers your question phrase. This is scored the same way as your Module 4 solo (Accuracy + Consistency).',
                 hint: 'Every skill here is a Module 4 skill — this is a victory lap. Open Module 4 and hit any ▶ &#x1F3B5; Backing track button on a core-song card. If the pentatonic box feels rusty, run the Module 4 scale-climb warm-up first, then come back.',
                 stuck: 'Play a 2-bar question, then answer with the SAME rhythm on different notes — copying the rhythm is the easiest way to make two phrases talk to each other.',
-                levelUp: 'Trade phrases with a partner over the same track — you play the call, they play the response, then swap roles.'
+                levelUp: 'Record your 2-bar call, play the recording back over the track, and improvise the response to it live — or trade call and response with a friend if one\'s around.'
               }
             ]
           },
@@ -745,7 +745,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'After today, what\'s the one part of your showcase song most likely to fall apart in front of the class? Write it down — that\'s exactly where your next practice starts.',
+                text: 'After today, what\'s the one part of your showcase song most likely to fall apart under pressure (recording light on, someone listening)? Type it below — that\'s exactly where your next practice starts.',
                 response: { type: 'short', placeholder: 'e.g. the B7 in the chorus — it never lands in time' }
               }
             ]
@@ -755,8 +755,8 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Semester Showcase: Perform one complete song of your choice using at least 4 chords from the semester. Evaluated on chord accuracy, timing, smooth transitions, and musicality. (Separate and ungraded: your written "My Guitar Adventure — Semester 1 Check-in" reflection — just for you, not part of the showcase score.)',
-      performance: 'Semester showcase performance. Student performs chosen song for class. Teacher evaluates chord accuracy, timing, transitions, and expression.',
+      goal: 'Course Showcase: Perform one complete song of your choice using at least 4 chords from the course. Evaluated on chord accuracy, timing, smooth transitions, and musicality. (Separate and ungraded: your written "My Guitar Adventure — Course Check-in" reflection — just for you, not part of the showcase score.)',
+      performance: 'Course showcase performance. Student records a full run of the chosen song (or plays it for family or friends), then reviews the recording for chord accuracy, timing, transitions, and expression.',
       selfCheck: 'Can you play your showcase song all the way through without stopping? Can you name every chord in your song and which group it belongs to?',
       standards: ['Pr.4a', 'Pr.5b', 'Pr.6a', 'Re.9a']
     },
@@ -774,7 +774,7 @@ SETS.push(
         gotItWhen: 'you can see an F#m or C#m diagram and explain which version (partial barre or full barre) and which finger goes where, even if you can\'t play it cleanly yet.',
         practice: { type: 'mc', prompt: 'F#m and C#m use a "barre" shape. What is a barre?',
           choices: ['One finger pressing across multiple strings at the same fret', 'A type of pick', 'A string-bending technique', 'Strumming with the thumb'], answer: 0 } },
-      { id: 'm5w4-s4', text: 'Demonstrate 3+ chord types from across the semester',
+      { id: 'm5w4-s4', text: 'Demonstrate 3+ chord types from across the course',
         gotItWhen: 'you can play at least one chord from each of Groups 1, 2, and 3 cleanly on demand — and name the group each belongs to.',
         practice: { type: 'mc', prompt: 'Which of these chords is from Group 2 (D, A, Em, Bm)?',
           choices: ['C major', 'G major', 'D major', 'F major'], answer: 2 } },
@@ -830,16 +830,18 @@ MODULE_REVIEWS[5] = {
   moduleNum: 5,
   module: 'Open Chords',
   skills: [
-    { id: 'mr5-s1', text: 'I can read any chord diagram and place my fingers on the right strings, frets, and finger numbers without asking', set: 'm5w1' },
+    { id: 'mr5-s1', text: 'I can read any chord diagram and place my fingers on the right strings, frets, and finger numbers without looking anything up', set: 'm5w1' },
     { id: 'mr5-s2', text: 'I can fret Am and Em cleanly — every string in each rings with no buzz', set: 'm5w1' },
     { id: 'mr5-s3', text: 'I can fret Group 1 chords (C, G, Am, and the simplified F) with clean tone', set: 'm5w2' },
     { id: 'mr5-s6', text: 'I can keep a steady 4-beat down-strum, and a down-up (1 + 2 + 3 + 4 +) pattern, through a chord change', set: 'm5w2' },
     { id: 'mr5-s4', text: 'I can fret Group 2 chords (D, A, Em, and a partial-barre Bm) with clean tone', set: 'm5w3' },
-    { id: 'mr5-s8', text: 'I can perform a chosen song start to finish using 4+ chords from across the semester for the showcase', set: 'm5w4' }
+    { id: 'mr5-s8', text: 'I can perform a chosen song start to finish using 4+ chords from across the course for the showcase', set: 'm5w4' }
   ],
   assessItems: [
-    'Perform one complete song using at least 4 chords from the semester, with clean tone and smooth transitions',
-    'Ungraded reflection (not scored): your written "My Guitar Adventure — Semester 1 Check-in" — what changed since the Module 1 goal'
+    'Draw three chords at random (shuffle flashcards or point blind at a chart) and play them in an 8-bar progression at 70 BPM with clean changes in time',
+    'Record (or perform for someone) one core song from memory — Let It Be, Luna, or "the cure" — plus one song of your choice using at least 4 chords from the course, with clean tone and smooth transitions, then listen back and check both',
+    'Identify and name the chords on an unlabelled chord chart',
+    'Ungraded reflection (not scored): your written "My Guitar Adventure — Course Check-in" — what changed since the Module 1 goal'
   ],
   forward: 'Every chord you can now fret is a word — <strong>Module 6 is where you learn to speak in rhythm.</strong> The down-up pattern you started here grows into full strumming patterns, accents, and syncopation that turn these shapes into real songs.',
   standards: ['Pr.4a', 'Pr.5a', 'Pr.5b', 'Pr.6a', 'Re.7a', 'Re.9a', 'Cn.11b']

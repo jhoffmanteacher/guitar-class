@@ -101,7 +101,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -166,7 +166,7 @@ SETS.push(
 
     assessment: {
       goal: 'Says the recipe from memory · Builds C and G major on one string · Explains where the pentatonic comes from',
-      performance: 'Class builds D major on one string together using only the recipe — no chart.',
+      performance: 'Build D major on one string using only the recipe — no chart — saying each whole/half step out loud as you go.',
       selfCheck: 'Can you spell G major out loud, including its sharp? Can you say which two scale notes pentatonic drops?',
       standards: ['Pr.4a', 'Cn.10a']
     },
@@ -270,7 +270,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Station Wrap-Up — explain relative minor to a friend in one sentence.',
+                text: 'Station Wrap-Up — explain relative minor in one sentence, as if to a friend.',
                 response: { type: 'short', placeholder: 'e.g. it\'s the minor key hiding inside every major key — same notes, sadder home' }
               }
             ]
@@ -284,7 +284,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -293,7 +293,7 @@ SETS.push(
             title: 'Find relative and parallel minors',
             steps: [
               {
-                text: 'Challenge 1 — Relative Pairs Drill: with a partner, one of you names a major key, the other answers its relative minor — C→Am, G→Em, F→Dm, D→Bm, A→F#m. Switch roles every 5 rounds. Then explain out loud how a PARALLEL minor would be different for the same key.',
+                text: 'Challenge 1 — Relative Pairs Drill: make five quick flashcards — major key on the front, relative minor on the back — C→Am, G→Em, F→Dm, D→Bm, A→F#m. Shuffle, flip one at a time, and answer out loud before checking the back. Then explain out loud how a PARALLEL minor would be different for the same key. (Got someone nearby? Have them quiz you with the cards.)',
                 hint: 'The shortcut: relative minor is always 3 frets down from the major root, or the major scale\'s 6th note.',
                 stuck: 'Drill just C→Am and G→Em until those two are automatic, then add the rest.',
                 levelUp: 'Add two more keys of your own (E, Bb) and find their relative minors on the spot.',
@@ -341,7 +341,7 @@ SETS.push(
 
     assessment: {
       goal: 'Finds any key\'s relative minor · Explains relative vs parallel · Builds and plays the blues scale at 60 BPM',
-      performance: 'Lightning round: teacher names five major keys; class answers the relative minors in rhythm.',
+      performance: 'Lightning round: shuffle your five key flashcards and answer each relative minor in rhythm — no pauses, then flip to check.',
       selfCheck: 'What\'s the relative minor of F (Luna\'s key)? Which single note makes a pentatonic a blues scale?',
       standards: ['Pr.4a', 'Pr.6a', 'Cn.10a']
     },
@@ -372,7 +372,7 @@ SETS.push(
     unit: 'Module 10 · Scales, Keys & Ear Training',
     title: 'Set 3',
     subtitle: 'Move any pattern to any key · Sing it, then play it · Major vs minor by ear',
-    objective: 'I CAN transpose a pentatonic pattern to a teacher-named key and echo short patterns back by ear.',
+    objective: 'I CAN transpose a pentatonic pattern to any named key and echo short patterns back by ear.',
     skillFocus: 'Transposing = moving the root · Sing-then-play · Hearing major (bright) vs minor (dark)',
     comingSoon: false,
 
@@ -458,7 +458,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -467,10 +467,10 @@ SETS.push(
             title: 'Transpose box 1 to a named key',
             steps: [
               {
-                text: 'Challenge 1 — Transpose Drill: play minor pentatonic box 1 at fret 5 (Am), then move it to teacher-named keys — fret 3 (Gm), fret 7 (Bm), fret 10 (Dm — Luna\'s solo box!). You\'ve got it when: you can find any of these four positions within 5 seconds of hearing the key name.',
+                text: 'Challenge 1 — Transpose Drill: write Am, Gm, Bm, and Dm on four slips, shuffle, and draw one at a time — play minor pentatonic box 1 at that key\'s fret: fret 5 (Am), fret 3 (Gm), fret 7 (Bm), fret 10 (Dm — Luna\'s solo box!). You\'ve got it when: you can find any of these four positions within 5 seconds of drawing the key name.',
                 hint: 'Fret 10 should feel familiar — it\'s the exact box you\'ve been using for Luna\'s solo since Module 4, now with a name attached.',
                 stuck: 'Drill just Am (fret 5) and Dm (fret 10) — the two you already know from real songs — before adding Gm and Bm.',
-                levelUp: 'Call out a key and have a partner find it blind, or move through all four positions without stopping.',
+                levelUp: 'Move through all four positions without stopping, or have someone call out keys for you to find blind.',
                 skills: [1, 2]
               }
             ]
@@ -479,10 +479,10 @@ SETS.push(
             title: 'Sing it, then play it',
             steps: [
               {
-                text: 'Challenge 2 — Sing-Then-Play: with a partner, one of you plays 3 notes on the low E string (frets 0–5), the other sings them back, then finds and plays them.',
+                text: 'Challenge 2 — Sing-Then-Play: record yourself playing 3 random notes on the low E string (frets 0–5) without watching your hand — or use the Echo Drill play button below as your note source. Wait a moment, play the recording back, sing the notes, then find and play them. (Got someone nearby? They can play the 3 notes for you instead.)',
                 hint: 'Sing FIRST, before you touch the guitar — that order is the whole skill.',
                 stuck: 'Start with just one note instead of three, and build up once that\'s reliable.',
-                levelUp: 'Extend to 5 notes, or have your partner play notes across two strings.',
+                levelUp: 'Extend to 5 notes, or record notes spread across two strings.',
                 skills: [3]
               }
             ]
@@ -491,10 +491,10 @@ SETS.push(
             title: 'Echo a pattern by ear',
             steps: [
               {
-                text: 'Challenge 3 — Echo Drill (your assessment piece): listen to a 3-note pattern once, sing it back, then play it on the E or A string. You\'ve got it when: 3 out of 4 patterns matched correctly, by ear alone.',
+                text: 'Challenge 3 — Echo Drill (your assessment piece): listen to a 3-note pattern once using the play button below, sing it back, then play it on the E or A string. You\'ve got it when: 3 out of 4 patterns matched correctly, by ear alone.',
                 hint: 'Resist the urge to hunt-and-peck on the fretboard before you\'ve sung the pattern — singing first locks in the pitch your hands need to find.',
                 stuck: 'Slow the pattern down and repeat just the first two notes until they\'re solid, then add the third.',
-                levelUp: 'Extend the echo to 4 or 5 notes, or have a partner play patterns you\'ve never heard before.',
+                levelUp: 'Extend the echo to 4 or 5 notes, or echo a short lick from a tutorial video you haven\'t learned yet — a pattern you\'ve truly never heard. (A partner playing surprise patterns works too.)',
                 skills: [3, 5],
                 playSeq: { label: 'Echo pattern — E · G · A', bpm: 60, notes: [40, 43, 45] }
               }
@@ -527,13 +527,13 @@ SETS.push(
 
     assessment: {
       goal: 'Transposes box 1 to a named key · Sings then plays a 3-note pattern · Tells major from minor by ear',
-      performance: 'Teacher names a key; class slides box 1 to it and plays it together. Then three echo rounds by ear.',
+      performance: 'Draw a key slip at random, slide box 1 to it, and play it. Then three echo rounds by ear using the play button — sing each pattern back before you play it.',
       selfCheck: 'Where does box 1 sit for D minor? Can you sing a phrase from a core song and find its first note?',
       standards: ['Pr.4a', 'Pr.6a', 'Re.7b']
     },
 
     skills: [
-      { id: 'm10w3-s1', text: 'Transpose minor pentatonic box 1 to a teacher-named key',
+      { id: 'm10w3-s1', text: 'Transpose minor pentatonic box 1 to any named key',
         practice: { type: 'mc', prompt: 'For D minor, box 1\'s root sits at low-E fret:',
           choices: ['5', '7', '10', '12'], answer: 2 } },
       { id: 'm10w3-s2', text: 'Move a riff up or down the neck to a new key and play it' },
@@ -585,11 +585,11 @@ MODULE_REVIEWS[10] = {
     { id: 'mr10-s2', text: 'I can spell C major and G major note-by-note out loud', set: 'm10w1' },
     { id: 'mr10-s3', text: 'I can find the relative minor of any major key', set: 'm10w2' },
     { id: 'mr10-s4', text: 'I can build and play the blues scale from minor pentatonic box 1', set: 'm10w2' },
-    { id: 'mr10-s5', text: 'I can transpose minor pentatonic box 1 to a teacher-named key', set: 'm10w3' },
+    { id: 'mr10-s5', text: 'I can transpose minor pentatonic box 1 to any named key', set: 'm10w3' },
     { id: 'mr10-s6', text: 'I can tell major from minor by ear', set: 'm10w3' }
   ],
   assessItems: [
-    'Transpose a pentatonic pattern to a teacher-named key and play it',
+    'Transpose a pentatonic pattern to a randomly drawn key and play it',
     'Name the relative minor of a given major key',
     'Identify major vs minor — and echo a short pattern — by ear'
   ],

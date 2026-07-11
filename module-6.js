@@ -70,7 +70,7 @@ SETS.push(
             title: 'Form today\'s chords',
             steps: [
           {
-            text: 'Meet your two chords for today: <strong>Em</strong> and <strong>Am</strong> (from Module 5). Form each shape from the diagram and strum once to make sure every string rings — you\'ll switch between these two all class.',
+            text: 'Meet your two chords for today: <strong>Em</strong> and <strong>Am</strong> (from Module 5). Form each shape from the diagram and strum once to make sure every string rings — you\'ll switch between these two for the rest of this set.',
             hint: 'Em uses two fingers; Am adds a third. The diagrams show exactly where each finger goes. Clean chords now make the strumming sound good later.',
             chords: [
               { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 },
@@ -97,7 +97,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 hint: 'Tuning (Module 1) is a skill you keep forever. 60 seconds here makes everything today sound better.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
@@ -140,7 +140,7 @@ SETS.push(
             stuck: 'Park on a finger Em and Am share and pivot around it — don\'t lift every finger at once. Drop to 50 BPM so the change has room.',
             levelUp: 'Switch every bar instead of every 2 bars, or climb to 75 BPM with the strum still unbroken.',
             skills: [4, 5, 6],
-            response: { type: 'short', prompt: 'Personal record — strum unbroken through Em↔Am, win at 60 BPM then +10 at a time. Your fastest CLEAN switch today (BPM)?', placeholder: 'e.g. 80 — beat it next class' },
+            response: { type: 'short', prompt: 'Personal record — strum unbroken through Em↔Am, win at 60 BPM then +10 at a time. Your fastest CLEAN switch today (BPM)?', placeholder: 'e.g. 80 — beat it next session' },
             playSeq: { label: 'Em → Am roots (2 bars each)', bpm: 60, notes: [40, 40, 45, 45] },
             chords: [
               { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
@@ -164,7 +164,7 @@ SETS.push(
                 stuck: 'Loop the G → D change alone — it\'s the only move where every finger travels.',
                 levelUp: 'Sing or hum a line over your own strumming, or bump to 70 BPM with the 8ths still even.',
                 skills: [2, 4],
-                response: { type: 'short', prompt: 'Personal record — full laps in a row with the strum hand never stopping. Your count today?', placeholder: 'e.g. 3 — beat it next class' }
+                response: { type: 'short', prompt: 'Personal record — full laps in a row with the strum hand never stopping. Your count today?', placeholder: 'e.g. 3 — beat it next session' }
               }
             ]
           }
@@ -174,14 +174,14 @@ SETS.push(
 
     assessment: {
       goal: 'Keeps a steady down-up 8th-note pulse for 8+ bars · Counts "1 + 2 + 3 + 4 +" aloud while strumming · Switches between Em and Am without stopping the strum hand · Strums evenly (downstrokes and upstrokes same volume)',
-      performance: 'Class strums Em for 4 bars, then Am for 4 bars, with a steady down-up pulse at 60 BPM. Everyone counts aloud. Teacher listens for the strum hand never stopping.',
+      performance: 'Strum Em for 4 bars, then Am for 4 bars, with a steady down-up pulse at 60 BPM, counting aloud the whole time. Record 20 seconds on your phone and listen back for the strum hand never stopping — especially at the change.',
       selfCheck: 'Can you keep your strum hand moving even during a chord change? Can you count the 8th-note pulse out loud without slowing down?',
       standards: ['Pr.4a', 'Pr.5a']
     },
 
     skills: [
       { id: 'm6w1-s1', text: 'Move my strumming wrist like a pendulum — continuous motion, even between strums',
-        gotItWhen: 'someone can watch your strum hand and see that it never fully stops — the wrist is always traveling down or up, even when you skip a strum.',
+        gotItWhen: 'you can watch your strum hand in a mirror or on a quick phone video and see that it never fully stops — the wrist is always traveling down or up, even when you skip a strum.',
         practice: { type: 'mc', prompt: 'When the wrist "stops" between strums, what usually goes wrong?',
           choices: ['Nothing — it should stop', 'You lose the pulse and the timing falls apart', 'The pick gets dropped', 'The chord sounds louder'], answer: 1 } },
       { id: 'm6w1-s2', text: 'Play a steady down-up 8th-note pattern at 60 BPM for 8 bars',
@@ -336,7 +336,7 @@ SETS.push(
             stuck: 'Change the chord on the LAST upstroke of the bar, while your hand is already moving up — that\'s the free moment to jump from G to D. Loop just 2 bars until the seam disappears.',
             levelUp: 'Add a third chord (G → D → Em), or run it at 75 BPM with no break at the change.',
             skills: [4, 5, 6],
-            response: { type: 'short', prompt: 'Personal record — D-DU-UDU through the G→D change, win at 60 BPM then +10 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 80 — beat it next class' }
+            response: { type: 'short', prompt: 'Personal record — D-DU-UDU through the G→D change, win at 60 BPM then +10 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 80 — beat it next session' }
           }
             ]
           },
@@ -370,7 +370,7 @@ SETS.push(
 
     assessment: {
       goal: 'Plays the D-DU-UDU pattern cleanly at 70 BPM · Accents beats 2 and 4 (backbeat) · Keeps pattern steady through a chord change · Applies pattern to a real song',
-      performance: 'Partner play: one student strums D-DU-UDU on Em for 4 bars, then partner takes over on Am for 4 bars. Pattern must not break at the handoff.',
+      performance: 'Strum D-DU-UDU on Em for 4 bars, then switch to Am for 4 more without the pattern breaking at the change. With someone around, trade fours instead: one plays Em, the other takes over on Am, and the pattern must not break at the handoff.',
       selfCheck: 'Can you play D-DU-UDU without thinking about which strum is next? Can you keep the pattern going through a G-to-D change?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
     },
@@ -381,7 +381,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'How would you read D-DU-UDU out loud as a count? (one of these matches)',
           choices: ['1, 2-+, +-3-+', '1-+, 2, 3, 4', 'Just count "1, 2, 3, 4"', '1-2-3-4-5-6'], answer: 0 } },
       { id: 'm6w2-s2', text: 'Skip a downstroke while keeping the wrist in motion',
-        gotItWhen: 'on the "skipped" strum in the pattern, your wrist still travels down — only the pick doesn\'t touch the strings. Someone watching can see the motion.',
+        gotItWhen: 'on the "skipped" strum in the pattern, your wrist still travels down — only the pick doesn\'t touch the strings. A quick phone video (or a mirror) shows the motion clearly.',
         practice: { type: 'mc', prompt: 'When you "skip" a strum in the D-DU-UDU pattern, what does your wrist do?',
           choices: ['Stops completely', 'Keeps moving in the pendulum — the pick just misses the strings', 'Lifts up away from the guitar', 'Locks for a beat'], answer: 1 } },
       { id: 'm6w2-s3', text: 'Accent beats 2 and 4 (the "backbeat")',
@@ -544,7 +544,7 @@ SETS.push(
             title: 'Solo over the groove with Pentatonic Pattern 1',
             steps: [
           {
-            text: 'Challenge 5 — Trade Off (give it a go!): partner up. One of you strums a progression (try Am–G–C or G–D–Em–C) with any pattern from this module. The other solos over it using Pentatonic Pattern 1 from Module 4. Swap after 8 bars. On your own? Loop the backing roots below (or record yourself strumming 8 bars) and solo over your own track. No score — aim for one clear musical idea, not a flurry of notes.',
+            text: 'Challenge 5 — Trade Off (give it a go!): loop the backing roots below — or record yourself strumming 8 bars of a progression (try Am–G–C or G–D–Em–C) with any pattern from this module — then solo over it using Pentatonic Pattern 1 from Module 4. Trade roles with yourself every 8 bars: strum a fresh backing, then solo again. Got another guitarist around? One strums, one solos, swap after 8 bars. No score — aim for one clear musical idea, not a flurry of notes.',
             hint: 'Am–G–C fits A minor pentatonic; a major-key progression fits major pentatonic. This is the payoff: the scale you learned in Module 4 lives on top of the chords you strum here. Leave space — silence is part of a solo.',
             playSeq: { label: 'Backing roots — Am · G · C', bpm: 70, notes: [45, 43, 48] }
           }
@@ -554,7 +554,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Watchtower, two ways: play Am · G · F with a soft folk strum for 8 bars, then the same loop rock-style — dig in, accent the downs — for 8 bars, no break at the switch. You\'ve got it when: someone listening can tell the exact bar the feel changed — Dylan\'s version becoming Hendrix\'s, live from your chair. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: five layers deep and still growing</a>.',
+                text: 'Challenge — Watchtower, two ways: play Am · G · F with a soft folk strum for 8 bars, then the same loop rock-style — dig in, accent the downs — for 8 bars, no break at the switch. You\'ve got it when: on a quick recording of yourself you can hear the exact bar the feel changed — Dylan\'s version becoming Hendrix\'s, live from your chair. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: five layers deep and still growing</a>.',
                 hint: 'You heard exactly this in Module 1 — acoustic Dylan vs. electric Hendrix. Same chords, same tempo; ONLY your strum hand changes.',
                 stuck: 'Make the switch on beat 1 of a new bar and drill just the 2-bar seam where folk becomes rock.',
                 levelUp: 'Add the reggae chop as a third 8-bar section — three eras of the same song.',
@@ -585,13 +585,13 @@ SETS.push(
       { id: 'm6w3-s1', text: 'Play a folk strum (gentle, even all-downstrokes or simple down-up)',
         gotItWhen: 'you can play a chord progression with even, soft downstrokes that supports a singer — no accents, no aggressive attack.' },
       { id: 'm6w3-s2', text: 'Play a rock strum (heavy downstrokes with accent and dig)',
-        gotItWhen: 'your rock strum has clear weight and drive — someone can tell from across the room that you mean it.' },
+        gotItWhen: 'your rock strum has clear weight and drive — play back a quick recording and you can hear that you mean it.' },
       { id: 'm6w3-s3', text: 'Play a reggae strum (upstrokes on the "+", downstrokes skipped)',
         gotItWhen: 'you can play a reggae chop where ONLY the upstrokes hit the strings — your hand still moves on the beats, but the pick misses on purpose.',
         practice: { type: 'mc', prompt: 'In a reggae offbeat strum, the strings are hit on which counts?',
           choices: ['1, 2, 3, 4 (the numbers)', 'The "+" of each beat (between numbers)', 'Only beat 1', 'Continuously'], answer: 1 } },
       { id: 'm6w3-s4', text: 'Choose a strum pattern that matches a song\'s style',
-        gotItWhen: 'someone hands you a new song and you can listen for 15 seconds and pick a strum pattern that fits — without being told what to play.',
+        gotItWhen: 'you can put on any new song, listen for 15 seconds, and pick a strum pattern that fits — without a tutorial telling you what to play.',
         practice: { type: 'mc', prompt: 'You hear a song with a slow, gentle, acoustic feel and a singer-songwriter vibe. Which strum suits it best?',
           choices: ['Heavy rock chops on every downstroke', 'Reggae offbeat upstrokes', 'Gentle folk strum (soft down-up)', 'No strum at all'], answer: 2 } },
       { id: 'm6w3-s5', text: 'Switch strum patterns mid-song (e.g., verse vs. chorus)',

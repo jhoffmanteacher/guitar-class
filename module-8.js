@@ -103,7 +103,7 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every class the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 hint: 'Tuning (Module 1) matters even more in fingerpicking — every note is exposed, so an out-of-tune string is easy to hear.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
@@ -125,13 +125,13 @@ SETS.push(
             title: 'Pluck p-i-m-a — thumb bass, i-m-a treble',
             steps: [
           {
-            text: 'Challenge 2 — p-i-m-a Plucks (your assessment piece): pluck once with each finger in order — p (low E), i (G), m (B), a (high e) — saying each letter aloud, 8 times at 60 BPM. You\'ve got it when: the same volume from every finger, even the weaker ring (a). This is the open-string check the whole class plays for the Set 1 check-off.',
+            text: 'Challenge 2 — p-i-m-a Plucks (your assessment piece): pluck once with each finger in order — p (low E), i (G), m (B), a (high e) — saying each letter aloud, 8 times at 60 BPM. You\'ve got it when: the same volume from every finger, even the weaker ring (a). This open-string check is the Set 1 check-off.',
             hint: 'No strumming, no pick. Each finger gets ONE string. Aim for the same volume from each finger — the ring finger (a) is usually the weakest at first. Set the ⏱ Timer for 2 minutes and loop it.',
             stuck: 'Pluck just p then i, over and over, until those two are even — then add m, then a.',
             levelUp: 'Run it backwards (a-m-i-p), or close your eyes and keep every finger on its string.',
             skills: [3, 4, 5],
             playSeq: { label: 'Hear p-i-m-a on open strings', bpm: 60, notes: [40, 55, 59, 64] },
-            response: { type: 'short', prompt: 'Personal record: win at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, even p-i-m-a lap today (BPM)?', placeholder: 'e.g. 80 — beat it next class' }
+            response: { type: 'short', prompt: 'Personal record: win at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, even p-i-m-a lap today (BPM)?', placeholder: 'e.g. 80 — beat it next session' }
           }
             ]
           },
@@ -180,7 +180,7 @@ SETS.push(
 
     assessment: {
       goal: 'Holds correct fingerpicking hand position · Assigns p to bass, i-m-a to G-B-e · Plucks each open string with the correct finger · Plays through p-i-m-a in order without looking',
-      performance: 'Class plays p-i-m-a on open strings in unison at 60 BPM for 8 reps. Teacher walks the room and checks each student\'s hand position.',
+      performance: 'Play p-i-m-a on open strings at 60 BPM for 8 reps. Check your own hand position in a mirror or on your device\'s camera — wrist arched, fingers curved.',
       selfCheck: 'Can you pluck a string with your "a" finger without looking? Can you keep your wrist arched for 30 seconds without it collapsing?',
       standards: ['Pr.4a', 'Pr.5a']
     },
@@ -352,7 +352,7 @@ SETS.push(
             stuck: 'Go back to 60 BPM and stay there until it\'s effortless — a clean 60 beats a sloppy 80 every time.',
             levelUp: 'Push past 80 BPM, or play the pattern over Am at the same tempo with the thumb relocating.',
             skills: [2, 5],
-            response: { type: 'short', prompt: 'Personal record: win at 70 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, even pattern today (BPM)?', placeholder: 'e.g. 90 — beat it next class' }
+            response: { type: 'short', prompt: 'Personal record: win at 70 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, even pattern today (BPM)?', placeholder: 'e.g. 90 — beat it next session' }
           }
             ]
           },
@@ -385,7 +385,7 @@ SETS.push(
 
     assessment: {
       goal: 'Plays p-i-m-a-m-i pattern cleanly over one chord · Even volume across all fingers · Pattern stays steady at 70 BPM · Adapts to a different chord by moving only the thumb',
-      performance: 'Class plays the 6-note pattern over Em for 4 bars, then Am for 4 bars, in unison at 70 BPM. Teacher listens for even volume on every finger.',
+      performance: 'Play the 6-note pattern over Em for 4 bars, then Am for 4 bars, at 70 BPM. Record yourself and listen back for even volume on every finger.',
       selfCheck: 'Can you play 8 bars of the pattern without losing your place? Can you switch from Em to Am bass without breaking the picking?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
     },
@@ -524,7 +524,7 @@ SETS.push(
             skills: [1, 3, 4],
             playSeq: { label: 'Am · C · D · F bass roots', bpm: 60,
               notes: [45, 48, 50, 53] },
-            response: { type: 'short', prompt: 'Personal record: win at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN lap of the progression today (BPM)?', placeholder: 'e.g. 75 — beat it next class' }
+            response: { type: 'short', prompt: 'Personal record: win at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN lap of the progression today (BPM)?', placeholder: 'e.g. 75 — beat it next session' }
           }
             ]
           },
@@ -570,9 +570,9 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 5 — Perform It (your assessment piece — give it a go!): pick one song — "the cure", "Hallelujah", "Let It Be" (verse), or a choice-list song — and play it through 3 times without stopping, even with mistakes. No score — practice the recovery; keep going no matter what.',
-            hint: 'Mistakes are normal — stopping is what makes them sound bad, so keep going and practice the recovery. No one to play for? Record yourself on the Chromebook and watch it back — the playback shows you exactly where the pattern broke.',
+            hint: 'Mistakes are normal — stopping is what makes them sound bad, so keep going and practice the recovery. No one to play for? Record yourself on your phone or device and watch it back — the playback shows you exactly where the pattern broke.',
             stuck: 'Pick the shortest, slowest song you know (Hallelujah is forgiving) and play just the verse — finishing matters more than difficulty.',
-            levelUp: 'Perform standing up, or play it for a real audience and keep going through any mistake.',
+            levelUp: 'Perform standing up, or play it for family or a friend and keep going through any mistake.',
             skills: [4, 5, 6]
           }
             ]
@@ -581,7 +581,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'You\'ve reached the last module — what fingerpicking skill are you proudest of, and what\'s the one song you want to keep working on after this class? Write it below.',
+                text: 'You\'ve reached the end of the first half of the course — what fingerpicking skill are you proudest of, and what\'s the one song you want to keep working on after this module? Write it below.',
                 response: { type: 'short', placeholder: 'e.g. proud of clean arpeggios; want to keep working on Blackbird' }
               }
             ]
@@ -592,7 +592,7 @@ SETS.push(
 
     assessment: {
       goal: 'Fingerpicks through a full 4-chord progression · Pattern stays steady through chord changes · Demonstrates Travis picking (alternating bass thumb) · Performs one full fingerpicked song from start to finish',
-      performance: 'Solo or paired: perform one full song from the song list using fingerpicking from start to finish. Teacher evaluates pattern consistency, chord changes, and timing.',
+      performance: 'Perform one full song from the song list using fingerpicking from start to finish — for family, a friend, or a recording you share. Listen back for pattern consistency, chord changes, and timing.',
       selfCheck: 'Can you play a 4-chord song with fingerpicking and not break the pattern at any chord change? Can your thumb alternate between two bass strings for 4 bars without confusion?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
     },
@@ -614,8 +614,8 @@ SETS.push(
           choices: ['On the first beat of the new bar', 'On the LAST note of the current bar — anticipate', 'Halfway through the current bar', 'Never — wait for the change'], answer: 1 } },
       { id: 'm8w3-s5', text: 'Play a full verse of a fingerpicked song from start to finish',
         gotItWhen: 'you can fingerpick through a complete verse of "House of the Rising Sun" or "Hallelujah" without stopping — mistakes ok, but you keep going.' },
-      { id: 'm8w3-s6', text: 'Perform a fingerpicked song for an audience (class, partner, family)',
-        gotItWhen: 'you can perform your chosen song in front of someone else, all the way through, with fingerpicking — and recover from any mistakes without breaking down.' }
+      { id: 'm8w3-s6', text: 'Perform a fingerpicked song for an audience (family, a friend, or a recording you share)',
+        gotItWhen: 'you can perform your chosen song for someone — in person or on a recording you share — all the way through, with fingerpicking, and recover from any mistakes without breaking down.' }
     ]
   }
 
@@ -635,7 +635,7 @@ MODULE_SONGS[8] = [
       { name: '"Sailor Song" — Gigi Perez', meta: 'Fingerpicked verse · capo IV (G-shapes)', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=1lrFsXkT_rM',
         tutorialUrl: 'https://www.youtube.com/watch?v=rpoyXduMZZw' },
-      { name: '"Blackbird" — The Beatles', meta: 'Advanced fingerpicking · semester capstone challenge', type: 'Choice', core: false, level: 3,
+      { name: '"Blackbird" — The Beatles', meta: 'Advanced fingerpicking · course capstone challenge', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=Man4Xw8Xypo',
         tutorialUrl: 'https://www.youtube.com/watch?v=Qqw15309knU' },
       { name: '"Tu Boda" — Oscar Maydon × Fuerza Regida', meta: 'Sierreño-style fingerpicking', type: 'Choice', core: false, level: 3,
@@ -661,6 +661,6 @@ MODULE_REVIEWS[8] = {
     'Fingerpick a 4-chord progression with the 6-note arpeggio, keeping the pattern unbroken through every chord change',
     'Perform one full fingerpicked song from the song list start to finish, recovering from any mistakes without stopping'
   ],
-  forward: 'You\'ve got the full first-year toolkit — notes, chords, power chords, lead, barre, strumming, and fingerpicking. <strong>Semester 2 goes deeper:</strong> Module 9 finishes the fretboard (all six strings) and teaches you to write your own TAB — the first step toward learning any song on your own.',
+  forward: 'You\'ve got the full first-half toolkit — notes, chords, power chords, lead, barre, strumming, and fingerpicking. <strong>The second half of the course goes deeper:</strong> Module 9 finishes the fretboard (all six strings) and teaches you to write your own TAB — the first step toward learning any song on your own.',
   standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
 };
