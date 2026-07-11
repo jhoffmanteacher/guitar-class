@@ -5,6 +5,22 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — Ready-made practice routines: 10-minute cards + the Daily 5
+
+### Added
+- **Every module review now opens with a 10-minute practice routine** built
+  from that module's own material: tune up, a one-minute finger warm-up, the
+  module's toughest drill, chord or scale work, and a song — each with play
+  buttons and a jump back to the set it came from. There's a print button so
+  you can stick it on a music stand.
+- **The ⚡ Daily 5 button** (next to the module picker) shows today's
+  5-minute warm-up for your current module — a tune-up, a rotating finger
+  warm-up, and one drill. It changes every day, same for everyone.
+- **The 15-Day Challenge** — taking a break between modules? Inside the
+  Daily 5 panel there's a 15-day list of 5-minute days that keeps your hands
+  in shape (one-minute chord changes, riffs from memory, one full song for
+  someone at home on the last day).
+
 ## 2026-07-11 — The whole site now works fully self-paced
 
 ### Changed

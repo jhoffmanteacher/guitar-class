@@ -13,6 +13,31 @@
 
 ## Open work
 
+- [~] **Research upgrades — Sessions A–G** (`RESEARCH_UPGRADES.md`). Session A ✅
+      2026-07-10: **10-Minute Routine cards + Daily 5 panel.** New in
+      `config-main.js`: `WARMUP_BANK` (3 dexterity warm-ups, playSeq format)
+      and `WINTER_CHALLENGE` (15 one-line break-bridge days). New in `app.js`
+      (all read-only, zero Firebase writes): `buildModuleRoutine(moduleNum)` —
+      assembles a ~10-min routine from the module's live SETS data (tune-up →
+      WARMUP_BANK[moduleNum % 3] → last set's first playSeq as the skill
+      drill → first chords:-spec step (else first other playSeq) → most
+      recent "Take It to a Song" step) and renders as a card at the top of
+      every Module Review; `printRoutine()` + `body.print-routine` print CSS
+      (card-only, black on white); `buildDaily5`/`toggleDaily5` — a ⚡ Daily 5
+      button beside the module dropdown opens today's 5-minute warm-up
+      (tune-up + warm-up + one playSeq from the current module, both rotated
+      by day-of-year so everyone sees the same drill on the same date), with
+      the 15-Day Challenge in a collapsed `<details>` underneath. Session A's
+      classroom framing ("bell-ringer," "teacher projects at Station A")
+      adapted to the site's self-paced voice per the 2026-07-10 conversion.
+      Verified via node VM harness (routine + Daily 5 render for all 12
+      modules; Module 1 gracefully drops its chord/song items — only 1
+      playSeq, no Take-It-to-a-Song step). In-browser spot-check pending
+      (browser automation declined this session — Jonathan may want to click
+      through one review + the Daily 5 button). Next: Session B (Module 9
+      Set 0 re-tests; remember the self-paced adaptation of its partner
+      "speed round" performance text).
+
 - [x] **Semester 2 build — Modules 9–12** (`MODULES_9_12.md`, decision-complete
       spec, four sessions A–D — all four complete). Session A ✅ 2026-07-10: built **Module 9 —
       The Full Fretboard & Writing TAB** (3 sets, 18 skills — naturals on D/G,

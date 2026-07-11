@@ -355,6 +355,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .coming p{font-size:16px;line-height:1.6}
 /* ── Module dropdown ── */
 .module-select-wrap{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+/* ── 10-Minute Routine card + Daily 5 panel ── */
+.routine-card{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
+.routine-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.routine-title{font-size:16px;font-weight:700}
+.routine-print-btn{border:1px solid var(--border2);background:var(--bg2);color:var(--text2);border-radius:8px;padding:4px 10px;font-size:13px;cursor:pointer}
+.routine-print-btn:hover{color:var(--text);border-color:var(--text2)}
+.routine-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.routine-item{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;line-height:1.5}
+.routine-min{flex-shrink:0;min-width:44px;text-align:center;font-size:12px;font-weight:700;color:var(--green-text);background:var(--green-bg);border-radius:12px;padding:2px 8px;margin-top:2px}
+.routine-body{flex:1}
+.routine-body .bpm-control-group{margin-top:4px}
+.routine-foot{margin-top:12px;font-size:12.5px;color:var(--text3)}
+.daily5-btn{border:1px solid var(--border2);background:var(--bg);color:var(--text2);border-radius:20px;padding:5px 14px;font-size:14px;cursor:pointer;transition:all .15s}
+.daily5-btn:hover{color:var(--text);border-color:var(--text2)}
+.daily5-btn[aria-expanded="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
+.daily5-panel{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px}
+.daily5-head{display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:700;margin-bottom:10px}
+.daily5-break{margin-top:12px;border-top:1px solid var(--border);padding-top:10px}
+.daily5-break summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--text2)}
+.daily5-break-note{font-size:13px;color:var(--text3);margin:8px 0 6px}
+.daily5-challenge{font-size:13.5px;line-height:1.6;padding-left:22px;margin:0}
 .module-select-label{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);white-space:nowrap}
 .module-select{font-size:15px;padding:6px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);cursor:pointer;flex:1;max-width:320px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b6b65' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 .module-select:focus{outline:none;border-color:var(--blue-text)}
@@ -688,7 +709,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .resource-panel,.resize-handle,.iframe-drag-shield,
   .fab-group,.tabs,.save-ind,.read-aloud-btn,
   #google_translate_element,.btn-translate,.user-area,
-  .welcome-overlay,.print-set-btn,
+  .welcome-overlay,.print-set-btn,.daily5-panel,.daily5-btn,
   .step-done-row,.mr-rec,.mr-locked-banner{display:none !important}
 
   /* Only the active set prints; expand BOTH stations + the checklist, drop songs */
@@ -734,4 +755,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
     content:'Guitar Class — Sequoia HS';
     display:block;font-size:11pt;color:#555;margin-bottom:6px
   }
+
+  /* Routine-only print (the card's own 🖨 button adds body.print-routine):
+     the active review panel prints just the routine card, black on white. */
+  body.print-routine .week-panel.active > *:not(.routine-card){display:none !important}
+  body.print-routine .module-songs,body.print-routine .daily5-panel{display:none !important}
+  body.print-routine .routine-card{border:1px solid #000;page-break-inside:avoid}
+  body.print-routine .routine-print-btn,body.print-routine .mr-review-link{display:none !important}
+  body.print-routine .week-panel.active::before{content:'Guitar Class — 10-Minute Practice Routine'}
 }

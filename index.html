@@ -121,9 +121,11 @@ function googleTranslateElementInit(){
       <div class="module-select-wrap">
         <label class="module-select-label" for="module-select">Module</label>
         <select class="module-select" id="module-select" onchange="onModuleChange(this.value); saveProgress()"></select>
+        <button type="button" class="daily5-btn" id="daily5-btn" onclick="toggleDaily5()" aria-expanded="false" aria-controls="daily5-panel">&#x26A1; Daily 5</button>
         <div class="module-strip" id="module-strip" role="group" aria-label="Module progress — jump to a module"></div>
         <span class="module-strip-label" id="module-strip-label"></span>
       </div>
+      <div class="daily5-panel" id="daily5-panel" hidden></div>
       <div class="week-pills" id="week-pills"></div>
       <div id="week-panels"></div>
       <div class="fab-group" id="fab-group" style="display:none">

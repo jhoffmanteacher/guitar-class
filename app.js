@@ -1699,6 +1699,105 @@ function buildAssess(w){
     <div class="ablock"><div class="albl">NAfME standards</div><div>${a.standards.map(s=>`<span class="spill">${s}</span>`).join('')}</div></div>`;
 }
 
+/* ── 10-Minute Routine card (module review) + Daily 5 panel ──
+   Both assemble themselves from the module's already-loaded SETS data, so
+   future content edits propagate automatically. Read-only: no Firebase writes. */
+function stripTags(html){ const d=document.createElement('div'); d.innerHTML=html||''; return (d.textContent||'').trim(); }
+function truncateText(s, n){ if(s.length<=n) return s; const cut=s.slice(0,n); return cut.slice(0, Math.max(cut.lastIndexOf(' '), n-20))+'…'; }
+// Every step in a module, in document order, with its set + section context.
+function moduleStepsFlat(moduleNum){
+  const out=[];
+  SETS.filter(w=>w.moduleNum===moduleNum && !w.comingSoon).forEach(w=>{
+    ['b','c'].forEach(st=>{
+      const stn=w.stations && w.stations[st]; if(!stn) return;
+      const sections=stn.sections || (stn.steps ? [{title:'', steps:stn.steps}] : []);
+      sections.forEach(sec=>(sec.steps||[]).forEach(step=>out.push({set:w, station:st, secTitle:sec.title||'', step})));
+    });
+  });
+  return out;
+}
+function routinePlaySeq(ps, key){
+  const bpm=readStoredBpm(key, ps.bpm||60);
+  return `<span class="bpm-control-group">`+
+    `<button type="button" class="play-seq-btn" data-midis="${escAttr(JSON.stringify(ps.notes))}" onclick="playSequenceFromGroup(this)" title="Play it">&#x25B6; ${escHtml(ps.label||'Play it')}</button>`+
+    renderBpmControl(key, bpm, ps.minBpm||40, ps.maxBpm||120)+`</span>`;
+}
+function buildModuleRoutine(moduleNum){
+  const steps=moduleStepsFlat(moduleNum);
+  if(!steps.length) return '';
+  const sets=SETS.filter(w=>w.moduleNum===moduleNum && !w.comingSoon);
+  // Skill drill: the LAST set's first playSeq step (latest material = the
+  // "hardest drill" heuristic), walking back set by set if needed.
+  let drill=null;
+  for(let i=sets.length-1; i>=0 && !drill; i--){
+    drill=steps.find(x=>x.set===sets[i] && x.step.playSeq)||null;
+  }
+  // Chord / scale work: first step with a chords: spec; else the module's
+  // first playSeq that isn't already the drill.
+  let chordWork=steps.find(x=>x.step.chords && x.step.chords.length)||null;
+  if(!chordWork){ chordWork=steps.find(x=>x.step.playSeq && x!==drill)||null; }
+  // Song: the most recent "Take It to a Song" step.
+  const songSteps=steps.filter(x=>/take it to a song/i.test(x.secTitle) || /take it to a song/i.test(x.step.text||''));
+  const song=songSteps.length ? songSteps[songSteps.length-1] : null;
+  const wu=WARMUP_BANK[moduleNum % WARMUP_BANK.length];
+  const li=(mins, title, body)=>`<li class="routine-item"><span class="routine-min">${mins} min</span><div class="routine-body"><strong>${title}</strong> ${body}</div></li>`;
+  const setLink=(x)=>`<button type="button" class="mr-review-link" onclick="goToSet('${x.set.id}')" title="Open this set">&#8617; ${escHtml(x.set.label)}</button>`;
+  let items='';
+  items+=li(1,'Tune up','&mdash; open the Tuner (corner button) and get all six strings to green.');
+  items+=li(1,'Finger Gym',`&mdash; ${escHtml(wu.text)}<br>${routinePlaySeq(wu, `bpm:routine:${moduleNum}:wu`)}`);
+  if(drill) items+=li(3,'Skill drill',`&mdash; ${escHtml(truncateText(stripTags(drill.step.text),180))} ${setLink(drill)}<br>${routinePlaySeq(drill.step.playSeq, `bpm:routine:${moduleNum}:drill`)}`);
+  if(chordWork && chordWork!==drill){
+    const c=chordWork.step;
+    const inner=c.chords && c.chords.length
+      ? `&mdash; ${escHtml(truncateText(stripTags(c.text),180))} ${setLink(chordWork)}<div class="chord-diagrams">${c.chords.map(ch=>`<div class="chord-box">${chordDiagramSVG(ch)}${ch.name?`<div class="chord-box-label">${ch.name}</div>`:''}</div>`).join('')}</div>`
+      : `&mdash; ${escHtml(truncateText(stripTags(c.text),180))} ${setLink(chordWork)}<br>${routinePlaySeq(c.playSeq, `bpm:routine:${moduleNum}:chords`)}`;
+    items+=li(3,'Chord / scale work',inner);
+  }
+  if(song) items+=li(2,'Song',`&mdash; ${escHtml(truncateText(stripTags(song.step.text),220))} ${setLink(song)}`);
+  return `<div class="routine-card">
+    <div class="routine-head">
+      <span class="routine-title">&#x1F552; Your 10-minute practice routine</span>
+      <button type="button" class="routine-print-btn" onclick="printRoutine()" title="Print this routine">&#x1F5A8; Print</button>
+    </div>
+    <ol class="routine-list">${items}</ol>
+    <div class="routine-foot">Built from this module&rsquo;s sets &mdash; short on time? Do steps 1&ndash;3 and call it a win.</div>
+  </div>`;
+}
+function printRoutine(){
+  document.body.classList.add('print-routine');
+  const done=()=>{ document.body.classList.remove('print-routine'); window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  window.print();
+}
+/* Daily 5 — today's 5-minute warm-up for the current module. Same drill for
+   everyone on the same date (rotated by day of year). Read-only. */
+function dayOfYear(){ const now=new Date(); return Math.floor((now-new Date(now.getFullYear(),0,0))/86400000); }
+function buildDaily5(){
+  const num=parseInt(document.getElementById('module-select').value)||1;
+  const doy=dayOfYear();
+  const wu=WARMUP_BANK[doy % WARMUP_BANK.length];
+  const seqSteps=moduleStepsFlat(num).filter(x=>x.step.playSeq);
+  const pick=seqSteps.length ? seqSteps[doy % seqSteps.length] : null;
+  const li=(mins,title,body)=>`<li class="routine-item"><span class="routine-min">${mins} min</span><div class="routine-body"><strong>${title}</strong> ${body}</div></li>`;
+  let items='';
+  items+=li(1,'Tune up','&mdash; all six strings to green with the corner Tuner.');
+  items+=li(2,'Warm-up',`&mdash; ${escHtml(wu.text)}<br>${routinePlaySeq(wu,'bpm:daily5:wu')}`);
+  if(pick) items+=li(2,'Today’s drill',`&mdash; from Module ${num}, ${escHtml(pick.set.label)}: ${escHtml(truncateText(stripTags(pick.step.text),160))}<br>${routinePlaySeq(pick.step.playSeq,'bpm:daily5:drill')}`);
+  const challenge=`<details class="daily5-break"><summary>&#x1F3D4; On a break? The 15-Day Challenge</summary>
+    <p class="daily5-break-note">Five minutes a day keeps your hands ready between Modules 8 and 9 (or any time off). One line a day:</p>
+    <ol class="daily5-challenge">${WINTER_CHALLENGE.map(t=>`<li>${escHtml(t)}</li>`).join('')}</ol></details>`;
+  return `<div class="daily5-head"><span>&#x26A1; Daily 5 &mdash; today’s warm-up</span><button type="button" class="tp-close" onclick="toggleDaily5()" aria-label="Close Daily 5">&#x2715;</button></div>
+    <ol class="routine-list">${items}</ol>${challenge}`;
+}
+function toggleDaily5(){
+  const p=document.getElementById('daily5-panel');
+  const btn=document.getElementById('daily5-btn');
+  const open=p.hasAttribute('hidden');
+  if(open){ p.innerHTML=buildDaily5(); p.removeAttribute('hidden'); }
+  else { p.setAttribute('hidden',''); }
+  if(btn) btn.setAttribute('aria-expanded', open?'true':'false');
+}
+
 /* ── Module Review (self-assessment) ── */
 function buildModuleReview(mr){
   const savedKey=`mr${mr.moduleNum}-reflection`;
@@ -1748,6 +1847,7 @@ function buildModuleReview(mr){
     ? `<div class="ablock mr-forward" style="margin-top:12px"><div class="albl">&#x1F517; Why this matters</div><div class="atxt">${mr.forward}</div></div>`
     : '';
   return `
+    ${buildModuleRoutine(mr.moduleNum)}
     <div class="mr-locked-banner">
       <span class="mr-locked-banner-icon">&#x1F512;</span>
       <div><strong>Preview only.</strong> Mark every skill on both sets as &ldquo;I&rsquo;ve got it!&rdquo; to unlock this self-assessment.</div>
