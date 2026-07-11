@@ -181,6 +181,7 @@ SETS.push(
                 skills: [3],
                 response: { type: 'short', prompt: 'Which of the three — hammer, pull, or slide — needs the most work? Name it for next session.', placeholder: 'e.g. the pull-off — my note comes out too quiet' },
                 tab: {
+                  noCoach: true,   // 2 picks + 3 slurred notes — a mic check expecting 5 picked onsets would fail correct technique
                   caption: '2-bar articulation lick · G string · h = hammer-on, p = pull-off, / = slide up',
                   notes: [
                     { string: 'G', fret: 5,    note: 'C', midi: 60 },

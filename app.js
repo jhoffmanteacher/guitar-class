@@ -206,6 +206,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     else { await loadProgress(); showApp(user); }
   } else {
     currentUser = null; progress = {}; responses = {}; completed = {};
+    _moduleStripStates = {};   // next user's first strip render is a first paint, not a celebration
     document.getElementById('auth-wall').style.display='block';
     document.getElementById('app').style.display='none';
     document.getElementById('teacher-app').style.display='none';
@@ -325,8 +326,7 @@ async function flushSave(){
   try{
     await ensureDb();
     await db.collection('progress').doc(currentUser.uid).set(payload,{merge:true});
-    setSaveMsg('Saved ✓');
-    setTimeout(()=>setSaveMsg(''),2000);
+    setSaveMsg('Saved ✓', 2000);
   } catch(e){
     keys.forEach(k=>_dirtyKeys.add(k));   // keep dirty so the next save retries
     setSaveMsg('Save failed — check connection');
@@ -341,7 +341,12 @@ function onCompleteChange(key, isDone){
 function saveCompleted(){ queueSave('completed'); }
 
 function saveProgress(){ queueSave('skills','place'); }
-function setSaveMsg(msg){ document.querySelectorAll('.save-ind').forEach(el=>el.textContent=msg); }
+let _saveMsgT = null;
+function setSaveMsg(msg, clearAfterMs){
+  clearTimeout(_saveMsgT);
+  document.querySelectorAll('.save-ind').forEach(el=>el.textContent=msg);
+  if(clearAfterMs) _saveMsgT = setTimeout(()=>setSaveMsg(''), clearAfterMs);
+}
 
 /* ── Render ── */
 let lastModuleNum = 1;
@@ -719,7 +724,9 @@ function buildTab(spec, opts){
     controlsHtml = `<div class="tab-controls"><span class="bpm-control-group">` +
       `<button type="button" class="play-seq-btn" data-midis="${escAttr(midisAttr)}" onclick="playSequenceFromGroup(this)" title="Play this tab">&#x25B6; Play tab</button>` +
       renderBpmControl(keyPrefix, bpm, minBpm, maxBpm) +
-      coachBtnHtml(midisAttr, tabNotesJson) +
+      // noCoach: tabs with slurred notes (hammer-ons/pull-offs) aren't
+      // one-pick-per-note, so a mic check would fail correct technique.
+      (spec.noCoach ? '' : coachBtnHtml(midisAttr, tabNotesJson)) +
       `</span></div>`;
   }
   if (spec.phrases && spec.phrases.length) {
@@ -1252,8 +1259,7 @@ function fmtModuleProgress(complete, partial){
 // module. Renders purely from manifest + progress — never forces a module load.
 let _moduleStripStates = {};   // num -> last seen state, to catch the just-completed moment
 function celebrateModuleComplete(seg){
-  seg.classList.add('celebrate');
-  setTimeout(()=>seg.classList.remove('celebrate'), 1300);
+  flashClass(seg, 'celebrate', 1300);
   if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const r = seg.getBoundingClientRect();
   ['\u{1F3B8}','\u{1F3B5}','\u2B50','\u{1F3B6}','\u{1F3B5}','\u2728'].forEach((ch, i)=>{
@@ -1712,15 +1718,10 @@ function buildModuleSongs(moduleNum){
     </div>`;
 }
 
-// Video links for a module-level song (mirrors loadSongVid, but indexes MODULE_SONGS).
+// Video links for a module-level song (indexes MODULE_SONGS, same launcher).
 function loadModuleSongVid(moduleNum, idx, kind){
   const list = (globalThis.MODULE_SONGS && MODULE_SONGS[moduleNum]) || [];
-  const s = list[idx]; if(!s) return;
-  const url = kind==='tutorial' ? s.tutorialUrl : kind==='backing' ? s.backingUrl : s.originalUrl;
-  if(!url) return;
-  if(kind==='original'){ window.open(url, '_blank', 'noopener'); return; }
-  if(kind==='backing'){ loadPanel('youtube', url, s.name, 'Backing track — already loops, just hit play and solo'); return; }
-  loadPanel('youtube', url, s.name, 'Solo tutorial');
+  openSongVid(list[idx], kind);
 }
 
 function loadSong(wid, idx){
@@ -1729,22 +1730,19 @@ function loadSong(wid, idx){
   loadPanel('youtube', s.url, s.name, s.type);
 }
 
+/* THE song-video launcher — every song list (per-set, per-module, Songs hub)
+   routes through this so the kind dispatch and subtitles can't drift. */
+function openSongVid(s, kind){
+  if(!s) return;
+  if(kind==='journey'){ if(s.journeyUrl) window.open(s.journeyUrl, '_blank', 'noopener'); return; }
+  if(kind==='original'){ if(s.originalUrl) window.open(s.originalUrl, '_blank', 'noopener'); return; }
+  if(kind==='backing'){ if(s.backingUrl) loadPanel('youtube', s.backingUrl, s.name, 'Backing track — already loops, just hit play and solo'); return; }
+  if(s.tutorialUrl) loadPanel('youtube', s.tutorialUrl, s.name, 'Tutorial');
+}
 function loadSongVid(wid, idx, kind){
   const w=SETS.find(x=>x.id===wid); if(!w) return;
-  const s=w.songs[idx]; if(!s) return;
-  const url = kind==='tutorial' ? s.tutorialUrl : kind==='backing' ? s.backingUrl : s.originalUrl;
-  if(!url) return;
-  if(kind==='original'){
-    window.open(url, '_blank', 'noopener');
-    return;
-  }
-  if(kind==='backing'){
-    loadPanel('youtube', url, s.name, 'Backing track — already loops, just hit play and solo');
-    return;
-  }
-  loadPanel('youtube', url, s.name, 'Solo tutorial');
+  openSongVid(w.songs[idx], kind);
 }
-
 /* ── Videos ── */
 function buildVideos(w){
   const rows=w.videos.map(v=>`<div class="vid-row"><div><div class="vname"><button class="rp-trigger" onclick="loadPanel('youtube','${v.url}','${v.name.replace(/'/g,"\\'")}','${v.source.replace(/'/g,"\\'")}')">&#x25B6; ${v.name}</button></div><div class="vsrc">${v.source}</div>${v.rec?'<span class="vrec">&#x2605; Recommended</span>':''}</div></div>`).join('');
@@ -2296,7 +2294,7 @@ function toggleSkill(sid, wid, which){
     if(progress[sid]==='gotit' && w.songThread && w.songThread.length){
       const echoEl = document.getElementById('se-'+wid);
       if(echoEl){
-        const t = w.songThread[(done - 1 + w.songThread.length) % w.songThread.length];
+        const t = w.songThread[(done - 1) % w.songThread.length];
         echoEl.textContent = `\u{1F3B8} You can now play more of ${t.name}.`;
         echoEl.classList.add('show');
         clearTimeout(echoEl._echoT);
@@ -2399,7 +2397,9 @@ function stopAllDemoAudio(){
   stopPlaySeq();
   chordStrumTimeouts.forEach(clearTimeout);
   chordStrumTimeouts = [];
-  if(typeof metroRunning !== 'undefined' && metroRunning) stopMetro();
+  // clearing the strum timeouts also cancels their '.playing' cleanup — sweep it
+  document.querySelectorAll('.playing').forEach(el => el.classList.remove('playing'));
+  if(metroRunning) stopMetro();
 }
 function playSequence(midis, bpm, btnEl){
   if(playSeqState){
@@ -2489,7 +2489,7 @@ function tick(){ if(!window.coachMicLive) beep(880,0.06); const dot=document.get
 function getBpm(){ return parseInt(document.getElementById('bpm-slider').value); }
 function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; if(metroRunning){ stopMetro(); startMetro(); } }
 function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Math.min(220,Math.max(40,getBpm()+d)); document.getElementById('bpm-display').textContent=s.value; if(metroRunning){ stopMetro(); startMetro(); } }
-function startMetro(){ tick(); metroInterval=setInterval(tick,Math.round(60000/getBpm())); metroRunning=true; document.getElementById('metro-btn').innerHTML='&#x23F8; Stop'; }
+function startMetro(){ if(window.coachMicLive) return; tick(); metroInterval=setInterval(tick,Math.round(60000/getBpm())); metroRunning=true; document.getElementById('metro-btn').innerHTML='&#x23F8; Stop'; }
 function stopMetro(){ clearInterval(metroInterval); metroRunning=false; document.getElementById('metro-btn').innerHTML='&#x25B6; Start'; }
 function toggleMetro(){ if(metroRunning) stopMetro(); else startMetro(); }
 
@@ -2497,10 +2497,18 @@ function toggleMetro(){ if(metroRunning) stopMetro(); else startMetro(); }
 let timerRunning=false, timerInterval=null, timerSecs=30, timerSelected=30;
 function setTimerSecs(secs){ timerSelected=secs; timerSecs=secs; if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; } updateTimerDisplay(); [30,60,120,180,240,300].forEach(s=>{ const el=document.getElementById('tp-'+s); if(el) el.classList.toggle('sel',s===secs); }); }
 function updateTimerDisplay(){ const m=Math.floor(timerSecs/60),s=timerSecs%60; document.getElementById('timer-display').textContent=m+':'+(s<10?'0':'')+s; }
+/* One-shot animation helper: restart a CSS animation class even if it's
+   already applied (remove → force reflow → add), then clear it after ms. */
+function flashClass(el, cls, ms){
+  if(!el) return;
+  el.classList.remove(cls); void el.offsetWidth;
+  el.classList.add(cls);
+  setTimeout(()=>el.classList.remove(cls), ms);
+}
 // Flash the display when time's up — visible across a loud room without headphones.
-function flashTimerDisplay(){ const el=document.getElementById('timer-display'); if(!el) return; el.classList.remove('timer-done-flash'); void el.offsetWidth; el.classList.add('timer-done-flash'); setTimeout(()=>el.classList.remove('timer-done-flash'),2400); }
+function flashTimerDisplay(){ flashClass(document.getElementById('timer-display'),'timer-done-flash',2400); }
 // Pulse the floating timer button too — it's visible even when the popup is closed.
-function flashTimerFab(){ const el=document.getElementById('fab-timer'); if(!el) return; el.classList.remove('fab-timer-done'); void el.offsetWidth; el.classList.add('fab-timer-done'); setTimeout(()=>el.classList.remove('fab-timer-done'),3600); }
+function flashTimerFab(){ flashClass(document.getElementById('fab-timer'),'fab-timer-done',3600); }
 function resetTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; } timerSecs=timerSelected; updateTimerDisplay(); document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; }
 function toggleTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; } else { timerRunning=true; document.getElementById('timer-btn').innerHTML='&#x23F8; Pause'; timerInterval=setInterval(()=>{ if(timerSecs>0){ timerSecs--; updateTimerDisplay(); } else { clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; [0,0.35,0.7].forEach(d=>setTimeout(()=>beep(660,0.3),d*1000)); flashTimerDisplay(); flashTimerFab(); } },1000); } }
 
@@ -2512,7 +2520,7 @@ function togglePopup(which){
   // The tuner has no Start/Stop button — opening it starts listening, closing stops.
   // One mic owner at a time: the tuner interrupts a live Listening Coach check
   // and stops any running game mic; the games do the reverse themselves.
-  if(which==='tuner'){ if(open){ if(typeof coachInterrupt==='function') coachInterrupt(); if(typeof gamesStopMic==='function') gamesStopMic(); startTuner(); } else { stopTuner(); } }
+  if(which==='tuner'){ if(open){ if(typeof coachInterrupt==='function') coachInterrupt(); if(typeof gamesStopMic==='function') gamesStopMic(); stopAllDemoAudio(); startTuner(); } else { stopTuner(); } }
 }
 function closePopup(which){ document.getElementById(which+'-popup').classList.remove('open'); setFabExpanded(which, false); if(which==='metro') stopMetro(); if(which==='tuner') stopTuner(); }
 document.addEventListener('click',e=>{
@@ -2761,9 +2769,7 @@ function showSkillLesson(wid, n){
       const head = sec.querySelector('.sc-sec-head');
       if(head) head.setAttribute('aria-expanded', 'true');
     }
-    li.classList.remove('step-flash'); void li.offsetWidth;
-    li.classList.add('step-flash');
-    setTimeout(() => li.classList.remove('step-flash'), 2600);
+    flashClass(li, 'step-flash', 2600);
   });
   matches[0].scrollIntoView({ block: 'center', behavior: 'smooth' });
 }
@@ -2793,8 +2799,7 @@ async function jumpToStep(moduleNum, wid, station, secIdx, stepIdx){
     li = panel.querySelectorAll('li.step')[stepIdx];
   }
   if(li){
-    li.classList.add('step-flash');
-    setTimeout(() => li.classList.remove('step-flash'), 2600);
+    flashClass(li, 'step-flash', 2600);
     li.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }
 }
@@ -2878,12 +2883,7 @@ async function toggleSongsHub(){
 }
 let songsHubList = [];
 function songsHubVid(idx, kind){
-  const sg = songsHubList[idx];
-  if(!sg) return;
-  if(kind === 'journey' && sg.journeyUrl){ window.open(sg.journeyUrl, '_blank', 'noopener'); return; }
-  if(kind === 'original' && sg.originalUrl){ window.open(sg.originalUrl, '_blank', 'noopener'); return; }
-  if(kind === 'tutorial' && sg.tutorialUrl){ loadPanel('youtube', sg.tutorialUrl, sg.name, 'Tutorial'); return; }
-  if(kind === 'backing' && sg.backingUrl) loadPanel('youtube', sg.backingUrl, sg.name, 'Backing track — hit play and jam');
+  openSongVid(songsHubList[idx], kind);
 }
 async function songHubGoModule(m){
   const sel = document.getElementById('module-select');

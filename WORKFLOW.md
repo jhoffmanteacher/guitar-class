@@ -121,7 +121,7 @@
       one-thing-per-screen, beat cursor).
       **2f song badges ✅ 2026-07-11** (same day, Jonathan's go-ahead):
       optional `songThread: [{name, journey, note}]` field hand-curated on
-      22 sets across modules 1–9 + 12 — every entry evidence-backed by a
+      21 sets across modules 1–9 + 12 — every entry evidence-backed by a
       Journey link or named drill INSIDE that set (song-list mentions
       don't qualify; the curation scan is in the session log). Rendered
       as a "🎸 This set unlocks:" row on the set header (names link to
@@ -132,9 +132,35 @@
       song-building drills. render-test asserts badge presence on m5w2
       and absence on untagged m5w1. DESIGN_UPGRADES.md 2f marked done;
       remaining there: tier 3 only.
-- [ ] **Video self-review** (last unbuilt Listening-Coach piece) — camera
-      toggle on Record Yourself so students watch their own playback with
-      the module's assessment checklist underneath; nothing uploads.
+- [x] **Second review round ✅ 2026-07-11** — 8-angle adversarial review of
+      9eee1d0..HEAD (Sem-2 content + 14-fix round + design pass): 24 raw
+      findings → 16 deduped, ALL fixed and pushed. Correctness: stale-
+      session micOff could kill a NEWER session's stream through the
+      single-flight acquisition (now coachReleaseMicIfIdle — deferred
+      orphan check); document.hidden bail after the permission await
+      (hidden-tab privacy hole); stopAllDemoAudio moved post-guard in
+      coachStartCheck (demo started during the prompt was scored);
+      module-7 articulation lick got tab-level `noCoach: true` honored in
+      buildTab (2 picks + 3 slurs vs 5 expected onsets — correct technique
+      failed the check); _moduleStripStates reset on sign-out (shared-
+      device confetti leak, found by 4 angles independently);
+      stopAllDemoAudio sweeps stale .playing classes; stopTuner/
+      selectTunerString clear .in-tune classes; setSaveMsg stale-timer
+      fix (could wipe 'Save failed'); startMetro refuses while
+      coachMicLive (armed-but-silent metronome). Cleanup: openSongVid
+      unifies 3 drifted video launchers; flashClass unifies 5 flash
+      copies (incl. tuner pop); coachEvictTuner unifies 4 eviction
+      copies; tuner open now silences demo audio; checks.mjs gained
+      journey-path validation (every hand-typed tabs/*.html must exist —
+      ~30 refs, previously unvalidated); .coach-mic dark override moved
+      adjacent to base; badge count corrected 22→21 in docs (the map has
+      21 entries; no badge missing); echo index math simplified; dead
+      typeof guard dropped. Efficiency angle: zero findings. All 6 VM
+      suites (sandboxes gained stopAllDemoAudio/flashClass stubs) +
+      checks green.
+- [x] ~~Video self-review~~ — CUT by Jonathan 2026-07-11 (never built;
+      was the last G1 leftover). The audio-only Record Yourself widget
+      stays as-is.
 
 ## Jonathan — manual, before course start
 

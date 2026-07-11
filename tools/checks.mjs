@@ -311,10 +311,27 @@ function checkSwAssets(src) {
   if (bad === 0) ok(`sw.js ASSETS ↔ shell files in sync (${assets.length} assets)`);
 }
 
+/* Journey pages are referenced by ~30 hand-typed 'tabs/*.html' strings across
+   module files and config — none previously validated (the link checker only
+   covers external URLs). A renamed/removed journey page shipped a 404 with no
+   net; this catches it. */
+function checkJourneyPaths() {
+  let bad = 0;
+  for (const file of [...MODULE_FILES, 'config-main.js']) {
+    const src = readFileSync(join(ROOT, file), 'utf8');
+    for (const m of src.matchAll(/tabs\/([a-z0-9-]+\.html)/g)) {
+      try { readFileSync(join(ROOT, 'tabs', m[1])); }
+      catch { err(`${file} references tabs/${m[1]} which does not exist`); problems++; bad++; }
+    }
+  }
+  if (bad === 0) ok('all tabs/*.html journey references resolve');
+}
+
 function bumpServiceWorker() {
   head('3. Service-worker cache version');
   const swPath = join(ROOT, 'sw.js');
   const src = readFileSync(swPath, 'utf8');
+  checkJourneyPaths();
   checkSwAssets(src);
   const fp = fingerprint();
   const date = new Date().toISOString().slice(0, 10);

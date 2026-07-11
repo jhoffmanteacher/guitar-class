@@ -68,6 +68,8 @@ function tunerResetSmoothing() {
 
 function selectTunerString(s) {
   tunerTargetString = s;
+  const noteEl = document.getElementById('tuner-note');
+  if (noteEl) noteEl.classList.remove('in-tune', 'in-tune-pop');
   document.querySelectorAll('#tuner-strings .ts-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.string === s);
   });
@@ -266,10 +268,7 @@ function tunerLoop() {
       // outside ±11 — hovering on the boundary no longer flickers the verdict.
       const shown = tunerShownCents;
       if (tunerInTune ? Math.abs(shown) <= 11 : Math.abs(shown) < 8) {
-        if (!tunerInTune) {   // just locked in — give the moment a little pop
-          noteEl.classList.remove('in-tune-pop'); void noteEl.offsetWidth;
-          noteEl.classList.add('in-tune-pop');
-        }
+        if (!tunerInTune) flashClass(noteEl, 'in-tune-pop', 500);   // just locked in — little pop
         tunerInTune = true;
         noteEl.classList.add('in-tune');
         needle.style.background = 'var(--green-text)';
@@ -353,7 +352,7 @@ function stopTuner() {
   const freqEl = document.getElementById('tuner-freq');
   const needle = document.getElementById('tuner-needle');
   const statusEl = document.getElementById('tuner-status');
-  if (noteEl)   noteEl.textContent = '—';
+  if (noteEl)   { noteEl.textContent = '—'; noteEl.classList.remove('in-tune', 'in-tune-pop'); }
   if (freqEl)   freqEl.textContent = 'Play a string…';
   if (needle)   { needle.style.left = '50%'; needle.style.background = 'var(--border2)'; }
   if (statusEl) { statusEl.textContent = ''; statusEl.className = 'tuner-status'; }

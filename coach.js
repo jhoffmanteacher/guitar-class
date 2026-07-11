@@ -244,22 +244,26 @@ async function coachStartCheck(){
   if (!coach || (coach.phase !== 'ready' && coach.phase !== 'report')) return;
 
   /* One mic owner at a time — the tuner hands over. */
-  if (typeof tunerRunning !== 'undefined' && tunerRunning && typeof closePopup === 'function'){
-    closePopup('tuner');
-  }
+  coachEvictTuner();
 
-  /* The games share the mic pipeline — hand it over cleanly first, and
-     silence anything the site itself is playing (demo sequences, chord
-     strums, metronome) so the mic doesn't score the speakers. */
+  /* The games share the mic pipeline — hand it over cleanly first. */
   if (typeof gamesStopMic === 'function') gamesStopMic();
-  if (typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
 
   const session = coach;
   if (!coachStream && !(await coachAcquireMic())){
     if (coach === session) coachRenderReady('Mic access denied — check browser permissions, then try again.');
     return;
   }
-  if (coach !== session){ coachMicOff(); return; }   // card closed during the permission prompt
+  if (coach !== session){ coachReleaseMicIfIdle(); return; }   // card closed during the prompt
+  if (document.hidden){   // tab was backgrounded while the prompt was open
+    coachMicOff();
+    coachRenderReady('Paused — this tab went to the background, so the mic switched off. Start the check again when you\'re back.');
+    return;
+  }
+  /* AFTER the guards: silence anything the site itself is playing (demo
+     sequences, chord strums, metronome) — including audio started while the
+     permission prompt was open — so the mic doesn't score the speakers. */
+  stopAllDemoAudio();
   const micEl = document.getElementById('coach-mic');
   if (micEl) micEl.hidden = false;
 
@@ -287,6 +291,13 @@ async function coachStartCheck(){
    Returns false if the mic is denied. Single-flight: while a permission
    prompt is pending, concurrent callers await the SAME acquisition — a
    double-click can never open a second stream and orphan the first. */
+/* The tuner-eviction snippet, once — four call sites had hand-copies. */
+function coachEvictTuner(){
+  if (typeof tunerRunning !== 'undefined' && tunerRunning && typeof closePopup === 'function'){
+    closePopup('tuner');
+  }
+}
+
 let coachAcquirePending = null;
 function coachAcquireMic(){
   if (coachAcquirePending) return coachAcquirePending;
@@ -315,6 +326,18 @@ async function coachAcquireMicInner(){
   coachFrameBuf = new Float32Array(COACH_FFT);
   window.coachMicLive = true;   // cleared in coachMicOff — set/clear live in ONE pair
   return true;
+}
+
+/* A stale caller (its card/panel closed during the permission prompt) must
+   not tear down the stream directly — a newer session may have adopted it via
+   the shared single-flight acquisition. Defer one tick: if nothing is
+   actively listening by then, the stream is orphaned and gets released. */
+function coachReleaseMicIfIdle(){
+  setTimeout(() => {
+    const active = (coach && (coach.phase === 'countin' || coach.phase === 'listening')) ||
+                   fretRunning || (cc && cc.micOn);
+    if (!active) coachMicOff();
+  }, 0);
 }
 
 /* One analyser read per frame, shared by all three loops (they're mutually
@@ -789,9 +812,7 @@ document.addEventListener('visibilitychange', () => {
   if (!document.hidden) return;
   coachInterrupt('Paused — this tab went to the background, so the mic switched off. Start the check again when you\'re back.');
   gamesStopMic();
-  if (typeof tunerRunning !== 'undefined' && tunerRunning && typeof closePopup === 'function'){
-    closePopup('tuner');
-  }
+  coachEvictTuner();
 });
 
 /* ════════════════════════════════════════════════════════════════════
@@ -824,9 +845,7 @@ async function fretStart(){
   if (fretRunning) return;
   coachClose();                                        // one mic owner at a time
   ccStop();
-  if (typeof tunerRunning !== 'undefined' && tunerRunning && typeof closePopup === 'function'){
-    closePopup('tuner');
-  }
+  coachEvictTuner();
   const body = document.getElementById('fret-body');
   if (!body) return;
   body.innerHTML = '<div class="coach-tip">Starting the mic…</div>';
@@ -835,8 +854,9 @@ async function fretStart(){
     if (b2) b2.innerHTML = '<div class="coach-note">Mic access denied — check browser permissions, then close and reopen Note Hunt.</div>';
     return;
   }
-  if (!document.getElementById('fret-body')){ coachMicOff(); return; }   // panel closed during the prompt
-  if (typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
+  if (!document.getElementById('fret-body')){ coachReleaseMicIfIdle(); return; }   // panel closed during the prompt
+  if (document.hidden){ coachMicOff(); gamesShow('hub'); return; }   // backgrounded during the prompt
+  stopAllDemoAudio();
   fretRunning = true;
   window.coachMicLive = true;   // stream may already be open from a prior owner
   let lvl = 1;
@@ -1196,17 +1216,20 @@ async function ccStart(){
   if (!cc || cc.phase === 'countin' || cc.phase === 'play') return;
   coachClose();
   fretStop();
-  if (typeof tunerRunning !== 'undefined' && tunerRunning && typeof closePopup === 'function'){
-    closePopup('tuner');
-  }
+  coachEvictTuner();
   const session = cc;
   if (!coachStream && !(await coachAcquireMic())){
     if (cc === session) ccRenderSetup('Mic access denied — check browser permissions, then try again.');
     return;
   }
-  if (cc !== session){ coachMicOff(); return; }   // panel closed during the permission prompt
+  if (cc !== session){ coachReleaseMicIfIdle(); return; }   // panel closed during the prompt
+  if (document.hidden){
+    coachMicOff();
+    ccRenderSetup('Paused — this tab went to the background, so the mic switched off. Start again when you\'re back.');
+    return;
+  }
   cc.micOn = true;
-  if (typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
+  stopAllDemoAudio();
 
   const prog = CC_PROGRESSIONS[cc.progIdx].chords;
   cc.bars = Array.from({ length: CC_BARS }, (_, i) => prog[i % prog.length]);

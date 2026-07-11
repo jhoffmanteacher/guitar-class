@@ -5,12 +5,31 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — Follow-up fix round from a full review
+
+### Changed
+- **More mic-reliability edge cases closed:** rapid open/close around the
+  permission prompt can no longer leave a check listening on a dead mic,
+  a tab backgrounded during the prompt no longer lets the mic run
+  hidden, and audio you start while the prompt is open can't get scored
+  as your playing anymore.
+- **Module 7's hammer-on/pull-off lick no longer offers a mic check** —
+  playing it correctly means most notes aren't picked, which is exactly
+  what the mic can't count. Correct technique was failing; now the drill
+  is self-checked by ear, as it should be.
+- **Small fixes:** the tuner no longer shows a stale green readout after
+  closing or switching strings; chord-demo buttons can't get stuck in
+  their pressed style; a "Save failed" message can no longer be wiped
+  before you see it; the metronome can't be armed silently during a
+  check; and switching accounts on a shared device no longer fires
+  celebration confetti for the new user's old completions.
+
 ## 2026-07-11 — Every set now tells you which song it unlocks
 
 ### Added
 - **🎸 Song badges.** Sets that build one of the six core songs now say
   so right at the top — *"This set unlocks: Seven Nation Army · Luna"* —
-  with each name linking to that song's Journey page. Twenty-two sets
+  with each name linking to that song's Journey page. Twenty-one sets
   across the course carry badges, every one hand-checked against a real
   drill in that set (no decorative claims).
 - **The check-off echoes it.** Mark a skill "I've got it!" in a badged
