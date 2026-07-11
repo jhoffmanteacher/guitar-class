@@ -132,6 +132,54 @@
       song-building drills. render-test asserts badge presence on m5w2
       and absence on untagged m5w1. DESIGN_UPGRADES.md 2f marked done;
       remaining there: tier 3 only.
+- [x] **Games page + module clarity fleet + layout ✅ 2026-07-11** (three
+      Jonathan asks in one batch). (a) 🎮 Games moved off the top-panel and
+      onto a full-screen arcade "page": #games URL hash (browser Back
+      exits, deep-linkable, Escape closes), body scroll-locked, deep-indigo
+      gradient shell + GUITAR GAMES logo + best-BPM chip, games render in a
+      normal-theme stage so widget CSS holds; closeTopPanels/gamesStopMic/
+      visibilitychange rekeyed to the screen. Station C card wording →
+      "Tune and warm up first". (b) 12 reviewer agents (one per module,
+      shared brief with render-reality + settled-facts guardrails) found 93
+      confusion issues; 12 Opus fixer agents applied ALL 93 (0 skipped)
+      under hard guardrails (no reorder/insert/delete — saved keys are
+      index-based; "move section" findings became wrap-up pointer texts;
+      no new videos — reword paths chosen; M11's Finger Gym carried into
+      the next section's first step BEFORE its title rename triggered the
+      Daily-5 swap; M2+M11 tuning warm-ups now use the exact trigger
+      title). Highlights: M3 octave-add-on finger placement was physically
+      wrong in 3 places; M5's "Am" video actually teaches Em (rewired
+      around Em, skill retag 3→4); M6's D-DU-UDU count MC keyed a wrong
+      answer; M7's "SNA riff" was 14 sequential single notes — actually
+      Smoke on the Water, rebuilt as 7 frets-array double-stop columns
+      (midis verified); M11's Bm–G drill showed an F diagram; M12 cited
+      course history that never happened + "La Diabla" which never
+      shipped. Full findings list: scratchpad module-fix-list.md (session
+      5f172c8c). (c) Layout: main column 860→1160px with prose measure
+      caps (.st-text 72ch etc.) — the narrow center was leftover from the
+      side-panel era. (d) Video popup: embed-restriction fallback line
+      under every player ("watch it there ↗" — oEmbed probe showed all
+      156 videos embeddable, so failures are age/label-gated at play time,
+      undetectable cross-origin) + ?t= timestamps now carry into embeds.
+      All 12 modules node --check; full checks incl. 160-link sweep; all
+      6 VM suites pass.
+- [x] **Song badges v2 — explicit Journey layers ✅ 2026-07-11** (Jonathan:
+      "the sets really reference different layers of each song — make that
+      clear"). Verified all six Journey pages share ONE ladder (1 Listen ·
+      2 Single Notes/Bass · 3 Power Chords · 4 Pentatonic Solo · 5 Open
+      Chords; Luna bonus 6 Requinto Intro; every page has id="layer-N"
+      anchors). songThread schema gains layer/bonus; all 21 sets re-tagged
+      with the ladder as source of truth (modules map 1:1 to layers 1–5;
+      M6+ entries that sit beyond the ladder carry notes, no chip). Badge
+      renders one row per song: name (deep-linked to journey#layer-N) +
+      "Layer N of 5" chip (amber "Bonus Layer 6" for Luna) + short visible
+      note (was tooltip-only). Check-off echo names the layer. Corrected in
+      passing: my original m5w2 badge said "Layers 1 and 2" — conflating a
+      within-set build with the Journey ladder (it's Layer 5); THREE stale
+      in-step link texts fixed (m5w2 ×2 "Layer 1/2 of 4" → "Layer 5 of 5 —
+      Open Chords"; m8w3 "Layer 4 of 4" → "the fingerstyle arrangement" —
+      fingerpicking isn't on the ladder). render-test asserts the layer-5
+      deep link + chip on m5w2.
 - [x] **Warm-up → Daily 5 + backing-track reference audit ✅ 2026-07-11**
       (Jonathan's ask). (a) The ~19 generic 'Warm-up — tuning check
       (Module 1)' Station C sections (modules 3–5, 7–12) now render as a

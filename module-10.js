@@ -64,7 +64,7 @@ SETS.push(
             title: 'Try building a scale from a new starting note',
             steps: [
               {
-                text: 'Now try it: apply the same W-W-H-W-W-W-H recipe starting from C, on one string, and notice you never need a sharp or flat.',
+                text: 'Now try it: run the same W-W-H-W-W-W-H recipe starting from C first — your baseline — and notice you never need a sharp or flat. That clean run is what makes the odd note stand out when you try G next.',
                 hint: 'C major is the recipe\'s "home base" example — every other major key is the same shape, just starting somewhere else.',
                 skills: [6],
                 response: { type: 'mc', prompt: 'C major is special among scales because:',
@@ -213,9 +213,9 @@ SETS.push(
                 text: 'Watch: <a href="https://youtu.be/G-X1RemAzks" target="_blank">Minor Pentatonic Scale - Stage 7 Guitar Lesson - Guitar For Beginners [BC-176] – JustinGuitar</a> as a refresher on the box-1 shape you\'ll build the blues scale from today.',
                 hint: 'Everything today builds on top of the minor pentatonic box you already know from Module 4 — nothing new to fret, just one note added.',
                 skills: [1],
-                response: { type: 'mc', prompt: 'The relative minor of C major is:',
+                response: { type: 'mc', prompt: 'Minor pentatonic box 1 with its root at low-E fret 5 is which key?',
                   answer: 1,
-                  explain: 'Same seven notes, different home base — count to the 6th note of C major (or slide 3 frets DOWN from C) and you land on A.',
+                  explain: 'The root fret names the key — fret 5 on the low E is A, so box 1 there is A minor: the shape you\'ll add the blues note to today.',
                   choices: ['C minor', 'A minor', 'E minor', 'G minor'] }
               },
               {
@@ -233,7 +233,7 @@ SETS.push(
             title: 'Listen for relative vs parallel',
             steps: [
               {
-                text: 'Listen for it: play a C major chord, then an A minor chord, then a C minor chord. C-to-Am shares every note (relative); C-to-Cm shares only the root (parallel). Notice how different Am and Cm sound from each other, even though both are "C\'s minor."',
+                text: 'Listen for it: play a C major chord, then an A minor chord, then a C minor chord (Cm = your full Bm barre shape from Module 7, slid up one fret to fret 3). C-to-Am shares every note (relative); C-to-Cm shares only the root (parallel). Notice how different Am and Cm sound from each other, even though both are "C\'s minor."',
                 hint: 'These two ideas get mixed up constantly — the drill is hearing that "C\'s relative minor" and "C\'s parallel minor" are two completely different chords.',
                 skills: [2],
                 response: { type: 'mc', prompt: 'Relative minor vs parallel minor — the difference is:',
@@ -305,7 +305,7 @@ SETS.push(
             title: 'Build and play the blues scale',
             steps: [
               {
-                text: 'Challenge 2 — Blues Scale (your assessment piece): add the b5 to A minor pentatonic box 1 and play it ascending and descending at 60 BPM. You\'ve got it when: the added note lands exactly where the pattern shows, every time.',
+                text: 'Challenge 2 — Blues Scale (your assessment piece): add the b5 to A minor pentatonic box 1 and play it ascending and descending at 60 BPM. The play button checks the ascending run — match it, then play the descent on your own after. You\'ve got it when: the added note matches what you hear from the play button, every time.',
                 hint: 'The b5 sits between two notes you already know in the box — it\'s one extra finger placement, not a new shape to learn from scratch.',
                 stuck: 'Play the plain minor pentatonic box first, then just add the one extra note once the rest is solid.',
                 levelUp: 'Play the blues scale over a 12-bar blues feel, or build it starting from a different root.',
@@ -330,7 +330,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'What\'s the relative minor of F (Luna\'s key)? Which single note makes a pentatonic a blues scale? Write both below.',
+                text: 'What\'s the relative minor of F (Luna\'s key)? Which single note makes a pentatonic a blues scale? Write both below. (One more below: Jam it — the blues scale over a real form.)',
                 response: { type: 'short', placeholder: 'e.g. Dm is F\'s relative minor; the b5 is what makes it blues' }
               }
             ]
@@ -339,7 +339,7 @@ SETS.push(
             title: 'Jam it — the blues scale over a real form',
             steps: [
               {
-                text: 'Jam it: record yourself strumming the 12-bar blues form in A — A7, D7, E7 (the full bar map lives in Module 11, Set 3; plain A, D, E or power chords work fine for now) — then loop the recording and solo over it with your blues scale, box 1 at fret 5. One chorus of comping, one chorus of soloing. Playing with someone? One comps while the other solos, then swap.',
+                text: 'Jam it: record yourself strumming the 12-bar blues form in A — the bars run A A A A | D D A A | E D A E (plain A, D, E or power chords work fine for now) — then loop the recording and solo over it with your blues scale, box 1 at fret 5. One chorus of comping, one chorus of soloing. (The full story behind that bar map is in Module 11, Set 3.) Playing with someone? One comps while the other solos, then swap.',
                 hint: 'Follow the form, not just the scale — when the loop returns to A, land on an A and let it ring. That arrival is what "playing the changes" means.',
                 skills: [7],
                 playSeq: { label: 'A blues scale, box 1 (loop-ready)', bpm: 60, notes: [45, 48, 50, 51, 52, 55, 57] }
@@ -511,7 +511,7 @@ SETS.push(
             title: 'Echo a pattern by ear',
             steps: [
               {
-                text: 'Challenge 3 — Echo Drill (your assessment piece): listen to a 3-note pattern once using the play button below, sing it back, then play it on the E or A string. You\'ve got it when: 3 out of 4 patterns matched correctly, by ear alone.',
+                text: 'Challenge 3 — Echo Drill (your assessment piece): for round 1, listen to the 3-note pattern once using the play button below, sing it back, then play it on the E or A string. For rounds 2–4, record yourself playing 3 random notes (eyes off your hand) and echo those back the same way. You\'ve got it when: 3 out of 4 patterns matched correctly, by ear alone.',
                 hint: 'Resist the urge to hunt-and-peck on the fretboard before you\'ve sung the pattern — singing first locks in the pitch your hands need to find.',
                 stuck: 'Slow the pattern down and repeat just the first two notes until they\'re solid, then add the third.',
                 levelUp: 'Extend the echo to 4 or 5 notes, or echo a short lick from a tutorial video you haven\'t learned yet — a pattern you\'ve truly never heard. (A partner playing surprise patterns works too.)',
@@ -547,7 +547,7 @@ SETS.push(
 
     assessment: {
       goal: 'Transposes box 1 to a named key · Sings then plays a 3-note pattern · Tells major from minor by ear',
-      performance: 'Draw a key slip at random, slide box 1 to it, and play it. Then three echo rounds by ear using the play button — sing each pattern back before you play it.',
+      performance: 'Draw a key slip at random, slide box 1 to it, and play it. Then three echo rounds by ear — the play button for round 1, your own self-recorded random patterns for the rest — singing each pattern back before you play it.',
       selfCheck: 'Where does box 1 sit for D minor? Can you sing a phrase from a core song and find its first note?',
       standards: ['Pr.4a', 'Pr.6a', 'Re.7b']
     },

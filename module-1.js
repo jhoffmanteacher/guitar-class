@@ -8,7 +8,7 @@ SETS.push(
 
   {
     id: 'w1',
-    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'Layer 1 of its Song Journey starts here' }],
+    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', layer: 1, note: 'meet the song' }],
     label: 'Set 1',
     locked: false,
     module: 'Introductions: You and The Guitar',
@@ -32,7 +32,7 @@ SETS.push(
             hint: 'Loud enough that you catch every detail, quiet enough that you can still hear your own guitar.'
           },
           {
-            text: 'Watch: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">How to Practice Guitar – JustinGuitar</a> (Lesson 1 Practice Routine). While you watch, write down the ONE practice habit he says matters most — you\'ll try it out this week.',
+            text: 'Watch: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">How to Practice Guitar – JustinGuitar</a> (Lesson 1 Practice Routine). While you watch, write down the ONE practice habit he says matters most — you\'ll try it out this session.',
             hint: 'As you watch, think about: what is one practice habit he says makes the biggest difference? Does it match what you thought? You\'ve got it when: you can name that one habit without looking back at your notes.',
             skills: [1],
             response: { type: 'short', placeholder: 'In one sentence: what practice habit did he say matters most, and did it match what you thought?' }
@@ -103,7 +103,7 @@ SETS.push(
           {
             text: 'Pick up the guitar. Hold it in a comfortable position. Strum all 6 strings slowly with your thumb — just listen to the sound. You\'ve got it when: the guitar sits steady on your leg and all 6 strings ring when you strum.',
             hint: 'Don\'t worry about pressing any frets yet. Just get used to holding it.',
-            stuck: 'If a string sounds dead, your hand or sleeve might be resting on it. Lift your fretting hand right off and strum with only your thumb — all six should ring.',
+            stuck: 'If a string sounds dead, your hand or sleeve might be resting on it. Lift your fretting hand (the hand on the neck — for most players, the left) right off and strum with only your thumb — all six should ring.',
             levelUp: 'Strum slowly from the low E to the high e and back, keeping every string ringing evenly — no string louder or quieter than the others.'
           },
           {
@@ -131,10 +131,10 @@ SETS.push(
             ]
           },
           {
-            title: 'My Practice Routine — weekly check-in (never graded)',
+            title: 'My Practice Routine — session check-in (never graded)',
             steps: [
           {
-            text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to write your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week went (skip that part this first time). We\'ll revisit it every module to see how your plan is working.',
+            text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to write your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice next, (3) how your last session went (skip that part this first time). We\'ll revisit it every module to see how your plan is working.',
             hint: 'No wrong answers — even five minutes a day beats one long cram. You\'re building a habit you\'ll actually keep.',
             response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went' }
           }
@@ -161,7 +161,7 @@ SETS.push(
       { name: '"Luna" — Peso Pluma, Junior H', meta: 'Listen — our Latin core song, back all course long', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
-      { name: '"Happy Birthday"', meta: 'First real song — open-string melody', type: 'Supp', core: false,
+      { name: '"Happy Birthday"', meta: 'First real song — melody on the low E string', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' }
     ],
 
@@ -184,7 +184,7 @@ SETS.push(
 
   {
     id: 'w2',
-    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', note: 'Layer 1 of its Song Journey starts here' }],
+    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', layer: 1, note: 'meet the riff' }],
     label: 'Set 2',
     locked: false,
     module: 'Introductions: You and The Guitar',
@@ -192,8 +192,8 @@ SETS.push(
     unit: 'Module 1 · Introductions: You and The Guitar',
     title: 'Set 2',
     subtitle: 'Parts of the guitar · Posture · Tuning · First melody',
-    objective: 'I CAN name 5+ parts of the guitar, tune all 6 strings, and play a short open-string melody with clean, even notes.',
-    skillFocus: 'Guitar parts, posture, and holding a pick · Naming and tuning the strings · Playing an open-string melody',
+    objective: 'I CAN name 5+ parts of the guitar, tune all 6 strings, and play a short melody on the low E string with clean, even notes.',
+    skillFocus: 'Guitar parts, posture, and holding a pick · Naming and tuning the strings · Playing a short melody on the low E string',
     comingSoon: false,
 
     stations: {
@@ -301,8 +301,8 @@ SETS.push(
             title: 'Preview the "Seven Nation Army" riff',
             steps: [
           {
-            text: 'Preview the "Seven Nation Army" riff: click the note names below the TAB to hear how it should sound, then try just the first few notes to get the feel. You\'ll play the whole riff at the practice station. You\'ve got it when: you can match the first three notes to what you heard. This song grows with you through the whole course — <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
-            hint: 'Listen first, then match it — one note at a time.',
+            text: 'Preview the "Seven Nation Army" riff: click the note names below the TAB (the little chart below — each number is a fret to press on the low E string; 0 = open) to hear how it should sound, then try just the first few notes to get the feel. You\'ll play the whole riff at the practice station. You\'ve got it when: you can match the first three notes to what you heard. This song grows with you through the whole course — <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
+            hint: 'Listen first, then match it — one note at a time. To fret a note, set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',
             stuck: 'Just the first two notes: click a note name to hear it, then find it on the low E string. Nail those before adding the next.',
             levelUp: 'Play the first four notes in a row, in time, humming the riff as you go.',
             response: { type: 'short', placeholder: 'How did the riff sound, and which note was hardest to find?' },
@@ -343,14 +343,14 @@ SETS.push(
             title: 'Play a melody on the open strings with clean, steady notes',
             steps: [
           {
-            text: 'Challenge 2 — One Minute, Perfect Notes: pluck each open string low to high (E A D G B e) and say its name out loud. For one minute, count how many ring perfectly clean — no buzz, no muting. You\'ve got it when: all 6 strings ring clean — no buzz, no muting. Log your score out of 6 so you can beat it next time.',
+            text: 'Challenge 2 — One Minute, Perfect Notes: for one minute, cycle through the open strings low to high (E A D G B e), saying each name out loud as you pluck. When the minute\'s up, play one last full pass and count how many of the 6 ring perfectly clean — no buzz, no muting. You\'ve got it when: all 6 ring clean on that final pass. Log your score out of 6 so you can beat it next time.',
             hint: 'These are open strings — press nothing. Let each string ring fully before moving to the next.',
             stuck: 'Slow way down — one string every few seconds. Lift any finger that\'s touching a string and let each one ring fully before the next.',
             levelUp: 'Score 6 clean out of 6 twice in a row, then try it once more with your eyes closed.',
             skills: [6]
           },
           {
-            text: 'Try "Happy Birthday" on open strings only — the tutorial video in the Songs tab walks you through the note sequence. Practice with a metronome at 60 BPM to keep steady. You\'ve got it when: you can play it start to finish with clean notes and a steady pulse.',
+            text: 'Try "Happy Birthday" on the low E string — the tutorial video in the Songs tab walks you through the note sequence, all on one string. Practice with the Metronome (floating corner button) set to 60 BPM — beats per minute, one click a second — to keep steady. You\'ve got it when: you can play it start to finish with clean notes and a steady pulse.',
             hint: 'Go slow. Clean notes matter more than speed right now.',
             stuck: 'Learn it in two halves — get the first phrase clean before you add the second. Drop the metronome to 50 BPM until the notes are smooth.',
             levelUp: 'Nudge the metronome up to 70 BPM, keeping every note clean and in time.',
@@ -358,7 +358,7 @@ SETS.push(
           },
           {
             text: 'Challenge 3 — Riff Time (give it a go!): play the "Seven Nation Army" riff on the low E string — slow and clean. You\'ve got it when: all 7 notes in the right order, each ringing clean — speed comes later. No score on this one, just go for it. Click any note name below the TAB to hear how it should sound.',
-            hint: 'Slow and clean beats fast and buzzy. One note at a time.',
+            hint: 'Slow and clean beats fast and buzzy. One note at a time. Set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',
             stuck: 'Break the 7 notes into two chunks and learn the first chunk cold. Click each note name to hear its pitch, then find it before you play on.',
             levelUp: 'Play all 7 notes in time with a slow metronome at 60 BPM, keeping each one clean.',
             tab: {
@@ -384,7 +384,7 @@ SETS.push(
       { name: '"Seven Nation Army" — The White Stripes', meta: 'Play the low-E riff — your first core-thread riff', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Happy Birthday"', meta: 'Play melody on open strings — first real song!', type: 'Supp', core: false,
+      { name: '"Happy Birthday"', meta: 'Play the melody on the low E string — first real song!', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
       { name: '"Sailor Song" — Gigi Perez', meta: 'Listen — fingerpicked vs. strummed guitar', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=1lrFsXkT_rM',

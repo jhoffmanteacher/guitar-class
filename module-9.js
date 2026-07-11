@@ -150,12 +150,12 @@ SETS.push(
 
     skills: [
       { id: 'm9w0-s1', text: 'RE-TEST: Switch C → G → Am → F smoothly at 60 BPM',
-        gotItWhen: 'you pick any two chords from C, G, Am, F at random (shuffle homemade flashcards or point blind at the chart) and can switch between them on beat 1 at 70 BPM without breaking the strum.' },
+        gotItWhen: 'you loop C → G → Am → F, two bars each at 60 BPM, landing every change on beat 1 without breaking the strum. Level up: pick any two of those four at random (shuffle homemade flashcards or point blind at the chart) and switch between them on beat 1 at 70 BPM.' },
       { id: 'm9w0-s2', text: 'RE-TEST: Play D-DU-UDU over a G–C change at 70 BPM',
-        gotItWhen: 'when you switch from G to D (or any two chords) the pattern doesn\'t change at all — only the chord underneath does.' },
+        gotItWhen: 'you switch from G to C (or any two chords) and the pattern doesn\'t change at all — only the chord underneath does.' },
       { id: 'm9w0-s3', text: 'RE-TEST: Play pentatonic Pattern 1 up and down at 60 BPM',
         gotItWhen: 'you can play the full pattern up and back down without looking at a diagram, with no missed notes or hesitations.',
-        practice: { type: 'playSeq', label: 'Am pentatonic Pattern 1 (ascending)', bpm: 70,
+        practice: { type: 'playSeq', label: 'Am pentatonic Pattern 1 (ascending)', bpm: 60,
           notes: [45, 48, 50, 52, 55, 57, 60, 62, 64, 67, 69, 72] } },
       { id: 'm9w0-s4', text: 'RE-TEST: Move a two-finger power chord E5 → G5 → A5 on the beat',
         gotItWhen: 'you can move the same shape to any of those positions on call and name the chord without counting frets.' },
@@ -249,7 +249,7 @@ SETS.push(
             steps: [
               {
                 text: 'Station Wrap-Up — which string\'s notes stuck faster today, D or G, and what trick helped?',
-                response: { type: 'short', placeholder: 'e.g. G was easier — only 3 naturals to fret 5; the octave shape helped me check myself' }
+                response: { type: 'short', placeholder: 'e.g. G was easier — its B–C half step gave me a landmark at fret 4; the octave shape helped me check myself' }
               }
             ]
           }
@@ -281,7 +281,7 @@ SETS.push(
               },
               {
                 text: 'Challenge 2 — G-String Naturals: same drill on the G string, low to high, 0 through 12.',
-                hint: 'G has fewer natural notes below fret 5 than D does — notice the pattern shift.',
+                hint: 'The natural half step sits in a different spot: on D it\'s E–F (F at fret 3), on G it\'s B–C (B at fret 4, C at fret 5) — notice the shift.',
                 stuck: 'Cover frets 0–5 (G–C) first, then add 5–12.',
                 levelUp: 'Race the clock — time yourself naming a random fret correctly three times in a row, then beat that time. Got someone around? Race them instead.',
                 skills: [2],
@@ -352,7 +352,7 @@ SETS.push(
 
   {
     id: 'm9w2',
-    songThread: [{ name: 'Luna', journey: 'tabs/luna.html', note: 'its intro, up in higher positions' }],
+    songThread: [{ name: 'Luna', journey: 'tabs/luna.html', layer: 6, bonus: true, note: 'its fingerpicked intro — name every note as you roll it' }],
     label: 'Set 2',
     locked: false,
     module: 'The Full Fretboard & Writing TAB',
@@ -488,7 +488,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Luna, the punteo line: play the fingerpicked intro fragment crossing three strings, reading Layer 6 TAB from <a href="tabs/luna.html#layer-6" target="_blank">Luna\'s Song Journey page</a> (the bonus requinto-intro layer). You\'ve got it when: all four notes ring cleanly in order, and you can name each one as you play it.',
+                text: 'Challenge — Luna, the punteo line: play the fingerpicked intro fragment — one note each on D, G, B and open e, four strings — reading Layer 6 TAB from <a href="tabs/luna.html#layer-6" target="_blank">Luna\'s Song Journey page</a> (the bonus requinto-intro layer). You\'ve got it when: all four notes ring cleanly in order, and you can name each one as you play it.',
                 hint: 'This roll uses the little-F shape you already know from Module 5 — today\'s new skill is being able to name every note in it.',
                 stuck: 'Fret the little F shape first, strum it once to hear the target chord, then break it apart one string at a time.',
                 levelUp: 'Name each note out loud as you roll through it, or drop it in front of the Layer 5 vamp as a real intro.',
@@ -637,14 +637,14 @@ SETS.push(
             title: 'Read a higher-position TAB',
             steps: [
               {
-                text: 'Challenge 1 — Read It Up High: read and play the little-F Layer 6 intro TAB from <a href="tabs/luna.html#layer-6" target="_blank">Luna\'s Song Journey page</a> — it lives around the little-F shape (D3, G2, B1, open e). You\'ve got it when: you can read it cold, no one walking you through it first.',
+                text: 'Challenge 1 — Warm-Up Read (down low first): read and play the little-F Layer 6 intro TAB from <a href="tabs/luna.html#layer-6" target="_blank">Luna\'s Song Journey page</a> — it lives around the little-F shape (D3, G2, B1, open e), down at frets 0–3. You\'ve got it when: you can read it straight through, no one walking you through it first.',
                 hint: 'Reading TAB up the neck feels harder mostly because the numbers are less familiar, not because it\'s actually different from reading it low.',
                 stuck: 'Fret the little F shape and strum it once to hear the target chord before reading the roll note by note.',
                 levelUp: 'Read a second higher-position TAB you haven\'t seen before today, cold.',
                 skills: [1]
               },
               {
-                text: 'Challenge — Higher Still (the real up-high read): the Luna TAB above was your warm-up, down at frets 0–3. THIS is the "up high" part. Cold-read the 8-note line below — it lives entirely at frets 5–10, up around 7th position, crossing the D, G, and B strings. No one walks you through it first; trust the numbers. You\'ve got it when: you play all eight notes in order, in tune, reading only the TAB.',
+                text: 'Challenge — Higher Still (the real up-high read): the Luna read above was your warm-up, down at frets 0–3 — now for the up-high part. Cold-read the 8-note line below — it lives entirely at frets 5–10, up around 7th position, crossing the D, G, and B strings. No one walks you through it first; trust the numbers. You\'ve got it when: you play all eight notes in order, in tune, reading only the TAB.',
                 hint: 'The shapes feel unfamiliar this high up, but the rule never changes: top line = thinnest string, numbers = frets. Find fret 5 (two frets past the fret-3 dot) and anchor your hand there.',
                 stuck: 'Play it one note at a time and say each fret out loud before you fret it — decode first, speed later.',
                 levelUp: 'Play the line backwards, from the last note to the first, still reading only the page.',
@@ -667,7 +667,7 @@ SETS.push(
             title: 'Write your own TAB from memory',
             steps: [
               {
-                text: 'Challenge 2 — Write It (your assessment piece): without looking anything up, write the "Seven Nation Army" riff to blank TAB on paper from memory — you played it chart-free back in Module 2. Then check yourself. You\'ve got it when: you put the TAB away for a day, then play EXACTLY what\'s written on the page — as if you\'d never heard the riff — and it comes out right. (Someone around to trade with? Even better — see Challenge 4.)',
+                text: 'Challenge 2 — Write It (your assessment piece): without looking anything up, write the "Seven Nation Army" riff to blank TAB on paper from memory — you played it chart-free back in Module 2. Then check yourself. You\'ve got it when: you play back EXACTLY what\'s on your page and it matches the riff note for note — every fret on the right string, in order. (The day-later, no-memory test is Challenge 4. Someone around to trade with? Even better — see Challenge 4.)',
                 hint: 'Say each note name in your head as you write its fret — that\'s the same habit that made you fast at naming notes all module.',
                 stuck: 'Play the riff on your guitar first, one note at a time, writing down each fret as you go — then copy it clean.',
                 levelUp: 'Write a second 4-bar riff of your choice from memory, or write the riff transposed to a different starting fret.',

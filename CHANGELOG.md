@@ -5,6 +5,50 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — Games get their own page, the site gets clearer everywhere
+
+### Added
+- **🎮 Guitar Games is its own page now.** The Games button takes over
+  the whole screen with an arcade look — big game cards, your best
+  tempo on display, and a "← Back to practice" button (your browser's
+  Back button works too). Practice stays practice; games feel like
+  games.
+- **A "watch it on YouTube" escape hatch under every video** in the
+  pop-up player — some videos (age-restricted or label-limited) only
+  play on YouTube itself, and now there's always a one-tap way out.
+  Timestamped links also start at the right moment now.
+
+### Changed
+- **A clarity pass across all twelve modules** — 93 fixes from a
+  module-by-module review: wrong or contradictory instructions
+  corrected (the octave add-on's finger placement, the folk-strum
+  count, a mislabeled riff that's actually Smoke on the Water, a chord
+  diagram that showed F where the song needs G), quiz answers that
+  disagreed with their own lessons re-keyed, undefined terms glossed at
+  first use (TAB, BPM, fretting hand), stale pointers fixed, invented
+  course history removed, and "don't stop yet" notes added where a
+  wrap-up sits above real content.
+- **The page finally uses your screen.** Content can spread to ~1160px
+  — TABs, chord rows, and checklists get room to breathe — while
+  paragraphs stay capped at a comfortable reading width.
+- The practice-station warm-up card now reads **"Tune and warm up
+  first"**, and the two remaining old-style tuning warm-ups (Modules 2
+  and 11) now route through the Daily 5 like everywhere else.
+
+## 2026-07-11 — Song badges now name the exact layer you're building
+
+### Changed
+- **The "song unlocks" got precise.** Every core song is built the same
+  way across the course — Layer 1 *Listen* → Layer 2 *Single Notes* →
+  Layer 3 *Power Chords* → Layer 4 *Pentatonic Solo* → Layer 5 *Open
+  Chords* (Luna adds a bonus Layer 6, the requinto intro). The set
+  badges now say exactly which layer you're on — *"Luna — Layer 3 of 5 ·
+  the F5–A5 vamp"* — one row per song, and each name links straight to
+  that layer on the song's Journey page. Checking off a skill answers in
+  kind: *"You just built more of Luna — that's Layer 3 work."*
+- Three older steps claimed wrong layer counts ("Layer 1 of 4" on a
+  5-layer song) — corrected to match the Journey pages.
+
 ## 2026-07-11 — Warm-ups route through the Daily 5, and jam tracks are one tap away
 
 ### Changed

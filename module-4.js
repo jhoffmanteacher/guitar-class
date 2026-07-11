@@ -8,7 +8,7 @@ SETS.push(
 
   {
     id: 'm4w1',
-    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', note: 'solo over the riff — Layer 4' }, { name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'improvise over its backing track — Layer 4' }, { name: 'Luna', journey: 'tabs/luna.html', note: 'Layer 4 of its Song Journey' }],
+    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', layer: 4, note: 'solo over the riff' }, { name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', layer: 4, note: 'improvise over its backing track' }, { name: 'Luna', journey: 'tabs/luna.html', layer: 4, note: 'Dm pentatonic in its highest box' }],
     label: 'Set 1',
     locked: false,
     module: 'Major / Minor / Blues Pentatonic Scales',
@@ -119,7 +119,7 @@ SETS.push(
             title: 'Play Pattern 1 with alternate picking',
             steps: [
           {
-            text: 'Challenge 1 — Pattern 1 Climb (skills-check warm-up): play Pentatonic Pattern 1 ascending at 60 BPM, one note per beat, alternate picking (down-up-down-up). You\'ve got it when: every note rings clean with no missed picks. This is a warm-up drill — the unit assessment is your improvised solo, held to the backing track\'s pulse — but this is the benchmark lap for your Set 1 check-off. Click "Play all" to hear it.',
+            text: 'Challenge 1 — Pattern 1 Climb (skills-check warm-up): play Pentatonic Pattern 1 ascending at 60 BPM, one note per beat, alternate picking (down-up-down-up). You\'ve got it when: every note rings clean with no missed picks. This is a warm-up drill — the unit assessment is your own 4-bar solo (you\'ll compose it in Set 3), held to the backing track\'s pulse — but this is the benchmark lap for your Set 1 check-off. Click "Play all" to hear it.',
             hint: 'Go as slow as you need. Every note should ring cleanly. Say each note aloud as you play it to connect your ear to your fingers. Set the ⏱ Timer for 2 minutes and loop it.',
             stuck: 'Drop to the lowest two strings only (E and A) and climb just those until they\'re clean, then add the rest one string at a time.',
             levelUp: 'Play it descending too (top to bottom), or nudge the metronome to 80 BPM and keep the picking strictly down-up.',
@@ -256,7 +256,7 @@ SETS.push(
 
     assessment: {
       goal: 'Plays minor pentatonic ascending and descending · Plays major pentatonic on E & A strings · Uses alternate picking · Improvises a 2-bar phrase over a backing track · Identifies minor vs major pentatonic by ear',
-      performance: 'Solo: record yourself improvising 4 bars over the Am backing track (any core song\'s ▶ &#x1F3B5; Backing track button in the &#x1F3B5; Songs list at the bottom of Module 4), then listen back. Goal is one clear phrase, not speed.',
+      performance: 'Solo: record yourself improvising 4 bars over an Am backing track — either "All Along the Watchtower" or "the cure" ▶ &#x1F3B5; Backing track button in the &#x1F3B5; Songs list at the bottom of Module 4 (both are in Am) — then listen back. Goal is one clear phrase, not speed.',
       selfCheck: 'Can you play Pattern 1 up and down without stopping? Can you position it for both Am and Em pentatonic?',
       standards: ['Cr.1a', 'Pr.4a', 'Pr.5a']
     },
@@ -285,7 +285,7 @@ SETS.push(
 
   {
     id: 'm4w2',
-    songThread: [{ name: 'Sweet Child O\' Mine', journey: 'tabs/sweet-child-o-mine.html', note: 'Layer 4 of its Song Journey' }],
+    songThread: [{ name: 'Sweet Child O\' Mine', journey: 'tabs/sweet-child-o-mine.html', layer: 4, note: 'solo territory' }],
     label: 'Set 2',
     locked: false,
     module: 'Major / Minor / Blues Pentatonic Scales',
@@ -304,10 +304,10 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/G-X1RemAzks" target="_blank">Minor Pentatonic Pattern 1 (BC-176) – JustinGuitar</a> (0:00–4:00). As you watch, copy his FEEL on one note — play it loud, then soft — before you worry about the actual notes.',
-            hint: 'Notice how he varies his attack — some notes are loud, some soft. That\'s dynamics. Try to copy his feel, not just his notes.',
+            text: 'Watch: <a href="https://youtu.be/G-X1RemAzks" target="_blank">Minor Pentatonic Pattern 1 (BC-176) – JustinGuitar</a> (0:00–4:00) to refresh the shape. Then YOU add the expression the video doesn\'t: pick one note from the pattern and play it loud, then soft — that difference in volume is dynamics.',
+            hint: 'The video shows the notes; the dynamics are on you. Play one note loud, then whisper-soft, and listen for how much the FEEL changes even though the note doesn\'t.',
             skills: [1, 2],
-            response: { type: 'short', placeholder: 'In your own words: what are dynamics, and how did he use them?' }
+            response: { type: 'short', placeholder: 'Describe your own loud-then-soft experiment: which note, and what changed in the sound?' }
           },
           {
             text: 'Watch: <a href="https://youtu.be/7hDdZAjKBjY" target="_blank">Hammer-Ons & Pull-Offs Explained – JustinGuitar</a> (0:00–3:00). As you watch, try one hammer-on on your own guitar — pick the open D string, then hammer your finger onto the 2nd fret without picking again.',
@@ -490,7 +490,7 @@ SETS.push(
 
     assessment: {
       goal: 'Plays pentatonic across E, A, D, G strings · Crosses strings smoothly without pausing · Performs a hammer-on and pull-off · Plays a call-and-response phrase · Creates a 4-bar melodic solo · Applies to at least 2 course songs',
-      performance: 'Solo check: record a 4-bar call-and-response solo over Am or C major, then listen back and judge: does it resolve at the end?',
+      performance: 'Solo check: record a 4-bar call-and-response solo over the Am jam track, then listen back and judge: does it resolve at the end?',
       selfCheck: 'Can you vary your dynamics on purpose (loud vs soft)? Can you play a clear call-and-response phrase where the "answer" lands on the root?',
       standards: ['Cr.1a', 'Pr.4a', 'Pr.5b']
     },
@@ -514,7 +514,7 @@ SETS.push(
         gotItWhen: 'on playback you can hear the question (call) and the answer (response) — the call feels unresolved, the response feels like it arrives.',
         practice: { type: 'mc', prompt: 'In a call-and-response phrase, where should the RESPONSE end?',
           choices: ['On any random note', 'On the root', 'On a non-root note', 'On the highest note in the scale'], answer: 1 } },
-      { id: 'm4w2-s7', text: 'Name all natural notes on the D string (frets 0–8) and G string (frets 0–8)',
+      { id: 'm4w2-s7', text: 'Name all natural notes on the D string (frets 0–10) and G string (frets 0–10)',
         gotItWhen: 'you can point to any fret 0–10 on D or G and name the note instantly without counting up from the open string.',
         practice: { type: 'mc', prompt: 'On the G string, what note is at fret 5?',
           choices: ['B', 'C', 'D', 'A'], answer: 1 } }
@@ -541,8 +541,8 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/m_IiyJu60-c" target="_blank">Major & Minor Pentatonic Connection – Marty Music</a> (5:00–end). As you watch the theory section, keep one finger on your low E root and notice it never moves — only which note you call "home" changes.',
-            hint: 'This time focus on the theory section. How does he explain the relationship between major and minor pentatonic? Can you see the relative major/minor connection?',
+            text: 'Re-watch the same video from Set 1 — <a href="https://youtu.be/m_IiyJu60-c" target="_blank">Major Pentatonic Scale – Marty Music</a> — this time listening for the major/minor connection. Then prove it on your own neck: play Pattern 1 and call the low E root "home" for major, then treat a different note as "home" and hear the same shape turn minor. Your hand stays parked in one place — only which note you call "home" changes.',
+            hint: 'Same five notes, two names: whichever note you treat as "home" (the root) decides whether it sounds major or minor. Watch for that connection, then prove it on your own neck.',
             skills: [1, 2],
             response: { type: 'short', placeholder: 'Explain the relative major/minor connection in your own words.' }
           },

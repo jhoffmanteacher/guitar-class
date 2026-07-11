@@ -129,7 +129,18 @@ function googleTranslateElementInit(){
         <span class="module-strip-label" id="module-strip-label"></span>
       </div>
       <div class="daily5-panel" id="daily5-panel" hidden></div>
-      <div class="games-panel" id="games-panel" hidden></div>
+      <!-- Guitar Games: a full-screen arcade "page" (own #games URL hash,
+           browser Back exits). Lives inside #app so it can't show pre-auth. -->
+      <div class="games-screen" id="games-screen" hidden>
+        <div class="games-shell">
+          <div class="games-topbar">
+            <button type="button" class="games-exit" onclick="closeGamesScreen()">&larr; Back to practice</button>
+            <div class="games-logo">&#x1F3AE; GUITAR GAMES</div>
+            <span class="games-topbar-spacer"></span>
+          </div>
+          <div class="games-stage"><div class="games-panel" id="games-panel"></div></div>
+        </div>
+      </div>
       <div class="daily5-panel" id="songs-hub-panel" hidden></div>
       <div class="daily5-panel" id="search-panel" hidden></div>
       <div class="week-pills" id="week-pills"></div>

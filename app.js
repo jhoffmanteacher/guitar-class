@@ -227,6 +227,9 @@ function showApp(user){
 
 /* "Start here" onboarding card (Phase 5): shown once on first load only.
    localStorage may be unavailable in private mode — fall back to showing it. */
+function maybeShowApp_gamesHash(){
+  if(location.hash==='#games' && typeof openGamesScreen==='function') openGamesScreen();
+}
 function maybeShowWelcome(){
   let seen=false;
   try{ seen = localStorage.getItem('gc-welcomed')==='1'; }catch(e){}
@@ -1461,12 +1464,22 @@ function buildSet(w){
     .map(s => `<li class="obj-skill-item">${s}</li>`)
     .join('');
   const skills = items ? `<ul class="obj-skill-list">${items}</ul>` : '';
-  /* Song-thread badge: the honest answer to "why am I doing this set?" —
-     each entry is hand-curated to a drill that genuinely builds that song. */
+  /* Song-thread badge: each core song is built LAYER BY LAYER across the
+     course (the Journey pages' shared ladder: 1 Listen · 2 Single Notes ·
+     3 Power Chords · 4 Pentatonic Solo · 5 Open Chords · Luna bonus 6).
+     Show WHICH layer this set builds, one row per song, deep-linked to
+     that layer on the Journey page. */
   const thread = (w.songThread && w.songThread.length)
-    ? `<div class="song-thread">&#x1F3B8; This set unlocks: ${w.songThread.map(t => t.journey
-        ? `<a class="song-thread-link" href="${escAttr(t.journey)}" target="_blank" rel="noopener" title="${escAttr(t.note || 'Open the Song Journey')}">${escHtml(t.name)}</a>`
-        : `<span title="${escAttr(t.note || '')}">${escHtml(t.name)}</span>`).join('<span class="song-thread-sep"> · </span>')}</div>`
+    ? `<div class="song-thread"><div class="song-thread-head">&#x1F3B8; Song Journey — what this set builds</div>${w.songThread.map(t => {
+        const chip = t.layer
+          ? `<span class="st-layer${t.bonus ? ' bonus' : ''}">${t.bonus ? 'Bonus Layer ' + t.layer : 'Layer ' + t.layer + ' of 5'}</span>`
+          : '';
+        const url = t.journey ? (t.layer ? `${t.journey}#layer-${t.layer}` : t.journey) : null;
+        const nameEl = url
+          ? `<a class="song-thread-link" href="${escAttr(url)}" target="_blank" rel="noopener" title="Open this layer on the Song Journey page">${escHtml(t.name)}</a>`
+          : `<span class="song-thread-name">${escHtml(t.name)}</span>`;
+        return `<div class="song-thread-row">${nameEl}${chip}<span class="st-note">${escHtml(t.note || '')}</span></div>`;
+      }).join('')}</div>`
     : '';
   return `<div class="obj-card set-head">${pill}${titleHtml}${skills}${thread}</div>
   <div class="tabs">
@@ -1622,7 +1635,7 @@ function buildStations(w, stationId){
     const firstReal = sections.findIndex(sec => !isTuningWarmup(sec));
     return sections.map((sec,gi)=>{
     if(isTuningWarmup(sec)){
-      return `<div class="daily5-inline">&#x26A1; <strong>Warm up first:</strong> today\u2019s Daily 5 has your tune-up, a finger warm-up, and one drill from this module \u2014 five minutes and your hands are ready. <button type="button" class="daily5-inline-btn" onclick="openDaily5Here()">&#x26A1; Open today\u2019s Daily 5</button></div>`;
+      return `<div class="daily5-inline">&#x26A1; <strong>Tune and warm up first:</strong> today\u2019s Daily 5 has your tune-up, a finger warm-up, and one drill from this module \u2014 five minutes and your hands are ready. <button type="button" class="daily5-inline-btn" onclick="openDaily5Here()">&#x26A1; Open today\u2019s Daily 5</button></div>`;
     }
     const ns = `${baseNs}-sec${gi}`;
     const open = gi===firstReal ? ' open' : '';
@@ -2345,7 +2358,9 @@ function toggleSkill(sid, wid, which){
       const echoEl = document.getElementById('se-'+wid);
       if(echoEl){
         const t = w.songThread[(done - 1) % w.songThread.length];
-        echoEl.textContent = `\u{1F3B8} You can now play more of ${t.name}.`;
+        echoEl.textContent = t.layer
+          ? `\u{1F3B8} You just built more of ${t.name} — that\u2019s ${t.bonus ? 'Bonus ' : ''}Layer ${t.layer} work.`
+          : `\u{1F3B8} You can now play more of ${t.name}.`;
         echoEl.classList.add('show');
         clearTimeout(echoEl._echoT);
         echoEl._echoT = setTimeout(()=>{ echoEl.classList.remove('show'); }, 5000);
@@ -2594,6 +2609,7 @@ document.addEventListener('keydown',e=>{
   ['metro','timer','tuner'].forEach(w=>{ const el=document.getElementById(w+'-popup'); if(el&&el.classList.contains('open')) closePopup(w); });
   const wo=document.getElementById('welcome-overlay'); if(wo&&wo.style.display!=='none') dismissWelcome();
   const vo=document.getElementById('video-overlay'); if(vo&&!vo.hidden) clearPanel();
+  const gs=document.getElementById('games-screen'); if(gs&&!gs.hasAttribute('hidden')&&typeof closeGamesScreen==='function') closeGamesScreen();
 });
 // Keyboard activation for non-<button> controls that carry role="button"
 // (the skill checkboxes and station cards are <div>s for layout reasons).
@@ -2628,9 +2644,16 @@ function loadPanel(type,url,title,subtitle){
   if(type==='youtube'){
     let embedUrl=url;
     const ytMatch=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{11})/);
-    if(ytMatch) embedUrl=`https://www.youtube.com/embed/${ytMatch[1]}?rel=0&modestbranding=1`;
+    if(ytMatch){
+      // carry a ?t=/&start= timestamp into the embed so timed links land right
+      const tMatch=url.match(/[?&](?:t|start)=(\d+)/);
+      embedUrl=`https://www.youtube.com/embed/${ytMatch[1]}?rel=0&modestbranding=1${tMatch?`&start=${tMatch[1]}`:''}`;
+    }
     wrap.className='rp-iframe-wrap rp-youtube';
-    wrap.innerHTML=`<iframe src="${embedUrl}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>`;
+    // Some videos (age-restricted / label-limited) only play on YouTube itself,
+    // and embed failures can't be detected cross-origin — always offer the out.
+    wrap.innerHTML=`<div class="rp-video-box"><iframe src="${embedUrl}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>
+      <div class="rp-embed-fallback">Not playing? Some videos only allow playback on YouTube — <a href="${escAttr(url)}" target="_blank" rel="noopener">watch it there &#x2197;</a></div>`;
   } else if(type==='pdf'){
     wrap.className='rp-iframe-wrap rp-doc';
     wrap.innerHTML=`<iframe src="${url}"></iframe>`;
@@ -2879,9 +2902,9 @@ initBackToTop();
 function closeTopPanels(except){
   ['daily5', 'games', 'songs-hub', 'search'].forEach(k => {
     if(k === except) return;
-    const p = document.getElementById(k + '-panel');
+    const p = document.getElementById(k === 'games' ? 'games-screen' : k + '-panel');
     if(p && !p.hasAttribute('hidden')){
-      if(k === 'games' && typeof gamesClosePanel === 'function'){ gamesClosePanel(); return; }
+      if(k === 'games' && typeof closeGamesScreen === 'function'){ closeGamesScreen(); return; }
       p.setAttribute('hidden', '');
       const b = document.getElementById(k + '-btn');
       if(b) b.setAttribute('aria-expanded', 'false');

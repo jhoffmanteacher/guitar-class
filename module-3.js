@@ -8,7 +8,7 @@ SETS.push(
 
   {
     id: 'm3w1',
-    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', note: 'the riff as power chords — Layer 3' }, { name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'Layer 3 of its Song Journey' }],
+    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', layer: 3, note: 'the riff as power chords' }, { name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', layer: 3, note: 'the loop as power chords' }],
     label: 'Set 1',
     locked: false,
     module: 'Two-Finger Power Chords',
@@ -28,7 +28,7 @@ SETS.push(
             title: 'See the power chord shape move',
             steps: [
           {
-            text: 'Power chord shape — see it move: here are E5, G5, and A5. It\'s the SAME two-finger shape (index on the root, ring two frets up) just slid to a new fret. Press ▶ to hear the root climb E → G → A, then build each shape on your guitar.',
+            text: 'Power chord shape — see it move: here are E5, G5, and A5. It\'s the SAME two-finger shape (index on the root, ring finger two frets up on the next string — for E5 the root is the open low E, so no index finger is needed, just the ring) just slid to a new fret. Press ▶ to hear the root climb E → G → A, then build each shape on your guitar.',
             hint: 'Your index finger names the chord — it sits on the root. The ring finger always lands two frets higher, on the next string. Pause and match each diagram before moving on.',
             skills: [1, 2],
             chords: [
@@ -103,7 +103,7 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 1 — Clean E5: fret an E5 power chord (low E open root + 2nd fret A string) and strum just those two strings — no others. You\'ve got it when: a clean, buzz-free E5 with nothing else ringing.',
-            hint: 'Use your index finger on the root and your ring finger on the 5th. Keep your pinky close. Palm-mute the strings below with the edge of your picking hand.',
+            hint: 'For E5 the root is the OPEN low E — no index finger needed. Just place your ring finger on the A string, 2nd fret (that note is the chord\'s fifth). Keep your pinky close. Palm-mute the strings below with the edge of your picking hand.',
             stuck: 'Pluck the two notes one at a time first — make sure each rings alone — then strum them together.',
             levelUp: 'Lift right off and re-fret the chord 5 times in a row, clean every single time.',
             skills: [1, 3],
@@ -181,7 +181,7 @@ SETS.push(
             title: 'Play a power chord progression in time',
             steps: [
           {
-            text: 'Challenge 6 — Watchtower Loop (your assessment piece): play A5–G5–F5–G5, one strum per beat at 60 BPM. You\'ve got it when: four times through, changing on beat 1 every time, with no stops. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+            text: 'Challenge 6 — Watchtower Loop (your assessment piece): play A5–G5–F5–G5, one bar (4 beats) per chord, one strum per beat at 60 BPM. You\'ve got it when: four times through, changing on beat 1 every time, with no stops. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
             hint: 'A5 = 5th fret E string, G5 = 3rd fret E string, F5 = 1st fret E string. Shift smoothly — aim to land exactly on beat 1. (The original song uses an Am chord, but as a power chord it\'s just A5 — no major or minor.) This is your Set 1 check-off loop — record a lap and listen back.',
             stuck: 'Loop just A5–G5 (frets 5 and 3) until that change is clean, then add F5.',
             levelUp: 'Play it with an eighth-note strum (down-down-up-down-up), or push past 70 BPM.',
@@ -243,7 +243,7 @@ SETS.push(
             title: '⚡ Ear Spark — optional ear bonus',
             steps: [
               {
-                text: '⚡ Ear Spark (optional, 2 min): record yourself playing either a power chord (E5) or the full open E major, a few reps in a shuffled slip order. On playback, call each one "power" or "full" before checking — power chords are hollow, with no major/minor color. Got someone around? Have them play while you look away.'
+                text: '⚡ Ear Spark (optional, 2 min): first, build a full open E major — it\'s your E5 (open low E + A string, 2nd fret) with two notes added: G string, 1st fret and D string, 2nd fret, letting the open B and high e ring too. Now write "power" on a few paper slips and "full" on a few others, shuffle them face-down, and draw one at a time: play E5 for a "power" slip or the full E major for a "full" slip, a few reps. On playback, call each one "power" or "full" before flipping the slip to check — power chords are hollow, with no major/minor color. Got someone around? Have them play while you look away.'
               }
             ]
           }
@@ -284,7 +284,7 @@ SETS.push(
 
   {
     id: 'm3w2',
-    songThread: [{ name: 'Luna', journey: 'tabs/luna.html', note: 'the F5–A5 vamp — Layer 3' }, { name: 'Sweet Child O\' Mine', journey: 'tabs/sweet-child-o-mine.html', note: 'D5–C5–G5 — Layer 3 and your assessment piece' }, { name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'the A5–G5–F5 loop — Layer 3' }, { name: '"the cure"', journey: 'tabs/the-cure.html', note: 'Layer 3 of its Song Journey' }],
+    songThread: [{ name: 'Luna', journey: 'tabs/luna.html', layer: 3, note: 'the F5–A5 vamp' }, { name: 'Sweet Child O\' Mine', journey: 'tabs/sweet-child-o-mine.html', layer: 3, note: 'D5–C5–G5 — your assessment piece' }, { name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', layer: 3, note: 'the A5–G5–F5 loop' }, { name: '"the cure"', journey: 'tabs/the-cure.html', layer: 3, note: 'the changes as power chords' }],
     label: 'Set 2',
     locked: false,
     module: 'Two-Finger Power Chords',
@@ -324,7 +324,7 @@ SETS.push(
             response: { type: 'short', placeholder: 'Which song did you try to play along with? What was hardest about it?' }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/q8SHmo1-dac" target="_blank">3 Tips to NAIL Alternate Picking (build speed) – JustinGuitar</a> (0:00–3:00).',
+            text: 'Watch: <a href="https://youtu.be/q8SHmo1-dac" target="_blank">3 Tips to NAIL Alternate Picking (build speed) – JustinGuitar</a> (0:00–3:00). Alternate picking means strict down-up-down-up — every downstroke is followed by an upstroke, so the pick never travels the same way twice in a row. Watch his tempo-step method for building speed.',
             hint: 'Notice his method for building tempo gradually. As he describes it, try it: play your "Watchtower" loop at 60 BPM, then bump to 65, then 70.',
             skills: [1, 2],
             response: { type: 'short', placeholder: 'In one sentence, describe his method for building up tempo gradually.' }
@@ -361,7 +361,7 @@ SETS.push(
             title: 'Read and clap the rhythm',
             steps: [
           {
-            text: 'Challenge — Clap & Count: before you play, read the rhythm. Clap and count a 4-bar line out loud — whole notes (hold 4 beats), half notes (hold 2 beats), quarter notes (one clap each), and straight eighths ("1 + 2 + 3 + 4 +"). You\'ve got it when: you can clap all 4 bars in time with the metronome at 70 BPM and name which notes are whole, half, quarter, and eighth.',
+            text: 'Challenge — Clap & Count: before you play, read this 4-bar rhythm line. Bar 1 = one whole note (clap once, hold all 4 beats). Bar 2 = two half notes (clap on beats 1 and 3, each held 2 beats). Bar 3 = four quarter notes (one clap per beat: 1, 2, 3, 4). Bar 4 = eight straight eighths (two claps per beat: "1 + 2 + 3 + 4 +"). Clap and count all 4 bars out loud. You\'ve got it when: you can clap all 4 bars in time with the metronome at 70 BPM and name which notes are whole, half, quarter, and eighth.',
             hint: 'Whole note = one clap held for a full bar. Half note = one clap held for two beats. Eighth notes = two even claps per beat. The straight-eighths strum you play (down-down-up-down-up) is just eighth notes — same rhythm, on the guitar.',
             stuck: 'Clap quarter notes on every beat first (1 2 3 4), then split one beat into eighths ("1 +") and feel the difference.',
             levelUp: 'Clap one bar of eighths, one bar of quarters, alternating, without losing the count.',
@@ -385,7 +385,7 @@ SETS.push(
             ]
           },
           {
-            text: 'Challenge 2 — Eighth-Note Strum (your assessment piece): play the loop with straight eighths (down-down-up-down-up), counting "1 + 2 + 3 + 4 +". You\'ve got it when: eight bars clean and steady at 60, then climb the ladder and hold 80 BPM for at least 15 seconds — that\'s the module bar.',
+            text: 'Challenge 2 — Eighth-Note Strum (one of your assessment pieces): play the A5–D5–E5 loop (two bars each) with straight eighths (down-down-up-down-up), counting "1 + 2 + 3 + 4 +". You\'ve got it when: eight bars clean and steady at 60, then climb the ladder and hold 80 BPM for at least 15 seconds — that\'s the module bar.',
             hint: 'Start at 60 BPM. If it feels easy, bump up 5 BPM. The module-end self-check is an 8-bar progression changing on beat 1 at 60, then holding 80 BPM for 15 seconds with clean muting — this is that piece.',
             stuck: 'Strum down-only on each beat first ("1 2 3 4"), then add the up-strums one at a time.',
             levelUp: 'Hold it clean at 80 BPM, or play it straight through a full song excerpt from the songs list.',
@@ -406,7 +406,7 @@ SETS.push(
             title: 'Optional: add octave doubling',
             steps: [
           {
-            text: 'Challenge 3 — Octave Add-On (give it a go!): add your pinky two frets above your ring finger to make a 3-note power chord. No score — just try it and notice how the sound changes.',
+            text: 'Challenge 4 — Octave Add-On (give it a go!): add your pinky on the next string, at the same fret as your ring finger, to make a 3-note power chord. No score — just try it and notice how the sound changes.',
             hint: 'This is optional. If your power chord sounds clean as is, keep it. Only add the 3rd finger if you can do it without buzzing.',
             skills: [5]
           }
@@ -535,8 +535,8 @@ SETS.push(
         practice: { type: 'mc', prompt: 'A song calls for G5 then C5. Where does your index finger go for each?',
           choices: ['Both on E string', 'Both on A string', 'G5 on E (fret 3), C5 on A (fret 3)', 'G5 on A, C5 on E'], answer: 2 } },
       { id: 'm3w2-s5', text: 'Optional: add 3rd finger octave doubling to the power chord shape',
-        gotItWhen: 'your pinky lands two frets above your ring finger and all three notes ring cleanly — no buzz, no muffled string.',
-        practice: { type: 'mc', prompt: 'You add your pinky two frets above your ring finger. What interval did you just add to the chord?',
+        gotItWhen: 'your pinky lands on the next string at the same fret as your ring finger and all three notes ring cleanly — no buzz, no muffled string.',
+        practice: { type: 'mc', prompt: 'You add your pinky on the next string, at the same fret as your ring finger. What interval did you just add to the chord?',
           choices: ['A 3rd', 'A 5th', 'An octave (same note, higher)', 'A 7th'], answer: 2 } },
       { id: 'm3w2-s6', text: 'Clap and count a 4-bar rhythm, and name whole, half, quarter, and eighth notes',
         gotItWhen: 'you can clap a 4-bar line in time with the metronome and say which notes are whole, half, quarter, or eighth — and name your strum as "straight eighths".',

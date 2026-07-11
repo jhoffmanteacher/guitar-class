@@ -1035,26 +1035,43 @@ function fretRender(){
    check starting) goes through gamesStopMic() so the mic never lingers.
    ════════════════════════════════════════════════════════════════════ */
 
+/* The games live on their own full-screen "page": #games in the URL, the
+   browser Back button exits, and the look is its own (arcade shell around
+   a normal-theme stage so the game internals render as designed). */
 function toggleGames(){
-  const p = document.getElementById('games-panel');
-  const btn = document.getElementById('games-btn');
-  if (!p) return;
-  const open = p.hasAttribute('hidden');
-  if (open){
-    if (typeof closeTopPanels === 'function') closeTopPanels('games');
-    p.removeAttribute('hidden'); gamesShow('hub');
-  }
-  else gamesClosePanel();
-  if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  const screen = document.getElementById('games-screen');
+  if (!screen) return;
+  if (screen.hasAttribute('hidden')) location.hash = 'games';
+  else closeGamesScreen();
 }
-
+function openGamesScreen(){
+  const screen = document.getElementById('games-screen');
+  if (!screen || !screen.hasAttribute('hidden')) return;
+  if (typeof closeTopPanels === 'function') closeTopPanels('games');
+  screen.removeAttribute('hidden');
+  document.body.classList.add('games-open');
+  const btn = document.getElementById('games-btn');
+  if (btn) btn.setAttribute('aria-expanded', 'true');
+  gamesShow('hub');
+}
+function closeGamesScreen(){
+  if (location.hash === '#games'){ location.hash = ''; return; }  // hashchange finishes the job
+  gamesClosePanel();
+}
 function gamesClosePanel(){
   gamesStopMic();
+  const screen = document.getElementById('games-screen');
+  if (screen) screen.setAttribute('hidden', '');
+  document.body.classList.remove('games-open');
   const p = document.getElementById('games-panel');
-  if (p){ p.setAttribute('hidden', ''); p.innerHTML = ''; }
+  if (p) p.innerHTML = '';
   const btn = document.getElementById('games-btn');
   if (btn) btn.setAttribute('aria-expanded', 'false');
 }
+window.addEventListener('hashchange', () => {
+  if (location.hash === '#games') openGamesScreen();
+  else gamesClosePanel();
+});
 
 /* Stops whichever game holds the mic. Called by app.js when the tuner
    opens, and by coachStartCheck when a Coach check starts. A stopped game
@@ -1063,31 +1080,41 @@ function gamesClosePanel(){
 function gamesStopMic(){
   fretStop();
   ccStop();
+  const screen = document.getElementById('games-screen');
   const p = document.getElementById('games-panel');
-  if (p && !p.hasAttribute('hidden') &&
+  if (screen && !screen.hasAttribute('hidden') && p &&
       (document.getElementById('fret-body') || document.getElementById('cc-body'))){
     gamesRenderHub(p);
   }
 }
 
 function gamesHeadHtml(title, inGame){
-  return `<div class="daily5-head"><span>${title}</span><span class="games-head-actions">` +
+  return `<div class="games-game-head"><span class="games-game-title">${title}</span>` +
     (inGame ? `<button type="button" class="games-back" onclick="gamesShow('hub')">&#x2190; All games</button>` : '') +
-    `<button type="button" class="tp-close" onclick="gamesClosePanel()" aria-label="Close games">&#x2715;</button></span></div>`;
+    `</div>`;
 }
 
 function gamesRenderHub(p){
-  p.innerHTML = gamesHeadHtml('&#x1F3AE; Games — your guitar is the controller', false) +
-    `<div class="games-grid">
-       <button type="button" class="games-card" onclick="gamesShow('fret')">
+  let ccBest = 0;
+  try {
+    for (const pr of CC_PROGRESSIONS){
+      ccBest = Math.max(ccBest, parseInt(sessionStorage.getItem(ccBestKey(pr)), 10) || 0);
+    }
+  } catch(e){}
+  const ccChip = ccBest ? `<span class="games-card-best">&#x1F3C6; best today: ${ccBest} BPM</span>` : '';
+  p.innerHTML =
+    `<div class="games-tagline">Your guitar is the controller.</div>
+     <div class="games-grid">
+       <button type="button" class="games-card gc-hunt" onclick="gamesShow('fret')">
          <span class="games-card-ico">&#x1F3AF;</span>
          <span class="games-card-title">Note Hunt</span>
          <span class="games-card-desc">Find named notes on the fretboard — the mic checks you. Five levels, from open strings to all six.</span>
        </button>
-       <button type="button" class="games-card" onclick="gamesShow('cc')">
+       <button type="button" class="games-card gc-change" onclick="gamesShow('cc')">
          <span class="games-card-ico">&#x1F501;</span>
          <span class="games-card-title">Change Up</span>
-         <span class="games-card-desc">Chord changes on the clock. Two chords back and forth, then three, then four — and push the tempo up.</span>
+         <span class="games-card-desc">Chord changes on the clock — two chords, then three, then four. Beat the tempo ladder.</span>
+         ${ccChip}
        </button>
      </div>
      ${COACH_FOOT_HTML}`;

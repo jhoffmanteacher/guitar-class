@@ -139,7 +139,7 @@ SETS.push(
             title: 'Move the thumb between bass strings',
             steps: [
           {
-            text: 'Challenge 3 — Moving Bass: pluck the A string with p then G-B-e with i-m-a, then the D string with p, fingers staying put. You\'ve got it when: only the thumb moves to find each bass note — the i-m-a fingers stay anchored.',
+            text: 'Challenge 3 — Moving Bass: pluck the low E string with p then G-B-e with i-m-a, then the A string, then the D string with p — fingers staying put. You\'ve got it when: only the thumb moves to find each bass note — the i-m-a fingers stay anchored.',
             hint: 'This is how you change chords later — the thumb finds the bass note of the chord (root) while the fingers stay anchored on the treble strings.',
             stuck: 'Move just the thumb E → A → D with the fingers resting (not plucking) on G-B-e, until the thumb finds each bass without looking.',
             levelUp: 'Call out the bass string a beat before you play it, or shift E → A → D → A → E in a continuous loop without stopping.',
@@ -152,7 +152,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — "the cure", first touch: fret Am and pluck p (A string) · i · m · a, one note per beat at 60 BPM — that soft broken-chord sound IS the verse feel of "the cure". Then change to C: your thumb\'s bass note doesn\'t even move — C\'s root lives on the A string too. You\'ve got it when: four clean p-i-m-a laps on Am and four on C, every note even.',
+                text: 'Challenge — "the cure", first touch: fret Am and pluck p (A string) · i · m · a, one note per beat at 60 BPM — that soft broken-chord sound IS the verse feel of "the cure". Then change to C: your thumb stays on the same bass STRING — C\'s root lives on the A string too, just at the 3rd fret, where your ring finger now supplies the new bass note. You\'ve got it when: four clean p-i-m-a laps on Am and four on C, every note even.',
                 hint: 'Olivia\'s verse is fingerpicked for exactly this reason — soft and close. Wrist stays arched; only the fingers move.',
                 stuck: 'Run p-i-m-a on open strings first (no chord at all), then add the Am under it.',
                 levelUp: 'Add the F: the thumb travels to the D string — and now you have the song\'s whole verse loop (Am · C · F).',
@@ -207,7 +207,7 @@ SETS.push(
         practice: { type: 'playSeq', label: 'p-i-m-a (low E · G · B · e) at 60 BPM', bpm: 60,
           notes: [40, 55, 59, 64] } },
       { id: 'm8w1-s6', text: 'Move the thumb to a different bass string while i-m-a stay on G, B, e',
-        gotItWhen: 'when the chord changes from Am to C, your thumb shifts from A string to A string (or wherever the new root is) while your i-m-a fingers stay anchored on G-B-e the whole time.' }
+        gotItWhen: 'when the chord changes from Em to Am, your thumb shifts from the low E string to the A string (finding the new root) while your i-m-a fingers stay anchored on G-B-e the whole time.' }
     ]
   },
 
@@ -311,7 +311,7 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 1 — Em Pattern: fret Em and play the 6-note pattern p-i-m-a-m-i at 60 BPM, one note per click, for 8 bars. You\'ve got it when: a steady, even pulse with every note ringing clean.',
-            hint: 'Count "1 + 2 + 3 + 4 +" and play 6 notes per bar — meaning some notes fall on numbers, some on "+"s. Don\'t worry about exact counting yet; just keep the pulse steady.',
+            hint: 'Count "1-2-3-4-5-6" — one number per pluck, one pluck per click — and let the six notes make one lap. Don\'t worry about exact rhythm yet; just keep the pulse steady.',
             stuck: 'Drop the metronome and play the pattern as slowly as you need to — get the finger order automatic first, speed comes after.',
             levelUp: 'Play 8 bars without a single uneven note, or close your eyes and keep the pulse rock-steady.',
             skills: [1, 2, 3],
@@ -362,7 +362,7 @@ SETS.push(
               {
                 text: 'Challenge — "the cure", verse: play the 6-note p-i-m-a-m-i pattern over the verse loop — Am · C · F, one bar each at 60 BPM. Thumb: A string for Am and C, D string for F; i-m-a never leave G-B-e. You\'ve got it when: one full lap with the pattern unbroken at both changes.',
                 hint: 'Two of the three bass notes live on the SAME string — only the F asks the thumb to travel. The fingers never move at all.',
-                stuck: 'Loop Am → C until the thumb finds fret 3 without looking, then add the F.',
+                stuck: 'Loop Am → C until your fretting hand lands on fret 3 without looking — the thumb just keeps plucking the A string — then add the F.',
                 levelUp: 'Hum the melody over your own picking — this is the actual sound of the record.',
                 skills: [4, 6],
                 playSeq: { label: '"the cure" verse bass roots — Am · C · F', bpm: 60, notes: [45, 48, 53] },
@@ -424,7 +424,7 @@ SETS.push(
 
   {
     id: 'm8w3',
-    songThread: [{ name: 'Let It Be', journey: 'tabs/let-it-be.html', note: 'fingerpicked — Layer 4 of 4' }],
+    songThread: [{ name: 'Let It Be', journey: 'tabs/let-it-be.html', note: 'the fingerpicked arrangement' }],
     label: 'Set 3',
     locked: false,
     module: 'Finger Picking',
@@ -553,7 +553,7 @@ SETS.push(
             title: 'Try Travis picking',
             steps: [
           {
-            text: 'Challenge 4 — Travis Thumb: warm up Travis picking on C — thumb alternating the A string (beats 1 & 3) and G string (beats 2 & 4), thumb-only at 60 BPM. You\'ve got it when: a steady, even alternating thumb — then add an i-pluck on the B string on each "+".',
+            text: 'Challenge 4 — Travis Thumb: warm up Travis picking on C — thumb alternating the A string (beats 1 & 3) and G string (beats 2 & 4), thumb-only at 60 BPM. Notice Travis reassigns your fingers on purpose: the thumb now claims the G string too, and the i finger takes the B — a deliberate break from Set 1\'s one-finger-per-string rule. You\'ve got it when: a steady, even alternating thumb — then add an i-pluck on the B string on each "+".',
             hint: 'Just the thumb! Once that\'s steady, add an i-pluck on the B string on the "+" of each beat. Travis picking adds fingers ON TOP of an already-grooving thumb.',
             stuck: 'Thumb only, no fingers, as slow as you need — get the alternating bass rock-steady before adding anything on top.',
             levelUp: 'Add the i-pluck on every "+", or carry the alternating thumb through a C → Am change without it stumbling.',
@@ -565,8 +565,8 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Let It Be, fingerpicked: play the four-chord verse — C · G · Am · F — with the 6-note pattern over each chord, one bar each at 60 BPM. Thumb roots: C and Am on the A string, G on the low E, F on the D string. You\'ve got it when: a full verse with the pattern unbroken — the same song you strummed in Units 5 and 6, now a lullaby. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 4</a>.',
-                hint: 'Anticipate like Challenge 2 taught you: the fretting hand starts moving on the pattern\'s 6th note, so beat 1 always lands ready.',
+                text: 'Challenge — Let It Be, fingerpicked: play the four-chord verse — C · G · Am · F — with the 6-note pattern over each chord, one bar each at 60 BPM. Thumb roots: C and Am on the A string, G on the low E, F on the D string. You\'ve got it when: a full verse with the pattern unbroken — the same song you strummed in Units 5 and 6, now a lullaby. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: the fingerstyle arrangement</a>.',
+                hint: 'Anticipate like the second lesson video showed you: the fretting hand starts moving on the pattern\'s 6th note, so beat 1 always lands ready.',
                 stuck: 'Strum each chord once to check it rings, then loop just C → G — the only change where the thumb crosses to the low E.',
                 levelUp: 'Add a pinch (p + a together) on beat 1 of each chord and hear the verse bloom, or sing it over your own picking.',
                 skills: [1, 3],
@@ -578,7 +578,7 @@ SETS.push(
             title: 'Perform a fingerpicked song',
             steps: [
           {
-            text: 'Challenge 5 — Perform It (your assessment piece — give it a go!): pick one song — "the cure", "Hallelujah", "Let It Be" (verse), or a choice-list song — and play it through 3 times without stopping, even with mistakes. No score — practice the recovery; keep going no matter what.',
+            text: 'Challenge 5 — Perform It (your assessment piece — give it a go!): pick one song — "the cure", "Hallelujah" (from Module 5\'s song list), "Let It Be" (verse), or a choice-list song — and play it through 3 times without stopping, even with mistakes. No score — practice the recovery; keep going no matter what.',
             hint: 'Mistakes are normal — stopping is what makes them sound bad, so keep going and practice the recovery. No one to play for? Record yourself on your phone or device and watch it back — the playback shows you exactly where the pattern broke.',
             stuck: 'Pick the shortest, slowest song you know (Hallelujah is forgiving) and play just the verse — finishing matters more than difficulty.',
             levelUp: 'Perform standing up, or play it for family or a friend and keep going through any mistake.',
@@ -601,7 +601,7 @@ SETS.push(
 
     assessment: {
       goal: 'Fingerpicks through a full 4-chord progression · Pattern stays steady through chord changes · Demonstrates Travis picking (alternating bass thumb) · Performs one full fingerpicked song from start to finish',
-      performance: 'Perform one full song from the song list using fingerpicking from start to finish — for family, a friend, or a recording you share. Listen back for pattern consistency, chord changes, and timing.',
+      performance: 'Perform one full song — from this module\'s song list or another fingerpicked song you know (like "Hallelujah" from Module 5) — using fingerpicking from start to finish, for family, a friend, or a recording you share. Listen back for pattern consistency, chord changes, and timing.',
       selfCheck: 'Can you play a 4-chord song with fingerpicking and not break the pattern at any chord change? Can your thumb alternate between two bass strings for 4 bars without confusion?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
     },
@@ -622,7 +622,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'When should your FRETTING hand start moving toward the next chord?',
           choices: ['On the first beat of the new bar', 'On the LAST note of the current bar — anticipate', 'Halfway through the current bar', 'Never — wait for the change'], answer: 1 } },
       { id: 'm8w3-s5', text: 'Play a full verse of a fingerpicked song from start to finish',
-        gotItWhen: 'you can fingerpick through a complete verse of "House of the Rising Sun" or "Hallelujah" without stopping — mistakes ok, but you keep going.' },
+        gotItWhen: 'you can fingerpick through a complete verse of "House of the Rising Sun" or "Hallelujah" (from Module 5\'s song list) without stopping — mistakes ok, but you keep going.' },
       { id: 'm8w3-s6', text: 'Perform a fingerpicked song for an audience (family, a friend, or a recording you share)',
         gotItWhen: 'you can perform your chosen song for someone — in person or on a recording you share — all the way through, with fingerpicking, and recover from any mistakes without breaking down.' }
     ]

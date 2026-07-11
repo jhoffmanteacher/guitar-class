@@ -18,7 +18,7 @@ SETS.push(
 
   {
     id: 'm2w1',
-    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', note: 'the riff lives on your low E string — Layer 2' }],
+    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', layer: 2, note: 'the riff on your low E string' }],
     label: 'Set 1',
     locked: false,
     module: 'Notes on the E & A Strings',
@@ -63,9 +63,10 @@ SETS.push(
             title: 'Listen and find notes by ear',
             steps: [
               {
-                text: 'Listen to "Happy Birthday" — can you identify which notes of the melody live on the E or A string? Hum along and try to find the notes.',
+                text: 'Listen to the opening of "Happy Birthday" — press ▶ to hear it, then hum along and see if you can identify which notes of the melody live on the E or A string.',
                 hint: 'Don\'t worry about playing it yet — just train your ear to connect sounds to strings.',
                 skills: [5],
+                playSeq: { label: 'Hear the opening', bpm: 60, notes: [40, 40, 42, 40, 45, 44] },
                 response: { type: 'short', placeholder: 'Which note(s) did you find first? Where on the fretboard?' }
               }
             ]
@@ -112,7 +113,7 @@ SETS.push(
         title: 'Practice station — fretboard drill',
         sections: [
           {
-            title: 'Warm-up — tune up first (Module 1 review)',
+            title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
                 text: 'Before today\'s notes: tune all 6 strings to green, low to high — E A D G B e — and say each string name as you go. Beat your time from last session. Click "Hear all 6 strings" for the target pitches.',
@@ -266,7 +267,7 @@ SETS.push(
 
   {
     id: 'm2w2',
-    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'the bass-note line — Layer 2 and your assessment piece' }, { name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', note: 'Layer 2 — the riff, note by note' }, { name: 'Sweet Child O\' Mine', journey: 'tabs/sweet-child-o-mine.html', note: 'Layer 2 of its Song Journey' }, { name: 'Luna', journey: 'tabs/luna.html', note: 'Layer 2 of its Song Journey' }, { name: 'Let It Be', journey: 'tabs/let-it-be.html', note: 'the C–G–A–F bass skeleton you\'ll build on in Module 5' }],
+    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', layer: 2, note: 'the bass-note line — your assessment piece' }, { name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', layer: 2, note: 'the riff, note by note' }, { name: 'Sweet Child O\' Mine', journey: 'tabs/sweet-child-o-mine.html', layer: 2, note: 'the bass roots' }, { name: 'Luna', journey: 'tabs/luna.html', layer: 2, note: 'the single-note line' }, { name: 'Let It Be', journey: 'tabs/let-it-be.html', layer: 2, note: 'the C–G–A–F bass skeleton' }],
     label: 'Set 2',
     locked: false,
     module: 'Notes on the E & A Strings',
@@ -361,7 +362,7 @@ SETS.push(
                 ] }
               },
               {
-                text: 'Try reading the TAB for "Ode to Joy" or "Mary Had a Little Lamb" from the songs section. Play it through at least once — slow and clean. Click a song below to open its TAB.',
+                text: 'Try reading the TAB for "Ode to Joy" or "Mary Had a Little Lamb". Play it through at least once — slow and clean. Click a song below to open its TAB.',
                 hint: 'If you get stuck on a note, use your note-name chart to find it. TAB numbers = fret numbers.',
                 skills: [4, 5],
                 tabs: [
@@ -548,8 +549,12 @@ SETS.push(
               caption: '"Sweet Child O\' Mine" — verse bass roots · E & A strings · 60 BPM',
               notes: [
                 { string: 'A', fret: 5, note: 'D', midi: 50 },
+                { string: 'A', fret: 5, note: 'D', midi: 50 },
+                { string: 'A', fret: 3, note: 'C', midi: 48 },
                 { string: 'A', fret: 3, note: 'C', midi: 48 },
                 { string: 'E', fret: 3, note: 'G', midi: 43 },
+                { string: 'E', fret: 3, note: 'G', midi: 43 },
+                { string: 'A', fret: 5, note: 'D', midi: 50 },
                 { string: 'A', fret: 5, note: 'D', midi: 50 }
               ]
             }
@@ -606,7 +611,7 @@ SETS.push(
               },
               {
                 text: 'Challenge — "the cure," root line: play the roots of Olivia Rodrigo\'s "the cure" across both strings — A · C · D · F · G — two beats per note at 60 BPM. You\'ve got it when: two clean laps crossing between the A and E strings without looking down.',
-                hint: 'This is the skeleton of the song — next unit these exact roots become power chords. Learn where they live now and Unit 3 is half done.',
+                hint: 'This is the skeleton of the song — next module these exact roots become power chords. Learn where they live now and Module 3 is half done.',
                 stuck: 'Split it by string: A · C · D on the A string first, then F · G on the low E, then join them.',
                 levelUp: 'Play the lap with the play button keeping the beat, or say each note name as you land it. Got someone around? Have them clap the beat instead.',
                 skills: [1, 2, 4, 5, 6],
@@ -614,9 +619,14 @@ SETS.push(
                   caption: '"the cure" — root line (teaching arrangement, no capo) · 60 BPM',
                   notes: [
                     { string: 'A', fret: 0, note: 'A', midi: 45 },
+                    { string: 'A', fret: 0, note: 'A', midi: 45 },
+                    { string: 'A', fret: 3, note: 'C', midi: 48 },
                     { string: 'A', fret: 3, note: 'C', midi: 48 },
                     { string: 'A', fret: 5, note: 'D', midi: 50 },
+                    { string: 'A', fret: 5, note: 'D', midi: 50 },
                     { string: 'E', fret: 1, note: 'F', midi: 41 },
+                    { string: 'E', fret: 1, note: 'F', midi: 41 },
+                    { string: 'E', fret: 3, note: 'G', midi: 43 },
                     { string: 'E', fret: 3, note: 'G', midi: 43 }
                   ]
                 },
@@ -626,7 +636,7 @@ SETS.push(
                 text: 'Challenge — Luna, bass roots: Luna rides two chords — F and Am — so its bassline is two notes. Play F (low E string, fret 1) and A (open A string) as single notes, two big beats each: the song is in 6/8, so feel the pulse in 2 and land each note on a downbeat. You\'ve got it when: four laps of F → A, both notes clean with no buzz, locked to the downbeats at 60 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
                 hint: 'Fret 1 is the tightest squeeze on the neck — press right behind the fret wire with the tip of your index and the F will ring clean.',
                 stuck: 'Park on just the F: pluck, listen, adjust, until five ring in a row. Then add the open A — that one\'s free.',
-                levelUp: 'Trade the open A for fret 5 on the low E — same note, new position. The simplified requinto intro line is coming to this page soon.'
+                levelUp: 'Trade the open A for fret 5 on the low E — same note, new position. Want the simplified requinto intro line? It\'s the bonus Layer 6 on the Luna Song Journey.'
               },
               {
                 text: 'Challenge — Let It Be, bass line: play the roots of "Let It Be" (Beatles) on the low E & A strings — C · G · A · F, two beats each at 60 BPM. These four notes are the bass skeleton of the whole song — you\'ll play "Let It Be" as a core song starting in Module 5, so learn where its roots live now. You\'ve got it when: two clean laps of C–G–A–F, every note ringing, each landing on the beat.',
@@ -727,7 +737,7 @@ MODULE_SONGS[2] = [
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Play verse bass roots on E & A strings · intro riff = Module 7 stretch goal', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Play the bassline as single-note roots (capo 1 · Am–C–Dm–F–G/B)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Play the bassline as single-note roots (no capo · A C D F G)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Happy Birthday"', meta: 'Play full melody on E & A strings from TAB', type: 'Supp', core: false,

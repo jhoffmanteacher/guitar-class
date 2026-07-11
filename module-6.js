@@ -16,7 +16,7 @@ SETS.push(
     unit: 'Module 6 · Strumming Patterns with Chords',
     title: 'Set 1',
     subtitle: 'The down-up foundation · 8th-note pulse · Counting "1 + 2 + 3 + 4 +"',
-    objective: 'I CAN play a steady down-up 8th-note strum pattern over open chords at 70+ BPM without losing the beat.',
+    objective: 'I CAN play a steady down-up 8th-note strum pattern over open chords without losing the beat — winning it at 60 BPM, then pushing to pass at 70.',
     skillFocus: 'Keeping a steady down-up strum · Counting 8th notes · Strumming through chord changes',
     comingSoon: false,
 
@@ -226,12 +226,12 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/6LmQCdt_ZhQ" target="_blank">The Most Common Strumming Pattern of All Time! – JustinGuitar</a> (0:00–4:00). Job while you watch: air-strum along and find the one downstroke he skips — the wrist still swings down, but the pick misses on purpose.',
+            text: 'Watch: <a href="https://youtu.be/6LmQCdt_ZhQ" target="_blank">The Most Common Strumming Pattern of All Time! – JustinGuitar</a> (0:00–4:00). Job while you watch: air-strum along and find the two moments the pick misses — the wrist keeps swinging, but on purpose it skips one upstroke and one downstroke.',
             hint: 'Justin calls this "old faithful" — D-DU-UDU. Listen for which strums he skips: the wrist still moves, but the pick doesn\'t hit the strings on those beats.',
             skills: [1, 2],
-            response: { type: 'mc', prompt: 'In the D-DU-UDU pattern, on which count is the strum SKIPPED (no strings hit, but wrist still moves)?',
+            response: { type: 'mc', prompt: 'In the D-DU-UDU pattern, which UPSTROKE is skipped (the wrist swings up but the pick misses)?',
               answer: 0,
-              explain: 'Reading "D - DU - UDU" over "1 + 2 + 3 + 4 +", the "+" of beat 1 is skipped — the wrist swings up but the pick misses on purpose.',
+              explain: 'Reading "D - DU - UDU" over "1 + 2 + 3 + 4 +", the skipped upstroke is the "+" of beat 1 — the wrist swings up but the pick misses on purpose. (Beat 3, a downstroke, is the other skip.)',
               choices: [
               'The "+" of beat 1',
               'Beat 2 (the third strum)',
@@ -254,7 +254,7 @@ SETS.push(
             text: 'Listen to "I\'m Yours" by Jason Mraz. Tap the D-DU-UDU pattern on your leg along with the song. Where does the pattern repeat?',
             hint: 'The pattern is one bar long and repeats throughout the whole song. Once you have it, you have most of his song.',
             skills: [4, 5],
-            response: { type: 'mc', prompt: 'A one-bar strum pattern in 4/4 time covers how many counts?',
+            response: { type: 'mc', prompt: 'A one-bar strum pattern in 4/4 time covers how many BEATS?',
               answer: 1,
               explain: 'The top number of 4/4 means 4 beats (counts) per bar — "1, 2, 3, 4." Add the "+" upbeats and you get 8 eighth-note slots, but the bar is 4 counts.',
               choices: [
@@ -324,7 +324,7 @@ SETS.push(
             stuck: 'Drop the accents for now and just nail the D-DU-UDU shape clean for 8 bars; add the louder 2-and-4 hits once the pattern runs on autopilot.',
             levelUp: 'Move it to G or D, or push to 75 BPM with the backbeat still landing.',
             skills: [2, 4, 5],
-            playSeq: { label: 'Hear Em with accent on 2 and 4', bpm: 60, notes: [40, 40, 47, 40, 40, 47] }
+            playSeq: { label: 'Hear Em with accent on 2 and 4', bpm: 60, notes: [40, 47, 40, 47] }
           }
             ]
           },
@@ -350,7 +350,7 @@ SETS.push(
                 stuck: 'Play the loop with one strum per bar until the changes are clean, then layer the pattern back on.',
                 levelUp: 'Accent beats 2 and 4 for the record\'s bounce, or push to 75 BPM.',
                 skills: [4, 5],
-                playSeq: { label: '"I\'m Yours" verse roots (G · D · Em · C)', bpm: 70, notes: [43, 50, 40, 48] }
+                playSeq: { label: '"I\'m Yours" verse roots (G · D · Em · C)', bpm: 60, notes: [43, 50, 40, 48] }
               },
               {
                 text: 'Challenge — Oye Mi Amor, verse: the verse rides Bm · G — use the small Bm (top four strings, no barre) and play one bar of each with D-DU-UDU at 60 BPM. You\'ve got it when: four laps with the pattern unbroken and beats 2 and 4 accented so it pushes like the record.',
@@ -397,7 +397,7 @@ SETS.push(
       { id: 'm6w2-s1', text: 'Play the D-DU-UDU pattern cleanly at 60 BPM',
         gotItWhen: 'you can play D-DU-UDU on a single chord at 60 BPM for 4 bars in a row without breaking the pattern or stopping the wrist.',
         practice: { type: 'mc', prompt: 'How would you read D-DU-UDU out loud as a count? (one of these matches)',
-          choices: ['1, 2-+, +-3-+', '1-+, 2, 3, 4', 'Just count "1, 2, 3, 4"', '1-2-3-4-5-6'], answer: 0 } },
+          choices: ['1, 2-+, +-4-+', '1, 2-+, +-3-+', 'Just count "1, 2, 3, 4"', '1-2-3-4-5-6'], answer: 0 } },
       { id: 'm6w2-s2', text: 'Skip a downstroke while keeping the wrist in motion',
         gotItWhen: 'on the "skipped" strum in the pattern, your wrist still travels down — only the pick doesn\'t touch the strings. A quick phone video (or a mirror) shows the motion clearly.',
         practice: { type: 'mc', prompt: 'When you "skip" a strum in the D-DU-UDU pattern, what does your wrist do?',
@@ -473,10 +473,10 @@ SETS.push(
             ]
           },
           {
-            title: 'Form the new C chord',
+            title: 'Refresh the C chord',
             steps: [
           {
-            text: 'The progressions today add one new shape: <strong>C</strong>. Form it from the diagram and strum the top five strings (the low E is muted) until it rings clean.',
+            text: 'The progressions today lean on <strong>C</strong> — your shape from Module 5, back again. Form it from the diagram and strum the top five strings (the low E is muted) until it rings clean.',
             hint: 'C skips the lowest string (the X on string 6). Your ring finger reaches to the 3rd fret of the A string — a big stretch at first.',
             chords: [
               { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 }
@@ -541,7 +541,7 @@ SETS.push(
             stuck: 'Keep your hand swinging down on every number, but lift the pick away so it only catches the strings on the way back up. Count "rest-UP-rest-UP" out loud.',
             levelUp: 'Mute with your fretting hand right after each up-strum for the crisp, clipped "chk" of a real reggae chop.',
             skills: [3, 4],
-            playSeq: { label: 'Hear the reggae offbeat (up-strums only)', bpm: 70, notes: [55, 55, 55, 55] }
+            playSeq: { label: 'Hear the backing root — chop your offbeat over it', bpm: 70, notes: [55, 55, 55, 55] }
           }
             ]
           },
@@ -670,7 +670,7 @@ MODULE_REVIEWS[6] = {
   moduleNum: 6,
   module: 'Strumming Patterns with Chords',
   skills: [
-    { id: 'mr6-s1', text: 'I can hold a steady down-up strum pattern at 70+ BPM', set: 'm6w1' },
+    { id: 'mr6-s1', text: 'I can hold a steady down-up strum pattern (win at 60 BPM, pass at 70)', set: 'm6w1' },
     { id: 'mr6-s3', text: 'I can keep my strum hand moving right through a chord change', set: 'm6w1' },
     { id: 'mr6-s4', text: 'I can play the D-DU-UDU pattern and accent beats 2 and 4', set: 'm6w2' },
     { id: 'mr6-s5', text: 'I can read a written strum pattern (D/U over "1 + 2 + 3 + 4 +") and play it', set: 'm6w2' },

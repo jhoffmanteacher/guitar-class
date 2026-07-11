@@ -133,10 +133,10 @@ SETS.push(
             title: 'Numeral flashcards',
             steps: [
               {
-                text: 'Challenge 2 — Numeral Flashcards: make seven flashcards, one numeral each (I through vii°), shuffle the deck, flip the top card, and play that chord in the key of C — no hesitating. Run the deck twice. (Got a partner handy? Have them call the numerals instead.)',
+                text: 'Challenge 2 — Numeral Flashcards: make six flashcards, one numeral each (I ii iii IV V vi), shuffle the deck, flip the top card, and play that chord in the key of C — no hesitating. Run the deck twice. (Got a partner handy? Have them call the numerals instead.)',
                 hint: 'If you know the family in order (C Dm Em F G Am), the numeral just tells you which slot to reach for.',
                 stuck: 'Write the family out in numeral order on paper and keep it in view while you drill.',
-                levelUp: 'Switch to the key of G, or time yourself through the deck and beat your best run.',
+                levelUp: 'Switch to the key of G, or time yourself through the deck and beat your best run. Ready for all seven? Look up Bdim — the vii° of C — and add a seventh card.',
                 skills: [1, 2]
               }
             ]
@@ -423,10 +423,10 @@ SETS.push(
                 text: 'Watch: <a href="https://youtu.be/C7k0CWgI-xI" target="_blank">A Shape Major Barre Chords on Guitar (my best tricks and exercises) – JustinGuitar</a>. Notice the root now lives on the A string, not the low E.',
                 hint: 'Same idea as the E-shape, different string — the A-shape root is always on the A string.',
                 skills: [1],
-                response: { type: 'mc', prompt: 'An E-shape barre at fret 5 is:',
-                  answer: 1,
-                  explain: 'Low E, fret 5 = A.',
-                  choices: ['G major', 'A major', 'C major', 'B major'] }
+                response: { type: 'mc', prompt: 'The A-shape barre chord takes its NAME from:',
+                  answer: 0,
+                  explain: 'The note under your barre on the A string names it — same trick as the E shape, just one string over.',
+                  choices: ['The note under your barre on the A string', 'The note under your barre on the low E string', 'The fret your pinky is on', 'The key of the song'] }
               }
             ]
           },
@@ -471,7 +471,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Station Wrap-Up — open shapes or barre shapes: which would you pick for Let It Be, and why?',
+                text: 'Station Wrap-Up — open shapes or barre shapes: which would you pick for Let It Be, and why? (Don\'t stop — the 12-bar blues section is below!)',
                 response: { type: 'short', placeholder: 'e.g. open — it rings better; but barre F beats the mini-F once my hand is warm' }
               }
             ]
@@ -506,10 +506,10 @@ SETS.push(
         title: 'Practice station — barre chords as harmony tools',
         sections: [
           {
-            title: 'Warm-up — tuning check + Finger Gym',
+            title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open — then run a quick Finger Gym stretch (<a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym – JustinGuitar</a>) before today\'s barre-heavy work. You\'ve got it when: in tune, hand warmed up, before today\'s work.',
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -518,7 +518,7 @@ SETS.push(
             title: 'Root-naming drill',
             steps: [
               {
-                text: 'Challenge 1 — Root-Naming Drill: write a handful of chord names on slips, draw one, and find BOTH barre locations for it — the E-shape fret on the low E string AND the A-shape fret on the A string.',
+                text: 'First, warm the hand up — run a quick Finger Gym stretch (<a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym – JustinGuitar</a>) before today\'s barre-heavy work. Then, Challenge 1 — Root-Naming Drill: write a handful of chord names on slips, draw one, and find BOTH barre locations for it — the E-shape fret on the low E string AND the A-shape fret on the A string.',
                 hint: 'Every chord has (at least) two barre homes — one for each shape. Module 9\'s fretboard naming is the whole trick here.',
                 stuck: 'Find the E-shape location first, get comfortable, then add the A-shape hunt.',
                 levelUp: 'Time yourself to both locations and beat your own best (race a partner if one\'s around), or add a third barre location further up the neck.',
@@ -545,11 +545,11 @@ SETS.push(
                 text: 'Challenge — Oye Mi Amor, full barre: play the verse\'s Bm–G with a full A-shape barre Bm — the song\'s last training wheel, off for good. You\'ve got it when: four laps where the full Bm rings as clean as the G.',
                 hint: 'This is Module 7\'s payoff, finally put to use as a harmony tool instead of just a shape to survive.',
                 stuck: 'Warm up the A-shape Bm alone for a minute before adding the G change.',
-                levelUp: 'Explain out loud why Bm is the ii chord of A major, using what you learned in Set 1.',
+                levelUp: 'Explain out loud why Bm is the vi chord of D major — check the inventory: both Bm and G live in D\'s family — using what you learned in Set 1.',
                 skills: [6],
                 chords: [
                   { name: 'Bm (A-shape barre)', chord: [[6,'x'],[5,2,'1'],[4,4,'3'],[3,4,'4'],[2,3,'2'],[1,2,'1']], position: 2 },
-                  { name: 'F (E-shape barre)', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 1 }
+                  { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
                 ]
               }
             ]
@@ -558,7 +558,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Where are the two places to play C major as a barre — and which shape is friendlier to your hand today?',
+                text: 'Where are the two places to play C major as a barre — and which shape is friendlier to your hand today? (Don\'t stop — the 12-bar blues section is below!)',
                 response: { type: 'short', placeholder: 'e.g. E-shape fret 8 or A-shape fret 3 — the A-shape one is easier for me right now' }
               }
             ]
@@ -577,7 +577,7 @@ SETS.push(
                 ]
               },
               {
-                text: 'The 12-bar map in A: A7 A7 A7 A7 | D7 D7 A7 A7 | E7 D7 A7 E7. Say each chord name OUT LOUD on beat 1 as you strum the bar — losing the form is the #1 blues mistake, and counting bars aloud is the fix. Quick-change variant: play D7 in bar 2.',
+                text: 'The 12-bar map in A: A7 A7 A7 A7 | D7 D7 A7 A7 | E7 D7 A7 E7. Say each chord name OUT LOUD on beat 1 as you strum the bar — losing the form is the #1 blues mistake, and counting bars aloud is the fix. Quick-change variant: swap D7 into bar 2 instead of staying on A7 — the "quick change" hands your ear the IV chord early, and it\'s the version you\'ll hear in most modern blues.',
                 hint: 'That last E7 in bar 12 is the "turnaround" — it yanks the music back to bar 1 so the form can loop forever.',
                 skills: [7, 8]
               },

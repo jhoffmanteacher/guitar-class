@@ -29,7 +29,7 @@ SETS.push(
             steps: [
           {
             text: 'Watch: <a href="https://youtu.be/4-JTCASlh-w" target="_blank">How To Read TAB and Chord Boxes (BC-108) – JustinGuitar</a> (0:00–4:00).',
-            hint: 'You\'ve read single-note TAB since Module 1. Watch for two new things now. First: numbers STACKED vertically mean play them together (a chord). Second: the symbols above the numbers tell you how long each note lasts — plain stems are quarter notes, flags and beams are 8th notes.',
+            hint: 'You\'ve read single-note TAB since Module 1. Watch for two new things now. First: numbers STACKED vertically mean play them together (a chord). Second: the symbols above the numbers tell you how long each note lasts — plain stems are quarter notes, flags and beams are 8th notes, and a hollow (open) note head with a stem is a half note, held for two beats.',
             skills: [1, 2, 3],
             response: { type: 'mc', prompt: 'When two or more numbers in a TAB line up VERTICALLY on top of each other, you should:',
               answer: 0,
@@ -94,20 +94,13 @@ SETS.push(
             tab: {
               caption: '"Smoke on the Water" — main riff · A + D strings together',
               notes: [
-                { string: 'D', fret: 0, note: 'D',  midi: 50 },
-                { string: 'A', fret: 0, note: 'A',  midi: 45 },
-                { string: 'D', fret: 3, note: 'F',  midi: 53 },
-                { string: 'A', fret: 3, note: 'C',  midi: 48 },
-                { string: 'D', fret: 5, note: 'G',  midi: 55 },
-                { string: 'A', fret: 5, note: 'D',  midi: 50 },
-                { string: 'D', fret: 0, note: 'D',  midi: 50 },
-                { string: 'A', fret: 0, note: 'A',  midi: 45 },
-                { string: 'D', fret: 3, note: 'F',  midi: 53 },
-                { string: 'A', fret: 3, note: 'C',  midi: 48 },
-                { string: 'D', fret: 6, note: 'F#', midi: 56 },
-                { string: 'A', fret: 6, note: 'D#', midi: 51 },
-                { string: 'D', fret: 5, note: 'G',  midi: 55 },
-                { string: 'A', fret: 5, note: 'D',  midi: 50 }
+                { frets: [['D', 0], ['A', 0]], note: 'A+D',   midi: [50, 45] },
+                { frets: [['D', 3], ['A', 3]], note: 'C+F',   midi: [53, 48] },
+                { frets: [['D', 5], ['A', 5]], note: 'D+G',   midi: [55, 50] },
+                { frets: [['D', 0], ['A', 0]], note: 'A+D',   midi: [50, 45] },
+                { frets: [['D', 3], ['A', 3]], note: 'C+F',   midi: [53, 48] },
+                { frets: [['D', 6], ['A', 6]], note: 'D#+G#', midi: [56, 51] },
+                { frets: [['D', 5], ['A', 5]], note: 'D+G',   midi: [55, 50] }
               ]
             }
           }
@@ -117,13 +110,13 @@ SETS.push(
             title: 'Read rhythm in TAB',
             steps: [
           {
-            text: 'Challenge 2 — Crazy Train: play the intro riff on the E and A strings with alternate picking, watching the 8th vs. quarter notes in the TAB. You\'ve got it when: clean and even at 60 BPM before you speed it up.',
+            text: 'Challenge 2 — Alternate-picking workout: play this riff on the low E and A strings with strict alternate picking, one down-up per note. You\'ve got it when: clean and even at 60 BPM before you speed it up.',
             hint: 'Use alternate picking (down-up-down-up). The riff is fast — start at 60 BPM and only speed up when it\'s clean. Set the ⏱ Timer for 2 minutes and loop it.',
             stuck: 'Drop to 50 BPM and keep strict down-up-down-up picking — even and slow beats fast and sloppy. Loop just the first 4 notes until they\'re automatic.',
             levelUp: 'Push to 80 BPM, or play it twice through with no stumble.',
             skills: [2, 3, 5],
             tab: {
-              caption: '"Crazy Train" — intro riff · low E and A strings',
+              caption: 'Alternate-picking workout riff · low E and A strings',
               notes: [
                 { string: 'A', fret: 7, note: 'E',  midi: 52 },
                 { string: 'E', fret: 7, note: 'B',  midi: 47 },
@@ -165,8 +158,8 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Which riff move tripped your fingers most today — a stretch, a string change, or the picking hand? Name it; that\'s your first loop next session.',
-                response: { type: 'short', placeholder: 'e.g. the string jump from A to E in Crazy Train' }
+                text: 'Which riff move tripped your fingers most today — a stretch, a string change, or the picking hand? Name it; that\'s your first loop next session. (Don\'t stop yet — one more section below!)',
+                response: { type: 'short', placeholder: 'e.g. the string jump from A to E in the workout riff' }
               }
             ]
           },
@@ -238,8 +231,8 @@ SETS.push(
     moduleNum: 7,
     unit: 'Module 7 · TAB Notation and Barre Chords',
     title: 'Set 2',
-    subtitle: 'E-shape barre chords · F, F#, G barre · Moving the shape up the neck',
-    objective: 'I CAN form a clean E-shape barre chord and move it up the neck to play F, F#, G, A, and B major.',
+    subtitle: 'E-shape barre chords · F, G, A barre · Moving the shape up the neck',
+    objective: 'I CAN form a clean E-shape barre chord and move it up the neck to play F, G, A, and B major.',
     skillFocus: 'Forming a clean E-shape barre chord · Moving the barre up the neck · Naming barre chords by their root',
     comingSoon: false,
 
@@ -392,7 +385,7 @@ SETS.push(
             title: '⚡ Ear Spark — optional ear bonus',
             steps: [
               {
-                text: '⚡ Ear Spark (optional, 2 min): record F both ways — the mini-F and the full barre — a few reps in a shuffled slip order. Same chord, different voice: on playback, guess which is which by listening for the low bass note only the barre has. Got someone around? Have them play and you call it.'
+                text: '⚡ Ear Spark (optional, 2 min): record F both ways — the little F (xx3211) and the full barre — a few reps in a random order you don\'t write down. Same chord, different voice: on playback, guess which is which by listening for the low bass note only the barre has. Got someone around? Have them play and you call it.'
               }
             ]
           }
@@ -435,7 +428,7 @@ SETS.push(
 
   {
     id: 'm7w3',
-    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'every chord as a barre' }, { name: 'Luna', journey: 'tabs/luna.html', note: 'beyond Layer 5 — the barre upgrade' }],
+    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'every chord as a barre' }, { name: 'Luna', journey: 'tabs/luna.html', note: 'the barre upgrade — beyond Layer 5' }],
     label: 'Set 3',
     locked: false,
     module: 'TAB Notation and Barre Chords',
@@ -615,7 +608,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'You\'ve reached the hardest hands-on skill in the course — give yourself credit for that. Which barre (E-shape or A-shape, and at which chord) most needs another week of short daily tries? Type it below; that\'s your standing warm-up from here.',
+                text: 'You\'ve reached the hardest hands-on skill in the course — give yourself credit for that. Which barre (E-shape or A-shape, and at which chord) most needs another week of short daily tries? Type it below; that\'s your standing warm-up from here. (Don\'t stop yet — one more section below!)',
                 response: { type: 'short', placeholder: 'e.g. the F barre at fret 1 — a few clean tries every day' }
               }
             ]

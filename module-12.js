@@ -155,8 +155,8 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — House of the Rising Sun, bass-note + pinch verse: play the verse with your alternating thumb and pinch pattern, following the chord progression. You\'ve got it when: the verse survives every chord change with the thumb never stopping.',
-                hint: 'This song is the textbook example of alternating-thumb fingerpicking — the bass moves on every beat, the fingers play between the beats.',
+                text: 'Challenge — House of the Rising Sun, bass + roll in 6/8: play the verse with a bass note on the downbeat and your fingers rolling up through each chord, following the progression. You\'ve got it when: the verse survives every chord change with the roll staying smooth.',
+                hint: 'House of the Rising Sun is in 6/8 — felt in two, the same waltz-family feel you met in Module 5. The thumb plays the bass on the downbeat; the fingers roll up through the chord between beats.',
                 stuck: 'Loop just the first two chords of the verse until the pattern is rock solid before adding the rest.',
                 levelUp: 'Play the whole verse from memory, no chord chart.',
                 skills: [6]
@@ -176,7 +176,7 @@ SETS.push(
             title: 'Play-along — one full pass, no stopping',
             steps: [
               {
-                text: 'Play-along: open Station B\'s Travis pattern lesson video, set YouTube\'s speed to 0.75×, and pick along for the ENTIRE demo section without stopping. You\'ve got it when: you finish a full pass with the video — dropped pinches and all, don\'t stop.',
+                text: 'Play-along: open <a href="https://youtu.be/rGt-lMXYzZc" target="_blank">Station B\'s Travis pattern lesson video</a>, set YouTube\'s speed to 0.75×, and pick along for the ENTIRE demo section without stopping. You\'ve got it when: you finish a full pass with the video — dropped pinches and all, don\'t stop.',
                 hint: 'Not stopping is the skill. If the thumb stumbles, let the fills go and keep the bass walking until you\'re back in.'
               }
             ]
@@ -185,7 +185,7 @@ SETS.push(
             title: 'Reactivate p-i-m-a — the claw (from Module 8)',
             steps: [
               {
-                text: 'Challenge — Claw Check (a 60-second reactivation of Module 8, not a re-teach): plant all four picking fingers at once — thumb (p) resting on the bass strings 6/5/4, index (i) on the G string, middle (m) on the B string, ring (a) on the high e. Then pluck p–i–m–a on the open strings, twice through at 60 BPM. You\'ve got it when: each finger fires in order, one string each, with no two fingers grabbing the same string. This is the picking hand you built back in Module 8 — you\'re just waking it up before today\'s Travis work.',
+                text: 'Challenge — Claw Check (a 60-second reactivation of Module 8, not a re-teach): plant all four picking fingers at once — thumb (p) resting on the bass strings 6/5/4, index (i) on the G string, middle (m) on the B string, ring (a) on the high e. Then pluck p–i–m–a on the open strings, twice through at 60 BPM. You\'ve got it when: each finger fires in order, one string each, with no two fingers grabbing the same string. This is the picking hand you built back in Module 8 — wake it up any time the claw feels rusty, including right now before your next run.',
                 hint: 'p owns the three bass strings (6/5/4); i-G, m-B, a-high-e never trade places. Set the assignment once and your hand stops hunting for strings.',
                 stuck: 'Plant all four fingers silently first and feel each one touching its string, then pluck slowly — p, then i, then m, then a — before you add the metronome.',
                 levelUp: 'Run the staircase up and back down (p-i-m-a-m-i) without looking at your picking hand.',
@@ -196,7 +196,7 @@ SETS.push(
                 text: 'Challenge — 4-Note Arpeggio, Am then C: play a p–i–m–a arpeggio on each chord — one thumb bass, then i-m-a rolling up the top three strings — 2 bars of Am, then 2 bars of C, and loop. On Am the thumb takes the open A string; on C it slides to the 3rd-fret C on that same string. You\'ve got it when: every note is the same volume and the a-finger (the high e) doesn\'t rush ahead of the beat.',
                 hint: 'This is the four-even-notes drill Module 8 built the whole pattern on — the a-finger is the one most likely to snap early, so keep it as calm as the thumb.',
                 stuck: 'Loop just Am until the four notes are dead even, then add C — the only thing that changes between the chords is where the thumb lands.',
-                levelUp: 'Fold the same p-i-m-a shape into this set\'s Travis or 3/4 waltz pattern, keeping every note even.',
+                levelUp: 'Fold the same p-i-m-a shape into this set\'s Travis pattern — and, when you reach Set 2, into the 3/4 waltz pattern too — keeping every note even.',
                 skills: [1, 4],
                 playSeq: { label: 'Hear one p-i-m-a lap on Am, then C — loop it 2 bars each', bpm: 60, notes: [45, 57, 60, 64, 48, 55, 60, 64] },
                 chords: [
@@ -275,13 +275,13 @@ SETS.push(
             title: 'Listen for the waltz feel',
             steps: [
               {
-                text: 'Which course song has been our 3/4 (waltz) vehicle since the first half of the course? Think back to Happy Birthday, strummed "in 3" in Module 6-era work — now you\'ll pick it in 3.',
-                hint: 'Happy Birthday is a waltz — you strummed it "in 3" in Module 6-era work; now you pick it in 3.',
+                text: 'Happy Birthday is a waltz — count along to any recording and you\'ll feel it swing ONE-two-three, ONE-two-three. Today you\'ll pick it in 3 instead of strumming it.',
+                hint: 'A waltz counts ONE-two-three, ONE-two-three — three beats per bar, with the bass note owning beat one.',
                 skills: [2, 6],
-                response: { type: 'mc', prompt: 'Which course song has been our 3/4 (waltz) vehicle since the first half of the course?',
+                response: { type: 'mc', prompt: 'A waltz (3/4 time) has how many beats per bar?',
                   answer: 1,
-                  explain: 'Happy Birthday is a waltz — you strummed it "in 3" in Module 6-era work; now you pick it in 3.',
-                  choices: ['Seven Nation Army', 'Happy Birthday', 'Beat It', 'Let It Be'] }
+                  explain: 'Three — ONE-two-three, ONE-two-three. Happy Birthday is a classic waltz, and now you\'ll pick it in 3.',
+                  choices: ['4 beats', '3 beats', '2 beats', '6 beats'] }
               }
             ]
           },
@@ -328,7 +328,7 @@ SETS.push(
             steps: [
               {
                 text: 'Challenge 1 — Count-and-Pick: play the 3/4 pattern (bass–pluck–pluck) on one chord, counting aloud, 60 BPM. You\'ve got it when: a steady 3-count with the bass landing exactly on beat 1 every bar.',
-                hint: 'Keeping a pattern "unbroken" through a chord change mostly depends on moving the fretting hand early, on the bar\'s last note.',
+                hint: 'Beat 1 is the boss — land the bass note dead on it every bar, and the two plucks fall into place after.',
                 stuck: 'Drop the counting and just feel "long-short-short" for bass-pluck-pluck.',
                 levelUp: 'Count silently in your head instead of aloud, or add a pinch on beat 1.',
                 skills: [1, 2],
@@ -341,7 +341,7 @@ SETS.push(
             steps: [
               {
                 text: 'Challenge 2 — "the cure" Native Style: fingerpick capo 1, Am–C–Dm–F, one bar each, pattern of your choice. You\'ve got it when: the ◐ is gone — this IS how the song wants to be played.',
-                hint: 'Native style — why the ◐ disappears: fingerpicking is this song\'s home texture, not a workaround.',
+                hint: 'Native style — why the ◐ disappears: fingerpicking is this song\'s home texture, not a workaround. Keep it unbroken through each change by moving your fretting hand early — on the bar\'s last note.',
                 stuck: 'Loop just Am–C until the pattern survives that one change before adding Dm–F.',
                 levelUp: 'Add a pinch on beat 1 of each chord.',
                 skills: [3]
@@ -365,7 +365,7 @@ SETS.push(
             steps: [
               {
                 text: 'Challenge — Happy Birthday in 3, fingerstyle: play the melody\'s chords with the 3/4 bass–pluck–pluck pattern all the way through. You\'ve got it when: the waltz feel never breaks, start to finish.',
-                hint: 'This is the same song you strummed "in 3" back in Module 6-era work — now you\'re picking it.',
+                hint: 'Happy Birthday is a waltz — count ONE-two-three, ONE-two-three and let the bass land on beat 1 of each bar.',
                 stuck: 'Play just the chord changes with the pattern first, humming the melody instead of picking it out.',
                 levelUp: 'Sing along while you pick it.',
                 skills: [6]
@@ -407,7 +407,7 @@ SETS.push(
 
   {
     id: 'm12w3',
-    songThread: [{ name: 'Luna', journey: 'tabs/luna.html', note: 'Layer 6 — the fingerpicked requinto intro' }],
+    songThread: [{ name: 'Luna', journey: 'tabs/luna.html', layer: 6, bonus: true, note: 'the fingerpicked requinto intro' }],
     label: 'Set 3',
     locked: false,
     module: 'Fingerstyle: Travis, Waltz & Requinto',
@@ -428,11 +428,11 @@ SETS.push(
             steps: [
               {
                 text: 'Watch: <a href="https://www.youtube.com/watch?v=cRJb_f4-M5g" target="_blank">La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera</a> — a real requinto line from the ranchera tradition sierreño grew out of, taught in English. Watch how his picking hand carries the melody a singer would otherwise have, then listen for the same job in Luna and Tu Boda from this module\'s song list. <!-- Session D filled this former video placeholder (oEmbed-verified 2026-07-10: "La Derrota - Vicente Fernandez - Guitar Lesson - requinto - tutorial - part 1 (ENGLISH)" / Jorge Aguilera). Spanish-lane content — Jonathan: review for fit. -->',
-                hint: 'Requinto sings the melodic lines you\'ve been hearing in Luna, Tu Boda, and La Diabla since the course\'s first tone-ID days.',
+                hint: 'Requinto sings the melodic lines you\'ve been hearing in Luna and Tu Boda since the course\'s first listening drills.',
                 skills: [3],
                 response: { type: 'mc', prompt: 'In a sierreño group, the requinto is:',
                   answer: 1,
-                  explain: 'Requinto sings the melodic lines you\'ve been hearing in Luna, Tu Boda, and La Diabla since the course\'s first tone-ID days.',
+                  explain: 'Requinto sings the melodic lines you\'ve been hearing in Luna and Tu Boda since the course\'s first listening drills.',
                   choices: ['The bass', 'A smaller, higher-pitched guitar that carries the melody', 'The singer', 'A drum'] }
               },
               {
@@ -514,7 +514,7 @@ SETS.push(
             title: 'Play Tu Boda\'s requinto intro line',
             steps: [
               {
-                text: 'Challenge 2 — Tu Boda Requinto Line: play the song\'s requinto intro line fingerstyle, reusing its existing TAB reference from the song\'s Module 6–8 material. You\'ve got it when: the line rings clean and in time.',
+                text: 'Challenge 2 — Tu Boda Requinto Line: play the song\'s requinto intro line fingerstyle, following the Tu Boda tutorial video in this module\'s Songs section at the bottom of the page. You\'ve got it when: the line rings clean and in time.',
                 hint: 'This is the real sierreño sound — a smaller, higher-pitched guitar carrying the melody.',
                 stuck: 'Slow the line down to half tempo and isolate just the first 4 notes.',
                 levelUp: 'Play it at full performance tempo.',
@@ -607,7 +607,7 @@ MODULE_SONGS[12] = [
       { name: '"Luna" — Peso Pluma, Junior H', meta: 'The fingerpicked intro — rolls through the little-F shape', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
-      { name: '"House of the Rising Sun" — The Animals', meta: 'Bass-note + pinch — the alternating-thumb classic', type: 'Choice', core: false, level: 2,
+      { name: '"House of the Rising Sun" — The Animals', meta: 'Bass note + rolling arpeggio in 6/8 — the fingerpicking classic', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=N4bFqW_eu2I',
         tutorialUrl: 'https://www.youtube.com/watch?v=q9dyAQLYybU' },
       { name: '"Tu Boda" — Oscar Maydon × Fuerza Regida', meta: 'Requinto intro line, fingerstyle — the real sierreño sound', type: 'Choice', core: false, level: 3,
