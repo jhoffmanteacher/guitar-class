@@ -5,6 +5,21 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — You can now actually PLAY the blues
+
+### Added
+- **The 12-bar blues lands in Module 11.** The I–IV–V chords you build in
+  Set 3 now pour into the most-played song form in American music: A7–D7–E7
+  chord diagrams, the full 12-bar map (with the quick-change and the
+  turnaround), a shuffle-feel lesson video, and a comp-then-solo challenge —
+  record yourself playing the 12 bars, loop it, and solo over your own
+  comping. Learn this form once and you can jam with strangers for the rest
+  of your life.
+- **Module 10's blues scale gets its payoff.** A new "Jam it" challenge has
+  you solo over a looping 12-bar form with the blues scale — following the
+  changes, not just the shape. The blues scale you build there was always
+  waiting for this.
+
 ## 2026-07-11 — New teachers in the mix, a requinto lesson, and play-along challenges
 
 ### Added

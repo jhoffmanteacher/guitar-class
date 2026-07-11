@@ -98,8 +98,46 @@
       satisfied by folding compare-the-teachers prompts into the swapped
       steps' texts/responses rather than adding keyed MCs about video
       content I can't verify. checks.mjs full link check: 159/159
-      reachable. Next: Session E (12-bar blues — new skills m11w3-s7/s8,
-      m10w2-s7; manifest 10→19, 11→20; adapt partner jam texts solo-first).
+      reachable.
+      **Session D judgment calls (for Jonathan's review):**
+      1. *Requinto video is live pending review* — the spec said fill the
+         slot, but the original placeholder said Spanish-lane content gets
+         Jonathan's review first. It's live with an in-file comment; watch
+         2 minutes of Jorge Aguilera's La Derrota lesson and veto if it
+         doesn't fit.
+      2. *m11w2 swap took slot #1, not #2* — the spec's replace-#2-only rule
+         would have protected a verbatim duplicate of m11w1's video; the
+         duplicate was the right thing to replace.
+      3. *Beato was appended, not swapped* — both existing m10w3 slots
+         anchor that set's drills (movable-pattern MC, sing-then-find habit);
+         the spec's append-only alternative was used instead.
+      4. *No invented timestamps* — watch-range sweep skipped (durations
+         unavailable to fetches); performance-first reordering skipped (no
+         performance video exists in any current pair). Compare-the-teachers
+         prompts went into step texts/short responses instead of keyed MCs
+         about video content that couldn't be verified.
+      Session E ✅ 2026-07-11: **12-bar blues form & shuffle feel** (the
+      most-corroborated research gap — 6 of 10 platforms). Module 11
+      (m11w3): new Station B section (Marty Music "12 Bar Blues Lesson For
+      Beginners" — oEmbed-verified XFuXLSIYH7s, chosen over JustinGuitar
+      candidates per the new two-voices policy since both existing m11w3
+      videos are Justin's — plus the spec's two verbatim MCs on the three
+      chords and shuffle feel); new Station C section (A7/D7/E7 chord specs
+      verbatim from spec, the 12-bar map step with quick-change note, and a
+      comp-record-loop-solo challenge — spec's partner jam adapted
+      solo-first with partner tail); skills m11w3-s7/s8 appended with the
+      spec's verbatim gotItWhen texts; blues assessItem appended to
+      MODULE_REVIEWS[11] (solo-first adaptation). Module 10 (m10w2): skill
+      m10w2-s7 appended (playSeq notes [45,48,50,51,52,55,57] verified
+      identical to the file's existing blues-scale spec before reuse); "Jam
+      it" step appended as a new final Station C section pointing at Module
+      11 Set 3's bar map. MODULE_MANIFEST: 10 → 19, 11 → 20 (checks.mjs
+      verifies, passes). M4's 12-bar Choice item and M10's levelUp left
+      untouched per spec. All sections/skills/steps appended at array ends —
+      no index shifts. Next: Session F (self-assessment feedback layer —
+      sounds, animations, feedback card, checkable assessment list; ONE new
+      Firebase key `mr{N}-assess`, and assessItems become append-only from
+      F on).
 
 - [x] **Semester 2 build — Modules 9–12** (`MODULES_9_12.md`, decision-complete
       spec, four sessions A–D — all four complete). Session A ✅ 2026-07-10: built **Module 9 —

@@ -334,6 +334,17 @@ SETS.push(
                 response: { type: 'short', placeholder: 'e.g. Dm is F\'s relative minor; the b5 is what makes it blues' }
               }
             ]
+          },
+          {
+            title: 'Jam it — the blues scale over a real form',
+            steps: [
+              {
+                text: 'Jam it: record yourself strumming the 12-bar blues form in A — A7, D7, E7 (the full bar map lives in Module 11, Set 3; plain A, D, E or power chords work fine for now) — then loop the recording and solo over it with your blues scale, box 1 at fret 5. One chorus of comping, one chorus of soloing. Playing with someone? One comps while the other solos, then swap.',
+                hint: 'Follow the form, not just the scale — when the loop returns to A, land on an A and let it ring. That arrival is what "playing the changes" means.',
+                skills: [7],
+                playSeq: { label: 'A blues scale, box 1 (loop-ready)', bpm: 60, notes: [45, 48, 50, 51, 52, 55, 57] }
+              }
+            ]
           }
         ]
       }
@@ -359,7 +370,11 @@ SETS.push(
           choices: ['5', '6', '7', '8'], answer: 1 } },
       { id: 'm10w2-s5', text: 'Play the blues scale ascending and descending at 60 BPM',
         practice: { type: 'playSeq', label: 'A blues scale, box 1', bpm: 60, notes: [45, 48, 50, 51, 52, 55, 57] } },
-      { id: 'm10w2-s6', text: 'Name relative pairs for our core songs\' keys (SNA Em↔G · Watchtower Am↔C · Sweet Child D↔Bm · Luna F↔Dm · Let It Be C↔Am)' }
+      { id: 'm10w2-s6', text: 'Name relative pairs for our core songs\' keys (SNA Em↔G · Watchtower Am↔C · Sweet Child D↔Bm · Luna F↔Dm · Let It Be C↔Am)' },
+      { id: 'm10w2-s7', text: 'Solo with the blues scale over a 12-bar blues loop, following the form',
+        gotItWhen: 'you can hear the chord changes coming and land on a strong note when the loop returns to the I chord.',
+        practice: { type: 'playSeq', label: 'A blues scale, box 1 (loop-ready)', bpm: 60,
+          notes: [45, 48, 50, 51, 52, 55, 57] } }
     ]
   },
 

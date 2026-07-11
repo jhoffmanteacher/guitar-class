@@ -475,6 +475,30 @@ SETS.push(
                 response: { type: 'short', placeholder: 'e.g. open — it rings better; but barre F beats the mini-F once my hand is warm' }
               }
             ]
+          },
+          {
+            title: 'The 12-bar blues — the form your I–IV–V was waiting for',
+            steps: [
+              {
+                text: 'Watch: <a href="https://youtu.be/XFuXLSIYH7s" target="_blank">12 Bar Blues Lesson For Beginners – Marty Music</a>. The 12-bar blues is I–IV–V — the exact chords you\'ve been building this set — poured into the most-played song form in American music. Watch for two things: the ORDER the chords arrive in, and the long-short "shuffle" bounce in the strumming hand.',
+                hint: 'Thousands of songs are this one form. Learn it once and you can jam with strangers for the rest of your life.',
+                skills: [7]
+              },
+              {
+                text: 'Check yourself on the form\'s ingredients before you play it at the practice station.',
+                response: { type: 'mc', prompt: 'A standard 12-bar blues in A uses which three chords?',
+                  answer: 0,
+                  explain: 'It\'s the I, IV, and V of A — each wearing a bluesy 7th. You already know I–IV–V from this set; the blues just gives it a form.',
+                  choices: ['A7, D7, E7', 'A, Bm, C#', 'A7, C7, G7', 'Am, Dm, Em'] }
+              },
+              {
+                text: 'One more — the feel is half the style.',
+                response: { type: 'mc', prompt: '"Shuffle feel" means the eighth notes are played:',
+                  answer: 1,
+                  explain: 'Swing the pair — DAH-da DAH-da. Even eighths make it rock; long-short makes it blues.',
+                  choices: ['Perfectly even', 'Long-short, like a heartbeat', 'As fast as possible', 'Only on downbeats'] }
+              }
+            ]
           }
         ]
       },
@@ -538,6 +562,31 @@ SETS.push(
                 response: { type: 'short', placeholder: 'e.g. E-shape fret 8 or A-shape fret 3 — the A-shape one is easier for me right now' }
               }
             ]
+          },
+          {
+            title: 'Play the 12-bar blues',
+            steps: [
+              {
+                text: 'Meet the three chords: A7, D7, E7 — your I, IV, and V in A, each with the bluesy 7th baked in. Fret each one clean, then strum each for a bar with a long-short shuffle feel at 60 BPM.',
+                hint: 'All three are open-position shapes — no barre needed. The shuffle lives in your strumming wrist: DAH-da DAH-da.',
+                skills: [7],
+                chords: [
+                  { name: 'A7', chord: [[6,'x'],[5,0],[4,2,'2'],[3,0],[2,2,'3'],[1,0]], position: 0 },
+                  { name: 'D7', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'2'],[2,1,'1'],[1,2,'3']], position: 0 },
+                  { name: 'E7', chord: [[6,0],[5,2,'2'],[4,0],[3,1,'1'],[2,0],[1,0]], position: 0 }
+                ]
+              },
+              {
+                text: 'The 12-bar map in A: A7 A7 A7 A7 | D7 D7 A7 A7 | E7 D7 A7 E7. Say each chord name OUT LOUD on beat 1 as you strum the bar — losing the form is the #1 blues mistake, and counting bars aloud is the fix. Quick-change variant: play D7 in bar 2.',
+                hint: 'That last E7 in bar 12 is the "turnaround" — it yanks the music back to bar 1 so the form can loop forever.',
+                skills: [7, 8]
+              },
+              {
+                text: 'Put it together: comp the full 12 bars from memory with shuffle feel at 60 BPM, then record a pass, loop your recording, and solo over your own comping with A minor pentatonic (your Module 4 box at fret 5). You\'ve got it when: a full chorus of each job — comping without losing the form, soloing without losing the changes. Playing with someone? One comps while the other solos, then swap.',
+                hint: 'When the loop comes back to A7, land on an A — hearing that "home" arrival is the whole game.',
+                skills: [7, 8]
+              }
+            ]
           }
         ]
       }
@@ -559,7 +608,11 @@ SETS.push(
       { id: 'm11w3-s4', text: 'Move one barre shape to three different named roots' },
       { id: 'm11w3-s5', text: 'Explain why one movable shape equals twelve chords',
         practice: { type: 'mc', prompt: 'To turn an E-shape G (fret 3) into an E-shape A, move:', choices: ['Up 2 frets', 'Down 2 frets', 'Up 1 string', 'Nowhere — re-finger it'], answer: 0 } },
-      { id: 'm11w3-s6', text: 'Choose open vs barre voicing for a progression and say why' }
+      { id: 'm11w3-s6', text: 'Choose open vs barre voicing for a progression and say why' },
+      { id: 'm11w3-s7', text: 'Comp a 12-bar blues in A with shuffle feel (A7–D7–E7)',
+        gotItWhen: 'you can play all 12 bars from memory at 60 BPM with a long-short shuffle strum, without losing your place in the form.' },
+      { id: 'm11w3-s8', text: 'Explain and play the quick-change and the turnaround',
+        gotItWhen: 'you can say what bar 2 does in a quick-change blues and land the E7 turnaround in bar 12 without stopping.' }
     ]
   }
 
@@ -600,7 +653,8 @@ MODULE_REVIEWS[11] = {
   ],
   assessItems: [
     'Analyze a thread song\'s progression in Roman numerals and name its key',
-    'Play a I–IV–V progression in a key you draw at random — open or barre shapes'
+    'Play a I–IV–V progression in a key you draw at random — open or barre shapes',
+    'Comp a 12-bar blues in A with shuffle feel, then solo over a recording of your own comping — with another player, comp while they solo and trade'
   ],
   forward: 'You can name what every chord is DOING now, and one barre grip just became twelve chords. <strong>Module 12 is the victory lap:</strong> fingerstyle goes deep — alternating thumb, waltz patterns, and the requinto sound — everything you need to pick your showcase song.',
   standards: ['Pr.4a', 'Pr.6a', 'Cn.10a', 'Re.9a']
