@@ -639,6 +639,24 @@ SETS.push(
                 stuck: 'Fret the little F shape and strum it once to hear the target chord before reading the roll note by note.',
                 levelUp: 'Read a second higher-position TAB you haven\'t seen before today, cold.',
                 skills: [1]
+              },
+              {
+                text: 'Challenge — Higher Still (the real up-high read): the Luna TAB above was your warm-up, down at frets 0–3. THIS is the "up high" part. Cold-read the 8-note line below — it lives entirely at frets 5–10, up around 7th position, crossing the D, G, and B strings. No one walks you through it first; trust the numbers. You\'ve got it when: you play all eight notes in order, in tune, reading only the TAB.',
+                hint: 'The shapes feel unfamiliar this high up, but the rule never changes: top line = thinnest string, numbers = frets. Find fret 5 (two frets past the fret-3 dot) and anchor your hand there.',
+                stuck: 'Play it one note at a time and say each fret out loud before you fret it — decode first, speed later.',
+                levelUp: 'Play the line backwards, from the last note to the first, still reading only the page.',
+                skills: [1],
+                tab: { caption: 'Cold-read: a 7th-position line across the D, G & B strings (frets 5–10)', notes: [
+                  { string: 'G', fret: 5, note: 'C', midi: 60 },
+                  { string: 'G', fret: 7, note: 'D', midi: 62 },
+                  { string: 'B', fret: 5, note: 'E', midi: 64 },
+                  { string: 'B', fret: 8, note: 'G', midi: 67 },
+                  { string: 'B', fret: 10, note: 'A', midi: 69 },
+                  { string: 'B', fret: 8, note: 'G', midi: 67 },
+                  { string: 'G', fret: 7, note: 'D', midi: 62 },
+                  { string: 'D', fret: 7, note: 'A', midi: 57 }
+                ] },
+                playSeq: { label: 'Hear the 7th-position line (check yourself only AFTER you\'ve read it cold)', bpm: 70, notes: [60, 62, 64, 67, 69, 67, 62, 57] }
               }
             ]
           },
@@ -667,6 +685,20 @@ SETS.push(
                   { name: 'G/B', chord: [[6,'x'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
                   { name: 'G', chord: [[6,3,'3'],[5,2,'2'],[4,0],[3,0],[2,0],[1,3,'4']], position: 0 }
                 ]
+              },
+              {
+                text: 'Challenge — Read a Partial Shape: the chart below shows dots on only three strings — the rest are marked X. That\'s a partial shape: just the top slice of a chord, the way slash-chord and lead-sheet charts often print it so you can grab it fast. Fret the three dots and play. You\'ve got it when: only the three fretted strings sound, and the X\'d strings stay silent under your strum.',
+                hint: 'An X over a string means "don\'t let this ring." Here the three X\'d strings are the lowest ones — brush only the top three, or lean a fretting finger against the low strings to mute them.',
+                stuck: 'Pick the three fretted strings one at a time first, so you can hear that each one rings clean, then brush them together.',
+                levelUp: 'Slide the same three-string shape up two frets and name the new chord it spells.',
+                skills: [5],
+                chords: [
+                  { name: 'D (partial — top 3 strings)', chord: [[6,'x'],[5,'x'],[4,'x'],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 }
+                ],
+                response: { type: 'mc', prompt: 'On this partial-shape chart, which strings actually ring when you play it?',
+                  answer: 1,
+                  explain: 'An X above a string means don\'t play it. Strings 6, 5, and 4 are X\'d, so only the top three — G, B, and high e — ring out. A partial shape is just a full chord\'s top slice.',
+                  choices: ['All six strings', 'Only the three fretted strings — G, B, and high e', 'Only the strings marked X', 'The three lowest strings'] }
               }
             ]
           },
@@ -756,7 +788,9 @@ MODULE_REVIEWS[9] = {
   assessItems: [
     'Name natural notes on all six strings through fret 12 — draw shuffled flashcards to pick the spots',
     'Play a thread-song melody from TAB in a higher position',
-    'Finish a 4-bar TAB you wrote yourself that passes the cold-read test — a day later, the page alone reproduces the riff (or a partner plays it back correctly)'
+    'Finish a 4-bar TAB you wrote yourself that passes the cold-read test — a day later, the page alone reproduces the riff (or a partner plays it back correctly)',
+    'Play a melody that crosses three or more strings cleanly, every note ringing in order',
+    'Read a partial-shape or slash chord chart and name which strings actually ring'
   ],
   forward: 'The whole neck is yours now — and you can write down anything you figure out. <strong>Module 10 turns notes into keys:</strong> you\'ll learn the recipe that builds every scale, find the key of any song, and start trusting your ear. (And any time you come back from a long break, <strong>Set 0</strong> at the top of this module re-checks the six core skills in one sitting.)',
   standards: ['Pr.4a', 'Pr.6a', 'Cn.10a']

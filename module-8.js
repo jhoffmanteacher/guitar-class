@@ -660,7 +660,7 @@ MODULE_REVIEWS[8] = {
   skills: [
     { id: 'mr8-s1', text: 'I can hold a relaxed fingerpicking hand — wrist arched, fingers curved — for 30 seconds without it collapsing flat', set: 'm8w1' },
     { id: 'mr8-s2', text: 'I can assign p to the bass strings and i-m-a to G-B-e, and put any finger on its string without looking', set: 'm8w1' },
-    { id: 'mr8-s3', text: 'I can pluck p-i-m-a in order on open strings at 60 BPM with even volume on every finger, including the ring (a)', set: 'm8w2' },
+    { id: 'mr8-s3', text: 'I can pluck p-i-m-a in order on open strings at 60 BPM with even volume on every finger, including the ring (a)', set: 'm8w1' },
     { id: 'mr8-s4', text: 'I can play the 6-note p-i-m-a-m-i arpeggio from memory while holding a chord, every note ringing clean', set: 'm8w2' },
     { id: 'mr8-s7', text: 'I can fingerpick a full 4-chord progression without the pattern breaking at any chord change', set: 'm8w3' },
     { id: 'mr8-s9', text: 'I can perform a full fingerpicked song start to finish, recovering from any mistake without stopping', set: 'm8w3' }

@@ -23,14 +23,31 @@
       Am↔Em), one Note Hunt round, one Change Up round. If detection is
       too eager/shy, the knobs are the COACH_* constants at the top of
       coach.js — same tuning dance as the tuner rounds 1–2.
-- [ ] **Semester 2 content gaps** (from the 2026-07-10 audit; Jonathan
-      deferred these when the Semester 1 gaps were filled 2026-07-11):
-      M7 — no TAB actually contains the hammer-on/pull-off/slide markings
-      students are assessed on playing, and Bb/F# are promised but never
-      played; M9 — "Read It Up High" claims higher-position reading but
-      its TAB sits at frets 0–3, partial-shape chart reading barely
-      taught; M12 — p-i-m-a string assignments and 4-note arpeggio steps
-      lean entirely on Module 8.
+- [x] **Semester 2 content gaps** ✅ 2026-07-11, same day Jonathan asked
+      (ultracode workflow: per-module Opus writer → adversarial auditor →
+      fixer lanes; unpushed, awaiting his word). M7 — new appended Station
+      C sections: a 2-bar G-string lick TAB carrying h/p// markings in
+      destination-fret strings ('h7'/'p5'/'/9', midi = destination pitch,
+      legend in caption) closing the recognise-AND-play gap, plus an
+      F#-and-Bb full-barre challenge (Bb corrected by audit to the set's
+      ring-finger sub-barre fingering; audit also fixed a factual error —
+      Bb is NOT in Hotel California; now cited via Hey Jude's IV). M9 —
+      "Higher Still" cold-read TAB appended after Read It Up High,
+      entirely frets 5–10 across D/G/B (midis hand-verified), a
+      partial-shape chart-reading step (top-3-strings D, keyed MC), and
+      two assessItems appended to MODULE_REVIEWS[9] (3+-string melody;
+      partial/slash chart). M12 — new final m12w1 Station C section:
+      p-i-m-a claw-check reactivation (explicitly credits Module 8) and a
+      dedicated 4-note arpeggio drill on Am→C (arp midis 45/57/60/64 and
+      48/55/60/64, verified). M8 quirk — mr8-s3 review link retagged
+      m8w2→m8w1 (Set 1 is the p-i-m-a check-off). Workflow war story for
+      the record: the two audit lanes each mistook the OTHER lane's diff
+      (and the parent's M8 fix) for out-of-scope leaks — M9's fixer
+      reverted module-7.js, M7's fixer restored it from a recovery file
+      with its should-fixes applied, and the parent re-applied the M8 fix;
+      final disk state hand-verified (no duplicate sections, all midis
+      recomputed, both audits' content checks passed). All 6 VM suites +
+      checks.mjs pass. Every Semester 1 + 2 audit gap is now closed.
 - [ ] **Research backlog (medium/low)** — stored One-Minute-Changes
       scores, tempo-ladder playSeq, Song Journey anatomy sections, bends,
       7th/sus chord color, songwriting capstone, Choice-song style lanes,

@@ -5,6 +5,28 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — Semester 2: the tested-but-never-taught gaps are closed
+
+### Added
+- **Module 7:** a lick TAB that finally contains real **hammer-ons,
+  pull-offs, and slides** — the markings your assessment asks you to
+  recognise AND play now exist somewhere you can play them, with a
+  legend and a what-your-hand-does breakdown for each. And the promised
+  **F# and B♭ barre chords** get their own challenge: both shapes,
+  diagrams, and audio — F# lives all over "Hotel California," B♭ is the
+  big IV chord in "Hey Jude."
+- **Module 9:** "Read It Up High" now actually goes up high — a new
+  cold-read TAB living entirely at frets 5–10, after the low warm-up.
+  Plus a **partial-shape chart** drill (reading charts that only show
+  three strings), and the Module Review checklist gains the two skills
+  it was missing.
+- **Module 12:** fingerstyle no longer assumes you remember Module 8 —
+  a 60-second **p-i-m-a claw check** re-anchors which finger owns which
+  string, and a dedicated **4-note arpeggio drill** on Am and C builds
+  the even-volume roll your Travis and waltz patterns sit on.
+- **Module 8 fix:** the review checklist's p-i-m-a skill now points its
+  "Review this" link at the set that actually teaches it.
+
 ## 2026-07-11 — Getting around the site is much faster
 
 ### Added

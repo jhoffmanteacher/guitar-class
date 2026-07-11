@@ -180,6 +180,31 @@ SETS.push(
                 hint: 'Not stopping is the skill. If the thumb stumbles, let the fills go and keep the bass walking until you\'re back in.'
               }
             ]
+          },
+          {
+            title: 'Reactivate p-i-m-a — the claw (from Module 8)',
+            steps: [
+              {
+                text: 'Challenge — Claw Check (a 60-second reactivation of Module 8, not a re-teach): plant all four picking fingers at once — thumb (p) resting on the bass strings 6/5/4, index (i) on the G string, middle (m) on the B string, ring (a) on the high e. Then pluck p–i–m–a on the open strings, twice through at 60 BPM. You\'ve got it when: each finger fires in order, one string each, with no two fingers grabbing the same string. This is the picking hand you built back in Module 8 — you\'re just waking it up before today\'s Travis work.',
+                hint: 'p owns the three bass strings (6/5/4); i-G, m-B, a-high-e never trade places. Set the assignment once and your hand stops hunting for strings.',
+                stuck: 'Plant all four fingers silently first and feel each one touching its string, then pluck slowly — p, then i, then m, then a — before you add the metronome.',
+                levelUp: 'Run the staircase up and back down (p-i-m-a-m-i) without looking at your picking hand.',
+                skills: [1, 3],
+                playSeq: { label: 'p-i-m-a on open strings — A, G, B, e (twice through)', bpm: 60, notes: [45, 55, 59, 64, 45, 55, 59, 64] }
+              },
+              {
+                text: 'Challenge — 4-Note Arpeggio, Am then C: play a p–i–m–a arpeggio on each chord — one thumb bass, then i-m-a rolling up the top three strings — 2 bars of Am, then 2 bars of C, and loop. On Am the thumb takes the open A string; on C it slides to the 3rd-fret C on that same string. You\'ve got it when: every note is the same volume and the a-finger (the high e) doesn\'t rush ahead of the beat.',
+                hint: 'This is the four-even-notes drill Module 8 built the whole pattern on — the a-finger is the one most likely to snap early, so keep it as calm as the thumb.',
+                stuck: 'Loop just Am until the four notes are dead even, then add C — the only thing that changes between the chords is where the thumb lands.',
+                levelUp: 'Fold the same p-i-m-a shape into this set\'s Travis or 3/4 waltz pattern, keeping every note even.',
+                skills: [1, 4],
+                playSeq: { label: 'Hear one p-i-m-a lap on Am, then C — loop it 2 bars each', bpm: 60, notes: [45, 57, 60, 64, 48, 55, 60, 64] },
+                chords: [
+                  { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
+                  { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 }
+                ]
+              }
+            ]
           }
         ]
       }

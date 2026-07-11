@@ -168,6 +168,29 @@ SETS.push(
                 response: { type: 'short', placeholder: 'e.g. the string jump from A to E in Crazy Train' }
               }
             ]
+          },
+          {
+            title: 'Play hammer-ons, pull-offs & slides (h / p / /)',
+            steps: [
+              {
+                text: 'Challenge — Slur It Together: play this 2-bar lick on the G string. Pick ONLY where the TAB shows a plain fret number — everywhere you see an h, p, or / , your fretting hand makes the note with no new pick. You\'ve got it when: the hammered, pulled, and slid notes ring out just as loud as the ones you actually pick.',
+                hint: 'Hammer-on (h7): pick the 5, then slam your ring finger down onto the 7 — the string keeps ringing, no pick. Pull-off (p5): from the 7, flick that same finger off sideways so the already-fretted 5 sounds. Slide (/9): pick the 7 and slide the finger up to the 9 without lifting off. Tap ▶ on the TAB to hear the target.',
+                stuck: 'Drill one move at a time. Hammer 5→7 twenty times until the hammered note is as loud as the picked one — that\'s finger strength and it comes fast. Then the pull-off, then the slide.',
+                levelUp: 'Run the whole lick as one smooth phrase in a single breath, or move it up to the B string and read the new frets.',
+                skills: [3],
+                response: { type: 'short', prompt: 'Which of the three — hammer, pull, or slide — needs the most work? Name it for next session.', placeholder: 'e.g. the pull-off — my note comes out too quiet' },
+                tab: {
+                  caption: '2-bar articulation lick · G string · h = hammer-on, p = pull-off, / = slide up',
+                  notes: [
+                    { string: 'G', fret: 5,    note: 'C', midi: 60 },
+                    { string: 'G', fret: 'h7', note: 'D', midi: 62 },
+                    { string: 'G', fret: 'p5', note: 'C', midi: 60 },
+                    { string: 'G', fret: 7,    note: 'D', midi: 62 },
+                    { string: 'G', fret: '/9', note: 'E', midi: 64 }
+                  ]
+                }
+              }
+            ]
           }
         ]
       }
@@ -590,6 +613,24 @@ SETS.push(
               {
                 text: 'You\'ve reached the hardest hands-on skill in the course — give yourself credit for that. Which barre (E-shape or A-shape, and at which chord) most needs another week of short daily tries? Type it below; that\'s your standing warm-up from here.',
                 response: { type: 'short', placeholder: 'e.g. the F barre at fret 1 — a few clean tries every day' }
+              }
+            ]
+          },
+          {
+            title: 'The last two barres — F# and Bb',
+            steps: [
+              {
+                text: 'Challenge — F# and Bb, the last two: you\'ve slid both barre shapes all over the neck — now nail the two lowest ones the module still owes you. F# major is your E-shape barre at fret 2 (root F# on string 6). Bb major is your A-shape barre at fret 1 (root Bb on string 5, low E muted). Play each one cleanly, then trade F# ↔ Bb, one strum apiece. You\'ve got it when: both ring clean at these tight low frets and you can name each by its root.',
+                hint: 'Same two shapes you already own, just parked down low where the strings fight hardest. F#: the E-shape bar on fret 2 — one fret above the open E chord. Bb: the A-shape bar on fret 1 — index bars the strings, your ring finger sub-barres strings 4-3-2 at fret 3 (the same sub-barre you drilled on B, C and D), and your index mutes the low E — one fret above the open A chord. Read the roots: string 6 fret 2 = F#, string 5 fret 1 = Bb. Tap ▶ to hear each chord.',
+                stuck: 'These sit at the tightest end of the neck, so build each in stages — and if fret 1 or 2 buzzes, prove the shape higher up first, then walk it down. For Bb, get the string-5 bass and the ring-finger sub-barre ringing before you add the high E. Cramping is normal; shake it out.',
+                levelUp: 'Hear them in real music: F# is all over "Hotel California"; Bb is the big IV chord in "Hey Jude." Or slide each shape up one fret and name the new chord (G, and B).',
+                skills: [3, 4, 5],
+                chords: [
+                  { name: 'F# major (E-shape)', chord: [[6,2,'1'],[5,4,'3'],[4,4,'4'],[3,3,'2'],[2,2,'1'],[1,2,'1']], position: 2 },
+                  { name: 'Bb major (A-shape)', chord: [[6,'x'],[5,1,'1'],[4,3,'3'],[3,3,'3'],[2,3,'3'],[1,1,'1']], position: 1 }
+                ],
+                playSeq: { label: 'Hear F# major, then Bb major', bpm: 50, notes: [[42,49,54,58,61,66],[46,53,58,62,65]] },
+                response: { type: 'short', prompt: 'Which of the two low barres — F# or Bb — rings less cleanly right now? Name it for your next warm-up.', placeholder: 'e.g. Bb — my ring-finger sub-barre deadens the high E' }
               }
             ]
           }
