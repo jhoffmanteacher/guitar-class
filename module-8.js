@@ -245,10 +245,10 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/YZkkUjDDamA" target="_blank">Beginner Fingerpicking Made Easy – Marty Music</a> (revisit 0:00–3:00 for the pattern walkthrough). Mute the strings with your fretting hand and tap the FINGER ORDER on the guitar top as he plays.',
-            hint: 'Marty\'s "pinch and pluck" demonstration breaks the pattern into chunks. Focus on the FINGER ORDER — once it\'s automatic, your speed will follow.',
+            text: 'Watch: <a href="https://youtu.be/AFyqe-rfxTU" target="_blank">Fingerpicking for Beginners — Pluck Patterns and Walkdowns – Lauren Bateman</a> — a fingerpicking specialist\'s take on the same skill as Set 1\'s videos. Mute the strings with your fretting hand and tap the FINGER ORDER on the guitar top as she plays.',
+            hint: 'Second teacher, same rule: focus on the FINGER ORDER — once it\'s automatic, your speed will follow.',
             skills: [3, 4],
-            response: { type: 'short', placeholder: 'When the chord changes, does the picking pattern change too, or stay the same?' }
+            response: { type: 'short', placeholder: 'When the chord changes, does the picking pattern change too? And what did Lauren show that Set 1\'s videos didn\'t?' }
           }
             ]
           },

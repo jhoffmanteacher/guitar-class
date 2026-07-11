@@ -400,6 +400,11 @@ SETS.push(
                   answer: 1,
                   explain: 'If you can sing it, you know it — your hands just have to find what your voice already solved.',
                   choices: ['Guess randomly', 'Sing it, then hunt for your sung notes on one string', 'Look up the TAB', 'Play every fret until something works'] }
+              },
+              {
+                text: 'Optional bonus watch: <a href="https://youtu.be/rPSRH3tf5B8" target="_blank">How To Develop The World\'s Greatest Ear – Rick Beato</a> — a producer\'s view of the exact skill this set trains. You don\'t need the advanced parts: the opening idea (ears are built by small daily reps, not talent) is the takeaway — grab it and go do the Station C echo drills.',
+                hint: 'Every ear-training path starts the same place your Station C drills do: two notes — which one is higher?',
+                response: { type: 'short', placeholder: 'One idea from this video worth stealing for your own practice: …' }
               }
             ]
           },

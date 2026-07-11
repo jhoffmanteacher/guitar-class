@@ -132,6 +132,12 @@ HTML / CSS / JS, then explain what you changed.
 
 ## Lessons learned
 
+### Station B video pairs — aim for two voices
+In each Station B video pair, aim for video #2 from a **different instructor**
+than video #1, teaching the same skill. Same-channel pairs are allowed when the
+alternative is a worse video — quality beats variety. (Adopted in the July 2026
+research-upgrades Session D.)
+
 ### Never invent YouTube IDs from memory
 When adding `originalUrl` / `tutorialUrl` / lesson video links in any module file:
 - **Do not** write a YouTube ID based on recall — even for famous songs or well-known channels (JustinGuitar, Marty Music, etc.). Training-data recall of 11-character video IDs is unreliable and most invented IDs are 404s.
@@ -141,6 +147,25 @@ When adding `originalUrl` / `tutorialUrl` / lesson video links in any module fil
 - If you can't find or verify a real URL for a given video slot, drop the link rather than inventing one. Pre-existing URLs in `module-1.js` through `module-5.js` are presumed valid (they were checked); reuse them when the topic fits.
 
 (Context: in May 2026 I drafted Modules 6–8 from recall and ~60 of the URLs were 404s. Search-and-verify is the only safe pattern.)
+
+### Prefer diverse tutorial creators
+An audit (2026-07-10) found the tutorial-video lineup skews heavily toward a
+handful of big channels run by white men — Marty Music, Andy Guitar,
+JustinGuitar, swiftlessons, GuitarZero2Hero, and Kurt Berg alone covered
+roughly half the tutorial slots. Jonathan wants students to see a more diverse
+set of teachers. So, when **adding or swapping any tutorial video**:
+
+- **Don't default to the biggest channel.** Before settling on Marty Music /
+  JustinGuitar / Andy Guitar, spend one extra search looking for a
+  comparable-quality lesson from a woman, a creator of color, or a
+  Spanish-language/bilingual channel (a plus for this class's repertoire).
+- Creators **already verified on the site** to reuse when the topic fits:
+  Lauren Bateman, Nikhil D'Souza, guitarraviva (Spanish), David Casas.
+- **Lesson quality still wins.** Never pick a worse lesson just for the
+  demographic — the rule is *check for a strong diverse option first*, not
+  *avoid the big channels at all costs*.
+- All the usual rules above still apply: find via WebSearch, verify via oEmbed,
+  never write an ID from memory.
 
 ## Settled song facts — do not re-flag in audits
 These song arrangements are intentional and have been reconciled with the

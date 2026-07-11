@@ -36,7 +36,7 @@ SETS.push(
                   choices: ['Play melody', 'Alternate steadily between two bass strings like a drummer', 'Strum', 'Rest'] }
               },
               {
-                text: 'Watch: <a href="https://youtu.be/K2Z3RZc5t-A" target="_blank">Basic Fingerstyle — Travis Finger Picking (FO-108) – JustinGuitar</a> (this was Module 8\'s teaser — now it\'s the main event; watch the full pattern section).',
+                text: 'Watch: <a href="https://youtu.be/XQiaCSabQaE" target="_blank">A Total Beginners Guide To Travis Picking – Andy Guitar</a> — a second teacher on the same pattern as the first video. Notice what Andy does differently from Justin: how he counts the thumb, and when he lets the pinch in.',
                 hint: 'A pinch is bass and treble sounding at the same instant — the signature Travis accent.',
                 skills: [2, 3],
                 response: { type: 'mc', prompt: 'A "pinch" is:',
@@ -169,6 +169,15 @@ SETS.push(
               {
                 text: 'What tempo could you hold the alternating thumb today without it stumbling? Write it below — that\'s your warm-up target next time.',
                 response: { type: 'short', placeholder: 'e.g. solid at 60 BPM; at 70 my thumb followed my fingers and fell apart' }
+              }
+            ]
+          },
+          {
+            title: 'Play-along — one full pass, no stopping',
+            steps: [
+              {
+                text: 'Play-along: open Station B\'s Travis pattern lesson video, set YouTube\'s speed to 0.75×, and pick along for the ENTIRE demo section without stopping. You\'ve got it when: you finish a full pass with the video — dropped pinches and all, don\'t stop.',
+                hint: 'Not stopping is the skill. If the thumb stumbles, let the fills go and keep the bass walking until you\'re back in.'
               }
             ]
           }
@@ -392,7 +401,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
               {
-                text: 'Video coming soon — in the meantime, listen for the requinto lines in Luna and Tu Boda from this module\'s song list. <!-- VIDEO-TODO: requinto / sierreño-style guitar picking introduction — Spanish-lane content; Jonathan reviews before it goes live -->',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=cRJb_f4-M5g" target="_blank">La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera</a> — a real requinto line from the ranchera tradition sierreño grew out of, taught in English. Watch how his picking hand carries the melody a singer would otherwise have, then listen for the same job in Luna and Tu Boda from this module\'s song list. <!-- Session D filled this former video placeholder (oEmbed-verified 2026-07-10: "La Derrota - Vicente Fernandez - Guitar Lesson - requinto - tutorial - part 1 (ENGLISH)" / Jorge Aguilera). Spanish-lane content — Jonathan: review for fit. -->',
                 hint: 'Requinto sings the melodic lines you\'ve been hearing in Luna, Tu Boda, and La Diabla since the course\'s first tone-ID days.',
                 skills: [3],
                 response: { type: 'mc', prompt: 'In a sierreño group, the requinto is:',

@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — New teachers in the mix, a requinto lesson, and play-along challenges
+
+### Added
+- **The requinto set finally has its video** — a real requinto lesson (La
+  Derrota, taught in English) shows the picking style that Luna and Tu Boda
+  are built on. No more "video coming soon."
+- **Second voices.** Five lessons now pair two different teachers on the
+  same skill, so if one explanation doesn't click, the other might: Paul
+  Davids on how chords are built and which chords belong together
+  (Module 11), a fingerpicking specialist on your picking patterns
+  (Module 8), Andy Guitar on strumming (Module 6) and Travis picking
+  (Module 12), and a bonus Rick Beato watch on why anyone can train their
+  ear (Module 10).
+- **Play-along challenges** in Modules 6 and 12: set the lesson video to
+  0.75× speed and play along for the entire demo without stopping — because
+  real songs don't wait for you.
+
 ## 2026-07-11 — Ear Spark: 2-minute ear training in every Semester 1 module
 
 ### Added

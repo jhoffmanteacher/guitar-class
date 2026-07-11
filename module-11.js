@@ -36,7 +36,7 @@ SETS.push(
                   choices: ['Any three notes', 'Every other note of a scale: root, 3rd, 5th', 'Three notes on one string', 'The same note in three octaves'] }
               },
               {
-                text: 'Watch: <a href="https://youtu.be/BvD1yoWfis4" target="_blank">Triad Chords #1of3 – JustinGuitar</a>. Every chord you\'ve ever strummed is built from these same three notes — root, 3rd, 5th.',
+                text: 'Watch: <a href="https://youtu.be/BIWEcDGB5lA" target="_blank">Understanding CHORDS (Ep. 3 Music Theory) – Paul Davids</a>. Every chord you\'ve ever strummed is built from the same three notes — root, 3rd, 5th — and Paul shows where they come from. A different teacher than the first video on purpose: notice which explanation clicks for you.',
                 hint: 'Notice the pattern: three of the seven chords in a key come out major, and three come out minor — no exceptions, in any key.',
                 skills: [2],
                 response: { type: 'mc', prompt: 'In any major key, chords I, IV, and V are major. Chords ii, iii, and vi are:',
@@ -214,7 +214,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
               {
-                text: 'Watch (revisit): <a href="https://youtu.be/lhHSU4AnXSU" target="_blank">How to Find Guitar Chords in a Key? – JustinGuitar</a>. Same video as Set 1 — this time run the lookup backwards: given the chords, name the key.',
+                text: 'Watch: <a href="https://youtu.be/6U8-Y7DEzOE" target="_blank">What chords sound good together? | Music theory ep. 7 – Paul Davids</a> — a second voice on the chord families you built in Set 1. Paul shows why a key\'s chords belong together; your job is to run it backwards: given a song\'s chords, name the key.',
                 hint: 'You already know each key\'s chord family from Set 1 — this is just running that lookup backwards.',
                 skills: [1],
                 response: { type: 'mc', prompt: 'A song uses G, C, D, and Em. Its key is almost certainly:',

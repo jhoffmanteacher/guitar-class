@@ -371,6 +371,15 @@ SETS.push(
                 text: '⚡ Ear Spark (optional, 2 min): play any lesson video from this set and pause right after one bar of strumming — clap the rhythm back exactly, then play it as muted strums. Rhythm echo is ear training too. Got someone around? Have them clap a bar of any pattern from this set for you to echo.'
               }
             ]
+          },
+          {
+            title: 'Play-along — one full pass, no stopping',
+            steps: [
+              {
+                text: 'Play-along: open Station B\'s D-DU-UDU lesson video, set YouTube\'s speed to 0.75×, and strum along for the ENTIRE demo section without stopping. You\'ve got it when: you finish a full pass with the video — flubbed changes and all, don\'t stop.',
+                hint: 'Not stopping is the skill. Real songs don\'t wait for you, and neither does the video — recovering mid-stream beats restarting.'
+              }
+            ]
           }
         ]
       }
@@ -443,8 +452,8 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/NCV9IgeSYuU" target="_blank">Beginner Guitar Strumming Patterns You MUST Know! – Marty Music</a> (0:00–3:00). Job while you watch: this time ignore the patterns themselves — just notice how he decides WHICH pattern fits a song.',
-            hint: 'Marty walks through several patterns. There is no single "correct" one — listen to a song and feel which fits. The original recording usually tells you exactly what to do.',
+            text: 'Watch: <a href="https://youtu.be/vMt8T5Jqf10" target="_blank">Best Strumming Exercise For Beginners and Improvers – Andy Guitar</a> — a different teacher\'s method for building ANY pattern. Strum along with his exercise in real time, and notice how his approach differs from Justin\'s in the first video.',
+            hint: 'There is no single "correct" pattern for a song — listen to the original recording and feel which fits. Andy\'s exercise builds the control to play whichever one you choose.',
             skills: [4, 5],
             response: { type: 'short', placeholder: 'Pick a song you like. Describe the strum pattern in your own words — is it gentle, driving, choppy? What gives it that feel?' }
           }

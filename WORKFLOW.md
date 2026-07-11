@@ -70,8 +70,36 @@
       in a shuffled-slip order → name what you hear on playback), with the
       partner version kept as a one-line tail; each drill's teaching kernel
       (hollow power chords, sing-first trick, etc.) preserved verbatim.
-      Next: Session D (second-voice videos — research-heavy; every URL
-      search-found + oEmbed-verified, full link check before push).
+      Session D ✅ 2026-07-10: **second-voice videos, play-alongs.** All six
+      new URLs search-found and oEmbed-verified live (HTTP 200, titles
+      quoted): m12w3 former video placeholder → "La Derrota - Vicente
+      Fernandez - Guitar Lesson - requinto - tutorial - part 1 (ENGLISH)" /
+      Jorge Aguilera (cRJb_f4-M5g — Spanish-lane content, comment in file
+      asks Jonathan to review fit); m12w1#2 → "A Total Beginners Guide To
+      Travis Picking" / Andy Guitar (XQiaCSabQaE); m8w2#2 → "Fingerpicking
+      for Beginners - Pluck Patterns and Walkdowns" / Lauren Bateman
+      (AFyqe-rfxTU); m11w1#2 → "Understanding CHORDS (Ep. 3 Music Theory)" /
+      Paul Davids (BIWEcDGB5lA); m11w2#1 → "What chords sound good
+      together? | Music theory ep. 7" / Paul Davids (6U8-Y7DEzOE) —
+      deviation: replaced slot #1 not #2 because it was a verbatim duplicate
+      of m11w1's video; m10w3 → "How To Develop The World's Greatest Ear" /
+      Rick Beato (rPSRH3tf5B8) APPENDED as an optional third watch step
+      (both existing slots were load-bearing; spec allows append). Swapped
+      URLs+texts strictly IN PLACE (no step reordering); stale Marty hints
+      and 0:00–3:00 ranges on replaced videos cleaned up. Play-along pilot
+      steps appended as new final Station C sections in m6w2 and m12w1
+      (0.75× full-pass challenge). Two-voices policy added to CLAUDE.md
+      (Lessons learned). NOT done, honestly: the watch-range sweep for
+      Modules 10–12 (YouTube pages don't expose durations to fetches;
+      assigning ranges without durations would mean inventing timestamps —
+      same hazard as inventing IDs; needs a YouTube API key or a manual
+      pass) and performance-first reordering (no current pair contains a
+      full-performance video; nothing to reorder). MC-retargeting was
+      satisfied by folding compare-the-teachers prompts into the swapped
+      steps' texts/responses rather than adding keyed MCs about video
+      content I can't verify. checks.mjs full link check: 159/159
+      reachable. Next: Session E (12-bar blues — new skills m11w3-s7/s8,
+      m10w2-s7; manifest 10→19, 11→20; adapt partner jam texts solo-first).
 
 - [x] **Semester 2 build — Modules 9–12** (`MODULES_9_12.md`, decision-complete
       spec, four sessions A–D — all four complete). Session A ✅ 2026-07-10: built **Module 9 —
