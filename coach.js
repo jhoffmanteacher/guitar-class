@@ -84,10 +84,11 @@ function coachOpen(btn){
     }
     slots = midis.slice(0, COACH_MAX_SLOTS).map(m => {
       const arr = (Array.isArray(m) ? m : [m]).map(Number);
+      const root = Math.min.apply(null, arr);   // tab midi arrays aren't root-first
       return {
-        midi: arr[0],
+        midi: root,
         classes: arr.map(x => ((x % 12) + 12) % 12),
-        label: coachNoteName(arr[0]),
+        label: coachNoteName(root),
         isChange: false, chordName: null,
         state: 'pending', hit: null
       };
@@ -247,13 +248,18 @@ async function coachStartCheck(){
     closePopup('tuner');
   }
 
-  /* The games share the mic pipeline — hand it over cleanly first. */
+  /* The games share the mic pipeline — hand it over cleanly first, and
+     silence anything the site itself is playing (demo sequences, chord
+     strums, metronome) so the mic doesn't score the speakers. */
   if (typeof gamesStopMic === 'function') gamesStopMic();
+  if (typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
 
+  const session = coach;
   if (!coachStream && !(await coachAcquireMic())){
-    coachRenderReady('Mic access denied — check browser permissions, then try again.');
+    if (coach === session) coachRenderReady('Mic access denied — check browser permissions, then try again.');
     return;
   }
+  if (coach !== session){ coachMicOff(); return; }   // card closed during the permission prompt
   const micEl = document.getElementById('coach-mic');
   if (micEl) micEl.hidden = false;
 
@@ -278,8 +284,16 @@ async function coachStartCheck(){
 
 /* Mic pipeline shared by the Coach card and Note Hunt: raw-audio capture →
    band-limit to the guitar's range (same as the tuner) → analyser.
-   Returns false if the mic is denied. */
-async function coachAcquireMic(){
+   Returns false if the mic is denied. Single-flight: while a permission
+   prompt is pending, concurrent callers await the SAME acquisition — a
+   double-click can never open a second stream and orphan the first. */
+let coachAcquirePending = null;
+function coachAcquireMic(){
+  if (coachAcquirePending) return coachAcquirePending;
+  coachAcquirePending = coachAcquireMicInner().finally(() => { coachAcquirePending = null; });
+  return coachAcquirePending;
+}
+async function coachAcquireMicInner(){
   try {
     coachStream = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
@@ -412,7 +426,9 @@ function coachLoop(){
 /* YIN, trimmed to the guitar's range: tau only up to ~sr/60Hz, so it's a
    fraction of the tuner's full scan — cheap enough for a Chromebook at 20Hz. */
 function coachDetectPitch(buf, sampleRate){
-  const W = Math.min(buf.length, 2048);
+  // Window scales with sample rate: at 88.2/96kHz a fixed 2048 caps maxTau
+  // below low E's 82Hz period — the whole 6th string became undetectable.
+  const W = Math.min(buf.length, sampleRate > 60000 ? 4096 : 2048);
   const start = buf.length - W;
   const half = Math.floor(W / 2);
   const maxTau = Math.min(half - 1, Math.ceil(sampleRate / 60));
@@ -506,12 +522,19 @@ function coachMicOff(){
   if (micEl) micEl.hidden = true;
 }
 
+/* How many matched slots a take needs before we trust it enough to score.
+   Scales down for short drills — a 2-note vamp can only ever match 2 slots,
+   so a flat floor of 3 made those drills unpassable. */
+function coachMinHeard(slotCount){
+  return Math.max(Math.min(3, Math.ceil(slotCount / 2)), Math.ceil(slotCount * 0.3));
+}
+
 function coachRenderReport(){
   const slots = coach.slots;
   const matched = slots.filter(s => s.hit);
 
   /* Too little signal → honest "couldn't hear", never a wrong verdict. */
-  if (matched.length < Math.max(3, slots.length * 0.3)){
+  if (matched.length < coachMinHeard(slots.length)){
     coachBody().innerHTML =
       `<div class="coach-note">&#x1F914; I couldn&rsquo;t hear that clearly — try again somewhere quieter, with the guitar closer to the mic, and give each ${coach.mode === 'chords' ? 'strum' : 'note'} a confident pluck.</div>
        ${coachStripHtml()}
@@ -795,9 +818,12 @@ async function fretStart(){
   if (!body) return;
   body.innerHTML = '<div class="coach-tip">Starting the mic…</div>';
   if (!coachStream && !(await coachAcquireMic())){
-    body.innerHTML = '<div class="coach-note">Mic access denied — check browser permissions, then close and reopen Note Hunt.</div>';
+    const b2 = document.getElementById('fret-body');
+    if (b2) b2.innerHTML = '<div class="coach-note">Mic access denied — check browser permissions, then close and reopen Note Hunt.</div>';
     return;
   }
+  if (!document.getElementById('fret-body')){ coachMicOff(); return; }   // panel closed during the prompt
+  if (typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
   fretRunning = true;
   window.coachMicLive = true;   // stream may already be open from a prior owner
   let lvl = 1;
@@ -1160,11 +1186,14 @@ async function ccStart(){
   if (typeof tunerRunning !== 'undefined' && tunerRunning && typeof closePopup === 'function'){
     closePopup('tuner');
   }
+  const session = cc;
   if (!coachStream && !(await coachAcquireMic())){
-    ccRenderSetup('Mic access denied — check browser permissions, then try again.');
+    if (cc === session) ccRenderSetup('Mic access denied — check browser permissions, then try again.');
     return;
   }
+  if (cc !== session){ coachMicOff(); return; }   // panel closed during the permission prompt
   cc.micOn = true;
+  if (typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
 
   const prog = CC_PROGRESSIONS[cc.progIdx].chords;
   cc.bars = Array.from({ length: CC_BARS }, (_, i) => prog[i % prog.length]);

@@ -15,6 +15,47 @@
 
 ## Open work
 
+- [x] **14-bug fix round ✅ 2026-07-11** — a parallel session's adversarial
+      review (session 889bd894, workflow wf_b7b34045) found 14 confirmed
+      bugs in commit 9eee1d0; all 14 fixed and verified: (1–3) mic
+      acquisition races — post-await session guards in coachStartCheck/
+      ccStart/fretStart + single-flight coachAcquireMic (pending-promise
+      dedupe), so closing a card/panel during the permission prompt or
+      double-clicking Start can no longer strand a live mic stream or
+      brick every ▶ Play via a stuck coachMicLive; (4) "couldn't hear"
+      gate now scales to drill length via coachMinHeard() — 2-slot drills
+      (m3 F5↔A5, Luna vamp) were unpassable under the flat floor of 3;
+      (5) YIN window scales to 4096 samples above 60kHz so low E is
+      detectable on 88.2/96kHz devices; (6) chord-array melody slots
+      label/anchor the ROOT (min midi), not arr[0]; (7) songs-hub video
+      buttons switched to index-based songsHubVid() — escAttr'd
+      apostrophes in inline onclick broke Sweet Child O' Mine et al;
+      (8) playSequence stop-toggle runs before the coachMicLive gate +
+      new stopAllDemoAudio() (sequences, strums, metronome) called by all
+      three mic entry points; (9) tick() beep gated on coachMicLive;
+      (10) body.viewer-open hides .fab-buttons while the mini-player is
+      open (FABs covered YouTube's control bar); (11) .coach-start
+      color:#fff→var(--bg) (was 1.76:1 in dark mode); (12) max-height
+      accounts for the 96px dock + a max-height:520px breakpoint (landscape
+      phones clipped the header/close off-screen); (13) back-to-top gets
+      visibility:hidden while hidden (was an invisible tab stop); (14)
+      .coach-mic #e74c3c→#c0392b + dark-mode #f2a39c (AA in both themes).
+      All 6 VM suites (coach-test extended with gate + root-label cases) +
+      checks pass. The same session's design plan lives in
+      DESIGN_UPGRADES.md (untracked, proposal only — Jonathan's call).
+- [x] **Assessment-coverage check, Modules 1–5 ✅ 2026-07-11** — Jonathan
+      supplied the five unit assessments; compared task-by-task and
+      requirement-by-requirement against MODULE_REVIEWS[1–5].assessItems
+      (which render stateless — safe to edit in place). Result: M2, M3,
+      M4, M5 fully covered (M4 includes the phrasing-strategy clause; M5's
+      teacher-facing tasks use the settled self-paced adaptations). Fixed:
+      M1 item 1 + "without restarting"; M1 item 3 + explicit tone bar
+      ("every string ringing full and clean, no accidental muting from
+      either hand"); M3 item 2 now names the two patterns (straight
+      eighths / split strum) like the unit spec. Flagged to Jonathan, not
+      changed: his assessment doc lists Luna as F–Am–Dm–C, but the
+      official chart (settled fact 2026-07-09) has NO C — the doc, not
+      the site, is off; also "Am5" in Unit 3 is presumably A5.
 - [ ] **Real-guitar test of the mic features** — the Listening Coach
       (🎤 Check me / Check my changes), Note Hunt, and Change Up shipped
       live 2026-07-11 verified only by VM test harnesses (Jonathan's

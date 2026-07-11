@@ -591,7 +591,7 @@ MODULE_REVIEWS[3] = {
   ],
   assessItems: [
     'Play a core-song excerpt (Seven Nation Army, All Along the Watchtower\'s A5–G5–F5, or Sweet Child\'s D5–C5–G5) with changes on beat 1 at 60 BPM — including a clean switch between two power chords with roots on the same fret of the E and A strings, with unused strings muted the whole way — then hold 80 BPM for 15 seconds',
-    'Read a three-chord (I–IV–V) progression from chord symbols / TAB with a named strumming pattern, and name power chords from a chord chart',
+    'Read a three-chord (I–IV–V) progression from chord symbols / TAB with a named strumming pattern (straight eighths or the split strum), and name power chords from a chord chart',
     'Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes'
   ],
   forward: 'The two-finger shape and the muting you just locked in are the backbone of rhythm guitar. The E &amp; A string roots you slide between also become your <strong>home base for the pentatonic patterns in Module 4</strong> — that\'s where you\'ll play lead lines and solos over these very same power chords.',

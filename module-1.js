@@ -449,9 +449,9 @@ MODULE_REVIEWS[1] = {
     { id: 'mr1-s5', text: 'I can hold the guitar and pick correctly and make every open string ring clean', set: 'w2' }
   ],
   assessItems: [
-    'Tune all 6 strings to green in under 2 minutes',
+    'Tune all 6 strings to green in under 2 minutes, without restarting',
     'Name all 6 strings from memory — in order and at random',
-    'Play each open string cleanly with correct posture and pick grip — down-strokes from the wrist'
+    'Play each open string with correct posture and pick grip — down-strokes from the wrist, every string ringing full and clean with no accidental muting from either hand'
   ],
   forward: 'You\'ve got a guitar that\'s in tune, a goal, and your first clean notes — <strong>Module 2 puts names on the frets</strong> so riffs and TAB start making sense. (Already played before, or coming back after a long break? <strong>Module 9, Set 0</strong> is a six-skill re-test that shows you exactly where to start.)',
   standards: ['Pr.1a', 'Pr.4a', 'Pr.5a', 'Cn.11a']

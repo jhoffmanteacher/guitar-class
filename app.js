@@ -2330,27 +2330,36 @@ function playBeat(btnEl){
   midis.forEach(m => playNote(Number(m)));
 }
 let playSeqState = null;
+function stopPlaySeq(){
+  if(!playSeqState) return;
+  playSeqState.timeouts.forEach(clearTimeout);
+  if(playSeqState.btn){
+    playSeqState.btn.innerHTML = playSeqState.idleHtml || '&#x25B6; Play all';
+    playSeqState.btn.classList.remove('playing');
+  }
+  playSeqState = null;
+}
+/* Kill every site-generated sound (demo sequences, chord strums, metronome
+   click). The Coach/games call this when the mic goes live so the analyser
+   never scores the speakers. */
+function stopAllDemoAudio(){
+  stopPlaySeq();
+  chordStrumTimeouts.forEach(clearTimeout);
+  chordStrumTimeouts = [];
+  if(typeof metroRunning !== 'undefined' && metroRunning) stopMetro();
+}
 function playSequence(midis, bpm, btnEl){
-  if(window.coachMicLive) return;  // demo audio would score itself while the Coach listens
-  const stop = () => {
-    if(!playSeqState) return;
-    playSeqState.timeouts.forEach(clearTimeout);
-    if(playSeqState.btn){
-      playSeqState.btn.innerHTML = playSeqState.idleHtml || '&#x25B6; Play all';
-      playSeqState.btn.classList.remove('playing');
-    }
-    playSeqState = null;
-  };
   if(playSeqState){
     const wasSame = playSeqState.btn === btnEl;
-    stop();
+    stopPlaySeq();                 // the STOP half of the toggle must work even mid-check
     if(wasSame) return;
   }
+  if(window.coachMicLive) return;  // but no NEW demo audio while the Coach listens
   const interval = 60000 / (bpm || 60);
   const timeouts = midis.map((m, i) => setTimeout(() => {
     (Array.isArray(m) ? m : [m]).forEach(x => playNote(Number(x)));
   }, i * interval));
-  timeouts.push(setTimeout(stop, midis.length * interval));
+  timeouts.push(setTimeout(stopPlaySeq, midis.length * interval));
   const idleHtml = btnEl ? btnEl.innerHTML : null;
   playSeqState = { timeouts, btn: btnEl, idleHtml };
   if(btnEl){
@@ -2423,7 +2432,7 @@ function coachChordBtnRowHtml(chords){
   const label = spec.length>1 ? 'Check my changes' : 'Strum check';
   return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}" onclick="coachOpen(this)" title="Strum along with the count — the mic listens and gives feedback">&#x1F3A4; ${label}</button></div>`;
 }
-function tick(){ beep(880,0.06); const dot=document.getElementById('metro-dot'); if(dot){ dot.classList.add('flash'); setTimeout(()=>dot.classList.remove('flash'),80); } }
+function tick(){ if(!window.coachMicLive) beep(880,0.06); const dot=document.getElementById('metro-dot'); if(dot){ dot.classList.add('flash'); setTimeout(()=>dot.classList.remove('flash'),80); } }
 function getBpm(){ return parseInt(document.getElementById('bpm-slider').value); }
 function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; if(metroRunning){ stopMetro(); startMetro(); } }
 function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Math.min(220,Math.max(40,getBpm()+d)); document.getElementById('bpm-display').textContent=s.value; if(metroRunning){ stopMetro(); startMetro(); } }
@@ -2490,6 +2499,7 @@ function loadPanel(type,url,title,subtitle){
   const newtab=document.getElementById('rp-newtab');
   const close=document.getElementById('rp-close');
   overlay.hidden=false;
+  document.body.classList.add('viewer-open');   // hides the FAB pills (they covered the player's controls)
   clampViewer(overlay);   // a drag on a bigger window could strand it off-screen
   content.classList.add('visible'); newtab.classList.add('visible'); close.classList.add('visible');
   newtab.href=url;
@@ -2559,6 +2569,7 @@ function clearPanel(){
   content.classList.remove('visible'); newtab.classList.remove('visible'); close.classList.remove('visible');
   wrap.className='rp-iframe-wrap'; wrap.innerHTML='';   // removing the iframe stops playback
   if(overlay) overlay.hidden=true;
+  document.body.classList.remove('viewer-open');
 }
 
 /* Keep the mini-player inside the viewport (after drags / window resizes). */
@@ -2790,16 +2801,19 @@ async function toggleSongsHub(){
   Object.keys(MS).forEach(m => MS[m].forEach(sg => noteSong(sg, Number(m))));
   const entries = [...byName.values()];
   entries.sort((a, b) => (b.song.core === true) - (a.song.core === true) || a.song.name.localeCompare(b.song.name));
-  const rows = entries.map(e => {
+  songsHubList = entries.map(e => e.song);
+  const rows = entries.map((e, idx) => {
     const sg = e.song;
     const mods = [...e.modules].sort((a, b) => a - b);
     const modBtns = mods.map(m =>
       `<button type="button" class="sh-mod-btn" onclick="songHubGoModule(${m})" title="Open Module ${m}">M${m}</button>`).join('');
+    /* Index-based handlers (like loadModuleSongVid): song names with
+       apostrophes (Sweet Child O' Mine…) break when inlined into onclick. */
     const vids = [];
-    if(sg.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="window.open('${escAttr(sg.journeyUrl)}','_blank','noopener')" title="One song, five layers">&#x1F9F5; Song Journey</button>`);
-    if(sg.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="loadPanel('youtube','${escAttr(sg.tutorialUrl)}','${escAttr(sg.name)}','Tutorial')"><span class="svb-play">&#x25B6;</span>Tutorial</button>`);
-    if(sg.backingUrl) vids.push(`<button class="song-vid-btn" onclick="loadPanel('youtube','${escAttr(sg.backingUrl)}','${escAttr(sg.name)}','Backing track — hit play and jam')"><span class="svb-play">&#x25B6;</span>&#x1F3B5; Backing${sg.backingKey ? ` (${escHtml(sg.backingKey)})` : ''}</button>`);
-    if(sg.originalUrl) vids.push(`<button class="song-vid-btn" onclick="window.open('${escAttr(sg.originalUrl)}','_blank','noopener')" title="Opens on YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:11px;opacity:0.6">&#x2197;</span></button>`);
+    if(sg.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'journey')" title="One song, five layers">&#x1F9F5; Song Journey</button>`);
+    if(sg.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="songsHubVid(${idx},'tutorial')"><span class="svb-play">&#x25B6;</span>Tutorial</button>`);
+    if(sg.backingUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'backing')"><span class="svb-play">&#x25B6;</span>&#x1F3B5; Backing${sg.backingKey ? ` (${escHtml(sg.backingKey)})` : ''}</button>`);
+    if(sg.originalUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'original')" title="Opens on YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:11px;opacity:0.6">&#x2197;</span></button>`);
     return `<div class="song-row"><div class="dot ${sg.core ? 'dc' : 'dch'}"></div>
       <div><div class="sname">${escHtml(sg.name)}</div><div class="smeta">${sg.meta ? escHtml(sg.meta) + ' · ' : ''}Taught in: ${modBtns}</div></div>
       ${vids.length ? `<div class="song-vids">${vids.join('')}</div>` : ''}
@@ -2808,6 +2822,15 @@ async function toggleSongsHub(){
   p.innerHTML = `<div class="daily5-head"><span>&#x266A; All the songs</span><button type="button" class="tp-close" onclick="toggleSongsHub()" aria-label="Close songs">&#x2715;</button></div>
     <div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>Core — everyone learns these</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu</div></div>
     <div class="card">${rows}</div>`;
+}
+let songsHubList = [];
+function songsHubVid(idx, kind){
+  const sg = songsHubList[idx];
+  if(!sg) return;
+  if(kind === 'journey' && sg.journeyUrl){ window.open(sg.journeyUrl, '_blank', 'noopener'); return; }
+  if(kind === 'original' && sg.originalUrl){ window.open(sg.originalUrl, '_blank', 'noopener'); return; }
+  if(kind === 'tutorial' && sg.tutorialUrl){ loadPanel('youtube', sg.tutorialUrl, sg.name, 'Tutorial'); return; }
+  if(kind === 'backing' && sg.backingUrl) loadPanel('youtube', sg.backingUrl, sg.name, 'Backing track — hit play and jam');
 }
 async function songHubGoModule(m){
   const sel = document.getElementById('module-select');

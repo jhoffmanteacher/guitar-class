@@ -5,6 +5,40 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — Bug-fix round for the new mic features and player
+
+### Changed
+- **The mic can no longer get stuck on.** Closing a Coach card or game
+  while the browser's microphone-permission prompt was still open could
+  leave the mic recording invisibly and silence every ▶ Play button
+  until reload — fixed, along with a double-click case that could open
+  two mic streams at once.
+- **Short drills are scorable now.** Two-note checks (like Luna's
+  F5↔A5 vamp) always answered "I couldn't hear that clearly" no matter
+  how well you played — the Coach now scales its "did I hear enough"
+  bar to the length of the drill.
+- **Power-chord checks name the right note.** The listening strip and
+  wrong-note feedback used to name a chord's higher note instead of its
+  root (E5 showed as "B").
+- **Playing demos and checks don't fight anymore.** Starting a check
+  now silences any running demo, chord strum, or metronome click (they
+  were being scored as *your* playing), and the demo Stop button works
+  during a check.
+- **Songs panel: every button works.** Tutorial and backing-track
+  buttons were dead for songs with apostrophes — *Sweet Child O' Mine*,
+  *Knockin' on Heaven's Door*.
+- **Video player fixes:** the corner tool buttons no longer sit on top
+  of the player's controls while a video is open, and short landscape
+  screens no longer clip the player's header off-screen.
+- **Readability fixes:** the Coach's Start button was nearly invisible
+  in dark mode; the "mic on" indicator is easier to read in both themes;
+  the low-E string now registers on more audio hardware; keyboard users
+  no longer land on an invisible button.
+- **Module 1's assessment checklist** now includes the tune-up's
+  "without restarting" bar and the full clean-tone standard, matching
+  the course assessment exactly (Module 3's now names its two strum
+  patterns too).
+
 ## 2026-07-11 — Semester 2: the tested-but-never-taught gaps are closed
 
 ### Added
