@@ -465,6 +465,14 @@ SETS.push(
                 response: { type: 'short', placeholder: 'e.g. phrasing is coming along; G string note names still need counting' }
               }
             ]
+          },
+          {
+            title: '⚡ Ear Spark — optional ear bonus',
+            steps: [
+              {
+                text: '⚡ Ear Spark (optional, 2 min): draw three fret slips (0–5), record those notes on the low E, and turn the slips face-down. On playback, sing each note back, hold it, then find it on the string — singing first is the whole trick. Check the slips last. Got someone around? Have them play the notes instead.'
+              }
+            ]
           }
         ]
       }

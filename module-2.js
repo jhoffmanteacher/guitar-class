@@ -223,6 +223,14 @@ SETS.push(
                 response: { type: 'short', placeholder: 'e.g. A string fret 7 — I keep guessing D vs E' }
               }
             ]
+          },
+          {
+            title: '⚡ Ear Spark — optional ear bonus',
+            steps: [
+              {
+                text: '⚡ Ear Spark (optional, 2 min): shuffle six paper slips labeled E A D G B e, draw five, and record yourself plucking the open strings in that order. A few minutes later, play it back and name each string by ear before checking your slips — thickest to thinnest is E-A-D-G-B-e, and your ear learns them faster than you\'d think. Got someone around? Have them pluck while you look away instead.'
+              }
+            ]
           }
         ]
       }

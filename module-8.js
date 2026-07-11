@@ -378,6 +378,14 @@ SETS.push(
                 response: { type: 'short', placeholder: 'e.g. clean to 80, then the ring finger starts dragging behind the beat' }
               }
             ]
+          },
+          {
+            title: '⚡ Ear Spark — optional ear bonus',
+            steps: [
+              {
+                text: '⚡ Ear Spark (optional, 2 min): fingerpick Am leading with the thumb on either the A string or the D string — a few reps in a shuffled slip order, recorded. On playback, name which string the bass note was each time — low vs high bass is a fingerpicker\'s first ear skill. Got someone around? Have them pick while you listen.'
+              }
+            ]
           }
         ]
       }

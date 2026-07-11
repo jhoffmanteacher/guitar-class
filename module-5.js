@@ -367,6 +367,14 @@ SETS.push(
                 response: { type: 'short', placeholder: 'e.g. Am→F — the F never lands in time' }
               }
             ]
+          },
+          {
+            title: '⚡ Ear Spark — optional ear bonus',
+            steps: [
+              {
+                text: '⚡ Ear Spark (optional, 2 min): record yourself strumming C or Am, a few reps in a shuffled slip order. On playback, call each one bright or moody before checking — that\'s major vs minor, and you can already hear it. Got someone around? Have them strum behind your back and you call it live.'
+              }
+            ]
           }
         ]
       }

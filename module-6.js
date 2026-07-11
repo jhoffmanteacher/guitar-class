@@ -363,6 +363,14 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which fought you more — the small Bm shape, or keeping the pattern through the change?', placeholder: 'e.g. the Bm — my pinky keeps missing fret 4' }
               }
             ]
+          },
+          {
+            title: '⚡ Ear Spark — optional ear bonus',
+            steps: [
+              {
+                text: '⚡ Ear Spark (optional, 2 min): play any lesson video from this set and pause right after one bar of strumming — clap the rhythm back exactly, then play it as muted strums. Rhythm echo is ear training too. Got someone around? Have them clap a bar of any pattern from this set for you to echo.'
+              }
+            ]
           }
         ]
       }

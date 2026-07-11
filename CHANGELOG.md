@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — Ear Spark: 2-minute ear training in every Semester 1 module
+
+### Added
+- **⚡ Ear Spark micro-drills in Modules 2–8.** Each module's practice
+  station now ends with an optional 2-minute ear challenge that matches what
+  you're learning: name open strings by ear (Module 2), hear power vs. full
+  chords (3), sing a note back before you find it (4), hear major vs. minor
+  (5), echo a strummed rhythm (6), tell the mini-F from the full barre (7),
+  and track the fingerpicked bass string (8). Each one works solo — record
+  yourself in a shuffled order, then name what you hear on playback — and
+  has a with-a-friend variant. Your ear is being trained for the real ear
+  work in Modules 10 and 11.
+
 ## 2026-07-11 — Welcome back: Module 9 now starts with a six-skill re-test
 
 ### Added

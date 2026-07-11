@@ -237,6 +237,14 @@ SETS.push(
                 response: { type: 'short', placeholder: 'e.g. the G5-to-F5 change drops a beat; high strings still ring sometimes' }
               }
             ]
+          },
+          {
+            title: '⚡ Ear Spark — optional ear bonus',
+            steps: [
+              {
+                text: '⚡ Ear Spark (optional, 2 min): record yourself playing either a power chord (E5) or the full open E major, a few reps in a shuffled slip order. On playback, call each one "power" or "full" before checking — power chords are hollow, with no major/minor color. Got someone around? Have them play while you look away.'
+              }
+            ]
           }
         ]
       }

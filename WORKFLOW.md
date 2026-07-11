@@ -55,9 +55,23 @@
       sets) — coherent with the tune-up-first intent, but flag if unwanted.
       Firestore summer-zero assumption verified by calendar reasoning only
       (modules launched 2026-07-10, it is summer break; no client query run).
-      Next: Session C (Ear Spark micro-drills — MUST be rewritten solo-first;
-      the spec's steps are all partner-based and predate the self-paced
-      conversion).
+      Session C ✅ 2026-07-10: **Ear Spark micro-drills, Modules 2–8.** One
+      text-only step per module (no `response`, no `skills`, no manifest
+      change — zero Firebase surface), added as a NEW final section
+      "⚡ Ear Spark — optional ear bonus" at the end of one Station C per
+      module: m2w1 (open strings), m3w1 (power vs full), m4w2 (sing-then-
+      find), m5w2 (major vs minor), m6w2 (rhythm echo), m7w2 (mini-F vs
+      barre), m8w2 (bass-string tracking). Placement chosen per set-content
+      fit (spec left the set unspecified). Appending a new SECTION (not a
+      step inside the wrap-up) keeps every existing `${'{'}setId{'}'}-{'{'}station{'}'}-sec{'{'}gi{'}'}-{'{'}i{'}'}`
+      response/done key untouched — verified via node VM harness (each Spark
+      is the last section of the right set, single step, responseless). The
+      spec's partner-based texts were rewritten SOLO-FIRST (record yourself
+      in a shuffled-slip order → name what you hear on playback), with the
+      partner version kept as a one-line tail; each drill's teaching kernel
+      (hollow power chords, sing-first trick, etc.) preserved verbatim.
+      Next: Session D (second-voice videos — research-heavy; every URL
+      search-found + oEmbed-verified, full link check before push).
 
 - [x] **Semester 2 build — Modules 9–12** (`MODULES_9_12.md`, decision-complete
       spec, four sessions A–D — all four complete). Session A ✅ 2026-07-10: built **Module 9 —

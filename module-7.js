@@ -361,6 +361,14 @@ SETS.push(
                 response: { type: 'short', placeholder: 'e.g. the B string — it sits in my finger crease' }
               }
             ]
+          },
+          {
+            title: '⚡ Ear Spark — optional ear bonus',
+            steps: [
+              {
+                text: '⚡ Ear Spark (optional, 2 min): record F both ways — the mini-F and the full barre — a few reps in a shuffled slip order. Same chord, different voice: on playback, guess which is which by listening for the low bass note only the barre has. Got someone around? Have them play and you call it.'
+              }
+            ]
           }
         ]
       }
