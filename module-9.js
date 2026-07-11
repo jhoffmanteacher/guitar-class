@@ -7,6 +7,166 @@
 SETS.push(
 
   {
+    id: 'm9w0',
+    label: 'Set 0',
+    locked: false,
+    module: 'The Full Fretboard & Writing TAB',
+    moduleNum: 9,
+    unit: 'Module 9 · The Full Fretboard & Writing TAB',
+    title: 'Set 0',
+    subtitle: 'Welcome back · Prove it, don\'t re-learn it',
+    objective: 'I CAN show that the first half of the course\'s core skills survived a break — and see exactly which ones need a tune-up.',
+    skillFocus: 'Six quick re-tests: open chords · strumming · pentatonic · power chords · TAB reading · fingerpicking',
+    comingSoon: false,
+
+    stations: {
+      b: {
+        title: 'Computer station — Where do I start?',
+        sections: [
+          {
+            title: 'The six re-tests — rate yourself honestly',
+            steps: [
+              {
+                text: 'This set has zero new material. It\'s a checkpoint: six things you could already do before the break. Play each one RIGHT NOW as you read it, then answer honestly — solid, shaky, or gone. Nothing here is graded; a "gone" just tells you where to spend your first tune-up session.',
+                hint: 'Everyone loses a little over a break. Finding out exactly what you lost is the fastest way to get it back — usually it returns in a day or two, not weeks.'
+              },
+              {
+                text: 'Re-test 1 — Open chords (Module 5): loop C → G → Am → F, two bars each at 60 BPM. Can you still land every change on beat 1 without breaking the strum?',
+                hint: 'If one change drags, name it — that exact change is your first One-Minute Changes drill.',
+                skills: [1],
+                response: { type: 'short', placeholder: 'Solid / shaky / gone — which change is the sticking point?' }
+              },
+              {
+                text: 'Re-test 2 — Strumming (Module 6): D-DU-UDU over a G → C change at 70 BPM. Does the pattern keep running while the chord moves, or does it flinch at the change?',
+                hint: 'Watch your strum hand, not your fret hand — the pattern should not care which chord is underneath.',
+                skills: [2],
+                response: { type: 'short', placeholder: 'Solid / shaky / gone — does the pattern break at the change?' }
+              },
+              {
+                text: 'Re-test 3 — Pentatonic (Module 4): Pattern 1, up and back down, from memory. No diagram, every note on a 60 BPM click?',
+                hint: 'Hesitations count as "shaky" — the pattern should be in your fingers, not your eyes.',
+                skills: [3],
+                response: { type: 'short', placeholder: 'Solid / shaky / gone — where do you hesitate?' }
+              },
+              {
+                text: 'Re-test 4 — Power chords (Module 3): move the two-finger shape E5 → G5 → A5, one change per bar, landing on the beat and naming each chord as you land it.',
+                hint: 'Frets 0 → 3 → 5 on the low E root. If you\'re counting frets to find G5, that\'s a "shaky."',
+                skills: [4],
+                response: { type: 'short', placeholder: 'Solid / shaky / gone — can you still name them on the fly?' }
+              },
+              {
+                text: 'Re-test 5 — TAB reading (Module 2): open any Song Journey page and find a section you\'ve never played. Can you read 4 bars cold — right strings, right frets, left to right?',
+                hint: 'It must be TAB you haven\'t drilled — reading from memory isn\'t reading.',
+                skills: [5],
+                response: { type: 'short', placeholder: 'Solid / shaky / gone — what did you read, and how did it go?' }
+              },
+              {
+                text: 'Re-test 6 — Fingerpicking (Module 8): p-i-m-a over Am, thumb on the A string, without stopping. Then change Em → Am and let the thumb switch bass strings while i-m-a stay put.',
+                hint: 'The fingers keep their strings for the whole test — only the thumb travels.',
+                skills: [6],
+                response: { type: 'short', placeholder: 'Solid / shaky / gone — did the thumb switch trip you?' }
+              }
+            ]
+          },
+          {
+            title: 'Station Wrap-Up',
+            steps: [
+              {
+                text: 'Look at your six answers. Which ONE re-test most needs a tune-up before you go deeper into Module 9? That\'s the first thing you practice next session — the original module\'s sets are all still there when you need them.',
+                hint: 'One focused session on your weakest re-test beats a vague "practice everything."',
+                response: { type: 'short', placeholder: 'e.g. Re-test 3 — Pattern 1 is half-gone; starting next session with Module 4, Set 1' }
+              }
+            ]
+          }
+        ]
+      },
+      c: {
+        title: 'Practice station — clear it or flag it',
+        sections: [
+          {
+            title: 'Warm-up — tuning check (Module 1)',
+            steps: [
+              {
+                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
+                hint: 'A break detunes guitars as reliably as it rusts fingers — check first.',
+                playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
+              }
+            ]
+          },
+          {
+            title: 'The six re-tests — mark each one as you go',
+            steps: [
+              {
+                text: 'How this works: play each re-test below, then mark its skill on the checklist. Clear it → "I\'ve got it!". Struggle → "Still working on it" — that\'s not a failure, it\'s your tune-up list, and the pointer next to each re-test tells you exactly which module rebuilds it.',
+                hint: 'Be strict. A generous self-check here just hides work that will resurface in Module 10.'
+              },
+              {
+                text: 'Re-test 1 — Open chords: 2 bars each of C, G, Am, F at 60 BPM, looped twice, every change on beat 1. Tune-up home: Module 5, Set 2 (the C–G–Am–F Loop and One-Minute Changes).',
+                hint: 'Quality bar: no dead strings, no pause at the change.',
+                skills: [1]
+              },
+              {
+                text: 'Re-test 2 — Strumming: D-DU-UDU for 4 bars of G, then 4 bars of C at 70 BPM, pattern unbroken at the seam. Tune-up home: Module 6, Set 2.',
+                hint: 'If it breaks, drop to 60 BPM and rebuild — speed comes back last.',
+                skills: [2]
+              },
+              {
+                text: 'Re-test 3 — Pentatonic Pattern 1: up and back down from memory at 60 BPM, every note on the click. Use the play button to hear the target. Tune-up home: Module 4, Set 1.',
+                hint: 'Fingers first, speed later — a clean 50 BPM pass beats a sloppy 60.',
+                skills: [3],
+                playSeq: { label: 'Am pentatonic Pattern 1 (ascending)', bpm: 60, notes: [45, 48, 50, 52, 55, 57, 60, 62, 64, 67, 69, 72] }
+              },
+              {
+                text: 'Re-test 4 — Power chords: E5 → G5 → A5 (low-E root, frets 0 → 3 → 5), one bar each on the beat, saying each name as you land it. Tune-up home: Module 3, Set 1.',
+                hint: 'Two fingers, unused strings muted — the mute is part of the skill.',
+                skills: [4]
+              },
+              {
+                text: 'Re-test 5 — TAB cold read: 4 bars of TAB you\'ve never played, from any Song Journey page, right strings and frets in order. Tune-up home: Module 2, Set 2.',
+                hint: 'Slow is fine — sight-reading is decoding, not speed.',
+                skills: [5]
+              },
+              {
+                text: 'Re-test 6 — Fingerpicking: p-i-m-a over Am (thumb on A) for 4 bars without stopping, then Em → Am with the thumb switching bass strings mid-stream. Tune-up home: Module 8, Sets 1–2.',
+                hint: 'Even volume across all four fingers — listen for the weak one.',
+                skills: [6]
+              },
+              {
+                text: 'The speed round: record yourself playing all six re-tests back to back, then listen with the checklist open and settle any you weren\'t sure about. Cleared all six? Module 9 proper starts at Set 1. Flagged some? Spend a session with their tune-up homes first — they come back fast.',
+                hint: 'The recording doesn\'t lie, and that\'s exactly why it\'s useful.'
+              }
+            ]
+          }
+        ]
+      }
+    },
+
+    assessment: {
+      goal: 'Clears all six re-tests in one focused session — or leaves with a named tune-up list and knows exactly which module rebuilds each flagged skill',
+      performance: 'Speed round: record all six re-tests back to back, listen back with the checklist open, and mark each skill honestly — cleared skills "got it," flagged skills "still working" with their tune-up home noted.',
+      selfCheck: 'Can you still play all six without re-learning anything? Which one drifted the most over the break — and which module does it live in?',
+      standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
+    },
+
+    skills: [
+      { id: 'm9w0-s1', text: 'RE-TEST: Switch C → G → Am → F smoothly at 60 BPM',
+        gotItWhen: 'you pick any two chords from C, G, Am, F at random (shuffle homemade flashcards or point blind at the chart) and can switch between them on beat 1 at 70 BPM without breaking the strum.' },
+      { id: 'm9w0-s2', text: 'RE-TEST: Play D-DU-UDU over a G–C change at 70 BPM',
+        gotItWhen: 'when you switch from G to D (or any two chords) the pattern doesn\'t change at all — only the chord underneath does.' },
+      { id: 'm9w0-s3', text: 'RE-TEST: Play pentatonic Pattern 1 up and down at 60 BPM',
+        gotItWhen: 'you can play the full pattern up and back down without looking at a diagram, with no missed notes or hesitations.',
+        practice: { type: 'playSeq', label: 'Am pentatonic Pattern 1 (ascending)', bpm: 70,
+          notes: [45, 48, 50, 52, 55, 57, 60, 62, 64, 67, 69, 72] } },
+      { id: 'm9w0-s4', text: 'RE-TEST: Move a two-finger power chord E5 → G5 → A5 on the beat',
+        gotItWhen: 'you can move the same shape to any of those positions on call and name the chord without counting frets.' },
+      { id: 'm9w0-s5', text: 'RE-TEST: Read and play a 4-bar TAB you haven\'t seen before',
+        gotItWhen: 'you can look at a short TAB line you haven\'t drilled, identify which string and fret each number refers to, and play it — that\'s sight-reading.' },
+      { id: 'm9w0-s6', text: 'RE-TEST: Fingerpick p-i-m-a over Am without stopping',
+        gotItWhen: 'you can switch your THUMB from low E to A string when the chord changes Em → Am, while i-m-a stay on G-B-e the whole time.' }
+    ]
+  },
+
+  {
     id: 'm9w1',
     label: 'Set 1',
     locked: false,
@@ -598,6 +758,6 @@ MODULE_REVIEWS[9] = {
     'Play a thread-song melody from TAB in a higher position',
     'Finish a 4-bar TAB you wrote yourself that passes the cold-read test — a day later, the page alone reproduces the riff (or a partner plays it back correctly)'
   ],
-  forward: 'The whole neck is yours now — and you can write down anything you figure out. <strong>Module 10 turns notes into keys:</strong> you\'ll learn the recipe that builds every scale, find the key of any song, and start trusting your ear.',
+  forward: 'The whole neck is yours now — and you can write down anything you figure out. <strong>Module 10 turns notes into keys:</strong> you\'ll learn the recipe that builds every scale, find the key of any song, and start trusting your ear. (And any time you come back from a long break, <strong>Set 0</strong> at the top of this module re-checks the six core skills in one sitting.)',
   standards: ['Pr.4a', 'Pr.6a', 'Cn.10a']
 };

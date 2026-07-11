@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — Welcome back: Module 9 now starts with a six-skill re-test
+
+### Added
+- **Module 9, Set 0 — "Prove it, don't re-learn it."** Coming back from a
+  break (or joining mid-course with some playing under your belt)? Set 0 is
+  six quick re-tests of the first half's core skills — open chords,
+  strumming, pentatonic Pattern 1, power chords, TAB reading, and
+  fingerpicking. No new material: clear each one and check it off, or flag
+  it and get pointed at exactly the module that rebuilds it. Ends with a
+  speed round — record all six back to back and listen with the checklist
+  open.
+- The Module 1 and Module 9 reviews now point returning and transfer
+  players at Set 0 as the "where do I start?" placement check.
+
 ## 2026-07-11 — Ready-made practice routines: 10-minute cards + the Daily 5
 
 ### Added

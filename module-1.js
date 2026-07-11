@@ -453,5 +453,6 @@ MODULE_REVIEWS[1] = {
     'Name all 6 strings from memory — in order and at random',
     'Play each open string cleanly with correct posture and pick grip — down-strokes from the wrist'
   ],
+  forward: 'You\'ve got a guitar that\'s in tune, a goal, and your first clean notes — <strong>Module 2 puts names on the frets</strong> so riffs and TAB start making sense. (Already played before, or coming back after a long break? <strong>Module 9, Set 0</strong> is a six-skill re-test that shows you exactly where to start.)',
   standards: ['Pr.1a', 'Pr.4a', 'Pr.5a', 'Cn.11a']
 };

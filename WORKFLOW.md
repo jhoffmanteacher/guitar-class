@@ -34,9 +34,30 @@
       modules; Module 1 gracefully drops its chord/song items — only 1
       playSeq, no Take-It-to-a-Song step). In-browser spot-check pending
       (browser automation declined this session — Jonathan may want to click
-      through one review + the Daily 5 button). Next: Session B (Module 9
-      Set 0 re-tests; remember the self-paced adaptation of its partner
-      "speed round" performance text).
+      through one review + the Daily 5 button). Session B ✅ 2026-07-10:
+      **Module 9 Set 0 — welcome-back re-tests + placement self-check.** New
+      set `m9w0` pushed FIRST in module-9.js (set order is id-keyed, safe):
+      six RE-TEST skills `m9w0-s1…s6` whose `gotItWhen` texts are copied
+      VERBATIM from their Semester 1 sources (m5w2-s6, m6w2-s4, m4w1-s1,
+      m3w1-s2, m2w2-s4, m8w2-s4 — note s1's inherited bar says 70 BPM while
+      the re-test text says 60; kept verbatim per spec, the original bar is
+      the stricter one). Station B = solid/shaky/gone self-check (short
+      responses, new `m9w0-*` keys, no collisions); Station C = tuning
+      warm-up + one drill per re-test with its "tune-up home" module pointer
+      (Pattern 1 playSeq copied from module-4.js) + record-the-speed-round
+      closer. `skillCount` 18 → 24 for module 9 in MODULE_MANIFEST
+      (checks.mjs verifies, passes). Transfer/returner pointer lines added to
+      MODULE_REVIEWS[1].forward (new field — renders as "Why this matters")
+      and MODULE_REVIEWS[9].forward. Spec's classroom framing ("six-station
+      speed round … partner … teacher verifies") adapted to the self-paced
+      voice. Behavior note: Module 9's review unlock now ALSO requires the
+      six re-tests marked "got it" (`isModuleReviewLocked` spans all module
+      sets) — coherent with the tune-up-first intent, but flag if unwanted.
+      Firestore summer-zero assumption verified by calendar reasoning only
+      (modules launched 2026-07-10, it is summer break; no client query run).
+      Next: Session C (Ear Spark micro-drills — MUST be rewritten solo-first;
+      the spec's steps are all partner-based and predate the self-paced
+      conversion).
 
 - [x] **Semester 2 build — Modules 9–12** (`MODULES_9_12.md`, decision-complete
       spec, four sessions A–D — all four complete). Session A ✅ 2026-07-10: built **Module 9 —
