@@ -3,8 +3,9 @@
 
    The site hears you play and gives rubric feedback. Two entry points,
    both rendered by app.js:
-     · "🎤 Check me" next to every ▶ Play button (data-midis = answer key)
-     · "🎤 Check my changes / Strum check" under a step's chord diagrams
+     · "🎤 Listening Coach" next to every ▶ Play button — melody mode
+       (data-midis = answer key)
+     · "🎤 Listening Coach" under a step's chord diagrams — chord mode
        (data-chords = [{n:name, m:[midis]}])
 
    Flow: inline card → 4-click count-in → mic listens while the student
@@ -39,8 +40,8 @@ const COACH_ONSET_FLOOR   = 0.010;  // absolute RMS floor for an onset
 const COACH_ONSET_RATIO   = 2.2;    // RMS must jump this × over the smoothed level
 const COACH_HF_FLOOR      = 0.002;  // absolute floor for the pick-attack (HF) channel
 const COACH_HF_RATIO      = 2.6;    // HF energy must jump this × over its smoothed level
-/* The two forgiving "check" flows — the Listening Coach's "Check my changes" /
-   "Check me" (coachLoop) and Change Up (ccLoop) — run their own, MORE SENSITIVE
+/* The two forgiving "check" flows — the Listening Coach's chord and melody
+   modes (coachLoop) and Change Up (ccLoop) — run their own, MORE SENSITIVE
    onset thresholds than the rhythm games. They're self-checks a student does
    solo into a Chromebook mic at a normal playing volume, and moderate strums
    were slipping under the stricter shared COACH_* floors and scoring as misses.
@@ -292,6 +293,7 @@ async function coachStartCheck(){
   coach.gridOffset = 0; coach.smoothRms = 0; coach.smoothHf = 0; coach.lastOnsetT = -1e9;
   coach.lastPulse = -1; coach.frameNo = 0; coach.lastPitchT = 0;
   coach.dbgOnsets = 0; coach.dbgGraded = 0; coach.dbgPeak = 0; coach.dbgTick = 0;   // DEBUG
+  coach.dbgLastN = 0; coach.dbgLastShare = null;   // DEBUG
 
   /* Count-in: 4 clicks, last one higher = "go". The tab stays on screen so
      the fretting hand can get in position while the clicks run. */
@@ -511,7 +513,9 @@ function coachLoop(){
       const txt = document.getElementById('coach-dbg-txt');
       if (bar) bar.style.width = Math.min(200, Math.round(coach.dbgPeak * 4000)) + 'px';
       if (lvl) lvl.textContent = 'rms ' + coach.dbgPeak.toFixed(4) + ' (floor ' + CHK_ONSET_FLOOR + ')';
-      if (txt) txt.textContent = 'onsets(strums heard): ' + (coach.dbgOnsets || 0) + ' · graded(on-beat): ' + (coach.dbgGraded || 0);
+      if (txt) txt.textContent = 'onsets: ' + (coach.dbgOnsets || 0) + ' · graded: ' + (coach.dbgGraded || 0) +
+        ' · last strum: ' + (coach.dbgLastN || 0) + ' pitch reads, ' +
+        (coach.dbgLastShare != null ? Math.round(coach.dbgLastShare * 100) + '% on chord' : '—') + ' (ok≥25%)';
     }
 
     /* Pitch readings (trimmed YIN, ~every 40ms) feed the pending event —
@@ -652,7 +656,7 @@ function coachMatchEvent(ev){
     const dev = rel - i * coach.beatMs;
     if (Math.abs(dev) > coach.beatMs * 0.75) continue;
     const classOk = coach.mode === 'chords'
-      ? coachToneShare(ev, s) >= 0.34
+      ? coachToneShare(ev, s) >= 0.25
       : ev.midi != null && s.classes.indexOf(((ev.midi % 12) + 12) % 12) >= 0;
     const score = Math.abs(dev) + (classOk ? 0 : coach.beatMs * 0.6);
     if (score < bestScore){ bestScore = score; best = i; }
@@ -669,8 +673,9 @@ function coachMatchEvent(ev){
        murky strum is dim, never an accusation. */
     const share = coachToneShare(ev, s);
     const n = (ev.classes || []).length;
+    coach.dbgLastN = n; coach.dbgLastShare = share;   // DEBUG
     if (n < 2) s.state = 'dim';
-    else if (share >= 0.34) s.state = 'ok';
+    else if (share >= 0.25) s.state = 'ok';
     else if (share <= 0.15 && n >= 3) s.state = 'wrong';
     else s.state = 'dim';
   }
