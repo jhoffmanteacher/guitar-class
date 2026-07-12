@@ -1,6 +1,8 @@
 /* Text sizing is in rem (1rem = the user's browser/OS base size, default 16px)
    so device text-size settings actually work — values are exact conversions of
    the former px sizes (e.g. 0.9375rem = 15px), not a re-design. */
+@font-face{font-family:'Fraunces';src:url('fonts/fraunces.woff2') format('woff2');
+  font-weight:400 700;font-display:swap}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 /* Site-wide keyboard focus indicator (a11y) */
 :focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
@@ -12,7 +14,7 @@
   --green-bg:#eaf3de;--green-text:#3b6d11;
   --amber-bg:#faeeda;--amber-text:#854f0b;
   --purple-bg:#eeedfe;--purple-bg2:#f6f5fe;--purple-text:#3c3489;
-  --purple-border:#c5c0ee;--purple-accent:#534ab7;
+  --purple-border:#c5c0ee;--purple-accent:#5b52a8;
   --shadow-card:0 1px 5px rgba(30,27,70,0.07);
   --shadow-raised:0 10px 36px rgba(30,27,70,0.28);
   --radius:10px;--radius-sm:6px;
@@ -20,6 +22,8 @@
   /* Brand plum (header, skip-link) + warm ivory left-nav rail surface */
   --brand:#514a7d;
   --rail-bg:#f4f2eb;
+  --font-display:'Fraunces',ui-serif,Georgia,serif;
+  --brand-text:#fff;--brand-hover:#5d5590;
 }
 @media(prefers-color-scheme:dark){
   :root{
@@ -35,11 +39,12 @@
     --shadow-raised:0 10px 36px rgba(0,0,0,0.6);
     --brand:#494370;
     --rail-bg:#201f1e;
+    --brand-hover:#544d80;
   }
 }
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg2);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 .header{background:var(--brand);color:#fff;border-bottom:1px solid rgba(255,255,255,0.10);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;box-shadow:0 1px 2px rgba(0,0,0,0.08)}
-.header-title{font-size:1.375rem;font-weight:600;color:#fff;line-height:1.2;letter-spacing:-0.01em}
+.header-title{font-size:1.375rem;font-weight:600;color:#fff;line-height:1.2;letter-spacing:-0.01em;font-family:var(--font-display)}
 .header-sub{font-size:0.875rem;color:rgba(255,255,255,0.82);margin-top:2px;line-height:1.25}
 .header .btn-sign,.header .btn-out,.header .btn-translate{color:#fff;border-color:rgba(255,255,255,0.45);background:transparent}
 .header .btn-sign:hover,.header .btn-out:hover,.header .btn-translate:hover{background:rgba(255,255,255,0.12)}
@@ -58,7 +63,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .btn-translate.active{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-text)}
 #google_translate_element{display:none}
 .auth-wall{max-width:400px;margin:80px auto;padding:0 20px;text-align:center}
-.auth-wall h2{font-size:1.5rem;font-weight:500;margin-bottom:10px}
+.auth-wall h2{font-size:1.5rem;font-weight:500;margin-bottom:10px;font-family:var(--font-display)}
 .auth-wall p{font-size:1rem;color:var(--text2);line-height:1.6;margin-bottom:28px}
 .btn-google{display:inline-flex;align-items:center;gap:10px;padding:10px 20px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);font-size:1rem;cursor:pointer}
 .btn-google:hover{background:var(--bg3)}
@@ -68,14 +73,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 /* Welcome / "Start here" onboarding card (Session 5 onboarding blurb) */
 .welcome-overlay{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,0.45);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:40px 16px}
 .welcome-card{position:relative;background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);box-shadow:0 8px 40px rgba(0,0,0,0.25);max-width:520px;width:100%;padding:28px 26px 26px;margin:auto}
-.welcome-card h2{font-size:1.375rem;font-weight:600;margin:0 0 6px;color:var(--text)}
+.welcome-card h2{font-size:1.375rem;font-weight:600;margin:0 0 6px;color:var(--text);font-family:var(--font-display)}
 .welcome-lead{font-size:0.9375rem;color:var(--text2);line-height:1.55;margin:0 0 18px}
 .welcome-row{display:flex;gap:12px;align-items:flex-start;font-size:0.9062rem;line-height:1.5;color:var(--text);margin-bottom:14px}
 .welcome-row strong{font-weight:600}
 .welcome-ico{font-size:1.25rem;flex-shrink:0;line-height:1.4}
 .welcome-note{font-size:0.875rem;color:var(--text2);line-height:1.5;margin:4px 0 20px}
-.welcome-go{display:block;width:100%;padding:11px 0;border:1px solid var(--purple-border);border-radius:var(--radius);background:var(--purple-bg);color:var(--purple-text);font-size:0.9688rem;font-weight:600;font-family:inherit;cursor:pointer}
-.welcome-go:hover{opacity:0.88}
+.welcome-go{display:block;width:100%;padding:11px 0;border:1px solid var(--brand);border-radius:var(--radius);background:var(--brand);color:var(--brand-text);font-size:0.9688rem;font-weight:600;font-family:inherit;cursor:pointer}
+.welcome-go:hover{background:var(--brand-hover)}
 .welcome-close{position:absolute;top:14px;right:14px;width:30px;height:30px;border:0;border-radius:50%;background:var(--bg3);color:var(--text2);font-size:0.9375rem;cursor:pointer;line-height:1}
 .welcome-close:hover{background:var(--border2)}
 .main{max-width:760px;margin:0 auto;padding:24px 16px 60px}
@@ -147,8 +152,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .mr-rec-help{font-size:0.8125rem;color:var(--text2);line-height:1.4}
 .mr-rec-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;font-size:0.9062rem;font-family:inherit;border:1px solid var(--border2);border-radius:20px;background:var(--bg);color:var(--text);cursor:pointer;text-decoration:none;transition:filter 0.12s,background 0.12s}
 .mr-rec-btn:hover{background:var(--bg3)}
-.mr-rec-btn.primary{background:var(--purple-bg);color:var(--purple-text);border-color:var(--purple-accent)}
-.mr-rec-btn.primary:hover{filter:brightness(0.96)}
+.mr-rec-btn.primary{background:var(--brand);color:var(--brand-text);border-color:var(--brand)}
+.mr-rec-btn.primary:hover{background:var(--brand-hover)}
 .mr-rec-active{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px}
 .mr-rec-dot{width:10px;height:10px;border-radius:50%;background:#d63838;box-shadow:0 0 0 0 rgba(214,56,56,0.7);animation:mr-rec-pulse 1.2s infinite}
 @keyframes mr-rec-pulse{0%{box-shadow:0 0 0 0 rgba(214,56,56,0.55)}70%{box-shadow:0 0 0 10px rgba(214,56,56,0)}100%{box-shadow:0 0 0 0 rgba(214,56,56,0)}}
@@ -177,12 +182,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .obj-card.set-head .obj-topic{margin-bottom:12px}
 .obj-card.set-head .obj-set-tag{display:inline-block;background:var(--blue-bg);color:var(--blue-text);font-size:0.6875rem;font-weight:500;letter-spacing:.4px;padding:3px 10px;border-radius:999px;text-transform:uppercase}
 .obj-card.set-head .obj-unit{font-size:0.75rem;color:var(--text3);text-transform:none;letter-spacing:0;margin-bottom:0;line-height:1.3}
-.obj-card.set-head .obj-main{font-size:1.25rem;font-weight:500;line-height:1.4;margin-bottom:0}
+.obj-card.set-head .obj-main{font-size:1.5rem;font-weight:500;line-height:1.3;margin-bottom:0;font-family:var(--font-display)}
 .obj-card.set-head .obj-i-can{color:var(--blue-text)}
 .obj-skill-label{font-size:0.75rem;color:var(--text3);letter-spacing:.4px;text-transform:uppercase;margin-top:16px;margin-bottom:8px}
 .obj-skill-list{list-style:disc;margin:0;padding-left:20px}
 .obj-skill-item{color:var(--text);font-size:0.9375rem;line-height:1.6}
-@media (max-width:420px){.obj-card.set-head .obj-main{font-size:1.125rem}}
+@media (max-width:420px){.obj-card.set-head .obj-main{font-size:1.25rem}}
 .tabs{margin-bottom:16px}
 .tabs-songbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px}
 .print-set-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;font-size:0.7812rem;font-weight:500;font-family:inherit;line-height:1.2;color:var(--text2);background:var(--bg2);border:1px solid var(--border);border-radius:14px;cursor:pointer;transition:background 0.15s,border-color 0.15s,color 0.15s}
@@ -277,7 +282,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .step-done .st-text{text-decoration:line-through;color:var(--text2);opacity:.65}
 .step-done .sn{background:var(--green-bg);color:var(--green-text)}
 .step-done{padding-top:5px;padding-bottom:5px}
-.skill-badge{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:20px;border-radius:10px;background:var(--blue-bg);border:1px solid var(--blue-text);font-size:0.75rem;font-weight:500;color:var(--blue-text);flex-shrink:0;margin-left:5px;vertical-align:middle;padding:0 7px;white-space:nowrap}
+.skill-badge{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:20px;border-radius:10px;background:var(--blue-bg);border:none;font-size:0.75rem;font-weight:500;color:var(--blue-text);flex-shrink:0;margin-left:5px;vertical-align:middle;padding:0 7px;white-space:nowrap}
 .step-branch{font-size:0.8438rem;line-height:1.45;color:var(--text2);padding:5px 10px;border-radius:7px}
 .step-stuck{background:var(--blue-bg)}
 .step-levelup{background:var(--green-bg)}
@@ -298,10 +303,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .song-request{border-top:1px dashed var(--border2);border-bottom:none;margin-top:2px}
 .song-request .sname{color:var(--text2)}
 .song-request-ico{font-size:1rem;flex-shrink:0;line-height:1.2}
-.stag{font-size:0.75rem;padding:2px 8px;border-radius:10px;flex-shrink:0;white-space:nowrap;background:var(--bg2);color:var(--text2)}
-.stag-core{background:var(--blue-bg);color:var(--blue-text)}
+.stag{font-size:0.75rem;padding:2px 0;border-radius:10px;flex-shrink:0;white-space:nowrap;background:transparent;color:var(--text2)}
+.stag-core{padding:2px 8px;background:var(--blue-bg);color:var(--blue-text)}
 .song-vids{display:flex;gap:6px;margin-left:auto;flex-shrink:0;align-items:center}
-.song-vid-btn{display:inline-flex;align-items:center;gap:5px;font-size:0.8125rem;padding:3px 9px;border-radius:14px;background:var(--bg);color:var(--text2);border:1px solid var(--border2);cursor:pointer;font-family:inherit;white-space:nowrap;transition:background 0.1s,border-color 0.1s,color 0.1s}
+.song-vid-btn{display:inline-flex;align-items:center;gap:5px;font-size:0.8125rem;padding:3px 9px;border-radius:14px;background:transparent;color:var(--text2);border:1px solid transparent;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background 0.1s,border-color 0.1s,color 0.1s}
 .song-vid-btn:hover{background:var(--bg2);border-color:var(--text2);color:var(--text)}
 .song-vid-btn .svb-play{color:var(--green-text);font-size:0.75rem;line-height:1}
 .legend{display:flex;gap:14px;margin-bottom:8px}
@@ -414,6 +419,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    panels). The full-width plum .header stays above it (L-shaped frame). */
 .app-layout{display:flex;align-items:stretch;min-height:calc(100vh - var(--hdr))}
 .app-layout .main{flex:1;min-width:0;max-width:800px;margin:0;padding:24px 28px 60px;overflow-x:hidden}
+@media(min-width:1240px){.app-layout .main{margin:0 auto}}
 .rail{width:252px;flex:0 0 252px;background:var(--rail-bg);color:var(--text);
   position:sticky;top:var(--hdr);height:calc(100vh - var(--hdr));
   border-right:1px solid var(--border);display:flex;flex-direction:column}
@@ -448,6 +454,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .rail-station[hidden]{display:none}
 .rs-num{width:22px;height:22px;flex:0 0 22px;border-radius:50%;background:rgba(0,0,0,0.07);
   display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--text2)}
+.rs-check{border-radius:6px}
 .rs-text{display:flex;flex-direction:column;line-height:1.2;min-width:0}
 .rs-title{font-size:0.875rem;font-weight:600}
 .rs-sub{font-size:0.6875rem;color:var(--text2);margin-top:1px}
@@ -523,12 +530,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 /* ── Floating practice tools ── */
 .fab-group{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;align-items:flex-end;gap:10px;z-index:100}
 .fab-buttons{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
-.fab{display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:999px;border:1px solid;font-size:0.9375rem;font-weight:500;cursor:pointer;transition:opacity 0.15s;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,0.10);font-family:inherit;appearance:none;-webkit-appearance:none;text-align:left;line-height:1.2}
-.fab-metro{background:var(--blue-bg);border-color:var(--blue-text);color:var(--blue-text)}
-.fab-timer{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
-.fab-tune{background:var(--purple-bg);border-color:var(--purple-accent);color:var(--purple-text)}
-.fab:hover{opacity:0.82}
+.fab{display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:999px;border:1px solid;font-size:0.9375rem;font-weight:500;cursor:pointer;transition:opacity 0.15s;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,0.10);font-family:inherit;appearance:none;-webkit-appearance:none;text-align:left;line-height:1.2;background:var(--bg);border-color:var(--border2);color:var(--text)}
+.fab:hover{background:var(--bg3);opacity:1}
 .fab svg{width:15px;height:15px;flex-shrink:0}
+.fab-metro svg{color:var(--blue-text)}
+.fab-timer svg{color:var(--green-text)}
+.fab-tune svg{color:var(--purple-accent)}
 .tool-popup{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:16px;width:240px;box-shadow:var(--shadow-raised);display:none}
 .tool-popup.open{display:block}
 .tuner-note{font-size:3.125rem;font-weight:500;text-align:center;line-height:1;color:var(--text);min-height:56px;margin-bottom:2px}
@@ -577,7 +584,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 /* ── Teacher dashboard ── */
 .t-main{max-width:900px;margin:0 auto;padding:24px 16px 60px}
 .t-header{margin-bottom:20px}
-.t-title{font-size:1.25rem;font-weight:500;margin-bottom:3px}
+.t-title{font-size:1.25rem;font-weight:500;margin-bottom:3px;font-family:var(--font-display)}
 .t-sub{font-size:0.9375rem;color:var(--text2)}
 .t-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:20px}
 .t-scard{background:var(--bg3);border-radius:var(--radius);padding:12px 14px}
@@ -651,7 +658,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .note-link:hover{background:var(--amber-bg)}
 /* ── Inline TAB diagram ── */
 .tab{display:inline-block;max-width:100%;margin:8px 0 4px;border-radius:10px;overflow:hidden;border:1px solid var(--border2);background:var(--bg);box-shadow:0 1px 0 var(--border),0 4px 14px rgba(24,95,165,0.10)}
-.tab-head{background:linear-gradient(90deg,#185fa5,#1f78ce);color:#fff;padding:7px 14px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:0.8438rem;line-height:1.3}
+.tab-head{background:var(--brand);color:#fff;padding:7px 14px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:0.8438rem;line-height:1.3}
 .tab-head .tab-icon{font-size:0.9375rem;flex-shrink:0}
 .tab-head .tab-title{flex:1;min-width:0}
 .tab-head .tab-kind{font-size:0.625rem;font-weight:700;letter-spacing:0.1em;background:rgba(255,255,255,0.22);padding:2px 7px;border-radius:10px;text-transform:uppercase;flex-shrink:0}
@@ -716,14 +723,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 /* Station C — collapsible skill sections (guided by the module review) */
 .sc-sections{display:flex;flex-direction:column;gap:8px}
 .sc-sec{border-radius:8px;overflow:hidden;background:var(--bg)}
-.sc-sec-head{width:100%;font-family:inherit;font-size:0.9375rem;font-weight:500;text-align:left;padding:11px 14px;background:var(--bg3);border:0;border-radius:8px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:10px;line-height:1.3}
-.sc-sec-head:hover{background:var(--green-bg)}
-.sc-sec.open .sc-sec-head{background:var(--green-bg);color:var(--green-text)}
+.sc-sec-head{width:100%;font-family:inherit;font-size:0.9375rem;font-weight:500;text-align:left;padding:11px 4px;background:transparent;border:0;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:10px;line-height:1.3}
+.sc-sec-head:hover{background:var(--bg2)}
+.sc-sec.open .sc-sec-head{background:transparent;color:var(--green-text)}
 .sc-sec-chev{font-size:0.6875rem;color:var(--green-text);flex-shrink:0;transition:transform 0.15s}
 .sc-sec.open .sc-sec-chev{transform:rotate(90deg)}
 .sc-sec-title{display:flex;align-items:center;gap:8px}
 .sc-sec-num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;font-size:0.75rem;font-weight:600;border-radius:50%;background:var(--green-text);color:#fff}
-.sc-sec-body{display:none;padding:4px 14px 6px}
+.sc-sec-body{display:none;padding:8px 14px 6px}
 .sc-sec.open .sc-sec-body{display:block}
 .sc-sec-body .steps{margin:0}
 .chord-popup{position:absolute;z-index:1000;background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 12px;box-shadow:0 4px 18px rgba(0,0,0,0.20);pointer-events:none;display:none;flex-direction:column;align-items:center;gap:4px;max-width:220px}
@@ -968,8 +975,8 @@ body.viewer-open .fab-buttons{display:none}
 
 /* ── Navigation: panel footers, back-to-top, skill jumps, Songs hub, search ── */
 .panel-next{margin:22px 0 4px;display:flex;justify-content:flex-end}
-.panel-next-btn{font-family:inherit;font-size:0.9062rem;font-weight:600;padding:9px 18px;border-radius:20px;border:1px solid var(--blue-text);background:var(--blue-bg);color:var(--blue-text);cursor:pointer;transition:filter .12s}
-.panel-next-btn:hover{filter:brightness(0.95)}
+.panel-next-btn{font-family:inherit;font-size:0.9062rem;font-weight:600;padding:9px 18px;border-radius:20px;border:1px solid var(--brand);background:var(--brand);color:var(--brand-text);cursor:pointer;transition:background .12s}
+.panel-next-btn:hover{background:var(--brand-hover)}
 .back-to-top{position:fixed;left:18px;bottom:18px;z-index:80;font-family:inherit;font-size:0.8438rem;font-weight:600;padding:8px 14px;border-radius:20px;border:1px solid var(--border2);background:var(--bg);color:var(--text2);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.12);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .2s,visibility .2s}
 .back-to-top.show{opacity:1;visibility:visible;pointer-events:auto}
 .back-to-top:hover{color:var(--text);border-color:var(--text2)}
@@ -1061,8 +1068,8 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 /* ── Song-thread v2: per-song rows with explicit Journey-layer chips ── */
 .song-thread-head{font-size:0.8438rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
 .song-thread-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding:2px 0;font-size:0.875rem}
-.st-layer{font-size:0.75rem;font-weight:700;padding:1px 9px;border-radius:999px;background:var(--green-bg);color:var(--green-text);border:1px solid var(--green-text);white-space:nowrap}
-.st-layer.bonus{background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-text)}
+.st-layer{font-size:0.75rem;font-weight:600;padding:0;border-radius:0;background:transparent;color:var(--text2);border:none;white-space:nowrap}
+.st-layer.bonus{color:var(--amber-text)}
 .st-note{color:var(--text3);font-size:0.8125rem}
 .song-thread-name{font-weight:600;color:var(--text)}
 

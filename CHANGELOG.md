@@ -5,6 +5,32 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-12 — Titles got some personality, and one less color to compete with
+
+### Changed
+- **Set titles and page headings now use a warm serif typeface** instead of the
+  same plain sans-serif as everything else, so titles clearly stand out from
+  body text at a glance. Body text and step instructions are unchanged.
+- **Badges and tags got quieter.** "Layer 1 of 5" and the song-list "Choice"
+  label are now plain text instead of little pill shapes — only things you can
+  actually click, or the "Core" tag, still look like buttons. The Original and
+  Tutorial video links on each song row are now quiet text links until you
+  hover over them, so the Song Journey button — the one action that matters
+  most on that row — stands out more clearly.
+- **The purple header color now shows up throughout the app, not just at the
+  top.** The "Next" button at the bottom of each station, the welcome popup's
+  start button, and the chord-tab header are all the same brand purple now,
+  instead of blue/gray tints that didn't quite match.
+- **On wide screens, the page content is centered** between the sidebar and
+  the floating Tuner/Timer/Metronome buttons instead of hugging the left edge,
+  so there's no more big empty stripe on a large monitor.
+- **The floating Tuner, Timer, and Metronome buttons are now one calm, matching
+  set** (previously each was a different color) — the icons keep their color,
+  but the buttons themselves are neutral so they don't compete for attention.
+- **The numbered section headers inside each station** ("1 · Watch the lesson
+  videos") are now a simple underlined heading instead of a solid gray/green
+  bar, so they feel lighter and match the rest of the calmer redesign.
+
 ## 2026-07-12 — A calmer, warmer look
 
 ### Changed
