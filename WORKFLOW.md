@@ -18,6 +18,22 @@
 
 ## Open work
 
+- [ ] **Real-guitar test of Riff Runner Wait Mode** (Jonathan, 2026-07-12) —
+      NEW feature, committed `6dcf68c`, **NOT pushed** until this passes.
+      Riff Runner's ready screen now has a "How do you want to play it?"
+      toggle: the existing timed **Keys / tap** game, or the new **🎸 My
+      guitar** *Wait Mode* — untimed, the TAB stops on each note and waits
+      until the mic hears the right pitch before sliding on. Reuses the
+      coach's mic pipeline + range-trimmed YIN (`coachDetectPitch`, same as
+      Note Hunt); pure practice aid, no tiers/score/unlocks. Idea from
+      PickHero's Wait Mode. **Verified so far:** UI render, mode toggle,
+      mic-start, play + done screens (browser, mock state — no JS errors).
+      **Still to test on a real guitar:** does it catch each note at a
+      natural pace, feel the pluck→advance timing right, and give sensible
+      hints (fret nudges, octave notes)? Remember mic retests run on the
+      LIVE site (PWA cache). Once it passes: push + add a `CHANGELOG.md`
+      entry (student-facing new feature). Code in `coach.js` (`rnw*`
+      functions + the toggle) and `styles.css`.
 - [~] **Real-guitar retest of the mic features** (Jonathan, 2026-07-12) —
       **Listening Coach chord check ("Check my changes"): DONE & verified**
       on real guitar (pushed through `2e3feee`). Root cause was NOT the
