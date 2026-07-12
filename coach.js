@@ -880,13 +880,13 @@ function coachScoreTiming(){
   const name = 'On the beat', icon = '&#x1F941;';
   const devs = coach.slots.filter(s => s.hit && s.hit.devMs != null).map(s => s.hit.devMs);
   if (devs.length < 3) return { name, icon, level: 1, sentence: 'Not enough hits landed to judge the beat — try again and play one hit per beat, even if it’s messy.' };
-  const onMs = Math.max(70, coach.beatMs * 0.12), closeMs = onMs * 2;
+  const onMs = Math.max(90, coach.beatMs * 0.18), closeMs = onMs * 2;
   const on = devs.filter(d => Math.abs(d) <= onMs).length;
   const close = devs.filter(d => Math.abs(d) <= closeMs).length;
   const mean = devs.reduce((a, b) => a + b, 0) / devs.length;
   const lean = Math.abs(mean) < onMs * 0.6 ? '' : (mean < 0 ? 'early' : 'late');
   let level, sentence;
-  if (on / devs.length >= 0.75){
+  if (on / devs.length >= 0.70){
     level = 3; sentence = `Right on time — ${on} of ${devs.length} notes landed exactly on the beat.`;
   } else if (close / devs.length >= 0.6){
     level = 2;
