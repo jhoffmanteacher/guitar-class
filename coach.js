@@ -529,7 +529,12 @@ function coachLoop(){
         now - coach.pending.t >= COACH_ATTACK_SKIP &&
         now - (coach.lastPitchT || 0) >= 40){
       coach.lastPitchT = now;
-      const f = coachDetectPitch(buf, coachCtx.sampleRate);
+      /* Chords aren't cleanly periodic, so YIN's strict single-note clarity
+         gate rejects most chord frames (they logged 0 pitch reads). A looser
+         gate for chord mode lets it lock onto the dominant chord tone — which
+         real data showed is reliably one of the chord's notes. Melody stays
+         strict (accuracy matters when the exact note is the answer). */
+      const f = coachDetectPitch(buf, coachCtx.sampleRate, coach.mode === 'chords' ? 0.55 : 0.22);
       if (f > 0) coach.pending.readings.push(69 + 12 * Math.log2(f / 440));
     }
     if (coach.pending && now - coach.pending.t > COACH_EVENT_TAIL) coachFinalizeEvent();
@@ -575,7 +580,8 @@ function coachLoop(){
 
 /* YIN, trimmed to the guitar's range: tau only up to ~sr/60Hz, so it's a
    fraction of the tuner's full scan — cheap enough for a Chromebook at 20Hz. */
-function coachDetectPitch(buf, sampleRate){
+function coachDetectPitch(buf, sampleRate, clarity){
+  clarity = clarity || 0.22;   // YIN accept threshold; higher = more permissive (chords)
   // Window scales with sample rate: at 88.2/96kHz a fixed 2048 caps maxTau
   // below low E's 82Hz period — the whole 6th string became undetectable.
   const W = Math.min(buf.length, sampleRate > 60000 ? 4096 : 2048);
@@ -595,7 +601,7 @@ function coachDetectPitch(buf, sampleRate){
     d[tau] = runSum ? s * tau / runSum : 1;
   }
   for (let tau = Math.max(2, Math.floor(sampleRate / 1400)); tau <= maxTau; tau++){
-    if (d[tau] < 0.22){
+    if (d[tau] < clarity){
       while (tau + 1 <= maxTau && d[tau + 1] < d[tau]) tau++;
       const x0 = d[tau - 1], x2 = tau < maxTau ? d[tau + 1] : d[tau];
       const denom = 2 * (2 * d[tau] - x0 - x2);
