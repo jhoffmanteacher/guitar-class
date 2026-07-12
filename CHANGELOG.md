@@ -5,6 +5,28 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-12 — A calmer, warmer look
+
+### Changed
+- **The whole site got a gentler coat of paint.** The background is now a warm
+  ivory instead of cool gray, the purple header bar is softer, and the sidebar
+  lost its heavy colored boxes — sections are now separated by simple spacing
+  and small labels, so the page feels quieter and easier on the eyes.
+- **The sidebar buttons are calmer too.** Station buttons sit flat until you
+  pick one, then light up with a soft wash of their color (blue for Station B,
+  green for Station C, amber for the checklist). The Explore buttons highlight
+  with a soft purple pill instead of a solid dark bar.
+
+## 2026-07-12 — Tidier step controls
+
+### Changed
+- **Hint, Stuck?, and Level up now sit in one row** under each step instead of
+  stacked one above the other, so you can see all three at a glance and open
+  whichever one you need.
+- **The "Listen" button is now labeled "Read aloud"** and moved to the
+  bottom-right of each step, next to Mark done, so the two step-ending
+  controls are together.
+
 ## 2026-07-12 — New look: a side navigation rail
 
 ### Changed

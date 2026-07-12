@@ -13,14 +13,14 @@
       d.setAttribute('role','alert');
       d.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;'
         + 'max-width:520px;margin:0 auto;padding:12px 44px 12px 16px;border-radius:12px;'
-        + 'background:#322b78;color:#fff;font:14px/1.45 system-ui,-apple-system,sans-serif;'
+        + 'background:#514a7d;color:#fff;font:14px/1.45 system-ui,-apple-system,sans-serif;'
         + 'box-shadow:0 6px 24px rgba(0,0,0,.28)';
       const msg = document.createElement('span');
       msg.textContent = 'Something went wrong. Your saved progress is safe — please refresh the page to keep going. ';
       const refresh = document.createElement('button');
       refresh.textContent = 'Refresh';
       refresh.style.cssText = 'margin-left:4px;padding:3px 12px;border:0;border-radius:14px;'
-        + 'background:#fff;color:#322b78;font-weight:600;cursor:pointer';
+        + 'background:#fff;color:#514a7d;font-weight:600;cursor:pointer';
       refresh.onclick = () => location.reload();
       const close = document.createElement('button');
       close.setAttribute('aria-label','Dismiss');
@@ -1211,9 +1211,9 @@ function pickEnglishVoice(){
   return cachedVoices[0] || null;
 }
 
-// Idle ("Listen") and active ("Stop") inner-markup for the read-aloud buttons.
+// Idle ("Read aloud") and active ("Stop") inner-markup for the read-aloud buttons.
 // Kept as constants so the SVG icon survives every state reset below.
-const READ_ALOUD_IDLE_HTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 8a5 5 0 0 1 0 8"/><path d="M19.5 5.5a9 9 0 0 1 0 13"/></svg><span>Listen</span>';
+const READ_ALOUD_IDLE_HTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 8a5 5 0 0 1 0 8"/><path d="M19.5 5.5a9 9 0 0 1 0 13"/></svg><span>Read aloud</span>';
 const READ_ALOUD_STOP_HTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg><span>Stop</span>';
 
 function resetAllReadAloudBtns(){
@@ -1654,16 +1654,16 @@ function buildStations(w, stationId){
        diagrams, TAB, responses) stay visible; supporting prose (hint, stuck,
        level-up) collapses behind native <details> — one tap away, never
        competing with the thing the student is supposed to do. */
-    const hintHtml = s.hint ? (()=>{
+    const hintFold = s.hint ? (()=>{
       const bullets = s.hint.split(/(?<=\.(?=\s))(?=\s*[A-Z])|\n/).map(b=>b.trim()).filter(Boolean);
       const inner = bullets.length <= 1 ? `<div class="sh">${s.hint}</div>`
         : `<ul class="sh-list">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
       return `<details class="step-fold step-hint-fold"><summary>&#x1F4A1; Hint</summary>${inner}</details>`;
     })() : '';
-    const branchHtml = (s.stuck || s.levelUp) ? `<div class="step-branches">`
-      + (s.stuck ? `<details class="step-fold step-stuck-fold"><summary>&#x1FA9C; Stuck?</summary><div class="step-branch step-stuck">${s.stuck}</div></details>` : '')
-      + (s.levelUp ? `<details class="step-fold step-levelup-fold"><summary>&#x1F336;&#xFE0F; Level up</summary><div class="step-branch step-levelup">${s.levelUp}</div></details>` : '')
-      + `</div>` : '';
+    const stuckFold = s.stuck ? `<details class="step-fold step-stuck-fold"><summary>&#x1FA9C; Stuck?</summary><div class="step-branch step-stuck">${s.stuck}</div></details>` : '';
+    const levelUpFold = s.levelUp ? `<details class="step-fold step-levelup-fold"><summary>&#x1F336;&#xFE0F; Level up</summary><div class="step-branch step-levelup">${s.levelUp}</div></details>` : '';
+    // Hint / Stuck? / Level up sit in one horizontal row so a student can scan all three at once.
+    const foldsHtml = (hintFold || stuckFold || levelUpFold) ? `<div class="step-folds">${hintFold}${stuckFold}${levelUpFold}</div>` : '';
     const chordsHtml = (s.chords&&s.chords.length)
       ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}${c.name?`<div class="chord-box-label">${c.name}</div>`:''}</div>`).join('')}</div>` + coachChordBtnRowHtml(s.chords)
       : '';
@@ -1725,9 +1725,10 @@ function buildStations(w, stationId){
     const readBtn = `<button class="read-aloud-btn" type="button" onclick="event.stopPropagation();readAloudStep(this)" title="Read this step aloud" aria-label="Read aloud">${READ_ALOUD_IDLE_HTML}</button>`;
     const doneKey = `${w.id}-${ns}-${i}`;
     const isDone = completed[doneKey] === true;
-    const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${isDone ? '&#x2713; Done' : 'Mark done'}</button></div>`;
+    // Mark-done sits bottom-left, Read aloud bottom-right — the last row of the step.
+    const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${isDone ? '&#x2713; Done' : 'Mark done'}</button>${readBtn}</div>`;
     const skillsAttr = (s.skills && s.skills.length) ? ` data-skills="${s.skills.join(',')}"` : '';
-    return `<li class="step${isDone ? ' step-done' : ''}"${skillsAttr}><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml}${hintHtml}${branchHtml} ${readBtn}</div>${doneBtn}</div></li>`;
+    return `<li class="step${isDone ? ' step-done' : ''}"${skillsAttr}><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml}${foldsHtml}</div>${doneBtn}</div></li>`;
   }).join('');
   /* Generic tuning warm-up sections are superseded by the Daily 5 (which
      starts with the tune-up): render a pointer card above the numbered
