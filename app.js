@@ -1323,6 +1323,22 @@ function renderProgressStrip(){
     }
     label.textContent = fmtModuleProgress(complete, partial) + tail;
   }
+  // Rail extras: current-module % + a completion badge that lights up at 100%.
+  const pctEl = document.getElementById('rail-module-pct');
+  if(pctEl){
+    if(currentInfo && currentInfo.total){
+      pctEl.textContent = Math.round(currentInfo.done / currentInfo.total * 100) + '%';
+      pctEl.hidden = false;
+    } else { pctEl.textContent = ''; pctEl.hidden = true; }
+  }
+  const goalEl = document.getElementById('rail-module-goal');
+  if(goalEl){
+    const earned = !!(currentInfo && currentInfo.state === 'complete');
+    goalEl.classList.toggle('earned', earned);
+    goalEl.title = earned
+      ? `Module ${currentInfo.num} complete!`
+      : 'Finish all skills to complete this module';
+  }
 }
 
 // Footer "Report a problem" — build the mailto at click time so the body carries
@@ -1439,6 +1455,50 @@ function activateSet(id){
   const activeMod = /^mr\d+$/.test(id) ? parseInt(id.slice(2)) : (SETS.find(x=>x.id===id)||{}).moduleNum;
   document.querySelectorAll('.module-songs').forEach(el=>el.classList.toggle('active', parseInt(el.dataset.module)===activeMod));
   renderChordBoxes();
+  syncRailStations();   // refresh the rail's "This set" station switcher for the new set
+}
+
+/* ── Rail station switcher ─────────────────────────────────────────────
+   The per-set station tabs (Station B/C · checklist · Songs) now live in the
+   left rail instead of inside each set panel. The in-panel .tabs block still
+   exists in the DOM (hidden via CSS) so switchTab/switchTabById/panelFooter/
+   print all keep working unchanged — these helpers just drive it and mirror
+   the active state back into the rail. */
+function activeWeekPanel(){ return document.querySelector('.week-panel.active'); }
+function railStation(tab){
+  const panel = activeWeekPanel();
+  if(!panel) return;
+  switchTabById(panel.dataset.id, tab);   // switchTab() calls syncRailStations() to reflect it
+}
+function syncRailStations(){
+  const group = document.getElementById('rail-set-group');
+  const list  = document.getElementById('rail-stations');
+  if(!group || !list) return;   // teacher view / pre-init: nothing to do
+  const panel = activeWeekPanel();
+  const hasTabs = panel && panel.querySelector('.tabs .tabs-card');
+  if(!hasTabs){ group.hidden = true; return; }   // module-review / coming-soon: no stations
+  group.hidden = false;
+  const wid = panel.dataset.id;
+  const w = (typeof SETS !== 'undefined') ? SETS.find(s=>s.id===wid) : null;
+  const label = document.getElementById('rail-set-label');
+  if(label) label.textContent = 'This set' + (w && w.label ? ' · ' + w.label : '');
+  const songsBtn = list.querySelector('[data-station="songs"]');
+  if(songsBtn) songsBtn.hidden = !(w && w.songs);
+  // Reflect whichever tab-panel is currently active back onto the rail buttons.
+  const activePanel = panel.querySelector('.tab-panel.active');
+  const activeTab = activePanel ? activePanel.id.slice(wid.length + 1) : 'station-b';
+  list.querySelectorAll('.rail-station').forEach(b=>{
+    const on = b.dataset.station === activeTab;
+    b.classList.toggle('active', on);
+    if(on) b.setAttribute('aria-current','true'); else b.removeAttribute('aria-current');
+  });
+}
+
+/* "Practice" nav item: leave whatever overlay is open (Games/Songs hub/Search)
+   and return to the practice view. Reuses the existing close-all helper. */
+function returnToPractice(){
+  if(typeof closeTopPanels === 'function') closeTopPanels();
+  window.scrollTo({ top:0, behavior:'smooth' });
 }
 
 /* Set/review panels are now built per-module, on demand, by
@@ -1521,6 +1581,7 @@ function switchTab(el,wid,tab){
   panel.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   el.classList.add('active');
   document.getElementById(`${wid}-${tab}`).classList.add('active');
+  if(typeof syncRailStations === 'function') syncRailStations();   // mirror onto the rail switcher
 }
 
 /* Print one set as a clean one-pager (for days the Chromebooks/Wi-Fi fail).
