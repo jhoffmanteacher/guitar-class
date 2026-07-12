@@ -5,6 +5,22 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-12 — Riff Runner: play the riffs on your real guitar
+
+### Added
+- **A new "My guitar" way to play Riff Runner.** On the start screen you can now
+  choose **⌨️ Keys / tap** (the original — press a key or tap as notes cross the
+  line) or **🎸 My guitar**, which listens through your device's mic while you
+  play the riff on a real guitar. Pick a **play-along speed** (Slow, Medium, or
+  full song speed), and a metronome counts you in and keeps the beat — the beat
+  dots light up and the line flashes so you can see the tempo as well as hear it.
+- **It waits for you.** Play each note in time with the click; the moment it
+  hears the right note, it moves on to the next. Fall behind and it simply holds
+  the note and waits — no penalty — so you can start slow and build up to full
+  speed. If you play the wrong note it gives you a nudge ("go 2 frets up," or
+  "right note, wrong octave"). A great way to learn a riff by ear and hands
+  before racing the clock.
+
 ## 2026-07-12 — Work each module in order, and pages remember your place
 
 ### Added

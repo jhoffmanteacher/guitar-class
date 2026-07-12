@@ -38,9 +38,11 @@
 ## Open work
 
 - [ ] **Real-guitar test of Riff Runner Wait Mode** (Jonathan, 2026-07-12) —
-      NEW feature. Base version committed `6dcf68c`; a **play-at-tempo rework
-      is UNCOMMITTED** in the working tree (`coach.js` + `styles.css`, plus a
-      `sw.js` version bump). **Nothing pushed** until this passes.
+      ⚠️ **SHIPPED LIVE UNTESTED** — Jonathan chose to push it before a guitar
+      test (base `6dcf68c` + the play-at-tempo rework). **Still needs a
+      real-guitar pass on the live site** (PWA cache applies — hard-refresh to
+      get the current code). If it misbehaves, fix + push again. This item
+      stays open until that verification is done.
       Riff Runner's ready screen has a "How do you want to play it?" toggle:
       the existing timed **Keys / tap** game, or **🎸 My guitar** *Wait Mode*.
       **Wait Mode is now play-at-tempo with a safety net** (Jonathan's call
@@ -62,10 +64,9 @@
       click feel right at each speed; on-time → smooth advance, lagging →
       clean wait-and-resume; any double-advance on one strum or notes it won't
       catch; are the beat pips / hit-line flash helpful or distracting?
-      Remember mic retests run on the LIVE site (PWA cache). Once it passes:
-      commit the rework, push, and add a `CHANGELOG.md` entry (student-facing
-      new feature). Code in `coach.js` (`rnw*` functions + the toggle) and
-      `styles.css`.
+      Remember mic retests run on the LIVE site (PWA cache). Committed +
+      pushed with a `CHANGELOG.md` entry (student-facing new feature). Code in
+      `coach.js` (`rnw*` functions + the toggle) and `styles.css`.
 - [~] **Real-guitar retest of the mic features** (Jonathan, 2026-07-12) —
       **Listening Coach chord check ("Check my changes"): DONE & verified**
       on real guitar (pushed through `2e3feee`). Root cause was NOT the
