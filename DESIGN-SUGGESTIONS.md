@@ -6,6 +6,14 @@ exact values to change, plus how to verify. Tasks are ordered by impact — impl
 top-down, or cherry-pick. T1–T4 are the core pass; T5–T6 are polish; T7–T8 are
 optional flavor.*
 
+**Status (2026-07-12, verified live):** T1–T6 are shipped — commits `838d564`
+("Design pass: serif headings, quieter pills, plum brand throughout, balanced wide
+layout") and `3d7146b`, confirmed against the live site (Fraunces set titles, ghost
+Tutorial/Original buttons + plain-text "Layer 1 of 5", solid-plum Next button and TAB
+header, centered wide layout, neutral FABs, flat step-group dividers). **T7 and T8 are
+the only tasks still open** — both optional flavor, neither started. A visual draft of
+T8 exists (not wired into the site): https://claude.ai/code/artifact/12a75fb3-d8d5-4f4d-a7c3-eac23b9380b1
+
 ## Ground rules for the executor
 
 - **No build step.** Plain CSS in `styles.css`; tokens live in `:root` (line ~7) with a
@@ -66,7 +74,7 @@ through the whole app instead of stopping at the header.
 
 ---
 
-## T1 — Give headings a voice (display serif)
+## T1 — Give headings a voice (display serif) ✅ SHIPPED
 
 **Why:** the single biggest personality gain per line of CSS. A warm serif for titles
 against the system-sans body matches the claude.ai-adjacent feel the site already aims
@@ -97,7 +105,7 @@ for.
 **Check:** set titles clearly outrank section bars; no FOUT jank on reload; offline
 reload still renders the font.
 
-## T2 — Quiet the chrome: a 3-tier badge/pill system
+## T2 — Quiet the chrome: a 3-tier badge/pill system ✅ SHIPPED
 
 **Why:** today every small element is a bordered pill. Encode one rule, then sweep:
 
@@ -128,7 +136,7 @@ reload still renders the font.
 (Song Journey), quiet ghost video links, and a readable name. Verify dark mode: the
 ghost buttons must still be visible (`--text2` on `--bg`).
 
-## T3 — Thread the plum brand through the app
+## T3 — Thread the plum brand through the app ✅ SHIPPED
 
 **Why:** `--brand #514a7d` exists only in the header and skip-link. Everything that
 means "primary / go forward" should share one color, and it should be the brand.
@@ -156,7 +164,7 @@ means "primary / go forward" should share one color, and it should be the brand.
 **Check:** one screen should never show two different "primary" colors; the Next
 button, welcome CTA, and header now visibly belong to the same brand.
 
-## T4 — Balance wide screens
+## T4 — Balance wide screens ✅ SHIPPED
 
 **Why:** content hugs the rail, leaving a dead right third on desktop.
 
@@ -170,7 +178,7 @@ line ~406); centering preserves that. Below 1240px behavior is unchanged.
 **Check:** at 1400px+ the column sits centered between rail and tools; at 1000px it
 still sits by the rail; no overlap with the Tuner/Timer/Metronome stack at any width.
 
-## T5 — Unify the floating tool buttons
+## T5 — Unify the floating tool buttons ✅ SHIPPED
 
 **Why:** three different-colored pills (blue/green/purple) are the loudest thing on an
 otherwise calm page, and color there carries no meaning (it's not the station coding).
@@ -189,7 +197,7 @@ intentionally goes green when the timer finishes.
 
 **Check:** corner stack reads as one quiet tool group; timer-done flash still pops.
 
-## T6 — Flatten the step-group section bars
+## T6 — Flatten the step-group section bars ✅ SHIPPED
 
 **Why:** the numbered group headers ("1 · See the power chord shape move") are solid
 filled bars — visually heavier than the card titles above them, and heavier than the
@@ -233,11 +241,11 @@ Keep it to those; more would tip into clutter the other tasks just removed.
 
 ## Suggested execution order & scope
 
-| Pass | Tasks | Feel of the change |
-|---|---|---|
-| Core (one session) | T1, T2, T3, T4 | "Same site, suddenly grown-up" |
-| Polish | T5, T6 | Calmer edges everywhere |
-| Flavor (taste call) | T7, T8 | Personality, optional |
+| Pass | Tasks | Feel of the change | Status |
+|---|---|---|---|
+| Core (one session) | T1, T2, T3, T4 | "Same site, suddenly grown-up" | ✅ Shipped |
+| Polish | T5, T6 | Calmer edges everywhere | ✅ Shipped |
+| Flavor (taste call) | T7, T8 | Personality, optional | Open |
 
 After each pass: Live Server + Dev bypass, light **and** dark mode, one print preview,
 narrow-window check (~760px where the rail stacks), then `node tools/checks.mjs`

@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-12 — A little guitar pick in the header
+
+### Added
+- A small hand-drawn guitar pick icon now sits next to the site title in the
+  header — just a friendlier visual touch, nothing to click or use.
+
 ## 2026-07-12 — A tidier "Songs" spot, and a sidebar that gets out of the way
 
 ### Changed

@@ -1018,12 +1018,15 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 .welcome-go,.coach-start,.panel-next-btn,.mr-rec-btn.primary{box-shadow:0 3px 0 rgba(0,0,0,0.22)}
 .welcome-go:active,.coach-start:active,.panel-next-btn:active,.mr-rec-btn.primary:active{transform:translateY(3px);box-shadow:none}
 
+.header-mark{flex-shrink:0}
+
 /* ── Design pass: header on small phones ── */
 @media (max-width:480px){
   .header{padding:10px 12px}
   .header-title{font-size:1.0625rem}
   .header-sub{font-size:0.75rem;margin-top:1px}
   .btn-translate{padding:4px 9px;font-size:0.8125rem}
+  .header-mark{width:22px;height:22px}
 }
 
 /* ── Design pass: tuner "in tune!" success moment ── */
