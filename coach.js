@@ -39,6 +39,18 @@ const COACH_ONSET_FLOOR   = 0.010;  // absolute RMS floor for an onset
 const COACH_ONSET_RATIO   = 2.2;    // RMS must jump this × over the smoothed level
 const COACH_HF_FLOOR      = 0.002;  // absolute floor for the pick-attack (HF) channel
 const COACH_HF_RATIO      = 2.6;    // HF energy must jump this × over its smoothed level
+/* Chord-change check ("Check my changes") runs its own, MORE SENSITIVE onset
+   thresholds. It's a self-check a student does solo into a Chromebook mic at a
+   normal playing volume — moderate strums were slipping under the shared COACH_*
+   floors and getting scored as misses. Lowering the bar here is safe: the cc
+   loop only grades a strum that lands near a scheduled change beat (see the
+   window match in ccLoop), so a twitchier detector doesn't invent verdicts — a
+   stray onset with no nearby change is simply ignored. The rhythm games keep the
+   stricter COACH_* values, where an extra onset WOULD be a false strum. */
+const CC_ONSET_FLOOR      = 0.003;  // absolute RMS floor for a chord-check onset
+const CC_ONSET_RATIO      = 1.4;    // RMS jump over the smoothed level
+const CC_HF_FLOOR         = 0.0008; // absolute floor for the pick-attack channel
+const CC_HF_RATIO         = 1.7;    // HF jump over its smoothed level
 const COACH_ONSET_REFRACT = 140;    // ms — one strum = one onset, not six
 const COACH_ATTACK_SKIP   = 70;     // ms after an onset before pitch readings start —
                                     // the analyser window still holds the pick scrape
@@ -1549,6 +1561,7 @@ async function ccStart(){
   }
   cc.beatMs = 60000 / cc.bpm;
   cc.smoothRms = 0; cc.smoothHf = 0; cc.lastOnsetT = -1e9; cc.gridOffset = 0; cc.lastBeat = -1; cc.frameNo = 0;
+  cc.dbgPeak = 0; cc.dbgOnsets = 0; cc.dbgMatched = 0;   // DEBUG: mic-meter counters (remove after tuning)
   cc.phase = 'countin';
   ccBody().innerHTML = `<div class="coach-count" id="cc-count">&nbsp;</div>` +
     ccDiagramsHtml(prog, prog[0]);
@@ -1574,6 +1587,10 @@ function ccRenderPlay(){
      ${ccDiagramsHtml(CC_PROGRESSIONS[cc.progIdx].chords, cc.bars[0])}
      <div class="coach-strip">${chips}</div>
      <div class="coach-live"><span class="coach-live-dot"></span>Strum every beat — the dots show the beat</div>
+     ${location.search.indexOf('ccdebug') >= 0 ? `<div id="cc-dbg" style="margin:8px 0;font:12px/1.4 monospace;opacity:.85">
+       <div>mic <span id="cc-dbg-bar" style="display:inline-block;height:10px;background:#4ade80;width:0"></span> <span id="cc-dbg-lvl">0</span></div>
+       <div id="cc-dbg-txt">onsets: 0 · graded: 0</div>
+     </div>` : ''}
      <button type="button" class="tp-btn coach-stop" onclick="ccFinish()">&#x25A0; Stop</button>`;
 }
 
@@ -1632,23 +1649,36 @@ function ccLoop(){
        jump for clean separated strums, HF pick-attack channel for a strum
        over the still-ringing previous chord — which is exactly what the
        graded beat-1-of-a-new-bar strum sounds like). */
-    if ((rms > COACH_ONSET_FLOOR &&
-         rms > cc.smoothRms * COACH_ONSET_RATIO ||
-         coachHfRms > COACH_HF_FLOOR &&
-         coachHfRms > cc.smoothHf * COACH_HF_RATIO) &&
+    if ((rms > CC_ONSET_FLOOR &&
+         rms > cc.smoothRms * CC_ONSET_RATIO ||
+         coachHfRms > CC_HF_FLOOR &&
+         coachHfRms > cc.smoothHf * CC_HF_RATIO) &&
         now - cc.lastOnsetT > COACH_ONSET_REFRACT){
       cc.lastOnsetT = now;
       const rel = now - cc.listenStart - cc.gridOffset;
       const beatIdx = Math.round(rel / cc.beatMs);
       const dev = rel - beatIdx * cc.beatMs;
-      if (Math.abs(dev) < cc.beatMs * 0.45) cc.gridOffset += dev * 0.15;
-      const win = Math.max(140, cc.beatMs * 0.3);
+      if (Math.abs(dev) < cc.beatMs * 0.5) cc.gridOffset += dev * 0.25;
+      const win = Math.max(260, cc.beatMs * 0.5);
       const ch = cc.changes.find(c => c.result === null && !c.pend &&
         Math.abs(c.beat * cc.beatMs - rel) <= win);
-      if (ch) ch.pend = { t: now, readings: [] };
+      cc.dbgOnsets++;                        // DEBUG
+      if (ch){ ch.pend = { t: now, readings: [] }; cc.dbgMatched++; }   // DEBUG
     }
     cc.smoothRms = cc.smoothRms * 0.82 + rms * 0.18;
     cc.smoothHf = cc.smoothHf * 0.82 + coachHfRms * 0.18;
+
+    /* DEBUG mic meter (remove after tuning) — shows whether the mic hears you
+       and whether strums register as onsets / graded changes. */
+    cc.dbgPeak = Math.max(cc.dbgPeak * 0.9, rms);
+    if (((cc.dbgTick = (cc.dbgTick || 0) + 1) % 4) === 0){
+      const bar = document.getElementById('cc-dbg-bar');
+      const lvl = document.getElementById('cc-dbg-lvl');
+      const txt = document.getElementById('cc-dbg-txt');
+      if (bar) bar.style.width = Math.min(200, Math.round(cc.dbgPeak * 4000)) + 'px';
+      if (lvl) lvl.textContent = 'rms ' + cc.dbgPeak.toFixed(4) + ' (floor ' + CC_ONSET_FLOOR + ')';
+      if (txt) txt.textContent = 'onsets(strums heard): ' + cc.dbgOnsets + ' · graded(on-beat): ' + cc.dbgMatched;
+    }
 
     /* Feed pitch readings to an open change-check, then resolve it. Same
        attack skip as the Coach: the first ~70ms of a strum is scrape plus
@@ -1667,7 +1697,7 @@ function ccLoop(){
     /* Overdue changes are misses. */
     const relNow = now - cc.listenStart - cc.gridOffset;
     cc.changes.forEach((c, i) => {
-      if (c.result === null && !c.pend && relNow > (c.beat + 0.7) * cc.beatMs){
+      if (c.result === null && !c.pend && relNow > (c.beat + 0.85) * cc.beatMs){
         c.result = 'miss';
         ccChipRefresh(i);
       }
