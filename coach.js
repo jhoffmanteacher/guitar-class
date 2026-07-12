@@ -39,18 +39,20 @@ const COACH_ONSET_FLOOR   = 0.010;  // absolute RMS floor for an onset
 const COACH_ONSET_RATIO   = 2.2;    // RMS must jump this × over the smoothed level
 const COACH_HF_FLOOR      = 0.002;  // absolute floor for the pick-attack (HF) channel
 const COACH_HF_RATIO      = 2.6;    // HF energy must jump this × over its smoothed level
-/* Chord-change check ("Check my changes") runs its own, MORE SENSITIVE onset
-   thresholds. It's a self-check a student does solo into a Chromebook mic at a
-   normal playing volume — moderate strums were slipping under the shared COACH_*
-   floors and getting scored as misses. Lowering the bar here is safe: the cc
-   loop only grades a strum that lands near a scheduled change beat (see the
-   window match in ccLoop), so a twitchier detector doesn't invent verdicts — a
-   stray onset with no nearby change is simply ignored. The rhythm games keep the
-   stricter COACH_* values, where an extra onset WOULD be a false strum. */
-const CC_ONSET_FLOOR      = 0.003;  // absolute RMS floor for a chord-check onset
-const CC_ONSET_RATIO      = 1.4;    // RMS jump over the smoothed level
-const CC_HF_FLOOR         = 0.0008; // absolute floor for the pick-attack channel
-const CC_HF_RATIO         = 1.7;    // HF jump over its smoothed level
+/* The two forgiving "check" flows — the Listening Coach's "Check my changes" /
+   "Check me" (coachLoop) and Change Up (ccLoop) — run their own, MORE SENSITIVE
+   onset thresholds than the rhythm games. They're self-checks a student does
+   solo into a Chromebook mic at a normal playing volume, and moderate strums
+   were slipping under the stricter shared COACH_* floors and scoring as misses.
+   Lowering the bar here is safe: both flows only grade a strum that lands near a
+   scheduled beat (the ±window matchers in coachMatchEvent / ccLoop), so a
+   twitchier detector doesn't invent verdicts — a stray onset with no nearby beat
+   is simply ignored. The rhythm games keep the stricter COACH_* values, where an
+   extra onset WOULD be a false strum. */
+const CHK_ONSET_FLOOR     = 0.003;  // absolute RMS floor for a check-flow onset
+const CHK_ONSET_RATIO     = 1.4;    // RMS jump over the smoothed level
+const CHK_HF_FLOOR        = 0.0008; // absolute floor for the pick-attack channel
+const CHK_HF_RATIO        = 1.7;    // HF jump over its smoothed level
 const COACH_ONSET_REFRACT = 140;    // ms — one strum = one onset, not six
 const COACH_ATTACK_SKIP   = 70;     // ms after an onset before pitch readings start —
                                     // the analyser window still holds the pick scrape
@@ -289,6 +291,7 @@ async function coachStartCheck(){
   coach.events = []; coach.pending = null;
   coach.gridOffset = 0; coach.smoothRms = 0; coach.smoothHf = 0; coach.lastOnsetT = -1e9;
   coach.lastPulse = -1; coach.frameNo = 0; coach.lastPitchT = 0;
+  coach.dbgOnsets = 0; coach.dbgGraded = 0; coach.dbgPeak = 0; coach.dbgTick = 0;   // DEBUG
 
   /* Count-in: 4 clicks, last one higher = "go". The tab stays on screen so
      the fretting hand can get in position while the clicks run. */
@@ -411,6 +414,10 @@ function coachRenderListening(){
      ${coachNowHtml()}
      ${coachChordsHtml(coach.slots[0] && coach.slots[0].chordName)}
      ${coachStripHtml()}
+     ${location.search.indexOf('ccdebug') >= 0 ? `<div id="coach-dbg" style="margin:8px 0;font:12px/1.4 monospace;opacity:.85">
+       <div>mic <span id="coach-dbg-bar" style="display:inline-block;height:10px;background:#4ade80;width:0"></span> <span id="coach-dbg-lvl">0</span></div>
+       <div id="coach-dbg-txt">onsets: 0 · graded: 0</div>
+     </div>` : ''}
      <button type="button" class="tp-btn coach-stop" onclick="coachFinish()">&#x25A0; I&rsquo;m done</button>`;
 }
 
@@ -484,14 +491,28 @@ function coachLoop(){
        level, but the attack is loud and broadband in the difference signal). */
     const hf = coachHfRms;
     if (now - coach.lastOnsetT > COACH_ONSET_REFRACT &&
-        ((rms > COACH_ONSET_FLOOR && rms > coach.smoothRms * COACH_ONSET_RATIO) ||
-         (hf > COACH_HF_FLOOR && hf > coach.smoothHf * COACH_HF_RATIO))){
+        ((rms > CHK_ONSET_FLOOR && rms > coach.smoothRms * CHK_ONSET_RATIO) ||
+         (hf > CHK_HF_FLOOR && hf > coach.smoothHf * CHK_HF_RATIO))){
       coach.lastOnsetT = now;
+      coach.dbgOnsets = (coach.dbgOnsets || 0) + 1;   // DEBUG
       if (coach.pending) coachFinalizeEvent();
       coach.pending = { t: now, readings: [] };
     }
     coach.smoothRms = coach.smoothRms * 0.82 + rms * 0.18;
     coach.smoothHf = coach.smoothHf * 0.82 + hf * 0.18;
+
+    /* DEBUG mic meter (remove after tuning) — shows whether the mic hears you
+       and whether strums register as onsets / graded slots. Gated by ?ccdebug=1
+       so it only renders when the URL asks for it (students never see it). */
+    coach.dbgPeak = Math.max((coach.dbgPeak || 0) * 0.9, rms);
+    if (((coach.dbgTick = (coach.dbgTick || 0) + 1) % 4) === 0){
+      const bar = document.getElementById('coach-dbg-bar');
+      const lvl = document.getElementById('coach-dbg-lvl');
+      const txt = document.getElementById('coach-dbg-txt');
+      if (bar) bar.style.width = Math.min(200, Math.round(coach.dbgPeak * 4000)) + 'px';
+      if (lvl) lvl.textContent = 'rms ' + coach.dbgPeak.toFixed(4) + ' (floor ' + CHK_ONSET_FLOOR + ')';
+      if (txt) txt.textContent = 'onsets(strums heard): ' + (coach.dbgOnsets || 0) + ' · graded(on-beat): ' + (coach.dbgGraded || 0);
+    }
 
     /* Pitch readings (trimmed YIN, ~every 40ms) feed the pending event —
        but not until the pick attack has left the analysis window: early
@@ -637,6 +658,7 @@ function coachMatchEvent(ev){
     if (score < bestScore){ bestScore = score; best = i; }
   }
   if (best < 0) return;   // unmatched onset — an extra strum between beats
+  coach.dbgGraded = (coach.dbgGraded || 0) + 1;   // DEBUG
   const s = coach.slots[best];
   const dev = rel - best * coach.beatMs;
   ev.devMs = dev; ev.slot = best;
@@ -1649,10 +1671,10 @@ function ccLoop(){
        jump for clean separated strums, HF pick-attack channel for a strum
        over the still-ringing previous chord — which is exactly what the
        graded beat-1-of-a-new-bar strum sounds like). */
-    if ((rms > CC_ONSET_FLOOR &&
-         rms > cc.smoothRms * CC_ONSET_RATIO ||
-         coachHfRms > CC_HF_FLOOR &&
-         coachHfRms > cc.smoothHf * CC_HF_RATIO) &&
+    if ((rms > CHK_ONSET_FLOOR &&
+         rms > cc.smoothRms * CHK_ONSET_RATIO ||
+         coachHfRms > CHK_HF_FLOOR &&
+         coachHfRms > cc.smoothHf * CHK_HF_RATIO) &&
         now - cc.lastOnsetT > COACH_ONSET_REFRACT){
       cc.lastOnsetT = now;
       const rel = now - cc.listenStart - cc.gridOffset;
@@ -1676,7 +1698,7 @@ function ccLoop(){
       const lvl = document.getElementById('cc-dbg-lvl');
       const txt = document.getElementById('cc-dbg-txt');
       if (bar) bar.style.width = Math.min(200, Math.round(cc.dbgPeak * 4000)) + 'px';
-      if (lvl) lvl.textContent = 'rms ' + cc.dbgPeak.toFixed(4) + ' (floor ' + CC_ONSET_FLOOR + ')';
+      if (lvl) lvl.textContent = 'rms ' + cc.dbgPeak.toFixed(4) + ' (floor ' + CHK_ONSET_FLOOR + ')';
       if (txt) txt.textContent = 'onsets(strums heard): ' + cc.dbgOnsets + ' · graded(on-beat): ' + cc.dbgMatched;
     }
 
