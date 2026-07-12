@@ -116,9 +116,85 @@ function setTeacherView(v){
   teacherView=v;
   document.querySelectorAll('.t-vt').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
+  // The Games view is class-wide, not per-week — hide the week tabs and the
+  // skill summary while it's showing.
+  const tabs=document.getElementById('t-week-tabs'); if(tabs) tabs.style.display = v==='games' ? 'none' : '';
+  const summ=document.getElementById('t-summary'); if(summ) summ.style.display = v==='games' ? 'none' : '';
   renderTeacherBody();
 }
-function renderTeacherBody(){ if(teacherView==='responses') renderTeacherResponses(); else renderTeacherGrid(); }
+function renderTeacherBody(){
+  if(teacherView==='games') renderTeacherGames();
+  else if(teacherView==='responses') renderTeacherResponses();
+  else renderTeacherGrid();
+}
+
+/* ── Games access (teacher control) ──────────────────────────────────────
+   One class-config doc, config/class, holds the whole-class master switch
+   (gamesEnabled) and a per-student override map (gameOverrides: uid → bool;
+   true = force on, false = force off, absent = follow the class). The teacher
+   owns this doc; students only read it (app.js loadClassConfig). Effective
+   access per student: override wins if present, else the class master. */
+let teacherClassConfig = { gamesEnabled:true, gameOverrides:{} };
+async function loadTeacherClassConfig(){
+  try{
+    await ensureDb();
+    const doc = await db.collection('config').doc('class').get();
+    teacherClassConfig = doc.exists ? (doc.data()||{}) : {};
+  }catch(e){ teacherClassConfig = {}; }
+  if(!teacherClassConfig.gameOverrides) teacherClassConfig.gameOverrides = {};
+  return teacherClassConfig;
+}
+function renderTeacherGames(){
+  const box=document.getElementById('t-grid-container');
+  box.innerHTML='<div class="t-loading">Loading game settings…</div>';
+  loadTeacherClassConfig().then(cfg=>{
+    const classOn = cfg.gamesEnabled!==false;
+    const ov = cfg.gameOverrides||{};
+    const classCtl=`
+      <div class="tg-class">
+        <div class="tg-class-lbl">🎮 Games for the whole class</div>
+        <div class="tg-seg">
+          <button class="tg-seg-btn ${classOn?'on':''}" onclick="teacherSetClassGames(true)">On</button>
+          <button class="tg-seg-btn ${!classOn?'on':''}" onclick="teacherSetClassGames(false)">Off</button>
+        </div>
+      </div>
+      <div class="tg-note">“Off” hides the Games button for everyone. Use the list below to override individual students (“Default” follows the class switch). Changes take effect the next time a student loads the site.</div>`;
+    if(allStudents.length===0){ box.innerHTML=classCtl+'<div class="t-loading">No students yet — they’ll appear here once they sign in.</div>'; return; }
+    const sorted=[...allStudents].sort((a,b)=>(a.name||a.email||a.uid).localeCompare(b.name||b.email||b.uid));
+    const rows=sorted.map(stu=>{
+      const name=stu.name||stu.email||stu.uid.slice(0,8)+'…';
+      const v=ov[stu.uid];                                   // true / false / undefined
+      const state=v===true?'on':v===false?'off':'default';
+      const effective=v===true?true:v===false?false:classOn;
+      const seg=(s,label)=>`<button class="tg-seg-btn ${state===s?'on':''}" onclick="teacherSetStudentGames('${stu.uid}','${s}')">${label}</button>`;
+      return `<tr><td class="tg-name" title="${escAttr(name)}">${escHtml(name)}</td>`+
+        `<td><div class="tg-seg">${seg('default','Default')}${seg('on','On')}${seg('off','Off')}</div></td>`+
+        `<td class="tg-eff">${effective?'🎮 available':'— hidden'}</td></tr>`;
+    }).join('');
+    box.innerHTML=classCtl+
+      `<div class="tg-grid-wrap"><table class="tg-table"><thead><tr><th>Student</th><th>Games access</th><th>Right now</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  });
+}
+async function teacherSetClassGames(enabled){
+  teacherClassConfig.gamesEnabled=enabled;
+  try{
+    await ensureDb();
+    await db.collection('config').doc('class').set({gamesEnabled:enabled},{merge:true});
+  }catch(e){ alert('Could not save that change — check your connection and Firestore rules.'); }
+  renderTeacherGames();
+}
+async function teacherSetStudentGames(uid, state){
+  try{
+    await ensureDb();
+    const fv=firebase.firestore.FieldValue;
+    if(!teacherClassConfig.gameOverrides) teacherClassConfig.gameOverrides={};
+    let patch;
+    if(state==='default'){ patch={gameOverrides:{[uid]:fv.delete()}}; delete teacherClassConfig.gameOverrides[uid]; }
+    else { const val=state==='on'; patch={gameOverrides:{[uid]:val}}; teacherClassConfig.gameOverrides[uid]=val; }
+    await db.collection('config').doc('class').set(patch,{merge:true});
+  }catch(e){ alert('Could not save that change — check your connection and Firestore rules.'); }
+  renderTeacherGames();
+}
 
 /* Enumerate every short free-text response slot in a set, in display order,
    rebuilding the exact keys the student app saves under

@@ -81,6 +81,7 @@ let progress    = {};
 let responses   = {};
 let completed   = {};
 let games       = {};   // per-game bests from the games arcade (coach.js) — its own save category
+let gamesAccessOn = true; // whether the Games arcade is available to THIS student (teacher-controlled; see loadClassConfig)
 let saveTimer   = null;
 
 /* ── Lazy module loading ──
@@ -204,9 +205,9 @@ if(auth) auth.onAuthStateChanged(async user=>{
   if(user){
     currentUser = user;
     if(IS_TEACHER_MODE){ showTeacherApp(user); }
-    else { await loadProgress(); showApp(user); }
+    else { await loadProgress(); await loadClassConfig(); showApp(user); }
   } else {
-    currentUser = null; progress = {}; responses = {}; completed = {}; games = {};
+    currentUser = null; progress = {}; responses = {}; completed = {}; games = {}; gamesAccessOn = true;
     _moduleStripStates = {};   // next user's first strip render is a first paint, not a celebration
     document.getElementById('auth-wall').style.display='block';
     document.getElementById('app').style.display='none';
@@ -223,6 +224,7 @@ function showApp(user){
   document.getElementById('fab-group').style.display='flex';
   document.getElementById('user-area').innerHTML=userHeaderHtml(user);
   renderAll();
+  applyGamesAccess();
   maybeShowWelcome();
 }
 
@@ -266,6 +268,41 @@ async function loadProgress(){
       games         = doc.data().games || {};
     } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; games={}; restoreLocalPlace(); }
   } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; games={}; restoreLocalPlace(); }
+}
+
+/* ── Games access (teacher-controlled) ──
+   One class-config doc (config/class) holds the whole-class master switch
+   (gamesEnabled) plus a per-student override map (gameOverrides: uid → bool).
+   The effective answer for THIS student: an override wins if present, else the
+   class master, else ON. Only the teacher writes this doc (teacher.js); every
+   student reads it. Reads that fail (offline / rules) leave games ON so a
+   connection hiccup never locks a student out of the arcade. */
+async function loadClassConfig(){
+  gamesAccessOn = true;
+  try{
+    await ensureDb();
+    if(!db) return;
+    const doc = await db.collection('config').doc('class').get();
+    if(!doc.exists) return;
+    const d = doc.data()||{};
+    const ov = (d.gameOverrides||{})[currentUser.uid];
+    if(ov===true)       gamesAccessOn = true;
+    else if(ov===false) gamesAccessOn = false;
+    else                gamesAccessOn = (d.gamesEnabled!==false);   // field absent ⇒ on
+  }catch(e){ /* leave games on */ }
+}
+/* Show/hide the 🎮 Games button to match this student's access, and if games
+   get turned off while the arcade is open, close it. */
+function applyGamesAccess(){
+  const btn = document.getElementById('games-btn');
+  if(btn) btn.style.display = gamesAccessOn ? '' : 'none';
+  if(!gamesAccessOn){
+    const screen = document.getElementById('games-screen');
+    if(screen && !screen.hasAttribute('hidden')){
+      if(location.hash==='#games') location.hash='';
+      if(typeof gamesClosePanel==='function') gamesClosePanel();
+    }
+  }
 }
 
 /* Last-place persistence (Session 4.4): Firestore is the source of truth, but
