@@ -3108,6 +3108,25 @@ async function searchGoSet(moduleNum, wid){
    ════════════════════════════════════════════════ */
 if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
   window.addEventListener('load', () => {
+    /* Was this page already controlled by a service worker when it loaded?
+       If so, a later "controllerchange" means a NEW version just took over
+       (see sw.js: install→skipWaiting→activate→clients.claim on every push).
+       The cached shell that already loaded is now stale, so reload ONCE to
+       pick up the fresh code automatically — no more reloading two or three
+       times after a deploy, and returning students stop sitting on old code.
+       A first-ever visit has no controller yet, so it must NOT reload (that
+       would bounce the very first load). */
+    const hadController = !!navigator.serviceWorker.controller;
     navigator.serviceWorker.register('sw.js').catch(() => {/* offline support is best-effort */});
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController || window.__swReloading) return;
+      window.__swReloading = true;
+      const reload = () => {
+        // Don't yank the page out from under a live mic check / count-in.
+        if (window.coachMicLive) { setTimeout(reload, 1500); return; }
+        location.reload();
+      };
+      reload();
+    });
   });
 }
