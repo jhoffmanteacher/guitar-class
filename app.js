@@ -1359,9 +1359,18 @@ function buildReportHref(a){
   return true;
 }
 
+// Teacher (signed into the student app as the class teacher) and the localhost
+// dev-bypass user can preview every set/review without working through the
+// sequential gate — they're checking content, not taking the class.
+function isGatePreviewer(){
+  if(typeof isDevBypassUser==='function' && isDevBypassUser()) return true;
+  return !!(currentUser && typeof TEACHER_EMAIL!=='undefined' && currentUser.email===TEACHER_EMAIL);
+}
+
 function isModuleReviewLocked(moduleNum){
   const sets = SETS.filter(w=>w.moduleNum===moduleNum);
   if(!sets.length) return true;
+  if(isGatePreviewer()) return false;                 // teacher/dev: always open
   if(sets.some(w=>w.locked||w.comingSoon)) return true;
   const allSkills = sets.flatMap(w=>w.skills||[]);
   if(!allSkills.length) return true;
@@ -1383,7 +1392,8 @@ function isSetComplete(w){
 // idea as Module Review, applied to every set. The first set is always open.
 function isSetLocked(w){
   if(!w) return true;
-  if(w.locked || w.comingSoon) return true;          // still honor the static flag
+  if(w.locked || w.comingSoon) return true;          // static/unbuilt stays locked for everyone
+  if(isGatePreviewer()) return false;                // teacher/dev: skip the sequential gate
   const moduleSets = SETS.filter(x=>x.moduleNum===w.moduleNum);
   const idx = moduleSets.indexOf(w);
   if(idx<=0) return false;
@@ -1509,7 +1519,23 @@ function renderPills(moduleNum){
 
 // Per-set window scroll positions, so returning to a set lands where the
 // student left off. A set that's never been opened has no entry → opens at top.
-const setScrollPos = {};
+// Hydrated from localStorage so the position also survives a reload / PWA
+// relaunch (same `gc-` key convention as gc-lastSet). window.scrollTo clamps to
+// the page height, so a stale offset can never scroll past the content.
+const setScrollPos = (function(){
+  try{ return JSON.parse(localStorage.getItem('gc-scroll')) || {}; }catch(e){ return {}; }
+})();
+function saveScrollPos(){
+  try{ localStorage.setItem('gc-scroll', JSON.stringify(setScrollPos)); }catch(e){}
+}
+// Capture the current set's scroll when the tab is hidden or closed, so a reload
+// that doesn't go through activateSet first still remembers the spot.
+function rememberActiveScroll(){
+  const p = document.querySelector('.week-panel.active');
+  if(p && p.dataset.id){ setScrollPos[p.dataset.id] = window.scrollY; saveScrollPos(); }
+}
+window.addEventListener('pagehide', rememberActiveScroll);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') rememberActiveScroll(); });
 
 function activateSet(id){
   // Sequential-gate backstop: never open a set that's still locked (e.g. from a
@@ -1526,6 +1552,7 @@ function activateSet(id){
   const leaving = document.querySelector('.week-panel.active');
   if(leaving && leaving.dataset.id && leaving.dataset.id!==id){
     setScrollPos[leaving.dataset.id] = window.scrollY;
+    saveScrollPos();
   }
   lastSetId = id;
   if (typeof stopAnyRec === 'function') stopAnyRec();
