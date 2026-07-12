@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-12 — The Listening Coach now hears your chords
+
+### Changed
+- **The Listening Coach can finally hear a full strummed chord.** Before, it
+  often shrugged and said it "couldn't make out the pitches" when you strummed
+  a chord at a normal volume — it was really only built to hear one note at a
+  time. Now it picks up your strums reliably and tells you whether the chord
+  rang true. It's also more forgiving: quieter strumming still registers, and
+  a strum that's a little off the beat still counts as on time.
+- **One clear name for the feature.** The mic-feedback buttons used to have
+  three different labels ("Check me", "Check my changes", "Strum check") for
+  what is really one tool. They're now all just **🎤 Listening Coach**, matching
+  the title you see when it opens.
+
 ## 2026-07-12 — Riff Runner, and lessons from more teachers
 
 ### Added

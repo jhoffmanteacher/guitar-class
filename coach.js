@@ -292,8 +292,6 @@ async function coachStartCheck(){
   coach.events = []; coach.pending = null;
   coach.gridOffset = 0; coach.smoothRms = 0; coach.smoothHf = 0; coach.lastOnsetT = -1e9;
   coach.lastPulse = -1; coach.frameNo = 0; coach.lastPitchT = 0;
-  coach.dbgOnsets = 0; coach.dbgGraded = 0; coach.dbgPeak = 0; coach.dbgTick = 0;   // DEBUG
-  coach.dbgLastN = 0; coach.dbgLastShare = null; coach.dbgStrums = [];   // DEBUG
 
   /* Count-in: 4 clicks, last one higher = "go". The tab stays on screen so
      the fretting hand can get in position while the clicks run. */
@@ -416,10 +414,6 @@ function coachRenderListening(){
      ${coachNowHtml()}
      ${coachChordsHtml(coach.slots[0] && coach.slots[0].chordName)}
      ${coachStripHtml()}
-     ${location.search.indexOf('ccdebug') >= 0 ? `<div id="coach-dbg" style="margin:8px 0;font:12px/1.4 monospace;opacity:.85">
-       <div>mic <span id="coach-dbg-bar" style="display:inline-block;height:10px;background:#4ade80;width:0"></span> <span id="coach-dbg-lvl">0</span></div>
-       <div id="coach-dbg-txt">onsets: 0 · graded: 0</div>
-     </div>` : ''}
      <button type="button" class="tp-btn coach-stop" onclick="coachFinish()">&#x25A0; I&rsquo;m done</button>`;
 }
 
@@ -496,27 +490,11 @@ function coachLoop(){
         ((rms > CHK_ONSET_FLOOR && rms > coach.smoothRms * CHK_ONSET_RATIO) ||
          (hf > CHK_HF_FLOOR && hf > coach.smoothHf * CHK_HF_RATIO))){
       coach.lastOnsetT = now;
-      coach.dbgOnsets = (coach.dbgOnsets || 0) + 1;   // DEBUG
       if (coach.pending) coachFinalizeEvent();
       coach.pending = { t: now, readings: [] };
     }
     coach.smoothRms = coach.smoothRms * 0.82 + rms * 0.18;
     coach.smoothHf = coach.smoothHf * 0.82 + hf * 0.18;
-
-    /* DEBUG mic meter (remove after tuning) — shows whether the mic hears you
-       and whether strums register as onsets / graded slots. Gated by ?ccdebug=1
-       so it only renders when the URL asks for it (students never see it). */
-    coach.dbgPeak = Math.max((coach.dbgPeak || 0) * 0.9, rms);
-    if (((coach.dbgTick = (coach.dbgTick || 0) + 1) % 4) === 0){
-      const bar = document.getElementById('coach-dbg-bar');
-      const lvl = document.getElementById('coach-dbg-lvl');
-      const txt = document.getElementById('coach-dbg-txt');
-      if (bar) bar.style.width = Math.min(200, Math.round(coach.dbgPeak * 4000)) + 'px';
-      if (lvl) lvl.textContent = 'rms ' + coach.dbgPeak.toFixed(4) + ' (floor ' + CHK_ONSET_FLOOR + ')';
-      if (txt) txt.textContent = 'onsets: ' + (coach.dbgOnsets || 0) + ' · graded: ' + (coach.dbgGraded || 0) +
-        ' · last strum: ' + (coach.dbgLastN || 0) + ' pitch reads, ' +
-        (coach.dbgLastShare != null ? Math.round(coach.dbgLastShare * 100) + '% on chord' : '—') + ' (ok≥25%)';
-    }
 
     /* Pitch readings (trimmed YIN, ~every 40ms) feed the pending event —
        but not until the pick attack has left the analysis window: early
@@ -668,19 +646,17 @@ function coachMatchEvent(ev){
     if (score < bestScore){ bestScore = score; best = i; }
   }
   if (best < 0) return;   // unmatched onset — an extra strum between beats
-  coach.dbgGraded = (coach.dbgGraded || 0) + 1;   // DEBUG
   const s = coach.slots[best];
   const dev = rel - best * coach.beatMs;
   ev.devMs = dev; ev.slot = best;
   if (coach.mode === 'chords'){
-    /* Chord-tone vote: ok when a third of the readings land on chord tones
-       (a clean strum easily clears that; detector noise doesn't sink it).
-       "Wrong" only on strong contrary evidence — the honest default for a
-       murky strum is dim, never an accusation. */
+    /* Chord-tone vote: ok when ≥20% of the readings land on chord tones — a
+       clean strum easily clears that, and a laptop mic hearing a full 6-string
+       chord (where the detector locks onto whichever tone is loudest) rarely
+       climbs higher. "Wrong" only on strong contrary evidence — the honest
+       default for a murky strum is dim, never an accusation. */
     const share = coachToneShare(ev, s);
     const n = (ev.classes || []).length;
-    coach.dbgLastN = n; coach.dbgLastShare = share;   // DEBUG
-    (coach.dbgStrums = coach.dbgStrums || []).push({ n, share });   // DEBUG: per-strum log
     if (n < 1) s.state = 'dim';
     else if (share >= 0.20) s.state = 'ok';
     else if (share <= 0.10 && n >= 3) s.state = 'wrong';
@@ -726,20 +702,6 @@ function coachMinHeard(slotCount){
   return Math.max(Math.min(3, Math.ceil(slotCount / 2)), Math.ceil(slotCount * 0.3));
 }
 
-/* DEBUG (?ccdebug=1): a persistent readout on the REPORT screen so the numbers
-   don't vanish with the live meter. Shows every graded strum's pitch-read count
-   and chord-tone %. Remove with the rest of the debug scaffolding after tuning. */
-function coachDbgSummary(){
-  if (location.search.indexOf('ccdebug') < 0) return '';
-  const st = coach.dbgStrums || [];
-  const rows = st.map((s, i) => `#${i + 1}: ${s.n} reads, ${Math.round(s.share * 100)}% on chord`).join(' · ');
-  const avg = st.length ? Math.round(st.reduce((a, s) => a + s.share, 0) / st.length * 100) : 0;
-  const avgN = st.length ? (st.reduce((a, s) => a + s.n, 0) / st.length).toFixed(1) : 0;
-  return `<div style="margin:8px 0;padding:8px;border:1px dashed #888;font:11px/1.5 monospace;white-space:normal">
-    <b>DEBUG</b> onsets ${coach.dbgOnsets || 0} · graded ${coach.dbgGraded || 0} · ok≥20%<br>
-    avg ${avgN} reads/strum, avg ${avg}% on chord<br>${rows || '(no graded strums)'}</div>`;
-}
-
 function coachRenderReport(){
   const slots = coach.slots;
   const matched = slots.filter(s => s.hit);
@@ -749,7 +711,6 @@ function coachRenderReport(){
     coachBody().innerHTML =
       `<div class="coach-note">&#x1F914; I couldn&rsquo;t hear that clearly — try again somewhere quieter, with the guitar closer to the mic, and ${coach.mode === 'chords' ? 'strum each chord' : 'pick each note'} firmly.</div>
        ${coachStripHtml()}
-       ${coachDbgSummary()}
        <div class="coach-actions">
          <button type="button" class="coach-start" onclick="coachStartCheck()">&#x21BB; Try again</button>
          <button type="button" class="tp-btn" onclick="coachClose()">Close</button>
@@ -800,7 +761,6 @@ function coachRenderReport(){
        </div>`).join('') +
     `</div>
      ${streakHtml}
-     ${coachDbgSummary()}
      <div class="coach-actions">
        <button type="button" class="coach-start" onclick="coachStartCheck()">&#x21BB; Try again</button>
        <button type="button" class="tp-btn" onclick="coachClose()">Done</button>
@@ -1611,7 +1571,6 @@ async function ccStart(){
   }
   cc.beatMs = 60000 / cc.bpm;
   cc.smoothRms = 0; cc.smoothHf = 0; cc.lastOnsetT = -1e9; cc.gridOffset = 0; cc.lastBeat = -1; cc.frameNo = 0;
-  cc.dbgPeak = 0; cc.dbgOnsets = 0; cc.dbgMatched = 0;   // DEBUG: mic-meter counters (remove after tuning)
   cc.phase = 'countin';
   ccBody().innerHTML = `<div class="coach-count" id="cc-count">&nbsp;</div>` +
     ccDiagramsHtml(prog, prog[0]);
@@ -1637,10 +1596,6 @@ function ccRenderPlay(){
      ${ccDiagramsHtml(CC_PROGRESSIONS[cc.progIdx].chords, cc.bars[0])}
      <div class="coach-strip">${chips}</div>
      <div class="coach-live"><span class="coach-live-dot"></span>Strum every beat — the dots show the beat</div>
-     ${location.search.indexOf('ccdebug') >= 0 ? `<div id="cc-dbg" style="margin:8px 0;font:12px/1.4 monospace;opacity:.85">
-       <div>mic <span id="cc-dbg-bar" style="display:inline-block;height:10px;background:#4ade80;width:0"></span> <span id="cc-dbg-lvl">0</span></div>
-       <div id="cc-dbg-txt">onsets: 0 · graded: 0</div>
-     </div>` : ''}
      <button type="button" class="tp-btn coach-stop" onclick="ccFinish()">&#x25A0; Stop</button>`;
 }
 
@@ -1712,23 +1667,10 @@ function ccLoop(){
       const win = Math.max(260, cc.beatMs * 0.5);
       const ch = cc.changes.find(c => c.result === null && !c.pend &&
         Math.abs(c.beat * cc.beatMs - rel) <= win);
-      cc.dbgOnsets++;                        // DEBUG
-      if (ch){ ch.pend = { t: now, readings: [] }; cc.dbgMatched++; }   // DEBUG
+      if (ch) ch.pend = { t: now, readings: [] };
     }
     cc.smoothRms = cc.smoothRms * 0.82 + rms * 0.18;
     cc.smoothHf = cc.smoothHf * 0.82 + coachHfRms * 0.18;
-
-    /* DEBUG mic meter (remove after tuning) — shows whether the mic hears you
-       and whether strums register as onsets / graded changes. */
-    cc.dbgPeak = Math.max(cc.dbgPeak * 0.9, rms);
-    if (((cc.dbgTick = (cc.dbgTick || 0) + 1) % 4) === 0){
-      const bar = document.getElementById('cc-dbg-bar');
-      const lvl = document.getElementById('cc-dbg-lvl');
-      const txt = document.getElementById('cc-dbg-txt');
-      if (bar) bar.style.width = Math.min(200, Math.round(cc.dbgPeak * 4000)) + 'px';
-      if (lvl) lvl.textContent = 'rms ' + cc.dbgPeak.toFixed(4) + ' (floor ' + CHK_ONSET_FLOOR + ')';
-      if (txt) txt.textContent = 'onsets(strums heard): ' + cc.dbgOnsets + ' · graded(on-beat): ' + cc.dbgMatched;
-    }
 
     /* Feed pitch readings to an open change-check, then resolve it. Same
        attack skip as the Coach: the first ~70ms of a strum is scrape plus
@@ -1738,7 +1680,9 @@ function ccLoop(){
       if (rms > COACH_PITCH_GATE * 0.5 &&
           now - open.pend.t >= COACH_ATTACK_SKIP &&
           (cc.frameNo = (cc.frameNo || 0) + 1) % 3 === 0){
-        const f = coachDetectPitch(buf, coachCtx.sampleRate);
+        // Change Up always grades chords — use the same looser YIN gate as the
+        // Listening Coach's chord mode so full strums actually register.
+        const f = coachDetectPitch(buf, coachCtx.sampleRate, 0.55);
         if (f > 0) open.pend.readings.push(69 + 12 * Math.log2(f / 440));
       }
       if (now - open.pend.t > COACH_EVENT_TAIL) ccResolvePend(open);
