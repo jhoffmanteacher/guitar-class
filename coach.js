@@ -357,7 +357,7 @@ async function coachAcquireMicInner(){
 function coachReleaseMicIfIdle(){
   setTimeout(() => {
     const active = (coach && (coach.phase === 'countin' || coach.phase === 'listening')) ||
-                   fretRunning || (cc && cc.micOn) || (sr && sr.micOn);
+                   fretRunning || (cc && cc.micOn) || (sr && sr.micOn) || (rn && rn.micOn);
     if (!active) coachMicOff();
   }, 0);
 }
@@ -1452,10 +1452,21 @@ function gamesShow(view){
    ════════════════════════════════════════════════════════════════════ */
 
 const CC_PROGRESSIONS = [
+  // 2 chords — back & forth
   { chords: ['Am','Em'] }, { chords: ['G','C'] }, { chords: ['A','D'] }, { chords: ['E','Am'] },
+  { chords: ['C','F'] }, { chords: ['G','D'] }, { chords: ['Em','C'] }, { chords: ['Am','F'] },
+  // 3 chords
   { chords: ['A','D','E'] }, { chords: ['G','C','D'] }, { chords: ['Am','C','G'] },
-  { chords: ['C','G','Am','F'] }, { chords: ['G','D','Em','C'] }, { chords: ['Am','F','C','G'] }
+  { chords: ['G','D','C'] }, { chords: ['C','F','G'] }, { chords: ['Em','C','G'] }, { chords: ['D','A','G'] },
+  // 4 chords
+  { chords: ['C','G','Am','F'] }, { chords: ['G','D','Em','C'] }, { chords: ['Am','F','C','G'] },
+  { chords: ['C','Am','F','G'] }, { chords: ['G','Em','C','D'] }, { chords: ['Em','C','G','D'] },
+  // Random 4 — a fresh set of four chords is drawn each round (see ccRandomFour)
+  { random: true, chords: ['C','G','D','A'] }
 ];
+/* Pool the Random-4 mode draws four distinct chords from each round. Kept to the
+   open chords students know, so any draw is playable. */
+const CC_RANDOM_POOL = ['C','G','D','A','E','Am','Em','Dm','F'];
 /* How often the chord switches. bpc = beats per chord; slots = chord positions
    in a round (so slots − 1 graded changes). Faster rates run fewer slots so the
    round stays a sensible length — every-bar ≈ 32 beats, every-beat ≈ 16. */
@@ -1479,7 +1490,15 @@ function ccStop(){
 
 function ccBody(){ return document.getElementById('cc-body'); }
 function ccProgLabel(prog){ return prog.chords.join(' → '); }
-function ccBestKey(prog, rateIdx){ return 'ccBest:' + prog.chords.join('-') + ':' + (CC_RATES[rateIdx] ? CC_RATES[rateIdx].id : 'bar'); }
+/* Draw four distinct chords from the pool, in random order — the Random-4 mode. */
+function ccRandomFour(){
+  const pool = CC_RANDOM_POOL.slice(), pick = [];
+  for (let i = 0; i < 4 && pool.length; i++){
+    pick.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+  }
+  return pick;
+}
+function ccBestKey(prog, rateIdx){ const rid = CC_RATES[rateIdx] ? CC_RATES[rateIdx].id : 'bar'; return 'ccBest:' + (prog.random ? 'RANDOM4' : prog.chords.join('-')) + ':' + rid; }
 
 function ccSetup(){
   let progIdx = 0, bpm = 60, rateIdx = 0;
@@ -1536,7 +1555,7 @@ function ccRenderSetup(msg){
   const pills = groups.map(([len, title]) =>
     `<div class="cc-group"><div class="cc-group-title">${title}</div><div class="fret-levels">` +
     CC_PROGRESSIONS.map((pr, i) => pr.chords.length !== len ? '' :
-      `<button type="button" class="ts-btn${i === cc.progIdx ? ' active' : ''}" onclick="ccPickProg(${i})">${escHtml(pr.chords.join(len === 2 ? ' ↔ ' : ' – '))}</button>`
+      `<button type="button" class="ts-btn${i === cc.progIdx ? ' active' : ''}" onclick="ccPickProg(${i})">${pr.random ? '&#x1F3B2; Random 4' : escHtml(pr.chords.join(len === 2 ? ' ↔ ' : ' – '))}</button>`
     ).join('') + `</div></div>`
   ).join('');
   const prog = CC_PROGRESSIONS[cc.progIdx];
@@ -1553,7 +1572,7 @@ function ccRenderSetup(msg){
     (msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '') +
     pills +
     `<div class="cc-group"><div class="cc-group-title">How fast the chord switches</div><div class="fret-levels">${rateBtns}</div></div>` +
-    ccDiagramsHtml(prog.chords, null) +
+    (prog.random ? `<div class="coach-note">&#x1F3B2; Random 4 — a fresh set of four chords is drawn each round and revealed when you press Start.</div>` : ccDiagramsHtml(prog.chords, null)) +
     `<div class="coach-bpm-row">
        <button type="button" class="tp-btn" onclick="ccNudgeBpm(-5)">&#x2212;5</button>
        <span class="coach-bpm-readout" id="cc-bpm-readout">${cc.bpm} BPM</span>
@@ -1584,7 +1603,9 @@ async function ccStart(){
   cc.micOn = true;
   stopAllDemoAudio();
 
-  const prog = CC_PROGRESSIONS[cc.progIdx].chords;
+  const progDef = CC_PROGRESSIONS[cc.progIdx];
+  const prog = progDef.random ? ccRandomFour() : progDef.chords;
+  cc.chords = prog;   // the actual chords this round (Random 4 differs each start)
   const rate = CC_RATES[cc.rateIdx] || CC_RATES[0];
   cc.bpc = rate.bpc; cc.slots = rate.slots;
   cc.seq = Array.from({ length: cc.slots }, (_, i) => prog[i % prog.length]);
@@ -1621,7 +1642,7 @@ function ccRenderPlay(){
        <div class="cc-next" id="cc-next">next: ${escHtml(cc.seq[1])}</div>
      </div>
      <div class="cc-beats" id="cc-beats"><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span></div>
-     ${ccDiagramsHtml(CC_PROGRESSIONS[cc.progIdx].chords, cc.seq[0])}
+     ${ccDiagramsHtml(cc.chords, cc.seq[0])}
      <div class="coach-strip">${chips}</div>
      <div class="coach-live"><span class="coach-live-dot"></span>Strum every beat — the dots show the beat</div>
      <button type="button" class="tp-btn coach-stop" onclick="ccFinish()">&#x25A0; Stop</button>`;
@@ -3744,6 +3765,7 @@ function rnStop(){
   if (rn){
     if (rn.sched){ clearInterval(rn.sched); rn.sched = null; }
     rnHearStop();
+    if (rn.micOn){ rn.micOn = false; coachMicOff(); }   // Wait Mode owned the mic
     (rn.timeouts || []).forEach(clearTimeout);
     rn = null;
   }
@@ -3793,11 +3815,12 @@ function rnTierBpm(song, t){ return Math.round(song.bpm * RN_TIERS[t].pct); }
 function rnTierName(t){ return ['slow speed', 'medium speed', 'full speed'][t] || ''; }
 
 function rnSetup(){
-  rn = { phase: 'select', songIdx: 0, tier: 0, timeouts: [], pv: null };
+  rn = { phase: 'select', songIdx: 0, tier: 0, timeouts: [], pv: null, guitar: false, micOn: false };
   try {
     const sid = sessionStorage.getItem('rnSong');
     const i = RN_SONGS.findIndex(sg => sg.id === sid);
     if (i >= 0 && rnSongUnlocked(i)) rn.songIdx = i;
+    rn.guitar = sessionStorage.getItem('rnMode') === 'guitar';
   } catch(e){}
   rnRenderSelect();
 }
@@ -3868,19 +3891,41 @@ function rnRenderReady(msg){
     return `<button type="button" class="ts-btn${t === rn.tier ? ' active' : ''}${un ? '' : ' rn-locked'}" ${un ? `onclick="rnPickTier(${t})"` : 'disabled'}>${tr.label} &middot; ${rnTierBpm(song, t)} BPM</button>`;
   }).join('');
   const b = rnBestMerged(song.id);
+  /* Mode toggle: "Keys / tap" is the timed groove game; "My guitar" is Wait
+     Mode — the tab holds each note until you actually play it, no clock. */
+  const modeToggle =
+    `<div class="cc-group"><div class="cc-group-title">How do you want to play it?</div>
+       <div class="fret-levels rn-modes">
+         <button type="button" class="ts-btn${rn.guitar ? '' : ' active'}" onclick="rnSetMode(false)">&#x2328;&#xFE0F; Keys / tap</button>
+         <button type="button" class="ts-btn${rn.guitar ? ' active' : ''}" onclick="rnSetMode(true)">&#x1F3B8; My guitar</button>
+       </div></div>`;
+  const keysUi =
+    `<div class="cc-group"><div class="cc-group-title">Speed level</div><div class="fret-levels">${pills}</div></div>
+     ${anyLocked ? `<div class="coach-tip rn-center">Score 90% or better at one speed level to unlock the next.</div>` : ''}
+     ${b ? `<div class="coach-tip rn-center">Best: ${b.acc}%${b.tier >= 0 ? ' &middot; cleared ' + rnTierName(b.tier) : ''}.</div>` : ''}
+     <div class="coach-tip rn-center">Keys: 1 = thin high e (top line) &hellip; 6 = thick low E (bottom line). On a phone, tap the string&rsquo;s line instead. 4 clicks count you in.</div>`;
+  const guitarUi =
+    `<div class="coach-tip rn-center">&#x1F3B8; <strong>Wait Mode:</strong> no clock, no rush. The tab stops on each note and waits until it <em>hears</em> you play the right one, then moves on. Play into your device&rsquo;s mic somewhere quiet.</div>`;
   body.innerHTML =
     (msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '') +
     `<div class="rn-ready-title">${escHtml(song.title)}</div>
      <div class="coach-tip rn-center">${escHtml(song.hint)}</div>
-     <div class="cc-group"><div class="cc-group-title">Speed level</div><div class="fret-levels">${pills}</div></div>
-     ${anyLocked ? `<div class="coach-tip rn-center">Score 90% or better at one speed level to unlock the next.</div>` : ''}
-     ${b ? `<div class="coach-tip rn-center">Best: ${b.acc}%${b.tier >= 0 ? ' &middot; cleared ' + rnTierName(b.tier) : ''}.</div>` : ''}
+     ${modeToggle}
+     ${rn.guitar ? guitarUi : keysUi}
      <div class="coach-actions">
        <button type="button" class="tp-btn" id="rn-hear" onclick="rnHear()">&#x1F50A; Hear it</button>
        <button type="button" class="tp-btn" onclick="rnShowSelect()">&#x2190; All songs</button>
      </div>
-     <div class="coach-tip rn-center">Keys: 1 = thin high e (top line) &hellip; 6 = thick low E (bottom line). On a phone, tap the string&rsquo;s line instead. 4 clicks count you in.</div>
-     <button type="button" class="coach-start" onclick="rnStart()">&#x25B6; Start</button>`;
+     <button type="button" class="coach-start" onclick="rnStart()">${rn.guitar ? '&#x1F3B8; Start &mdash; I&rsquo;ll play it' : '&#x25B6; Start'}</button>`;
+}
+
+/* Toggle timed-keys vs. guitar Wait Mode from the ready screen. */
+function rnSetMode(guitar){
+  if (!rn || rn.phase !== 'ready') return;
+  rnHearStop();
+  rn.guitar = !!guitar;
+  try { sessionStorage.setItem('rnMode', rn.guitar ? 'guitar' : 'keys'); } catch(e){}
+  rnRenderReady();
 }
 
 /* playNote's Karplus-Strong pluck, parameterized with a future audio-clock
@@ -4006,7 +4051,8 @@ function rnSchedule(){
 }
 
 async function rnStart(){
-  if (!rn || rn.phase === 'countin' || rn.phase === 'play') return;
+  if (!rn || rn.phase === 'countin' || rn.phase === 'play' || rn.phase === 'wait') return;
+  if (rn.guitar) return rnwStart();   // Wait Mode: untimed, mic-graded
   if (typeof getAudioCtx !== 'function'){ rnRenderReady('Sound isn’t available in this browser, and this game needs the click.'); return; }
   coachClose(); coachEvictTuner();   // one mic/audio owner at a time
   rnHearStop();
@@ -4377,4 +4423,256 @@ function rnAgain(d){
   if (rnTierUnlocked(song.id, t)) rn.tier = t;
   rn.phase = 'ready';
   rnStart();
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   RIFF RUNNER — WAIT MODE (guitar). The same scrolling-TAB lane, but
+   there is NO clock: the tab stops on each note and waits until the mic
+   HEARS the student play the right pitch, then slides on to the next.
+   Borrowed from PickHero's "Wait Mode" — pedagogically ideal for
+   beginners, who get to learn the notes without rhythm pressure. Reuses
+   the coach's mic pipeline + trimmed-YIN detector (coachDetectPitch),
+   the same one Note Hunt grades single notes with. No tiers, no score,
+   no unlocks — this is a pure practice aid; the timed game still owns
+   rhythm and progression. One pass through the riff's notes.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* Friendly spoken name for a string, e.g. 6 → "low E", 1 → "high e". */
+const RNW_STRING_SAY = { 6: 'low E', 5: 'A', 4: 'D', 3: 'G', 2: 'B', 1: 'high e' };
+function rnwWhere(n){
+  const at = n.fret === 0 ? 'open' : 'fret ' + n.fret;
+  return RNW_STRING_SAY[n.string] + ' string, ' + at;
+}
+
+async function rnwStart(){
+  const song = RN_SONGS[rn.songIdx];
+  const body = rnBody();
+  if (!body) return;
+  /* One mic owner at a time — hand the pipeline over cleanly. */
+  coachClose(); ccStop(); coachEvictTuner();
+  rnHearStop();
+  if (rn.sched){ clearInterval(rn.sched); rn.sched = null; }
+  const s = rn;
+  s.phase = 'wait';
+  body.innerHTML = '<div class="coach-tip rn-center">Starting the mic&hellip;</div>';
+  if (!coachStream && !(await coachAcquireMic())){
+    if (rn === s){ s.phase = 'ready'; rnRenderReady('Mic access denied — check browser permissions, then try again.'); }
+    return;
+  }
+  if (rn !== s || !rnBody()){ coachReleaseMicIfIdle(); return; }   // panel closed during the prompt
+  if (document.hidden){
+    coachMicOff();
+    s.phase = 'ready';
+    rnRenderReady('Paused — this tab went to the background, so the mic switched off. Start again when you’re back.');
+    return;
+  }
+  stopAllDemoAudio();
+  s.micOn = true;
+  window.coachMicLive = true;
+  /* One pass through the riff's notes (no laps — laps are the timed groove). */
+  s.wait = {
+    notes: song.notes.map(nt => ({ string: nt[0], fret: nt[1], label: nt[3] || '',
+      midi: STRING_OPEN_MIDI[nt[0]] + nt[1], result: null })),
+    cur: 0, tries: 0, firstTry: 0, readings: [],
+    needSilence: false, cooldownUntil: 0, frameNo: 0, hint: '', heard: ''
+  };
+  rnwRender();
+  if (rnRaf) cancelAnimationFrame(rnRaf);
+  rnwLoop();
+}
+
+function rnwRender(){
+  const body = rnBody();
+  if (!body || !rn || !rn.wait) return;
+  const w = rn.wait;
+  const names = { 1: 'e', 2: 'B', 3: 'G', 4: 'D', 5: 'A', 6: 'E' };
+  const lanes = [];
+  for (let str = 1; str <= 6; str++){
+    const toks = w.notes.map((n, i) => n.string !== str ? '' :
+      `<span class="rn-token rnw-token" id="rnw-n-${i}">${n.label ? `<span class="rn-token-label">${escHtml(n.label)}</span>` : ''}<span class="rn-token-fret">${n.fret}</span></span>`
+    ).join('');
+    lanes.push(`<div class="rn-lane" id="rnw-lane-${str}"><span class="rn-lane-name">${str} ${names[str]}</span>${toks}</div>`);
+  }
+  const cur = w.notes[w.cur];
+  body.innerHTML =
+    `<div class="sh-hud">
+       <span class="sh-score">Note ${Math.min(w.cur + 1, w.notes.length)} of ${w.notes.length}</span>
+       <span class="sh-bar rnw-live"><span class="coach-live-dot"></span>Listening&hellip;</span>
+     </div>
+     <div class="rn-track rnw-track" id="rnw-track">${lanes.join('')}<div class="rn-hitline"></div></div>
+     <div class="rnw-target" id="rnw-target">
+       <div class="rnw-target-note">Play <strong>${escHtml(cur.label || coachNoteName(cur.midi))}</strong></div>
+       <div class="rnw-target-where">${escHtml(rnwWhere(cur))}</div>
+     </div>
+     <div class="rnw-feedback" id="rnw-feedback">&nbsp;</div>
+     <div class="coach-actions">
+       <button type="button" class="tp-btn" onclick="rnwSkip()">Skip this note &#x2192;</button>
+       <button type="button" class="tp-btn coach-stop" onclick="rnwFinish()">&#x25A0; Stop</button>
+     </div>`;
+  rnwPositionTokens(false);
+}
+
+/* Slide the lane so the current target sits on the purple hit line;
+   past notes to its left, upcoming ones to its right. Pure JS transform
+   (reduced-motion just gets no CSS transition — handled in the stylesheet). */
+function rnwPositionTokens(animate){
+  const w = rn && rn.wait;
+  const track = document.getElementById('rnw-track');
+  if (!w || !track) return;
+  const tw = track.clientWidth;
+  const hitX = tw * 0.22;
+  const gap = Math.max(56, Math.min(96, (tw - hitX) / 4));   // spacing between notes
+  for (let i = 0; i < w.notes.length; i++){
+    const el = document.getElementById('rnw-n-' + i);
+    if (!el) continue;
+    const x = hitX + (i - w.cur) * gap;
+    if (x < -50 || x > tw + 50){ el.style.visibility = 'hidden'; continue; }
+    el.style.visibility = 'visible';
+    el.classList.toggle('rnw-cur', i === w.cur && !w.notes[i].result);
+    el.classList.toggle('rnw-past', i < w.cur || !!w.notes[i].result);
+    el.style.transform = 'translateX(' + x + 'px)';
+  }
+}
+
+function rnwLoop(){
+  if (!rn || rn.phase !== 'wait') return;
+  if (!coachAnalyser || !document.getElementById('rnw-track')){ rnStop(); return; }
+  const w = rn.wait;
+  const now = performance.now();
+  const rms = coachReadFrame();
+  const buf = coachFrameBuf;
+  /* One pluck = one answer: after a reading, wait for the note to decay
+     (or 1.8s) before listening again — same gate Note Hunt uses. */
+  if (w.needSilence && (rms < COACH_PITCH_GATE * 0.7 || now > w.cooldownUntil + 1800)){
+    w.needSilence = false;
+  }
+  if (!w.needSilence && now >= w.cooldownUntil && rms > COACH_PITCH_GATE &&
+      (w.frameNo = (w.frameNo || 0) + 1) % 3 === 0){
+    const f = coachDetectPitch(buf, coachCtx.sampleRate);
+    if (f > 0){
+      w.readings.push(69 + 12 * Math.log2(f / 440));
+      if (w.readings.length > 5) w.readings.shift();
+      if (w.readings.length >= 4){
+        const r = w.readings;
+        if (Math.max.apply(null, r) - Math.min.apply(null, r) < 0.6){
+          rnwJudge(Math.round(tunerMedian(r)));
+        }
+      }
+    }
+  } else if (rms < COACH_PITCH_GATE * 0.5 && w.readings.length){
+    w.readings = [];   // pluck decayed mid-reading — start fresh
+  }
+  rnRaf = requestAnimationFrame(rnwLoop);
+}
+
+function rnwJudge(midi){
+  const w = rn.wait, n = w.notes[w.cur];
+  w.readings = [];
+  w.needSilence = true;
+  w.cooldownUntil = performance.now() + 500;
+  w.tries++;
+  if (midi === n.midi){                      // correct note — advance
+    n.result = w.tries === 1 ? 'first' : 'ok';
+    if (w.tries === 1) w.firstTry++;
+    if (typeof playNote === 'function') playNote(n.midi);   // the reward: the riff itself
+    rnwFeedback('&#x2713; ' + escHtml(n.label || coachNoteName(n.midi)) + (w.tries === 1 ? ' — first try!' : ' — got it!'), 'ok');
+    const el = document.getElementById('rnw-n-' + w.cur);
+    if (el) el.classList.add('rnw-hit');
+    rn.timeouts.push(setTimeout(rnwAdvance, 550));
+    return;
+  }
+  const heard = coachNoteName(midi);
+  const d = n.midi - midi;
+  if (d % 12 === 0){
+    rnwFeedback('That&rsquo;s the right note, but an octave ' + (midi > n.midi ? 'high' : 'low') +
+                '. Play it on the ' + escHtml(rnwWhere(n)) + '.', 'near');
+  } else if (Math.abs(d) <= 9){
+    rnwFeedback('Heard ' + escHtml(heard) + ' — go ' + Math.abs(d) + ' fret' + (Math.abs(d) > 1 ? 's' : '') + ' ' +
+                (d > 0 ? 'up (toward the body)' : 'down (toward the headstock)') + '.', 'near');
+  } else {
+    rnwFeedback('Heard ' + escHtml(heard) + ' — you&rsquo;re after ' + escHtml(n.label || coachNoteName(n.midi)) + '. Keep hunting!', 'near');
+  }
+}
+
+function rnwFeedback(html, cls){
+  const el = document.getElementById('rnw-feedback');
+  if (el){ el.innerHTML = html; el.className = 'rnw-feedback ' + (cls || ''); }
+}
+
+function rnwAdvance(){
+  if (!rn || rn.phase !== 'wait') return;
+  const w = rn.wait;
+  w.cur++;
+  w.tries = 0;
+  w.readings = [];
+  if (w.cur >= w.notes.length){ rnwFinish(); return; }
+  /* Update the target readout + slide the lane; don't re-render the whole
+     panel so the mic loop and lane keep running smoothly. */
+  const n = w.notes[w.cur];
+  const tEl = document.getElementById('rnw-target');
+  if (tEl) tEl.innerHTML =
+    `<div class="rnw-target-note">Play <strong>${escHtml(n.label || coachNoteName(n.midi))}</strong></div>
+     <div class="rnw-target-where">${escHtml(rnwWhere(n))}</div>`;
+  const hud = document.querySelector('#rn-body .sh-score');
+  if (hud) hud.textContent = 'Note ' + (w.cur + 1) + ' of ' + w.notes.length;
+  rnwFeedback('&nbsp;', '');
+  rnwPositionTokens(true);
+}
+
+function rnwSkip(){
+  if (!rn || rn.phase !== 'wait') return;
+  const w = rn.wait, n = w.notes[w.cur];
+  if (n && !n.result) n.result = 'skip';
+  rnwAdvance();
+}
+
+function rnwFinish(){
+  if (!rn || rn.phase !== 'wait') return;
+  if (rnRaf){ cancelAnimationFrame(rnRaf); rnRaf = null; }
+  (rn.timeouts || []).forEach(clearTimeout);
+  rn.timeouts = [];
+  if (rn.micOn){ rn.micOn = false; coachMicOff(); }
+  const w = rn.wait;
+  rn.phase = 'done';
+  const song = RN_SONGS[rn.songIdx];
+  const played = w.notes.filter(n => n.result && n.result !== 'skip').length;
+  const total = w.notes.length;
+  const first = w.firstTry;
+  let verdict, advice;
+  if (played === total && first === total){
+    verdict = 'Every note, first try — you know this riff cold.';
+    advice = 'Ready for rhythm? Switch to Keys / tap and play it in time with the click.';
+  } else if (played === total){
+    verdict = 'You played the whole riff! ' + first + ' of ' + total + ' on the first try.';
+    advice = 'Run it again — the notes you hunted for will come quicker next time.';
+  } else {
+    verdict = 'You played ' + played + ' of ' + total + ' notes.';
+    advice = 'No rush — go again and let the tab wait for each one.';
+  }
+  const body = rnBody();
+  if (!body) return;
+  body.innerHTML =
+    `<div class="coach-report">
+       <div class="coach-overall">&#x1F3B8; ${escHtml(verdict)}</div>
+       <div class="coach-crit-note">${escHtml(advice)}</div>
+       <div class="coach-actions">
+         <button type="button" class="coach-start" onclick="rnwAgain()">&#x21BB; Play it again</button>
+         <button type="button" class="tp-btn" onclick="rnGoReady()">&#x2699;&#xFE0F; Speed / mode</button>
+       </div>
+       ${rn.songIdx < RN_SONGS.length - 1 && rnSongUnlocked(rn.songIdx + 1) ? `<button type="button" class="tp-btn" onclick="rnPick(${rn.songIdx + 1})">Next song &#x2192;</button>` : ''}
+       <button type="button" class="tp-btn" onclick="rnShowSelect()">&#x2190; All songs</button>
+     </div>`;
+}
+
+function rnwAgain(){
+  if (!rn) return;
+  rn.phase = 'ready';
+  rnwStart();
+}
+
+/* Back to the ready screen (speed + mode chooser) from a Wait-Mode result. */
+function rnGoReady(){
+  if (!rn) return;
+  rn.phase = 'ready';
+  rnRenderReady();
 }
