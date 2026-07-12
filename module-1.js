@@ -107,7 +107,7 @@ SETS.push(
             levelUp: 'Strum slowly from the low E to the high e and back, keeping every string ringing evenly — no string louder or quieter than the others.'
           },
           {
-            text: 'Try playing with your foot up on a stool, then flat on the ground. Keep whichever one lets you sit up straight without gripping the neck to hold the guitar up. You\'ve got it when: you can let go with your fretting hand and the guitar stays put on your leg.<span class="step-figure"><img src="img/posture-check.svg" alt="Diagram of two good sitting positions — foot on a stool and feet flat on the floor, both with a straight back and the guitar resting on the leg — plus the test: take your fretting hand off the neck and the guitar stays put."></span>',
+            text: 'Try playing with your foot up on a stool, then flat on the ground. Keep whichever one lets you sit up straight without gripping the neck to hold the guitar up. You\'ve got it when: you can let go with your fretting hand and the guitar stays put on your leg.<span class="step-figure"><img src="img/posture-check.jpg" alt="Side-view drawing comparing sitting with a footstool (comfortable: back upright, guitar resting steady) to sitting without one (uncomfortable: hunched forward to reach the guitar)."></span>',
             hint: 'The guitar should balance on your leg, not hang from your hand. Your fretting hand needs to be free to move.',
             stuck: 'Rest the narrow waist of the guitar in the dip of your leg so it sits still. If it slides, slide it toward your body until it stops.',
             levelUp: 'Hold the position with both hands off the neck for 10 seconds while you sit up tall.'
@@ -455,6 +455,6 @@ MODULE_REVIEWS[1] = {
     'Name all 6 strings from memory — in order and at random',
     'Play each open string with correct posture and pick grip — down-strokes from the wrist, every string ringing full and clean with no accidental muting from either hand'
   ],
-  forward: 'You\'ve got a guitar that\'s in tune, a goal, and your first clean notes — <strong>Module 2 puts names on the frets</strong> so riffs and TAB start making sense. (Already played before, or coming back after a long break? <strong>Module 9, Set 0</strong> is a six-skill re-test that shows you exactly where to start.)',
+  forward: 'You\'ve got a guitar that\'s in tune, a goal, and your first clean notes — <strong>Module 2 puts names on the frets</strong> so riffs and TAB start making sense. (Already played before, or coming back after a long break? <strong>Module 9, Set 1</strong> is a six-skill re-test that shows you exactly where to start.)',
   standards: ['Pr.1a', 'Pr.4a', 'Pr.5a', 'Cn.11a']
 };

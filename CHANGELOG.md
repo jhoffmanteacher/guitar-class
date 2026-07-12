@@ -8,6 +8,9 @@ see `WORKFLOW.md` and the git commit log.
 ## 2026-07-12 — A calmer, warmer look
 
 ### Changed
+- **Module 9's sets are numbered 1–4 now.** The "welcome back" checkpoint that
+  used to be called Set 0 is simply Set 1, so every module starts counting from
+  the same place. (Nothing about your saved progress changes.)
 - **The whole site got a gentler coat of paint.** The background is now a warm
   ivory instead of cool gray, the purple header bar is softer, and the sidebar
   lost its heavy colored boxes — sections are now separated by simple spacing
@@ -16,6 +19,17 @@ see `WORKFLOW.md` and the git commit log.
   pick one, then light up with a soft wash of their color (blue for Station B,
   green for Station C, amber for the checklist). The Explore buttons highlight
   with a soft purple pill instead of a solid dark bar.
+- **The Set and Module review buttons moved into the sidebar.** They now sit
+  right under the Module dropdown, so the whole path — Module, then Set, then
+  Station — reads top to bottom in one place. The little 8-segment module
+  progress strip came out to make room (the Module dropdown still shows where
+  you are, and the 🏆 trophy still lights up — with confetti — when you finish
+  a module).
+- **The work area is tidier.** The white content cards are narrower now, ending
+  where the text ends — so the floating Tuner, Timer, and Metronome buttons no
+  longer sit on top of your reading. Inside each card, the extra boxes and
+  divider lines between steps are gone; section headers are simple soft bars,
+  which makes each station page feel much less cluttered.
 
 ## 2026-07-12 — Tidier step controls
 

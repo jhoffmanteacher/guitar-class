@@ -1294,19 +1294,6 @@ function populateModuleDropdown(){
   if(keep) sel.value = keep;
 }
 
-// Wording for the progress-strip label, e.g. "2½ of 8 modules" (a module that's
-// partially done counts as a half).
-function fmtModuleProgress(complete, partial){
-  const val = complete + partial * 0.5;
-  const whole = Math.floor(val);
-  const half = (val - whole) >= 0.5;
-  const num = half ? (whole ? whole + '½' : '½') : String(whole);
-  return `${num} of ${MODULE_MANIFEST.length} modules`;
-}
-
-// The 8-segment "you are here / how far I've come" strip next to the Module
-// dropdown. Each segment is a real button that jumps to (and lazy-loads) its
-// module. Renders purely from manifest + progress — never forces a module load.
 let _moduleStripStates = {};   // num -> last seen state, to catch the just-completed moment
 function celebrateModuleComplete(seg){
   flashClass(seg, 'celebrate', 1300);
@@ -1323,51 +1310,24 @@ function celebrateModuleComplete(seg){
     setTimeout(()=>el.remove(), 1900);
   });
 }
+/* The 8-segment module strip is gone (the Set pills live in its rail slot
+   now), but this still drives the 🏆 module-complete badge — and throws the
+   confetti from it the moment the current module flips to complete. */
 function renderProgressStrip(){
-  const strip = document.getElementById('module-strip');
-  if(!strip) return;
-  strip.innerHTML='';
-  let complete = 0, partial = 0, currentInfo = null;
+  let currentInfo = null;
   const firstRender = Object.keys(_moduleStripStates).length === 0;
   MODULE_MANIFEST.forEach(m=>{
     const { done, total, state } = moduleCompletion(m);
-    if(state==='complete') complete++; else if(state==='partial') partial++;
     if(m.num===lastModuleNum) currentInfo = { done, total, state, num: m.num };
-    const seg = document.createElement('button');
-    seg.type = 'button';
-    seg.className = 'mstrip-seg '+state+(m.num===lastModuleNum ? ' current' : '');
-    const word = state==='complete' ? 'complete'
-      : state==='partial' ? `in progress (${done} of ${total} skills)`
-      : 'not started';
-    seg.setAttribute('aria-label', `Module ${m.num} — ${m.name}, ${word}. Jump to module.`);
-    if(m.num===lastModuleNum) seg.setAttribute('aria-current','true');
-    seg.onclick = ()=>{ onModuleChange(m.num); saveProgress(); };
-    strip.appendChild(seg);
-    // Celebrate the moment a module flips to complete (never on first paint —
-    // returning students shouldn't get confetti for last month's work).
-    if(!firstRender && state==='complete' && _moduleStripStates[m.num] && _moduleStripStates[m.num] !== 'complete'){
-      celebrateModuleComplete(seg);
+    // Celebrate the moment the CURRENT module flips to complete (never on first
+    // paint — returning students shouldn't get confetti for last month's work).
+    if(!firstRender && state==='complete' && _moduleStripStates[m.num] && _moduleStripStates[m.num] !== 'complete'
+       && m.num===lastModuleNum){
+      const goal = document.getElementById('rail-module-goal');
+      if(goal) celebrateModuleComplete(goal);
     }
     _moduleStripStates[m.num] = state;
   });
-  const label = document.getElementById('module-strip-label');
-  if(label){
-    let tail = '';
-    if(currentInfo){
-      tail = currentInfo.state === 'complete'
-        ? ` · Module ${currentInfo.num} complete!`
-        : ` · ${currentInfo.total - currentInfo.done} skill${currentInfo.total - currentInfo.done === 1 ? '' : 's'} left in Module ${currentInfo.num}`;
-    }
-    label.textContent = fmtModuleProgress(complete, partial) + tail;
-  }
-  // Rail extras: current-module % + a completion badge that lights up at 100%.
-  const pctEl = document.getElementById('rail-module-pct');
-  if(pctEl){
-    if(currentInfo && currentInfo.total){
-      pctEl.textContent = Math.round(currentInfo.done / currentInfo.total * 100) + '%';
-      pctEl.hidden = false;
-    } else { pctEl.textContent = ''; pctEl.hidden = true; }
-  }
   const goalEl = document.getElementById('rail-module-goal');
   if(goalEl){
     const earned = !!(currentInfo && currentInfo.state === 'complete');
@@ -1435,7 +1395,10 @@ function setCompletion(w){
 function renderPills(moduleNum){
   const c = document.getElementById('week-pills');
   c.innerHTML='';
-  SETS.filter(w=>w.moduleNum===moduleNum).forEach(w=>{
+  const sets = SETS.filter(w=>w.moduleNum===moduleNum);
+  // 4+ sets: compact the buttons so they still fit on one rail row
+  c.classList.toggle('wp-many', sets.length>3);
+  sets.forEach(w=>{
     const btn = document.createElement('button');
     btn.className='wpill'+(w.locked?' locked':'');
     btn.dataset.id=w.id;
@@ -1462,11 +1425,8 @@ function renderPills(moduleNum){
     c.appendChild(btn);
   });
 
-  // Divider + Module Review pill
+  // Module Review pill — wraps to its own full-width row below the set buttons
   if(MODULE_REVIEWS[moduleNum]){
-    const div = document.createElement('div');
-    div.style.cssText='width:1px;height:18px;background:var(--border2);margin:0 4px;align-self:center;flex-shrink:0';
-    c.appendChild(div);
     const locked = isModuleReviewLocked(moduleNum);
     const rbtn = document.createElement('button');
     rbtn.className='wpill review-pill'+(locked?' locked':'');

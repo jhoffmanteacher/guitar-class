@@ -129,11 +129,7 @@ function googleTranslateElementInit(){
           <span class="rail-sec-label">Module<span class="sec-goal" id="rail-module-goal" title="Finish all skills to complete this module" aria-hidden="true">&#x1F3C6;</span></span>
           <label class="sr-only" for="module-select">Choose module</label>
           <select class="module-select" id="module-select" onchange="onModuleChange(this.value); saveProgress()"></select>
-          <div class="module-strip" id="module-strip" role="group" aria-label="Module progress — jump to a module"></div>
-          <div class="strip-foot">
-            <span class="module-strip-label" id="module-strip-label"></span>
-            <span class="strip-pct" id="rail-module-pct" hidden></span>
-          </div>
+          <div class="week-pills" id="week-pills" role="group" aria-label="Sets in this module"></div>
         </div>
         <div class="rail-group g-set" id="rail-set-group">
           <span class="rail-sec-label" id="rail-set-label">This set</span>
@@ -182,7 +178,6 @@ function googleTranslateElementInit(){
       </div>
       <div class="daily5-panel" id="songs-hub-panel" hidden></div>
       <div class="daily5-panel" id="search-panel" hidden></div>
-      <div class="week-pills" id="week-pills"></div>
       <div id="week-panels"></div>
       <div class="fab-group" id="fab-group" style="display:none">
         <div class="tool-popup" id="metro-popup" role="dialog" aria-label="Metronome">

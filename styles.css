@@ -79,7 +79,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .welcome-close{position:absolute;top:14px;right:14px;width:30px;height:30px;border:0;border-radius:50%;background:var(--bg3);color:var(--text2);font-size:0.9375rem;cursor:pointer;line-height:1}
 .welcome-close:hover{background:var(--border2)}
 .main{max-width:760px;margin:0 auto;padding:24px 16px 60px}
-.week-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px}
+.week-pills{display:flex;gap:6px;flex-wrap:wrap}
 .wpill{padding:8px 16px;font-size:0.9375rem;border:1px solid var(--border2);border-radius:20px;background:var(--bg);color:var(--text2);cursor:pointer;transition:all 0.15s;position:relative}
 .wpill:hover:not(.locked){border-color:var(--text2);color:var(--text)}
 .wpill.active{background:var(--text);color:var(--bg);border-color:var(--text)}
@@ -230,14 +230,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .st-desc{font-size:0.875rem;color:var(--text2)}
 .dp{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
 .dp.hidden{display:none}
-.dp-head{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.dp-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
 .dp-title{font-size:1rem;font-weight:500}
 .dp-time{font-size:0.875rem;color:var(--text2);margin-left:auto}
 .steps{list-style:none}
-.step{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.step{display:flex;gap:10px;padding:10px 0}
 .step:last-child{border-bottom:none}
 .sn{width:20px;height:20px;border-radius:50%;background:var(--bg2);font-size:0.8125rem;font-weight:500;color:var(--text2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
-.st{font-size:0.9375rem;line-height:1.5}
+/* flex:1 so every step's bottom row (Mark done · Read aloud) spans the full
+   card width — Read aloud buttons all share one right edge no matter how
+   wide the step's own content is */
+.st{flex:1;min-width:0;font-size:0.9375rem;line-height:1.5}
 .sh{font-size:0.875rem;color:var(--text2);margin-top:3px}
 .step-figure{display:block;margin:12px 0 4px;max-width:640px}
 .step-figure img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--border2);background:#fff}
@@ -310,14 +313,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .vname a:hover{text-decoration:underline}
 .vsrc{font-size:0.875rem;color:var(--text2);margin-top:1px}
 .vrec{font-size:0.75rem;padding:2px 7px;border-radius:10px;background:var(--amber-bg);color:var(--amber-text);margin-top:3px;display:inline-block}
-.ablock{background:var(--bg2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px}
+.ablock{background:var(--bg3);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px}
 .albl{font-size:0.8125rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:4px}
 .atxt{font-size:0.9375rem;line-height:1.6}
 .mr-assess-list{margin:8px 0 0;padding-left:22px}
 .mr-assess-list li{margin-bottom:4px}
 .spill{display:inline-block;font-size:0.8125rem;padding:2px 8px;border-radius:10px;border:1px solid var(--border2);color:var(--text2);margin:2px 2px 0 0}
 /* ── Checklist — two-column ── */
-.cl-intro{background:var(--bg2);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:0.9375rem;color:var(--text2);line-height:1.6}
+.cl-intro{background:var(--bg3);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:12px;font-size:0.9375rem;color:var(--text2);line-height:1.6}
 .cl-grid-wrap{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px}
 .cl-header{display:grid;grid-template-columns:1fr 82px 82px}
 .cl-header-skill{padding:8px 14px;font-size:0.8125rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);background:var(--bg2);font-weight:500}
@@ -395,31 +398,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .module-select-label{font-size:0.8125rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);white-space:nowrap}
 .module-select{font-size:0.9375rem;padding:6px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);cursor:pointer;flex:1;max-width:320px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b6b65' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 .module-select:focus{outline:none;border-color:var(--blue-text)}
-/* Module progress strip — 8 clickable segments + a running "X of 8" label.
-   solid green = every skill got-it · light green = some · neutral = untouched. */
-.module-strip{display:flex;gap:3px;align-items:center}
-.mstrip-seg{width:24px;height:9px;padding:0;border:1px solid var(--border2);border-radius:3px;background:var(--bg);cursor:pointer;transition:transform .12s,background .12s,border-color .12s,height .12s;position:relative}
-.mstrip-seg::after{content:'';position:absolute;inset:-12px -3px}  /* invisible finger-sized hit area */
-.mstrip-seg:hover{border-color:var(--text2);transform:translateY(-1px)}
-.mstrip-seg.partial{background:var(--green-bg);border-color:var(--green-text)}
-.mstrip-seg.complete{background:var(--green-text);border-color:var(--green-text)}
-.mstrip-seg.current{height:14px;box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--text2)}
-.module-strip-label{font-size:0.7812rem;color:var(--text2);white-space:nowrap}
 /* Slim student-view footer: school credit + a prefilled "report a problem" link. */
 .student-footer{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 20px;margin-top:4px;border-top:1px solid var(--border);font-size:0.8125rem;color:var(--text3)}
 .sf-report{color:var(--text3);text-decoration:underline;text-underline-offset:2px}
 .sf-report:hover{color:var(--text)}
 .module-select:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
-/* ── Single-column layout: wide working area, readable prose.
-      The page uses up to 1160px (TABs, chord rows, checklists, and cards
-      all benefit); only PROSE is capped at a readable measure below. ── */
+/* ── Single-column layout: content column capped at 800px so the card's
+      right edge ends where the capped prose (70–78ch) ends and the floating
+      Tuner/Timer/Metronome buttons never overlap it. Wide content (TABs,
+      chord rows) scrolls within its own container. ── */
 /* ── Left navigation rail ─────────────────────────────────────────────
    The module picker, module-progress strip, per-set station switcher, and
    Games/Songs/Find nav all live in a sticky left column. Warm ivory surface,
    flat sections separated by whitespace + small uppercase labels (no boxed
    panels). The full-width plum .header stays above it (L-shaped frame). */
 .app-layout{display:flex;align-items:stretch;min-height:calc(100vh - var(--hdr))}
-.app-layout .main{flex:1;min-width:0;max-width:1200px;margin:0;padding:24px 28px 60px;overflow-x:hidden}
+.app-layout .main{flex:1;min-width:0;max-width:800px;margin:0;padding:24px 28px 60px;overflow-x:hidden}
 .rail{width:252px;flex:0 0 252px;background:var(--rail-bg);color:var(--text);
   position:sticky;top:var(--hdr);height:calc(100vh - var(--hdr));
   border-right:1px solid var(--border);display:flex;flex-direction:column}
@@ -432,12 +426,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .sec-goal.earned{opacity:1;filter:none}
 /* module dropdown fills the rail width */
 .rail .module-select{width:100%;max-width:none;flex:none}
-/* module-progress strip: 8 module segments stretch to fill the rail width */
-.rail .module-strip{width:100%;gap:3px}
-.rail .mstrip-seg{flex:1;width:auto;min-width:0}
-.strip-foot{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-top:9px}
-.rail .module-strip-label{white-space:normal;line-height:1.35;flex:1;min-width:0}
-.strip-pct{font-size:0.8125rem;font-weight:700;color:var(--purple-accent);font-variant-numeric:tabular-nums;flex-shrink:0}
+/* Set switcher: the wpills sit side by side as buttons under the module
+   dropdown; the Module review pill drops to its own full-width row below */
+.rail .week-pills{margin:10px 0 0}
+.rail .wpill{flex:1 1 0;text-align:center;padding:7px 8px;font-size:0.875rem;border-radius:8px;white-space:nowrap}
+.rail .wpill.active{background:var(--purple-bg);border-color:var(--purple-accent);color:var(--purple-text);font-weight:600}
+.rail .wpill.review-pill{flex-basis:100%}
+.rail .wpill.review-pill.active{background:var(--purple-bg);color:var(--purple-text);border-style:solid;border-color:var(--purple-accent);font-weight:600}
+/* 4+ sets in a module: tighter buttons so one rail row still fits them all
+   (the "· 2/6" started-set fraction is hidden at this size — the green
+   complete state and the aria-labels still carry the progress info) */
+.rail .week-pills.wp-many{gap:4px}
+.rail .week-pills.wp-many .wpill{font-size:0.8125rem;padding:7px 3px}
+.rail .week-pills.wp-many .wpill-frac,.rail .week-pills.wp-many .wpill-check{display:none}
 /* per-set station switcher */
 .rail-station-list{display:flex;flex-direction:column;gap:6px}
 .rail-station{display:flex;align-items:center;gap:10px;width:100%;text-align:left;
@@ -714,9 +715,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .tab-choice-content .tab{margin-top:0}
 /* Station C — collapsible skill sections (guided by the module review) */
 .sc-sections{display:flex;flex-direction:column;gap:8px}
-.sc-sec{border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--bg)}
-.sc-sec.open{border-color:var(--green-text)}
-.sc-sec-head{width:100%;font-family:inherit;font-size:0.9375rem;font-weight:500;text-align:left;padding:11px 14px;background:var(--bg2);border:0;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:10px;line-height:1.3}
+.sc-sec{border-radius:8px;overflow:hidden;background:var(--bg)}
+.sc-sec-head{width:100%;font-family:inherit;font-size:0.9375rem;font-weight:500;text-align:left;padding:11px 14px;background:var(--bg3);border:0;border-radius:8px;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:10px;line-height:1.3}
 .sc-sec-head:hover{background:var(--green-bg)}
 .sc-sec.open .sc-sec-head{background:var(--green-bg);color:var(--green-text)}
 .sc-sec-chev{font-size:0.6875rem;color:var(--green-text);flex-shrink:0;transition:transform 0.15s}
@@ -986,7 +986,7 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 .search-hit:hover{border-color:var(--blue-text);background:var(--blue-bg)}
 .search-hit-where{font-size:0.75rem;font-weight:700;color:var(--blue-text);letter-spacing:.2px}
 .search-hit-text{font-size:0.8438rem;color:var(--text);line-height:1.4}
-.st-flex-note{font-size:0.875rem;color:var(--text2);background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;margin:2px 0 8px;line-height:1.55}
+.st-flex-note{font-size:0.875rem;color:var(--text2);background:var(--bg3);border-radius:8px;padding:11px 14px;margin:2px 0 8px;line-height:1.55}
 .st-note-link{font-family:inherit;font-size:inherit;font-weight:600;padding:0;background:none;border:none;color:var(--blue-text);cursor:pointer;text-decoration:underline}
 
 /* ── Design pass: pressable primary buttons (Duolingo-style tactile press) ── */
@@ -1011,7 +1011,7 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 @keyframes coachReportUp{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
 
 /* ── Design pass: module-completion celebration ── */
-.mstrip-seg.celebrate{animation:segCelebrate 1.2s ease-out}
+.sec-goal.celebrate{animation:segCelebrate 1.2s ease-out}
 @keyframes segCelebrate{0%,100%{transform:scale(1)}20%,60%{transform:scale(1.6)}40%,80%{transform:scale(1.2)}}
 .celebrate-particle{position:fixed;z-index:300;font-size:1.125rem;pointer-events:none;animation:particleUp 1.4s ease-out forwards}
 @keyframes particleUp{from{transform:translateY(0) scale(1);opacity:1}to{transform:translateY(-70px) scale(1.4);opacity:0}}

@@ -8,12 +8,12 @@ SETS.push(
 
   {
     id: 'm9w0',
-    label: 'Set 0',
+    label: 'Set 1',
     locked: false,
     module: 'The Full Fretboard & Writing TAB',
     moduleNum: 9,
     unit: 'Module 9 · The Full Fretboard & Writing TAB',
-    title: 'Set 0',
+    title: 'Set 1',
     subtitle: 'Welcome back · Prove it, don\'t re-learn it',
     objective: 'I CAN show that the first half of the course\'s core skills stayed with me over the break — and see exactly which ones need more practice.',
     skillFocus: 'Six quick re-tests: open chords · strumming · pentatonic · power chords · TAB reading · fingerpicking',
@@ -132,7 +132,7 @@ SETS.push(
                 skills: [6]
               },
               {
-                text: 'The fast round: record yourself playing all six re-tests back to back, then listen with the checklist open and settle any you weren\'t sure about. Cleared all six? Module 9 proper starts at Set 1. Flagged some? Spend a session with the practice spots listed above first — they come back fast.',
+                text: 'The fast round: record yourself playing all six re-tests back to back, then listen with the checklist open and settle any you weren\'t sure about. Cleared all six? Module 9 proper starts at Set 2. Flagged some? Spend a session with the practice spots listed above first — they come back fast.',
                 hint: 'The recording shows exactly how you really sounded — that\'s exactly why it\'s useful.'
               }
             ]
@@ -169,12 +169,12 @@ SETS.push(
   {
     id: 'm9w1',
     songThread: [{ name: 'Sweet Child O\' Mine', journey: 'tabs/sweet-child-o-mine.html', note: 'read its TAB anywhere on the neck' }],
-    label: 'Set 1',
+    label: 'Set 2',
     locked: false,
     module: 'The Full Fretboard & Writing TAB',
     moduleNum: 9,
     unit: 'Module 9 · The Full Fretboard & Writing TAB',
-    title: 'Set 1',
+    title: 'Set 2',
     subtitle: 'Notes on D & G · The octave shortcut · Sharps & flats',
     objective: 'I CAN name the natural notes on the D and G strings through fret 12 and find any named note on them.',
     skillFocus: 'Natural notes on D (0–12) · Natural notes on G (0–12) · The two-string octave shape',
@@ -353,12 +353,12 @@ SETS.push(
   {
     id: 'm9w2',
     songThread: [{ name: 'Luna', journey: 'tabs/luna.html', layer: 6, bonus: true, note: 'its fingerpicked intro — name every note as you roll it' }],
-    label: 'Set 2',
+    label: 'Set 3',
     locked: false,
     module: 'The Full Fretboard & Writing TAB',
     moduleNum: 9,
     unit: 'Module 9 · The Full Fretboard & Writing TAB',
-    title: 'Set 2',
+    title: 'Set 3',
     subtitle: 'Notes on B & e · The B-string bump · The whole neck',
     objective: 'I CAN name the natural notes on all six strings and locate any named note anywhere on the neck.',
     skillFocus: 'Naturals on B (0–12) · Naturals on high e (they mirror low E) · The 3-fret octave shift onto B & e',
@@ -535,12 +535,12 @@ SETS.push(
   {
     id: 'm9w3',
     songThread: [{ name: 'Luna', journey: 'tabs/luna.html', note: 'read and write its lines in TAB' }],
-    label: 'Set 3',
+    label: 'Set 4',
     locked: false,
     module: 'The Full Fretboard & Writing TAB',
     moduleNum: 9,
     unit: 'Module 9 · The Full Fretboard & Writing TAB',
-    title: 'Set 3',
+    title: 'Set 4',
     subtitle: 'Higher-position TAB · Write your own 4 bars · Slash chords & partial shapes',
     objective: 'I CAN read TAB in higher positions and write an accurate 4-bar TAB of a riff I already play.',
     skillFocus: 'Reading TAB above fret 5 · Writing TAB others can play · Slash chords (G/B) & partial-shape charts',
@@ -795,6 +795,6 @@ MODULE_REVIEWS[9] = {
     'Play a melody that crosses three or more strings cleanly, every note ringing in order',
     'Read a partial-shape or slash chord chart and name which strings actually ring'
   ],
-  forward: 'The whole neck is yours now — and you can write down anything you figure out. <strong>Module 10 turns notes into keys:</strong> you\'ll learn the recipe that builds every scale, find the key of any song, and start trusting your ear. (And any time you come back from a long break, <strong>Set 0</strong> at the top of this module re-checks the six core skills in one sitting.)',
+  forward: 'The whole neck is yours now — and you can write down anything you figure out. <strong>Module 10 turns notes into keys:</strong> you\'ll learn the recipe that builds every scale, find the key of any song, and start trusting your ear. (And any time you come back from a long break, <strong>Set 1</strong> at the top of this module re-checks the six core skills in one sitting.)',
   standards: ['Pr.4a', 'Pr.6a', 'Cn.10a']
 };
