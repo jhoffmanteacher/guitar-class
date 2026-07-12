@@ -2567,7 +2567,7 @@ function playSequenceFromGroup(btn){
       derives a fingering itself. ── */
 function coachBtnHtml(midisJson, tabNotesJson){
   const tabAttr = tabNotesJson ? ` data-tabnotes="${escAttr(tabNotesJson)}"` : '';
-  return `<button type="button" class="coach-btn" data-midis="${escAttr(midisJson)}"${tabAttr} onclick="coachOpen(this)" title="Play it into the mic and get feedback">&#x1F3A4; Check me</button>`;
+  return `<button type="button" class="coach-btn" data-midis="${escAttr(midisJson)}"${tabAttr} onclick="coachOpen(this)" title="Play it into the mic and get feedback">&#x1F3A4; Listening Coach</button>`;
 }
 /* Chord steps: build [{n:name, m:[midis]}] from the step's own diagram
    specs (same fret math as chordMidis — frets are absolute). */
@@ -2577,8 +2577,7 @@ function coachChordBtnRowHtml(chords){
     m: chordSpecMidis(c.chord)
   })).filter(c=>c.m.length);
   if(!spec.length) return '';
-  const label = spec.length>1 ? 'Check my changes' : 'Strum check';
-  return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}" onclick="coachOpen(this)" title="4 count-in clicks, then strum on every beat — the mic listens and gives feedback">&#x1F3A4; ${label}</button></div>`;
+  return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}" onclick="coachOpen(this)" title="4 count-in clicks, then strum on every beat — the mic listens and gives feedback">&#x1F3A4; Listening Coach</button></div>`;
 }
 function tick(){ if(!window.coachMicLive) beep(880,0.06); const dot=document.getElementById('metro-dot'); if(dot){ dot.classList.add('flash'); setTimeout(()=>dot.classList.remove('flash'),80); } }
 function getBpm(){ return parseInt(document.getElementById('bpm-slider').value); }
