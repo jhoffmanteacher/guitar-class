@@ -22,6 +22,18 @@ see `WORKFLOW.md` and the git commit log.
   opening for the first time starts cleanly at the top. Before, a page would
   sometimes open already scrolled part-way down for no clear reason.
 
+## 2026-07-12 — Change Up game: more chord sets + a Random 4 mode
+
+### Added
+- **More chord combinations to switch between** in the Change Up game — the
+  2-chord, 3-chord, and 4-chord menus each grew (new picks like C↔F, G↔D,
+  C–F–G, and the classic C–Am–F–G turnaround), so there's more variety to
+  train against.
+- **A 🎲 Random 4 mode** — draws a fresh set of four chords each round and
+  reveals them at the count-in, so you never know exactly what's coming. Great
+  for testing whether your changes hold up on combinations you haven't drilled.
+  Works at every switching speed, and it keeps its own best-BPM record.
+
 ## 2026-07-12 — Change Up game: pick how fast the chords switch
 
 ### Added
