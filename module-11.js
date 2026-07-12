@@ -27,7 +27,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
               {
-                text: 'Watch: <a href="https://youtu.be/lhHSU4AnXSU" target="_blank">How to Find Guitar Chords in a Key? – JustinGuitar</a>. Watch how he builds a chord on every note of the scale — that\'s the "chord family" you\'ll be naming with Roman numerals today.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=jGh2Erg-o8E" target="_blank">Encontrar los acordes en cualquier tonalidad – Maru Martinez (0:00–7:27)</a> (in Spanish — turn on English captions if you need them; the on-screen diagrams carry the lesson). Watch how she builds a chord on every note of the scale — that\'s the "chord family" you\'ll be naming with Roman numerals today.',
                 hint: 'Every chord you\'ve ever strummed is built from a scale — today you learn the recipe that turns one scale into a whole family of chords.',
                 skills: [1],
                 response: { type: 'mc', prompt: 'A triad is built by stacking:',
@@ -480,7 +480,7 @@ SETS.push(
             title: 'The 12-bar blues — the form your I–IV–V was waiting for',
             steps: [
               {
-                text: 'Watch: <a href="https://youtu.be/XFuXLSIYH7s" target="_blank">12 Bar Blues Lesson For Beginners – Marty Music</a>. The 12-bar blues is I–IV–V — the exact chords you\'ve been building this set — used to build the most-played song form in American music. Watch for two things: the ORDER the chords arrive in, and the long-short "shuffle" bounce in the strumming hand.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=kurgOIcTCIE" target="_blank">How To Play Old School 12 Bar Blues Guitar No.1 EASY Beginners - Chords Key E – EricBlackmonGuitar (0:00–4:41)</a>. The 12-bar blues is I–IV–V — the exact chords you\'ve been building this set — used to build the most-played song form in American music. Watch for two things: the ORDER the chords arrive in, and the long-short "shuffle" bounce in the strumming hand.',
                 hint: 'Thousands of songs are this one form. Learn it once and you can jam (play along freely and make up your own part) with people you\'ve just met for the rest of your life.',
                 skills: [7]
               },

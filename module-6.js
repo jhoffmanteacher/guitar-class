@@ -27,8 +27,8 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/n45PDizCRLw" target="_blank">Your FIRST Strumming Pattern EVER! – JustinGuitar</a> (0:00–4:00). Your task while you watch: keep your eyes on his strumming wrist and count how many times it changes direction in one bar.',
-            hint: 'Pay close attention to his wrist — it never stops moving, even when he isn\'t hitting the strings. The pendulum motion is the secret.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=SdLsQuvsuO0" target="_blank">Strumming Patterns for Absolute Beginners – Lauren Bateman (0:00–4:00)</a>. Your task while you watch: keep your eyes on her strumming wrist and count how many times it changes direction in one bar.',
+            hint: 'Pay close attention to her wrist — it never stops moving, even when she isn\'t hitting the strings. The pendulum motion is the secret.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'What is the SINGLE most important habit for good strumming?',
               answer: 0,

@@ -244,8 +244,8 @@ SETS.push(
             title: 'Watch: the E-shape barre chord',
             steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/4cR1sa1_d_8" target="_blank">The Easiest F Chord Guitar Lesson You\'ll Find – JustinGuitar</a> (0:00–4:00).',
-            hint: 'The F barre — one finger pressed flat across several strings — is famously hard. It\'s the lowest barre, where the strings are tightest, so it\'s the toughest spot — G and A higher up are easier. Watch his THUMB: keep it on the BACK of the neck, behind your index. That\'s where the squeezing power comes from.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=vUNxt5EvXv8" target="_blank">Pain Free F Chord for Beginners – Lauren Bateman (0:00–5:03)</a>.',
+            hint: 'The F barre — one finger pressed flat across several strings — is famously hard. It\'s the lowest barre, where the strings are tightest, so it\'s the toughest spot — G and A higher up are easier. Watch her THUMB: keep it on the BACK of the neck, behind your index. That\'s where the squeezing power comes from.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'For the cleanest E-shape barre, where should your THUMB go?',
               answer: 1,
@@ -598,8 +598,8 @@ SETS.push(
             title: '🌶️ Level-up — the Sweet Child O\' Mine intro riff (optional harder goal)',
             steps: [
           {
-            text: '🌶️ Try it: learn the most famous riff in the course. The "Sweet Child O\' Mine" intro lives up high on the D, G, and B strings around the 12th–15th frets, picked one note at a time. Watch <a href="https://youtu.be/t3yol_zrt7g" target="_blank">How to Play the Intro for Sweet Child O\' Mine – JustinGuitar</a>, learn just the first bar, and play it slowly. No score, no rush — this is a late-course optional challenge you can keep practicing a little at a time.',
-            hint: 'Note: the lesson teaches it in E♭ tuning (a half-step down), so on your standard-tuned guitar it will sound a half-step higher than the video — that\'s part of the challenge, not a mistake. The frets and finger shapes are exactly the same. Loop just the first bar until it\'s clean before adding more.',
+            text: '🌶️ Try it: learn the most famous riff in the course. The "Sweet Child O\' Mine" intro lives up high on the D, G, and B strings around the 12th–15th frets, picked one note at a time. Watch <a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a> (played slow and full speed, with the TAB on screen), learn just the first bar, and play it slowly. No score, no rush — this is a late-course optional challenge you can keep practicing a little at a time.',
+            hint: 'The lesson is in standard tuning — the same tuning your guitar is already in — so you can play along directly. (The original record is tuned a half-step lower, so you\'ll sound slightly higher than the album; that\'s normal.) Loop just the first bar until it\'s clean before adding more.',
             skills: [3, 6]
           }
             ]

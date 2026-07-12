@@ -5,6 +5,29 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-12 — Riff Runner, and lessons from more teachers
+
+### Added
+- **Riff Runner** — the arcade's biggest game yet. The class songs become a
+  scrolling game: six lines on screen are the six strings (laid out like
+  TAB), fret numbers slide toward a line, and you press that string's key
+  (1–6 on a laptop) or tap its lane (on a phone) right on time. Every hit
+  plays the real note, so playing well means hearing the riff come together.
+  Four songs from class — Seven Nation Army, All Along the Watchtower,
+  Luna, and Sweet Child O' Mine — each at three speed levels. Clear a speed
+  at 90% to unlock the next; clear a song at full speed to unlock the next
+  song. A "Hear it" button plays any riff for you first, and after three
+  stars the game points you back to your real guitar.
+
+### Changed
+- **24 lesson videos now come from a wider range of teachers.** The video
+  lineup leaned heavily on two channels; you'll now also learn from Lauren
+  Bateman, Guitar Goddess, Maru Martinez (in Spanish), and
+  EricBlackmonGuitar across tuning, chords, strumming, scales, blues, and
+  fingerpicking lessons. Every replacement was checked to be as good as or
+  better than the video it replaced — where nothing better existed, the
+  original stayed.
+
 ## 2026-07-12 — Site-wide accuracy pass: 30+ fixes from a full audit
 
 ### Changed

@@ -305,7 +305,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Sweet Child O\' Mine, name it as you play it: watch the intro-riff clip — a riff is a short musical phrase that repeats — that you first saw in Module 7 (<a href="https://youtu.be/t3yol_zrt7g" target="_blank">How to Play the Intro for Sweet Child O\' Mine – JustinGuitar</a>) and learn just its first two notes, up on the D and G strings around fret 12–15. Say each note\'s NAME as you play it, using today\'s D/G-string knowledge to figure it out instead of just copying frets. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this song\'s Journey page</a>.',
+                text: 'Challenge — Sweet Child O\' Mine, name it as you play it: watch the intro-riff clip — a riff is a short musical phrase that repeats — that you first saw in Module 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>) and learn just its first two notes, up on the D and G strings around fret 12–15. Say each note\'s NAME as you play it, using today\'s D/G-string knowledge to figure it out instead of just copying frets. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this song\'s Journey page</a>.',
                 hint: 'This riff lives up the neck on strings you\'ve never named notes on before today — that\'s exactly why it\'s the reward for this set.',
                 stuck: 'Pause the video on the very first note and just name that one string/fret before moving on.',
                 levelUp: 'Name all four notes of the opening phrase before you play them, then check yourself against the video.',

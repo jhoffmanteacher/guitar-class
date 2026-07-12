@@ -32,10 +32,10 @@ SETS.push(
             hint: 'Loud enough that you catch every detail, quiet enough that you can still hear your own guitar.'
           },
           {
-            text: 'Watch: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">How to Practice Guitar – JustinGuitar</a> (Lesson 1 Practice Routine). While you watch, write down the ONE practice habit he says matters most — you\'ll try it out this session.',
-            hint: 'As you watch, think about: what is one practice habit he says makes the biggest difference? Does it match what you thought? You\'ve got it when: you can name that one habit without looking back at your notes.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=4_CWBgLMPCI" target="_blank">Only Got 15 Min? No Problem! Guitar Practice Tips – Lauren Bateman (0:00–5:00)</a>. While you watch, write down the ONE practice habit she says matters most — you\'ll try it out this session.',
+            hint: 'As you watch, think about: what is one practice habit she says makes the biggest difference? Does it match what you thought? You\'ve got it when: you can name that one habit without looking back at your notes.',
             skills: [1],
-            response: { type: 'short', placeholder: 'In one sentence: what practice habit did he say matters most, and did it match what you thought?' }
+            response: { type: 'short', placeholder: 'In one sentence: what practice habit did she say matters most, and did it match what you thought?' }
           },
           {
             text: 'Watch: <a href="https://youtu.be/PyWZYHy17As" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a> (you only need the first ~3 minutes — cleaning, humidity, and basic care; after that it\'s a string-changing demo you won\'t need yet). While you watch, note two things that can damage a guitar and how to avoid each — good habits now keep your guitar playable for years.',
@@ -204,7 +204,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/X2EmpWr9vUc?t=105" target="_blank">How to Tune Your Guitar For Beginners – JustinGuitar</a> (the link jumps to 1:45, where he shows how to use the tuner — the part before is about which tuner to buy, and this site has a built-in tuner in the corner toolbar; you can stop around 4:28). Have your tuner ready and follow along on your own guitar — match one string at a time as he goes.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=bTvmDGDuUZ4" target="_blank">How to Tune a Guitar for Beginners with a Tuner – Lauren Bateman (0:00–4:30)</a> (this site also has a built-in tuner in the corner toolbar). Have your tuner ready and follow along on your own guitar — match one string at a time as she goes.',
             hint: 'Headphones on. Notice the order of the strings and what "in tune" sounds like. You\'ve got it when: you can tell whether a note is too high or too low before the tuner shows you.',
             stuck: 'Pause after each string and tune just that one before moving on. If the tuner jumps around, pluck a little softer and let the note ring.',
             levelUp: 'Detune one string on purpose, then bring it back to green by ear first — check the tuner only to confirm.',
@@ -219,7 +219,7 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/zpRoq0jcWfQ?t=16" target="_blank">Beginner Guide To Guitar Anatomy – JustinGuitar</a> (the parts walkthrough runs about 0:16–3:18; the later sections cover electric guitars, which aren\'t the ones we use — you can stop at 3:18). As he names each part, point to it on your own guitar and say the name out loud.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=lWnbBIs6-P4" target="_blank">Parts of Acoustic Guitar (Beginner Lesson #2) – Guitar Goddess (0:00–4:00)</a>. As she names each part, point to it on your own guitar and say the name out loud.',
             hint: 'Write down 5 parts you can now name from memory. You\'ve got it when: you can point to and name at least 5 parts without the video.',
             response: { type: 'mc', prompt: 'Which of these is NOT a part of the guitar?',
               answer: 0,
@@ -232,7 +232,7 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/MlV6WhM9YhE" target="_blank">How To Hold Your Guitar – JustinGuitar</a>. While you watch, set up in your chair and copy his position piece by piece — feet, guitar on leg, back, strumming arm.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=eyrgiiONULE" target="_blank">How to Hold Your Guitar Comfortably – Lauren Bateman (0:00–4:00)</a>. While you watch, set up in your chair and copy her position piece by piece — feet, guitar on leg, back, strumming arm.',
             hint: 'Notice where the guitar rests and how the back stays straight. You\'ve got it when: you can look away from the screen and your guitar stays put without your fretting hand holding it up.',
             stuck: 'Pause at each position checkpoint and match one thing at a time: feet flat first, then guitar on the right leg, then straighten the back. Prop up your phone and film a few seconds, then compare yourself to the freeze-frame.',
             levelUp: 'Close your eyes for 10 seconds and keep the position. Or film 10 seconds of yourself playing and name one posture fix.',
@@ -247,7 +247,7 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/1JBxNFEg0nU" target="_blank">Picks: How to Choose & Hold One (BC-107) – JustinGuitar</a>. Grab a pick and copy his grip as you watch — rest it on your bent index finger, then press your thumb on top.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=TKO8NLOdSwQ" target="_blank">How To Hold A Guitar Pick for Beginners: Right vs Wrong – Lauren Bateman (0:00–4:00)</a>. Grab a pick and copy her grip as you watch — rest it on your bent index finger, then press your thumb on top.',
             hint: 'Write down: what are the two most common pick-holding mistakes? You\'ve got it when: only a small tip of the pick pokes past your thumb and it doesn\'t slip when you strum.',
             stuck: 'Hold the pick still and just brush it down across the strings with your whole forearm. If it flips or drops, let a little less tip show and relax your grip.',
             levelUp: 'Strum down-up-down-up slowly for 30 seconds without the pick sliding or twisting in your fingers.',

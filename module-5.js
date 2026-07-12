@@ -240,7 +240,7 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/yrn3kbBaOMI" target="_blank">F Chord Simplified – Marty Music</a> (0:00–3:00).',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=vUNxt5EvXv8" target="_blank">Pain Free F Chord for Beginners – Lauren Bateman (0:00–4:00)</a>.',
             hint: 'The F chord is the hardest thing for beginners. The simplified version (xx3211) avoids the full barre (pressing one finger flat across several strings). Use this until it\'s clean, then worry about the barre version.',
             skills: [2],
             response: { type: 'short', placeholder: 'Which version of the F chord are you starting with (full barre or simplified)? Why?' }
@@ -477,8 +477,8 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/yh6sPqDEZCY" target="_blank">The D Chord – JustinGuitar</a> (0:00–5:00).',
-            hint: 'D major has a triangular finger shape — notice how his three fingers are stacked in a triangle on strings 1, 2, and 3. Try to copy that exact shape.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=VKgyE6g2Y-s" target="_blank">How to Play a D Major Chord – Lauren Bateman (0:00–4:00)</a>.',
+            hint: 'D major has a triangular finger shape — notice how her three fingers are stacked in a triangle on strings 1, 2, and 3. Try to copy that exact shape.',
             skills: [1, 2, 3, 4],
             response: { type: 'mc', prompt: 'The D major chord uses which finger shape on strings 1, 2, and 3?',
               answer: 0,
@@ -491,7 +491,7 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/IxXG5S8vSd8" target="_blank">Fail-Proof Easy Barre Chords (start here for Bm) – JustinGuitar</a> (0:00–3:00).',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=suJnbc2TERU" target="_blank">B minor (Bm) Chord, 2 Ways (start easy, then barre) – Guitar Goddess (0:00–4:00)</a>.',
             hint: 'Bm is the trickiest chord in this group. The partial barre version (xx4432) is the most accessible. Don\'t try the full barre version yet — focus on getting a clean sound first.',
             skills: [4],
             chords: [

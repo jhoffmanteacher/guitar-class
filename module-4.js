@@ -27,8 +27,8 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/G-X1RemAzks" target="_blank">Minor Pentatonic Scale, Pattern 1 (BC-176) – JustinGuitar</a> (0:00–5:00). As you watch, follow along on your guitar — pause and find each note BEFORE he names it.',
-            hint: 'Follow along on your guitar as he shows the pattern. Pause and find each note before he names it.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=l6ayje1ug_0" target="_blank">The Minor Pentatonic Scale on Guitar Explained – Lauren Bateman (0:00–5:00)</a>. As you watch, follow along on your guitar — pause and find each note BEFORE she names it.',
+            hint: 'Follow along on your guitar as she shows the pattern. Pause and find each note before she names it.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'For A minor pentatonic Pattern 1, where does your 1st finger sit on the low E string?',
               answer: 0,
@@ -304,7 +304,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/G-X1RemAzks" target="_blank">Minor Pentatonic Pattern 1 (BC-176) – JustinGuitar</a> (0:00–4:00) to refresh the shape. Then YOU add the expression the video doesn\'t: pick one note from the pattern and play it loud, then soft — that difference in volume is dynamics.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M" target="_blank">How to USE the Minor Pentatonic Scale – Lauren Bateman (0:00–4:00)</a> to refresh the shape. Then YOU add the expression the video doesn\'t: pick one note from the pattern and play it loud, then soft — that difference in volume is dynamics.',
             hint: 'The video shows the notes; the dynamics are on you. Play one note loud, then whisper-soft, and listen for how much the FEEL changes even though the note doesn\'t.',
             skills: [1, 2],
             response: { type: 'short', placeholder: 'Describe your own loud-then-soft experiment: which note, and what changed in the sound?' }

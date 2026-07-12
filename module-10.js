@@ -27,7 +27,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
               {
-                text: 'Watch: <a href="https://youtu.be/LmbMnc2vpFg" target="_blank">The Major Scale #1: How and Why – JustinGuitar</a>. Follow along as he lays out the whole/half-step recipe — the exact formula you\'ll use to build C and G major yourself.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=fnVlMjza32c" target="_blank">What is a Major Scale Guitar Lesson - Music Theory For Guitar – Lauren Bateman (0:00–5:12)</a>. Follow along as she lays out the whole/half-step recipe — the exact formula you\'ll use to build C and G major yourself.',
                 hint: 'The recipe is a formula — the exact same seven-step pattern of whole and half steps, starting from any note, builds that note\'s major scale.',
                 skills: [1],
                 response: { type: 'mc', prompt: 'The step recipe that builds EVERY major scale is:',
@@ -210,7 +210,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
               {
-                text: 'Watch: <a href="https://youtu.be/G-X1RemAzks" target="_blank">Minor Pentatonic Scale - Stage 7 Guitar Lesson - Guitar For Beginners [BC-176] – JustinGuitar</a> as a refresher on the box-1 shape you\'ll build the blues scale from today.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=l6ayje1ug_0" target="_blank">The MINOR PENTATONIC scale on Guitar Explained – Lauren Bateman (0:00–5:30)</a> as a refresher on the box-1 shape you\'ll build the blues scale from today.',
                 hint: 'Everything today builds on top of the minor pentatonic box you already know from Module 4 — nothing new to fret, just one note added.',
                 skills: [1],
                 response: { type: 'mc', prompt: 'Minor pentatonic box 1 with its root at low-E fret 5 is which key?',
@@ -399,7 +399,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
               {
-                text: 'Watch: <a href="https://youtu.be/G-X1RemAzks" target="_blank">Minor Pentatonic Scale - Stage 7 Guitar Lesson - Guitar For Beginners [BC-176] – JustinGuitar</a> again, this time watching the shape as a MOVABLE pattern rather than a fixed one.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M" target="_blank">HOW TO USE The Minor Pentatonic Scale on the Guitar – Lauren Bateman (0:00–5:00)</a>, watching the shape as a MOVABLE pattern rather than a fixed one.',
                 hint: 'Nothing about the shape changes when you slide it — only the fret you start on, which renames the key.',
                 skills: [1],
                 response: { type: 'mc', prompt: 'Minor pentatonic box 1 with its root at fret 5 is A minor. Slide it to fret 7 and it becomes:',

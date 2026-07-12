@@ -53,10 +53,10 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/ZBYoI7e3v5Y" target="_blank">Your Ultimate Power Chords Guide for Beginners – JustinGuitar</a> (0:00–4:00).',
-            hint: 'Focus on his right-hand muting technique — how does he stop the strings he isn\'t playing from ringing? Try it on your guitar as he shows it.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=vtcdDira8eE" target="_blank">What Is A Power Chord? Easy Rock Guitar Chords – Lauren Bateman (0:00–4:00)</a>.',
+            hint: 'Focus on the two-finger shape — which fingers go where, and how the note under your index finger names the chord. Try the shape on your guitar as she shows it.',
             skills: [1, 3],
-            response: { type: 'short', placeholder: 'Describe his right-hand muting technique in your own words.' }
+            response: { type: 'short', placeholder: 'Describe the power chord shape in your own words — which fingers go where, and what names the chord?' }
           },
           {
             text: 'Watch: <a href="https://youtu.be/DVveuwoVmmY" target="_blank">Power Chords for Beginners – Marty Music</a> (0:00–3:00).',

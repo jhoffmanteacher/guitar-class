@@ -27,7 +27,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
               {
-                text: 'Watch: <a href="https://youtu.be/rGt-lMXYzZc" target="_blank">Folk Fingerstyle Patterns #1 — Travis Picking (FO-101) – JustinGuitar</a>.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">How To Travis Pick on Guitar - The ULTIMATE Fingerpicking Pattern – Lauren Bateman (0:00–9:00)</a>.',
                 hint: 'In Travis-style picking, the thumb keeps everything moving — steady quarter notes on two bass strings while the fingers decorate on top.',
                 skills: [1, 2],
                 response: { type: 'mc', prompt: 'In Travis-style picking, the thumb\'s job is to:',
@@ -176,7 +176,7 @@ SETS.push(
             title: 'Play-along — one full pass, no stopping',
             steps: [
               {
-                text: 'Play-along: open <a href="https://youtu.be/rGt-lMXYzZc" target="_blank">Station B\'s Travis pattern lesson video</a>, set YouTube\'s speed to 0.75×, and pick along for the ENTIRE demo section without stopping. You\'ve got it when: you finish a full pass with the video — dropped pinches and all, don\'t stop.',
+                text: 'Play-along: open <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">Station B\'s Travis pattern lesson video</a> (the Practice Playalong section, 8:59–11:16), set YouTube\'s speed to 0.75×, and pick along for the ENTIRE demo section without stopping. You\'ve got it when: you finish a full pass with the video — dropped pinches and all, don\'t stop.',
                 hint: 'Not stopping is the skill. If the thumb stumbles, let the fills go and keep the bass walking until you\'re back in.'
               }
             ]
@@ -252,7 +252,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
               {
-                text: 'Watch: <a href="https://youtu.be/YZkkUjDDamA" target="_blank">Beginner Fingerpicking Made Easy: Pinch, Pluck, & Play! – Marty Music</a> (the pinch/pattern half).',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=AFyqe-rfxTU" target="_blank">Fingerpicking for Beginners - Pluck Patterns and Walkdowns – Lauren Bateman (0:00–5:55)</a> (the pinch/pattern half — she calls the pinch "the pluck").',
                 hint: 'In 3/4 time, each bar has 3 beats — count ONE-two-three, ONE-two-three. Your bass note owns beat one.',
                 skills: [1, 2],
                 response: { type: 'mc', prompt: 'In 3/4 time, each bar has:',

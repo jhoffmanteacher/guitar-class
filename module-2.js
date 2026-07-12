@@ -287,8 +287,8 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
               {
-                text: 'Watch: <a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym: Strength & Dexterity (TE-001) – JustinGuitar</a> (0:00–4:00).',
-                hint: 'Try each exercise slowly on your guitar as he demonstrates. Slow and clean is better than fast and buzzy, every time.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=DBNNf4Ri3yc" target="_blank">Spider Exercises: Finger Dexterity #1 – Lauren Bateman (0:00–4:00)</a>.',
+                hint: 'Try each exercise slowly on your guitar as she demonstrates. Slow and clean is better than fast and buzzy, every time.',
                 skills: [1, 2, 3],
                 response: { type: 'short', placeholder: 'Which exercise felt hardest, and what do you think makes it hard?' }
               },
@@ -307,8 +307,8 @@ SETS.push(
                 ] }
               },
               {
-                text: 'Watch: <a href="https://youtu.be/FofCWizp43Y" target="_blank">How to Read Guitar TAB – JustinGuitar</a> (0:00–4:00).',
-                hint: 'Pause when he shows a TAB example. Find those notes on your guitar before hitting play.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=qR0O0bUl5_A" target="_blank">How to Read Guitar TAB – Lauren Bateman (0:00–4:00)</a>.',
+                hint: 'Pause when she shows a TAB example. Find those notes on your guitar before hitting play.',
                 skills: [4],
                 response: { type: 'mc', prompt: 'On a TAB diagram, the TOP line represents which string?',
                   answer: 0,

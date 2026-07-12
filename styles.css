@@ -510,6 +510,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .t-viewtoggle{display:inline-flex;gap:0;margin-bottom:16px;border:1px solid var(--border2);border-radius:20px;overflow:hidden}
 .t-vt{font-size:0.875rem;padding:5px 16px;border:0;background:transparent;color:var(--text2);cursor:pointer;font-family:inherit}
 .t-vt.on{background:var(--text);color:var(--bg)}
+/* Games-access controls (teacher Games tab) */
+.tg-class{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:14px 16px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg2);margin-bottom:8px}
+.tg-class-lbl{font-weight:600;font-size:0.9375rem}
+.tg-note{font-size:0.8125rem;color:var(--text2);line-height:1.5;margin:0 2px 16px}
+.tg-seg{display:inline-flex;border:1px solid var(--border2);border-radius:16px;overflow:hidden}
+.tg-seg-btn{font-size:0.8125rem;padding:4px 13px;border:0;background:transparent;color:var(--text2);cursor:pointer;font-family:inherit}
+.tg-seg-btn.on{background:var(--text);color:var(--bg)}
+.tg-grid-wrap{overflow-x:auto}
+.tg-table{border-collapse:collapse;width:100%}
+.tg-table th,.tg-table td{text-align:left;padding:8px 12px;border-bottom:1px solid var(--border2);font-size:0.875rem}
+.tg-table th{font-weight:600;color:var(--text2)}
+.tg-name{font-weight:500}
+.tg-eff{color:var(--text2);white-space:nowrap}
 .tr-meta{font-size:0.8125rem;color:var(--text2);margin-bottom:12px}
 .tr-list{display:flex;flex-direction:column;gap:12px}
 .tr-card{border:1px solid var(--border2);border-radius:var(--radius);padding:14px 16px;background:var(--bg)}
@@ -825,6 +838,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .games-back{background:none;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:var(--blue-text);font-family:inherit;padding:0}
 .games-back:hover{text-decoration:underline}
 .games-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:4px 0 10px}
+.games-section-head{font-size:0.75rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text3);margin:16px 2px 2px}
 .games-card{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:14px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg2);cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s}
 .games-card:hover{border-color:var(--green-text);background:var(--green-bg)}
 .games-card-ico{font-size:1.375rem;line-height:1}
@@ -1113,6 +1127,44 @@ body.games-open{overflow:hidden}
 .sr-slot-count{font-size:0.75rem;font-weight:600;color:var(--text2)}
 @media (max-width:480px){
   .sr-slot-glyph{font-size:1.125rem}
+}
+
+/* ── 🏃 Riff Runner (coach.js) ── */
+.games-card.gc-runner::before{background:linear-gradient(90deg,#8a5cf0,#e0538a)}
+#rn-body{max-width:680px;margin:0 auto}
+.rn-center{text-align:center}
+.rn-songs{display:flex;flex-direction:column;gap:8px;margin:6px 0 10px}
+.rn-song{display:flex;flex-direction:column;align-items:flex-start;gap:3px;text-align:left;font-family:inherit;padding:12px 14px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg2);color:var(--text);cursor:pointer;transition:transform .12s,border-color .12s}
+.rn-song:hover:not(:disabled){transform:translateY(-2px);border-color:var(--purple-accent)}
+.rn-song:disabled{cursor:default;opacity:0.55}
+.rn-song-title{font-size:1.0625rem;font-weight:800}
+.rn-song-sub{font-size:0.8125rem;color:var(--text2)}
+.rn-song-best{font-size:0.75rem;font-weight:700;color:var(--amber-text)}
+.rn-song-best.dim{color:var(--text3);font-weight:600}
+.rn-song-lock{font-size:0.75rem;font-weight:600;color:var(--text3)}
+.rn-ready-title{font-size:1.25rem;font-weight:800;text-align:center;margin:2px 0 4px}
+.ts-btn.rn-locked{opacity:0.45;cursor:default}
+.rn-track{position:relative;margin:8px 0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.rn-lane{position:relative;height:38px;cursor:pointer}
+.rn-lane::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--border2)}
+.rn-lane.wrong{background:var(--amber-bg)}
+.rn-lane-name{position:absolute;left:8px;top:50%;transform:translateY(-50%);z-index:2;font-family:'Courier New',ui-monospace,monospace;font-size:0.75rem;font-weight:700;color:var(--text3);pointer-events:none}
+.rn-hitline{position:absolute;top:0;bottom:0;left:22%;width:3px;border-radius:2px;background:var(--purple-accent);pointer-events:none;z-index:3}
+.rn-count{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.875rem;font-weight:700;color:var(--text3);pointer-events:none;z-index:4}
+.rn-token{position:absolute;top:50%;left:0;width:30px;height:30px;margin:-15px 0 0 -15px;display:flex;align-items:center;justify-content:center;border:2px solid var(--text2);border-radius:999px;background:var(--bg);visibility:hidden;will-change:transform;pointer-events:none;z-index:1}
+.rn-token-fret{font-size:0.9375rem;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;line-height:1}
+.rn-token-label{position:absolute;bottom:calc(100% + 1px);left:50%;transform:translateX(-50%);font-size:0.625rem;font-weight:700;color:var(--text2);white-space:nowrap;line-height:1}
+.rn-token.hit-perfect,.rn-token.hit-good{opacity:0;transition:opacity .35s}
+.rn-token.hit-perfect{border-color:var(--green-text);background:var(--green-bg)}
+.rn-token.hit-perfect .rn-token-fret{color:var(--green-text)}
+.rn-token.hit-good{border-color:var(--blue-text);background:var(--blue-bg)}
+.rn-token.hit-good .rn-token-fret{color:var(--blue-text)}
+.rn-token.miss{opacity:0.3}
+.rn-token.miss .rn-token-fret{color:var(--text3)}
+.rn-unlock{font-size:0.9375rem;font-weight:700;color:var(--green-text);background:var(--green-bg);border:1px solid var(--green-text);border-radius:8px;padding:8px 12px;margin:8px 0;display:inline-block}
+@media (max-width:480px){
+  .rn-lane{height:44px}
+  .rn-lane-name{font-size:0.6875rem}
 }
 
 /* ── Challenge Day (occasional, module-gated pick-one inside the Daily 5) ── */

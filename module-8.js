@@ -443,7 +443,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/rGt-lMXYzZc" target="_blank">Folk Fingerstyle Patterns #1 — Travis Picking (FO-101) – JustinGuitar</a> (0:00–4:00). As you watch, tap the alternating thumb on your knee — bass on 1, the other bass on 3 — before you ever add the fingers.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">How To Travis Pick on Guitar – Lauren Bateman (0:00–5:00)</a>. As you watch, tap the alternating thumb on your knee — bass on 1, the other bass on 3 — before you ever add the fingers.',
             hint: 'Travis picking uses an ALTERNATING thumb: bass note on beat 1, a different bass note on beat 3. The fingers fill in between. It\'s the foundation of country, folk, and a lot of pop.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'In Travis picking, what does the THUMB do?',
