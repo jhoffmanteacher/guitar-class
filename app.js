@@ -1543,7 +1543,7 @@ function buildSet(w){
         return `<div class="song-thread-row">${nameEl}${chip}<span class="st-note">${escHtml(t.note || '')}</span></div>`;
       }).join('')}</div>`
     : '';
-  return `<div class="obj-card set-head">${pill}${titleHtml}${skills}${thread}</div>
+  return `<div class="obj-card set-head">${titleHtml}${pill}${skills}${thread}</div>
   <div class="tabs">
     <div class="tabs-songbar">
       ${w.songs ? `<button type="button" class="tabs-songs tab-songs" onclick="switchTab(this,'${w.id}','songs')">&#9835; Songs</button>` : ''}

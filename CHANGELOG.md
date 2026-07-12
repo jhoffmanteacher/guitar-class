@@ -30,6 +30,9 @@ see `WORKFLOW.md` and the git commit log.
   longer sit on top of your reading. Inside each card, the extra boxes and
   divider lines between steps are gone; section headers are simple soft bars,
   which makes each station page feel much less cluttered.
+- **The set card now reads top to bottom in order.** The module name comes
+  first, then the Set badge, then the skills you're working on — module,
+  then set, then skills, instead of set-badge-first.
 
 ## 2026-07-12 — Tidier step controls
 
