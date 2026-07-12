@@ -38,21 +38,34 @@
 ## Open work
 
 - [ ] **Real-guitar test of Riff Runner Wait Mode** (Jonathan, 2026-07-12) —
-      NEW feature, committed `6dcf68c`, **NOT pushed** until this passes.
-      Riff Runner's ready screen now has a "How do you want to play it?"
-      toggle: the existing timed **Keys / tap** game, or the new **🎸 My
-      guitar** *Wait Mode* — untimed, the TAB stops on each note and waits
-      until the mic hears the right pitch before sliding on. Reuses the
-      coach's mic pipeline + range-trimmed YIN (`coachDetectPitch`, same as
-      Note Hunt); pure practice aid, no tiers/score/unlocks. Idea from
-      PickHero's Wait Mode. **Verified so far:** UI render, mode toggle,
-      mic-start, play + done screens (browser, mock state — no JS errors).
-      **Still to test on a real guitar:** does it catch each note at a
-      natural pace, feel the pluck→advance timing right, and give sensible
-      hints (fret nudges, octave notes)? Remember mic retests run on the
-      LIVE site (PWA cache). Once it passes: push + add a `CHANGELOG.md`
-      entry (student-facing new feature). Code in `coach.js` (`rnw*`
-      functions + the toggle) and `styles.css`.
+      NEW feature. Base version committed `6dcf68c`; a **play-at-tempo rework
+      is UNCOMMITTED** in the working tree (`coach.js` + `styles.css`, plus a
+      `sw.js` version bump). **Nothing pushed** until this passes.
+      Riff Runner's ready screen has a "How do you want to play it?" toggle:
+      the existing timed **Keys / tap** game, or **🎸 My guitar** *Wait Mode*.
+      **Wait Mode is now play-at-tempo with a safety net** (Jonathan's call
+      over the original clock-free version): pick a **Play-along speed** (Slow
+      36 / Medium 48 / Full 60 BPM, all unlocked), a **metronome** counts you
+      in then keeps a steady click (beat pips light + the hit line flashes
+      green on each beat), and you play each note in time. The safety net: the
+      mic must still *hear* the right pitch before the tab advances, so if you
+      fall behind it just holds the note and waits — no penalty. Notes are
+      spaced by their beat gaps so the tab reads like the rhythm. **Note
+      playback on a correct hit was removed** (you're already playing it).
+      Reuses the coach's mic pipeline + range-trimmed YIN (`coachDetectPitch`,
+      same as Note Hunt) for listening and the timed game's audio-clock click
+      scheduler for the metronome. Practice aid — no score/unlocks. Idea from
+      PickHero's Wait Mode. **Verified so far:** UI render — ready screen with
+      speed pills, play screen with count-in + beat pips + green hit-line
+      pulse + beat-spaced notes, done screen (browser, mock state, no JS
+      errors). **Still to test on a real guitar:** does playing along with the
+      click feel right at each speed; on-time → smooth advance, lagging →
+      clean wait-and-resume; any double-advance on one strum or notes it won't
+      catch; are the beat pips / hit-line flash helpful or distracting?
+      Remember mic retests run on the LIVE site (PWA cache). Once it passes:
+      commit the rework, push, and add a `CHANGELOG.md` entry (student-facing
+      new feature). Code in `coach.js` (`rnw*` functions + the toggle) and
+      `styles.css`.
 - [~] **Real-guitar retest of the mic features** (Jonathan, 2026-07-12) —
       **Listening Coach chord check ("Check my changes"): DONE & verified**
       on real guitar (pushed through `2e3feee`). Root cause was NOT the
