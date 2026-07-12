@@ -32,6 +32,29 @@
       "Great". Debug meter (`?ccdebug=1`) was used to find this and has been
       stripped. **Still to retest:** a melody check (Module 4 Pattern 1),
       one Note Hunt round, one full Change Up round.
+- [x] **Gate the Sets in each module — do them in order** (Jonathan, 2026-07-12) —
+      DONE & browser-verified. Every Set now locks until the Set before it is
+      finished (all its skills marked "I've got it!" — same bar as Module
+      Review). Implementation in `app.js`: `isSetComplete(w)` / `isSetLocked(w)`
+      (sequential, first set always open); `renderPills` uses them and gives a
+      locked pill a 🔒 + a tap-hint `gateToast(...)` naming the set to finish
+      first; `activateSet` has a backstop that refuses a locked set; `goToSet`
+      /search deep-links (`gatedJumpGuard`) land on the module's *frontier* set
+      with a toast instead of revealing a hidden locked panel; `onModuleChange`
+      picks the frontier (first unlocked+unfinished) as its default target and
+      never lands on a locked set. CSS: `.wpill.locked:not(.review-pill)::before`
+      lock icon + `#gate-toast`. Unlocks live because `toggleSkill` re-renders
+      pills. Verified: M4 Set 2/3 locked, tap-toast, live-unlock of Set 2 on
+      completing Set 1, Set 3 staying locked.
+- [x] **Fix where each page opens (scroll position)** (Jonathan, 2026-07-12) —
+      DONE & browser-verified. `activateSet` is now the single authority on set
+      scroll: it saves `window.scrollY` for the set you're leaving into an
+      in-memory `setScrollPos` map and restores it when you return, or scrolls to
+      top for a set never opened this session. Removed the competing
+      `window.scrollTo({top:0})` calls in `goToSet`, `songHubGoModule`, and
+      `searchGoSet` that were forcing top and causing the "sometimes scrolled,
+      sometimes not" inconsistency. Verified: first open → top(0); leave at 500 →
+      return restores 500; second set restores its own 300.
 - [ ] **Research backlog (medium/low)** — stored One-Minute-Changes
       scores, tempo-ladder playSeq, Song Journey anatomy sections, bends,
       7th/sus chord color, songwriting capstone, Choice-song style lanes,

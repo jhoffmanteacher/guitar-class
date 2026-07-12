@@ -1368,6 +1368,51 @@ function isModuleReviewLocked(moduleNum){
   return !allSkills.every(s=>progress[s.id]==='gotit');
 }
 
+// A set counts as "finished" once every one of its trackable skills is marked
+// "I've got it!" — the same bar Module Review uses. A set that isn't built yet
+// (static locked/comingSoon) never counts as finished, so it holds the gate.
+function isSetComplete(w){
+  if(!w || w.locked || w.comingSoon) return false;
+  const skills = w.skills || [];
+  if(!skills.length) return true;
+  return skills.every(s=>progress[s.id]==='gotit');
+}
+
+// Sequential gate: a set stays locked until the set before it (in module order)
+// is finished, so students work a module in order — the same lock-until-complete
+// idea as Module Review, applied to every set. The first set is always open.
+function isSetLocked(w){
+  if(!w) return true;
+  if(w.locked || w.comingSoon) return true;          // still honor the static flag
+  const moduleSets = SETS.filter(x=>x.moduleNum===w.moduleNum);
+  const idx = moduleSets.indexOf(w);
+  if(idx<=0) return false;
+  return !isSetComplete(moduleSets[idx-1]);
+}
+
+// The set immediately before w in its module (for "finish X first" hints).
+function prevSetLabel(w){
+  const arr = SETS.filter(x=>x.moduleNum===w.moduleNum);
+  return (arr[arr.indexOf(w)-1] || {}).label || 'the previous set';
+}
+
+// Tiny transient toast for gate hints — makes its own element and self-dismisses.
+let _gateToastTimer = null;
+function gateToast(msg){
+  let el = document.getElementById('gate-toast');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'gate-toast';
+    el.setAttribute('role','status');
+    el.setAttribute('aria-live','polite');
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.classList.add('show');
+  if(_gateToastTimer) clearTimeout(_gateToastTimer);
+  _gateToastTimer = setTimeout(()=>el.classList.remove('show'), 2800);
+}
+
 async function onModuleChange(moduleNum, restoreSetId){
   moduleNum = parseInt(moduleNum);
   lastModuleNum = moduleNum;
@@ -1379,8 +1424,16 @@ async function onModuleChange(moduleNum, restoreSetId){
   renderPills(moduleNum);
   renderProgressStrip();   // refresh the "you are here" indicator
   const isReviewId = restoreSetId === `mr${moduleNum}` && MODULE_REVIEWS[moduleNum];
-  const target = restoreSetId && (moduleSets.find(w=>w.id===restoreSetId) || isReviewId)
-    ? restoreSetId : (moduleSets.find(w=>!w.locked)||moduleSets[0]).id;
+  // The student's "frontier": the first unlocked set they haven't finished yet
+  // (or the last unlocked one if they're all done). Used when there's nothing
+  // valid to restore, and as the fallback if a restore target is now locked.
+  const frontier = ( moduleSets.find(w=>!isSetLocked(w) && !isSetComplete(w))
+                  || [...moduleSets].reverse().find(w=>!isSetLocked(w))
+                  || moduleSets[0] ).id;
+  let target = (restoreSetId && (moduleSets.find(w=>w.id===restoreSetId) || isReviewId))
+    ? restoreSetId : frontier;
+  // Never open onto a set the sequential gate has locked.
+  if(!/^mr\d+$/.test(target) && isSetLocked(moduleSets.find(w=>w.id===target))) target = frontier;
   activateSet(target);
 }
 
@@ -1400,15 +1453,16 @@ function renderPills(moduleNum){
   c.classList.toggle('wp-many', sets.length>3);
   sets.forEach(w=>{
     const btn = document.createElement('button');
-    btn.className='wpill'+(w.locked?' locked':'');
+    const locked = isSetLocked(w);
+    btn.className='wpill'+(locked?' locked':'');
     btn.dataset.id=w.id;
-    const { done, total } = w.locked ? { done:0, total:0 } : setCompletion(w);
-    if(!w.locked && total>0 && done===total){
+    const { done, total } = locked ? { done:0, total:0 } : setCompletion(w);
+    if(!locked && total>0 && done===total){
       // All skills got-it: green treatment + leading ✓.
       btn.classList.add('complete');
       btn.innerHTML = `<span class="wpill-check" aria-hidden="true">✓</span>${w.label}`;
       btn.setAttribute('aria-label', `${w.label} — all ${total} skills complete`);
-    } else if(!w.locked && done>0){
+    } else if(!locked && done>0){
       // Started but not finished: full name + a small fraction. Untouched sets
       // stay clean (just the name) until the first skill is marked got-it.
       btn.classList.add('incomplete');
@@ -1421,7 +1475,17 @@ function renderPills(moduleNum){
     } else {
       btn.textContent = w.label;
     }
-    if(!w.locked) btn.onclick=()=>{ leaveTopPanelForSet(); lastSetId=w.id; activateSet(w.id); saveProgress(); };
+    if(locked){
+      // Sequential gate: opens once the set before it is finished. Keep the
+      // pill tappable so it explains why instead of doing nothing.
+      const prev = prevSetLabel(w);
+      btn.setAttribute('aria-disabled','true');
+      btn.setAttribute('aria-label', `${w.label} — locked until ${prev} is finished`);
+      btn.title = `Locked — mark every skill in ${prev} as "I've got it!" to unlock ${w.label}.`;
+      btn.onclick = ()=> gateToast(`Finish ${prev} first — mark all its skills "I've got it!" to unlock ${w.label}.`);
+    } else {
+      btn.onclick=()=>{ leaveTopPanelForSet(); lastSetId=w.id; activateSet(w.id); saveProgress(); };
+    }
     c.appendChild(btn);
   });
 
@@ -1443,7 +1507,26 @@ function renderPills(moduleNum){
   }
 }
 
+// Per-set window scroll positions, so returning to a set lands where the
+// student left off. A set that's never been opened has no entry → opens at top.
+const setScrollPos = {};
+
 function activateSet(id){
+  // Sequential-gate backstop: never open a set that's still locked (e.g. from a
+  // stale search deep-link). Explain why and stay put. Module Review (mrN) is
+  // intentionally preview-openable while locked, so it's exempt.
+  if(!/^mr\d+$/.test(id)){
+    const w = SETS.find(x=>x.id===id);
+    if(w && isSetLocked(w)){
+      gateToast(`Finish ${prevSetLabel(w)} first to unlock ${w.label}.`);
+      return;
+    }
+  }
+  // Remember how far the student had scrolled the set they're leaving.
+  const leaving = document.querySelector('.week-panel.active');
+  if(leaving && leaving.dataset.id && leaving.dataset.id!==id){
+    setScrollPos[leaving.dataset.id] = window.scrollY;
+  }
   lastSetId = id;
   if (typeof stopAnyRec === 'function') stopAnyRec();
   document.querySelectorAll('.wpill').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
@@ -1453,6 +1536,8 @@ function activateSet(id){
   document.querySelectorAll('.module-songs').forEach(el=>el.classList.toggle('active', parseInt(el.dataset.module)===activeMod));
   renderChordBoxes();
   syncRailStations();   // refresh the rail's "This set" station switcher for the new set
+  // Restore where the student last was in this set — or top on a first open.
+  window.scrollTo(0, Object.prototype.hasOwnProperty.call(setScrollPos, id) ? setScrollPos[id] : 0);
 }
 
 /* ── Rail station switcher ─────────────────────────────────────────────
@@ -2078,7 +2163,7 @@ function goToSet(setId){
   saveProgress();
   const pill = document.querySelector(`.wpill[data-id="${setId}"]`);
   if(pill) pill.scrollIntoView({block:'nearest', inline:'nearest'});
-  window.scrollTo({top:0, behavior:'smooth'});
+  // activateSet() already restored this set's scroll (or top on first open).
 }
 
 function isReviewPanelLocked(mrId){
@@ -2968,6 +3053,7 @@ function showSkillLesson(wid, n){
 /* Deep-link to one step (used by search results): activate module + set,
    switch to its station tab, open the section, scroll + flash the step. */
 async function jumpToStep(moduleNum, wid, station, secIdx, stepIdx){
+  if(await gatedJumpGuard(moduleNum, wid)) return;
   const sel = document.getElementById('module-select');
   if(sel) sel.value = String(moduleNum);
   await onModuleChange(moduleNum, wid);
@@ -3095,7 +3181,7 @@ async function songHubGoModule(m){
   await onModuleChange(m);
   saveProgress();
   closeTopPanels('');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // onModuleChange → activateSet restored the target set's scroll (top if new).
 }
 
 /* ── 🔍 Site search: steps, skills, and set titles across all modules ── */
@@ -3182,8 +3268,22 @@ async function searchGo(moduleNum, wid, station, secIdx, stepIdx){
   closeTopPanels('');
   await jumpToStep(moduleNum, wid, station, secIdx, stepIdx);
 }
+// Search / deep-link guard: if the jump target is gated, land the student on
+// the module (their frontier) and tell them why, rather than trying to reveal a
+// hidden locked panel. Returns true when it handled a locked target.
+async function gatedJumpGuard(moduleNum, wid){
+  const w = SETS.find(x => x.id === wid);
+  if(!(w && isSetLocked(w))) return false;
+  const sel = document.getElementById('module-select');
+  if(sel) sel.value = String(moduleNum);
+  await onModuleChange(moduleNum);
+  saveProgress();
+  gateToast(`${w.label} unlocks after you finish ${prevSetLabel(w)}.`);
+  return true;
+}
 async function searchGoSkill(moduleNum, wid, skillNum){
   closeTopPanels('');
+  if(await gatedJumpGuard(moduleNum, wid)) return;
   const sel = document.getElementById('module-select');
   if(sel) sel.value = String(moduleNum);
   await onModuleChange(moduleNum, wid);
@@ -3194,11 +3294,12 @@ async function searchGoSkill(moduleNum, wid, skillNum){
 }
 async function searchGoSet(moduleNum, wid){
   closeTopPanels('');
+  if(await gatedJumpGuard(moduleNum, wid)) return;
   const sel = document.getElementById('module-select');
   if(sel) sel.value = String(moduleNum);
   await onModuleChange(moduleNum, wid);
   saveProgress();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // onModuleChange → activateSet restored the target set's scroll (top if new).
 }
 
 /* ════════════════════════════════════════════════
