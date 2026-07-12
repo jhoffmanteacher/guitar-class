@@ -1888,9 +1888,22 @@ function buildDaily5(){
   items+=li(1,'Tune up','&mdash; all six strings to green with the corner Tuner.');
   items+=li(2,'Warm-up',`&mdash; ${escHtml(wu.text)}<br>${routinePlaySeq(wu,'bpm:daily5:wu')}`);
   if(pick) items+=li(2,'Today’s drill',`&mdash; from Module ${num}, ${escHtml(pick.set.label)}: ${escHtml(truncateText(stripTags(pick.step.text),160))}<br>${routinePlaySeq(pick.step.playSeq,'bpm:daily5:drill')}`);
-  const challenge=`<details class="daily5-break"><summary>&#x1F3D4; On a break? The 15-Day Challenge</summary>
-    <p class="daily5-break-note">Five minutes a day keeps your hands ready between Modules 8 and 9 (or any time off). One line a day:</p>
-    <ol class="daily5-challenge">${WINTER_CHALLENGE.map(t=>`<li>${escHtml(t)}</li>`).join('')}</ol></details>`;
+  /* Challenge Day: every third day the Daily 5 offers ONE extra challenge to
+     pick from a pair — drawn ONLY from modules the student has reached, so an
+     early-module student never sees barre chords or fingerpicking. */
+  let challenge='';
+  if(doy % 3 === 0){
+    const elig=WINTER_CHALLENGE.filter(c=>c.minModule<=num);
+    if(elig.length){
+      const a=elig[doy % elig.length];
+      const b=elig.length>1 ? elig[(doy + (doy % (elig.length-1)) + 1) % elig.length] : null;
+      const opts=(b && b!==a) ? [a,b] : [a];
+      challenge=`<div class="daily5-challengeday">
+        <div class="daily5-challengeday-head">&#x1F3D4; Challenge Day! Pick ONE (all skills you already know):</div>
+        <ul class="daily5-challenge">${opts.map(c=>`<li>${escHtml(c.text)}</li>`).join('')}</ul>
+      </div>`;
+    }
+  }
   const backBtn = _daily5ReturnY!=null ? `<button type="button" class="daily5-back" onclick="daily5Return()">&#x21A9; Done — back to my set</button>` : '';
   return `<div class="daily5-head"><span>&#x26A1; Daily 5 &mdash; today’s warm-up</span><span style="display:flex;gap:10px;align-items:center">${backBtn}<button type="button" class="tp-close" onclick="toggleDaily5()" aria-label="Close Daily 5">&#x2715;</button></span></div>
     <ol class="routine-list">${items}</ol>${challenge}`;

@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — Challenge Day replaces the always-on 15-Day list
+
+### Changed
+- **The 15-Day Challenge list no longer shows challenges you can't do
+  yet.** Instead of the full list (which mentioned barre chords and
+  fingerpicking to Module 1 students), every third day your Daily 5 ends
+  with a **🏔 Challenge Day** — pick one of two challenges, drawn only
+  from skills your current module has already covered. Same ideas, right
+  timing.
+
 ## 2026-07-11 — Games get their own page, the site gets clearer everywhere
 
 ### Added

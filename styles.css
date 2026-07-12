@@ -998,3 +998,7 @@ body.games-open{overflow:hidden}
   .games-shell{padding:12px 10px 30px}
   .games-stage{padding:12px}
 }
+
+/* ── Challenge Day (occasional, module-gated pick-one inside the Daily 5) ── */
+.daily5-challengeday{margin-top:12px;border-top:1px solid var(--border);padding-top:10px}
+.daily5-challengeday-head{font-size:0.875rem;font-weight:700;color:var(--amber-text);margin-bottom:5px}
