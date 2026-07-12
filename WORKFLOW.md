@@ -55,6 +55,19 @@
       `searchGoSet` that were forcing top and causing the "sometimes scrolled,
       sometimes not" inconsistency. Verified: first open → top(0); leave at 500 →
       return restores 500; second set restores its own 300.
+- [x] **Harden the gate + scroll** (Jonathan, 2026-07-12, worktree `worktree-jh-session`) —
+      Two follow-ups to the two items above, browser-verified. (1) **Previewer
+      bypass:** new `isGatePreviewer()` (dev-bypass user via `isDevBypassUser()`,
+      or a login as `TEACHER_EMAIL`) makes `isSetLocked` and `isModuleReviewLocked`
+      return unlocked, so a teacher/dev previewing the *student* app sees every
+      Set + Module Review without grinding skills; the static `locked/comingSoon`
+      flag still hides unbuilt content for everyone. Normal students are
+      unaffected (verified: student ctx still gates m4 Set 2/3 + review).
+      (2) **Scroll survives reload:** `setScrollPos` now hydrates from / persists
+      to `localStorage['gc-scroll']` (same `gc-` convention as gc-lastSet), saved
+      on set-leave and on `pagehide`/`visibilitychange:hidden`; `window.scrollTo`
+      clamps so a stale offset can't overscroll. Verified: reload → m4w2 restored
+      to 250, a never-opened set still opens at top. Not pushed yet.
 - [ ] **Research backlog (medium/low)** — stored One-Minute-Changes
       scores, tempo-ladder playSeq, Song Journey anatomy sections, bends,
       7th/sus chord color, songwriting capstone, Choice-song style lanes,
