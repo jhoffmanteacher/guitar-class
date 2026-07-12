@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-12 — The Games hub matches the rest of the site now
+
+### Changed
+- **The Guitar Games arcade screen's colors now come from the same palette as
+  the rest of the site**, instead of a grab-bag of unrelated rainbow hues. The
+  colored stripe on top of each game card is now built from the site's own
+  blue, green, amber, and purple, plus one pink accent for variety — so a
+  screenshot of the games hub and the regular practice pages now reads as one
+  product instead of two. The arcade screen still keeps its own bold, after-dark
+  look — this only changes where the colors come from.
+
 ## 2026-07-12 — A tidier "Songs" spot, and a sidebar that gets out of the way
 
 ### Changed
