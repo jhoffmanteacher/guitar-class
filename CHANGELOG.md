@@ -5,6 +5,32 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-12 — Work each module in order, and pages remember your place
+
+### Added
+- **Sets now unlock in order.** Within a module, each Set stays locked until you
+  finish the one before it — "finished" meaning every skill in it is marked
+  **"I've got it!"** (the same bar the Module review already used). A locked Set
+  shows a 🔒 and, if you tap it, a quick reminder of which Set to finish first.
+  Set 1 is always open, and the next Set unlocks the moment you check off the
+  last skill of the current one. This keeps everyone on the intended path
+  instead of skipping ahead.
+
+### Fixed
+- **Pages open where you left them.** Returning to a Set you were already working
+  on now drops you back at the same spot you'd scrolled to, while a Set you're
+  opening for the first time starts cleanly at the top. Before, a page would
+  sometimes open already scrolled part-way down for no clear reason.
+
+## 2026-07-12 — Change Up game: pick how fast the chords switch
+
+### Added
+- **The Change Up game now lets you choose how often the chord changes** —
+  **every bar** (the original), **every 2 beats**, or **every beat**. Faster
+  settings pack more changes into a round, so you can push your switching speed
+  toward the pace real songs actually move. Your best BPM is now saved separately
+  for each speed, so beating your "every beat" record is its own goal.
+
 ## 2026-07-12 — New: practice for faster chord changes
 
 ### Added

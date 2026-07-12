@@ -1319,7 +1319,9 @@ function gamesRenderHub(p){
   let ccBest = 0;
   try {
     for (const pr of CC_PROGRESSIONS){
-      ccBest = Math.max(ccBest, parseInt(sessionStorage.getItem(ccBestKey(pr)), 10) || 0);
+      for (let ri = 0; ri < CC_RATES.length; ri++){
+        ccBest = Math.max(ccBest, parseInt(sessionStorage.getItem(ccBestKey(pr, ri)), 10) || 0);
+      }
     }
   } catch(e){}
   const ccChip = ccBest ? `<span class="games-card-best">&#x1F3C6; best today: ${ccBest} BPM</span>` : '';
@@ -1454,7 +1456,14 @@ const CC_PROGRESSIONS = [
   { chords: ['A','D','E'] }, { chords: ['G','C','D'] }, { chords: ['Am','C','G'] },
   { chords: ['C','G','Am','F'] }, { chords: ['G','D','Em','C'] }, { chords: ['Am','F','C','G'] }
 ];
-const CC_BARS = 8;                 // 8 bars ≈ 7 graded changes per round
+/* How often the chord switches. bpc = beats per chord; slots = chord positions
+   in a round (so slots − 1 graded changes). Faster rates run fewer slots so the
+   round stays a sensible length — every-bar ≈ 32 beats, every-beat ≈ 16. */
+const CC_RATES = [
+  { id: 'bar',  bpc: 4, slots: 8,  short: 'Every bar',     sub: '4 beats each' },
+  { id: 'half', bpc: 2, slots: 12, short: 'Every 2 beats', sub: 'half bar' },
+  { id: 'beat', bpc: 1, slots: 16, short: 'Every beat',    sub: 'one per beat' }
+];
 const CC_BPM_MIN = 40, CC_BPM_MAX = 140;
 
 let cc = null, ccRaf = null;
@@ -1470,17 +1479,19 @@ function ccStop(){
 
 function ccBody(){ return document.getElementById('cc-body'); }
 function ccProgLabel(prog){ return prog.chords.join(' → '); }
-function ccBestKey(prog){ return 'ccBest:' + prog.chords.join('-'); }
+function ccBestKey(prog, rateIdx){ return 'ccBest:' + prog.chords.join('-') + ':' + (CC_RATES[rateIdx] ? CC_RATES[rateIdx].id : 'bar'); }
 
 function ccSetup(){
-  let progIdx = 0, bpm = 60;
+  let progIdx = 0, bpm = 60, rateIdx = 0;
   try {
     progIdx = parseInt(sessionStorage.getItem('ccProg'), 10);
     bpm = parseInt(sessionStorage.getItem('ccBpm'), 10);
+    rateIdx = parseInt(sessionStorage.getItem('ccRate'), 10);
   } catch(e){}
   if (!(progIdx >= 0 && progIdx < CC_PROGRESSIONS.length)) progIdx = 0;
   if (!(bpm >= CC_BPM_MIN && bpm <= CC_BPM_MAX)) bpm = 60;
-  cc = { phase: 'setup', progIdx, bpm, micOn: false, timeouts: [] };
+  if (!(rateIdx >= 0 && rateIdx < CC_RATES.length)) rateIdx = 0;
+  cc = { phase: 'setup', progIdx, rateIdx, bpm, micOn: false, timeouts: [] };
   ccRenderSetup();
 }
 
@@ -1488,6 +1499,13 @@ function ccPickProg(i){
   if (!cc) return;
   cc.progIdx = i;
   try { sessionStorage.setItem('ccProg', String(i)); } catch(e){}
+  ccRenderSetup();
+}
+
+function ccPickRate(i){
+  if (!cc) return;
+  cc.rateIdx = i;
+  try { sessionStorage.setItem('ccRate', String(i)); } catch(e){}
   ccRenderSetup();
 }
 
@@ -1522,11 +1540,19 @@ function ccRenderSetup(msg){
     ).join('') + `</div></div>`
   ).join('');
   const prog = CC_PROGRESSIONS[cc.progIdx];
+  const rate = CC_RATES[cc.rateIdx] || CC_RATES[0];
   let best = 0;
-  try { best = parseInt(sessionStorage.getItem(ccBestKey(prog)), 10) || 0; } catch(e){}
+  try { best = parseInt(sessionStorage.getItem(ccBestKey(prog, cc.rateIdx)), 10) || 0; } catch(e){}
+  const rateBtns = CC_RATES.map((r, i) =>
+    `<button type="button" class="ts-btn${i === cc.rateIdx ? ' active' : ''}" onclick="ccPickRate(${i})">${escHtml(r.short)}<span class="cc-rate-sub">${escHtml(r.sub)}</span></button>`
+  ).join('');
+  const tipRate = rate.bpc === 4 ? 'each bar (one group of 4 beats)'
+    : rate.bpc === 2 ? 'every 2 beats (twice a bar)'
+    : 'every single beat';
   body.innerHTML =
     (msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '') +
     pills +
+    `<div class="cc-group"><div class="cc-group-title">How fast the chord switches</div><div class="fret-levels">${rateBtns}</div></div>` +
     ccDiagramsHtml(prog.chords, null) +
     `<div class="coach-bpm-row">
        <button type="button" class="tp-btn" onclick="ccNudgeBpm(-5)">&#x2212;5</button>
@@ -1534,8 +1560,8 @@ function ccRenderSetup(msg){
        <button type="button" class="tp-btn" onclick="ccNudgeBpm(5)">+5</button>
        ${best ? `<span class="cc-best">Best today: ${best} BPM</span>` : ''}
      </div>
-     <div class="coach-tip">&#x1F92B; Quiet room, guitar close to the mic. 4 count-in clicks, then <strong>strum on every beat</strong> — the chord switches each bar (one group of 4 beats), and beat 1 of the new bar is what I&rsquo;m grading. The click is silent: watch the beat dots.</div>
-     <button type="button" class="coach-start" onclick="ccStart()">&#x25B6; Start &mdash; ${CC_BARS} bars</button>
+     <div class="coach-tip">&#x1F92B; Quiet room, guitar close to the mic. 4 count-in clicks, then <strong>strum on every beat</strong> — the chord switches ${tipRate}, and every change is what I&rsquo;m grading. The click is silent: watch the beat dots.</div>
+     <button type="button" class="coach-start" onclick="ccStart()">&#x25B6; Start &mdash; ${rate.slots} chords</button>
      ${COACH_FOOT_HTML}`;
 }
 
@@ -1559,15 +1585,17 @@ async function ccStart(){
   stopAllDemoAudio();
 
   const prog = CC_PROGRESSIONS[cc.progIdx].chords;
-  cc.bars = Array.from({ length: CC_BARS }, (_, i) => prog[i % prog.length]);
+  const rate = CC_RATES[cc.rateIdx] || CC_RATES[0];
+  cc.bpc = rate.bpc; cc.slots = rate.slots;
+  cc.seq = Array.from({ length: cc.slots }, (_, i) => prog[i % prog.length]);
   cc.classes = {};
   prog.forEach(n => {
     const midis = (typeof chordMidis === 'function') ? chordMidis(n) : [];
     cc.classes[n] = midis.map(m => ((m % 12) + 12) % 12);
   });
   cc.changes = [];
-  for (let b = 1; b < CC_BARS; b++){
-    cc.changes.push({ beat: b * 4, from: cc.bars[b - 1], to: cc.bars[b], result: null, pend: null });
+  for (let s = 1; s < cc.slots; s++){
+    cc.changes.push({ beat: s * cc.bpc, from: cc.seq[s - 1], to: cc.seq[s], result: null, pend: null });
   }
   cc.beatMs = 60000 / cc.bpm;
   cc.smoothRms = 0; cc.smoothHf = 0; cc.lastOnsetT = -1e9; cc.gridOffset = 0; cc.lastBeat = -1; cc.frameNo = 0;
@@ -1589,28 +1617,28 @@ function ccRenderPlay(){
   ).join('');
   body.innerHTML =
     `<div class="cc-now">
-       <div class="cc-chord" id="cc-chord">${escHtml(cc.bars[0])}</div>
-       <div class="cc-next" id="cc-next">next: ${escHtml(cc.bars[1])}</div>
+       <div class="cc-chord" id="cc-chord">${escHtml(cc.seq[0])}</div>
+       <div class="cc-next" id="cc-next">next: ${escHtml(cc.seq[1])}</div>
      </div>
      <div class="cc-beats" id="cc-beats"><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span></div>
-     ${ccDiagramsHtml(CC_PROGRESSIONS[cc.progIdx].chords, cc.bars[0])}
+     ${ccDiagramsHtml(CC_PROGRESSIONS[cc.progIdx].chords, cc.seq[0])}
      <div class="coach-strip">${chips}</div>
      <div class="coach-live"><span class="coach-live-dot"></span>Strum every beat — the dots show the beat</div>
      <button type="button" class="tp-btn coach-stop" onclick="ccFinish()">&#x25A0; Stop</button>`;
 }
 
 function ccBeatTick(cur){
-  const bar = Math.floor(cur / 4), beatInBar = cur % 4;
-  if (bar >= CC_BARS) return;
+  const slotIdx = Math.floor(cur / cc.bpc), beatInBar = cur % 4;
+  if (slotIdx >= cc.slots) return;
   const chordEl = document.getElementById('cc-chord');
   const nextEl = document.getElementById('cc-next');
-  if (chordEl && chordEl.textContent !== cc.bars[bar]){
-    chordEl.textContent = cc.bars[bar];
+  if (chordEl && chordEl.textContent !== cc.seq[slotIdx]){
+    chordEl.textContent = cc.seq[slotIdx];
     document.querySelectorAll('.cc-dia').forEach(el => el.classList.remove('cur'));
-    const dia = document.getElementById('cc-dia-' + cc.bars[bar]);
+    const dia = document.getElementById('cc-dia-' + cc.seq[slotIdx]);
     if (dia) dia.classList.add('cur');
   }
-  if (nextEl) nextEl.textContent = bar + 1 < CC_BARS ? 'next: ' + cc.bars[bar + 1] : 'last bar!';
+  if (nextEl) nextEl.textContent = slotIdx + 1 < cc.slots ? 'next: ' + cc.seq[slotIdx + 1] : 'last one!';
   document.querySelectorAll('#cc-beats .cc-pip').forEach((el, i) => el.classList.toggle('on', i === beatInBar));
 }
 
@@ -1664,7 +1692,9 @@ function ccLoop(){
       const beatIdx = Math.round(rel / cc.beatMs);
       const dev = rel - beatIdx * cc.beatMs;
       if (Math.abs(dev) < cc.beatMs * 0.5) cc.gridOffset += dev * 0.25;
-      const win = Math.max(260, cc.beatMs * 0.5);
+      // Cap the match window at half the spacing between changes (bpc beats) so a
+      // single strum can't land inside two adjacent change windows at fast rates.
+      const win = Math.min(cc.beatMs * cc.bpc * 0.5, Math.max(220, cc.beatMs * 0.5));
       const ch = cc.changes.find(c => c.result === null && !c.pend &&
         Math.abs(c.beat * cc.beatMs - rel) <= win);
       if (ch) ch.pend = { t: now, readings: [] };
@@ -1702,7 +1732,7 @@ function ccLoop(){
     const cur = Math.floor((now - cc.listenStart - cc.gridOffset) / cc.beatMs);
     if (cur !== cc.lastBeat && cur >= 0){ cc.lastBeat = cur; ccBeatTick(cur); }
 
-    if (now > cc.listenStart + (CC_BARS * 4 + 1) * cc.beatMs){ ccFinish(); return; }
+    if (now > cc.listenStart + (cc.slots * cc.bpc + 1) * cc.beatMs){ ccFinish(); return; }
   }
   ccRaf = requestAnimationFrame(ccLoop);
 }
@@ -1745,13 +1775,14 @@ function ccRenderDone(){
     verdict = '&#x1F31F; ' + ok + ' of ' + total + ' changes on time — you can play at that speed now.';
     advice = 'Level up: try it 10 BPM faster.';
     try {
-      const k = ccBestKey(prog);
+      const k = ccBestKey(prog, cc.rateIdx);
       const best = parseInt(sessionStorage.getItem(k), 10) || 0;
       if (cc.bpm > best) sessionStorage.setItem(k, String(cc.bpm));
     } catch(e){}
   } else if (r >= 0.5){
+    const early = cc.bpc >= 4 ? 'start moving your fingers on beat 4' : cc.bpc === 2 ? 'start moving your fingers a beat early' : 'start moving the instant the last chord sounds';
     verdict = '&#x1F4AA; ' + ok + ' of ' + total + ' changes worked' + (off ? ' (' + off + ' were on time but sounded messy)' : '') + '.';
-    advice = worst ? ('Practice just ' + worst + ' on its own — start moving your fingers on beat 4.') : 'Try it again at this speed until it feels steady.';
+    advice = worst ? ('Practice just ' + worst + ' on its own — ' + early + '.') : 'Try it again at this speed until it feels steady.';
   } else {
     verdict = '&#x1F3B8; ' + ok + ' of ' + total + ' — this speed is too fast for now.';
     advice = 'That’s completely fine: drop 10 BPM — slow and smooth is better than fast and messy, every time.';

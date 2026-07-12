@@ -88,7 +88,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .wpill{padding:8px 16px;font-size:0.9375rem;border:1px solid var(--border2);border-radius:20px;background:var(--bg);color:var(--text2);cursor:pointer;transition:all 0.15s;position:relative}
 .wpill:hover:not(.locked){border-color:var(--text2);color:var(--text)}
 .wpill.active{background:var(--text);color:var(--bg);border-color:var(--text)}
-.wpill.locked{opacity:.35;cursor:default}
+.wpill.locked{opacity:.5;cursor:pointer}
+/* Sequential-gate lock: a 🔒 before a set that isn't unlocked yet. The review
+   pill has its own lock rule below, so exclude it to avoid two padlocks. */
+.wpill.locked:not(.review-pill)::before{content:'\1F512';margin-right:5px;font-size:0.8125rem;opacity:.85}
 .wpill.complete:not(.active){background:var(--green-bg);color:var(--green-text);border-color:var(--green-text)}
 .wpill-check{font-weight:700;margin-right:5px}
 .wpill-frac{font-size:0.75rem;margin-left:1px;font-variant-numeric:tabular-nums;color:var(--amber-text)}
@@ -109,6 +112,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .mr-locked-banner-icon{font-size:1.125rem;line-height:1.4;flex-shrink:0}
 .reflection-ta{width:100%;box-sizing:border-box;border:1px solid var(--border2);border-radius:var(--radius);padding:10px 13px;font-size:0.9375rem;font-family:inherit;font-weight:500;color:var(--text);background:var(--bg);resize:vertical;min-height:68px;line-height:1.5}
 .reflection-ta::placeholder{color:var(--text2);font-weight:400}
+/* Transient hint toast (e.g. tapping a locked set) — self-made element, no markup needed. */
+#gate-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(8px);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:0.9rem;font-weight:600;line-height:1.4;box-shadow:0 6px 24px rgba(0,0,0,.28);opacity:0;pointer-events:none;z-index:9999;max-width:min(90vw,360px);text-align:center;transition:opacity .18s ease,transform .18s ease}
+#gate-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .reflection-ta:focus{outline:none;border-color:var(--text2)}
 .reflection-ta:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 .week-panel[data-id^="mr"] .albl{color:var(--text);font-weight:600}
@@ -955,6 +961,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .cc-group-title{font-size:0.75rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
 .cc-group .fret-levels{flex-wrap:wrap}
 .cc-group .ts-btn{flex:0 0 auto;padding:4px 12px;white-space:nowrap}
+.cc-rate-sub{display:block;font-size:0.66rem;font-weight:400;opacity:0.68;margin-top:1px}
 .cc-best{font-size:0.7812rem;font-weight:600;color:var(--green-text);margin-left:6px}
 .cc-diagrams{margin:8px 0}
 .cc-dia{opacity:0.75;border-radius:8px;padding:2px;transition:opacity .15s,box-shadow .15s}
