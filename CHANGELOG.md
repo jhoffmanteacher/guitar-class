@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — Two games that need your real guitar: Riff Roulette and Strum Radar
+
+### Added
+- **Riff Roulette** — spin for a short real-guitar challenge picked from your
+  current module ("E5 to A5, 10 clean changes at 70 BPM"). The metronome
+  starts by itself, a timer runs, and when it ends you score yourself: Got it
+  (full points), Almost (half points — the card comes back later today), or
+  Not yet. Three scored cards finish your daily set, and finishing a set
+  every day builds a streak. Score yourself honestly — honest answers help
+  you get better faster.
+- **Strum Radar** — strum a real pattern on your real guitar and the mic
+  checks your timing. Pick a pattern and tempo, hold any chord you know, and
+  after the count-in the radar listens quietly (no click during the round —
+  it would hear itself) and marks every strum on time, early, or missed. It
+  hears WHEN you strum, not which direction — follow the arrows with your
+  arm anyway. Like all listening on this site, nothing is recorded or
+  uploaded.
+
 ## 2026-07-11 — Chord checks that hear real strums, and a pop-up Daily 5
 
 ### Changed

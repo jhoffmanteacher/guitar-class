@@ -342,7 +342,7 @@ async function coachAcquireMicInner(){
 function coachReleaseMicIfIdle(){
   setTimeout(() => {
     const active = (coach && (coach.phase === 'countin' || coach.phase === 'listening')) ||
-                   fretRunning || (cc && cc.micOn);
+                   fretRunning || (cc && cc.micOn) || (sr && sr.micOn);
     if (!active) coachMicOff();
   }, 0);
 }
@@ -1242,11 +1242,14 @@ function gamesStopMic(){
   ccStop();
   cbStop();
   shStop();
+  rrStop();
+  srStop();
   const screen = document.getElementById('games-screen');
   const p = document.getElementById('games-panel');
   if (screen && !screen.hasAttribute('hidden') && p &&
       (document.getElementById('fret-body') || document.getElementById('cc-body') ||
-       document.getElementById('cb-body') || document.getElementById('sh-body'))){
+       document.getElementById('cb-body') || document.getElementById('sh-body') ||
+       document.getElementById('rr-body') || document.getElementById('sr-body'))){
     gamesRenderHub(p);
   }
 }
@@ -1280,6 +1283,24 @@ function gamesRenderHub(p){
     if (b) shBest = Math.max(shBest, b.score);
   }
   const shChip = shBest ? `<span class="games-card-best">&#x1F3C6; best today: ${shBest}</span>` : '';
+  let srBest = 0;
+  for (const pat of SH_PATTERNS){
+    const b = srBestRead(pat.id);
+    if (b) srBest = Math.max(srBest, b.acc);
+  }
+  const srChip = srBest ? `<span class="games-card-best">&#x1F3C6; best today: ${srBest}%</span>` : '';
+  let rrChip = '';
+  const rrG = (typeof games !== 'undefined' && games && games.rr) || null;
+  if (rrStreakAlive(rrG)){
+    rrChip = `<span class="games-card-best">&#x1F525; ${rrG.streak}-day streak</span>`;
+  } else {
+    let rrPts = 0, rrDay = '';
+    try {
+      rrPts = parseInt(sessionStorage.getItem('rrPts'), 10) || 0;
+      rrDay = sessionStorage.getItem('rrDay') || '';
+    } catch(e){}
+    if (rrPts > 0 && rrDay === rrDayStr(new Date())) rrChip = `<span class="games-card-best">&#x2B50; ${rrPts} points today</span>`;
+  }
   p.innerHTML =
     `<div class="games-tagline">Some games listen to your guitar. Others just need your eyes and a tapping finger.</div>
      <div class="games-grid">
@@ -1305,6 +1326,18 @@ function gamesRenderHub(p){
          <span class="games-card-title">Strum Hero</span>
          <span class="games-card-desc">Tap the strums in time — down-up arrows on a scrolling lane. Your rhythm, graded.</span>
          ${shChip}
+       </button>
+       <button type="button" class="games-card gc-radar" onclick="gamesShow('radar')">
+         <span class="games-card-ico">&#x1F4E1;</span>
+         <span class="games-card-title">Strum Radar</span>
+         <span class="games-card-desc">Strum a real pattern on your real guitar — the mic checks your timing, not your notes.</span>
+         ${srChip}
+       </button>
+       <button type="button" class="games-card gc-roulette" onclick="gamesShow('roulette')">
+         <span class="games-card-ico">&#x1F3B0;</span>
+         <span class="games-card-title">Riff Roulette</span>
+         <span class="games-card-desc">Spin for a short real-guitar challenge from your module. Score yourself honestly — you are the judge.</span>
+         ${rrChip}
        </button>
      </div>
      ${COACH_FOOT_HTML}`;
@@ -1336,6 +1369,16 @@ function gamesShow(view){
   if (view === 'strum'){
     p.innerHTML = gamesHeadHtml('&#x1F3B8; Strum Hero', true) + `<div id="sh-body"></div>`;
     shSetup();
+    return;
+  }
+  if (view === 'radar'){
+    p.innerHTML = gamesHeadHtml('&#x1F4E1; Strum Radar', true) + `<div id="sr-body"></div>`;
+    srSetup();
+    return;
+  }
+  if (view === 'roulette'){
+    p.innerHTML = gamesHeadHtml('&#x1F3B0; Riff Roulette', true) + `<div id="rr-body"></div>`;
+    rrSetup();
     return;
   }
 }
@@ -2429,4 +2472,849 @@ function shAgain(d){
   try { sessionStorage.setItem('shBpm', String(sh.bpm)); } catch(e){}
   sh.phase = 'setup';
   shStart();
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   RIFF ROULETTE — a practice spinner for the real guitar. Spin, get a
+   short challenge from your current module, do it over a metronome and
+   a countdown, then score yourself. Honesty is the whole game: the
+   points are only worth what the practice was. No mic — the guitar in
+   the student's hands is the input; the buttons are the judge. Three
+   scored cards make the daily set; finishing one keeps a Firestore
+   streak alive (games.rr), everything else is session-scoped like the
+   other games' "today" numbers.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* The card bank. Draw pool = cards whose module range contains the
+   student's current module (lastModuleNum), so a challenge never asks
+   for anything the class hasn't taught yet. Early-module cards age out
+   (maxModule) so a Module 6 student isn't dealt open-string plucking.
+   bpm null = no metronome (holds, stretches, count-your-changes cards);
+   double = worth 200 instead of 100. */
+const RR_CARDS = [
+  /* Module 1 — open strings, thumb strums */
+  { text: 'Strum all 6 strings slowly with your thumb, one strum per click. Make every strum soft and even.',
+    bpm: 60, secs: 30, minModule: 1, maxModule: 3 },
+  { text: 'Pluck only the A string (5th string) 8 times, counting "1-2-3-4, 1-2-3-4" out loud.',
+    bpm: null, secs: 30, minModule: 1, maxModule: 3 },
+  { text: 'Say the string names from thickest to thinnest — E, A, D, G, B, E — and pluck each string as you say it. Do the whole trip 3 times.',
+    bpm: null, secs: 45, minModule: 1, maxModule: 3 },
+  { text: 'Pluck the low E string (the thickest one) 4 times, then the A string 4 times, then D, then G. Stay with the click.',
+    bpm: 60, secs: 40, minModule: 1, maxModule: 3 },
+  /* Module 2 — notes on the E & A strings */
+  { text: 'On the low E string, play frets 0-1-2-3 going up, then 3-2-1-0 coming back. One note per click, over and over.',
+    bpm: 60, secs: 45, minModule: 2, maxModule: 5 },
+  { text: 'Find G on the low E string (fret 3) and play it 5 times. Let every note ring — no buzz.',
+    bpm: null, secs: 30, minModule: 2, maxModule: 5 },
+  { text: 'Walk E-F-G on the low E string (open, fret 1, fret 3) up and back, one note per click.',
+    bpm: 60, secs: 45, minModule: 2, maxModule: 5 },
+  { text: 'On the A string, play A-B-C (open, fret 2, fret 3) up and back, one note per click.',
+    bpm: 60, secs: 45, minModule: 2, maxModule: 5 },
+  /* Module 3 — power chords, palm mute, Seven Nation Army */
+  { text: 'Play E5 for 4 clicks, then A5 for 4 clicks. Keep switching until the timer ends.',
+    bpm: 70, secs: 45, minModule: 3 },
+  { text: 'Palm mute E5 (rest the side of your strumming hand on the strings, right by the bridge) and play 8 short chugs per group of 4 clicks.',
+    bpm: 80, secs: 40, minModule: 3 },
+  { text: 'Play the Seven Nation Army riff 4 times in a row without stopping. Stay with the click.',
+    bpm: 90, secs: 60, minModule: 3 },
+  { text: 'Power-chord ladder: E5 → G5 → A5, one strum each, 2 clicks per chord — then come back down.',
+    bpm: 70, secs: 45, minModule: 3 },
+  /* Module 4 — minor pentatonic Pattern 1, alternate picking */
+  { text: 'Play minor pentatonic Pattern 1 going up, one note per click. Strict alternate picking: down-up-down-up.',
+    bpm: 60, secs: 60, minModule: 4 },
+  { text: 'Loop the first 4 notes of Pattern 1 with alternate picking. Keep the down-up motion steady the whole time.',
+    bpm: 70, secs: 45, minModule: 4 },
+  { text: 'Play Pattern 1 up AND back down without stopping. Miss a note? Keep going — do not restart.',
+    bpm: 60, secs: 60, minModule: 4 },
+  /* Module 5 — open chords */
+  { text: 'Em to Am, one strum each: switch as many times as you can. Count your clean changes out loud.',
+    bpm: null, secs: 60, minModule: 5 },
+  { text: 'G to C, one strum each: switch as many times as you can before the timer ends.',
+    bpm: null, secs: 60, minModule: 5 },
+  { text: 'Loop Em → C → G with 4 downstrums on each chord. Strum on the click.',
+    bpm: 60, secs: 60, minModule: 5 },
+  { text: 'Simplified F chord: press it, strum once, lift your whole hand off, put it back. Repeat until the timer ends.',
+    bpm: null, secs: 45, minModule: 5 },
+  /* Module 6 — strumming patterns, partial barres */
+  { text: 'Strum D-DU-UDU on Em, over and over. Your hand keeps swinging on the skips — it just misses the strings.',
+    bpm: 70, secs: 60, minModule: 6 },
+  { text: 'Reggae chop on Em: upstrums only, on every "+" between the clicks. Stay silent on the beat itself.',
+    bpm: 70, secs: 45, minModule: 6 },
+  { text: 'G to C with down-up eighths: D-U-D-U-D-U-D-U on each chord, then switch chords without stopping your hand.',
+    bpm: 70, secs: 60, minModule: 6 },
+  { text: 'Bm to Am, one strum each, switching every 4 clicks. Use the small Bm (top 4 strings only).',
+    bpm: 60, secs: 45, minModule: 6 },
+  /* Module 7 — full barre chords */
+  { text: 'Full F barre chord: press, strum once, hold for about 4 seconds, then relax your hand completely. Repeat until the timer ends.',
+    bpm: null, secs: 60, minModule: 7 },
+  { text: 'Make the E-shape barre at fret 1 (that is F), then slide the whole shape up 3 frets and back, strumming once at each stop.',
+    bpm: null, secs: 45, minModule: 7 },
+  /* Module 8 — fingerpicking */
+  { text: 'Fingerpick Am: thumb plays string 5, then your first, second, and third fingers play strings 3, 2, 1 — one at a time, one note per click.',
+    bpm: 60, secs: 60, minModule: 8 },
+  { text: 'Hold Em and let your thumb walk: string 6, string 4, string 6, string 4 — one pluck per click, steady like a heartbeat.',
+    bpm: 60, secs: 45, minModule: 8 },
+  /* Wildcards — any module */
+  { text: 'Play anything you have learned, without stopping, until the timer ends. Mess up? Keep going anyway.',
+    bpm: null, secs: 60, minModule: 1, double: true },
+  { text: 'Eyes closed: play one note or one chord you know 8 times, by feel only.',
+    bpm: null, secs: 30, minModule: 1, double: true },
+  { text: 'Stand up and play anything you know until the timer ends. Standing changes how the guitar sits — go slower if you need to.',
+    bpm: null, secs: 45, minModule: 1 },
+  { text: 'Whisper mode: play anything you know as SOFTLY as you can. Quiet takes more control than loud.',
+    bpm: null, secs: 30, minModule: 1 }
+];
+
+let rr = null;
+
+function rrStop(){
+  if (rr){
+    if (rr.sched){ clearInterval(rr.sched); rr.sched = null; }
+    if (rr.tick){ clearInterval(rr.tick); rr.tick = null; }
+    (rr.timeouts || []).forEach(clearTimeout);
+    rr = null;
+  }
+}
+
+function rrBody(){ return document.getElementById('rr-body'); }
+
+function rrNum(key){
+  try { return parseInt(sessionStorage.getItem(key), 10) || 0; } catch(e){}
+  return 0;
+}
+
+function rrDayStr(d){
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+/* A streak is worth showing only while it's alive — kept up today or
+   still winnable today (last set was yesterday). */
+function rrStreakAlive(g, min){
+  if (!g || !(g.streak >= (min || 2)) || !g.lastDay) return false;
+  const y = new Date();
+  y.setDate(y.getDate() - 1);
+  return g.lastDay === rrDayStr(new Date()) || g.lastDay === rrDayStr(y);
+}
+
+function rrPool(){
+  const m = (typeof lastModuleNum !== 'undefined' && lastModuleNum) || 1;
+  const pool = [];
+  RR_CARDS.forEach((c, i) => {
+    if (c.minModule <= m && (!c.maxModule || m <= c.maxModule)) pool.push(i);
+  });
+  return pool;
+}
+
+function rrQueueRead(){
+  try {
+    const q = JSON.parse(sessionStorage.getItem('rrQueue'));
+    if (Array.isArray(q)) return q.filter(e => e && RR_CARDS[e.idx]);
+  } catch(e){}
+  return [];
+}
+
+function rrQueueWrite(q){
+  try { sessionStorage.setItem('rrQueue', JSON.stringify(q)); } catch(e){}
+}
+
+/* Deal a card: "Almost" cards come back once their spins-out counter
+   runs down; otherwise random from the module pool. Never the same
+   card twice in a row. */
+function rrDraw(){
+  let last = -1;
+  try { last = parseInt(sessionStorage.getItem('rrLast'), 10); } catch(e){}
+  if (isNaN(last)) last = -1;
+  const q = rrQueueRead();
+  q.forEach(e => e.due--);
+  let pick = -1;
+  const di = q.findIndex(e => e.due <= 0 && e.idx !== last);
+  if (di >= 0) pick = q.splice(di, 1)[0].idx;
+  rrQueueWrite(q);
+  if (pick < 0){
+    const pool = rrPool();
+    const avail = pool.filter(i => i !== last);
+    pick = avail.length ? avail[Math.floor(Math.random() * avail.length)] : pool[0];
+  }
+  try { sessionStorage.setItem('rrLast', String(pick)); } catch(e){}
+  return pick;
+}
+
+/* Today's counters live in sessionStorage; a tab left open across
+   midnight would otherwise carry yesterday's set into today — and a
+   carried-over rrDone >= 3 would keep the daily set from ever completing.
+   Called on view entry AND before every spin/skip (not on score: a card
+   dealt at 23:59 still belongs to the day that dealt it). */
+function rrDayReset(){
+  const today = rrDayStr(new Date());
+  let day = '';
+  try { day = sessionStorage.getItem('rrDay') || ''; } catch(e){}
+  if (day !== today){
+    try {
+      sessionStorage.setItem('rrDay', today);
+      sessionStorage.removeItem('rrPts');
+      sessionStorage.removeItem('rrDone');
+      sessionStorage.removeItem('rrSkips');
+      sessionStorage.removeItem('rrQueue');
+      sessionStorage.removeItem('rrLast');
+    } catch(e){}
+  }
+}
+
+function rrSetup(){
+  rrDayReset();
+  rr = { phase: 'setup', timeouts: [] };
+  rrRenderSetup();
+}
+
+function rrRenderSetup(justDone){
+  const body = rrBody();
+  if (!body || !rr) return;
+  const pts = rrNum('rrPts'), done = rrNum('rrDone');
+  const g = (typeof games !== 'undefined' && games && games.rr) || null;
+  const streak = rrStreakAlive(g, 1) ? g.streak : 0;
+  const chips =
+    `<span class="rr-chip">&#x2B50; ${pts} points today</span>
+     <span class="rr-chip">&#x1F0CF; ${Math.min(done, 3)} of 3 cards</span>
+     ${streak ? `<span class="rr-chip streak">&#x1F525; ${streak === 1 ? 'streak started today' : streak + '-day streak'}</span>` : ''}`;
+  body.innerHTML =
+    `<div class="coach-tip rr-center">Spin. Do the card for real, on your guitar. Score yourself honestly.</div>
+     <div class="rr-chips">${chips}</div>
+     ${done >= 3 ? `<div class="rr-done-banner" id="rr-done-banner">&#x1F389; Today&rsquo;s set is done — ${pts} points. Extra spins still count.</div>` : ''}
+     <button type="button" class="coach-start rr-spin-btn" onclick="rrSpin()">&#x1F3B0; SPIN</button>`;
+  if (justDone) rrCelebrate(document.getElementById('rr-done-banner'));
+}
+
+/* Small celebration over the done banner — same particles as the
+   module-strip completion moment. */
+function rrCelebrate(el){
+  if (!el) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const r = el.getBoundingClientRect();
+  ['\u{1F3B8}', '\u{1F3B5}', '\u2B50', '\u{1F3B6}', '\u{1F3B5}', '\u2728'].forEach((ch, i) => {
+    const p = document.createElement('span');
+    p.className = 'celebrate-particle';
+    p.textContent = ch;
+    p.style.left = (r.left + r.width / 2 - 9 + (i - 2.5) * 18) + 'px';
+    p.style.top = (r.top - 4) + 'px';
+    p.style.animationDelay = (i * 60) + 'ms';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1900);
+  });
+}
+
+/* One-line preview for the shuffle animation — the cycling faces are
+   decoration, only the final card needs to be readable. */
+function rrFaceText(card){
+  return card.text.length > 60 ? card.text.slice(0, 57) + '…' : card.text;
+}
+
+function rrSpin(){
+  if (!rr || (rr.phase !== 'setup' && rr.phase !== 'card')) return;
+  rrDayReset();
+  const s = rr;
+  const body = rrBody();
+  if (!body) return;
+  s.phase = 'spin';
+  s.cardIdx = rrDraw();
+  (s.timeouts || []).forEach(clearTimeout);
+  s.timeouts = [];
+  body.innerHTML = `<div class="rr-card"><div class="rr-card-text" id="rr-face">&nbsp;</div></div>`;
+  /* Shuffle: cycle card faces quickly, slowing down, then land on the
+     dealt card. JS timeouts, not CSS animation, so reduced-motion users
+     still see the cycle (it stays decorative either way). */
+  const pool = rrPool();
+  let delay = 0;
+  [70, 70, 80, 90, 100, 110, 130, 150, 180].forEach(ms => {
+    delay += ms;
+    s.timeouts.push(setTimeout(() => {
+      if (rr !== s || s.phase !== 'spin') return;
+      const el = document.getElementById('rr-face');
+      if (!el) return;
+      const i = pool[Math.floor(Math.random() * pool.length)];
+      el.textContent = rrFaceText(RR_CARDS[i]);
+    }, delay));
+  });
+  s.timeouts.push(setTimeout(() => {
+    if (rr !== s || s.phase !== 'spin') return;
+    s.phase = 'card';
+    rrRenderCard();
+  }, delay + 200));
+}
+
+function rrRenderCard(){
+  const body = rrBody();
+  if (!body || !rr) return;
+  const card = RR_CARDS[rr.cardIdx];
+  const skipsLeft = Math.max(0, 2 - rrNum('rrSkips'));
+  body.innerHTML =
+    `<div class="rr-card${card.double ? ' double' : ''}">
+       ${card.double ? '<div class="rr-double">&#x2B50; Double points</div>' : ''}
+       <div class="rr-card-text">${escHtml(card.text)}</div>
+       <div class="rr-card-meta">
+         ${card.bpm ? `<span class="rr-bpm">&#x1F3B5; click at ${card.bpm} BPM</span>` : ''}
+         <span class="rr-secs">&#x23F1; ${card.secs} seconds</span>
+       </div>
+     </div>
+     <button type="button" class="coach-start" onclick="rrStart()">&#x25B6; Start</button>
+     ${skipsLeft ? `<button type="button" class="rr-skip" onclick="rrSkip()">Skip this card (${skipsLeft} skip${skipsLeft === 1 ? '' : 's'} left today)</button>` : ''}`;
+}
+
+/* Two free skips a day — enough to dodge a card that doesn't fit the
+   moment, not enough to fish for an easy one. */
+function rrSkip(){
+  if (!rr || rr.phase !== 'card') return;
+  const skips = rrNum('rrSkips');
+  if (skips >= 2) return;
+  try { sessionStorage.setItem('rrSkips', String(skips + 1)); } catch(e){}
+  rrSpin();
+}
+
+/* One metronome click at an exact audio-clock time — same lookahead
+   voice as Strum Hero's, reading this game's state. */
+function rrClickAt(t, accent){
+  const ctx = rr.ctx;
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.connect(g); g.connect(ctx.destination);
+  o.frequency.value = accent ? 990 : 660;
+  g.gain.setValueAtTime(0.25, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+  o.start(t); o.stop(t + 0.05);
+}
+
+/* Lookahead scheduler: every ~25ms, post the clicks due in the next
+   ~120ms. Beat 1 of each group of 4 is accented. The beat pips ride
+   this interval too — plenty smooth for a decorative pulse. */
+function rrSchedule(){
+  const s = rr;
+  if (!s || s.phase !== 'run' || !s.ctx || !s.spb) return;   // no-metronome card: nothing to schedule
+  const horizon = s.ctx.currentTime + 0.12;
+  while (true){
+    const t = s.startAt + s.nextClick * s.spb;
+    if (t >= horizon) break;
+    rrClickAt(t, s.nextClick % 4 === 0);
+    s.nextClick++;
+  }
+  const beat = Math.floor((s.ctx.currentTime - s.startAt) / s.spb);
+  if (beat !== s.lastBeat && beat >= 0){
+    s.lastBeat = beat;
+    document.querySelectorAll('#rr-beats .cc-pip').forEach((el, i) => el.classList.toggle('on', i === beat % 4));
+  }
+}
+
+async function rrStart(){
+  if (!rr || rr.phase !== 'card') return;
+  coachClose(); coachEvictTuner();   // one mic/audio owner at a time
+  const s = rr;
+  s.phase = 'run';
+  stopAllDemoAudio();
+  /* The click is scheduled on the audio clock and the done-beeps use
+     beep(), which assumes a running context — resume a suspended
+     (autoplay-blocked) one first, with the usual stale guard. */
+  if (typeof getAudioCtx === 'function'){
+    const ctx = getAudioCtx();
+    if (ctx.state === 'suspended'){
+      try { await ctx.resume(); } catch(e){}
+    }
+    if (rr !== s || s.phase !== 'run') return;   // panel switched during the resume
+    s.ctx = ctx;
+  }
+  if (!rrBody()){ rrStop(); return; }
+  const card = RR_CARDS[s.cardIdx];
+  s.endAt = performance.now() + card.secs * 1000;
+  rrRenderRun();
+  if (card.bpm && s.ctx){
+    s.spb = 60 / card.bpm;
+    s.startAt = s.ctx.currentTime + 0.2;
+    s.nextClick = 0;
+    s.lastBeat = -1;
+    if (s.sched) clearInterval(s.sched);
+    s.sched = setInterval(rrSchedule, 25);
+    rrSchedule();
+  }
+  if (s.tick) clearInterval(s.tick);
+  /* 200ms so the finish check can't drift late; display is 1Hz anyway. */
+  s.tick = setInterval(rrTick, 200);
+  rrTick();
+}
+
+function rrRenderRun(){
+  const body = rrBody();
+  if (!body || !rr) return;
+  const card = RR_CARDS[rr.cardIdx];
+  body.innerHTML =
+    `<div class="rr-card${card.double ? ' double' : ''}">
+       ${card.double ? '<div class="rr-double">&#x2B50; Double points</div>' : ''}
+       <div class="rr-card-text">${escHtml(card.text)}</div>
+       ${card.bpm ? `<div class="rr-card-meta"><span class="rr-bpm">&#x1F3B5; ${card.bpm} BPM</span></div>` : ''}
+     </div>
+     ${card.bpm ? '<div class="cc-beats" id="rr-beats"><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span></div>' : ''}
+     <div class="rr-timer" id="rr-timer">${card.secs}</div>
+     <div class="coach-tip rr-center">Play until the timer ends — you score it yourself after.</div>`;
+}
+
+function rrTick(){
+  if (!rr || rr.phase !== 'run'){
+    if (rr && rr.tick){ clearInterval(rr.tick); rr.tick = null; }
+    return;
+  }
+  if (!rrBody()){ rrStop(); return; }   // panel swapped under us
+  const left = rr.endAt - performance.now();
+  const el = document.getElementById('rr-timer');
+  if (el){
+    el.textContent = String(Math.max(0, Math.ceil(left / 1000)));
+    el.classList.toggle('low', left <= 5000);
+  }
+  if (left <= 0) rrTimeUp();
+}
+
+function rrTimeUp(){
+  if (!rr || rr.phase !== 'run') return;
+  const s = rr;
+  if (s.sched){ clearInterval(s.sched); s.sched = null; }
+  if (s.tick){ clearInterval(s.tick); s.tick = null; }
+  s.phase = 'score';
+  /* Same three done-beeps as the FAB timer — the site's "time's up". */
+  if (typeof beep === 'function'){
+    [0, 350, 700].forEach(d => s.timeouts.push(setTimeout(() => { if (rr === s) beep(660, 0.3); }, d)));
+  }
+  rrRenderScore();
+}
+
+function rrRenderScore(){
+  const body = rrBody();
+  if (!body || !rr) return;
+  const card = RR_CARDS[rr.cardIdx];
+  const worth = card.double ? 200 : 100;
+  body.innerHTML =
+    `<div class="rr-time-up">&#x23F0; Time!</div>
+     <div class="coach-tip rr-center">How did it go? Score yourself honestly — honest answers help you get better faster.</div>
+     <div class="rr-score-row">
+       <button type="button" class="rr-score-btn got" onclick="rrScore('got')">
+         <span>&#x2705; Got it</span><span class="rr-score-sub">+${worth} points</span>
+       </button>
+       <button type="button" class="rr-score-btn almost" onclick="rrScore('almost')">
+         <span>&#x1F7E1; Almost</span><span class="rr-score-sub">+${worth / 2} — this card comes back later</span>
+       </button>
+       <button type="button" class="rr-score-btn" onclick="rrScore('not')">
+         <span>Not yet</span><span class="rr-score-sub">+0 — that is okay, try this card another day</span>
+       </button>
+     </div>`;
+}
+
+function rrScore(kind){
+  if (!rr || rr.phase !== 'score') return;
+  const s = rr;
+  const card = RR_CARDS[s.cardIdx];
+  const worth = card.double ? 200 : 100;
+  const pts = kind === 'got' ? worth : kind === 'almost' ? worth / 2 : 0;
+  if (kind === 'almost'){
+    /* Re-queued to reappear after 2–4 more spins today. */
+    const q = rrQueueRead();
+    q.push({ idx: s.cardIdx, due: 2 + Math.floor(Math.random() * 3) });
+    rrQueueWrite(q);
+  }
+  const total = rrNum('rrPts') + pts;
+  const done = rrNum('rrDone') + 1;
+  try {
+    sessionStorage.setItem('rrPts', String(total));
+    sessionStorage.setItem('rrDone', String(done));
+  } catch(e){}
+  if (done === 3) rrSetDone(total);
+  s.phase = 'setup';
+  rrRenderSetup(done === 3);
+}
+
+/* Third scored card of the day = the daily set. That's the one moment
+   this game touches Firestore: bump days/streak/best on games.rr.
+   Skipped in dev bypass (Firestore rejects that uid; the session
+   points above still count). */
+function rrSetDone(ptsTotal){
+  if (typeof saveGames !== 'function' || !currentUser || isDevBypassUser()) return;
+  const today = rrDayStr(new Date());
+  const g = games.rr || {};
+  if (g.lastDay !== today){
+    const y = new Date();
+    y.setDate(y.getDate() - 1);
+    g.streak = g.lastDay === rrDayStr(y) ? (g.streak || 0) + 1 : 1;
+    g.days = (g.days || 0) + 1;
+    g.lastDay = today;
+  }
+  if (ptsTotal > (g.best || 0)) g.best = ptsTotal;
+  games.rr = g;
+  saveGames();
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   STRUM RADAR — Strum Hero on real strings. Same curriculum patterns
+   (SH_PATTERNS), but the student holds any chord and strums an actual
+   guitar; the mic grades WHEN each strum lands using Change Up's onset
+   detector — amplitude/attack spikes only, no pitch anywhere (ringing
+   strings defeat the pitch detector; onsets don't care). Two honest
+   limits, both said out loud in the UI: the mic can't tell a downstrum
+   from an upstrum (arrows are arm guidance, not graded), and the click
+   goes silent after the count-in (the mic would hear the speaker), so
+   the beat grid eases toward the player like Change Up's does.
+   ════════════════════════════════════════════════════════════════════ */
+
+const SR_BARS = 4;                       // half of Strum Hero: one held chord tires the
+                                         // fretting hand, and short rounds mean fast retries
+const SR_BPM_MIN = 50, SR_BPM_MAX = 100; // above ~100, per-eighth onsets blur together
+
+/* Setup hints are radar-specific: Strum Hero's mention the click, and
+   this game's click stops after the count-in. */
+const SR_HINTS = {
+  downs:    'One downstrum on every beat: 1, 2, 3, 4. Count out loud — it helps your arm stay steady on the beat.',
+  eighths:  'Down on every beat, up on every "+". Your arm never stops moving.',
+  faithful: 'Down, down-up, up-down-up. On the dots your arm still swings — it just misses the strings.',
+  reggae:   'Strum only on every "+". Stay silent on the beat — count it in your head.'
+};
+
+let sr = null, srRaf = null;
+
+function srStop(){
+  if (srRaf){ cancelAnimationFrame(srRaf); srRaf = null; }
+  if (sr){
+    (sr.timeouts || []).forEach(clearTimeout);
+    if (sr.micOn) coachMicOff();
+    sr = null;
+  }
+}
+
+function srBody(){ return document.getElementById('sr-body'); }
+function srBestKey(patId){ return 'srBest:' + patId; }
+
+/* Session best per pattern is a JSON {acc, bpm} — best accuracy wins,
+   higher tempo breaks the tie. */
+function srBestRead(patId){
+  try {
+    const b = JSON.parse(sessionStorage.getItem(srBestKey(patId)));
+    if (b && b.acc > 0) return { acc: Math.round(b.acc), bpm: Math.round(b.bpm) || 0 };
+  } catch(e){}
+  return null;
+}
+
+function srSetup(){
+  let patIdx = 0, bpm = 0;
+  try {
+    const pid = sessionStorage.getItem('srPat');
+    const i = SH_PATTERNS.findIndex(p => p.id === pid);
+    if (i >= 0) patIdx = i;
+    bpm = parseInt(sessionStorage.getItem('srBpm'), 10) || 0;
+  } catch(e){}
+  if (!(bpm >= SR_BPM_MIN && bpm <= SR_BPM_MAX)) bpm = Math.min(SR_BPM_MAX, SH_PATTERNS[patIdx].defBpm);
+  sr = { phase: 'setup', patIdx, bpm, micOn: false, timeouts: [] };
+  srRenderSetup();
+}
+
+function srPickPat(i){
+  if (!sr) return;
+  sr.patIdx = i;
+  try { sessionStorage.setItem('srPat', SH_PATTERNS[i].id); } catch(e){}
+  srRenderSetup();
+}
+
+function srNudgeBpm(d){
+  if (!sr) return;
+  sr.bpm = Math.min(SR_BPM_MAX, Math.max(SR_BPM_MIN, sr.bpm + d));
+  try { sessionStorage.setItem('srBpm', String(sr.bpm)); } catch(e){}
+  const el = document.getElementById('sr-bpm-readout');
+  if (el) el.textContent = sr.bpm + ' BPM';
+  else srRenderSetup();
+}
+
+function srRenderSetup(msg){
+  const body = srBody();
+  if (!body || !sr) return;
+  const pills = SH_PATTERNS.map((p, i) =>
+    `<button type="button" class="ts-btn${i === sr.patIdx ? ' active' : ''}" onclick="srPickPat(${i})">${escHtml(p.label)}</button>`
+  ).join('');
+  const pat = SH_PATTERNS[sr.patIdx];
+  const best = srBestRead(pat.id);
+  body.innerHTML =
+    (msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '') +
+    `<div class="cc-group"><div class="cc-group-title">Pattern</div><div class="fret-levels">${pills}</div></div>
+     ${shPatternLineHtml(pat)}
+     <div class="coach-tip">${escHtml(SR_HINTS[pat.id] || pat.hint)}</div>
+     <div class="coach-bpm-row">
+       <button type="button" class="tp-btn" onclick="srNudgeBpm(-5)">&#x2212;5</button>
+       <span class="coach-bpm-readout" id="sr-bpm-readout">${sr.bpm} BPM</span>
+       <button type="button" class="tp-btn" onclick="srNudgeBpm(5)">+5</button>
+       ${best ? `<span class="cc-best">Best today: ${best.acc}%${best.bpm ? ' (at ' + best.bpm + ' BPM)' : ''}</span>` : ''}
+     </div>
+     <div class="coach-tip">&#x1F3B8; Hold any chord you know — Em is a good choice. The radar listens to your timing, not your notes. And it hears WHEN you strum, not which way — follow the arrows with your arm anyway, they matter for the feel.</div>
+     <div class="coach-tip">&#x1F92B; Quiet room, guitar close to the mic. 4 count-in clicks, then the click goes silent — it can&rsquo;t sound while the mic listens — so keep the beat with your foot or in your head.</div>
+     <button type="button" class="coach-start" onclick="srStart()">&#x25B6; Start &mdash; ${SR_BARS} bars</button>
+     ${COACH_FOOT_HTML}`;
+}
+
+/* The one bar of the pattern, big: the same D/U monospace notation as
+   the setup preview, one cell per eighth position so the current cell
+   can light up as the grid advances. */
+function srStripHtml(pat){
+  const counts = ['1','+','2','+','3','+','4','+'];
+  return `<div class="sr-strip" id="sr-strip">` + pat.slots.map((d, i) =>
+    `<span class="sr-slot" id="sr-slot-${i}"><span class="sr-slot-glyph${d ? '' : ' skip'}">${d || '·'}</span><span class="sr-slot-count">${counts[i]}</span></span>`
+  ).join('') + `</div>`;
+}
+
+async function srStart(){
+  if (!sr || sr.phase === 'countin' || sr.phase === 'play') return;
+  coachClose();
+  coachEvictTuner();
+  const s = sr;
+  const body = srBody();
+  if (!body) return;
+  body.innerHTML = '<div class="coach-tip sr-center">Starting the mic…</div>';
+  if (!coachStream && !(await coachAcquireMic())){
+    if (sr === s) srRenderSetup('Mic access denied — check browser permissions, then try again.');
+    return;
+  }
+  if (!srBody()){ coachReleaseMicIfIdle(); return; }   // panel closed during the prompt
+  if (document.hidden){ coachMicOff(); gamesShow('hub'); return; }   // backgrounded during the prompt
+  if (sr !== s){ coachReleaseMicIfIdle(); return; }    // a new session started under us
+  stopAllDemoAudio();
+  s.micOn = true;
+  window.coachMicLive = true;   // stream may already be open from a prior owner
+
+  const pat = SH_PATTERNS[s.patIdx];
+  s.beatMs = 60000 / s.bpm;
+  s.slotMs = s.beatMs / 2;
+  /* Hit window per expected strum — wider than Strum Hero's tap windows
+     because onset detection adds its own jitter, capped so neighbouring
+     eighth slots can't both claim one strum. */
+  s.win = Math.max(90, s.beatMs * 0.22);
+  s.notes = [];
+  for (let b = 0; b < SR_BARS; b++){
+    pat.slots.forEach((dir, i) => {
+      if (dir) s.notes.push({ t: (b * 8 + i) * s.slotMs, dir, bar: b, result: null });
+    });
+  }
+  s.errs = [];                  // signed onset errors (ms), for the early/late line
+  s.extras = 0;
+  s.smoothRms = 0; s.smoothHf = 0; s.lastOnsetT = -1e9; s.gridOffset = 0; s.lastSlot = -1;
+  s.phase = 'countin';
+  srBody().innerHTML = `<div class="coach-count" id="sr-count">&nbsp;</div>` + srStripHtml(pat) +
+    `<div class="coach-tip sr-center">4 clicks, then strum — the click goes quiet while the mic listens.</div>`;
+  coachCountIn(s, 'sr-count', () => {
+    if (sr === s && s.phase === 'countin'){ s.phase = 'play'; srRenderPlay(); }
+  });
+  if (srRaf) cancelAnimationFrame(srRaf);
+  srLoop();
+}
+
+function srRenderPlay(){
+  const body = srBody();
+  if (!body || !sr) return;
+  const pat = SH_PATTERNS[sr.patIdx];
+  const chips = sr.notes.map((n, i) =>
+    `<span class="coach-chip pending" id="sr-chip-${i}" title="bar ${n.bar + 1}">${n.dir}</span>`
+  ).join('');
+  body.innerHTML =
+    `<div class="coach-live"><span class="coach-live-dot"></span>Listening — strum along<span class="sr-bar" id="sr-bar">bar 1/${SR_BARS}</span></div>
+     <div class="cc-beats" id="sr-beats"><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span><span class="cc-pip"></span></div>
+     ${srStripHtml(pat)}
+     <div class="coach-strip">${chips}</div>
+     <div class="coach-tip sr-center">No click now — keep the count-in&rsquo;s beat going with your foot.</div>
+     <button type="button" class="tp-btn coach-stop" onclick="srFinish()">&#x25A0; Stop</button>`;
+}
+
+function srChipRefresh(i){
+  const el = document.getElementById('sr-chip-' + i);
+  if (el) el.className = 'coach-chip ' + (sr.notes[i].result || 'pending');
+}
+
+/* The advancing highlight: current eighth cell in the strip, beat pips,
+   bar counter — all on the adapted grid the scoring reads (same rule as
+   Change Up: on the rigid grid the display drifts off the player). */
+function srSlotTick(cur){
+  const bar = Math.floor(cur / 8);
+  if (bar >= SR_BARS) return;
+  document.querySelectorAll('#sr-strip .sr-slot').forEach((el, i) => el.classList.toggle('cur', i === cur % 8));
+  const barEl = document.getElementById('sr-bar');
+  if (barEl) barEl.textContent = 'bar ' + (bar + 1) + '/' + SR_BARS;
+  document.querySelectorAll('#sr-beats .cc-pip').forEach((el, i) => el.classList.toggle('on', i === Math.floor(cur / 2) % 4));
+}
+
+function srLoop(){
+  if (!sr) return;
+  if (!coachAnalyser || !srBody()){ srStop(); return; }  // mic taken or panel closed under us
+  const s = sr;
+  const now = performance.now();
+  /* Bar 1 beat 1 is a graded slot, so its ±win window reaches BACK into
+     the count-in — start detecting that early or an eager (but in-window)
+     first strum gets swallowed by the baseline warmers and marked a miss.
+     Safe from speaker bleed: the last count-in click ends a full beat
+     before this, well outside any win. The visual flip stays at listenStart. */
+  const srEarly = s.phase === 'countin' && now >= s.listenStart - s.win;
+  if (s.phase === 'countin' && !srEarly){
+    /* Warm the level trackers on room noise during the count-in — same
+       cold-start guard as the Coach loop. */
+    const r = coachReadFrame();
+    s.smoothRms = s.smoothRms * 0.82 + r * 0.18;
+    s.smoothHf = s.smoothHf * 0.82 + coachHfRms * 0.18;
+  }
+  if (s.phase === 'play' || srEarly){
+    const rms = coachReadFrame();
+    const hf = coachHfRms;
+
+    /* Onset = strum (Change Up's dual-channel detector, same constants:
+       full-band jump for a clean strum over silence, HF pick-attack
+       channel for a strum over the still-ringing previous one — which is
+       every strum after the first here). The 140ms refractory still fits:
+       eighths at the 100 BPM cap arrive every 300ms. */
+    if ((rms > COACH_ONSET_FLOOR &&
+         rms > s.smoothRms * COACH_ONSET_RATIO ||
+         hf > COACH_HF_FLOOR &&
+         hf > s.smoothHf * COACH_HF_RATIO) &&
+        now - s.lastOnsetT > COACH_ONSET_REFRACT){
+      s.lastOnsetT = now;
+      const rel = now - s.listenStart - s.gridOffset;
+      /* No audible reference during play, so the grid eases toward the
+         player — Change Up's EMA, on the eighth grid. */
+      const slotIdx = Math.round(rel / s.slotMs);
+      const dev = rel - slotIdx * s.slotMs;
+      if (Math.abs(dev) < s.slotMs * 0.45) s.gridOffset += dev * 0.15;
+      /* Nearest unconsumed expected strum within the window; anything
+         else is an extra — counted, never punished live (real rooms are
+         noisy, and a squeaky chair shouldn't wreck a run). */
+      let best = -1, bestAbs = Infinity;
+      for (let i = 0; i < s.notes.length; i++){
+        const n = s.notes[i];
+        if (n.result) continue;
+        if (n.t - rel > s.win) break;   // notes are time-sorted — the rest are too far ahead
+        const a = Math.abs(n.t - rel);
+        if (a < bestAbs){ bestAbs = a; best = i; }
+      }
+      if (best >= 0 && bestAbs <= s.win){
+        s.notes[best].result = 'ok';
+        s.errs.push(rel - s.notes[best].t);
+        srChipRefresh(best);
+      } else if (rel > -s.win){
+        s.extras++;                     // pre-roll noise before bar 1 stays free
+      }
+    }
+    s.smoothRms = s.smoothRms * 0.82 + rms * 0.18;
+    s.smoothHf = s.smoothHf * 0.82 + hf * 0.18;
+
+    /* Overdue strums are misses. */
+    const relNow = now - s.listenStart - s.gridOffset;
+    s.notes.forEach((n, i) => {
+      if (!n.result && relNow > n.t + 0.7 * s.slotMs){
+        n.result = 'miss';
+        srChipRefresh(i);
+      }
+    });
+
+    const cur = Math.floor(relNow / s.slotMs);
+    if (cur !== s.lastSlot && cur >= 0){ s.lastSlot = cur; srSlotTick(cur); }
+
+    if (now > s.listenStart + (SR_BARS * 4 + 1) * s.beatMs){ srFinish(); return; }
+  }
+  srRaf = requestAnimationFrame(srLoop);
+}
+
+function srFinish(){
+  if (!sr || (sr.phase !== 'play' && sr.phase !== 'countin')) return;
+  const s = sr;
+  if (srRaf){ cancelAnimationFrame(srRaf); srRaf = null; }
+  s.timeouts.forEach(clearTimeout);
+  s.timeouts = [];
+  s.notes.forEach(n => { if (!n.result) n.result = 'miss'; });   // early Stop: the rest never landed
+  if (s.micOn){ coachMicOff(); s.micOn = false; }
+  s.phase = 'done';
+  const pat = SH_PATTERNS[s.patIdx];
+  const total = s.notes.length;
+  const hits = s.notes.filter(n => n.result === 'ok').length;
+  s.acc = total ? Math.round(100 * hits / total) : 0;
+  s.prevBest = srBestRead(pat.id);
+  if (s.acc > 0 && (!s.prevBest || s.acc > s.prevBest.acc ||
+      (s.acc === s.prevBest.acc && s.bpm > s.prevBest.bpm))){
+    try { sessionStorage.setItem(srBestKey(pat.id), JSON.stringify({ acc: s.acc, bpm: s.bpm })); } catch(e){}
+  }
+  /* Cross-session best → the student's progress doc. Skipped in dev bypass
+     (Firestore rejects that uid; the session best above still counts). */
+  if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
+    const old = (games.sr && games.sr.best) || 0;
+    if (s.acc > old){
+      games.sr = { best: s.acc, pattern: pat.id, bpm: s.bpm, at: new Date().toISOString().slice(0, 10) };
+      saveGames();
+    }
+  }
+  srRenderDone();
+}
+
+function srRenderDone(){
+  const body = srBody();
+  if (!body || !sr) return;
+  const s = sr;
+  const total = s.notes.length;
+  const hits = s.notes.filter(n => n.result === 'ok').length;
+  const misses = total - hits;
+  /* More forgiving stars than Strum Hero — the detector adds its own
+     noise, and a real room adds more. */
+  const stars = s.acc >= 85 ? 3 : s.acc >= 65 ? 2 : s.acc >= 40 ? 1 : 0;
+  const starHtml = '&#x2605;'.repeat(stars) + '&#x2606;'.repeat(3 - stars);
+
+  let verdict, advice;
+  if (stars === 3){
+    verdict = s.acc + '% of strums on the beat — your strumming arm is steady on real strings.';
+    advice = 'Level up: try it 5 BPM faster, or switch chords each bar on your own.';
+  } else if (stars === 2){
+    verdict = s.acc + '% on the beat — this pattern is almost yours.';
+    advice = 'One more round at this speed and it will feel easy.';
+  } else if (stars === 1){
+    verdict = s.acc + '% on the beat — the pattern is starting to land.';
+    advice = 'Say the pattern out loud while you strum — it really helps.';
+  } else {
+    verdict = s.acc + '% — the radar barely heard the pattern.';
+    advice = 'Two easy fixes: move closer to the mic and strum a little harder, or drop 10 BPM.';
+  }
+
+  /* Early/late bias — median signed error over the landed strums. Only
+     shown with enough strums to mean something. */
+  let biasLine = '';
+  if (s.errs.length >= 4){
+    const med = tunerMedian(s.errs);
+    if (Math.abs(med) > 25){
+      biasLine = `<div class="coach-tip sr-center">${med < 0
+        ? 'You strum a little early (about ' + Math.round(-med) + 'ms) — relax and wait for the beat.'
+        : 'You strum a little late (about ' + Math.round(med) + 'ms) — move with the beat.'}</div>`;
+    }
+  }
+
+  let bestLine = '';
+  if (s.prevBest && s.acc > s.prevBest.acc){
+    bestLine = `<div class="sh-newbest">&#x1F3C6; New best! Your old best today was ${s.prevBest.acc}%.</div>`;
+  } else if (s.prevBest){
+    bestLine = `<div class="coach-tip sr-center">Best today: ${s.prevBest.acc}%${s.prevBest.bpm ? ' (at ' + s.prevBest.bpm + ' BPM)' : ''}.</div>`;
+  }
+
+  const rec = stars >= 3 ? 'up' : stars >= 1 ? 'same' : 'down';
+  body.innerHTML =
+    `<div class="coach-report">
+       <div class="sh-stars">${starHtml}</div>
+       <div class="coach-overall">&#x1F4E1; ${escHtml(verdict)}</div>
+       <div class="coach-strip">
+         <span class="coach-chip ok">Hit ${hits}</span>
+         <span class="coach-chip miss">Miss ${misses}</span>
+         ${s.extras ? `<span class="coach-chip dim">Extra strums ${s.extras}</span>` : ''}
+       </div>
+       ${biasLine}
+       ${bestLine}
+       <div class="coach-crit-note">${escHtml(advice)}</div>
+       <div class="coach-actions">
+         <button type="button" class="${rec === 'down' ? 'coach-start' : 'tp-btn'}" onclick="srAgain(-10)">&#x2B07; &minus;10 BPM</button>
+         <button type="button" class="${rec === 'same' ? 'coach-start' : 'tp-btn'}" onclick="srAgain(0)">&#x21BB; Again at ${s.bpm}</button>
+         <button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="srAgain(10)">&#x2B06; +10 BPM</button>
+       </div>
+       <button type="button" class="tp-btn" onclick="srSetup()">Change pattern</button>
+     </div>`;
+}
+
+function srAgain(d){
+  if (!sr) return;
+  sr.bpm = Math.min(SR_BPM_MAX, Math.max(SR_BPM_MIN, sr.bpm + d));
+  try { sessionStorage.setItem('srBpm', String(sr.bpm)); } catch(e){}
+  sr.phase = 'setup';
+  srStart();
 }
