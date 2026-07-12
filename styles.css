@@ -1026,6 +1026,14 @@ body.games-open{overflow:hidden}
 .cb-newbest{font-size:0.9375rem;font-weight:700;color:var(--amber-text);background:var(--amber-bg);border:1px solid var(--amber-text);border-radius:8px;padding:8px 10px;margin:8px 0;display:inline-block}
 .cb-done-score{font-size:2.875rem;font-weight:800;text-align:center;color:var(--text);font-variant-numeric:tabular-nums;line-height:1.1}
 
+/* ── 💥 Fret Zap (coach.js) — reuses the .cb-* HUD / answer / done classes;
+   only the card gradient and the fretboard prompt are new. */
+.games-card.gc-fretzap::before{background:linear-gradient(90deg,#f062b8,#b24ae8)}
+#fz-body{max-width:560px;margin:0 auto}
+.fz-prompt{display:flex;justify-content:center;align-items:center;margin:4px auto 12px;max-width:340px}
+.fz-prompt svg{width:100%;height:auto;display:block}
+@media(max-width:480px){.fz-prompt{max-width:100%}.cb-answer{min-height:48px}}
+
 /* ── 🎸 Strum Hero (coach.js) ── */
 .games-card.gc-strum::before{background:linear-gradient(90deg,#f0575d,#f0a24a)}
 #sh-body{max-width:640px;margin:0 auto}

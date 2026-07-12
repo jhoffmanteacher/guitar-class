@@ -5,6 +5,21 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — Fret Zap: name the note on the fretboard
+
+### Added
+- **Fret Zap** — a 60-second sprint that trains your fretboard memory. A dot
+  lights up on a blank neck diagram (no letter on it) and you tap that note's
+  name from four choices before the 60 seconds run out. Right answers build a streak —
+  every 5 in a row is worth more points — and you hear the note ring as a
+  reward. Miss one and the right answer lights up green, then that spot comes
+  back a few cards later so you get another shot. Four decks get harder in order:
+  just the low E and A strings, then all six strings up to the 5th fret, then
+  the natural notes (the plain letters, no sharps) all the way to the 12th
+  fret, and finally everything including the sharps (a sharp, written ♯, is
+  the note one fret above a letter). No mic and no guitar needed — just your
+  eyes and a tapping finger. On a laptop, keys 1–4 answer.
+
 ## 2026-07-11 — Two games that need your real guitar: Riff Roulette and Strum Radar
 
 ### Added

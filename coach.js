@@ -1244,12 +1244,14 @@ function gamesStopMic(){
   shStop();
   rrStop();
   srStop();
+  fzStop();
   const screen = document.getElementById('games-screen');
   const p = document.getElementById('games-panel');
   if (screen && !screen.hasAttribute('hidden') && p &&
       (document.getElementById('fret-body') || document.getElementById('cc-body') ||
        document.getElementById('cb-body') || document.getElementById('sh-body') ||
-       document.getElementById('rr-body') || document.getElementById('sr-body'))){
+       document.getElementById('rr-body') || document.getElementById('sr-body') ||
+       document.getElementById('fz-body'))){
     gamesRenderHub(p);
   }
 }
@@ -1277,6 +1279,13 @@ function gamesRenderHub(p){
     }
   } catch(e){}
   const cbChip = cbBest ? `<span class="games-card-best">&#x1F3C6; best today: ${cbBest}</span>` : '';
+  let fzBest = 0;
+  try {
+    for (const d of FZ_DECKS){
+      fzBest = Math.max(fzBest, parseInt(sessionStorage.getItem(fzBestKey(d.id)), 10) || 0);
+    }
+  } catch(e){}
+  const fzChip = fzBest ? `<span class="games-card-best">&#x1F3C6; best today: ${fzBest}</span>` : '';
   let shBest = 0;
   for (const pat of SH_PATTERNS){
     const b = shBestRead(pat.id);
@@ -1320,6 +1329,12 @@ function gamesRenderHub(p){
          <span class="games-card-title">Chord Blitz</span>
          <span class="games-card-desc">90 seconds, how many chord shapes can you name? No guitar needed — this one trains your eyes.</span>
          ${cbChip}
+       </button>
+       <button type="button" class="games-card gc-fretzap" onclick="gamesShow('fretzap')">
+         <span class="games-card-ico">&#x1F4A5;</span>
+         <span class="games-card-title">Fret Zap</span>
+         <span class="games-card-desc">A dot lights up on the fretboard — name that note before the clock runs out. Pure neck memory, no guitar needed.</span>
+         ${fzChip}
        </button>
        <button type="button" class="games-card gc-strum" onclick="gamesShow('strum')">
          <span class="games-card-ico">&#x1F3B8;</span>
@@ -1379,6 +1394,11 @@ function gamesShow(view){
   if (view === 'roulette'){
     p.innerHTML = gamesHeadHtml('&#x1F3B0; Riff Roulette', true) + `<div id="rr-body"></div>`;
     rrSetup();
+    return;
+  }
+  if (view === 'fretzap'){
+    p.innerHTML = gamesHeadHtml('&#x1F4A5; Fret Zap', true) + `<div id="fz-body"></div>`;
+    fzSetup();
     return;
   }
 }
@@ -1985,6 +2005,265 @@ function cbRenderDone(){
        <div class="coach-actions">
          <button type="button" class="coach-start" onclick="cbStart()">&#x21BB; Play again</button>
          <button type="button" class="tp-btn" onclick="cbSetup()">Change deck</button>
+       </div>
+     </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   FRET ZAP — 60-second fretboard-memory sprint. No mic and no guitar: a
+   single dot lights up on a blank fretboard and you tap that note's NAME
+   from four choices. Right answers build a streak that multiplies points;
+   a wrong answer lights the right button green and the missed spot comes
+   back a few cards later. Four decks climb the ladder — low strings only,
+   then all six to fret 5, then naturals up to fret 12, then everything
+   including the sharps (♯, the note a half-step above a letter). Best per
+   deck is session-scoped (hub chip says "today"); the cross-session best
+   goes to the progress doc via the 'games' category.
+   ════════════════════════════════════════════════════════════════════ */
+
+const FZ_SECONDS = 60;
+const FZ_DECKS = [
+  { id: 'lowEA', label: 'Low strings (E & A)', strings: [6, 5],             maxFret: 5,  naturalsOnly: true },
+  { id: 'first5', label: 'All strings, 0–5',   strings: [6, 5, 4, 3, 2, 1], maxFret: 5,  naturalsOnly: true },
+  { id: 'to12',  label: 'Naturals to 12',      strings: [6, 5, 4, 3, 2, 1], maxFret: 12, naturalsOnly: true },
+  { id: 'sharps', label: 'Everything',         strings: [6, 5, 4, 3, 2, 1], maxFret: 12, naturalsOnly: false }
+];
+/* localNoteSvg wants a string KIND ('lowE'…), we work in string NUMBERS. */
+const FZ_NUM_TO_KIND = { 6: 'lowE', 5: 'A', 4: 'D', 3: 'G', 2: 'B', 1: 'highE' };
+const FZ_NATURALS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+/* All 12 note names, using the same unicode ♯ coachNoteName returns. */
+const FZ_ALL_NAMES = Array.from({ length: 12 }, (_, m) => coachNoteName(60 + m));
+
+/* Precompute each deck's legal positions {string, fret, note}. A position's
+   note = coachNoteName(open-string midi + fret); naturals decks drop any
+   name carrying a ♯. Done once at load so card picks are just array reads. */
+FZ_DECKS.forEach(d => {
+  const pos = [];
+  d.strings.forEach(str => {
+    for (let f = 0; f <= d.maxFret; f++){
+      const note = coachNoteName(STRING_OPEN_MIDI[str] + f);
+      if (d.naturalsOnly && note.indexOf('♯') >= 0) continue;
+      pos.push({ string: str, fret: f, note });
+    }
+  });
+  d.positions = pos;
+});
+
+let fz = null, fzTick = null;
+
+function fzStop(){
+  if (fzTick){ clearInterval(fzTick); fzTick = null; }
+  document.removeEventListener('keydown', fzKeydown);
+  if (fz){
+    (fz.timeouts || []).forEach(clearTimeout);
+    fz = null;
+  }
+}
+
+function fzBody(){ return document.getElementById('fz-body'); }
+function fzBestKey(deck){ return 'fzBest:' + deck; }
+function fzDeck(){ return FZ_DECKS.find(d => d.id === fz.deck) || FZ_DECKS[0]; }
+function fzDeckPositions(){ return fzDeck().positions; }
+function fzUniverse(){ return fzDeck().naturalsOnly ? FZ_NATURALS : FZ_ALL_NAMES; }
+function fzPosKey(p){ return p.string + ':' + p.fret; }
+
+function fzSetup(){
+  let deck = 'lowEA';
+  try { deck = sessionStorage.getItem('fzDeck') || deck; } catch(e){}
+  if (!FZ_DECKS.some(d => d.id === deck)) deck = 'lowEA';
+  fz = { phase: 'setup', deck, timeouts: [] };
+  fzRenderSetup();
+}
+
+function fzPickDeck(id){
+  if (!fz) return;
+  fz.deck = id;
+  try { sessionStorage.setItem('fzDeck', id); } catch(e){}
+  fzRenderSetup();
+}
+
+function fzRenderSetup(){
+  const body = fzBody();
+  if (!body || !fz) return;
+  const deckPills = FZ_DECKS.map(d =>
+    `<button type="button" class="ts-btn${d.id === fz.deck ? ' active' : ''}" onclick="fzPickDeck('${d.id}')">${escHtml(d.label)}</button>`
+  ).join('');
+  let best = 0;
+  try { best = parseInt(sessionStorage.getItem(fzBestKey(fz.deck)), 10) || 0; } catch(e){}
+  body.innerHTML =
+    `<div class="cc-group"><div class="cc-group-title">Deck</div><div class="fret-levels">${deckPills}</div></div>
+     <div class="coach-tip">A dot lights up on the fretboard — a diagram of the guitar neck — and you tap that note's <strong>name</strong> from four choices. Right answers build a streak: every 5 in a row is worth more points. Miss one and the right answer lights up green, then that spot comes back later. Higher decks add more strings, more frets, and the sharps and naturals (a <strong>natural</strong> is a plain letter with no sharp; a <strong>sharp</strong>, written ♯, is the note one fret above a letter). On a laptop, keys 1&ndash;4 answer.</div>
+     ${best ? `<div class="cb-setup-best">&#x1F3C6; Best today: ${best}</div>` : ''}
+     <button type="button" class="coach-start" onclick="fzStart()">&#x25B6; Start &mdash; 60 seconds</button>`;
+}
+
+function fzStart(){
+  if (!fz || fz.phase === 'play') return;
+  coachClose(); coachEvictTuner();   // one mic/audio owner at a time
+  const s = fz;
+  s.phase = 'play';
+  s.score = 0; s.streak = 0; s.answered = 0; s.correct = 0;
+  s.cur = null; s.prevKey = null; s.opts = [];
+  s.requeue = []; s.locked = false;
+  (s.timeouts || []).forEach(clearTimeout);
+  s.timeouts = [];
+  s.endAt = performance.now() + FZ_SECONDS * 1000;
+  document.addEventListener('keydown', fzKeydown);   // laptop: 1–4 answer
+  if (fzTick) clearInterval(fzTick);
+  /* 200ms so the finish check can't drift a second late; display is 1Hz anyway. */
+  fzTick = setInterval(fzTimerTick, 200);
+  fzNext();
+}
+
+function fzTimerTick(){
+  if (!fz || fz.phase !== 'play'){
+    if (fzTick){ clearInterval(fzTick); fzTick = null; }
+    return;
+  }
+  if (!fzBody()){ fzStop(); return; }   // panel swapped under us
+  const left = fz.endAt - performance.now();
+  const el = document.getElementById('fz-timer');
+  if (el){
+    el.textContent = cbFmtTime(left);
+    el.classList.toggle('low', left <= 10000);
+  }
+  if (left <= 0) fzFinish();
+}
+
+function fzKeydown(e){
+  if (e.repeat) return;
+  if (!fz || fz.phase !== 'play' || fz.locked) return;
+  const tag = (e.target && e.target.tagName) || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  const i = ['1', '2', '3', '4'].indexOf(e.key);
+  if (i >= 0) fzAnswer(i);
+}
+
+/* A missed spot is due again 2–4 cards later; otherwise a random legal
+   position from the deck. Never the same (string+fret) twice in a row. */
+function fzPickCard(){
+  const i = fz.requeue.findIndex(q => q.due <= fz.answered && fzPosKey(q.pos) !== fz.prevKey);
+  if (i >= 0) return fz.requeue.splice(i, 1)[0].pos;
+  const pool = fzDeckPositions().filter(p => fzPosKey(p) !== fz.prevKey);
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function fzShuffle(arr){
+  for (let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = arr[i]; arr[i] = arr[j]; arr[j] = t;
+  }
+  return arr;
+}
+
+function fzOptions(correct){
+  const pool = fzUniverse().filter(n => n !== correct);
+  const opts = fzShuffle(pool.slice()).slice(0, 3);
+  opts.push(correct);
+  return fzShuffle(opts);
+}
+
+function fzNext(){
+  if (!fz || fz.phase !== 'play') return;
+  const body = fzBody();
+  if (!body){ fzStop(); return; }
+  const s = fz;
+  s.cur = fzPickCard();
+  s.prevKey = fzPosKey(s.cur);
+  s.opts = fzOptions(s.cur.note);
+  s.locked = false;
+  /* Blank dot ('' label) so the player names it rather than reads it. */
+  const svg = (typeof localNoteSvg === 'function' && localNoteSvg(FZ_NUM_TO_KIND[s.cur.string], s.cur.fret, '')) || '';
+  const answers = s.opts.map((n, i) =>
+    `<button type="button" class="cb-answer" id="fz-opt-${i}" onclick="fzAnswer(${i})"><span class="cb-key">${i + 1}</span>${escHtml(n)}</button>`
+  ).join('');
+  const mult = Math.min(4, 1 + Math.floor(s.streak / 5));
+  const left = s.endAt - performance.now();
+  body.innerHTML =
+    `<div class="cb-hud">
+       <span class="cb-timer${left <= 10000 ? ' low' : ''}" id="fz-timer">${cbFmtTime(left)}</span>
+       <span class="cb-score" id="fz-score">Score: ${s.score}</span>
+       <span class="cb-streak" id="fz-streak">${s.streak >= 2 ? '&#x1F525; ' + s.streak + ' in a row' + (mult > 1 ? ' &mdash; &times;' + mult : '') : '&nbsp;'}</span>
+     </div>
+     <div class="fz-prompt">${svg}</div>
+     <div class="cb-answers">${answers}</div>`;
+}
+
+function fzAnswer(i){
+  if (!fz || fz.phase !== 'play' || fz.locked) return;
+  const s = fz;
+  const pick = s.opts[i];
+  if (!pick) return;
+  s.answered++;
+  if (pick === s.cur.note){
+    s.correct++;
+    s.streak++;
+    s.score += 10 * Math.min(4, 1 + Math.floor(s.streak / 5));
+    if (typeof playNote === 'function') playNote(STRING_OPEN_MIDI[s.cur.string] + s.cur.fret);   // reward: hear the note you just named
+    fzNext();
+    return;
+  }
+  /* Wrong: show the right button for a beat (inputs locked), requeue the spot. */
+  s.score = Math.max(0, s.score - 5);
+  s.streak = 0;
+  s.requeue.push({ pos: s.cur, due: s.answered + 2 + Math.floor(Math.random() * 3) });
+  s.locked = true;
+  const hit = document.getElementById('fz-opt-' + i);
+  if (hit) hit.classList.add('wrong');
+  const right = document.getElementById('fz-opt-' + s.opts.indexOf(s.cur.note));
+  if (right) right.classList.add('reveal');
+  const scoreEl = document.getElementById('fz-score');
+  if (scoreEl) scoreEl.textContent = 'Score: ' + s.score;
+  const streakEl = document.getElementById('fz-streak');
+  if (streakEl) streakEl.innerHTML = '&nbsp;';
+  s.timeouts.push(setTimeout(() => {
+    if (fz !== s || s.phase !== 'play') return;
+    fzNext();
+  }, 800));
+}
+
+function fzFinish(){
+  if (!fz || fz.phase !== 'play') return;
+  if (fzTick){ clearInterval(fzTick); fzTick = null; }
+  fz.timeouts.forEach(clearTimeout);
+  fz.timeouts = [];
+  fz.phase = 'done';
+  fz.prevBest = 0;
+  try {
+    const k = fzBestKey(fz.deck);
+    fz.prevBest = parseInt(sessionStorage.getItem(k), 10) || 0;
+    if (fz.score > fz.prevBest) sessionStorage.setItem(k, String(fz.score));
+  } catch(e){}
+  /* Cross-session best → the student's progress doc. Skipped in dev bypass
+     (Firestore rejects that uid; the session best above still counts). */
+  if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
+    const old = (games.fz && games.fz.best) || 0;
+    if (fz.score > old){
+      games.fz = { best: fz.score, deck: fz.deck, at: new Date().toISOString().slice(0, 10) };
+      saveGames();
+    }
+  }
+  fzRenderDone();
+}
+
+function fzRenderDone(){
+  const body = fzBody();
+  if (!body || !fz) return;
+  const acc = fz.answered ? Math.round(100 * fz.correct / fz.answered) : 0;
+  let bestLine = '';
+  if (fz.prevBest > 0 && fz.score > fz.prevBest){
+    bestLine = `<div class="cb-newbest">&#x1F3C6; New best! Your old best today was ${fz.prevBest}.</div>`;
+  } else if (fz.prevBest > 0){
+    bestLine = `<div class="coach-tip">Best today: ${fz.prevBest}.</div>`;
+  }
+  body.innerHTML =
+    `<div class="coach-report">
+       <div class="cb-done-score">${fz.score}</div>
+       <div class="coach-overall">&#x1F4A5; ${fz.answered} card${fz.answered === 1 ? '' : 's'} answered &mdash; ${fz.correct} right (${acc}%).</div>
+       ${bestLine}
+       <div class="coach-actions">
+         <button type="button" class="coach-start" onclick="fzStart()">&#x21BB; Play again</button>
+         <button type="button" class="tp-btn" onclick="fzSetup()">Change deck</button>
        </div>
      </div>`;
 }
