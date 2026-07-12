@@ -5,6 +5,99 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-11 — Chord checks that hear real strums, and a pop-up Daily 5
+
+### Changed
+- **The 🎤 chord checks now hear strums the way strums actually sound.**
+  A strummed chord rings several notes at once, but the old check listened
+  for a single note and often reported "couldn't hear that clearly" on
+  perfectly good strums. Now it credits a strum when the notes it hears
+  belong to the chord — so clean playing scores clean. The same fix powers
+  the Change Up game.
+- **Chord checks now show you what's coming.** During a check you see the
+  current chord big, plus "next:" so you can get your fingers moving before
+  the switch — and the chord diagrams stay on screen from the count-in on,
+  so you can set up your first shape while the clicks run (Change Up too).
+  The moving beat highlight also follows your actual playing now instead of
+  drifting away from it.
+- **The Daily 5 opens right where you practice.** Its button lives on the
+  "Tune and warm up first" card at the top of Station C and opens as a
+  pop-up over the page — close it and you're exactly where you left off.
+  (The old Daily 5 button at the top of the page is gone.)
+- Station C's drill sections start at #1 again, the intro cards line up
+  with the drill boxes, and finger-placement instructions are spelled out
+  in plain words ("index finger on string 2, fret 1") instead of shorthand.
+- The Module 4 pentatonic video now starts at 1:45, skipping straight to
+  the lesson.
+
+### Added
+- **The Am ↔ Em switch drill (Module 5, Set 1) has its own "Check my
+  changes" button** — the mic listens to the actual chord changes, not just
+  each chord on its own.
+
+## 2026-07-11 — Two new games in the arcade: Chord Blitz and Strum Hero
+
+### Added
+- **Chord Blitz** — a 90-second sprint on chord shapes. You see a chord
+  diagram and pick its name from four choices (or flip it: see a name, pick
+  the shape). Right answers build a streak worth more points, missed chords
+  come back a few cards later so you learn them, and every correct answer
+  plays the chord so your ears learn it too. Four decks: open chords, power
+  chords, partial barres, or everything. On a laptop, keys 1–4 answer.
+- **Strum Hero** — a rhythm game for real strumming patterns. Down and up
+  arrows slide toward a line while a click keeps the beat; tap the screen
+  (or the spacebar) on every strum. Your timing is graded (Perfect / Good /
+  Miss), and the end screen tells you if you tend to tap early or late —
+  the same habit that makes real strumming rush or drag. Patterns come
+  straight from class: all downstrums, down-up eighths, Old Faithful
+  (D-DU-UDU), and the reggae chop.
+- Neither game uses the microphone, so both work anywhere — including a
+  quiet classroom. Your best scores now save with your progress, so they
+  survive between visits.
+
+## 2026-07-11 — Plainer English everywhere
+
+### Changed
+- **Music words are now explained the first time you see them.** Terms like
+  *riff*, *vamp*, *barre*, *palm-mute*, *chug*, *turnaround*, *requinto*, and
+  *sierreño* get a short plain-English definition at their first use on every
+  page, so you learn the real vocabulary without having to guess.
+- **Confusing idioms and slang were rewritten in plain English.** Phrases
+  like "the song goes native," "boss-level," "victory lap," "stretch goal,"
+  and "campfire version" now say what they mean — the site reads the same
+  friendly way, just clearer, especially if English isn't your first
+  language.
+- **The welcome card now defines the words you'll see everywhere:** *Level
+  up* (an optional harder version), *"You've got it when"* (the signs you're
+  ready to move on), *a lap* (one full time through), and *BPM* (beats per
+  minute).
+- **The tuner speaks plainly:** "Too high — tune down (sharp)" and "Too low —
+  tune up (flat)" instead of just "Sharp" and "Flat."
+
+## 2026-07-11 — The Listening Coach hears real guitars much better
+
+### Changed
+- **The Listening Coach now recognizes your notes when strings ring into
+  each other.** On a scale climb (like Pentatonic Pattern 1) the previous
+  string keeps ringing while you pick the next note — and the coach's ear
+  used to miss almost everything played that way. It now listens for the
+  pick attack itself, waits out the attack noise before judging the pitch,
+  and only calls a note wrong when its readings agree. Quiet takes and
+  lightly muted notes score correctly too.
+- **When a few notes don't register, the report now says why.** If every
+  note the coach heard was right but some never came through, it tells
+  you the likely culprit is uneven volume — pluck every note at the same
+  confident level — instead of hinting your fingers were in the wrong
+  place.
+- **The Change Up game hears your strums the same improved way.** Its
+  graded moment — the first strum of each new chord, played while the old
+  chord still rings — now uses the same upgraded ear, and it won't call a
+  change "off" unless its readings actually agree.
+- **The TAB stays on screen during the count-in.** It used to vanish
+  behind the big 1-2-3-4 count right when you needed it to get your
+  fretting hand in position; now it stays put from the moment you open
+  the check until the report card.
+
 ## 2026-07-11 — Challenge Day replaces the always-on 15-Day list
 
 ### Changed

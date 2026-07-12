@@ -41,8 +41,8 @@ SETS.push(
             ] }
           },
           {
-            // FLAG (review): swapped 2026-06-11 from mislabeled dJfV7DsTThc ("Blues Scale Explained" was actually a Dorian/lead-theory video). Confirm this Marty major-pentatonic video fits Set 1 before the course starts.
-            text: 'Watch: <a href="https://youtu.be/m_IiyJu60-c" target="_blank">Major Pentatonic Scale – Marty Music</a> (0:00–4:00). As you watch, find the root note on your own neck and play the shape up once before answering below.',
+            // Reviewed by Jonathan 2026-07-11: fits Set 1; start at 1:45 (the link jumps there — the intro before is skippable).
+            text: 'Watch: <a href="https://youtu.be/m_IiyJu60-c?t=105" target="_blank">Major Pentatonic Scale – Marty Music</a> (the link jumps to 1:45, where the lesson starts — watch to about 4:00). As you watch, find the root note on your own neck and play the shape up once before answering below.',
             hint: 'Focus on the Pattern 1 shape — how does it sit on the neck? Notice where the root note is.',
             skills: [1, 3],
             response: { type: 'short', placeholder: 'Describe the Pattern 1 shape. Where is the root note?' }
@@ -95,7 +95,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
           {
-            text: 'Station Wrap-Up — take a beat to reflect: when you positioned Pattern 1 today, what told you whether you were set up for MAJOR or MINOR — the finger on the root, or the sound? Which felt more reliable?',
+            text: 'Station Wrap-Up — pause and think: when you positioned Pattern 1 today, what told you whether you were set up for MAJOR or MINOR — the finger on the root, or the sound? Which felt more reliable?',
             response: { type: 'short', placeholder: 'e.g. I trusted the finger (4th = major, 1st = minor) more than my ear so far' }
           }
             ]
@@ -119,13 +119,13 @@ SETS.push(
             title: 'Play Pattern 1 with alternate picking',
             steps: [
           {
-            text: 'Challenge 1 — Pattern 1 Climb (skills-check warm-up): play Pentatonic Pattern 1 ascending at 60 BPM, one note per beat, alternate picking (down-up-down-up). You\'ve got it when: every note rings clean with no missed picks. This is a warm-up drill — the unit assessment is your own 4-bar solo (you\'ll compose it in Set 3), held to the backing track\'s pulse — but this is the benchmark lap for your Set 1 check-off. Click "Play all" to hear it.',
+            text: 'Challenge 1 — Pattern 1 Climb (skills-check warm-up): play Pentatonic Pattern 1 ascending at 60 BPM, one note per beat, alternate picking (down-up-down-up). You\'ve got it when: every note rings clean with no missed picks. This is a warm-up drill — the unit assessment is your own 4-bar solo (you\'ll compose it in Set 3), held to the backing track\'s pulse — but this is the benchmark lap (a lap = one full time through) for your Set 1 check-off. Click "Play all" to hear it.',
             hint: 'Go as slow as you need. Every note should ring cleanly. Say each note aloud as you play it to connect your ear to your fingers. Set the ⏱ Timer for 2 minutes and loop it.',
             stuck: 'Drop to the lowest two strings only (E and A) and climb just those until they\'re clean, then add the rest one string at a time.',
-            levelUp: 'Play it descending too (top to bottom), or nudge the metronome to 80 BPM and keep the picking strictly down-up.',
+            levelUp: 'Play it descending too (top to bottom), or raise the metronome to 80 BPM and keep the picking strictly down-up.',
             skills: [1, 2, 5],
             playSeq: { label: 'Play all', bpm: 60, notes: [45, 48, 50, 52, 55, 57, 60, 62, 64, 67, 69, 72] },
-            response: { type: 'short', prompt: 'Personal record: win at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN climb today (BPM)?', placeholder: 'e.g. 80 — beat it next session' }
+            response: { type: 'short', prompt: 'Personal record: play it cleanly at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN climb today (BPM)?', placeholder: 'e.g. 80 — try for a higher number next session' }
           }
             ]
           },
@@ -133,7 +133,7 @@ SETS.push(
             title: 'Position Pattern 1 for major & minor',
             steps: [
           {
-            text: 'Challenge 2 — Move the Box: play Pattern 1 as A minor pentatonic (1st finger, 5th fret, string 6) up and down using the TAB map, then shift it to E minor pentatonic (open-string root). You\'ve got it when: both positions clean — same shape, two spots on the neck.',
+            text: 'Challenge 2 — Move the Box (a box = the block of frets where a scale pattern sits): play Pattern 1 as A minor pentatonic (1st finger, 5th fret, string 6) up and down using the TAB map, then shift it to E minor pentatonic (open-string root). You\'ve got it when: both positions clean — same shape, two spots on the neck.',
             hint: 'A minor: your hand sits around frets 5–8. E minor: your hand starts at the open string and you\'ll use frets 3 and 5 instead of 1st finger.',
             stuck: 'Stay on A minor only until the shape is automatic, then slide the whole hand down to find E minor — it\'s the exact same finger pattern, just moved.',
             levelUp: 'Position it a third place — G minor (3rd fret root) — or call out the root note name before you start each box.',
@@ -162,10 +162,10 @@ SETS.push(
             title: 'Improvise your first solo',
             steps: [
           {
-            text: 'Challenge 3 — Rule of 3 (give it a go!): improvise using ONLY 3 notes of Pattern 1 for 4 bars over the Am backing track — <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; Am jam track</a>. Once those 3 feel like home, add a 4th note and play 4 more bars. No score — aim for short, intentional ideas with space between them.',
-            hint: 'Limiting yourself to 3 notes forces you to make music with phrasing and rhythm, not note-count. A short, clear idea with silence around it beats a stream of notes.',
+            text: 'Challenge 3 — Rule of 3 (try it!): improvise using ONLY 3 notes of Pattern 1 for 4 bars over the Am backing track — <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; Am jam track</a>. Once those 3 feel comfortable, add a 4th note and play 4 more bars. No score — aim for short, intentional ideas with space between them.',
+            hint: 'Limiting yourself to 3 notes forces you to make music with phrasing and rhythm, not note-count. A short, clear idea with silence around it is better than a stream of notes.',
             stuck: 'Pick just 2 notes on one string and trade them back and forth, changing only the rhythm — that\'s already improvising.',
-            levelUp: 'Add a 4th and 5th note, or end every phrase on the root (A) so each idea "arrives home."',
+            levelUp: 'Add a 4th and 5th note, or end every phrase on the root (A) so each idea "arrives home" (home = the note the music rests on and sounds finished).',
             skills: [6]
           },
           {
@@ -182,10 +182,10 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Solo over Seven Nation Army: loop the SNA riff in your head (or record yourself playing the riff and jam over the playback) and improvise using ONLY these three notes — low E, G, and open A — for four bars. Rule of 3: short ideas, space between them. You\'ve got it when: four bars of intentional phrases — not a stream of notes — that land back on E. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
-                hint: 'E is home base for this song. End every phrase on it and you\'ll always sound like you meant it.',
+                text: 'Challenge — Solo over Seven Nation Army: loop the SNA riff (a riff = a short musical phrase that repeats) in your head (or record yourself playing the riff and jam over the playback) and improvise using ONLY these three notes — low E, G, and open A — for four bars. Rule of 3: short ideas, space between them. You\'ve got it when: four bars of intentional phrases — not a stream of notes — that land back on E. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
+                hint: 'E is the note this song centers on. End every phrase on it and you\'ll always sound like you meant it.',
                 stuck: 'Play just E and G, trading two-beat phrases with silence: play two beats, rest two beats.',
-                levelUp: 'Add the open D string as a fourth note, or record the riff on a loop and trade fours with your recording — or with anyone at home who\'ll play it.',
+                levelUp: 'Add the open D string as a fourth note, or record the riff on a loop and trade fours with your recording (trade fours = play 4 bars, then let the recording play 4) — or with anyone at home who\'ll play it.',
                 skills: [6],
                 tab: {
                   caption: 'Your three allowed notes — E minor pentatonic, open position',
@@ -217,7 +217,7 @@ SETS.push(
                 text: 'Challenge — Solo over Luna: Luna lives in F major, and F\'s relative minor is D — so D minor pentatonic Pattern 1 (root D, low E fret 10) is your box: the exact shape you\'ve been drilling, parked at the course\'s highest position. Improvise four bars using only the three notes marked below, then four more adding a fourth note from the box. Jam over <a href="https://www.youtube.com/watch?v=wBxFnX_V9mQ" target="_blank">▶ &#x1F3B5; Luna\'s Dm backing track</a>. You\'ve got it when: eight bars where every phrase starts or ends on D. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
                 hint: 'Same Pattern 1 shape — just at fret 10. This high up, the frets sit closer together, so the stretch is easier than it looks.',
                 stuck: 'Trade just D and F (frets 10 and 13 on the low E) back and forth, changing only the rhythm, until an idea appears.',
-                levelUp: 'End every phrase on D so each idea arrives home — or lean on the F (fret 13) for extra sierreño ache.',
+                levelUp: 'End every phrase on D so each idea arrives home — or hold the F (fret 13) a little longer for a sadder, longing feel.',
                 skills: [6],
                 tab: {
                   caption: 'Your three starting notes — D minor pentatonic Pattern 1 · 10th position',
@@ -236,7 +236,7 @@ SETS.push(
             steps: [
               {
                 text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week\'s plan went. Same check-in you\'ve kept since Module 1 — we keep it going through the whole course.',
-                hint: 'No wrong answers — even five minutes a day beats one long cram. You\'re building a habit you\'ll actually keep.',
+                hint: 'No wrong answers — even five minutes a day is better than one long rushed session. You\'re building a habit you\'ll actually keep.',
                 response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went' }
               }
             ]
@@ -348,7 +348,7 @@ SETS.push(
             title: 'Name the D-string notes',
             steps: [
           {
-            text: 'Now try it: the natural notes on the D string. Click any note below the TAB to hear it, then play and NAME each one up the string — D · E · F · G · A · B · C. You\'ll drill this chart-free at the practice station.',
+            text: 'Now try it: the natural notes on the D string. Click any note below the TAB to hear it, then play and NAME each one up the string — D · E · F · G · A · B · C. You\'ll drill this without looking at the chart at the practice station.',
             hint: 'It\'s the same musical alphabet you know from the E and A strings. The gap between E–F and B–C is one fret (a half step). Every other gap is two frets (a whole step).',
             skills: [7],
             tab: {
@@ -370,7 +370,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
           {
-            text: 'Station Wrap-Up — take a beat to reflect: which expressive tool felt most natural today — dynamics (loud/soft), timbre (bright/warm), or the hammer-on? Which one will you lean on in your solos?',
+            text: 'Station Wrap-Up — pause and think: which expressive tool felt most natural today — dynamics (loud/soft), timbre (bright/warm), or the hammer-on? Which one will you lean on in your solos?',
             response: { type: 'short', placeholder: 'e.g. dynamics came easily; hammer-ons still feel unreliable' }
           }
             ]
@@ -418,16 +418,16 @@ SETS.push(
             title: 'Name the notes on the D & G strings',
             steps: [
           {
-            text: 'Challenge 3 — D String Map: play the natural notes on the D string — D · E · F · G · A · B · C (frets 0–10) — slowly, saying each name aloud. You\'ve got it when: a clean lap up and back, chart-free. Click "Play all" to hear it at 60 BPM.',
-            hint: 'Same musical alphabet pattern you know from E and A strings. Find the pattern — it repeats! Set the ⏱ Timer for 2 minutes and see how many chart-free laps you get.',
+            text: 'Challenge 3 — D String Map: play the natural notes on the D string — D · E · F · G · A · B · C (frets 0–10) — slowly, saying each name aloud. You\'ve got it when: a clean lap up and back, without looking at the chart. Click "Play all" to hear it at 60 BPM.',
+            hint: 'Same musical alphabet pattern you know from E and A strings. Find the pattern — it repeats! Set the ⏱ Timer for 2 minutes and see how many laps you get without looking at the chart.',
             stuck: 'Cover the chart and name just the dots first (frets 0, 2, 3, 5, 7) — find E–F and B–C, the two one-fret jumps, and the rest falls into place.',
             levelUp: 'Point to a random fret 0–10 without counting up and name the note in under 3 seconds, or run the string top-to-bottom (C back down to D).',
             skills: [7],
             playSeq: { label: 'Play all', bpm: 60, notes: [50, 52, 53, 55, 57, 59, 60] },
-            response: { type: 'short', prompt: 'Personal record: win at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, chart-free lap naming + playing the D string (BPM)?', placeholder: 'e.g. 80 — beat it next session' }
+            response: { type: 'short', prompt: 'Personal record: play it cleanly at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN lap naming + playing the D string, without looking at the chart (BPM)?', placeholder: 'e.g. 80 — try for a higher number next session' }
           },
           {
-            text: 'Challenge 4 — G String Map: same on the G string — G · A · B · C · D · E · F (frets 0–10), slowly, names aloud. You\'ve got it when: a clean lap up and back, chart-free.',
+            text: 'Challenge 4 — G String Map: same on the G string — G · A · B · C · D · E · F (frets 0–10), slowly, names aloud. You\'ve got it when: a clean lap up and back, without looking at the chart.',
             hint: 'Notice the same pattern of whole and half steps — the musical alphabet behaves the same way on every string.',
             stuck: 'Find the two half steps first — B–C (frets 4–5) and E–F (frets 9–10) — then fill in the whole-step gaps between them.',
             levelUp: 'Jump between strings: play D on the D string, then D on the G string, and name both — or quiz yourself on random frets against the clock.',
@@ -440,10 +440,10 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Sweet Child O\' Mine, solo-section feel: the famous outro solo lives in E minor pentatonic. Improvise four bars in the open position, then move the same shape up to the 12th fret and play four more — same pattern, one octave up, instant "solo voice." You\'ve got it when: both registers, phrases with space, landing on E in each. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
+                text: 'Challenge — Sweet Child O\' Mine, solo-section feel: the famous outro solo lives in E minor pentatonic. Improvise four bars in the open position, then move the same shape up to the 12th fret and play four more — same pattern, one octave up, instant "solo voice." You\'ve got it when: both registers (register = how high or low the notes are), phrases with space, landing on E in each. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
                 hint: 'High on the neck IS the solo sound. Nothing about your ideas has to change — the register does the drama for you.',
                 stuck: 'Stay open-position and just VISIT the 12th fret for your last note of each phrase.',
-                levelUp: 'Slide between the two positions mid-phrase, or hold your longest note an extra bar and let it sing.',
+                levelUp: 'Slide between the two positions mid-phrase, or hold your longest note an extra bar and let it ring out.',
                 skills: [5, 6],
                 tab: {
                   caption: 'Same shape, two homes — E at fret 0 and fret 12',
@@ -506,7 +506,7 @@ SETS.push(
         gotItWhen: 'you can produce the second note with no pick stroke — and it rings as clearly as a picked note.',
         practice: { type: 'mc', prompt: 'On a pull-off, your finger starts on the higher fret. How do you make the SECOND note sound?',
           choices: ['Pluck it with your picking hand', 'Snap your finger off the string sideways', 'Hammer down on a lower fret', 'Bend the string up'], answer: 1 } },
-      { id: 'm4w2-s4', text: 'Use "envelope": vary attack and note length intentionally',
+      { id: 'm4w2-s4', text: 'Use "envelope": vary attack (attack = how hard and suddenly a note starts) and note length intentionally',
         gotItWhen: 'you can play a short, sharp note and a long, sustained note on demand, and the difference is obvious on playback.' },
       { id: 'm4w2-s5', text: 'Play a one-note solo that uses dynamics and rhythm for expression',
         gotItWhen: 'you can play one note for 8 bars and a recording still holds your attention on listen-back — because you change something each time.' },
@@ -541,7 +541,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            text: 'Re-watch the same video from Set 1 — <a href="https://youtu.be/m_IiyJu60-c" target="_blank">Major Pentatonic Scale – Marty Music</a> — this time listening for the major/minor connection. Then prove it on your own neck: play Pattern 1 and call the low E root "home" for major, then treat a different note as "home" and hear the same shape turn minor. Your hand stays parked in one place — only which note you call "home" changes.',
+            text: 'Re-watch the same video from Set 1 — <a href="https://youtu.be/m_IiyJu60-c?t=105" target="_blank">Major Pentatonic Scale – Marty Music</a> (the link skips the intro) — this time listening for the major/minor connection. Then prove it on your own neck: play Pattern 1 and call the low E root "home" for major, then treat a different note as "home" and hear the same shape turn minor. Your hand stays parked in one place — only which note you call "home" changes.',
             hint: 'Same five notes, two names: whichever note you treat as "home" (the root) decides whether it sounds major or minor. Watch for that connection, then prove it on your own neck.',
             skills: [1, 2],
             response: { type: 'short', placeholder: 'Explain the relative major/minor connection in your own words.' }
@@ -586,8 +586,8 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
           {
-            text: 'Station Wrap-Up — take a beat to reflect: you can now explain how the pentatonic is built, add the blues note, and use vibrato. Which piece of theory finally "clicked" today, and which still feels fuzzy?',
-            response: { type: 'short', placeholder: 'e.g. relative major/minor clicked; the ♭5 blue note still feels random to me' }
+            text: 'Station Wrap-Up — pause and think: you can now explain how the pentatonic is built, add the blues note, and use vibrato. Which piece of theory finally made sense today, and which still feels fuzzy?',
+            response: { type: 'short', placeholder: 'e.g. relative major/minor made sense; the ♭5 blue note still feels random to me' }
           }
             ]
           }
@@ -636,7 +636,7 @@ SETS.push(
             title: 'Read a lick cold',
             steps: [
           {
-            text: 'Challenge — Cold Read (Knowledge &amp; Reading): here\'s a 1-bar lick in the A minor pentatonic box you haven\'t drilled. DECODE it from the TAB first — name each string and fret, left to right — then play it. You\'ve got it when: you can read a short 1-bar pentatonic lick straight from TAB and play it accurately, without anyone demonstrating it first. At the module self-assessment you\'ll read a NEW 1-bar lick cold — this is Task 2.',
+            text: 'Challenge — Cold Read (Knowledge &amp; Reading): here\'s a 1-bar lick (a lick = a short solo phrase) in the A minor pentatonic box you haven\'t drilled. DECODE it from the TAB first — name each string and fret, left to right — then play it. You\'ve got it when: you can read a short 1-bar pentatonic lick straight from TAB and play it accurately, without anyone demonstrating it first. At the module self-assessment you\'ll read a NEW 1-bar lick cold — this is Task 2.',
             hint: 'Read before you press Play. Bottom TAB line = low E, top line = high e; the number is the fret. Say it out loud — "G string, fret 5, that\'s C" — as you go, then hit Play all to check yourself.',
             stuck: 'Take it two notes at a time. Find the first note on the neck and play it, then the next — speed comes after the map is clear.',
             levelUp: 'Read it backwards (right to left), or move the same shape to the E minor box (open-string root) and read it there.',
@@ -661,8 +661,8 @@ SETS.push(
             title: 'Perform your original solo',
             steps: [
           {
-            text: 'Challenge 3 — Perform It (your assessment piece — give it a go!): play your 4-bar solo over a core-song backing track — start with <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a>, or pick any core song\'s ▶ &#x1F3B5; Backing track in the &#x1F3B5; Songs list at the bottom of this module — working in at least one hammer-on, pull-off, or vibrato. Record your take, say your phrasing strategy (call-and-response or four-phrase) out loud on the recording, and listen back. You\'ve got it when: you hold the backing track\'s pulse start to finish with no restarts, and you can name your phrasing strategy. Tell a story, don\'t run scales.',
-            hint: 'Include at least one technique (hammer-on, pull-off, or vibrato) in your solo. Don\'t just run scales — tell a story! Playing for the camera counts as performing, and the playback shows you exactly where to tighten up.',
+            text: 'Challenge 3 — Perform It (your assessment piece — try it!): play your 4-bar solo over a core-song backing track — start with <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a>, or pick any core song\'s ▶ &#x1F3B5; Backing track in the &#x1F3B5; Songs list at the bottom of this module — working in at least one hammer-on, pull-off, or vibrato. Record your take, say your phrasing strategy (call-and-response or four-phrase) out loud on the recording, and listen back. You\'ve got it when: you hold the backing track\'s pulse start to finish with no restarts, and you can name your phrasing strategy. Play musical ideas — don\'t just run up and down the scale.',
+            hint: 'Include at least one technique (hammer-on, pull-off, or vibrato) in your solo. Don\'t just run up and down the scale — play musical ideas! Playing for the camera counts as performing, and the playback shows you exactly where to tighten up.',
             stuck: 'Drop the backing track and play your written 4 bars alone, slowly, until they\'re solid — then add the track back and just one technique.',
             levelUp: 'Perform it standing, record a performance take, or play it for someone at home — or transpose your solo to E minor and play it from the open-string box.',
             skills: [3, 6, 7]

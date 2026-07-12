@@ -28,20 +28,20 @@ SETS.push(
             steps: [
               {
                 text: 'Watch: <a href="https://youtu.be/rGt-lMXYzZc" target="_blank">Folk Fingerstyle Patterns #1 — Travis Picking (FO-101) – JustinGuitar</a>.',
-                hint: 'In Travis-style picking, the thumb is the engine — steady quarter notes on two bass strings while the fingers decorate on top.',
+                hint: 'In Travis-style picking, the thumb keeps everything moving — steady quarter notes on two bass strings while the fingers decorate on top.',
                 skills: [1, 2],
                 response: { type: 'mc', prompt: 'In Travis-style picking, the thumb\'s job is to:',
                   answer: 1,
-                  explain: 'The thumb is the engine — steady quarter notes on two bass strings while the fingers decorate on top.',
+                  explain: 'The thumb keeps everything moving — steady quarter notes on two bass strings while the fingers decorate on top.',
                   choices: ['Play melody', 'Alternate steadily between two bass strings like a drummer', 'Strum', 'Rest'] }
               },
               {
                 text: 'Watch: <a href="https://youtu.be/XQiaCSabQaE" target="_blank">A Total Beginners Guide To Travis Picking – Andy Guitar</a> — a second teacher on the same pattern as the first video. Notice what Andy does differently from Justin: how he counts the thumb, and when he lets the pinch in.',
-                hint: 'A pinch is bass and treble sounding at the same instant — the signature Travis accent.',
+                hint: 'A pinch is bass and treble sounding at the same instant — the accent that makes Travis picking recognizable.',
                 skills: [2, 3],
                 response: { type: 'mc', prompt: 'A "pinch" is:',
                   answer: 1,
-                  explain: 'Bass and treble sound at the same instant — the signature Travis accent.',
+                  explain: 'Bass and treble sound at the same instant — the accent that makes Travis picking recognizable.',
                   choices: ['Two fingers on one string', 'Thumb and a finger plucking together on the beat', 'Muting the strings', 'A very quiet note'] }
               }
             ]
@@ -78,7 +78,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Station Wrap-Up — take a beat to reflect: what tempo could you hold the alternating thumb today without it stumbling?',
+                text: 'Station Wrap-Up — pause and think: what tempo could you hold the alternating thumb today without it stumbling?',
                 response: { type: 'short', placeholder: 'e.g. solid at 60 BPM; at 70 my thumb followed my fingers and fell apart' }
               }
             ]
@@ -127,8 +127,8 @@ SETS.push(
             title: 'Add finger fills',
             steps: [
               {
-                text: 'Challenge 3 — Fills: keep the thumb going, add i on the "and" of beat 2. You\'ve got it when: the fill lands cleanly between two thumb strokes without slowing the thumb down.',
-                hint: 'Fingers decorate ON TOP of an already-grooving thumb — the thumb\'s rhythm never bends to fit the fingers.',
+                text: 'Challenge 3 — Fills (a fill is a short extra run of notes between the main parts): keep the thumb going, add i on the "and" of beat 2. You\'ve got it when: the fill lands cleanly between two thumb strokes without slowing the thumb down.',
+                hint: 'Fingers decorate ON TOP of a thumb that\'s already keeping a steady groove (a groove is the steady rhythmic feel) — the thumb\'s rhythm never bends to fit the fingers.',
                 stuck: 'Isolate just the thumb + one fill note, looping it until it\'s automatic before adding more.',
                 levelUp: 'Add a second fill on the "and" of beat 4.',
                 skills: [3]
@@ -155,8 +155,8 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — House of the Rising Sun, bass + roll in 6/8: play the verse with a bass note on the downbeat and your fingers rolling up through each chord, following the progression. You\'ve got it when: the verse survives every chord change with the roll staying smooth.',
-                hint: 'House of the Rising Sun is in 6/8 — felt in two, the same waltz-family feel you met in Module 5. The thumb plays the bass on the downbeat; the fingers roll up through the chord between beats.',
+                text: 'Challenge — House of the Rising Sun, bass + roll in 6/8: play the verse with a bass note on the downbeat (the first, strongest beat of the bar) and your fingers rolling up through each chord, following the progression. You\'ve got it when: the verse survives every chord change with the roll staying smooth.',
+                hint: 'House of the Rising Sun is in 6/8 — felt in two (you tap two main beats per bar), the same waltz-family feel you met in Module 5. The thumb plays the bass on the downbeat; the fingers roll up through the chord between beats.',
                 stuck: 'Loop just the first two chords of the verse until the pattern is rock solid before adding the rest.',
                 levelUp: 'Play the whole verse from memory, no chord chart.',
                 skills: [6]
@@ -185,7 +185,7 @@ SETS.push(
             title: 'Reactivate p-i-m-a — the claw (from Module 8)',
             steps: [
               {
-                text: 'Challenge — Claw Check (a 60-second reactivation of Module 8, not a re-teach): plant all four picking fingers at once — thumb (p) resting on the bass strings 6/5/4, index (i) on the G string, middle (m) on the B string, ring (a) on the high e. Then pluck p–i–m–a on the open strings, twice through at 60 BPM. You\'ve got it when: each finger fires in order, one string each, with no two fingers grabbing the same string. This is the picking hand you built back in Module 8 — wake it up any time the claw feels rusty, including right now before your next run.',
+                text: 'Challenge — Claw Check (a 60-second reactivation of Module 8, not a re-teach): plant all four picking fingers at once — thumb (p) resting on the bass strings 6/5/4, index (i) on the G string, middle (m) on the B string, ring (a) on the high e. Then pluck p–i–m–a on the open strings, twice through at 60 BPM. You\'ve got it when: each finger plays in order, one string each, with no two fingers grabbing the same string. This is the picking hand you built back in Module 8 — warm it up any time it feels out of practice, including right now before your next run.',
                 hint: 'p owns the three bass strings (6/5/4); i-G, m-B, a-high-e never trade places. Set the assignment once and your hand stops hunting for strings.',
                 stuck: 'Plant all four fingers silently first and feel each one touching its string, then pluck slowly — p, then i, then m, then a — before you add the metronome.',
                 levelUp: 'Run the staircase up and back down (p-i-m-a-m-i) without looking at your picking hand.',
@@ -194,7 +194,7 @@ SETS.push(
               },
               {
                 text: 'Challenge — 4-Note Arpeggio, Am then C: play a p–i–m–a arpeggio on each chord — one thumb bass, then i-m-a rolling up the top three strings — 2 bars of Am, then 2 bars of C, and loop. On Am the thumb takes the open A string; on C it slides to the 3rd-fret C on that same string. You\'ve got it when: every note is the same volume and the a-finger (the high e) doesn\'t rush ahead of the beat.',
-                hint: 'This is the four-even-notes drill Module 8 built the whole pattern on — the a-finger is the one most likely to snap early, so keep it as calm as the thumb.',
+                hint: 'This is the four-even-notes drill (a drill is a short exercise you repeat to build a skill) Module 8 built the whole pattern on — the a-finger is the one most likely to play too early, so keep it as calm as the thumb.',
                 stuck: 'Loop just Am until the four notes are dead even, then add C — the only thing that changes between the chords is where the thumb lands.',
                 levelUp: 'Fold the same p-i-m-a shape into this set\'s Travis pattern — and, when you reach Set 2, into the 3/4 waltz pattern too — keeping every note even.',
                 skills: [1, 4],
@@ -289,7 +289,7 @@ SETS.push(
             title: 'Try "the cure" fingerstyle — its native style',
             steps: [
               {
-                text: 'Playing "the cure" fingerstyle removes its ◐ flag — fingerpicking IS the song\'s native style, not "against the grain" like power-chording a gentle ballad. Try picking through Am–C–Dm–F, one bar each.',
+                text: 'Playing "the cure" fingerstyle removes its ◐ flag — fingerpicking IS the song\'s native style, not "against the grain" (playing a song in a style that fights its natural feel) like power-chording a gentle ballad. Try picking through Am–C–Dm–F, one bar each.',
                 hint: 'The ◐ flag marked renderings that fought a song\'s nature. Fingerpicked, "the cure" is finally itself.',
                 skills: [3, 5],
                 response: { type: 'mc', prompt: 'Playing "the cure" fingerstyle removes its ◐ flag because:',
@@ -303,7 +303,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Station Wrap-Up — take a beat to reflect: which felt more natural — picking in 4 or in 3? What does the waltz feel do to the song?',
+                text: 'Station Wrap-Up — pause and think: which felt more natural — picking in 4 or in 3? What does the waltz feel do to the song?',
                 response: { type: 'short', placeholder: 'e.g. 3 kept surprising me — but it makes Happy Birthday float instead of march' }
               }
             ]
@@ -328,7 +328,7 @@ SETS.push(
             steps: [
               {
                 text: 'Challenge 1 — Count-and-Pick: play the 3/4 pattern (bass–pluck–pluck) on one chord, counting aloud, 60 BPM. You\'ve got it when: a steady 3-count with the bass landing exactly on beat 1 every bar.',
-                hint: 'Beat 1 is the boss — land the bass note dead on it every bar, and the two plucks fall into place after.',
+                hint: 'Beat 1 is the strongest — land the bass note exactly on it every bar, and the two plucks fall into place after.',
                 stuck: 'Drop the counting and just feel "long-short-short" for bass-pluck-pluck.',
                 levelUp: 'Count silently in your head instead of aloud, or add a pinch on beat 1.',
                 skills: [1, 2],
@@ -352,7 +352,7 @@ SETS.push(
             title: 'Fingerpick Let It Be with your own pattern',
             steps: [
               {
-                text: 'Challenge 3 — Let It Be: arpeggiate C–G–Am–F, your chosen pattern, working toward 70 BPM. You\'ve got it when: one full lap with the pattern unbroken through all four chords.',
+                text: 'Challenge 3 — Let It Be: arpeggiate C–G–Am–F, your chosen pattern, working toward 70 BPM. You\'ve got it when: one full lap (a lap = one full time through) with the pattern unbroken through all four chords.',
                 hint: 'You already fingerpicked this verse in Module 8 — now push the tempo and choice of pattern further.',
                 stuck: 'Drop to 50 BPM and loop just C–G until it\'s automatic.',
                 levelUp: 'Reach 70 BPM clean, or add a pinch on beat 1 of each chord.',
@@ -427,7 +427,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
               {
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=cRJb_f4-M5g" target="_blank">La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera</a> — a real requinto line from the ranchera tradition sierreño grew out of, taught in English. Watch how his picking hand carries the melody a singer would otherwise have, then listen for the same job in Luna and Tu Boda from this module\'s song list. <!-- Session D filled this former video placeholder (oEmbed-verified 2026-07-10: "La Derrota - Vicente Fernandez - Guitar Lesson - requinto - tutorial - part 1 (ENGLISH)" / Jorge Aguilera). Spanish-lane content — Jonathan: review for fit. -->',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=cRJb_f4-M5g" target="_blank">La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera</a> — a real requinto line from the ranchera tradition that sierreño (a Mexican acoustic-guitar style) grew out of, taught in English. Watch how his picking hand carries the melody a singer would otherwise have, then listen for the same job in Luna and Tu Boda from this module\'s song list. <!-- Session D filled this former video placeholder (oEmbed-verified 2026-07-10: "La Derrota - Vicente Fernandez - Guitar Lesson - requinto - tutorial - part 1 (ENGLISH)" / Jorge Aguilera). Spanish-lane content — Jonathan: review for fit. -->',
                 hint: 'Requinto sings the melodic lines you\'ve been hearing in Luna and Tu Boda since the course\'s first listening drills.',
                 skills: [3],
                 response: { type: 'mc', prompt: 'In a sierreño group, the requinto is:',
@@ -450,13 +450,13 @@ SETS.push(
             title: 'Listen for melody riding on top of a steady thumb',
             steps: [
               {
-                text: '"Melody on top" in fingerstyle means the tune rides the treble strings while the thumb keeps the bass going underneath — two jobs, one hand. Listen for it in Luna or Tu Boda.',
-                hint: 'Two jobs, one hand — the requinto texture in a nutshell.',
+                text: '"Melody on top" in fingerstyle means the melody is played on the thin, high strings while the thumb keeps the bass going underneath — two jobs, one hand. Listen for it in Luna or Tu Boda.',
+                hint: 'Two jobs, one hand — the requinto texture in short.',
                 skills: [4],
                 response: { type: 'mc', prompt: '"Melody on top" in fingerstyle means:',
                   answer: 1,
-                  explain: 'The tune rides the treble strings while the thumb keeps the bass going underneath.',
-                  choices: ['Play only high notes', 'The tune rides the treble strings while the thumb keeps the bass going underneath', 'The melody comes first, chords after', 'Sing while playing'] }
+                  explain: 'The melody is played on the thin, high strings while the thumb keeps the bass going underneath.',
+                  choices: ['Play only high notes', 'The melody is played on the thin, high strings while the thumb keeps the bass going underneath', 'The melody comes first, chords after', 'Sing while playing'] }
               }
             ]
           },
@@ -465,12 +465,12 @@ SETS.push(
             steps: [
               {
                 text: 'Now try it: over a C chord, keep the thumb on steady quarters and pick a 3-note melody on strings 1–2 on top.',
-                hint: 'Fingerpicking makes our regional-Mexican songs sound MORE authentic than power chords did — sierreño is an acoustic, fingerpicked tradition, and this is its real timbre.',
+                hint: 'Fingerpicking makes our regional-Mexican songs sound MORE authentic than power chords did — sierreño is an acoustic, fingerpicked tradition, and this is its real tone.',
                 skills: [4, 5],
                 response: { type: 'mc', prompt: 'Why does fingerstyle make our regional-Mexican songs sound MORE authentic than power chords did?',
                   answer: 1,
-                  explain: 'Sierreño is an acoustic, fingerpicked tradition — this is its real timbre.',
-                  choices: ['It\'s louder', 'Sierreño is an acoustic, fingerpicked tradition — this is its real timbre', 'It isn\'t', 'Distortion is illegal'] }
+                  explain: 'Sierreño is an acoustic, fingerpicked tradition — this is its real tone.',
+                  choices: ['It\'s louder', 'Sierreño is an acoustic, fingerpicked tradition — this is its real tone', 'It isn\'t', 'Distortion is illegal'] }
               }
             ]
           },
@@ -478,8 +478,8 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Station Wrap-Up — take a beat to reflect: name your showcase song and pattern — and the one spot you\'ll drill this week.',
-                response: { type: 'short', placeholder: 'e.g. "the cure," 6-note pattern — the Dm-to-F change still hiccups' }
+                text: 'Station Wrap-Up — pause and think: name your showcase song and pattern — and the one spot you\'ll drill this week.',
+                response: { type: 'short', placeholder: 'e.g. "the cure," 6-note pattern — the Dm-to-F change still stumbles' }
               }
             ]
           }
@@ -527,7 +527,7 @@ SETS.push(
             steps: [
               {
                 text: 'Challenge 3 — Melody on Top: over a C chord, keep the thumb going in steady quarters and pick a 3-note melody on strings 1–2 above it. You\'ve got it when: the thumb never wavers while the melody rides on top.',
-                hint: 'Two jobs, one hand — the requinto texture in a nutshell.',
+                hint: 'Two jobs, one hand — the requinto texture in short.',
                 stuck: 'Isolate the thumb alone first, then add just one melody note at a time.',
                 levelUp: 'Extend the melody to 6 notes without losing the thumb.',
                 skills: [4]
@@ -564,7 +564,7 @@ SETS.push(
             steps: [
               {
                 text: 'Name your showcase song and pattern — and the one spot you\'ll drill this week. Write it below.',
-                response: { type: 'short', placeholder: 'e.g. "the cure," 6-note pattern — the Dm-to-F change still hiccups' }
+                response: { type: 'short', placeholder: 'e.g. "the cure," 6-note pattern — the Dm-to-F change still stumbles' }
               }
             ]
           }
@@ -582,7 +582,7 @@ SETS.push(
     skills: [
       { id: 'm12w3-s1', text: 'Play Luna\'s fingerpicked intro (Journey Layer 6) with p-i-m rolls' },
       { id: 'm12w3-s2', text: 'Play Tu Boda\'s requinto intro line fingerstyle' },
-      { id: 'm12w3-s3', text: 'Explain the requinto\'s role in sierreño / corridos tumbados',
+      { id: 'm12w3-s3', text: 'Explain the requinto\'s role in sierreño / corridos tumbados (a modern Mexican regional style)',
         practice: { type: 'mc', prompt: 'The requinto\'s job in the group is:',
           choices: ['Rhythm chords', 'The melodic lead lines', 'Bass', 'Percussion'], answer: 1 } },
       { id: 'm12w3-s4', text: 'Blend melody notes into a picking pattern — tune on top, thumb bass below' },
@@ -598,7 +598,7 @@ SETS.push(
 
 globalThis.MODULE_SONGS = globalThis.MODULE_SONGS || {};
 MODULE_SONGS[12] = [
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Full fingerpicked verse — its native style, the ◐ comes off', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Full fingerpicked verse — its native style, so the ◐ mark (our flag for a song played against its natural style) comes off', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Let It Be" — The Beatles', meta: 'Arpeggiated C–G–Am–F with your chosen pattern', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
@@ -619,7 +619,7 @@ MODULE_SONGS[12] = [
       { name: '"Blackbird" — The Beatles', meta: 'The capstone challenge — pinches and moving shapes', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=Man4Xw8Xypo',
         tutorialUrl: 'https://www.youtube.com/watch?v=Qqw15309knU' },
-      { name: '"Just Like Heaven" — The Cure', meta: 'Turn the arpeggiated riff into a picking pattern', type: 'Choice', core: false, level: 2,
+      { name: '"Just Like Heaven" — The Cure', meta: 'Turn the arpeggiated riff (short repeated phrase) into a picking pattern', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=n3nPiBai66M',
         tutorialUrl: 'https://www.youtube.com/watch?v=fEgsKS_IcQA' }
     ];

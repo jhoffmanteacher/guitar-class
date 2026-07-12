@@ -16,7 +16,7 @@
         + 'background:#322b78;color:#fff;font:14px/1.45 system-ui,-apple-system,sans-serif;'
         + 'box-shadow:0 6px 24px rgba(0,0,0,.28)';
       const msg = document.createElement('span');
-      msg.textContent = 'Something hiccuped. Your saved progress is safe — please refresh the page to keep going. ';
+      msg.textContent = 'Something went wrong. Your saved progress is safe — please refresh the page to keep going. ';
       const refresh = document.createElement('button');
       refresh.textContent = 'Refresh';
       refresh.style.cssText = 'margin-left:4px;padding:3px 12px;border:0;border-radius:14px;'
@@ -80,6 +80,7 @@ let currentUser = null;
 let progress    = {};
 let responses   = {};
 let completed   = {};
+let games       = {};   // per-game bests from the games arcade (coach.js) — its own save category
 let saveTimer   = null;
 
 /* ── Lazy module loading ──
@@ -138,7 +139,7 @@ async function ensureModuleRendered(num){
   // Idempotent: already-wrapped spans are skipped (see CHORD_SKIP_CLASSES).
   wrapAllChordLinks();
 }
-let _dirtyKeys = new Set();   // which categories need writing: skills · place · responses · completed
+let _dirtyKeys = new Set();   // which categories need writing: skills · place · responses · completed · games
 const escAttr = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const escHtml = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 // Builds the signed-in user header. Escapes name/email/photoURL — Google
@@ -205,7 +206,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     if(IS_TEACHER_MODE){ showTeacherApp(user); }
     else { await loadProgress(); showApp(user); }
   } else {
-    currentUser = null; progress = {}; responses = {}; completed = {};
+    currentUser = null; progress = {}; responses = {}; completed = {}; games = {};
     _moduleStripStates = {};   // next user's first strip render is a first paint, not a celebration
     document.getElementById('auth-wall').style.display='block';
     document.getElementById('app').style.display='none';
@@ -262,8 +263,9 @@ async function loadProgress(){
       lastSetId     = doc.data().lastSet||null;
       responses     = doc.data().responses || {};
       completed     = doc.data().completed || {};
-    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; restoreLocalPlace(); }
-  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; restoreLocalPlace(); }
+      games         = doc.data().games || {};
+    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; games={}; restoreLocalPlace(); }
+  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; games={}; restoreLocalPlace(); }
 }
 
 /* Last-place persistence (Session 4.4): Firestore is the source of truth, but
@@ -326,6 +328,7 @@ async function flushSave(){
   if(keys.has('place')){    payload.lastModule = lastModuleNum; payload.lastSet = lastSetId||null; }
   if(keys.has('responses')) payload.responses = responses;
   if(keys.has('completed')) payload.completed = completed;
+  if(keys.has('games'))     payload.games     = games;
   try{
     await ensureDb();
     await db.collection('progress').doc(currentUser.uid).set(payload,{merge:true});
@@ -342,6 +345,7 @@ function onCompleteChange(key, isDone){
   saveCompleted();
 }
 function saveCompleted(){ queueSave('completed'); }
+function saveGames(){ queueSave('games'); }   // per-game bests (games arcade, coach.js)
 
 function saveProgress(){ queueSave('skills','place'); }
 let _saveMsgT = null;
@@ -1627,20 +1631,19 @@ function buildStations(w, stationId){
     return `<li class="step${isDone ? ' step-done' : ''}"${skillsAttr}><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml}${hintHtml}${branchHtml} ${readBtn}</div>${doneBtn}</div></li>`;
   }).join('');
   /* Generic tuning warm-up sections are superseded by the Daily 5 (which
-     starts with the tune-up): render a pointer card in their slot instead.
-     The section object STAYS in the data so every later section keeps its
-     index — saved responses and Mark-done state are keyed on it. */
+     starts with the tune-up): render a pointer card above the numbered
+     sections instead of taking a numbered slot itself. */
   const isTuningWarmup = sec => sec.title === 'Warm-up — tuning check (Module 1)' && w.moduleNum !== 1;
   const sectionsHtml=(sections,baseNs)=>{
-    const firstReal = sections.findIndex(sec => !isTuningWarmup(sec));
-    return sections.map((sec,gi)=>{
-    if(isTuningWarmup(sec)){
-      return `<div class="daily5-inline">&#x26A1; <strong>Tune and warm up first:</strong> today\u2019s Daily 5 has your tune-up, a finger warm-up, and one drill from this module \u2014 five minutes and your hands are ready. <button type="button" class="daily5-inline-btn" onclick="openDaily5Here()">&#x26A1; Open today\u2019s Daily 5</button></div>`;
-    }
+    const reminder = sections.some(isTuningWarmup)
+      ? `<div class="daily5-inline">&#x26A1; <strong>Tune and warm up first:</strong> today\u2019s Daily 5 has tuning, a finger warm-up, and one drill (a short exercise you repeat to build a skill) from this module \u2014 five minutes and your hands are ready. <button type="button" class="daily5-inline-btn" onclick="openDaily5Here()">&#x26A1; Open today\u2019s Daily 5</button></div>`
+      : '';
+    const real = sections.filter(sec => !isTuningWarmup(sec));
+    return reminder + real.map((sec,gi)=>{
     const ns = `${baseNs}-sec${gi}`;
-    const open = gi===firstReal ? ' open' : '';
+    const open = gi===0 ? ' open' : '';
     return `<div class="sc-sec${open}">
-      <button type="button" class="sc-sec-head" aria-expanded="${gi===firstReal}" onclick="toggleStationSection(this)">
+      <button type="button" class="sc-sec-head" aria-expanded="${gi===0}" onclick="toggleStationSection(this)">
         <span class="sc-sec-chev">&#x25B6;</span>
         <span class="sc-sec-title"><span class="sc-sec-num">${gi+1}</span>${sec.title}</span>
       </button>
@@ -1656,7 +1659,7 @@ function buildStations(w, stationId){
        B→C (B teaches what C drills), but returning straight to C on a
        later day is spaced practice — say so, so nobody feels off-track. */
     const flexNote = (id==='c' && w.stations && w.stations.b)
-      ? `<div class="st-flex-note">&#x1F9ED; <strong>First time on this set?</strong> Do <button type="button" class="st-note-link" onclick="switchTabById('${w.id}','station-b')">Station B</button> first — watch the lessons, then come back here and drill. Back on another day just to practice? Perfect — split days are how skills stick.</div>`
+      ? `<div class="st-flex-note">&#x1F9ED; <strong>First time on this set?</strong> Do <button type="button" class="st-note-link" onclick="switchTabById('${w.id}','station-b')">Station B</button> first — watch the lessons, then come back here and drill. Back on another day just to practice? Perfect — practicing on different days helps you remember.</div>`
       : '';
     return `
     <div class="dp${cls}" id="${w.id}-dp-${id}">
@@ -1725,7 +1728,7 @@ function buildSongs(w){
     const vids = [];
     if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="loadSongVid('${w.id}',${i},'original')" title="Opens in YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
     if(s.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="loadSongVid('${w.id}',${i},'tutorial')"><span class="svb-play">&#x25B6;</span>Tutorial</button>`);
-    if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="loadSongVid('${w.id}',${i},'backing')" title="Jam track to solo over"><span class="svb-play">&#x25B6;</span>&#x1F3B5; Backing track${s.backingKey?` (${s.backingKey})`:''}</button>`);
+    if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="loadSongVid('${w.id}',${i},'backing')" title="Jam track — backing music to play along with; make up your own melody (solo) over it"><span class="svb-play">&#x25B6;</span>&#x1F3B5; Backing track${s.backingKey?` (${s.backingKey})`:''}</button>`);
     // Song Journey pages are same-origin (tabs/*.html), opened in a new tab so app state stays put.
     if(s.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="One song, five layers">&#x1F9F5; Song Journey</button>`);
     const vidsEl = vids.length ? `<div class="song-vids">${vids.join('')}</div>` : '';
@@ -1747,7 +1750,7 @@ function buildModuleSongs(moduleNum){
     const vids = [];
     if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="loadModuleSongVid(${moduleNum},${i},'original')" title="Opens in YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
     if(s.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="loadModuleSongVid(${moduleNum},${i},'tutorial')"><span class="svb-play">&#x25B6;</span>Tutorial</button>`);
-    if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="loadModuleSongVid(${moduleNum},${i},'backing')" title="Jam track to solo over"><span class="svb-play">&#x25B6;</span>&#x1F3B5; Backing track${s.backingKey?` (${s.backingKey})`:''}</button>`);
+    if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="loadModuleSongVid(${moduleNum},${i},'backing')" title="Jam track — backing music to play along with; make up your own melody (solo) over it"><span class="svb-play">&#x25B6;</span>&#x1F3B5; Backing track${s.backingKey?` (${s.backingKey})`:''}</button>`);
     if(s.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="One song, five layers">&#x1F9F5; Song Journey</button>`);
     const vidsEl = vids.length ? `<div class="song-vids">${vids.join('')}</div>` : '';
     return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div><div class="sname">${s.name}</div><div class="smeta">${diffDotsHtml(s.level)}${s.meta}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${s.type}</span></div>`;
@@ -1783,7 +1786,7 @@ function openSongVid(s, kind){
   if(!s) return;
   if(kind==='journey'){ if(s.journeyUrl) window.open(s.journeyUrl, '_blank', 'noopener'); return; }
   if(kind==='original'){ if(s.originalUrl) window.open(s.originalUrl, '_blank', 'noopener'); return; }
-  if(kind==='backing'){ if(s.backingUrl) loadPanel('youtube', s.backingUrl, s.name, 'Backing track — already loops, just hit play and solo'); return; }
+  if(kind==='backing'){ if(s.backingUrl) loadPanel('youtube', s.backingUrl, s.name, 'Backing track — it repeats on its own; press play and solo over it'); return; }
   if(s.tutorialUrl) loadPanel('youtube', s.tutorialUrl, s.name, 'Tutorial');
 }
 function loadSongVid(wid, idx, kind){
@@ -1848,7 +1851,7 @@ function buildModuleRoutine(moduleNum){
   const li=(mins, title, body)=>`<li class="routine-item"><span class="routine-min">${mins} min</span><div class="routine-body"><strong>${title}</strong> ${body}</div></li>`;
   const setLink=(x)=>`<button type="button" class="mr-review-link" onclick="goToSet('${x.set.id}')" title="Open this set">&#8617; ${escHtml(x.set.label)}</button>`;
   let items='';
-  items+=li(1,'Tune up','&mdash; open the Tuner (corner button) and get all six strings to green.');
+  items+=li(1,'Tune up','&mdash; open the Tuner (corner button) and tune all six strings until the tuner turns green.');
   items+=li(1,'Finger Gym',`&mdash; ${escHtml(wu.text)}<br>${routinePlaySeq(wu, `bpm:routine:${moduleNum}:wu`)}`);
   if(drill) items+=li(3,'Skill drill',`&mdash; ${escHtml(truncateText(stripTags(drill.step.text),180))} ${setLink(drill)}<br>${routinePlaySeq(drill.step.playSeq, `bpm:routine:${moduleNum}:drill`)}`);
   if(chordWork && chordWork!==drill){
@@ -1865,7 +1868,7 @@ function buildModuleRoutine(moduleNum){
       <button type="button" class="routine-print-btn" onclick="printRoutine()" title="Print this routine">&#x1F5A8; Print</button>
     </div>
     <ol class="routine-list">${items}</ol>
-    <div class="routine-foot">Built from this module&rsquo;s sets &mdash; short on time? Do steps 1&ndash;3 and call it a win.</div>
+    <div class="routine-foot">Built from this module&rsquo;s sets &mdash; short on time? Do steps 1&ndash;3 &mdash; that's still good.</div>
   </div>`;
 }
 function printRoutine(){
@@ -1885,7 +1888,7 @@ function buildDaily5(){
   const pick=seqSteps.length ? seqSteps[doy % seqSteps.length] : null;
   const li=(mins,title,body)=>`<li class="routine-item"><span class="routine-min">${mins} min</span><div class="routine-body"><strong>${title}</strong> ${body}</div></li>`;
   let items='';
-  items+=li(1,'Tune up','&mdash; all six strings to green with the corner Tuner.');
+  items+=li(1,'Tune up','&mdash; tune all six strings until the tuner turns green (use the corner Tuner).');
   items+=li(2,'Warm-up',`&mdash; ${escHtml(wu.text)}<br>${routinePlaySeq(wu,'bpm:daily5:wu')}`);
   if(pick) items+=li(2,'Today’s drill',`&mdash; from Module ${num}, ${escHtml(pick.set.label)}: ${escHtml(truncateText(stripTags(pick.step.text),160))}<br>${routinePlaySeq(pick.step.playSeq,'bpm:daily5:drill')}`);
   /* Challenge Day: every third day the Daily 5 offers ONE extra challenge to
@@ -1904,32 +1907,26 @@ function buildDaily5(){
       </div>`;
     }
   }
-  const backBtn = _daily5ReturnY!=null ? `<button type="button" class="daily5-back" onclick="daily5Return()">&#x21A9; Done — back to my set</button>` : '';
-  return `<div class="daily5-head"><span>&#x26A1; Daily 5 &mdash; today’s warm-up</span><span style="display:flex;gap:10px;align-items:center">${backBtn}<button type="button" class="tp-close" onclick="toggleDaily5()" aria-label="Close Daily 5">&#x2715;</button></span></div>
+  return `<div class="daily5-head"><span>&#x26A1; Daily 5 &mdash; today’s warm-up</span><button type="button" class="tp-close" onclick="closeDaily5()" aria-label="Close Daily 5">&#x2715;</button></div>
     <ol class="routine-list">${items}</ol>${challenge}`;
 }
-function toggleDaily5(){
-  const p=document.getElementById('daily5-panel');
-  const btn=document.getElementById('daily5-btn');
-  const open=p.hasAttribute('hidden');
-  if(open){ closeTopPanels('daily5'); p.innerHTML=buildDaily5(); p.removeAttribute('hidden'); }
-  else { p.setAttribute('hidden',''); _daily5ReturnY=null; }
-  if(btn) btn.setAttribute('aria-expanded', open?'true':'false');
-}
-/* Station C's warm-up card: open the Daily 5 (top of page) and remember where
-   the student was, so the panel can offer a one-tap trip back down. */
-let _daily5ReturnY=null;
+/* Station C's warm-up card opens the Daily 5 as a popup over the activities —
+   close it and you're exactly where you left off, no scrolling to the top. */
 function openDaily5Here(){
-  _daily5ReturnY=window.scrollY;
-  const p=document.getElementById('daily5-panel');
-  if(p.hasAttribute('hidden')) toggleDaily5();
-  else p.innerHTML=buildDaily5();   // refresh so the return button appears
-  p.scrollIntoView({behavior:'smooth', block:'start'});
+  closeDaily5();
+  const ov=document.createElement('div');
+  ov.className='daily5-overlay';
+  ov.id='daily5-overlay';
+  ov.innerHTML=`<div class="daily5-modal" role="dialog" aria-modal="true" aria-label="Daily 5 — today's warm-up">${buildDaily5()}</div>`;
+  ov.addEventListener('click', e=>{ if(e.target===ov) closeDaily5(); });
+  document.body.appendChild(ov);
+  document.addEventListener('keydown', daily5EscClose);
 }
-function daily5Return(){
-  const y=_daily5ReturnY; _daily5ReturnY=null;
-  toggleDaily5();   // close
-  if(y!=null) window.scrollTo({top:y, behavior:'smooth'});
+function daily5EscClose(e){ if(e.key==='Escape') closeDaily5(); }
+function closeDaily5(){
+  const ov=document.getElementById('daily5-overlay');
+  if(ov) ov.remove();
+  document.removeEventListener('keydown', daily5EscClose);
 }
 
 /* ── Module Review (self-assessment) ── */
@@ -1959,7 +1956,7 @@ function buildModuleReview(mr){
   const pBtn=(n)=>`<button class="mr-rb lvl${n}${pLvl===String(n)?' active':''}" onclick="setPerformanceLevel(${mr.moduleNum},'${n}')">${n}</button>`;
   const playHtml=`<div class="mr-play">
       <span class="mr-play-tag">&#x1F3B8; <span class="mr-q-num">${playNum}.</span> Play it &amp; Record it!</span>
-      <div class="mr-play-prompt">Perform a core song from this module &mdash; or a song of your choice that shows off these skills. Then listen back to your recording and reflect on what could be improved.</div>
+      <div class="mr-play-prompt">Perform a core song from this module &mdash; or a song of your choice that uses these skills. Then listen back to your recording and reflect on what could be improved.</div>
       <label class="mr-play-label" for="${mrId}-song">Song I played</label>
       <input type="text" id="${mrId}-song" class="mr-play-song" oninput="savePerformance(${mr.moduleNum})" value="${escAttr(perf.song||'')}">
       <div class="mr-rec" data-module="${mr.moduleNum}">
@@ -1998,7 +1995,7 @@ function buildModuleReview(mr){
       <span class="mr-legend-item"><span class="mr-legend-dot lvl3"></span>3 = Got it</span>
     </div>
     <div class="ablock" style="margin-top:18px">
-      <div class="albl"><span class="mr-q-num">${clickedNum}.</span> What clicked this module?</div>
+      <div class="albl"><span class="mr-q-num">${clickedNum}.</span> What suddenly made sense this module?</div>
       <textarea id="${mrId}-clicked" class="reflection-ta" placeholder="e.g. TAB finally made sense when I slowed it down…" oninput="saveReflection(${mr.moduleNum})">${saved.clicked||''}</textarea>
     </div>
     <div class="ablock" style="margin-top:12px">
@@ -2911,9 +2908,10 @@ function initBackToTop(){
 initBackToTop();
 
 /* ── Top-bar panels (Songs hub · Search) — one open at a time, and they
-      close Daily 5 / Games too so the top of the page stays tidy. ── */
+      close Games too so the top of the page stays tidy. (The Daily 5 is a
+      popup opened from Station C now, not a top-bar panel.) ── */
 function closeTopPanels(except){
-  ['daily5', 'games', 'songs-hub', 'search'].forEach(k => {
+  ['games', 'songs-hub', 'search'].forEach(k => {
     if(k === except) return;
     const p = document.getElementById(k === 'games' ? 'games-screen' : k + '-panel');
     if(p && !p.hasAttribute('hidden')){
@@ -2941,7 +2939,7 @@ async function toggleSongsHub(){
   closeTopPanels('songs-hub');
   p.removeAttribute('hidden');
   if(btn) btn.setAttribute('aria-expanded', 'true');
-  p.innerHTML = `<div class="daily5-head"><span>&#x266A; All the songs</span><button type="button" class="tp-close" onclick="toggleSongsHub()" aria-label="Close songs">&#x2715;</button></div><div class="coach-tip">Loading the song catalogue…</div>`;
+  p.innerHTML = `<div class="daily5-head"><span>&#x266A; All the songs</span><button type="button" class="tp-close" onclick="toggleSongsHub()" aria-label="Close songs">&#x2715;</button></div><div class="coach-tip">Loading the song list…</div>`;
   await ensureAllModuleData();
   const byName = new Map();
   const noteSong = (song, moduleNum) => {
@@ -3025,7 +3023,7 @@ async function toggleSearch(){
   if(btn) btn.setAttribute('aria-expanded', 'true');
   p.innerHTML = `<div class="daily5-head"><span>&#x1F50D; Find it</span><button type="button" class="tp-close" onclick="toggleSearch()" aria-label="Close search">&#x2715;</button></div>
     <input type="search" class="search-input" id="search-input" placeholder="Try &quot;F chord&quot;, &quot;folk strum&quot;, &quot;pentatonic&quot;…" oninput="runSearch(this.value)" aria-label="Search the whole site">
-    <div id="search-results" class="search-results"><div class="coach-tip">Loading the catalogue…</div></div>`;
+    <div id="search-results" class="search-results"><div class="coach-tip">Loading the song list…</div></div>`;
   const input = document.getElementById('search-input');
   if(input) input.focus();
   if(!searchIndex) searchIndex = await buildSearchIndex();

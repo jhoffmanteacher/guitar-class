@@ -795,3 +795,40 @@
 - [x] ~~Video self-review~~ — CUT by Jonathan 2026-07-11 (never built;
       was the last G1 leftover). The audio-only Record Yourself widget
       stays as-is.
+- [x] **Docs consolidation + Challenge Day ✅ 2026-07-11 (evening)** —
+      WORKFLOW slimmed again (10 completed entries → this archive);
+      fully-executed DESIGN_UPGRADES.md archived. WINTER_CHALLENGE
+      restructured to {minModule, text} (each line tagged with the module
+      that teaches its skill) and the always-visible 15-item list
+      replaced by Challenge Day: every 3rd day (dayOfYear%3) the Daily 5
+      appends a pick-one-of-two drawn from minModule<=current module —
+      VM-verified module 1 sees zero later-module skills across 30
+      simulated days (challenge on 10 of 30).
+- [x] **Daily 5 becomes a Station C popup ✅ 2026-07-11 (night)** — the
+      Daily 5 button left the top toolbar; its one entry point is the
+      "Tune and warm up first" card at the top of Station C, and it opens
+      as a popup over the activities (dimmed backdrop; ✕, backdrop-click,
+      or Esc closes it, landing you right where you left off). Same pass:
+      Station C drill sections number from 1 again (the superseded tuning
+      warm-up no longer eats slot #1), the two Station C intro cards align
+      with the drill boxes, finger-placement shorthand expanded to plain
+      English ("index finger on string 2, fret 1"), and both Module 4
+      links to the Marty pentatonic video jump past the intro (?t=105).
+- [x] **Chord-check guitar-test fix batch ✅ 2026-07-11 (night, pushed)** —
+      from Jonathan's first real-guitar chord test: (1) change-prompt lag
+      fixed — multi-chord coach checks show a big current-chord + "next:"
+      readout, chord diagrams stay visible from the count-in on (coach AND
+      Change Up), and the visual beat pulse follows the adaptive scoring
+      grid instead of drifting off the player; (2) chord sensitivity —
+      strums are scored by chord-tone VOTE (ok ≥34% of readings on chord
+      tones; wrong only ≤15% with ≥3 readings; else dim) instead of the
+      melody single-pitch consensus, which polyphonic strums could never
+      pass; Change Up got the same vote. VM-tested against the real
+      coach.js; melody paths byte-identical. (3) Module 5 Set 1's Am↔Em
+      switch step gained its own chord pair + "Check my changes" button —
+      the changes drill previously had no check of its own.
+- [x] Watch Module 4 Set 1's video (`m_IiyJu60-c`, "Major Pentatonic
+      Scale – Marty Music") through; confirm it fits the beginner
+      Pattern-1 station. ✅ 2026-07-11 — fits; links jump to 1:45.
+- [x] Spanish spot-check: review 2–3 sets in Español mode with a fluent
+      speaker. ✅ 2026-07-11

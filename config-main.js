@@ -50,13 +50,13 @@ const MODULE_MANIFEST = [
 const WARMUP_BANK = [
   { label: 'Spider walk — 1-2-3-4 up two strings', bpm: 60,
     notes: [41, 42, 43, 44, 46, 47, 48, 49],
-    text: 'One finger per fret — index, middle, ring, pinky up the low E (frets 1–4), then the same on the A string. Slow and even beats fast and sloppy.' },
+    text: 'One finger per fret — index, middle, ring, pinky up the low E (frets 1–4), then the same on the A string. Slow and even is better than fast and sloppy.' },
   { label: 'Stretch walk — 1-3-2-4 on the low E', bpm: 60,
     notes: [41, 43, 42, 44],
     text: 'Frets 1-3-2-4 with fingers 1-3-2-4, all on the low E. A reach-and-control drill — slow, no rushing.' },
   { label: 'Open-string skip picking', bpm: 60,
     notes: [40, 50, 45, 55, 50, 59, 55, 64],
-    text: 'Picking hand only: E then D, A then G, D then B, G then e — skip a string on every jump, alternate picking. Slow and even beats fast and sloppy.' }
+    text: 'Picking hand only: E then D, A then G, D then B, G then e — skip a string on every jump, alternate picking. Slow and even is better than fast and sloppy.' }
 ];
 
 // 15-day, 5-minutes-a-day challenge bridging Modules 8 → 9. Rendered inside
@@ -68,11 +68,11 @@ const WINTER_CHALLENGE = [
   { minModule: 1, text: 'Tune by ear from the low E, then check with the tuner.' },
   { minModule: 5, text: 'One-minute changes: C→G. Write down your number.' },
   { minModule: 8, text: 'Fingerpick p-i-m-a over Am for two minutes straight.' },
-  { minModule: 2, text: 'Play the Seven Nation Army riff from memory.' },
+  { minModule: 2, text: 'Play the Seven Nation Army riff (short repeated phrase) from memory.' },
   { minModule: 2, text: 'Spider walk warm-up, then name the notes at every dot fret on the low E.' },
   { minModule: 6, text: 'D-DU-UDU over G–C–D until it feels automatic.' },
-  { minModule: 5, text: 'One-minute changes: your two hardest chords. Beat your last number.' },
-  { minModule: 5, text: 'Play the Luna F–Am vamp — two downbeat strums per bar, count “1-2”.' },
+  { minModule: 5, text: 'One-minute changes: your two hardest chords. Try to beat your last number.' },
+  { minModule: 5, text: 'Play the Luna F–Am vamp (two chords repeated over and over) — two downbeat strums per bar, count “1-2”.' },
   { minModule: 4, text: 'Pentatonic Pattern 1, ascending and descending, slow.' },
   { minModule: 3, text: 'Power-chord riff day: Smoke on the Water or Seven Nation Army as power chords.' },
   { minModule: 8, text: 'Fingerpick the Let It Be progression (C–G–Am–F), thumb on bass.' },

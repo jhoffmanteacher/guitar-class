@@ -28,7 +28,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            text: 'Sound setup (every lesson-video day): grab headphones if people are around you, or set a comfortable speaker volume if you\'re on your own. You\'ll bounce between videos and playing all course long, so make it easy to hear both.',
+            text: 'Sound setup (every lesson-video day): get headphones if people are around you, or set a comfortable speaker volume if you\'re on your own. You\'ll switch between watching videos and playing all course long, so make it easy to hear both.',
             hint: 'Loud enough that you catch every detail, quiet enough that you can still hear your own guitar.'
           },
           {
@@ -42,7 +42,7 @@ SETS.push(
             hint: 'Notice how he handles and stores the guitar. You\'ll practice the safe set-down at the practice station next. You\'ve got it when: you can name two ways to keep a guitar safe.',
             response: { type: 'mc', prompt: 'Which of these does the video call out as a real danger to an acoustic guitar?',
               answer: 0,
-              explain: 'Wood shrinks and can crack when the air gets too dry — that\'s why guitars are stored in cases and kept away from heaters. Wiping the strings after playing keeps sweat from corroding them. Lots of practice, picks, and standing up are all totally safe.',
+              explain: 'Wood shrinks and can crack when the air gets too dry — that\'s why guitars are stored in cases and kept away from heaters. Wiping the strings after playing keeps sweat from damaging them. Lots of practice, picks, and standing up are all totally safe.',
               choices: [
               'Dry air — low humidity can crack the wood',
               'Playing it too many hours a day',
@@ -56,7 +56,7 @@ SETS.push(
             title: 'Listening — find the guitar',
             steps: [
           {
-            text: 'Find a YouTube clip of your song — the one that means something to you (any song you love with guitar in it works). As you listen, follow the guitar only — tune out the singing and drums for 30 seconds and track what the guitar is doing. You\'ve got it when: you can describe the guitar\'s job in the song in one sentence.',
+            text: 'Find a YouTube clip of your song — the one that means something to you (any song you love with guitar in it works). As you listen, follow the guitar only — ignore the singing and drums for 30 seconds and track what the guitar is doing. You\'ve got it when: you can describe the guitar\'s job in the song in one sentence.',
             hint: 'Is it strumming chords? Playing a melody? Both? Just listen — you don\'t need to know the names yet.',
             levelUp: 'Listen a second time and try to tap along with just the guitar\'s rhythm, ignoring everything else.',
             response: { type: 'mc', prompt: 'In the clip you watched, what was the guitar doing?', choices: [
@@ -109,7 +109,7 @@ SETS.push(
           {
             text: 'Try playing with your foot up on a stool, then flat on the ground. Keep whichever one lets you sit up straight without gripping the neck to hold the guitar up. You\'ve got it when: you can let go with your fretting hand and the guitar stays put on your leg.<span class="step-figure"><img src="img/posture-check.svg" alt="Diagram of two good sitting positions — foot on a stool and feet flat on the floor, both with a straight back and the guitar resting on the leg — plus the test: take your fretting hand off the neck and the guitar stays put."></span>',
             hint: 'The guitar should balance on your leg, not hang from your hand. Your fretting hand needs to be free to move.',
-            stuck: 'Rest the narrow waist of the guitar in the dip of your leg so it settles in. If it slides, scoot it toward your body until it stops.',
+            stuck: 'Rest the narrow waist of the guitar in the dip of your leg so it sits still. If it slides, slide it toward your body until it stops.',
             levelUp: 'Hold the position with both hands off the neck for 10 seconds while you sit up tall.'
           },
           {
@@ -135,7 +135,7 @@ SETS.push(
             steps: [
           {
             text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to write your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice next, (3) how your last session went (skip that part this first time). We\'ll revisit it every module to see how your plan is working.',
-            hint: 'No wrong answers — even five minutes a day beats one long cram. You\'re building a habit you\'ll actually keep.',
+            hint: 'No wrong answers — even five minutes a day is better than one long rushed session. You\'re building a habit you\'ll actually keep.',
             response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went' }
           }
             ]
@@ -146,13 +146,13 @@ SETS.push(
 
     songs: [
       { name: 'Student choice — any song that means something to them', meta: 'Listening & sharing day · No playing required', type: 'Choice', core: false },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Listen — find the guitar in a current song (capo 1 · Am–C–Dm–F–G/B)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Listen — find the guitar in a current song (capo 1 — a capo is a clamp on the neck that raises the pitch · Am–C–Dm–F–G/B)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Listen — the low-E riff you\'ll build all course long', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'Listen — the low-E riff (a short musical phrase that repeats) you\'ll build all course long', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Listen — a riff-driven song we return to later', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
@@ -167,7 +167,7 @@ SETS.push(
 
     assessment: {
       goal: 'Can describe why they want to learn guitar · Can name one song that matters to them · Can describe what the guitar is doing in a song they love',
-      performance: 'Type your guitar goal and your song reflection into the response boxes, then say your "why guitar?" answer out loud in one or two sentences — if you can say it without hesitating, it\'s yours.',
+      performance: 'Type your guitar goal and your song reflection into the response boxes, then say your "why guitar?" answer out loud in one or two sentences — if you can say it without hesitating, you\'ve learned it.',
       selfCheck: 'Can you name one reason you want to play? Can you name one song you\'d love to play by the end of the year?',
       standards: ['Pr.1a', 'Cn.11a']
     },
@@ -282,7 +282,7 @@ SETS.push(
           },
           {
             text: 'Quick try: play each open string once, low E to high e, saying the name out loud as you pluck. Just a preview — you\'ll drill these for real at the practice station. You\'ve got it when: you can name each string out loud the instant you pluck it.',
-            hint: 'Hearing + saying + playing locks it in faster than just watching.',
+            hint: 'Hearing + saying + playing helps you memorize it faster than just watching.',
             stuck: 'Go low to high slowly, checking the mnemonic after each one: E, A, D, G, B, e. Do it twice before you speed up.',
             levelUp: 'Look away, pluck a string at random, and name it from pitch and thickness alone before you peek. Got someone around? Have them pluck one out of your sight instead.',
             response: { type: 'mc', prompt: 'Say the string names low to high — which comes right after G?',
@@ -303,7 +303,7 @@ SETS.push(
           {
             text: 'Preview the "Seven Nation Army" riff: click the note names below the TAB (the little chart below — each number is a fret to press on the low E string; 0 = open) to hear how it should sound, then try just the first few notes to get the feel. You\'ll play the whole riff at the practice station. You\'ve got it when: you can match the first three notes to what you heard. This song grows with you through the whole course — <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
             hint: 'Listen first, then match it — one note at a time. To fret a note, set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',
-            stuck: 'Just the first two notes: click a note name to hear it, then find it on the low E string. Nail those before adding the next.',
+            stuck: 'Just the first two notes: click a note name to hear it, then find it on the low E string. Get those solid before adding the next.',
             levelUp: 'Play the first four notes in a row, in time, humming the riff as you go.',
             response: { type: 'short', placeholder: 'How did the riff sound, and which note was hardest to find?' },
             tab: {
@@ -330,10 +330,10 @@ SETS.push(
             title: 'Tune all 6 strings with a tuner',
             steps: [
           {
-            text: 'Challenge 1 — Tune Challenge: get all 6 strings to green on the tuner. Beat the clock — can you do it in under 2 minutes? You\'ve got it when: all 6 strings green in under 2 minutes. Log your time so you can beat it next session.',
-            hint: 'Tune low to high: E A D G B e. Slow and steady beats rushing past the note. Use the play button to hear the target pitches.',
+            text: 'Challenge 1 — Tune Challenge: get all 6 strings to green on the tuner. Race the timer — can you do it in under 2 minutes? You\'ve got it when: all 6 strings green in under 2 minutes. Log your time so you can try for a faster time next session.',
+            hint: 'Tune low to high: E A D G B e. Going slowly works better than rushing past the note. Use the play button to hear the target pitches.',
             stuck: 'Tune just one string to green and leave it, then the next. Hit the play button to hear each target pitch first so your ear knows where it\'s headed.',
-            levelUp: 'Beat your own record: log this session\'s time and try to shave 15 seconds off it next session.',
+            levelUp: 'Log this session\'s time and try to make your time 15 seconds faster next session.',
             skills: [5],
             playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
           }
@@ -343,7 +343,7 @@ SETS.push(
             title: 'Play a melody on the open strings with clean, steady notes',
             steps: [
           {
-            text: 'Challenge 2 — One Minute, Perfect Notes: for one minute, cycle through the open strings low to high (E A D G B e), saying each name out loud as you pluck. When the minute\'s up, play one last full pass and count how many of the 6 ring perfectly clean — no buzz, no muting. You\'ve got it when: all 6 ring clean on that final pass. Log your score out of 6 so you can beat it next time.',
+            text: 'Challenge 2 — One Minute, Perfect Notes: for one minute, cycle through the open strings low to high (E A D G B e), saying each name out loud as you pluck. When the minute\'s up, play one last full pass and count how many of the 6 ring perfectly clean — no buzz, no muting. You\'ve got it when: all 6 ring clean on that final pass. Log your score out of 6 and try for a higher score next time.',
             hint: 'These are open strings — press nothing. Let each string ring fully before moving to the next.',
             stuck: 'Slow way down — one string every few seconds. Lift any finger that\'s touching a string and let each one ring fully before the next.',
             levelUp: 'Score 6 clean out of 6 twice in a row, then try it once more with your eyes closed.',
@@ -353,12 +353,12 @@ SETS.push(
             text: 'Try "Happy Birthday" on the low E string — the tutorial video in the Songs tab walks you through the note sequence, all on one string. Practice with the Metronome (floating corner button) set to 60 BPM — beats per minute, one click a second — to keep steady. You\'ve got it when: you can play it start to finish with clean notes and a steady pulse.',
             hint: 'Go slow. Clean notes matter more than speed right now.',
             stuck: 'Learn it in two halves — get the first phrase clean before you add the second. Drop the metronome to 50 BPM until the notes are smooth.',
-            levelUp: 'Nudge the metronome up to 70 BPM, keeping every note clean and in time.',
+            levelUp: 'Raise the metronome to 70 BPM, keeping every note clean and in time.',
             skills: [6]
           },
           {
-            text: 'Challenge 3 — Riff Time (give it a go!): play the "Seven Nation Army" riff on the low E string — slow and clean. You\'ve got it when: all 7 notes in the right order, each ringing clean — speed comes later. No score on this one, just go for it. Click any note name below the TAB to hear how it should sound.',
-            hint: 'Slow and clean beats fast and buzzy. One note at a time. Set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',
+            text: 'Challenge 3 — Riff Time (try it!): play the "Seven Nation Army" riff on the low E string — slow and clean. You\'ve got it when: all 7 notes in the right order, each ringing clean — speed comes later. No score on this one, just go for it. Click any note name below the TAB to hear how it should sound.',
+            hint: 'Slow and clean is better than fast and buzzy. One note at a time. Set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',
             stuck: 'Break the 7 notes into two chunks and learn the first chunk cold. Click each note name to hear its pitch, then find it before you play on.',
             levelUp: 'Play all 7 notes in time with a slow metronome at 60 BPM, keeping each one clean.',
             tab: {
@@ -407,7 +407,7 @@ SETS.push(
 
     assessment: {
       goal: 'Names 5+ parts of the guitar · Holds guitar with correct posture · Holds pick with correct grip · Tunes all 6 strings · Plays a short melody on the E string with clean, steady notes',
-      performance: 'Record yourself doing the full tune-up, then playing each open string cleanly low to high while naming it. Listen back and self-check: every string green, every note clean, every name right.',
+      performance: 'Record yourself tuning all six strings, then playing each open string cleanly low to high while naming it. Listen back and self-check: every string green, every note clean, every name right.',
       selfCheck: 'Can you name 5 parts of the guitar? Can you tune all 6 strings with a tuner? Can you play a single note cleanly with no buzzing?',
       standards: ['Pr.4a', 'Pr.5a']
     },
@@ -432,7 +432,7 @@ SETS.push(
         practice: { type: 'playSeq', label: 'Hear all 6 strings in tune', bpm: 50,
           notes: [40, 45, 50, 55, 59, 64] } },
       { id: 'w2-s6', text: 'Play a short melody on the E string with clean, steady notes',
-        gotItWhen: 'you can play the melody all the way through with clean notes and a steady pulse — practice it at 60 BPM with the metronome to lock in the timing.',
+        gotItWhen: 'you can play the melody all the way through with clean notes and a steady pulse — practice it at 60 BPM with the metronome to keep the timing steady.',
         practice: { type: 'playSeq', label: 'E string warm-up melody', bpm: 60,
           notes: [40, 41, 43, 45, 43, 41, 40] } }
     ]

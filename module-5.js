@@ -35,13 +35,13 @@ SETS.push(
               choices: [
               'Do not play that string',
               'Play that string with your thumb',
-              'Play it muted (palm-mute)',
+              'Play it muted (palm-mute — rest the side of your strumming hand on the strings)',
               'It is optional'
             ] }
           },
           {
             text: 'Watch: <a href="https://youtu.be/HNSaXAe8tyg" target="_blank">Your Very First Chords: Em & Asus2 – Marty Music</a> (0:00–5:00).',
-            hint: 'Try placing your fingers as he shows Em, then strum it before watching more. Does every string ring? If not, check which finger is accidentally muting a string. Keep your fretting hand relaxed — tension is the enemy of clean tone.',
+            hint: 'Try placing your fingers as he shows Em, then strum it before watching more. Does every string ring? If not, check which finger is accidentally muting a string. Keep your fretting hand relaxed — a tense hand makes the notes sound bad.',
             skills: [4],
             response: { type: 'short', placeholder: 'When you strummed Em, did every string ring clean? If not, which one was muted and why?' }
           },
@@ -51,7 +51,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
           {
-            text: 'Station Wrap-Up — take a beat to reflect: of everything on a chord diagram (X, O, dots, finger numbers), which part still feels least automatic when you sit down to read one?',
+            text: 'Station Wrap-Up — pause and think: of everything on a chord diagram (X, O, dots, finger numbers), which part still feels least automatic when you sit down to read one?',
             response: { type: 'short', placeholder: 'e.g. I still pause on which number means which finger' }
           }
             ]
@@ -75,8 +75,8 @@ SETS.push(
             title: 'Fret Am cleanly',
             steps: [
           {
-            text: 'Challenge 1 — Clean Am: fret Am (index str 2/fret 1, middle str 4/fret 2, ring str 3/fret 2) and strum strings 1–5 (not the low E). You\'ve got it when: every string rings cleanly — check each one by plucking it.',
-            hint: 'Press just behind the frets, not on them. Curve your fingers so they don\'t accidentally touch neighboring strings, and keep your hand relaxed — tension is the enemy of clean tone. Check each string individually by plucking it.',
+            text: 'Challenge 1 — Clean Am: fret Am (index finger on string 2, fret 1 · middle finger on string 4, fret 2 · ring finger on string 3, fret 2) and strum strings 1–5 (not the low E). You\'ve got it when: every string rings cleanly — check each one by plucking it.',
+            hint: 'Press just behind the frets, not on them. Curve your fingers so they don\'t accidentally touch neighboring strings, and keep your hand relaxed — a tense hand makes the notes sound bad. Check each string individually by plucking it.',
             stuck: 'Get strings 2 and 3 ringing first (index + ring), then add the middle finger. Most buzz comes from a finger lying too flat — sit up on the very tip.',
             levelUp: 'Lift all three fingers, then drop the whole shape at once and strum — aim for a clean chord on the first try.',
             skills: [3, 5],
@@ -90,7 +90,7 @@ SETS.push(
             title: 'Fret Em cleanly',
             steps: [
           {
-            text: 'Challenge 2 — Clean Em: fret Em (middle str 5/fret 2, ring str 4/fret 2) and strum all 6 strings. You\'ve got it when: a full, open, buzz-free Em — this is your warm-up chord.',
+            text: 'Challenge 2 — Clean Em: fret Em (middle finger on string 5, fret 2 · ring finger on string 4, fret 2) and strum all 6 strings. You\'ve got it when: a full, open, buzz-free Em — this is your warm-up chord.',
             hint: 'Em is the easiest chord on guitar. Use it to warm up before harder chords. It should sound full and open.',
             stuck: 'If a string buzzes, check that both fingers are arched up on their tips and not leaning on the open strings next door.',
             levelUp: 'Switch Em→Am→Em without looking at your fingers — feel the shape instead of watching it.',
@@ -107,22 +107,26 @@ SETS.push(
           {
             text: 'Challenge 3 — Am ↔ Em Switch: at 60 BPM, 4 down-strums per bar, play 2 bars of Am then 2 bars of Em and repeat. You\'ve got it when: change chords right on beat 1 every time — keep strumming through any fumble.',
             hint: 'Even if the chord isn\'t perfect, keep strumming in time. Stopping to fix a note is the #1 habit to avoid. Fix it between bars, not mid-bar. Set the ⏱ Timer for 2 minutes and loop the switch until it beeps.',
-            stuck: 'Your index finger barely moves between Am and Em — anchor it and let the others follow. Drop to 50 BPM if 60 feels rushed.',
-            levelUp: 'Bump to 70 BPM, or play a down-up strum on each bar instead of straight downs.',
-            skills: [5, 6]
+            stuck: 'Your index finger barely moves between Am and Em — anchor it: keep that finger pressed down and still while the others move. Drop to 50 BPM if 60 feels rushed.',
+            levelUp: 'Speed up to 70 BPM, or play a down-up strum on each bar instead of straight downs.',
+            skills: [5, 6],
+            chords: [
+              { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
+              { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 }
+            ]
           }
             ]
           },
           {
-            title: 'One-Minute Changes — beat your record',
+            title: 'One-Minute Changes — try for a higher number',
             steps: [
               {
-                text: 'Challenge 4 — One-Minute Changes (Am ↔ Em): set the ⏱ Timer for 60 seconds and switch Am→Em→Am→Em as many times as you can. Every CLEAN change counts; a buzzy or missed one doesn\'t. You\'ve got it when: count your clean changes and type the number below — beat it next session. (Over 20 is solid for your first day on chords.)',
-                hint: 'This is the classic chord-change speed test. Quality first: a clean change you can count beats a blurry one you can\'t.',
+                text: 'Challenge 4 — One-Minute Changes (Am ↔ Em): set the ⏱ Timer for 60 seconds and switch Am→Em→Am→Em as many times as you can. Every CLEAN change counts; a buzzy or missed one doesn\'t. You\'ve got it when: count your clean changes and type the number below — try for a higher number next time. (Over 20 is a good result for your first day on chords.)',
+                hint: 'This is the classic chord-change speed test. Quality first: a clean change you can count is better than a blurry one you can\'t.',
                 stuck: 'Keep your index finger planted (it barely moves between Am and Em) and move only the other fingers. Slow down until every change rings.',
                 levelUp: 'Add one strum on each chord before you switch, or swap in Am→C instead.',
                 skills: [5, 6],
-                response: { type: 'short', prompt: 'Personal record — clean Am↔Em changes in 60 seconds. Your count today?', placeholder: 'e.g. 22 — beat it next session' }
+                response: { type: 'short', prompt: 'Personal record — clean Am↔Em changes in 60 seconds. Your count today?', placeholder: 'e.g. 22 — try for a higher number next time' }
               }
             ]
           },
@@ -131,7 +135,7 @@ SETS.push(
             steps: [
               {
                 text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week\'s plan went. Same check-in you\'ve kept since Module 1 — we keep it going through the whole course.',
-                hint: 'No wrong answers — even five minutes a day beats one long cram. You\'re building a habit you\'ll actually keep.',
+                hint: 'No wrong answers — even five minutes a day is better than one long rushed session. You\'re building a habit you\'ll actually keep.',
                 response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went' }
               }
             ]
@@ -140,7 +144,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Which was harder today — getting each chord to ring clean, or switching between them in time? Type the one thing you\'ll drill first next session.',
+                text: 'Which was harder today — getting each chord to ring clean, or switching between them in time? Type the one thing you\'ll drill (practice over and over) first next session.',
                 response: { type: 'short', placeholder: 'e.g. Am keeps buzzing on string 3 — I\'ll start there' }
               }
             ]
@@ -237,7 +241,7 @@ SETS.push(
           },
           {
             text: 'Watch: <a href="https://youtu.be/yrn3kbBaOMI" target="_blank">F Chord Simplified – Marty Music</a> (0:00–3:00).',
-            hint: 'The F chord is the #1 stumbling block for beginners. The simplified version (xx3211) avoids the full barre. Use this until it\'s clean, then worry about the barre version.',
+            hint: 'The F chord is the hardest thing for beginners. The simplified version (xx3211) avoids the full barre (pressing one finger flat across several strings). Use this until it\'s clean, then worry about the barre version.',
             skills: [2],
             response: { type: 'short', placeholder: 'Which version of the F chord are you starting with (full barre or simplified)? Why?' }
           },
@@ -258,7 +262,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
           {
-            text: 'Station Wrap-Up — take a beat to reflect: which of these four chords (C, G, Am, F) is fighting you most right now, and is it the shape itself or getting to it in time?',
+            text: 'Station Wrap-Up — pause and think: which of these four chords (C, G, Am, F) is fighting you most right now, and is it the shape itself or getting to it in time?',
             response: { type: 'short', placeholder: 'e.g. F — the shape is fine but I\'m slow getting into it' }
           }
             ]
@@ -302,9 +306,9 @@ SETS.push(
             title: 'Play the C–G–Am–F loop in time',
             steps: [
           {
-            text: 'Challenge 2 — C–G–Am–F Loop: at 60 BPM, play 2 bars each of C, G, Am, F and repeat. You\'ve got it when: change on beat 1 every time — then climb the ladder 60 → 65 → 70 and hold 70 BPM clean (that\'s the assessment tempo).',
+            text: 'Challenge 2 — C–G–Am–F Loop: at 60 BPM, play 2 bars each of C, G, Am, F and repeat. You\'ve got it when: change on beat 1 every time — then speed up in steps — 60 → 65 → 70 — and hold 70 BPM clean (that\'s the assessment tempo).',
             hint: 'If you miss a change, keep going. You can slow to 50 BPM if needed. Gradually increase by 5 BPM each time through, aiming for a clean 70. Set the ⏱ Timer for 3 minutes and see how clean the loop gets before it beeps.',
-            stuck: 'Loop just the two chords that trip you (often G→Am or Am→F) on their own before running the whole circle.',
+            stuck: 'Loop just the two chords that give you trouble (often G→Am or Am→F) on their own before running the whole circle.',
             levelUp: 'Push toward 75 BPM, or strum down-up on each bar instead of straight downs.',
             skills: [1, 2, 3, 5]
           }
@@ -323,15 +327,15 @@ SETS.push(
             ]
           },
           {
-            title: 'One-Minute Changes — beat your record',
+            title: 'One-Minute Changes — try for a higher number',
             steps: [
               {
-                text: 'Challenge 4 — One-Minute Changes (C ↔ G): set the ⏱ Timer for 60 seconds and switch C→G→C→G as many times as you can — only CLEAN changes count. You\'ve got it when: type your count below and aim to beat your Set 1 number.',
+                text: 'Challenge 4 — One-Minute Changes (C ↔ G): set the ⏱ Timer for 60 seconds and switch C→G→C→G as many times as you can — only CLEAN changes count. You\'ve got it when: type your count below and aim for a higher count than your Set 1 number.',
                 hint: 'C and G share no easy anchor finger, so pre-shape the next chord in the air before you land it. Quality first — slow down until each one rings.',
                 stuck: 'Break it down: park your hand over G, then practice just dropping into C and back. Speed comes after the path is clean.',
-                levelUp: 'Run Am↔F instead — the boss-level pair for this group.',
+                levelUp: 'Run Am↔F instead — the hardest pair in this group.',
                 skills: [3, 6],
-                response: { type: 'short', prompt: 'Personal record — clean C↔G changes in 60 seconds. Your count today?', placeholder: 'e.g. 18 — beat it next session' }
+                response: { type: 'short', prompt: 'Personal record — clean C↔G changes in 60 seconds. Your count today?', placeholder: 'e.g. 18 — try for a higher number next time' }
               }
             ]
           },
@@ -342,7 +346,7 @@ SETS.push(
                 text: 'Challenge — Let It Be, verse (assessment rehearsal): play C · G · Am · F with a down-strum, four beats per chord, building from 60 to 70 BPM. This C–G–Am–F verse is the song you play from memory for the module assessment — record a run and check it against the chart. You\'ve got it when: one full verse loop at 70 BPM, every change landing on beat 1. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5 — Open Chords</a>.',
                 hint: 'Look ahead — start forming the next chord on beat 4 of the current one. Keep your fingers arched and your thumb behind the neck so every string rings. The strum keeps moving even while fingers travel.',
                 stuck: 'Isolate the roughest pair (probably C → F) and loop just those two, four beats each.',
-                levelUp: 'Add the chorus turnaround — Am · G · F · C — or drop to two beats per chord at the same 60 BPM.',
+                levelUp: 'Add the chorus turnaround (a short chord move that leads back to the start) — Am · G · F · C — or drop to two beats per chord at the same 60 BPM.',
                 skills: [3, 6],
                 chords: [
                   { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
@@ -363,10 +367,10 @@ SETS.push(
                 response: { type: 'short', prompt: 'Bass line, power chords, or open chords — which Watchtower is your favorite so far?', placeholder: 'e.g. open chords — it finally sounds full' }
               },
               {
-                text: 'Challenge — "the cure" capo-1 play-along: put a capo on fret 1, then loop Olivia\'s chords with a down-strum — Am · C · Dm · F, four beats each, then G to turn it around — climbing the tempo ladder 60 → 65 → 70 BPM. Shapes are pre-loaded below. You\'ve got it when: two clean loops at 70 BPM, every change on beat 1, the capo ringing clear.',
+                text: 'Challenge — "the cure" capo-1 play-along: put a capo on fret 1, then loop Olivia\'s chords with a down-strum — Am · C · Dm · F, four beats each, then G to turn it around — speeding up in steps: 60 → 65 → 70 BPM. Shapes are pre-loaded below. You\'ve got it when: two clean loops at 70 BPM, every change on beat 1, the capo ringing clear.',
                 hint: 'The capo just moves everything up one fret — your shapes don\'t change. Dm is new: a small triangle on the top three strings. Keep your fingers arched and your thumb behind the neck.',
                 stuck: 'Take the capo off and get Am · C · Dm · F clean in open position first, then add the capo and the G turnaround.',
-                levelUp: 'Add the G/B bass turnaround (G shape, but catch the B on the A string), or switch to a down-up strum.',
+                levelUp: 'Add the G/B bass turnaround — G/B is a G chord with a B note in the bass (play the G shape, but catch the B on the A string) — or switch to a down-up strum.',
                 skills: [5, 6],
                 chords: [
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
@@ -392,7 +396,7 @@ SETS.push(
             title: '⚡ Ear Spark — optional ear bonus',
             steps: [
               {
-                text: '⚡ Ear Spark (optional, 2 min): record yourself strumming C or Am, a few reps in a shuffled slip order. On playback, call each one bright or moody before checking — that\'s major vs minor, and you can already hear it. Got someone around? Have them strum behind your back and you call it live.'
+                text: '⚡ Ear Spark (optional, 2 min): record yourself strumming C or Am, playing them a few times in a mixed-up order. On playback, say whether each one sounds bright or sad before checking — that\'s major vs minor, and you can already hear it. Got someone around? Have them strum behind your back and you name it live.'
               }
             ]
           },
@@ -400,7 +404,7 @@ SETS.push(
             title: 'The folk strum (D–D–U–U–D–U)',
             steps: [
               {
-                text: 'Challenge — The Folk Strum: this is the campfire pattern the down-up strum skill is really testing. Over one bar, strum down, down-up, up-down-up — written D · D U · U D U. Count it out loud "1, 2-and, (3)-and, 4-and" — beat 3 in parentheses is the down you skip: you strum on 1, on 2 and its "and," then catch just the "and" of 3, then 4 and its "and." That skipped beat-3 down is the whole secret of the groove. Start on one chord (G is a great one). You\'ve got it when: it loops smoothly 4 times in a row on one chord without stopping.',
+                text: 'Challenge — The Folk Strum: this is the classic singalong strum the down-up strum skill is really testing. Over one bar, strum down, down-up, up-down-up — written D · D U · U D U. Count it out loud "1, 2-and, (3)-and, 4-and" — beat 3 in parentheses is the down you skip: you strum on 1, on 2 and its "and," then catch just the "and" of 3, then 4 and its "and." That skipped beat-3 down is the whole secret of the groove (the steady rhythmic feel). Start on one chord (G is a great one). You\'ve got it when: it loops smoothly 4 times in a row on one chord without stopping.',
                 hint: 'Say the full count "1 2 and 3 and 4 and" while your hand swings nonstop. The six strums land on 1, 2, &(2), &(3), 4, &(4) — and beat 3\'s downstrum is the one you leave out. Upstrokes stay lighter than downstrokes.',
                 stuck: 'Keep your strumming hand moving down-up-down-up the entire bar — never stop the swing. On the beats you don\'t want (that missed beat-3 down), just let the hand pass and MISS the strings. The motion is constant; only the contact changes.',
                 levelUp: 'Now take it to a chord change: play the folk strum for one full bar on G, then one full bar on C, and loop G → C → G → C keeping the strum unbroken right through the switch.',
@@ -501,7 +505,7 @@ SETS.push(
             title: 'Listen for the chord changes',
             steps: [
           {
-            text: 'Listen to "Luna" by Peso Pluma & Junior H — the whole song rides two chords, F and Am, with Dm making a brief passing appearance near the end of the verse and again in the closing bridge (some charts voice it as Dm9). The pulse is in 2: tap just the big downbeats and feel the chord changes land right on them.',
+            text: 'Listen to "Luna" by Peso Pluma & Junior H — the whole song uses just two chords, F and Am, with Dm making a brief passing appearance near the end of the verse and again in the closing bridge (some charts voice it as Dm9). The pulse is in 2: tap just the big downbeats and feel the chord changes land right on them.',
             hint: 'F and Am are chords you already know from Group 1 — Dm passes through briefly near the end of the verse and in the closing bridge. Your ear already knows the sound — you\'re just learning to place the changes.',
             skills: [5],
             response: { type: 'short', placeholder: 'Describe one moment where you clearly heard a chord change.' }
@@ -512,7 +516,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
           {
-            text: 'Station Wrap-Up — take a beat to reflect: you now know two whole chord groups. Which Group 2 chord (D, A, Em, Bm) feels furthest from automatic, and what specifically trips it up?',
+            text: 'Station Wrap-Up — pause and think: you now know two whole chord groups. Which Group 2 chord (D, A, Em, Bm) feels furthest from automatic, and what specifically trips it up?',
             response: { type: 'short', placeholder: 'e.g. D — string 1 keeps getting muted by my ring finger' }
           }
             ]
@@ -526,7 +530,7 @@ SETS.push(
             title: 'Fret D major cleanly',
             steps: [
           {
-            text: 'Challenge 1 — Clean D: fret D major (triangle: str 1/fret 2, str 2/fret 3, str 3/fret 2) and strum strings 1–4 only. You\'ve got it when: all four ring — especially string 1 (high E), which loves to get muted.',
+            text: 'Challenge 1 — Clean D: fret D major (triangle: string 1, fret 2 · string 2, fret 3 · string 3, fret 2) and strum strings 1–4 only. You\'ve got it when: all four ring — especially string 1 (high E), which loves to get muted.',
             hint: 'The D chord is tricky because string 1 is easy to accidentally mute. Curve your fingers and make sure your fingertips arch away from that string.',
             stuck: 'Get strings 1 and 2 ringing first, then add string 3. Arch the ring finger up high so it clears the high E.',
             levelUp: 'Switch D→A→D without looking — both shapes live around the 2nd fret.',
@@ -554,15 +558,15 @@ SETS.push(
             ]
           },
           {
-            title: 'One-Minute Changes — beat your record',
+            title: 'One-Minute Changes — try for a higher number',
             steps: [
               {
-                text: 'Challenge 3 — One-Minute Changes (G ↔ D): set the ⏱ Timer for 60 seconds and switch G→D→G→D as many times as you can — only CLEAN changes count. This is a cross-group jump, so it\'s a real test. You\'ve got it when: type your count below and aim to beat your Set 2 number.',
+                text: 'Challenge 3 — One-Minute Changes (G ↔ D): set the ⏱ Timer for 60 seconds and switch G→D→G→D as many times as you can — only CLEAN changes count. This is a cross-group jump, so it\'s a real test. You\'ve got it when: type your count below and aim for a higher count than your Set 2 number.',
                 hint: 'G and D both sit up near the high strings — let your whole hand travel as one shape rather than placing finger by finger.',
                 stuck: 'Park your hand over G, then practice just dropping into D and back. Slow until each one rings, then let speed come.',
                 levelUp: 'Run Em↔A instead, or add a down-up strum on each chord.',
                 skills: [5, 6],
-                response: { type: 'short', prompt: 'Personal record — clean G↔D changes in 60 seconds. Your count today?', placeholder: 'e.g. 20 — beat it next session' }
+                response: { type: 'short', prompt: 'Personal record — clean G↔D changes in 60 seconds. Your count today?', placeholder: 'e.g. 20 — try for a higher number next time' }
               }
             ]
           },
@@ -570,7 +574,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Luna, the vamp: F · Am — two shapes, both from Group 1 and by now old friends, with the simplified F (xx3211). The song is in 6/8, so play two downbeat strums per bar — nothing syncopated — changing every bar at 60 BPM. You\'ve got it when: four laps with every change landing on the downbeat and the little F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
+                text: 'Challenge — Luna, the vamp (a short chord pattern repeated over and over): F · Am — two shapes, both from Group 1 and chords you already know well, with the simplified F (xx3211). The song is in 6/8, so play two downbeat strums per bar — nothing syncopated — changing every bar at 60 BPM. You\'ve got it when: four laps (a lap = one full time through the loop) with every change landing on the downbeat and the little F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
                 hint: 'F and Am are already in your hands from Group 1 — the only new part is the simplified F shape (xx3211) and locking the change to the 6/8 pulse.',
                 stuck: 'Loop just F → Am until the shape change is automatic, then add the metronome at 60 BPM.',
                 levelUp: 'Drop in the passing Dm near the end of the verse (some charts voice it as Dm9), or push the tempo to 70 BPM.',
@@ -579,7 +583,7 @@ SETS.push(
                   { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
                 ],
-                response: { type: 'short', prompt: 'Which change was toughest — into F, or out of it?', placeholder: 'e.g. into F — the top-string barre lags' }
+                response: { type: 'short', prompt: 'Which change was toughest — into F, or out of it?', placeholder: 'e.g. into F — the top-string barre lands late' }
               }
             ]
           },
@@ -596,7 +600,7 @@ SETS.push(
             title: 'The waltz strum (3/4 time) — count in 3',
             steps: [
               {
-                text: 'Challenge — Waltz Strum: not every song is in 4. A waltz counts in THREE — "ONE-two-three, ONE-two-three." Play a firm downstrum on beat 1 (dig in toward the low strings so the bass rings), then lighter downs on beats 2 and 3 (D · D · D). Comfortable? Sneak an up after beat 3: D · D · D-U. Beat 1 is the boss: it should clearly be the strongest of the three. This "in-3" feel is what drives waltz-time songs like the House of the Rising Sun groove. Use Em so the low strings ring full. You\'ve got it when: you keep it steady for 8 bars and beat 1 is unmistakably the strongest pulse in every bar.',
+                text: 'Challenge — Waltz Strum: not every song is in 4. A waltz counts in THREE — "ONE-two-three, ONE-two-three." Play a firm downstrum on beat 1 (strum harder into the low strings so the bass rings), then lighter downs on beats 2 and 3 (D · D · D). Comfortable? Sneak an up after beat 3: D · D · D-U. Beat 1 is the strongest: it should clearly stand out from the other two. This "in-3" feel is what drives waltz-time songs like the House of the Rising Sun groove. Use Em so the low strings ring full. You\'ve got it when: you keep it steady for 8 bars and beat 1 is unmistakably the strongest pulse in every bar.',
                 hint: 'Say "ONE-two-three" out loud with the ONE loudest. Let the pick fall a little heavier and more toward the bass strings on beat 1, then lift to lighter strums for 2 and 3. Three beats per bar, then straight back to a strong ONE — no beat 4 to wait for.',
                 stuck: 'Drop the strum entirely and just tap: one loud tap on 1, two soft taps on 2 and 3, over and over. Once that "ONE-two-three" pulse is in your foot, add the strums back on top of it.',
                 levelUp: 'Change chords every bar on beat 1 — one bar of Em, then Am, then G — keeping the strong-beat-1 waltz pulse unbroken through each change.',
@@ -677,7 +681,7 @@ SETS.push(
           },
           {
             text: 'Watch: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">How to Practice Effectively – JustinGuitar</a> (0:00–4:00).',
-            hint: 'Key idea: practice doesn\'t make perfect — practice makes permanent. Are you practicing your mistakes or your solutions? This matters most before a performance.',
+            hint: 'Key idea: practice doesn\'t make perfect — practice makes permanent: whatever you repeat becomes the habit, good or bad. Are you practicing your mistakes or your solutions? This matters most before a performance.',
             skills: [5],
             response: { type: 'mc', prompt: 'What is the KEY idea from this video about practice?',
               answer: 0,
@@ -702,7 +706,7 @@ SETS.push(
           },
           {
             text: 'Re-read what you wrote back in Module 1 — your "My Guitar Adventure" goal. You set it before you could play a single chord. What has changed? Name one thing you can do now that felt impossible then, and the one thing you still want by the showcase.',
-            hint: 'This is the same goal you\'ll reflect on in your course self-check. Be specific — "I can switch C to G without stopping" beats "I got better."',
+            hint: 'This is the same goal you\'ll reflect on in your course self-check. Be specific — "I can switch C to G without stopping" is better than "I got better."',
             skills: [5],
             response: { type: 'short', placeholder: 'One thing you can do now that you couldn\'t in Module 1 — and one goal for the showcase.' }
           },
@@ -712,7 +716,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
           {
-            text: 'Station Wrap-Up — take a beat to reflect: with the showcase ahead, what will eat most of your practice time between now and then — a specific chord, a transition, or keeping the strum steady?',
+            text: 'Station Wrap-Up — pause and think: with the showcase ahead, what will eat most of your practice time between now and then — a specific chord, a transition, or keeping the strum steady?',
             response: { type: 'short', placeholder: 'e.g. the B7→E change, and not rushing the strum' }
           }
             ]
@@ -726,7 +730,7 @@ SETS.push(
             title: 'Fret E major cleanly',
             steps: [
           {
-            text: 'Challenge 1 — Clean E: fret E major (index str 3/fret 1, middle str 5/fret 2, ring str 4/fret 2) and strum all 6 strings. You\'ve got it when: a full, rich chord with every string ringing — watch your index on string 2.',
+            text: 'Challenge 1 — Clean E: fret E major (index finger on string 3, fret 1 · middle finger on string 5, fret 2 · ring finger on string 4, fret 2) and strum all 6 strings. You\'ve got it when: a full, rich chord with every string ringing — watch your index on string 2.',
             hint: 'E major is one of the most satisfying open chords to play. If any string buzzes, check your index finger — it tends to accidentally mute string 2.',
             stuck: 'E is the Em shape plus one finger — play a clean Em first, then add the index on string 3, fret 1.',
             levelUp: 'Switch E→Am→E (similar finger feel), or loop E→B7→E.',
@@ -741,10 +745,10 @@ SETS.push(
             title: 'Fret B7 cleanly',
             steps: [
           {
-            text: 'Challenge 2 — Four-Finger B7: fret B7 (index str 4/fret 1, middle str 5/fret 2, ring str 3/fret 2, pinky str 1/fret 2) and strum strings 1–5. You\'ve got it when: all four fingers down and every played string clean — then play E→B7→E and hear it pull home.',
+            text: 'Challenge 2 — Four-Finger B7: fret B7 (index finger on string 4, fret 1 · middle finger on string 5, fret 2 · ring finger on string 3, fret 2 · pinky on string 1, fret 2) and strum strings 1–5. You\'ve got it when: all four fingers down and every played string clean — then play E→B7→E and listen: the B7 sounds unfinished and "wants" to move back to E — that pull is called resolving.',
             hint: 'B7 is a dominant 7th chord — it has a slightly tense sound that wants to resolve to E. Play E then B7 then E again and hear how it pulls back.',
             stuck: 'Place the fingers one at a time in order — index, middle, ring, then pinky — and check that the open string 2 still rings between them.',
-            levelUp: 'Loop E→B7→E in time at 60 BPM and feel the pull-home resolve on every cycle.',
+            levelUp: 'Loop E→B7→E in time at 60 BPM and feel that pull back to E on every cycle.',
             skills: [2, 3],
             chords: [
               { name: 'B7', chord: [[6,'x'],[5,2,'2'],[4,1,'1'],[3,2,'3'],[2,0],[1,2,'4']], position: 0 }
@@ -753,15 +757,15 @@ SETS.push(
             ]
           },
           {
-            title: 'One-Minute Changes — beat your record',
+            title: 'One-Minute Changes — try for a higher number',
             steps: [
               {
-                text: 'Challenge 3 — One-Minute Changes (E ↔ B7): set the ⏱ Timer for 60 seconds and switch E→B7→E→B7 as many times as you can — only CLEAN changes count (all four B7 fingers down, strings 1–5 ringing). You\'ve got it when: type your count below and aim to beat your Set 3 number.',
+                text: 'Challenge 3 — One-Minute Changes (E ↔ B7): set the ⏱ Timer for 60 seconds and switch E→B7→E→B7 as many times as you can — only CLEAN changes count (all four B7 fingers down, strings 1–5 ringing). You\'ve got it when: type your count below and aim for a higher count than your Set 3 number.',
                 hint: 'These two share no fingers, so this is the hardest pair yet. Pre-shape B7 in the air before you land it, and keep string 2 open.',
                 stuck: 'Drill just dropping into B7 from E and back, slowly, until all four fingers land together. Speed comes after the landing is clean.',
                 levelUp: 'Add a strum on each chord before switching, or run E→Am→B7.',
                 skills: [2, 3],
-                response: { type: 'short', prompt: 'Personal record — clean E↔B7 changes in 60 seconds. Your count today?', placeholder: 'e.g. 14 — beat it next session' }
+                response: { type: 'short', prompt: 'Personal record — clean E↔B7 changes in 60 seconds. Your count today?', placeholder: 'e.g. 14 — try for a higher number next time' }
               }
             ]
           },
@@ -779,7 +783,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Luna, strummed (showcase version): the full song is F · Am, with Dm making a brief passing appearance near the end of the verse and in the closing bridge — two downbeat strums per bar at 60 BPM, building toward 70, singing or humming "Luna, dile tú" if you dare. You\'ve got it when: a full verse and chorus with every change on the downbeat and the F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
+                text: 'Challenge — Luna, strummed (showcase version): the full song is F · Am, with Dm making a brief passing appearance near the end of the verse and in the closing bridge — two downbeat strums per bar at 60 BPM, building toward 70, singing or humming "Luna, dile tú" — it\'s tricky! You\'ve got it when: a full verse and chorus with every change on the downbeat and the F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
                 hint: 'You met this vamp in Set 3 — now make it showcase-clean. F is the trickiest shape; keep your fingers arched and thumb behind the neck so all four strings you strum ring.',
                 stuck: 'F is the tough one — loop Am → F on its own until the shape lands clean, then run the full F–Am (with the passing Dm near the verse\'s end and in the closing bridge).',
                 levelUp: 'Try the down-down-up split strum on each chord, or push to 70 BPM.',
@@ -797,8 +801,8 @@ SETS.push(
             title: 'Call & Response over a backing track',
             steps: [
               {
-                text: 'Challenge — Call & Response (your course-wrap check piece): jam over <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a> (or any core-song ▶ &#x1F3B5; Backing track in Module 4\'s &#x1F3B5; Songs list) and improvise a call-and-response solo — play a 2-bar "question" phrase, leave a little space, then answer it with a 2-bar "response." Stay in the minor pentatonic box from Module 4. You\'ve got it when: you hold the track\'s pulse start to finish with no restarts, and your response phrase clearly answers your question phrase. This is scored the same way as your Module 4 solo (Accuracy + Consistency).',
-                hint: 'Every skill here is a Module 4 skill — this is a victory lap. The &#x1F3B5; Songs list at the bottom of Module 4 has a ▶ &#x1F3B5; Backing track for every core song. If the pentatonic box feels rusty, run the Module 4 scale-climb warm-up first, then come back.',
+                text: 'Challenge — Call & Response (your course-wrap check piece): jam (play along freely and make up your own part) over <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a> (or any core-song ▶ &#x1F3B5; Backing track — recorded music you play along with — in Module 4\'s &#x1F3B5; Songs list) and improvise a call-and-response solo — play a 2-bar "question" phrase, leave a little space, then answer it with a 2-bar "response." Stay in the minor pentatonic box from Module 4. You\'ve got it when: you hold the track\'s pulse start to finish with no restarts, and your response phrase clearly answers your question phrase. This is scored the same way as your Module 4 solo (Accuracy + Consistency).',
+                hint: 'Every skill here is a Module 4 skill — this is an easy, fun review of what you already know. The &#x1F3B5; Songs list at the bottom of Module 4 has a ▶ &#x1F3B5; Backing track for every core song. If the pentatonic box feels rusty, run the Module 4 scale-climb warm-up first, then come back.',
                 stuck: 'Play a 2-bar question, then answer with the SAME rhythm on different notes — copying the rhythm is the easiest way to make two phrases talk to each other.',
                 levelUp: 'Record your 2-bar call, play the recording back over the track, and improvise the response to it live — or trade call and response with a friend if one\'s around.'
               }
@@ -866,7 +870,7 @@ MODULE_SONGS[5] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
       { name: '"Happy Birthday"', meta: 'Full chord arrangement — all groups reviewed (optional)', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: '◐ optional stretch · D–A–Em strummed adaptation', type: 'Supp', core: false, journeyUrl: 'tabs/seven-nation-army.html',
+      { name: '"Seven Nation Army" — The White Stripes', meta: '◐ optional harder challenge · D–A–Em strummed adaptation', type: 'Supp', core: false, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Optional showcase · D–C–G power chords (from Module 3)', type: 'Supp', core: false, journeyUrl: 'tabs/sweet-child-o-mine.html',

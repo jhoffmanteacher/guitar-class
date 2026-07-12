@@ -6,7 +6,8 @@
 > **`WORKFLOW-2026-research-upgrades-era.md`** (the entire 2026-07-11
 > mega-day: research-upgrade Sessions A–G, Semester 2 build, Listening
 > Coach + games, mini-player, navigation pass, both review rounds, the
-> full design plan, and the 93-fix module clarity fleet — its specs
+> full design plan, the 93-fix module clarity fleet, and the evening's
+> Daily-5-popup + chord-check fix batches — its specs
 > `RESEARCH_UPGRADES.md`, `MODULES_9_12.md`, and the fully-executed
 > `DESIGN_UPGRADES.md` are archived alongside). Consult them for *why*;
 > they drive no current work. All CLAUDE.md rules apply as always.
@@ -17,34 +18,18 @@
 
 ## Open work
 
-- [ ] **Real-guitar test of the mic features** — the Listening Coach
-      (🎤 Check me / Check my changes), Note Hunt, and Change Up shipped
-      live 2026-07-11 verified only by VM test harnesses (Jonathan's
-      explicit call: push first, guitar-test after). Test on the live
-      site: a melody check (Module 4 Pattern 1), a chord check (Module 5
-      Am↔Em), one Note Hunt round, one Change Up round. If detection is
-      too eager/shy, the knobs are the COACH_* constants at the top of
-      coach.js — same tuning dance as the tuner rounds 1–2.
+- [ ] **Real-guitar retest of the mic features** (Jonathan, planned
+      2026-07-12) — the melody fixes and the chord-check fix batch
+      (change-prompt lag, diagrams through the count-in, chord-tone-vote
+      scoring — coach AND Change Up) are live as of 2026-07-11 night but
+      VM-verified only. Retest on the live site: the Module 5 Set 1
+      Am↔Em "Check my changes", a melody check (Module 4 Pattern 1), one
+      Note Hunt round, one Change Up round. Tuning knobs if needed:
+      detection too eager/shy → the COACH_* constants at the top of
+      coach.js; chord verdicts too generous/strict → the 0.34-ok /
+      0.15-wrong vote thresholds in coachMatchEvent and ccResolvePend.
 - [ ] **Research backlog (medium/low)** — stored One-Minute-Changes
       scores, tempo-ladder playSeq, Song Journey anatomy sections, bends,
       7th/sus chord color, songwriting capstone, Choice-song style lanes,
       motivation layer. Details in `archive/RESEARCH_UPGRADES.md`; do not
       start without Jonathan's go-ahead.
-
-- [x] **Docs consolidation + Challenge Day ✅ 2026-07-11 (evening)** —
-      WORKFLOW slimmed again (10 completed entries → the era archive);
-      fully-executed DESIGN_UPGRADES.md archived. WINTER_CHALLENGE
-      restructured to {minModule, text} (each line tagged with the module
-      that teaches its skill) and the always-visible 15-item list
-      replaced by Challenge Day: every 3rd day (dayOfYear%3) the Daily 5
-      appends a pick-one-of-two drawn from minModule<=current module —
-      VM-verified module 1 sees zero later-module skills across 30
-      simulated days (challenge on 10 of 30).
-
-## Jonathan — manual, before course start
-
-- [ ] ⚠️ Watch Module 4 Set 1's video (`m_IiyJu60-c`, "Major Pentatonic
-      Scale – Marty Music") through; confirm it fits the beginner Pattern-1
-      station.
-- [ ] Spanish spot-check: review 2–3 sets in Español mode with a fluent
-      speaker.

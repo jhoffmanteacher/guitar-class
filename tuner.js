@@ -277,12 +277,12 @@ function tunerLoop() {
         tunerInTune = false;
         noteEl.classList.remove('in-tune', 'in-tune-pop');
         needle.style.background = 'var(--amber-text)';
-        statusEl.textContent = 'Sharp — tune down'; statusEl.className = 'tuner-status sharp';
+        statusEl.textContent = 'Too high — tune down (sharp)'; statusEl.className = 'tuner-status sharp';
       } else {
         tunerInTune = false;
         noteEl.classList.remove('in-tune', 'in-tune-pop');
         needle.style.background = 'var(--blue-text)';
-        statusEl.textContent = 'Flat — tune up'; statusEl.className = 'tuner-status flat';
+        statusEl.textContent = 'Too low — tune up (flat)'; statusEl.className = 'tuner-status flat';
       }
     }
   } else {

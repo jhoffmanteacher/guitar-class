@@ -95,7 +95,7 @@ function googleTranslateElementInit(){
     <div class="welcome-card">
       <button class="welcome-close" onclick="dismissWelcome()" aria-label="Close welcome">&#x2715;</button>
       <h2 id="welcome-title">&#x1F44B; Start here</h2>
-      <p class="welcome-lead"><strong>Welcome to Guitar Class!</strong> This is your home base for independent practice. Here's how it works:</p>
+      <p class="welcome-lead"><strong>Welcome to Guitar Class!</strong> This is your main page for practicing on your own. Here's how it works:</p>
       <div class="welcome-row">
         <span class="welcome-ico">&#x1F511;</span>
         <div><strong>Signing in</strong><br>You're in with your <strong>Google account</strong>. Your progress saves automatically and follows you to any device &mdash; laptop, phone, or home computer. Just sign in again and pick up where you left off.</div>
@@ -106,11 +106,15 @@ function googleTranslateElementInit(){
       </div>
       <div class="welcome-row">
         <span class="welcome-ico">&#x2705;</span>
-        <div><strong>Tracking your progress</strong><br>As you practice, update each skill: <em>Still working on it</em> while you're learning, then <em>I've got it!</em> once you can do it consistently. No grade, no penalty &mdash; it just helps you see how you're growing.</div>
+        <div><strong>Tracking your progress</strong><br>As you practice, update each skill: <em>Still working on it</em> while you're learning, then <em>I've got it!</em> once you can do it consistently. No grade, nothing counts against you &mdash; it just helps you see how you're growing.</div>
       </div>
       <div class="welcome-row">
         <span class="welcome-ico">&#x1F3A7;</span>
         <div><strong>Practice tools</strong><br>The <strong>Tuner, Timer, and Metronome</strong> are the floating buttons in the corner &mdash; you'll use them every session. Practicing around other people? Headphones keep the videos clear for you and quiet for everyone else.</div>
+      </div>
+      <div class="welcome-row">
+        <span class="welcome-ico">&#x1F4D6;</span>
+        <div><strong>Words you'll see everywhere</strong><br><strong>Level up</strong> = an optional harder version of the step. <strong>"You've got it when"</strong> = the signs you're ready to move on. <strong>A lap</strong> = one full time through the exercise or loop. <strong>BPM</strong> = beats per minute &mdash; the speed of the metronome.</div>
       </div>
       <p class="welcome-note">&#x1F310; Need Spanish? Tap <strong>Espa&ntilde;ol</strong> at the top anytime.</p>
       <button class="welcome-go" onclick="dismissWelcome()">Got it &mdash; let's play &#x1F3B8;</button>
@@ -121,14 +125,12 @@ function googleTranslateElementInit(){
       <div class="module-select-wrap">
         <label class="module-select-label" for="module-select">Module</label>
         <select class="module-select" id="module-select" onchange="onModuleChange(this.value); saveProgress()"></select>
-        <button type="button" class="daily5-btn" id="daily5-btn" onclick="toggleDaily5()" aria-expanded="false" aria-controls="daily5-panel">&#x26A1; Daily 5</button>
         <button type="button" class="daily5-btn" id="games-btn" onclick="toggleGames()" aria-expanded="false" aria-controls="games-panel">&#x1F3AE; Games</button>
         <button type="button" class="daily5-btn" id="songs-hub-btn" onclick="toggleSongsHub()" aria-expanded="false" aria-controls="songs-hub-panel">&#x266A; Songs</button>
         <button type="button" class="daily5-btn" id="search-btn" onclick="toggleSearch()" aria-expanded="false" aria-controls="search-panel">&#x1F50D; Find</button>
         <div class="module-strip" id="module-strip" role="group" aria-label="Module progress — jump to a module"></div>
         <span class="module-strip-label" id="module-strip-label"></span>
       </div>
-      <div class="daily5-panel" id="daily5-panel" hidden></div>
       <!-- Guitar Games: a full-screen arcade "page" (own #games URL hash,
            browser Back exits). Lives inside #app so it can't show pre-auth. -->
       <div class="games-screen" id="games-screen" hidden>

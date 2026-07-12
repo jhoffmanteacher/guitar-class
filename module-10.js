@@ -41,7 +41,7 @@ SETS.push(
                 skills: [5],
                 response: { type: 'mc', prompt: 'Major pentatonic is the major scale with which two notes removed?',
                   answer: 2,
-                  explain: 'Drop the 4th and 7th — the two "tension" notes — and the friendly five-note pentatonic you already solo with is what\'s left.',
+                  explain: 'Drop the 4th and 7th — the two "tension" notes, the ones that sound unsettled and want to move — and the friendly five-note pentatonic you already solo with is what\'s left.',
                   choices: ['1st and 5th', '2nd and 6th', '4th and 7th', '3rd and 5th'] }
               }
             ]
@@ -65,7 +65,7 @@ SETS.push(
             steps: [
               {
                 text: 'Now try it: run the same W-W-H-W-W-W-H recipe starting from C first — your baseline — and notice you never need a sharp or flat. That clean run is what makes the odd note stand out when you try G next.',
-                hint: 'C major is the recipe\'s "home base" example — every other major key is the same shape, just starting somewhere else.',
+                hint: 'C major is the recipe\'s starting-point example — every other major key is the same shape, just starting somewhere else.',
                 skills: [6],
                 response: { type: 'mc', prompt: 'C major is special among scales because:',
                   answer: 1,
@@ -88,7 +88,7 @@ SETS.push(
             steps: [
               {
                 text: 'Station Wrap-Up — in your own words: what does it mean when someone says a song is "in the key of G"?',
-                response: { type: 'short', placeholder: 'e.g. its notes and chords come from the G major scale — G feels like home base' }
+                response: { type: 'short', placeholder: 'e.g. its notes and chords come from the G major scale — G feels like home' }
               }
             ]
           }
@@ -132,7 +132,7 @@ SETS.push(
             steps: [
               {
                 text: 'Challenge 3 — Recipe by Heart (your assessment piece): play the C major scale while saying "whole, whole, half, whole, whole, whole, half" out loud, no chart, no hesitating. You\'ve got it when: you can say the whole recipe from memory before you even touch the guitar.',
-                hint: 'If you can say the recipe cold, you can build ANY major scale on the spot — that\'s the whole point of memorizing it as words, not just frets.',
+                hint: 'If you can say the recipe from memory, you can build ANY major scale on the spot — that\'s the whole point of memorizing it as words, not just frets.',
                 stuck: 'Say the recipe alone, away from the guitar, until it\'s automatic — then add the fretting hand back in.',
                 levelUp: 'Say the recipe starting from a key you haven\'t tried yet (D, or A) and build it on the spot.',
                 skills: [1, 6]
@@ -156,7 +156,7 @@ SETS.push(
             steps: [
               {
                 text: 'Can you say the major-scale recipe from memory right now, no guitar in hand? Write below how confident you feel.',
-                response: { type: 'short', placeholder: 'e.g. solid on W-W-H-W-W-W-H now — just need more reps building from a new note' }
+                response: { type: 'short', placeholder: 'e.g. solid on W-W-H-W-W-W-H now — just need more tries building from a new note' }
               }
             ]
           }
@@ -234,7 +234,7 @@ SETS.push(
             steps: [
               {
                 text: 'Listen for it: play a C major chord, then an A minor chord, then a C minor chord (Cm = your full Bm barre shape from Module 7, slid up one fret to fret 3). C-to-Am shares every note (relative); C-to-Cm shares only the root (parallel). Notice how different Am and Cm sound from each other, even though both are "C\'s minor."',
-                hint: 'These two ideas get mixed up constantly — the drill is hearing that "C\'s relative minor" and "C\'s parallel minor" are two completely different chords.',
+                hint: 'These two ideas get mixed up constantly — the exercise is hearing that "C\'s relative minor" and "C\'s parallel minor" are two completely different chords.',
                 skills: [2],
                 response: { type: 'mc', prompt: 'Relative minor vs parallel minor — the difference is:',
                   answer: 0,
@@ -293,7 +293,7 @@ SETS.push(
             title: 'Find relative and parallel minors',
             steps: [
               {
-                text: 'Challenge 1 — Relative Pairs Drill: make five quick flashcards — major key on the front, relative minor on the back — C→Am, G→Em, F→Dm, D→Bm, A→F#m. Shuffle, flip one at a time, and answer out loud before checking the back. Then explain out loud how a PARALLEL minor would be different for the same key. (Got someone nearby? Have them quiz you with the cards.)',
+                text: 'Challenge 1 — Relative Pairs Drill (a drill is a short exercise you repeat to build a skill): make five quick flashcards — major key on the front, relative minor on the back — C→Am, G→Em, F→Dm, D→Bm, A→F#m. Shuffle, flip one at a time, and answer out loud before checking the back. Then explain out loud how a PARALLEL minor would be different for the same key. (Got someone nearby? Have them quiz you with the cards.)',
                 hint: 'The shortcut: relative minor is always 3 frets down from the major root, or the major scale\'s 6th note.',
                 stuck: 'Drill just C→Am and G→Em until those two are automatic, then add the rest.',
                 levelUp: 'Add two more keys of your own (E, Bb) and find their relative minors on the spot.',
@@ -318,9 +318,9 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Smoke on the Water, bluesy: play the A blues scale over the riff\'s feel — this is the scale\'s natural habitat, the sound it was built for.',
+                text: 'Challenge — Smoke on the Water, bluesy: play the A blues scale over the feel of the riff (a riff is a short musical phrase that repeats) — this is where this scale is normally used, the sound it was built for.',
                 hint: 'Deep Purple\'s whole riff lives in exactly this bluesy, gritty pentatonic-plus-b5 sound world.',
-                stuck: 'Play the riff itself first to lock in the feel, then noodle the blues scale over the same groove.',
+                stuck: 'Play the riff itself first to get the feel steady, then freely play the blues scale over the same groove (a groove is the steady rhythmic feel).',
                 levelUp: 'Try soloing over the riff using only the blues scale, no other notes.',
                 skills: [5, 6]
               }
@@ -339,7 +339,7 @@ SETS.push(
             title: 'Jam it — the blues scale over a real form',
             steps: [
               {
-                text: 'Jam it: record yourself strumming the 12-bar blues form in A — the bars run A A A A | D D A A | E D A E (plain A, D, E or power chords work fine for now) — then loop the recording and solo over it with your blues scale, box 1 at fret 5. One chorus of comping, one chorus of soloing. (The full story behind that bar map is in Module 11, Set 3.) Playing with someone? One comps while the other solos, then swap.',
+                text: 'Jam it (to jam = play along freely and make up your own part): record yourself strumming the 12-bar blues form in A — the bars run A A A A | D D A A | E D A E (plain A, D, E or power chords work fine for now) — then loop the recording and solo over it with your blues scale, box 1 at fret 5. One chorus of comping, one chorus of soloing — one chorus = one full trip through the 12 bars, and comping = playing the backing chords while someone else solos. (The full story behind that bar map is in Module 11, Set 3.) Playing with someone? One comps while the other solos, then swap.',
                 hint: 'Follow the form, not just the scale — when the loop returns to A, land on an A and let it ring. That arrival is what "playing the changes" means.',
                 skills: [7],
                 playSeq: { label: 'A blues scale, box 1 (loop-ready)', bpm: 60, notes: [45, 48, 50, 51, 52, 55, 57] }
@@ -352,7 +352,7 @@ SETS.push(
 
     assessment: {
       goal: 'Finds any key\'s relative minor · Explains relative vs parallel · Builds and plays the blues scale at 60 BPM',
-      performance: 'Lightning round: shuffle your five key flashcards and answer each relative minor in rhythm — no pauses, then flip to check.',
+      performance: 'Fast round: shuffle your five key flashcards and answer each relative minor in rhythm — no pauses, then flip to check.',
       selfCheck: 'What\'s the relative minor of F (Luna\'s key)? Which single note makes a pentatonic a blues scale?',
       standards: ['Pr.4a', 'Pr.6a', 'Cn.10a']
     },
@@ -417,9 +417,9 @@ SETS.push(
                   choices: ['Guess randomly', 'Sing it, then hunt for your sung notes on one string', 'Look up the TAB', 'Play every fret until something works'] }
               },
               {
-                text: 'Optional bonus watch: <a href="https://youtu.be/rPSRH3tf5B8" target="_blank">How To Develop The World\'s Greatest Ear – Rick Beato</a> — a producer\'s view of the exact skill this set trains. You don\'t need the advanced parts: the opening idea (ears are built by small daily reps, not talent) is the takeaway — grab it and go do the Station C echo drills.',
+                text: 'Optional bonus watch: <a href="https://youtu.be/rPSRH3tf5B8" target="_blank">How To Develop The World\'s Greatest Ear – Rick Beato</a> — a producer\'s view of the exact skill this set trains. You don\'t need the advanced parts: the opening idea (ears are built by a little practice every day, not talent) is the main point — then go do the Station C echo drills.',
                 hint: 'Every ear-training path starts the same place your Station C drills do: two notes — which one is higher?',
-                response: { type: 'short', placeholder: 'One idea from this video worth stealing for your own practice: …' }
+                response: { type: 'short', placeholder: 'One idea from this video worth borrowing for your own practice: …' }
               }
             ]
           },
@@ -512,9 +512,9 @@ SETS.push(
             steps: [
               {
                 text: 'Challenge 3 — Echo Drill (your assessment piece): for round 1, listen to the 3-note pattern once using the play button below, sing it back, then play it on the E or A string. For rounds 2–4, record yourself playing 3 random notes (eyes off your hand) and echo those back the same way. You\'ve got it when: 3 out of 4 patterns matched correctly, by ear alone.',
-                hint: 'Resist the urge to hunt-and-peck on the fretboard before you\'ve sung the pattern — singing first locks in the pitch your hands need to find.',
+                hint: 'Resist the urge to search fret by fret at random before you\'ve sung the pattern — singing first fixes the pitch in your ear, and that\'s what your hands need to find.',
                 stuck: 'Slow the pattern down and repeat just the first two notes until they\'re solid, then add the third.',
-                levelUp: 'Extend the echo to 4 or 5 notes, or echo a short lick from a tutorial video you haven\'t learned yet — a pattern you\'ve truly never heard. (A partner playing surprise patterns works too.)',
+                levelUp: 'Extend the echo to 4 or 5 notes, or echo a short lick (a lick is a short solo phrase) from a tutorial video you haven\'t learned yet — a pattern you\'ve truly never heard. (A partner playing surprise patterns works too.)',
                 skills: [3, 5],
                 playSeq: { label: 'Echo pattern — E · G · A', bpm: 60, notes: [40, 43, 45] }
               }
@@ -583,7 +583,7 @@ MODULE_SONGS[10] = [
       { name: '"the cure" — Olivia Rodrigo', meta: 'Transpose the progression\'s shapes to a new key', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
-      { name: '"Smoke on the Water" — Deep Purple', meta: 'Blues scale in its natural habitat', type: 'Choice', core: false, level: 1,
+      { name: '"Smoke on the Water" — Deep Purple', meta: 'Blues scale where it\'s normally used', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=Q2FzZSBD5LE',
         tutorialUrl: 'https://www.youtube.com/watch?v=QkT5yLP5VQA' },
       { name: '"Beat It" — Michael Jackson', meta: 'The Em pentatonic solo — name the key by ear', type: 'Choice', core: false, level: 2,

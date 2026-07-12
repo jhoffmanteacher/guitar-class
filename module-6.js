@@ -16,7 +16,7 @@ SETS.push(
     unit: 'Module 6 · Strumming Patterns with Chords',
     title: 'Set 1',
     subtitle: 'The down-up foundation · 8th-note pulse · Counting "1 + 2 + 3 + 4 +"',
-    objective: 'I CAN play a steady down-up 8th-note strum pattern over open chords without losing the beat — winning it at 60 BPM, then pushing to pass at 70.',
+    objective: 'I CAN play a steady down-up 8th-note strum pattern over open chords without losing the beat — playing it cleanly at 60 BPM, then trying 70.',
     skillFocus: 'Keeping a steady down-up strum · Counting 8th notes · Strumming through chord changes',
     comingSoon: false,
 
@@ -27,7 +27,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/n45PDizCRLw" target="_blank">Your FIRST Strumming Pattern EVER! – JustinGuitar</a> (0:00–4:00). Job while you watch: keep your eyes on his strumming wrist and count how many times it changes direction in one bar.',
+            text: 'Watch: <a href="https://youtu.be/n45PDizCRLw" target="_blank">Your FIRST Strumming Pattern EVER! – JustinGuitar</a> (0:00–4:00). Your task while you watch: keep your eyes on his strumming wrist and count how many times it changes direction in one bar.',
             hint: 'Pay close attention to his wrist — it never stops moving, even when he isn\'t hitting the strings. The pendulum motion is the secret.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'What is the SINGLE most important habit for good strumming?',
@@ -41,7 +41,7 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/NCV9IgeSYuU" target="_blank">Beginner Guitar Strumming Patterns You MUST Know! – Marty Music</a> (0:00–3:00). Job while you watch: count "1 + 2 + 3 + 4 +" out loud with him for the first pattern and notice which counts get a down and which get an up.',
+            text: 'Watch: <a href="https://youtu.be/NCV9IgeSYuU" target="_blank">Beginner Guitar Strumming Patterns You MUST Know! – Marty Music</a> (0:00–3:00). Your task while you watch: count "1 + 2 + 3 + 4 +" out loud with him for the first pattern and notice which counts get a down and which get an up.',
             hint: 'Count out loud with him: "1 + 2 + 3 + 4 +". Saying the count is the fastest way to internalize the pulse.',
             skills: [3],
             response: { type: 'short', placeholder: 'When you count "1 + 2 + 3 + 4 +", which counts are the downstrokes? Which are the upstrokes?' }
@@ -84,7 +84,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
           {
-            text: 'Station Wrap-Up — take a beat to reflect: which was harder to keep steady today — your strum hand swinging non-stop like a pendulum, or counting "1 + 2 + 3 + 4 +" out loud the whole time? What started to make it click?',
+            text: 'Station Wrap-Up — pause and think: which was harder to keep steady today — your strum hand swinging non-stop like a pendulum, or counting "1 + 2 + 3 + 4 +" out loud the whole time? What started to feel easier?',
             response: { type: 'short', placeholder: 'e.g. my hand kept freezing on the chord change — slowing to 50 BPM helped it keep swinging' }
           }
             ]
@@ -92,7 +92,7 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — strumming hand drill',
+        title: 'Practice station — strumming hand drill (a short exercise you repeat)',
         sections: [
           {
             title: 'Warm-up — tuning check (Module 1)',
@@ -123,7 +123,7 @@ SETS.push(
             text: 'Challenge 2 — Even Eighths on Em: fret Em and strum down-up at 60 BPM for 8 bars. You\'ve got it when: every strum even — same volume, same timing — with upstrokes brushing only the top 3–4 strings.',
             hint: 'It\'s normal for upstrokes to feel weaker at first. They should brush only the top 3–4 strings, not the whole chord.',
             stuck: 'Lighten the pick on the way up so it grazes just the thin strings. If the chord buzzes, recheck your Em fingers before worrying about the strum.',
-            levelUp: 'Bump to 75 BPM, or hold the 8 bars without letting your eyes drop to your strumming hand.',
+            levelUp: 'Speed up to 75 BPM, or hold the 8 bars without letting your eyes drop to your strumming hand.',
             skills: [2, 4],
             playSeq: { label: 'Hear the 8th-note pulse', bpm: 60, notes: [60, 60, 60, 60, 60, 60, 60, 60] },
             chords: [
@@ -141,7 +141,7 @@ SETS.push(
             stuck: 'Park on a finger Em and Am share and pivot around it — don\'t lift every finger at once. Drop to 50 BPM so the change has room.',
             levelUp: 'Switch every bar instead of every 2 bars, or climb to 75 BPM with the strum still unbroken.',
             skills: [4, 5, 6],
-            response: { type: 'short', prompt: 'Personal record — strum unbroken through Em↔Am, win at 60 BPM then +10 at a time. Your fastest CLEAN switch today (BPM)?', placeholder: 'e.g. 80 — beat it next session' },
+            response: { type: 'short', prompt: 'Personal record — strum unbroken through Em↔Am: play it cleanly at 60 BPM, then go +10 at a time. Your fastest CLEAN switch today (BPM)?', placeholder: 'e.g. 80 — try for a higher number next time' },
             playSeq: { label: 'Em → Am roots (2 bars each)', bpm: 60, notes: [40, 40, 45, 45] },
             chords: [
               { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
@@ -153,7 +153,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Watchtower, strummed for real: play Am · G · F (small F), four beats of down-up strumming per chord at 60 BPM, the pendulum swinging through both changes. You\'ve got it when: two full laps where the strum hand never stops — not even when the F lands late. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this song has grown with you since Unit 1</a>.',
+                text: 'Challenge — Watchtower, strummed for real: play Am · G · F (small F), four beats of down-up strumming per chord at 60 BPM, the pendulum swinging through both changes. You\'ve got it when: two full laps (a lap = one full time through the loop) where the strum hand never stops — not even when the F lands late. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this song has grown with you since Unit 1</a>.',
                 hint: 'Same loop you strummed in Module 5 — the new skill is that your right hand is now the drummer. The chord change happens BETWEEN strums.',
                 stuck: 'Drop to just Am ↔ G until the strum survives that change, then add the F back.',
                 levelUp: 'Switch every 2 beats instead of 4, or count "1 + 2 + 3 + 4 +" out loud the whole time.',
@@ -161,11 +161,11 @@ SETS.push(
               },
               {
                 text: 'Challenge — Knockin\' on Heaven\'s Door: play G · D · Am · C, four beats of down-up each at 60 BPM — the record is slow too, so this song never rushes you. You\'ve got it when: one full lap with even volume on downs and ups and every change landing on beat 1.',
-                hint: 'Dylan built this song to support a voice — soft, even 8ths are the whole job. If an upstroke snags, let the pick graze just the top 3–4 strings.',
+                hint: 'Dylan built this song to support a voice — soft, even 8ths are the whole job. If an upstroke catches the strings, let the pick graze just the top 3–4 strings.',
                 stuck: 'Loop the G → D change alone — it\'s the only move where every finger travels.',
-                levelUp: 'Sing or hum a line over your own strumming, or bump to 70 BPM with the 8ths still even.',
+                levelUp: 'Sing or hum a line over your own strumming, or speed up to 70 BPM with the 8ths still even.',
                 skills: [2, 4],
-                response: { type: 'short', prompt: 'Personal record — full laps in a row with the strum hand never stopping. Your count today?', placeholder: 'e.g. 3 — beat it next session' }
+                response: { type: 'short', prompt: 'Personal record — full laps in a row with the strum hand never stopping. Your count today?', placeholder: 'e.g. 3 — try for a higher number next time' }
               }
             ]
           }
@@ -194,7 +194,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'In "1 + 2 + 3 + 4 +", which counts are the DOWNSTROKES?',
           choices: ['The "+" (and) counts', 'The numbers (1, 2, 3, 4)', 'All of them', 'Only beat 1'], answer: 1 } },
       { id: 'm6w1-s4', text: 'Strum with even volume — downstrokes and upstrokes feel equally controlled',
-        gotItWhen: 'your downstrokes and upstrokes sound roughly the same volume — neither overpowers the other, and your pick doesn\'t snag the strings on the way up.' },
+        gotItWhen: 'your downstrokes and upstrokes sound roughly the same volume — neither overpowers the other, and your pick doesn\'t catch the strings on the way up.' },
       { id: 'm6w1-s5', text: 'Keep the strum hand moving through a chord change',
         gotItWhen: 'when you switch from Em to Am (or any two chords), your strum hand never pauses — the chord change happens BETWEEN strums, not by stopping the rhythm.',
         practice: { type: 'mc', prompt: 'During a chord change, what should your STRUM hand do?',
@@ -214,7 +214,7 @@ SETS.push(
     moduleNum: 6,
     unit: 'Module 6 · Strumming Patterns with Chords',
     title: 'Set 2',
-    subtitle: 'The "D-DU-UDU" pattern · Rests and accents · Adding groove',
+    subtitle: 'The "D-DU-UDU" pattern · Rests and accents · Adding groove (the steady rhythmic feel)',
     objective: 'I CAN play the classic D-DU-UDU strum pattern at 70+ BPM and apply it to a real song with chord changes.',
     skillFocus: 'Playing the D-DU-UDU strum pattern · Adding accents and rests · Reading strum-pattern notation',
     comingSoon: false,
@@ -226,8 +226,8 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/6LmQCdt_ZhQ" target="_blank">The Most Common Strumming Pattern of All Time! – JustinGuitar</a> (0:00–4:00). Job while you watch: air-strum along and find the two moments the pick misses — the wrist keeps swinging, but on purpose it skips one upstroke and one downstroke.',
-            hint: 'Justin calls this "old faithful" — D-DU-UDU. Listen for which strums he skips: the wrist still moves, but the pick doesn\'t hit the strings on those beats.',
+            text: 'Watch: <a href="https://youtu.be/6LmQCdt_ZhQ" target="_blank">The Most Common Strumming Pattern of All Time! – JustinGuitar</a> (0:00–4:00). Your task while you watch: air-strum along and find the two moments the pick misses — the wrist keeps swinging, but on purpose it skips one upstroke and one downstroke.',
+            hint: 'Justin calls it the pattern you can always rely on — D-DU-UDU. Listen for which strums he skips: the wrist still moves, but the pick doesn\'t hit the strings on those beats.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'In the D-DU-UDU pattern, which UPSTROKE is skipped (the wrist swings up but the pick misses)?',
               answer: 0,
@@ -240,7 +240,7 @@ SETS.push(
             ] }
           },
           {
-            text: 'Watch: <a href="https://youtu.be/0JDGO0n6tjw" target="_blank">Step-by-Step Easy Strumming Patterns – Marty Music</a> (0:00–3:00). Job while you watch: clap a little louder on beats 2 and 4 along with him, and feel how that "backbeat" makes the pattern groove.',
+            text: 'Watch: <a href="https://youtu.be/0JDGO0n6tjw" target="_blank">Step-by-Step Easy Strumming Patterns – Marty Music</a> (0:00–3:00). Your task while you watch: clap a little louder on beats 2 and 4 along with him, and feel how that "backbeat" makes the pattern groove.',
             hint: 'Marty stacks patterns from easiest to harder, accenting beats 2 and 4 as he goes. The accents give the strum a "backbeat" feel, like a drummer\'s snare.',
             skills: [3, 4],
             response: { type: 'short', placeholder: 'Why might emphasizing beats 2 and 4 (instead of 1 and 3) make a strum pattern sound more "groovy"?' }
@@ -283,7 +283,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
           {
-            text: 'Station Wrap-Up — take a beat to reflect: in the D-DU-UDU pattern, what trips you up more right now — skipping a strum while the wrist keeps moving, or landing the accents on beats 2 and 4? What helped today?',
+            text: 'Station Wrap-Up — pause and think: in the D-DU-UDU pattern, what trips you up more right now — skipping a strum while the wrist keeps moving, or landing the accents on beats 2 and 4? What helped today?',
             response: { type: 'short', placeholder: 'e.g. I keep actually hitting the strings on the skip — pulling the pick back just slightly fixed it' }
           }
             ]
@@ -298,7 +298,7 @@ SETS.push(
             steps: [
               {
                 text: 'Tune all 6 strings to green, then warm the strum hand: 4 bars of steady down-up on Em at 60 BPM (Set 1). You\'ve got it when: in tune and the pendulum already swinging before you add the new pattern.',
-                hint: 'Spiral back: D-DU-UDU is just the down-up you already own with two strums left out. Get the even swing going first.',
+                hint: 'Look back: D-DU-UDU is just the down-up you already own with two strums left out. Get the even swing going first.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -321,7 +321,7 @@ SETS.push(
           {
             text: 'Challenge 2 — Pattern on Em: fret Em and play D-DU-UDU at 60 BPM for 8 bars, counting aloud and accenting beats 2 and 4. You\'ve got it when: 8 clean bars with a clear "snare hit" feel on 2 and 4.',
             hint: 'Add accents on beats 2 and 4 — those downstrokes should be a little louder. Feel the "snare hit" on those beats.',
-            stuck: 'Drop the accents for now and just nail the D-DU-UDU shape clean for 8 bars; add the louder 2-and-4 hits once the pattern runs on autopilot.',
+            stuck: 'Drop the accents for now and just get the D-DU-UDU shape clean for 8 bars; add the louder 2-and-4 hits once the pattern runs on autopilot.',
             levelUp: 'Move it to G or D, or push to 75 BPM with the backbeat still landing.',
             skills: [2, 4, 5],
             playSeq: { label: 'Hear Em with accent on 2 and 4', bpm: 60, notes: [40, 47, 40, 47] }
@@ -334,10 +334,10 @@ SETS.push(
           {
             text: 'Challenge 3 — G → D, Pattern Locked (your assessment piece): loop G → D every 2 bars playing D-DU-UDU, and set the ⏱ Timer for 3 minutes to keep going. You\'ve got it when: the pattern stays identical through the change — only the chord moves (drop to 50 BPM if it falls apart).',
             hint: 'If the pattern falls apart during the chord change, slow to 50 BPM. The pattern is the GROOVE — losing it is worse than missing a note in the chord.',
-            stuck: 'Change the chord on the LAST upstroke of the bar, while your hand is already moving up — that\'s the free moment to jump from G to D. Loop just 2 bars until the seam disappears.',
+            stuck: 'Change the chord on the LAST upstroke of the bar, while your hand is already moving up — that\'s the free moment to jump from G to D. Loop just 2 bars until the join between the two bars (the seam) is smooth.',
             levelUp: 'Add a third chord (G → D → Em), or run it at 75 BPM with no break at the change.',
             skills: [4, 5, 6],
-            response: { type: 'short', prompt: 'Personal record — D-DU-UDU through the G→D change, win at 60 BPM then +10 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 80 — beat it next session' }
+            response: { type: 'short', prompt: 'Personal record — D-DU-UDU through the G→D change: play it cleanly at 60 BPM, then go +10 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 80 — try for a higher number next time' }
           }
             ]
           },
@@ -348,13 +348,13 @@ SETS.push(
                 text: 'Challenge — I\'m Yours, verse: play G · D · Em · C with D-DU-UDU, one bar per chord at 60 BPM. This is THE song this pattern is famous for. You\'ve got it when: the verse loop start to finish with the pattern identical on every chord — even when a chord lands imperfect, the groove holds.',
                 hint: 'The pattern IS the song here. If it breaks at a change, the fix is Challenge 3\'s trick: jump chords on the last upstroke of the bar.',
                 stuck: 'Play the loop with one strum per bar until the changes are clean, then layer the pattern back on.',
-                levelUp: 'Accent beats 2 and 4 for the record\'s bounce, or push to 75 BPM.',
+                levelUp: 'Accent beats 2 and 4 to match the recording\'s bouncy feel, or push to 75 BPM.',
                 skills: [4, 5],
                 playSeq: { label: '"I\'m Yours" verse roots (G · D · Em · C)', bpm: 60, notes: [43, 50, 40, 48] }
               },
               {
-                text: 'Challenge — Oye Mi Amor, verse: the verse rides Bm · G — use the small Bm (top four strings, no barre) and play one bar of each with D-DU-UDU at 60 BPM. You\'ve got it when: four laps with the pattern unbroken and beats 2 and 4 accented so it pushes like the record.',
-                hint: 'The small Bm is the training-wheels version — the full barre Bm arrives in Module 7. For now the pattern matters more than the shape.',
+                text: 'Challenge — Oye Mi Amor, verse: the verse uses just two chords, Bm · G — use the small Bm (top four strings, no barre) and play one bar of each with D-DU-UDU at 60 BPM. You\'ve got it when: four laps with the pattern unbroken and beats 2 and 4 accented so it pushes like the record.',
+                hint: 'The small Bm is the easier beginner version — the full-barre Bm (one finger pressed flat across several strings) arrives in Module 7. For now the pattern matters more than the shape.',
                 stuck: 'Loop just the G → Bm change with one strum per bar until the landing is clean, then add the pattern.',
                 levelUp: 'Lean into the up-strums a little — that extra offbeat push is the Latin feel.',
                 skills: [3, 5],
@@ -378,7 +378,7 @@ SETS.push(
             steps: [
               {
                 text: 'Play-along: open Station B\'s D-DU-UDU lesson video, set YouTube\'s speed to 0.75×, and strum along for the ENTIRE demo section without stopping. You\'ve got it when: you finish a full pass with the video — flubbed changes and all, don\'t stop.',
-                hint: 'Not stopping is the skill. Real songs don\'t wait for you, and neither does the video — recovering mid-stream beats restarting.'
+                hint: 'Not stopping is the skill. Real songs don\'t wait for you, and neither does the video — keeping going after a mistake is better than starting over.'
               }
             ]
           }
@@ -440,12 +440,12 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
           {
-            text: 'Watch: <a href="https://youtu.be/CjM5fyXoV8w" target="_blank">Learn ANY Strumming Pattern with this Exercise – JustinGuitar</a> (0:00–4:00). Job while you watch: pick ONE pattern he shows and tap it on your leg until you can keep it going without looking.',
+            text: 'Watch: <a href="https://youtu.be/CjM5fyXoV8w" target="_blank">Learn ANY Strumming Pattern with this Exercise – JustinGuitar</a> (0:00–4:00). Your task while you watch: pick ONE pattern he shows and tap it on your leg until you can keep it going without looking.',
             hint: 'Notice how each pattern Justin demonstrates has a different feel — folk feels gentle, rock feels driving, reggae feels bouncy. The pattern is the GENRE in many cases.',
             skills: [1, 2, 3],
             response: { type: 'mc', prompt: 'Which strum-pattern feature most defines REGGAE rhythm?',
               answer: 1,
-              explain: 'Reggae lives on the offbeat — crisp upstrokes on the "+" of each beat while the downbeats stay empty. That "skank" is the signature of the style.',
+              explain: 'Reggae lives on the offbeat — crisp upstrokes on the "+" of each beat while the downbeats stay empty. That offbeat chop — reggae players call it the "skank" — is what makes reggae sound like reggae.',
               choices: [
               'Loud downstrokes on beat 1',
               'Upstrokes on the "+" (and) of each beat, with the downstrokes skipped',
@@ -488,7 +488,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
           {
-            text: 'Station Wrap-Up — take a beat to reflect: of the three feels you tried — folk, rock, reggae — which was hardest to make sound convincing on your guitar, and what gave it away as "not quite right"?',
+            text: 'Station Wrap-Up — pause and think: of the three feels you tried — folk, rock, reggae — which was hardest to make sound convincing on your guitar, and what gave it away as "not quite right"?',
             response: { type: 'short', placeholder: 'e.g. reggae — my offbeat upstrokes were too heavy, so it sounded like rock with gaps' }
           }
             ]
@@ -499,11 +499,11 @@ SETS.push(
         title: 'Practice station — try three styles',
         sections: [
           {
-            title: 'Warm-up — tune + flyover all three feels (recall)',
+            title: 'Warm-up — tune + a quick pass through all three feels (recall)',
             steps: [
               {
                 text: 'Tune to green, then on a G chord play 2 bars each of: steady down-up (folk), heavy down-up (rock), and up-only on the "+" (reggae). You\'ve got it when: in tune and your hand remembers all three feels before you refine them.',
-                hint: 'A quick 60-second flyover of all three styles wakes up the patterns you\'ll polish this set.',
+                hint: 'A quick 60-second pass through all three styles wakes up the patterns you\'ll polish this set.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -512,10 +512,10 @@ SETS.push(
             title: 'Play a folk strum',
             steps: [
           {
-            text: 'Challenge 1 — Folk Feel: hold G and strum all downstrokes, one per beat, at 70 BPM — quiet and steady, campfire style. You\'ve got it when: even, soft, supportive strumming with no accents sticking out.<div class="strum-line">D       D       D       D\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
+            text: 'Challenge 1 — Folk Feel: hold G and strum all downstrokes, one per beat, at 70 BPM — quiet and steady, singalong style. You\'ve got it when: even, soft, supportive strumming with no accents sticking out.<div class="strum-line">D       D       D       D\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
             hint: 'Folk is about supporting the singer, not standing out. Soft attack, even volume, no accents.',
             stuck: 'Strum from the wrist only and let the pick barely graze the strings — imagine someone is singing and you must not cover them up.',
-            levelUp: 'Add a gentle up-strum on the "+" of beats 2 and 4 for a fuller campfire feel.',
+            levelUp: 'Add a gentle up-strum on the "+" of beats 2 and 4 for a fuller singalong feel.',
             skills: [1, 4]
           }
             ]
@@ -524,10 +524,10 @@ SETS.push(
             title: 'Play a rock strum',
             steps: [
           {
-            text: 'Challenge 2 — Rock Feel: same G at the same tempo, but dig in — heavy down-up-down-up accenting every down. You\'ve got it when: a chunky, driving sound using arm weight, not just wrist.<div class="strum-line">D   U   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
-            hint: 'Rock strumming uses arm weight more than wrist. Let the pick go deeper into the strings. Aim for a "chunky" sound.',
+            text: 'Challenge 2 — Rock Feel: same G at the same tempo, but strum harder into the strings — heavy down-up-down-up accenting every down. You\'ve got it when: a thick, driving sound using arm weight, not just wrist.<div class="strum-line">D   U   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
+            hint: 'Rock strumming uses arm weight more than wrist. Let the pick go deeper into the strings. Aim for a thick, heavy sound.',
             stuck: 'Strum from the elbow, not just the wrist — rock needs weight. Keep the accents on the downs and let the ups stay light.',
-            levelUp: 'Push to 90 BPM, or palm-mute the low strings with the side of your hand for a tighter chug.',
+            levelUp: 'Push to 90 BPM, or palm-mute the low strings — rest the side of your strumming hand on them — for a tighter chug (a short, muted, punchy strum).',
             skills: [2, 4]
           }
             ]
@@ -536,7 +536,7 @@ SETS.push(
             title: 'Play a reggae strum',
             steps: [
           {
-            text: 'Challenge 3 — Reggae Chop (give it a go!): hold G, skip every downbeat, and strum UP only on each "+" — rest-up-rest-up. No score — play along with "Three Little Birds" to lock in the offbeat feel.<div class="strum-line">·   U   ·   U   ·   U   ·   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
+            text: 'Challenge 3 — Reggae Chop, a short, quick, muted upstroke (try it!): hold G, skip every downbeat, and strum UP only on each "+" — rest-up-rest-up. No score — play along with "Three Little Birds" to lock in the offbeat feel.<div class="strum-line">·   U   ·   U   ·   U   ·   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
             hint: 'Counter-intuitive at first — your hand goes down on the beats but doesn\'t hit the strings. Listen to "Three Little Birds" while you do this to lock in the feel.',
             stuck: 'Keep your hand swinging down on every number, but lift the pick away so it only catches the strings on the way back up. Count "rest-UP-rest-UP" out loud.',
             levelUp: 'Mute with your fretting hand right after each up-strum for the crisp, clipped "chk" of a real reggae chop.',
@@ -563,8 +563,8 @@ SETS.push(
             title: 'Solo over the groove with Pentatonic Pattern 1',
             steps: [
           {
-            text: 'Challenge 5 — Trade Off (give it a go!): loop the backing roots below — or record yourself strumming 8 bars of a progression (try Am–G–C or G–D–Em–C) with any pattern from this module — then solo over it using Pentatonic Pattern 1 from Module 4. Trade roles with yourself every 8 bars: strum a fresh backing, then solo again. Got another guitarist around? One strums, one solos, swap after 8 bars. No score — aim for one clear musical idea, not a flurry of notes.',
-            hint: 'Am–G–C fits A minor pentatonic; a major-key progression fits major pentatonic. This is the payoff: the scale you learned in Module 4 lives on top of the chords you strum here. Leave space — silence is part of a solo.',
+            text: 'Challenge 5 — Trade Off (try it!): loop the backing roots below — or record yourself strumming 8 bars of a progression (try Am–G–C or G–D–Em–C) with any pattern from this module — then solo over it using Pentatonic Pattern 1 from Module 4. Take turns with yourself every 8 bars: strum one pass, then solo over the next. Got another guitarist around? One strums, one solos, swap after 8 bars. No score — aim for one clear musical idea, not a flurry of notes.',
+            hint: 'Am–G–C fits A minor pentatonic; a major-key progression fits major pentatonic. This is the reward: the scale you learned in Module 4 lives on top of the chords you strum here. Leave space — silence is part of a solo.',
             playSeq: { label: 'Backing roots — Am · G · C', bpm: 70, notes: [45, 43, 48] }
           }
             ]
@@ -573,7 +573,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Watchtower, two ways: play Am · G · F with a soft folk strum for 8 bars, then the same loop rock-style — dig in, accent the downs — for 8 bars, no break at the switch. You\'ve got it when: on a quick recording of yourself you can hear the exact bar the feel changed — Dylan\'s version becoming Hendrix\'s, live from your chair. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: five layers deep and still growing</a>.',
+                text: 'Challenge — Watchtower, two ways: play Am · G · F with a soft folk strum for 8 bars, then the same loop rock-style — strum harder, accent the downs — for 8 bars, no break at the switch. You\'ve got it when: on a quick recording of yourself you can hear the exact bar the feel changed — Dylan\'s version becoming Hendrix\'s, live from your chair. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: five layers deep and still growing</a>.',
                 hint: 'You heard exactly this in Module 1 — acoustic Dylan vs. electric Hendrix. Same chords, same tempo; ONLY your strum hand changes.',
                 stuck: 'Make the switch on beat 1 of a new bar and drill just the 2-bar seam where folk becomes rock.',
                 levelUp: 'Add the reggae chop as a third 8-bar section — three eras of the same song.',
@@ -603,7 +603,7 @@ SETS.push(
     skills: [
       { id: 'm6w3-s1', text: 'Play a folk strum (gentle, even all-downstrokes or simple down-up)',
         gotItWhen: 'you can play a chord progression with even, soft downstrokes that supports a singer — no accents, no aggressive attack.' },
-      { id: 'm6w3-s2', text: 'Play a rock strum (heavy downstrokes with accent and dig)',
+      { id: 'm6w3-s2', text: 'Play a rock strum (heavy downstrokes with accent and weight)',
         gotItWhen: 'your rock strum has clear weight and drive — play back a quick recording and you can hear that you mean it.' },
       { id: 'm6w3-s3', text: 'Play a reggae strum (upstrokes on the "+", downstrokes skipped)',
         gotItWhen: 'you can play a reggae chop where ONLY the upstrokes hit the strings — your hand still moves on the beats, but the pick misses on purpose.',
@@ -670,7 +670,7 @@ MODULE_REVIEWS[6] = {
   moduleNum: 6,
   module: 'Strumming Patterns with Chords',
   skills: [
-    { id: 'mr6-s1', text: 'I can hold a steady down-up strum pattern (win at 60 BPM, pass at 70)', set: 'm6w1' },
+    { id: 'mr6-s1', text: 'I can hold a steady down-up strum pattern (play it cleanly at 60 BPM, then try 70)', set: 'm6w1' },
     { id: 'mr6-s3', text: 'I can keep my strum hand moving right through a chord change', set: 'm6w1' },
     { id: 'mr6-s4', text: 'I can play the D-DU-UDU pattern and accent beats 2 and 4', set: 'm6w2' },
     { id: 'mr6-s5', text: 'I can read a written strum pattern (D/U over "1 + 2 + 3 + 4 +") and play it', set: 'm6w2' },

@@ -15,7 +15,7 @@ SETS.push(
     unit: 'Module 9 · The Full Fretboard & Writing TAB',
     title: 'Set 0',
     subtitle: 'Welcome back · Prove it, don\'t re-learn it',
-    objective: 'I CAN show that the first half of the course\'s core skills survived a break — and see exactly which ones need a tune-up.',
+    objective: 'I CAN show that the first half of the course\'s core skills stayed with me over the break — and see exactly which ones need more practice.',
     skillFocus: 'Six quick re-tests: open chords · strumming · pentatonic · power chords · TAB reading · fingerpicking',
     comingSoon: false,
 
@@ -27,24 +27,24 @@ SETS.push(
             title: 'The six re-tests — rate yourself honestly',
             steps: [
               {
-                text: 'This set has zero new material. It\'s a checkpoint: six things you could already do before the break. Play each one RIGHT NOW as you read it, then answer honestly — solid, shaky, or gone. Nothing here is graded; a "gone" just tells you where to spend your first tune-up session.',
+                text: 'This set has zero new material. It\'s a checkpoint: six things you could already do before the break. Play each one RIGHT NOW as you read it, then answer honestly — solid, shaky, or gone. Nothing here is graded; a "gone" just tells you where to spend your first practice session.',
                 hint: 'Everyone loses a little over a break. Finding out exactly what you lost is the fastest way to get it back — usually it returns in a day or two, not weeks.'
               },
               {
                 text: 'Re-test 1 — Open chords (Module 5): loop C → G → Am → F, two bars each at 60 BPM. Can you still land every change on beat 1 without breaking the strum?',
-                hint: 'If one change drags, name it — that exact change is your first One-Minute Changes drill.',
+                hint: 'If one change drags, name it — that exact change is your first One-Minute Changes drill (a drill is a short exercise you repeat to build a skill).',
                 skills: [1],
-                response: { type: 'short', placeholder: 'Solid / shaky / gone — which change is the sticking point?' }
+                response: { type: 'short', placeholder: 'Solid / shaky / gone — which change gives you trouble?' }
               },
               {
-                text: 'Re-test 2 — Strumming (Module 6): D-DU-UDU over a G → C change at 70 BPM. Does the pattern keep running while the chord moves, or does it flinch at the change?',
+                text: 'Re-test 2 — Strumming (Module 6): D-DU-UDU over a G → C change at 70 BPM. Does the pattern keep running while the chord moves, or does it break at the change?',
                 hint: 'Watch your strum hand, not your fret hand — the pattern should not care which chord is underneath.',
                 skills: [2],
                 response: { type: 'short', placeholder: 'Solid / shaky / gone — does the pattern break at the change?' }
               },
               {
                 text: 'Re-test 3 — Pentatonic (Module 4): Pattern 1, up and back down, from memory. No diagram, every note on a 60 BPM click?',
-                hint: 'Hesitations count as "shaky" — the pattern should be in your fingers, not your eyes.',
+                hint: 'Hesitations count as "shaky" — you should know the pattern by feel, not by reading it.',
                 skills: [3],
                 response: { type: 'short', placeholder: 'Solid / shaky / gone — where do you hesitate?' }
               },
@@ -52,10 +52,10 @@ SETS.push(
                 text: 'Re-test 4 — Power chords (Module 3): move the two-finger shape E5 → G5 → A5, one change per bar, landing on the beat and naming each chord as you land it.',
                 hint: 'Frets 0 → 3 → 5 on the low E root. If you\'re counting frets to find G5, that\'s a "shaky."',
                 skills: [4],
-                response: { type: 'short', placeholder: 'Solid / shaky / gone — can you still name them on the fly?' }
+                response: { type: 'short', placeholder: 'Solid / shaky / gone — can you still name them quickly while playing?' }
               },
               {
-                text: 'Re-test 5 — TAB reading (Module 2): open any Song Journey page and find a section you\'ve never played. Can you read 4 bars cold — right strings, right frets, left to right?',
+                text: 'Re-test 5 — TAB reading (Module 2): open any Song Journey page and find a section you\'ve never played. Can you read 4 bars cold (cold = playing it the very first time you see it, no practice) — right strings, right frets, left to right?',
                 hint: 'It must be TAB you haven\'t drilled — reading from memory isn\'t reading.',
                 skills: [5],
                 response: { type: 'short', placeholder: 'Solid / shaky / gone — what did you read, and how did it go?' }
@@ -64,7 +64,7 @@ SETS.push(
                 text: 'Re-test 6 — Fingerpicking (Module 8): p-i-m-a over Am, thumb on the A string, without stopping. Then change Em → Am and let the thumb switch bass strings while i-m-a stay put.',
                 hint: 'The fingers keep their strings for the whole test — only the thumb travels.',
                 skills: [6],
-                response: { type: 'short', placeholder: 'Solid / shaky / gone — did the thumb switch trip you?' }
+                response: { type: 'short', placeholder: 'Solid / shaky / gone — did the thumb switch make you mess up?' }
               }
             ]
           },
@@ -72,8 +72,8 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Look at your six answers. Which ONE re-test most needs a tune-up before you go deeper into Module 9? That\'s the first thing you practice next session — the original module\'s sets are all still there when you need them.',
-                hint: 'One focused session on your weakest re-test beats a vague "practice everything."',
+                text: 'Look at your six answers. Which ONE re-test most needs more practice before you go deeper into Module 9? That\'s the first thing you practice next session — the original module\'s sets are all still there when you need them.',
+                hint: 'One focused session on your weakest re-test is better than a vague "practice everything."',
                 response: { type: 'short', placeholder: 'e.g. Re-test 3 — Pattern 1 is half-gone; starting next session with Module 4, Set 1' }
               }
             ]
@@ -88,7 +88,7 @@ SETS.push(
             steps: [
               {
                 text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
-                hint: 'A break detunes guitars as reliably as it rusts fingers — check first.',
+                hint: 'A break detunes guitars as reliably as it makes your fingers out of practice — check first.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -97,43 +97,43 @@ SETS.push(
             title: 'The six re-tests — mark each one as you go',
             steps: [
               {
-                text: 'How this works: play each re-test below, then mark its skill on the checklist. Clear it → "I\'ve got it!". Struggle → "Still working on it" — that\'s not a failure, it\'s your tune-up list, and the pointer next to each re-test tells you exactly which module rebuilds it.',
-                hint: 'Be strict. A generous self-check here just hides work that will resurface in Module 10.'
+                text: 'How this works: play each re-test below, then mark its skill on the checklist. Clear it → "I\'ve got it!". Struggle → "Still working on it" — that\'s not a failure, it\'s your practice list, and the pointer next to each re-test tells you exactly which module rebuilds it.',
+                hint: 'Be strict. A generous self-check here just hides work that will come back in Module 10.'
               },
               {
-                text: 'Re-test 1 — Open chords: 2 bars each of C, G, Am, F at 60 BPM, looped twice, every change on beat 1. Tune-up home: Module 5, Set 2 (the C–G–Am–F Loop and One-Minute Changes).',
+                text: 'Re-test 1 — Open chords: 2 bars each of C, G, Am, F at 60 BPM, looped twice, every change on beat 1. Where to practice it: Module 5, Set 2 (the C–G–Am–F Loop and One-Minute Changes).',
                 hint: 'Quality bar: no dead strings, no pause at the change.',
                 skills: [1]
               },
               {
-                text: 'Re-test 2 — Strumming: D-DU-UDU for 4 bars of G, then 4 bars of C at 70 BPM, pattern unbroken at the seam. Tune-up home: Module 6, Set 2.',
+                text: 'Re-test 2 — Strumming: D-DU-UDU for 4 bars of G, then 4 bars of C at 70 BPM, the pattern never stopping where the two chords meet. Where to practice it: Module 6, Set 2.',
                 hint: 'If it breaks, drop to 60 BPM and rebuild — speed comes back last.',
                 skills: [2]
               },
               {
-                text: 'Re-test 3 — Pentatonic Pattern 1: up and back down from memory at 60 BPM, every note on the click. Use the play button to hear the target. Tune-up home: Module 4, Set 1.',
-                hint: 'Fingers first, speed later — a clean 50 BPM pass beats a sloppy 60.',
+                text: 'Re-test 3 — Pentatonic Pattern 1: up and back down from memory at 60 BPM, every note on the click. Use the play button to hear the target. Where to practice it: Module 4, Set 1.',
+                hint: 'Fingers first, speed later — a clean 50 BPM pass is better than a sloppy 60.',
                 skills: [3],
                 playSeq: { label: 'Am pentatonic Pattern 1 (ascending)', bpm: 60, notes: [45, 48, 50, 52, 55, 57, 60, 62, 64, 67, 69, 72] }
               },
               {
-                text: 'Re-test 4 — Power chords: E5 → G5 → A5 (low-E root, frets 0 → 3 → 5), one bar each on the beat, saying each name as you land it. Tune-up home: Module 3, Set 1.',
+                text: 'Re-test 4 — Power chords: E5 → G5 → A5 (low-E root, frets 0 → 3 → 5), one bar each on the beat, saying each name as you land it. Where to practice it: Module 3, Set 1.',
                 hint: 'Two fingers, unused strings muted — the mute is part of the skill.',
                 skills: [4]
               },
               {
-                text: 'Re-test 5 — TAB cold read: 4 bars of TAB you\'ve never played, from any Song Journey page, right strings and frets in order. Tune-up home: Module 2, Set 2.',
+                text: 'Re-test 5 — TAB cold read: 4 bars of TAB you\'ve never played, from any Song Journey page, right strings and frets in order. Where to practice it: Module 2, Set 2.',
                 hint: 'Slow is fine — sight-reading is decoding, not speed.',
                 skills: [5]
               },
               {
-                text: 'Re-test 6 — Fingerpicking: p-i-m-a over Am (thumb on A) for 4 bars without stopping, then Em → Am with the thumb switching bass strings mid-stream. Tune-up home: Module 8, Sets 1–2.',
+                text: 'Re-test 6 — Fingerpicking: p-i-m-a over Am (thumb on A) for 4 bars without stopping, then Em → Am with the thumb switching bass strings while you keep playing. Where to practice it: Module 8, Sets 1–2.',
                 hint: 'Even volume across all four fingers — listen for the weak one.',
                 skills: [6]
               },
               {
-                text: 'The speed round: record yourself playing all six re-tests back to back, then listen with the checklist open and settle any you weren\'t sure about. Cleared all six? Module 9 proper starts at Set 1. Flagged some? Spend a session with their tune-up homes first — they come back fast.',
-                hint: 'The recording doesn\'t lie, and that\'s exactly why it\'s useful.'
+                text: 'The fast round: record yourself playing all six re-tests back to back, then listen with the checklist open and settle any you weren\'t sure about. Cleared all six? Module 9 proper starts at Set 1. Flagged some? Spend a session with the practice spots listed above first — they come back fast.',
+                hint: 'The recording shows exactly how you really sounded — that\'s exactly why it\'s useful.'
               }
             ]
           }
@@ -142,15 +142,15 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Clears all six re-tests in one focused session — or leaves with a named tune-up list and knows exactly which module rebuilds each flagged skill',
-      performance: 'Speed round: record all six re-tests back to back, listen back with the checklist open, and mark each skill honestly — cleared skills "got it," flagged skills "still working" with their tune-up home noted.',
-      selfCheck: 'Can you still play all six without re-learning anything? Which one drifted the most over the break — and which module does it live in?',
+      goal: 'Clears all six re-tests in one focused session — or leaves with a named practice list and knows exactly which module rebuilds each flagged skill',
+      performance: 'Fast round: record all six re-tests back to back, listen back with the checklist open, and mark each skill honestly — cleared skills "got it," flagged skills "still working" with where to practice them noted.',
+      selfCheck: 'Can you still play all six without re-learning anything? Which one faded the most over the break — and which module does it live in?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
     },
 
     skills: [
       { id: 'm9w0-s1', text: 'RE-TEST: Switch C → G → Am → F smoothly at 60 BPM',
-        gotItWhen: 'you loop C → G → Am → F, two bars each at 60 BPM, landing every change on beat 1 without breaking the strum. Level up: pick any two of those four at random (shuffle homemade flashcards or point blind at the chart) and switch between them on beat 1 at 70 BPM.' },
+        gotItWhen: 'you loop C → G → Am → F, two bars each at 60 BPM, landing every change on beat 1 without breaking the strum. Level up: pick any two of those four at random (shuffle homemade flashcards, or close your eyes and point at the chart) and switch between them on beat 1 at 70 BPM.' },
       { id: 'm9w0-s2', text: 'RE-TEST: Play D-DU-UDU over a G–C change at 70 BPM',
         gotItWhen: 'you switch from G to C (or any two chords) and the pattern doesn\'t change at all — only the chord underneath does.' },
       { id: 'm9w0-s3', text: 'RE-TEST: Play pentatonic Pattern 1 up and down at 60 BPM',
@@ -158,7 +158,7 @@ SETS.push(
         practice: { type: 'playSeq', label: 'Am pentatonic Pattern 1 (ascending)', bpm: 60,
           notes: [45, 48, 50, 52, 55, 57, 60, 62, 64, 67, 69, 72] } },
       { id: 'm9w0-s4', text: 'RE-TEST: Move a two-finger power chord E5 → G5 → A5 on the beat',
-        gotItWhen: 'you can move the same shape to any of those positions on call and name the chord without counting frets.' },
+        gotItWhen: 'you can move the same shape to any of those positions whenever you want and name the chord without counting frets.' },
       { id: 'm9w0-s5', text: 'RE-TEST: Read and play a 4-bar TAB you haven\'t seen before',
         gotItWhen: 'you can look at a short TAB line you haven\'t drilled, identify which string and fret each number refers to, and play it — that\'s sight-reading.' },
       { id: 'm9w0-s6', text: 'RE-TEST: Fingerpick p-i-m-a over Am without stopping',
@@ -283,7 +283,7 @@ SETS.push(
                 text: 'Challenge 2 — G-String Naturals: same drill on the G string, low to high, 0 through 12.',
                 hint: 'The natural half step sits in a different spot: on D it\'s E–F (F at fret 3), on G it\'s B–C (B at fret 4, C at fret 5) — notice the shift.',
                 stuck: 'Cover frets 0–5 (G–C) first, then add 5–12.',
-                levelUp: 'Race the clock — time yourself naming a random fret correctly three times in a row, then beat that time. Got someone around? Race them instead.',
+                levelUp: 'Time yourself — name a random fret correctly three times in a row, then try to beat your time. Got someone around? Race them instead.',
                 skills: [2],
                 playSeq: { label: 'G-string naturals, low to high', bpm: 60, notes: [55, 57, 59, 60, 62, 64, 65, 67] }
               }
@@ -295,7 +295,7 @@ SETS.push(
               {
                 text: 'Challenge 3 — Flash Drill (your assessment piece): make flashcards — write each natural note name (A through G) on its own slip of paper, shuffle them face-down, and draw one at a time. Find each drawn note on the D or G string within 5 seconds, switching strings every 5 draws. You\'ve got it when: 8 out of 10 correct within 5 seconds each, on both strings. Got someone around? Have them call the notes instead of drawing cards.',
                 hint: 'If you\'re stuck, use the octave shape from a string you already know instead of counting up one fret at a time.',
-                stuck: 'Allow 10 seconds instead of 5 until it\'s automatic, then tighten the clock back up.',
+                stuck: 'Allow 10 seconds instead of 5 until it\'s automatic, then lower the time limit again.',
                 levelUp: 'Add sharp and flat cards too (F#, Bb), or drop to a 3-second limit.',
                 skills: [3, 4]
               }
@@ -305,8 +305,8 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Sweet Child O\' Mine, name it as you play it: watch the intro-riff clip you first saw in Module 7 (<a href="https://youtu.be/t3yol_zrt7g" target="_blank">How to Play the Intro for Sweet Child O\' Mine – JustinGuitar</a>) and learn just its first two notes, up on the D and G strings around fret 12–15. Say each note\'s NAME as you play it, using today\'s D/G-string knowledge to figure it out instead of just copying frets. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this song\'s Journey page</a>.',
-                hint: 'This riff lives up the neck on strings you\'ve never named notes on before today — that\'s exactly why it\'s the payoff for this set.',
+                text: 'Challenge — Sweet Child O\' Mine, name it as you play it: watch the intro-riff clip — a riff is a short musical phrase that repeats — that you first saw in Module 7 (<a href="https://youtu.be/t3yol_zrt7g" target="_blank">How to Play the Intro for Sweet Child O\' Mine – JustinGuitar</a>) and learn just its first two notes, up on the D and G strings around fret 12–15. Say each note\'s NAME as you play it, using today\'s D/G-string knowledge to figure it out instead of just copying frets. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this song\'s Journey page</a>.',
+                hint: 'This riff lives up the neck on strings you\'ve never named notes on before today — that\'s exactly why it\'s the reward for this set.',
                 stuck: 'Pause the video on the very first note and just name that one string/fret before moving on.',
                 levelUp: 'Name all four notes of the opening phrase before you play them, then check yourself against the video.',
                 skills: [5]
@@ -410,7 +410,7 @@ SETS.push(
             steps: [
               {
                 text: 'Now try it: pick any note name and find it on all six strings, one string at a time, using the octave shape (remembering the B-string bump) rather than counting from open every time.',
-                hint: 'This is the moment the whole fretboard "clicks" — one note, six places to find it.',
+                hint: 'This is the moment the whole fretboard suddenly makes sense — one note, six places to find it.',
                 skills: [3, 4],
                 response: { type: 'mc', prompt: 'The B string at fret 5 is the same pitch as which open string?',
                   answer: 2,
@@ -466,7 +466,7 @@ SETS.push(
                 text: 'Challenge 2 — High-e Naturals: same drill on the high e string, low to high, 0 through 12 — and notice these are the exact same note names as the low E string.',
                 hint: 'If you know the low E string from Module 2, you already know this string — just two octaves higher.',
                 stuck: 'Say the low-E note names first, then transfer them to the high e string fret by fret.',
-                levelUp: 'Beat the clock naming random frets on the high e string — time three in a row, then shave seconds. Got a partner handy? Race them.',
+                levelUp: 'Time yourself naming random frets on the high e string — time three in a row, then try to make it faster. Got a partner handy? Race them.',
                 skills: [2],
                 playSeq: { label: 'High-e naturals', bpm: 60, notes: [64, 65, 67, 69, 71, 72, 74, 76] }
               }
@@ -488,10 +488,10 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Luna, the punteo line: play the fingerpicked intro fragment — one note each on D, G, B and open e, four strings — reading Layer 6 TAB from <a href="tabs/luna.html#layer-6" target="_blank">Luna\'s Song Journey page</a> (the bonus requinto-intro layer). You\'ve got it when: all four notes ring cleanly in order, and you can name each one as you play it.',
+                text: 'Challenge — Luna, the punteo line (punteo = the picked melody line, a Spanish guitar term): play the fingerpicked intro fragment — one note each on D, G, B and open e, four strings — reading Layer 6 TAB from <a href="tabs/luna.html#layer-6" target="_blank">Luna\'s Song Journey page</a> (the bonus requinto-intro layer — a requinto is a small, higher-pitched guitar that plays the lead melody). You\'ve got it when: all four notes ring cleanly in order, and you can name each one as you play it.',
                 hint: 'This roll uses the little-F shape you already know from Module 5 — today\'s new skill is being able to name every note in it.',
                 stuck: 'Fret the little F shape first, strum it once to hear the target chord, then break it apart one string at a time.',
-                levelUp: 'Name each note out loud as you roll through it, or drop it in front of the Layer 5 vamp as a real intro.',
+                levelUp: 'Name each note out loud as you roll through it, or drop it in front of the Layer 5 vamp (a vamp is a short chord pattern repeated over and over) as a real intro.',
                 skills: [5]
               }
             ]
@@ -559,7 +559,7 @@ SETS.push(
                 skills: [1],
                 response: { type: 'mc', prompt: 'In TAB, the TOP line represents:',
                   answer: 1,
-                  explain: 'TAB mirrors the guitar as you look down at it — thinnest string on top. It\'s the #1 rookie reading mistake.',
+                  explain: 'TAB mirrors the guitar as you look down at it — thinnest string on top. It\'s the most common beginner reading mistake.',
                   choices: ['The low E string (thickest)', 'The high e string (thinnest)', 'Whichever string you like', 'The B string'] }
               },
               {
@@ -667,7 +667,7 @@ SETS.push(
             title: 'Write your own TAB from memory',
             steps: [
               {
-                text: 'Challenge 2 — Write It (your assessment piece): without looking anything up, write the "Seven Nation Army" riff to blank TAB on paper from memory — you played it chart-free back in Module 2. Then check yourself. You\'ve got it when: you play back EXACTLY what\'s on your page and it matches the riff note for note — every fret on the right string, in order. (The day-later, no-memory test is Challenge 4. Someone around to trade with? Even better — see Challenge 4.)',
+                text: 'Challenge 2 — Write It (your assessment piece): without looking anything up, write the "Seven Nation Army" riff to blank TAB on paper from memory — you played it without looking at the chart back in Module 2. Then check yourself. You\'ve got it when: you play back EXACTLY what\'s on your page and it matches the riff note for note — every fret on the right string, in order. (The day-later, no-memory test is Challenge 4. Someone around to trade with? Even better — see Challenge 4.)',
                 hint: 'Say each note name in your head as you write its fret — that\'s the same habit that made you fast at naming notes all module.',
                 stuck: 'Play the riff on your guitar first, one note at a time, writing down each fret as you go — then copy it clean.',
                 levelUp: 'Write a second 4-bar riff of your choice from memory, or write the riff transposed to a different starting fret.',
@@ -732,7 +732,7 @@ SETS.push(
 
     assessment: {
       goal: 'Reads TAB above fret 5 · Writes a playable 4-bar TAB · Reads a slash chord from a chart',
-      performance: 'The cold-read test: play your own hand-written TAB at least a day after writing it, exactly as written. If the page alone reproduces the riff, the TAB passes. (Trading with a partner who plays it cold is the gold standard, if you can.)',
+      performance: 'The cold-read test: play your own hand-written TAB at least a day after writing it, exactly as written. If the page alone reproduces the riff, the TAB passes. (Trading with a partner who plays it cold is the best possible test, if you can.)',
       selfCheck: 'Could a stranger play your TAB without hearing the song first? Can you explain what G/B means in one sentence?',
       standards: ['Pr.4a', 'Pr.6a', 'Cn.10a']
     },

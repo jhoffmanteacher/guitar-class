@@ -36,7 +36,7 @@ SETS.push(
                   choices: ['Any three notes', 'Every other note of a scale: root, 3rd, 5th', 'Three notes on one string', 'The same note in three octaves'] }
               },
               {
-                text: 'Watch: <a href="https://youtu.be/BIWEcDGB5lA" target="_blank">Understanding CHORDS (Ep. 3 Music Theory) – Paul Davids</a>. Every chord you\'ve ever strummed is built from the same three notes — root, 3rd, 5th — and Paul shows where they come from. A different teacher than the first video on purpose: notice which explanation clicks for you.',
+                text: 'Watch: <a href="https://youtu.be/BIWEcDGB5lA" target="_blank">Understanding CHORDS (Ep. 3 Music Theory) – Paul Davids</a>. Every chord you\'ve ever strummed is built from the same three notes — root, 3rd, 5th — and Paul shows where they come from. A different teacher than the first video on purpose: notice which explanation makes the most sense to you.',
                 hint: 'Notice the pattern: three of the seven chords in a key come out major, and three come out minor — no exceptions, in any key.',
                 skills: [2],
                 response: { type: 'mc', prompt: 'In any major key, chords I, IV, and V are major. Chords ii, iii, and vi are:',
@@ -76,7 +76,7 @@ SETS.push(
                 text: 'Try it on Luna: F and Am aren\'t I–IV or I–V — figure out which scale degree Am is built on in the key of F before checking.',
                 hint: 'Count up the F major scale: F(I) G(ii) A(iii) — Am is built on the THIRD note.',
                 skills: [6],
-                response: { type: 'mc', prompt: 'Luna vamps between F and Am in the key of F. In numerals that\'s:',
+                response: { type: 'mc', prompt: 'Luna vamps between F and Am — a vamp is a short chord pattern repeated over and over — in the key of F. In numerals that\'s:',
                   answer: 2,
                   explain: 'F=I and Am is built on F major\'s THIRD note — I–iii, a dreamier color than the famous four. Not every hit uses I–V–vi–IV.',
                   choices: ['I–vi', 'I–IV', 'I–iii', 'V–I'] }
@@ -136,7 +136,7 @@ SETS.push(
                 text: 'Challenge 2 — Numeral Flashcards: make six flashcards, one numeral each (I ii iii IV V vi), shuffle the deck, flip the top card, and play that chord in the key of C — no hesitating. Run the deck twice. (Got a partner handy? Have them call the numerals instead.)',
                 hint: 'If you know the family in order (C Dm Em F G Am), the numeral just tells you which slot to reach for.',
                 stuck: 'Write the family out in numeral order on paper and keep it in view while you drill.',
-                levelUp: 'Switch to the key of G, or time yourself through the deck and beat your best run. Ready for all seven? Look up Bdim — the vii° of C — and add a seventh card.',
+                levelUp: 'Switch to the key of G, or time yourself through the deck and try to beat your best time. Ready for all seven? Look up Bdim — the vii° of C — and add a seventh card.',
                 skills: [1, 2]
               }
             ]
@@ -224,11 +224,11 @@ SETS.push(
               },
               {
                 text: 'Watch: <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank">All Along the Watchtower – Bob Dylan (Official Audio)</a>. Listen to the Am–G–F loop and, without looking anything up, decide by ear which chord feels like "home."',
-                hint: 'Home is the chord the loop keeps landing back on — the one that makes the progression feel finished, not "in the air."',
+                hint: 'Home is the chord the loop keeps landing back on — the one that makes the progression feel finished, not left unfinished.',
                 skills: [4],
                 response: { type: 'mc', prompt: 'Watchtower loops Am–G–F. Which chord feels like home?',
                   answer: 2,
-                  explain: 'The loop keeps landing back on Am — home base. Call the song A minor (C major\'s relative family).',
+                  explain: 'The loop keeps landing back on Am — its home. Call the song A minor (C major\'s relative family).',
                   choices: ['G', 'F', 'Am', 'None'] }
               }
             ]
@@ -238,11 +238,11 @@ SETS.push(
             steps: [
               {
                 text: 'Listen for it: count up the A major scale to find its I, IV, and V chords before checking your answer.',
-                hint: 'I–IV–V is the backbone progression behind blues, rock, and a lot of cumbia — worth having on instant recall in any key.',
+                hint: 'I–IV–V is the foundation progression behind blues, rock, and a lot of cumbia — worth having on instant recall in any key.',
                 skills: [2],
                 response: { type: 'mc', prompt: 'I–IV–V in the key of A is:',
                   answer: 0,
-                  explain: 'Count up the A major scale: A(I), D(IV), E(V) — the backbone of blues, rock, and cumbia alike.',
+                  explain: 'Count up the A major scale: A(I), D(IV), E(V) — the foundation of blues, rock, and cumbia alike.',
                   choices: ['A–D–E', 'A–C–D', 'A–E–F#m', 'A–B–C'] }
               }
             ]
@@ -256,7 +256,7 @@ SETS.push(
                 skills: [3],
                 response: { type: 'mc', prompt: '"the cure" (capo 1 shapes) uses Am–C–Dm–F–G/B. In the key of C, Am–C–Dm–F is:',
                   answer: 0,
-                  explain: 'Am=vi, C=I, Dm=ii, F=IV — and the G/B is the V chord wearing a B in the bass to walk smoothly back to C.',
+                  explain: 'Am=vi, C=I, Dm=ii, F=IV — and the G/B is the V chord with a B as its lowest note, so the bass walks smoothly back to C.',
                   choices: ['vi–I–ii–IV', 'I–V–vi–IV', 'ii–IV–vi–I', 'vi–IV–I–V'] }
               },
               {
@@ -297,7 +297,7 @@ SETS.push(
             title: 'Chord-inventory detective drill',
             steps: [
               {
-                text: 'Challenge 1 — Inventory Drill: four mystery chord sets on cards — G-C-D-Em, C-F-G-Am, D-G-A-Bm, Am-F-G-C — name each key before flipping the card. (Answers: G, C, D, C/Am.)',
+                text: 'Challenge 1 — Inventory Drill (a drill is a short exercise you repeat to build a skill): four mystery chord sets on cards — G-C-D-Em, C-F-G-Am, D-G-A-Bm, Am-F-G-C — name each key before flipping the card. (Answers: G, C, D, C/Am.)',
                 hint: 'Find the single family that contains ALL the chords on the card — that\'s the key, before your ear even weighs in.',
                 stuck: 'Cross off keys one at a time — if even one chord doesn\'t belong to a family, that key is out.',
                 levelUp: 'Time yourself — how fast can you call all four keys correctly in a row?',
@@ -328,7 +328,7 @@ SETS.push(
             steps: [
               {
                 text: 'Challenge 3 — Slash Chord Walk: play C → G/B → Am as a smooth bass-line move — notice the bass note walks down one step at a time (C, B, A) while the chords change around it.',
-                hint: 'This is exactly what "the cure" does to glide from the G chord back home to C — the slash chord is the connective tissue.',
+                hint: 'This is exactly what "the cure" does to glide from the G chord back home to C — the slash chord is the piece that links the two chords smoothly.',
                 stuck: 'Play C and Am first without the G/B in between, then add it back and listen for how much smoother the move feels.',
                 levelUp: 'Try the reverse walk, Am → G/B → C, or find another slash chord to decode.',
                 skills: [5],
@@ -472,7 +472,7 @@ SETS.push(
             steps: [
               {
                 text: 'Station Wrap-Up — open shapes or barre shapes: which would you pick for Let It Be, and why? (Don\'t stop — the 12-bar blues section is below!)',
-                response: { type: 'short', placeholder: 'e.g. open — it rings better; but barre F beats the mini-F once my hand is warm' }
+                response: { type: 'short', placeholder: 'e.g. open — it rings better; but the barre F is better than the mini-F once my hand is warm' }
               }
             ]
           },
@@ -480,15 +480,15 @@ SETS.push(
             title: 'The 12-bar blues — the form your I–IV–V was waiting for',
             steps: [
               {
-                text: 'Watch: <a href="https://youtu.be/XFuXLSIYH7s" target="_blank">12 Bar Blues Lesson For Beginners – Marty Music</a>. The 12-bar blues is I–IV–V — the exact chords you\'ve been building this set — poured into the most-played song form in American music. Watch for two things: the ORDER the chords arrive in, and the long-short "shuffle" bounce in the strumming hand.',
-                hint: 'Thousands of songs are this one form. Learn it once and you can jam with strangers for the rest of your life.',
+                text: 'Watch: <a href="https://youtu.be/XFuXLSIYH7s" target="_blank">12 Bar Blues Lesson For Beginners – Marty Music</a>. The 12-bar blues is I–IV–V — the exact chords you\'ve been building this set — used to build the most-played song form in American music. Watch for two things: the ORDER the chords arrive in, and the long-short "shuffle" bounce in the strumming hand.',
+                hint: 'Thousands of songs are this one form. Learn it once and you can jam (play along freely and make up your own part) with people you\'ve just met for the rest of your life.',
                 skills: [7]
               },
               {
                 text: 'Check yourself on the form\'s ingredients before you play it at the practice station.',
                 response: { type: 'mc', prompt: 'A standard 12-bar blues in A uses which three chords?',
                   answer: 0,
-                  explain: 'It\'s the I, IV, and V of A — each wearing a bluesy 7th. You already know I–IV–V from this set; the blues just gives it a form.',
+                  explain: 'It\'s the I, IV, and V of A — each with a bluesy 7th added. You already know I–IV–V from this set; the blues just gives it a form.',
                   choices: ['A7, D7, E7', 'A, Bm, C#', 'A7, C7, G7', 'Am, Dm, Em'] }
               },
               {
@@ -521,7 +521,7 @@ SETS.push(
                 text: 'First, warm the hand up — run a quick Finger Gym stretch (<a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym – JustinGuitar</a>) before today\'s barre-heavy work. Then, Challenge 1 — Root-Naming Drill: write a handful of chord names on slips, draw one, and find BOTH barre locations for it — the E-shape fret on the low E string AND the A-shape fret on the A string.',
                 hint: 'Every chord has (at least) two barre homes — one for each shape. Module 9\'s fretboard naming is the whole trick here.',
                 stuck: 'Find the E-shape location first, get comfortable, then add the A-shape hunt.',
-                levelUp: 'Time yourself to both locations and beat your own best (race a partner if one\'s around), or add a third barre location further up the neck.',
+                levelUp: 'Time yourself finding both locations and try to beat your best time (race a partner if one\'s around), or add a third barre location further up the neck.',
                 skills: [1, 2]
               }
             ]
@@ -542,7 +542,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Oye Mi Amor, full barre: play the verse\'s Bm–G with a full A-shape barre Bm — the song\'s last training wheel, off for good. You\'ve got it when: four laps where the full Bm rings as clean as the G.',
+                text: 'Challenge — Oye Mi Amor, full barre: play the verse\'s Bm–G with a full A-shape barre Bm — the song\'s last beginner shortcut, gone for good. You\'ve got it when: four laps (a lap = one full time through) where the full Bm rings as clean as the G.',
                 hint: 'This is Module 7\'s payoff, finally put to use as a harmony tool instead of just a shape to survive.',
                 stuck: 'Warm up the A-shape Bm alone for a minute before adding the G change.',
                 levelUp: 'Explain out loud why Bm is the vi chord of D major — check the inventory: both Bm and G live in D\'s family — using what you learned in Set 1.',
@@ -567,7 +567,7 @@ SETS.push(
             title: 'Play the 12-bar blues',
             steps: [
               {
-                text: 'Meet the three chords: A7, D7, E7 — your I, IV, and V in A, each with the bluesy 7th baked in. Fret each one clean, then strum each for a bar with a long-short shuffle feel at 60 BPM.',
+                text: 'Meet the three chords: A7, D7, E7 — your I, IV, and V in A, each with the bluesy 7th built in. Fret each one clean, then strum each for a bar with a long-short shuffle feel at 60 BPM.',
                 hint: 'All three are open-position shapes — no barre needed. The shuffle lives in your strumming wrist: DAH-da DAH-da.',
                 skills: [7],
                 chords: [
@@ -577,13 +577,13 @@ SETS.push(
                 ]
               },
               {
-                text: 'The 12-bar map in A: A7 A7 A7 A7 | D7 D7 A7 A7 | E7 D7 A7 E7. Say each chord name OUT LOUD on beat 1 as you strum the bar — losing the form is the #1 blues mistake, and counting bars aloud is the fix. Quick-change variant: swap D7 into bar 2 instead of staying on A7 — the "quick change" hands your ear the IV chord early, and it\'s the version you\'ll hear in most modern blues.',
-                hint: 'That last E7 in bar 12 is the "turnaround" — it yanks the music back to bar 1 so the form can loop forever.',
+                text: 'The 12-bar map in A: A7 A7 A7 A7 | D7 D7 A7 A7 | E7 D7 A7 E7. Say each chord name OUT LOUD on beat 1 as you strum the bar — losing the form is the most common blues mistake, and counting bars aloud is the fix. Quick-change variant: swap D7 into bar 2 instead of staying on A7 — the "quick change" hands your ear the IV chord early, and it\'s the version you\'ll hear in most modern blues.',
+                hint: 'That last E7 in bar 12 is the "turnaround" — it pulls the music back to bar 1 so the form can loop forever.',
                 skills: [7, 8]
               },
               {
-                text: 'Put it together: comp the full 12 bars from memory with shuffle feel at 60 BPM, then record a pass, loop your recording, and solo over your own comping with A minor pentatonic (your Module 4 box at fret 5). You\'ve got it when: a full chorus of each job — comping without losing the form, soloing without losing the changes. Playing with someone? One comps while the other solos, then swap.',
-                hint: 'When the loop comes back to A7, land on an A — hearing that "home" arrival is the whole game.',
+                text: 'Put it together: comp the full 12 bars from memory — comping = playing the backing chords while someone else solos — with shuffle feel at 60 BPM, then record a pass, loop your recording, and solo over your own comping with A minor pentatonic (your Module 4 box at fret 5). You\'ve got it when: a full chorus of each job (one chorus = one full trip through the 12 bars) — comping without losing the form, soloing without losing the changes. Playing with someone? One comps while the other solos, then swap.',
+                hint: 'When the loop comes back to A7, land on an A — hearing that "home" arrival is the most important thing.',
                 skills: [7, 8]
               }
             ]
@@ -656,6 +656,6 @@ MODULE_REVIEWS[11] = {
     'Play a I–IV–V progression in a key you draw at random — open or barre shapes',
     'Comp a 12-bar blues in A with shuffle feel, then solo over a recording of your own comping — with another player, comp while they solo and trade'
   ],
-  forward: 'You can name what every chord is DOING now, and one barre grip just became twelve chords. <strong>Module 12 is the victory lap:</strong> fingerstyle goes deep — alternating thumb, waltz patterns, and the requinto sound — everything you need to pick your showcase song.',
+  forward: 'You can name what every chord is DOING now, and one barre grip just became twelve chords. <strong>Module 12 is the fun final stretch — you\'ll use everything you\'ve learned:</strong> we study fingerstyle in detail — alternating thumb, waltz patterns, and the requinto sound — everything you need to pick your showcase song.',
   standards: ['Pr.4a', 'Pr.6a', 'Cn.10a', 'Re.9a']
 };

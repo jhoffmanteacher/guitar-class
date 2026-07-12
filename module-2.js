@@ -102,7 +102,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Station Wrap-Up — take a beat to reflect: which note or fret felt fuzziest today, and what (if anything) started to make it click?',
+                text: 'Station Wrap-Up — pause and think: which note or fret felt fuzziest today, and what (if anything) started to make sense?',
                 response: { type: 'short', placeholder: 'e.g. fret 8 on the low E — kept mixing up B and C' }
               }
             ]
@@ -116,8 +116,8 @@ SETS.push(
             title: 'Warm-up — tuning check (Module 1)',
             steps: [
               {
-                text: 'Before today\'s notes: tune all 6 strings to green, low to high — E A D G B e — and say each string name as you go. Beat your time from last session. Click "Hear all 6 strings" for the target pitches.',
-                hint: 'Tuning and the string names are Module 1 skills you keep forever — do this every practice session before you play. Slow and steady beats rushing past the note.',
+                text: 'Before today\'s notes: tune all 6 strings to green, low to high — E A D G B e — and say each string name as you go. Try for a faster time than last session. Click "Hear all 6 strings" for the target pitches.',
+                hint: 'Tuning and the string names are Module 1 skills you keep forever — do this every practice session before you play. Going slowly works better than rushing past the note.',
                 playSeq: { label: 'Hear all 6 strings in tune', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -126,13 +126,13 @@ SETS.push(
             title: 'Name every note on the low E string (frets 0–12)',
             steps: [
               {
-                text: 'Challenge 1 — Low E Run: play every natural note up the low E string and back down — E · F · G · A · B · C · D · E — saying each name aloud. You\'ve got it when: one lap, chart-free, with no mistakes.',
-                hint: 'Hearing + saying + playing locks it in. Peek at the chart only if you\'re truly stuck. Set the ⏱ Timer (bottom of the screen) to 2 min and count how many clean laps you fit before it beeps — beat that number next session.',
-                stuck: 'Master frets 0–5 only (E–A) chart-free first, then add 7–12 once those are automatic.',
+                text: 'Challenge 1 — Low E Run: play every natural note up the low E string and back down — E · F · G · A · B · C · D · E — saying each name aloud. You\'ve got it when: one clean lap (a lap = one full time through) without looking at the chart, with no mistakes.',
+                hint: 'Hearing + saying + playing helps you memorize it. Peek at the chart only if you\'re truly stuck. Set the ⏱ Timer (bottom of the screen) to 2 min and count how many clean laps you fit before it beeps — try for a higher number next session.',
+                stuck: 'Master frets 0–5 only (E–A) without looking at the chart first, then add 7–12 once those are automatic.',
                 levelUp: 'One clean lap at 80 BPM, or start at fret 12 and name your way down.',
                 skills: [2],
                 playSeq: { label: 'Play all', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] },
-                response: { type: 'short', prompt: 'Personal record: win at 60, then raise the metronome +10 at a time. What\'s your fastest CLEAN lap today (BPM)?', placeholder: 'e.g. 90 — that\'s the number to beat next session' }
+                response: { type: 'short', prompt: 'Personal record: play it cleanly at 60, then raise the metronome +10 at a time. What\'s your fastest CLEAN lap today (BPM)?', placeholder: 'e.g. 90 — try for a higher number next session' }
               },
               {
                 text: 'Quick check — name the note before you play it:',
@@ -143,7 +143,7 @@ SETS.push(
                   choices: ['A', 'C', 'D', 'B'] }
               },
               {
-                text: 'Name That Riff (give it a go!): pick out the "Seven Nation Army" or "Smoke on the Water" main riff by ear on the low E string. No score — just go for it.',
+                text: 'Name That Riff (try it!): pick out the "Seven Nation Army" or "Smoke on the Water" main riff (a riff = a short musical phrase that repeats) by ear on the low E string. No score — just go for it.',
                 hint: 'Use the note-name chart. Don\'t worry about getting it perfect — the attempt trains your ear.',
                 skills: [5]
               }
@@ -153,13 +153,13 @@ SETS.push(
             title: 'Name every note on the A string (frets 0–12)',
             steps: [
               {
-                text: 'Challenge 2 — A String Run (your Set 1 check-off): same on the A string, chart-free — A · B · C · D · E · F · G · A, up to fret 12 and back, one note per beat. You\'ve got it when: a clean lap with the metronome and no stalls. The Set 1 check-off tests exactly this: draw any fret at random — shuffled paper slips 0–12 work great — and name the note within 3 seconds.',
+                text: 'Challenge 2 — A String Run (your Set 1 check-off): same on the A string, without looking at the chart — A · B · C · D · E · F · G · A, up to fret 12 and back, one note per beat. You\'ve got it when: a clean lap with the metronome and no stalls. The Set 1 check-off tests exactly this: draw any fret at random — shuffled paper slips 0–12 work great — and name the note within 3 seconds.',
                 hint: 'Keep the metronome at 60 BPM. If you stall on a note, that\'s the one to drill.',
-                stuck: 'Drop to 50 BPM and win there first, or cover frets 0–5 (A–D) before adding the rest.',
+                stuck: 'Drop to 50 BPM and play it cleanly there first, or cover frets 0–5 (A–D) before adding the rest.',
                 levelUp: 'Lap it at 80 BPM, or draw shuffled fret slips and name each on the spot. Got someone around? Have them call out random frets instead.',
                 skills: [3],
                 playSeq: { label: 'Play all', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] },
-                response: { type: 'short', prompt: 'Personal record: win at 60, then raise the metronome +10 at a time. Your fastest CLEAN A-string lap today (BPM)?', placeholder: 'e.g. 80 — beat it next session' }
+                response: { type: 'short', prompt: 'Personal record: play it cleanly at 60, then raise the metronome +10 at a time. Your fastest CLEAN A-string lap today (BPM)?', placeholder: 'e.g. 80 — try for a higher number next session' }
               },
               {
                 text: 'Quick check — name the note before you play it:',
@@ -186,8 +186,8 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Seven Nation Army, chart-free: play the riff on the low E string and say each note name out loud as you play it — B · B · D · B · A · G · F#. You\'ve got it when: one clean lap, no chart, every note named correctly. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                hint: 'You played this riff in Module 1 with the TAB in front of you. Today the win is knowing WHERE you are — name it, then play it.',
+                text: 'Challenge — Seven Nation Army, without looking at the chart: play the riff on the low E string and say each note name out loud as you play it — B · B · D · B · A · G · F#. You\'ve got it when: one clean lap, no chart, every note named correctly. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                hint: 'You played this riff in Module 1 with the TAB in front of you. Today the goal is knowing WHERE you are — name it, then play it.',
                 stuck: 'Do it in two halves: name-and-play B B D B, then A G F#. Join them once each half is automatic.',
                 levelUp: 'Close your eyes for a lap, or play it one octave-position up starting at fret 7 of the A string.',
                 skills: [2, 3],
@@ -203,7 +203,7 @@ SETS.push(
                     { string: 'E', fret: 2,  note: 'F#', midi: 42 }
                   ]
                 },
-                response: { type: 'short', prompt: 'Chart-free lap — clean or not yet? What note still needs a look at the chart?', placeholder: 'e.g. clean! / still peeking at the G' }
+                response: { type: 'short', prompt: 'A lap without looking at the chart — clean or not yet? What note still needs a look at the chart?', placeholder: 'e.g. clean! / still peeking at the G' }
               }
             ]
           },
@@ -212,7 +212,7 @@ SETS.push(
             steps: [
               {
                 text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week\'s plan went. Same check-in as Module 1 — we keep it going for the whole course.',
-                hint: 'No wrong answers — even five minutes a day beats one long cram. You\'re building a habit you\'ll actually keep.',
+                hint: 'No wrong answers — even five minutes a day is better than one long rushed session. You\'re building a habit you\'ll actually keep.',
                 response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went' }
               }
             ]
@@ -267,7 +267,7 @@ SETS.push(
 
   {
     id: 'm2w2',
-    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', layer: 2, note: 'the bass-note line — your assessment piece' }, { name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', layer: 2, note: 'the riff, note by note' }, { name: 'Sweet Child O\' Mine', journey: 'tabs/sweet-child-o-mine.html', layer: 2, note: 'the bass roots' }, { name: 'Luna', journey: 'tabs/luna.html', layer: 2, note: 'the single-note line' }, { name: 'Let It Be', journey: 'tabs/let-it-be.html', layer: 2, note: 'the C–G–A–F bass skeleton' }],
+    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', layer: 2, note: 'the bass-note line — your assessment piece' }, { name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', layer: 2, note: 'the riff, note by note' }, { name: 'Sweet Child O\' Mine', journey: 'tabs/sweet-child-o-mine.html', layer: 2, note: 'the bass roots' }, { name: 'Luna', journey: 'tabs/luna.html', layer: 2, note: 'the single-note line' }, { name: 'Let It Be', journey: 'tabs/let-it-be.html', layer: 2, note: 'the C–G–A–F bass outline' }],
     label: 'Set 2',
     locked: false,
     module: 'Notes on the E & A Strings',
@@ -288,7 +288,7 @@ SETS.push(
             steps: [
               {
                 text: 'Watch: <a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym: Strength & Dexterity (TE-001) – JustinGuitar</a> (0:00–4:00).',
-                hint: 'Try each exercise slowly on your guitar as he demonstrates. Slow and clean beats fast and buzzy every time.',
+                hint: 'Try each exercise slowly on your guitar as he demonstrates. Slow and clean is better than fast and buzzy, every time.',
                 skills: [1, 2, 3],
                 response: { type: 'short', placeholder: 'Which exercise felt hardest, and what do you think makes it hard?' }
               },
@@ -407,7 +407,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
               {
-                text: 'Station Wrap-Up — take a beat to reflect: what tripped you up most today — reading the TAB, or getting a clean note with no buzz? What felt easier than you expected?',
+                text: 'Station Wrap-Up — pause and think: what tripped you up most today — reading the TAB, or getting a clean note with no buzz? What felt easier than you expected?',
                 response: { type: 'short', placeholder: 'e.g. reading TAB was fine, but fret 1 kept buzzing' }
               }
             ]
@@ -539,11 +539,11 @@ SETS.push(
                 { string: 'E', fret: 3, note: 'G', midi: 43 }
               ]
             },
-            response: { type: 'short', prompt: 'Personal record: once it loops clean at 60, raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 100 — beat it next session' }
+            response: { type: 'short', prompt: 'Personal record: once it loops clean at 60, raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', placeholder: 'e.g. 100 — try for a higher number next session' }
           },
           {
             text: 'Bonus riff — "Sweet Child O\' Mine" (Guns N\' Roses) bass roots on the E & A strings: play the root note under each verse chord — D · C · G · D — one per bar at 60 BPM. Click any note name to hear how it should sound. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-            hint: 'These are the roots of the D–C–G verse loop. Heads up: the original recording is tuned a half-step lower, so your notes will sound slightly higher than the record — that\'s normal, not a mistake. The famous intro riff comes later in the course (Module 7 stretch goal!).',
+            hint: 'These are the roots of the D–C–G verse loop. Note: the original recording is tuned a half-step lower, so your notes will sound slightly higher than the recording — that\'s normal, not a mistake. The famous intro riff comes later in the course (an optional harder challenge in Module 7!).',
             skills: [4, 5],
             tab: {
               caption: '"Sweet Child O\' Mine" — verse bass roots · E & A strings · 60 BPM',
@@ -587,7 +587,7 @@ SETS.push(
                     { string: 'E', fret: 3, note: 'G', midi: 43 }
                   ]
                 },
-                response: { type: 'short', prompt: 'How many clean laps in a row did you get at 60 BPM?', placeholder: 'e.g. 4 — beat it next session' }
+                response: { type: 'short', prompt: 'How many clean laps in a row did you get at 60 BPM?', placeholder: 'e.g. 4 — try for a higher number next session' }
               },
               {
                 text: 'Challenge — Seven Nation Army, true pitch: play the riff where the record actually lives — on the A string — E · E · G · E · D · C · B at 60 BPM. You\'ve got it when: two clean laps, and you can say which string version sounds like the recording. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
@@ -611,12 +611,12 @@ SETS.push(
               },
               {
                 text: 'Challenge — "the cure," root line: play the roots of Olivia Rodrigo\'s "the cure" across both strings — A · C · D · F · G — two beats per note at 60 BPM. You\'ve got it when: two clean laps crossing between the A and E strings without looking down.',
-                hint: 'This is the skeleton of the song — next module these exact roots become power chords. Learn where they live now and Module 3 is half done.',
+                hint: 'This is the simplest outline of the song — next module these exact roots become power chords. Learn where they live now and Module 3 is half done.',
                 stuck: 'Split it by string: A · C · D on the A string first, then F · G on the low E, then join them.',
                 levelUp: 'Play the lap with the play button keeping the beat, or say each note name as you land it. Got someone around? Have them clap the beat instead.',
                 skills: [1, 2, 4, 5, 6],
                 tab: {
-                  caption: '"the cure" — root line (teaching arrangement, no capo) · 60 BPM',
+                  caption: '"the cure" — root line (teaching arrangement, no capo — a capo is a clamp on the neck that raises the pitch) · 60 BPM',
                   notes: [
                     { string: 'A', fret: 0, note: 'A', midi: 45 },
                     { string: 'A', fret: 0, note: 'A', midi: 45 },
@@ -636,10 +636,10 @@ SETS.push(
                 text: 'Challenge — Luna, bass roots: Luna rides two chords — F and Am — so its bassline is two notes. Play F (low E string, fret 1) and A (open A string) as single notes, two big beats each: the song is in 6/8, so feel the pulse in 2 and land each note on a downbeat. You\'ve got it when: four laps of F → A, both notes clean with no buzz, locked to the downbeats at 60 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
                 hint: 'Fret 1 is the tightest squeeze on the neck — press right behind the fret wire with the tip of your index and the F will ring clean.',
                 stuck: 'Park on just the F: pluck, listen, adjust, until five ring in a row. Then add the open A — that one\'s free.',
-                levelUp: 'Trade the open A for fret 5 on the low E — same note, new position. Want the simplified requinto intro line? It\'s the bonus Layer 6 on the Luna Song Journey.'
+                levelUp: 'Trade the open A for fret 5 on the low E — same note, new position. Want the simplified requinto intro line (a requinto is a small, higher-pitched guitar that plays the lead melody)? It\'s the bonus Layer 6 on the Luna Song Journey.'
               },
               {
-                text: 'Challenge — Let It Be, bass line: play the roots of "Let It Be" (Beatles) on the low E & A strings — C · G · A · F, two beats each at 60 BPM. These four notes are the bass skeleton of the whole song — you\'ll play "Let It Be" as a core song starting in Module 5, so learn where its roots live now. You\'ve got it when: two clean laps of C–G–A–F, every note ringing, each landing on the beat.',
+                text: 'Challenge — Let It Be, bass line: play the roots of "Let It Be" (Beatles) on the low E & A strings — C · G · A · F, two beats each at 60 BPM. These four notes are the simple bass outline of the whole song — you\'ll play "Let It Be" as a core song starting in Module 5, so learn where its roots live now. You\'ve got it when: two clean laps of C–G–A–F, every note ringing, each landing on the beat.',
                 hint: 'C is A-string fret 3 (ring finger), G is low-E fret 3 (ring finger), A is the open A string, F is low-E fret 1 (index). Watch the crossings between the two strings and keep your thumb behind the neck. Click any note name to hear how it should sound.',
                 stuck: 'Split it by string: play C then A (both on the A string), then G then F (both on the low E), then join all four in order.',
                 levelUp: 'Say each root name out loud as you land it, or run four laps in a row without stopping.',
@@ -734,7 +734,7 @@ MODULE_SONGS[2] = [
       { name: '"Luna" — Peso Pluma, Junior H', meta: 'Listen ahead — our Latin core song; you play its bass roots this module', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Play verse bass roots on E & A strings · intro riff = Module 7 stretch goal', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Play verse bass roots on E & A strings · intro riff = optional harder challenge in Module 7', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
       { name: '"the cure" — Olivia Rodrigo', meta: 'Play the bassline as single-note roots (no capo · A C D F G)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',

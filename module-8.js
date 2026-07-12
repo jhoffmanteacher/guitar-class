@@ -15,7 +15,7 @@ SETS.push(
     unit: 'Module 8 · Finger Picking',
     title: 'Set 1',
     subtitle: 'Hand position · p-i-m-a · Thumb on bass · Fingers on treble',
-    objective: 'I CAN hold a relaxed fingerpicking hand position and pluck the bass strings with my thumb and the treble strings with i-m-a fingers.',
+    objective: 'I CAN hold a relaxed fingerpicking hand position and pluck the bass strings (the low, thick strings) with my thumb and the treble strings (the high, thin strings) with i-m-a fingers.',
     skillFocus: 'A relaxed fingerpicking hand position · Thumb on the bass strings, fingers on the treble · Rest stroke vs. free stroke',
     comingSoon: false,
 
@@ -60,7 +60,7 @@ SETS.push(
             steps: [
           {
             text: 'Listen to "Dust in the Wind" by Kansas. Pay attention to the picking pattern — you can clearly hear the alternating bass (thumb) underneath the melody (fingers).',
-            hint: 'This song is the textbook example of fingerpicking. The bass moves on every beat, the fingers play between the beats.',
+            hint: 'This song is the classic example of fingerpicking. The bass moves on every beat, the fingers play between the beats.',
             skills: [4, 5],
             response: { type: 'short', placeholder: 'In "Dust in the Wind", describe what you hear the THUMB doing vs. what the FINGERS are doing.' }
           }
@@ -89,7 +89,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
           {
-            text: 'Station Wrap-Up — take a beat to reflect: which finger felt the most awkward today, and what helped it land more evenly?',
+            text: 'Station Wrap-Up — pause and think: which finger felt the most awkward today, and what helped it land more evenly?',
             response: { type: 'short', placeholder: 'e.g. the ring (a) finger was weakest — slowing down and watching it helped' }
           }
             ]
@@ -131,7 +131,7 @@ SETS.push(
             levelUp: 'Run it backwards (a-m-i-p), or close your eyes and keep every finger on its string.',
             skills: [3, 4, 5],
             playSeq: { label: 'Hear p-i-m-a on open strings', bpm: 60, notes: [40, 55, 59, 64] },
-            response: { type: 'short', prompt: 'Personal record: win at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, even p-i-m-a lap today (BPM)?', placeholder: 'e.g. 80 — beat it next session' }
+            response: { type: 'short', prompt: 'Personal record: play it cleanly at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, even p-i-m-a lap (one full time through the pattern) today (BPM)?', placeholder: 'e.g. 80 — try for a higher number next time' }
           }
             ]
           },
@@ -219,7 +219,7 @@ SETS.push(
     moduleNum: 8,
     unit: 'Module 8 · Finger Picking',
     title: 'Set 2',
-    subtitle: 'Basic PIMA pattern · The classic arpeggio · Over a single chord',
+    subtitle: 'Basic PIMA pattern · The classic arpeggio (the notes of a chord played one at a time) · Over a single chord',
     objective: 'I CAN play a basic p-i-m-a-m-i fingerpicking arpeggio pattern cleanly over a single open chord at 70 BPM.',
     skillFocus: 'Playing a PIMA arpeggio pattern · Keeping even timing and volume · Picking through a held chord',
     comingSoon: false,
@@ -296,7 +296,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
           {
-            text: 'Station Wrap-Up — take a beat to reflect: did the pattern start to feel automatic, or were you still thinking through each finger? What would make it smoother?',
+            text: 'Station Wrap-Up — pause and think: did the pattern start to feel automatic, or were you still thinking through each finger? What would make it smoother?',
             response: { type: 'short', placeholder: 'e.g. still counting each finger — slowing the metronome down helped it flow' }
           }
             ]
@@ -347,12 +347,12 @@ SETS.push(
             title: 'Build up your tempo (70+ BPM)',
             steps: [
           {
-            text: 'Challenge 3 — Beat Your Tempo (your assessment piece): play the Em pattern at 70 BPM, then try 80. You\'ve got it when: clean at 70+ with the "a" finger landing right on its beat — drop back to 60 if it falls apart. This steady-pattern check is the Set 2 check-off.',
-            hint: 'The most common mistake: the "a" finger lags. Pay extra attention to your ring finger — it needs to land exactly on its beat, no later. Set the ⏱ Timer for 2 minutes and loop it.',
-            stuck: 'Go back to 60 BPM and stay there until it\'s effortless — a clean 60 beats a sloppy 80 every time.',
+            text: 'Challenge 3 — Raise Your Tempo (your assessment piece): play the Em pattern at 70 BPM, then try 80. You\'ve got it when: clean at 70+ with the "a" finger landing right on its beat — drop back to 60 if it falls apart. This steady-pattern check is the Set 2 check-off.',
+            hint: 'The most common mistake: the ring finger (a) comes in late. Pay extra attention to your ring finger — it needs to land exactly on its beat, no later. Set the ⏱ Timer for 2 minutes and loop it.',
+            stuck: 'Go back to 60 BPM and stay there until it\'s effortless — a clean 60 is better than a sloppy 80 every time.',
             levelUp: 'Push past 80 BPM, or play the pattern over Am at the same tempo with the thumb relocating.',
             skills: [2, 5],
-            response: { type: 'short', prompt: 'Personal record: win at 70 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, even pattern today (BPM)?', placeholder: 'e.g. 90 — beat it next session' }
+            response: { type: 'short', prompt: 'Personal record: play it cleanly at 70 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, even pattern today (BPM)?', placeholder: 'e.g. 90 — try for a higher number next time' }
           }
             ]
           },
@@ -383,7 +383,7 @@ SETS.push(
             title: '⚡ Ear Spark — optional ear bonus',
             steps: [
               {
-                text: '⚡ Ear Spark (optional, 2 min): fingerpick Am leading with the thumb on either the A string or the D string — a few reps in a shuffled slip order, recorded. On playback, name which string the bass note was each time — low vs high bass is a fingerpicker\'s first ear skill. Got someone around? Have them pick while you listen.'
+                text: '⚡ Ear Spark (optional, 2 min): fingerpick Am leading with the thumb on either the A string or the D string — a few times in a mixed-up order, recorded. On playback, name which string the bass note was each time — low vs high bass is a fingerpicker\'s first ear skill. Got someone around? Have them pick while you listen.'
               }
             ]
           }
@@ -500,7 +500,7 @@ SETS.push(
             title: 'Station Wrap-Up',
             steps: [
           {
-            text: 'Station Wrap-Up — take a beat to reflect: across the whole module, which is harder for you — keeping the picking pattern steady, or changing chords cleanly underneath it? What\'s your plan for the harder one?',
+            text: 'Station Wrap-Up — pause and think: across the whole module, which is harder for you — keeping the picking pattern steady, or changing chords cleanly underneath it? What\'s your plan for the harder one?',
             response: { type: 'short', placeholder: 'e.g. chord changes break my pattern — I\'ll practice moving the fretting hand a beat early' }
           }
             ]
@@ -533,7 +533,7 @@ SETS.push(
             skills: [1, 3, 4],
             playSeq: { label: 'Am · C · D · F bass roots', bpm: 60,
               notes: [45, 48, 50, 53] },
-            response: { type: 'short', prompt: 'Personal record: win at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN lap of the progression today (BPM)?', placeholder: 'e.g. 75 — beat it next session' }
+            response: { type: 'short', prompt: 'Personal record: play it cleanly at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN lap of the progression today (BPM)?', placeholder: 'e.g. 75 — try for a higher number next time' }
           }
             ]
           },
@@ -544,7 +544,7 @@ SETS.push(
             text: 'Challenge 3 — The Pinch: fret C and "pinch" two strings at once — thumb on the A string (root) and your "a" finger on the high e, plucked at the SAME instant, on each beat for 8 beats. You\'ve got it when: both notes sound together as one, perfectly in sync — not one slightly before the other.',
             hint: 'A pinch is the bridge between arpeggios and Travis picking — thumb and finger move toward each other and meet. Listen for ONE sound, not a flam (two close hits).',
             stuck: 'Pluck the bass and the treble separately first, slowly, then bring them closer until they land together.',
-            levelUp: 'Pinch on beats 1 & 3 and fill beats 2 & 4 with a single i-pluck on the B string — that\'s the Travis groove starting to form.',
+            levelUp: 'Pinch on beats 1 & 3 and fill beats 2 & 4 with a single i-pluck on the B string — that\'s the Travis groove (its steady rhythmic feel) starting to form.',
             skills: [2, 4]
           }
             ]
@@ -578,7 +578,7 @@ SETS.push(
             title: 'Perform a fingerpicked song',
             steps: [
           {
-            text: 'Challenge 5 — Perform It (your assessment piece — give it a go!): pick one song — "the cure", "Hallelujah" (from Module 5\'s song list), "Let It Be" (verse), or a choice-list song — and play it through 3 times without stopping, even with mistakes. No score — practice the recovery; keep going no matter what.',
+            text: 'Challenge 5 — Perform It (your assessment piece — try it!): pick one song — "the cure", "Hallelujah" (from Module 5\'s song list), "Let It Be" (verse), or a choice-list song — and play it through 3 times without stopping, even with mistakes. No score — practice the recovery; keep going no matter what.',
             hint: 'Mistakes are normal — stopping is what makes them sound bad, so keep going and practice the recovery. No one to play for? Record yourself on your phone or device and watch it back — the playback shows you exactly where the pattern broke.',
             stuck: 'Pick the shortest, slowest song you know (Hallelujah is forgiving) and play just the verse — finishing matters more than difficulty.',
             levelUp: 'Perform standing up, or play it for family or a friend and keep going through any mistake.',
