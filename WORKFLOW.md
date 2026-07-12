@@ -16,6 +16,25 @@
 
 ---
 
+## Working conventions
+
+- **Two Claude sessions at once → each in its own git worktree.** Both machines
+  run parallel terminals sometimes. Two sessions in the SAME working tree share
+  one git index, so one session's commit can sweep up the other's *uncommitted*
+  work — this happened 2026-07-12 (the Change Up combos + Random-4 changes got
+  bundled into the unrelated Wait Mode commit `6dcf68c`). If you start a second
+  session while one is active, give it its own worktree before editing shared
+  files: `git worktree add ../guitar-class-<tag> -b work-<tag>`, work there, then
+  merge/push from there. On the **Mac** this is now auto-reminded — a SessionStart
+  hook (`~/.claude/hooks/cc-session-lock.sh`, wired in `~/.claude/settings.json`)
+  detects a live second session via per-session heartbeat locks and tells Claude
+  to switch to a worktree. It's a *reminder, not a relocation*, and it's
+  **Mac-only**; the **Windows** machine needs the rule followed by hand (or a
+  PowerShell twin of the hook). Activate after editing the hook with `/hooks` or a
+  restart.
+
+---
+
 ## Open work
 
 - [ ] **Real-guitar test of Riff Runner Wait Mode** (Jonathan, 2026-07-12) —
