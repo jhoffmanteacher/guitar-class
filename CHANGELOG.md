@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-12 — A tidier "Songs" spot, and a sidebar that gets out of the way
+
+### Changed
+- **"Songs" only shows up once now**, under Explore in the sidebar. It used to
+  also appear as its own button under "This set," which pointed to the same
+  place — a little confusing since they looked like two different things.
+- **On a narrow window or phone-sized screen, the sidebar tucks itself away**
+  instead of stacking above your practice material (which used to push
+  everything else way down the page). Tap the ☰ menu button next to the title
+  to open it, pick what you want, and it closes automatically so you can see
+  what you picked.
+
 ## 2026-07-12 — Titles got some personality, and one less color to compete with
 
 ### Changed

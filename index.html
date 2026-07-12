@@ -68,9 +68,14 @@ function googleTranslateElementInit(){
      service worker still precaches every module file for offline use. -->
 <div id="google_translate_element"></div>
 <header class="header">
-  <div>
-    <h1 class="header-title">Sequoia High School &ndash; Beginning Guitar</h1>
-    <div class="header-sub">Independent Practice and Skills Tracker</div>
+  <div style="display:flex;align-items:center;gap:10px;min-width:0">
+    <button type="button" class="rail-toggle" id="rail-toggle-btn" onclick="toggleRail()" aria-expanded="false" aria-controls="nav-rail" aria-label="Open navigation menu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    <div style="min-width:0">
+      <h1 class="header-title">Sequoia High School &ndash; Beginning Guitar</h1>
+      <div class="header-sub">Independent Practice and Skills Tracker</div>
+    </div>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
     <button class="btn-translate" id="btn-translate" onclick="toggleTranslate()" title="Translate to Spanish">
@@ -123,7 +128,7 @@ function googleTranslateElementInit(){
   </div>
   <div class="app-layout">
     <!-- ══ LEFT NAV RAIL — module picker, progress, station switcher, Explore ══ -->
-    <aside class="rail" aria-label="Course navigation">
+    <aside class="rail" id="nav-rail" aria-label="Course navigation">
       <div class="rail-scroll">
         <div class="rail-group g-module">
           <span class="rail-sec-label">Module<span class="sec-goal" id="rail-module-goal" title="Finish all skills to complete this module" aria-hidden="true">&#x1F3C6;</span></span>
@@ -143,9 +148,6 @@ function googleTranslateElementInit(){
             <button type="button" class="rail-station st-chk" data-station="checklist" onclick="railStation('checklist')">
               <span class="rs-num rs-check" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7 12l3 3 7-7"/></svg></span><span class="rs-text"><span class="rs-title">My skills checklist</span><span class="rs-sub">Track what you can do</span></span>
             </button>
-            <button type="button" class="rail-station st-songs" data-station="songs" onclick="railStation('songs')" hidden>
-              <span class="rs-num">&#9835;</span><span class="rs-text"><span class="rs-title">Songs</span><span class="rs-sub">Play along</span></span>
-            </button>
           </div>
         </div>
         <nav class="rail-group g-explore" aria-label="Explore">
@@ -163,6 +165,7 @@ function googleTranslateElementInit(){
         </nav>
       </div>
     </aside>
+    <div class="rail-backdrop" id="rail-backdrop" onclick="closeRail()"></div>
     <main class="main" id="main-content">
       <!-- Guitar Games: a full-screen arcade "page" (own #games URL hash,
            browser Back exits). Lives inside #app so it can't show pre-auth. -->

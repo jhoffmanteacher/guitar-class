@@ -1479,8 +1479,6 @@ function syncRailStations(){
   const w = (typeof SETS !== 'undefined') ? SETS.find(s=>s.id===wid) : null;
   const label = document.getElementById('rail-set-label');
   if(label) label.textContent = 'This set' + (w && w.label ? ' · ' + w.label : '');
-  const songsBtn = list.querySelector('[data-station="songs"]');
-  if(songsBtn) songsBtn.hidden = !(w && w.songs);
   // Reflect whichever tab-panel is currently active back onto the rail buttons.
   const activePanel = panel.querySelector('.tab-panel.active');
   const activeTab = activePanel ? activePanel.id.slice(wid.length + 1) : 'station-b';
@@ -2688,6 +2686,37 @@ document.addEventListener('keydown',e=>{
   const wo=document.getElementById('welcome-overlay'); if(wo&&wo.style.display!=='none') dismissWelcome();
   const vo=document.getElementById('video-overlay'); if(vo&&!vo.hidden) clearPanel();
   const gs=document.getElementById('games-screen'); if(gs&&!gs.hasAttribute('hidden')&&typeof closeGamesScreen==='function') closeGamesScreen();
+  if(document.body.classList.contains('rail-open')) closeRail();
+});
+
+/* Keep --hdr in sync with the header's real rendered height — on narrow
+   screens the title can wrap to two lines, and the drawer/backdrop below
+   position themselves off this variable, so a stale 70px would leave a gap
+   or an overlap. */
+function syncHeaderHeight(){
+  const h = document.querySelector('.header');
+  if(h) document.documentElement.style.setProperty('--hdr', h.offsetHeight + 'px');
+}
+window.addEventListener('resize', syncHeaderHeight);
+syncHeaderHeight();
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(syncHeaderHeight);
+
+/* ── Mobile nav drawer: below 760px the rail slides in as an overlay instead
+   of stacking in the page flow (see styles.css @media(max-width:760px)). ── */
+function isNarrowLayout(){ return window.matchMedia('(max-width:760px)').matches; }
+function setRailOpen(open){
+  document.body.classList.toggle('rail-open', open);
+  const btn = document.getElementById('rail-toggle-btn');
+  if(btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+function toggleRail(){ setRailOpen(!document.body.classList.contains('rail-open')); }
+function closeRail(){ setRailOpen(false); }
+window.addEventListener('resize', () => { if(!isNarrowLayout()) closeRail(); });
+// Picking a station or an Explore item shows the main content — close the
+// drawer so students actually see it instead of the nav still covering it.
+document.getElementById('nav-rail')?.addEventListener('click', e => {
+  if(!isNarrowLayout()) return;
+  if(e.target.closest('.rail-station, .nav-btn')) closeRail();
 });
 // Keyboard activation for non-<button> controls that carry role="button"
 // (the skill checkboxes and station cards are <div>s for layout reasons).

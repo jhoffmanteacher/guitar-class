@@ -466,8 +466,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .rail-station.active.st-c .rs-title{color:var(--green-text)}  .rail-station.active.st-c .rs-num{background:var(--green-text);color:#fff}
 .rail-station.active.st-chk{background:var(--amber-bg)}
 .rail-station.active.st-chk .rs-title{color:var(--amber-text)} .rail-station.active.st-chk .rs-num{background:var(--amber-text);color:#fff}
-.rail-station.active.st-songs{background:var(--purple-bg)}
-.rail-station.active.st-songs .rs-title{color:var(--purple-text)} .rail-station.active.st-songs .rs-num{background:var(--purple-accent);color:#fff}
 /* Explore nav */
 .nav-list{display:flex;flex-direction:column;gap:4px}
 .nav-btn{display:flex;align-items:center;gap:11px;width:100%;text-align:left;
@@ -491,13 +489,33 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   padding:8px 14px;border-radius:8px;z-index:200;font-size:0.875rem;font-weight:600;transition:transform .15s}
 .skip-link:focus{transform:translateY(0);outline:2px solid #fff;outline-offset:2px}
 .nav-btn:focus-visible,.rail-station:focus-visible,.mstrip-seg:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
-/* ── Responsive: rail stacks above the main content on narrow screens ── */
+/* ── Hamburger nav toggle (header) — hidden above the drawer breakpoint ── */
+.rail-toggle{display:none;align-items:center;justify-content:center;width:36px;height:36px;
+  flex-shrink:0;border-radius:8px;border:1px solid rgba(255,255,255,0.35);background:transparent;
+  color:#fff;cursor:pointer}
+.rail-toggle:hover{background:rgba(255,255,255,0.12)}
+.rail-toggle svg{width:20px;height:20px}
+/* Backdrop behind the drawer — sits below the header so the header (and the
+   toggle button that closes the drawer) stays reachable while it's open. */
+.rail-backdrop{display:none;position:fixed;top:var(--hdr);left:0;right:0;bottom:0;
+  background:rgba(0,0,0,0.45);z-index:55}
+/* ── Responsive: below 760px the rail becomes an off-canvas drawer instead of
+   stacking in the page flow, so a narrow window shows the main content first
+   instead of a long sidebar you have to scroll past. ── */
 @media(max-width:760px){
-  .app-layout{flex-direction:column}
-  .rail{width:100%;flex:none;height:auto;position:static;border-right:none;border-bottom:1px solid var(--border)}
-  .rail-scroll{overflow-y:visible}
+  .app-layout{flex-direction:column;position:relative}
+  .rail-toggle{display:inline-flex}
+  .rail{width:82vw;max-width:300px;flex:none;position:fixed;top:var(--hdr);left:0;
+    height:calc(100vh - var(--hdr));border-right:1px solid var(--border);border-bottom:none;
+    transform:translateX(-100%);transition:transform 0.2s ease;z-index:60;box-shadow:var(--shadow-raised)}
+  body.rail-open .rail{transform:translateX(0)}
+  body.rail-open .rail-backdrop{display:block}
+  body.rail-open{overflow:hidden}
+  body.rail-open .fab-buttons{display:none}
+  .rail-scroll{overflow-y:auto}
   .app-layout .main{max-width:100%;padding:20px 16px 50px}
 }
+@media(prefers-reduced-motion:reduce){.rail{transition:none}}
 .st-text{display:block;max-width:72ch}
 .sh,.sh-list,.step-branch,.step-resp-prompt,.cl-intro,.obj-skill-list,.welcome-lead{max-width:70ch}
 .mr-assess-body{max-width:78ch}
@@ -781,7 +799,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   body{background:#fff !important}
 
   /* Hide all on-screen chrome */
-  .header,.rail,.skip-link,.module-select-wrap,.module-strip,.module-strip-label,.week-pills,
+  .header,.rail,.rail-backdrop,.skip-link,.module-select-wrap,.module-strip,.module-strip-label,.week-pills,
   .student-footer,
   .video-overlay,
   .fab-group,.tabs,.save-ind,.read-aloud-btn,
