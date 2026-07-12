@@ -384,6 +384,65 @@ SETS.push(
             ]
           },
           {
+            title: 'Speed changes — every two beats, then every beat',
+            steps: [
+          {
+            text: 'Challenge — Half-Bar Changes (2 chords): so far you\'ve changed once a bar. Real songs move faster. Switch Am ↔ C every TWO beats — two down-strums on Am, two on C, and repeat, at 60 BPM. That\'s twice as many changes as the loop you just played. You\'ve got it when: four laps where every switch lands right on beat 1 and 3, no stops. Press &#x25B6; to hear the target.',
+            hint: 'Am and C share an anchor: your 1st finger stays on the B string (fret 1) and your 2nd finger stays on the D string (fret 2). Only your 3rd finger jumps (to the A string for C). Pivot on the two fingers that don\'t move.',
+            stuck: 'Drop to 50 BPM. Start moving your 3rd finger on the "and" after beat 2, so C is ready before you strum it.',
+            levelUp: 'Climb to 70 BPM, or try Am ↔ F (the hardest pair) at the same half-bar speed.',
+            skills: [4, 6],
+            chords: [
+              { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
+              { name: 'C',  chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 }
+            ],
+            playSeq: { label: 'Hear it — Am·Am · C·C (change every 2 beats)', bpm: 60, notes: [[45,52,57,60,64],[45,52,57,60,64],[48,52,55,60,64],[48,52,55,60,64],[45,52,57,60,64],[45,52,57,60,64],[48,52,55,60,64],[48,52,55,60,64]] }
+          },
+          {
+            text: 'Challenge — Three-Chord Half-Bar (3 chords): now three shapes, still two beats each — G · C · Am, then back to G, looping at 60 BPM. Three chords this fast is chorus speed for a lot of songs. You\'ve got it when: two clean laps, every change on the beat.',
+            hint: 'G → C keeps your 2nd finger near the same spot; C → Am keeps the 1st finger planted on the B string. Look for the finger that can stay put in each move.',
+            stuck: 'Loop just the change that trips you (usually G → C, where every finger travels) on its own before running all three.',
+            levelUp: 'Speed up to 70 BPM, or reorder as C · G · Am and keep every change on the beat.',
+            skills: [6],
+            chords: [
+              { name: 'G',  chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
+              { name: 'C',  chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
+              { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
+            ],
+            playSeq: { label: 'Hear it — G·G · C·C · Am·Am (every 2 beats)', bpm: 60, notes: [[43,47,50,55,59,67],[43,47,50,55,59,67],[48,52,55,60,64],[48,52,55,60,64],[45,52,57,60,64],[45,52,57,60,64]] }
+          },
+          {
+            text: 'Challenge — Four-Chord Half-Bar (Let It Be, fast): the whole C · G · Am · F loop from your song, but two beats each at 60 BPM instead of a full bar. Same chords, twice the changes — the verse now moves at a real, brisk pace. You\'ve got it when: two clean laps, every change landing on the beat.',
+            hint: 'You already know this loop slow. The only new demand is your hands resetting faster — pre-shape each chord in the air while the last one is still ringing.',
+            stuck: 'Isolate the pair that lags (often G → Am or Am → F) and loop just those two at half-bar speed before running the circle.',
+            levelUp: 'Push to 70 BPM, or move on to the every-beat version below.',
+            skills: [5, 6],
+            chords: [
+              { name: 'C',  chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
+              { name: 'G',  chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
+              { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
+              { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
+            ],
+            playSeq: { label: 'Hear it — C·G·Am·F (every 2 beats)', bpm: 60, notes: [[48,52,55,60,64],[48,52,55,60,64],[43,47,50,55,59,67],[43,47,50,55,59,67],[45,52,57,60,64],[45,52,57,60,64],[53,57,60,65],[53,57,60,65]] }
+          },
+          {
+            text: 'Challenge — One Chord Per Beat (Let It Be, fastest): the top of the ladder — a new chord on every single beat. Play C · G · Am · F, one down-strum per beat at 60 BPM, looping. This is the real test of clean, fast switching: the next shape has to be ready before you get to it. You\'ve got it when: four laps clean at 60 — then, if you can, climb to 65.',
+            hint: 'At this speed you can\'t watch your hands. Trust the shapes and keep the strum steady — a change that\'s slightly buzzy but in time beats a clean one that\'s late.',
+            stuck: 'Cut it in half: loop just C · G, one per beat, until it\'s smooth, then add Am and F back one at a time.',
+            levelUp: 'Hold it clean at 70 BPM, or try G · D · Em · C one per beat once you\'ve met D and Em elsewhere.',
+            skills: [5, 6],
+            chords: [
+              { name: 'C',  chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
+              { name: 'G',  chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
+              { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
+              { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
+            ],
+            playSeq: { label: 'Hear it — C·G·Am·F (one chord per beat)', bpm: 60, notes: [[48,52,55,60,64],[43,47,50,55,59,67],[45,52,57,60,64],[53,57,60,65],[48,52,55,60,64],[43,47,50,55,59,67],[45,52,57,60,64],[53,57,60,65]] },
+            response: { type: 'short', prompt: 'Your fastest CLEAN one-chord-per-beat C–G–Am–F today (BPM)?', placeholder: 'e.g. 60 — 65 next session' }
+          }
+            ]
+          },
+          {
             title: 'Station Wrap-Up',
             steps: [
               {

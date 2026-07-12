@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-12 — New: practice for faster chord changes
+
+### Added
+- **A "Speed Changes" set of drills in three modules** — the chord-switching
+  practice used to top out at one change per bar, which is slower than most real
+  songs move. Now each of these modules has a new practice block that ramps up
+  the challenge to match real playing:
+  - **Two-Finger Power Chords** — half-bar and one-per-beat switches, building up
+    to the "All Along the Watchtower" riff played a new chord every beat.
+  - **Open Chords** — the same C–G–Am–F loop from "Let It Be," first every two
+    beats, then a new chord on every beat.
+  - **Strumming Patterns with Chords** — faster switches while the strum hand
+    never stops, which is the real rhythm-guitar skill.
+- Each drill goes **2 chords → 3 chords → 4 chords**, and **every two beats →
+  every beat**, with a ▶ play-along so you can hear the target before you try it,
+  and a spot to log your fastest clean tempo and beat it next time.
+
 ## 2026-07-12 — Fixed: picking a Set while Songs (or Search) was open
 
 ### Fixed

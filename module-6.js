@@ -150,6 +150,63 @@ SETS.push(
             ]
           },
           {
+            title: 'Speed changes — faster switches, strum never stops',
+            steps: [
+          {
+            text: 'Challenge — Half-Bar Switch, Non-Stop (2 chords): you just switched Em ↔ Am every two bars. Now do it every TWO BEATS — down-up strumming the whole time, changing on beats 1 and 3, at 60 BPM. The strum hand never pauses; the chord changes between strums. You\'ve got it when: four laps where the pendulum never stops and every change lands on the beat. Press &#x25B6; to hear the target.',
+            hint: 'Keep the wrist swinging down-up-down-up without a hitch — the fingers change underneath a moving hand. The moment you freeze to place the chord, you\'ve stopped the strum.',
+            stuck: 'Drop to 50 BPM. Say "change" on the "and" after beats 2 and 4 to remind your fingers to move early.',
+            levelUp: 'Climb to 70 BPM, or jump ahead to the every-beat drill below.',
+            skills: [4, 5],
+            chords: [
+              { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 },
+              { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
+            ],
+            playSeq: { label: 'Em·Em · Am·Am roots (change every 2 beats)', bpm: 60, notes: [40, 40, 45, 45, 40, 40, 45, 45] }
+          },
+          {
+            text: 'Challenge — Three-Chord Half-Bar (3 chords): add G (from Module 5). Loop Em · Am · G, two beats each, the strum never stopping, at 60 BPM. You\'ve got it when: two clean laps with the pendulum unbroken through all three changes.',
+            hint: 'Am → G moves every finger, so pre-shape G in the air while Am is still ringing. Em → Am shares your two fretting fingers — barely a move.',
+            stuck: 'Loop just Am → G until the strum survives that change, then drop Em back in front.',
+            levelUp: 'Speed up to 70 BPM, or count "1 + 2 + 3 + 4 +" aloud the whole time.',
+            skills: [5, 6],
+            chords: [
+              { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 },
+              { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
+              { name: 'G',  chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
+            ],
+            playSeq: { label: 'Em·Em · Am·Am · G·G roots (every 2 beats)', bpm: 60, notes: [40, 40, 45, 45, 43, 43] }
+          },
+          {
+            text: 'Challenge — Four-Chord Half-Bar (Let It Be, strummed): the C · G · Am · F loop from Module 5, down-up strumming, two beats per chord at 60 BPM. Four chords at half-bar speed with the strum hand driving — this is real rhythm-guitar playing. You\'ve got it when: two clean laps, strum unbroken, every change on the beat.',
+            hint: 'The right hand is the drummer and never stops; the left hand catches up between strokes. Keep upstrokes light — brush only the top few strings.',
+            stuck: 'Isolate the pair that lags (often G → Am or Am → F) and loop just those two with the strum before running the circle.',
+            levelUp: 'Push to 70 BPM, or move on to the every-beat drill below.',
+            skills: [5, 6],
+            chords: [
+              { name: 'C',  chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
+              { name: 'G',  chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
+              { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
+              { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
+            ],
+            playSeq: { label: 'C·C · G·G · Am·Am · F·F roots (every 2 beats)', bpm: 60, notes: [48, 48, 43, 43, 45, 45, 53, 53] }
+          },
+          {
+            text: 'Challenge — One Chord Per Beat (fastest): the top of the ladder. Switch Em ↔ Am on every single beat — one down-strum per beat, a new chord each time, at 60 BPM, the strum still non-stop. You\'ve got it when: four laps clean at 60 where the change happens the instant your hand lifts for the next strum.',
+            hint: 'Em and Am share two fingers, so this is the easiest pair to change every beat — perfect for training raw speed. Trust the shared fingers and move only what has to move.',
+            stuck: 'Slow to 50 BPM and let some changes be a little buzzy — here the goal is the timing of the switch, not perfect tone. Clean it up as the speed settles.',
+            levelUp: 'Hold it clean at 70 BPM, or try Am · G one per beat (every finger moves — much harder).',
+            skills: [5, 6],
+            chords: [
+              { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 },
+              { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
+            ],
+            playSeq: { label: 'Em·Am roots (one chord per beat)', bpm: 60, notes: [40, 45, 40, 45, 40, 45, 40, 45] },
+            response: { type: 'short', prompt: 'Your fastest CLEAN one-chord-per-beat Em↔Am today (BPM)?', placeholder: 'e.g. 60 — 65 next session' }
+          }
+            ]
+          },
+          {
             title: 'Take It to a Song',
             steps: [
               {

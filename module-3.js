@@ -358,6 +358,63 @@ SETS.push(
             ]
           },
           {
+            title: 'Speed changes — every two beats, then every beat',
+            steps: [
+          {
+            text: 'Challenge — Half-Bar Power Switches (2 chords): real riffs change faster than once a bar. Keep A5 and D5, but switch every TWO beats — two down-strums on A5, two on D5, and repeat, at 60 BPM. That\'s a change every half-bar, twice as often as the loops so far. You\'ve got it when: four laps where every switch lands right on the beat, no stops. Press &#x25B6; to hear the target.',
+            hint: 'A5 and D5 are the same shape one string apart — A5 roots on the low E (fret 5), D5 on the A string (fret 5). Shift the whole shape across and keep your two fingers glued together.',
+            stuck: 'Drop to 50 BPM. Start moving your fingers to the next chord on the "and" after beat 2, so the shape is ready before the switch.',
+            levelUp: 'Climb to 70, then 80 BPM, or jump ahead to the every-beat drill below.',
+            skills: [1, 2],
+            chords: [
+              { name: 'A5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 },
+              { name: 'D5', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,'x'],[2,'x'],[1,'x']], position: 5 }
+            ],
+            playSeq: { label: 'Hear it — A5·A5 · D5·D5 (change every 2 beats)', bpm: 60, notes: [[45,52],[45,52],[50,57],[50,57],[45,52],[45,52],[50,57],[50,57]] }
+          },
+          {
+            text: 'Challenge — Three-Chord Half-Bar (3 chords): now three shapes, still two beats each — G5 · C5 · D5, then back to G5, looping at 60 BPM. That\'s a I–IV–V in the key of G, the backbone of thousands of songs, moving at chorus speed. You\'ve got it when: two clean laps, every change on the beat.',
+            hint: 'C5 and D5 are both A-string roots two frets apart (frets 3 and 5); G5 drops to the low E string (fret 3). Group the two A-string shapes in your mind, then the hop down to G5.',
+            stuck: 'Loop just C5 → D5 (the same-string, two-fret slide) until it\'s automatic, then add the G5 hop.',
+            levelUp: 'Speed up to 75 BPM, or reorder as G5 · D5 · C5 and keep every change on the beat.',
+            skills: [1, 2],
+            chords: [
+              { name: 'G5', chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
+              { name: 'C5', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
+              { name: 'D5', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,'x'],[2,'x'],[1,'x']], position: 5 }
+            ],
+            playSeq: { label: 'Hear it — G5·G5 · C5·C5 · D5·D5 (I–IV–V, every 2 beats)', bpm: 60, notes: [[43,50],[43,50],[48,55],[48,55],[50,57],[50,57]] }
+          },
+          {
+            text: 'Challenge — Four-Chord Half-Bar (Watchtower): the full "All Along the Watchtower" loop as low-E power chords — A5 · G5 · F5 · G5 — two beats each at 60 BPM, looping. Four chord slots inside every bar-and-a-half — this is exactly how the record cycles. You\'ve got it when: four clean laps, every change landing on the beat.',
+            hint: 'All three roots sit on the low E string — A5 (fret 5), G5 (fret 3), F5 (fret 1). It\'s one shape walking down the neck and back up.',
+            stuck: 'Play just the roots (skip the second string) for one lap to lock the walk, then add the fifth back in.',
+            levelUp: 'Palm-mute for a tighter chug, or move on to the every-beat version below.',
+            skills: [1, 2],
+            chords: [
+              { name: 'A5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 },
+              { name: 'G5', chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
+              { name: 'F5', chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 1 }
+            ],
+            playSeq: { label: 'Hear it — A5·G5·F5·G5 (every 2 beats)', bpm: 60, notes: [[45,52],[45,52],[43,50],[43,50],[41,48],[41,48],[43,50],[43,50]] }
+          },
+          {
+            text: 'Challenge — One Chord Per Beat (Watchtower, fast): the top of the ladder — a new chord on every single beat. Same A5 · G5 · F5 · G5 loop, but one down-strum per beat at 60 BPM, no repeats. This is what a driving riff feels like: no time to think, the next shape has to be ready before you arrive. You\'ve got it when: four laps clean at 60, then climb 65 → 70.',
+            hint: 'Because the walk is A5→G5→F5→G5, your hand moves two frets, two frets, then back two — a steady rocking slide. Feel the pattern in your arm, not your eyes.',
+            stuck: 'Cut it in half: loop just A5 · G5, one per beat, until it\'s smooth, then add F5.',
+            levelUp: 'Hold it clean at 80 BPM, or make all four different — E5 · G5 · A5 · C5, one per beat.',
+            skills: [1, 2],
+            chords: [
+              { name: 'A5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 },
+              { name: 'G5', chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
+              { name: 'F5', chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 1 }
+            ],
+            playSeq: { label: 'Hear it — A5·G5·F5·G5 (one chord per beat)', bpm: 60, notes: [[45,52],[43,50],[41,48],[43,50],[45,52],[43,50],[41,48],[43,50]] },
+            response: { type: 'short', prompt: 'Your fastest CLEAN one-chord-per-beat Watchtower today (BPM)?', placeholder: 'e.g. 70 — 80 next session' }
+          }
+            ]
+          },
+          {
             title: 'Read and clap the rhythm',
             steps: [
           {
