@@ -5,6 +5,22 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-12 — New look: a side navigation rail
+
+### Changed
+- **The site has a new layout with a navigation rail down the left side.** The
+  module picker, your progress strip, and the buttons for each set's stations
+  (Station B, Station C, your skills checklist, and Songs) now live together in
+  a sidebar, along with an Explore section for Practice, Games, Songs, and Find.
+  It keeps everything one click away instead of stacked across the top, adds a
+  little "module complete" badge, and includes a Skip-to-content link for
+  keyboard and screen-reader users.
+
+### Added
+- **Teachers can turn Games on or off** — for the whole class at once, or for
+  individual students — from a new Games tab in the teacher dashboard. When
+  Games are off for a student, the 🎮 button simply doesn't show for them.
+
 ## 2026-07-12 — The Listening Coach now hears your chords
 
 ### Changed
