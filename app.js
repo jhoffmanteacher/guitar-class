@@ -1420,7 +1420,7 @@ function renderPills(moduleNum){
     rbtn.dataset.id=`mr${moduleNum}`;
     rbtn.textContent='Module review';
     rbtn.title = locked
-      ? 'Preview only — finish marking every skill on both sets as "got it" to unlock this self-assessment.'
+      ? 'Preview only — finish marking every skill on every set as "I\'ve got it!" to unlock this self-assessment.'
       : '';
     rbtn.onclick=()=>{ lastSetId=`mr${moduleNum}`; activateSet(`mr${moduleNum}`); saveProgress(); };
     c.appendChild(rbtn);
@@ -1432,6 +1432,7 @@ function renderPills(moduleNum){
 
 function activateSet(id){
   lastSetId = id;
+  if (typeof stopAnyRec === 'function') stopAnyRec();
   document.querySelectorAll('.wpill').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   document.querySelectorAll('.week-panel').forEach(p=>p.classList.toggle('active',p.dataset.id===id));
   // Show the module-level Songs section only for the active set's module.
@@ -1981,7 +1982,7 @@ function buildModuleReview(mr){
     ${buildModuleRoutine(mr.moduleNum)}
     <div class="mr-locked-banner">
       <span class="mr-locked-banner-icon">&#x1F512;</span>
-      <div><strong>Preview only.</strong> Mark every skill on both sets as &ldquo;I&rsquo;ve got it!&rdquo; to unlock this self-assessment.</div>
+      <div><strong>Preview only.</strong> Mark every skill on every set as &ldquo;I&rsquo;ve got it!&rdquo; to unlock this self-assessment.</div>
     </div>
     <div class="obj-card">
       <span class="mr-tag">Module ${mr.moduleNum} self-assessment</span>
@@ -2168,6 +2169,15 @@ function stopRec(moduleNum){
   const s = recState[moduleNum];
   if (!s || !s.recorder) return;
   if (s.recorder.state !== 'inactive') s.recorder.stop();
+}
+
+/* Navigating away mid-recording would otherwise leave the mic live for up
+   to REC_MAX_SECS — every other mic feature on the site stops on navigation,
+   so the recorder does too. Called from activateSet. */
+function stopAnyRec(){
+  Object.keys(recState).forEach(m => {
+    if (recState[m] && recState[m].recording) stopRec(m);
+  });
 }
 
 function discardRec(moduleNum){
@@ -2568,7 +2578,7 @@ function coachChordBtnRowHtml(chords){
   })).filter(c=>c.m.length);
   if(!spec.length) return '';
   const label = spec.length>1 ? 'Check my changes' : 'Strum check';
-  return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}" onclick="coachOpen(this)" title="Strum along with the count — the mic listens and gives feedback">&#x1F3A4; ${label}</button></div>`;
+  return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}" onclick="coachOpen(this)" title="4 count-in clicks, then strum on every beat — the mic listens and gives feedback">&#x1F3A4; ${label}</button></div>`;
 }
 function tick(){ if(!window.coachMicLive) beep(880,0.06); const dot=document.getElementById('metro-dot'); if(dot){ dot.classList.add('flash'); setTimeout(()=>dot.classList.remove('flash'),80); } }
 function getBpm(){ return parseInt(document.getElementById('bpm-slider').value); }
@@ -3023,7 +3033,7 @@ async function toggleSearch(){
   if(btn) btn.setAttribute('aria-expanded', 'true');
   p.innerHTML = `<div class="daily5-head"><span>&#x1F50D; Find it</span><button type="button" class="tp-close" onclick="toggleSearch()" aria-label="Close search">&#x2715;</button></div>
     <input type="search" class="search-input" id="search-input" placeholder="Try &quot;F chord&quot;, &quot;folk strum&quot;, &quot;pentatonic&quot;…" oninput="runSearch(this.value)" aria-label="Search the whole site">
-    <div id="search-results" class="search-results"><div class="coach-tip">Loading the song list…</div></div>`;
+    <div id="search-results" class="search-results"><div class="coach-tip">Getting search ready…</div></div>`;
   const input = document.getElementById('search-input');
   if(input) input.focus();
   if(!searchIndex) searchIndex = await buildSearchIndex();

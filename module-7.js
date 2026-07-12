@@ -8,7 +8,7 @@ SETS.push(
 
   {
     id: 'm7w1',
-    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', note: 'the riff that started it all — now with barres' }],
+    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', note: 'the riff that started it all — now read it in full TAB with rhythm symbols' }],
     label: 'Set 1',
     locked: false,
     module: 'TAB Notation and Barre Chords',
@@ -110,7 +110,7 @@ SETS.push(
             title: 'Read rhythm in TAB',
             steps: [
           {
-            text: 'Challenge 2 — Alternate-picking workout: play this riff on the low E and A strings with strict alternate picking, one down-up per note. You\'ve got it when: clean and even at 60 BPM before you speed it up.',
+            text: 'Challenge 2 — Alternate-picking workout: play this riff on the low E and A strings with strict alternate picking — one stroke per note, alternating down-up. You\'ve got it when: clean and even at 60 BPM before you speed it up.',
             hint: 'Use alternate picking (down-up-down-up). The riff is fast — start at 60 BPM and only speed up when it\'s clean. Set the ⏱ Timer for 2 minutes and loop it.',
             stuck: 'Drop to 50 BPM and keep strict down-up-down-up picking — even and slow is better than fast and sloppy. Loop just the first 4 notes until they\'re automatic.',
             levelUp: 'Push to 80 BPM, or play it twice through with no stumble.',
@@ -463,9 +463,9 @@ SETS.push(
           },
           {
             text: 'Watch: <a href="https://youtu.be/MpMhueVEz2g" target="_blank">Basic Barre Chords (CH-006) – JustinGuitar</a> (0:00–4:00 — rewatch with A-shape focus).',
-            hint: 'B major is a great A-shape practice chord — it lives at the 2nd fret with the root on string 5. Listen for the muted high E (string 1) — that\'s normal for an A-shape barre.',
+            hint: 'B major is a great A-shape practice chord — it lives at the 2nd fret with the root on string 5. You may hear a muted high E (string 1) in some videos — many players let the ring finger mute it, and that\'s a real technique. In this module, though, we arch the fingers so string 1 rings.',
             skills: [3, 4],
-            response: { type: 'short', placeholder: 'When you play an A-shape barre, what should happen to string 1 (the high e)? Is it played or muted? Why?' }
+            response: { type: 'short', placeholder: 'In this module, should string 1 (the high e) ring or stay muted in your A-shape barre? What do you do with your fingers to make it ring?' }
           }
             ]
           },
@@ -588,7 +588,7 @@ SETS.push(
               },
               {
                 text: 'Challenge — Luna, full barre F: the little F (xx3211) graduates today. Index bars fret 1 across all six strings — the toughest fret on the neck to barre — and you play F ↔ Am with two downbeat strums per bar at 60 BPM. You\'ve got it when: four laps where all six strings of the F ring as clean as the Am — Luna\'s last beginner shortcut is gone. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: beyond Layer 5 — the barre upgrade</a>.',
-                hint: 'Roll the index onto its bony edge and pull back with the whole arm rather than squeezing with the thumb — fret 1 needs leverage, not force.',
+                hint: 'Roll the index onto its bony edge and add a gentle pull-back from the whole arm so the thumb doesn\'t do all the work — fret 1 needs that extra leverage on top of your thumb squeeze.',
                 stuck: 'Barre just the top two strings at fret 1 and add one string per day. The six-string F takes weeks, not one day — go slow.',
                 levelUp: 'Slide the same barre shape to fret 5 — that\'s A major, and suddenly you can play every major chord on the neck.'
               }

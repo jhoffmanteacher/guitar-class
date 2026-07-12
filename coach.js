@@ -71,8 +71,8 @@ function coachOpen(btn){
     slots = coachChordSlots(chords);
     const names = chords.map(c => c.n).join(' → ');
     desc = chords.length > 1
-      ? `${names} — strum on every click, 4 beats each chord, twice through`
-      : `${names} — one strum on every click`;
+      ? `${names} — strum on every beat, 4 beats each chord, twice through`
+      : `${names} — one strum on every beat`;
   } else {
     let midis;
     try { midis = JSON.parse(btn.dataset.midis || '[]'); } catch(e){ return; }
@@ -99,7 +99,7 @@ function coachOpen(btn){
       };
     });
     const preview = slots.slice(0, 10).map(s => s.label).join('–');
-    desc = `${slots.length} notes: ${preview}${slots.length > 10 ? '…' : ''} — one note per click`;
+    desc = `${slots.length} notes: ${preview}${slots.length > 10 ? '…' : ''} — one note per beat`;
   }
 
   /* BPM: start from the sibling ▶ Play slider when there is one (shared
@@ -233,7 +233,7 @@ function coachRenderReady(msg){
        <span class="coach-bpm-readout" id="coach-bpm-readout">${coach.bpm} BPM</span>
        <button type="button" class="tp-btn" onclick="coachNudgeBpm(5)">+5</button>
      </div>
-     <div class="coach-tip">&#x1F92B; Works best somewhere quiet, guitar close to the mic. You&rsquo;ll hear 4 count-in clicks, then play one ${noun} per click.</div>
+     <div class="coach-tip">&#x1F92B; Works best somewhere quiet, guitar close to the mic. You&rsquo;ll hear 4 count-in clicks, then the click goes silent while I listen — keep counting in your head and play one ${noun} per beat.</div>
      <button type="button" class="coach-start" onclick="coachStartCheck()">&#x25B6; Start the check</button>`;
 }
 
@@ -817,7 +817,7 @@ function coachScorePitch(){
 function coachScoreTiming(){
   const name = 'On the beat', icon = '&#x1F941;';
   const devs = coach.slots.filter(s => s.hit && s.hit.devMs != null).map(s => s.hit.devMs);
-  if (devs.length < 3) return { name, icon, level: 1, sentence: 'Not enough hits landed to judge the beat — try again and play one hit per click, even if it’s messy.' };
+  if (devs.length < 3) return { name, icon, level: 1, sentence: 'Not enough hits landed to judge the beat — try again and play one hit per beat, even if it’s messy.' };
   const onMs = Math.max(70, coach.beatMs * 0.12), closeMs = onMs * 2;
   const on = devs.filter(d => Math.abs(d) <= onMs).length;
   const close = devs.filter(d => Math.abs(d) <= closeMs).length;
@@ -825,14 +825,14 @@ function coachScoreTiming(){
   const lean = Math.abs(mean) < onMs * 0.6 ? '' : (mean < 0 ? 'early' : 'late');
   let level, sentence;
   if (on / devs.length >= 0.75){
-    level = 3; sentence = `Right on time — ${on} of ${devs.length} notes landed exactly on the click.`;
+    level = 3; sentence = `Right on time — ${on} of ${devs.length} notes landed exactly on the beat.`;
   } else if (close / devs.length >= 0.6){
     level = 2;
     sentence = lean
-      ? `You’re slightly ${lean} on average — listen to the click and play along with it; it’ll get steadier.`
-      : `Most notes were close to the click but scattered — count “1-2-3-4” out loud and it’ll get steadier.`;
+      ? `You’re slightly ${lean} on average — keep the count-in’s speed going in your head and it’ll get steadier.`
+      : `Most notes were close to the beat but scattered — count “1-2-3-4” out loud and it’ll get steadier.`;
   } else {
-    level = 1; sentence = 'The hits and the clicks weren’t lining up yet — drop the BPM, tap your foot, and make the foot and the pick move together.';
+    level = 1; sentence = 'The hits and the beat weren’t lining up yet — drop the BPM, tap your foot, and make the foot and the pick move together.';
   }
   return { name, icon, level, sentence };
 }
@@ -850,7 +850,7 @@ function coachScoreTempo(){
   const iois = [];
   for (let i = 1; i < ts.length; i++) iois.push(ts[i] - ts[i - 1]);
   const med = tunerMedian(iois);
-  if (!(med > 0)) return { name, icon, level: 2, sentence: 'I couldn’t get a clear tempo reading on that try — go again with one confident hit per click.' };
+  if (!(med > 0)) return { name, icon, level: 2, sentence: 'I couldn’t get a clear tempo reading on that try — go again with one confident hit per beat.' };
   const pos = [0];
   for (const d of iois) pos.push(pos[pos.length - 1] + Math.max(1, Math.round(d / med)));
   const pts = ts.map((t, i) => ({ x: pos[i], y: t }));
@@ -865,7 +865,7 @@ function coachScoreTempo(){
     return beat > 0 ? 60000 / beat : null;
   };
   const b1 = bpmOf(pts.slice(0, half)), b2 = bpmOf(pts.slice(-half)), bAll = bpmOf(pts);
-  if (!b1 || !b2 || !bAll) return { name, icon, level: 2, sentence: 'I couldn’t get a clear tempo reading on that try — go again with one confident hit per click.' };
+  if (!b1 || !b2 || !bAll) return { name, icon, level: 2, sentence: 'I couldn’t get a clear tempo reading on that try — go again with one confident hit per beat.' };
   const drift = Math.abs(b2 - b1) / coach.bpm;
   let level, sentence;
   if (drift <= 0.07){
@@ -1212,6 +1212,11 @@ function openGamesScreen(){
   const btn = document.getElementById('games-btn');
   if (btn) btn.setAttribute('aria-expanded', 'true');
   gamesShow('hub');
+  /* Keyboard/screen-reader users: focus follows into the dialog (the page
+     behind stays in the DOM; aria-modal on #games-screen tells AT to
+     ignore it). gamesClosePanel hands focus back to the Games button. */
+  const exit = screen.querySelector('.games-exit');
+  if (exit) exit.focus();
 }
 function closeGamesScreen(){
   if (location.hash === '#games'){ location.hash = ''; return; }  // hashchange finishes the job
@@ -1220,12 +1225,16 @@ function closeGamesScreen(){
 function gamesClosePanel(){
   gamesStopMic();
   const screen = document.getElementById('games-screen');
+  const wasOpen = screen && !screen.hasAttribute('hidden');
   if (screen) screen.setAttribute('hidden', '');
   document.body.classList.remove('games-open');
   const p = document.getElementById('games-panel');
   if (p) p.innerHTML = '';
   const btn = document.getElementById('games-btn');
-  if (btn) btn.setAttribute('aria-expanded', 'false');
+  if (btn){
+    btn.setAttribute('aria-expanded', 'false');
+    if (wasOpen) btn.focus();   // return focus to where the dialog was opened
+  }
 }
 window.addEventListener('hashchange', () => {
   if (location.hash === '#games') openGamesScreen();
@@ -1351,7 +1360,7 @@ function gamesRenderHub(p){
        <button type="button" class="games-card gc-roulette" onclick="gamesShow('roulette')">
          <span class="games-card-ico">&#x1F3B0;</span>
          <span class="games-card-title">Riff Roulette</span>
-         <span class="games-card-desc">Spin for a short real-guitar challenge from your module. Score yourself honestly — you are the judge.</span>
+         <span class="games-card-desc">Spin for a short real-guitar challenge matched to what you&rsquo;ve learned so far. Score yourself honestly — you are the judge.</span>
          ${rrChip}
        </button>
      </div>
@@ -2727,7 +2736,7 @@ function shRenderDone(){
        <div class="coach-overall">&#x1F3B8; ${escHtml(verdict)}</div>
        <div class="coach-strip">
          <span class="coach-chip ok">Perfect ${nPerfect}</span>
-         <span class="coach-chip wrong">Good ${nGood}</span>
+         <span class="coach-chip good">Good ${nGood}</span>
          <span class="coach-chip miss">Miss ${nMiss}</span>
          ${s.extras ? `<span class="coach-chip dim">Extra taps ${s.extras}</span>` : ''}
        </div>
@@ -2833,6 +2842,22 @@ const RR_CARDS = [
     bpm: 60, secs: 60, minModule: 8 },
   { text: 'Hold Em and let your thumb walk: string 6, string 4, string 6, string 4 — one pluck per click, steady like a heartbeat.',
     bpm: 60, secs: 45, minModule: 8 },
+  /* Module 9 — the full fretboard & writing TAB */
+  { text: 'Pick a dot fret — 3, 5, 7, or 9. Pluck that fret on all 6 strings, thickest to thinnest, saying each note’s name out loud as you go. Made the trip? Pick a new dot fret and go again.',
+    bpm: null, secs: 60, minModule: 9 },
+  { text: 'Play the first four notes of the Seven Nation Army riff, then say each one the way you’d write it in TAB — string, then fret (like “A string, fret 7”). Play it once more to check yourself.',
+    bpm: null, secs: 45, minModule: 9 },
+  /* Module 10 — scales */
+  { text: 'Build a major scale up the low E string starting at fret 3 (that’s G) with the recipe W-W-H-W-W-W-H — a whole step (W) is 2 frets, a half step (H) is 1. One note per click.',
+    bpm: 60, secs: 60, minModule: 10 },
+  { text: 'Play minor pentatonic box 1 at fret 5, up and back, one note per click. Then say the key (A minor) and its relative major — the major key that shares its notes, 3 frets up (C).',
+    bpm: 60, secs: 60, minModule: 10 },
+  /* Module 11 — chord families */
+  { text: 'Say the chord family of C major out loud — C, Dm, Em, F, G, Am — then strum the I, IV, and V (C, F, G) once each. A chord family = the main chords built from a key’s own notes.',
+    bpm: null, secs: 45, minModule: 11 },
+  /* Module 12 — fingerstyle */
+  { text: 'Fret a C chord and let your thumb walk: alternate between the A string and the D string, one bass note per click, without stopping. That steady thumb is the engine of Travis picking.',
+    bpm: 60, secs: 45, minModule: 12 },
   /* Wildcards — any module */
   { text: 'Play anything you have learned, without stopping, until the timer ends. Mess up? Keep going anyway.',
     bpm: null, secs: 60, minModule: 1, double: true },

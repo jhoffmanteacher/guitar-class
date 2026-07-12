@@ -357,7 +357,7 @@ SETS.push(
             skills: [6]
           },
           {
-            text: 'Challenge 3 — Riff Time (try it!): play the "Seven Nation Army" riff on the low E string — slow and clean. You\'ve got it when: all 7 notes in the right order, each ringing clean — speed comes later. No score on this one, just go for it. Click any note name below the TAB to hear how it should sound.',
+            text: 'Challenge 3 — Riff Time (try it!): play the "Seven Nation Army" riff on the low E string — slow and clean. You\'ve got it when: all 7 notes in the right order, each ringing clean — speed comes later. No score on this one, just try it. Click any note name below the TAB to hear how it should sound.',
             hint: 'Slow and clean is better than fast and buzzy. One note at a time. Set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',
             stuck: 'Break the 7 notes into two chunks and learn the first chunk cold. Click each note name to hear its pitch, then find it before you play on.',
             levelUp: 'Play all 7 notes in time with a slow metronome at 60 BPM, keeping each one clean.',

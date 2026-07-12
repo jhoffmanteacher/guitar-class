@@ -215,7 +215,7 @@ SETS.push(
     unit: 'Module 6 · Strumming Patterns with Chords',
     title: 'Set 2',
     subtitle: 'The "D-DU-UDU" pattern · Rests and accents · Adding groove (the steady rhythmic feel)',
-    objective: 'I CAN play the classic D-DU-UDU strum pattern at 70+ BPM and apply it to a real song with chord changes.',
+    objective: 'I CAN play the classic D-DU-UDU strum pattern at 60 BPM — pushing toward 70+ — and apply it to a real song with chord changes.',
     skillFocus: 'Playing the D-DU-UDU strum pattern · Adding accents and rests · Reading strum-pattern notation',
     comingSoon: false,
 
@@ -387,7 +387,7 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Plays the D-DU-UDU pattern cleanly at 70 BPM · Accents beats 2 and 4 (backbeat) · Keeps pattern steady through a chord change · Applies pattern to a real song',
+      goal: 'Plays the D-DU-UDU pattern cleanly at 60 BPM (70+ is the push goal) · Accents beats 2 and 4 (backbeat) · Keeps pattern steady through a chord change · Applies pattern to a real song',
       performance: 'Strum D-DU-UDU on Em for 4 bars, then switch to Am for 4 more without the pattern breaking at the change. With someone around, trade fours instead: one plays Em, the other takes over on Am, and the pattern must not break at the handoff.',
       selfCheck: 'Can you play D-DU-UDU without thinking about which strum is next? Can you keep the pattern going through a G-to-D change?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']

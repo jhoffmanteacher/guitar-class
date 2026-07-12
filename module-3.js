@@ -184,7 +184,7 @@ SETS.push(
             text: 'Challenge 6 — Watchtower Loop (your assessment piece): play A5–G5–F5–G5, one bar (4 beats) per chord, one strum per beat at 60 BPM. You\'ve got it when: four times through, changing on beat 1 every time, with no stops. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
             hint: 'A5 = 5th fret E string, G5 = 3rd fret E string, F5 = 1st fret E string. Shift smoothly — aim to land exactly on beat 1. (The original song uses an Am chord, but as a power chord it\'s just A5 — no major or minor.) This is your Set 1 check-off loop — record a lap and listen back.',
             stuck: 'Loop just A5–G5 (frets 5 and 3) until that change is clean, then add F5.',
-            levelUp: 'Play it with an eighth-note strum (down-down-up-down-up), or push past 70 BPM.',
+            levelUp: 'Play it with an eighth-note strum (down on each number, up on each "+": "1 + 2 + 3 + 4 +"), or push past 70 BPM.',
             skills: [2, 5, 6],
             chords: [
               { name: 'A5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 },
@@ -261,7 +261,7 @@ SETS.push(
     skills: [
       { id: 'm3w1-s1', text: 'Fret a clean 2-finger power chord (root + 5th) with no buzzing',
         gotItWhen: 'both notes ring clearly when you strum, with no buzz and no muffled strings — and it sounds the same every time you play it.',
-        practice: { type: 'mc', prompt: 'A power chord is built from which two scale degrees?',
+        practice: { type: 'mc', prompt: 'A power chord is built from which two scale degrees (a scale degree = a note\'s number in the scale, counting up from the root)?',
           choices: ['Root + 3rd', 'Root + 5th', 'Root + 7th', 'Root + octave'], answer: 1 } },
       { id: 'm3w1-s2', text: 'Move the power chord shape along the E string (E5, G5, A5, B5)',
         gotItWhen: 'you can move the same shape to any of those positions on call and name the chord without counting frets.',
@@ -362,7 +362,7 @@ SETS.push(
             steps: [
           {
             text: 'Challenge — Clap & Count: before you play, read this 4-bar rhythm line. Bar 1 = one whole note (clap once, hold all 4 beats). Bar 2 = two half notes (clap on beats 1 and 3, each held 2 beats). Bar 3 = four quarter notes (one clap per beat: 1, 2, 3, 4). Bar 4 = eight straight eighths (two claps per beat: "1 + 2 + 3 + 4 +"). Clap and count all 4 bars out loud. You\'ve got it when: you can clap all 4 bars in time with the metronome at 70 BPM and name which notes are whole, half, quarter, and eighth.',
-            hint: 'Whole note = one clap held for a full bar. Half note = one clap held for two beats. Eighth notes = two even claps per beat. The straight-eighths strum you play (down-down-up-down-up) is just eighth notes — same rhythm, on the guitar.',
+            hint: 'Whole note = one clap held for a full bar. Half note = one clap held for two beats. Eighth notes = two even claps per beat. The straight-eighths strum you play (down on each number, up on each "+") is just eighth notes — same rhythm, on the guitar.',
             stuck: 'Clap quarter notes on every beat first (1 2 3 4), then split one beat into eighths ("1 +") and feel the difference.',
             levelUp: 'Clap one bar of eighths, one bar of quarters, alternating, without losing the count.',
             skills: [6]
@@ -385,7 +385,7 @@ SETS.push(
             ]
           },
           {
-            text: 'Challenge 2 — Eighth-Note Strum (one of your assessment pieces): play the A5–D5–E5 loop (two bars each) with straight eighths (down-down-up-down-up), counting "1 + 2 + 3 + 4 +". You\'ve got it when: eight bars clean and steady at 60, then speed up in steps (65 → 70 → 75) and hold 80 BPM for at least 15 seconds — that\'s the module bar.',
+            text: 'Challenge 2 — Eighth-Note Strum (one of your assessment pieces): play the A5–D5–E5 loop (two bars each) with straight eighths (down on each number, up on each "+"), counting "1 + 2 + 3 + 4 +". You\'ve got it when: eight bars clean and steady at 60, then speed up in steps (65 → 70 → 75) and hold 80 BPM for at least 15 seconds — that\'s the module bar.',
             hint: 'Start at 60 BPM. If it feels easy, bump up 5 BPM. The module-end self-check is an 8-bar progression changing on beat 1 at 60, then holding 80 BPM for 15 seconds with clean muting — this is that piece.',
             stuck: 'Strum down-only on each beat first ("1 2 3 4"), then add the up-strums one at a time.',
             levelUp: 'Hold it clean at 80 BPM, or play it straight through a full song excerpt from the songs list.',
@@ -529,18 +529,18 @@ SETS.push(
         practice: { type: 'playSeq', label: 'Watchtower roots (A · G · F · G)', bpm: 70,
           notes: [45, 43, 41, 43] } },
       { id: 'm3w2-s3', text: 'Play a straight-eighths strumming pattern with power chords',
-        gotItWhen: 'you can play down-down-up-down-up across a bar and count "1 + 2 + 3 + 4 +" aloud without losing the strum.' },
+        gotItWhen: 'you can strum down on each number and up on each "+" across a bar and count "1 + 2 + 3 + 4 +" aloud without losing the strum.' },
       { id: 'm3w2-s4', text: 'Apply power chords on both E and A string roots in the same song',
         gotItWhen: 'you can switch between an E-root and an A-root power chord mid-song without your palm mute breaking or the wrong strings ringing.',
         practice: { type: 'mc', prompt: 'A song calls for G5 then C5. Where does your index finger go for each?',
           choices: ['Both on E string', 'Both on A string', 'G5 on E (fret 3), C5 on A (fret 3)', 'G5 on A, C5 on E'], answer: 2 } },
       { id: 'm3w2-s5', text: 'Optional: add 3rd finger octave doubling to the power chord shape',
         gotItWhen: 'your pinky lands on the next string at the same fret as your ring finger and all three notes ring cleanly — no buzz, no muffled string.',
-        practice: { type: 'mc', prompt: 'You add your pinky on the next string, at the same fret as your ring finger. What interval did you just add to the chord?',
+        practice: { type: 'mc', prompt: 'You add your pinky on the next string, at the same fret as your ring finger. What interval (an interval = the distance between two notes) did you just add to the chord?',
           choices: ['A 3rd', 'A 5th', 'An octave (same note, higher)', 'A 7th'], answer: 2 } },
       { id: 'm3w2-s6', text: 'Clap and count a 4-bar rhythm, and name whole, half, quarter, and eighth notes',
         gotItWhen: 'you can clap a 4-bar line in time with the metronome and say which notes are whole, half, quarter, or eighth — and name your strum as "straight eighths".',
-        practice: { type: 'mc', prompt: 'A straight-eighths strum (down-down-up-down-up, counted "1 + 2 +") is made of which note value?',
+        practice: { type: 'mc', prompt: 'A straight-eighths strum — down on each number, up on each "+", counted "1 + 2 + 3 + 4 +" — is made of which note value?',
           choices: ['Whole notes', 'Quarter notes', 'Eighth notes', 'Half notes'], answer: 2 } }
     ]
   }

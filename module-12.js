@@ -226,8 +226,8 @@ SETS.push(
       { id: 'm12w1-s3', text: 'Add i-m finger fills while the thumb keeps alternating' },
       { id: 'm12w1-s4', text: 'Play a Travis-feel pattern over C at 60 BPM for 8 bars' },
       { id: 'm12w1-s5', text: 'Keep the alternating pattern unbroken through an Am–C change' },
-      { id: 'm12w1-s6', text: 'Play a bass-note + pinch verse of House of the Rising Sun',
-        gotItWhen: 'the verse survives every chord change with the thumb never stopping.' }
+      { id: 'm12w1-s6', text: 'Play a bass-note + roll verse of House of the Rising Sun (thumb bass, then fingers rolling up through the chord)',
+        gotItWhen: 'the verse survives every chord change with the roll staying smooth and the thumb never stopping.' }
     ]
   },
 
@@ -580,7 +580,7 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm12w3-s1', text: 'Play Luna\'s fingerpicked intro (Journey Layer 6) with p-i-m rolls' },
+      { id: 'm12w3-s1', text: 'Play Luna\'s fingerpicked intro (Journey Layer 6) with p-i-m-a rolls' },
       { id: 'm12w3-s2', text: 'Play Tu Boda\'s requinto intro line fingerstyle' },
       { id: 'm12w3-s3', text: 'Explain the requinto\'s role in sierreño / corridos tumbados (a modern Mexican regional style)',
         practice: { type: 'mc', prompt: 'The requinto\'s job in the group is:',

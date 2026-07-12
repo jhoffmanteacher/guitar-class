@@ -134,7 +134,7 @@ SETS.push(
             steps: [
           {
             text: 'Challenge 2 — Move the Box (a box = the block of frets where a scale pattern sits): play Pattern 1 as A minor pentatonic (1st finger, 5th fret, string 6) up and down using the TAB map, then shift it to E minor pentatonic (open-string root). You\'ve got it when: both positions clean — same shape, two spots on the neck.',
-            hint: 'A minor: your hand sits around frets 5–8. E minor: your hand starts at the open string and you\'ll use frets 3 and 5 instead of 1st finger.',
+            hint: 'A minor: your hand sits around frets 5–8. E minor: the open strings do your 1st finger\'s job, and your other fingers play frets 2 and 3.',
             stuck: 'Stay on A minor only until the shape is automatic, then slide the whole hand down to find E minor — it\'s the exact same finger pattern, just moved.',
             levelUp: 'Position it a third place — G minor (3rd fret root) — or call out the root note name before you start each box.',
             skills: [3, 4],
@@ -420,7 +420,7 @@ SETS.push(
           {
             text: 'Challenge 3 — D String Map: play the natural notes on the D string — D · E · F · G · A · B · C (frets 0–10) — slowly, saying each name aloud. You\'ve got it when: a clean lap up and back, without looking at the chart. Click "Play all" to hear it at 60 BPM.',
             hint: 'Same musical alphabet pattern you know from E and A strings. Find the pattern — it repeats! Set the ⏱ Timer for 2 minutes and see how many laps you get without looking at the chart.',
-            stuck: 'Cover the chart and name just the dots first (frets 0, 2, 3, 5, 7) — find E–F and B–C, the two one-fret jumps, and the rest falls into place.',
+            stuck: 'Cover the chart and name just the first five notes (frets 0, 2, 3, 5, 7 — D, E, F, G, A) — find E–F and B–C, the two one-fret jumps, and the rest falls into place.',
             levelUp: 'Point to a random fret 0–10 without counting up and name the note in under 3 seconds, or run the string top-to-bottom (C back down to D).',
             skills: [7],
             playSeq: { label: 'Play all', bpm: 60, notes: [50, 52, 53, 55, 57, 59, 60] },
@@ -496,7 +496,7 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm4w2-s1', text: 'Vary dynamics consciously: play the same note at p, mf, and f',
+      { id: 'm4w2-s1', text: 'Vary dynamics consciously: play the same note at p, mf, and f (the letters musicians use for volume: p = piano, quiet · mf = mezzo-forte, medium · f = forte, loud)',
         gotItWhen: 'you play the same note three times in a row and can clearly hear on a recording that you got louder each time.',
         practice: { type: 'mc', prompt: 'Which order goes from QUIETEST to LOUDEST?',
           choices: ['p, mf, f', 'f, mf, p', 'mf, p, f', 'mf, f, p'], answer: 0 } },
@@ -567,7 +567,7 @@ SETS.push(
             steps: [
           {
             text: 'Theory check: the blues scale adds one note to the minor pentatonic — the ♭5 (flat 5). In A minor, that\'s the note Eb. Click "Hear the A blues scale" below and listen for the extra note that wasn\'t in the plain minor pentatonic — that\'s the blue note.',
-            hint: 'In Pattern 1 for A minor, the ♭5 sits between the 4 and 5 on the D string. It\'s a "passing tone" — it creates tension that wants to resolve.',
+            hint: 'In Pattern 1 for A minor, the ♭5 sits between the 4 and 5 on the A string — fret 6, right between the 4 at fret 5 and the 5 at fret 7. It\'s a "passing tone" — it creates tension that wants to resolve.',
             skills: [4, 5],
             playSeq: { label: 'Hear the A blues scale (listen for the blue note)', bpm: 70, notes: [45, 48, 50, 51, 52, 55, 57] },
             response: { type: 'mc', prompt: 'What is the "blue note" added to the minor pentatonic to make a blues scale?',

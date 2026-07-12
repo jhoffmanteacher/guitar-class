@@ -5,6 +5,40 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-12 — Site-wide accuracy pass: 30+ fixes from a full audit
+
+### Changed
+- **Three teaching errors corrected.** Module 4 now points you to the right
+  string for the blues note (the A string, fret 6 — not the D string) and
+  the right frets for the open-position E-minor pentatonic shape (frets 2
+  and 3). Module 5 now says E major uses three fingers (B7 is the
+  four-finger chord).
+- **"Straight eighths" is now described correctly everywhere in Module 3**
+  — down on each number, up on each "+" — instead of a five-stroke pattern
+  that couldn't fit the count. The quiz was re-keyed to match.
+- **Module 8's "the cure" now matches the song everywhere else teaches:**
+  the verse loop is Am · C · Dm · F with a capo on fret 1 to match the
+  recording (the old text skipped Dm and never mentioned the capo).
+- **Module 7's A-shape barre no longer argues with itself.** The lesson
+  now explains that muting the high E is a real technique you'll see in
+  videos, but this module teaches the arched version where it rings — the
+  same standard the set's own checks use.
+- **The mic checks now tell you the click goes silent while they listen**
+  (it always did — the tips just never said so), and the timing feedback
+  talks about "the beat" instead of a click you can't hear.
+- **Quizzes only test what was taught:** volume letters (p, mf, f), scale
+  degrees, intervals, and "diatonic" now get plain-English definitions
+  before they're used.
+- **Riff Roulette now has challenge cards for Modules 9–12**, so students
+  in the later modules get spins that match what they're learning.
+- Smaller fixes: the module-review unlock message now says "every set"
+  (some modules have three or four, not two); a Strum Hero "Good" score
+  no longer wears the same amber color as a wrong answer; dozens of small
+  wording, spelling, and alignment corrections across modules and song
+  pages; better keyboard and screen-reader support in the Games arcade;
+  the tuner and the review recorder now always release the microphone
+  when you move on.
+
 ## 2026-07-11 — Fret Zap: name the note on the fretboard
 
 ### Added

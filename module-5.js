@@ -252,7 +252,7 @@ SETS.push(
             steps: [
           {
             text: 'Listen to "Let It Be" by The Beatles. Can you hear the C–G–Am–F chord pattern in the verse? Count the bars — how many strums per chord? <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5 — Open Chords</a>.',
-            hint: 'You don\'t need to play along yet. Just listen and map out when the chords change. This trains your ear to recognize the I–V–vi–IV progression.',
+            hint: 'You don\'t need to play along yet. Just listen and map out when the chords change. This trains your ear to recognize the I–V–vi–IV progression (a lowercase numeral like vi means that chord is minor).',
             skills: [5],
             response: { type: 'short', placeholder: 'About how many strums (or beats) does each chord get before it changes?' }
           },
@@ -600,7 +600,7 @@ SETS.push(
             title: 'The waltz strum (3/4 time) — count in 3',
             steps: [
               {
-                text: 'Challenge — Waltz Strum: not every song is in 4. A waltz counts in THREE — "ONE-two-three, ONE-two-three." Play a firm downstrum on beat 1 (strum harder into the low strings so the bass rings), then lighter downs on beats 2 and 3 (D · D · D). Comfortable? Sneak an up after beat 3: D · D · D-U. Beat 1 is the strongest: it should clearly stand out from the other two. This "in-3" feel is what drives waltz-time songs like the House of the Rising Sun groove. Use Em so the low strings ring full. You\'ve got it when: you keep it steady for 8 bars and beat 1 is unmistakably the strongest pulse in every bar.',
+                text: 'Challenge — Waltz Strum: not every song is in 4. A waltz counts in THREE — "ONE-two-three, ONE-two-three." Play a firm downstrum on beat 1 (strum harder into the low strings so the bass rings), then lighter downs on beats 2 and 3 (D · D · D). Comfortable? Sneak an up after beat 3: D · D · D-U. Beat 1 is the strongest: it should clearly stand out from the other two. This "in-3" feel is the same strong-ONE pulse you hear driving songs like "The House of the Rising Sun." Use Em so the low strings ring full. You\'ve got it when: you keep it steady for 8 bars and beat 1 is unmistakably the strongest pulse in every bar.',
                 hint: 'Say "ONE-two-three" out loud with the ONE loudest. Let the pick fall a little heavier and more toward the bass strings on beat 1, then lift to lighter strums for 2 and 3. Three beats per bar, then straight back to a strong ONE — no beat 4 to wait for.',
                 stuck: 'Drop the strum entirely and just tap: one loud tap on 1, two soft taps on 2 and 3, over and over. Once that "ONE-two-three" pulse is in your foot, add the strums back on top of it.',
                 levelUp: 'Change chords every bar on beat 1 — one bar of Em, then Am, then G — keeping the strong-beat-1 waltz pulse unbroken through each change.',
@@ -633,7 +633,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'In the open A major chord, all three fretting fingers go on which fret?',
           choices: ['1st fret', '2nd fret', '3rd fret', 'Different frets each'], answer: 1 } },
       { id: 'm5w3-s3', text: 'Fret Bm with partial barre shape (xx4432)',
-        gotItWhen: 'you can play the partial-barre Bm and all four notes ring — no buzz from the index finger barre across strings 1 and 2.',
+        gotItWhen: 'you can play the small four-finger Bm (xx4432) and all four notes ring — each finger arched so strings 1–4 are buzz-free.',
         practice: { type: 'mc', prompt: 'The Bm chord is written "xx4432". What do the two "x"s at the start mean?',
           choices: ['Strum extra hard', 'Mute strings 6 and 5 — don\'t play them', 'Use 2 fingers on string 1', 'Cross your fingers'], answer: 1 } },
       { id: 'm5w3-s4', text: 'Switch D to A in time at 70 BPM',
@@ -671,7 +671,7 @@ SETS.push(
             steps: [
           {
             text: 'Watch: <a href="https://youtu.be/8H393ryDkuY" target="_blank">The E Chord (BC-113) – JustinGuitar</a> (0:00–4:00).',
-            hint: 'E major uses all four fingers — it\'s a full, rich chord. Play it as he shows and take it slow, checking every string rings. The two diagrams below are F#m and C#m: Group 3 barre shapes you only need to RECOGNIZE on a chart for now, not play cleanly yet.',
+            hint: 'E major uses three fingers — it\'s a full, rich chord. (B7, later in this set, is the one that uses all four.) Play it as he shows and take it slow, checking every string rings. The two diagrams below are F#m and C#m: Group 3 barre shapes you only need to RECOGNIZE on a chart for now, not play cleanly yet.',
             skills: [1, 2],
             chords: [
               { name: 'F#m', chord: [[6,'x'],[5,'x'],[4,4,'3'],[3,2,'1'],[2,2,'1'],[1,2,'1']], position: 2 },

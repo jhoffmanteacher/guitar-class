@@ -89,7 +89,7 @@ function renderTeacherGrid(){
   const checkSvg=`<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const workSvg=`<svg width="9" height="9" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.8"/></svg>`;
   const minusSvg=`<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
-  const headerCells=w.skills.map(s=>`<th title="${s.text}">${abbreviate(s.text)}</th>`).join('');
+  const headerCells=w.skills.map(s=>`<th title="${escAttr(s.text)}">${abbreviate(s.text)}</th>`).join('');
   const rows=sorted.map(stu=>{
     const done=w.skills.filter(s=>stu.skills[s.id]==='gotit').length;
     const total=w.skills.length;

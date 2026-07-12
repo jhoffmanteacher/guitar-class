@@ -16,7 +16,7 @@ SETS.push(
     title: 'Set 1',
     subtitle: 'Stack every other note · I ii iii IV V vi · The chord family of a key',
     objective: 'I CAN build triads from a scale and label a progression with Roman numerals.',
-    skillFocus: 'Triad = root + 3rd + 5th · UPPERCASE major (I IV V), lowercase minor (ii iii vi) · The diatonic family',
+    skillFocus: 'Triad = root + 3rd + 5th · UPPERCASE major (I IV V), lowercase minor (ii iii vi) · The diatonic family (chords built only from the key\'s own seven notes)',
     comingSoon: false,
 
     stations: {

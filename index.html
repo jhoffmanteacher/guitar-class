@@ -125,7 +125,7 @@ function googleTranslateElementInit(){
       <div class="module-select-wrap">
         <label class="module-select-label" for="module-select">Module</label>
         <select class="module-select" id="module-select" onchange="onModuleChange(this.value); saveProgress()"></select>
-        <button type="button" class="daily5-btn" id="games-btn" onclick="toggleGames()" aria-expanded="false" aria-controls="games-panel">&#x1F3AE; Games</button>
+        <button type="button" class="daily5-btn" id="games-btn" onclick="toggleGames()" aria-expanded="false" aria-controls="games-screen">&#x1F3AE; Games</button>
         <button type="button" class="daily5-btn" id="songs-hub-btn" onclick="toggleSongsHub()" aria-expanded="false" aria-controls="songs-hub-panel">&#x266A; Songs</button>
         <button type="button" class="daily5-btn" id="search-btn" onclick="toggleSearch()" aria-expanded="false" aria-controls="search-panel">&#x1F50D; Find</button>
         <div class="module-strip" id="module-strip" role="group" aria-label="Module progress — jump to a module"></div>
@@ -133,7 +133,7 @@ function googleTranslateElementInit(){
       </div>
       <!-- Guitar Games: a full-screen arcade "page" (own #games URL hash,
            browser Back exits). Lives inside #app so it can't show pre-auth. -->
-      <div class="games-screen" id="games-screen" hidden>
+      <div class="games-screen" id="games-screen" role="dialog" aria-modal="true" aria-label="Guitar games" hidden>
         <div class="games-shell">
           <div class="games-topbar">
             <button type="button" class="games-exit" onclick="closeGamesScreen()">&larr; Back to practice</button>
@@ -279,7 +279,7 @@ function googleTranslateElementInit(){
 <div id="teacher-denied" style="display:none">
   <div class="t-denied">
     <h2>Access denied</h2>
-    <p>The teacher dashboard is only available to authorised accounts. Please sign in with your school Google account.</p>
+    <p>The teacher dashboard is only available to authorized accounts. Please sign in with your school Google account.</p>
   </div>
 </div>
 <script defer src="app.js"></script>

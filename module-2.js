@@ -143,7 +143,7 @@ SETS.push(
                   choices: ['A', 'C', 'D', 'B'] }
               },
               {
-                text: 'Name That Riff (try it!): pick out the "Seven Nation Army" or "Smoke on the Water" main riff (a riff = a short musical phrase that repeats) by ear on the low E string. No score — just go for it.',
+                text: 'Name That Riff (try it!): pick out the "Seven Nation Army" or "Smoke on the Water" main riff (a riff = a short musical phrase that repeats) by ear on the low E string. No score — just try it.',
                 hint: 'Use the note-name chart. Don\'t worry about getting it perfect — the attempt trains your ear.',
                 skills: [5]
               }
@@ -630,7 +630,7 @@ SETS.push(
                     { string: 'E', fret: 3, note: 'G', midi: 43 }
                   ]
                 },
-                response: { type: 'short', prompt: 'Which string crossing tripped you up — D down to F, or F up to G?', placeholder: 'e.g. D to F — big jump' }
+                response: { type: 'short', prompt: 'Which move was harder — crossing strings from D down to F, or walking up the same string from F to G?', placeholder: 'e.g. D to F — big jump' }
               },
               {
                 text: 'Challenge — Luna, bass roots: Luna rides two chords — F and Am — so its bassline is two notes. Play F (low E string, fret 1) and A (open A string) as single notes, two big beats each: the song is in 6/8, so feel the pulse in 2 and land each note on a downbeat. You\'ve got it when: four laps of F → A, both notes clean with no buzz, locked to the downbeats at 60 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',

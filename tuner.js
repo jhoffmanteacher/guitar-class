@@ -13,7 +13,7 @@
 const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const STRING_TARGETS = { 'E2': 82.41, 'A2': 110.00, 'D3': 146.83, 'G3': 196.00, 'B3': 246.94, 'E4': 329.63 };
 let tunerRunning = false, tunerStream = null, tunerCtx = null,
-    tunerAnalyser = null, tunerFreqAnalyser = null, tunerRaf = null,
+    tunerAnalyser = null, tunerFreqAnalyser = null, tunerRaf = null, tunerLoopTimeout = null,
     tunerHP = null, tunerLP = null,
     tunerLastNote = null, tunerStableCount = 0, tunerSmoothedFreq = 0,
     tunerTargetString = 'auto',
@@ -296,7 +296,9 @@ function tunerLoop() {
       statusEl.textContent = ''; statusEl.className = 'tuner-status';
     }
   }
-  setTimeout(() => { tunerRaf = requestAnimationFrame(tunerLoop); }, 60);
+  /* Tracked so stopTuner can cancel it — an uncancelled timeout surviving a
+     fast close-reopen would start a second loop alongside the new one. */
+  tunerLoopTimeout = setTimeout(() => { tunerRaf = requestAnimationFrame(tunerLoop); }, 60);
 }
 
 async function startTuner() {
@@ -342,6 +344,7 @@ async function startTuner() {
 
 function stopTuner() {
   tunerRunning = false;
+  if (tunerLoopTimeout){ clearTimeout(tunerLoopTimeout); tunerLoopTimeout = null; }
   if (tunerRaf)    cancelAnimationFrame(tunerRaf);
   if (tunerStream) tunerStream.getTracks().forEach(t => t.stop());
   if (tunerCtx)    tunerCtx.close();

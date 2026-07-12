@@ -155,7 +155,7 @@ SETS.push(
                 text: 'Challenge — "the cure", first touch: fret Am and pluck p (A string) · i · m · a, one note per beat at 60 BPM — that soft broken-chord sound IS the verse feel of "the cure". Then change to C: your thumb stays on the same bass STRING — C\'s root lives on the A string too, just at the 3rd fret, where your ring finger now supplies the new bass note. You\'ve got it when: four clean p-i-m-a laps on Am and four on C, every note even.',
                 hint: 'Olivia\'s verse is fingerpicked for exactly this reason — soft and close. Wrist stays arched; only the fingers move.',
                 stuck: 'Run p-i-m-a on open strings first (no chord at all), then add the Am under it.',
-                levelUp: 'Add the F: the thumb travels to the D string — and now you have the song\'s whole verse loop (Am · C · F).',
+                levelUp: 'Add Dm and F: the thumb travels to the D string for both — and now you have the song\'s whole verse loop (Am · C · Dm · F). A capo on fret 1 puts you in tune with the record; without one, the practice still works.',
                 skills: [5, 6],
                 playSeq: { label: '"the cure" feel — p-i-m-a on Am', bpm: 60, notes: [45, 57, 60, 64] },
                 chords: [
@@ -360,13 +360,13 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — "the cure", verse: play the 6-note p-i-m-a-m-i pattern over the verse loop — Am · C · F, one bar each at 60 BPM. Thumb: A string for Am and C, D string for F; i-m-a never leave G-B-e. You\'ve got it when: one full lap with the pattern unbroken at both changes.',
-                hint: 'Two of the three bass notes live on the SAME string — only the F asks the thumb to travel. The fingers never move at all.',
-                stuck: 'Loop Am → C until your fretting hand lands on fret 3 without looking — the thumb just keeps plucking the A string — then add the F.',
+                text: 'Challenge — "the cure", verse: play the 6-note p-i-m-a-m-i pattern over the verse loop — Am · C · Dm · F, one bar each at 60 BPM, with a capo on fret 1 to match the recording (no capo? The practice still works — the capo just puts you in tune with the record). Thumb: A string for Am and C, D string for Dm and F; i-m-a never leave G-B-e. You\'ve got it when: one full lap with the pattern unbroken at every change.',
+                hint: 'The four bass notes pair up: Am and C both live on the A string, Dm and F both live on the D string — the thumb travels only once, at C→Dm, then stays. The fingers never move at all.',
+                stuck: 'Loop Am → C until your fretting hand lands on fret 3 without looking — the thumb just keeps plucking the A string — then add Dm and F as their own pair.',
                 levelUp: 'Hum the melody over your own picking — this is the actual sound of the record.',
                 skills: [4, 6],
-                playSeq: { label: '"the cure" verse bass roots — Am · C · F', bpm: 60, notes: [45, 48, 53] },
-                response: { type: 'short', prompt: 'Which change broke the pattern more — Am→C or C→F?', placeholder: 'e.g. C→F — the thumb overshoots the D string' }
+                playSeq: { label: '"the cure" verse bass roots — Am · C · Dm · F', bpm: 60, notes: [45, 48, 50, 53] },
+                response: { type: 'short', prompt: 'Which change broke the pattern more — Am→C or C→Dm?', placeholder: 'e.g. C→Dm — the thumb overshoots the D string' }
               }
             ]
           },
@@ -632,7 +632,7 @@ SETS.push(
 
 globalThis.MODULE_SONGS = globalThis.MODULE_SONGS || {};
 MODULE_SONGS[8] = [
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Fingerpick the verse for a soft feel · Am–C–F', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Fingerpick the verse for a soft feel · Am–C–Dm–F', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Let It Be" — The Beatles', meta: 'Fingerpick the verse · C–G–Am–F', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',

@@ -536,6 +536,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .pp-hi{background:var(--green-bg);color:var(--green-text)}
 .pp-mid{background:var(--amber-bg);color:var(--amber-text)}
 .pp-lo{background:#fde8e8;color:#a32d2d}
+@media (prefers-color-scheme: dark){ .pp-lo{background:#452023;color:#e09a9a} }
 .t-legend{display:flex;gap:14px;margin-top:10px;font-size:0.8125rem;color:var(--text2);align-items:center;flex-wrap:wrap}
 .t-leg{display:flex;align-items:center;gap:5px}
 .t-loading{text-align:center;padding:48px 20px;color:var(--text2);font-size:1rem}
@@ -777,6 +778,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .coach-chip.now{border-color:var(--green-text);box-shadow:0 0 0 2px var(--green-bg)}
 .coach-chip.ok,.coach-chip.oct{background:var(--green-bg);color:var(--green-text);border-color:var(--green-text)}
 .coach-chip.wrong{background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-text)}
+/* Second-tier POSITIVE grade (Strum Hero "Good") — blue, so it can't be
+   read as the amber "wrong/messy" students know from the Coach report. */
+.coach-chip.good{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-text)}
 .coach-chip.dim{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-text)}
 .coach-chip.miss{opacity:0.45}
 .coach-stop{flex:0 0 auto;padding:6px 14px;margin-top:4px}

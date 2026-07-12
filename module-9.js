@@ -281,7 +281,7 @@ SETS.push(
               },
               {
                 text: 'Challenge 2 — G-String Naturals: same drill on the G string, low to high, 0 through 12.',
-                hint: 'The natural half step sits in a different spot: on D it\'s E–F (F at fret 3), on G it\'s B–C (B at fret 4, C at fret 5) — notice the shift.',
+                hint: 'Each string has TWO natural half steps (notes one fret apart) between frets 0 and 12. The first one you meet going up: on D it\'s E–F (F at fret 3), on G it\'s B–C (B at fret 4, C at fret 5). The other pair sits at frets 9–10 on both strings — B–C on the D string, E–F on the G string.',
                 stuck: 'Cover frets 0–5 (G–C) first, then add 5–12.',
                 levelUp: 'Time yourself — name a random fret correctly three times in a row, then try to beat your time. Got someone around? Race them instead.',
                 skills: [2],
@@ -772,7 +772,7 @@ MODULE_SONGS[9] = [
       { name: '"Just Like Heaven" — The Cure', meta: 'Arpeggiated riff — read it up the neck', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=n3nPiBai66M',
         tutorialUrl: 'https://www.youtube.com/watch?v=fEgsKS_IcQA' },
-      { name: '"Smoke on the Water" — Deep Purple', meta: 'Write its riff as TAB — level 2', type: 'Choice', core: false, level: 1,
+      { name: '"Smoke on the Water" — Deep Purple', meta: 'Write its riff as TAB — the classic starter riff', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=Q2FzZSBD5LE',
         tutorialUrl: 'https://www.youtube.com/watch?v=QkT5yLP5VQA' }
     ];
