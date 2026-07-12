@@ -1421,7 +1421,7 @@ function renderPills(moduleNum){
     } else {
       btn.textContent = w.label;
     }
-    if(!w.locked) btn.onclick=()=>{ lastSetId=w.id; activateSet(w.id); saveProgress(); };
+    if(!w.locked) btn.onclick=()=>{ leaveTopPanelForSet(); lastSetId=w.id; activateSet(w.id); saveProgress(); };
     c.appendChild(btn);
   });
 
@@ -1435,7 +1435,7 @@ function renderPills(moduleNum){
     rbtn.title = locked
       ? 'Preview only — finish marking every skill on every set as "I\'ve got it!" to unlock this self-assessment.'
       : '';
-    rbtn.onclick=()=>{ lastSetId=`mr${moduleNum}`; activateSet(`mr${moduleNum}`); saveProgress(); };
+    rbtn.onclick=()=>{ leaveTopPanelForSet(); lastSetId=`mr${moduleNum}`; activateSet(`mr${moduleNum}`); saveProgress(); };
     c.appendChild(rbtn);
     // Sync preview/locked state onto the review's panel so its inputs disable themselves
     const panel = document.querySelector(`.week-panel[data-id="mr${moduleNum}"]`);
@@ -1465,6 +1465,7 @@ function activeWeekPanel(){ return document.querySelector('.week-panel.active');
 function railStation(tab){
   const panel = activeWeekPanel();
   if(!panel) return;
+  leaveTopPanelForSet();
   switchTabById(panel.dataset.id, tab);   // switchTab() calls syncRailStations() to reflect it
 }
 function syncRailStations(){
@@ -3018,6 +3019,18 @@ function closeTopPanels(except){
       if(b) b.setAttribute('aria-expanded', 'false');
     }
   });
+}
+
+/* Picking a Set or Module review from the rail while Songs/Search/Games is
+   open used to silently switch the set underneath the still-open panel — the
+   click "did nothing" as far as the student could see. Close whichever panel
+   is covering the page and scroll up so the new set is actually visible. */
+function leaveTopPanelForSet(){
+  const covering = ['games-screen', 'songs-hub-panel', 'search-panel']
+    .some(id => { const el = document.getElementById(id); return el && !el.hasAttribute('hidden'); });
+  if(!covering) return;
+  closeTopPanels('');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 /* Load every module's data (not its panels) — the Songs hub and search

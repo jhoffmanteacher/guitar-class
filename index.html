@@ -136,7 +136,7 @@ function googleTranslateElementInit(){
         <div class="rail-group g-module">
           <span class="rail-sec-label">Module<span class="sec-goal" id="rail-module-goal" title="Finish all skills to complete this module" aria-hidden="true">&#x1F3C6;</span></span>
           <label class="sr-only" for="module-select">Choose module</label>
-          <select class="module-select" id="module-select" onchange="onModuleChange(this.value); saveProgress()"></select>
+          <select class="module-select" id="module-select" onchange="leaveTopPanelForSet(); onModuleChange(this.value); saveProgress()"></select>
           <div class="week-pills" id="week-pills" role="group" aria-label="Sets in this module"></div>
         </div>
         <div class="rail-group g-set" id="rail-set-group">

@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-12 — Fixed: picking a Set while Songs (or Search) was open
+
+### Fixed
+- If you opened **Songs** (or Search) from the sidebar and then clicked a
+  **Set**, **Module review**, or changed the **Module** dropdown, the page
+  silently switched behind the scenes but Songs stayed on screen — it looked
+  like nothing happened. Doing any of those now closes Songs/Search first and
+  scrolls you up to the set you picked.
+
 ## 2026-07-12 — A little guitar pick in the header
 
 ### Added
