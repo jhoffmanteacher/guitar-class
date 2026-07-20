@@ -21,7 +21,7 @@
   --hdr:70px;
   /* Brand plum (header, skip-link) + warm ivory left-nav rail surface */
   --brand:#514a7d;
-  --rail-bg:#f4f2eb;
+  --rail-bg:#e7e2d3;
   --font-display:'Fraunces',ui-serif,Georgia,serif;
   --brand-text:#fff;--brand-hover:#5d5590;
 }
@@ -38,7 +38,7 @@
     --shadow-card:0 1px 5px rgba(0,0,0,0.4);
     --shadow-raised:0 10px 36px rgba(0,0,0,0.6);
     --brand:#494370;
-    --rail-bg:#201f1e;
+    --rail-bg:#151413;
     --brand-hover:#544d80;
   }
 }
@@ -479,6 +479,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .rs-text{display:flex;flex-direction:column;line-height:1.2;min-width:0}
 .rs-title{font-size:0.875rem;font-weight:600}
 .rs-sub{font-size:0.75rem;color:var(--text2);margin-top:1px}
+/* Station badges keep a soft tint of their own color at all times, so B/C/
+   checklist stay visually distinct even before you pick one */
+.rail-station.st-b .rs-num{background:var(--blue-bg);color:var(--blue-text)}
+.rail-station.st-c .rs-num{background:var(--green-bg);color:var(--green-text)}
+.rail-station.st-chk .rs-num{background:var(--amber-bg);color:var(--amber-text)}
 /* Active station = a soft wash of its own station color (muted trace of the
    old color-coding — no hard borders, calm claude.ai-style pill) */
 .rail-station.active.st-b{background:var(--blue-bg)}
