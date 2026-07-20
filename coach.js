@@ -1325,34 +1325,50 @@ function gamesRenderHub(p){
     }
   } catch(e){}
   const ccChip = ccBest ? `<span class="games-card-best">&#x1F3C6; best today: ${ccBest} BPM</span>` : '';
-  let cbBest = 0;
-  try {
-    for (const d of CB_DECKS){
-      cbBest = Math.max(cbBest,
-        parseInt(sessionStorage.getItem(cbBestKey(d.id, 'name')), 10) || 0,
-        parseInt(sessionStorage.getItem(cbBestKey(d.id, 'spot')), 10) || 0);
-    }
-  } catch(e){}
-  const cbChip = cbBest ? `<span class="games-card-best">&#x1F3C6; best today: ${cbBest}</span>` : '';
-  let fzBest = 0;
-  try {
-    for (const d of FZ_DECKS){
-      fzBest = Math.max(fzBest, parseInt(sessionStorage.getItem(fzBestKey(d.id)), 10) || 0);
-    }
-  } catch(e){}
-  const fzChip = fzBest ? `<span class="games-card-best">&#x1F3C6; best today: ${fzBest}</span>` : '';
-  let shBest = 0;
-  for (const pat of SH_PATTERNS){
-    const b = shBestRead(pat.id);
-    if (b) shBest = Math.max(shBest, b.score);
+  /* Persisted (all-time, cross-session) bests win over the sessionStorage
+     "today" fallback used when signed out / dev-bypass, so a returning
+     student sees their real record without having to replay. */
+  const gGlobal = (typeof games !== 'undefined' && games) || null;
+  let cbBest = (gGlobal && gGlobal.cb && gGlobal.cb.best) || 0;
+  let cbAllTime = cbBest > 0;
+  if (!cbBest) {
+    try {
+      for (const d of CB_DECKS){
+        cbBest = Math.max(cbBest,
+          parseInt(sessionStorage.getItem(cbBestKey(d.id, 'name')), 10) || 0,
+          parseInt(sessionStorage.getItem(cbBestKey(d.id, 'spot')), 10) || 0);
+      }
+    } catch(e){}
   }
-  const shChip = shBest ? `<span class="games-card-best">&#x1F3C6; best today: ${shBest}</span>` : '';
-  let srBest = 0;
-  for (const pat of SH_PATTERNS){
-    const b = srBestRead(pat.id);
-    if (b) srBest = Math.max(srBest, b.acc);
+  const cbChip = cbBest ? `<span class="games-card-best">&#x1F3C6; ${cbAllTime ? 'best' : 'best today'}: ${cbBest}</span>` : '';
+  let fzBest = (gGlobal && gGlobal.fz && gGlobal.fz.best) || 0;
+  let fzAllTime = fzBest > 0;
+  if (!fzBest) {
+    try {
+      for (const d of FZ_DECKS){
+        fzBest = Math.max(fzBest, parseInt(sessionStorage.getItem(fzBestKey(d.id)), 10) || 0);
+      }
+    } catch(e){}
   }
-  const srChip = srBest ? `<span class="games-card-best">&#x1F3C6; best today: ${srBest}%</span>` : '';
+  const fzChip = fzBest ? `<span class="games-card-best">&#x1F3C6; ${fzAllTime ? 'best' : 'best today'}: ${fzBest}</span>` : '';
+  let shBest = (gGlobal && gGlobal.sh && gGlobal.sh.best) || 0;
+  let shAllTime = shBest > 0;
+  if (!shBest) {
+    for (const pat of SH_PATTERNS){
+      const b = shBestRead(pat.id);
+      if (b) shBest = Math.max(shBest, b.score);
+    }
+  }
+  const shChip = shBest ? `<span class="games-card-best">&#x1F3C6; ${shAllTime ? 'best' : 'best today'}: ${shBest}</span>` : '';
+  let srBest = (gGlobal && gGlobal.sr && gGlobal.sr.best) || 0;
+  let srAllTime = srBest > 0;
+  if (!srBest) {
+    for (const pat of SH_PATTERNS){
+      const b = srBestRead(pat.id);
+      if (b) srBest = Math.max(srBest, b.acc);
+    }
+  }
+  const srChip = srBest ? `<span class="games-card-best">&#x1F3C6; ${srAllTime ? 'best' : 'best today'}: ${srBest}%</span>` : '';
   let rrChip = '';
   const rrG = (typeof games !== 'undefined' && games && games.rr) || null;
   if (rrStreakAlive(rrG)){
@@ -1366,11 +1382,20 @@ function gamesRenderHub(p){
     if (rrPts > 0 && rrDay === rrDayStr(new Date())) rrChip = `<span class="games-card-best">&#x2B50; ${rrPts} points today</span>`;
   }
   let rnBest = 0;
-  for (const sg of RN_SONGS){
-    const b = rnBestSession(sg.id);
-    if (b) rnBest = Math.max(rnBest, b.acc);
+  if (gGlobal && gGlobal.rn && gGlobal.rn.songs){
+    for (const sg of RN_SONGS){
+      const b = gGlobal.rn.songs[sg.id];
+      if (b) rnBest = Math.max(rnBest, b.acc || 0);
+    }
   }
-  const rnChip = rnBest ? `<span class="games-card-best">&#x1F3C6; best today: ${rnBest}%</span>` : '';
+  let rnAllTime = rnBest > 0;
+  if (!rnBest) {
+    for (const sg of RN_SONGS){
+      const b = rnBestSession(sg.id);
+      if (b) rnBest = Math.max(rnBest, b.acc);
+    }
+  }
+  const rnChip = rnBest ? `<span class="games-card-best">&#x1F3C6; ${rnAllTime ? 'best' : 'best today'}: ${rnBest}%</span>` : '';
   /* Per-game "best today" chips, keyed by game. Note Hunt has none. */
   const chips = { cc:ccChip, blitz:cbChip, fretzap:fzChip, strum:shChip, radar:srChip, roulette:rrChip, runner:rnChip };
   const card = g => `

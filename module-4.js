@@ -119,7 +119,7 @@ SETS.push(
             title: 'Play Pattern 1 with alternate picking',
             steps: [
           {
-            text: 'Challenge 1 — Pattern 1 Climb (skills-check warm-up): play Pentatonic Pattern 1 ascending at 60 BPM, one note per beat, alternate picking (down-up-down-up). You\'ve got it when: every note rings clean with no missed picks. This is a warm-up drill — the unit assessment is your own 4-bar solo (you\'ll compose it in Set 3), held to the backing track\'s pulse — but this is the benchmark lap (a lap = one full time through) for your Set 1 check-off. Click "Play all" to hear it.',
+            text: 'Challenge 1 — Pattern 1 Climb (skills-check warm-up): play Pentatonic Pattern 1 ascending at 60 BPM, one note per beat, alternate picking (down-up-down-up). You\'ve got it when: every note rings clean with no missed picks. This is a warm-up drill — the module assessment is your own 4-bar solo (you\'ll compose it in Set 3), held to the backing track\'s pulse — but this is the benchmark lap (a lap = one full time through) for your Set 1 check-off. Click "Play all" to hear it.',
             hint: 'Go as slow as you need. Every note should ring cleanly. Say each note aloud as you play it to connect your ear to your fingers. Set the ⏱ Timer for 2 minutes and loop it.',
             stuck: 'Drop to the lowest two strings only (E and A) and climb just those until they\'re clean, then add the rest one string at a time.',
             levelUp: 'Play it descending too (top to bottom), or raise the metronome to 80 BPM and keep the picking strictly down-up.',
@@ -683,7 +683,7 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Unit-end (two tasks): (1) Perform an original 4-bar solo over a course-song backing track, holding the track\'s pulse start to finish — use the full minor pentatonic box, include at least one hammer-on, pull-off, or vibrato, and follow a named phrasing strategy (call-and-response or four-phrase). (2) Read a short 1-bar pentatonic lick from TAB and play it.',
+      goal: 'Module-end (two tasks): (1) Perform an original 4-bar solo over a course-song backing track, holding the track\'s pulse start to finish — use the full minor pentatonic box, include at least one hammer-on, pull-off, or vibrato, and follow a named phrasing strategy (call-and-response or four-phrase). (2) Read a short 1-bar pentatonic lick from TAB and play it.',
       performance: 'Solo: record your original 4-bar solo over a core-song backing track, saying your phrasing strategy (call-and-response or four-phrase) out loud on the recording, then listen back; then sight-read and play a short 1-bar pentatonic lick from TAB.',
       selfCheck: 'Can you explain the difference between major and minor pentatonic? Can you add the blues note? Can you perform your original solo without looking at your notes?',
       standards: ['Cr.1a', 'Cr.2a', 'Pr.6a']

@@ -565,7 +565,7 @@ SETS.push(
             title: 'Take It to a Song',
             steps: [
               {
-                text: 'Challenge — Let It Be, fingerpicked: play the four-chord verse — C · G · Am · F — with the 6-note pattern over each chord, one bar each at 60 BPM. Thumb roots: C and Am on the A string, G on the low E, F on the D string. You\'ve got it when: a full verse with the pattern unbroken — the same song you strummed in Units 5 and 6, now a lullaby. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: the fingerstyle arrangement</a>.',
+                text: 'Challenge — Let It Be, fingerpicked: play the four-chord verse — C · G · Am · F — with the 6-note pattern over each chord, one bar each at 60 BPM. Thumb roots: C and Am on the A string, G on the low E, F on the D string. You\'ve got it when: a full verse with the pattern unbroken — the same song you strummed in Modules 5 and 6, now a lullaby. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: the fingerstyle arrangement</a>.',
                 hint: 'Anticipate like the second lesson video showed you: the fretting hand starts moving on the pattern\'s 6th note, so beat 1 always lands ready.',
                 stuck: 'Strum each chord once to check it rings, then loop just C → G — the only change where the thumb crosses to the low E.',
                 levelUp: 'Add a pinch (p + a together) on beat 1 of each chord and hear the verse bloom, or sing it over your own picking.',

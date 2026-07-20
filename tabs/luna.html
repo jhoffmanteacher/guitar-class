@@ -11,61 +11,29 @@
 <script defer src="../firebase-config.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<style>
-  :root{
-    --bg:#ffffff; --bg2:#f6f7f9; --bg3:#eef0f3;
-    --text:#1c2230; --text2:#5b6472; --text3:#98a0ad;
-    --border:#e3e6eb; --border2:#d3d8df;
-    --l1:#7c5cbf; --l2:#2f7fbf; --l3:#c2703d; --l4:#3f9464; --l5:#b04a6e; --l6:#2f9e93;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;padding:20px 16px 64px}
-  .wrap{max-width:760px;margin:0 auto}
-  a{color:var(--l2)}
-  .crumb{font-size:13px;color:var(--text2);margin-bottom:18px;display:flex;justify-content:space-between;gap:12px}
-  #save-msg{color:var(--text3);white-space:nowrap}
-  header.song{border-bottom:1px solid var(--border2);padding-bottom:18px;margin-bottom:8px}
-  .song-kicker{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--text3)}
-  h1{font-size:30px;font-weight:650;margin:4px 0 2px}
-  .song-artist{font-size:15px;color:var(--text2)}
-  .thread-badge{display:inline-block;margin-top:10px;font-size:12px;font-weight:600;padding:3px 10px;border-radius:12px;background:var(--bg3);color:var(--text2)}
-  .journey-note{font-size:14px;color:var(--text2);margin:16px 0 26px;max-width:60ch}
-  .songmap{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:30px;font-size:14px}
-  .songmap b{font-weight:600}
-  .layer{border:1px solid var(--border);border-radius:12px;margin-bottom:22px;overflow:hidden}
-  .layer-head{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);border-bottom:1px solid var(--border)}
-  .layer-num{width:26px;height:26px;border-radius:50%;color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
-  .layer h2{font-size:17px;font-weight:600}
-  .layer-unit{margin-left:auto;font-size:12px;color:var(--text2);white-space:nowrap}
-  .layer-body{padding:16px}
-  .layer-body p{font-size:14.5px;margin-bottom:12px;max-width:62ch}
-  .l1 .layer-num{background:var(--l1)} .l2 .layer-num{background:var(--l2)}
-  .l3 .layer-num{background:var(--l3)} .l4 .layer-num{background:var(--l4)}
-  .l5 .layer-num{background:var(--l5)} .l6 .layer-num{background:var(--l6)}
-  .grain{font-size:13px;color:var(--text2);background:var(--bg3);border-radius:8px;padding:8px 12px;margin-bottom:12px}
-  pre.tab{background:#20242c;color:#e8eaee;border-radius:8px;padding:14px 16px;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:13px;line-height:1.5;overflow-x:auto;margin-bottom:12px}
-  pre.tab .hl{color:#ffd479}
-  .playline{font-size:14.5px;background:var(--bg2);border-left:3px solid var(--border2);padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:12px}
-  .branch{font-size:13.5px;color:var(--text2);margin-bottom:6px}
-  .branch b{color:var(--text)}
-  .rate{display:flex;align-items:center;gap:8px;margin-top:14px;padding-top:12px;border-top:1px dashed var(--border)}
-  .rate-label{font-size:13px;color:var(--text2)}
-  .rate button{font:inherit;font-size:13px;padding:5px 12px;border-radius:8px;border:1px solid var(--border2);background:var(--bg);cursor:pointer}
-  .rate button.on{background:var(--text);color:var(--bg);border-color:var(--text)}
-  .rate-key{font-size:12px;color:var(--text3)}
-  footer{margin-top:36px;font-size:12.5px;color:var(--text3);border-top:1px solid var(--border);padding-top:14px}
-  @media (max-width:480px){ h1{font-size:24px} pre.tab{font-size:11.5px} }
-</style>
+<script type="text/javascript">
+function googleTranslateElementInit(){
+  new google.translate.TranslateElement({
+    pageLanguage:'en',
+    includedLanguages:'es',
+    layout:google.translate.TranslateElement.InlineLayout.NONE,
+    autoDisplay:false
+  },'google_translate_element');
+}
+</script>
+<script defer src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<link rel="stylesheet" href="journey-theme.css">
 </head>
 <body>
+<div id="google_translate_element"></div>
 <div class="wrap">
-  <div class="crumb"><a href="../index.html">&larr; Back to class site</a><span id="save-msg" aria-live="polite"></span></div>
+  <div class="crumb"><span class="crumb-left"><a href="../index.html">&larr; Back to class site</a><button class="btn-translate" id="btn-translate" onclick="toggleTranslate()" title="Translate to Spanish"><span>&#x1F310;</span><span id="translate-label">Español</span></button></span><span id="save-msg" aria-live="polite"></span></div>
 
   <header class="song">
     <div class="song-kicker">Song Journey</div>
     <h1>Luna</h1>
     <div class="song-artist">Peso Pluma &amp; Junior H</div>
-    <span class="thread-badge">&#x1F9F5; Thread song — it grows through Units 1–5</span>
+    <span class="thread-badge">&#x1F9F5; Thread song — it grows through Modules 1–5</span>
   </header>
 
   <p class="journey-note">One song, five layers. As your skills grow this semester, you come back to this song with a new tool — and it gets bigger every time. Find your current layer below. Done early? Move down one layer and try the next. There's also a bonus Layer 6 with the song's fingerpicked intro, once you're ready for a harder challenge.</p>
@@ -78,17 +46,17 @@
 
   <!-- LAYER 1 -->
   <section class="layer l1" id="layer-1">
-    <div class="layer-head"><span class="layer-num">1</span><h2>Listening</h2><span class="layer-unit">Unit 1</span></div>
+    <div class="layer-head"><span class="layer-num">1</span><h2>Listening</h2><span class="layer-unit">Module 1</span></div>
     <div class="layer-body">
       <p>Before you play a note, feel where the pulse lives. "Luna" is in 6/8 — count it out and you might land on 2 big beats or 6 small ones, and both are true at once: two big beats, each one dividing into three. Tap along with just the two big beats and let the requinto play the rest.</p>
       <div class="playline"><b>Do it:</b> listen to the first verse. Tap only the two big downbeats per bar — try not to tap all six.</div>
       <div class="branch"><b>Respond:</b> what does the requinto add to the song that strumming alone can't?</div>
       <div class="branch"><b>Connect:</b> name another song where an acoustic guitar carries the hook (the catchy part you remember), not just the rhythm.</div>
-      <div class="rate" data-layer="1">
+      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="1">
         <span class="rate-label">Rate this layer:</span>
-        <button type="button" onclick="rate(this)">1</button>
-        <button type="button" onclick="rate(this)">2</button>
-        <button type="button" onclick="rate(this)">3</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
         <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
       </div>
     </div>
@@ -96,7 +64,7 @@
 
   <!-- LAYER 2 -->
   <section class="layer l2" id="layer-2">
-    <div class="layer-head"><span class="layer-num">2</span><h2>Single Notes</h2><span class="layer-unit">Unit 2</span></div>
+    <div class="layer-head"><span class="layer-num">2</span><h2>Single Notes</h2><span class="layer-unit">Module 2</span></div>
     <div class="layer-body">
       <p>Luna rides two chords — F and Am — so its bassline is just two notes: F (low E string, fret 1) and A (open A string). Two big beats each, right on the downbeats.</p>
 <pre class="tab">Bass roots — teaching arrangement &middot; 2 big beats per note
@@ -110,11 +78,11 @@ E |--1-------------|</pre>
       <div class="playline"><b>Play it:</b> two big beats per note at <b>60 BPM</b>, four laps (a lap = one full time through the loop), F ringing with no buzz.</div>
       <div class="branch"><b>Stuck?</b> Park on just the F — pluck, listen, adjust — until five ring in a row, then add the open A.</div>
       <div class="branch"><b>Level up:</b> curious about the actual requinto intro line? Jump ahead to the bonus Layer 6 at the bottom of this page once you're ready for a harder challenge.</div>
-      <div class="rate" data-layer="2">
+      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="2">
         <span class="rate-label">Rate this layer:</span>
-        <button type="button" onclick="rate(this)">1</button>
-        <button type="button" onclick="rate(this)">2</button>
-        <button type="button" onclick="rate(this)">3</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
         <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
       </div>
     </div>
@@ -122,7 +90,7 @@ E |--1-------------|</pre>
 
   <!-- LAYER 3 -->
   <section class="layer l3" id="layer-3">
-    <div class="layer-head"><span class="layer-num">3</span><h2>Power Chords &nbsp;&#x25D0;</h2><span class="layer-unit">Unit 3</span></div>
+    <div class="layer-head"><span class="layer-num">3</span><h2>Power Chords &nbsp;&#x25D0;</h2><span class="layer-unit">Module 3</span></div>
     <div class="layer-body">
       <div class="grain">&#x25D0; <b>An unusual twist:</b> this sierreño ballad isn't usually played with power chords — that's the point. Playing it with distortion goes against the song's usual style on purpose; optional harder challenge, no score.</div>
       <p>Same two notes from Layer 2 — each note now also plays the note a fifth above it. F5 and A5, the same two-finger shape sliding four frets.</p>
@@ -136,11 +104,11 @@ E |--1----5--------|</pre>
       <div class="playline"><b>Play it:</b> two downbeat strums per bar at <b>60 BPM</b> — nothing syncopated (no accents landing off the main beat), changing every bar.</div>
       <div class="branch"><b>Stuck?</b> Park on the slide: fret 1, fret 5, fret 1, fret 5 with no rhythm until the jump is automatic.</div>
       <div class="branch"><b>Level up:</b> palm-mute (rest the side of your strumming hand on the strings for a short, muffled sound) for a tight sierreño chug (a short, muted, punchy strum), then let it ring and hear why distortion isn't this song's home.</div>
-      <div class="rate" data-layer="3">
+      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="3">
         <span class="rate-label">Rate this layer:</span>
-        <button type="button" onclick="rate(this)">1</button>
-        <button type="button" onclick="rate(this)">2</button>
-        <button type="button" onclick="rate(this)">3</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
         <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
       </div>
     </div>
@@ -148,7 +116,7 @@ E |--1----5--------|</pre>
 
   <!-- LAYER 4 -->
   <section class="layer l4" id="layer-4">
-    <div class="layer-head"><span class="layer-num">4</span><h2>Pentatonic Solo</h2><span class="layer-unit">Unit 4</span></div>
+    <div class="layer-head"><span class="layer-num">4</span><h2>Pentatonic Solo</h2><span class="layer-unit">Module 4</span></div>
     <div class="layer-body">
       <p>Luna lives in F major, and F's relative minor is D — so D minor pentatonic Pattern 1 (root D, low E fret 10) is your box (the block of frets where a scale pattern sits), parked at the semester's highest position.</p>
 <pre class="tab">Your three starting notes — D minor pentatonic, Pattern 1 (10th position)
@@ -162,11 +130,11 @@ E |--10------13-----------------------|</pre>
       <div class="playline"><b>Play it:</b> improvise over the chord loop — hit &#x25B6; &#x1F3B5; Backing track on the Luna card in Module 4 to play along and improvise over. End every phrase on D — the note the music rests on — so each idea sounds finished.</div>
       <div class="branch"><b>Stuck?</b> Trade just D and F (frets 10 and 13 on the low E) back and forth, changing only the rhythm, until an idea appears.</div>
       <div class="branch"><b>Level up:</b> hold the F (fret 13) a little longer for a sadder, longing feel, or slide the whole box down to open position and compare how they sound.</div>
-      <div class="rate" data-layer="4">
+      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="4">
         <span class="rate-label">Rate this layer:</span>
-        <button type="button" onclick="rate(this)">1</button>
-        <button type="button" onclick="rate(this)">2</button>
-        <button type="button" onclick="rate(this)">3</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
         <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
       </div>
     </div>
@@ -174,7 +142,7 @@ E |--10------13-----------------------|</pre>
 
   <!-- LAYER 5 -->
   <section class="layer l5" id="layer-5">
-    <div class="layer-head"><span class="layer-num">5</span><h2>Open Chords</h2><span class="layer-unit">Unit 5</span></div>
+    <div class="layer-head"><span class="layer-num">5</span><h2>Open Chords</h2><span class="layer-unit">Module 5</span></div>
     <div class="layer-body">
       <p>The whole song as open chords: F (the little shape, xx3211) and Am carry it start to finish as one vamp (a short chord pattern repeated over and over), with Dm making a brief passing appearance near the end of the verse and again in the closing bridge. Same 6/8 pulse — two downbeat strums per bar, nothing syncopated.</p>
 <pre class="tab">Verse vamp — 2 downbeats per bar &middot; 6/8 felt in 2 &middot; 60 BPM
@@ -183,11 +151,11 @@ E |--10------13-----------------------|</pre>
       <div class="playline"><b>Play it:</b> down-strums, two beats per bar, four laps with every change landing on the downbeat and the little F ringing clean. Near the end of the verse and in the closing bridge, swap in Dm.</div>
       <div class="branch"><b>Stuck?</b> Loop just F&nbsp;&rarr;&nbsp;Am until the shape change is automatic, then add the metronome at 60 BPM.</div>
       <div class="branch"><b>Level up:</b> sing or hum "Luna, dile tú" over the loop, or push to a full verse and chorus without stopping. Module 7 upgrades the little F to the full barre (one finger pressed flat across several strings) — the last beginner shortcut before the real shape. Or try the bonus Layer 6 below for the song's fingerpicked intro.</div>
-      <div class="rate" data-layer="5">
+      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="5">
         <span class="rate-label">Rate this layer:</span>
-        <button type="button" onclick="rate(this)">1</button>
-        <button type="button" onclick="rate(this)">2</button>
-        <button type="button" onclick="rate(this)">3</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
         <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
       </div>
     </div>
@@ -197,7 +165,7 @@ E |--10------13-----------------------|</pre>
   <section class="layer l6" id="layer-6">
     <div class="layer-head"><span class="layer-num">6</span><h2>Requinto Intro</h2><span class="layer-unit">Bonus</span></div>
     <div class="layer-body">
-      <div class="grain">Bonus layer — optional harder challenge, no score. Ready whenever you are; no specific Unit required.</div>
+      <div class="grain">Bonus layer — optional harder challenge, no score. Ready whenever you are; no specific Module required.</div>
       <p>Back in Layer 1 you heard the requinto open the song before the vamp starts. It's rolling through the same little F shape you already know from Layer 5 (xx3211) — just leave the high e string open, and pick the notes one at a time instead of strumming them together.</p>
 <pre class="tab">Intro riff — teaching arrangement &middot; roll the little F, low to high, let it ring
               (roll &uarr;)
@@ -210,17 +178,17 @@ E |-----------------|</pre>
       <div class="playline"><b>Play it:</b> pick D (fret 3) &rarr; G (fret 2) &rarr; B (fret 1) &rarr; open e, one note at a time, letting each ring into the next until all four are singing together. Repeat twice, then let the chord ring out before the vamp comes in.</div>
       <div class="branch"><b>Stuck?</b> Fret the little F shape first (D3, G2, B1, e open) and strum it once to hear the target chord — then break it apart one string at a time, slowest possible tempo.</div>
       <div class="branch"><b>Level up:</b> once the roll is smooth, drop it in front of the Layer 5 vamp as a real intro, or reverse the roll (high to low) for a variation.</div>
-      <div class="rate" data-layer="6">
+      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="6">
         <span class="rate-label">Rate this layer:</span>
-        <button type="button" onclick="rate(this)">1</button>
-        <button type="button" onclick="rate(this)">2</button>
-        <button type="button" onclick="rate(this)">3</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
+        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
         <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
       </div>
     </div>
   </section>
 
-  <footer>Mr. Hoffman's Guitar Class &middot; Song Journey &middot; teaching arrangement for classroom use &middot; 60 BPM throughout</footer>
+  <footer>Mr. Hoffman's Guitar Class &middot; Song Journey &middot; teaching arrangement for classroom use &middot; tempo targets build across layers</footer>
 </div>
 
 <script>
@@ -233,10 +201,28 @@ E |-----------------|</pre>
 var SONG_ID = 'luna';
 var fbUser = null, fbDb = null, saveTimer = null, dirty = false;
 
+/* Spanish translate toggle — mirrors the main app's toggleTranslate() */
+var isSpanish = false;
+function toggleTranslate(){
+  var btn = document.getElementById('btn-translate');
+  var lbl = document.getElementById('translate-label');
+  var select = document.querySelector('.goog-te-combo');
+  if(!isSpanish){
+    if(select){ select.value='es'; select.dispatchEvent(new Event('change')); }
+    else { document.cookie='googtrans=/en/es; path=/'; location.reload(); return; }
+    btn.classList.add('active'); lbl.textContent='English'; isSpanish=true;
+  } else {
+    if(select){ select.value='en'; select.dispatchEvent(new Event('change')); }
+    else { document.cookie='googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'; location.reload(); return; }
+    btn.classList.remove('active'); lbl.textContent='Español'; isSpanish=false;
+  }
+}
+
 function rate(btn){
   var group = btn.closest('.rate');
-  group.querySelectorAll('button').forEach(function(b){ b.classList.remove('on'); });
+  group.querySelectorAll('button').forEach(function(b){ b.classList.remove('on'); b.setAttribute('aria-checked', 'false'); });
   btn.classList.add('on');
+  btn.setAttribute('aria-checked', 'true');
   queueSave();
 }
 
@@ -254,7 +240,9 @@ function applyRatings(saved){
     var g = document.querySelector('.rate[data-layer="' + layer + '"]');
     if(!g) return;
     g.querySelectorAll('button').forEach(function(b){
-      b.classList.toggle('on', parseInt(b.textContent, 10) === saved[layer]);
+      var on = parseInt(b.textContent, 10) === saved[layer];
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-checked', on ? 'true' : 'false');
     });
   });
 }

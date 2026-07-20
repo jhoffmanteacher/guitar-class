@@ -127,7 +127,7 @@ async function ensureModuleRendered(num){
     c.appendChild(div);
   }
   // Module-level "🎵 Songs" collapsible, appended after this module's panels
-  // (modules 2–8 only; module 1 keeps its per-set song tabs via buildSet).
+  // (modules 2–12; module 1 keeps its per-set song tabs via buildSet).
   if(num!==1){
     const songsHtml = buildModuleSongs(num);
     if(songsHtml){
@@ -1211,6 +1211,29 @@ function pickEnglishVoice(){
   return cachedVoices[0] || null;
 }
 
+// Mirrors pickEnglishVoice() for when the page is translated to Spanish
+// (isSpanish, set by toggleTranslate() below) so Read aloud speaks the
+// language a student is actually reading.
+function pickSpanishVoice(){
+  if (!cachedVoices.length) loadVoices();
+  const es = cachedVoices.filter(v => /^es[-_]/i.test(v.lang));
+
+  const ranked = [
+    v => v.name === 'Google español',
+    v => /Microsoft.*Online.*Natural.*Spanish/i.test(v.name),
+    v => /\(Enhanced\)|\(Premium\)/i.test(v.name),
+    v => /^(Mónica|Monica|Paulina|Jorge|Juan)$/i.test(v.name),
+    v => /neural|natural|enhanced|premium/i.test(v.name),
+    v => true,
+  ];
+
+  for (const test of ranked) {
+    const match = es.find(test);
+    if (match) return match;
+  }
+  return null;
+}
+
 // Idle ("Read aloud") and active ("Stop") inner-markup for the read-aloud buttons.
 // Kept as constants so the SVG icon survives every state reset below.
 const READ_ALOUD_IDLE_HTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 8a5 5 0 0 1 0 8"/><path d="M19.5 5.5a9 9 0 0 1 0 13"/></svg><span>Read aloud</span>';
@@ -1243,9 +1266,9 @@ function readAloudStep(btn){
   if (!text) return;
 
   const utter = new SpeechSynthesisUtterance(text);
-  const voice = pickEnglishVoice();
+  const voice = isSpanish ? pickSpanishVoice() : pickEnglishVoice();
   if (voice) utter.voice = voice;
-  utter.lang = (voice && voice.lang) || 'en-US';
+  utter.lang = (voice && voice.lang) || (isSpanish ? 'es-ES' : 'en-US');
   utter.rate = 0.90;
   utter.pitch = 1.0;
   utter.onend = () => { btn.innerHTML = READ_ALOUD_IDLE_HTML; btn.classList.remove('speaking'); delete btn.dataset.speaking; };
@@ -1910,7 +1933,7 @@ function buildSongs(w){
   return `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>Core — everyone</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu — pick 1</div>${diffLegend}</div><div class="card">${rows}${requestSlot}</div>`;
 }
 
-/* Module-level songs (modules 2–8): one consolidated "🎵 Songs" list per module,
+/* Module-level songs (modules 2–12): one consolidated "🎵 Songs" list per module,
    read from MODULE_SONGS[num] and rendered as a collapsible .sc-sec section after
    the module's set panels (see ensureModuleRendered). Module 1 keeps its per-set
    lists via buildSongs above. Returns '' if the module has no song list. */
@@ -2689,7 +2712,7 @@ function playSequence(midis, bpm, btnEl){
 function readStoredBpm(key, defBpm){
   if(!key) return defBpm;
   try{
-    const v = sessionStorage.getItem(key);
+    const v = localStorage.getItem(key);
     if(v != null){
       const n = parseInt(v, 10);
       if(!isNaN(n)) return n;
@@ -2711,7 +2734,7 @@ function onBpmSliderChange(slider){
   if(readout) readout.textContent = slider.value + ' BPM';
   const key = slider.dataset.key;
   if(key){
-    try{ sessionStorage.setItem(key, slider.value); }catch(e){}
+    try{ localStorage.setItem(key, slider.value); }catch(e){}
   }
 }
 /* Read the BPM slider that shares a .bpm-control-group with this button.
