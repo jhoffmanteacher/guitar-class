@@ -141,6 +141,7 @@ function coachOpen(btn){
     phase: 'ready', mode, slots, desc, bpm, tabNotes, tabDerived,
     beatMs: 60000 / bpm,
     card, streakKey: 'coachStreak:' + (btn.dataset.chords || btn.dataset.midis),
+    drillId: btn.dataset.chords || btn.dataset.midis,
     events: [], pending: null,
     gridOffset: 0, listenStart: 0, timeouts: [],
     smoothRms: 0, smoothHf: 0, lastOnsetT: -1e9, lastPitchT: 0
@@ -730,6 +731,7 @@ function coachRenderReport(){
   const LVL = { 1: 'Needs work', 2: 'You’re getting it', 3: 'Great' };
   const applicable = crits.filter(c => c.level > 0);
   const greats = applicable.filter(c => c.level === 3).length;
+  const overallLevel = greats === applicable.length ? 3 : (greats >= 2 ? 2 : 1);
   let overall;
   if (greats === applicable.length) overall = '&#x1F31F; That was great — seriously.';
   else if (greats >= 2)             overall = '&#x1F4AA; Good try — look how much is already green.';
@@ -745,8 +747,25 @@ function coachRenderReport(){
   const streakHtml = streak >= 3
     ? `<div class="coach-streak">&#x1F525; That&rsquo;s ${streak} clean tries in a row — you&rsquo;ve got this one.</div>` : '';
 
+  /* Last-time-vs-this-time: read whatever's already loaded in the progress
+     doc before this attempt overwrites it (same read pattern as rnBestMerged). */
+  const prevCoach = (typeof games !== 'undefined' && games && games.coach && coach.drillId)
+    ? games.coach[coach.drillId] : null;
+  const compareHtml = prevCoach
+    ? `<div class="coach-tip">Last time: ${LVL[prevCoach.level] || '—'} — This time: ${LVL[overallLevel]}</div>` : '';
+
+  /* Compact per-drill result → the student's progress doc, so the next visit
+     can show the line above. Skipped in dev bypass (Firestore rejects that uid). */
+  if (typeof saveGames === 'function' && currentUser && !isDevBypassUser() && coach.drillId){
+    if (!games.coach) games.coach = {};
+    const prevAttempts = (games.coach[coach.drillId] && games.coach[coach.drillId].attempts) || 0;
+    games.coach[coach.drillId] = { level: overallLevel, attempts: prevAttempts + 1, at: new Date().toISOString().slice(0, 10) };
+    saveGames();
+  }
+
   coachBody().innerHTML =
     `<div class="coach-report"><div class="coach-overall">${overall}</div>
+     ${compareHtml}
      ${coachStripHtml()}
      <div class="coach-crits">` +
     crits.map(c =>

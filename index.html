@@ -137,6 +137,9 @@ function googleTranslateElementInit(){
           <span class="rail-sec-label">Module<span class="sec-goal" id="rail-module-goal" title="Finish all skills to complete this module" aria-hidden="true">&#x1F3C6;</span></span>
           <label class="sr-only" for="module-select">Choose module</label>
           <select class="module-select" id="module-select" onchange="leaveTopPanelForSet(); onModuleChange(this.value); saveProgress()"></select>
+          <div class="rail-mod-prog" id="rail-mod-prog" role="progressbar" aria-label="Module skills progress" aria-valuemin="0" hidden>
+            <div class="rmp-bar"><div class="rmp-fill" id="rmp-fill"></div></div><span class="rmp-lbl" id="rmp-lbl" aria-hidden="true"></span>
+          </div>
           <div class="week-pills" id="week-pills" role="group" aria-label="Sets in this module"></div>
         </div>
         <div class="rail-group g-set" id="rail-set-group">
@@ -164,6 +167,10 @@ function googleTranslateElementInit(){
               <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17V5.5l10-1.8V15"/><circle cx="6.5" cy="17" r="2.5"/><circle cx="16.5" cy="15" r="2.5"/></svg></span>Songs</button>
             <button type="button" class="nav-btn" id="search-btn" onclick="toggleSearch()" aria-expanded="false" aria-controls="search-panel">
               <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.7-4.7"/></svg></span>Find</button>
+            <button type="button" class="nav-btn" id="keep-practicing-btn" onclick="toggleKeepPracticing()" aria-expanded="false" aria-controls="keep-practicing-panel">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5l3.2 3.2"/></svg></span>Keep practicing</button>
+            <button type="button" class="nav-btn" id="my-progress-btn" onclick="toggleMyProgress()" aria-expanded="false" aria-controls="my-progress-panel">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M12 20V4M20 20v-7"/></svg></span>My progress</button>
           </div>
         </nav>
       </div>
@@ -184,6 +191,19 @@ function googleTranslateElementInit(){
       </div>
       <div class="daily5-panel" id="songs-hub-panel" hidden></div>
       <div class="daily5-panel" id="search-panel" hidden></div>
+      <div class="daily5-panel" id="keep-practicing-panel" hidden></div>
+      <div class="daily5-panel" id="my-progress-panel" hidden></div>
+      <!-- "Next up" card: you-are-here, skills left in this set, and the one
+           obvious next action. Filled by renderNextUp() in app.js. -->
+      <div class="next-up" id="next-up-card" hidden>
+        <div class="nu-body">
+          <div class="nu-eyebrow" id="nu-eyebrow">Next up</div>
+          <div class="nu-title" id="nu-title"></div>
+          <div class="nu-sub" id="nu-sub"></div>
+          <div class="nu-bar" aria-hidden="true"><div class="nu-fill" id="nu-fill"></div></div>
+        </div>
+        <button type="button" class="nu-btn" id="nu-btn" hidden></button>
+      </div>
       <div id="week-panels"></div>
       <div class="fab-group" id="fab-group" style="display:none">
         <div class="tool-popup" id="metro-popup" role="dialog" aria-label="Metronome">
@@ -199,6 +219,14 @@ function googleTranslateElementInit(){
             </div>
             <input class="bpm-slider" type="range" min="40" max="220" value="60" step="1" id="bpm-slider" oninput="onBpmSlider(this.value)">
           </div>
+          <div class="timer-presets" role="radiogroup" aria-label="Time signature" onkeydown="meterKeydown(event)">
+            <button type="button" class="meter-btn" id="meter-2" onclick="setMetroMeter(2)" role="radio" aria-checked="false" tabindex="-1">2/4</button>
+            <button type="button" class="meter-btn sel" id="meter-4" onclick="setMetroMeter(4)" role="radio" aria-checked="true" tabindex="0">4/4</button>
+            <button type="button" class="meter-btn" id="meter-3" onclick="setMetroMeter(3)" role="radio" aria-checked="false" tabindex="-1">3/4</button>
+          </div>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.8125rem;margin-bottom:10px">
+            <input type="checkbox" id="metro-countin" onchange="setMetroCountIn(this.checked)"> Count-in (one bar before it starts)
+          </label>
           <div class="tp-ctrl">
             <button class="tp-btn" onclick="nudgeBpm(-5)">&#x2212;5</button>
             <button class="tp-btn" onclick="nudgeBpm(-1)">&#x2212;1</button>

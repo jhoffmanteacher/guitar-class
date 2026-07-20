@@ -8,7 +8,7 @@
 :focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 :root{
   --bg:#ffffff;--bg2:#faf9f5;--bg3:#f0eee6;
-  --text:#1a1a18;--text2:#6b6b65;--text3:#63635d;
+  --text:#1a1a18;--text2:#5e5e58;--text3:#585852;
   --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
   --blue-bg:#e6f1fb;--blue-text:#185fa5;
   --green-bg:#eaf3de;--green-text:#3b6d11;
@@ -28,7 +28,7 @@
 @media(prefers-color-scheme:dark){
   :root{
     --bg:#1e1e1c;--bg2:#272724;--bg3:#313130;
-    --text:#e8e6df;--text2:#888880;--text3:#8c8c84;
+    --text:#e8e6df;--text2:#9a9a91;--text3:#9e9e95;
     --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.14);
     --blue-bg:#0c3a6b;--blue-text:#93c4f0;
     --green-bg:#1e4208;--green-text:#a8d070;
@@ -88,7 +88,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .wpill{padding:8px 16px;font-size:0.9375rem;border:1px solid var(--border2);border-radius:20px;background:var(--bg);color:var(--text2);cursor:pointer;transition:all 0.15s;position:relative}
 .wpill:hover:not(.locked){border-color:var(--text2);color:var(--text)}
 .wpill.active{background:var(--text);color:var(--bg);border-color:var(--text)}
-.wpill.locked{opacity:.5;cursor:pointer}
+.wpill.locked{color:var(--text3);cursor:pointer}
 /* Sequential-gate lock: a 🔒 before a set that isn't unlocked yet. The review
    pill has its own lock rule below, so exclude it to avoid two padlocks. */
 .wpill.locked:not(.review-pill)::before{content:'\1F512';margin-right:5px;font-size:0.8125rem;opacity:.85}
@@ -99,6 +99,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .wpill.review-pill{border-style:dashed;border-color:var(--purple-accent);color:var(--purple-text);background:var(--purple-bg2)}
 .wpill.review-pill:hover{background:var(--purple-bg);border-color:var(--purple-text);color:var(--purple-text)}
 .wpill.review-pill.active{background:var(--purple-text);color:var(--bg);border-color:var(--purple-text);border-style:solid}
+.wpill.review-pill.locked{color:var(--purple-accent)}
 .wpill.review-pill.locked::before{content:'\1F512';margin-right:5px;font-size:0.8125rem;opacity:.85}
 .week-panel.mr-locked .mr-rb,
 .week-panel.mr-locked .reflection-ta,
@@ -186,7 +187,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .obj-card.set-head .obj-set{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;padding-bottom:0;border-bottom:none}
 .obj-card.set-head .obj-set .print-set-btn{margin-left:auto}
 .obj-card.set-head .obj-topic{margin-bottom:12px}
-.obj-card.set-head .obj-set-tag{display:inline-block;background:var(--blue-bg);color:var(--blue-text);font-size:0.6875rem;font-weight:500;letter-spacing:.4px;padding:3px 10px;border-radius:999px;text-transform:uppercase}
+.obj-card.set-head .obj-set-tag{display:inline-block;background:var(--blue-bg);color:var(--blue-text);font-size:0.75rem;font-weight:500;letter-spacing:.4px;padding:3px 10px;border-radius:999px;text-transform:uppercase}
 .obj-card.set-head .obj-unit{font-size:0.75rem;color:var(--text3);text-transform:none;letter-spacing:0;margin-bottom:0;line-height:1.3}
 .obj-card.set-head .obj-main{font-size:1.5rem;font-weight:500;line-height:1.3;margin-bottom:0;font-family:var(--font-display)}
 .obj-card.set-head .obj-i-can{color:var(--blue-text)}
@@ -200,7 +201,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .print-set-btn svg{width:13px;height:13px;flex-shrink:0}
 .print-set-btn:hover{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-text)}
 .tabs-songs{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;font-size:0.7812rem;color:var(--text2);background:var(--bg2);border:1px solid var(--border);border-radius:14px;cursor:pointer;font-weight:500;font-family:inherit;line-height:1.2;transition:background 0.15s,border-color 0.15s,color 0.15s}
-.tabs-songs::before{content:'Reference';font-size:0.6875rem;font-weight:700;letter-spacing:0.08em;color:var(--text3);padding-right:7px;border-right:1px solid var(--border);margin-right:2px;text-transform:uppercase}
+.tabs-songs::before{content:'Reference';font-size:0.75rem;font-weight:700;letter-spacing:0.08em;color:var(--text3);padding-right:7px;border-right:1px solid var(--border);margin-right:2px;text-transform:uppercase}
 .tabs-songs:hover{background:var(--green-bg);color:var(--green-text);border-color:var(--green-text)}
 .tabs-songs.active{background:var(--green-bg);color:var(--green-text);border-color:var(--green-text)}
 .tabs-main{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:0}
@@ -257,7 +258,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .sh-list{font-size:0.875rem;color:var(--text2);margin-top:5px;padding-left:16px;display:flex;flex-direction:column;gap:3px}
 .sh-list li{line-height:1.5}
 .step-resp{margin-top:10px;background:var(--blue-bg);border-radius:8px;padding:10px 12px}
-.step-resp-label{font-size:0.7188rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--blue-text);margin-bottom:6px}
+.step-resp-label{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--blue-text);margin-bottom:6px}
 .step-resp-prompt{font-size:0.875rem;font-weight:500;color:var(--text);margin-bottom:5px}
 .step-resp-input{width:100%;min-height:54px;padding:7px 9px;font-family:inherit;font-size:0.9062rem;line-height:1.45;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:6px;resize:vertical;box-sizing:border-box}
 .step-resp-input:focus{outline:none;border-color:var(--blue-text);box-shadow:0 0 0 2px var(--blue-bg)}
@@ -300,7 +301,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .sname{font-size:0.9375rem;font-weight:500}
 .smeta{font-size:0.875rem;color:var(--text2);margin-top:1px}
 /* Song difficulty dots (Choice songs) */
-.song-diff{font-size:0.625rem;letter-spacing:1px;vertical-align:middle;white-space:nowrap}
+.song-diff{font-size:0.75rem;letter-spacing:1px;vertical-align:middle;white-space:nowrap}
 .song-diff-empty{color:var(--text3);opacity:0.45}
 .diff-1{color:var(--green-text)}.diff-2{color:var(--amber-text)}.diff-3{color:#b03a2e}
 @media(prefers-color-scheme:dark){.diff-3{color:#f08070}}
@@ -430,7 +431,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   border-right:1px solid var(--border);display:flex;flex-direction:column}
 .rail-scroll{display:flex;flex-direction:column;gap:24px;padding:20px 14px;overflow-y:auto;flex:1;min-height:0}
 .rail-group{padding:0 2px}
-.rail-sec-label{font-size:0.6875rem;text-transform:uppercase;letter-spacing:0.09em;
+.rail-sec-label{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.09em;
   color:var(--text3);font-weight:600;margin-bottom:9px;display:flex;align-items:center;gap:7px}
 /* module-complete reward badge: greyed until the CURRENT module is fully done */
 .sec-goal{margin-left:auto;font-size:0.9375rem;line-height:1;opacity:0.4;filter:grayscale(1)}
@@ -462,7 +463,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .rs-check{border-radius:6px}
 .rs-text{display:flex;flex-direction:column;line-height:1.2;min-width:0}
 .rs-title{font-size:0.875rem;font-weight:600}
-.rs-sub{font-size:0.6875rem;color:var(--text2);margin-top:1px}
+.rs-sub{font-size:0.75rem;color:var(--text2);margin-top:1px}
 /* Active station = a soft wash of its own station color (muted trace of the
    old color-coding — no hard borders, calm claude.ai-style pill) */
 .rail-station.active.st-b{background:var(--blue-bg)}
@@ -572,8 +573,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .tuner-status.in-tune{color:var(--green-text)}
 .tuner-status.sharp{color:var(--amber-text)}
 .tuner-status.flat{color:var(--blue-text)}
-.tuner-strings{display:flex;gap:3px;margin-bottom:10px}
+.tuner-strings{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
 .ts-btn{flex:1;padding:8px 0;min-height:34px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg2);font-size:0.8125rem;cursor:pointer;color:var(--text2);font-family:inherit;min-width:0}
+.tuner-strings .ts-btn{flex:1 1 40px;min-width:40px;min-height:44px}
 .ts-btn:hover{background:var(--bg3)}
 .ts-btn.active{background:var(--purple-bg);border-color:var(--purple-accent);color:var(--purple-text);font-weight:500}
 .tp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
@@ -684,7 +686,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .tab-head{background:var(--brand);color:#fff;padding:7px 14px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:0.8438rem;line-height:1.3}
 .tab-head .tab-icon{font-size:0.9375rem;flex-shrink:0}
 .tab-head .tab-title{flex:1;min-width:0}
-.tab-head .tab-kind{font-size:0.625rem;font-weight:700;letter-spacing:0.1em;background:rgba(255,255,255,0.22);padding:2px 7px;border-radius:10px;text-transform:uppercase;flex-shrink:0}
+.tab-head .tab-kind{font-size:0.75rem;font-weight:700;letter-spacing:0.1em;background:rgba(255,255,255,0.22);padding:2px 7px;border-radius:10px;text-transform:uppercase;flex-shrink:0}
 .tab-body{padding:10px 14px 12px}
 .tab-caption{font-size:0.8125rem;color:var(--text2);margin-bottom:6px;font-weight:500}
 /* Strum-pattern line — monospace D/U arrows aligned over the count (Module 6) */
@@ -720,25 +722,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .tab-controls{margin:4px 0 6px}
 @media (max-width:600px){
   .bpm-slider{width:96px}
-  .bpm-readout{font-size:0.6875rem;min-width:48px}
+  .bpm-readout{font-size:0.75rem;min-width:48px}
 }
 .tab-note-btn{font-family:inherit;font-size:0.75rem;font-weight:600;padding:6px 4px;min-width:26px;margin:2px 0 0;background:var(--bg2);border:1px solid var(--border);border-radius:3px;color:var(--text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:1px;white-space:nowrap;line-height:1}
 .tab-note-btn:hover{background:var(--blue-bg);border-color:var(--blue-text);color:var(--blue-text)}
 .tab-note-btn:active{transform:scale(0.94)}
-.tab-spkr{font-size:0.625rem;color:var(--blue-text);opacity:0.85}
+.tab-spkr{font-size:0.75rem;color:var(--blue-text);opacity:0.85}
 .tab-note-btn:hover .tab-spkr{color:var(--blue-text);opacity:1}
 @media (max-width:600px){
-  .tab-str-label{font-size:0.6875rem;padding-right:3px}
+  .tab-str-label{font-size:0.75rem;padding-right:3px}
   .tab-cell{height:10px}
-  .tab-cell .tab-fret{font-size:0.6875rem;padding:0 2px}
-  .tab-note-btn{font-size:0.6875rem;padding:2px 2px}
-  .tab-spkr{font-size:0.5938rem}
+  .tab-cell .tab-fret{font-size:0.75rem;padding:0 2px}
+  .tab-note-btn{font-size:0.75rem;padding:2px 2px}
+  .tab-spkr{font-size:0.75rem}
 }
 /* Expandable TAB choice (used when a step offers multiple TABs) */
 .tab-choice-group{display:flex;flex-direction:column;gap:6px;margin:8px 0 4px}
 .tab-choice-btn{font-family:inherit;font-size:0.875rem;font-weight:500;padding:6px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);cursor:pointer;text-align:left;display:inline-flex;align-items:center;gap:8px;width:max-content;max-width:100%;line-height:1.2}
 .tab-choice-btn:hover{background:var(--blue-bg);border-color:var(--blue-text);color:var(--blue-text)}
-.tab-choice-icon{font-size:0.6875rem;color:var(--blue-text);display:inline-block;transition:transform 0.15s}
+.tab-choice-icon{font-size:0.75rem;color:var(--blue-text);display:inline-block;transition:transform 0.15s}
 .tab-choice-btn.expanded .tab-choice-icon{transform:rotate(90deg)}
 .tab-choice-content{display:none}
 .tab-choice-content.expanded{display:block;margin-top:2px}
@@ -749,7 +751,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .sc-sec-head{width:100%;font-family:inherit;font-size:0.9375rem;font-weight:500;text-align:left;padding:11px 4px;background:transparent;border:0;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:10px;line-height:1.3}
 .sc-sec-head:hover{background:var(--bg2)}
 .sc-sec.open .sc-sec-head{background:transparent;color:var(--green-text)}
-.sc-sec-chev{font-size:0.6875rem;color:var(--green-text);flex-shrink:0;transition:transform 0.15s}
+.sc-sec-chev{font-size:0.75rem;color:var(--green-text);flex-shrink:0;transition:transform 0.15s}
 .sc-sec.open .sc-sec-chev{transform:rotate(90deg)}
 .sc-sec-title{display:flex;align-items:center;gap:8px}
 .sc-sec-num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;font-size:0.75rem;font-weight:600;border-radius:50%;background:var(--green-text);color:#fff}
@@ -804,7 +806,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .fab-group,.tabs,.save-ind,
   #google_translate_element,.btn-translate,.user-area,
   .welcome-overlay,.print-set-btn,.daily5-panel,.daily5-btn,.daily5-overlay,.games-screen,
-  .back-to-top,.panel-next,.sk-where-btn,.st-flex-note,
+  .back-to-top,.panel-next,.sk-where-btn,.st-flex-note,.next-up,
   .step-done-row,.mr-rec,.mr-locked-banner{display:none !important}
 
   /* Only the active set prints; expand BOTH stations + the checklist, drop songs */
@@ -878,7 +880,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 @keyframes coachPulse{0%,100%{opacity:1}50%{opacity:0.35}}
 .coach-x{margin-left:auto;background:none;border:none;cursor:pointer;font-size:1.125rem;color:var(--text3);line-height:1;padding:0 2px;font-family:inherit}
 .coach-x:hover{color:var(--text)}
-.coach-foot{font-size:0.7188rem;color:var(--text3);margin-top:10px}
+.coach-foot{font-size:0.75rem;color:var(--text3);margin-top:10px}
 .coach-target{font-size:0.875rem;color:var(--text);margin-bottom:6px;line-height:1.45}
 .coach-tip{font-size:0.8125rem;color:var(--text2);margin:8px 0;line-height:1.45}
 .coach-note{font-size:0.8438rem;color:var(--amber-text);background:var(--amber-bg);border-radius:8px;padding:8px 10px;margin-bottom:8px;line-height:1.45}
@@ -917,7 +919,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .coach-actions .tp-btn{flex:0 0 auto;padding:8px 16px}
 .coach-actions .coach-start{margin-top:0}
 .coach-tab{margin:8px 0}
-.coach-tab-hint{font-size:0.7188rem;color:var(--text3);margin-top:4px}
+.coach-tab-hint{font-size:0.75rem;color:var(--text3);margin-top:4px}
 
 /* ── Note Hunt (fretboard trainer, coach.js) ── */
 .fret-levels{display:flex;gap:4px;margin-bottom:10px}
@@ -954,7 +956,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .cc-group-title{font-size:0.75rem;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px}
 .cc-group .fret-levels{flex-wrap:wrap}
 .cc-group .ts-btn{flex:0 0 auto;padding:4px 12px;white-space:nowrap}
-.cc-rate-sub{display:block;font-size:0.66rem;font-weight:400;opacity:0.68;margin-top:1px}
+.cc-rate-sub{display:block;font-size:0.75rem;font-weight:400;opacity:0.68;margin-top:1px}
 .cc-best{font-size:0.7812rem;font-weight:600;color:var(--green-text);margin-left:6px}
 .cc-diagrams{margin:8px 0}
 .cc-dia{opacity:0.75;border-radius:8px;padding:2px;transition:opacity .15s,box-shadow .15s}
@@ -1067,7 +1069,7 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 .step-fold{margin-top:8px}
 .step-fold summary{cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:0.8438rem;font-weight:600;color:var(--text2);padding:5px 12px;border:1px solid var(--border);border-radius:14px;background:var(--bg2);user-select:none;list-style:none}
 .step-fold summary::-webkit-details-marker{display:none}
-.step-fold summary::before{content:'▸';font-size:0.6875rem;transition:transform .15s}
+.step-fold summary::before{content:'▸';font-size:0.75rem;transition:transform .15s}
 .step-fold[open] summary::before{transform:rotate(90deg)}
 .step-fold summary:hover{color:var(--text);border-color:var(--text2)}
 .step-fold[open]{margin-bottom:4px}
@@ -1144,7 +1146,7 @@ body.games-open{overflow:hidden}
 .cb-answers{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .cb-answer{position:relative;font-family:inherit;font-size:1.0625rem;font-weight:700;color:var(--text);padding:16px 10px;border-radius:var(--radius);border:1px solid var(--border2);background:var(--bg2);cursor:pointer;transition:transform .12s,border-color .12s,background .12s}
 .cb-answer:hover{transform:translateY(-2px);border-color:var(--purple-accent)}
-.cb-answer .cb-key{position:absolute;top:4px;left:8px;font-size:0.7188rem;font-weight:600;color:var(--text3)}
+.cb-answer .cb-key{position:absolute;top:4px;left:8px;font-size:0.75rem;font-weight:600;color:var(--text3)}
 .cb-answer-dia{display:block;width:88px;margin:0 auto}
 .cb-answer-dia svg{width:100%;height:auto;display:block}
 .cb-answer.reveal{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
@@ -1263,7 +1265,7 @@ body.games-open{overflow:hidden}
 .rn-count{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:2.875rem;font-weight:700;color:var(--text3);pointer-events:none;z-index:4}
 .rn-token{position:absolute;top:50%;left:0;width:30px;height:30px;margin:-15px 0 0 -15px;display:flex;align-items:center;justify-content:center;border:2px solid var(--text2);border-radius:999px;background:var(--bg);visibility:hidden;will-change:transform;pointer-events:none;z-index:1}
 .rn-token-fret{font-size:0.9375rem;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;line-height:1}
-.rn-token-label{position:absolute;bottom:calc(100% + 1px);left:50%;transform:translateX(-50%);font-size:0.625rem;font-weight:700;color:var(--text2);white-space:nowrap;line-height:1}
+.rn-token-label{position:absolute;bottom:calc(100% + 1px);left:50%;transform:translateX(-50%);font-size:0.75rem;font-weight:700;color:var(--text2);white-space:nowrap;line-height:1}
 .rn-token.hit-perfect,.rn-token.hit-good{opacity:0;transition:opacity .35s}
 .rn-token.hit-perfect{border-color:var(--green-text);background:var(--green-bg)}
 .rn-token.hit-perfect .rn-token-fret{color:var(--green-text)}
@@ -1302,9 +1304,71 @@ body.games-open{overflow:hidden}
 }
 @media (max-width:480px){
   .rn-lane{height:44px}
-  .rn-lane-name{font-size:0.6875rem}
+  .rn-lane-name{font-size:0.75rem}
 }
 
 /* ── Challenge Day (occasional, module-gated pick-one inside the Daily 5) ── */
 .daily5-challengeday{margin-top:12px;border-top:1px solid var(--border);padding-top:10px}
 .daily5-challengeday-head{font-size:0.875rem;font-weight:700;color:var(--amber-text);margin-bottom:5px}
+
+/* ════════════════════════════════════════════════════════════════
+   TAP-TARGET PASS — every control gets a ≥44px hit area (thumbs on
+   phones/Chromebooks). Two tools: real min-sizes where the layout can
+   absorb them, and an invisible ::after overlay that widens the hit
+   area of compact pills/closes without changing how they look.
+   ════════════════════════════════════════════════════════════════ */
+.rail-toggle{width:44px;height:44px}
+.mr-rb{width:44px;height:44px}
+.tp-btn,.ts-btn,.timer-presets button{min-height:44px}
+.nav-btn,.rail-station,.wpill,.module-select,.search-input,
+.welcome-go,.panel-next-btn,.coach-start,.back-to-top,.tab-choice-btn{min-height:44px}
+.step-resp-mc-opt,.step-mc-keyed .step-mc-opt,.sk-practice-mc-opt{min-height:44px}
+.bpm-slider{height:28px}
+/* Overlay hit area, full 44px — isolated controls with clear space around them
+   (.welcome-close is already position:absolute, so it skips the relative list) */
+.btn-sign,.btn-out,.btn-translate,.tp-close,.coach-x,.rp-close,.rp-newtab,
+.daily5-btn,.games-back,.routine-print-btn,.print-set-btn,.tabs-songs{position:relative}
+.btn-sign::after,.btn-out::after,.btn-translate::after,.tp-close::after,.coach-x::after,
+.rp-close::after,.rp-newtab::after,.daily5-btn::after,.games-back::after,
+.routine-print-btn::after,.print-set-btn::after,.tabs-songs::after,.welcome-close::after{
+  content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:max(100%,44px);height:max(100%,44px)}
+/* Overlay hit area, capped at 36px tall — controls that sit inline with text
+   or in tight rows, where a full 44px halo would swallow neighbors' taps */
+.song-vid-btn,.play-seq-btn,.coach-btn,.step-done-btn,.sh-mod-btn,.sk-toggle,
+.sk-where-btn,.mr-review-link,.st-note-link,.sk-practice-btn,.rp-trigger,.step-fold summary{position:relative}
+.song-vid-btn::after,.play-seq-btn::after,.coach-btn::after,.step-done-btn::after,
+.sh-mod-btn::after,.sk-toggle::after,.sk-where-btn::after,.mr-review-link::after,
+.st-note-link::after,.sk-practice-btn::after,.rp-trigger::after,.step-fold summary::after{
+  content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:max(100%,44px);height:max(100%,36px)}
+
+/* ── "Next up" card — you-are-here + skills-left + the one obvious next
+      action, at the top of the practice view. Goal-gradient: the closer a
+      set is to done, the harder the almost-full bar pulls. ── */
+.next-up{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--bg);
+  border:1px solid var(--purple-border);border-left:4px solid var(--purple-accent);
+  border-radius:var(--radius);padding:13px 16px;margin-bottom:16px;box-shadow:var(--shadow-card)}
+.next-up[hidden]{display:none}
+.nu-body{flex:1;min-width:220px}
+.nu-eyebrow{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  color:var(--purple-accent);margin-bottom:2px}
+.nu-title{font-size:1.0625rem;font-weight:600;line-height:1.35;color:var(--text)}
+.nu-sub{font-size:0.875rem;color:var(--text2);margin-top:2px;line-height:1.45;max-width:60ch}
+.nu-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:9px;max-width:340px}
+.nu-fill{height:100%;background:var(--green-text);border-radius:3px;transition:width .3s}
+.nu-btn{font-family:inherit;font-size:0.9062rem;font-weight:600;padding:10px 18px;min-height:44px;
+  border-radius:20px;border:1px solid var(--brand);background:var(--brand);color:var(--brand-text);
+  cursor:pointer;white-space:nowrap;box-shadow:0 3px 0 rgba(0,0,0,0.22)}
+.nu-btn:hover{background:var(--brand-hover)}
+.nu-btn:active{transform:translateY(3px);box-shadow:none}
+.nu-btn[hidden]{display:none}
+
+/* ── Rail module progress bar — always-visible version of the done/total
+      that otherwise hides inside the module dropdown's labels ── */
+.rail-mod-prog{display:flex;align-items:center;gap:8px;margin-top:8px}
+.rail-mod-prog[hidden]{display:none}
+.rmp-bar{flex:1;height:5px;background:rgba(0,0,0,0.09);border-radius:3px;overflow:hidden}
+.rmp-fill{height:100%;background:var(--green-text);border-radius:3px;transition:width .3s}
+.rmp-lbl{font-size:0.75rem;color:var(--text2);font-variant-numeric:tabular-nums;white-space:nowrap}
+@media(prefers-color-scheme:dark){.rmp-bar{background:rgba(255,255,255,0.10)}}

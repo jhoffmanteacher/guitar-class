@@ -5,6 +5,65 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-20 — Practice streaks, two new progress views, and a smarter search
+
+### Added
+- **A practice streak.** Practicing on consecutive days now builds a visible
+  streak, shown on the Daily 5 card — miss a day and it resets, just like the
+  streak in Riff Roulette.
+- **"Keep practicing" list.** A new panel gathers every skill you've marked
+  "still working on it" across all 12 modules in one place, with a jump link
+  back to each one — no more hunting for what you meant to revisit.
+- **"My progress" overview.** A new panel shows a full ladder of all 12
+  modules with how many skills you've finished in each, plus your
+  total-skills-mastered count in one place.
+- **Arcade cards remember Change Up and Note Hunt too.** Those two games now
+  save your best BPM/score like the rest of the arcade, and Note Hunt gets its
+  first "best" chip on the hub.
+- **The Listening Coach remembers your last attempt.** Finishing a Coach
+  check now shows "last time vs. this time," so you can see yourself improve.
+- **Metronome accent + count-in.** Pick a time signature (2/4, 3/4, 4/4) and
+  beat 1 is now audibly accented, with an optional one-bar count-in before it
+  starts.
+- **An offline notice.** If your connection drops, a small banner lets you
+  know practice pages still work and videos/saving will resume once you're
+  back online.
+- **Chord-based song search.** Typing chord names into Find (e.g. "G C D")
+  now also returns songs you can play using only those chords.
+- **A teacher "trouble spots" view** ranking the class's least-mastered
+  skills, and **BPM personal records now keep a short history** instead of
+  overwriting your last one.
+
+### Fixed
+- **Progress saves now retry automatically** if a save fails on a spotty
+  connection, instead of silently staying unsaved until your next click.
+- **The "Start here" welcome card** now keeps keyboard focus inside it while
+  open, and returns focus to where you were when you close it.
+
+## 2026-07-20 — "Next up" card, easier tapping, and clearer text everywhere
+
+### Added
+- **A "Next up" card at the top of your practice page.** It shows which set
+  you're on, how many skills you have left ("only 2 more to finish this set!"),
+  and one big button for your next step — start at Station B, update your
+  checklist, or jump straight into the next set the moment you finish one.
+- **An always-visible module progress bar** in the left menu, right under the
+  module picker. You no longer have to open the dropdown to see how far along
+  you are — the green bar fills as you check off skills.
+
+### Changed
+- **Everything is easier to tap on a phone or Chromebook.** Buttons across the
+  site — set pills, station buttons, rating buttons, the metronome and timer
+  controls, close buttons — now have bigger touch areas, so fewer missed taps
+  with a guitar on your lap.
+- **No more tiny text.** The smallest text sizes site-wide were raised to a
+  readable minimum, and the gray "helper" text got darker (in both light and
+  dark mode) so it's easier to read at arm's length.
+- **Song Journey pages are friendlier to keyboards and text-size settings.**
+  Tabbing through a song page now shows a visible highlight on each button and
+  link, text respects your browser's text-size setting, and animations respect
+  your device's "reduce motion" preference — matching the main site.
+
 ## 2026-07-20 — Song Journey pages get a redesign, plus a fingerpicked bonus layer
 
 ### Added

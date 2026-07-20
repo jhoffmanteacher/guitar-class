@@ -554,7 +554,7 @@ SETS.push(
             title: 'Watch the lesson videos',
             steps: [
               {
-                text: 'Watch: <a href="https://youtu.be/FofCWizp43Y" target="_blank">How to read guitar TAB for beginners – JustinGuitar</a> (0:00–4:00) as a refresher, paying attention to how string order and chord stacks are shown.',
+                text: 'Watch: <a href="https://youtu.be/qR0O0bUl5_A" target="_blank">How to Read Guitar TAB - A Better Way To Read Music – Lauren Bateman</a> as a refresher, paying attention to how string order and chord stacks are shown.',
                 hint: 'You met TAB reading back in Module 2 — today\'s new ground is reading it confidently ABOVE fret 5, and writing your own.',
                 skills: [1],
                 response: { type: 'mc', prompt: 'In TAB, the TOP line represents:',

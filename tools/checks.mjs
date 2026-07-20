@@ -327,12 +327,39 @@ function checkJourneyPaths() {
   if (bad === 0) ok('all tabs/*.html journey references resolve');
 }
 
+/* The Firestore SDK version (currently 10.12.2) is hardcoded as a gstatic.com
+   URL fragment independently in app.js, index.html, and each tabs/*.html
+   page (sw.js doesn't reference it directly). Nothing else catches a page
+   drifting to a different version, so diff every occurrence found. */
+function checkSdkVersion() {
+  const FILES = ['app.js', 'sw.js', 'index.html', ...TAB_PAGES];
+  const found = new Map();   // version → Set(files)
+  for (const file of FILES) {
+    let src;
+    try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    for (const m of src.matchAll(/firebasejs\/(\d+\.\d+\.\d+)\//g)) {
+      if (!found.has(m[1])) found.set(m[1], new Set());
+      found.get(m[1]).add(file);
+    }
+  }
+  if (found.size === 0) { warn('no Firestore SDK version references found'); warnings++; return; }
+  if (found.size > 1) {
+    err(`Firestore SDK version mismatch — ${found.size} different versions in use:`);
+    for (const [v, files] of found) console.log(`${C.dim}      ${v}: ${[...files].join(', ')}${C.reset}`);
+    problems++;
+    return;
+  }
+  const [[v, files]] = found;
+  ok(`Firestore SDK version consistent (${v}) across ${files.size} files`);
+}
+
 function bumpServiceWorker() {
   head('3. Service-worker cache version');
   const swPath = join(ROOT, 'sw.js');
   const src = readFileSync(swPath, 'utf8');
   checkJourneyPaths();
   checkSwAssets(src);
+  checkSdkVersion();
   const fp = fingerprint();
   const date = new Date().toISOString().slice(0, 10);
   const want = `guitar-class-${date}-${fp}`;

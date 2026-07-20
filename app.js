@@ -36,6 +36,41 @@
   window.addEventListener('unhandledrejection', e => { console.error('[guitar-class] unhandled rejection:', e.reason); showBanner(); });
 })();
 
+/* ── Offline banner ──
+   sw.js already serves the cached shell while offline — this just tells the
+   student why videos/saving are paused, and clears itself on reconnect.
+   Mirrors the safety-net banner above (same look, same dismiss pattern). */
+(function(){
+  let el = null;
+  function showOfflineBanner(){
+    if (el) return;
+    try {
+      const d = document.createElement('div');
+      d.setAttribute('role','status');
+      d.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;'
+        + 'max-width:520px;margin:0 auto;padding:12px 44px 12px 16px;border-radius:12px;'
+        + 'background:#514a7d;color:#fff;font:14px/1.45 system-ui,-apple-system,sans-serif;'
+        + 'box-shadow:0 6px 24px rgba(0,0,0,.28)';
+      const msg = document.createElement('span');
+      msg.textContent = "You're offline — practice pages still work; videos and saving resume when you reconnect.";
+      const close = document.createElement('button');
+      close.setAttribute('aria-label','Dismiss');
+      close.textContent = '×';
+      close.style.cssText = 'position:absolute;top:8px;right:12px;background:none;border:0;'
+        + 'color:#fff;font-size:1.25rem;line-height:1;cursor:pointer';
+      close.onclick = () => hideOfflineBanner();
+      d.append(msg, close);
+      (document.body || document.documentElement).appendChild(d);
+      el = d;
+    } catch(_) { /* never let the banner crash the page */ }
+  }
+  function hideOfflineBanner(){
+    if (el) { el.remove(); el = null; }
+  }
+  window.addEventListener('offline', showOfflineBanner);
+  window.addEventListener('online', hideOfflineBanner);
+})();
+
 /* ── Firebase init ── */
 // The Firebase SDK + config load as separate <script>s. On some school
 // networks a content filter blocks gstatic.com, so they may never arrive —
@@ -81,6 +116,7 @@ let progress    = {};
 let responses   = {};
 let completed   = {};
 let games       = {};   // per-game bests from the games arcade (coach.js) — its own save category
+let streak      = { count:0, lastDay:null };   // site-wide practice streak, independent of any one game
 let gamesAccessOn = true; // whether the Games arcade is available to THIS student (teacher-controlled; see loadClassConfig)
 let saveTimer   = null;
 
@@ -207,7 +243,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     if(IS_TEACHER_MODE){ showTeacherApp(user); }
     else { await loadProgress(); await loadClassConfig(); showApp(user); }
   } else {
-    currentUser = null; progress = {}; responses = {}; completed = {}; games = {}; gamesAccessOn = true;
+    currentUser = null; progress = {}; responses = {}; completed = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true;
     _moduleStripStates = {};   // next user's first strip render is a first paint, not a celebration
     document.getElementById('auth-wall').style.display='block';
     document.getElementById('app').style.display='none';
@@ -225,25 +261,54 @@ function showApp(user){
   document.getElementById('user-area').innerHTML=userHeaderHtml(user);
   renderAll();
   applyGamesAccess();
-  maybeShowWelcome();
+  // A direct #games deep-link takes priority over the one-time welcome card —
+  // opening both at once would stack two aria-modal dialogs on top of each other.
+  if(!maybeShowApp_gamesHash()) maybeShowWelcome();
 }
 
 /* "Start here" onboarding card (Phase 5): shown once on first load only.
    localStorage may be unavailable in private mode — fall back to showing it. */
 function maybeShowApp_gamesHash(){
-  if(location.hash==='#games' && typeof openGamesScreen==='function') openGamesScreen();
+  if(location.hash==='#games' && typeof openGamesScreen==='function'){ openGamesScreen(); return true; }
+  return false;
 }
 function maybeShowWelcome(){
   let seen=false;
   try{ seen = localStorage.getItem('gc-welcomed')==='1'; }catch(e){}
   if(!seen) openWelcome();
 }
+let welcomeReturnFocus=null;
+function welcomeFocusables(){
+  const card=document.querySelector('#welcome-overlay .welcome-card');
+  if(!card) return [];
+  return Array.from(card.querySelectorAll('button, [href], input, select, textarea, [tabindex]'))
+    .filter(el=>!el.disabled && el.tabIndex!==-1 && el.offsetParent!==null);
+}
+function welcomeKeydown(e){
+  if(e.key!=='Tab') return;
+  const items=welcomeFocusables();
+  if(!items.length) return;
+  const first=items[0], last=items[items.length-1];
+  if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+}
 function openWelcome(){
-  const o=document.getElementById('welcome-overlay'); if(o) o.style.display='flex';
+  const o=document.getElementById('welcome-overlay'); if(!o) return;
+  welcomeReturnFocus=document.activeElement;
+  o.style.display='flex';
+  const card=o.querySelector('.welcome-card');
+  const items=welcomeFocusables();
+  const target=items[0] || card;
+  if(target===card) card.setAttribute('tabindex','-1');
+  if(target) target.focus();
+  o.addEventListener('keydown', welcomeKeydown);
 }
 function dismissWelcome(){
   const o=document.getElementById('welcome-overlay'); if(o) o.style.display='none';
+  if(o) o.removeEventListener('keydown', welcomeKeydown);
   try{ localStorage.setItem('gc-welcomed','1'); }catch(e){}
+  if(welcomeReturnFocus && typeof welcomeReturnFocus.focus==='function') welcomeReturnFocus.focus();
+  welcomeReturnFocus=null;
 }
 
 /* ── Firestore ── */
@@ -266,8 +331,9 @@ async function loadProgress(){
       responses     = doc.data().responses || {};
       completed     = doc.data().completed || {};
       games         = doc.data().games || {};
-    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; games={}; restoreLocalPlace(); }
-  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; games={}; restoreLocalPlace(); }
+      streak        = doc.data().streak || { count:0, lastDay:null };
+    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; games={}; streak={ count:0, lastDay:null }; restoreLocalPlace(); }
+  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; games={}; streak={ count:0, lastDay:null }; restoreLocalPlace(); }
 }
 
 /* ── Games access (teacher-controlled) ──
@@ -324,10 +390,33 @@ function saveLocalPlace(){
   }catch(e){/* ignore */}
 }
 
-function onResponseChange(key, value){
-  responses[key] = value;
+/* PR (personal-record BPM) response slots keep a short history instead of a
+   single overwritten value, so a student (and the teacher view) can see
+   progress over time. Legacy docs still have a bare scalar for these keys —
+   prLatestValue() below reads either shape. */
+function prLatestValue(raw){
+  if(Array.isArray(raw)) return raw.length ? (raw[raw.length-1].value || '') : '';
+  return raw || '';
+}
+const _prEditingKeys = new Set();
+function onResponseChange(key, value, isPR){
+  if(isPR){
+    const arr = Array.isArray(responses[key]) ? responses[key].slice()
+      : (responses[key] != null && responses[key] !== '' ? [{value:responses[key], date:null}] : []);
+    if(_prEditingKeys.has(key) && arr.length){
+      arr[arr.length-1] = {value, date:arr[arr.length-1].date};
+    } else {
+      arr.push({value, date:new Date().toISOString()});
+      if(arr.length > 8) arr.shift();
+      _prEditingKeys.add(key);
+    }
+    responses[key] = arr;
+  } else {
+    responses[key] = value;
+  }
   saveResponses();
 }
+function onResponsePRBlur(key){ _prEditingKeys.delete(key); }
 /* Graded in-step MC (factual, has answer:). Stores the choice TEXT (so the
    teacher dashboard reads it unchanged); recolors and reveals the explanation. */
 function onStepMcSelect(key, btn){
@@ -366,6 +455,7 @@ async function flushSave(){
   if(keys.has('responses')) payload.responses = responses;
   if(keys.has('completed')) payload.completed = completed;
   if(keys.has('games'))     payload.games     = games;
+  if(keys.has('streak'))    payload.streak    = streak;
   try{
     await ensureDb();
     await db.collection('progress').doc(currentUser.uid).set(payload,{merge:true});
@@ -373,6 +463,8 @@ async function flushSave(){
   } catch(e){
     keys.forEach(k=>_dirtyKeys.add(k));   // keep dirty so the next save retries
     setSaveMsg('Save failed — check connection');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(flushSave, 3000);   // auto-retry once, then re-arms again on further failure
   }
 }
 function saveResponses(){ queueSave('responses'); }
@@ -383,8 +475,26 @@ function onCompleteChange(key, isDone){
 }
 function saveCompleted(){ queueSave('completed'); }
 function saveGames(){ queueSave('games'); }   // per-game bests (games arcade, coach.js)
+function saveStreak(){ queueSave('streak'); }
 
 function saveProgress(){ queueSave('skills','place'); }
+
+/* Site-wide practice streak, independent of any one game (see coach.js's
+   rrSetDone for the same day-string / yesterday-comparison pattern applied
+   to the Riff Roulette game specifically). */
+function dayStr(d){
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+function bumpPracticeStreak(){
+  if(!currentUser || isDevBypassUser()) return;
+  const today = dayStr(new Date());
+  if(streak.lastDay === today) return;
+  const y = new Date();
+  y.setDate(y.getDate() - 1);
+  streak.count = streak.lastDay === dayStr(y) ? (streak.count || 0) + 1 : 1;
+  streak.lastDay = today;
+  saveStreak();
+}
 let _saveMsgT = null;
 function setSaveMsg(msg, clearAfterMs){
   clearTimeout(_saveMsgT);
@@ -866,6 +976,8 @@ function findStringMatches(text){
 /* Longest names first so the alternation matches them before the 1-char names */
 const CHORD_NAMES = ['F#m','C#m','Em','Am','Dm','Bm','B7','A5','E5','G5','D5','C5','C','G','D','A','E','F'];
 const CHORD_RE = new RegExp('(^|[^A-Za-z0-9#])(' + CHORD_NAMES.join('|') + ')(?![A-Za-z0-9#])(?![ -][Ss]hape)(?![ -][Mm]inor)(?![ -][Pp]entatonic)(?![ -][Ss]cale)(?![ -][Mm]ajor[ -](?:pentatonic|scale))', 'g');
+// lowercase chord name → canonical CHORD_NAMES spelling, for matching typed search queries like "g c d"
+const CHORD_NAME_LOOKUP = new Map(CHORD_NAMES.map(c => [c.toLowerCase(), c]));
 const CHORD_SKIP_TAGS = new Set(['A','BUTTON','SCRIPT','STYLE','TEXTAREA','INPUT','LABEL','SELECT']);
 const CHORD_SKIP_CLASSES = ['skill-badge','chord-link','string-link','note-link','rp-trigger','chord-box-label','chord-diagrams','step-resp-mc-opt','tab','nolink'];
 
@@ -1247,6 +1359,82 @@ function renderProgressStrip(){
       ? `Module ${currentInfo.num} complete!`
       : 'Finish all skills to complete this module';
   }
+  // Rail module progress bar — same "clean until started" rule as the pills:
+  // hidden until the first skill in the module is marked got-it.
+  const prog = document.getElementById('rail-mod-prog');
+  if(prog){
+    const show = !!(currentInfo && currentInfo.total > 0 && currentInfo.done > 0);
+    prog.hidden = !show;
+    if(show){
+      const fill = document.getElementById('rmp-fill');
+      const lbl  = document.getElementById('rmp-lbl');
+      if(fill) fill.style.width = Math.round(currentInfo.done / currentInfo.total * 100) + '%';
+      if(lbl)  lbl.textContent = `${currentInfo.done}/${currentInfo.total}`;
+      prog.setAttribute('aria-valuemax', String(currentInfo.total));
+      prog.setAttribute('aria-valuenow', String(currentInfo.done));
+      prog.setAttribute('aria-valuetext', `${currentInfo.done} of ${currentInfo.total} skills`);
+    }
+  }
+  renderNextUp();
+}
+
+/* ── "Next up" card (top of the practice view) ─────────────────────────
+   Tells the student where they are, how close the current set is to done,
+   and the one obvious next action — so a returning student never has to
+   re-decide what to do from the full menu. Refreshed by renderProgressStrip
+   (module change + every skill toggle) and by activateSet (set change). */
+function renderNextUp(){
+  const card = document.getElementById('next-up-card');
+  if(!card) return;
+  const w = SETS.find(x=>x.id===lastSetId);
+  // Module review (mrN) and not-yet-loaded states keep the card hidden —
+  // the review panel narrates its own next steps.
+  if(!w || !w.skills || !w.skills.length){ card.hidden = true; return; }
+  const eyebrow = document.getElementById('nu-eyebrow');
+  const title   = document.getElementById('nu-title');
+  const sub     = document.getElementById('nu-sub');
+  const fill    = document.getElementById('nu-fill');
+  const btn     = document.getElementById('nu-btn');
+  const { done, total } = setCompletion(w);
+  const complete = total > 0 && done === total;
+  const moduleSets = SETS.filter(x=>x.moduleNum===w.moduleNum);
+  const next = moduleSets[moduleSets.indexOf(w)+1] || null;
+  card.hidden = false;
+  fill.style.width = (total ? Math.round(done/total*100) : 0) + '%';
+  btn.hidden = false;
+  if(!complete){
+    const left = total - done;
+    eyebrow.textContent = 'Keep going';
+    title.textContent = w.label + (w.subtitle ? ` — ${w.subtitle}` : '');
+    if(done === 0){
+      sub.textContent = `${total} skills to learn in this set. Work the stations, then check off each skill as you get it.`;
+      btn.textContent = 'Start at Station B';
+      btn.onclick = ()=> railStation('station-b');
+    } else {
+      sub.textContent = left === 1
+        ? `${done} of ${total} skills checked — just 1 more to finish this set!`
+        : `${done} of ${total} skills checked — only ${left} more to finish this set!`;
+      btn.textContent = 'Update my checklist';
+      btn.onclick = ()=> railStation('checklist');
+    }
+  } else if(next && !next.locked && !next.comingSoon){
+    eyebrow.textContent = 'Set complete';
+    title.textContent = `✓ ${w.label} done — nice work!`;
+    sub.textContent = `Up next: ${next.label}${next.subtitle ? ` — ${next.subtitle}` : ''}.`;
+    btn.textContent = `Start ${next.label}`;
+    btn.onclick = ()=>{ leaveTopPanelForSet(); lastSetId = next.id; activateSet(next.id); saveProgress(); };
+  } else if(!next && MODULE_REVIEWS[w.moduleNum] && !isModuleReviewLocked(w.moduleNum)){
+    eyebrow.textContent = 'Set complete';
+    title.textContent = `✓ ${w.label} done — that's every set!`;
+    sub.textContent = 'Wrap up the module with the self-check review.';
+    btn.textContent = 'Go to Module review';
+    btn.onclick = ()=>{ leaveTopPanelForSet(); lastSetId = `mr${w.moduleNum}`; activateSet(`mr${w.moduleNum}`); saveProgress(); };
+  } else {
+    eyebrow.textContent = 'Set complete';
+    title.textContent = `✓ ${w.label} done — nice work!`;
+    sub.textContent = next ? 'The next set is coming soon.' : 'You’ve finished everything here for now.';
+    btn.hidden = true;
+  }
 }
 
 // Footer "Report a problem" — build the mailto at click time so the body carries
@@ -1447,6 +1635,7 @@ function rememberActiveScroll(){
 }
 window.addEventListener('pagehide', rememberActiveScroll);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') rememberActiveScroll(); });
+window.addEventListener('pagehide', function(){ if(_dirtyKeys.size){ clearTimeout(saveTimer); flushSave(); } });
 
 function activateSet(id){
   // Sequential-gate backstop: never open a set that's still locked (e.g. from a
@@ -1474,6 +1663,7 @@ function activateSet(id){
   document.querySelectorAll('.module-songs').forEach(el=>el.classList.toggle('active', parseInt(el.dataset.module)===activeMod));
   renderChordBoxes();
   syncRailStations();   // refresh the rail's "This set" station switcher for the new set
+  renderNextUp();       // refresh the "Next up" card for the newly active set
   // Restore where the student last was in this set — or top on a first open.
   window.scrollTo(0, Object.prototype.hasOwnProperty.call(setScrollPos, id) ? setScrollPos[id] : 0);
 }
@@ -1531,7 +1721,7 @@ function buildSetHeader(w){
 
 function buildComingSoon(w){
   const header = buildSetHeader(w);
-  const sub = w.subtitle ? `<div class="obj-main">${w.subtitle}</div>` : '';
+  const sub = w.subtitle ? `<h2 class="obj-main">${w.subtitle}</h2>` : '';
   return `<div class="obj-card set-head">${header}${sub}</div>
   <div class="coming"><div class="big">&#x1F3B8;</div><p>This set's content will appear here when it's ready.<br>Check back soon!</p></div>`;
 }
@@ -1541,7 +1731,7 @@ function buildSet(w){
   // skill bullets (the old "I CAN…" objective line is no longer shown).
   const printBtn = `<button type="button" class="print-set-btn" onclick="printSet('${w.id}')" title="Print this set as a one-page handout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg>Print this set</button>`;
   const pill = `<div class="obj-set">${w.title ? `<span class="obj-set-tag">${w.title}</span>` : ''}${printBtn}</div>`;
-  const titleHtml = w.unit ? `<div class="obj-main obj-topic">${w.unit}</div>` : '';
+  const titleHtml = w.unit ? `<h2 class="obj-main obj-topic">${w.unit}</h2>` : '';
   const items = (w.skillFocus||'').split(' · ')
     .map(s => s.trim())
     .filter(Boolean)
@@ -1673,12 +1863,14 @@ function buildStations(w, stationId){
       : '';
     const respHtml = s.response ? (()=>{
       const key = `${w.id}-${ns}-${i}`;
-      const stored = responses[key] || '';
+      const isPR = s.response.type === 'short' && (/personal record/i.test(s.response.prompt||'') || /\bBPM\b/i.test(s.response.prompt||''));
+      const stored = isPR ? prLatestValue(responses[key]) : (responses[key] || '');
       const promptHtml = s.response.prompt ? `<div class="step-resp-prompt">${escHtml(s.response.prompt)}</div>` : '';
       const labelHtml = `<div class="step-resp-label">&#x270F;&#xFE0F; Your response</div>`;
       if(s.response.type === 'short'){
         const ph = s.response.placeholder || 'Type your answer here…';
-        return `<div class="step-resp">${labelHtml}${promptHtml}<textarea class="step-resp-input" rows="2" placeholder="${escAttr(ph)}" oninput="onResponseChange('${key}', this.value)">${escHtml(stored)}</textarea></div>`;
+        const prAttrs = isPR ? ` onblur="onResponsePRBlur('${key}')"` : '';
+        return `<div class="step-resp">${labelHtml}${promptHtml}<textarea class="step-resp-input" rows="2" placeholder="${escAttr(ph)}" oninput="onResponseChange('${key}', this.value${isPR?', true':''})"${prAttrs}>${escHtml(stored)}</textarea></div>`;
       }
       if(s.response.type === 'mc' && Array.isArray(s.response.choices)){
         const r = s.response;
@@ -1724,10 +1916,10 @@ function buildStations(w, stationId){
     const ns = `${baseNs}-sec${gi}`;
     const open = gi===0 ? ' open' : '';
     return `<div class="sc-sec${open}">
-      <button type="button" class="sc-sec-head" aria-expanded="${gi===0}" onclick="toggleStationSection(this)">
+      <h3><button type="button" class="sc-sec-head" aria-expanded="${gi===0}" onclick="toggleStationSection(this)">
         <span class="sc-sec-chev">&#x25B6;</span>
         <span class="sc-sec-title"><span class="sc-sec-num">${gi+1}</span>${sec.title}</span>
-      </button>
+      </button></h3>
       <div class="sc-sec-body"><ul class="steps">${stepsHtml(sec.steps, ns)}</ul></div>
     </div>`;
   }).join('');
@@ -1744,7 +1936,7 @@ function buildStations(w, stationId){
       : '';
     return `
     <div class="dp${cls}" id="${w.id}-dp-${id}">
-      <div class="dp-head"><span class="st-badge ${badgeClass}">${badge}</span><div class="dp-title">${s.title}</div></div>
+      <div class="dp-head"><span class="st-badge ${badgeClass}">${badge}</span><h3 class="dp-title">${s.title}</h3></div>
       ${flexNote}
       ${body}
     </div>`;
@@ -1841,10 +2033,10 @@ function buildModuleSongs(moduleNum){
   // Collapsible section — reuses the Station B/C collapse (toggleStationSection);
   // starts closed so it sits quietly below the set content.
   return `<div class="sc-sec">
-      <button type="button" class="sc-sec-head" aria-expanded="false" onclick="toggleStationSection(this)">
+      <h3><button type="button" class="sc-sec-head" aria-expanded="false" onclick="toggleStationSection(this)">
         <span class="sc-sec-chev">&#x25B6;</span>
         <span class="sc-sec-title">&#x1F3B5; Songs</span>
-      </button>
+      </button></h3>
       <div class="sc-sec-body">${legend}<div class="card">${rows}</div></div>
     </div>`;
 }
@@ -1988,7 +2180,9 @@ function buildDaily5(){
       </div>`;
     }
   }
-  return `<div class="daily5-head"><span>&#x26A1; Daily 5 &mdash; today’s warm-up</span><button type="button" class="tp-close" onclick="closeDaily5()" aria-label="Close Daily 5">&#x2715;</button></div>
+  const streakChip = streak.count > 1
+    ? `<span class="games-card-best">&#x1F525; ${streak.count}-day streak</span>` : '';
+  return `<div class="daily5-head"><div style="display:flex;align-items:center;gap:8px"><h3 style="font:inherit;margin:0">&#x26A1; Daily 5 &mdash; today’s warm-up</h3>${streakChip}</div><button type="button" class="tp-close" onclick="closeDaily5()" aria-label="Close Daily 5">&#x2715;</button></div>
     <ol class="routine-list">${items}</ol>${challenge}`;
 }
 /* Station C's warm-up card opens the Daily 5 as a popup over the activities —
@@ -2066,7 +2260,7 @@ function buildModuleReview(mr){
     </div>
     <div class="obj-card">
       <span class="mr-tag">Module ${mr.moduleNum} self-assessment</span>
-      <div class="obj-main">${mr.module}</div>
+      <h2 class="obj-main">${mr.module}</h2>
       <div class="obj-sub">Rate yourself on the module's key skills, then reflect.</div>
     </div>
     <div class="mr-skills">${rows}</div>
@@ -2296,7 +2490,7 @@ function buildChecklist(w){
     const whereBtn = (skillNum && skillTaughtStation(w, Number(skillNum)))
       ? `<button type="button" class="sk-where-btn" onclick="showSkillLesson('${w.id}', ${skillNum})" title="Jump to the steps that teach this">&#x1F4CD; Show me where</button>` : '';
     const practicePanel = s.practice ? renderPracticePanel(s.practice, s.id, w.id) : '';
-    return `<div class="skill-row">
+    return `<div class="skill-row" data-sid="${escAttr(s.id)}">
       <div class="sktxt"><div class="sn" style="flex-shrink:0;margin-top:0;margin-right:8px">${i+1}</div><div class="sk-body"><div class="sk-label">${s.text}</div>${helper}${practiceBtn}${whereBtn}</div></div>
       <div class="skchk-cell working-col${st==='working'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='working'}" aria-label="Still working on it: ${escAttr(s.text)}" onclick="toggleSkill('${s.id}','${w.id}','working')" title="Still working on it"><div class="skbox">${st==='working'?wkSvg:''}</div></div>
       <div class="skchk-cell gotit-col${st==='gotit'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='gotit'}" aria-label="I've got it: ${escAttr(s.text)}" onclick="toggleSkill('${s.id}','${w.id}','gotit')" title="I've got it!"><div class="skbox">${st==='gotit'?giSvg:''}</div></div>
@@ -2427,18 +2621,15 @@ function toggleSkill(sid, wid, which){
     else progress[sid]='working';
   } else {
     if(cur==='gotit') progress[sid]='working';
-    else progress[sid]='gotit';
+    else { progress[sid]='gotit'; bumpPracticeStreak(); }
   }
   const wkSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="var(--amber-text)" stroke-width="1.5"/><path d="M6 4v2.2l1.4 1.4" stroke="var(--amber-text)" stroke-width="1.5" stroke-linecap="round"/></svg>`;
   const giSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green-text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const w=SETS.find(x=>x.id===wid);
-  document.querySelectorAll(`.week-panel[data-id="${wid}"] .skill-row`).forEach(row=>{
+  document.querySelectorAll(`.week-panel[data-id="${wid}"] .skill-row[data-sid="${CSS.escape(sid)}"]`).forEach(row=>{
     const wkCell = row.querySelector('.working-col');
     const giCell = row.querySelector('.gotit-col');
     if(!wkCell||!giCell) return;
-    const onclick = wkCell.getAttribute('onclick')||'';
-    const m = onclick.match(/'([^']+)'/);
-    if(!m || m[1]!==sid) return;
     const st = progress[sid]||'none';
     wkCell.classList.toggle('active', st==='working');
     giCell.classList.toggle('active', st==='gotit');
@@ -2499,7 +2690,7 @@ function toggleTranslate(){
    ══════════════════════════════════════════════ */
 let metroRunning=false, metroInterval=null, audioCtx=null;
 function getAudioCtx(){ if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
-function beep(freq,dur){ const ctx=getAudioCtx(); const o=ctx.createOscillator(),g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=freq; g.gain.setValueAtTime(0.4,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur); o.start(); o.stop(ctx.currentTime+dur); }
+function beep(freq,dur,gain){ const ctx=getAudioCtx(); const o=ctx.createOscillator(),g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=freq; g.gain.setValueAtTime(gain==null?0.4:gain,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur); o.start(); o.stop(ctx.currentTime+dur); }
 /* Reusable single-note player. Karplus-Strong plucked-string
    synthesis: a short noise burst is fed into a feedback delay
    line whose length equals one period of the target pitch. A
@@ -2659,13 +2850,82 @@ function coachChordBtnRowHtml(chords){
   if(!spec.length) return '';
   return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}" onclick="coachOpen(this)" title="4 count-in clicks, then strum on every beat — the mic listens and gives feedback">&#x1F3A4; Listening Coach</button></div>`;
 }
-function tick(){ if(!window.coachMicLive) beep(880,0.06); const dot=document.getElementById('metro-dot'); if(dot){ dot.classList.add('flash'); setTimeout(()=>dot.classList.remove('flash'),80); } }
+let metroMeter=4, metroCountIn=false, metroBeatIdx=0, metroCountInTimeouts=[];
+function getMetroMeter(){ return metroMeter; }
+function setMetroMeter(n){
+  metroMeter = n;
+  document.querySelectorAll('#metro-popup .meter-btn').forEach(b=>{
+    const on = b.id === 'meter-'+n;
+    b.classList.toggle('sel', on);
+    b.setAttribute('aria-checked', on ? 'true' : 'false');
+    b.tabIndex = on ? 0 : -1;
+  });
+  if(metroRunning){ stopMetro(); startMetro(false); }
+}
+/* Arrow-key navigation for the 2/4-4/4-3/4 radiogroup (WAI-ARIA roving-tabindex
+   pattern): only the selected meter button is tabbable; arrows move selection
+   and focus among the other options. */
+function meterKeydown(e){
+  const nav = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'];
+  if(!nav.includes(e.key)) return;
+  e.preventDefault();
+  const order = [2,4,3];
+  const idx = order.indexOf(metroMeter);
+  let next;
+  if(e.key==='Home') next = order[0];
+  else if(e.key==='End') next = order[order.length-1];
+  else if(e.key==='ArrowRight' || e.key==='ArrowDown') next = order[(idx+1)%order.length];
+  else next = order[(idx-1+order.length)%order.length];
+  setMetroMeter(next);
+  document.getElementById('meter-'+next).focus();
+}
+function setMetroCountIn(on){ metroCountIn = !!on; }
+/* Beat 1 of the bar rings out louder and higher — the downbeat you count "1" on
+   — everything else in the bar is the plain click. */
+function tick(){
+  if(!window.coachMicLive){
+    const accent = metroBeatIdx === 0;
+    beep(accent ? 1320 : 880, accent ? 0.08 : 0.06, accent ? 0.55 : 0.4);
+  }
+  const dot=document.getElementById('metro-dot'); if(dot){ dot.classList.add('flash'); setTimeout(()=>dot.classList.remove('flash'),80); }
+  metroBeatIdx = (metroBeatIdx + 1) % getMetroMeter();
+}
 function getBpm(){ return parseInt(document.getElementById('bpm-slider').value); }
-function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; if(metroRunning){ stopMetro(); startMetro(); } }
-function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Math.min(220,Math.max(40,getBpm()+d)); document.getElementById('bpm-display').textContent=s.value; if(metroRunning){ stopMetro(); startMetro(); } }
-function startMetro(){ if(window.coachMicLive) return; tick(); metroInterval=setInterval(tick,Math.round(60000/getBpm())); metroRunning=true; document.getElementById('metro-btn').innerHTML='&#x23F8; Stop'; }
-function stopMetro(){ clearInterval(metroInterval); metroRunning=false; document.getElementById('metro-btn').innerHTML='&#x25B6; Start'; }
-function toggleMetro(){ if(metroRunning) stopMetro(); else startMetro(); }
+function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; if(metroRunning){ stopMetro(); startMetro(false); } }
+function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Math.min(220,Math.max(40,getBpm()+d)); document.getElementById('bpm-display').textContent=s.value; if(metroRunning){ stopMetro(); startMetro(false); } }
+/* useCountIn defaults true (the Start button's toggle); BPM/meter changes
+   while already running pass false so they don't replay the lead-in bar. */
+function startMetro(useCountIn){
+  if(window.coachMicLive) return;
+  metroRunning = true;
+  metroBeatIdx = 0;
+  document.getElementById('metro-btn').innerHTML='&#x23F8; Stop';
+  const beatMs = Math.round(60000/getBpm());
+  const beginRun = () => {
+    if(!metroRunning) return;
+    metroBeatIdx = 0;
+    tick();
+    metroInterval = setInterval(tick, beatMs);
+  };
+  if(useCountIn !== false && metroCountIn){
+    const meter = getMetroMeter();
+    for(let i=0; i<meter; i++){
+      metroCountInTimeouts.push(setTimeout(()=>{ if(metroRunning) tick(); }, i*beatMs));
+    }
+    metroCountInTimeouts.push(setTimeout(beginRun, meter*beatMs));
+  } else {
+    beginRun();
+  }
+}
+function stopMetro(){
+  clearInterval(metroInterval);
+  metroCountInTimeouts.forEach(clearTimeout);
+  metroCountInTimeouts = [];
+  metroRunning=false;
+  metroBeatIdx=0;
+  document.getElementById('metro-btn').innerHTML='&#x25B6; Start';
+}
+function toggleMetro(){ if(metroRunning) stopMetro(); else startMetro(true); }
 
 /* ── Timer ── */
 let timerRunning=false, timerInterval=null, timerSecs=30, timerSelected=30;
@@ -3032,7 +3292,7 @@ initBackToTop();
       close Games too so the top of the page stays tidy. (The Daily 5 is a
       popup opened from Station C now, not a top-bar panel.) ── */
 function closeTopPanels(except){
-  ['games', 'songs-hub', 'search'].forEach(k => {
+  ['games', 'songs-hub', 'search', 'keep-practicing', 'my-progress'].forEach(k => {
     if(k === except) return;
     const p = document.getElementById(k === 'games' ? 'games-screen' : k + '-panel');
     if(p && !p.hasAttribute('hidden')){
@@ -3044,12 +3304,24 @@ function closeTopPanels(except){
   });
 }
 
+/* Move keyboard/screen-reader focus into a just-opened top-bar panel — mirrors
+   toggleSearch()'s explicit focus of its input. The panel's own close button
+   is always present and focusable, so focus lands there when the panel has no
+   more specific "first interactive thing" of its own. */
+function focusPanel(p){
+  if(!p) return;
+  const close = p.querySelector('.tp-close');
+  if(close){ close.focus(); return; }
+  p.setAttribute('tabindex', '-1');
+  p.focus();
+}
+
 /* Picking a Set or Module review from the rail while Songs/Search/Games is
    open used to silently switch the set underneath the still-open panel — the
    click "did nothing" as far as the student could see. Close whichever panel
    is covering the page and scroll up so the new set is actually visible. */
 function leaveTopPanelForSet(){
-  const covering = ['games-screen', 'songs-hub-panel', 'search-panel']
+  const covering = ['games-screen', 'songs-hub-panel', 'search-panel', 'keep-practicing-panel', 'my-progress-panel']
     .some(id => { const el = document.getElementById(id); return el && !el.hasAttribute('hidden'); });
   if(!covering) return;
   closeTopPanels('');
@@ -3143,6 +3415,34 @@ async function buildSearchIndex(){
       }));
     });
   });
+  /* Songs — also indexed by the chords named in their meta text, so a query
+     like "G C D" can find every song playable with just those shapes.
+     Module 1's songs live on SETS; modules 2+ live in MODULE_SONGS. Dedup by
+     name (a song taught in multiple modules only needs one entry to search). */
+  const songSeen = new Map();
+  const indexSong = (song, moduleNum, wid) => {
+    if(!song || !song.name) return;
+    const metaText = song.meta || '';
+    const chords = new Set();
+    const re = new RegExp(CHORD_RE.source, 'g');
+    let m;
+    while((m = re.exec(metaText)) !== null) chords.add(m[2]);
+    const existing = songSeen.get(song.name);
+    if(existing){
+      /* Same song taught again in a later module (e.g. Module 1's "Listen"
+         intro vs. its full chord chart in Module 6/7) — merge in any chords
+         found there instead of letting the earlier, often chordless, entry
+         permanently hide the song from chord-based search. */
+      chords.forEach(c => { if(!existing.chords.includes(c)) existing.chords.push(c); });
+      return;
+    }
+    const entry = { kind: 'song', moduleNum, wid, text: song.name + (metaText ? ' ' + metaText : ''), chords: [...chords] };
+    songSeen.set(song.name, entry);
+    ix.push(entry);
+  };
+  SETS.forEach(w => { if(w.moduleNum === 1 && w.songs) w.songs.forEach(sg => indexSong(sg, 1, w.id)); });
+  const MS2 = globalThis.MODULE_SONGS || {};
+  Object.keys(MS2).forEach(m => (MS2[m] || []).forEach(sg => indexSong(sg, Number(m), null)));
   return ix;
 }
 async function toggleSearch(){
@@ -3169,16 +3469,38 @@ function runSearch(q){
   q = (q || '').trim().toLowerCase();
   if(q.length < 2){ res.innerHTML = `<div class="coach-tip">Type at least two letters…</div>`; return; }
   const terms = q.split(/\s+/).filter(Boolean);
+  /* "G C D" — a space-separated list of known chord names — asks "what can I
+     play with just these shapes?" rather than a text search. Match songs
+     whose whole indexed chord set is covered by the chords the student named
+     (a student who knows only G, C, D can play a song that uses G and C, but
+     not one that also needs Em). Needs 2+ terms so an ordinary word that
+     happens to share a chord's spelling (e.g. "am") doesn't get hijacked. */
+  const isChordQuery = terms.length >= 2 && terms.every(t => CHORD_NAME_LOOKUP.has(t));
   const scored = [];
-  for(const e of searchIndex){
-    const hay = e.text.toLowerCase();
-    if(!terms.every(t => hay.includes(t))) continue;
-    scored.push({ e, score: (e.kind === 'skill' ? 2 : e.kind === 'set' ? 1 : 0) + (hay.indexOf(terms[0]) < 40 ? 1 : 0) });
-    if(scored.length > 400) break;
+  if(isChordQuery){
+    const known = new Set(terms.map(t => CHORD_NAME_LOOKUP.get(t)));
+    for(const e of searchIndex){
+      if(e.kind !== 'song' || !e.chords || !e.chords.length) continue;
+      if(!e.chords.every(c => known.has(c))) continue;
+      scored.push({ e, score: e.chords.length });
+      if(scored.length > 400) break;
+    }
+  } else {
+    for(const e of searchIndex){
+      const hay = e.text.toLowerCase();
+      if(!terms.every(t => hay.includes(t))) continue;
+      scored.push({ e, score: (e.kind === 'skill' ? 2 : e.kind === 'set' ? 1 : 0) + (hay.indexOf(terms[0]) < 40 ? 1 : 0) });
+      if(scored.length > 400) break;
+    }
   }
   scored.sort((a, b) => b.score - a.score || a.e.moduleNum - b.e.moduleNum);
   const top = scored.slice(0, 25);
-  if(!top.length){ res.innerHTML = `<div class="coach-tip">No matches for &ldquo;${escHtml(q)}&rdquo; — try a shorter word.</div>`; return; }
+  if(!top.length){
+    res.innerHTML = isChordQuery
+      ? `<div class="coach-tip">No songs use only ${escHtml(terms.join(', ').toUpperCase())} yet — try adding another chord.</div>`
+      : `<div class="coach-tip">No matches for &ldquo;${escHtml(q)}&rdquo; — try a shorter word.</div>`;
+    return;
+  }
   const snippet = (text) => {
     const at = text.toLowerCase().indexOf(terms[0]);
     const start = Math.max(0, at - 30);
@@ -3188,13 +3510,17 @@ function runSearch(q){
     return escHtml(cut);
   };
   res.innerHTML = top.map(({e}) => {
-    const where = `Module ${e.moduleNum} · ${escHtml(e.label || '')}` +
-      (e.kind === 'step' ? ` · Station ${e.station.toUpperCase()}` : e.kind === 'skill' ? ' · Skill' : '');
+    const where = e.kind === 'song'
+      ? `Module ${e.moduleNum} · Song`
+      : `Module ${e.moduleNum} · ${escHtml(e.label || '')}` +
+        (e.kind === 'step' ? ` · Station ${e.station.toUpperCase()}` : e.kind === 'skill' ? ' · Skill' : '');
     const onclick = e.kind === 'step'
       ? `searchGo(${e.moduleNum},'${e.wid}','${e.station}',${e.secIdx},${e.stepIdx})`
       : e.kind === 'skill' && e.skillNum != null
         ? `searchGoSkill(${e.moduleNum},'${e.wid}',${e.skillNum})`
-        : `searchGoSet(${e.moduleNum},'${e.wid}')`;
+        : e.kind === 'song'
+          ? (e.wid ? `searchGoSet(${e.moduleNum},'${e.wid}')` : `songHubGoModule(${e.moduleNum})`)
+          : `searchGoSet(${e.moduleNum},'${e.wid}')`;
     return `<button type="button" class="search-hit" onclick="${onclick}">
       <span class="search-hit-where">${where}</span>
       <span class="search-hit-text">${snippet(e.text)}</span>
@@ -3237,6 +3563,77 @@ async function searchGoSet(moduleNum, wid){
   await onModuleChange(moduleNum, wid);
   saveProgress();
   // onModuleChange → activateSet restored the target set's scroll (top if new).
+}
+
+/* ── 🔁 Keep practicing: every skill marked "still working on it", grouped
+   by module, with a jump link back to that skill ── */
+async function toggleKeepPracticing(){
+  const p = document.getElementById('keep-practicing-panel');
+  const btn = document.getElementById('keep-practicing-btn');
+  if(!p) return;
+  const open = p.hasAttribute('hidden');
+  if(!open){ p.setAttribute('hidden', ''); if(btn) btn.setAttribute('aria-expanded', 'false'); return; }
+  closeTopPanels('keep-practicing');
+  p.removeAttribute('hidden');
+  if(btn) btn.setAttribute('aria-expanded', 'true');
+  const head = `<div class="daily5-head"><span>&#x1F501; Keep practicing</span><button type="button" class="tp-close" onclick="toggleKeepPracticing()" aria-label="Close keep practicing">&#x2715;</button></div>`;
+  p.innerHTML = `${head}<div class="coach-tip">Loading…</div>`;
+  await ensureAllModuleData();
+  const byModule = new Map();
+  SETS.forEach(w => {
+    (w.skills || []).forEach(sk => {
+      if(progress[sk.id] !== 'working') return;
+      const num = (sk.id.match(/-s(\d+)$/) || [])[1];
+      if(!num) return;
+      const g = byModule.get(w.moduleNum) || [];
+      g.push({ wid: w.id, setLabel: w.label, skillNum: Number(num), text: sk.text });
+      byModule.set(w.moduleNum, g);
+    });
+  });
+  const modNums = [...byModule.keys()].sort((a, b) => a - b);
+  if(!modNums.length){
+    p.innerHTML = `${head}<div class="coach-tip">Nothing marked &ldquo;still working on it&rdquo; right now — mark a skill that way on any checklist and it'll show up here.</div>`;
+    focusPanel(p);
+    return;
+  }
+  const body = modNums.map(mn => {
+    const m = MODULE_MANIFEST.find(x => x.num === mn);
+    const rows = byModule.get(mn).map(it =>
+      `<button type="button" class="search-hit" onclick="searchGoSkill(${mn},'${it.wid}',${it.skillNum})">
+        <span class="search-hit-where">${escHtml(it.setLabel || '')}</span>
+        <span class="search-hit-text">${escHtml(it.text)}</span>
+      </button>`).join('');
+    return `<div class="rail-sec-label" style="margin:16px 0 6px">Module ${mn}${m ? ` — ${escHtml(m.name)}` : ''}</div>
+      <div class="search-results" style="max-height:none">${rows}</div>`;
+  }).join('');
+  p.innerHTML = `${head}${body}`;
+  focusPanel(p);
+}
+
+/* ── 📊 My progress: done/total for every module + a total mastered count ── */
+function toggleMyProgress(){
+  const p = document.getElementById('my-progress-panel');
+  const btn = document.getElementById('my-progress-btn');
+  if(!p) return;
+  const open = p.hasAttribute('hidden');
+  if(!open){ p.setAttribute('hidden', ''); if(btn) btn.setAttribute('aria-expanded', 'false'); return; }
+  closeTopPanels('my-progress');
+  p.removeAttribute('hidden');
+  if(btn) btn.setAttribute('aria-expanded', 'true');
+  let totalDone = 0, totalAll = 0;
+  const rows = MODULE_MANIFEST.map(m => {
+    const { done, total } = moduleCompletion(m);
+    totalDone += done; totalAll += total;
+    const pct = total ? Math.round(done / total * 100) : 0;
+    return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:0.875rem;font-weight:600">Module ${m.num} — ${escHtml(m.name)}</div>
+      <div class="prog-wrap"><div class="prog-row"><div class="prog-bg"><div class="prog-fill" style="width:${pct}%"></div></div><div class="prog-lbl">${done} / ${total}</div></div></div>
+    </div>`;
+  }).join('');
+  p.innerHTML = `<div class="daily5-head"><span>&#x1F4CA; My progress</span><button type="button" class="tp-close" onclick="toggleMyProgress()" aria-label="Close my progress">&#x2715;</button></div>
+    <div class="coach-tip">${totalDone} of ${totalAll} skills mastered across all ${MODULE_MANIFEST.length} modules.</div>
+    <div class="card">${rows}</div>`;
+  focusPanel(p);
 }
 
 /* ════════════════════════════════════════════════

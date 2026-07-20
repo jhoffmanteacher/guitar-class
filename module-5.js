@@ -601,10 +601,25 @@ SETS.push(
             ]
           },
           {
+            title: 'Fret Bm cleanly',
+            steps: [
+          {
+            text: 'Challenge 2 — Clean Bm: fret the partial-barre Bm shape (xx4432 — index on string 1, fret 2 · middle on string 2, fret 3 · ring on string 3, fret 4 · pinky on string 4, fret 4) and strum strings 4–1 only. You\'ve got it when: all four fretted strings ring clearly — the pinky on string 4 is the one most likely to go quiet.',
+            hint: 'This is your first partial barre — fingers 1 through 4 climb like stairs across strings 1 through 4. Curl each one so it presses straight down on its own string, not brushing the neighbor.',
+            stuck: 'Build it one finger at a time: index on string 1, then middle, then ring, then pinky last — check each string rings before adding the next finger.',
+            levelUp: 'Switch Em→Bm→Em without looking — the index finger barely has to move between them.',
+            skills: [3],
+            chords: [
+              { name: 'Bm', chord: [[6,'x'],[5,'x'],[4,4,'4'],[3,4,'3'],[2,3,'2'],[1,2,'1']], position: 2 }
+            ]
+          }
+            ]
+          },
+          {
             title: 'Connect Group 1 & Group 2 chords',
             steps: [
           {
-            text: 'Challenge 2 — Cross-Group Changes: at 60 BPM, switch G→D, Am→Em, and C→A, 2 bars each — then drill the two within-group pairs your assessment checks, D→A and Em→Bm, 2 bars each. You\'ve got it when: each change lands on beat 1, using fingers that stay close as you switch.',
+            text: 'Challenge 3 — Cross-Group Changes: at 60 BPM, switch G→D, Am→Em, and C→A, 2 bars each — then drill the two within-group pairs your assessment checks, D→A and Em→Bm, 2 bars each. You\'ve got it when: each change lands on beat 1, using fingers that stay close as you switch.',
             hint: 'Look for fingers that stay close or in the same area as you switch. Planning your hand movement before you lift your fingers saves time. Set the ⏱ Timer for 3 minutes and run the pairs until it beeps.',
             stuck: 'Take one pair at a time. For G→D, notice all your fingers shift toward the high strings together — move them as one unit, not finger by finger.',
             levelUp: 'Run all the pairs back-to-back without stopping — including D↔A and Em↔Bm — or push every pair to 70 BPM.',
@@ -620,7 +635,7 @@ SETS.push(
             title: 'One-Minute Changes — try for a higher number',
             steps: [
               {
-                text: 'Challenge 3 — One-Minute Changes (G ↔ D): set the ⏱ Timer for 60 seconds and switch G→D→G→D as many times as you can — only CLEAN changes count. This is a cross-group jump, so it\'s a real test. You\'ve got it when: type your count below and aim for a higher count than your Set 2 number.',
+                text: 'Challenge 4 — One-Minute Changes (G ↔ D): set the ⏱ Timer for 60 seconds and switch G→D→G→D as many times as you can — only CLEAN changes count. This is a cross-group jump, so it\'s a real test. You\'ve got it when: type your count below and aim for a higher count than your Set 2 number.',
                 hint: 'G and D both sit up near the high strings — let your whole hand travel as one shape rather than placing finger by finger.',
                 stuck: 'Park your hand over G, then practice just dropping into D and back. Slow until each one rings, then let speed come.',
                 levelUp: 'Run Em↔A instead, or add a down-up strum on each chord.',
