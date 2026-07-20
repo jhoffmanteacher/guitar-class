@@ -506,7 +506,15 @@ function setSaveMsg(msg, clearAfterMs){
 let lastModuleNum = 1;
 let lastSetId = null;
 
-function renderAll(){ populateModuleDropdown(); onModuleChange(lastModuleNum||1, lastSetId); renderChordBoxes(); }
+function renderAll(){ populateModuleDropdown(); onModuleChange(lastModuleNum||1, lastSetId); renderChordBoxes(); syncPreviewNote(); }
+
+/* Teacher/dev accounts skip the sequential set gate (isGatePreviewer), which
+   makes their view quietly different from a student's — no 🔒 anywhere. This
+   badge makes that visible so preview mode can't be mistaken for student view. */
+function syncPreviewNote(){
+  const pn = document.getElementById('preview-note');
+  if(pn) pn.hidden = !isGatePreviewer();
+}
 
 function chordDiagramSVG(cfg){
   const W=96,H=104,padL=22,padR=14,padT=20,padB=4;
