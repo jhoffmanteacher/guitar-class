@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-20 — Tuner, Timer, and Metronome now on every Song Journey page
+
+### Added
+- **The floating Tuner, Timer, and Metronome buttons now show up on the six
+  Song Journey pages**, not just the main practice site — so if you're
+  reading through Luna's layers or "the cure"'s chords, you can tune up or
+  count in without switching tabs. Same tools, same look, same behavior as
+  the main site.
+
 ## 2026-07-20 — Play-along tracks on every Song Journey page, and tidier layers
 
 ### Added
