@@ -49,6 +49,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .header .btn-sign,.header .btn-out,.header .btn-translate{color:#fff;border-color:rgba(255,255,255,0.45);background:transparent}
 .header .btn-sign:hover,.header .btn-out:hover,.header .btn-translate:hover{background:rgba(255,255,255,0.12)}
 .header .btn-translate.active{background:rgba(255,255,255,0.18);color:#fff;border-color:#fff}
+/* "Find" sits in the header as a small, real-looking search box (light fill)
+   rather than a translucent pill like its header siblings — reads as "type
+   here" against the purple bar */
+.header-search-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;
+  border-radius:16px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.92);
+  color:var(--text2);font-family:inherit;font-size:0.8125rem;cursor:pointer;
+  transition:background .13s,box-shadow .13s}
+.header-search-btn .ico{width:15px;height:15px;flex:0 0 15px;display:flex}
+.header-search-btn:hover{background:#fff}
+.header-search-btn[aria-expanded="true"]{background:#fff;box-shadow:0 0 0 2px rgba(255,255,255,0.5)}
+@media(max-width:520px){.header-search-label{display:none}.header-search-btn{padding:7px}}
 .header .user-name{color:rgba(255,255,255,0.9)}
 .user-area{display:flex;align-items:center;gap:10px}
 .avatar{width:32px;height:32px;border-radius:50%;object-fit:cover}

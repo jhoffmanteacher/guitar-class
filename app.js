@@ -250,6 +250,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     document.getElementById('teacher-app').style.display='none';
     document.getElementById('teacher-denied').style.display='none';
     document.getElementById('fab-group').style.display='none';
+    document.getElementById('search-btn').style.display='none';
     document.getElementById('user-area').innerHTML='<button class="btn-sign" onclick="signIn()">Sign in with Google</button>';
   }
 });
@@ -258,6 +259,7 @@ function showApp(user){
   document.getElementById('auth-wall').style.display='none';
   document.getElementById('app').style.display='block';
   document.getElementById('fab-group').style.display='flex';
+  document.getElementById('search-btn').style.display='flex';
   document.getElementById('user-area').innerHTML=userHeaderHtml(user);
   renderAll();
   applyGamesAccess();

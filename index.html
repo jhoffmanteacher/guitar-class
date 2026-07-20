@@ -81,6 +81,10 @@ function googleTranslateElementInit(){
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
+    <button type="button" class="header-search-btn" id="search-btn" onclick="toggleSearch()" aria-expanded="false" aria-controls="search-panel" aria-label="Find it — search the whole site" style="display:none">
+      <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.7-4.7"/></svg></span>
+      <span class="header-search-label">Find</span>
+    </button>
     <button class="btn-translate" id="btn-translate" onclick="toggleTranslate()" title="Translate to Spanish">
       <span>&#x1F310;</span><span id="translate-label">Español</span>
     </button>
@@ -166,8 +170,6 @@ function googleTranslateElementInit(){
               <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6.5" width="19" height="11" rx="5.5"/><path d="M7 9.5v3M5.5 11h3"/><circle cx="15.7" cy="10.7" r="0.95" fill="currentColor" stroke="none"/><circle cx="17.6" cy="12.6" r="0.95" fill="currentColor" stroke="none"/></svg></span>Games</button>
             <button type="button" class="nav-btn" id="songs-hub-btn" onclick="toggleSongsHub()" aria-expanded="false" aria-controls="songs-hub-panel">
               <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17V5.5l10-1.8V15"/><circle cx="6.5" cy="17" r="2.5"/><circle cx="16.5" cy="15" r="2.5"/></svg></span>Songs</button>
-            <button type="button" class="nav-btn" id="search-btn" onclick="toggleSearch()" aria-expanded="false" aria-controls="search-panel">
-              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.7-4.7"/></svg></span>Find</button>
             <button type="button" class="nav-btn" id="keep-practicing-btn" onclick="toggleKeepPracticing()" aria-expanded="false" aria-controls="keep-practicing-panel">
               <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5l3.2 3.2"/></svg></span>Keep practicing</button>
             <button type="button" class="nav-btn" id="my-progress-btn" onclick="toggleMyProgress()" aria-expanded="false" aria-controls="my-progress-panel">
