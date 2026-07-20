@@ -86,9 +86,15 @@ function freqToNoteInfo(freq) {
 
 // YIN pitch detection — accurate and fast on time-domain data.
 // Works well on low strings because it finds the true period directly.
+// The difference-function buffer is reused across calls (no per-frame GC).
+let tunerYinD = null;
 function detectPitchYIN(buf, sampleRate) {
   const W = buf.length;
   const half = Math.floor(W / 2);
+  // Lags longer than sampleRate/60 can only yield frequencies below 60 Hz,
+  // which the final range check rejects anyway (low E is ~82 Hz) — capping
+  // here cuts the scan ~5× with no accuracy loss (coach.js caps the same way).
+  const maxTau = Math.min(half, Math.ceil(sampleRate / 60));
 
   // Silence check (lowered so sustained/decaying notes still register)
   let rms = 0;
@@ -96,10 +102,11 @@ function detectPitchYIN(buf, sampleRate) {
   if (Math.sqrt(rms / W) < 0.002) return -1;
 
   // YIN difference function
-  const d = new Float32Array(half);
+  if (!tunerYinD || tunerYinD.length < maxTau) tunerYinD = new Float32Array(maxTau);
+  const d = tunerYinD;
   d[0] = 1;
   let runSum = 0;
-  for (let tau = 1; tau < half; tau++) {
+  for (let tau = 1; tau < maxTau; tau++) {
     let s = 0;
     for (let i = 0; i < half; i++) {
       const diff = buf[i] - buf[i + tau];
@@ -115,12 +122,12 @@ function detectPitchYIN(buf, sampleRate) {
   // still qualify — the rolling median + note-stability layers downstream
   // discard whatever marginal detections slip through.
   const threshold = 0.22;
-  for (let tau = 2; tau < half; tau++) {
+  for (let tau = 2; tau < maxTau; tau++) {
     if (d[tau] < threshold) {
-      while (tau + 1 < half && d[tau + 1] < d[tau]) tau++;
+      while (tau + 1 < maxTau && d[tau + 1] < d[tau]) tau++;
       // Parabolic interpolation for sub-sample accuracy
       const x0 = tau > 1 ? d[tau - 1] : d[tau];
-      const x2 = tau < half - 1 ? d[tau + 1] : d[tau];
+      const x2 = tau < maxTau - 1 ? d[tau + 1] : d[tau];
       const refined = tau + (x2 - x0) / (2 * (2 * d[tau] - x0 - x2));
       const freq = sampleRate / refined;
       return (freq >= 60 && freq <= 1400) ? freq : -1;
@@ -162,11 +169,16 @@ function detectPitchHPS(freqData, sampleRate, fftSize) {
   return (freq >= 60 && freq <= 1400) ? freq : -1;
 }
 
+// Analysis buffers reused every frame — allocating them per frame caused
+// steady GC churn at ~16 fps (coach.js reuses coachFrameBuf for the same
+// reason). Lazily (re)sized so an analyser config change can't break them.
+let tunerTimeBuf = null, tunerFreqBuf = null;
 function tunerLoop() {
   if (!tunerRunning) return;
 
   // Get time-domain data for YIN
-  const timeBuf = new Float32Array(tunerAnalyser.fftSize);
+  if (!tunerTimeBuf || tunerTimeBuf.length !== tunerAnalyser.fftSize) tunerTimeBuf = new Float32Array(tunerAnalyser.fftSize);
+  const timeBuf = tunerTimeBuf;
   tunerAnalyser.getFloatTimeDomainData(timeBuf);
 
   // Volume gate BEFORE the detectors: between plucks the HPS would otherwise
@@ -176,7 +188,8 @@ function tunerLoop() {
   const rms = Math.sqrt(rmsSum / timeBuf.length);
 
   // Get frequency-domain data for HPS
-  const freqBuf = new Float32Array(tunerFreqAnalyser.frequencyBinCount);
+  if (!tunerFreqBuf || tunerFreqBuf.length !== tunerFreqAnalyser.frequencyBinCount) tunerFreqBuf = new Float32Array(tunerFreqAnalyser.frequencyBinCount);
+  const freqBuf = tunerFreqBuf;
   tunerFreqAnalyser.getFloatFrequencyData(freqBuf);
 
   // Run both detectors; prefer HPS for low strings, YIN as fallback.

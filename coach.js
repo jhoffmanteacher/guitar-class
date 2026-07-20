@@ -1115,6 +1115,19 @@ function fretLoop(){
   fretRaf = requestAnimationFrame(fretLoop);
 }
 
+/* Round over → cross-session best to the student's progress doc. Skipped in
+   dev bypass (Firestore rejects that uid). Best = first-try hits out of 10;
+   ties keep the earlier entry (level recorded for context, not compared). */
+function fretSaveRound(g){
+  if (typeof saveGames !== 'function' || !currentUser || isDevBypassUser()) return;
+  const score = g.results.filter(Boolean).length;
+  const old = (games.fret && games.fret.best) || 0;
+  if (score > old){
+    games.fret = { best: score, level: g.level, at: new Date().toISOString().slice(0, 10) };
+    saveGames();
+  }
+}
+
 function fretJudge(midi){
   const g = fretGame, p = g.prompt;
   g.readings = [];
@@ -1128,6 +1141,7 @@ function fretJudge(midi){
     g.flash = { text: '&#x2713; ' + escHtml(p.note) + (first ? ' — first try!' : ' — got there!') };
     if (g.results.length >= FRET_ROUND){
       g.phase = 'done';
+      fretSaveRound(g);
       fretRender();
       return;
     }
@@ -1156,7 +1170,7 @@ function fretSkip(){
   g.results.push(false);
   g.hint = 'It was fret ' + p.f + ' — ' + p.note + ' on the ' + FRET_STRING_NAMES[p.s] + ' string.';
   g.cooldownUntil = performance.now() + 1600;
-  if (g.results.length >= FRET_ROUND){ g.phase = 'done'; fretRender(); return; }
+  if (g.results.length >= FRET_ROUND){ g.phase = 'done'; fretSaveRound(g); fretRender(); return; }
   fretRender();
   setTimeout(() => { if (fretGame === g && g.phase === 'play') fretNextPrompt(); }, 1600);
 }
@@ -1315,7 +1329,20 @@ const GAMES_META = [
   { key:'strum',    cls:'gc-strum',    ico:'&#x1F3B8;', title:'Strum Hero',    guitar:false, desc:'Tap the strums in time — down-up arrows on a scrolling lane. Your rhythm, graded.' },
 ];
 
+/* Card chip for a game's best score. Prefers the all-time best persisted in
+   the student's progress doc ("best") over this browser session's high
+   ("best today") — a returning student should see their real record, not a
+   blank slate. Session can still win in dev bypass / signed-out, where
+   nothing persists. */
+function gamesBestChip(allTime, today, unit){
+  const v = Math.max(allTime || 0, today || 0);
+  if (!v) return '';
+  const label = (allTime || 0) >= v ? 'best' : 'best today';
+  return `<span class="games-card-best">&#x1F3C6; ${label}: ${v}${unit || ''}</span>`;
+}
+
 function gamesRenderHub(p){
+  const saved = (typeof games !== 'undefined' && games) || {};
   let ccBest = 0;
   try {
     for (const pr of CC_PROGRESSIONS){
@@ -1324,7 +1351,7 @@ function gamesRenderHub(p){
       }
     }
   } catch(e){}
-  const ccChip = ccBest ? `<span class="games-card-best">&#x1F3C6; best today: ${ccBest} BPM</span>` : '';
+  const ccChip = gamesBestChip(saved.cc && saved.cc.bestBpm, ccBest, ' BPM');
   let cbBest = 0;
   try {
     for (const d of CB_DECKS){
@@ -1333,26 +1360,28 @@ function gamesRenderHub(p){
         parseInt(sessionStorage.getItem(cbBestKey(d.id, 'spot')), 10) || 0);
     }
   } catch(e){}
-  const cbChip = cbBest ? `<span class="games-card-best">&#x1F3C6; best today: ${cbBest}</span>` : '';
+  const cbChip = gamesBestChip(saved.cb && saved.cb.best, cbBest);
   let fzBest = 0;
   try {
     for (const d of FZ_DECKS){
       fzBest = Math.max(fzBest, parseInt(sessionStorage.getItem(fzBestKey(d.id)), 10) || 0);
     }
   } catch(e){}
-  const fzChip = fzBest ? `<span class="games-card-best">&#x1F3C6; best today: ${fzBest}</span>` : '';
+  const fzChip = gamesBestChip(saved.fz && saved.fz.best, fzBest);
   let shBest = 0;
   for (const pat of SH_PATTERNS){
     const b = shBestRead(pat.id);
     if (b) shBest = Math.max(shBest, b.score);
   }
-  const shChip = shBest ? `<span class="games-card-best">&#x1F3C6; best today: ${shBest}</span>` : '';
+  const shChip = gamesBestChip(saved.sh && saved.sh.best, shBest);
   let srBest = 0;
   for (const pat of SH_PATTERNS){
     const b = srBestRead(pat.id);
     if (b) srBest = Math.max(srBest, b.acc);
   }
-  const srChip = srBest ? `<span class="games-card-best">&#x1F3C6; best today: ${srBest}%</span>` : '';
+  const srChip = gamesBestChip(saved.sr && saved.sr.best, srBest, '%');
+  const fretChip = saved.fret && saved.fret.best
+    ? `<span class="games-card-best">&#x1F3C6; best: ${saved.fret.best}/${FRET_ROUND} first try</span>` : '';
   let rrChip = '';
   const rrG = (typeof games !== 'undefined' && games && games.rr) || null;
   if (rrStreakAlive(rrG)){
@@ -1370,9 +1399,13 @@ function gamesRenderHub(p){
     const b = rnBestSession(sg.id);
     if (b) rnBest = Math.max(rnBest, b.acc);
   }
-  const rnChip = rnBest ? `<span class="games-card-best">&#x1F3C6; best today: ${rnBest}%</span>` : '';
-  /* Per-game "best today" chips, keyed by game. Note Hunt has none. */
-  const chips = { cc:ccChip, blitz:cbChip, fretzap:fzChip, strum:shChip, radar:srChip, roulette:rrChip, runner:rnChip };
+  let rnAllTime = 0;
+  if (saved.rn && saved.rn.songs){
+    for (const id in saved.rn.songs) rnAllTime = Math.max(rnAllTime, saved.rn.songs[id].acc || 0);
+  }
+  const rnChip = gamesBestChip(rnAllTime, rnBest, '%');
+  /* Per-game best chips, keyed by game. */
+  const chips = { fret:fretChip, cc:ccChip, blitz:cbChip, fretzap:fzChip, strum:shChip, radar:srChip, roulette:rrChip, runner:rnChip };
   const card = g => `
        <button type="button" class="games-card ${g.cls}" onclick="gamesShow('${g.key}')">
          <span class="games-card-ico">${g.ico}</span>
@@ -1800,6 +1833,15 @@ function ccRenderDone(){
       const best = parseInt(sessionStorage.getItem(k), 10) || 0;
       if (cc.bpm > best) sessionStorage.setItem(k, String(cc.bpm));
     } catch(e){}
+    /* Cross-session best → the student's progress doc. Skipped in dev bypass
+       (Firestore rejects that uid; the session best above still counts). */
+    if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
+      const old = (games.cc && games.cc.bestBpm) || 0;
+      if (cc.bpm > old){
+        games.cc = { bestBpm: cc.bpm, progression: prog, at: new Date().toISOString().slice(0, 10) };
+        saveGames();
+      }
+    }
   } else if (r >= 0.5){
     const early = cc.bpc >= 4 ? 'start moving your fingers on beat 4' : cc.bpc === 2 ? 'start moving your fingers a beat early' : 'start moving the instant the last chord sounds';
     verdict = '&#x1F4AA; ' + ok + ' of ' + total + ' changes worked' + (off ? ' (' + off + ' were on time but sounded messy)' : '') + '.';

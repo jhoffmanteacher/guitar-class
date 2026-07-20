@@ -46,7 +46,7 @@ Every content link on the site is YouTube (no Google Docs links remain); all ver
 
 ### P1
 
-#### K-2 — Cap the tuner's YIN search (CONFIRMED)
+#### K-2 — Cap the tuner's YIN search (CONFIRMED) — ✅ Code done 2026-07-20; pending the real-guitar six-string check (pair with K-1's live session)
 - **What:** `detectPitchYIN` (`tuner.js:99–129`) scans tau over half of an 8192-sample buffer → ~16.7M multiply-adds per call, ~16 fps, gated only by RMS 0.002 — heavy on the school Chromebooks this site targets. `coach.js:568` already caps its YIN at `maxTau = ceil(sampleRate/60)`; the tuner doesn't.
 - **Files:** `tuner.js:99–129, 186`.
 - **Why:** Can peg a core, lag the needle, and drain battery while the tuner is open; ~5× cheaper with no accuracy loss above ~60 Hz (low E is ~82 Hz).
@@ -65,7 +65,7 @@ Every content link on the site is YouTube (no Google Docs links remain); all ver
 - **Files:** `tabs/*.html` (~lines 285–313 each), `app.js:60–71`, `sw.js`, `index.html`, `tools/checks.mjs`.
 - **Done when:** the SDK version and save-debounce logic exist in exactly one place, or `checks.mjs` fails the push when they diverge.
 
-#### K-5 — Stop per-frame typed-array allocation in the tuner
+#### K-5 — Stop per-frame typed-array allocation in the tuner — ✅ Code done 2026-07-20 (bundled with K-2; same pending device check)
 - **What:** `tunerLoop` allocates fresh `Float32Array(8192)` + `Float32Array(4096)` every frame (`tuner.js:169, 179`); `coach.js` already reuses `coachFrameBuf` specifically to avoid this GC pressure. Allocate once in `startTuner`, reuse per frame.
 - **Done when:** `tunerLoop` performs no per-frame typed-array allocation and the tuner still reads correctly. (Bundle with K-2 — same file, same test.)
 
@@ -181,7 +181,7 @@ Theme (verified against the code): the app already **computes and even persists*
 
 ### P0 (high impact, low effort — all three CONFIRMED against the code)
 
-#### I-1 — Show all-time game bests on the arcade cards
+#### I-1 — Show all-time game bests on the arcade cards — ✅ Done 2026-07-20
 - **What:** Finish handlers already persist cross-session bests to Firestore (`games.cb` at `coach.js:2072`, `games.fz` :2331, `games.sh` :2758, `games.sr` :3623, `games.rn.songs` :4334), but `gamesRenderHub` (`coach.js:1319–1373`) renders only sessionStorage "best today" chips — so a returning student's real accomplishments look erased. Prefer the persisted value, fall back to session.
 - **Done when:** a student who earned a best, closed the tab, and returned still sees that best on the game card without replaying.
 
@@ -194,7 +194,7 @@ Theme (verified against the code): the app already **computes and even persists*
 
 ### P1 (high impact, real effort)
 
-#### I-4 — Persist Change Up and Note Hunt results (currently saved nowhere)
+#### I-4 — Persist Change Up and Note Hunt results (currently saved nowhere) — ✅ Done 2026-07-20 (`games.cc = {bestBpm, progression, at}`, `games.fret = {best, level, at}`; both surfaced on the hub via I-1)
 - **What:** Change Up's best BPM and Note Hunt's rounds live only in sessionStorage (`coach.js:1801`; Note Hunt persists nothing) while the other six games save to Firestore. Mirror the existing pattern: `games.cc = {bestBpm, progression, at}` and `games.fret = {best, at}`, guarded by `currentUser && !isDevBypassUser()`; surface on the hub (ties into I-1).
 - **Done when:** completed rounds of both games write to the games doc and reappear after sign-out/sign-in.
 
