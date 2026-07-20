@@ -27,8 +27,11 @@ see `WORKFLOW.md` and the git commit log.
 - **Tempo sliders remember your setting.** If you slow a tricky riff down to
   practice it, that speed stays set the next time you open the page — no more
   re-adjusting every visit.
-- **Read Aloud speaks Spanish when the page is translated.** Previously it
-  always read in English even with the Español toggle on.
+
+### Removed
+- **The "Read aloud" button.** The built-in browser voices never sounded
+  natural enough to be worth keeping. If you want a step read aloud, Google
+  Read&amp;Write or your device's built-in text-to-speech both work well.
 
 ## 2026-07-12 — Riff Runner: play the riffs on your real guitar
 

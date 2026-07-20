@@ -867,7 +867,7 @@ function findStringMatches(text){
 const CHORD_NAMES = ['F#m','C#m','Em','Am','Dm','Bm','B7','A5','E5','G5','D5','C5','C','G','D','A','E','F'];
 const CHORD_RE = new RegExp('(^|[^A-Za-z0-9#])(' + CHORD_NAMES.join('|') + ')(?![A-Za-z0-9#])(?![ -][Ss]hape)(?![ -][Mm]inor)(?![ -][Pp]entatonic)(?![ -][Ss]cale)(?![ -][Mm]ajor[ -](?:pentatonic|scale))', 'g');
 const CHORD_SKIP_TAGS = new Set(['A','BUTTON','SCRIPT','STYLE','TEXTAREA','INPUT','LABEL','SELECT']);
-const CHORD_SKIP_CLASSES = ['skill-badge','chord-link','string-link','note-link','rp-trigger','chord-box-label','chord-diagrams','read-aloud-btn','step-resp-mc-opt','tab','nolink'];
+const CHORD_SKIP_CLASSES = ['skill-badge','chord-link','string-link','note-link','rp-trigger','chord-box-label','chord-diagrams','step-resp-mc-opt','tab','nolink'];
 
 /* Natural-note fret positions on each string (frets 0–12). Used to
    auto-map sequences like "E · F · G · A · B · C · D · E" to single-note
@@ -1167,118 +1167,6 @@ function wrapAllChordLinks(){
   document.querySelectorAll('.skill-row .sk-label, .skill-row .sk-helper').forEach(wrapChordLinksIn);
   /* Mid-module review — self-rated skill text and "play it" prompt */
   document.querySelectorAll('.mr-skill-text, .mr-play-prompt').forEach(wrapChordLinksIn);
-}
-
-/* ══════════════════════════════════════════════
-   READ ALOUD — ELD support via speechSynthesis
-   ══════════════════════════════════════════════ */
-let cachedVoices = [];
-function loadVoices(){
-  if (!window.speechSynthesis) return;
-  cachedVoices = window.speechSynthesis.getVoices() || [];
-}
-if (window.speechSynthesis){
-  loadVoices();
-  window.speechSynthesis.onvoiceschanged = loadVoices;
-}
-
-function pickEnglishVoice(){
-  if (!cachedVoices.length) loadVoices();
-  const en = cachedVoices.filter(v => /^en[-_]/i.test(v.lang));
-
-  // Ranked preference list — first match wins
-  const ranked = [
-    // Chrome / Edge neural voices (highest quality in browser)
-    v => v.name === 'Google US English',
-    v => v.name === 'Google UK English Female',
-    v => v.name === 'Microsoft Aria Online (Natural) - English (United States)',
-    v => v.name === 'Microsoft Jenny Online (Natural) - English (United States)',
-    v => /Microsoft.*Online.*Natural.*English/i.test(v.name),
-    // macOS / iOS enhanced system voices
-    v => v.name === 'Samantha' && v.localService,
-    v => /\(Enhanced\)|\(Premium\)/i.test(v.name),
-    v => /^(Samantha|Karen|Moira|Tessa|Fiona|Serena)$/i.test(v.name),
-    // Generic neural/premium keywords
-    v => /neural|natural|enhanced|premium/i.test(v.name),
-    // Any remaining English voice
-    v => true,
-  ];
-
-  for (const test of ranked) {
-    const match = en.find(test);
-    if (match) return match;
-  }
-  return cachedVoices[0] || null;
-}
-
-// Mirrors pickEnglishVoice() for when the page is translated to Spanish
-// (isSpanish, set by toggleTranslate() below) so Read aloud speaks the
-// language a student is actually reading.
-function pickSpanishVoice(){
-  if (!cachedVoices.length) loadVoices();
-  const es = cachedVoices.filter(v => /^es[-_]/i.test(v.lang));
-
-  const ranked = [
-    v => v.name === 'Google español',
-    v => /Microsoft.*Online.*Natural.*Spanish/i.test(v.name),
-    v => /\(Enhanced\)|\(Premium\)/i.test(v.name),
-    v => /^(Mónica|Monica|Paulina|Jorge|Juan)$/i.test(v.name),
-    v => /neural|natural|enhanced|premium/i.test(v.name),
-    v => true,
-  ];
-
-  for (const test of ranked) {
-    const match = es.find(test);
-    if (match) return match;
-  }
-  return null;
-}
-
-// Idle ("Read aloud") and active ("Stop") inner-markup for the read-aloud buttons.
-// Kept as constants so the SVG icon survives every state reset below.
-const READ_ALOUD_IDLE_HTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M17 8a5 5 0 0 1 0 8"/><path d="M19.5 5.5a9 9 0 0 1 0 13"/></svg><span>Read aloud</span>';
-const READ_ALOUD_STOP_HTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/></svg><span>Stop</span>';
-
-function resetAllReadAloudBtns(){
-  document.querySelectorAll('.read-aloud-btn').forEach(b => {
-    b.innerHTML = READ_ALOUD_IDLE_HTML;
-    b.classList.remove('speaking');
-    delete b.dataset.speaking;
-  });
-}
-
-function readAloudStep(btn){
-  const synth = window.speechSynthesis;
-  if (!synth){ alert('Read-aloud is not supported in this browser.'); return; }
-
-  const wasSpeakingThis = btn.dataset.speaking === 'true';
-  if (synth.speaking || synth.pending){
-    synth.cancel();
-    resetAllReadAloudBtns();
-    if (wasSpeakingThis) return;
-  }
-
-  const stEl = btn.closest('.st');
-  if (!stEl) return;
-  const clone = stEl.cloneNode(true);
-  clone.querySelectorAll('.read-aloud-btn, .chord-diagrams, .skill-badge, .step-resp-saved').forEach(el => el.remove());
-  const text = (clone.textContent || '').replace(/\s+/g, ' ').trim();
-  if (!text) return;
-
-  const utter = new SpeechSynthesisUtterance(text);
-  const voice = isSpanish ? pickSpanishVoice() : pickEnglishVoice();
-  if (voice) utter.voice = voice;
-  utter.lang = (voice && voice.lang) || (isSpanish ? 'es-ES' : 'en-US');
-  utter.rate = 0.90;
-  utter.pitch = 1.0;
-  utter.onend = () => { btn.innerHTML = READ_ALOUD_IDLE_HTML; btn.classList.remove('speaking'); delete btn.dataset.speaking; };
-  utter.onerror = utter.onend;
-
-  resetAllReadAloudBtns();
-  btn.innerHTML = READ_ALOUD_STOP_HTML;
-  btn.classList.add('speaking');
-  btn.dataset.speaking = 'true';
-  synth.speak(utter);
 }
 
 // Per-module completion from the student's own progress, derived from the
@@ -1816,11 +1704,10 @@ function buildStations(w, stationId){
       }
       return '';
     })() : '';
-    const readBtn = `<button class="read-aloud-btn" type="button" onclick="event.stopPropagation();readAloudStep(this)" title="Read this step aloud" aria-label="Read aloud">${READ_ALOUD_IDLE_HTML}</button>`;
     const doneKey = `${w.id}-${ns}-${i}`;
     const isDone = completed[doneKey] === true;
-    // Mark-done sits bottom-left, Read aloud bottom-right — the last row of the step.
-    const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${isDone ? '&#x2713; Done' : 'Mark done'}</button>${readBtn}</div>`;
+    // Mark-done is the last row of the step.
+    const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${isDone ? '&#x2713; Done' : 'Mark done'}</button></div>`;
     const skillsAttr = (s.skills && s.skills.length) ? ` data-skills="${s.skills.join(',')}"` : '';
     return `<li class="step${isDone ? ' step-done' : ''}"${skillsAttr}><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml}${foldsHtml}</div>${doneBtn}</div></li>`;
   }).join('');
