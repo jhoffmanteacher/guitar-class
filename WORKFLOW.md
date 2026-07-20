@@ -11,6 +11,12 @@
 > `RESEARCH_UPGRADES.md`, `MODULES_9_12.md`, and the fully-executed
 > `DESIGN_UPGRADES.md` are archived alongside). Consult them for *why*;
 > they drive no current work. All CLAUDE.md rules apply as always.
+>
+> Also individually archived: **`REVIEW-PLAN.md`** (the 2026-07-13 full-site
+> review across CODE/CONTENT/DESIGN/IMPROVEMENTS — every item executed
+> 2026-07-20 in `b76dd67` except the handful that need Jonathan live on the
+> real site, tracked below) and **`PLAN-COMPACT-CHECKLIST.md`** (the
+> compact-checklist step redesign spec, executed 2026-07-20 in `e6925ec`).
 
 **Status legend:** [ ] not started · [~] in progress · [x] done
 
@@ -67,7 +73,8 @@
       Remember mic retests run on the LIVE site (PWA cache). Committed +
       pushed with a `CHANGELOG.md` entry (student-facing new feature). Code in
       `coach.js` (`rnw*` functions + the toggle) and `styles.css`.
-- [~] **Real-guitar retest of the mic features** (Jonathan, 2026-07-12) —
+- [~] **Real-guitar retest of the mic features** (Jonathan, 2026-07-12; melody
+      detail added from REVIEW-PLAN K-1, 2026-07-20) —
       **Listening Coach chord check ("Check my changes"): DONE & verified**
       on real guitar (pushed through `2e3feee`). Root cause was NOT the
       onset/verdict knobs but the pitch detector: YIN's strict 0.22 clarity
@@ -79,8 +86,97 @@
       ±0.18-beat "on the beat" window; same 0.55 clarity applied to Change
       Up. Final real-guitar run: ~4.7 reads/strum, ~65–80% on chord, 87% →
       "Great". Debug meter (`?ccdebug=1`) was used to find this and has been
-      stripped. **Still to retest:** a melody check (Module 4 Pattern 1),
-      one Note Hunt round, one full Change Up round.
+      stripped.
+      **Still to retest, all on a real guitar:**
+      - **Melody mode (P0 — this is the one that matters most).** Never
+        verified on a real guitar. Uses a stricter 0.22 clarity gate and a
+        different verdict path than chord mode (`coach.js` ~515 the gate
+        constant, ~666–669 the `ok`/`oct`/`wrong` verdict logic) — if the
+        single-note consensus is noisy on a laptop/Chromebook mic, students
+        could be getting false "wrong" verdicts on melody exercises right
+        now. Play a single-note TAB exercise into the mic; correct notes
+        should read `ok`, clean octave errors `oct`, anything else `wrong`,
+        with no spurious misses. If it needs tuning, the clarity gate is
+        where the chord-mode fix lived — start there before touching onset
+        logic.
+      - One Note Hunt round, one full Change Up round.
+      - **Must run on the LIVE site**, not localhost — the PWA service
+        worker caches the shell, so confirm the deployed `CACHE_VERSION` is
+        current and hard-refresh first.
+- [ ] **Live-site device checks, no mic needed** (bundled from REVIEW-PLAN
+      K-2/K-5/D-7 and today's compact-checklist work, 2026-07-20) — code for
+      all of these already shipped; each just needs an on-device look, ideally
+      in the same live-site sitting as the mic retest above:
+      - **Tuner still locks all six strings** after the 5×-cheaper YIN scan
+        (`tuner.js` — tau loop now bounded by `sampleRate/60` instead of
+        scanning the full buffer, and the per-frame `Float32Array` allocation
+        was removed in favor of a reused buffer).
+      - **Tuner string-selector touch targets** on an actual phone (~360px
+        wide) — buttons were raised toward ~40–44px; confirm they're
+        comfortable to tap with a guitar on your lap.
+      - **Compact checklist at phone width (~400px)** — rows shouldn't
+        overflow and tap targets should hold ≥44px (`.step-head` is set to
+        `min-height:48px` in styles.css, but wasn't confirmed on a real
+        device — my browser-automation window resize didn't actually
+        reflow the viewport during testing).
+      - **Compact checklist print preview (⌘P)** — every step should render
+        fully expanded with the chevron hidden, same as before the redesign;
+        also not yet visually confirmed.
+- [ ] **Module 12: confirm the requinto video fits, then delete the leftover
+      note** (REVIEW-PLAN C-7, 2026-07-20) — `module-12.js:430` has an HTML
+      comment flagging that the La Derrota (Vicente Fernández) requinto
+      lesson still needs a fit check for the sierreño/corridos-tumbados
+      requinto skill it's teaching. Not student-visible, but it's an
+      unresolved flag in shipped content. Watch it (or have an agent watch
+      and summarize) and either confirm it's a good fit or swap it — if
+      swapping, WebSearch → oEmbed-verify, never write a video ID from
+      memory. Delete the HTML comment once resolved.
+- [ ] **Research backlog (medium/low)** — stored One-Minute-Changes
+      scores, tempo-ladder playSeq, Song Journey anatomy sections, bends,
+      7th/sus chord color, songwriting capstone, Choice-song style lanes,
+      motivation layer. Details in `archive/RESEARCH_UPGRADES.md`; do not
+      start without Jonathan's go-ahead.
+
+---
+
+## Recently shipped (post-archive)
+
+- [x] **Station checklists: compact, one-tap-at-a-time steps** ("Concept B") —
+      pushed `e6925ec` (2026-07-20). Station B/C steps now collapse to a
+      single scannable row (status circle + short label + chevron); tapping
+      opens the full step (video, chords, TAB, response), one open per
+      section, with the first not-done step open by default. Mark done
+      collapses the row, shows ✓, and auto-opens the next not-done step; a
+      live "N of M steps done" pill sits next to each station's title.
+      Collapse/expand is CSS-class-only (never a re-render), so in-progress
+      responses survive. Short labels are derived from step text, with
+      special handling for `Challenge — X:` / `Challenge N — X:` and a kept
+      `Watch:` prefix. Deep links (search, "Show me where") auto-expand their
+      target step. Browser-verified via Dev bypass: typed-text survives
+      collapse/expand, one-open-per-section both directions, mark-done
+      auto-advance + pill update, chord diagrams render, bare (Station C) and
+      sectioned (Station B) layouts both correct. **Not yet verified:** phone
+      width (~400px) and print preview — tracked above under Open work. Spec
+      archived at `archive/PLAN-COMPACT-CHECKLIST.md`.
+- [x] **REVIEW-PLAN full-site review, P1/P2 batch** — pushed `b76dd67`
+      (2026-07-20). Implemented essentially every item across the review's
+      four dimensions via a multi-agent workflow: auto-retry progress saves,
+      real `<h2>/<h3>` headings in generated content, welcome-dialog focus
+      trap, `data-sid` skill-row selection (replacing regex-parsed `onclick`
+      matching), the `#games` deep link, a site-wide practice streak, "keep
+      practicing" + "my progress" panels, persisted Listening Coach results,
+      a teacher trouble-spots view + BPM personal-record history, metronome
+      accent/count-in, an offline banner, chord-set song search, tuner
+      YIN-scan cost cut ~5× + per-frame allocation removed, tuner/pill touch
+      targets, a Bm clean-fret drill, an oEmbed-verified video swap, journey
+      pages brought onto the app's plum/dark theme with fixed contrast, and a
+      `checks.mjs` Firestore-SDK-version assertion across all 8 copies — then
+      reviewed the diff across three dimensions and fixed the 4 confirmed
+      bugs found (a song-search dedup bug hiding 3 core songs from chord
+      search, a metronome keyboard-nav gap, invalid heading markup, missing
+      focus movement on the two new panels). Full item-by-item detail
+      archived at `archive/REVIEW-PLAN.md`; the handful of items needing
+      Jonathan live on a real device are tracked above under Open work.
 - [x] **Gate the Sets in each module — do them in order** (Jonathan, 2026-07-12) —
       DONE & browser-verified. Every Set now locks until the Set before it is
       finished (all its skills marked "I've got it!" — same bar as Module
@@ -116,17 +212,7 @@
       to `localStorage['gc-scroll']` (same `gc-` convention as gc-lastSet), saved
       on set-leave and on `pagehide`/`visibilitychange:hidden`; `window.scrollTo`
       clamps so a stale offset can't overscroll. Verified: reload → m4w2 restored
-      to 250, a never-opened set still opens at top. Not pushed yet.
-- [ ] **Research backlog (medium/low)** — stored One-Minute-Changes
-      scores, tempo-ladder playSeq, Song Journey anatomy sections, bends,
-      7th/sus chord color, songwriting capstone, Choice-song style lanes,
-      motivation layer. Details in `archive/RESEARCH_UPGRADES.md`; do not
-      start without Jonathan's go-ahead.
-
----
-
-## Recently shipped (post-archive)
-
+      to 250, a never-opened set still opens at top. Pushed `41efa61`.
 - [x] **Fret Zap** — games arcade, `fz*` in `coach.js` — pushed `c64ef08`
       (2026-07-11), browser-verified against the live code 2026-07-12. A
       no-mic, no-guitar fretboard note-naming sprint: a blank dot lights on
