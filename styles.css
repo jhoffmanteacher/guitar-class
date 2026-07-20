@@ -756,7 +756,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .tab-choice-content.expanded{display:block;margin-top:2px}
 .tab-choice-content .tab{margin-top:0}
 /* Station C — collapsible skill sections (guided by the module review) */
-.sc-sections{display:flex;flex-direction:column;gap:8px}
+/* Station step-list sections (Concept B): plain group-label dividers, not
+   their own accordion — every step is a row from the start. */
+.stp-sec-label{padding:14px 2px 6px;margin-top:2px;font-size:0.75rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);border-top:1px solid var(--border)}
 .sc-sec{border-radius:8px;overflow:hidden;background:var(--bg)}
 .sc-sec-head{width:100%;font-family:inherit;font-size:0.9375rem;font-weight:500;text-align:left;padding:11px 4px;background:transparent;border:0;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:10px;line-height:1.3}
 .sc-sec-head:hover{background:var(--bg2)}
@@ -857,7 +859,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .main{max-width:100% !important;width:100% !important;flex:none !important;padding:0 !important;overflow:visible !important}
 
   /* Avoid awkward breaks mid-step / mid-diagram */
-  .step,.tab,.chord-diagrams,.obj-card,.sc-sec{break-inside:avoid;page-break-inside:avoid}
+  .step,.tab,.chord-diagrams,.obj-card,.sc-sec,.stp-sec{break-inside:avoid;page-break-inside:avoid}
 
   /* Print-only set title so the handout is labelled */
   .week-panel.active::before{

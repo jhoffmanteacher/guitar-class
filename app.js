@@ -1948,21 +1948,21 @@ function buildStations(w, stationId){
       ? `<div class="daily5-inline">&#x26A1; <strong>Tune and warm up first:</strong> today\u2019s Daily 5 has tuning, a finger warm-up, and one drill (a short exercise you repeat to build a skill) from this module \u2014 five minutes and your hands are ready. <button type="button" class="daily5-inline-btn" onclick="openDaily5Here()">&#x26A1; Open today\u2019s Daily 5</button></div>`
       : '';
     const real = sections.filter(sec => !isTuningWarmup(sec));
+    // Sections are plain group labels now, not their own accordion — every
+    // step across the whole station is a row from the start (Concept B: one
+    // level of chunking, not two). `.stp-sec` still wraps each group so
+    // deep links can address "section N, step K" without needing a card look.
     return reminder + real.map((sec,gi)=>{
     const ns = `${baseNs}-sec${gi}`;
-    const open = gi===0 ? ' open' : '';
-    return `<div class="sc-sec${open}">
-      <h3><button type="button" class="sc-sec-head" aria-expanded="${gi===0}" onclick="toggleStationSection(this)">
-        <span class="sc-sec-chev">&#x25B6;</span>
-        <span class="sc-sec-title"><span class="sc-sec-num">${gi+1}</span>${sec.title}</span>
-      </button></h3>
-      <div class="sc-sec-body"><ul class="steps">${stepsHtml(sec.steps, ns)}</ul></div>
+    return `<div class="stp-sec">
+      <div class="stp-sec-label">${sec.title}</div>
+      <ul class="steps">${stepsHtml(sec.steps, ns)}</ul>
     </div>`;
   }).join('');
   };
   const dp=(id,cls,badge,badgeClass,s)=>{
     const body = (s.sections && s.sections.length)
-      ? `<div class="sc-sections">${sectionsHtml(s.sections, id)}</div>`
+      ? sectionsHtml(s.sections, id)
       : `<ul class="steps">${stepsHtml(s.steps, id)}</ul>`;
     /* Stations don't have to happen in one sitting: first pass should be
        B→C (B teaches what C drills), but returning straight to C on a
@@ -2135,8 +2135,8 @@ function buildModuleSongs(moduleNum){
   }).join('');
   const diffLegend = `<div class="leg"><span class="song-diff diff-1">&#x25CF;<span class="song-diff-empty">&#x25CB;&#x25CB;</span></span>&#x2192;<span class="song-diff diff-3">&#x25CF;&#x25CF;&#x25CF;</span> easier &#x2192; harder</div>`;
   const legend = `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>Core — everyone</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu — pick 1</div>${diffLegend}</div>`;
-  // Collapsible section — reuses the Station B/C collapse (toggleStationSection);
-  // starts closed so it sits quietly below the set content.
+  // Collapsible section (toggleStationSection); starts closed so it sits
+  // quietly below the set content.
   return `<div class="sc-sec">
       <h3><button type="button" class="sc-sec-head" aria-expanded="false" onclick="toggleStationSection(this)">
         <span class="sc-sec-chev">&#x25B6;</span>
@@ -3349,12 +3349,6 @@ function showSkillLesson(wid, n){
     .filter(li => li.dataset.skills.split(',').includes(String(n)));
   if(!matches.length) return;
   matches.forEach(li => {
-    const sec = li.closest('.sc-sec');
-    if(sec && !sec.classList.contains('open')){
-      sec.classList.add('open');
-      const head = sec.querySelector('.sc-sec-head');
-      if(head) head.setAttribute('aria-expanded', 'true');
-    }
     expandStepEl(li);
     flashClass(li, 'step-flash', 2600);
   });
@@ -3362,7 +3356,7 @@ function showSkillLesson(wid, n){
 }
 
 /* Deep-link to one step (used by search results): activate module + set,
-   switch to its station tab, open the section, scroll + flash the step. */
+   switch to its station tab, scroll + flash the step. */
 async function jumpToStep(moduleNum, wid, station, secIdx, stepIdx){
   if(await gatedJumpGuard(moduleNum, wid)) return;
   const sel = document.getElementById('module-select');
@@ -3372,17 +3366,10 @@ async function jumpToStep(moduleNum, wid, station, secIdx, stepIdx){
   switchTabById(wid, `station-${station}`, true);
   const panel = document.getElementById(`${wid}-station-${station}`);
   if(!panel) return;
-  const sections = panel.querySelectorAll('.sc-sec');
+  const sections = panel.querySelectorAll('.stp-sec');
   let li = null;
   if(sections.length && sections[secIdx]){
-    const sec = sections[secIdx];
-    if(!sec.classList.contains('open')){
-      sec.classList.add('open');
-      const head = sec.querySelector('.sc-sec-head');
-      if(head) head.setAttribute('aria-expanded', 'true');
-    }
-    li = sec.querySelectorAll(':scope .sc-sec-body > ul.steps > li.step')[stepIdx] ||
-         sec.querySelectorAll('li.step')[stepIdx];
+    li = sections[secIdx].querySelectorAll('li.step')[stepIdx];
   } else {
     li = panel.querySelectorAll('li.step')[stepIdx];
   }
