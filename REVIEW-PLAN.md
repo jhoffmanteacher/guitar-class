@@ -189,9 +189,8 @@ Theme (verified against the code): the app already **computes and even persists*
 - **What:** BPM sliders read/write **sessionStorage** (`app.js:2692, 2714`), so a student who slowed a hard riff to 50 BPM redoes it every visit. Switch the same key scheme to localStorage (per-device UI state; keep the try/catch for private mode).
 - **Done when:** a BPM chosen on a tab/step is still selected after closing and reopening the browser.
 
-#### I-3 — Spanish voice for read-aloud when the page is translated
-- **What:** Read-aloud is an ELD support, but `pickEnglishVoice` filters `/^en[-_]/i` only and `readAloudStep` sets `utter.lang = 'en-US'` (`app.js:1187, 1246–1248`) — a student using the Español toggle hears English speech over Spanish text. Detect the translate state (`toggleTranslate`, `app.js:2571–2584` / `html lang`) and pick an `es-*` voice + `lang='es'` when active.
-- **Done when:** with the page translated to Spanish, Read aloud speaks with a Spanish voice.
+#### I-3 — Spanish voice for read-aloud when the page is translated — ❌ Obsolete 2026-07-20
+- **Resolution:** The read-aloud feature was removed from the site entirely (browser voices judged too unnatural to be helpful). Students who need text-to-speech use Google Read&Write or their device's built-in reader instead, which handles the Español-translated page in Spanish automatically. No site work remains on this item.
 
 ### P1 (high impact, real effort)
 

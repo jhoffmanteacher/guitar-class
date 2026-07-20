@@ -248,9 +248,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .step{display:flex;gap:10px;padding:10px 0}
 .step:last-child{border-bottom:none}
 .sn{width:20px;height:20px;border-radius:50%;background:var(--bg2);font-size:0.8125rem;font-weight:500;color:var(--text2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
-/* flex:1 so every step's bottom row (Mark done · Read aloud) spans the full
-   card width — Read aloud buttons all share one right edge no matter how
-   wide the step's own content is */
+/* flex:1 so every step's bottom row (Mark done) spans the full card width
+   no matter how wide the step's own content is */
 .st{flex:1;min-width:0;font-size:0.9375rem;line-height:1.5}
 .sh{font-size:0.875rem;color:var(--text2);margin-top:3px}
 .step-figure{display:block;margin:12px 0 4px;max-width:640px}
@@ -284,7 +283,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .step-done-btn{display:inline-flex;align-items:center;gap:5px;font-family:inherit;font-size:0.7812rem;font-weight:600;color:var(--green-text);background:var(--green-bg);border:1px solid var(--green-text);border-radius:14px;padding:3px 12px;cursor:pointer}
 .step-done-btn:hover{filter:brightness(0.97)}
 /* When a step is marked done: hide its body, dim + strike the text, tint the number */
-.step-done .step-body,.step-done .read-aloud-btn{display:none}
+.step-done .step-body{display:none}
 .step-done .st-text{text-decoration:line-through;color:var(--text2);opacity:.65}
 .step-done .sn{background:var(--green-bg);color:var(--green-text)}
 .step-done{padding-top:5px;padding-bottom:5px}
@@ -776,12 +775,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .rp-chord-play{margin:0;padding:7px 16px;font-size:0.9375rem;font-family:inherit;color:var(--green-text);background:var(--green-bg);border:1px solid var(--green-text);border-radius:20px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:filter 0.12s}
 .rp-chord-play:hover{filter:brightness(0.95)}
 .rp-chord-play.playing{filter:brightness(0.88);font-weight:600}
-/* ── Read Aloud button (ELD) ── */
-.read-aloud-btn{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;font-size:0.8125rem;color:var(--text2);background:var(--bg2);border:1px solid var(--border);border-radius:12px;cursor:pointer;font-family:inherit;line-height:1.4;vertical-align:middle;flex-shrink:0}
-.read-aloud-btn svg{width:14px;height:14px;flex-shrink:0}
-.read-aloud-btn:hover{background:var(--bg3);color:var(--text)}
-.read-aloud-btn.speaking{background:var(--amber-bg);color:var(--amber-text);border-color:var(--amber-text)}
-
 /* ════════════════════════════════════════════════════════════════
    PRINT / HANDOUT  (Session 4.5)
    "🖨 Print this set" produces a clean one-pager for days the
@@ -808,7 +801,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .header,.rail,.rail-backdrop,.skip-link,.module-select-wrap,.module-strip,.module-strip-label,.week-pills,
   .student-footer,
   .video-overlay,
-  .fab-group,.tabs,.save-ind,.read-aloud-btn,
+  .fab-group,.tabs,.save-ind,
   #google_translate_element,.btn-translate,.user-area,
   .welcome-overlay,.print-set-btn,.daily5-panel,.daily5-btn,.daily5-overlay,.games-screen,
   .back-to-top,.panel-next,.sk-where-btn,.st-flex-note,
