@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-20 — Checklist polish: clearer rows, a shorter song blurb, one less box
+
+### Changed
+- **Steps within a station are easier to tell apart.** A thin line now
+  separates one step from the next, and a slightly heavier line marks where
+  one part of the station ends and the next begins (like "Watch the lesson
+  videos" giving way to "Station Wrap-Up").
+- **The "what this set builds" song blurb is one line instead of five.** Set
+  pages used to list every song this set contributes to with its own note
+  underneath — now it's a single line naming the songs and which layer
+  you're building, so it doesn't compete with the actual lesson content for
+  attention. The full song list with videos still lives in the "🎵 Songs"
+  section at the bottom of each module.
+- **Removed the "Keep going" box** that sat at the top of the practice page —
+  it was adding a second "what should I do" prompt on top of the set
+  description right below it, which felt repetitive rather than helpful.
+
 ## 2026-07-20 — Station checklists are now a compact, one-tap-at-a-time list
 
 ### Changed

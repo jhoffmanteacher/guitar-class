@@ -250,6 +250,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 /* Shared numbered-circle badge — also used by the skill-checklist grid (.sktxt .sn) */
 .sn{width:20px;height:20px;border-radius:50%;background:var(--bg2);font-size:0.8125rem;font-weight:500;color:var(--text2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
 .step{padding:2px 0}
+/* Hairline between rows so consecutive collapsed steps don't blend together
+   — matches the approved mockup's .b-row divider. Adjacent-sibling selector
+   so the very first step under a section label (which already has its own
+   border-top) doesn't get a doubled-up line. */
+.step + .step{border-top:1px solid var(--border)}
 /* Compact checklist row: tapping .step-head toggles .step-detail below it
    (the full step, unchanged from the old always-open layout) via a class
    toggle only — never re-rendered, so in-progress responses survive. */
@@ -758,7 +763,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 /* Station C — collapsible skill sections (guided by the module review) */
 /* Station step-list sections (Concept B): plain group-label dividers, not
    their own accordion — every step is a row from the start. */
-.stp-sec-label{padding:14px 2px 6px;margin-top:2px;font-size:0.75rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);border-top:1px solid var(--border)}
+.stp-sec-label{padding:16px 2px 6px;margin-top:2px;font-size:0.75rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);border-top:2px solid var(--border2)}
 .sc-sec{border-radius:8px;overflow:hidden;background:var(--bg)}
 .sc-sec-head{width:100%;font-family:inherit;font-size:0.9375rem;font-weight:500;text-align:left;padding:11px 4px;background:transparent;border:0;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:10px;line-height:1.3}
 .sc-sec-head:hover{background:var(--bg2)}
@@ -818,7 +823,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .fab-group,.tabs,.save-ind,
   #google_translate_element,.btn-translate,.user-area,
   .welcome-overlay,.print-set-btn,.daily5-panel,.daily5-btn,.daily5-overlay,.games-screen,
-  .back-to-top,.panel-next,.sk-where-btn,.st-flex-note,.next-up,
+  .back-to-top,.panel-next,.sk-where-btn,.st-flex-note,
   .step-done-row,.mr-rec,.mr-locked-banner{display:none !important}
 
   /* Only the active set prints; expand BOTH stations + the checklist, drop songs */
@@ -1068,7 +1073,6 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 .song-thread{margin-top:10px;font-size:0.8438rem;font-weight:600;color:var(--text2);line-height:1.6}
 .song-thread-link{color:var(--green-text);text-decoration:none;border-bottom:1px dashed var(--green-text)}
 .song-thread-link:hover{background:var(--green-bg)}
-.song-thread-sep{color:var(--text3);font-weight:400}
 .song-echo{min-height:0;font-size:0.875rem;font-weight:600;color:var(--green-text);opacity:0;transition:opacity .3s;margin-top:6px}
 .song-echo.show{opacity:1}
 
@@ -1101,12 +1105,6 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 .daily5-overlay{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,0.45);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:48px 16px 24px}
 .daily5-modal{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:16px 18px;width:min(560px,100%);max-height:calc(100vh - 72px);overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,0.30)}
 
-/* ── Song-thread v2: per-song rows with explicit Journey-layer chips ── */
-.song-thread-head{font-size:0.8438rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px}
-.song-thread-row{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding:2px 0;font-size:0.875rem}
-.st-layer{font-size:0.75rem;font-weight:600;padding:0;border-radius:0;background:transparent;color:var(--text2);border:none;white-space:nowrap}
-.st-layer.bonus{color:var(--amber-text)}
-.st-note{color:var(--text3);font-size:0.8125rem}
 .song-thread-name{font-weight:600;color:var(--text)}
 
 /* ══════════════════════════════════════════════
@@ -1356,26 +1354,6 @@ body.games-open{overflow:hidden}
   content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   width:max(100%,44px);height:max(100%,36px)}
 
-/* ── "Next up" card — you-are-here + skills-left + the one obvious next
-      action, at the top of the practice view. Goal-gradient: the closer a
-      set is to done, the harder the almost-full bar pulls. ── */
-.next-up{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--bg);
-  border:1px solid var(--purple-border);border-left:4px solid var(--purple-accent);
-  border-radius:var(--radius);padding:13px 16px;margin-bottom:16px;box-shadow:var(--shadow-card)}
-.next-up[hidden]{display:none}
-.nu-body{flex:1;min-width:220px}
-.nu-eyebrow{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
-  color:var(--purple-accent);margin-bottom:2px}
-.nu-title{font-size:1.0625rem;font-weight:600;line-height:1.35;color:var(--text)}
-.nu-sub{font-size:0.875rem;color:var(--text2);margin-top:2px;line-height:1.45;max-width:60ch}
-.nu-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:9px;max-width:340px}
-.nu-fill{height:100%;background:var(--green-text);border-radius:3px;transition:width .3s}
-.nu-btn{font-family:inherit;font-size:0.9062rem;font-weight:600;padding:10px 18px;min-height:44px;
-  border-radius:20px;border:1px solid var(--brand);background:var(--brand);color:var(--brand-text);
-  cursor:pointer;white-space:nowrap;box-shadow:0 3px 0 rgba(0,0,0,0.22)}
-.nu-btn:hover{background:var(--brand-hover)}
-.nu-btn:active{transform:translateY(3px);box-shadow:none}
-.nu-btn[hidden]{display:none}
 
 /* ── Rail module progress bar — always-visible version of the done/total
       that otherwise hides inside the module dropdown's labels ── */

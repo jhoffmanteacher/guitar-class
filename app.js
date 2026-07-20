@@ -1383,66 +1383,6 @@ function renderProgressStrip(){
       prog.setAttribute('aria-valuetext', `${currentInfo.done} of ${currentInfo.total} skills`);
     }
   }
-  renderNextUp();
-}
-
-/* ── "Next up" card (top of the practice view) ─────────────────────────
-   Tells the student where they are, how close the current set is to done,
-   and the one obvious next action — so a returning student never has to
-   re-decide what to do from the full menu. Refreshed by renderProgressStrip
-   (module change + every skill toggle) and by activateSet (set change). */
-function renderNextUp(){
-  const card = document.getElementById('next-up-card');
-  if(!card) return;
-  const w = SETS.find(x=>x.id===lastSetId);
-  // Module review (mrN) and not-yet-loaded states keep the card hidden —
-  // the review panel narrates its own next steps.
-  if(!w || !w.skills || !w.skills.length){ card.hidden = true; return; }
-  const eyebrow = document.getElementById('nu-eyebrow');
-  const title   = document.getElementById('nu-title');
-  const sub     = document.getElementById('nu-sub');
-  const fill    = document.getElementById('nu-fill');
-  const btn     = document.getElementById('nu-btn');
-  const { done, total } = setCompletion(w);
-  const complete = total > 0 && done === total;
-  const moduleSets = SETS.filter(x=>x.moduleNum===w.moduleNum);
-  const next = moduleSets[moduleSets.indexOf(w)+1] || null;
-  card.hidden = false;
-  fill.style.width = (total ? Math.round(done/total*100) : 0) + '%';
-  btn.hidden = false;
-  if(!complete){
-    const left = total - done;
-    eyebrow.textContent = 'Keep going';
-    title.textContent = w.label + (w.subtitle ? ` — ${w.subtitle}` : '');
-    if(done === 0){
-      sub.textContent = `${total} skills to learn in this set. Work the stations, then check off each skill as you get it.`;
-      btn.textContent = 'Start at Station B';
-      btn.onclick = ()=> railStation('station-b');
-    } else {
-      sub.textContent = left === 1
-        ? `${done} of ${total} skills checked — just 1 more to finish this set!`
-        : `${done} of ${total} skills checked — only ${left} more to finish this set!`;
-      btn.textContent = 'Update my checklist';
-      btn.onclick = ()=> railStation('checklist');
-    }
-  } else if(next && !next.locked && !next.comingSoon){
-    eyebrow.textContent = 'Set complete';
-    title.textContent = `✓ ${w.label} done — nice work!`;
-    sub.textContent = `Up next: ${next.label}${next.subtitle ? ` — ${next.subtitle}` : ''}.`;
-    btn.textContent = `Start ${next.label}`;
-    btn.onclick = ()=>{ leaveTopPanelForSet(); lastSetId = next.id; activateSet(next.id); saveProgress(); };
-  } else if(!next && MODULE_REVIEWS[w.moduleNum] && !isModuleReviewLocked(w.moduleNum)){
-    eyebrow.textContent = 'Set complete';
-    title.textContent = `✓ ${w.label} done — that's every set!`;
-    sub.textContent = 'Wrap up the module with the self-check review.';
-    btn.textContent = 'Go to Module review';
-    btn.onclick = ()=>{ leaveTopPanelForSet(); lastSetId = `mr${w.moduleNum}`; activateSet(`mr${w.moduleNum}`); saveProgress(); };
-  } else {
-    eyebrow.textContent = 'Set complete';
-    title.textContent = `✓ ${w.label} done — nice work!`;
-    sub.textContent = next ? 'The next set is coming soon.' : 'You’ve finished everything here for now.';
-    btn.hidden = true;
-  }
 }
 
 // Footer "Report a problem" — build the mailto at click time so the body carries
@@ -1671,7 +1611,6 @@ function activateSet(id){
   document.querySelectorAll('.module-songs').forEach(el=>el.classList.toggle('active', parseInt(el.dataset.module)===activeMod));
   renderChordBoxes();
   syncRailStations();   // refresh the rail's "This set" station switcher for the new set
-  renderNextUp();       // refresh the "Next up" card for the newly active set
   // Restore where the student last was in this set — or top on a first open.
   window.scrollTo(0, Object.prototype.hasOwnProperty.call(setScrollPos, id) ? setScrollPos[id] : 0);
 }
@@ -1746,22 +1685,29 @@ function buildSet(w){
     .map(s => `<li class="obj-skill-item">${s}</li>`)
     .join('');
   const skills = items ? `<ul class="obj-skill-list">${items}</ul>` : '';
-  /* Song-thread badge: each core song is built LAYER BY LAYER across the
+  /* Song-thread line: each core song is built LAYER BY LAYER across the
      course (the Journey pages' shared ladder: 1 Listen · 2 Single Notes ·
      3 Power Chords · 4 Pentatonic Solo · 5 Open Chords · Luna bonus 6).
-     Show WHICH layer this set builds, one row per song, deep-linked to
-     that layer on the Journey page. */
+     One compact line naming which layer this set builds, names deep-linked
+     to that layer on the Journey page — full detail (videos, notes) lives
+     in the module's Songs list at the bottom, so this doesn't repeat it. */
   const thread = (w.songThread && w.songThread.length)
-    ? `<div class="song-thread"><div class="song-thread-head">&#x1F3B8; Song Journey — what this set builds</div>${w.songThread.map(t => {
-        const chip = t.layer
-          ? `<span class="st-layer${t.bonus ? ' bonus' : ''}">${t.bonus ? 'Bonus Layer ' + t.layer : 'Layer ' + t.layer + ' of 5'}</span>`
-          : '';
-        const url = t.journey ? (t.layer ? `${t.journey}#layer-${t.layer}` : t.journey) : null;
-        const nameEl = url
-          ? `<a class="song-thread-link" href="${escAttr(url)}" target="_blank" rel="noopener" title="Open this layer on the Song Journey page">${escHtml(t.name)}</a>`
-          : `<span class="song-thread-name">${escHtml(t.name)}</span>`;
-        return `<div class="song-thread-row">${nameEl}${chip}<span class="st-note">${escHtml(t.note || '')}</span></div>`;
-      }).join('')}</div>`
+    ? (()=>{
+        const entries = w.songThread;
+        const names = entries.map(t => {
+          const url = t.journey ? (t.layer ? `${t.journey}#layer-${t.layer}` : t.journey) : null;
+          return url
+            ? `<a class="song-thread-link" href="${escAttr(url)}" target="_blank" rel="noopener" title="Open this layer on the Song Journey page">${escHtml(t.name)}</a>`
+            : `<span class="song-thread-name">${escHtml(t.name)}</span>`;
+        }).join(', ');
+        const layers = entries.map(t => t.layer);
+        const sameLayer = layers[0] != null && layers.every(l => l === layers[0]);
+        const sameBonus = entries.every(t => !!t.bonus === !!entries[0].bonus);
+        const lede = (sameLayer && sameBonus && entries[0].bonus) ? 'This set adds a bonus layer for:'
+          : sameLayer ? `This set builds Layer ${layers[0]} of 5 for:`
+          : 'This set grows:';
+        return `<div class="song-thread">&#x1F3B8; ${lede} ${names}</div>`;
+      })()
     : '';
   return `<div class="obj-card set-head">${titleHtml}${pill}${skills}${thread}</div>
   <div class="tabs">
