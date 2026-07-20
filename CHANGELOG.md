@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-20 — Station checklists are now a compact, one-tap-at-a-time list
+
+### Changed
+- **Station B and C are no longer one long scroll of everything at once.**
+  Each step now collapses to a single line — a status circle, a short
+  description, and an arrow — so you can see the whole station at a glance.
+  Tap a step to open it and see the full instructions, video, chords, or
+  question; tap another step and the first one tucks itself away again.
+- **Finishing a step automatically opens the next one.** Mark a step done and
+  it collapses with a checkmark while the next thing to do opens right below
+  it — no more scrolling to find where you left off.
+- **A small "N of M steps done" counter** now sits next to each station's
+  title and updates live as you check things off.
+- Anything you're in the middle of typing stays put if you collapse and
+  reopen a step, and printing a set still shows every step fully expanded,
+  exactly as before.
+
 ## 2026-07-20 — Practice streaks, two new progress views, and a smarter search
 
 ### Added

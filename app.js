@@ -1821,7 +1821,9 @@ window.addEventListener('afterprint', ()=>{
 
 /* ── Stations ── */
 function buildStations(w, stationId){
-  const stepsHtml=(steps,ns)=>steps.map((s,i)=>{
+  const stepsHtml=(steps,ns)=>{
+   const curIdx = steps.findIndex((st,idx)=>completed[`${w.id}-${ns}-${idx}`]!==true);
+   return steps.map((s,i)=>{
     const text=s.text.replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
       const safe=label.replace(/'/g,"\\'");
       // data-ext links can't be embedded (official recordings block it) — open on YouTube in a new tab.
@@ -1906,15 +1908,41 @@ function buildStations(w, stationId){
     })() : '';
     const doneKey = `${w.id}-${ns}-${i}`;
     const isDone = completed[doneKey] === true;
+    const isCur = i === curIdx;
     // Mark-done is the last row of the step.
     const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${isDone ? '&#x2713; Done' : 'Mark done'}</button></div>`;
     const skillsAttr = (s.skills && s.skills.length) ? ` data-skills="${s.skills.join(',')}"` : '';
-    return `<li class="step${isDone ? ' step-done' : ''}"${skillsAttr}><div class="sn">${i+1}</div><div class="st"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml}${foldsHtml}</div>${doneBtn}</div></li>`;
-  }).join('');
+    const label = stepLabel(s);
+    const ariaLabel = `Step ${i+1}${isDone ? ', done' : ''} — ${label}`;
+    const statusIcon = isDone ? '&#x2713;' : String(i+1);
+    return `<li class="step${isDone ? ' step-done' : ''}${isCur ? ' cur' : ''}${isCur ? '' : ' collapsed'}"${skillsAttr} data-num="${i+1}">`
+      + `<button type="button" class="step-head" aria-expanded="${isCur}" onclick="toggleStepOpen(this)" aria-label="${escAttr(ariaLabel)}">`
+      + `<span class="step-status" aria-hidden="true">${statusIcon}</span>`
+      + `<span class="step-label">${escHtml(label)}</span>`
+      + `<span class="step-chev" aria-hidden="true">&#x25B6;</span>`
+      + `</button>`
+      + `<div class="step-detail"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml}${foldsHtml}</div>${doneBtn}</div>`
+      + `</li>`;
+   }).join('');
+  };
   /* Generic tuning warm-up sections are superseded by the Daily 5 (which
      starts with the tune-up): render a pointer card above the numbered
      sections instead of taking a numbered slot itself. */
   const isTuningWarmup = sec => sec.title === 'Warm-up — tuning check (Module 1)' && w.moduleNum !== 1;
+  // Steps done / total for a station's progress pill — mirrors stepsHtml's ns-per-section scheme.
+  const stationStepCounts = (id,s) => {
+    let total=0, done=0;
+    const count=(steps,ns)=>steps.forEach((st,idx)=>{
+      total++;
+      if(completed[`${w.id}-${ns}-${idx}`]===true) done++;
+    });
+    if(s.sections && s.sections.length){
+      s.sections.filter(sec=>!isTuningWarmup(sec)).forEach((sec,gi)=>count(sec.steps, `${id}-sec${gi}`));
+    } else if(s.steps){
+      count(s.steps, id);
+    }
+    return {total,done};
+  };
   const sectionsHtml=(sections,baseNs)=>{
     const reminder = sections.some(isTuningWarmup)
       ? `<div class="daily5-inline">&#x26A1; <strong>Tune and warm up first:</strong> today\u2019s Daily 5 has tuning, a finger warm-up, and one drill (a short exercise you repeat to build a skill) from this module \u2014 five minutes and your hands are ready. <button type="button" class="daily5-inline-btn" onclick="openDaily5Here()">&#x26A1; Open today\u2019s Daily 5</button></div>`
@@ -1942,9 +1970,11 @@ function buildStations(w, stationId){
     const flexNote = (id==='c' && w.stations && w.stations.b)
       ? `<div class="st-flex-note">&#x1F9ED; <strong>First time on this set?</strong> Do <button type="button" class="st-note-link" onclick="switchTabById('${w.id}','station-b')">Station B</button> first — watch the lessons, then come back here and drill. Back on another day just to practice? Perfect — practicing on different days helps you remember.</div>`
       : '';
+    const {total: stepTotal, done: stepDone} = stationStepCounts(id, s);
+    const pillHtml = stepTotal > 0 ? `<span class="prog-pill">${stepDone} of ${stepTotal} steps done</span>` : '';
     return `
     <div class="dp${cls}" id="${w.id}-dp-${id}">
-      <div class="dp-head"><span class="st-badge ${badgeClass}">${badge}</span><h3 class="dp-title">${s.title}</h3></div>
+      <div class="dp-head"><span class="st-badge ${badgeClass}">${badge}</span><h3 class="dp-title">${s.title}</h3>${pillHtml}</div>
       ${flexNote}
       ${body}
     </div>`;
@@ -1976,7 +2006,74 @@ function toggleStepDone(btn, key){
   li.classList.toggle('step-done', nowDone);
   btn.setAttribute('aria-pressed', nowDone);
   btn.innerHTML = nowDone ? '&#x2713; Done' : 'Mark done';
+  const status = li.querySelector('.step-status');
+  if(status) status.textContent = nowDone ? '✓' : (li.dataset.num || status.textContent);
+  const head = li.querySelector('.step-head');
+  const labelEl = li.querySelector('.step-label');
+  if(head) head.setAttribute('aria-label', `Step ${li.dataset.num}${nowDone ? ', done' : ''} — ${labelEl ? labelEl.textContent : ''}`);
+  // Un-marking done just updates the icon above — no forced expand/collapse.
+  if(nowDone) collapseAndAdvance(li);
   onCompleteChange(key, nowDone);
+  updateProgressPill(li);
+}
+
+// Close every other step in the same section/list, leaving `keep` untouched.
+function closeOtherSteps(ul, keep){
+  if(!ul) return;
+  ul.querySelectorAll(':scope > li.step').forEach(other=>{
+    if(other===keep) return;
+    other.classList.add('collapsed');
+    const h = other.querySelector('.step-head');
+    if(h) h.setAttribute('aria-expanded','false');
+  });
+}
+
+function toggleStepOpen(btn){
+  const li = btn.closest('.step');
+  const ul = li.closest('ul.steps');
+  const willOpen = li.classList.contains('collapsed');
+  closeOtherSteps(ul, li);
+  li.classList.toggle('collapsed', !willOpen);
+  btn.setAttribute('aria-expanded', String(willOpen));
+  renderChordBoxes();
+}
+
+// Deep links (search, "Show me where") land on a collapsed row — open it in place.
+function expandStepEl(li){
+  if(!li) return;
+  closeOtherSteps(li.closest('ul.steps'), li);
+  li.classList.remove('collapsed');
+  const head = li.querySelector('.step-head');
+  if(head) head.setAttribute('aria-expanded','true');
+  renderChordBoxes();
+}
+
+// Mark done: collapse this row, drop its .cur badge, and open the next not-done step.
+function collapseAndAdvance(li){
+  li.classList.remove('cur');
+  li.classList.add('collapsed');
+  const head = li.querySelector('.step-head');
+  if(head) head.setAttribute('aria-expanded','false');
+  const ul = li.closest('ul.steps');
+  if(!ul) return;
+  const siblings = [...ul.querySelectorAll(':scope > li.step')];
+  const next = siblings.slice(siblings.indexOf(li)+1).find(sib=>!sib.classList.contains('step-done'));
+  if(next){
+    next.classList.remove('collapsed');
+    next.classList.add('cur');
+    const nh = next.querySelector('.step-head');
+    if(nh) nh.setAttribute('aria-expanded','true');
+  }
+  renderChordBoxes();
+}
+
+function updateProgressPill(li){
+  const dp = li.closest('.dp');
+  const pill = dp && dp.querySelector('.prog-pill');
+  if(!pill) return;
+  const total = dp.querySelectorAll('li.step').length;
+  const done = dp.querySelectorAll('li.step.step-done').length;
+  pill.textContent = `${done} of ${total} steps done`;
 }
 
 function toggleStationSection(btn){
@@ -2093,6 +2190,14 @@ function buildAssess(w){
    future content edits propagate automatically. Read-only: no Firebase writes. */
 function stripTags(html){ const d=document.createElement('div'); d.innerHTML=html||''; return (d.textContent||'').trim(); }
 function truncateText(s, n){ if(s.length<=n) return s; const cut=s.slice(0,n); return cut.slice(0, Math.max(cut.lastIndexOf(' '), n-20))+'…'; }
+// Short one-line label for a step's collapsed checklist row.
+function stepLabel(s){
+  const plain = stripTags(s.text || '').trim();
+  if(!plain && s.response && s.response.prompt) return truncateText(stripTags(s.response.prompt), 60);
+  const challengeMatch = plain.match(/^Challenge\s*\d*\s*[—-]\s*([^:]+):/);
+  if(challengeMatch) return truncateText(challengeMatch[1].trim(), 60);
+  return truncateText(plain, 60);
+}
 // Every step in a module, in document order, with its set + section context.
 function moduleStepsFlat(moduleNum){
   const out=[];
@@ -3250,6 +3355,7 @@ function showSkillLesson(wid, n){
       const head = sec.querySelector('.sc-sec-head');
       if(head) head.setAttribute('aria-expanded', 'true');
     }
+    expandStepEl(li);
     flashClass(li, 'step-flash', 2600);
   });
   matches[0].scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -3281,6 +3387,7 @@ async function jumpToStep(moduleNum, wid, station, secIdx, stepIdx){
     li = panel.querySelectorAll('li.step')[stepIdx];
   }
   if(li){
+    expandStepEl(li);
     flashClass(li, 'step-flash', 2600);
     li.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }

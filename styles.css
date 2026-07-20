@@ -245,13 +245,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .dp-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
 .dp-title{font-size:1rem;font-weight:500}
 .dp-time{font-size:0.875rem;color:var(--text2);margin-left:auto}
+.prog-pill{margin-left:auto;font-size:0.8125rem;font-weight:600;color:var(--text2);background:var(--bg3);border-radius:12px;padding:3px 10px;white-space:nowrap}
 .steps{list-style:none}
-.step{display:flex;gap:10px;padding:10px 0}
-.step:last-child{border-bottom:none}
+/* Shared numbered-circle badge — also used by the skill-checklist grid (.sktxt .sn) */
 .sn{width:20px;height:20px;border-radius:50%;background:var(--bg2);font-size:0.8125rem;font-weight:500;color:var(--text2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
-/* flex:1 so every step's bottom row (Mark done) spans the full card width
-   no matter how wide the step's own content is */
-.st{flex:1;min-width:0;font-size:0.9375rem;line-height:1.5}
+.step{padding:2px 0}
+/* Compact checklist row: tapping .step-head toggles .step-detail below it
+   (the full step, unchanged from the old always-open layout) via a class
+   toggle only — never re-rendered, so in-progress responses survive. */
+.step-head{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:8px 4px;font-family:inherit;font-size:0.9375rem;text-align:left;background:transparent;border:0;border-radius:8px;color:var(--text);cursor:pointer}
+.step-head:hover{background:var(--bg2)}
+.step-head:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+.step-status{width:22px;height:22px;border-radius:50%;background:var(--bg3);color:var(--text2);font-size:0.8125rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.step.cur .step-status{background:var(--purple-accent);color:#fff}
+.step.step-done .step-status{background:var(--green-bg);color:var(--green-text)}
+.step-label{flex:1;min-width:0;line-height:1.4}
+.step.step-done .step-label{text-decoration:line-through;color:var(--text2);opacity:.65}
+.step-chev{font-size:0.75rem;color:var(--text3);flex-shrink:0;transition:transform 0.15s}
+.step:not(.collapsed) .step-chev{transform:rotate(90deg)}
+.step-detail{padding:2px 4px 10px 36px;font-size:0.9375rem;line-height:1.5}
+.step.collapsed .step-detail{display:none}
 .sh{font-size:0.875rem;color:var(--text2);margin-top:3px}
 .step-figure{display:block;margin:12px 0 4px;max-width:640px}
 .step-figure img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--border2);background:#fff}
@@ -279,15 +292,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .step-mc-explain{display:none;margin-top:7px;font-size:0.8438rem;line-height:1.45;color:var(--text2);padding:6px 10px;border-left:3px solid var(--green-text);background:var(--bg2);border-radius:0 6px 6px 0}
 .step-mc-keyed.answered + .step-mc-explain{display:block}
 .step-resp-saved{font-size:0.7812rem;color:var(--text2);margin-top:3px;min-height:13px}
-/* ── Per-step "Mark done" toggle + collapsed (completed) state ── */
+/* ── Per-step "Mark done" toggle (collapsed/current state is .step-detail above) ── */
 .step-done-row{margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .step-done-btn{display:inline-flex;align-items:center;gap:5px;font-family:inherit;font-size:0.7812rem;font-weight:600;color:var(--green-text);background:var(--green-bg);border:1px solid var(--green-text);border-radius:14px;padding:3px 12px;cursor:pointer}
 .step-done-btn:hover{filter:brightness(0.97)}
-/* When a step is marked done: hide its body, dim + strike the text, tint the number */
-.step-done .step-body{display:none}
+/* When a step is marked done, dim + strike its full text (still viewable by re-expanding) */
 .step-done .st-text{text-decoration:line-through;color:var(--text2);opacity:.65}
-.step-done .sn{background:var(--green-bg);color:var(--green-text)}
-.step-done{padding-top:5px;padding-bottom:5px}
 .skill-badge{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:20px;border-radius:10px;background:var(--blue-bg);border:none;font-size:0.75rem;font-weight:500;color:var(--blue-text);flex-shrink:0;margin-left:5px;vertical-align:middle;padding:0 7px;white-space:nowrap}
 .step-branch{font-size:0.8438rem;line-height:1.45;color:var(--text2);padding:5px 10px;border-radius:7px}
 .step-stuck{background:var(--blue-bg)}
@@ -830,9 +840,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .sc-sec-body,.sk-helper,.sk-practice-panel{display:block !important}
   .dp.hidden{display:block !important}
 
-  /* Expand any collapsed step bodies so TAB/chords/hints all show */
-  .step-body{display:block !important}
-  .step-done .st-text{text-decoration:none;color:var(--text);opacity:1}
+  /* Expand every step (compact-checklist rows collapse on screen; print shows all) */
+  .step-detail,.step-body{display:block !important}
+  .step-chev{display:none !important}
+  .step-done .st-text,.step-done .step-label{text-decoration:none;color:var(--text);opacity:1}
 
   /* Drop interactive bits inside steps; keep the static content */
   .step-resp-input,.step-resp-mc,.play-seq-btn,.bpm-control-group,
