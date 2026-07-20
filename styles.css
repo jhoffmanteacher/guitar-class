@@ -19,9 +19,9 @@
   --shadow-raised:0 10px 36px rgba(30,27,70,0.28);
   --radius:10px;--radius-sm:6px;
   --hdr:70px;
-  /* Brand plum (header, skip-link) + warm ivory left-nav rail surface */
+  /* Brand plum (header, skip-link) + cool neutral-gray left-nav rail surface */
   --brand:#514a7d;
-  --rail-bg:#e7e2d3;
+  --rail-bg:#e2e3e1;
   --font-display:'Fraunces',ui-serif,Georgia,serif;
   --brand-text:#fff;--brand-hover:#5d5590;
 }
@@ -38,7 +38,7 @@
     --shadow-card:0 1px 5px rgba(0,0,0,0.4);
     --shadow-raised:0 10px 36px rgba(0,0,0,0.6);
     --brand:#494370;
-    --rail-bg:#151413;
+    --rail-bg:#1b1b1a;
     --brand-hover:#544d80;
   }
 }
