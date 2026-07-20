@@ -2,7 +2,7 @@
 //  GUITAR CLASS — MAIN CONFIG
 //  This file initializes the SETS array and holds global settings.
 //  Content for each module lives in its own file:
-//    module-1.js, module-2.js, modules-3-9.js, etc.
+//    module-1.js, module-2.js, module-3.js, etc.
 //
 //  HOW TO ADD A NEW MODULE:
 //    1. Create a new file, e.g. module-3.js
@@ -24,7 +24,7 @@ const MODULE_REVIEWS = {};
 // `skillCount` = number of set-level skills in that module (module reviews' own
 // self-assessment skills are NOT counted). `skillIdRe` matches that module's
 // set-skill ids in the student's `progress` map — the id scheme is `w{n}-s{m}`
-// for Module 1 and `m{N}w{n}-s{m}` for Modules 2–8. Both fields duplicate data
+// for Module 1 and `m{N}w{n}-s{m}` for Modules 2–12. Both fields duplicate data
 // that lives in the module files, so `tools/checks.mjs` verifies them against
 // the real skills on every run — see the sync rule in CLAUDE.md before editing
 // a module's skills.

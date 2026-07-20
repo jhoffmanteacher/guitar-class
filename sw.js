@@ -14,7 +14,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-07-20-8b9f5eb09c';
+const CACHE_VERSION = 'guitar-class-2026-07-20-b6a95bae07';
 
 // Static shell — everything needed to render the practice content offline.
 const ASSETS = [
@@ -53,7 +53,8 @@ const ASSETS = [
   './tabs/luna.html',
   './tabs/seven-nation-army.html',
   './tabs/sweet-child-o-mine.html',
-  './tabs/the-cure.html'
+  './tabs/the-cure.html',
+  './tabs/journey-theme.css'
 ];
 
 self.addEventListener('install', event => {

@@ -127,7 +127,7 @@ async function ensureModuleRendered(num){
     c.appendChild(div);
   }
   // Module-level "🎵 Songs" collapsible, appended after this module's panels
-  // (modules 2–8 only; module 1 keeps its per-set song tabs via buildSet).
+  // (modules 2–12; module 1 keeps its per-set song tabs via buildSet).
   if(num!==1){
     const songsHtml = buildModuleSongs(num);
     if(songsHtml){
@@ -1820,7 +1820,7 @@ function buildSongs(w){
   return `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>Core — everyone</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu — pick 1</div>${diffLegend}</div><div class="card">${rows}${requestSlot}</div>`;
 }
 
-/* Module-level songs (modules 2–8): one consolidated "🎵 Songs" list per module,
+/* Module-level songs (modules 2–12): one consolidated "🎵 Songs" list per module,
    read from MODULE_SONGS[num] and rendered as a collapsible .sc-sec section after
    the module's set panels (see ensureModuleRendered). Module 1 keeps its per-set
    lists via buildSongs above. Returns '' if the module has no song list. */
@@ -2599,7 +2599,7 @@ function playSequence(midis, bpm, btnEl){
 function readStoredBpm(key, defBpm){
   if(!key) return defBpm;
   try{
-    const v = sessionStorage.getItem(key);
+    const v = localStorage.getItem(key);
     if(v != null){
       const n = parseInt(v, 10);
       if(!isNaN(n)) return n;
@@ -2621,7 +2621,7 @@ function onBpmSliderChange(slider){
   if(readout) readout.textContent = slider.value + ' BPM';
   const key = slider.dataset.key;
   if(key){
-    try{ sessionStorage.setItem(key, slider.value); }catch(e){}
+    try{ localStorage.setItem(key, slider.value); }catch(e){}
   }
 }
 /* Read the BPM slider that shares a .bpm-control-group with this button.

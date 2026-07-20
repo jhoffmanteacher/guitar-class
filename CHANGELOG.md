@@ -5,6 +5,34 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-20 — Song Journey pages get a redesign, plus a fingerpicked bonus layer
+
+### Added
+- **Song Journey pages now match the rest of the site**, including dark mode.
+  The six song pages (Let It Be, Luna, Seven Nation Army, Sweet Child O' Mine,
+  "the cure", All Along the Watchtower) had their own separate look before —
+  now they share the same colors, fonts, and dark-mode support as everywhere
+  else, so switching between them and the main site feels like one app.
+- **Spanish translate button on Song Journey pages.** The same "Español"
+  toggle from the main site now works on every song page too, so Spanish-reading
+  students don't lose that support when they click into a song.
+- **A real fingerpicked bonus layer for Let It Be and "the cure".** Both songs'
+  journey pages now include an optional Layer 6 with the actual fingerpicking
+  pattern (the same one taught in Module 8), matching what those modules had
+  already promised.
+- **Arcade games remember your real best score.** Chord Blitz, Fret Zap, Strum
+  Hero, Strum Radar, and Riff Runner now show your all-time best on the game
+  card — not just what you scored today. Come back tomorrow and your record is
+  still there.
+- **Tempo sliders remember your setting.** If you slow a tricky riff down to
+  practice it, that speed stays set the next time you open the page — no more
+  re-adjusting every visit.
+
+### Removed
+- **The "Read aloud" button.** The built-in browser voices never sounded
+  natural enough to be worth keeping. If you want a step read aloud, Google
+  Read&amp;Write or your device's built-in text-to-speech both work well.
+
 ## 2026-07-12 — Riff Runner: play the riffs on your real guitar
 
 ### Added
