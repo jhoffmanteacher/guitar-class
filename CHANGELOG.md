@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-20 — Sidebar redesign and a real search box up top
+
+### Changed
+- **The left sidebar has a new, cooler gray background** instead of the old
+  warm tan shade.
+- **Station B, Station C, and "My skills checklist" each keep their own color**
+  in the sidebar all the time now — blue, green, and amber — instead of only
+  lighting up once you tap into one. Makes it easier to tell at a glance which
+  is which.
+- **"Find" moved from the sidebar up to the header bar** at the very top of
+  the page, styled like a real search box with a magnifying-glass icon. Same
+  search as before — just easier to spot and out of the way of your practice
+  materials.
+
 ## 2026-07-20 — Checklist polish: clearer rows, a shorter song blurb, one less box
 
 ### Changed
