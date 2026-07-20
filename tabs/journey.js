@@ -75,6 +75,37 @@ function openFromHash(){
 
 window.addEventListener('hashchange', openFromHash);
 
+/* Printing: show everything — expand all layers and open every fold, so a
+   printed handout is the full journey (matches the main app's print rule). */
+window.addEventListener('beforeprint', function(){
+  allLayers().forEach(function(s){
+    s.classList.remove('closed');
+    var btn = s.querySelector('.layer-head');
+    if(btn) btn.setAttribute('aria-expanded', 'true');
+  });
+  document.querySelectorAll('details').forEach(function(d){ d.open = true; });
+});
+
+/* ── Play-along backing track ──
+   The iframe is only injected on first open (lazy), so the page never
+   loads YouTube unless the student asks for it. */
+function togglePlayalong(btn){
+  var box = document.getElementById('playalong-frame');
+  if(!box) return;
+  var opening = box.hidden;
+  if(opening && !box.dataset.loaded){
+    var f = document.createElement('iframe');
+    f.src = 'https://www.youtube.com/embed/' + box.dataset.video;
+    f.title = 'Play-along backing track';
+    f.allow = 'autoplay; encrypted-media; picture-in-picture';
+    f.allowFullscreen = true;
+    box.appendChild(f);
+    box.dataset.loaded = '1';
+  }
+  box.hidden = !opening;
+  btn.setAttribute('aria-expanded', opening ? 'true' : 'false');
+}
+
 /* ── Progress pill ── */
 function updateProgressPill(){
   var pill = document.querySelector('.prog-pill');

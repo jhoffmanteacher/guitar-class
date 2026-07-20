@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-20 — Play-along tracks on every Song Journey page, and tidier layers
+
+### Added
+- **Every Song Journey page now has a "🎵 Play along" button** right above the
+  layers — tap it and a backing track opens on the page, so you can play
+  whatever layer you're working on over real music without hunting for the
+  track inside a module. Seven Nation Army, Sweet Child O' Mine, and Let It
+  Be got tracks that keep the singing but leave out the guitar — that part
+  is yours to play. (Watchtower, Luna, and "the cure" use jam loops for now,
+  until versions with vocals are ready.)
+
+### Changed
+- **The "Stuck?" and "Level up" tips inside each layer are now tucked behind
+  small tap-to-open buttons**, the same way hints work in the station
+  checklists. The lesson itself — the explanation, the TAB chart, and the
+  "Play it" goal — stays right there; the extra help appears only when you
+  ask for it.
+
 ## 2026-07-20 — Song Journey pages are now one layer at a time
 
 ### Changed

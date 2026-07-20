@@ -45,6 +45,11 @@ function googleTranslateElementInit(){
     <br><em style="color:var(--text3);font-size:0.8125rem">All layers are teaching arrangements at 60 BPM — simplified for learning, not note-for-note transcriptions.</em>
   </div>
 
+  <div class="playalong">
+    <button type="button" class="playalong-btn" onclick="togglePlayalong(this)" aria-expanded="false" title="Jam track — backing music to play along with; play the layer you're working on over it"><span class="pa-play">&#x25B6;</span> &#x1F3B5; Play along — backing track (with vocals, no guitar)</button>
+    <div class="playalong-frame" id="playalong-frame" data-video="xHhfKZAH_EU" hidden></div>
+  </div>
+
   <!-- LAYER 1 -->
   <section class="layer l1" id="layer-1">
     <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="true" aria-controls="layer-1-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">1</span><span class="layer-title">Listen</span><span class="layer-unit">Module 1</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
@@ -77,8 +82,8 @@ D |--------------------------|
 A |--3---------0-------------|
 E |-------3---------1--------|</pre>
       <div class="playline"><b>Play it:</b> four beats per note at <b>60 BPM</b>, saying the note names out loud. You've got it when: two clean laps (a lap = one full time through the loop) crossing between the A and E strings without looking down.</div>
-      <div class="branch"><b>Stuck?</b> Loop just the two string-cross moves — C&nbsp;&rarr;&nbsp;G and A&nbsp;&rarr;&nbsp;F — until each cross is automatic, then join the laps.</div>
-      <div class="branch"><b>Level up:</b> halve it to two beats per note, or find the same four roots using only the E string (frets 8&nbsp;&middot;&nbsp;3&nbsp;&middot;&nbsp;5&nbsp;&middot;&nbsp;1).</div>
+      <details class="fold"><summary>Stuck?</summary><div class="branch">Loop just the two string-cross moves — C&nbsp;&rarr;&nbsp;G and A&nbsp;&rarr;&nbsp;F — until each cross is automatic, then join the laps.</div></details>
+      <details class="fold"><summary>Level up</summary><div class="branch">Halve it to two beats per note, or find the same four roots using only the E string (frets 8&nbsp;&middot;&nbsp;3&nbsp;&middot;&nbsp;5&nbsp;&middot;&nbsp;1).</div></details>
       <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="2">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
@@ -103,8 +108,8 @@ D |--<span class="hl">5</span>---------<span class="hl">2</span>-------------|
 A |--3----<span class="hl">5</span>----0----<span class="hl">3</span>--------|
 E |-------3---------1--------|</pre>
       <div class="playline"><b>Play it:</b> four beats per chord at <b>60 BPM</b>, soft down-strums, every change landing on beat 1. You've got it when: two laps clean AND soft.</div>
-      <div class="branch"><b>Stuck?</b> Drop back to the Layer 2 root line for a lap, then add the second string back one chord at a time.</div>
-      <div class="branch"><b>Level up:</b> play one lap big and one lap gentle — hear how the same shapes carry two moods.</div>
+      <details class="fold"><summary>Stuck?</summary><div class="branch">Drop back to the Layer 2 root line for a lap, then add the second string back one chord at a time.</div></details>
+      <details class="fold"><summary>Level up</summary><div class="branch">Play one lap big and one lap gentle — hear how the same shapes carry two moods.</div></details>
       <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="3">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
@@ -129,8 +134,8 @@ D |----------------------------------|
 A |--------------------5-------------|
 E |--5-------8-----------------------|</pre>
       <div class="playline"><b>Play it:</b> improvise 8 bars over the C–G–Am–F loop — slow phrases, lots of space, ending on C (E string, fret 8). That landing note is what makes it sound major.</div>
-      <div class="branch"><b>Stuck?</b> Quarter notes only, two-beat phrases, two-beat rests.</div>
-      <div class="branch"><b>Level up:</b> try call-and-response — a 2-bar question ending anywhere, a 2-bar answer landing on C.</div>
+      <details class="fold"><summary>Stuck?</summary><div class="branch">Quarter notes only, two-beat phrases, two-beat rests.</div></details>
+      <details class="fold"><summary>Level up</summary><div class="branch">Try call-and-response — a 2-bar question ending anywhere, a 2-bar answer landing on C.</div></details>
       <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="4">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
@@ -150,8 +155,8 @@ E |--5-------8-----------------------|</pre>
 |  C           |  G           |  Am          |  F           |
    1  2  3  4     1  2  3  4     1  2  3  4     1  2  3  4</pre>
       <div class="playline"><b>Play it:</b> one down-strum per beat, four beats per chord, one full verse loop with every change landing on beat 1. Start forming the next chord on beat 4.</div>
-      <div class="branch"><b>Stuck?</b> Isolate the roughest pair (probably C&nbsp;&rarr;&nbsp;F) and loop just those two, four beats each.</div>
-      <div class="branch"><b>Level up:</b> keep the strum hand swinging down-up in 8th notes ("1 + 2 + 3 + 4 +") through every change, add the chorus turnaround (a short chord move that leads back to the start) — Am &middot; G &middot; F &middot; C — or trade loops with a partner soloing Layer 4 over you.</div>
+      <details class="fold"><summary>Stuck?</summary><div class="branch">Isolate the roughest pair (probably C&nbsp;&rarr;&nbsp;F) and loop just those two, four beats each.</div></details>
+      <details class="fold"><summary>Level up</summary><div class="branch">Keep the strum hand swinging down-up in 8th notes ("1 + 2 + 3 + 4 +") through every change, add the chorus turnaround (a short chord move that leads back to the start) — Am &middot; G &middot; F &middot; C — or trade loops with a partner soloing Layer 4 over you.</div></details>
       <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="5">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
@@ -176,8 +181,8 @@ D |-------------------------|
 A |--<span class="hl">3</span>-----------------------|
 E |-------------------------|</pre>
       <div class="playline"><b>Play it:</b> one bar of C, one note per click at 60 BPM — p (A string, fret 3) &middot; i (open G) &middot; m (B, fret 1) &middot; a (open e) &middot; m &middot; i. Then walk the verse: thumb moves to the low E string (fret 3) for G, back to open A for Am, then the D string (fret 3) for F — i-m-a never leave G-B-e.</div>
-      <div class="branch"><b>Stuck?</b> Fret C and pluck p-i-m-a in order, one note per beat, before adding the roll-back m-i. Speed comes after the order is automatic.</div>
-      <div class="branch"><b>Level up:</b> once C is smooth, cycle the full C &middot; G &middot; Am &middot; F verse loop, one bar each — a full lap with the pattern unbroken.</div>
+      <details class="fold"><summary>Stuck?</summary><div class="branch">Fret C and pluck p-i-m-a in order, one note per beat, before adding the roll-back m-i. Speed comes after the order is automatic.</div></details>
+      <details class="fold"><summary>Level up</summary><div class="branch">Once C is smooth, cycle the full C &middot; G &middot; Am &middot; F verse loop, one bar each — a full lap with the pattern unbroken.</div></details>
       <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="6">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>

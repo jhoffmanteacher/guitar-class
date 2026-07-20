@@ -45,6 +45,11 @@ function googleTranslateElementInit(){
     <br><em style="color:var(--text3);font-size:0.8125rem">All layers are teaching arrangements at 60 BPM — simplified for learning, not note-for-note transcriptions.</em>
   </div>
 
+  <div class="playalong">
+    <button type="button" class="playalong-btn" onclick="togglePlayalong(this)" aria-expanded="false" title="Jam track — backing music to play along with; play the layer you're working on over it"><span class="pa-play">&#x25B6;</span> &#x1F3B5; Play along — jam loop (Am)</button>
+    <div class="playalong-frame" id="playalong-frame" data-video="Vq8cApzOdy8" hidden></div>
+  </div>
+
   <!-- LAYER 1 -->
   <section class="layer l1" id="layer-1">
     <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="true" aria-controls="layer-1-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">1</span><span class="layer-title">Listen</span><span class="layer-unit">Module 1</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
@@ -77,8 +82,8 @@ D |--------------------------------------|
 A |--------------------------------------|
 E |--5----3----1----3--------------------|</pre>
       <div class="playline"><b>Play it:</b> one note per beat at <b>60 BPM</b>, four laps (a lap = one full time through the loop) without stopping. Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A) — no jumping, every finger has a home.</div>
-      <div class="branch"><b>Stuck?</b> Loop just F&nbsp;&rarr;&nbsp;G (frets 1–3) until the change is clean, then add the A on fret 5.</div>
-      <div class="branch"><b>Level up:</b> say each note name out loud as you play, or run the whole loop with your eyes closed.</div>
+      <details class="fold"><summary>Stuck?</summary><div class="branch">Loop just F&nbsp;&rarr;&nbsp;G (frets 1–3) until the change is clean, then add the A on fret 5.</div></details>
+      <details class="fold"><summary>Level up</summary><div class="branch">Say each note name out loud as you play, or run the whole loop with your eyes closed.</div></details>
       <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="2">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
@@ -102,8 +107,8 @@ D |----------------------------------------|
 A |--<span class="hl">7</span>----<span class="hl">5</span>----<span class="hl">3</span>----<span class="hl">5</span>----------------------|
 E |--5----3----1----3----------------------|</pre>
       <div class="playline"><b>Play it:</b> two beats per chord at <b>60 BPM</b>, four clean laps, every change landing on the beat. Keep your grip — it's one shape, your arm does the moving.</div>
-      <div class="branch"><b>Stuck?</b> Drop to roots-only (your Layer 2 line) for a lap, then add the second string back on just the A5.</div>
-      <div class="branch"><b>Level up:</b> one beat per chord — same 60 BPM, twice the changes — or palm-mute the verse (rest the side of your strumming hand on the strings for a short, muffled sound), then let the strings ring louder for a big lap.</div>
+      <details class="fold"><summary>Stuck?</summary><div class="branch">Drop to roots-only (your Layer 2 line) for a lap, then add the second string back on just the A5.</div></details>
+      <details class="fold"><summary>Level up</summary><div class="branch">One beat per chord — same 60 BPM, twice the changes — or palm-mute the verse (rest the side of your strumming hand on the strings for a short, muffled sound), then let the strings ring louder for a big lap.</div></details>
       <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="3">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
@@ -128,8 +133,8 @@ D |--------------5---------7---------|
 A |--7-------------------------------|
 E |----------------------------------|</pre>
       <div class="playline"><b>Play it:</b> loop the chords in your head (or with a partner on Layer 3) and improvise 4 bars on those three notes, then 4 more adding one note of your choice from Pattern 1. Start or end every phrase on A — that's 'home', the note the music rests on.</div>
-      <div class="branch"><b>Stuck?</b> Quarter notes only, two-beat phrases, two-beat rests — until an idea shows up on its own.</div>
-      <div class="branch"><b>Level up:</b> start a phrase during the F bar and resolve it on the Am bar — that's real tension and release.</div>
+      <details class="fold"><summary>Stuck?</summary><div class="branch">Quarter notes only, two-beat phrases, two-beat rests — until an idea shows up on its own.</div></details>
+      <details class="fold"><summary>Level up</summary><div class="branch">Start a phrase during the F bar and resolve it on the Am bar — that's real tension and release.</div></details>
       <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="4">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
@@ -149,8 +154,8 @@ E |----------------------------------|</pre>
 |  Am        G        |  F         G        |  (loop)
    1    2    3    4      1    2    3    4</pre>
       <div class="playline"><b>Play it:</b> down-strums, two beats per chord, four loops — and listen for it: this is the SAME song you played in Modules 2 and 3, finally sounding full.</div>
-      <div class="branch"><b>Stuck?</b> Strum only beat 1 of each chord and use the silent beats to travel to the next shape.</div>
-      <div class="branch"><b>Level up:</b> trade loops with a partner playing Layer 3 power chords — Dylan and Hendrix at the same time — or hum a verse over your own strumming.</div>
+      <details class="fold"><summary>Stuck?</summary><div class="branch">Strum only beat 1 of each chord and use the silent beats to travel to the next shape.</div></details>
+      <details class="fold"><summary>Level up</summary><div class="branch">Trade loops with a partner playing Layer 3 power chords — Dylan and Hendrix at the same time — or hum a verse over your own strumming.</div></details>
       <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="5">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
