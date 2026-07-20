@@ -479,8 +479,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .rs-text{display:flex;flex-direction:column;line-height:1.2;min-width:0}
 .rs-title{font-size:0.875rem;font-weight:600}
 .rs-sub{font-size:0.75rem;color:var(--text2);margin-top:1px}
-/* Station badges keep a soft tint of their own color at all times, so B/C/
-   checklist stay visually distinct even before you pick one */
+/* Station rows + badges keep a soft tint of their own color at all times, so
+   B/C/checklist stay visually distinct even before you pick one. Hover deepens
+   the tint a step; active (below) goes to the full pastel wash. */
+.rail-station.st-b{background:color-mix(in srgb, var(--blue-bg) 55%, var(--rail-bg))}
+.rail-station.st-c{background:color-mix(in srgb, var(--green-bg) 55%, var(--rail-bg))}
+.rail-station.st-chk{background:color-mix(in srgb, var(--amber-bg) 55%, var(--rail-bg))}
+.rail-station.st-b:hover{background:color-mix(in srgb, var(--blue-bg) 75%, var(--rail-bg))}
+.rail-station.st-c:hover{background:color-mix(in srgb, var(--green-bg) 75%, var(--rail-bg))}
+.rail-station.st-chk:hover{background:color-mix(in srgb, var(--amber-bg) 75%, var(--rail-bg))}
 .rail-station.st-b .rs-num{background:var(--blue-bg);color:var(--blue-text)}
 .rail-station.st-c .rs-num{background:var(--green-bg);color:var(--green-text)}
 .rail-station.st-chk .rs-num{background:var(--amber-bg);color:var(--amber-text)}
