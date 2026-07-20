@@ -343,7 +343,10 @@ function googleTranslateElementInit(){
 </div>
 <script defer src="app.js"></script>
 <!-- Split out of app.js for maintainability. Load AFTER app.js; both attach
-     global functions used by onclick handlers / the auth flow at event time. -->
+     global functions used by onclick handlers / the auth flow at event time.
+     fab-tools.js is also loaded (unmodified) by every tabs/*.html Song
+     Journey page, so the same Tuner/Timer/Metronome are available there. -->
+<script defer src="fab-tools.js"></script>
 <script defer src="tuner.js"></script>
 <script defer src="coach.js"></script>
 <script defer src="teacher.js"></script>

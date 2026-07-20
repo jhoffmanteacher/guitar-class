@@ -11,6 +11,15 @@
   --focus:#185fa5;
   --l1:#7c5cbf; --l2:#2f7fbf; --l3:#c2703d; --l4:#3f9464; --l5:#b04a6e; --l6:#2f9e93;
   --font-display:'Fraunces',ui-serif,Georgia,serif;
+  /* Below: only needed by the floating Tuner/Timer/Metronome tools
+     (fab-tools.css) — matches the main app's styles.css exactly. */
+  --blue-bg:#e6f1fb; --blue-text:#185fa5;
+  --green-bg:#eaf3de; --green-text:#3b6d11;
+  --amber-bg:#faeeda; --amber-text:#854f0b;
+  --purple-bg:#eeedfe; --purple-text:#3c3489;
+  --purple-border:#c5c0ee; --purple-accent:#5b52a8;
+  --radius:10px; --radius-sm:6px;
+  --shadow-raised:0 10px 36px rgba(30,27,70,0.28);
 }
 @media (prefers-color-scheme:dark){
   :root{
@@ -19,6 +28,12 @@
     --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
     --brand:#8f85e8;
     --focus:#93c4f0;
+    --blue-bg:#0c3a6b; --blue-text:#93c4f0;
+    --green-bg:#1e4208; --green-text:#a8d070;
+    --amber-bg:#4a2a04; --amber-text:#f0b84a;
+    --purple-bg:#2b2752; --purple-text:#c7c1f5;
+    --purple-border:#4a4390; --purple-accent:#8f85e8;
+    --shadow-raised:0 10px 36px rgba(0,0,0,0.6);
   }
   pre.tab{background:#141518;color:#e8eaee}
 }

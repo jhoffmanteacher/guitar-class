@@ -23,6 +23,7 @@ const ASSETS = [
   './styles.css',
   './fonts/fraunces.woff2',
   './app.js',
+  './fab-tools.js',
   './tuner.js',
   './coach.js',
   './teacher.js',
@@ -55,7 +56,8 @@ const ASSETS = [
   './tabs/sweet-child-o-mine.html',
   './tabs/the-cure.html',
   './tabs/journey-theme.css',
-  './tabs/journey.js'
+  './tabs/journey.js',
+  './tabs/fab-tools.css'
 ];
 
 self.addEventListener('install', event => {

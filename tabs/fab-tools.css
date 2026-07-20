@@ -1,0 +1,70 @@
+/* Floating Tuner / Timer / Metronome tools — shared across the six Song
+   Journey pages. Ported verbatim from the main app's styles.css so these
+   look identical wherever a student runs into them; relies on the color
+   tokens journey-theme.css adds specifically for this file (load that
+   first). Paired with tuner.js + fab-tools.js. */
+.fab-group{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;align-items:flex-end;gap:10px;z-index:100}
+.fab-buttons{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.fab{display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:999px;border:1px solid;font-size:0.9375rem;font-weight:500;cursor:pointer;transition:opacity 0.15s;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,0.10);font-family:inherit;appearance:none;-webkit-appearance:none;text-align:left;line-height:1.2;background:var(--bg);border-color:var(--border2);color:var(--text)}
+.fab:hover{background:var(--bg3);opacity:1}
+.fab svg{width:15px;height:15px;flex-shrink:0}
+.fab-metro svg{color:var(--blue-text)}
+.fab-timer svg{color:var(--green-text)}
+.fab-tune svg{color:var(--purple-accent)}
+.tool-popup{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:16px;width:240px;box-shadow:var(--shadow-raised);display:none}
+.tool-popup.open{display:block}
+.tuner-note{font-size:3.125rem;font-weight:500;text-align:center;line-height:1;color:var(--text);min-height:56px;margin-bottom:2px}
+.tuner-note.in-tune{color:var(--green-text)}
+.tuner-note.in-tune-pop{animation:tunerPop .45s ease-out}
+@keyframes tunerPop{0%{transform:scale(1)}40%{transform:scale(1.14)}100%{transform:scale(1)}}
+.tuner-freq{font-size:0.875rem;color:var(--text2);text-align:center;min-height:18px;margin-bottom:10px}
+.tuner-gauge{position:relative;height:36px;margin-bottom:4px}
+.tuner-track{position:absolute;bottom:0;left:8px;right:8px;height:4px;border-radius:2px;background:var(--bg3)}
+.tuner-center{position:absolute;left:50%;bottom:-3px;width:2px;height:10px;background:var(--border2);border-radius:1px;transform:translateX(-50%)}
+.tuner-needle{position:absolute;bottom:0;width:3px;height:26px;border-radius:2px 2px 0 0;transform-origin:bottom center;transform:translateX(-50%);transition:left .18s ease-out,background .15s;left:50%;background:var(--border2)}
+.tuner-labels{display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text3);padding:0 8px;margin-bottom:8px}
+.tuner-status{text-align:center;font-size:0.875rem;font-weight:500;min-height:18px;margin-bottom:10px;color:var(--text2)}
+.tuner-status.in-tune{color:var(--green-text)}
+.tuner-status.sharp{color:var(--amber-text)}
+.tuner-status.flat{color:var(--blue-text)}
+.tuner-strings{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.ts-btn{flex:1;padding:8px 0;min-height:34px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg2);font-size:0.8125rem;cursor:pointer;color:var(--text2);font-family:inherit;min-width:0}
+.tuner-strings .ts-btn{flex:1 1 40px;min-width:40px;min-height:44px}
+.ts-btn:hover{background:var(--bg3)}
+.ts-btn.active{background:var(--purple-bg);border-color:var(--purple-accent);color:var(--purple-text);font-weight:500}
+.tp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.tp-title{font-size:0.9375rem;font-weight:500}
+.tp-close{background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--text3);line-height:1;padding:0 2px;font-family:inherit}
+.tp-close:hover{color:var(--text)}
+.bpm-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.bpm-num{font-size:1.875rem;font-weight:500;min-width:48px;color:var(--text)}
+.bpm-lbl{font-size:0.8125rem;color:var(--text2)}
+.bpm-row .bpm-slider{flex:1}
+.tp-ctrl{display:flex;gap:5px}
+.tp-btn{flex:1;padding:10px 0;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg2);font-size:0.875rem;cursor:pointer;color:var(--text);font-family:inherit}
+.tp-btn:hover{background:var(--bg3)}
+.tp-btn.primary{background:var(--blue-bg);border-color:var(--blue-text);color:var(--blue-text);font-weight:500}
+.tp-btn.primary-g{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text);font-weight:500}
+.tp-btn.primary:hover,.tp-btn.primary-g:hover{opacity:0.85}
+.timer-display{font-size:2.25rem;font-weight:500;text-align:center;letter-spacing:2px;margin:4px 0 12px;color:var(--text);border-radius:8px}
+@keyframes timerDoneFlash{0%,100%{background:transparent;color:var(--text)}50%{background:var(--green-text);color:var(--bg)}}
+.timer-done-flash{animation:timerDoneFlash 0.6s ease-in-out 4}
+@keyframes fabTimerDone{0%,100%{background:var(--green-bg);color:var(--green-text);transform:scale(1)}50%{background:var(--green-text);color:var(--bg);transform:scale(1.08)}}
+.fab-timer-done{animation:fabTimerDone 0.6s ease-in-out 6}
+.metro-dot{width:28px;height:28px;border-radius:50%;background:var(--blue-bg);border:2px solid var(--blue-text);margin:0 auto 14px;transition:background 0.05s,transform 0.05s}
+.metro-dot.flash{background:var(--blue-text);transform:scale(1.25)}
+.timer-presets{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.timer-presets button{flex:1;min-width:44px;padding:5px 4px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg2);font-size:0.8125rem;cursor:pointer;color:var(--text);font-family:inherit;white-space:nowrap}
+.timer-presets button:hover{background:var(--bg3)}
+.timer-presets button.sel{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
+.bpm-slider{-webkit-appearance:none;appearance:none;width:120px;height:28px;background:transparent;cursor:pointer;margin:0;padding:0}
+.bpm-slider:focus{outline:none}
+.bpm-slider:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+.bpm-slider::-webkit-slider-runnable-track{height:3px;background:var(--border2);border-radius:2px;border:none}
+.bpm-slider::-moz-range-track{height:3px;background:var(--border2);border-radius:2px;border:none}
+.bpm-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:13px;height:13px;border-radius:50%;background:var(--text2);border:none;margin-top:-5px;cursor:pointer;transition:background 0.1s}
+.bpm-slider::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--text2);border:none;cursor:pointer;transition:background 0.1s}
+.bpm-slider:hover::-webkit-slider-thumb,.bpm-slider:focus::-webkit-slider-thumb{background:var(--text)}
+.bpm-slider:hover::-moz-range-thumb,.bpm-slider:focus::-moz-range-thumb{background:var(--text)}
+/* ≥44px tap targets, matching the main app's tap-target pass */
+.tp-btn,.ts-btn,.timer-presets button{min-height:44px}

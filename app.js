@@ -2749,7 +2749,7 @@ function toggleTranslate(){
 /* ══════════════════════════════════════════════
    FLOATING TOOLS — Metronome & Timer
    ══════════════════════════════════════════════ */
-let metroRunning=false, metroInterval=null, audioCtx=null;
+let audioCtx=null;
 function getAudioCtx(){ if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
 function beep(freq,dur,gain){ const ctx=getAudioCtx(); const o=ctx.createOscillator(),g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=freq; g.gain.setValueAtTime(gain==null?0.4:gain,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur); o.start(); o.stop(ctx.currentTime+dur); }
 /* Reusable single-note player. Karplus-Strong plucked-string
@@ -2819,7 +2819,9 @@ function stopAllDemoAudio(){
   chordStrumTimeouts = [];
   // clearing the strum timeouts also cancels their '.playing' cleanup — sweep it
   document.querySelectorAll('.playing').forEach(el => el.classList.remove('playing'));
-  if(metroRunning) stopMetro();
+  // metroRunning/stopMetro live in fab-tools.js (always loaded alongside
+  // app.js on index.html) — guarded for robustness, not because it's optional.
+  if(typeof metroRunning !== 'undefined' && metroRunning) stopMetro();
 }
 function playSequence(midis, bpm, btnEl){
   if(playSeqState){
@@ -2911,87 +2913,6 @@ function coachChordBtnRowHtml(chords){
   if(!spec.length) return '';
   return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}" onclick="coachOpen(this)" title="4 count-in clicks, then strum on every beat — the mic listens and gives feedback">&#x1F3A4; Listening Coach</button></div>`;
 }
-let metroMeter=4, metroCountIn=false, metroBeatIdx=0, metroCountInTimeouts=[];
-function getMetroMeter(){ return metroMeter; }
-function setMetroMeter(n){
-  metroMeter = n;
-  document.querySelectorAll('#metro-popup .meter-btn').forEach(b=>{
-    const on = b.id === 'meter-'+n;
-    b.classList.toggle('sel', on);
-    b.setAttribute('aria-checked', on ? 'true' : 'false');
-    b.tabIndex = on ? 0 : -1;
-  });
-  if(metroRunning){ stopMetro(); startMetro(false); }
-}
-/* Arrow-key navigation for the 2/4-4/4-3/4 radiogroup (WAI-ARIA roving-tabindex
-   pattern): only the selected meter button is tabbable; arrows move selection
-   and focus among the other options. */
-function meterKeydown(e){
-  const nav = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End'];
-  if(!nav.includes(e.key)) return;
-  e.preventDefault();
-  const order = [2,4,3];
-  const idx = order.indexOf(metroMeter);
-  let next;
-  if(e.key==='Home') next = order[0];
-  else if(e.key==='End') next = order[order.length-1];
-  else if(e.key==='ArrowRight' || e.key==='ArrowDown') next = order[(idx+1)%order.length];
-  else next = order[(idx-1+order.length)%order.length];
-  setMetroMeter(next);
-  document.getElementById('meter-'+next).focus();
-}
-function setMetroCountIn(on){ metroCountIn = !!on; }
-/* Beat 1 of the bar rings out louder and higher — the downbeat you count "1" on
-   — everything else in the bar is the plain click. */
-function tick(){
-  if(!window.coachMicLive){
-    const accent = metroBeatIdx === 0;
-    beep(accent ? 1320 : 880, accent ? 0.08 : 0.06, accent ? 0.55 : 0.4);
-  }
-  const dot=document.getElementById('metro-dot'); if(dot){ dot.classList.add('flash'); setTimeout(()=>dot.classList.remove('flash'),80); }
-  metroBeatIdx = (metroBeatIdx + 1) % getMetroMeter();
-}
-function getBpm(){ return parseInt(document.getElementById('bpm-slider').value); }
-function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; if(metroRunning){ stopMetro(); startMetro(false); } }
-function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Math.min(220,Math.max(40,getBpm()+d)); document.getElementById('bpm-display').textContent=s.value; if(metroRunning){ stopMetro(); startMetro(false); } }
-/* useCountIn defaults true (the Start button's toggle); BPM/meter changes
-   while already running pass false so they don't replay the lead-in bar. */
-function startMetro(useCountIn){
-  if(window.coachMicLive) return;
-  metroRunning = true;
-  metroBeatIdx = 0;
-  document.getElementById('metro-btn').innerHTML='&#x23F8; Stop';
-  const beatMs = Math.round(60000/getBpm());
-  const beginRun = () => {
-    if(!metroRunning) return;
-    metroBeatIdx = 0;
-    tick();
-    metroInterval = setInterval(tick, beatMs);
-  };
-  if(useCountIn !== false && metroCountIn){
-    const meter = getMetroMeter();
-    for(let i=0; i<meter; i++){
-      metroCountInTimeouts.push(setTimeout(()=>{ if(metroRunning) tick(); }, i*beatMs));
-    }
-    metroCountInTimeouts.push(setTimeout(beginRun, meter*beatMs));
-  } else {
-    beginRun();
-  }
-}
-function stopMetro(){
-  clearInterval(metroInterval);
-  metroCountInTimeouts.forEach(clearTimeout);
-  metroCountInTimeouts = [];
-  metroRunning=false;
-  metroBeatIdx=0;
-  document.getElementById('metro-btn').innerHTML='&#x25B6; Start';
-}
-function toggleMetro(){ if(metroRunning) stopMetro(); else startMetro(true); }
-
-/* ── Timer ── */
-let timerRunning=false, timerInterval=null, timerSecs=30, timerSelected=30;
-function setTimerSecs(secs){ timerSelected=secs; timerSecs=secs; if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; } updateTimerDisplay(); [30,60,120,180,240,300].forEach(s=>{ const el=document.getElementById('tp-'+s); if(el) el.classList.toggle('sel',s===secs); }); }
-function updateTimerDisplay(){ const m=Math.floor(timerSecs/60),s=timerSecs%60; document.getElementById('timer-display').textContent=m+':'+(s<10?'0':'')+s; }
 /* One-shot animation helper: restart a CSS animation class even if it's
    already applied (remove → force reflow → add), then clear it after ms. */
 function flashClass(el, cls, ms){
@@ -3000,33 +2921,10 @@ function flashClass(el, cls, ms){
   el.classList.add(cls);
   setTimeout(()=>el.classList.remove(cls), ms);
 }
-// Flash the display when time's up — visible across a loud room without headphones.
-function flashTimerDisplay(){ flashClass(document.getElementById('timer-display'),'timer-done-flash',2400); }
-// Pulse the floating timer button too — it's visible even when the popup is closed.
-function flashTimerFab(){ flashClass(document.getElementById('fab-timer'),'fab-timer-done',3600); }
-function resetTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; } timerSecs=timerSelected; updateTimerDisplay(); document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; }
-function toggleTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; } else { timerRunning=true; document.getElementById('timer-btn').innerHTML='&#x23F8; Pause'; timerInterval=setInterval(()=>{ if(timerSecs>0){ timerSecs--; updateTimerDisplay(); } else { clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; [0,0.35,0.7].forEach(d=>setTimeout(()=>beep(660,0.3),d*1000)); flashTimerDisplay(); flashTimerFab(); } },1000); } }
-
-/* ── Popup logic ── */
-function setFabExpanded(which, isOpen){ const f=document.getElementById('fab-'+which); if(f) f.setAttribute('aria-expanded', isOpen?'true':'false'); }
-function togglePopup(which){
-  const open=document.getElementById(which+'-popup').classList.toggle('open');
-  setFabExpanded(which, open);
-  // The tuner has no Start/Stop button — opening it starts listening, closing stops.
-  // One mic owner at a time: the tuner interrupts a live Listening Coach check
-  // and stops any running game mic; the games do the reverse themselves.
-  if(which==='tuner'){ if(open){ if(typeof coachInterrupt==='function') coachInterrupt(); if(typeof gamesStopMic==='function') gamesStopMic(); stopAllDemoAudio(); startTuner(); } else { stopTuner(); } }
-}
-function closePopup(which){ document.getElementById(which+'-popup').classList.remove('open'); setFabExpanded(which, false); if(which==='metro') stopMetro(); if(which==='tuner') stopTuner(); }
-document.addEventListener('click',e=>{
-  if(!e.target.closest('.tool-popup')&&!e.target.closest('.fab')&&!e.target.closest('.fab-buttons')){
-    ['metro','timer','tuner'].forEach(closePopup);
-  }
-});
-// Escape closes any open tool popup (a11y)
+// Escape closes the welcome/video/games overlays (a11y). Tool-popup closing
+// (metronome/timer/tuner) is handled by fab-tools.js's own Escape listener.
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
-  ['metro','timer','tuner'].forEach(w=>{ const el=document.getElementById(w+'-popup'); if(el&&el.classList.contains('open')) closePopup(w); });
   const wo=document.getElementById('welcome-overlay'); if(wo&&wo.style.display!=='none') dismissWelcome();
   const vo=document.getElementById('video-overlay'); if(vo&&!vo.hidden) clearPanel();
   const gs=document.getElementById('games-screen'); if(gs&&!gs.hasAttribute('hidden')&&typeof closeGamesScreen==='function') closeGamesScreen();
