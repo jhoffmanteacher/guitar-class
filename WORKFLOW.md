@@ -43,6 +43,25 @@
 
 ## Open work
 
+- [ ] **Listen-check the six journey-page backing tracks; make moises.ai
+      versions where needed** (Jonathan, 2026-07-20) — every Song Journey page
+      now has a "🎵 Play along" button. Claude verified the six YouTube videos
+      exist (oEmbed titles) but could not listen to them, so each needs a
+      10-second ear check. Target sound: **vocals kept, rhythm guitar
+      removed**. Current state:
+      - Seven Nation Army — `sbN1wfDb4sw` (title says with-vocals/no-guitar; confirm)
+      - Sweet Child O' Mine — `kkZI8Lma8UA` (with-vocals, standard tuning — confirm it
+        really is standard tuning, matching the site's arrangement)
+      - Let It Be — `xHhfKZAH_EU` (title says with-vocals; confirm)
+      - Watchtower — `Vq8cApzOdy8` ⚠️ generic Am jam loop, no vocals → moises.ai candidate
+      - Luna — `wBxFnX_V9mQ` ⚠️ generic Dm jam loop, no vocals → moises.ai candidate
+      - "the cure" — `bs802M_jqtk` ⚠️ generic Am jam loop, no vocals → moises.ai candidate
+      For any replacement (moises.ai upload to YouTube, or a better find):
+      swapping is one line in two places per song — `data-video="<id>"` in
+      `tabs/<song>.html` and `backingUrl` on the song's module card
+      (module-4.js for most, module-5.js for Let It Be). Give Claude the link
+      and it'll verify + swap.
+
 - [ ] **Real-guitar test of Riff Runner Wait Mode** (Jonathan, 2026-07-12) —
       ⚠️ **SHIPPED LIVE UNTESTED** — Jonathan chose to push it before a guitar
       test (base `6dcf68c` + the play-at-tempo rework). **Still needs a
