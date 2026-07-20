@@ -34,9 +34,10 @@ function googleTranslateElementInit(){
     <h1>&ldquo;the cure&rdquo;</h1>
     <div class="song-artist">Olivia Rodrigo</div>
     <span class="thread-badge">&#x1F9F5; Thread song — it appears across all 5 modules</span>
+    <span class="prog-pill">0 of 6 layers rated</span>
   </header>
 
-  <p class="journey-note">One song, five layers. Every module this semester, you come back to this song with a new skill — and it gets bigger every time. Find your current layer below. Done early? Move down one layer and try the next. There's also a bonus Layer 6 with the song's fingerpicked verse, once you're ready for a harder challenge.</p>
+  <p class="journey-note">One song, five layers. Every module this semester, you come back to this song with a new skill — and it gets bigger every time. There's also a bonus Layer 6 with the song's fingerpicked verse, once you're ready for a harder challenge.</p>
 
   <div class="songmap">
     <b>Song map:</b> Verse (soft, guitar carries it) &rarr; Chorus (fuller, same chords) &rarr; Verse &rarr; Chorus &rarr; Outro (the ending section).
@@ -47,8 +48,8 @@ function googleTranslateElementInit(){
 
   <!-- LAYER 1 -->
   <section class="layer l1" id="layer-1">
-    <div class="layer-head"><span class="layer-num">1</span><h2>Listen</h2><span class="layer-unit">Module 1</span></div>
-    <div class="layer-body">
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="true" aria-controls="layer-1-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">1</span><span class="layer-title">Listen</span><span class="layer-unit">Module 1</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <div class="layer-body" id="layer-1-body">
       <p>This is the newest song in the course — and the quietest. Find the guitar first: it's acoustic, clean, and close, like it's being played in the room with you. Listen once for the chords changing, once for how little else is happening, and once for how the chorus grows without ever getting loud.</p>
       <div class="playline"><b>Do it:</b> listen to the song (the clean edit). Count the chord changes in one verse — how many different chords do you hear?</div>
       <div class="branch"><b>Respond:</b> clean or distorted? Acoustic or electric? How is Olivia's guitar tone different from Seven Nation Army's?</div>
@@ -64,9 +65,9 @@ function googleTranslateElementInit(){
   </section>
 
   <!-- LAYER 2 -->
-  <section class="layer l2" id="layer-2">
-    <div class="layer-head"><span class="layer-num">2</span><h2>Single Notes</h2><span class="layer-unit">Module 2</span></div>
-    <div class="layer-body">
+  <section class="layer l2 closed" id="layer-2">
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-2-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">2</span><span class="layer-title">Single Notes</span><span class="layer-unit">Module 2</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <div class="layer-body" id="layer-2-body">
       <p>Every chord has a root note, and the roots make a bassline you can play right now: <b>A &middot; C &middot; D &middot; F &middot; G</b>. This line crosses between the A and E strings — your first song that makes you switch strings mid-phrase.</p>
 <pre class="tab">Root line — teaching arrangement, no capo · 2 beats per note
         A    C    D    F    G
@@ -90,9 +91,9 @@ E |-----------------1----3---------|</pre>
   </section>
 
   <!-- LAYER 3 -->
-  <section class="layer l3" id="layer-3">
-    <div class="layer-head"><span class="layer-num">3</span><h2>Power Chords &nbsp;&#x25D0;</h2><span class="layer-unit">Module 3</span></div>
-    <div class="layer-body">
+  <section class="layer l3 closed" id="layer-3">
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-3-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">3</span><span class="layer-title">Power Chords &nbsp;&#x25D0;</span><span class="layer-unit">Module 3</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <div class="layer-body" id="layer-3-body">
       <div class="grain">&#x25D0; <b>An unusual twist:</b> this gentle acoustic song isn't usually played with power chords — that's the point. Optional harder challenge, no score. Try it.</div>
       <p>Same roots you played in Layer 2 — same frets, even — each note now also plays the note a fifth above it. Two-finger shape, and here's the surprising part: play it <em>quietly</em>. Power chords don't have to be loud.</p>
 <pre class="tab">        A5   C5   D5   F5   G5
@@ -116,9 +117,9 @@ E |-----------------1----3---------|</pre>
   </section>
 
   <!-- LAYER 4 -->
-  <section class="layer l4" id="layer-4">
-    <div class="layer-head"><span class="layer-num">4</span><h2>Pentatonic Solo</h2><span class="layer-unit">Module 4</span></div>
-    <div class="layer-body">
+  <section class="layer l4 closed" id="layer-4">
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-4-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">4</span><span class="layer-title">Pentatonic Solo</span><span class="layer-unit">Module 4</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <div class="layer-body" id="layer-4-body">
       <p>The teaching arrangement sits in A minor, so A minor pentatonic fits over every chord. Olivia's song is soft — so your solo has to be too. Start with three notes and leave gaps of silence between notes — the space is part of the music.</p>
 <pre class="tab">Your three starting notes — A minor pentatonic, Pattern 1 (5th position)
         A         C         D
@@ -142,9 +143,9 @@ E |--5-------8-----------------------|</pre>
   </section>
 
   <!-- LAYER 5 -->
-  <section class="layer l5" id="layer-5">
-    <div class="layer-head"><span class="layer-num">5</span><h2>Open Chords</h2><span class="layer-unit">Module 5</span></div>
-    <div class="layer-body">
+  <section class="layer l5 closed" id="layer-5">
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-5-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">5</span><span class="layer-title">Open Chords</span><span class="layer-unit">Module 5</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <div class="layer-body" id="layer-5-body">
       <p>Now you play it the way the recording does. Capo on fret 1, and the shapes you know — Am, C, Dm, F — match the actual recording. The G/B turnaround (a short chord move that leads back to the start) is just a G sound with its B note in the bass, closing the loop back to Am.</p>
 <pre class="tab">Capo 1 — shapes as written · 4 beats per chord · 60 &rarr; 65 &rarr; 70 BPM
 |  Am          |  C           |  Dm          |  F           |
@@ -164,9 +165,9 @@ then G/B for 4 beats to turn it around, back to Am</pre>
   </section>
 
   <!-- LAYER 6 -->
-  <section class="layer l6" id="layer-6">
-    <div class="layer-head"><span class="layer-num">6</span><h2>Fingerpicked Verse</h2><span class="layer-unit">Bonus</span></div>
-    <div class="layer-body">
+  <section class="layer l6 closed" id="layer-6">
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-6-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">6</span><span class="layer-title">Fingerpicked Verse</span><span class="layer-unit">Bonus</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <div class="layer-body" id="layer-6-body">
       <div class="grain">Bonus layer — optional harder challenge, no score. Ready whenever you are; no specific Module required.</div>
       <p>This is "the cure" in its native style — no strumming. The verse is a soft 6-note roll, p-i-m-a-m-i (thumb &middot; index &middot; middle &middot; ring &middot; middle &middot; index), your thumb walking the bass note of each chord while your fingers stay parked on the G, B, and e strings.</p>
 <pre class="tab">Am arpeggio — capo 1 &middot; p i m a m i (one bar)
@@ -192,114 +193,7 @@ E |-------------------------|</pre>
   <footer>Mr. Hoffman's Guitar Class &middot; Song Journey &middot; teaching arrangement for classroom use &middot; tempo targets build across layers</footer>
 </div>
 
-<script>
-/* ── Layer self-rating ──
-   Ratings save into the SAME Firestore doc the main app uses
-   (progress/{uid}), under songRatings.<song-id>.<layer> — so no new
-   collections and no security-rule changes. If the student isn't signed
-   in, or a school filter blocks the Firebase SDK, the highlight quietly
-   stays session-only (same behavior the page always had). */
-var SONG_ID = 'the-cure';
-var fbUser = null, fbDb = null, saveTimer = null, dirty = false;
-
-/* Spanish translate toggle — mirrors the main app's toggleTranslate() */
-var isSpanish = false;
-function toggleTranslate(){
-  var btn = document.getElementById('btn-translate');
-  var lbl = document.getElementById('translate-label');
-  var select = document.querySelector('.goog-te-combo');
-  if(!isSpanish){
-    if(select){ select.value='es'; select.dispatchEvent(new Event('change')); }
-    else { document.cookie='googtrans=/en/es; path=/'; location.reload(); return; }
-    btn.classList.add('active'); lbl.textContent='English'; isSpanish=true;
-  } else {
-    if(select){ select.value='en'; select.dispatchEvent(new Event('change')); }
-    else { document.cookie='googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'; location.reload(); return; }
-    btn.classList.remove('active'); lbl.textContent='Español'; isSpanish=false;
-  }
-}
-
-function rate(btn){
-  var group = btn.closest('.rate');
-  group.querySelectorAll('button').forEach(function(b){ b.classList.remove('on'); b.setAttribute('aria-checked', 'false'); });
-  btn.classList.add('on');
-  btn.setAttribute('aria-checked', 'true');
-  queueSave();
-}
-
-function currentRatings(){
-  var out = {};
-  document.querySelectorAll('.rate').forEach(function(g){
-    var on = g.querySelector('button.on');
-    if(on) out[g.dataset.layer] = parseInt(on.textContent, 10);
-  });
-  return out;
-}
-
-function applyRatings(saved){
-  Object.keys(saved || {}).forEach(function(layer){
-    var g = document.querySelector('.rate[data-layer="' + layer + '"]');
-    if(!g) return;
-    g.querySelectorAll('button').forEach(function(b){
-      var on = parseInt(b.textContent, 10) === saved[layer];
-      b.classList.toggle('on', on);
-      b.setAttribute('aria-checked', on ? 'true' : 'false');
-    });
-  });
-}
-
-function setSaveMsg(t){ document.getElementById('save-msg').textContent = t; }
-
-/* Debounced save, mirroring the app's queueSave/flushSave pattern: a burst
-   of clicks becomes one write, and a failed write stays dirty so the next
-   click retries it. */
-function queueSave(){
-  if(!fbUser) return;
-  dirty = true;
-  setSaveMsg('Saving…');
-  clearTimeout(saveTimer);
-  saveTimer = setTimeout(flushSave, 800);
-}
-
-function flushSave(){
-  if(!fbUser || !dirty) return;
-  dirty = false;
-  var payload = { songRatings: {} };
-  payload.songRatings[SONG_ID] = currentRatings();
-  fbDb.collection('progress').doc(fbUser.uid).set(payload, { merge: true })
-    .then(function(){ setSaveMsg('Saved ✓'); setTimeout(function(){ setSaveMsg(''); }, 2000); })
-    .catch(function(){ dirty = true; setSaveMsg('Save failed — check connection'); });
-}
-
-function loadFirestoreSdk(){
-  return new Promise(function(resolve, reject){
-    if(firebase.firestore){ resolve(); return; }
-    var s = document.createElement('script');
-    s.src = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js';
-    s.onload = resolve;
-    s.onerror = function(){ reject(new Error('Firestore SDK failed to load')); };
-    document.head.appendChild(s);
-  });
-}
-
-window.addEventListener('load', function(){
-  if(typeof firebase === 'undefined' || typeof firebaseConfig === 'undefined') return;
-  firebase.initializeApp(firebaseConfig);
-  firebase.auth().onAuthStateChanged(function(user){
-    if(!user){ setSaveMsg('Sign in on the class site to save your ratings'); return; }
-    loadFirestoreSdk().then(function(){
-      fbDb = firebase.firestore();
-      fbUser = user;
-      setSaveMsg('');
-      return fbDb.collection('progress').doc(user.uid).get();
-    }).then(function(doc){
-      var data = doc && doc.exists ? doc.data() : null;
-      applyRatings(data && data.songRatings && data.songRatings[SONG_ID]);
-    }).catch(function(){ /* offline first read is fine — clicks still queue saves */ });
-  });
-  // Best-effort flush if the tab closes inside the debounce window.
-  window.addEventListener('pagehide', function(){ if(dirty){ clearTimeout(saveTimer); flushSave(); } });
-});
-</script>
+<script>var SONG_ID = 'the-cure';</script>
+<script src="journey.js"></script>
 </body>
 </html>

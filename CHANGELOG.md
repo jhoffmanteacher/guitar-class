@@ -5,6 +5,25 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-20 — Song Journey pages are now one layer at a time
+
+### Changed
+- **Song Journey pages (Seven Nation Army, Watchtower, Sweet Child O' Mine,
+  Luna, Let It Be, "the cure") no longer dump every layer on the page at
+  once.** Each layer now collapses to a single row — its number, name, and
+  module — so you can see the whole journey at a glance and open just the
+  layer you're on. Tap a row to expand it; tapping another closes the last
+  one, same as the station checklists.
+- **A small badge shows your progress** ("2 of 6 layers rated") right at the
+  top of the page, and each rated layer gets a checkmark in its row.
+- **The page opens on your next layer automatically** — the first one you
+  haven't rated yet — so you don't have to scroll to find your spot. Links
+  from inside a module still jump straight to the right layer.
+- **Trimmed the intro text on each page** — the extra "how to use this page"
+  sentence is gone now that the layout shows it visually, and Luna's page
+  tucks the background story about the song into a "More about this song"
+  toggle so the chords and feel are what you see first.
+
 ## 2026-07-20 — Sidebar redesign and a real search box up top
 
 ### Changed
