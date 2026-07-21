@@ -15,8 +15,10 @@
 > Also individually archived: **`REVIEW-PLAN.md`** (the 2026-07-13 full-site
 > review across CODE/CONTENT/DESIGN/IMPROVEMENTS — every item executed
 > 2026-07-20 in `b76dd67` except the handful that need Jonathan live on the
-> real site, tracked below) and **`PLAN-COMPACT-CHECKLIST.md`** (the
-> compact-checklist step redesign spec, executed 2026-07-20 in `e6925ec`).
+> real site, tracked below), **`PLAN-COMPACT-CHECKLIST.md`** (the
+> compact-checklist step redesign spec, executed 2026-07-20 in `e6925ec`),
+> and **`PLAN-COMPACT-JOURNEY.md`** (the same compact redesign applied to the
+> six Song Journey pages, executed 2026-07-20 in `dbd2f8f` + `c0b14fc`).
 
 **Status legend:** [ ] not started · [~] in progress · [x] done
 
@@ -141,6 +143,12 @@
       - **Compact checklist print preview (⌘P)** — every step should render
         fully expanded with the chevron hidden, same as before the redesign;
         also not yet visually confirmed.
+      - **Song Journey pages at phone width + print preview** — same two
+        checks for the new journey-page accordion (`tabs/*.html`): rows
+        shouldn't overflow at ~400px, and ⌘P should show every layer fully
+        expanded with chevrons/translate button hidden. Shipped in `dbd2f8f`
+        with print styles written, but neither has been eyeballed on a real
+        device.
 - [ ] **Module 12: confirm the requinto video fits, then delete the leftover
       note** (REVIEW-PLAN C-7, 2026-07-20) — `module-12.js:430` has an HTML
       comment flagging that the La Derrota (Vicente Fernández) requinto
@@ -160,8 +168,43 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **Tuner / Timer / Metronome on the Song Journey pages** — pushed
+      `8eb26f6` + `8f33ae1` + `2acd13f` (2026-07-20). The same floating
+      tool buttons students have in the main app now sit on all six journey
+      pages, so they can tune up, set a countdown, or click along without
+      leaving the song. Implementation: metronome/timer/popup logic extracted
+      from `app.js` into a shared, dependency-free `fab-tools.js`; its styles
+      ported to `tabs/fab-tools.css` (+ needed color tokens in
+      `tabs/journey-theme.css`); FAB markup + `tuner.js` + `fab-tools.js`
+      wired into each `tabs/*.html`. Verified in-browser on both `index.html`
+      (unchanged behavior post-extraction) and `tabs/luna.html` (tuner mic,
+      metronome tick, timer countdown all working).
+- [x] **Song Journey pages: compact one-layer-at-a-time accordion + tip
+      folds + play-along tracks** — pushed `dbd2f8f` + `c0b14fc`
+      (2026-07-20), executing `archive/PLAN-COMPACT-JOURNEY.md`. Each page's
+      5–6 fully-expanded layers now collapse to scannable header rows
+      (badge + title + module chip + rating chip + chevron), one open at a
+      time, with an "N of M layers rated" pill; `#layer-N` deep links still
+      open + scroll to their layer. Inside an open layer the Stuck?/Level up
+      branches sit behind `<details>` folds, and every page gained a
+      lazy-loading "Play along" button (SNA / Sweet Child / Let It Be got
+      newly-found oEmbed-verified vocals-kept/guitar-removed tracks; the
+      other three keep jam loops pending moises.ai — see Open work). The
+      previously-verbatim-duplicated inline script is extracted to
+      `tabs/journey.js`; print styles added; `checks.mjs`/`sw.js` now
+      fingerprint `tabs/*.css`/`*.js` too. Musical facts untouched (settled
+      list in CLAUDE.md).
+- [x] **Sidebar redesign + header search box** — pushed `f4d952d` →
+      `92e5da6` (2026-07-20). The left rail got a cool neutral-gray
+      background with distinct, color-matched Station B / Station C /
+      checklist row backgrounds (not just badges), and Find moved out of the
+      Explore nav list into a compact search-box-styled button in the top
+      purple bar (visible once signed in).
 - [x] **Station checklists: compact, one-tap-at-a-time steps** ("Concept B") —
-      pushed `e6925ec` (2026-07-20). Station B/C steps now collapse to a
+      pushed `e6925ec`, plus same-day follow-ups `66cbc7d` (flattened the
+      sections to match the approved mockup — the first push missed that) and
+      `40a03ba` (row/section dividers, compact song blurb, dropped the
+      Keep-going card) (2026-07-20). Station B/C steps now collapse to a
       single scannable row (status circle + short label + chevron); tapping
       opens the full step (video, chords, TAB, response), one open per
       section, with the first not-done step open by default. Mark done
