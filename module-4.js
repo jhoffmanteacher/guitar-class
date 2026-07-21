@@ -729,7 +729,7 @@ MODULE_SONGS[4] = [
       { name: '"the cure" — Olivia Rodrigo', meta: 'Full solo · A minor pentatonic', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY',
-        backingUrl: 'https://www.youtube.com/watch?v=bs802M_jqtk',
+        backingUrl: 'audio/the-cure-backing-Am-144bpm.mp3',
         backingKey: 'Am' },
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Full solo over D–C–G · G major / E minor pentatonic', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',

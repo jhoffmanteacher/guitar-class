@@ -2112,7 +2112,7 @@ function openSongVid(s, kind){
   if(!s) return;
   if(kind==='journey'){ if(s.journeyUrl) window.open(s.journeyUrl, '_blank', 'noopener'); return; }
   if(kind==='original'){ if(s.originalUrl) window.open(s.originalUrl, '_blank', 'noopener'); return; }
-  if(kind==='backing'){ if(s.backingUrl) loadPanel('youtube', s.backingUrl, s.name, 'Backing track — it repeats on its own; press play and solo over it'); return; }
+  if(kind==='backing'){ if(s.backingUrl) loadPanel(/\.(mp3|m4a|ogg|wav)(\?|$)/i.test(s.backingUrl)?'audio':'youtube', s.backingUrl, s.name, 'Backing track — it repeats on its own; press play and solo over it'); return; }
   if(s.tutorialUrl) loadPanel('youtube', s.tutorialUrl, s.name, 'Tutorial');
 }
 function loadSongVid(wid, idx, kind){
@@ -3003,6 +3003,10 @@ function loadPanel(type,url,title,subtitle){
     // and embed failures can't be detected cross-origin — always offer the out.
     wrap.innerHTML=`<div class="rp-video-box"><iframe src="${embedUrl}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>
       <div class="rp-embed-fallback">Not playing? Some videos only allow playback on YouTube — <a href="${escAttr(url)}" target="_blank" rel="noopener">watch it there &#x2197;</a></div>`;
+  } else if(type==='audio'){
+    // Local backing track — an <audio> player that loops on its own.
+    wrap.className='rp-iframe-wrap rp-audio';
+    wrap.innerHTML=`<div class="rp-audio-box"><audio src="${escAttr(url)}" controls loop autoplay preload="none"></audio></div>`;
   } else if(type==='pdf'){
     wrap.className='rp-iframe-wrap rp-doc';
     wrap.innerHTML=`<iframe src="${url}"></iframe>`;

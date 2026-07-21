@@ -295,7 +295,7 @@ SETS.push(
                 response: { type: 'mc', prompt: 'Playing "the cure" fingerstyle removes its ◐ flag because:',
                   answer: 1,
                   explain: 'Fingerpicking IS the song\'s native style — no more "against the grain."',
-                  choices: ['It\'s easier', 'Fingerpicking IS the song\'s native style — no more "against the grain"', 'The capo comes off', 'The flag was a mistake'] }
+                  choices: ['It\'s easier', 'Fingerpicking IS the song\'s native style — no more "against the grain"', 'It uses fewer chords', 'The flag was a mistake'] }
               }
             ]
           },
@@ -340,7 +340,7 @@ SETS.push(
             title: 'Fingerpick "the cure" in its native style',
             steps: [
               {
-                text: 'Challenge 2 — "the cure" Native Style: fingerpick capo 1, Am–C–Dm–F, one bar each, pattern of your choice. You\'ve got it when: the ◐ is gone — this IS how the song wants to be played.',
+                text: 'Challenge 2 — "the cure" Native Style: fingerpick Am–C–Dm–F, one bar each, pattern of your choice. You\'ve got it when: the ◐ is gone — this IS how the song wants to be played.',
                 hint: 'Native style — why the ◐ disappears: fingerpicking is this song\'s home texture, not a workaround. Keep it unbroken through each change by moving your fretting hand early — on the bar\'s last note.',
                 stuck: 'Loop just Am–C until the pattern survives that one change before adding Dm–F.',
                 levelUp: 'Add a pinch on beat 1 of each chord.',
@@ -398,7 +398,7 @@ SETS.push(
       { id: 'm12w2-s2', text: 'Count and feel the difference between 3/4 and 4/4 while picking',
         practice: { type: 'mc', prompt: 'A waltz pattern repeats every:',
           choices: ['2 beats', '3 beats', '4 beats', '8 beats'], answer: 1 } },
-      { id: 'm12w2-s3', text: 'Fingerpick "the cure"\'s capo-1 shapes — its native style' },
+      { id: 'm12w2-s3', text: 'Fingerpick "the cure"\'s shapes — its native style' },
       { id: 'm12w2-s4', text: 'Fingerpick Let It Be\'s C–G–Am–F with a pattern of my choice' },
       { id: 'm12w2-s5', text: 'Keep my pattern unbroken through a 4-chord progression at 70 BPM' },
       { id: 'm12w2-s6', text: 'Play Happy Birthday\'s waltz feel fingerstyle' }
@@ -636,7 +636,7 @@ MODULE_REVIEWS[12] = {
     { id: 'mr12-s6', text: 'I can perform one full fingerpicked verse start to finish, recovering from any mistake without stopping', set: 'm12w3' }
   ],
   assessItems: [
-    'Play one full fingerpicked verse with a steady thumb bass and a clean, unbroken finger pattern — flagship options: "the cure" (capo 1) or Let It Be',
+    'Play one full fingerpicked verse with a steady thumb bass and a clean, unbroken finger pattern — flagship options: "the cure" or Let It Be',
     'Show your chosen showcase pattern and name it'
   ],
   forward: 'Twelve modules — the whole toolkit, twice as deep as most first-year players ever get. <strong>Now comes your capstone performance:</strong> pick your song, pick your lane — strummed, fingerpicked, or riff + solo — get it performance-ready, then record a full take or play it live for people you choose. This website got you here; the stage is yours. And after your capstone? Keep the list of songs you want to learn, and go learn them — you know how now.',

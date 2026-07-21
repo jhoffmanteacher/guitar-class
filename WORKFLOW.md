@@ -45,24 +45,30 @@
 
 ## Open work
 
-- [ ] **Listen-check the six journey-page backing tracks; make moises.ai
-      versions where needed** (Jonathan, 2026-07-20) — every Song Journey page
-      now has a "🎵 Play along" button. Claude verified the six YouTube videos
-      exist (oEmbed titles) but could not listen to them, so each needs a
-      10-second ear check. Target sound: **vocals kept, rhythm guitar
-      removed**. Current state:
-      - Seven Nation Army — `sbN1wfDb4sw` (title says with-vocals/no-guitar; confirm)
-      - Sweet Child O' Mine — `kkZI8Lma8UA` (with-vocals, standard tuning — confirm it
-        really is standard tuning, matching the site's arrangement)
-      - Let It Be — `xHhfKZAH_EU` (title says with-vocals; confirm)
-      - Watchtower — `Vq8cApzOdy8` ⚠️ generic Am jam loop, no vocals → moises.ai candidate
-      - Luna — `wBxFnX_V9mQ` ⚠️ generic Dm jam loop, no vocals → moises.ai candidate
-      - "the cure" — `bs802M_jqtk` ⚠️ generic Am jam loop, no vocals → moises.ai candidate
-      For any replacement (moises.ai upload to YouTube, or a better find):
-      swapping is one line in two places per song — `data-video="<id>"` in
-      `tabs/<song>.html` and `backingUrl` on the song's module card
-      (module-4.js for most, module-5.js for Let It Be). Give Claude the link
-      and it'll verify + swap.
+- [ ] **Custom backing tracks for the six journey-page play-alongs — Jonathan
+      is making them himself** (Jonathan, 2026-07-20) — every Song Journey page
+      has a "🎵 Play along" button. **"the cure" is DONE:** swapped to Jonathan's
+      own **A-minor, no-capo** track (`audio/the-cure-backing-Am-144bpm.mp3`, a
+      local file played through a looping `<audio>` element). At the same time
+      every capo instruction for the song was stripped across the modules + its
+      Journey page, and an asterisk note under the play-along button explains
+      that capoing the 1st fret matches the original recording's pitch.
+      **Jonathan will supply custom backing tracks for the other five later** —
+      until then they keep their existing YouTube loops:
+      - Seven Nation Army — `sbN1wfDb4sw`
+      - Sweet Child O' Mine — `kkZI8Lma8UA`
+      - Let It Be — `xHhfKZAH_EU`
+      - Watchtower — `Vq8cApzOdy8` (generic Am jam loop, no vocals)
+      - Luna — `wBxFnX_V9mQ` (generic Dm jam loop, no vocals)
+      Two ways to wire a replacement per song:
+      - **Local audio file** (the cure's setup): drop the mp3 in `audio/`, then
+        in `tabs/<song>.html` set `data-audio="../audio/<file>.mp3"` on
+        `#playalong-frame` and add the `playalong-frame--audio` class; point the
+        song's module-card `backingUrl` at `audio/<file>.mp3` (any
+        `.mp3/.m4a/.ogg/.wav` auto-routes to the in-app audio player).
+      - **YouTube**: `data-video="<id>"` in `tabs/<song>.html` + a youtube
+        `backingUrl` on the module card (module-4.js for most, module-5.js for
+        Let It Be). Give Claude the file or link and it'll wire + verify.
 
 - [ ] **Real-guitar test of Riff Runner Wait Mode** (Jonathan, 2026-07-12) —
       ⚠️ **SHIPPED LIVE UNTESTED** — Jonathan chose to push it before a guitar

@@ -367,9 +367,9 @@ SETS.push(
                 response: { type: 'short', prompt: 'Bass line, power chords, or open chords — which Watchtower is your favorite so far?', placeholder: 'e.g. open chords — it finally sounds full' }
               },
               {
-                text: 'Challenge — "the cure" capo-1 play-along: put a capo on fret 1, then loop Olivia\'s chords with a down-strum — Am · C · Dm · F, four beats each, then G to turn it around — speeding up in steps: 60 → 65 → 70 BPM. Shapes are pre-loaded below. You\'ve got it when: two clean loops at 70 BPM, every change on beat 1, the capo ringing clear.',
-                hint: 'The capo just moves everything up one fret — your shapes don\'t change. Dm is new: a small triangle on the top three strings. Keep your fingers arched and your thumb behind the neck.',
-                stuck: 'Take the capo off and get Am · C · Dm · F clean in open position first, then add the capo and the G turnaround.',
+                text: 'Challenge — "the cure" play-along: loop Olivia\'s chords with a down-strum — Am · C · Dm · F, four beats each, then G to turn it around — speeding up in steps: 60 → 65 → 70 BPM. Open chords, no capo. Shapes are pre-loaded below. You\'ve got it when: two clean loops at 70 BPM, every change on beat 1, every string ringing clear.',
+                hint: 'Dm is the new one: a small triangle on the top three strings. Keep your fingers arched and your thumb behind the neck.',
+                stuck: 'Get Am · C · Dm · F clean in open position first, then add the G turnaround.',
                 levelUp: 'Add the G/B bass turnaround — G/B is a G chord with a B note in the bass (play the G shape, but catch the B on the A string) — or switch to a down-up strum.',
                 skills: [5, 6],
                 chords: [
@@ -938,7 +938,7 @@ MODULE_SONGS[5] = [
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full performance with open chords', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Capo 1 play-along · Am–C–Dm–F–G/B', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Open-chord play-along · Am–C–Dm–F–G/B', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Luna" — Peso Pluma, Junior H', meta: 'Full-song showcase · F–Am–Dm', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',

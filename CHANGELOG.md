@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-20 — New "the cure" jam track, and no capo needed
+
+### Changed
+- **"the cure" now has a custom jam track in A minor, and you no longer need a
+  capo to play along with it.** The old backing track wanted a capo on the first
+  fret to match the record; this new one is tuned so the open shapes you already
+  know — Am, C, Dm, F, G/B — line up perfectly with no clamp on the neck. The
+  "🎵 Play along" button on the Song Journey page and the "🎵 Backing track"
+  button in Module 4 both use it. Every capo instruction for this song across the
+  modules and its Journey page has been removed — it's an open-chord song from
+  start to finish now.
+
 ## 2026-07-20 — Tuner, Timer, and Metronome now on every Song Journey page
 
 ### Added

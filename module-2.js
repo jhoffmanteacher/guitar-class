@@ -616,7 +616,7 @@ SETS.push(
                 levelUp: 'Play the lap with the play button keeping the beat, or say each note name as you land it. Got someone around? Have them clap the beat instead.',
                 skills: [1, 2, 4, 5, 6],
                 tab: {
-                  caption: '"the cure" — root line (teaching arrangement, no capo — a capo is a clamp on the neck that raises the pitch) · 60 BPM',
+                  caption: '"the cure" — root line (teaching arrangement) · 60 BPM',
                   notes: [
                     { string: 'A', fret: 0, note: 'A', midi: 45 },
                     { string: 'A', fret: 0, note: 'A', midi: 45 },
@@ -737,7 +737,7 @@ MODULE_SONGS[2] = [
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Play verse bass roots on E & A strings · intro riff = optional harder challenge in Module 7', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Play the bassline as single-note roots (no capo · A C D F G)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Play the bassline as single-note roots (A C D F G)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Happy Birthday"', meta: 'Play full melody on E & A strings from TAB', type: 'Supp', core: false,

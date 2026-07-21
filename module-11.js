@@ -251,10 +251,10 @@ SETS.push(
             title: 'Try numbering a real progression',
             steps: [
               {
-                text: 'Now try it: number "the cure"\'s capo-1 shapes — Am–C–Dm–F–G/B — in the key of C before checking.',
+                text: 'Now try it: number "the cure"\'s chords — Am–C–Dm–F–G/B — in the key of C before checking.',
                 hint: 'Ignore the slash for a moment and number the chord names first — the bass note is a separate question.',
                 skills: [3],
-                response: { type: 'mc', prompt: '"the cure" (capo 1 shapes) uses Am–C–Dm–F–G/B. In the key of C, Am–C–Dm–F is:',
+                response: { type: 'mc', prompt: '"the cure" uses Am–C–Dm–F–G/B. In the key of C, Am–C–Dm–F is:',
                   answer: 0,
                   explain: 'Am=vi, C=I, Dm=ii, F=IV — and the G/B is the V chord with a B as its lowest note, so the bass walks smoothly back to C.',
                   choices: ['vi–I–ii–IV', 'I–V–vi–IV', 'ii–IV–vi–I', 'vi–IV–I–V'] }
@@ -382,7 +382,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'A song uses C, F, G, and Am. Its key:', choices: ['F major', 'C major', 'A major', 'G major'], answer: 1 } },
       { id: 'm11w2-s2', text: 'Recognize I–IV–V and I–V–vi–IV progressions by their numerals',
         practice: { type: 'mc', prompt: 'I–V–vi–IV in the key of G is:', choices: ['G–D–Em–C', 'G–C–D–Em', 'G–Am–B–C', 'G–Em–C–D'], answer: 0 } },
-      { id: 'm11w2-s3', text: 'Number "the cure"\'s capo-1 progression in the key of C' },
+      { id: 'm11w2-s3', text: 'Number "the cure"\'s progression in the key of C' },
       { id: 'm11w2-s4', text: 'Find Watchtower\'s key from Am–G–F and say why Am is home' },
       { id: 'm11w2-s5', text: 'Explain what a slash chord tells you (chord / bass note)',
         practice: { type: 'mc', prompt: 'In Am/E, your lowest sounding note should be:', choices: ['A', 'C', 'E', 'G'], answer: 2 } },
@@ -626,7 +626,7 @@ MODULE_SONGS[11] = [
       { name: '"Luna" — Peso Pluma, Junior H', meta: 'F–Am = I–iii in F — proof it\'s not always the famous four', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Number the capo-1 progression in C', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Number the progression in C', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Find the key from Am–G–F', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',

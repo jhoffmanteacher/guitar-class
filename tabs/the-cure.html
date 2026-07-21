@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>&ldquo;the cure&rdquo; — Song Journey · Mr. Hoffman's Guitar Class</title>
-<meta name="description" content="One song, five layers plus a bonus fingerpicked verse: follow Olivia Rodrigo's &quot;the cure&quot; from listening to the capo-1 open chords as your skills grow.">
+<meta name="description" content="One song, five layers plus a bonus fingerpicked verse: follow Olivia Rodrigo's &quot;the cure&quot; from listening to the open chords as your skills grow.">
 <!-- Same Firebase project + sign-in session as the class site (same origin),
      so a student signed in there is already signed in here. Firestore SDK
      loads later, only once we know someone is signed in. -->
@@ -42,14 +42,14 @@ function googleTranslateElementInit(){
 
   <div class="songmap">
     <b>Song map:</b> Verse (soft, guitar carries it) &rarr; Chorus (fuller, same chords) &rarr; Verse &rarr; Chorus &rarr; Outro (the ending section).
-    The whole song lives in one chord family: <b>Am &middot; C &middot; Dm &middot; F &middot; G/B</b> — played with a <b>capo on fret 1</b> on the original recording.
-    Layers 2–4 use a teaching arrangement with <b>no capo</b>; the capo comes on in Layer 5, where you play it the way the recording does.
+    The whole song lives in one chord family: <b>Am &middot; C &middot; Dm &middot; F &middot; G/B</b> — no capo needed; the open shapes you already know are all it takes.
     <br><em style="color:var(--text3);font-size:0.8125rem">All layers are teaching arrangements at 60 BPM — simplified for learning, not note-for-note transcriptions.</em>
   </div>
 
   <div class="playalong">
-    <button type="button" class="playalong-btn" onclick="togglePlayalong(this)" aria-expanded="false" title="Jam track — backing music to play along with; play the layer you're working on over it"><span class="pa-play">&#x25B6;</span> &#x1F3B5; Play along — jam loop (Am)</button>
-    <div class="playalong-frame" id="playalong-frame" data-video="bs802M_jqtk" hidden></div>
+    <button type="button" class="playalong-btn" onclick="togglePlayalong(this)" aria-expanded="false" title="Jam track — backing music to play along with; play the layer you're working on over it"><span class="pa-play">&#x25B6;</span> &#x1F3B5; Play along — jam loop (Am&#42;)</button>
+    <div class="playalong-frame playalong-frame--audio" id="playalong-frame" data-audio="../audio/the-cure-backing-Am-144bpm.mp3" hidden></div>
+    <p class="playalong-note">&#42; This jam track is in A&nbsp;minor, so the open shapes you know play in tune with no capo. To match the exact pitch of Olivia's original recording, put a capo on the 1st fret.</p>
   </div>
 
   <!-- LAYER 1 -->
@@ -75,7 +75,7 @@ function googleTranslateElementInit(){
     <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-2-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">2</span><span class="layer-title">Single Notes</span><span class="layer-unit">Module 2</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-2-body">
       <p>Every chord has a root note, and the roots make a bassline you can play right now: <b>A &middot; C &middot; D &middot; F &middot; G</b>. This line crosses between the A and E strings — your first song that makes you switch strings mid-phrase.</p>
-<pre class="tab">Root line — teaching arrangement, no capo · 2 beats per note
+<pre class="tab">Root line — teaching arrangement · 2 beats per note
         A    C    D    F    G
 e |--------------------------------|
 B |--------------------------------|
@@ -152,13 +152,13 @@ E |--5-------8-----------------------|</pre>
   <section class="layer l5 closed" id="layer-5">
     <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-5-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">5</span><span class="layer-title">Open Chords</span><span class="layer-unit">Module 5</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-5-body">
-      <p>Now you play it the way the recording does. Capo on fret 1, and the shapes you know — Am, C, Dm, F — match the actual recording. The G/B turnaround (a short chord move that leads back to the start) is just a G sound with its B note in the bass, closing the loop back to Am.</p>
-<pre class="tab">Capo 1 — shapes as written · 4 beats per chord · 60 &rarr; 65 &rarr; 70 BPM
+      <p>Now the whole progression as open chords — the shapes you know, Am, C, Dm, F, strummed straight through. No capo: play them in open position and you're in tune with the jam track. The G/B turnaround (a short chord move that leads back to the start) is just a G sound with its B note in the bass, closing the loop back to Am.</p>
+<pre class="tab">Open chords · 4 beats per chord · 60 &rarr; 65 &rarr; 70 BPM
 |  Am          |  C           |  Dm          |  F           |
    1  2  3  4     1  2  3  4     1  2  3  4     1  2  3  4
 then G/B for 4 beats to turn it around, back to Am</pre>
-      <div class="playline"><b>Play it:</b> capo on, down-strums, four beats per chord, speeding up in steps: <b>60, then 65, then 70 BPM</b>. You've got it when: two clean loops at 70 BPM, every change on beat 1, the capo ringing clear.</div>
-      <details class="fold"><summary>Stuck?</summary><div class="branch">Strum only beat 1 of each chord and travel on the silent beats. Check the capo sits just behind fret 1 — buzzing usually means it slid.</div></details>
+      <div class="playline"><b>Play it:</b> down-strums, four beats per chord, speeding up in steps: <b>60, then 65, then 70 BPM</b>. You've got it when: two clean loops at 70 BPM, every change on beat 1, every string ringing clear.</div>
+      <details class="fold"><summary>Stuck?</summary><div class="branch">Strum only beat 1 of each chord and travel on the silent beats. Buzzing usually means a finger isn't pressing right behind the fret.</div></details>
       <details class="fold"><summary>Level up</summary><div class="branch">Folk strum (D-D-U-U-D-U) on each chord, or trade loops with a partner soloing Layer 4 over you — together you're the whole track.</div></details>
       <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="5">
         <span class="rate-label">Rate this layer:</span>
@@ -176,7 +176,7 @@ then G/B for 4 beats to turn it around, back to Am</pre>
     <div class="layer-body" id="layer-6-body">
       <div class="grain">Bonus layer — optional harder challenge, no score. Ready whenever you are; no specific Module required.</div>
       <p>This is "the cure" in its native style — no strumming. The verse is a soft 6-note roll, p-i-m-a-m-i (thumb &middot; index &middot; middle &middot; ring &middot; middle &middot; index), your thumb walking the bass note of each chord while your fingers stay parked on the G, B, and e strings.</p>
-<pre class="tab">Am arpeggio — capo 1 &middot; p i m a m i (one bar)
+<pre class="tab">Am arpeggio &middot; p i m a m i (one bar)
 e |----------------<span class="hl">0</span>-------|
 B |--------------<span class="hl">1</span>----<span class="hl">1</span>----|
 G |------<span class="hl">2</span>------------<span class="hl">2</span>----|
@@ -185,7 +185,7 @@ A |--<span class="hl">0</span>-----------------------|
 E |-------------------------|</pre>
       <div class="playline"><b>Play it:</b> one bar of Am, one note per click at 60 BPM — p (open A) &middot; i (G, fret 2) &middot; m (B, fret 1) &middot; a (open e) &middot; m &middot; i. Then walk the whole verse: thumb moves to the A string (fret 3) for C, then the D string for Dm (open) and F (fret 3) — i-m-a never leave G-B-e.</div>
       <details class="fold"><summary>Stuck?</summary><div class="branch">Fret Am and pluck p-i-m-a in order, one note per beat, before adding the roll-back m-i. Speed comes after the order is automatic.</div></details>
-      <details class="fold"><summary>Level up</summary><div class="branch">Once Am is smooth, cycle the full Am &middot; C &middot; Dm &middot; F loop, one bar each, capo on — this IS the recording.</div></details>
+      <details class="fold"><summary>Level up</summary><div class="branch">Once Am is smooth, cycle the full Am &middot; C &middot; Dm &middot; F loop, one bar each — this IS how the song wants to be played.</div></details>
       <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="6">
         <span class="rate-label">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>

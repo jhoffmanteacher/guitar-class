@@ -87,19 +87,32 @@ window.addEventListener('beforeprint', function(){
 });
 
 /* ── Play-along backing track ──
-   The iframe is only injected on first open (lazy), so the page never
-   loads YouTube unless the student asks for it. */
+   The player is only injected on first open (lazy), so the page never
+   downloads the track unless the student asks for it. A page can supply
+   either a local audio file (data-audio, an <audio> player that loops) or
+   a YouTube id (data-video, an embedded iframe). */
 function togglePlayalong(btn){
   var box = document.getElementById('playalong-frame');
   if(!box) return;
   var opening = box.hidden;
   if(opening && !box.dataset.loaded){
-    var f = document.createElement('iframe');
-    f.src = 'https://www.youtube.com/embed/' + box.dataset.video;
-    f.title = 'Play-along backing track';
-    f.allow = 'autoplay; encrypted-media; picture-in-picture';
-    f.allowFullscreen = true;
-    box.appendChild(f);
+    if(box.dataset.audio){
+      var a = document.createElement('audio');
+      a.src = box.dataset.audio;
+      a.controls = true;
+      a.loop = true;
+      a.preload = 'none';
+      a.title = 'Play-along backing track';
+      box.appendChild(a);
+      a.play().catch(function(){ /* autoplay may be blocked — the controls still work */ });
+    } else {
+      var f = document.createElement('iframe');
+      f.src = 'https://www.youtube.com/embed/' + box.dataset.video;
+      f.title = 'Play-along backing track';
+      f.allow = 'autoplay; encrypted-media; picture-in-picture';
+      f.allowFullscreen = true;
+      box.appendChild(f);
+    }
     box.dataset.loaded = '1';
   }
   box.hidden = !opening;

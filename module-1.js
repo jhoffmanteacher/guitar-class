@@ -146,7 +146,7 @@ SETS.push(
 
     songs: [
       { name: 'Student choice — any song that means something to them', meta: 'Listening & sharing day · No playing required', type: 'Choice', core: false },
-      { name: '"the cure" — Olivia Rodrigo', meta: 'Listen — find the guitar in a current song (capo 1 — a capo is a clamp on the neck that raises the pitch · Am–C–Dm–F–G/B)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+      { name: '"the cure" — Olivia Rodrigo', meta: 'Listen — find the guitar in a current song (Am–C–Dm–F–G/B)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
