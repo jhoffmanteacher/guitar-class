@@ -86,7 +86,41 @@
       *contents*, the Daily 5 modal, and the recording widget's two labels —
       none of these are module-N.js content, so they're unaffected by the
       `i18nComplete` gate and stay Google-Translate-covered.
-      **Next session:** translate 1–2 more modules (Module 2 next), or move
+      **Session 2 (2026-07-22): Modules 2 & 3, done & browser-verified —
+      built with a multi-agent workflow (ultracode).** Two independent
+      translator agents hand-translated `module-2.js` and `module-3.js` in
+      parallel (each read Module 1 first as the reference pattern), each
+      immediately followed by its own independent adversarial Spanish-quality
+      reviewer (6 issues found+fixed in Module 2, 1 in Module 3 — English
+      leakage, register, glossary drift). Both modules fully verified via
+      `node --check`, a scripted structural completeness sweep, and
+      `tools/checks.mjs`, then flagged `i18nComplete`. Glossary extended
+      (post-hoc reconciled against ACTUAL usage in the files, not the
+      agents' self-reported terms, which were sometimes wrong — e.g. Module
+      3's agent claimed it used "fundamental" for "root" throughout but the
+      file actually uses "raíz" consistently; the memory now records what's
+      really in the files): sight-read → leer a primera vista, root → raíz,
+      home note → nota base, vamp/chug/boom-chick kept as loanwords, beat →
+      tiempo, bar/measure → compás. One schema gap found and fixed: neither
+      translator's brief mentioned `MODULE_SONGS[N]` (a module-level song
+      list separate from a Set's own `songs:` array, used by modules 2–12) —
+      added `meta_es` for both modules' entries by hand and added a
+      `tools/checks.mjs` requirement so future modules can't skip it.
+      `translations-review.md` backfilled with full EN→ES tables for
+      Modules 1–3 (Module 1's had been skipped in session 1).
+
+      **Mid-session incident:** a second, concurrent Claude Code session was
+      running directly in this same working tree (not its own worktree) and
+      a `git checkout`/`restore` it ran silently discarded ALL of this
+      session's then-uncommitted work in `config-main.js`, `module-2.js`,
+      `tools/checks.mjs`, and `i18n.js` — Module 2's translation, fully
+      verified, was gone with no recovery path. Module 3's translation
+      (still intact) was immediately committed alone to protect it before
+      continuing. The concurrent session then moved to its own worktree;
+      Module 2 turned out to still be recoverable once the working tree
+      settled, so nothing had to be redone — but treat this as a live
+      example of why the worktree rule above exists, not just a hypothetical.
+      **Next session:** translate 1–2 more modules (Module 4 next), or move
       to tabs/ + games once all twelve are done — see CLAUDE.md's per-session
       workflow.
 - [ ] **Custom backing tracks for the six journey-page play-alongs — Jonathan

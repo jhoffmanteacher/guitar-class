@@ -76,6 +76,18 @@
        bridge                               → puente
        fretting hand                        → mano de trastear
        picking hand                         → mano de pulsar
+       sight-read / sight-reading           → leer a primera vista / lectura
+                                               a primera vista
+       root (of a chord)                    → raíz
+       home note (of a key, i.e. tonic)     → nota base
+       vamp (short repeated chord pattern)  → vamp (kept — no clean one-word
+                                               Spanish equivalent, same
+                                               treatment as "riff")
+       chug (short muted punchy strum)      → chug (kept, same reasoning)
+       boom-chick (split-strum counting mnemonic) → boom-chick (kept as-is,
+                                               it's onomatopoeia, not a word)
+       beat                                 → tiempo
+       bar / measure                        → compás
   */
   const I18N = {
     // ── Header ──

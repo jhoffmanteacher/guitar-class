@@ -92,6 +92,7 @@ function validateModules() {
   const configSrc = readFileSync(join(ROOT, 'config-main.js'), 'utf8');
   const allSets = [];
   const reviewsByModule = new Map();  // moduleNum → MODULE_REVIEWS[moduleNum]
+  const moduleSongsByModule = new Map(); // moduleNum → MODULE_SONGS[moduleNum] (modules 2–12 only)
   const seenIds = new Map();          // set id → file it first appeared in
 
   for (const file of MODULE_FILES) {
@@ -120,6 +121,8 @@ function validateModules() {
     if (sets.length === 0) { warn(`${file} pushed no Sets`); warnings++; }
     const reviews = vm.runInContext('typeof MODULE_REVIEWS !== "undefined" ? MODULE_REVIEWS : {}', sandbox) || {};
     if (reviews[expectedNum]) reviewsByModule.set(expectedNum, reviews[expectedNum]);
+    const moduleSongs = vm.runInContext('typeof MODULE_SONGS !== "undefined" ? MODULE_SONGS : {}', sandbox) || {};
+    if (moduleSongs[expectedNum]) moduleSongsByModule.set(expectedNum, moduleSongs[expectedNum]);
 
     for (const s of sets) {
       const where = `${file} · set "${s && s.id || '??'}"`;
@@ -212,7 +215,7 @@ function validateModules() {
   }
 
   if (problems === 0) ok(`${allSets.length} Sets across ${MODULE_FILES.length} modules — all valid`);
-  checkI18nCompleteness(manifest, allSets, reviewsByModule);
+  checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsByModule);
   return allSets;
 }
 
@@ -225,7 +228,7 @@ function validateModules() {
    here must track what app.js's tf() calls actually render (a field this
    check doesn't know about is a field a push can silently leave English).
    ════════════════════════════════════════════════════════════════════ */
-function checkI18nCompleteness(manifest, allSets, reviewsByModule) {
+function checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsByModule) {
   head('1b. Module-content i18n completeness');
   const completeModules = (manifest || []).filter(m => m.i18nComplete);
   if (!completeModules.length) { ok('no modules marked i18nComplete yet — nothing to enforce'); return; }
@@ -276,7 +279,14 @@ function checkI18nCompleteness(manifest, allSets, reviewsByModule) {
               reqEsArray(stepWhere, step.response, 'choices');
             }
             if (step.playSeq) reqEs(stepWhere, step.playSeq, 'label');
-            if (step.tab) reqEs(stepWhere, step.tab, 'caption');
+            if (step.tab) { reqEs(stepWhere, step.tab, 'caption'); reqEs(stepWhere, step.tab, 'title'); }
+            if (Array.isArray(step.tabs)) {
+              step.tabs.forEach((t, ti) => {
+                const tWhere = `${stepWhere} · tabs[${ti}]`;
+                reqEs(tWhere, t, 'caption');
+                reqEs(tWhere, t, 'title');
+              });
+            }
           });
         });
       }
@@ -307,6 +317,15 @@ function checkI18nCompleteness(manifest, allSets, reviewsByModule) {
       if (Array.isArray(mr.skills)) {
         mr.skills.forEach(sk => reqEs(`${where} · skill "${sk && sk.id}"`, sk, 'text'));
       }
+    }
+
+    // Module-level "🎵 Songs" list (modules 2–12 only — Module 1 uses per-Set
+    // `songs:` arrays instead, already covered above). Rendered by
+    // buildModuleSongs() into a `.module-songs` div that gets the same
+    // translate="no" gate as the Set/Module-Review panels once i18nComplete.
+    const ms = moduleSongsByModule.get(m.num);
+    if (Array.isArray(ms)) {
+      ms.forEach((s, i) => reqEs(`module-${m.num}.js · MODULE_SONGS[${m.num}][${i}] "${s && s.name || i}"`, s, 'meta'));
     }
   }
 
