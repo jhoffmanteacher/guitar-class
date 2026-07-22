@@ -244,7 +244,24 @@ curriculum map. Do **not** flag them as drift in future alignment audits:
 
 - **All Along the Watchtower** — the loop is `Am–G–F–G` (`A5–G5–F5–G5` as
   power chords) — the record's turnaround. The map's "Am–G–F" is shorthand;
-  the site's four-chord loop is intentional (settled 2026-07-07).
+  the site's four-chord loop is intentional (settled 2026-07-07). Harmonic
+  rhythm: **two beats per chord** (half-bar) — this is the record's real
+  cycle and the reference standard other core songs' rhythm bridges are
+  modeled on (settled 2026-07-22, rhythm-alignment analysis).
+- **Sweet Child O' Mine** — verse loop `D–C–G` (`D5–C5–G5` as power chords),
+  each chord held a **full bar (4 beats)** at the record's ~123–125 BPM,
+  standard 4/4 — confirmed against Songsterr/Ultimate-Guitar chord charts.
+  Settled 2026-07-22.
+- **Let It Be** — verse loop `C–G–Am–F`, **two beats per chord (half-bar)**
+  at ~71–76 BPM — chord charts consistently pair it `|C G|Am F|`, two chords
+  sharing each bar. This is the record's real cycle (not the site's older,
+  slower full-bar teaching tier). Settled 2026-07-22.
+- **"the cure"** — loop `Am–C–Dm–F` (then a `G/B` turnaround), **two felt
+  beats per chord** — the backing track's metronome reads 144 BPM, but it
+  feels like half that (~72), and 144 = 2×72, so a chord lasting one bar of
+  quick 144-BPM beats is the same duration as two slow/felt 72-BPM beats.
+  State this to students as "count it in big slow beats, about 72 — two of
+  those per chord." Settled 2026-07-22.
 - **Core/thread songs are exactly six** (settled 2026-07-08): Seven Nation Army,
   All Along the Watchtower, Sweet Child O' Mine (standard tuning), Luna (Peso
   Pluma & Junior H), Let It Be, and "the cure" (Olivia Rodrigo). Just Like

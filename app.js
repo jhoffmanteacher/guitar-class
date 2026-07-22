@@ -865,16 +865,20 @@ function buildTab(spec, opts){
   const showCaptionInBody = !!spec.title && !!spec.caption && spec.title !== spec.caption;
   const headHtml = `<div class="tab-head"><span class="tab-icon">&#x1F3B8;</span><span class="tab-title">${escHtml(headTitle)}</span><span class="tab-kind">${t('tab.label')}</span></div>`;
   const captionHtml = showCaptionInBody ? `<div class="tab-caption">${escHtml(tf(spec,'caption'))}</div>` : '';
-  /* Collect all midis (across phrases if any) so the tab play-all walks the whole melody. */
+  /* Collect all midis (across phrases if any) so the tab play-all walks the whole melody.
+     A note can carry an optional beats:N (default 1) to hold longer than one beat —
+     playSequence() reads that back off the { midi, beats } shape. */
+  const toSeqEntry = n => {
+    const midi = Array.isArray(n.midi) ? n.midi.map(Number) : Number(n.midi);
+    return (n.beats && n.beats !== 1) ? { midi, beats: n.beats } : midi;
+  };
   let allMidis = [];
   if (spec.phrases && spec.phrases.length) {
     spec.phrases.forEach(p => {
-      if (p.notes && p.notes.length) allMidis = allMidis.concat(
-        p.notes.map(n => Array.isArray(n.midi) ? n.midi.map(Number) : Number(n.midi))
-      );
+      if (p.notes && p.notes.length) allMidis = allMidis.concat(p.notes.map(toSeqEntry));
     });
   } else if (spec.notes && spec.notes.length) {
-    allMidis = spec.notes.map(n => Array.isArray(n.midi) ? n.midi.map(Number) : Number(n.midi));
+    allMidis = spec.notes.map(toSeqEntry);
   }
   let controlsHtml = '';
   if (allMidis.length && keyPrefix) {
@@ -2960,14 +2964,27 @@ function playSequence(midis, bpm, btnEl){
   /* Beat cursor: when the button lives inside a TAB, highlight the sounding
      column — the moving thing is the thing making noise (Ableton's rule). */
   const tabRoot = btnEl ? btnEl.closest('.tab') : null;
-  const timeouts = midis.map((m, i) => setTimeout(() => {
-    (Array.isArray(m) ? m : [m]).forEach(x => playNote(Number(x)));
-    if(tabRoot){
-      tabRoot.querySelectorAll('.beat-now').forEach(el=>el.classList.remove('beat-now'));
-      tabRoot.querySelectorAll(`[data-seq="${i}"]`).forEach(el=>el.classList.add('beat-now'));
-    }
-  }, i * interval));
-  timeouts.push(setTimeout(stopPlaySeq, midis.length * interval));
+  /* Each entry is normally a bare midi number or an array of midis (a
+     chord/dyad played on one beat). It can also be { midi, beats } so a
+     note can hold longer than one beat — e.g. Watchtower's roots held
+     two full beats instead of one. Bare entries default to beats:1, so
+     every existing sequence schedules exactly as before. */
+  let cursor = 0;
+  const timeouts = midis.map((m, i) => {
+    const hasBeats = m && typeof m === 'object' && !Array.isArray(m);
+    const pitches = hasBeats ? m.midi : m;
+    const beats = (hasBeats && m.beats > 0) ? m.beats : 1;
+    const at = cursor;
+    cursor += beats * interval;
+    return setTimeout(() => {
+      (Array.isArray(pitches) ? pitches : [pitches]).forEach(x => playNote(Number(x)));
+      if(tabRoot){
+        tabRoot.querySelectorAll('.beat-now').forEach(el=>el.classList.remove('beat-now'));
+        tabRoot.querySelectorAll(`[data-seq="${i}"]`).forEach(el=>el.classList.add('beat-now'));
+      }
+    }, at);
+  });
+  timeouts.push(setTimeout(stopPlaySeq, cursor));
   const idleHtml = btnEl ? btnEl.innerHTML : null;
   playSeqState = { timeouts, btn: btnEl, idleHtml, tabRoot };
   if(btnEl){

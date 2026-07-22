@@ -16,6 +16,15 @@ see `WORKFLOW.md` and the git commit log.
   Journey pages and the practice games, then Google Translate comes out
   entirely.
 
+## 2026-07-22 — Watchtower's "real rhythm" challenge now has a working demo you can hear
+
+### Added
+- **The Module 4 "Watchtower, the real rhythm" challenge now has a ▶ Play
+  button** — tap it and you'll hear the A · G · F · G roots actually held
+  for two full beats each, the way the record plays them, instead of just
+  reading about it. This is the first step to get this treatment; more
+  songs' real-rhythm challenges will get playable demos over time.
+
 ## 2026-07-22 — Modules 7 and 8 are now in real, hand-written Spanish
 
 ### Added
@@ -23,6 +32,38 @@ see `WORKFLOW.md` and the git commit log.
   notation, barre chords, and fingerpicking all read like a native Spanish
   lesson now, not a machine translation. Modules 1–8 are done; Modules
   9–12 are still machine-translated for now.
+
+## 2026-07-22 — New "real rhythm" challenges for Seven Nation Army and Sweet Child O' Mine, and honest jam-track expectations on every Song Journey page
+
+### Added
+- **Seven Nation Army now gets an ear-training "real rhythm" challenge in
+  Module 4** — instead of waiting until Module 7, you now clap along with
+  the record's actual swung feel much earlier, right after you first solo
+  over the riff.
+- **Sweet Child O' Mine now has a full open-chord verse challenge in
+  Module 5**, ending with a play-along at the record's real 125 BPM — this
+  song didn't have one before, even though its Song Journey page did.
+- **Every Song Journey page's jam track now tells you what to expect** —
+  its real tempo, and a heads-up when it's faster than the practice layers
+  above it. Seven Nation Army's page also points you to YouTube's 0.75×
+  playback if the real recording's speed catches you off guard. Five of the
+  six pages now end with a "ready to play it for real?" pointer to exactly
+  where that speed lives in the course.
+
+## 2026-07-22 — Fixed rhythm mix-ups for Sweet Child O' Mine, Let It Be, All Along the Watchtower, and "the cure"
+
+### Fixed
+- **Some song challenges were teaching the wrong rhythm for how the record
+  actually goes.** Sweet Child O' Mine's Song Journey said "two beats per
+  chord" in one spot and "four beats per chord" everywhere else — it's four
+  (one full bar), so that's fixed. Let It Be's "the way the recording does
+  it" step was actually a slower practice tempo — it's now honest about
+  that, and points you to the faster Half-Bar challenge that IS the record's
+  real speed. All Along the Watchtower's assessment piece and its "strummed
+  for real" challenge were both slower than the record's actual two-beat
+  pace — fixed, with a clear note on where the real speed lives. And "the
+  cure" now explains that its 144 BPM backing track feels like a slower 72 —
+  count two beats per chord and you're right on the record's pace.
 
 ## 2026-07-22 — Modules 4, 5, and 6 are now in real, hand-written Spanish
 
