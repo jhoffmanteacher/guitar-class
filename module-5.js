@@ -474,8 +474,8 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                text: 'Challenge — Let It Be, verse (assessment rehearsal): play C · G · Am · F with a down-strum, four beats per chord, building from 60 to 70 BPM. This C–G–Am–F verse is the song you play from memory for the module assessment — record a run and check it against the chart. You\'ve got it when: one full verse loop at 70 BPM, every change landing on beat 1. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5 — Open Chords</a>.',
-                text_es: 'Reto — Let It Be, estrofa (ensayo de evaluación): toca C · G · Am · F con un rasgueo hacia abajo, cuatro tiempos por acorde, subiendo de 60 a 70 BPM. Esta estrofa C–G–Am–F es la canción que tocas de memoria para la evaluación del módulo — graba una toma y compárala con el diagrama. Lo tienes cuando: una vuelta completa de la estrofa a 70 BPM, cada cambio cayendo en el tiempo 1. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5 — Acordes al aire</a>.',
+                text: 'Challenge — Let It Be, verse (assessment rehearsal): play C · G · Am · F with a down-strum, four beats per chord, building from 60 to 70 BPM. Your Module 2 bass roots moved every two beats to keep things easy — this is the real pacing, a full bar per chord, patient and unhurried. This C–G–Am–F verse is the song you play from memory for the module assessment — record a run and check it against the chart. You\'ve got it when: one full verse loop at 70 BPM, every change landing on beat 1. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5 — Open Chords</a>.',
+                text_es: 'Reto — Let It Be, estrofa (ensayo de evaluación): toca C · G · Am · F con un rasgueo hacia abajo, cuatro tiempos por acorde, subiendo de 60 a 70 BPM. Tus raíces de bajo del Módulo 2 se movían cada dos tiempos para que fuera más fácil — este es el ritmo real, un compás completo por acorde, paciente y sin apuro. Esta estrofa C–G–Am–F es la canción que tocas de memoria para la evaluación del módulo — graba una toma y compárala con el diagrama. Lo tienes cuando: una vuelta completa de la estrofa a 70 BPM, cada cambio cayendo en el tiempo 1. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5 — Acordes al aire</a>.',
                 hint: 'Look ahead — start forming the next chord on beat 4 of the current one. Keep your fingers arched and your thumb behind the neck so every string rings. The strum keeps moving even while fingers travel.',
                 hint_es: 'Mira hacia adelante — empieza a formar el siguiente acorde en el tiempo 4 del actual. Mantén tus dedos arqueados y tu pulgar detrás del mástil para que cada cuerda suene. El rasgueo sigue moviéndose aunque los dedos viajen.',
                 stuck: 'Isolate the roughest pair (probably C → F) and loop just those two, four beats each.',
@@ -1281,7 +1281,7 @@ MODULE_SONGS[5] = [
       { name: '"Let It Be" — The Beatles', meta: 'Verse & chorus full chord strum · C–G–Am–F (I–V–vi–IV)', meta_es: 'Rasgueo completo de estrofa y coro · C–G–Am–F (I–V–vi–IV)', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
         tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8',
-        backingUrl: 'https://www.youtube.com/watch?v=xHhfKZAH_EU',
+        backingUrl: 'audio/the-beatles-let-it-be-backing-C-71bpm-440hz-rhythm-down.mp3',
         backingKey: 'C' },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full performance with open chords', meta_es: 'Interpretación completa con acordes al aire', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
