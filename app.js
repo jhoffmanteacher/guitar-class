@@ -895,12 +895,15 @@ function buildTab(spec, opts){
     const tabNotesJson = JSON.stringify(allTabNotes.map(n =>
       n.frets ? { frets: n.frets, note: n.note, midi: n.midi }
               : { string: n.string, fret: n.fret, note: n.note, midi: n.midi }));
+    // Held notes ({midi,beats}, from toSeqEntry) aren't one-pick-per-beat
+    // either — same rationale as noCoach below.
+    const hasHolds = allMidis.some(n => n && typeof n === 'object' && !Array.isArray(n));
     controlsHtml = `<div class="tab-controls"><span class="bpm-control-group">` +
       `<button type="button" class="play-seq-btn" data-midis="${escAttr(midisAttr)}" onclick="playSequenceFromGroup(this)" title="Play this tab">&#x25B6; ${t('tab.playTab')}</button>` +
       renderBpmControl(keyPrefix, bpm, minBpm, maxBpm) +
       // noCoach: tabs with slurred notes (hammer-ons/pull-offs) aren't
       // one-pick-per-note, so a mic check would fail correct technique.
-      (spec.noCoach ? '' : coachBtnHtml(midisAttr, tabNotesJson)) +
+      (spec.noCoach || hasHolds ? '' : coachBtnHtml(midisAttr, tabNotesJson)) +
       `</span></div>`;
   }
   if (spec.phrases && spec.phrases.length) {
@@ -1830,10 +1833,13 @@ function buildStations(w, stationId){
       const key = `bpm:${w.id}:${ns}:${i}`;
       const bpm = readStoredBpm(key, defBpm);
       const midis = JSON.stringify(ps.notes);
+      // Held notes ({midi,beats}) aren't one-pick-per-beat — a mic check
+      // expecting evenly picked onsets would fail correct technique.
+      const hasHolds = (ps.notes || []).some(n => n && typeof n === 'object' && !Array.isArray(n));
       return ` <span class="bpm-control-group">` +
         `<button type="button" class="play-seq-btn" data-midis="${escAttr(midis)}" onclick="playSequenceFromGroup(this)" title="Play all notes">&#x25B6; ${escHtml(label)}</button>` +
         renderBpmControl(key, bpm, minBpm, maxBpm) +
-        coachBtnHtml(midis) +
+        (hasHolds ? '' : coachBtnHtml(midis)) +
         `</span>`;
     })() : '';
     const tabHtml = s.tab ? buildTab(s.tab, { keyPrefix: `bpm:${w.id}:${ns}:${i}:tab` }) : '';
@@ -2214,9 +2220,10 @@ function moduleStepsFlat(moduleNum){
 }
 function routinePlaySeq(ps, key){
   const bpm=readStoredBpm(key, ps.bpm||60);
+  const hasHolds = (ps.notes || []).some(n => n && typeof n === 'object' && !Array.isArray(n));
   return `<span class="bpm-control-group">`+
     `<button type="button" class="play-seq-btn" data-midis="${escAttr(JSON.stringify(ps.notes))}" onclick="playSequenceFromGroup(this)" title="${escAttr(t('routine.playIt'))}">&#x25B6; ${escHtml((ps.label && tf(ps,'label')) || t('routine.playIt'))}</button>`+
-    renderBpmControl(key, bpm, ps.minBpm||40, ps.maxBpm||120)+coachBtnHtml(JSON.stringify(ps.notes))+`</span>`;
+    renderBpmControl(key, bpm, ps.minBpm||40, ps.maxBpm||120)+(hasHolds ? '' : coachBtnHtml(JSON.stringify(ps.notes)))+`</span>`;
 }
 function buildModuleRoutine(moduleNum){
   const steps=moduleStepsFlat(moduleNum);
@@ -2649,12 +2656,13 @@ function renderPracticePanel(practice, skillId, wid){
     const key = `bpm:practice:${skillId}`;
     const bpm = readStoredBpm(key, defBpm);
     const midis = JSON.stringify(practice.notes || []);
+    const hasHolds = (practice.notes || []).some(n => n && typeof n === 'object' && !Array.isArray(n));
     return `<div class="sk-practice-panel" id="pp-${skillId}" hidden>` +
       `<div class="sk-practice-title">${t('step.practiceThis')}</div>` +
       `<div class="bpm-control-group">` +
         `<button type="button" class="play-seq-btn" data-midis="${escAttr(midis)}" onclick="playSequenceFromGroup(this)" title="Play all notes">&#x25B6; ${escHtml(label)}</button>` +
         renderBpmControl(key, bpm, minBpm, maxBpm) +
-        coachBtnHtml(midis) +
+        (hasHolds ? '' : coachBtnHtml(midis)) +
       `</div>` +
     `</div>`;
   }

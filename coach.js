@@ -92,6 +92,9 @@ function coachOpen(btn){
     let midis;
     try { midis = JSON.parse(btn.dataset.midis || '[]'); } catch(e){ return; }
     if (!Array.isArray(midis) || !midis.length) return;
+    // Held notes ({midi,beats}) aren't one-pick-per-beat — the caller should
+    // have suppressed the button already, but bail out rather than render NaNs.
+    if (midis.some(m => m && typeof m === 'object' && !Array.isArray(m))) return;
     mode = 'melody';
     /* Show WHERE to play it: a real TAB spec passes through verbatim
        (data-tabnotes); bare midi drills get a derived fingering. */
