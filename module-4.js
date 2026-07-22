@@ -302,6 +302,7 @@ SETS.push(
                 stuck_es: 'Primero aplaude el ritmo de la grabación, sin guitarra — un aplauso por raíz, sosteniendo durante el silencio — y luego vuelve a agregar los trastes una vez que tus manos conozcan la forma del tiempo.',
                 levelUp: 'Play it as power chords instead of single notes — same two-beat holds, fuller sound.',
                 levelUp_es: 'Tócalo como acordes de potencia en vez de notas sueltas — los mismos dos tiempos sostenidos, un sonido más lleno.',
+                playSeq: { label: 'Hear it — A · G · F · G roots, held two full beats each', label_es: 'Escúchalo — raíces A · G · F · G, sostenidas dos tiempos completos cada una', bpm: 60, notes: [{ midi: 45, beats: 2 }, { midi: 43, beats: 2 }, { midi: 41, beats: 2 }, { midi: 43, beats: 2 }] },
                 response: { type: 'short', prompt: 'What did you notice, holding each root for two beats instead of one?', prompt_es: '¿Qué notaste al sostener cada raíz dos tiempos en vez de uno?', placeholder: 'e.g. it finally sounds like the song, not an exercise', placeholder_es: 'p. ej. por fin suena como la canción, no como un ejercicio' }
               },
               {

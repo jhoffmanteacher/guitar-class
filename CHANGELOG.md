@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-22 — Watchtower's "real rhythm" challenge now has a working demo you can hear
+
+### Added
+- **The Module 4 "Watchtower, the real rhythm" challenge now has a ▶ Play
+  button** — tap it and you'll hear the A · G · F · G roots actually held
+  for two full beats each, the way the record plays them, instead of just
+  reading about it. This is the first step to get this treatment; more
+  songs' real-rhythm challenges will get playable demos over time.
+
 ## 2026-07-22 — Modules 7 and 8 are now in real, hand-written Spanish
 
 ### Added

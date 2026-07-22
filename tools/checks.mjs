@@ -216,7 +216,58 @@ function validateModules() {
 
   if (problems === 0) ok(`${allSets.length} Sets across ${MODULE_FILES.length} modules — all valid`);
   checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsByModule);
+  validateNoteBeats(allSets);
   return allSets;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1c. NOTE "beats" SHAPE — tab.notes and playSeq.notes entries may
+   optionally carry { beats: N } (or, for tab notes, a bare beats field
+   alongside string/fret/midi) so a demo can hold a note longer than one
+   beat. Default is 1 and every existing entry omits it, so this only
+   fires on the new field — nothing else about note shape is checked.
+   ════════════════════════════════════════════════════════════════════ */
+function validateNoteBeats(allSets) {
+  head('1c. Note "beats" field shape');
+  const checkBeats = (where, n) => {
+    if (!n || typeof n !== 'object' || Array.isArray(n)) return;
+    if (n.beats !== undefined && !(typeof n.beats === 'number' && n.beats > 0))
+      { err(`${where}: "beats" should be a positive number`); problems++; }
+  };
+  const checkTabNotes = (where, notes) => {
+    (notes || []).forEach((n, i) => checkBeats(`${where} · notes[${i}]`, n));
+  };
+  const checkTab = (where, tabSpec) => {
+    if (!tabSpec) return;
+    if (Array.isArray(tabSpec.phrases)) tabSpec.phrases.forEach((p, pi) => checkTabNotes(`${where} · phrases[${pi}]`, p.notes));
+    else checkTabNotes(where, tabSpec.notes);
+  };
+  const checkPlaySeq = (where, ps) => {
+    if (!ps || !Array.isArray(ps.notes)) return;
+    ps.notes.forEach((n, i) => checkBeats(`${where} · notes[${i}]`, n));
+  };
+
+  for (const w of allSets) {
+    for (const stId of Object.keys(w.stations || {})) {
+      const st = w.stations[stId];
+      const sections = st.sections || (st.steps ? [{ title: '', steps: st.steps }] : []);
+      sections.forEach(sec => {
+        (sec.steps || []).forEach((step, sti) => {
+          const stepWhere = `set "${w.id}" · station "${stId}" · step ${sti + 1}`;
+          checkTab(`${stepWhere} · tab`, step.tab);
+          if (Array.isArray(step.tabs)) step.tabs.forEach((t, ti) => checkTab(`${stepWhere} · tabs[${ti}]`, t));
+          checkPlaySeq(`${stepWhere} · playSeq`, step.playSeq);
+        });
+      });
+    }
+    if (Array.isArray(w.skills)) {
+      w.skills.forEach(sk => {
+        if (sk.practice && sk.practice.type === 'playSeq') checkPlaySeq(`set "${w.id}" · skill "${sk.id}" · practice`, sk.practice);
+      });
+    }
+  }
+
+  if (problems === 0) ok('all note "beats" fields (where present) are valid');
 }
 
 /* ════════════════════════════════════════════════════════════════════
