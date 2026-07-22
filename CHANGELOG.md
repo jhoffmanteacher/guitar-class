@@ -15,6 +15,19 @@ see `WORKFLOW.md` and the git commit log.
   machine-translated for now — they'll get the same treatment over the
   coming sessions.
 
+## 2026-07-22 — Let It Be has a real jam track now, with a metronome option
+
+### Changed
+- **Let It Be's "🎵 Play along" button now plays a real backing track**
+  instead of a generic YouTube loop — a clean C-major mix at 71 BPM that
+  matches the C–G–Am–F verse loop you're playing.
+
+### Added
+- **A "🎵 Metronome" toggle on Let It Be's play-along track**, same as "the
+  cure", Luna, and Sweet Child O' Mine — flip it on for a click laid under
+  the backing track to help you lock in the downbeats, flip it off for the
+  clean mix. Switching mid-song keeps your spot.
+
 ## 2026-07-22 — Sweet Child O' Mine has a real jam track now, with a metronome option
 
 ### Changed

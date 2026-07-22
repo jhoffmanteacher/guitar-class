@@ -933,7 +933,7 @@ MODULE_SONGS[5] = [
       { name: '"Let It Be" — The Beatles', meta: 'Verse & chorus full chord strum · C–G–Am–F (I–V–vi–IV)', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
         tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8',
-        backingUrl: 'https://www.youtube.com/watch?v=xHhfKZAH_EU',
+        backingUrl: 'audio/the-beatles-let-it-be-backing-C-71bpm-440hz-rhythm-down.mp3',
         backingKey: 'C' },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full performance with open chords', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
