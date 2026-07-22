@@ -141,6 +141,16 @@ function loadModuleData(num){
   });
   return _moduleLoads[num];
 }
+// Once a module is marked i18nComplete, every field checks.mjs requires has a
+// real Spanish twin — hide the whole panel from Google Translate so it can't
+// re-translate (or mangle) our own hand-written Spanish. Modules still mid-
+// translation are left alone: Google Translate keeps covering them, same as
+// before phase 2 (see CLAUDE.md's i18n architecture note).
+function markModulePanelTranslated(el, num){
+  if(!moduleI18nComplete(num)) return;
+  el.setAttribute('translate','no');
+  el.classList.add('notranslate');
+}
 // Build (once) the set + review panels for one module and wire chord links.
 async function ensureModuleRendered(num){
   num = parseInt(num);
@@ -153,6 +163,7 @@ async function ensureModuleRendered(num){
     const div=document.createElement('div');
     div.className='week-panel'; div.dataset.id=w.id; div.dataset.module=w.moduleNum;
     div.innerHTML = w.comingSoon ? buildComingSoon(w) : buildSet(w);
+    markModulePanelTranslated(div, num);
     c.appendChild(div);
   });
   if(MODULE_REVIEWS[num]){
@@ -160,6 +171,7 @@ async function ensureModuleRendered(num){
     const div=document.createElement('div');
     div.className='week-panel'; div.dataset.id=`mr${mr.moduleNum}`; div.dataset.module=mr.moduleNum;
     div.innerHTML=buildModuleReview(mr);
+    markModulePanelTranslated(div, num);
     c.appendChild(div);
   }
   // Module-level "🎵 Songs" collapsible, appended after this module's panels
@@ -170,6 +182,7 @@ async function ensureModuleRendered(num){
       const div=document.createElement('div');
       div.className='module-songs'; div.dataset.module=num;
       div.innerHTML=songsHtml;
+      markModulePanelTranslated(div, num);
       c.appendChild(div);
     }
   }
@@ -185,6 +198,33 @@ async function ensureModuleRendered(num){
 let _dirtyKeys = new Set();   // which categories need writing: skills · place · responses · completed · games
 const escAttr = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const escHtml = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+/* ── Module-content i18n (phase 2) ──────────────────────────────────────
+   Hand-written Spanish for module/lesson CONTENT (as opposed to the app
+   shell, which i18n.js's t()/data-i18n already covers). Every translatable
+   field on a Set/skill/song/etc. can carry a `<field>_es` twin alongside the
+   English `<field>` — tf(obj, 'field') returns the Spanish twin when the
+   student is in Spanish mode AND that twin exists, else the English original.
+   A module with no _es fields yet behaves exactly as before (falls through
+   to English, which Google Translate then covers, same as today) — modules
+   translate incrementally, field by field, with no renderer changes needed
+   per module. See CLAUDE.md "i18n — module/lesson content" for the full
+   rules (what to translate, glossary, checks.mjs enforcement). */
+function tf(obj, field){
+  if(!obj) return obj;
+  if(typeof getLang === 'function' && getLang()==='es'){
+    const v = obj[field+'_es'];
+    if(v != null && v !== '') return v;
+  }
+  return obj[field];
+}
+// True once every required field in this module is hand-translated
+// (tools/checks.mjs enforces that claim) — safe to hide it from Google
+// Translate entirely so the two layers can't double-translate or clash.
+function moduleI18nComplete(num){
+  const m = MODULE_MANIFEST.find(x=>x.num===Number(num));
+  return !!(m && m.i18nComplete);
+}
 // Builds the signed-in user header. Escapes name/email/photoURL — Google
 // account values are user-controlled and go into innerHTML.
 function userHeaderHtml(user){
@@ -821,10 +861,10 @@ function buildTab(spec, opts){
   const keyPrefix = (opts && opts.keyPrefix) || '';
   /* Header title: prefer explicit title; otherwise use caption as the header.
      If both are present and distinct, caption stays in the body. */
-  const headTitle = spec.title || spec.caption || 'Tab';
+  const headTitle = (spec.title && tf(spec,'title')) || (spec.caption && tf(spec,'caption')) || t('tab.defaultTitle');
   const showCaptionInBody = !!spec.title && !!spec.caption && spec.title !== spec.caption;
-  const headHtml = `<div class="tab-head"><span class="tab-icon">&#x1F3B8;</span><span class="tab-title">${escHtml(headTitle)}</span><span class="tab-kind">Tab</span></div>`;
-  const captionHtml = showCaptionInBody ? `<div class="tab-caption">${escHtml(spec.caption)}</div>` : '';
+  const headHtml = `<div class="tab-head"><span class="tab-icon">&#x1F3B8;</span><span class="tab-title">${escHtml(headTitle)}</span><span class="tab-kind">${t('tab.label')}</span></div>`;
+  const captionHtml = showCaptionInBody ? `<div class="tab-caption">${escHtml(tf(spec,'caption'))}</div>` : '';
   /* Collect all midis (across phrases if any) so the tab play-all walks the whole melody. */
   let allMidis = [];
   if (spec.phrases && spec.phrases.length) {
@@ -852,7 +892,7 @@ function buildTab(spec, opts){
       n.frets ? { frets: n.frets, note: n.note, midi: n.midi }
               : { string: n.string, fret: n.fret, note: n.note, midi: n.midi }));
     controlsHtml = `<div class="tab-controls"><span class="bpm-control-group">` +
-      `<button type="button" class="play-seq-btn" data-midis="${escAttr(midisAttr)}" onclick="playSequenceFromGroup(this)" title="Play this tab">&#x25B6; Play tab</button>` +
+      `<button type="button" class="play-seq-btn" data-midis="${escAttr(midisAttr)}" onclick="playSequenceFromGroup(this)" title="Play this tab">&#x25B6; ${t('tab.playTab')}</button>` +
       renderBpmControl(keyPrefix, bpm, minBpm, maxBpm) +
       // noCoach: tabs with slurred notes (hammer-ons/pull-offs) aren't
       // one-pick-per-note, so a mic check would fail correct technique.
@@ -1286,7 +1326,7 @@ function populateModuleDropdown(){
     let tail = '';
     if(state==='complete') tail = ` · ${total}/${total} ✓`;
     else if(state==='partial') tail = ` · ${done}/${total}`;
-    opt.textContent = `Module ${m.num} — ${m.name}${tail}`;
+    opt.textContent = `${t('nav.module')} ${m.num} — ${tf(m,'name')}${tail}`;
     sel.appendChild(opt);
   });
   if(keep) sel.value = keep;
@@ -1642,14 +1682,14 @@ function returnToPractice(){
    ensureModuleRendered() (defined near the top of this file). */
 
 function buildSetHeader(w){
-  const pill = w.title ? `<span class="obj-set-tag">${w.title}</span>` : '';
+  const pill = w.title ? `<span class="obj-set-tag" data-i18n-setlabel="${escAttr(w.title)}" translate="no">${escHtml(tSetLabel(w.title))}</span>` : '';
   const crumb = w.unit ? `<span class="obj-unit">${w.unit}</span>` : '';
   return (pill || crumb) ? `<div class="obj-set">${pill}${crumb}</div>` : '';
 }
 
 function buildComingSoon(w){
   const header = buildSetHeader(w);
-  const sub = w.subtitle ? `<h2 class="obj-main">${w.subtitle}</h2>` : '';
+  const sub = w.subtitle ? `<h2 class="obj-main">${tf(w,'subtitle')}</h2>` : '';
   return `<div class="obj-card set-head">${header}${sub}</div>
   <div class="coming"><div class="big">&#x1F3B8;</div><p>This set's content will appear here when it's ready.<br>Check back soon!</p></div>`;
 }
@@ -1658,9 +1698,9 @@ function buildSet(w){
   // Small "Set N" pill, then the topic as the large title, then generalized
   // skill bullets (the old "I CAN…" objective line is no longer shown).
   const printBtn = `<button type="button" class="print-set-btn" onclick="printSet('${w.id}')" title="Print this set as a one-page handout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg><span data-i18n="btn.printSet">${t('btn.printSet')}</span></button>`;
-  const pill = `<div class="obj-set">${w.title ? `<span class="obj-set-tag">${w.title}</span>` : ''}${printBtn}</div>`;
-  const titleHtml = w.unit ? `<h2 class="obj-main obj-topic">${w.unit}</h2>` : '';
-  const items = (w.skillFocus||'').split(' · ')
+  const pill = `<div class="obj-set">${w.title ? `<span class="obj-set-tag" data-i18n-setlabel="${escAttr(w.title)}" translate="no">${escHtml(tSetLabel(w.title))}</span>` : ''}${printBtn}</div>`;
+  const titleHtml = w.unit ? `<h2 class="obj-main obj-topic">${tf(w,'unit')}</h2>` : '';
+  const items = (tf(w,'skillFocus')||'').split(' · ')
     .map(s => s.trim())
     .filter(Boolean)
     .map(s => `<li class="obj-skill-item">${s}</li>`)
@@ -1684,32 +1724,32 @@ function buildSet(w){
         const layers = entries.map(t => t.layer);
         const sameLayer = layers[0] != null && layers.every(l => l === layers[0]);
         const sameBonus = entries.every(t => !!t.bonus === !!entries[0].bonus);
-        const lede = (sameLayer && sameBonus && entries[0].bonus) ? 'This set adds a bonus layer for:'
-          : sameLayer ? `This set builds Layer ${layers[0]} of 5 for:`
-          : 'This set grows:';
+        const lede = (sameLayer && sameBonus && entries[0].bonus) ? t('thread.bonusLayer')
+          : sameLayer ? t('thread.buildsLayer', {n: layers[0]})
+          : t('thread.grows');
         return `<div class="song-thread">&#x1F3B8; ${lede} ${names}</div>`;
       })()
     : '';
   return `<div class="obj-card set-head">${titleHtml}${pill}${skills}${thread}</div>
   <div class="tabs">
     <div class="tabs-songbar">
-      ${w.songs ? `<button type="button" class="tabs-songs tab-songs" onclick="switchTab(this,'${w.id}','songs')">&#9835; Songs</button>` : ''}
+      ${w.songs ? `<button type="button" class="tabs-songs tab-songs" onclick="switchTab(this,'${w.id}','songs')">&#9835; ${t('nav.songs')}</button>` : ''}
     </div>
     <div class="tabs-main">
       <div class="tabs-stations-col">
         <button type="button" class="tabs-card tab-station-b active" onclick="switchTab(this,'${w.id}','station-b')">
-          <span class="tabs-card-title"><span class="tabs-card-num">1</span>Station B</span>
-          <span class="tabs-card-sub">Watch &middot; Listen &middot; Practice</span>
+          <span class="tabs-card-title"><span class="tabs-card-num">1</span>${t('nav.stationBTitle')}</span>
+          <span class="tabs-card-sub">${t('nav.stationBSub')}</span>
         </button>
         <button type="button" class="tabs-card tab-station-c" onclick="switchTab(this,'${w.id}','station-c')">
-          <span class="tabs-card-title"><span class="tabs-card-num">2</span>Station C</span>
-          <span class="tabs-card-sub">Independent drill</span>
+          <span class="tabs-card-title"><span class="tabs-card-num">2</span>${t('nav.stationCTitle')}</span>
+          <span class="tabs-card-sub">${t('nav.stationCSub')}</span>
         </button>
       </div>
       <div class="tabs-arrow" aria-hidden="true">&rarr;</div>
       <button type="button" class="tabs-card tab-checklist" onclick="switchTab(this,'${w.id}','checklist')">
-        <span class="tabs-card-title"><span class="tabs-card-num">3</span>My skills checklist</span>
-        <span class="tabs-card-sub">Track what you can do</span>
+        <span class="tabs-card-title"><span class="tabs-card-num">3</span>${t('nav.checklistTitle')}</span>
+        <span class="tabs-card-sub">${t('nav.checklistSub')}</span>
       </button>
     </div>
   </div>
@@ -1751,7 +1791,7 @@ function buildStations(w, stationId){
   const stepsHtml=(steps,ns)=>{
    const curIdx = steps.findIndex((st,idx)=>completed[`${w.id}-${ns}-${idx}`]!==true);
    return steps.map((s,i)=>{
-    const text=s.text.replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
+    const text=tf(s,'text').replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
       const safe=label.replace(/'/g,"\\'");
       // data-ext links can't be embedded (official recordings block it) — open on YouTube in a new tab.
       if(/data-ext/.test(attrs)){
@@ -1764,13 +1804,14 @@ function buildStations(w, stationId){
        level-up) collapses behind native <details> — one tap away, never
        competing with the thing the student is supposed to do. */
     const hintFold = s.hint ? (()=>{
-      const bullets = s.hint.split(/(?<=\.(?=\s))(?=\s*[A-Z])|\n/).map(b=>b.trim()).filter(Boolean);
-      const inner = bullets.length <= 1 ? `<div class="sh">${s.hint}</div>`
+      const hint = tf(s,'hint');
+      const bullets = hint.split(/(?<=\.(?=\s))(?=\s*[A-Z])|\n/).map(b=>b.trim()).filter(Boolean);
+      const inner = bullets.length <= 1 ? `<div class="sh">${hint}</div>`
         : `<ul class="sh-list">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
-      return `<details class="step-fold step-hint-fold"><summary>&#x1F4A1; Hint</summary>${inner}</details>`;
+      return `<details class="step-fold step-hint-fold"><summary>&#x1F4A1; ${t('step.hint')}</summary>${inner}</details>`;
     })() : '';
-    const stuckFold = s.stuck ? `<details class="step-fold step-stuck-fold"><summary>&#x1FA9C; Stuck?</summary><div class="step-branch step-stuck">${s.stuck}</div></details>` : '';
-    const levelUpFold = s.levelUp ? `<details class="step-fold step-levelup-fold"><summary>&#x1F336;&#xFE0F; Level up</summary><div class="step-branch step-levelup">${s.levelUp}</div></details>` : '';
+    const stuckFold = s.stuck ? `<details class="step-fold step-stuck-fold"><summary>&#x1FA9C; ${t('step.stuck')}</summary><div class="step-branch step-stuck">${tf(s,'stuck')}</div></details>` : '';
+    const levelUpFold = s.levelUp ? `<details class="step-fold step-levelup-fold"><summary>&#x1F336;&#xFE0F; ${t('step.levelUp')}</summary><div class="step-branch step-levelup">${tf(s,'levelUp')}</div></details>` : '';
     // Hint / Stuck? / Level up sit in one horizontal row so a student can scan all three at once.
     const foldsHtml = (hintFold || stuckFold || levelUpFold) ? `<div class="step-folds">${hintFold}${stuckFold}${levelUpFold}</div>` : '';
     const chordsHtml = (s.chords&&s.chords.length)
@@ -1778,7 +1819,7 @@ function buildStations(w, stationId){
       : '';
     const playSeqHtml = s.playSeq ? (()=>{
       const ps = s.playSeq;
-      const label = ps.label || 'Play all';
+      const label = (ps.label && tf(ps,'label')) || t('step.playAll');
       const defBpm = ps.bpm || 60;
       const minBpm = ps.minBpm || 40;
       const maxBpm = ps.maxBpm || 120;
@@ -1793,41 +1834,45 @@ function buildStations(w, stationId){
     })() : '';
     const tabHtml = s.tab ? buildTab(s.tab, { keyPrefix: `bpm:${w.id}:${ns}:${i}:tab` }) : '';
     const tabsHtml = (s.tabs && s.tabs.length)
-      ? `<div class="tab-choice-group">${s.tabs.map((t, tIdx) => {
-          const title = t.title || t.caption || 'TAB';
-          return `<div class="tab-choice"><button type="button" class="tab-choice-btn" onclick="toggleTabChoice(this)"><span class="tab-choice-icon">&#x25B6;</span><span>Show TAB: ${escHtml(title)}</span></button><div class="tab-choice-content">${buildTab(t, { keyPrefix: `bpm:${w.id}:${ns}:${i}:tab:${tIdx}` })}</div></div>`;
+      ? `<div class="tab-choice-group">${s.tabs.map((spec, tIdx) => {
+          const title = (spec.title && tf(spec,'title')) || (spec.caption && tf(spec,'caption')) || t('tab.defaultTitle');
+          return `<div class="tab-choice"><button type="button" class="tab-choice-btn" onclick="toggleTabChoice(this)"><span class="tab-choice-icon">&#x25B6;</span><span>${t('tab.showTabLabel')} ${escHtml(title)}</span></button><div class="tab-choice-content">${buildTab(spec, { keyPrefix: `bpm:${w.id}:${ns}:${i}:tab:${tIdx}` })}</div></div>`;
         }).join('')}</div>`
       : '';
     const respHtml = s.response ? (()=>{
       const key = `${w.id}-${ns}-${i}`;
       const isPR = s.response.type === 'short' && (/personal record/i.test(s.response.prompt||'') || /\bBPM\b/i.test(s.response.prompt||''));
       const stored = isPR ? prLatestValue(responses[key]) : (responses[key] || '');
-      const promptHtml = s.response.prompt ? `<div class="step-resp-prompt">${escHtml(s.response.prompt)}</div>` : '';
-      const labelHtml = `<div class="step-resp-label">&#x270F;&#xFE0F; Your response</div>`;
+      const promptHtml = s.response.prompt ? `<div class="step-resp-prompt">${escHtml(tf(s.response,'prompt'))}</div>` : '';
+      const labelHtml = `<div class="step-resp-label">&#x270F;&#xFE0F; ${t('step.yourResponse')}</div>`;
       if(s.response.type === 'short'){
-        const ph = s.response.placeholder || 'Type your answer here…';
+        const ph = s.response.placeholder ? tf(s.response,'placeholder') : t('step.answerPlaceholder');
         const prAttrs = isPR ? ` onblur="onResponsePRBlur('${key}')"` : '';
         return `<div class="step-resp">${labelHtml}${promptHtml}<textarea class="step-resp-input" rows="2" placeholder="${escAttr(ph)}" oninput="onResponseChange('${key}', this.value${isPR?', true':''})"${prAttrs}>${escHtml(stored)}</textarea></div>`;
       }
       if(s.response.type === 'mc' && Array.isArray(s.response.choices)){
         const r = s.response;
+        const choicesEs = tf(r,'choices');
         // Factual MCs carry answer: (index) + explain: — render as graded buttons.
+        // NOTE: `stored`/data-choice are always keyed on the ENGLISH choice text
+        // (r.choices), even when the Spanish label is shown — that's the value
+        // persisted in Firestore, so it must stay language-stable.
         if(typeof r.answer === 'number'){
           const ansChoice = r.choices[r.answer];
           const answered = stored !== '';
-          const opts = r.choices.map(c=>{
+          const opts = r.choices.map((c,ci)=>{
             let cls = 'step-mc-opt';
             if(c === ansChoice) cls += ' is-answer';
             if(answered && c === stored) cls += (c === ansChoice) ? ' correct' : ' incorrect';
-            return `<button type="button" class="${cls}" data-choice="${escAttr(c)}" data-correct="${c===ansChoice?'1':'0'}" onclick="onStepMcSelect('${key}', this)"><span class="step-mc-text">${escHtml(c)}</span><span class="step-mc-check">&#x2713;</span></button>`;
+            return `<button type="button" class="${cls}" data-choice="${escAttr(c)}" data-correct="${c===ansChoice?'1':'0'}" onclick="onStepMcSelect('${key}', this)"><span class="step-mc-text">${escHtml(choicesEs[ci])}</span><span class="step-mc-check">&#x2713;</span></button>`;
           }).join('');
-          const explainHtml = r.explain ? `<div class="step-mc-explain">${escHtml(r.explain)}</div>` : '';
+          const explainHtml = r.explain ? `<div class="step-mc-explain">${escHtml(tf(r,'explain'))}</div>` : '';
           return `<div class="step-resp">${labelHtml}${promptHtml}<div class="step-resp-mc step-mc-keyed${answered?' answered':''}">${opts}</div>${explainHtml}</div>`;
         }
         // Reflection / observation MCs stay unkeyed — record the pick only.
-        const opts = r.choices.map(c=>{
+        const opts = r.choices.map((c,ci)=>{
           const checked = stored===c ? 'checked' : '';
-          return `<label class="step-resp-mc-opt"><input type="radio" name="resp-${key}" ${checked} onchange="onResponseChange('${key}', '${escAttr(c)}')"><span>${escHtml(c)}</span></label>`;
+          return `<label class="step-resp-mc-opt"><input type="radio" name="resp-${key}" ${checked} onchange="onResponseChange('${key}', '${escAttr(c)}')"><span>${escHtml(choicesEs[ci])}</span></label>`;
         }).join('');
         return `<div class="step-resp">${labelHtml}${promptHtml}<div class="step-resp-mc">${opts}</div></div>`;
       }
@@ -1882,7 +1927,7 @@ function buildStations(w, stationId){
     return reminder + real.map((sec,gi)=>{
     const ns = `${baseNs}-sec${gi}`;
     return `<div class="stp-sec">
-      <div class="stp-sec-label">${sec.title}</div>
+      <div class="stp-sec-label">${tf(sec,'title')}</div>
       <ul class="steps">${stepsHtml(sec.steps, ns)}</ul>
     </div>`;
   }).join('');
@@ -1895,20 +1940,20 @@ function buildStations(w, stationId){
        B→C (B teaches what C drills), but returning straight to C on a
        later day is spaced practice — say so, so nobody feels off-track. */
     const flexNote = (id==='c' && w.stations && w.stations.b)
-      ? `<div class="st-flex-note">&#x1F9ED; <strong>First time on this set?</strong> Do <button type="button" class="st-note-link" onclick="switchTabById('${w.id}','station-b')">Station B</button> first — watch the lessons, then come back here and drill. Back on another day just to practice? Perfect — practicing on different days helps you remember.</div>`
+      ? `<div class="st-flex-note">${t('note.firstTimeHtml',{btn:`<button type="button" class="st-note-link" onclick="switchTabById('${w.id}','station-b')">${t('nav.stationBTitle')}</button>`})}</div>`
       : '';
     const {total: stepTotal, done: stepDone} = stationStepCounts(id, s);
     const pillHtml = stepTotal > 0 ? `<span class="prog-pill" data-i18n="progress.stepsDone" data-i18n-params="${escAttr(JSON.stringify({done:stepDone,total:stepTotal}))}">${t('progress.stepsDone',{done:stepDone,total:stepTotal})}</span>` : '';
     return `
     <div class="dp${cls}" id="${w.id}-dp-${id}">
-      <div class="dp-head"><span class="st-badge ${badgeClass}">${badge}</span><h3 class="dp-title">${s.title}</h3>${pillHtml}</div>
+      <div class="dp-head"><span class="st-badge ${badgeClass}">${badge}</span><h3 class="dp-title">${tf(s,'title')}</h3>${pillHtml}</div>
       ${flexNote}
       ${body}
     </div>`;
   };
   if(stationId){
     const s = stationId === 'b' ? w.stations.b : w.stations.c;
-    const badge = stationId === 'b' ? 'Station B' : 'Station C';
+    const badge = stationId === 'b' ? t('nav.stationBTitle') : t('nav.stationCTitle');
     const badgeClass = stationId === 'b' ? 'bb' : 'bc';
     return dp(stationId, '', badge, badgeClass, s);
   }
@@ -2028,29 +2073,36 @@ function openSt(wid,s){
 }
 
 /* ── Songs ── */
-const DIFF_LABELS = {1:'Beginner',2:'Intermediate',3:'Advanced'};
+function diffLabel(level){
+  return level===1 ? t('songs.diff1') : level===2 ? t('songs.diff2') : level===3 ? t('songs.diff3') : '';
+}
 function diffDotsHtml(level){
   if(!level) return '';
-  const lbl = DIFF_LABELS[level] || '';
+  const lbl = diffLabel(level);
   const filled = '●'.repeat(level);            // ●
   const empty  = '○'.repeat(Math.max(0,3-level)); // ○
-  return `<span class="song-diff diff-${level}" title="Difficulty: ${lbl}" aria-label="Difficulty: ${lbl}">${filled}<span class="song-diff-empty">${empty}</span></span> `;
+  const title = `${t('songs.difficulty')}: ${lbl}`;
+  return `<span class="song-diff diff-${level}" title="${escAttr(title)}" aria-label="${escAttr(title)}">${filled}<span class="song-diff-empty">${empty}</span></span> `;
+}
+function songVidButtonsHtml(s, onclickFor){
+  const vids = [];
+  if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="${onclickFor('original')}" title="${escAttr(t('songs.opensYoutube'))}"><span class="svb-play">&#x25B6;</span>${t('songs.original')} <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
+  if(s.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="${onclickFor('tutorial')}"><span class="svb-play">&#x25B6;</span>${t('songs.tutorial')}</button>`);
+  if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="${onclickFor('backing')}" title="${escAttr(t('songs.jamTrackTitle'))}"><span class="svb-play">&#x25B6;</span>&#x1F3B5; ${t('songs.backingTrack')}${s.backingKey?` (${s.backingKey})`:''}</button>`);
+  return vids;
 }
 function buildSongs(w){
   const rows=w.songs.map((s,i)=>{
     const nameEl = s.url ? `<button class="rp-trigger" onclick="loadSong('${w.id}',${i})">${s.name}</button>` : s.name;
-    const vids = [];
-    if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="loadSongVid('${w.id}',${i},'original')" title="Opens in YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
-    if(s.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="loadSongVid('${w.id}',${i},'tutorial')"><span class="svb-play">&#x25B6;</span>Tutorial</button>`);
-    if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="loadSongVid('${w.id}',${i},'backing')" title="Jam track — backing music to play along with; make up your own melody (solo) over it"><span class="svb-play">&#x25B6;</span>&#x1F3B5; Backing track${s.backingKey?` (${s.backingKey})`:''}</button>`);
+    const vids = songVidButtonsHtml(s, kind=>`loadSongVid('${w.id}',${i},'${kind}')`);
     // Song Journey pages are same-origin (tabs/*.html), opened in a new tab so app state stays put.
-    if(s.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="One song, five layers">&#x1F9F5; Song Journey</button>`);
+    if(s.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="${escAttr(t('songs.oneSongLayers'))}">&#x1F9F5; ${t('songs.songJourney')}</button>`);
     const vidsEl = vids.length ? `<div class="song-vids">${vids.join('')}</div>` : '';
-    return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div><div class="sname">${nameEl}</div><div class="smeta">${diffDotsHtml(s.level)}${s.meta}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${s.type}</span></div>`;
+    return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div><div class="sname">${nameEl}</div><div class="smeta">${diffDotsHtml(s.level)}${tf(s,'meta')}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${s.type}</span></div>`;
   }).join('');
-  const requestSlot = `<div class="song-row song-request"><div class="song-request-ico">&#x1F3A4;</div><div><div class="sname">Your pick — bring your own song!</div><div class="smeta">Got a song you want to learn? Search YouTube for a beginner tutorial and use this module's skills on it.</div></div></div>`;
-  const diffLegend = `<div class="leg"><span class="song-diff diff-1">&#x25CF;<span class="song-diff-empty">&#x25CB;&#x25CB;</span></span>&#x2192;<span class="song-diff diff-3">&#x25CF;&#x25CF;&#x25CF;</span> easier &#x2192; harder</div>`;
-  return `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>Core — everyone</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu — pick 1</div>${diffLegend}</div><div class="card">${rows}${requestSlot}</div>`;
+  const requestSlot = `<div class="song-row song-request"><div class="song-request-ico">&#x1F3A4;</div><div><div class="sname">${t('songs.yourPick')}</div><div class="smeta">${t('songs.yourPickBody')}</div></div></div>`;
+  const diffLegend = `<div class="leg"><span class="song-diff diff-1">&#x25CF;<span class="song-diff-empty">&#x25CB;&#x25CB;</span></span>&#x2192;<span class="song-diff diff-3">&#x25CF;&#x25CF;&#x25CF;</span> ${t('songs.diffLegend')}</div>`;
+  return `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('songs.core')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('songs.choice')}</div>${diffLegend}</div><div class="card">${rows}${requestSlot}</div>`;
 }
 
 /* Module-level songs (modules 2–12): one consolidated "🎵 Songs" list per module,
@@ -2061,22 +2113,19 @@ function buildModuleSongs(moduleNum){
   const list = (globalThis.MODULE_SONGS && MODULE_SONGS[moduleNum]) || [];
   if(!list.length) return '';
   const rows = list.map((s,i)=>{
-    const vids = [];
-    if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="loadModuleSongVid(${moduleNum},${i},'original')" title="Opens in YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
-    if(s.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="loadModuleSongVid(${moduleNum},${i},'tutorial')"><span class="svb-play">&#x25B6;</span>Tutorial</button>`);
-    if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="loadModuleSongVid(${moduleNum},${i},'backing')" title="Jam track — backing music to play along with; make up your own melody (solo) over it"><span class="svb-play">&#x25B6;</span>&#x1F3B5; Backing track${s.backingKey?` (${s.backingKey})`:''}</button>`);
-    if(s.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="One song, five layers">&#x1F9F5; Song Journey</button>`);
+    const vids = songVidButtonsHtml(s, kind=>`loadModuleSongVid(${moduleNum},${i},'${kind}')`);
+    if(s.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="${escAttr(t('songs.oneSongLayers'))}">&#x1F9F5; ${t('songs.songJourney')}</button>`);
     const vidsEl = vids.length ? `<div class="song-vids">${vids.join('')}</div>` : '';
-    return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div><div class="sname">${s.name}</div><div class="smeta">${diffDotsHtml(s.level)}${s.meta}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${s.type}</span></div>`;
+    return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div><div class="sname">${s.name}</div><div class="smeta">${diffDotsHtml(s.level)}${tf(s,'meta')}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${s.type}</span></div>`;
   }).join('');
-  const diffLegend = `<div class="leg"><span class="song-diff diff-1">&#x25CF;<span class="song-diff-empty">&#x25CB;&#x25CB;</span></span>&#x2192;<span class="song-diff diff-3">&#x25CF;&#x25CF;&#x25CF;</span> easier &#x2192; harder</div>`;
-  const legend = `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>Core — everyone</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu — pick 1</div>${diffLegend}</div>`;
+  const diffLegend = `<div class="leg"><span class="song-diff diff-1">&#x25CF;<span class="song-diff-empty">&#x25CB;&#x25CB;</span></span>&#x2192;<span class="song-diff diff-3">&#x25CF;&#x25CF;&#x25CF;</span> ${t('songs.diffLegend')}</div>`;
+  const legend = `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('songs.core')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('songs.choice')}</div>${diffLegend}</div>`;
   // Collapsible section (toggleStationSection); starts closed so it sits
   // quietly below the set content.
   return `<div class="sc-sec">
       <h3><button type="button" class="sc-sec-head" aria-expanded="false" onclick="toggleStationSection(this)">
         <span class="sc-sec-chev">&#x25B6;</span>
-        <span class="sc-sec-title">&#x1F3B5; Songs</span>
+        <span class="sc-sec-title">&#x1F3B5; ${t('nav.songs')}</span>
       </button></h3>
       <div class="sc-sec-body">${legend}<div class="card">${rows}</div></div>
     </div>`;
@@ -2116,9 +2165,9 @@ function buildVideos(w){
 /* ── Assessment ── */
 function buildAssess(w){
   const a=w.assessment;
-  return `<div class="ablock"><div class="albl">Assessment goal</div><div class="atxt">${a.goal}</div></div>
-    <div class="ablock"><div class="albl">Self-check</div><div class="atxt">${a.selfCheck}</div></div>
-    <div class="ablock"><div class="albl">NAfME standards</div><div>${a.standards.map(s=>`<span class="spill">${s}</span>`).join('')}</div></div>`;
+  return `<div class="ablock"><div class="albl">${t('assess.goal')}</div><div class="atxt">${tf(a,'goal')}</div></div>
+    <div class="ablock"><div class="albl">${t('assess.selfCheck')}</div><div class="atxt">${tf(a,'selfCheck')}</div></div>
+    <div class="ablock"><div class="albl">${t('assess.standards')}</div><div>${a.standards.map(s=>`<span class="spill">${s}</span>`).join('')}</div></div>`;
 }
 
 /* ── 10-Minute Routine card (module review) + Daily 5 panel ──
@@ -2128,9 +2177,10 @@ function stripTags(html){ const d=document.createElement('div'); d.innerHTML=htm
 function truncateText(s, n){ if(s.length<=n) return s; const cut=s.slice(0,n); return cut.slice(0, Math.max(cut.lastIndexOf(' '), n-20))+'…'; }
 // Short one-line label for a step's collapsed checklist row.
 function stepLabel(s){
-  const plain = stripTags(s.text || '').trim();
-  if(!plain && s.response && s.response.prompt) return truncateText(stripTags(s.response.prompt), 60);
-  const challengeMatch = plain.match(/^Challenge\s*\d*\s*[—-]\s*([^:]+):/);
+  const plain = stripTags(tf(s,'text') || '').trim();
+  if(!plain && s.response && s.response.prompt) return truncateText(stripTags(tf(s.response,'prompt')), 60);
+  // English "Challenge N — X:" / Spanish "Reto N — X:" both strip down to just X.
+  const challengeMatch = plain.match(/^(?:Challenge|Reto)\s*\d*\s*[—-]\s*([^:]+):/);
   if(challengeMatch) return truncateText(challengeMatch[1].trim(), 60);
   return truncateText(plain, 60);
 }
@@ -2149,7 +2199,7 @@ function moduleStepsFlat(moduleNum){
 function routinePlaySeq(ps, key){
   const bpm=readStoredBpm(key, ps.bpm||60);
   return `<span class="bpm-control-group">`+
-    `<button type="button" class="play-seq-btn" data-midis="${escAttr(JSON.stringify(ps.notes))}" onclick="playSequenceFromGroup(this)" title="Play it">&#x25B6; ${escHtml(ps.label||'Play it')}</button>`+
+    `<button type="button" class="play-seq-btn" data-midis="${escAttr(JSON.stringify(ps.notes))}" onclick="playSequenceFromGroup(this)" title="${escAttr(t('routine.playIt'))}">&#x25B6; ${escHtml((ps.label && tf(ps,'label')) || t('routine.playIt'))}</button>`+
     renderBpmControl(key, bpm, ps.minBpm||40, ps.maxBpm||120)+coachBtnHtml(JSON.stringify(ps.notes))+`</span>`;
 }
 function buildModuleRoutine(moduleNum){
@@ -2171,26 +2221,26 @@ function buildModuleRoutine(moduleNum){
   const song=songSteps.length ? songSteps[songSteps.length-1] : null;
   const wu=WARMUP_BANK[moduleNum % WARMUP_BANK.length];
   const li=(mins, title, body)=>`<li class="routine-item"><span class="routine-min">${mins} min</span><div class="routine-body"><strong>${title}</strong> ${body}</div></li>`;
-  const setLink=(x)=>`<button type="button" class="mr-review-link" onclick="goToSet('${x.set.id}')" title="Open this set">&#8617; ${escHtml(x.set.label)}</button>`;
+  const setLink=(x)=>`<button type="button" class="mr-review-link" onclick="goToSet('${x.set.id}')" title="${escAttr(t('routine.openThisSet'))}">&#8617; ${escHtml(x.set.label)}</button>`;
   let items='';
-  items+=li(1,'Tune up','&mdash; open the Tuner (corner button) and tune all six strings until the tuner turns green.');
-  items+=li(1,'Finger Gym',`&mdash; ${escHtml(wu.text)}<br>${routinePlaySeq(wu, `bpm:routine:${moduleNum}:wu`)}`);
-  if(drill) items+=li(3,'Skill drill',`&mdash; ${escHtml(truncateText(stripTags(drill.step.text),180))} ${setLink(drill)}<br>${routinePlaySeq(drill.step.playSeq, `bpm:routine:${moduleNum}:drill`)}`);
+  items+=li(1,t('routine.tuneUp'),t('routine.tuneUpBody'));
+  items+=li(1,t('routine.fingerGym'),`&mdash; ${escHtml(tf(wu,'text'))}<br>${routinePlaySeq(wu, `bpm:routine:${moduleNum}:wu`)}`);
+  if(drill) items+=li(3,t('routine.skillDrill'),`&mdash; ${escHtml(truncateText(stripTags(tf(drill.step,'text')),180))} ${setLink(drill)}<br>${routinePlaySeq(drill.step.playSeq, `bpm:routine:${moduleNum}:drill`)}`);
   if(chordWork && chordWork!==drill){
     const c=chordWork.step;
     const inner=c.chords && c.chords.length
-      ? `&mdash; ${escHtml(truncateText(stripTags(c.text),180))} ${setLink(chordWork)}<div class="chord-diagrams">${c.chords.map(ch=>`<div class="chord-box">${chordDiagramSVG(ch)}${ch.name?`<div class="chord-box-label">${ch.name}</div>`:''}</div>`).join('')}</div>`
-      : `&mdash; ${escHtml(truncateText(stripTags(c.text),180))} ${setLink(chordWork)}<br>${routinePlaySeq(c.playSeq, `bpm:routine:${moduleNum}:chords`)}`;
-    items+=li(3,'Chord / scale work',inner);
+      ? `&mdash; ${escHtml(truncateText(stripTags(tf(c,'text')),180))} ${setLink(chordWork)}<div class="chord-diagrams">${c.chords.map(ch=>`<div class="chord-box">${chordDiagramSVG(ch)}${ch.name?`<div class="chord-box-label">${ch.name}</div>`:''}</div>`).join('')}</div>`
+      : `&mdash; ${escHtml(truncateText(stripTags(tf(c,'text')),180))} ${setLink(chordWork)}<br>${routinePlaySeq(c.playSeq, `bpm:routine:${moduleNum}:chords`)}`;
+    items+=li(3,t('routine.chordScaleWork'),inner);
   }
-  if(song) items+=li(2,'Song',`&mdash; ${escHtml(truncateText(stripTags(song.step.text),220))} ${setLink(song)}`);
+  if(song) items+=li(2,t('routine.song'),`&mdash; ${escHtml(truncateText(stripTags(tf(song.step,'text')),220))} ${setLink(song)}`);
   return `<div class="routine-card">
     <div class="routine-head">
-      <span class="routine-title">&#x1F552; Your 10-minute practice routine</span>
-      <button type="button" class="routine-print-btn" onclick="printRoutine()" title="Print this routine">&#x1F5A8; Print</button>
+      <span class="routine-title">&#x1F552; ${t('routine.title')}</span>
+      <button type="button" class="routine-print-btn" onclick="printRoutine()" title="Print this routine">&#x1F5A8; ${t('routine.print')}</button>
     </div>
     <ol class="routine-list">${items}</ol>
-    <div class="routine-foot">Built from this module&rsquo;s sets &mdash; short on time? Do steps 1&ndash;3 &mdash; that's still good.</div>
+    <div class="routine-foot">${t('routine.foot')}</div>
   </div>`;
 }
 function printRoutine(){
@@ -2266,10 +2316,10 @@ function buildModuleReview(mr){
     const lvl=progress[s.id];
     const btn=(n)=>`<button class="mr-rb lvl${n}${lvl===String(n)?' active':''}" onclick="setSkillLevel('${s.id}','${mrId}','${n}')">${n}</button>`;
     const reviewLink = s.set
-      ? `<button type="button" class="mr-review-link" onclick="goToSet('${s.set}')" title="Go back to the lesson for this skill">&#8617; Review this</button>`
+      ? `<button type="button" class="mr-review-link" onclick="goToSet('${s.set}')" title="Go back to the lesson for this skill">&#8617; ${t('review.reviewThis')}</button>`
       : '';
     return `<div class="mr-row">
-      <div class="mr-skill-text"><span class="mr-q-num">${qNum}.</span> ${s.text}${reviewLink}</div>
+      <div class="mr-skill-text"><span class="mr-q-num">${qNum}.</span> ${tf(s,'text')}${reviewLink}</div>
       <div class="mr-rating">${btn(1)}${btn(2)}${btn(3)}</div>
     </div>`;
   }).join('');
@@ -2279,38 +2329,39 @@ function buildModuleReview(mr){
   const pLvl=perf.level;
   const pBtn=(n)=>`<button class="mr-rb lvl${n}${pLvl===String(n)?' active':''}" onclick="setPerformanceLevel(${mr.moduleNum},'${n}')">${n}</button>`;
   const playHtml=`<div class="mr-play">
-      <span class="mr-play-tag">&#x1F3B8; <span class="mr-q-num">${playNum}.</span> Play it &amp; Record it!</span>
-      <div class="mr-play-prompt">Perform a core song from this module &mdash; or a song of your choice that uses these skills. Then listen back to your recording and reflect on what could be improved.</div>
-      <label class="mr-play-label" for="${mrId}-song">Song I played</label>
+      <span class="mr-play-tag">&#x1F3B8; <span class="mr-q-num">${playNum}.</span> ${t('review.playRecord')}</span>
+      <div class="mr-play-prompt">${t('review.playPrompt')}</div>
+      <label class="mr-play-label" for="${mrId}-song">${t('review.songIPlayed')}</label>
       <input type="text" id="${mrId}-song" class="mr-play-song" oninput="savePerformance(${mr.moduleNum})" value="${escAttr(perf.song||'')}">
       <div class="mr-rec" data-module="${mr.moduleNum}">
         <div class="mr-rec-body" id="${mrId}-rec-body">${renderRecBody(mr.moduleNum)}</div>
       </div>
       <div class="mr-play-rate">
-        <span class="mr-play-rate-label">How did it go?</span>
+        <span class="mr-play-rate-label">${t('review.howDidItGo')}</span>
         <div class="mr-rating">${pBtn(1)}${pBtn(2)}${pBtn(3)}</div>
       </div>
     </div>`;
+  const assessItemsEs = tf(mr,'assessItems');
   const assessBody = (mr.assessItems && mr.assessItems.length)
-    ? `When you're ready, record yourself doing the module assessment, then check the recording against these skills:<ul class="mr-assess-list">${mr.assessItems.map(i=>`<li>${i}</li>`).join('')}</ul>`
-    : 'When you\'re ready, record yourself performing the skills above and self-check the recording.';
+    ? `${t('review.assessBodyItems')}<ul class="mr-assess-list">${mr.assessItems.map((i,ii)=>`<li>${assessItemsEs[ii]}</li>`).join('')}</ul>`
+    : t('review.assessBodyDflt');
   const performanceHtml=`<div class="mr-assess-box">
-      <div class="mr-assess-head"><span class="mr-assess-icon">&#x1F4DD;</span> Module ${mr.moduleNum} Assessment</div>
+      <div class="mr-assess-head"><span class="mr-assess-icon">&#x1F4DD;</span> ${t('review.assessHead',{n:mr.moduleNum})}</div>
       <div class="mr-assess-body">${assessBody}</div>
     </div>`;
   const forwardHtml = mr.forward
-    ? `<div class="ablock mr-forward" style="margin-top:12px"><div class="albl">&#x1F517; Why this matters</div><div class="atxt">${mr.forward}</div></div>`
+    ? `<div class="ablock mr-forward" style="margin-top:12px"><div class="albl">&#x1F517; ${t('review.whyMatters')}</div><div class="atxt">${tf(mr,'forward')}</div></div>`
     : '';
   return `
     ${buildModuleRoutine(mr.moduleNum)}
     <div class="mr-locked-banner">
       <span class="mr-locked-banner-icon">&#x1F512;</span>
-      <div><strong>Preview only.</strong> Mark every skill on every set as &ldquo;I&rsquo;ve got it!&rdquo; to unlock this self-assessment.</div>
+      <div><strong>${t('review.previewOnly')}</strong> ${t('review.previewBodyHtml')}</div>
     </div>
     <div class="obj-card">
-      <span class="mr-tag">Module ${mr.moduleNum} self-assessment</span>
-      <h2 class="obj-main">${mr.module}</h2>
-      <div class="obj-sub">Rate yourself on the module's key skills, then reflect.</div>
+      <span class="mr-tag">${t('review.tag',{n:mr.moduleNum})}</span>
+      <h2 class="obj-main">${tf(mr,'module')}</h2>
+      <div class="obj-sub">${t('review.rateReflect')}</div>
     </div>
     <div class="mr-skills">${rows}</div>
     <div class="mr-legend">
@@ -2319,18 +2370,18 @@ function buildModuleReview(mr){
       <span class="mr-legend-item"><span class="mr-legend-dot lvl3"></span>3 = <span data-i18n="skill.gotItShort">${t('skill.gotItShort')}</span></span>
     </div>
     <div class="ablock" style="margin-top:18px">
-      <div class="albl"><span class="mr-q-num">${clickedNum}.</span> What suddenly made sense this module?</div>
-      <textarea id="${mrId}-clicked" class="reflection-ta" placeholder="e.g. TAB finally made sense when I slowed it down…" oninput="saveReflection(${mr.moduleNum})">${saved.clicked||''}</textarea>
+      <div class="albl"><span class="mr-q-num">${clickedNum}.</span> ${t('review.whatClicked')}</div>
+      <textarea id="${mrId}-clicked" class="reflection-ta" placeholder="${escAttr(t('review.whatClickedPh'))}" oninput="saveReflection(${mr.moduleNum})">${saved.clicked||''}</textarea>
     </div>
     <div class="ablock" style="margin-top:12px">
-      <div class="albl"><span class="mr-q-num">${hardNum}.</span> What's still hard?</div>
-      <textarea id="${mrId}-hard" class="reflection-ta" placeholder="e.g. My ring finger keeps slipping off the fret…" oninput="saveReflection(${mr.moduleNum})">${saved.hard||''}</textarea>
+      <div class="albl"><span class="mr-q-num">${hardNum}.</span> ${t('review.whatsHard')}</div>
+      <textarea id="${mrId}-hard" class="reflection-ta" placeholder="${escAttr(t('review.whatsHardPh'))}" oninput="saveReflection(${mr.moduleNum})">${saved.hard||''}</textarea>
     </div>
     ${playHtml}
     ${performanceHtml}
     ${forwardHtml}
     <div class="ablock" style="margin-top:12px">
-      <div class="albl">NAfME standards</div>
+      <div class="albl">${t('assess.standards')}</div>
       <div>${mr.standards.map(s=>`<span class="spill">${s}</span>`).join('')}</div>
     </div>
     <div class="save-ind" id="${mrId}-save-ind" style="margin-top:10px" aria-live="polite"></div>`;
@@ -2523,26 +2574,27 @@ function downloadRec(moduleNum){
 
 /* ── Checklist ── */
 function buildChecklist(w){
-  if(!w.skills||w.skills.length===0) return '<p style="font-size:0.9375rem;color:var(--text2);padding:12px 0">No skills listed for this set yet.</p>';
+  if(!w.skills||w.skills.length===0) return `<p style="font-size:0.9375rem;color:var(--text2);padding:12px 0">${t('skill.noneListed')}</p>`;
   const done=w.skills.filter(s=>progress[s.id]==='gotit').length;
   const pct=Math.round(done/w.skills.length*100);
   const wkSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="var(--amber-text)" stroke-width="1.5"/><path d="M6 4v2.2l1.4 1.4" stroke="var(--amber-text)" stroke-width="1.5" stroke-linecap="round"/></svg>`;
   const giSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green-text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
   const rows=w.skills.map((s,i)=>{
     const st=progress[s.id]||'none';
+    const skillText = tf(s,'text');
     const helper = s.gotItWhen ? `
         <button type="button" class="sk-toggle" onclick="toggleGotIt('${s.id}', this)" aria-expanded="false" aria-controls="gi-${s.id}"><span class="sk-toggle-arrow">▾</span> <span data-i18n="skill.whatDoesThisLookLike">${t('skill.whatDoesThisLookLike')}</span></button>
-        <div class="sk-helper" id="gi-${s.id}" hidden><strong data-i18n="skill.youveGotItWhen">${t('skill.youveGotItWhen')}</strong> ${s.gotItWhen}</div>` : '';
+        <div class="sk-helper" id="gi-${s.id}" hidden><strong data-i18n="skill.youveGotItWhen">${t('skill.youveGotItWhen')}</strong> ${tf(s,'gotItWhen')}</div>` : '';
     const practiceBtn = s.practice ? `
-        <button type="button" class="sk-practice-btn" onclick="togglePracticePanel('${s.id}', this)" aria-expanded="false" aria-controls="pp-${s.id}"><span class="sk-practice-btn-arrow">▸</span> Practice this</button>` : '';
+        <button type="button" class="sk-practice-btn" onclick="togglePracticePanel('${s.id}', this)" aria-expanded="false" aria-controls="pp-${s.id}"><span class="sk-practice-btn-arrow">▸</span> ${t('step.practiceThis')}</button>` : '';
     const skillNum = (s.id.match(/-s(\d+)$/) || [])[1];
     const whereBtn = (skillNum && skillTaughtStation(w, Number(skillNum)))
       ? `<button type="button" class="sk-where-btn" onclick="showSkillLesson('${w.id}', ${skillNum})" title="Jump to the steps that teach this">&#x1F4CD; <span data-i18n="skill.showMeWhere">${t('skill.showMeWhere')}</span></button>` : '';
     const practicePanel = s.practice ? renderPracticePanel(s.practice, s.id, w.id) : '';
     return `<div class="skill-row" data-sid="${escAttr(s.id)}">
-      <div class="sktxt"><div class="sn" style="flex-shrink:0;margin-top:0;margin-right:8px">${i+1}</div><div class="sk-body"><div class="sk-label">${s.text}</div>${helper}${practiceBtn}${whereBtn}</div></div>
-      <div class="skchk-cell working-col${st==='working'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='working'}" aria-label="Still working on it: ${escAttr(s.text)}" onclick="toggleSkill('${s.id}','${w.id}','working')" title="Still working on it" data-i18n-attr="title:skill.stillWorking"><div class="skbox">${st==='working'?wkSvg:''}</div></div>
-      <div class="skchk-cell gotit-col${st==='gotit'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='gotit'}" aria-label="I've got it: ${escAttr(s.text)}" onclick="toggleSkill('${s.id}','${w.id}','gotit')" title="I've got it!" data-i18n-attr="title:skill.gotIt"><div class="skbox">${st==='gotit'?giSvg:''}</div></div>
+      <div class="sktxt"><div class="sn" style="flex-shrink:0;margin-top:0;margin-right:8px">${i+1}</div><div class="sk-body"><div class="sk-label">${skillText}</div>${helper}${practiceBtn}${whereBtn}</div></div>
+      <div class="skchk-cell working-col${st==='working'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='working'}" aria-label="Still working on it: ${escAttr(skillText)}" onclick="toggleSkill('${s.id}','${w.id}','working')" title="Still working on it" data-i18n-attr="title:skill.stillWorking"><div class="skbox">${st==='working'?wkSvg:''}</div></div>
+      <div class="skchk-cell gotit-col${st==='gotit'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='gotit'}" aria-label="I've got it: ${escAttr(skillText)}" onclick="toggleSkill('${s.id}','${w.id}','gotit')" title="I've got it!" data-i18n-attr="title:skill.gotIt"><div class="skbox">${st==='gotit'?giSvg:''}</div></div>
       ${practicePanel}
     </div>`;
   }).join('');
@@ -2574,7 +2626,7 @@ function toggleGotIt(sid, btn){
 function renderPracticePanel(practice, skillId, wid){
   if(!practice || !practice.type) return '';
   if(practice.type === 'playSeq'){
-    const label = practice.label || 'Play all';
+    const label = (practice.label && tf(practice,'label')) || t('step.playAll');
     const defBpm = practice.bpm || 60;
     const minBpm = practice.minBpm || 40;
     const maxBpm = practice.maxBpm || 120;
@@ -2582,7 +2634,7 @@ function renderPracticePanel(practice, skillId, wid){
     const bpm = readStoredBpm(key, defBpm);
     const midis = JSON.stringify(practice.notes || []);
     return `<div class="sk-practice-panel" id="pp-${skillId}" hidden>` +
-      `<div class="sk-practice-title">Practice this</div>` +
+      `<div class="sk-practice-title">${t('step.practiceThis')}</div>` +
       `<div class="bpm-control-group">` +
         `<button type="button" class="play-seq-btn" data-midis="${escAttr(midis)}" onclick="playSequenceFromGroup(this)" title="Play all notes">&#x25B6; ${escHtml(label)}</button>` +
         renderBpmControl(key, bpm, minBpm, maxBpm) +
@@ -2595,26 +2647,27 @@ function renderPracticePanel(practice, skillId, wid){
     const storedRaw = responses[key];
     const storedIdx = (storedRaw === '' || storedRaw == null) ? -1 : parseInt(storedRaw, 10);
     const ansIdx = (typeof practice.answer === 'number') ? practice.answer : -1;
+    const choicesEs = tf(practice,'choices');
     const opts = practice.choices.map((c, idx)=>{
       let cls = 'sk-practice-mc-opt';
       if(storedIdx === idx){
         cls += (idx === ansIdx) ? ' correct' : ' incorrect';
       }
-      return `<button type="button" class="${cls}" data-idx="${idx}" onclick="onPracticeMcSelect('${skillId}', ${idx}, ${ansIdx}, this)"><span>${escHtml(c)}</span></button>`;
+      return `<button type="button" class="${cls}" data-idx="${idx}" onclick="onPracticeMcSelect('${skillId}', ${idx}, ${ansIdx}, this)"><span>${escHtml(choicesEs[idx])}</span></button>`;
     }).join('');
     let feedbackHtml = '';
     if(storedIdx >= 0){
       if(storedIdx === ansIdx){
-        feedbackHtml = `<div class="sk-practice-feedback correct">Correct!</div>`;
+        feedbackHtml = `<div class="sk-practice-feedback correct">${t('step.correct')}</div>`;
       } else {
-        feedbackHtml = `<div class="sk-practice-feedback incorrect">Not quite — try again.</div>`;
+        feedbackHtml = `<div class="sk-practice-feedback incorrect">${t('step.notQuite')}</div>`;
       }
     } else {
       feedbackHtml = `<div class="sk-practice-feedback"></div>`;
     }
-    const promptHtml = practice.prompt ? `<div class="sk-practice-prompt">${escHtml(practice.prompt)}</div>` : '';
+    const promptHtml = practice.prompt ? `<div class="sk-practice-prompt">${escHtml(tf(practice,'prompt'))}</div>` : '';
     return `<div class="sk-practice-panel" id="pp-${skillId}" hidden>` +
-      `<div class="sk-practice-title">Practice this</div>` +
+      `<div class="sk-practice-title">${t('step.practiceThis')}</div>` +
       promptHtml +
       `<div class="sk-practice-mc" id="pp-mc-${skillId}">${opts}</div>` +
       feedbackHtml +
@@ -2652,10 +2705,10 @@ function onPracticeMcSelect(skillId, idx, ansIdx, btnEl){
       fb.classList.remove('correct','incorrect');
       if(idx === ansIdx){
         fb.classList.add('correct');
-        fb.textContent = 'Correct!';
+        fb.textContent = t('step.correct');
       } else {
         fb.classList.add('incorrect');
-        fb.textContent = 'Not quite — try again.';
+        fb.textContent = t('step.notQuite');
       }
     }
   }
@@ -2746,9 +2799,61 @@ function toggleTranslate(){
 // not tagged with data-i18n) need an explicit refresh on a pure language
 // toggle — applyI18n's DOM walk (already run by setLang) only reaches
 // elements tagged with data-i18n and can't help these.
+// Module-content panels (Set / Module Review / module-level Songs) are built
+// ONCE per module and cached (see ensureModuleRendered/_modulesRendered) — a
+// language toggle after that first build won't reach their baked-in text on
+// its own, unlike the shell strings above (which re-resolve live through
+// t()). Rebuild each already-rendered module's panels from source data so
+// any _es fields available get picked up (a module still mid-translation
+// just falls back to English again, same as before this rebuild existed).
+// Cheap: only touches modules the student actually opened this session.
+const TAB_SUFFIX_SELECTOR = {
+  'station-b': '.tab-station-b', 'station-c': '.tab-station-c',
+  'songs': '.tab-songs', 'checklist': '.tab-checklist'
+};
+function rebuildModuleContentPanels(){
+  document.querySelectorAll('#week-panels .week-panel').forEach(panel=>{
+    const wid = panel.dataset.id;
+    const num = Number(panel.dataset.module);
+    const w = SETS.find(x=>x.id===wid);
+    const mr = MODULE_REVIEWS[num];
+    if(w && wid===w.id){
+      // Remember which tab was open so rebuilding doesn't bounce the
+      // student back to Station B.
+      const activeEl = panel.querySelector('.tab-panel.active');
+      const activeSuffix = activeEl ? activeEl.id.slice(wid.length+1) : null;
+      panel.innerHTML = w.comingSoon ? buildComingSoon(w) : buildSet(w);
+      if(activeSuffix && activeSuffix !== 'station-b'){
+        panel.querySelectorAll('.tabs > .tabs-main .tabs-card, .tabs > .tabs-songbar > .tabs-songs').forEach(t=>t.classList.remove('active'));
+        panel.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+        const targetPanel = document.getElementById(`${wid}-${activeSuffix}`);
+        const targetBtn = TAB_SUFFIX_SELECTOR[activeSuffix] ? panel.querySelector(TAB_SUFFIX_SELECTOR[activeSuffix]) : null;
+        if(targetPanel) targetPanel.classList.add('active');
+        if(targetBtn) targetBtn.classList.add('active');
+      }
+    } else if(mr && wid===`mr${num}`){
+      panel.innerHTML = buildModuleReview(mr);
+    } else {
+      return;
+    }
+    markModulePanelTranslated(panel, num);
+  });
+  document.querySelectorAll('.module-songs').forEach(div=>{
+    const num = Number(div.dataset.module);
+    const html = buildModuleSongs(num);
+    if(html){ div.innerHTML = html; markModulePanelTranslated(div, num); }
+  });
+  if(typeof wrapAllChordLinks === 'function') wrapAllChordLinks();
+  if(typeof applyI18n === 'function'){
+    const c = document.getElementById('week-panels');
+    if(c) applyI18n(c);
+  }
+}
 window.addEventListener('gc-langchange', function(){
   if(typeof lastModuleNum !== 'undefined' && document.getElementById('week-pills')) renderPills(lastModuleNum);
   if(typeof syncRailStations === 'function') syncRailStations();
+  if(typeof populateModuleDropdown === 'function') populateModuleDropdown();
+  rebuildModuleContentPanels();
   const myProgressPanel = document.getElementById('my-progress-panel');
   if(myProgressPanel && !myProgressPanel.hidden && typeof toggleMyProgress === 'function'){
     toggleMyProgress(); toggleMyProgress();   // closed→rebuild→reopen, cheapest correct refresh
@@ -3567,7 +3672,7 @@ async function toggleKeepPracticing(){
         <span class="search-hit-where">${escHtml(it.setLabel || '')}</span>
         <span class="search-hit-text">${escHtml(it.text)}</span>
       </button>`).join('');
-    return `<div class="rail-sec-label" style="margin:16px 0 6px">Module ${mn}${m ? ` — ${escHtml(m.name)}` : ''}</div>
+    return `<div class="rail-sec-label" style="margin:16px 0 6px">${t('nav.module')} ${mn}${m ? ` — ${escHtml(tf(m,'name'))}` : ''}</div>
       <div class="search-results" style="max-height:none">${rows}</div>`;
   }).join('');
   p.innerHTML = `${head}${body}`;
@@ -3590,7 +3695,7 @@ function toggleMyProgress(){
     totalDone += done; totalAll += total;
     const pct = total ? Math.round(done / total * 100) : 0;
     return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
-      <div style="font-size:0.875rem;font-weight:600">Module ${m.num} — ${escHtml(m.name)}</div>
+      <div style="font-size:0.875rem;font-weight:600">${t('nav.module')} ${m.num} — ${escHtml(tf(m,'name'))}</div>
       <div class="prog-wrap"><div class="prog-row"><div class="prog-bg"><div class="prog-fill" style="width:${pct}%"></div></div><div class="prog-lbl">${done} / ${total}</div></div></div>
     </div>`;
   }).join('');

@@ -61,6 +61,21 @@
        "You've got it when" → "Lo tienes cuando"
        "I've got it!"       → "¡Ya lo tengo!"
        BPM / Auto           → kept as-is (already the common usage)
+       riff (short repeated musical phrase) → riff (kept — common loanword
+                                               in Spanish guitar teaching)
+       drill (a short exercise you repeat)  → ejercicio
+       Song Journey (the tabs/*.html pages) → Recorrido de la canción
+       layer (of a Song Journey song)       → capa
+       Stuck?  (hint fold)                  → "¿Atascado?"
+       body (of the guitar)                 → cuerpo
+       neck                                 → mástil
+       headstock                            → clavijero
+       tuning peg                           → clavija
+       nut (top of the neck, not a capo)    → cejuela
+       saddle                               → selleta
+       bridge                               → puente
+       fretting hand                        → mano de trastear
+       picking hand                         → mano de pulsar
   */
   const I18N = {
     // ── Header ──
@@ -157,7 +172,102 @@
     'btn.backToPractice':    { en: 'Back to practice', es: 'Volver a practicar' },
     'btn.backToTop':         { en: 'Back to top', es: 'Volver arriba' },
     'btn.top':               { en: 'Top', es: 'Arriba' },
-    'btn.reportProblem':     { en: 'Report a problem', es: 'Reportar un problema' }
+    'btn.reportProblem':     { en: 'Report a problem', es: 'Reportar un problema' },
+
+    // ── Step folds & responses (module content phase 2 — chrome around
+    // per-step data, not the step data itself, see CLAUDE.md's module-
+    // content i18n section) ──
+    'step.hint':             { en: 'Hint', es: 'Pista' },
+    'step.stuck':            { en: 'Stuck?', es: '¿Atascado?' },
+    'step.levelUp':          { en: 'Level up', es: 'Sube de nivel' },
+    'step.yourResponse':     { en: 'Your response', es: 'Tu respuesta' },
+    'step.answerPlaceholder':{ en: 'Type your answer here…', es: 'Escribe tu respuesta aquí…' },
+    'step.playAll':          { en: 'Play all', es: 'Reproducir todo' },
+    'step.practiceThis':     { en: 'Practice this', es: 'Practica esto' },
+    'step.correct':          { en: 'Correct!', es: '¡Correcto!' },
+    'step.notQuite':         { en: 'Not quite — try again.', es: 'Casi — inténtalo de nuevo.' },
+
+    // ── Assessment block (goal / self-check / standards labels) ──
+    'assess.goal':           { en: 'Assessment goal', es: 'Objetivo de la evaluación' },
+    'assess.selfCheck':      { en: 'Self-check', es: 'Autoevaluación' },
+    'assess.standards':      { en: 'NAfME standards', es: 'Estándares NAfME' },
+
+    // ── Songs list (per-set and per-module "🎵 Songs") ──
+    'songs.core':            { en: 'Core — everyone', es: 'Básica — para todos' },
+    'songs.choice':          { en: 'Choice menu — pick 1', es: 'Menú a elección — elige 1' },
+    'songs.diffLegend':      { en: 'easier → harder', es: 'más fácil → más difícil' },
+    'songs.difficulty':      { en: 'Difficulty', es: 'Dificultad' },
+    'songs.diff1':           { en: 'Beginner', es: 'Principiante' },
+    'songs.diff2':           { en: 'Intermediate', es: 'Intermedio' },
+    'songs.diff3':           { en: 'Advanced', es: 'Avanzado' },
+    'songs.original':        { en: 'Original', es: 'Original' },
+    'songs.tutorial':        { en: 'Tutorial', es: 'Tutorial' },
+    'songs.backingTrack':    { en: 'Backing track', es: 'Pista de acompañamiento' },
+    'songs.songJourney':     { en: 'Song Journey', es: 'Recorrido de la canción' },
+    'songs.yourPick':        { en: 'Your pick — bring your own song!', es: 'Tu elección — ¡trae tu propia canción!' },
+    'songs.yourPickBody':    { en: "Got a song you want to learn? Search YouTube for a beginner tutorial and use this module's skills on it.",
+                                es: '¿Tienes una canción que quieres aprender? Busca en YouTube un tutorial para principiantes y aplica las destrezas de este módulo.' },
+    'songs.opensYoutube':    { en: 'Opens in YouTube', es: 'Se abre en YouTube' },
+    'songs.jamTrackTitle':   { en: 'Jam track — backing music to play along with; make up your own melody (solo) over it',
+                                es: 'Pista de acompañamiento — música de fondo para tocar junto con ella; improvisa tu propia melodía (solo) encima.' },
+    'songs.oneSongLayers':   { en: 'One song, five layers', es: 'Una canción, cinco capas' },
+
+    // ── Module review (self-assessment panel) ──
+    'review.tag':            { en: 'Module {n} self-assessment', es: 'Autoevaluación del módulo {n}' },
+    'review.rateReflect':    { en: "Rate yourself on the module's key skills, then reflect.",
+                                es: 'Califícate en las destrezas clave del módulo y luego reflexiona.' },
+    'review.whatClicked':    { en: 'What suddenly made sense this module?', es: '¿Qué de repente tuvo sentido este módulo?' },
+    'review.whatClickedPh':  { en: 'e.g. TAB finally made sense when I slowed it down…',
+                                es: 'por ejemplo: el TAB por fin tuvo sentido cuando fui más despacio…' },
+    'review.whatsHard':      { en: "What's still hard?", es: '¿Qué sigue siendo difícil?' },
+    'review.whatsHardPh':    { en: 'e.g. My ring finger keeps slipping off the fret…',
+                                es: 'por ejemplo: mi dedo anular se me resbala del traste…' },
+    'review.playRecord':     { en: 'Play it & Record it!', es: '¡Tócala y grábate!' },
+    'review.playPrompt':     { en: 'Perform a core song from this module — or a song of your choice that uses these skills. Then listen back to your recording and reflect on what could be improved.',
+                                es: 'Toca una canción principal de este módulo, o una canción de tu elección que use estas destrezas. Luego escucha tu grabación y reflexiona sobre qué podrías mejorar.' },
+    'review.songIPlayed':    { en: 'Song I played', es: 'Canción que toqué' },
+    'review.howDidItGo':     { en: 'How did it go?', es: '¿Cómo te fue?' },
+    'review.assessBodyItems':{ en: "When you're ready, record yourself doing the module assessment, then check the recording against these skills:",
+                                es: 'Cuando estés listo, grábate haciendo la evaluación del módulo y luego revisa la grabación contra estas destrezas:' },
+    'review.assessBodyDflt': { en: "When you're ready, record yourself performing the skills above and self-check the recording.",
+                                es: 'Cuando estés listo, grábate haciendo las destrezas de arriba y autoevalúa la grabación.' },
+    'review.assessHead':     { en: 'Module {n} Assessment', es: 'Evaluación del módulo {n}' },
+    'review.whyMatters':     { en: 'Why this matters', es: 'Por qué esto importa' },
+    'review.previewOnly':    { en: 'Preview only.', es: 'Solo vista previa.' },
+    'review.previewBodyHtml':{ en: 'Mark every skill on every set as &ldquo;I&rsquo;ve got it!&rdquo; to unlock this self-assessment.',
+                                es: 'Marca cada destreza de cada unidad como &ldquo;¡Ya lo tengo!&rdquo; para desbloquear esta autoevaluación.' },
+    'review.reviewThis':     { en: 'Review this', es: 'Repasar esto' },
+
+    // ── 10-minute practice routine card (module review) ──
+    'routine.title':         { en: 'Your 10-minute practice routine', es: 'Tu rutina de práctica de 10 minutos' },
+    'routine.print':         { en: 'Print', es: 'Imprimir' },
+    'routine.foot':          { en: "Built from this module's sets — short on time? Do steps 1–3 — that's still good.",
+                                es: 'Armada con las unidades de este módulo — ¿poco tiempo? Haz los pasos 1–3 — ya es una buena práctica.' },
+    'routine.tuneUp':        { en: 'Tune up', es: 'Afina' },
+    'routine.tuneUpBody':    { en: '— open the Tuner (corner button) and tune all six strings until the tuner turns green.',
+                                es: '— abre el Afinador (botón de la esquina) y afina las seis cuerdas hasta que el afinador se ponga verde.' },
+    'routine.fingerGym':     { en: 'Finger Gym', es: 'Gimnasia de dedos' },
+    'routine.skillDrill':    { en: 'Skill drill', es: 'Ejercicio de destreza' },
+    'routine.chordScaleWork':{ en: 'Chord / scale work', es: 'Trabajo de acordes / escalas' },
+    'routine.song':          { en: 'Song', es: 'Canción' },
+    'routine.openThisSet':   { en: 'Open this set', es: 'Abrir esta unidad' },
+    'routine.playIt':        { en: 'Play it', es: 'Tócalo' },
+
+    // ── TAB blocks ──
+    'tab.label':             { en: 'Tab', es: 'Tab' },
+    'tab.playTab':           { en: 'Play tab', es: 'Tocar el tab' },
+    'tab.defaultTitle':      { en: 'Tab', es: 'Tab' },
+    'tab.showTabLabel':      { en: 'Show TAB:', es: 'Mostrar TAB:' },
+
+    // ── Song-thread lede (Set header — which Song Journey layer this set builds) ──
+    'thread.bonusLayer':     { en: 'This set adds a bonus layer for:', es: 'Esta unidad agrega una capa extra para:' },
+    'thread.buildsLayer':    { en: 'This set builds Layer {n} of 5 for:', es: 'Esta unidad construye la Capa {n} de 5 para:' },
+    'thread.grows':          { en: 'This set grows:', es: 'Esta unidad hace crecer:' },
+
+    // ── "First time on this set?" flex-practice note ──
+    'note.firstTimeHtml':    { en: '&#x1F9ED; <strong>First time on this set?</strong> Do {btn} first — watch the lessons, then come back here and drill. Back on another day just to practice? Perfect — practicing on different days helps you remember.',
+                                es: '&#x1F9ED; <strong>¿Primera vez en esta unidad?</strong> Primero haz {btn} — mira las lecciones y luego vuelve aquí a practicar. ¿Volviste otro día solo a practicar? Perfecto — practicar en días distintos te ayuda a recordar mejor.' },
+    'skill.noneListed':      { en: 'No skills listed for this set yet.', es: 'Todavía no hay destrezas para esta unidad.' }
   };
 
   let lang = 'en';

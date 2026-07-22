@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-22 — Module 1 is now in real, hand-written Spanish
+
+### Added
+- **Módulo 1 is now fully hand-translated into Spanish** — every step, hint,
+  song, and skill in both sets plus the Module 1 self-assessment. Switch to
+  Español and Module 1 reads like a native Spanish lesson, not a machine
+  translation. The rest of the modules (2–12) are still machine-translated
+  for now — they'll get the same hand-written treatment over the coming
+  sessions, one or two modules at a time.
+
 ## 2026-07-22 — Luna has a real jam track now, with a metronome option
 
 ### Changed

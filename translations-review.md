@@ -26,6 +26,19 @@ a bilingual colleague or student aide if you'd like a native-speaker check.
 | "You've got it when" | "Lo tienes cuando" |
 | "I've got it!" | "¡Ya lo tengo!" |
 | BPM / Auto | kept as-is |
+| riff (short repeated musical phrase) | riff (kept — common loanword) |
+| drill | ejercicio |
+| Song Journey | Recorrido de la canción |
+| layer (of a Song Journey song) | capa |
+| body (of the guitar) | cuerpo |
+| neck | mástil |
+| headstock | clavijero |
+| tuning peg | clavija |
+| nut (top of the neck, not a capo) | cejuela |
+| saddle | selleta |
+| bridge | puente |
+| fretting hand | mano de trastear |
+| picking hand | mano de pulsar |
 
 ## Header
 
@@ -137,12 +150,135 @@ a bilingual colleague or student aide if you'd like a native-speaker check.
 | Top | Arriba |
 | Report a problem | Reportar un problema |
 
+## Step folds & responses
+
+| English | Spanish |
+|---|---|
+| Hint | Pista |
+| Stuck? | ¿Atascado? |
+| Level up | Sube de nivel |
+| Your response | Tu respuesta |
+| Type your answer here… | Escribe tu respuesta aquí… |
+| Play all | Reproducir todo |
+| Practice this | Practica esto |
+| Correct! | ¡Correcto! |
+| Not quite — try again. | Casi — inténtalo de nuevo. |
+
+## Assessment block
+
+| English | Spanish |
+|---|---|
+| Assessment goal | Objetivo de la evaluación |
+| Self-check | Autoevaluación |
+| NAfME standards | Estándares NAfME |
+
+## Songs list
+
+| English | Spanish |
+|---|---|
+| Core — everyone | Básica — para todos |
+| Choice menu — pick 1 | Menú a elección — elige 1 |
+| easier → harder | más fácil → más difícil |
+| Difficulty | Dificultad |
+| Beginner | Principiante |
+| Intermediate | Intermedio |
+| Advanced | Avanzado |
+| Original | Original |
+| Tutorial | Tutorial |
+| Backing track | Pista de acompañamiento |
+| Song Journey | Recorrido de la canción |
+| Your pick — bring your own song! | Tu elección — ¡trae tu propia canción! |
+| Got a song you want to learn? Search YouTube for a beginner tutorial and use this module's skills on it. | ¿Tienes una canción que quieres aprender? Busca en YouTube un tutorial para principiantes y aplica las destrezas de este módulo. |
+| Opens in YouTube | Se abre en YouTube |
+| Jam track — backing music to play along with; make up your own melody (solo) over it | Pista de acompañamiento — música de fondo para tocar junto con ella; improvisa tu propia melodía (solo) encima. |
+| One song, five layers | Una canción, cinco capas |
+
+## Module review (self-assessment)
+
+| English | Spanish |
+|---|---|
+| Module {n} self-assessment | Autoevaluación del módulo {n} |
+| Rate yourself on the module's key skills, then reflect. | Califícate en las destrezas clave del módulo y luego reflexiona. |
+| What suddenly made sense this module? | ¿Qué de repente tuvo sentido este módulo? |
+| e.g. TAB finally made sense when I slowed it down… | por ejemplo: el TAB por fin tuvo sentido cuando fui más despacio… |
+| What's still hard? | ¿Qué sigue siendo difícil? |
+| e.g. My ring finger keeps slipping off the fret… | por ejemplo: mi dedo anular se me resbala del traste… |
+| Play it & Record it! | ¡Tócala y grábate! |
+| Perform a core song from this module — or a song of your choice that uses these skills. Then listen back to your recording and reflect on what could be improved. | Toca una canción principal de este módulo, o una canción de tu elección que use estas destrezas. Luego escucha tu grabación y reflexiona sobre qué podrías mejorar. |
+| Song I played | Canción que toqué |
+| How did it go? | ¿Cómo te fue? |
+| When you're ready, record yourself doing the module assessment, then check the recording against these skills: | Cuando estés listo, grábate haciendo la evaluación del módulo y luego revisa la grabación contra estas destrezas: |
+| When you're ready, record yourself performing the skills above and self-check the recording. | Cuando estés listo, grábate haciendo las destrezas de arriba y autoevalúa la grabación. |
+| Module {n} Assessment | Evaluación del módulo {n} |
+| Why this matters | Por qué esto importa |
+| Preview only. | Solo vista previa. |
+| Mark every skill on every set as "I've got it!" to unlock this self-assessment. | Marca cada destreza de cada unidad como "¡Ya lo tengo!" para desbloquear esta autoevaluación. |
+| Review this | Repasar esto |
+
+## 10-minute practice routine card
+
+| English | Spanish |
+|---|---|
+| Your 10-minute practice routine | Tu rutina de práctica de 10 minutos |
+| Print | Imprimir |
+| Built from this module's sets — short on time? Do steps 1–3 — that's still good. | Armada con las unidades de este módulo — ¿poco tiempo? Haz los pasos 1–3 — ya es una buena práctica. |
+| Tune up | Afina |
+| — open the Tuner (corner button) and tune all six strings until the tuner turns green. | — abre el Afinador (botón de la esquina) y afina las seis cuerdas hasta que el afinador se ponga verde. |
+| Finger Gym | Gimnasia de dedos |
+| Skill drill | Ejercicio de destreza |
+| Chord / scale work | Trabajo de acordes / escalas |
+| Song | Canción |
+| Open this set | Abrir esta unidad |
+| Play it | Tócalo |
+
+## TAB blocks
+
+| English | Spanish |
+|---|---|
+| Tab | Tab |
+| Play tab | Tocar el tab |
+| Show TAB: | Mostrar TAB: |
+
+## Song-thread lede (Set header)
+
+| English | Spanish |
+|---|---|
+| This set adds a bonus layer for: | Esta unidad agrega una capa extra para: |
+| This set builds Layer {n} of 5 for: | Esta unidad construye la Capa {n} de 5 para: |
+| This set grows: | Esta unidad hace crecer: |
+
+## Other module-content chrome
+
+| English | Spanish |
+|---|---|
+| First time on this set? Do {Station B} first — watch the lessons, then come back here and drill. Back on another day just to practice? Perfect — practicing on different days helps you remember. | ¿Primera vez en esta unidad? Primero haz {Estación B} — mira las lecciones y luego vuelve aquí a practicar. ¿Volviste otro día solo a practicar? Perfecto — practicar en días distintos te ayuda a recordar mejor. |
+| No skills listed for this set yet. | Todavía no hay destrezas para esta unidad. |
+
 ## Known gaps (not yet hand-translated — still Google-Translate-only)
 
 These are lower-traffic microcopy the task didn't explicitly call out, left
 for a future pass rather than guessed at: locked-set gate/toast messages
-("Finish Set 2 first…"), tooltips on locked pills, the Games/Songs/Keep
+("Finish Set 2 first…"), tooltips on locked pills, the Games/Songs Hub/Keep
 practicing/My progress panel *contents* (only their nav-rail buttons are
-translated), "Practice this" skill-practice toggle, and the aria-only
-`aria-label` strings on the skills-checklist cells (their `title` tooltip
-*is* translated — the fuller aria-label used by screen readers is not).
+translated — these panels sit outside `.week-panel` so they're still fully
+Google-Translate-covered, same as before phase 2), the Daily 5 modal, the
+"Report a problem" email body, the module-review recording widget ("Record",
+"Up to 90 seconds. Browser will ask for microphone permission.") in
+`renderRecBody()`, and the aria-only `aria-label` strings on the
+skills-checklist cells (their `title` tooltip *is* translated — the fuller
+aria-label used by screen readers is not).
+
+---
+
+# Module content — EN → ES review sheet (phase 2)
+
+Hand-written Spanish for the twelve modules' actual lesson content (set
+titles, step text, hints, skills, songs, assessments — the `_es` fields on
+each module's data, picked up by `tf()` in `app.js`; see CLAUDE.md's
+"module/lesson content" i18n section for the full architecture). Translated
+one or two modules per session; each module gets its own section below,
+added in the same session its `module-N.js` is marked `i18nComplete`.
+
+Jonathan doesn't speak Spanish, so — same as the shell table above — this is
+currently *unreviewed*. Hand it to a bilingual colleague or student aide if
+you'd like a native-speaker check.

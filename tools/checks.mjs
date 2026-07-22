@@ -91,6 +91,7 @@ function validateModules() {
   head('1. Validating module data');
   const configSrc = readFileSync(join(ROOT, 'config-main.js'), 'utf8');
   const allSets = [];
+  const reviewsByModule = new Map();  // moduleNum → MODULE_REVIEWS[moduleNum]
   const seenIds = new Map();          // set id → file it first appeared in
 
   for (const file of MODULE_FILES) {
@@ -117,6 +118,8 @@ function validateModules() {
     // the context — read them back by evaluating the name, not as sandbox props.
     const sets = vm.runInContext('SETS', sandbox) || [];
     if (sets.length === 0) { warn(`${file} pushed no Sets`); warnings++; }
+    const reviews = vm.runInContext('typeof MODULE_REVIEWS !== "undefined" ? MODULE_REVIEWS : {}', sandbox) || {};
+    if (reviews[expectedNum]) reviewsByModule.set(expectedNum, reviews[expectedNum]);
 
     for (const s of sets) {
       const where = `${file} · set "${s && s.id || '??'}"`;
@@ -209,7 +212,105 @@ function validateModules() {
   }
 
   if (problems === 0) ok(`${allSets.length} Sets across ${MODULE_FILES.length} modules — all valid`);
+  checkI18nCompleteness(manifest, allSets, reviewsByModule);
   return allSets;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1b. I18N COMPLETENESS — every module marked i18nComplete must have a
+   real `_es` twin on every required student-facing field. This is what
+   makes bilingual shipping automatic: once a module is flagged complete,
+   it's structurally impossible to push new English-only content into it.
+   See CLAUDE.md's "module/lesson content" i18n section — the field list
+   here must track what app.js's tf() calls actually render (a field this
+   check doesn't know about is a field a push can silently leave English).
+   ════════════════════════════════════════════════════════════════════ */
+function checkI18nCompleteness(manifest, allSets, reviewsByModule) {
+  head('1b. Module-content i18n completeness');
+  const completeModules = (manifest || []).filter(m => m.i18nComplete);
+  if (!completeModules.length) { ok('no modules marked i18nComplete yet — nothing to enforce'); return; }
+
+  const hasVal = v => v !== undefined && v !== null && v !== '';
+  // `field` present on the English side but its `_es` twin missing/empty.
+  const reqEs = (where, obj, field) => {
+    if (!obj || !hasVal(obj[field])) return;
+    if (!hasVal(obj[field + '_es'])) { err(`${where}: missing "${field}_es"`); problems++; }
+  };
+  // Array field (e.g. mc choices) — the `_es` twin must exist with the same length.
+  const reqEsArray = (where, obj, field) => {
+    if (!obj || !Array.isArray(obj[field]) || obj[field].length === 0) return;
+    const es = obj[field + '_es'];
+    if (!Array.isArray(es) || es.length !== obj[field].length)
+      { err(`${where}: "${field}_es" missing or length mismatch (expected ${obj[field].length} items)`); problems++; }
+  };
+
+  for (const m of completeModules) {
+    reqEs(`MODULE_MANIFEST[num=${m.num}]`, m, 'name');
+    const sets = allSets.filter(s => Number(s.moduleNum) === m.num);
+    if (!sets.length) { warn(`Module ${m.num} is marked i18nComplete but has no Sets loaded`); warnings++; continue; }
+
+    for (const w of sets) {
+      const where = `module-${m.num}.js · set "${w.id}"`;
+      reqEs(where, w, 'unit');
+      reqEs(where, w, 'skillFocus');
+      reqEs(where, w, 'subtitle');
+
+      for (const stId of Object.keys(w.stations || {})) {
+        const st = w.stations[stId];
+        const stWhere = `${where} · station "${stId}"`;
+        reqEs(stWhere, st, 'title');
+        const sections = st.sections || (st.steps ? [{ title: '', steps: st.steps }] : []);
+        sections.forEach((sec, si) => {
+          const secWhere = `${stWhere} · section ${si + 1}`;
+          reqEs(secWhere, sec, 'title');
+          (sec.steps || []).forEach((step, sti) => {
+            const stepWhere = `${secWhere} · step ${sti + 1}`;
+            reqEs(stepWhere, step, 'text');
+            reqEs(stepWhere, step, 'hint');
+            reqEs(stepWhere, step, 'stuck');
+            reqEs(stepWhere, step, 'levelUp');
+            if (step.response) {
+              reqEs(stepWhere, step.response, 'prompt');
+              if (step.response.type === 'short') reqEs(stepWhere, step.response, 'placeholder');
+              reqEs(stepWhere, step.response, 'explain');
+              reqEsArray(stepWhere, step.response, 'choices');
+            }
+            if (step.playSeq) reqEs(stepWhere, step.playSeq, 'label');
+            if (step.tab) reqEs(stepWhere, step.tab, 'caption');
+          });
+        });
+      }
+
+      if (Array.isArray(w.songs)) {
+        w.songs.forEach((s, i) => reqEs(`${where} · song "${s && s.name || i}"`, s, 'meta'));
+      }
+      if (Array.isArray(w.skills)) {
+        w.skills.forEach(sk => {
+          const skWhere = `${where} · skill "${sk && sk.id}"`;
+          reqEs(skWhere, sk, 'text');
+          reqEs(skWhere, sk, 'gotItWhen');
+          if (sk.practice) {
+            reqEs(skWhere, sk.practice, 'prompt');
+            reqEsArray(skWhere, sk.practice, 'choices');
+            if (sk.practice.type === 'playSeq') reqEs(skWhere, sk.practice, 'label');
+          }
+        });
+      }
+    }
+
+    const mr = reviewsByModule.get(m.num);
+    if (mr) {
+      const where = `module-${m.num}.js · MODULE_REVIEWS[${m.num}]`;
+      reqEs(where, mr, 'module');
+      reqEs(where, mr, 'forward');
+      reqEsArray(where, mr, 'assessItems');
+      if (Array.isArray(mr.skills)) {
+        mr.skills.forEach(sk => reqEs(`${where} · skill "${sk && sk.id}"`, sk, 'text'));
+      }
+    }
+  }
+
+  if (problems === 0) ok(`${completeModules.length} module${completeModules.length > 1 ? 's' : ''} marked i18nComplete — every required field has a Spanish twin`);
 }
 
 /* ════════════════════════════════════════════════════════════════════

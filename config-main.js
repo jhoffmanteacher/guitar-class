@@ -28,8 +28,15 @@ const MODULE_REVIEWS = {};
 // that lives in the module files, so `tools/checks.mjs` verifies them against
 // the real skills on every run — see the sync rule in CLAUDE.md before editing
 // a module's skills.
+//
+// `name_es` — hand-written Spanish module name (module-content i18n, phase 2).
+// `i18nComplete: true` — set once EVERY required student-facing field in that
+// module's module-N.js has a real `_es` twin (tools/checks.mjs enforces this
+// on every run). Flips the module's Set/Module-Review panels to translate="no"
+// so Google Translate stops touching them — see CLAUDE.md's module-content
+// i18n section before setting this by hand.
 const MODULE_MANIFEST = [
-  { num: 1, name: 'Introductions: You and The Guitar',        skillCount: 9,  skillIdRe: '^w\\d+-s\\d+$' },
+  { num: 1, name: 'Introductions: You and The Guitar',        name_es: 'Presentaciones: tú y la guitarra', i18nComplete: true, skillCount: 9,  skillIdRe: '^w\\d+-s\\d+$' },
   { num: 2, name: 'Notes on the E & A Strings',               skillCount: 11, skillIdRe: '^m2w\\d+-s\\d+$' },
   { num: 3, name: 'Two-Finger Power Chords',                  skillCount: 12, skillIdRe: '^m3w\\d+-s\\d+$' },
   { num: 4, name: 'Major / Minor / Blues Pentatonic Scales',  skillCount: 21, skillIdRe: '^m4w\\d+-s\\d+$' },
@@ -47,16 +54,23 @@ const MODULE_MANIFEST = [
 // Content-independent dexterity warm-ups. playSeq format (midi note numbers),
 // all at 60 BPM. These are conditioning, not speed — slow and even beats fast
 // and sloppy, and the step text says so.
+// text_es/label_es: hand-written Spanish (module-content i18n, phase 2) —
+// picked up by tf() in app.js's buildModuleRoutine, which is embedded in
+// every module's (gated) Module Review panel, so every entry needs both
+// twins regardless of which modules are currently i18nComplete.
 const WARMUP_BANK = [
-  { label: 'Spider walk — 1-2-3-4 up two strings', bpm: 60,
+  { label: 'Spider walk — 1-2-3-4 up two strings', label_es: 'Caminata de araña — 1-2-3-4 subiendo dos cuerdas', bpm: 60,
     notes: [41, 42, 43, 44, 46, 47, 48, 49],
-    text: 'One finger per fret — index, middle, ring, pinky up the low E (frets 1–4), then the same on the A string. Slow and even is better than fast and sloppy.' },
-  { label: 'Stretch walk — 1-3-2-4 on the low E', bpm: 60,
+    text: 'One finger per fret — index, middle, ring, pinky up the low E (frets 1–4), then the same on the A string. Slow and even is better than fast and sloppy.',
+    text_es: 'Un dedo por traste — índice, medio, anular y meñique subiendo por la Mi grave (trastes 1–4), y luego lo mismo en la cuerda La. Lento y parejo es mejor que rápido y descuidado.' },
+  { label: 'Stretch walk — 1-3-2-4 on the low E', label_es: 'Caminata de estiramiento — 1-3-2-4 en la Mi grave', bpm: 60,
     notes: [41, 43, 42, 44],
-    text: 'Frets 1-3-2-4 with fingers 1-3-2-4, all on the low E. A reach-and-control drill — slow, no rushing.' },
-  { label: 'Open-string skip picking', bpm: 60,
+    text: 'Frets 1-3-2-4 with fingers 1-3-2-4, all on the low E. A reach-and-control drill — slow, no rushing.',
+    text_es: 'Trastes 1-3-2-4 con los dedos 1-3-2-4, todo en la cuerda Mi grave. Un ejercicio de estiramiento y control — despacio, sin apurarte.' },
+  { label: 'Open-string skip picking', label_es: 'Pulsado salteado en cuerdas al aire', bpm: 60,
     notes: [40, 50, 45, 55, 50, 59, 55, 64],
-    text: 'Picking hand only: E then D, A then G, D then B, G then e — skip a string on every jump, alternate picking. Slow and even is better than fast and sloppy.' }
+    text: 'Picking hand only: E then D, A then G, D then B, G then e — skip a string on every jump, alternate picking. Slow and even is better than fast and sloppy.',
+    text_es: 'Solo la mano que puntea: Mi grave y luego Re, La y luego Sol, Re y luego Si, Sol y luego mi agudo — salta una cuerda en cada salto, alternando la púa. Lento y parejo es mejor que rápido y descuidado.' }
 ];
 
 // 15-day, 5-minutes-a-day challenge bridging Modules 8 → 9. Rendered inside

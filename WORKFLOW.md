@@ -45,6 +45,50 @@
 
 ## Open work
 
+- [~] **i18n phase 2 — hand-written Spanish for module/lesson content, tabs/
+      pages, and games** (started 2026-07-22) — phase 1 (already done, see
+      CLAUDE.md's "i18n — hand-written Spanish for the app shell") only
+      covered the shell (header, nav, tools, checklist). This phase extends
+      real Spanish to the twelve module files, the Song Journey pages, and
+      `coach.js`'s games, then removes Google Translate entirely once
+      everything's covered.
+      **Session 1 (2026-07-22): architecture + Module 1, done & browser-verified.**
+      Schema: parallel `<field>_es` suffix fields on every translatable field
+      (`text_es`, `hint_es`, `meta_es`, …) — renderer falls back to English
+      when absent, so modules translate incrementally with no code changes
+      needed per module. `app.js` gained a `tf(obj, field)` helper used at
+      ~25 render call sites (steps, hints, skills, songs, assessment, module
+      review, the 10-minute routine card, TAB captions, playSeq labels) plus
+      ~40 new shell strings in `i18n.js` for the chrome *around* that content
+      (fold labels, response labels, module-review copy) that had never been
+      wired to `t()` before. Module-content panels are built once and cached
+      (`ensureModuleRendered`), so a new `rebuildModuleContentPanels()` runs
+      on `gc-langchange` to re-render already-open panels in the new
+      language (preserving the active station/songs/checklist tab).
+      `tools/checks.mjs` gained an i18n-completeness pass (`1b.`): any module
+      flagged `i18nComplete` in `MODULE_MANIFEST` must have a real `_es` twin
+      on every required field, enforced on every push. Once a module is
+      flagged complete, its Set + Module Review panels get `translate="no"`
+      so Google Translate can't touch (or re-translate) the hand-written
+      Spanish — modules still in progress keep Google Translate as their
+      fallback, same as before this phase. **Module 1 (both sets + its
+      Module Review) is fully translated and flagged `i18nComplete`** —
+      glossary extended with guitar-anatomy terms (clavijero, cejuela,
+      selleta, puente, mano de trastear/de pulsar) and Song-Journey terms
+      (Recorrido de la canción, capa). Browser-verified end to end via a
+      local static server + dev bypass: every step/hint/response/choice,
+      the riff TAB block, the songs list, the skills checklist, and the full
+      Module Review (routine card, reflection, assessment, "why this
+      matters") all render in Spanish with no English leaking through.
+      Known gaps intentionally deferred (documented in
+      `translations-review.md`'s "Known gaps" section): locked-set gate
+      toasts, the Games/Songs Hub/Keep-practicing/My-progress panel
+      *contents*, the Daily 5 modal, and the recording widget's two labels —
+      none of these are module-N.js content, so they're unaffected by the
+      `i18nComplete` gate and stay Google-Translate-covered.
+      **Next session:** translate 1–2 more modules (Module 2 next), or move
+      to tabs/ + games once all twelve are done — see CLAUDE.md's per-session
+      workflow.
 - [ ] **Custom backing tracks for the six journey-page play-alongs — Jonathan
       is making them himself** (Jonathan, 2026-07-20; plan to do all six
       confirmed 2026-07-22) — every Song Journey page has a "🎵 Play along"
@@ -94,36 +138,25 @@
       Give Claude the file(s) — it'll copy into `audio/`, rename to convention,
       wire, run `tools/checks.mjs`, and verify before pushing.
 
-- [ ] **Real-guitar test of Riff Runner Wait Mode** (Jonathan, 2026-07-12) —
-      ⚠️ **SHIPPED LIVE UNTESTED** — Jonathan chose to push it before a guitar
-      test (base `6dcf68c` + the play-at-tempo rework). **Still needs a
-      real-guitar pass on the live site** (PWA cache applies — hard-refresh to
-      get the current code). If it misbehaves, fix + push again. This item
-      stays open until that verification is done.
-      Riff Runner's ready screen has a "How do you want to play it?" toggle:
-      the existing timed **Keys / tap** game, or **🎸 My guitar** *Wait Mode*.
-      **Wait Mode is now play-at-tempo with a safety net** (Jonathan's call
-      over the original clock-free version): pick a **Play-along speed** (Slow
-      36 / Medium 48 / Full 60 BPM, all unlocked), a **metronome** counts you
-      in then keeps a steady click (beat pips light + the hit line flashes
-      green on each beat), and you play each note in time. The safety net: the
-      mic must still *hear* the right pitch before the tab advances, so if you
-      fall behind it just holds the note and waits — no penalty. Notes are
-      spaced by their beat gaps so the tab reads like the rhythm. **Note
-      playback on a correct hit was removed** (you're already playing it).
-      Reuses the coach's mic pipeline + range-trimmed YIN (`coachDetectPitch`,
-      same as Note Hunt) for listening and the timed game's audio-clock click
-      scheduler for the metronome. Practice aid — no score/unlocks. Idea from
-      PickHero's Wait Mode. **Verified so far:** UI render — ready screen with
-      speed pills, play screen with count-in + beat pips + green hit-line
-      pulse + beat-spaced notes, done screen (browser, mock state, no JS
-      errors). **Still to test on a real guitar:** does playing along with the
-      click feel right at each speed; on-time → smooth advance, lagging →
-      clean wait-and-resume; any double-advance on one strum or notes it won't
-      catch; are the beat pips / hit-line flash helpful or distracting?
-      Remember mic retests run on the LIVE site (PWA cache). Committed +
-      pushed with a `CHANGELOG.md` entry (student-facing new feature). Code in
-      `coach.js` (`rnw*` functions + the toggle) and `styles.css`.
+- [~] **Real-guitar test of Riff Runner Wait Mode** (Jonathan, 2026-07-12;
+      metronome stripped out 2026-07-22) —
+      **Note detection confirmed on real guitar (2026-07-22): correctly
+      catches the notes played along.** That same real-guitar pass also
+      surfaced a design problem: the metronome/count-in implied a fixed
+      rhythm to match, but the tab was already waiting on pitch, not time —
+      the two signals fought each other and read as confusing rather than
+      helpful. **Fix: dropped the metronome/count-in entirely.** Wait Mode
+      is now pure untimed note-by-note play-along — play each note whenever
+      you're ready, the mic listens, the tab advances on a correct hit, no
+      clock at all. This also removed the **Play-along speed** picker from
+      the ready screen (nothing left to set a tempo for) and the beat pips /
+      hit-line pulse from the play screen. Rhythm/tempo practice is still
+      the timed **Keys / tap** game's job — Wait Mode is now purely about
+      landing the right notes. Code: `coach.js` (`rnw*` functions, ready
+      screen's `guitarUi`) and `styles.css`. **Not yet pushed or re-tested
+      on a real guitar** — do a fresh real-guitar pass on the live site
+      (PWA cache — hard-refresh) once pushed, to confirm the no-clock flow
+      feels natural end to end (not just note detection in isolation).
 - [~] **Real-guitar retest of the mic features** (Jonathan, 2026-07-12; melody
       detail added from REVIEW-PLAN K-1, 2026-07-20) —
       **Listening Coach chord check ("Check my changes"): DONE & verified**
@@ -139,17 +172,22 @@
       "Great". Debug meter (`?ccdebug=1`) was used to find this and has been
       stripped.
       **Still to retest, all on a real guitar:**
-      - **Melody mode (P0 — this is the one that matters most).** Never
-        verified on a real guitar. Uses a stricter 0.22 clarity gate and a
-        different verdict path than chord mode (`coach.js` ~515 the gate
-        constant, ~666–669 the `ok`/`oct`/`wrong` verdict logic) — if the
-        single-note consensus is noisy on a laptop/Chromebook mic, students
-        could be getting false "wrong" verdicts on melody exercises right
-        now. Play a single-note TAB exercise into the mic; correct notes
-        should read `ok`, clean octave errors `oct`, anything else `wrong`,
-        with no spurious misses. If it needs tuning, the clarity gate is
-        where the chord-mode fix lived — start there before touching onset
-        logic.
+      - **Melody mode (P0 — this is the one that matters most).** Pitch
+        detection confirmed correct on real guitar (2026-07-22) — it hears
+        the right notes. But that same test surfaced a **timing UX bug**:
+        melody mode only had the small reactive chip strip as a "what to
+        play now" cue (`.now` class, flips exactly at the beat), unlike
+        chords mode, which already solved this with a big current/next
+        readout shown ahead of time (`coachNowHtml` — the code comment even
+        documents why: "the chip strip alone only reveals a change the
+        instant it's due, which makes every switch late by reaction time").
+        Melody never got that same treatment, so students were watching the
+        reactive highlight and always landing a beat late. **Fix: extended
+        `coachNowHtml` to melody mode** — it now shows the current note big
+        + "next: X" ahead of time, same as chords (`coach.js`, `coachNowHtml`
+        + the beat-pulse update block ~line 533). **Not yet pushed or
+        retested** — confirm on a real guitar that the current/next preview
+        actually makes it easier to land notes on the beat.
       - One Note Hunt round, one full Change Up round.
       - **Must run on the LIVE site**, not localhost — the PWA service
         worker caches the shell, so confirm the deployed `CACHE_VERSION` is
