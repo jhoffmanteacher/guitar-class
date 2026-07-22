@@ -5,6 +5,21 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-22 — Fixed rhythm mix-ups for Sweet Child O' Mine, Let It Be, All Along the Watchtower, and "the cure"
+
+### Fixed
+- **Some song challenges were teaching the wrong rhythm for how the record
+  actually goes.** Sweet Child O' Mine's Song Journey said "two beats per
+  chord" in one spot and "four beats per chord" everywhere else — it's four
+  (one full bar), so that's fixed. Let It Be's "the way the recording does
+  it" step was actually a slower practice tempo — it's now honest about
+  that, and points you to the faster Half-Bar challenge that IS the record's
+  real speed. All Along the Watchtower's assessment piece and its "strummed
+  for real" challenge were both slower than the record's actual two-beat
+  pace — fixed, with a clear note on where the real speed lives. And "the
+  cure" now explains that its 144 BPM backing track feels like a slower 72 —
+  count two beats per chord and you're right on the record's pace.
+
 ## 2026-07-22 — Modules 4, 5, and 6 are now in real, hand-written Spanish
 
 ### Added
