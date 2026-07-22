@@ -512,8 +512,8 @@ SETS.push(
                 hint_es: 'Dm es el nuevo: un pequeño triángulo en las tres cuerdas agudas. Mantén tus dedos arqueados y tu pulgar detrás del mástil.',
                 stuck: 'Get Am · C · Dm · F clean in open position first, then add the G turnaround.',
                 stuck_es: 'Deja Am · C · Dm · F limpios en posición abierta primero, y luego agrega el giro de G.',
-                levelUp: 'Add the G/B bass turnaround — G/B is a G chord with a B note in the bass (play the G shape, but catch the B on the A string) — or switch to a down-up strum.',
-                levelUp_es: 'Agrega el giro de bajo G/B — G/B es un acorde de G con una nota B en el bajo (toca la forma de G, pero captura la B en la cuerda La) — o cambia a un rasgueo abajo-arriba.',
+                levelUp: 'Add the G/B bass turnaround — G/B is a G chord with a B note in the bass (play the G shape, but catch the B on the A string) — or switch to a down-up strum. Ready for the real thing? Press &#x25B6; on the Song Journey page and play along with the actual 144 BPM backing track.',
+                levelUp_es: 'Agrega el giro de bajo G/B — G/B es un acorde de G con una nota B en el bajo (toca la forma de G, pero captura la B en la cuerda La) — o cambia a un rasgueo abajo-arriba. ¿Listo para lo real? Presiona &#x25B6; en la página de Recorrido de la canción y toca junto con la pista base real a 144 BPM.',
                 skills: [5, 6],
                 chords: [
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
@@ -899,6 +899,22 @@ SETS.push(
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
                 ],
                 response: { type: 'short', prompt: 'Which change was toughest — into F, or out of it?', prompt_es: '¿Qué cambio fue el más difícil — entrar a F, o salir de él?', placeholder: 'e.g. into F — the top-string barre lands late', placeholder_es: 'p. ej. entrar a F — la cejilla en la cuerda aguda llega tarde' }
+              },
+              {
+                text: 'Challenge — Sweet Child O\' Mine, verse (open chords): the D · C · G loop you\'ve played as bass notes (Module 2) and power chords (Module 3), now as full open chords — one bar per chord, same pacing as always, using D, C, and G shapes you already know from Group 1 and Group 2. You\'ve got it when: two full verse loops, every change landing on beat 1, all six strings ringing clean. Then press &#x25B6; on the Song Journey page and strum along with the actual record at 125 BPM — the same one-bar-per-chord pacing you already know, just at real speed. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
+                text_es: 'Reto — Sweet Child O\' Mine, estrofa (acordes al aire): la vuelta D · C · G que ya tocaste como notas de bajo (Módulo 2) y acordes de potencia (Módulo 3), ahora como acordes al aire completos — un compás por acorde, el mismo ritmo de siempre, usando las formas de D, C y G que ya conoces del Grupo 1 y el Grupo 2. Lo tienes cuando: dos vueltas completas de la estrofa, cada cambio cayendo en el tiempo 1, las seis cuerdas sonando limpias. Luego presiona &#x25B6; en la página de Recorrido de la canción y rasguea junto con la grabación real a 125 BPM — el mismo ritmo de un compás por acorde que ya conoces, solo que a velocidad real. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
+                hint: 'D, C, and G are chords you already know solidly from Group 1 and Group 2 — the only new skill here is the switch itself. Look ahead one bar early: start shaping the next chord while the current one is still ringing.',
+                hint_es: 'D, C y G son acordes que ya conoces bien del Grupo 1 y el Grupo 2 — la única destreza nueva aquí es el cambio en sí. Mira hacia adelante un compás antes: empieza a formar el siguiente acorde mientras el actual todavía suena.',
+                stuck: 'Loop just D &rarr; C (the trickiest pair — your 2nd and 3rd fingers both move) until it\'s automatic, then add G back in.',
+                stuck_es: 'Repite solo D &rarr; C (el par más difícil — tus dedos 2 y 3 se mueven ambos) hasta que sea automático, y luego vuelve a agregar G.',
+                levelUp: 'Try the down-up 8th-note strum from earlier in this Set, or hum the famous intro riff while you strum the verse underneath it.',
+                levelUp_es: 'Prueba el rasgueo de corcheas abajo-arriba de antes en esta unidad, o tararea el famoso riff de la intro mientras rasgueas la estrofa debajo.',
+                chords: [
+                  { name: 'D', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 },
+                  { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
+                  { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
+                ],
+                response: { type: 'short', prompt: 'How did it feel playing along with the actual 125 BPM record after practicing slower?', prompt_es: '¿Cómo se sintió tocar junto con la grabación real a 125 BPM después de practicar más despacio?', placeholder: 'e.g. the changes felt rushed at first, then locked in', placeholder_es: 'p. ej. los cambios se sintieron apurados al principio, y luego encajaron' }
               }
             ]
           },
