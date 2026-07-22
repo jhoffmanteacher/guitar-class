@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-22 — Modules 2 and 3 are now in real, hand-written Spanish
+
+### Added
+- **Módulos 2 y 3 are now fully hand-translated into Spanish** — every step,
+  hint, song, and skill in both sets of each module, plus their self-
+  assessments. Switch to Español and Modules 1–3 all read like a native
+  Spanish lesson, not a machine translation. Modules 4–12 are still
+  machine-translated for now — they'll get the same treatment over the
+  coming sessions.
+
 ## 2026-07-22 — Sweet Child O' Mine has a real jam track now, with a metronome option
 
 ### Changed
