@@ -120,9 +120,43 @@
       Module 2 turned out to still be recoverable once the working tree
       settled, so nothing had to be redone — but treat this as a live
       example of why the worktree rule above exists, not just a hypothetical.
-      **Next session:** translate 1–2 more modules (Module 4 next), or move
-      to tabs/ + games once all twelve are done — see CLAUDE.md's per-session
-      workflow.
+      **Session 3 (2026-07-22): Modules 4, 5 & 6, done & browser-verified —
+      3-module multi-agent workflow (ultracode), translate→verify→backfill
+      pipelined per module.** Same pattern as session 2, scaled to three
+      modules and with both session-2 lessons baked into the brief up front
+      this time: translators were told explicitly about `MODULE_SONGS[N]`
+      (missed for modules 2/3 originally) and told to grep their own file
+      before self-reporting glossary terms (a session-2 agent had
+      misreported "fundamental" when the file actually used "raíz"). Result:
+      all three modules included their `MODULE_SONGS[N]` translation
+      unprompted-a-second-time, and verify agents cross-checked reported
+      terms against actual file content directly (one still had a minor
+      count mismatch — reported "cejilla" 18 times, actually 17 — but the
+      *term itself* was consistent, just a counting slip, not a translation
+      bug). New glossary terms, this time reconciled against real usage
+      before being recorded: root → raíz (module 4 confirmed this again),
+      barre → cejilla, resolve/resolution → resolver/resolución, backbeat/
+      offbeat → contratiempo, chop (reggae upstroke) → picoteo/picar,
+      groove kept as a loanword (matching riff/vamp/chug). Module 6's own
+      translator agent set its `config-main.js` flag itself (mirroring
+      module 2's agent in session 2); Modules 4 and 5's flags were set by
+      the coordinator after their independent verify passes.
+      **Also found and fixed a real production bug while browser-testing
+      Module 4** (already live for Modules 2–3 too, since it's shared
+      `app.js` code, not per-module data): the "⚡ Tune and warm up first…"
+      reminder shown on Station C for every module except Module 1 was
+      hardcoded English, missed in session 1 because Module 1 never
+      triggers that code path. Fixed by wiring it through `t()` like
+      everything else — the fix applies retroactively to every module, no
+      module-file changes needed.
+      `translations-review.md`'s shell-glossary table had also drifted out
+      of sync with `i18n.js` (sessions 2's new terms were added to the code
+      comment but never mirrored to the doc table) — caught and backfilled
+      both sessions' worth of terms in the same pass.
+      **Next session:** translate 1–2 more modules (Module 7 next — first
+      one with real barre chords, ties into Module 5's cejilla intro), or
+      move to tabs/ + games once all twelve are done — see CLAUDE.md's
+      per-session workflow.
 - [ ] **Custom backing tracks for the six journey-page play-alongs — Jonathan
       is making them himself** (Jonathan, 2026-07-20; plan to do all six
       confirmed 2026-07-22) — every Song Journey page has a "🎵 Play along"

@@ -88,6 +88,12 @@
                                                it's onomatopoeia, not a word)
        beat                                 → tiempo
        bar / measure                        → compás
+       barre (guitar technique)             → cejilla
+       resolve / resolution (dominant→tonic pull) → resolver / resolución
+       backbeat / offbeat ("+", or accenting beats 2&4) → contratiempo
+       chop (muted punchy reggae upstroke)  → picoteo (noun) / picar (verb)
+       groove (steady rhythmic feel)        → groove (kept — same loanword
+                                               treatment as riff/vamp/chug)
   */
   const I18N = {
     // ── Header ──
@@ -279,6 +285,9 @@
     // ── "First time on this set?" flex-practice note ──
     'note.firstTimeHtml':    { en: '&#x1F9ED; <strong>First time on this set?</strong> Do {btn} first — watch the lessons, then come back here and drill. Back on another day just to practice? Perfect — practicing on different days helps you remember.',
                                 es: '&#x1F9ED; <strong>¿Primera vez en esta unidad?</strong> Primero haz {btn} — mira las lecciones y luego vuelve aquí a practicar. ¿Volviste otro día solo a practicar? Perfecto — practicar en días distintos te ayuda a recordar mejor.' },
+    'daily5.tuneWarmupHtml': { en: '&#x26A1; <strong>Tune and warm up first:</strong> today’s Daily 5 has tuning, a finger warm-up, and one drill (a short exercise you repeat to build a skill) from this module — five minutes and your hands are ready. {btn}',
+                                es: '&#x26A1; <strong>Primero afina y calienta:</strong> el Daily 5 de hoy tiene afinación, un calentamiento de dedos, y un ejercicio de este módulo — cinco minutos y tus manos estarán listas. {btn}' },
+    'daily5.openToday':      { en: 'Open today’s Daily 5', es: 'Abrir el Daily 5 de hoy' },
     'skill.noneListed':      { en: 'No skills listed for this set yet.', es: 'Todavía no hay destrezas para esta unidad.' }
   };
 

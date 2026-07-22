@@ -1918,7 +1918,7 @@ function buildStations(w, stationId){
   };
   const sectionsHtml=(sections,baseNs)=>{
     const reminder = sections.some(isTuningWarmup)
-      ? `<div class="daily5-inline">&#x26A1; <strong>Tune and warm up first:</strong> today\u2019s Daily 5 has tuning, a finger warm-up, and one drill (a short exercise you repeat to build a skill) from this module \u2014 five minutes and your hands are ready. <button type="button" class="daily5-inline-btn" onclick="openDaily5Here()">&#x26A1; Open today\u2019s Daily 5</button></div>`
+      ? `<div class="daily5-inline">${t('daily5.tuneWarmupHtml',{btn:`<button type="button" class="daily5-inline-btn" onclick="openDaily5Here()">&#x26A1; ${t('daily5.openToday')}</button>`})}</div>`
       : '';
     const real = sections.filter(sec => !isTuningWarmup(sec));
     // Sections are plain group labels now, not their own accordion — every

@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-22 — Modules 4, 5, and 6 are now in real, hand-written Spanish
+
+### Added
+- **Módulos 4, 5, y 6 are now fully hand-translated into Spanish** —
+  pentatonic scales, open chords, and strumming patterns all read like a
+  native Spanish lesson now, not a machine translation. Modules 1–6 are
+  done; Modules 7–12 are still machine-translated for now.
+
+### Fixed
+- **A "Tune and warm up first" reminder on the practice-drill screen was
+  stuck in English even in Spanish mode** for every module after Module 1
+  — it's translated now.
+
 ## 2026-07-22 — Modules 2 and 3 are now in real, hand-written Spanish
 
 ### Added
