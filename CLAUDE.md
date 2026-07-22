@@ -262,6 +262,13 @@ curriculum map. Do **not** flag them as drift in future alignment audits:
   quick 144-BPM beats is the same duration as two slow/felt 72-BPM beats.
   State this to students as "count it in big slow beats, about 72 — two of
   those per chord." Settled 2026-07-22.
+- **Luna's Module 4 `backingUrl`** stays the generic YouTube Dm jam loop
+  ("Slow Burn Groove Guitar Backing Track Jam in D Minor" — Elevated Jam
+  Tracks, oEmbed-verified) by design — do not flag it as drift or swap it for
+  the local Luna mp3. It's a deliberately slow, generic D-minor groove for
+  the "Solo over Luna" challenge, easier to improvise over than Luna's real
+  128 BPM vamp; the local `audio/peso-pluma-junior-h-luna-backing-...mp3`
+  stays the actual song track on the Journey page. Settled 2026-07-22.
 - **Core/thread songs are exactly six** (settled 2026-07-08): Seven Nation Army,
   All Along the Watchtower, Sweet Child O' Mine (standard tuning), Luna (Peso
   Pluma & Junior H), Let It Be, and "the cure" (Olivia Rodrigo). Just Like
