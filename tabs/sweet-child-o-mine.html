@@ -183,14 +183,14 @@ E |--12---15-------------------------|</pre>
 <div class="fab-group" id="fab-group">
   <div class="tool-popup" id="metro-popup" role="dialog" aria-label="Metronome">
     <div class="tp-head">
-      <span class="tp-title">&#x1F3B5; Metronome</span>
+      <span class="tp-title">&#x1F3B5; <span data-i18n="tools.metronome">Metronome</span></span>
       <button class="tp-close" onclick="closePopup('metro')" aria-label="Close metronome">&#x2715;</button>
     </div>
     <div class="metro-dot" id="metro-dot"></div>
     <div class="bpm-row">
       <div>
         <div class="bpm-num" id="bpm-display">60</div>
-        <div class="bpm-lbl">BPM</div>
+        <div class="bpm-lbl" data-i18n="tools.bpm">BPM</div>
       </div>
       <input class="bpm-slider" type="range" min="40" max="220" value="60" step="1" id="bpm-slider" oninput="onBpmSlider(this.value)">
     </div>
@@ -200,19 +200,19 @@ E |--12---15-------------------------|</pre>
       <button type="button" class="meter-btn" id="meter-3" onclick="setMetroMeter(3)" role="radio" aria-checked="false" tabindex="-1">3/4</button>
     </div>
     <label style="display:flex;align-items:center;gap:6px;font-size:0.8125rem;margin-bottom:10px">
-      <input type="checkbox" id="metro-countin" onchange="setMetroCountIn(this.checked)"> Count-in (one bar before it starts)
+      <input type="checkbox" id="metro-countin" onchange="setMetroCountIn(this.checked)"> <span data-i18n="tools.countIn">Count-in (one bar before it starts)</span>
     </label>
     <div class="tp-ctrl">
       <button class="tp-btn" onclick="nudgeBpm(-5)">&#x2212;5</button>
       <button class="tp-btn" onclick="nudgeBpm(-1)">&#x2212;1</button>
-      <button class="tp-btn primary" id="metro-btn" onclick="toggleMetro()">&#x25B6; Start</button>
+      <button class="tp-btn primary" id="metro-btn" onclick="toggleMetro()">&#x25B6; <span data-i18n="tools.start">Start</span></button>
       <button class="tp-btn" onclick="nudgeBpm(1)">+1</button>
       <button class="tp-btn" onclick="nudgeBpm(5)">+5</button>
     </div>
   </div>
   <div class="tool-popup" id="timer-popup" role="dialog" aria-label="Practice Timer">
     <div class="tp-head">
-      <span class="tp-title">&#x23F1; Practice Timer</span>
+      <span class="tp-title">&#x23F1; <span data-i18n="tools.timerTitle">Practice Timer</span></span>
       <button class="tp-close" onclick="closePopup('timer')" aria-label="Close timer">&#x2715;</button>
     </div>
     <div class="timer-display" id="timer-display">0:30</div>
@@ -225,17 +225,17 @@ E |--12---15-------------------------|</pre>
       <button onclick="setTimerSecs(300)" id="tp-300">5 min</button>
     </div>
     <div class="tp-ctrl">
-      <button class="tp-btn" onclick="resetTimer()">Reset</button>
-      <button class="tp-btn primary-g" id="timer-btn" onclick="toggleTimer()">&#x25B6; Start</button>
+      <button class="tp-btn" onclick="resetTimer()" data-i18n="tools.reset">Reset</button>
+      <button class="tp-btn primary-g" id="timer-btn" onclick="toggleTimer()">&#x25B6; <span data-i18n="tools.start">Start</span></button>
     </div>
   </div>
   <div class="tool-popup" id="tuner-popup" role="dialog" aria-label="Tuner">
     <div class="tp-head">
-      <span class="tp-title">&#x1F3B8; Tuner</span>
+      <span class="tp-title">&#x1F3B8; <span data-i18n="tools.tuner">Tuner</span></span>
       <button class="tp-close" onclick="closePopup('tuner')" aria-label="Close tuner">&#x2715;</button>
     </div>
-    <div class="tuner-strings" id="tuner-strings">
-      <button class="ts-btn active" data-string="auto" onclick="selectTunerString('auto')">Auto</button>
+    <div class="tuner-strings notranslate" id="tuner-strings" translate="no">
+      <button class="ts-btn active" data-string="auto" onclick="selectTunerString('auto')" data-i18n="tools.auto">Auto</button>
       <button class="ts-btn" data-string="E2" onclick="selectTunerString('E2')">E</button>
       <button class="ts-btn" data-string="A2" onclick="selectTunerString('A2')">A</button>
       <button class="ts-btn" data-string="D3" onclick="selectTunerString('D3')">D</button>
@@ -243,35 +243,37 @@ E |--12---15-------------------------|</pre>
       <button class="ts-btn" data-string="B3" onclick="selectTunerString('B3')">B</button>
       <button class="ts-btn" data-string="E4" onclick="selectTunerString('E4')">e</button>
     </div>
-    <div class="tuner-note" id="tuner-note">—</div>
-    <div class="tuner-freq" id="tuner-freq">Play a string&hellip;</div>
+    <div class="tuner-note notranslate" id="tuner-note" translate="no">—</div>
+    <div class="tuner-freq" id="tuner-freq" data-i18n="tools.playAString">Play a string&hellip;</div>
     <div class="tuner-gauge">
       <div class="tuner-track">
         <div class="tuner-center"></div>
         <div class="tuner-needle" id="tuner-needle"></div>
       </div>
     </div>
-    <div class="tuner-labels"><span>flat</span><span>in tune</span><span>sharp</span></div>
+    <div class="tuner-labels"><span data-i18n="tools.flat">flat</span><span data-i18n="tools.inTune">in tune</span><span data-i18n="tools.sharp">sharp</span></div>
     <div class="tuner-status" id="tuner-status"></div>
+    <div class="tuner-tip" data-i18n="tools.tunerTip">Noisy room? Pick your string above and play close to the computer.</div>
   </div>
   <div class="fab-buttons">
     <button type="button" class="fab fab-tune" id="fab-tuner" onclick="togglePopup('tuner')" aria-controls="tuner-popup" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-      Tuner
+      <span data-i18n="tools.tuner">Tuner</span>
     </button>
     <button type="button" class="fab fab-timer" id="fab-timer" onclick="togglePopup('timer')" aria-controls="timer-popup" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6M12 3v2"/></svg>
-      Timer
+      <span data-i18n="tools.timer">Timer</span>
     </button>
     <button type="button" class="fab fab-metro" id="fab-metro" onclick="togglePopup('metro')" aria-controls="metro-popup" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 3 19 21 12 17 5 21 12 3"/><line x1="12" y1="10" x2="12" y2="17"/></svg>
-      Metronome
+      <span data-i18n="tools.metronome">Metronome</span>
     </button>
   </div>
 </div>
 
 <script>var SONG_ID = 'sweet-child-o-mine';</script>
 <script src="journey.js"></script>
+<script defer src="../i18n.js"></script>
 <script defer src="../fab-tools.js"></script>
 <script defer src="../tuner.js"></script>
 </body>

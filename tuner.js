@@ -10,6 +10,12 @@
 /* ══════════════════════════════════════════════
    TUNER — HPS via Web Audio FFT + YIN smoothing
    ══════════════════════════════════════════════ */
+// i18n.js loads before this file — sets text + the data-i18n key together so
+// a later pure language switch (no tuner-state change) still finds it.
+// translate="no" is set directly here (not left for the next setLang() call)
+// since this fires many times a second while listening — an unmarked span
+// mid-stream is a window Google Translate could grab if it re-scans the page.
+function setToolText(el, key){ if(!el) return; el.textContent = t(key); el.setAttribute('data-i18n', key); el.setAttribute('translate','no'); el.classList.add('notranslate'); }
 const NOTES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const STRING_TARGETS = { 'E2': 82.41, 'A2': 110.00, 'D3': 146.83, 'G3': 196.00, 'B3': 246.94, 'E4': 329.63 };
 let tunerRunning = false, tunerStream = null, tunerCtx = null,
@@ -30,6 +36,7 @@ let tunerRunning = false, tunerStream = null, tunerCtx = null,
    quality bar and will hallucinate a pitch from room noise, so it stays
    gated harder. */
 const TUNER_RMS_GATE_YIN = 0.002;  // quiet decaying high strings still register
+const TUNER_RMS_GATE_YIN_E4 = 0.001;  // high e is the thinnest string — needs an even lower bar than the other strings, safe because the string lock (±2 semitones of 329.63Hz) rejects stray noise that slips through
 const TUNER_RMS_GATE_HPS = 0.006;  // noise-hallucination guard for HPS
 const TUNER_WINDOW   = 5;       // median window (frames, ~60ms apart)
 const TUNER_JUMP     = 1 / 12;  // "far away" = more than one semitone (log2)
@@ -88,7 +95,7 @@ function freqToNoteInfo(freq) {
 // Works well on low strings because it finds the true period directly.
 // The difference-function buffer is reused across calls (no per-frame GC).
 let tunerYinD = null;
-function detectPitchYIN(buf, sampleRate) {
+function detectPitchYIN(buf, sampleRate, minRms) {
   const W = buf.length;
   const half = Math.floor(W / 2);
   // Lags longer than sampleRate/60 can only yield frequencies below 60 Hz,
@@ -96,10 +103,11 @@ function detectPitchYIN(buf, sampleRate) {
   // here cuts the scan ~5× with no accuracy loss (coach.js caps the same way).
   const maxTau = Math.min(half, Math.ceil(sampleRate / 60));
 
-  // Silence check (lowered so sustained/decaying notes still register)
+  // Silence check (lowered so sustained/decaying notes still register;
+  // caller passes a lower bar still when locked to high e — see TUNER_RMS_GATE_YIN_E4)
   let rms = 0;
   for (let i = 0; i < W; i++) rms += buf[i] * buf[i];
-  if (Math.sqrt(rms / W) < 0.002) return -1;
+  if (Math.sqrt(rms / W) < (minRms ?? 0.002)) return -1;
 
   // YIN difference function
   if (!tunerYinD || tunerYinD.length < maxTau) tunerYinD = new Float32Array(maxTau);
@@ -195,8 +203,13 @@ function tunerLoop() {
   // Run both detectors; prefer HPS for low strings, YIN as fallback.
   // In the quiet zone (0.003–0.006 RMS) only YIN listens — that's where the
   // softly-plucked high strings live, and YIN's dip threshold keeps it honest.
+  // Locked to high e specifically, drop the bar further still — it's the
+  // thinnest string and the quietest pluck of the six, so it needs the most
+  // headroom; the ±2-semitone string lock (applied below) guards against the
+  // extra noise sensitivity this invites.
+  const yinGate = tunerTargetString === 'E4' ? TUNER_RMS_GATE_YIN_E4 : TUNER_RMS_GATE_YIN;
   const freqHPS = rms >= TUNER_RMS_GATE_HPS ? detectPitchHPS(freqBuf, tunerCtx.sampleRate, tunerFreqAnalyser.fftSize) : -1;
-  const freqYIN = rms >= TUNER_RMS_GATE_YIN ? detectPitchYIN(timeBuf, tunerCtx.sampleRate) : -1;
+  const freqYIN = rms >= yinGate ? detectPitchYIN(timeBuf, tunerCtx.sampleRate, yinGate) : -1;
 
   // Pick the best candidate — if both fire, prefer HPS; if HPS misses, use YIN
   let freq = -1;
@@ -285,17 +298,17 @@ function tunerLoop() {
         tunerInTune = true;
         noteEl.classList.add('in-tune');
         needle.style.background = 'var(--green-text)';
-        statusEl.textContent = 'In tune ✓'; statusEl.className = 'tuner-status in-tune';
+        setToolText(statusEl, 'tools.inTuneStatus'); statusEl.className = 'tuner-status in-tune';
       } else if (shown > 0) {
         tunerInTune = false;
         noteEl.classList.remove('in-tune', 'in-tune-pop');
         needle.style.background = 'var(--amber-text)';
-        statusEl.textContent = 'Too high — tune down (sharp)'; statusEl.className = 'tuner-status sharp';
+        setToolText(statusEl, 'tools.tooHighSharp'); statusEl.className = 'tuner-status sharp';
       } else {
         tunerInTune = false;
         noteEl.classList.remove('in-tune', 'in-tune-pop');
         needle.style.background = 'var(--blue-text)';
-        statusEl.textContent = 'Too low — tune up (flat)'; statusEl.className = 'tuner-status flat';
+        setToolText(statusEl, 'tools.tooLowFlat'); statusEl.className = 'tuner-status flat';
       }
     }
   } else {
@@ -304,9 +317,9 @@ function tunerLoop() {
     if (tunerStableCount < -8) {
       tunerResetSmoothing();
       noteEl.classList.remove('in-tune', 'in-tune-pop');
-      noteEl.textContent = '—'; freqEl.textContent = 'Play a string…';
+      noteEl.textContent = '—'; setToolText(freqEl, 'tools.playAString');
       needle.style.left = '50%'; needle.style.background = 'var(--border2)';
-      statusEl.textContent = ''; statusEl.className = 'tuner-status';
+      statusEl.textContent = ''; statusEl.removeAttribute('data-i18n'); statusEl.className = 'tuner-status';
     }
   }
   /* Tracked so stopTuner can cancel it — an uncancelled timeout surviving a
@@ -348,10 +361,10 @@ async function startTuner() {
     tunerLP.connect(tunerFreqAnalyser);
 
     tunerRunning = true; tunerResetSmoothing();
-    document.getElementById('tuner-freq').textContent = 'Listening…';
+    setToolText(document.getElementById('tuner-freq'), 'tools.listening');
     tunerLoop();
   } catch(e) {
-    document.getElementById('tuner-freq').textContent = 'Mic access denied — check browser permissions';
+    setToolText(document.getElementById('tuner-freq'), 'tools.micDenied');
   }
 }
 
@@ -369,9 +382,9 @@ function stopTuner() {
   const needle = document.getElementById('tuner-needle');
   const statusEl = document.getElementById('tuner-status');
   if (noteEl)   { noteEl.textContent = '—'; noteEl.classList.remove('in-tune', 'in-tune-pop'); }
-  if (freqEl)   freqEl.textContent = 'Play a string…';
+  if (freqEl)   setToolText(freqEl, 'tools.playAString');
   if (needle)   { needle.style.left = '50%'; needle.style.background = 'var(--border2)'; }
-  if (statusEl) { statusEl.textContent = ''; statusEl.className = 'tuner-status'; }
+  if (statusEl) { statusEl.textContent = ''; statusEl.removeAttribute('data-i18n'); statusEl.className = 'tuner-status'; }
 }
 
 /* No Start/Stop button — opening the tuner popup starts listening, closing it

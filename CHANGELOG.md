@@ -17,6 +17,26 @@ see `WORKFLOW.md` and the git commit log.
   flip it on for a click laid under the backing track to help you lock in the
   downbeats, flip it off for the clean mix. Switching mid-song keeps your spot.
 
+## 2026-07-22 — A cleaner start screen, real Spanish for the app itself, and a tuner tip
+
+### Changed
+- **The "Start here" welcome pop-up is gone.** That orientation now happens
+  in class, so the card was just an extra click between you and practicing.
+- **The Español button now gives you real, hand-written Spanish for
+  everything you see every session** — the header, the module/set/station
+  navigation, the skills checklist, the Tuner/Timer/Metronome, and every
+  button and footer link. Longer lesson content is still machine-translated
+  (that part hasn't changed), but the words you read 100 times a week are
+  now translated with care, not by a machine. Switching back to English
+  restores everything exactly as it was.
+- **The Tuner catches the high E string more easily.** It used to need you
+  to play right up close to the microphone; a normal pluck should register
+  cleanly now.
+
+### Added
+- **A quiet tip in the Tuner** for noisy classrooms: pick your string above
+  and play close to the computer's mic for a cleaner reading.
+
 ## 2026-07-22 — "the cure" jam track is now perfectly in tune, plus an optional metronome click
 
 ### Changed

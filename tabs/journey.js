@@ -9,17 +9,23 @@
 var fbUser = null, fbDb = null, saveTimer = null, dirty = false;
 var userInteracted = false;
 
-/* Spanish translate toggle — mirrors the main app's toggleTranslate() */
+/* Spanish translate toggle — mirrors the main app's toggleTranslate(). On
+   Journey pages only the floating Tuner/Timer/Metronome (fab-tools.js
+   markup) carry data-i18n — the rest of the page is still Google-Translate
+   only — but setLang() is still called here so those tools stay in sync
+   with the main app's saved language (gc-lang) and behave identically. */
 var isSpanish = false;
 function toggleTranslate(){
   var btn = document.getElementById('btn-translate');
   var lbl = document.getElementById('translate-label');
   var select = document.querySelector('.goog-te-combo');
   if(!isSpanish){
+    setLang('es');
     if(select){ select.value='es'; select.dispatchEvent(new Event('change')); }
     else { document.cookie='googtrans=/en/es; path=/'; location.reload(); return; }
     btn.classList.add('active'); lbl.textContent='English'; isSpanish=true;
   } else {
+    setLang('en');
     if(select){ select.value='en'; select.dispatchEvent(new Event('change')); }
     else { document.cookie='googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'; location.reload(); return; }
     btn.classList.remove('active'); lbl.textContent='Español'; isSpanish=false;

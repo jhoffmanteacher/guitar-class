@@ -46,19 +46,21 @@
 ## Open work
 
 - [ ] **Custom backing tracks for the six journey-page play-alongs — Jonathan
-      is making them himself** (Jonathan, 2026-07-20) — every Song Journey page
-      has a "🎵 Play along" button. **"the cure" is DONE:** swapped to Jonathan's
-      own **A-minor, no-capo** tracks — a clean rhythm-down mix
+      is making them himself** (Jonathan, 2026-07-20; plan to do all six
+      confirmed 2026-07-22) — every Song Journey page has a "🎵 Play along"
+      button. **"the cure" is DONE and live-verified** (2026-07-22): swapped to
+      Jonathan's own **A-minor, no-capo** tracks — a clean rhythm-down mix
       (`audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-rhythm-down.mp3`)
       plus a metronome variant with a click baked in
-      (`...-rhythm-down-metronome.mp3`), both local files played through a
-      looping `<audio>` element with a "🎵 Metronome" toggle on the Journey page
-      to swap between them mid-playback (position + play state preserved).
-      At the same time every capo instruction for the song was stripped across
-      the modules + its Journey page, and an asterisk note under the
-      play-along button explains that capoing the 1st fret matches the
-      original recording's pitch. **"Luna" is DONE (2026-07-22):** swapped to
-      Jonathan's own **A-minor, 128 BPM** rhythm-down mix
+      (`...-rhythm-down-metronome.mp3`, re-balanced once already for a too-loud
+      click), both local files played through a looping `<audio>` element with
+      a "🎵 Metronome" toggle on the Journey page to swap between them
+      mid-playback (position + play state preserved). At the same time every
+      capo instruction for the song was stripped across the modules + its
+      Journey page, and an asterisk note under the play-along button explains
+      that capoing the 1st fret matches the original recording's pitch.
+      **"Luna" is DONE (2026-07-22):** swapped to Jonathan's own **A-minor,
+      128 BPM** rhythm-down mix
       (`audio/peso-pluma-junior-h-luna-backing-Am-128bpm-440hz-rhythm-down.mp3`)
       plus a metronome variant (`...-rhythm-down-metronome.mp3`), replacing the
       generic Dm YouTube loop on the Journey page — same local-`<audio>` +
@@ -67,21 +69,30 @@
       `<artist-slug>-<song-slug>-backing-<key>-<bpm>bpm-<tuning>hz-<mix>.mp3` —
       see the "Backing-track naming & tuning" section in `CLAUDE.md` for the
       full rule (every track ships at A=440, exported directly from Moises).
-      **Jonathan will supply custom backing tracks for the other four later** —
-      until then they keep their existing YouTube loops:
-      - Seven Nation Army — `sbN1wfDb4sw`
-      - Sweet Child O' Mine — `kkZI8Lma8UA`
-      - Let It Be — `xHhfKZAH_EU`
-      - Watchtower — `Vq8cApzOdy8` (generic Am jam loop, no vocals)
-      Two ways to wire a replacement per song:
-      - **Local audio file** (the cure's setup): drop the mp3 in `audio/`, then
-        in `tabs/<song>.html` set `data-audio="../audio/<file>.mp3"` on
-        `#playalong-frame` and add the `playalong-frame--audio` class; point the
-        song's module-card `backingUrl` at `audio/<file>.mp3` (any
-        `.mp3/.m4a/.ogg/.wav` auto-routes to the in-app audio player).
-      - **YouTube**: `data-video="<id>"` in `tabs/<song>.html` + a youtube
-        `backingUrl` on the module card (module-4.js for most, module-5.js for
-        Let It Be). Give Claude the file or link and it'll wire + verify.
+      **Plan for the other four: same treatment, one song at a time, as
+      Jonathan supplies the mp3s** — each gets the same recipe "the cure" and
+      "Luna" got:
+      - Two files per song at minimum: a clean rhythm-down mix and a
+        rhythm-down-metronome variant, **both exported at A=440** (never trust
+        the source master's tuning — see "Backing-track naming & tuning" in
+        `CLAUDE.md`), named
+        `<artist-slug>-<song-slug>-backing-<key>-<bpm>bpm-<tuning>hz-<mix>.mp3`.
+      - Wire exactly like `tabs/the-cure.html` / `module-4.js`: `data-audio` +
+        `data-audio-metronome` on `#playalong-frame`, `backingUrl` pointing at
+        the clean mix. The metronome-toggle code in `tabs/journey.js` is
+        already generic — it activates automatically whenever a page's frame
+        has `data-audio-metronome`, no per-song JS changes needed.
+      - `tools/checks.mjs` fingerprints everything in `audio/` (fixed
+        2026-07-22), so `CACHE_VERSION` bumps automatically for these too —
+        no manual cache-busting step per song.
+      - Until Jonathan supplies a song's files, it keeps its existing YouTube
+        loop:
+        - Seven Nation Army — `sbN1wfDb4sw`
+        - Sweet Child O' Mine — `kkZI8Lma8UA`
+        - Let It Be — `xHhfKZAH_EU`
+        - Watchtower — `Vq8cApzOdy8` (generic Am jam loop, no vocals)
+      Give Claude the file(s) — it'll copy into `audio/`, rename to convention,
+      wire, run `tools/checks.mjs`, and verify before pushing.
 
 - [ ] **Real-guitar test of Riff Runner Wait Mode** (Jonathan, 2026-07-12) —
       ⚠️ **SHIPPED LIVE UNTESTED** — Jonathan chose to push it before a guitar

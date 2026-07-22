@@ -25,6 +25,16 @@ function toolsBeep(freq,dur,gain){
   o.start(); o.stop(ctx.currentTime+dur);
 }
 
+// Start/Stop/Pause/Reset labels are set dynamically here as the tool runs, so
+// each one carries its own data-i18n key (i18n.js is loaded before this file
+// on every page that uses it) — a later pure language switch can still find
+// and retranslate whichever label is currently showing. translate="no" is
+// set directly here too, not left for the next setLang() call to add — this
+// button can be rebuilt (e.g. an auto stopMetro()) with no language switch in
+// between, and an unmarked span in that window is one Google Translate could
+// still grab if it re-scans the page.
+function toolLabelHtml(icon, key){ return `${icon} <span data-i18n="${key}" translate="no" class="notranslate">${t(key)}</span>`; }
+
 /* ── Metronome ── */
 let metroRunning=false, metroInterval=null, metroMeter=4, metroCountIn=false, metroBeatIdx=0, metroCountInTimeouts=[];
 function getMetroMeter(){ return metroMeter; }
@@ -75,7 +85,7 @@ function startMetro(useCountIn){
   if(window.coachMicLive) return;
   metroRunning = true;
   metroBeatIdx = 0;
-  document.getElementById('metro-btn').innerHTML='&#x23F8; Stop';
+  document.getElementById('metro-btn').innerHTML=toolLabelHtml('&#x23F8;','tools.stop');
   const beatMs = Math.round(60000/getBpm());
   const beginRun = () => {
     if(!metroRunning) return;
@@ -99,20 +109,20 @@ function stopMetro(){
   metroCountInTimeouts = [];
   metroRunning=false;
   metroBeatIdx=0;
-  document.getElementById('metro-btn').innerHTML='&#x25B6; Start';
+  document.getElementById('metro-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start');
 }
 function toggleMetro(){ if(metroRunning) stopMetro(); else startMetro(true); }
 
 /* ── Timer ── */
 let timerRunning=false, timerInterval=null, timerSecs=30, timerSelected=30;
-function setTimerSecs(secs){ timerSelected=secs; timerSecs=secs; if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; } updateTimerDisplay(); [30,60,120,180,240,300].forEach(s=>{ const el=document.getElementById('tp-'+s); if(el) el.classList.toggle('sel',s===secs); }); }
+function setTimerSecs(secs){ timerSelected=secs; timerSecs=secs; if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); } updateTimerDisplay(); [30,60,120,180,240,300].forEach(s=>{ const el=document.getElementById('tp-'+s); if(el) el.classList.toggle('sel',s===secs); }); }
 function updateTimerDisplay(){ const m=Math.floor(timerSecs/60),s=timerSecs%60; document.getElementById('timer-display').textContent=m+':'+(s<10?'0':'')+s; }
 // Flash the display when time's up — visible across a loud room without headphones.
 function flashTimerDisplay(){ flashClass(document.getElementById('timer-display'),'timer-done-flash',2400); }
 // Pulse the floating timer button too — it's visible even when the popup is closed.
 function flashTimerFab(){ flashClass(document.getElementById('fab-timer'),'fab-timer-done',3600); }
-function resetTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; } timerSecs=timerSelected; updateTimerDisplay(); document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; }
-function toggleTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; } else { timerRunning=true; document.getElementById('timer-btn').innerHTML='&#x23F8; Pause'; timerInterval=setInterval(()=>{ if(timerSecs>0){ timerSecs--; updateTimerDisplay(); } else { clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML='&#x25B6; Start'; [0,0.35,0.7].forEach(d=>setTimeout(()=>toolsBeep(660,0.3),d*1000)); flashTimerDisplay(); flashTimerFab(); } },1000); } }
+function resetTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; } timerSecs=timerSelected; updateTimerDisplay(); document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); }
+function toggleTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); } else { timerRunning=true; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x23F8;','tools.pause'); timerInterval=setInterval(()=>{ if(timerSecs>0){ timerSecs--; updateTimerDisplay(); } else { clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); [0,0.35,0.7].forEach(d=>setTimeout(()=>toolsBeep(660,0.3),d*1000)); flashTimerDisplay(); flashTimerFab(); } },1000); } }
 
 /* ── Popup logic ── */
 function setFabExpanded(which, isOpen){ const f=document.getElementById('fab-'+which); if(f) f.setAttribute('aria-expanded', isOpen?'true':'false'); }

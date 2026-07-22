@@ -175,6 +175,12 @@ async function ensureModuleRendered(num){
   }
   // Idempotent: already-wrapped spans are skipped (see CHORD_SKIP_CLASSES).
   wrapAllChordLinks();
+  // A module can be rendered for the first time long after page load (lazy,
+  // on first visit) — with no setLang() in between, its data-i18n spans
+  // (checklist strings, panel-footer buttons, print button, module-review
+  // legend) would otherwise sit unmarked and exposed to Google Translate
+  // until the next language toggle. Mark them right away instead of waiting.
+  if(typeof applyI18n === 'function') applyI18n(c);
 }
 let _dirtyKeys = new Set();   // which categories need writing: skills · place · responses · completed · games
 const escAttr = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -185,7 +191,7 @@ function userHeaderHtml(user){
   const av = user.photoURL
     ? `<img src="${escAttr(user.photoURL)}" class="avatar" alt="">`
     : `<div class="avatar-init">${escHtml((user.displayName||'?')[0].toUpperCase())}</div>`;
-  return `${av}<span class="user-name">${escHtml(user.displayName||user.email)}</span><button class="btn-out" onclick="signOut()">Sign out</button>`;
+  return `${av}<span class="user-name">${escHtml(user.displayName||user.email)}</span><button class="btn-out notranslate" onclick="signOut()" data-i18n="header.signOut" translate="no">${t('header.signOut')}</button>`;
 }
 
 /* ── Auth ── */
@@ -200,9 +206,10 @@ function showFirebaseLoadError(){
   const wall = document.getElementById('auth-wall');
   if(!wall) return;
   wall.innerHTML =
-    '<h1>Can’t reach the sign-in service</h1>' +
-    '<p>The sign-in service couldn’t load on this network — a Wi-Fi or content filter may be blocking it. Try again or switch to a different network.</p>' +
-    '<button class="btn-google" onclick="location.reload()">Try again</button>';
+    `<h1 data-i18n="auth.fallbackTitle">${t('auth.fallbackTitle')}</h1>` +
+    `<p data-i18n="auth.fallbackBody">${t('auth.fallbackBody')}</p>` +
+    `<button class="btn-google" onclick="location.reload()" data-i18n="auth.tryAgain">${t('auth.tryAgain')}</button>`;
+  if(typeof applyI18n === 'function') applyI18n(wall);
 }
 function signIn(){
   showAuthError('');
@@ -214,7 +221,7 @@ function signIn(){
     .catch(e=>{
       // The student just closed/cancelled the popup — not an error worth nagging about.
       if(e && (e.code==='auth/popup-closed-by-user' || e.code==='auth/cancelled-popup-request')) return;
-      showAuthError('Sign-in didn’t work — make sure pop-ups are allowed and you’re using your school Google account, then try again.');
+      showAuthError(t('auth.signInFailed'));
     });
 }
 function signOut(){ auth.signOut(); }
@@ -263,54 +270,12 @@ function showApp(user){
   document.getElementById('user-area').innerHTML=userHeaderHtml(user);
   renderAll();
   applyGamesAccess();
-  // A direct #games deep-link takes priority over the one-time welcome card —
-  // opening both at once would stack two aria-modal dialogs on top of each other.
-  if(!maybeShowApp_gamesHash()) maybeShowWelcome();
+  maybeShowApp_gamesHash();
 }
 
-/* "Start here" onboarding card (Phase 5): shown once on first load only.
-   localStorage may be unavailable in private mode — fall back to showing it. */
 function maybeShowApp_gamesHash(){
   if(location.hash==='#games' && typeof openGamesScreen==='function'){ openGamesScreen(); return true; }
   return false;
-}
-function maybeShowWelcome(){
-  let seen=false;
-  try{ seen = localStorage.getItem('gc-welcomed')==='1'; }catch(e){}
-  if(!seen) openWelcome();
-}
-let welcomeReturnFocus=null;
-function welcomeFocusables(){
-  const card=document.querySelector('#welcome-overlay .welcome-card');
-  if(!card) return [];
-  return Array.from(card.querySelectorAll('button, [href], input, select, textarea, [tabindex]'))
-    .filter(el=>!el.disabled && el.tabIndex!==-1 && el.offsetParent!==null);
-}
-function welcomeKeydown(e){
-  if(e.key!=='Tab') return;
-  const items=welcomeFocusables();
-  if(!items.length) return;
-  const first=items[0], last=items[items.length-1];
-  if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
-  else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
-}
-function openWelcome(){
-  const o=document.getElementById('welcome-overlay'); if(!o) return;
-  welcomeReturnFocus=document.activeElement;
-  o.style.display='flex';
-  const card=o.querySelector('.welcome-card');
-  const items=welcomeFocusables();
-  const target=items[0] || card;
-  if(target===card) card.setAttribute('tabindex','-1');
-  if(target) target.focus();
-  o.addEventListener('keydown', welcomeKeydown);
-}
-function dismissWelcome(){
-  const o=document.getElementById('welcome-overlay'); if(o) o.style.display='none';
-  if(o) o.removeEventListener('keydown', welcomeKeydown);
-  try{ localStorage.setItem('gc-welcomed','1'); }catch(e){}
-  if(welcomeReturnFocus && typeof welcomeReturnFocus.focus==='function') welcomeReturnFocus.focus();
-  welcomeReturnFocus=null;
 }
 
 /* ── Firestore ── */
@@ -1516,10 +1481,13 @@ function renderPills(moduleNum){
     btn.className='wpill'+(locked?' locked':'');
     btn.dataset.id=w.id;
     const { done, total } = locked ? { done:0, total:0 } : setCompletion(w);
+    // Label text carries data-i18n-setlabel (not just plain text) so applyI18n
+    // marks it translate="no" — otherwise these freshly-created buttons are
+    // never caught by the DOM walk and stay exposed to Google Translate.
     if(!locked && total>0 && done===total){
       // All skills got-it: green treatment + leading ✓.
       btn.classList.add('complete');
-      btn.innerHTML = `<span class="wpill-check" aria-hidden="true">✓</span>${w.label}`;
+      btn.innerHTML = `<span class="wpill-check" aria-hidden="true">✓</span><span data-i18n-setlabel="${escAttr(w.label)}" translate="no" class="notranslate">${escHtml(tSetLabel(w.label))}</span>`;
       btn.setAttribute('aria-label', `${w.label} — all ${total} skills complete`);
     } else if(!locked && done>0){
       // Started but not finished: full name + a small fraction. Untouched sets
@@ -1528,11 +1496,11 @@ function renderPills(moduleNum){
       const frac = document.createElement('span');
       frac.className = 'wpill-frac';
       frac.textContent = ` · ${done}/${total}`;
-      btn.textContent = w.label;
+      btn.innerHTML = `<span data-i18n-setlabel="${escAttr(w.label)}" translate="no" class="notranslate">${escHtml(tSetLabel(w.label))}</span>`;
       btn.appendChild(frac);
       btn.setAttribute('aria-label', `${w.label} — ${done} of ${total} skills done`);
     } else {
-      btn.textContent = w.label;
+      btn.innerHTML = `<span data-i18n-setlabel="${escAttr(w.label)}" translate="no" class="notranslate">${escHtml(tSetLabel(w.label))}</span>`;
     }
     if(locked){
       // Sequential gate: opens once the set before it is finished. Keep the
@@ -1554,7 +1522,9 @@ function renderPills(moduleNum){
     const rbtn = document.createElement('button');
     rbtn.className='wpill review-pill'+(locked?' locked':'');
     rbtn.dataset.id=`mr${moduleNum}`;
-    rbtn.textContent='Module review';
+    rbtn.textContent=t('nav.moduleReview');
+    rbtn.setAttribute('data-i18n','nav.moduleReview');
+    rbtn.setAttribute('translate','no'); rbtn.classList.add('notranslate');
     rbtn.title = locked
       ? 'Preview only — finish marking every skill on every set as "I\'ve got it!" to unlock this self-assessment.'
       : '';
@@ -1574,6 +1544,12 @@ function renderPills(moduleNum){
 const setScrollPos = (function(){
   try{ return JSON.parse(localStorage.getItem('gc-scroll')) || {}; }catch(e){ return {}; }
 })();
+// A fresh page load/reload should always land at the top — jumping straight
+// to a mid-scroll position on open reads as "opened somewhere random" rather
+// than picking up where you left off (the module/set selection itself still
+// restores). Scroll memory still applies once you're clicking between sets
+// in the same session — this only suppresses the very first restore.
+let isInitialActivation = true;
 function saveScrollPos(){
   try{ localStorage.setItem('gc-scroll', JSON.stringify(setScrollPos)); }catch(e){}
 }
@@ -1614,7 +1590,10 @@ function activateSet(id){
   renderChordBoxes();
   syncRailStations();   // refresh the rail's "This set" station switcher for the new set
   // Restore where the student last was in this set — or top on a first open.
-  window.scrollTo(0, Object.prototype.hasOwnProperty.call(setScrollPos, id) ? setScrollPos[id] : 0);
+  // Except right after a page load: always open at the top (see isInitialActivation above).
+  const restoreScroll = !isInitialActivation && Object.prototype.hasOwnProperty.call(setScrollPos, id);
+  window.scrollTo(0, restoreScroll ? setScrollPos[id] : 0);
+  isInitialActivation = false;
 }
 
 /* ── Rail station switcher ─────────────────────────────────────────────
@@ -1641,7 +1620,7 @@ function syncRailStations(){
   const wid = panel.dataset.id;
   const w = (typeof SETS !== 'undefined') ? SETS.find(s=>s.id===wid) : null;
   const label = document.getElementById('rail-set-label');
-  if(label) label.textContent = 'This set' + (w && w.label ? ' · ' + w.label : '');
+  if(label) label.textContent = t('nav.thisSet') + (w && w.label ? ' · ' + tSetLabel(w.label) : '');
   // Reflect whichever tab-panel is currently active back onto the rail buttons.
   const activePanel = panel.querySelector('.tab-panel.active');
   const activeTab = activePanel ? activePanel.id.slice(wid.length + 1) : 'station-b';
@@ -1678,7 +1657,7 @@ function buildComingSoon(w){
 function buildSet(w){
   // Small "Set N" pill, then the topic as the large title, then generalized
   // skill bullets (the old "I CAN…" objective line is no longer shown).
-  const printBtn = `<button type="button" class="print-set-btn" onclick="printSet('${w.id}')" title="Print this set as a one-page handout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg>Print this set</button>`;
+  const printBtn = `<button type="button" class="print-set-btn" onclick="printSet('${w.id}')" title="Print this set as a one-page handout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg><span data-i18n="btn.printSet">${t('btn.printSet')}</span></button>`;
   const pill = `<div class="obj-set">${w.title ? `<span class="obj-set-tag">${w.title}</span>` : ''}${printBtn}</div>`;
   const titleHtml = w.unit ? `<h2 class="obj-main obj-topic">${w.unit}</h2>` : '';
   const items = (w.skillFocus||'').split(' · ')
@@ -1858,7 +1837,7 @@ function buildStations(w, stationId){
     const isDone = completed[doneKey] === true;
     const isCur = i === curIdx;
     // Mark-done is the last row of the step.
-    const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${isDone ? '&#x2713; Done' : 'Mark done'}</button></div>`;
+    const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${stepDoneHtml(isDone)}</button></div>`;
     const skillsAttr = (s.skills && s.skills.length) ? ` data-skills="${s.skills.join(',')}"` : '';
     const label = stepLabel(s);
     const ariaLabel = `Step ${i+1}${isDone ? ', done' : ''} — ${label}`;
@@ -1919,7 +1898,7 @@ function buildStations(w, stationId){
       ? `<div class="st-flex-note">&#x1F9ED; <strong>First time on this set?</strong> Do <button type="button" class="st-note-link" onclick="switchTabById('${w.id}','station-b')">Station B</button> first — watch the lessons, then come back here and drill. Back on another day just to practice? Perfect — practicing on different days helps you remember.</div>`
       : '';
     const {total: stepTotal, done: stepDone} = stationStepCounts(id, s);
-    const pillHtml = stepTotal > 0 ? `<span class="prog-pill">${stepDone} of ${stepTotal} steps done</span>` : '';
+    const pillHtml = stepTotal > 0 ? `<span class="prog-pill" data-i18n="progress.stepsDone" data-i18n-params="${escAttr(JSON.stringify({done:stepDone,total:stepTotal}))}">${t('progress.stepsDone',{done:stepDone,total:stepTotal})}</span>` : '';
     return `
     <div class="dp${cls}" id="${w.id}-dp-${id}">
       <div class="dp-head"><span class="st-badge ${badgeClass}">${badge}</span><h3 class="dp-title">${s.title}</h3>${pillHtml}</div>
@@ -1948,12 +1927,20 @@ function buildStations(w, stationId){
     ${dp('c',' hidden','Station C','bc',w.stations.c)}`;
 }
 
+// "Mark done" ⇄ "✓ Done" — a state-and-language-dependent label, so the
+// data-i18n key travels with the current state and a later pure language
+// switch (no state change) still resolves to the right word.
+function stepDoneHtml(isDone){
+  return isDone
+    ? `&#x2713; <span data-i18n="btn.doneWord" translate="no" class="notranslate">${t('btn.doneWord')}</span>`
+    : `<span data-i18n="btn.markDone" translate="no" class="notranslate">${t('btn.markDone')}</span>`;
+}
 function toggleStepDone(btn, key){
   const li = btn.closest('.step');
   const nowDone = !li.classList.contains('step-done');
   li.classList.toggle('step-done', nowDone);
   btn.setAttribute('aria-pressed', nowDone);
-  btn.innerHTML = nowDone ? '&#x2713; Done' : 'Mark done';
+  btn.innerHTML = stepDoneHtml(nowDone);
   const status = li.querySelector('.step-status');
   if(status) status.textContent = nowDone ? '✓' : (li.dataset.num || status.textContent);
   const head = li.querySelector('.step-head');
@@ -2021,7 +2008,8 @@ function updateProgressPill(li){
   if(!pill) return;
   const total = dp.querySelectorAll('li.step').length;
   const done = dp.querySelectorAll('li.step.step-done').length;
-  pill.textContent = `${done} of ${total} steps done`;
+  pill.setAttribute('data-i18n-params', JSON.stringify({done, total}));
+  pill.textContent = t('progress.stepsDone', {done, total});
 }
 
 function toggleStationSection(btn){
@@ -2326,9 +2314,9 @@ function buildModuleReview(mr){
     </div>
     <div class="mr-skills">${rows}</div>
     <div class="mr-legend">
-      <span class="mr-legend-item"><span class="mr-legend-dot lvl1"></span>1 = Still learning</span>
-      <span class="mr-legend-item"><span class="mr-legend-dot lvl2"></span>2 = Getting it</span>
-      <span class="mr-legend-item"><span class="mr-legend-dot lvl3"></span>3 = Got it</span>
+      <span class="mr-legend-item"><span class="mr-legend-dot lvl1"></span>1 = <span data-i18n="skill.stillLearning">${t('skill.stillLearning')}</span></span>
+      <span class="mr-legend-item"><span class="mr-legend-dot lvl2"></span>2 = <span data-i18n="skill.gettingIt">${t('skill.gettingIt')}</span></span>
+      <span class="mr-legend-item"><span class="mr-legend-dot lvl3"></span>3 = <span data-i18n="skill.gotItShort">${t('skill.gotItShort')}</span></span>
     </div>
     <div class="ablock" style="margin-top:18px">
       <div class="albl"><span class="mr-q-num">${clickedNum}.</span> What suddenly made sense this module?</div>
@@ -2543,24 +2531,24 @@ function buildChecklist(w){
   const rows=w.skills.map((s,i)=>{
     const st=progress[s.id]||'none';
     const helper = s.gotItWhen ? `
-        <button type="button" class="sk-toggle" onclick="toggleGotIt('${s.id}', this)" aria-expanded="false" aria-controls="gi-${s.id}"><span class="sk-toggle-arrow">▾</span> What does this look like?</button>
-        <div class="sk-helper" id="gi-${s.id}" hidden><strong>You've got it when:</strong> ${s.gotItWhen}</div>` : '';
+        <button type="button" class="sk-toggle" onclick="toggleGotIt('${s.id}', this)" aria-expanded="false" aria-controls="gi-${s.id}"><span class="sk-toggle-arrow">▾</span> <span data-i18n="skill.whatDoesThisLookLike">${t('skill.whatDoesThisLookLike')}</span></button>
+        <div class="sk-helper" id="gi-${s.id}" hidden><strong data-i18n="skill.youveGotItWhen">${t('skill.youveGotItWhen')}</strong> ${s.gotItWhen}</div>` : '';
     const practiceBtn = s.practice ? `
         <button type="button" class="sk-practice-btn" onclick="togglePracticePanel('${s.id}', this)" aria-expanded="false" aria-controls="pp-${s.id}"><span class="sk-practice-btn-arrow">▸</span> Practice this</button>` : '';
     const skillNum = (s.id.match(/-s(\d+)$/) || [])[1];
     const whereBtn = (skillNum && skillTaughtStation(w, Number(skillNum)))
-      ? `<button type="button" class="sk-where-btn" onclick="showSkillLesson('${w.id}', ${skillNum})" title="Jump to the steps that teach this">&#x1F4CD; Show me where</button>` : '';
+      ? `<button type="button" class="sk-where-btn" onclick="showSkillLesson('${w.id}', ${skillNum})" title="Jump to the steps that teach this">&#x1F4CD; <span data-i18n="skill.showMeWhere">${t('skill.showMeWhere')}</span></button>` : '';
     const practicePanel = s.practice ? renderPracticePanel(s.practice, s.id, w.id) : '';
     return `<div class="skill-row" data-sid="${escAttr(s.id)}">
       <div class="sktxt"><div class="sn" style="flex-shrink:0;margin-top:0;margin-right:8px">${i+1}</div><div class="sk-body"><div class="sk-label">${s.text}</div>${helper}${practiceBtn}${whereBtn}</div></div>
-      <div class="skchk-cell working-col${st==='working'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='working'}" aria-label="Still working on it: ${escAttr(s.text)}" onclick="toggleSkill('${s.id}','${w.id}','working')" title="Still working on it"><div class="skbox">${st==='working'?wkSvg:''}</div></div>
-      <div class="skchk-cell gotit-col${st==='gotit'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='gotit'}" aria-label="I've got it: ${escAttr(s.text)}" onclick="toggleSkill('${s.id}','${w.id}','gotit')" title="I've got it!"><div class="skbox">${st==='gotit'?giSvg:''}</div></div>
+      <div class="skchk-cell working-col${st==='working'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='working'}" aria-label="Still working on it: ${escAttr(s.text)}" onclick="toggleSkill('${s.id}','${w.id}','working')" title="Still working on it" data-i18n-attr="title:skill.stillWorking"><div class="skbox">${st==='working'?wkSvg:''}</div></div>
+      <div class="skchk-cell gotit-col${st==='gotit'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='gotit'}" aria-label="I've got it: ${escAttr(s.text)}" onclick="toggleSkill('${s.id}','${w.id}','gotit')" title="I've got it!" data-i18n-attr="title:skill.gotIt"><div class="skbox">${st==='gotit'?giSvg:''}</div></div>
       ${practicePanel}
     </div>`;
   }).join('');
-  return `<div class="cl-intro">Check each skill as you practice. Use "Still working on it" while you're learning, then mark "I've got it!" once you can do it consistently.</div>
+  return `<div class="cl-intro" data-i18n="skill.checklistIntro">${t('skill.checklistIntro')}</div>
   <div class="cl-grid-wrap">
-    <div class="cl-header"><div class="cl-header-skill">Skill</div><div class="cl-header-working">Still<br>working on it</div><div class="cl-header-gotit">I've<br>got it!</div></div>
+    <div class="cl-header"><div class="cl-header-skill" data-i18n="skill.clHeaderSkill">${t('skill.clHeaderSkill')}</div><div class="cl-header-working" data-i18n-html="skill.clHeaderWorkingHtml">${t('skill.clHeaderWorkingHtml')}</div><div class="cl-header-gotit" data-i18n-html="skill.clHeaderGotItHtml">${t('skill.clHeaderGotItHtml')}</div></div>
     ${rows}
   </div>
   <div class="prog-wrap"><div class="prog-row"><div class="prog-bg"><div class="prog-fill" id="pf-${w.id}" style="width:${pct}%"></div></div><div class="prog-lbl" id="pl-${w.id}">${done} / ${w.skills.length}</div></div></div>
@@ -2730,21 +2718,42 @@ function toggleSkill(sid, wid, which){
 
 /* ── Translate toggle ── */
 let isSpanish = false;
+// The Español button now drives TWO layers at once: our own hand-written
+// shell translations (setLang, instant, no dependency on Google) for the
+// chrome a student sees every session, and the existing Google Translate
+// flow for everything else (module/lesson content). Elements carrying
+// data-i18n/data-i18n-attr/data-i18n-html are marked translate="no" by
+// setLang's applyI18n pass, so Google Translate skips them — no double
+// translation of our own Spanish.
 function toggleTranslate(){
   const btn = document.getElementById('btn-translate');
   const lbl = document.getElementById('translate-label');
   if(!isSpanish){
+    setLang('es');
     const select = document.querySelector('.goog-te-combo');
     if(select){ select.value='es'; select.dispatchEvent(new Event('change')); }
     else { document.cookie='googtrans=/en/es; path=/'; location.reload(); return; }
     btn.classList.add('active'); lbl.textContent='English'; isSpanish=true;
   } else {
+    setLang('en');
     const select = document.querySelector('.goog-te-combo');
     if(select){ select.value='en'; select.dispatchEvent(new Event('change')); }
     else { document.cookie='googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'; location.reload(); return; }
     btn.classList.remove('active'); lbl.textContent='Español'; isSpanish=false;
   }
 }
+// Shell re-renders that build strings dynamically (rebuilt on navigation,
+// not tagged with data-i18n) need an explicit refresh on a pure language
+// toggle — applyI18n's DOM walk (already run by setLang) only reaches
+// elements tagged with data-i18n and can't help these.
+window.addEventListener('gc-langchange', function(){
+  if(typeof lastModuleNum !== 'undefined' && document.getElementById('week-pills')) renderPills(lastModuleNum);
+  if(typeof syncRailStations === 'function') syncRailStations();
+  const myProgressPanel = document.getElementById('my-progress-panel');
+  if(myProgressPanel && !myProgressPanel.hidden && typeof toggleMyProgress === 'function'){
+    toggleMyProgress(); toggleMyProgress();   // closed→rebuild→reopen, cheapest correct refresh
+  }
+});
 
 /* ══════════════════════════════════════════════
    FLOATING TOOLS — Metronome & Timer
@@ -2921,11 +2930,10 @@ function flashClass(el, cls, ms){
   el.classList.add(cls);
   setTimeout(()=>el.classList.remove(cls), ms);
 }
-// Escape closes the welcome/video/games overlays (a11y). Tool-popup closing
+// Escape closes the video/games overlays (a11y). Tool-popup closing
 // (metronome/timer/tuner) is handled by fab-tools.js's own Escape listener.
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
-  const wo=document.getElementById('welcome-overlay'); if(wo&&wo.style.display!=='none') dismissWelcome();
   const vo=document.getElementById('video-overlay'); if(vo&&!vo.hidden) clearPanel();
   const gs=document.getElementById('games-screen'); if(gs&&!gs.hasAttribute('hidden')&&typeof closeGamesScreen==='function') closeGamesScreen();
   if(document.body.classList.contains('rail-open')) closeRail();
@@ -3137,21 +3145,25 @@ function clampViewer(box){
 /* "Keep going" footer for each set tab-panel: the bottom of a long station
    used to be a dead end — you had to scroll back up to continue. */
 function panelFooter(w, tab){
-  const btn = (label, onclick) =>
-    `<button type="button" class="panel-next-btn" onclick="${onclick}">${label} &rarr;</button>`;
+  const btn = (labelHtml, onclick) =>
+    `<button type="button" class="panel-next-btn" onclick="${onclick}">${labelHtml} &rarr;</button>`;
+  const span = key => `<span data-i18n="${key}">${escHtml(t(key))}</span>`;
   let inner = '';
   if(tab === 'station-b'){
-    inner = btn('Next: Station C — practice it', `switchTabById('${w.id}','station-c')`);
+    inner = btn(span('btn.nextStationC'), `switchTabById('${w.id}','station-c')`);
   } else if(tab === 'station-c' || tab === 'songs'){
-    inner = btn('Next: My skills checklist', `switchTabById('${w.id}','checklist')`);
+    inner = btn(span('btn.nextChecklist'), `switchTabById('${w.id}','checklist')`);
   } else if(tab === 'checklist'){
     const sets = SETS.filter(x => x.moduleNum === w.moduleNum && !x.comingSoon);
     const i = sets.findIndex(x => x.id === w.id);
     if(i >= 0 && i < sets.length - 1){
       const next = sets[i + 1];
-      inner = btn(`Next: ${escHtml(next.label || 'the next set')}`, `goToSet('${next.id}')`);
+      const labelHtml = next.label
+        ? `<span data-i18n-setlabel="${escAttr(next.label)}">${escHtml(tSetLabel(next.label))}</span>`
+        : span('btn.theNextSet');
+      inner = btn(`${span('btn.next')} ${labelHtml}`, `goToSet('${next.id}')`);
     } else if(MODULE_REVIEWS[w.moduleNum]){
-      inner = btn('Next: Module Review', `goToSet('mr${w.moduleNum}')`);
+      inner = btn(span('btn.nextModuleReview'), `goToSet('mr${w.moduleNum}')`);
     }
   }
   return inner ? `<div class="panel-next">${inner}</div>` : '';
@@ -3582,9 +3594,10 @@ function toggleMyProgress(){
       <div class="prog-wrap"><div class="prog-row"><div class="prog-bg"><div class="prog-fill" style="width:${pct}%"></div></div><div class="prog-lbl">${done} / ${total}</div></div></div>
     </div>`;
   }).join('');
-  p.innerHTML = `<div class="daily5-head"><span>&#x1F4CA; My progress</span><button type="button" class="tp-close" onclick="toggleMyProgress()" aria-label="Close my progress">&#x2715;</button></div>
-    <div class="coach-tip">${totalDone} of ${totalAll} skills mastered across all ${MODULE_MANIFEST.length} modules.</div>
+  p.innerHTML = `<div class="daily5-head"><span>&#x1F4CA; <span data-i18n="nav.myProgress">${t('nav.myProgress')}</span></span><button type="button" class="tp-close" onclick="toggleMyProgress()" aria-label="Close my progress">&#x2715;</button></div>
+    <div class="coach-tip" data-i18n="progress.skillsMastered" data-i18n-params="${escAttr(JSON.stringify({done:totalDone,total:totalAll,modules:MODULE_MANIFEST.length}))}">${t('progress.skillsMastered',{done:totalDone,total:totalAll,modules:MODULE_MANIFEST.length})}</div>
     <div class="card">${rows}</div>`;
+  if(typeof applyI18n === 'function') applyI18n(p);
   focusPanel(p);
 }
 
