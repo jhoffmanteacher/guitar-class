@@ -1034,7 +1034,7 @@ MODULE_SONGS[4] = [
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Full solo using Am pentatonic across 4 strings', meta_es: 'Solo completo usando Am pentatónica en 4 cuerdas', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8',
-        backingUrl: 'https://www.youtube.com/watch?v=Vq8cApzOdy8',
+        backingUrl: 'audio/neil-young-all-along-the-watchtower-backing-Am-115bpm-440hz-rhythm-down.mp3',
         backingKey: 'Am' },
       { name: '"the cure" — Olivia Rodrigo', meta: 'Full solo · A minor pentatonic', meta_es: 'Solo completo · A menor pentatónica', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',

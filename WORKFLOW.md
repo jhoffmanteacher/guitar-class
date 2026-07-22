@@ -230,7 +230,20 @@
       plus a metronome variant (`...-rhythm-down-metronome.mp3`), replacing the
       generic Dm YouTube loop on the Journey page — same local-`<audio>` +
       Metronome-toggle pattern as "the cure." Song is already capo-free, so no
-      capo cleanup was needed. **Naming convention going forward:**
+      capo cleanup was needed. **Watchtower is DONE (2026-07-22):** swapped to
+      Jonathan's own **Neil Young cover, A-minor, 115 BPM** rhythm-down mix
+      (`audio/neil-young-all-along-the-watchtower-backing-Am-115bpm-440hz-rhythm-down.mp3`)
+      plus a metronome variant (`...-rhythm-down-metronome.mp3`), replacing the
+      generic Am YouTube jam loop (`Vq8cApzOdy8`) on the Journey page — same
+      local-`<audio>` + Metronome-toggle pattern, wired in both
+      `tabs/all-along-the-watchtower.html` and `module-4.js`'s `MODULE_SONGS`
+      entry (the display name stays "Dylan / Hendrix" per the artist-stays-out-
+      of-display-metadata rule — only the filename carries the Neil Young
+      slug). Song is already capo-free and already in the site's teaching key
+      (Am), so no key/capo cleanup was needed. Browser-verified: play-along
+      button builds the `<audio>` element with a resolvable source, Metronome
+      toggle correctly swaps to the `-metronome` variant. **Naming convention
+      going forward:**
       `<artist-slug>-<song-slug>-backing-<key>-<bpm>bpm-<tuning>hz-<mix>.mp3` —
       see the "Backing-track naming & tuning" section in `CLAUDE.md` for the
       full rule (every track ships at A=440, exported directly from Moises).
@@ -255,7 +268,6 @@
         - Seven Nation Army — `sbN1wfDb4sw`
         - Sweet Child O' Mine — `kkZI8Lma8UA`
         - Let It Be — `xHhfKZAH_EU`
-        - Watchtower — `Vq8cApzOdy8` (generic Am jam loop, no vocals)
       Give Claude the file(s) — it'll copy into `audio/`, rename to convention,
       wire, run `tools/checks.mjs`, and verify before pushing.
 
