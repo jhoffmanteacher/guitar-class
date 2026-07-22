@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-22 — Every module is now in real, hand-written Spanish
+
+### Added
+- **All twelve modules are now fully hand-translated into Spanish** —
+  fretboard mapping, scales and keys, chords and harmony, and fingerstyle
+  (Modules 9–12) join Modules 1–8 from the past few sessions. Every step,
+  hint, song, and self-assessment across the whole course now reads like a
+  native Spanish lesson, not a machine translation. Next up: the six Song
+  Journey pages and the practice games, then Google Translate comes out
+  entirely.
+
 ## 2026-07-22 — Modules 7 and 8 are now in real, hand-written Spanish
 
 ### Added

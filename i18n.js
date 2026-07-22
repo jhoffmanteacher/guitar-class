@@ -106,6 +106,36 @@
        rest stroke / free stroke (classical → apoyando (toque de apoyo) /
          plucking technique)                  tirando (toque libre) — the
                                                authentic Spanish-origin terms
+       capo (the physical device)           → capo (kept — distinct from
+                                               "cejilla", the barre TECHNIQUE)
+       octave shape (fretboard-mapping shortcut) → forma de octava
+       B-string bump (the half-step tuning offset when → el desfase de la
+         an octave shape crosses onto the B/high-e string) cuerda B
+       whole step / half step               → tono / semitono
+       transpose / transposing              → transponer / transposición
+       relative minor / relative major (relative key) → relativa menor /
+                                               relativa mayor (la relativa)
+       parallel minor                       → la paralela menor
+       lick (short solo phrase)             → lick (kept — same loanword
+                                               treatment as riff/vamp/chug)
+       key (musical key, e.g. "key of C")   → tonalidad
+       triad                                → tríada
+       slash chord                          → acorde con bajo alterno
+       home chord (the tonic chord, e.g. the I) → acorde base (pairs with
+                                               "home note" → "nota base")
+       E-shape / A-shape (barre chord)      → forma de E / forma de A
+       quick change (12-bar blues variant)  → cambio rápido
+       comp / comping (backing chords while another solos) → acompañar /
+                                               acompañamiento
+       chorus (blues: one full 12-bar cycle) → ronda
+       shuffle (rhythmic feel)              → shuffle (kept — same loanword
+                                               treatment as groove/chug/vamp)
+       chord family                         → familia de acordes
+       diatonic                             → diatónico/a
+       waltz (named 3/4 style/feel)         → vals
+       downbeat (first/strongest beat of a bar) → tiempo fuerte
+       fill (short extra run between main parts) → relleno
+       roll (fingerpicked ascending run through a chord) → floreo
   */
   const I18N = {
     // ── Header ──

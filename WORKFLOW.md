@@ -177,9 +177,39 @@
       an explicit coordinator-level English-leak sweep across all touched
       files at the end of every session, not just trusting each module's
       own verify pass in isolation.
-      **Next session:** translate 1–2 more modules (Module 9 next), or
-      move to tabs/ + games once all twelve are done — see CLAUDE.md's
-      per-session workflow.
+      **Session 5 (2026-07-22): Modules 9–12, done & browser-verified —
+      ALL TWELVE MODULES NOW COMPLETE.** First 4-module batch (previous
+      sessions did 2–3 at a time) via the same translate→verify→backfill
+      pipeline; concurrency handled it fine (12 agents total, no
+      collisions). These four modules lean much more into music theory
+      than 1–8, so most of the session's new vocabulary is theory terms:
+      whole/half step → tono/semitono, transpose → transponer (a
+      translator initially coined "transportar," caught its own drift via
+      the "grep modules 1-8 first" instruction, and self-corrected to the
+      pre-existing module-4 term before finalizing — the instruction
+      worked as intended), relative/parallel minor, key → tonalidad,
+      triad → tríada, slash chord → acorde con bajo alterno, home chord →
+      acorde base (paired with the existing "home note" → "nota base"),
+      E-shape/A-shape barre → forma de E / forma de A, comp/comping →
+      acompañar, chorus (blues) → ronda, chord family → familia de
+      acordes, diatonic → diatónico/a, waltz → vals, downbeat → tiempo
+      fuerte, fill → relleno, roll → floreo, plus Module 9's own
+      fretboard-mapping terms (octave shape → forma de octava, the
+      B-string tuning offset → el desfase de la cuerda B). Also explicitly
+      added "capo (the physical device) → capo, kept — distinct from
+      cejilla" to the glossary, since Module 11 uses both concepts close
+      together and a translator could plausibly conflate them (one did,
+      briefly, in session 4's Module 8 — see that session's notes — this
+      makes the distinction explicit going forward).
+      Coordinator's own cross-file sweep (the session-4 lesson, now a
+      standing step) specifically re-checked for "power chords"/"barre"
+      slipping through untranslated in modules 9-12's forward/summary
+      text — found zero leaks this time, confirming the tightened
+      translator+verifier briefs (explicit instruction to grep for
+      established terms, not just new ones) closed that gap.
+      **Next: tabs/ (the six Song Journey pages) and coach.js (the
+      practice games), then the final cleanup session that removes Google
+      Translate entirely** — see CLAUDE.md's "Later stages."
 - [ ] **Custom backing tracks for the six journey-page play-alongs — Jonathan
       is making them himself** (Jonathan, 2026-07-20; plan to do all six
       confirmed 2026-07-22) — every Song Journey page has a "🎵 Play along"

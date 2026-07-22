@@ -59,6 +59,29 @@ a bilingual colleague or student aide if you'd like a native-speaker check.
 | pinch (thumb+finger plucked together) | pellizco / pellizcar |
 | alternating bass | bajo alternante |
 | rest stroke / free stroke (classical plucking technique) | apoyando (toque de apoyo) / tirando (toque libre) — the authentic Spanish-origin terms |
+| capo (the physical device) | capo (kept — distinct from "cejilla", the barre technique) |
+| octave shape (fretboard-mapping shortcut) | forma de octava |
+| B-string bump (half-step tuning offset when an octave shape crosses onto the B/high-e string) | el desfase de la cuerda B |
+| whole step / half step | tono / semitono |
+| transpose / transposing | transponer / transposición |
+| relative minor / relative major (relative key) | relativa menor / relativa mayor (la relativa) |
+| parallel minor | la paralela menor |
+| lick (short solo phrase) | lick (kept — same loanword treatment as riff/vamp/chug) |
+| key (musical key, e.g. "key of C") | tonalidad |
+| triad | tríada |
+| slash chord | acorde con bajo alterno |
+| home chord (the tonic chord, e.g. the I) | acorde base (pairs with "home note" → "nota base") |
+| E-shape / A-shape (barre chord) | forma de E / forma de A |
+| quick change (12-bar blues variant) | cambio rápido |
+| comp / comping (backing chords while another solos) | acompañar / acompañamiento |
+| chorus (blues: one full 12-bar cycle) | ronda |
+| shuffle (rhythmic feel) | shuffle (kept — same loanword treatment as groove/chug/vamp) |
+| chord family | familia de acordes |
+| diatonic | diatónico/a |
+| waltz (named 3/4 style/feel) | vals |
+| downbeat (first/strongest beat of a bar) | tiempo fuerte |
+| fill (short extra run between main parts) | relleno |
+| roll (fingerpicked ascending run through a chord) | floreo |
 
 ## Header
 
@@ -3899,3 +3922,1890 @@ MODULE_SONGS[8] meta fields (song title shown for reference, not itself translat
 | assessItem: Fingerpick a 4-chord progression with the 6-note arpeggio, keeping the pattern unbroken through every chord change | Toca con fingerpicking una progresión de 4 acordes con el arpegio de 6 notas, manteniendo el patrón sin interrupciones en cada cambio de acorde |
 | assessItem: Perform one full fingerpicked song from the song list start to finish, recovering from any mistakes without stopping | Interpreta una canción completa con fingerpicking de la lista de canciones de principio a fin, recuperándote de cualquier error sin detenerte |
 | forward: You've got the full first-half toolkit — notes, chords, power chords, lead, barre, strumming, and fingerpicking. <strong>The second half of the course goes deeper:</strong> Module 9 finishes the fretboard (all six strings) and teaches you to write your own TAB — the first step toward learning any song on your own. | Ya tienes el kit de herramientas completo de la primera mitad — notas, acordes, power chords, solos, cejilla, rasgueo y fingerpicking. <strong>La segunda mitad del curso profundiza más:</strong> el Módulo 9 termina el mástil (las seis cuerdas) y te enseña a escribir tu propio TAB — el primer paso hacia aprender cualquier canción por tu cuenta. |
+
+## Module 9 — The Full Fretboard & Writing TAB
+
+### Set 1
+
+| English | Spanish |
+|---|---|
+| unit: Module 9 · The Full Fretboard & Writing TAB | Módulo 9 · El mástil completo y cómo escribir TAB |
+| subtitle: Welcome back · Prove it, don't re-learn it | Bienvenido de vuelta · Demuéstralo, no lo vuelvas a aprender |
+| skillFocus: Six quick re-tests: open chords · strumming · pentatonic · power chords · TAB reading · fingerpicking | Seis repasos rápidos: acordes abiertos · rasgueo · pentatónica · acordes de potencia · lectura de TAB · fingerpicking |
+| Station B title: Computer station — Where do I start? | Estación de computadora — ¿Por dónde empiezo? |
+| Section title: The six re-tests — rate yourself honestly | Los seis repasos — evalúate con honestidad |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — clear it or flag it | Estación de práctica — apruébalo o márcalo |
+| Section title: Warm-up — tuning check (Module 1) | Calentamiento — revisión de afinación (Módulo 1) |
+| Section title: The six re-tests — mark each one as you go | Los seis repasos — márcalos a medida que avanzas |
+
+**Station B — The six re-tests — rate yourself honestly**
+
+| English | Spanish |
+|---|---|
+| text: This set has zero new material. It's a checkpoint: six things you could already do before the break. Play each one RIGHT NOW as you read it, then answer honestly — solid, shaky, or gone. Nothing here is graded; a "gone" just tells you where to spend your first practice session. | Esta unidad no tiene material nuevo. Es un chequeo: seis cosas que ya podías hacer antes del receso. Toca cada una AHORA MISMO mientras la lees, y luego responde con honestidad — sólida, insegura, o perdida. Nada de esto se califica; un "perdida" solo te dice dónde pasar tu primera sesión de práctica. |
+| hint: Everyone loses a little over a break. Finding out exactly what you lost is the fastest way to get it back — usually it returns in a day or two, not weeks. | Todos pierden algo durante un receso. Descubrir exactamente qué perdiste es la forma más rápida de recuperarlo — normalmente vuelve en un día o dos, no en semanas. |
+| text: Re-test 1 — Open chords (Module 5): loop C → G → Am → F, two bars each at 60 BPM. Can you still land every change on beat 1 without breaking the strum? | Repaso 1 — Acordes abiertos (Módulo 5): repite C → G → Am → F, dos compases cada uno a 60 BPM. ¿Todavía puedes caer en cada cambio justo en el tiempo 1 sin romper el rasgueo? |
+| hint: If one change drags, name it — that exact change is your first One-Minute Changes drill (a drill is a short exercise you repeat to build a skill). | Si un cambio se atrasa, identifícalo — ese cambio exacto es tu primer ejercicio de Cambios de Un Minuto (un ejercicio es una actividad corta que repites para desarrollar una destreza). |
+| response placeholder: Solid / shaky / gone — which change gives you trouble? | Sólida / insegura / perdida — ¿cuál cambio te cuesta trabajo? |
+| text: Re-test 2 — Strumming (Module 6): D-DU-UDU over a G → C change at 70 BPM. Does the pattern keep running while the chord moves, or does it break at the change? | Repaso 2 — Rasgueo (Módulo 6): D-DU-UDU sobre un cambio de G → C a 70 BPM. ¿El patrón sigue corriendo mientras cambia el acorde, o se rompe en el cambio? |
+| hint: Watch your strum hand, not your fret hand — the pattern should not care which chord is underneath. | Observa tu mano de rasgueo, no tu mano de trastear — al patrón no le debería importar cuál acorde hay debajo. |
+| response placeholder: Solid / shaky / gone — does the pattern break at the change? | Sólida / insegura / perdida — ¿el patrón se rompe en el cambio? |
+| text: Re-test 3 — Pentatonic (Module 4): Pattern 1, up and back down, from memory. No diagram, every note on a 60 BPM click? | Repaso 3 — Pentatónica (Módulo 4): Patrón 1, hacia arriba y de vuelta hacia abajo, de memoria. ¿Sin diagrama, cada nota en el clic a 60 BPM? |
+| hint: Hesitations count as "shaky" — you should know the pattern by feel, not by reading it. | Las dudas cuentan como "insegura" — deberías saber el patrón por sensación, no por leerlo. |
+| response placeholder: Solid / shaky / gone — where do you hesitate? | Sólida / insegura / perdida — ¿dónde dudas? |
+| text: Re-test 4 — Power chords (Module 3): move the two-finger shape E5 → G5 → A5, one change per bar, landing on the beat and naming each chord as you land it. | Repaso 4 — Acordes de potencia (Módulo 3): mueve la forma de dos dedos E5 → G5 → A5, un cambio por compás, cayendo en el tiempo y nombrando cada acorde al caer en él. |
+| hint: Frets 0 → 3 → 5 on the low E root. If you're counting frets to find G5, that's a "shaky." | Trastes 0 → 3 → 5 con raíz en la Mi grave. Si estás contando trastes para encontrar G5, eso es "insegura." |
+| response placeholder: Solid / shaky / gone — can you still name them quickly while playing? | Sólida / insegura / perdida — ¿todavía puedes nombrarlos rápido mientras tocas? |
+| text: Re-test 5 — TAB reading (Module 2): open any Song Journey page and find a section you've never played. Can you read 4 bars cold (cold = playing it the very first time you see it, no practice) — right strings, right frets, left to right? | Repaso 5 — Lectura de TAB (Módulo 2): abre cualquier página de Recorrido de la canción y busca una sección que nunca hayas tocado. ¿Puedes leer 4 compases a primera vista (a primera vista = tocarlo la primera vez que lo ves, sin práctica) — cuerdas correctas, trastes correctos, de izquierda a derecha? |
+| hint: It must be TAB you haven't drilled — reading from memory isn't reading. | Debe ser TAB que no hayas practicado — leer de memoria no es leer. |
+| response placeholder: Solid / shaky / gone — what did you read, and how did it go? | Sólida / insegura / perdida — ¿qué leíste, y cómo te fue? |
+| text: Re-test 6 — Fingerpicking (Module 8): p-i-m-a over Am, thumb on the A string, without stopping. Then change Em → Am and let the thumb switch bass strings while i-m-a stay put. | Repaso 6 — Fingerpicking (Módulo 8): p-i-m-a sobre Am, pulgar en la cuerda La, sin detenerte. Luego cambia Em → Am y deja que el pulgar cambie de cuerda grave mientras i-m-a se quedan quietos. |
+| hint: The fingers keep their strings for the whole test — only the thumb travels. | Los dedos mantienen sus cuerdas durante toda la prueba — solo el pulgar viaja. |
+| response placeholder: Solid / shaky / gone — did the thumb switch make you mess up? | Sólida / insegura / perdida — ¿el cambio del pulgar te hizo equivocarte? |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Look at your six answers. Which ONE re-test most needs more practice before you go deeper into Module 9? That's the first thing you practice next session — the original module's sets are all still there when you need them. | Mira tus seis respuestas. ¿Cuál ÚNICO repaso necesita más práctica antes de profundizar en el Módulo 9? Eso es lo primero que practicas la próxima sesión — las unidades del módulo original siguen ahí cuando las necesites. |
+| hint: One focused session on your weakest re-test is better than a vague "practice everything." | Una sesión enfocada en tu repaso más débil vale más que un vago "practicar todo." |
+| response placeholder: e.g. Re-test 3 — Pattern 1 is half-gone; starting next session with Module 4, Set 1 | p. ej. Repaso 3 — el Patrón 1 está a medio olvidar; empiezo la próxima sesión con el Módulo 4, Unidad 1 |
+
+**Station C — Warm-up — tuning check (Module 1)**
+
+| English | Spanish |
+|---|---|
+| text: Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You've got it when: in tune before today's work. | Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy. |
+| hint: A break detunes guitars as reliably as it makes your fingers out of practice — check first. | Un receso desafina las guitarras tan seguro como desentrena tus dedos — revisa primero. |
+| playSeq label: Hear all 6 strings in tune | Escucha las 6 cuerdas afinadas |
+
+**Station C — The six re-tests — mark each one as you go**
+
+| English | Spanish |
+|---|---|
+| text: How this works: play each re-test below, then mark its skill on the checklist. Clear it → "I've got it!". Struggle → "Still working on it" — that's not a failure, it's your practice list, and the pointer next to each re-test tells you exactly which module rebuilds it. | Cómo funciona: toca cada repaso de abajo, y luego marca su destreza en la lista de verificación. Lo apruebas → "¡Ya lo tengo!". Te cuesta → "Todavía en proceso" — eso no es un fracaso, es tu lista de práctica, y el enlace junto a cada repaso te dice exactamente cuál módulo lo reconstruye. |
+| hint: Be strict. A generous self-check here just hides work that will come back in Module 10. | Sé estricto. Una autoevaluación generosa aquí solo esconde trabajo que reaparecerá en el Módulo 10. |
+| text: Re-test 1 — Open chords: 2 bars each of C, G, Am, F at 60 BPM, looped twice, every change on beat 1. Where to practice it: Module 5, Set 2 (the C–G–Am–F Loop and One-Minute Changes). | Repaso 1 — Acordes abiertos: 2 compases cada uno de C, G, Am, F a 60 BPM, repetido dos veces, cada cambio en el tiempo 1. Dónde practicarlo: Módulo 5, Unidad 2 (el Loop C–G–Am–F y Cambios de Un Minuto). |
+| hint: Quality bar: no dead strings, no pause at the change. | Nivel de calidad: sin cuerdas apagadas, sin pausa en el cambio. |
+| text: Re-test 2 — Strumming: D-DU-UDU for 4 bars of G, then 4 bars of C at 70 BPM, the pattern never stopping where the two chords meet. Where to practice it: Module 6, Set 2. | Repaso 2 — Rasgueo: D-DU-UDU durante 4 compases de G, y luego 4 compases de C a 70 BPM, el patrón nunca se detiene donde se encuentran los dos acordes. Dónde practicarlo: Módulo 6, Unidad 2. |
+| hint: If it breaks, drop to 60 BPM and rebuild — speed comes back last. | Si se rompe, baja a 60 BPM y reconstrúyelo — la velocidad vuelve al final. |
+| text: Re-test 3 — Pentatonic Pattern 1: up and back down from memory at 60 BPM, every note on the click. Use the play button to hear the target. Where to practice it: Module 4, Set 1. | Repaso 3 — Patrón pentatónico 1: hacia arriba y de vuelta hacia abajo de memoria a 60 BPM, cada nota en el clic. Usa el botón de reproducir para escuchar el objetivo. Dónde practicarlo: Módulo 4, Unidad 1. |
+| hint: Fingers first, speed later — a clean 50 BPM pass is better than a sloppy 60. | Primero los dedos, luego la velocidad — una pasada limpia a 50 BPM vale más que una desordenada a 60. |
+| playSeq label: Am pentatonic Pattern 1 (ascending) | Patrón pentatónico 1 de Am (ascendente) |
+| text: Re-test 4 — Power chords: E5 → G5 → A5 (low-E root, frets 0 → 3 → 5), one bar each on the beat, saying each name as you land it. Where to practice it: Module 3, Set 1. | Repaso 4 — Acordes de potencia: E5 → G5 → A5 (raíz en la Mi grave, trastes 0 → 3 → 5), un compás cada uno en el tiempo, diciendo cada nombre al caer en él. Dónde practicarlo: Módulo 3, Unidad 1. |
+| hint: Two fingers, unused strings muted — the mute is part of the skill. | Dos dedos, las cuerdas que no usas silenciadas — el silenciado es parte de la destreza. |
+| text: Re-test 5 — TAB cold read: 4 bars of TAB you've never played, from any Song Journey page, right strings and frets in order. Where to practice it: Module 2, Set 2. | Repaso 5 — Lectura a primera vista de TAB: 4 compases de TAB que nunca hayas tocado, de cualquier página de Recorrido de la canción, cuerdas y trastes correctos en orden. Dónde practicarlo: Módulo 2, Unidad 2. |
+| hint: Slow is fine — sight-reading is decoding, not speed. | Ir despacio está bien — la lectura a primera vista es descifrar, no velocidad. |
+| text: Re-test 6 — Fingerpicking: p-i-m-a over Am (thumb on A) for 4 bars without stopping, then Em → Am with the thumb switching bass strings while you keep playing. Where to practice it: Module 8, Sets 1–2. | Repaso 6 — Fingerpicking: p-i-m-a sobre Am (pulgar en La) durante 4 compases sin detenerte, y luego Em → Am con el pulgar cambiando de cuerda grave mientras sigues tocando. Dónde practicarlo: Módulo 8, Unidades 1–2. |
+| hint: Even volume across all four fingers — listen for the weak one. | Volumen parejo en los cuatro dedos — escucha cuál es el más débil. |
+| text: The fast round: record yourself playing all six re-tests back to back, then listen with the checklist open and settle any you weren't sure about. Cleared all six? Module 9 proper starts at Set 2. Flagged some? Spend a session with the practice spots listed above first — they come back fast. | La ronda rápida: grábate tocando los seis repasos seguidos, y luego escucha con la lista de verificación abierta y resuelve cualquiera del que no estuvieras seguro. ¿Aprobaste los seis? El Módulo 9 propiamente empieza en la Unidad 2. ¿Marcaste algunos? Dedica una sesión a los puntos de práctica listados arriba primero — vuelven rápido. |
+| hint: The recording shows exactly how you really sounded — that's exactly why it's useful. | La grabación muestra exactamente cómo sonaste de verdad — por eso es tan útil. |
+
+**Set 1 — Skills**
+
+| English | Spanish |
+|---|---|
+| m9w0-s1 text: RE-TEST: Switch C → G → Am → F smoothly at 60 BPM | REPASO: Cambiar C → G → Am → F sin problemas a 60 BPM |
+| m9w0-s1 gotItWhen: you loop C → G → Am → F, two bars each at 60 BPM, landing every change on beat 1 without breaking the strum. Level up: pick any two of those four at random (shuffle homemade flashcards, or close your eyes and point at the chart) and switch between them on beat 1 at 70 BPM. | repites C → G → Am → F, dos compases cada uno a 60 BPM, cayendo en cada cambio en el tiempo 1 sin romper el rasgueo. Sube de nivel: elige dos de esos cuatro al azar (baraja tarjetas caseras, o cierra los ojos y señala el diagrama) y cambia entre ellos en el tiempo 1 a 70 BPM. |
+| m9w0-s2 text: RE-TEST: Play D-DU-UDU over a G–C change at 70 BPM | REPASO: Tocar D-DU-UDU sobre un cambio de G–C a 70 BPM |
+| m9w0-s2 gotItWhen: you switch from G to C (or any two chords) and the pattern doesn't change at all — only the chord underneath does. | cambias de G a C (o cualquier par de acordes) y el patrón no cambia para nada — solo cambia el acorde debajo. |
+| m9w0-s3 text: RE-TEST: Play pentatonic Pattern 1 up and down at 60 BPM | REPASO: Tocar el Patrón pentatónico 1 hacia arriba y hacia abajo a 60 BPM |
+| m9w0-s3 gotItWhen: you can play the full pattern up and back down without looking at a diagram, with no missed notes or hesitations. | puedes tocar el patrón completo hacia arriba y de vuelta hacia abajo sin mirar un diagrama, sin notas perdidas ni dudas. |
+| m9w0-s3 practice label: Am pentatonic Pattern 1 (ascending) | Patrón pentatónico 1 de Am (ascendente) |
+| m9w0-s4 text: RE-TEST: Move a two-finger power chord E5 → G5 → A5 on the beat | REPASO: Mover un acorde de potencia de dos dedos E5 → G5 → A5 en el tiempo |
+| m9w0-s4 gotItWhen: you can move the same shape to any of those positions whenever you want and name the chord without counting frets. | puedes mover la misma forma a cualquiera de esas posiciones cuando quieras y nombrar el acorde sin contar trastes. |
+| m9w0-s5 text: RE-TEST: Read and play a 4-bar TAB you haven't seen before | REPASO: Leer y tocar un TAB de 4 compases que no hayas visto antes |
+| m9w0-s5 gotItWhen: you can look at a short TAB line you haven't drilled, identify which string and fret each number refers to, and play it — that's sight-reading. | puedes mirar una línea corta de TAB que no hayas practicado, identificar a cuál cuerda y traste se refiere cada número, y tocarla — eso es lectura a primera vista. |
+| m9w0-s6 text: RE-TEST: Fingerpick p-i-m-a over Am without stopping | REPASO: Tocar con fingerpicking p-i-m-a sobre Am sin detenerte |
+| m9w0-s6 gotItWhen: you can switch your THUMB from low E to A string when the chord changes Em → Am, while i-m-a stay on G-B-e the whole time. | puedes cambiar tu PULGAR de la Mi grave a la cuerda La cuando el acorde cambia Em → Am, mientras i-m-a se quedan en G-B-e todo el tiempo. |
+
+### Set 2
+
+| English | Spanish |
+|---|---|
+| unit: Module 9 · The Full Fretboard & Writing TAB | Módulo 9 · El mástil completo y cómo escribir TAB |
+| subtitle: Notes on D & G · The octave shortcut · Sharps & flats | Notas en D y G · El atajo de la octava · Sostenidos y bemoles |
+| skillFocus: Natural notes on D (0–12) · Natural notes on G (0–12) · The two-string octave shape | Notas naturales en D (0–12) · Notas naturales en G (0–12) · La forma de octava de dos cuerdas |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch the lesson videos | Mira los videos de la lección |
+| Section title: Listen for the note names | Escucha los nombres de las notas |
+| Section title: Try naming from anywhere on the neck | Prueba nombrar desde cualquier parte del mástil |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — the D and G strings | Estación de práctica — las cuerdas D y G |
+| Section title: Warm-up — tuning check (Module 1) | Calentamiento — revisión de afinación (Módulo 1) |
+| Section title: Say-then-play the D and G strings | Di y luego toca las cuerdas D y G |
+| Section title: Flashcard flash-drill | Ejercicio relámpago de tarjetas |
+| Section title: Take It to a Song | Llévalo a una canción |
+| Section title: Station Wrap-Up | Cierre de la estación |
+
+**Station B — Watch the lesson videos**
+
+| English | Spanish |
+|---|---|
+| text: Watch: Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music (0:00–6:00). Follow along on your own guitar as he walks the D and G strings. | Mira: Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music (0:00–6:00). Sigue el ritmo en tu propia guitarra mientras él recorre las cuerdas D y G. |
+| hint: Marty builds the fretboard the same way you already know the E and A strings from Module 2 — natural notes, then the sharps and flats that sit between them. | Marty construye el mástil de la misma manera que ya conoces las cuerdas E y A del Módulo 2 — notas naturales, y luego los sostenidos y bemoles que están entre ellas. |
+| response prompt: The D string at fret 2 is which note? | ¿Cuál nota es la cuerda D en el traste 2? |
+| response explain: D to E is a whole step — two frets — with D# sitting at fret 1 between them. | De D a E hay un tono entero — dos trastes — con D# ubicado en el traste 1 entre ambas. |
+| response choices: D# / E / F / C | D# / E / F / C |
+| text: Watch: Open Notes On The Guitar | Practical Beginner Lesson – JustinGuitar as a refresher on the open strings, then apply the same idea moving up the D and G strings fret by fret. | Mira: Open Notes On The Guitar | Practical Beginner Lesson – JustinGuitar como repaso de las cuerdas al aire, y luego aplica la misma idea subiendo por las cuerdas D y G traste por traste. |
+| hint: Refresh how each open string got its name in Module 1 — the exact same logic just keeps climbing the neck one fret at a time. | Refresca cómo cada cuerda al aire recibió su nombre en el Módulo 1 — es exactamente la misma lógica, solo que sigue subiendo por el mástil un traste a la vez. |
+| response prompt: On the G string, C sits at which fret? | En la cuerda G, ¿en cuál traste está C? |
+| response explain: G(0) → A(2) → B(4) → C(5). B to C is a half step, so C is only one fret above B. | G(0) → A(2) → B(4) → C(5). De B a C hay un semitono, así que C está solo un traste arriba de B. |
+| response choices: 3 / 4 / 5 / 7 | 3 / 4 / 5 / 7 |
+
+**Station B — Listen for the note names**
+
+| English | Spanish |
+|---|---|
+| text: Listen for it: play up the D string one fret at a time, saying each note name OUT LOUD before you check a chart. Then do the same up the G string. Notice where you hesitate — that's tonight's target. | Escucha esto: toca hacia arriba por la cuerda D un traste a la vez, diciendo cada nombre de nota EN VOZ ALTA antes de revisar un diagrama. Luego haz lo mismo en la cuerda G. Fíjate dónde dudas — ese es tu objetivo de esta noche. |
+| hint: Naming a note before you check it (not after) is what actually builds the recall — reading a chart at the same time you say the name just trains you to read the chart. | Nombrar una nota antes de revisarla (no después) es lo que realmente construye la memoria — leer un diagrama al mismo tiempo que dices el nombre solo te entrena a leer el diagrama. |
+| response prompt: You know A is at fret 5 on the low E string. Using the octave shape — two strings down, two frets up — where's the next A? | Sabes que A está en el traste 5 de la cuerda Mi grave. Usando la forma de octava — dos cuerdas hacia abajo, dos trastes hacia arriba — ¿dónde está la siguiente A? |
+| response explain: From the low E or A string, the octave lives two strings toward the floor and two frets toward the body. | Desde la cuerda Mi grave o La, la octava vive dos cuerdas hacia el piso y dos trastes hacia el cuerpo de la guitarra. |
+| response choices: D string, fret 7 / G string, fret 5 / D string, fret 5 / A string, fret 7 | Cuerda D, traste 7 / Cuerda G, traste 5 / Cuerda D, traste 5 / Cuerda A, traste 7 |
+
+**Station B — Try naming from anywhere on the neck**
+
+| English | Spanish |
+|---|---|
+| text: Now try it: starting from any note you already know on the low E or A string, use the octave shape (two strings down, two frets up) to find its twin on the D or G string. Try it from three different starting notes. | Ahora pruébalo: empezando desde cualquier nota que ya conozcas en la cuerda Mi grave o La, usa la forma de octava (dos cuerdas hacia abajo, dos trastes hacia arriba) para encontrar su gemela en la cuerda D o G. Pruébalo desde tres notas de partida distintas. |
+| hint: This is the whole point of the octave shape — it turns one memorized note into a second one for free, anywhere on the neck. | Este es todo el sentido de la forma de octava — convierte una nota memorizada en una segunda gratis, en cualquier parte del mástil. |
+| response prompt: Which two natural notes have NO sharp or flat between them? | ¿Cuáles dos notas naturales NO tienen sostenido ni bemol entre ellas? |
+| response explain: B–C and E–F are the two natural half steps — one fret apart, nothing in between. | B–C y E–F son los dos semitonos naturales — un traste de separación, nada en medio. |
+| response choices: A and B / B and C / C and D / F and G | A y B / B y C / C y D / F y G |
+| text: Try the top of the neck: play fret 12 on the D string, then fret 12 on the G string. Say what you notice about fret 12 compared to the open string. | Prueba la parte alta del mástil: toca el traste 12 en la cuerda D, y luego el traste 12 en la cuerda G. Di qué notas sobre el traste 12 comparado con la cuerda al aire. |
+| hint: Fret 12 is the octave marker on every string — look for the double-dot inlay as your landmark. | El traste 12 es el marcador de octava en cada cuerda — busca el incrustado de doble punto como tu referencia. |
+| response prompt: The D string at fret 12 is which note? | ¿Cuál nota es la cuerda D en el traste 12? |
+| response explain: Fret 12 is always the octave — the same note as the open string, one octave higher. | El traste 12 siempre es la octava — la misma nota que la cuerda al aire, una octava más aguda. |
+| response choices: C / D / E / D# | C / D / E / D# |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — which string's notes stuck faster today, D or G, and what trick helped? | Cierre de la estación — ¿las notas de cuál cuerda se te quedaron más rápido hoy, D o G, y qué truco ayudó? |
+| response placeholder: e.g. G was easier — its B–C half step gave me a landmark at fret 4; the octave shape helped me check myself | p. ej. G fue más fácil — su semitono B–C me dio una referencia en el traste 4; la forma de octava me ayudó a comprobarme |
+
+**Station C — Warm-up — tuning check (Module 1)**
+
+| English | Spanish |
+|---|---|
+| text: Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You've got it when: in tune before today's work. | Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy. |
+| hint: Every note-naming drill today depends on your strings actually being in tune — check first. | Cada ejercicio de nombrar notas de hoy depende de que tus cuerdas realmente estén afinadas — revisa primero. |
+| playSeq label: Hear all 6 strings in tune | Escucha las 6 cuerdas afinadas |
+
+**Station C — Say-then-play the D and G strings**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 1 — D-String Naturals: say-then-play every natural note on the D string, low to high, 0 through 12. You've got it when: naming them takes under 15 seconds with no chart. | Reto 1 — Notas naturales de la cuerda D: di y luego toca cada nota natural de la cuerda D, de grave a aguda, del traste 0 al 12. Lo tienes cuando: nombrarlas te toma menos de 15 segundos sin diagrama. |
+| hint: Say the note name first, THEN play it — that order is what builds the recall. | Di el nombre de la nota primero, y LUEGO tócala — ese orden es lo que construye la memoria. |
+| stuck: Cover frets 0–5 (D–A) first, get those solid, then add 7–12. | Cubre primero los trastes 0–5 (D–A), domínalos, y luego agrega 7–12. |
+| levelUp: Say-then-play backwards, high to low. | Di y luego toca al revés, de aguda a grave. |
+| playSeq label: D-string naturals, low to high | Notas naturales de la cuerda D, de grave a aguda |
+| text: Challenge 2 — G-String Naturals: same drill on the G string, low to high, 0 through 12. | Reto 2 — Notas naturales de la cuerda G: el mismo ejercicio en la cuerda G, de grave a aguda, del traste 0 al 12. |
+| hint: Each string has TWO natural half steps (notes one fret apart) between frets 0 and 12. The first one you meet going up: on D it's E–F (F at fret 3), on G it's B–C (B at fret 4, C at fret 5). The other pair sits at frets 9–10 on both strings — B–C on the D string, E–F on the G string. | Cada cuerda tiene DOS semitonos naturales (notas separadas por un traste) entre los trastes 0 y 12. El primero que encuentras subiendo: en D es E–F (F en el traste 3), en G es B–C (B en el traste 4, C en el traste 5). El otro par está en los trastes 9–10 en ambas cuerdas — B–C en la cuerda D, E–F en la cuerda G. |
+| stuck: Cover frets 0–5 (G–C) first, then add 5–12. | Cubre primero los trastes 0–5 (G–C), y luego agrega 5–12. |
+| levelUp: Time yourself — name a random fret correctly three times in a row, then try to beat your time. Got someone around? Race them instead. | Cronométrate — nombra un traste al azar correctamente tres veces seguidas, y luego intenta superar tu tiempo. ¿Tienes a alguien cerca? Compite contra esa persona. |
+| playSeq label: G-string naturals, low to high | Notas naturales de la cuerda G, de grave a aguda |
+
+**Station C — Flashcard flash-drill**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 3 — Flash Drill (your assessment piece): make flashcards — write each natural note name (A through G) on its own slip of paper, shuffle them face-down, and draw one at a time. Find each drawn note on the D or G string within 5 seconds, switching strings every 5 draws. You've got it when: 8 out of 10 correct within 5 seconds each, on both strings. Got someone around? Have them call the notes instead of drawing cards. | Reto 3 — Ejercicio relámpago (tu pieza de evaluación): haz tarjetas — escribe cada nombre de nota natural (de A a G) en su propia tira de papel, barájalas boca abajo, y saca una a la vez. Encuentra cada nota sacada en la cuerda D o G en menos de 5 segundos, cambiando de cuerda cada 5 tarjetas. Lo tienes cuando: 8 de 10 correctas en menos de 5 segundos cada una, en ambas cuerdas. ¿Tienes a alguien cerca? Que te diga las notas en vez de sacar tarjetas. |
+| hint: If you're stuck, use the octave shape from a string you already know instead of counting up one fret at a time. | Si te atoras, usa la forma de octava desde una cuerda que ya conozcas en vez de contar traste por traste. |
+| stuck: Allow 10 seconds instead of 5 until it's automatic, then lower the time limit again. | Permite 10 segundos en vez de 5 hasta que sea automático, y luego baja el límite de tiempo de nuevo. |
+| levelUp: Add sharp and flat cards too (F#, Bb), or drop to a 3-second limit. | Agrega también tarjetas de sostenidos y bemoles (F#, Bb), o baja el límite a 3 segundos. |
+
+**Station C — Take It to a Song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — Sweet Child O' Mine, name it as you play it: watch the intro-riff clip — a riff is a short musical phrase that repeats — that you first saw in Module 7 (Sweet Child O' Mine Intro in Standard Tuning – Jbf Music & Guitar) and learn just its first two notes, up on the D and G strings around fret 12–15. Say each note's NAME as you play it, using today's D/G-string knowledge to figure it out instead of just copying frets. 🧵 Song Journey: this song's Journey page. | Reto — Sweet Child O' Mine, nómbralo mientras lo tocas: mira el clip del riff de intro — un riff es una frase musical corta que se repite — que viste por primera vez en el Módulo 7 (Sweet Child O' Mine Intro in Standard Tuning – Jbf Music & Guitar) y aprende solo sus primeras dos notas, arriba en las cuerdas D y G alrededor del traste 12–15. Di el NOMBRE de cada nota mientras la tocas, usando lo que sabes hoy de las cuerdas D/G para descifrarla en vez de solo copiar los trastes. 🧵 Recorrido de la canción: la página de Recorrido de esta canción. |
+| hint: This riff lives up the neck on strings you've never named notes on before today — that's exactly why it's the reward for this set. | Este riff vive arriba en el mástil, en cuerdas donde nunca antes habías nombrado notas — por eso es exactamente la recompensa de esta unidad. |
+| stuck: Pause the video on the very first note and just name that one string/fret before moving on. | Pausa el video en la primerísima nota y solo nombra esa cuerda/traste antes de continuar. |
+| levelUp: Name all four notes of the opening phrase before you play them, then check yourself against the video. | Nombra las cuatro notas de la frase de apertura antes de tocarlas, y luego compruébate con el video. |
+
+**Station C — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Which fret on D or G still makes you pause and count? Write it below — that's your warm-up target next time. | ¿Cuál traste en D o G todavía te hace pausar y contar? Escríbelo abajo — ese es tu objetivo de calentamiento la próxima vez. |
+| response placeholder: e.g. fret 9 on the G string — I still count up from the fret-7 dot | p. ej. traste 9 en la cuerda G — todavía cuento desde el punto del traste 7 |
+
+**Set 2 — Skills**
+
+| English | Spanish |
+|---|---|
+| m9w1-s1 text: Name the natural notes on the D string, frets 0–12, in order | Nombrar las notas naturales de la cuerda D, trastes 0–12, en orden |
+| m9w1-s1 gotItWhen: naming them takes under 15 seconds with no chart | nombrarlas te toma menos de 15 segundos sin diagrama |
+| m9w1-s1 practice label: D-string naturals, low to high | Notas naturales de la cuerda D, de grave a aguda |
+| m9w1-s2 text: Name the natural notes on the G string, frets 0–12, in order | Nombrar las notas naturales de la cuerda G, trastes 0–12, en orden |
+| m9w1-s2 practice label: G-string naturals, low to high | Notas naturales de la cuerda G, de grave a aguda |
+| m9w1-s3 text: Find any named note (drawn from a shuffled flashcard) on the D or G string within 5 seconds | Encontrar cualquier nota nombrada (sacada de una tarjeta barajada) en la cuerda D o G en menos de 5 segundos |
+| m9w1-s3 practice prompt: On the D string, G is at which fret? | En la cuerda D, ¿en cuál traste está G? |
+| m9w1-s3 practice choices: 3 / 5 / 7 / 9 | 3 / 5 / 7 / 9 |
+| m9w1-s4 text: Use the octave shape to find a D- or G-string note from an E- or A-string note I already know | Usar la forma de octava para encontrar una nota en D o G a partir de una nota en E o A que ya conozco |
+| m9w1-s4 practice prompt: The octave shape from the low E and A strings moves you: | La forma de octava desde las cuerdas Mi grave y La te mueve: |
+| m9w1-s4 practice choices: Two strings down, two frets up / Two strings down, same fret / One string down, two frets up / Two strings down, three frets up | Dos cuerdas hacia abajo, dos trastes hacia arriba / Dos cuerdas hacia abajo, el mismo traste / Una cuerda hacia abajo, dos trastes hacia arriba / Dos cuerdas hacia abajo, tres trastes hacia arriba |
+| m9w1-s5 text: Play the Sweet Child O' Mine intro fragment on the D and G strings from TAB | Tocar el fragmento de intro de Sweet Child O' Mine en las cuerdas D y G a partir del TAB |
+| m9w1-s6 text: Say which two natural notes any sharp or flat on D or G sits between | Decir entre cuáles dos notas naturales se ubica cualquier sostenido o bemol en D o G |
+| m9w1-s6 practice prompt: F# on the D string sits at which fret? | ¿En cuál traste está F# en la cuerda D? |
+| m9w1-s6 practice choices: 3 / 4 / 5 / 2 | 3 / 4 / 5 / 2 |
+
+### Set 3
+
+| English | Spanish |
+|---|---|
+| unit: Module 9 · The Full Fretboard & Writing TAB | Módulo 9 · El mástil completo y cómo escribir TAB |
+| subtitle: Notes on B & e · The B-string bump · The whole neck | Notas en B y e · El desfase de la cuerda B · Todo el mástil |
+| skillFocus: Naturals on B (0–12) · Naturals on high e (they mirror low E) · The 3-fret octave shift onto B & e | Notas naturales en B (0–12) · Notas naturales en mi aguda (reflejan la Mi grave) · El desplazamiento de octava de 3 trastes hacia B y e |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch the lesson videos | Mira los videos de la lección |
+| Section title: Listen for the six-string landmarks | Escucha las referencias de las seis cuerdas |
+| Section title: Try the whole fretboard | Prueba con todo el mástil |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — the whole fretboard | Estación de práctica — todo el mástil |
+| Section title: Warm-up — tuning check (Module 1) | Calentamiento — revisión de afinación (Módulo 1) |
+| Section title: Say-then-play the B and high-e strings | Di y luego toca las cuerdas B y mi aguda |
+| Section title: Six-string landmark drill | Ejercicio de referencias de las seis cuerdas |
+| Section title: Take It to a Song | Llévalo a una canción |
+| Section title: Station Wrap-Up | Cierre de la estación |
+
+**Station B — Watch the lesson videos**
+
+| English | Spanish |
+|---|---|
+| text: Watch: Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music (6:00–end), finishing the fretboard on the B and high-e strings. | Mira: Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music (6:00–final), terminando el mástil en las cuerdas B y mi aguda. |
+| hint: Notice the B string breaks the pattern you learned last set — it's tuned a half-step "early," which shifts every shape crossing onto it. | Fíjate que la cuerda B rompe el patrón que aprendiste la unidad pasada — está afinada un semitono "antes," lo cual desplaza cualquier forma que cruce hacia ella. |
+| response prompt: The high e string's notes are the same as which other string? | ¿Las notas de la cuerda mi aguda son las mismas que las de cuál otra cuerda? |
+| response explain: Both E strings are tuned to E — same note names at every fret, two octaves apart. | Ambas cuerdas E están afinadas en E — los mismos nombres de nota en cada traste, separadas por dos octavas. |
+| response choices: The B string / The low E string / The G string / No other string | La cuerda B / La cuerda Mi grave / La cuerda G / Ninguna otra cuerda |
+| text: Watch: Finding Notes On The Guitar Neck Using Octaves – JustinGuitar. Pay close attention to what changes when the shape crosses onto the B string — that's today's 3-fret bump. | Mira: Finding Notes On The Guitar Neck Using Octaves – JustinGuitar. Presta mucha atención a qué cambia cuando la forma cruza hacia la cuerda B — ese es el desfase de 3 trastes de hoy. |
+| hint: Every octave shape you've used so far has been "two strings down, two frets up." Crossing onto B (or e) adds one extra fret — watch for it in the video. | Toda forma de octava que has usado hasta ahora ha sido "dos cuerdas hacia abajo, dos trastes hacia arriba." Cruzar hacia B (o e) agrega un traste extra — obsérvalo en el video. |
+| response prompt: The octave shape coming FROM the D or G string onto the B or e string moves: | La forma de octava que va DESDE la cuerda D o G hacia la cuerda B o e se mueve: |
+| response explain: The B string is tuned a step "early," so every shape crossing onto B (or e) stretches one extra fret — the B-string bump. | La cuerda B está afinada un paso "antes," así que toda forma que cruce hacia B (o e) se estira un traste extra — el desfase de la cuerda B. |
+| response choices: Two strings down, two frets up / Two strings down, three frets up / Two strings down, same fret / One string down, three frets up | Dos cuerdas hacia abajo, dos trastes hacia arriba / Dos cuerdas hacia abajo, tres trastes hacia arriba / Dos cuerdas hacia abajo, el mismo traste / Una cuerda hacia abajo, tres trastes hacia arriba |
+
+**Station B — Listen for the six-string landmarks**
+
+| English | Spanish |
+|---|---|
+| text: Listen for it: play the dot-fret landmarks (3, 5, 7, 9, 12) across all six strings and say each note out loud before checking a chart. These five frets are your fastest shortcuts anywhere on the neck. | Escucha esto: toca las referencias de los trastes con punto (3, 5, 7, 9, 12) en las seis cuerdas y di cada nota en voz alta antes de revisar un diagrama. Estos cinco trastes son tus atajos más rápidos en cualquier parte del mástil. |
+| hint: You already know these dots as fretting landmarks — today you're also learning what they're called on every string. | Ya conoces estos puntos como referencias de trasteo — hoy también aprendes cómo se llaman en cada cuerda. |
+| response prompt: On the B string, C sits at which fret? | En la cuerda B, ¿en cuál traste está C? |
+| response explain: B to C is a natural half step — one fret. | De B a C hay un semitono natural — un traste. |
+| response choices: 1 / 2 / 3 / 5 | 1 / 2 / 3 / 5 |
+| text: Try the dot at fret 7 on every string — name each note before checking. Dot frets are the fastest landmarks on the whole neck. | Prueba el punto en el traste 7 en cada cuerda — nombra cada nota antes de revisar. Los trastes con punto son las referencias más rápidas de todo el mástil. |
+| hint: You already used fret 7 to tune by ear (5th-fret/7th-fret method) — now you're naming what's there. | Ya usaste el traste 7 para afinar de oído (método del traste 5/traste 7) — ahora estás nombrando lo que hay ahí. |
+| response prompt: At the dot on fret 7, the low E string plays: | En el punto del traste 7, la cuerda Mi grave toca: |
+| response explain: E→F(1)→G(3)→A(5)→B(7). Dot frets (3-5-7-9-12) are your landmarks. | E→F(1)→G(3)→A(5)→B(7). Los trastes con punto (3-5-7-9-12) son tus referencias. |
+| response choices: A / B / C / G | A / B / C / G |
+
+**Station B — Try the whole fretboard**
+
+| English | Spanish |
+|---|---|
+| text: Now try it: pick any note name and find it on all six strings, one string at a time, using the octave shape (remembering the B-string bump) rather than counting from open every time. | Ahora pruébalo: elige el nombre de cualquier nota y encuéntrala en las seis cuerdas, una cuerda a la vez, usando la forma de octava (recordando el desfase de la cuerda B) en vez de contar desde el aire cada vez. |
+| hint: This is the moment the whole fretboard suddenly makes sense — one note, six places to find it. | Este es el momento en que todo el mástil de repente tiene sentido — una nota, seis lugares para encontrarla. |
+| response prompt: The B string at fret 5 is the same pitch as which open string? | ¿La cuerda B en el traste 5 es la misma nota que cuál cuerda al aire? |
+| response explain: B(0)→C(1)→D(3)→E(5). B at fret 5 = E, the open high-e — that's exactly how you tune by ear. | B(0)→C(1)→D(3)→E(5). B en el traste 5 = E, la mi aguda al aire — así es exactamente como afinas de oído. |
+| response choices: G / D / High e / A | G / D / Mi aguda / A |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — where on the neck are you still slowest? Name the string and fret zone. | Cierre de la estación — ¿dónde en el mástil todavía eres más lento? Nombra la cuerda y la zona de trastes. |
+| response placeholder: e.g. B string frets 6–10 — I still count up from fret 5 | p. ej. cuerda B, trastes 6–10 — todavía cuento desde el traste 5 |
+
+**Station C — Warm-up — tuning check (Module 1)**
+
+| English | Spanish |
+|---|---|
+| text: Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You've got it when: in tune before today's work. | Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy. |
+| playSeq label: Hear all 6 strings in tune | Escucha las 6 cuerdas afinadas |
+
+**Station C — Say-then-play the B and high-e strings**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 1 — B-String Naturals: say-then-play every natural note on the B string, low to high, 0 through 12. | Reto 1 — Notas naturales de la cuerda B: di y luego toca cada nota natural de la cuerda B, de grave a aguda, del traste 0 al 12. |
+| hint: Remember: B to C is only ONE fret, not two — the exception to the pattern you learned on D and G. | Recuerda: de B a C hay solo UN traste, no dos — la excepción al patrón que aprendiste en D y G. |
+| stuck: Cover frets 0–5 (B–E) first, then add 5–12. | Cubre primero los trastes 0–5 (B–E), y luego agrega 5–12. |
+| levelUp: Say-then-play backwards, high to low, without slowing down. | Di y luego toca al revés, de aguda a grave, sin ir más despacio. |
+| playSeq label: B-string naturals | Notas naturales de la cuerda B |
+| text: Challenge 2 — High-e Naturals: same drill on the high e string, low to high, 0 through 12 — and notice these are the exact same note names as the low E string. | Reto 2 — Notas naturales de la mi aguda: el mismo ejercicio en la cuerda mi aguda, de grave a aguda, del traste 0 al 12 — y fíjate que son exactamente los mismos nombres de nota que la Mi grave. |
+| hint: If you know the low E string from Module 2, you already know this string — just two octaves higher. | Si conoces la cuerda Mi grave del Módulo 2, ya conoces esta cuerda — solo que dos octavas más aguda. |
+| stuck: Say the low-E note names first, then transfer them to the high e string fret by fret. | Di los nombres de nota de la Mi grave primero, y luego transfiérelos a la mi aguda traste por traste. |
+| levelUp: Time yourself naming random frets on the high e string — time three in a row, then try to make it faster. Got a partner handy? Race them. | Cronométrate nombrando trastes al azar en la mi aguda — cronometra tres seguidos, y luego intenta hacerlo más rápido. ¿Tienes a alguien a la mano? Compite contra esa persona. |
+| playSeq label: High-e naturals | Notas naturales de la mi aguda |
+
+**Station C — Six-string landmark drill**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 3 — Landmark Drill (your assessment piece): name every string at the fret-5 dot, then every string at the fret-7 dot. You've got it when: all six strings named correctly at both dots, no chart, within 5 seconds each. | Reto 3 — Ejercicio de referencias (tu pieza de evaluación): nombra cada cuerda en el punto del traste 5, y luego cada cuerda en el punto del traste 7. Lo tienes cuando: las seis cuerdas nombradas correctamente en ambos puntos, sin diagrama, en menos de 5 segundos cada una. |
+| hint: Dots are the fastest way to orient yourself anywhere on the neck — this drill is worth over-practicing. | Los puntos son la forma más rápida de orientarte en cualquier parte del mástil — vale la pena sobre-practicar este ejercicio. |
+| stuck: Do the fret-5 dot on all six strings first until it's solid, then add fret 7. | Haz primero el punto del traste 5 en las seis cuerdas hasta que salga sólido, y luego agrega el traste 7. |
+| levelUp: Add the fret-9 and fret-12 dots, or write the dot frets on slips of paper and draw them at random to name across all six strings — or have someone call them out if a helper's around. | Agrega los puntos de los trastes 9 y 12, o escribe los trastes con punto en tiras de papel y sácalos al azar para nombrarlos en las seis cuerdas — o pide que alguien te los diga si tienes ayuda cerca. |
+
+**Station C — Take It to a Song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — Luna, the punteo line (punteo = the picked melody line, a Spanish guitar term): play the fingerpicked intro fragment — one note each on D, G, B and open e, four strings — reading Layer 6 TAB from Luna's Song Journey page (the bonus requinto-intro layer — a requinto is a small, higher-pitched guitar that plays the lead melody). You've got it when: all four notes ring cleanly in order, and you can name each one as you play it. | Reto — Luna, la línea de punteo (punteo = la línea melódica punteada, un término de guitarra en español): toca el fragmento de intro con fingerpicking — una nota en cada una de D, G, B y e al aire, cuatro cuerdas — leyendo el TAB de la Capa 6 de la página de Recorrido de la canción de Luna (la capa bonus de intro con requinto — un requinto es una guitarra pequeña y más aguda que toca la melodía principal). Lo tienes cuando: las cuatro notas suenan limpias en orden, y puedes nombrar cada una mientras la tocas. |
+| hint: This roll uses the little-F shape you already know from Module 5 — today's new skill is being able to name every note in it. | Este roll usa la forma de F pequeña que ya conoces del Módulo 5 — la destreza nueva de hoy es poder nombrar cada nota dentro de ella. |
+| stuck: Fret the little F shape first, strum it once to hear the target chord, then break it apart one string at a time. | Trastea primero la forma de F pequeña, ráscala una vez para escuchar el acorde objetivo, y luego desármala una cuerda a la vez. |
+| levelUp: Name each note out loud as you roll through it, or drop it in front of the Layer 5 vamp (a vamp is a short chord pattern repeated over and over) as a real intro. | Nombra cada nota en voz alta mientras la tocas, o colócala antes del vamp de la Capa 5 (un vamp es un patrón de acordes corto que se repite una y otra vez) como una intro de verdad. |
+
+**Station C — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Six strings, fully named — what's your fastest way to find a note now: counting up, or the octave shape? Write it below. | Seis cuerdas, completamente nombradas — ¿cuál es tu forma más rápida de encontrar una nota ahora: contar hacia arriba, o la forma de octava? Escríbelo abajo. |
+| response placeholder: e.g. octave shape, every time — counting up from open is too slow now | p. ej. la forma de octava, siempre — contar desde el aire ya es demasiado lento |
+
+**Set 3 — Skills**
+
+| English | Spanish |
+|---|---|
+| m9w2-s1 text: Name the natural notes on the B string, frets 0–12, in order | Nombrar las notas naturales de la cuerda B, trastes 0–12, en orden |
+| m9w2-s1 practice label: B-string naturals | Notas naturales de la cuerda B |
+| m9w2-s2 text: Name the natural notes on the high e string and explain why they match the low E | Nombrar las notas naturales de la mi aguda y explicar por qué coinciden con la Mi grave |
+| m9w2-s2 practice prompt: Why do the two E strings share the same note names? | ¿Por qué las dos cuerdas E comparten los mismos nombres de nota? |
+| m9w2-s2 practice choices: They're the two thickest strings / They're both tuned to E, two octaves apart / It's a coincidence / They don't — they're different | Son las dos cuerdas más gruesas / Ambas están afinadas en E, separadas por dos octavas / Es una coincidencia / No coinciden — son distintas |
+| m9w2-s3 text: Locate any named natural note (drawn from a shuffled card) on any of the six strings | Ubicar cualquier nota natural nombrada (sacada de una tarjeta barajada) en cualquiera de las seis cuerdas |
+| m9w2-s4 text: Use the 3-fret octave shift when crossing onto the B or high-e string | Usar el desplazamiento de octava de 3 trastes al cruzar hacia la cuerda B o mi aguda |
+| m9w2-s4 practice prompt: You know G at D-string fret 5. Its octave on the B string is at fret: | Sabes que G está en el traste 5 de la cuerda D. Su octava en la cuerda B está en el traste: |
+| m9w2-s4 practice choices: 5 / 7 / 8 / 10 | 5 / 7 / 8 / 10 |
+| m9w2-s5 text: Play a melody that crosses three or more strings cleanly (Luna intro fragment) | Tocar una melodía que cruce tres o más cuerdas de forma limpia (fragmento de intro de Luna) |
+| m9w2-s6 text: Name the note at any dot fret (3, 5, 7, 9, 12) on all six strings | Nombrar la nota en cualquier traste con punto (3, 5, 7, 9, 12) en las seis cuerdas |
+| m9w2-s6 practice prompt: At fret 3, the A string plays: | En el traste 3, la cuerda A toca: |
+| m9w2-s6 practice choices: B / C / C# / D | B / C / C# / D |
+
+### Set 4
+
+| English | Spanish |
+|---|---|
+| unit: Module 9 · The Full Fretboard & Writing TAB | Módulo 9 · El mástil completo y cómo escribir TAB |
+| subtitle: Higher-position TAB · Write your own 4 bars · Slash chords & partial shapes | TAB en posiciones altas · Escribe tus propios 4 compases · Acordes con barra diagonal y formas parciales |
+| skillFocus: Reading TAB above fret 5 · Writing TAB others can play · Slash chords (G/B) & partial-shape charts | Leer TAB arriba del traste 5 · Escribir TAB que otros puedan tocar · Acordes con barra diagonal (G/B) y diagramas de forma parcial |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch the lesson videos | Mira los videos de la lección |
+| Section title: Listen for chords hiding in the TAB | Escucha los acordes escondidos en el TAB |
+| Section title: Try reading a slash chord | Prueba leer un acorde con barra diagonal |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — reading, writing, and cold-reading TAB | Estación de práctica — leer, escribir y leer TAB a primera vista |
+| Section title: Warm-up — tuning check (Module 1) | Calentamiento — revisión de afinación (Módulo 1) |
+| Section title: Read a higher-position TAB | Lee un TAB en posición alta |
+| Section title: Write your own TAB from memory | Escribe tu propio TAB de memoria |
+| Section title: Read a slash chord and a partial shape | Lee un acorde con barra diagonal y una forma parcial |
+| Section title: The TAB cold-read test | La prueba de lectura a primera vista de TAB |
+| Section title: Station Wrap-Up | Cierre de la estación |
+
+**Station B — Watch the lesson videos**
+
+| English | Spanish |
+|---|---|
+| text: Watch: How to Read Guitar TAB - A Better Way To Read Music – Lauren Bateman as a refresher, paying attention to how string order and chord stacks are shown. | Mira: How to Read Guitar TAB - A Better Way To Read Music – Lauren Bateman como repaso, prestando atención a cómo se muestran el orden de las cuerdas y las pilas de acordes. |
+| hint: You met TAB reading back in Module 2 — today's new ground is reading it confidently ABOVE fret 5, and writing your own. | Conociste la lectura de TAB en el Módulo 2 — el terreno nuevo de hoy es leerlo con confianza ARRIBA del traste 5, y escribir el tuyo propio. |
+| response prompt: In TAB, the TOP line represents: | En el TAB, la línea SUPERIOR representa: |
+| response explain: TAB mirrors the guitar as you look down at it — thinnest string on top. It's the most common beginner reading mistake. | El TAB refleja la guitarra tal como la ves desde arriba — la cuerda más delgada arriba. Es el error de lectura más común entre principiantes. |
+| response choices: The low E string (thickest) / The high e string (thinnest) / Whichever string you like / The B string | La cuerda Mi grave (la más gruesa) / La cuerda mi aguda (la más delgada) / La que tú prefieras / La cuerda B |
+| text: Watch: Writing TABs – JustinGuitar. This is the reverse skill of reading TAB — watch how he turns a riff he can already play into TAB someone else could read. | Mira: Writing TABs – JustinGuitar. Esta es la destreza inversa de leer TAB — observa cómo convierte un riff que ya puede tocar en un TAB que otra persona podría leer. |
+| hint: Writing TAB is the reverse skill of reading it — the video models the process before you try it yourself at the practice station. | Escribir TAB es la destreza inversa de leerlo — el video modela el proceso antes de que lo intentes tú mismo en la estación de práctica. |
+| response prompt: Two numbers stacked in the same column of TAB mean: | Dos números apilados en la misma columna del TAB significan: |
+| response explain: A vertical stack is a chord — everything in the column sounds together. | Una pila vertical es un acorde — todo lo que está en la columna suena junto. |
+| response choices: Play them one after another / Play them at the same time / Choose one to play / Play the top one twice | Tocarlos uno después del otro / Tocarlos al mismo tiempo / Elegir uno para tocar / Tocar el de arriba dos veces |
+
+**Station B — Listen for chords hiding in the TAB**
+
+| English | Spanish |
+|---|---|
+| text: Listen for it: as you read through a TAB'd riff, notice where single notes stack into a chord (a vertical column) versus where they stay a single melodic line. | Escucha esto: mientras lees un riff en TAB, fíjate dónde las notas sueltas se apilan en un acorde (una columna vertical) frente a dónde se quedan como una sola línea melódica. |
+| hint: Spotting the difference between a melody line and a stacked chord in TAB is what lets you read faster. | Distinguir entre una línea melódica y un acorde apilado en el TAB es lo que te permite leer más rápido. |
+| response prompt: A "12" written on the thinnest TAB line tells you to play: | Un "12" escrito en la línea más delgada del TAB te dice que toques: |
+| response explain: Numbers are FRETS, lines are STRINGS — fret 12, high-e string. | Los números son TRASTES, las líneas son CUERDAS — traste 12, cuerda mi aguda. |
+| response choices: Fret 12 on the low E / Fret 12 on the high e / String 12 / The 12th chord | El traste 12 en la Mi grave / El traste 12 en la mi aguda / La cuerda 12 / El acorde número 12 |
+
+**Station B — Try reading a slash chord**
+
+| English | Spanish |
+|---|---|
+| text: Now try it: look up a chord chart for G/B and figure out, before checking, which note has to be the LOWEST one you strum. | Ahora pruébalo: busca un diagrama de acorde para G/B y descubre, antes de revisar, cuál nota tiene que ser la MÁS GRAVE que rasgueas. |
+| hint: Read the slash like a fraction: chord name first, bass note second. | Lee la barra diagonal como una fracción: primero el nombre del acorde, luego la nota grave. |
+| response prompt: The chord G/B (say "G over B") means: | El acorde G/B (di "G sobre B") significa: |
+| response explain: Slash chords name the chord, then the bass note — you met G/B inside "the cure"'s progression. | Los acordes con barra diagonal nombran el acorde y luego la nota grave — conociste G/B dentro de la progresión de "the cure". |
+| response choices: Play G, then B / A G chord with B as its lowest note / A B chord with G on top / Either G or B | Tocar G, y luego B / Un acorde de G con B como su nota más grave / Un acorde de B con G arriba / G o B, cualquiera de los dos |
+| text: Try spacing a few numbers on paper the way you would in written TAB, then check: could someone else tell the rhythm from your spacing alone? | Prueba espaciar unos números en papel de la manera que lo harías en un TAB escrito, y luego revisa: ¿podría alguien más deducir el ritmo solo por tu espaciado? |
+| hint: Cramped numbers are the single most common reason a hand-written TAB is unplayable for anyone but the person who wrote it. | Los números amontonados son la razón más común por la que un TAB escrito a mano resulta imposible de tocar para cualquiera que no sea quien lo escribió. |
+| response prompt: When you write your own TAB, the most important thing to keep readable is: | Cuando escribes tu propio TAB, lo más importante que debes mantener legible es: |
+| response explain: Spacing IS the rhythm in TAB — cramped numbers make your riff unplayable for anyone else. | El espaciado ES el ritmo en el TAB — los números amontonados hacen que tu riff sea imposible de tocar para cualquier otra persona. |
+| response choices: Fancy handwriting / Even spacing that shows the rhythm / Using pen, not pencil / Writing the song title | Una letra elegante / Un espaciado parejo que muestre el ritmo / Usar pluma en vez de lápiz / Escribir el título de la canción |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — what was hardest about writing TAB: finding the frets, or spacing the rhythm? | Cierre de la estación — ¿qué fue lo más difícil de escribir TAB: encontrar los trastes, o espaciar el ritmo? |
+| response placeholder: e.g. I knew the frets but my spacing squished bar 3 | p. ej. sabía los trastes pero mi espaciado apretó el compás 3 |
+
+**Station C — Warm-up — tuning check (Module 1)**
+
+| English | Spanish |
+|---|---|
+| text: Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You've got it when: in tune before today's work. | Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy. |
+| playSeq label: Hear all 6 strings in tune | Escucha las 6 cuerdas afinadas |
+
+**Station C — Read a higher-position TAB**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 1 — Warm-Up Read (down low first): read and play the little-F Layer 6 intro TAB from Luna's Song Journey page — it lives around the little-F shape (D3, G2, B1, open e), down at frets 0–3. You've got it when: you can read it straight through, no one walking you through it first. | Reto 1 — Lectura de calentamiento (primero abajo): lee y toca el TAB de intro de la Capa 6 de F pequeña de la página de Recorrido de la canción de Luna — vive alrededor de la forma de F pequeña (D3, G2, B1, e al aire), abajo en los trastes 0–3. Lo tienes cuando: puedes leerlo de corrido, sin que nadie te lo explique primero. |
+| hint: Reading TAB up the neck feels harder mostly because the numbers are less familiar, not because it's actually different from reading it low. | Leer TAB arriba del mástil se siente más difícil sobre todo porque los números son menos familiares, no porque sea realmente distinto a leerlo abajo. |
+| stuck: Fret the little F shape and strum it once to hear the target chord before reading the roll note by note. | Trastea la forma de F pequeña y ráscala una vez para escuchar el acorde objetivo antes de leer el roll nota por nota. |
+| levelUp: Read a second higher-position TAB you haven't seen before today, cold. | Lee a primera vista un segundo TAB en posición alta que no hayas visto antes de hoy. |
+| text: Challenge — Higher Still (the real up-high read): the Luna read above was your warm-up, down at frets 0–3 — now for the up-high part. Cold-read the 8-note line below — it lives entirely at frets 5–10, up around 7th position, crossing the D, G, and B strings. No one walks you through it first; trust the numbers. You've got it when: you play all eight notes in order, in tune, reading only the TAB. | Reto — Todavía más alto (la verdadera lectura arriba): la lectura de Luna de arriba fue tu calentamiento, abajo en los trastes 0–3 — ahora la parte de arriba. Lee a primera vista la línea de 8 notas de abajo — vive completamente en los trastes 5–10, arriba alrededor de la 7ª posición, cruzando las cuerdas D, G y B. Nadie te lo explica primero; confía en los números. Lo tienes cuando: tocas las ocho notas en orden, afinado, leyendo solo el TAB. |
+| hint: The shapes feel unfamiliar this high up, but the rule never changes: top line = thinnest string, numbers = frets. Find fret 5 (two frets past the fret-3 dot) and anchor your hand there. | Las formas se sienten poco familiares tan arriba, pero la regla nunca cambia: línea superior = cuerda más delgada, números = trastes. Encuentra el traste 5 (dos trastes después del punto del traste 3) y ancla tu mano ahí. |
+| stuck: Play it one note at a time and say each fret out loud before you fret it — decode first, speed later. | Tócala una nota a la vez y di cada traste en voz alta antes de trastearlo — primero descifra, la velocidad viene después. |
+| levelUp: Play the line backwards, from the last note to the first, still reading only the page. | Toca la línea al revés, de la última nota a la primera, todavía leyendo solo la página. |
+| tab caption: Cold-read: a 7th-position line across the D, G & B strings (frets 5–10) | Lectura a primera vista: una línea en 7ª posición a través de las cuerdas D, G y B (trastes 5–10) |
+| playSeq label: Hear the 7th-position line (check yourself only AFTER you've read it cold) | Escucha la línea en 7ª posición (compruébate solo DESPUÉS de haberla leído a primera vista) |
+
+**Station C — Write your own TAB from memory**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 2 — Write It (your assessment piece): without looking anything up, write the "Seven Nation Army" riff to blank TAB on paper from memory — you played it without looking at the chart back in Module 2. Then check yourself. You've got it when: you play back EXACTLY what's on your page and it matches the riff note for note — every fret on the right string, in order. (The day-later, no-memory test is Challenge 4. Someone around to trade with? Even better — see Challenge 4.) | Reto 2 — Escríbelo (tu pieza de evaluación): sin buscar nada, escribe de memoria el riff de "Seven Nation Army" en TAB en blanco sobre papel — lo tocaste sin mirar el diagrama allá en el Módulo 2. Luego compruébate. Lo tienes cuando: tocas EXACTAMENTE lo que está en tu página y coincide con el riff nota por nota — cada traste en la cuerda correcta, en orden. (La prueba de un día después, sin memoria, es el Reto 4. ¿Tienes a alguien cerca con quien intercambiar? Todavía mejor — ve el Reto 4.) |
+| hint: Say each note name in your head as you write its fret — that's the same habit that made you fast at naming notes all module. | Di el nombre de cada nota en tu mente mientras escribes su traste — es el mismo hábito que te hizo rápido nombrando notas todo el módulo. |
+| stuck: Play the riff on your guitar first, one note at a time, writing down each fret as you go — then copy it clean. | Toca el riff en tu guitarra primero, una nota a la vez, escribiendo cada traste mientras avanzas — y luego cópialo limpio. |
+| levelUp: Write a second 4-bar riff of your choice from memory, or write the riff transposed to a different starting fret. | Escribe un segundo riff de 4 compases de tu elección de memoria, o escribe el riff transportado a un traste de partida distinto. |
+
+**Station C — Read a slash chord and a partial shape**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 3 — Slash Chord: fret and play G/B, then compare it against a standard open G. Notice what changes and what stays the same. | Reto 3 — Acorde con barra diagonal: trastea y toca G/B, y luego compáralo con un G abierto estándar. Fíjate qué cambia y qué se mantiene igual. |
+| hint: The chord shape barely changes — it's the LOWEST note you strum that makes it a slash chord. | La forma del acorde casi no cambia — es la nota MÁS GRAVE que rasgueas lo que lo convierte en un acorde con barra diagonal. |
+| stuck: Play the open G first, then just move your lowest-string finger to find the B. | Toca el G abierto primero, y luego solo mueve tu dedo de la cuerda más grave para encontrar la B. |
+| levelUp: Walk C → G/B → Am as a smooth bass-line move, the way "the cure" does it. | Camina C → G/B → Am como un movimiento suave de línea de bajo, tal como lo hace "the cure". |
+| text: Challenge — Read a Partial Shape: the chart below shows dots on only three strings — the rest are marked X. That's a partial shape: just the top slice of a chord, the way slash-chord and lead-sheet charts often print it so you can grab it fast. Fret the three dots and play. You've got it when: only the three fretted strings sound, and the X'd strings stay silent under your strum. | Reto — Lee una forma parcial: el diagrama de abajo muestra puntos en solo tres cuerdas — el resto están marcadas con X. Eso es una forma parcial: solo la rebanada superior de un acorde, tal como los diagramas de acordes con barra diagonal y de lead sheet suelen imprimirlos para que los agarres rápido. Trastea los tres puntos y toca. Lo tienes cuando: solo suenan las tres cuerdas trasteadas, y las marcadas con X se quedan silenciosas bajo tu rasgueo. |
+| hint: An X over a string means "don't let this ring." Here the three X'd strings are the lowest ones — brush only the top three, or lean a fretting finger against the low strings to mute them. | Una X sobre una cuerda significa "no dejes que suene." Aquí las tres cuerdas con X son las más graves — rasguea solo las tres de arriba, o apoya un dedo de trastear contra las cuerdas graves para silenciarlas. |
+| stuck: Pick the three fretted strings one at a time first, so you can hear that each one rings clean, then brush them together. | Pulsa las tres cuerdas trasteadas una a la vez primero, para que puedas escuchar que cada una suena limpia, y luego rasguéalas juntas. |
+| levelUp: Slide the same three-string shape up two frets and name the new chord it spells. | Desliza la misma forma de tres cuerdas dos trastes hacia arriba y nombra el nuevo acorde que forma. |
+| response prompt: On this partial-shape chart, which strings actually ring when you play it? | En este diagrama de forma parcial, ¿cuáles cuerdas realmente suenan cuando lo tocas? |
+| response explain: An X above a string means don't play it. Strings 6, 5, and 4 are X'd, so only the top three — G, B, and high e — ring out. A partial shape is just a full chord's top slice. | Una X sobre una cuerda significa que no la toques. Las cuerdas 6, 5 y 4 tienen X, así que solo suenan las tres de arriba — G, B y mi aguda. Una forma parcial es solo la rebanada superior de un acorde completo. |
+| response choices: All six strings / Only the three fretted strings — G, B, and high e / Only the strings marked X / The three lowest strings | Las seis cuerdas / Solo las tres cuerdas trasteadas — G, B y mi aguda / Solo las cuerdas marcadas con X / Las tres cuerdas más graves |
+
+**Station C — The TAB cold-read test**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 4 — Cold-Read It: at least a day after writing your Challenge 2 TAB, take it back out and play it exactly as written — trust only the page, no memory allowed. You've got it when: the riff comes out right on the first try, purely from what's on the paper. Got someone around who plays? Swap TABs and play each other's exactly as written, no explanation allowed — the ultimate readability test. | Reto 4 — Léelo a primera vista: al menos un día después de escribir tu TAB del Reto 2, sácalo de nuevo y tócalo exactamente como está escrito — confía solo en la página, no se permite memoria. Lo tienes cuando: el riff sale bien al primer intento, únicamente a partir de lo que hay en el papel. ¿Tienes a alguien cerca que toque? Intercambien sus TABs y toquen el del otro exactamente como está escrito, sin explicaciones permitidas — la prueba definitiva de legibilidad. |
+| hint: This is the real test of whether your spacing and fret numbers were actually readable — not just correct to you. | Esta es la verdadera prueba de si tu espaciado y tus números de traste realmente eran legibles — no solo correctos para ti. |
+| stuck: If your written TAB stumps you, say the fret numbers out loud in rhythm while following the page, then add the guitar. | Si tu TAB escrito te confunde, di los números de traste en voz alta con el ritmo mientras sigues la página, y luego agrega la guitarra. |
+| levelUp: Write and cold-read a second riff, or swap with a partner for a fresh TAB cold. | Escribe y lee a primera vista un segundo riff, o intercambia con un compañero para un TAB nuevo a primera vista. |
+
+**Station C — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Could a stranger play your TAB without hearing the song first? Write below what you'd change about your spacing next time. | ¿Podría un desconocido tocar tu TAB sin haber escuchado la canción primero? Escribe abajo qué cambiarías de tu espaciado la próxima vez. |
+| response placeholder: e.g. yes — but I'd leave more room around the chord stack in bar 2 | p. ej. sí — pero dejaría más espacio alrededor de la pila de acordes en el compás 2 |
+
+**Set 4 — Skills**
+
+| English | Spanish |
+|---|---|
+| m9w3-s1 text: Read and play a TAB phrase written above fret 5 | Leer y tocar una frase de TAB escrita arriba del traste 5 |
+| m9w3-s2 text: Write an accurate 4-bar TAB of a riff I can already play | Escribir un TAB preciso de 4 compases de un riff que ya sé tocar |
+| m9w3-s2 gotItWhen: you play it back correctly a day later, reading only what's on the page — or a partner can, without ever hearing you play it first. | lo tocas correctamente un día después, leyendo solo lo que hay en la página — o un compañero puede hacerlo, sin haberte escuchado tocarlo antes. |
+| m9w3-s3 text: Space my TAB so the rhythm is readable | Espaciar mi TAB para que el ritmo sea legible |
+| m9w3-s3 practice prompt: In hand-written TAB, rhythm is shown mainly by: | En el TAB escrito a mano, el ritmo se muestra principalmente por: |
+| m9w3-s3 practice choices: Note-head shapes / The spacing between numbers / Color coding / It can't be shown | Las formas de las cabezas de nota / El espaciado entre los números / Un código de colores / No se puede mostrar |
+| m9w3-s4 text: Read a slash chord (like G/B) from a chart and play it | Leer un acorde con barra diagonal (como G/B) de un diagrama y tocarlo |
+| m9w3-s4 practice prompt: In C/G, the lowest note you play is: | En C/G, la nota más grave que tocas es: |
+| m9w3-s4 practice choices: C / E / G / B | C / E / G / B |
+| m9w3-s5 text: Read a partial chord shape (X marks and small grids) from a chart | Leer una forma de acorde parcial (marcas de X y diagramas pequeños) de un diagrama |
+| m9w3-s5 practice prompt: An X above a string on a chord chart means: | Una X sobre una cuerda en un diagrama de acorde significa: |
+| m9w3-s5 practice choices: Play it open / Don't play that string / Bend that string / Play it twice | Tócala al aire / No toques esa cuerda / Hazle un bend a esa cuerda / Tócala dos veces |
+| m9w3-s6 text: Play an unfamiliar hand-written TAB correctly on the first try — one I wrote days ago, or a partner's | Tocar correctamente al primer intento un TAB escrito a mano que no me sea familiar — uno que escribí hace días, o el de un compañero |
+
+### Module-level Songs
+
+MODULE_SONGS[9] meta fields (song title shown for reference, not itself translated on the site).
+
+| English | Spanish |
+|---|---|
+| "Sweet Child O' Mine" — Guns N' Roses — meta: Map the intro up the neck — D & G strings | Ubica la intro arriba del mástil — cuerdas D y G |
+| "Luna" — Peso Pluma, Junior H — meta: Punteo line crossing three strings | Línea de punteo que cruza tres cuerdas |
+| "Seven Nation Army" — The White Stripes — meta: Write the riff out as TAB yourself | Escribe el riff como TAB tú mismo |
+| "Beat It" — Michael Jackson — meta: Riff notes across E, A & D — map them | Notas del riff a través de E, A y D — ubícalas |
+| "Just Like Heaven" — The Cure — meta: Arpeggiated riff — read it up the neck | Riff arpegiado — léelo arriba del mástil |
+| "Smoke on the Water" — Deep Purple — meta: Write its riff as TAB — the classic starter riff | Escribe su riff como TAB — el clásico riff para principiantes |
+
+### Module Review
+
+| English | Spanish |
+|---|---|
+| module: The Full Fretboard & Writing TAB | El mástil completo y cómo escribir TAB |
+| skill mr9-s1: I can name every natural note on the D and G strings through fret 12 | Puedo nombrar cada nota natural de las cuerdas D y G hasta el traste 12 |
+| skill mr9-s2: I can use the octave shape to find a note on a new string from one I already know | Puedo usar la forma de octava para encontrar una nota en una cuerda nueva a partir de una que ya conozco |
+| skill mr9-s3: I can locate any named note anywhere on the neck, on any of the six strings | Puedo ubicar cualquier nota nombrada en cualquier parte del mástil, en cualquiera de las seis cuerdas |
+| skill mr9-s4: I can name the note at any dot-fret landmark (3, 5, 7, 9, 12) on all six strings | Puedo nombrar la nota en cualquier traste con punto (3, 5, 7, 9, 12) en las seis cuerdas |
+| skill mr9-s5: I can read a TAB phrase written above fret 5 without help | Puedo leer una frase de TAB escrita arriba del traste 5 sin ayuda |
+| skill mr9-s6: I can write an accurate 4-bar TAB of a riff I already play, that reproduces the riff from the page alone | Puedo escribir un TAB preciso de 4 compases de un riff que ya toco, que reproduce el riff únicamente a partir de la página |
+| assessItem: Name natural notes on all six strings through fret 12 — draw shuffled flashcards to pick the spots | Nombra notas naturales en las seis cuerdas hasta el traste 12 — saca tarjetas barajadas para elegir los puntos |
+| assessItem: Play a thread-song melody from TAB in a higher position | Toca una melodía de canción hilo a partir de TAB en una posición alta |
+| assessItem: Finish a 4-bar TAB you wrote yourself that passes the cold-read test — a day later, the page alone reproduces the riff (or a partner plays it back correctly) | Termina un TAB de 4 compases que escribiste tú mismo y que pasa la prueba de lectura a primera vista — un día después, la página sola reproduce el riff (o un compañero lo toca correctamente) |
+| assessItem: Play a melody that crosses three or more strings cleanly, every note ringing in order | Toca una melodía que cruce tres o más cuerdas de forma limpia, cada nota sonando en orden |
+| assessItem: Read a partial-shape or slash chord chart and name which strings actually ring | Lee un diagrama de forma parcial o de acorde con barra diagonal y nombra cuáles cuerdas realmente suenan |
+| forward: The whole neck is yours now — and you can write down anything you figure out. <strong>Module 10 turns notes into keys:</strong> you'll learn the recipe that builds every scale, find the key of any song, and start trusting your ear. (And any time you come back from a long break, <strong>Set 1</strong> at the top of this module re-checks the six core skills in one sitting.) | Ahora todo el mástil es tuyo — y puedes escribir cualquier cosa que descifres. <strong>El Módulo 10 convierte notas en tonalidades:</strong> aprenderás la receta que construye cada escala, encontrarás la tonalidad de cualquier canción, y empezarás a confiar en tu oído. (Y cada vez que vuelvas de un receso largo, la <strong>Unidad 1</strong> al inicio de este módulo repasa las seis destrezas principales en una sola sesión.) |
+
+## Module 10 — Scales, Keys & Ear Training
+
+### Set 1
+
+| English | Spanish |
+|---|---|
+| unit: Module 10 · Scales, Keys & Ear Training | Módulo 10 · Escalas, Tonalidades y Entrenamiento Auditivo |
+| subtitle: The W-W-H recipe · Build a scale on one string · Where pentatonics come from | La receta de tonos y semitonos · Construye una escala en una sola cuerda · De dónde vienen las pentatónicas |
+| skillFocus: W-W-H-W-W-W-H · Whole step = 2 frets, half step = 1 · Major pentatonic = major scale minus 2 notes | T-T-S-T-T-T-S · Un tono = 2 trastes, un semitono = 1 · La pentatónica mayor = la escala mayor menos 2 notas |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch the lesson videos | Mira los videos de la lección |
+| Section title: Listen for the recipe as you play it | Escucha la receta mientras la tocas |
+| Section title: Try building a scale from a new starting note | Prueba a construir una escala desde una nota inicial nueva |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — building the major scale | Estación de práctica — construir la escala mayor |
+| Section title: Warm-up — tuning check (Module 1) | Calentamiento — revisión de afinación (Módulo 1) |
+| Section title: Build C major and G major on one string | Construye C mayor y G mayor en una sola cuerda |
+| Section title: Say the recipe while you play | Di la receta mientras tocas |
+| Section title: Take It to a Song | Llévalo a una canción |
+
+**Station B — Watch the lesson videos**
+
+| English | Spanish |
+|---|---|
+| text: Watch: What is a Major Scale Guitar Lesson - Music Theory For Guitar – Lauren Bateman (0:00–5:12). Follow along as she lays out the whole/half-step recipe — the exact formula you'll use to build C and G major yourself. | Mira: What is a Major Scale Guitar Lesson - Music Theory For Guitar – Lauren Bateman (0:00–5:12). Sigue el video mientras ella explica la receta de tonos y semitonos — la fórmula exacta que usarás para construir C mayor y G mayor tú mismo. |
+| hint: The recipe is a formula — the exact same seven-step pattern of whole and half steps, starting from any note, builds that note's major scale. | La receta es una fórmula — el mismo patrón de siete pasos de tonos y semitonos, empezando desde cualquier nota, construye la escala mayor de esa nota. |
+| response prompt: The step recipe that builds EVERY major scale is: | La receta de pasos que construye TODAS las escalas mayores es: |
+| response explain: Whole-whole-half, whole-whole-whole-half. Same recipe from any starting note — that's what makes it a formula. | Tono-tono-semitono, tono-tono-tono-semitono. La misma receta desde cualquier nota inicial — eso es lo que la hace una fórmula. |
+| response choices: W-H-W-W-H-W-W / W-W-H-W-W-W-H / H-W-W-H-W-W-W / W-W-W-H-W-W-H | T-S-T-T-S-T-T / T-T-S-T-T-T-S / S-T-T-S-T-T-T / T-T-T-S-T-T-S |
+| text: Watch: How to Play the Major Pentatonic Scale: Your Guide to Beautiful Solos – Marty Music. This is where the pentatonic sound you've been soloing with since Module 4 actually comes from. | Mira: How to Play the Major Pentatonic Scale: Your Guide to Beautiful Solos – Marty Music. Aquí es de donde realmente viene el sonido pentatónico con el que has estado improvisando desde el Módulo 4. |
+| hint: Major pentatonic isn't a separate scale to memorize — it's the major scale with two notes lifted out. | La pentatónica mayor no es una escala separada para memorizar — es la escala mayor con dos notas quitadas. |
+| response prompt: Major pentatonic is the major scale with which two notes removed? | ¿La pentatónica mayor es la escala mayor menos cuáles dos notas? |
+| response explain: Drop the 4th and 7th — the two "tension" notes, the ones that sound unsettled and want to move — and the friendly five-note pentatonic you already solo with is what's left. | Quita el 4º y el 7º — las dos notas de "tensión", las que suenan inestables y quieren resolver — y lo que queda es la amigable escala pentatónica de cinco notas con la que ya improvisas. |
+| response choices: 1st and 5th / 2nd and 6th / 4th and 7th / 3rd and 5th | 1º y 5º / 2º y 6º / 4º y 7º / 3º y 5º |
+
+**Station B — Listen for the recipe as you play it**
+
+| English | Spanish |
+|---|---|
+| text: Listen for it: play up the C major scale on one string, saying "whole, whole, half, whole, whole, whole, half" out loud on every step. The distances should match the frets you're moving. | Escucha esto: toca la escala de C mayor subiendo en una sola cuerda, diciendo "tono, tono, semitono, tono, tono, tono, semitono" en voz alta en cada paso. Las distancias deben coincidir con los trastes que te mueves. |
+| hint: On guitar, a whole step and a half step are just fret distances — say the word, then check it's 2 frets (whole) or 1 fret (half). | En la guitarra, un tono y un semitono son solo distancias de trastes — di la palabra, y luego comprueba que sean 2 trastes (tono) o 1 traste (semitono). |
+| response prompt: On guitar, a whole step equals how many frets? | En la guitarra, ¿cuántos trastes equivale un tono? |
+| response explain: One fret = half step, two frets = whole step. The recipe becomes fret distances: 2-2-1-2-2-2-1. | Un traste = semitono, dos trastes = tono. La receta se convierte en distancias de trastes: 2-2-1-2-2-2-1. |
+| response choices: 1 / 2 / 3 / 4 | 1 / 2 / 3 / 4 |
+
+**Station B — Try building a scale from a new starting note**
+
+| English | Spanish |
+|---|---|
+| text: Now try it: run the same W-W-H-W-W-W-H recipe starting from C first — your baseline — and notice you never need a sharp or flat. That clean run is what makes the odd note stand out when you try G next. | Ahora pruébalo: corre la misma receta T-T-S-T-T-T-S empezando primero desde C — tu punto de referencia — y fíjate que nunca necesitas un sostenido ni un bemol. Ese recorrido limpio es lo que hace que la nota rara resalte cuando pruebes G a continuación. |
+| hint: C major is the recipe's starting-point example — every other major key is the same shape, just starting somewhere else. | C mayor es el ejemplo de punto de partida de la receta — cada otra tonalidad mayor es la misma forma, solo que empieza en otro lugar. |
+| response prompt: C major is special among scales because: | C mayor es especial entre las escalas porque: |
+| response explain: C is the recipe's "clean" starting point — all seven natural notes, C D E F G A B. | C es el punto de partida "limpio" de la receta — las siete notas naturales, C D E F G A B. |
+| response choices: It has one sharp / It has no sharps or flats / It's the hardest scale / It only works on piano | Tiene un sostenido / No tiene sostenidos ni bemoles / Es la escala más difícil / Solo funciona en el piano |
+| text: Try it again starting from G, on one string — follow the recipe exactly and see what note comes out different from the rest. | Pruébalo otra vez empezando desde G, en una sola cuerda — sigue la receta exactamente y observa qué nota sale distinta de las demás. |
+| hint: Follow W-W-H-W-W-W-H from G one step at a time; the recipe itself will tell you which note needs raising. | Sigue T-T-S-T-T-T-S desde G un paso a la vez; la receta misma te dirá cuál nota necesita subirse. |
+| response prompt: Follow the recipe from G and one note comes out sharp. Which? | Sigue la receta desde G y una nota sale sostenida. ¿Cuál? |
+| response explain: G A B C D E F#. The last whole step forces F up to F# — G major's single sharp. | G A B C D E F#. El último tono obliga a F a subir a F# — el único sostenido de G mayor. |
+| response choices: C# / G# / F# / A# | C# / G# / F# / A# |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — in your own words: what does it mean when someone says a song is "in the key of G"? | Cierre de la estación — con tus propias palabras: ¿qué significa cuando alguien dice que una canción está "en la tonalidad de G"? |
+| response placeholder: e.g. its notes and chords come from the G major scale — G feels like home | p. ej. sus notas y acordes vienen de la escala de G mayor — G se siente como el hogar |
+
+**Station C — Warm-up — tuning check (Module 1)**
+
+| English | Spanish |
+|---|---|
+| text: Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You've got it when: in tune before today's work. | Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy. |
+| playSeq label: Hear all 6 strings in tune | Escucha las 6 cuerdas afinadas |
+
+**Station C — Build C major and G major on one string**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 1 — C Major Walk: play the C major scale on the A string using the recipe, saying "whole, whole, half…" out loud as you go. | Reto 1 — Caminata de C Mayor: toca la escala de C mayor en la cuerda La usando la receta, diciendo "tono, tono, semitono…" en voz alta mientras avanzas. |
+| hint: Start on C (A string, fret 3) and let the recipe — not a chart — tell you where each next note lands. | Empieza en C (cuerda La, traste 3) y deja que la receta — no un diagrama — te diga dónde cae cada siguiente nota. |
+| stuck: Play just the first three notes (C-D-E) until the whole-whole-half feel is automatic, then keep climbing. | Toca solo las primeras tres notas (C-D-E) hasta que la sensación de tono-tono-semitono sea automática, y luego sigue subiendo. |
+| levelUp: Play it descending too, saying the recipe backwards (half, whole, whole, whole, half, whole, whole). | Tócala también descendiendo, diciendo la receta al revés (semitono, tono, tono, tono, semitono, tono, tono). |
+| playSeq label: C major on the A string (recipe walk) | C mayor en la cuerda La (caminata de la receta) |
+| text: Challenge 2 — G Major Walk: play the G major scale on the low E string using the same recipe, and catch the one note that needs to be sharp. | Reto 2 — Caminata de G Mayor: toca la escala de G mayor en la cuerda Mi grave usando la misma receta, y detecta la única nota que necesita ser sostenida. |
+| hint: Everything is identical to the C major walk except one note — the recipe itself will tell you which. | Todo es idéntico a la caminata de C mayor excepto una nota — la receta misma te dirá cuál. |
+| stuck: Play up to the 6th note first (G-A-B-C-D-E), stop, and only then figure out what the 7th note needs to be. | Toca hasta la 6ª nota primero (G-A-B-C-D-E), detente, y solo entonces averigua qué necesita ser la 7ª nota. |
+| levelUp: Play both C major and G major back to back without stopping, on their two different strings. | Toca C mayor y G mayor una después de la otra sin detenerte, en sus dos cuerdas distintas. |
+| playSeq label: G major on the low E string | G mayor en la cuerda Mi grave |
+
+**Station C — Say the recipe while you play**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 3 — Recipe by Heart (your assessment piece): play the C major scale while saying "whole, whole, half, whole, whole, whole, half" out loud, no chart, no hesitating. You've got it when: you can say the whole recipe from memory before you even touch the guitar. | Reto 3 — La Receta de Memoria (tu pieza de evaluación): toca la escala de C mayor mientras dices "tono, tono, semitono, tono, tono, tono, semitono" en voz alta, sin diagrama, sin dudar. Lo tienes cuando: puedes decir toda la receta de memoria antes incluso de tocar la guitarra. |
+| hint: If you can say the recipe from memory, you can build ANY major scale on the spot — that's the whole point of memorizing it as words, not just frets. | Si puedes decir la receta de memoria, puedes construir CUALQUIER escala mayor al instante — ese es el punto de memorizarla como palabras, no solo como trastes. |
+| stuck: Say the recipe alone, away from the guitar, until it's automatic — then add the fretting hand back in. | Di la receta sola, lejos de la guitarra, hasta que sea automática — y luego agrega de nuevo la mano de trastear. |
+| levelUp: Say the recipe starting from a key you haven't tried yet (D, or A) and build it on the spot. | Di la receta empezando desde una tonalidad que no hayas probado todavía (D, o A) y constrúyela al instante. |
+
+**Station C — Take It to a Song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — Let It Be, in the scale: hum the Let It Be melody while playing the C major walk underneath it, and notice every note of the tune lives inside the scale you just built. | Reto — Let It Be, dentro de la escala: tararea la melodía de Let It Be mientras tocas la caminata de C mayor debajo, y fíjate cómo cada nota de la melodía vive dentro de la escala que acabas de construir. |
+| hint: This is the payoff of today's whole set — a song's melody isn't random, it's built from the same key's scale. | Esta es la recompensa de toda la unidad de hoy — la melodía de una canción no es aleatoria, está construida a partir de la escala de su misma tonalidad. |
+| stuck: Just hum the first line of the melody on its own first, then play the C major walk separately, then try them together. | Primero tararea sola la primera línea de la melodía, luego toca la caminata de C mayor por separado, y después intenta ambas juntas. |
+| levelUp: Find where in the walk the melody's highest note lives, and name it. | Encuentra dónde en la caminata vive la nota más aguda de la melodía, y nómbrala. |
+
+**Station C — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Can you say the major-scale recipe from memory right now, no guitar in hand? Write below how confident you feel. | ¿Puedes decir la receta de la escala mayor de memoria ahora mismo, sin guitarra en la mano? Escribe abajo qué tan seguro te sientes. |
+| response placeholder: e.g. solid on W-W-H-W-W-W-H now — just need more tries building from a new note | p. ej. ya domino T-T-S-T-T-T-S — solo necesito más intentos construyendo desde una nota nueva |
+
+**Set 1 — Skills**
+
+| English | Spanish |
+|---|---|
+| m10w1-s1 text: Say the major-scale recipe (W-W-H-W-W-W-H) from memory | Decir la receta de la escala mayor (T-T-S-T-T-T-S) de memoria |
+| m10w1-s1 practice prompt: In fret distances, the recipe is: | En distancias de trastes, la receta es: |
+| m10w1-s1 practice choices: 2-2-1-2-2-2-1 / 1-2-2-1-2-2-2 / 2-1-2-2-1-2-2 / 3-3-1-3-3-3-1 | 2-2-1-2-2-2-1 / 1-2-2-1-2-2-2 / 2-1-2-2-1-2-2 / 3-3-1-3-3-3-1 |
+| m10w1-s2 text: Build a C major scale on one string using the recipe | Construir una escala de C mayor en una sola cuerda usando la receta |
+| m10w1-s2 practice label: C major on the A string | C mayor en la cuerda La |
+| m10w1-s3 text: Build a G major scale on one string and find the F# | Construir una escala de G mayor en una sola cuerda y encontrar el F# |
+| m10w1-s3 practice label: G major on the low E string | G mayor en la cuerda Mi grave |
+| m10w1-s4 text: Explain what a key is — the scale a song's notes and chords come from | Explicar qué es una tonalidad — la escala de la que vienen las notas y acordes de una canción |
+| m10w1-s4 practice prompt: "This song is in A" most nearly means: | "Esta canción está en A" quiere decir principalmente que: |
+| m10w1-s4 practice choices: It starts loud / Its notes & chords come from the A major scale and A feels like home / It uses only the A string / It's at 100 BPM | Empieza fuerte / Sus notas y acordes vienen de la escala de A mayor y A se siente como el hogar / Usa solo la cuerda La / Está a 100 BPM |
+| m10w1-s5 text: Explain how major pentatonic relates to the major scale | Explicar cómo se relaciona la pentatónica mayor con la escala mayor |
+| m10w1-s5 practice prompt: The pentatonic has how many different notes? | ¿Cuántas notas distintas tiene la pentatónica? |
+| m10w1-s5 practice choices: 4 / 5 / 6 / 7 | 4 / 5 / 6 / 7 |
+| m10w1-s6 text: Spell C major and G major note-by-note out loud | Deletrear C mayor y G mayor nota por nota en voz alta |
+
+### Set 2
+
+| English | Spanish |
+|---|---|
+| unit: Module 10 · Scales, Keys & Ear Training | Módulo 10 · Escalas, Tonalidades y Entrenamiento Auditivo |
+| subtitle: Every major key's minor twin · Relative vs parallel · Add the b5 = blues | La gemela menor de cada tonalidad mayor · Relativa vs. paralela · Agrega la b5 = blues |
+| skillFocus: Relative minor = 3 frets down (the 6th degree) · Relative shares NOTES, parallel shares ROOT · Blues scale = minor pentatonic + b5 | La relativa menor = 3 trastes abajo (el 6º grado) · La relativa comparte NOTAS, la paralela comparte RAÍZ · La escala de blues = pentatónica menor + b5 |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch the lesson videos | Mira los videos de la lección |
+| Section title: Listen for relative vs parallel | Escucha la relativa frente a la paralela |
+| Section title: Try finding a core song's relative key | Prueba a encontrar la tonalidad relativa de una canción principal |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — relative keys and the blues scale | Estación de práctica — tonalidades relativas y la escala de blues |
+| Section title: Warm-up — tuning check (Module 1) | Calentamiento — revisión de afinación (Módulo 1) |
+| Section title: Find relative and parallel minors | Encuentra relativas y paralelas menores |
+| Section title: Build and play the blues scale | Construye y toca la escala de blues |
+| Section title: Take It to a Song | Llévalo a una canción |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Section title: Jam it — the blues scale over a real form | Tócalo de improviso — la escala de blues sobre una forma real |
+
+**Station B — Watch the lesson videos**
+
+| English | Spanish |
+|---|---|
+| text: Watch: The MINOR PENTATONIC scale on Guitar Explained – Lauren Bateman (0:00–5:30) as a refresher on the box-1 shape you'll build the blues scale from today. | Mira: The MINOR PENTATONIC scale on Guitar Explained – Lauren Bateman (0:00–5:30) como repaso de la forma de la caja 1 sobre la que vas a construir la escala de blues hoy. |
+| hint: Everything today builds on top of the minor pentatonic box you already know from Module 4 — nothing new to fret, just one note added. | Todo lo de hoy se construye encima de la caja de pentatónica menor que ya conoces del Módulo 4 — nada nuevo que trastear, solo se agrega una nota. |
+| response prompt: Minor pentatonic box 1 with its root at low-E fret 5 is which key? | ¿La caja 1 de la pentatónica menor con su raíz en el traste 5 de la Mi grave es qué tonalidad? |
+| response explain: The root fret names the key — fret 5 on the low E is A, so box 1 there is A minor: the shape you'll add the blues note to today. | El traste de la raíz nombra la tonalidad — el traste 5 en la Mi grave es A, así que la caja 1 ahí es A menor: la forma a la que le agregarás la nota de blues hoy. |
+| response choices: C minor / A minor / E minor / G minor | C menor / A menor / E menor / G menor |
+| text: Watch: The First Scale Beginners Should Learn for BLUES GUITAR – JustinGuitar. Listen for the one extra note added to the minor pentatonic box you already know — that's the b5. | Mira: The First Scale Beginners Should Learn for BLUES GUITAR – JustinGuitar. Escucha la única nota extra que se agrega a la caja de pentatónica menor que ya conoces — esa es la b5. |
+| hint: The blues scale is just minor pentatonic plus one extra note — listen for where it gets added in the video. | La escala de blues es simplemente la pentatónica menor más una nota extra — escucha dónde se agrega en el video. |
+| response prompt: The blues scale is the minor pentatonic plus which extra note? | ¿La escala de blues es la pentatónica menor más cuál nota extra? |
+| response explain: One sour-sweet note — the flat five — turns the pentatonic blue. | Una nota agridulce — la quinta bemol — convierte la pentatónica en blues. |
+| response choices: The 2nd / The b5 / The major 7th / The 4th | El 2º / La b5 / La 7ª mayor / El 4º |
+
+**Station B — Listen for relative vs parallel**
+
+| English | Spanish |
+|---|---|
+| text: Listen for it: play a C major chord, then an A minor chord, then a C minor chord (Cm = your full Bm barre shape from Module 7, slid up one fret to fret 3). C-to-Am shares every note (relative); C-to-Cm shares only the root (parallel). Notice how different Am and Cm sound from each other, even though both are "C's minor." | Escucha esto: toca un acorde de C mayor, luego un acorde de A menor, y luego un acorde de C menor (Cm = tu forma completa de cejilla de Bm del Módulo 7, deslizada un traste hacia arriba, al traste 3). C a Am comparte cada nota (relativa); C a Cm comparte solo la raíz (paralela). Fíjate qué tan diferentes suenan Am y Cm entre sí, aunque ambos sean "el menor de C." |
+| hint: These two ideas get mixed up constantly — the exercise is hearing that "C's relative minor" and "C's parallel minor" are two completely different chords. | Estas dos ideas se confunden constantemente — el ejercicio es escuchar que "la relativa menor de C" y "la paralela menor de C" son dos acordes completamente distintos. |
+| response prompt: Relative minor vs parallel minor — the difference is: | La relativa menor frente a la paralela menor — la diferencia es: |
+| response explain: A minor is C major's relative (same notes). C minor is C major's parallel (same root, different notes). | A menor es la relativa de C mayor (mismas notas). C menor es la paralela de C mayor (misma raíz, notas distintas). |
+| response choices: Relative shares the same NOTES; parallel shares the same ROOT / They're two names for one thing / Parallel shares the notes; relative shares the root / Neither involves minor | La relativa comparte las mismas NOTAS; la paralela comparte la misma RAÍZ / Son dos nombres para la misma cosa / La paralela comparte las notas; la relativa comparte la raíz / Ninguna de las dos involucra menor |
+
+**Station B — Try finding a core song's relative key**
+
+| English | Spanish |
+|---|---|
+| text: Now try it: All Along the Watchtower loops in A minor. Find its relative major by sliding 3 frets up from A — check your answer before moving on. | Ahora pruébalo: All Along the Watchtower gira en A menor. Encuentra su relativa mayor deslizando 3 trastes hacia arriba desde A — comprueba tu respuesta antes de seguir. |
+| hint: Relative major is always 3 frets UP from a minor root — the mirror image of sliding 3 frets down to find a relative minor. | La relativa mayor siempre está 3 trastes ARRIBA de una raíz menor — la imagen espejo de deslizar 3 trastes abajo para encontrar una relativa menor. |
+| response prompt: All Along the Watchtower lives in A minor. Its relative major is: | All Along the Watchtower vive en A menor. Su relativa mayor es: |
+| response explain: 3 frets UP from A lands on C — Am and C major share every note. | 3 trastes ARRIBA de A cae en C — Am y C mayor comparten cada nota. |
+| response choices: A major / F major / C major / G major | A mayor / F mayor / C mayor / G mayor |
+| text: Try it on Luna: its solo lives in D minor pentatonic even though the song is in F major. Work out why using what you just learned about relative keys. | Pruébalo con Luna: su solo vive en la pentatónica menor de D aunque la canción esté en F mayor. Descubre por qué usando lo que acabas de aprender sobre tonalidades relativas. |
+| hint: D minor is exactly 3 frets down from F — the same relative relationship you just used on Watchtower. | D menor está exactamente 3 trastes abajo de F — la misma relación relativa que acabas de usar en Watchtower. |
+| response prompt: Luna is in F major, which is exactly why its solo uses: | Luna está en F mayor, y por eso mismo su solo usa: |
+| response explain: D minor is F major's relative minor — same notes. That's why the Module 4 solo box sits at fret 10: its root is D. | D menor es la relativa menor de F mayor — mismas notas. Por eso la caja del solo del Módulo 4 está en el traste 10: su raíz es D. |
+| response choices: F minor pentatonic / D minor pentatonic / A major pentatonic / C blues | Pentatónica menor de F / Pentatónica menor de D / Pentatónica mayor de A / Blues de C |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — explain relative minor in one sentence, as if to a friend. | Cierre de la estación — explica la relativa menor en una oración, como si fuera para un amigo. |
+| response placeholder: e.g. it's the minor key hiding inside every major key — same notes, sadder home | p. ej. es la tonalidad menor escondida dentro de cada tonalidad mayor — mismas notas, un hogar más triste |
+
+**Station C — Warm-up — tuning check (Module 1)**
+
+| English | Spanish |
+|---|---|
+| text: Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You've got it when: in tune before today's work. | Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy. |
+| playSeq label: Hear all 6 strings in tune | Escucha las 6 cuerdas afinadas |
+
+**Station C — Find relative and parallel minors**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 1 — Relative Pairs Drill (a drill is a short exercise you repeat to build a skill): make five quick flashcards — major key on the front, relative minor on the back — C→Am, G→Em, F→Dm, D→Bm, A→F#m. Shuffle, flip one at a time, and answer out loud before checking the back. Then explain out loud how a PARALLEL minor would be different for the same key. (Got someone nearby? Have them quiz you with the cards.) | Reto 1 — Ejercicio de Pares Relativos (un ejercicio es una actividad corta que repites para desarrollar una destreza): haz cinco tarjetas rápidas — tonalidad mayor al frente, relativa menor atrás — C→Am, G→Em, F→Dm, D→Bm, A→F#m. Mézclalas, voltea una a la vez, y responde en voz alta antes de revisar el reverso. Luego explica en voz alta cómo sería distinta una paralela menor para esa misma tonalidad. (¿Tienes a alguien cerca? Pídele que te haga preguntas con las tarjetas.) |
+| hint: The shortcut: relative minor is always 3 frets down from the major root, or the major scale's 6th note. | El atajo: la relativa menor siempre está 3 trastes abajo de la raíz mayor, o es la 6ª nota de la escala mayor. |
+| stuck: Drill just C→Am and G→Em until those two are automatic, then add the rest. | Practica solo C→Am y G→Em hasta que esos dos sean automáticos, y luego agrega el resto. |
+| levelUp: Add two more keys of your own (E, Bb) and find their relative minors on the spot. | Agrega dos tonalidades más por tu cuenta (E, Bb) y encuentra sus relativas menores al instante. |
+
+**Station C — Build and play the blues scale**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 2 — Blues Scale (your assessment piece): add the b5 to A minor pentatonic box 1 and play it ascending and descending at 60 BPM. The play button checks the ascending run — match it, then play the descent on your own after. You've got it when: the added note matches what you hear from the play button, every time. | Reto 2 — Escala de Blues (tu pieza de evaluación): agrega la b5 a la caja 1 de la pentatónica menor de A y tócala subiendo y bajando a 60 BPM. El botón de reproducir comprueba el recorrido ascendente — iguálalo, y luego toca el descenso por tu cuenta después. Lo tienes cuando: la nota agregada coincide con lo que escuchas del botón de reproducir, cada vez. |
+| hint: The b5 sits between two notes you already know in the box — it's one extra finger placement, not a new shape to learn from scratch. | La b5 se ubica entre dos notas que ya conoces en la caja — es una colocación de dedo extra, no una forma nueva que aprender desde cero. |
+| stuck: Play the plain minor pentatonic box first, then just add the one extra note once the rest is solid. | Toca primero la caja simple de pentatónica menor, y luego agrega solo la nota extra una vez que el resto esté sólido. |
+| levelUp: Play the blues scale over a 12-bar blues feel, or build it starting from a different root. | Toca la escala de blues sobre la sensación de un blues de 12 compases, o constrúyela empezando desde otra raíz. |
+| playSeq label: A blues scale, box 1 | Escala de blues de A, caja 1 |
+
+**Station C — Take It to a Song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — Smoke on the Water, bluesy: play the A blues scale over the feel of the riff (a riff is a short musical phrase that repeats) — this is where this scale is normally used, the sound it was built for. | Reto — Smoke on the Water, con sabor a blues: toca la escala de blues de A sobre la sensación del riff (un riff es una frase musical corta que se repite) — aquí es donde normalmente se usa esta escala, el sonido para el que fue creada. |
+| hint: Deep Purple's whole riff lives in exactly this bluesy, gritty pentatonic-plus-b5 sound world. | Todo el riff de Deep Purple vive exactamente en este mundo sonoro bluesero y áspero de pentatónica más b5. |
+| stuck: Play the riff itself first to get the feel steady, then freely play the blues scale over the same groove (a groove is the steady rhythmic feel). | Toca primero el riff mismo para asentar la sensación, y luego toca libremente la escala de blues sobre el mismo groove (un groove es la sensación rítmica constante). |
+| levelUp: Try soloing over the riff using only the blues scale, no other notes. | Intenta improvisar un solo sobre el riff usando solo la escala de blues, sin otras notas. |
+
+**Station C — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: What's the relative minor of F (Luna's key)? Which single note makes a pentatonic a blues scale? Write both below. (One more below: Jam it — the blues scale over a real form.) | ¿Cuál es la relativa menor de F (la tonalidad de Luna)? ¿Cuál nota única convierte una pentatónica en una escala de blues? Escribe ambas abajo. (Una más abajo: Tócalo de improviso — la escala de blues sobre una forma real.) |
+| response placeholder: e.g. Dm is F's relative minor; the b5 is what makes it blues | p. ej. Dm es la relativa menor de F; la b5 es lo que la hace blues |
+
+**Station C — Jam it — the blues scale over a real form**
+
+| English | Spanish |
+|---|---|
+| text: Jam it (to jam = play along freely and make up your own part): record yourself strumming the 12-bar blues form in A — the bars run A A A A \| D D A A \| E D A E (plain A, D, E or power chords work fine for now) — then loop the recording and solo over it with your blues scale, box 1 at fret 5. One chorus of comping, one chorus of soloing — one chorus = one full trip through the 12 bars, and comping = playing the backing chords while someone else solos. (The full story behind that bar map is in Module 11, Set 3.) Playing with someone? One comps while the other solos, then swap. | Tócalo de improviso (tocar de improviso = tocar libremente e inventar tu propia parte): grábate rasgueando la forma de blues de 12 compases en A — los compases van A A A A \| D D A A \| E D A E (por ahora funcionan bien A, D, E simples o como acordes de potencia) — y luego repite la grabación en loop y haz un solo sobre ella con tu escala de blues, caja 1 en el traste 5. Una vuelta de acompañamiento, una vuelta de solo — una vuelta = un recorrido completo por los 12 compases, y acompañar = tocar los acordes de base mientras otra persona hace el solo. (La historia completa detrás de ese mapa de compases está en el Módulo 11, Unidad 3.) ¿Tocando con alguien? Uno acompaña mientras el otro hace el solo, y luego cambian. |
+| hint: Follow the form, not just the scale — when the loop returns to A, land on an A and let it ring. That arrival is what "playing the changes" means. | Sigue la forma, no solo la escala — cuando el loop regresa a A, cae en una A y déjala sonar. Esa llegada es lo que significa "tocar los cambios." |
+| playSeq label: A blues scale, box 1 (loop-ready) | Escala de blues de A, caja 1 (lista para loop) |
+
+**Set 2 — Skills**
+
+| English | Spanish |
+|---|---|
+| m10w2-s1 text: Find the relative minor of any major key (6th degree / 3 frets down) | Encontrar la relativa menor de cualquier tonalidad mayor (6º grado / 3 trastes abajo) |
+| m10w2-s1 practice prompt: The relative minor of G major is: | La relativa menor de G mayor es: |
+| m10w2-s1 practice choices: G minor / B minor / E minor / D minor | G menor / B menor / E menor / D menor |
+| m10w2-s2 text: Explain the difference between relative and parallel minor | Explicar la diferencia entre la relativa y la paralela menor |
+| m10w2-s2 practice prompt: C major's PARALLEL minor is: | La PARALELA menor de C mayor es: |
+| m10w2-s2 practice choices: A minor / C minor / E minor / F minor | A menor / C menor / E menor / F menor |
+| m10w2-s3 text: Name Watchtower's key (Am) and its relative major (C) | Nombrar la tonalidad de Watchtower (Am) y su relativa mayor (C) |
+| m10w2-s4 text: Build the blues scale by adding the b5 to minor pentatonic box 1 | Construir la escala de blues agregando la b5 a la caja 1 de pentatónica menor |
+| m10w2-s4 practice prompt: In A minor pentatonic at fret 5, the added blues note (b5, an Eb) sits on the A string at fret: | En la pentatónica menor de A en el traste 5, la nota de blues agregada (b5, una Eb) se ubica en la cuerda La en el traste: |
+| m10w2-s4 practice choices: 5 / 6 / 7 / 8 | 5 / 6 / 7 / 8 |
+| m10w2-s5 text: Play the blues scale ascending and descending at 60 BPM | Tocar la escala de blues subiendo y bajando a 60 BPM |
+| m10w2-s5 practice label: A blues scale, box 1 | Escala de blues de A, caja 1 |
+| m10w2-s6 text: Name relative pairs for our core songs' keys (SNA Em↔G · Watchtower Am↔C · Sweet Child D↔Bm · Luna F↔Dm · Let It Be C↔Am) | Nombrar los pares relativos de las tonalidades de nuestras canciones principales (SNA Em↔G · Watchtower Am↔C · Sweet Child D↔Bm · Luna F↔Dm · Let It Be C↔Am) |
+| m10w2-s7 text: Solo with the blues scale over a 12-bar blues loop, following the form | Improvisar un solo con la escala de blues sobre un loop de blues de 12 compases, siguiendo la forma |
+| m10w2-s7 gotItWhen: you can hear the chord changes coming and land on a strong note when the loop returns to the I chord. | puedes escuchar los cambios de acorde venir y caer en una nota fuerte cuando el loop regresa al acorde I. |
+| m10w2-s7 practice label: A blues scale, box 1 (loop-ready) | Escala de blues de A, caja 1 (lista para loop) |
+
+### Set 3
+
+| English | Spanish |
+|---|---|
+| unit: Module 10 · Scales, Keys & Ear Training | Módulo 10 · Escalas, Tonalidades y Entrenamiento Auditivo |
+| subtitle: Move any pattern to any key · Sing it, then play it · Major vs minor by ear | Mueve cualquier patrón a cualquier tonalidad · Cántalo, y luego tócalo · Mayor vs. menor de oído |
+| skillFocus: Transposing = moving the root · Sing-then-play · Hearing major (bright) vs minor (dark) | Transponer = mover la raíz · Canta y luego toca · Escuchar mayor (brillante) vs. menor (oscuro) |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch the lesson videos | Mira los videos de la lección |
+| Section title: Listen for bright vs dark | Escucha brillante vs. oscuro |
+| Section title: Try transposing a pattern | Prueba a transponer un patrón |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — transposing and ear training | Estación de práctica — transponer y entrenamiento auditivo |
+| Section title: Warm-up — tuning check (Module 1) | Calentamiento — revisión de afinación (Módulo 1) |
+| Section title: Transpose box 1 to a named key | Transpon la caja 1 a una tonalidad nombrada |
+| Section title: Sing it, then play it | Cántalo, y luego tócalo |
+| Section title: Echo a pattern by ear | Repite un patrón de oído |
+| Section title: Take It to a Song | Llévalo a una canción |
+| Section title: Station Wrap-Up | Cierre de la estación |
+
+**Station B — Watch the lesson videos**
+
+| English | Spanish |
+|---|---|
+| text: Watch: HOW TO USE The Minor Pentatonic Scale on the Guitar – Lauren Bateman (0:00–5:00), watching the shape as a MOVABLE pattern rather than a fixed one. | Mira: HOW TO USE The Minor Pentatonic Scale on the Guitar – Lauren Bateman (0:00–5:00), observando la forma como un patrón MÓVIL en lugar de uno fijo. |
+| hint: Nothing about the shape changes when you slide it — only the fret you start on, which renames the key. | Nada de la forma cambia cuando la deslizas — solo el traste en el que empiezas, que renombra la tonalidad. |
+| response prompt: Minor pentatonic box 1 with its root at fret 5 is A minor. Slide it to fret 7 and it becomes: | La caja 1 de pentatónica menor con su raíz en el traste 5 es A menor. Deslízala al traste 7 y se convierte en: |
+| response explain: The root fret names the key: fret 7 on the low E is B. | El traste de la raíz nombra la tonalidad: el traste 7 en la Mi grave es B. |
+| response choices: B minor / C minor / G minor / A major | B menor / C menor / G menor / A mayor |
+| text: Watch: 5' Guitar Exercise: Find Melodies You Know – JustinGuitar. This is the exact sing-it-then-find-it habit today's Station C drill is built around. | Mira: 5' Guitar Exercise: Find Melodies You Know – JustinGuitar. Este es exactamente el hábito de cantarlo-y-luego-encontrarlo alrededor del cual está construido el ejercicio de la Estación C de hoy. |
+| hint: This is the single most useful guitar habit you can build: sing what you hear first, then let your hands catch up. | Este es el hábito más útil que puedes construir en la guitarra: canta primero lo que escuchas, y luego deja que tus manos te alcancen. |
+| response prompt: The best FIRST step to playing a melody by ear is: | El mejor PRIMER paso para tocar una melodía de oído es: |
+| response explain: If you can sing it, you know it — your hands just have to find what your voice already solved. | Si puedes cantarla, la conoces — tus manos solo tienen que encontrar lo que tu voz ya resolvió. |
+| response choices: Guess randomly / Sing it, then hunt for your sung notes on one string / Look up the TAB / Play every fret until something works | Adivinar al azar / Cantarla, y luego buscar las notas cantadas en una sola cuerda / Buscar el TAB / Tocar cada traste hasta que algo funcione |
+| text: Optional bonus watch: How To Develop The World's Greatest Ear – Rick Beato — a producer's view of the exact skill this set trains. You don't need the advanced parts: the opening idea (ears are built by a little practice every day, not talent) is the main point — then go do the Station C echo drills. | Video extra opcional: How To Develop The World's Greatest Ear – Rick Beato — la visión de un productor sobre exactamente la destreza que entrena esta unidad. No necesitas las partes avanzadas: la idea inicial (el oído se construye con un poco de práctica cada día, no con talento) es el punto principal — y luego ve a hacer los ejercicios de eco de la Estación C. |
+| response placeholder: One idea from this video worth borrowing for your own practice: … | Una idea de este video que vale la pena tomar prestada para tu propia práctica: … |
+
+**Station B — Listen for bright vs dark**
+
+| English | Spanish |
+|---|---|
+| text: Listen for it: play a major chord, then its parallel minor, back and forth. Notice which one sounds "bright" and which sounds "dark" — this is the ear-training foundation for everything else today. | Escucha esto: toca un acorde mayor, luego su paralela menor, alternando. Fíjate cuál suena "brillante" y cuál suena "oscuro" — esta es la base de entrenamiento auditivo para todo lo demás de hoy. |
+| hint: You've been hearing this distinction since Module 4 — today you're naming it and using it deliberately. | Has estado escuchando esta distinción desde el Módulo 4 — hoy la estás nombrando y usando a propósito. |
+| response prompt: To most ears, major sounds ___ and minor sounds ___: | Para la mayoría de los oídos, el mayor suena ___ y el menor suena ___: |
+| response explain: Bright-happy vs dark-moody is the first ear-training distinction — you've been hearing it since Module 4. | Brillante-alegre vs. oscuro-melancólico es la primera distinción del entrenamiento auditivo — la has estado escuchando desde el Módulo 4. |
+| response choices: dark, then bright / bright, then dark / loud, then quiet / fast, then slow | oscuro, y luego brillante / brillante, y luego oscuro / fuerte, y luego suave / rápido, y luego lento |
+
+**Station B — Try transposing a pattern**
+
+| English | Spanish |
+|---|---|
+| text: Now try it: take minor pentatonic box 1 and move it up two frets from wherever you're starting. Say out loud what key it's in now before you check. | Ahora pruébalo: toma la caja 1 de pentatónica menor y muévela dos trastes hacia arriba desde donde estés empezando. Di en voz alta en qué tonalidad está ahora antes de comprobarlo. |
+| hint: The pattern itself never changes shape — only the fret you start it on, which is what "transposing" means. | El patrón en sí nunca cambia de forma — solo el traste en el que lo empiezas, que es lo que significa "transponer." |
+| response prompt: Transposing a riff means: | Transponer un riff significa: |
+| response explain: The pattern is a movable shape — slide the whole thing so its ROOT lands on the new key's note. | El patrón es una forma móvil — desliza todo el conjunto para que su RAÍZ caiga en la nota de la nueva tonalidad. |
+| response choices: Playing it faster / Moving it to a different key, keeping its shape / Playing it backwards / Adding more notes | Tocarlo más rápido / Moverlo a una tonalidad distinta, manteniendo su forma / Tocarlo al revés / Agregar más notas |
+| text: Try moving a pattern UP two half steps and predict the new fret before you slide there. | Prueba a mover un patrón dos semitonos HACIA ARRIBA y predice el nuevo traste antes de deslizarte hasta ahí. |
+| hint: Half steps are just frets — count two frets toward the body from wherever you started. | Los semitonos son solo trastes — cuenta dos trastes hacia el cuerpo desde donde empezaste. |
+| response prompt: To move a pattern UP two half steps, you move it: | Para mover un patrón dos semitonos HACIA ARRIBA, lo mueves: |
+| response explain: Half steps are frets — two half steps = two frets up the neck. | Los semitonos son trastes — dos semitonos = dos trastes hacia arriba del mástil. |
+| response choices: 2 strings up / 2 frets toward the body / 2 frets toward the headstock / You can't | 2 cuerdas hacia arriba / 2 trastes hacia el cuerpo / 2 trastes hacia el clavijero / No puedes |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — which was harder today, moving the pattern to a new key, or echoing by ear? Why? | Cierre de la estación — ¿qué fue más difícil hoy, mover el patrón a una nueva tonalidad, o repetir de oído? ¿Por qué? |
+| response placeholder: e.g. echoing — I could sing it but took a while to find the starting fret | p. ej. repetir de oído — podía cantarlo pero me tomó tiempo encontrar el traste inicial |
+
+**Station C — Warm-up — tuning check (Module 1)**
+
+| English | Spanish |
+|---|---|
+| text: Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You've got it when: in tune before today's work. | Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy. |
+| playSeq label: Hear all 6 strings in tune | Escucha las 6 cuerdas afinadas |
+
+**Station C — Transpose box 1 to a named key**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 1 — Transpose Drill: write Am, Gm, Bm, and Dm on four slips, shuffle, and draw one at a time — play minor pentatonic box 1 at that key's fret: fret 5 (Am), fret 3 (Gm), fret 7 (Bm), fret 10 (Dm — Luna's solo box!). You've got it when: you can find any of these four positions within 5 seconds of drawing the key name. | Reto 1 — Ejercicio de Transposición: escribe Am, Gm, Bm y Dm en cuatro papelitos, mézclalos, y saca uno a la vez — toca la caja 1 de pentatónica menor en el traste de esa tonalidad: traste 5 (Am), traste 3 (Gm), traste 7 (Bm), traste 10 (Dm — ¡la caja del solo de Luna!). Lo tienes cuando: puedes encontrar cualquiera de estas cuatro posiciones dentro de los 5 segundos de sacar el nombre de la tonalidad. |
+| hint: Fret 10 should feel familiar — it's the exact box you've been using for Luna's solo since Module 4, now with a name attached. | El traste 10 debería sentirse familiar — es exactamente la caja que has estado usando para el solo de Luna desde el Módulo 4, ahora con un nombre asignado. |
+| stuck: Drill just Am (fret 5) and Dm (fret 10) — the two you already know from real songs — before adding Gm and Bm. | Practica solo Am (traste 5) y Dm (traste 10) — los dos que ya conoces de canciones reales — antes de agregar Gm y Bm. |
+| levelUp: Move through all four positions without stopping, or have someone call out keys for you to find blind. | Recorre las cuatro posiciones sin detenerte, o pídele a alguien que diga tonalidades para que las encuentres a ciegas. |
+
+**Station C — Sing it, then play it**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 2 — Sing-Then-Play: record yourself playing 3 random notes on the low E string (frets 0–5) without watching your hand — or use the Echo Drill play button below as your note source. Wait a moment, play the recording back, sing the notes, then find and play them. (Got someone nearby? They can play the 3 notes for you instead.) | Reto 2 — Canta y Luego Toca: grábate tocando 3 notas al azar en la cuerda Mi grave (trastes 0–5) sin mirar tu mano — o usa el botón de reproducir del Ejercicio de Eco de abajo como tu fuente de notas. Espera un momento, reproduce la grabación, canta las notas, y luego encuéntralas y tócalas. (¿Tienes a alguien cerca? Puede tocarte las 3 notas en tu lugar.) |
+| hint: Sing FIRST, before you touch the guitar — that order is the whole skill. | Canta PRIMERO, antes de tocar la guitarra — ese orden es toda la destreza. |
+| stuck: Start with just one note instead of three, and build up once that's reliable. | Empieza con solo una nota en lugar de tres, y aumenta una vez que eso sea confiable. |
+| levelUp: Extend to 5 notes, or record notes spread across two strings. | Extiéndelo a 5 notas, o graba notas repartidas en dos cuerdas. |
+
+**Station C — Echo a pattern by ear**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 3 — Echo Drill (your assessment piece): for round 1, listen to the 3-note pattern once using the play button below, sing it back, then play it on the E or A string. For rounds 2–4, record yourself playing 3 random notes (eyes off your hand) and echo those back the same way. You've got it when: 3 out of 4 patterns matched correctly, by ear alone. | Reto 3 — Ejercicio de Eco (tu pieza de evaluación): para la ronda 1, escucha el patrón de 3 notas una vez usando el botón de reproducir de abajo, cántalo de vuelta, y luego tócalo en la cuerda Mi o La. Para las rondas 2–4, grábate tocando 3 notas al azar (sin mirar tu mano) y repítelas de la misma manera. Lo tienes cuando: 3 de 4 patrones coincidan correctamente, solo de oído. |
+| hint: Resist the urge to search fret by fret at random before you've sung the pattern — singing first fixes the pitch in your ear, and that's what your hands need to find. | Resiste el impulso de buscar traste por traste al azar antes de haber cantado el patrón — cantar primero fija el tono en tu oído, y eso es lo que tus manos necesitan encontrar. |
+| stuck: Slow the pattern down and repeat just the first two notes until they're solid, then add the third. | Baja la velocidad del patrón y repite solo las primeras dos notas hasta que estén sólidas, y luego agrega la tercera. |
+| levelUp: Extend the echo to 4 or 5 notes, or echo a short lick (a lick is a short solo phrase) from a tutorial video you haven't learned yet — a pattern you've truly never heard. (A partner playing surprise patterns works too.) | Extiende el eco a 4 o 5 notas, o repite un lick corto (un lick es una frase corta de solo) de un video tutorial que no hayas aprendido todavía — un patrón que de verdad nunca hayas escuchado. (Un compañero tocando patrones sorpresa también funciona.) |
+| playSeq label: Echo pattern — E · G · A | Patrón de eco — E · G · A |
+
+**Station C — Take It to a Song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — "the cure", by ear: strum through the progression and, without looking anything up, decide by ear which chords feel bright and which feel dark. | Reto — "the cure", de oído: rasguea la progresión y, sin buscar nada, decide de oído cuáles acordes se sienten brillantes y cuáles se sienten oscuros. |
+| hint: You already know the chord names from Module 9 — today's challenge is trusting your ear to sort them into bright vs dark before you check. | Ya conoces los nombres de los acordes desde el Módulo 9 — el reto de hoy es confiar en tu oído para clasificarlos en brillante vs. oscuro antes de comprobarlo. |
+| stuck: Isolate just two chords at a time and compare them directly, back and forth. | Aísla solo dos acordes a la vez y compáralos directamente, alternando. |
+| levelUp: Guess which chord is the "home" chord using only your ear, then confirm it. | Adivina cuál acorde es el acorde "base" usando solo tu oído, y luego confírmalo. |
+
+**Station C — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Where does box 1 sit for D minor? Can you sing a phrase from a core song and find its first note? Write both below. | ¿Dónde se ubica la caja 1 para D menor? ¿Puedes cantar una frase de una canción principal y encontrar su primera nota? Escribe ambas abajo. |
+| response placeholder: e.g. D minor box 1 is fret 10; I found "the cure"'s first note on the A string | p. ej. la caja 1 de D menor está en el traste 10; encontré la primera nota de "the cure" en la cuerda La |
+
+**Set 3 — Skills**
+
+| English | Spanish |
+|---|---|
+| m10w3-s1 text: Transpose minor pentatonic box 1 to any named key | Transponer la caja 1 de pentatónica menor a cualquier tonalidad nombrada |
+| m10w3-s1 practice prompt: For D minor, box 1's root sits at low-E fret: | Para D menor, la raíz de la caja 1 se ubica en el traste de la Mi grave: |
+| m10w3-s1 practice choices: 5 / 7 / 10 / 12 | 5 / 7 / 10 / 12 |
+| m10w3-s2 text: Move a riff up or down the neck to a new key and play it | Mover un riff hacia arriba o abajo del mástil a una nueva tonalidad y tocarlo |
+| m10w3-s3 text: Sing a short pattern, then find and play it on one string | Cantar un patrón corto, y luego encontrarlo y tocarlo en una sola cuerda |
+| m10w3-s4 text: Tell major from minor by ear | Distinguir mayor de menor de oído |
+| m10w3-s4 practice prompt: A progression feels moody and dark. Its home chord is most likely: | Una progresión se siente melancólica y oscura. Su acorde base es más probablemente: |
+| m10w3-s4 practice choices: Major / Minor / A power chord / A slash chord | Mayor / Menor / Un acorde de potencia / Un acorde slash (con un bajo distinto) |
+| m10w3-s5 text: Echo back a 3-note pattern by ear on the E or A string | Repetir de oído un patrón de 3 notas en la cuerda Mi o La |
+| m10w3-s5 practice label: Echo pattern — E · G · A | Patrón de eco — E · G · A |
+| m10w3-s6 text: Identify whether a core-song chord sounds major or minor (Luna's F = bright, Am = dark) | Identificar si un acorde de una canción principal suena mayor o menor (la F de Luna = brillante, Am = oscuro) |
+
+### Module-level Songs
+
+MODULE_SONGS[10] meta fields (song title shown for reference, not itself translated on the site).
+
+| English | Spanish |
+|---|---|
+| "Seven Nation Army" — The White Stripes — meta: Name its key and scale (E minor) | Nombra su tonalidad y escala (E menor) |
+| "All Along the Watchtower" — Dylan / Hendrix — meta: Am — find the relative major | Am — encuentra la relativa mayor |
+| "Luna" — Peso Pluma, Junior H — meta: F major — why the solo uses D minor pentatonic | F mayor — por qué el solo usa la pentatónica menor de D |
+| "the cure" — Olivia Rodrigo — meta: Transpose the progression's shapes to a new key | Transpon las formas de la progresión a una nueva tonalidad |
+| "Smoke on the Water" — Deep Purple — meta: Blues scale where it's normally used | La escala de blues donde normalmente se usa |
+| "Beat It" — Michael Jackson — meta: The Em pentatonic solo — name the key by ear | El solo de pentatónica de Em — nombra la tonalidad de oído |
+| "Ella Baila Sola" — Eslabon Armado × Peso Pluma — meta: Hear major vs minor in the progression | Escucha mayor vs. menor en la progresión |
+| "House of the Rising Sun" — The Animals — meta: A minor — the classic minor-key sound | A menor — el sonido clásico de tonalidad menor |
+
+### Module Review
+
+| English | Spanish |
+|---|---|
+| module: Scales, Keys & Ear Training | Escalas, Tonalidades y Entrenamiento Auditivo |
+| skill mr10-s1: I can say the major-scale recipe (W-W-H-W-W-W-H) from memory | Puedo decir la receta de la escala mayor (T-T-S-T-T-T-S) de memoria |
+| skill mr10-s2: I can spell C major and G major note-by-note out loud | Puedo deletrear C mayor y G mayor nota por nota en voz alta |
+| skill mr10-s3: I can find the relative minor of any major key | Puedo encontrar la relativa menor de cualquier tonalidad mayor |
+| skill mr10-s4: I can build and play the blues scale from minor pentatonic box 1 | Puedo construir y tocar la escala de blues a partir de la caja 1 de pentatónica menor |
+| skill mr10-s5: I can transpose minor pentatonic box 1 to any named key | Puedo transponer la caja 1 de pentatónica menor a cualquier tonalidad nombrada |
+| skill mr10-s6: I can tell major from minor by ear | Puedo distinguir mayor de menor de oído |
+| assessItem: Transpose a pentatonic pattern to a randomly drawn key and play it | Transponer un patrón pentatónico a una tonalidad sacada al azar y tocarlo |
+| assessItem: Name the relative minor of a given major key | Nombrar la relativa menor de una tonalidad mayor dada |
+| assessItem: Identify major vs minor — and echo a short pattern — by ear | Identificar mayor vs. menor — y repetir un patrón corto — de oído |
+| forward: You can build scales, name keys, and trust your ear. <strong>Module 11 does the same for chords:</strong> you'll see why Let It Be's four chords work, number any progression like a pro, and unlock twelve chords from one barre shape. | Puedes construir escalas, nombrar tonalidades, y confiar en tu oído. <strong>El Módulo 11 hace lo mismo con los acordes:</strong> verás por qué funcionan los cuatro acordes de Let It Be, numerarás cualquier progresión como un profesional, y desbloquearás doce acordes a partir de una sola forma de cejilla. |
+
+## Module 11 — Chords, Keys & Harmony
+
+### Set 1
+
+| English | Spanish |
+|---|---|
+| unit: Module 11 · Chords, Keys & Harmony | Módulo 11 · Acordes, Tonalidades y Armonía |
+| subtitle: Stack every other note · I ii iii IV V vi · The chord family of a key | Apila cada otra nota · I ii iii IV V vi · La familia de acordes de una tonalidad |
+| skillFocus: Triad = root + 3rd + 5th · UPPERCASE major (I IV V), lowercase minor (ii iii vi) · The diatonic family (chords built only from the key's own seven notes) | Tríada = raíz + 3ª + 5ª · Mayor en MAYÚSCULAS (I IV V), menor en minúsculas (ii iii vi) · La familia diatónica (acordes construidos solo con las siete notas propias de la tonalidad) |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch the lesson videos | Mira los videos de la lección |
+| Section title: Listen for the numerals in a familiar song | Escucha los números romanos en una canción conocida |
+| Section title: Try building a chord family | Prueba a construir una familia de acordes |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — triads and numerals | Estación de práctica — tríadas y números romanos |
+| Section title: Warm-up — tuning check (Module 1) | Calentamiento — revisión de afinación (Módulo 1) |
+| Section title: Build and play a chord family | Construye y toca una familia de acordes |
+| Section title: Numeral flashcards | Tarjetas de números romanos |
+| Section title: Take It to a Song | Llévalo a una canción |
+
+**Station B — Watch the lesson videos**
+
+| English | Spanish |
+|---|---|
+| text: Watch: Encontrar los acordes en cualquier tonalidad – Maru Martinez (0:00–7:27) (in Spanish — turn on English captions if you need them; the on-screen diagrams carry the lesson). Watch how she builds a chord on every note of the scale — that's the "chord family" you'll be naming with Roman numerals today. | Mira: Encontrar los acordes en cualquier tonalidad – Maru Martinez (0:00–7:27) (en español — activa los subtítulos en inglés si los necesitas; los diagramas en pantalla llevan la lección). Mira cómo ella construye un acorde en cada nota de la escala — esa es la "familia de acordes" que vas a nombrar con números romanos hoy. |
+| hint: Every chord you've ever strummed is built from a scale — today you learn the recipe that turns one scale into a whole family of chords. | Cada acorde que has rasgueado alguna vez se construye a partir de una escala — hoy aprendes la receta que convierte una escala en toda una familia de acordes. |
+| response prompt: A triad is built by stacking: | Una tríada se construye apilando: |
+| response explain: Skip-a-note, skip-a-note: C-E-G makes the C chord. Every chord you've strummed is one of these plus doubled notes. | Salta una nota, salta una nota: C-E-G arma el acorde de C. Cada acorde que has rasgueado es uno de estos más notas duplicadas. |
+| response choices: Any three notes / Every other note of a scale: root, 3rd, 5th / Three notes on one string / The same note in three octaves | Cualquier tres notas / Cada otra nota de una escala: raíz, 3ª, 5ª / Tres notas en una sola cuerda / La misma nota en tres octavas |
+| text: Watch: Understanding CHORDS (Ep. 3 Music Theory) – Paul Davids. Every chord you've ever strummed is built from the same three notes — root, 3rd, 5th — and Paul shows where they come from. A different teacher than the first video on purpose: notice which explanation makes the most sense to you. | Mira: Understanding CHORDS (Ep. 3 Music Theory) – Paul Davids. Cada acorde que has rasgueado alguna vez se construye con las mismas tres notas — raíz, 3ª, 5ª — y Paul muestra de dónde vienen. Un maestro distinto al del primer video a propósito: fíjate cuál explicación tiene más sentido para ti. |
+| hint: Notice the pattern: three of the seven chords in a key come out major, and three come out minor — no exceptions, in any key. | Fíjate en el patrón: tres de los siete acordes de una tonalidad salen mayores, y tres salen menores — sin excepciones, en cualquier tonalidad. |
+| response prompt: In any major key, chords I, IV, and V are major. Chords ii, iii, and vi are: | En cualquier tonalidad mayor, los acordes I, IV y V son mayores. Los acordes ii, iii y vi son: |
+| response explain: The scale's spacing makes it automatic — uppercase numerals = major, lowercase = minor. | El espaciado de la escala lo hace automático — números romanos en mayúscula = mayor, en minúscula = menor. |
+| response choices: Also major / Minor / Power chords / Silent | También mayores / Menores / Acordes de potencia / Silenciosos |
+
+**Station B — Listen for the numerals in a familiar song**
+
+| English | Spanish |
+|---|---|
+| text: Listen for it: play through Let It Be's C–G–Am–F loop and, before checking, guess which numeral each chord is in the key of C. | Escucha con atención: toca el loop C–G–Am–F de Let It Be y, antes de revisar, adivina qué número romano es cada acorde en la tonalidad de C. |
+| hint: C is home (I), so everything else numbers off of it — G is a fifth up, Am shares C's notes, F is a fourth up. | C es la base (I), así que todo lo demás se numera a partir de ella — G es una quinta arriba, Am comparte las notas de C, F es una cuarta arriba. |
+| response prompt: Let It Be's C–G–Am–F in the key of C is: | El C–G–Am–F de Let It Be en la tonalidad de C es: |
+| response explain: C=I, G=V, Am=vi, F=IV — the most-used progression in pop history, and now you can name it. | C=I, G=V, Am=vi, F=IV — la progresión más usada en la historia del pop, y ahora puedes nombrarla. |
+| response choices: I–IV–V–I / I–V–vi–IV / ii–V–I–IV / vi–IV–I–V | I–IV–V–I / I–V–vi–IV / ii–V–I–IV / vi–IV–I–V |
+
+**Station B — Try building a chord family**
+
+| English | Spanish |
+|---|---|
+| text: Now try it: build a triad on every note of the C major scale (C-D-E-F-G-A-B) and see which come out major and which come out minor. | Ahora pruébalo: construye una tríada en cada nota de la escala de C mayor (C-D-E-F-G-A-B) y observa cuáles salen mayores y cuáles salen menores. |
+| hint: You'll get major-minor-minor-major-major-minor-diminished — the same pattern in every major key. | Obtendrás mayor-menor-menor-mayor-mayor-menor-disminuido — el mismo patrón en cualquier tonalidad mayor. |
+| response prompt: The chord family of C major is: | La familia de acordes de C mayor es: |
+| response explain: Build a triad on each scale note: major-minor-minor-major-major-minor, in every major key. | Construye una tríada en cada nota de la escala: mayor-menor-menor-mayor-mayor-menor, en cualquier tonalidad mayor. |
+| response choices: C · Dm · Em · F · G · Am / C · D · E · F · G · A / Cm · Dm · Em · Fm · Gm · Am / C · Dm · E · F · Gm · Am | C · Dm · Em · F · G · Am / C · D · E · F · G · A / Cm · Dm · Em · Fm · Gm · Am / C · Dm · E · F · Gm · Am |
+| text: Try it on Luna: F and Am aren't I–IV or I–V — figure out which scale degree Am is built on in the key of F before checking. | Pruébalo con Luna: F y Am no son I–IV ni I–V — averigua sobre cuál grado de la escala está construido Am en la tonalidad de F antes de revisar. |
+| hint: Count up the F major scale: F(I) G(ii) A(iii) — Am is built on the THIRD note. | Cuenta hacia arriba en la escala de F mayor: F(I) G(ii) A(iii) — Am está construido sobre la TERCERA nota. |
+| response prompt: Luna vamps between F and Am — a vamp is a short chord pattern repeated over and over — in the key of F. In numerals that's: | Luna hace un vamp entre F y Am — un vamp es un patrón corto de acordes repetido una y otra vez — en la tonalidad de F. En números romanos eso es: |
+| response explain: F=I and Am is built on F major's THIRD note — I–iii, a dreamier color than the famous four. Not every hit uses I–V–vi–IV. | F=I y Am está construido sobre la TERCERA nota de F mayor — I–iii, un color más soñador que los famosos cuatro. No todo éxito usa I–V–vi–IV. |
+| response choices: I–vi / I–IV / I–iii / V–I | I–vi / I–IV / I–iii / V–I |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — pick any core song: which numeral is its home chord, and is it major or minor? | Cierre de la estación — elige cualquier canción principal: ¿qué número romano es su acorde base, y es mayor o menor? |
+| response placeholder: e.g. Watchtower's home is Am — the vi of C, or "i" if you call the key A minor | p. ej. la base de Watchtower es Am — el vi de C, o "i" si llamas a la tonalidad A menor |
+
+**Station C — Warm-up — tuning check (Module 1)**
+
+| English | Spanish |
+|---|---|
+| text: Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You've got it when: in tune before today's work. | Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy. |
+| playSeq label: Hear all 6 strings in tune | Escucha las 6 cuerdas afinadas |
+
+**Station C — Build and play a chord family**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 1 — Build the Family: write out the chord families of C major and G major (six chords each) — type them below — then play each family as open chords in order. | Reto 1 — Construye la familia: escribe las familias de acordes de C mayor y G mayor (seis acordes cada una) — anótalas abajo — y luego toca cada familia como acordes abiertos en orden. |
+| hint: C family: C · Dm · Em · F · G · Am. G family: G · Am · Bm · C · D · Em. Notice how much they overlap — that's no accident. | Familia de C: C · Dm · Em · F · G · Am. Familia de G: G · Am · Bm · C · D · Em. Fíjate cuánto se superponen — eso no es casualidad. |
+| stuck: Just play the C family first and get it solid before adding G. | Toca primero solo la familia de C y déjala firme antes de agregar G. |
+| levelUp: Play both families back to back without looking at what you wrote. | Toca ambas familias una tras otra sin mirar lo que escribiste. |
+| response placeholder: C: C Dm Em F G Am · G: … | C: C Dm Em F G Am · G: … |
+
+**Station C — Numeral flashcards**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 2 — Numeral Flashcards: make six flashcards, one numeral each (I ii iii IV V vi), shuffle the deck, flip the top card, and play that chord in the key of C — no hesitating. Run the deck twice. (Got a partner handy? Have them call the numerals instead.) | Reto 2 — Tarjetas de números romanos: haz seis tarjetas, un número romano en cada una (I ii iii IV V vi), mezcla el mazo, voltea la tarjeta de arriba, y toca ese acorde en la tonalidad de C — sin dudar. Repite el mazo dos veces. (¿Tienes a alguien cerca? Pídele que diga los números romanos en tu lugar.) |
+| hint: If you know the family in order (C Dm Em F G Am), the numeral just tells you which slot to reach for. | Si conoces la familia en orden (C Dm Em F G Am), el número romano solo te dice cuál lugar buscar. |
+| stuck: Write the family out in numeral order on paper and keep it in view while you drill. | Escribe la familia en orden de números romanos en papel y mantenla a la vista mientras practicas. |
+| levelUp: Switch to the key of G, or time yourself through the deck and try to beat your best time. Ready for all seven? Look up Bdim — the vii° of C — and add a seventh card. | Cambia a la tonalidad de G, o cronométrate a través del mazo e intenta superar tu mejor tiempo. ¿Listo para los siete? Busca Bdim — el vii° de C — y agrega una séptima tarjeta. |
+
+**Station C — Take It to a Song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — Let It Be, numbered: write I, V, vi, and IV on four slips, then strum the verse drawing a slip each bar (or call the numerals aloud in a random order you set beforehand) — you have to know which chord each numeral means, not just the C–G–Am–F letters. You've got it when: one full loop with every numeral landing on the right chord. (A partner calling numerals works too.) | Reto — Let It Be, numerado: escribe I, V, vi y IV en cuatro papelitos, y luego rasguea la estrofa sacando un papelito en cada compás (o di los números romanos en voz alta en un orden aleatorio que definas de antemano) — tienes que saber qué acorde significa cada número romano, no solo las letras C–G–Am–F. Lo tienes cuando: una vuelta completa con cada número romano cayendo en el acorde correcto. (Tener a alguien que diga los números romanos también funciona.) |
+| hint: This is the same verse you've strummed since Module 5 — today the only new part is thinking in numerals instead of letters. | Esta es la misma estrofa que has rasgueado desde el Módulo 5 — hoy lo único nuevo es pensar en números romanos en lugar de letras. |
+| stuck: Say each chord's NAME out loud first, then its numeral, until the pairing sticks. | Di primero el NOMBRE de cada acorde en voz alta, y luego su número romano, hasta que la relación se fije. |
+| levelUp: Shuffle the slips into a new order each loop, and always land back on I to finish. | Mezcla los papelitos en un nuevo orden cada vuelta, y siempre termina cayendo en I. |
+
+**Station C — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: What's the vi chord of G major, and can you explain in one sentence why Am is lowercase but C is uppercase? | ¿Cuál es el acorde vi de G mayor, y puedes explicar en una oración por qué Am va en minúscula pero C va en mayúscula? |
+| response placeholder: e.g. Em is the vi of G; Am is lowercase because it comes out minor when you stack the scale in thirds | p. ej. Em es el vi de G; Am va en minúscula porque sale menor al apilar la escala en terceras |
+
+**Set 1 — Skills**
+
+| English | Spanish |
+|---|---|
+| m11w1-s1 text: Build a triad from a scale (root–3rd–5th) | Construir una tríada a partir de una escala (raíz–3ª–5ª) |
+| m11w1-s1 practice prompt: The notes of the C major triad are: | Las notas de la tríada de C mayor son: |
+| m11w1-s1 practice choices: C-D-E / C-E-G / C-F-G / C-E-A | C-D-E / C-E-G / C-F-G / C-E-A |
+| m11w1-s2 text: Say which chords in a major key are major (I, IV, V) and which are minor (ii, iii, vi) | Decir cuáles acordes de una tonalidad mayor son mayores (I, IV, V) y cuáles son menores (ii, iii, vi) |
+| m11w1-s2 practice prompt: In the key of G, the vi chord is: | En la tonalidad de G, el acorde vi es: |
+| m11w1-s2 practice choices: E major / E minor / B minor / C major | E mayor / E menor / B menor / C mayor |
+| m11w1-s3 text: Label Let It Be's C–G–Am–F as I–V–vi–IV | Etiquetar el C–G–Am–F de Let It Be como I–V–vi–IV |
+| m11w1-s4 text: List the chord family of C major (C Dm Em F G Am) | Enumerar la familia de acordes de C mayor (C Dm Em F G Am) |
+| m11w1-s4 practice prompt: Which chord is NOT in the key of C? | ¿Cuál acorde NO está en la tonalidad de C? |
+| m11w1-s4 practice choices: Am / F / E major / Dm | Am / F / E mayor / Dm |
+| m11w1-s5 text: List the chord family of G major (G Am Bm C D Em) | Enumerar la familia de acordes de G mayor (G Am Bm C D Em) |
+| m11w1-s5 practice prompt: In the key of G, the IV and V chords are: | En la tonalidad de G, los acordes IV y V son: |
+| m11w1-s5 practice choices: C and D / A and B / F and G / D and E | C y D / A y B / F y G / D y E |
+| m11w1-s6 text: Label Luna's F–Am vamp as I–iii in F major (with the passing Dm as vi) | Etiquetar el vamp F–Am de Luna como I–iii en F mayor (con el Dm de paso como vi) |
+
+### Set 2
+
+| English | Spanish |
+|---|---|
+| unit: Module 11 · Chords, Keys & Harmony | Módulo 11 · Acordes, Tonalidades y Armonía |
+| subtitle: The chord inventory trick · I–IV–V vs the famous four · Slash chords decoded | El truco del inventario de acordes · I–IV–V vs. los famosos cuatro · Acordes con bajo alterno descifrados |
+| skillFocus: Match the inventory to a family · The home chord feels like rest · G/B = G chord, B bass | Compara el inventario con una familia · El acorde base se siente como reposo · G/B = acorde de G, bajo en B |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch the lesson videos | Mira los videos de la lección |
+| Section title: Listen for I–IV–V | Escucha el I–IV–V |
+| Section title: Try numbering a real progression | Prueba a numerar una progresión real |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — finding the key | Estación de práctica — encontrar la tonalidad |
+| Section title: Warm-up — tuning check (Module 1) | Calentamiento — revisión de afinación (Módulo 1) |
+| Section title: Chord-inventory detective drill | Ejercicio detective de inventario de acordes |
+| Section title: Play and feel for home | Toca y siente la base |
+| Section title: Decode a slash chord | Descifra un acorde con bajo alterno |
+| Section title: Take It to a Song | Llévalo a una canción |
+
+**Station B — Watch the lesson videos**
+
+| English | Spanish |
+|---|---|
+| text: Watch: What chords sound good together? \| Music theory ep. 7 – Paul Davids — a second voice on the chord families you built in Set 1. Paul shows why a key's chords belong together; your job is to run it backwards: given a song's chords, name the key. | Mira: What chords sound good together? \| Music theory ep. 7 – Paul Davids — una segunda voz sobre las familias de acordes que construiste en la Unidad 1. Paul muestra por qué los acordes de una tonalidad pertenecen juntos; tu trabajo es hacerlo al revés: dados los acordes de una canción, nombrar la tonalidad. |
+| hint: You already know each key's chord family from Set 1 — this is just running that lookup backwards. | Ya conoces la familia de acordes de cada tonalidad desde la Unidad 1 — esto es solo hacer esa búsqueda al revés. |
+| response prompt: A song uses G, C, D, and Em. Its key is almost certainly: | Una canción usa G, C, D y Em. Su tonalidad casi seguro es: |
+| response explain: All four live in G major's family, and G/D/C are its I, V, IV. (Em, the relative minor, shares those notes too — your ear decides between G and Em by which chord feels like home.) | Los cuatro viven en la familia de G mayor, y G/D/C son su I, V, IV. (Em, la relativa menor, también comparte esas notas — tu oído decide entre G y Em según cuál acorde se sienta como base.) |
+| response choices: C major / G major / D major / F major | C mayor / G mayor / D mayor / F mayor |
+| text: Watch: All Along the Watchtower – Bob Dylan (Official Audio). Listen to the Am–G–F loop and, without looking anything up, decide by ear which chord feels like "home." | Mira: All Along the Watchtower – Bob Dylan (Official Audio). Escucha el loop Am–G–F y, sin buscar nada, decide de oído cuál acorde se siente como "base." |
+| hint: Home is the chord the loop keeps landing back on — the one that makes the progression feel finished, not left unfinished. | La base es el acorde donde el loop siempre vuelve a caer — el que hace que la progresión se sienta terminada, no inconclusa. |
+| response prompt: Watchtower loops Am–G–F. Which chord feels like home? | Watchtower repite Am–G–F. ¿Cuál acorde se siente como base? |
+| response explain: The loop keeps landing back on Am — its home. Call the song A minor (C major's relative family). | El loop siempre vuelve a caer en Am — su base. Llama a la canción A menor (la familia relativa de C mayor). |
+| response choices: G / F / Am / None | G / F / Am / Ninguno |
+
+**Station B — Listen for I–IV–V**
+
+| English | Spanish |
+|---|---|
+| text: Listen for it: count up the A major scale to find its I, IV, and V chords before checking your answer. | Escucha con atención: cuenta hacia arriba en la escala de A mayor para encontrar sus acordes I, IV y V antes de revisar tu respuesta. |
+| hint: I–IV–V is the foundation progression behind blues, rock, and a lot of cumbia — worth having on instant recall in any key. | I–IV–V es la progresión fundamental detrás del blues, el rock y buena parte de la cumbia — vale la pena tenerla lista al instante en cualquier tonalidad. |
+| response prompt: I–IV–V in the key of A is: | El I–IV–V en la tonalidad de A es: |
+| response explain: Count up the A major scale: A(I), D(IV), E(V) — the foundation of blues, rock, and cumbia alike. | Cuenta hacia arriba en la escala de A mayor: A(I), D(IV), E(V) — la base tanto del blues como del rock y la cumbia. |
+| response choices: A–D–E / A–C–D / A–E–F#m / A–B–C | A–D–E / A–C–D / A–E–F#m / A–B–C |
+
+**Station B — Try numbering a real progression**
+
+| English | Spanish |
+|---|---|
+| text: Now try it: number "the cure"'s chords — Am–C–Dm–F–G/B — in the key of C before checking. | Ahora pruébalo: numera los acordes de "the cure" — Am–C–Dm–F–G/B — en la tonalidad de C antes de revisar. |
+| hint: Ignore the slash for a moment and number the chord names first — the bass note is a separate question. | Ignora la barra diagonal por un momento y numera primero los nombres de los acordes — la nota de bajo es una pregunta aparte. |
+| response prompt: "the cure" uses Am–C–Dm–F–G/B. In the key of C, Am–C–Dm–F is: | "the cure" usa Am–C–Dm–F–G/B. En la tonalidad de C, Am–C–Dm–F es: |
+| response explain: Am=vi, C=I, Dm=ii, F=IV — and the G/B is the V chord with a B as its lowest note, so the bass walks smoothly back to C. | Am=vi, C=I, Dm=ii, F=IV — y el G/B es el acorde V con una B como su nota más grave, así que el bajo camina suavemente de vuelta a C. |
+| response choices: vi–I–ii–IV / I–V–vi–IV / ii–IV–vi–I / vi–IV–I–V | vi–I–ii–IV / I–V–vi–IV / ii–IV–vi–I / vi–IV–I–V |
+| text: Try it fast: given only a chord list (no song name), find the single family that contains every chord before you do anything else. | Pruébalo rápido: dada solo una lista de acordes (sin nombre de canción), encuentra la única familia que contiene todos los acordes antes de hacer cualquier otra cosa. |
+| hint: Inventory first, family second, home-chord-by-ear last — in that order, every time. | Primero el inventario, después la familia, y al final el acorde base por oído — en ese orden, siempre. |
+| response prompt: The fastest first move to find a song's key from a chord chart is: | El primer paso más rápido para encontrar la tonalidad de una canción a partir de una tabla de acordes es: |
+| response explain: Inventory → family → then let your ear pick the home chord (major key or its relative minor). | Inventario → familia → y luego deja que tu oído elija el acorde base (la tonalidad mayor o su relativa menor). |
+| response choices: Count the chords / See which single family contains ALL the chords / Find the loudest chord / Check the tempo | Contar los acordes / Ver cuál única familia contiene TODOS los acordes / Encontrar el acorde más fuerte / Revisar el tempo |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — describe the "home chord" feeling in your own words. | Cierre de la estación — describe con tus propias palabras la sensación del "acorde base." |
+| response placeholder: e.g. like the last word of a sentence — the loop can finally stop there | p. ej. como la última palabra de una oración — el loop finalmente puede detenerse ahí |
+
+**Station C — Warm-up — tuning check (Module 1)**
+
+| English | Spanish |
+|---|---|
+| text: Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You've got it when: in tune before today's work. | Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy. |
+| playSeq label: Hear all 6 strings in tune | Escucha las 6 cuerdas afinadas |
+
+**Station C — Chord-inventory detective drill**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 1 — Inventory Drill (a drill is a short exercise you repeat to build a skill): four mystery chord sets on cards — G-C-D-Em, C-F-G-Am, D-G-A-Bm, Am-F-G-C — name each key before flipping the card. (Answers: G, C, D, C/Am.) | Reto 1 — Ejercicio de inventario (un ejercicio es una práctica corta que repites para desarrollar una destreza): cuatro conjuntos misteriosos de acordes en tarjetas — G-C-D-Em, C-F-G-Am, D-G-A-Bm, Am-F-G-C — nombra cada tonalidad antes de voltear la tarjeta. (Respuestas: G, C, D, C/Am.) |
+| hint: Find the single family that contains ALL the chords on the card — that's the key, before your ear even weighs in. | Encuentra la única familia que contiene TODOS los acordes de la tarjeta — esa es la tonalidad, incluso antes de que tu oído opine. |
+| stuck: Cross off keys one at a time — if even one chord doesn't belong to a family, that key is out. | Descarta tonalidades una a la vez — si aunque sea un acorde no pertenece a una familia, esa tonalidad queda descartada. |
+| levelUp: Time yourself — how fast can you call all four keys correctly in a row? | Cronométrate — ¿qué tan rápido puedes decir las cuatro tonalidades correctamente seguidas? |
+
+**Station C — Play and feel for home**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 2 — Play and Feel: strum Am–G–F, stopping and holding each chord in turn, then say (or type below) which one feels most like "home." | Reto 2 — Toca y siente: rasguea Am–G–F, deteniéndote y sosteniendo cada acorde por turno, y luego di (o escribe abajo) cuál se siente más como "base." |
+| hint: Play the loop a few times through first — home only reveals itself once you can hear the whole shape of the progression. | Toca el loop unas cuantas veces primero — la base solo se revela una vez que puedes escuchar la forma completa de la progresión. |
+| stuck: Play just Am, then G, then F in isolation and rate each one 1-10 for "does this feel finished." | Toca solo Am, luego G, luego F por separado y califica cada uno del 1 al 10 según "¿se siente terminado?" |
+| levelUp: Try the same drill on a progression you haven't analyzed yet. | Prueba el mismo ejercicio con una progresión que no hayas analizado todavía. |
+| response placeholder: e.g. Am — the loop only feels finished when it lands there | p. ej. Am — el loop solo se siente terminado cuando cae ahí |
+
+**Station C — Decode a slash chord**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 3 — Slash Chord Walk: play C → G/B → Am as a smooth bass-line move — notice the bass note walks down one step at a time (C, B, A) while the chords change around it. | Reto 3 — Caminata de acorde con bajo alterno: toca C → G/B → Am como un movimiento suave de línea de bajo — fíjate cómo la nota de bajo baja un paso a la vez (C, B, A) mientras los acordes cambian alrededor. |
+| hint: This is exactly what "the cure" does to glide from the G chord back home to C — the slash chord is the piece that links the two chords smoothly. | Esto es exactamente lo que hace "the cure" para deslizarse del acorde de G de vuelta a la base en C — el acorde con bajo alterno es la pieza que conecta los dos acordes suavemente. |
+| stuck: Play C and Am first without the G/B in between, then add it back and listen for how much smoother the move feels. | Toca C y Am primero sin el G/B en medio, y luego agrégalo de vuelta y escucha cuánto más suave se siente el movimiento. |
+| levelUp: Try the reverse walk, Am → G/B → C, or find another slash chord to decode. | Prueba la caminata al revés, Am → G/B → C, o encuentra otro acorde con bajo alterno para descifrar. |
+
+**Station C — Take It to a Song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — Watchtower, fully numbered: play the Am–G–F loop and label every chord's numeral in the key of C — vi–V–IV — before landing back on Am as the true minor-key home. You've got it when: one clean loop, numerals called correctly on every chord. | Reto — Watchtower, completamente numerado: toca el loop Am–G–F y etiqueta el número romano de cada acorde en la tonalidad de C — vi–V–IV — antes de aterrizar de vuelta en Am como la verdadera base en tonalidad menor. Lo tienes cuando: un loop limpio, con los números romanos dichos correctamente en cada acorde. |
+| hint: Watchtower is C major's relative-minor family in action — same three chords you've played since Module 2, now fully numbered. | Watchtower es la familia relativa menor de C mayor en acción — los mismos tres acordes que has tocado desde el Módulo 2, ahora completamente numerados. |
+| stuck: Number just Am and G first (vi and V), then add F (IV). | Numera primero solo Am y G (vi y V), y luego agrega F (IV). |
+| levelUp: Explain out loud why Watchtower can be called "in C" or "in A minor" and both are correct. | Explica en voz alta por qué a Watchtower se le puede llamar "en C" o "en A menor" y ambas son correctas. |
+
+**Station C — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: A song uses D, G, A, and Bm — what key? And what does the B in G/B tell you to do with your bass note? | Una canción usa D, G, A y Bm — ¿qué tonalidad? ¿Y qué te dice la B en G/B que hagas con tu nota de bajo? |
+| response placeholder: e.g. key of D; the B means B is the lowest note you play, even though it's still a G chord shape | p. ej. tonalidad de D; la B significa que B es la nota más grave que tocas, aunque siga siendo la forma del acorde de G |
+
+**Set 2 — Skills**
+
+| English | Spanish |
+|---|---|
+| m11w2-s1 text: Identify a song's key from its chord inventory | Identificar la tonalidad de una canción a partir de su inventario de acordes |
+| m11w2-s1 practice prompt: A song uses C, F, G, and Am. Its key: | Una canción usa C, F, G y Am. Su tonalidad: |
+| m11w2-s1 practice choices: F major / C major / A major / G major | F mayor / C mayor / A mayor / G mayor |
+| m11w2-s2 text: Recognize I–IV–V and I–V–vi–IV progressions by their numerals | Reconocer las progresiones I–IV–V y I–V–vi–IV por sus números romanos |
+| m11w2-s2 practice prompt: I–V–vi–IV in the key of G is: | I–V–vi–IV en la tonalidad de G es: |
+| m11w2-s2 practice choices: G–D–Em–C / G–C–D–Em / G–Am–B–C / G–Em–C–D | G–D–Em–C / G–C–D–Em / G–Am–B–C / G–Em–C–D |
+| m11w2-s3 text: Number "the cure"'s progression in the key of C | Numerar la progresión de "the cure" en la tonalidad de C |
+| m11w2-s4 text: Find Watchtower's key from Am–G–F and say why Am is home | Encontrar la tonalidad de Watchtower a partir de Am–G–F y decir por qué Am es la base |
+| m11w2-s5 text: Explain what a slash chord tells you (chord / bass note) | Explicar qué te dice un acorde con bajo alterno (acorde / nota de bajo) |
+| m11w2-s5 practice prompt: In Am/E, your lowest sounding note should be: | En Am/E, tu nota más grave debería ser: |
+| m11w2-s5 practice choices: A / C / E / G | A / C / E / G |
+| m11w2-s6 text: Given any three chords, name their key and each chord's numeral | Dados tres acordes cualesquiera, nombrar su tonalidad y el número romano de cada acorde |
+
+### Set 3
+
+| English | Spanish |
+|---|---|
+| unit: Module 11 · Chords, Keys & Harmony | Módulo 11 · Acordes, Tonalidades y Armonía |
+| subtitle: One shape, twelve chords · Root names the chord · Play I–IV–V anywhere | Una forma, doce acordes · La raíz nombra el acorde · Toca I–IV–V en cualquier lugar |
+| skillFocus: E-shape root on the low E · A-shape root on the A string · Your Module 9 fretboard knowledge names every barre | Raíz de la forma de E en la Mi grave · Raíz de la forma de A en la cuerda La · Tu conocimiento del diapasón del Módulo 9 nombra cada cejilla |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch the lesson videos | Mira los videos de la lección |
+| Section title: Listen for the A-shape root | Escucha la raíz de la forma de A |
+| Section title: Try naming a barre from its root | Prueba a nombrar una cejilla a partir de su raíz |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Section title: The 12-bar blues — the form your I–IV–V was waiting for | El blues de 12 compases — la forma que tu I–IV–V estaba esperando |
+| Station C title: Practice station — barre chords as harmony tools | Estación de práctica — acordes con cejilla como herramientas de armonía |
+| Section title: Warm-up — tuning check (Module 1) | Calentamiento — revisión de afinación (Módulo 1) |
+| Section title: Root-naming drill | Ejercicio de nombrar raíces |
+| Section title: Build I–IV–V in a named key | Construye I–IV–V en una tonalidad nombrada |
+| Section title: Take It to a Song | Llévalo a una canción |
+| Section title: Play the 12-bar blues | Toca el blues de 12 compases |
+
+**Station B — Watch the lesson videos**
+
+| English | Spanish |
+|---|---|
+| text: Watch: Basic Barré Chords #1 — the E shape (CH-006) – JustinGuitar. As you watch, find the low-E-string fret for each root he names. | Mira: Basic Barré Chords #1 — the E shape (CH-006) – JustinGuitar. Mientras miras, encuentra el traste en la cuerda Mi grave para cada raíz que él nombra. |
+| hint: The low-E root names an E-shape barre chord — Module 9's fretboard knowledge pays off here. | La raíz en la Mi grave nombra un acorde con cejilla en forma de E — el conocimiento del diapasón del Módulo 9 rinde frutos aquí. |
+| response prompt: The E-shape barre chord takes its NAME from: | El acorde con cejilla en forma de E toma su NOMBRE de: |
+| response explain: The low-E root names it — barre fret 3 and the low E says G, so it's G major. Module 9 pays off. | La raíz en la Mi grave lo nombra — cejilla en el traste 3 y la Mi grave da G, así que es G mayor. El Módulo 9 rinde frutos. |
+| response choices: The fret your pinky is on / The note under your barre on the low E string / The key of the song / The A string | El traste donde está tu meñique / La nota debajo de tu cejilla en la cuerda Mi grave / La tonalidad de la canción / La cuerda La |
+| text: Watch: A Shape Major Barre Chords on Guitar (my best tricks and exercises) – JustinGuitar. Notice the root now lives on the A string, not the low E. | Mira: A Shape Major Barre Chords on Guitar (my best tricks and exercises) – JustinGuitar. Fíjate que ahora la raíz vive en la cuerda La, no en la Mi grave. |
+| hint: Same idea as the E-shape, different string — the A-shape root is always on the A string. | Misma idea que la forma de E, distinta cuerda — la raíz de la forma de A siempre está en la cuerda La. |
+| response prompt: The A-shape barre chord takes its NAME from: | El acorde con cejilla en forma de A toma su NOMBRE de: |
+| response explain: The note under your barre on the A string names it — same trick as the E shape, just one string over. | La nota debajo de tu cejilla en la cuerda La lo nombra — el mismo truco que la forma de E, solo una cuerda más allá. |
+| response choices: The note under your barre on the A string / The note under your barre on the low E string / The fret your pinky is on / The key of the song | La nota debajo de tu cejilla en la cuerda La / La nota debajo de tu cejilla en la cuerda Mi grave / El traste donde está tu meñique / La tonalidad de la canción |
+
+**Station B — Listen for the A-shape root**
+
+| English | Spanish |
+|---|---|
+| text: Listen for it: play an A-shape barre at fret 5 and name its root before checking — remember the root lives on the A string this time, not the low E. | Escucha con atención: toca una cejilla en forma de A en el traste 5 y nombra su raíz antes de revisar — recuerda que esta vez la raíz vive en la cuerda La, no en la Mi grave. |
+| hint: Count up the A string from open: A-A#-B-C-C#-D. Fret 5 lands on D. | Cuenta hacia arriba en la cuerda La desde el aire: A-A#-B-C-C#-D. El traste 5 cae en D. |
+| response prompt: An A-shape barre at fret 5 is: | Una cejilla en forma de A en el traste 5 es: |
+| response explain: A-shape roots live on the A STRING — fret 5 there is D. | Las raíces de la forma de A viven en la CUERDA LA — el traste 5 ahí es D. |
+| response choices: A major / C major / D major / E major | A mayor / C mayor / D mayor / E mayor |
+
+**Station B — Try naming a barre from its root**
+
+| English | Spanish |
+|---|---|
+| text: Now try it: find B major using the A-shape barre — count up the A string until you hit B before you fret anything. | Ahora pruébalo: encuentra B mayor usando la cejilla en forma de A — cuenta hacia arriba en la cuerda La hasta llegar a B antes de trastear nada. |
+| hint: A string: A(0)-A#(1)-B(2). B is only two frets up. | Cuerda La: A(0)-A#(1)-B(2). B está a solo dos trastes de distancia. |
+| response prompt: To play B major with the A shape, barre at fret: | Para tocar B mayor con la forma de A, pon la cejilla en el traste: |
+| response explain: A string, fret 2 = B. | Cuerda La, traste 2 = B. |
+| response choices: 1 / 2 / 4 / 7 | 1 / 2 / 4 / 7 |
+| text: Try it on paper: list all 12 chromatic notes and, for each, name the fret where an E-shape barre would land on that root. | Pruébalo en papel: enumera las 12 notas cromáticas y, para cada una, nombra el traste donde caería una cejilla en forma de E sobre esa raíz. |
+| hint: One shape, twelve chords — the ONLY thing that changes is which fret you barre. | Una forma, doce acordes — lo ÚNICO que cambia es en cuál traste pones la cejilla. |
+| response prompt: One movable shape gives you twelve different chords because: | Una forma movible te da doce acordes distintos porque: |
+| response explain: Slide the shape, and the root fret renames it — one grip, the whole chromatic set. | Desliza la forma, y el traste de la raíz la renombra — un solo agarre, todo el conjunto cromático. |
+| response choices: You can barre at each of the 12 frets before the octave repeats / Guitars have 12 strings / You use 12 fingers / It doesn't — each shape is one chord | Puedes poner la cejilla en cada uno de los 12 trastes antes de que se repita la octava / Las guitarras tienen 12 cuerdas / Usas 12 dedos / No lo hace — cada forma es un solo acorde |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — open shapes or barre shapes: which would you pick for Let It Be, and why? (Don't stop — the 12-bar blues section is below!) | Cierre de la estación — formas abiertas o formas con cejilla: ¿cuál elegirías para Let It Be, y por qué? (¡No pares — la sección de blues de 12 compases está abajo!) |
+| response placeholder: e.g. open — it rings better; but the barre F is better than the mini-F once my hand is warm | p. ej. abierta — suena mejor; pero la F con cejilla es mejor que la mini-F una vez que mi mano está caliente |
+
+**Station B — The 12-bar blues — the form your I–IV–V was waiting for**
+
+| English | Spanish |
+|---|---|
+| text: Watch: How To Play Old School 12 Bar Blues Guitar No.1 EASY Beginners - Chords Key E – EricBlackmonGuitar (0:00–4:41). The 12-bar blues is I–IV–V — the exact chords you've been building this set — used to build the most-played song form in American music. Watch for two things: the ORDER the chords arrive in, and the long-short "shuffle" bounce in the strumming hand. | Mira: How To Play Old School 12 Bar Blues Guitar No.1 EASY Beginners - Chords Key E – EricBlackmonGuitar (0:00–4:41). El blues de 12 compases es I–IV–V — los mismos acordes que has estado construyendo en esta unidad — usado para armar la forma de canción más tocada en la música estadounidense. Fíjate en dos cosas: el ORDEN en que llegan los acordes, y el rebote largo-corto de "shuffle" en la mano que rasguea. |
+| hint: Thousands of songs are this one form. Learn it once and you can jam (play along freely and make up your own part) with people you've just met for the rest of your life. | Miles de canciones usan esta única forma. Apréndela una vez y podrás improvisar (jam: tocar libremente junto con otros e inventar tu propia parte) con gente que acabas de conocer por el resto de tu vida. |
+| text: Check yourself on the form's ingredients before you play it at the practice station. | Ponte a prueba con los ingredientes de la forma antes de tocarla en la estación de práctica. |
+| response prompt: A standard 12-bar blues in A uses which three chords? | Un blues de 12 compases estándar en A usa cuáles tres acordes: |
+| response explain: It's the I, IV, and V of A — each with a bluesy 7th added. You already know I–IV–V from this set; the blues just gives it a form. | Es el I, IV y V de A — cada uno con una 7ª bluesera agregada. Ya conoces el I–IV–V de esta unidad; el blues solo le da una forma. |
+| response choices: A7, D7, E7 / A, Bm, C# / A7, C7, G7 / Am, Dm, Em | A7, D7, E7 / A, Bm, C# / A7, C7, G7 / Am, Dm, Em |
+| text: One more — the feel is half the style. | Una más — la sensación es la mitad del estilo. |
+| response prompt: "Shuffle feel" means the eighth notes are played: | La "sensación de shuffle" significa que las corcheas se tocan: |
+| response explain: Swing the pair — DAH-da DAH-da. Even eighths make it rock; long-short makes it blues. | Balancea el par — DAH-da DAH-da. Las corcheas parejas lo hacen sonar a rock; largo-corto lo hace sonar a blues. |
+| response choices: Perfectly even / Long-short, like a heartbeat / As fast as possible / Only on downbeats | Perfectamente parejas / Largo-corto, como un latido / Lo más rápido posible / Solo en los tiempos fuertes |
+
+**Station C — Warm-up — tuning check (Module 1)**
+
+| English | Spanish |
+|---|---|
+| text: Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You've got it when: in tune before today's work. | Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy. |
+| playSeq label: Hear all 6 strings in tune | Escucha las 6 cuerdas afinadas |
+
+**Station C — Root-naming drill**
+
+| English | Spanish |
+|---|---|
+| text: First, warm the hand up — run a quick Finger Gym stretch (The Finger Gym – JustinGuitar) before today's barre-heavy work. Then, Challenge 1 — Root-Naming Drill: write a handful of chord names on slips, draw one, and find BOTH barre locations for it — the E-shape fret on the low E string AND the A-shape fret on the A string. | Primero, calienta la mano — haz un estiramiento rápido de Gimnasio de Dedos (The Finger Gym – JustinGuitar) antes del trabajo intenso de cejillas de hoy. Luego, Reto 1 — Ejercicio de nombrar raíces: escribe un puñado de nombres de acordes en papelitos, saca uno, y encuentra AMBAS ubicaciones de cejilla para ese acorde — el traste de la forma de E en la cuerda Mi grave Y el traste de la forma de A en la cuerda La. |
+| hint: Every chord has (at least) two barre homes — one for each shape. Module 9's fretboard naming is the whole trick here. | Cada acorde tiene (al menos) dos hogares de cejilla — uno por cada forma. El nombrado del diapasón del Módulo 9 es todo el truco aquí. |
+| stuck: Find the E-shape location first, get comfortable, then add the A-shape hunt. | Encuentra primero la ubicación de la forma de E, ponte cómodo, y luego agrega la búsqueda de la forma de A. |
+| levelUp: Time yourself finding both locations and try to beat your best time (race a partner if one's around), or add a third barre location further up the neck. | Cronométrate encontrando ambas ubicaciones e intenta superar tu mejor tiempo (compite con alguien si hay alguien cerca), o agrega una tercera ubicación de cejilla más arriba en el mástil. |
+
+**Station C — Build I–IV–V in a named key**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 2 — I–IV–V Builder: play I–IV–V in G (G open or fret-3 barre · C · D), then in A, then a key you draw at random from your chord slips. You've got it when: clean changes in time at 60 BPM, using at least one barre shape. | Reto 2 — Constructor de I–IV–V: toca I–IV–V en G (G abierto o cejilla en el traste 3 · C · D), luego en A, y luego una tonalidad que saques al azar de tus papelitos de acordes. Lo tienes cuando: cambios limpios y a tiempo a 60 BPM, usando al menos una forma con cejilla. |
+| hint: Once you know I–IV–V's shape in one key, moving the whole progression to a new key is just sliding your hands. | Una vez que conoces la forma del I–IV–V en una tonalidad, mover toda la progresión a una tonalidad nueva es solo deslizar tus manos. |
+| stuck: Stay in G until the changes are automatic, then move the whole progression up together. | Quédate en G hasta que los cambios sean automáticos, y luego mueve toda la progresión hacia arriba junta. |
+| levelUp: Play I–IV–V in a key using barre shapes only — no open chords at all. | Toca I–IV–V en una tonalidad usando solo formas con cejilla — sin ningún acorde abierto. |
+
+**Station C — Take It to a Song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — Oye Mi Amor, full barre: play the verse's Bm–G with a full A-shape barre Bm — the song's last beginner shortcut, gone for good. You've got it when: four laps (a lap = one full time through) where the full Bm rings as clean as the G. | Reto — Oye Mi Amor, cejilla completa: toca el Bm–G de la estrofa con una cejilla completa en forma de A para Bm — el último atajo de principiante de la canción, desaparecido para siempre. Lo tienes cuando: cuatro vueltas (una vuelta = un recorrido completo) donde el Bm completo suena tan limpio como el G. |
+| hint: This is Module 7's payoff, finally put to use as a harmony tool instead of just a shape to survive. | Esta es la recompensa del Módulo 7, finalmente usada como herramienta de armonía en lugar de solo una forma para sobrevivir. |
+| stuck: Warm up the A-shape Bm alone for a minute before adding the G change. | Calienta el Bm en forma de A solo durante un minuto antes de agregar el cambio a G. |
+| levelUp: Explain out loud why Bm is the vi chord of D major — check the inventory: both Bm and G live in D's family — using what you learned in Set 1. | Explica en voz alta por qué Bm es el acorde vi de D mayor — revisa el inventario: tanto Bm como G viven en la familia de D — usando lo que aprendiste en la Unidad 1. |
+
+**Station C — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Where are the two places to play C major as a barre — and which shape is friendlier to your hand today? (Don't stop — the 12-bar blues section is below!) | ¿Cuáles son los dos lugares para tocar C mayor como cejilla — y cuál forma es más amigable para tu mano hoy? (¡No pares — la sección de blues de 12 compases está abajo!) |
+| response placeholder: e.g. E-shape fret 8 or A-shape fret 3 — the A-shape one is easier for me right now | p. ej. forma de E en el traste 8 o forma de A en el traste 3 — la de forma de A es más fácil para mí ahora mismo |
+
+**Station C — Play the 12-bar blues**
+
+| English | Spanish |
+|---|---|
+| text: Meet the three chords: A7, D7, E7 — your I, IV, and V in A, each with the bluesy 7th built in. Fret each one clean, then strum each for a bar with a long-short shuffle feel at 60 BPM. | Conoce los tres acordes: A7, D7, E7 — tu I, IV y V en A, cada uno con la 7ª bluesera incorporada. Trastea cada uno limpio, y luego rasguea cada uno durante un compás con una sensación de shuffle largo-corto a 60 BPM. |
+| hint: All three are open-position shapes — no barre needed. The shuffle lives in your strumming wrist: DAH-da DAH-da. | Los tres son formas en posición abierta — no se necesita cejilla. El shuffle vive en tu muñeca que rasguea: DAH-da DAH-da. |
+| text: The 12-bar map in A: A7 A7 A7 A7 \| D7 D7 A7 A7 \| E7 D7 A7 E7. Say each chord name OUT LOUD on beat 1 as you strum the bar — losing the form is the most common blues mistake, and counting bars aloud is the fix. Quick-change variant: swap D7 into bar 2 instead of staying on A7 — the "quick change" hands your ear the IV chord early, and it's the version you'll hear in most modern blues. | El mapa de 12 compases en A: A7 A7 A7 A7 \| D7 D7 A7 A7 \| E7 D7 A7 E7. Di el nombre de cada acorde EN VOZ ALTA en el tiempo 1 mientras rasgueas el compás — perder la forma es el error más común del blues, y contar los compases en voz alta es la solución. Variante de cambio rápido: cambia a D7 en el compás 2 en lugar de quedarte en A7 — el "cambio rápido" le entrega a tu oído el acorde IV antes de tiempo, y es la versión que escucharás en la mayoría del blues moderno. |
+| hint: That last E7 in bar 12 is the "turnaround" — it pulls the music back to bar 1 so the form can loop forever. | Ese último E7 en el compás 12 es el "giro" — jala la música de vuelta al compás 1 para que la forma pueda repetirse para siempre. |
+| text: Put it together: comp the full 12 bars from memory — comping = playing the backing chords while someone else solos — with shuffle feel at 60 BPM, then record a pass, loop your recording, and solo over your own comping with A minor pentatonic (your Module 4 box at fret 5). You've got it when: a full chorus of each job (one chorus = one full trip through the 12 bars) — comping without losing the form, soloing without losing the changes. Playing with someone? One comps while the other solos, then swap. | Júntalo todo: acompaña los 12 compases completos de memoria — acompañar = tocar los acordes de base mientras alguien más hace un solo — con sensación de shuffle a 60 BPM, y luego graba una pasada, repite tu grabación en loop, y haz un solo sobre tu propio acompañamiento con la pentatónica menor de A (tu caja del Módulo 4 en el traste 5). Lo tienes cuando: una ronda completa de cada trabajo (una ronda = un recorrido completo por los 12 compases) — acompañar sin perder la forma, hacer un solo sin perder los cambios. ¿Tocando con alguien? Uno acompaña mientras el otro hace el solo, y luego cambian. |
+| hint: When the loop comes back to A7, land on an A — hearing that "home" arrival is the most important thing. | Cuando el loop vuelve a A7, aterriza en una A — escuchar esa llegada a "casa" es lo más importante. |
+
+**Set 3 — Skills**
+
+| English | Spanish |
+|---|---|
+| m11w3-s1 text: Play the E-shape major barre and name its root from the low-E fret | Tocar la cejilla mayor en forma de E y nombrar su raíz a partir del traste en la Mi grave |
+| m11w3-s1 practice prompt: E-shape barre, fret 8: | Cejilla en forma de E, traste 8: |
+| m11w3-s1 practice choices: C major / G major / A major / B major | C mayor / G mayor / A mayor / B mayor |
+| m11w3-s2 text: Play the A-shape major barre and name its root from the A-string fret | Tocar la cejilla mayor en forma de A y nombrar su raíz a partir del traste en la cuerda La |
+| m11w3-s2 practice prompt: A-shape barre, fret 7: | Cejilla en forma de A, traste 7: |
+| m11w3-s2 practice choices: D major / E major / F major / G major | D mayor / E mayor / F mayor / G mayor |
+| m11w3-s3 text: Play a I–IV–V in a randomly drawn key using barre and/or open shapes | Tocar un I–IV–V en una tonalidad sacada al azar usando formas con cejilla y/o abiertas |
+| m11w3-s4 text: Move one barre shape to three different named roots | Mover una forma con cejilla a tres raíces distintas nombradas |
+| m11w3-s5 text: Explain why one movable shape equals twelve chords | Explicar por qué una forma movible equivale a doce acordes |
+| m11w3-s5 practice prompt: To turn an E-shape G (fret 3) into an E-shape A, move: | Para convertir un G en forma de E (traste 3) en un A en forma de E, mueve: |
+| m11w3-s5 practice choices: Up 2 frets / Down 2 frets / Up 1 string / Nowhere — re-finger it | 2 trastes hacia arriba / 2 trastes hacia abajo / 1 cuerda hacia arriba / A ningún lado — cambia los dedos |
+| m11w3-s6 text: Choose open vs barre voicing for a progression and say why | Elegir un acorde abierto o uno con cejilla para una progresión y explicar por qué |
+| m11w3-s7 text: Comp a 12-bar blues in A with shuffle feel (A7–D7–E7) | Acompañar un blues de 12 compases en A con sensación de shuffle (A7–D7–E7) |
+| m11w3-s7 gotItWhen: you can play all 12 bars from memory at 60 BPM with a long-short shuffle strum, without losing your place in the form. | puedes tocar los 12 compases completos de memoria a 60 BPM con un rasgueo shuffle largo-corto, sin perder tu lugar en la forma. |
+| m11w3-s8 text: Explain and play the quick-change and the turnaround | Explicar y tocar el cambio rápido y el giro |
+| m11w3-s8 gotItWhen: you can say what bar 2 does in a quick-change blues and land the E7 turnaround in bar 12 without stopping. | puedes decir qué hace el compás 2 en un blues de cambio rápido y aterrizar el giro de E7 en el compás 12 sin detenerte. |
+
+### Module-level Songs
+
+MODULE_SONGS[11] meta fields (song title shown for reference, not itself translated on the site).
+
+| English | Spanish |
+|---|---|
+| "Let It Be" — The Beatles — meta: C–G–Am–F = I–V–vi–IV, the famous four | C–G–Am–F = I–V–vi–IV, los famosos cuatro |
+| "Luna" — Peso Pluma, Junior H — meta: F–Am = I–iii in F — proof it's not always the famous four | F–Am = I–iii en F — prueba de que no siempre son los famosos cuatro |
+| "the cure" — Olivia Rodrigo — meta: Number the progression in C | Numera la progresión en C |
+| "All Along the Watchtower" — Dylan / Hendrix — meta: Find the key from Am–G–F | Encuentra la tonalidad a partir de Am–G–F |
+| "Oye Mi Amor" — Maná — meta: Bm and barre practice with numerals | Práctica de Bm y cejilla con números romanos |
+| "House of the Rising Sun" — The Animals — meta: Number an A-minor-family progression | Numera una progresión de la familia de A menor |
+
+### Module Review
+
+| English | Spanish |
+|---|---|
+| module: Chords, Keys & Harmony | Acordes, Tonalidades y Armonía |
+| skill mr11-s1: I can build a triad (root–3rd–5th) from any major scale | Puedo construir una tríada (raíz–3ª–5ª) a partir de cualquier escala mayor |
+| skill mr11-s2: I can label a chord progression with Roman numerals, including Luna's F–Am vamp as I–iii | Puedo etiquetar una progresión de acordes con números romanos, incluyendo el vamp F–Am de Luna como I–iii |
+| skill mr11-s3: I can figure out a song's key from the chords it uses | Puedo averiguar la tonalidad de una canción a partir de los acordes que usa |
+| skill mr11-s4: I can read a slash chord (like G/B) and know which note goes on the bottom | Puedo leer un acorde con bajo alterno (como G/B) y saber qué nota va abajo |
+| skill mr11-s5: I can name a barre chord's root from either the E-shape or A-shape fret | Puedo nombrar la raíz de un acorde con cejilla a partir del traste en forma de E o de A |
+| skill mr11-s6: I can play a I–IV–V progression in a randomly drawn key using open or barre shapes | Puedo tocar una progresión I–IV–V en una tonalidad sacada al azar usando formas abiertas o con cejilla |
+| assessItem: Analyze a thread song's progression in Roman numerals and name its key | Analiza la progresión de una canción principal en números romanos y nombra su tonalidad |
+| assessItem: Play a I–IV–V progression in a key you draw at random — open or barre shapes | Toca una progresión I–IV–V en una tonalidad que saques al azar — formas abiertas o con cejilla |
+| assessItem: Comp a 12-bar blues in A with shuffle feel, then solo over a recording of your own comping — with another player, comp while they solo and trade | Acompaña un blues de 12 compases en A con sensación de shuffle, y luego haz un solo sobre una grabación de tu propio acompañamiento — con otro músico, acompaña mientras el otro hace el solo y luego cambien |
+| forward: You can name what every chord is DOING now, and one barre grip just became twelve chords. <strong>Module 12 is the fun final stretch — you'll use everything you've learned:</strong> we study fingerstyle in detail — alternating thumb, waltz patterns, and the requinto sound — everything you need to pick your showcase song. | Ahora puedes nombrar qué está HACIENDO cada acorde, y un solo agarre de cejilla se acaba de convertir en doce acordes. <strong>El Módulo 12 es el divertido tramo final — vas a usar todo lo que has aprendido:</strong> estudiamos el fingerstyle a fondo — pulgar alternante, patrones de vals y el sonido de requinto — todo lo que necesitas para elegir tu canción para la muestra. |
+
+## Module 12 — Fingerstyle: Travis, Waltz & Requinto
+
+### Set 1
+
+| English | Spanish |
+|---|---|
+| unit: Module 12 · Fingerstyle: Travis, Waltz & Requinto | Módulo 12 · Fingerstyle: Travis, Vals y Requinto |
+| subtitle: The thumb becomes a drummer · Pinch on the downbeat · Fills between | El pulgar se convierte en baterista · Pellizco en el tiempo fuerte · Rellenos entre medio |
+| skillFocus: Thumb alternates two bass strings in quarter notes · Pinch = thumb + finger together · The thumb NEVER stops | El pulgar alterna entre dos cuerdas graves en negras · Pellizco = pulgar + dedo juntos · El pulgar NUNCA se detiene |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch the lesson videos | Mira los videos de la lección |
+| Section title: Listen for the alternating bass | Escucha el bajo alternante |
+| Section title: Try the alternating thumb | Prueba el pulgar alternante |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — alternating thumb & the pinch | Estación de práctica — pulgar alternante y el pellizco |
+| Section title: Warm-up — tuning check (Module 1) | Calentamiento — revisión de afinación (Módulo 1) |
+| Section title: Alternate the thumb between two bass strings | Alterna el pulgar entre dos cuerdas graves |
+| Section title: Add the pinch | Agrega el pellizco |
+| Section title: Add finger fills | Agrega rellenos de dedos |
+| Section title: Keep the pattern through a chord change | Mantén el patrón a través de un cambio de acorde |
+| Section title: Take It to a Song | Llévalo a una canción |
+| Section title: Play-along — one full pass, no stopping | Toca junto al video — una pasada completa, sin detenerte |
+| Section title: Reactivate p-i-m-a — the claw (from Module 8) | Reactiva p-i-m-a — la garra (del Módulo 8) |
+
+**Station B — Watch the lesson videos**
+
+| English | Spanish |
+|---|---|
+| text: Watch: How To Travis Pick on Guitar - The ULTIMATE Fingerpicking Pattern – Lauren Bateman (0:00–9:00). | Mira: How To Travis Pick on Guitar - The ULTIMATE Fingerpicking Pattern – Lauren Bateman (0:00–9:00). |
+| hint: In Travis-style picking, the thumb keeps everything moving — steady quarter notes on two bass strings while the fingers decorate on top. | En el picking estilo Travis, el pulgar mantiene todo en movimiento — negras constantes en dos cuerdas graves mientras los dedos decoran encima. |
+| response prompt: In Travis-style picking, the thumb's job is to: | En el picking estilo Travis, el trabajo del pulgar es: |
+| response explain: The thumb keeps everything moving — steady quarter notes on two bass strings while the fingers decorate on top. | El pulgar mantiene todo en movimiento — negras constantes en dos cuerdas graves mientras los dedos decoran encima. |
+| response choices: Play melody / Alternate steadily between two bass strings like a drummer / Strum / Rest | Tocar la melodía / Alternar constantemente entre dos cuerdas graves como un baterista / Rasguear / Descansar |
+| text: Watch: A Total Beginners Guide To Travis Picking – Andy Guitar — a second teacher on the same pattern as the first video. Notice what Andy does differently from Justin: how he counts the thumb, and when he lets the pinch in. | Mira: A Total Beginners Guide To Travis Picking – Andy Guitar — un segundo maestro con el mismo patrón que el primer video. Fíjate en qué hace Andy diferente a Justin: cómo cuenta el pulgar, y cuándo deja entrar el pellizco. |
+| hint: A pinch is bass and treble sounding at the same instant — the accent that makes Travis picking recognizable. | Un pellizco es el bajo y el agudo sonando en el mismo instante — el acento que hace reconocible al Travis picking. |
+| response prompt: A "pinch" is: | Un "pellizco" es: |
+| response explain: Bass and treble sound at the same instant — the accent that makes Travis picking recognizable. | El bajo y el agudo suenan en el mismo instante — el acento que hace reconocible al Travis picking. |
+| response choices: Two fingers on one string / Thumb and a finger plucking together on the beat / Muting the strings / A very quiet note | Dos dedos en una cuerda / El pulgar y un dedo pulsando juntos en el tiempo / Silenciar las cuerdas / Una nota muy suave |
+
+**Station B — Listen for the alternating bass**
+
+| English | Spanish |
+|---|---|
+| text: On a C chord, the alternating thumb usually bounces between two bass strings. Listen for it in a Travis-picked recording of your choice. | En un acorde de C, el pulgar alternante suele rebotar entre dos cuerdas graves. Escúchalo en una grabación tocada con Travis picking de tu elección. |
+| hint: The root (A string) and a neighbor — the C chord's bass lives on string 5, so the thumb anchors there. | La raíz (cuerda La) y una vecina — el bajo del acorde C vive en la cuerda 5, así que el pulgar se ancla ahí. |
+| response prompt: On a C chord, the alternating thumb usually bounces between: | En un acorde de C, el pulgar alternante suele rebotar entre: |
+| response explain: The root (A string) and a neighbor — the C chord's bass lives on string 5, so the thumb anchors there. | La raíz (cuerda La) y una vecina — el bajo del acorde C vive en la cuerda 5, así que el pulgar se ancla ahí. |
+| response choices: Strings 6 and 5 / Strings 5 and 4 (or 5 and 3) / Strings 2 and 1 / Any two strings at random | Las cuerdas 6 y 5 / Las cuerdas 5 y 4 (o 5 y 3) / Las cuerdas 2 y 1 / Cualquier par de cuerdas al azar |
+
+**Station B — Try the alternating thumb**
+
+| English | Spanish |
+|---|---|
+| text: Now try it: alternate your thumb between strings 5 and 4 over a C chord, 8 bars, no finger notes yet. | Ahora pruébalo: alterna tu pulgar entre las cuerdas 5 y 4 sobre un acorde de C, 8 compases, todavía sin notas de dedos. |
+| hint: Rule one of Travis: the thumb never stops. Fingers can rejoin on the next beat. | Regla número uno del Travis picking: el pulgar nunca se detiene. Los dedos pueden reincorporarse en el siguiente tiempo. |
+| response prompt: If your fingers get lost mid-pattern, what must keep going no matter what? | Si tus dedos se pierden a mitad del patrón, ¿qué debe seguir sin importar qué? |
+| response explain: Rule one of Travis: the thumb never stops. Fingers can rejoin on the next beat. | Regla número uno del Travis picking: el pulgar nunca se detiene. Los dedos pueden reincorporarse en el siguiente tiempo. |
+| response choices: The melody / The thumb bass / The metronome app / Your foot | La melodía / El bajo del pulgar / La app del metrónomo / Tu pie |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — pause and think: what tempo could you hold the alternating thumb today without it stumbling? | Cierre de la estación — pausa y piensa: ¿a qué tempo pudiste mantener el pulgar alternante hoy sin que tropezara? |
+| response placeholder: e.g. solid at 60 BPM; at 70 my thumb followed my fingers and fell apart | p. ej. firme a 60 BPM; a 70 mi pulgar siguió a mis dedos y se desarmó |
+
+**Station C — Warm-up — tuning check (Module 1)**
+
+| English | Spanish |
+|---|---|
+| text: Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You've got it when: in tune before today's work. | Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy. |
+| hint: Fingerpicking exposes every note — an out-of-tune string is easy to hear. | El fingerpicking expone cada nota — una cuerda desafinada se escucha fácilmente. |
+| playSeq label: Hear all 6 strings in tune | Escucha las 6 cuerdas afinadas |
+
+**Station C — Alternate the thumb between two bass strings**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 1 — Thumb Only: alternate strings 5↔4 in quarter notes, 60 BPM, 8 bars, zero finger notes. You've got it when: a steady, even alternating thumb with no wobble. | Reto 1 — Solo el pulgar: alterna las cuerdas 5↔4 en negras, 60 BPM, 8 compases, cero notas de dedos. Lo tienes cuando: un pulgar alternante constante y parejo, sin tambalearse. |
+| hint: Compared to Module 8's p-i-m-a-m-i arpeggio, the thumb ALTERNATES between bass strings instead of staying put — that bounce is the whole style. | Comparado con el arpegio p-i-m-a-m-i del Módulo 8, el pulgar ALTERNA entre cuerdas graves en lugar de quedarse quieto — ese rebote es todo el estilo. |
+| stuck: Drop to half tempo and count "1-2-3-4" aloud, landing the thumb exactly on each number. | Baja a la mitad del tempo y cuenta "1-2-3-4" en voz alta, haciendo caer el pulgar exactamente en cada número. |
+| levelUp: Add a chord change Am↔C every 4 bars without the thumb missing a beat. | Agrega un cambio de acorde Am↔C cada 4 compases sin que el pulgar se pierda ni un tiempo. |
+| playSeq label: Thumb alternation on C — strings 5 & 4 | Alternancia del pulgar en C — cuerdas 5 y 4 |
+
+**Station C — Add the pinch**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 2 — The Pinch: pinch (thumb string 5 + m on string 2) on beat 1, thumb alone beats 2–4. You've got it when: both notes of the pinch sound together as one, perfectly in sync. | Reto 2 — El pellizco: pellizca (pulgar en la cuerda 5 + m en la cuerda 2) en el tiempo 1, pulgar solo en los tiempos 2–4. Lo tienes cuando: ambas notas del pellizco suenan juntas como una sola, perfectamente sincronizadas. |
+| hint: A pinch is the bridge between arpeggios and Travis picking — thumb and finger move toward each other and meet. | Un pellizco es el puente entre los arpegios y el Travis picking — el pulgar y el dedo se mueven uno hacia el otro y se encuentran. |
+| stuck: Pluck the bass and the treble separately first, slowly, then bring them closer until they land together. | Pulsa el bajo y el agudo por separado primero, despacio, y luego acércalos hasta que caigan juntos. |
+| levelUp: Add a second pinch on beat 3, or hold the thumb alternation through an Am↔C change. | Agrega un segundo pellizco en el tiempo 3, o mantén la alternancia del pulgar a través de un cambio Am↔C. |
+
+**Station C — Add finger fills**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 3 — Fills (a fill is a short extra run of notes between the main parts): keep the thumb going, add i on the "and" of beat 2. You've got it when: the fill lands cleanly between two thumb strokes without slowing the thumb down. | Reto 3 — Rellenos (un relleno es una pequeña serie extra de notas entre las partes principales): mantén el pulgar en marcha, agrega i en el "y" del tiempo 2. Lo tienes cuando: el relleno cae limpio entre dos golpes del pulgar sin frenarlo. |
+| hint: Fingers decorate ON TOP of a thumb that's already keeping a steady groove (a groove is the steady rhythmic feel) — the thumb's rhythm never bends to fit the fingers. | Los dedos decoran ENCIMA de un pulgar que ya mantiene un groove constante (un groove es la sensación rítmica estable) — el ritmo del pulgar nunca se dobla para ajustarse a los dedos. |
+| stuck: Isolate just the thumb + one fill note, looping it until it's automatic before adding more. | Aísla solo el pulgar + una nota de relleno, repitiéndolo hasta que sea automático antes de agregar más. |
+| levelUp: Add a second fill on the "and" of beat 4. | Agrega un segundo relleno en el "y" del tiempo 4. |
+
+**Station C — Keep the pattern through a chord change**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 4 — Am↔C: play the alternating thumb + pinch pattern through an Am↔C change. You've got it when: the pattern survives the change with the thumb never stopping. | Reto 4 — Am↔C: toca el patrón de pulgar alternante + pellizco a través de un cambio Am↔C. Lo tienes cuando: el patrón sobrevive el cambio sin que el pulgar se detenga nunca. |
+| hint: Anticipate the change — start moving your fretting hand on the last note of the bar so beat 1 always lands ready. | Anticipa el cambio — empieza a mover tu mano de trastear en la última nota del compás para que el tiempo 1 siempre caiga listo. |
+| stuck: Strum Am then C once each to check both chords ring clean, then loop just the thumb through the change before adding the pinch back. | Rasguea Am y luego C una vez cada uno para revisar que ambos acordes suenen limpios, y luego repite solo el pulgar a través del cambio antes de agregar el pellizco de nuevo. |
+| levelUp: Run Am → C → Am → C for 8 bars without a single broken beat. | Corre Am → C → Am → C durante 8 compases sin un solo tiempo roto. |
+
+**Station C — Take It to a Song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — House of the Rising Sun, bass + roll in 6/8: play the verse with a bass note on the downbeat (the first, strongest beat of the bar) and your fingers rolling up through each chord, following the progression. You've got it when: the verse survives every chord change with the roll staying smooth. | Reto — House of the Rising Sun, bajo + floreo en 6/8: toca la estrofa con una nota grave en el tiempo fuerte (el primer tiempo, el más fuerte del compás) y tus dedos haciendo un floreo ascendente a través de cada acorde, siguiendo la progresión. Lo tienes cuando: la estrofa sobrevive cada cambio de acorde con el floreo manteniéndose suave. |
+| hint: House of the Rising Sun is in 6/8 — felt in two (you tap two main beats per bar), the same waltz-family feel you met in Module 5. The thumb plays the bass on the downbeat; the fingers roll up through the chord between beats. | House of the Rising Sun está en 6/8 — se siente en dos (marcas dos tiempos principales por compás), la misma sensación de la familia del vals que conociste en el Módulo 5. El pulgar toca el bajo en el tiempo fuerte; los dedos hacen un floreo ascendente a través del acorde entre los tiempos. |
+| stuck: Loop just the first two chords of the verse until the pattern is rock solid before adding the rest. | Repite solo los dos primeros acordes de la estrofa hasta que el patrón sea firme como una roca antes de agregar el resto. |
+| levelUp: Play the whole verse from memory, no chord chart. | Toca la estrofa completa de memoria, sin diagrama de acordes. |
+
+**Station C — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: What tempo could you hold the alternating thumb today without it stumbling? Write it below — that's your warm-up target next time. | ¿A qué tempo pudiste mantener el pulgar alternante hoy sin que tropezara? Escríbelo abajo — ese es tu objetivo de calentamiento la próxima vez. |
+| response placeholder: e.g. solid at 60 BPM; at 70 my thumb followed my fingers and fell apart | p. ej. firme a 60 BPM; a 70 mi pulgar siguió a mis dedos y se desarmó |
+
+**Station C — Play-along — one full pass, no stopping**
+
+| English | Spanish |
+|---|---|
+| text: Play-along: open Station B's Travis pattern lesson video (the Practice Playalong section, 8:59–11:16), set YouTube's speed to 0.75×, and pick along for the ENTIRE demo section without stopping. You've got it when: you finish a full pass with the video — dropped pinches and all, don't stop. | Toca junto al video: abre Station B's Travis pattern lesson video (la sección Practice Playalong, 8:59–11:16), pon la velocidad de YouTube en 0.75×, y toca junto a la TOTALIDAD de la sección de demostración sin detenerte. Lo tienes cuando: terminas una pasada completa con el video — con pellizcos fallados y todo, no te detengas. |
+| hint: Not stopping is the skill. If the thumb stumbles, let the fills go and keep the bass walking until you're back in. | No detenerte es la destreza. Si el pulgar tropieza, deja ir los rellenos y mantén el bajo caminando hasta que vuelvas a estar dentro. |
+
+**Station C — Reactivate p-i-m-a — the claw (from Module 8)**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — Claw Check (a 60-second reactivation of Module 8, not a re-teach): plant all four picking fingers at once — thumb (p) resting on the bass strings 6/5/4, index (i) on the G string, middle (m) on the B string, ring (a) on the high e. Then pluck p–i–m–a on the open strings, twice through at 60 BPM. You've got it when: each finger plays in order, one string each, with no two fingers grabbing the same string. This is the picking hand you built back in Module 8 — warm it up any time it feels out of practice, including right now before your next run. | Reto — Revisión de la garra (una reactivación de 60 segundos del Módulo 8, no una nueva enseñanza): planta los cuatro dedos de pulsar a la vez — pulgar (p) apoyado en las cuerdas graves 6/5/4, índice (i) en la cuerda G, medio (m) en la cuerda B, anular (a) en la mi aguda. Luego pulsa p–i–m–a en las cuerdas al aire, dos veces seguidas a 60 BPM. Lo tienes cuando: cada dedo toca en orden, una cuerda cada uno, sin que dos dedos agarren la misma cuerda. Esta es la mano de pulsar que construiste allá en el Módulo 8 — caliéntala cuando sea que se sienta oxidada, incluso ahora mismo antes de tu próxima corrida. |
+| hint: p owns the three bass strings (6/5/4); i-G, m-B, a-high-e never trade places. Set the assignment once and your hand stops hunting for strings. | p es dueño de las tres cuerdas graves (6/5/4); i-G, m-B, a-mi aguda nunca intercambian lugares. Fija la asignación una vez y tu mano deja de buscar cuerdas a tientas. |
+| stuck: Plant all four fingers silently first and feel each one touching its string, then pluck slowly — p, then i, then m, then a — before you add the metronome. | Planta los cuatro dedos en silencio primero y siente cada uno tocando su cuerda, y luego pulsa despacio — p, luego i, luego m, luego a — antes de agregar el metrónomo. |
+| levelUp: Run the staircase up and back down (p-i-m-a-m-i) without looking at your picking hand. | Corre la escalera subiendo y bajando (p-i-m-a-m-i) sin mirar tu mano de pulsar. |
+| playSeq label: p-i-m-a on open strings — A, G, B, e (twice through) | p-i-m-a en cuerdas al aire — La, G, B, e (dos veces seguidas) |
+| text: Challenge — 4-Note Arpeggio, Am then C: play a p–i–m–a arpeggio on each chord — one thumb bass, then i-m-a rolling up the top three strings — 2 bars of Am, then 2 bars of C, and loop. On Am the thumb takes the open A string; on C it slides to the 3rd-fret C on that same string. You've got it when: every note is the same volume and the a-finger (the high e) doesn't rush ahead of the beat. | Reto — Arpegio de 4 notas, Am y luego C: toca un arpegio p–i–m–a en cada acorde — un bajo del pulgar, y luego i-m-a en un floreo ascendente por las tres cuerdas superiores — 2 compases de Am, y luego 2 compases de C, y repite. En Am el pulgar toma la cuerda La al aire; en C se desliza al C del traste 3 de esa misma cuerda. Lo tienes cuando: cada nota tiene el mismo volumen y el dedo a (la mi aguda) no se adelanta al tiempo. |
+| hint: This is the four-even-notes drill (a drill is a short exercise you repeat to build a skill) Module 8 built the whole pattern on — the a-finger is the one most likely to play too early, so keep it as calm as the thumb. | Este es el ejercicio de cuatro notas parejas (un ejercicio es una rutina corta que repites para desarrollar una destreza) sobre el que el Módulo 8 construyó todo el patrón — el dedo a es el que más probablemente toque demasiado temprano, así que mantenlo tan calmado como el pulgar. |
+| stuck: Loop just Am until the four notes are dead even, then add C — the only thing that changes between the chords is where the thumb lands. | Repite solo Am hasta que las cuatro notas estén perfectamente parejas, y luego agrega C — lo único que cambia entre los acordes es dónde cae el pulgar. |
+| levelUp: Fold the same p-i-m-a shape into this set's Travis pattern — and, when you reach Set 2, into the 3/4 waltz pattern too — keeping every note even. | Incorpora la misma forma p-i-m-a en el patrón Travis de esta unidad — y, cuando llegues a la Unidad 2, también en el patrón de vals en 3/4 — manteniendo cada nota pareja. |
+| playSeq label: Hear one p-i-m-a lap on Am, then C — loop it 2 bars each | Escucha una vuelta p-i-m-a en Am, y luego en C — repítelo 2 compases cada uno |
+
+**Set 1 — Skills**
+
+| English | Spanish |
+|---|---|
+| m12w1-s1 text: Alternate the thumb between two bass strings in steady quarter notes | Alternar el pulgar entre dos cuerdas graves en negras constantes |
+| m12w1-s1 practice label: Thumb alternation on C — strings 5 & 4 | Alternancia del pulgar en C — cuerdas 5 y 4 |
+| m12w1-s2 text: Play a pinch (thumb + finger together) on the downbeat | Tocar un pellizco (pulgar + dedo juntos) en el tiempo fuerte |
+| m12w1-s2 practice prompt: A pinch means the bass and treble notes sound: | Un pellizco significa que las notas graves y agudas suenan: |
+| m12w1-s2 practice choices: One after the other / At exactly the same time / Only on beat 3 / Muted | Una después de la otra / Exactamente al mismo tiempo / Solo en el tiempo 3 / Silenciadas |
+| m12w1-s3 text: Add i-m finger fills while the thumb keeps alternating | Agregar rellenos de i-m mientras el pulgar sigue alternando |
+| m12w1-s4 text: Play a Travis-feel pattern over C at 60 BPM for 8 bars | Tocar un patrón con sensación Travis sobre C a 60 BPM durante 8 compases |
+| m12w1-s5 text: Keep the alternating pattern unbroken through an Am–C change | Mantener el patrón alternante sin interrupciones a través de un cambio Am–C |
+| m12w1-s6 text: Play a bass-note + roll verse of House of the Rising Sun (thumb bass, then fingers rolling up through the chord) | Tocar una estrofa de nota grave + floreo de House of the Rising Sun (bajo del pulgar, y luego dedos en floreo ascendente a través del acorde) |
+| m12w1-s6 gotItWhen: the verse survives every chord change with the roll staying smooth and the thumb never stopping. | la estrofa sobrevive cada cambio de acorde con el floreo manteniéndose suave y el pulgar sin detenerse nunca. |
+
+### Set 2
+
+| English | Spanish |
+|---|---|
+| unit: Module 12 · Fingerstyle: Travis, Waltz & Requinto | Módulo 12 · Fingerstyle: Travis, Vals y Requinto |
+| subtitle: Picking in 3 · "the cure" finally at home · Your pattern, your song | Punteo en 3 · "the cure" por fin en su lugar · Tu patrón, tu canción |
+| skillFocus: The 3/4 pattern: bass–pluck–pluck · Feeling 3 vs 4 · "Native style" — why the ◐ disappears | El patrón en 3/4: bajo–pulsación–pulsación · Sentir el 3 frente al 4 · "Estilo nativo" — por qué desaparece el ◐ |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch the lesson videos | Mira los videos de la lección |
+| Section title: Listen for the waltz feel | Escucha la sensación de vals |
+| Section title: Try "the cure" fingerstyle — its native style | Prueba "the cure" con fingerstyle — su estilo nativo |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — the waltz pattern & native-style songs | Estación de práctica — el patrón de vals y las canciones en su estilo nativo |
+| Section title: Warm-up — tuning check (Module 1) | Calentamiento — revisión de afinación (Módulo 1) |
+| Section title: Count and pick a 3/4 pattern | Cuenta y puntea un patrón en 3/4 |
+| Section title: Fingerpick "the cure" in its native style | Toca "the cure" con fingerpicking en su estilo nativo |
+| Section title: Fingerpick Let It Be with your own pattern | Toca Let It Be con fingerpicking usando tu propio patrón |
+| Section title: Take It to a Song | Llévalo a una canción |
+| Section title: Station Wrap-Up | Cierre de la estación |
+
+**Station B — Watch the lesson videos**
+
+| English | Spanish |
+|---|---|
+| text: Watch: Fingerpicking for Beginners - Pluck Patterns and Walkdowns – Lauren Bateman (0:00–5:55) (the pinch/pattern half — she calls the pinch "the pluck"). | Mira: Fingerpicking for Beginners - Pluck Patterns and Walkdowns – Lauren Bateman (0:00–5:55) (la mitad sobre el pellizco/patrón — ella llama al pellizco "the pluck"). |
+| hint: In 3/4 time, each bar has 3 beats — count ONE-two-three, ONE-two-three. Your bass note owns beat one. | En el compás de 3/4, cada compás tiene 3 tiempos — cuenta UNO-dos-tres, UNO-dos-tres. Tu nota grave es dueña del tiempo uno. |
+| response prompt: In 3/4 time, each bar has: | En el compás de 3/4, cada compás tiene: |
+| response explain: Count ONE-two-three, ONE-two-three — the waltz. Your bass note owns beat one. | Cuenta UNO-dos-tres, UNO-dos-tres — el vals. Tu nota grave es dueña del tiempo uno. |
+| response choices: 4 beats / 3 beats / 2 beats / 6 beats | 4 tiempos / 3 tiempos / 2 tiempos / 6 tiempos |
+| text: Watch: Fingerpicking Pattern for 3/4 or 6/8 Time – MrPoloniaMusic. Notice the bass note always lands on beat 1, with the fingers answering after. | Mira: Fingerpicking Pattern for 3/4 or 6/8 Time – MrPoloniaMusic. Fíjate que la nota grave siempre cae en el tiempo 1, con los dedos respondiendo después. |
+| hint: The simplest 3/4 picking pattern: thumb states the bar on beat 1, fingers answer on 2 and 3. | El patrón de punteo en 3/4 más simple: el pulgar anuncia el compás en el tiempo 1, los dedos responden en el 2 y el 3. |
+| response prompt: The simplest 3/4 picking pattern is: | El patrón de punteo en 3/4 más simple es: |
+| response explain: Thumb states the bar on beat 1; fingers answer on 2 and 3. | El pulgar anuncia el compás en el tiempo 1; los dedos responden en el 2 y el 3. |
+| response choices: pluck–pluck–bass / bass–pluck–pluck / bass–bass–bass / pinch–pinch–pinch | pulsación–pulsación–bajo / bajo–pulsación–pulsación / bajo–bajo–bajo / pellizco–pellizco–pellizco |
+
+**Station B — Listen for the waltz feel**
+
+| English | Spanish |
+|---|---|
+| text: Happy Birthday is a waltz — count along to any recording and you'll feel it swing ONE-two-three, ONE-two-three. Today you'll pick it in 3 instead of strumming it. | Happy Birthday es un vals — cuenta junto a cualquier grabación y sentirás cómo se mece UNO-dos-tres, UNO-dos-tres. Hoy lo puntearás en 3 en lugar de rasguearlo. |
+| hint: A waltz counts ONE-two-three, ONE-two-three — three beats per bar, with the bass note owning beat one. | Un vals se cuenta UNO-dos-tres, UNO-dos-tres — tres tiempos por compás, con la nota grave dueña del tiempo uno. |
+| response prompt: A waltz (3/4 time) has how many beats per bar? | ¿Un vals (compás de 3/4) tiene cuántos tiempos por compás? |
+| response explain: Three — ONE-two-three, ONE-two-three. Happy Birthday is a classic waltz, and now you'll pick it in 3. | Tres — UNO-dos-tres, UNO-dos-tres. Happy Birthday es un vals clásico, y ahora lo puntearás en 3. |
+| response choices: 4 beats / 3 beats / 2 beats / 6 beats | 4 tiempos / 3 tiempos / 2 tiempos / 6 tiempos |
+
+**Station B — Try "the cure" fingerstyle — its native style**
+
+| English | Spanish |
+|---|---|
+| text: Playing "the cure" fingerstyle removes its ◐ flag — fingerpicking IS the song's native style, not "against the grain" (playing a song in a style that fights its natural feel) like power-chording a gentle ballad. Try picking through Am–C–Dm–F, one bar each. | Tocar "the cure" con fingerstyle le quita su marca ◐ — el fingerpicking ES el estilo nativo de la canción, no "a contrapelo" (tocar una canción en un estilo que pelea contra su sensación natural) como tocar una balada suave con acordes de potencia. Prueba a puntear a través de Am–C–Dm–F, un compás cada uno. |
+| hint: The ◐ flag marked renderings that fought a song's nature. Fingerpicked, "the cure" is finally itself. | La marca ◐ señalaba versiones que peleaban contra la naturaleza de una canción. Con fingerpicking, "the cure" por fin es ella misma. |
+| response prompt: Playing "the cure" fingerstyle removes its ◐ flag because: | Tocar "the cure" con fingerstyle le quita su marca ◐ porque: |
+| response explain: Fingerpicking IS the song's native style — no more "against the grain." | El fingerpicking ES el estilo nativo de la canción — ya no está más "a contrapelo". |
+| response choices: It's easier / Fingerpicking IS the song's native style — no more "against the grain" / It uses fewer chords / The flag was a mistake | Es más fácil / El fingerpicking ES el estilo nativo de la canción — ya no está "a contrapelo" / Usa menos acordes / La marca fue un error |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — pause and think: which felt more natural — picking in 4 or in 3? What does the waltz feel do to the song? | Cierre de la estación — pausa y piensa: ¿qué se sintió más natural — puntear en 4 o en 3? ¿Qué le hace la sensación de vals a la canción? |
+| response placeholder: e.g. 3 kept surprising me — but it makes Happy Birthday float instead of march | p. ej. el 3 me seguía sorprendiendo — pero hace que Happy Birthday flote en lugar de marchar |
+
+**Station C — Warm-up — tuning check (Module 1)**
+
+| English | Spanish |
+|---|---|
+| text: Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You've got it when: in tune before today's work. | Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy. |
+| hint: Fingerpicking exposes every note — an out-of-tune string is easy to hear. | El fingerpicking expone cada nota — una cuerda desafinada se escucha fácilmente. |
+| playSeq label: Hear all 6 strings in tune | Escucha las 6 cuerdas afinadas |
+
+**Station C — Count and pick a 3/4 pattern**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 1 — Count-and-Pick: play the 3/4 pattern (bass–pluck–pluck) on one chord, counting aloud, 60 BPM. You've got it when: a steady 3-count with the bass landing exactly on beat 1 every bar. | Reto 1 — Cuenta y puntea: toca el patrón en 3/4 (bajo–pulsación–pulsación) sobre un acorde, contando en voz alta, 60 BPM. Lo tienes cuando: un conteo de 3 constante con el bajo cayendo exactamente en el tiempo 1 de cada compás. |
+| hint: Beat 1 is the strongest — land the bass note exactly on it every bar, and the two plucks fall into place after. | El tiempo 1 es el más fuerte — haz caer la nota grave exactamente ahí en cada compás, y las dos pulsaciones caen en su lugar después. |
+| stuck: Drop the counting and just feel "long-short-short" for bass-pluck-pluck. | Deja el conteo y solo siente "largo-corto-corto" para bajo-pulsación-pulsación. |
+| levelUp: Count silently in your head instead of aloud, or add a pinch on beat 1. | Cuenta en silencio en tu cabeza en lugar de en voz alta, o agrega un pellizco en el tiempo 1. |
+| playSeq label: 3/4 pattern on C — bass, then G string, then C on the B string | Patrón en 3/4 sobre C — bajo, y luego la cuerda G, y luego C en la cuerda B |
+
+**Station C — Fingerpick "the cure" in its native style**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 2 — "the cure" Native Style: fingerpick Am–C–Dm–F, one bar each, pattern of your choice. You've got it when: the ◐ is gone — this IS how the song wants to be played. | Reto 2 — "the cure" en su estilo nativo: toca con fingerpicking Am–C–Dm–F, un compás cada uno, con el patrón que elijas. Lo tienes cuando: el ◐ desaparece — así ES como la canción quiere que se toque. |
+| hint: Native style — why the ◐ disappears: fingerpicking is this song's home texture, not a workaround. Keep it unbroken through each change by moving your fretting hand early — on the bar's last note. | Estilo nativo — por qué desaparece el ◐: el fingerpicking es la textura natural de esta canción, no una solución alternativa. Mantenlo sin interrupciones a través de cada cambio moviendo tu mano de trastear temprano — en la última nota del compás. |
+| stuck: Loop just Am–C until the pattern survives that one change before adding Dm–F. | Repite solo Am–C hasta que el patrón sobreviva ese cambio antes de agregar Dm–F. |
+| levelUp: Add a pinch on beat 1 of each chord. | Agrega un pellizco en el tiempo 1 de cada acorde. |
+
+**Station C — Fingerpick Let It Be with your own pattern**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 3 — Let It Be: arpeggiate C–G–Am–F, your chosen pattern, working toward 70 BPM. You've got it when: one full lap (a lap = one full time through) with the pattern unbroken through all four chords. | Reto 3 — Let It Be: arpegia C–G–Am–F con el patrón que elegiste, trabajando hacia 70 BPM. Lo tienes cuando: una vuelta completa (una vuelta = un recorrido completo) con el patrón sin interrupciones a través de los cuatro acordes. |
+| hint: You already fingerpicked this verse in Module 8 — now push the tempo and choice of pattern further. | Ya tocaste esta estrofa con fingerpicking en el Módulo 8 — ahora empuja más el tempo y la elección del patrón. |
+| stuck: Drop to 50 BPM and loop just C–G until it's automatic. | Baja a 50 BPM y repite solo C–G hasta que sea automático. |
+| levelUp: Reach 70 BPM clean, or add a pinch on beat 1 of each chord. | Alcanza 70 BPM limpio, o agrega un pellizco en el tiempo 1 de cada acorde. |
+
+**Station C — Take It to a Song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — Happy Birthday in 3, fingerstyle: play the melody's chords with the 3/4 bass–pluck–pluck pattern all the way through. You've got it when: the waltz feel never breaks, start to finish. | Reto — Happy Birthday en 3, con fingerstyle: toca los acordes de la melodía con el patrón en 3/4 bajo–pulsación–pulsación de principio a fin. Lo tienes cuando: la sensación de vals nunca se rompe, de principio a fin. |
+| hint: Happy Birthday is a waltz — count ONE-two-three, ONE-two-three and let the bass land on beat 1 of each bar. | Happy Birthday es un vals — cuenta UNO-dos-tres, UNO-dos-tres y deja que el bajo caiga en el tiempo 1 de cada compás. |
+| stuck: Play just the chord changes with the pattern first, humming the melody instead of picking it out. | Toca solo los cambios de acorde con el patrón primero, tarareando la melodía en lugar de puntearla. |
+| levelUp: Sing along while you pick it. | Canta mientras la punteas. |
+
+**Station C — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Which felt more natural — picking in 4 or in 3? What does the waltz feel do to the song? Write it below. | ¿Qué se sintió más natural — puntear en 4 o en 3? ¿Qué le hace la sensación de vals a la canción? Escríbelo abajo. |
+| response placeholder: e.g. 3 kept surprising me — but it makes Happy Birthday float instead of march | p. ej. el 3 me seguía sorprendiendo — pero hace que Happy Birthday flote en lugar de marchar |
+
+**Set 2 — Skills**
+
+| English | Spanish |
+|---|---|
+| m12w2-s1 text: Play a 3/4 fingerpicking pattern (bass–pluck–pluck) in time | Tocar un patrón de fingerpicking en 3/4 (bajo–pulsación–pulsación) en tiempo |
+| m12w2-s1 practice label: 3/4 pattern on C | Patrón en 3/4 sobre C |
+| m12w2-s2 text: Count and feel the difference between 3/4 and 4/4 while picking | Contar y sentir la diferencia entre 3/4 y 4/4 mientras punteas |
+| m12w2-s2 practice prompt: A waltz pattern repeats every: | Un patrón de vals se repite cada: |
+| m12w2-s2 practice choices: 2 beats / 3 beats / 4 beats / 8 beats | 2 tiempos / 3 tiempos / 4 tiempos / 8 tiempos |
+| m12w2-s3 text: Fingerpick "the cure"'s shapes — its native style | Tocar con fingerpicking las formas de "the cure" — su estilo nativo |
+| m12w2-s4 text: Fingerpick Let It Be's C–G–Am–F with a pattern of my choice | Tocar con fingerpicking el C–G–Am–F de Let It Be con un patrón de mi elección |
+| m12w2-s5 text: Keep my pattern unbroken through a 4-chord progression at 70 BPM | Mantener mi patrón sin interrupciones a través de una progresión de 4 acordes a 70 BPM |
+| m12w2-s6 text: Play Happy Birthday's waltz feel fingerstyle | Tocar la sensación de vals de Happy Birthday con fingerstyle |
+
+### Set 3
+
+| English | Spanish |
+|---|---|
+| unit: Module 12 · Fingerstyle: Travis, Waltz & Requinto | Módulo 12 · Fingerstyle: Travis, Vals y Requinto |
+| subtitle: Melody on top, thumb below · Luna's intro for real · Choose your showcase voice | Melodía arriba, pulgar abajo · La intro de Luna de verdad · Elige tu voz de presentación |
+| skillFocus: The requinto role in sierreño · Melody notes ride ABOVE the thumb bass · Pick the pattern you'll perform with | El papel del requinto en el sierreño · Las notas de la melodía viajan ENCIMA del bajo del pulgar · Elige el patrón con el que vas a interpretar |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch the lesson videos | Mira los videos de la lección |
+| Section title: Listen for melody riding on top of a steady thumb | Escucha la melodía viajando encima de un pulgar constante |
+| Section title: Try melody-on-top over C | Prueba melodía arriba sobre C |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — requinto texture & your showcase pattern | Estación de práctica — la textura del requinto y tu patrón de presentación |
+| Section title: Warm-up — tuning check (Module 1) | Calentamiento — revisión de afinación (Módulo 1) |
+| Section title: Play Luna's fingerpicked intro | Toca la intro de Luna con fingerpicking |
+| Section title: Play Tu Boda's requinto intro line | Toca la línea de requinto de la intro de Tu Boda |
+| Section title: Blend melody over a steady thumb | Combina melodía sobre un pulgar constante |
+| Section title: Choose your showcase pattern | Elige tu patrón de presentación |
+| Section title: Take It to a Song | Llévalo a una canción |
+| Section title: Station Wrap-Up | Cierre de la estación |
+
+**Station B — Watch the lesson videos**
+
+| English | Spanish |
+|---|---|
+| text: Watch: La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera — a real requinto line from the ranchera tradition that sierreño (a Mexican acoustic-guitar style) grew out of, taught in English. Watch how his picking hand carries the melody a singer would otherwise have, then listen for the same job in Luna and Tu Boda from this module's song list. | Mira: La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera — una línea de requinto real de la tradición ranchera de la que surgió el sierreño (un estilo de guitarra acústica mexicano), enseñada en inglés. Observa cómo su mano de pulsar lleva la melodía que de otro modo tendría un cantante, y luego escucha ese mismo papel en Luna y Tu Boda de la lista de canciones de este módulo. |
+| hint: Requinto sings the melodic lines you've been hearing in Luna and Tu Boda since the course's first listening drills. | El requinto canta las líneas melódicas que has estado escuchando en Luna y Tu Boda desde los primeros ejercicios de escucha del curso. |
+| response prompt: In a sierreño group, the requinto is: | En un grupo de sierreño, el requinto es: |
+| response explain: Requinto sings the melodic lines you've been hearing in Luna and Tu Boda since the course's first listening drills. | El requinto canta las líneas melódicas que has estado escuchando en Luna y Tu Boda desde los primeros ejercicios de escucha del curso. |
+| response choices: The bass / A smaller, higher-pitched guitar that carries the melody / The singer / A drum | El bajo / Una guitarra más pequeña y más aguda que lleva la melodía / El cantante / Un tambor |
+| text: Watch: Luna's Song Journey — Layer 6, the fingerpicked intro. This on-site lesson shows the intro rolling through the little-F shape. | Mira: Luna's Song Journey — Layer 6, the fingerpicked intro. Esta lección del sitio muestra la intro en un floreo a través de la forma del little-F. |
+| hint: Same little-F you learned in Module 5 — the intro arpeggiates it one note at a time. | El mismo little-F que aprendiste en el Módulo 5 — la intro lo arpegia una nota a la vez. |
+| response prompt: Luna's fingerpicked intro rolls through which chord shape? | ¿La intro de Luna con fingerpicking hace un floreo a través de cuál forma de acorde? |
+| response explain: Same little-F you learned in Module 5 — the intro arpeggiates it one note at a time (Journey Layer 6). | El mismo little-F que aprendiste en el Módulo 5 — la intro lo arpegia una nota a la vez (Journey, Layer 6). |
+| response choices: Full barre F / The little F (xx3211) / Open C / Am | F con cejilla completa / El little F (xx3211) / C al aire / Am |
+
+**Station B — Listen for melody riding on top of a steady thumb**
+
+| English | Spanish |
+|---|---|
+| text: "Melody on top" in fingerstyle means the melody is played on the thin, high strings while the thumb keeps the bass going underneath — two jobs, one hand. Listen for it in Luna or Tu Boda. | "Melodía arriba" en fingerstyle significa que la melodía se toca en las cuerdas delgadas y agudas mientras el pulgar mantiene el bajo sonando debajo — dos trabajos, una mano. Escúchalo en Luna o en Tu Boda. |
+| hint: Two jobs, one hand — the requinto texture in short. | Dos trabajos, una mano — la textura del requinto en pocas palabras. |
+| response prompt: "Melody on top" in fingerstyle means: | "Melodía arriba" en fingerstyle significa: |
+| response explain: The melody is played on the thin, high strings while the thumb keeps the bass going underneath. | La melodía se toca en las cuerdas delgadas y agudas mientras el pulgar mantiene el bajo sonando debajo. |
+| response choices: Play only high notes / The melody is played on the thin, high strings while the thumb keeps the bass going underneath / The melody comes first, chords after / Sing while playing | Tocar solo notas agudas / La melodía se toca en las cuerdas delgadas y agudas mientras el pulgar mantiene el bajo sonando debajo / La melodía va primero, los acordes después / Cantar mientras tocas |
+
+**Station B — Try melody-on-top over C**
+
+| English | Spanish |
+|---|---|
+| text: Now try it: over a C chord, keep the thumb on steady quarters and pick a 3-note melody on strings 1–2 on top. | Ahora pruébalo: sobre un acorde de C, mantén el pulgar en negras constantes y puntea una melodía de 3 notas en las cuerdas 1–2 encima. |
+| hint: Fingerpicking makes our regional-Mexican songs sound MORE authentic than power chords did — sierreño is an acoustic, fingerpicked tradition, and this is its real tone. | El fingerpicking hace que nuestras canciones de música regional mexicana suenen MÁS auténticas de lo que sonaban con acordes de potencia — el sierreño es una tradición acústica de fingerpicking, y este es su verdadero sonido. |
+| response prompt: Why does fingerstyle make our regional-Mexican songs sound MORE authentic than power chords did? | ¿Por qué el fingerstyle hace que nuestras canciones de música regional mexicana suenen MÁS auténticas de lo que sonaban con acordes de potencia? |
+| response explain: Sierreño is an acoustic, fingerpicked tradition — this is its real tone. | El sierreño es una tradición acústica de fingerpicking — este es su verdadero sonido. |
+| response choices: It's louder / Sierreño is an acoustic, fingerpicked tradition — this is its real tone / It isn't / Distortion is illegal | Es más fuerte / El sierreño es una tradición acústica de fingerpicking — este es su verdadero sonido / No es así / La distorsión es ilegal |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — pause and think: name your showcase song and pattern — and the one spot you'll drill this week. | Cierre de la estación — pausa y piensa: nombra tu canción y patrón de presentación — y el único punto que vas a practicar esta semana. |
+| response placeholder: e.g. "the cure," 6-note pattern — the Dm-to-F change still stumbles | p. ej. "the cure," patrón de 6 notas — el cambio de Dm a F todavía tropieza |
+
+**Station C — Warm-up — tuning check (Module 1)**
+
+| English | Spanish |
+|---|---|
+| text: Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You've got it when: in tune before today's work. | Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy. |
+| hint: Fingerpicking exposes every note — an out-of-tune string is easy to hear. | El fingerpicking expone cada nota — una cuerda desafinada se escucha fácilmente. |
+| playSeq label: Hear all 6 strings in tune | Escucha las 6 cuerdas afinadas |
+
+**Station C — Play Luna's fingerpicked intro**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 1 — Luna Intro: play the Layer 6 rolls from Luna's Song Journey page, slow then at tempo. You've got it when: all notes ring cleanly in order at performance tempo. | Reto 1 — Intro de Luna: toca los floreos de Layer 6 de Luna's Song Journey page, despacio y luego a tempo. Lo tienes cuando: todas las notas suenan limpias en orden al tempo de interpretación. |
+| hint: This roll uses the little-F shape you already know from Module 5. | Este floreo usa la forma del little-F que ya conoces del Módulo 5. |
+| stuck: Fret the little F shape, strum it once to hear the target chord, then break it apart one string at a time. | Trastea la forma del little F, rasguéala una vez para escuchar el acorde objetivo, y luego desármala una cuerda a la vez. |
+| levelUp: Play it twice through without stopping, or add it as your showcase intro. | Tócala dos veces seguidas sin detenerte, o agrégala como tu intro de presentación. |
+
+**Station C — Play Tu Boda's requinto intro line**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 2 — Tu Boda Requinto Line: play the song's requinto intro line fingerstyle, following the Tu Boda tutorial video in this module's Songs section at the bottom of the page. You've got it when: the line rings clean and in time. | Reto 2 — Línea de requinto de Tu Boda: toca con fingerstyle la línea de requinto de la intro de la canción, siguiendo el video tutorial de Tu Boda en la sección de Canciones de este módulo, al final de la página. Lo tienes cuando: la línea suena limpia y en tiempo. |
+| hint: This is the real sierreño sound — a smaller, higher-pitched guitar carrying the melody. | Este es el sonido real del sierreño — una guitarra más pequeña y más aguda llevando la melodía. |
+| stuck: Slow the line down to half tempo and isolate just the first 4 notes. | Baja la línea a la mitad del tempo y aísla solo las primeras 4 notas. |
+| levelUp: Play it at full performance tempo. | Tócala al tempo completo de interpretación. |
+
+**Station C — Blend melody over a steady thumb**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 3 — Melody on Top: over a C chord, keep the thumb going in steady quarters and pick a 3-note melody on strings 1–2 above it. You've got it when: the thumb never wavers while the melody rides on top. | Reto 3 — Melodía arriba: sobre un acorde de C, mantén el pulgar sonando en negras constantes y puntea una melodía de 3 notas en las cuerdas 1–2 encima. Lo tienes cuando: el pulgar nunca vacila mientras la melodía viaja arriba. |
+| hint: Two jobs, one hand — the requinto texture in short. | Dos trabajos, una mano — la textura del requinto en pocas palabras. |
+| stuck: Isolate the thumb alone first, then add just one melody note at a time. | Aísla solo el pulgar primero, y luego agrega una sola nota de melodía a la vez. |
+| levelUp: Extend the melody to 6 notes without losing the thumb. | Extiende la melodía a 6 notas sin perder el pulgar. |
+
+**Station C — Choose your showcase pattern**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 4 — Choose Your Pattern: run ALL patterns learned this course (6-note · Travis · pinch · 3/4) over one chord, then pick one and write it in the box below. You've got it when: you've named the pattern you'll perform with. | Reto 4 — Elige tu patrón: corre TODOS los patrones aprendidos en este curso (6 notas · Travis · pellizco · 3/4) sobre un acorde, y luego elige uno y escríbelo en el cuadro de abajo. Lo tienes cuando: has nombrado el patrón con el que vas a interpretar. |
+| hint: The smartest choice is the one you can keep unbroken at performance tempo TODAY — not the hardest one. | La elección más inteligente es la que puedes mantener sin interrupciones al tempo de interpretación HOY — no la más difícil. |
+| stuck: If none feel ready, default to the 6-note pattern from Module 8 — it's the most forgiving. | Si ninguno se siente listo, recurre por defecto al patrón de 6 notas del Módulo 8 — es el más indulgente. |
+| levelUp: Practice your chosen pattern at 10 BPM above your current comfortable tempo. | Practica tu patrón elegido a 10 BPM por encima de tu tempo cómodo actual. |
+| response placeholder: e.g. Travis with a pinch on beat 1 — steady at 65 BPM today | p. ej. Travis con un pellizco en el tiempo 1 — firme a 65 BPM hoy |
+
+**Station C — Take It to a Song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — Full-Verse Rehearsal (your assessment piece): play one complete fingerpicked verse of your showcase song, no stopping, mistakes recovered. You've got it when: you reach the last bar without stopping. | Reto — Ensayo de la estrofa completa (tu pieza de evaluación): toca una estrofa completa con fingerpicking de tu canción de presentación, sin detenerte, recuperándote de los errores. Lo tienes cuando: llegas al último compás sin detenerte. |
+| hint: Performances reward reliability, not difficulty — pick the pattern that never breaks, then make it musical. | Las interpretaciones premian la confiabilidad, no la dificultad — elige el patrón que nunca se rompe, y luego hazlo musical. |
+| stuck: Slow the whole verse down until you can finish it clean, even at half speed. | Baja el tempo de toda la estrofa hasta que puedas terminarla limpia, aunque sea a la mitad de la velocidad. |
+| levelUp: Record a performance take, or play it for someone at home. | Graba una toma de interpretación, o tócala para alguien en casa. |
+
+**Station C — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Name your showcase song and pattern — and the one spot you'll drill this week. Write it below. | Nombra tu canción y patrón de presentación — y el único punto que vas a practicar esta semana. Escríbelo abajo. |
+| response placeholder: e.g. "the cure," 6-note pattern — the Dm-to-F change still stumbles | p. ej. "the cure," patrón de 6 notas — el cambio de Dm a F todavía tropieza |
+
+**Set 3 — Skills**
+
+| English | Spanish |
+|---|---|
+| m12w3-s1 text: Play Luna's fingerpicked intro (Journey Layer 6) with p-i-m-a rolls | Tocar la intro de Luna con fingerpicking (Journey, Layer 6) con floreos p-i-m-a |
+| m12w3-s2 text: Play Tu Boda's requinto intro line fingerstyle | Tocar la línea de requinto de la intro de Tu Boda con fingerstyle |
+| m12w3-s3 text: Explain the requinto's role in sierreño / corridos tumbados (a modern Mexican regional style) | Explicar el papel del requinto en el sierreño / los corridos tumbados (un estilo regional mexicano moderno) |
+| m12w3-s3 practice prompt: The requinto's job in the group is: | El trabajo del requinto en el grupo es: |
+| m12w3-s3 practice choices: Rhythm chords / The melodic lead lines / Bass / Percussion | Acordes de ritmo / Las líneas melódicas principales / El bajo / La percusión |
+| m12w3-s4 text: Blend melody notes into a picking pattern — tune on top, thumb bass below | Combinar notas de melodía en un patrón de punteo — melodía arriba, bajo del pulgar debajo |
+| m12w3-s5 text: Choose and name the picking pattern I'll perform with | Elegir y nombrar el patrón de punteo con el que voy a interpretar |
+| m12w3-s5 practice prompt: Your showcase pattern should be the one that: | Tu patrón de presentación debería ser el que: |
+| m12w3-s5 practice choices: Impresses the most / Never breaks at performance tempo / Uses all four fingers / Is newest | Impresiona más / Nunca se rompe al tempo de interpretación / Usa los cuatro dedos / Es el más nuevo |
+| m12w3-s6 text: Perform one full fingerpicked verse start to finish, recovering from any mistake | Interpretar una estrofa completa con fingerpicking de principio a fin, recuperándose de cualquier error |
+| m12w3-s6 gotItWhen: you reach the last bar without stopping — slips allowed, stops not. | llegas al último compás sin detenerte — se permiten resbalones, no detenerse. |
+
+### Module-level Songs
+
+MODULE_SONGS[12] meta fields (song title shown for reference, not itself translated on the site).
+
+| English | Spanish |
+|---|---|
+| "the cure" — Olivia Rodrigo — meta: Full fingerpicked verse — its native style, so the ◐ mark (our flag for a song played against its natural style) comes off | Estrofa completa con fingerpicking — su estilo nativo, así que la marca ◐ (nuestra señal para una canción tocada en contra de su estilo natural) desaparece |
+| "Let It Be" — The Beatles — meta: Arpeggiated C–G–Am–F with your chosen pattern | C–G–Am–F arpegiado con el patrón que elijas |
+| "Luna" — Peso Pluma, Junior H — meta: The fingerpicked intro — rolls through the little-F shape | La intro con fingerpicking — floreos a través de la forma del little-F |
+| "House of the Rising Sun" — The Animals — meta: Bass note + rolling arpeggio in 6/8 — the fingerpicking classic | Nota grave + arpegio en floreo en 6/8 — el clásico del fingerpicking |
+| "Tu Boda" — Oscar Maydon × Fuerza Regida — meta: Requinto intro line, fingerstyle — the real sierreño sound | Línea de requinto de la intro, con fingerstyle — el sonido real del sierreño |
+| "Sailor Song" — Gigi Perez — meta: Fingerpicked verse, capo IV — pattern endurance | Estrofa con fingerpicking, capo en el traste 4 — resistencia del patrón |
+| "Blackbird" — The Beatles — meta: The capstone challenge — pinches and moving shapes | El reto final del curso — pellizcos y formas en movimiento |
+| "Just Like Heaven" — The Cure — meta: Turn the arpeggiated riff (short repeated phrase) into a picking pattern | Convierte el riff arpegiado (frase corta repetida) en un patrón de punteo |
+
+### Module Review
+
+| English | Spanish |
+|---|---|
+| module: Fingerstyle: Travis, Waltz & Requinto | Fingerstyle: Travis, Vals y Requinto |
+| skill mr12-s1: I can hold a steady alternating thumb-bass in quarter notes for 8 bars without it stumbling | Puedo mantener un bajo del pulgar alternante y constante en negras durante 8 compases sin que tropiece |
+| skill mr12-s2: I can play a clean pinch — thumb and finger landing together — right on the downbeat | Puedo tocar un pellizco limpio — pulgar y dedo cayendo juntos — justo en el tiempo fuerte |
+| skill mr12-s3: I can pick a 3/4 waltz pattern (bass–pluck–pluck) in time, bass always landing on beat 1 | Puedo puntear un patrón de vals en 3/4 (bajo–pulsación–pulsación) en tiempo, con el bajo cayendo siempre en el tiempo 1 |
+| skill mr12-s4: I can fingerpick "the cure" or Let It Be in its native style with the pattern unbroken | Puedo tocar "the cure" o Let It Be con fingerpicking en su estilo nativo con el patrón sin interrupciones |
+| skill mr12-s5: I can blend a melody on top of a steady thumb bass — the requinto texture | Puedo combinar una melodía encima de un bajo de pulgar constante — la textura del requinto |
+| skill mr12-s6: I can perform one full fingerpicked verse start to finish, recovering from any mistake without stopping | Puedo interpretar una estrofa completa con fingerpicking de principio a fin, recuperándome de cualquier error sin detenerme |
+| assessItem: Play one full fingerpicked verse with a steady thumb bass and a clean, unbroken finger pattern — flagship options: "the cure" or Let It Be | Toca una estrofa completa con fingerpicking con un bajo de pulgar constante y un patrón de dedos limpio y sin interrupciones — opciones destacadas: "the cure" o Let It Be |
+| assessItem: Show your chosen showcase pattern and name it | Muestra tu patrón de presentación elegido y nómbralo |
+| forward: Twelve modules — the whole toolkit, twice as deep as most first-year players ever get. <strong>Now comes your capstone performance:</strong> pick your song, pick your lane — strummed, fingerpicked, or riff + solo — get it performance-ready, then record a full take or play it live for people you choose. This website got you here; the stage is yours. And after your capstone? Keep the list of songs you want to learn, and go learn them — you know how now. | Doce módulos — el kit de herramientas completo, el doble de profundo de lo que la mayoría de los guitarristas de primer año llegan a alcanzar. <strong>Ahora llega tu interpretación final:</strong> elige tu canción, elige tu camino — rasgueada, con fingerpicking, o riff + solo — déjala lista para interpretar, y luego graba una toma completa o tócala en vivo para las personas que elijas. Este sitio web te trajo hasta aquí; el escenario es tuyo. ¿Y después de tu interpretación final? Guarda la lista de canciones que quieres aprender, y ve a aprenderlas — ya sabes cómo. |
