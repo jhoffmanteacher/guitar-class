@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-22 — Sweet Child O' Mine has a real jam track now, with a metronome option
+
+### Changed
+- **Sweet Child O' Mine's "🎵 Play along" button now plays a real backing
+  track** instead of a generic YouTube loop — a clean G-major mix at 125 BPM
+  that matches the D–C–G verse loop you're playing.
+
+### Added
+- **A "🎵 Metronome" toggle on Sweet Child O' Mine's play-along track**, same
+  as "the cure" and Luna — flip it on for a click laid under the backing
+  track to help you lock in the downbeats, flip it off for the clean mix.
+  Switching mid-song keeps your spot.
+
 ## 2026-07-22 — Module 1 is now in real, hand-written Spanish
 
 ### Added
