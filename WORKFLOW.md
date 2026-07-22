@@ -48,11 +48,19 @@
 - [ ] **Custom backing tracks for the six journey-page play-alongs — Jonathan
       is making them himself** (Jonathan, 2026-07-20) — every Song Journey page
       has a "🎵 Play along" button. **"the cure" is DONE:** swapped to Jonathan's
-      own **A-minor, no-capo** track (`audio/the-cure-backing-Am-144bpm.mp3`, a
-      local file played through a looping `<audio>` element). At the same time
-      every capo instruction for the song was stripped across the modules + its
-      Journey page, and an asterisk note under the play-along button explains
-      that capoing the 1st fret matches the original recording's pitch.
+      own **A-minor, no-capo** tracks — a clean rhythm-down mix
+      (`audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-rhythm-down.mp3`)
+      plus a metronome variant with a click baked in
+      (`...-rhythm-down-metronome.mp3`), both local files played through a
+      looping `<audio>` element with a "🎵 Metronome" toggle on the Journey page
+      to swap between them mid-playback (position + play state preserved).
+      At the same time every capo instruction for the song was stripped across
+      the modules + its Journey page, and an asterisk note under the
+      play-along button explains that capoing the 1st fret matches the
+      original recording's pitch. **Naming convention going forward:**
+      `<artist-slug>-<song-slug>-backing-<key>-<bpm>bpm-<tuning>hz-<mix>.mp3` —
+      see the "Backing-track naming & tuning" section in `CLAUDE.md` for the
+      full rule (every track ships at A=440, exported directly from Moises).
       **Jonathan will supply custom backing tracks for the other five later** —
       until then they keep their existing YouTube loops:
       - Seven Nation Army — `sbN1wfDb4sw`

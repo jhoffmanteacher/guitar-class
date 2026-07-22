@@ -167,6 +167,29 @@ set of teachers. So, when **adding or swapping any tutorial video**:
 - All the usual rules above still apply: find via WebSearch, verify via oEmbed,
   never write an ID from memory.
 
+## Backing-track naming & tuning
+Custom backing tracks (local mp3s in `audio/`, as opposed to a YouTube jam-loop
+`backingUrl`) follow one naming convention and one hard tuning rule:
+
+- **Filename pattern:** `<artist-slug>-<song-slug>-backing-<key>-<bpm>bpm-<tuning>hz-<mix>.mp3`
+  — artist and song are lowercase kebab-case. The artist stays **out** of the
+  app's display metadata — the song list keeps its own display form (e.g.
+  `'"the cure" — Olivia Rodrigo'`); only the filename gained the artist slug.
+- **`mix` values in use:** `rhythm-down`, `rhythm-down-metronome`, plus
+  `no-gtr`, `full`, `drums-only`, and slower tempo tiers like `slow-100`.
+- **Every track ships at A=440** — `tuner.js` is hardcoded to A4=440Hz, so a
+  track mastered at any other reference (e.g. "the cure"'s original master was
+  442, ~8 cents sharp) will sound out of tune against the app's tuner. Fix by
+  exporting at 440 directly from Moises (preferred), or ffmpeg/rubberband as a
+  fallback if Moises isn't available.
+- **Worked example** (`tabs/the-cure.html`, `module-4.js`):
+  - `olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-rhythm-down.mp3` — the
+    default clean track (`backingUrl` + `data-audio`)
+  - `olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-rhythm-down-metronome.mp3`
+    — same mix with a metronome click baked in, wired via `data-audio-metronome`
+    and surfaced as a "🎵 Metronome" toggle on the Journey page (`tabs/journey.js`)
+    that swaps the `<audio>` src while preserving playback position and state
+
 ## Settled song facts — do not re-flag in audits
 These song arrangements are intentional and have been reconciled with the
 curriculum map. Do **not** flag them as drift in future alignment audits:

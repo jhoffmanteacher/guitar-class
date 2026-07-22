@@ -5,6 +5,21 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-22 — "the cure" jam track is now perfectly in tune, plus an optional metronome click
+
+### Changed
+- **"the cure"'s jam track is now perfectly in tune with the app's built-in
+  tuner.** The previous track was mastered a hair sharp, so if you tuned up
+  with the app first, you'd be playing slightly out of tune with the track.
+  It's been re-exported at the same pitch the tuner uses, so tuning up and
+  playing along now line up exactly.
+
+### Added
+- **A new "🎵 Metronome" toggle on "the cure"'s play-along track.** Flip it on
+  and the same backing track plays with a click track laid under it, so you
+  can practice staying in time; flip it off for the clean mix. Switching
+  mid-song keeps your spot — it doesn't restart the track.
+
 ## 2026-07-20 — New "the cure" jam track, and no capo needed
 
 ### Changed

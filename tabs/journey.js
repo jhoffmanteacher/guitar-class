@@ -103,6 +103,28 @@ function togglePlayalong(btn){
       a.loop = true;
       a.preload = 'none';
       a.title = 'Play-along backing track';
+      if(box.dataset.audioMetronome){
+        var metroBtn = document.createElement('button');
+        metroBtn.type = 'button';
+        metroBtn.className = 'metronome-toggle';
+        metroBtn.setAttribute('aria-pressed', 'false');
+        metroBtn.innerHTML = '&#x1F3B5; Metronome';
+        metroBtn.onclick = function(){
+          var wasPlaying = !a.paused;
+          var t = a.currentTime;
+          var on = metroBtn.classList.toggle('on');
+          metroBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+          var resume = function(){
+            a.currentTime = t;
+            if(wasPlaying) a.play().catch(function(){});
+            a.removeEventListener('loadedmetadata', resume);
+          };
+          a.addEventListener('loadedmetadata', resume);
+          a.src = on ? box.dataset.audioMetronome : box.dataset.audio;
+          a.load();
+        };
+        box.appendChild(metroBtn);
+      }
       box.appendChild(a);
       a.play().catch(function(){ /* autoplay may be blocked — the controls still work */ });
     } else {
