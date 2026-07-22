@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-22 — Seven Nation Army gets a real jam track
+
+### Added
+- **Seven Nation Army's Song Journey page now has a play-along jam
+  track**, replacing the old music-video link — same as the other five
+  core songs. The mix keeps the vocals and full band but dials down the
+  guitar, so you can play the riff live over the recording, with a 🎵
+  Metronome toggle for a click track at record speed (123 BPM).
+
 ## 2026-07-22 — Backing tracks now have a 🐢 Slow tier to step down from record speed
 
 ### Added
