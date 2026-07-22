@@ -96,7 +96,14 @@ window.addEventListener('beforeprint', function(){
    The player is only injected on first open (lazy), so the page never
    downloads the track unless the student asks for it. A page can supply
    either a local audio file (data-audio, an <audio> player that loops) or
-   a YouTube id (data-video, an embedded iframe). */
+   a YouTube id (data-video, an embedded iframe).
+
+   A page may also supply a slower stepping-stone tier (data-audio-slow,
+   optionally data-audio-slow-metronome) alongside data-bpm / data-bpm-slow.
+   The Slow and Metronome toggles are independent, so the audio source is
+   picked from whichever of the four combinations is active. Switching the
+   Slow toggle mid-song rescales currentTime by the tempo ratio so playback
+   resumes at the same musical position instead of the same second. */
 function togglePlayalong(btn){
   var box = document.getElementById('playalong-frame');
   if(!box) return;
@@ -104,11 +111,53 @@ function togglePlayalong(btn){
   if(opening && !box.dataset.loaded){
     if(box.dataset.audio){
       var a = document.createElement('audio');
-      a.src = box.dataset.audio;
       a.controls = true;
       a.loop = true;
       a.preload = 'none';
       a.title = 'Play-along backing track';
+
+      var metroOn = false, slowOn = false;
+
+      var currentSrc = function(){
+        if(slowOn) return metroOn ? box.dataset.audioSlowMetronome : box.dataset.audioSlow;
+        return metroOn ? box.dataset.audioMetronome : box.dataset.audio;
+      };
+
+      var switchSrc = function(rescale){
+        var wasPlaying = !a.paused;
+        var t = a.currentTime;
+        if(rescale){
+          var bpm = parseFloat(box.dataset.bpm);
+          var bpmSlow = parseFloat(box.dataset.bpmSlow);
+          if(bpm && bpmSlow) t = slowOn ? t * (bpm / bpmSlow) : t * (bpmSlow / bpm);
+        }
+        var resume = function(){
+          a.currentTime = t;
+          if(wasPlaying) a.play().catch(function(){});
+          a.removeEventListener('loadedmetadata', resume);
+        };
+        a.addEventListener('loadedmetadata', resume);
+        a.src = currentSrc();
+        a.load();
+      };
+
+      a.src = currentSrc();
+
+      if(box.dataset.audioSlow){
+        var slowBtn = document.createElement('button');
+        slowBtn.type = 'button';
+        slowBtn.className = 'metronome-toggle';
+        slowBtn.setAttribute('aria-pressed', 'false');
+        slowBtn.innerHTML = '&#x1F422; Slow (' + box.dataset.bpmSlow + ' BPM)';
+        slowBtn.onclick = function(){
+          slowOn = !slowOn;
+          slowBtn.classList.toggle('on', slowOn);
+          slowBtn.setAttribute('aria-pressed', slowOn ? 'true' : 'false');
+          switchSrc(true);
+        };
+        box.appendChild(slowBtn);
+      }
+
       if(box.dataset.audioMetronome){
         var metroBtn = document.createElement('button');
         metroBtn.type = 'button';
@@ -116,21 +165,14 @@ function togglePlayalong(btn){
         metroBtn.setAttribute('aria-pressed', 'false');
         metroBtn.innerHTML = '&#x1F3B5; Metronome';
         metroBtn.onclick = function(){
-          var wasPlaying = !a.paused;
-          var t = a.currentTime;
-          var on = metroBtn.classList.toggle('on');
-          metroBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
-          var resume = function(){
-            a.currentTime = t;
-            if(wasPlaying) a.play().catch(function(){});
-            a.removeEventListener('loadedmetadata', resume);
-          };
-          a.addEventListener('loadedmetadata', resume);
-          a.src = on ? box.dataset.audioMetronome : box.dataset.audio;
-          a.load();
+          metroOn = !metroOn;
+          metroBtn.classList.toggle('on', metroOn);
+          metroBtn.setAttribute('aria-pressed', metroOn ? 'true' : 'false');
+          switchSrc(false);
         };
         box.appendChild(metroBtn);
       }
+
       box.appendChild(a);
       a.play().catch(function(){ /* autoplay may be blocked — the controls still work */ });
     } else {
