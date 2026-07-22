@@ -491,10 +491,10 @@ SETS.push(
             title: 'Sweet Child O\' Mine — assessment rehearsal',
             steps: [
           {
-            text: 'Challenge — Sweet Child Verse (assessment rehearsal): play the Guns N\' Roses verse as power chords — D5 · C5 · G5, two beats per chord at 60 BPM. This is one of the songs you can use for the module self-assessment. You\'ve got it when: four clean laps, every change on beat 1, muting tight. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-            hint: 'On this site we play Sweet Child in standard tuning. (The famous recording is tuned a half-step down, so your D5–C5–G5 sound one fret higher than the recording — that\'s expected; don\'t retune.) D5 and C5 are A-string roots; G5 drops to the low E string.',
-            stuck: 'Loop D5 → C5 (both A-string, 2 frets apart) until smooth, then add the jump to G5 on the low E string.',
-            levelUp: 'Speed up in steps to 70, then 80 BPM, or add a straight-eighths strum.',
+            text: 'Challenge — Sweet Child Verse (assessment rehearsal): play the Guns N\' Roses verse as power chords — D5 · C5 · G5, one note per bar at 60 BPM — the same patient, one-per-bar spacing as your Module 2 bass roots, just power chords now. This is one of the songs you can use for the module self-assessment. You\'ve got it when: two clean laps, every change on beat 1, each chord ringing the full bar, muting tight. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+            hint: 'On this site we play Sweet Child in standard tuning. (The famous recording is tuned a half-step down, so your D5–C5–G5 sound one fret higher than the recording — that\'s expected; don\'t retune.) D5 and C5 are A-string roots; G5 drops to the low E string. It\'s a patience test — the temptation is to rush into the next chord instead of holding the bar out.',
+            stuck: 'Loop D5 → C5 (both A-string, 2 frets apart) until smooth, then add the jump to G5 on the low E string. Count the full 4 beats out loud before each change so you don\'t rush it.',
+            levelUp: 'Once two full bars feels easy to hold, speed up in steps to 70, then 80 BPM — still one note per bar, just brisker.',
             skills: [3, 4],
             chords: [
               { name: 'D5', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,'x'],[2,'x'],[1,'x']], position: 5 },

@@ -214,6 +214,13 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which chord in the loop was easiest to solo over, and which fought you?', placeholder: 'e.g. Am easy, F felt weird' }
               },
               {
+                text: 'Challenge — Watchtower, the real rhythm: you\'ve played this bass line since Module 2 — but always one even note per beat. Listen to the recording, find the riff\'s TAB with rhythm stems (Songsterr shows them clearly), and play it the way the record actually goes — each root held a full two beats, not one. You\'ve got it when: you can loop A · G · F · G along with the record and stay locked with it. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                hint: 'The frets haven\'t changed since Module 2 — only the rhythm reading is new. That\'s the whole point of this step: same notes, real music.',
+                stuck: 'Clap the record\'s rhythm first, no guitar — one clap per root, holding through the silence — then add the frets back once your hands know the shape of the timing.',
+                levelUp: 'Play it as power chords instead of single notes — same two-beat holds, fuller sound.',
+                response: { type: 'short', prompt: 'What did you notice, holding each root for two beats instead of one?', placeholder: 'e.g. it finally sounds like the song, not an exercise' }
+              },
+              {
                 text: 'Challenge — Solo over Luna: Luna lives in F major, and F\'s relative minor is D — so D minor pentatonic Pattern 1 (root D, low E fret 10) is your box: the exact shape you\'ve been drilling, parked at the course\'s highest position. Improvise four bars using only the three notes marked below, then four more adding a fourth note from the box. Jam over <a href="https://www.youtube.com/watch?v=wBxFnX_V9mQ" target="_blank">▶ &#x1F3B5; Luna\'s Dm backing track</a>. You\'ve got it when: eight bars where every phrase starts or ends on D. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
                 hint: 'Same Pattern 1 shape — just at fret 10. This high up, the frets sit closer together, so the stretch is easier than it looks.',
                 stuck: 'Trade just D and F (frets 10 and 13 on the low E) back and forth, changing only the rhythm, until an idea appears.',
