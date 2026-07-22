@@ -1788,7 +1788,7 @@ window.addEventListener('afterprint', ()=>{
 
 /* ── Stations ── */
 function buildStations(w, stationId){
-  const stepsHtml=(steps,ns)=>{
+  const stepsHtml=(steps,ns,numOffset=0)=>{
    const curIdx = steps.findIndex((st,idx)=>completed[`${w.id}-${ns}-${idx}`]!==true);
    return steps.map((s,i)=>{
     const text=tf(s,'text').replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
@@ -1885,9 +1885,10 @@ function buildStations(w, stationId){
     const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${stepDoneHtml(isDone)}</button></div>`;
     const skillsAttr = (s.skills && s.skills.length) ? ` data-skills="${s.skills.join(',')}"` : '';
     const label = stepLabel(s);
-    const ariaLabel = `Step ${i+1}${isDone ? ', done' : ''} — ${label}`;
-    const statusIcon = isDone ? '&#x2713;' : String(i+1);
-    return `<li class="step${isDone ? ' step-done' : ''}${isCur ? ' cur' : ''}${isCur ? '' : ' collapsed'}"${skillsAttr} data-num="${i+1}">`
+    const num = numOffset + i + 1;
+    const ariaLabel = `Step ${num}${isDone ? ', done' : ''} — ${label}`;
+    const statusIcon = isDone ? '&#x2713;' : String(num);
+    return `<li class="step${isDone ? ' step-done' : ''}${isCur ? ' cur' : ''}${isCur ? '' : ' collapsed'}"${skillsAttr} data-num="${num}">`
       + `<button type="button" class="step-head" aria-expanded="${isCur}" onclick="toggleStepOpen(this)" aria-label="${escAttr(ariaLabel)}">`
       + `<span class="step-status" aria-hidden="true">${statusIcon}</span>`
       + `<span class="step-label">${escHtml(label)}</span>`
@@ -1924,12 +1925,17 @@ function buildStations(w, stationId){
     // step across the whole station is a row from the start (Concept B: one
     // level of chunking, not two). `.stp-sec` still wraps each group so
     // deep links can address "section N, step K" without needing a card look.
+    // Numbering runs continuously across sections (offset carries the running
+    // total) even though storage keys stay section-local (`ns` + local `i`).
+    let numOffset = 0;
     return reminder + real.map((sec,gi)=>{
     const ns = `${baseNs}-sec${gi}`;
-    return `<div class="stp-sec">
+    const html = `<div class="stp-sec">
       <div class="stp-sec-label">${tf(sec,'title')}</div>
-      <ul class="steps">${stepsHtml(sec.steps, ns)}</ul>
+      <ul class="steps">${stepsHtml(sec.steps, ns, numOffset)}</ul>
     </div>`;
+    numOffset += sec.steps.length;
+    return html;
   }).join('');
   };
   const dp=(id,cls,badge,badgeClass,s)=>{
