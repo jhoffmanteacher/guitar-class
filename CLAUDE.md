@@ -35,6 +35,12 @@ Notes:
 - The site is a light PWA: `sw.js` caches the static shell so it loads offline.
   If the version didn't change, returning students would keep the OLD cached
   site — which is exactly what the automatic bump prevents.
+- The fingerprint also covers every file in `audio/` — the service worker
+  runtime-caches those cache-first same as any other same-origin file, so
+  re-exporting a backing track's audio (same filename, new bytes, e.g. a
+  quieter metronome click) needs the same cache-bust as a shell edit. They're
+  fingerprinted but deliberately **not** added to `sw.js`'s `ASSETS` precache
+  list (that would make the SW download every jam track at install time).
 - **Editing a module's skills? Update `MODULE_MANIFEST` in `config-main.js`.**
   The Module dropdown counts and the 8-segment progress strip read each module's
   skill total from `MODULE_MANIFEST` (`skillCount` = number of set-level skills;

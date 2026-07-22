@@ -71,6 +71,19 @@ const SHELL_FILES = [
   ...TAB_PAGES,
 ];
 
+/* Backing-track audio isn't in sw.js's ASSETS precache list (they're large —
+   precaching them at install would bloat the offline install), but the SW's
+   fetch handler still runtime-caches them cache-first same as everything else
+   same-origin. That means swapping a track's bytes at the same filename (e.g.
+   re-exporting a mix) only reaches returning students once CACHE_VERSION
+   changes — same reasoning as TAB_PAGES above. Fingerprint them, but keep them
+   out of SHELL_FILES so checkSwAssets doesn't also demand they be precached. */
+let AUDIO_FILES = [];
+try {
+  AUDIO_FILES = readdirSync(join(ROOT, 'audio'))
+    .filter(f => /\.(mp3|m4a|wav|ogg)$/i.test(f)).sort().map(f => `audio/${f}`);
+} catch { /* no audio/ dir yet */ }
+
 /* ════════════════════════════════════════════════════════════════════
    1. VALIDATE — load each module in a sandbox and check its Sets
    ════════════════════════════════════════════════════════════════════ */
@@ -284,7 +297,7 @@ async function checkLinks() {
    ════════════════════════════════════════════════════════════════════ */
 function fingerprint() {
   const h = createHash('sha256');
-  for (const f of SHELL_FILES) {
+  for (const f of [...SHELL_FILES, ...AUDIO_FILES]) {
     try { h.update(f + '\0'); h.update(readFileSync(join(ROOT, f))); }
     catch { /* file may not exist (e.g. optional icon) — skip */ }
   }
