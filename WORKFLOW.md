@@ -57,17 +57,22 @@
       At the same time every capo instruction for the song was stripped across
       the modules + its Journey page, and an asterisk note under the
       play-along button explains that capoing the 1st fret matches the
-      original recording's pitch. **Naming convention going forward:**
+      original recording's pitch. **"Luna" is DONE (2026-07-22):** swapped to
+      Jonathan's own **A-minor, 128 BPM** rhythm-down mix
+      (`audio/peso-pluma-junior-h-luna-backing-Am-128bpm-440hz-rhythm-down.mp3`)
+      plus a metronome variant (`...-rhythm-down-metronome.mp3`), replacing the
+      generic Dm YouTube loop on the Journey page — same local-`<audio>` +
+      Metronome-toggle pattern as "the cure." Song is already capo-free, so no
+      capo cleanup was needed. **Naming convention going forward:**
       `<artist-slug>-<song-slug>-backing-<key>-<bpm>bpm-<tuning>hz-<mix>.mp3` —
       see the "Backing-track naming & tuning" section in `CLAUDE.md` for the
       full rule (every track ships at A=440, exported directly from Moises).
-      **Jonathan will supply custom backing tracks for the other five later** —
+      **Jonathan will supply custom backing tracks for the other four later** —
       until then they keep their existing YouTube loops:
       - Seven Nation Army — `sbN1wfDb4sw`
       - Sweet Child O' Mine — `kkZI8Lma8UA`
       - Let It Be — `xHhfKZAH_EU`
       - Watchtower — `Vq8cApzOdy8` (generic Am jam loop, no vocals)
-      - Luna — `wBxFnX_V9mQ` (generic Dm jam loop, no vocals)
       Two ways to wire a replacement per song:
       - **Local audio file** (the cure's setup): drop the mp3 in `audio/`, then
         in `tabs/<song>.html` set `data-audio="../audio/<file>.mp3"` on

@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-22 — Luna has a real jam track now, with a metronome option
+
+### Changed
+- **Luna's "🎵 Play along" button now plays Jonathan's own recorded backing
+  track** instead of a generic YouTube loop — a clean A-minor mix at 128 BPM
+  that matches the F–Am vamp you're playing.
+
+### Added
+- **A "🎵 Metronome" toggle on Luna's play-along track**, same as "the cure" —
+  flip it on for a click laid under the backing track to help you lock in the
+  downbeats, flip it off for the clean mix. Switching mid-song keeps your spot.
+
 ## 2026-07-22 — "the cure" jam track is now perfectly in tune, plus an optional metronome click
 
 ### Changed
