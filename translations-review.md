@@ -52,6 +52,13 @@ a bilingual colleague or student aide if you'd like a native-speaker check.
 | backbeat / offbeat ("+", or accenting beats 2&4) | contratiempo |
 | chop (muted punchy reggae upstroke) | picoteo (noun) / picar (verb) |
 | groove (steady rhythmic feel) | groove (kept — same loanword treatment as riff/vamp/chug) |
+| double-stop (two notes played together) | doble nota / dobles notas |
+| sub-barre (ring-finger mini-barre inside a full barre shape) | sub-cejilla |
+| fingerpicking / fingerstyle | fingerpicking / fingerstyle (kept — same loanword treatment as riff/vamp/chug) |
+| Travis picking (named technique) | Travis picking (kept as-is) |
+| pinch (thumb+finger plucked together) | pellizco / pellizcar |
+| alternating bass | bajo alternante |
+| rest stroke / free stroke (classical plucking technique) | apoyando (toque de apoyo) / tirando (toque libre) — the authentic Spanish-origin terms |
 
 ## Header
 
@@ -2990,3 +2997,905 @@ MODULE_SONGS[6] meta fields (song title shown for reference, not itself translat
 | assessItem: Play Em for 4 bars, then Am for 4 bars, with a non-stop down-up strum at 60 BPM | Toca Em durante 4 compases, y luego Am durante 4 compases, con un rasgueo abajo-arriba sin interrupciones a 60 BPM |
 | assessItem: Take G–D–Em–C and play it two ways — folk, then rock — switching feel with no break at the seam | Toma G–D–Em–C y tócalo de dos formas — folk, y luego rock — cambiando la sensación sin interrupción en la costura |
 | forward: Module 7 is the <strong>barre-chord</strong> module — and every steady strum hand you just built is what carries you through it. The rhythm keeps going even while your fretting hand fights the hardest shapes in the course. The groove you own now is what makes a clamped, buzzy first barre still sound like music. | El Módulo 7 es el módulo de <strong>acordes con cejilla</strong> — y cada mano de rasgueo estable que acabas de construir es lo que te lleva a través de él. El ritmo sigue adelante incluso mientras tu mano de trastear lucha con las formas más difíciles del curso. El groove que ahora dominas es lo que hace que una primera cejilla apretada y con zumbido siga sonando a música. |
+
+## Module 7 — TAB Notation and Barre Chords
+
+### Set 1
+
+| English | Spanish |
+|---|---|
+| unit: Module 7 · TAB Notation and Barre Chords | Módulo 7 · Notación TAB y acordes con cejilla |
+| subtitle: Multi-line TAB · Rhythm in TAB · Riffs that mix notes and chords | TAB de varias líneas · Ritmo en el TAB · Riffs que combinan notas y acordes |
+| skillFocus: Reading multi-line TAB and rhythm symbols · Playing slides, hammer-ons, and pull-offs · Playing a riff of notes and chords | Leer TAB de varias líneas y símbolos de ritmo · Tocar deslizamientos, hammer-ons y pull-offs · Tocar un riff de notas y acordes |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch: reading TAB and your riff | Mira: leer TAB y tu riff |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — riffs from TAB | Estación de práctica — riffs desde el TAB |
+| Section title: Warm-up — tuning check (Module 1) | Calentamiento — revisión de afinación (Módulo 1) |
+| Section title: Read a riff with stacked TAB (double-stops) | Lee un riff con TAB apilado (dobles notas) |
+| Section title: Read rhythm in TAB | Lee el ritmo en el TAB |
+| Section title: Find & read a TAB on your own | Encuentra y lee un TAB por tu cuenta |
+| Section title: Take It to a Song | Llévalo a una canción |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Section title: Play hammer-ons, pull-offs & slides (h / p / /) | Toca hammer-ons, pull-offs y deslizamientos (h / p / /) |
+
+**Station B — Watch: reading TAB and your riff**
+
+| English | Spanish |
+|---|---|
+| text: Watch: How To Read TAB and Chord Boxes (BC-108) – JustinGuitar (0:00–4:00). | Mira: How To Read TAB and Chord Boxes (BC-108) – JustinGuitar (0:00–4:00). |
+| hint: You've read single-note TAB since Module 1. Watch for two new things now. First: numbers STACKED vertically mean play them together (a chord). Second: the symbols above the numbers tell you how long each note lasts — plain stems are quarter notes, flags and beams are 8th notes, and a hollow (open) note head with a stem is a half note, held for two beats. | Has leído TAB de una sola nota desde el Módulo 1. Ahora fíjate en dos cosas nuevas. Primero: los números APILADOS verticalmente significan que se tocan juntos (un acorde). Segundo: los símbolos arriba de los números indican cuánto dura cada nota — las plicas simples son negras (un tiempo), las banderas y barras son corcheas, y una cabeza de nota hueca (abierta) con plica es una blanca, sostenida por dos tiempos. |
+| response prompt: When two or more numbers in a TAB line up VERTICALLY on top of each other, you should: | Cuando dos o más números en un TAB se alinean VERTICALMENTE uno encima del otro, debes: |
+| response explain: Stacked numbers are a chord — strike those strings together in one motion. Numbers spread left-to-right are played one after another. | Los números apilados son un acorde — golpea esas cuerdas juntas en un solo movimiento. Los números repartidos de izquierda a derecha se tocan uno tras otro. |
+| response choices: Play them at the same time (as a chord) / Play them one after another, lowest first / Play only the lowest-numbered string / Roll across them slowly, one note at a time | Tocarlos al mismo tiempo (como un acorde) / Tocarlos uno tras otro, empezando por el número más bajo / Tocar solo la cuerda con el número más bajo / Recorrerlos lentamente, una nota a la vez |
+| text: Watch: Smoke On The Water Guitar Lesson – Marty Music (0:00–4:00). This is the riff you'll learn in the Practice station. | Mira: Smoke On The Water Guitar Lesson – Marty Music (0:00–4:00). Este es el riff que vas a aprender en la estación de práctica. |
+| hint: Notice that the riff uses 2-note "power chord" intervals played together — perfect example of stacked TAB numbers. | Fíjate que el riff usa intervalos de "acorde de potencia" de 2 notas tocadas juntas — un ejemplo perfecto de números apilados en el TAB. |
+| response prompt: The "Smoke on the Water" main riff uses which two strings most? | ¿Cuáles dos cuerdas usa más el riff principal de "Smoke on the Water"? |
+| response explain: You'll play it as a two-note double-stop (two notes played at the same time) on the A and D strings (strings 5 and 4) — index and ring locked together as one unit. | Lo vas a tocar como una doble nota de dos notas (dos notas tocadas al mismo tiempo) en las cuerdas La y Re (cuerdas 5 y 4) — el índice y el anular trabados juntos como una sola unidad. |
+| response choices: Strings 1 and 2 (high e and B) / Strings 6 and 5 (low E and A) / Strings 5 and 4 (A and D) / Strings 3 and 2 (G and B) | Cuerdas 1 y 2 (mi aguda y Si) / Cuerdas 6 y 5 (Mi grave y La) / Cuerdas 5 y 4 (La y Re) / Cuerdas 3 y 2 (Sol y Si) |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — pause and think: TAB packs a lot into one line (which string, which fret, chord-or-melody, how long the note lasts). Which part still slows you down most when you sight-read a new riff? | Cierre de la estación — pausa y piensa: el TAB mete mucha información en una sola línea (qué cuerda, qué traste, acorde o melodía, cuánto dura la nota). ¿Qué parte todavía te frena más cuando lees a primera vista un riff nuevo? |
+| response placeholder: e.g. the rhythm symbols — I can find the notes but not the timing | p. ej. los símbolos de ritmo — encuentro las notas pero no el tiempo |
+
+**Station C — Warm-up — tuning check (Module 1)**
+
+| English | Spanish |
+|---|---|
+| text: Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You've got it when: in tune before today's work. | Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy. |
+| hint: Tuning (Module 1) is a skill you keep forever. Reading TAB today is faster when you also name the notes you land on — that's your Module 2 fretboard map. | Afinar (Módulo 1) es una destreza que conservas para siempre. Leer TAB hoy es más rápido cuando también nombras las notas donde caes — ese es tu mapa del diapasón del Módulo 2. |
+| playSeq label: Hear all 6 strings in tune | Escucha las 6 cuerdas afinadas |
+
+**Station C — Read a riff with stacked TAB (double-stops)**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 1 — Smoke on the Water: play the main riff with index + ring locked as a unit on the A + D strings — 0/0 — 3/3 — 5/5 — 0/0 — 3/3 — 6/6 — 5/5. You've got it when: both notes ring at the same volume, clean through the whole riff. Use the TAB below. | Reto 1 — Smoke on the Water: toca el riff principal con el índice + el anular trabados como una unidad en las cuerdas La + Re — 0/0 — 3/3 — 5/5 — 0/0 — 3/3 — 6/6 — 5/5. Lo tienes cuando: ambas notas suenan al mismo volumen, limpias durante todo el riff. Usa el TAB de abajo. |
+| hint: Use your index and ring finger together — keep them locked in shape and slide as a unit. Both notes should ring at the same volume. | Usa tu dedo índice y tu dedo anular juntos — mantenlos trabados en forma y deslízalos como una unidad. Ambas notas deben sonar al mismo volumen. |
+| stuck: Lock the two fingers into one shape and move them as a block — don't re-place them each time. Get the 0/0 → 3/3 slide clean before adding the rest. | Traba los dos dedos en una sola forma y muévelos como un bloque — no los vuelvas a colocar cada vez. Logra que el deslizamiento 0/0 → 3/3 salga limpio antes de agregar el resto. |
+| levelUp: Play it at 90 BPM, or add the higher part that answers the riff and closes the full version. | Tócalo a 90 BPM, o agrega la parte más aguda que responde al riff y cierra la versión completa. |
+| response prompt: Personal record — play it cleanly at 70 BPM, then go +10 at a time. Your fastest CLEAN "Smoke" lap (one full time through the riff) today (BPM)? | Récord personal — tócalo limpio a 70 BPM, y luego sube de 10 en 10. ¿Tu vuelta LIMPIA más rápida de "Smoke" (una vuelta = un recorrido completo del riff) hoy (BPM)? |
+| response placeholder: e.g. 100 — try for a higher number next time | p. ej. 100 — intenta superarlo la próxima vez |
+| tab caption: "Smoke on the Water" — main riff · A + D strings together | "Smoke on the Water" — riff principal · cuerdas La + Re juntas |
+
+**Station C — Read rhythm in TAB**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 2 — Alternate-picking workout: play this riff on the low E and A strings with strict alternate picking — one stroke per note, alternating down-up. You've got it when: clean and even at 60 BPM before you speed it up. | Reto 2 — Ejercicio de púa alternada: toca este riff en las cuerdas Mi grave y La con púa alternada estricta — un golpe de púa por nota, alternando abajo-arriba. Lo tienes cuando: sale limpio y parejo a 60 BPM antes de acelerarlo. |
+| hint: Use alternate picking (down-up-down-up). The riff is fast — start at 60 BPM and only speed up when it's clean. Set the ⏱ Timer for 2 minutes and loop it. | Usa púa alternada (abajo-arriba-abajo-arriba). El riff es rápido — empieza a 60 BPM y solo acelera cuando salga limpio. Pon el ⏱ Temporizador en 2 minutos y repítelo. |
+| stuck: Drop to 50 BPM and keep strict down-up-down-up picking — even and slow is better than fast and sloppy. Loop just the first 4 notes until they're automatic. | Baja a 50 BPM y mantén la púa estricta abajo-arriba-abajo-arriba — parejo y lento es mejor que rápido y descuidado. Repite solo las primeras 4 notas hasta que salgan automáticas. |
+| levelUp: Push to 80 BPM, or play it twice through with no stumble. | Sube a 80 BPM, o tócalo dos veces seguidas sin tropiezos. |
+| tab caption: Alternate-picking workout riff · low E and A strings | Riff de ejercicio de púa alternada · cuerdas Mi grave y La |
+
+**Station C — Find & read a TAB on your own**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 3 — Find a Riff (try it!): pick "Iron Man" or "Sunshine of Your Love", find a TAB online, and play through it once. No score — see which rhythm symbols you can spot above the numbers. | Reto 3 — Encuentra un riff (¡pruébalo!): elige "Iron Man" o "Sunshine of Your Love", encuentra un TAB en línea, y tócalo una vez de principio a fin. Sin puntaje — fíjate en qué símbolos de ritmo puedes reconocer arriba de los números. |
+| hint: Most beginner TAB sites (Songsterr, Ultimate Guitar) show the rhythm. Look for the stem marks above each number. | La mayoría de los sitios de TAB para principiantes (Songsterr, Ultimate Guitar) muestran el ritmo. Busca las marcas de plica arriba de cada número. |
+
+**Station C — Take It to a Song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — Seven Nation Army, the real rhythm: you've played this riff since Module 1 — but always one even note per beat. Listen to the recording, find the riff's TAB with rhythm stems (Songsterr shows them clearly), and play it the way the record actually goes — long notes held, quick notes tucked between beats. You've got it when: you can play along with the record and stay locked with it. 🧵 Song Journey: the riff that started it all. | Reto — Seven Nation Army, el ritmo real: has tocado este riff desde el Módulo 1 — pero siempre con una nota pareja por tiempo. Escucha la grabación, encuentra el TAB del riff con plicas de ritmo (Songsterr las muestra con claridad), y tócalo como suena de verdad en la grabación — notas largas sostenidas, notas rápidas metidas entre los tiempos. Lo tienes cuando: puedes tocar junto con la grabación y mantenerte sincronizado con ella. 🧵 Recorrido de la canción: el riff que lo empezó todo. |
+| hint: The frets haven't changed since Module 1 — only the rhythm reading is new. That's the whole point of this set: same notes, real music. | Los trastes no han cambiado desde el Módulo 1 — solo la lectura del ritmo es nueva. Ese es todo el punto de esta unidad: mismas notas, música real. |
+| stuck: Clap the record's rhythm first, no guitar. Add the frets back only once your hands know the shape of the timing. | Aplaude el ritmo de la grabación primero, sin guitarra. Vuelve a agregar los trastes solo una vez que tus manos conozcan la forma del tiempo. |
+| levelUp: Play it palm-muted (rest the side of your strumming hand on the strings for a muffled sound) for the verse and open for the chorus — rhythm AND dynamics (how loud or soft you play) from the same TAB. | Tócalo silenciado con la palma (apoya el borde de tu mano de rasgueo sobre las cuerdas para un sonido apagado) en la estrofa y abierto en el coro — ritmo Y dinámica (qué tan fuerte o suave tocas) desde el mismo TAB. |
+| response prompt: What did the rhythm stems tell you that your ear had missed? | ¿Qué te dijeron las plicas de ritmo que tu oído se había perdido? |
+| response placeholder: e.g. the last three notes are quicker than I'd been playing them | p. ej. las últimas tres notas son más rápidas de lo que las estaba tocando |
+
+**Station C — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Which riff move tripped your fingers most today — a stretch, a string change, or the picking hand? Name it; that's your first loop next session. (Don't stop yet — one more section below!) | ¿Qué movimiento del riff te trabó más los dedos hoy — un estiramiento, un cambio de cuerda, o la mano de pulsar? Nómbralo; ese es tu primer loop la próxima sesión. (¡No te detengas todavía — falta una sección más abajo!) |
+| response placeholder: e.g. the string jump from A to E in the workout riff | p. ej. el salto de cuerda de La a Mi en el riff de ejercicio |
+
+**Station C — Play hammer-ons, pull-offs & slides (h / p / /)**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — Slur It Together: play this 2-bar lick (a short solo phrase) on the G string. Pick ONLY where the TAB shows a plain fret number — everywhere you see an h, p, or / , your fretting hand makes the note with no new pick (these are slurs: notes joined smoothly without picking each one). You've got it when: the hammered, pulled, and slid notes ring out just as loud as the ones you actually pick. | Reto — Únelo todo: toca este lick de 2 compases (una frase corta de solo) en la cuerda Sol. Pulsa SOLO donde el TAB muestre un número de traste normal — en todos los lugares donde veas una h, una p, o una /, tu mano de trastear hace la nota sin pulsar de nuevo (estas son ligaduras: notas unidas suavemente sin pulsar cada una). Lo tienes cuando: las notas de hammer-on, pull-off y deslizamiento suenan tan fuerte como las que sí pulsas. |
+| hint: Hammer-on (h7): pick the 5, then slam your ring finger down onto the 7 — the string keeps ringing, no pick. Pull-off (p5): from the 7, flick that same finger off sideways so the already-fretted 5 sounds. Slide (/9): pick the 7 and slide the finger up to the 9 without lifting off. Tap ▶ on the TAB to hear the target. | Hammer-on (h7): pulsa el 5, y luego golpea tu dedo anular sobre el 7 — la cuerda sigue sonando, sin pulsar. Pull-off (p5): desde el 7, saca ese mismo dedo hacia el costado de un tirón para que suene el 5 que ya estaba trasteado. Deslizamiento (/9): pulsa el 7 y desliza el dedo hasta el 9 sin levantarlo. Toca ▶ en el TAB para escuchar el objetivo. |
+| stuck: Drill (practice over and over) one move at a time. Hammer 5→7 twenty times until the hammered note is as loud as the picked one — that's finger strength and it comes fast. Then the pull-off, then the slide. | Ejercita (practica una y otra vez) un movimiento a la vez. Haz el hammer-on 5→7 veinte veces hasta que la nota martillada suene tan fuerte como la pulsada — eso es fuerza de dedo y llega rápido. Luego el pull-off, y luego el deslizamiento. |
+| levelUp: Run the whole lick as one smooth phrase in a single breath, or move it up to the B string and read the new frets. | Toca todo el lick como una sola frase fluida de un solo aliento, o muévelo a la cuerda Si y lee los nuevos trastes. |
+| response prompt: Which of the three — hammer, pull, or slide — needs the most work? Name it for next session. | ¿Cuál de los tres — hammer-on, pull-off o deslizamiento — necesita más trabajo? Nómbralo para la próxima sesión. |
+| response placeholder: e.g. the pull-off — my note comes out too quiet | p. ej. el pull-off — mi nota sale demasiado suave |
+| tab caption: 2-bar articulation lick · G string · h = hammer-on, p = pull-off, / = slide up | Lick de articulación de 2 compases · cuerda Sol · h = hammer-on, p = pull-off, / = deslizamiento hacia arriba |
+
+**Set 1 — Skills**
+
+| English | Spanish |
+|---|---|
+| m7w1-s1 text: Read stacked TAB numbers as a chord (play simultaneously) | Leer números apilados en el TAB como un acorde (tocarlos al mismo tiempo) |
+| m7w1-s1 gotItWhen: when you see two or more TAB numbers stacked vertically, you instantly play them together — no thinking about "which one first". | cuando ves dos o más números de TAB apilados verticalmente, los tocas al instante juntos — sin pensar en "cuál va primero". |
+| m7w1-s1 practice prompt: TAB shows "3" on the A string and "3" on the D string, stacked vertically. How should you play it? | El TAB muestra "3" en la cuerda La y "3" en la cuerda Re, apilados verticalmente. ¿Cómo deberías tocarlo? |
+| m7w1-s1 practice choices: A string first, then D string / D string first, then A string / Both at the same time / Just pick one | La cuerda La primero, y luego la Re / La cuerda Re primero, y luego la La / Ambas al mismo tiempo / Solo pulsar una |
+| m7w1-s2 text: Identify quarter notes, 8th notes, and half notes in TAB rhythm symbols | Identificar negras, corcheas y blancas en los símbolos de ritmo del TAB |
+| m7w1-s2 gotItWhen: you can look at the stems and flags above a TAB and call out the rhythm before you play — without having to listen to the original recording. | puedes mirar las plicas y banderas arriba de un TAB y decir el ritmo en voz alta antes de tocar — sin tener que escuchar la grabación original. |
+| m7w1-s2 practice prompt: Two TAB notes with their stems JOINED by a single beam (like ♫) are what kind of notes? | ¿Qué tipo de notas son dos notas de TAB con sus plicas UNIDAS por una sola barra (como ♫)? |
+| m7w1-s2 practice choices: Whole notes / Half notes / Quarter notes / 8th notes | Redondas / Blancas / Negras / Corcheas |
+| m7w1-s3 text: Recognize hammer-on (h), pull-off (p), and slide (/ or \) markings | Reconocer las marcas de hammer-on (h), pull-off (p) y deslizamiento (/ o \) |
+| m7w1-s3 gotItWhen: you can see "5h7" or "7p5" or "5/7" in TAB and know exactly what your fretting hand should do — without looking it up. | puedes ver "5h7" o "7p5" o "5/7" en un TAB y saber exactamente qué debe hacer tu mano de trastear — sin tener que buscarlo. |
+| m7w1-s3 practice prompt: In TAB, "5h7" tells you to: | En el TAB, "5h7" te dice que: |
+| m7w1-s3 practice choices: Pick the 5th fret note, then HAMMER your finger onto the 7th fret without re-picking / Pick both notes hard / Hold the 5th fret for 7 beats / Skip to the 7th fret | Pulses la nota del traste 5, y luego hagas un HAMMER-ON hacia el traste 7 sin volver a pulsar / Pulses ambas notas fuerte / Sostengas el traste 5 durante 7 tiempos / Saltes directo al traste 7 |
+| m7w1-s4 text: Play the "Smoke on the Water" main riff in time | Tocar el riff principal de "Smoke on the Water" a tiempo |
+| m7w1-s4 gotItWhen: you can play the full riff at 70 BPM with both notes ringing together cleanly — no buzzing, no missed double-stops. (This is a straight-quarter-note teaching count — the record's actual rhythm has more punch and space than that.) | puedes tocar el riff completo a 70 BPM con ambas notas sonando limpias juntas — sin zumbido, sin dobles notas falladas. (Este es un conteo de enseñanza en negras parejas — el ritmo real de la grabación tiene más contundencia y espacio que eso.) |
+| m7w1-s4 practice label: "Smoke on the Water" — D string melody only | "Smoke on the Water" — solo la melodía en la cuerda Re |
+| m7w1-s5 text: Play a riff that mixes single notes and double-stops from TAB | Tocar un riff que combina notas sueltas y dobles notas desde el TAB |
+| m7w1-s5 gotItWhen: you can sight-read a beginner riff that combines single notes and 2-note chord stabs and play it cleanly the first time through at half speed. | puedes leer a primera vista un riff de principiante que combina notas sueltas y golpes de acorde de 2 notas y tocarlo limpio la primera vez, a media velocidad. |
+| m7w1-s6 text: Find a TAB online for a new song and play through it | Encontrar un TAB en línea para una canción nueva y tocarlo de principio a fin |
+| m7w1-s6 gotItWhen: you can pick a song you like, find a beginner TAB (Ultimate Guitar, Songsterr), and get through at least one section without asking for help. | puedes elegir una canción que te guste, encontrar un TAB para principiantes (Ultimate Guitar, Songsterr), y tocar al menos una sección sin pedir ayuda. |
+
+### Set 2
+
+| English | Spanish |
+|---|---|
+| unit: Module 7 · TAB Notation and Barre Chords | Módulo 7 · Notación TAB y acordes con cejilla |
+| subtitle: E-shape barre chords · F, G, A barre · Moving the shape up the neck | Acordes con cejilla en forma de E · Cejilla de F, G, A · Mover la forma por el mástil |
+| skillFocus: Forming a clean E-shape barre chord · Moving the barre up the neck · Naming barre chords by their root | Formar una cejilla limpia en forma de E · Mover la cejilla por el mástil · Nombrar acordes con cejilla por su raíz |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch: the E-shape barre chord | Mira: el acorde con cejilla en forma de E |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — building the barre | Estación de práctica — construye la cejilla |
+| Section title: Bar all 6 strings with your index finger | Haz cejilla en las 6 cuerdas con tu dedo índice |
+| Section title: Form the E-shape barre | Forma la cejilla en forma de E |
+| Section title: Find the power chord hiding inside your F barre | Encuentra el acorde de potencia escondido dentro de tu cejilla de F |
+| Section title: Slide the E-shape: F, G, A | Desliza la forma de E: F, G, A |
+| Section title: One-Minute Barre Changes — try for a higher number | Cambios de cejilla en un minuto — intenta superar tu marca |
+| Section title: Take It to a Song | Llévalo a una canción |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Section title: ⚡ Ear Spark — optional ear bonus | ⚡ Chispa auditiva — bono opcional de oído |
+
+**Station B — Watch: the E-shape barre chord**
+
+| English | Spanish |
+|---|---|
+| text: Watch: Pain Free F Chord for Beginners – Lauren Bateman (0:00–5:03). | Mira: Pain Free F Chord for Beginners – Lauren Bateman (0:00–5:03). |
+| hint: The F barre — one finger pressed flat across several strings — is famously hard. It's the lowest barre, where the strings are tightest, so it's the toughest spot — G and A higher up are easier. Watch her THUMB: keep it on the BACK of the neck, behind your index. That's where the squeezing power comes from. | La cejilla de F — un dedo presionado plano sobre varias cuerdas — es famosa por ser difícil. Es la cejilla más baja, donde las cuerdas están más tensas, así que es el punto más duro — G y A más arriba son más fáciles. Fíjate en su PULGAR: mantenlo en la PARTE TRASERA del mástil, detrás de tu índice. Ahí es de donde viene la fuerza de apriete. |
+| response prompt: For the cleanest E-shape barre, where should your THUMB go? | Para la cejilla en forma de E más limpia, ¿dónde debería ir tu PULGAR? |
+| response explain: Plant the thumb on the BACK of the neck, roughly behind your index finger. That gives the squeezing leverage a barre needs — wrapping it over the top kills your strength. | Planta el pulgar en la PARTE TRASERA del mástil, más o menos detrás de tu dedo índice. Eso da la palanca de apriete que una cejilla necesita — envolverlo por encima del mástil te quita fuerza. |
+| response choices: Wrapped over the top of the neck / On the BACK of the neck, roughly behind your index finger / Pointing toward the ceiling / It doesn't matter where the thumb goes | Envuelto por encima del mástil / En la PARTE TRASERA del mástil, más o menos detrás de tu dedo índice / Apuntando hacia el techo / No importa dónde vaya el pulgar |
+| text: Watch: Basic Barre Chords #1 — the E shape (CH-006) – JustinGuitar (0:00–4:00). | Mira: Basic Barre Chords #1 — the E shape (CH-006) – JustinGuitar (0:00–4:00). |
+| hint: The "E shape" is literally the E major open chord, but you slide your fingers up the neck and use your INDEX finger to "be the nut" (the thin strip at the top of the neck that the strings cross) — your finger becomes the bar. | La "forma de E" es literalmente el acorde abierto de E mayor, pero deslizas tus dedos por el mástil y usas tu dedo ÍNDICE para "ser la cejuela" (la tira delgada en la parte superior del mástil por donde cruzan las cuerdas) — tu dedo se convierte en la cejilla. |
+| response placeholder: Why is it called an "E-shape" barre chord? What does the shape have in common with the open E major chord? | ¿Por qué se llama acorde con cejilla "en forma de E"? ¿Qué tiene en común la forma con el acorde abierto de E mayor? |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — barre chords are a strength skill that takes weeks, not minutes. What is one small thing that improved today, even if the whole chord isn't ringing yet? | Cierre de la estación — los acordes con cejilla son una destreza de fuerza que toma semanas, no minutos. ¿Qué pequeña cosa mejoró hoy, aunque el acorde completo todavía no suene? |
+| response placeholder: e.g. the low strings ring now — just the B string left to fix | p. ej. las cuerdas graves ya suenan — solo falta arreglar la cuerda Si |
+
+**Station C — Bar all 6 strings with your index finger**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 1 — Just the Bar: lay your index finger flat across all 6 strings at the 5th fret — bar only, no other fingers — and strum. You've got it when: all 6 strings ring, rolling the index slightly onto its bonier edge. | Reto 1 — Solo la cejilla: coloca tu dedo índice plano sobre las 6 cuerdas en el traste 5 — solo la cejilla, sin otros dedos — y rasguea. Lo tienes cuando: las 6 cuerdas suenan, rodando el índice ligeramente hacia su borde más óseo. |
+| hint: Roll your index finger slightly toward its outer edge — that side is bonier and gives a cleaner bar. The power comes from the thumb on the back of the neck, not from squeezing the whole hand. | Rueda tu dedo índice ligeramente hacia su borde exterior — ese lado es más óseo y da una cejilla más limpia. La fuerza viene del pulgar en la parte trasera del mástil, no de apretar toda la mano. |
+| stuck: Line the bar up right behind the fret. If the B string buzzes, it's usually sitting in a knuckle crease — shift the finger a hair up or down. Get just the top 3 strings ringing first, then chase the rest. | Alinea la cejilla justo detrás del traste. Si la cuerda Si zumba, suele estar cayendo en un pliegue del nudillo — mueve el dedo un poquito hacia arriba o hacia abajo. Logra que suenen solo las 3 cuerdas más agudas primero, y luego persigue el resto. |
+| levelUp: Bar at the 1st fret (the hardest spot) and get all 6 ringing, or bar and slide cleanly up to the 7th fret and back. | Haz la cejilla en el traste 1 (el punto más difícil) y logra que suenen las 6, o haz la cejilla y deslízala limpiamente hasta el traste 7 y de vuelta. |
+
+**Station C — Form the E-shape barre**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 2 — E-Shape Barre: add the E-shape on top of the bar at the 5th fret for A major (ring finger on string 5, fret 7 · pinky on string 4, fret 7 · middle finger on string 3, fret 6) and strum all 6. You've got it when: a full, clean A major barre — master it here before tackling F. | Reto 2 — Cejilla en forma de E: agrega la forma de E encima de la cejilla en el traste 5 para A mayor (dedo anular en la cuerda 5, traste 7 · meñique en la cuerda 4, traste 7 · dedo medio en la cuerda 3, traste 6) y rasguea las 6 cuerdas. Lo tienes cuando: una cejilla de A mayor completa y limpia — domínala aquí antes de atacar F. |
+| hint: It's the open E major shape moved up — index finger replaces the "nut". Practice this at the 5th fret BEFORE attempting F at fret 1. If your hand cramps, that's normal — shake your hand loose and come back. | Es la forma abierta de E mayor movida hacia arriba — el dedo índice reemplaza a la "cejuela". Practica esto en el traste 5 ANTES de intentar F en el traste 1. Si tu mano se acalambra, eso es normal — sacúdela para relajarla y vuelve a intentarlo. |
+| stuck: Stage it: (1) get the bar across fret 5 clean, (2) add ring + pinky on strings 5–4, (3) add the middle on string 3 last — pluck each string to find the muffled one before moving on. Short tries are better than one long tiring session. | Hazlo por etapas: (1) logra que la cejilla en el traste 5 suene limpia, (2) agrega el anular + el meñique en las cuerdas 5–4, (3) agrega el medio en la cuerda 3 al final — puntea cada cuerda para encontrar la que suena apagada antes de seguir. Intentos cortos son mejores que una sola sesión larga y agotadora. |
+| levelUp: Slide the whole shape up to the 7th fret (B major) and keep every string ringing. | Desliza toda la forma hasta el traste 7 (B mayor) y mantén todas las cuerdas sonando. |
+
+**Station C — Find the power chord hiding inside your F barre**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — Spot the Power Chord: form your F major barre, then look at just strings 6 and 5 — low E (fret 1) + A (fret 3). That is exactly the F5 power chord you learned in Module 3. The barre just stacks the rest of the chord on top. You've got it when: play F5 alone, then add the barre fingers to make full F — and hear the power chord living inside it. | Reto — Encuentra el acorde de potencia: forma tu cejilla de F mayor, y luego mira solo las cuerdas 6 y 5 — Mi grave (traste 1) + La (traste 3). Eso es exactamente el acorde de potencia F5 que aprendiste en el Módulo 3. La cejilla solo apila el resto del acorde encima. Lo tienes cuando: toca F5 solo, y luego agrega los dedos de la cejilla para formar el F completo — y escucha el acorde de potencia viviendo dentro de él. |
+| hint: Barre chords feel less scary once you see them as a power chord you already know, plus a few extra notes. And just like a power chord, you name the barre by its root on string 6 — that's your Module 2 + Module 3 skills combining. | Los acordes con cejilla dan menos miedo una vez que los ves como un acorde de potencia que ya conoces, más algunas notas extra. Y al igual que un acorde de potencia, nombras la cejilla por su raíz en la cuerda 6 — eso es tus destrezas del Módulo 2 y el Módulo 3 combinándose. |
+| stuck: If full F won't ring yet, fall back to just the F5 power chord (strings 6–5) and add one string at a time upward — the full bar comes last. | Si el F completo todavía no suena, vuelve solo al acorde de potencia F5 (cuerdas 6–5) y agrega una cuerda a la vez hacia arriba — la cejilla completa llega al final. |
+| levelUp: Do the same reveal at G (fret 3): play G5, then stack the full G barre on top and hear the power chord inside it. | Haz la misma revelación en G (traste 3): toca G5, y luego apila la cejilla completa de G encima y escucha el acorde de potencia dentro de ella. |
+
+**Station C — Slide the E-shape: F, G, A**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 3 — F, G, A Slide (your assessment piece): slide the same shape to fret 1 (F), fret 3 (G), and fret 5 (A) — same shape, three chords. You've got it when: G and A ringing clean, then F — the hardest — without buzzing. | Reto 3 — Deslizamiento F, G, A (tu pieza de evaluación): desliza la misma forma al traste 1 (F), traste 3 (G), y traste 5 (A) — misma forma, tres acordes. Lo tienes cuando: G y A suenan limpio, y luego F — el más difícil — sin zumbido. |
+| hint: F is the hardest position — don't panic if it buzzes. Barre chords are a hand-strength skill. If your hand cramps, shake your hand loose and rest. Short, frequent tries are better than one long, tiring session, and the strength comes within a couple of weeks. | F es la posición más difícil — no te asustes si zumba. Los acordes con cejilla son una destreza de fuerza de mano. Si tu mano se acalambra, sacúdela para relajarla y descansa. Intentos cortos y frecuentes son mejores que una sola sesión larga y agotadora, y la fuerza llega en un par de semanas. |
+| stuck: Build the barre in stages: (1) bar + just the low-E root, (2) add strings 5–4, (3) add the B and high E last — get each stage clean before stacking the next. Start at G or A (frets 3–5) where the strings are looser, then bring the shape down to F. | Construye la cejilla por etapas: (1) cejilla + solo la raíz en Mi grave, (2) agrega las cuerdas 5–4, (3) agrega la Si y la mi aguda al final — logra que cada etapa suene limpia antes de apilar la siguiente. Empieza en G o A (trastes 3–5) donde las cuerdas están más sueltas, y luego baja la forma a F. |
+| levelUp: Add B at the 7th fret as a 4th chord, or switch F→G→A in time at 70 BPM. | Agrega B en el traste 7 como un 4to acorde, o cambia F→G→A a tiempo a 70 BPM. |
+
+**Station C — One-Minute Barre Changes — try for a higher number**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 4 — One-Minute Barre Changes (F ↔ G): set the ⏱ Timer for 60 seconds and slide your E-shape barre between F (fret 1) and G (fret 3) as many times as you can — only changes where all 6 strings ring count. You've got it when: type your count below and try for a higher number next time. (Even 6–8 clean ones is a real success for barres.) | Reto 4 — Cambios de cejilla en un minuto (F ↔ G): pon el ⏱ Temporizador en 60 segundos y desliza tu cejilla en forma de E entre F (traste 1) y G (traste 3) tantas veces como puedas — solo cuentan los cambios donde suenan las 6 cuerdas. Lo tienes cuando: escribe tu cuenta abajo e intenta superarla la próxima vez. (Incluso 6–8 limpios es un verdadero éxito para las cejillas.) |
+| hint: It's the same shape sliding two frets — keep the bar pressed and glide, don't lift and re-place. Quality over speed. | Es la misma forma deslizándose dos trastes — mantén la cejilla presionada y deslízala, no la levantes y la vuelvas a colocar. Calidad sobre velocidad. |
+| stuck: Keep the bar lightly down the whole time so you never fully reset the shape — just shift two frets. Slow down until both chords ring. | Mantén la cejilla ligeramente abajo todo el tiempo para que nunca reinicies del todo la forma — solo cambia dos trastes. Baja la velocidad hasta que ambos acordes suenen. |
+| levelUp: Add A (fret 5) and cycle F→G→A, or run it with a down-up strum. | Agrega A (traste 5) y cicla F→G→A, o tócalo con un rasgueo abajo-arriba. |
+| response prompt: Personal record — clean F↔G barre changes in 60 seconds. Your count today? | Récord personal — cambios de cejilla F↔G limpios en 60 segundos. ¿Tu cuenta de hoy? |
+| response placeholder: e.g. 8 — try for a higher number next time | p. ej. 8 — intenta superarlo la próxima vez |
+
+**Station C — Take It to a Song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — Sweet Child O' Mine, one-shape verse: the verse is D · C · G — and with the E-shape barre that's ONE shape sliding: D at fret 10, C at fret 8, G at fret 3. Play one clean strum per chord, then two bars each at 60 BPM. You've got it when: all three ring clean — and the high frets prove the point: barres get EASIER up the neck. 🧵 Song Journey: this is the Module 7 finale. | Reto — Sweet Child O' Mine, estrofa de una sola forma: la estrofa es D · C · G — y con la cejilla en forma de E eso es UNA forma deslizándose: D en el traste 10, C en el traste 8, G en el traste 3. Toca un rasgueo limpio por acorde, y luego dos compases cada uno a 60 BPM. Lo tienes cuando: los tres suenan limpios — y los trastes altos prueban el punto: las cejillas se vuelven MÁS FÁCILES conforme subes por el mástil. 🧵 Recorrido de la canción: este es el final del Módulo 7. |
+| hint: Start at the top — get D clean at fret 10 where the strings are loosest, then walk the same shape down. Name each chord by its string-6 root: fret 10 = D, fret 8 = C, fret 3 = G. | Empieza por arriba — logra que D suene limpio en el traste 10 donde las cuerdas están más sueltas, y luego camina la misma forma hacia abajo. Nombra cada acorde por su raíz en la cuerda 6: traste 10 = D, traste 8 = C, traste 3 = G. |
+| stuck: Play just the roots on string 6 first (10 → 8 → 3) so the slide distances live in your arm, then add the barre on top. | Toca solo las raíces en la cuerda 6 primero (10 → 8 → 3) para que las distancias del deslizamiento vivan en tu brazo, y luego agrega la cejilla encima. |
+| levelUp: Run the loop with a down-up strum, or hum the verse melody over your own chords. | Toca el loop con un rasgueo abajo-arriba, o tararea la melodía de la estrofa sobre tus propios acordes. |
+
+**Station C — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Which string in your barre is most likely to buzz right now — the B string, the high E, or the G? Name it; isolating that one string is your first job next session. | ¿Qué cuerda de tu cejilla es más probable que zumbe ahora mismo — la Si, la mi aguda, o la Sol? Nómbrala; aislar esa cuerda es tu primer trabajo la próxima sesión. |
+| response placeholder: e.g. the B string — it sits in my finger crease | p. ej. la cuerda Si — cae en un pliegue de mi dedo |
+
+**Station C — ⚡ Ear Spark — optional ear bonus**
+
+| English | Spanish |
+|---|---|
+| text: ⚡ Ear Spark (optional, 2 min): record F both ways — the little F (xx3211) and the full barre — a few reps in a random order you don't write down. Same chord, different voice: on playback, guess which is which by listening for the low bass note only the barre has. Got someone around? Have them play and you call it. | ⚡ Chispa auditiva (opcional, 2 min): grábate tocando F de las dos formas — el F pequeño (xx3211) y la cejilla completa — unas cuantas veces en un orden aleatorio que no anotes. Mismo acorde, voz distinta: al reproducirlo, adivina cuál es cuál escuchando la nota grave que solo tiene la cejilla. ¿Tienes a alguien cerca? Que toque y tú adivinas. |
+
+**Set 2 — Skills**
+
+| English | Spanish |
+|---|---|
+| m7w2-s1 text: Bar all 6 strings cleanly with my index finger | Hacer cejilla limpia en las 6 cuerdas con mi dedo índice |
+| m7w2-s1 gotItWhen: with only your index finger flat across the 5th fret, you can strum and every one of the 6 strings rings — no muffled strings, no buzz. | con solo tu dedo índice plano sobre el traste 5, puedes rasguear y cada una de las 6 cuerdas suena — sin cuerdas apagadas, sin zumbido. |
+| m7w2-s1 practice prompt: Which side of your index finger is best for a clean barre? | ¿Qué lado de tu dedo índice es mejor para una cejilla limpia? |
+| m7w2-s1 practice choices: The fleshy front pad / The bony outer edge (rolled slightly) / Either works equally well / The fingernail side | La almohadilla carnosa de enfrente / El borde óseo exterior (ligeramente rodado) / Cualquiera de los dos funciona igual / El lado de la uña |
+| m7w2-s2 text: Position my thumb correctly behind the neck for barre chords | Colocar mi pulgar correctamente detrás del mástil para los acordes con cejilla |
+| m7w2-s2 gotItWhen: your thumb sits on the BACK of the neck — roughly behind your index finger — and you can feel a pinching motion between thumb and index when you squeeze. | tu pulgar se apoya en la PARTE TRASERA del mástil — más o menos detrás de tu dedo índice — y puedes sentir un movimiento de pinza entre el pulgar y el índice cuando aprietas. |
+| m7w2-s2 practice prompt: For maximum squeezing power on a barre chord, your thumb should be: | Para la máxima fuerza de apriete en un acorde con cejilla, tu pulgar debería estar: |
+| m7w2-s2 practice choices: Wrapped over the top of the neck (folk style) / On the BACK of the neck, behind the index finger / Floating in the air, not touching the neck / Pressing the strings | Envuelto por encima del mástil (estilo folk) / En la PARTE TRASERA del mástil, detrás del dedo índice / Flotando en el aire, sin tocar el mástil / Presionando las cuerdas |
+| m7w2-s3 text: Form an E-shape barre chord at the 5th fret (A major) cleanly | Formar un acorde con cejilla en forma de E en el traste 5 (A mayor) de forma limpia |
+| m7w2-s3 gotItWhen: you can pluck each of the 6 strings individually in your A barre and every one rings — no muffled string from a cramped finger. | puedes puntear cada una de las 6 cuerdas por separado en tu cejilla de A y todas suenan — sin ninguna cuerda apagada por un dedo acalambrado. |
+| m7w2-s4 text: Play F major barre at the 1st fret | Tocar la cejilla de F mayor en el traste 1 |
+| m7w2-s4 gotItWhen: your F barre at the 1st fret rings cleanly on at least 5 of 6 strings — including the B string, which is the trickiest for the bar. | tu cejilla de F en el traste 1 suena limpia en al menos 5 de las 6 cuerdas — incluyendo la cuerda Si, que es la más difícil para la cejilla. |
+| m7w2-s4 practice label: Hear F major (E-shape barre, arpeggiated) | Escucha F mayor (cejilla en forma de E, arpegiada) |
+| m7w2-s5 text: Name an E-shape barre chord by its root note on string 6 | Nombrar un acorde con cejilla en forma de E por su nota raíz en la cuerda 6 |
+| m7w2-s5 gotItWhen: you can slide your E-shape barre to any random fret and name the chord instantly — because you know the notes on the low E string from Module 2. | puedes deslizar tu cejilla en forma de E a cualquier traste al azar y nombrar el acorde al instante — porque conoces las notas de la cuerda Mi grave desde el Módulo 2. |
+| m7w2-s5 practice prompt: If you play an E-shape barre chord with your index finger on the 7th fret of string 6, what chord is it? | Si tocas un acorde con cejilla en forma de E con tu dedo índice en el traste 7 de la cuerda 6, ¿qué acorde es? |
+| m7w2-s5 practice choices: G major / A major / B major / C major | G mayor / A mayor / B mayor / C mayor |
+| m7w2-s6 text: Switch between F, G, and A barre chords in time at 60 BPM | Cambiar entre los acordes con cejilla F, G, y A a tiempo a 60 BPM |
+| m7w2-s6 gotItWhen: you can play 2 bars of F, 2 bars of G, 2 bars of A, looping, at 60 BPM — same shape, just sliding up and down the neck. | puedes tocar 2 compases de F, 2 compases de G, 2 compases de A, en loop, a 60 BPM — misma forma, solo deslizándose arriba y abajo del mástil. |
+| m7w2-s6 practice label: F · G · A roots (low E string) | Raíces F · G · A (cuerda Mi grave) |
+
+### Set 3
+
+| English | Spanish |
+|---|---|
+| unit: Module 7 · TAB Notation and Barre Chords | Módulo 7 · Notación TAB y acordes con cejilla |
+| subtitle: A-shape barre chords · Bb, B, C barre · Combining E-shape and A-shape | Acordes con cejilla en forma de A · Cejilla de Bb, B, C · Combinar forma de E y forma de A |
+| skillFocus: Forming a clean A-shape barre chord · Naming A-shape chords by their root · Combining E-shape and A-shape chords in a song | Formar una cejilla limpia en forma de A · Nombrar acordes en forma de A por su raíz · Combinar acordes en forma de E y de A en una canción |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch: the A-shape barre chord | Mira: el acorde con cejilla en forma de A |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — A-shape and combining | Estación de práctica — forma de A y combinaciones |
+| Section title: Form the A-shape barre | Forma la cejilla en forma de A |
+| Section title: Slide the A-shape: C, D, E | Desliza la forma de A: C, D, E |
+| Section title: Every chord has two homes (E-shape ↔ A-shape) | Cada acorde tiene dos hogares (forma de E ↔ forma de A) |
+| Section title: Combine E-shape & A-shape barres | Combina las cejillas en forma de E y de A |
+| Section title: Strum the barre chords with a D-DU-UDU pattern | Rasguea los acordes con cejilla con un patrón D-DU-UDU |
+| Section title: Take It to a Song | Llévalo a una canción |
+| Section title: 🌶️ Level-up — the Sweet Child O' Mine intro riff (optional harder goal) | 🌶️ Sube de nivel — el riff de intro de Sweet Child O' Mine (meta opcional más difícil) |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Section title: The last two barres — F# and Bb | Las últimas dos cejillas — F# y Bb |
+
+**Station B — Watch: the A-shape barre chord**
+
+| English | Spanish |
+|---|---|
+| text: Watch: A Shape Major Barre Chords on Guitar – JustinGuitar (0:00–4:00). | Mira: A Shape Major Barre Chords on Guitar – JustinGuitar (0:00–4:00). |
+| hint: The A-shape uses the open A major chord, moved up the neck. Some players bar strings 2, 3, 4 with their RING finger only — it's a different technique from the E-shape. | La forma de A usa el acorde abierto de A mayor, movido por el mástil. Algunos guitarristas hacen cejilla en las cuerdas 2, 3, 4 solo con el dedo ANULAR — es una técnica distinta a la de la forma de E. |
+| response prompt: The A-shape barre chord places its ROOT note on which string? | ¿En cuál cuerda coloca su nota RAÍZ el acorde con cejilla en forma de A? |
+| response explain: The A-shape is rooted on string 5 (the A string) — so the fret your barre sits on, on the A string, names the chord. (The E-shape is rooted on string 6.) | La forma de A tiene su raíz en la cuerda 5 (la cuerda La) — así que el traste donde cae tu cejilla, en la cuerda La, nombra el acorde. (La forma de E tiene su raíz en la cuerda 6.) |
+| response choices: String 6 (low E) / String 5 (A) / String 4 (D) / String 1 (high e) | Cuerda 6 (Mi grave) / Cuerda 5 (La) / Cuerda 4 (Re) / Cuerda 1 (mi aguda) |
+| text: Watch: Basic Barre Chords (CH-006) – JustinGuitar (0:00–4:00 — rewatch with A-shape focus). | Mira: Basic Barre Chords (CH-006) – JustinGuitar (0:00–4:00 — vuelve a verlo enfocándote en la forma de A). |
+| hint: B major is a great A-shape practice chord — it lives at the 2nd fret with the root on string 5. You may hear a muted high E (string 1) in some videos — many players let the ring finger mute it, and that's a real technique. In this module, though, we arch the fingers so string 1 rings. | B mayor es un gran acorde de práctica para la forma de A — vive en el traste 2 con la raíz en la cuerda 5. Puede que escuches una mi aguda (cuerda 1) silenciada en algunos videos — muchos guitarristas dejan que el dedo anular la silencie, y esa es una técnica real. En este módulo, sin embargo, arqueamos los dedos para que la cuerda 1 suene. |
+| response placeholder: In this module, should string 1 (the high e) ring or stay muted in your A-shape barre? What do you do with your fingers to make it ring? | En este módulo, ¿la cuerda 1 (la mi aguda) debe sonar o quedarse silenciada en tu cejilla en forma de A? ¿Qué haces con tus dedos para que suene? |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — you now know both barre shapes. Which feels harder right now — the E-shape (root on string 6) or the A-shape (root on string 5) — and what makes it tougher for your hand? | Cierre de la estación — ahora conoces las dos formas de cejilla. ¿Cuál se siente más difícil ahora mismo — la forma de E (raíz en la cuerda 6) o la forma de A (raíz en la cuerda 5) — y qué la hace más dura para tu mano? |
+| response placeholder: e.g. the A-shape — barring 4-3-2 with my ring finger is awkward | p. ej. la forma de A — hacer cejilla en 4-3-2 con mi anular se siente incómodo |
+
+**Station C — Form the A-shape barre**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 1 — A-Shape B Major: index bars all 6 strings at fret 2, fingers on strings 4/3/2 at fret 4, strum strings 5–1 (let the index mute string 6). You've got it when: a clean B major with the string-5 bass ringing and no low E. | Reto 1 — B mayor en forma de A: el índice hace cejilla en las 6 cuerdas en el traste 2, los dedos en las cuerdas 4/3/2 en el traste 4, rasguea las cuerdas 5–1 (deja que el índice silencie la cuerda 6). Lo tienes cuando: un B mayor limpio con el bajo de la cuerda 5 sonando y sin Mi grave. |
+| hint: Avoid the low E string (string 6) — your index finger mutes it for you. Aim your strum from string 5 downward. | Evita la cuerda Mi grave (cuerda 6) — tu dedo índice la silencia por ti. Apunta tu rasgueo desde la cuerda 5 hacia abajo. |
+| stuck: Stage it: (1) bar fret 2 and get strings 5 and 1 ringing, (2) add the ring-finger sub-barre on strings 4-3-2 at fret 4 last. The ring finger is the tricky part — arch it so the high E still rings. Cramping is normal; shake your hand loose. | Hazlo por etapas: (1) haz la cejilla en el traste 2 y logra que suenen las cuerdas 5 y 1, (2) agrega al final la sub-cejilla del dedo anular en las cuerdas 4-3-2 en el traste 4. El dedo anular es la parte difícil — arquéalo para que la mi aguda siga sonando. Acalambrarse es normal; sacude tu mano para relajarla. |
+| levelUp: Slide the whole A-shape up to C (3rd fret) and keep it clean. | Desliza toda la forma de A hasta C (traste 3) y mantenla limpia. |
+
+**Station C — Slide the A-shape: C, D, E**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 2 — A-Shape Slide: slide the A-shape to C (3rd fret), D (5th fret), and E (7th fret), strumming strings 5–1 only. You've got it when: name each by its string-5 root and play all three clean. | Reto 2 — Deslizamiento en forma de A: desliza la forma de A a C (traste 3), D (traste 5), y E (traste 7), rasgueando solo las cuerdas 5–1. Lo tienes cuando: nombras cada uno por su raíz en la cuerda 5 y tocas los tres limpios. |
+| hint: The A-shape is named by the root note on string 5. Apply your Module 2 A-string note knowledge: fret 3 of A = C, fret 5 of A = D, fret 7 of A = E. | La forma de A se nombra por la nota raíz en la cuerda 5. Aplica tu conocimiento de las notas de la cuerda La del Módulo 2: traste 3 de La = C, traste 5 de La = D, traste 7 de La = E. |
+| stuck: Higher frets (D, E) are easier — the strings are looser, so get those clean first, then bring the shape down to C. Keep the bar pressed and slide rather than lifting between chords. | Los trastes más altos (D, E) son más fáciles — las cuerdas están más sueltas, así que logra que esos suenen limpio primero, y luego baja la forma a C. Mantén la cejilla presionada y deslízala en lugar de levantarla entre acordes. |
+| levelUp: Run C→D→E in time at 70 BPM, or add F at the 8th fret. | Toca C→D→E a tiempo a 70 BPM, o agrega F en el traste 8. |
+
+**Station C — Every chord has two homes (E-shape ↔ A-shape)**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 3 — Two Homes for F: play F as an E-shape barre (index on string 6, fret 1), then play the SAME chord as an A-shape barre (index on string 5, fret 8). Same note name, two places on the neck. Pluck both and listen — same chord, slightly different colour. You've got it when: find and play both Fs, and say WHY they are both F (read the root: low E + 1 fret = F; A string + 8 frets = F). | Reto 3 — Dos hogares para F: toca F como cejilla en forma de E (índice en la cuerda 6, traste 1), y luego toca el MISMO acorde como cejilla en forma de A (índice en la cuerda 5, traste 8). Mismo nombre de nota, dos lugares en el mástil. Puntea ambos y escucha — mismo acorde, un color ligeramente distinto. Lo tienes cuando: encuentras y tocas ambos F, y dices POR QUÉ los dos son F (lee la raíz: Mi grave + traste 1 = F; cuerda La + traste 8 = F). |
+| hint: This is your Module 2 fretboard map paying off: the root note names the chord, so wherever an F lives on string 6 or string 5, an F barre lives there too. Knowing both homes means you are never far from any chord. | Este es tu mapa del diapasón del Módulo 2 dando frutos: la nota raíz nombra el acorde, así que donde sea que un F viva en la cuerda 6 o la cuerda 5, una cejilla de F también vive ahí. Conocer ambos hogares significa que nunca estás lejos de ningún acorde. |
+| stuck: Find the root note first, then build the shape around it. Low E + 1 fret = F (E-shape home); A string + 8 frets = F (A-shape home). The shape follows the root. | Encuentra la nota raíz primero, y luego construye la forma alrededor de ella. Mi grave + traste 1 = F (hogar de la forma de E); cuerda La + traste 8 = F (hogar de la forma de A). La forma sigue a la raíz. |
+| levelUp: Find both homes for G (E-shape fret 3, A-shape fret 10) and for C (A-shape fret 3, E-shape fret 8). | Encuentra ambos hogares para G (forma de E traste 3, forma de A traste 10) y para C (forma de A traste 3, forma de E traste 8). |
+
+**Station C — Combine E-shape & A-shape barres**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 4 — Shape Combo (your assessment piece): alternate E-shape and A-shape — F (E, 1st), C (A, 3rd), G (E, 3rd), D (A, 5th), 2 bars each at 60 BPM. You've got it when: smooth switches between the two shapes, landing each change on beat 1. | Reto 4 — Combo de formas (tu pieza de evaluación): alterna forma de E y forma de A — F (E, traste 1), C (A, traste 3), G (E, traste 3), D (A, traste 5), 2 compases cada uno a 60 BPM. Lo tienes cuando: cambios fluidos entre las dos formas, cayendo cada cambio en el tiempo 1. |
+| hint: You're alternating between E-shape and A-shape with each chord change. This is what real songs ask for. Notice that some chord changes are tiny hand moves — barely shift positions. | Estás alternando entre la forma de E y la forma de A con cada cambio de acorde. Esto es lo que las canciones reales piden. Fíjate que algunos cambios de acorde son movimientos pequeños de mano — apenas cambian de posición. |
+| stuck: Drill one pair at a time — F→C, then G→D — before running all four. Some moves are tiny (G E-shape fret 3 → D A-shape fret 5 is a short hop). Drop to 50 BPM if the changes fall apart. | Ejercita un par a la vez — F→C, y luego G→D — antes de correr los cuatro. Algunos movimientos son pequeños (G en forma de E traste 3 → D en forma de A traste 5 es un salto corto). Baja a 50 BPM si los cambios se desarman. |
+| levelUp: Run it with the D-DU-UDU strum, or push to 75 BPM. | Tócalo con el rasgueo D-DU-UDU, o sube a 75 BPM. |
+| response prompt: Personal record — play the F–C–G–D switch cleanly at 60 BPM, then go +5 at a time. Your fastest CLEAN loop today (BPM)? | Récord personal — toca el cambio F–C–G–D limpio a 60 BPM, y luego sube de 5 en 5. ¿Tu vuelta LIMPIA más rápida hoy (BPM)? |
+| response placeholder: e.g. 70 — try for a higher number next time | p. ej. 70 — intenta superarlo la próxima vez |
+
+**Station C — Strum the barre chords with a D-DU-UDU pattern**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — Groove the Barres: take a barre progression (F–C–G–D, or Am–G–F as barres) and play it with the D-DU-UDU pattern from Module 6 instead of one strum per bar. You've got it when: the strum pattern stays steady and even while you switch barre shapes — the groove (the steady rhythmic feel) doesn't break at the chord change. | Reto — Dale groove a las cejillas: toma una progresión con cejillas (F–C–G–D, o Am–G–F como cejillas) y tócala con el patrón D-DU-UDU del Módulo 6 en lugar de un rasgueo por compás. Lo tienes cuando: el patrón de rasgueo se mantiene estable y parejo mientras cambias de forma de cejilla — el groove (la sensación rítmica constante) no se rompe en el cambio de acorde. |
+| hint: You spent Module 6 making that strum automatic — now layer it onto the harder barre chords. If the pattern falls apart at a change, slow the metronome until barre + strum hold together. | Pasaste el Módulo 6 haciendo que ese rasgueo fuera automático — ahora superpónlo sobre los acordes con cejilla, más difíciles. Si el patrón se desarma en un cambio, baja el metrónomo hasta que la cejilla y el rasgueo se mantengan juntos. |
+| stuck: Strip it back: play the progression as one strum per bar until the changes are clean, THEN layer the D-DU-UDU pattern on top. Add the rhythm only once the chords land. | Simplifícalo: toca la progresión con un rasgueo por compás hasta que los cambios salgan limpios, y LUEGO superpón el patrón D-DU-UDU encima. Agrega el ritmo solo una vez que los acordes caigan bien. |
+| levelUp: Push the tempo, or accent beats 2 and 4 for a backbeat feel. | Sube el tempo, o acentúa los tiempos 2 y 4 para una sensación de contratiempo. |
+
+**Station C — Take It to a Song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — Oye Mi Amor, full barre Bm: the verse's small Bm graduates today. Index bars fret 2 (strings 5–1), and you play Bm · G one bar each with your D-DU-UDU strum at 60 BPM. You've got it when: four laps where the full Bm rings as clean as the G — the song's last beginner shortcut is gone. | Reto — Oye Mi Amor, cejilla completa de Bm: el Bm pequeño de la estrofa se gradúa hoy. El índice hace cejilla en el traste 2 (cuerdas 5–1), y tocas Bm · G un compás cada uno con tu rasgueo D-DU-UDU a 60 BPM. Lo tienes cuando: cuatro vueltas donde el Bm completo suena tan limpio como el G — el último atajo de principiante de la canción se acabó. |
+| hint: It's built on the same fret-2 bar as your B major — the minor version just re-stacks the fingers on top. The index tip mutes string 6 for you. | Se construye sobre la misma cejilla del traste 2 que tu B mayor — la versión menor solo reacomoda los dedos encima. La punta del índice silencia la cuerda 6 por ti. |
+| stuck: Whenever the barre buzzes, fall back to the small Bm for a lap, then trade back — alternate small and full until full wins. | Cada vez que la cejilla zumbe, vuelve al Bm pequeño por una vuelta, y luego cambia de vuelta — alterna el pequeño y el completo hasta que gane el completo. |
+| levelUp: Play the chorus (A · D · E · D) as barres too — the whole song with no open chords. | Toca también el coro (A · D · E · D) como cejillas — la canción entera sin acordes abiertos. |
+| text: Challenge — Watchtower, no open chords: play Am · G · F entirely as barres — Am is the E-shape minor at fret 5 (the bar plus your open-Em fingers), G and F are your E-shape majors at frets 3 and 1. Two beats per chord at 60 BPM. You've got it when: four laps using ONLY barre chords — proof you no longer need the open shapes. 🧵 Song Journey: from Layer 1 to every chord a barre. | Reto — Watchtower, sin acordes abiertos: toca Am · G · F por completo como cejillas — Am es la forma menor de E en el traste 5 (la cejilla más tus dedos de Em abierto), G y F son tus formas mayores de E en los trastes 3 y 1. Dos tiempos por acorde a 60 BPM. Lo tienes cuando: cuatro vueltas usando SOLO acordes con cejilla — prueba de que ya no necesitas las formas abiertas. 🧵 Recorrido de la canción: de la Capa 1 a cada acorde como cejilla. |
+| hint: Minor E-shape = the major shape minus the middle finger; the bar covers the note it left behind. Read the roots on string 6: fret 5 = A, fret 3 = G, fret 1 = F. | Forma menor de E = la forma mayor menos el dedo medio; la cejilla cubre la nota que dejó atrás. Lee las raíces en la cuerda 6: traste 5 = A, traste 3 = G, traste 1 = F. |
+| stuck: Get each chord clean on its own (pluck all 6 strings), then pair Am → G, and add the F last — it's the tightest squeeze. | Logra que cada acorde suene limpio por separado (puntea las 6 cuerdas), y luego junta Am → G, y agrega el F al final — es el apriete más ajustado. |
+| levelUp: Run it with D-DU-UDU, or alternate one lap of open chords with one lap of barres and hear the difference. | Tócalo con D-DU-UDU, o alterna una vuelta de acordes abiertos con una vuelta de cejillas y escucha la diferencia. |
+| response prompt: Personal record — clean all-barre Watchtower laps in a row. Your count today? | Récord personal — vueltas seguidas de Watchtower solo con cejillas y limpias. ¿Tu cuenta de hoy? |
+| response placeholder: e.g. 2 — the F still buzzes | p. ej. 2 — el F todavía zumba |
+| text: Challenge — Luna, full barre F: the little F (xx3211) graduates today. Index bars fret 1 across all six strings — the toughest fret on the neck to barre — and you play F ↔ Am with two downbeat strums per bar at 60 BPM. You've got it when: four laps where all six strings of the F ring as clean as the Am — Luna's last beginner shortcut is gone. 🧵 Song Journey: beyond Layer 5 — the barre upgrade. | Reto — Luna, cejilla completa de F: el F pequeño (xx3211) se gradúa hoy. El índice hace cejilla en el traste 1 a lo largo de las seis cuerdas — el traste más difícil del mástil para hacer cejilla — y tocas F ↔ Am con dos rasgueos en el tiempo fuerte por compás a 60 BPM. Lo tienes cuando: cuatro vueltas donde las seis cuerdas del F suenan tan limpias como el Am — el último atajo de principiante de Luna se acabó. 🧵 Recorrido de la canción: más allá de la Capa 5 — la mejora de la cejilla. |
+| hint: Roll the index onto its bony edge and add a gentle pull-back from the whole arm so the thumb doesn't do all the work — fret 1 needs that extra leverage on top of your thumb squeeze. | Rueda el índice hacia su borde óseo y agrega un ligero tirón hacia atrás desde todo el brazo para que el pulgar no haga todo el trabajo — el traste 1 necesita esa palanca extra además del apriete de tu pulgar. |
+| stuck: Barre just the top two strings at fret 1 and add one string per day. The six-string F takes weeks, not one day — go slow. | Haz cejilla solo en las dos cuerdas más agudas en el traste 1 y agrega una cuerda por día. El F de seis cuerdas toma semanas, no un día — ve despacio. |
+| levelUp: Slide the same barre shape to fret 5 — that's A major, and suddenly you can play every major chord on the neck. | Desliza la misma forma de cejilla al traste 5 — eso es A mayor, y de repente puedes tocar todos los acordes mayores del mástil. |
+
+**Station C — 🌶️ Level-up — the Sweet Child O' Mine intro riff (optional harder goal)**
+
+| English | Spanish |
+|---|---|
+| text: 🌶️ Try it: learn the most famous riff in the course. The "Sweet Child O' Mine" intro lives up high on the D, G, and B strings around the 12th–15th frets, picked one note at a time. Watch Sweet Child O' Mine Intro in Standard Tuning – Jbf Music & Guitar (played slow and full speed, with the TAB on screen), learn just the first bar, and play it slowly. No score, no rush — this is a late-course optional challenge you can keep practicing a little at a time. | 🌶️ Pruébalo: aprende el riff más famoso del curso. La intro de "Sweet Child O' Mine" vive arriba en las cuerdas Re, Sol y Si, alrededor de los trastes 12–15, pulsada una nota a la vez. Mira Sweet Child O' Mine Intro in Standard Tuning – Jbf Music & Guitar (tocado lento y a velocidad completa, con el TAB en pantalla), aprende solo el primer compás, y tócalo despacio. Sin puntaje, sin apuro — este es un reto opcional de fin de curso que puedes seguir practicando poco a poco. |
+| hint: The lesson is in standard tuning — the same tuning your guitar is already in — so you can play along directly. (The original record is tuned a half-step lower, so you'll sound slightly higher than the album; that's normal.) Loop just the first bar until it's clean before adding more. | La lección está en afinación estándar — la misma afinación en la que ya está tu guitarra — así que puedes tocar junto directamente. (La grabación original está afinada medio tono más abajo, así que vas a sonar ligeramente más agudo que el álbum; eso es normal.) Repite solo el primer compás hasta que salga limpio antes de agregar más. |
+
+**Station C — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: You've reached the hardest hands-on skill in the course — give yourself credit for that. Which barre (E-shape or A-shape, and at which chord) most needs another week of short daily tries? Type it below; that's your standing warm-up from here. (Don't stop yet — one more section below!) | Has llegado a la destreza práctica más difícil del curso — date crédito por eso. ¿Qué cejilla (forma de E o forma de A, y en qué acorde) necesita más otra semana de intentos cortos diarios? Escríbelo abajo; ese es tu calentamiento fijo de ahora en adelante. (¡No te detengas todavía — falta una sección más abajo!) |
+| response placeholder: e.g. the F barre at fret 1 — a few clean tries every day | p. ej. la cejilla de F en el traste 1 — algunos intentos limpios cada día |
+
+**Station C — The last two barres — F# and Bb**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — F# and Bb, the last two: you've slid both barre shapes all over the neck — now get the two lowest ones clean — the last two shapes left in this module. F# major is your E-shape barre at fret 2 (root F# on string 6). Bb major is your A-shape barre at fret 1 (root Bb on string 5, low E muted). Play each one cleanly, then trade F# ↔ Bb, one strum apiece. You've got it when: both ring clean at these tight low frets and you can name each by its root. | Reto — F# y Bb, las últimas dos: has deslizado ambas formas de cejilla por todo el mástil — ahora logra que las dos más bajas suenen limpias — las últimas dos formas que quedan en este módulo. F# mayor es tu cejilla en forma de E en el traste 2 (raíz F# en la cuerda 6). Bb mayor es tu cejilla en forma de A en el traste 1 (raíz Bb en la cuerda 5, Mi grave silenciada). Toca cada una de forma limpia, y luego alterna F# ↔ Bb, un rasgueo cada una. Lo tienes cuando: ambas suenan limpias en estos trastes bajos y apretados y puedes nombrar cada una por su raíz. |
+| hint: Same two shapes you already own, just parked down low where the strings fight hardest. F#: the E-shape bar on fret 2 — one fret above the open E chord. Bb: the A-shape bar on fret 1 — index bars the strings, your ring finger sub-barres strings 4-3-2 at fret 3 (the same sub-barre you drilled on B, C and D), and your index mutes the low E — one fret above the open A chord. Read the roots: string 6 fret 2 = F#, string 5 fret 1 = Bb. Tap ▶ to hear each chord. | Las mismas dos formas que ya dominas, solo que ubicadas abajo donde las cuerdas pelean más. F#: la cejilla en forma de E en el traste 2 — un traste arriba del acorde abierto de E. Bb: la cejilla en forma de A en el traste 1 — el índice hace la cejilla en las cuerdas, tu dedo anular hace la sub-cejilla en las cuerdas 4-3-2 en el traste 3 (la misma sub-cejilla que ejercitaste en B, C y D), y tu índice silencia la Mi grave — un traste arriba del acorde abierto de A. Lee las raíces: cuerda 6 traste 2 = F#, cuerda 5 traste 1 = Bb. Toca ▶ para escuchar cada acorde. |
+| stuck: These sit at the tightest end of the neck, so build each in stages — and if fret 1 or 2 buzzes, prove the shape higher up first, then walk it down. For Bb, get the string-5 bass and the ring-finger sub-barre ringing before you add the high E. Cramping is normal; shake your hand loose. | Estos caen en el extremo más apretado del mástil, así que construye cada uno por etapas — y si el traste 1 o 2 zumba, prueba la forma más arriba primero, y luego bájala. Para Bb, logra que suenen el bajo de la cuerda 5 y la sub-cejilla del anular antes de agregar la mi aguda. Acalambrarse es normal; sacude tu mano para relajarla. |
+| levelUp: Hear them in real music: F# is all over "Hotel California"; Bb is the fourth chord of the key (the IV chord) in "Hey Jude." Or slide each shape up one fret and name the new chord (G, and B). | Escúchalas en música real: F# está por toda "Hotel California"; Bb es el cuarto acorde de la tonalidad (el acorde IV) en "Hey Jude". O desliza cada forma un traste hacia arriba y nombra el acorde nuevo (G, y B). |
+| playSeq label: Hear F# major, then Bb major | Escucha F# mayor, y luego Bb mayor |
+| response prompt: Which of the two low barres — F# or Bb — rings less cleanly right now? Name it for your next warm-up. | ¿Cuál de las dos cejillas bajas — F# o Bb — suena menos limpia ahora mismo? Nómbrala para tu próximo calentamiento. |
+| response placeholder: e.g. Bb — my ring-finger sub-barre deadens the high E | p. ej. Bb — mi sub-cejilla del anular apaga la mi aguda |
+
+**Set 3 — Skills**
+
+| English | Spanish |
+|---|---|
+| m7w3-s1 text: Form an A-shape barre chord cleanly at the 2nd fret (B major) | Formar un acorde con cejilla en forma de A de manera limpia en el traste 2 (B mayor) |
+| m7w3-s1 gotItWhen: your B barre rings cleanly on strings 5 to 1 — and string 6 (low E) is muted by your index finger so it doesn't accidentally sound. | tu cejilla de B suena limpia en las cuerdas 5 a 1 — y la cuerda 6 (Mi grave) está silenciada por tu dedo índice para que no suene por accidente. |
+| m7w3-s1 practice label: Hear B major (A-shape barre, arpeggiated) | Escucha B mayor (cejilla en forma de A, arpegiada) |
+| m7w3-s2 text: Mute string 6 (low E) when playing an A-shape barre | Silenciar la cuerda 6 (Mi grave) al tocar una cejilla en forma de A |
+| m7w3-s2 gotItWhen: your index finger lightly mutes string 6 so you don't have to think about avoiding it when strumming — even a slightly wide strum sounds fine. | tu dedo índice silencia ligeramente la cuerda 6 para que no tengas que pensar en evitarla al rasguear — incluso un rasgueo un poco amplio suena bien. |
+| m7w3-s2 practice prompt: In an A-shape barre chord, what happens to the low E string (string 6)? | En un acorde con cejilla en forma de A, ¿qué pasa con la cuerda Mi grave (cuerda 6)? |
+| m7w3-s2 practice choices: It rings as part of the chord / It is muted by the side of your index finger / You skip your strum carefully / You tune it to a different note | Suena como parte del acorde / Está silenciada por el costado de tu dedo índice / Te saltas esa cuerda con cuidado al rasguear / La afinas a una nota distinta |
+| m7w3-s3 text: Name an A-shape barre chord by its root note on string 5 | Nombrar un acorde con cejilla en forma de A por su nota raíz en la cuerda 5 |
+| m7w3-s3 gotItWhen: you can slide your A-shape barre to any random fret and name the chord by reading the note on string 5 (using your Module 2 knowledge). | puedes deslizar tu cejilla en forma de A a cualquier traste al azar y nombrar el acorde leyendo la nota en la cuerda 5 (usando tu conocimiento del Módulo 2). |
+| m7w3-s3 practice prompt: If you play an A-shape barre chord with your index finger on the 5th fret of string 5, what chord is it? | Si tocas un acorde con cejilla en forma de A con tu dedo índice en el traste 5 de la cuerda 5, ¿qué acorde es? |
+| m7w3-s3 practice choices: C major / D major / E major / A major | C mayor / D mayor / E mayor / A mayor |
+| m7w3-s4 text: Play Bb, C, and D as A-shape barre chords | Tocar Bb, C, y D como acordes con cejilla en forma de A |
+| m7w3-s4 gotItWhen: you can slide the A-shape between Bb (1st fret), C (3rd fret), and D (5th fret) and each chord rings cleanly with no muffled strings. | puedes deslizar la forma de A entre Bb (traste 1), C (traste 3), y D (traste 5) y cada acorde suena limpio sin cuerdas apagadas. |
+| m7w3-s4 practice label: Bb · C · D roots (A string) | Raíces Bb · C · D (cuerda La) |
+| m7w3-s5 text: Switch between an E-shape barre and an A-shape barre in time | Cambiar entre una cejilla en forma de E y una cejilla en forma de A a tiempo |
+| m7w3-s5 gotItWhen: you can go from F (E-shape, 1st fret) to C (A-shape, 3rd fret) on beat 1 of a new bar at 60 BPM without buzzing or pausing. | puedes ir de F (forma de E, traste 1) a C (forma de A, traste 3) en el tiempo 1 de un compás nuevo a 60 BPM sin zumbido ni pausas. |
+| m7w3-s6 text: Play a full song using only barre chords (no open chords) | Tocar una canción completa usando solo acordes con cejilla (sin acordes abiertos) |
+| m7w3-s6 gotItWhen: you can play "All Along the Watchtower" or another 3-chord song from start to finish using ONLY barre chords — proving you no longer need the open shapes. | puedes tocar "All Along the Watchtower" u otra canción de 3 acordes de principio a fin usando SOLO acordes con cejilla — probando que ya no necesitas las formas abiertas. |
+| m7w3-s6 practice label: F · C · G · D barre progression (roots) | Progresión de cejillas F · C · G · D (raíces) |
+
+### Module-level Songs
+
+MODULE_SONGS[7] meta fields (song title shown for reference, not itself translated on the site).
+
+| English | Spanish |
+|---|---|
+| "Smoke on the Water" — Deep Purple — meta: Iconic 2-note TAB riff · A + D strings | Riff icónico de TAB de 2 notas · cuerdas La + Re |
+| "Crazy Train" — Ozzy Osbourne — meta: Fast intro riff · alternate picking practice | Riff de intro rápido · práctica de púa alternada |
+| "Seven Nation Army" — The White Stripes — meta: Single-note riff with rhythm variations | Riff de una sola nota con variaciones rítmicas |
+| "Hey Jude" — The Beatles — meta: F major in the chorus · perfect E-shape barre application | F mayor en el coro · aplicación perfecta de la cejilla en forma de E |
+| "Luna" — Peso Pluma, Junior H — meta: Full barre F in the vamp (instead of the little F) | Cejilla completa de F en el vamp (en lugar del F pequeño) |
+| "Wonderwall" — Oasis — meta: Easier with barre chords once you have them down | Más fácil con acordes con cejilla una vez que los dominas |
+| "Sweet Child O' Mine" — Guns N' Roses — meta: Barre the D–C–G verse · intro riff = optional harder challenge | Toca la estrofa D–C–G con cejillas · riff de intro = reto opcional más difícil |
+| "All Along the Watchtower" — Dylan / Hendrix — meta: Am–G–F–G · use barre shapes for all three | Am–G–F–G · usa formas de cejilla para los tres |
+| "Happy Birthday" — meta: Play it entirely with barre chords | Tócala por completo con acordes con cejilla |
+| "Oye Mi Amor" — Maná — meta: Full barre-chord progression · Bm–G | Progresión completa de acordes con cejilla · Bm–G |
+| "Tu Boda" — Oscar Maydon × Fuerza Regida — meta: Barre-chord sierreño progression | Progresión sierreña con acordes con cejilla |
+| "Hotel California" — Eagles — meta: Bm–F#–A–E·G–D–Em–F# · lots of barre practice | Bm–F#–A–E·G–D–Em–F# · mucha práctica de cejilla |
+| "Zombie" — The Cranberries — meta: Em–C–G–D · mix open and barre | Em–C–G–D · mezcla acordes abiertos y cejillas |
+| "Mad World" — Gary Jules / Tears for Fears — meta: Em–G–D–A · barre chord workout | Em–G–D–A · ejercicio de acordes con cejilla |
+
+### Module Review
+
+| English | Spanish |
+|---|---|
+| module: TAB Notation and Barre Chords | Notación TAB y acordes con cejilla |
+| skill mr7-s1: I can read multi-line TAB — stacked numbers as chords, plus the rhythm symbols (quarter, 8th, half) above the notes | Puedo leer TAB de varias líneas — números apilados como acordes, además de los símbolos de ritmo (negra, corchea, blanca) arriba de las notas |
+| skill mr7-s2: I can recognise hammer-on (h), pull-off (p), and slide (/ \) markings in TAB and play them | Puedo reconocer las marcas de hammer-on (h), pull-off (p), y deslizamiento (/ \) en el TAB y tocarlas |
+| skill mr7-s3: I can bar all 6 strings with my index finger so every string rings | Puedo hacer cejilla en las 6 cuerdas con mi dedo índice para que todas suenen |
+| skill mr7-s4: I can form an E-shape barre and play F, G, and A cleanly, naming each by its root on string 6 | Puedo formar una cejilla en forma de E y tocar F, G, y A de forma limpia, nombrando cada uno por su raíz en la cuerda 6 |
+| skill mr7-s5: I can form an A-shape barre and play B, C, and D cleanly, naming each by its root on string 5 | Puedo formar una cejilla en forma de A y tocar B, C, y D de forma limpia, nombrando cada uno por su raíz en la cuerda 5 |
+| skill mr7-s6: I can find both "homes" for a chord — its E-shape (string-6 root) and A-shape (string-5 root) — and switch between the two shapes in a progression | Puedo encontrar los dos "hogares" de un acorde — su forma de E (raíz en la cuerda 6) y su forma de A (raíz en la cuerda 5) — y cambiar entre las dos formas en una progresión |
+| assessItem: Play F barre → slide to G → slide to A, one clean strum each (E-shape, root on string 6) | Toca la cejilla de F → deslízala a G → deslízala a A, un rasgueo limpio cada una (forma de E, raíz en la cuerda 6) |
+| assessItem: Play a 4-chord progression mixing E-shape and A-shape barres (e.g. F–C–G–D), 2 bars each, at 60 BPM | Toca una progresión de 4 acordes mezclando cejillas en forma de E y de A (p. ej. F–C–G–D), 2 compases cada uno, a 60 BPM |
+| forward: Module 8 hands the spotlight to your <strong>picking hand</strong>. Every barre and open shape you can now hold becomes a chord frame that fingerpicking decorates one string at a time — the fretting work you just did is exactly what makes those patterns sound full. | El Módulo 8 le da el protagonismo a tu <strong>mano de pulsar</strong>. Cada cejilla y forma abierta que ahora puedes sostener se convierte en un marco de acorde que el fingerpicking decora una cuerda a la vez — el trabajo de trastear que acabas de hacer es exactamente lo que hace que esos patrones suenen completos. |
+
+## Module 8 — Finger Picking
+
+### Set 1
+
+| English | Spanish |
+|---|---|
+| unit: Module 8 · Finger Picking | Módulo 8 · Fingerpicking |
+| subtitle: Hand position · p-i-m-a · Thumb on bass · Fingers on treble | Posición de la mano · p-i-m-a · Pulgar en el bajo · Dedos en las agudas |
+| skillFocus: A relaxed fingerpicking hand position · Thumb on the bass strings, fingers on the treble · Rest stroke vs. free stroke | Una posición relajada de la mano de fingerpicking · Pulgar en las cuerdas graves, dedos en las agudas · Apoyando (toque de apoyo) vs. tirando (toque libre) |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch the lesson videos | Mira los videos de la lección |
+| Section title: Listen for the thumb and fingers | Escucha el pulgar y los dedos |
+| Section title: Try p-i-m-a on open strings | Prueba p-i-m-a en cuerdas al aire |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — finger assignments | Estación de práctica — asignación de dedos |
+| Section title: Warm-up — tuning check (Module 1) | Calentamiento — revisión de afinación (Módulo 1) |
+| Section title: Set up a relaxed fingerpicking hand | Prepara una mano de fingerpicking relajada |
+| Section title: Pluck p-i-m-a — thumb bass, i-m-a treble | Pulsa p-i-m-a — pulgar en el bajo, i-m-a en las agudas |
+| Section title: Move the thumb between bass strings | Mueve el pulgar entre las cuerdas graves |
+| Section title: Take It to a Song | Llévalo a una canción |
+
+**Station B — Watch the lesson videos**
+
+| English | Spanish |
+|---|---|
+| text: Watch: Beginner Fingerpicking Made Easy: Pinch, Pluck, & Play! – Marty Music (0:00–5:00). As you watch, copy his RIGHT-HAND shape on your own guitar — thumb resting on the low E, fingers curved over the treble strings. | Mira: Beginner Fingerpicking Made Easy: Pinch, Pluck, & Play! – Marty Music (0:00–5:00). Mientras miras, copia su forma de la MANO DERECHA en tu propia guitarra — pulgar apoyado en la Mi grave, dedos curvados sobre las cuerdas agudas. |
+| hint: Watch the right hand: wrist arched, fingers curved like he's holding a small ball. The thumb sits FORWARD of the fingers, not tucked under them. | Observa la mano derecha: muñeca arqueada, dedos curvados como si sostuviera una pelotita. El pulgar se ubica ADELANTE de los dedos, no metido debajo de ellos. |
+| response prompt: In classical fingerpicking notation, which finger is "p"? | En la notación clásica de fingerpicking, ¿cuál dedo es "p"? |
+| response explain: "p" is the thumb (from Spanish "pulgar"). The rest: i = index, m = middle, a = ring. | "p" es el pulgar (del español "pulgar"). El resto: i = índice, m = medio, a = anular. |
+| response choices: Index finger / Middle finger / Thumb / Ring finger | Dedo índice / Dedo medio / Pulgar / Dedo anular |
+| text: Watch: Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar (0:00–4:00). Pause when he assigns the fingers and place yours the same way: p on the bass, i-m-a on G-B-e. | Mira: Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar (0:00–4:00). Pausa cuando asigna los dedos y coloca los tuyos de la misma manera: p en el bajo, i-m-a en G-B-e. |
+| hint: Justin's assignment: thumb handles strings 6, 5, 4 (the bass) and i-m-a handle strings 3, 2, 1 (treble). One finger per string is the goal. | La asignación de Justin: el pulgar se encarga de las cuerdas 6, 5, 4 (el bajo) y i-m-a se encargan de las cuerdas 3, 2, 1 (las agudas). Un dedo por cuerda es la meta. |
+| response prompt: Which finger normally plucks the B string (string 2)? | ¿Cuál dedo pulsa normalmente la cuerda B (cuerda 2)? |
+| response explain: Each finger gets a "home" string: i on G (3), m on B (2), a on high e (1). So the B string is m (middle). | Cada dedo tiene una cuerda "de base": i en G (3), m en B (2), a en mi aguda (1). Así que la cuerda B es m (medio). |
+| response choices: p (thumb) / i (index) / m (middle) / a (ring) | p (pulgar) / i (índice) / m (medio) / a (anular) |
+
+**Station B — Listen for the thumb and fingers**
+
+| English | Spanish |
+|---|---|
+| text: Listen to "Dust in the Wind" by Kansas. Pay attention to the picking pattern — you can clearly hear the alternating bass (thumb) underneath the melody (fingers). | Escucha "Dust in the Wind" de Kansas. Pon atención al patrón de punteo — puedes escuchar claramente el bajo alternante (pulgar) debajo de la melodía (dedos). |
+| hint: This song is the classic example of fingerpicking. The bass moves on every beat, the fingers play between the beats. | Esta canción es el ejemplo clásico de fingerpicking. El bajo se mueve en cada tiempo, los dedos tocan entre los tiempos. |
+| response placeholder: In "Dust in the Wind", describe what you hear the THUMB doing vs. what the FINGERS are doing. | En "Dust in the Wind", describe qué escuchas haciendo al PULGAR frente a lo que hacen los DEDOS. |
+
+**Station B — Try p-i-m-a on open strings**
+
+| English | Spanish |
+|---|---|
+| text: Now try it: pluck p-i-m-a on open strings — low E (p), G (i), B (m), high e (a). Click any note below the TAB to hear it, then play the staircase on your own guitar, one finger per string. | Ahora pruébalo: pulsa p-i-m-a en cuerdas al aire — Mi grave (p), G (i), B (m), mi aguda (a). Haz clic en cualquier nota debajo del TAB para escucharla, y luego toca la escalera en tu propia guitarra, un dedo por cuerda. |
+| hint: No pick, no chord yet — just the right hand. Each pluck lands on its own string, reading left to right. Aim for the same volume from every finger. | Sin púa, sin acorde todavía — solo la mano derecha. Cada pulsación cae en su propia cuerda, leyendo de izquierda a derecha. Apunta al mismo volumen en cada dedo. |
+| tab caption: p-i-m-a on open strings · low E · G · B · high e | p-i-m-a en cuerdas al aire · Mi grave · G · B · mi aguda |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — pause and think: which finger felt the most awkward today, and what helped it land more evenly? | Cierre de la estación — pausa y piensa: ¿cuál dedo se sintió más incómodo hoy, y qué ayudó a que cayera más parejo? |
+| response placeholder: e.g. the ring (a) finger was weakest — slowing down and watching it helped | p. ej. el dedo anular (a) era el más débil — ir más despacio y observarlo ayudó |
+
+**Station C — Warm-up — tuning check (Module 1)**
+
+| English | Spanish |
+|---|---|
+| text: Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You've got it when: in tune before today's work. | Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy. |
+| hint: Tuning (Module 1) matters even more in fingerpicking — every note is exposed, so an out-of-tune string is easy to hear. | Afinar (Módulo 1) importa todavía más en el fingerpicking — cada nota queda expuesta, así que una cuerda desafinada se escucha fácilmente. |
+| playSeq label: Hear all 6 strings in tune | Escucha las 6 cuerdas afinadas |
+
+**Station C — Set up a relaxed fingerpicking hand**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 1 — Hand Shape: put the pick down, rest your thumb on the low E and i-m-a on the G, B, and high e strings, and hold for 30 seconds. You've got it when: a relaxed, arched wrist with curved fingers — like holding an apple. | Reto 1 — Forma de la mano: deja la púa a un lado, apoya tu pulgar en la Mi grave e i-m-a en las cuerdas G, B y mi aguda, y sostén la posición por 30 segundos. Lo tienes cuando: una muñeca relajada y arqueada con dedos curvados — como si sostuvieras una manzana. |
+| hint: Your wrist should be arched (curved) — not flat against the guitar body. Fingers curved as if you're holding an apple. Relax. | Tu muñeca debe estar arqueada (curvada) — no plana contra el cuerpo de la guitarra. Dedos curvados como si sostuvieras una manzana. Relájate. |
+| stuck: Drop your hand to your side and shake it loose, then place it back on the strings without tensing up — relaxed first, accurate second. | Deja caer tu mano a un lado y sacúdela para soltarla, y luego colócala de nuevo en las cuerdas sin tensarte — relajada primero, precisa después. |
+| levelUp: Hold the shape, look away, then pluck each string in turn by feel alone — no peeking. | Sostén la forma, mira hacia otro lado, y luego pulsa cada cuerda por turno solo por sensación — sin mirar. |
+
+**Station C — Pluck p-i-m-a — thumb bass, i-m-a treble**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 2 — p-i-m-a Plucks (your assessment piece): pluck once with each finger in order — p (low E), i (G), m (B), a (high e) — saying each letter aloud, 8 times at 60 BPM. You've got it when: the same volume from every finger, even the weaker ring (a). This open-string check is the Set 1 check-off. | Reto 2 — Pulsaciones p-i-m-a (tu pieza de evaluación): pulsa una vez con cada dedo en orden — p (Mi grave), i (G), m (B), a (mi aguda) — diciendo cada letra en voz alta, 8 veces a 60 BPM. Lo tienes cuando: el mismo volumen en cada dedo, incluso en el anular (a), que es más débil. Esta revisión con cuerdas al aire es el chequeo de la Unidad 1. |
+| hint: No strumming, no pick. Each finger gets ONE string. Aim for the same volume from each finger — the ring finger (a) is usually the weakest at first. Set the ⏱ Timer for 2 minutes and loop it. | Sin rasgueo, sin púa. Cada dedo tiene UNA cuerda. Apunta al mismo volumen en cada dedo — el dedo anular (a) suele ser el más débil al principio. Pon el ⏱ Temporizador en 2 minutos y repítelo. |
+| stuck: Pluck just p then i, over and over, until those two are even — then add m, then a. | Pulsa solo p y luego i, una y otra vez, hasta que esos dos salgan parejos — y luego agrega m, y luego a. |
+| levelUp: Run it backwards (a-m-i-p), or close your eyes and keep every finger on its string. | Tócalo al revés (a-m-i-p), o cierra los ojos y mantén cada dedo en su cuerda. |
+| playSeq label: Hear p-i-m-a on open strings | Escucha p-i-m-a en cuerdas al aire |
+| response prompt: Personal record: play it cleanly at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, even p-i-m-a lap (one full time through the pattern) today (BPM)? | Récord personal: tócalo limpio a 60 BPM, y luego sube el metrónomo de 10 en 10. ¿Tu vuelta p-i-m-a más rápida, LIMPIA y pareja (una vuelta = un recorrido completo del patrón) hoy (BPM)? |
+| response placeholder: e.g. 80 — try for a higher number next time | p. ej. 80 — intenta superarlo la próxima vez |
+
+**Station C — Move the thumb between bass strings**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 3 — Moving Bass: pluck the low E string with p then G-B-e with i-m-a, then the A string, then the D string with p — fingers staying put. You've got it when: only the thumb moves to find each bass note — the i-m-a fingers stay anchored. | Reto 3 — Bajo en movimiento: pulsa la cuerda Mi grave con p y luego G-B-e con i-m-a, luego la cuerda La, y luego la cuerda Re con p — los dedos se quedan quietos. Lo tienes cuando: solo el pulgar se mueve para encontrar cada nota grave — los dedos i-m-a se quedan anclados. |
+| hint: This is how you change chords later — the thumb finds the bass note of the chord (root) while the fingers stay anchored on the treble strings. | Así es como cambiarás de acorde más adelante — el pulgar encuentra la nota grave del acorde (la raíz) mientras los dedos se quedan anclados en las cuerdas agudas. |
+| stuck: Move just the thumb E → A → D with the fingers resting (not plucking) on G-B-e, until the thumb finds each bass without looking. | Mueve solo el pulgar E → A → D con los dedos apoyados (sin pulsar) en G-B-e, hasta que el pulgar encuentre cada nota grave sin mirar. |
+| levelUp: Call out the bass string a beat before you play it, or shift E → A → D → A → E in a continuous loop without stopping. | Anuncia la cuerda grave un tiempo antes de tocarla, o cambia E → A → D → A → E en un loop continuo sin detenerte. |
+| playSeq label: Thumb shifts: E · A · D bass with i-m-a above | Cambios del pulgar: bajo E · A · D con i-m-a arriba |
+
+**Station C — Take It to a Song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — "the cure", first touch: fret Am and pluck p (A string) · i · m · a, one note per beat at 60 BPM — that soft broken-chord sound IS the verse feel of "the cure". Then change to C: your thumb stays on the same bass STRING — C's root lives on the A string too, just at the 3rd fret, where your ring finger now supplies the new bass note. You've got it when: four clean p-i-m-a laps on Am and four on C, every note even. | Reto — "the cure", primer contacto: trastea Am y pulsa p (cuerda La) · i · m · a, una nota por tiempo a 60 BPM — ese sonido suave de acorde desglosado ES la sensación de la estrofa de "the cure". Luego cambia a C: tu pulgar se queda en la misma CUERDA grave — la raíz de C también vive en la cuerda La, solo que en el traste 3, donde tu dedo anular ahora aporta la nueva nota grave. Lo tienes cuando: cuatro vueltas limpias de p-i-m-a en Am y cuatro en C, cada nota pareja. |
+| hint: Olivia's verse is fingerpicked for exactly this reason — soft and close. Wrist stays arched; only the fingers move. | La estrofa de Olivia está tocada con fingerpicking exactamente por esta razón — suave y cercana. La muñeca se mantiene arqueada; solo se mueven los dedos. |
+| stuck: Run p-i-m-a on open strings first (no chord at all), then add the Am under it. | Toca p-i-m-a en cuerdas al aire primero (sin acorde alguno), y luego agrega el Am debajo. |
+| levelUp: Add Dm and F: the thumb travels to the D string for both — and now you have the song's whole verse loop (Am · C · Dm · F). | Agrega Dm y F: el pulgar viaja a la cuerda Re para ambos — y ahora tienes todo el loop de la estrofa de la canción (Am · C · Dm · F). |
+| playSeq label: "the cure" feel — p-i-m-a on Am | Sensación de "the cure" — p-i-m-a en Am |
+
+**Set 1 — Skills**
+
+| English | Spanish |
+|---|---|
+| m8w1-s1 text: Hold a relaxed fingerpicking hand position — wrist arched, fingers curved | Mantener una posición relajada de la mano de fingerpicking — muñeca arqueada, dedos curvados |
+| m8w1-s1 gotItWhen: you can hold the position for 30 seconds without your wrist collapsing flat, and your fingers stay curved (not flat) over the treble strings. | puedes mantener la posición durante 30 segundos sin que tu muñeca se aplane, y tus dedos se quedan curvados (no planos) sobre las cuerdas agudas. |
+| m8w1-s1 practice prompt: In a correct fingerpicking hand position, your wrist should be: | En una posición correcta de la mano de fingerpicking, tu muñeca debería estar: |
+| m8w1-s1 practice choices: Flat against the guitar body / Arched (curved away from the guitar) / Locked stiff / Pointing toward the floor | Plana contra el cuerpo de la guitarra / Arqueada (curvada lejos de la guitarra) / Bloqueada y rígida / Apuntando hacia el suelo |
+| m8w1-s2 text: Identify p, i, m, a finger letters and their string assignments | Identificar las letras de dedos p, i, m, a y sus cuerdas asignadas |
+| m8w1-s2 gotItWhen: you can say "p = thumb / bass strings, i = index / G, m = middle / B, a = ring / high e" without hesitating — and assign a finger to any string on demand. | puedes decir "p = pulgar / cuerdas graves, i = índice / G, m = medio / B, a = anular / mi aguda" sin dudar — y asignar un dedo a cualquier cuerda cuando se te pida. |
+| m8w1-s2 practice prompt: In p-i-m-a notation, which finger handles the G string (string 3)? | En la notación p-i-m-a, ¿cuál dedo se encarga de la cuerda G (cuerda 3)? |
+| m8w1-s2 practice choices: p (thumb) / i (index) / m (middle) / a (ring) | p (pulgar) / i (índice) / m (medio) / a (anular) |
+| m8w1-s3 text: Pluck the low E string cleanly with my thumb (p) | Pulsar la cuerda Mi grave de forma limpia con mi pulgar (p) |
+| m8w1-s3 gotItWhen: your thumb pulls down and slightly inward (toward the body) and the low E rings clearly with a warm, full tone — no clicking. | tu pulgar tira hacia abajo y ligeramente hacia adentro (hacia el cuerpo de la guitarra) y la Mi grave suena clara con un tono cálido y lleno — sin chasquidos. |
+| m8w1-s3 practice label: Thumb only — low E · A · D bass strings | Solo el pulgar — cuerdas graves Mi · La · Re |
+| m8w1-s4 text: Pluck the G, B, and high e strings with i, m, a fingers respectively | Pulsar las cuerdas G, B y mi aguda con los dedos i, m, a respectivamente |
+| m8w1-s4 gotItWhen: each finger goes to its assigned string without you having to look — and all three sound roughly equal in volume. | cada dedo va a su cuerda asignada sin que tengas que mirar — y los tres suenan más o menos con el mismo volumen. |
+| m8w1-s4 practice label: i · m · a on G · B · e | i · m · a en G · B · e |
+| m8w1-s5 text: Pluck p-i-m-a in order on open strings at 60 BPM | Pulsar p-i-m-a en orden en cuerdas al aire a 60 BPM |
+| m8w1-s5 gotItWhen: you can pluck low E (p), G (i), B (m), high e (a) in order, four times in a row at 60 BPM, all four notes equal in volume. | puedes pulsar Mi grave (p), G (i), B (m), mi aguda (a) en orden, cuatro veces seguidas a 60 BPM, con las cuatro notas iguales en volumen. |
+| m8w1-s5 practice label: p-i-m-a (low E · G · B · e) at 60 BPM | p-i-m-a (Mi grave · G · B · e) a 60 BPM |
+| m8w1-s6 text: Move the thumb to a different bass string while i-m-a stay on G, B, e | Mover el pulgar a una cuerda grave distinta mientras i-m-a se quedan en G, B, e |
+| m8w1-s6 gotItWhen: when the chord changes from Em to Am, your thumb shifts from the low E string to the A string (finding the new root) while your i-m-a fingers stay anchored on G-B-e the whole time. | cuando el acorde cambia de Em a Am, tu pulgar se mueve de la cuerda Mi grave a la cuerda La (encontrando la nueva raíz) mientras tus dedos i-m-a se quedan anclados en G-B-e todo el tiempo. |
+
+### Set 2
+
+| English | Spanish |
+|---|---|
+| unit: Module 8 · Finger Picking | Módulo 8 · Fingerpicking |
+| subtitle: Basic PIMA pattern · The classic arpeggio (the notes of a chord played one at a time) · Over a single chord | Patrón básico PIMA · El arpegio clásico (las notas de un acorde tocadas una a la vez) · Sobre un solo acorde |
+| skillFocus: Playing a PIMA arpeggio pattern · Keeping even timing and volume · Picking through a held chord | Tocar un patrón de arpegio PIMA · Mantener el tiempo y el volumen parejos · Puntear a través de un acorde sostenido |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch the lesson videos | Mira los videos de la lección |
+| Section title: Listen for the 6-note pulse | Escucha el pulso de 6 notas |
+| Section title: Try the pattern on Em | Prueba el patrón en Em |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — the 6-note pattern | Estación de práctica — el patrón de 6 notas |
+| Section title: Play the p-i-m-a-m-i pattern on Em | Toca el patrón p-i-m-a-m-i en Em |
+| Section title: Play the pattern on Am (move the thumb) | Toca el patrón en Am (mueve el pulgar) |
+| Section title: Build up your tempo (70+ BPM) | Aumenta tu tempo (70+ BPM) |
+| Section title: Take It to a Song | Llévalo a una canción |
+| Section title: ⚡ Ear Spark — optional ear bonus | ⚡ Chispa auditiva — bono opcional de oído |
+
+**Station B — Watch the lesson videos**
+
+| English | Spanish |
+|---|---|
+| text: Watch: Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar (revisit 0:00–4:00). This time, watch one full pattern cycle and count the notes out loud with him. | Mira: Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar (revisita 0:00–4:00). Esta vez, mira un ciclo completo del patrón y cuenta las notas en voz alta con él. |
+| hint: The "p-i-m-a-m-i" cycle (6 notes per bar) is one of the most-used patterns in folk and pop. It creates a flowing, arpeggiated feel under a chord. | El ciclo "p-i-m-a-m-i" (6 notas por compás) es uno de los patrones más usados en folk y pop. Crea una sensación fluida y arpegiada debajo de un acorde. |
+| response prompt: In the 6-note pattern "p-i-m-a-m-i", how many times does each finger play in one cycle? | En el patrón de 6 notas "p-i-m-a-m-i", ¿cuántas veces toca cada dedo en un ciclo? |
+| response explain: Count the letters: p(1) i(2) m(2) a(1) — i and m each play twice as the pattern climbs up and back down, while p and a play once. | Cuenta las letras: p(1) i(2) m(2) a(1) — i y m tocan cada uno dos veces mientras el patrón sube y vuelve a bajar, mientras que p y a tocan una vez. |
+| response choices: p once, i twice, m twice, a once / Each finger plays exactly once / p three times, others once each / p twice, i once, m once, a twice | p una vez, i dos veces, m dos veces, a una vez / Cada dedo toca exactamente una vez / p tres veces, los demás una vez cada uno / p dos veces, i una vez, m una vez, a dos veces |
+| text: Watch: Fingerpicking for Beginners — Pluck Patterns and Walkdowns – Lauren Bateman — a fingerpicking specialist's take on the same skill as Set 1's videos. Mute the strings with your fretting hand and tap the FINGER ORDER on the guitar top as she plays. | Mira: Fingerpicking for Beginners — Pluck Patterns and Walkdowns – Lauren Bateman — el enfoque de una especialista en fingerpicking sobre la misma destreza de los videos de la Unidad 1. Silencia las cuerdas con tu mano de trastear y marca el ORDEN DE LOS DEDOS en la tapa de la guitarra mientras ella toca. |
+| hint: Second teacher, same rule: focus on the FINGER ORDER — once it's automatic, your speed will follow. | Segunda maestra, misma regla: concéntrate en el ORDEN DE LOS DEDOS — una vez que sea automático, la velocidad vendrá sola. |
+| response placeholder: When the chord changes, does the picking pattern change too? And what did Lauren show that Set 1's videos didn't? | Cuando el acorde cambia, ¿el patrón de punteo también cambia? ¿Y qué mostró Lauren que los videos de la Unidad 1 no mostraron? |
+
+**Station B — Listen for the 6-note pulse**
+
+| English | Spanish |
+|---|---|
+| text: Listen to "Nothing Else Matters" by Metallica. The intro is entirely fingerpicked open chords. Tap along — can you feel the 6-note pulse? | Escucha "Nothing Else Matters" de Metallica. El intro son acordes al aire tocados enteramente con fingerpicking. Sigue el ritmo — ¿puedes sentir el pulso de 6 notas? |
+| hint: James Hetfield famously taught himself this with no plan. He uses thumb-finger-thumb-finger patterns. Notice the constant thumb motion. | James Hetfield famosamente se enseñó esto a sí mismo sin ningún plan. Usa patrones de pulgar-dedo-pulgar-dedo. Fíjate en el movimiento constante del pulgar. |
+| response prompt: In a typical fingerpicked arpeggio, what role does the THUMB usually play? | En un arpegio típico de fingerpicking, ¿qué papel suele cumplir el PULGAR? |
+| response explain: The thumb is the anchor — it stays on a bass string and lays down the foundation while i, m, and a handle the higher, faster notes. | El pulgar es el ancla — se queda en una cuerda grave y sienta la base mientras i, m y a se encargan de las notas más agudas y rápidas. |
+| response choices: It moves least — it stays on a bass string and provides the foundation / It moves fastest, switching strings every beat / It doesn't play at all in arpeggios / It plays the highest notes | Es el que menos se mueve — se queda en una cuerda grave y da la base / Es el que más rápido se mueve, cambiando de cuerda en cada tiempo / No toca para nada en los arpegios / Toca las notas más agudas |
+
+**Station B — Try the pattern on Em**
+
+| English | Spanish |
+|---|---|
+| text: Now try it: fret Em and play the 6-note p-i-m-a-m-i arpeggio. Click any note below the TAB to hear it, then play the staircase yourself — thumb on the low E (Em's root), i-m-a on G-B-e, then back down m-i. | Ahora pruébalo: trastea Em y toca el arpegio de 6 notas p-i-m-a-m-i. Haz clic en cualquier nota debajo del TAB para escucharla, y luego toca la escalera tú mismo — pulgar en la Mi grave (la raíz de Em), i-m-a en G-B-e, y luego de vuelta hacia abajo m-i. |
+| hint: Em is all open strings on the treble side, so you can focus entirely on the picking hand. Read the TAB left to right — the bass note starts it, then the fingers climb and come back. | Em son todas cuerdas al aire del lado agudo, así que puedes concentrarte por completo en la mano de pulsar. Lee el TAB de izquierda a derecha — la nota grave lo empieza, y luego los dedos suben y vuelven. |
+| tab caption: Em arpeggio · p-i-m-a-m-i · thumb on the low E | Arpegio de Em · p-i-m-a-m-i · pulgar en la Mi grave |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — pause and think: did the pattern start to feel automatic, or were you still thinking through each finger? What would make it smoother? | Cierre de la estación — pausa y piensa: ¿el patrón empezó a sentirse automático, o todavía estabas pensando en cada dedo? ¿Qué lo haría más fluido? |
+| response placeholder: e.g. still counting each finger — slowing the metronome down helped it flow | p. ej. todavía cuento cada dedo — bajar el metrónomo ayudó a que fluyera |
+
+**Station C — Play the p-i-m-a-m-i pattern on Em**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 1 — Em Pattern: fret Em and play the 6-note pattern p-i-m-a-m-i at 60 BPM, one note per click, for 8 bars. You've got it when: a steady, even pulse with every note ringing clean. | Reto 1 — Patrón en Em: trastea Em y toca el patrón de 6 notas p-i-m-a-m-i a 60 BPM, una nota por clic, durante 8 compases. Lo tienes cuando: un pulso constante y parejo con cada nota sonando limpia. |
+| hint: Count "1-2-3-4-5-6" — one number per pluck, one pluck per click — and let the six notes make one lap. Don't worry about exact rhythm yet; just keep the pulse steady. | Cuenta "1-2-3-4-5-6" — un número por pulsación, una pulsación por clic — y deja que las seis notas formen una vuelta. No te preocupes todavía por el ritmo exacto; solo mantén el pulso constante. |
+| stuck: Drop the metronome and play the pattern as slowly as you need to — get the finger order automatic first, speed comes after. | Deja el metrónomo y toca el patrón tan despacio como necesites — logra que el orden de los dedos sea automático primero, la velocidad viene después. |
+| levelUp: Play 8 bars without a single uneven note, or close your eyes and keep the pulse rock-steady. | Toca 8 compases sin una sola nota despareja, o cierra los ojos y mantén el pulso firme como una roca. |
+| playSeq label: Em p-i-m-a-m-i pattern at 60 BPM | Patrón p-i-m-a-m-i en Em a 60 BPM |
+
+**Station C — Play the pattern on Am (move the thumb)**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 2 — Am Pattern: fret Am and play the 6-note pattern over it — thumb on the A string (Am's root), i-m-a still on G-B-e — 8 times. You've got it when: only the thumb moves to the new bass; the fingers stay anchored. Click any note below the TAB to hear it. | Reto 2 — Patrón en Am: trastea Am y toca el patrón de 6 notas sobre él — pulgar en la cuerda La (la raíz de Am), i-m-a siguen en G-B-e — 8 veces. Lo tienes cuando: solo el pulgar se mueve hacia el nuevo bajo; los dedos se quedan anclados. Haz clic en cualquier nota debajo del TAB para escucharla. |
+| hint: The only change from Em is which bass string the thumb plays. Fingers stay parked on G, B, high e. | El único cambio respecto a Em es en cuál cuerda grave toca el pulgar. Los dedos se quedan estacionados en G, B, mi aguda. |
+| stuck: Drop the pattern — just pluck the Am bass (p) and let it ring, then add i-m-a one finger at a time. | Deja el patrón — solo pulsa el bajo de Am (p) y deja que suene, y luego agrega i-m-a un dedo a la vez. |
+| levelUp: Switch Em → Am every 2 bars without breaking the pulse — only the thumb relocates. | Cambia Em → Am cada 2 compases sin romper el pulso — solo el pulgar se reubica. |
+| tab caption: Am arpeggio · p-i-m-a-m-i · thumb on the A string | Arpegio de Am · p-i-m-a-m-i · pulgar en la cuerda La |
+
+**Station C — Build up your tempo (70+ BPM)**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 3 — Raise Your Tempo (your assessment piece): play the Em pattern at 70 BPM, then try 80. You've got it when: clean at 70+ with the "a" finger landing right on its beat — drop back to 60 if it falls apart. This steady-pattern check is the Set 2 check-off. | Reto 3 — Sube tu tempo (tu pieza de evaluación): toca el patrón de Em a 70 BPM, y luego intenta 80. Lo tienes cuando: limpio a 70+ con el dedo "a" cayendo justo en su tiempo — baja a 60 si se desarma. Esta revisión de patrón constante es el chequeo de la Unidad 2. |
+| hint: The most common mistake: the ring finger (a) comes in late. Pay extra attention to your ring finger — it needs to land exactly on its beat, no later. Set the ⏱ Timer for 2 minutes and loop it. | El error más común: el dedo anular (a) llega tarde. Presta atención extra a tu dedo anular — necesita caer exactamente en su tiempo, no después. Pon el ⏱ Temporizador en 2 minutos y repítelo. |
+| stuck: Go back to 60 BPM and stay there until it's effortless — a clean 60 is better than a sloppy 80 every time. | Regresa a 60 BPM y quédate ahí hasta que salga sin esfuerzo — un 60 limpio siempre es mejor que un 80 desordenado. |
+| levelUp: Push past 80 BPM, or play the pattern over Am at the same tempo with the thumb relocating. | Supera los 80 BPM, o toca el patrón sobre Am al mismo tempo con el pulgar reubicándose. |
+| response prompt: Personal record: play it cleanly at 70 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, even pattern today (BPM)? | Récord personal: tócalo limpio a 70 BPM, y luego sube el metrónomo de 10 en 10. ¿Tu patrón más rápido, LIMPIO y parejo hoy (BPM)? |
+| response placeholder: e.g. 90 — try for a higher number next time | p. ej. 90 — intenta superarlo la próxima vez |
+
+**Station C — Take It to a Song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — "the cure", verse: play the 6-note p-i-m-a-m-i pattern over the verse loop — Am · C · Dm · F, one bar each at 60 BPM. Thumb: A string for Am and C, D string for Dm and F; i-m-a never leave G-B-e. You've got it when: one full lap with the pattern unbroken at every change. | Reto — "the cure", estrofa: toca el patrón de 6 notas p-i-m-a-m-i sobre el loop de la estrofa — Am · C · Dm · F, un compás cada uno a 60 BPM. Pulgar: cuerda La para Am y C, cuerda Re para Dm y F; i-m-a nunca dejan G-B-e. Lo tienes cuando: una vuelta completa con el patrón sin interrupciones en cada cambio. |
+| hint: The four bass notes pair up: Am and C both live on the A string, Dm and F both live on the D string — the thumb travels only once, at C→Dm, then stays. The fingers never move at all. | Las cuatro notas graves se emparejan: Am y C viven en la cuerda La, Dm y F viven en la cuerda Re — el pulgar viaja solo una vez, en C→Dm, y luego se queda. Los dedos nunca se mueven. |
+| stuck: Loop Am → C until your fretting hand lands on fret 3 without looking — the thumb just keeps plucking the A string — then add Dm and F as their own pair. | Repite Am → C hasta que tu mano de trastear caiga en el traste 3 sin mirar — el pulgar sigue pulsando la cuerda La — y luego agrega Dm y F como su propio par. |
+| levelUp: Hum the melody over your own picking — this is the actual sound of the record. | Tararea la melodía sobre tu propio punteo — este es el sonido real de la grabación. |
+| tab caption: "the cure" — fingerstyle bass roots · Am · C · Dm · F · one bar each · 60 BPM | "the cure" — raíces graves de fingerstyle · Am · C · Dm · F · un compás cada uno · 60 BPM |
+| response prompt: Which change broke the pattern more — Am→C or C→Dm? | ¿Qué cambio rompió más el patrón — Am→C o C→Dm? |
+| response placeholder: e.g. C→Dm — the thumb overshoots the D string | p. ej. C→Dm — el pulgar se pasa de la cuerda Re |
+
+**Station C — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: What's your honest top clean tempo right now, and which finger gives out first when you push it? Write it below — that's your warm-up target next time. | ¿Cuál es honestamente tu mejor tempo limpio ahora mismo, y cuál dedo cede primero cuando lo aceleras? Escríbelo abajo — ese es tu objetivo de calentamiento la próxima vez. |
+| response placeholder: e.g. clean to 80, then the ring finger starts dragging behind the beat | p. ej. limpio hasta 80, y luego el dedo anular empieza a atrasarse del tiempo |
+
+**Station C — ⚡ Ear Spark — optional ear bonus**
+
+| English | Spanish |
+|---|---|
+| text: ⚡ Ear Spark (optional, 2 min): fingerpick Am leading with the thumb on either the A string or the D string — a few times in a mixed-up order, recorded. On playback, name which string the bass note was each time — low vs high bass is a fingerpicker's first ear skill. Got someone around? Have them pick while you listen. | ⚡ Chispa auditiva (opcional, 2 min): toca Am con fingerpicking empezando con el pulgar en la cuerda La o en la cuerda Re — varias veces en un orden mezclado, grabado. Al escuchar la grabación, nombra en cuál cuerda estaba la nota grave cada vez — grave vs. agudo en el bajo es la primera destreza auditiva de un fingerpicker. ¿Tienes a alguien cerca? Pídele que toque mientras tú escuchas. |
+
+**Set 2 — Skills**
+
+| English | Spanish |
+|---|---|
+| m8w2-s1 text: Play the 6-note p-i-m-a-m-i pattern in order from memory | Tocar el patrón de 6 notas p-i-m-a-m-i en orden de memoria |
+| m8w2-s1 gotItWhen: you can play the sequence p-i-m-a-m-i on open strings (or one chord) at 60 BPM without having to think about which finger comes next. | puedes tocar la secuencia p-i-m-a-m-i en cuerdas al aire (o un acorde) a 60 BPM sin tener que pensar cuál dedo sigue. |
+| m8w2-s1 practice prompt: In the "p-i-m-a-m-i" pattern, which two fingers each play TWICE per bar? | En el patrón "p-i-m-a-m-i", ¿cuáles dos dedos tocan DOS VECES cada uno por compás? |
+| m8w2-s1 practice choices: p and a / i and m / p and i / m and a | p y a / i y m / p e i / m y a |
+| m8w2-s2 text: Pluck with even volume across all four fingers | Pulsar con volumen parejo en los cuatro dedos |
+| m8w2-s2 gotItWhen: when you listen back to your picking, no single finger is noticeably louder or quieter than the others — including the ring finger (a), which is hardest. | cuando escuchas tu punteo grabado, ningún dedo suena notablemente más fuerte o más suave que los demás — incluyendo el dedo anular (a), que es el más difícil. |
+| m8w2-s2 practice prompt: Which finger is usually the WEAKEST at first and needs extra practice? | ¿Cuál dedo suele ser el MÁS DÉBIL al principio y necesita práctica extra? |
+| m8w2-s2 practice choices: p (thumb) / i (index) / m (middle) / a (ring) | p (pulgar) / i (índice) / m (medio) / a (anular) |
+| m8w2-s3 text: Hold an Em chord while picking through it cleanly | Mantener un acorde Em mientras lo punteas de forma limpia |
+| m8w2-s3 gotItWhen: your fretting hand stays planted on Em the entire bar while your picking hand cycles through the pattern — and every note rings clearly. | tu mano de trastear se queda plantada en Em durante todo el compás mientras tu mano de pulsar recorre el patrón — y cada nota suena con claridad. |
+| m8w2-s3 practice label: Em arpeggio p-i-m-a-m-i | Arpegio de Em p-i-m-a-m-i |
+| m8w2-s4 text: Play the pattern over Am (thumb on A string) | Tocar el patrón sobre Am (pulgar en la cuerda La) |
+| m8w2-s4 gotItWhen: you can switch your THUMB from low E to A string when the chord changes Em → Am, while i-m-a stay on G-B-e the whole time. | puedes cambiar tu PULGAR de la Mi grave a la cuerda La cuando el acorde cambia de Em → Am, mientras i-m-a se quedan en G-B-e todo el tiempo. |
+| m8w2-s4 practice label: Am arpeggio p-i-m-a-m-i | Arpegio de Am p-i-m-a-m-i |
+| m8w2-s5 text: Keep the pattern steady at 70 BPM for 4+ bars | Mantener el patrón estable a 70 BPM durante 4 o más compases |
+| m8w2-s5 gotItWhen: you can play the pattern for at least 4 bars at 70 BPM without your tempo slowing down or speeding up — the metronome and you agree the whole time. | puedes tocar el patrón durante al menos 4 compases a 70 BPM sin que tu tempo se atrase ni se acelere — el metrónomo y tú están de acuerdo todo el tiempo. |
+| m8w2-s6 text: Switch the thumb to a new bass string at a chord change | Cambiar el pulgar a una nueva cuerda grave en un cambio de acorde |
+| m8w2-s6 gotItWhen: at a chord change, only your thumb moves to find the new root note — i-m-a stay parked on G, B, high e. The pattern continues uninterrupted. | en un cambio de acorde, solo tu pulgar se mueve para encontrar la nueva nota raíz — i-m-a se quedan estacionados en G, B, mi aguda. El patrón continúa sin interrupciones. |
+
+### Set 3
+
+| English | Spanish |
+|---|---|
+| unit: Module 8 · Finger Picking | Módulo 8 · Fingerpicking |
+| subtitle: Fingerpick a full progression · Travis picking intro · Performance song | Fingerpicking sobre una progresión completa · Introducción al Travis picking · Canción de interpretación |
+| skillFocus: Fingerpicking through a chord progression · An intro to Travis picking · Performing a fingerpicked song | Tocar con fingerpicking a través de una progresión de acordes · Una introducción al Travis picking · Interpretar una canción con fingerpicking |
+| Station B title: Computer station — Watch · Listen · Practice | Estación de computadora — Mira · Escucha · Practica |
+| Section title: Watch the lesson videos | Mira los videos de la lección |
+| Section title: Listen through a full verse | Escucha una estrofa completa |
+| Section title: Try the arpeggio on C | Prueba el arpegio en C |
+| Section title: Station Wrap-Up | Cierre de la estación |
+| Station C title: Practice station — full progressions & performance | Estación de práctica — progresiones completas e interpretación |
+| Section title: Fret each chord clean before you fingerpick it | Trastea cada acorde limpio antes de tocarlo con fingerpicking |
+| Section title: Fingerpick a full chord progression | Toca con fingerpicking una progresión de acordes completa |
+| Section title: Pinch the thumb and a finger together | Pellizca el pulgar y un dedo juntos |
+| Section title: Try Travis picking | Prueba el Travis picking |
+| Section title: Take It to a Song | Llévalo a una canción |
+| Section title: Perform a fingerpicked song | Interpreta una canción con fingerpicking |
+| Section title: Station Wrap-Up | Cierre de la estación |
+
+**Station B — Watch the lesson videos**
+
+| English | Spanish |
+|---|---|
+| text: Watch: How To Travis Pick on Guitar – Lauren Bateman (0:00–5:00). As you watch, tap the alternating thumb on your knee — bass on 1, the other bass on 3 — before you ever add the fingers. | Mira: How To Travis Pick on Guitar – Lauren Bateman (0:00–5:00). Mientras miras, marca el pulgar alternante en tu rodilla — bajo en el 1, el otro bajo en el 3 — antes de siquiera agregar los dedos. |
+| hint: Travis picking uses an ALTERNATING thumb: bass note on beat 1, a different bass note on beat 3. The fingers fill in between. It's the foundation of country, folk, and a lot of pop. | El Travis picking usa un pulgar ALTERNANTE: nota grave en el tiempo 1, una nota grave distinta en el tiempo 3. Los dedos rellenan en el medio. Es la base del country, el folk y mucho pop. |
+| response prompt: In Travis picking, what does the THUMB do? | En el Travis picking, ¿qué hace el PULGAR? |
+| response explain: The Travis "engine" is the thumb alternating between two bass strings (usually the root and the 5th) in steady time, while the fingers add melody on top. | El "motor" del Travis picking es el pulgar alternando entre dos cuerdas graves (normalmente la raíz y la quinta) en tiempo constante, mientras los dedos agregan melodía encima. |
+| response choices: Plays the same bass note over and over / Alternates between two bass notes — usually the root and the 5th / Doesn't play at all / Plays the melody | Toca la misma nota grave una y otra vez / Alterna entre dos notas graves — normalmente la raíz y la quinta / No toca en absoluto / Toca la melodía |
+| text: Watch: Nothing Else Matters Guitar Lesson Part 1 – Marty Music (0:00–4:00). Watch one chord change closely — notice when his fretting hand starts moving toward the next shape. | Mira: Nothing Else Matters Guitar Lesson Part 1 – Marty Music (0:00–4:00). Observa de cerca un cambio de acorde — fíjate cuándo su mano de trastear empieza a moverse hacia la siguiente forma. |
+| hint: The hardest part: keeping the picking pattern PERFECTLY STEADY through a chord change. Anticipate the next chord — start moving your fretting hand on the LAST note of the current bar. | La parte más difícil: mantener el patrón de punteo PERFECTAMENTE CONSTANTE a través de un cambio de acorde. Anticipa el siguiente acorde — empieza a mover tu mano de trastear en la ÚLTIMA nota del compás actual. |
+| response placeholder: When you fingerpick from Am to C, when (which note in the bar) does your fretting hand start preparing for the next chord? | Cuando tocas con fingerpicking de Am a C, ¿cuándo (en cuál nota del compás) empieza tu mano de trastear a prepararse para el siguiente acorde? |
+
+**Station B — Listen through a full verse**
+
+| English | Spanish |
+|---|---|
+| text: Listen to one of: "House of the Rising Sun", "Dust in the Wind", or "Hallelujah". Listen to a full verse. Can you hear when the chord changes? Does the pattern ever break? | Escucha una de estas: "House of the Rising Sun", "Dust in the Wind", o "Hallelujah". Escucha una estrofa completa. ¿Puedes escuchar cuándo cambia el acorde? ¿El patrón se rompe en algún momento? |
+| hint: In professional recordings the pattern almost never breaks at a chord change — that's your standard. It's a high bar but worth aiming for. | En las grabaciones profesionales el patrón casi nunca se rompe en un cambio de acorde — ese es tu estándar. Es una meta alta pero vale la pena perseguirla. |
+| response placeholder: Which song did you listen to? Did the picking pattern stay completely steady through every chord change? | ¿Cuál canción escuchaste? ¿El patrón de punteo se mantuvo completamente estable en cada cambio de acorde? |
+
+**Station B — Try the arpeggio on C**
+
+| English | Spanish |
+|---|---|
+| text: Now try it: fret C and play the 6-note arpeggio over it. Click any note below the TAB to hear it, then play the staircase — thumb on the A string's 3rd fret (C's root), i-m-a on G-B-e, then back down m-i. | Ahora pruébalo: trastea C y toca el arpegio de 6 notas sobre él. Haz clic en cualquier nota debajo del TAB para escucharla, y luego toca la escalera — pulgar en el traste 3 de la cuerda La (la raíz de C), i-m-a en G-B-e, y luego de vuelta hacia abajo m-i. |
+| hint: C uses the same picking pattern as Em and Am — only the thumb's bass note changes. Read the TAB left to right and match each pluck. | C usa el mismo patrón de punteo que Em y Am — solo cambia la nota grave del pulgar. Lee el TAB de izquierda a derecha y haz coincidir cada pulsación. |
+| tab caption: C arpeggio · p-i-m-a-m-i · thumb on the A string (3rd fret) | Arpegio de C · p-i-m-a-m-i · pulgar en la cuerda La (traste 3) |
+
+**Station B — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: Station Wrap-Up — pause and think: across the whole module, which is harder for you — keeping the picking pattern steady, or changing chords cleanly underneath it? What's your plan for the harder one? | Cierre de la estación — pausa y piensa: a lo largo de todo el módulo, ¿qué se te hace más difícil — mantener el patrón de punteo estable, o cambiar de acorde limpiamente debajo de él? ¿Cuál es tu plan para lo más difícil? |
+| response placeholder: e.g. chord changes break my pattern — I'll practice moving the fretting hand a beat early | p. ej. los cambios de acorde rompen mi patrón — voy a practicar mover la mano de trastear un tiempo antes |
+
+**Station C — Fret each chord clean before you fingerpick it**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 1 — Clean Shapes First: before you fingerpick the progression, strum each chord once (Am, C, D, F) and check every string rings — these are the exact open chords you learned in Module 5. You've got it when: all four shapes clean on a strum before you pick a single note through them. | Reto 1 — Formas limpias primero: antes de tocar la progresión con fingerpicking, rasguea cada acorde una vez (Am, C, D, F) y revisa que suenen todas las cuerdas — estos son exactamente los acordes al aire que aprendiste en el Módulo 5. Lo tienes cuando: las cuatro formas suenan limpias con un rasgueo antes de puntear una sola nota a través de ellas. |
+| hint: Fingerpicking exposes every note, so a chord that was "good enough" for strumming in Module 5 needs to be truly clean here. Fix the fretting hand first; then the picking hand has something solid to work over. | El fingerpicking expone cada nota, así que un acorde que era "suficientemente bueno" para rasguear en el Módulo 5 necesita estar de verdad limpio aquí. Arregla primero la mano de trastear; luego la mano de pulsar tiene algo sólido con qué trabajar. |
+| stuck: Whichever shape buzzes, fix just that one — adjust your finger angle so the fingertip (not the pad) presses just behind the fret. | La forma que zumbe, arregla solo esa — ajusta el ángulo de tu dedo para que la punta (no la yema plana) presione justo detrás del traste. |
+| levelUp: Fret each shape, lift off, and re-fret it cleanly 5 times in a row before moving to the next chord. | Trastea cada forma, levanta los dedos, y vuelve a trastearla limpia 5 veces seguidas antes de pasar al siguiente acorde. |
+
+**Station C — Fingerpick a full chord progression**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 2 — Full Progression: play the 6-note arpeggio over a 4-chord progression — Am–C–D–F or C–Am–F–G — 1 bar each at 60 BPM. You've got it when: the thumb finds each chord's root bass while the fingers stay on G-B-e. | Reto 2 — Progresión completa: toca el arpegio de 6 notas sobre una progresión de 4 acordes — Am–C–D–F o C–Am–F–G — 1 compás cada uno a 60 BPM. Lo tienes cuando: el pulgar encuentra el bajo raíz de cada acorde mientras los dedos se quedan en G-B-e. |
+| hint: For each chord, the thumb plays the ROOT bass note (Am = A string, C = A string, D = D string, F = D string). Fingers always on G-B-e. | Para cada acorde, el pulgar toca la nota grave RAÍZ (Am = cuerda La, C = cuerda La, D = cuerda Re, F = cuerda Re). Los dedos siempre en G-B-e. |
+| stuck: Drop to two chords (Am–C) and loop just that change until the pattern doesn't break, then add D and F. | Baja a dos acordes (Am–C) y repite solo ese cambio hasta que el patrón no se rompa, y luego agrega D y F. |
+| levelUp: Run the full four-chord loop without a single broken pattern, or nudge the metronome to 70 BPM. | Corre el loop completo de cuatro acordes sin un solo patrón roto, o empuja el metrónomo a 70 BPM. |
+| playSeq label: Am · C · D · F bass roots | Raíces graves Am · C · D · F |
+| response prompt: Personal record: play it cleanly at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN lap of the progression today (BPM)? | Récord personal: tócalo limpio a 60 BPM, y luego sube el metrónomo de 10 en 10. ¿Tu vuelta más rápida y LIMPIA de la progresión hoy (BPM)? |
+| response placeholder: e.g. 75 — try for a higher number next time | p. ej. 75 — intenta superarlo la próxima vez |
+
+**Station C — Pinch the thumb and a finger together**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 3 — The Pinch: fret C and "pinch" two strings at once — thumb on the A string (root) and your "a" finger on the high e, plucked at the SAME instant, on each beat for 8 beats. You've got it when: both notes sound together as one, perfectly in sync — not one slightly before the other. | Reto 3 — El pellizco: trastea C y "pellizca" dos cuerdas a la vez — pulgar en la cuerda La (raíz) y tu dedo "a" en la mi aguda, pulsadas en el MISMO instante, en cada tiempo durante 8 tiempos. Lo tienes cuando: ambas notas suenan juntas como una sola, perfectamente sincronizadas — no una ligeramente antes que la otra. |
+| hint: A pinch is the bridge between arpeggios and Travis picking — thumb and finger move toward each other and meet. Listen for ONE sound, not a flam (two close hits). | Un pellizco es el puente entre los arpegios y el Travis picking — el pulgar y el dedo se mueven uno hacia el otro y se encuentran. Escucha UN solo sonido, no un "flam" (dos golpes muy cercanos). |
+| stuck: Pluck the bass and the treble separately first, slowly, then bring them closer until they land together. | Pulsa el bajo y la aguda por separado primero, despacio, y luego acércalos hasta que caigan juntos. |
+| levelUp: Pinch on beats 1 & 3 and fill beats 2 & 4 with a single i-pluck on the B string — that's the Travis groove (its steady rhythmic feel) starting to form. | Pellizca en los tiempos 1 y 3 y rellena los tiempos 2 y 4 con una sola pulsación de i en la cuerda B — así empieza a formarse el groove del Travis picking (su sensación rítmica constante). |
+
+**Station C — Try Travis picking**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 4 — Travis Thumb: warm up Travis picking on C — thumb alternating the A string (beats 1 & 3) and G string (beats 2 & 4), thumb-only at 60 BPM. Notice Travis reassigns your fingers on purpose: the thumb now claims the G string too, and the i finger takes the B — a deliberate break from Set 1's one-finger-per-string rule. You've got it when: a steady, even alternating thumb — then add an i-pluck on the B string on each "+". | Reto 4 — Pulgar Travis: calienta el Travis picking en C — pulgar alternando entre la cuerda La (tiempos 1 y 3) y la cuerda G (tiempos 2 y 4), solo el pulgar a 60 BPM. Fíjate que Travis reasigna tus dedos a propósito: el pulgar ahora también reclama la cuerda G, y el dedo i toma la B — una ruptura deliberada de la regla de un-dedo-por-cuerda de la Unidad 1. Lo tienes cuando: un pulgar alternante constante y parejo — y luego agrega una pulsación de i en la cuerda B en cada "+". |
+| hint: Just the thumb! Once that's steady, add an i-pluck on the B string on the "+" of each beat. Travis picking adds fingers ON TOP of an already-grooving thumb. | ¡Solo el pulgar! Una vez que esté estable, agrega una pulsación de i en la cuerda B en el "+" de cada tiempo. El Travis picking agrega dedos ENCIMA de un pulgar que ya tiene groove. |
+| stuck: Thumb only, no fingers, as slow as you need — get the alternating bass rock-steady before adding anything on top. | Solo el pulgar, sin dedos, tan despacio como necesites — logra que el bajo alternante sea firme como una roca antes de agregar algo encima. |
+| levelUp: Add the i-pluck on every "+", or carry the alternating thumb through a C → Am change without it stumbling. | Agrega la pulsación de i en cada "+", o lleva el pulgar alternante a través de un cambio C → Am sin que tropiece. |
+
+**Station C — Take It to a Song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge — Let It Be, fingerpicked: play the four-chord verse — C · G · Am · F — with the 6-note pattern over each chord, one bar each at 60 BPM. Thumb roots: C and Am on the A string, G on the low E, F on the D string. You've got it when: a full verse with the pattern unbroken — the same song you strummed in Modules 5 and 6, now a lullaby. Song Journey: the fingerstyle arrangement. | Reto — Let It Be, con fingerpicking: toca la estrofa de cuatro acordes — C · G · Am · F — con el patrón de 6 notas sobre cada acorde, un compás cada uno a 60 BPM. Raíces del pulgar: C y Am en la cuerda La, G en la Mi grave, F en la cuerda Re. Lo tienes cuando: una estrofa completa con el patrón sin interrupciones — la misma canción que rasgueaste en los Módulos 5 y 6, ahora una canción de cuna. Recorrido de la canción: el arreglo fingerstyle. |
+| hint: Anticipate like the second lesson video showed you: the fretting hand starts moving on the pattern's 6th note, so beat 1 always lands ready. | Anticipa como te mostró el segundo video de la lección: la mano de trastear empieza a moverse en la 6ª nota del patrón, así que el tiempo 1 siempre cae listo. |
+| stuck: Strum each chord once to check it rings, then loop just C → G — the only change where the thumb crosses to the low E. | Rasguea cada acorde una vez para revisar que suene, y luego repite solo C → G — el único cambio donde el pulgar cruza hacia la Mi grave. |
+| levelUp: Add a pinch (p + a together) on beat 1 of each chord and hear the verse bloom, or sing it over your own picking. | Agrega un pellizco (p + a juntos) en el tiempo 1 de cada acorde y escucha cómo florece la estrofa, o cántala sobre tu propio punteo. |
+| tab caption: "Let It Be" — fingerstyle bass roots · C · G · Am · F · one bar each · 60 BPM | "Let It Be" — raíces graves de fingerstyle · C · G · Am · F · un compás cada uno · 60 BPM |
+
+**Station C — Perform a fingerpicked song**
+
+| English | Spanish |
+|---|---|
+| text: Challenge 5 — Perform It (your assessment piece — try it!): pick one song — "the cure", "Hallelujah" (from Module 5's song list), "Let It Be" (verse), or a choice-list song — and play it through 3 times without stopping, even with mistakes. No score — practice the recovery; keep going no matter what. | Reto 5 — Interprétala (tu pieza de evaluación — ¡pruébalo!): elige una canción — "the cure", "Hallelujah" (de la lista de canciones del Módulo 5), "Let It Be" (estrofa), o una canción de la lista de elección — y tócala completa 3 veces sin detenerte, incluso con errores. Sin puntaje — practica la recuperación; sigue adelante pase lo que pase. |
+| hint: Mistakes are normal — stopping is what makes them sound bad, so keep going and practice the recovery. No one to play for? Record yourself on your phone or device and watch it back — the playback shows you exactly where the pattern broke. | Los errores son normales — detenerte es lo que los hace sonar mal, así que sigue adelante y practica la recuperación. ¿No tienes a nadie para quien tocar? Grábate en tu teléfono o dispositivo y vuelve a verlo — la grabación te muestra exactamente dónde se rompió el patrón. |
+| stuck: Pick the shortest, slowest song you know (Hallelujah is forgiving) and play just the verse — finishing matters more than difficulty. | Elige la canción más corta y lenta que conozcas (Hallelujah es indulgente) y toca solo la estrofa — terminar importa más que la dificultad. |
+| levelUp: Perform standing up, or play it for family or a friend and keep going through any mistake. | Interprétala de pie, o tócala para tu familia o un amigo y sigue adelante a través de cualquier error. |
+
+**Station C — Station Wrap-Up**
+
+| English | Spanish |
+|---|---|
+| text: You've reached the end of the first half of the course — what fingerpicking skill are you proudest of, and what's the one song you want to keep working on after this module? Write it below. | Has llegado al final de la primera mitad del curso — ¿de cuál destreza de fingerpicking estás más orgulloso, y cuál es la única canción que quieres seguir trabajando después de este módulo? Escríbelo abajo. |
+| response placeholder: e.g. proud of clean arpeggios; want to keep working on Blackbird | p. ej. orgulloso de mis arpegios limpios; quiero seguir trabajando en Blackbird |
+
+**Set 3 — Skills**
+
+| English | Spanish |
+|---|---|
+| m8w3-s1 text: Fingerpick a 4-chord progression with the pattern unbroken | Tocar con fingerpicking una progresión de 4 acordes con el patrón sin interrupciones |
+| m8w3-s1 gotItWhen: you can play Am–C–D–F (or another 4-chord progression) with the 6-note arpeggio over each chord, and the pattern never breaks at a chord change. | puedes tocar Am–C–D–F (u otra progresión de 4 acordes) con el arpegio de 6 notas sobre cada acorde, y el patrón nunca se rompe en un cambio de acorde. |
+| m8w3-s1 practice label: Am · C · D · F bass roots | Raíces graves Am · C · D · F |
+| m8w3-s2 text: Demonstrate Travis picking — thumb alternates between two bass strings | Demostrar el Travis picking — el pulgar alterna entre dos cuerdas graves |
+| m8w3-s2 gotItWhen: your thumb plays the root of the chord on beats 1 and 3, and a different bass string on beats 2 and 4 — steadily, for at least 4 bars. | tu pulgar toca la raíz del acorde en los tiempos 1 y 3, y una cuerda grave distinta en los tiempos 2 y 4 — de forma constante, durante al menos 4 compases. |
+| m8w3-s2 practice prompt: In Travis picking on a C major chord, your thumb might alternate between which two strings? | En el Travis picking sobre un acorde de C mayor, ¿tu pulgar podría alternar entre cuáles dos cuerdas? |
+| m8w3-s2 practice choices: B string and high e / A string (root C) and G string / High e and G string / Low E and high e | La cuerda B y la mi aguda / La cuerda La (raíz de C) y la cuerda G / La mi aguda y la cuerda G / La Mi grave y la mi aguda |
+| m8w3-s3 text: Keep the picking pattern steady through a chord change | Mantener el patrón de punteo estable a través de un cambio de acorde |
+| m8w3-s3 gotItWhen: when the chord changes mid-song, you don't miss a single note in the picking pattern — the fretting hand catches up, but the picking pattern stays exact. | cuando el acorde cambia a mitad de la canción, no te pierdes ni una sola nota del patrón de punteo — la mano de trastear se pone al día, pero el patrón de punteo se mantiene exacto. |
+| m8w3-s4 text: Anticipate the next chord by moving the fretting hand on the last note of the bar | Anticipar el siguiente acorde moviendo la mano de trastear en la última nota del compás |
+| m8w3-s4 gotItWhen: your fretting hand starts repositioning for the next chord BEFORE the current bar ends — by the time the new bar starts, you're ready. | tu mano de trastear empieza a reposicionarse para el siguiente acorde ANTES de que termine el compás actual — para cuando empieza el nuevo compás, ya estás listo. |
+| m8w3-s4 practice prompt: When should your FRETTING hand start moving toward the next chord? | ¿Cuándo debería tu mano de TRASTEAR empezar a moverse hacia el siguiente acorde? |
+| m8w3-s4 practice choices: On the first beat of the new bar / On the LAST note of the current bar — anticipate / Halfway through the current bar / Never — wait for the change | En el primer tiempo del nuevo compás / En la ÚLTIMA nota del compás actual — anticipa / A la mitad del compás actual / Nunca — espera al cambio |
+| m8w3-s5 text: Play a full verse of a fingerpicked song from start to finish | Tocar una estrofa completa de una canción con fingerpicking de principio a fin |
+| m8w3-s5 gotItWhen: you can fingerpick through a complete verse of "House of the Rising Sun" or "Hallelujah" (from Module 5's song list) without stopping — mistakes ok, but you keep going. | puedes tocar con fingerpicking una estrofa completa de "House of the Rising Sun" o "Hallelujah" (de la lista de canciones del Módulo 5) sin detenerte — los errores están bien, pero sigues adelante. |
+| m8w3-s6 text: Perform a fingerpicked song for an audience (family, a friend, or a recording you share) | Interpretar una canción con fingerpicking para una audiencia (familia, un amigo, o una grabación que compartas) |
+| m8w3-s6 gotItWhen: you can perform your chosen song for someone — in person or on a recording you share — all the way through, with fingerpicking, and recover from any mistakes without breaking down. | puedes interpretar tu canción elegida para alguien — en persona o en una grabación que compartas — de principio a fin, con fingerpicking, y recuperarte de cualquier error sin desmoronarte. |
+
+### Module-level Songs
+
+MODULE_SONGS[8] meta fields (song title shown for reference, not itself translated on the site).
+
+| English | Spanish |
+|---|---|
+| "the cure" — Olivia Rodrigo — meta: Fingerpick the verse for a soft feel · Am–C–Dm–F | Toca la estrofa con fingerpicking para una sensación suave · Am–C–Dm–F |
+| "Let It Be" — The Beatles — meta: Fingerpick the verse · C–G–Am–F | Toca la estrofa con fingerpicking · C–G–Am–F |
+| "House of the Rising Sun" — The Animals — meta: Am–C–D–F–Am–C–E–E · the classic fingerpicked song | Am–C–D–F–Am–C–E–E · la canción clásica de fingerpicking |
+| "Sailor Song" — Gigi Perez — meta: Fingerpicked verse · capo IV (G-shapes) | Estrofa con fingerpicking · capo en el traste 4 (formas de G) |
+| "Blackbird" — The Beatles — meta: Advanced fingerpicking · course capstone challenge | Fingerpicking avanzado · reto final del curso |
+| "Tu Boda" — Oscar Maydon × Fuerza Regida — meta: Sierreño-style fingerpicking | Fingerpicking estilo sierreño |
+| "Just Like Heaven" — The Cure — meta: Iconic arpeggiated intro riff — dreamy chord-picking | Riff de intro arpegiado e icónico — punteo de acordes soñador |
+
+### Module Review
+
+| English | Spanish |
+|---|---|
+| module: Finger Picking | Fingerpicking |
+| skill mr8-s1: I can hold a relaxed fingerpicking hand — wrist arched, fingers curved — for 30 seconds without it collapsing flat | Puedo mantener una mano de fingerpicking relajada — muñeca arqueada, dedos curvados — durante 30 segundos sin que se aplane |
+| skill mr8-s2: I can assign p to the bass strings and i-m-a to G-B-e, and put any finger on its string without looking | Puedo asignar p a las cuerdas graves e i-m-a a G-B-e, y poner cualquier dedo en su cuerda sin mirar |
+| skill mr8-s3: I can pluck p-i-m-a in order on open strings at 60 BPM with even volume on every finger, including the ring (a) | Puedo pulsar p-i-m-a en orden en cuerdas al aire a 60 BPM con volumen parejo en cada dedo, incluyendo el anular (a) |
+| skill mr8-s4: I can play the 6-note p-i-m-a-m-i arpeggio from memory while holding a chord, every note ringing clean | Puedo tocar el arpegio de 6 notas p-i-m-a-m-i de memoria mientras sostengo un acorde, con cada nota sonando limpia |
+| skill mr8-s7: I can fingerpick a full 4-chord progression without the pattern breaking at any chord change | Puedo tocar con fingerpicking una progresión completa de 4 acordes sin que el patrón se rompa en ningún cambio de acorde |
+| skill mr8-s9: I can perform a full fingerpicked song start to finish, recovering from any mistake without stopping | Puedo interpretar una canción completa con fingerpicking de principio a fin, recuperándome de cualquier error sin detenerme |
+| assessItem: Fingerpick a 4-chord progression with the 6-note arpeggio, keeping the pattern unbroken through every chord change | Toca con fingerpicking una progresión de 4 acordes con el arpegio de 6 notas, manteniendo el patrón sin interrupciones en cada cambio de acorde |
+| assessItem: Perform one full fingerpicked song from the song list start to finish, recovering from any mistakes without stopping | Interpreta una canción completa con fingerpicking de la lista de canciones de principio a fin, recuperándote de cualquier error sin detenerte |
+| forward: You've got the full first-half toolkit — notes, chords, power chords, lead, barre, strumming, and fingerpicking. <strong>The second half of the course goes deeper:</strong> Module 9 finishes the fretboard (all six strings) and teaches you to write your own TAB — the first step toward learning any song on your own. | Ya tienes el kit de herramientas completo de la primera mitad — notas, acordes, power chords, solos, cejilla, rasgueo y fingerpicking. <strong>La segunda mitad del curso profundiza más:</strong> el Módulo 9 termina el mástil (las seis cuerdas) y te enseña a escribir tu propio TAB — el primer paso hacia aprender cualquier canción por tu cuenta. |

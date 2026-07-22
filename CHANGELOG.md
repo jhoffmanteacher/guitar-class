@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-22 — Modules 7 and 8 are now in real, hand-written Spanish
+
+### Added
+- **Módulos 7 y 8 are now fully hand-translated into Spanish** — TAB
+  notation, barre chords, and fingerpicking all read like a native Spanish
+  lesson now, not a machine translation. Modules 1–8 are done; Modules
+  9–12 are still machine-translated for now.
+
 ## 2026-07-22 — Modules 4, 5, and 6 are now in real, hand-written Spanish
 
 ### Added

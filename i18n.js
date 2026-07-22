@@ -94,6 +94,18 @@
        chop (muted punchy reggae upstroke)  → picoteo (noun) / picar (verb)
        groove (steady rhythmic feel)        → groove (kept — same loanword
                                                treatment as riff/vamp/chug)
+       double-stop (two notes played together) → doble nota / dobles notas
+       sub-barre (ring-finger mini-barre inside a → sub-cejilla
+         full barre shape, e.g. strings 4-3-2)
+       fingerpicking / fingerstyle          → fingerpicking / fingerstyle
+                                               (kept — same loanword
+                                               treatment as riff/vamp/chug)
+       Travis picking (named technique)     → Travis picking (kept as-is)
+       pinch (thumb+finger plucked together) → pellizco / pellizcar
+       alternating bass                     → bajo alternante
+       rest stroke / free stroke (classical → apoyando (toque de apoyo) /
+         plucking technique)                  tirando (toque libre) — the
+                                               authentic Spanish-origin terms
   */
   const I18N = {
     // ── Header ──

@@ -153,8 +153,31 @@
       of sync with `i18n.js` (sessions 2's new terms were added to the code
       comment but never mirrored to the doc table) — caught and backfilled
       both sessions' worth of terms in the same pass.
-      **Next session:** translate 1–2 more modules (Module 7 next — first
-      one with real barre chords, ties into Module 5's cejilla intro), or
+      **Session 4 (2026-07-22): Modules 7 & 8, done & browser-verified —
+      same 2-module translate→verify→backfill pipeline as session 3.**
+      Module 7 (TAB Notation and Barre Chords) uses "barre" 120+ times —
+      100% landed as "cejilla" per a scripted grep-only-the-_es-fields
+      check the translator ran itself. New terms: double-stop → doble
+      nota/dobles notas, sub-barre (ring-finger mini-barre inside a full
+      barre shape) → sub-cejilla. Module 8 (Finger Picking) introduced a
+      full new vocabulary cluster: fingerpicking/fingerstyle kept as
+      loanwords (matching riff/vamp/chug/groove), Travis picking kept as a
+      named technique, pinch → pellizco/pellizcar, alternating bass → bajo
+      alternante, rest stroke/free stroke → apoyando (toque de apoyo) /
+      tirando (toque libre) — the real classical-guitar Spanish terms for
+      those techniques, not a coinage. Both verify passes were solid (3
+      issues found+fixed in Module 7, 0 in Module 8) but the coordinator's
+      own independent sweep still caught one real miss the module-8 verify
+      pass didn't: `forward_es` had "power chords" left untranslated
+      instead of the established "acordes de potencia" — module 7's verify
+      agent happened to notice it in passing (reading module-8.js for
+      context) and flagged it for the coordinator, since fixing another
+      module's file was outside its own scope. Lesson: even a same-module
+      verify pass can miss something a cross-module read catches — worth
+      an explicit coordinator-level English-leak sweep across all touched
+      files at the end of every session, not just trusting each module's
+      own verify pass in isolation.
+      **Next session:** translate 1–2 more modules (Module 9 next), or
       move to tabs/ + games once all twelve are done — see CLAUDE.md's
       per-session workflow.
 - [ ] **Custom backing tracks for the six journey-page play-alongs — Jonathan
