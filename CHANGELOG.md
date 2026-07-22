@@ -17,14 +17,15 @@ see `WORKFLOW.md` and the git commit log.
 ## 2026-07-22 — Backing tracks now have a 🐢 Slow tier to step down from record speed
 
 ### Added
-- **Sweet Child O' Mine, "the cure," and All Along the Watchtower's jam
-  tracks now have a 🐢 Slow toggle** alongside the existing 🎵 Metronome
-  toggle — a stepping-stone tempo between the 60 BPM teaching layers and
-  full record speed (100/120/90 BPM vs. 125/144/115). The two toggles work
-  independently, and switching Slow mid-song rescales playback position so
-  you land on the same musical spot instead of the same second. Other Song
-  Journey pages are unaffected — the toggle only appears where a slow file
-  is wired up.
+- **Sweet Child O' Mine, "the cure," All Along the Watchtower, and Seven
+  Nation Army's jam tracks now have a 🐢 Slow toggle** alongside the
+  existing 🎵 Metronome toggle — a stepping-stone tempo between the 60 BPM
+  teaching layers and full record speed (100/120/90/100 BPM vs.
+  125/144/115/123). The two toggles work independently, and switching Slow
+  mid-song rescales playback position so you land on the same musical spot
+  instead of the same second. This completes the slow-tier program — Luna
+  and Let It Be intentionally don't get one, since their records already
+  sit at practice pace.
 
 ## 2026-07-22 — Every module is now in real, hand-written Spanish
 
