@@ -212,7 +212,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'In TAB, "5h7" tells you to:',
           choices: ['Pick the 5th fret note, then HAMMER your finger onto the 7th fret without re-picking', 'Pick both notes hard', 'Hold the 5th fret for 7 beats', 'Skip to the 7th fret'], answer: 0 } },
       { id: 'm7w1-s4', text: 'Play the "Smoke on the Water" main riff in time',
-        gotItWhen: 'you can play the full riff at 70 BPM with both notes ringing together cleanly — no buzzing, no missed double-stops.',
+        gotItWhen: 'you can play the full riff at 70 BPM with both notes ringing together cleanly — no buzzing, no missed double-stops. (This is a straight-quarter-note teaching count — the record\'s actual rhythm has more punch and space than that.)',
         practice: { type: 'playSeq', label: '"Smoke on the Water" — D string melody only', bpm: 70,
           notes: [50, 53, 55, 50, 53, 56, 55] } },
       { id: 'm7w1-s5', text: 'Play a riff that mixes single notes and double-stops from TAB',

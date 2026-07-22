@@ -1788,8 +1788,8 @@ window.addEventListener('afterprint', ()=>{
 
 /* ── Stations ── */
 function buildStations(w, stationId){
-  const stepsHtml=(steps,ns,numOffset=0)=>{
-   const curIdx = steps.findIndex((st,idx)=>completed[`${w.id}-${ns}-${idx}`]!==true);
+  const stepsHtml=(steps,ns,numOffset=0,allowCur=true)=>{
+   const curIdx = allowCur ? steps.findIndex((st,idx)=>completed[`${w.id}-${ns}-${idx}`]!==true) : -1;
    return steps.map((s,i)=>{
     const text=tf(s,'text').replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
       const safe=label.replace(/'/g,"\\'");
@@ -1927,13 +1927,19 @@ function buildStations(w, stationId){
     // deep links can address "section N, step K" without needing a card look.
     // Numbering runs continuously across sections (offset carries the running
     // total) even though storage keys stay section-local (`ns` + local `i`).
-    let numOffset = 0;
+    // Only ONE step should be open at a time across the whole station, not
+    // one per section — once an earlier section's current step has claimed
+    // it, every later section (even ones with their own incomplete steps)
+    // stays fully collapsed until the student works down to it.
+    let numOffset = 0, foundCur = false;
     return reminder + real.map((sec,gi)=>{
     const ns = `${baseNs}-sec${gi}`;
+    const allowCur = !foundCur;
     const html = `<div class="stp-sec">
       <div class="stp-sec-label">${tf(sec,'title')}</div>
-      <ul class="steps">${stepsHtml(sec.steps, ns, numOffset)}</ul>
+      <ul class="steps">${stepsHtml(sec.steps, ns, numOffset, allowCur)}</ul>
     </div>`;
+    if(allowCur && sec.steps.some((st,idx)=>completed[`${w.id}-${ns}-${idx}`]!==true)) foundCur = true;
     numOffset += sec.steps.length;
     return html;
   }).join('');

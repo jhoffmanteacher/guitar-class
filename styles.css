@@ -1300,14 +1300,10 @@ body.games-open{overflow:hidden}
 .rn-token.miss .rn-token-fret{color:var(--text3)}
 .rn-unlock{font-size:0.9375rem;font-weight:700;color:var(--green-text);background:var(--green-bg);border:1px solid var(--green-text);border-radius:8px;padding:8px 12px;margin:8px 0;display:inline-block}
 
-/* ── Riff Runner: Wait Mode (guitar, play-along at tempo) ── */
+/* ── Riff Runner: Wait Mode (guitar, untimed note-by-note play-along) ── */
 .rn-modes{margin-bottom:2px}
 .rnw-track{margin-bottom:8px}
-#rnw-beats{justify-content:center;margin:2px 0 6px}
 .rnw-live{display:inline-flex;align-items:center;gap:6px;color:var(--purple-accent);font-weight:700}
-/* Hit line flashes on each metronome beat — the tempo made visible. */
-.rnw-track .rn-hitline{transition:background .09s ease-out,box-shadow .09s ease-out}
-.rnw-track.rnw-beat .rn-hitline{background:var(--green-text);box-shadow:0 0 8px 1px var(--green-text)}
 .rnw-token{transition:transform .28s cubic-bezier(.22,.61,.36,1),border-color .2s,background .2s,opacity .35s}
 .rnw-token.rnw-cur{border-color:var(--purple-accent);border-width:3px;background:var(--bg);box-shadow:0 0 0 4px color-mix(in srgb,var(--purple-accent) 22%,transparent);animation:rnw-pulse 1.1s ease-in-out infinite}
 .rnw-token.rnw-cur .rn-token-fret{color:var(--purple-accent)}

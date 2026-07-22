@@ -365,7 +365,27 @@ SETS.push(
                 stuck: 'Loop Am → C until your fretting hand lands on fret 3 without looking — the thumb just keeps plucking the A string — then add Dm and F as their own pair.',
                 levelUp: 'Hum the melody over your own picking — this is the actual sound of the record.',
                 skills: [4, 6],
-                playSeq: { label: '"the cure" verse bass roots — Am · C · Dm · F', bpm: 60, notes: [45, 48, 50, 53] },
+                tab: {
+                  caption: '"the cure" — fingerstyle bass roots · Am · C · Dm · F · one bar each · 60 BPM',
+                  notes: [
+                    { string: 'A', fret: 0, note: 'A', midi: 45 },
+                    { string: 'A', fret: 0, note: 'A', midi: 45 },
+                    { string: 'A', fret: 0, note: 'A', midi: 45 },
+                    { string: 'A', fret: 0, note: 'A', midi: 45 },
+                    { string: 'A', fret: 3, note: 'C', midi: 48 },
+                    { string: 'A', fret: 3, note: 'C', midi: 48 },
+                    { string: 'A', fret: 3, note: 'C', midi: 48 },
+                    { string: 'A', fret: 3, note: 'C', midi: 48 },
+                    { string: 'D', fret: 0, note: 'D', midi: 50 },
+                    { string: 'D', fret: 0, note: 'D', midi: 50 },
+                    { string: 'D', fret: 0, note: 'D', midi: 50 },
+                    { string: 'D', fret: 0, note: 'D', midi: 50 },
+                    { string: 'D', fret: 3, note: 'F', midi: 53 },
+                    { string: 'D', fret: 3, note: 'F', midi: 53 },
+                    { string: 'D', fret: 3, note: 'F', midi: 53 },
+                    { string: 'D', fret: 3, note: 'F', midi: 53 }
+                  ]
+                },
                 response: { type: 'short', prompt: 'Which change broke the pattern more — Am→C or C→Dm?', placeholder: 'e.g. C→Dm — the thumb overshoots the D string' }
               }
             ]
@@ -570,7 +590,27 @@ SETS.push(
                 stuck: 'Strum each chord once to check it rings, then loop just C → G — the only change where the thumb crosses to the low E.',
                 levelUp: 'Add a pinch (p + a together) on beat 1 of each chord and hear the verse bloom, or sing it over your own picking.',
                 skills: [1, 3],
-                playSeq: { label: '"Let It Be" verse bass roots — C · G · Am · F', bpm: 60, notes: [48, 43, 45, 53] }
+                tab: {
+                  caption: '"Let It Be" — fingerstyle bass roots · C · G · Am · F · one bar each · 60 BPM',
+                  notes: [
+                    { string: 'A', fret: 3, note: 'C', midi: 48 },
+                    { string: 'A', fret: 3, note: 'C', midi: 48 },
+                    { string: 'A', fret: 3, note: 'C', midi: 48 },
+                    { string: 'A', fret: 3, note: 'C', midi: 48 },
+                    { string: 'E', fret: 3, note: 'G', midi: 43 },
+                    { string: 'E', fret: 3, note: 'G', midi: 43 },
+                    { string: 'E', fret: 3, note: 'G', midi: 43 },
+                    { string: 'E', fret: 3, note: 'G', midi: 43 },
+                    { string: 'A', fret: 0, note: 'A', midi: 45 },
+                    { string: 'A', fret: 0, note: 'A', midi: 45 },
+                    { string: 'A', fret: 0, note: 'A', midi: 45 },
+                    { string: 'A', fret: 0, note: 'A', midi: 45 },
+                    { string: 'D', fret: 3, note: 'F', midi: 53 },
+                    { string: 'D', fret: 3, note: 'F', midi: 53 },
+                    { string: 'D', fret: 3, note: 'F', midi: 53 },
+                    { string: 'D', fret: 3, note: 'F', midi: 53 }
+                  ]
+                }
               }
             ]
           },

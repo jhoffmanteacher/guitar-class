@@ -418,10 +418,14 @@ function coachRenderListening(){
      <button type="button" class="tp-btn coach-stop" onclick="coachFinish()">&#x25A0; I&rsquo;m done</button>`;
 }
 
-/* Big current-chord readout for multi-chord checks (same pattern as Change
-   Up): the player needs to see the NEXT chord before its beat arrives — the
-   chip strip alone only reveals a change the instant it's due, which makes
-   every switch late by reaction time. */
+/* Big current/next readout — same pattern as Change Up: the player needs to
+   see what's coming before its beat arrives, or the chip strip alone only
+   reveals a change the instant it's due, which makes every hit late by
+   reaction time (visual cues need lead time the way a metronome beep
+   doesn't — you can't react to a beep in advance, but you CAN read an
+   upcoming label). Covers both modes: chords show the chord name, melody
+   shows the note name — melody didn't have this until a real-guitar test
+   found the chip strip alone made it hard to play on the beat (2026-07-22). */
 /* Chord diagrams for the coach card — visible from the count-in on, so the
    fretting hand can set up the first shape before beat 1 (same reason the
    melody TAB stays up during the count-in). */
@@ -433,9 +437,16 @@ function coachChordsHtml(curName){
 }
 
 function coachNowHtml(){
-  if (coach.mode !== 'chords' || !coach.slots.some(s => s.isChange)) return '';
-  return `<div class="cc-now"><div class="cc-chord" id="coach-chord">${escHtml(coach.slots[0].chordName)}</div>` +
-         `<div class="cc-next" id="coach-next">next: ${escHtml(coachNextChord(0) || '')}</div></div>`;
+  if (coach.mode === 'chords'){
+    if (!coach.slots.some(s => s.isChange)) return '';
+    return `<div class="cc-now"><div class="cc-chord" id="coach-chord">${escHtml(coach.slots[0].chordName)}</div>` +
+           `<div class="cc-next" id="coach-next">next: ${escHtml(coachNextChord(0) || '')}</div></div>`;
+  }
+  if (coach.mode === 'melody' && coach.slots.length > 1){
+    return `<div class="cc-now"><div class="cc-chord" id="coach-chord">${escHtml(coach.slots[0].label)}</div>` +
+           `<div class="cc-next" id="coach-next">next: ${escHtml(coach.slots[1] ? coach.slots[1].label : '')}</div></div>`;
+  }
+  return '';
 }
 
 function coachNextChord(cur){
@@ -532,17 +543,20 @@ function coachLoop(){
       if (el) el.classList.add('now');
       const chordEl = document.getElementById('coach-chord');
       if (chordEl){
-        const name = coach.slots[cur].chordName;
+        const name = coach.mode === 'chords' ? coach.slots[cur].chordName : coach.slots[cur].label;
         if (chordEl.textContent !== name){
           chordEl.textContent = name;
-          coach.card.querySelectorAll('.cc-dia').forEach(el => el.classList.remove('cur'));
-          const dia = document.getElementById('coach-dia-' + name);
-          if (dia) dia.classList.add('cur');
+          if (coach.mode === 'chords'){
+            coach.card.querySelectorAll('.cc-dia').forEach(el => el.classList.remove('cur'));
+            const dia = document.getElementById('coach-dia-' + name);
+            if (dia) dia.classList.add('cur');
+          }
         }
         const nextEl = document.getElementById('coach-next');
         if (nextEl){
-          const nx = coachNextChord(cur);
-          nextEl.textContent = nx ? 'next: ' + nx : 'last chord — let the sound keep ringing';
+          const nx = coach.mode === 'chords' ? coachNextChord(cur) : (coach.slots[cur + 1] ? coach.slots[cur + 1].label : null);
+          nextEl.textContent = nx ? 'next: ' + nx
+            : (coach.mode === 'chords' ? 'last chord — let the sound keep ringing' : 'last note — let it ring');
         }
       }
     }
@@ -3798,7 +3812,7 @@ const RN_TIERS = [
 const RN_SONGS = [
   { id: 'sna', title: 'Seven Nation Army',
     sub: 'The main riff — seven notes, all on the thick low E string.',
-    hint: 'One note per beat, then one beat of rest at the end of each lap. Count 1-2-3-4 with the click.',
+    hint: 'One note per beat, then one beat of rest at the end of each lap. Count 1-2-3-4 with the click. (This is the straight-quarter-note teaching version, to make it easy to count — the record swings it looser than that.)',
     bpm: 60, bpb: 4, loopBeats: 8, laps: 4,
     notes: [[6,7,0,'B'],[6,7,1,'B'],[6,10,2,'D'],[6,7,3,'B'],[6,5,4,'A'],[6,3,5,'G'],[6,2,6,'F#']] },
   { id: 'watchtower', title: 'All Along the Watchtower',
@@ -3825,7 +3839,6 @@ function rnStop(){
   document.removeEventListener('keydown', rnKeydown);
   if (rn){
     if (rn.sched){ clearInterval(rn.sched); rn.sched = null; }
-    if (rn.wait && rn.wait.clickTimer){ clearInterval(rn.wait.clickTimer); rn.wait.clickTimer = null; }
     rnHearStop();
     if (rn.micOn){ rn.micOn = false; coachMicOff(); }   // Wait Mode owned the mic
     (rn.timeouts || []).forEach(clearTimeout);
@@ -3968,14 +3981,8 @@ function rnRenderReady(msg){
      ${anyLocked ? `<div class="coach-tip rn-center">Score 90% or better at one speed level to unlock the next.</div>` : ''}
      ${b ? `<div class="coach-tip rn-center">Best: ${b.acc}%${b.tier >= 0 ? ' &middot; cleared ' + rnTierName(b.tier) : ''}.</div>` : ''}
      <div class="coach-tip rn-center">Keys: 1 = thin high e (top line) &hellip; 6 = thick low E (bottom line). On a phone, tap the string&rsquo;s line instead. 4 clicks count you in.</div>`;
-  /* Guitar mode uses the same speed pills, but every one is unlocked — they set
-     the play-along metronome tempo (Slow → full song speed). */
-  const gpills = RN_TIERS.map((tr, t) =>
-    `<button type="button" class="ts-btn${t === rn.tier ? ' active' : ''}" onclick="rnPickTier(${t})">${tr.label} &middot; ${rnTierBpm(song, t)} BPM</button>`
-  ).join('');
   const guitarUi =
-    `<div class="cc-group"><div class="cc-group-title">Play-along speed</div><div class="fret-levels">${gpills}</div></div>
-     <div class="coach-tip rn-center">&#x1F3B8; <strong>Wait Mode:</strong> a metronome counts you in, then you play each note in time with the click. Fall behind and the tab just <em>waits</em> for you before moving on — so start slow and build up to full speed. Play into your device&rsquo;s mic somewhere quiet.</div>`;
+    `<div class="coach-tip rn-center">&#x1F3B8; <strong>Wait Mode:</strong> play the riff&rsquo;s notes in order, at your own pace — no clock, no rush. The mic listens for the right note before the tab moves on to the next one. Play into your device&rsquo;s mic somewhere quiet.</div>`;
   body.innerHTML =
     (msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '') +
     `<div class="rn-ready-title">${escHtml(song.title)}</div>
@@ -4496,18 +4503,19 @@ function rnAgain(d){
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   RIFF RUNNER — WAIT MODE (guitar). Play the riff in time on a real
-   guitar: a metronome counts you in at the speed you pick (Slow → full
-   song tempo), then you play each note with the click. It's a WAIT-with-
-   safety-net — the mic must HEAR the right pitch before the tab moves on,
-   so if you fall behind the tab just holds the note and waits, then you
-   carry on. Build up from slow to full speed with no penalty for lagging.
-   Idea from PickHero's Wait Mode. Reuses the coach's mic pipeline +
-   trimmed-YIN detector (coachDetectPitch, the same one Note Hunt grades
-   single notes with) for listening, and the timed game's audio-clock
-   click scheduler for the metronome. Practice aid — no score, no unlocks;
-   the timed Keys game still owns scoring and progression. One pass through
-   the riff's notes.
+   RIFF RUNNER — WAIT MODE (guitar). Play the riff on a real guitar, one
+   note at a time, at your own pace — no clock. The mic must HEAR the
+   right pitch before the tab moves to the next note, so there's nothing
+   to fall behind on. (Dropped the metronome/count-in this mode shipped
+   with originally — real-guitar testing found it confusing: the click
+   implied a fixed rhythm to match, but the tab was already waiting on
+   pitch, not time, so the two signals fought each other. The timed Keys
+   game is where tempo/rhythm practice lives.) Idea from PickHero's Wait
+   Mode. Reuses the coach's mic pipeline + trimmed-YIN detector
+   (coachDetectPitch, the same one Note Hunt grades single notes with)
+   for listening. Practice aid — no score, no unlocks; the timed Keys
+   game still owns scoring and progression. One pass through the riff's
+   notes.
    ════════════════════════════════════════════════════════════════════ */
 
 /* Friendly spoken name for a string, e.g. 6 → "low E", 1 → "high e". */
@@ -4539,57 +4547,21 @@ async function rnwStart(){
     rnRenderReady('Paused — this tab went to the background, so the mic switched off. Start again when you’re back.');
     return;
   }
-  /* Output audio clock for the metronome (separate from the mic's coachCtx).
-     Resume it before we capture the beat epoch — a suspended clock would put
-     the count-in in the past. */
-  if (typeof getAudioCtx !== 'function'){ s.phase = 'ready'; rnRenderReady('Sound isn’t available in this browser, and Wait Mode needs the metronome.'); return; }
-  const ctx = getAudioCtx();
-  if (ctx.state === 'suspended'){ try { await ctx.resume(); } catch(e){} }
-  if (rn !== s || s.phase !== 'wait' || !rnBody()){ coachReleaseMicIfIdle(); return; }
   stopAllDemoAudio();
   s.micOn = true;
-  s.ctx = ctx;
   window.coachMicLive = true;
-  const bpm = rnTierBpm(song, s.tier);
-  const spb = 60 / bpm;                       // seconds per beat
   /* One pass through the riff's notes (no laps — laps are the timed groove).
-     beatPos = each note's beat within the pass, so the tab can space notes by
-     their rhythm and the metronome lines up with the reading. */
+     beat = each note's beat within the pass, kept only so the tab can space
+     notes visually like the riff's rhythm shape — no clock enforces it. */
   s.wait = {
     notes: song.notes.map(nt => ({ string: nt[0], fret: nt[1], label: nt[3] || '',
       midi: STRING_OPEN_MIDI[nt[0]] + nt[1], beat: nt[2], result: null })),
     cur: 0, tries: 0, firstTry: 0, readings: [],
-    needSilence: false, cooldownUntil: 0, frameNo: 0, hint: '', heard: '',
-    bpm, spb, bpb: song.bpb,
-    startAudio: ctx.currentTime + 0.35,        // count-in click 1 (beat 0)
-    playAudio: ctx.currentTime + 0.35 + 4 * spb,  // note 1 is due here (after 4 count-in beats)
-    listening: false, nextClick: 0, lastBeat: -1, clickTimer: null
+    needSilence: false, cooldownUntil: 0, frameNo: 0, hint: '', heard: ''
   };
   rnwRender();
-  /* Steady metronome: schedule ahead on the audio clock so it doesn't jitter. */
-  s.wait.clickTimer = setInterval(rnwClickSchedule, 25);
-  rnwClickSchedule();
   if (rnRaf) cancelAnimationFrame(rnRaf);
   rnwLoop();
-}
-
-/* Lookahead metronome (same "two clocks" pattern as the timed game): every
-   ~25ms, post any click due in the next ~150ms. 4 count-in beats (4th accented
-   = "go"), then a steady pulse with beat 1 of each bar accented. Runs until the
-   riff is done or the student stops — advancing is gated on playing, so the
-   number of beats is open-ended. */
-function rnwClickSchedule(){
-  const w = rn && rn.wait;
-  if (!w || rn.phase !== 'wait' || !rn.ctx) return;
-  const horizon = rn.ctx.currentTime + 0.15;
-  while (w.nextClick < 2400){                 // soft cap; the interval is cleared on stop/finish
-    const t = w.startAudio + w.nextClick * w.spb;
-    if (t >= horizon) break;
-    const countin = w.nextClick < 4;
-    const accent = countin ? (w.nextClick === 3) : ((w.nextClick - 4) % w.bpb === 0);
-    rnClickAt(t, accent, countin);            // louder during the count-in
-    w.nextClick++;
-  }
 }
 
 function rnwRender(){
@@ -4608,10 +4580,9 @@ function rnwRender(){
   body.innerHTML =
     `<div class="sh-hud">
        <span class="sh-score">Note ${Math.min(w.cur + 1, w.notes.length)} of ${w.notes.length}</span>
-       <span class="sh-bar rnw-live" id="rnw-live">${w.bpm} BPM &middot; get ready&hellip;</span>
+       <span class="sh-bar rnw-live" id="rnw-live"><span class="coach-live-dot"></span>Play whenever you&rsquo;re ready</span>
      </div>
-     <div class="cc-beats" id="rnw-beats">${'<span class="cc-pip"></span>'.repeat(w.bpb)}</div>
-     <div class="rn-track rnw-track" id="rnw-track">${lanes.join('')}<div class="rn-hitline"></div><div class="rn-count" id="rnw-count">&nbsp;</div></div>
+     <div class="rn-track rnw-track" id="rnw-track">${lanes.join('')}<div class="rn-hitline"></div></div>
      <div class="rnw-target" id="rnw-target">
        <div class="rnw-target-note">Play <strong>${escHtml(cur.label || coachNoteName(cur.midi))}</strong></div>
        <div class="rnw-target-where">${escHtml(rnwWhere(cur))}</div>
@@ -4626,9 +4597,10 @@ function rnwRender(){
 
 /* Slide the lane so the current target sits on the purple hit line; past notes
    to its left, upcoming ones to its right. Spacing is proportional to the notes'
-   BEAT gaps, so the tab reads like the rhythm you're playing to the click — a
-   note two beats away sits twice as far as a note one beat away. Pure JS
-   transform (reduced-motion just gets no CSS transition — see the stylesheet). */
+   BEAT gaps (no clock enforces them — it's just so the tab reads like the
+   riff's rhythm shape) — a note two beats away sits twice as far as a note
+   one beat away. Pure JS transform (reduced-motion just gets no CSS
+   transition — see the stylesheet). */
 function rnwPositionTokens(animate){
   const w = rn && rn.wait;
   const track = document.getElementById('rnw-track');
@@ -4654,32 +4626,6 @@ function rnwLoop(){
   if (!coachAnalyser || !document.getElementById('rnw-track')){ rnStop(); return; }
   const w = rn.wait;
   const now = performance.now();
-
-  /* Count-in: show 1-2-3-4 on the audio clock; don't listen yet. */
-  if (!w.listening){
-    const countEl = document.getElementById('rnw-count');
-    if (rn.ctx.currentTime >= w.playAudio){
-      w.listening = true;
-      if (countEl) countEl.innerHTML = '&nbsp;';
-      const live = document.getElementById('rnw-live');
-      if (live) live.innerHTML = '<span class="coach-live-dot"></span>Play with the click!';
-    } else {
-      const b = Math.floor((rn.ctx.currentTime - w.startAudio) / w.spb);
-      if (countEl) countEl.textContent = b >= 0 && b < 4 ? String(b + 1) : ' ';
-      rnRaf = requestAnimationFrame(rnwLoop);
-      return;
-    }
-  }
-
-  /* Beat pips + hit-line pulse on each beat, so the tempo is visible as well
-     as heard while the tab waits for the next note. */
-  const beat = Math.floor((rn.ctx.currentTime - w.playAudio) / w.spb);
-  if (beat !== w.lastBeat && beat >= 0){
-    w.lastBeat = beat;
-    document.querySelectorAll('#rnw-beats .cc-pip').forEach((el, i) => el.classList.toggle('on', i === beat % w.bpb));
-    const track = document.getElementById('rnw-track');
-    if (track){ track.classList.remove('rnw-beat'); void track.offsetWidth; track.classList.add('rnw-beat'); }
-  }
 
   const rms = coachReadFrame();
   const buf = coachFrameBuf;
@@ -4773,27 +4719,23 @@ function rnwFinish(){
   if (!rn || rn.phase !== 'wait') return;
   if (rnRaf){ cancelAnimationFrame(rnRaf); rnRaf = null; }
   const w = rn.wait;
-  if (w && w.clickTimer){ clearInterval(w.clickTimer); w.clickTimer = null; }
   (rn.timeouts || []).forEach(clearTimeout);
   rn.timeouts = [];
   if (rn.micOn){ rn.micOn = false; coachMicOff(); }
   rn.phase = 'done';
-  const song = RN_SONGS[rn.songIdx];
   const played = w.notes.filter(n => n.result && n.result !== 'skip').length;
   const total = w.notes.length;
   const first = w.firstTry;
-  const atFull = rn.tier >= RN_TIERS.length - 1;
   let verdict, advice;
   if (played === total && first === total){
-    verdict = 'Every note, first try at ' + w.bpm + ' BPM — clean run.';
-    advice = atFull ? 'That’s full song tempo — you own this riff.'
-                    : 'Bump the speed up a level and play it again.';
+    verdict = 'Every note, first try — clean run through the riff.';
+    advice = 'Play it again, or open the song’s Journey page and try it on the real guitar.';
   } else if (played === total){
-    verdict = 'You played the whole riff at ' + w.bpm + ' BPM — ' + first + ' of ' + total + ' on the first try.';
-    advice = 'Run it again at this speed until it feels easy, then nudge the tempo up.';
+    verdict = 'You played the whole riff — ' + first + ' of ' + total + ' on the first try.';
+    advice = 'Run it again — first-try notes should climb each time.';
   } else {
-    verdict = 'You played ' + played + ' of ' + total + ' notes at ' + w.bpm + ' BPM.';
-    advice = 'No rush — go again, or drop to a slower speed and let the tab wait for each note.';
+    verdict = 'You played ' + played + ' of ' + total + ' notes.';
+    advice = 'No rush — go again, the tab waits for each note.';
   }
   const body = rnBody();
   if (!body) return;
@@ -4803,7 +4745,7 @@ function rnwFinish(){
        <div class="coach-crit-note">${escHtml(advice)}</div>
        <div class="coach-actions">
          <button type="button" class="coach-start" onclick="rnwAgain()">&#x21BB; Play it again</button>
-         <button type="button" class="tp-btn" onclick="rnGoReady()">&#x2699;&#xFE0F; Speed / mode</button>
+         <button type="button" class="tp-btn" onclick="rnGoReady()">&#x2699;&#xFE0F; Mode</button>
        </div>
        ${rn.songIdx < RN_SONGS.length - 1 && rnSongUnlocked(rn.songIdx + 1) ? `<button type="button" class="tp-btn" onclick="rnPick(${rn.songIdx + 1})">Next song &#x2192;</button>` : ''}
        <button type="button" class="tp-btn" onclick="rnShowSelect()">&#x2190; All songs</button>

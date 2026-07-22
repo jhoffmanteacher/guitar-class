@@ -449,8 +449,8 @@ SETS.push(
             title_es: 'Adelanto del riff de "Seven Nation Army"',
             steps: [
           {
-            text: 'Preview the "Seven Nation Army" riff: click the note names below the TAB (the little chart below — each number is a fret to press on the low E string; 0 = open) to hear how it should sound, then try just the first few notes to get the feel. You\'ll play the whole riff at the practice station. You\'ve got it when: you can match the first three notes to what you heard. This song grows with you through the whole course — <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
-            text_es: 'Adelanto del riff de "Seven Nation Army": haz clic en los nombres de las notas debajo del TAB (el pequeño diagrama de abajo — cada número es un traste que debes presionar en la cuerda Mi grave; 0 = al aire) para escuchar cómo debe sonar, y luego prueba solo las primeras notas para agarrar la sensación. Vas a tocar el riff completo en la estación de práctica. Lo tienes cuando: puedes hacer coincidir las primeras tres notas con lo que escuchaste. Esta canción crece contigo durante todo el curso — <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 1 de 5</a>.',
+            text: 'Preview the "Seven Nation Army" riff: click the note names below the TAB (the little chart below — each number is a fret to press on the low E string; 0 = open) to hear how it should sound, then try just the first few notes to get the feel. Heads up: this site teaches it as straight, even quarter notes — one per beat — to make it easy to count while you\'re learning it; the actual record swings it a bit looser than that, which you\'ll start to hear naturally once the shape feels solid. You\'ll play the whole riff at the practice station. You\'ve got it when: you can match the first three notes to what you heard. This song grows with you through the whole course — <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
+            text_es: 'Adelanto del riff de "Seven Nation Army": haz clic en los nombres de las notas debajo del TAB (el pequeño diagrama de abajo — cada número es un traste que debes presionar en la cuerda Mi grave; 0 = al aire) para escuchar cómo debe sonar, y luego prueba solo las primeras notas para agarrar la sensación. Aviso: aquí se enseña con negras rectas y parejas — una nota por pulso — para que sea fácil de contar mientras lo aprendes; la grabación original lo toca con un poco más de swing (vaivén) que eso, algo que empezarás a notar de oído en cuanto domines bien la forma. Vas a tocar el riff completo en la estación de práctica. Lo tienes cuando: puedes hacer coincidir las primeras tres notas con lo que escuchaste. Esta canción crece contigo durante todo el curso — <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 1 de 5</a>.',
             hint: 'Listen first, then match it — one note at a time. To fret a note, set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',
             hint_es: 'Escucha primero y luego iguálalo — una nota a la vez. Para trastear una nota, coloca la punta del dedo justo detrás del traste y presiona firme; si zumba, acércate un poco más al traste o presiona más fuerte.',
             stuck: 'Just the first two notes: click a note name to hear it, then find it on the low E string. Get those solid before adding the next.',
@@ -460,6 +460,7 @@ SETS.push(
             response: { type: 'short', placeholder: 'How did the riff sound, and which note was hardest to find?',
               placeholder_es: '¿Cómo sonó el riff, y qué nota fue la más difícil de encontrar?' },
             tab: {
+              bpm: 40,
               caption: '"Seven Nation Army" — main riff · Low E string · 7 notes',
               caption_es: '"Seven Nation Army" — riff principal · cuerda Mi grave · 7 notas',
               notes: [
@@ -535,6 +536,7 @@ SETS.push(
             levelUp: 'Play all 7 notes in time with a slow metronome at 60 BPM, keeping each one clean.',
             levelUp_es: 'Toca las 7 notas a tiempo con el metrónomo despacio a 60 BPM, manteniendo cada una limpia.',
             tab: {
+              bpm: 40,
               caption: '"Seven Nation Army" — main riff · Low E string · 7 notes',
               caption_es: '"Seven Nation Army" — riff principal · cuerda Mi grave · 7 notas',
               notes: [
