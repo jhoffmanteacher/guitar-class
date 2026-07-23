@@ -235,7 +235,7 @@ SETS.push(
             playSeq: { label: 'Em·Em · Am·Am roots (change every 2 beats)', label_es: 'Raíces Em·Em · Am·Am (cambia cada 2 tiempos)', bpm: 60, notes: [40, 40, 45, 45, 40, 40, 45, 45] }
           },
           {
-            label: 'Challenge: three-chord half-bar', label_es: 'Reto: medio compás, tres acordes',
+            label: 'Challenge: three-chord half-bar', label_es: 'Reto: medio compás con 3 acordes',
             text: 'Challenge — Three-Chord Half-Bar (3 chords): add G (from Module 5). Loop Em · Am · G, two beats each, the strum never stopping, at 60 BPM. You\'ve got it when: two clean laps with the pendulum unbroken through all three changes.',
             text_es: 'Reto — Medio compás con tres acordes (3 acordes): agrega G (del Módulo 5). Repite Em · Am · G, dos tiempos cada uno, el rasgueo sin detenerse, a 60 BPM. Lo tienes cuando: dos vueltas limpias con el péndulo sin interrupciones a través de los tres cambios.',
             hint: 'Am → G moves every finger, so pre-shape G in the air while Am is still ringing. Em → Am shares your two fretting fingers — barely a move.',

@@ -378,7 +378,7 @@ SETS.push(
                   choices_es: ['A mayor', 'F mayor', 'C mayor', 'G mayor'] }
               },
               {
-                label: 'Why Luna\'s solo is in D minor', label_es: 'Por qué el solo de Luna está en Dm',
+                label: 'Why Luna\'s solo is in D minor', label_es: 'Por qué el solo de Luna está en D menor',
                 text: 'Try it on Luna: its solo lives in D minor pentatonic even though the song is in F major. Work out why using what you just learned about relative keys.',
                 text_es: 'Pruébalo con Luna: su solo vive en la pentatónica menor de D aunque la canción esté en F mayor. Descubre por qué usando lo que acabas de aprender sobre tonalidades relativas.',
                 hint: 'D minor is exactly 3 frets down from F — the same relative relationship you just used on Watchtower.',

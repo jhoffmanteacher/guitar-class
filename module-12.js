@@ -266,9 +266,9 @@ SETS.push(
               {
                 label: 'Challenge: claw check', label_es: 'Reto: revisión de la garra',
                 text: 'Challenge — Claw Check (a 60-second reactivation of Module 8, not a re-teach): plant all four picking fingers at once:<ul><li>Thumb (p) resting on the bass strings 6/5/4.</li><li>Index (i) on the G string.</li><li>Middle (m) on the B string.</li><li>Ring (a) on the high e.</li></ul>Then pluck p–i–m–a on the open strings, twice through at 60 BPM. You\'ve got it when: each finger plays in order, one string each, with no two fingers grabbing the same string. This is the picking hand you built back in Module 8 — warm it up any time it feels out of practice, including right now before your next run.',
-                text_es: 'Reto — Revisión de la garra (una reactivación de 60 segundos del Módulo 8, no una nueva enseñanza): planta los cuatro dedos de pulsar a la vez:<ul><li>Pulgar (p) apoyado en las cuerdas graves 6/5/4.</li><li>Índice (i) en la cuerda G.</li><li>Medio (m) en la cuerda B.</li><li>Anular (a) en la mi aguda.</li></ul>Luego pulsa p–i–m–a en las cuerdas al aire, dos veces seguidas a 60 BPM. Lo tienes cuando: cada dedo toca en orden, una cuerda cada uno, sin que dos dedos agarren la misma cuerda. Esta es la mano de pulsar que construiste allá en el Módulo 8 — caliéntala cuando sea que se sienta oxidada, incluso ahora mismo antes de tu próxima corrida.',
+                text_es: 'Reto — Revisión de la garra (una reactivación de 60 segundos del Módulo 8, no una nueva enseñanza): planta los cuatro dedos de pulsar a la vez:<ul><li>Pulgar (p) apoyado en las cuerdas graves 6/5/4.</li><li>Índice (i) en la cuerda Sol.</li><li>Medio (m) en la cuerda Si.</li><li>Anular (a) en la mi aguda.</li></ul>Luego pulsa p–i–m–a en las cuerdas al aire, dos veces seguidas a 60 BPM. Lo tienes cuando: cada dedo toca en orden, una cuerda cada uno, sin que dos dedos agarren la misma cuerda. Esta es la mano de pulsar que construiste allá en el Módulo 8 — caliéntala cuando sea que se sienta oxidada, incluso ahora mismo antes de tu próxima corrida.',
                 hint: 'p owns the three bass strings (6/5/4); i-G, m-B, a-high-e never trade places. Set the assignment once and your hand stops hunting for strings.',
-                hint_es: 'p es dueño de las tres cuerdas graves (6/5/4); i-G, m-B, a-mi aguda nunca intercambian lugares. Fija la asignación una vez y tu mano deja de buscar cuerdas a tientas.',
+                hint_es: 'p es dueño de las tres cuerdas graves (6/5/4); i-Sol, m-Si, a-mi aguda nunca intercambian lugares. Fija la asignación una vez y tu mano deja de buscar cuerdas a tientas.',
                 stuck: 'Plant all four fingers silently first and feel each one touching its string, then pluck slowly — p, then i, then m, then a — before you add the metronome.',
                 stuck_es: 'Planta los cuatro dedos en silencio primero y siente cada uno tocando su cuerda, y luego pulsa despacio — p, luego i, luego m, luego a — antes de agregar el metrónomo.',
                 levelUp: 'Run the staircase up and back down (p-i-m-a-m-i) without looking at your picking hand.',
@@ -320,7 +320,7 @@ SETS.push(
           choices_es: ['Una después de la otra', 'Exactamente al mismo tiempo', 'Solo en el tiempo 3', 'Silenciadas'], answer: 1 } },
       { id: 'm12w1-s3', text: 'Add i-m finger fills while the thumb keeps alternating',
         text_es: 'Agregar rellenos de i-m mientras el pulgar sigue alternando',
-        practice: { type: 'playSeq', label: 'Thumb keeps alternating, i·m fill between — C: bass · B-string · bass · e-string', label_es: 'El pulgar sigue alternando, i·m rellenan en medio — C: bajo · cuerda B · bajo · cuerda e', bpm: 60,
+        practice: { type: 'playSeq', label: 'Thumb keeps alternating, i·m fill between — C: bass · B-string · bass · e-string', label_es: 'El pulgar sigue alternando, i·m rellenan en medio — C: bajo · cuerda Si · bajo · cuerda mi aguda', bpm: 60,
           notes: [48, 60, 52, 64] } },
       { id: 'm12w1-s4', text: 'Play a Travis-feel pattern over C at 60 BPM for 8 bars',
         text_es: 'Tocar un patrón con sensación Travis sobre C a 60 BPM durante 8 compases',
@@ -488,7 +488,7 @@ SETS.push(
                 levelUp: 'Count silently in your head instead of aloud, or add a pinch on beat 1.',
                 levelUp_es: 'Cuenta en silencio en tu cabeza en lugar de en voz alta, o agrega un pellizco en el tiempo 1.',
                 skills: [1, 2],
-                playSeq: { label: '3/4 pattern on C — bass, then G string, then C on the B string', label_es: 'Patrón en 3/4 sobre C — bajo, y luego la cuerda G, y luego C en la cuerda B', bpm: 60, notes: [48, 55, 60] }
+                playSeq: { label: '3/4 pattern on C — bass, then G string, then C on the B string', label_es: 'Patrón en 3/4 sobre C — bajo, y luego la cuerda Sol, y luego C en la cuerda Si', bpm: 60, notes: [48, 55, 60] }
               }
             ]
           },
@@ -650,17 +650,17 @@ SETS.push(
               {
                 label: 'Watch: Luna\'s fingerpicked intro', label_es: 'Mira: la intro fingerstyle de Luna',
                 text: 'Watch: <a href="tabs/luna.html#layer-6" target="_blank">Luna\'s Song Journey — Layer 6, the fingerpicked intro</a>. This on-site lesson shows the intro rolling through the little-F shape.',
-                text_es: 'Mira: <a href="tabs/luna.html#layer-6" target="_blank">Luna\'s Song Journey — Layer 6, the fingerpicked intro</a>. Esta lección del sitio muestra la intro en un floreo a través de la forma del little-F.',
+                text_es: 'Mira: <a href="tabs/luna.html#layer-6" target="_blank">Recorrido de Luna — Capa 6, la intro con fingerpicking</a>. Esta lección del sitio muestra la intro en un floreo a través de la forma del F pequeño.',
                 hint: 'Same little-F you learned in Module 5 — the intro arpeggiates it one note at a time.',
-                hint_es: 'El mismo little-F que aprendiste en el Módulo 5 — la intro lo arpegia una nota a la vez.',
+                hint_es: 'El mismo F pequeño que aprendiste en el Módulo 5 — la intro lo arpegia una nota a la vez.',
                 skills: [1],
                 response: { type: 'mc', prompt: 'Luna\'s fingerpicked intro rolls through which chord shape?',
                   prompt_es: '¿La intro de Luna con fingerpicking hace un floreo a través de cuál forma de acorde?',
                   answer: 1,
                   explain: 'Same little-F you learned in Module 5 — the intro arpeggiates it one note at a time (Journey Layer 6).',
-                  explain_es: 'El mismo little-F que aprendiste en el Módulo 5 — la intro lo arpegia una nota a la vez (Journey, Layer 6).',
+                  explain_es: 'El mismo F pequeño que aprendiste en el Módulo 5 — la intro lo arpegia una nota a la vez (Recorrido, Capa 6).',
                   choices: ['Full barre F', 'The little F (xx3211)', 'Open C', 'Am'],
-                  choices_es: ['F con cejilla completa', 'El little F (xx3211)', 'C al aire', 'Am'] }
+                  choices_es: ['F con cejilla completa', 'El F pequeño (xx3211)', 'C al aire', 'Am'] }
               }
             ]
           },
@@ -746,11 +746,11 @@ SETS.push(
               {
                 label: 'Challenge: Luna intro', label_es: 'Reto: intro de Luna',
                 text: 'Challenge 1 — Luna Intro: play the Layer 6 rolls from <a href="tabs/luna.html#layer-6" target="_blank">Luna\'s Song Journey page</a>, slow then at tempo. You\'ve got it when: all notes ring cleanly in order at performance tempo.',
-                text_es: 'Reto 1 — Intro de Luna: toca los floreos de Layer 6 de <a href="tabs/luna.html#layer-6" target="_blank">Luna\'s Song Journey page</a>, despacio y luego a tempo. Lo tienes cuando: todas las notas suenan limpias en orden al tempo de interpretación.',
+                text_es: 'Reto 1 — Intro de Luna: toca los floreos de la Capa 6 en la <a href="tabs/luna.html#layer-6" target="_blank">página del Recorrido de Luna</a>, despacio y luego a tempo. Lo tienes cuando: todas las notas suenan limpias en orden al tempo de interpretación.',
                 hint: 'This roll uses the little-F shape you already know from Module 5.',
-                hint_es: 'Este floreo usa la forma del little-F que ya conoces del Módulo 5.',
+                hint_es: 'Este floreo usa la forma del F pequeño que ya conoces del Módulo 5.',
                 stuck: 'Fret the little F shape, strum it once to hear the target chord, then break it apart one string at a time.',
-                stuck_es: 'Trastea la forma del little F, rasguéala una vez para escuchar el acorde objetivo, y luego desármala una cuerda a la vez.',
+                stuck_es: 'Trastea la forma del F pequeño, rasguéala una vez para escuchar el acorde objetivo, y luego desármala una cuerda a la vez.',
                 levelUp: 'Play it twice through without stopping, or add it as your showcase intro.',
                 levelUp_es: 'Tócala dos veces seguidas sin detenerte, o agrégala como tu intro de presentación.',
                 skills: [1]
@@ -859,8 +859,8 @@ SETS.push(
 
     skills: [
       { id: 'm12w3-s1', text: 'Play Luna\'s fingerpicked intro (Journey Layer 6) with p-i-m-a rolls',
-        text_es: 'Tocar la intro de Luna con fingerpicking (Journey, Layer 6) con floreos p-i-m-a',
-        practice: { type: 'playSeq', label: 'Luna requinto intro — little-F roll (D3 · G2 · B1 · open e)', label_es: 'Intro de requinto de Luna — floreo de F pequeña (D3 · G2 · B1 · e al aire)', bpm: 60,
+        text_es: 'Tocar la intro de Luna con fingerpicking (Recorrido, Capa 6) con floreos p-i-m-a',
+        practice: { type: 'playSeq', label: 'Luna requinto intro — little-F roll (D3 · G2 · B1 · open e)', label_es: 'Intro de requinto de Luna — floreo del F pequeño (D3 · G2 · B1 · e al aire)', bpm: 60,
           notes: [53, 57, 60, 64] } },
       { id: 'm12w3-s2', text: 'Play Tu Boda\'s requinto intro line fingerstyle',
         text_es: 'Tocar la línea de requinto de la intro de Tu Boda con fingerstyle',
@@ -907,7 +907,7 @@ MODULE_SONGS[12] = [
       { name: '"Let It Be" — The Beatles', meta: 'Arpeggiated C–G–Am–F with your chosen pattern', meta_es: 'C–G–Am–F arpegiado con el patrón que elijas', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
         tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8' },
-      { name: '"Luna" — Peso Pluma, Junior H', meta: 'The fingerpicked intro — rolls through the little-F shape', meta_es: 'La intro con fingerpicking — floreos a través de la forma del little-F', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+      { name: '"Luna" — Peso Pluma, Junior H', meta: 'The fingerpicked intro — rolls through the little-F shape', meta_es: 'La intro con fingerpicking — floreos a través de la forma del F pequeño', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
       { name: '"House of the Rising Sun" — The Animals', meta: 'Bass note + rolling arpeggio in 6/8 — the fingerpicking classic', meta_es: 'Nota grave + arpegio en floreo en 6/8 — el clásico del fingerpicking', type: 'Choice', core: false, level: 2,

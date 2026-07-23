@@ -330,7 +330,7 @@ SETS.push(
             title_es: '⚡ Chispa de oído — bono opcional',
             steps: [
               {
-                label: 'Ear Spark: name the open strings', label_es: 'Chispa de oído: nombra las cuerdas',
+                label: 'Ear Spark: name the open strings', label_es: 'Chispa auditiva: nombra las cuerdas',
                 text: '⚡ Ear Spark (optional, 2 min): shuffle six paper slips labeled E A D G B e, draw five, and record yourself plucking the open strings in that order. A few minutes later, play it back and name each string by ear before checking your slips — thickest to thinnest is E-A-D-G-B-e, and your ear learns them faster than you\'d think. Got someone around? Have them pluck while you look away instead.',
                 text_es: '⚡ Chispa de oído (opcional, 2 min): revuelve seis papelitos con las letras E A D G B e, saca cinco, y grábate pulsando las cuerdas al aire en ese orden. Unos minutos después, escucha la grabación y nombra cada cuerda de oído antes de revisar tus papelitos — de más gruesa a más delgada es E-A-D-G-B-e, y tu oído las aprende más rápido de lo que crees. ¿Tienes a alguien cerca? Pídele que pulse mientras tú miras hacia otro lado.'
               }

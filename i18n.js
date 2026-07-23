@@ -116,6 +116,11 @@
        relative minor / relative major (relative key) → relativa menor /
                                                relativa mayor (la relativa)
        parallel minor                       → la paralela menor
+       slash chord (G/B)                    → acorde con barra diagonal
+                                               (module-9's shipped usage)
+       thread song (core song threaded      → canción hilo (coined course
+         through the whole course)             term, deliberate — mirrors
+                                               the coined English)
        lick (short solo phrase)             → lick (kept — same loanword
                                                treatment as riff/vamp/chug)
        key (musical key, e.g. "key of C")   → tonalidad
@@ -199,7 +204,7 @@
     // ── Tools: Metronome / Timer / Tuner ──
     'tools.metronome':     { en: 'Metronome', es: 'Metrónomo' },
     'tools.bpm':           { en: 'BPM', es: 'BPM' },
-    'tools.countIn':       { en: 'Count-in (one bar before it starts)', es: 'Cuenta regresiva (un compás antes de empezar)' },
+    'tools.countIn':       { en: 'Count-in (one bar before it starts)', es: 'Conteo de entrada (un compás antes de empezar)' },
     'tools.start':         { en: 'Start', es: 'Iniciar' },
     'tools.stop':          { en: 'Stop', es: 'Detener' },
     'tools.pause':         { en: 'Pause', es: 'Pausa' },
@@ -290,7 +295,7 @@
     'review.assessBodyItems':{ en: "When you're ready, record yourself doing the module assessment, then check the recording against these skills:",
                                 es: 'Cuando estés listo, grábate haciendo la evaluación del módulo y luego revisa la grabación contra estas destrezas:' },
     'review.assessBodyDflt': { en: "When you're ready, record yourself performing the skills above and self-check the recording.",
-                                es: 'Cuando estés listo, grábate haciendo las destrezas de arriba y autoevalúa la grabación.' },
+                                es: 'Cuando estés listo, grábate demostrando las destrezas de arriba y autoevalúa la grabación.' },
     'review.assessHead':     { en: 'Module {n} Assessment', es: 'Evaluación del módulo {n}' },
     'review.whyMatters':     { en: 'Why this matters', es: 'Por qué esto importa' },
     'review.previewOnly':    { en: 'Preview only.', es: 'Solo vista previa.' },
@@ -629,7 +634,7 @@
     'games.cc.advice.great': { en: 'Level up: try it 10 BPM faster.',
       es: 'Sube de nivel: pruébalo 10 BPM más rápido.' },
     'games.cc.advice.low': { en: 'That’s completely fine: drop 10 BPM — slow and smooth is better than fast and messy, every time.',
-      es: 'Está perfectamente bien: baja 10 BPM — lento y suave siempre es mejor que rápido y desordenado.' },
+      es: 'Está totalmente bien: baja 10 BPM — lento y suave siempre es mejor que rápido y desordenado.' },
     'games.cc.advice.practiceWorst': { en: 'Practice just {worst} on its own — {early}.',
       es: 'Practica solo {worst} por separado — {early}.' },
     'games.cc.advice.tryAgainSteady': { en: 'Try it again at this speed until it feels steady.',
@@ -691,7 +696,7 @@
     'games.cc.verdict.great': { en: '{ok} of {total} changes on time — you can play at that speed now.',
       es: '{ok} de {total} cambios a tiempo — ya puedes tocar a esa velocidad.' },
     'games.cc.verdict.low': { en: '{ok} of {total} — this speed is too fast for now.',
-      es: '{ok} de {total} — esta velocidad todavía es muy rápida.' },
+      es: '{ok} de {total} — esta velocidad es demasiado rápida por ahora.' },
     'games.cc.verdict.ok': { en: '{ok} of {total} changes worked.',
       es: '{ok} de {total} cambios funcionaron.' },
     'games.cc.verdict.okMessy': { en: '{ok} of {total} changes worked ({off} were on time but sounded messy).',
@@ -725,7 +730,7 @@
     'games.common.micAccessDenied': { en: 'Mic access denied — check browser permissions, then try again.',
       es: 'Acceso al micrófono denegado — revisa los permisos del navegador y vuelve a intentarlo.' },
     'games.common.newBest': { en: 'New best! Your old best today was {value}.',
-      es: '¡Nuevo mejor puntaje! Tu mejor de hoy anterior era {value}.' },
+      es: '¡Nuevo récord! Tu mejor puntaje de hoy antes era {value}.' },
     'games.common.next': { en: 'next:',
       es: 'sigue:' },
     'games.common.pausedBackgrounded': { en: 'Paused — this tab went to the background, so the mic switched off. Start again when you’re back.',
@@ -877,9 +882,9 @@
     'games.radar.tipHoldChord': { en: 'Hold any chord you know — Em is a good choice. The radar listens to your timing, not your notes. And it hears WHEN you strum, not which way — follow the arrows with your arm anyway, they matter for the feel.',
       es: 'Sostén cualquier acorde que sepas — Em es una buena opción. El radar escucha tu ritmo, no tus notas. Y escucha CUÁNDO rasgueas, no en qué dirección — sigue las flechas con el brazo de todas formas, ayudan con la sensación.' },
     'games.radar.tipNoClickNow': { en: 'No click now — keep the count-in’s beat going with your foot.',
-      es: 'Ahora no hay clic — sigue el tiempo de la cuenta regresiva con el pie.' },
+      es: 'Ahora no hay clic — sigue el tiempo del conteo de entrada con el pie.' },
     'games.radar.tipQuietRoom': { en: 'Quiet room, guitar close to the mic. 4 count-in clicks, then the click goes silent — it can’t sound while the mic listens — so keep the beat with your foot or in your head.',
-      es: 'Cuarto silencioso, guitarra cerca del micrófono. 4 clics de cuenta regresiva, y luego el clic queda en silencio — no puede sonar mientras el micrófono escucha — así que sigue el tiempo con el pie o en tu cabeza.' },
+      es: 'Cuarto silencioso, guitarra cerca del micrófono. 4 clics de conteo de entrada, y luego el clic queda en silencio — no puede sonar mientras el micrófono escucha — así que sigue el tiempo con el pie o en tu cabeza.' },
     'games.radar.title': { en: 'Strum Radar',
       es: 'Radar de rasgueo' },
     'games.radar.verdict.one': { en: '{acc}% on the beat — the pattern is starting to land.',
@@ -989,7 +994,7 @@
     'games.riff.tipHowToPlay': { en: 'Fret numbers slide along the strings toward the purple line — press that string’s key (1–6), or tap its line, right as each number crosses. Every hit plays the real note, so a clean run IS the riff.',
       es: 'Los números de traste se deslizan por las cuerdas hacia la línea morada — presiona la tecla de esa cuerda (1–6), o toca su línea, justo cuando cada número la cruce. Cada acierto toca la nota real, así que una pasada limpia ES el riff.' },
     'games.riff.tipKeysLegend': { en: 'Keys: 1 = thin high e (top line) … 6 = thick low E (bottom line). On a phone, tap the string’s line instead. 4 clicks count you in.',
-      es: 'Teclas: 1 = mi aguda fina (línea superior) … 6 = Mi grave gruesa (línea inferior). En un teléfono, toca la línea de la cuerda en su lugar. 4 clics de cuenta regresiva antes de empezar.' },
+      es: 'Teclas: 1 = mi aguda fina (línea superior) … 6 = Mi grave gruesa (línea inferior). En un teléfono, toca la línea de la cuerda en su lugar. 4 clics de conteo de entrada antes de empezar.' },
     'games.riff.tipPlayOnRealGuitar': { en: 'Now play it on your real guitar — open the song’s Journey page for the TAB.',
       es: 'Ahora tócalo en tu guitarra real — abre la página del Recorrido de la canción para ver el TAB.' },
     'games.riff.tipPressString': { en: 'Press the string’s key (1–6) or tap its line as each number crosses the purple line.',
@@ -1189,7 +1194,7 @@
     'games.sh.tapPadSub': { en: 'or press the spacebar',
       es: 'o presiona la barra espaciadora' },
     'games.sh.tipArrows': { en: 'Arrows slide toward the line — tap right when each arrow reaches it. Tap the big pad, or press the spacebar. &#x2193; is a downstrum, &#x2191; is an upstrum. 4 clicks count you in.',
-      es: 'Las flechas se deslizan hacia la línea — toca justo cuando cada flecha la alcance. Toca el botón grande, o presiona la barra espaciadora. &#x2193; es un rasgueo hacia abajo, &#x2191; es un rasgueo hacia arriba. 4 clics de cuenta regresiva antes de empezar.' },
+      es: 'Las flechas se deslizan hacia la línea — toca justo cuando cada flecha la alcance. Toca el botón grande, o presiona la barra espaciadora. &#x2193; es un rasgueo hacia abajo, &#x2191; es un rasgueo hacia arriba. 4 clics de conteo de entrada antes de empezar.' },
     'games.sh.title': { en: 'Strum Hero',
       es: 'Héroe del rasgueo' },
     'games.sh.verdict.one': { en: '{acc}% on time — keep going, the pattern is starting to land on the beat.',

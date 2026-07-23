@@ -717,7 +717,7 @@ SETS.push(
                 skills: [7]
               },
               {
-                label: 'Quick check: the blues chords', label_es: 'Ponte a prueba: los acordes del blues',
+                label: 'Quick check: the blues chords', label_es: 'Revisión rápida: los acordes del blues',
                 text: 'Check yourself on the form\'s ingredients before you play it at the practice station.',
                 text_es: 'Ponte a prueba con los ingredientes de la forma antes de tocarla en la estación de práctica.',
                 response: { type: 'mc', prompt: 'A standard 12-bar blues in A uses which three chords?',
@@ -729,7 +729,7 @@ SETS.push(
                   choices_es: ['A7, D7, E7', 'A, Bm, C#', 'A7, C7, G7', 'Am, Dm, Em'] }
               },
               {
-                label: 'Quick check: shuffle feel', label_es: 'Ponte a prueba: la sensación de shuffle',
+                label: 'Quick check: shuffle feel', label_es: 'Revisión rápida: la sensación de shuffle',
                 text: 'One more — the feel is half the style.',
                 text_es: 'Una más — la sensación es la mitad del estilo.',
                 response: { type: 'mc', prompt: '"Shuffle feel" means the eighth notes are played:',

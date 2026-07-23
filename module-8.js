@@ -559,7 +559,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
-                label: 'Wrap-up: your top clean tempo', label_es: 'Cierre: tu mejor tempo limpio',
+                label: 'Wrap-up: your top clean tempo', label_es: 'Cierre: tu tempo limpio máximo',
                 text: 'What\'s your honest top clean tempo right now, and which finger gives out first when you push it? Write it below — that\'s your warm-up target next time.',
                 text_es: '¿Cuál es honestamente tu mejor tempo limpio ahora mismo, y cuál dedo cede primero cuando lo aceleras? Escríbelo abajo — ese es tu objetivo de calentamiento la próxima vez.',
                 response: { type: 'short', placeholder: 'e.g. clean to 80, then the ring finger starts dragging behind the beat',
@@ -636,7 +636,7 @@ SETS.push(
           choices: ['Only the thumb — it moves from the low E string to the A string; i-m-a stay put', 'All four fingers shift up one string', 'Nothing at all, ever', 'i-m-a move to new strings; the thumb stays'],
           choices_es: ['Solo el pulgar — se mueve de la cuerda Mi grave a la cuerda La; i-m-a se quedan en su lugar', 'Los cuatro dedos suben una cuerda', 'Nada en absoluto, nunca', 'i-m-a se mueven a cuerdas nuevas; el pulgar se queda'], answer: 0,
           explain: 'The thumb hunts the new root; i-m-a stay parked on G, B, and high e. Moving everything is what breaks the pattern at changes.',
-          explain_es: 'El pulgar busca la nueva raíz; i-m-a se quedan estacionados en G, B y mi aguda. Mover todo es lo que rompe el patrón en los cambios.' } }
+          explain_es: 'El pulgar busca la nueva raíz; i-m-a se quedan estacionados en Sol, Si y mi aguda. Mover todo es lo que rompe el patrón en los cambios.' } }
     ]
   },
 

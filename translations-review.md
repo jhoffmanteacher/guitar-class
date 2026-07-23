@@ -156,7 +156,7 @@ a bilingual colleague or student aide if you'd like a native-speaker check.
 |---|---|
 | Metronome | Metrónomo |
 | BPM | BPM |
-| Count-in (one bar before it starts) | Cuenta regresiva (un compás antes de empezar) |
+| Count-in (one bar before it starts) | Conteo de entrada (un compás antes de empezar) |
 | Start | Iniciar |
 | Stop | Detener |
 | Pause | Pausa |
@@ -251,7 +251,7 @@ a bilingual colleague or student aide if you'd like a native-speaker check.
 | Song I played | Canción que toqué |
 | How did it go? | ¿Cómo te fue? |
 | When you're ready, record yourself doing the module assessment, then check the recording against these skills: | Cuando estés listo, grábate haciendo la evaluación del módulo y luego revisa la grabación contra estas destrezas: |
-| When you're ready, record yourself performing the skills above and self-check the recording. | Cuando estés listo, grábate haciendo las destrezas de arriba y autoevalúa la grabación. |
+| When you're ready, record yourself performing the skills above and self-check the recording. | Cuando estés listo, grábate demostrando las destrezas de arriba y autoevalúa la grabación. |
 | Module {n} Assessment | Evaluación del módulo {n} |
 | Why this matters | Por qué esto importa |
 | Preview only. | Solo vista previa. |
@@ -4116,7 +4116,7 @@ MODULE_SONGS[8] meta fields (song title shown for reference, not itself translat
 | m8w2-s5 practice prompt: <ol><li>Keep the p-i-m-a-m-i pattern going for 4 bars straight with the metronome.</li><li>Start at 60 BPM and raise it +5 at a time.</li><li>Log the fastest BPM where the tempo never wavered.</li></ol> | <ol><li>Mantén el patrón p-i-m-a-m-i durante 4 compases seguidos con el metrónomo.</li><li>Empieza a 60 BPM y súbelo de 5 en 5.</li><li>Anota el BPM más rápido donde el tempo nunca vaciló.</li></ol> |
 | m8w2-s5 practice placeholder: e.g. 70 — try for a higher number next session | p. ej. 70 — intenta superarlo la próxima sesión |
 | m8w2-s6 practice prompt: You're fingerpicking and the chord changes Em → Am. What changes for your PICKING hand? | Estás tocando fingerpicking y el acorde cambia de Em → Am. ¿Qué cambia para tu mano de PUNTEO? |
-| m8w2-s6 practice explain: The thumb hunts the new root; i-m-a stay parked on G, B, and high e. Moving everything is what breaks the pattern at changes. | El pulgar busca la nueva raíz; i-m-a se quedan estacionados en G, B y mi aguda. Mover todo es lo que rompe el patrón en los cambios. |
+| m8w2-s6 practice explain: The thumb hunts the new root; i-m-a stay parked on G, B, and high e. Moving everything is what breaks the pattern at changes. | El pulgar busca la nueva raíz; i-m-a se quedan estacionados en Sol, Si y mi aguda. Mover todo es lo que rompe el patrón en los cambios. |
 | m8w2-s6 practice choice 1: Only the thumb — it moves from the low E string to the A string; i-m-a stay put | Solo el pulgar — se mueve de la cuerda Mi grave a la cuerda La; i-m-a se quedan en su lugar |
 | m8w2-s6 practice choice 2: All four fingers shift up one string | Los cuatro dedos suben una cuerda |
 | m8w2-s6 practice choice 3: Nothing at all, ever | Nada en absoluto, nunca |
@@ -6187,6 +6187,23 @@ MODULE_SONGS[12] meta fields (song title shown for reference, not itself transla
 | m12w3-s6 practice placeholder: e.g. 2 runs — try for a higher number | p. ej. 2 pasadas — intenta superarlo |
 
 
+
+## Review policy (settled 2026-07-23)
+
+Jonathan has no bilingual colleague available, so the QA gate for the site's
+Spanish is an **independent AI proofread sweep** instead of a human
+spot-check: fresh reviewer agents (no authorship context) audited all four
+translation rounds plus a 3-of-12-module sample of shipped module content
+against the English and the binding glossary, flagging only genuine errors.
+Result (2026-07-23): ~4,300 strings reviewed → 2 high-severity findings
+(chord-symbol notation used for a key name; module-9 breaking the solfège
+string-name convention ~30×), ~13 medium (nearly all cross-file consistency,
+zero mistranslations of meaning), all fixed the same day. Two flagged items
+were kept deliberately and added to the glossary: "canción hilo" (coined
+course term mirroring the coined English "thread song") and "acorde con
+barra diagonal" (module-9's shipped slash-chord term). This sheet remains
+the audit trail; rerun a sweep after any large batch of new Spanish.
+
 ---
 
 # Round 3 — 2026-07-23 (step titles, Journey pages, journey.js strings)
@@ -6244,7 +6261,7 @@ truncated step text. Full table:
 | Challenge: Seven Nation Army | Reto: Seven Nation Army |
 | Plan your practice | Planea tu práctica |
 | Station wrap-up | Cierre de la estación |
-| Ear Spark: name the open strings | Chispa de oído: nombra las cuerdas |
+| Ear Spark: name the open strings | Chispa auditiva: nombra las cuerdas |
 | Watch: spider exercises | Mira: ejercicios de araña |
 | Watch: avoiding fret buzz | Mira: evita el zumbido |
 | Watch: how to read TAB | Mira: cómo leer TAB |
@@ -6363,7 +6380,7 @@ truncated step text. Full table:
 | Watch: reading TAB & chord boxes | Mira: leer TAB y diagramas de acorde |
 | Watch: first chords Em & Asus2 | Mira: primeros acordes Em y Asus2 |
 | Wrap-up: chord diagram parts | Cierre: partes del diagrama |
-| Warm-up: tuning check | Calentamiento: revisa la afinación |
+| Warm-up: tuning check | Calentamiento: afinación |
 | Challenge: clean Am | Reto: Am limpio |
 | Challenge: clean Em | Reto: Em limpio |
 | Challenge: Am ↔ Em on beat 1 | Reto: Am ↔ Em en el tiempo 1 |
@@ -6372,7 +6389,7 @@ truncated step text. Full table:
 | Wrap-up: clean vs. switching | Cierre: limpio vs. cambiar |
 | Challenge: mystery chart | Reto: diagrama misterioso |
 | Watch: the C chord | Mira: el acorde de C |
-| Watch: a pain-free F chord | Mira: un F sin dolor |
+| Watch: a pain-free F chord | Mira: el acorde F sin dolor |
 | Listen: Let It Be | Escucha: Let It Be |
 | Wrap-up: your toughest chord | Cierre: tu acorde más difícil |
 | Challenge: name the root | Reto: nombra la raíz |
@@ -6382,7 +6399,7 @@ truncated step text. Full table:
 | Challenge: one-minute changes (C ↔ G) | Reto: cambios de un minuto (C ↔ G) |
 | Challenge: Let It Be, verse | Reto: Let It Be, estrofa |
 | Challenge: Watchtower, open chords | Reto: Watchtower, acordes al aire |
-| Challenge: "the cure" play-along | Reto: "the cure" tocando junto |
+| Challenge: "the cure" play-along | Reto: toca junto a "the cure" |
 | Challenge: half-bar changes (2 chords) | Reto: medio compás (2 acordes) |
 | Challenge: half-bar changes (3 chords) | Reto: medio compás (3 acordes) |
 | Challenge: Let It Be, fast (4 chords) | Reto: Let It Be, rápido (4 acordes) |
@@ -6429,7 +6446,7 @@ truncated step text. Full table:
 | Challenge: even eighths on Em | Reto: corcheas parejas en Em |
 | Challenge: Em ↔ Am switch | Reto: cambio Em ↔ Am |
 | Challenge: half-bar switch | Reto: cambio de medio compás |
-| Challenge: three-chord half-bar | Reto: medio compás, tres acordes |
+| Challenge: three-chord half-bar | Reto: medio compás con 3 acordes |
 | Challenge: Let It Be, strummed | Reto: Let It Be, rasgueado |
 | Hear it: full-chord loop | Escúchalo: loop de acordes completos |
 | Challenge: one chord per beat | Reto: un acorde por tiempo |
@@ -6526,7 +6543,7 @@ truncated step text. Full table:
 | Challenge: Am pattern | Reto: patrón en Am |
 | Challenge: raise your tempo | Reto: sube tu tempo |
 | Challenge: the cure, verse | Reto: the cure, estrofa |
-| Wrap-up: your top clean tempo | Cierre: tu mejor tempo limpio |
+| Wrap-up: your top clean tempo | Cierre: tu tempo limpio máximo |
 | Ear Spark: name the bass string | Chispa auditiva: nombra el bajo |
 | Watch: Travis picking basics | Mira: fundamentos del Travis picking |
 | Watch: Nothing Else Matters lesson | Mira: lección de Nothing Else Matters |
@@ -6562,7 +6579,7 @@ truncated step text. Full table:
 | Re-test 5: TAB cold read | Repaso 5: TAB a primera vista |
 | Re-test 6: fingerpicking | Repaso 6: fingerpicking |
 | Fast round: record all six | Ronda rápida: grábate los seis |
-| Watch: note system on D and G | Mira: sistema de notas en D y G |
+| Watch: note system on D and G | Mira: sistema de notas en Re y Sol |
 | Watch: open string refresher | Mira: repaso de cuerdas al aire |
 | Name notes up the D and G strings | Nombra las notas por D y G |
 | Octave shape: find the twin note | Forma de octava: la nota gemela |
@@ -6574,14 +6591,14 @@ truncated step text. Full table:
 | Challenge: flashcard drill | Reto: ejercicio relámpago |
 | Challenge: Sweet Child O' Mine riff | Reto: riff de Sweet Child O' Mine |
 | Which fret still slows you? | ¿Cuál traste todavía te frena? |
-| Watch: finishing on B and high e | Mira: termina en B y mi aguda |
-| Watch: octaves and the B-string bump | Mira: octavas y el desfase de la B |
+| Watch: finishing on B and high e | Mira: termina en Si y mi aguda |
+| Watch: octaves and the B-string bump | Mira: octavas y el desfase de la cuerda B |
 | Name the dot-fret landmarks | Nombra los trastes con punto |
 | Find one note on all six strings | Encuentra una nota en las 6 cuerdas |
 | Try fret 7 on every string | Prueba el traste 7 en cada cuerda |
 | Where are you slowest? | ¿Dónde eres más lento? |
 | Warm-up: tune all 6 strings | Calentamiento: afina las 6 cuerdas |
-| Challenge: B-string naturals | Reto: naturales de la cuerda B |
+| Challenge: B-string naturals | Reto: naturales de la cuerda Si |
 | Challenge: high-e naturals | Reto: naturales de la mi aguda |
 | Challenge: landmark drill | Reto: ejercicio de referencias |
 | Challenge: Luna's punteo line | Reto: línea de punteo de Luna |
@@ -6596,7 +6613,7 @@ truncated step text. Full table:
 | Challenge: Luna warm-up read | Reto: calentamiento con Luna |
 | Challenge: cold read at frets 5–10 | Reto: primera vista en trastes 5–10 |
 | Challenge: write Seven Nation Army TAB | Reto: escribe Seven Nation Army en TAB |
-| Challenge: the G/B slash chord | Reto: acorde con barra diagonal |
+| Challenge: the G/B slash chord | Reto: el acorde con barra diagonal G/B |
 | Challenge: read a partial shape | Reto: lee una forma parcial |
 | Challenge: cold-read your own TAB | Reto: lee tu TAB a primera vista |
 | Could a stranger play your TAB? | ¿Podría un desconocido tocar tu TAB? |
@@ -6621,7 +6638,7 @@ truncated step text. Full table:
 | Watch: the blues scale | Mira: la escala de blues |
 | Ear training: relative vs. parallel | Oído: relativa vs. paralela |
 | Find Watchtower's relative major | La relativa mayor de Watchtower |
-| Why Luna's solo is in D minor | Por qué el solo de Luna está en Dm |
+| Why Luna's solo is in D minor | Por qué el solo de Luna está en D menor |
 | Wrap-up: explain relative minor | Cierre: explica la relativa menor |
 | Warm-up: tuning check | Calentamiento: afinación |
 | Challenge: relative pairs drill | Reto: ejercicio de pares relativos |
@@ -6677,8 +6694,8 @@ truncated step text. Full table:
 | Map all 12 roots on paper | Mapea las 12 raíces en papel |
 | Wrap-up: open shapes or barres? | Cierre: ¿formas abiertas o cejillas? |
 | Watch: 12-bar blues in E | Mira: blues de 12 compases en E |
-| Quick check: the blues chords | Ponte a prueba: los acordes del blues |
-| Quick check: shuffle feel | Ponte a prueba: la sensación de shuffle |
+| Quick check: the blues chords | Revisión rápida: los acordes del blues |
+| Quick check: shuffle feel | Revisión rápida: la sensación de shuffle |
 | Warm-up: tuning check | Calentamiento: afinación |
 | Challenge: root-naming drill | Reto: ejercicio de nombrar raíces |
 | Challenge: I–IV–V builder | Reto: constructor de I–IV–V |
@@ -6852,7 +6869,7 @@ All coach.js student-facing strings now render through `t()`. 407 keys:
 | games.cb.tip | <strong>Name it</strong>: you see a chord shape, you pick its name. <strong>Spot it</strong>: you see a name, you pick the shape. Right answers build a streak — every 5 in a row is worth more points. Miss one and the right answer lights up green, then that chord comes back later. On a laptop, keys 1–4 answer. | <strong>Nómbralo</strong>: ves una forma de acorde y eliges su nombre. <strong>Encuéntralo</strong>: ves un nombre y eliges la forma. Las respuestas correctas forman una racha — cada 5 seguidas valen más puntos. Si fallas, la respuesta correcta se ilumina en verde, y ese acorde vuelve a aparecer más tarde. En una laptop, las teclas 1–4 responden. |
 | games.cb.title | Chord Blitz | Acordes relámpago |
 | games.cc.advice.great | Level up: try it 10 BPM faster. | Sube de nivel: pruébalo 10 BPM más rápido. |
-| games.cc.advice.low | That’s completely fine: drop 10 BPM — slow and smooth is better than fast and messy, every time. | Está perfectamente bien: baja 10 BPM — lento y suave siempre es mejor que rápido y desordenado. |
+| games.cc.advice.low | That’s completely fine: drop 10 BPM — slow and smooth is better than fast and messy, every time. | Está totalmente bien: baja 10 BPM — lento y suave siempre es mejor que rápido y desordenado. |
 | games.cc.advice.practiceWorst | Practice just {worst} on its own — {early}. | Practica solo {worst} por separado — {early}. |
 | games.cc.advice.tryAgainSteady | Try it again at this speed until it feels steady. | Inténtalo de nuevo a esta velocidad hasta que se sienta estable. |
 | games.cc.changeTooltip | {from} to {to} | {from} a {to} |
@@ -6883,7 +6900,7 @@ All coach.js student-facing strings now render through `t()`. 407 keys:
 | games.cc.tipRate.half | every 2 beats (twice a bar) | cada 2 tiempos (dos veces por compás) |
 | games.cc.title | Change Up | Cambio de acordes |
 | games.cc.verdict.great | {ok} of {total} changes on time — you can play at that speed now. | {ok} de {total} cambios a tiempo — ya puedes tocar a esa velocidad. |
-| games.cc.verdict.low | {ok} of {total} — this speed is too fast for now. | {ok} de {total} — esta velocidad todavía es muy rápida. |
+| games.cc.verdict.low | {ok} of {total} — this speed is too fast for now. | {ok} de {total} — esta velocidad es demasiado rápida por ahora. |
 | games.cc.verdict.ok | {ok} of {total} changes worked. | {ok} de {total} cambios funcionaron. |
 | games.cc.verdict.okMessy | {ok} of {total} changes worked ({off} were on time but sounded messy). | {ok} de {total} cambios funcionaron ({off} llegaron a tiempo pero sonaron desordenados). |
 | games.common.again | Again at {bpm} | De nuevo a {bpm} |
@@ -6900,7 +6917,7 @@ All coach.js student-facing strings now render through `t()`. 407 keys:
 | games.common.deck | Deck | Mazo |
 | games.common.inARow | {n} in a row | {n} seguidos |
 | games.common.micAccessDenied | Mic access denied — check browser permissions, then try again. | Acceso al micrófono denegado — revisa los permisos del navegador y vuelve a intentarlo. |
-| games.common.newBest | New best! Your old best today was {value}. | ¡Nuevo mejor puntaje! Tu mejor de hoy anterior era {value}. |
+| games.common.newBest | New best! Your old best today was {value}. | ¡Nuevo récord! Tu mejor puntaje de hoy antes era {value}. |
 | games.common.next | next: | sigue: |
 | games.common.pausedBackgrounded | Paused — this tab went to the background, so the mic switched off. Start again when you’re back. | Pausado — esta pestaña pasó a segundo plano, así que el micrófono se apagó. Empieza de nuevo cuando regreses. |
 | games.common.playAgain | Play again | Jugar de nuevo |

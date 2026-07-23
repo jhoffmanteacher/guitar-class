@@ -92,7 +92,7 @@ SETS.push(
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
               {
-                label: 'Warm-up: tuning check', label_es: 'Calentamiento: revisa la afinación',
+                label: 'Warm-up: tuning check', label_es: 'Calentamiento: afinación',
                 text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 hint: 'Tuning (Module 1) is a skill you keep forever. Clean open strings are exactly what makes a chord ring.',
@@ -349,7 +349,7 @@ SETS.push(
             ] }
           },
           {
-            label: 'Watch: a pain-free F chord', label_es: 'Mira: un F sin dolor',
+            label: 'Watch: a pain-free F chord', label_es: 'Mira: el acorde F sin dolor',
             text: 'Watch: <a href="https://www.youtube.com/watch?v=vUNxt5EvXv8" target="_blank">Pain Free F Chord for Beginners – Lauren Bateman (0:00–4:00)</a>.',
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=vUNxt5EvXv8" target="_blank">Pain Free F Chord for Beginners – Lauren Bateman (0:00–4:00)</a>.',
             hint: 'The F chord is the hardest thing for beginners. The simplified version (xx3211) avoids the full barre (pressing one finger flat across several strings). Use this until it\'s clean, then worry about the barre version.',
@@ -531,7 +531,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Bass line, power chords, or open chords — which Watchtower is your favorite so far?', prompt_es: 'Línea de bajo, acordes de potencia, o acordes al aire — ¿cuál Watchtower es tu favorito hasta ahora?', placeholder: 'e.g. open chords — it finally sounds full', placeholder_es: 'p. ej. acordes al aire — por fin suena completo' }
               },
               {
-                label: 'Challenge: "the cure" play-along', label_es: 'Reto: "the cure" tocando junto',
+                label: 'Challenge: "the cure" play-along', label_es: 'Reto: toca junto a "the cure"',
                 text: 'Challenge — "the cure" play-along: loop Olivia\'s chords with a down-strum — Am · C · Dm · F, two beats each, then G to turn it around — speeding up in steps: 60 → 65 → 70 BPM. The backing track\'s metronome reads 144, but it feels half that fast — so 70 BPM here already puts you close to the record\'s real pace. Open chords, no capo. Shapes are pre-loaded below. You\'ve got it when: two clean loops at 70 BPM, every change on beat 1, every string ringing clear.',
                 text_es: 'Reto — "the cure" tocando junto: repite los acordes de Olivia con un rasgueo hacia abajo — Am · C · Dm · F, dos tiempos cada uno, y luego G para dar la vuelta — acelerando en pasos: 60 → 65 → 70 BPM. El metrónomo de la pista base marca 144, pero se siente a la mitad de esa velocidad — así que 70 BPM aquí ya te acerca bastante al ritmo real de la grabación. Acordes al aire, sin capo. Las formas están precargadas abajo. Lo tienes cuando: dos vueltas limpias a 70 BPM, cada cambio en el tiempo 1, cada cuerda sonando clara.',
                 hint: 'Dm is the new one: a small triangle on the top three strings. Keep your fingers arched and your thumb behind the neck.',
