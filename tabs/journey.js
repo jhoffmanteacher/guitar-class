@@ -9,6 +9,15 @@
 var fbUser = null, fbDb = null, saveTimer = null, dirty = false;
 var userInteracted = false;
 
+/* Always open at the very top — regardless of a #layer-N hash in the URL
+   (deep links, "resume where you left off" buttons) or the browser
+   restoring a previous scroll position on back/forward navigation. The
+   hash still opens the right layer (see openFromHash below); it just
+   shouldn't scroll the page there on first load. */
+if('scrollRestoration' in history) history.scrollRestoration = 'manual';
+window.scrollTo(0, 0);
+window.addEventListener('load', function(){ window.scrollTo(0, 0); });
+
 /* Spanish translate toggle — mirrors the main app's toggleTranslate(). On
    Journey pages only the floating Tuner/Timer/Metronome (fab-tools.js
    markup) carry data-i18n — the rest of the page is still Google-Translate
@@ -69,13 +78,13 @@ function firstUnratedLayer(){
   })[0];
 }
 
-function openFromHash(){
+function openFromHash(scroll){
   var id = (location.hash || '').replace('#', '');
   if(!id) return false;
   var section = document.getElementById(id);
   if(!section || !section.classList.contains('layer')) return false;
   userInteracted = true;
-  openLayer(section, true);
+  openLayer(section, scroll !== false);
   return true;
 }
 
@@ -210,10 +219,13 @@ function paintChip(section){
 }
 
 /* Run immediately (script loads at end of body, DOM is already parsed):
-   a hash link always wins; otherwise Layer 1 stays open (its default
-   HTML state) until saved ratings arrive. */
-openFromHash();
+   a hash link always wins for which layer opens; otherwise Layer 1 stays
+   open (its default HTML state) until saved ratings arrive. Don't scroll
+   on this initial call — the page always opens at the top (see the
+   scrollRestoration/scrollTo block above). */
+openFromHash(false);
 updateProgressPill();
+window.scrollTo(0, 0);
 
 /* ── Layer self-rating ── */
 function rate(btn){
