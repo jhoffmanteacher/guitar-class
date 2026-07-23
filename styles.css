@@ -334,6 +334,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .song-request-ico{font-size:1rem;flex-shrink:0;line-height:1.2}
 .stag{font-size:0.75rem;padding:2px 0;border-radius:10px;flex-shrink:0;white-space:nowrap;background:transparent;color:var(--text2)}
 .stag-core{padding:2px 8px;background:var(--blue-bg);color:var(--blue-text)}
+/* ── Songs hub two-tier layout: Core card pinned on top, then the Choice
+      menu in collapsible difficulty groups (first group open by default) ── */
+.sh-sec-title{font-size:1.0625rem;font-weight:600;margin:16px 2px 8px}
+.sh-group{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow-card);margin-bottom:10px;overflow:hidden}
+.sh-group-head{width:100%;display:flex;align-items:center;gap:8px;padding:12px 14px;font-size:0.9375rem;font-weight:600;font-family:inherit;line-height:inherit;background:var(--bg);border:none;color:var(--text);cursor:pointer;text-align:left}
+.sh-group-head::before{content:'▸';font-size:0.8125rem;color:var(--text2);transition:transform .15s;flex-shrink:0}
+.sh-group.open .sh-group-head::before{transform:rotate(90deg)}
+.sh-group-head:hover{background:var(--bg2)}
+.sh-group-sub{font-size:0.8125rem;font-weight:400;color:var(--text2)}
+.sh-group-count{margin-left:auto;font-size:0.8125rem;font-weight:500;color:var(--text2);white-space:nowrap}
+.sh-group-body{display:none;padding:0 14px 4px;border-top:1px solid var(--border)}
+.sh-group.open .sh-group-body{display:block}
 .song-vids{display:flex;gap:6px;margin-left:auto;flex-shrink:0;align-items:center}
 .song-vid-btn{display:inline-flex;align-items:center;gap:5px;font-size:0.8125rem;padding:3px 9px;border-radius:14px;background:transparent;color:var(--text2);border:1px solid transparent;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background 0.1s,border-color 0.1s,color 0.1s}
 .song-vid-btn:hover{background:var(--bg2);border-color:var(--text2);color:var(--text)}

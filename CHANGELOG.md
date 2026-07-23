@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-23 — The song list is organized now
+
+### Changed
+- The Songs hub is no longer one long list. The six Core songs sit in their
+  own card at the top, and every other song is grouped by difficulty — First
+  riffs & single notes, Chord & strumming songs, and Advanced — based on the
+  module where it first shows up. Tap a group to open it; the counts on each
+  header show how many songs are inside. In English and Spanish.
+- The "Student choice" row at the bottom now reads "any song that means
+  something to you."
+
 ## 2026-07-23 — Smoother practice steps: no more jumping pills or hidden headings
 
 ### Changed

@@ -59,14 +59,16 @@ its `hint`/`stuck`/`levelUp` fields (+ `_es` twins) and show just the instructio
   on the `games-screen` pattern (own URL hash, browser Back exits).
 - **Revisit:** consider giving "My progress" / "My skills checklist" the same full-page treatment.
 
-### [ ] Song list is overwhelming — organize into categories
+### [x] Song list is overwhelming — organize into categories (done 2026-07-23)
 - **Where:** Songs hub — `#songs-hub-btn` → `toggleSongsHub` → `#songs-hub-panel` (app.js ~3918).
-  Today it's one flat card of all songs (core-first, then alphabetical).
 - **Decision (2026-07-23):** **two-tier grouping** — Core (the 6 thread songs) first, then a
   Choice menu broken into **sub-groups**.
-- **OPEN DECISION:** sub-group axis — by **language** (English vs Spanish/regional Mexican) or by
-  **difficulty/skill layer**. Show Jonathan a mockup, then implement.
-- New category labels need EN + ES in `i18n.js`.
+- **DECIDED (Jonathan, mockup review 2026-07-23): sub-group axis = difficulty/skill layer** —
+  First riffs & single notes (start M1–4) / Chord & strumming songs (M5–8) / Advanced (M9–12),
+  grouped by the module where each song first appears; groups collapsible, first open by default;
+  module Focus songs sit inside groups with their tag; student-request row renders last.
+- Category labels added EN + ES in `i18n.js` (+ `translations-review.md`).
+- Also (Jonathan, 2026-07-23): student-choice row renamed "…means something to **you**".
 
 ### [ ] New module: Changing guitar strings (in-class assessment)
 - A **dedicated module** on changing strings, to be a **graded in-class assessment**.

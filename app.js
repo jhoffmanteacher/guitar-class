@@ -3957,8 +3957,27 @@ async function toggleSongsHub(){
   Object.keys(MS).forEach(m => MS[m].forEach(sg => noteSong(sg, Number(m))));
   const entries = [...byName.values()];
   entries.sort((a, b) => (b.song.core === true) - (a.song.core === true) || a.song.name.localeCompare(b.song.name));
-  songsHubList = entries.map(e => e.song);
-  const rows = entries.map((e, idx) => {
+  /* Two-tier layout (2026-07-23): the six Core thread songs pinned in their
+     own card on top, then the Choice menu split into collapsible difficulty
+     groups by the module where each song FIRST appears. Jonathan picked the
+     difficulty axis over language grouping after a mockup comparison.
+     Module Focus songs (core:true, type:'Focus') live inside the groups and
+     keep their tag; the student-request row (request:true) renders last. */
+  const isCoreSix = e => e.song.core === true && e.song.type !== 'Focus';
+  const firstMod = e => Math.min(...e.modules);
+  const coreEntries = entries.filter(isCoreSix);
+  const requestEntries = entries.filter(e => !isCoreSix(e) && e.song.request === true);
+  const rest = entries.filter(e => !isCoreSix(e) && e.song.request !== true);
+  const groups = [
+    { title: t('hub.groupRiffs'),  sub: t('hub.groupStart', {a: 1, b: 4}),  match: e => firstMod(e) <= 4 },
+    { title: t('hub.groupChords'), sub: t('hub.groupStart', {a: 5, b: 8}),  match: e => firstMod(e) >= 5 && firstMod(e) <= 8 },
+    { title: t('hub.groupAdv'),    sub: t('hub.groupStart', {a: 9, b: 12}), match: e => firstMod(e) >= 9 },
+  ].map(g => ({ ...g, entries: rest.filter(g.match) })).filter(g => g.entries.length);
+  const ordered = [...coreEntries, ...groups.flatMap(g => g.entries), ...requestEntries];
+  songsHubList = ordered.map(e => e.song);
+  let rowIdx = 0;
+  const row = (e) => {
+    const idx = rowIdx++;
     const sg = e.song;
     const mods = [...e.modules].sort((a, b) => a - b);
     const modBtns = mods.map(m =>
@@ -3974,10 +3993,23 @@ async function toggleSongsHub(){
       <div><div class="sname">${escHtml(sg.name)}</div><div class="smeta">${sg.meta ? escHtml(sg.meta) + ' · ' : ''}${t('hub.taughtIn')} ${modBtns}</div></div>
       ${vids.length ? `<div class="song-vids">${vids.join('')}</div>` : ''}
       <span class="stag ${sg.core ? 'stag-core' : ''}">${escHtml(sg.type || t(sg.core ? 'hub.tagCore' : 'hub.tagChoice'))}</span></div>`;
-  }).join('');
+  };
+  const renderRows = list => list.map(row).join('');
+  const coreHtml = `<div class="sh-sec-title">${t('hub.coreTitle')}</div><div class="card">${renderRows(coreEntries)}</div>`;
+  const groupsHtml = `<div class="sh-sec-title">${t('hub.choiceTitle')}</div>` + groups.map((g, gi) =>
+    `<div class="sh-group${gi === 0 ? ' open' : ''}"><button type="button" class="sh-group-head" aria-expanded="${gi === 0}" onclick="toggleHubGroup(this)"><span>${g.title}</span><span class="sh-group-sub">${g.sub}</span><span class="sh-group-count">${t('hub.groupCount', {n: g.entries.length})}</span></button><div class="sh-group-body">${renderRows(g.entries)}</div></div>`).join('');
+  const requestHtml = requestEntries.length ? `<div class="card">${renderRows(requestEntries)}</div>` : '';
   p.innerHTML = `<div class="daily5-head"><span>&#x266A; ${t('hub.allSongs')}</span><button type="button" class="tp-close" onclick="toggleSongsHub()" aria-label="${escAttr(t('hub.closeAria'))}">&#x2715;</button></div>
     <div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('hub.legendCore')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('hub.legendChoice')}</div></div>
-    <div class="card">${rows}</div>`;
+    ${coreHtml}${groupsHtml}${requestHtml}`;
+}
+
+/* Songs-hub difficulty group open/close (header button). */
+function toggleHubGroup(btn){
+  const g = btn.closest('.sh-group');
+  if(!g) return;
+  const open = g.classList.toggle('open');
+  btn.setAttribute('aria-expanded', String(open));
 }
 let songsHubList = [];
 function songsHubVid(idx, kind){

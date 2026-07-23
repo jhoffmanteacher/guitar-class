@@ -414,6 +414,13 @@
     'hub.backing':           { en: 'Backing', es: 'Pista' },
     'hub.tagCore':           { en: 'Core', es: 'Básica' },
     'hub.tagChoice':         { en: 'Choice', es: 'A elección' },
+    'hub.coreTitle':         { en: 'Core songs', es: 'Canciones básicas' },
+    'hub.choiceTitle':       { en: 'Choice menu', es: 'Menú a elección' },
+    'hub.groupRiffs':        { en: 'First riffs & single notes', es: 'Primeros riffs y notas individuales' },
+    'hub.groupChords':       { en: 'Chord & strumming songs', es: 'Canciones con acordes y rasgueo' },
+    'hub.groupAdv':          { en: 'Advanced', es: 'Avanzadas' },
+    'hub.groupStart':        { en: 'start in Modules {a}–{b}', es: 'empiezan en los Módulos {a}–{b}' },
+    'hub.groupCount':        { en: '{n} songs', es: '{n} canciones' },
 
     // ── 🔁 Keep practicing panel ──
     'kp.closeAria':          { en: 'Close keep practicing', es: 'Cerrar seguir practicando' },
