@@ -24,11 +24,17 @@
      node tools/checks.mjs --skip-links   validate + bump SW  (fast)
      node tools/checks.mjs --check        verify only, change nothing
                                           (exit 1 if SW version is stale)
+     node tools/checks.mjs --live     POST-push only: fetch the live site's
+                                      sw.js and confirm its CACHE_VERSION
+                                      matches local — catches a failed or
+                                      still-running GitHub Pages deploy.
+                                      Runs alone (no other checks).
 
    Exit code is non-zero if anything fails, so a push can be aborted.
    ════════════════════════════════════════════════════════════════════ */
 
 import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -38,6 +44,9 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const args = new Set(process.argv.slice(2));
 const CHECK_ONLY = args.has('--check');
 const SKIP_LINKS = args.has('--skip-links');
+const LIVE_ONLY  = args.has('--live');
+
+const LIVE_SW_URL = 'https://jhoffmanteacher.github.io/guitar-class/sw.js';
 
 const C = { red:'\x1b[31m', green:'\x1b[32m', yellow:'\x1b[33m', dim:'\x1b[2m', bold:'\x1b[1m', reset:'\x1b[0m' };
 const ok   = m => console.log(`${C.green}✓${C.reset} ${m}`);
@@ -570,8 +579,70 @@ function bumpServiceWorker() {
 }
 
 /* ════════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════════
+   0. SYNTAX — parse every shipped .js with `node --check`.
+   The site has no build step, so a syntax error in app.js/coach.js/etc.
+   ships straight to the live site and bricks it on load. validateModules
+   already parses module-N.js + config-main.js; this covers everything
+   else (app, coach, i18n, fab-tools, tuner, teacher, firebase-config,
+   sw.js, tabs/*.js). Cheap (<1s), runs in every mode incl. the
+   pre-commit hook's --check --skip-links.
+   ════════════════════════════════════════════════════════════════════ */
+function syntaxCheck() {
+  head('0. JS syntax (node --check)');
+  const files = [...SHELL_FILES.filter(f => f.endsWith('.js')), 'sw.js'];
+  let bad = 0;
+  for (const f of files) {
+    const r = spawnSync(process.execPath, ['--check', join(ROOT, f)], { encoding: 'utf8' });
+    if (r.status !== 0) {
+      err(`syntax error: ${f}`);
+      console.log(`${C.dim}${(r.stderr || '').trim().split('\n').slice(0, 4).join('\n')}${C.reset}`);
+      bad++; problems++;
+    }
+  }
+  if (!bad) ok(`${files.length} shipped .js files parse clean`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   POST-PUSH: --live — confirm GitHub Pages actually deployed what we
+   pushed, by comparing the live sw.js CACHE_VERSION against local.
+   Catches a failed/stuck Pages build (students would silently keep the
+   old cached site). Run it ~a minute after `git push`.
+   ════════════════════════════════════════════════════════════════════ */
+async function liveCheck() {
+  head('Post-push: live-site deploy check');
+  const verRe = /CACHE_VERSION\s*=\s*['"]([^'"]+)['"]/;
+  const local = (readFileSync(join(ROOT, 'sw.js'), 'utf8').match(verRe) || [])[1];
+  if (!local) { err('could not read local CACHE_VERSION from sw.js'); problems++; return; }
+  let live;
+  try {
+    const res = await fetchWithTimeout(`${LIVE_SW_URL}?nocache=${Date.now()}`, { headers: { 'cache-control': 'no-cache' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    live = ((await res.text()).match(verRe) || [])[1];
+  } catch (e) {
+    warn(`could not fetch live sw.js (${e.message}) — check the network and retry`); warnings++;
+    return 'unreachable';
+  }
+  if (live === local) { ok(`live site is serving this exact version (${local})`); return 'ok'; }
+  err(`live CACHE_VERSION is ${live || 'unreadable'}, local is ${local}`);
+  console.log(`${C.dim}      GitHub Pages may still be deploying — wait ~1–2 minutes and re-run:\n      node tools/checks.mjs --live${C.reset}`);
+  problems++;
+  return 'mismatch';
+}
+
 (async function main() {
+  if (LIVE_ONLY) {
+    console.log(`${C.bold}Guitar Class — post-push live check${C.reset}`);
+    const status = await liveCheck();
+    console.log('');
+    if (status === 'ok') { ok('deploy confirmed.'); return; }
+    err(status === 'unreachable'
+      ? 'could NOT confirm the deploy (live site unreachable) — retry when online.'
+      : 'live site does not match — see above.');
+    process.exit(1);
+  }
   console.log(`${C.bold}Guitar Class — pre-push checks${C.reset}${CHECK_ONLY ? `  ${C.dim}(check-only)${C.reset}` : ''}`);
+  syntaxCheck();
   validateModules();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');

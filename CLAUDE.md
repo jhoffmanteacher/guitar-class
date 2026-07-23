@@ -13,12 +13,28 @@ Jonathan Hoffman prefers plain-English instructions and wants Claude to handle a
 **Cloud (Cowork) sessions:** "push to GitHub" can't push directly — cloud
 GitHub access is read-only for this repo, and git write operations through the
 device-bridge folder fail (lock files can't be unlinked; never attempt them).
-Instead: run the FULL pre-push checks in the cloud (so `CACHE_VERSION` ships
-pre-bumped), commit, then deliver a `git format-patch` file plus a short
-`APPLY-*.md` instruction file; Jonathan hands both to his local Claude Code,
-which runs `git am`, re-verifies, and pushes. Afterwards the cloud session
-fetches origin and hard-resets its clone to match. (Full rationale + history:
-WORKFLOW.md "Working conventions.")
+The handoff process instead, refined 2026-07-23:
+
+1. **Cloud side:** run the FULL pre-push checks (`node tools/checks.mjs`) so
+   the link check happens once and `CACHE_VERSION` ships pre-bumped; commit;
+   `git format-patch` the commit(s).
+2. **Every patch ships as a PAIR with its own `APPLY-<name>.md`** — never a
+   patch alone, never instructions only in chat. The APPLY file states: what
+   the commit is, which base commit it expects, the apply order if other
+   patches are pending, and these exact steps — `git status` (clean tree) →
+   `git am <patch>` → `node tools/checks.mjs --check --skip-links` (FAST
+   verify only: the cloud already ran the full battery, and the patch carries
+   the validated content byte-for-byte — re-running the link check locally is
+   wasted time) → `git push` → `node tools/checks.mjs --live` a minute later.
+   If the doc mentions a WORKFLOW.md status flip (`[~]`→`[x]`), amend it in
+   before pushing.
+3. **Local side:** Jonathan hands the pair to his local Claude Code
+   ("opusplan"), which follows the APPLY file.
+4. **Cloud side, afterwards:** fetch origin and hard-reset the cloud clone to
+   match (patches applied via `git am` get new hashes — never re-merge, just
+   reset).
+
+(Full rationale + history: WORKFLOW.md "Working conventions.")
 
 ### ⚠️ Run the pre-push checks before EVERY code push
 Before any push that changes `index.html`, `styles.css`, `app.js`, `tuner.js`,
@@ -28,18 +44,37 @@ Before any push that changes `index.html`, `styles.css`, `app.js`, `tuner.js`,
 node tools/checks.mjs
 ```
 
-It does three jobs automatically and exits non-zero if anything's wrong (so
+It does four jobs automatically and exits non-zero if anything's wrong (so
 don't push until it passes):
 
-1. **Validates module data** — loads every `module-N.js` and checks each Set
+1. **Syntax-checks every shipped .js** (`node --check` on app.js, coach.js,
+   i18n.js, sw.js, tabs/*.js, etc.) — the site has no build step, so a typo
+   in a non-module file would otherwise ship straight to students. (Added
+   2026-07-23; module files were already parsed by the validator.)
+2. **Validates module data** — loads every `module-N.js` and checks each Set
    has the fields the app needs, so a stray comma or missing field is caught
    here instead of breaking the live site.
-2. **Link-checks** all external YouTube / Google-Docs URLs (YouTube via the
+3. **Link-checks** all external YouTube / Google-Docs URLs (YouTube via the
    oEmbed endpoint — see "Lessons learned" below). Flags dead links to fix.
-3. **Bumps the service-worker cache version** — `CACHE_VERSION` in `sw.js` is
+   Keep this on full pushes even when no links changed — it also catches
+   previously-good videos that have since been taken down.
+4. **Bumps the service-worker cache version** — `CACHE_VERSION` in `sw.js` is
    now a content *fingerprint* of the cached shell files, so the script updates
    it automatically whenever a shell file changed and leaves it alone when
    nothing did. **No more bumping it by hand, and it can't be forgotten.**
+
+### After every push: confirm the deploy actually landed
+About a minute after `git push`, run:
+
+```
+node tools/checks.mjs --live
+```
+
+It fetches the live site's `sw.js` and confirms its `CACHE_VERSION` matches
+local — catching a failed or stuck GitHub Pages build, which would otherwise
+silently leave students on the old cached site. If it reports a mismatch,
+wait a minute and re-run before investigating. (Cloud sessions can't reach
+the live site — this step belongs to whichever LOCAL session pushed.)
 
 Notes:
 - The site is a light PWA: `sw.js` caches the static shell so it loads offline.

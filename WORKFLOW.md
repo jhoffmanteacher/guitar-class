@@ -47,10 +47,13 @@
   git's lock files — stale locks had to be swept to `_to_delete/`). The
   working pattern instead: build + verify in the cloud (full `checks.mjs`
   run pre-handoff so `CACHE_VERSION` ships pre-bumped) → commit → deliver
-  `git format-patch` output + a short `APPLY-*.md` → Jonathan's local
-  Claude Code applies (`git am`) and pushes → the cloud session then
-  fetches origin and hard-resets its clone. Local sessions keep the normal
-  "push to GitHub" workflow from CLAUDE.md unchanged.
+  `git format-patch` output **always paired with its own `APPLY-*.md`**
+  (canonical step list lives in CLAUDE.md's cloud-sessions section: fast
+  `--check --skip-links` verify on apply, push, then `--live` deploy
+  confirmation) → Jonathan's local Claude Code applies (`git am`) and
+  pushes → the cloud session then fetches origin and hard-resets its
+  clone. Local sessions keep the normal "push to GitHub" workflow from
+  CLAUDE.md unchanged.
 
 ---
 
