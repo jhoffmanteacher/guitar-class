@@ -59,7 +59,166 @@
 
 ## Open work
 
-- [~] **i18n phase 2 — hand-written Spanish for module/lesson content, tabs/
+- [ ] **Custom backing tracks for the six journey-page play-alongs — Jonathan
+      is making them himself** (Jonathan, 2026-07-20; plan to do all six
+      confirmed 2026-07-22) — every Song Journey page has a "🎵 Play along"
+      button. **"the cure" is DONE and live-verified** (2026-07-22): swapped to
+      Jonathan's own **A-minor, no-capo** tracks — a clean rhythm-down mix
+      (`audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-rhythm-down.mp3`)
+      plus a metronome variant with a click baked in
+      (`...-rhythm-down-metronome.mp3`, re-balanced once already for a too-loud
+      click), both local files played through a looping `<audio>` element with
+      a "🎵 Metronome" toggle on the Journey page to swap between them
+      mid-playback (position + play state preserved). At the same time every
+      capo instruction for the song was stripped across the modules + its
+      Journey page, and an asterisk note under the play-along button explains
+      that capoing the 1st fret matches the original recording's pitch.
+      **"Luna" is DONE (2026-07-22):** swapped to Jonathan's own **A-minor,
+      128 BPM** rhythm-down mix
+      (`audio/peso-pluma-junior-h-luna-backing-Am-128bpm-440hz-rhythm-down.mp3`)
+      plus a metronome variant (`...-rhythm-down-metronome.mp3`), replacing the
+      generic Dm YouTube loop on the Journey page — same local-`<audio>` +
+      Metronome-toggle pattern as "the cure." Song is already capo-free, so no
+      capo cleanup was needed. **Watchtower is DONE (2026-07-22):** swapped to
+      Jonathan's own **Neil Young cover, A-minor, 115 BPM** rhythm-down mix
+      (`audio/neil-young-all-along-the-watchtower-backing-Am-115bpm-440hz-rhythm-down.mp3`)
+      plus a metronome variant (`...-rhythm-down-metronome.mp3`), replacing the
+      generic Am YouTube jam loop (`Vq8cApzOdy8`) on the Journey page — same
+      local-`<audio>` + Metronome-toggle pattern, wired in both
+      `tabs/all-along-the-watchtower.html` and `module-4.js`'s `MODULE_SONGS`
+      entry (the display name stays "Dylan / Hendrix" per the artist-stays-out-
+      of-display-metadata rule — only the filename carries the Neil Young
+      slug). Song is already capo-free and already in the site's teaching key
+      (Am), so no key/capo cleanup was needed. Browser-verified: play-along
+      button builds the `<audio>` element with a resolvable source, Metronome
+      toggle correctly swaps to the `-metronome` variant. **Naming convention
+      going forward:**
+      `<artist-slug>-<song-slug>-backing-<key>-<bpm>bpm-<tuning>hz-<mix>.mp3` —
+      see the "Backing-track naming & tuning" section in `CLAUDE.md` for the
+      full rule (every track ships at A=440, exported directly from Moises).
+      **Plan for the other four: same treatment, one song at a time, as
+      Jonathan supplies the mp3s** — each gets the same recipe "the cure" and
+      "Luna" got:
+      - Two files per song at minimum: a clean rhythm-down mix and a
+        rhythm-down-metronome variant, **both exported at A=440** (never trust
+        the source master's tuning — see "Backing-track naming & tuning" in
+        `CLAUDE.md`), named
+        `<artist-slug>-<song-slug>-backing-<key>-<bpm>bpm-<tuning>hz-<mix>.mp3`.
+      - Wire exactly like `tabs/the-cure.html` / `module-4.js`: `data-audio` +
+        `data-audio-metronome` on `#playalong-frame`, `backingUrl` pointing at
+        the clean mix. The metronome-toggle code in `tabs/journey.js` is
+        already generic — it activates automatically whenever a page's frame
+        has `data-audio-metronome`, no per-song JS changes needed.
+      - `tools/checks.mjs` fingerprints everything in `audio/` (fixed
+        2026-07-22), so `CACHE_VERSION` bumps automatically for these too —
+        no manual cache-busting step per song.
+      - Until Jonathan supplies a song's files, it keeps its existing YouTube
+        loop:
+        - Seven Nation Army — `sbN1wfDb4sw`
+        - Sweet Child O' Mine — `kkZI8Lma8UA`
+        - Let It Be — `xHhfKZAH_EU`
+      Give Claude the file(s) — it'll copy into `audio/`, rename to convention,
+      wire, run `tools/checks.mjs`, and verify before pushing.
+
+- [~] **Real-guitar test of Riff Runner Wait Mode** (Jonathan, 2026-07-12;
+      metronome stripped out 2026-07-22) —
+      **Note detection confirmed on real guitar (2026-07-22): correctly
+      catches the notes played along.** That same real-guitar pass also
+      surfaced a design problem: the metronome/count-in implied a fixed
+      rhythm to match, but the tab was already waiting on pitch, not time —
+      the two signals fought each other and read as confusing rather than
+      helpful. **Fix: dropped the metronome/count-in entirely.** Wait Mode
+      is now pure untimed note-by-note play-along — play each note whenever
+      you're ready, the mic listens, the tab advances on a correct hit, no
+      clock at all. This also removed the **Play-along speed** picker from
+      the ready screen (nothing left to set a tempo for) and the beat pips /
+      hit-line pulse from the play screen. Rhythm/tempo practice is still
+      the timed **Keys / tap** game's job — Wait Mode is now purely about
+      landing the right notes. Code: `coach.js` (`rnw*` functions, ready
+      screen's `guitarUi`) and `styles.css`. **Not yet pushed or re-tested
+      on a real guitar** — do a fresh real-guitar pass on the live site
+      (PWA cache — hard-refresh) once pushed, to confirm the no-clock flow
+      feels natural end to end (not just note detection in isolation).
+- [~] **Real-guitar retest of the mic features** (Jonathan, 2026-07-12; melody
+      detail added from REVIEW-PLAN K-1, 2026-07-20) —
+      **Listening Coach chord check ("Check my changes"): DONE & verified**
+      on real guitar (pushed through `2e3feee`). Root cause was NOT the
+      onset/verdict knobs but the pitch detector: YIN's strict 0.22 clarity
+      gate rejected polyphonic chord frames outright (most strums logged 0
+      pitch reads). Fixes now live: forgiving *check-flow* onset thresholds
+      (`CHK_*` at the top of coach.js, shared by the Coach + Change Up, split
+      from the stricter `COACH_*` the rhythm games keep); chord-mode YIN
+      clarity of 0.55 (melody stays 0.22); 20%-ok chord-tone bar; wider
+      ±0.18-beat "on the beat" window; same 0.55 clarity applied to Change
+      Up. Final real-guitar run: ~4.7 reads/strum, ~65–80% on chord, 87% →
+      "Great". Debug meter (`?ccdebug=1`) was used to find this and has been
+      stripped.
+      **Still to retest, all on a real guitar:**
+      - **Melody mode (P0 — this is the one that matters most).** Pitch
+        detection confirmed correct on real guitar (2026-07-22) — it hears
+        the right notes. But that same test surfaced a **timing UX bug**:
+        melody mode only had the small reactive chip strip as a "what to
+        play now" cue (`.now` class, flips exactly at the beat), unlike
+        chords mode, which already solved this with a big current/next
+        readout shown ahead of time (`coachNowHtml` — the code comment even
+        documents why: "the chip strip alone only reveals a change the
+        instant it's due, which makes every switch late by reaction time").
+        Melody never got that same treatment, so students were watching the
+        reactive highlight and always landing a beat late. **Fix: extended
+        `coachNowHtml` to melody mode** — it now shows the current note big
+        + "next: X" ahead of time, same as chords (`coach.js`, `coachNowHtml`
+        + the beat-pulse update block ~line 533). **Not yet pushed or
+        retested** — confirm on a real guitar that the current/next preview
+        actually makes it easier to land notes on the beat.
+      - One Note Hunt round, one full Change Up round.
+      - **Must run on the LIVE site**, not localhost — the PWA service
+        worker caches the shell, so confirm the deployed `CACHE_VERSION` is
+        current and hard-refresh first.
+- [ ] **Live-site device checks, no mic needed** (bundled from REVIEW-PLAN
+      K-2/K-5/D-7 and today's compact-checklist work, 2026-07-20) — code for
+      all of these already shipped; each just needs an on-device look, ideally
+      in the same live-site sitting as the mic retest above:
+      - **Tuner still locks all six strings** after the 5×-cheaper YIN scan
+        (`tuner.js` — tau loop now bounded by `sampleRate/60` instead of
+        scanning the full buffer, and the per-frame `Float32Array` allocation
+        was removed in favor of a reused buffer).
+      - **Tuner string-selector touch targets** on an actual phone (~360px
+        wide) — buttons were raised toward ~40–44px; confirm they're
+        comfortable to tap with a guitar on your lap.
+      - **Compact checklist at phone width (~400px)** — rows shouldn't
+        overflow and tap targets should hold ≥44px (`.step-head` is set to
+        `min-height:48px` in styles.css, but wasn't confirmed on a real
+        device — my browser-automation window resize didn't actually
+        reflow the viewport during testing).
+      - **Compact checklist print preview (⌘P)** — every step should render
+        fully expanded with the chevron hidden, same as before the redesign;
+        also not yet visually confirmed.
+      - **Song Journey pages at phone width + print preview** — same two
+        checks for the new journey-page accordion (`tabs/*.html`): rows
+        shouldn't overflow at ~400px, and ⌘P should show every layer fully
+        expanded with chevrons/translate button hidden. Shipped in `dbd2f8f`
+        with print styles written, but neither has been eyeballed on a real
+        device.
+- [ ] **Module 12: confirm the requinto video fits, then delete the leftover
+      note** (REVIEW-PLAN C-7, 2026-07-20) — `module-12.js:430` has an HTML
+      comment flagging that the La Derrota (Vicente Fernández) requinto
+      lesson still needs a fit check for the sierreño/corridos-tumbados
+      requinto skill it's teaching. Not student-visible, but it's an
+      unresolved flag in shipped content. Watch it (or have an agent watch
+      and summarize) and either confirm it's a good fit or swap it — if
+      swapping, WebSearch → oEmbed-verify, never write a video ID from
+      memory. Delete the HTML comment once resolved.
+- [ ] **Research backlog (medium/low)** — stored One-Minute-Changes
+      scores, tempo-ladder playSeq, Song Journey anatomy sections, bends,
+      7th/sus chord color, songwriting capstone, Choice-song style lanes,
+      motivation layer. Details in `archive/RESEARCH_UPGRADES.md`; do not
+      start without Jonathan's go-ahead.
+
+---
+
+## Recently shipped (post-archive)
+
+- [x] **i18n phase 2 — hand-written Spanish for module/lesson content, tabs/
       pages, and games** (started 2026-07-22) — phase 1 (already done, see
       CLAUDE.md's "i18n — hand-written Spanish for the app shell") only
       covered the shell (header, nav, tools, checklist). This phase extends
@@ -239,164 +398,13 @@
       Song Journey pages hand-translated via data-es, and Google
       Translate REMOVED site-wide** (the `WINTER_CHALLENGE` Challenge
       Day feature was removed entirely instead of translating it).
-- [ ] **Custom backing tracks for the six journey-page play-alongs — Jonathan
-      is making them himself** (Jonathan, 2026-07-20; plan to do all six
-      confirmed 2026-07-22) — every Song Journey page has a "🎵 Play along"
-      button. **"the cure" is DONE and live-verified** (2026-07-22): swapped to
-      Jonathan's own **A-minor, no-capo** tracks — a clean rhythm-down mix
-      (`audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-rhythm-down.mp3`)
-      plus a metronome variant with a click baked in
-      (`...-rhythm-down-metronome.mp3`, re-balanced once already for a too-loud
-      click), both local files played through a looping `<audio>` element with
-      a "🎵 Metronome" toggle on the Journey page to swap between them
-      mid-playback (position + play state preserved). At the same time every
-      capo instruction for the song was stripped across the modules + its
-      Journey page, and an asterisk note under the play-along button explains
-      that capoing the 1st fret matches the original recording's pitch.
-      **"Luna" is DONE (2026-07-22):** swapped to Jonathan's own **A-minor,
-      128 BPM** rhythm-down mix
-      (`audio/peso-pluma-junior-h-luna-backing-Am-128bpm-440hz-rhythm-down.mp3`)
-      plus a metronome variant (`...-rhythm-down-metronome.mp3`), replacing the
-      generic Dm YouTube loop on the Journey page — same local-`<audio>` +
-      Metronome-toggle pattern as "the cure." Song is already capo-free, so no
-      capo cleanup was needed. **Watchtower is DONE (2026-07-22):** swapped to
-      Jonathan's own **Neil Young cover, A-minor, 115 BPM** rhythm-down mix
-      (`audio/neil-young-all-along-the-watchtower-backing-Am-115bpm-440hz-rhythm-down.mp3`)
-      plus a metronome variant (`...-rhythm-down-metronome.mp3`), replacing the
-      generic Am YouTube jam loop (`Vq8cApzOdy8`) on the Journey page — same
-      local-`<audio>` + Metronome-toggle pattern, wired in both
-      `tabs/all-along-the-watchtower.html` and `module-4.js`'s `MODULE_SONGS`
-      entry (the display name stays "Dylan / Hendrix" per the artist-stays-out-
-      of-display-metadata rule — only the filename carries the Neil Young
-      slug). Song is already capo-free and already in the site's teaching key
-      (Am), so no key/capo cleanup was needed. Browser-verified: play-along
-      button builds the `<audio>` element with a resolvable source, Metronome
-      toggle correctly swaps to the `-metronome` variant. **Naming convention
-      going forward:**
-      `<artist-slug>-<song-slug>-backing-<key>-<bpm>bpm-<tuning>hz-<mix>.mp3` —
-      see the "Backing-track naming & tuning" section in `CLAUDE.md` for the
-      full rule (every track ships at A=440, exported directly from Moises).
-      **Plan for the other four: same treatment, one song at a time, as
-      Jonathan supplies the mp3s** — each gets the same recipe "the cure" and
-      "Luna" got:
-      - Two files per song at minimum: a clean rhythm-down mix and a
-        rhythm-down-metronome variant, **both exported at A=440** (never trust
-        the source master's tuning — see "Backing-track naming & tuning" in
-        `CLAUDE.md`), named
-        `<artist-slug>-<song-slug>-backing-<key>-<bpm>bpm-<tuning>hz-<mix>.mp3`.
-      - Wire exactly like `tabs/the-cure.html` / `module-4.js`: `data-audio` +
-        `data-audio-metronome` on `#playalong-frame`, `backingUrl` pointing at
-        the clean mix. The metronome-toggle code in `tabs/journey.js` is
-        already generic — it activates automatically whenever a page's frame
-        has `data-audio-metronome`, no per-song JS changes needed.
-      - `tools/checks.mjs` fingerprints everything in `audio/` (fixed
-        2026-07-22), so `CACHE_VERSION` bumps automatically for these too —
-        no manual cache-busting step per song.
-      - Until Jonathan supplies a song's files, it keeps its existing YouTube
-        loop:
-        - Seven Nation Army — `sbN1wfDb4sw`
-        - Sweet Child O' Mine — `kkZI8Lma8UA`
-        - Let It Be — `xHhfKZAH_EU`
-      Give Claude the file(s) — it'll copy into `audio/`, rename to convention,
-      wire, run `tools/checks.mjs`, and verify before pushing.
-
-- [~] **Real-guitar test of Riff Runner Wait Mode** (Jonathan, 2026-07-12;
-      metronome stripped out 2026-07-22) —
-      **Note detection confirmed on real guitar (2026-07-22): correctly
-      catches the notes played along.** That same real-guitar pass also
-      surfaced a design problem: the metronome/count-in implied a fixed
-      rhythm to match, but the tab was already waiting on pitch, not time —
-      the two signals fought each other and read as confusing rather than
-      helpful. **Fix: dropped the metronome/count-in entirely.** Wait Mode
-      is now pure untimed note-by-note play-along — play each note whenever
-      you're ready, the mic listens, the tab advances on a correct hit, no
-      clock at all. This also removed the **Play-along speed** picker from
-      the ready screen (nothing left to set a tempo for) and the beat pips /
-      hit-line pulse from the play screen. Rhythm/tempo practice is still
-      the timed **Keys / tap** game's job — Wait Mode is now purely about
-      landing the right notes. Code: `coach.js` (`rnw*` functions, ready
-      screen's `guitarUi`) and `styles.css`. **Not yet pushed or re-tested
-      on a real guitar** — do a fresh real-guitar pass on the live site
-      (PWA cache — hard-refresh) once pushed, to confirm the no-clock flow
-      feels natural end to end (not just note detection in isolation).
-- [~] **Real-guitar retest of the mic features** (Jonathan, 2026-07-12; melody
-      detail added from REVIEW-PLAN K-1, 2026-07-20) —
-      **Listening Coach chord check ("Check my changes"): DONE & verified**
-      on real guitar (pushed through `2e3feee`). Root cause was NOT the
-      onset/verdict knobs but the pitch detector: YIN's strict 0.22 clarity
-      gate rejected polyphonic chord frames outright (most strums logged 0
-      pitch reads). Fixes now live: forgiving *check-flow* onset thresholds
-      (`CHK_*` at the top of coach.js, shared by the Coach + Change Up, split
-      from the stricter `COACH_*` the rhythm games keep); chord-mode YIN
-      clarity of 0.55 (melody stays 0.22); 20%-ok chord-tone bar; wider
-      ±0.18-beat "on the beat" window; same 0.55 clarity applied to Change
-      Up. Final real-guitar run: ~4.7 reads/strum, ~65–80% on chord, 87% →
-      "Great". Debug meter (`?ccdebug=1`) was used to find this and has been
-      stripped.
-      **Still to retest, all on a real guitar:**
-      - **Melody mode (P0 — this is the one that matters most).** Pitch
-        detection confirmed correct on real guitar (2026-07-22) — it hears
-        the right notes. But that same test surfaced a **timing UX bug**:
-        melody mode only had the small reactive chip strip as a "what to
-        play now" cue (`.now` class, flips exactly at the beat), unlike
-        chords mode, which already solved this with a big current/next
-        readout shown ahead of time (`coachNowHtml` — the code comment even
-        documents why: "the chip strip alone only reveals a change the
-        instant it's due, which makes every switch late by reaction time").
-        Melody never got that same treatment, so students were watching the
-        reactive highlight and always landing a beat late. **Fix: extended
-        `coachNowHtml` to melody mode** — it now shows the current note big
-        + "next: X" ahead of time, same as chords (`coach.js`, `coachNowHtml`
-        + the beat-pulse update block ~line 533). **Not yet pushed or
-        retested** — confirm on a real guitar that the current/next preview
-        actually makes it easier to land notes on the beat.
-      - One Note Hunt round, one full Change Up round.
-      - **Must run on the LIVE site**, not localhost — the PWA service
-        worker caches the shell, so confirm the deployed `CACHE_VERSION` is
-        current and hard-refresh first.
-- [ ] **Live-site device checks, no mic needed** (bundled from REVIEW-PLAN
-      K-2/K-5/D-7 and today's compact-checklist work, 2026-07-20) — code for
-      all of these already shipped; each just needs an on-device look, ideally
-      in the same live-site sitting as the mic retest above:
-      - **Tuner still locks all six strings** after the 5×-cheaper YIN scan
-        (`tuner.js` — tau loop now bounded by `sampleRate/60` instead of
-        scanning the full buffer, and the per-frame `Float32Array` allocation
-        was removed in favor of a reused buffer).
-      - **Tuner string-selector touch targets** on an actual phone (~360px
-        wide) — buttons were raised toward ~40–44px; confirm they're
-        comfortable to tap with a guitar on your lap.
-      - **Compact checklist at phone width (~400px)** — rows shouldn't
-        overflow and tap targets should hold ≥44px (`.step-head` is set to
-        `min-height:48px` in styles.css, but wasn't confirmed on a real
-        device — my browser-automation window resize didn't actually
-        reflow the viewport during testing).
-      - **Compact checklist print preview (⌘P)** — every step should render
-        fully expanded with the chevron hidden, same as before the redesign;
-        also not yet visually confirmed.
-      - **Song Journey pages at phone width + print preview** — same two
-        checks for the new journey-page accordion (`tabs/*.html`): rows
-        shouldn't overflow at ~400px, and ⌘P should show every layer fully
-        expanded with chevrons/translate button hidden. Shipped in `dbd2f8f`
-        with print styles written, but neither has been eyeballed on a real
-        device.
-- [ ] **Module 12: confirm the requinto video fits, then delete the leftover
-      note** (REVIEW-PLAN C-7, 2026-07-20) — `module-12.js:430` has an HTML
-      comment flagging that the La Derrota (Vicente Fernández) requinto
-      lesson still needs a fit check for the sierreño/corridos-tumbados
-      requinto skill it's teaching. Not student-visible, but it's an
-      unresolved flag in shipped content. Watch it (or have an agent watch
-      and summarize) and either confirm it's a good fit or swap it — if
-      swapping, WebSearch → oEmbed-verify, never write a video ID from
-      memory. Delete the HTML comment once resolved.
-- [ ] **Research backlog (medium/low)** — stored One-Minute-Changes
-      scores, tempo-ladder playSeq, Song Journey anatomy sections, bends,
-      7th/sus chord color, songwriting capstone, Choice-song style lanes,
-      motivation layer. Details in `archive/RESEARCH_UPGRADES.md`; do not
-      start without Jonathan's go-ahead.
-
----
-
-## Recently shipped (post-archive)
+      **CLOSED 2026-07-23:** the AI-sweep proofread review (session 6's
+      review policy) is finished with all findings fixed, closing out phase
+      2 end to end. `translations-review.md` — the working EN→ES review
+      sheet used throughout this phase — was deleted (`956743e`) now that
+      the review it supported is done; the review policy itself moved into
+      CLAUDE.md's i18n section as the standing rule for future Spanish
+      batches.
 
 - [x] **Practice everywhere (round 2): Modules 6–12 drills + six-string
       Find-the-Note + shell i18n finished + list-formatted directions** —
