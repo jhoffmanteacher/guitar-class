@@ -32,6 +32,7 @@ SETS.push(
             title_es: 'Mira los videos de la lección',
             steps: [
           {
+            label: 'Watch: reading TAB & chord boxes', label_es: 'Mira: leer TAB y diagramas de acorde',
             text: 'Watch: <a href="https://youtu.be/4-JTCASlh-w" target="_blank">How to Read TAB & Chord Boxes – JustinGuitar</a> (0:00–4:00).',
             text_es: 'Mira: <a href="https://youtu.be/4-JTCASlh-w" target="_blank">How to Read TAB & Chord Boxes – JustinGuitar</a> (0:00–4:00).',
             hint: 'Pause when he shows a diagram and look at it yourself. What does the X mean? What does the O mean? What do the numbers in the dots tell you?',
@@ -56,6 +57,7 @@ SETS.push(
             ] }
           },
           {
+            label: 'Watch: first chords Em & Asus2', label_es: 'Mira: primeros acordes Em y Asus2',
             text: 'Watch: <a href="https://youtu.be/HNSaXAe8tyg" target="_blank">Your Very First Chords: Em & Asus2 – Marty Music</a> (0:00–5:00).',
             text_es: 'Mira: <a href="https://youtu.be/HNSaXAe8tyg" target="_blank">Your Very First Chords: Em & Asus2 – Marty Music</a> (0:00–5:00).',
             hint: 'Try placing your fingers as he shows Em, then strum it before watching more. Does every string ring? If not, check which finger is accidentally muting a string. Keep your fretting hand relaxed — a tense hand makes the notes sound bad.',
@@ -71,6 +73,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
           {
+            label: 'Wrap-up: chord diagram parts', label_es: 'Cierre: partes del diagrama',
             text: 'Station Wrap-Up — pause and think: of everything on a chord diagram (X, O, dots, finger numbers), which part still feels least automatic when you sit down to read one?',
             text_es: 'Cierre de la estación — pausa y piensa: de todo lo que hay en un diagrama de acorde (X, O, puntos, números de dedo), ¿qué parte todavía se siente menos automática cuando te sientas a leer uno?',
             response: { type: 'short', placeholder: 'e.g. I still pause on which number means which finger',
@@ -89,6 +92,7 @@ SETS.push(
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
               {
+                label: 'Warm-up: tuning check', label_es: 'Calentamiento: revisa la afinación',
                 text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 hint: 'Tuning (Module 1) is a skill you keep forever. Clean open strings are exactly what makes a chord ring.',
@@ -102,6 +106,7 @@ SETS.push(
             title_es: 'Trastea Am limpio',
             steps: [
           {
+            label: 'Challenge: clean Am', label_es: 'Reto: Am limpio',
             text: 'Challenge 1 — Clean Am: fret Am (index finger on string 2, fret 1 · middle finger on string 4, fret 2 · ring finger on string 3, fret 2) and strum strings 1–5 (not the low E). You\'ve got it when: every string rings cleanly — check each one by plucking it.',
             text_es: 'Reto 1 — Am limpio: trastea Am (dedo índice en la cuerda 2, traste 1 · dedo medio en la cuerda 4, traste 2 · dedo anular en la cuerda 3, traste 2) y rasguea las cuerdas 1–5 (no la Mi grave). Lo tienes cuando: cada cuerda suena limpia — revisa cada una pulsándola.',
             hint: 'Press just behind the frets, not on them. Curve your fingers so they don\'t accidentally touch neighboring strings, and keep your hand relaxed — a tense hand makes the notes sound bad. Check each string individually by plucking it.',
@@ -122,6 +127,7 @@ SETS.push(
             title_es: 'Trastea Em limpio',
             steps: [
           {
+            label: 'Challenge: clean Em', label_es: 'Reto: Em limpio',
             text: 'Challenge 2 — Clean Em: fret Em (middle finger on string 5, fret 2 · ring finger on string 4, fret 2) and strum all 6 strings. You\'ve got it when: a full, open, buzz-free Em — this is your warm-up chord.',
             text_es: 'Reto 2 — Em limpio: trastea Em (dedo medio en la cuerda 5, traste 2 · dedo anular en la cuerda 4, traste 2) y rasguea las 6 cuerdas. Lo tienes cuando: un Em completo, abierto, sin zumbido — este es tu acorde de calentamiento.',
             hint: 'Em is the easiest chord on guitar. Use it to warm up before harder chords. It should sound full and open.',
@@ -142,6 +148,7 @@ SETS.push(
             title_es: 'Cambia Am ↔ Em en el tiempo 1',
             steps: [
           {
+            label: 'Challenge: Am ↔ Em on beat 1', label_es: 'Reto: Am ↔ Em en el tiempo 1',
             text: 'Challenge 3 — Am ↔ Em Switch: at 60 BPM, 4 down-strums per bar, play 2 bars of Am then 2 bars of Em and repeat. You\'ve got it when: change chords right on beat 1 every time — keep strumming through any fumble.',
             text_es: 'Reto 3 — Cambio Am ↔ Em: a 60 BPM, 4 rasgueos hacia abajo por compás, toca 2 compases de Am y luego 2 compases de Em, y repite. Lo tienes cuando: cambias de acorde justo en el tiempo 1 cada vez — sigue rasgueando aunque falles.',
             hint: 'Even if the chord isn\'t perfect, keep strumming in time. Stopping to fix a note is the #1 habit to avoid. Fix it between bars, not mid-bar. Set the ⏱ Timer for 2 minutes and loop the switch until it beeps.',
@@ -163,6 +170,7 @@ SETS.push(
             title_es: 'Cambios de un minuto — intenta superar tu número',
             steps: [
               {
+                label: 'Challenge: one-minute changes (Am ↔ Em)', label_es: 'Reto: cambios de un minuto (Am ↔ Em)',
                 text: 'Challenge 4 — One-Minute Changes (Am ↔ Em): set the ⏱ Timer for 60 seconds and switch Am→Em→Am→Em as many times as you can. Every CLEAN change counts; a buzzy or missed one doesn\'t. You\'ve got it when: count your clean changes and type the number below — try for a higher number next time. (Over 20 is a good result for your first day on chords.)',
                 text_es: 'Reto 4 — Cambios de un minuto (Am ↔ Em): pon el ⏱ Temporizador en 60 segundos y cambia Am→Em→Am→Em tantas veces como puedas. Cada cambio LIMPIO cuenta; uno con zumbido o fallado no. Lo tienes cuando: cuentas tus cambios limpios y escribes el número abajo — intenta superarlo la próxima vez. (Más de 20 es un buen resultado para tu primer día con acordes.)',
                 hint: 'This is the classic chord-change speed test. Quality first: a clean change you can count is better than a blurry one you can\'t.',
@@ -181,6 +189,7 @@ SETS.push(
             title_es: 'Mi rutina de práctica — check-in semanal (nunca se califica)',
             steps: [
               {
+                label: 'Plan your practice', label_es: 'Planea tu práctica',
                 text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine:<ol><li>One thing you want to get better at.</li><li>When and where you\'ll practice this week.</li><li>How last week\'s plan went.</li></ol>Same check-in you\'ve kept since Module 1 — we keep it going through the whole course.',
                 text_es: 'Planea tu práctica — esta parte es solo para ti, nunca se califica. Tómate dos minutos para actualizar tu rutina:<ol><li>Una cosa en la que quieres mejorar.</li><li>Cuándo y dónde vas a practicar esta semana.</li><li>Cómo te fue con el plan de la semana pasada.</li></ol>El mismo check-in que has mantenido desde el Módulo 1 — lo seguimos manteniendo durante todo el curso.',
                 hint: 'No wrong answers — even five minutes a day is better than one long rushed session. You\'re building a habit you\'ll actually keep.',
@@ -194,6 +203,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: clean vs. switching', label_es: 'Cierre: limpio vs. cambiar',
                 text: 'Which was harder today — getting each chord to ring clean, or switching between them in time? Type the one thing you\'ll drill (practice over and over) first next session.',
                 text_es: '¿Qué fue más difícil hoy — lograr que cada acorde sonara limpio, o cambiar entre ellos a tiempo? Escribe la primera cosa que vas a ejercitar (practicar una y otra vez) la próxima sesión.',
                 response: { type: 'short', placeholder: 'e.g. Am keeps buzzing on string 3 — I\'ll start there', placeholder_es: 'p. ej. Am sigue zumbando en la cuerda 3 — empezaré por ahí' }
@@ -205,6 +215,7 @@ SETS.push(
             title_es: 'Diagrama misterioso — nombra la forma sin etiqueta',
             steps: [
               {
+                label: 'Challenge: mystery chart', label_es: 'Reto: diagrama misterioso',
                 text: 'Challenge — Mystery Chart: the two diagrams below have NO names. This is exactly the assessment task — naming chords on an unlabelled chart. Look at the FIRST (left) one only: which string is muted, which are open, and where do the fretted fingers sit? Read it, then answer which chord it is.',
                 text_es: 'Reto — Diagrama misterioso: los dos diagramas de abajo NO tienen nombre. Esta es exactamente la tarea de evaluación — nombrar acordes en un diagrama sin etiquetar. Mira solo el PRIMERO (izquierda): ¿qué cuerda está silenciada, cuáles están al aire, y dónde se colocan los dedos trasteados? Léelo, y luego responde qué acorde es.',
                 hint: 'Read it the way Set 1 taught: check string 6 first (X or open?), then find the fretted dots. The first shape mutes the low E (X on string 6), leaves string 5 open, and frets strings 4 & 3 at fret 2 with a finger on string 2, fret 1. The second shape plays all six strings, with just two fingers at fret 2 on strings 5 & 4.',
@@ -313,6 +324,7 @@ SETS.push(
             title_es: 'Mira los videos de la lección',
             steps: [
           {
+            label: 'Watch: the C chord', label_es: 'Mira: el acorde de C',
             text: 'Watch: <a href="https://youtu.be/RBYqdBqogo4" target="_blank">The C Chord (BC-132) – JustinGuitar</a> (0:00–4:00).',
             text_es: 'Mira: <a href="https://youtu.be/RBYqdBqogo4" target="_blank">The C Chord (BC-132) – JustinGuitar</a> (0:00–4:00).',
             hint: 'He shows the "perfect" chord change technique. Watch how he prepares the next chord shape before strumming it. Anticipation is the secret.',
@@ -337,6 +349,7 @@ SETS.push(
             ] }
           },
           {
+            label: 'Watch: a pain-free F chord', label_es: 'Mira: un F sin dolor',
             text: 'Watch: <a href="https://www.youtube.com/watch?v=vUNxt5EvXv8" target="_blank">Pain Free F Chord for Beginners – Lauren Bateman (0:00–4:00)</a>.',
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=vUNxt5EvXv8" target="_blank">Pain Free F Chord for Beginners – Lauren Bateman (0:00–4:00)</a>.',
             hint: 'The F chord is the hardest thing for beginners. The simplified version (xx3211) avoids the full barre (pressing one finger flat across several strings). Use this until it\'s clean, then worry about the barre version.',
@@ -352,6 +365,7 @@ SETS.push(
             title_es: 'Escucha los cambios de acorde',
             steps: [
           {
+            label: 'Listen: Let It Be', label_es: 'Escucha: Let It Be',
             text: 'Listen to "Let It Be" by The Beatles. Can you hear the C–G–Am–F chord pattern in the verse? Count the bars — how many strums per chord? <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5 — Open Chords</a>.',
             text_es: 'Escucha "Let It Be" de The Beatles. ¿Puedes oír el patrón de acordes C–G–Am–F en la estrofa? Cuenta los compases — ¿cuántos rasgueos por acorde? <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5 — Acordes al aire</a>.',
             hint: 'You don\'t need to play along yet. Just listen and map out when the chords change. This trains your ear to recognize the I–V–vi–IV progression (a lowercase numeral like vi means that chord is minor).',
@@ -367,6 +381,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
           {
+            label: 'Wrap-up: your toughest chord', label_es: 'Cierre: tu acorde más difícil',
             text: 'Station Wrap-Up — pause and think: which of these four chords (C, G, Am, F) is fighting you most right now, and is it the shape itself or getting to it in time?',
             text_es: 'Cierre de la estación — pausa y piensa: ¿cuál de estos cuatro acordes (C, G, Am, F) te está costando más ahora mismo, y es la forma en sí o el llegar a ella a tiempo?',
             response: { type: 'short', placeholder: 'e.g. F — the shape is fine but I\'m slow getting into it',
@@ -385,6 +400,7 @@ SETS.push(
             title_es: 'Nombra la nota raíz de cada acorde antes de rasguear',
             steps: [
           {
+            label: 'Challenge: name the root', label_es: 'Reto: nombra la raíz',
             text: 'Challenge — Name the Root: before you strum each chord, find and say its ROOT — the note the chord is named after, on the lowest string you strum. C = C (A string, 3rd fret) · G = G (low E, 3rd fret) · Am = A (A string, open) · F = F (D string, 3rd fret). You\'ve got it when: name all four roots correctly, then play the chord.',
             text_es: 'Reto — Nombra la raíz: antes de rasguear cada acorde, encuentra y di su RAÍZ — la nota que le da nombre al acorde, en la cuerda más grave que rasgueas. C = C (cuerda La, traste 3) · G = G (Mi grave, traste 3) · Am = A (cuerda La, al aire) · F = F (cuerda Re, traste 3). Lo tienes cuando: nombras correctamente las cuatro raíces, y luego tocas el acorde.',
             hint: 'Knowing where a chord\'s root lives on the neck is the same Module 2 note-name skill — and it is exactly what makes barre chords easy in Module 7. The root tells you the chord\'s name.',
@@ -408,6 +424,7 @@ SETS.push(
             title_es: 'Usa un dedo pivote común (Am ↔ C)',
             steps: [
           {
+            label: 'Challenge: pivot finger (Am ↔ C)', label_es: 'Reto: dedo pivote (Am ↔ C)',
             text: 'Challenge 1 — Pivot Finger: switch Am ↔ C keeping your index finger planted on string 2, fret 1, moving only the other fingers. You\'ve got it when: clean changes both ways without ever lifting the pivot finger.',
             text_es: 'Reto 1 — Dedo pivote: cambia Am ↔ C manteniendo tu dedo índice plantado en la cuerda 2, traste 1, moviendo solo los otros dedos. Lo tienes cuando: cambios limpios en ambas direcciones sin levantar nunca el dedo pivote.',
             hint: 'Common-finger pivots cut your transition time in half. Look for other chords in this group that share a finger position.',
@@ -425,6 +442,7 @@ SETS.push(
             title_es: 'Toca la vuelta C–G–Am–F a tiempo',
             steps: [
           {
+            label: 'Challenge: C–G–Am–F loop', label_es: 'Reto: vuelta C–G–Am–F',
             text: 'Challenge 2 — C–G–Am–F Loop: at 60 BPM, play 2 bars each of C, G, Am, F and repeat. You\'ve got it when: change on beat 1 every time — then speed up in steps — 60 → 65 → 70 — and hold 70 BPM clean (that\'s the assessment tempo).',
             text_es: 'Reto 2 — Vuelta C–G–Am–F: a 60 BPM, toca 2 compases de cada uno de C, G, Am, F y repite. Lo tienes cuando: cambias en el tiempo 1 cada vez — y luego acelera en pasos — 60 → 65 → 70 — y sostén 70 BPM limpio (ese es el tempo de la evaluación).',
             hint: 'If you miss a change, keep going. You can slow to 50 BPM if needed. Gradually increase by 5 BPM each time through, aiming for a clean 70. Set the ⏱ Timer for 3 minutes and see how clean the loop gets before it beeps.',
@@ -442,6 +460,7 @@ SETS.push(
             title_es: 'Toca un patrón de rasgueo abajo-arriba',
             steps: [
           {
+            label: 'Challenge: down-up strum', label_es: 'Reto: rasgueo abajo-arriba',
             text: 'Challenge 3 — Down-Up Strum: play the loop strumming down on 1 2 3 4 and up on each "+", counting "1 + 2 + 3 + 4 +" aloud, building to 70 BPM. You\'ve got it when: a steady, relaxed pendulum at 70 BPM with lighter upstrokes and no stumbles.',
             text_es: 'Reto 3 — Rasgueo abajo-arriba: toca la vuelta rasgueando hacia abajo en 1 2 3 4 y hacia arriba en cada "+", contando "1 + 2 + 3 + 4 +" en voz alta, subiendo hasta 70 BPM. Lo tienes cuando: un péndulo constante y relajado a 70 BPM con rasgueos hacia arriba más ligeros y sin tropiezos.',
             hint: 'Start slower than you think you need to, then climb to 70. The upstroke should be lighter than the downstroke. Your wrist should move like a relaxed pendulum.',
@@ -459,6 +478,7 @@ SETS.push(
             title_es: 'Cambios de un minuto — intenta superar tu número',
             steps: [
               {
+                label: 'Challenge: one-minute changes (C ↔ G)', label_es: 'Reto: cambios de un minuto (C ↔ G)',
                 text: 'Challenge 4 — One-Minute Changes (C ↔ G): set the ⏱ Timer for 60 seconds and switch C→G→C→G as many times as you can — only CLEAN changes count. You\'ve got it when: type your count below and aim for a higher count than your Set 1 number.',
                 text_es: 'Reto 4 — Cambios de un minuto (C ↔ G): pon el ⏱ Temporizador en 60 segundos y cambia C→G→C→G tantas veces como puedas — solo cuentan los cambios LIMPIOS. Lo tienes cuando: escribes tu cuenta abajo y apuntas a superar el número de la Unidad 1.',
                 hint: 'C and G share no easy anchor finger, so pre-shape the next chord in the air before you land it. Quality first — slow down until each one rings.',
@@ -477,6 +497,7 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
+                label: 'Challenge: Let It Be, verse', label_es: 'Reto: Let It Be, estrofa',
                 text: 'Challenge — Let It Be, verse (assessment rehearsal): play C · G · Am · F with a down-strum, four beats per chord, building from 60 to 70 BPM — a full bar per chord, patient and unhurried, twice as long as your Module 2 bass roots (which moved every two beats). This C–G–Am–F verse is the song you play from memory for the module assessment — record a run and check it against the chart. You\'ve got it when: one full verse loop at 70 BPM, every change landing on beat 1. The record actually moves at your Module 2 pace — two beats per chord — and the Half-Bar Changes ladder later in this set gets you there. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5 — Open Chords</a>.',
                 text_es: 'Reto — Let It Be, estrofa (ensayo de evaluación): toca C · G · Am · F con un rasgueo hacia abajo, cuatro tiempos por acorde, subiendo de 60 a 70 BPM — un compás completo por acorde, paciente y sin apuro, el doble de duración que tus raíces de bajo del Módulo 2 (que se movían cada dos tiempos). Esta estrofa C–G–Am–F es la canción que tocas de memoria para la evaluación del módulo — graba una toma y compárala con el diagrama. Lo tienes cuando: una vuelta completa de la estrofa a 70 BPM, cada cambio cayendo en el tiempo 1. La grabación en realidad se mueve al ritmo de tu Módulo 2 — dos tiempos por acorde — y la escalera de Cambios de Medio Compás más adelante en esta unidad te lleva ahí. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5 — Acordes al aire</a>.',
                 hint: 'Look ahead — start forming the next chord on beat 4 of the current one. Keep your fingers arched and your thumb behind the neck so every string rings. The strum keeps moving even while fingers travel.',
@@ -493,6 +514,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which chord change still fights you in Let It Be?', prompt_es: '¿Qué cambio de acorde todavía te cuesta en Let It Be?', placeholder: 'e.g. C to F — fingers arrive late', placeholder_es: 'p. ej. de C a F — los dedos llegan tarde' }
               },
               {
+                label: 'Challenge: Watchtower, open chords', label_es: 'Reto: Watchtower, acordes al aire',
                 text: 'Challenge — Watchtower, open-chord version: the same loop you\'ve played as bass notes and power chords, now as full open chords — Am · G · F · G — two beats per chord at 60 BPM. You\'ve got it when: four loops, and you can hear that it\'s the SAME song you played in Modules 2 and 3. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
                 text_es: 'Reto — Watchtower, versión con acordes al aire: la misma vuelta que ya tocaste como notas de bajo y como acordes de potencia, ahora como acordes al aire completos — Am · G · F · G — dos tiempos por acorde a 60 BPM. Lo tienes cuando: cuatro vueltas, y puedes escuchar que es la MISMA canción que tocaste en los Módulos 2 y 3. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
                 hint: 'This is the third time this song has met you — bass line, power chords, now open chords. Notice the roots are identical every time.',
@@ -509,6 +531,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Bass line, power chords, or open chords — which Watchtower is your favorite so far?', prompt_es: 'Línea de bajo, acordes de potencia, o acordes al aire — ¿cuál Watchtower es tu favorito hasta ahora?', placeholder: 'e.g. open chords — it finally sounds full', placeholder_es: 'p. ej. acordes al aire — por fin suena completo' }
               },
               {
+                label: 'Challenge: "the cure" play-along', label_es: 'Reto: "the cure" tocando junto',
                 text: 'Challenge — "the cure" play-along: loop Olivia\'s chords with a down-strum — Am · C · Dm · F, two beats each, then G to turn it around — speeding up in steps: 60 → 65 → 70 BPM. The backing track\'s metronome reads 144, but it feels half that fast — so 70 BPM here already puts you close to the record\'s real pace. Open chords, no capo. Shapes are pre-loaded below. You\'ve got it when: two clean loops at 70 BPM, every change on beat 1, every string ringing clear.',
                 text_es: 'Reto — "the cure" tocando junto: repite los acordes de Olivia con un rasgueo hacia abajo — Am · C · Dm · F, dos tiempos cada uno, y luego G para dar la vuelta — acelerando en pasos: 60 → 65 → 70 BPM. El metrónomo de la pista base marca 144, pero se siente a la mitad de esa velocidad — así que 70 BPM aquí ya te acerca bastante al ritmo real de la grabación. Acordes al aire, sin capo. Las formas están precargadas abajo. Lo tienes cuando: dos vueltas limpias a 70 BPM, cada cambio en el tiempo 1, cada cuerda sonando clara.',
                 hint: 'Dm is the new one: a small triangle on the top three strings. Keep your fingers arched and your thumb behind the neck.',
@@ -541,6 +564,7 @@ SETS.push(
             title_es: 'Cambios más rápidos — cada dos tiempos, y luego cada tiempo',
             steps: [
           {
+            label: 'Challenge: half-bar changes (2 chords)', label_es: 'Reto: medio compás (2 acordes)',
             text: 'Challenge — Half-Bar Changes (2 chords): so far you\'ve changed once a bar. Real songs move faster. Switch Am ↔ C every TWO beats — two down-strums on Am, two on C, and repeat, at 60 BPM. That\'s twice as many changes as the loop you just played. You\'ve got it when: four laps where every switch lands right on beat 1 and 3, no stops. Press &#x25B6; to hear the target.',
             text_es: 'Reto — Cambios de medio compás (2 acordes): hasta ahora has cambiado una vez por compás. Las canciones reales se mueven más rápido. Cambia Am ↔ C cada DOS tiempos — dos rasgueos hacia abajo en Am, dos en C, y repite, a 60 BPM. Eso es el doble de cambios que la vuelta que acabas de tocar. Lo tienes cuando: cuatro vueltas donde cada cambio cae justo en el tiempo 1 y 3, sin detenerte. Presiona &#x25B6; para escuchar el objetivo.',
             hint: 'Am and C share an anchor: your 1st finger stays on the B string (fret 1) and your 2nd finger stays on the D string (fret 2). Only your 3rd finger jumps (to the A string for C). Pivot on the two fingers that don\'t move.',
@@ -557,6 +581,7 @@ SETS.push(
             playSeq: { label: 'Hear it — Am·Am · C·C (change every 2 beats)', label_es: 'Escúchalo — Am·Am · C·C (cambio cada 2 tiempos)', bpm: 60, notes: [[45,52,57,60,64],[45,52,57,60,64],[48,52,55,60,64],[48,52,55,60,64],[45,52,57,60,64],[45,52,57,60,64],[48,52,55,60,64],[48,52,55,60,64]] }
           },
           {
+            label: 'Challenge: half-bar changes (3 chords)', label_es: 'Reto: medio compás (3 acordes)',
             text: 'Challenge — Three-Chord Half-Bar (3 chords): now three shapes, still two beats each — G · C · Am, then back to G, looping at 60 BPM. Three chords this fast is chorus speed for a lot of songs. You\'ve got it when: two clean laps, every change on the beat.',
             text_es: 'Reto — Medio compás con tres acordes (3 acordes): ahora tres formas, todavía dos tiempos cada una — G · C · Am, y de vuelta a G, repitiendo a 60 BPM. Tres acordes a esta velocidad es la velocidad de coro para muchas canciones. Lo tienes cuando: dos vueltas limpias, cada cambio a tiempo.',
             hint: 'G → C keeps your 2nd finger near the same spot; C → Am keeps the 1st finger planted on the B string. Look for the finger that can stay put in each move.',
@@ -574,6 +599,7 @@ SETS.push(
             playSeq: { label: 'Hear it — G·G · C·C · Am·Am (every 2 beats)', label_es: 'Escúchalo — G·G · C·C · Am·Am (cada 2 tiempos)', bpm: 60, notes: [[43,47,50,55,59,67],[43,47,50,55,59,67],[48,52,55,60,64],[48,52,55,60,64],[45,52,57,60,64],[45,52,57,60,64]] }
           },
           {
+            label: 'Challenge: Let It Be, fast (4 chords)', label_es: 'Reto: Let It Be, rápido (4 acordes)',
             text: 'Challenge — Four-Chord Half-Bar (Let It Be, fast): the whole C · G · Am · F loop from your song, but two beats each at 60 BPM instead of a full bar. Same chords, twice the changes — this is exactly how the record\'s verse actually moves. You\'ve got it when: two clean laps, every change landing on the beat.',
             text_es: 'Reto — Medio compás con cuatro acordes (Let It Be, rápido): toda la vuelta C · G · Am · F de tu canción, pero dos tiempos cada uno a 60 BPM en vez de un compás completo. Los mismos acordes, el doble de cambios — así es exactamente como se mueve la estrofa en la grabación. Lo tienes cuando: dos vueltas limpias, cada cambio cayendo a tiempo.',
             hint: 'You already know this loop slow. The only new demand is your hands resetting faster — pre-shape each chord in the air while the last one is still ringing.',
@@ -592,6 +618,7 @@ SETS.push(
             playSeq: { label: 'Hear it — C·G·Am·F (every 2 beats)', label_es: 'Escúchalo — C·G·Am·F (cada 2 tiempos)', bpm: 60, notes: [[48,52,55,60,64],[48,52,55,60,64],[43,47,50,55,59,67],[43,47,50,55,59,67],[45,52,57,60,64],[45,52,57,60,64],[53,57,60,65],[53,57,60,65]] }
           },
           {
+            label: 'Challenge: one chord per beat', label_es: 'Reto: un acorde por tiempo',
             text: 'Challenge — One Chord Per Beat (Let It Be, fastest): the top of the ladder — a new chord on every single beat. Play C · G · Am · F, one down-strum per beat at 60 BPM, looping. This is the real test of clean, fast switching: the next shape has to be ready before you get to it. You\'ve got it when: four laps clean at 60 — then, if you can, climb to 65.',
             text_es: 'Reto — Un acorde por tiempo (Let It Be, lo más rápido): el escalón más alto — un acorde nuevo en cada tiempo. Toca C · G · Am · F, un rasgueo hacia abajo por tiempo a 60 BPM, repitiendo. Esta es la prueba real de cambio limpio y rápido: la siguiente forma tiene que estar lista antes de llegar a ella. Lo tienes cuando: cuatro vueltas limpias a 60 — y luego, si puedes, sube a 65.',
             hint: 'At this speed you can\'t watch your hands. Trust the shapes and keep the strum steady — a change that\'s slightly buzzy but in time beats a clean one that\'s late.',
@@ -617,6 +644,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: your hardest transition', label_es: 'Cierre: tu transición más difícil',
                 text: 'Of C, G, Am, and F, which transition cost you the most clean changes in the minute drill? Name the two chords — that\'s your first loop next session.',
                 text_es: 'De C, G, Am y F, ¿qué transición te costó más cambios limpios en el ejercicio de un minuto? Nombra los dos acordes — esa es tu primera vuelta la próxima sesión.',
                 response: { type: 'short', placeholder: 'e.g. Am→F — the F never lands in time', placeholder_es: 'p. ej. Am→F — el F nunca llega a tiempo' }
@@ -628,6 +656,7 @@ SETS.push(
             title_es: '⚡ Chispa auditiva — bono opcional de oído',
             steps: [
               {
+                label: 'Ear Spark: bright or sad?', label_es: 'Chispa auditiva: ¿alegre o triste?',
                 text: '⚡ Ear Spark (optional, 2 min): record yourself strumming C or Am, playing them a few times in a mixed-up order. On playback, say whether each one sounds bright or sad before checking — that\'s major vs minor, and you can already hear it. Got someone around? Have them strum behind your back and you name it live.',
                 text_es: '⚡ Chispa auditiva (opcional, 2 min): grábate rasgueando C o Am, tocándolos varias veces en un orden mezclado. Al escuchar la grabación, di si cada uno suena alegre o triste antes de comprobarlo — eso es mayor vs. menor, y ya puedes oírlo. ¿Tienes a alguien cerca? Que rasguee detrás de ti y tú lo nombres en vivo.'
               }
@@ -638,6 +667,7 @@ SETS.push(
             title_es: 'El rasgueo folk (D–D–U–U–D–U)',
             steps: [
               {
+                label: 'Challenge: the folk strum', label_es: 'Reto: el rasgueo folk',
                 text: 'Challenge — The Folk Strum: this is the classic singalong strum the down-up strum skill is really testing. Over one bar, strum down, down-up, up-down-up — written D · D U · U D U. Count it out loud "1, 2-and, (3)-and, 4-and" — beat 3 in parentheses is the down you skip: you strum on 1, on 2 and its "and," then catch just the "and" of 3, then 4 and its "and." That skipped beat-3 down is the whole secret of the groove (the steady rhythmic feel). Start on one chord (G is a great one). You\'ve got it when: it loops smoothly 4 times in a row on one chord without stopping.',
                 text_es: 'Reto — El rasgueo folk: este es el clásico rasgueo para cantar en grupo que la destreza de rasgueo abajo-arriba realmente está probando. En un compás, rasguea abajo, abajo-arriba, arriba-abajo-arriba — escrito D · D U · U D U. Cuéntalo en voz alta "1, 2-y, (3)-y, 4-y" — el tiempo 3 entre paréntesis es el "abajo" que te saltas: rasgueas en 1, en 2 y su "y", y luego solo capturas el "y" del 3, y luego el 4 y su "y". Ese "abajo" saltado del tiempo 3 es todo el secreto del groove (la sensación rítmica constante). Empieza con un solo acorde (G es excelente). Lo tienes cuando: se repite suavemente 4 veces seguidas en un solo acorde sin detenerte.',
                 hint: 'Say the full count "1 2 and 3 and 4 and" while your hand swings nonstop. The six strums land on 1, 2, &(2), &(3), 4, &(4) — and beat 3\'s downstrum is the one you leave out. Upstrokes stay lighter than downstrokes.',
@@ -741,6 +771,7 @@ SETS.push(
             title_es: 'Mira los videos de la lección',
             steps: [
           {
+            label: 'Watch: the D major chord', label_es: 'Mira: el acorde de D mayor',
             text: 'Watch: <a href="https://www.youtube.com/watch?v=VKgyE6g2Y-s" target="_blank">How to Play a D Major Chord – Lauren Bateman (0:00–4:00)</a>.',
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=VKgyE6g2Y-s" target="_blank">How to Play a D Major Chord – Lauren Bateman (0:00–4:00)</a>.',
             hint: 'D major has a triangular finger shape — notice how her three fingers are stacked in a triangle on strings 1, 2, and 3. Try to copy that exact shape.',
@@ -765,6 +796,7 @@ SETS.push(
             ] }
           },
           {
+            label: 'Watch: Bm two ways', label_es: 'Mira: Bm de dos maneras',
             text: 'Watch: <a href="https://www.youtube.com/watch?v=suJnbc2TERU" target="_blank">B minor (Bm) Chord, 2 Ways (start easy, then barre) – Guitar Goddess (0:00–4:00)</a>.',
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=suJnbc2TERU" target="_blank">B minor (Bm) Chord, 2 Ways (start easy, then barre) – Guitar Goddess (0:00–4:00)</a>.',
             hint: 'Bm is the trickiest chord in this group. The partial barre version (xx4432) is the most accessible. Don\'t try the full barre version yet — focus on getting a clean sound first.',
@@ -783,6 +815,7 @@ SETS.push(
             title_es: 'Escucha los cambios de acorde',
             steps: [
           {
+            label: 'Listen: Luna', label_es: 'Escucha: Luna',
             text: 'Listen to "Luna" by Peso Pluma & Junior H — the whole song uses just two chords, F and Am, with Dm making a brief passing appearance near the end of the verse and again in the closing bridge (some charts voice it as Dm9). The pulse is in 2: tap just the big downbeats and feel the chord changes land right on them.',
             text_es: 'Escucha "Luna" de Peso Pluma y Junior H — toda la canción usa solo dos acordes, F y Am, con Dm apareciendo brevemente de paso cerca del final de la estrofa y otra vez en el puente final (algunos diagramas lo interpretan como Dm9). El pulso está en 2: marca solo los tiempos fuertes y siente los cambios de acorde caer justo en ellos.',
             hint: 'F and Am are chords you already know from Group 1 — Dm passes through briefly near the end of the verse and in the closing bridge. Your ear already knows the sound — you\'re just learning to place the changes.',
@@ -798,6 +831,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
           {
+            label: 'Wrap-up: your Group 2 weak spot', label_es: 'Cierre: tu punto débil del Grupo 2',
             text: 'Station Wrap-Up — pause and think: you now know two whole chord groups. Which Group 2 chord (D, A, Em, Bm) feels furthest from automatic, and what specifically trips it up?',
             text_es: 'Cierre de la estación — pausa y piensa: ahora conoces dos grupos completos de acordes. ¿Qué acorde del Grupo 2 (D, A, Em, Bm) se siente más lejos de ser automático, y qué específicamente lo hace tropezar?',
             response: { type: 'short', placeholder: 'e.g. D — string 1 keeps getting muted by my ring finger',
@@ -816,6 +850,7 @@ SETS.push(
             title_es: 'Trastea D mayor limpio',
             steps: [
           {
+            label: 'Challenge: clean D', label_es: 'Reto: D limpio',
             text: 'Challenge 1 — Clean D: fret D major (triangle: string 1, fret 2 · string 2, fret 3 · string 3, fret 2) and strum strings 1–4 only. You\'ve got it when: all four ring — especially string 1 (high E), which loves to get muted.',
             text_es: 'Reto 1 — D limpio: trastea D mayor (triángulo: cuerda 1, traste 2 · cuerda 2, traste 3 · cuerda 3, traste 2) y rasguea solo las cuerdas 1–4. Lo tienes cuando: las cuatro suenan — especialmente la cuerda 1 (mi aguda), que ama silenciarse.',
             hint: 'The D chord is tricky because string 1 is easy to accidentally mute. Curve your fingers and make sure your fingertips arch away from that string.',
@@ -836,6 +871,7 @@ SETS.push(
             title_es: 'Trastea Bm limpio',
             steps: [
           {
+            label: 'Challenge: clean Bm', label_es: 'Reto: Bm limpio',
             text: 'Challenge 2 — Clean Bm: fret the partial-barre Bm shape (xx4432 — index on string 1, fret 2 · middle on string 2, fret 3 · ring on string 3, fret 4 · pinky on string 4, fret 4) and strum strings 4–1 only. You\'ve got it when: all four fretted strings ring clearly — the pinky on string 4 is the one most likely to go quiet.',
             text_es: 'Reto 2 — Bm limpio: trastea la forma de cejilla parcial de Bm (xx4432 — índice en la cuerda 1, traste 2 · medio en la cuerda 2, traste 3 · anular en la cuerda 3, traste 4 · meñique en la cuerda 4, traste 4) y rasguea solo las cuerdas 4–1. Lo tienes cuando: las cuatro cuerdas trasteadas suenan claras — el meñique en la cuerda 4 es el que más se apaga.',
             hint: 'This is your first partial barre — fingers 1 through 4 climb like stairs across strings 1 through 4. Curl each one so it presses straight down on its own string, not brushing the neighbor.',
@@ -856,6 +892,7 @@ SETS.push(
             title_es: 'Conecta acordes del Grupo 1 y del Grupo 2',
             steps: [
           {
+            label: 'Challenge: cross-group changes', label_es: 'Reto: cambios entre grupos',
             text: 'Challenge 3 — Cross-Group Changes: at 60 BPM, switch G→D, Am→Em, and C→A, 2 bars each — then drill the two within-group pairs your assessment checks, D→A and Em→Bm, 2 bars each. You\'ve got it when: each change lands on beat 1, using fingers that stay close as you switch.',
             text_es: 'Reto 3 — Cambios entre grupos: a 60 BPM, cambia G→D, Am→Em, y C→A, 2 compases cada uno — y luego ejercita los dos pares dentro del mismo grupo que revisa tu evaluación, D→A y Em→Bm, 2 compases cada uno. Lo tienes cuando: cada cambio cae en el tiempo 1, usando dedos que se quedan cerca al cambiar.',
             hint: 'Look for fingers that stay close or in the same area as you switch. Planning your hand movement before you lift your fingers saves time. Set the ⏱ Timer for 3 minutes and run the pairs until it beeps.',
@@ -877,6 +914,7 @@ SETS.push(
             title_es: 'Cambios de un minuto — intenta superar tu número',
             steps: [
               {
+                label: 'Challenge: one-minute changes (G ↔ D)', label_es: 'Reto: cambios de un minuto (G ↔ D)',
                 text: 'Challenge 4 — One-Minute Changes (G ↔ D): set the ⏱ Timer for 60 seconds and switch G→D→G→D as many times as you can — only CLEAN changes count. This is a cross-group jump, so it\'s a real test. You\'ve got it when: type your count below and aim for a higher count than your Set 2 number.',
                 text_es: 'Reto 4 — Cambios de un minuto (G ↔ D): pon el ⏱ Temporizador en 60 segundos y cambia G→D→G→D tantas veces como puedas — solo cuentan los cambios LIMPIOS. Este es un salto entre grupos, así que es una prueba real. Lo tienes cuando: escribes tu cuenta abajo y apuntas a superar el número de la Unidad 2.',
                 hint: 'G and D both sit up near the high strings — let your whole hand travel as one shape rather than placing finger by finger.',
@@ -895,6 +933,7 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
+                label: 'Challenge: Luna, the vamp', label_es: 'Reto: Luna, el vamp',
                 text: 'Challenge — Luna, the vamp (a short chord pattern repeated over and over): F · Am — two shapes, both from Group 1 and chords you already know well, with the simplified F (xx3211). The song is in 6/8, so play two downbeat strums per bar — nothing syncopated — changing every bar at 60 BPM. You\'ve got it when: four laps (a lap = one full time through the loop) with every change landing on the downbeat and the little F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
                 text_es: 'Reto — Luna, el vamp (un patrón de acordes corto que se repite una y otra vez): F · Am — dos formas, ambas del Grupo 1 y acordes que ya conoces bien, con el F simplificado (xx3211). La canción está en 6/8, así que toca dos rasgueos en el tiempo fuerte por compás — nada sincopado — cambiando cada compás a 60 BPM. Lo tienes cuando: cuatro vueltas (una vuelta = un recorrido completo del loop) con cada cambio cayendo en el tiempo fuerte y el pequeño F sonando limpio. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
                 hint: 'F and Am are already in your hands from Group 1 — the only new part is the simplified F shape (xx3211) and locking the change to the 6/8 pulse.',
@@ -911,6 +950,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which change was toughest — into F, or out of it?', prompt_es: '¿Qué cambio fue el más difícil — entrar a F, o salir de él?', placeholder: 'e.g. into F — the top-string barre lands late', placeholder_es: 'p. ej. entrar a F — la cejilla en la cuerda aguda llega tarde' }
               },
               {
+                label: 'Challenge: Sweet Child, open chords', label_es: 'Reto: Sweet Child, acordes al aire',
                 text: 'Challenge — Sweet Child O\' Mine, verse (open chords): the D · C · G loop you\'ve played as bass notes (Module 2) and power chords (Module 3), now as full open chords — one bar per chord, same pacing as always, using D, C, and G shapes you already know from Group 1 and Group 2. You\'ve got it when: two full verse loops, every change landing on beat 1, all six strings ringing clean. Then press &#x25B6; on the Song Journey page and strum along with the actual record at 125 BPM — the same one-bar-per-chord pacing you already know, just at real speed. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
                 text_es: 'Reto — Sweet Child O\' Mine, estrofa (acordes al aire): la vuelta D · C · G que ya tocaste como notas de bajo (Módulo 2) y acordes de potencia (Módulo 3), ahora como acordes al aire completos — un compás por acorde, el mismo ritmo de siempre, usando las formas de D, C y G que ya conoces del Grupo 1 y el Grupo 2. Lo tienes cuando: dos vueltas completas de la estrofa, cada cambio cayendo en el tiempo 1, las seis cuerdas sonando limpias. Luego presiona &#x25B6; en la página de Recorrido de la canción y rasguea junto con la grabación real a 125 BPM — el mismo ritmo de un compás por acorde que ya conoces, solo que a velocidad real. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
                 hint: 'D, C, and G are chords you already know solidly from Group 1 and Group 2 — the only new skill here is the switch itself. Look ahead one bar early: start shaping the next chord while the current one is still ringing.',
@@ -938,6 +978,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: your hardest cross-group change', label_es: 'Cierre: tu cambio entre grupos más difícil',
                 text: 'Crossing between Group 1 and Group 2, which single change still feels like reaching across the neck? Name it — that\'s your warm-up next session.',
                 text_es: 'Al cruzar entre el Grupo 1 y el Grupo 2, ¿qué cambio todavía se siente como estirarse por todo el mástil? Nómbralo — ese es tu calentamiento la próxima sesión.',
                 response: { type: 'short', placeholder: 'e.g. C→A still feels like a big jump', placeholder_es: 'p. ej. C→A todavía se siente como un salto grande' }
@@ -949,6 +990,7 @@ SETS.push(
             title_es: 'El rasgueo de vals (compás 3/4) — cuenta en 3',
             steps: [
               {
+                label: 'Challenge: the waltz strum', label_es: 'Reto: el rasgueo de vals',
                 text: 'Challenge — Waltz Strum: not every song is in 4. A waltz counts in THREE — "ONE-two-three, ONE-two-three." Play a firm downstrum on beat 1 (strum harder into the low strings so the bass rings), then lighter downs on beats 2 and 3 (D · D · D). Comfortable? Sneak an up after beat 3: D · D · D-U. Beat 1 is the strongest: it should clearly stand out from the other two. This "in-3" feel is the same strong-ONE pulse you hear driving songs like "The House of the Rising Sun." Use Em so the low strings ring full. You\'ve got it when: you keep it steady for 8 bars and beat 1 is unmistakably the strongest pulse in every bar.',
                 text_es: 'Reto — Rasgueo de vals: no todas las canciones están en 4. Un vals cuenta en TRES — "UNO-dos-tres, UNO-dos-tres." Toca un rasgueo firme hacia abajo en el tiempo 1 (rasguea más fuerte hacia las cuerdas graves para que suene el bajo), y luego rasgueos más ligeros hacia abajo en los tiempos 2 y 3 (D · D · D). ¿Cómodo? Agrega un rasgueo hacia arriba después del tiempo 3: D · D · D-U. El tiempo 1 es el más fuerte: debe destacar claramente de los otros dos. Esta sensación "en 3" es el mismo pulso fuerte-UNO que escuchas impulsando canciones como "The House of the Rising Sun." Usa Em para que las cuerdas graves suenen completas. Lo tienes cuando: lo mantienes constante por 8 compases y el tiempo 1 es inconfundiblemente el pulso más fuerte en cada compás.',
                 hint: 'Say "ONE-two-three" out loud with the ONE loudest. Let the pick fall a little heavier and more toward the bass strings on beat 1, then lift to lighter strums for 2 and 3. Three beats per bar, then straight back to a strong ONE — no beat 4 to wait for.',
@@ -1054,6 +1096,7 @@ SETS.push(
             title_es: 'Mira los videos de la lección',
             steps: [
           {
+            label: 'Watch: the E chord', label_es: 'Mira: el acorde de E',
             text: 'Watch: <a href="https://youtu.be/8H393ryDkuY" target="_blank">The E Chord (BC-113) – JustinGuitar</a> (0:00–4:00).',
             text_es: 'Mira: <a href="https://youtu.be/8H393ryDkuY" target="_blank">The E Chord (BC-113) – JustinGuitar</a> (0:00–4:00).',
             hint: 'E major uses three fingers — it\'s a full, rich chord. (B7, later in this set, is the one that uses all four.) Play it as he shows and take it slow, checking every string rings. The two diagrams below are F#m and C#m: Group 3 barre shapes you only need to RECOGNIZE on a chart for now, not play cleanly yet.',
@@ -1067,6 +1110,7 @@ SETS.push(
               placeholder_es: 'Describe el sonido del acorde E mayor — ¿completo y rico, o hay una cuerda zumbando?' }
           },
           {
+            label: 'Watch: how to practice effectively', label_es: 'Mira: cómo practicar con eficacia',
             text: 'Watch: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">How to Practice Effectively – JustinGuitar</a> (0:00–4:00).',
             text_es: 'Mira: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">How to Practice Effectively – JustinGuitar</a> (0:00–4:00).',
             hint: 'Key idea: practice doesn\'t make perfect — practice makes permanent: whatever you repeat becomes the habit, good or bad. Are you practicing your mistakes or your solutions? This matters most before a performance.',
@@ -1097,6 +1141,7 @@ SETS.push(
             title_es: 'Planea tu práctica para la muestra',
             steps: [
           {
+            label: 'Map your showcase song\'s chords', label_es: 'Ubica los acordes de tu canción',
             text: 'Look up a chord chart for your showcase song (or one you\'ve been working on). Map out which chord groups you\'ll use. Are there any chords you need to review?',
             text_es: 'Busca un diagrama de acordes para tu canción de la muestra (o una en la que has estado trabajando). Ubica qué grupos de acordes vas a usar. ¿Hay algún acorde que necesites repasar?',
             hint: 'Being intentional about your practice is a skill. Know exactly which transitions are rough and spend most of your time there — not on the parts you already know.',
@@ -1106,6 +1151,7 @@ SETS.push(
               placeholder_es: '¿En qué canción estás trabajando? ¿Qué transición de acorde se siente más difícil ahora mismo?' }
           },
           {
+            label: 'Revisit your Module 1 goal', label_es: 'Vuelve a tu meta del Módulo 1',
             text: 'Re-read what you wrote back in Module 1 — your "My Guitar Adventure" goal. You set it before you could play a single chord. What has changed? Name one thing you can do now that felt impossible then, and the one thing you still want by the showcase.',
             text_es: 'Vuelve a leer lo que escribiste en el Módulo 1 — tu meta de "Mi aventura con la guitarra". La escribiste antes de poder tocar un solo acorde. ¿Qué ha cambiado? Nombra una cosa que puedes hacer ahora que se sentía imposible entonces, y lo único que todavía quieres lograr para la muestra.',
             hint: 'This is the same goal you\'ll reflect on in your course self-check. Be specific — "I can switch C to G without stopping" is better than "I got better."',
@@ -1121,6 +1167,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
           {
+            label: 'Wrap-up: your showcase priority', label_es: 'Cierre: tu prioridad para la muestra',
             text: 'Station Wrap-Up — pause and think: with the showcase ahead, what will eat most of your practice time between now and then — a specific chord, a transition, or keeping the strum steady?',
             text_es: 'Cierre de la estación — pausa y piensa: con la muestra por delante, ¿qué se va a llevar la mayor parte de tu tiempo de práctica de aquí a entonces — un acorde específico, una transición, o mantener el rasgueo constante?',
             response: { type: 'short', placeholder: 'e.g. the B7→E change, and not rushing the strum',
@@ -1139,6 +1186,7 @@ SETS.push(
             title_es: 'Trastea E mayor limpio',
             steps: [
           {
+            label: 'Challenge: clean E', label_es: 'Reto: E limpio',
             text: 'Challenge 1 — Clean E: fret E major (index finger on string 3, fret 1 · middle finger on string 5, fret 2 · ring finger on string 4, fret 2) and strum all 6 strings. You\'ve got it when: a full, rich chord with every string ringing — watch your index on string 2.',
             text_es: 'Reto 1 — E limpio: trastea E mayor (dedo índice en la cuerda 3, traste 1 · dedo medio en la cuerda 5, traste 2 · dedo anular en la cuerda 4, traste 2) y rasguea las 6 cuerdas. Lo tienes cuando: un acorde completo y rico con cada cuerda sonando — cuidado con tu índice en la cuerda 2.',
             hint: 'E major is one of the most satisfying open chords to play. If any string buzzes, check your index finger — it tends to accidentally mute string 2.',
@@ -1159,6 +1207,7 @@ SETS.push(
             title_es: 'Trastea B7 limpio',
             steps: [
           {
+            label: 'Challenge: four-finger B7', label_es: 'Reto: B7 con cuatro dedos',
             text: 'Challenge 2 — Four-Finger B7: fret B7 (index finger on string 4, fret 1 · middle finger on string 5, fret 2 · ring finger on string 3, fret 2 · pinky on string 1, fret 2) and strum strings 1–5. You\'ve got it when: all four fingers down and every played string clean — then play E→B7→E and listen: the B7 sounds unfinished and "wants" to move back to E — that pull is called resolving.',
             text_es: 'Reto 2 — B7 con cuatro dedos: trastea B7 (dedo índice en la cuerda 4, traste 1 · dedo medio en la cuerda 5, traste 2 · dedo anular en la cuerda 3, traste 2 · meñique en la cuerda 1, traste 2) y rasguea las cuerdas 1–5. Lo tienes cuando: los cuatro dedos abajo y cada cuerda tocada suena limpia — y luego toca E→B7→E y escucha: el B7 suena inconcluso y "quiere" volver a E — ese tirón se llama resolución.',
             hint: 'B7 is a dominant 7th chord — it has a slightly tense sound that wants to resolve to E. Play E then B7 then E again and hear how it pulls back.',
@@ -1179,6 +1228,7 @@ SETS.push(
             title_es: 'Cambios de un minuto — intenta superar tu número',
             steps: [
               {
+                label: 'Challenge: one-minute changes (E ↔ B7)', label_es: 'Reto: cambios de un minuto (E ↔ B7)',
                 text: 'Challenge 3 — One-Minute Changes (E ↔ B7): set the ⏱ Timer for 60 seconds and switch E→B7→E→B7 as many times as you can — only CLEAN changes count (all four B7 fingers down, strings 1–5 ringing). You\'ve got it when: type your count below and aim for a higher count than your Set 3 number.',
                 text_es: 'Reto 3 — Cambios de un minuto (E ↔ B7): pon el ⏱ Temporizador en 60 segundos y cambia E→B7→E→B7 tantas veces como puedas — solo cuentan los cambios LIMPIOS (los cuatro dedos de B7 abajo, cuerdas 1–5 sonando). Lo tienes cuando: escribes tu cuenta abajo y apuntas a superar el número de la Unidad 3.',
                 hint: 'These two share no fingers, so this is the hardest pair yet. Pre-shape B7 in the air before you land it, and keep string 2 open.',
@@ -1197,6 +1247,7 @@ SETS.push(
             title_es: 'Interpreta tu canción de la muestra',
             steps: [
           {
+            label: 'Challenge: showcase run', label_es: 'Reto: ensayo de la muestra',
             text: 'Challenge 4 — Showcase Run (your assessment piece): play your course showcase song — the one you\'re building toward performing for someone (family, a friend, or a recording) — start to finish 3 times without stopping, even through mistakes, and time yourself. No score — this trains your recovery, not perfection.',
             text_es: 'Reto 4 — Ensayo de la muestra (tu pieza de evaluación): toca tu canción de la muestra del curso — la que estás construyendo para interpretar frente a alguien (familia, un amigo, o una grabación) — de principio a fin 3 veces sin detenerte, incluso con errores, y cronométrate. Sin puntaje — esto entrena tu recuperación, no la perfección.',
             hint: 'Don\'t stop when you make a mistake in performance practice. The goal is to keep going. You can fix mistakes in slow practice — performance practice trains your recovery.',
@@ -1210,6 +1261,7 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
+                label: 'Challenge: Luna, showcase version', label_es: 'Reto: Luna, versión para la muestra',
                 text: 'Challenge — Luna, strummed (showcase version): the full song is F · Am, with Dm making a brief passing appearance near the end of the verse and in the closing bridge — two downbeat strums per bar at 60 BPM, building toward 70, singing or humming "Luna, dile tú" — it\'s tricky! You\'ve got it when: a full verse and chorus with every change on the downbeat and the F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
                 text_es: 'Reto — Luna, rasgueada (versión para la muestra): la canción completa es F · Am, con Dm apareciendo brevemente de paso cerca del final de la estrofa y en el puente final — dos rasgueos en el tiempo fuerte por compás a 60 BPM, subiendo hacia 70, cantando o tarareando "Luna, dile tú" — ¡es complicado! Lo tienes cuando: una estrofa y un coro completos con cada cambio en el tiempo fuerte y el F sonando limpio. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
                 hint: 'You met this vamp in Set 3 — now make it showcase-clean. F is the trickiest shape; keep your fingers arched and thumb behind the neck so all four strings you strum ring.',
@@ -1233,6 +1285,7 @@ SETS.push(
             title_es: 'Llamada y respuesta sobre una pista de acompañamiento',
             steps: [
               {
+                label: 'Challenge: call & response jam', label_es: 'Reto: jam de llamada y respuesta',
                 text: 'Challenge — Call & Response (your course-wrap check piece): jam (play along freely and make up your own part) over <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a> (or any core-song ▶ &#x1F3B5; Backing track — recorded music you play along with — in Module 4\'s &#x1F3B5; Songs list) and improvise a call-and-response solo — play a 2-bar "question" phrase, leave a little space, then answer it with a 2-bar "response." Stay in the minor pentatonic box from Module 4. You\'ve got it when: you hold the track\'s pulse start to finish with no restarts, and your response phrase clearly answers your question phrase. This is scored the same way as your Module 4 solo (Accuracy + Consistency).',
                 text_es: 'Reto — Llamada y respuesta (tu pieza de revisión de fin de curso): improvisa (toca libremente junto con la pista y crea tu propia parte) sobre <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; la pista de jam en Am</a> (o cualquier ▶ &#x1F3B5; pista de acompañamiento — música grabada con la que tocas junto — de canción principal en la lista de &#x1F3B5; Canciones del Módulo 4) e improvisa un solo de llamada y respuesta — toca una frase "pregunta" de 2 compases, deja un poco de espacio, y luego respóndela con una "respuesta" de 2 compases. Quédate en la caja pentatónica menor del Módulo 4. Lo tienes cuando: mantienes el pulso de la pista de principio a fin sin reiniciar, y tu frase de respuesta claramente responde a tu frase de pregunta. Esto se califica de la misma manera que tu solo del Módulo 4 (Precisión + Consistencia).',
                 hint: 'Every skill here is a Module 4 skill — this is an easy, fun review of what you already know. The &#x1F3B5; Songs list at the bottom of Module 4 has a ▶ &#x1F3B5; Backing track for every core song. If the pentatonic box feels rusty, run the Module 4 scale-climb warm-up first, then come back.',
@@ -1249,6 +1302,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: your pressure point', label_es: 'Cierre: tu punto débil bajo presión',
                 text: 'After today, what\'s the one part of your showcase song most likely to fall apart under pressure (recording light on, someone listening)? Type it below — that\'s exactly where your next practice starts.',
                 text_es: 'Después de hoy, ¿cuál es la única parte de tu canción de la muestra que más probablemente se desarme bajo presión (con la luz de grabación encendida, alguien escuchando)? Escríbelo abajo — ahí es exactamente donde empieza tu próxima práctica.',
                 response: { type: 'short', placeholder: 'e.g. the B7 in the chorus — it never lands in time', placeholder_es: 'p. ej. el B7 en el coro — nunca cae a tiempo' }

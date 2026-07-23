@@ -33,12 +33,14 @@ SETS.push(
             title_es: 'Mira los videos de la lección',
             steps: [
           {
+            label: 'Sound setup', label_es: 'Configura el sonido',
             text: 'Sound setup (every lesson-video day): get headphones if people are around you, or set a comfortable speaker volume if you\'re on your own. You\'ll switch between watching videos and playing all course long, so make it easy to hear both.',
             text_es: 'Preparación de sonido (cada día de videos de lección): consigue audífonos si hay gente cerca de ti, o pon el volumen de las bocinas a un nivel cómodo si estás solo. Vas a alternar entre ver videos y tocar durante todo el curso, así que facilita escuchar bien ambas cosas.',
             hint: 'Loud enough that you catch every detail, quiet enough that you can still hear your own guitar.',
             hint_es: 'Lo bastante fuerte para captar cada detalle, lo bastante bajo para que también puedas escuchar tu propia guitarra.'
           },
           {
+            label: 'Watch: smart practice tips', label_es: 'Mira: consejos de práctica',
             text: 'Watch: <a href="https://www.youtube.com/watch?v=4_CWBgLMPCI" target="_blank">Only Got 15 Min? No Problem! Guitar Practice Tips – Lauren Bateman (0:00–5:00)</a>. While you watch, write down the ONE practice habit she says matters most — you\'ll try it out this session.',
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=4_CWBgLMPCI" target="_blank">Only Got 15 Min? No Problem! Guitar Practice Tips – Lauren Bateman (0:00–5:00)</a>. Mientras miras, anota el ÚNICO hábito de práctica que ella dice que más importa — lo vas a probar en esta sesión.',
             hint: 'As you watch, think about: what is one practice habit she says makes the biggest difference? Does it match what you thought? You\'ve got it when: you can name that one habit without looking back at your notes.',
@@ -48,6 +50,7 @@ SETS.push(
               placeholder_es: 'En una oración: ¿qué hábito de práctica dijo que es el más importante, y coincidió con lo que pensabas?' }
           },
           {
+            label: 'Watch: caring for your guitar', label_es: 'Mira: cuidado de la guitarra',
             text: 'Watch: <a href="https://youtu.be/PyWZYHy17As" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a> (you only need the first ~3 minutes — cleaning, humidity, and basic care; after that it\'s a string-changing demo you won\'t need yet). While you watch, note two things that can damage a guitar and how to avoid each — good habits now keep your guitar playable for years.',
             text_es: 'Mira: <a href="https://youtu.be/PyWZYHy17As" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a> (solo necesitas los primeros ~3 minutos — limpieza, humedad y cuidados básicos; después de eso es una demostración de cambio de cuerdas que todavía no necesitas). Mientras miras, anota dos cosas que pueden dañar una guitarra y cómo evitar cada una — los buenos hábitos desde ahora mantienen tu guitarra tocable por años.',
             hint: 'Notice how he handles and stores the guitar. You\'ll practice the safe set-down at the practice station next. You\'ve got it when: you can name two ways to keep a guitar safe.',
@@ -77,6 +80,7 @@ SETS.push(
             title_es: 'Escuchar — encuentra la guitarra',
             steps: [
           {
+            label: 'Find your song on YouTube', label_es: 'Busca tu canción en YouTube',
             text: 'Find a YouTube clip of your song — the one that means something to you (any song you love with guitar in it works). As you listen, follow the guitar only — ignore the singing and drums for 30 seconds and track what the guitar is doing. You\'ve got it when: you can describe the guitar\'s job in the song in one sentence.',
             text_es: 'Busca en YouTube un clip de tu canción — la que significa algo para ti (sirve cualquier canción que ames que tenga guitarra). Mientras escuchas, sigue solo la guitarra — ignora la voz y la batería durante 30 segundos y fíjate en qué está haciendo la guitarra. Lo tienes cuando: puedes describir en una oración el papel de la guitarra en la canción.',
             hint: 'Is it strumming chords? Playing a melody? Both? Just listen — you don\'t need to know the names yet.',
@@ -104,6 +108,7 @@ SETS.push(
             title_es: 'Entrenamiento auditivo — acústica vs. eléctrica',
             steps: [
           {
+            label: 'Ear training: acoustic vs. electric', label_es: 'Oído: acústica vs. eléctrica',
             text: 'Ear training — acoustic vs. electric. Two short clips play the SAME song, "All Along the Watchtower": <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank" data-ext="1">Clip 1 — Bob Dylan</a> and <a href="https://www.youtube.com/watch?v=TLV4_xaYynY" target="_blank" data-ext="1">Clip 2 — Jimi Hendrix</a>. As you listen, decide which clip sounds warm and woody and which sounds bright and fuzzy — that\'s the acoustic-vs-electric difference. This song grows with you through the whole course — <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
             text_es: 'Entrenamiento auditivo — acústica vs. eléctrica. Dos clips cortos tocan la MISMA canción, "All Along the Watchtower": <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank" data-ext="1">Clip 1 — Bob Dylan</a> y <a href="https://www.youtube.com/watch?v=TLV4_xaYynY" target="_blank" data-ext="1">Clip 2 — Jimi Hendrix</a>. Mientras escuchas, decide qué clip suena cálido y "de madera" y cuál suena brillante y distorsionado — esa es la diferencia entre acústica y eléctrica. Esta canción crece contigo durante todo el curso — <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 1 de 5</a>.',
             hint: 'Acoustic guitars sound warm and woody. Electric guitars sound brighter and can be distorted or "fuzzy." Same song, very different sound. You\'ve got it when: you can point to the electric clip and say one word for why it sounds different.',
@@ -139,6 +144,7 @@ SETS.push(
             title_es: 'Ponte cómodo sosteniendo y explorando la guitarra',
             steps: [
           {
+            label: 'Safe handling', label_es: 'Manejo seguro',
             text: 'Safe handling (every session):<ul><li>When you\'re not playing, rest the guitar flat on its back across your lap, or lay it in the case or stand.</li><li>Never lean it against a chair or wall — it can slip and fall.</li><li>Carry it with one hand on the neck and one on the body.</li></ul>You\'ve got it when: you can set the guitar down and pick it up without it wobbling or tipping.',
             text_es: 'Manejo seguro (cada sesión):<ul><li>Cuando no estés tocando, apoya la guitarra boca arriba sobre tu regazo, o déjala en el estuche o en un soporte.</li><li>Nunca la recuestes contra una silla o pared — se puede resbalar y caer.</li><li>Cárgala con una mano en el mástil y otra en el cuerpo.</li></ul>Lo tienes cuando: puedes dejarla y levantarla sin que se tambalee o se caiga.',
             hint: 'A guitar that falls can crack its neck. A little care keeps your guitar playable for years.',
@@ -149,6 +155,7 @@ SETS.push(
             levelUp_es: 'Déjala y levántala tres veces seguidas, suave y en silencio cada vez — sin golpes contra la silla.'
           },
           {
+            label: 'Your first strum', label_es: 'Tu primer rasgueo',
             text: 'Pick up the guitar. Hold it in a comfortable position. Strum all 6 strings slowly with your thumb — just listen to the sound. You\'ve got it when: the guitar sits steady on your leg and all 6 strings ring when you strum.',
             text_es: 'Levanta la guitarra. Sostenla en una posición cómoda. Rasguea las 6 cuerdas despacio con el pulgar — solo escucha el sonido. Lo tienes cuando: la guitarra queda firme sobre tu pierna y las 6 cuerdas suenan al rasguear.',
             hint: 'Don\'t worry about pressing any frets yet. Just get used to holding it.',
@@ -159,6 +166,7 @@ SETS.push(
             levelUp_es: 'Rasguea despacio desde la Mi grave hasta la mi aguda y de regreso, manteniendo cada cuerda sonando parejo — ninguna cuerda más fuerte o más baja que las demás.'
           },
           {
+            label: 'Find your sitting position', label_es: 'Encuentra tu posición al sentarte',
             text: 'Try playing with your foot up on a stool, then flat on the ground. Keep whichever one lets you sit up straight without gripping the neck to hold the guitar up. You\'ve got it when: you can let go with your fretting hand and the guitar stays put on your leg.<span class="step-figure"><img src="img/posture-check.jpg" alt="Side-view drawing comparing sitting with a footstool (comfortable: back upright, guitar resting steady) to sitting without one (uncomfortable: hunched forward to reach the guitar)."></span>',
             text_es: 'Prueba tocar con el pie apoyado en un banquito, y luego con el pie plano en el suelo. Quédate con la posición que te permita sentarte derecho sin agarrar el mástil para sostener la guitarra. Lo tienes cuando: puedes soltar la mano de trastear y la guitarra se queda quieta sobre tu pierna.<span class="step-figure"><img src="img/posture-check.jpg" alt="Dibujo de perfil comparando sentarse con un banquito para el pie (cómodo: espalda derecha, guitarra firme) con sentarse sin uno (incómodo: encorvado hacia adelante para alcanzar la guitarra)."></span>',
             hint: 'The guitar should balance on your leg, not hang from your hand. Your fretting hand needs to be free to move.',
@@ -169,6 +177,7 @@ SETS.push(
             levelUp_es: 'Mantén la posición con las dos manos lejos del mástil durante 10 segundos mientras te sientas bien derecho.'
           },
           {
+            label: 'Explore the guitar\'s sounds', label_es: 'Explora los sonidos de la guitarra',
             text: 'Try tapping the body, plucking one string at a time, and strumming. What differences do you notice? You\'ve got it when: you can make at least three different sounds and say how they differ.',
             text_es: 'Prueba golpear suavemente el cuerpo, pulsar una cuerda a la vez, y rasguear. ¿Qué diferencias notas? Lo tienes cuando: puedes hacer al menos tres sonidos distintos y decir en qué se diferencian.',
             hint: 'Curiosity is your best tool right now.',
@@ -185,6 +194,7 @@ SETS.push(
             title_es: 'Describe por qué quiero aprender guitarra',
             steps: [
           {
+            label: 'Write your guitar goal', label_es: 'Escribe tu meta con la guitarra',
             text: 'Type your guitar goal in the box below — we\'ll revisit it at the end of the course. You\'ve got it when: you wrote a goal you can explain in one sentence.',
             text_es: 'Escribe tu meta con la guitarra en el cuadro de abajo — la vamos a repasar al final del curso. Lo tienes cuando: escribiste una meta que puedes explicar en una oración.',
             hint: 'It can be a song you want to play, a skill you want to build, or just a feeling.',
@@ -199,6 +209,7 @@ SETS.push(
             title_es: 'Mi rutina de práctica — check-in de la sesión (nunca se califica)',
             steps: [
           {
+            label: 'Plan your practice routine', label_es: 'Planea tu rutina de práctica',
             text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to write your routine:<ol><li>One thing you want to get better at.</li><li>When and where you\'ll practice next.</li><li>How your last session went (skip that part this first time).</li></ol>We\'ll revisit it every module to see how your plan is working.',
             text_es: 'Planea tu práctica — esta parte es solo para ti, nunca se califica. Tómate dos minutos para escribir tu rutina:<ol><li>Una cosa en la que quieres mejorar.</li><li>Cuándo y dónde vas a practicar la próxima vez.</li><li>Cómo te fue en tu última sesión (sáltate esa parte esta primera vez).</li></ol>La vamos a repasar en cada módulo para ver cómo va tu plan.',
             hint: 'No wrong answers — even five minutes a day is better than one long rushed session. You\'re building a habit you\'ll actually keep.',
@@ -301,6 +312,7 @@ SETS.push(
             title_es: 'Mira los videos de la lección',
             steps: [
           {
+            label: 'Watch: tuning with a tuner', label_es: 'Mira: afinar con afinador',
             text: 'Watch: <a href="https://www.youtube.com/watch?v=bTvmDGDuUZ4" target="_blank">How to Tune a Guitar for Beginners with a Tuner – Lauren Bateman (0:00–4:30)</a> (this site also has a built-in tuner in the corner toolbar). Have your tuner ready and follow along on your own guitar — match one string at a time as she goes.',
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=bTvmDGDuUZ4" target="_blank">How to Tune a Guitar for Beginners with a Tuner – Lauren Bateman (0:00–4:30)</a> (este sitio también tiene un afinador integrado en la barra de la esquina). Ten tu afinador listo y sigue el video en tu propia guitarra — afina una cuerda a la vez a medida que ella avanza.',
             hint: 'Headphones on. Notice the order of the strings and what "in tune" sounds like. You\'ve got it when: you can tell whether a note is too high or too low before the tuner shows you.',
@@ -328,6 +340,7 @@ SETS.push(
             ] }
           },
           {
+            label: 'Watch: parts of the guitar', label_es: 'Mira: las partes de la guitarra',
             text: 'Watch: <a href="https://www.youtube.com/watch?v=lWnbBIs6-P4" target="_blank">Parts of Acoustic Guitar (Beginner Lesson #2) – Guitar Goddess (0:00–4:00)</a>. As she names each part, point to it on your own guitar and say the name out loud.',
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=lWnbBIs6-P4" target="_blank">Parts of Acoustic Guitar (Beginner Lesson #2) – Guitar Goddess (0:00–4:00)</a>. Mientras ella nombra cada parte, señálala en tu propia guitarra y di el nombre en voz alta.',
             hint: 'Write down 5 parts you can now name from memory. You\'ve got it when: you can point to and name at least 5 parts without the video.',
@@ -351,6 +364,7 @@ SETS.push(
             ] }
           },
           {
+            label: 'Watch: how to hold the guitar', label_es: 'Mira: cómo sostener la guitarra',
             text: 'Watch: <a href="https://www.youtube.com/watch?v=eyrgiiONULE" target="_blank">How to Hold Your Guitar Comfortably – Lauren Bateman (0:00–4:00)</a>. While you watch, set up in your chair and copy her position piece by piece — feet, guitar on leg, back, strumming arm.',
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=eyrgiiONULE" target="_blank">How to Hold Your Guitar Comfortably – Lauren Bateman (0:00–4:00)</a>. Mientras miras, acomódate en tu silla y copia su posición paso a paso — pies, guitarra sobre la pierna, espalda, brazo de rasgueo.',
             hint: 'Notice where the guitar rests and how the back stays straight. You\'ve got it when: you can look away from the screen and your guitar stays put without your fretting hand holding it up.',
@@ -378,6 +392,7 @@ SETS.push(
             ] }
           },
           {
+            label: 'Watch: how to hold the pick', label_es: 'Mira: cómo agarrar la púa',
             text: 'Watch: <a href="https://www.youtube.com/watch?v=TKO8NLOdSwQ" target="_blank">How To Hold A Guitar Pick for Beginners: Right vs Wrong – Lauren Bateman (0:00–4:00)</a>. Grab a pick and copy her grip as you watch — rest it on your bent index finger, then press your thumb on top.',
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=TKO8NLOdSwQ" target="_blank">How To Hold A Guitar Pick for Beginners: Right vs Wrong – Lauren Bateman (0:00–4:00)</a>. Toma una púa y copia su agarre mientras miras — apóyala sobre tu dedo índice doblado, y luego presiona el pulgar encima.',
             hint: 'Write down: what are the two most common pick-holding mistakes? You\'ve got it when: only a small tip of the pick pokes past your thumb and it doesn\'t slip when you strum.',
@@ -411,6 +426,7 @@ SETS.push(
             title_es: 'Nombres de las cuerdas y pulsación limpia',
             steps: [
           {
+            label: 'Name the 6 strings', label_es: 'Nombra las 6 cuerdas',
             text: 'Type the 6 string names from memory, low to high, in the box below. Mnemonic: Eddie Ate Dynamite, Good Bye Eddie. You\'ve got it when: you can type all six in order without peeking at the mnemonic.',
             text_es: 'Escribe de memoria los nombres de las 6 cuerdas, de grave a aguda, en el cuadro de abajo. Regla mnemotécnica: Eddie Ate Dynamite, Good Bye Eddie. Lo tienes cuando: puedes escribir las seis en orden sin mirar la regla mnemotécnica.',
             stuck: 'Type just the first letters — E A D G B E — using "Eddie Ate Dynamite, Good Bye Eddie." Clear it, then type them again from memory.',
@@ -421,6 +437,7 @@ SETS.push(
               placeholder_es: 'Las 6 cuerdas, de grave a aguda: …' }
           },
           {
+            label: 'Watch: picking single strings', label_es: 'Mira: pulsar cuerdas sueltas',
             text: 'Watch: <a href="https://youtu.be/Z1ETtvhPqdQ" target="_blank">Picking Individual Strings (BC-166) – JustinGuitar</a>. Copy him on your own guitar — pick one open string over and over, aiming for the same clean sound every time.',
             text_es: 'Mira: <a href="https://youtu.be/Z1ETtvhPqdQ" target="_blank">Picking Individual Strings (BC-166) – JustinGuitar</a>. Cópialo en tu propia guitarra — pulsa una cuerda al aire una y otra vez, buscando el mismo sonido limpio cada vez.',
             hint: 'Watch his picking hand and how light his fretting touch is. Clean single notes are the whole goal of your first melody. You\'ve got it when: you can pick a single string five times and it rings clean every time — no buzz, no catching a neighbor string.',
@@ -434,6 +451,7 @@ SETS.push(
               placeholder_es: '¿Qué cuerda fue más fácil de pulsar limpio, y cuál te tomó más intentos?' }
           },
           {
+            label: 'Quick try: play and name each string', label_es: 'Prueba rápida: toca y nombra cada cuerda',
             text: 'Quick try: play each open string once, low E to high e, saying the name out loud as you pluck. Just a preview — you\'ll drill these for real at the practice station. You\'ve got it when: you can name each string out loud the instant you pluck it.',
             text_es: 'Prueba rápida: toca cada cuerda al aire una vez, de Mi grave a mi aguda, diciendo el nombre en voz alta al pulsarla. Es solo un adelanto — las vas a practicar de verdad en la estación de práctica. Lo tienes cuando: puedes nombrar cada cuerda en voz alta al instante de pulsarla.',
             hint: 'Hearing + saying + playing helps you memorize it faster than just watching.',
@@ -467,6 +485,7 @@ SETS.push(
             title_es: 'Adelanto del riff de "Seven Nation Army"',
             steps: [
           {
+            label: 'Preview the Seven Nation Army riff', label_es: 'Adelanto del riff de Seven Nation Army',
             text: 'Preview the "Seven Nation Army" riff: click the note names below the TAB (the little chart below — each number is a fret to press on the low E string; 0 = open) to hear how it should sound, then try just the first few notes to get the feel. Heads up: this site teaches it as straight, even quarter notes — one per beat — to make it easy to count while you\'re learning it; the actual record swings it a bit looser than that, which you\'ll start to hear naturally once the shape feels solid. You\'ll play the whole riff at the practice station. You\'ve got it when: you can match the first three notes to what you heard. This song grows with you through the whole course — <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
             text_es: 'Adelanto del riff de "Seven Nation Army": haz clic en los nombres de las notas debajo del TAB (el pequeño diagrama de abajo — cada número es un traste que debes presionar en la cuerda Mi grave; 0 = al aire) para escuchar cómo debe sonar, y luego prueba solo las primeras notas para agarrar la sensación. Aviso: aquí se enseña con negras rectas y parejas — una nota por pulso — para que sea fácil de contar mientras lo aprendes; la grabación original lo toca con un poco más de swing (vaivén) que eso, algo que empezarás a notar de oído en cuanto domines bien la forma. Vas a tocar el riff completo en la estación de práctica. Lo tienes cuando: puedes hacer coincidir las primeras tres notas con lo que escuchaste. Esta canción crece contigo durante todo el curso — <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 1 de 5</a>.',
             hint: 'Listen first, then match it — one note at a time. To fret a note, set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',
@@ -505,6 +524,7 @@ SETS.push(
             title_es: 'Afina las 6 cuerdas con un afinador',
             steps: [
           {
+            label: 'Challenge: tune all 6 strings', label_es: 'Reto: afina las 6 cuerdas',
             text: 'Challenge 1 — Tune Challenge: get all 6 strings to green on the tuner. Race the timer — can you do it in under 2 minutes? You\'ve got it when: all 6 strings green in under 2 minutes. Log your time so you can try for a faster time next session.',
             text_es: 'Reto 1 — Reto de afinación: pon las 6 cuerdas en verde en el afinador. Compite contra el cronómetro — ¿puedes lograrlo en menos de 2 minutos? Lo tienes cuando: las 6 cuerdas en verde en menos de 2 minutos. Anota tu tiempo para intentar superarlo en la próxima sesión.',
             hint: 'Tune low to high: E A D G B e. Going slowly works better than rushing past the note. Use the play button to hear the target pitches.',
@@ -523,6 +543,7 @@ SETS.push(
             title_es: 'Toca una melodía en las cuerdas al aire con notas limpias y constantes',
             steps: [
           {
+            label: 'Challenge: one minute, perfect notes', label_es: 'Reto: un minuto, notas perfectas',
             text: 'Challenge 2 — One Minute, Perfect Notes:<ol><li>For one minute, cycle through the open strings low to high (E A D G B e), saying each name out loud as you pluck.</li><li>When the minute\'s up, play one last full pass and count how many of the 6 ring perfectly clean — no buzz, no muting.</li><li>Log your score out of 6 and try for a higher score next time.</li></ol>You\'ve got it when: all 6 ring clean on that final pass.',
             text_es: 'Reto 2 — Un minuto, notas perfectas:<ol><li>Durante un minuto, recorre las cuerdas al aire de grave a aguda (E A D G B e), diciendo cada nombre en voz alta al pulsarla.</li><li>Cuando se acabe el minuto, toca una última vuelta completa y cuenta cuántas de las 6 suenan perfectamente limpias — sin zumbido, sin apagarse.</li><li>Anota tu puntaje sobre 6 e intenta superarlo la próxima vez.</li></ol>Lo tienes cuando: las 6 suenan limpias en esa última vuelta.',
             hint: 'These are open strings — press nothing. Let each string ring fully before moving to the next.',
@@ -534,6 +555,7 @@ SETS.push(
             skills: [6]
           },
           {
+            label: 'Happy Birthday on the low E', label_es: 'Happy Birthday en la Mi grave',
             text: 'Try "Happy Birthday" on the low E string — the tutorial video in the Songs tab walks you through the note sequence, all on one string. Practice with the Metronome (floating corner button) set to 60 BPM — beats per minute, one click a second — to keep steady. You\'ve got it when: you can play it start to finish with clean notes and a steady pulse.',
             text_es: 'Prueba "Happy Birthday" en la cuerda Mi grave — el video tutorial en la pestaña de Canciones te guía por la secuencia de notas, todo en una sola cuerda. Practica con el Metrónomo (botón flotante de la esquina) puesto en 60 BPM — pulsos por minuto, un clic por segundo — para mantenerte constante. Lo tienes cuando: puedes tocarla de principio a fin con notas limpias y un pulso constante.',
             hint: 'Go slow. Clean notes matter more than speed right now.',
@@ -545,6 +567,7 @@ SETS.push(
             skills: [6]
           },
           {
+            label: 'Challenge: the Seven Nation Army riff', label_es: 'Reto: el riff de Seven Nation Army',
             text: 'Challenge 3 — Riff Time (try it!): play the "Seven Nation Army" riff on the low E string — slow and clean. You\'ve got it when: all 7 notes in the right order, each ringing clean — speed comes later. No score on this one, just try it. Click any note name below the TAB to hear how it should sound.',
             text_es: 'Reto 3 — Hora del riff (¡pruébalo!): toca el riff de "Seven Nation Army" en la cuerda Mi grave — despacio y limpio. Lo tienes cuando: las 7 notas en el orden correcto, cada una sonando limpia — la velocidad viene después. Este no tiene puntaje, solo pruébalo. Haz clic en cualquier nombre de nota debajo del TAB para escuchar cómo debe sonar.',
             hint: 'Slow and clean is better than fast and buzzy. One note at a time. Set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',

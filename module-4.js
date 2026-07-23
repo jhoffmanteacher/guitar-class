@@ -33,6 +33,7 @@ SETS.push(
             title_es: 'Mira los videos de la lección',
             steps: [
           {
+            label: 'Watch: minor pentatonic scale', label_es: 'Mira: pentatónica menor',
             text: 'Watch: <a href="https://www.youtube.com/watch?v=l6ayje1ug_0" target="_blank">The Minor Pentatonic Scale on Guitar Explained – Lauren Bateman (0:00–5:00)</a>. As you watch, follow along on your guitar — pause and find each note BEFORE she names it.',
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=l6ayje1ug_0" target="_blank">The Minor Pentatonic Scale on Guitar Explained – Lauren Bateman (0:00–5:00)</a>. Mientras miras, sigue el ritmo en tu guitarra — pausa y encuentra cada nota ANTES de que ella la nombre.',
             hint: 'Follow along on your guitar as she shows the pattern. Pause and find each note before she names it.',
@@ -58,6 +59,7 @@ SETS.push(
           },
           {
             // Reviewed by Jonathan 2026-07-11: fits Set 1; start at 1:45 (the link jumps there — the intro before is skippable).
+            label: 'Watch: major pentatonic scale', label_es: 'Mira: pentatónica mayor',
             text: 'Watch: <a href="https://youtu.be/m_IiyJu60-c?t=105" target="_blank">Major Pentatonic Scale – Marty Music</a> (the link jumps to 1:45, where the lesson starts — watch to about 4:00). As you watch, find the root note on your own neck and play the shape up once before answering below.',
             text_es: 'Mira: <a href="https://youtu.be/m_IiyJu60-c?t=105" target="_blank">Major Pentatonic Scale – Marty Music</a> (el enlace salta a 1:45, donde empieza la lección — mira hasta cerca de 4:00). Mientras miras, encuentra la nota raíz en tu propio mástil y toca la forma una vez antes de responder abajo.',
             hint: 'Focus on the Pattern 1 shape — how does it sit on the neck? Notice where the root note is.',
@@ -73,6 +75,7 @@ SETS.push(
             title_es: 'Posiciona el patrón tú mismo',
             steps: [
           {
+            label: 'Position Pattern 1 as C major', label_es: 'Posiciona el Patrón 1 en C mayor',
             text: 'Try positioning Pattern 1 as C major pentatonic: place your 4th finger on the 8th fret of string 6 (the note C). Play the pattern up and down slowly. Click "Hear C major pentatonic" below to check your ear against it.',
             text_es: 'Intenta posicionar el Patrón 1 como C mayor pentatónica: coloca tu dedo anular (4º) en el traste 8 de la cuerda 6 (la nota C). Toca el patrón hacia arriba y hacia abajo despacio. Presiona "Escucha C mayor pentatónica" abajo para comprobarlo con tu oído.',
             hint: 'Major pentatonic: 4th finger on root. Minor pentatonic: 1st finger on root. Same pattern — different finger on the starting note.',
@@ -104,6 +107,7 @@ SETS.push(
             title_es: 'Escucha — estados de ánimo mayor vs menor',
             steps: [
           {
+            label: 'Listen: major vs. minor moods', label_es: 'Escucha: ánimo mayor vs. menor',
             text: 'Match the mood — scale choice changes the feel. Listen to two short solos: <a href="https://www.youtube.com/watch?v=BycLmWI97Nc" target="_blank" data-ext="1">Clip 1 — "La Bamba"</a> (major pentatonic) then <a href="https://www.youtube.com/watch?v=kpC69qIe02E" target="_blank" data-ext="1">Clip 2 — "The Thrill Is Gone"</a> (minor / blues). Notice how the major-pentatonic solo sounds brighter and happier, while the minor / blues solo sounds darker and moodier.',
             text_es: 'Iguala el estado de ánimo — la elección de escala cambia la sensación. Escucha dos solos cortos: <a href="https://www.youtube.com/watch?v=BycLmWI97Nc" target="_blank" data-ext="1">Clip 1 — "La Bamba"</a> (pentatónica mayor) y luego <a href="https://www.youtube.com/watch?v=kpC69qIe02E" target="_blank" data-ext="1">Clip 2 — "The Thrill Is Gone"</a> (menor / blues). Fíjate en cómo el solo con pentatónica mayor suena más brillante y alegre, mientras que el solo menor / blues suena más oscuro y melancólico.',
             hint: 'Major pentatonic = brighter, sunnier. Minor / blues = darker, sadder, more "bluesy." Same instrument — the scale choice sets the mood.',
@@ -125,6 +129,7 @@ SETS.push(
             ] }
           },
           {
+            label: 'Name the mood of each clip', label_es: 'Nombra el ánimo de cada clip',
             text: 'In one word each, name the mood you heard in the two clips above.',
             text_es: 'En una palabra cada uno, nombra el estado de ánimo que escuchaste en los dos clips de arriba.',
             hint: 'There\'s no wrong answer — trust your ear. Words like "bright," "happy," "dark," "sad," or "moody" all work.',
@@ -138,6 +143,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
           {
+            label: 'Wrap-up: the finger or the sound?', label_es: 'Cierre: ¿el dedo o el sonido?',
             text: 'Station Wrap-Up — pause and think: when you positioned Pattern 1 today, what told you whether you were set up for MAJOR or MINOR — the finger on the root, or the sound? Which felt more reliable?',
             text_es: 'Cierre de la estación — pausa y piensa: cuando posicionaste el Patrón 1 hoy, ¿qué te decía si estabas listo para MAYOR o para MENOR — el dedo en la raíz, o el sonido? ¿Cuál se sintió más confiable?',
             response: { type: 'short', placeholder: 'e.g. I trusted the finger (4th = major, 1st = minor) more than my ear so far',
@@ -156,6 +162,7 @@ SETS.push(
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
               {
+                label: 'Tune all 6 strings', label_es: 'Afina las 6 cuerdas',
                 text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 hint: 'Tuning (Module 1) is a skill you keep forever. As you climb the pentatonic pattern today, keep naming the notes too — that\'s your Module 2 fretboard map in action.',
@@ -169,6 +176,7 @@ SETS.push(
             title_es: 'Toca el Patrón 1 con púa alterna',
             steps: [
           {
+            label: 'Challenge: Pattern 1 climb', label_es: 'Reto: subida del Patrón 1',
             text: 'Challenge 1 — Pattern 1 Climb (skills-check warm-up): play Pentatonic Pattern 1 ascending at 60 BPM, one note per beat, alternate picking (down-up-down-up). You\'ve got it when: every note rings clean with no missed picks. This is a warm-up drill — the module assessment is your own 4-bar solo (you\'ll compose it in Set 3), held to the backing track\'s pulse — but this is the benchmark lap (a lap = one full time through) for your Set 1 check-off. Click "Play all" to hear it.',
             text_es: 'Reto 1 — Subida del Patrón 1 (calentamiento de revisión de destrezas): toca el Patrón pentatónico 1 subiendo a 60 BPM, una nota por tiempo, con púa alterna (abajo-arriba-abajo-arriba). Lo tienes cuando: cada nota suena limpia sin púas falladas. Este es un ejercicio de calentamiento — la evaluación del módulo es tu propio solo de 4 compases (lo compondrás en la Unidad 3), sostenido al pulso de la pista de acompañamiento — pero esta es la vuelta de referencia (una vuelta = un recorrido completo) para tu verificación de la Unidad 1. Presiona "Tocar todo" para escucharlo.',
             hint: 'Go as slow as you need. Every note should ring cleanly. Say each note aloud as you play it to connect your ear to your fingers. Set the ⏱ Timer for 2 minutes and loop it.',
@@ -188,6 +196,7 @@ SETS.push(
             title_es: 'Posiciona el Patrón 1 para mayor y menor',
             steps: [
           {
+            label: 'Challenge: move the box', label_es: 'Reto: mueve la caja',
             text: 'Challenge 2 — Move the Box (a box = the block of frets where a scale pattern sits): play Pattern 1 as A minor pentatonic (1st finger, 5th fret, string 6) up and down using the TAB map, then shift it to E minor pentatonic (open-string root). You\'ve got it when: both positions clean — same shape, two spots on the neck.',
             text_es: 'Reto 2 — Mueve la caja (una caja = el bloque de trastes donde se ubica un patrón de escala): toca el Patrón 1 como A menor pentatónica (dedo índice, traste 5, cuerda 6) subiendo y bajando usando el mapa de TAB, y luego cámbialo a E menor pentatónica (raíz en cuerda al aire). Lo tienes cuando: ambas posiciones limpias — misma forma, dos lugares en el mástil.',
             hint: 'A minor: your hand sits around frets 5–8. E minor: the open strings do your 1st finger\'s job, and your other fingers play frets 2 and 3.',
@@ -223,6 +232,7 @@ SETS.push(
             title_es: 'Improvisa tu primer solo',
             steps: [
           {
+            label: 'Challenge: Rule of 3', label_es: 'Reto: Regla de 3',
             text: 'Challenge 3 — Rule of 3 (try it!): improvise using ONLY 3 notes of Pattern 1 for 4 bars over the Am backing track — <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; Am jam track</a>. Once those 3 feel comfortable, add a 4th note and play 4 more bars. No score — aim for short, intentional ideas with space between them.',
             text_es: 'Reto 3 — Regla de 3 (¡pruébalo!): improvisa usando SOLO 3 notas del Patrón 1 durante 4 compases sobre la pista de acompañamiento de Am — <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; pista de jam en Am</a>. Una vez que esas 3 se sientan cómodas, agrega una 4ª nota y toca 4 compases más. Sin puntaje — apunta a ideas cortas e intencionadas con espacio entre ellas.',
             hint: 'Limiting yourself to 3 notes forces you to make music with phrasing and rhythm, not note-count. A short, clear idea with silence around it is better than a stream of notes.',
@@ -234,6 +244,7 @@ SETS.push(
             skills: [6]
           },
           {
+            label: 'Challenge: four-phrase plan', label_es: 'Reto: plan de las cuatro frases',
             text: 'Challenge 4 — The Four-Phrase Plan: use the SAME 3 notes from Rule of 3, but now shape a whole solo with four short phrases — about one bar each, silence between them (the space IS part of the plan). Give each phrase a job: <strong>Phrase 1 — say it</strong> (a tiny idea, 2–4 notes). <strong>Phrase 2 — repeat it</strong> (play that same idea again, maybe with one note changed). <strong>Phrase 3 — stretch it</strong> (take the idea higher, or keep the notes and change the rhythm). <strong>Phrase 4 — come home</strong> (end on the root, A, so the solo lands). Play it over the Am backing track — <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; Am jam track</a>. You\'ve got it when: four distinct phrases with space between them, and the last one lands on the root (A).',
             text_es: 'Reto 4 — El plan de las cuatro frases: usa las MISMAS 3 notas de la Regla de 3, pero ahora dale forma a un solo entero con cuatro frases cortas — más o menos un compás cada una, con silencio entre ellas (el espacio SÍ es parte del plan). Dale un trabajo a cada frase: <strong>Frase 1 — dila</strong> (una idea pequeña, 2–4 notas). <strong>Frase 2 — repítela</strong> (toca esa misma idea otra vez, tal vez con una nota cambiada). <strong>Frase 3 — estírala</strong> (lleva la idea más arriba, o mantén las notas y cambia el ritmo). <strong>Frase 4 — llega a la nota base</strong> (termina en la raíz, A, para que el solo aterrice). Tócalo sobre la pista de acompañamiento de Am — <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; pista de jam en Am</a>. Lo tienes cuando: cuatro frases distintas con espacio entre ellas, y la última aterriza en la raíz (A).',
             hint: 'This is Rule of 3 with a road map. Say-it / repeat-it / stretch-it / come-home turns three notes into a story with a beginning, middle, and ending — instead of a random string of notes.',
@@ -252,6 +263,7 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
+                label: 'Challenge: solo over Seven Nation Army', label_es: 'Reto: solo sobre Seven Nation Army',
                 text: 'Challenge — Solo over Seven Nation Army: loop the SNA riff (a riff = a short musical phrase that repeats) in your head (or record yourself playing the riff and jam over the playback) and improvise using ONLY these three notes — low E, G, and open A — for four bars. Rule of 3: short ideas, space between them. You\'ve got it when: four bars of intentional phrases — not a stream of notes — that land back on E. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
                 text_es: 'Reto — Solo sobre Seven Nation Army: repite el riff de SNA (un riff = una frase musical corta que se repite) en tu cabeza (o grábate tocando el riff y toca sobre la grabación) e improvisa usando SOLO estas tres notas — Mi grave, G, y La al aire — durante cuatro compases. Regla de 3: ideas cortas, espacio entre ellas. Lo tienes cuando: cuatro compases de frases intencionadas — no un torrente de notas — que aterricen de vuelta en E. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 4 de 5</a>.',
                 hint: 'E is the note this song centers on. End every phrase on it and you\'ll always sound like you meant it.',
@@ -273,6 +285,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Describe your best phrase in words — what made it feel finished?', prompt_es: 'Describe tu mejor frase con palabras — ¿qué la hizo sentir terminada?', placeholder: 'e.g. two quick notes then a long E', placeholder_es: 'p. ej. dos notas rápidas y luego una E larga' }
               },
               {
+                label: 'Challenge: solo over Watchtower', label_es: 'Reto: solo sobre Watchtower',
                 text: 'Challenge — Solo over Watchtower: the song\'s loop is Am · G · F · G — and A minor pentatonic Pattern 1 (the box you just learned) fits every bar of it. Improvise four bars using only the three notes marked below, then four more adding a fourth note of your choice from Pattern 1. You\'ve got it when: eight bars where every phrase starts or ends on A. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
                 text_es: 'Reto — Solo sobre Watchtower: la vuelta de la canción es Am · G · F · G — y el Patrón pentatónico 1 de A menor (la caja que acabas de aprender) encaja en cada compás. Improvisa cuatro compases usando solo las tres notas marcadas abajo, y luego cuatro más agregando una cuarta nota de tu elección del Patrón 1. Lo tienes cuando: ocho compases donde cada frase empieza o termina en A. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 4 de 5</a>.',
                 hint: 'This is the same box from your Pattern 1 drill — you\'re not learning anything new, you\'re USING it. That\'s the whole point of today.',
@@ -294,6 +307,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which chord in the loop was easiest to solo over, and which fought you?', prompt_es: '¿Qué acorde de la vuelta fue el más fácil para improvisar, y cuál se te resistió?', placeholder: 'e.g. Am easy, F felt weird', placeholder_es: 'p. ej. Am fácil, F se sintió raro' }
               },
               {
+                label: 'Challenge: Watchtower\'s real rhythm', label_es: 'Reto: el ritmo real de Watchtower',
                 text: 'Challenge — Watchtower, the real rhythm: you\'ve played this bass line since Module 2 — but always one even note per beat. Listen to the recording, find the riff\'s TAB with rhythm stems (Songsterr shows them clearly), and play it the way the record actually goes — each root held a full two beats, not one. You\'ve got it when: you can loop A · G · F · G along with the record and stay locked with it. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
                 text_es: 'Reto — Watchtower, el ritmo real: has tocado esta línea de bajo desde el Módulo 2 — pero siempre con una nota pareja por tiempo. Escucha la grabación, busca el TAB del riff con plicas de ritmo (Songsterr las muestra claramente), y tócalo como realmente suena en el disco — cada raíz sostenida dos tiempos completos, no uno. Lo tienes cuando: puedes repetir A · G · F · G junto con la grabación y mantenerte sincronizado. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'The frets haven\'t changed since Module 2 — only the rhythm reading is new. That\'s the whole point of this step: same notes, real music.',
@@ -306,6 +320,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'What did you notice, holding each root for two beats instead of one?', prompt_es: '¿Qué notaste al sostener cada raíz dos tiempos en vez de uno?', placeholder: 'e.g. it finally sounds like the song, not an exercise', placeholder_es: 'p. ej. por fin suena como la canción, no como un ejercicio' }
               },
               {
+                label: 'Challenge: SNA\'s real rhythm by ear', label_es: 'Reto: ritmo real de SNA, de oído',
                 text: 'Challenge — Seven Nation Army, the real rhythm (by ear): you\'ve played this riff since Module 1 as straight, even quarter notes — but the record swings it looser than that. Press the two &#x25B6; buttons below to hear the difference before you clap it. Listen to the recording on repeat, then clap the riff\'s rhythm with no guitar — some notes clipped short, some held longer — until it\'s in your hands. Add the frets back once the feel is there. You\'ve got it when: you can loop the riff along with the record and stay locked with its groove. (Module 7 revisits this riff to read its rhythm in notation — for now, trust your ear.) <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
                 text_es: 'Reto — Seven Nation Army, el ritmo real (de oído): has tocado este riff desde el Módulo 1 como negras parejas y rectas — pero la grabación lo balancea más suelto que eso. Presiona los dos botones &#x25B6; de abajo para escuchar la diferencia antes de aplaudirlo. Escucha la grabación una y otra vez, y luego aplaude el ritmo del riff sin guitarra — algunas notas cortas, algunas sostenidas más — hasta que esté en tus manos. Vuelve a agregar los trastes una vez que tengas la sensación. Lo tienes cuando: puedes repetir el riff junto con la grabación y mantenerte sincronizado con su groove (el groove = la sensación rítmica que te hace mover el cuerpo). (El Módulo 7 vuelve a este riff para leer su ritmo en notación — por ahora, confía en tu oído.) <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'Don\'t reach for counts or note values yet — this is ear training, the same way you learned to clap Watchtower\'s rhythm. Your ear already knows this riff; you\'re just teaching your hands to match it.',
@@ -352,6 +367,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'What\'s different about the riff\'s real rhythm compared to how you first learned it?', prompt_es: '¿Qué es diferente en el ritmo real del riff comparado con cómo lo aprendiste primero?', placeholder: 'e.g. the first two B\'s aren\'t evenly spaced', placeholder_es: 'p. ej. las primeras dos B no están parejas' }
               },
               {
+                label: 'Challenge: solo over Luna', label_es: 'Reto: solo sobre Luna',
                 text: 'Challenge — Solo over Luna: Luna lives in F major, and F\'s relative minor is D — so D minor pentatonic Pattern 1 (root D, low E fret 10) is your box: the exact shape you\'ve been drilling, parked at the course\'s highest position. Improvise four bars using only the three notes marked below, then four more adding a fourth note from the box. Jam over <a href="https://www.youtube.com/watch?v=wBxFnX_V9mQ" target="_blank">▶ &#x1F3B5; a slow Dm practice jam (Luna\'s solo key)</a>. You\'ve got it when: eight bars where every phrase starts or ends on D. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
                 text_es: 'Reto — Solo sobre Luna: Luna vive en F mayor, y la relativa menor de F es D — así que el Patrón pentatónico 1 de D menor (raíz D, cuerda Mi grave traste 10) es tu caja: la misma forma que has estado ejercitando, ubicada en la posición más alta del curso. Improvisa cuatro compases usando solo las tres notas marcadas abajo, y luego cuatro más agregando una cuarta nota de la caja. Toca sobre <a href="https://www.youtube.com/watch?v=wBxFnX_V9mQ" target="_blank">▶ &#x1F3B5; una pista de jam lenta en D menor (la tonalidad del solo de Luna)</a>. Lo tienes cuando: ocho compases donde cada frase empieza o termina en D. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 4 de 5</a>.',
                 hint: 'Same Pattern 1 shape — just at fret 10. This high up, the frets sit closer together, so the stretch is easier than it looks.',
@@ -379,6 +395,7 @@ SETS.push(
             title_es: 'Mi rutina de práctica — check-in semanal (nunca se califica)',
             steps: [
               {
+                label: 'Plan your practice', label_es: 'Planea tu práctica',
                 text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine:<ol><li>One thing you want to get better at.</li><li>When and where you\'ll practice this week.</li><li>How last week\'s plan went.</li></ol>Same check-in you\'ve kept since Module 1 — we keep it going through the whole course.',
                 text_es: 'Planea tu práctica — esta parte es solo para ti, nunca se califica. Tómate dos minutos para actualizar tu rutina:<ol><li>Una cosa en la que quieres mejorar.</li><li>Cuándo y dónde vas a practicar esta semana.</li><li>Cómo te fue con el plan de la semana pasada.</li></ol>El mismo check-in que has mantenido desde el Módulo 1 — lo seguimos manteniendo durante todo el curso.',
                 hint: 'No wrong answers — even five minutes a day is better than one long rushed session. You\'re building a habit you\'ll actually keep.',
@@ -393,6 +410,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: what felt harder?', label_es: 'Cierre: ¿qué fue más difícil?',
                 text: 'Which felt harder today — playing the pattern cleanly, or making music with only 3 notes? Write it below — that\'s your warm-up target next time.',
                 text_es: '¿Qué se sintió más difícil hoy — tocar el patrón limpio, o hacer música con solo 3 notas? Escríbelo abajo — ese es tu objetivo de calentamiento la próxima vez.',
                 response: { type: 'short', placeholder: 'e.g. the pattern is clean; making 3 notes sound intentional is the hard part',
@@ -487,6 +505,7 @@ SETS.push(
             title_es: 'Mira los videos de la lección',
             steps: [
           {
+            label: 'Watch: using the minor pentatonic', label_es: 'Mira: usar la pentatónica menor',
             text: 'Watch: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M" target="_blank">How to USE the Minor Pentatonic Scale – Lauren Bateman (0:00–4:00)</a> to refresh the shape. Then YOU add the expression the video doesn\'t: pick one note from the pattern and play it loud, then soft — that difference in volume is dynamics.',
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M" target="_blank">How to USE the Minor Pentatonic Scale – Lauren Bateman (0:00–4:00)</a> para repasar la forma. Luego TÚ agregas la expresión que el video no muestra: elige una nota del patrón y tócala fuerte, y luego suave — esa diferencia de volumen es la dinámica.',
             hint: 'The video shows the notes; the dynamics are on you. Play one note loud, then whisper-soft, and listen for how much the FEEL changes even though the note doesn\'t.',
@@ -496,6 +515,7 @@ SETS.push(
               placeholder_es: 'Describe tu propio experimento fuerte-luego-suave: qué nota, y qué cambió en el sonido?' }
           },
           {
+            label: 'Watch: hammer-ons and pull-offs', label_es: 'Mira: hammer-ons y pull-offs',
             text: 'Watch: <a href="https://youtu.be/7hDdZAjKBjY" target="_blank">Hammer-Ons & Pull-Offs Explained – JustinGuitar</a> (0:00–3:00). As you watch, try one hammer-on on your own guitar — pick the open D string, then hammer your finger onto the 2nd fret without picking again.',
             text_es: 'Mira: <a href="https://youtu.be/7hDdZAjKBjY" target="_blank">Hammer-Ons & Pull-Offs Explained – JustinGuitar</a> (0:00–3:00). Mientras miras, prueba un hammer-on en tu propia guitarra — pulsa la cuerda Re al aire, y luego martilla tu dedo sobre el traste 2 sin pulsar de nuevo.',
             hint: 'These are your first "expressive" techniques. A hammer-on connects two notes with one pick stroke — it changes the shape (envelope) of the notes.',
@@ -526,6 +546,7 @@ SETS.push(
             title_es: 'Experimenta con el timbre',
             steps: [
           {
+            label: 'Bright vs. warm timbre', label_es: 'Timbre brillante vs. cálido',
             text: 'Experiment with timbre: play a note close to the bridge, then the same note near the neck. Hear the difference? Bright vs warm. Try to match the mood of a song you know.',
             text_es: 'Experimenta con el timbre: toca una nota cerca del puente, y luego la misma nota cerca del mástil. ¿Escuchas la diferencia? Brillante vs cálido. Intenta igualar el estado de ánimo de una canción que conozcas.',
             hint: 'There\'s no wrong answer here. Your picking hand position is a real-time tone control. Move it consciously.',
@@ -556,6 +577,7 @@ SETS.push(
             title_es: 'Nombra las notas de la cuerda Re',
             steps: [
           {
+            label: 'Play and name the D-string notes', label_es: 'Toca y nombra las notas de la cuerda Re',
             text: 'Now try it: the natural notes on the D string. Click any note below the TAB to hear it, then play and NAME each one up the string — D · E · F · G · A · B · C. You\'ll drill this without looking at the chart at the practice station.',
             text_es: 'Ahora pruébalo: las notas naturales de la cuerda Re. Presiona cualquier nota debajo del TAB para escucharla, y luego toca y NOMBRA cada una subiendo por la cuerda — D · E · F · G · A · B · C. Vas a ejercitar esto sin mirar el diagrama en la estación de práctica.',
             hint: 'It\'s the same musical alphabet you know from the E and A strings. The gap between E–F and B–C is one fret (a half step). Every other gap is two frets (a whole step).',
@@ -582,6 +604,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
           {
+            label: 'Wrap-up: your go-to expressive tool', label_es: 'Cierre: tu herramienta expresiva',
             text: 'Station Wrap-Up — pause and think: which expressive tool felt most natural today — dynamics (loud/soft), timbre (bright/warm), or the hammer-on? Which one will you lean on in your solos?',
             text_es: 'Cierre de la estación — pausa y piensa: ¿qué herramienta expresiva se sintió más natural hoy — la dinámica (fuerte/suave), el timbre (brillante/cálido), o el hammer-on? ¿En cuál te vas a apoyar en tus solos?',
             response: { type: 'short', placeholder: 'e.g. dynamics came easily; hammer-ons still feel unreliable',
@@ -600,6 +623,7 @@ SETS.push(
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
               {
+                label: 'Tune all 6 strings', label_es: 'Afina las 6 cuerdas',
                 text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 hint: 'Tuning (Module 1) is a skill you keep forever. Today you\'re adding expression on top of clean notes — so the notes have to be clean first.',
@@ -613,6 +637,7 @@ SETS.push(
             title_es: 'Toca un solo expresivo de una sola nota',
             steps: [
           {
+            label: 'Challenge: the one-note solo', label_es: 'Reto: el solo de una nota',
             text: 'Challenge 1 — The One-Note Solo: choose one note in the Am pentatonic pattern and play only that note for 8 bars, varying rhythm, dynamics, and tone. You\'ve got it when: make one note stay interesting for all 8 bars — record it and listen back.',
             text_es: 'Reto 1 — El solo de una nota: elige una nota del patrón pentatónico de Am y toca solo esa nota durante 8 compases, variando el ritmo, la dinámica y el tono. Lo tienes cuando: logras que una nota se mantenga interesante durante los 8 compases — grábalo y escúchalo después.',
             hint: 'This sounds easy but isn\'t. Can you make one note interesting for 8 whole bars? The way you play it matters more than how many notes you play.',
@@ -630,6 +655,7 @@ SETS.push(
             title_es: 'Improvisa una frase de llamada y respuesta',
             steps: [
           {
+            label: 'Challenge: call and response', label_es: 'Reto: llamada y respuesta',
             text: 'Challenge 2 — Call & Response (your assessment piece): over the Am backing track (<a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; Am jam track</a>), play a 2-bar idea (call), pause 1 bar, then answer with a 2-bar idea (response). You\'ve got it when: the call ends on a non-root note (unresolved) and the response lands on the root (arrives home). This — call-and-response — is one of the two phrasing strategies you\'ll name at your Set 3 assessment.',
             text_es: 'Reto 2 — Llamada y respuesta (tu pieza de evaluación): sobre la pista de acompañamiento de Am (<a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; pista de jam en Am</a>), toca una idea de 2 compases (llamada), pausa 1 compás, y luego responde con una idea de 2 compases (respuesta). Lo tienes cuando: la llamada termina en una nota que no es la raíz (sin resolver) y la respuesta aterriza en la raíz (llega a la nota base). Esto — llamada y respuesta — es una de las dos estrategias de fraseo que vas a nombrar en tu evaluación de la Unidad 3.',
             hint: 'Think of it like a musical question and answer. The call feels unresolved; the response feels like it arrives somewhere.',
@@ -647,6 +673,7 @@ SETS.push(
             title_es: 'Nombra las notas en las cuerdas Re y Sol',
             steps: [
           {
+            label: 'Challenge: D string map', label_es: 'Reto: mapa de la cuerda Re',
             text: 'Challenge 3 — D String Map: play the natural notes on the D string — D · E · F · G · A · B · C (frets 0–10) — slowly, saying each name aloud. You\'ve got it when: a clean lap up and back, without looking at the chart. Click "Play all" to hear it at 60 BPM.',
             text_es: 'Reto 3 — Mapa de la cuerda Re: toca las notas naturales de la cuerda Re — D · E · F · G · A · B · C (trastes 0–10) — despacio, diciendo cada nombre en voz alta. Lo tienes cuando: una vuelta limpia subiendo y bajando, sin mirar el diagrama. Presiona "Tocar todo" para escucharlo a 60 BPM.',
             hint: 'Same musical alphabet pattern you know from E and A strings. Find the pattern — it repeats! Set the ⏱ Timer for 2 minutes and see how many laps you get without looking at the chart.',
@@ -660,6 +687,7 @@ SETS.push(
             response: { type: 'short', prompt: 'Personal record: play it cleanly at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN lap naming + playing the D string, without looking at the chart (BPM)?', prompt_es: 'Récord personal: tócalo limpio a 60 BPM, y luego sube el metrónomo de 10 en 10. ¿Tu vuelta LIMPIA más rápida nombrando y tocando la cuerda Re, sin mirar el diagrama (BPM)?', placeholder: 'e.g. 80 — try for a higher number next session', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima sesión' }
           },
           {
+            label: 'Challenge: G string map', label_es: 'Reto: mapa de la cuerda Sol',
             text: 'Challenge 4 — G String Map: same on the G string — G · A · B · C · D · E · F (frets 0–10), slowly, names aloud. You\'ve got it when: a clean lap up and back, without looking at the chart.',
             text_es: 'Reto 4 — Mapa de la cuerda Sol: lo mismo en la cuerda Sol — G · A · B · C · D · E · F (trastes 0–10), despacio, nombres en voz alta. Lo tienes cuando: una vuelta limpia subiendo y bajando, sin mirar el diagrama.',
             hint: 'Notice the same pattern of whole and half steps — the musical alphabet behaves the same way on every string.',
@@ -678,6 +706,7 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
+                label: 'Challenge: Sweet Child O\' Mine solo', label_es: 'Reto: solo de Sweet Child O\' Mine',
                 text: 'Challenge — Sweet Child O\' Mine, solo-section feel: the famous outro solo lives in E minor pentatonic. Improvise four bars in the open position, then move the same shape up to the 12th fret and play four more — same pattern, one octave up, instant "solo voice." You\'ve got it when: both registers (register = how high or low the notes are), phrases with space, landing on E in each. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
                 text_es: 'Reto — Sweet Child O\' Mine, sensación de sección de solo: el famoso solo del outro vive en E menor pentatónica. Improvisa cuatro compases en posición abierta, y luego mueve la misma forma hasta el traste 12 y toca cuatro más — mismo patrón, una octava más arriba, sonido de "solo" instantáneo. Lo tienes cuando: ambos registros (registro = qué tan agudas o graves son las notas), frases con espacio, aterrizando en E en cada uno. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 4 de 5</a>.',
                 hint: 'High on the neck IS the solo sound. Nothing about your ideas has to change — the register does the drama for you.',
@@ -701,6 +730,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Open position vs. 12th fret — which felt more like "your" sound?', prompt_es: 'Posición abierta vs. traste 12 — ¿cuál se sintió más como "tu" sonido?', placeholder: 'e.g. 12th fret — felt like a real solo', placeholder_es: 'p. ej. traste 12 — se sintió como un solo de verdad' }
               },
               {
+                label: 'Challenge: soft solo over the cure', label_es: 'Reto: solo suave sobre the cure',
                 text: 'Challenge — Solo over "the cure": Olivia\'s song is soft — so your solo has to be too. Improvise eight bars in Am pentatonic Pattern 1 at a whisper: light pick, slow phrases, lots of space. You\'ve got it when: eight bars where the quietest note is as clean as your loudest.',
                 text_es: 'Reto — Solo sobre "the cure": la canción de Olivia es suave — así que tu solo también tiene que serlo. Improvisa ocho compases en el Patrón pentatónico 1 de Am en un susurro: púa ligera, frases lentas, mucho espacio. Lo tienes cuando: ocho compases donde la nota más suave está tan limpia como la más fuerte.',
                 hint: 'Playing quietly is a skill, not a limitation. Every buzz and mistake hides at loud volume and shows at soft — this is an honesty check.',
@@ -719,6 +749,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: phrasing or note names?', label_es: 'Cierre: ¿fraseo o nombres de nota?',
                 text: 'Which is more solid right now — your expressive phrasing (call-and-response, dynamics) or your note names on D and G? Write the weaker one below — that\'s your warm-up target next time.',
                 text_es: '¿Qué está más sólido ahora mismo — tu fraseo expresivo (llamada y respuesta, dinámica) o tus nombres de nota en Re y Sol? Escribe el más débil abajo — ese es tu objetivo de calentamiento la próxima vez.',
                 response: { type: 'short', placeholder: 'e.g. phrasing is coming along; G string note names still need counting',
@@ -731,6 +762,7 @@ SETS.push(
             title_es: '⚡ Chispa auditiva — bono opcional de oído',
             steps: [
               {
+                label: 'Ear Spark: sing and find the note', label_es: 'Chispa auditiva: canta y encuentra la nota',
                 text: '⚡ Ear Spark (optional, 2 min):<ol><li>Draw three fret slips (0–5), record those notes on the low E, and turn the slips face-down.</li><li>On playback, sing each note back, hold it, then find it on the string — singing first is the whole trick.</li><li>Check the slips last.</li></ol>Got someone around? Have them play the notes instead.',
                 text_es: '⚡ Chispa auditiva (opcional, 2 min):<ol><li>Saca tres papelitos de trastes (0–5), graba esas notas en la Mi grave, y voltea los papelitos boca abajo.</li><li>Al escuchar la grabación, canta cada nota de vuelta, sostenla, y luego encuéntrala en la cuerda — cantar primero es todo el truco.</li><li>Revisa los papelitos al final.</li></ol>¿Tienes a alguien cerca? Que toque las notas en tu lugar.'
               }
@@ -837,6 +869,7 @@ SETS.push(
             title_es: 'Mira los videos de la lección',
             steps: [
           {
+            label: 'Re-watch: major/minor connection', label_es: 'Vuelve a mirar: conexión mayor/menor',
             text: 'Re-watch the same video from Set 1 — <a href="https://youtu.be/m_IiyJu60-c?t=105" target="_blank">Major Pentatonic Scale – Marty Music</a> (the link skips the intro) — this time listening for the major/minor connection. Then prove it on your own neck: play Pattern 1 and call the low E root "home" for major, then treat a different note as "home" and hear the same shape turn minor. Your hand stays parked in one place — only which note you call "home" changes.',
             text_es: 'Vuelve a mirar el mismo video de la Unidad 1 — <a href="https://youtu.be/m_IiyJu60-c?t=105" target="_blank">Major Pentatonic Scale – Marty Music</a> (el enlace se salta la intro) — esta vez escuchando la conexión mayor/menor. Luego compruébalo en tu propio mástil: toca el Patrón 1 y llama "nota base" a la raíz de la Mi grave para mayor, y luego trata una nota distinta como "nota base" y escucha cómo la misma forma se vuelve menor. Tu mano se queda quieta en un lugar — solo cambia qué nota llamas "nota base."',
             hint: 'Same five notes, two names: whichever note you treat as "home" (the root) decides whether it sounds major or minor. Watch for that connection, then prove it on your own neck.',
@@ -846,6 +879,7 @@ SETS.push(
               placeholder_es: 'Explica con tus propias palabras la conexión entre relativa mayor y menor.' }
           },
           {
+            label: 'Watch: vibrato technique', label_es: 'Mira: técnica de vibrato',
             text: 'Watch: <a href="https://youtu.be/WNWqobkgdBA" target="_blank">Vibrato Technique (Hand Movement, TE-103) – JustinGuitar</a> (0:00–3:00). As you watch, try it yourself on the 5th fret of string 1 — rock the finger back and forth gently and listen for the pitch to wobble.',
             text_es: 'Mira: <a href="https://youtu.be/WNWqobkgdBA" target="_blank">Vibrato Technique (Hand Movement, TE-103) – JustinGuitar</a> (0:00–3:00). Mientras miras, pruébalo tú mismo en el traste 5 de la cuerda 1 — mece el dedo hacia adelante y atrás suavemente y escucha cómo la nota oscila.',
             hint: 'Vibrato is a small, controlled pitch wobble on a sustained note. Try it on the 5th fret, string 1. Rock your finger back and forth gently. It takes weeks to develop — just start!',
@@ -876,6 +910,7 @@ SETS.push(
             title_es: 'Escucha la nota de blues',
             steps: [
           {
+            label: 'The blues note: ♭5', label_es: 'La nota de blues: ♭5',
             text: 'Theory check: the blues scale adds one note to the minor pentatonic — the ♭5 (flat 5). In A minor, that\'s the note Eb. Click "Hear the A blues scale" below and listen for the extra note that wasn\'t in the plain minor pentatonic — that\'s the blue note.',
             text_es: 'Revisión de teoría: la escala de blues agrega una nota a la pentatónica menor — la ♭5 (quinta bemol). En A menor, esa nota es Eb. Presiona "Escucha la escala de blues de A" abajo y escucha la nota extra que no estaba en la pentatónica menor simple — esa es la nota de blues.',
             hint: 'In Pattern 1 for A minor, the ♭5 sits between the 4 and 5 on the A string — fret 6, right between the 4 at fret 5 and the 5 at fret 7. It\'s a "passing tone" — it creates tension that wants to resolve.',
@@ -907,6 +942,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
           {
+            label: 'Wrap-up: which theory clicked?', label_es: 'Cierre: ¿qué teoría tuvo sentido?',
             text: 'Station Wrap-Up — pause and think: you can now explain how the pentatonic is built, add the blues note, and use vibrato. Which piece of theory finally made sense today, and which still feels fuzzy?',
             text_es: 'Cierre de la estación — pausa y piensa: ahora puedes explicar cómo se construye la pentatónica, agregar la nota de blues, y usar vibrato. ¿Qué parte de la teoría finalmente tuvo sentido hoy, y cuál todavía se siente confusa?',
             response: { type: 'short', placeholder: 'e.g. relative major/minor made sense; the ♭5 blue note still feels random to me',
@@ -925,6 +961,7 @@ SETS.push(
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
               {
+                label: 'Tune all 6 strings', label_es: 'Afina las 6 cuerdas',
                 text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 hint: 'Tuning (Module 1) is a skill you keep forever. Today you compose and perform — a clean, in-tune guitar is what makes a simple solo sound finished.',
@@ -938,6 +975,7 @@ SETS.push(
             title_es: 'Comprende las escalas relativas mayor y menor',
             steps: [
           {
+            label: 'Challenge: relative scales', label_es: 'Reto: escalas relativas',
             text: 'Challenge 1 — Relative Scales: type out C major pentatonic (1 C, 2 D, 3 E, 5 G, 6 A), then A minor pentatonic (1 A, ♭3 C, 4 D, 5 E, ♭7 G) into the box below. You\'ve got it when: you spot that they share the same five notes — only which note is "home" changes.',
             text_es: 'Reto 1 — Escalas relativas: escribe C mayor pentatónica (1 C, 2 D, 3 E, 5 G, 6 A), y luego A menor pentatónica (1 A, ♭3 C, 4 D, 5 E, ♭7 G) en el cuadro de abajo. Lo tienes cuando: notas que comparten las mismas cinco notas — solo cambia cuál nota es "nota base."',
             hint: 'C major pentatonic and A minor pentatonic share exactly the same five notes. Your hand position is the same — only which note you treat as "home" (the root) changes.',
@@ -957,6 +995,7 @@ SETS.push(
             title_es: 'Compón un solo de 4 compases',
             steps: [
           {
+            label: 'Challenge: compose a 4-bar solo', label_es: 'Reto: compón un solo de 4 compases',
             text: 'Challenge 2 — Compose It: write a 4-bar solo as scale-degree numbers (e.g. 1 3 5 3 | 6 5 3 1 | …), then play exactly what you wrote, varying the rhythms. You\'ve got it when: a deliberate 4-bar line you can play back the same way twice. Type your 4 bars into the box below so you have them next session.',
             text_es: 'Reto 2 — Compónlo: escribe un solo de 4 compases como números de grado de escala (p. ej. 1 3 5 3 | 6 5 3 1 | …), y luego toca exactamente lo que escribiste, variando los ritmos. Lo tienes cuando: una línea deliberada de 4 compases que puedes volver a tocar de la misma manera dos veces. Escribe tus 4 compases en el cuadro de abajo para tenerlos la próxima sesión.',
             hint: 'Write first, then play! It\'s okay if it sounds simple. The goal is to make a deliberate musical decision, not to improvise randomly.',
@@ -975,6 +1014,7 @@ SETS.push(
             title_es: 'Lee un lick a primera vista',
             steps: [
           {
+            label: 'Challenge: cold-read a lick', label_es: 'Reto: lee un lick a primera vista',
             text: 'Challenge — Cold Read (Knowledge &amp; Reading): here\'s a 1-bar lick (a lick = a short solo phrase) in the A minor pentatonic box you haven\'t drilled. DECODE it from the TAB first — name each string and fret, left to right — then play it. You\'ve got it when: you can read a short 1-bar pentatonic lick straight from TAB and play it accurately, without anyone demonstrating it first. At the module self-assessment you\'ll read a NEW 1-bar lick cold — this is Task 2.',
             text_es: 'Reto — Lectura a primera vista (Conocimiento y lectura): aquí tienes un lick de 1 compás (un lick = una frase corta de solo) en la caja de A menor pentatónica que no has ejercitado. DECODIFÍCALO del TAB primero — nombra cada cuerda y traste, de izquierda a derecha — y luego tócalo. Lo tienes cuando: puedes leer un lick pentatónico corto de 1 compás directamente del TAB y tocarlo con precisión, sin que nadie te lo demuestre primero. En la autoevaluación del módulo vas a leer un lick de 1 compás NUEVO a primera vista — esta es la Tarea 2.',
             hint: 'Read before you press Play. Bottom TAB line = low E, top line = high e; the number is the fret. Say it out loud — "G string, fret 5, that\'s C" — as you go, then hit Play all to check yourself.',
@@ -1006,6 +1046,7 @@ SETS.push(
             title_es: 'Toca tu solo original',
             steps: [
           {
+            label: 'Challenge: perform your solo', label_es: 'Reto: toca tu solo',
             text: 'Challenge 3 — Perform It (your assessment piece — try it!): play your 4-bar solo over a core-song backing track — start with <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a>, or pick any core song\'s ▶ &#x1F3B5; Backing track in the &#x1F3B5; Songs list at the bottom of this module — working in at least one hammer-on, pull-off, or vibrato. Record your take, say your phrasing strategy (call-and-response or four-phrase) out loud on the recording, and listen back. You\'ve got it when: you hold the backing track\'s pulse start to finish with no restarts, and you can name your phrasing strategy. Play musical ideas — don\'t just run up and down the scale.',
             text_es: 'Reto 3 — Tócalo (tu pieza de evaluación — ¡pruébala!): toca tu solo de 4 compases sobre la pista de acompañamiento de una canción principal — empieza con <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; la pista de jam en Am</a>, o elige la ▶ &#x1F3B5; Pista de acompañamiento de cualquier canción principal en la lista de &#x1F3B5; Canciones al final de este módulo — incorporando al menos un hammer-on, pull-off, o vibrato. Graba tu toma, di en voz alta tu estrategia de fraseo (llamada y respuesta o cuatro frases) en la grabación, y escúchala después. Lo tienes cuando: sostienes el pulso de la pista de principio a fin sin reiniciar, y puedes nombrar tu estrategia de fraseo. Toca ideas musicales — no solo subas y bajes la escala.',
             hint: 'Include at least one technique (hammer-on, pull-off, or vibrato) in your solo. Don\'t just run up and down the scale — play musical ideas! Playing for the camera counts as performing, and the playback shows you exactly where to tighten up.',
@@ -1023,6 +1064,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: reflect on your solo', label_es: 'Cierre: reflexiona sobre tu solo',
                 text: 'You composed and performed an original solo — what are you proudest of, and what would make the next one better? Write it below; this is the kind of reflection your end-of-module recorded performance builds on.',
                 text_es: 'Compusiste y tocaste un solo original — ¿de qué estás más orgulloso, y qué haría mejor el siguiente? Escríbelo abajo; este es el tipo de reflexión sobre el que se construye tu presentación grabada de fin de módulo.',
                 response: { type: 'short', placeholder: 'e.g. proud it resolved on the root; next time I\'ll leave more space between phrases',

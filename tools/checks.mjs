@@ -328,6 +328,7 @@ function checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsBy
           reqEs(secWhere, sec, 'title');
           (sec.steps || []).forEach((step, sti) => {
             const stepWhere = `${secWhere} · step ${sti + 1}`;
+            reqEs(stepWhere, step, 'label');
             reqEs(stepWhere, step, 'text');
             reqEs(stepWhere, step, 'hint');
             reqEs(stepWhere, step, 'stuck');

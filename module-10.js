@@ -32,6 +32,7 @@ SETS.push(
             title_es: 'Mira los videos de la lección',
             steps: [
               {
+                label: 'Watch: the major scale recipe', label_es: 'Mira: la receta de la escala mayor',
                 text: 'Watch: <a href="https://www.youtube.com/watch?v=fnVlMjza32c" target="_blank">What is a Major Scale Guitar Lesson - Music Theory For Guitar – Lauren Bateman (0:00–5:12)</a>. Follow along as she lays out the whole/half-step recipe — the exact formula you\'ll use to build C and G major yourself.',
                 text_es: 'Mira: <a href="https://www.youtube.com/watch?v=fnVlMjza32c" target="_blank">What is a Major Scale Guitar Lesson - Music Theory For Guitar – Lauren Bateman (0:00–5:12)</a>. Sigue el video mientras ella explica la receta de tonos y semitonos — la fórmula exacta que usarás para construir C mayor y G mayor tú mismo.',
                 hint: 'The recipe is a formula — the exact same seven-step pattern of whole and half steps, starting from any note, builds that note\'s major scale.',
@@ -46,6 +47,7 @@ SETS.push(
                   choices_es: ['T-S-T-T-S-T-T', 'T-T-S-T-T-T-S', 'S-T-T-S-T-T-T', 'T-T-T-S-T-T-S'] }
               },
               {
+                label: 'Watch: the major pentatonic scale', label_es: 'Mira: la pentatónica mayor',
                 text: 'Watch: <a href="https://youtu.be/m_IiyJu60-c" target="_blank">How to Play the Major Pentatonic Scale: Your Guide to Beautiful Solos – Marty Music</a>. This is where the pentatonic sound you\'ve been soloing with since Module 4 actually comes from.',
                 text_es: 'Mira: <a href="https://youtu.be/m_IiyJu60-c" target="_blank">How to Play the Major Pentatonic Scale: Your Guide to Beautiful Solos – Marty Music</a>. Aquí es de donde realmente viene el sonido pentatónico con el que has estado improvisando desde el Módulo 4.',
                 hint: 'Major pentatonic isn\'t a separate scale to memorize — it\'s the major scale with two notes lifted out.',
@@ -66,6 +68,7 @@ SETS.push(
             title_es: 'Escucha la receta mientras la tocas',
             steps: [
               {
+                label: 'Hear the recipe in the frets', label_es: 'Escucha la receta en los trastes',
                 text: 'Listen for it: play up the C major scale on one string, saying "whole, whole, half, whole, whole, whole, half" out loud on every step. The distances should match the frets you\'re moving.',
                 text_es: 'Escucha esto: toca la escala de C mayor subiendo en una sola cuerda, diciendo "tono, tono, semitono, tono, tono, tono, semitono" en voz alta en cada paso. Las distancias deben coincidir con los trastes que te mueves.',
                 hint: 'On guitar, a whole step and a half step are just fret distances — say the word, then check it\'s 2 frets (whole) or 1 fret (half).',
@@ -86,6 +89,7 @@ SETS.push(
             title_es: 'Prueba a construir una escala desde una nota inicial nueva',
             steps: [
               {
+                label: 'Build C major with the recipe', label_es: 'Construye C mayor con la receta',
                 text: 'Now try it: run the same W-W-H-W-W-W-H recipe starting from C first — your baseline — and notice you never need a sharp or flat. That clean run is what makes the odd note stand out when you try G next.',
                 text_es: 'Ahora pruébalo: corre la misma receta T-T-S-T-T-T-S empezando primero desde C — tu punto de referencia — y fíjate que nunca necesitas un sostenido ni un bemol. Ese recorrido limpio es lo que hace que la nota rara resalte cuando pruebes G a continuación.',
                 hint: 'C major is the recipe\'s starting-point example — every other major key is the same shape, just starting somewhere else.',
@@ -100,6 +104,7 @@ SETS.push(
                   choices_es: ['Tiene un sostenido', 'No tiene sostenidos ni bemoles', 'Es la escala más difícil', 'Solo funciona en el piano'] }
               },
               {
+                label: 'Try the recipe from G', label_es: 'Prueba la receta desde G',
                 text: 'Try it again starting from G, on one string — follow the recipe exactly and see what note comes out different from the rest.',
                 text_es: 'Pruébalo otra vez empezando desde G, en una sola cuerda — sigue la receta exactamente y observa qué nota sale distinta de las demás.',
                 hint: 'Follow W-W-H-W-W-W-H from G one step at a time; the recipe itself will tell you which note needs raising.',
@@ -120,6 +125,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: what is a key?', label_es: 'Cierre: ¿qué es una tonalidad?',
                 text: 'Station Wrap-Up — in your own words: what does it mean when someone says a song is "in the key of G"?',
                 text_es: 'Cierre de la estación — con tus propias palabras: ¿qué significa cuando alguien dice que una canción está "en la tonalidad de G"?',
                 response: { type: 'short', placeholder: 'e.g. its notes and chords come from the G major scale — G feels like home',
@@ -138,6 +144,7 @@ SETS.push(
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
               {
+                label: 'Warm-up: tuning check', label_es: 'Calentamiento: afinación',
                 text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -149,6 +156,7 @@ SETS.push(
             title_es: 'Construye C mayor y G mayor en una sola cuerda',
             steps: [
               {
+                label: 'Challenge: C major walk', label_es: 'Reto: caminata de C mayor',
                 text: 'Challenge 1 — C Major Walk: play the C major scale on the A string using the recipe, saying "whole, whole, half…" out loud as you go.',
                 text_es: 'Reto 1 — Caminata de C Mayor: toca la escala de C mayor en la cuerda La usando la receta, diciendo "tono, tono, semitono…" en voz alta mientras avanzas.',
                 hint: 'Start on C (A string, fret 3) and let the recipe — not a chart — tell you where each next note lands.',
@@ -161,6 +169,7 @@ SETS.push(
                 playSeq: { label: 'C major on the A string (recipe walk)', label_es: 'C mayor en la cuerda La (caminata de la receta)', bpm: 60, notes: [48, 50, 52, 53, 55, 57, 59, 60] }
               },
               {
+                label: 'Challenge: G major walk', label_es: 'Reto: caminata de G mayor',
                 text: 'Challenge 2 — G Major Walk: play the G major scale on the low E string using the same recipe, and catch the one note that needs to be sharp.',
                 text_es: 'Reto 2 — Caminata de G Mayor: toca la escala de G mayor en la cuerda Mi grave usando la misma receta, y detecta la única nota que necesita ser sostenida.',
                 hint: 'Everything is identical to the C major walk except one note — the recipe itself will tell you which.',
@@ -179,6 +188,7 @@ SETS.push(
             title_es: 'Di la receta mientras tocas',
             steps: [
               {
+                label: 'Challenge: recipe by heart', label_es: 'Reto: la receta de memoria',
                 text: 'Challenge 3 — Recipe by Heart (your assessment piece): play the C major scale while saying "whole, whole, half, whole, whole, whole, half" out loud, no chart, no hesitating. You\'ve got it when: you can say the whole recipe from memory before you even touch the guitar.',
                 text_es: 'Reto 3 — La Receta de Memoria (tu pieza de evaluación): toca la escala de C mayor mientras dices "tono, tono, semitono, tono, tono, tono, semitono" en voz alta, sin diagrama, sin dudar. Lo tienes cuando: puedes decir toda la receta de memoria antes incluso de tocar la guitarra.',
                 hint: 'If you can say the recipe from memory, you can build ANY major scale on the spot — that\'s the whole point of memorizing it as words, not just frets.',
@@ -196,6 +206,7 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
+                label: 'Challenge: Let It Be in the scale', label_es: 'Reto: Let It Be en la escala',
                 text: 'Challenge — Let It Be, in the scale: hum the Let It Be melody while playing the C major walk underneath it, and notice every note of the tune lives inside the scale you just built.',
                 text_es: 'Reto — Let It Be, dentro de la escala: tararea la melodía de Let It Be mientras tocas la caminata de C mayor debajo, y fíjate cómo cada nota de la melodía vive dentro de la escala que acabas de construir.',
                 hint: 'This is the payoff of today\'s whole set — a song\'s melody isn\'t random, it\'s built from the same key\'s scale.',
@@ -213,6 +224,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: do you know the recipe?', label_es: 'Cierre: ¿sabes la receta?',
                 text: 'Can you say the major-scale recipe from memory right now, no guitar in hand? Write below how confident you feel.',
                 text_es: '¿Puedes decir la receta de la escala mayor de memoria ahora mismo, sin guitarra en la mano? Escribe abajo qué tan seguro te sientes.',
                 response: { type: 'short', placeholder: 'e.g. solid on W-W-H-W-W-W-H now — just need more tries building from a new note',
@@ -294,6 +306,7 @@ SETS.push(
             title_es: 'Mira los videos de la lección',
             steps: [
               {
+                label: 'Watch: minor pentatonic refresher', label_es: 'Mira: repaso de pentatónica menor',
                 text: 'Watch: <a href="https://www.youtube.com/watch?v=l6ayje1ug_0" target="_blank">The MINOR PENTATONIC scale on Guitar Explained – Lauren Bateman (0:00–5:30)</a> as a refresher on the box-1 shape you\'ll build the blues scale from today.',
                 text_es: 'Mira: <a href="https://www.youtube.com/watch?v=l6ayje1ug_0" target="_blank">The MINOR PENTATONIC scale on Guitar Explained – Lauren Bateman (0:00–5:30)</a> como repaso de la forma de la caja 1 sobre la que vas a construir la escala de blues hoy.',
                 hint: 'Everything today builds on top of the minor pentatonic box you already know from Module 4 — nothing new to fret, just one note added.',
@@ -308,6 +321,7 @@ SETS.push(
                   choices_es: ['C menor', 'A menor', 'E menor', 'G menor'] }
               },
               {
+                label: 'Watch: the blues scale', label_es: 'Mira: la escala de blues',
                 text: 'Watch: <a href="https://youtu.be/EILFkSGNkdA" target="_blank">The First Scale Beginners Should Learn for BLUES GUITAR – JustinGuitar</a>. Listen for the one extra note added to the minor pentatonic box you already know — that\'s the b5.',
                 text_es: 'Mira: <a href="https://youtu.be/EILFkSGNkdA" target="_blank">The First Scale Beginners Should Learn for BLUES GUITAR – JustinGuitar</a>. Escucha la única nota extra que se agrega a la caja de pentatónica menor que ya conoces — esa es la b5.',
                 hint: 'The blues scale is just minor pentatonic plus one extra note — listen for where it gets added in the video.',
@@ -328,6 +342,7 @@ SETS.push(
             title_es: 'Escucha la relativa frente a la paralela',
             steps: [
               {
+                label: 'Ear training: relative vs. parallel', label_es: 'Oído: relativa vs. paralela',
                 text: 'Listen for it: play a C major chord, then an A minor chord, then a C minor chord (Cm = your full Bm barre shape from Module 7, slid up one fret to fret 3). C-to-Am shares every note (relative); C-to-Cm shares only the root (parallel). Notice how different Am and Cm sound from each other, even though both are "C\'s minor."',
                 text_es: 'Escucha esto: toca un acorde de C mayor, luego un acorde de A menor, y luego un acorde de C menor (Cm = tu forma completa de cejilla de Bm del Módulo 7, deslizada un traste hacia arriba, al traste 3). C a Am comparte cada nota (relativa); C a Cm comparte solo la raíz (paralela). Fíjate qué tan diferentes suenan Am y Cm entre sí, aunque ambos sean "el menor de C."',
                 hint: 'These two ideas get mixed up constantly — the exercise is hearing that "C\'s relative minor" and "C\'s parallel minor" are two completely different chords.',
@@ -348,6 +363,7 @@ SETS.push(
             title_es: 'Prueba a encontrar la tonalidad relativa de una canción principal',
             steps: [
               {
+                label: 'Find Watchtower\'s relative major', label_es: 'La relativa mayor de Watchtower',
                 text: 'Now try it: All Along the Watchtower loops in A minor. Find its relative major by sliding 3 frets up from A — check your answer before moving on.',
                 text_es: 'Ahora pruébalo: All Along the Watchtower gira en A menor. Encuentra su relativa mayor deslizando 3 trastes hacia arriba desde A — comprueba tu respuesta antes de seguir.',
                 hint: 'Relative major is always 3 frets UP from a minor root — the mirror image of sliding 3 frets down to find a relative minor.',
@@ -362,6 +378,7 @@ SETS.push(
                   choices_es: ['A mayor', 'F mayor', 'C mayor', 'G mayor'] }
               },
               {
+                label: 'Why Luna\'s solo is in D minor', label_es: 'Por qué el solo de Luna está en Dm',
                 text: 'Try it on Luna: its solo lives in D minor pentatonic even though the song is in F major. Work out why using what you just learned about relative keys.',
                 text_es: 'Pruébalo con Luna: su solo vive en la pentatónica menor de D aunque la canción esté en F mayor. Descubre por qué usando lo que acabas de aprender sobre tonalidades relativas.',
                 hint: 'D minor is exactly 3 frets down from F — the same relative relationship you just used on Watchtower.',
@@ -382,6 +399,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: explain relative minor', label_es: 'Cierre: explica la relativa menor',
                 text: 'Station Wrap-Up — explain relative minor in one sentence, as if to a friend.',
                 text_es: 'Cierre de la estación — explica la relativa menor en una oración, como si fuera para un amigo.',
                 response: { type: 'short', placeholder: 'e.g. it\'s the minor key hiding inside every major key — same notes, sadder home',
@@ -400,6 +418,7 @@ SETS.push(
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
               {
+                label: 'Warm-up: tuning check', label_es: 'Calentamiento: afinación',
                 text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -411,6 +430,7 @@ SETS.push(
             title_es: 'Encuentra relativas y paralelas menores',
             steps: [
               {
+                label: 'Challenge: relative pairs drill', label_es: 'Reto: ejercicio de pares relativos',
                 text: 'Challenge 1 — Relative Pairs Drill (a drill is a short exercise you repeat to build a skill): make five quick flashcards — major key on the front, relative minor on the back — C→Am, G→Em, F→Dm, D→Bm, A→F#m. Shuffle, flip one at a time, and answer out loud before checking the back. Then explain out loud how a PARALLEL minor would be different for the same key. (Got someone nearby? Have them quiz you with the cards.)',
                 text_es: 'Reto 1 — Ejercicio de Pares Relativos (un ejercicio es una actividad corta que repites para desarrollar una destreza): haz cinco tarjetas rápidas — tonalidad mayor al frente, relativa menor atrás — C→Am, G→Em, F→Dm, D→Bm, A→F#m. Mézclalas, voltea una a la vez, y responde en voz alta antes de revisar el reverso. Luego explica en voz alta cómo sería distinta una paralela menor para esa misma tonalidad. (¿Tienes a alguien cerca? Pídele que te haga preguntas con las tarjetas.)',
                 hint: 'The shortcut: relative minor is always 3 frets down from the major root, or the major scale\'s 6th note.',
@@ -428,6 +448,7 @@ SETS.push(
             title_es: 'Construye y toca la escala de blues',
             steps: [
               {
+                label: 'Challenge: the blues scale', label_es: 'Reto: la escala de blues',
                 text: 'Challenge 2 — Blues Scale (your assessment piece): add the b5 to A minor pentatonic box 1 and play it ascending and descending at 60 BPM. The play button checks the ascending run — match it, then play the descent on your own after. You\'ve got it when: the added note matches what you hear from the play button, every time.',
                 text_es: 'Reto 2 — Escala de Blues (tu pieza de evaluación): agrega la b5 a la caja 1 de la pentatónica menor de A y tócala subiendo y bajando a 60 BPM. El botón de reproducir comprueba el recorrido ascendente — iguálalo, y luego toca el descenso por tu cuenta después. Lo tienes cuando: la nota agregada coincide con lo que escuchas del botón de reproducir, cada vez.',
                 hint: 'The b5 sits between two notes you already know in the box — it\'s one extra finger placement, not a new shape to learn from scratch.',
@@ -446,6 +467,7 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
+                label: 'Challenge: Smoke on the Water, bluesy', label_es: 'Reto: Smoke on the Water, con sabor a blues',
                 text: 'Challenge — Smoke on the Water, bluesy: play the A blues scale over the feel of the riff (a riff is a short musical phrase that repeats) — this is where this scale is normally used, the sound it was built for.',
                 text_es: 'Reto — Smoke on the Water, con sabor a blues: toca la escala de blues de A sobre la sensación del riff (un riff es una frase musical corta que se repite) — aquí es donde normalmente se usa esta escala, el sonido para el que fue creada.',
                 hint: 'Deep Purple\'s whole riff lives in exactly this bluesy, gritty pentatonic-plus-b5 sound world.',
@@ -463,6 +485,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: relative key and the b5', label_es: 'Cierre: la relativa y la b5',
                 text: 'What\'s the relative minor of F (Luna\'s key)? Which single note makes a pentatonic a blues scale? Write both below. (One more below: Jam it — the blues scale over a real form.)',
                 text_es: '¿Cuál es la relativa menor de F (la tonalidad de Luna)? ¿Cuál nota única convierte una pentatónica en una escala de blues? Escribe ambas abajo. (Una más abajo: Tócalo de improviso — la escala de blues sobre una forma real.)',
                 response: { type: 'short', placeholder: 'e.g. Dm is F\'s relative minor; the b5 is what makes it blues',
@@ -475,6 +498,7 @@ SETS.push(
             title_es: 'Tócalo de improviso — la escala de blues sobre una forma real',
             steps: [
               {
+                label: 'Jam: blues scale over 12-bar form', label_es: 'Improvisa: blues de 12 compases',
                 text: 'Jam it (to jam = play along freely and make up your own part): record yourself strumming the 12-bar blues form in A — the bars run A A A A | D D A A | E D A E (plain A, D, E or power chords work fine for now) — then loop the recording and solo over it with your blues scale, box 1 at fret 5. One chorus of comping, one chorus of soloing — one chorus = one full trip through the 12 bars, and comping = playing the backing chords while someone else solos. (The full story behind that bar map is in Module 11, Set 3.) Playing with someone? One comps while the other solos, then swap.',
                 text_es: 'Tócalo de improviso (tocar de improviso = tocar libremente e inventar tu propia parte): grábate rasgueando la forma de blues de 12 compases en A — los compases van A A A A | D D A A | E D A E (por ahora funcionan bien A, D, E simples o como acordes de potencia) — y luego repite la grabación en loop y haz un solo sobre ella con tu escala de blues, caja 1 en el traste 5. Una vuelta de acompañamiento, una vuelta de solo — una vuelta = un recorrido completo por los 12 compases, y acompañar = tocar los acordes de base mientras otra persona hace el solo. (La historia completa detrás de ese mapa de compases está en el Módulo 11, Unidad 3.) ¿Tocando con alguien? Uno acompaña mientras el otro hace el solo, y luego cambian.',
                 hint: 'Follow the form, not just the scale — when the loop returns to A, land on an A and let it ring. That arrival is what "playing the changes" means.',
@@ -570,6 +594,7 @@ SETS.push(
             title_es: 'Mira los videos de la lección',
             steps: [
               {
+                label: 'Watch: the movable pentatonic box', label_es: 'Mira: la caja pentatónica móvil',
                 text: 'Watch: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M" target="_blank">HOW TO USE The Minor Pentatonic Scale on the Guitar – Lauren Bateman (0:00–5:00)</a>, watching the shape as a MOVABLE pattern rather than a fixed one.',
                 text_es: 'Mira: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M" target="_blank">HOW TO USE The Minor Pentatonic Scale on the Guitar – Lauren Bateman (0:00–5:00)</a>, observando la forma como un patrón MÓVIL en lugar de uno fijo.',
                 hint: 'Nothing about the shape changes when you slide it — only the fret you start on, which renames the key.',
@@ -584,6 +609,7 @@ SETS.push(
                   choices_es: ['B menor', 'C menor', 'G menor', 'A mayor'] }
               },
               {
+                label: 'Watch: find melodies by ear', label_es: 'Mira: encuentra melodías de oído',
                 text: 'Watch: <a href="https://youtu.be/bd8M2fhK6Z8" target="_blank">5\' Guitar Exercise: Find Melodies You Know – JustinGuitar</a>. This is the exact sing-it-then-find-it habit today\'s Station C drill is built around.',
                 text_es: 'Mira: <a href="https://youtu.be/bd8M2fhK6Z8" target="_blank">5\' Guitar Exercise: Find Melodies You Know – JustinGuitar</a>. Este es exactamente el hábito de cantarlo-y-luego-encontrarlo alrededor del cual está construido el ejercicio de la Estación C de hoy.',
                 hint: 'This is the single most useful guitar habit you can build: sing what you hear first, then let your hands catch up.',
@@ -598,6 +624,7 @@ SETS.push(
                   choices_es: ['Adivinar al azar', 'Cantarla, y luego buscar las notas cantadas en una sola cuerda', 'Buscar el TAB', 'Tocar cada traste hasta que algo funcione'] }
               },
               {
+                label: 'Optional watch: building your ear', label_es: 'Opcional: desarrolla tu oído',
                 text: 'Optional bonus watch: <a href="https://youtu.be/rPSRH3tf5B8" target="_blank">How To Develop The World\'s Greatest Ear – Rick Beato</a> — a producer\'s view of the exact skill this set trains. You don\'t need the advanced parts: the opening idea (ears are built by a little practice every day, not talent) is the main point — then go do the Station C echo drills.',
                 text_es: 'Video extra opcional: <a href="https://youtu.be/rPSRH3tf5B8" target="_blank">How To Develop The World\'s Greatest Ear – Rick Beato</a> — la visión de un productor sobre exactamente la destreza que entrena esta unidad. No necesitas las partes avanzadas: la idea inicial (el oído se construye con un poco de práctica cada día, no con talento) es el punto principal — y luego ve a hacer los ejercicios de eco de la Estación C.',
                 response: { type: 'short', placeholder: 'One idea from this video worth borrowing for your own practice: …',
@@ -610,6 +637,7 @@ SETS.push(
             title_es: 'Escucha brillante vs. oscuro',
             steps: [
               {
+                label: 'Ear training: bright vs. dark', label_es: 'Oído: brillante vs. oscuro',
                 text: 'Listen for it: play a major chord, then its parallel minor, back and forth. Notice which one sounds "bright" and which sounds "dark" — this is the ear-training foundation for everything else today.',
                 text_es: 'Escucha esto: toca un acorde mayor, luego su paralela menor, alternando. Fíjate cuál suena "brillante" y cuál suena "oscuro" — esta es la base de entrenamiento auditivo para todo lo demás de hoy.',
                 hint: 'You\'ve been hearing this distinction since Module 4 — today you\'re naming it and using it deliberately.',
@@ -630,6 +658,7 @@ SETS.push(
             title_es: 'Prueba a transponer un patrón',
             steps: [
               {
+                label: 'Move box 1 up two frets', label_es: 'Mueve la caja 1 dos trastes',
                 text: 'Now try it: take minor pentatonic box 1 and move it up two frets from wherever you\'re starting. Say out loud what key it\'s in now before you check.',
                 text_es: 'Ahora pruébalo: toma la caja 1 de pentatónica menor y muévela dos trastes hacia arriba desde donde estés empezando. Di en voz alta en qué tonalidad está ahora antes de comprobarlo.',
                 hint: 'The pattern itself never changes shape — only the fret you start it on, which is what "transposing" means.',
@@ -644,6 +673,7 @@ SETS.push(
                   choices_es: ['Tocarlo más rápido', 'Moverlo a una tonalidad distinta, manteniendo su forma', 'Tocarlo al revés', 'Agregar más notas'] }
               },
               {
+                label: 'Predict the new fret', label_es: 'Predice el nuevo traste',
                 text: 'Try moving a pattern UP two half steps and predict the new fret before you slide there.',
                 text_es: 'Prueba a mover un patrón dos semitonos HACIA ARRIBA y predice el nuevo traste antes de deslizarte hasta ahí.',
                 hint: 'Half steps are just frets — count two frets toward the body from wherever you started.',
@@ -664,6 +694,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: which was harder?', label_es: 'Cierre: ¿qué fue más difícil?',
                 text: 'Station Wrap-Up — which was harder today, moving the pattern to a new key, or echoing by ear? Why?',
                 text_es: 'Cierre de la estación — ¿qué fue más difícil hoy, mover el patrón a una nueva tonalidad, o repetir de oído? ¿Por qué?',
                 response: { type: 'short', placeholder: 'e.g. echoing — I could sing it but took a while to find the starting fret',
@@ -682,6 +713,7 @@ SETS.push(
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
               {
+                label: 'Warm-up: tuning check', label_es: 'Calentamiento: afinación',
                 text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -693,6 +725,7 @@ SETS.push(
             title_es: 'Transpon la caja 1 a una tonalidad nombrada',
             steps: [
               {
+                label: 'Challenge: transpose drill', label_es: 'Reto: ejercicio de transposición',
                 text: 'Challenge 1 — Transpose Drill: write Am, Gm, Bm, and Dm on four slips, shuffle, and draw one at a time — play minor pentatonic box 1 at that key\'s fret: fret 5 (Am), fret 3 (Gm), fret 7 (Bm), fret 10 (Dm — Luna\'s solo box!). You\'ve got it when: you can find any of these four positions within 5 seconds of drawing the key name.',
                 text_es: 'Reto 1 — Ejercicio de Transposición: escribe Am, Gm, Bm y Dm en cuatro papelitos, mézclalos, y saca uno a la vez — toca la caja 1 de pentatónica menor en el traste de esa tonalidad: traste 5 (Am), traste 3 (Gm), traste 7 (Bm), traste 10 (Dm — ¡la caja del solo de Luna!). Lo tienes cuando: puedes encontrar cualquiera de estas cuatro posiciones dentro de los 5 segundos de sacar el nombre de la tonalidad.',
                 hint: 'Fret 10 should feel familiar — it\'s the exact box you\'ve been using for Luna\'s solo since Module 4, now with a name attached.',
@@ -710,6 +743,7 @@ SETS.push(
             title_es: 'Cántalo, y luego tócalo',
             steps: [
               {
+                label: 'Challenge: sing, then play', label_es: 'Reto: canta y luego toca',
                 text: 'Challenge 2 — Sing-Then-Play:<ol><li>Record yourself playing 3 random notes on the low E string (frets 0–5) without watching your hand — or use the Echo Drill play button below as your note source.</li><li>Wait a moment, play the recording back, and sing the notes.</li><li>Find and play them.</li></ol>(Got someone nearby? They can play the 3 notes for you instead.)',
                 text_es: 'Reto 2 — Canta y Luego Toca:<ol><li>Grábate tocando 3 notas al azar en la cuerda Mi grave (trastes 0–5) sin mirar tu mano — o usa el botón de reproducir del Ejercicio de Eco de abajo como tu fuente de notas.</li><li>Espera un momento, reproduce la grabación, y canta las notas.</li><li>Encuéntralas y tócalas.</li></ol>(¿Tienes a alguien cerca? Puede tocarte las 3 notas en tu lugar.)',
                 hint: 'Sing FIRST, before you touch the guitar — that order is the whole skill.',
@@ -727,6 +761,7 @@ SETS.push(
             title_es: 'Repite un patrón de oído',
             steps: [
               {
+                label: 'Challenge: echo drill', label_es: 'Reto: ejercicio de eco',
                 text: 'Challenge 3 — Echo Drill (your assessment piece): for round 1, listen to the 3-note pattern once using the play button below, sing it back, then play it on the E or A string. For rounds 2–4, record yourself playing 3 random notes (eyes off your hand) and echo those back the same way. You\'ve got it when: 3 out of 4 patterns matched correctly, by ear alone.',
                 text_es: 'Reto 3 — Ejercicio de Eco (tu pieza de evaluación): para la ronda 1, escucha el patrón de 3 notas una vez usando el botón de reproducir de abajo, cántalo de vuelta, y luego tócalo en la cuerda Mi o La. Para las rondas 2–4, grábate tocando 3 notas al azar (sin mirar tu mano) y repítelas de la misma manera. Lo tienes cuando: 3 de 4 patrones coincidan correctamente, solo de oído.',
                 hint: 'Resist the urge to search fret by fret at random before you\'ve sung the pattern — singing first fixes the pitch in your ear, and that\'s what your hands need to find.',
@@ -745,6 +780,7 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
+                label: 'Challenge: the cure, by ear', label_es: 'Reto: the cure, de oído',
                 text: 'Challenge — "the cure", by ear: strum through the progression and, without looking anything up, decide by ear which chords feel bright and which feel dark.',
                 text_es: 'Reto — "the cure", de oído: rasguea la progresión y, sin buscar nada, decide de oído cuáles acordes se sienten brillantes y cuáles se sienten oscuros.',
                 hint: 'You already know the chord names from Module 9 — today\'s challenge is trusting your ear to sort them into bright vs dark before you check.',
@@ -762,6 +798,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: box 1 and finding notes', label_es: 'Cierre: caja 1 y notas de oído',
                 text: 'Where does box 1 sit for D minor? Can you sing a phrase from a core song and find its first note? Write both below.',
                 text_es: '¿Dónde se ubica la caja 1 para D menor? ¿Puedes cantar una frase de una canción principal y encontrar su primera nota? Escribe ambas abajo.',
                 response: { type: 'short', placeholder: 'e.g. D minor box 1 is fret 10; I found "the cure"\'s first note on the A string',

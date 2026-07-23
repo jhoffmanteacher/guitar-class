@@ -43,6 +43,7 @@ SETS.push(
             title_es: 'Mira los videos de la lección',
             steps: [
               {
+                label: 'Watch: open string notes', label_es: 'Mira: notas al aire',
                 text: 'Watch: <a href="https://youtu.be/Abrd0c92xRE" target="_blank">Open Notes On The Guitar – JustinGuitar</a>.',
                 text_es: 'Mira: <a href="https://youtu.be/Abrd0c92xRE" target="_blank">Open Notes On The Guitar – JustinGuitar</a>.',
                 hint: 'Play along on your guitar as he goes through each note on both strings. Pause and find each note before he names it.',
@@ -67,6 +68,7 @@ SETS.push(
                 ] }
               },
               {
+                label: 'Watch: notes on the fretboard', label_es: 'Mira: notas en el mástil',
                 text: 'Watch: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard – Marty Music</a> (0:00–4:00).',
                 text_es: 'Mira: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard – Marty Music</a> (0:00–4:00).',
                 hint: 'Focus on the E and A strings only for now. What patterns does he point out?',
@@ -82,6 +84,7 @@ SETS.push(
             title_es: 'Escucha y encuentra notas de oído',
             steps: [
               {
+                label: 'Ear: find Happy Birthday notes', label_es: 'Oído: notas de Happy Birthday',
                 text: 'Listen to the opening of "Happy Birthday" — press ▶ to hear it, then hum along and see if you can identify which notes of the melody live on the E or A string.',
                 text_es: 'Escucha el inicio de "Happy Birthday" — presiona ▶ para escucharlo, luego tararea y trata de identificar qué notas de la melodía viven en la cuerda Mi o La.',
                 hint: 'Don\'t worry about playing it yet — just train your ear to connect sounds to strings.',
@@ -98,6 +101,7 @@ SETS.push(
             title_es: 'Toca junto con tu tabla de notas',
             steps: [
               {
+                label: 'Low E notes with your chart', label_es: 'Notas de la Mi grave con tu tabla',
                 text: 'Play-along preview: keep your note-name chart open and play up the low E string slowly with the audio, frets 0–12 — E · F · G · A · B · C · D · E — saying each name aloud. Lean on the chart here; you\'ll do it from memory at the practice station.',
                 text_es: 'Adelanto para tocar junto: mantén abierta tu tabla de nombres de notas y toca despacio hacia arriba en la cuerda Mi grave junto con el audio, trastes 0–12 — E · F · G · A · B · C · D · E — diciendo cada nombre en voz alta. Apóyate en la tabla aquí; lo harás de memoria en la estación de práctica.',
                 hint: 'Slow is fine. Right now the goal is connecting each name to its spot — use the chart freely.',
@@ -123,6 +127,7 @@ SETS.push(
                 ] }
               },
               {
+                label: 'A string notes with your chart', label_es: 'Notas de la cuerda La con tu tabla',
                 text: 'Same idea on the A string, still with your chart: A · B · C · D · E · F · G · A (frets 0–12), up then back down, names aloud.',
                 text_es: 'La misma idea en la cuerda La, todavía con tu tabla: A · B · C · D · E · F · G · A (trastes 0–12), hacia arriba y de regreso, nombres en voz alta.',
                 hint: 'Notice fret 5 of the A string is the same note as the open D string — that connection helps later.',
@@ -139,6 +144,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Station wrap-up', label_es: 'Cierre de la estación',
                 text: 'Station Wrap-Up — pause and think: which note or fret felt fuzziest today, and what (if anything) started to make sense?',
                 text_es: 'Cierre de la estación — pausa y piensa: ¿qué nota o traste se sintió más confuso hoy, y qué (si acaso) empezó a tener sentido?',
                 response: { type: 'short', placeholder: 'e.g. fret 8 on the low E — kept mixing up B and C',
@@ -157,6 +163,7 @@ SETS.push(
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
               {
+                label: 'Warm-up: tune all 6 strings', label_es: 'Calentamiento: afina las 6 cuerdas',
                 text: 'Before today\'s notes: tune all 6 strings to green, low to high — E A D G B e — and say each string name as you go. Try for a faster time than last session. Click "Hear all 6 strings" for the target pitches.',
                 text_es: 'Antes de las notas de hoy: afina las 6 cuerdas en verde, de grave a aguda — E A D G B e — y di cada nombre de cuerda a medida que avanzas. Intenta lograr un tiempo más rápido que la sesión pasada. Haz clic en "Escucha las 6 cuerdas" para escuchar los tonos objetivo.',
                 hint: 'Tuning and the string names are Module 1 skills you keep forever — do this every practice session before you play. Going slowly works better than rushing past the note.',
@@ -170,6 +177,7 @@ SETS.push(
             title_es: 'Nombra cada nota en la cuerda Mi grave (trastes 0–12)',
             steps: [
               {
+                label: 'Challenge: low E run', label_es: 'Reto: recorrido de la Mi grave',
                 text: 'Challenge 1 — Low E Run: play every natural note up the low E string and back down — E · F · G · A · B · C · D · E — saying each name aloud. You\'ve got it when: one clean lap (a lap = one full time through) without looking at the chart, with no mistakes.',
                 text_es: 'Reto 1 — Recorrido de la Mi grave: toca cada nota natural hacia arriba en la cuerda Mi grave y de regreso — E · F · G · A · B · C · D · E — diciendo cada nombre en voz alta. Lo tienes cuando: una vuelta limpia (una vuelta = una pasada completa) sin mirar la tabla, sin errores.',
                 hint: 'Hearing + saying + playing helps you memorize it. Peek at the chart only if you\'re truly stuck. Set the ⏱ Timer (bottom of the screen) to 2 min and count how many clean laps you fit before it beeps — try for a higher number next session.',
@@ -183,6 +191,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Personal record: play it cleanly at 60, then raise the metronome +10 at a time. What\'s your fastest CLEAN lap today (BPM)?', prompt_es: 'Récord personal: tócalo limpio a 60, y luego sube el metrónomo de 10 en 10. ¿Cuál es tu vuelta LIMPIA más rápida hoy (BPM)?', placeholder: 'e.g. 90 — try for a higher number next session', placeholder_es: 'ej. 90 — intenta superarlo la próxima sesión' }
               },
               {
+                label: 'Quick check: low E notes', label_es: 'Revisión rápida: notas de Mi grave',
                 text: 'Quick check — name the note before you play it:',
                 text_es: 'Revisión rápida — nombra la nota antes de tocarla:',
                 skills: [2],
@@ -195,6 +204,7 @@ SETS.push(
                   choices_es: ['A', 'C', 'D', 'B'] }
               },
               {
+                label: 'Ear: name that riff', label_es: 'Oído: adivina el riff',
                 text: 'Name That Riff (try it!): pick out the "Seven Nation Army" or "Smoke on the Water" main riff (a riff = a short musical phrase that repeats) by ear on the low E string. No score — just try it.',
                 text_es: 'Adivina el riff (¡pruébalo!): saca de oído el riff principal de "Seven Nation Army" o "Smoke on the Water" (un riff = una frase musical corta que se repite) en la cuerda Mi grave. Sin puntaje — solo pruébalo.',
                 hint: 'Use the note-name chart. Don\'t worry about getting it perfect — the attempt trains your ear.',
@@ -208,6 +218,7 @@ SETS.push(
             title_es: 'Nombra cada nota en la cuerda La (trastes 0–12)',
             steps: [
               {
+                label: 'Challenge: A string run', label_es: 'Reto: recorrido de la cuerda La',
                 text: 'Challenge 2 — A String Run (your Set 1 check-off): same on the A string, without looking at the chart — A · B · C · D · E · F · G · A, up to fret 12 and back, one note per beat. You\'ve got it when: a clean lap with the metronome and no stalls. The Set 1 check-off tests exactly this: draw any fret at random — shuffled paper slips 0–12 work great — and name the note within 3 seconds.',
                 text_es: 'Reto 2 — Recorrido de la cuerda La (tu evaluación de la Unidad 1): lo mismo en la cuerda La, sin mirar la tabla — A · B · C · D · E · F · G · A, hasta el traste 12 y de regreso, una nota por pulso. Lo tienes cuando: una vuelta limpia con el metrónomo y sin trabarte. La evaluación de la Unidad 1 pone a prueba exactamente esto: saca un traste al azar — unos papelitos revueltos del 0–12 funcionan genial — y nombra la nota en 3 segundos.',
                 hint: 'Keep the metronome at 60 BPM. If you stall on a note, that\'s the one to drill.',
@@ -221,6 +232,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Personal record: play it cleanly at 60, then raise the metronome +10 at a time. Your fastest CLEAN A-string lap today (BPM)?', prompt_es: 'Récord personal: tócalo limpio a 60, y luego sube el metrónomo de 10 en 10. ¿Cuál es tu vuelta LIMPIA más rápida en la cuerda La hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next session', placeholder_es: 'ej. 80 — intenta superarlo la próxima sesión' }
               },
               {
+                label: 'Quick check: A string notes', label_es: 'Revisión rápida: notas de la La',
                 text: 'Quick check — name the note before you play it:',
                 text_es: 'Revisión rápida — nombra la nota antes de tocarla:',
                 skills: [3],
@@ -233,12 +245,14 @@ SETS.push(
                   choices_es: ['A', 'B', 'C', 'D'] }
               },
               {
+                label: 'Shuffle self-quiz', label_es: 'Autoevaluación con papelitos',
                 text: 'Shuffle self-quiz:<ol><li>Write frets 0–12 on small scraps of paper and shuffle them.</li><li>Flip one at a time and say the A-string note within 3 seconds.</li><li>Go 10 rounds.</li></ol>Got someone around? Have them call out random frets instead — same 3-second limit.',
                 text_es: 'Autoevaluación con papelitos:<ol><li>Escribe los trastes 0–12 en pequeños papelitos y revuélvelos.</li><li>Voltea uno a la vez y di la nota de la cuerda La en 3 segundos.</li><li>Haz 10 rondas.</li></ol>¿Tienes a alguien cerca? Pídele que diga trastes al azar en su lugar — con el mismo límite de 3 segundos.',
                 hint: 'No chart. If you stall on a note, loop just that part of the string until it\'s automatic.',
                 hint_es: 'Sin tabla. Si te trabas en una nota, repite solo esa parte de la cuerda hasta que sea automática.'
               },
               {
+                label: 'Challenge: shuffle run', label_es: 'Reto: recorrido con papelitos',
                 text: 'Challenge 3 — Shuffle Run: write frets 0–12 on scraps of paper (or reuse your slips from the self-quiz above), shuffle them, then draw one at a time and — on the low E string — name it AND play it within 3 seconds. You\'ve got it when: 10 in a row with no counting up from E.',
                 text_es: 'Reto 3 — Recorrido con papelitos: escribe los trastes 0–12 en papelitos (o reutiliza los de la autoevaluación anterior), revuélvelos, y luego saca uno a la vez y — en la cuerda Mi grave — nómbralo Y tócalo en 3 segundos. Lo tienes cuando: 10 seguidas sin contar desde E.',
                 hint: 'The 3-second limit is the real test. You\'re jumping to random frets, not running a memorized lap — that\'s what "name any fret instantly" really means.',
@@ -256,6 +270,7 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
+                label: 'Challenge: Seven Nation Army', label_es: 'Reto: Seven Nation Army',
                 text: 'Challenge — Seven Nation Army, without looking at the chart: play the riff on the low E string and say each note name out loud as you play it — B · B · D · B · A · G · F#. You\'ve got it when: one clean lap, no chart, every note named correctly. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
                 text_es: 'Reto — Seven Nation Army, sin mirar la tabla: toca el riff en la cuerda Mi grave y di cada nombre de nota en voz alta mientras lo tocas — B · B · D · B · A · G · F#. Lo tienes cuando: una vuelta limpia, sin tabla, cada nota nombrada correctamente. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'You played this riff in Module 1 with the TAB in front of you. Today the goal is knowing WHERE you are — name it, then play it.',
@@ -287,6 +302,7 @@ SETS.push(
             title_es: 'Mi rutina de práctica — check-in semanal (nunca se califica)',
             steps: [
               {
+                label: 'Plan your practice', label_es: 'Planea tu práctica',
                 text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine:<ol><li>One thing you want to get better at.</li><li>When and where you\'ll practice this week.</li><li>How last week\'s plan went.</li></ol>Same check-in as Module 1 — we keep it going for the whole course.',
                 text_es: 'Planea tu práctica — esta parte es solo para ti, nunca se califica. Tómate dos minutos para actualizar tu rutina:<ol><li>Una cosa en la que quieres mejorar.</li><li>Cuándo y dónde vas a practicar esta semana.</li><li>Cómo te fue con el plan de la semana pasada.</li></ol>El mismo check-in del Módulo 1 — lo mantenemos durante todo el curso.',
                 hint: 'No wrong answers — even five minutes a day is better than one long rushed session. You\'re building a habit you\'ll actually keep.',
@@ -301,6 +317,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Station wrap-up', label_es: 'Cierre de la estación',
                 text: 'Which fret made you stop and count today? Write it below — that\'s your first thing to drill next time you practice.',
                 text_es: '¿Qué traste te hizo detenerte y contar hoy? Escríbelo abajo — eso es lo primero que debes practicar la próxima vez.',
                 response: { type: 'short', placeholder: 'e.g. A string fret 7 — I keep guessing D vs E',
@@ -313,6 +330,7 @@ SETS.push(
             title_es: '⚡ Chispa de oído — bono opcional',
             steps: [
               {
+                label: 'Ear Spark: name the open strings', label_es: 'Chispa de oído: nombra las cuerdas',
                 text: '⚡ Ear Spark (optional, 2 min): shuffle six paper slips labeled E A D G B e, draw five, and record yourself plucking the open strings in that order. A few minutes later, play it back and name each string by ear before checking your slips — thickest to thinnest is E-A-D-G-B-e, and your ear learns them faster than you\'d think. Got someone around? Have them pluck while you look away instead.',
                 text_es: '⚡ Chispa de oído (opcional, 2 min): revuelve seis papelitos con las letras E A D G B e, saca cinco, y grábate pulsando las cuerdas al aire en ese orden. Unos minutos después, escucha la grabación y nombra cada cuerda de oído antes de revisar tus papelitos — de más gruesa a más delgada es E-A-D-G-B-e, y tu oído las aprende más rápido de lo que crees. ¿Tienes a alguien cerca? Pídele que pulse mientras tú miras hacia otro lado.'
               }
@@ -396,6 +414,7 @@ SETS.push(
             title_es: 'Mira los videos de la lección',
             steps: [
               {
+                label: 'Watch: spider exercises', label_es: 'Mira: ejercicios de araña',
                 text: 'Watch: <a href="https://www.youtube.com/watch?v=DBNNf4Ri3yc" target="_blank">Spider Exercises: Finger Dexterity #1 – Lauren Bateman (0:00–4:00)</a>.',
                 text_es: 'Mira: <a href="https://www.youtube.com/watch?v=DBNNf4Ri3yc" target="_blank">Spider Exercises: Finger Dexterity #1 – Lauren Bateman (0:00–4:00)</a>.',
                 hint: 'Try each exercise slowly on your guitar as she demonstrates. Slow and clean is better than fast and buzzy, every time.',
@@ -405,6 +424,7 @@ SETS.push(
                   placeholder_es: '¿Qué ejercicio se sintió más difícil, y por qué crees que es difícil?' }
               },
               {
+                label: 'Watch: avoiding fret buzz', label_es: 'Mira: evita el zumbido',
                 text: 'Watch: <a href="https://youtu.be/IscDj_-Nr0s" target="_blank">Finger Placement to Avoid Fret Buzz (BC-106) – JustinGuitar</a> (0:00–4:00).',
                 text_es: 'Mira: <a href="https://youtu.be/IscDj_-Nr0s" target="_blank">Finger Placement to Avoid Fret Buzz (BC-106) – JustinGuitar</a> (0:00–4:00).',
                 hint: 'As he lists each cause, pause and test it on your own guitar — find your buzz before he names the fix.',
@@ -429,6 +449,7 @@ SETS.push(
                 ] }
               },
               {
+                label: 'Watch: how to read TAB', label_es: 'Mira: cómo leer TAB',
                 text: 'Watch: <a href="https://www.youtube.com/watch?v=qR0O0bUl5_A" target="_blank">How to Read Guitar TAB – Lauren Bateman (0:00–4:00)</a>.',
                 text_es: 'Mira: <a href="https://www.youtube.com/watch?v=qR0O0bUl5_A" target="_blank">How to Read Guitar TAB – Lauren Bateman (0:00–4:00)</a>.',
                 hint: 'Pause when she shows a TAB example. Find those notes on your guitar before hitting play.',
@@ -459,6 +480,7 @@ SETS.push(
             title_es: 'Practica la lectura de TAB y notas limpias',
             steps: [
               {
+                label: 'Read TAB: Happy Birthday', label_es: 'Lee el TAB: Happy Birthday',
                 text: 'Read this TAB: the opening of "Happy Birthday" written out on the low E string. Look at the fret numbers on the bottom line and try to play it. Click any note name below the TAB to hear how it should sound.',
                 text_es: 'Lee este TAB: el inicio de "Happy Birthday" escrito en la cuerda Mi grave. Mira los números de traste en la línea de abajo e intenta tocarlo. Haz clic en cualquier nombre de nota debajo del TAB para escuchar cómo debe sonar.',
                 hint: 'Read left-to-right, one note per beat. The numbers tell you which fret to press on the low E string. See a # (sharp)? It just means one fret higher than the plain note — F# is one fret above F. We\'ll cover sharps and flats later. For now, just trust the fret numbers.',
@@ -484,6 +506,7 @@ SETS.push(
                 }
               },
               {
+                label: 'Fret buzz self-check', label_es: 'Autorrevisión de zumbido',
                 text: 'Fret buzz self-check: play frets 1–4 on the low E string, one at a time. Press lightly until you hear buzz, then press just enough to stop it. That is the minimum pressure needed.',
                 text_es: 'Autorrevisión de zumbido: toca los trastes 1–4 en la cuerda Mi grave, uno a la vez. Presiona suave hasta que escuches zumbido, y luego presiona justo lo necesario para que pare. Esa es la presión mínima necesaria.',
                 hint: 'Most beginners press too hard. Finding the minimum pressure is a real technique.',
@@ -508,6 +531,7 @@ SETS.push(
                 ] }
               },
               {
+                label: 'Read TAB: choose a song', label_es: 'Lee el TAB: elige una canción',
                 text: 'Try reading the TAB for "Ode to Joy" or "Mary Had a Little Lamb". Play it through at least once — slow and clean. Click a song below to open its TAB.',
                 text_es: 'Intenta leer el TAB de "Ode to Joy" o "Mary Had a Little Lamb". Tócalo completo al menos una vez — despacio y limpio. Haz clic en una canción abajo para abrir su TAB.',
                 hint: 'If you get stuck on a note, use your note-name chart to find it. TAB numbers = fret numbers.',
@@ -560,6 +584,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Station wrap-up', label_es: 'Cierre de la estación',
                 text: 'Station Wrap-Up — pause and think: what tripped you up most today — reading the TAB, or getting a clean note with no buzz? What felt easier than you expected?',
                 text_es: 'Cierre de la estación — pausa y piensa: ¿qué te costó más hoy — leer el TAB, o lograr una nota limpia sin zumbido? ¿Qué se sintió más fácil de lo que esperabas?',
                 response: { type: 'short', placeholder: 'e.g. reading TAB was fine, but fret 1 kept buzzing',
@@ -578,6 +603,7 @@ SETS.push(
             title_es: 'Presiona notas limpias sin zumbido',
             steps: [
           {
+            label: 'Challenge: finger workout', label_es: 'Reto: ejercicio de dedos',
             text: 'Challenge 1 — Finger Workout: play frets 1–5 on the low E string, one finger per fret, then do the same on the A string. Keep your thumb behind the neck. You\'ve got it when: every note rings clean with no buzz.',
             text_es: 'Reto 1 — Ejercicio de dedos: toca los trastes 1–5 en la cuerda Mi grave, un dedo por traste, y luego lo mismo en la cuerda La. Mantén el pulgar detrás del mástil. Lo tienes cuando: cada nota suena limpia sin zumbido.',
             hint: 'Go as slow as you need. Every note should ring cleanly with no buzz.',
@@ -589,6 +615,7 @@ SETS.push(
             skills: [1, 2, 3, 6]
           },
           {
+            label: 'Minimum-pressure drill', label_es: 'Ejercicio de presión mínima',
             text: 'Minimum-pressure drill: play frets 1–4 on the low E string one at a time. Press lightly until it buzzes, then add just enough to make it ring clean. That is your target pressure.',
             text_es: 'Ejercicio de presión mínima: toca los trastes 1–4 en la cuerda Mi grave uno a la vez. Presiona suave hasta que zumbe, y luego agrega justo lo necesario para que suene limpio. Esa es tu presión objetivo.',
             hint: 'Press just behind the fret, on your fingertip, thumb behind the neck. Most beginners press far too hard.',
@@ -596,6 +623,7 @@ SETS.push(
             skills: [1, 2]
           },
           {
+            label: 'One-finger-per-fret check', label_es: 'Revisión de un dedo por traste',
             text: 'One-finger-per-fret check: index=1, middle=2, ring=3, pinky=4 up the low E string. Every note rings — nothing buzzes or mutes. Click to hear the clean target tone.',
             text_es: 'Revisión de un dedo por traste: índice=1, medio=2, anular=3, meñique=4 subiendo la cuerda Mi grave. Cada nota suena — nada zumba ni se apaga. Haz clic para escuchar el tono objetivo limpio.',
             hint: 'Keep unused fingers hovering close, ready to drop down.',
@@ -604,6 +632,7 @@ SETS.push(
             playSeq: { label: 'Target tone (frets 1–4)', label_es: 'Tono objetivo (trastes 1–4)', bpm: 60, notes: [41, 42, 43, 44] }
           },
           {
+            label: 'Quick check: clean notes', label_es: 'Revisión rápida: notas limpias',
             text: 'Quick check:',
             text_es: 'Revisión rápida:',
             skills: [1, 2],
@@ -632,6 +661,7 @@ SETS.push(
             title_es: 'Lee TAB y toca una melodía de 4 compases a tiempo a 60 BPM',
             steps: [
           {
+            label: 'Warm-up TAB read', label_es: 'Lectura de calentamiento',
             text: 'Warm-up read — play this melody straight from the TAB at 60 BPM, one note per beat. Click any note name to hear how it should sound.',
             text_es: 'Lectura de calentamiento — toca esta melodía directo del TAB a 60 BPM, una nota por pulso. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar.',
             hint: 'Read left-to-right. The numbers are fret numbers on the A string. If you buzz, fix the finger before moving on.',
@@ -652,6 +682,7 @@ SETS.push(
             }
           },
           {
+            label: 'Challenge: play Happy Birthday', label_es: 'Reto: toca Happy Birthday',
             text: 'Challenge 2 — Play the Tune: using the TAB, play "Happy Birthday" on the E & A strings at 60 BPM, one note per beat. You\'ve got it when: the whole melody start to finish, in time, no buzz. Click any note name to hear how it should sound.',
             text_es: 'Reto 2 — Toca la melodía: usando el TAB, toca "Happy Birthday" en las cuerdas Mi y La a 60 BPM, una nota por pulso. Lo tienes cuando: la melodía completa de principio a fin, a tiempo, sin zumbido. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar.',
             hint: 'If you buzz on a note, stop, fix your finger position, then continue. Don\'t just play through the buzz.',
@@ -704,6 +735,7 @@ SETS.push(
             }
           },
           {
+            label: 'Challenge: Watchtower bass riff', label_es: 'Reto: riff de bajo de Watchtower',
             text: 'Challenge 3 — Watchtower Bass Riff (your module assessment piece): using the TAB, play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. You\'ve got it when: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
             text_es: 'Reto 3 — Riff de bajo de Watchtower (tu pieza de evaluación del módulo): usando el TAB, toca la línea de bajo de "All Along the Watchtower" solo en la cuerda Mi grave — A · G · F · G, en bucle — una nota por pulso a 60 BPM. Lo tienes cuando: el riff de principio a fin de memoria, a tiempo, con tono limpio y digitación correcta. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
             hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A). Keep your thumb behind the neck. Let each note ring fully before the next. Drill it until you can run it with your eyes closed — then record yourself playing it: that\'s your module-end assessment piece.',
@@ -730,6 +762,7 @@ SETS.push(
             response: { type: 'short', prompt: 'Personal record: once it loops clean at 60, raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', prompt_es: 'Récord personal: una vez que el bucle salga limpio a 60, sube el metrónomo de 10 en 10. ¿Cuál es tu bucle LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 100 — try for a higher number next session', placeholder_es: 'ej. 100 — intenta superarlo la próxima sesión' }
           },
           {
+            label: 'Bonus: Sweet Child O\' Mine roots', label_es: 'Extra: raíces de Sweet Child O\' Mine',
             text: 'Bonus riff — "Sweet Child O\' Mine" (Guns N\' Roses) bass roots on the E & A strings: play the root note under each verse chord — D · C · G · D — one per bar at 60 BPM. Click any note name to hear how it should sound. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
             text_es: 'Riff extra — raíces de bajo de "Sweet Child O\' Mine" (Guns N\' Roses) en las cuerdas Mi y La: toca la nota raíz bajo cada acorde de la estrofa — D · C · G · D — una por compás a 60 BPM. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
             hint: 'These are the roots of the D–C–G verse loop. Note: the original recording is tuned a half-step lower, so your notes will sound slightly higher than the recording — that\'s normal, not a mistake. The famous intro riff comes later in the course (an optional harder challenge in Module 7!).',
@@ -751,6 +784,7 @@ SETS.push(
             }
           },
           {
+            label: 'Quick check: reading TAB', label_es: 'Revisión rápida: lectura de TAB',
             text: 'Quick check on reading TAB:',
             text_es: 'Revisión rápida sobre la lectura de TAB:',
             skills: [4],
@@ -769,6 +803,7 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
+                label: 'Challenge: Watchtower bass line', label_es: 'Reto: línea de bajo de Watchtower',
                 text: 'Challenge — Watchtower bass line: play the "All Along the Watchtower" bass loop on the low E string — A · G · F · G — one note per beat at 60 BPM, four laps without stopping. You\'ve got it when: four laps, every note landing on the click. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
                 text_es: 'Reto — Línea de bajo de Watchtower: toca el bucle de bajo de "All Along the Watchtower" en la cuerda Mi grave — A · G · F · G — una nota por pulso a 60 BPM, cuatro vueltas sin parar. Lo tienes cuando: cuatro vueltas, cada nota cayendo con el clic. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'Three notes carry this whole song. Keep your eyes one note ahead of your pick.',
@@ -791,6 +826,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'How many clean laps in a row did you get at 60 BPM?', prompt_es: '¿Cuántas vueltas limpias seguidas lograste a 60 BPM?', placeholder: 'e.g. 4 — try for a higher number next session', placeholder_es: 'ej. 4 — intenta superarlo la próxima sesión' }
               },
               {
+                label: 'Challenge: Seven Nation Army, true pitch', label_es: 'Reto: Seven Nation Army, tono real',
                 text: 'Challenge — Seven Nation Army, true pitch: play the riff where the record actually lives — on the A string — E · E · G · E · D · C · B at 60 BPM. You\'ve got it when: two clean laps, and you can say which string version sounds like the recording. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
                 text_es: 'Reto — Seven Nation Army, tono real: toca el riff donde realmente vive en la grabación — en la cuerda La — E · E · G · E · D · C · B a 60 BPM. Lo tienes cuando: dos vueltas limpias, y puedes decir qué versión de cuerda suena como la grabación. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'Same riff, new string, new note names. Notice how the shape of the moves feels the same even though every name changed.',
@@ -816,6 +852,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which version do you like playing more — low E or A string — and why?', prompt_es: '¿Qué versión te gusta más tocar — Mi grave o cuerda La — y por qué?', placeholder: 'e.g. A string, it sounds like the song', placeholder_es: 'ej. cuerda La, suena como la canción' }
               },
               {
+                label: 'Challenge: the cure root line', label_es: 'Reto: línea de raíces de the cure',
                 text: 'Challenge — "the cure," root line: play the roots of Olivia Rodrigo\'s "the cure" across both strings — A · C · D · F · G — two beats per note at 60 BPM. You\'ve got it when: two clean laps crossing between the A and E strings without looking down.',
                 text_es: 'Reto — "the cure," línea de raíces: toca las raíces de "the cure" de Olivia Rodrigo cruzando ambas cuerdas — A · C · D · F · G — dos pulsos por nota a 60 BPM. Lo tienes cuando: dos vueltas limpias cruzando entre las cuerdas La y Mi sin mirar hacia abajo.',
                 hint: 'This is the simplest outline of the song — next module these exact roots become power chords. Learn where they live now and Module 3 is half done.',
@@ -844,6 +881,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which move was harder — crossing strings from D down to F, or walking up the same string from F to G?', prompt_es: '¿Qué movimiento fue más difícil — cruzar de cuerda de D a F, o subir por la misma cuerda de F a G?', placeholder: 'e.g. D to F — big jump', placeholder_es: 'ej. D a F — un salto grande' }
               },
               {
+                label: 'Challenge: Luna bass roots', label_es: 'Reto: raíces de bajo de Luna',
                 text: 'Challenge — Luna, bass roots: Luna rides two chords — F and Am — so its bassline is two notes. Play F (low E string, fret 1) and A (open A string) as single notes, two big beats each: the song is in 6/8, so feel the pulse in 2 and land each note on a downbeat. You\'ve got it when: four laps of F → A, both notes clean with no buzz, locked to the downbeats at 60 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
                 text_es: 'Reto — Luna, raíces de bajo: Luna se apoya en dos acordes — F y Am — así que su línea de bajo son dos notas. Toca F (cuerda Mi grave, traste 1) y A (cuerda La al aire) como notas individuales, dos pulsos grandes cada una: la canción está en 6/8, así que siente el pulso en 2 y aterriza cada nota en un tiempo fuerte. Lo tienes cuando: cuatro vueltas de F → A, ambas notas limpias sin zumbido, ajustadas a los tiempos fuertes a 60 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'Fret 1 is the tightest squeeze on the neck — press right behind the fret wire with the tip of your index and the F will ring clean.',
@@ -854,6 +892,7 @@ SETS.push(
                 levelUp_es: 'Cambia la A al aire por el traste 5 de la Mi grave — la misma nota, una posición nueva. ¿Quieres la línea de intro simplificada de requinto (un requinto es una guitarra pequeña y de tono más agudo que toca la melodía principal)? Es la Capa 6 extra en el Recorrido de la canción de Luna.'
               },
               {
+                label: 'Challenge: Let It Be bass line', label_es: 'Reto: línea de bajo de Let It Be',
                 text: 'Challenge — Let It Be, bass line: play the roots of "Let It Be" (Beatles) on the low E & A strings — C · G · A · F, two beats each at 60 BPM. These four notes are the simple bass outline of the whole song — you\'ll play "Let It Be" as a core song starting in Module 5, so learn where its roots live now. You\'ve got it when: two clean laps of C–G–A–F, every note ringing, each landing on the beat.',
                 text_es: 'Reto — Let It Be, línea de bajo: toca las raíces de "Let It Be" (Beatles) en las cuerdas Mi y La — C · G · A · F, dos pulsos cada una a 60 BPM. Estas cuatro notas son el esquema simple de bajo de toda la canción — vas a tocar "Let It Be" como canción principal a partir del Módulo 5, así que aprende dónde viven sus raíces desde ahora. Lo tienes cuando: dos vueltas limpias de C–G–A–F, cada nota sonando, cada una cayendo en el pulso.',
                 hint: 'C is A-string fret 3 (ring finger), G is low-E fret 3 (ring finger), A is the open A string, F is low-E fret 1 (index). Watch the crossings between the two strings and keep your thumb behind the neck. Click any note name to hear how it should sound.',
@@ -880,6 +919,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which string crossing was trickiest — C down to G, or A down to F?', prompt_es: '¿Qué cruce de cuerda fue más complicado — C bajando a G, o A bajando a F?', placeholder: 'e.g. A to F — the jump across strings', placeholder_es: 'ej. A a F — el salto entre cuerdas' }
               },
               {
+                label: 'Challenge: mystery TAB sight-read', label_es: 'Reto: TAB misterioso a primera vista',
                 text: 'Challenge — Mystery TAB (sight-read it cold): here\'s a 2-bar melody you\'ve never heard.<ol><li>Do NOT press ▶ Play tab first.</li><li>Read it straight off the page — work out each string and fret and play all the way through, one note per beat at 60 BPM.</li><li>THEN press ▶ Play tab to check yourself.</li></ol>You\'ve got it when: you play it correctly on the first cold read, before ever hearing it. That\'s real sight-reading, and it\'s exactly what your module assessment asks for.',
                 text_es: 'Reto — TAB misterioso (léelo a primera vista, en frío): aquí hay una melodía de 2 compases que nunca has escuchado.<ol><li>NO presiones ▶ Tocar el tab primero.</li><li>Léela directo de la página — descifra cada cuerda y traste y tócala completa, una nota por pulso a 60 BPM.</li><li>LUEGO presiona ▶ Tocar el tab para revisarte.</li></ol>Lo tienes cuando: la tocas correctamente en la primera lectura en frío, antes de escucharla siquiera. Eso es lectura a primera vista real, y es exactamente lo que pide tu evaluación del módulo.',
                 hint: 'This is the whole point of sight-reading: playing music you don\'t already know by ear. Bottom line = low E, the line above it = A, the next one up = D. Every fret here is 0–3 on the A and D strings. Say each note name before you pluck it, then use ▶ Play tab as your answer key — only after you\'ve played it yourself.',
@@ -912,6 +952,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Station wrap-up', label_es: 'Cierre de la estación',
                 text: 'Which part of your Watchtower assessment riff still needs work? Write it below — that\'s your warm-up target next time you practice.',
                 text_es: '¿Qué parte de tu riff de evaluación de Watchtower todavía necesita trabajo? Escríbelo abajo — ese es tu objetivo de calentamiento la próxima vez que practiques.',
                 response: { type: 'short', placeholder: 'e.g. the F-to-G change on frets 1 and 3 is shaky',

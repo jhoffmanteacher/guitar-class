@@ -2210,12 +2210,21 @@ function stripTags(html){
 }
 function truncateText(s, n){ if(s.length<=n) return s; const cut=s.slice(0,n); return cut.slice(0, Math.max(cut.lastIndexOf(' '), n-20))+'…'; }
 // Short one-line label for a step's collapsed checklist row.
+// Every step now carries a hand-written label/label_es (enforced by
+// checks.mjs for i18nComplete modules) — the derivation below is only a
+// fallback so a future unlabeled step still gets a usable header instead
+// of a blank row.
 function stepLabel(s){
+  const lbl = (tf(s,'label') || '').trim();
+  if(lbl) return lbl;
   const plain = stripTags(tf(s,'text') || '').trim();
   if(!plain && s.response && s.response.prompt) return truncateText(stripTags(tf(s.response,'prompt')), 60);
   // English "Challenge N — X:" / Spanish "Reto N — X:" both strip down to just X.
   const challengeMatch = plain.match(/^(?:Challenge|Reto)\s*\d*\s*[—-]\s*([^:]+):/);
   if(challengeMatch) return truncateText(challengeMatch[1].trim(), 60);
+  // "Lead-in (aside): directions…" → just the lead-in, aside dropped.
+  const leadIn = plain.match(/^([^:.!?]{3,60}?)(?:\s*\([^)]*\))?\s*:\s/);
+  if(leadIn) return truncateText(leadIn[1].trim(), 60);
   return truncateText(plain, 60);
 }
 // Every step in a module, in document order, with its set + section context.

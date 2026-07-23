@@ -32,6 +32,7 @@ SETS.push(
             title_es: 'Mira los videos de la lección',
             steps: [
               {
+                label: 'Watch: chords in any key', label_es: 'Mira: acordes en cualquier tonalidad',
                 text: 'Watch: <a href="https://www.youtube.com/watch?v=jGh2Erg-o8E" target="_blank">Encontrar los acordes en cualquier tonalidad – Maru Martinez (0:00–7:27)</a> (in Spanish — turn on English captions if you need them; the on-screen diagrams carry the lesson). Watch how she builds a chord on every note of the scale — that\'s the "chord family" you\'ll be naming with Roman numerals today.',
                 text_es: 'Mira: <a href="https://www.youtube.com/watch?v=jGh2Erg-o8E" target="_blank">Encontrar los acordes en cualquier tonalidad – Maru Martinez (0:00–7:27)</a> (en español — activa los subtítulos en inglés si los necesitas; los diagramas en pantalla llevan la lección). Mira cómo ella construye un acorde en cada nota de la escala — esa es la "familia de acordes" que vas a nombrar con números romanos hoy.',
                 hint: 'Every chord you\'ve ever strummed is built from a scale — today you learn the recipe that turns one scale into a whole family of chords.',
@@ -46,6 +47,7 @@ SETS.push(
                   choices_es: ['Cualquier tres notas', 'Cada otra nota de una escala: raíz, 3ª, 5ª', 'Tres notas en una sola cuerda', 'La misma nota en tres octavas'] }
               },
               {
+                label: 'Watch: how chords are built', label_es: 'Mira: cómo se construyen los acordes',
                 text: 'Watch: <a href="https://youtu.be/BIWEcDGB5lA" target="_blank">Understanding CHORDS (Ep. 3 Music Theory) – Paul Davids</a>. Every chord you\'ve ever strummed is built from the same three notes — root, 3rd, 5th — and Paul shows where they come from. A different teacher than the first video on purpose: notice which explanation makes the most sense to you.',
                 text_es: 'Mira: <a href="https://youtu.be/BIWEcDGB5lA" target="_blank">Understanding CHORDS (Ep. 3 Music Theory) – Paul Davids</a>. Cada acorde que has rasgueado alguna vez se construye con las mismas tres notas — raíz, 3ª, 5ª — y Paul muestra de dónde vienen. Un maestro distinto al del primer video a propósito: fíjate cuál explicación tiene más sentido para ti.',
                 hint: 'Notice the pattern: three of the seven chords in a key come out major, and three come out minor — no exceptions, in any key.',
@@ -66,6 +68,7 @@ SETS.push(
             title_es: 'Escucha los números romanos en una canción conocida',
             steps: [
               {
+                label: 'Numerals in Let It Be', label_es: 'Números romanos en Let It Be',
                 text: 'Listen for it: play through Let It Be\'s C–G–Am–F loop and, before checking, guess which numeral each chord is in the key of C.',
                 text_es: 'Escucha con atención: toca el loop C–G–Am–F de Let It Be y, antes de revisar, adivina qué número romano es cada acorde en la tonalidad de C.',
                 hint: 'C is home (I), so everything else numbers off of it — G is a fifth up, Am shares C\'s notes, F is a fourth up.',
@@ -86,6 +89,7 @@ SETS.push(
             title_es: 'Prueba a construir una familia de acordes',
             steps: [
               {
+                label: 'Build triads up the C scale', label_es: 'Construye tríadas en la escala de C',
                 text: 'Now try it: build a triad on every note of the C major scale (C-D-E-F-G-A-B) and see which come out major and which come out minor.',
                 text_es: 'Ahora pruébalo: construye una tríada en cada nota de la escala de C mayor (C-D-E-F-G-A-B) y observa cuáles salen mayores y cuáles salen menores.',
                 hint: 'You\'ll get major-minor-minor-major-major-minor-diminished — the same pattern in every major key.',
@@ -100,6 +104,7 @@ SETS.push(
                   choices_es: ['C · Dm · Em · F · G · Am', 'C · D · E · F · G · A', 'Cm · Dm · Em · Fm · Gm · Am', 'C · Dm · E · F · Gm · Am'] }
               },
               {
+                label: 'Luna: place Am in the key of F', label_es: 'Luna: ubica Am en la tonalidad de F',
                 text: 'Try it on Luna: F and Am aren\'t I–IV or I–V — figure out which scale degree Am is built on in the key of F before checking.',
                 text_es: 'Pruébalo con Luna: F y Am no son I–IV ni I–V — averigua sobre cuál grado de la escala está construido Am en la tonalidad de F antes de revisar.',
                 hint: 'Count up the F major scale: F(I) G(ii) A(iii) — Am is built on the THIRD note.',
@@ -120,6 +125,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: your song\'s home chord', label_es: 'Cierre: el acorde base de tu canción',
                 text: 'Station Wrap-Up — pick any core song: which numeral is its home chord, and is it major or minor?',
                 text_es: 'Cierre de la estación — elige cualquier canción principal: ¿qué número romano es su acorde base, y es mayor o menor?',
                 response: { type: 'short', placeholder: 'e.g. Watchtower\'s home is Am — the vi of C, or "i" if you call the key A minor',
@@ -138,6 +144,7 @@ SETS.push(
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
               {
+                label: 'Warm-up: tuning check', label_es: 'Calentamiento: afinación',
                 text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -149,6 +156,7 @@ SETS.push(
             title_es: 'Construye y toca una familia de acordes',
             steps: [
               {
+                label: 'Challenge: build the family', label_es: 'Reto: construye la familia',
                 text: 'Challenge 1 — Build the Family: write out the chord families of C major and G major (six chords each) — type them below — then play each family as open chords in order.',
                 text_es: 'Reto 1 — Construye la familia: escribe las familias de acordes de C mayor y G mayor (seis acordes cada una) — anótalas abajo — y luego toca cada familia como acordes abiertos en orden.',
                 hint: 'C family: C · Dm · Em · F · G · Am. G family: G · Am · Bm · C · D · Em. Notice how much they overlap — that\'s no accident.',
@@ -177,6 +185,7 @@ SETS.push(
             title_es: 'Tarjetas de números romanos',
             steps: [
               {
+                label: 'Challenge: numeral flashcards', label_es: 'Reto: tarjetas de números romanos',
                 text: 'Challenge 2 — Numeral Flashcards: make six flashcards, one numeral each (I ii iii IV V vi), shuffle the deck, flip the top card, and play that chord in the key of C — no hesitating. Run the deck twice. (Got a partner handy? Have them call the numerals instead.)',
                 text_es: 'Reto 2 — Tarjetas de números romanos: haz seis tarjetas, un número romano en cada una (I ii iii IV V vi), mezcla el mazo, voltea la tarjeta de arriba, y toca ese acorde en la tonalidad de C — sin dudar. Repite el mazo dos veces. (¿Tienes a alguien cerca? Pídele que diga los números romanos en tu lugar.)',
                 hint: 'If you know the family in order (C Dm Em F G Am), the numeral just tells you which slot to reach for.',
@@ -194,6 +203,7 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
+                label: 'Challenge: Let It Be, numbered', label_es: 'Reto: Let It Be, numerado',
                 text: 'Challenge — Let It Be, numbered: write I, V, vi, and IV on four slips, then strum the verse drawing a slip each bar (or call the numerals aloud in a random order you set beforehand) — you have to know which chord each numeral means, not just the C–G–Am–F letters. You\'ve got it when: one full loop with every numeral landing on the right chord. (A partner calling numerals works too.)',
                 text_es: 'Reto — Let It Be, numerado: escribe I, V, vi y IV en cuatro papelitos, y luego rasguea la estrofa sacando un papelito en cada compás (o di los números romanos en voz alta en un orden aleatorio que definas de antemano) — tienes que saber qué acorde significa cada número romano, no solo las letras C–G–Am–F. Lo tienes cuando: una vuelta completa con cada número romano cayendo en el acorde correcto. (Tener a alguien que diga los números romanos también funciona.)',
                 hint: 'This is the same verse you\'ve strummed since Module 5 — today the only new part is thinking in numerals instead of letters.',
@@ -217,6 +227,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: why is Am lowercase?', label_es: 'Cierre: ¿por qué Am va en minúscula?',
                 text: 'What\'s the vi chord of G major, and can you explain in one sentence why Am is lowercase but C is uppercase?',
                 text_es: '¿Cuál es el acorde vi de G mayor, y puedes explicar en una oración por qué Am va en minúscula pero C va en mayúscula?',
                 response: { type: 'short', placeholder: 'e.g. Em is the vi of G; Am is lowercase because it comes out minor when you stack the scale in thirds',
@@ -295,6 +306,7 @@ SETS.push(
             title_es: 'Mira los videos de la lección',
             steps: [
               {
+                label: 'Watch: chords that sound good together', label_es: 'Mira: acordes que suenan bien juntos',
                 text: 'Watch: <a href="https://youtu.be/6U8-Y7DEzOE" target="_blank">What chords sound good together? | Music theory ep. 7 – Paul Davids</a> — a second voice on the chord families you built in Set 1. Paul shows why a key\'s chords belong together; your job is to run it backwards: given a song\'s chords, name the key.',
                 text_es: 'Mira: <a href="https://youtu.be/6U8-Y7DEzOE" target="_blank">What chords sound good together? | Music theory ep. 7 – Paul Davids</a> — una segunda voz sobre las familias de acordes que construiste en la Unidad 1. Paul muestra por qué los acordes de una tonalidad pertenecen juntos; tu trabajo es hacerlo al revés: dados los acordes de una canción, nombrar la tonalidad.',
                 hint: 'You already know each key\'s chord family from Set 1 — this is just running that lookup backwards.',
@@ -309,6 +321,7 @@ SETS.push(
                   choices_es: ['C mayor', 'G mayor', 'D mayor', 'F mayor'] }
               },
               {
+                label: 'Watch: All Along the Watchtower', label_es: 'Mira: All Along the Watchtower',
                 text: 'Watch: <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank">All Along the Watchtower – Bob Dylan (Official Audio)</a>. Listen to the Am–G–F loop and, without looking anything up, decide by ear which chord feels like "home."',
                 text_es: 'Mira: <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank">All Along the Watchtower – Bob Dylan (Official Audio)</a>. Escucha el loop Am–G–F y, sin buscar nada, decide de oído cuál acorde se siente como "base."',
                 hint: 'Home is the chord the loop keeps landing back on — the one that makes the progression feel finished, not left unfinished.',
@@ -329,6 +342,7 @@ SETS.push(
             title_es: 'Escucha el I–IV–V',
             steps: [
               {
+                label: 'Find I–IV–V in A', label_es: 'Encuentra I–IV–V en A',
                 text: 'Listen for it: count up the A major scale to find its I, IV, and V chords before checking your answer.',
                 text_es: 'Escucha con atención: cuenta hacia arriba en la escala de A mayor para encontrar sus acordes I, IV y V antes de revisar tu respuesta.',
                 hint: 'I–IV–V is the foundation progression behind blues, rock, and a lot of cumbia — worth having on instant recall in any key.',
@@ -349,6 +363,7 @@ SETS.push(
             title_es: 'Prueba a numerar una progresión real',
             steps: [
               {
+                label: 'Number "the cure"\'s chords', label_es: 'Numera los acordes de "the cure"',
                 text: 'Now try it: number "the cure"\'s chords — Am–C–Dm–F–G/B — in the key of C before checking.',
                 text_es: 'Ahora pruébalo: numera los acordes de "the cure" — Am–C–Dm–F–G/B — en la tonalidad de C antes de revisar.',
                 hint: 'Ignore the slash for a moment and number the chord names first — the bass note is a separate question.',
@@ -363,6 +378,7 @@ SETS.push(
                   choices_es: ['vi–I–ii–IV', 'I–V–vi–IV', 'ii–IV–vi–I', 'vi–IV–I–V'] }
               },
               {
+                label: 'Find the family fast', label_es: 'Encuentra la familia rápido',
                 text: 'Try it fast: given only a chord list (no song name), find the single family that contains every chord before you do anything else.',
                 text_es: 'Pruébalo rápido: dada solo una lista de acordes (sin nombre de canción), encuentra la única familia que contiene todos los acordes antes de hacer cualquier otra cosa.',
                 hint: 'Inventory first, family second, home-chord-by-ear last — in that order, every time.',
@@ -383,6 +399,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: the home-chord feeling', label_es: 'Cierre: la sensación del acorde base',
                 text: 'Station Wrap-Up — describe the "home chord" feeling in your own words.',
                 text_es: 'Cierre de la estación — describe con tus propias palabras la sensación del "acorde base."',
                 response: { type: 'short', placeholder: 'e.g. like the last word of a sentence — the loop can finally stop there',
@@ -401,6 +418,7 @@ SETS.push(
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
               {
+                label: 'Warm-up: tuning check', label_es: 'Calentamiento: afinación',
                 text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -412,6 +430,7 @@ SETS.push(
             title_es: 'Ejercicio detective de inventario de acordes',
             steps: [
               {
+                label: 'Challenge: chord inventory drill', label_es: 'Reto: ejercicio de inventario',
                 text: 'Challenge 1 — Inventory Drill (a drill is a short exercise you repeat to build a skill): four mystery chord sets on cards — G-C-D-Em, C-F-G-Am, D-G-A-Bm, Am-F-G-C — name each key before flipping the card. (Answers: G, C, D, C/Am.)',
                 text_es: 'Reto 1 — Ejercicio de inventario (un ejercicio es una práctica corta que repites para desarrollar una destreza): cuatro conjuntos misteriosos de acordes en tarjetas — G-C-D-Em, C-F-G-Am, D-G-A-Bm, Am-F-G-C — nombra cada tonalidad antes de voltear la tarjeta. (Respuestas: G, C, D, C/Am.)',
                 hint: 'Find the single family that contains ALL the chords on the card — that\'s the key, before your ear even weighs in.',
@@ -429,6 +448,7 @@ SETS.push(
             title_es: 'Toca y siente la base',
             steps: [
               {
+                label: 'Challenge: play and feel for home', label_es: 'Reto: toca y siente la base',
                 text: 'Challenge 2 — Play and Feel: strum Am–G–F, stopping and holding each chord in turn, then say (or type below) which one feels most like "home."',
                 text_es: 'Reto 2 — Toca y siente: rasguea Am–G–F, deteniéndote y sosteniendo cada acorde por turno, y luego di (o escribe abajo) cuál se siente más como "base."',
                 hint: 'Play the loop a few times through first — home only reveals itself once you can hear the whole shape of the progression.',
@@ -453,6 +473,7 @@ SETS.push(
             title_es: 'Descifra un acorde con bajo alterno',
             steps: [
               {
+                label: 'Challenge: slash chord walk', label_es: 'Reto: caminata de acorde con bajo alterno',
                 text: 'Challenge 3 — Slash Chord Walk: play C → G/B → Am as a smooth bass-line move — notice the bass note walks down one step at a time (C, B, A) while the chords change around it.',
                 text_es: 'Reto 3 — Caminata de acorde con bajo alterno: toca C → G/B → Am como un movimiento suave de línea de bajo — fíjate cómo la nota de bajo baja un paso a la vez (C, B, A) mientras los acordes cambian alrededor.',
                 hint: 'This is exactly what "the cure" does to glide from the G chord back home to C — the slash chord is the piece that links the two chords smoothly.',
@@ -475,6 +496,7 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
+                label: 'Challenge: Watchtower, numbered', label_es: 'Reto: Watchtower, numerado',
                 text: 'Challenge — Watchtower, fully numbered: play the Am–G–F loop and label every chord\'s numeral in the key of C — vi–V–IV — before landing back on Am as the true minor-key home. You\'ve got it when: one clean loop, numerals called correctly on every chord.',
                 text_es: 'Reto — Watchtower, completamente numerado: toca el loop Am–G–F y etiqueta el número romano de cada acorde en la tonalidad de C — vi–V–IV — antes de aterrizar de vuelta en Am como la verdadera base en tonalidad menor. Lo tienes cuando: un loop limpio, con los números romanos dichos correctamente en cada acorde.',
                 hint: 'Watchtower is C major\'s relative-minor family in action — same three chords you\'ve played since Module 2, now fully numbered.',
@@ -497,6 +519,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: mystery key and G/B', label_es: 'Cierre: tonalidad misteriosa y G/B',
                 text: 'A song uses D, G, A, and Bm — what key? And what does the B in G/B tell you to do with your bass note?',
                 text_es: 'Una canción usa D, G, A y Bm — ¿qué tonalidad? ¿Y qué te dice la B en G/B que hagas con tu nota de bajo?',
                 response: { type: 'short', placeholder: 'e.g. key of D; the B means B is the lowest note you play, even though it\'s still a G chord shape',
@@ -580,6 +603,7 @@ SETS.push(
             title_es: 'Mira los videos de la lección',
             steps: [
               {
+                label: 'Watch: E-shape barre chords', label_es: 'Mira: cejillas en forma de E',
                 text: 'Watch: <a href="https://youtu.be/MpMhueVEz2g" target="_blank">Basic Barré Chords #1 — the E shape (CH-006) – JustinGuitar</a>. As you watch, find the low-E-string fret for each root he names.',
                 text_es: 'Mira: <a href="https://youtu.be/MpMhueVEz2g" target="_blank">Basic Barré Chords #1 — the E shape (CH-006) – JustinGuitar</a>. Mientras miras, encuentra el traste en la cuerda Mi grave para cada raíz que él nombra.',
                 hint: 'The low-E root names an E-shape barre chord — Module 9\'s fretboard knowledge pays off here.',
@@ -594,6 +618,7 @@ SETS.push(
                   choices_es: ['El traste donde está tu meñique', 'La nota debajo de tu cejilla en la cuerda Mi grave', 'La tonalidad de la canción', 'La cuerda La'] }
               },
               {
+                label: 'Watch: A-shape barre chords', label_es: 'Mira: cejillas en forma de A',
                 text: 'Watch: <a href="https://youtu.be/C7k0CWgI-xI" target="_blank">A Shape Major Barre Chords on Guitar (my best tricks and exercises) – JustinGuitar</a>. Notice the root now lives on the A string, not the low E.',
                 text_es: 'Mira: <a href="https://youtu.be/C7k0CWgI-xI" target="_blank">A Shape Major Barre Chords on Guitar (my best tricks and exercises) – JustinGuitar</a>. Fíjate que ahora la raíz vive en la cuerda La, no en la Mi grave.',
                 hint: 'Same idea as the E-shape, different string — the A-shape root is always on the A string.',
@@ -614,6 +639,7 @@ SETS.push(
             title_es: 'Escucha la raíz de la forma de A',
             steps: [
               {
+                label: 'Find the A-shape root', label_es: 'Encuentra la raíz de la forma de A',
                 text: 'Listen for it: play an A-shape barre at fret 5 and name its root before checking — remember the root lives on the A string this time, not the low E.',
                 text_es: 'Escucha con atención: toca una cejilla en forma de A en el traste 5 y nombra su raíz antes de revisar — recuerda que esta vez la raíz vive en la cuerda La, no en la Mi grave.',
                 hint: 'Count up the A string from open: A-A#-B-C-C#-D. Fret 5 lands on D.',
@@ -634,6 +660,7 @@ SETS.push(
             title_es: 'Prueba a nombrar una cejilla a partir de su raíz',
             steps: [
               {
+                label: 'Find B major as a barre', label_es: 'Encuentra B mayor con cejilla',
                 text: 'Now try it: find B major using the A-shape barre — count up the A string until you hit B before you fret anything.',
                 text_es: 'Ahora pruébalo: encuentra B mayor usando la cejilla en forma de A — cuenta hacia arriba en la cuerda La hasta llegar a B antes de trastear nada.',
                 hint: 'A string: A(0)-A#(1)-B(2). B is only two frets up.',
@@ -648,6 +675,7 @@ SETS.push(
                   choices_es: ['1', '2', '4', '7'] }
               },
               {
+                label: 'Map all 12 roots on paper', label_es: 'Mapea las 12 raíces en papel',
                 text: 'Try it on paper: list all 12 chromatic notes and, for each, name the fret where an E-shape barre would land on that root.',
                 text_es: 'Pruébalo en papel: enumera las 12 notas cromáticas y, para cada una, nombra el traste donde caería una cejilla en forma de E sobre esa raíz.',
                 hint: 'One shape, twelve chords — the ONLY thing that changes is which fret you barre.',
@@ -668,6 +696,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: open shapes or barres?', label_es: 'Cierre: ¿formas abiertas o cejillas?',
                 text: 'Station Wrap-Up — open shapes or barre shapes: which would you pick for Let It Be, and why? (Don\'t stop — the 12-bar blues section is below!)',
                 text_es: 'Cierre de la estación — formas abiertas o formas con cejilla: ¿cuál elegirías para Let It Be, y por qué? (¡No pares — la sección de blues de 12 compases está abajo!)',
                 response: { type: 'short', placeholder: 'e.g. open — it rings better; but the barre F is better than the mini-F once my hand is warm',
@@ -680,6 +709,7 @@ SETS.push(
             title_es: 'El blues de 12 compases — la forma que tu I–IV–V estaba esperando',
             steps: [
               {
+                label: 'Watch: 12-bar blues in E', label_es: 'Mira: blues de 12 compases en E',
                 text: 'Watch: <a href="https://www.youtube.com/watch?v=kurgOIcTCIE" target="_blank">How To Play Old School 12 Bar Blues Guitar No.1 EASY Beginners - Chords Key E – EricBlackmonGuitar (0:00–4:41)</a>. The 12-bar blues is I–IV–V — the exact chords you\'ve been building this set — used to build the most-played song form in American music. Watch for two things: the ORDER the chords arrive in, and the long-short "shuffle" bounce in the strumming hand.',
                 text_es: 'Mira: <a href="https://www.youtube.com/watch?v=kurgOIcTCIE" target="_blank">How To Play Old School 12 Bar Blues Guitar No.1 EASY Beginners - Chords Key E – EricBlackmonGuitar (0:00–4:41)</a>. El blues de 12 compases es I–IV–V — los mismos acordes que has estado construyendo en esta unidad — usado para armar la forma de canción más tocada en la música estadounidense. Fíjate en dos cosas: el ORDEN en que llegan los acordes, y el rebote largo-corto de "shuffle" en la mano que rasguea.',
                 hint: 'Thousands of songs are this one form. Learn it once and you can jam (play along freely and make up your own part) with people you\'ve just met for the rest of your life.',
@@ -687,6 +717,7 @@ SETS.push(
                 skills: [7]
               },
               {
+                label: 'Quick check: the blues chords', label_es: 'Ponte a prueba: los acordes del blues',
                 text: 'Check yourself on the form\'s ingredients before you play it at the practice station.',
                 text_es: 'Ponte a prueba con los ingredientes de la forma antes de tocarla en la estación de práctica.',
                 response: { type: 'mc', prompt: 'A standard 12-bar blues in A uses which three chords?',
@@ -698,6 +729,7 @@ SETS.push(
                   choices_es: ['A7, D7, E7', 'A, Bm, C#', 'A7, C7, G7', 'Am, Dm, Em'] }
               },
               {
+                label: 'Quick check: shuffle feel', label_es: 'Ponte a prueba: la sensación de shuffle',
                 text: 'One more — the feel is half the style.',
                 text_es: 'Una más — la sensación es la mitad del estilo.',
                 response: { type: 'mc', prompt: '"Shuffle feel" means the eighth notes are played:',
@@ -721,6 +753,7 @@ SETS.push(
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
               {
+                label: 'Warm-up: tuning check', label_es: 'Calentamiento: afinación',
                 text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
                 text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -732,6 +765,7 @@ SETS.push(
             title_es: 'Ejercicio de nombrar raíces',
             steps: [
               {
+                label: 'Challenge: root-naming drill', label_es: 'Reto: ejercicio de nombrar raíces',
                 text: 'First, warm the hand up — run a quick Finger Gym stretch (<a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym – JustinGuitar</a>) before today\'s barre-heavy work. Then, Challenge 1 — Root-Naming Drill: write a handful of chord names on slips, draw one, and find BOTH barre locations for it — the E-shape fret on the low E string AND the A-shape fret on the A string.',
                 text_es: 'Primero, calienta la mano — haz un estiramiento rápido de Gimnasio de Dedos (<a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym – JustinGuitar</a>) antes del trabajo intenso de cejillas de hoy. Luego, Reto 1 — Ejercicio de nombrar raíces: escribe un puñado de nombres de acordes en papelitos, saca uno, y encuentra AMBAS ubicaciones de cejilla para ese acorde — el traste de la forma de E en la cuerda Mi grave Y el traste de la forma de A en la cuerda La.',
                 hint: 'Every chord has (at least) two barre homes — one for each shape. Module 9\'s fretboard naming is the whole trick here.',
@@ -749,6 +783,7 @@ SETS.push(
             title_es: 'Construye I–IV–V en una tonalidad nombrada',
             steps: [
               {
+                label: 'Challenge: I–IV–V builder', label_es: 'Reto: constructor de I–IV–V',
                 text: 'Challenge 2 — I–IV–V Builder:<ol><li>Play I–IV–V in G (G open or fret-3 barre · C · D).</li><li>Then in A.</li><li>Then a key you draw at random from your chord slips.</li></ol>You\'ve got it when: clean changes in time at 60 BPM, using at least one barre shape.',
                 text_es: 'Reto 2 — Constructor de I–IV–V:<ol><li>Toca I–IV–V en G (G abierto o cejilla en el traste 3 · C · D).</li><li>Luego en A.</li><li>Luego una tonalidad que saques al azar de tus papelitos de acordes.</li></ol>Lo tienes cuando: cambios limpios y a tiempo a 60 BPM, usando al menos una forma con cejilla.',
                 hint: 'Once you know I–IV–V\'s shape in one key, moving the whole progression to a new key is just sliding your hands.',
@@ -766,6 +801,7 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
+                label: 'Challenge: Oye Mi Amor, full barre', label_es: 'Reto: Oye Mi Amor, cejilla completa',
                 text: 'Challenge — Oye Mi Amor, full barre: play the verse\'s Bm–G with a full A-shape barre Bm — the song\'s last beginner shortcut, gone for good. You\'ve got it when: four laps (a lap = one full time through) where the full Bm rings as clean as the G.',
                 text_es: 'Reto — Oye Mi Amor, cejilla completa: toca el Bm–G de la estrofa con una cejilla completa en forma de A para Bm — el último atajo de principiante de la canción, desaparecido para siempre. Lo tienes cuando: cuatro vueltas (una vuelta = un recorrido completo) donde el Bm completo suena tan limpio como el G.',
                 hint: 'This is Module 7\'s payoff, finally put to use as a harmony tool instead of just a shape to survive.',
@@ -787,6 +823,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
+                label: 'Wrap-up: two homes for C major', label_es: 'Cierre: dos lugares para C mayor',
                 text: 'Where are the two places to play C major as a barre — and which shape is friendlier to your hand today? (Don\'t stop — the 12-bar blues section is below!)',
                 text_es: '¿Cuáles son los dos lugares para tocar C mayor como cejilla — y cuál forma es más amigable para tu mano hoy? (¡No pares — la sección de blues de 12 compases está abajo!)',
                 response: { type: 'short', placeholder: 'e.g. E-shape fret 8 or A-shape fret 3 — the A-shape one is easier for me right now',
@@ -799,6 +836,7 @@ SETS.push(
             title_es: 'Toca el blues de 12 compases',
             steps: [
               {
+                label: 'Meet A7, D7, and E7', label_es: 'Conoce A7, D7 y E7',
                 text: 'Meet the three chords: A7, D7, E7 — your I, IV, and V in A, each with the bluesy 7th built in. Fret each one clean, then strum each for a bar with a long-short shuffle feel at 60 BPM.',
                 text_es: 'Conoce los tres acordes: A7, D7, E7 — tu I, IV y V en A, cada uno con la 7ª bluesera incorporada. Trastea cada uno limpio, y luego rasguea cada uno durante un compás con una sensación de shuffle largo-corto a 60 BPM.',
                 hint: 'All three are open-position shapes — no barre needed. The shuffle lives in your strumming wrist: DAH-da DAH-da.',
@@ -811,6 +849,7 @@ SETS.push(
                 ]
               },
               {
+                label: 'Play the 12-bar map', label_es: 'Toca el mapa de 12 compases',
                 text: 'The 12-bar map in A: A7 A7 A7 A7 | D7 D7 A7 A7 | E7 D7 A7 E7. Say each chord name OUT LOUD on beat 1 as you strum the bar — losing the form is the most common blues mistake, and counting bars aloud is the fix. Quick-change variant: swap D7 into bar 2 instead of staying on A7 — the "quick change" hands your ear the IV chord early, and it\'s the version you\'ll hear in most modern blues.',
                 text_es: 'El mapa de 12 compases en A: A7 A7 A7 A7 | D7 D7 A7 A7 | E7 D7 A7 E7. Di el nombre de cada acorde EN VOZ ALTA en el tiempo 1 mientras rasgueas el compás — perder la forma es el error más común del blues, y contar los compases en voz alta es la solución. Variante de cambio rápido: cambia a D7 en el compás 2 en lugar de quedarte en A7 — el "cambio rápido" le entrega a tu oído el acorde IV antes de tiempo, y es la versión que escucharás en la mayoría del blues moderno.',
                 hint: 'That last E7 in bar 12 is the "turnaround" — it pulls the music back to bar 1 so the form can loop forever.',
@@ -818,6 +857,7 @@ SETS.push(
                 skills: [7, 8]
               },
               {
+                label: 'Comp the full 12 bars', label_es: 'Acompaña los 12 compases completos',
                 text: 'Put it together — comping = playing the backing chords while someone else solos:<ol><li>Comp the full 12 bars from memory with shuffle feel at 60 BPM.</li><li>Record a pass and loop your recording.</li><li>Solo over your own comping with A minor pentatonic (your Module 4 box at fret 5).</li></ol>You\'ve got it when: a full chorus of each job (one chorus = one full trip through the 12 bars) — comping without losing the form, soloing without losing the changes. Playing with someone? One comps while the other solos, then swap.',
                 text_es: 'Júntalo todo — acompañar = tocar los acordes de base mientras alguien más hace un solo:<ol><li>Acompaña los 12 compases completos de memoria con sensación de shuffle a 60 BPM.</li><li>Graba una pasada y repite tu grabación en loop.</li><li>Haz un solo sobre tu propio acompañamiento con la pentatónica menor de A (tu caja del Módulo 4 en el traste 5).</li></ol>Lo tienes cuando: una ronda completa de cada trabajo (una ronda = un recorrido completo por los 12 compases) — acompañar sin perder la forma, hacer un solo sin perder los cambios. ¿Tocando con alguien? Uno acompaña mientras el otro hace el solo, y luego cambian.',
                 hint: 'When the loop comes back to A7, land on an A — hearing that "home" arrival is the most important thing.',
