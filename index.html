@@ -129,9 +129,9 @@
               <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6.5" width="19" height="11" rx="5.5"/><path d="M7 9.5v3M5.5 11h3"/><circle cx="15.7" cy="10.7" r="0.95" fill="currentColor" stroke="none"/><circle cx="17.6" cy="12.6" r="0.95" fill="currentColor" stroke="none"/></svg></span><span data-i18n="nav.games">Games</span></button>
             <button type="button" class="nav-btn" id="songs-hub-btn" onclick="toggleSongsHub()" aria-expanded="false" aria-controls="songs-hub-panel">
               <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 17V5.5l10-1.8V15"/><circle cx="6.5" cy="17" r="2.5"/><circle cx="16.5" cy="15" r="2.5"/></svg></span><span data-i18n="nav.songs">Songs</span></button>
-            <button type="button" class="nav-btn" id="keep-practicing-btn" onclick="toggleKeepPracticing()" aria-expanded="false" aria-controls="keep-practicing-panel">
+            <button type="button" class="nav-btn" id="keep-practicing-btn" onclick="toggleKeepPracticing()" aria-expanded="false" aria-controls="keep-practicing-screen">
               <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5l3.2 3.2"/></svg></span><span data-i18n="nav.keepPracticing">Keep practicing</span></button>
-            <button type="button" class="nav-btn" id="my-progress-btn" onclick="toggleMyProgress()" aria-expanded="false" aria-controls="my-progress-panel">
+            <button type="button" class="nav-btn" id="my-progress-btn" onclick="toggleMyProgress()" aria-expanded="false" aria-controls="my-progress-screen">
               <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M12 20V4M20 20v-7"/></svg></span><span data-i18n="nav.myProgress">My progress</span></button>
           </div>
         </nav>
@@ -153,8 +153,29 @@
       </div>
       <div class="daily5-panel" id="songs-hub-panel" hidden></div>
       <div class="daily5-panel" id="search-panel" hidden></div>
-      <div class="daily5-panel" id="keep-practicing-panel" hidden></div>
-      <div class="daily5-panel" id="my-progress-panel" hidden></div>
+      <!-- Keep practicing + My progress: full-screen "pages" in the site's
+           normal look (own URL hash, browser Back exits) — same pattern as
+           the Games arcade above, minus the arcade styling. -->
+      <div class="page-screen" id="keep-practicing-screen" role="dialog" aria-modal="true" aria-label="Keep practicing" hidden>
+        <div class="page-shell">
+          <div class="page-topbar">
+            <button type="button" class="page-exit" onclick="closeKeepPracticingScreen()">&larr; <span data-i18n="btn.backToPractice">Back to practice</span></button>
+            <div class="page-title">&#x1F501; <span data-i18n="nav.keepPracticing">Keep practicing</span></div>
+            <span class="page-topbar-spacer"></span>
+          </div>
+          <div class="page-body" id="keep-practicing-body"></div>
+        </div>
+      </div>
+      <div class="page-screen" id="my-progress-screen" role="dialog" aria-modal="true" aria-label="My progress" hidden>
+        <div class="page-shell">
+          <div class="page-topbar">
+            <button type="button" class="page-exit" onclick="closeMyProgressScreen()">&larr; <span data-i18n="btn.backToPractice">Back to practice</span></button>
+            <div class="page-title">&#x1F4CA; <span data-i18n="nav.myProgress">My progress</span></div>
+            <span class="page-topbar-spacer"></span>
+          </div>
+          <div class="page-body" id="my-progress-body"></div>
+        </div>
+      </div>
       <div id="week-panels"></div>
       <div class="fab-group" id="fab-group" style="display:none">
         <div class="tool-popup" id="metro-popup" role="dialog" aria-label="Metronome">

@@ -52,12 +52,14 @@ its `hint`/`stuck`/`levelUp` fields (+ `_es` twins) and show just the instructio
 
 ## Features / redesigns
 
-### [ ] "Keep practicing" — open as its own page, not a top-of-module panel
+### [x] "Keep practicing" — open as its own page, not a top-of-module panel (done 2026-07-23)
 - **Where:** `#keep-practicing-btn` (index.html), `toggleKeepPracticing` (app.js), `kp.*` (i18n.js), styles.css.
-- **Today:** left-rail button opens a *top panel* dropping over the current module.
 - **Decision (2026-07-23):** keep the feature but open it as its **own full-screen page** — model
   on the `games-screen` pattern (own URL hash, browser Back exits).
-- **Revisit:** consider giving "My progress" / "My skills checklist" the same full-page treatment.
+- **Built:** generic `.page-screen` pattern (site-normal look) with `#keep-practicing` hash;
+  **Jonathan also opted to convert "My progress" in the same round** (`#my-progress` hash) —
+  the "revisit" note is resolved for My progress. "My skills checklist" (per-set tab) unchanged.
+- No new i18n strings — topbars reuse `btn.backToPractice` + the `nav.*` titles.
 
 ### [x] Song list is overwhelming — organize into categories (done 2026-07-23)
 - **Where:** Songs hub — `#songs-hub-btn` → `toggleSongsHub` → `#songs-hub-panel` (app.js ~3918).

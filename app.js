@@ -316,6 +316,8 @@ function showApp(user){
 
 function maybeShowApp_gamesHash(){
   if(location.hash==='#games' && typeof openGamesScreen==='function'){ openGamesScreen(); return true; }
+  if(location.hash==='#keep-practicing'){ openKeepPracticingScreen(); return true; }
+  if(location.hash==='#my-progress'){ openMyProgressScreen(); return true; }
   return false;
 }
 
@@ -3356,19 +3358,18 @@ window.addEventListener('gc-langchange', function(){
   if(typeof syncRailStations === 'function') syncRailStations();
   if(typeof populateModuleDropdown === 'function') populateModuleDropdown();
   rebuildModuleContentPanels();
-  const myProgressPanel = document.getElementById('my-progress-panel');
-  if(myProgressPanel && !myProgressPanel.hidden && typeof toggleMyProgress === 'function'){
-    toggleMyProgress(); toggleMyProgress();   // closed→rebuild→reopen, cheapest correct refresh
-  }
-  // Same closed→reopen trick for the other top panels built at open time.
+  // Closed→reopen trick for the drop-over panels built at open time.
   const shPanel = document.getElementById('songs-hub-panel');
   if(shPanel && !shPanel.hidden && typeof toggleSongsHub === 'function'){
     toggleSongsHub(); toggleSongsHub();
   }
-  const kpPanel = document.getElementById('keep-practicing-panel');
-  if(kpPanel && !kpPanel.hidden && typeof toggleKeepPracticing === 'function'){
-    toggleKeepPracticing(); toggleKeepPracticing();
-  }
+  /* The full-page screens are hash-based (toggling twice would churn the
+     browser history), so an open one just re-renders its body in place —
+     the topbar labels are data-i18n-tagged and already re-translated. */
+  const kpScreen = document.getElementById('keep-practicing-screen');
+  if(kpScreen && !kpScreen.hidden && typeof renderKeepPracticing === 'function') renderKeepPracticing();
+  const mpScreen = document.getElementById('my-progress-screen');
+  if(mpScreen && !mpScreen.hidden && typeof renderMyProgress === 'function') renderMyProgress();
   // A live Daily 5 overlay just rebuilds its modal body in place.
   const d5 = document.querySelector('#daily5-overlay .daily5-modal');
   if(d5 && typeof buildDaily5 === 'function'){
@@ -3891,11 +3892,16 @@ initBackToTop();
       close Games too so the top of the page stays tidy. (The Daily 5 is a
       popup opened from Station C now, not a top-bar panel.) ── */
 function closeTopPanels(except){
+  /* Hash-based full pages close through their own close fns (which clear
+     the URL hash); plain drop-over panels just get hidden. */
+  const SCREEN_IDS = { games: 'games-screen', 'keep-practicing': 'keep-practicing-screen', 'my-progress': 'my-progress-screen' };
   ['games', 'songs-hub', 'search', 'keep-practicing', 'my-progress'].forEach(k => {
     if(k === except) return;
-    const p = document.getElementById(k === 'games' ? 'games-screen' : k + '-panel');
+    const p = document.getElementById(SCREEN_IDS[k] || k + '-panel');
     if(p && !p.hasAttribute('hidden')){
       if(k === 'games' && typeof closeGamesScreen === 'function'){ closeGamesScreen(); return; }
+      if(k === 'keep-practicing'){ closeKeepPracticingScreen(); return; }
+      if(k === 'my-progress'){ closeMyProgressScreen(); return; }
       p.setAttribute('hidden', '');
       const b = document.getElementById(k + '-btn');
       if(b) b.setAttribute('aria-expanded', 'false');
@@ -3920,7 +3926,7 @@ function focusPanel(p){
    click "did nothing" as far as the student could see. Close whichever panel
    is covering the page and scroll up so the new set is actually visible. */
 function leaveTopPanelForSet(){
-  const covering = ['games-screen', 'songs-hub-panel', 'search-panel', 'keep-practicing-panel', 'my-progress-panel']
+  const covering = ['games-screen', 'songs-hub-panel', 'search-panel', 'keep-practicing-screen', 'my-progress-screen']
     .some(id => { const el = document.getElementById(id); return el && !el.hasAttribute('hidden'); });
   if(!covering) return;
   closeTopPanels('');
@@ -4198,17 +4204,32 @@ async function searchGoSet(moduleNum, wid){
 
 /* ── 🔁 Keep practicing: every skill marked "still working on it", grouped
    by module, with a jump link back to that skill ── */
-async function toggleKeepPracticing(){
-  const p = document.getElementById('keep-practicing-panel');
-  const btn = document.getElementById('keep-practicing-btn');
-  if(!p) return;
-  const open = p.hasAttribute('hidden');
-  if(!open){ p.setAttribute('hidden', ''); if(btn) btn.setAttribute('aria-expanded', 'false'); return; }
+/* ── 🔁 Keep practicing: its own full-screen page — #keep-practicing in the
+      URL, browser Back exits (the games-screen pattern, in the site's normal
+      look). Decision + full-page treatment for My progress: 2026-07-23. ── */
+function toggleKeepPracticing(){
+  const screen = document.getElementById('keep-practicing-screen');
+  if(!screen) return;
+  if(screen.hasAttribute('hidden')) location.hash = 'keep-practicing';
+  else closeKeepPracticingScreen();
+}
+function openKeepPracticingScreen(){
+  const screen = document.getElementById('keep-practicing-screen');
+  if(!screen || !screen.hasAttribute('hidden')) return;
   closeTopPanels('keep-practicing');
-  p.removeAttribute('hidden');
+  screen.removeAttribute('hidden');
+  document.body.classList.add('page-screen-open');
+  const btn = document.getElementById('keep-practicing-btn');
   if(btn) btn.setAttribute('aria-expanded', 'true');
-  const head = `<div class="daily5-head"><span>&#x1F501; ${t('nav.keepPracticing')}</span><button type="button" class="tp-close" onclick="toggleKeepPracticing()" aria-label="${escAttr(t('kp.closeAria'))}">&#x2715;</button></div>`;
-  p.innerHTML = `${head}<div class="coach-tip">${t('kp.loading')}</div>`;
+  /* Focus follows into the dialog; kpClosePanel hands it back to the button. */
+  const exit = screen.querySelector('.page-exit');
+  if(exit) exit.focus();
+  renderKeepPracticing();
+}
+async function renderKeepPracticing(){
+  const bodyEl = document.getElementById('keep-practicing-body');
+  if(!bodyEl) return;
+  bodyEl.innerHTML = `<div class="coach-tip">${t('kp.loading')}</div>`;
   await ensureAllModuleData();
   const byModule = new Map();
   SETS.forEach(w => {
@@ -4223,11 +4244,10 @@ async function toggleKeepPracticing(){
   });
   const modNums = [...byModule.keys()].sort((a, b) => a - b);
   if(!modNums.length){
-    p.innerHTML = `${head}<div class="coach-tip">${t('kp.emptyHtml')}</div>`;
-    focusPanel(p);
+    bodyEl.innerHTML = `<div class="coach-tip">${t('kp.emptyHtml')}</div>`;
     return;
   }
-  const body = modNums.map(mn => {
+  bodyEl.innerHTML = modNums.map(mn => {
     const m = MODULE_MANIFEST.find(x => x.num === mn);
     const rows = byModule.get(mn).map(it =>
       `<button type="button" class="search-hit" onclick="searchGoSkill(${mn},'${it.wid}',${it.skillNum})">
@@ -4237,20 +4257,61 @@ async function toggleKeepPracticing(){
     return `<div class="rail-sec-label" style="margin:16px 0 6px">${t('nav.module')} ${mn}${m ? ` — ${escHtml(tf(m,'name'))}` : ''}</div>
       <div class="search-results" style="max-height:none">${rows}</div>`;
   }).join('');
-  p.innerHTML = `${head}${body}`;
-  focusPanel(p);
+}
+function closeKeepPracticingScreen(){
+  if(location.hash === '#keep-practicing'){ location.hash = ''; return; }  // hashchange finishes the job
+  kpClosePanel();
+}
+function kpClosePanel(){
+  const screen = document.getElementById('keep-practicing-screen');
+  const wasOpen = screen && !screen.hasAttribute('hidden');
+  if(screen) screen.setAttribute('hidden', '');
+  if(!document.querySelector('.page-screen:not([hidden])')) document.body.classList.remove('page-screen-open');
+  const btn = document.getElementById('keep-practicing-btn');
+  if(btn){
+    btn.setAttribute('aria-expanded', 'false');
+    if(wasOpen) btn.focus();   // return focus to where the dialog was opened
+  }
 }
 
-/* ── 📊 My progress: done/total for every module + a total mastered count ── */
+/* ── 📊 My progress: done/total for every module + a total mastered count.
+      Full-screen page like Keep practicing — #my-progress, Back exits. ── */
 function toggleMyProgress(){
-  const p = document.getElementById('my-progress-panel');
-  const btn = document.getElementById('my-progress-btn');
-  if(!p) return;
-  const open = p.hasAttribute('hidden');
-  if(!open){ p.setAttribute('hidden', ''); if(btn) btn.setAttribute('aria-expanded', 'false'); return; }
+  const screen = document.getElementById('my-progress-screen');
+  if(!screen) return;
+  if(screen.hasAttribute('hidden')) location.hash = 'my-progress';
+  else closeMyProgressScreen();
+}
+function openMyProgressScreen(){
+  const screen = document.getElementById('my-progress-screen');
+  if(!screen || !screen.hasAttribute('hidden')) return;
   closeTopPanels('my-progress');
-  p.removeAttribute('hidden');
+  screen.removeAttribute('hidden');
+  document.body.classList.add('page-screen-open');
+  const btn = document.getElementById('my-progress-btn');
   if(btn) btn.setAttribute('aria-expanded', 'true');
+  const exit = screen.querySelector('.page-exit');
+  if(exit) exit.focus();
+  renderMyProgress();
+}
+function closeMyProgressScreen(){
+  if(location.hash === '#my-progress'){ location.hash = ''; return; }  // hashchange finishes the job
+  mpClosePanel();
+}
+function mpClosePanel(){
+  const screen = document.getElementById('my-progress-screen');
+  const wasOpen = screen && !screen.hasAttribute('hidden');
+  if(screen) screen.setAttribute('hidden', '');
+  if(!document.querySelector('.page-screen:not([hidden])')) document.body.classList.remove('page-screen-open');
+  const btn = document.getElementById('my-progress-btn');
+  if(btn){
+    btn.setAttribute('aria-expanded', 'false');
+    if(wasOpen) btn.focus();
+  }
+}
+function renderMyProgress(){
+  const bodyEl = document.getElementById('my-progress-body');
+  if(!bodyEl) return;
   let totalDone = 0, totalAll = 0;
   const rows = MODULE_MANIFEST.map(m => {
     const { done, total } = moduleCompletion(m);
@@ -4261,12 +4322,19 @@ function toggleMyProgress(){
       <div class="prog-wrap"><div class="prog-row"><div class="prog-bg"><div class="prog-fill" style="width:${pct}%"></div></div><div class="prog-lbl">${done} / ${total}</div></div></div>
     </div>`;
   }).join('');
-  p.innerHTML = `<div class="daily5-head"><span>&#x1F4CA; <span data-i18n="nav.myProgress">${t('nav.myProgress')}</span></span><button type="button" class="tp-close" onclick="toggleMyProgress()" aria-label="${escAttr(t('mp.closeAria'))}" data-i18n-attr="aria-label:mp.closeAria">&#x2715;</button></div>
-    <div class="coach-tip" data-i18n="progress.skillsMastered" data-i18n-params="${escAttr(JSON.stringify({done:totalDone,total:totalAll,modules:MODULE_MANIFEST.length}))}">${t('progress.skillsMastered',{done:totalDone,total:totalAll,modules:MODULE_MANIFEST.length})}</div>
+  bodyEl.innerHTML = `<div class="coach-tip" data-i18n="progress.skillsMastered" data-i18n-params="${escAttr(JSON.stringify({done:totalDone,total:totalAll,modules:MODULE_MANIFEST.length}))}">${t('progress.skillsMastered',{done:totalDone,total:totalAll,modules:MODULE_MANIFEST.length})}</div>
     <div class="card">${rows}</div>`;
-  if(typeof applyI18n === 'function') applyI18n(p);
-  focusPanel(p);
+  if(typeof applyI18n === 'function') applyI18n(bodyEl);
 }
+
+/* Hash router for the two full-page screens (the games arcade has its own
+   listener in coach.js; its else-branch close is a safe no-op here). */
+window.addEventListener('hashchange', () => {
+  if(location.hash === '#keep-practicing') openKeepPracticingScreen();
+  else kpClosePanel();
+  if(location.hash === '#my-progress') openMyProgressScreen();
+  else mpClosePanel();
+});
 
 /* ════════════════════════════════════════════════
    Service worker — light PWA / offline resilience.

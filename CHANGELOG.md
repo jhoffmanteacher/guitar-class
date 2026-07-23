@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-23 — Keep practicing and My progress get their own pages
+
+### Changed
+- "Keep practicing" and "My progress" no longer drop over the top of the
+  module you're working in. Each opens as its own full page — like the Games
+  arcade, but in the site's normal look — with a "Back to practice" button,
+  and your browser's Back button exits too. Picking a skill from Keep
+  practicing still jumps you straight to its lesson.
+
 ## 2026-07-23 — The song list is organized now
 
 ### Changed
