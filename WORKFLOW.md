@@ -55,6 +55,17 @@
   clone. Local sessions keep the normal "push to GitHub" workflow from
   CLAUDE.md unchanged.
 
+- **Single-flow modules (new pattern, 2026-07-23).** A set whose `stations`
+  has only `b` (no `c`) renders as a SINGLE-FLOW set: one custom-labeled
+  learn tab straight into the checklist — no Station B/C framing. The tab
+  card and rail mirror the set's own labels: `tabTitle`/`tabSub` (+`_es`)
+  on `stations.b`, `checklistSub` (+`_es`) on the set; `panelFooter` routes
+  station-b → checklist; `syncRailStations` hides the Station C rail button
+  and swaps the labels. **Module 13 · String Changing** (`module-13.js`) is
+  the first single-flow module — its 4 checklist skills ARE the graded
+  in-class assessment rubric. Everything else (skills checklist, practice
+  panels, search, Keep practicing, My progress, print) works unchanged.
+
 ---
 
 ## Open work
@@ -117,6 +128,52 @@
 ---
 
 ## Recently shipped (post-archive)
+
+- [x] **Module 13 · String Changing — new single-flow module + graded
+      assessment** — built in the cloud session, applied+pushed locally via
+      patch (`539a939`, 2026-07-23). New `module-13.js`: 7-section process
+      (tools/safety → 4 verified videos → remove → seat at bridge → wind →
+      tune/stretch → assessment briefing), covering BOTH nylon **ball-end**
+      (no tie knot — the string type being purchased) and steel-string; 3
+      hand-drawn inline-SVG diagrams with EN/ES label variants; 4 checklist
+      skills = the in-class assessment rubric (safe removal · bridge
+      seating · post winding · tune-stretch-hold), each with `gotItWhen` +
+      an mc practice drill; hand-written Spanish throughout. Videos
+      oEmbed-verified: Lauren Bateman (steel), Takamine (nylon), LEARNING-
+      CHORDS (ball-end nylon), guitarraviva (Spanish, luthier). App support:
+      buildSet single-flow path, panelFooter reroute, rail sync (see
+      "Working conventions" above); `MODULE_MANIFEST` num 13 (skillCount 4);
+      `module-13.js` added to `sw.js` ASSETS. This is the last
+      FUTURE-CHANGES item — closed in the same patch.
+- [x] **Keep practicing + My progress → full-screen pages** — pushed
+      `dc2d6ef` (2026-07-23; built in the cloud session, applied+pushed
+      locally via patch). Games-screen pattern in the site's normal look:
+      `#keep-practicing` / `#my-progress` URL hashes, browser Back exits,
+      "Back to practice" button, proper dialog focus handling. Picking a
+      skill from Keep practicing still jumps to its lesson (closing the page
+      via the hash); bookmarked hashes reopen the right page after sign-in;
+      language switches re-render open pages in place with no history churn.
+- [x] **Songs hub: two-tier layout — Core card + Choice menu grouped by
+      difficulty** — pushed `5043121` (2026-07-23; built in the cloud
+      session, applied+pushed locally via patch, excluding a stale
+      `translations-review.md` hunk since that file had just been retired).
+      Core six pinned in their own card on top; Choice menu splits into
+      collapsible difficulty groups keyed to first-appearance module (First
+      riffs & single notes M1–4, 21 songs · Chord & strumming songs M5–8,
+      21 songs · Advanced M9–12, auto-hidden while empty); first group open
+      by default; headers show counts; module Focus songs keep their tag
+      inside the groups; student-request row renders last, reworded to "any
+      song that means something to **you**." 7 new `hub.*` strings EN+ES.
+- [x] **Practice-step polish trio: disclosure pills, scroll-under-header,
+      safe-handling fold removal** — pushed `5cbb316` + `ee1a5f0` +
+      `b95f1f5` (2026-07-23; built in the cloud session, applied+pushed
+      locally via patch pairs). Hint/Stuck?/Level up pills now sit in a
+      fixed row with the open panel full-width below (tab-style, one at a
+      time — the old `<details class="step-fold">` markup is gone);
+      programmatic scrolls land below the sticky header
+      (`scroll-margin-top` + a `toggleStepOpen` rAF nudge); Module 1's Safe
+      handling step dropped its redundant folds down to just the
+      instruction.
 
 - [x] **Live-site device checks, no mic needed — closed without on-device
       confirmation** (bundled from REVIEW-PLAN K-2/K-5/D-7 and the

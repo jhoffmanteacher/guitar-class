@@ -14,7 +14,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-07-23-3213fa3f51';
+const CACHE_VERSION = 'guitar-class-2026-07-23-3e4567cb6e';
 
 // Static shell — everything needed to render the practice content offline.
 const ASSETS = [
@@ -50,6 +50,7 @@ const ASSETS = [
   './module-10.js',
   './module-11.js',
   './module-12.js',
+  './module-13.js',
   './tabs/all-along-the-watchtower.html',
   './tabs/let-it-be.html',
   './tabs/luna.html',
