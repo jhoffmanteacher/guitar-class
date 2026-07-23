@@ -427,8 +427,6 @@
     'daily5.warmUp':         { en: 'Warm-up', es: 'Calentamiento' },
     'daily5.todaysDrill':    { en: 'Today’s drill', es: 'El ejercicio de hoy' },
     'daily5.fromModule':     { en: 'from Module {num}, {set}:', es: 'del Módulo {num}, {set}:' },
-    'daily5.challengeHead':  { en: 'Challenge Day! Pick ONE (all skills you already know):',
-                               es: '¡Día de reto! Elige UNO (todas son destrezas que ya conoces):' },
     'daily5.streak':         { en: '{n}-day streak', es: 'racha de {n} días' },
 
     // ── Footer "Report a problem" mailto ──

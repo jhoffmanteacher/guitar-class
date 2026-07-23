@@ -2298,26 +2298,10 @@ function buildDaily5(){
   items+=li(1,t('routine.tuneUp'),t('daily5.tuneUpBody'));
   items+=li(2,t('daily5.warmUp'),`&mdash; ${escHtml(tf(wu,'text'))}<br>${routinePlaySeq(wu,'bpm:daily5:wu')}`);
   if(pick) items+=li(2,t('daily5.todaysDrill'),`&mdash; ${t('daily5.fromModule',{num, set: tSetLabel(pick.set.label)})} ${escHtml(truncateText(stripTags(tf(pick.step,'text')),160))}<br>${routinePlaySeq(pick.step.playSeq,'bpm:daily5:drill')}`);
-  /* Challenge Day: every third day the Daily 5 offers ONE extra challenge to
-     pick from a pair — drawn ONLY from modules the student has reached, so an
-     early-module student never sees barre chords or fingerpicking. */
-  let challenge='';
-  if(doy % 3 === 0){
-    const elig=WINTER_CHALLENGE.filter(c=>c.minModule<=num);
-    if(elig.length){
-      const a=elig[doy % elig.length];
-      const b=elig.length>1 ? elig[(doy + (doy % (elig.length-1)) + 1) % elig.length] : null;
-      const opts=(b && b!==a) ? [a,b] : [a];
-      challenge=`<div class="daily5-challengeday">
-        <div class="daily5-challengeday-head">&#x1F3D4; ${t('daily5.challengeHead')}</div>
-        <ul class="daily5-challenge">${opts.map(c=>`<li>${escHtml(tf(c,'text'))}</li>`).join('')}</ul>
-      </div>`;
-    }
-  }
   const streakChip = streak.count > 1
     ? `<span class="games-card-best">&#x1F525; ${t('daily5.streak',{n:streak.count})}</span>` : '';
   return `<div class="daily5-head"><div style="display:flex;align-items:center;gap:8px"><h3 style="font:inherit;margin:0">&#x26A1; ${t('daily5.title')}</h3>${streakChip}</div><button type="button" class="tp-close" onclick="closeDaily5()" aria-label="${escAttr(t('daily5.closeAria'))}">&#x2715;</button></div>
-    <ol class="routine-list">${items}</ol>${challenge}`;
+    <ol class="routine-list">${items}</ol>`;
 }
 /* Station C's warm-up card opens the Daily 5 as a popup over the activities —
    close it and you're exactly where you left off, no scrolling to the top. */

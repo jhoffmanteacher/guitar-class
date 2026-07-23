@@ -235,9 +235,9 @@
       across modules 1–12 plus the new practice-panel UI strings —
       review tables backfilled in `translations-review.md`.
       **Remaining before Google Translate can be removed: coach.js game
-      panel contents, `WINTER_CHALLENGE` `text_es` twins in
-      config-main.js (renderer already `tf()`-ready), and the tabs/
-      Song Journey pages** — see CLAUDE.md's "Later stages."
+      panel contents and the tabs/ Song Journey pages** (the
+      `WINTER_CHALLENGE` Challenge Day feature was removed entirely
+      2026-07-23 instead of translating it) — see CLAUDE.md's "Later stages."
 - [ ] **Custom backing tracks for the six journey-page play-alongs — Jonathan
       is making them himself** (Jonathan, 2026-07-20; plan to do all six
       confirmed 2026-07-22) — every Song Journey page has a "🎵 Play along"

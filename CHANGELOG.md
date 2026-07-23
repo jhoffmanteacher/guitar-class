@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-23 — Clearer step titles + simpler Daily 5
+
+### Added
+- Every practice step now has its own short title in the checklist — like
+  "Sound setup" or "Name the 6 strings" — instead of repeating the first
+  line of the directions. Titles are hand-written in English and Spanish
+  for all 476 steps.
+
+### Changed
+- The Daily 5 no longer adds an extra "Challenge Day" pick every third day —
+  the Daily 5 is back to its core five minutes: tune-up, warm-up, and today's
+  drill, in both English and Spanish.
+
 ## 2026-07-23 — Practice everywhere: Modules 6–12 join in, the whole fretboard opens up, and the site finishes learning Spanish
 
 ### Added

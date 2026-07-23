@@ -72,26 +72,3 @@ const WARMUP_BANK = [
     text: 'Picking hand only: E then D, A then G, D then B, G then e — skip a string on every jump, alternate picking. Slow and even is better than fast and sloppy.',
     text_es: 'Solo la mano que puntea: Mi grave y luego Re, La y luego Sol, Re y luego Si, Sol y luego mi agudo — salta una cuerda en cada salto, alternando la púa. Lento y parejo es mejor que rápido y descuidado.' }
 ];
-
-// 15-day, 5-minutes-a-day challenge bridging Modules 8 → 9. Rendered inside
-// the Daily 5 panel under "On a break?" — one line per day, nothing to save.
-/* Challenge Day pool (was the 15-Day break challenge). Each entry is tagged
-   with the earliest module whose skills it uses — the Daily 5 only offers
-   challenges from modules the student has already reached. */
-const WINTER_CHALLENGE = [
-  { minModule: 1, text: 'Tune by ear from the low E, then check with the tuner.' },
-  { minModule: 5, text: 'One-minute changes: C→G. Write down your number.' },
-  { minModule: 8, text: 'Fingerpick p-i-m-a over Am for two minutes straight.' },
-  { minModule: 2, text: 'Play the Seven Nation Army riff (short repeated phrase) from memory.' },
-  { minModule: 2, text: 'Spider walk warm-up, then name the notes at every dot fret on the low E.' },
-  { minModule: 6, text: 'D-DU-UDU over G–C–D until it feels automatic.' },
-  { minModule: 5, text: 'One-minute changes: your two hardest chords. Try to beat your last number.' },
-  { minModule: 5, text: 'Play the Luna F–Am vamp (two chords repeated over and over) — two downbeat strums per bar, count “1-2”.' },
-  { minModule: 4, text: 'Pentatonic Pattern 1, ascending and descending, slow.' },
-  { minModule: 3, text: 'Power-chord riff day: Smoke on the Water or Seven Nation Army as power chords.' },
-  { minModule: 8, text: 'Fingerpick the Let It Be progression (C–G–Am–F), thumb on bass.' },
-  { minModule: 2, text: 'Read a 4-bar TAB you’ve never played (any Song Journey page, new section).' },
-  { minModule: 7, text: 'One-minute changes: barre F → C. Any number is a win.' },
-  { minModule: 2, text: 'Play along with any core-song video at 0.75× speed, full pass.' },
-  { minModule: 5, text: 'Perform one full song for someone at home. That’s the whole day.' }
-];

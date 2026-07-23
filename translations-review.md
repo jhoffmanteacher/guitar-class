@@ -428,16 +428,12 @@ is assembled from already-translated pieces (module names, "Module",
 
 ## Known gaps (not yet hand-translated — still Google-Translate-only)
 
-Down to two, both living in files outside the shell i18n layer:
+Down to one, living in a file outside the shell i18n layer:
 
 - **🎮 Games arcade panel contents** (game cards, in-game prompts and
   feedback) — built by `coach.js`, which doesn't use `t()` yet. The panel
   sits outside `.week-panel`, so the Google-Translate layer still covers
   it, same as before phase 2.
-- **Challenge Day lines in the Daily 5** — the `WINTER_CHALLENGE` entries
-  in `config-main.js` have no `text_es` twins yet. The renderer now reads
-  them through `tf(c,'text')`, so they translate the moment those twins
-  are added (a content/data edit, not a shell one).
 
 ---
 

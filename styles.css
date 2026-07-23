@@ -420,7 +420,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .daily5-break{margin-top:12px;border-top:1px solid var(--border);padding-top:10px}
 .daily5-break summary{cursor:pointer;font-size:0.875rem;font-weight:600;color:var(--text2)}
 .daily5-break-note{font-size:0.8125rem;color:var(--text3);margin:8px 0 6px}
-.daily5-challenge{font-size:0.8438rem;line-height:1.6;padding-left:22px;margin:0}
 .module-select-label{font-size:0.8125rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);white-space:nowrap}
 .module-select{font-size:0.9375rem;padding:6px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);cursor:pointer;flex:1;max-width:320px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b6b65' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 .module-select:focus{outline:none;border-color:var(--blue-text)}
@@ -1331,8 +1330,6 @@ body.games-open{overflow:hidden}
 }
 
 /* ── Challenge Day (occasional, module-gated pick-one inside the Daily 5) ── */
-.daily5-challengeday{margin-top:12px;border-top:1px solid var(--border);padding-top:10px}
-.daily5-challengeday-head{font-size:0.875rem;font-weight:700;color:var(--amber-text);margin-bottom:5px}
 
 /* ════════════════════════════════════════════════════════════════
    TAP-TARGET PASS — every control gets a ≥44px hit area (thumbs on
