@@ -5,9 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
-## 2026-07-23 — Clearer step titles + simpler Daily 5
+## 2026-07-23 — Everything in real Spanish + clearer step titles
 
 ### Added
+- The whole site now speaks real Spanish. The Games arcade and the Listening
+  Coach — every game card, in-game prompt, and report-card sentence — are
+  hand-translated, the last part of the site that still used Google's
+  automatic translation. The Google Translate widget is gone: press Español
+  and everything you see was written for this class, in both languages.
 - The six Song Journey pages are now fully hand-translated: press Español and
   every part of the page — layers, tips, the play-along notes — switches to
   real Spanish written for this class, instead of Google's automatic

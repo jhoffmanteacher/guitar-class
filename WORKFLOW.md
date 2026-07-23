@@ -234,10 +234,11 @@
       shipped) added hand-written `_es` for all 83 new practice drills
       across modules 1–12 plus the new practice-panel UI strings —
       review tables backfilled in `translations-review.md`.
-      **Remaining before Google Translate can be removed: coach.js game
-      panel contents and the tabs/ Song Journey pages** (the
-      `WINTER_CHALLENGE` Challenge Day feature was removed entirely
-      2026-07-23 instead of translating it) — see CLAUDE.md's "Later stages."
+      **DONE 2026-07-23 (same-day session): coach.js games arcade +
+      Listening Coach converted to t() (407 new keys), the six tabs/
+      Song Journey pages hand-translated via data-es, and Google
+      Translate REMOVED site-wide** (the `WINTER_CHALLENGE` Challenge
+      Day feature was removed entirely instead of translating it).
 - [ ] **Custom backing tracks for the six journey-page play-alongs — Jonathan
       is making them himself** (Jonathan, 2026-07-20; plan to do all six
       confirmed 2026-07-22) — every Song Journey page has a "🎵 Play along"

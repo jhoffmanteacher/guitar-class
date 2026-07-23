@@ -3246,31 +3246,25 @@ function toggleSkill(sid, wid, which){
 }
 
 /* ── Translate toggle ── */
-let isSpanish = false;
-// The Español button now drives TWO layers at once: our own hand-written
-// shell translations (setLang, instant, no dependency on Google) for the
-// chrome a student sees every session, and the existing Google Translate
-// flow for everything else (module/lesson content). Elements carrying
-// data-i18n/data-i18n-attr/data-i18n-html are marked translate="no" by
-// setLang's applyI18n pass, so Google Translate skips them — no double
-// translation of our own Spanish.
-function toggleTranslate(){
+// Every layer is hand-written now: the shell (i18n.js), module/lesson
+// content (_es twins read through tf()), the games arcade + Listening
+// Coach (coach.js via t()), and the Song Journey pages (data-es). The
+// Google Translate widget is gone — a language switch is just setLang(),
+// and the gc-langchange listener below refreshes the dynamic panels.
+function syncTranslateBtn(){
   const btn = document.getElementById('btn-translate');
   const lbl = document.getElementById('translate-label');
-  if(!isSpanish){
-    setLang('es');
-    const select = document.querySelector('.goog-te-combo');
-    if(select){ select.value='es'; select.dispatchEvent(new Event('change')); }
-    else { document.cookie='googtrans=/en/es; path=/'; location.reload(); return; }
-    btn.classList.add('active'); lbl.textContent='English'; isSpanish=true;
-  } else {
-    setLang('en');
-    const select = document.querySelector('.goog-te-combo');
-    if(select){ select.value='en'; select.dispatchEvent(new Event('change')); }
-    else { document.cookie='googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'; location.reload(); return; }
-    btn.classList.remove('active'); lbl.textContent='Español'; isSpanish=false;
-  }
+  const es = getLang() === 'es';
+  if(btn) btn.classList.toggle('active', es);
+  if(lbl) lbl.textContent = es ? 'English' : 'Español';
 }
+function toggleTranslate(){
+  setLang(getLang() === 'es' ? 'en' : 'es');
+  syncTranslateBtn();
+}
+// Restore the button to the saved language on load (i18n.js already
+// restored the strings themselves before app.js ran).
+document.addEventListener('DOMContentLoaded', syncTranslateBtn);
 // Shell re-renders that build strings dynamically (rebuilt on navigation,
 // not tagged with data-i18n) need an explicit refresh on a pure language
 // toggle — applyI18n's DOM walk (already run by setLang) only reaches

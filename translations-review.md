@@ -428,12 +428,10 @@ is assembled from already-translated pieces (module names, "Module",
 
 ## Known gaps (not yet hand-translated — still Google-Translate-only)
 
-Down to one, living in a file outside the shell i18n layer:
+Nothing left — the games arcade / Listening Coach (coach.js) was converted
+to `t()` keys on 2026-07-23 (see the Round 3b table at the end), and Google
+Translate is removed site-wide.
 
-- **🎮 Games arcade panel contents** (game cards, in-game prompts and
-  feedback) — built by `coach.js`, which doesn't use `t()` yet. The panel
-  sits outside `.week-panel`, so the Google-Translate layer still covers
-  it, same as before phase 2.
 
 ---
 
@@ -6752,3 +6750,420 @@ these pages.
 | journey.slow | Slow ({bpm} BPM) | Lento ({bpm} BPM) |
 | journey.rateAria | Rate this layer | Evalúa esta capa |
 | journey.playalongTitle | Play-along backing track | Pista de acompañamiento para tocar encima |
+
+
+---
+
+# Round 3b — 2026-07-23 (games arcade + Listening Coach, coach.js)
+
+All coach.js student-facing strings now render through `t()`. 407 keys:
+
+| Key | EN | ES |
+| :--- | :--- | :--- |
+| coach.close | Close | Cerrar |
+| coach.closeAria | Close Listening Coach | Cerrar el Entrenador de Escucha |
+| coach.compare | Last time: {last} — This time: {now} | La vez pasada: {last} — Esta vez: {now} |
+| coach.crit.changes.allMany | All {n} changes landed on time — the chord change no longer makes you miss the beat. | Los {n} cambios cayeron a tiempo — el cambio de acorde ya no te hace perder el tiempo. |
+| coach.crit.changes.allOne | The change landed on time — the chord change no longer makes you miss the beat. | El cambio cayó a tiempo — el cambio de acorde ya no te hace perder el tiempo. |
+| coach.crit.changes.late | The changes came in late — practice just the change: four slow beats on each chord, and start moving your fingers on beat 4. | Los cambios llegaron tarde — practica solo el cambio: cuatro tiempos lentos en cada acorde, y empieza a mover los dedos en el tiempo 4. |
+| coach.crit.changes.name | Chord changes | Cambios de acorde |
+| coach.crit.changes.nextChordFallback | the next chord | el siguiente acorde |
+| coach.crit.changes.notApplicable | No chord changes in this drill — run a Check on a chord step to light this one up. | No hay cambios de acorde en este ejercicio — haz un chequeo en un paso de acordes para activar esto. |
+| coach.crit.changes.onlyOne | Only one chord here — no changes to judge. Steady strumming is all that matters on this one. | Aquí solo hay un acorde — no hay cambios que juzgar. Lo único que importa aquí es un rasgueo estable. |
+| coach.crit.changes.some | {on} of {total} changes landed on time — the change to {to} is the one to practice by itself. | {on} de {total} cambios cayeron a tiempo — el cambio a {to} es el que hay que practicar por separado. |
+| coach.crit.completion.gapAt | You got through most of it — there was a pause around beat {beat}; that’s the spot to loop on its own. | Llegaste a la mayor parte — hubo una pausa cerca del tiempo {beat}; ese es el punto para repetir por separado. |
+| coach.crit.completion.gaps | Lots of gaps in that try — slow and smooth is better than fast and messy, every time. | Hubo muchos huecos en ese intento — lento y suave siempre es mejor que rápido y desordenado. |
+| coach.crit.completion.great | Start to finish with no stops — that’s how you build real songs. | De principio a fin sin parar — así es como se construyen canciones de verdad. |
+| coach.crit.completion.mostly | You got through most of it — a couple of hits didn’t reach the mic (quieter plucks, usually), but the run kept moving. Keep every note at the same volume. | Llegaste a la mayor parte — un par de golpes no llegaron al micrófono (notas más suaves, normalmente), pero la pasada siguió avanzando. Mantén cada nota con el mismo volumen. |
+| coach.crit.completion.name | Played it through | Lo tocaste completo |
+| coach.crit.completion.stoppedPartway | You stopped partway — make the chunk smaller: play just the first few notes cleanly, then add one more each time. | Te detuviste a medio camino — haz el fragmento más pequeño: toca solo las primeras notas con limpieza, y agrega una más cada vez. |
+| coach.crit.pitch.close | About {good} of {total} beats sounded right — you’re close; keep your eyes on the fretting hand at the tricky spot. | Cerca de {good} de {total} tiempos sonaron bien — ya casi lo tienes; fíjate en tu mano de trastear en la parte difícil. |
+| coach.crit.pitch.closeQuietChords | Every strum I heard clearly sounded right — {good} of {total} — but the mic didn’t hear the rest. That’s usually volume, not your fingers: keep every strum at the same confident level. | Cada rasgueo que escuché con claridad sonó correcto — {good} de {total} — pero el micrófono no captó el resto. Eso normalmente es volumen, no tus dedos: mantén cada rasgueo con el mismo nivel de confianza. |
+| coach.crit.pitch.closeQuietMelody | Every note I heard clearly was right — {good} of {total} — but the mic didn’t hear the rest. That’s usually volume, not your fingers: give every note the same confident pluck. | Cada nota que escuché con claridad fue correcta — {good} de {total} — pero el micrófono no captó el resto. Eso normalmente es volumen, no tus dedos: toca cada nota con la misma confianza. |
+| coach.crit.pitch.correctPerfect | {good} of {total} notes correct — a perfect run! | {good} de {total} notas correctas — ¡una pasada perfecta! |
+| coach.crit.pitch.correctWithOct | {good} of {total} notes correct ({octs} came out an octave off, which still counts). | {good} de {total} notas correctas ({octs} salieron una octava fuera, lo cual todavía cuenta). |
+| coach.crit.pitch.dimChords | I heard the strums but couldn’t make out the pitches clearly — I mostly scored your timing this round, so the beat feedback is the important part. | Escuché los rasgueos pero no pude distinguir bien las notas — esta vez califiqué sobre todo tu ritmo, así que lo importante es la retroalimentación del tiempo. |
+| coach.crit.pitch.greatChords | The chord tones rang true on {good} of {total} beats — that’s the sound we want. | Las notas del acorde sonaron bien en {good} de {total} tiempos — ese es el sonido que buscamos. |
+| coach.crit.pitch.greatQuietMelody | You played every note I heard correctly — {good} of {total}; the other {rest} didn’t reach the mic, so keep every pluck at the same confident volume. | Tocaste correctamente cada nota que escuché — {good} de {total}; las otras {rest} no llegaron al micrófono, así que mantén cada nota con el mismo volumen de confianza. |
+| coach.crit.pitch.nameChords | Right chord sound | Sonido correcto del acorde |
+| coach.crit.pitch.nameMelody | Right notes | Notas correctas |
+| coach.crit.pitch.needsChords | The mic wasn’t picking up the chord sound yet — check each finger is on its tip, then strum slowly and let the sound keep ringing. | El micrófono todavía no captaba bien el sonido del acorde — revisa que cada dedo esté en la punta, luego rasguea despacio y deja que el sonido siga sonando. |
+| coach.crit.pitch.needsMelody | I only caught {good} of {total} notes landing — drop the BPM way down and say each note name as you play it. | Solo capté {good} de {total} notas — baja mucho el BPM y di el nombre de cada nota mientras la tocas. |
+| coach.crit.pitch.needsQuietChords | What I heard clearly sounded right, but most strums didn’t reach the mic — that’s usually a volume problem. Strum every beat at the same confident level, closer to the mic. | Lo que escuché con claridad sonó bien, pero la mayoría de los rasgueos no llegaron al micrófono — eso normalmente es un problema de volumen. Rasguea cada tiempo con el mismo nivel de confianza, más cerca del micrófono. |
+| coach.crit.pitch.needsQuietMelody | The notes I heard clearly were right, but most didn’t reach the mic — that’s usually a volume problem. Pluck every note at the same confident level, closer to the mic. | Las notas que escuché con claridad fueron correctas, pero la mayoría no llegaron al micrófono — eso normalmente es un problema de volumen. Toca cada nota con el mismo nivel de confianza, más cerca del micrófono. |
+| coach.crit.pitch.quietMostAll | Most of your notes didn’t reach the mic — usually that’s uneven volume, not your fingers. Pluck every note at the same confident level, closer to the mic. | La mayoría de tus notas no llegaron al micrófono — normalmente eso es volumen desigual, no tus dedos. Toca cada nota con el mismo nivel de confianza, más cerca del micrófono. |
+| coach.crit.pitch.quietMostMany | The {good} notes I heard clearly were right, but most of your notes didn’t reach the mic — usually that’s uneven volume, not your fingers. Pluck every note at the same confident level, closer to the mic. | Las {good} notas que escuché con claridad fueron correctas, pero la mayoría de tus notas no llegaron al micrófono — normalmente eso es volumen desigual, no tus dedos. Toca cada nota con el mismo nivel de confianza, más cerca del micrófono. |
+| coach.crit.pitch.quietMostOne | The one note I heard clearly was right, but most of your notes didn’t reach the mic — usually that’s uneven volume, not your fingers. Pluck every note at the same confident level, closer to the mic. | La única nota que escuché con claridad fue correcta, pero la mayoría de tus notas no llegaron al micrófono — normalmente eso es volumen desigual, no tus dedos. Toca cada nota con el mismo nivel de confianza, más cerca del micrófono. |
+| coach.crit.pitch.wrongNote | You hit {good} of {total} — your {ordinal} note came out {heard} instead of {expected}; slow down just for that spot. | Acertaste {good} de {total} — tu {ordinal} nota salió {heard} en vez de {expected}; baja la velocidad solo en ese punto. |
+| coach.crit.tempo.name | Steady tempo | Tempo estable |
+| coach.crit.tempo.slowedDown | You slowed down — from ~{b1} to ~{b2} BPM. That’s normal! Tap your foot and follow your foot. | Bajaste el ritmo — de ~{b1} a ~{b2} BPM. ¡Eso es normal! Marca el ritmo con el pie y sigue a tu pie. |
+| coach.crit.tempo.slowedDownSlight | You slowed down a little (~{b1} to ~{b2} BPM) — totally normal; keep the count going in your head after the clicks stop. | Bajaste el ritmo un poco (~{b1} a ~{b2} BPM) — totalmente normal; sigue contando en tu cabeza cuando los clics se detengan. |
+| coach.crit.tempo.spedUp | You sped up — from ~{b1} to ~{b2} BPM. That’s normal! Tap your foot and follow your foot. | Aceleraste — de ~{b1} a ~{b2} BPM. ¡Eso es normal! Marca el ritmo con el pie y sigue a tu pie. |
+| coach.crit.tempo.spedUpSlight | You sped up a little (~{b1} to ~{b2} BPM) — totally normal; keep the count going in your head after the clicks stop. | Aceleraste un poco (~{b1} a ~{b2} BPM) — totalmente normal; sigue contando en tu cabeza cuando los clics se detengan. |
+| coach.crit.tempo.steady | You held ~{bpm} BPM steady the whole way through. | Mantuviste ~{bpm} BPM estable durante todo el recorrido. |
+| coach.crit.tempo.tooShort | Too short a try to judge tempo drift — play a longer try and this feedback will mean more. | El intento fue muy corto para juzgar cambios de tempo — toca un intento más largo y esta retroalimentación tendrá más sentido. |
+| coach.crit.tempo.unclear | I couldn’t get a clear tempo reading on that try — go again with one confident hit per beat. | No pude obtener una lectura clara del tempo en ese intento — vuelve a intentarlo con un golpe seguro por tiempo. |
+| coach.crit.timing.great | Right on time — {on} of {total} notes landed exactly on the beat. | Justo a tiempo — {on} de {total} notas cayeron exactamente en el tiempo. |
+| coach.crit.timing.leanEarly | You’re slightly early on average — keep the count-in’s speed going in your head and it’ll get steadier. | En promedio vas un poco adelantado — sigue contando en tu cabeza al ritmo de la cuenta inicial y se volverá más estable. |
+| coach.crit.timing.leanLate | You’re slightly late on average — keep the count-in’s speed going in your head and it’ll get steadier. | En promedio vas un poco retrasado — sigue contando en tu cabeza al ritmo de la cuenta inicial y se volverá más estable. |
+| coach.crit.timing.name | On the beat | En el tiempo |
+| coach.crit.timing.needsWork | The hits and the beat weren’t lining up yet — drop the BPM, tap your foot, and make the foot and the pick move together. | Los golpes y el tiempo todavía no coincidían — baja el BPM, marca el ritmo con el pie, y haz que el pie y la púa se muevan juntos. |
+| coach.crit.timing.notEnough | Not enough hits landed to judge the beat — try again and play one hit per beat, even if it’s messy. | No hubo suficientes toques para juzgar el tiempo — inténtalo de nuevo y toca un golpe por tiempo, aunque salga desordenado. |
+| coach.crit.timing.scattered | Most notes were close to the beat but scattered — count “1-2-3-4” out loud and it’ll get steadier. | La mayoría de las notas estuvieron cerca del tiempo pero dispersas — cuenta “1-2-3-4” en voz alta y se volverá más estable. |
+| coach.desc.chordsMulti | {names} — strum on every beat, 4 beats each chord, twice through | {names} — rasguea en cada tiempo, 4 tiempos por acorde, dos vueltas |
+| coach.desc.chordsOne | {names} — one strum on every beat | {names} — un rasgueo en cada tiempo |
+| coach.desc.melody | {count} notes: {list} — one note per beat | {count} notas: {list} — una nota por tiempo |
+| coach.done.button | I’m done | Ya terminé |
+| coach.foot | Listening happens right on this device — nothing is recorded or uploaded. | La escucha ocurre aquí mismo en este dispositivo — no se graba ni se sube nada. |
+| coach.interrupt.tunerTook | The tuner took over the mic — tune up, then start the check again. | El afinador tomó el micrófono — afina, y luego empieza el chequeo de nuevo. |
+| coach.lastChord | last chord — let the sound keep ringing | último acorde — deja que el sonido siga sonando |
+| coach.lastNote | last note — let it ring | última nota — déjala sonar |
+| coach.level.gettingIt | You’re getting it | Ya le vas agarrando |
+| coach.level.great | Great | Excelente |
+| coach.level.needsWork | Needs work | Necesita trabajo |
+| coach.listening.live | Listening — play now! | Escuchando — ¡toca ahora! |
+| coach.mic.denied | Mic access denied — check browser permissions, then try again. | Acceso al micrófono denegado — revisa los permisos del navegador y vuelve a intentarlo. |
+| coach.micOn | mic on | micrófono activo |
+| coach.overall.good | Good try — look how much is already green. | Buen intento — mira cuánto ya está en verde. |
+| coach.overall.great | That was great — seriously. | Eso estuvo excelente — en serio. |
+| coach.overall.practice | Good practice — every check makes the next one better. | Buena práctica — cada chequeo hace que el siguiente sea mejor. |
+| coach.paused.backgrounded | Paused — this tab went to the background, so the mic switched off. Start the check again when you’re back. | Pausado — esta pestaña pasó a segundo plano, así que el micrófono se apagó. Empieza el chequeo de nuevo cuando regreses. |
+| coach.report.couldntHearChords | I couldn’t hear that clearly — try again somewhere quieter, with the guitar closer to the mic, and strum each chord firmly. | No pude escucharlo con claridad — inténtalo de nuevo en un lugar más silencioso, con la guitarra más cerca del micrófono, y rasguea cada acorde con firmeza. |
+| coach.report.couldntHearMelody | I couldn’t hear that clearly — try again somewhere quieter, with the guitar closer to the mic, and pick each note firmly. | No pude escucharlo con claridad — inténtalo de nuevo en un lugar más silencioso, con la guitarra más cerca del micrófono, y toca cada nota con firmeza. |
+| coach.reportDone | Done | Listo |
+| coach.start | Start the check | Empezar el chequeo |
+| coach.streak | That’s {n} clean tries in a row — you’ve got this one. | Van {n} intentos limpios seguidos — ya lo tienes. |
+| coach.tabHint | One way to finger it — if the step shows a different position, use that one. | Una forma de tocarlo — si el paso muestra otra posición, usa esa. |
+| coach.target.label | You’ll play: | Vas a tocar: |
+| coach.tip.readyChords | Works best somewhere quiet, guitar close to the mic. You’ll hear 4 count-in clicks, then the click goes silent while I listen — keep counting in your head and play one strum per beat. | Funciona mejor en un lugar tranquilo, con la guitarra cerca del micrófono. Vas a escuchar 4 clics de cuenta, y luego el clic se calla mientras escucho — sigue contando en tu cabeza y toca un rasgueo por tiempo. |
+| coach.tip.readyMelody | Works best somewhere quiet, guitar close to the mic. You’ll hear 4 count-in clicks, then the click goes silent while I listen — keep counting in your head and play one note per beat. | Funciona mejor en un lugar tranquilo, con la guitarra cerca del micrófono. Vas a escuchar 4 clics de cuenta, y luego el clic se calla mientras escucho — sigue contando en tu cabeza y toca una nota por tiempo. |
+| coach.title | Listening Coach | Entrenador de Escucha |
+| coach.tryAgain | Try again | Intentar de nuevo |
+| games.cb.changeDeck | Change deck | Cambiar mazo |
+| games.cb.deck.all | Everything | Todo |
+| games.cb.deck.barre | Partial barres | Cejillas parciales |
+| games.cb.deck.open | Open chords | Acordes abiertos |
+| games.cb.deck.power | Power chords | Power chords |
+| games.cb.desc | 90 seconds, how many chord shapes can you name? No guitar needed — this one trains your eyes. | 90 segundos, ¿cuántas formas de acorde puedes nombrar? No necesitas guitarra — este entrena tus ojos. |
+| games.cb.direction | Direction | Dirección |
+| games.cb.nameIt | Name it | Nómbralo |
+| games.cb.spotIt | Spot it | Encuéntralo |
+| games.cb.startButton | Start — 90 seconds | Empezar — 90 segundos |
+| games.cb.tip | <strong>Name it</strong>: you see a chord shape, you pick its name. <strong>Spot it</strong>: you see a name, you pick the shape. Right answers build a streak — every 5 in a row is worth more points. Miss one and the right answer lights up green, then that chord comes back later. On a laptop, keys 1–4 answer. | <strong>Nómbralo</strong>: ves una forma de acorde y eliges su nombre. <strong>Encuéntralo</strong>: ves un nombre y eliges la forma. Las respuestas correctas forman una racha — cada 5 seguidas valen más puntos. Si fallas, la respuesta correcta se ilumina en verde, y ese acorde vuelve a aparecer más tarde. En una laptop, las teclas 1–4 responden. |
+| games.cb.title | Chord Blitz | Acordes relámpago |
+| games.cc.advice.great | Level up: try it 10 BPM faster. | Sube de nivel: pruébalo 10 BPM más rápido. |
+| games.cc.advice.low | That’s completely fine: drop 10 BPM — slow and smooth is better than fast and messy, every time. | Está perfectamente bien: baja 10 BPM — lento y suave siempre es mejor que rápido y desordenado. |
+| games.cc.advice.practiceWorst | Practice just {worst} on its own — {early}. | Practica solo {worst} por separado — {early}. |
+| games.cc.advice.tryAgainSteady | Try it again at this speed until it feels steady. | Inténtalo de nuevo a esta velocidad hasta que se sienta estable. |
+| games.cc.changeTooltip | {from} to {to} | {from} a {to} |
+| games.cc.desc | Change chords in time with the beat — two chords, then three, then four. Go faster each round. | Cambia de acorde al ritmo del ritmo — dos acordes, luego tres, luego cuatro. Ve más rápido cada ronda. |
+| games.cc.early.bar | start moving your fingers on beat 4 | empieza a mover los dedos en el tiempo 4 |
+| games.cc.early.beat | start moving the instant the last chord sounds | empieza a moverte en el instante en que suena el último acorde |
+| games.cc.early.half | start moving your fingers a beat early | empieza a mover los dedos un tiempo antes |
+| games.cc.group.four | 4 chords | 4 acordes |
+| games.cc.group.speedTitle | How fast the chord switches | Qué tan rápido cambia el acorde |
+| games.cc.group.three | 3 chords | 3 acordes |
+| games.cc.group.two | 2 chords — back & forth | 2 acordes — ida y vuelta |
+| games.cc.lastOne | last one! | ¡el último! |
+| games.cc.micDenied | Mic access denied — check browser permissions, then try again. | Acceso al micrófono denegado — revisa los permisos del navegador y vuelve a intentarlo. |
+| games.cc.pickDifferentLoop | Pick a different loop | Elige otra secuencia |
+| games.cc.randomFour | Random 4 | 4 al azar |
+| games.cc.randomNote | Random 4 — a fresh set of four chords is drawn each round and revealed when you press Start. | 4 al azar — se elige un nuevo grupo de cuatro acordes en cada ronda, y se revela cuando presionas Empezar. |
+| games.cc.rate.bar | Every bar | Cada compás |
+| games.cc.rate.barSub | 4 beats each | 4 tiempos cada uno |
+| games.cc.rate.beat | Every beat | Cada tiempo |
+| games.cc.rate.beatSub | one per beat | uno por tiempo |
+| games.cc.rate.half | Every 2 beats | Cada 2 tiempos |
+| games.cc.rate.halfSub | half bar | medio compás |
+| games.cc.startButton | Start — {slots} chords | Empezar — {slots} acordes |
+| games.cc.strumEveryBeat | Strum every beat — the dots show the beat | Rasguea en cada tiempo — los puntos marcan el tiempo |
+| games.cc.tip | Quiet room, guitar close to the mic. 4 count-in clicks, then <strong>strum on every beat</strong> — the chord switches {rate}, and every change is what I’m grading. The click is silent: watch the beat dots. | Cuarto tranquilo, guitarra cerca del micrófono. 4 clics de cuenta, luego <strong>rasguea en cada tiempo</strong> — el acorde cambia {rate}, y estoy calificando cada cambio. El clic queda en silencio: mira los puntos del tiempo. |
+| games.cc.tipRate.bar | each bar (one group of 4 beats) | cada compás (un grupo de 4 tiempos) |
+| games.cc.tipRate.beat | every single beat | en cada tiempo |
+| games.cc.tipRate.half | every 2 beats (twice a bar) | cada 2 tiempos (dos veces por compás) |
+| games.cc.title | Change Up | Cambio de acordes |
+| games.cc.verdict.great | {ok} of {total} changes on time — you can play at that speed now. | {ok} de {total} cambios a tiempo — ya puedes tocar a esa velocidad. |
+| games.cc.verdict.low | {ok} of {total} — this speed is too fast for now. | {ok} de {total} — esta velocidad todavía es muy rápida. |
+| games.cc.verdict.ok | {ok} of {total} changes worked. | {ok} de {total} cambios funcionaron. |
+| games.cc.verdict.okMessy | {ok} of {total} changes worked ({off} were on time but sounded messy). | {ok} de {total} cambios funcionaron ({off} llegaron a tiempo pero sonaron desordenados). |
+| games.common.again | Again at {bpm} | De nuevo a {bpm} |
+| games.common.allGames | All games | Todos los juegos |
+| games.common.atBpm | at {bpm} BPM | a {bpm} BPM |
+| games.common.best | best | mejor |
+| games.common.bestToday | best today | mejor de hoy |
+| games.common.bestTodayLabel | Best today | Mejor de hoy |
+| games.common.bestTodayValue | Best today: {value} | Mejor de hoy: {value} |
+| games.common.bpmDown10 | −10 BPM | −10 BPM |
+| games.common.bpmUp10 | +10 BPM | +10 BPM |
+| games.common.cardsAnsweredMany | {answered} cards answered — {correct} right ({acc}%). | {answered} tarjetas respondidas — {correct} correctas ({acc}%). |
+| games.common.cardsAnsweredOne | {answered} card answered — {correct} right ({acc}%). | {answered} tarjeta respondida — {correct} correcta ({acc}%). |
+| games.common.deck | Deck | Mazo |
+| games.common.inARow | {n} in a row | {n} seguidos |
+| games.common.micAccessDenied | Mic access denied — check browser permissions, then try again. | Acceso al micrófono denegado — revisa los permisos del navegador y vuelve a intentarlo. |
+| games.common.newBest | New best! Your old best today was {value}. | ¡Nuevo mejor puntaje! Tu mejor de hoy anterior era {value}. |
+| games.common.next | next: | sigue: |
+| games.common.pausedBackgrounded | Paused — this tab went to the background, so the mic switched off. Start again when you’re back. | Pausado — esta pestaña pasó a segundo plano, así que el micrófono se apagó. Empieza de nuevo cuando regreses. |
+| games.common.playAgain | Play again | Jugar de nuevo |
+| games.common.score | Score: {n} | Puntos: {n} |
+| games.common.start | Start | Empezar |
+| games.common.startingMic | Starting the mic… | Encendiendo el micrófono… |
+| games.common.stop | Stop | Detener |
+| games.fret.bestChip | best: {best}/{total} first try | mejor: {best}/{total} al primer intento |
+| games.fret.desc | Find named notes on the fretboard — the mic checks you. Five levels, from open strings to all six. | Encuentra las notas indicadas en el mástil — el micrófono te revisa. Cinco niveles, desde cuerdas al aire hasta las seis cuerdas. |
+| games.fret.done.good | Nice — you’re learning the fretboard. | Bien — estás aprendiendo el mástil. |
+| games.fret.done.great | You know the fretboard! Try a harder level. | ¡Ya conoces el mástil! Prueba un nivel más difícil. |
+| games.fret.done.keep | Every round teaches you the fretboard a little more — go again. | Cada ronda te enseña un poco más el mástil — vuelve a intentarlo. |
+| games.fret.down | down (toward the headstock — the top, where the tuning pegs are) | hacia abajo (hacia el clavijero — la parte de arriba, donde están las clavijas) |
+| games.fret.firstTry | {note} — first try! | {note} — ¡al primer intento! |
+| games.fret.gotThere | {note} — got there! | {note} — ¡ahí está! |
+| games.fret.higher | higher | más aguda |
+| games.fret.hintFar | I heard {heard} — you’re hunting {note}. Keep going! | Escuché {heard} — estás buscando {note}. ¡Sigue! |
+| games.fret.hintNearPlural | I heard {heard} — go {n} frets {dir}. | Escuché {heard} — ve {n} trastes {dir}. |
+| games.fret.hintNearSingular | I heard {heard} — go {n} fret {dir}. | Escuché {heard} — ve {n} traste {dir}. |
+| games.fret.hintOctave | That’s {heard} too — but an octave {dir}. Find it on the {string} string. | Eso también es {heard} — pero una octava {dir}. Encuéntrala en la cuerda {string}. |
+| games.fret.level.all6 | All 6 | Las 6 |
+| games.fret.level.open | Open | Al aire |
+| games.fret.listening | Listening… | Escuchando… |
+| games.fret.lower | lower | más grave |
+| games.fret.micDenied | Mic access denied — check browser permissions, then close and reopen Note Hunt. | Acceso al micrófono denegado — revisa los permisos del navegador, luego cierra y vuelve a abrir Caza de notas. |
+| games.fret.promptFind | Find {note} on the {string} string | Encuentra {note} en la cuerda {string} |
+| games.fret.promptOpen | Play the open {string} string | Toca la cuerda {string} al aire |
+| games.fret.scoreLine | {score} of {total} first try | {score} de {total} al primer intento |
+| games.fret.skip | Skip | Saltar |
+| games.fret.skipReveal | It was fret {fret} — {note} on the {string} string. | Era el traste {fret} — {note} en la cuerda {string}. |
+| games.fret.startingMic | Starting the mic… | Encendiendo el micrófono… |
+| games.fret.string.A | A | La |
+| games.fret.string.B | B | Si |
+| games.fret.string.D | D | Re |
+| games.fret.string.G | G | Sol |
+| games.fret.string.highE | high e | mi aguda |
+| games.fret.string.lowE | low E | Mi grave |
+| games.fret.title | Note Hunt | Caza de notas |
+| games.fret.up | up (toward the body — the round part) | hacia arriba (hacia el cuerpo — la parte redonda) |
+| games.fz.changeDeck | Change deck | Cambiar mazo |
+| games.fz.deck.first5 | All strings, 0–5 | Todas las cuerdas, 0–5 |
+| games.fz.deck.lowEA | Low strings (E & A) | Cuerdas graves (Mi y La) |
+| games.fz.deck.sharps | Everything | Todo |
+| games.fz.deck.to12 | Naturals to 12 | Naturales hasta el 12 |
+| games.fz.desc | A dot lights up on the fretboard — name that note before the clock runs out. Pure neck memory, no guitar needed. | Un punto se ilumina en el mástil — nombra esa nota antes de que se acabe el tiempo. Pura memoria del mástil, no necesitas guitarra. |
+| games.fz.startButton | Start — 60 seconds | Empezar — 60 segundos |
+| games.fz.tip | A dot lights up on the fretboard — a diagram of the guitar neck — and you tap that note's <strong>name</strong> from four choices. Right answers build a streak: every 5 in a row is worth more points. Miss one and the right answer lights up green, then that spot comes back later. Higher decks add more strings, more frets, and the sharps and naturals (a <strong>natural</strong> is a plain letter with no sharp; a <strong>sharp</strong>, written ♯, is the note one fret above a letter). On a laptop, keys 1–4 answer. | Un punto se ilumina en el mástil — un diagrama del mástil de la guitarra — y eliges el <strong>nombre</strong> de esa nota entre cuatro opciones. Las respuestas correctas forman una racha: cada 5 seguidas valen más puntos. Si fallas, la respuesta correcta se ilumina en verde, y ese punto vuelve a aparecer más tarde. Los mazos más avanzados agregan más cuerdas, más trastes, y los sostenidos y naturales (una <strong>natural</strong> es una letra simple sin sostenido; un <strong>sostenido</strong>, escrito ♯, es la nota un traste arriba de una letra). En una laptop, las teclas 1–4 responden. |
+| games.fz.title | Fret Zap | Trastes relámpago |
+| games.hub.sectionGuitar | Grab your guitar | Toma tu guitarra |
+| games.hub.sectionNoGuitar | No guitar needed | No necesitas guitarra |
+| games.hub.tagline | Some games listen to your guitar. Others just need your eyes and a tapping finger. | Algunos juegos escuchan tu guitarra. Otros solo necesitan tus ojos y un dedo para tocar. |
+| games.radar.advice.one | Say the pattern out loud while you strum — it really helps. | Di el patrón en voz alta mientras rasgueas — ayuda muchísimo. |
+| games.radar.advice.three | Level up: try it 5 BPM faster, or switch chords each bar on your own. | Sube de nivel: pruébalo 5 BPM más rápido, o cambia de acorde en cada compás por tu cuenta. |
+| games.radar.advice.two | One more round at this speed and it will feel easy. | Una ronda más a esta velocidad y se sentirá fácil. |
+| games.radar.advice.zero | Two easy fixes: move closer to the mic and strum a little harder, or drop 10 BPM. | Dos arreglos fáciles: acércate más al micrófono y rasguea un poco más fuerte, o baja 10 BPM. |
+| games.radar.againAtBpm | Again at {bpm} | Otra vez a {bpm} |
+| games.radar.barOfTotal | bar {bar}/{total} | compás {bar}/{total} |
+| games.radar.barTooltip | bar {n} | compás {n} |
+| games.radar.biasEarly | You strum a little early (about {ms}ms) — relax and wait for the beat. | Rasgueas un poco temprano (unos {ms}ms) — relájate y espera el tiempo. |
+| games.radar.biasLate | You strum a little late (about {ms}ms) — move with the beat. | Rasgueas un poco tarde (unos {ms}ms) — muévete con el tiempo. |
+| games.radar.changePatternButton | Change pattern | Cambiar patrón |
+| games.radar.chipExtraStrums | Extra strums {n} | Rasgueos extra {n} |
+| games.radar.chipHit | Hit {n} | Acierto {n} |
+| games.radar.chipMiss | Miss {n} | Fallo {n} |
+| games.radar.desc | Strum a real pattern on your real guitar — the mic checks your timing, not your notes. | Rasguea un patrón real en tu guitarra real — el micrófono revisa tu tiempo, no tus notas. |
+| games.radar.hint.downs | One downstrum on every beat: 1, 2, 3, 4. Count out loud — it helps your arm stay steady on the beat. | Un rasgueo hacia abajo en cada tiempo: 1, 2, 3, 4. Cuenta en voz alta — ayuda a que tu brazo se mantenga firme en el tiempo. |
+| games.radar.hint.eighths | Down on every beat, up on every "+". Your arm never stops moving. | Abajo en cada tiempo, arriba en cada "+". Tu brazo nunca deja de moverse. |
+| games.radar.hint.faithful | Down, down-up, up-down-up. On the dots your arm still swings — it just misses the strings. | Abajo, abajo-arriba, arriba-abajo-arriba. En los puntos tu brazo sigue moviéndose — solo que no toca las cuerdas. |
+| games.radar.hint.reggae | Strum only on every "+". Stay silent on the beat — count it in your head. | Rasguea solo en cada "+". Queda en silencio en el tiempo — cuéntalo en tu cabeza. |
+| games.radar.listeningStrumAlong | Listening — strum along | Escuchando — rasguea junto con el clic |
+| games.radar.newBest | New best! Your old best today was {prevBest}. | ¡Nuevo récord! Tu mejor puntaje de hoy antes era {prevBest}. |
+| games.radar.patternGroupTitle | Pattern | Patrón |
+| games.radar.startBarsButton | Start — {bars} bars | Empezar — {bars} compases |
+| games.radar.tipCountInThenStrum | 4 clicks, then strum — the click goes quiet while the mic listens. | 4 clics, y luego rasguea — el clic queda en silencio mientras el micrófono escucha. |
+| games.radar.tipHoldChord | Hold any chord you know — Em is a good choice. The radar listens to your timing, not your notes. And it hears WHEN you strum, not which way — follow the arrows with your arm anyway, they matter for the feel. | Sostén cualquier acorde que sepas — Em es una buena opción. El radar escucha tu ritmo, no tus notas. Y escucha CUÁNDO rasgueas, no en qué dirección — sigue las flechas con el brazo de todas formas, ayudan con la sensación. |
+| games.radar.tipNoClickNow | No click now — keep the count-in’s beat going with your foot. | Ahora no hay clic — sigue el tiempo de la cuenta regresiva con el pie. |
+| games.radar.tipQuietRoom | Quiet room, guitar close to the mic. 4 count-in clicks, then the click goes silent — it can’t sound while the mic listens — so keep the beat with your foot or in your head. | Cuarto silencioso, guitarra cerca del micrófono. 4 clics de cuenta regresiva, y luego el clic queda en silencio — no puede sonar mientras el micrófono escucha — así que sigue el tiempo con el pie o en tu cabeza. |
+| games.radar.title | Strum Radar | Radar de rasgueo |
+| games.radar.verdict.one | {acc}% on the beat — the pattern is starting to land. | {acc}% a tiempo — el patrón está empezando a caer en su lugar. |
+| games.radar.verdict.three | {acc}% of strums on the beat — your strumming arm is steady on real strings. | {acc}% de los rasgueos a tiempo — tu brazo de rasgueo está firme en cuerdas reales. |
+| games.radar.verdict.two | {acc}% on the beat — this pattern is almost yours. | {acc}% a tiempo — este patrón ya casi es tuyo. |
+| games.radar.verdict.zero | {acc}% — the radar barely heard the pattern. | {acc}% — el radar apenas escuchó el patrón. |
+| games.riff.advice.one | Watch one note at a time — the next one always comes in from the right. | Mira una nota a la vez — la siguiente siempre entra desde la derecha. |
+| games.riff.advice.threeMax | You own this riff at full speed. | Ya dominas este riff a toda velocidad. |
+| games.riff.advice.threeMore | Level up: the next speed level is open. | Sube de nivel: el siguiente nivel de velocidad está abierto. |
+| games.riff.advice.two | One more round at this speed and it will feel easy. | Una ronda más a esta velocidad y se sentirá fácil. |
+| games.riff.advice.zeroHearIt | That’s completely fine: press "Hear it" a few times so your ears learn the riff, then try again. | Está totalmente bien: presiona «Escuchar» varias veces para que tus oídos aprendan el riff, y luego inténtalo de nuevo. |
+| games.riff.advice.zeroSlower | That’s completely fine: drop to a slower speed level — slow and steady builds the skill. | Está totalmente bien: baja a un nivel de velocidad más lento — despacio y constante se construye la destreza. |
+| games.riff.allSongsButton | All songs | Todas las canciones |
+| games.riff.barOfTotal | bar {bar}/{total} | compás {bar}/{total} |
+| games.riff.bestPercent | Best: {pct}% | Mejor: {pct}% |
+| games.riff.biasEarly | You press a little early (about {ms}ms) — wait for the click. | Presionas un poco temprano (unos {ms}ms) — espera al clic. |
+| games.riff.biasLate | You press a little late (about {ms}ms) — move with the click. | Presionas un poco tarde (unos {ms}ms) — muévete con el clic. |
+| games.riff.chipExtraPresses | Extra presses {n} | Pulsaciones extra {n} |
+| games.riff.chipGood | Good {n} | Bien {n} |
+| games.riff.chipMiss | Miss {n} | Fallo {n} |
+| games.riff.chipPerfect | Perfect {n} | Perfecto {n} |
+| games.riff.clearToUnlock | Clear {title} at full speed to unlock | Supera {title} a velocidad completa para desbloquear |
+| games.riff.clearedTier | cleared {tier} | superado en {tier} |
+| games.riff.desc | The class songs as a falling-note game — hit the right string as the TAB scrolls, and the riff plays itself. No guitar needed. | Las canciones de la clase como un juego de notas que caen — toca la cuerda correcta mientras se desplaza el TAB, y el riff suena solo. No necesitas guitarra. |
+| games.riff.fasterButton | Faster | Más rápido |
+| games.riff.getReady | get ready… | prepárate… |
+| games.riff.hearItButton | Hear it | Escuchar |
+| games.riff.howToPlayTitle | How do you want to play it? | ¿Cómo quieres tocarlo? |
+| games.riff.longestStreak | Longest streak: {n} in a row. | Racha más larga: {n} seguidos. |
+| games.riff.modeKeysTap | Keys / tap | Teclas / toques |
+| games.riff.modeMyGuitar | My guitar | Mi guitarra |
+| games.riff.newBest | New best! Your old best today was {prevBest}. | ¡Nuevo récord! Tu mejor puntaje de hoy antes era {prevBest}. |
+| games.riff.newSongUnlocked | New song unlocked: {title}! | ¡Nueva canción desbloqueada: {title}! |
+| games.riff.newTierUnlocked | New speed level unlocked: {tier} ({bpm} BPM)! | ¡Nuevo nivel de velocidad desbloqueado: {tier} ({bpm} BPM)! |
+| games.riff.nextSongButton | Next song | Siguiente canción |
+| games.riff.noSoundMsg | Sound isn’t available in this browser, and this game needs the click. | El sonido no está disponible en este navegador, y este juego necesita el clic. |
+| games.riff.notPlayedYet | Not played yet | Todavía no jugado |
+| games.riff.slowerButton | Slower | Más lento |
+| games.riff.song.luna.hint | Luna swings in 6/8, so every click is one BIG beat — two per bar. Two notes of F, two of Am, then three high solo notes. | Luna se toca en 6/8, así que cada clic es un tiempo GRANDE — dos por compás. Dos notas de F, dos de Am, y luego tres notas agudas de solo. |
+| games.riff.song.luna.sub | The F–Am vamp in big downbeats, plus three solo notes. | El vamp F–Am en tiempos fuertes grandes, más tres notas de solo. |
+| games.riff.song.sna.hint | One note per beat, then one beat of rest at the end of each lap. Count 1-2-3-4 with the click. (This is the straight-quarter-note teaching version, to make it easy to count — the record swings it looser than that.) | Una nota por tiempo, y luego un tiempo de silencio al final de cada vuelta. Cuenta 1-2-3-4 con el clic. (Esta es la versión de enseñanza en negras rectas, para que sea fácil de contar — la grabación original la toca con más swing que esto.) |
+| games.riff.song.sna.sub | The main riff — seven notes, all on the thick low E string. | El riff principal — siete notas, todas en la cuerda Mi grave gruesa. |
+| games.riff.song.sweetchild.hint | The patience test: one note on beat 1 of each bar, then three beats of waiting while it rings. | La prueba de paciencia: una nota en el tiempo 1 de cada compás, y luego tres tiempos esperando mientras suena. |
+| games.riff.song.sweetchild.sub | Verse bass notes — one long note per bar. | Notas de bajo de la estrofa — una nota larga por compás. |
+| games.riff.song.watchtower.hint | Each number is the root note of a power chord — two beats each, so press on counts 1 and 3. | Cada número es la nota raíz de un power chord — dos tiempos cada uno, así que presiona en los conteos 1 y 3. |
+| games.riff.song.watchtower.sub | The Am–G–F–G loop as single bass notes. | El bucle Am–G–F–G como notas de bajo individuales. |
+| games.riff.speedLevelTitle | Speed level | Nivel de velocidad |
+| games.riff.startPlayItButton | Start — I’ll play it | Empezar — yo la toco |
+| games.riff.tier.full | Full speed | Velocidad completa |
+| games.riff.tier.fullCleared | full speed | velocidad completa |
+| games.riff.tier.medium | Medium | Media |
+| games.riff.tier.mediumCleared | medium speed | velocidad media |
+| games.riff.tier.slow | Slow | Lenta |
+| games.riff.tier.slowCleared | slow speed | velocidad lenta |
+| games.riff.tipHowToPlay | Fret numbers slide along the strings toward the purple line — press that string’s key (1–6), or tap its line, right as each number crosses. Every hit plays the real note, so a clean run IS the riff. | Los números de traste se deslizan por las cuerdas hacia la línea morada — presiona la tecla de esa cuerda (1–6), o toca su línea, justo cuando cada número la cruce. Cada acierto toca la nota real, así que una pasada limpia ES el riff. |
+| games.riff.tipKeysLegend | Keys: 1 = thin high e (top line) … 6 = thick low E (bottom line). On a phone, tap the string’s line instead. 4 clicks count you in. | Teclas: 1 = mi aguda fina (línea superior) … 6 = Mi grave gruesa (línea inferior). En un teléfono, toca la línea de la cuerda en su lugar. 4 clics de cuenta regresiva antes de empezar. |
+| games.riff.tipPlayOnRealGuitar | Now play it on your real guitar — open the song’s Journey page for the TAB. | Ahora tócalo en tu guitarra real — abre la página del Recorrido de la canción para ver el TAB. |
+| games.riff.tipPressString | Press the string’s key (1–6) or tap its line as each number crosses the purple line. | Presiona la tecla de la cuerda (1–6) o toca su línea cuando cada número cruce la línea morada. |
+| games.riff.tipUnlockNext | Score 90% or better at one speed level to unlock the next. | Consigue 90% o más en un nivel de velocidad para desbloquear el siguiente. |
+| games.riff.title | Riff Runner | Corredor de riffs |
+| games.riff.verdict.one | {acc}% on time — you are starting to catch the notes. | {acc}% a tiempo — estás empezando a agarrar las notas. |
+| games.riff.verdict.three | {acc}% on time — that was the real riff, played clean. | {acc}% a tiempo — ese fue el riff real, tocado limpio. |
+| games.riff.verdict.two | {acc}% on time — the riff is really taking shape. | {acc}% a tiempo — el riff realmente está tomando forma. |
+| games.riff.verdict.zero | {acc}% — this speed is too fast for now. | {acc}% — esta velocidad es demasiado rápida por ahora. |
+| games.rr.card01 | Strum all 6 strings slowly with your thumb, one strum per click. Make every strum soft and even. | Rasguea las 6 cuerdas despacio con el pulgar, un rasgueo por clic. Que cada rasgueo sea suave y parejo. |
+| games.rr.card02 | Pluck only the A string (5th string) 8 times, counting "1-2-3-4, 1-2-3-4" out loud. | Pulsa solo la cuerda La (la 5.ª cuerda) 8 veces, contando en voz alta «1-2-3-4, 1-2-3-4». |
+| games.rr.card03 | Say the string names from thickest to thinnest — E, A, D, G, B, E — and pluck each string as you say it. Do the whole trip 3 times. | Di los nombres de las cuerdas de la más gruesa a la más fina — Mi, La, Re, Sol, Si, Mi — y pulsa cada cuerda mientras la dices. Haz el recorrido completo 3 veces. |
+| games.rr.card04 | Pluck the low E string (the thickest one) 4 times, then the A string 4 times, then D, then G. Stay with the click. | Pulsa la cuerda Mi grave (la más gruesa) 4 veces, luego la cuerda La 4 veces, luego Re, luego Sol. Sigue el clic. |
+| games.rr.card05 | On the low E string, play frets 0-1-2-3 going up, then 3-2-1-0 coming back. One note per click, over and over. | En la cuerda Mi grave, toca los trastes 0-1-2-3 subiendo, y luego 3-2-1-0 bajando. Una nota por clic, una y otra vez. |
+| games.rr.card06 | Find G on the low E string (fret 3) and play it 5 times. Let every note ring — no buzz. | Busca el Sol en la cuerda Mi grave (traste 3) y tócalo 5 veces. Deja que cada nota suene limpia — sin zumbido. |
+| games.rr.card07 | Walk E-F-G on the low E string (open, fret 1, fret 3) up and back, one note per click. | Camina Mi-Fa-Sol en la cuerda Mi grave (al aire, traste 1, traste 3) subiendo y bajando, una nota por clic. |
+| games.rr.card08 | On the A string, play A-B-C (open, fret 2, fret 3) up and back, one note per click. | En la cuerda La, toca La-Si-Do (al aire, traste 2, traste 3) subiendo y bajando, una nota por clic. |
+| games.rr.card09 | Play E5 for 4 clicks, then A5 for 4 clicks. Keep switching until the timer ends. | Toca E5 durante 4 clics, luego A5 durante 4 clics. Sigue cambiando hasta que termine el tiempo. |
+| games.rr.card10 | Palm mute E5 (rest the side of your strumming hand on the strings, right by the bridge) and play 8 short chugs per group of 4 clicks. | Con palm mute en E5 (apoya el borde de tu mano de rasgueo sobre las cuerdas, justo junto al puente) toca 8 chugs cortos por cada grupo de 4 clics. |
+| games.rr.card11 | Play the Seven Nation Army riff 4 times in a row without stopping. Stay with the click. | Toca el riff de Seven Nation Army 4 veces seguidas sin parar. Sigue el clic. |
+| games.rr.card12 | Power-chord ladder: E5 → G5 → A5, one strum each, 2 clicks per chord — then come back down. | Escalera de power chords: E5 → G5 → A5, un rasgueo cada uno, 2 clics por acorde — y luego baja de regreso. |
+| games.rr.card13 | Play minor pentatonic Pattern 1 going up, one note per click. Strict alternate picking: down-up-down-up. | Toca el Patrón 1 de la pentatónica menor subiendo, una nota por clic. Púa alterna estricta: abajo-arriba-abajo-arriba. |
+| games.rr.card14 | Loop the first 4 notes of Pattern 1 with alternate picking. Keep the down-up motion steady the whole time. | Repite en bucle las primeras 4 notas del Patrón 1 con púa alterna. Mantén el movimiento abajo-arriba constante todo el tiempo. |
+| games.rr.card15 | Play Pattern 1 up AND back down without stopping. Miss a note? Keep going — do not restart. | Toca el Patrón 1 subiendo Y bajando sin parar. ¿Te equivocas en una nota? Sigue adelante — no reinicies. |
+| games.rr.card16 | Em to Am, one strum each: switch as many times as you can. Count your clean changes out loud. | Em a Am, un rasgueo cada uno: cambia tantas veces como puedas. Cuenta en voz alta tus cambios limpios. |
+| games.rr.card17 | G to C, one strum each: switch as many times as you can before the timer ends. | G a C, un rasgueo cada uno: cambia tantas veces como puedas antes de que termine el tiempo. |
+| games.rr.card18 | Loop Em → C → G with 4 downstrums on each chord. Strum on the click. | Repite en bucle Em → C → G con 4 rasgueos hacia abajo en cada acorde. Rasguea con el clic. |
+| games.rr.card19 | Simplified F chord: press it, strum once, lift your whole hand off, put it back. Repeat until the timer ends. | Acorde de F simplificado: pisa el acorde, rasguea una vez, levanta toda la mano, y vuelve a ponerla. Repite hasta que termine el tiempo. |
+| games.rr.card20 | Strum D-DU-UDU on Em, over and over. Your hand keeps swinging on the skips — it just misses the strings. | Rasguea D-DU-UDU en Em, una y otra vez. Tu mano sigue moviéndose en los saltos — solo que no toca las cuerdas. |
+| games.rr.card21 | Reggae chop on Em: upstrums only, on every "+" between the clicks. Stay silent on the beat itself. | Picoteo reggae en Em: solo rasgueos hacia arriba, en cada «+» entre los clics. Queda en silencio justo en el tiempo. |
+| games.rr.card22 | G to C with down-up eighths: D-U-D-U-D-U-D-U on each chord, then switch chords without stopping your hand. | G a C con corcheas abajo-arriba: D-U-D-U-D-U-D-U en cada acorde, y cambia de acorde sin detener la mano. |
+| games.rr.card23 | Bm to Am, one strum each, switching every 4 clicks. Use the small Bm (top 4 strings only). | Bm a Am, un rasgueo cada uno, cambiando cada 4 clics. Usa el Bm pequeño (solo las 4 cuerdas superiores). |
+| games.rr.card24 | Full F barre chord: press, strum once, hold for about 4 seconds, then relax your hand completely. Repeat until the timer ends. | Cejilla completa de F: pisa, rasguea una vez, sostén unos 4 segundos, y luego relaja la mano por completo. Repite hasta que termine el tiempo. |
+| games.rr.card25 | Make the E-shape barre at fret 1 (that is F), then slide the whole shape up 3 frets and back, strumming once at each stop. | Haz la cejilla en forma de E en el traste 1 (eso es F), y luego desliza toda la forma 3 trastes hacia arriba y de regreso, rasgueando una vez en cada parada. |
+| games.rr.card26 | Fingerpick Am: thumb plays string 5, then your first, second, and third fingers play strings 3, 2, 1 — one at a time, one note per click. | Fingerpicking en Am: el pulgar toca la cuerda 5, y luego tus dedos índice, medio y anular tocan las cuerdas 3, 2, 1 — uno a la vez, una nota por clic. |
+| games.rr.card27 | Hold Em and let your thumb walk: string 6, string 4, string 6, string 4 — one pluck per click, steady like a heartbeat. | Sostén Em y deja que tu pulgar camine: cuerda 6, cuerda 4, cuerda 6, cuerda 4 — un pulso por clic, constante como un latido. |
+| games.rr.card28 | Pick a dot fret — 3, 5, 7, or 9. Pluck that fret on all 6 strings, thickest to thinnest, saying each note’s name out loud as you go. Made the trip? Pick a new dot fret and go again. | Elige un traste marcado — 3, 5, 7 o 9. Pulsa ese traste en las 6 cuerdas, de la más gruesa a la más fina, diciendo en voz alta el nombre de cada nota. ¿Terminaste el recorrido? Elige otro traste marcado y hazlo de nuevo. |
+| games.rr.card29 | Play the first four notes of the Seven Nation Army riff, then say each one the way you’d write it in TAB — string, then fret (like “A string, fret 7”). Play it once more to check yourself. | Toca las primeras cuatro notas del riff de Seven Nation Army, y luego di cada una como la escribirías en TAB — cuerda, luego traste (como «cuerda La, traste 7»). Tócalo una vez más para comprobarte. |
+| games.rr.card30 | Build a major scale up the low E string starting at fret 3 (that’s G) with the recipe W-W-H-W-W-W-H — a whole step (W) is 2 frets, a half step (H) is 1. One note per click. | Construye una escala mayor subiendo por la cuerda Mi grave desde el traste 3 (eso es Sol) con la receta T-T-S-T-T-T-S — un tono (T) son 2 trastes, un semitono (S) es 1. Una nota por clic. |
+| games.rr.card31 | Play minor pentatonic box 1 at fret 5, up and back, one note per click. Then say the key (A minor) and its relative major — the major key that shares its notes, 3 frets up (C). | Toca la caja 1 de la pentatónica menor en el traste 5, subiendo y bajando, una nota por clic. Luego di la tonalidad (La menor) y su relativa mayor — la tonalidad mayor que comparte sus notas, 3 trastes más arriba (Do). |
+| games.rr.card32 | Say the chord family of C major out loud — C, Dm, Em, F, G, Am — then strum the I, IV, and V (C, F, G) once each. A chord family = the main chords built from a key’s own notes. | Di en voz alta la familia de acordes de Do mayor — C, Dm, Em, F, G, Am — y luego rasguea el I, el IV y el V (C, F, G) una vez cada uno. Una familia de acordes = los acordes principales construidos con las notas propias de una tonalidad. |
+| games.rr.card33 | Fret a C chord and let your thumb walk: alternate between the A string and the D string, one bass note per click, without stopping. That steady thumb is the engine of Travis picking. | Pisa un acorde de C y deja que tu pulgar camine: alterna entre la cuerda La y la cuerda Re, una nota de bajo por clic, sin parar. Ese pulgar constante es el motor del Travis picking. |
+| games.rr.card34 | Play anything you have learned, without stopping, until the timer ends. Mess up? Keep going anyway. | Toca cualquier cosa que hayas aprendido, sin parar, hasta que termine el tiempo. ¿Te equivocas? Sigue adelante de todas formas. |
+| games.rr.card35 | Eyes closed: play one note or one chord you know 8 times, by feel only. | Con los ojos cerrados: toca una nota o un acorde que ya sepas 8 veces, solo guiándote por el tacto. |
+| games.rr.card36 | Stand up and play anything you know until the timer ends. Standing changes how the guitar sits — go slower if you need to. | Ponte de pie y toca lo que sepas hasta que termine el tiempo. Estar de pie cambia cómo se acomoda la guitarra — ve más despacio si lo necesitas. |
+| games.rr.card37 | Whisper mode: play anything you know as SOFTLY as you can. Quiet takes more control than loud. | Modo susurro: toca lo que sepas lo MÁS SUAVE posible. Tocar bajito requiere más control que tocar fuerte. |
+| games.rr.chipCardsOfThree | {n} of 3 cards | {n} de 3 cartas |
+| games.rr.chipPointsToday | {n} points today | {n} puntos hoy |
+| games.rr.clickAtBpm | click at {bpm} BPM | clic a {bpm} BPM |
+| games.rr.desc | Spin for a short real-guitar challenge matched to what you’ve learned so far. Score yourself honestly — you are the judge. | Gira para un reto corto de guitarra real, según lo que ya has aprendido. Califícate con honestidad — tú eres el juez. |
+| games.rr.doneBanner | Today’s set is done — {pts} points. Extra spins still count. | La unidad de hoy está lista — {pts} puntos. Los giros extra todavía cuentan. |
+| games.rr.doublePoints | Double points | Puntos dobles |
+| games.rr.playUntilTimer | Play until the timer ends — you score it yourself after. | Toca hasta que termine el tiempo — luego te calificas tú mismo. |
+| games.rr.pointsToday | {n} points today | {n} puntos hoy |
+| games.rr.scoreAlmostLabel | Almost | Casi |
+| games.rr.scoreAlmostSub | +{n} — this card comes back later | +{n} — esta carta vuelve más tarde |
+| games.rr.scoreGotLabel | Got it | Lo logré |
+| games.rr.scoreNotYetLabel | Not yet | Todavía no |
+| games.rr.scoreNotYetSub | +0 — that is okay, try this card another day | +0 — está bien, prueba esta carta otro día |
+| games.rr.scorePointsSuffix | +{n} points | +{n} puntos |
+| games.rr.scorePrompt | How did it go? Score yourself honestly — honest answers help you get better faster. | ¿Cómo te fue? Califícate con honestidad — las respuestas honestas te ayudan a mejorar más rápido. |
+| games.rr.secondsLabel | {n} seconds | {n} segundos |
+| games.rr.skipCardButton | Skip this card ({n} left today) | Saltar esta carta (quedan {n} hoy) |
+| games.rr.spinButton | SPIN | GIRAR |
+| games.rr.streakChip | {n}-day streak | racha de {n} días |
+| games.rr.streakDays | {n}-day streak | racha de {n} días |
+| games.rr.streakStartedToday | streak started today | racha empezada hoy |
+| games.rr.tagline | Spin. Do the card for real, on your guitar. Score yourself honestly. | Gira. Haz la carta de verdad, en tu guitarra. Califícate con honestidad. |
+| games.rr.timeUp | Time! | ¡Se acabó el tiempo! |
+| games.rr.title | Riff Roulette | Ruleta de riffs |
+| games.sh.advice.one | Say the pattern out loud while you tap: it really helps. | Di el patrón en voz alta mientras tocas: ayuda muchísimo. |
+| games.sh.advice.three | Level up: try it 10 BPM faster. | Sube de nivel: pruébalo 10 BPM más rápido. |
+| games.sh.advice.two | One more round at this speed and it will feel easy. | Una ronda más a esta velocidad y se sentirá fácil. |
+| games.sh.advice.zero | That’s completely fine: drop 10 BPM — slow and steady builds the skill. | Está totalmente bien: baja 10 BPM — despacio y constante se construye la destreza. |
+| games.sh.againAtBpm | Again at {bpm} | Otra vez a {bpm} |
+| games.sh.barOfTotal | bar {bar}/{total} | compás {bar}/{total} |
+| games.sh.biasEarly | You tap a little early (about {ms}ms) — wait for the click. | Tocas un poco temprano (unos {ms}ms) — espera al clic. |
+| games.sh.biasLate | You tap a little late (about {ms}ms) — move with the click. | Tocas un poco tarde (unos {ms}ms) — muévete con el clic. |
+| games.sh.changePatternButton | Change pattern | Cambiar patrón |
+| games.sh.chipExtraTaps | Extra taps {n} | Toques extra {n} |
+| games.sh.chipGood | Good {n} | Bien {n} |
+| games.sh.chipMiss | Miss {n} | Fallo {n} |
+| games.sh.chipPerfect | Perfect {n} | Perfecto {n} |
+| games.sh.desc | Tap the strums in time — down-up arrows on a scrolling lane. Your rhythm, graded. | Marca los rasgueos a tiempo — flechas de abajo y arriba en un carril que se desplaza. Tu ritmo, calificado. |
+| games.sh.getReady | get ready… | prepárate… |
+| games.sh.longestStreak | Longest streak: {n} in a row. | Racha más larga: {n} seguidos. |
+| games.sh.newBest | New best! Your old best today was {prevBest}. | ¡Nuevo récord! Tu mejor puntaje de hoy antes era {prevBest}. |
+| games.sh.noSoundMsg | Sound isn’t available in this browser, and this game needs the click. | El sonido no está disponible en este navegador, y este juego necesita el clic. |
+| games.sh.pattern.downs.hint | One downstrum on every beat: 1, 2, 3, 4. Count along with the click. | Un rasgueo hacia abajo en cada tiempo: 1, 2, 3, 4. Cuenta junto con el clic. |
+| games.sh.pattern.downs.label | All downstrums | Solo rasgueos hacia abajo |
+| games.sh.pattern.eighths.hint | Down on every beat, up on every "+". Your hand never stops moving. | Abajo en cada tiempo, arriba en cada "+". Tu mano nunca deja de moverse. |
+| games.sh.pattern.eighths.label | Down-up eighths | Corcheas abajo-arriba |
+| games.sh.pattern.faithful.hint | Down, down-up, up-down-up. On the dots your hand still swings — it just misses the strings. | Abajo, abajo-arriba, arriba-abajo-arriba. En los puntos tu mano sigue moviéndose — solo que no toca las cuerdas. |
+| games.sh.pattern.faithful.label | Old Faithful (D-DU-UDU) | Old Faithful (D-DU-UDU) |
+| games.sh.pattern.reggae.hint | Upstrums only, on every "+". Stay silent on the beat — the click plays it for you. | Solo rasgueos hacia arriba, en cada "+". Queda en silencio en el tiempo — el clic lo marca por ti. |
+| games.sh.pattern.reggae.label | Reggae chop | Picoteo reggae |
+| games.sh.patternGroupTitle | Pattern | Patrón |
+| games.sh.startBarsButton | Start — {bars} bars | Empezar — {bars} compases |
+| games.sh.tapPadLabel | TAP | TOCA |
+| games.sh.tapPadSub | or press the spacebar | o presiona la barra espaciadora |
+| games.sh.tipArrows | Arrows slide toward the line — tap right when each arrow reaches it. Tap the big pad, or press the spacebar. &#x2193; is a downstrum, &#x2191; is an upstrum. 4 clicks count you in. | Las flechas se deslizan hacia la línea — toca justo cuando cada flecha la alcance. Toca el botón grande, o presiona la barra espaciadora. &#x2193; es un rasgueo hacia abajo, &#x2191; es un rasgueo hacia arriba. 4 clics de cuenta regresiva antes de empezar. |
+| games.sh.title | Strum Hero | Héroe del rasgueo |
+| games.sh.verdict.one | {acc}% on time — keep going, the pattern is starting to land on the beat. | {acc}% a tiempo — sigue así, el patrón está empezando a caer en el tiempo. |
+| games.sh.verdict.three | {acc}% on time — your strumming hand keeps a steady beat. | {acc}% a tiempo — tu mano de rasgueo mantiene un ritmo firme. |
+| games.sh.verdict.two | {acc}% on time — this pattern is almost yours. | {acc}% a tiempo — este patrón ya casi es tuyo. |
+| games.sh.verdict.zero | {acc}% on time — this speed is too fast for now. | {acc}% a tiempo — esta velocidad es demasiado rápida por ahora. |
+| games.wait.advice.allFirstTry | Play it again, or open the song’s Journey page and try it on the real guitar. | Tócalo de nuevo, o abre la página del Recorrido de la canción e inténtalo en la guitarra real. |
+| games.wait.advice.allPlayed | Run it again — first-try notes should climb each time. | Hazlo de nuevo — las notas al primer intento deberían subir cada vez. |
+| games.wait.advice.partial | No rush — go again, the tab waits for each note. | Sin prisa — inténtalo de nuevo, el tab espera cada nota. |
+| games.wait.modeButton | Mode | Modo |
+| games.wait.modeDescriptionHtml | <strong>Wait Mode:</strong> play the riff’s notes in order, at your own pace — no clock, no rush. The mic listens for the right note before the tab moves on to the next one. Play into your device’s mic somewhere quiet. | <strong>Modo espera:</strong> toca las notas del riff en orden, a tu propio ritmo — sin reloj, sin prisa. El micrófono escucha la nota correcta antes de que el tab pase a la siguiente. Toca frente al micrófono de tu dispositivo en un lugar silencioso. |
+| games.wait.nearFarOff | Heard {heard} — you’re after {target}. Keep hunting! | Escuché {heard} — buscas {target}. ¡Sigue buscando! |
+| games.wait.nearFretDownPlural | Heard {heard} — go {n} frets down (toward the headstock). | Escuché {heard} — muévete {n} trastes hacia abajo (hacia el clavijero). |
+| games.wait.nearFretDownSingular | Heard {heard} — go {n} fret down (toward the headstock). | Escuché {heard} — muévete {n} traste hacia abajo (hacia el clavijero). |
+| games.wait.nearFretUpPlural | Heard {heard} — go {n} frets up (toward the body). | Escuché {heard} — muévete {n} trastes hacia arriba (hacia el cuerpo). |
+| games.wait.nearFretUpSingular | Heard {heard} — go {n} fret up (toward the body). | Escuché {heard} — muévete {n} traste hacia arriba (hacia el cuerpo). |
+| games.wait.noteOfTotal | Note {n} of {total} | Nota {n} de {total} |
+| games.wait.octaveHigh | That’s the right note, but an octave high. Play it on the {where}. | Es la nota correcta, pero una octava más aguda. Tócala en la {where}. |
+| games.wait.octaveLow | That’s the right note, but an octave low. Play it on the {where}. | Es la nota correcta, pero una octava más grave. Tócala en la {where}. |
+| games.wait.pausedBackground | Paused — this tab went to the background, so the mic switched off. Start again when you’re back. | Pausado — esta pestaña pasó a segundo plano, así que el micrófono se apagó. Empieza de nuevo cuando regreses. |
+| games.wait.playAgainButton | Play it again | Tocarlo de nuevo |
+| games.wait.playNoteHtml | Play <strong>{note}</strong> | Toca <strong>{note}</strong> |
+| games.wait.playWheneverReady | Play whenever you’re ready | Toca cuando estés listo |
+| games.wait.skipNoteButton | Skip this note | Saltar esta nota |
+| games.wait.string.a | A | La |
+| games.wait.string.b | B | Si |
+| games.wait.string.d | D | Re |
+| games.wait.string.g | G | Sol |
+| games.wait.string.highE | high e | mi aguda |
+| games.wait.string.lowE | low E | Mi grave |
+| games.wait.stringFret | {string} string, fret {fret} | cuerda {string}, traste {fret} |
+| games.wait.stringOpen | {string} string, open | cuerda {string}, al aire |
+| games.wait.verdict.allFirstTry | Every note, first try — clean run through the riff. | Cada nota, al primer intento — pasada limpia por todo el riff. |
+| games.wait.verdict.allPlayed | You played the whole riff — {first} of {total} on the first try. | Tocaste todo el riff — {first} de {total} al primer intento. |
+| games.wait.verdict.partial | You played {played} of {total} notes. | Tocaste {played} de {total} notas. |
