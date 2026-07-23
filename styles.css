@@ -1097,18 +1097,18 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 .tab-note-btn.beat-now{background:var(--blue-text);color:#fff;border-color:var(--blue-text)}
 .tab-note-btn.beat-now .tab-spkr{color:#fff}
 
-/* ── Tier 3: one-thing-per-screen — supporting prose folds behind a tap ── */
-.step-fold{margin-top:8px}
-.step-fold summary{cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:0.8438rem;font-weight:600;color:var(--text2);padding:5px 12px;border:1px solid var(--border);border-radius:14px;background:var(--bg2);user-select:none;list-style:none}
-.step-fold summary::-webkit-details-marker{display:none}
-.step-fold summary::before{content:'▸';font-size:0.75rem;transition:transform .15s}
-.step-fold[open] summary::before{transform:rotate(90deg)}
-.step-fold summary:hover{color:var(--text);border-color:var(--text2)}
-.step-fold[open]{margin-bottom:4px}
-.step-fold > :not(summary){margin-top:6px}
-/* Hint / Stuck? / Level up sit side by side so a student can scan all three at once. */
-.step-folds{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px;margin-top:8px}
-.step-folds .step-fold{margin-top:0}
+/* ── Tier 3: one-thing-per-screen — supporting prose folds behind a tap.
+   Hint / Stuck? / Level up pills sit side by side in a FIXED row; the open
+   pill's panel drops in full-width BELOW the row (one open at a time), so
+   expanding a panel never shoves the other pills onto a new line. ── */
+.step-folds{margin-top:8px}
+.step-folds-row{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px}
+.step-fold-pill{cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:0.8438rem;font-weight:600;font-family:inherit;line-height:inherit;color:var(--text2);padding:5px 12px;border:1px solid var(--border);border-radius:14px;background:var(--bg2);user-select:none}
+.step-fold-pill::before{content:'▸';font-size:0.75rem;transition:transform .15s}
+.step-fold-pill[aria-expanded="true"]::before{transform:rotate(90deg)}
+.step-fold-pill:hover,.step-fold-pill[aria-expanded="true"]{color:var(--text);border-color:var(--text2)}
+.step-fold-panel{margin-top:6px}
+.step-fold-panel[hidden]{display:none}
 
 /* ── Station C warm-up slot: Daily 5 pointer (replaces the generic tuning section) ── */
 .daily5-inline{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px 14px;font-size:0.875rem;color:var(--text2);line-height:1.55}
@@ -1355,10 +1355,10 @@ body.games-open{overflow:hidden}
 /* Overlay hit area, capped at 36px tall — controls that sit inline with text
    or in tight rows, where a full 44px halo would swallow neighbors' taps */
 .song-vid-btn,.play-seq-btn,.coach-btn,.step-done-btn,.sh-mod-btn,.sk-toggle,
-.sk-where-btn,.mr-review-link,.st-note-link,.sk-practice-btn,.rp-trigger,.step-fold summary{position:relative}
+.sk-where-btn,.mr-review-link,.st-note-link,.sk-practice-btn,.rp-trigger,.step-fold-pill{position:relative}
 .song-vid-btn::after,.play-seq-btn::after,.coach-btn::after,.step-done-btn::after,
 .sh-mod-btn::after,.sk-toggle::after,.sk-where-btn::after,.mr-review-link::after,
-.st-note-link::after,.sk-practice-btn::after,.rp-trigger::after,.step-fold summary::after{
+.st-note-link::after,.sk-practice-btn::after,.rp-trigger::after,.step-fold-pill::after{
   content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   width:max(100%,44px);height:max(100%,36px)}
 

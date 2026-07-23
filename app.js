@@ -1786,17 +1786,33 @@ function switchTab(el,wid,tab){
    checklist tabs and all on-screen chrome — so this just fires the dialog. */
 function printSet(wid){ window.print(); }
 /* Printed handouts must show the collapsed hint/stuck/level-up prose —
-   closed <details> hide their content from print, so open them for the
-   print pass and restore afterwards. */
+   hidden fold panels don't print, so unhide them for the print pass and
+   restore afterwards. */
 let _printOpened = [];
 window.addEventListener('beforeprint', ()=>{
-  _printOpened = [...document.querySelectorAll('details.step-fold:not([open])')];
-  _printOpened.forEach(d=>d.setAttribute('open',''));
+  _printOpened = [...document.querySelectorAll('.step-fold-panel[hidden]')];
+  _printOpened.forEach(d=>d.removeAttribute('hidden'));
 });
 window.addEventListener('afterprint', ()=>{
-  _printOpened.forEach(d=>d.removeAttribute('open'));
+  _printOpened.forEach(d=>d.setAttribute('hidden',''));
   _printOpened = [];
 });
+
+/* Hint / Stuck? / Level up pill tapped: open that pill's panel full-width
+   below the pill row. Tab-style — one panel open at a time, tapping the
+   open pill closes it (Jonathan's call, 2026-07-23). */
+function toggleStepFold(btn){
+  const wrap = btn.closest('.step-folds');
+  const panel = document.getElementById(btn.getAttribute('aria-controls'));
+  if(!wrap || !panel) return;
+  const willOpen = panel.hasAttribute('hidden');
+  wrap.querySelectorAll('.step-fold-pill').forEach(p=>p.setAttribute('aria-expanded','false'));
+  wrap.querySelectorAll('.step-fold-panel').forEach(p=>p.setAttribute('hidden',''));
+  if(willOpen){
+    panel.removeAttribute('hidden');
+    btn.setAttribute('aria-expanded','true');
+  }
+}
 
 /* ── Stations ── */
 function buildStations(w, stationId){
@@ -1813,19 +1829,26 @@ function buildStations(w, stationId){
     });
     /* One-thing-per-screen: the challenge text and the DOER (play buttons,
        diagrams, TAB, responses) stay visible; supporting prose (hint, stuck,
-       level-up) collapses behind native <details> — one tap away, never
-       competing with the thing the student is supposed to do. */
-    const hintFold = s.hint ? (()=>{
+       level-up) collapses behind a tap — never competing with the thing the
+       student is supposed to do. The three pills sit in a FIXED row and the
+       tapped pill's panel opens full-width BELOW the row (one at a time), so
+       opening a panel never reflows the pills (fix approved 2026-07-23). */
+    const folds = [];
+    if(s.hint){
       const hint = tf(s,'hint');
       const bullets = hint.split(/(?<=\.(?=\s))(?=\s*[A-Z])|\n/).map(b=>b.trim()).filter(Boolean);
       const inner = bullets.length <= 1 ? `<div class="sh">${hint}</div>`
         : `<ul class="sh-list">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
-      return `<details class="step-fold step-hint-fold"><summary>&#x1F4A1; ${t('step.hint')}</summary>${inner}</details>`;
+      folds.push({key:'hint', icon:'&#x1F4A1;', label:t('step.hint'), body:inner});
+    }
+    if(s.stuck) folds.push({key:'stuck', icon:'&#x1FA9C;', label:t('step.stuck'), body:`<div class="step-branch step-stuck">${tf(s,'stuck')}</div>`});
+    if(s.levelUp) folds.push({key:'levelup', icon:'&#x1F336;&#xFE0F;', label:t('step.levelUp'), body:`<div class="step-branch step-levelup">${tf(s,'levelUp')}</div>`});
+    const foldsHtml = folds.length ? (()=>{
+      const idBase = `${w.id}-${ns}-${i}-fold`;
+      const pills = folds.map(f=>`<button type="button" class="step-fold-pill step-${f.key}-fold" aria-expanded="false" aria-controls="${idBase}-${f.key}" onclick="toggleStepFold(this)">${f.icon} ${f.label}</button>`).join('');
+      const panels = folds.map(f=>`<div class="step-fold-panel" id="${idBase}-${f.key}" hidden>${f.body}</div>`).join('');
+      return `<div class="step-folds"><div class="step-folds-row">${pills}</div>${panels}</div>`;
     })() : '';
-    const stuckFold = s.stuck ? `<details class="step-fold step-stuck-fold"><summary>&#x1FA9C; ${t('step.stuck')}</summary><div class="step-branch step-stuck">${tf(s,'stuck')}</div></details>` : '';
-    const levelUpFold = s.levelUp ? `<details class="step-fold step-levelup-fold"><summary>&#x1F336;&#xFE0F; ${t('step.levelUp')}</summary><div class="step-branch step-levelup">${tf(s,'levelUp')}</div></details>` : '';
-    // Hint / Stuck? / Level up sit in one horizontal row so a student can scan all three at once.
-    const foldsHtml = (hintFold || stuckFold || levelUpFold) ? `<div class="step-folds">${hintFold}${stuckFold}${levelUpFold}</div>` : '';
     const chordsHtml = (s.chords&&s.chords.length)
       ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}${c.name?`<div class="chord-box-label">${c.name}</div>`:''}</div>`).join('')}</div>` + coachChordBtnRowHtml(s.chords)
       : '';

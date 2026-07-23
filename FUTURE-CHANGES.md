@@ -27,7 +27,7 @@ In `module-1.js`, practice station `c`, the "Safe handling (every session)" step
 its `hint`/`stuck`/`levelUp` fields (+ `_es` twins) and show just the instruction text (EN + ES).
 (Was briefly applied then reverted on 2026-07-23 — clean to-do now.)
 
-### [~] Hint / Stuck? / Level up disclosures reflow the pill row when expanded — FIX APPROVED
+### [x] Hint / Stuck? / Level up disclosures reflow the pill row when expanded (done 2026-07-23)
 - **Symptom:** clicking Stuck?/Level up drops the panel *between* the pills and shoves the
   others onto a new line.
 - **Cause:** the three pills are native `<details>` inside `.step-folds{display:flex;flex-wrap:wrap}`
@@ -35,11 +35,9 @@ its `hint`/`stuck`/`levelUp` fields (+ `_es` twins) and show just the instructio
   panel widens the flex item (~70ch) and forces siblings to wrap.
 - **Approved fix (Jonathan signed off on a mockup, 2026-07-23):** separate pills from panels —
   keep the three pills in a fixed row; open the panel full-width **below** the row.
-- **OPEN DECISION:** one panel open at a time (tab-style) vs. independent toggles (panels stack
-  below). Ask Jonathan before building.
-- **VERIFY FIRST:** a parallel Cowork session may have already fixed this. As of 2026-07-23 it
-  was NOT fixed in the repo (no relevant commit in last 40). Check latest before implementing to
-  avoid duplicate/conflicting work.
+- **DECIDED (Jonathan, 2026-07-23):** one panel open at a time (tab-style); tapping the open
+  pill closes it.
+- Verified before building: not fixed in the repo as of implementation (checked latest commits).
 
 ### [ ] Expanding a section scrolls it so the top hides under the header
 - **Symptom:** expanding a section sometimes makes the page "jump up" so the first part of the
