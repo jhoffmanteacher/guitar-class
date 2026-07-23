@@ -39,7 +39,7 @@ its `hint`/`stuck`/`levelUp` fields (+ `_es` twins) and show just the instructio
   pill closes it.
 - Verified before building: not fixed in the repo as of implementation (checked latest commits).
 
-### [ ] Expanding a section scrolls it so the top hides under the header
+### [x] Expanding a section scrolls it so the top hides under the header (done 2026-07-23)
 - **Symptom:** expanding a section sometimes makes the page "jump up" so the first part of the
   expanded content sits above the top of the screen / under the sticky header.
 - **Likely cause:** a `scrollIntoView`/focus call on expand aligns the element top to viewport

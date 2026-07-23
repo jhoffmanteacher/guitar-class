@@ -2066,6 +2066,15 @@ function toggleStepOpen(btn){
   li.classList.toggle('collapsed', !willOpen);
   btn.setAttribute('aria-expanded', String(willOpen));
   renderChordBoxes();
+  /* Collapsing a taller open step ABOVE this one shortens the page, which
+     can yank the just-opened step up under the sticky header. After layout
+     settles, nudge it back into view — scroll-margin-top (styles.css) makes
+     scrollIntoView land below the header, not at viewport top. */
+  if(willOpen) requestAnimationFrame(()=>{
+    const hdr = document.querySelector('.header');
+    const hdrH = hdr ? hdr.offsetHeight : 0;
+    if(li.getBoundingClientRect().top < hdrH) li.scrollIntoView({block:'start'});
+  });
 }
 
 // Deep links (search, "Show me where") land on a collapsed row — open it in place.

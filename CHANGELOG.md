@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-23 — Smoother practice steps: no more jumping pills or hidden headings
+
+### Changed
+- Opening a Hint, Stuck?, or Level up panel no longer shoves the other pills
+  onto a new line. The three pills stay put in one row, and the panel you
+  tapped opens full-width right below them — one panel at a time, and tapping
+  the open pill closes it.
+- Opening a practice step no longer makes the page jump so the top of the
+  step hides behind the purple header bar. Whatever you open — a step, a tab,
+  a jump from your skills checklist — now lands just below the header where
+  you can read it from the first line.
+- Module 1's "Safe handling" step now shows just its checklist — the extra
+  Hint / Stuck? / Level up pills were repeating what the step already says.
+
 ## 2026-07-23 — Everything in real Spanish + clearer step titles
 
 ### Added
