@@ -22,7 +22,7 @@ implemented by the local Claude Code ("opusplan") in VS Code.
 
 ## Bugs / fixes
 
-### [ ] Module 1 · Set 1 — remove Hint/Stuck/Level up from the "Safe handling" step
+### [x] Module 1 · Set 1 — remove Hint/Stuck/Level up from the "Safe handling" step (done 2026-07-23)
 In `module-1.js`, practice station `c`, the "Safe handling (every session)" step should drop
 its `hint`/`stuck`/`levelUp` fields (+ `_es` twins) and show just the instruction text (EN + ES).
 (Was briefly applied then reverted on 2026-07-23 — clean to-do now.)

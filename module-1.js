@@ -146,13 +146,7 @@ SETS.push(
           {
             label: 'Safe handling', label_es: 'Manejo seguro',
             text: 'Safe handling (every session):<ul><li>When you\'re not playing, rest the guitar flat on its back across your lap, or lay it in the case or stand.</li><li>Never lean it against a chair or wall — it can slip and fall.</li><li>Carry it with one hand on the neck and one on the body.</li></ul>You\'ve got it when: you can set the guitar down and pick it up without it wobbling or tipping.',
-            text_es: 'Manejo seguro (cada sesión):<ul><li>Cuando no estés tocando, apoya la guitarra boca arriba sobre tu regazo, o déjala en el estuche o en un soporte.</li><li>Nunca la recuestes contra una silla o pared — se puede resbalar y caer.</li><li>Cárgala con una mano en el mástil y otra en el cuerpo.</li></ul>Lo tienes cuando: puedes dejarla y levantarla sin que se tambalee o se caiga.',
-            hint: 'A guitar that falls can crack its neck. A little care keeps your guitar playable for years.',
-            hint_es: 'Una guitarra que se cae puede agrietar el mástil. Un poco de cuidado la mantiene tocable por años.',
-            stuck: 'Practice just the set-down first: two hands, lower it slowly onto its back, let go. Then just the pick-up. Watch the guitar as you release it — if it wobbles, slow the set-down way down.',
-            stuck_es: 'Practica primero solo el dejarla: con las dos manos, bájala despacio boca arriba y suéltala. Luego practica solo el levantarla. Obsérvala mientras la sueltas — si se tambalea, hazlo mucho más despacio.',
-            levelUp: 'Set it down and pick it up three times in a row, smooth and quiet each time — no clunks against the chair.',
-            levelUp_es: 'Déjala y levántala tres veces seguidas, suave y en silencio cada vez — sin golpes contra la silla.'
+            text_es: 'Manejo seguro (cada sesión):<ul><li>Cuando no estés tocando, apoya la guitarra boca arriba sobre tu regazo, o déjala en el estuche o en un soporte.</li><li>Nunca la recuestes contra una silla o pared — se puede resbalar y caer.</li><li>Cárgala con una mano en el mástil y otra en el cuerpo.</li></ul>Lo tienes cuando: puedes dejarla y levantarla sin que se tambalee o se caiga.'
           },
           {
             label: 'Your first strum', label_es: 'Tu primer rasgueo',
