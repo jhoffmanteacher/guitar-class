@@ -6187,3 +6187,568 @@ MODULE_SONGS[12] meta fields (song title shown for reference, not itself transla
 | m12w3-s4 practice choice 4: You pause the bass whenever the melody plays | Pausas el bajo cada vez que suena la melodía |
 | m12w3-s6 practice prompt: Perform your fingerpicked verse start to finish — slips allowed, stops not. How many complete no-stop runs did you get today? | Interpreta tu estrofa con fingerpicking de principio a fin — se permiten resbalones, no detenerse. ¿Cuántas pasadas completas sin paradas lograste hoy? |
 | m12w3-s6 practice placeholder: e.g. 2 runs — try for a higher number | p. ej. 2 pasadas — intenta superarlo |
+
+
+---
+
+# Round 3 — 2026-07-23 (step titles, Journey pages, journey.js strings)
+
+**Step titles (new `label`/`label_es` on every step, all 12 modules).** The
+collapsed checklist rows now show these short hand-written titles instead of
+truncated step text. Full table:
+
+**module-1.js**
+
+| EN | ES |
+| :--- | :--- |
+| Sound setup | Configura el sonido |
+| Watch: smart practice tips | Mira: consejos de práctica |
+| Watch: caring for your guitar | Mira: cuidado de la guitarra |
+| Find your song on YouTube | Busca tu canción en YouTube |
+| Ear training: acoustic vs. electric | Oído: acústica vs. eléctrica |
+| Safe handling | Manejo seguro |
+| Your first strum | Tu primer rasgueo |
+| Find your sitting position | Encuentra tu posición al sentarte |
+| Explore the guitar's sounds | Explora los sonidos de la guitarra |
+| Write your guitar goal | Escribe tu meta con la guitarra |
+| Plan your practice routine | Planea tu rutina de práctica |
+| Watch: tuning with a tuner | Mira: afinar con afinador |
+| Watch: parts of the guitar | Mira: las partes de la guitarra |
+| Watch: how to hold the guitar | Mira: cómo sostener la guitarra |
+| Watch: how to hold the pick | Mira: cómo agarrar la púa |
+| Name the 6 strings | Nombra las 6 cuerdas |
+| Watch: picking single strings | Mira: pulsar cuerdas sueltas |
+| Quick try: play and name each string | Prueba rápida: toca y nombra cada cuerda |
+| Preview the Seven Nation Army riff | Adelanto del riff de Seven Nation Army |
+| Challenge: tune all 6 strings | Reto: afina las 6 cuerdas |
+| Challenge: one minute, perfect notes | Reto: un minuto, notas perfectas |
+| Happy Birthday on the low E | Happy Birthday en la Mi grave |
+| Challenge: the Seven Nation Army riff | Reto: el riff de Seven Nation Army |
+
+**module-2.js**
+
+| EN | ES |
+| :--- | :--- |
+| Watch: open string notes | Mira: notas al aire |
+| Watch: notes on the fretboard | Mira: notas en el mástil |
+| Ear: find Happy Birthday notes | Oído: notas de Happy Birthday |
+| Low E notes with your chart | Notas de la Mi grave con tu tabla |
+| A string notes with your chart | Notas de la cuerda La con tu tabla |
+| Station wrap-up | Cierre de la estación |
+| Warm-up: tune all 6 strings | Calentamiento: afina las 6 cuerdas |
+| Challenge: low E run | Reto: recorrido de la Mi grave |
+| Quick check: low E notes | Revisión rápida: notas de Mi grave |
+| Ear: name that riff | Oído: adivina el riff |
+| Challenge: A string run | Reto: recorrido de la cuerda La |
+| Quick check: A string notes | Revisión rápida: notas de la La |
+| Shuffle self-quiz | Autoevaluación con papelitos |
+| Challenge: shuffle run | Reto: recorrido con papelitos |
+| Challenge: Seven Nation Army | Reto: Seven Nation Army |
+| Plan your practice | Planea tu práctica |
+| Station wrap-up | Cierre de la estación |
+| Ear Spark: name the open strings | Chispa de oído: nombra las cuerdas |
+| Watch: spider exercises | Mira: ejercicios de araña |
+| Watch: avoiding fret buzz | Mira: evita el zumbido |
+| Watch: how to read TAB | Mira: cómo leer TAB |
+| Read TAB: Happy Birthday | Lee el TAB: Happy Birthday |
+| Fret buzz self-check | Autorrevisión de zumbido |
+| Read TAB: choose a song | Lee el TAB: elige una canción |
+| Station wrap-up | Cierre de la estación |
+| Challenge: finger workout | Reto: ejercicio de dedos |
+| Minimum-pressure drill | Ejercicio de presión mínima |
+| One-finger-per-fret check | Revisión de un dedo por traste |
+| Quick check: clean notes | Revisión rápida: notas limpias |
+| Warm-up TAB read | Lectura de calentamiento |
+| Challenge: play Happy Birthday | Reto: toca Happy Birthday |
+| Challenge: Watchtower bass riff | Reto: riff de bajo de Watchtower |
+| Bonus: Sweet Child O' Mine roots | Extra: raíces de Sweet Child O' Mine |
+| Quick check: reading TAB | Revisión rápida: lectura de TAB |
+| Challenge: Watchtower bass line | Reto: línea de bajo de Watchtower |
+| Challenge: Seven Nation Army, true pitch | Reto: Seven Nation Army, tono real |
+| Challenge: the cure root line | Reto: línea de raíces de the cure |
+| Challenge: Luna bass roots | Reto: raíces de bajo de Luna |
+| Challenge: Let It Be bass line | Reto: línea de bajo de Let It Be |
+| Challenge: mystery TAB sight-read | Reto: TAB misterioso a primera vista |
+| Station wrap-up | Cierre de la estación |
+
+**module-3.js**
+
+| EN | ES |
+| :--- | :--- |
+| One shape, three chords | Una forma, tres acordes |
+| Watch: what a power chord is | Mira: qué es un acorde de potencia |
+| Watch: playing power chords | Mira: tocar acordes de potencia |
+| Wrap-up: today's hardest part | Cierre: lo más difícil de hoy |
+| Warm-up: tuning check | Calentamiento: afinación |
+| Challenge: clean E5 | Reto: E5 limpio |
+| Challenge: mute check | Reto: revisión de silenciado |
+| Challenge: shape shifter | Reto: cambiaformas |
+| Challenge: name & climb (E string) | Reto: nombra y sube (cuerda Mi) |
+| Challenge: name & climb (A string) | Reto: nombra y sube (cuerda La) |
+| Challenge: Watchtower loop | Reto: vuelta de Watchtower |
+| Challenge: Seven Nation Army riff | Reto: riff de Seven Nation Army |
+| Plan your practice | Planea tu práctica |
+| Wrap-up: your shaky spot | Cierre: tu punto inestable |
+| Ear Spark: E5 vs. E major | Chispa auditiva: E5 vs. Mi mayor |
+| Watch: using a metronome | Mira: usar el metrónomo |
+| Watch: easy power-chord songs | Mira: canciones con acordes de potencia |
+| Watch: alternate picking | Mira: púa alterna |
+| Wrap-up: where the loop breaks | Cierre: dónde se desarma la vuelta |
+| Challenge: loop in time | Reto: vuelta a tiempo |
+| Challenge: half-bar switches (2 chords) | Reto: medio compás (2 acordes) |
+| Challenge: three-chord half-bar | Reto: medio compás con 3 acordes |
+| Challenge: four-chord half-bar | Reto: medio compás con 4 acordes |
+| Challenge: one chord per beat | Reto: un acorde por tiempo |
+| Challenge: clap & count | Reto: aplaude y cuenta |
+| Challenge: name your progression | Reto: nombra tu progresión |
+| Challenge: eighth-note strum | Reto: rasgueo de corcheas |
+| Challenge: split strum (boom-chick) | Reto: rasgueo dividido (boom-chick) |
+| Challenge: octave add-on | Reto: octava extra |
+| Challenge: F5 ↔ A5 drill | Reto: ejercicio F5 ↔ A5 |
+| Challenge: Sweet Child verse | Reto: estrofa de Sweet Child |
+| Challenge: Watchtower verse | Reto: estrofa de Watchtower |
+| Challenge: the cure as power chords | Reto: the cure con acordes de potencia |
+| Challenge: Luna, full vamp | Reto: Luna, vamp completo |
+| Wrap-up: your top clean tempo | Cierre: tu tempo limpio máximo |
+
+**module-4.js**
+
+| EN | ES |
+| :--- | :--- |
+| Watch: minor pentatonic scale | Mira: pentatónica menor |
+| Watch: major pentatonic scale | Mira: pentatónica mayor |
+| Position Pattern 1 as C major | Posiciona el Patrón 1 en C mayor |
+| Listen: major vs. minor moods | Escucha: ánimo mayor vs. menor |
+| Name the mood of each clip | Nombra el ánimo de cada clip |
+| Wrap-up: the finger or the sound? | Cierre: ¿el dedo o el sonido? |
+| Tune all 6 strings | Afina las 6 cuerdas |
+| Challenge: Pattern 1 climb | Reto: subida del Patrón 1 |
+| Challenge: move the box | Reto: mueve la caja |
+| Challenge: Rule of 3 | Reto: Regla de 3 |
+| Challenge: four-phrase plan | Reto: plan de las cuatro frases |
+| Challenge: solo over Seven Nation Army | Reto: solo sobre Seven Nation Army |
+| Challenge: solo over Watchtower | Reto: solo sobre Watchtower |
+| Challenge: Watchtower's real rhythm | Reto: el ritmo real de Watchtower |
+| Challenge: SNA's real rhythm by ear | Reto: ritmo real de SNA, de oído |
+| Challenge: solo over Luna | Reto: solo sobre Luna |
+| Plan your practice | Planea tu práctica |
+| Wrap-up: what felt harder? | Cierre: ¿qué fue más difícil? |
+| Watch: using the minor pentatonic | Mira: usar la pentatónica menor |
+| Watch: hammer-ons and pull-offs | Mira: hammer-ons y pull-offs |
+| Bright vs. warm timbre | Timbre brillante vs. cálido |
+| Play and name the D-string notes | Toca y nombra las notas de la cuerda Re |
+| Wrap-up: your go-to expressive tool | Cierre: tu herramienta expresiva |
+| Tune all 6 strings | Afina las 6 cuerdas |
+| Challenge: the one-note solo | Reto: el solo de una nota |
+| Challenge: call and response | Reto: llamada y respuesta |
+| Challenge: D string map | Reto: mapa de la cuerda Re |
+| Challenge: G string map | Reto: mapa de la cuerda Sol |
+| Challenge: Sweet Child O' Mine solo | Reto: solo de Sweet Child O' Mine |
+| Challenge: soft solo over the cure | Reto: solo suave sobre the cure |
+| Wrap-up: phrasing or note names? | Cierre: ¿fraseo o nombres de nota? |
+| Ear Spark: sing and find the note | Chispa auditiva: canta y encuentra la nota |
+| Re-watch: major/minor connection | Vuelve a mirar: conexión mayor/menor |
+| Watch: vibrato technique | Mira: técnica de vibrato |
+| The blues note: ♭5 | La nota de blues: ♭5 |
+| Wrap-up: which theory clicked? | Cierre: ¿qué teoría tuvo sentido? |
+| Tune all 6 strings | Afina las 6 cuerdas |
+| Challenge: relative scales | Reto: escalas relativas |
+| Challenge: compose a 4-bar solo | Reto: compón un solo de 4 compases |
+| Challenge: cold-read a lick | Reto: lee un lick a primera vista |
+| Challenge: perform your solo | Reto: toca tu solo |
+| Wrap-up: reflect on your solo | Cierre: reflexiona sobre tu solo |
+
+**module-5.js**
+
+| EN | ES |
+| :--- | :--- |
+| Watch: reading TAB & chord boxes | Mira: leer TAB y diagramas de acorde |
+| Watch: first chords Em & Asus2 | Mira: primeros acordes Em y Asus2 |
+| Wrap-up: chord diagram parts | Cierre: partes del diagrama |
+| Warm-up: tuning check | Calentamiento: revisa la afinación |
+| Challenge: clean Am | Reto: Am limpio |
+| Challenge: clean Em | Reto: Em limpio |
+| Challenge: Am ↔ Em on beat 1 | Reto: Am ↔ Em en el tiempo 1 |
+| Challenge: one-minute changes (Am ↔ Em) | Reto: cambios de un minuto (Am ↔ Em) |
+| Plan your practice | Planea tu práctica |
+| Wrap-up: clean vs. switching | Cierre: limpio vs. cambiar |
+| Challenge: mystery chart | Reto: diagrama misterioso |
+| Watch: the C chord | Mira: el acorde de C |
+| Watch: a pain-free F chord | Mira: un F sin dolor |
+| Listen: Let It Be | Escucha: Let It Be |
+| Wrap-up: your toughest chord | Cierre: tu acorde más difícil |
+| Challenge: name the root | Reto: nombra la raíz |
+| Challenge: pivot finger (Am ↔ C) | Reto: dedo pivote (Am ↔ C) |
+| Challenge: C–G–Am–F loop | Reto: vuelta C–G–Am–F |
+| Challenge: down-up strum | Reto: rasgueo abajo-arriba |
+| Challenge: one-minute changes (C ↔ G) | Reto: cambios de un minuto (C ↔ G) |
+| Challenge: Let It Be, verse | Reto: Let It Be, estrofa |
+| Challenge: Watchtower, open chords | Reto: Watchtower, acordes al aire |
+| Challenge: "the cure" play-along | Reto: "the cure" tocando junto |
+| Challenge: half-bar changes (2 chords) | Reto: medio compás (2 acordes) |
+| Challenge: half-bar changes (3 chords) | Reto: medio compás (3 acordes) |
+| Challenge: Let It Be, fast (4 chords) | Reto: Let It Be, rápido (4 acordes) |
+| Challenge: one chord per beat | Reto: un acorde por tiempo |
+| Wrap-up: your hardest transition | Cierre: tu transición más difícil |
+| Ear Spark: bright or sad? | Chispa auditiva: ¿alegre o triste? |
+| Challenge: the folk strum | Reto: el rasgueo folk |
+| Watch: the D major chord | Mira: el acorde de D mayor |
+| Watch: Bm two ways | Mira: Bm de dos maneras |
+| Listen: Luna | Escucha: Luna |
+| Wrap-up: your Group 2 weak spot | Cierre: tu punto débil del Grupo 2 |
+| Challenge: clean D | Reto: D limpio |
+| Challenge: clean Bm | Reto: Bm limpio |
+| Challenge: cross-group changes | Reto: cambios entre grupos |
+| Challenge: one-minute changes (G ↔ D) | Reto: cambios de un minuto (G ↔ D) |
+| Challenge: Luna, the vamp | Reto: Luna, el vamp |
+| Challenge: Sweet Child, open chords | Reto: Sweet Child, acordes al aire |
+| Wrap-up: your hardest cross-group change | Cierre: tu cambio entre grupos más difícil |
+| Challenge: the waltz strum | Reto: el rasgueo de vals |
+| Watch: the E chord | Mira: el acorde de E |
+| Watch: how to practice effectively | Mira: cómo practicar con eficacia |
+| Map your showcase song's chords | Ubica los acordes de tu canción |
+| Revisit your Module 1 goal | Vuelve a tu meta del Módulo 1 |
+| Wrap-up: your showcase priority | Cierre: tu prioridad para la muestra |
+| Challenge: clean E | Reto: E limpio |
+| Challenge: four-finger B7 | Reto: B7 con cuatro dedos |
+| Challenge: one-minute changes (E ↔ B7) | Reto: cambios de un minuto (E ↔ B7) |
+| Challenge: showcase run | Reto: ensayo de la muestra |
+| Challenge: Luna, showcase version | Reto: Luna, versión para la muestra |
+| Challenge: call & response jam | Reto: jam de llamada y respuesta |
+| Wrap-up: your pressure point | Cierre: tu punto débil bajo presión |
+
+**module-6.js**
+
+| EN | ES |
+| :--- | :--- |
+| Watch: the strumming wrist | Mira: la muñeca de rasgueo |
+| Watch: count your strums | Mira: cuenta tus rasgueos |
+| Feel the pulse: Brown Eyed Girl | Siente el pulso: Brown Eyed Girl |
+| Form Em and Am | Forma Em y Am |
+| Station wrap-up | Cierre de la estación |
+| Warm-up: tune to green | Calentamiento: afina hasta verde |
+| Challenge: pendulum motion | Reto: movimiento de péndulo |
+| Challenge: even eighths on Em | Reto: corcheas parejas en Em |
+| Challenge: Em ↔ Am switch | Reto: cambio Em ↔ Am |
+| Challenge: half-bar switch | Reto: cambio de medio compás |
+| Challenge: three-chord half-bar | Reto: medio compás, tres acordes |
+| Challenge: Let It Be, strummed | Reto: Let It Be, rasgueado |
+| Hear it: full-chord loop | Escúchalo: loop de acordes completos |
+| Challenge: one chord per beat | Reto: un acorde por tiempo |
+| Challenge: Watchtower, strummed | Reto: Watchtower, rasgueado |
+| Challenge: Knockin' on Heaven's Door | Reto: Knockin' on Heaven's Door |
+| Watch: the D-DU-UDU pattern | Mira: el patrón D-DU-UDU |
+| Watch: backbeat accents | Mira: acentos en el contratiempo |
+| Tap along: I'm Yours | Marca el patrón: I'm Yours |
+| Form G and D | Forma G y D |
+| Station wrap-up | Cierre de la estación |
+| Warm-up: tune + down-up | Calentamiento: afina + abajo-arriba |
+| Challenge: learn the groove | Reto: aprende el groove |
+| Challenge: pattern on Em | Reto: patrón en Em |
+| Challenge: G → D, pattern locked | Reto: G → D, patrón asegurado |
+| Challenge: I'm Yours, verse | Reto: I'm Yours, estrofa |
+| Challenge: Oye Mi Amor, verse | Reto: Oye Mi Amor, estrofa |
+| Ear Spark: rhythm echo | Chispa auditiva: eco de ritmo |
+| Play-along at 0.75× | Toca junto a 0.75× |
+| Watch: any-pattern exercise (JustinGuitar) | Mira: ejercicio de patrones (JustinGuitar) |
+| Watch: strumming exercise (Andy Guitar) | Mira: ejercicio de rasgueo (Andy Guitar) |
+| Compare: reggae vs. rock | Compara: reggae vs. rock |
+| Refresh the C chord | Repasa el acorde C |
+| Station wrap-up | Cierre de la estación |
+| Warm-up: all three feels | Calentamiento: las tres sensaciones |
+| Challenge: folk feel | Reto: sensación folk |
+| Challenge: rock feel | Reto: sensación rock |
+| Challenge: reggae chop | Reto: picoteo reggae |
+| Challenge: two feels, one song | Reto: dos sensaciones, una canción |
+| Challenge: trade off with a solo | Reto: intercambio con solo |
+| Challenge: Watchtower, two ways | Reto: Watchtower, de dos formas |
+| Challenge: Three Little Birds | Reto: Three Little Birds |
+
+**module-7.js**
+
+| EN | ES |
+| :--- | :--- |
+| Watch: how to read TAB | Mira: cómo leer TAB |
+| Watch: the Smoke on the Water riff | Mira: el riff de Smoke on the Water |
+| Wrap-up: what slows your TAB reading | Cierre: qué te frena al leer TAB |
+| Warm-up: tuning check | Calentamiento: afinación |
+| Challenge: Smoke on the Water | Reto: Smoke on the Water |
+| Challenge: alternate-picking workout | Reto: ejercicio de púa alternada |
+| Challenge: find a riff online | Reto: encuentra un riff en línea |
+| Challenge: Seven Nation Army rhythm | Reto: el ritmo real de Seven Nation Army |
+| Wrap-up: name your trickiest move | Cierre: tu movimiento más difícil |
+| Challenge: slur it together | Reto: únelo todo |
+| Watch: a pain-free F chord | Mira: el acorde F sin dolor |
+| Watch: the E-shape barre | Mira: la cejilla en forma de E |
+| Wrap-up: one small win today | Cierre: una pequeña mejora de hoy |
+| Challenge: just the bar | Reto: solo la cejilla |
+| Challenge: the E-shape barre | Reto: cejilla en forma de E |
+| Challenge: spot the power chord | Reto: encuentra el acorde de potencia |
+| Challenge: F, G, A slide | Reto: deslizamiento F, G, A |
+| Challenge: one-minute barre changes | Reto: cambios de cejilla en un minuto |
+| Challenge: Sweet Child O' Mine verse | Reto: la estrofa de Sweet Child O' Mine |
+| Wrap-up: find your buzzing string | Cierre: tu cuerda que zumba |
+| Ear Spark: little F vs. barre F | Chispa auditiva: F pequeño vs. cejilla |
+| Watch: the A-shape barre | Mira: la cejilla en forma de A |
+| Watch: rewatch, A-shape focus | Mira: repaso enfocado en la forma de A |
+| Wrap-up: E-shape or A-shape? | Cierre: ¿forma de E o forma de A? |
+| Challenge: A-shape B major | Reto: B mayor en forma de A |
+| Challenge: A-shape slide (C, D, E) | Reto: deslizamiento en forma de A |
+| Challenge: two homes for F | Reto: dos hogares para F |
+| Challenge: shape combo | Reto: combo de formas |
+| Challenge: groove the barres | Reto: dale groove a las cejillas |
+| Challenge: Oye Mi Amor, full-barre Bm | Reto: Oye Mi Amor, Bm con cejilla |
+| Challenge: Watchtower, all barres | Reto: Watchtower, todo con cejillas |
+| Challenge: Luna, full-barre F | Reto: Luna, F con cejilla completa |
+| Level-up: Sweet Child O' Mine intro | Sube de nivel: intro de Sweet Child O' Mine |
+| Wrap-up: which barre needs more work | Cierre: qué cejilla necesita más práctica |
+| Challenge: F# and Bb | Reto: F# y Bb |
+
+**module-8.js**
+
+| EN | ES |
+| :--- | :--- |
+| Watch: fingerpicking basics | Mira: fundamentos de fingerpicking |
+| Watch: p-i-m-a finger assignments | Mira: asignación de dedos p-i-m-a |
+| Listen: Dust in the Wind | Escucha: Dust in the Wind |
+| Try it: p-i-m-a on open strings | Pruébalo: p-i-m-a al aire |
+| Wrap-up: your trickiest finger | Cierre: tu dedo más difícil |
+| Warm-up: tuning check | Calentamiento: afinación |
+| Challenge: hand shape | Reto: forma de la mano |
+| Challenge: p-i-m-a plucks | Reto: pulsaciones p-i-m-a |
+| Challenge: moving bass | Reto: bajo en movimiento |
+| Challenge: the cure, first touch | Reto: the cure, primer contacto |
+| Wrap-up: wrist or volume? | Cierre: ¿muñeca o volumen? |
+| Watch: count the 6-note cycle | Mira: cuenta el ciclo de 6 notas |
+| Watch: pluck patterns and walkdowns | Mira: patrones de pulsación y walkdowns |
+| Listen: Nothing Else Matters | Escucha: Nothing Else Matters |
+| Try it: the pattern on Em | Pruébalo: el patrón en Em |
+| Wrap-up: is it automatic yet? | Cierre: ¿ya es automático? |
+| Challenge: Em pattern | Reto: patrón en Em |
+| Challenge: Am pattern | Reto: patrón en Am |
+| Challenge: raise your tempo | Reto: sube tu tempo |
+| Challenge: the cure, verse | Reto: the cure, estrofa |
+| Wrap-up: your top clean tempo | Cierre: tu mejor tempo limpio |
+| Ear Spark: name the bass string | Chispa auditiva: nombra el bajo |
+| Watch: Travis picking basics | Mira: fundamentos del Travis picking |
+| Watch: Nothing Else Matters lesson | Mira: lección de Nothing Else Matters |
+| Listen: a full fingerpicked verse | Escucha: una estrofa completa |
+| Try it: the arpeggio on C | Pruébalo: el arpegio en C |
+| Wrap-up: pattern or chord changes? | Cierre: ¿patrón o cambios? |
+| Challenge: clean shapes first | Reto: formas limpias primero |
+| Challenge: full progression | Reto: progresión completa |
+| Challenge: the pinch | Reto: el pellizco |
+| Challenge: Travis thumb | Reto: pulgar Travis |
+| Challenge: Let It Be, fingerpicked | Reto: Let It Be con fingerpicking |
+| Challenge: perform a song | Reto: interpreta una canción |
+| Wrap-up: halfway-point reflection | Cierre: reflexión de medio curso |
+
+**module-9.js**
+
+| EN | ES |
+| :--- | :--- |
+| How the checkpoint works | Cómo funciona el chequeo |
+| Re-test 1: open chords | Repaso 1: acordes abiertos |
+| Re-test 2: strumming | Repaso 2: rasgueo |
+| Re-test 3: pentatonic Pattern 1 | Repaso 3: Patrón pentatónico 1 |
+| Re-test 4: power chords | Repaso 4: acordes de potencia |
+| Re-test 5: TAB cold read | Repaso 5: TAB a primera vista |
+| Re-test 6: fingerpicking | Repaso 6: fingerpicking |
+| Pick your weakest re-test | Elige tu repaso más débil |
+| Warm-up: tune all 6 strings | Calentamiento: afina las 6 cuerdas |
+| How to mark each re-test | Cómo marcar cada repaso |
+| Re-test 1: open chords | Repaso 1: acordes abiertos |
+| Re-test 2: strumming | Repaso 2: rasgueo |
+| Re-test 3: pentatonic Pattern 1 | Repaso 3: Patrón pentatónico 1 |
+| Re-test 4: power chords | Repaso 4: acordes de potencia |
+| Re-test 5: TAB cold read | Repaso 5: TAB a primera vista |
+| Re-test 6: fingerpicking | Repaso 6: fingerpicking |
+| Fast round: record all six | Ronda rápida: grábate los seis |
+| Watch: note system on D and G | Mira: sistema de notas en D y G |
+| Watch: open string refresher | Mira: repaso de cuerdas al aire |
+| Name notes up the D and G strings | Nombra las notas por D y G |
+| Octave shape: find the twin note | Forma de octava: la nota gemela |
+| Try fret 12 on D and G | Prueba el traste 12 en D y G |
+| Which string stuck faster? | ¿Cuál cuerda se te quedó más rápido? |
+| Warm-up: tune all 6 strings | Calentamiento: afina las 6 cuerdas |
+| Challenge: D-string naturals | Reto: naturales de la cuerda D |
+| Challenge: G-string naturals | Reto: naturales de la cuerda G |
+| Challenge: flashcard drill | Reto: ejercicio relámpago |
+| Challenge: Sweet Child O' Mine riff | Reto: riff de Sweet Child O' Mine |
+| Which fret still slows you? | ¿Cuál traste todavía te frena? |
+| Watch: finishing on B and high e | Mira: termina en B y mi aguda |
+| Watch: octaves and the B-string bump | Mira: octavas y el desfase de la B |
+| Name the dot-fret landmarks | Nombra los trastes con punto |
+| Find one note on all six strings | Encuentra una nota en las 6 cuerdas |
+| Try fret 7 on every string | Prueba el traste 7 en cada cuerda |
+| Where are you slowest? | ¿Dónde eres más lento? |
+| Warm-up: tune all 6 strings | Calentamiento: afina las 6 cuerdas |
+| Challenge: B-string naturals | Reto: naturales de la cuerda B |
+| Challenge: high-e naturals | Reto: naturales de la mi aguda |
+| Challenge: landmark drill | Reto: ejercicio de referencias |
+| Challenge: Luna's punteo line | Reto: línea de punteo de Luna |
+| Counting up or octave shape? | ¿Contar o la forma de octava? |
+| Watch: TAB reading refresher | Mira: repaso de lectura de TAB |
+| Watch: writing your own TAB | Mira: escribe tu propio TAB |
+| Spot chords inside the TAB | Encuentra acordes en el TAB |
+| G/B: find the lowest note | G/B: encuentra la nota más grave |
+| Try spacing TAB rhythm on paper | Prueba espaciar el ritmo en papel |
+| Frets or rhythm: which was harder? | ¿Trastes o ritmo: qué fue más difícil? |
+| Warm-up: tune all 6 strings | Calentamiento: afina las 6 cuerdas |
+| Challenge: Luna warm-up read | Reto: calentamiento con Luna |
+| Challenge: cold read at frets 5–10 | Reto: primera vista en trastes 5–10 |
+| Challenge: write Seven Nation Army TAB | Reto: escribe Seven Nation Army en TAB |
+| Challenge: the G/B slash chord | Reto: acorde con barra diagonal |
+| Challenge: read a partial shape | Reto: lee una forma parcial |
+| Challenge: cold-read your own TAB | Reto: lee tu TAB a primera vista |
+| Could a stranger play your TAB? | ¿Podría un desconocido tocar tu TAB? |
+
+**module-10.js**
+
+| EN | ES |
+| :--- | :--- |
+| Watch: the major scale recipe | Mira: la receta de la escala mayor |
+| Watch: the major pentatonic scale | Mira: la pentatónica mayor |
+| Hear the recipe in the frets | Escucha la receta en los trastes |
+| Build C major with the recipe | Construye C mayor con la receta |
+| Try the recipe from G | Prueba la receta desde G |
+| Wrap-up: what is a key? | Cierre: ¿qué es una tonalidad? |
+| Warm-up: tuning check | Calentamiento: afinación |
+| Challenge: C major walk | Reto: caminata de C mayor |
+| Challenge: G major walk | Reto: caminata de G mayor |
+| Challenge: recipe by heart | Reto: la receta de memoria |
+| Challenge: Let It Be in the scale | Reto: Let It Be en la escala |
+| Wrap-up: do you know the recipe? | Cierre: ¿sabes la receta? |
+| Watch: minor pentatonic refresher | Mira: repaso de pentatónica menor |
+| Watch: the blues scale | Mira: la escala de blues |
+| Ear training: relative vs. parallel | Oído: relativa vs. paralela |
+| Find Watchtower's relative major | La relativa mayor de Watchtower |
+| Why Luna's solo is in D minor | Por qué el solo de Luna está en Dm |
+| Wrap-up: explain relative minor | Cierre: explica la relativa menor |
+| Warm-up: tuning check | Calentamiento: afinación |
+| Challenge: relative pairs drill | Reto: ejercicio de pares relativos |
+| Challenge: the blues scale | Reto: la escala de blues |
+| Challenge: Smoke on the Water, bluesy | Reto: Smoke on the Water, con sabor a blues |
+| Wrap-up: relative key and the b5 | Cierre: la relativa y la b5 |
+| Jam: blues scale over 12-bar form | Improvisa: blues de 12 compases |
+| Watch: the movable pentatonic box | Mira: la caja pentatónica móvil |
+| Watch: find melodies by ear | Mira: encuentra melodías de oído |
+| Optional watch: building your ear | Opcional: desarrolla tu oído |
+| Ear training: bright vs. dark | Oído: brillante vs. oscuro |
+| Move box 1 up two frets | Mueve la caja 1 dos trastes |
+| Predict the new fret | Predice el nuevo traste |
+| Wrap-up: which was harder? | Cierre: ¿qué fue más difícil? |
+| Warm-up: tuning check | Calentamiento: afinación |
+| Challenge: transpose drill | Reto: ejercicio de transposición |
+| Challenge: sing, then play | Reto: canta y luego toca |
+| Challenge: echo drill | Reto: ejercicio de eco |
+| Challenge: the cure, by ear | Reto: the cure, de oído |
+| Wrap-up: box 1 and finding notes | Cierre: caja 1 y notas de oído |
+
+**module-11.js**
+
+| EN | ES |
+| :--- | :--- |
+| Watch: chords in any key | Mira: acordes en cualquier tonalidad |
+| Watch: how chords are built | Mira: cómo se construyen los acordes |
+| Numerals in Let It Be | Números romanos en Let It Be |
+| Build triads up the C scale | Construye tríadas en la escala de C |
+| Luna: place Am in the key of F | Luna: ubica Am en la tonalidad de F |
+| Wrap-up: your song's home chord | Cierre: el acorde base de tu canción |
+| Warm-up: tuning check | Calentamiento: afinación |
+| Challenge: build the family | Reto: construye la familia |
+| Challenge: numeral flashcards | Reto: tarjetas de números romanos |
+| Challenge: Let It Be, numbered | Reto: Let It Be, numerado |
+| Wrap-up: why is Am lowercase? | Cierre: ¿por qué Am va en minúscula? |
+| Watch: chords that sound good together | Mira: acordes que suenan bien juntos |
+| Watch: All Along the Watchtower | Mira: All Along the Watchtower |
+| Find I–IV–V in A | Encuentra I–IV–V en A |
+| Number "the cure"'s chords | Numera los acordes de "the cure" |
+| Find the family fast | Encuentra la familia rápido |
+| Wrap-up: the home-chord feeling | Cierre: la sensación del acorde base |
+| Warm-up: tuning check | Calentamiento: afinación |
+| Challenge: chord inventory drill | Reto: ejercicio de inventario |
+| Challenge: play and feel for home | Reto: toca y siente la base |
+| Challenge: slash chord walk | Reto: caminata de acorde con bajo alterno |
+| Challenge: Watchtower, numbered | Reto: Watchtower, numerado |
+| Wrap-up: mystery key and G/B | Cierre: tonalidad misteriosa y G/B |
+| Watch: E-shape barre chords | Mira: cejillas en forma de E |
+| Watch: A-shape barre chords | Mira: cejillas en forma de A |
+| Find the A-shape root | Encuentra la raíz de la forma de A |
+| Find B major as a barre | Encuentra B mayor con cejilla |
+| Map all 12 roots on paper | Mapea las 12 raíces en papel |
+| Wrap-up: open shapes or barres? | Cierre: ¿formas abiertas o cejillas? |
+| Watch: 12-bar blues in E | Mira: blues de 12 compases en E |
+| Quick check: the blues chords | Ponte a prueba: los acordes del blues |
+| Quick check: shuffle feel | Ponte a prueba: la sensación de shuffle |
+| Warm-up: tuning check | Calentamiento: afinación |
+| Challenge: root-naming drill | Reto: ejercicio de nombrar raíces |
+| Challenge: I–IV–V builder | Reto: constructor de I–IV–V |
+| Challenge: Oye Mi Amor, full barre | Reto: Oye Mi Amor, cejilla completa |
+| Wrap-up: two homes for C major | Cierre: dos lugares para C mayor |
+| Meet A7, D7, and E7 | Conoce A7, D7 y E7 |
+| Play the 12-bar map | Toca el mapa de 12 compases |
+| Comp the full 12 bars | Acompaña los 12 compases completos |
+
+**module-12.js**
+
+| EN | ES |
+| :--- | :--- |
+| Watch: Travis picking basics (Lauren Bateman) | Mira: bases del Travis picking (Lauren Bateman) |
+| Watch: Travis picking basics (Andy Guitar) | Mira: bases del Travis picking (Andy Guitar) |
+| Listen: the alternating bass | Escucha: el bajo alternante |
+| Try the alternating thumb | Prueba el pulgar alternante |
+| Station wrap-up | Cierre de la estación |
+| Warm-up: tuning check | Calentamiento: afinación |
+| Challenge: thumb only | Reto: solo el pulgar |
+| Challenge: the pinch | Reto: el pellizco |
+| Challenge: fills | Reto: rellenos |
+| Challenge: Am↔C change | Reto: cambio Am↔C |
+| Challenge: House of the Rising Sun | Reto: House of the Rising Sun |
+| Wrap-up: write your tempo target | Cierre: escribe tu objetivo de tempo |
+| Play-along: the Travis pattern | Toca junto al video: patrón Travis |
+| Challenge: claw check | Reto: revisión de la garra |
+| Challenge: 4-note arpeggio | Reto: arpegio de 4 notas |
+| Watch: pinch patterns | Mira: patrones de pellizco |
+| Watch: a fingerpicking pattern in 3/4 | Mira: patrón de fingerpicking en 3/4 |
+| Listen: the waltz feel | Escucha: la sensación de vals |
+| Try the cure fingerstyle | Prueba the cure con fingerstyle |
+| Station wrap-up | Cierre de la estación |
+| Warm-up: tuning check | Calentamiento: afinación |
+| Challenge: count and pick | Reto: cuenta y puntea |
+| Challenge: the cure, native style | Reto: the cure en su estilo nativo |
+| Challenge: Let It Be | Reto: Let It Be |
+| Challenge: Happy Birthday in 3 | Reto: Happy Birthday en 3 |
+| Wrap-up: picking in 4 vs. in 3 | Cierre: puntear en 4 vs. en 3 |
+| Watch: La Derrota requinto line | Mira: línea de requinto de La Derrota |
+| Watch: Luna's fingerpicked intro | Mira: la intro fingerstyle de Luna |
+| Listen: melody on top | Escucha: melodía arriba |
+| Try melody on top over C | Prueba la melodía arriba sobre C |
+| Station wrap-up | Cierre de la estación |
+| Warm-up: tuning check | Calentamiento: afinación |
+| Challenge: Luna intro | Reto: intro de Luna |
+| Challenge: Tu Boda requinto line | Reto: línea de requinto de Tu Boda |
+| Challenge: melody on top | Reto: melodía arriba |
+| Challenge: choose your pattern | Reto: elige tu patrón |
+| Challenge: full-verse rehearsal | Reto: ensayo de la estrofa completa |
+| Wrap-up: your showcase song | Cierre: tu canción de presentación |
+
+**Song Journey pages — hand-translated in place.** All six `tabs/*.html`
+pages now carry their Spanish as `data-es` attributes next to each English
+element (~60–75 strings per page). To review: open the page, click Español,
+and read it side-by-side with the English toggle — that's faster and more
+faithful than a table for full-page prose. Google Translate is gone from
+these pages.
+
+**journey.js dynamic strings (shell `I18N` keys):**
+
+| Key | EN | ES |
+| :--- | :--- | :--- |
+| journey.progPill | {rated} of {n} layers rated | {rated} de {n} capas evaluadas |
+| journey.saving | Saving… | Guardando… |
+| journey.saved | Saved ✓ | Guardado ✓ |
+| journey.saveFailed | Save failed — check connection | No se pudo guardar — revisa tu conexión |
+| journey.signin | Sign in on the class site to save your ratings | Inicia sesión en el sitio de la clase para guardar tus evaluaciones |
+| journey.slow | Slow ({bpm} BPM) | Lento ({bpm} BPM) |
+| journey.rateAria | Rate this layer | Evalúa esta capa |
+| journey.playalongTitle | Play-along backing track | Pista de acompañamiento para tocar encima |

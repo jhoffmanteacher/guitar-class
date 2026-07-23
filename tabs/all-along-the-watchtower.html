@@ -11,71 +11,61 @@
 <script defer src="../firebase-config.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script type="text/javascript">
-function googleTranslateElementInit(){
-  new google.translate.TranslateElement({
-    pageLanguage:'en',
-    includedLanguages:'es',
-    layout:google.translate.TranslateElement.InlineLayout.NONE,
-    autoDisplay:false
-  },'google_translate_element');
-}
-</script>
-<script defer src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <link rel="stylesheet" href="journey-theme.css">
 <link rel="stylesheet" href="fab-tools.css">
 </head>
 <body>
-<div id="google_translate_element"></div>
 <div class="wrap">
-  <div class="crumb"><span class="crumb-left"><a href="../index.html">&larr; Back to class site</a><button class="btn-translate" id="btn-translate" onclick="toggleTranslate()" title="Translate to Spanish"><span>&#x1F310;</span><span id="translate-label">Español</span></button></span><span id="save-msg" aria-live="polite"></span></div>
+  <div class="crumb"><span class="crumb-left"><a href="../index.html" data-es="&larr; Volver al sitio de la clase">&larr; Back to class site</a><button class="btn-translate" id="btn-translate" onclick="toggleTranslate()" title="Translate to Spanish"><span>&#x1F310;</span><span id="translate-label">Español</span></button></span><span id="save-msg" aria-live="polite"></span></div>
 
   <header class="song">
-    <div class="song-kicker">Song Journey</div>
+    <div class="song-kicker" data-es="Recorrido de la canción">Song Journey</div>
     <h1>All Along the Watchtower</h1>
     <div class="song-artist">Bob Dylan &middot; made famous by Jimi Hendrix</div>
-    <span class="thread-badge">&#x1F9F5; Thread song — it appears across all 5 modules</span>
+    <span class="thread-badge" data-es="&#x1F9F5; Canción hilo — aparece en los 5 módulos">&#x1F9F5; Thread song — it appears across all 5 modules</span>
     <span class="prog-pill">0 of 5 layers rated</span>
   </header>
 
-  <p class="journey-note">One song, five layers. Every module this semester, you come back to this song with a new skill — and it gets bigger every time.</p>
+  <p class="journey-note" data-es="Una canción, cinco capas. Cada módulo de este semestre vuelves a esta canción con una destreza nueva — y cada vez se hace más grande.">One song, five layers. Every module this semester, you come back to this song with a new skill — and it gets bigger every time.</p>
 
-  <div class="songmap">
+  <div class="songmap" data-es="&lt;b&gt;Mapa de la canción:&lt;/b&gt; toda la canción es un solo ciclo de tres acordes — &lt;b&gt;Am &middot; G &middot; F &middot; G&lt;/b&gt; — que se repite bajo cada verso y cada solo.
+    Dylan canta encima; Hendrix hace solos encima. Todo lo de abajo es ese ciclo a distinta profundidad.
+    &lt;br&gt;&lt;em style=&quot;color:var(--text3);font-size:0.8125rem&quot;&gt;Todas las capas son arreglos didácticos a 60 BPM — simplificados para aprender, no transcripciones nota por nota.&lt;/em&gt;">
     <b>Song map:</b> the whole song is one three-chord loop — <b>Am &middot; G &middot; F &middot; G</b> — repeating under every verse and every solo.
     Dylan sings over it; Hendrix solos over it. Everything below is that loop at a different depth.
     <br><em style="color:var(--text3);font-size:0.8125rem">All layers are teaching arrangements at 60 BPM — simplified for learning, not note-for-note transcriptions.</em>
   </div>
 
   <div class="playalong">
-    <button type="button" class="playalong-btn" onclick="togglePlayalong(this)" aria-expanded="false" title="Jam track — backing music to play along with; play the layer you're working on over it"><span class="pa-play">&#x25B6;</span> &#x1F3B5; Play along — jam loop (Am)</button>
+    <button type="button" class="playalong-btn" onclick="togglePlayalong(this)" aria-expanded="false" title="Jam track — backing music to play along with; play the layer you're working on over it" data-es="&lt;span class=&quot;pa-play&quot;&gt;&#x25B6;&lt;/span&gt; &#x1F3B5; Toca encima — bucle de acompañamiento (Am)"><span class="pa-play">&#x25B6;</span> &#x1F3B5; Play along — jam loop (Am)</button>
     <div class="playalong-frame playalong-frame--audio" id="playalong-frame" data-audio="../audio/neil-young-all-along-the-watchtower-backing-Am-115bpm-440hz-rhythm-down.mp3" data-audio-metronome="../audio/neil-young-all-along-the-watchtower-backing-Am-115bpm-440hz-rhythm-down-metronome.mp3" data-audio-slow="../audio/neil-young-all-along-the-watchtower-backing-Am-90bpm-440hz-rhythm-down.mp3" data-audio-slow-metronome="../audio/neil-young-all-along-the-watchtower-backing-Am-90bpm-440hz-rhythm-down-metronome.mp3" data-bpm="115" data-bpm-slow="90" hidden></div>
-    <p class="playalong-note">This track runs at 115 BPM, two beats per chord — the record's real cycle, faster than your 60 BPM practice layers. Not there yet? Toggle &#x1F422; Slow (90 BPM) for a stepping stone before the full tempo.</p>
+    <p class="playalong-note" data-es="Esta pista corre a 115 BPM, dos tiempos por acorde — el ciclo real del disco, más rápido que tus capas de práctica a 60 BPM. ¿Todavía no llegas? Activa el botón &#x1F422; Lento (90 BPM) para un escalón intermedio antes del tempo completo.">This track runs at 115 BPM, two beats per chord — the record's real cycle, faster than your 60 BPM practice layers. Not there yet? Toggle &#x1F422; Slow (90 BPM) for a stepping stone before the full tempo.</p>
   </div>
 
   <!-- LAYER 1 -->
   <section class="layer l1" id="layer-1">
-    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="true" aria-controls="layer-1-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">1</span><span class="layer-title">Listen</span><span class="layer-unit">Module 1</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="true" aria-controls="layer-1-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">1</span><span class="layer-title" data-es="Escucha">Listen</span><span class="layer-unit" data-es="Módulo 1">Module 1</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-1-body">
-      <p>This song exists twice: Bob Dylan's 1967 original and Jimi Hendrix's 1968 cover — same three chords, very different guitars. Before you play a note, hear what one arrangement choice (acoustic vs. electric) does to the same song.</p>
-      <div class="playline"><b>Do it:</b> listen to the opening minute of both versions. One guitar is acoustic, one is electric — decide which is which, and name one word for how each version <em>feels</em>.</div>
-      <div class="branch"><b>Respond:</b> Dylan wrote it — so why do most people know the Hendrix version? What did the cover add?</div>
-      <div class="branch"><b>Connect:</b> name another song where a cover became more famous than the original.</div>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="1">
-        <span class="rate-label">Rate this layer:</span>
+      <p data-es="Esta canción existe dos veces: el original de Bob Dylan de 1967 y la versión de Jimi Hendrix de 1968 — los mismos tres acordes, guitarras muy distintas. Antes de tocar una sola nota, escucha qué le hace a la misma canción una decisión de arreglo (acústica vs. eléctrica).">This song exists twice: Bob Dylan's 1967 original and Jimi Hendrix's 1968 cover — same three chords, very different guitars. Before you play a note, hear what one arrangement choice (acoustic vs. electric) does to the same song.</p>
+      <div class="playline" data-es="&lt;b&gt;Hazlo:&lt;/b&gt; escucha el primer minuto de las dos versiones. Una guitarra es acústica, la otra es eléctrica — decide cuál es cuál, y nombra una palabra para cómo &lt;em&gt;se siente&lt;/em&gt; cada versión."><b>Do it:</b> listen to the opening minute of both versions. One guitar is acoustic, one is electric — decide which is which, and name one word for how each version <em>feels</em>.</div>
+      <div class="branch" data-es="&lt;b&gt;Responde:&lt;/b&gt; Dylan la escribió — entonces ¿por qué la mayoría conoce la versión de Hendrix? ¿Qué aportó esa versión?"><b>Respond:</b> Dylan wrote it — so why do most people know the Hendrix version? What did the cover add?</div>
+      <div class="branch" data-es="&lt;b&gt;Conecta:&lt;/b&gt; nombra otra canción donde una versión se hizo más famosa que el original."><b>Connect:</b> name another song where a cover became more famous than the original.</div>
+      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="1">
+        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+        <span class="rate-key" data-es="1 empezando &middot; 2 estable &middot; 3 sólido">1 getting started &middot; 2 steady &middot; 3 solid</span>
       </div>
     </div>
   </section>
 
   <!-- LAYER 2 -->
   <section class="layer l2 closed" id="layer-2">
-    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-2-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">2</span><span class="layer-title">Bass Line</span><span class="layer-unit">Module 2</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-2-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">2</span><span class="layer-title" data-es="Línea de bajo">Bass Line</span><span class="layer-unit" data-es="Módulo 2">Module 2</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-2-body">
-      <p>Three notes on the low E string carry this whole song: the roots of the chord loop. This riff (a short musical phrase that repeats) was your Module 2 assessment piece — the goal is playing it from memory, eyes closed.</p>
-<pre class="tab">Bass loop — low E string · one note per beat
+      <p data-es="Tres notas en la cuerda Mi grave llevan toda esta canción: las raíces del ciclo de acordes. Este riff (una frase musical corta que se repite) fue tu pieza de evaluación del Módulo 2 — la meta es tocarlo de memoria, con los ojos cerrados.">Three notes on the low E string carry this whole song: the roots of the chord loop. This riff (a short musical phrase that repeats) was your Module 2 assessment piece — the goal is playing it from memory, eyes closed.</p>
+<pre class="tab"><span data-es="Bucle de bajo — cuerda Mi grave · una nota por tiempo">Bass loop — low E string · one note per beat</span>
         A    G    F    G    (loop)
 e |--------------------------------------|
 B |--------------------------------------|
@@ -83,24 +73,24 @@ G |--------------------------------------|
 D |--------------------------------------|
 A |--------------------------------------|
 E |--5----3----1----3--------------------|</pre>
-      <div class="playline"><b>Play it:</b> one note per beat at <b>60 BPM</b>, four laps (a lap = one full time through the loop) without stopping. Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A) — no jumping, every finger has a home.</div>
-      <details class="fold"><summary>Stuck?</summary><div class="branch">Loop just F&nbsp;&rarr;&nbsp;G (frets 1–3) until the change is clean, then add the A on fret 5.</div></details>
-      <details class="fold"><summary>Level up</summary><div class="branch">Say each note name out loud as you play, or run the whole loop with your eyes closed.</div></details>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="2">
-        <span class="rate-label">Rate this layer:</span>
+      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; una nota por tiempo a &lt;b&gt;60 BPM&lt;/b&gt;, cuatro vueltas (una vuelta = una pasada completa del ciclo) sin parar. Digitación: índice en el traste 1 (F), anular en el traste 3 (G), meñique en el traste 5 (A) — sin saltos, cada dedo tiene su lugar."><b>Play it:</b> one note per beat at <b>60 BPM</b>, four laps (a lap = one full time through the loop) without stopping. Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A) — no jumping, every finger has a home.</div>
+      <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Repite solo F &rarr; G (trastes 1–3) hasta que el cambio salga limpio, y luego añade el A en el traste 5.">Loop just F&nbsp;&rarr;&nbsp;G (frets 1–3) until the change is clean, then add the A on fret 5.</div></details>
+      <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Di el nombre de cada nota en voz alta mientras tocas, o toca todo el ciclo con los ojos cerrados.">Say each note name out loud as you play, or run the whole loop with your eyes closed.</div></details>
+      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="2">
+        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+        <span class="rate-key" data-es="1 empezando &middot; 2 estable &middot; 3 sólido">1 getting started &middot; 2 steady &middot; 3 solid</span>
       </div>
     </div>
   </section>
 
   <!-- LAYER 3 -->
   <section class="layer l3 closed" id="layer-3">
-    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-3-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">3</span><span class="layer-title">Power Chords</span><span class="layer-unit">Module 3</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-3-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">3</span><span class="layer-title" data-es="Acordes de potencia">Power Chords</span><span class="layer-unit" data-es="Módulo 3">Module 3</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-3-body">
-      <p>Same three roots you played in Layer 2 — each note now also plays the note a fifth above it. One two-string shape sliding along the low E string.</p>
+      <p data-es="Las mismas tres raíces que tocaste en la Capa 2 — ahora cada nota también suena junto con la nota una quinta arriba. Una sola forma de dos cuerdas deslizándose por la cuerda Mi grave.">Same three roots you played in Layer 2 — each note now also plays the note a fifth above it. One two-string shape sliding along the low E string.</p>
 <pre class="tab">        A5   G5   F5   G5   (loop)
 e |----------------------------------------|
 B |----------------------------------------|
@@ -108,25 +98,25 @@ G |----------------------------------------|
 D |----------------------------------------|
 A |--<span class="hl">7</span>----<span class="hl">5</span>----<span class="hl">3</span>----<span class="hl">5</span>----------------------|
 E |--5----3----1----3----------------------|</pre>
-      <div class="playline"><b>Play it:</b> two beats per chord at <b>60 BPM</b>, four clean laps, every change landing on the beat. Keep your grip — it's one shape, your arm does the moving.</div>
-      <details class="fold"><summary>Stuck?</summary><div class="branch">Drop to roots-only (your Layer 2 line) for a lap, then add the second string back on just the A5.</div></details>
-      <details class="fold"><summary>Level up</summary><div class="branch">One beat per chord — same 60 BPM, twice the changes — or palm-mute the verse (rest the side of your strumming hand on the strings for a short, muffled sound), then let the strings ring louder for a big lap.</div></details>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="3">
-        <span class="rate-label">Rate this layer:</span>
+      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; dos tiempos por acorde a &lt;b&gt;60 BPM&lt;/b&gt;, cuatro vueltas limpias, cada cambio cayendo en el tiempo. Mantén el agarre — es una sola forma, tu brazo hace el movimiento."><b>Play it:</b> two beats per chord at <b>60 BPM</b>, four clean laps, every change landing on the beat. Keep your grip — it's one shape, your arm does the moving.</div>
+      <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Baja a solo raíces (tu línea de la Capa 2) durante una vuelta, y luego vuelve a añadir la segunda cuerda solo en el A5.">Drop to roots-only (your Layer 2 line) for a lap, then add the second string back on just the A5.</div></details>
+      <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Un tiempo por acorde — el mismo 60 BPM, el doble de cambios — o apaga con la palma en el verso (apoya el costado de tu mano de rasgueo sobre las cuerdas para un sonido corto y apagado), y deja que las cuerdas suenen más fuerte en una vuelta grande.">One beat per chord — same 60 BPM, twice the changes — or palm-mute the verse (rest the side of your strumming hand on the strings for a short, muffled sound), then let the strings ring louder for a big lap.</div></details>
+      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="3">
+        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+        <span class="rate-key" data-es="1 empezando &middot; 2 estable &middot; 3 sólido">1 getting started &middot; 2 steady &middot; 3 solid</span>
       </div>
     </div>
   </section>
 
   <!-- LAYER 4 -->
   <section class="layer l4 closed" id="layer-4">
-    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-4-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">4</span><span class="layer-title">Pentatonic Solo</span><span class="layer-unit">Module 4</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-4-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">4</span><span class="layer-title" data-es="Solo pentatónico">Pentatonic Solo</span><span class="layer-unit" data-es="Módulo 4">Module 4</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-4-body">
-      <p>The loop is in A minor, so A minor pentatonic Pattern 1 fits every bar — this is the fret shape Hendrix used for most of his solos. Start with three notes only and leave gaps of silence between notes — the space is part of the music.</p>
-<pre class="tab">Your three starting notes — Am pentatonic Pattern 1 · 5th position
+      <p data-es="El ciclo está en La menor, así que la pentatónica de La menor Patrón 1 encaja en cada compás — esta es la forma en el mástil que usó Hendrix en la mayoría de sus solos. Empieza con solo tres notas y deja huecos de silencio entre nota y nota — el espacio es parte de la música.">The loop is in A minor, so A minor pentatonic Pattern 1 fits every bar — this is the fret shape Hendrix used for most of his solos. Start with three notes only and leave gaps of silence between notes — the space is part of the music.</p>
+<pre class="tab"><span data-es="Tus tres notas para empezar — pentatónica de La menor Patrón 1 · 5.ª posición">Your three starting notes — Am pentatonic Pattern 1 · 5th position</span>
         E        G         A
 e |----------------------------------|
 B |----------------------------------|
@@ -134,43 +124,43 @@ G |----------------------------------|
 D |--------------5---------7---------|
 A |--7-------------------------------|
 E |----------------------------------|</pre>
-      <div class="playline"><b>Play it:</b> loop the chords in your head (or with a partner on Layer 3) and improvise 4 bars on those three notes, then 4 more adding one note of your choice from Pattern 1. Start or end every phrase on A — that's 'home', the note the music rests on.</div>
-      <details class="fold"><summary>Stuck?</summary><div class="branch">Quarter notes only, two-beat phrases, two-beat rests — until an idea shows up on its own.</div></details>
-      <details class="fold"><summary>Level up</summary><div class="branch">Start a phrase during the F bar and resolve it on the Am bar — that's real tension and release.</div></details>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="4">
-        <span class="rate-label">Rate this layer:</span>
+      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; repite los acordes en tu cabeza (o con un compañero tocando la Capa 3) e improvisa 4 compases con esas tres notas, y luego 4 más añadiendo una nota más de tu elección del Patrón 1. Empieza o termina cada frase en La — esa es la nota base, donde la música descansa."><b>Play it:</b> loop the chords in your head (or with a partner on Layer 3) and improvise 4 bars on those three notes, then 4 more adding one note of your choice from Pattern 1. Start or end every phrase on A — that's 'home', the note the music rests on.</div>
+      <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Solo negras, frases de dos tiempos, silencios de dos tiempos — hasta que una idea aparezca sola.">Quarter notes only, two-beat phrases, two-beat rests — until an idea shows up on its own.</div></details>
+      <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Empieza una frase durante el compás de F y resuélvela en el compás de Am — eso es tensión y resolución de verdad.">Start a phrase during the F bar and resolve it on the Am bar — that's real tension and release.</div></details>
+      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="4">
+        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+        <span class="rate-key" data-es="1 empezando &middot; 2 estable &middot; 3 sólido">1 getting started &middot; 2 steady &middot; 3 solid</span>
       </div>
     </div>
   </section>
 
   <!-- LAYER 5 -->
   <section class="layer l5 closed" id="layer-5">
-    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-5-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">5</span><span class="layer-title">Open Chords</span><span class="layer-unit">Module 5</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-5-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">5</span><span class="layer-title" data-es="Acordes al aire">Open Chords</span><span class="layer-unit" data-es="Módulo 5">Module 5</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-5-body">
-      <p>The simple singalong version — closest to how Dylan actually plays it. The same loop you've played as bass notes and power chords becomes full open chords you can strum and sing over. Use the small F (top four strings, xx3211) — no barre needed (a barre presses one finger flat across several strings).</p>
-<pre class="tab">Singalong loop — 2 beats per chord · 60 BPM
+      <p data-es="La versión sencilla para cantar — la más parecida a cómo la toca Dylan en realidad. El mismo ciclo que tocaste como notas de bajo y acordes de potencia se convierte en acordes al aire completos que puedes rasguear y cantar encima. Usa el F pequeño (las cuatro cuerdas de arriba, xx3211) — no hace falta cejilla (una cejilla presiona un dedo plano sobre varias cuerdas).">The simple singalong version — closest to how Dylan actually plays it. The same loop you've played as bass notes and power chords becomes full open chords you can strum and sing over. Use the small F (top four strings, xx3211) — no barre needed (a barre presses one finger flat across several strings).</p>
+<pre class="tab"><span data-es="Ciclo para cantar — 2 tiempos por acorde · 60 BPM">Singalong loop — 2 beats per chord · 60 BPM</span>
 |  Am        G        |  F         G        |  (loop)
    1    2    3    4      1    2    3    4</pre>
-      <div class="playline"><b>Play it:</b> down-strums, two beats per chord, four loops — and listen for it: this is the SAME song you played in Modules 2 and 3, finally sounding full.</div>
-      <details class="fold"><summary>Stuck?</summary><div class="branch">Strum only beat 1 of each chord and use the silent beats to travel to the next shape.</div></details>
-      <details class="fold"><summary>Level up</summary><div class="branch">Trade loops with a partner playing Layer 3 power chords — Dylan and Hendrix at the same time — or hum a verse over your own strumming.</div></details>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="5">
-        <span class="rate-label">Rate this layer:</span>
+      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; rasgueos hacia abajo, dos tiempos por acorde, cuatro vueltas — y escúchalo bien: es la MISMA canción que tocaste en los Módulos 2 y 3, sonando completa por fin."><b>Play it:</b> down-strums, two beats per chord, four loops — and listen for it: this is the SAME song you played in Modules 2 and 3, finally sounding full.</div>
+      <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Rasguea solo el tiempo 1 de cada acorde y usa los tiempos en silencio para viajar a la siguiente forma.">Strum only beat 1 of each chord and use the silent beats to travel to the next shape.</div></details>
+      <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Intercambia vueltas con un compañero tocando los acordes de potencia de la Capa 3 — Dylan y Hendrix al mismo tiempo — o tararea un verso sobre tu propio rasgueo.">Trade loops with a partner playing Layer 3 power chords — Dylan and Hendrix at the same time — or hum a verse over your own strumming.</div></details>
+      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="5">
+        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+        <span class="rate-key" data-es="1 empezando &middot; 2 estable &middot; 3 sólido">1 getting started &middot; 2 steady &middot; 3 solid</span>
       </div>
     </div>
   </section>
 
-  <p class="journey-note">Ready to play it for real? Module 4, Set 1's "Watchtower, the real rhythm" challenge gets your bass line matching the record's actual two-beats-per-chord timing.</p>
+  <p class="journey-note" data-es="¿Listo para tocarla de verdad? El reto &quot;Watchtower, el ritmo real&quot; del Módulo 4, Unidad 1 hace que tu línea de bajo encaje con el tiempo real de dos-tiempos-por-acorde del disco.">Ready to play it for real? Module 4, Set 1's "Watchtower, the real rhythm" challenge gets your bass line matching the record's actual two-beats-per-chord timing.</p>
 
-  <footer>Mr. Hoffman's Guitar Class &middot; Song Journey &middot; teaching arrangement for classroom use &middot; 60 BPM throughout</footer>
+  <footer data-es="Clase de guitarra del Sr. Hoffman &middot; Recorrido de la canción &middot; arreglo didáctico para uso en clase &middot; 60 BPM en todo">Mr. Hoffman's Guitar Class &middot; Song Journey &middot; teaching arrangement for classroom use &middot; 60 BPM throughout</footer>
 </div>
 
 <!-- Floating Tuner/Timer/Metronome — same markup+behavior as the main app
@@ -267,8 +257,10 @@ E |----------------------------------|</pre>
 </div>
 
 <script>var SONG_ID = 'all-along-the-watchtower';</script>
+<!-- i18n.js loads synchronously BEFORE journey.js: journey.js uses t()/getLang()
+     at parse time (progress pill, saved-language restore). -->
+<script src="../i18n.js"></script>
 <script src="journey.js"></script>
-<script defer src="../i18n.js"></script>
 <script defer src="../fab-tools.js"></script>
 <script defer src="../tuner.js"></script>
 </body>

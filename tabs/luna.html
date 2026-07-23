@@ -11,36 +11,28 @@
 <script defer src="../firebase-config.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script type="text/javascript">
-function googleTranslateElementInit(){
-  new google.translate.TranslateElement({
-    pageLanguage:'en',
-    includedLanguages:'es',
-    layout:google.translate.TranslateElement.InlineLayout.NONE,
-    autoDisplay:false
-  },'google_translate_element');
-}
-</script>
-<script defer src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <link rel="stylesheet" href="journey-theme.css">
 <link rel="stylesheet" href="fab-tools.css">
 </head>
 <body>
-<div id="google_translate_element"></div>
 <div class="wrap">
-  <div class="crumb"><span class="crumb-left"><a href="../index.html">&larr; Back to class site</a><button class="btn-translate" id="btn-translate" onclick="toggleTranslate()" title="Translate to Spanish"><span>&#x1F310;</span><span id="translate-label">Español</span></button></span><span id="save-msg" aria-live="polite"></span></div>
+  <div class="crumb"><span class="crumb-left"><a href="../index.html" data-es="&larr; Volver al sitio de la clase">&larr; Back to class site</a><button class="btn-translate" id="btn-translate" onclick="toggleTranslate()" title="Translate to Spanish"><span>&#x1F310;</span><span id="translate-label">Español</span></button></span><span id="save-msg" aria-live="polite"></span></div>
 
   <header class="song">
-    <div class="song-kicker">Song Journey</div>
+    <div class="song-kicker" data-es="Recorrido de la canción">Song Journey</div>
     <h1>Luna</h1>
     <div class="song-artist">Peso Pluma &amp; Junior H</div>
-    <span class="thread-badge">&#x1F9F5; Thread song — it grows through Modules 1–5</span>
+    <span class="thread-badge" data-es="&#x1F9F5; Canción hilo — crece a través de los Módulos 1–5">&#x1F9F5; Thread song — it grows through Modules 1–5</span>
     <span class="prog-pill">0 of 6 layers rated</span>
   </header>
 
-  <p class="journey-note">One song, five layers. As your skills grow this semester, you come back to this song with a new tool — and it gets bigger every time. There's also a bonus Layer 6 with the song's fingerpicked intro, once you're ready for a harder challenge.</p>
+  <p class="journey-note" data-es="Una canción, cinco capas. A medida que tus destrezas crecen este semestre, vuelves a esta canción con una herramienta nueva — y cada vez se hace más grande. También hay una Capa 6 de bono con la introducción punteada de la canción, para cuando estés listo para un reto más difícil.">One song, five layers. As your skills grow this semester, you come back to this song with a new tool — and it gets bigger every time. There's also a bonus Layer 6 with the song's fingerpicked intro, once you're ready for a harder challenge.</p>
 
-  <div class="songmap">
+  <div class="songmap" data-es="&lt;b&gt;Mapa de la canción:&lt;/b&gt; toda la canción se apoya en &lt;b&gt;F &middot; Am&lt;/b&gt;; &lt;b&gt;Dm&lt;/b&gt; hace una breve aparición de paso cerca del final del verso y otra vez en el puente final (algunas partituras lo anotan como Dm9 ahí). Está en 6/8 — siente el pulso en 2 y rasguea los tiempos fuertes.
+    &lt;details class=&quot;songmap-more&quot;&gt;&lt;summary&gt;Más sobre esta canción&lt;/summary&gt;
+    &lt;p&gt;&ldquo;Luna&rdquo;, de Peso Pluma y Junior H, es uno de los mayores éxitos de su época en el estilo sierreño (un estilo acústico mexicano moderno), cantada solo sobre un requinto acústico (una guitarra pequeña y más aguda que toca la melodía principal) y bajo — por eso cada capa aquí apunta a tocarla de forma acústica, sin amplificador.&lt;/p&gt;
+    &lt;p&gt;&lt;em style=&quot;color:var(--text3);font-size:0.8125rem&quot;&gt;Todas las capas son arreglos didácticos — simplificados para aprender, no transcripciones nota por nota. Las metas de tempo siguen los pasos habituales — 60, luego 70, luego 80 BPM por tiempo fuerte — aunque la grabación original va más rápido en 6/8.&lt;/em&gt;&lt;/p&gt;
+    &lt;/details&gt;">
     <b>Song map:</b> the whole song rides <b>F &middot; Am</b>; <b>Dm</b> makes a brief passing appearance near the end of the verse and again in the closing bridge (some charts voice it as Dm9 there). It's in 6/8 — feel the pulse in 2 and strum the downbeats.
     <details class="songmap-more"><summary>More about this song</summary>
     <p>Peso Pluma and Junior H's "Luna" is one of the biggest hits of its time in the sierreño style (a modern Mexican acoustic style), sung over just an acoustic requinto (a small, higher-pitched guitar that plays the lead melody) and bass — which is why every layer here builds toward playing it acoustic, without an amplifier.</p>
@@ -49,35 +41,35 @@ function googleTranslateElementInit(){
   </div>
 
   <div class="playalong">
-    <button type="button" class="playalong-btn" onclick="togglePlayalong(this)" aria-expanded="false" title="Jam track — backing music to play along with; play the layer you're working on over it"><span class="pa-play">&#x25B6;</span> &#x1F3B5; Play along — jam loop (Am)</button>
+    <button type="button" class="playalong-btn" onclick="togglePlayalong(this)" aria-expanded="false" title="Jam track — backing music to play along with; play the layer you're working on over it" data-es="&lt;span class=&quot;pa-play&quot;&gt;&#x25B6;&lt;/span&gt; &#x1F3B5; Toca encima — bucle de acompañamiento (Am)"><span class="pa-play">&#x25B6;</span> &#x1F3B5; Play along — jam loop (Am)</button>
     <div class="playalong-frame playalong-frame--audio" id="playalong-frame" data-audio="../audio/peso-pluma-junior-h-luna-backing-Am-128bpm-440hz-rhythm-down.mp3" data-audio-metronome="../audio/peso-pluma-junior-h-luna-backing-Am-128bpm-440hz-rhythm-down-metronome.mp3" hidden></div>
-    <p class="playalong-note">This track runs at record speed (128 BPM), felt in 2 — same two-downbeat-strums-per-bar feel you've been playing since Module 3, just at the record's real tempo.</p>
+    <p class="playalong-note" data-es="Esta pista corre a la velocidad del disco (128 BPM), sentida en 2 — la misma sensación de dos rasgueos por compás que has tocado desde el Módulo 3, solo que al tempo real del disco.">This track runs at record speed (128 BPM), felt in 2 — same two-downbeat-strums-per-bar feel you've been playing since Module 3, just at the record's real tempo.</p>
   </div>
 
   <!-- LAYER 1 -->
   <section class="layer l1" id="layer-1">
-    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="true" aria-controls="layer-1-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">1</span><span class="layer-title">Listening</span><span class="layer-unit">Module 1</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="true" aria-controls="layer-1-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">1</span><span class="layer-title" data-es="Escuchando">Listening</span><span class="layer-unit" data-es="Módulo 1">Module 1</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-1-body">
-      <p>Before you play a note, feel where the pulse lives. "Luna" is in 6/8 — count it out and you might land on 2 big beats or 6 small ones, and both are true at once: two big beats, each one dividing into three. Tap along with just the two big beats and let the requinto play the rest.</p>
-      <div class="playline"><b>Do it:</b> listen to the first verse. Tap only the two big downbeats per bar — try not to tap all six.</div>
-      <div class="branch"><b>Respond:</b> what does the requinto add to the song that strumming alone can't?</div>
-      <div class="branch"><b>Connect:</b> name another song where an acoustic guitar carries the hook (the catchy part you remember), not just the rhythm.</div>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="1">
-        <span class="rate-label">Rate this layer:</span>
+      <p data-es="Antes de tocar una sola nota, siente dónde vive el pulso. &ldquo;Luna&rdquo; está en 6/8 — cuéntalo y puede que caigas en 2 tiempos grandes o en 6 pequeños, y las dos cosas son ciertas a la vez: dos tiempos grandes, cada uno dividido en tres. Marca solo los dos tiempos grandes y deja que el requinto toque el resto.">Before you play a note, feel where the pulse lives. "Luna" is in 6/8 — count it out and you might land on 2 big beats or 6 small ones, and both are true at once: two big beats, each one dividing into three. Tap along with just the two big beats and let the requinto play the rest.</p>
+      <div class="playline" data-es="&lt;b&gt;Hazlo:&lt;/b&gt; escucha el primer verso. Marca solo los dos tiempos fuertes grandes por compás — intenta no marcar los seis."><b>Do it:</b> listen to the first verse. Tap only the two big downbeats per bar — try not to tap all six.</div>
+      <div class="branch" data-es="&lt;b&gt;Responde:&lt;/b&gt; ¿qué le aporta el requinto a la canción que el rasgueo solo no puede?"><b>Respond:</b> what does the requinto add to the song that strumming alone can't?</div>
+      <div class="branch" data-es="&lt;b&gt;Conecta:&lt;/b&gt; nombra otra canción donde una guitarra acústica lleve el gancho (la parte pegajosa que recuerdas), no solo el ritmo."><b>Connect:</b> name another song where an acoustic guitar carries the hook (the catchy part you remember), not just the rhythm.</div>
+      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="1">
+        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+        <span class="rate-key" data-es="1 empezando &middot; 2 estable &middot; 3 sólido">1 getting started &middot; 2 steady &middot; 3 solid</span>
       </div>
     </div>
   </section>
 
   <!-- LAYER 2 -->
   <section class="layer l2 closed" id="layer-2">
-    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-2-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">2</span><span class="layer-title">Single Notes</span><span class="layer-unit">Module 2</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-2-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">2</span><span class="layer-title" data-es="Notas sueltas">Single Notes</span><span class="layer-unit" data-es="Módulo 2">Module 2</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-2-body">
-      <p>Luna rides two chords — F and Am — so its bassline is just two notes: F (low E string, fret 1) and A (open A string). Two big beats each, right on the downbeats.</p>
-<pre class="tab">Bass roots — teaching arrangement &middot; 2 big beats per note
+      <p data-es="Luna se apoya en dos acordes — F y Am — así que su línea de bajo es solo dos notas: F (cuerda Mi grave, traste 1) y A (cuerda La al aire). Dos tiempos grandes cada una, justo en los tiempos fuertes.">Luna rides two chords — F and Am — so its bassline is just two notes: F (low E string, fret 1) and A (open A string). Two big beats each, right on the downbeats.</p>
+<pre class="tab"><span data-es="Raíces del bajo — arreglo didáctico &middot; 2 tiempos grandes por nota">Bass roots — teaching arrangement &middot; 2 big beats per note</span>
    F    A
 e |----------------|
 B |----------------|
@@ -85,25 +77,25 @@ G |----------------|
 D |----------------|
 A |---------0------|
 E |--1-------------|</pre>
-      <div class="playline"><b>Play it:</b> two big beats per note at <b>60 BPM</b>, four laps (a lap = one full time through the loop), F ringing with no buzz.</div>
-      <details class="fold"><summary>Stuck?</summary><div class="branch">Park on just the F — pluck, listen, adjust — until five ring in a row, then add the open A.</div></details>
-      <details class="fold"><summary>Level up</summary><div class="branch">Curious about the actual requinto intro line? Jump ahead to the bonus Layer 6 at the bottom of this page once you're ready for a harder challenge.</div></details>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="2">
-        <span class="rate-label">Rate this layer:</span>
+      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; dos tiempos grandes por nota a &lt;b&gt;60 BPM&lt;/b&gt;, cuatro vueltas (una vuelta = una pasada completa del bucle), con la F sonando limpia, sin zumbido."><b>Play it:</b> two big beats per note at <b>60 BPM</b>, four laps (a lap = one full time through the loop), F ringing with no buzz.</div>
+      <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Quédate solo en la F — pulsa, escucha, ajusta — hasta que suenen cinco seguidas limpias, luego añade la A al aire.">Park on just the F — pluck, listen, adjust — until five ring in a row, then add the open A.</div></details>
+      <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="¿Curiosidad por la línea real de intro del requinto? Adelántate a la Capa 6 de bono al final de esta página cuando estés listo para un reto más difícil.">Curious about the actual requinto intro line? Jump ahead to the bonus Layer 6 at the bottom of this page once you're ready for a harder challenge.</div></details>
+      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="2">
+        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+        <span class="rate-key" data-es="1 empezando &middot; 2 estable &middot; 3 sólido">1 getting started &middot; 2 steady &middot; 3 solid</span>
       </div>
     </div>
   </section>
 
   <!-- LAYER 3 -->
   <section class="layer l3 closed" id="layer-3">
-    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-3-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">3</span><span class="layer-title">Power Chords &nbsp;&#x25D0;</span><span class="layer-unit">Module 3</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-3-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">3</span><span class="layer-title" data-es="Acordes de potencia &nbsp;&#x25D0;">Power Chords &nbsp;&#x25D0;</span><span class="layer-unit" data-es="Módulo 3">Module 3</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-3-body">
-      <div class="grain">&#x25D0; <b>An unusual twist:</b> this sierreño ballad isn't usually played with power chords — that's the point. Playing it with distortion goes against the song's usual style on purpose; optional harder challenge, no score.</div>
-      <p>Same two notes from Layer 2 — each note now also plays the note a fifth above it. F5 and A5, the same two-finger shape sliding four frets.</p>
+      <div class="grain" data-es="&#x25D0; &lt;b&gt;Un giro poco común:&lt;/b&gt; esta balada sierreña normalmente no se toca con acordes de potencia — y ese es justamente el punto. Tocarla con distorsión va a propósito en contra del estilo habitual de la canción; reto opcional más difícil, sin puntuación.">&#x25D0; <b>An unusual twist:</b> this sierreño ballad isn't usually played with power chords — that's the point. Playing it with distortion goes against the song's usual style on purpose; optional harder challenge, no score.</div>
+      <p data-es="Las mismas dos notas de la Capa 2 — cada nota ahora también suena la nota una quinta arriba. F5 y A5, la misma forma de dos dedos deslizándose cuatro trastes.">Same two notes from Layer 2 — each note now also plays the note a fifth above it. F5 and A5, the same two-finger shape sliding four frets.</p>
 <pre class="tab">        F5   A5
 e |----------------|
 B |----------------|
@@ -111,25 +103,25 @@ G |----------------|
 D |----------------|
 A |--<span class="hl">3</span>----<span class="hl">7</span>--------|
 E |--1----5--------|</pre>
-      <div class="playline"><b>Play it:</b> two downbeat strums per bar at <b>60 BPM</b> — nothing syncopated (no accents landing off the main beat), changing every bar.</div>
-      <details class="fold"><summary>Stuck?</summary><div class="branch">Park on the slide: fret 1, fret 5, fret 1, fret 5 with no rhythm until the jump is automatic.</div></details>
-      <details class="fold"><summary>Level up</summary><div class="branch">Palm-mute (rest the side of your strumming hand on the strings for a short, muffled sound) for a tight sierreño chug (a short, muted, punchy strum), then let it ring and hear why distortion isn't this song's home.</div></details>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="3">
-        <span class="rate-label">Rate this layer:</span>
+      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; dos rasgueos en los tiempos fuertes por compás a &lt;b&gt;60 BPM&lt;/b&gt; — nada sincopado (sin acentos que caigan fuera del tiempo principal), cambiando cada compás."><b>Play it:</b> two downbeat strums per bar at <b>60 BPM</b> — nothing syncopated (no accents landing off the main beat), changing every bar.</div>
+      <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Quédate en el deslizamiento: traste 1, traste 5, traste 1, traste 5, sin ritmo, hasta que el salto sea automático.">Park on the slide: fret 1, fret 5, fret 1, fret 5 with no rhythm until the jump is automatic.</div></details>
+      <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Apaga con la palma (apoya el costado de tu mano de rasgueo sobre las cuerdas para un sonido corto y apagado) para un chug sierreño ajustado (un rasgueo corto, apagado y contundente), luego deja que suene y escucha por qué la distorsión no es el hogar de esta canción.">Palm-mute (rest the side of your strumming hand on the strings for a short, muffled sound) for a tight sierreño chug (a short, muted, punchy strum), then let it ring and hear why distortion isn't this song's home.</div></details>
+      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="3">
+        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+        <span class="rate-key" data-es="1 empezando &middot; 2 estable &middot; 3 sólido">1 getting started &middot; 2 steady &middot; 3 solid</span>
       </div>
     </div>
   </section>
 
   <!-- LAYER 4 -->
   <section class="layer l4 closed" id="layer-4">
-    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-4-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">4</span><span class="layer-title">Pentatonic Solo</span><span class="layer-unit">Module 4</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-4-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">4</span><span class="layer-title" data-es="Solo pentatónico">Pentatonic Solo</span><span class="layer-unit" data-es="Módulo 4">Module 4</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-4-body">
-      <p>Luna lives in F major, and F's relative minor is D — so D minor pentatonic Pattern 1 (root D, low E fret 10) is your box (the block of frets where a scale pattern sits), parked at the semester's highest position.</p>
-<pre class="tab">Your three starting notes — D minor pentatonic, Pattern 1 (10th position)
+      <p data-es="Luna vive en Fa mayor, y la relativa menor de Fa es Re — así que el Patrón 1 de la pentatónica de Re menor (raíz Re, traste 10 de la cuerda Mi grave) es tu caja (el bloque de trastes donde se ubica un patrón de escala), colocada en la posición más aguda del semestre.">Luna lives in F major, and F's relative minor is D — so D minor pentatonic Pattern 1 (root D, low E fret 10) is your box (the block of frets where a scale pattern sits), parked at the semester's highest position.</p>
+<pre class="tab"><span data-es="Tus tres notas para empezar — pentatónica de Re menor, Patrón 1 (posición 10)">Your three starting notes — D minor pentatonic, Pattern 1 (10th position)</span>
         D         F         G
 e |----------------------------------|
 B |----------------------------------|
@@ -137,47 +129,47 @@ G |----------------------------------|
 D |----------------------------------|
 A |--------------------10------------|
 E |--10------13-----------------------|</pre>
-      <div class="playline"><b>Play it:</b> improvise over the chord loop — hit &#x25B6; &#x1F3B5; Backing track on the Luna card in Module 4 to play along and improvise over. End every phrase on D — the note the music rests on — so each idea sounds finished.</div>
-      <details class="fold"><summary>Stuck?</summary><div class="branch">Trade just D and F (frets 10 and 13 on the low E) back and forth, changing only the rhythm, until an idea appears.</div></details>
-      <details class="fold"><summary>Level up</summary><div class="branch">Hold the F (fret 13) a little longer for a sadder, longing feel, or slide the whole box down to open position and compare how they sound.</div></details>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="4">
-        <span class="rate-label">Rate this layer:</span>
+      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; improvisa sobre el bucle de acordes — pulsa &#x25B6; &#x1F3B5; Pista de acompañamiento en la tarjeta de Luna en el Módulo 4 para tocar encima e improvisar. Termina cada frase en Re — la nota donde descansa la música — para que cada idea suene terminada."><b>Play it:</b> improvise over the chord loop — hit &#x25B6; &#x1F3B5; Backing track on the Luna card in Module 4 to play along and improvise over. End every phrase on D — the note the music rests on — so each idea sounds finished.</div>
+      <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Alterna solo Re y Fa (trastes 10 y 13 en la cuerda Mi grave) de ida y vuelta, cambiando solo el ritmo, hasta que aparezca una idea.">Trade just D and F (frets 10 and 13 on the low E) back and forth, changing only the rhythm, until an idea appears.</div></details>
+      <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Sostén la Fa (traste 13) un poco más para un sentimiento más triste y anhelante, o desliza toda la caja hasta la posición abierta y compara cómo suenan.">Hold the F (fret 13) a little longer for a sadder, longing feel, or slide the whole box down to open position and compare how they sound.</div></details>
+      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="4">
+        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+        <span class="rate-key" data-es="1 empezando &middot; 2 estable &middot; 3 sólido">1 getting started &middot; 2 steady &middot; 3 solid</span>
       </div>
     </div>
   </section>
 
   <!-- LAYER 5 -->
   <section class="layer l5 closed" id="layer-5">
-    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-5-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">5</span><span class="layer-title">Open Chords</span><span class="layer-unit">Module 5</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-5-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">5</span><span class="layer-title" data-es="Acordes al aire">Open Chords</span><span class="layer-unit" data-es="Módulo 5">Module 5</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-5-body">
-      <p>The whole song as open chords: F (the little shape, xx3211) and Am carry it start to finish as one vamp (a short chord pattern repeated over and over), with Dm making a brief passing appearance near the end of the verse and again in the closing bridge. Same 6/8 pulse — two downbeat strums per bar, nothing syncopated.</p>
-<pre class="tab">Verse vamp — 2 downbeats per bar &middot; 6/8 felt in 2 &middot; 60 BPM
+      <p data-es="Toda la canción con acordes al aire: F (la forma pequeña, xx3211) y Am la llevan de principio a fin como un solo vamp (un patrón corto de acordes que se repite una y otra vez), con Dm haciendo una breve aparición de paso cerca del final del verso y otra vez en el puente final. Mismo pulso de 6/8 — dos rasgueos en los tiempos fuertes por compás, nada sincopado.">The whole song as open chords: F (the little shape, xx3211) and Am carry it start to finish as one vamp (a short chord pattern repeated over and over), with Dm making a brief passing appearance near the end of the verse and again in the closing bridge. Same 6/8 pulse — two downbeat strums per bar, nothing syncopated.</p>
+<pre class="tab"><span data-es="Vamp del verso — 2 tiempos fuertes por compás &middot; 6/8 sentido en 2 &middot; 60 BPM">Verse vamp — 2 downbeats per bar &middot; 6/8 felt in 2 &middot; 60 BPM</span>
 |  F      |  Am     |  F      |  Am     |
    1  2      1  2      1  2      1  2</pre>
-      <div class="playline"><b>Play it:</b> down-strums, two beats per bar, four laps with every change landing on the downbeat and the little F ringing clean. Near the end of the verse and in the closing bridge, swap in Dm.</div>
-      <details class="fold"><summary>Stuck?</summary><div class="branch">Loop just F&nbsp;&rarr;&nbsp;Am until the shape change is automatic, then add the metronome at 60 BPM.</div></details>
-      <details class="fold"><summary>Level up</summary><div class="branch">Sing or hum "Luna, dile tú" over the loop, or push to a full verse and chorus without stopping. Module 7 upgrades the little F to the full barre (one finger pressed flat across several strings) — the last beginner shortcut before the real shape. Or try the bonus Layer 6 below for the song's fingerpicked intro.</div></details>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="5">
-        <span class="rate-label">Rate this layer:</span>
+      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; rasgueos hacia abajo, dos tiempos por compás, cuatro vueltas con cada cambio cayendo en el tiempo fuerte y la F pequeña sonando limpia. Cerca del final del verso y en el puente final, cambia a Dm."><b>Play it:</b> down-strums, two beats per bar, four laps with every change landing on the downbeat and the little F ringing clean. Near the end of the verse and in the closing bridge, swap in Dm.</div>
+      <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Repite solo F&nbsp;&rarr;&nbsp;Am hasta que el cambio de forma sea automático, luego añade el metrónomo a 60 BPM.">Loop just F&nbsp;&rarr;&nbsp;Am until the shape change is automatic, then add the metronome at 60 BPM.</div></details>
+      <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Canta o tararea &ldquo;Luna, dile tú&rdquo; sobre el bucle, o avanza a un verso y coro completos sin parar. El Módulo 7 sube la F pequeña a la cejilla completa (un dedo presionado plano sobre varias cuerdas) — el último atajo de principiante antes de la forma real. O prueba la Capa 6 de bono más abajo para la introducción punteada de la canción.">Sing or hum "Luna, dile tú" over the loop, or push to a full verse and chorus without stopping. Module 7 upgrades the little F to the full barre (one finger pressed flat across several strings) — the last beginner shortcut before the real shape. Or try the bonus Layer 6 below for the song's fingerpicked intro.</div></details>
+      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="5">
+        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+        <span class="rate-key" data-es="1 empezando &middot; 2 estable &middot; 3 sólido">1 getting started &middot; 2 steady &middot; 3 solid</span>
       </div>
     </div>
   </section>
 
   <!-- LAYER 6 -->
   <section class="layer l6 closed" id="layer-6">
-    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-6-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">6</span><span class="layer-title">Requinto Intro</span><span class="layer-unit">Bonus</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
+    <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-6-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">6</span><span class="layer-title" data-es="Intro de requinto">Requinto Intro</span><span class="layer-unit" data-es="Bono">Bonus</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-6-body">
-      <div class="grain">Bonus layer — optional harder challenge, no score. Ready whenever you are; no specific Module required.</div>
-      <p>Back in Layer 1 you heard the requinto open the song before the vamp starts. It's rolling through the same little F shape you already know from Layer 5 (xx3211) — just leave the high e string open, and pick the notes one at a time instead of strumming them together.</p>
-<pre class="tab">Intro riff — teaching arrangement &middot; roll the little F, low to high, let it ring
+      <div class="grain" data-es="Capa de bono — reto opcional más difícil, sin puntuación. Lista cuando tú quieras; no se requiere ningún Módulo en específico.">Bonus layer — optional harder challenge, no score. Ready whenever you are; no specific Module required.</div>
+      <p data-es="En la Capa 1 escuchaste al requinto abrir la canción antes de que empiece el vamp. Va haciendo un floreo sobre la misma forma pequeña de F que ya conoces de la Capa 5 (xx3211) — solo deja la cuerda mi aguda al aire, y pulsa las notas una por una en vez de rasguearlas juntas.">Back in Layer 1 you heard the requinto open the song before the vamp starts. It's rolling through the same little F shape you already know from Layer 5 (xx3211) — just leave the high e string open, and pick the notes one at a time instead of strumming them together.</p>
+<pre class="tab"><span data-es="Riff de intro — arreglo didáctico &middot; floreo de la F pequeña, de grave a aguda, deja que suene">Intro riff — teaching arrangement &middot; roll the little F, low to high, let it ring</span>
               (roll &uarr;)
 e |------------<span class="hl">0</span>---|
 B |----------<span class="hl">1</span>-----|
@@ -185,20 +177,20 @@ G |--------<span class="hl">2</span>-------|
 D |------<span class="hl">3</span>---------|
 A |-----------------|
 E |-----------------|</pre>
-      <div class="playline"><b>Play it:</b> pick D (fret 3) &rarr; G (fret 2) &rarr; B (fret 1) &rarr; open e, one note at a time, letting each ring into the next until all four are singing together. Repeat twice, then let the chord ring out before the vamp comes in.</div>
-      <details class="fold"><summary>Stuck?</summary><div class="branch">Fret the little F shape first (D3, G2, B1, e open) and strum it once to hear the target chord — then break it apart one string at a time, slowest possible tempo.</div></details>
-      <details class="fold"><summary>Level up</summary><div class="branch">Once the roll is smooth, drop it in front of the Layer 5 vamp as a real intro, or reverse the roll (high to low) for a variation.</div></details>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-layer="6">
-        <span class="rate-label">Rate this layer:</span>
+      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; pulsa Re (traste 3) &rarr; Sol (traste 2) &rarr; Si (traste 1) &rarr; mi aguda al aire, una nota a la vez, dejando que cada una suene hasta la siguiente hasta que las cuatro canten juntas. Repite dos veces, luego deja que el acorde suene hasta apagarse antes de que entre el vamp."><b>Play it:</b> pick D (fret 3) &rarr; G (fret 2) &rarr; B (fret 1) &rarr; open e, one note at a time, letting each ring into the next until all four are singing together. Repeat twice, then let the chord ring out before the vamp comes in.</div>
+      <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Traste primero la forma pequeña de F (D3, G2, B1, e al aire) y rasguéala una vez para escuchar el acorde objetivo — luego desármala una cuerda a la vez, al tempo más lento posible.">Fret the little F shape first (D3, G2, B1, e open) and strum it once to hear the target chord — then break it apart one string at a time, slowest possible tempo.</div></details>
+      <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Una vez que el floreo salga suave, colócalo delante del vamp de la Capa 5 como una intro real, o invierte el floreo (de aguda a grave) para una variación.">Once the roll is smooth, drop it in front of the Layer 5 vamp as a real intro, or reverse the roll (high to low) for a variation.</div></details>
+      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="6">
+        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key">1 getting started &middot; 2 steady &middot; 3 solid</span>
+        <span class="rate-key" data-es="1 empezando &middot; 2 estable &middot; 3 sólido">1 getting started &middot; 2 steady &middot; 3 solid</span>
       </div>
     </div>
   </section>
 
-  <footer>Mr. Hoffman's Guitar Class &middot; Song Journey &middot; teaching arrangement for classroom use &middot; tempo targets build across layers</footer>
+  <footer data-es="Clase de guitarra del Sr. Hoffman &middot; Recorrido de la canción &middot; arreglo didáctico para uso en clase &middot; las metas de tempo suben con cada capa">Mr. Hoffman's Guitar Class &middot; Song Journey &middot; teaching arrangement for classroom use &middot; tempo targets build across layers</footer>
 </div>
 
 <!-- Floating Tuner/Timer/Metronome — same markup+behavior as the main app
@@ -295,8 +287,10 @@ E |-----------------|</pre>
 </div>
 
 <script>var SONG_ID = 'luna';</script>
+<!-- i18n.js loads synchronously BEFORE journey.js: journey.js uses t()/getLang()
+     at parse time (progress pill, saved-language restore). -->
+<script src="../i18n.js"></script>
 <script src="journey.js"></script>
-<script defer src="../i18n.js"></script>
 <script defer src="../fab-tools.js"></script>
 <script defer src="../tuner.js"></script>
 </body>

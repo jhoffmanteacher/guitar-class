@@ -18,28 +18,34 @@ if('scrollRestoration' in history) history.scrollRestoration = 'manual';
 window.scrollTo(0, 0);
 window.addEventListener('load', function(){ window.scrollTo(0, 0); });
 
-/* Spanish translate toggle — mirrors the main app's toggleTranslate(). On
-   Journey pages only the floating Tuner/Timer/Metronome (fab-tools.js
-   markup) carry data-i18n — the rest of the page is still Google-Translate
-   only — but setLang() is still called here so those tools stay in sync
-   with the main app's saved language (gc-lang) and behave identically. */
-var isSpanish = false;
-function toggleTranslate(){
+/* Spanish toggle — hand-written translations, no Google Translate.
+   Every translatable element in a Journey page carries a data-es attribute
+   holding its Spanish innerHTML; switching to Spanish stashes the English
+   original in data-en-html and swaps, switching back restores it. The
+   shared Tuner/Timer/Metronome popups keep their data-i18n keys (i18n.js
+   handles those via setLang → applyI18n), and journey.js's own dynamic
+   strings go through t() — i18n.js loads synchronously BEFORE this file
+   on every Journey page, so t()/getLang() exist even at parse time. */
+function applyJourneyLang(lang){
+  document.querySelectorAll('[data-es]').forEach(function(el){
+    if(lang === 'es'){
+      if(el.dataset.enHtml === undefined) el.dataset.enHtml = el.innerHTML;
+      el.innerHTML = el.dataset.es;
+    } else if(el.dataset.enHtml !== undefined){
+      el.innerHTML = el.dataset.enHtml;
+    }
+  });
   var btn = document.getElementById('btn-translate');
   var lbl = document.getElementById('translate-label');
-  var select = document.querySelector('.goog-te-combo');
-  if(!isSpanish){
-    setLang('es');
-    if(select){ select.value='es'; select.dispatchEvent(new Event('change')); }
-    else { document.cookie='googtrans=/en/es; path=/'; location.reload(); return; }
-    btn.classList.add('active'); lbl.textContent='English'; isSpanish=true;
-  } else {
-    setLang('en');
-    if(select){ select.value='en'; select.dispatchEvent(new Event('change')); }
-    else { document.cookie='googtrans=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'; location.reload(); return; }
-    btn.classList.remove('active'); lbl.textContent='Español'; isSpanish=false;
-  }
+  if(btn) btn.classList.toggle('active', lang === 'es');
+  if(lbl) lbl.textContent = (lang === 'es') ? 'English' : 'Español';
+  updateProgressPill();
 }
+function toggleTranslate(){
+  setLang(getLang() === 'es' ? 'en' : 'es');
+  /* the gc-langchange listener below does the page swap */
+}
+window.addEventListener('gc-langchange', function(e){ applyJourneyLang(e.detail.lang); });
 
 /* ── Layer accordion ──
    One layer open at a time. Collapsed = `.closed` on `section.layer`
@@ -123,7 +129,7 @@ function togglePlayalong(btn){
       a.controls = true;
       a.loop = true;
       a.preload = 'none';
-      a.title = 'Play-along backing track';
+      a.title = t('journey.playalongTitle');
 
       var metroOn = false, slowOn = false;
 
@@ -157,7 +163,7 @@ function togglePlayalong(btn){
         slowBtn.type = 'button';
         slowBtn.className = 'metronome-toggle';
         slowBtn.setAttribute('aria-pressed', 'false');
-        slowBtn.innerHTML = '&#x1F422; Slow (' + box.dataset.bpmSlow + ' BPM)';
+        slowBtn.innerHTML = '&#x1F422; <span data-i18n="journey.slow" data-i18n-params=\'{"bpm":"' + box.dataset.bpmSlow + '"}\'></span>';
         slowBtn.onclick = function(){
           slowOn = !slowOn;
           slowBtn.classList.toggle('on', slowOn);
@@ -172,7 +178,7 @@ function togglePlayalong(btn){
         metroBtn.type = 'button';
         metroBtn.className = 'metronome-toggle';
         metroBtn.setAttribute('aria-pressed', 'false');
-        metroBtn.innerHTML = '&#x1F3B5; Metronome';
+        metroBtn.innerHTML = '&#x1F3B5; <span data-i18n="tools.metronome"></span>';
         metroBtn.onclick = function(){
           metroOn = !metroOn;
           metroBtn.classList.toggle('on', metroOn);
@@ -183,11 +189,12 @@ function togglePlayalong(btn){
       }
 
       box.appendChild(a);
+      applyI18n(box);  /* fill the lazily-created toggle labels in the current language */
       a.play().catch(function(){ /* autoplay may be blocked — the controls still work */ });
     } else {
       var f = document.createElement('iframe');
       f.src = 'https://www.youtube.com/embed/' + box.dataset.video;
-      f.title = 'Play-along backing track';
+      f.title = t('journey.playalongTitle');
       f.allow = 'autoplay; encrypted-media; picture-in-picture';
       f.allowFullscreen = true;
       box.appendChild(f);
@@ -207,7 +214,7 @@ function updateProgressPill(){
     var chip = s.querySelector('.layer-rate-chip');
     return chip && chip.textContent;
   }).length;
-  pill.textContent = rated + ' of ' + layers.length + ' layers rated';
+  pill.textContent = t('journey.progPill', { rated: rated, n: layers.length });
 }
 
 function paintChip(section){
@@ -225,6 +232,9 @@ function paintChip(section){
    scrollRestoration/scrollTo block above). */
 openFromHash(false);
 updateProgressPill();
+/* A returning student who chose Spanish shouldn't see a flash of English —
+   i18n.js (loaded just above) already restored gc-lang, so swap now. */
+applyJourneyLang(getLang());
 window.scrollTo(0, 0);
 
 /* ── Layer self-rating ── */
@@ -265,7 +275,14 @@ function applyRatings(saved){
   }
 }
 
-function setSaveMsg(t){ document.getElementById('save-msg').textContent = t; }
+/* Save-status line — takes an I18N key (or '' to clear) and tags the element
+   with data-i18n so a language switch re-translates whatever is showing. */
+function setSaveMsg(key){
+  var el = document.getElementById('save-msg');
+  if(!key){ el.textContent = ''; el.removeAttribute('data-i18n'); return; }
+  el.setAttribute('data-i18n', key);
+  el.textContent = t(key);
+}
 
 /* Debounced save, mirroring the app's queueSave/flushSave pattern: a burst
    of clicks becomes one write, and a failed write stays dirty so the next
@@ -273,7 +290,7 @@ function setSaveMsg(t){ document.getElementById('save-msg').textContent = t; }
 function queueSave(){
   if(!fbUser) return;
   dirty = true;
-  setSaveMsg('Saving…');
+  setSaveMsg('journey.saving');
   clearTimeout(saveTimer);
   saveTimer = setTimeout(flushSave, 800);
 }
@@ -284,8 +301,8 @@ function flushSave(){
   var payload = { songRatings: {} };
   payload.songRatings[SONG_ID] = currentRatings();
   fbDb.collection('progress').doc(fbUser.uid).set(payload, { merge: true })
-    .then(function(){ setSaveMsg('Saved ✓'); setTimeout(function(){ setSaveMsg(''); }, 2000); })
-    .catch(function(){ dirty = true; setSaveMsg('Save failed — check connection'); });
+    .then(function(){ setSaveMsg('journey.saved'); setTimeout(function(){ setSaveMsg(''); }, 2000); })
+    .catch(function(){ dirty = true; setSaveMsg('journey.saveFailed'); });
 }
 
 function loadFirestoreSdk(){
@@ -303,7 +320,7 @@ window.addEventListener('load', function(){
   if(typeof firebase === 'undefined' || typeof firebaseConfig === 'undefined') return;
   firebase.initializeApp(firebaseConfig);
   firebase.auth().onAuthStateChanged(function(user){
-    if(!user){ setSaveMsg('Sign in on the class site to save your ratings'); return; }
+    if(!user){ setSaveMsg('journey.signin'); return; }
     loadFirestoreSdk().then(function(){
       fbDb = firebase.firestore();
       fbUser = user;

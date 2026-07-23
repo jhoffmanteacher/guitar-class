@@ -429,6 +429,18 @@
     'daily5.fromModule':     { en: 'from Module {num}, {set}:', es: 'del Módulo {num}, {set}:' },
     'daily5.streak':         { en: '{n}-day streak', es: 'racha de {n} días' },
 
+    // ── Song Journey pages (tabs/journey.js dynamic strings — the page
+    //    content itself is hand-translated per-page via data-es) ──
+    'journey.progPill':      { en: '{rated} of {n} layers rated', es: '{rated} de {n} capas evaluadas' },
+    'journey.saving':        { en: 'Saving…', es: 'Guardando…' },
+    'journey.saved':         { en: 'Saved ✓', es: 'Guardado ✓' },
+    'journey.saveFailed':    { en: 'Save failed — check connection', es: 'No se pudo guardar — revisa tu conexión' },
+    'journey.signin':        { en: 'Sign in on the class site to save your ratings',
+                               es: 'Inicia sesión en el sitio de la clase para guardar tus evaluaciones' },
+    'journey.slow':          { en: 'Slow ({bpm} BPM)', es: 'Lento ({bpm} BPM)' },
+    'journey.rateAria':      { en: 'Rate this layer', es: 'Evalúa esta capa' },
+    'journey.playalongTitle':{ en: 'Play-along backing track', es: 'Pista de acompañamiento para tocar encima' },
+
     // ── Footer "Report a problem" mailto ──
     'report.subject':        { en: 'Guitar site — problem report', es: 'Sitio de guitarra — reporte de problema' },
 
