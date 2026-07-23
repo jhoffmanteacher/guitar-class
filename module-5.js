@@ -522,6 +522,13 @@ SETS.push(
                   { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
                   { name: 'G',  chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
                 ],
+                playSeq: { label: 'Hear it — Am · C · Dm · F, two felt beats each, then G to turn it around', label_es: 'Escúchalo — Am · C · Dm · F, dos tiempos sentidos cada uno, y luego G para dar la vuelta', bpm: 60, notes: [
+                  { midi: [45,52,57,60,64], beats: 2 },
+                  { midi: [48,52,55,60,64], beats: 2 },
+                  { midi: [50,57,62,65], beats: 2 },
+                  { midi: [53,57,60,65], beats: 2 },
+                  { midi: [43,47,50,55,59,67], beats: 2 }
+                ] },
                 response: { type: 'short', prompt: 'Your cleanest tempo on the "the cure" loop today (BPM)?', prompt_es: '¿Tu tempo más limpio hoy en la vuelta de "the cure" (BPM)?', placeholder: 'e.g. 65 — 70 next session', placeholder_es: 'p. ej. 65 — 70 la próxima sesión' }
               }
             ]
@@ -914,6 +921,11 @@ SETS.push(
                   { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
                 ],
+                playSeq: { label: 'Hear it — D · C · G, one full bar per chord, like the record', label_es: 'Escúchalo — D · C · G, un compás completo por acorde, como en la grabación', bpm: 60, maxBpm: 130, notes: [
+                  { midi: [50,57,62,66], beats: 4 },
+                  { midi: [48,52,55,60,64], beats: 4 },
+                  { midi: [43,47,50,55,59,67], beats: 4 }
+                ] },
                 response: { type: 'short', prompt: 'How did it feel playing along with the actual 125 BPM record after practicing slower?', prompt_es: '¿Cómo se sintió tocar junto con la grabación real a 125 BPM después de practicar más despacio?', placeholder: 'e.g. the changes felt rushed at first, then locked in', placeholder_es: 'p. ej. los cambios se sintieron apurados al principio, y luego encajaron' }
               }
             ]

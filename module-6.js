@@ -260,6 +260,20 @@ SETS.push(
             playSeq: { label: 'C·C · G·G · Am·Am · F·F roots (every 2 beats)', label_es: 'Raíces C·C · G·G · Am·Am · F·F (cada 2 tiempos)', bpm: 60, notes: [48, 48, 43, 43, 45, 45, 53, 53] }
           },
           {
+            text: 'Hear it — the same C · G · Am · F loop as full chords, each one ringing for the full two beats before the next change: two laps, just like the record\'s verse.',
+            text_es: 'Escúchalo — el mismo loop C · G · Am · F como acordes completos, cada uno sonando los dos tiempos completos antes del siguiente cambio: dos vueltas, tal como la estrofa de la grabación.',
+            playSeq: { label: 'Hear it — C · G · Am · F, two beats per chord', label_es: 'Escúchalo — C · G · Am · F, dos tiempos por acorde', bpm: 60, notes: [
+              { midi: [48,52,55,60,64], beats: 2 },
+              { midi: [43,47,50,55,59,67], beats: 2 },
+              { midi: [45,52,57,60,64], beats: 2 },
+              { midi: [53,57,60,65], beats: 2 },
+              { midi: [48,52,55,60,64], beats: 2 },
+              { midi: [43,47,50,55,59,67], beats: 2 },
+              { midi: [45,52,57,60,64], beats: 2 },
+              { midi: [53,57,60,65], beats: 2 }
+            ] }
+          },
+          {
             text: 'Challenge — One Chord Per Beat (fastest): the top of the ladder. Switch Em ↔ Am on every single beat — one down-strum per beat, a new chord each time, at 60 BPM, the strum still non-stop. You\'ve got it when: four laps clean at 60 where the change happens the instant your hand lifts for the next strum.',
             text_es: 'Reto — Un acorde por tiempo (el más rápido): la cima de la escalera. Cambia entre Em ↔ Am en cada tiempo — un golpe hacia abajo por tiempo, un acorde nuevo cada vez, a 60 BPM, el rasgueo sigue sin detenerse. Lo tienes cuando: cuatro vueltas limpias a 60 donde el cambio ocurre en el instante en que tu mano se levanta para el siguiente rasgueo.',
             hint: 'Em and Am share two fingers, so this is the easiest pair to change every beat — perfect for training raw speed. Trust the shared fingers and move only what has to move.',

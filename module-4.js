@@ -306,14 +306,49 @@ SETS.push(
                 response: { type: 'short', prompt: 'What did you notice, holding each root for two beats instead of one?', prompt_es: '¿Qué notaste al sostener cada raíz dos tiempos en vez de uno?', placeholder: 'e.g. it finally sounds like the song, not an exercise', placeholder_es: 'p. ej. por fin suena como la canción, no como un ejercicio' }
               },
               {
-                text: 'Challenge — Seven Nation Army, the real rhythm (by ear): you\'ve played this riff since Module 1 as straight, even quarter notes — but the record swings it looser than that. Listen to the recording on repeat, then clap the riff\'s rhythm with no guitar — some notes clipped short, some held longer — until it\'s in your hands. Add the frets back once the feel is there. You\'ve got it when: you can loop the riff along with the record and stay locked with its groove. (Module 7 revisits this riff to read its rhythm in notation — for now, trust your ear.) <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                text_es: 'Reto — Seven Nation Army, el ritmo real (de oído): has tocado este riff desde el Módulo 1 como negras parejas y rectas — pero la grabación lo balancea más suelto que eso. Escucha la grabación una y otra vez, y luego aplaude el ritmo del riff sin guitarra — algunas notas cortas, algunas sostenidas más — hasta que esté en tus manos. Vuelve a agregar los trastes una vez que tengas la sensación. Lo tienes cuando: puedes repetir el riff junto con la grabación y mantenerte sincronizado con su groove (el groove = la sensación rítmica que te hace mover el cuerpo). (El Módulo 7 vuelve a este riff para leer su ritmo en notación — por ahora, confía en tu oído.) <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+                text: 'Challenge — Seven Nation Army, the real rhythm (by ear): you\'ve played this riff since Module 1 as straight, even quarter notes — but the record swings it looser than that. Press the two &#x25B6; buttons below to hear the difference before you clap it. Listen to the recording on repeat, then clap the riff\'s rhythm with no guitar — some notes clipped short, some held longer — until it\'s in your hands. Add the frets back once the feel is there. You\'ve got it when: you can loop the riff along with the record and stay locked with its groove. (Module 7 revisits this riff to read its rhythm in notation — for now, trust your ear.) <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text_es: 'Reto — Seven Nation Army, el ritmo real (de oído): has tocado este riff desde el Módulo 1 como negras parejas y rectas — pero la grabación lo balancea más suelto que eso. Presiona los dos botones &#x25B6; de abajo para escuchar la diferencia antes de aplaudirlo. Escucha la grabación una y otra vez, y luego aplaude el ritmo del riff sin guitarra — algunas notas cortas, algunas sostenidas más — hasta que esté en tus manos. Vuelve a agregar los trastes una vez que tengas la sensación. Lo tienes cuando: puedes repetir el riff junto con la grabación y mantenerte sincronizado con su groove (el groove = la sensación rítmica que te hace mover el cuerpo). (El Módulo 7 vuelve a este riff para leer su ritmo en notación — por ahora, confía en tu oído.) <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'Don\'t reach for counts or note values yet — this is ear training, the same way you learned to clap Watchtower\'s rhythm. Your ear already knows this riff; you\'re just teaching your hands to match it.',
                 hint_es: 'No busques contar tiempos o valores de nota todavía — esto es entrenamiento de oído, igual que aprendiste a aplaudir el ritmo de Watchtower. Tu oído ya conoce este riff; solo estás enseñándole a tus manos a igualarlo.',
                 stuck: 'Clap just the first half of the riff (B · B · D · B) on loop until that half locks with the record, then add the second half (A · G · F#).',
                 stuck_es: 'Aplaude solo la primera mitad del riff (B · B · D · B) en bucle hasta que esa mitad encaje con la grabación, y luego agrega la segunda mitad (A · G · F#).',
                 levelUp: 'Play it as power chords instead of single notes, keeping the same swung feel — same trick as Watchtower\'s real-rhythm level-up.',
                 levelUp_es: 'Tócalo como acordes de potencia en vez de notas sueltas, manteniendo la misma sensación de balanceo — el mismo truco que el nivel superior del ritmo real de Watchtower.',
+                tabs: [
+                  {
+                    title: 'How you learned it — straight teaching count',
+                    title_es: 'Cómo lo aprendiste — conteo de enseñanza recto',
+                    caption: '"Seven Nation Army" — main riff · Low E string · straight quarter notes',
+                    caption_es: '"Seven Nation Army" — riff principal · cuerda Mi grave · negras rectas y parejas',
+                    bpm: 60,
+                    notes: [
+                      { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+                      { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+                      { string: 'E', fret: 10, note: 'D',  midi: 50 },
+                      { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+                      { string: 'E', fret: 5,  note: 'A',  midi: 45 },
+                      { string: 'E', fret: 3,  note: 'G',  midi: 43 },
+                      { string: 'E', fret: 2,  note: 'F#', midi: 42 }
+                    ]
+                  },
+                  {
+                    title: 'How the record goes',
+                    title_es: 'Cómo suena en la grabación',
+                    caption: '"Seven Nation Army" — main riff · the record\'s real durations (close to the record\'s feel, not note-perfect)',
+                    caption_es: '"Seven Nation Army" — riff principal · las duraciones reales de la grabación (cercano a la sensación de la grabación, no nota por nota)',
+                    bpm: 60,
+                    maxBpm: 130,
+                    notes: [
+                      { string: 'E', fret: 7,  note: 'B',  midi: 47, beats: 1.5 },
+                      { string: 'E', fret: 7,  note: 'B',  midi: 47, beats: 0.5 },
+                      { string: 'E', fret: 10, note: 'D',  midi: 50, beats: 0.5 },
+                      { string: 'E', fret: 7,  note: 'B',  midi: 47, beats: 0.5 },
+                      { string: 'E', fret: 5,  note: 'A',  midi: 45, beats: 0.5 },
+                      { string: 'E', fret: 3,  note: 'G',  midi: 43, beats: 2 },
+                      { string: 'E', fret: 2,  note: 'F#', midi: 42, beats: 0.5 }
+                    ]
+                  }
+                ],
                 response: { type: 'short', prompt: 'What\'s different about the riff\'s real rhythm compared to how you first learned it?', prompt_es: '¿Qué es diferente en el ritmo real del riff comparado con cómo lo aprendiste primero?', placeholder: 'e.g. the first two B\'s aren\'t evenly spaced', placeholder_es: 'p. ej. las primeras dos B no están parejas' }
               },
               {

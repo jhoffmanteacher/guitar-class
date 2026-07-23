@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-23 — Play buttons now play real rhythms on the real-rhythm challenges
+
+### Added
+- **Seven Nation Army's Module 4 "real rhythm" step now has two &#x25B6; buttons**
+  so you can hear the riff both ways before you clap it — the straight
+  teaching count you've played since Module 1, and the record's real,
+  swung durations, side by side.
+- **Let It Be, "the cure," and Sweet Child O' Mine each get a new "Hear it"
+  play button** on their strummed/verse challenge steps, playing the full
+  chords held for the record's real chord lengths — two beats each for
+  Let It Be and "the cure," a full bar each for Sweet Child O' Mine —
+  instead of just root notes.
+
 ## 2026-07-22 — Seven Nation Army gets a real jam track
 
 ### Added
