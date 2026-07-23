@@ -10,16 +10,6 @@ Jonathan Hoffman prefers plain-English instructions and wants Claude to handle a
 | "Push to GitHub" | **First run the pre-push checks** (see below), fix anything they flag, then git add relevant files, git commit with a clear message, git push, confirm success |
 | "Save progress with a note: [message]" | Run the pre-push checks, commit with that message, push |
 
-**Cloud (Cowork) sessions:** "push to GitHub" can't push directly — cloud
-GitHub access is read-only for this repo, and git write operations through the
-device-bridge folder fail (lock files can't be unlinked; never attempt them).
-Instead: run the FULL pre-push checks in the cloud (so `CACHE_VERSION` ships
-pre-bumped), commit, then deliver a `git format-patch` file plus a short
-`APPLY-*.md` instruction file; Jonathan hands both to his local Claude Code,
-which runs `git am`, re-verifies, and pushes. Afterwards the cloud session
-fetches origin and hard-resets its clone to match. (Full rationale + history:
-WORKFLOW.md "Working conventions.")
-
 ### ⚠️ Run the pre-push checks before EVERY code push
 Before any push that changes `index.html`, `styles.css`, `app.js`, `tuner.js`,
 `teacher.js`, `config-main.js`, or a `module-N.js`, run:

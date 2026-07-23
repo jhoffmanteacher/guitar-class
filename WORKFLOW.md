@@ -40,17 +40,6 @@
   **Mac-only**; the **Windows** machine needs the rule followed by hand (or a
   PowerShell twin of the hook). Activate after editing the hook with `/hooks` or a
   restart.
-- **Cloud Cowork sessions can't push (and must not git-write through the
-  device bridge).** Established 2026-07-23: the cloud session's GitHub access
-  is read-only for this repo, and running `git am`/`merge` against the Mac
-  clone through the connected-folder bridge fails (the bridge can't unlink
-  git's lock files — stale locks had to be swept to `_to_delete/`). The
-  working pattern instead: build + verify in the cloud (full `checks.mjs`
-  run pre-handoff so `CACHE_VERSION` ships pre-bumped) → commit → deliver
-  `git format-patch` output + a short `APPLY-*.md` → Jonathan's local
-  Claude Code applies (`git am`) and pushes → the cloud session then
-  fetches origin and hard-resets its clone. Local sessions keep the normal
-  "push to GitHub" workflow from CLAUDE.md unchanged.
 
 ---
 
@@ -218,23 +207,9 @@
       text — found zero leaks this time, confirming the tightened
       translator+verifier briefs (explicit instruction to grep for
       established terms, not just new ones) closed that gap.
-      **Session 6 (2026-07-23, cloud Cowork session): shell "Known gaps"
-      CLEARED + practice-drill Spanish for 83 new drills.** The deferred
-      shell list from session 1 is done — locked-set gate toasts + locked
-      pill tooltips, Songs Hub / Keep practicing / My progress panel
-      contents, the Daily 5 modal, the report-a-problem subject, the
-      recording widget (incl. both alerts), and the checklist cells'
-      aria-labels: 46 new `I18N` keys, en+es, wired with language-switch
-      rebuild handling; Daily 5 and Keep practicing now also read module
-      content through `tf()` (they had been bypassing existing `_es`
-      twins). Separately, the Practice System rounds (see Recently
-      shipped) added hand-written `_es` for all 83 new practice drills
-      across modules 1–12 plus the new practice-panel UI strings —
-      review tables backfilled in `translations-review.md`.
-      **Remaining before Google Translate can be removed: coach.js game
-      panel contents, `WINTER_CHALLENGE` `text_es` twins in
-      config-main.js (renderer already `tf()`-ready), and the tabs/
-      Song Journey pages** — see CLAUDE.md's "Later stages."
+      **Next: tabs/ (the six Song Journey pages) and coach.js (the
+      practice games), then the final cleanup session that removes Google
+      Translate entirely** — see CLAUDE.md's "Later stages."
 - [ ] **Custom backing tracks for the six journey-page play-alongs — Jonathan
       is making them himself** (Jonathan, 2026-07-20; plan to do all six
       confirmed 2026-07-22) — every Song Journey page has a "🎵 Play along"
@@ -393,38 +368,6 @@
 ---
 
 ## Recently shipped (post-archive)
-
-- [~] **Practice everywhere (round 2): Modules 6–12 drills + six-string
-      Find-the-Note + shell i18n finished + list-formatted directions** —
-      commit `202f4dd` (2026-07-23), built in the cloud Cowork session and
-      **delivered as `practice-everywhere.patch` for local apply+push;
-      flip this to [x] with the final hash once pushed.** 54 new drills
-      (all 230 course skills now practiceable; M6–12 mix 77 mc / 31
-      playSeq / 17 pr / 5 chord / 5 fretboard) + 9 conversions (M7/M11
-      barres → 'chord', M9 note-naming → per-string 'fretboard');
-      Find-the-Note extended to D/G/B/high-E + a six-row 'all' mode;
-      i18n session 6 (see Open work); practice prompt/explain/chord-label
-      now render trusted HTML; 17 step texts + 20 pr prompts reformatted
-      as `<ol>/<ul>` per Jonathan's new list rule (documented in
-      CLAUDE.md); step-preview tag stripping made word-safe;
-      `.step ul` solid discs. One content removal to know about:
-      m9w2-s2's old "why do the two E strings share note names?" mc was
-      replaced by its fretboard game (flagged to Jonathan).
-- [x] **Practice System 2.0 (round 1): every Module 1–5 skill practiceable,
-      with rep tracking and spaced review** — pushed `1deed88`
-      (2026-07-23; built in the cloud Cowork session, applied+pushed
-      locally via patch). Engine: `practiceLog` persistence (Firestore
-      save category + localStorage write-through), rep strip with a
-      3-reps/day goal on every practice panel, "Keep it sharp"
-      spaced-review card at the top of each set's checklist, and three
-      new practice types — `fretboard` (Find-the-Note game, lowE/A/both),
-      `chord` (diagram + Listening Coach + log-rep), `pr` (structured
-      BPM/count ladder on the responses PR-history path, no regex
-      heuristic). Content: 29 drills added + 2 conversions so all 77
-      M1–5 skills have `practice:`, hand-written `_es` throughout.
-      Verified via checks.mjs + Playwright integration on real module
-      data. `practiceLog` is teacher-dashboard-ready but not surfaced in
-      teacher.js yet (future idea).
 
 - [x] **Tuner / Timer / Metronome on the Song Journey pages** — pushed
       `8eb26f6` + `8f33ae1` + `2acd13f` (2026-07-20). The same floating
