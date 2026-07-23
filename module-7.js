@@ -294,11 +294,23 @@ SETS.push(
       { id: 'm7w1-s5', text: 'Play a riff that mixes single notes and double-stops from TAB',
         text_es: 'Tocar un riff que combina notas sueltas y dobles notas desde el TAB',
         gotItWhen: 'you can sight-read a beginner riff that combines single notes and 2-note chord stabs and play it cleanly the first time through at half speed.',
-        gotItWhen_es: 'puedes leer a primera vista un riff de principiante que combina notas sueltas y golpes de acorde de 2 notas y tocarlo limpio la primera vez, a media velocidad.' },
+        gotItWhen_es: 'puedes leer a primera vista un riff de principiante que combina notas sueltas y golpes de acorde de 2 notas y tocarlo limpio la primera vez, a media velocidad.',
+        practice: { type: 'mc', prompt: 'You strum a double-stop but only ONE of the two strings sounds. Most likely cause?',
+          prompt_es: 'Rasgueas una doble nota pero solo suena UNA de las dos cuerdas. ¿La causa más probable?',
+          choices: ['Your pick stroke is too small — flatten it out so it crosses both strings', 'Double-stops can only be played with fingers, never a pick', 'You need to press both frets twice as hard', 'The TAB must be wrong'],
+          choices_es: ['Tu golpe de púa es demasiado pequeño — hazlo más plano para que cruce las dos cuerdas', 'Las dobles notas solo se pueden tocar con los dedos, nunca con púa', 'Necesitas presionar los dos trastes el doble de fuerte', 'El TAB debe estar mal'], answer: 0,
+          explain: 'A double-stop needs one stroke that travels through both strings — widen the motion slightly. Pressing harder or blaming the TAB doesn\'t move the pick.',
+          explain_es: 'Una doble nota necesita un solo golpe que atraviese ambas cuerdas — amplía un poco el movimiento. Presionar más fuerte o culpar al TAB no mueve la púa.' } },
       { id: 'm7w1-s6', text: 'Find a TAB online for a new song and play through it',
         text_es: 'Encontrar un TAB en línea para una canción nueva y tocarlo de principio a fin',
         gotItWhen: 'you can pick a song you like, find a beginner TAB (Ultimate Guitar, Songsterr), and get through at least one section without asking for help.',
-        gotItWhen_es: 'puedes elegir una canción que te guste, encontrar un TAB para principiantes (Ultimate Guitar, Songsterr), y tocar al menos una sección sin pedir ayuda.' }
+        gotItWhen_es: 'puedes elegir una canción que te guste, encontrar un TAB para principiantes (Ultimate Guitar, Songsterr), y tocar al menos una sección sin pedir ayuda.',
+        practice: { type: 'mc', prompt: 'You find three different TABs of the same song online. How do you decide which one to trust?',
+          prompt_es: 'Encuentras tres TABs diferentes de la misma canción en línea. ¿Cómo decides en cuál confiar?',
+          choices: ['Play the first riff of each and keep the one that sounds like the record', 'The highest star rating is always the correct one', 'The longest, most detailed one', 'The first search result'],
+          choices_es: ['Toca el primer riff de cada uno y quédate con el que suena como la grabación', 'La calificación de estrellas más alta siempre es la correcta', 'El más largo y detallado', 'El primer resultado de búsqueda'], answer: 0,
+          explain: 'Ratings are a good starting filter, but fan TABs are often wrong — your ear against the recording is the real referee.',
+          explain_es: 'Las calificaciones son un buen filtro inicial, pero los TABs de fans a menudo están mal — tu oído contra la grabación es el verdadero árbitro.' } }
     ]
   },
 
@@ -557,13 +569,19 @@ SETS.push(
       { id: 'm7w2-s3', text: 'Form an E-shape barre chord at the 5th fret (A major) cleanly',
         text_es: 'Formar un acorde con cejilla en forma de E en el traste 5 (A mayor) de forma limpia',
         gotItWhen: 'you can pluck each of the 6 strings individually in your A barre and every one rings — no muffled string from a cramped finger.',
-        gotItWhen_es: 'puedes puntear cada una de las 6 cuerdas por separado en tu cejilla de A y todas suenan — sin ninguna cuerda apagada por un dedo acalambrado.' },
+        gotItWhen_es: 'puedes puntear cada una de las 6 cuerdas por separado en tu cejilla de A y todas suenan — sin ninguna cuerda apagada por un dedo acalambrado.',
+        practice: { type: 'chord', label: 'A major — E-shape barre at fret 5',
+          chords: [
+            { name: 'A major', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,6,'2'],[2,5,'1'],[1,5,'1']], position: 5 }
+          ] } },
       { id: 'm7w2-s4', text: 'Play F major barre at the 1st fret',
         text_es: 'Tocar la cejilla de F mayor en el traste 1',
         gotItWhen: 'your F barre at the 1st fret rings cleanly on at least 5 of 6 strings — including the B string, which is the trickiest for the bar.',
         gotItWhen_es: 'tu cejilla de F en el traste 1 suena limpia en al menos 5 de las 6 cuerdas — incluyendo la cuerda Si, que es la más difícil para la cejilla.',
-        practice: { type: 'playSeq', label: 'Hear F major (E-shape barre, arpeggiated)', label_es: 'Escucha F mayor (cejilla en forma de E, arpegiada)', bpm: 60,
-          notes: [41, 48, 53, 57, 60, 65] } },
+        practice: { type: 'chord', label: 'F major — E-shape barre at fret 1',
+          chords: [
+            { name: 'F major', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
+          ] } },
       { id: 'm7w2-s5', text: 'Name an E-shape barre chord by its root note on string 6',
         text_es: 'Nombrar un acorde con cejilla en forma de E por su nota raíz en la cuerda 6',
         gotItWhen: 'you can slide your E-shape barre to any random fret and name the chord instantly — because you know the notes on the low E string from Module 2.',
@@ -576,8 +594,9 @@ SETS.push(
         text_es: 'Cambiar entre los acordes con cejilla F, G, y A a tiempo a 60 BPM',
         gotItWhen: 'you can play 2 bars of F, 2 bars of G, 2 bars of A, looping, at 60 BPM — same shape, just sliding up and down the neck.',
         gotItWhen_es: 'puedes tocar 2 compases de F, 2 compases de G, 2 compases de A, en loop, a 60 BPM — misma forma, solo deslizándose arriba y abajo del mástil.',
-        practice: { type: 'playSeq', label: 'F · G · A roots (low E string)', label_es: 'Raíces F · G · A (cuerda Mi grave)', bpm: 60,
-          notes: [41, 43, 45] } }
+        practice: { type: 'pr', prompt: '<ol><li>Loop 2 bars each of F, G, and A — the same E-shape sliding up the neck.</li><li>Start at 60 BPM and raise the metronome +5 at a time.</li><li>Log your fastest BPM with clean changes.</li></ol>',
+          prompt_es: '<ol><li>Repite 2 compases de F, G, y A — la misma forma de E deslizándose por el mástil.</li><li>Empieza a 60 BPM y sube el metrónomo de 5 en 5.</li><li>Anota tu BPM más rápido con cambios limpios.</li></ol>',
+          unit: 'BPM', placeholder: 'e.g. 70 — try for a higher number next session', placeholder_es: 'p. ej. 70 — intenta superarlo la próxima sesión' } }
     ]
   },
 
@@ -873,8 +892,10 @@ SETS.push(
         text_es: 'Formar un acorde con cejilla en forma de A de manera limpia en el traste 2 (B mayor)',
         gotItWhen: 'your B barre rings cleanly on strings 5 to 1 — and string 6 (low E) is muted by your index finger so it doesn\'t accidentally sound.',
         gotItWhen_es: 'tu cejilla de B suena limpia en las cuerdas 5 a 1 — y la cuerda 6 (Mi grave) está silenciada por tu dedo índice para que no suene por accidente.',
-        practice: { type: 'playSeq', label: 'Hear B major (A-shape barre, arpeggiated)', label_es: 'Escucha B mayor (cejilla en forma de A, arpegiada)', bpm: 60,
-          notes: [47, 54, 59, 63, 66] } },
+        practice: { type: 'chord', label: 'B major — A-shape barre at fret 2',
+          chords: [
+            { name: 'B major', chord: [[6,'x'],[5,2,'1'],[4,4,'3'],[3,4,'3'],[2,4,'3'],[1,2,'1']], position: 2 }
+          ] } },
       { id: 'm7w3-s2', text: 'Mute string 6 (low E) when playing an A-shape barre',
         text_es: 'Silenciar la cuerda 6 (Mi grave) al tocar una cejilla en forma de A',
         gotItWhen: 'your index finger lightly mutes string 6 so you don\'t have to think about avoiding it when strumming — even a slightly wide strum sounds fine.',
@@ -895,12 +916,19 @@ SETS.push(
         text_es: 'Tocar Bb, C, y D como acordes con cejilla en forma de A',
         gotItWhen: 'you can slide the A-shape between Bb (1st fret), C (3rd fret), and D (5th fret) and each chord rings cleanly with no muffled strings.',
         gotItWhen_es: 'puedes deslizar la forma de A entre Bb (traste 1), C (traste 3), y D (traste 5) y cada acorde suena limpio sin cuerdas apagadas.',
-        practice: { type: 'playSeq', label: 'Bb · C · D roots (A string)', label_es: 'Raíces Bb · C · D (cuerda La)', bpm: 60,
-          notes: [46, 48, 50] } },
+        practice: { type: 'chord', label: 'One A-shape, three roots — Bb · C · D',
+          chords: [
+            { name: 'Bb major (A-shape)', chord: [[6,'x'],[5,1,'1'],[4,3,'3'],[3,3,'3'],[2,3,'3'],[1,1,'1']], position: 1 },
+            { name: 'C', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,5,'3'],[2,5,'3'],[1,3,'1']], position: 3 },
+            { name: 'D', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,7,'3'],[2,7,'3'],[1,5,'1']], position: 5 }
+          ] } },
       { id: 'm7w3-s5', text: 'Switch between an E-shape barre and an A-shape barre in time',
         text_es: 'Cambiar entre una cejilla en forma de E y una cejilla en forma de A a tiempo',
         gotItWhen: 'you can go from F (E-shape, 1st fret) to C (A-shape, 3rd fret) on beat 1 of a new bar at 60 BPM without buzzing or pausing.',
-        gotItWhen_es: 'puedes ir de F (forma de E, traste 1) a C (forma de A, traste 3) en el tiempo 1 de un compás nuevo a 60 BPM sin zumbido ni pausas.' },
+        gotItWhen_es: 'puedes ir de F (forma de E, traste 1) a C (forma de A, traste 3) en el tiempo 1 de un compás nuevo a 60 BPM sin zumbido ni pausas.',
+        practice: { type: 'pr', prompt: '<ol><li>One minute: switch F (E-shape, fret 1) ↔ C (A-shape, fret 3), one bar each.</li><li>Count the changes that landed clean on beat 1.</li><li>Log your best.</li></ol>',
+          prompt_es: '<ol><li>Un minuto: cambia entre F (forma de E, traste 1) ↔ C (forma de A, traste 3), un compás cada uno.</li><li>Cuenta los cambios que cayeron limpios en el tiempo 1.</li><li>Anota tu mejor número.</li></ol>',
+          unit: 'count', placeholder: 'e.g. 10 changes — try for a higher number', placeholder_es: 'p. ej. 10 cambios — intenta superarlo' } },
       { id: 'm7w3-s6', text: 'Play a full song using only barre chords (no open chords)',
         text_es: 'Tocar una canción completa usando solo acordes con cejilla (sin acordes abiertos)',
         gotItWhen: 'you can play "All Along the Watchtower" or another 3-chord song from start to finish using ONLY barre chords — proving you no longer need the open shapes.',

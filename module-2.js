@@ -233,8 +233,8 @@ SETS.push(
                   choices_es: ['A', 'B', 'C', 'D'] }
               },
               {
-                text: 'Shuffle self-quiz: write frets 0–12 on small scraps of paper and shuffle them. Flip one at a time and say the A-string note within 3 seconds. Go 10 rounds. Got someone around? Have them call out random frets instead — same 3-second limit.',
-                text_es: 'Autoevaluación con papelitos: escribe los trastes 0–12 en pequeños papelitos y revuélvelos. Voltea uno a la vez y di la nota de la cuerda La en 3 segundos. Haz 10 rondas. ¿Tienes a alguien cerca? Pídele que diga trastes al azar en su lugar — con el mismo límite de 3 segundos.',
+                text: 'Shuffle self-quiz:<ol><li>Write frets 0–12 on small scraps of paper and shuffle them.</li><li>Flip one at a time and say the A-string note within 3 seconds.</li><li>Go 10 rounds.</li></ol>Got someone around? Have them call out random frets instead — same 3-second limit.',
+                text_es: 'Autoevaluación con papelitos:<ol><li>Escribe los trastes 0–12 en pequeños papelitos y revuélvelos.</li><li>Voltea uno a la vez y di la nota de la cuerda La en 3 segundos.</li><li>Haz 10 rondas.</li></ol>¿Tienes a alguien cerca? Pídele que diga trastes al azar en su lugar — con el mismo límite de 3 segundos.',
                 hint: 'No chart. If you stall on a note, loop just that part of the string until it\'s automatic.',
                 hint_es: 'Sin tabla. Si te trabas en una nota, repite solo esa parte de la cuerda hasta que sea automática.'
               },
@@ -287,8 +287,8 @@ SETS.push(
             title_es: 'Mi rutina de práctica — check-in semanal (nunca se califica)',
             steps: [
               {
-                text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week\'s plan went. Same check-in as Module 1 — we keep it going for the whole course.',
-                text_es: 'Planea tu práctica — esta parte es solo para ti, nunca se califica. Tómate dos minutos para actualizar tu rutina: (1) una cosa en la que quieres mejorar, (2) cuándo y dónde vas a practicar esta semana, (3) cómo te fue con el plan de la semana pasada. El mismo check-in del Módulo 1 — lo mantenemos durante todo el curso.',
+                text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine:<ol><li>One thing you want to get better at.</li><li>When and where you\'ll practice this week.</li><li>How last week\'s plan went.</li></ol>Same check-in as Module 1 — we keep it going for the whole course.',
+                text_es: 'Planea tu práctica — esta parte es solo para ti, nunca se califica. Tómate dos minutos para actualizar tu rutina:<ol><li>Una cosa en la que quieres mejorar.</li><li>Cuándo y dónde vas a practicar esta semana.</li><li>Cómo te fue con el plan de la semana pasada.</li></ol>El mismo check-in del Módulo 1 — lo mantenemos durante todo el curso.',
                 hint: 'No wrong answers — even five minutes a day is better than one long rushed session. You\'re building a habit you\'ll actually keep.',
                 hint_es: 'No hay respuestas incorrectas — hasta cinco minutos al día es mejor que una sola sesión larga y apurada. Estás construyendo un hábito que de verdad vas a mantener.',
                 response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went',
@@ -880,8 +880,8 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which string crossing was trickiest — C down to G, or A down to F?', prompt_es: '¿Qué cruce de cuerda fue más complicado — C bajando a G, o A bajando a F?', placeholder: 'e.g. A to F — the jump across strings', placeholder_es: 'ej. A a F — el salto entre cuerdas' }
               },
               {
-                text: 'Challenge — Mystery TAB (sight-read it cold): here\'s a 2-bar melody you\'ve never heard. Do NOT press ▶ Play tab first. Read it straight off the page — work out each string and fret and play all the way through, one note per beat at 60 BPM — THEN press ▶ Play tab to check yourself. You\'ve got it when: you play it correctly on the first cold read, before ever hearing it. That\'s real sight-reading, and it\'s exactly what your module assessment asks for.',
-                text_es: 'Reto — TAB misterioso (léelo a primera vista, en frío): aquí hay una melodía de 2 compases que nunca has escuchado. NO presiones ▶ Tocar el tab primero. Léela directo de la página — descifra cada cuerda y traste y tócala completa, una nota por pulso a 60 BPM — LUEGO presiona ▶ Tocar el tab para revisarte. Lo tienes cuando: la tocas correctamente en la primera lectura en frío, antes de escucharla siquiera. Eso es lectura a primera vista real, y es exactamente lo que pide tu evaluación del módulo.',
+                text: 'Challenge — Mystery TAB (sight-read it cold): here\'s a 2-bar melody you\'ve never heard.<ol><li>Do NOT press ▶ Play tab first.</li><li>Read it straight off the page — work out each string and fret and play all the way through, one note per beat at 60 BPM.</li><li>THEN press ▶ Play tab to check yourself.</li></ol>You\'ve got it when: you play it correctly on the first cold read, before ever hearing it. That\'s real sight-reading, and it\'s exactly what your module assessment asks for.',
+                text_es: 'Reto — TAB misterioso (léelo a primera vista, en frío): aquí hay una melodía de 2 compases que nunca has escuchado.<ol><li>NO presiones ▶ Tocar el tab primero.</li><li>Léela directo de la página — descifra cada cuerda y traste y tócala completa, una nota por pulso a 60 BPM.</li><li>LUEGO presiona ▶ Tocar el tab para revisarte.</li></ol>Lo tienes cuando: la tocas correctamente en la primera lectura en frío, antes de escucharla siquiera. Eso es lectura a primera vista real, y es exactamente lo que pide tu evaluación del módulo.',
                 hint: 'This is the whole point of sight-reading: playing music you don\'t already know by ear. Bottom line = low E, the line above it = A, the next one up = D. Every fret here is 0–3 on the A and D strings. Say each note name before you pluck it, then use ▶ Play tab as your answer key — only after you\'ve played it yourself.',
                 hint_es: 'Este es todo el punto de la lectura a primera vista: tocar música que todavía no conoces de oído. Línea de abajo = Mi grave, la línea de arriba = La, la siguiente hacia arriba = Re. Cada traste aquí es 0–3 en las cuerdas La y Re. Di cada nombre de nota antes de pulsarla, y luego usa ▶ Tocar el tab como tu clave de respuestas — solo después de haberla tocado tú.',
                 stuck: 'Break it into two 1-bar halves: read and play the first four notes clean, then the last four, then join them. Peeking at your note-name chart to find a fret is fine — hitting Play tab to hear the tune first is not (hearing it cold is the part you\'re testing).',
@@ -971,8 +971,8 @@ SETS.push(
         text_es: 'Tocar una melodía de 4 compases a tiempo a 60 BPM',
         gotItWhen: 'you can play the Happy Birthday phrase all the way through at 60 BPM without stopping to find a note.',
         gotItWhen_es: 'puedes tocar la frase de Happy Birthday completa a 60 BPM sin detenerte a buscar una nota.',
-        practice: { type: 'pr', prompt: 'Play the Happy Birthday phrase start to finish with no stops. Start at 60 BPM and raise the metronome +5 at a time — log your fastest CLEAN run.',
-          prompt_es: 'Toca la frase de Happy Birthday de principio a fin sin detenerte. Empieza a 60 BPM y sube el metrónomo de 5 en 5 — anota tu pasada LIMPIA más rápida.',
+        practice: { type: 'pr', prompt: '<ol><li>Play the Happy Birthday phrase start to finish with no stops.</li><li>Start at 60 BPM and raise the metronome +5 at a time.</li><li>Log your fastest CLEAN run.</li></ol>',
+          prompt_es: '<ol><li>Toca la frase de Happy Birthday de principio a fin sin detenerte.</li><li>Empieza a 60 BPM y sube el metrónomo de 5 en 5.</li><li>Anota tu pasada LIMPIA más rápida.</li></ol>',
           unit: 'BPM', placeholder: 'e.g. 70 — try for a higher number next session', placeholder_es: 'p. ej. 70 — intenta superarlo la próxima sesión' } },
       { id: 'm2w2-s6', text: 'Keep thumb behind the neck throughout',
         text_es: 'Mantener el pulgar detrás del mástil todo el tiempo',

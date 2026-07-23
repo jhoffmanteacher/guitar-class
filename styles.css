@@ -1450,3 +1450,16 @@ body.games-open{overflow:hidden}
 /* Chord practice panel — .chord-diagrams is shared with station steps; just
    tighten its top margin inside the practice panel */
 .sk-practice-panel .chord-diagrams{margin-top:0}
+
+/* ── Lists in steps + practice panels ──
+   Steps live inside list markup already, so a bare <ul> in step text falls
+   to the depth-2 default (hollow circles) — force solid discs. Practice
+   panels now render trusted HTML in prompt/explain, so give their lists the
+   same treatment with compact Chromebook-friendly margins. */
+.step ul{list-style:disc}
+.sk-practice-prompt ol,.sk-practice-prompt ul,
+.sk-practice-explain ol,.sk-practice-explain ul{margin:6px 0 4px;padding-left:22px}
+.sk-practice-prompt ul,.sk-practice-explain ul{list-style:disc}
+.sk-practice-prompt li,.sk-practice-explain li{margin:3px 0;line-height:1.45}
+.sk-practice-explain{margin-top:8px;padding:8px 10px;font-size:0.875rem;color:var(--text2);background:var(--bg2);border-left:2px solid var(--green-text);border-radius:0 4px 4px 0;line-height:1.5}
+.sk-practice-explain[hidden]{display:none}

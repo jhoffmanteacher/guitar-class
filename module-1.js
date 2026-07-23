@@ -139,8 +139,8 @@ SETS.push(
             title_es: 'Ponte cómodo sosteniendo y explorando la guitarra',
             steps: [
           {
-            text: 'Safe handling (every session): when you\'re not playing, rest the guitar flat on its back across your lap, or lay it in the case or stand. Never lean it against a chair or wall — it can slip and fall. Carry it with one hand on the neck and one on the body. You\'ve got it when: you can set the guitar down and pick it up without it wobbling or tipping.',
-            text_es: 'Manejo seguro (cada sesión): cuando no estés tocando, apoya la guitarra boca arriba sobre tu regazo, o déjala en el estuche o en un soporte. Nunca la recuestes contra una silla o pared — se puede resbalar y caer. Cárgala con una mano en el mástil y otra en el cuerpo. Lo tienes cuando: puedes dejarla y levantarla sin que se tambalee o se caiga.',
+            text: 'Safe handling (every session):<ul><li>When you\'re not playing, rest the guitar flat on its back across your lap, or lay it in the case or stand.</li><li>Never lean it against a chair or wall — it can slip and fall.</li><li>Carry it with one hand on the neck and one on the body.</li></ul>You\'ve got it when: you can set the guitar down and pick it up without it wobbling or tipping.',
+            text_es: 'Manejo seguro (cada sesión):<ul><li>Cuando no estés tocando, apoya la guitarra boca arriba sobre tu regazo, o déjala en el estuche o en un soporte.</li><li>Nunca la recuestes contra una silla o pared — se puede resbalar y caer.</li><li>Cárgala con una mano en el mástil y otra en el cuerpo.</li></ul>Lo tienes cuando: puedes dejarla y levantarla sin que se tambalee o se caiga.',
             hint: 'A guitar that falls can crack its neck. A little care keeps your guitar playable for years.',
             hint_es: 'Una guitarra que se cae puede agrietar el mástil. Un poco de cuidado la mantiene tocable por años.',
             stuck: 'Practice just the set-down first: two hands, lower it slowly onto its back, let go. Then just the pick-up. Watch the guitar as you release it — if it wobbles, slow the set-down way down.',
@@ -199,8 +199,8 @@ SETS.push(
             title_es: 'Mi rutina de práctica — check-in de la sesión (nunca se califica)',
             steps: [
           {
-            text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to write your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice next, (3) how your last session went (skip that part this first time). We\'ll revisit it every module to see how your plan is working.',
-            text_es: 'Planea tu práctica — esta parte es solo para ti, nunca se califica. Tómate dos minutos para escribir tu rutina: (1) una cosa en la que quieres mejorar, (2) cuándo y dónde vas a practicar la próxima vez, (3) cómo te fue en tu última sesión (sáltate esa parte esta primera vez). La vamos a repasar en cada módulo para ver cómo va tu plan.',
+            text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to write your routine:<ol><li>One thing you want to get better at.</li><li>When and where you\'ll practice next.</li><li>How your last session went (skip that part this first time).</li></ol>We\'ll revisit it every module to see how your plan is working.',
+            text_es: 'Planea tu práctica — esta parte es solo para ti, nunca se califica. Tómate dos minutos para escribir tu rutina:<ol><li>Una cosa en la que quieres mejorar.</li><li>Cuándo y dónde vas a practicar la próxima vez.</li><li>Cómo te fue en tu última sesión (sáltate esa parte esta primera vez).</li></ol>La vamos a repasar en cada módulo para ver cómo va tu plan.',
             hint: 'No wrong answers — even five minutes a day is better than one long rushed session. You\'re building a habit you\'ll actually keep.',
             hint_es: 'No hay respuestas incorrectas — hasta cinco minutos al día es mejor que una sola sesión larga y apurada. Estás construyendo un hábito que de verdad vas a mantener.',
             response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went',
@@ -523,8 +523,8 @@ SETS.push(
             title_es: 'Toca una melodía en las cuerdas al aire con notas limpias y constantes',
             steps: [
           {
-            text: 'Challenge 2 — One Minute, Perfect Notes: for one minute, cycle through the open strings low to high (E A D G B e), saying each name out loud as you pluck. When the minute\'s up, play one last full pass and count how many of the 6 ring perfectly clean — no buzz, no muting. You\'ve got it when: all 6 ring clean on that final pass. Log your score out of 6 and try for a higher score next time.',
-            text_es: 'Reto 2 — Un minuto, notas perfectas: durante un minuto, recorre las cuerdas al aire de grave a aguda (E A D G B e), diciendo cada nombre en voz alta al pulsarla. Cuando se acabe el minuto, toca una última vuelta completa y cuenta cuántas de las 6 suenan perfectamente limpias — sin zumbido, sin apagarse. Lo tienes cuando: las 6 suenan limpias en esa última vuelta. Anota tu puntaje sobre 6 e intenta superarlo la próxima vez.',
+            text: 'Challenge 2 — One Minute, Perfect Notes:<ol><li>For one minute, cycle through the open strings low to high (E A D G B e), saying each name out loud as you pluck.</li><li>When the minute\'s up, play one last full pass and count how many of the 6 ring perfectly clean — no buzz, no muting.</li><li>Log your score out of 6 and try for a higher score next time.</li></ol>You\'ve got it when: all 6 ring clean on that final pass.',
+            text_es: 'Reto 2 — Un minuto, notas perfectas:<ol><li>Durante un minuto, recorre las cuerdas al aire de grave a aguda (E A D G B e), diciendo cada nombre en voz alta al pulsarla.</li><li>Cuando se acabe el minuto, toca una última vuelta completa y cuenta cuántas de las 6 suenan perfectamente limpias — sin zumbido, sin apagarse.</li><li>Anota tu puntaje sobre 6 e intenta superarlo la próxima vez.</li></ol>Lo tienes cuando: las 6 suenan limpias en esa última vuelta.',
             hint: 'These are open strings — press nothing. Let each string ring fully before moving to the next.',
             hint_es: 'Estas son cuerdas al aire — no presiones nada. Deja que cada cuerda suene por completo antes de pasar a la siguiente.',
             stuck: 'Slow way down — one string every few seconds. Lift any finger that\'s touching a string and let each one ring fully before the next.',

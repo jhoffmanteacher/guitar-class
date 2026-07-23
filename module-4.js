@@ -379,8 +379,8 @@ SETS.push(
             title_es: 'Mi rutina de práctica — check-in semanal (nunca se califica)',
             steps: [
               {
-                text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week\'s plan went. Same check-in you\'ve kept since Module 1 — we keep it going through the whole course.',
-                text_es: 'Planea tu práctica — esta parte es solo para ti, nunca se califica. Tómate dos minutos para actualizar tu rutina: (1) una cosa en la que quieres mejorar, (2) cuándo y dónde vas a practicar esta semana, (3) cómo te fue con el plan de la semana pasada. El mismo check-in que has mantenido desde el Módulo 1 — lo seguimos manteniendo durante todo el curso.',
+                text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine:<ol><li>One thing you want to get better at.</li><li>When and where you\'ll practice this week.</li><li>How last week\'s plan went.</li></ol>Same check-in you\'ve kept since Module 1 — we keep it going through the whole course.',
+                text_es: 'Planea tu práctica — esta parte es solo para ti, nunca se califica. Tómate dos minutos para actualizar tu rutina:<ol><li>Una cosa en la que quieres mejorar.</li><li>Cuándo y dónde vas a practicar esta semana.</li><li>Cómo te fue con el plan de la semana pasada.</li></ol>El mismo check-in que has mantenido desde el Módulo 1 — lo seguimos manteniendo durante todo el curso.',
                 hint: 'No wrong answers — even five minutes a day is better than one long rushed session. You\'re building a habit you\'ll actually keep.',
                 hint_es: 'No hay respuestas incorrectas — hasta cinco minutos al día es mejor que una sola sesión larga y apurada. Estás construyendo un hábito que de verdad vas a mantener.',
                 response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went',
@@ -444,8 +444,8 @@ SETS.push(
         text_es: 'Tocar el patrón a tiempo a 60 BPM con un metrónomo',
         gotItWhen: 'every note lands on a beat at 60 BPM and you can play the whole pattern without stopping or losing the click.',
         gotItWhen_es: 'cada nota cae en un tiempo a 60 BPM y puedes tocar todo el patrón sin detenerte ni perder el clic.',
-        practice: { type: 'pr', prompt: 'Play Pattern 1 up and down with every note landing on a click. Start at 60 BPM and raise the metronome +5 at a time — log your fastest CLEAN tempo.',
-          prompt_es: 'Toca el Patrón 1 subiendo y bajando con cada nota cayendo en un clic. Empieza a 60 BPM y sube el metrónomo de 5 en 5 — anota tu tempo LIMPIO más rápido.',
+        practice: { type: 'pr', prompt: '<ol><li>Play Pattern 1 up and down with every note landing on a click.</li><li>Start at 60 BPM and raise the metronome +5 at a time.</li><li>Log your fastest CLEAN tempo.</li></ol>',
+          prompt_es: '<ol><li>Toca el Patrón 1 subiendo y bajando con cada nota cayendo en un clic.</li><li>Empieza a 60 BPM y sube el metrónomo de 5 en 5.</li><li>Anota tu tempo LIMPIO más rápido.</li></ol>',
           unit: 'BPM', placeholder: 'e.g. 70 — try for a higher number next session', placeholder_es: 'p. ej. 70 — intenta superarlo la próxima sesión' } },
       { id: 'm4w1-s6', text: 'Improvise a short 2-bar musical idea using 2–3 notes from the pattern',
         text_es: 'Improvisar una idea musical corta de 2 compases usando 2–3 notas del patrón',
@@ -731,8 +731,8 @@ SETS.push(
             title_es: '⚡ Chispa auditiva — bono opcional de oído',
             steps: [
               {
-                text: '⚡ Ear Spark (optional, 2 min): draw three fret slips (0–5), record those notes on the low E, and turn the slips face-down. On playback, sing each note back, hold it, then find it on the string — singing first is the whole trick. Check the slips last. Got someone around? Have them play the notes instead.',
-                text_es: '⚡ Chispa auditiva (opcional, 2 min): saca tres papelitos de trastes (0–5), graba esas notas en la Mi grave, y voltea los papelitos boca abajo. Al escuchar la grabación, canta cada nota de vuelta, sostenla, y luego encuéntrala en la cuerda — cantar primero es todo el truco. Revisa los papelitos al final. ¿Tienes a alguien cerca? Que toque las notas en tu lugar.'
+                text: '⚡ Ear Spark (optional, 2 min):<ol><li>Draw three fret slips (0–5), record those notes on the low E, and turn the slips face-down.</li><li>On playback, sing each note back, hold it, then find it on the string — singing first is the whole trick.</li><li>Check the slips last.</li></ol>Got someone around? Have them play the notes instead.',
+                text_es: '⚡ Chispa auditiva (opcional, 2 min):<ol><li>Saca tres papelitos de trastes (0–5), graba esas notas en la Mi grave, y voltea los papelitos boca abajo.</li><li>Al escuchar la grabación, canta cada nota de vuelta, sostenla, y luego encuéntrala en la cuerda — cantar primero es todo el truco.</li><li>Revisa los papelitos al final.</li></ol>¿Tienes a alguien cerca? Que toque las notas en tu lugar.'
               }
             ]
           }
@@ -1096,8 +1096,8 @@ SETS.push(
         text_es: 'Tocar el solo original sobre la pista de acompañamiento de una canción del curso de memoria, sosteniendo el pulso de la pista',
         gotItWhen: 'you can play your 4-bar solo all the way through with the backing track — holding its pulse with no restarts — and name your phrasing strategy (call-and-response or four-phrase).',
         gotItWhen_es: 'puedes tocar tu solo de 4 compases de principio a fin con la pista de acompañamiento — sosteniendo su pulso sin reiniciar — y nombrar tu estrategia de fraseo (llamada y respuesta o cuatro frases).',
-        practice: { type: 'pr', prompt: 'Play your 4-bar solo over the backing track, holding its pulse. How many times in a row can you get through with no restart? Log your best streak.',
-          prompt_es: 'Toca tu solo de 4 compases sobre la pista de acompañamiento, sosteniendo su pulso. ¿Cuántas veces seguidas puedes completarlo sin reiniciar? Anota tu mejor racha.',
+        practice: { type: 'pr', prompt: '<ol><li>Play your 4-bar solo over the backing track, holding its pulse.</li><li>Count how many times in a row you get through with no restart.</li><li>Log your best streak.</li></ol>',
+          prompt_es: '<ol><li>Toca tu solo de 4 compases sobre la pista de acompañamiento, sosteniendo su pulso.</li><li>Cuenta cuántas veces seguidas puedes completarlo sin reiniciar.</li><li>Anota tu mejor racha.</li></ol>',
           unit: 'count', placeholder: 'e.g. 3 in a row — try for a longer streak', placeholder_es: 'p. ej. 3 seguidas — intenta una racha más larga' } },
       { id: 'm4w3-s8', text: 'Sight-read a short 1-bar pentatonic lick from TAB and play it',
         text_es: 'Leer a primera vista un lick pentatónico corto de 1 compás del TAB y tocarlo',

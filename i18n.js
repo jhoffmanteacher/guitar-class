@@ -372,7 +372,81 @@
     'review.title':          { en: 'Keep it sharp', es: 'Mantenlo fresco' },
     'review.explainer':      { en: 'Skills fade without reps — a quick review keeps them automatic.',
                                es: 'Las destrezas se olvidan sin repeticiones — un repaso rápido las mantiene automáticas.' },
-    'review.practiceAgain':  { en: 'Practice again', es: 'Practicar de nuevo' }
+    'review.practiceAgain':  { en: 'Practice again', es: 'Practicar de nuevo' },
+
+    // ── Find-the-Note: remaining string names (glossary: solfège names,
+    //    matching fret.stringLowE 'Mi grave' / fret.stringA 'La') ──
+    'fret.stringD':          { en: 'D', es: 'Re' },
+    'fret.stringG':          { en: 'G', es: 'Sol' },
+    'fret.stringB':          { en: 'B', es: 'Si' },
+    'fret.stringHighE':      { en: 'high E', es: 'Mi agudo' },
+
+    // ── Sequential-gate messages + locked-pill tooltips/aria ──
+    'gate.lockedUntilAria':  { en: '{set} — locked until {prev} is finished', es: '{set} — bloqueada hasta terminar {prev}' },
+    'gate.lockedTitle':      { en: 'Locked — mark every skill in {prev} as "I\'ve got it!" to unlock {set}.',
+                               es: 'Bloqueada — marca cada destreza de {prev} como "¡Ya lo tengo!" para desbloquear {set}.' },
+    'gate.finishFirstLong':  { en: 'Finish {prev} first — mark all its skills "I\'ve got it!" to unlock {set}.',
+                               es: 'Primero termina {prev} — marca todas sus destrezas con "¡Ya lo tengo!" para desbloquear {set}.' },
+    'gate.finishFirstShort': { en: 'Finish {prev} first to unlock {set}.', es: 'Primero termina {prev} para desbloquear {set}.' },
+    'gate.unlocksAfter':     { en: '{set} unlocks after you finish {prev}.', es: '{set} se desbloquea cuando termines {prev}.' },
+    'gate.reviewPreviewTitle': { en: 'Preview only — finish marking every skill on every set as "I\'ve got it!" to unlock this self-assessment.',
+                               es: 'Solo vista previa — termina de marcar cada destreza de cada unidad con "¡Ya lo tengo!" para desbloquear esta autoevaluación.' },
+    'gate.pillAllComplete':  { en: '{set} — all {total} skills complete', es: '{set} — las {total} destrezas completas' },
+    'gate.pillProgress':     { en: '{set} — {done} of {total} skills done', es: '{set} — {done} de {total} destrezas listas' },
+
+    // ── Skills-checklist cell aria-labels (fuller than the title tooltips) ──
+    'skill.ariaStillWorking': { en: 'Still working on it: {skill}', es: 'Todavía lo estoy practicando: {skill}' },
+    'skill.ariaGotIt':        { en: "I've got it: {skill}", es: 'Ya lo tengo: {skill}' },
+
+    // ── ♪ Songs hub panel ──
+    'hub.allSongs':          { en: 'All the songs', es: 'Todas las canciones' },
+    'hub.loading':           { en: 'Loading the song list…', es: 'Cargando la lista de canciones…' },
+    'hub.closeAria':         { en: 'Close songs', es: 'Cerrar canciones' },
+    'hub.taughtIn':          { en: 'Taught in:', es: 'Se enseña en:' },
+    'hub.openModuleTitle':   { en: 'Open Module {n}', es: 'Abrir el Módulo {n}' },
+    'hub.legendCore':        { en: 'Core — everyone learns these', es: 'Básicas — todos las aprenden' },
+    'hub.legendChoice':      { en: 'Choice menu', es: 'Menú a elección' },
+    'hub.backing':           { en: 'Backing', es: 'Pista' },
+    'hub.tagCore':           { en: 'Core', es: 'Básica' },
+    'hub.tagChoice':         { en: 'Choice', es: 'A elección' },
+
+    // ── 🔁 Keep practicing panel ──
+    'kp.closeAria':          { en: 'Close keep practicing', es: 'Cerrar seguir practicando' },
+    'kp.loading':            { en: 'Loading…', es: 'Cargando…' },
+    'kp.emptyHtml':          { en: 'Nothing marked &ldquo;still working on it&rdquo; right now — mark a skill that way on any checklist and it\'ll show up here.',
+                               es: 'No hay nada marcado como &ldquo;todavía lo estoy practicando&rdquo; — marca así una destreza en cualquier lista y aparecerá aquí.' },
+
+    // ── 📊 My progress panel ──
+    'mp.closeAria':          { en: 'Close my progress', es: 'Cerrar mi progreso' },
+
+    // ── ⚡ Daily 5 modal ──
+    'daily5.title':          { en: 'Daily 5 — today’s warm-up', es: 'Daily 5 — el calentamiento de hoy' },
+    'daily5.closeAria':      { en: 'Close Daily 5', es: 'Cerrar el Daily 5' },
+    'daily5.tuneUpBody':     { en: '— tune all six strings until the tuner turns green (use the corner Tuner).',
+                               es: '— afina las seis cuerdas hasta que el afinador se ponga verde (usa el Afinador de la esquina).' },
+    'daily5.warmUp':         { en: 'Warm-up', es: 'Calentamiento' },
+    'daily5.todaysDrill':    { en: 'Today’s drill', es: 'El ejercicio de hoy' },
+    'daily5.fromModule':     { en: 'from Module {num}, {set}:', es: 'del Módulo {num}, {set}:' },
+    'daily5.challengeHead':  { en: 'Challenge Day! Pick ONE (all skills you already know):',
+                               es: '¡Día de reto! Elige UNO (todas son destrezas que ya conoces):' },
+    'daily5.streak':         { en: '{n}-day streak', es: 'racha de {n} días' },
+
+    // ── Footer "Report a problem" mailto ──
+    'report.subject':        { en: 'Guitar site — problem report', es: 'Sitio de guitarra — reporte de problema' },
+
+    // ── Module-review recording widget (renderRecBody) ──
+    'rec.record':            { en: 'Record', es: 'Grabar' },
+    'rec.help':              { en: 'Up to {s} seconds. Browser will ask for microphone permission.',
+                               es: 'Hasta {s} segundos. El navegador pedirá permiso para usar el micrófono.' },
+    'rec.stop':              { en: 'Stop', es: 'Detener' },
+    'rec.max':               { en: 'max {s}s', es: 'máx {s}s' },
+    'rec.download':          { en: 'Download', es: 'Descargar' },
+    'rec.rerecord':          { en: 'Re-record', es: 'Volver a grabar' },
+    'rec.listenBack':        { en: 'Listen back as often as you like. Download to keep a copy.',
+                               es: 'Escúchala cuantas veces quieras. Descárgala para guardar una copia.' },
+    'rec.noSupport':         { en: 'This browser does not support audio recording. Try Chrome, Edge, or Firefox on a desktop.',
+                               es: 'Este navegador no permite grabar audio. Prueba Chrome, Edge o Firefox en una computadora.' },
+    'rec.micFail':           { en: 'Could not start microphone: {err}', es: 'No se pudo iniciar el micrófono: {err}' }
   };
 
   let lang = 'en';

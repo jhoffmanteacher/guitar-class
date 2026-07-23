@@ -180,6 +180,16 @@ HTML / CSS / JS, then explain what you changed.
 
 ## Lessons learned
 
+### Multi-step directions get lists, not paragraphs (Jonathan, 2026-07-23)
+Any student-facing direction that packs 2–3+ sequential steps or parallel
+points into one prose paragraph should be an inline HTML list instead —
+`<ol>` for ordered steps, `<ul>` for parallel points, short lead-in clause
+kept as text before the list. Applies to step `text:` fields and practice
+`prompt`s (both render trusted HTML; mc `choices` stay plain text). Mirror
+the identical structure in the `_es` twin. Leave alone: single actions,
+naturally flowing two-clause sentences, hints (≤2 sentences), `gotItWhen`
+strings, and input placeholders (no HTML there).
+
 ### Station B video pairs — aim for two voices
 In each Station B video pair, aim for video #2 from a **different instructor**
 than video #1, teaching the same skill. Same-channel pairs are allowed when the

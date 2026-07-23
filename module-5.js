@@ -181,8 +181,8 @@ SETS.push(
             title_es: 'Mi rutina de práctica — check-in semanal (nunca se califica)',
             steps: [
               {
-                text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine: (1) one thing you want to get better at, (2) when and where you\'ll practice this week, (3) how last week\'s plan went. Same check-in you\'ve kept since Module 1 — we keep it going through the whole course.',
-                text_es: 'Planea tu práctica — esta parte es solo para ti, nunca se califica. Tómate dos minutos para actualizar tu rutina: (1) una cosa en la que quieres mejorar, (2) cuándo y dónde vas a practicar esta semana, (3) cómo te fue con el plan de la semana pasada. El mismo check-in que has mantenido desde el Módulo 1 — lo seguimos manteniendo durante todo el curso.',
+                text: 'Plan your practice — this one\'s just for you, never graded. Take two minutes to update your routine:<ol><li>One thing you want to get better at.</li><li>When and where you\'ll practice this week.</li><li>How last week\'s plan went.</li></ol>Same check-in you\'ve kept since Module 1 — we keep it going through the whole course.',
+                text_es: 'Planea tu práctica — esta parte es solo para ti, nunca se califica. Tómate dos minutos para actualizar tu rutina:<ol><li>Una cosa en la que quieres mejorar.</li><li>Cuándo y dónde vas a practicar esta semana.</li><li>Cómo te fue con el plan de la semana pasada.</li></ol>El mismo check-in que has mantenido desde el Módulo 1 — lo seguimos manteniendo durante todo el curso.',
                 hint: 'No wrong answers — even five minutes a day is better than one long rushed session. You\'re building a habit you\'ll actually keep.',
                 hint_es: 'No hay respuestas incorrectas — hasta cinco minutos al día es mejor que una sola sesión larga y apurada. Estás construyendo un hábito que de verdad vas a mantener.',
                 response: { type: 'short', placeholder: '1) One thing to improve   2) When & where I\'ll practice   3) How last week went', placeholder_es: '1) Algo que quiero mejorar   2) Cuándo y dónde voy a practicar   3) Cómo me fue la semana pasada' }
@@ -272,8 +272,8 @@ SETS.push(
         text_es: 'Rasguear 4 golpes hacia abajo por compás a tiempo a 60 BPM',
         gotItWhen: 'your strums land on beats 1, 2, 3, 4 with the metronome at 60 BPM and you can keep it going for at least 8 bars without drifting.',
         gotItWhen_es: 'tus rasgueos caen en los tiempos 1, 2, 3, 4 con el metrónomo a 60 BPM y puedes mantenerlo por al menos 8 compases sin desviarte.',
-        practice: { type: 'pr', prompt: 'Metronome at 60 BPM: strum 4 down-strums per bar and count how many bars in a row every strum lands with the click. Log your best streak — 8 bars is the goal.',
-          prompt_es: 'Metrónomo a 60 BPM: rasguea 4 golpes hacia abajo por compás y cuenta cuántos compases seguidos logras con cada rasgueo cayendo con el clic. Anota tu mejor racha — la meta es 8 compases.',
+        practice: { type: 'pr', prompt: '<ol><li>Metronome at 60 BPM: strum 4 down-strums per bar.</li><li>Count how many bars in a row every strum lands with the click.</li><li>Log your best streak — 8 bars is the goal.</li></ol>',
+          prompt_es: '<ol><li>Metrónomo a 60 BPM: rasguea 4 golpes hacia abajo por compás.</li><li>Cuenta cuántos compases seguidos logras con cada rasgueo cayendo con el clic.</li><li>Anota tu mejor racha — la meta es 8 compases.</li></ol>',
           unit: 'count', placeholder: 'e.g. 8 bars — try for a longer streak', placeholder_es: 'p. ej. 8 compases — intenta una racha más larga' } },
       { id: 'm5w1-s6', text: 'Identify and fret any chord shown on a chord chart',
         text_es: 'Identificar y trastear cualquier acorde mostrado en un diagrama de acordes',

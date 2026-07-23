@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-23 — Practice everywhere: Modules 6–12 join in, the whole fretboard opens up, and the site finishes learning Spanish
+
+### Added
+- **Every skill in Modules 6–12 now has its own practice exercise too** — 54
+  new drills, so all 230 skills across the whole course are practiceable.
+- **Find-the-Note now covers all six strings**: Module 9's fretboard skills
+  become string-by-string games (D, G, B, high E) plus an all-strings mode
+  that quizzes the entire fretboard on a six-string board.
+- **More chord drills and personal-record ladders**: barre-chord skills in
+  Modules 7 and 11 get diagram-plus-mic-check practice, and speed skills
+  across Modules 6–12 get BPM/count ladders that remember your history.
+
+### Changed
+- **The whole site now speaks Spanish by hand, not by machine**: the last
+  machine-translated corners — locked-set messages, the Songs Hub, Keep
+  practicing, My progress, the Daily 5, the recording widget, and
+  screen-reader labels — now have hand-written Spanish.
+- **Step-by-step directions are now actual lists**: instructions that used
+  to cram two or three steps into one paragraph (like the weekly practice
+  check-in) now show as clean numbered or bulleted lists, in both languages.
+
 ## 2026-07-23 — Every Module 1–5 skill is now practiceable, and the site remembers your reps
 
 ### Added

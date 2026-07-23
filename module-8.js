@@ -289,7 +289,9 @@ SETS.push(
       { id: 'm8w1-s6', text: 'Move the thumb to a different bass string while i-m-a stay on G, B, e',
         text_es: 'Mover el pulgar a una cuerda grave distinta mientras i-m-a se quedan en G, B, e',
         gotItWhen: 'when the chord changes from Em to Am, your thumb shifts from the low E string to the A string (finding the new root) while your i-m-a fingers stay anchored on G-B-e the whole time.',
-        gotItWhen_es: 'cuando el acorde cambia de Em a Am, tu pulgar se mueve de la cuerda Mi grave a la cuerda La (encontrando la nueva raíz) mientras tus dedos i-m-a se quedan anclados en G-B-e todo el tiempo.' }
+        gotItWhen_es: 'cuando el acorde cambia de Em a Am, tu pulgar se mueve de la cuerda Mi grave a la cuerda La (encontrando la nueva raíz) mientras tus dedos i-m-a se quedan anclados en G-B-e todo el tiempo.',
+        practice: { type: 'playSeq', label: 'p walks E → A → D while i·m·a stay on G · B · e', label_es: 'p camina por Mi → La → Re mientras i·m·a se quedan en G · B · e', bpm: 60,
+          notes: [40, 55, 59, 64, 45, 55, 59, 64, 50, 55, 59, 64] } }
     ]
   },
 
@@ -599,11 +601,20 @@ SETS.push(
       { id: 'm8w2-s5', text: 'Keep the pattern steady at 70 BPM for 4+ bars',
         text_es: 'Mantener el patrón estable a 70 BPM durante 4 o más compases',
         gotItWhen: 'you can play the pattern for at least 4 bars at 70 BPM without your tempo slowing down or speeding up — the metronome and you agree the whole time.',
-        gotItWhen_es: 'puedes tocar el patrón durante al menos 4 compases a 70 BPM sin que tu tempo se atrase ni se acelere — el metrónomo y tú están de acuerdo todo el tiempo.' },
+        gotItWhen_es: 'puedes tocar el patrón durante al menos 4 compases a 70 BPM sin que tu tempo se atrase ni se acelere — el metrónomo y tú están de acuerdo todo el tiempo.',
+        practice: { type: 'pr', prompt: '<ol><li>Keep the p-i-m-a-m-i pattern going for 4 bars straight with the metronome.</li><li>Start at 60 BPM and raise it +5 at a time.</li><li>Log the fastest BPM where the tempo never wavered.</li></ol>',
+          prompt_es: '<ol><li>Mantén el patrón p-i-m-a-m-i durante 4 compases seguidos con el metrónomo.</li><li>Empieza a 60 BPM y súbelo de 5 en 5.</li><li>Anota el BPM más rápido donde el tempo nunca vaciló.</li></ol>',
+          unit: 'BPM', placeholder: 'e.g. 70 — try for a higher number next session', placeholder_es: 'p. ej. 70 — intenta superarlo la próxima sesión' } },
       { id: 'm8w2-s6', text: 'Switch the thumb to a new bass string at a chord change',
         text_es: 'Cambiar el pulgar a una nueva cuerda grave en un cambio de acorde',
         gotItWhen: 'at a chord change, only your thumb moves to find the new root note — i-m-a stay parked on G, B, high e. The pattern continues uninterrupted.',
-        gotItWhen_es: 'en un cambio de acorde, solo tu pulgar se mueve para encontrar la nueva nota raíz — i-m-a se quedan estacionados en G, B, mi aguda. El patrón continúa sin interrupciones.' }
+        gotItWhen_es: 'en un cambio de acorde, solo tu pulgar se mueve para encontrar la nueva nota raíz — i-m-a se quedan estacionados en G, B, mi aguda. El patrón continúa sin interrupciones.',
+        practice: { type: 'mc', prompt: 'You\'re fingerpicking and the chord changes Em → Am. What changes for your PICKING hand?',
+          prompt_es: 'Estás tocando fingerpicking y el acorde cambia de Em → Am. ¿Qué cambia para tu mano de PUNTEO?',
+          choices: ['Only the thumb — it moves from the low E string to the A string; i-m-a stay put', 'All four fingers shift up one string', 'Nothing at all, ever', 'i-m-a move to new strings; the thumb stays'],
+          choices_es: ['Solo el pulgar — se mueve de la cuerda Mi grave a la cuerda La; i-m-a se quedan en su lugar', 'Los cuatro dedos suben una cuerda', 'Nada en absoluto, nunca', 'i-m-a se mueven a cuerdas nuevas; el pulgar se queda'], answer: 0,
+          explain: 'The thumb hunts the new root; i-m-a stay parked on G, B, and high e. Moving everything is what breaks the pattern at changes.',
+          explain_es: 'El pulgar busca la nueva raíz; i-m-a se quedan estacionados en G, B y mi aguda. Mover todo es lo que rompe el patrón en los cambios.' } }
     ]
   },
 
@@ -896,7 +907,10 @@ SETS.push(
       { id: 'm8w3-s3', text: 'Keep the picking pattern steady through a chord change',
         text_es: 'Mantener el patrón de punteo estable a través de un cambio de acorde',
         gotItWhen: 'when the chord changes mid-song, you don\'t miss a single note in the picking pattern — the fretting hand catches up, but the picking pattern stays exact.',
-        gotItWhen_es: 'cuando el acorde cambia a mitad de la canción, no te pierdes ni una sola nota del patrón de punteo — la mano de trastear se pone al día, pero el patrón de punteo se mantiene exacto.' },
+        gotItWhen_es: 'cuando el acorde cambia a mitad de la canción, no te pierdes ni una sola nota del patrón de punteo — la mano de trastear se pone al día, pero el patrón de punteo se mantiene exacto.',
+        practice: { type: 'pr', prompt: '<ol><li>One minute: fingerpick your pattern over Em ↔ Am, changing every bar.</li><li>Count the changes where the pattern never missed a note.</li><li>Log your best.</li></ol>',
+          prompt_es: '<ol><li>Un minuto: toca tu patrón de fingerpicking sobre Em ↔ Am, cambiando cada compás.</li><li>Cuenta los cambios donde el patrón nunca perdió una nota.</li><li>Anota tu mejor número.</li></ol>',
+          unit: 'count', placeholder: 'e.g. 8 changes — try for a higher number', placeholder_es: 'p. ej. 8 cambios — intenta superarlo' } },
       { id: 'm8w3-s4', text: 'Anticipate the next chord by moving the fretting hand on the last note of the bar',
         text_es: 'Anticipar el siguiente acorde moviendo la mano de trastear en la última nota del compás',
         gotItWhen: 'your fretting hand starts repositioning for the next chord BEFORE the current bar ends — by the time the new bar starts, you\'re ready.',
@@ -908,11 +922,20 @@ SETS.push(
       { id: 'm8w3-s5', text: 'Play a full verse of a fingerpicked song from start to finish',
         text_es: 'Tocar una estrofa completa de una canción con fingerpicking de principio a fin',
         gotItWhen: 'you can fingerpick through a complete verse of "House of the Rising Sun" or "Hallelujah" (from Module 5\'s song list) without stopping — mistakes ok, but you keep going.',
-        gotItWhen_es: 'puedes tocar con fingerpicking una estrofa completa de "House of the Rising Sun" o "Hallelujah" (de la lista de canciones del Módulo 5) sin detenerte — los errores están bien, pero sigues adelante.' },
+        gotItWhen_es: 'puedes tocar con fingerpicking una estrofa completa de "House of the Rising Sun" o "Hallelujah" (de la lista de canciones del Módulo 5) sin detenerte — los errores están bien, pero sigues adelante.',
+        practice: { type: 'pr', prompt: 'Fingerpick a complete verse of your song without stopping — mistakes are fine, stopping isn\'t. How many full no-stop verses did you get today?',
+          prompt_es: 'Toca con fingerpicking una estrofa completa de tu canción sin detenerte — los errores están bien, detenerse no. ¿Cuántas estrofas completas sin paradas lograste hoy?',
+          unit: 'count', placeholder: 'e.g. 2 verses — try for a higher number', placeholder_es: 'p. ej. 2 estrofas — intenta superarlo' } },
       { id: 'm8w3-s6', text: 'Perform a fingerpicked song for an audience (family, a friend, or a recording you share)',
         text_es: 'Interpretar una canción con fingerpicking para una audiencia (familia, un amigo, o una grabación que compartas)',
         gotItWhen: 'you can perform your chosen song for someone — in person or on a recording you share — all the way through, with fingerpicking, and recover from any mistakes without breaking down.',
-        gotItWhen_es: 'puedes interpretar tu canción elegida para alguien — en persona o en una grabación que compartas — de principio a fin, con fingerpicking, y recuperarte de cualquier error sin desmoronarte.' }
+        gotItWhen_es: 'puedes interpretar tu canción elegida para alguien — en persona o en una grabación que compartas — de principio a fin, con fingerpicking, y recuperarte de cualquier error sin desmoronarte.',
+        practice: { type: 'mc', prompt: 'Mid-performance you flub a note. What do experienced players do?',
+          prompt_es: 'A mitad de la presentación fallas una nota. ¿Qué hacen los músicos con experiencia?',
+          choices: ['Keep the pattern going and rejoin — most listeners never notice', 'Stop and restart the song from the top', 'Apologize and point out the mistake', 'Slow way down until confidence returns'],
+          choices_es: ['Mantienen el patrón y se reincorporan — la mayoría de los oyentes nunca lo nota', 'Se detienen y reinician la canción desde el principio', 'Se disculpan y señalan el error', 'Bajan mucho la velocidad hasta que vuelve la confianza'], answer: 0,
+          explain: 'The pulse is the performance — a dropped note vanishes if the rhythm survives. Stopping or announcing the mistake is what audiences actually remember.',
+          explain_es: 'El pulso es la presentación — una nota perdida desaparece si el ritmo sobrevive. Detenerse o anunciar el error es lo que el público de verdad recuerda.' } }
     ]
   }
 

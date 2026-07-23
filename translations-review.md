@@ -336,19 +336,108 @@ a bilingual colleague or student aide if you'd like a native-speaker check.
 | Skills fade without reps — a quick review keeps them automatic. | Las destrezas se olvidan sin repeticiones — un repaso rápido las mantiene automáticas. |
 | Practice again | Practicar de nuevo |
 
+## Sequential gate — locked pills & toasts
+
+| English | Spanish |
+|---|---|
+| {set} — locked until {prev} is finished | {set} — bloqueada hasta terminar {prev} |
+| Locked — mark every skill in {prev} as "I've got it!" to unlock {set}. | Bloqueada — marca cada destreza de {prev} como "¡Ya lo tengo!" para desbloquear {set}. |
+| Finish {prev} first — mark all its skills "I've got it!" to unlock {set}. | Primero termina {prev} — marca todas sus destrezas con "¡Ya lo tengo!" para desbloquear {set}. |
+| Finish {prev} first to unlock {set}. | Primero termina {prev} para desbloquear {set}. |
+| {set} unlocks after you finish {prev}. | {set} se desbloquea cuando termines {prev}. |
+| Preview only — finish marking every skill on every set as "I've got it!" to unlock this self-assessment. | Solo vista previa — termina de marcar cada destreza de cada unidad con "¡Ya lo tengo!" para desbloquear esta autoevaluación. |
+| {set} — all {total} skills complete | {set} — las {total} destrezas completas |
+| {set} — {done} of {total} skills done | {set} — {done} de {total} destrezas listas |
+
+## Skills-checklist cell aria-labels (screen readers)
+
+| English | Spanish |
+|---|---|
+| Still working on it: {skill} | Todavía lo estoy practicando: {skill} |
+| I've got it: {skill} | Ya lo tengo: {skill} |
+
+## Songs hub panel
+
+| English | Spanish |
+|---|---|
+| All the songs | Todas las canciones |
+| Loading the song list… | Cargando la lista de canciones… |
+| Close songs (aria) | Cerrar canciones |
+| Taught in: | Se enseña en: |
+| Open Module {n} | Abrir el Módulo {n} |
+| Core — everyone learns these | Básicas — todos las aprenden |
+| Choice menu | Menú a elección |
+| Backing (button) | Pista |
+| Core (tag) | Básica |
+| Choice (tag) | A elección |
+
+## Keep practicing / My progress panels
+
+| English | Spanish |
+|---|---|
+| Close keep practicing (aria) | Cerrar seguir practicando |
+| Loading… | Cargando… |
+| Nothing marked "still working on it" right now — mark a skill that way on any checklist and it'll show up here. | No hay nada marcado como "todavía lo estoy practicando" — marca así una destreza en cualquier lista y aparecerá aquí. |
+| Close my progress (aria) | Cerrar mi progreso |
+
+## Daily 5 modal
+
+| English | Spanish |
+|---|---|
+| Daily 5 — today's warm-up | Daily 5 — el calentamiento de hoy |
+| Close Daily 5 (aria) | Cerrar el Daily 5 |
+| — tune all six strings until the tuner turns green (use the corner Tuner). | — afina las seis cuerdas hasta que el afinador se ponga verde (usa el Afinador de la esquina). |
+| Warm-up | Calentamiento |
+| Today's drill | El ejercicio de hoy |
+| from Module {num}, {set}: | del Módulo {num}, {set}: |
+| Challenge Day! Pick ONE (all skills you already know): | ¡Día de reto! Elige UNO (todas son destrezas que ya conoces): |
+| {n}-day streak | racha de {n} días |
+
+## Report a problem (footer mailto)
+
+| English | Spanish |
+|---|---|
+| Guitar site — problem report | Sitio de guitarra — reporte de problema |
+
+The body's location line ("Module 2 — Notes on the E & A Strings, Set 1")
+is assembled from already-translated pieces (module names, "Module",
+"Module review", set labels).
+
+## Module-review recording widget
+
+| English | Spanish |
+|---|---|
+| Record | Grabar |
+| Up to {s} seconds. Browser will ask for microphone permission. | Hasta {s} segundos. El navegador pedirá permiso para usar el micrófono. |
+| Stop | Detener |
+| max {s}s | máx {s}s |
+| Download | Descargar |
+| Re-record | Volver a grabar |
+| Listen back as often as you like. Download to keep a copy. | Escúchala cuantas veces quieras. Descárgala para guardar una copia. |
+| This browser does not support audio recording. Try Chrome, Edge, or Firefox on a desktop. | Este navegador no permite grabar audio. Prueba Chrome, Edge o Firefox en una computadora. |
+| Could not start microphone: {err} | No se pudo iniciar el micrófono: {err} |
+
+## Find-the-Note — remaining string names
+
+| English | Spanish |
+|---|---|
+| D (string name) | Re |
+| G (string name) | Sol |
+| B (string name) | Si |
+| high E (string name) | Mi agudo |
+
 ## Known gaps (not yet hand-translated — still Google-Translate-only)
 
-These are lower-traffic microcopy the task didn't explicitly call out, left
-for a future pass rather than guessed at: locked-set gate/toast messages
-("Finish Set 2 first…"), tooltips on locked pills, the Games/Songs Hub/Keep
-practicing/My progress panel *contents* (only their nav-rail buttons are
-translated — these panels sit outside `.week-panel` so they're still fully
-Google-Translate-covered, same as before phase 2), the Daily 5 modal, the
-"Report a problem" email body, the module-review recording widget ("Record",
-"Up to 90 seconds. Browser will ask for microphone permission.") in
-`renderRecBody()`, and the aria-only `aria-label` strings on the
-skills-checklist cells (their `title` tooltip *is* translated — the fuller
-aria-label used by screen readers is not).
+Down to two, both living in files outside the shell i18n layer:
+
+- **🎮 Games arcade panel contents** (game cards, in-game prompts and
+  feedback) — built by `coach.js`, which doesn't use `t()` yet. The panel
+  sits outside `.week-panel`, so the Google-Translate layer still covers
+  it, same as before phase 2.
+- **Challenge Day lines in the Daily 5** — the `WINTER_CHALLENGE` entries
+  in `config-main.js` have no `text_es` twins yet. The renderer now reads
+  them through `tf(c,'text')`, so they translate the moment those twins
+  are added (a content/data edit, not a shell one).
 
 ---
 
@@ -3076,6 +3165,32 @@ MODULE_SONGS[6] meta fields (song title shown for reference, not itself translat
 | assessItem: Take G–D–Em–C and play it two ways — folk, then rock — switching feel with no break at the seam | Toma G–D–Em–C y tócalo de dos formas — folk, y luego rock — cambiando la sensación sin interrupción en la costura |
 | forward: Module 7 is the <strong>barre-chord</strong> module — and every steady strum hand you just built is what carries you through it. The rhythm keeps going even while your fretting hand fights the hardest shapes in the course. The groove you own now is what makes a clamped, buzzy first barre still sound like music. | El Módulo 7 es el módulo de <strong>acordes con cejilla</strong> — y cada mano de rasgueo estable que acabas de construir es lo que te lleva a través de él. El ritmo sigue adelante incluso mientras tu mano de trastear lucha con las formas más difíciles del curso. El groove que ahora dominas es lo que hace que una primera cejilla apretada y con zumbido siga sonando a música. |
 
+### Skills practice drills (added 2026-07-23)
+
+| English | Spanish |
+|---|---|
+| m6w1-s2 practice prompt: <ol><li>Strum down-up 8th notes on one chord, every strum landing with the click, for 8 bars.</li><li>Start at 60 BPM and raise the metronome +5 at a time.</li><li>Log your fastest even BPM.</li></ol> | <ol><li>Rasguea corcheas abajo-arriba sobre un acorde, con cada rasgueo cayendo con el clic, durante 8 compases.</li><li>Empieza a 60 BPM y sube el metrónomo de 5 en 5.</li><li>Anota tu BPM parejo más rápido.</li></ol> |
+| m6w1-s2 practice placeholder: e.g. 70 — try for a higher number next session | p. ej. 70 — intenta superarlo la próxima sesión |
+| m6w1-s4 practice prompt: Your upstrokes sound weak and clunky compared to your downstrokes. What's the classic fix? | Tus golpes hacia arriba suenan débiles y torpes comparados con los de abajo. ¿Cuál es el arreglo clásico? |
+| m6w1-s4 practice explain: Upstrokes aren't downstrokes in reverse — a relaxed wrist brushing the top 3–4 strings sounds even. Gripping harder or using the whole arm makes the catch worse. | Los golpes hacia arriba no son los de abajo al revés — una muñeca relajada rozando las 3–4 cuerdas agudas suena pareja. Apretar más o usar todo el brazo empeora el enganche. |
+| m6w1-s4 practice choice 1: Relax the wrist and let the upstroke brush just the top few strings | Relajar la muñeca y dejar que el golpe hacia arriba roce solo las primeras cuerdas agudas |
+| m6w1-s4 practice choice 2: Grip the pick harder and dig in on the way up | Apretar más la púa y clavarla en el camino hacia arriba |
+| m6w1-s4 practice choice 3: Skip the upstrokes until they're perfect | Saltarte los golpes hacia arriba hasta que salgan perfectos |
+| m6w1-s4 practice choice 4: Swing the whole arm up for more power | Subir todo el brazo para tener más fuerza |
+| m6w2-s1 practice prompt: <ol><li>Play D-DU-UDU on a single chord, 4 bars in a row, wrist never stopping.</li><li>Start at 60 BPM and raise the metronome +5 at a time.</li><li>Log your fastest clean BPM.</li></ol> | <ol><li>Toca D-DU-UDU sobre un solo acorde, 4 compases seguidos, sin que la muñeca se detenga.</li><li>Empieza a 60 BPM y sube el metrónomo de 5 en 5.</li><li>Anota tu BPM limpio más rápido.</li></ol> |
+| m6w2-s1 practice placeholder: e.g. 70 — try for a higher number next session | p. ej. 70 — intenta superarlo la próxima sesión |
+| m6w2-s4 practice prompt: <ol><li>One minute: strum D-DU-UDU over G ↔ D, changing chords every bar.</li><li>Count the changes where the pattern never broke.</li><li>Log your best.</li></ol> | <ol><li>Un minuto: rasguea D-DU-UDU sobre G ↔ D, cambiando de acorde cada compás.</li><li>Cuenta los cambios donde el patrón nunca se rompió.</li><li>Anota tu mejor número.</li></ol> |
+| m6w2-s4 practice placeholder: e.g. 12 changes — try for a higher number | p. ej. 12 cambios — intenta superarlo |
+| m6w3-s1 practice label: Folk feel — soft, even strums (G root, one per beat) | Sensación folk — rasgueos suaves y parejos (raíz de G, uno por tiempo) |
+| m6w3-s2 practice prompt: What actually gives a rock strum its weight? | ¿Qué le da en realidad su peso a un rasgueo de rock? |
+| m6w3-s2 practice explain: Weight comes from the picking hand's attack, not from speed or fret-hand squeezing. Dig in on the accents and let the other strums stay lighter. | El peso viene del ataque de la mano de pulsar, no de la velocidad ni de apretar con la mano de trastear. Entra con fuerza en los acentos y deja los demás rasgueos más ligeros. |
+| m6w3-s2 practice choice 1: Accented downstrokes driven from the wrist, digging a little deeper into the strings | Golpes hacia abajo acentuados impulsados desde la muñeca, entrando un poco más profundo en las cuerdas |
+| m6w3-s2 practice choice 2: Strumming as fast as possible | Rasguear lo más rápido posible |
+| m6w3-s2 practice choice 3: Squeezing the chord harder with the fretting hand | Apretar el acorde más fuerte con la mano de trastear |
+| m6w3-s2 practice choice 4: Only strumming on beat 1 | Rasguear solo en el tiempo 1 |
+| m6w3-s5 practice prompt: <ol><li>Play 4 bars of one pattern, then switch to a different pattern for 4 bars, back and forth.</li><li>Count the switches where you never lost the beat.</li><li>Log your best streak.</li></ol> | <ol><li>Toca 4 compases de un patrón, y luego cambia a un patrón distinto durante 4 compases, ida y vuelta.</li><li>Cuenta los cambios donde nunca perdiste el tiempo.</li><li>Anota tu mejor racha.</li></ol> |
+| m6w3-s5 practice placeholder: e.g. 6 switches — try for a longer streak | p. ej. 6 cambios — intenta una racha más larga |
+
 ## Module 7 — TAB Notation and Barre Chords
 
 ### Set 1
@@ -3537,6 +3652,27 @@ MODULE_SONGS[7] meta fields (song title shown for reference, not itself translat
 | assessItem: Play a 4-chord progression mixing E-shape and A-shape barres (e.g. F–C–G–D), 2 bars each, at 60 BPM | Toca una progresión de 4 acordes mezclando cejillas en forma de E y de A (p. ej. F–C–G–D), 2 compases cada uno, a 60 BPM |
 | forward: Module 8 hands the spotlight to your <strong>picking hand</strong>. Every barre and open shape you can now hold becomes a chord frame that fingerpicking decorates one string at a time — the fretting work you just did is exactly what makes those patterns sound full. | El Módulo 8 le da el protagonismo a tu <strong>mano de pulsar</strong>. Cada cejilla y forma abierta que ahora puedes sostener se convierte en un marco de acorde que el fingerpicking decora una cuerda a la vez — el trabajo de trastear que acabas de hacer es exactamente lo que hace que esos patrones suenen completos. |
 
+### Skills practice drills (added 2026-07-23)
+
+| English | Spanish |
+|---|---|
+| m7w1-s5 practice prompt: You strum a double-stop but only ONE of the two strings sounds. Most likely cause? | Rasgueas una doble nota pero solo suena UNA de las dos cuerdas. ¿La causa más probable? |
+| m7w1-s5 practice explain: A double-stop needs one stroke that travels through both strings — widen the motion slightly. Pressing harder or blaming the TAB doesn't move the pick. | Una doble nota necesita un solo golpe que atraviese ambas cuerdas — amplía un poco el movimiento. Presionar más fuerte o culpar al TAB no mueve la púa. |
+| m7w1-s5 practice choice 1: Your pick stroke is too small — flatten it out so it crosses both strings | Tu golpe de púa es demasiado pequeño — hazlo más plano para que cruce las dos cuerdas |
+| m7w1-s5 practice choice 2: Double-stops can only be played with fingers, never a pick | Las dobles notas solo se pueden tocar con los dedos, nunca con púa |
+| m7w1-s5 practice choice 3: You need to press both frets twice as hard | Necesitas presionar los dos trastes el doble de fuerte |
+| m7w1-s5 practice choice 4: The TAB must be wrong | El TAB debe estar mal |
+| m7w1-s6 practice prompt: You find three different TABs of the same song online. How do you decide which one to trust? | Encuentras tres TABs diferentes de la misma canción en línea. ¿Cómo decides en cuál confiar? |
+| m7w1-s6 practice explain: Ratings are a good starting filter, but fan TABs are often wrong — your ear against the recording is the real referee. | Las calificaciones son un buen filtro inicial, pero los TABs de fans a menudo están mal — tu oído contra la grabación es el verdadero árbitro. |
+| m7w1-s6 practice choice 1: Play the first riff of each and keep the one that sounds like the record | Toca el primer riff de cada uno y quédate con el que suena como la grabación |
+| m7w1-s6 practice choice 2: The highest star rating is always the correct one | La calificación de estrellas más alta siempre es la correcta |
+| m7w1-s6 practice choice 3: The longest, most detailed one | El más largo y detallado |
+| m7w1-s6 practice choice 4: The first search result | El primer resultado de búsqueda |
+| m7w2-s6 practice prompt: <ol><li>Loop 2 bars each of F, G, and A — the same E-shape sliding up the neck.</li><li>Start at 60 BPM and raise the metronome +5 at a time.</li><li>Log your fastest BPM with clean changes.</li></ol> | <ol><li>Repite 2 compases de F, G, y A — la misma forma de E deslizándose por el mástil.</li><li>Empieza a 60 BPM y sube el metrónomo de 5 en 5.</li><li>Anota tu BPM más rápido con cambios limpios.</li></ol> |
+| m7w2-s6 practice placeholder: e.g. 70 — try for a higher number next session | p. ej. 70 — intenta superarlo la próxima sesión |
+| m7w3-s5 practice prompt: <ol><li>One minute: switch F (E-shape, fret 1) ↔ C (A-shape, fret 3), one bar each.</li><li>Count the changes that landed clean on beat 1.</li><li>Log your best.</li></ol> | <ol><li>Un minuto: cambia entre F (forma de E, traste 1) ↔ C (forma de A, traste 3), un compás cada uno.</li><li>Cuenta los cambios que cayeron limpios en el tiempo 1.</li><li>Anota tu mejor número.</li></ol> |
+| m7w3-s5 practice placeholder: e.g. 10 changes — try for a higher number | p. ej. 10 cambios — intenta superarlo |
+
 ## Module 8 — Finger Picking
 
 ### Set 1
@@ -3977,6 +4113,30 @@ MODULE_SONGS[8] meta fields (song title shown for reference, not itself translat
 | assessItem: Fingerpick a 4-chord progression with the 6-note arpeggio, keeping the pattern unbroken through every chord change | Toca con fingerpicking una progresión de 4 acordes con el arpegio de 6 notas, manteniendo el patrón sin interrupciones en cada cambio de acorde |
 | assessItem: Perform one full fingerpicked song from the song list start to finish, recovering from any mistakes without stopping | Interpreta una canción completa con fingerpicking de la lista de canciones de principio a fin, recuperándote de cualquier error sin detenerte |
 | forward: You've got the full first-half toolkit — notes, chords, power chords, lead, barre, strumming, and fingerpicking. <strong>The second half of the course goes deeper:</strong> Module 9 finishes the fretboard (all six strings) and teaches you to write your own TAB — the first step toward learning any song on your own. | Ya tienes el kit de herramientas completo de la primera mitad — notas, acordes, power chords, solos, cejilla, rasgueo y fingerpicking. <strong>La segunda mitad del curso profundiza más:</strong> el Módulo 9 termina el mástil (las seis cuerdas) y te enseña a escribir tu propio TAB — el primer paso hacia aprender cualquier canción por tu cuenta. |
+
+### Skills practice drills (added 2026-07-23)
+
+| English | Spanish |
+|---|---|
+| m8w1-s6 practice label: p walks E → A → D while i·m·a stay on G · B · e | p camina por Mi → La → Re mientras i·m·a se quedan en G · B · e |
+| m8w2-s5 practice prompt: <ol><li>Keep the p-i-m-a-m-i pattern going for 4 bars straight with the metronome.</li><li>Start at 60 BPM and raise it +5 at a time.</li><li>Log the fastest BPM where the tempo never wavered.</li></ol> | <ol><li>Mantén el patrón p-i-m-a-m-i durante 4 compases seguidos con el metrónomo.</li><li>Empieza a 60 BPM y súbelo de 5 en 5.</li><li>Anota el BPM más rápido donde el tempo nunca vaciló.</li></ol> |
+| m8w2-s5 practice placeholder: e.g. 70 — try for a higher number next session | p. ej. 70 — intenta superarlo la próxima sesión |
+| m8w2-s6 practice prompt: You're fingerpicking and the chord changes Em → Am. What changes for your PICKING hand? | Estás tocando fingerpicking y el acorde cambia de Em → Am. ¿Qué cambia para tu mano de PUNTEO? |
+| m8w2-s6 practice explain: The thumb hunts the new root; i-m-a stay parked on G, B, and high e. Moving everything is what breaks the pattern at changes. | El pulgar busca la nueva raíz; i-m-a se quedan estacionados en G, B y mi aguda. Mover todo es lo que rompe el patrón en los cambios. |
+| m8w2-s6 practice choice 1: Only the thumb — it moves from the low E string to the A string; i-m-a stay put | Solo el pulgar — se mueve de la cuerda Mi grave a la cuerda La; i-m-a se quedan en su lugar |
+| m8w2-s6 practice choice 2: All four fingers shift up one string | Los cuatro dedos suben una cuerda |
+| m8w2-s6 practice choice 3: Nothing at all, ever | Nada en absoluto, nunca |
+| m8w2-s6 practice choice 4: i-m-a move to new strings; the thumb stays | i-m-a se mueven a cuerdas nuevas; el pulgar se queda |
+| m8w3-s3 practice prompt: <ol><li>One minute: fingerpick your pattern over Em ↔ Am, changing every bar.</li><li>Count the changes where the pattern never missed a note.</li><li>Log your best.</li></ol> | <ol><li>Un minuto: toca tu patrón de fingerpicking sobre Em ↔ Am, cambiando cada compás.</li><li>Cuenta los cambios donde el patrón nunca perdió una nota.</li><li>Anota tu mejor número.</li></ol> |
+| m8w3-s3 practice placeholder: e.g. 8 changes — try for a higher number | p. ej. 8 cambios — intenta superarlo |
+| m8w3-s5 practice prompt: Fingerpick a complete verse of your song without stopping — mistakes are fine, stopping isn't. How many full no-stop verses did you get today? | Toca con fingerpicking una estrofa completa de tu canción sin detenerte — los errores están bien, detenerse no. ¿Cuántas estrofas completas sin paradas lograste hoy? |
+| m8w3-s5 practice placeholder: e.g. 2 verses — try for a higher number | p. ej. 2 estrofas — intenta superarlo |
+| m8w3-s6 practice prompt: Mid-performance you flub a note. What do experienced players do? | A mitad de la presentación fallas una nota. ¿Qué hacen los músicos con experiencia? |
+| m8w3-s6 practice explain: The pulse is the performance — a dropped note vanishes if the rhythm survives. Stopping or announcing the mistake is what audiences actually remember. | El pulso es la presentación — una nota perdida desaparece si el ritmo sobrevive. Detenerse o anunciar el error es lo que el público de verdad recuerda. |
+| m8w3-s6 practice choice 1: Keep the pattern going and rejoin — most listeners never notice | Mantienen el patrón y se reincorporan — la mayoría de los oyentes nunca lo nota |
+| m8w3-s6 practice choice 2: Stop and restart the song from the top | Se detienen y reinician la canción desde el principio |
+| m8w3-s6 practice choice 3: Apologize and point out the mistake | Se disculpan y señalan el error |
+| m8w3-s6 practice choice 4: Slow way down until confidence returns | Bajan mucho la velocidad hasta que vuelve la confianza |
 
 ## Module 9 — The Full Fretboard & Writing TAB
 
@@ -4519,6 +4679,46 @@ MODULE_SONGS[9] meta fields (song title shown for reference, not itself translat
 | assessItem: Read a partial-shape or slash chord chart and name which strings actually ring | Lee un diagrama de forma parcial o de acorde con barra diagonal y nombra cuáles cuerdas realmente suenan |
 | forward: The whole neck is yours now — and you can write down anything you figure out. <strong>Module 10 turns notes into keys:</strong> you'll learn the recipe that builds every scale, find the key of any song, and start trusting your ear. (And any time you come back from a long break, <strong>Set 1</strong> at the top of this module re-checks the six core skills in one sitting.) | Ahora todo el mástil es tuyo — y puedes escribir cualquier cosa que descifres. <strong>El Módulo 10 convierte notas en tonalidades:</strong> aprenderás la receta que construye cada escala, encontrarás la tonalidad de cualquier canción, y empezarás a confiar en tu oído. (Y cada vez que vuelvas de un receso largo, la <strong>Unidad 1</strong> al inicio de este módulo repasa las seis destrezas principales en una sola sesión.) |
 
+### Skills practice drills (added 2026-07-23)
+
+Note: m9w2-s2’s old mc practice ("Why do the two E strings share the same note names?" + its `_es` strings) was removed when that skill converted to the find-the-note fretboard game.
+
+| English | Spanish |
+|---|---|
+| m9w0-s1 practice prompt: <ol><li>Loop C → G → Am → F, two bars each, every change landing on beat 1.</li><li>Start at 60 BPM and raise the metronome +5 at a time.</li><li>Log your fastest clean BPM.</li></ol> | <ol><li>Repite C → G → Am → F, dos compases cada uno, con cada cambio cayendo en el tiempo 1.</li><li>Empieza a 60 BPM y sube el metrónomo de 5 en 5.</li><li>Anota tu BPM limpio más rápido.</li></ol> |
+| m9w0-s1 practice placeholder: e.g. 70 — try for a higher number next session | p. ej. 70 — intenta superarlo la próxima sesión |
+| m9w0-s2 practice prompt: <ol><li>Strum D-DU-UDU over G ↔ C, changing every bar without breaking the pattern.</li><li>Start at 60 BPM and raise the metronome +5 at a time.</li><li>Log your fastest clean BPM (70 was the old goal — beat it).</li></ol> | <ol><li>Rasguea D-DU-UDU sobre G ↔ C, cambiando cada compás sin romper el patrón.</li><li>Empieza a 60 BPM y sube el metrónomo de 5 en 5.</li><li>Anota tu BPM limpio más rápido (70 era la meta anterior — supérala).</li></ol> |
+| m9w0-s2 practice placeholder: e.g. 75 — try for a higher number next session | p. ej. 75 — intenta superarlo la próxima sesión |
+| m9w0-s4 practice label: E5 · G5 · A5 roots — two beats each, move on the beat | Raíces E5 · G5 · A5 — dos tiempos cada una, muévete en el tiempo |
+| m9w0-s5 practice prompt: A new TAB shows a "3" on the second line from the bottom, then "0 2" side by side on the bottom line. What do you play? | Un TAB nuevo muestra un "3" en la segunda línea desde abajo, y luego "0 2" lado a lado en la línea de abajo. ¿Qué tocas? |
+| m9w0-s5 practice explain: Side-by-side numbers are played in order; only STACKED numbers sound together. The bottom line is the low E, the line above it is the A. | Los números lado a lado se tocan en orden; solo los números APILADOS suenan juntos. La línea de abajo es la Mi grave; la línea de arriba de ella es la La. |
+| m9w0-s5 practice choice 1: A string fret 3, then open low E, then low E fret 2 — one at a time | Cuerda La traste 3, luego Mi grave al aire, luego Mi grave traste 2 — una a la vez |
+| m9w0-s5 practice choice 2: All three notes at once, as a chord | Las tres notas a la vez, como un acorde |
+| m9w0-s5 practice choice 3: Fingers 3, 0, and 2 on any strings you like | Dedos 3, 0 y 2 en las cuerdas que quieras |
+| m9w0-s5 practice choice 4: Frets 3, 0, 2 all on the top string | Trastes 3, 0, 2 todos en la cuerda aguda |
+| m9w0-s6 practice label: p-i-m-a over Am — thumb on the A string | p-i-m-a sobre Am — el pulgar en la cuerda La |
+| m9w1-s5 practice prompt: The Sweet Child intro TAB starts at fret 12 on the D string. Using today's fretboard knowledge, what note is that? | El TAB de la intro de Sweet Child empieza en el traste 12 de la cuerda D. Usando lo que sabes hoy del diapasón, ¿qué nota es? |
+| m9w1-s5 practice explain: Fret 12 is the octave — every string repeats its open name there, so the whole map restarts. That's what makes riffs up high readable, not scary. | El traste 12 es la octava — cada cuerda repite ahí el nombre de su cuerda al aire, así que todo el mapa vuelve a empezar. Eso hace que los riffs arriba sean legibles, no aterradores. |
+| m9w1-s5 practice choice 1: D — fret 12 repeats the open string's name, an octave higher | D — el traste 12 repite el nombre de la cuerda al aire, una octava más arriba |
+| m9w1-s5 practice choice 2: C — one below the octave | C — una nota debajo de la octava |
+| m9w1-s5 practice choice 3: E — fret 12 is always E | E — el traste 12 siempre es E |
+| m9w1-s5 practice choice 4: Notes don't have names above fret 5 | Las notas no tienen nombre arriba del traste 5 |
+| m9w2-s5 practice label: Luna intro punteo — D3 · G2 · B1 · open e | Punteo de la intro de Luna — D3 · G2 · B1 · e al aire |
+| m9w3-s1 practice prompt: A high-position TAB shows "10" on the B-string line. What is it? | Un TAB en posición alta muestra "10" en la línea de la cuerda B. ¿Qué es? |
+| m9w3-s1 practice explain: Above fret 9, TAB numbers go double-digit — "10" is one fret, not a 1 and a 0. Spacing (or a dash) is what separates two real notes. | Arriba del traste 9, los números del TAB pasan a dos dígitos — "10" es un solo traste, no un 1 y un 0. El espaciado (o un guion) es lo que separa dos notas reales. |
+| m9w3-s1 practice choice 1: One note — B string, fret 10 | Una nota — cuerda B, traste 10 |
+| m9w3-s1 practice choice 2: Two notes — fret 1, then fret 0 | Dos notas — traste 1, y luego traste 0 |
+| m9w3-s1 practice choice 3: Finger 1, then an open string | Dedo 1, y luego una cuerda al aire |
+| m9w3-s1 practice choice 4: Strings 1 and 0 played together | Las cuerdas 1 y 0 tocadas juntas |
+| m9w3-s2 practice prompt: You're writing TAB for a riff that lives on the D string. Which of the six lines does it go on? | Estás escribiendo el TAB de un riff que vive en la cuerda D. ¿En cuál de las seis líneas va? |
+| m9w3-s2 practice explain: TAB lines mirror the strings with the low E at the bottom: E-A-D from the bottom up, so the D string is line 3. Writing it on the wrong line is the #1 TAB-writing error. | Las líneas del TAB reflejan las cuerdas con la Mi grave abajo: E-A-D de abajo hacia arriba, así que la cuerda D es la línea 3. Escribirla en la línea equivocada es el error número uno al escribir TAB. |
+| m9w3-s2 practice choice 1: The 3rd line from the bottom | La 3ª línea desde abajo |
+| m9w3-s2 practice choice 2: The 3rd line from the top | La 3ª línea desde arriba |
+| m9w3-s2 practice choice 3: The bottom line — thickest string goes lowest, D is thick-ish | La línea de abajo — la cuerda más gruesa va más abajo, y la D es algo gruesa |
+| m9w3-s2 practice choice 4: Any line, as long as you label it | Cualquier línea, siempre que la etiquetes |
+| m9w3-s6 practice prompt: <ol><li>Pull out a TAB you wrote days ago (or trade with a partner) and sight-read it cold.</li><li>Count how many of its bars you played correctly on the very first pass.</li><li>Log your best.</li></ol> | <ol><li>Saca un TAB que escribiste hace días (o intercambia con un compañero) y léelo a primera vista.</li><li>Cuenta cuántos de sus compases tocaste correctamente en la primerísima pasada.</li><li>Anota tu mejor número.</li></ol> |
+| m9w3-s6 practice placeholder: e.g. 3 of 4 bars — try for all of them | p. ej. 3 de 4 compases — intenta lograrlos todos |
+
 ## Module 10 — Scales, Keys & Ear Training
 
 ### Set 1
@@ -4956,6 +5156,47 @@ MODULE_SONGS[10] meta fields (song title shown for reference, not itself transla
 | assessItem: Name the relative minor of a given major key | Nombrar la relativa menor de una tonalidad mayor dada |
 | assessItem: Identify major vs minor — and echo a short pattern — by ear | Identificar mayor vs. menor — y repetir un patrón corto — de oído |
 | forward: You can build scales, name keys, and trust your ear. <strong>Module 11 does the same for chords:</strong> you'll see why Let It Be's four chords work, number any progression like a pro, and unlock twelve chords from one barre shape. | Puedes construir escalas, nombrar tonalidades, y confiar en tu oído. <strong>El Módulo 11 hace lo mismo con los acordes:</strong> verás por qué funcionan los cuatro acordes de Let It Be, numerarás cualquier progresión como un profesional, y desbloquearás doce acordes a partir de una sola forma de cejilla. |
+
+### Skills practice drills (added 2026-07-23)
+
+| English | Spanish |
+|---|---|
+| m10w1-s6 practice prompt: Which is the correct spelling of the G major scale? | ¿Cuál es el deletreo correcto de la escala de G mayor? |
+| m10w1-s6 practice explain: Run the W-W-H-W-W-W-H recipe from G and the 7th note lands on F#, not F — forgetting that sharp is the classic slip. (C major is the one key with no sharps or flats.) | Aplica la receta W-W-H-W-W-W-H desde G y la 7ª nota cae en F#, no en F — olvidar ese sostenido es el desliz clásico. (C mayor es la única tonalidad sin sostenidos ni bemoles.) |
+| m10w1-s6 practice choice 1: G A B C D E F G | G A B C D E F G |
+| m10w1-s6 practice choice 2: G A B C D E F# G | G A B C D E F# G |
+| m10w1-s6 practice choice 3: G A Bb C D E F# G | G A Bb C D E F# G |
+| m10w1-s6 practice choice 4: G B D G B D G | G B D G B D G |
+| m10w2-s3 practice prompt: Watchtower loops Am–G–F, and Am is the chord that feels like home. Name the key and its relative major. | Watchtower repite Am–G–F, y Am es el acorde que se siente como base. Nombra la tonalidad y su relativa mayor. |
+| m10w2-s3 practice explain: Home chord Am makes it A minor, and A minor shares all its notes with C major — its relative major, 3 frets up. | El acorde base Am la hace A menor, y A menor comparte todas sus notas con C mayor — su relativa mayor, 3 trastes arriba. |
+| m10w2-s3 practice choice 1: A minor — relative major C | A menor — relativa mayor C |
+| m10w2-s3 practice choice 2: A major — relative minor F#m | A mayor — relativa menor F#m |
+| m10w2-s3 practice choice 3: C minor — relative major Eb | C menor — relativa mayor Eb |
+| m10w2-s3 practice choice 4: G major — because G is in the loop | G mayor — porque G está en la vuelta |
+| m10w2-s6 practice prompt: Seven Nation Army lives in E minor. Which key is its relative major? | Seven Nation Army vive en E menor. ¿Cuál tonalidad es su relativa mayor? |
+| m10w2-s6 practice explain: Relative major = 3 frets up from the minor root: E → G. E major is the PARALLEL major — same root, different notes. | La relativa mayor = 3 trastes arriba de la raíz menor: E → G. E mayor es la mayor PARALELA — misma raíz, notas distintas. |
+| m10w2-s6 practice choice 1: E major | E mayor |
+| m10w2-s6 practice choice 2: G major | G mayor |
+| m10w2-s6 practice choice 3: C major | C mayor |
+| m10w2-s6 practice choice 4: B major | B mayor |
+| m10w3-s2 practice prompt: A riff starts on G (low E string, fret 3). To play the same riff in A, what do you do? | Un riff empieza en G (cuerda Mi grave, traste 3). Para tocar el mismo riff en A, ¿qué haces? |
+| m10w3-s2 practice explain: Transposing on one string is pure sliding — move the whole shape by the distance between old and new root (G→A = 2 frets). The internal distances never change. | Transportar en una cuerda es puro deslizamiento — mueve toda la forma la distancia entre la raíz vieja y la nueva (G→A = 2 trastes). Las distancias internas nunca cambian. |
+| m10w3-s2 practice choice 1: Slide the whole shape up 2 frets and keep every distance the same | Deslizar toda la forma 2 trastes hacia arriba y mantener todas las distancias iguales |
+| m10w3-s2 practice choice 2: Play the same frets but on the A string | Tocar los mismos trastes pero en la cuerda La |
+| m10w3-s2 practice choice 3: Move only the first note up 2 frets | Mover solo la primera nota 2 trastes arriba |
+| m10w3-s2 practice choice 4: Relearn the riff from a new TAB | Volver a aprender el riff de un TAB nuevo |
+| m10w3-s3 practice prompt: You sang a note and you're hunting for it on the B string. How do you know you've found the right fret? | Cantaste una nota y la estás buscando en la cuerda B. ¿Cómo sabes que encontraste el traste correcto? |
+| m10w3-s3 practice explain: Matching pitch feels like the two sounds lock together; a close-but-wrong fret makes an audible beating wobble. The tuner checks the string, not your melody. | Igualar el tono se siente como si los dos sonidos se acoplaran; un traste cercano pero equivocado produce una oscilación audible. El afinador revisa la cuerda, no tu melodía. |
+| m10w3-s3 practice choice 1: The fretted note and your voice blend into one sound — no wobble between them | La nota trasteada y tu voz se funden en un solo sonido — sin oscilación entre ellas |
+| m10w3-s3 practice choice 2: The tuner shows the string is in tune | El afinador muestra que la cuerda está afinada |
+| m10w3-s3 practice choice 3: It's the fret that sounds loudest | Es el traste que suena más fuerte |
+| m10w3-s3 practice choice 4: Any nearby fret counts if you sing along | Cualquier traste cercano cuenta si cantas junto |
+| m10w3-s6 practice prompt: Luna's F sounds bright and its Am sounds dark. What single ingredient makes a chord minor? | La F de Luna suena brillante y su Am suena oscuro. ¿Cuál único ingrediente hace que un acorde sea menor? |
+| m10w3-s6 practice explain: Major and minor differ by one note: the 3rd, a half step lower in minor. Volume, string count, and position change the sound but never the major/minor color. | Mayor y menor difieren en una sola nota: la 3ª, medio tono más baja en menor. El volumen, el número de cuerdas y la posición cambian el sonido, pero nunca el color mayor/menor. |
+| m10w3-s6 practice choice 1: Its 3rd is lowered a half step | Su 3ª está bajada medio tono |
+| m10w3-s6 practice choice 2: It's strummed more quietly | Se rasguea más suave |
+| m10w3-s6 practice choice 3: It uses fewer strings | Usa menos cuerdas |
+| m10w3-s6 practice choice 4: It's played higher up the neck | Se toca más arriba en el mástil |
 
 ## Module 11 — Chords, Keys & Harmony
 
@@ -5402,6 +5643,60 @@ MODULE_SONGS[11] meta fields (song title shown for reference, not itself transla
 | assessItem: Play a I–IV–V progression in a key you draw at random — open or barre shapes | Toca una progresión I–IV–V en una tonalidad que saques al azar — formas abiertas o con cejilla |
 | assessItem: Comp a 12-bar blues in A with shuffle feel, then solo over a recording of your own comping — with another player, comp while they solo and trade | Acompaña un blues de 12 compases en A con sensación de shuffle, y luego haz un solo sobre una grabación de tu propio acompañamiento — con otro músico, acompaña mientras el otro hace el solo y luego cambien |
 | forward: You can name what every chord is DOING now, and one barre grip just became twelve chords. <strong>Module 12 is the fun final stretch — you'll use everything you've learned:</strong> we study fingerstyle in detail — alternating thumb, waltz patterns, and the requinto sound — everything you need to pick your showcase song. | Ahora puedes nombrar qué está HACIENDO cada acorde, y un solo agarre de cejilla se acaba de convertir en doce acordes. <strong>El Módulo 12 es el divertido tramo final — vas a usar todo lo que has aprendido:</strong> estudiamos el fingerstyle a fondo — pulgar alternante, patrones de vals y el sonido de requinto — todo lo que necesitas para elegir tu canción para la muestra. |
+
+### Skills practice drills (added 2026-07-23)
+
+| English | Spanish |
+|---|---|
+| m11w1-s3 practice prompt: Let It Be runs C–G–Am–F in the key of C. Which numerals — and why is the "vi" lowercase? | Let It Be va C–G–Am–F en la tonalidad de C. ¿Cuáles números romanos — y por qué el "vi" va en minúscula? |
+| m11w1-s3 practice explain: Numerals come from each chord's position in the KEY's scale, not from play order — and case shows quality: uppercase major, lowercase minor. | Los números vienen de la posición de cada acorde en la escala de la TONALIDAD, no del orden en que se tocan — y la caja muestra la calidad: mayúscula mayor, minúscula menor. |
+| m11w1-s3 practice choice 1: I–V–vi–IV — lowercase because Am is a minor chord | I–V–vi–IV — minúscula porque Am es un acorde menor |
+| m11w1-s3 practice choice 2: I–V–VI–IV — Roman numerals are always uppercase | I–V–VI–IV — los números romanos siempre van en mayúscula |
+| m11w1-s3 practice choice 3: I–IV–V–vi — count the chords in play order 1, 4, 5, 6 | I–IV–V–vi — cuenta los acordes en orden de aparición 1, 4, 5, 6 |
+| m11w1-s3 practice choice 4: vi–V–I–IV — Am is the key, so it gets I | vi–V–I–IV — Am es la tonalidad, así que recibe el I |
+| m11w1-s6 practice prompt: Luna vamps F → Am in the key of F major. What numeral does Am get? | Luna alterna F → Am en la tonalidad de F mayor. ¿Qué número romano recibe Am? |
+| m11w1-s6 practice explain: Count up the F major scale — F(1) G(2) A(3) — so Am is the 3rd chord, written lowercase iii because it's minor. (The passing Dm is vi.) | Cuenta la escala de F mayor — F(1) G(2) A(3) — así que Am es el 3er acorde, escrito iii en minúscula porque es menor. (El Dm de paso es vi.) |
+| m11w1-s6 practice choice 1: iii — A is the 3rd note of the F scale, and the chord is minor | iii — A es la 3ª nota de la escala de F, y el acorde es menor |
+| m11w1-s6 practice choice 2: vi — minor chords are always vi | vi — los acordes menores siempre son vi |
+| m11w1-s6 practice choice 3: III — uppercase, it's the 3rd chord | III — mayúscula, es el 3er acorde |
+| m11w1-s6 practice choice 4: ii — it comes second in the vamp | ii — viene en segundo lugar en el vamp |
+| m11w2-s3 practice prompt: "the cure" moves Am–C–Dm–F in the key of C. Which numeral string is right? | "the cure" va Am–C–Dm–F en la tonalidad de C. ¿Cuál cadena de números romanos es la correcta? |
+| m11w2-s3 practice explain: In C: Am=vi, C=I, Dm=ii, F=IV. Dm is lowercase ii (2nd scale degree, minor chord) — "iv" would mean a minor chord built on F. | En C: Am=vi, C=I, Dm=ii, F=IV. Dm es ii en minúscula (2º grado de la escala, acorde menor) — "iv" significaría un acorde menor construido sobre F. |
+| m11w2-s3 practice choice 1: vi–I–ii–IV | vi–I–ii–IV |
+| m11w2-s3 practice choice 2: I–III–IV–VI — number them in the order they appear | I–III–IV–VI — se numeran en el orden en que aparecen |
+| m11w2-s3 practice choice 3: vi–I–iv–IV — Dm is minor, so it's iv | vi–I–iv–IV — Dm es menor, así que es iv |
+| m11w2-s3 practice choice 4: i–III–iv–VI — the song starts on Am, so Am is i | i–III–iv–VI — la canción empieza en Am, así que Am es i |
+| m11w2-s4 practice prompt: Watchtower loops Am–G–F. What actually tells you the key is A minor? | Watchtower repite Am–G–F. ¿Qué te dice en realidad que la tonalidad es A menor? |
+| m11w2-s4 practice explain: Key = the resting place your ear hears, not the first chord (plenty of songs start away from home). Hum along and notice where the loop feels finished — that's Am. | La tonalidad = el punto de descanso que escucha tu oído, no el primer acorde (muchas canciones empiezan lejos de la base). Tararea y nota dónde la vuelta se siente terminada — eso es Am. |
+| m11w2-s4 practice choice 1: Every phrase pulls back to Am and rests there — home is where the music resolves | Cada frase regresa a Am y descansa ahí — la base es donde la música se resuelve |
+| m11w2-s4 practice choice 2: The first chord of a song is always its key | El primer acorde de una canción siempre es su tonalidad |
+| m11w2-s4 practice choice 3: It has more minor chords than major ones | Tiene más acordes menores que mayores |
+| m11w2-s4 practice choice 4: F comes last alphabetically | F va al final alfabéticamente |
+| m11w2-s6 practice prompt: A song uses G, C, and D — all major. Name the key and the numerals. | Una canción usa G, C y D — todos mayores. Nombra la tonalidad y los números romanos. |
+| m11w2-s6 practice explain: Only G major contains G, C, AND D as majors — in C the "D" chord would be Dm (ii). Three majors a whole step apart are almost always I, IV, V. | Solo G mayor contiene G, C Y D como mayores — en C el acorde de "D" sería Dm (ii). Tres mayores separados así casi siempre son I, IV, V. |
+| m11w2-s6 practice choice 1: G major — I, IV, V | G mayor — I, IV, V |
+| m11w2-s6 practice choice 2: C major — V, I, II | C mayor — V, I, II |
+| m11w2-s6 practice choice 3: D major — IV, VII, I | D mayor — IV, VII, I |
+| m11w2-s6 practice choice 4: Can't tell from chords alone | No se puede saber solo con los acordes |
+| m11w3-s3 practice prompt: Your I chord is an E-shape barre at fret 3 (G). Where do IV and V live? | Tu acorde I es una cejilla en forma de E en el traste 3 (G). ¿Dónde viven el IV y el V? |
+| m11w3-s3 practice explain: The movable I–IV–V grip: IV sits on the A-shape at the I chord's fret, and V is 2 frets above it. Learn it once and it works in every key. | El agarre movible de I–IV–V: el IV se ubica en la forma de A en el traste del acorde I, y el V está 2 trastes arriba. Apréndelo una vez y funciona en todas las tonalidades. |
+| m11w3-s3 practice choice 1: A-shape at the SAME fret (C), then A-shape 2 frets up (D) | Forma de A en el MISMO traste (C), y luego forma de A 2 trastes arriba (D) |
+| m11w3-s3 practice choice 2: E-shape at frets 4 and 5 | Forma de E en los trastes 4 y 5 |
+| m11w3-s3 practice choice 3: A-shape at frets 1 and 2 | Forma de A en los trastes 1 y 2 |
+| m11w3-s3 practice choice 4: Only the open C and D shapes work | Solo funcionan las formas abiertas de C y D |
+| m11w3-s6 practice prompt: When is a BARRE voicing the better pick for a progression? | ¿Cuándo es el acorde con cejilla la mejor opción para una progresión? |
+| m11w3-s6 practice explain: It's a sound-and-logistics choice, not a skill ranking: barres reach any root and mute cleanly; open shapes ring bigger. Pick per progression, not by difficulty. | Es una decisión de sonido y logística, no un ranking de destreza: las cejillas alcanzan cualquier raíz y se silencian limpio; las formas abiertas suenan más grandes. Elige según la progresión, no por dificultad. |
+| m11w3-s6 practice choice 1: When the roots have no open shape (Bb, F#…) — one movable grip covers them all | Cuando las raíces no tienen forma abierta (Bb, F#…) — un solo agarre movible las cubre todas |
+| m11w3-s6 practice choice 2: Always — barre chords are more advanced, so they're better | Siempre — los acordes con cejilla son más avanzados, así que son mejores |
+| m11w3-s6 practice choice 3: When you want ringing open strings in the sound | Cuando quieres cuerdas al aire sonando en el sonido |
+| m11w3-s6 practice choice 4: Never — open shapes cover every song | Nunca — las formas abiertas cubren todas las canciones |
+| m11w3-s7 practice label: The 12-bar form — one root per bar (A·A·A·A · D·D·A·A · E·D·A·E) | La forma de 12 compases — una raíz por compás (A·A·A·A · D·D·A·A · E·D·A·E) |
+| m11w3-s8 practice prompt: In a 12-bar blues in A, what does the "quick change" do? | En un blues de 12 compases en A, ¿qué hace el "cambio rápido"? |
+| m11w3-s8 practice explain: Quick change = an early visit to IV in bar 2, back to I in bar 3. The turnaround is the other bookend: V (E7) in bar 12 pulling you back to the top. | Cambio rápido = una visita temprana al IV en el compás 2, de vuelta al I en el compás 3. El giro es el otro extremo: el V (E7) en el compás 12 jalándote de regreso al inicio. |
+| m11w3-s8 practice choice 1: Jumps to the IV chord (D7) in bar 2 instead of staying on A7 | Salta al acorde IV (D7) en el compás 2 en vez de quedarse en A7 |
+| m11w3-s8 practice choice 2: Doubles the tempo for one bar | Duplica el tempo por un compás |
+| m11w3-s8 practice choice 3: Skips the turnaround entirely | Se salta el giro por completo |
+| m11w3-s8 practice choice 4: Changes key halfway through | Cambia de tonalidad a la mitad |
 
 ## Module 12 — Fingerstyle: Travis, Waltz & Requinto
 
@@ -5864,3 +6159,35 @@ MODULE_SONGS[12] meta fields (song title shown for reference, not itself transla
 | assessItem: Play one full fingerpicked verse with a steady thumb bass and a clean, unbroken finger pattern — flagship options: "the cure" or Let It Be | Toca una estrofa completa con fingerpicking con un bajo de pulgar constante y un patrón de dedos limpio y sin interrupciones — opciones destacadas: "the cure" o Let It Be |
 | assessItem: Show your chosen showcase pattern and name it | Muestra tu patrón de presentación elegido y nómbralo |
 | forward: Twelve modules — the whole toolkit, twice as deep as most first-year players ever get. <strong>Now comes your capstone performance:</strong> pick your song, pick your lane — strummed, fingerpicked, or riff + solo — get it performance-ready, then record a full take or play it live for people you choose. This website got you here; the stage is yours. And after your capstone? Keep the list of songs you want to learn, and go learn them — you know how now. | Doce módulos — el kit de herramientas completo, el doble de profundo de lo que la mayoría de los guitarristas de primer año llegan a alcanzar. <strong>Ahora llega tu interpretación final:</strong> elige tu canción, elige tu camino — rasgueada, con fingerpicking, o riff + solo — déjala lista para interpretar, y luego graba una toma completa o tócala en vivo para las personas que elijas. Este sitio web te trajo hasta aquí; el escenario es tuyo. ¿Y después de tu interpretación final? Guarda la lista de canciones que quieres aprender, y ve a aprenderlas — ya sabes cómo. |
+
+### Skills practice drills (added 2026-07-23)
+
+| English | Spanish |
+|---|---|
+| m12w1-s3 practice label: Thumb keeps alternating, i·m fill between — C: bass · B-string · bass · e-string | El pulgar sigue alternando, i·m rellenan en medio — C: bajo · cuerda B · bajo · cuerda e |
+| m12w1-s4 practice prompt: <ol><li>Loop your Travis-feel pattern over C at 60 BPM.</li><li>Count the bars in a row before the pattern breaks.</li><li>Log your best streak (8 bars is the goal).</li></ol> | <ol><li>Repite tu patrón con sensación Travis sobre C a 60 BPM.</li><li>Cuenta los compases seguidos antes de que el patrón se rompa.</li><li>Anota tu mejor racha (la meta es 8 compases).</li></ol> |
+| m12w1-s4 practice placeholder: e.g. 8 bars — try for a longer streak | p. ej. 8 compases — intenta una racha más larga |
+| m12w1-s5 practice prompt: <ol><li>One minute: keep the alternating-thumb pattern going over Am ↔ C, switching every bar.</li><li>Count the changes where the thumb never stopped.</li><li>Log your best.</li></ol> | <ol><li>Un minuto: mantén el patrón de pulgar alternante sobre Am ↔ C, cambiando cada compás.</li><li>Cuenta los cambios donde el pulgar nunca se detuvo.</li><li>Anota tu mejor número.</li></ol> |
+| m12w1-s5 practice placeholder: e.g. 8 changes — try for a higher number | p. ej. 8 cambios — intenta superarlo |
+| m12w1-s6 practice label: Am bass + roll — House of the Rising Sun feel (6/8) | Bajo de Am + floreo — sensación de House of the Rising Sun (6/8) |
+| m12w2-s3 practice label: "the cure" thumb targets — Am · C · Dm · F bass notes | Objetivos del pulgar en "the cure" — notas graves de Am · C · Dm · F |
+| m12w2-s4 practice label: Let It Be thumb targets — C · G · Am · F bass notes | Objetivos del pulgar en Let It Be — notas graves de C · G · Am · F |
+| m12w2-s5 practice prompt: <ol><li>Fingerpick your chosen pattern through a 4-chord progression.</li><li>Start at 60 BPM and raise the metronome +5 at a time.</li><li>Log the fastest BPM where the pattern never broke.</li></ol> | <ol><li>Toca tu patrón elegido con fingerpicking a través de una progresión de 4 acordes.</li><li>Empieza a 60 BPM y sube el metrónomo de 5 en 5.</li><li>Anota el BPM más rápido donde el patrón nunca se rompió.</li></ol> |
+| m12w2-s5 practice placeholder: e.g. 70 — try for a higher number next session | p. ej. 70 — intenta superarlo la próxima sesión |
+| m12w2-s6 practice prompt: Happy Birthday is in 3/4. How does your bass–pluck–pluck pattern line up with the count? | Happy Birthday está en 3/4. ¿Cómo se alinea tu patrón bajo–pulsación–pulsación con el conteo? |
+| m12w2-s6 practice explain: The waltz's "ONE-two-three" lives in the thumb: bass anchors beat 1, the plucks float on 2 and 3. Treating it like fast 4/4 is what erases the waltz feel. | El "UN-dos-tres" del vals vive en el pulgar: el bajo ancla el tiempo 1, las pulsaciones flotan en el 2 y el 3. Tratarlo como un 4/4 rápido es lo que borra la sensación de vals. |
+| m12w2-s6 practice choice 1: Thumb bass on beat 1, finger plucks on beats 2 and 3 | Bajo del pulgar en el tiempo 1, pulsaciones de los dedos en los tiempos 2 y 3 |
+| m12w2-s6 practice choice 2: Bass on every one of the three beats | Bajo en cada uno de los tres tiempos |
+| m12w2-s6 practice choice 3: Plucks on 1 and 2, bass on 3 | Pulsaciones en el 1 y el 2, bajo en el 3 |
+| m12w2-s6 practice choice 4: Same as 4/4 — just play it faster | Igual que en 4/4 — solo tócalo más rápido |
+| m12w3-s1 practice label: Luna requinto intro — little-F roll (D3 · G2 · B1 · open e) | Intro de requinto de Luna — floreo de F pequeña (D3 · G2 · B1 · e al aire) |
+| m12w3-s2 practice prompt: <ol><li>Learn the Tu Boda intro line from the tutorial.</li><li>Play it top to bottom and count your clean, no-stop passes.</li><li>Log your best.</li></ol> | <ol><li>Aprende la línea de la intro de Tu Boda con el tutorial.</li><li>Tócala de principio a fin y cuenta tus pasadas limpias y sin paradas.</li><li>Anota tu mejor número.</li></ol> |
+| m12w3-s2 practice placeholder: e.g. 3 clean passes — try for a higher number | p. ej. 3 pasadas limpias — intenta superarlo |
+| m12w3-s4 practice prompt: You're blending a tune into your picking pattern, requinto-style. Where do the melody notes go? | Estás combinando una melodía en tu patrón de punteo, al estilo requinto. ¿Dónde van las notas de la melodía? |
+| m12w3-s4 practice explain: Two jobs, one hand: the thumb never stops the bass, and i-m-a sing the tune on top. Stopping the bass for the melody is the habit this skill breaks. | Dos trabajos, una mano: el pulgar nunca detiene el bajo, e i-m-a cantan la melodía encima. Detener el bajo para la melodía es el hábito que esta destreza rompe. |
+| m12w3-s4 practice choice 1: On the high strings, riding above the thumb's steady bass | En las cuerdas agudas, viajando encima del bajo constante del pulgar |
+| m12w3-s4 practice choice 2: In the bass — the thumb carries the tune | En el bajo — el pulgar lleva la melodía |
+| m12w3-s4 practice choice 3: On whichever string has a free finger | En la cuerda que tenga un dedo libre |
+| m12w3-s4 practice choice 4: You pause the bass whenever the melody plays | Pausas el bajo cada vez que suena la melodía |
+| m12w3-s6 practice prompt: Perform your fingerpicked verse start to finish — slips allowed, stops not. How many complete no-stop runs did you get today? | Interpreta tu estrofa con fingerpicking de principio a fin — se permiten resbalones, no detenerse. ¿Cuántas pasadas completas sin paradas lograste hoy? |
+| m12w3-s6 practice placeholder: e.g. 2 runs — try for a higher number | p. ej. 2 pasadas — intenta superarlo |

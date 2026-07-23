@@ -1411,17 +1411,17 @@ function renderProgressStrip(){
 // default action opens the student's mail client with it prefilled.
 function currentReportContext(){
   const m = MODULE_MANIFEST.find(x=>x.num===lastModuleNum);
-  let loc = m ? `Module ${m.num} — ${m.name}` : `Module ${lastModuleNum||1}`;
+  let loc = m ? `${t('nav.module')} ${m.num} — ${tf(m,'name')}` : `${t('nav.module')} ${lastModuleNum||1}`;
   if(lastSetId && String(lastSetId).startsWith('mr')){
-    loc += ', Module review';
+    loc += `, ${t('nav.moduleReview')}`;
   } else {
     const w = SETS.find(s=>s.id===lastSetId);
-    if(w) loc += `, ${w.label}`;   // module name already carries the topic
+    if(w) loc += `, ${tSetLabel(w.label)}`;   // module name already carries the topic
   }
   return loc;
 }
 function buildReportHref(a){
-  const subject = 'Guitar site — problem report';
+  const subject = t('report.subject');
   const body = currentReportContext() + ':\n\n';
   a.href = 'mailto:jhoffman@seq.org?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
   return true;
@@ -1542,7 +1542,7 @@ function renderPills(moduleNum){
       // All skills got-it: green treatment + leading ✓.
       btn.classList.add('complete');
       btn.innerHTML = `<span class="wpill-check" aria-hidden="true">✓</span><span data-i18n-setlabel="${escAttr(w.label)}" translate="no" class="notranslate">${escHtml(tSetLabel(w.label))}</span>`;
-      btn.setAttribute('aria-label', `${w.label} — all ${total} skills complete`);
+      btn.setAttribute('aria-label', t('gate.pillAllComplete', {set: tSetLabel(w.label), total}));
     } else if(!locked && done>0){
       // Started but not finished: full name + a small fraction. Untouched sets
       // stay clean (just the name) until the first skill is marked got-it.
@@ -1552,18 +1552,18 @@ function renderPills(moduleNum){
       frac.textContent = ` · ${done}/${total}`;
       btn.innerHTML = `<span data-i18n-setlabel="${escAttr(w.label)}" translate="no" class="notranslate">${escHtml(tSetLabel(w.label))}</span>`;
       btn.appendChild(frac);
-      btn.setAttribute('aria-label', `${w.label} — ${done} of ${total} skills done`);
+      btn.setAttribute('aria-label', t('gate.pillProgress', {set: tSetLabel(w.label), done, total}));
     } else {
       btn.innerHTML = `<span data-i18n-setlabel="${escAttr(w.label)}" translate="no" class="notranslate">${escHtml(tSetLabel(w.label))}</span>`;
     }
     if(locked){
       // Sequential gate: opens once the set before it is finished. Keep the
       // pill tappable so it explains why instead of doing nothing.
-      const prev = prevSetLabel(w);
+      const gp = { set: tSetLabel(w.label), prev: tSetLabel(prevSetLabel(w)) };
       btn.setAttribute('aria-disabled','true');
-      btn.setAttribute('aria-label', `${w.label} — locked until ${prev} is finished`);
-      btn.title = `Locked — mark every skill in ${prev} as "I've got it!" to unlock ${w.label}.`;
-      btn.onclick = ()=> gateToast(`Finish ${prev} first — mark all its skills "I've got it!" to unlock ${w.label}.`);
+      btn.setAttribute('aria-label', t('gate.lockedUntilAria', gp));
+      btn.title = t('gate.lockedTitle', gp);
+      btn.onclick = ()=> gateToast(t('gate.finishFirstLong', { set: tSetLabel(w.label), prev: tSetLabel(prevSetLabel(w)) }));
     } else {
       btn.onclick=()=>{ leaveTopPanelForSet(); lastSetId=w.id; activateSet(w.id); saveProgress(); };
     }
@@ -1579,9 +1579,7 @@ function renderPills(moduleNum){
     rbtn.textContent=t('nav.moduleReview');
     rbtn.setAttribute('data-i18n','nav.moduleReview');
     rbtn.setAttribute('translate','no'); rbtn.classList.add('notranslate');
-    rbtn.title = locked
-      ? 'Preview only — finish marking every skill on every set as "I\'ve got it!" to unlock this self-assessment.'
-      : '';
+    rbtn.title = locked ? t('gate.reviewPreviewTitle') : '';
     rbtn.onclick=()=>{ leaveTopPanelForSet(); lastSetId=`mr${moduleNum}`; activateSet(`mr${moduleNum}`); saveProgress(); };
     c.appendChild(rbtn);
     // Sync preview/locked state onto the review's panel so its inputs disable themselves
@@ -1624,7 +1622,7 @@ function activateSet(id){
   if(!/^mr\d+$/.test(id)){
     const w = SETS.find(x=>x.id===id);
     if(w && isSetLocked(w)){
-      gateToast(`Finish ${prevSetLabel(w)} first to unlock ${w.label}.`);
+      gateToast(t('gate.finishFirstShort', { set: tSetLabel(w.label), prev: tSetLabel(prevSetLabel(w)) }));
       return;
     }
   }
@@ -2202,7 +2200,14 @@ function buildAssess(w){
 /* ── 10-Minute Routine card (module review) + Daily 5 panel ──
    Both assemble themselves from the module's already-loaded SETS data, so
    future content edits propagate automatically. Read-only: no Firebase writes. */
-function stripTags(html){ const d=document.createElement('div'); d.innerHTML=html||''; return (d.textContent||'').trim(); }
+function stripTags(html){
+  const d=document.createElement('div');
+  // Insert a space at block/line-break boundaries before flattening, so a
+  // lead-in ending in ":" doesn't abut the first <li> in one-line previews
+  // ("…(every session): When you're not…" — not "…(every session):When…").
+  d.innerHTML=(html||'').replace(/<\/?(?:p|div|li|ol|ul|h[1-6]|tr|table|blockquote|br|hr)\b[^>]*>/gi, '$& ');
+  return (d.textContent||'').replace(/\s+/g,' ').trim();
+}
 function truncateText(s, n){ if(s.length<=n) return s; const cut=s.slice(0,n); return cut.slice(0, Math.max(cut.lastIndexOf(' '), n-20))+'…'; }
 // Short one-line label for a step's collapsed checklist row.
 function stepLabel(s){
@@ -2290,9 +2295,9 @@ function buildDaily5(){
   const pick=seqSteps.length ? seqSteps[doy % seqSteps.length] : null;
   const li=(mins,title,body)=>`<li class="routine-item"><span class="routine-min">${mins} min</span><div class="routine-body"><strong>${title}</strong> ${body}</div></li>`;
   let items='';
-  items+=li(1,'Tune up','&mdash; tune all six strings until the tuner turns green (use the corner Tuner).');
-  items+=li(2,'Warm-up',`&mdash; ${escHtml(wu.text)}<br>${routinePlaySeq(wu,'bpm:daily5:wu')}`);
-  if(pick) items+=li(2,'Today’s drill',`&mdash; from Module ${num}, ${escHtml(pick.set.label)}: ${escHtml(truncateText(stripTags(pick.step.text),160))}<br>${routinePlaySeq(pick.step.playSeq,'bpm:daily5:drill')}`);
+  items+=li(1,t('routine.tuneUp'),t('daily5.tuneUpBody'));
+  items+=li(2,t('daily5.warmUp'),`&mdash; ${escHtml(tf(wu,'text'))}<br>${routinePlaySeq(wu,'bpm:daily5:wu')}`);
+  if(pick) items+=li(2,t('daily5.todaysDrill'),`&mdash; ${t('daily5.fromModule',{num, set: tSetLabel(pick.set.label)})} ${escHtml(truncateText(stripTags(tf(pick.step,'text')),160))}<br>${routinePlaySeq(pick.step.playSeq,'bpm:daily5:drill')}`);
   /* Challenge Day: every third day the Daily 5 offers ONE extra challenge to
      pick from a pair — drawn ONLY from modules the student has reached, so an
      early-module student never sees barre chords or fingerpicking. */
@@ -2304,14 +2309,14 @@ function buildDaily5(){
       const b=elig.length>1 ? elig[(doy + (doy % (elig.length-1)) + 1) % elig.length] : null;
       const opts=(b && b!==a) ? [a,b] : [a];
       challenge=`<div class="daily5-challengeday">
-        <div class="daily5-challengeday-head">&#x1F3D4; Challenge Day! Pick ONE (all skills you already know):</div>
-        <ul class="daily5-challenge">${opts.map(c=>`<li>${escHtml(c.text)}</li>`).join('')}</ul>
+        <div class="daily5-challengeday-head">&#x1F3D4; ${t('daily5.challengeHead')}</div>
+        <ul class="daily5-challenge">${opts.map(c=>`<li>${escHtml(tf(c,'text'))}</li>`).join('')}</ul>
       </div>`;
     }
   }
   const streakChip = streak.count > 1
-    ? `<span class="games-card-best">&#x1F525; ${streak.count}-day streak</span>` : '';
-  return `<div class="daily5-head"><div style="display:flex;align-items:center;gap:8px"><h3 style="font:inherit;margin:0">&#x26A1; Daily 5 &mdash; today’s warm-up</h3>${streakChip}</div><button type="button" class="tp-close" onclick="closeDaily5()" aria-label="Close Daily 5">&#x2715;</button></div>
+    ? `<span class="games-card-best">&#x1F525; ${t('daily5.streak',{n:streak.count})}</span>` : '';
+  return `<div class="daily5-head"><div style="display:flex;align-items:center;gap:8px"><h3 style="font:inherit;margin:0">&#x26A1; ${t('daily5.title')}</h3>${streakChip}</div><button type="button" class="tp-close" onclick="closeDaily5()" aria-label="${escAttr(t('daily5.closeAria'))}">&#x2715;</button></div>
     <ol class="routine-list">${items}</ol>${challenge}`;
 }
 /* Station C's warm-up card opens the Daily 5 as a popup over the activities —
@@ -2321,7 +2326,7 @@ function openDaily5Here(){
   const ov=document.createElement('div');
   ov.className='daily5-overlay';
   ov.id='daily5-overlay';
-  ov.innerHTML=`<div class="daily5-modal" role="dialog" aria-modal="true" aria-label="Daily 5 — today's warm-up">${buildDaily5()}</div>`;
+  ov.innerHTML=`<div class="daily5-modal" role="dialog" aria-modal="true" aria-label="${escAttr(t('daily5.title'))}">${buildDaily5()}</div>`;
   ov.addEventListener('click', e=>{ if(e.target===ov) closeDaily5(); });
   document.body.appendChild(ov);
   document.addEventListener('keydown', daily5EscClose);
@@ -2499,23 +2504,23 @@ function renderRecBody(moduleNum){
     return `<div class="mr-rec-active">
       <span class="mr-rec-dot"></span>
       <span class="mr-rec-time" id="mr${moduleNum}-rec-time">0:00</span>
-      <button type="button" class="mr-rec-stop" onclick="stopRec(${moduleNum})">&#x25A0; Stop</button>
-      <span class="mr-rec-max">max ${REC_MAX_SECS}s</span>
+      <button type="button" class="mr-rec-stop" onclick="stopRec(${moduleNum})">&#x25A0; ${t('rec.stop')}</button>
+      <span class="mr-rec-max">${t('rec.max',{s:REC_MAX_SECS})}</span>
     </div>`;
   }
   if (s.pendingBlobUrl){
     return `<div class="mr-rec-preview">
       <audio controls src="${s.pendingBlobUrl}" class="mr-rec-audio"></audio>
       <div class="mr-rec-actions">
-        <button type="button" class="mr-rec-btn" onclick="downloadRec(${moduleNum})">&#x2B07; Download</button>
-        <button type="button" class="mr-rec-btn" onclick="discardRec(${moduleNum})">&#x21BB; Re-record</button>
+        <button type="button" class="mr-rec-btn" onclick="downloadRec(${moduleNum})">&#x2B07; ${t('rec.download')}</button>
+        <button type="button" class="mr-rec-btn" onclick="discardRec(${moduleNum})">&#x21BB; ${t('rec.rerecord')}</button>
       </div>
-      <div class="mr-rec-status">Listen back as often as you like. Download to keep a copy.</div>
+      <div class="mr-rec-status">${t('rec.listenBack')}</div>
     </div>`;
   }
   return `<div class="mr-rec-idle">
-    <button type="button" class="mr-rec-btn primary" onclick="startRec(${moduleNum})">&#x1F399; Record</button>
-    <span class="mr-rec-help">Up to ${REC_MAX_SECS} seconds. Browser will ask for microphone permission.</span>
+    <button type="button" class="mr-rec-btn primary" onclick="startRec(${moduleNum})">&#x1F399; ${t('rec.record')}</button>
+    <span class="mr-rec-help">${t('rec.help',{s:REC_MAX_SECS})}</span>
   </div>`;
 }
 
@@ -2527,7 +2532,7 @@ function refreshRecUI(moduleNum){
 
 async function startRec(moduleNum){
   if (!navigator.mediaDevices || !window.MediaRecorder){
-    alert('This browser does not support audio recording. Try Chrome, Edge, or Firefox on a desktop.');
+    alert(t('rec.noSupport'));
     return;
   }
   try {
@@ -2565,7 +2570,7 @@ async function startRec(moduleNum){
     recorder.start();
     refreshRecUI(moduleNum);
   } catch (err) {
-    alert('Could not start microphone: ' + (err.message || err.name || 'permission denied'));
+    alert(t('rec.micFail', {err: err.message || err.name || 'permission denied'}));
   }
 }
 
@@ -2623,8 +2628,8 @@ function buildChecklist(w){
     const practicePanel = s.practice ? renderPracticePanel(s.practice, s.id, w.id) : '';
     return `<div class="skill-row" data-sid="${escAttr(s.id)}">
       <div class="sktxt"><div class="sn" style="flex-shrink:0;margin-top:0;margin-right:8px">${i+1}</div><div class="sk-body"><div class="sk-label">${skillText}</div>${helper}${practiceBtn}${whereBtn}</div></div>
-      <div class="skchk-cell working-col${st==='working'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='working'}" aria-label="Still working on it: ${escAttr(skillText)}" onclick="toggleSkill('${s.id}','${w.id}','working')" title="Still working on it" data-i18n-attr="title:skill.stillWorking"><div class="skbox">${st==='working'?wkSvg:''}</div></div>
-      <div class="skchk-cell gotit-col${st==='gotit'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='gotit'}" aria-label="I've got it: ${escAttr(skillText)}" onclick="toggleSkill('${s.id}','${w.id}','gotit')" title="I've got it!" data-i18n-attr="title:skill.gotIt"><div class="skbox">${st==='gotit'?giSvg:''}</div></div>
+      <div class="skchk-cell working-col${st==='working'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='working'}" aria-label="${escAttr(t('skill.ariaStillWorking',{skill:skillText}))}" onclick="toggleSkill('${s.id}','${w.id}','working')" title="Still working on it" data-i18n-attr="title:skill.stillWorking"><div class="skbox">${st==='working'?wkSvg:''}</div></div>
+      <div class="skchk-cell gotit-col${st==='gotit'?' active':''}" role="button" tabindex="0" aria-pressed="${st==='gotit'}" aria-label="${escAttr(t('skill.ariaGotIt',{skill:skillText}))}" onclick="toggleSkill('${s.id}','${w.id}','gotit')" title="I've got it!" data-i18n-attr="title:skill.gotIt"><div class="skbox">${st==='gotit'?giSvg:''}</div></div>
       ${practicePanel}
     </div>`;
   }).join('');
@@ -2711,7 +2716,8 @@ function renderPracticePanel(practice, skillId, wid){
        Listening Coach chord check + self-reported clean-rep logging.
        Schema: {type:'chord', chords:[{name, chord:[[string,fret,finger]…],
        position}], label} — same chord spec shape as station-step s.chords. */
-    const promptHtml = practice.label ? `<div class="sk-practice-prompt">${escHtml(tf(practice,'label'))}</div>` : '';
+    // Trusted HTML, same as step text: fields — module data is repo-authored.
+    const promptHtml = practice.label ? `<div class="sk-practice-prompt">${tf(practice,'label')}</div>` : '';
     const boxes = practice.chords.map(c =>
       `<div class="chord-box">${chordDiagramSVG(c)}${c.name ? `<div class="chord-box-label">${escHtml(c.name)}</div>` : ''}</div>`).join('');
     return `<div class="sk-practice-panel" id="pp-${skillId}" hidden>` +
@@ -2733,7 +2739,8 @@ function renderPracticePanel(practice, skillId, wid){
     const unit = practice.unit === 'count' ? 'count' : 'BPM';
     const unitKey = unit === 'count' ? 'pr.unitCount' : 'pr.unitBpm';
     const latest = prLatestValue(responses[key]);
-    const promptHtml = practice.prompt ? `<div class="sk-practice-prompt">${escHtml(tf(practice,'prompt'))}</div>` : '';
+    // Trusted HTML, same as step text: fields — module data is repo-authored.
+    const promptHtml = practice.prompt ? `<div class="sk-practice-prompt">${tf(practice,'prompt')}</div>` : '';
     const ph = practice.placeholder ? tf(practice,'placeholder') : t('step.answerPlaceholder');
     return `<div class="sk-practice-panel" id="pp-${skillId}" hidden>` +
       `<div class="sk-practice-title">${t('step.practiceThis')}</div>` +
@@ -2769,13 +2776,18 @@ function renderPracticePanel(practice, skillId, wid){
     } else {
       feedbackHtml = `<div class="sk-practice-feedback"></div>`;
     }
-    const promptHtml = practice.prompt ? `<div class="sk-practice-prompt">${escHtml(tf(practice,'prompt'))}</div>` : '';
+    // Trusted HTML, same as step text: fields — module data is repo-authored.
+    // (choices stay text-only — they're short button labels, escaped above.)
+    const promptHtml = practice.prompt ? `<div class="sk-practice-prompt">${tf(practice,'prompt')}</div>` : '';
+    const explainHtml = practice.explain
+      ? `<div class="sk-practice-explain"${storedIdx >= 0 ? '' : ' hidden'}>${tf(practice,'explain')}</div>` : '';
     return `<div class="sk-practice-panel" id="pp-${skillId}" hidden>` +
       `<div class="sk-practice-title">${t('step.practiceThis')}</div>` +
       renderRepStrip(skillId) +
       promptHtml +
       `<div class="sk-practice-mc" id="pp-mc-${skillId}">${opts}</div>` +
       feedbackHtml +
+      explainHtml +
     `</div>`;
   }
   return '';
@@ -2816,6 +2828,12 @@ function onPracticeMcSelect(skillId, idx, ansIdx, btnEl){
         fb.textContent = t('step.notQuite');
       }
     }
+  }
+  // Any pick reveals the explanation (if the practice carries one) — same
+  // behavior as the station-step graded MCs.
+  if(panel){
+    const ex = panel.querySelector('.sk-practice-explain');
+    if(ex) ex.removeAttribute('hidden');
   }
   // A correct pick counts as one practice rep (feeds the rep strip + review card).
   if(idx === ansIdx) logPracticeRep(skillId);
@@ -2950,18 +2968,29 @@ function refreshRepStrips(sid){
 }
 
 /* ── Find-the-Note game (practice.type === 'fretboard') ──
-   practice.string: 'lowE' | 'A' | 'both'. Frets 0–12, natural notes only;
-   'both' draws two strings and alternates the prompts between them. A round
-   = 5 prompts; a prompt scores if the FIRST click is right (wrong clicks
-   flash red and let the student keep hunting — no timers, no lockout).
-   Round end logs one rep and keeps a best score. */
+   practice.string: 'lowE' | 'A' | 'D' | 'G' | 'B' | 'highE' (single-string
+   board) | 'both' (low E + A, prompts alternate) | 'all' (all six strings,
+   each prompt picks a random string). Frets 0–12, natural notes only. A
+   round = 5 prompts; a prompt scores if the FIRST click is right (wrong
+   clicks flash red and let the student keep hunting — no timers, no
+   lockout). Round end logs one rep and keeps a best score. */
 const FG_ROUND = 5;
 const FG_NATURALS = {
-  lowE: {0:'E',1:'F',3:'G',5:'A',7:'B',8:'C',10:'D',12:'E'},
-  A:    {0:'A',2:'B',3:'C',5:'D',7:'E',8:'F',10:'G',12:'A'}
+  lowE:  {0:'E',1:'F',3:'G',5:'A',7:'B',8:'C',10:'D',12:'E'},
+  A:     {0:'A',2:'B',3:'C',5:'D',7:'E',8:'F',10:'G',12:'A'},
+  D:     {0:'D',2:'E',3:'F',5:'G',7:'A',9:'B',10:'C',12:'D'},
+  G:     {0:'G',2:'A',4:'B',5:'C',7:'D',9:'E',10:'F',12:'G'},
+  B:     {0:'B',1:'C',3:'D',5:'E',6:'F',8:'G',10:'A',12:'B'},
+  highE: {0:'E',1:'F',3:'G',5:'A',7:'B',8:'C',10:'D',12:'E'}
 };
-const FRET_STRING_KEY = { lowE:'fret.stringLowE', A:'fret.stringA' };
-function fgStringsFor(kind){ return kind === 'both' ? ['lowE','A'] : [kind]; }
+const FRET_STRING_KEY = { lowE:'fret.stringLowE', A:'fret.stringA', D:'fret.stringD', G:'fret.stringG', B:'fret.stringB', highE:'fret.stringHighE' };
+/* Multi-string boards draw high strings on top (string 1 → 6), matching
+   every other horizontal fretboard diagram on the site. */
+function fgStringsFor(kind){
+  if(kind === 'both') return ['A','lowE'];
+  if(kind === 'all')  return ['highE','B','G','D','A','lowE'];
+  return [kind];
+}
 function fgShuffle(arr){
   for(let i = arr.length - 1; i > 0; i--){
     const j = Math.floor(Math.random() * (i + 1));
@@ -2971,20 +3000,26 @@ function fgShuffle(arr){
 }
 const fretGames = {};
 
-/* Clickable fretboard board — one row per string (1 for lowE/A, 2 for
-   'both'). Same visual vocabulary as the reference fretboard
-   (localStringFretboardSvg): nut, fret wires, inlay dots, fret numbers —
-   prominent string lines and a transparent hit zone per string × fret. */
+/* Clickable fretboard board — one row per string (1 for a single-string
+   kind, 2 for 'both', 6 for 'all'). Same visual vocabulary as the reference
+   fretboard (localStringFretboardSvg): nut, fret wires, inlay dots, fret
+   numbers — prominent string lines and a transparent hit zone per
+   string × fret. Rows compact themselves when there are 3+ strings so the
+   'all' board still fits a Chromebook column. */
 function fgBoardSvg(sid, kind){
   const strs = fgStringsFor(kind).filter(k => FG_NATURALS[k]);
   if(!strs.length) return '';
-  const multi = strs.length > 1;
+  const n = strs.length, multi = n > 1, compact = n >= 3;
   const W = 600, padR = 8, openW = 44, maxF = 12;
-  const padL = multi ? 46 : 8;               // room for string labels on a 2-string board
-  const rowGap = 34, topY = 28;
+  const padL = multi ? 54 : 8;               // room for string labels on multi-string boards
+  const rowGap = compact ? 24 : 34;
+  const rowPad = compact ? 12 : 16;
+  const mR     = compact ? 10.5 : 13;        // feedback-marker radius
+  const mFont  = compact ? 10.5 : 11.5;
+  const topY = compact ? 22 : 28;
   const stringYs = strs.map((_, i) => topY + i * rowGap);
-  const wireTop = stringYs[0] - 16, wireBot = stringYs[stringYs.length - 1] + 16;
-  const numY = wireBot + 18, H = numY + 8;
+  const wireTop = stringYs[0] - rowPad, wireBot = stringYs[n - 1] + rowPad;
+  const numY = wireBot + (compact ? 16 : 18), H = numY + 8;
   const nutX = padL + openW;
   const fretW = (W - padL - padR - openW) / maxF;
   const colX = f => f === 0 ? padL : nutX + (f - 1) * fretW;
@@ -3017,8 +3052,8 @@ function fgBoardSvg(sid, kind){
     const y = stringYs[i], map = FG_NATURALS[k];
     for(let f = 0; f <= maxF; f++){
       s += `<g class="fg-marker" id="fgm-${sid}-${k}-${f}">` +
-        `<circle cx="${cx(f)}" cy="${y}" r="13"/>` +
-        `<text x="${cx(f)}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="11.5" font-weight="700">${map[f] || '&#x2715;'}</text>` +
+        `<circle cx="${cx(f)}" cy="${y}" r="${mR}"/>` +
+        `<text x="${cx(f)}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${mFont}" font-weight="700">${map[f] || '&#x2715;'}</text>` +
       `</g>`;
     }
   });
@@ -3031,7 +3066,8 @@ function fgBoardSvg(sid, kind){
   });
   return s + '</svg>';
 }
-/* Prompts: per-string shuffled note pools; 'both' alternates lowE/A. */
+/* Prompts: per-string shuffled note pools. 'both' strictly alternates its
+   two strings; 'all' picks a random string per prompt. */
 function fgStart(sid){
   const wrap = document.getElementById('fg-' + sid);
   if(!wrap) return;
@@ -3043,7 +3079,9 @@ function fgStart(sid){
   strs.forEach(k => { pools[k] = refill(k); });
   const prompts = [];
   for(let i = 0; i < FG_ROUND; i++){
-    const k = strs[i % strs.length];
+    const k = kind === 'all'
+      ? strs[Math.floor(Math.random() * strs.length)]
+      : strs[i % strs.length];
     if(!pools[k].length) pools[k] = refill(k);
     prompts.push({ str: k, note: pools[k].pop() });
   }
@@ -3302,6 +3340,21 @@ window.addEventListener('gc-langchange', function(){
   const myProgressPanel = document.getElementById('my-progress-panel');
   if(myProgressPanel && !myProgressPanel.hidden && typeof toggleMyProgress === 'function'){
     toggleMyProgress(); toggleMyProgress();   // closed→rebuild→reopen, cheapest correct refresh
+  }
+  // Same closed→reopen trick for the other top panels built at open time.
+  const shPanel = document.getElementById('songs-hub-panel');
+  if(shPanel && !shPanel.hidden && typeof toggleSongsHub === 'function'){
+    toggleSongsHub(); toggleSongsHub();
+  }
+  const kpPanel = document.getElementById('keep-practicing-panel');
+  if(kpPanel && !kpPanel.hidden && typeof toggleKeepPracticing === 'function'){
+    toggleKeepPracticing(); toggleKeepPracticing();
+  }
+  // A live Daily 5 overlay just rebuilds its modal body in place.
+  const d5 = document.querySelector('#daily5-overlay .daily5-modal');
+  if(d5 && typeof buildDaily5 === 'function'){
+    d5.setAttribute('aria-label', t('daily5.title'));
+    d5.innerHTML = buildDaily5();
   }
 });
 
@@ -3871,7 +3924,7 @@ async function toggleSongsHub(){
   closeTopPanels('songs-hub');
   p.removeAttribute('hidden');
   if(btn) btn.setAttribute('aria-expanded', 'true');
-  p.innerHTML = `<div class="daily5-head"><span>&#x266A; All the songs</span><button type="button" class="tp-close" onclick="toggleSongsHub()" aria-label="Close songs">&#x2715;</button></div><div class="coach-tip">Loading the song list…</div>`;
+  p.innerHTML = `<div class="daily5-head"><span>&#x266A; ${t('hub.allSongs')}</span><button type="button" class="tp-close" onclick="toggleSongsHub()" aria-label="${escAttr(t('hub.closeAria'))}">&#x2715;</button></div><div class="coach-tip">${t('hub.loading')}</div>`;
   await ensureAllModuleData();
   const byName = new Map();
   const noteSong = (song, moduleNum) => {
@@ -3890,21 +3943,21 @@ async function toggleSongsHub(){
     const sg = e.song;
     const mods = [...e.modules].sort((a, b) => a - b);
     const modBtns = mods.map(m =>
-      `<button type="button" class="sh-mod-btn" onclick="songHubGoModule(${m})" title="Open Module ${m}">M${m}</button>`).join('');
+      `<button type="button" class="sh-mod-btn" onclick="songHubGoModule(${m})" title="${escAttr(t('hub.openModuleTitle',{n:m}))}">M${m}</button>`).join('');
     /* Index-based handlers (like loadModuleSongVid): song names with
        apostrophes (Sweet Child O' Mine…) break when inlined into onclick. */
     const vids = [];
-    if(sg.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'journey')" title="One song, five layers">&#x1F9F5; Song Journey</button>`);
-    if(sg.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="songsHubVid(${idx},'tutorial')"><span class="svb-play">&#x25B6;</span>Tutorial</button>`);
-    if(sg.backingUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'backing')"><span class="svb-play">&#x25B6;</span>&#x1F3B5; Backing${sg.backingKey ? ` (${escHtml(sg.backingKey)})` : ''}</button>`);
-    if(sg.originalUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'original')" title="Opens on YouTube"><span class="svb-play">&#x25B6;</span>Original <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
+    if(sg.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'journey')" title="${escAttr(t('songs.oneSongLayers'))}">&#x1F9F5; ${t('songs.songJourney')}</button>`);
+    if(sg.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="songsHubVid(${idx},'tutorial')"><span class="svb-play">&#x25B6;</span>${t('songs.tutorial')}</button>`);
+    if(sg.backingUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'backing')"><span class="svb-play">&#x25B6;</span>&#x1F3B5; ${t('hub.backing')}${sg.backingKey ? ` (${escHtml(sg.backingKey)})` : ''}</button>`);
+    if(sg.originalUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'original')" title="${escAttr(t('songs.opensYoutube'))}"><span class="svb-play">&#x25B6;</span>${t('songs.original')} <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
     return `<div class="song-row"><div class="dot ${sg.core ? 'dc' : 'dch'}"></div>
-      <div><div class="sname">${escHtml(sg.name)}</div><div class="smeta">${sg.meta ? escHtml(sg.meta) + ' · ' : ''}Taught in: ${modBtns}</div></div>
+      <div><div class="sname">${escHtml(sg.name)}</div><div class="smeta">${sg.meta ? escHtml(sg.meta) + ' · ' : ''}${t('hub.taughtIn')} ${modBtns}</div></div>
       ${vids.length ? `<div class="song-vids">${vids.join('')}</div>` : ''}
-      <span class="stag ${sg.core ? 'stag-core' : ''}">${escHtml(sg.type || (sg.core ? 'Core' : 'Choice'))}</span></div>`;
+      <span class="stag ${sg.core ? 'stag-core' : ''}">${escHtml(sg.type || t(sg.core ? 'hub.tagCore' : 'hub.tagChoice'))}</span></div>`;
   }).join('');
-  p.innerHTML = `<div class="daily5-head"><span>&#x266A; All the songs</span><button type="button" class="tp-close" onclick="toggleSongsHub()" aria-label="Close songs">&#x2715;</button></div>
-    <div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>Core — everyone learns these</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>Choice menu</div></div>
+  p.innerHTML = `<div class="daily5-head"><span>&#x266A; ${t('hub.allSongs')}</span><button type="button" class="tp-close" onclick="toggleSongsHub()" aria-label="${escAttr(t('hub.closeAria'))}">&#x2715;</button></div>
+    <div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('hub.legendCore')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('hub.legendChoice')}</div></div>
     <div class="card">${rows}</div>`;
 }
 let songsHubList = [];
@@ -4068,7 +4121,7 @@ async function gatedJumpGuard(moduleNum, wid){
   if(sel) sel.value = String(moduleNum);
   await onModuleChange(moduleNum);
   saveProgress();
-  gateToast(`${w.label} unlocks after you finish ${prevSetLabel(w)}.`);
+  gateToast(t('gate.unlocksAfter', { set: tSetLabel(w.label), prev: tSetLabel(prevSetLabel(w)) }));
   return true;
 }
 async function searchGoSkill(moduleNum, wid, skillNum){
@@ -4103,8 +4156,8 @@ async function toggleKeepPracticing(){
   closeTopPanels('keep-practicing');
   p.removeAttribute('hidden');
   if(btn) btn.setAttribute('aria-expanded', 'true');
-  const head = `<div class="daily5-head"><span>&#x1F501; Keep practicing</span><button type="button" class="tp-close" onclick="toggleKeepPracticing()" aria-label="Close keep practicing">&#x2715;</button></div>`;
-  p.innerHTML = `${head}<div class="coach-tip">Loading…</div>`;
+  const head = `<div class="daily5-head"><span>&#x1F501; ${t('nav.keepPracticing')}</span><button type="button" class="tp-close" onclick="toggleKeepPracticing()" aria-label="${escAttr(t('kp.closeAria'))}">&#x2715;</button></div>`;
+  p.innerHTML = `${head}<div class="coach-tip">${t('kp.loading')}</div>`;
   await ensureAllModuleData();
   const byModule = new Map();
   SETS.forEach(w => {
@@ -4113,13 +4166,13 @@ async function toggleKeepPracticing(){
       const num = (sk.id.match(/-s(\d+)$/) || [])[1];
       if(!num) return;
       const g = byModule.get(w.moduleNum) || [];
-      g.push({ wid: w.id, setLabel: w.label, skillNum: Number(num), text: sk.text });
+      g.push({ wid: w.id, setLabel: tSetLabel(w.label), skillNum: Number(num), text: tf(sk,'text') });
       byModule.set(w.moduleNum, g);
     });
   });
   const modNums = [...byModule.keys()].sort((a, b) => a - b);
   if(!modNums.length){
-    p.innerHTML = `${head}<div class="coach-tip">Nothing marked &ldquo;still working on it&rdquo; right now — mark a skill that way on any checklist and it'll show up here.</div>`;
+    p.innerHTML = `${head}<div class="coach-tip">${t('kp.emptyHtml')}</div>`;
     focusPanel(p);
     return;
   }
@@ -4157,7 +4210,7 @@ function toggleMyProgress(){
       <div class="prog-wrap"><div class="prog-row"><div class="prog-bg"><div class="prog-fill" style="width:${pct}%"></div></div><div class="prog-lbl">${done} / ${total}</div></div></div>
     </div>`;
   }).join('');
-  p.innerHTML = `<div class="daily5-head"><span>&#x1F4CA; <span data-i18n="nav.myProgress">${t('nav.myProgress')}</span></span><button type="button" class="tp-close" onclick="toggleMyProgress()" aria-label="Close my progress">&#x2715;</button></div>
+  p.innerHTML = `<div class="daily5-head"><span>&#x1F4CA; <span data-i18n="nav.myProgress">${t('nav.myProgress')}</span></span><button type="button" class="tp-close" onclick="toggleMyProgress()" aria-label="${escAttr(t('mp.closeAria'))}" data-i18n-attr="aria-label:mp.closeAria">&#x2715;</button></div>
     <div class="coach-tip" data-i18n="progress.skillsMastered" data-i18n-params="${escAttr(JSON.stringify({done:totalDone,total:totalAll,modules:MODULE_MANIFEST.length}))}">${t('progress.skillsMastered',{done:totalDone,total:totalAll,modules:MODULE_MANIFEST.length})}</div>
     <div class="card">${rows}</div>`;
   if(typeof applyI18n === 'function') applyI18n(p);
