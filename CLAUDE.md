@@ -179,13 +179,22 @@ just `setLang()` — four layers all hang off it:
   - `translate="no"` is still added automatically by `applyI18n()` —
     harmless now that Google Translate is gone, and it keeps any student's
     own browser auto-translate from mangling our hand-written Spanish.
-- **Review policy (settled 2026-07-23): no bilingual human is available, so
-  the QA gate for new Spanish is an independent AI proofread sweep** — fresh
-  agents with no authorship context audit new Spanish against the English +
-  glossary and flag genuine errors only. Run one after any large batch of new
-  Spanish. (`translations-review.md`, the working EN→ES review sheet, was
-  removed 2026-07-23 once the full-site sweep was complete and all findings
-  fixed — see WORKFLOW.md "Recently shipped" for the history.)
+- **Review policy (revised 2026-07-23 — Jonathan: audit much less):**
+  routine proofread sweeps are retired. The 2026-07-23 full-site sweep found
+  essentially no meaning errors across ~4,300 strings, so the ongoing bar is
+  simply: write new Spanish carefully against the glossary and ship it. Run
+  an AI proofread sweep **only** when Jonathan explicitly asks for one, or
+  when a student/teacher flags a specific string — never as an automatic
+  step after a content batch. The **authoritative Spanish lives in the code
+  itself** — `i18n.js` (shell strings + the binding glossary at the top) and
+  the `_es` twins in each `module-N.js` — so no separate review sheet is
+  maintained. (`translations-review.md` was removed 2026-07-23 to clean up
+  the repo once the full-site sweep was complete; its final version is
+  preserved outside the repo in the Claude project as
+  `claude/translations-review-final-2026-07-23.md`, and WORKFLOW.md
+  "Recently shipped" keeps the history. The Module 13 APPLY doc's
+  suggestion to sweep its new Spanish is superseded by this policy — skip
+  it.)
 - `i18n.js` loads on **every page that uses these strings**: `index.html`
   (the full shell + coach.js) and every `tabs/*.html` Song Journey page.
   It must load **before** `app.js`, `fab-tools.js`, `tuner.js`, and (on
