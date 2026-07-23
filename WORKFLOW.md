@@ -86,10 +86,13 @@
       hit-line pulse from the play screen. Rhythm/tempo practice is still
       the timed **Keys / tap** game's job — Wait Mode is now purely about
       landing the right notes. Code: `coach.js` (`rnw*` functions, ready
-      screen's `guitarUi`) and `styles.css`. **Not yet pushed or re-tested
-      on a real guitar** — do a fresh real-guitar pass on the live site
-      (PWA cache — hard-refresh) once pushed, to confirm the no-clock flow
-      feels natural end to end (not just note detection in isolation).
+      screen's `guitarUi`) and `styles.css`. **Code confirmed live in
+      origin/main (2026-07-23 cloud audit: `rnwStart` is the untimed
+      mic-graded path; no metronome/count-in or speed picker remains)** —
+      only the real-guitar pass is left. **Where to test:** live site →
+      left rail **Games** → **Riff Runner** → pick **Seven Nation Army** →
+      "I have my guitar" (Wait Mode). Hard-refresh first (PWA cache) and
+      confirm the no-clock flow feels natural end to end.
 - [~] **Real-guitar retest of the mic features** (Jonathan, 2026-07-12; melody
       detail added from REVIEW-PLAN K-1, 2026-07-20) —
       **Listening Coach chord check ("Check my changes"): DONE & verified**
@@ -118,9 +121,14 @@
         reactive highlight and always landing a beat late. **Fix: extended
         `coachNowHtml` to melody mode** — it now shows the current note big
         + "next: X" ahead of time, same as chords (`coach.js`, `coachNowHtml`
-        + the beat-pulse update block ~line 533). **Not yet pushed or
-        retested** — confirm on a real guitar that the current/next preview
-        actually makes it easier to land notes on the beat.
+        + the beat-pulse update block ~line 533). **Code confirmed live in
+        origin/main (2026-07-23 cloud audit: `coachNowHtml` has the melody
+        branch)** — only the real-guitar retest remains. **Where to test:**
+        live site → **Module 2 · Set 1 → Station B → "Play along with your
+        note chart" → "Low E notes with your chart"** — hit the **Check me**
+        mic button next to "Play all" (8 notes walking up the low E, slow
+        60 BPM — ideal for judging whether the current/next preview lets
+        you land notes on the beat instead of a beat late).
       - One Note Hunt round, one full Change Up round.
       - **Must run on the LIVE site**, not localhost — the PWA service
         worker caches the shell, so confirm the deployed `CACHE_VERSION` is
