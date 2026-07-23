@@ -59,66 +59,6 @@
 
 ## Open work
 
-- [ ] **Custom backing tracks for the six journey-page play-alongs — Jonathan
-      is making them himself** (Jonathan, 2026-07-20; plan to do all six
-      confirmed 2026-07-22) — every Song Journey page has a "🎵 Play along"
-      button. **"the cure" is DONE and live-verified** (2026-07-22): swapped to
-      Jonathan's own **A-minor, no-capo** tracks — a clean rhythm-down mix
-      (`audio/olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-rhythm-down.mp3`)
-      plus a metronome variant with a click baked in
-      (`...-rhythm-down-metronome.mp3`, re-balanced once already for a too-loud
-      click), both local files played through a looping `<audio>` element with
-      a "🎵 Metronome" toggle on the Journey page to swap between them
-      mid-playback (position + play state preserved). At the same time every
-      capo instruction for the song was stripped across the modules + its
-      Journey page, and an asterisk note under the play-along button explains
-      that capoing the 1st fret matches the original recording's pitch.
-      **"Luna" is DONE (2026-07-22):** swapped to Jonathan's own **A-minor,
-      128 BPM** rhythm-down mix
-      (`audio/peso-pluma-junior-h-luna-backing-Am-128bpm-440hz-rhythm-down.mp3`)
-      plus a metronome variant (`...-rhythm-down-metronome.mp3`), replacing the
-      generic Dm YouTube loop on the Journey page — same local-`<audio>` +
-      Metronome-toggle pattern as "the cure." Song is already capo-free, so no
-      capo cleanup was needed. **Watchtower is DONE (2026-07-22):** swapped to
-      Jonathan's own **Neil Young cover, A-minor, 115 BPM** rhythm-down mix
-      (`audio/neil-young-all-along-the-watchtower-backing-Am-115bpm-440hz-rhythm-down.mp3`)
-      plus a metronome variant (`...-rhythm-down-metronome.mp3`), replacing the
-      generic Am YouTube jam loop (`Vq8cApzOdy8`) on the Journey page — same
-      local-`<audio>` + Metronome-toggle pattern, wired in both
-      `tabs/all-along-the-watchtower.html` and `module-4.js`'s `MODULE_SONGS`
-      entry (the display name stays "Dylan / Hendrix" per the artist-stays-out-
-      of-display-metadata rule — only the filename carries the Neil Young
-      slug). Song is already capo-free and already in the site's teaching key
-      (Am), so no key/capo cleanup was needed. Browser-verified: play-along
-      button builds the `<audio>` element with a resolvable source, Metronome
-      toggle correctly swaps to the `-metronome` variant. **Naming convention
-      going forward:**
-      `<artist-slug>-<song-slug>-backing-<key>-<bpm>bpm-<tuning>hz-<mix>.mp3` —
-      see the "Backing-track naming & tuning" section in `CLAUDE.md` for the
-      full rule (every track ships at A=440, exported directly from Moises).
-      **Plan for the other four: same treatment, one song at a time, as
-      Jonathan supplies the mp3s** — each gets the same recipe "the cure" and
-      "Luna" got:
-      - Two files per song at minimum: a clean rhythm-down mix and a
-        rhythm-down-metronome variant, **both exported at A=440** (never trust
-        the source master's tuning — see "Backing-track naming & tuning" in
-        `CLAUDE.md`), named
-        `<artist-slug>-<song-slug>-backing-<key>-<bpm>bpm-<tuning>hz-<mix>.mp3`.
-      - Wire exactly like `tabs/the-cure.html` / `module-4.js`: `data-audio` +
-        `data-audio-metronome` on `#playalong-frame`, `backingUrl` pointing at
-        the clean mix. The metronome-toggle code in `tabs/journey.js` is
-        already generic — it activates automatically whenever a page's frame
-        has `data-audio-metronome`, no per-song JS changes needed.
-      - `tools/checks.mjs` fingerprints everything in `audio/` (fixed
-        2026-07-22), so `CACHE_VERSION` bumps automatically for these too —
-        no manual cache-busting step per song.
-      - Until Jonathan supplies a song's files, it keeps its existing YouTube
-        loop:
-        - Seven Nation Army — `sbN1wfDb4sw`
-        - Sweet Child O' Mine — `kkZI8Lma8UA`
-        - Let It Be — `xHhfKZAH_EU`
-      Give Claude the file(s) — it'll copy into `audio/`, rename to convention,
-      wire, run `tools/checks.mjs`, and verify before pushing.
 
 - [~] **Real-guitar test of Riff Runner Wait Mode** (Jonathan, 2026-07-12;
       metronome stripped out 2026-07-22) —
@@ -202,6 +142,36 @@
 ---
 
 ## Recently shipped (post-archive)
+
+- [x] **Custom backing tracks for all six journey-page play-alongs — Jonathan
+      made them himself** (Jonathan, 2026-07-20 → all six DONE 2026-07-22;
+      this entry was stale until corrected 2026-07-23, see below) — every
+      Song Journey page has a "🎵 Play along" button; all six now play
+      Jonathan's own local mixes (`audio/`) instead of generic YouTube jam
+      loops, each a clean rhythm-down mix + a metronome variant (`<audio>`
+      element, "🎵 Metronome" toggle preserving playback position), every
+      track exported at A=440. **"the cure"** (Am, 144 BPM) and **Luna** (Am,
+      128 BPM) done first (2026-07-22), followed same day by **Watchtower**
+      (Neil Young cover, Am, 115 BPM — display name stays "Dylan/Hendrix" per
+      the artist-stays-out-of-display-metadata rule), **Sweet Child O' Mine**
+      (G, 125 BPM — standard tuning on this site, so it sounds a half-step
+      above the famous down-tuned recording, expected/documented), **Let It
+      Be** (C, 71 BPM), and **Seven Nation Army** (Em, 123 BPM). Bonus 🐢
+      **Slow tier** added same day for four of the six ("the cure" 120 BPM,
+      Watchtower 90 BPM, Sweet Child 100 BPM, Seven Nation Army 100 BPM) — an
+      independent tempo toggle alongside the Metronome toggle
+      (`data-audio-slow`/`data-bpm-slow` in `tabs/*.html`, generic handling in
+      `tabs/journey.js`, which rescales `currentTime` by the tempo ratio on
+      toggle so playback position holds through a tempo change). Naming
+      convention: `<artist-slug>-<song-slug>-backing-<key>-<bpm>bpm-<tuning>
+      hz-<mix>.mp3` (see CLAUDE.md's "Backing-track naming & tuning"
+      section). **Correction 2026-07-23:** this item had sat marked "Open"
+      listing Seven Nation Army/Sweet Child/Let It Be as still pending
+      Jonathan's files, months after all three actually shipped
+      (`c2b9e94`/`2958547`/`73c7afd`, 2026-07-22) — caught when Jonathan
+      pointed out the files were already in `audio/`. Lesson: an Open-work
+      item needs its ground truth (git log / working tree) spot-checked
+      before assuming a stale-looking status is still accurate.
 
 - [x] **Module 12: confirmed the requinto video fits, deleted the leftover
       note** (REVIEW-PLAN C-7, 2026-07-20; resolved 2026-07-23) —
