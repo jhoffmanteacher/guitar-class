@@ -394,11 +394,11 @@
 
 ## Recently shipped (post-archive)
 
-- [~] **Practice everywhere (round 2): Modules 6–12 drills + six-string
+- [x] **Practice everywhere (round 2): Modules 6–12 drills + six-string
       Find-the-Note + shell i18n finished + list-formatted directions** —
-      commit `202f4dd` (2026-07-23), built in the cloud Cowork session and
-      **delivered as `practice-everywhere.patch` for local apply+push;
-      flip this to [x] with the final hash once pushed.** 54 new drills
+      pushed `9d742ac` (2026-07-23; built in the cloud Cowork session as
+      `202f4dd`, applied+pushed locally via patch, hash changed with
+      `git am`). 54 new drills
       (all 230 course skills now practiceable; M6–12 mix 77 mc / 31
       playSeq / 17 pr / 5 chord / 5 fretboard) + 9 conversions (M7/M11
       barres → 'chord', M9 note-naming → per-string 'fretboard');
