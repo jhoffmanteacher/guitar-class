@@ -114,34 +114,20 @@
       - **Must run on the LIVE site**, not localhost — the PWA service
         worker caches the shell, so confirm the deployed `CACHE_VERSION` is
         current and hard-refresh first.
-- [ ] **Live-site device checks, no mic needed** (bundled from REVIEW-PLAN
-      K-2/K-5/D-7 and today's compact-checklist work, 2026-07-20) — code for
-      all of these already shipped; each just needs an on-device look, ideally
-      in the same live-site sitting as the mic retest above:
-      - **Tuner still locks all six strings** after the 5×-cheaper YIN scan
-        (`tuner.js` — tau loop now bounded by `sampleRate/60` instead of
-        scanning the full buffer, and the per-frame `Float32Array` allocation
-        was removed in favor of a reused buffer).
-      - **Tuner string-selector touch targets** on an actual phone (~360px
-        wide) — buttons were raised toward ~40–44px; confirm they're
-        comfortable to tap with a guitar on your lap.
-      - **Compact checklist at phone width (~400px)** — rows shouldn't
-        overflow and tap targets should hold ≥44px (`.step-head` is set to
-        `min-height:48px` in styles.css, but wasn't confirmed on a real
-        device — my browser-automation window resize didn't actually
-        reflow the viewport during testing).
-      - **Compact checklist print preview (⌘P)** — every step should render
-        fully expanded with the chevron hidden, same as before the redesign;
-        also not yet visually confirmed.
-      - **Song Journey pages at phone width + print preview** — same two
-        checks for the new journey-page accordion (`tabs/*.html`): rows
-        shouldn't overflow at ~400px, and ⌘P should show every layer fully
-        expanded with chevrons/translate button hidden. Shipped in `dbd2f8f`
-        with print styles written, but neither has been eyeballed on a real
-        device.
 ---
 
 ## Recently shipped (post-archive)
+
+- [x] **Live-site device checks, no mic needed — closed without on-device
+      confirmation** (bundled from REVIEW-PLAN K-2/K-5/D-7 and the
+      compact-checklist work, 2026-07-20; closed 2026-07-23) — covered the
+      tuner's post-YIN-optimization string lock, tuner string-selector touch
+      targets, compact checklist + Song Journey pages at phone width
+      (~360–400px) and in print preview (⌘P). All the underlying code
+      shipped; **Jonathan decided phone-specific polish isn't a priority for
+      him**, so this is marked done as a deliberate scope call, not because
+      it was verified working on a real device. If phone usability becomes a
+      concern later, these are the specific checks to revisit.
 
 - [x] **Custom backing tracks for all six journey-page play-alongs — Jonathan
       made them himself** (Jonathan, 2026-07-20 → all six DONE 2026-07-22;
