@@ -195,7 +195,7 @@ async function ensureModuleRendered(num){
   // until the next language toggle. Mark them right away instead of waiting.
   if(typeof applyI18n === 'function') applyI18n(c);
 }
-let _dirtyKeys = new Set();   // which categories need writing: skills · place · responses · completed · games
+let _dirtyKeys = new Set();   // which categories need writing: skills · place · responses · completed · games · streak · practiceLog
 const escAttr = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const escHtml = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
@@ -291,6 +291,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     else { await loadProgress(); await loadClassConfig(); showApp(user); }
   } else {
     currentUser = null; progress = {}; responses = {}; completed = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true;
+    practiceLog = loadLocalPracticeLog();   // per-skill rep history: back to the local copy on sign-out
     _moduleStripStates = {};   // next user's first strip render is a first paint, not a celebration
     document.getElementById('auth-wall').style.display='block';
     document.getElementById('app').style.display='none';
@@ -339,8 +340,13 @@ async function loadProgress(){
       completed     = doc.data().completed || {};
       games         = doc.data().games || {};
       streak        = doc.data().streak || { count:0, lastDay:null };
-    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; games={}; streak={ count:0, lastDay:null }; restoreLocalPlace(); }
-  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; games={}; streak={ count:0, lastDay:null }; restoreLocalPlace(); }
+      // practiceLog (per-skill rep history): Firestore is the source of truth
+      // when signed in; fall back to the localStorage copy for older docs that
+      // predate the field, then mirror back so the offline copy stays fresh.
+      practiceLog   = doc.data().practiceLog || loadLocalPracticeLog();
+      savePracticeLogLocal();
+    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); restoreLocalPlace(); }
+  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); restoreLocalPlace(); }
 }
 
 /* ── Games access (teacher-controlled) ──
@@ -463,6 +469,7 @@ async function flushSave(){
   if(keys.has('completed')) payload.completed = completed;
   if(keys.has('games'))     payload.games     = games;
   if(keys.has('streak'))    payload.streak    = streak;
+  if(keys.has('practiceLog')) payload.practiceLog = practiceLog;
   try{
     await ensureDb();
     await db.collection('progress').doc(currentUser.uid).set(payload,{merge:true});
@@ -2621,7 +2628,8 @@ function buildChecklist(w){
       ${practicePanel}
     </div>`;
   }).join('');
-  return `<div class="cl-intro" data-i18n="skill.checklistIntro">${t('skill.checklistIntro')}</div>
+  return `<div class="review-slot" id="rc-${w.id}">${reviewCardHtml()}</div>
+  <div class="cl-intro" data-i18n="skill.checklistIntro">${t('skill.checklistIntro')}</div>
   <div class="cl-grid-wrap">
     <div class="cl-header"><div class="cl-header-skill" data-i18n="skill.clHeaderSkill">${t('skill.clHeaderSkill')}</div><div class="cl-header-working" data-i18n-html="skill.clHeaderWorkingHtml">${t('skill.clHeaderWorkingHtml')}</div><div class="cl-header-gotit" data-i18n-html="skill.clHeaderGotItHtml">${t('skill.clHeaderGotItHtml')}</div></div>
     ${rows}
@@ -2646,24 +2654,96 @@ function toggleGotIt(sid, btn){
 }
 
 /* ── Per-skill practice panel ── */
+/* The playSeq row (▶ Play button + BPM slider + optional Listening Coach) is
+   shared by the 'playSeq' panel and the 'fretboard' panel (which keeps the
+   listen-through as a helper under the game). */
+function playSeqControlsHtml(practice, skillId){
+  const label = (practice.label && tf(practice,'label')) || t('step.playAll');
+  const defBpm = practice.bpm || 60;
+  const minBpm = practice.minBpm || 40;
+  const maxBpm = practice.maxBpm || 120;
+  const key = `bpm:practice:${skillId}`;
+  const bpm = readStoredBpm(key, defBpm);
+  const midis = JSON.stringify(practice.notes || []);
+  const hasHolds = (practice.notes || []).some(n => n && typeof n === 'object' && !Array.isArray(n));
+  return `<div class="bpm-control-group">` +
+    `<button type="button" class="play-seq-btn" data-midis="${escAttr(midis)}" onclick="playSequenceFromGroup(this)" title="Play all notes">&#x25B6; ${escHtml(label)}</button>` +
+    renderBpmControl(key, bpm, minBpm, maxBpm) +
+    (hasHolds ? '' : coachBtnHtml(midis)) +
+  `</div>`;
+}
 function renderPracticePanel(practice, skillId, wid){
   if(!practice || !practice.type) return '';
   if(practice.type === 'playSeq'){
-    const label = (practice.label && tf(practice,'label')) || t('step.playAll');
-    const defBpm = practice.bpm || 60;
-    const minBpm = practice.minBpm || 40;
-    const maxBpm = practice.maxBpm || 120;
-    const key = `bpm:practice:${skillId}`;
-    const bpm = readStoredBpm(key, defBpm);
-    const midis = JSON.stringify(practice.notes || []);
-    const hasHolds = (practice.notes || []).some(n => n && typeof n === 'object' && !Array.isArray(n));
     return `<div class="sk-practice-panel" id="pp-${skillId}" hidden>` +
       `<div class="sk-practice-title">${t('step.practiceThis')}</div>` +
-      `<div class="bpm-control-group">` +
-        `<button type="button" class="play-seq-btn" data-midis="${escAttr(midis)}" onclick="playSequenceFromGroup(this)" title="Play all notes">&#x25B6; ${escHtml(label)}</button>` +
-        renderBpmControl(key, bpm, minBpm, maxBpm) +
-        (hasHolds ? '' : coachBtnHtml(midis)) +
+      renderRepStrip(skillId) +
+      playSeqControlsHtml(practice, skillId) +
+      `<div class="rep-actions"><button type="button" class="rep-log-btn" onclick="logCleanRep('${skillId}', this)">&#x2713; <span data-i18n="rep.logClean">${t('rep.logClean')}</span></button></div>` +
+    `</div>`;
+  }
+  if(practice.type === 'fretboard'){
+    /* Find-the-Note game: practice.string 'lowE' | 'A' | 'both' (see fgBoardSvg). */
+    const kind = practice.string || 'lowE';
+    const e = practiceLog[skillId];
+    const bestHtml = (e && e.best != null)
+      ? `<span data-i18n="fret.best" data-i18n-params='{"n":${e.best},"total":${FG_ROUND}}'>${t('fret.best',{n:e.best,total:FG_ROUND})}</span>` : '';
+    const playRow = (practice.notes && practice.notes.length) ? playSeqControlsHtml(practice, skillId) : '';
+    return `<div class="sk-practice-panel" id="pp-${skillId}" hidden>` +
+      `<div class="sk-practice-title">${t('step.practiceThis')}</div>` +
+      renderRepStrip(skillId) +
+      `<div class="fg-wrap" id="fg-${skillId}" data-kind="${escAttr(kind)}">` +
+        `<div class="fg-head">` +
+          `<div class="fg-status">` +
+            `<span class="fg-intro" data-i18n-html="fret.introHtml" data-i18n-params='{"total":${FG_ROUND}}'>${t('fret.introHtml',{total:FG_ROUND})}</span>` +
+            `<button type="button" class="fg-start-btn" onclick="fgStart('${skillId}')" data-i18n="fret.startRound">${t('fret.startRound')}</button>` +
+          `</div>` +
+          `<div class="fg-best">${bestHtml}</div>` +
+        `</div>` +
+        `<div class="fg-board">${fgBoardSvg(skillId, kind)}</div>` +
+        `<div class="fg-fb"></div>` +
       `</div>` +
+      playRow +
+    `</div>`;
+  }
+  if(practice.type === 'chord' && Array.isArray(practice.chords)){
+    /* Chord drill: diagram(s) via the existing chordDiagramSVG renderer +
+       Listening Coach chord check + self-reported clean-rep logging.
+       Schema: {type:'chord', chords:[{name, chord:[[string,fret,finger]…],
+       position}], label} — same chord spec shape as station-step s.chords. */
+    const promptHtml = practice.label ? `<div class="sk-practice-prompt">${escHtml(tf(practice,'label'))}</div>` : '';
+    const boxes = practice.chords.map(c =>
+      `<div class="chord-box">${chordDiagramSVG(c)}${c.name ? `<div class="chord-box-label">${escHtml(c.name)}</div>` : ''}</div>`).join('');
+    return `<div class="sk-practice-panel" id="pp-${skillId}" hidden>` +
+      `<div class="sk-practice-title">${t('step.practiceThis')}</div>` +
+      renderRepStrip(skillId) +
+      promptHtml +
+      `<div class="chord-diagrams">${boxes}</div>` +
+      coachChordBtnRowHtml(practice.chords) +
+      `<div class="rep-actions"><button type="button" class="rep-log-btn" onclick="logCleanRep('${skillId}', this)">&#x2713; <span data-i18n="rep.logClean">${t('rep.logClean')}</span></button></div>` +
+    `</div>`;
+  }
+  if(practice.type === 'pr'){
+    /* Structured PR ladder: {type:'pr', prompt, unit:'BPM'|'count',
+       placeholder}. Persists through the SAME path as the regex-promoted PR
+       steps — responses[`practice-<skillId>`] as an 8-entry {value,date}
+       history via onResponseChange(key, value, true) — but declared in data,
+       no prompt-text heuristic. Committing a new value (blur) logs one rep. */
+    const key = `practice-${skillId}`;
+    const unit = practice.unit === 'count' ? 'count' : 'BPM';
+    const unitKey = unit === 'count' ? 'pr.unitCount' : 'pr.unitBpm';
+    const latest = prLatestValue(responses[key]);
+    const promptHtml = practice.prompt ? `<div class="sk-practice-prompt">${escHtml(tf(practice,'prompt'))}</div>` : '';
+    const ph = practice.placeholder ? tf(practice,'placeholder') : t('step.answerPlaceholder');
+    return `<div class="sk-practice-panel" id="pp-${skillId}" hidden>` +
+      `<div class="sk-practice-title">${t('step.practiceThis')}</div>` +
+      renderRepStrip(skillId) +
+      promptHtml +
+      `<div class="pr-input-row">` +
+        `<input type="text" inputmode="numeric" class="pr-input" placeholder="${escAttr(ph)}" value="${escAttr(latest)}" aria-label="${escAttr(t('pr.inputAria'))}" oninput="onResponseChange('${key}', this.value, true)" onblur="onPracticePrBlur('${skillId}')">` +
+        `<span class="pr-unit" data-i18n="${unitKey}">${t(unitKey)}</span>` +
+      `</div>` +
+      `<div class="pr-stats" id="pr-stats-${skillId}" data-unit="${unit}">${prStatsInner(skillId, unit)}</div>` +
     `</div>`;
   }
   if(practice.type === 'mc' && Array.isArray(practice.choices)){
@@ -2692,6 +2772,7 @@ function renderPracticePanel(practice, skillId, wid){
     const promptHtml = practice.prompt ? `<div class="sk-practice-prompt">${escHtml(tf(practice,'prompt'))}</div>` : '';
     return `<div class="sk-practice-panel" id="pp-${skillId}" hidden>` +
       `<div class="sk-practice-title">${t('step.practiceThis')}</div>` +
+      renderRepStrip(skillId) +
       promptHtml +
       `<div class="sk-practice-mc" id="pp-mc-${skillId}">${opts}</div>` +
       feedbackHtml +
@@ -2736,6 +2817,345 @@ function onPracticeMcSelect(skillId, idx, ansIdx, btnEl){
       }
     }
   }
+  // A correct pick counts as one practice rep (feeds the rep strip + review card).
+  if(idx === ansIdx) logPracticeRep(skillId);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   Practice rep tracking, Find-the-Note fretboard game, chord/PR practice
+   panels, and the "Keep it sharp" spaced-review card.
+   Persistence: practiceLog is its own category in the unified Firestore
+   writer (queueSave/flushSave, top-level key `practiceLog`), with a
+   localStorage mirror (key: practiceLog) that is ALWAYS written too — it
+   is the store in dev-bypass mode and the fallback when a signed-in doc
+   predates the field. loadProgress() prefers the Firestore value.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── Practice log: { [skillId]: {reps, todayCount, lastDay, last, best} } ── */
+const REP_GOAL = 3;   // gentle daily target per skill — no timers, just dots
+function loadLocalPracticeLog(){
+  try{ return JSON.parse(localStorage.getItem('practiceLog')) || {}; }catch(e){ return {}; }
+}
+let practiceLog = loadLocalPracticeLog();
+function savePracticeLogLocal(){
+  try{ localStorage.setItem('practiceLog', JSON.stringify(practiceLog)); }catch(e){}
+}
+function savePracticeLog(){
+  savePracticeLogLocal();   // offline/dev-bypass copy, always
+  // Firestore write-through — but not for the dev-bypass user, whose uid the
+  // Firestore rules reject (same guard pattern as bumpPracticeStreak).
+  if(currentUser && !isDevBypassUser()) queueSave('practiceLog');
+}
+function repsToday(sid){
+  const e = practiceLog[sid];
+  return (e && e.lastDay === dayStr(new Date())) ? (e.todayCount || 0) : 0;
+}
+/* Whole-day distance from the last logged rep: 0 = today, 1 = yesterday,
+   -1 = never practiced. Day-boundary based so "1 day ago" flips at midnight,
+   not 24h after the rep. */
+function daysSinceLastRep(sid){
+  const e = practiceLog[sid];
+  if(!e || !e.last) return -1;
+  const a = new Date(); a.setHours(0,0,0,0);
+  const b = new Date(e.last); b.setHours(0,0,0,0);
+  return Math.max(0, Math.round((a - b) / 86400000));
+}
+function lastPracticedLabel(sid){
+  const d = daysSinceLastRep(sid);
+  if(d < 0)  return { key:'rep.lastNever',     params:null };
+  if(d === 0) return { key:'rep.lastToday',     params:null };
+  if(d === 1) return { key:'rep.lastYesterday', params:null };
+  return { key:'rep.lastDays', params:{n:d} };
+}
+function logPracticeRep(sid, opts){
+  const today = dayStr(new Date());
+  const e = practiceLog[sid] || (practiceLog[sid] = { reps:0 });
+  if(e.lastDay !== today){ e.lastDay = today; e.todayCount = 0; }
+  e.reps = (e.reps || 0) + 1;
+  e.todayCount = (e.todayCount || 0) + 1;
+  e.last = Date.now();
+  if(opts && typeof opts.best === 'number') e.best = Math.max(e.best || 0, opts.best);
+  savePracticeLog();
+  refreshRepStrips(sid);
+  refreshReviewCards();
+}
+function logCleanRep(sid, btnEl){
+  logPracticeRep(sid);
+  if(btnEl) flashClass(btnEl, 'rep-logged', 500);
+}
+
+/* ── PR ladder helpers (practice.type === 'pr') ──
+   The stored shape is the standard PR history array ({value,date}×≤8, see
+   onResponseChange) under responses[`practice-<skillId>`]; these render it. */
+function prHistoryValues(key){
+  const raw = responses[key];
+  if(Array.isArray(raw)) return raw.map(e => String(e && e.value != null ? e.value : '').trim()).filter(v => v !== '');
+  return (raw != null && String(raw).trim() !== '') ? [String(raw).trim()] : [];
+}
+function prStatsInner(sid, unit){
+  const vals = prHistoryValues(`practice-${sid}`);
+  if(!vals.length) return `<span class="pr-none" data-i18n="pr.noneYet">${t('pr.noneYet')}</span>`;
+  const unitTxt = t(unit === 'count' ? 'pr.unitCount' : 'pr.unitBpm');
+  const latest = `${escHtml(vals[vals.length - 1])}&nbsp;${unitTxt}`;
+  const nums = vals.map(v => parseFloat(v)).filter(n => !isNaN(n));
+  const bestHtml = nums.length
+    ? `<span class="rep-sep" aria-hidden="true">·</span><span class="pr-best">${t('pr.best', {v: `${escHtml(String(Math.max(...nums)))}&nbsp;${unitTxt}`})}</span>` : '';
+  const histHtml = vals.length > 1
+    ? `<span class="rep-sep" aria-hidden="true">·</span><span class="pr-history" title="${escAttr(t('pr.historyTitle'))}">${vals.map(escHtml).join(' &rarr; ')}</span>` : '';
+  return `<span class="pr-latest">${t('pr.latest', {v: latest})}</span>` + bestHtml + histHtml;
+}
+/* Blur commits the edit session (same as the step PR textareas). If this
+   session created/filled an entry, that's one practice rep. */
+function onPracticePrBlur(sid){
+  const key = `practice-${sid}`;
+  const wasEditing = _prEditingKeys.has(key);
+  onResponsePRBlur(key);
+  const raw = responses[key];
+  const lastVal = Array.isArray(raw) && raw.length ? String(raw[raw.length - 1].value || '').trim() : '';
+  if(wasEditing && lastVal) logPracticeRep(sid);
+  const el = document.getElementById('pr-stats-' + sid);
+  if(el){
+    el.innerHTML = prStatsInner(sid, el.dataset.unit === 'count' ? 'count' : 'BPM');
+    if(typeof applyI18n === 'function') applyI18n(el);
+  }
+}
+
+/* ── Rep strip: "Reps today: n of 3" dots · total · last practiced ── */
+function repStripInner(sid){
+  const e = practiceLog[sid] || {};
+  const today = repsToday(sid);
+  const total = e.reps || 0;
+  const dots = Array.from({length: REP_GOAL}, (_, i) =>
+    `<span class="rep-dot${i < today ? ' filled' : ''}"></span>`).join('');
+  const last = lastPracticedLabel(sid);
+  const goalMet = today >= REP_GOAL;
+  return `<span class="rep-dots" aria-hidden="true">${dots}</span>` +
+    `<span class="rep-count" data-i18n="rep.today" data-i18n-params='{"n":${today},"goal":${REP_GOAL}}'>${t('rep.today',{n:today,goal:REP_GOAL})}</span>` +
+    (goalMet ? `<span class="rep-goal-note" data-i18n="rep.goalMet">${t('rep.goalMet')}</span>` : '') +
+    `<span class="rep-sep" aria-hidden="true">·</span>` +
+    `<span class="rep-total" data-i18n="rep.total" data-i18n-params='{"n":${total}}'>${t('rep.total',{n:total})}</span>` +
+    `<span class="rep-sep" aria-hidden="true">·</span>` +
+    `<span class="rep-last" data-i18n="${last.key}"${last.params ? ` data-i18n-params='${escAttr(JSON.stringify(last.params))}'` : ''}>${t(last.key, last.params)}</span>`;
+}
+function renderRepStrip(sid){
+  const goalMet = repsToday(sid) >= REP_GOAL;
+  return `<div class="rep-strip${goalMet ? ' rep-goal-met' : ''}" data-sid="${escAttr(sid)}">${repStripInner(sid)}</div>`;
+}
+function refreshRepStrips(sid){
+  document.querySelectorAll(`.rep-strip[data-sid="${CSS.escape(sid)}"]`).forEach(el=>{
+    el.innerHTML = repStripInner(sid);
+    el.classList.toggle('rep-goal-met', repsToday(sid) >= REP_GOAL);
+    if(typeof applyI18n === 'function') applyI18n(el);
+  });
+}
+
+/* ── Find-the-Note game (practice.type === 'fretboard') ──
+   practice.string: 'lowE' | 'A' | 'both'. Frets 0–12, natural notes only;
+   'both' draws two strings and alternates the prompts between them. A round
+   = 5 prompts; a prompt scores if the FIRST click is right (wrong clicks
+   flash red and let the student keep hunting — no timers, no lockout).
+   Round end logs one rep and keeps a best score. */
+const FG_ROUND = 5;
+const FG_NATURALS = {
+  lowE: {0:'E',1:'F',3:'G',5:'A',7:'B',8:'C',10:'D',12:'E'},
+  A:    {0:'A',2:'B',3:'C',5:'D',7:'E',8:'F',10:'G',12:'A'}
+};
+const FRET_STRING_KEY = { lowE:'fret.stringLowE', A:'fret.stringA' };
+function fgStringsFor(kind){ return kind === 'both' ? ['lowE','A'] : [kind]; }
+function fgShuffle(arr){
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+const fretGames = {};
+
+/* Clickable fretboard board — one row per string (1 for lowE/A, 2 for
+   'both'). Same visual vocabulary as the reference fretboard
+   (localStringFretboardSvg): nut, fret wires, inlay dots, fret numbers —
+   prominent string lines and a transparent hit zone per string × fret. */
+function fgBoardSvg(sid, kind){
+  const strs = fgStringsFor(kind).filter(k => FG_NATURALS[k]);
+  if(!strs.length) return '';
+  const multi = strs.length > 1;
+  const W = 600, padR = 8, openW = 44, maxF = 12;
+  const padL = multi ? 46 : 8;               // room for string labels on a 2-string board
+  const rowGap = 34, topY = 28;
+  const stringYs = strs.map((_, i) => topY + i * rowGap);
+  const wireTop = stringYs[0] - 16, wireBot = stringYs[stringYs.length - 1] + 16;
+  const numY = wireBot + 18, H = numY + 8;
+  const nutX = padL + openW;
+  const fretW = (W - padL - padR - openW) / maxF;
+  const colX = f => f === 0 ? padL : nutX + (f - 1) * fretW;
+  const colW = f => f === 0 ? openW : fretW;
+  const cx   = f => f === 0 ? padL + openW / 2 : nutX + (f - 0.5) * fretW;
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" class="fg-svg" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">`;
+  /* Inlay dots (below the lowest string so they read as fretboard markers) */
+  FRETBOARD_INLAYS.forEach(f => {
+    s += `<circle cx="${cx(f)}" cy="${wireBot + 1}" r="2.5" fill="var(--text3)" opacity="0.35"/>`;
+    if(f === 12) s += `<circle cx="${cx(f)}" cy="${wireTop - 1}" r="2.5" fill="var(--text3)" opacity="0.35"/>`;
+  });
+  /* Fret wires + nut */
+  for(let f = 1; f <= maxF; f++){
+    const x = nutX + f * fretW;
+    s += `<line x1="${x}" y1="${wireTop + 2}" x2="${x}" y2="${wireBot - 2}" stroke="var(--text3)" stroke-width="0.8"/>`;
+  }
+  s += `<rect x="${nutX - 2}" y="${wireTop}" width="4" height="${wireBot - wireTop}" fill="var(--text)" rx="1"/>`;
+  /* The strings (+ labels when there's more than one) */
+  strs.forEach((k, i) => {
+    const y = stringYs[i];
+    s += `<line x1="${padL}" y1="${y}" x2="${W - padR}" y2="${y}" stroke="var(--green-text)" stroke-width="2.2"/>`;
+    if(multi) s += `<text x="${padL - 6}" y="${y}" text-anchor="end" dominant-baseline="central" font-size="9" font-weight="600" fill="var(--green-text)">${escHtml(t(FRET_STRING_KEY[k]))}</text>`;
+  });
+  /* Fret numbers */
+  for(let f = 0; f <= maxF; f++){
+    s += `<text x="${cx(f)}" y="${numY}" text-anchor="middle" font-size="9" fill="var(--text2)">${f}</text>`;
+  }
+  /* Feedback markers (hidden until a click) + hit zones on top */
+  strs.forEach((k, i) => {
+    const y = stringYs[i], map = FG_NATURALS[k];
+    for(let f = 0; f <= maxF; f++){
+      s += `<g class="fg-marker" id="fgm-${sid}-${k}-${f}">` +
+        `<circle cx="${cx(f)}" cy="${y}" r="13"/>` +
+        `<text x="${cx(f)}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="11.5" font-weight="700">${map[f] || '&#x2715;'}</text>` +
+      `</g>`;
+    }
+  });
+  strs.forEach((k, i) => {
+    const bandTop = multi ? stringYs[i] - rowGap / 2 : wireTop - 8;
+    const bandH   = multi ? rowGap : (wireBot - wireTop) + 16;
+    for(let f = 0; f <= maxF; f++){
+      s += `<rect class="fg-hit" x="${colX(f)}" y="${bandTop}" width="${colW(f)}" height="${bandH}" rx="6" onclick="fgClick('${sid}','${k}',${f})" aria-label="${escAttr(t(FRET_STRING_KEY[k]))} — fret ${f}"><title>Fret ${f}</title></rect>`;
+    }
+  });
+  return s + '</svg>';
+}
+/* Prompts: per-string shuffled note pools; 'both' alternates lowE/A. */
+function fgStart(sid){
+  const wrap = document.getElementById('fg-' + sid);
+  if(!wrap) return;
+  const kind = wrap.dataset.kind || 'lowE';
+  const strs = fgStringsFor(kind).filter(k => FG_NATURALS[k]);
+  if(!strs.length) return;
+  const pools = {};
+  const refill = k => fgShuffle([...new Set(Object.values(FG_NATURALS[k]))]);
+  strs.forEach(k => { pools[k] = refill(k); });
+  const prompts = [];
+  for(let i = 0; i < FG_ROUND; i++){
+    const k = strs[i % strs.length];
+    if(!pools[k].length) pools[k] = refill(k);
+    prompts.push({ str: k, note: pools[k].pop() });
+  }
+  fretGames[sid] = { kind, prompts, idx: 0, score: 0, missed: false, done: false };
+  fgRenderPrompt(sid);
+}
+function fgRenderPrompt(sid){
+  const st = fretGames[sid];
+  const wrap = document.getElementById('fg-' + sid);
+  if(!st || !wrap) return;
+  const p = st.prompts[st.idx];
+  const pp = { note: p.note, string: t(FRET_STRING_KEY[p.str] || 'fret.stringLowE') };
+  const cp = { i: st.idx + 1, total: FG_ROUND };
+  wrap.querySelector('.fg-status').innerHTML =
+    `<span class="fg-prompt" data-i18n-html="fret.findPromptHtml" data-i18n-params='${escAttr(JSON.stringify(pp))}'>${t('fret.findPromptHtml', pp)}</span>` +
+    `<span class="fg-count" data-i18n="fret.promptCount" data-i18n-params='${escAttr(JSON.stringify(cp))}'>${t('fret.promptCount', cp)}</span>`;
+  wrap.querySelector('.fg-fb').innerHTML = '';
+}
+function fgClick(sid, strKind, fret){
+  const st = fretGames[sid];
+  const wrap = document.getElementById('fg-' + sid);
+  if(!st || st.done || !wrap) return;
+  const p = st.prompts[st.idx];
+  const fb = wrap.querySelector('.fg-fb');
+  const marker = document.getElementById(`fgm-${sid}-${strKind}-${fret}`);
+  if(strKind === p.str && (FG_NATURALS[strKind] || {})[fret] === p.note){
+    if(!st.missed) st.score++;
+    st.missed = false;
+    if(marker) flashClass(marker, 'fg-good', 650);
+    fb.innerHTML = `<span class="fg-fb-good" data-i18n="fret.gotIt">${t('fret.gotIt')}</span>`;
+    st.idx++;
+    if(st.idx >= FG_ROUND){
+      st.done = true;
+      setTimeout(()=>fgEnd(sid), 650);
+    } else {
+      setTimeout(()=>{ if(fretGames[sid] === st && !st.done) fgRenderPrompt(sid); }, 650);
+    }
+  } else {
+    st.missed = true;
+    if(marker) flashClass(marker, 'fg-bad', 650);
+    fb.innerHTML = `<span class="fg-fb-bad" data-i18n="fret.notThatOne">${t('fret.notThatOne')}</span>`;
+  }
+}
+function fgEnd(sid){
+  const st = fretGames[sid];
+  const wrap = document.getElementById('fg-' + sid);
+  if(!st || !wrap) return;
+  const praiseKey = st.score >= 4 ? 'fret.praiseHigh' : (st.score >= 3 ? 'fret.praiseMid' : 'fret.praiseLow');
+  wrap.querySelector('.fg-status').innerHTML =
+    `<span class="fg-score">${t('fret.roundScore',{score:st.score,total:FG_ROUND})} &mdash; ${t(praiseKey)}</span>` +
+    `<button type="button" class="fg-start-btn" onclick="fgStart('${sid}')" data-i18n="fret.playAgain">${t('fret.playAgain')}</button>`;
+  wrap.querySelector('.fg-fb').innerHTML = '';
+  logPracticeRep(sid, { best: st.score });
+  const e = practiceLog[sid];
+  wrap.querySelector('.fg-best').innerHTML =
+    `<span data-i18n="fret.best" data-i18n-params='{"n":${e.best},"total":${FG_ROUND}}'>${t('fret.best',{n:e.best,total:FG_ROUND})}</span>`;
+}
+
+/* ── "Keep it sharp" spaced-review card ──
+   Up to 3 skills marked "I've got it!" (that have a practice panel), oldest
+   last-practice first; anything already practiced today is considered sharp.
+   Rendered at the top of every set's checklist. */
+function reviewCandidates(){
+  const out = [];
+  SETS.forEach(w => (w.skills || []).forEach(s => {
+    if(!s.practice || progress[s.id] !== 'gotit') return;
+    if(daysSinceLastRep(s.id) === 0) return;   // practiced today — sharp
+    const e = practiceLog[s.id];
+    out.push({ s, w, last: (e && e.last) || 0 });
+  }));
+  out.sort((a, b) => a.last - b.last);
+  return out.slice(0, 3);
+}
+function reviewCardHtml(){
+  const cands = reviewCandidates();
+  if(!cands.length) return '';
+  const items = cands.map(c => {
+    const last = lastPracticedLabel(c.s.id);
+    return `<div class="review-item">
+      <div class="review-item-main">
+        <div class="review-item-text">${tf(c.s,'text')}</div>
+        <div class="review-item-when" data-i18n="${last.key}"${last.params ? ` data-i18n-params='${escAttr(JSON.stringify(last.params))}'` : ''}>${t(last.key, last.params)}</div>
+      </div>
+      <button type="button" class="review-go-btn" onclick="reviewJump('${c.s.id}','${c.w.id}')">&#x21BB; <span data-i18n="review.practiceAgain">${t('review.practiceAgain')}</span></button>
+    </div>`;
+  }).join('');
+  return `<div class="review-card">
+    <div class="review-head"><span aria-hidden="true">&#x2726;</span><span data-i18n="review.title">${t('review.title')}</span></div>
+    <div class="review-explainer" data-i18n="review.explainer">${t('review.explainer')}</div>
+    <div class="review-items">${items}</div>
+  </div>`;
+}
+function refreshReviewCards(){
+  const html = reviewCardHtml();
+  document.querySelectorAll('.review-slot').forEach(el => {
+    el.innerHTML = html;
+    if(typeof applyI18n === 'function') applyI18n(el);
+  });
+}
+/* "Practice again" → jump to that skill's row and open its practice panel. */
+function reviewJump(sid, wid){
+  activateSet(wid);
+  switchTabById(wid, 'checklist', true);
+  const row = document.querySelector(`.week-panel[data-id="${wid}"] .skill-row[data-sid="${CSS.escape(sid)}"]`);
+  if(!row) return;
+  const btn = row.querySelector('.sk-practice-btn');
+  const panel = document.getElementById('pp-' + sid);
+  if(btn && panel && panel.hasAttribute('hidden')) togglePracticePanel(sid, btn);
+  setTimeout(()=>{
+    row.scrollIntoView({ behavior:'smooth', block:'center' });
+    flashClass(row, 'review-flash', 1800);
+  }, 60);
 }
 
 /* ── Toggle skill ── */
@@ -2790,6 +3210,7 @@ function toggleSkill(sid, wid, which){
   // reflects immediately without leaving the set.
   populateModuleDropdown();
   renderProgressStrip();
+  refreshReviewCards();   // "Keep it sharp" card reacts to got-it changes
   saveProgress();
 }
 

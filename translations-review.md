@@ -299,6 +299,43 @@ a bilingual colleague or student aide if you'd like a native-speaker check.
 | Tune and warm up first: today's Daily 5 has tuning, a finger warm-up, and one drill (a short exercise you repeat to build a skill) from this module — five minutes and your hands are ready. | Primero afina y calienta: el Daily 5 de hoy tiene afinación, un calentamiento de dedos, y un ejercicio de este módulo — cinco minutos y tus manos estarán listas. |
 | Open today's Daily 5 | Abrir el Daily 5 de hoy |
 
+## Practice panels — rep tracking, Find-the-Note, PR ladder, "Keep it sharp"
+
+| English | Spanish |
+|---|---|
+| Reps today: {n} of {goal} | Repeticiones hoy: {n} de {goal} |
+| Total reps: {n} | Repeticiones en total: {n} |
+| Last practiced today | Última práctica: hoy |
+| Last practiced yesterday | Última práctica: ayer |
+| Last practiced {n} days ago | Última práctica: hace {n} días |
+| Not practiced yet | Aún sin practicar |
+| Log a clean rep | Registrar una repetición limpia |
+| Daily goal met — nice work! | Meta del día cumplida — ¡buen trabajo! |
+| A round is {total} notes. Click the fret where each note lives — take your time. | Una ronda son {total} notas. Haz clic en el traste donde vive cada nota — tómate tu tiempo. |
+| Start a round | Empezar una ronda |
+| Play again | Jugar de nuevo |
+| Find **{note}** on the {string} string | Encuentra **{note}** en la cuerda {string} |
+| Note {i} of {total} | Nota {i} de {total} |
+| Not that one — try again. | Esa no es — inténtalo de nuevo. |
+| That's it! | ¡Eso es! |
+| Round done: {score}/{total} | Ronda terminada: {score}/{total} |
+| nice! | ¡muy bien! |
+| getting there! | ¡vas bien! |
+| reps make it stick — go again when you're ready. | las repeticiones lo fijan — repite cuando estés listo. |
+| Best: {n}/{total} | Mejor: {n}/{total} |
+| low E (string name) | Mi grave |
+| A (string name) | La |
+| Latest: {v} | Último: {v} |
+| Best: {v} | Mejor: {v} |
+| No personal record yet — set your first! | Aún no hay récord personal — ¡marca el primero! |
+| Your recent attempts, oldest first | Tus intentos recientes, del más antiguo al más nuevo |
+| BPM (PR unit) | BPM |
+| times (PR unit, e.g. "12 times") | veces |
+| Enter your new personal record | Escribe tu nuevo récord personal |
+| Keep it sharp | Mantenlo fresco |
+| Skills fade without reps — a quick review keeps them automatic. | Las destrezas se olvidan sin repeticiones — un repaso rápido las mantiene automáticas. |
+| Practice again | Practicar de nuevo |
+
 ## Known gaps (not yet hand-translated — still Google-Translate-only)
 
 These are lower-traffic microcopy the task didn't explicitly call out, left

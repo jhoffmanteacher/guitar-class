@@ -271,7 +271,10 @@ SETS.push(
       { id: 'm5w1-s5', text: 'Strum 4 down-strums per bar in time at 60 BPM',
         text_es: 'Rasguear 4 golpes hacia abajo por compás a tiempo a 60 BPM',
         gotItWhen: 'your strums land on beats 1, 2, 3, 4 with the metronome at 60 BPM and you can keep it going for at least 8 bars without drifting.',
-        gotItWhen_es: 'tus rasgueos caen en los tiempos 1, 2, 3, 4 con el metrónomo a 60 BPM y puedes mantenerlo por al menos 8 compases sin desviarte.' },
+        gotItWhen_es: 'tus rasgueos caen en los tiempos 1, 2, 3, 4 con el metrónomo a 60 BPM y puedes mantenerlo por al menos 8 compases sin desviarte.',
+        practice: { type: 'pr', prompt: 'Metronome at 60 BPM: strum 4 down-strums per bar and count how many bars in a row every strum lands with the click. Log your best streak — 8 bars is the goal.',
+          prompt_es: 'Metrónomo a 60 BPM: rasguea 4 golpes hacia abajo por compás y cuenta cuántos compases seguidos logras con cada rasgueo cayendo con el clic. Anota tu mejor racha — la meta es 8 compases.',
+          unit: 'count', placeholder: 'e.g. 8 bars — try for a longer streak', placeholder_es: 'p. ej. 8 compases — intenta una racha más larga' } },
       { id: 'm5w1-s6', text: 'Identify and fret any chord shown on a chord chart',
         text_es: 'Identificar y trastear cualquier acorde mostrado en un diagrama de acordes',
         gotItWhen: 'you can read any chord diagram in the songbook and play it without having to look up the chord name.',
@@ -1015,7 +1018,12 @@ SETS.push(
       { id: 'm5w3-s6', text: 'Play the "Luna" vamp (F–Am, plus a passing Dm) using Group 1 chords with a strum pattern',
         text_es: 'Tocar el vamp de "Luna" (F–Am, con un Dm de paso) usando acordes del Grupo 1 con un patrón de rasgueo',
         gotItWhen: 'you can loop the "Luna" vamp (F · Am) with steady downbeat strums at 60 BPM, every change landing on the downbeat and the simplified F (xx3211) ringing clean.',
-        gotItWhen_es: 'puedes repetir el vamp de "Luna" (F · Am) con rasgueos constantes en el tiempo fuerte a 60 BPM, cada cambio cayendo en el tiempo fuerte y el F simplificado (xx3211) sonando limpio.' }
+        gotItWhen_es: 'puedes repetir el vamp de "Luna" (F · Am) con rasgueos constantes en el tiempo fuerte a 60 BPM, cada cambio cayendo en el tiempo fuerte y el F simplificado (xx3211) sonando limpio.',
+        practice: { type: 'chord', label: 'Luna vamp — simplified F and Am',
+          chords: [
+            { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
+            { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
+          ] } }
     ]
   },
 
@@ -1294,11 +1302,17 @@ SETS.push(
       { id: 'm5w4-s5', text: 'Perform a chosen song all the way through without stopping',
         text_es: 'Interpretar una canción elegida de principio a fin sin detenerse',
         gotItWhen: 'you can play your showcase song start to finish — fingers arched, thumb behind the neck, the shapes held through the whole song — and even with mistakes you keep going and stay in time.',
-        gotItWhen_es: 'puedes tocar tu canción de la muestra de principio a fin — dedos arqueados, pulgar detrás del mástil, las formas sostenidas durante toda la canción — y aunque haya errores sigues tocando y te mantienes a tiempo.' },
+        gotItWhen_es: 'puedes tocar tu canción de la muestra de principio a fin — dedos arqueados, pulgar detrás del mástil, las formas sostenidas durante toda la canción — y aunque haya errores sigues tocando y te mantienes a tiempo.',
+        practice: { type: 'pr', prompt: 'Play your showcase song start to finish without stopping — mistakes are fine, stopping isn\'t. How many complete no-stop runs did you get today?',
+          prompt_es: 'Toca tu canción de la muestra de principio a fin sin detenerte — los errores están bien, detenerse no. ¿Cuántas pasadas completas sin paradas lograste hoy?',
+          unit: 'count', placeholder: 'e.g. 2 runs — try for a higher number', placeholder_es: 'p. ej. 2 pasadas — intenta superarlo' } },
       { id: 'm5w4-s6', text: 'Maintain a steady strum pattern throughout a full song',
         text_es: 'Mantener un patrón de rasgueo constante durante una canción completa',
         gotItWhen: 'your strum pattern stays consistent across the whole song — it doesn\'t fall apart during the hard chord changes.',
-        gotItWhen_es: 'tu patrón de rasgueo se mantiene constante durante toda la canción — no se desarma durante los cambios de acorde difíciles.' }
+        gotItWhen_es: 'tu patrón de rasgueo se mantiene constante durante toda la canción — no se desarma durante los cambios de acorde difíciles.',
+        practice: { type: 'pr', prompt: 'Play a full verse and chorus of your song and count the chord changes you made WITHOUT breaking the strum pattern. Log your best count.',
+          prompt_es: 'Toca una estrofa y un coro completos de tu canción y cuenta los cambios de acorde que hiciste SIN romper el patrón de rasgueo. Anota tu mejor cuenta.',
+          unit: 'count', placeholder: 'e.g. 10 changes — try for a higher number', placeholder_es: 'p. ej. 10 cambios — intenta superarlo' } }
     ]
   }
 

@@ -5,6 +5,26 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-23 — Every Module 1–5 skill is now practiceable, and the site remembers your reps
+
+### Added
+- **Every skill in Modules 1–5 now has its own practice exercise** under a
+  "Practice this" button — 29 new drills, so no skill is check-the-box only.
+- **Find-the-Note game**: the note-naming skills in Module 2 are now a
+  clickable fretboard game — find the named note on the low E string, the A
+  string, or both mixed. Five notes a round, with a saved best score.
+- **Rep tracking**: every practice panel now shows your reps for today (goal:
+  3), your total reps, and how long since you last practiced that skill —
+  saved to your account, so it follows you between school and home.
+- **"Keep it sharp" review card** at the top of each set's checklist: skills
+  you've marked "I've got it!" but haven't practiced lately come back around
+  for a quick refresher, because practice fades without reps.
+- **Personal-record ladders**: speed and consistency skills (like clean
+  changes at 60 BPM) now track your history — "21 → 24 → 28" — so you can
+  watch yourself get faster.
+- **Chord practice with the Listening Coach**: the Luna vamp skill now shows
+  its chord shapes with a mic check and a "log a clean rep" button.
+
 ## 2026-07-23 — Play buttons now play real rhythms on the real-rhythm challenges
 
 ### Added

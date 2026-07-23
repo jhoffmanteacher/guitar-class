@@ -330,7 +330,49 @@
     'daily5.tuneWarmupHtml': { en: '&#x26A1; <strong>Tune and warm up first:</strong> today’s Daily 5 has tuning, a finger warm-up, and one drill (a short exercise you repeat to build a skill) from this module — five minutes and your hands are ready. {btn}',
                                 es: '&#x26A1; <strong>Primero afina y calienta:</strong> el Daily 5 de hoy tiene afinación, un calentamiento de dedos, y un ejercicio de este módulo — cinco minutos y tus manos estarán listas. {btn}' },
     'daily5.openToday':      { en: 'Open today’s Daily 5', es: 'Abrir el Daily 5 de hoy' },
-    'skill.noneListed':      { en: 'No skills listed for this set yet.', es: 'Todavía no hay destrezas para esta unidad.' }
+    'skill.noneListed':      { en: 'No skills listed for this set yet.', es: 'Todavía no hay destrezas para esta unidad.' },
+
+    // ── Practice reps (per-skill rep tracking strip) ──
+    'rep.today':             { en: 'Reps today: {n} of {goal}', es: 'Repeticiones hoy: {n} de {goal}' },
+    'rep.total':             { en: 'Total reps: {n}', es: 'Repeticiones en total: {n}' },
+    'rep.lastToday':         { en: 'Last practiced today', es: 'Última práctica: hoy' },
+    'rep.lastYesterday':     { en: 'Last practiced yesterday', es: 'Última práctica: ayer' },
+    'rep.lastDays':          { en: 'Last practiced {n} days ago', es: 'Última práctica: hace {n} días' },
+    'rep.lastNever':         { en: 'Not practiced yet', es: 'Aún sin practicar' },
+    'rep.logClean':          { en: 'Log a clean rep', es: 'Registrar una repetición limpia' },
+    'rep.goalMet':           { en: 'Daily goal met — nice work!', es: 'Meta del día cumplida — ¡buen trabajo!' },
+
+    // ── Find-the-Note fretboard game ──
+    'fret.introHtml':        { en: 'A round is {total} notes. Click the fret where each note lives — take your time.',
+                               es: 'Una ronda son {total} notas. Haz clic en el traste donde vive cada nota — tómate tu tiempo.' },
+    'fret.startRound':       { en: 'Start a round', es: 'Empezar una ronda' },
+    'fret.playAgain':        { en: 'Play again', es: 'Jugar de nuevo' },
+    'fret.findPromptHtml':   { en: 'Find <strong>{note}</strong> on the {string} string', es: 'Encuentra <strong>{note}</strong> en la cuerda {string}' },
+    'fret.promptCount':      { en: 'Note {i} of {total}', es: 'Nota {i} de {total}' },
+    'fret.notThatOne':       { en: 'Not that one — try again.', es: 'Esa no es — inténtalo de nuevo.' },
+    'fret.gotIt':            { en: 'That’s it!', es: '¡Eso es!' },
+    'fret.roundScore':       { en: 'Round done: {score}/{total}', es: 'Ronda terminada: {score}/{total}' },
+    'fret.praiseHigh':       { en: 'nice!', es: '¡muy bien!' },
+    'fret.praiseMid':        { en: 'getting there!', es: '¡vas bien!' },
+    'fret.praiseLow':        { en: 'reps make it stick — go again when you’re ready.', es: 'las repeticiones lo fijan — repite cuando estés listo.' },
+    'fret.best':             { en: 'Best: {n}/{total}', es: 'Mejor: {n}/{total}' },
+    'fret.stringLowE':       { en: 'low E', es: 'Mi grave' },
+    'fret.stringA':          { en: 'A', es: 'La' },
+
+    // ── PR ladder practice panel (personal-record history) ──
+    'pr.latest':             { en: 'Latest: {v}', es: 'Último: {v}' },
+    'pr.best':               { en: 'Best: {v}', es: 'Mejor: {v}' },
+    'pr.noneYet':            { en: 'No personal record yet — set your first!', es: 'Aún no hay récord personal — ¡marca el primero!' },
+    'pr.historyTitle':       { en: 'Your recent attempts, oldest first', es: 'Tus intentos recientes, del más antiguo al más nuevo' },
+    'pr.unitBpm':            { en: 'BPM', es: 'BPM' },
+    'pr.unitCount':          { en: 'times', es: 'veces' },
+    'pr.inputAria':          { en: 'Enter your new personal record', es: 'Escribe tu nuevo récord personal' },
+
+    // ── "Keep it sharp" spaced-review card ──
+    'review.title':          { en: 'Keep it sharp', es: 'Mantenlo fresco' },
+    'review.explainer':      { en: 'Skills fade without reps — a quick review keeps them automatic.',
+                               es: 'Las destrezas se olvidan sin repeticiones — un repaso rápido las mantiene automáticas.' },
+    'review.practiceAgain':  { en: 'Practice again', es: 'Practicar de nuevo' }
   };
 
   let lang = 'en';

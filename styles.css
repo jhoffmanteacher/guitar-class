@@ -13,6 +13,7 @@
   --blue-bg:#e6f1fb;--blue-text:#185fa5;
   --green-bg:#eaf3de;--green-text:#3b6d11;
   --amber-bg:#faeeda;--amber-text:#854f0b;
+  --red-bg:#fbe9e7;--red-text:#b3372a;
   --purple-bg:#eeedfe;--purple-bg2:#f6f5fe;--purple-text:#3c3489;
   --purple-border:#c5c0ee;--purple-accent:#5b52a8;
   --shadow-card:0 1px 5px rgba(30,27,70,0.07);
@@ -33,6 +34,7 @@
     --blue-bg:#0c3a6b;--blue-text:#93c4f0;
     --green-bg:#1e4208;--green-text:#a8d070;
     --amber-bg:#4a2a04;--amber-text:#f0b84a;
+    --red-bg:#4a1710;--red-text:#f0968a;
     --purple-bg:#2b2752;--purple-bg2:#262244;--purple-text:#c7c1f5;
     --purple-border:#4a4390;--purple-accent:#8f85e8;
     --shadow-card:0 1px 5px rgba(0,0,0,0.4);
@@ -1378,3 +1380,73 @@ body.games-open{overflow:hidden}
 .preview-note{font-size:0.75rem;line-height:1.45;color:var(--amber-text);background:var(--amber-bg);
   border:1px dashed var(--amber-text);border-radius:8px;padding:7px 10px}
 .preview-note[hidden]{display:none}
+
+/* ══ PROTOTYPE — practice reps · Find-the-Note game · "Keep it sharp" ══ */
+/* Rep strip — small header inside every practice panel */
+.rep-strip{display:flex;flex-wrap:wrap;align-items:center;gap:5px 10px;padding:7px 11px;margin-bottom:10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.8125rem;color:var(--text2);line-height:1.4}
+.rep-dots{display:inline-flex;gap:4px;align-items:center}
+.rep-dot{width:9px;height:9px;border-radius:50%;border:1px solid var(--border2);background:var(--bg2)}
+.rep-dot.filled{background:var(--green-text);border-color:var(--green-text)}
+.rep-count{font-weight:600;color:var(--text)}
+.rep-strip.rep-goal-met .rep-count{color:var(--green-text)}
+.rep-goal-note{color:var(--green-text);font-weight:500}
+.rep-sep{color:var(--text3)}
+.rep-actions{margin-top:8px}
+.rep-log-btn{background:var(--green-bg);color:var(--green-text);border:1px solid var(--green-text);border-radius:6px;padding:5px 12px;font:inherit;font-size:0.8437rem;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:5px;line-height:1.3}
+.rep-log-btn:hover{filter:brightness(0.96)}
+.rep-log-btn.rep-logged{animation:repPulse 0.5s ease}
+@keyframes repPulse{0%{transform:scale(1)}35%{transform:scale(1.07)}100%{transform:scale(1)}}
+/* Find-the-Note game */
+.fg-wrap{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px 8px;margin-bottom:8px}
+.fg-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.fg-status{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:0.9062rem;color:var(--text);line-height:1.45}
+.fg-intro{color:var(--text2);font-size:0.8437rem}
+.fg-count{font-size:0.7812rem;color:var(--text3);white-space:nowrap}
+.fg-best{font-size:0.7812rem;color:var(--text2);white-space:nowrap}
+.fg-start-btn{background:var(--blue-bg);color:var(--blue-text);border:1px solid var(--blue-text);border-radius:6px;padding:4px 12px;font:inherit;font-size:0.8437rem;font-weight:500;cursor:pointer;line-height:1.3}
+.fg-start-btn:hover{filter:brightness(0.95)}
+.fg-score{font-weight:600}
+.fg-board{max-width:600px}
+.fg-svg{width:100%;height:auto;display:block}
+.fg-hit{fill:transparent;cursor:pointer}
+.fg-hit:hover{fill:var(--bg3)}
+.fg-marker{opacity:0;pointer-events:none;transition:opacity 0.1s}
+.fg-marker.fg-good,.fg-marker.fg-bad{opacity:1}
+/* Neutral defaults so the fade-out after a flash never shows raw SVG black
+   (flashClass removes the color class at the same moment opacity animates) */
+.fg-marker circle{stroke-width:2;fill:var(--bg);stroke:var(--border2)}
+.fg-marker text{fill:var(--text2)}
+.fg-marker.fg-good circle{fill:var(--green-bg);stroke:var(--green-text)}
+.fg-marker.fg-good text{fill:var(--green-text)}
+.fg-marker.fg-bad circle{fill:var(--red-bg);stroke:var(--red-text)}
+.fg-marker.fg-bad text{fill:var(--red-text)}
+.fg-fb{min-height:18px;margin-top:2px;font-size:0.875rem;line-height:1.4}
+.fg-fb-good{color:var(--green-text);font-weight:500}
+.fg-fb-bad{color:var(--red-text)}
+/* "Keep it sharp" spaced-review card — purple = review/self-assessment family */
+.review-slot:empty{display:none}
+.review-card{border:1.5px solid var(--purple-border);background:var(--purple-bg2);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;box-shadow:var(--shadow-card)}
+.review-head{display:flex;align-items:center;gap:8px;font-size:1rem;font-weight:700;color:var(--purple-text);margin-bottom:3px}
+.review-explainer{font-size:0.8437rem;color:var(--text2);margin-bottom:10px;line-height:1.5}
+.review-items{display:flex;flex-direction:column;gap:8px}
+.review-item{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px}
+.review-item-main{min-width:0}
+.review-item-text{font-size:0.9062rem;color:var(--text);line-height:1.4;font-weight:500}
+.review-item-when{font-size:0.7812rem;color:var(--text3);margin-top:2px}
+.review-go-btn{flex-shrink:0;background:var(--purple-bg);color:var(--purple-text);border:1px solid var(--purple-border);border-radius:20px;padding:5px 13px;font:inherit;font-size:0.8125rem;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:5px;line-height:1.3}
+.review-go-btn:hover{background:var(--purple-text);color:var(--bg);border-color:var(--purple-text)}
+.skill-row.review-flash{animation:reviewFlash 1.8s ease}
+@keyframes reviewFlash{0%{background:var(--purple-bg)}100%{background:transparent}}
+/* PR ladder practice panel */
+.pr-input-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.pr-input{width:110px;box-sizing:border-box;padding:7px 10px;font:inherit;font-size:0.9375rem;color:var(--text);background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius-sm)}
+.pr-input:focus{outline:none;border-color:var(--blue-text)}
+.pr-unit{font-size:0.8125rem;color:var(--text2);font-weight:500}
+.pr-stats{font-size:0.8125rem;color:var(--text2);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:baseline;line-height:1.5}
+.pr-latest{font-weight:600;color:var(--text)}
+.pr-best{color:var(--green-text);font-weight:500}
+.pr-history{font-variant-numeric:tabular-nums;color:var(--text3)}
+.pr-none{color:var(--text3)}
+/* Chord practice panel — .chord-diagrams is shared with station steps; just
+   tighten its top margin inside the practice panel */
+.sk-practice-panel .chord-diagrams{margin-top:0}
