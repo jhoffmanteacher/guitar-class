@@ -199,24 +199,22 @@
         expanded with chevrons/translate button hidden. Shipped in `dbd2f8f`
         with print styles written, but neither has been eyeballed on a real
         device.
-- [ ] **Module 12: confirm the requinto video fits, then delete the leftover
-      note** (REVIEW-PLAN C-7, 2026-07-20) — `module-12.js:430` has an HTML
-      comment flagging that the La Derrota (Vicente Fernández) requinto
-      lesson still needs a fit check for the sierreño/corridos-tumbados
-      requinto skill it's teaching. Not student-visible, but it's an
-      unresolved flag in shipped content. Watch it (or have an agent watch
-      and summarize) and either confirm it's a good fit or swap it — if
-      swapping, WebSearch → oEmbed-verify, never write a video ID from
-      memory. Delete the HTML comment once resolved.
-- [ ] **Research backlog (medium/low)** — stored One-Minute-Changes
-      scores, tempo-ladder playSeq, Song Journey anatomy sections, bends,
-      7th/sus chord color, songwriting capstone, Choice-song style lanes,
-      motivation layer. Details in `archive/RESEARCH_UPGRADES.md`; do not
-      start without Jonathan's go-ahead.
-
 ---
 
 ## Recently shipped (post-archive)
+
+- [x] **Module 12: confirmed the requinto video fits, deleted the leftover
+      note** (REVIEW-PLAN C-7, 2026-07-20; resolved 2026-07-23) —
+      `module-12.js`'s La Derrota (Vicente Fernández) requinto lesson had an
+      HTML comment flagging it for a fit check against the sierreño/corridos-
+      tumbados requinto skill it teaches. Re-verified the video
+      (`cRJb_f4-M5g`) is still live via oEmbed, and confirmed via WebSearch
+      that it's specifically a "part 1: requinto line" lesson (the same
+      instructor, Jorge Aguilera, splits his tutorials into a requinto part 1
+      / chords part 2 for other Vicente Fernández songs too, e.g. "Para
+      Siempre") — a good, purpose-built fit for the lesson's stated goal
+      (watch the picking hand carry the melody). Deleted the review-flag
+      comment; no video swap needed.
 
 - [x] **i18n phase 2 — hand-written Spanish for module/lesson content, tabs/
       pages, and games** (started 2026-07-22) — phase 1 (already done, see
