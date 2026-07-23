@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-23 — New module: String Changing
+
+### Added
+- A new Module 13: String Changing. Learn the whole process — getting the
+  old string off safely, seating the new one at the bridge (our nylon
+  strings have ball ends, so no tricky knot), winding it neatly at the
+  post, and tuning and stretching it until it holds. Step-by-step diagrams,
+  four tutorial videos (including one in Spanish from a professional
+  luthier), and a skills checklist that doubles as the in-class assessment:
+  the four things you'll be graded on, with "you've got it when" for each.
+  In English and Spanish.
+
 ## 2026-07-23 — Keep practicing and My progress get their own pages
 
 ### Changed

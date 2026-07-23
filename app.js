@@ -1675,6 +1675,21 @@ function syncRailStations(){
   const w = (typeof SETS !== 'undefined') ? SETS.find(s=>s.id===wid) : null;
   const label = document.getElementById('rail-set-label');
   if(label) label.textContent = t('nav.thisSet') + (w && w.label ? ' · ' + tSetLabel(w.label) : '');
+  /* Single-flow sets (only station b): hide the Station C rail button and
+     mirror the set's own tab labels onto the rail. applyI18n restores the
+     defaults on language switch, then this override re-applies (the
+     gc-langchange listener calls syncRailStations after applyI18n). */
+  const single = !!(w && w.stations && w.stations.b && !w.stations.c && !w.comingSoon);
+  const stC = list.querySelector('.rail-station.st-c');
+  if(stC) stC.hidden = single;
+  const bNum = list.querySelector('.rail-station.st-b .rs-num');
+  const bTitle = list.querySelector('.rail-station.st-b .rs-title');
+  const bSub = list.querySelector('.rail-station.st-b .rs-sub');
+  if(bNum) bNum.textContent = single ? '1' : 'B';
+  if(bTitle) bTitle.textContent = (single && w.stations.b.tabTitle) ? tf(w.stations.b,'tabTitle') : t('nav.stationBTitle');
+  if(bSub) bSub.textContent = (single && w.stations.b.tabSub) ? tf(w.stations.b,'tabSub') : t('nav.stationBSub');
+  const chkSubEl = list.querySelector('.rail-station.st-chk .rs-sub');
+  if(chkSubEl) chkSubEl.textContent = (single && w.checklistSub) ? tf(w,'checklistSub') : t('nav.checklistSub');
   // Reflect whichever tab-panel is currently active back onto the rail buttons.
   const activePanel = panel.querySelector('.tab-panel.active');
   const activeTab = activePanel ? activePanel.id.slice(wid.length + 1) : 'station-b';
@@ -1744,6 +1759,27 @@ function buildSet(w){
         return `<div class="song-thread">&#x1F3B8; ${lede} ${names}</div>`;
       })()
     : '';
+  /* Single-flow sets (e.g. Module 13 · String Changing): only station b
+     exists — one "learn the process" card straight into the checklist, no
+     Station B/C framing. The card's labels come from the set's own fields
+     (tabTitle/tabSub on stations.b, checklistSub on the set, + _es twins). */
+  const single = !!(w.stations && w.stations.b && !w.stations.c);
+  const bTabTitle = (single && w.stations.b.tabTitle) ? tf(w.stations.b,'tabTitle') : t('nav.stationBTitle');
+  const bTabSub   = (single && w.stations.b.tabSub)   ? tf(w.stations.b,'tabSub')   : t('nav.stationBSub');
+  const chkSub    = (single && w.checklistSub) ? tf(w,'checklistSub') : t('nav.checklistSub');
+  const stationCards = single
+    ? `<button type="button" class="tabs-card tab-station-b active" onclick="switchTab(this,'${w.id}','station-b')">
+          <span class="tabs-card-title"><span class="tabs-card-num">1</span>${bTabTitle}</span>
+          <span class="tabs-card-sub">${bTabSub}</span>
+        </button>`
+    : `<button type="button" class="tabs-card tab-station-b active" onclick="switchTab(this,'${w.id}','station-b')">
+          <span class="tabs-card-title"><span class="tabs-card-num">1</span>${t('nav.stationBTitle')}</span>
+          <span class="tabs-card-sub">${t('nav.stationBSub')}</span>
+        </button>
+        <button type="button" class="tabs-card tab-station-c" onclick="switchTab(this,'${w.id}','station-c')">
+          <span class="tabs-card-title"><span class="tabs-card-num">2</span>${t('nav.stationCTitle')}</span>
+          <span class="tabs-card-sub">${t('nav.stationCSub')}</span>
+        </button>`;
   return `<div class="obj-card set-head">${titleHtml}${pill}${skills}${thread}</div>
   <div class="tabs">
     <div class="tabs-songbar">
@@ -1751,24 +1787,17 @@ function buildSet(w){
     </div>
     <div class="tabs-main">
       <div class="tabs-stations-col">
-        <button type="button" class="tabs-card tab-station-b active" onclick="switchTab(this,'${w.id}','station-b')">
-          <span class="tabs-card-title"><span class="tabs-card-num">1</span>${t('nav.stationBTitle')}</span>
-          <span class="tabs-card-sub">${t('nav.stationBSub')}</span>
-        </button>
-        <button type="button" class="tabs-card tab-station-c" onclick="switchTab(this,'${w.id}','station-c')">
-          <span class="tabs-card-title"><span class="tabs-card-num">2</span>${t('nav.stationCTitle')}</span>
-          <span class="tabs-card-sub">${t('nav.stationCSub')}</span>
-        </button>
+        ${stationCards}
       </div>
       <div class="tabs-arrow" aria-hidden="true">&rarr;</div>
       <button type="button" class="tabs-card tab-checklist" onclick="switchTab(this,'${w.id}','checklist')">
-        <span class="tabs-card-title"><span class="tabs-card-num">3</span>${t('nav.checklistTitle')}</span>
-        <span class="tabs-card-sub">${t('nav.checklistSub')}</span>
+        <span class="tabs-card-title"><span class="tabs-card-num">${single ? 2 : 3}</span>${t('nav.checklistTitle')}</span>
+        <span class="tabs-card-sub">${chkSub}</span>
       </button>
     </div>
   </div>
   <div id="${w.id}-station-b" class="tab-panel tp-station-b active">${buildStations(w,'b')}${panelFooter(w,'station-b')}</div>
-  <div id="${w.id}-station-c" class="tab-panel tp-station-c">${buildStations(w,'c')}${panelFooter(w,'station-c')}</div>
+  ${single ? '' : `<div id="${w.id}-station-c" class="tab-panel tp-station-c">${buildStations(w,'c')}${panelFooter(w,'station-c')}</div>`}
   <div id="${w.id}-songs"    class="tab-panel tp-songs">${w.songs ? buildSongs(w) + panelFooter(w,'songs') : ''}</div>
   <div id="${w.id}-checklist" class="tab-panel tp-checklist">${buildChecklist(w)}${panelFooter(w,'checklist')}</div>`;
 }
@@ -3786,7 +3815,10 @@ function panelFooter(w, tab){
   const span = key => `<span data-i18n="${key}">${escHtml(t(key))}</span>`;
   let inner = '';
   if(tab === 'station-b'){
-    inner = btn(span('btn.nextStationC'), `switchTabById('${w.id}','station-c')`);
+    // Single-flow sets have no Station C — the process goes straight to the checklist.
+    inner = (w.stations && !w.stations.c)
+      ? btn(span('btn.nextChecklist'), `switchTabById('${w.id}','checklist')`)
+      : btn(span('btn.nextStationC'), `switchTabById('${w.id}','station-c')`);
   } else if(tab === 'station-c' || tab === 'songs'){
     inner = btn(span('btn.nextChecklist'), `switchTabById('${w.id}','checklist')`);
   } else if(tab === 'checklist'){

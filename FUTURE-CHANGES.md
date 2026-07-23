@@ -72,14 +72,16 @@ its `hint`/`stuck`/`levelUp` fields (+ `_es` twins) and show just the instructio
 - Category labels added EN + ES in `i18n.js` (+ `translations-review.md`).
 - Also (Jonathan, 2026-07-23): student-choice row renamed "…means something to **you**".
 
-### [ ] New module: Changing guitar strings (in-class assessment)
-- A **dedicated module** on changing strings, to be a **graded in-class assessment**.
-- **Scope (2026-07-23):** cover **both nylon/classical AND steel-string**. For nylon, teach the
-  **ball-end** method (buttoned strings, no classical tie-knot — the string type being purchased).
-- **Must include:** step **visuals** (diagrams/photos) and **videos** (found via WebSearch +
-  oEmbed-verified, diverse creators, aim for a Spanish/bilingual option — per CLAUDE.md rules).
-- **OPEN SCOPE:** new Module 13 vs. slot into existing? Full Station A/B/C + skills-checklist
-  structure (it's an assessment)? Extend `MODULE_MANIFEST`/progress strip? Source vs. custom visuals?
+### [x] New module: Changing guitar strings (in-class assessment) (done 2026-07-23)
+- A **dedicated module** on changing strings, a **graded in-class assessment**.
+- **Scope (2026-07-23):** covers **both nylon/classical AND steel-string**; nylon teaches the
+  **ball-end** method (no classical tie-knot — the string type being purchased).
+- **DECIDED (Jonathan, 2026-07-23):** named **"String Changing"** as **Module 13**; **no B/C
+  stations** — a single-flow set (new pattern, see WORKFLOW.md): one "Learn the process" tab into
+  the checklist. **Assessment = the 4 checklist skills** (safe removal · bridge seating · post
+  winding · tune-stretch-hold), each with a gotItWhen bar + mc practice drill. **Custom inline
+  SVG diagrams** (EN/ES label variants). Videos oEmbed-verified: Lauren Bateman (steel), Takamine
+  (nylon), LEARNINGCHORDS (ball-end nylon), guitarraviva (en español).
 
 ---
 

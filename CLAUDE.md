@@ -133,7 +133,7 @@ entry style (`## YYYY-MM-DD — Title`, then `### Added` / `### Changed` section
   record, but keep it readable as if a student might see it.)
 
 ## Project: what this is
-Plain static HTML/JS/CSS site — no build step, no Jekyll, no Node framework. Content lives in `index.html` and per-module JS files (`module-1.js` through `module-12.js`, `config-main.js`). Uses Firebase for auth and Firestore for student progress. Deployed by pushing to GitHub.
+Plain static HTML/JS/CSS site — no build step, no Jekyll, no Node framework. Content lives in `index.html` and per-module JS files (`module-1.js` through `module-13.js`, `config-main.js`). Uses Firebase for auth and Firestore for student progress. Deployed by pushing to GitHub. (Module 13 · String Changing is a *single-flow* module — only `stations.b`, custom tab labels, checklist = graded assessment; pattern documented in WORKFLOW.md "Working conventions.")
 
 ## Live preview
 VS Code **Live Server** extension. Right-click `index.html` → "Open with Live Server". Browser auto-refreshes on save. No commit needed.
