@@ -77,6 +77,27 @@ confirmed on a real guitar 2026-07-24; see "Recently shipped" below.)
 
 ## Recently shipped (post-archive)
 
+- [x] **Report-an-issue in-site form + always-top-scroll fix** — pushed
+      `a86ec71` (2026-07-24). Footer's "Report a problem" now opens an
+      in-site form (`openIssueModal`/`submitIssueReport`, `app.js`) instead
+      of a mailto link — writes to a new Firestore `issueReports` collection
+      with the student's email/name, current module+set, browser info, and
+      message auto-attached; falls back to the old mailto if Firebase/
+      Firestore isn't reachable or the student is the dev-bypass user (same
+      convention as progress saves). New security rule documented in
+      `index.html`'s setup comment (also backfilled the previously-
+      undocumented `config` collection rule there); Jonathan confirmed +
+      published the matching rule in the Firebase console the same day.
+      Browser-verified (dev bypass + manual console calls): modal renders,
+      empty-message validation, and the graceful failure path (dev-bypass
+      writes are rejected by Firestore rules) all work as expected — the
+      live end-to-end save (real signed-in student) hasn't been checked yet.
+      Separately: opening or returning to a Set now **always scrolls to the
+      very top**, replacing the scroll-memory feature from 2026-07-12 (which
+      Jonathan decided he didn't want after all) — `activateSet` no longer
+      restores `window.scrollY`, and `history.scrollRestoration='manual'`
+      (matching `tabs/journey.js`) stops the browser's own back/forward
+      scroll memory from undoing it.
 - [x] **Real-guitar mic tests all passed clean (2026-07-24)** — closes out
       the last two open items:
       - **Riff Runner Wait Mode** (untimed, mic-graded note-by-note
