@@ -70,73 +70,24 @@
 
 ## Open work
 
+(none — the last two open items, Wait Mode and the mic-features retest, were
+confirmed on a real guitar 2026-07-24; see "Recently shipped" below.)
 
-- [~] **Real-guitar test of Riff Runner Wait Mode** (Jonathan, 2026-07-12;
-      metronome stripped out 2026-07-22) —
-      **Note detection confirmed on real guitar (2026-07-22): correctly
-      catches the notes played along.** That same real-guitar pass also
-      surfaced a design problem: the metronome/count-in implied a fixed
-      rhythm to match, but the tab was already waiting on pitch, not time —
-      the two signals fought each other and read as confusing rather than
-      helpful. **Fix: dropped the metronome/count-in entirely.** Wait Mode
-      is now pure untimed note-by-note play-along — play each note whenever
-      you're ready, the mic listens, the tab advances on a correct hit, no
-      clock at all. This also removed the **Play-along speed** picker from
-      the ready screen (nothing left to set a tempo for) and the beat pips /
-      hit-line pulse from the play screen. Rhythm/tempo practice is still
-      the timed **Keys / tap** game's job — Wait Mode is now purely about
-      landing the right notes. Code: `coach.js` (`rnw*` functions, ready
-      screen's `guitarUi`) and `styles.css`. **Code confirmed live in
-      origin/main (2026-07-23 cloud audit: `rnwStart` is the untimed
-      mic-graded path; no metronome/count-in or speed picker remains)** —
-      only the real-guitar pass is left. **Where to test:** live site →
-      left rail **Games** → **Riff Runner** → pick **Seven Nation Army** →
-      "I have my guitar" (Wait Mode). Hard-refresh first (PWA cache) and
-      confirm the no-clock flow feels natural end to end.
-- [~] **Real-guitar retest of the mic features** (Jonathan, 2026-07-12; melody
-      detail added from REVIEW-PLAN K-1, 2026-07-20) —
-      **Listening Coach chord check ("Check my changes"): DONE & verified**
-      on real guitar (pushed through `2e3feee`). Root cause was NOT the
-      onset/verdict knobs but the pitch detector: YIN's strict 0.22 clarity
-      gate rejected polyphonic chord frames outright (most strums logged 0
-      pitch reads). Fixes now live: forgiving *check-flow* onset thresholds
-      (`CHK_*` at the top of coach.js, shared by the Coach + Change Up, split
-      from the stricter `COACH_*` the rhythm games keep); chord-mode YIN
-      clarity of 0.55 (melody stays 0.22); 20%-ok chord-tone bar; wider
-      ±0.18-beat "on the beat" window; same 0.55 clarity applied to Change
-      Up. Final real-guitar run: ~4.7 reads/strum, ~65–80% on chord, 87% →
-      "Great". Debug meter (`?ccdebug=1`) was used to find this and has been
-      stripped.
-      **Still to retest, all on a real guitar:**
-      - **Melody mode (P0 — this is the one that matters most).** Pitch
-        detection confirmed correct on real guitar (2026-07-22) — it hears
-        the right notes. But that same test surfaced a **timing UX bug**:
-        melody mode only had the small reactive chip strip as a "what to
-        play now" cue (`.now` class, flips exactly at the beat), unlike
-        chords mode, which already solved this with a big current/next
-        readout shown ahead of time (`coachNowHtml` — the code comment even
-        documents why: "the chip strip alone only reveals a change the
-        instant it's due, which makes every switch late by reaction time").
-        Melody never got that same treatment, so students were watching the
-        reactive highlight and always landing a beat late. **Fix: extended
-        `coachNowHtml` to melody mode** — it now shows the current note big
-        + "next: X" ahead of time, same as chords (`coach.js`, `coachNowHtml`
-        + the beat-pulse update block ~line 533). **Code confirmed live in
-        origin/main (2026-07-23 cloud audit: `coachNowHtml` has the melody
-        branch)** — only the real-guitar retest remains. **Where to test:**
-        live site → **Module 2 · Set 1 → Station B → "Play along with your
-        note chart" → "Low E notes with your chart"** — hit the **Check me**
-        mic button next to "Play all" (8 notes walking up the low E, slow
-        60 BPM — ideal for judging whether the current/next preview lets
-        you land notes on the beat instead of a beat late).
-      - One Note Hunt round, one full Change Up round.
-      - **Must run on the LIVE site**, not localhost — the PWA service
-        worker caches the shell, so confirm the deployed `CACHE_VERSION` is
-        current and hard-refresh first.
 ---
 
 ## Recently shipped (post-archive)
 
+- [x] **Real-guitar mic tests all passed clean (2026-07-24)** — closes out
+      the last two open items:
+      - **Riff Runner Wait Mode** (untimed, mic-graded note-by-note
+        play-along, metronome/count-in removed) — tested live on Seven
+        Nation Army; no-clock flow feels natural end to end.
+      - **Mic features retest**: melody mode's new `coachNowHtml`
+        current/next preview (Module 2 · Set 1 · Station B, low E notes)
+        fixed the beat-late timing bug and lands notes on time now; one
+        Note Hunt round and one full Change Up round also passed clean.
+      Nothing further to fix — this was the last item tracked under Open
+      work, so that section is now empty.
 - [x] **Module 13 · String Changing — new single-flow module + graded
       assessment** — built in the cloud session, applied+pushed locally via
       patch (`539a939`, 2026-07-23). New `module-13.js`: 7-section process

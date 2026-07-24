@@ -1140,6 +1140,12 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 .daily5-overlay{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,0.45);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:48px 16px 24px}
 .daily5-modal{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:16px 18px;width:min(560px,100%);max-height:calc(100vh - 72px);overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,0.30)}
 
+/* Report-an-issue modal reuses the .daily5-overlay/.daily5-modal shell above. */
+.issue-actions{display:flex;justify-content:flex-end;margin-top:10px}
+.issue-status{font-size:0.8125rem;min-height:1.2em;margin-top:8px}
+.issue-status.ok{color:var(--green-text)}
+.issue-status.err{color:var(--red-text)}
+
 .song-thread-name{font-weight:600;color:var(--text)}
 
 /* ══════════════════════════════════════════════

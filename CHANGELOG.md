@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-24 — Report a problem right from the site
+
+### Added
+- The "Report a problem" link at the bottom of the page now opens a quick
+  form right on the site instead of trying to open your email app. Describe
+  what happened and send it — it automatically includes which module and
+  set you were on, so there's less to explain.
+
+### Changed
+- Opening or switching to a Set (or coming back to one you'd already
+  started) now always starts you at the very top of the page, instead of
+  sometimes landing wherever you'd last scrolled to.
+
 ## 2026-07-23 — New module: String Changing
 
 ### Added

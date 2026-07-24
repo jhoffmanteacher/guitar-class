@@ -1271,8 +1271,21 @@
     'games.wait.verdict.partial': { en: 'You played {played} of {total} notes.',
       es: 'Tocaste {played} de {total} notas.' },
 
-    // ── Footer "Report a problem" mailto ──
+    // ── Footer "Report a problem" — in-site form (falls back to mailto
+    // when Firebase/Firestore isn't available or the student is in dev bypass) ──
     'report.subject':        { en: 'Guitar site — problem report', es: 'Sitio de guitarra — reporte de problema' },
+    'issue.closeAria':       { en: 'Close report form', es: 'Cerrar formulario de reporte' },
+    'issue.contextLabel':    { en: "You're working on: {loc}", es: 'Estás trabajando en: {loc}' },
+    'issue.placeholder':     { en: 'Describe what happened…', es: 'Describe lo que pasó…' },
+    'issue.submit':          { en: 'Send report', es: 'Enviar reporte' },
+    'issue.sending':         { en: 'Sending…', es: 'Enviando…' },
+    'issue.sent':            { en: 'Thanks — got it! Mr. Hoffman will take a look.',
+                               es: 'Gracias — ¡recibido! El Sr. Hoffman lo va a revisar.' },
+    'issue.failed':          { en: "Couldn't send that — check your connection and try again, or email jhoffman@seq.org directly.",
+                               es: 'No se pudo enviar — revisa tu conexión e intenta de nuevo, o escribe directamente a jhoffman@seq.org.' },
+    'issue.bypassNote':      { en: "Reports don't save in dev/testing mode.",
+                               es: 'Los reportes no se guardan en modo de prueba.' },
+    'issue.emptyWarn':       { en: 'Type a quick description first.', es: 'Escribe una breve descripción primero.' },
 
     // ── Module-review recording widget (renderRecBody) ──
     'rec.record':            { en: 'Record', es: 'Grabar' },

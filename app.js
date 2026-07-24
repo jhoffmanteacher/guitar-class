@@ -1,3 +1,9 @@
+/* Every set always opens at the top (activateSet enforces this) — but a
+   reload or browser back/forward can otherwise have the browser natively
+   restore its own remembered scroll position before our JS runs, undoing
+   that. Same fix as tabs/journey.js: hand scroll restoration back to us. */
+if('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
 /* ── Global safety net ──
    If a script throws or a promise rejects unhandled, a student shouldn't be
    left staring at a half-broken page with no idea what happened. Show one
@@ -1428,6 +1434,79 @@ function buildReportHref(a){
   a.href = 'mailto:jhoffman@seq.org?subject='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
   return true;
 }
+// Footer "Report a problem" now opens an in-site form that writes to Firestore
+// (issueReports collection) instead of navigating away to a mail client — but
+// falls back to the mailto link above whenever a Firestore write isn't
+// possible: Firebase failed to load, or the student is the dev-bypass user
+// (whose uid Firestore rules reject, same convention as progress saves).
+function handleReportClick(a){
+  if(firebaseReady && currentUser && !isDevBypassUser()){
+    openIssueModal();
+    return false;
+  }
+  return buildReportHref(a);
+}
+function buildIssueModalHtml(){
+  return `<div class="daily5-head"><h3 style="font:inherit;margin:0">${t('btn.reportProblem')}</h3><button type="button" class="tp-close" onclick="closeIssueModal()" aria-label="${escAttr(t('issue.closeAria'))}">&#x2715;</button></div>
+    <p class="coach-tip">${escHtml(t('issue.contextLabel',{loc:currentReportContext()}))}</p>
+    <textarea id="issue-text" class="reflection-ta" placeholder="${escAttr(t('issue.placeholder'))}" rows="5"></textarea>
+    <div class="issue-status" id="issue-status" aria-live="polite"></div>
+    <div class="issue-actions">
+      <button type="button" class="panel-next-btn" id="issue-submit-btn" onclick="submitIssueReport()">${t('issue.submit')}</button>
+    </div>`;
+}
+function openIssueModal(){
+  closeIssueModal();
+  const ov=document.createElement('div');
+  ov.className='daily5-overlay';
+  ov.id='issue-overlay';
+  ov.innerHTML=`<div class="daily5-modal" role="dialog" aria-modal="true" aria-label="${escAttr(t('btn.reportProblem'))}">${buildIssueModalHtml()}</div>`;
+  ov.addEventListener('click', e=>{ if(e.target===ov) closeIssueModal(); });
+  document.body.appendChild(ov);
+  document.addEventListener('keydown', issueEscClose);
+  const ta = document.getElementById('issue-text');
+  if(ta) ta.focus();
+}
+function issueEscClose(e){ if(e.key==='Escape') closeIssueModal(); }
+function closeIssueModal(){
+  const ov=document.getElementById('issue-overlay');
+  if(ov) ov.remove();
+  document.removeEventListener('keydown', issueEscClose);
+}
+async function submitIssueReport(){
+  const ta = document.getElementById('issue-text');
+  const status = document.getElementById('issue-status');
+  const btn = document.getElementById('issue-submit-btn');
+  const message = ((ta && ta.value) || '').trim();
+  if(!message){
+    if(status){ status.textContent = t('issue.emptyWarn'); status.className = 'issue-status err'; }
+    return;
+  }
+  if(btn){ btn.disabled = true; btn.textContent = t('issue.sending'); }
+  if(status){ status.textContent = ''; status.className = 'issue-status'; }
+  try{
+    await ensureDb();
+    await db.collection('issueReports').add({
+      uid: currentUser.uid,
+      email: currentUser.email || '',
+      name: currentUser.displayName || '',
+      message,
+      location: currentReportContext(),
+      moduleNum: lastModuleNum,
+      setId: lastSetId,
+      lang: getLang(),
+      userAgent: navigator.userAgent,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    if(status){ status.textContent = t('issue.sent'); status.className = 'issue-status ok'; }
+    if(ta) ta.disabled = true;
+    if(btn) btn.remove();
+    setTimeout(closeIssueModal, 2200);
+  } catch(e){
+    if(status){ status.textContent = t('issue.failed'); status.className = 'issue-status err'; }
+    if(btn){ btn.disabled = false; btn.textContent = t('issue.submit'); }
+  }
+}
 
 // Teacher (signed into the student app as the class teacher) and the localhost
 // dev-bypass user can preview every set/review without working through the
@@ -1590,31 +1669,6 @@ function renderPills(moduleNum){
   }
 }
 
-// Per-set window scroll positions, so returning to a set lands where the
-// student left off. A set that's never been opened has no entry → opens at top.
-// Hydrated from localStorage so the position also survives a reload / PWA
-// relaunch (same `gc-` key convention as gc-lastSet). window.scrollTo clamps to
-// the page height, so a stale offset can never scroll past the content.
-const setScrollPos = (function(){
-  try{ return JSON.parse(localStorage.getItem('gc-scroll')) || {}; }catch(e){ return {}; }
-})();
-// A fresh page load/reload should always land at the top — jumping straight
-// to a mid-scroll position on open reads as "opened somewhere random" rather
-// than picking up where you left off (the module/set selection itself still
-// restores). Scroll memory still applies once you're clicking between sets
-// in the same session — this only suppresses the very first restore.
-let isInitialActivation = true;
-function saveScrollPos(){
-  try{ localStorage.setItem('gc-scroll', JSON.stringify(setScrollPos)); }catch(e){}
-}
-// Capture the current set's scroll when the tab is hidden or closed, so a reload
-// that doesn't go through activateSet first still remembers the spot.
-function rememberActiveScroll(){
-  const p = document.querySelector('.week-panel.active');
-  if(p && p.dataset.id){ setScrollPos[p.dataset.id] = window.scrollY; saveScrollPos(); }
-}
-window.addEventListener('pagehide', rememberActiveScroll);
-document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') rememberActiveScroll(); });
 window.addEventListener('pagehide', function(){ if(_dirtyKeys.size){ clearTimeout(saveTimer); flushSave(); } });
 
 function activateSet(id){
@@ -1628,12 +1682,6 @@ function activateSet(id){
       return;
     }
   }
-  // Remember how far the student had scrolled the set they're leaving.
-  const leaving = document.querySelector('.week-panel.active');
-  if(leaving && leaving.dataset.id && leaving.dataset.id!==id){
-    setScrollPos[leaving.dataset.id] = window.scrollY;
-    saveScrollPos();
-  }
   lastSetId = id;
   if (typeof stopAnyRec === 'function') stopAnyRec();
   document.querySelectorAll('.wpill').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
@@ -1643,11 +1691,8 @@ function activateSet(id){
   document.querySelectorAll('.module-songs').forEach(el=>el.classList.toggle('active', parseInt(el.dataset.module)===activeMod));
   renderChordBoxes();
   syncRailStations();   // refresh the rail's "This set" station switcher for the new set
-  // Restore where the student last was in this set — or top on a first open.
-  // Except right after a page load: always open at the top (see isInitialActivation above).
-  const restoreScroll = !isInitialActivation && Object.prototype.hasOwnProperty.call(setScrollPos, id);
-  window.scrollTo(0, restoreScroll ? setScrollPos[id] : 0);
-  isInitialActivation = false;
+  // Every set opens at the top, every time — no scroll-position memory.
+  window.scrollTo(0, 0);
 }
 
 /* ── Rail station switcher ─────────────────────────────────────────────
