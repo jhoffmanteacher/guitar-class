@@ -456,6 +456,8 @@
 
     // ── 🎧 Listening Coach + 🎮 Games arcade (coach.js — every
     //    student-facing string; render-time t() calls, hand-written ES) ──
+    'coach.btn': { en: 'Listening Coach — click here to get feedback',
+      es: 'Entrenador de Escucha — haz clic aquí para recibir comentarios' },
     'coach.close': { en: 'Close',
       es: 'Cerrar' },
     'coach.closeAria': { en: 'Close Listening Coach',

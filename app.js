@@ -918,7 +918,9 @@ function buildTab(spec, opts){
       renderBpmControl(keyPrefix, bpm, minBpm, maxBpm) +
       // noCoach: tabs with slurred notes (hammer-ons/pull-offs) aren't
       // one-pick-per-note, so a mic check would fail correct technique.
-      (spec.noCoach || hasHolds ? '' : coachBtnHtml(midisAttr, tabNotesJson)) +
+      // suppressCoach: this step already has a chord-check Coach button —
+      // don't show a second one for the tab's note sequence.
+      (spec.noCoach || hasHolds || (opts && opts.suppressCoach) ? '' : coachBtnHtml(midisAttr, tabNotesJson)) +
       `</span></div>`;
   }
   if (spec.phrases && spec.phrases.length) {
@@ -1928,6 +1930,10 @@ function buildStations(w, stationId){
     const chordsHtml = (s.chords&&s.chords.length)
       ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}${c.name?`<div class="chord-box-label">${c.name}</div>`:''}</div>`).join('')}</div>` + coachChordBtnRowHtml(s.chords)
       : '';
+    // One step, one Listening Coach button: a step's chord-check button
+    // (above) already covers this step, so the melody/tab Coach buttons
+    // below stay suppressed rather than showing a second one.
+    const hasChordsCoach = chordsHtml.includes('coach-chord-row');
     const playSeqHtml = s.playSeq ? (()=>{
       const ps = s.playSeq;
       const label = (ps.label && tf(ps,'label')) || t('step.playAll');
@@ -1943,14 +1949,14 @@ function buildStations(w, stationId){
       return ` <span class="bpm-control-group">` +
         `<button type="button" class="play-seq-btn" data-midis="${escAttr(midis)}" onclick="playSequenceFromGroup(this)" title="Play all notes">&#x25B6; ${escHtml(label)}</button>` +
         renderBpmControl(key, bpm, minBpm, maxBpm) +
-        (hasHolds ? '' : coachBtnHtml(midis)) +
+        (hasHolds || hasChordsCoach ? '' : coachBtnHtml(midis)) +
         `</span>`;
     })() : '';
-    const tabHtml = s.tab ? buildTab(s.tab, { keyPrefix: `bpm:${w.id}:${ns}:${i}:tab` }) : '';
+    const tabHtml = s.tab ? buildTab(s.tab, { keyPrefix: `bpm:${w.id}:${ns}:${i}:tab`, suppressCoach: hasChordsCoach }) : '';
     const tabsHtml = (s.tabs && s.tabs.length)
       ? `<div class="tab-choice-group">${s.tabs.map((spec, tIdx) => {
           const title = (spec.title && tf(spec,'title')) || (spec.caption && tf(spec,'caption')) || t('tab.defaultTitle');
-          return `<div class="tab-choice"><button type="button" class="tab-choice-btn" onclick="toggleTabChoice(this)"><span class="tab-choice-icon">&#x25B6;</span><span>${t('tab.showTabLabel')} ${escHtml(title)}</span></button><div class="tab-choice-content">${buildTab(spec, { keyPrefix: `bpm:${w.id}:${ns}:${i}:tab:${tIdx}` })}</div></div>`;
+          return `<div class="tab-choice"><button type="button" class="tab-choice-btn" onclick="toggleTabChoice(this)"><span class="tab-choice-icon">&#x25B6;</span><span>${t('tab.showTabLabel')} ${escHtml(title)}</span></button><div class="tab-choice-content">${buildTab(spec, { keyPrefix: `bpm:${w.id}:${ns}:${i}:tab:${tIdx}`, suppressCoach: hasChordsCoach })}</div></div>`;
         }).join('')}</div>`
       : '';
     const respHtml = s.response ? (()=>{
@@ -3620,7 +3626,7 @@ function playSequenceFromGroup(btn){
       derives a fingering itself. ── */
 function coachBtnHtml(midisJson, tabNotesJson){
   const tabAttr = tabNotesJson ? ` data-tabnotes="${escAttr(tabNotesJson)}"` : '';
-  return `<button type="button" class="coach-btn" data-midis="${escAttr(midisJson)}"${tabAttr} onclick="coachOpen(this)" title="Play it into the mic and get feedback">&#x1F3A4; Listening Coach</button>`;
+  return `<button type="button" class="coach-btn" data-midis="${escAttr(midisJson)}"${tabAttr} onclick="coachOpen(this)" title="Play it into the mic and get feedback">&#x1F3A4; <span data-i18n="coach.btn">${t('coach.btn')}</span></button>`;
 }
 /* Chord steps: build [{n:name, m:[midis]}] from the step's own diagram
    specs (same fret math as chordMidis — frets are absolute). */
@@ -3630,7 +3636,7 @@ function coachChordBtnRowHtml(chords){
     m: chordSpecMidis(c.chord)
   })).filter(c=>c.m.length);
   if(!spec.length) return '';
-  return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}" onclick="coachOpen(this)" title="4 count-in clicks, then strum on every beat — the mic listens and gives feedback">&#x1F3A4; Listening Coach</button></div>`;
+  return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}" onclick="coachOpen(this)" title="4 count-in clicks, then strum on every beat — the mic listens and gives feedback">&#x1F3A4; <span data-i18n="coach.btn">${t('coach.btn')}</span></button></div>`;
 }
 /* One-shot animation helper: restart a CSS animation class even if it's
    already applied (remove → force reflow → add), then clear it after ms. */
