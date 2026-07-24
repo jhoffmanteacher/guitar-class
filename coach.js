@@ -4905,8 +4905,54 @@ const NR_LEVELS = [
   { nameKey:'games.nr.lv15', strings:[6,5], maxFret:5, tiers:['e8s'],      bpm:66, bars:4, chords:true, chordHold:4 }
 ];
 
+/* ── Adaptive mode — the game's front door is ONE Play button ──
+   The stage order walks the melody ladder with the power-chord branch
+   interleaved right after its level-5 prerequisite, so chords start
+   showing up mid-journey instead of after sixteenth notes. Results move
+   the student along it: ≥90% steps up a stage, <65% steps back one
+   (unless the round smells like a MIC problem — an unclear-heavy round
+   means the machine couldn't hear, not that the student can't play),
+   anything between stays put. The full level picker survives behind a
+   "practice a specific skill" door for targeted work (and for pointing
+   the whole class at one thing).
+   Weak spots: every missed or wrong-note position bumps a small score in
+   a per-student map ('string:fret', 'c:'-prefixed for chords); the
+   generator re-deals live weak spots ~⅓ of the time, and clean hits pay
+   the score back down until the entry retires. Map + stage persist in
+   games.nr for signed-in students. */
+const NR_ADAPT_ORDER = [0, 1, 2, 3, 4, 12, 5, 6, 13, 7, 8, 14, 9, 10, 11];
+const NR_UP_PCT = 90, NR_DOWN_PCT = 65;
+
 let nr = null, nrRaf = null;
 let nrOffsetMs = null;   // lazy-read from localStorage on first use
+let nrWeakMap = null;    // hydrated once per page from games.nr.weak
+
+function nrWeak(){
+  if (!nrWeakMap){
+    nrWeakMap = {};
+    if (typeof games !== 'undefined' && games && games.nr && games.nr.weak){
+      for (const k in games.nr.weak){
+        const v = games.nr.weak[k] | 0;
+        if (v > 0) nrWeakMap[k] = Math.min(6, v);
+      }
+    }
+  }
+  return nrWeakMap;
+}
+function nrWeakKey(n){ return (n.chord ? 'c:' : '') + n.string + ':' + n.fret; }
+
+function nrStagePos(){
+  let p = -1;
+  try { p = parseInt(sessionStorage.getItem('nrStagePos'), 10); } catch(e){}
+  if (!(p >= 0) && typeof games !== 'undefined' && games && games.nr &&
+      typeof games.nr.stage === 'number'){
+    p = games.nr.stage;
+  }
+  return Math.max(0, Math.min(NR_ADAPT_ORDER.length - 1, p >= 0 ? p : 0));
+}
+function nrSetStagePos(p){
+  try { sessionStorage.setItem('nrStagePos', String(p)); } catch(e){}
+}
 
 function nrBody(){ return document.getElementById('nr-body'); }
 function nrBestKey(i){ return 'nrBest:' + i; }
@@ -4959,8 +5005,37 @@ function nrStop(){
 }
 
 function nrSetup(){
-  nr = { phase: 'select', level: 0, timeouts: [], pv: null, micOn: false };
-  nrRenderSelect();
+  nr = { phase: 'home', level: 0, timeouts: [], pv: null, micOn: false };
+  nrRenderHome();
+}
+
+/* ── Home: one big Play button + where you are on the journey ── */
+function nrRenderHome(){
+  const body = nrBody();
+  if (!body || !nr) return;
+  nrHearStop();
+  nr.phase = 'home';
+  const pos = nrStagePos();
+  const lv = NR_LEVELS[NR_ADAPT_ORDER[pos]];
+  body.innerHTML =
+    `<div class="coach-tip rn-center">${t('games.nr.homeIntro')}</div>
+     <div class="nr-stage rn-center"><strong>${t('games.nr.homeStage', {n: pos + 1, total: NR_ADAPT_ORDER.length})}</strong> &mdash; ${t(lv.nameKey)}<br>
+       <span class="rn-song-sub">${nrLevelMeta(lv)}</span></div>
+     <div class="rn-center"><button type="button" class="coach-start nr-play" onclick="nrPlayAdaptive()">&#x1F3B8; ${t('games.nr.playButton')}</button></div>
+     <div class="nr-slider"><label for="nr-off">${t('games.nr.offsetLabel')}</label>
+       <input type="range" id="nr-off" min="0" max="250" step="10" value="${nrOffset()}" oninput="nrSetOffset(this.value)">
+       <span id="nr-off-lbl">${nrOffset()} ms</span></div>
+     <div class="coach-tip rn-center">${t('games.nr.offsetTip')}</div>
+     <div class="rn-center"><button type="button" class="tp-btn" onclick="nrShowSelect()">&#x1F3AF; ${t('games.nr.practiceDoor')}</button></div>`;
+}
+
+function nrPlayAdaptive(){
+  if (!nr || (nr.phase !== 'home' && nr.phase !== 'done')) return;
+  nr.adaptive = true;
+  nr.stagePos = nrStagePos();
+  nr.level = NR_ADAPT_ORDER[nr.stagePos];
+  nr.phase = 'ready';
+  nrStart();
 }
 
 /* ── Level select ── */
@@ -4995,7 +5070,8 @@ function nrRenderSelect(){
   }).join('');
   body.innerHTML =
     `<div class="coach-tip rn-center">${t('games.nr.tipHowToPlay')}</div>
-     <div class="rn-songs">${cards}</div>`;
+     <div class="rn-songs">${cards}</div>
+     <div class="rn-center"><button type="button" class="tp-btn" onclick="nrRenderHome()">&#x2190; ${t('games.nr.homeButton')}</button></div>`;
 }
 
 function nrShowSelect(){
@@ -5008,6 +5084,7 @@ function nrShowSelect(){
 function nrPick(i){
   if (!nr || !nrUnlocked(i)) return;
   nrHearStop();
+  nr.adaptive = false;   // the practice door: the student chose this level
   nr.level = i;
   nr.phase = 'ready';
   nrRenderReady();
@@ -5098,6 +5175,22 @@ function nrGen(lv){
     return next;
   };
 
+  /* Weak-spot re-dealing: ~¼ of picks swap in a position the student has
+     been missing (see the adaptive-mode note above NR_ADAPT_ORDER) when
+     one lives inside this pool. The walk resumes FROM the weak spot so
+     the line stays melodic around it — which also means its neighbours
+     recur, so the effective dose is higher than the swap rate; don't
+     raise this without playing a round. */
+  const wk = nrWeak();
+  const weakSwap = (curIdx, chord) => {
+    if (Math.random() >= 0.25) return curIdx;
+    const cands = [];
+    for (let i = 0; i < pool.length; i++){
+      if (wk[(chord ? 'c:' : '') + pool[i].string + ':' + pool[i].fret] > 0) cands.push(i);
+    }
+    return cands.length ? cands[Math.floor(Math.random() * cands.length)] : curIdx;
+  };
+
   /* Chord levels: one pool position per hold window, decided up front. */
   let windows = null;
   if (lv.chords){
@@ -5106,6 +5199,7 @@ function nrGen(lv){
     let wIdx = Math.floor(Math.random() * Math.min(4, pool.length));
     let wSame = 0;
     for (let wn = 0; wn < nWin; wn++){
+      wIdx = weakSwap(wIdx, true);
       windows.push(pool[wIdx]);
       const next = walk(wIdx, wSame);
       wSame = next === wIdx ? wSame + 1 : 0;
@@ -5130,6 +5224,7 @@ function nrGen(lv){
                      name: coachNoteName(c.midi) + '5', beat, dur: ev[1] });
         return;
       }
+      idx = weakSwap(idx, false);
       const cur = pool[idx];
       notes.push({ string: cur.string, fret: cur.fret, midi: cur.midi,
                    beat, dur: ev[1] });
@@ -5207,7 +5302,12 @@ function nrRenderPlay(){
   const body = nrBody();
   if (!body || !nr) return;
   const s = nr;
-  const lanes = [[5, 'A'], [6, 'E']].map(([str, name]) => {
+  /* All six strings draw, like real TAB (thin high e on top, low E on the
+     bottom — Riff Runner's layout), even though this game only writes to
+     strings 5 and 6: reading two lines floating in space is a habit the
+     real page never asks for. */
+  const names = { 1: 'e', 2: 'B', 3: 'G', 4: 'D', 5: 'A', 6: 'E' };
+  const lanes = [1, 2, 3, 4, 5, 6].map(str => {
     const toks = s.notes.map((n, i) => {
       if (n.rest || n.string !== str) return '';   // rests render once, below the lanes
       /* Chord tokens ride the ROOT string's lane: fret number in the circle
@@ -5215,7 +5315,7 @@ function nrRenderPlay(){
          root + two-frets-up one string down, so that fully specifies it. */
       return `<span class="rn-token nr-token${n.chord ? ' nr-chord' : ''}" id="nr-n-${i}"><span class="rn-token-label">${n.chord ? n.name : coachNoteName(n.midi)}</span><span class="rn-token-fret">${n.fret}</span>${n.dur > 1 ? '<span class="nr-tail"></span>' : ''}</span>`;
     }).join('');
-    return `<div class="rn-lane nr-lane"><span class="rn-lane-name">${str} ${name}</span>${toks}</div>`;
+    return `<div class="rn-lane nr-lane"><span class="rn-lane-name">${str} ${names[str]}</span>${toks}</div>`;
   });
   /* rests live between the lanes, on the track itself */
   const rests = s.notes.map((n, i) => n.rest
@@ -5338,6 +5438,37 @@ function nrMark(n, cls){
   if (el) el.classList.add(cls);
 }
 
+/* ── Hit celebrations (the Guitar-Hero sparkle) ──
+   A perfect throws a spark burst at the hit line on that note's lane; a
+   good gets a soft expanding ring; stepping the combo multiplier (×2 at
+   8 in a row, up to ×4) pops the new multiplier over the track. Pure
+   CSS animations on throwaway elements — spawned here, removed on a
+   timer, hidden entirely under prefers-reduced-motion (the grade marks
+   on the tokens carry the same information without motion). */
+function nrBurst(n, kind){
+  const s = nr;
+  const track = document.getElementById('nr-track');
+  const i = s ? s.notes.indexOf(n) : -1;
+  const el = i >= 0 && s.els[i];
+  if (!track || !el || !el.parentElement) return;
+  const b = document.createElement('span');
+  b.className = 'nr-burst ' + kind;
+  b.style.left = (track.clientWidth * 0.22) + 'px';
+  b.style.top = (el.parentElement.offsetTop + el.parentElement.offsetHeight / 2) + 'px';
+  track.appendChild(b);
+  s.timeouts.push(setTimeout(() => b.remove(), 650));
+}
+function nrComboPop(mult){
+  const s = nr;
+  const track = document.getElementById('nr-track');
+  if (!s || !track) return;
+  const b = document.createElement('span');
+  b.className = 'nr-combo-pop';
+  b.textContent = '×' + mult;
+  track.appendChild(b);
+  s.timeouts.push(setTimeout(() => b.remove(), 950));
+}
+
 /* An event finished collecting readings: consensus pitch (the Coach's
    tight-median filter — "unclear" is honest, a wrong verdict isn't),
    then match against the one open note whose window it landed in. */
@@ -5376,28 +5507,36 @@ function nrFinalizeEvent(){
      raw pitch readings are tones of the chord (root or fifth; the
      detector legitimately hops between them, so single-pitch consensus
      would fail honest strums — see coachFinalizeEvent). */
-  let pitchOk;
+  let pitchOk, unclear;
   if (n.chord){
     const want = [((n.midi % 12) + 12) % 12, ((n.midi + 7) % 12) % 12];
     const cls = p.readings.map(r => ((Math.round(r) % 12) + 12) % 12);
     pitchOk = cls.length >= 2 &&
       cls.filter(c => want.indexOf(c) >= 0).length / cls.length >= 0.20;
+    unclear = cls.length < 2;          // heard a strum, no usable pitch reads
   } else {
     pitchOk = midi !== null && (midi === n.midi || midi === n.midi + 12);
+    unclear = midi === null;           // heard a pluck, consensus failed
   }
   s.errs.push((tEv - n.t) / 1000);
   if (pitchOk){
+    const prevMult = Math.min(4, 1 + Math.floor(s.combo / 8));
     s.combo++;
     if (s.combo > s.maxCombo) s.maxCombo = s.combo;
     const mult = Math.min(4, 1 + Math.floor(s.combo / 8));
     if (bestAbs <= s.perfectMs){
       n.result = 'perfect'; s.score += 100 * mult; nrMark(n, 'hit-perfect');
+      nrBurst(n, 'nr-burst-perfect');
     } else {
       n.result = 'good'; s.score += 50 * mult; nrMark(n, 'hit-good');
+      nrBurst(n, 'nr-burst-good');
     }
+    if (mult > prevMult) nrComboPop(mult);
   } else {
-    /* On the beat but the wrong (or unclear) note: half credit, amber. */
-    n.result = 'pitch'; s.combo = 0; s.score += 20; nrMark(n, 'nr-hit-pitch');
+    /* On the beat but the wrong (or unclear) note: half credit, amber.
+       The unclear flag feeds the mic-problem guard in nrFinish. */
+    n.result = 'pitch'; n.unclear = unclear;
+    s.combo = 0; s.score += 20; nrMark(n, 'nr-hit-pitch');
   }
   nrHud();
 }
@@ -5434,17 +5573,49 @@ function nrFinish(){
   s.passed = s.acc >= NR_PASS;
   s.prevBest = nrBestMerged(s.level);
 
+  /* Weak-map upkeep: misses and wrong notes charge a position up; clean
+     hits pay it back down until the entry retires. */
+  const wk = nrWeak();
+  let wkChanged = false;
+  s.playable.forEach(n => {
+    const k = nrWeakKey(n);
+    if (n.result === 'miss' || n.result === 'pitch'){
+      wk[k] = Math.min(6, (wk[k] || 0) + 2); wkChanged = true;
+    } else if (wk[k]){
+      wk[k] -= 1; wkChanged = true;
+      if (wk[k] <= 0) delete wk[k];
+    }
+  });
+
+  /* Adaptive stage move. An unclear-heavy round is a MIC problem, not a
+     student problem — hold the stage and say so instead of demoting. */
+  s.micSuspect = false;
+  if (s.adaptive){
+    const unclear = s.playable.filter(n => n.result === 'pitch' && n.unclear).length;
+    s.micSuspect = total > 0 && unclear >= Math.max(3, Math.round(total * 0.4));
+    let move = 0;
+    if (s.acc >= NR_UP_PCT) move = 1;
+    else if (s.acc < NR_DOWN_PCT && !s.micSuspect) move = -1;
+    s.stageWas = s.stagePos;
+    s.stagePos = Math.max(0, Math.min(NR_ADAPT_ORDER.length - 1, s.stagePos + move));
+    s.stageMove = s.stagePos - s.stageWas;
+    nrSetStagePos(s.stagePos);
+  }
+
   if (s.acc > nrBestSession(s.level)){
     try { sessionStorage.setItem(nrBestKey(s.level), String(s.acc)); } catch(e){}
   }
-  /* Cross-session best + unlocks → the student's progress doc. Skipped in
-     dev bypass (Firestore rejects that uid; the session best still counts). */
+  /* Cross-session best + unlocks + adaptive stage + weak map → the
+     student's progress doc. Skipped in dev bypass (Firestore rejects that
+     uid; sessionStorage still carries the session). */
   if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
-    const g = (games.nr && games.nr.levels) || {};
-    if (s.acc > (g[s.level] || 0)){
-      if (!games.nr) games.nr = { levels: {} };
-      if (!games.nr.levels) games.nr.levels = {};
-      games.nr.levels[s.level] = s.acc;
+    if (!games.nr) games.nr = {};
+    if (!games.nr.levels) games.nr.levels = {};
+    let dirty = false;
+    if (s.acc > (games.nr.levels[s.level] || 0)){ games.nr.levels[s.level] = s.acc; dirty = true; }
+    if (s.adaptive && games.nr.stage !== s.stagePos){ games.nr.stage = s.stagePos; dirty = true; }
+    if (wkChanged){ games.nr.weak = wk; dirty = true; }
+    if (dirty){
       games.nr.at = new Date().toISOString().slice(0, 10);
       saveGames();
     }
@@ -5461,16 +5632,52 @@ function nrRenderDone(nPerfect, nGood, nPitch, total){
      re-clear (or a level whose successor unlocks off a different branch
      point, see `after`) gets the plain cleared line instead. */
   const firstClear = s.passed && s.prevBest < NR_PASS;
-  const justUnlocked = nxt >= 0 && firstClear && nrReq(nxt) === s.level;
+  const justUnlocked = !s.adaptive && nxt >= 0 && firstClear && nrReq(nxt) === s.level;
   const nextOpen = nxt >= 0 && nrUnlocked(nxt);
 
-  let statusLine;
-  if (s.passed){
+  let statusLine, banner = justUnlocked;
+  if (s.adaptive){
+    /* Adaptive verdict: where the journey goes next, and why. */
+    const atTop = s.stageWas === NR_ADAPT_ORDER.length - 1;
+    const hereName = t(NR_LEVELS[NR_ADAPT_ORDER[s.stagePos]].nameKey);
+    if (s.micSuspect){
+      statusLine = t('games.nr.micSuspect');
+    } else if (s.stageMove > 0){
+      statusLine = t('games.nr.stageUp', {name: hereName});
+      banner = true;
+    } else if (s.acc >= NR_UP_PCT && atTop){
+      statusLine = t('games.nr.stageTop');
+      banner = true;
+    } else if (s.stageMove < 0){
+      statusLine = t('games.nr.stageDown', {name: hereName});
+    } else {
+      statusLine = t('games.nr.stageStay');
+    }
+  } else if (s.passed){
     statusLine = justUnlocked ? t('games.nr.passUnlocked', {n: nxt + 1})
       : nxt < 0 ? t('games.nr.passLadderDone')
       : t('games.nr.passCleared');
   } else {
     statusLine = t('games.nr.failLine', {pct: NR_PASS});
+  }
+
+  /* What's coming back around — the top weak spots the next rounds will
+     re-deal (shown in adaptive mode, where re-dealing is the promise). */
+  let weakLine = '';
+  if (s.adaptive){
+    const wk = nrWeak();
+    const seen = [];
+    Object.keys(wk).filter(k => wk[k] >= 2).sort((a, b) => wk[b] - wk[a]).forEach(k => {
+      const parts = k.split(':');
+      const chord = parts[0] === 'c';
+      const str = +parts[chord ? 1 : 0], fret = +parts[chord ? 2 : 1];
+      const name = coachNoteName(STRING_OPEN_MIDI[str] + fret) + (chord ? '5' : '') +
+        ' (' + t('games.nr.fretN', {n: fret}) + ')';
+      if (seen.indexOf(name) < 0) seen.push(name);
+    });
+    if (seen.length){
+      weakLine = `<div class="coach-tip rn-center">${t('games.nr.weakLine', {list: seen.slice(0, 3).join(' · ')})}</div>`;
+    }
   }
 
   /* Early/late bias — median signed error, only with enough hits to
@@ -5498,16 +5705,19 @@ function nrRenderDone(nPerfect, nGood, nPitch, total){
     bestLine = `<div class="sh-newbest">&#x1F3C6; ${t('games.nr.newBest', {prevBest: s.prevBest + '%'})}</div>`;
   }
 
+  const buttons = s.adaptive
+    ? `<button type="button" class="coach-start" onclick="nrPlayAdaptive()">&#x1F3B8; ${t('games.nr.nextRoundButton')}</button>
+       <button type="button" class="tp-btn" onclick="nrRenderHome()">&#x2190; ${t('games.nr.homeButton')}</button>`
+    : `<button type="button" class="coach-start" onclick="nrPick(${s.level})">&#x21BB; ${t('games.nr.tryAgainButton')}</button>
+       ${nextOpen ? `<button type="button" class="coach-start" onclick="nrPick(${nxt})">${t('games.nr.nextLevelButton')} &#x2192;</button>` : ''}
+       <button type="button" class="tp-btn" onclick="nrShowSelect()">&#x2190; ${t('games.nr.allLevelsButton')}</button>`;
   body.innerHTML =
     `<div class="nr-acc ${s.passed ? 'pass' : ''}">${s.acc}%</div>
      <div class="coach-tip rn-center">${t('games.nr.resLine', {hits: nPerfect + nGood, total, perfects: nPerfect})}${nPitch ? ' ' + t('games.nr.resPitch', {n: nPitch}) : ''}</div>
-     ${justUnlocked ? `<div class="rn-unlock">&#x1F513; ${statusLine}</div>` : `<div class="coach-tip rn-center">${statusLine}</div>`}
+     ${banner ? `<div class="rn-unlock">&#x1F513; ${statusLine}</div>` : `<div class="coach-tip rn-center">${statusLine}</div>`}
      ${bestLine}
      <div class="nr-marks">${marks}</div>
      ${biasLine}
-     <div class="rn-center">
-       <button type="button" class="coach-start" onclick="nrPick(${s.level})">&#x21BB; ${t('games.nr.tryAgainButton')}</button>
-       ${nextOpen ? `<button type="button" class="coach-start" onclick="nrPick(${nxt})">${t('games.nr.nextLevelButton')} &#x2192;</button>` : ''}
-       <button type="button" class="tp-btn" onclick="nrShowSelect()">&#x2190; ${t('games.nr.allLevelsButton')}</button>
-     </div>`;
+     ${weakLine}
+     <div class="rn-center">${buttons}</div>`;
 }

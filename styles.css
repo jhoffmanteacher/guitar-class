@@ -1372,7 +1372,6 @@ body.games-open{overflow:hidden}
    adjustments plus the states Riff Runner doesn't have (amber wrong-note,
    sustain tails, rest glyphs, the results marks row, the offset slider). */
 .games-card.gc-noterun::before{background:linear-gradient(90deg,#3aa886,#8f85e8)}
-.nr-track .rn-lane,.nr-track .nr-lane{height:56px}
 .nr-rest{border:none;background:none;margin-top:-15px}
 .nr-rest .rn-token-fret{color:var(--text3);opacity:0.55;font-size:1.25rem}
 .nr-token.nr-hit-pitch{border-color:var(--amber-text);background:var(--amber-bg)}
@@ -1387,9 +1386,27 @@ body.games-open{overflow:hidden}
 .nr-mark.p{color:var(--green-text);border-color:var(--green-text)}
 .nr-mark.g{color:var(--green-text)}
 .nr-mark.a{color:var(--amber-text);border-color:var(--amber-text)}
+.nr-stage{font-size:1.0625rem;margin:10px 0 4px}
+.nr-play{font-size:1.125rem;padding:14px 34px}
 .nr-slider{display:flex;align-items:center;justify-content:center;gap:8px;font-size:0.8125rem;color:var(--text2);margin:10px 0 2px}
 .nr-slider input{width:min(220px,50%);accent-color:var(--purple-accent)}
 .nr-slider #nr-off-lbl{font-variant-numeric:tabular-nums;min-width:52px;text-align:left}
+/* hit celebrations: spark burst (perfect) / soft ring (good) at the hit
+   line, ×N pop when the combo multiplier steps up */
+.nr-burst{position:absolute;width:8px;height:8px;margin:-4px 0 0 -4px;border-radius:50%;pointer-events:none;z-index:5}
+.nr-burst::before{content:'';position:absolute;inset:-13px;border:2px solid var(--green-text);border-radius:50%;opacity:0;animation:nr-ring .45s ease-out forwards}
+.nr-burst-good::before{border-color:var(--blue-text)}
+.nr-burst-perfect::after{content:'';position:absolute;inset:1px;border-radius:50%;background:var(--green-text);box-shadow:7px 0 0 -1px var(--green-text),-7px 0 0 -1px var(--green-text),0 7px 0 -1px var(--green-text),0 -7px 0 -1px var(--green-text),5px 5px 0 -1px var(--amber-text),-5px 5px 0 -1px var(--amber-text),5px -5px 0 -1px var(--amber-text),-5px -5px 0 -1px var(--amber-text);animation:nr-sparks .55s ease-out forwards}
+@keyframes nr-ring{0%{transform:scale(.3);opacity:.9}100%{transform:scale(1.7);opacity:0}}
+@keyframes nr-sparks{0%{transform:scale(.5);opacity:1}100%{transform:scale(3.2);opacity:0}}
+.nr-combo-pop{position:absolute;left:50%;top:50%;z-index:6;pointer-events:none;font-size:2.25rem;font-weight:800;color:var(--amber-text);text-shadow:0 1px 0 var(--bg),0 0 14px color-mix(in srgb,var(--amber-text) 45%,transparent);animation:nr-combo-pop .9s cubic-bezier(.22,.61,.36,1) forwards}
+@keyframes nr-combo-pop{0%{transform:translate(-50%,-50%) scale(.4);opacity:0}22%{transform:translate(-50%,-50%) scale(1.2);opacity:1}55%{transform:translate(-50%,-58%) scale(1)}100%{transform:translate(-50%,-95%) scale(.95);opacity:0}}
+.nr-token.hit-perfect .rn-token-fret{animation:nr-fret-pop .28s ease-out}
+@keyframes nr-fret-pop{0%{transform:scale(1)}45%{transform:scale(1.35)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){
+  .nr-burst,.nr-combo-pop{display:none}
+  .nr-token.hit-perfect .rn-token-fret{animation:none}
+}
 
 /* ── Challenge Day (occasional, module-gated pick-one inside the Daily 5) ── */
 

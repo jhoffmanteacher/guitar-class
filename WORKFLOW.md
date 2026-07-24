@@ -70,8 +70,25 @@
 
 ## Open work
 
-(none — the last two open items, Wait Mode and the mic-features retest, were
-confirmed on a real guitar 2026-07-24; see "Recently shipped" below.)
+- [ ] **Note Runner — live guitar check (Jonathan, on a school Chromebook if
+      possible).** The new adaptive arcade game shipped verified only against
+      headless fake-mic runs; nobody has played it with a real guitar yet.
+      What to check, in rough order:
+      1. **Mic timing offset** — play a few melody rounds dead on the beat;
+         if the results keep saying "late," raise the home-screen slider
+         until it stops and report the number (we'll bake it in as the
+         default instead of 70 ms).
+      2. **Stage movement feel** — do the 90%-up / 65%-down thresholds move
+         you at a sensible pace? (`NR_UP_PCT` / `NR_DOWN_PCT` in coach.js.)
+      3. **Power-chord stages** — strums are louder and messier than single
+         notes; if grading feels wrong there specifically, that's the
+         chord-tone vote, not the offset.
+      4. **Weak-spot re-dealing** — deliberately flub one note for a round
+         or two, then confirm it starts showing up more and the results
+         screen names it ("Coming back around until they're clean: …").
+      5. **Hit animations** — sparks/×2 pops read as fun, not distracting,
+         at Chromebook size.
+      Report tuning numbers to Claude; the knobs are one-line constants.
 
 ---
 

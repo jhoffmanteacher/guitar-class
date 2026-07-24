@@ -9,16 +9,22 @@ see `WORKFLOW.md` and the git commit log.
 
 ### Added
 - A new game in the arcade: 🎼 Note Runner. Notes on the low E and A strings
-  scroll toward a line, and you play them on your real guitar — the mic
-  checks that you hit the right note at the right moment. Twelve levels
-  climb from open-position quarter notes all the way to sixteenth-note
-  bursts across the whole neck (through fret 12), and every round is a
-  freshly written line, so it never plays the same twice. Score 80% to
-  unlock the next level.
-- Three power-chord levels on top of that: E5/G5/A5-style shapes rooted on
-  the E and A strings, strummed in rhythm — the mic listens for the chord's
-  notes instead of a single pitch. They open up once you clear level 5, so
-  you don't have to master sixteenth notes before you get to riff.
+  scroll toward a line over real six-line TAB, and you play them on your
+  actual guitar — the mic checks that you hit the right note at the right
+  moment. One Play button runs the whole journey: the game finds your
+  level, steps you up a stage when you play a round clean (90%+), eases
+  off when one falls apart, and quietly re-deals the exact notes you've
+  been missing until they come out clean. Stages climb from open-position
+  quarter notes through eighths and sixteenth-note bursts across the
+  whole neck (through fret 12), with power-chord stages (E5/G5/A5-style
+  shapes, graded by listening for the chord's notes) mixed into the
+  journey partway along.
+- Prefer to aim at one thing? A "practice a specific skill" door lists all
+  fifteen levels so you (or your teacher) can drill exactly one — score
+  80% there to unlock the next.
+- It celebrates with you: sparks on perfect hits and a big ×2/×3/×4 when
+  your streak multiplier climbs. (These sit out automatically if your
+  device asks for reduced motion.)
 - If the game keeps calling you "late" when you know you're on the beat,
   there's a mic timing slider on the level screen — Chromebook microphones
   hear you a moment after you actually play, and this lets you fix that.
