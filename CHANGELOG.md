@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-24 — New game: Note Runner
+
+### Added
+- A new game in the arcade: 🎼 Note Runner. Notes on the low E and A strings
+  scroll toward a line, and you play them on your real guitar — the mic
+  checks that you hit the right note at the right moment. Twelve levels
+  climb from open-position quarter notes all the way to sixteenth-note
+  bursts across the whole neck (through fret 12), and every round is a
+  freshly written line, so it never plays the same twice. Score 80% to
+  unlock the next level.
+- Three power-chord levels on top of that: E5/G5/A5-style shapes rooted on
+  the E and A strings, strummed in rhythm — the mic listens for the chord's
+  notes instead of a single pitch. They open up once you clear level 5, so
+  you don't have to master sixteenth notes before you get to riff.
+- If the game keeps calling you "late" when you know you're on the beat,
+  there's a mic timing slider on the level screen — Chromebook microphones
+  hear you a moment after you actually play, and this lets you fix that.
+
 ## 2026-07-24 — Report a problem right from the site
 
 ### Added

@@ -360,7 +360,8 @@ async function coachAcquireMicInner(){
 function coachReleaseMicIfIdle(){
   setTimeout(() => {
     const active = (coach && (coach.phase === 'countin' || coach.phase === 'listening')) ||
-                   fretRunning || (cc && cc.micOn) || (sr && sr.micOn) || (rn && rn.micOn);
+                   fretRunning || (cc && cc.micOn) || (sr && sr.micOn) || (rn && rn.micOn) ||
+                   (nr && nr.micOn);
     if (!active) coachMicOff();
   }, 0);
 }
@@ -1340,13 +1341,15 @@ function gamesStopMic(){
   srStop();
   fzStop();
   rnStop();
+  nrStop();
   const screen = document.getElementById('games-screen');
   const p = document.getElementById('games-panel');
   if (screen && !screen.hasAttribute('hidden') && p &&
       (document.getElementById('fret-body') || document.getElementById('cc-body') ||
        document.getElementById('cb-body') || document.getElementById('sh-body') ||
        document.getElementById('rr-body') || document.getElementById('sr-body') ||
-       document.getElementById('fz-body') || document.getElementById('rn-body'))){
+       document.getElementById('fz-body') || document.getElementById('rn-body') ||
+       document.getElementById('nr-body'))){
     gamesRenderHub(p);
   }
 }
@@ -1368,6 +1371,7 @@ const GAMES_META = [
   { key:'cc',       cls:'gc-change',   ico:'&#x1F501;', titleKey:'games.cc.title',    guitar:true,  descKey:'games.cc.desc' },
   { key:'radar',    cls:'gc-radar',    ico:'&#x1F4E1;', titleKey:'games.radar.title', guitar:true,  descKey:'games.radar.desc' },
   { key:'roulette', cls:'gc-roulette', ico:'&#x1F3B0;', titleKey:'games.rr.title',    guitar:true,  descKey:'games.rr.desc' },
+  { key:'noterunner', cls:'gc-noterun', ico:'&#x1F3BC;', titleKey:'games.nr.title',   guitar:true,  descKey:'games.nr.desc' },
   { key:'runner',   cls:'gc-runner',   ico:'&#x1F3C3;', titleKey:'games.riff.title',  guitar:false, descKey:'games.riff.desc' },
   { key:'blitz',    cls:'gc-blitz',    ico:'&#x26A1;',  titleKey:'games.cb.title',    guitar:false, descKey:'games.cb.desc' },
   { key:'fretzap',  cls:'gc-fretzap',  ico:'&#x1F4A5;', titleKey:'games.fz.title',    guitar:false, descKey:'games.fz.desc' },
@@ -1449,8 +1453,15 @@ function gamesRenderHub(p){
     for (const id in saved.rn.songs) rnAllTime = Math.max(rnAllTime, saved.rn.songs[id].acc || 0);
   }
   const rnChip = gamesBestChip(rnAllTime, rnBest, '%');
+  let nrSess = 0;
+  for (let i = 0; i < NR_LEVELS.length; i++) nrSess = Math.max(nrSess, nrBestSession(i));
+  let nrAllTime = 0;
+  if (saved.nr && saved.nr.levels){
+    for (const k in saved.nr.levels) nrAllTime = Math.max(nrAllTime, saved.nr.levels[k] || 0);
+  }
+  const nrChip = gamesBestChip(nrAllTime, nrSess, '%');
   /* Per-game best chips, keyed by game. */
-  const chips = { fret:fretChip, cc:ccChip, blitz:cbChip, fretzap:fzChip, strum:shChip, radar:srChip, roulette:rrChip, runner:rnChip };
+  const chips = { fret:fretChip, cc:ccChip, blitz:cbChip, fretzap:fzChip, strum:shChip, radar:srChip, roulette:rrChip, runner:rnChip, noterunner:nrChip };
   const card = g => `
        <button type="button" class="games-card ${g.cls}" onclick="gamesShow('${g.key}')">
          <span class="games-card-ico">${g.ico}</span>
@@ -1514,6 +1525,11 @@ function gamesShow(view){
   if (view === 'runner'){
     p.innerHTML = gamesHeadHtml('&#x1F3C3; ' + t('games.riff.title'), true) + `<div id="rn-body"></div>`;
     rnSetup();
+    return;
+  }
+  if (view === 'noterunner'){
+    p.innerHTML = gamesHeadHtml('&#x1F3BC; ' + t('games.nr.title'), true) + `<div id="nr-body"></div>`;
+    nrSetup();
     return;
   }
 }
@@ -4799,4 +4815,699 @@ function rnGoReady(){
   if (!rn) return;
   rn.phase = 'ready';
   rnRenderReady();
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   NOTE RUNNER — a Guitar-Hero-style note ladder for the low E and A
+   strings through fret 12. Each level GENERATES a fresh exercise (never
+   the same twice): fret ranges widen 0–3 → 5 → 7 → 12 while rhythms
+   ramp from straight quarters through halves/wholes/rests and eighths
+   to sixteenth bursts. Two TAB-style lanes (Riff Runner's track, cut
+   to A over low E) scroll toward the hit line and the student plays
+   each note on a REAL guitar: the Coach's onset + YIN pipeline grades
+   pitch AND timing against a FIXED beat grid — this is the timed game,
+   so no adaptive drift; the scrolling track itself is the beat anchor
+   (Strum Radar's silent-click grid has no visual anchor, hence its
+   easing — this one does, hence none).
+   Speaker audio during grading would bleed into the mic (see Strum
+   Radar's design note), so the count-in clicks, then goes SILENT — the
+   scrolling notes and pulsing beat pips carry the tempo. No synth
+   reward on hits either; the reward is the student's own guitar.
+   A per-device mic-latency offset (nrMicOffset, localStorage — it's a
+   property of the MACHINE, so it outlives the session) shifts every
+   onset earlier before grading: classroom Chromebooks hear a pick
+   ~40–120ms after it happens, which would grade honest playing as
+   "late" forever. Default 70ms; the ready screen has the slider.
+   ════════════════════════════════════════════════════════════════════ */
+
+const NR_PASS = 80;   // % accuracy that clears a level and unlocks the next
+
+/* Rhythm tiers: each pattern is one 4/4 bar as [beat, durBeats] events.
+   A gap between events is space; beats listed in 'rests' additionally get
+   a visible rest glyph (a written rest the student should count through
+   reads differently from mid-phrase emptiness). */
+const NR_RHYTHMS = {
+  q:   { nameKey: 'games.nr.tier.q', patterns: [
+          { ev: [[0,1],[1,1],[2,1],[3,1]] } ] },
+  long:{ nameKey: 'games.nr.tier.long', patterns: [
+          { ev: [[0,2],[2,1],[3,1]] },
+          { ev: [[0,1],[1,1],[2,2]] },
+          { ev: [[0,4]] },
+          { ev: [[0,1],[2,1],[3,1]], rests: [1] },
+          { ev: [[0,1],[1,1],[3,1]], rests: [2] },
+          { ev: [[0,2],[2,2]] } ] },
+  e8:  { nameKey: 'games.nr.tier.e8', patterns: [
+          { ev: [[0,.5],[.5,.5],[1,1],[2,1],[3,1]] },
+          { ev: [[0,1],[1,.5],[1.5,.5],[2,1],[3,1]] },
+          { ev: [[0,1],[1,1],[2,.5],[2.5,.5],[3,1]] },
+          { ev: [[0,1],[1,1],[2,1],[3,.5],[3.5,.5]] } ] },
+  e8s: { nameKey: 'games.nr.tier.e8s', patterns: [
+          { ev: [[0,.5],[.5,.5],[1,.5],[1.5,.5],[2,1],[3,1]] },
+          { ev: [[0,.5],[.5,.5],[1,1],[2,.5],[2.5,.5],[3,1]] },
+          { ev: [[0,.5],[.5,.5],[1,.5],[1.5,.5],[2,.5],[2.5,.5],[3,1]] },
+          { ev: [[0,1],[1,.5],[1.5,.5],[2,1],[3,.5],[3.5,.5]] },
+          { ev: [[0,.5],[.5,.5],[1,1],[3,1]], rests: [2] } ] },
+  s16: { nameKey: 'games.nr.tier.s16', patterns: [
+          { ev: [[0,.25],[.25,.25],[.5,.5],[1,1],[2,1],[3,1]] },
+          { ev: [[0,1],[1,.25],[1.25,.25],[1.5,.5],[2,1],[3,1]] },
+          { ev: [[0,.5],[.5,.5],[1,1],[2,.25],[2.25,.25],[2.5,.5],[3,1]] },
+          { ev: [[0,.25],[.25,.25],[.5,.25],[.75,.25],[1,1],[2,1],[3,1]] } ] }
+};
+
+/* The ladder. strings use the site's numbering (6 = low E, 5 = A);
+   tiers are drawn easy→hard across the round's bars. Tempos stay modest:
+   above ~85 BPM the eighth/sixteenth gaps close on the onset detector's
+   refractory window (COACH_ONSET_REFRACT). */
+const NR_LEVELS = [
+  { nameKey:'games.nr.lv1',  strings:[6],   maxFret:3,  tiers:['q'],             bpm:72, bars:4 },
+  { nameKey:'games.nr.lv2',  strings:[5],   maxFret:3,  tiers:['q'],             bpm:72, bars:4 },
+  { nameKey:'games.nr.lv3',  strings:[6,5], maxFret:3,  tiers:['q'],             bpm:76, bars:4 },
+  { nameKey:'games.nr.lv4',  strings:[6,5], maxFret:3,  tiers:['long'],          bpm:76, bars:4 },
+  { nameKey:'games.nr.lv5',  strings:[6,5], maxFret:5,  tiers:['q','long'],      bpm:80, bars:4 },
+  { nameKey:'games.nr.lv6',  strings:[6,5], maxFret:3,  tiers:['e8'],            bpm:66, bars:4 },
+  { nameKey:'games.nr.lv7',  strings:[6,5], maxFret:5,  tiers:['e8'],            bpm:72, bars:4 },
+  { nameKey:'games.nr.lv8',  strings:[6,5], maxFret:7,  tiers:['q','long','e8'], bpm:80, bars:4 },
+  { nameKey:'games.nr.lv9',  strings:[6,5], maxFret:7,  tiers:['e8s'],           bpm:72, bars:4 },
+  { nameKey:'games.nr.lv10', strings:[6,5], maxFret:12, tiers:['q','long','e8'], bpm:84, bars:4 },
+  { nameKey:'games.nr.lv11', strings:[6,5], maxFret:12, tiers:['e8s'],           bpm:76, bars:4 },
+  { nameKey:'games.nr.lv12', strings:[6,5], maxFret:12, tiers:['e8s','s16'],     bpm:63, bars:4 },
+  /* Power-chord branch: chords:true switches the generator to power-chord
+     shapes rooted on the E and A strings (maxFret bounds the ROOT) and the
+     grader to the Coach's chord-tone vote — single-pitch consensus is the
+     wrong test for a strum (see coachFinalizeEvent's note). chordHold =
+     beats before the chord may change, so lines chug like real power-chord
+     riffs instead of shape-hopping every strum. `after` reroutes the
+     unlock: clearing level 5 (index 4, both strings to fret 5) opens this
+     branch — power chords shouldn't have to wait behind sixteenth notes.
+     Within the branch, levels chain normally. */
+  { nameKey:'games.nr.lv13', strings:[6,5], maxFret:3, tiers:['q','long'], bpm:66, bars:4, chords:true, chordHold:4, after:4 },
+  { nameKey:'games.nr.lv14', strings:[6,5], maxFret:7, tiers:['q','long'], bpm:72, bars:4, chords:true, chordHold:2 },
+  { nameKey:'games.nr.lv15', strings:[6,5], maxFret:5, tiers:['e8s'],      bpm:66, bars:4, chords:true, chordHold:4 }
+];
+
+let nr = null, nrRaf = null;
+let nrOffsetMs = null;   // lazy-read from localStorage on first use
+
+function nrBody(){ return document.getElementById('nr-body'); }
+function nrBestKey(i){ return 'nrBest:' + i; }
+
+function nrOffset(){
+  if (nrOffsetMs === null){
+    let v = NaN;
+    try { v = parseInt(localStorage.getItem('nrMicOffset'), 10); } catch(e){}
+    nrOffsetMs = (v >= 0 && v <= 250) ? v : 70;
+  }
+  return nrOffsetMs;
+}
+function nrSetOffset(v){
+  nrOffsetMs = Math.max(0, Math.min(250, parseInt(v, 10) || 0));
+  try { localStorage.setItem('nrMicOffset', String(nrOffsetMs)); } catch(e){}
+  const el = document.getElementById('nr-off-lbl');
+  if (el) el.textContent = nrOffsetMs + ' ms';
+}
+
+/* Session best per level (accuracy %), merged with the Firestore best the
+   same way Riff Runner merges — so unlocks survive across days for a
+   signed-in student and still progress within a dev-bypass session. */
+function nrBestSession(i){
+  let v = 0;
+  try { v = parseInt(sessionStorage.getItem(nrBestKey(i)), 10) || 0; } catch(e){}
+  return v;
+}
+function nrBestMerged(i){
+  let fs = 0;
+  if (typeof games !== 'undefined' && games && games.nr && games.nr.levels){
+    fs = games.nr.levels[i] || 0;
+  }
+  return Math.max(nrBestSession(i), fs);
+}
+/* Which level must be cleared before level i opens (see `after` above). */
+function nrReq(i){
+  const a = NR_LEVELS[i].after;
+  return a !== undefined ? a : i - 1;
+}
+function nrUnlocked(i){ return i === 0 || nrBestMerged(nrReq(i)) >= NR_PASS; }
+
+function nrStop(){
+  if (nrRaf){ cancelAnimationFrame(nrRaf); nrRaf = null; }
+  if (nr){
+    nrHearStop();
+    (nr.timeouts || []).forEach(clearTimeout);
+    if (nr.micOn){ nr.micOn = false; coachMicOff(); }
+    nr = null;
+  }
+}
+
+function nrSetup(){
+  nr = { phase: 'select', level: 0, timeouts: [], pv: null, micOn: false };
+  nrRenderSelect();
+}
+
+/* ── Level select ── */
+
+function nrLevelMeta(lv){
+  const topTier = NR_RHYTHMS[lv.tiers[lv.tiers.length - 1]];
+  if (lv.chords)
+    return `${t('games.nr.meta.pcRoots', {n: lv.maxFret})} &middot; ${t(topTier.nameKey)} &middot; ${lv.bpm} BPM`;
+  const strings = lv.strings.length === 2 ? t('games.nr.meta.stringsBoth')
+    : lv.strings[0] === 6 ? t('games.nr.meta.stringsE') : t('games.nr.meta.stringsA');
+  return `${strings} &middot; ${t('games.nr.meta.frets', {n: lv.maxFret})} &middot; ${t(topTier.nameKey)} &middot; ${lv.bpm} BPM`;
+}
+
+function nrRenderSelect(){
+  const body = nrBody();
+  if (!body || !nr) return;
+  const cards = NR_LEVELS.map((lv, i) => {
+    const un = nrUnlocked(i);
+    const b = nrBestMerged(i);
+    let meta;
+    if (!un){
+      meta = `<span class="rn-song-lock">&#x1F512; ${t('games.nr.clearToUnlock', {pct: NR_PASS, n: nrReq(i) + 1})}</span>`;
+    } else if (b > 0){
+      meta = `<span class="rn-song-best">${t('games.nr.bestPercent', {pct: b})}${b >= NR_PASS ? ' &middot; ' + t('games.nr.clearedFlag') : ''}</span>`;
+    } else {
+      meta = `<span class="rn-song-best dim">${t('games.nr.notPlayedYet')}</span>`;
+    }
+    return `<button type="button" class="rn-song${un ? '' : ' locked'}" ${un ? `onclick="nrPick(${i})"` : 'disabled'}>
+       <span class="rn-song-title">${t('games.nr.levelChip', {n: i + 1})} — ${t(lv.nameKey)}</span>
+       <span class="rn-song-sub">${nrLevelMeta(lv)}</span>
+       ${meta}</button>`;
+  }).join('');
+  body.innerHTML =
+    `<div class="coach-tip rn-center">${t('games.nr.tipHowToPlay')}</div>
+     <div class="rn-songs">${cards}</div>`;
+}
+
+function nrShowSelect(){
+  if (!nr) return;
+  nrHearStop();
+  nr.phase = 'select';
+  nrRenderSelect();
+}
+
+function nrPick(i){
+  if (!nr || !nrUnlocked(i)) return;
+  nrHearStop();
+  nr.level = i;
+  nr.phase = 'ready';
+  nrRenderReady();
+}
+
+function nrRenderReady(msg){
+  const body = nrBody();
+  if (!body || !nr) return;
+  const lv = NR_LEVELS[nr.level];
+  const tiers = lv.tiers.map(k => t(NR_RHYTHMS[k].nameKey)).join(' + ');
+  const b = nrBestMerged(nr.level);
+  body.innerHTML =
+    `${msg ? `<div class="coach-tip rn-center">${msg}</div>` : ''}
+     <div class="coach-tip rn-center"><strong>${t('games.nr.levelChip', {n: nr.level + 1})} — ${t(NR_LEVELS[nr.level].nameKey)}</strong><br>
+       ${nrLevelMeta(lv)} &middot; ${t('games.nr.readyBars', {bars: lv.bars})}<br>
+       ${t('games.nr.readyRhythms', {list: tiers, pct: NR_PASS})}</div>
+     ${b > 0 ? `<div class="coach-tip rn-center">${t('games.nr.bestPercent', {pct: b})}</div>` : ''}
+     <div class="rn-center">
+       <button type="button" class="tp-btn" id="nr-hear" onclick="nrHear()">&#x1F50A; ${t('games.nr.hearButton')}</button>
+       <button type="button" class="tp-btn" onclick="nrShowSelect()">&#x2190; ${t('games.nr.allLevelsButton')}</button>
+     </div>
+     <div class="rn-center"><button type="button" class="coach-start" onclick="nrStart()">&#x1F3B8; ${t('games.nr.startButton')}</button></div>
+     <div class="nr-slider"><label for="nr-off">${t('games.nr.offsetLabel')}</label>
+       <input type="range" id="nr-off" min="0" max="250" step="10" value="${nrOffset()}" oninput="nrSetOffset(this.value)">
+       <span id="nr-off-lbl">${nrOffset()} ms</span></div>
+     <div class="coach-tip rn-center">${t('games.nr.offsetTip')}</div>
+     <div class="coach-tip rn-center">${t('games.nr.clickNote')}</div>`;
+}
+
+/* ── "Hear an example" — one generated round through the pluck synth,
+   scheduled on the audio clock (rnPluckAt is Riff Runner's). ── */
+
+function nrHear(){
+  const s = nr;
+  if (!s || s.phase !== 'ready') return;
+  if (s.pv){ nrHearStop(); return; }
+  if (typeof getAudioCtx !== 'function') return;
+  stopAllDemoAudio();
+  const ctx = getAudioCtx();
+  if (ctx.state === 'suspended'){ try { ctx.resume(); } catch(e){} }
+  const lv = NR_LEVELS[s.level];
+  const spb = 60 / lv.bpm;
+  const notes = nrGen(lv).filter(n => !n.rest);
+  const startAt = ctx.currentTime + 0.2;
+  /* A chord token previews as root + fifth + octave — the power-chord sound. */
+  s.pv = { srcs: notes.flatMap(n => (n.chord ? [0, 7, 12] : [0])
+    .map(iv => rnPluckAt(n.midi + iv, startAt + n.beat * spb))) };
+  const btn = document.getElementById('nr-hear');
+  if (btn) btn.innerHTML = '&#x25A0; ' + t('games.common.stop');
+  const pv = s.pv;
+  pv.autoStop = setTimeout(() => { if (nr === s && s.pv === pv) nrHearStop(); },
+    (0.2 + lv.bars * 4 * spb + 1.6) * 1000);
+  s.timeouts.push(pv.autoStop);
+}
+
+function nrHearStop(){
+  if (!nr || !nr.pv) return;
+  clearTimeout(nr.pv.autoStop);
+  nr.pv.srcs.forEach(src => { try { src.stop(); } catch(e){} });
+  nr.pv = null;
+  const btn = document.getElementById('nr-hear');
+  if (btn) btn.innerHTML = '&#x1F50A; ' + t('games.nr.hearButton');
+}
+
+/* ── Exercise generator: a random walk over the level's note pool.
+   Mostly small steps (±1–3 frets in pitch order), never more than two
+   repeats of the same note, starting near the bottom of the pool —
+   playable lines rather than fret-number lottery.
+   Power-chord levels walk the same way over ROOT positions, but the
+   chord only changes every chordHold beats (each strum inside a hold
+   window repeats the shape — that's what a power-chord riff is), and
+   every event carries chord:true + a display name (root + "5"). ── */
+function nrGen(lv){
+  const pool = [];
+  lv.strings.forEach(str => {
+    for (let f = 0; f <= lv.maxFret; f++)
+      pool.push({ string: str, fret: f, midi: STRING_OPEN_MIDI[str] + f });
+  });
+  pool.sort((a, b) => a.midi - b.midi || b.string - a.string);
+
+  const walk = (idx, same) => {
+    let next = idx, tries = 0;
+    do {
+      const step = [0, 1, -1, 1, -1, 2, -2, 3, -3][Math.floor(Math.random() * 9)];
+      next = Math.max(0, Math.min(pool.length - 1, idx + step));
+      tries++;
+    } while (tries < 6 && next === idx && same >= 2);
+    return next;
+  };
+
+  /* Chord levels: one pool position per hold window, decided up front. */
+  let windows = null;
+  if (lv.chords){
+    const nWin = Math.ceil(lv.bars * 4 / lv.chordHold);
+    windows = [];
+    let wIdx = Math.floor(Math.random() * Math.min(4, pool.length));
+    let wSame = 0;
+    for (let wn = 0; wn < nWin; wn++){
+      windows.push(pool[wIdx]);
+      const next = walk(wIdx, wSame);
+      wSame = next === wIdx ? wSame + 1 : 0;
+      wIdx = next;
+    }
+  }
+
+  const notes = [];
+  let idx = Math.floor(Math.random() * Math.min(4, pool.length));
+  let same = 0;
+  for (let b = 0; b < lv.bars; b++){
+    /* easy tiers in the early bars, the harder ones later */
+    const tier = NR_RHYTHMS[lv.tiers[Math.min(lv.tiers.length - 1,
+      Math.floor(b * lv.tiers.length / lv.bars))]];
+    const pat = tier.patterns[Math.floor(Math.random() * tier.patterns.length)];
+    (pat.rests || []).forEach(beat => notes.push({ rest: true, beat: b * 4 + beat }));
+    pat.ev.forEach(ev => {
+      const beat = b * 4 + ev[0];
+      if (lv.chords){
+        const c = windows[Math.floor(beat / lv.chordHold)];
+        notes.push({ string: c.string, fret: c.fret, midi: c.midi, chord: true,
+                     name: coachNoteName(c.midi) + '5', beat, dur: ev[1] });
+        return;
+      }
+      const cur = pool[idx];
+      notes.push({ string: cur.string, fret: cur.fret, midi: cur.midi,
+                   beat, dur: ev[1] });
+      const next = walk(idx, same);
+      same = next === idx ? same + 1 : 0;
+      idx = next;
+    });
+  }
+  notes.sort((a, b) => a.beat - b.beat);
+  return notes;
+}
+
+/* ── The round ── */
+
+async function nrStart(){
+  if (!nr || nr.phase !== 'ready') return;
+  const s = nr;
+  const body = nrBody();
+  if (!body) return;
+  coachClose();
+  coachEvictTuner();
+  nrHearStop();
+  body.innerHTML = `<div class="coach-tip rn-center">${t('games.common.startingMic')}</div>`;
+  if (!coachStream && !(await coachAcquireMic())){
+    if (nr === s){ s.phase = 'ready'; nrRenderReady(t('games.common.micAccessDenied')); }
+    return;
+  }
+  if (nr !== s || !nrBody()){ coachReleaseMicIfIdle(); return; }
+  if (document.hidden){
+    coachMicOff();
+    s.phase = 'ready';
+    nrRenderReady(t('games.wait.pausedBackground'));
+    return;
+  }
+  stopAllDemoAudio();
+  s.micOn = true;
+  window.coachMicLive = true;
+
+  const lv = NR_LEVELS[s.level];
+  s.phase = 'countin';
+  s.chordMode = !!lv.chords;
+  s.beatMs = 60000 / lv.bpm;
+  s.totalBeats = lv.bars * 4;
+  s.notes = nrGen(lv);
+  s.playable = s.notes.filter(n => !n.rest);
+
+  /* Hit windows, in ms: wider than Riff Runner's key windows (onset
+     detection adds its own jitter — same reasoning as Strum Radar's),
+     capped below half the smallest gap so neighbours can't both claim
+     one pluck. */
+  let minGap = Infinity;
+  for (let i = 1; i < s.playable.length; i++)
+    minGap = Math.min(minGap, (s.playable[i].beat - s.playable[i - 1].beat) * s.beatMs);
+  s.goodMs = Math.min(180, 0.45 * minGap);
+  s.perfectMs = Math.min(90, s.goodMs * 0.55);
+
+  s.score = 0; s.combo = 0; s.maxCombo = 0;
+  s.errs = [];
+  s.sweepIdx = 0; s.lastBeat = -1;
+  s.smoothRms = 0; s.smoothHf = 0; s.lastOnsetT = -1e9; s.lastPitchT = 0; s.pending = null;
+
+  nrRenderPlay();
+  s.els = s.notes.map((_, i) => document.getElementById('nr-n-' + i));
+  /* coachCountIn beeps 4 clicks and sets s.listenStart = beat 1. The
+     clicks stop there — see the header comment. */
+  coachCountIn(s, 'nr-count', () => {
+    if (nr === s && s.phase === 'countin') s.phase = 'play';
+  });
+  s.playable.forEach(n => { n.t = s.listenStart + n.beat * s.beatMs; n.result = null; });
+  if (nrRaf) cancelAnimationFrame(nrRaf);
+  nrLoop();
+}
+
+function nrRenderPlay(){
+  const body = nrBody();
+  if (!body || !nr) return;
+  const s = nr;
+  const lanes = [[5, 'A'], [6, 'E']].map(([str, name]) => {
+    const toks = s.notes.map((n, i) => {
+      if (n.rest || n.string !== str) return '';   // rests render once, below the lanes
+      /* Chord tokens ride the ROOT string's lane: fret number in the circle
+         (where the root goes), chord name above — the shape is always
+         root + two-frets-up one string down, so that fully specifies it. */
+      return `<span class="rn-token nr-token${n.chord ? ' nr-chord' : ''}" id="nr-n-${i}"><span class="rn-token-label">${n.chord ? n.name : coachNoteName(n.midi)}</span><span class="rn-token-fret">${n.fret}</span>${n.dur > 1 ? '<span class="nr-tail"></span>' : ''}</span>`;
+    }).join('');
+    return `<div class="rn-lane nr-lane"><span class="rn-lane-name">${str} ${name}</span>${toks}</div>`;
+  });
+  /* rests live between the lanes, on the track itself */
+  const rests = s.notes.map((n, i) => n.rest
+    ? `<span class="rn-token nr-token nr-rest" id="nr-n-${i}"><span class="rn-token-fret">&#x1D13D;</span></span>` : '').join('');
+  body.innerHTML =
+    `<div class="sh-hud">
+       <span class="sh-score" id="nr-score">${t('games.common.score', {n: 0})}</span>
+       <span class="sh-combo" id="nr-combo">&nbsp;</span>
+       <span class="sh-bar" id="nr-bar">${t('games.nr.getReady')}</span>
+     </div>
+     <div class="cc-beats" id="nr-beats">${'<span class="cc-pip"></span>'.repeat(4)}</div>
+     <div class="rn-track nr-track" id="nr-track">${lanes.join('')}${rests}<div class="rn-hitline"></div><div class="rn-count" id="nr-count">&nbsp;</div></div>
+     <div class="coach-tip rn-center">${t('games.nr.tipPlay')}</div>
+     <button type="button" class="tp-btn coach-stop" onclick="nrFinish()">&#x25A0; ${t('games.common.stop')}</button>`;
+}
+
+function nrLoop(){
+  const s = nr;
+  if (!s || (s.phase !== 'countin' && s.phase !== 'play')) return;
+  if (!nrBody() || !document.getElementById('nr-track')){ nrStop(); return; }
+  const now = performance.now();
+
+  /* count-in digits are drawn by coachCountIn's timeouts; clear on go */
+  if (s.phase === 'play' && !s.countCleared){
+    s.countCleared = true;
+    const el = document.getElementById('nr-count');
+    if (el) el.innerHTML = '&nbsp;';
+  }
+
+  /* ── mic: the Coach's dual-channel onset detector + YIN readings.
+     Runs through the count-in too (trackers warm against room noise and
+     beep leakage, same as coachLoop) — but grading only ever matches
+     onsets that land inside a note's window, so count-in noodling and
+     the count-in beeps themselves are free. ── */
+  if (coachAnalyser){
+    const rms = coachReadFrame();
+    const hf = coachHfRms;
+    if (now - s.lastOnsetT > COACH_ONSET_REFRACT &&
+        ((rms > CHK_ONSET_FLOOR && rms > s.smoothRms * CHK_ONSET_RATIO) ||
+         (hf > CHK_HF_FLOOR && hf > s.smoothHf * CHK_HF_RATIO))){
+      s.lastOnsetT = now;
+      if (s.pending) nrFinalizeEvent();
+      s.pending = { t: now, readings: [] };
+    }
+    s.smoothRms = s.smoothRms * 0.82 + rms * 0.18;
+    s.smoothHf = s.smoothHf * 0.82 + hf * 0.18;
+    if (s.pending && rms > COACH_PITCH_GATE * 0.5 &&
+        now - s.pending.t >= COACH_ATTACK_SKIP &&
+        now - s.lastPitchT >= 40){
+      s.lastPitchT = now;
+      /* Chord levels loosen YIN's clarity gate the way the Coach's chord
+         mode does — a strum isn't cleanly periodic, and the tone vote
+         below is what keeps loose readings from becoming wrong verdicts. */
+      const f = coachDetectPitch(coachFrameBuf, coachCtx.sampleRate, s.chordMode ? 0.55 : 0.22);
+      if (f > 0) s.pending.readings.push(69 + 12 * Math.log2(f / 440));
+    }
+    if (s.pending && now - s.pending.t > COACH_EVENT_TAIL) nrFinalizeEvent();
+  }
+
+  /* ── token scroll: pure function of the clock (JS transforms, not CSS
+     animations — reduced-motion zeroes those). ── */
+  const track = document.getElementById('nr-track');
+  if (track){
+    const w = track.clientWidth;
+    const hitX = w * 0.22;
+    const lookBeats = w < 480 ? 4 : 8;
+    const pxPerMs = (w - hitX) / (lookBeats * s.beatMs);
+    for (let i = 0; i < s.notes.length; i++){
+      const el = s.els[i];
+      if (!el) continue;
+      const n = s.notes[i];
+      const tt = n.rest ? s.listenStart + n.beat * s.beatMs : n.t;
+      const x = hitX + (tt - now) * pxPerMs;
+      if (x < -80 || x > w + 40){
+        el.style.visibility = 'hidden';
+      } else {
+        el.style.visibility = 'visible';
+        el.style.transform = 'translateX(' + x + 'px)';
+        if (n.dur > 1){
+          const tail = el.querySelector('.nr-tail');
+          if (tail) tail.style.width = ((n.dur - 1) * s.beatMs * pxPerMs) + 'px';
+        }
+      }
+    }
+  }
+
+  if (s.phase === 'play'){
+    /* Notes past their window become misses — but only after the event
+       tail has had its chance to finalize a pluck that landed late in
+       the window (+COACH_EVENT_TAIL, not Riff Runner's 150ms). */
+    while (s.sweepIdx < s.playable.length && s.playable[s.sweepIdx].result) s.sweepIdx++;
+    for (let i = s.sweepIdx; i < s.playable.length; i++){
+      const n = s.playable[i];
+      if (n.t + s.goodMs + COACH_EVENT_TAIL + 60 > now) break;
+      if (!n.result){
+        n.result = 'miss';
+        s.combo = 0;
+        nrMark(n, 'miss');
+        nrHud();
+      }
+    }
+    const beat = Math.floor((now - s.listenStart) / s.beatMs);
+    if (beat !== s.lastBeat && beat >= 0){
+      s.lastBeat = beat;
+      const bar = Math.floor(beat / 4);
+      const barEl = document.getElementById('nr-bar');
+      if (barEl && bar < NR_LEVELS[s.level].bars)
+        barEl.textContent = t('games.nr.barOfTotal', {bar: bar + 1, total: NR_LEVELS[s.level].bars});
+      document.querySelectorAll('#nr-beats .cc-pip').forEach((el, i) =>
+        el.classList.toggle('on', i === ((beat % 4) + 4) % 4));
+    }
+    if (now > s.listenStart + s.totalBeats * s.beatMs + COACH_EVENT_TAIL + 300){ nrFinish(); return; }
+  }
+  nrRaf = requestAnimationFrame(nrLoop);
+}
+
+function nrMark(n, cls){
+  const i = nr.notes.indexOf(n);
+  const el = i >= 0 && nr.els[i];
+  if (el) el.classList.add(cls);
+}
+
+/* An event finished collecting readings: consensus pitch (the Coach's
+   tight-median filter — "unclear" is honest, a wrong verdict isn't),
+   then match against the one open note whose window it landed in. */
+function nrFinalizeEvent(){
+  const s = nr;
+  if (!s) return;
+  const p = s.pending;
+  s.pending = null;
+  if (!p || (s.phase !== 'play' && s.phase !== 'countin')) return;
+  let midi = null;
+  if (p.readings.length >= 2){
+    const med = tunerMedian(p.readings);
+    const tight = p.readings.filter(r => Math.abs(r - med) <= 0.6);
+    if (tight.length >= 2 && tight.length * 2 >= p.readings.length){
+      midi = Math.round(tunerMedian(tight));
+    }
+  }
+  /* Onset time, minus the device's mic latency. */
+  const tEv = p.t - nrOffset();
+  if (tEv < s.listenStart - s.goodMs) return;   // count-in: free
+  let best = -1, bestAbs = Infinity;
+  for (let i = 0; i < s.playable.length; i++){
+    const n = s.playable[i];
+    if (n.result) continue;
+    if (n.t - tEv > s.goodMs) break;            // time-sorted — rest are ahead
+    const a = Math.abs(n.t - tEv);
+    if (a <= s.goodMs && a < bestAbs){ bestAbs = a; best = i; }
+  }
+  if (best < 0) return;   // stray onset with no note nearby: ignored, the
+                          // same bargain the check flows strike (see CHK_*)
+  const n = s.playable[best];
+  /* Right note? Melody: exact midi — or the octave above, because a
+     Chromebook mic often hears the low strings' 2nd harmonic louder than
+     the fundamental (the same physics behind tuner.js's octave guard).
+     Chords: the Coach's chord-tone vote — what fraction of the strum's
+     raw pitch readings are tones of the chord (root or fifth; the
+     detector legitimately hops between them, so single-pitch consensus
+     would fail honest strums — see coachFinalizeEvent). */
+  let pitchOk;
+  if (n.chord){
+    const want = [((n.midi % 12) + 12) % 12, ((n.midi + 7) % 12) % 12];
+    const cls = p.readings.map(r => ((Math.round(r) % 12) + 12) % 12);
+    pitchOk = cls.length >= 2 &&
+      cls.filter(c => want.indexOf(c) >= 0).length / cls.length >= 0.20;
+  } else {
+    pitchOk = midi !== null && (midi === n.midi || midi === n.midi + 12);
+  }
+  s.errs.push((tEv - n.t) / 1000);
+  if (pitchOk){
+    s.combo++;
+    if (s.combo > s.maxCombo) s.maxCombo = s.combo;
+    const mult = Math.min(4, 1 + Math.floor(s.combo / 8));
+    if (bestAbs <= s.perfectMs){
+      n.result = 'perfect'; s.score += 100 * mult; nrMark(n, 'hit-perfect');
+    } else {
+      n.result = 'good'; s.score += 50 * mult; nrMark(n, 'hit-good');
+    }
+  } else {
+    /* On the beat but the wrong (or unclear) note: half credit, amber. */
+    n.result = 'pitch'; s.combo = 0; s.score += 20; nrMark(n, 'nr-hit-pitch');
+  }
+  nrHud();
+}
+
+function nrHud(){
+  const s = nr;
+  const sc = document.getElementById('nr-score');
+  if (sc) sc.textContent = t('games.common.score', {n: s.score});
+  const cb = document.getElementById('nr-combo');
+  if (cb){
+    const mult = Math.min(4, 1 + Math.floor(s.combo / 8));
+    cb.innerHTML = s.combo >= 3
+      ? '&#x1F525; ' + t('games.common.inARow', {n: s.combo}) + (mult > 1 ? ' &mdash; &times;' + mult : '')
+      : '&nbsp;';
+  }
+}
+
+function nrFinish(){
+  if (!nr || (nr.phase !== 'play' && nr.phase !== 'countin')) return;
+  const s = nr;
+  if (nrRaf){ cancelAnimationFrame(nrRaf); nrRaf = null; }
+  (s.timeouts || []).forEach(clearTimeout);
+  s.timeouts = [];
+  if (s.pending) nrFinalizeEvent();
+  if (s.micOn){ s.micOn = false; coachMicOff(); }
+  s.playable.forEach(n => { if (!n.result) n.result = 'miss'; });   // early Stop
+  s.phase = 'done';
+
+  const total = s.playable.length;
+  const nPerfect = s.playable.filter(n => n.result === 'perfect').length;
+  const nGood = s.playable.filter(n => n.result === 'good').length;
+  const nPitch = s.playable.filter(n => n.result === 'pitch').length;
+  s.acc = total ? Math.round(100 * (nPerfect + nGood) / total) : 0;
+  s.passed = s.acc >= NR_PASS;
+  s.prevBest = nrBestMerged(s.level);
+
+  if (s.acc > nrBestSession(s.level)){
+    try { sessionStorage.setItem(nrBestKey(s.level), String(s.acc)); } catch(e){}
+  }
+  /* Cross-session best + unlocks → the student's progress doc. Skipped in
+     dev bypass (Firestore rejects that uid; the session best still counts). */
+  if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
+    const g = (games.nr && games.nr.levels) || {};
+    if (s.acc > (g[s.level] || 0)){
+      if (!games.nr) games.nr = { levels: {} };
+      if (!games.nr.levels) games.nr.levels = {};
+      games.nr.levels[s.level] = s.acc;
+      games.nr.at = new Date().toISOString().slice(0, 10);
+      saveGames();
+    }
+  }
+  nrRenderDone(nPerfect, nGood, nPitch, total);
+}
+
+function nrRenderDone(nPerfect, nGood, nPitch, total){
+  const body = nrBody();
+  if (!body || !nr) return;
+  const s = nr;
+  const nxt = s.level + 1 < NR_LEVELS.length ? s.level + 1 : -1;
+  /* "Unlocked!" only when THIS clear is what opened the next level — a
+     re-clear (or a level whose successor unlocks off a different branch
+     point, see `after`) gets the plain cleared line instead. */
+  const firstClear = s.passed && s.prevBest < NR_PASS;
+  const justUnlocked = nxt >= 0 && firstClear && nrReq(nxt) === s.level;
+  const nextOpen = nxt >= 0 && nrUnlocked(nxt);
+
+  let statusLine;
+  if (s.passed){
+    statusLine = justUnlocked ? t('games.nr.passUnlocked', {n: nxt + 1})
+      : nxt < 0 ? t('games.nr.passLadderDone')
+      : t('games.nr.passCleared');
+  } else {
+    statusLine = t('games.nr.failLine', {pct: NR_PASS});
+  }
+
+  /* Early/late bias — median signed error, only with enough hits to
+     mean something (same bar Riff Runner uses). */
+  let biasLine = '';
+  if (s.errs.length >= 4){
+    const med = tunerMedian(s.errs) * 1000;
+    if (Math.abs(med) > 25){
+      biasLine = `<div class="coach-tip rn-center">${med < 0
+        ? t('games.nr.biasEarly', {ms: Math.round(-med)})
+        : t('games.nr.biasLate', {ms: Math.round(med)})}</div>`;
+    } else {
+      biasLine = `<div class="coach-tip rn-center">${t('games.nr.biasTight')}</div>`;
+    }
+  }
+
+  const marks = s.playable.map(n => {
+    const cls = n.result === 'perfect' ? 'p' : n.result === 'good' ? 'g' : n.result === 'pitch' ? 'a' : 'm';
+    const sym = n.result === 'perfect' ? '&#x2605;' : n.result === 'good' ? '&#x2713;' : n.result === 'pitch' ? '~' : '&middot;';
+    return `<span class="nr-mark ${cls}" title="${escAttr((n.chord ? n.name : coachNoteName(n.midi)) + ' — ' + t('games.nr.fretN', {n: n.fret}))}">${sym}</span>`;
+  }).join('');
+
+  let bestLine = '';
+  if (s.prevBest > 0 && s.acc > s.prevBest){
+    bestLine = `<div class="sh-newbest">&#x1F3C6; ${t('games.nr.newBest', {prevBest: s.prevBest + '%'})}</div>`;
+  }
+
+  body.innerHTML =
+    `<div class="nr-acc ${s.passed ? 'pass' : ''}">${s.acc}%</div>
+     <div class="coach-tip rn-center">${t('games.nr.resLine', {hits: nPerfect + nGood, total, perfects: nPerfect})}${nPitch ? ' ' + t('games.nr.resPitch', {n: nPitch}) : ''}</div>
+     ${justUnlocked ? `<div class="rn-unlock">&#x1F513; ${statusLine}</div>` : `<div class="coach-tip rn-center">${statusLine}</div>`}
+     ${bestLine}
+     <div class="nr-marks">${marks}</div>
+     ${biasLine}
+     <div class="rn-center">
+       <button type="button" class="coach-start" onclick="nrPick(${s.level})">&#x21BB; ${t('games.nr.tryAgainButton')}</button>
+       ${nextOpen ? `<button type="button" class="coach-start" onclick="nrPick(${nxt})">${t('games.nr.nextLevelButton')} &#x2192;</button>` : ''}
+       <button type="button" class="tp-btn" onclick="nrShowSelect()">&#x2190; ${t('games.nr.allLevelsButton')}</button>
+     </div>`;
 }
