@@ -1499,6 +1499,86 @@ body.games-open{overflow:hidden}
 .fg-fb{min-height:18px;margin-top:2px;font-size:0.875rem;line-height:1.4}
 .fg-fb-good{color:var(--green-text);font-weight:500}
 .fg-fb-bad{color:var(--red-text)}
+/* ── Shuffle Drill (step.drill) — the digital shuffle self-quiz ──
+   Purple frame = the self-assessment family (same as the review card and
+   the practice panels); the dealt card itself is high-contrast neutral so
+   the fret number reads from across a classroom. */
+.sdr{margin-top:12px;border:1px solid var(--purple-border);border-radius:var(--radius);
+  background:var(--purple-bg2);overflow:hidden}
+.sdr-head{display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:8px 12px;background:var(--purple-bg);border-bottom:1px solid var(--purple-border);
+  font-size:0.8125rem;font-weight:600;color:var(--purple-text)}
+.sdr-meta{font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sdr-body{padding:14px 12px 16px;text-align:center}
+.sdr-intro{font-size:0.875rem;color:var(--text2);line-height:1.5;margin-bottom:12px}
+.sdr-pills{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:13px}
+.sdr-pill{padding:6px 13px;border:1px solid var(--border2);background:var(--bg);color:var(--text2);
+  border-radius:20px;font-size:0.8125rem;font-family:inherit;cursor:pointer}
+.sdr-pill.active{background:var(--purple-accent);border-color:var(--purple-accent);color:#fff}
+.sdr-start{padding:10px 22px;border:none;border-radius:22px;background:var(--purple-accent);
+  color:#fff;font-size:0.9375rem;font-family:inherit;font-weight:600;cursor:pointer}
+.sdr-start:hover{filter:brightness(1.08)}
+.sdr-best{font-size:0.8125rem;color:var(--text2);margin-top:10px}
+.sdr-stage{display:flex;align-items:center;justify-content:center;gap:18px;
+  margin:2px 0 14px;flex-wrap:wrap}
+.sdr-card{width:128px;height:152px;border-radius:12px;background:var(--bg);
+  border:2px solid var(--text);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:2px;box-shadow:var(--shadow-card);animation:sdrDeal .26s ease-out}
+@keyframes sdrDeal{from{transform:translateY(-10px) rotate(-4deg);opacity:0}to{transform:none;opacity:1}}
+.sdr-card-kicker{font-size:0.6875rem;letter-spacing:.09em;text-transform:uppercase;color:var(--text2)}
+.sdr-card-fret{font-size:3.5rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.sdr-card.hit{border-color:var(--green-text);background:var(--green-bg)}
+.sdr-card.slow{border-color:var(--amber-text);background:var(--amber-bg)}
+.sdr-card.miss{border-color:var(--red-text);background:var(--red-bg)}
+.sdr-ring{position:relative;width:74px;height:74px;flex:0 0 74px}
+.sdr-ring svg{transform:rotate(-90deg)}
+.sdr-ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:1.375rem;font-weight:700;font-variant-numeric:tabular-nums;color:var(--text2)}
+.sdr-ring.over circle:last-of-type{stroke:var(--red-text)}
+.sdr-ring.over .sdr-ring-num{color:var(--red-text)}
+.sdr-fb{min-height:24px;font-size:1rem;font-weight:600;margin-bottom:11px;line-height:1.35}
+.sdr-fb.hit{color:var(--green-text)}
+.sdr-fb.slow{color:var(--amber-text)}
+.sdr-fb.miss{color:var(--red-text)}
+/* 440px keeps all 7 naturals on ONE row on a Chromebook (7 × 59px = 413) and
+   wraps the sharps pile to a clean 7 + 5. */
+.sdr-notes{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;max-width:440px;margin:0 auto}
+.sdr-note{min-width:52px;padding:12px 6px;border:1px solid var(--border2);background:var(--bg);
+  color:var(--text);border-radius:8px;font-size:1rem;font-weight:600;font-family:inherit;
+  cursor:pointer;transition:transform .08s,background .12s}
+.sdr-note:hover{background:var(--bg3)}
+.sdr-note:active{transform:scale(.95)}
+.sdr-note.sharp{color:var(--text2);font-size:0.9375rem}
+.sdr-note.correct{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
+.sdr-note.wrong{background:var(--red-bg);border-color:var(--red-text);color:var(--red-text)}
+.sdr-score{font-size:2.125rem;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
+.sdr-score-sub{font-size:0.9375rem;color:var(--text2);margin-top:3px}
+.sdr-verdict{display:inline-block;margin-top:11px;padding:6px 14px;border-radius:20px;
+  font-size:0.875rem;font-weight:600}
+.sdr-verdict.good{background:var(--green-bg);color:var(--green-text)}
+.sdr-verdict.mid{background:var(--amber-bg);color:var(--amber-text)}
+.sdr-drill{margin:14px auto 0;max-width:400px;text-align:left;background:var(--bg);
+  border:1px solid var(--border);border-radius:8px;padding:11px 13px}
+.sdr-drill-title{font-size:0.75rem;font-weight:600;color:var(--text2);text-transform:uppercase;
+  letter-spacing:.05em;margin-bottom:7px}
+.sdr-drill-row{display:flex;justify-content:space-between;gap:10px;font-size:0.9375rem;
+  padding:4px 0;border-bottom:1px solid var(--border)}
+.sdr-drill-row:last-child{border-bottom:none}
+.sdr-drill-row span{color:var(--text2);font-size:0.875rem;white-space:nowrap}
+.sdr-checkoff{margin-top:13px;padding:9px 18px;border:1.5px solid var(--green-text);
+  background:var(--green-bg);color:var(--green-text);border-radius:22px;font-size:0.9375rem;
+  font-family:inherit;font-weight:600;cursor:pointer}
+.sdr-checkoff.done{opacity:.65;cursor:default}
+.sdr-actions{display:flex;gap:9px;justify-content:center;margin-top:14px;flex-wrap:wrap}
+.sdr-btn2{padding:9px 18px;border:1px solid var(--purple-accent);background:transparent;
+  color:var(--purple-accent);border-radius:20px;font-size:0.875rem;font-family:inherit;
+  font-weight:600;cursor:pointer}
+@media(prefers-reduced-motion:reduce){.sdr-card{animation:none}}
+@media(max-width:430px){
+  .sdr-card{width:108px;height:130px}
+  .sdr-card-fret{font-size:2.875rem}
+  .sdr-note{min-width:46px;padding:11px 5px}
+}
 /* "Keep it sharp" spaced-review card — purple = review/self-assessment family */
 .review-slot:empty{display:none}
 .review-card{border:1.5px solid var(--purple-border);background:var(--purple-bg2);border-radius:var(--radius);padding:14px 16px;margin-bottom:14px;box-shadow:var(--shadow-card)}

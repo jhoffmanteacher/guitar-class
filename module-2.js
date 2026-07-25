@@ -245,20 +245,25 @@ SETS.push(
                   choices_es: ['A', 'B', 'C', 'D'] }
               },
               {
-                label: 'Shuffle self-quiz', label_es: 'Autoevaluación con papelitos',
-                text: 'Shuffle self-quiz:<ol><li>Write frets 0–12 on small scraps of paper and shuffle them.</li><li>Flip one at a time and say the A-string note within 3 seconds.</li><li>Go 10 rounds.</li></ol>Got someone around? Have them call out random frets instead — same 3-second limit.<span class="step-figure"><img src="img/m2-shuffle-slips.svg" alt="Three steps of the shuffle game: a pile of shuffled paper slips, one drawn slip showing fret 7, and the answer E said within three seconds."></span>',
-                text_es: 'Autoevaluación con papelitos:<ol><li>Escribe los trastes 0–12 en pequeños papelitos y revuélvelos.</li><li>Voltea uno a la vez y di la nota de la cuerda La en 3 segundos.</li><li>Haz 10 rondas.</li></ol>¿Tienes a alguien cerca? Pídele que diga trastes al azar en su lugar — con el mismo límite de 3 segundos.<span class="step-figure"><img src="img/m2-shuffle-slips.svg" alt="Los tres pasos del juego de papelitos: un montón de papelitos revueltos, un papelito volteado con el traste 7, y la respuesta E dicha en menos de tres segundos."></span>',
+                label: 'Shuffle self-quiz', label_es: 'Autoevaluación con cartas',
+                text: 'Shuffle self-quiz — the deck below deals you a random fret. Say the A-string note out loud, then press it, before the ring runs out: three seconds a card, ten rounds. Miss one and it comes back later in the ten. Nine in time and you can check the skill off right there.',
+                text_es: 'Autoevaluación con cartas — el mazo de abajo te reparte un traste al azar. Di en voz alta la nota de la cuerda La y luego presiónala, antes de que el círculo se acabe: tres segundos por carta, diez rondas. Si fallas una, vuelve a salir más adelante. Nueve a tiempo y ya puedes marcar la destreza ahí mismo.',
+                drill: { type: 'shuffle', string: 'A', maxFret: 12, rounds: 10, seconds: 3, pile: 'naturals', skill: 'm2w1-s3' },
                 hint: 'No chart. If you stall on a note, loop just that part of the string until it\'s automatic.',
-                hint_es: 'Sin tabla. Si te trabas en una nota, repite solo esa parte de la cuerda hasta que sea automática.'
+                hint_es: 'Sin tabla. Si te trabas en una nota, repite solo esa parte de la cuerda hasta que sea automática.',
+                levelUp: 'Switch to the sharps pile — all 13 frets, sharps included. Got someone around? Have them call out random frets while you answer on the guitar.',
+                levelUp_es: 'Cambia al montón con sostenidos — los 13 trastes, sostenidos incluidos. ¿Tienes a alguien cerca? Pídele que diga trastes al azar mientras tú respondes en la guitarra.',
+                skills: [3]
               },
               {
-                label: 'Challenge: shuffle run', label_es: 'Reto: recorrido con papelitos',
-                text: 'Challenge 3 — Shuffle Run: write frets 0–12 on scraps of paper (or reuse your slips from the self-quiz above), shuffle them, then draw one at a time and — on the low E string — name it AND play it within 3 seconds. You\'ve got it when: 10 in a row with no counting up from E.',
-                text_es: 'Reto 3 — Recorrido con papelitos: escribe los trastes 0–12 en papelitos (o reutiliza los de la autoevaluación anterior), revuélvelos, y luego saca uno a la vez y — en la cuerda Mi grave — nómbralo Y tócalo en 3 segundos. Lo tienes cuando: 10 seguidas sin contar desde E.',
+                label: 'Challenge: shuffle run', label_es: 'Reto: recorrido con cartas',
+                text: 'Challenge 3 — Shuffle Run: same deck, now on the low E string — and this time name it AND play it before the ring runs out. Guitar in hand for this one: the app checks the name, your ear checks the note. You\'ve got it when: 10 in a row with no counting up from E.',
+                text_es: 'Reto 3 — Recorrido con cartas: el mismo mazo, ahora en la cuerda Mi grave — y esta vez nómbrala Y tócala antes de que se acabe el círculo. Con la guitarra en la mano: la app revisa el nombre, tu oído revisa la nota. Lo tienes cuando: 10 seguidas sin contar desde E.',
+                drill: { type: 'shuffle', string: 'lowE', maxFret: 12, rounds: 10, seconds: 3, pile: 'naturals', skill: 'm2w1-s2' },
                 hint: 'The 3-second limit is the real test. You\'re jumping to random frets, not running a memorized lap — that\'s what "name any fret instantly" really means.',
                 hint_es: 'El límite de 3 segundos es la verdadera prueba. Estás saltando a trastes al azar, no haciendo una vuelta memorizada — eso es lo que de verdad significa "nombrar cualquier traste al instante".',
-                stuck: 'Put only frets 0–7 in the pile first; add 8–12 once you hit 10 in a row.',
-                stuck_es: 'Pon solo los trastes 0–7 en el montón primero; agrega 8–12 una vez que logres 10 seguidas.',
+                stuck: 'Stay on the naturals pile — it deals only the eight natural frets. Add the sharps pile once you hit 9 of 10.',
+                stuck_es: 'Quédate en el montón de solo naturales — reparte únicamente los ocho trastes naturales. Agrega el montón con sostenidos cuando logres 9 de 10.',
                 levelUp: 'Run the Shuffle on the A string too, or name a full lap going down the string (12 → 0) without counting.',
                 levelUp_es: 'Haz el ejercicio de papelitos en la cuerda La también, o nombra una vuelta completa bajando por la cuerda (12 → 0) sin contar.',
                 skills: [2, 3]

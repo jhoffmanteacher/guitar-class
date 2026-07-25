@@ -1998,6 +1998,9 @@ function buildStations(w, stationId){
       }
       return '';
     })() : '';
+    /* Interactive drill (shuffle self-quiz) — sits under the doer row and
+       above the written response, since it IS the doing. */
+    const drillHtml = s.drill ? renderShuffleDrill(s.drill, `${w.id}-${ns}-${i}`, w.id) : '';
     const doneKey = `${w.id}-${ns}-${i}`;
     const isDone = completed[doneKey] === true;
     const isCur = i === curIdx;
@@ -2014,7 +2017,7 @@ function buildStations(w, stationId){
       + `<span class="step-label">${escHtml(label)}</span>`
       + `<span class="step-chev" aria-hidden="true">&#x25B6;</span>`
       + `</button>`
-      + `<div class="step-detail"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${chordsHtml}${tabHtml}${tabsHtml}${respHtml}${foldsHtml}</div>${doneBtn}</div>`
+      + `<div class="step-detail"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${chordsHtml}${tabHtml}${tabsHtml}${drillHtml}${respHtml}${foldsHtml}</div>${doneBtn}</div>`
       + `</li>`;
    }).join('');
   };
@@ -3245,6 +3248,321 @@ function fgEnd(sid){
   const e = practiceLog[sid];
   wrap.querySelector('.fg-best').innerHTML =
     `<span data-i18n="fret.best" data-i18n-params='{"n":${e.best},"total":${FG_ROUND}}'>${t('fret.best',{n:e.best,total:FG_ROUND})}</span>`;
+}
+
+/* ── Shuffle Drill (step.drill, type 'shuffle') ──────────────────────────
+   The digital twin of the paper shuffle self-quiz. A shuffled deck of frets
+   is dealt one card at a time; the student says the note out loud AND taps
+   it; the 3-second limit is the standard the Set 1 check-off tests.
+
+   Module-data schema:
+     drill: { type:'shuffle', string:'lowE'|'A'|…, rounds:10, seconds:3,
+              maxFret:12, pile:'naturals'|'sharps', skill:'m2w1-s3' }
+
+   Design calls (Jonathan, 2026-07-25):
+   - TAP THE NOTE NAME, not 4-choice and not the mic. The whole pile is on
+     screen (7 naturals, or 12 with sharps), so it stays recall rather than
+     a 1-in-4 guess — Fret Zap already owns the multiple-choice version.
+   - Running out of clock does NOT end the card: the ring turns red and
+     counts up, and a right-but-late answer lands as "slow", not wrong.
+     Only IN-TIME answers count toward the 10 — the 3-second standard stays
+     intact without the drill snatching the card away mid-thought.
+   - A miss OR a slow one is re-dealt 2–4 cards later: the paper move of
+     tossing that slip back into the pile.
+   - Best in-time score persists in the `games` save category
+     (games.sd['<string>:<pile>']); at 90% the results screen offers the
+     skill check-off instead of making them go hunt the checklist tab.
+   State lives in `shuffleDrills[stepKey]`; a language switch rebuilds the
+   module panels, which resets any in-flight round (same as the arcade). */
+const SD_ROUNDS = 10;
+const SD_LIMIT = 3;               // seconds — the check-off standard
+const SD_NOTE_NAMES = ['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const SD_NATURALS = ['A','B','C','D','E','F','G'];
+const SD_OPEN_MIDI = { lowE:40, A:45, D:50, G:55, B:59, highE:64 };
+const SD_RING_LEN = 201;          // 2πr for the r=32 countdown ring
+const SD_SLOW_MS = 2000;          // a hit this slow still lands in "drill these"
+const shuffleDrills = {};
+
+function sdNoteAt(kind, fret){ return SD_NOTE_NAMES[(SD_OPEN_MIDI[kind] + fret) % 12]; }
+function sdStringName(kind){ return t(FRET_STRING_KEY[kind] || 'fret.stringLowE'); }
+function sdBox(key){ return document.getElementById('sdr-' + key); }
+function sdPileKey(c){ return c.string + ':' + c.pile; }
+function sdSessionKey(c){ return 'sdBest:' + sdPileKey(c); }
+/* Best = the higher of this browser session and the persisted all-time best,
+   same rule the arcade cards use (a returning student sees their record, and
+   dev-bypass/signed-out still gets a number). */
+function sdBest(c){
+  let s = 0;
+  try { s = parseInt(sessionStorage.getItem(sdSessionKey(c)), 10) || 0; } catch(e){}
+  return Math.max(s, ((games && games.sd) || {})[sdPileKey(c)] || 0);
+}
+function sdSaveBest(c, n){
+  try {
+    if((parseInt(sessionStorage.getItem(sdSessionKey(c)), 10) || 0) < n) sessionStorage.setItem(sdSessionKey(c), String(n));
+  } catch(e){}
+  // Firestore rejects the dev-bypass uid — session best above still counts.
+  if(!currentUser || (typeof isDevBypassUser === 'function' && isDevBypassUser())) return;
+  if(!games.sd) games.sd = {};
+  if((games.sd[sdPileKey(c)] || 0) >= n) return;
+  games.sd[sdPileKey(c)] = n;
+  games.sd.at = dayStr(new Date());
+  saveGames();
+}
+function sdShuffle(a){
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+/* Legal frets for the pile: the naturals pile drops every fret whose note
+   carries a ♯, so the answer row stays one Chromebook line wide. */
+function sdFrets(c){
+  const out = [];
+  for(let f = 0; f <= c.maxFret; f++){
+    if(c.pile === 'naturals' && sdNoteAt(c.string, f).indexOf('♯') >= 0) continue;
+    out.push(f);
+  }
+  return out;
+}
+function sdAnswerNames(c){ return c.pile === 'naturals' ? SD_NATURALS.slice() : SD_NOTE_NAMES.slice(); }
+
+/* Called from stepsHtml — registers state and returns the setup screen. */
+function renderShuffleDrill(drill, key, wid){
+  if(!drill || drill.type !== 'shuffle') return '';
+  const prev = shuffleDrills[key];
+  if(prev && prev.tick) clearInterval(prev.tick);
+  shuffleDrills[key] = {
+    phase: 'setup', tick: null,
+    cfg: {
+      string:  drill.string || 'lowE',
+      rounds:  drill.rounds || SD_ROUNDS,
+      seconds: drill.seconds || SD_LIMIT,
+      maxFret: drill.maxFret != null ? drill.maxFret : 12,
+      /* A student's last pile choice sticks across a rebuild (language
+         switch, tab revisit) — only the round itself resets. */
+      pile:    (prev && prev.cfg && prev.cfg.pile) || drill.pile || 'naturals',
+      skill:   drill.skill || null,
+      wid:     wid
+    }
+  };
+  return `<div class="sdr" id="sdr-${escAttr(key)}">${sdSetupHtml(key)}</div>`;
+}
+
+function sdHeadHtml(key, right){
+  const c = shuffleDrills[key].cfg;
+  return `<div class="sdr-head">` +
+    `<span>${escHtml(t('drill.head', { string: sdStringName(c.string), max: c.maxFret }))}</span>` +
+    `<span class="sdr-meta">${escHtml(right)}</span></div>`;
+}
+
+function sdSetupHtml(key){
+  const st = shuffleDrills[key];
+  if(!st) return '';
+  const c = st.cfg;
+  const best = sdBest(c);
+  const pill = (id, label) =>
+    `<button type="button" class="sdr-pill${c.pile === id ? ' active' : ''}" onclick="sdPickPile('${key}','${id}')">${escHtml(label)}</button>`;
+  return sdHeadHtml(key, t('drill.headMeta', { n: c.rounds, s: c.seconds })) +
+    `<div class="sdr-body">` +
+      `<div class="sdr-intro">${escHtml(t('drill.intro'))}</div>` +
+      `<div class="sdr-pills">${pill('naturals', t('drill.pileNaturals'))}${pill('sharps', t('drill.pileSharps'))}</div>` +
+      `<button type="button" class="sdr-start" onclick="sdStart('${key}')">&#x25B6; ${escHtml(t('drill.start'))}</button>` +
+      (best ? `<div class="sdr-best">&#x1F3C6; ${escHtml(t('drill.best', { n: best, total: c.rounds }))}</div>` : '') +
+    `</div>`;
+}
+
+function sdPickPile(key, pile){
+  const st = shuffleDrills[key], box = sdBox(key);
+  if(!st || !box) return;
+  st.cfg.pile = pile;
+  box.innerHTML = sdSetupHtml(key);
+}
+
+function sdStart(key){
+  const st = shuffleDrills[key], box = sdBox(key);
+  if(!st || !box) return;
+  st.phase = 'play';
+  st.round = 0; st.inTime = 0;
+  st.results = []; st.requeue = []; st.deck = sdShuffle(sdFrets(st.cfg));
+  st.locked = false;
+  sdNext(key);
+}
+
+/* A missed/slow fret comes back 2–4 cards later; otherwise deal off the
+   shuffled deck, reshuffling a fresh one when it runs out. */
+function sdDraw(st){
+  const due = st.requeue.findIndex(q => q.due <= st.round);
+  if(due >= 0) return st.requeue.splice(due, 1)[0].fret;
+  if(!st.deck.length) st.deck = sdShuffle(sdFrets(st.cfg));
+  return st.deck.pop();
+}
+
+function sdNext(key){
+  const st = shuffleDrills[key], box = sdBox(key);
+  if(!st || !box) return sdStop(key);
+  if(st.round >= st.cfg.rounds) return sdFinish(key);
+  st.round++;
+  st.cur = { fret: sdDraw(st), at: performance.now() };
+  st.locked = false;
+  box.innerHTML = sdPlayHtml(key);
+  if(st.tick) clearInterval(st.tick);
+  st.tick = setInterval(() => sdTick(key), 80);
+}
+
+function sdStop(key){
+  const st = shuffleDrills[key];
+  if(st && st.tick){ clearInterval(st.tick); st.tick = null; }
+}
+
+function sdPlayHtml(key){
+  const st = shuffleDrills[key], c = st.cfg;
+  const notes = sdAnswerNames(c).map(n =>
+    `<button type="button" class="sdr-note${n.indexOf('♯') >= 0 ? ' sharp' : ''}" data-note="${escAttr(n)}" onclick="sdAnswer('${key}','${escAttr(n)}')">${escHtml(n)}</button>`
+  ).join('');
+  return sdHeadHtml(key, t('drill.round', { n: st.round, total: c.rounds })) +
+    `<div class="sdr-body">` +
+      `<div class="sdr-stage">` +
+        `<div class="sdr-card" id="sdr-card-${key}">` +
+          `<span class="sdr-card-kicker">${escHtml(t('drill.fret'))}</span>` +
+          `<span class="sdr-card-fret">${st.cur.fret}</span>` +
+        `</div>` +
+        `<div class="sdr-ring" id="sdr-ring-${key}">` +
+          `<svg width="74" height="74" viewBox="0 0 74 74" aria-hidden="true">` +
+            `<circle cx="37" cy="37" r="32" fill="none" stroke="var(--border2)" stroke-width="6"></circle>` +
+            `<circle cx="37" cy="37" r="32" fill="none" stroke="var(--purple-accent)" stroke-width="6" stroke-linecap="round" id="sdr-arc-${key}" stroke-dasharray="${SD_RING_LEN}" stroke-dashoffset="0"></circle>` +
+          `</svg>` +
+          `<span class="sdr-ring-num" id="sdr-num-${key}">${c.seconds}</span>` +
+        `</div>` +
+      `</div>` +
+      `<div class="sdr-fb" id="sdr-fb-${key}" role="status" aria-live="polite">&nbsp;</div>` +
+      `<div class="sdr-notes">${notes}</div>` +
+    `</div>`;
+}
+
+/* Ring: drains over the limit, then turns red and counts UP — the card is
+   never snatched away, but "you're past three seconds" is unmissable. */
+function sdTick(key){
+  const st = shuffleDrills[key];
+  if(!st || st.phase !== 'play') return sdStop(key);
+  if(!sdBox(key)) return sdStop(key);          // panel rebuilt under us
+  if(st.locked) return;
+  const limit = st.cfg.seconds * 1000;
+  const gone = performance.now() - st.cur.at;
+  const arc = document.getElementById('sdr-arc-' + key);
+  const num = document.getElementById('sdr-num-' + key);
+  const ring = document.getElementById('sdr-ring-' + key);
+  const over = gone >= limit;
+  if(arc) arc.setAttribute('stroke-dashoffset', String(SD_RING_LEN * Math.min(1, gone / limit)));
+  if(num) num.textContent = over ? (gone / 1000).toFixed(1) : String(Math.ceil((limit - gone) / 1000));
+  if(ring) ring.classList.toggle('over', over);
+}
+
+function sdAnswer(key, pick){
+  const st = shuffleDrills[key];
+  if(!st || st.phase !== 'play' || st.locked) return;
+  const c = st.cfg;
+  const ms = performance.now() - st.cur.at;
+  const right = sdNoteAt(c.string, st.cur.fret);
+  const ok = pick === right;
+  const inTime = ok && ms <= c.seconds * 1000;
+  st.locked = true;
+  sdStop(key);
+  st.results.push({ fret: st.cur.fret, note: right, ok: ok, inTime: inTime, ms: ms });
+  if(inTime) st.inTime++;
+  else st.requeue.push({ fret: st.cur.fret, due: st.round + 2 + Math.floor(Math.random() * 3) });
+
+  const card = document.getElementById('sdr-card-' + key);
+  const fb = document.getElementById('sdr-fb-' + key);
+  if(card) card.classList.add(inTime ? 'hit' : (ok ? 'slow' : 'miss'));
+  const box = sdBox(key);
+  if(box) box.querySelectorAll('.sdr-note').forEach(b => {
+    const n = b.getAttribute('data-note');
+    if(n === right) b.classList.add('correct');
+    else if(n === pick) b.classList.add('wrong');
+  });
+  if(fb){
+    fb.className = 'sdr-fb ' + (inTime ? 'hit' : (ok ? 'slow' : 'miss'));
+    fb.textContent = inTime
+      ? t('drill.fbHit', { note: right, s: (ms / 1000).toFixed(1) })
+      : ok
+        ? t('drill.fbSlow', { note: right, s: (ms / 1000).toFixed(1), limit: c.seconds })
+        : t('drill.fbMiss', { pick: pick, fret: st.cur.fret, note: right });
+  }
+  // The reward for a right answer is hearing the note you just named.
+  if(ok && typeof playNote === 'function') playNote(SD_OPEN_MIDI[c.string] + st.cur.fret);
+  setTimeout(() => sdNext(key), inTime ? 620 : 1500);
+}
+
+function sdFinish(key){
+  const st = shuffleDrills[key], box = sdBox(key);
+  if(!st || !box) return sdStop(key);
+  st.phase = 'done';
+  sdStop(key);
+  const c = st.cfg;
+  sdSaveBest(c, st.inTime);
+
+  /* "Drill these next" — every fret that was wrong, late, or just sluggish,
+     worst first. This is the thing paper slips could never tell them. */
+  const bad = {};
+  st.results.forEach(r => {
+    if(r.ok && r.inTime && r.ms <= SD_SLOW_MS) return;
+    const e = bad[r.fret] || (bad[r.fret] = { fret: r.fret, note: r.note, misses: 0, slow: false });
+    if(!r.ok) e.misses++; else e.slow = true;
+  });
+  const list = Object.keys(bad).map(k => bad[k])
+    .sort((a, b) => (b.misses - a.misses) || (a.fret - b.fret));
+  const hits = st.results.filter(r => r.ok);
+  const avg = hits.length ? (hits.reduce((s, r) => s + r.ms, 0) / hits.length / 1000).toFixed(1) : '—';
+  const pct = st.inTime / c.rounds;
+  const verdict = pct >= 0.9 ? { cls:'good', key:'drill.verdictGood' }
+                : pct >= 0.7 ? { cls:'mid',  key:'drill.verdictMid' }
+                             : { cls:'mid',  key:'drill.verdictLow' };
+  const rows = list.length
+    ? list.map(b => `<div class="sdr-drill-row"><b>${escHtml(t('drill.rowFret', { fret: b.fret, note: b.note }))}</b>` +
+        `<span>${escHtml(b.misses ? t('drill.rowMiss', { n: b.misses }) : t('drill.rowSlow'))}</span></div>`).join('')
+    : `<div class="sdr-drill-row"><b>${escHtml(t('drill.clean'))}</b><span>${escHtml(t('drill.cleanNext'))}</span></div>`;
+  const canCheck = c.skill && pct >= 0.9 && progress[c.skill] !== 'gotit';
+  const checkHtml = canCheck
+    ? `<button type="button" class="sdr-checkoff" onclick="sdCheckOff('${key}')">&#x2713; ${escHtml(t('drill.checkOff'))}</button>`
+    : '';
+  box.innerHTML = sdHeadHtml(key, t('drill.round', { n: c.rounds, total: c.rounds })) +
+    `<div class="sdr-body">` +
+      `<div class="sdr-score">${escHtml(t('drill.score', { n: st.inTime, total: c.rounds }))}</div>` +
+      `<div class="sdr-score-sub">${escHtml(t('drill.scoreSub', { s: c.seconds, avg: avg }))}</div>` +
+      `<div class="sdr-verdict ${verdict.cls}">${escHtml(t(verdict.key))}</div>` +
+      `<div class="sdr-drill"><div class="sdr-drill-title">${escHtml(t('drill.drillTitle'))}</div>${rows}</div>` +
+      checkHtml +
+      `<div class="sdr-actions">` +
+        `<button type="button" class="sdr-start" onclick="sdStart('${key}')">&#x21BB; ${escHtml(t('drill.again'))}</button>` +
+        `<button type="button" class="sdr-btn2" onclick="sdBackToSetup('${key}')">${escHtml(t('drill.changePile'))}</button>` +
+      `</div>` +
+    `</div>`;
+}
+
+function sdBackToSetup(key){
+  const st = shuffleDrills[key], box = sdBox(key);
+  if(!st || !box) return;
+  sdStop(key);
+  st.phase = 'setup';
+  box.innerHTML = sdSetupHtml(key);
+}
+
+/* 9-of-10 earns the offer to check the skill off right here, rather than
+   sending them to the checklist tab to do it from memory. */
+function sdCheckOff(key){
+  const st = shuffleDrills[key];
+  if(!st || !st.cfg.skill) return;
+  if(progress[st.cfg.skill] !== 'gotit' && typeof toggleSkill === 'function'){
+    toggleSkill(st.cfg.skill, st.cfg.wid, 'gotit');
+  }
+  const box = sdBox(key);
+  const btn = box && box.querySelector('.sdr-checkoff');
+  if(btn){
+    btn.textContent = '✓ ' + t('drill.checkedOff');
+    btn.classList.add('done');
+    btn.disabled = true;
+  }
 }
 
 /* ── "Keep it sharp" spaced-review card ──

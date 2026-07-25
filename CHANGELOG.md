@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-25 — The shuffle self-quiz is now a drill you can play
+
+### Changed
+
+- Module 2, Set 1: the two shuffle activities in Station C — the A-string
+  self-quiz and Challenge 3 on the low E string — no longer ask you to cut
+  up paper. The site deals the cards now: a random fret comes up, a ring
+  counts down three seconds, and you say the note out loud and press it.
+  Ten rounds. Miss one and it comes back later in the ten, exactly like
+  tossing that slip back in the pile.
+- The clock doesn't snatch the card away: run past three seconds and the
+  ring turns red and keeps counting, and a right-but-late answer lands as
+  "slow" rather than wrong. Only in-time answers add to your ten, so the
+  three-second standard still means what it says on the check-off.
+- Two piles: naturals only (the eight lettered frets) or all thirteen frets
+  with the sharps mixed in.
+- At the end you get the thing paper slips never could — a "drill these
+  next" list naming the exact frets that were wrong or slow — and at nine
+  out of ten, a button to check the skill off right there.
+- Your best run is remembered per string and pile.
+
 ## 2026-07-24 — Module 2, now illustrated
 
 ### Added
