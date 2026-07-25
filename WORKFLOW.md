@@ -70,6 +70,15 @@
 
 ## Open work
 
+- [ ] **Listening Coach check-off gate — teacher view of overrides
+      (2026-07-25).** The gate records `games.coachSkill[skillId] =
+      {level, last, at, override?, overrideAt?}`; `teacher.js` does not
+      surface it yet. Worth adding a marker in the skills grid so a
+      Coach-backed "I've got it!" reads differently from a self-declared
+      one. Also unverified with a real mic in a real classroom: is
+      `COACH_GATE_MIN_LEVEL = 2` (💪 Good) the right bar, or does a noisy
+      room make it feel punitive?
+
 - [ ] **Note Runner — live guitar check (Jonathan, on a school Chromebook if
       possible).** The new adaptive arcade game shipped verified only against
       headless fake-mic runs; nobody has played it with a real guitar yet.

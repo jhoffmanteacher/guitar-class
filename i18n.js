@@ -185,6 +185,15 @@
     'skill.stillWorking':      { en: 'Still working on it', es: 'Todavía lo estoy practicando' },
     'skill.gotIt':             { en: "I've got it!", es: '¡Ya lo tengo!' },
     'skill.stillLearning':     { en: 'Still learning', es: 'Todavía aprendiendo' },
+
+    // ── Listening Coach check-off gate (soft: student can always override) ──
+    'gate.title':              { en: 'Let the Coach hear it first', es: 'Deja que el Coach lo escuche primero' },
+    'gate.body':               { en: 'The Listening Coach hasn\'t heard you play this one at 💪 Good yet. Play it into the mic first — it only takes a minute, and it makes "I\'ve got it!" mean something.',
+                                 es: 'El Coach de Escucha todavía no te ha escuchado tocar esto a nivel 💪 Bien. Tócalo al micrófono primero — solo toma un minuto, y hace que "¡Ya lo tengo!" signifique algo.' },
+    'gate.practice':           { en: '🎤 Practice it now', es: '🎤 Practicarlo ahora' },
+    'gate.markAnyway':         { en: 'Mark it anyway', es: 'Marcarlo de todos modos' },
+    'gate.closeAria':          { en: 'Close', es: 'Cerrar' },
+    'gate.overrideNote':       { en: 'Marked without a Coach check — your teacher can see this.', es: 'Marcado sin revisión del Coach — tu maestro puede verlo.' },
     'skill.gettingIt':         { en: 'Getting it', es: 'Ya le voy agarrando' },
     'skill.gotItShort':        { en: 'Got it', es: 'Ya lo tengo' },
     'skill.checklistIntro':    { en: 'Check each skill as you practice. Use "Still working on it" while you\'re learning, then mark "I\'ve got it!" once you can do it consistently.',

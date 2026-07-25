@@ -1928,7 +1928,7 @@ function buildStations(w, stationId){
       return `<div class="step-folds"><div class="step-folds-row">${pills}</div>${panels}</div>`;
     })() : '';
     const chordsHtml = (s.chords&&s.chords.length)
-      ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}${c.name?`<div class="chord-box-label">${c.name}</div>`:''}</div>`).join('')}</div>` + coachChordBtnRowHtml(s.chords)
+      ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}${c.name?`<div class="chord-box-label">${c.name}</div>`:''}</div>`).join('')}</div>` + coachChordBtnRowHtml(s.chords, stepSkillIds(w, s))
       : '';
     // One step, one Listening Coach button: a step's chord-check button
     // (above) already covers this step, so the melody/tab Coach buttons
@@ -1949,7 +1949,7 @@ function buildStations(w, stationId){
       return ` <span class="bpm-control-group">` +
         `<button type="button" class="play-seq-btn" data-midis="${escAttr(midis)}" onclick="playSequenceFromGroup(this)" title="Play all notes">&#x25B6; ${escHtml(label)}</button>` +
         renderBpmControl(key, bpm, minBpm, maxBpm) +
-        (hasHolds || hasChordsCoach ? '' : coachBtnHtml(midis)) +
+        (hasHolds || hasChordsCoach ? '' : coachBtnHtml(midis, null, stepSkillIds(w, s))) +
         `</span>`;
     })() : '';
     const tabHtml = s.tab ? buildTab(s.tab, { keyPrefix: `bpm:${w.id}:${ns}:${i}:tab`, suppressCoach: hasChordsCoach }) : '';
@@ -2784,7 +2784,7 @@ function playSeqControlsHtml(practice, skillId){
   return `<div class="bpm-control-group">` +
     `<button type="button" class="play-seq-btn" data-midis="${escAttr(midis)}" onclick="playSequenceFromGroup(this)" title="Play all notes">&#x25B6; ${escHtml(label)}</button>` +
     renderBpmControl(key, bpm, minBpm, maxBpm) +
-    (hasHolds ? '' : coachBtnHtml(midis)) +
+    (hasHolds ? '' : coachBtnHtml(midis, null, skillId)) +
   `</div>`;
 }
 function renderPracticePanel(practice, skillId, wid){
@@ -2835,7 +2835,7 @@ function renderPracticePanel(practice, skillId, wid){
       renderRepStrip(skillId) +
       promptHtml +
       `<div class="chord-diagrams">${boxes}</div>` +
-      coachChordBtnRowHtml(practice.chords) +
+      coachChordBtnRowHtml(practice.chords, skillId) +
       `<div class="rep-actions"><button type="button" class="rep-log-btn" onclick="logCleanRep('${skillId}', this)">&#x2713; <span data-i18n="rep.logClean">${t('rep.logClean')}</span></button></div>` +
     `</div>`;
   }
@@ -3622,6 +3622,92 @@ function reviewJump(sid, wid){
 }
 
 /* ── Toggle skill ── */
+function openCoachGate(sid, wid){
+  closeCoachGate();
+  const sk = skillById(sid);
+  const ov = document.createElement('div');
+  ov.className = 'daily5-overlay';
+  ov.id = 'coach-gate-overlay';
+  ov.innerHTML = `<div class="daily5-modal" role="dialog" aria-modal="true" aria-label="${escAttr(t('gate.title'))}">
+    <div class="daily5-head"><h3 style="font:inherit;margin:0">&#x1F3A4; ${t('gate.title')}</h3>
+      <button type="button" class="tp-close" onclick="closeCoachGate()" aria-label="${escAttr(t('gate.closeAria'))}">&#x2715;</button></div>
+    ${sk ? `<p class="coach-tip">${escHtml(tf(sk,'text'))}</p>` : ''}
+    <p class="coach-tip">${escHtml(t('gate.body'))}</p>
+    <div class="issue-actions">
+      <button type="button" class="panel-next-btn" onclick="coachGatePractice('${escAttr(sid)}')">${t('gate.practice')}</button>
+      <button type="button" class="tp-btn" onclick="coachGateMarkAnyway('${escAttr(sid)}','${escAttr(wid)}')">${t('gate.markAnyway')}</button>
+    </div>`;
+  ov.addEventListener('click', e => { if(e.target === ov) closeCoachGate(); });
+  document.body.appendChild(ov);
+  document.addEventListener('keydown', coachGateEscClose);
+}
+function coachGateEscClose(e){ if(e.key === 'Escape') closeCoachGate(); }
+function closeCoachGate(){
+  const ov = document.getElementById('coach-gate-overlay');
+  if(ov) ov.remove();
+  document.removeEventListener('keydown', coachGateEscClose);
+}
+/* "Practice it now" → close the gate and open that skill's practice panel,
+   where the Listening Coach button lives. */
+function coachGatePractice(sid){
+  closeCoachGate();
+  const panel = document.getElementById('pp-'+sid);
+  if(!panel) return;
+  panel.removeAttribute('hidden');
+  const btn = document.querySelector(`[aria-controls="pp-${CSS.escape(sid)}"]`);
+  if(btn) btn.setAttribute('aria-expanded','true');
+  panel.scrollIntoView({block:'center', behavior:'smooth'});
+  const coachBtn = panel.querySelector('.coach-btn');
+  if(coachBtn) flashClass(coachBtn, 'gate-attn', 1200);
+}
+/* "Mark it anyway" → honour the student's call, but record the override so
+   the teacher can see the got-it had no Coach take behind it. */
+function coachGateMarkAnyway(sid, wid){
+  closeCoachGate();
+  if(typeof games !== 'undefined' && games){
+    if(!games.coachSkill) games.coachSkill = {};
+    const prev = games.coachSkill[sid] || {};
+    games.coachSkill[sid] = Object.assign({}, prev, {
+      level: prev.level || 0,
+      override: true,
+      overrideAt: new Date().toISOString().slice(0,10)
+    });
+    if(typeof saveGames === 'function' && currentUser && !isDevBypassUser()) saveGames();
+  }
+  coachGateBypass = true;
+  toggleSkill(sid, wid, 'gotit');
+  coachGateBypass = false;
+}
+
+/* ══════════ Listening Coach check-off gate ══════════
+   A skill whose practice drill is mic-checkable (playSeq / chord) asks for a
+   Coach take at 💪 Good or better before "I've got it!" can be set. It is a
+   SOFT gate on purpose: a dead Chromebook mic or a loud room must never trap
+   a student who really can play it, so the modal always offers "Mark it
+   anyway" — and records that they took it, so the teacher view can tell a
+   Coach-backed got-it from a self-declared one. Skills practiced by mc / pr /
+   fretboard drills (the large majority) are never gated — the mic can't hear
+   a multiple-choice answer. */
+const COACH_GATE_MIN_LEVEL = 2;      // 1 Needs work · 2 Good · 3 Great
+function skillById(sid){
+  for(const w of (SETS||[])){
+    const hit = (w.skills||[]).find(x => x.id === sid);
+    if(hit) return hit;
+  }
+  return null;
+}
+function skillIsCoachGated(sid){
+  const sk = skillById(sid);
+  const type = sk && sk.practice && sk.practice.type;
+  return type === 'playSeq' || type === 'chord';
+}
+function coachSkillBest(sid){
+  const rec = (typeof games !== 'undefined' && games && games.coachSkill) ? games.coachSkill[sid] : null;
+  return (rec && rec.level) || 0;
+}
+/* Set while the student confirms "Mark it anyway" so the re-entry into
+   toggleSkill skips the gate exactly once. */
+let coachGateBypass = false;
 function toggleSkill(sid, wid, which){
   const cur = progress[sid]||'none';
   if(which==='working'){
@@ -3630,7 +3716,14 @@ function toggleSkill(sid, wid, which){
     else progress[sid]='working';
   } else {
     if(cur==='gotit') progress[sid]='working';
-    else { progress[sid]='gotit'; bumpPracticeStreak(); }
+    else {
+      if(!coachGateBypass && skillIsCoachGated(sid) && coachSkillBest(sid) < COACH_GATE_MIN_LEVEL){
+        openCoachGate(sid, wid);
+        return;
+      }
+      coachGateBypass = false;
+      progress[sid]='gotit'; bumpPracticeStreak();
+    }
   }
   const wkSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="var(--amber-text)" stroke-width="1.5"/><path d="M6 4v2.2l1.4 1.4" stroke="var(--amber-text)" stroke-width="1.5" stroke-linecap="round"/></svg>`;
   const giSvg=`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="var(--green-text)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -3942,19 +4035,33 @@ function playSequenceFromGroup(btn){
       caller has a real TAB spec, carries [{string,fret,note,midi},…] so the
       coach card can show WHERE to play each note; without it coach.js
       derives a fingering itself. ── */
-function coachBtnHtml(midisJson, tabNotesJson){
+/* Which checklist skills a drill can vouch for. coach.js writes each take's
+   level back to these ids (games.coachSkill) and the check-off gate in
+   toggleSkill reads it. Note the attribute name: a step <li> already carries
+   data-skills holding skill NUMBERS, so the button uses data-coachskills
+   holding full skill IDs. Omit for drills that belong to no single skill. */
+function coachSkillsAttr(skillIds){
+  const ids = Array.isArray(skillIds) ? skillIds : (skillIds ? [skillIds] : []);
+  return ids.length ? ` data-coachskills="${escAttr(ids.join(','))}"` : '';
+}
+/* Step → the ids of the skills that step teaches (step.skills holds numbers). */
+function stepSkillIds(w, step){
+  if(!w || !step || !step.skills) return [];
+  return step.skills.map(n => `${w.id}-s${n}`);
+}
+function coachBtnHtml(midisJson, tabNotesJson, skillIds){
   const tabAttr = tabNotesJson ? ` data-tabnotes="${escAttr(tabNotesJson)}"` : '';
-  return `<button type="button" class="coach-btn" data-midis="${escAttr(midisJson)}"${tabAttr} onclick="coachOpen(this)" title="Play it into the mic and get feedback">&#x1F3A4; <span data-i18n="coach.btn">${t('coach.btn')}</span></button>`;
+  return `<button type="button" class="coach-btn" data-midis="${escAttr(midisJson)}"${tabAttr}${coachSkillsAttr(skillIds)} onclick="coachOpen(this)" title="Play it into the mic and get feedback">&#x1F3A4; <span data-i18n="coach.btn">${t('coach.btn')}</span></button>`;
 }
 /* Chord steps: build [{n:name, m:[midis]}] from the step's own diagram
    specs (same fret math as chordMidis — frets are absolute). */
-function coachChordBtnRowHtml(chords){
+function coachChordBtnRowHtml(chords, skillIds){
   const spec = (chords||[]).filter(c=>c && c.name && Array.isArray(c.chord)).map(c=>({
     n: c.name,
     m: chordSpecMidis(c.chord)
   })).filter(c=>c.m.length);
   if(!spec.length) return '';
-  return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}" onclick="coachOpen(this)" title="4 count-in clicks, then strum on every beat — the mic listens and gives feedback">&#x1F3A4; <span data-i18n="coach.btn">${t('coach.btn')}</span></button></div>`;
+  return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}"${coachSkillsAttr(skillIds)} onclick="coachOpen(this)" title="4 count-in clicks, then strum on every beat — the mic listens and gives feedback">&#x1F3A4; <span data-i18n="coach.btn">${t('coach.btn')}</span></button></div>`;
 }
 /* One-shot animation helper: restart a CSS animation class even if it's
    already applied (remove → force reflow → add), then clear it after ms. */

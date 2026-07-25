@@ -1593,6 +1593,9 @@ body.games-open{overflow:hidden}
 .review-go-btn:hover{background:var(--purple-text);color:var(--bg);border-color:var(--purple-text)}
 .skill-row.review-flash{animation:reviewFlash 1.8s ease}
 @keyframes reviewFlash{0%{background:var(--purple-bg)}100%{background:transparent}}
+/* Listening Coach check-off gate: pulse the Coach button the gate sent you to */
+.coach-btn.gate-attn{animation:gateAttn 1.2s ease}
+@keyframes gateAttn{0%,100%{box-shadow:none}30%,70%{box-shadow:0 0 0 4px var(--green-bg)}}
 /* PR ladder practice panel */
 .pr-input-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .pr-input{width:110px;box-sizing:border-box;padding:7px 10px;font:inherit;font-size:0.9375rem;color:var(--text);background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius-sm)}

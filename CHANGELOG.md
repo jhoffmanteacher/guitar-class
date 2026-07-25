@@ -26,6 +26,25 @@ see `WORKFLOW.md` and the git commit log.
   out of ten, a button to check the skill off right there.
 - Your best run is remembered per string and pile.
 
+## 2026-07-25 — Directions you can follow at a glance
+
+### Changed
+
+- About 157 practice cards across all thirteen modules no longer hand you a
+  paragraph. Anything that asked you to do more than one thing is now a
+  numbered or bulleted list, with the "You've got it when…" line kept
+  underneath where it always was. Spanish matches step for step.
+
+### Added
+
+- Skills you practice with the Listening Coach (the play-a-sequence and chord
+  drills) now ask the Coach to hear you before you mark "I've got it!" If it
+  hasn't heard you play that one at 💪 Good or better, a card offers to take
+  you straight to the drill. You can still mark it anyway — a bad mic or a
+  loud room should never block you — and that choice is recorded so your
+  teacher can see it. Skills practiced by quiz, BPM log, or the fretboard
+  game are never gated.
+
 ## 2026-07-24 — Module 2, now illustrated
 
 ### Added

@@ -145,6 +145,9 @@ function coachOpen(btn){
     beatMs: 60000 / bpm,
     card, streakKey: 'coachStreak:' + (btn.dataset.chords || btn.dataset.midis),
     drillId: btn.dataset.chords || btn.dataset.midis,
+    /* Checklist skills this drill vouches for (app.js coachSkillsAttr). The
+       report writes its level to each, and the "I've got it!" gate reads it. */
+    skillIds: (btn.dataset.coachskills || '').split(',').filter(Boolean),
     events: [], pending: null,
     gridOffset: 0, listenStart: 0, timeouts: [],
     smoothRms: 0, smoothHf: 0, lastOnsetT: -1e9, lastPitchT: 0
@@ -777,6 +780,21 @@ function coachRenderReport(){
     if (!games.coach) games.coach = {};
     const prevAttempts = (games.coach[coach.drillId] && games.coach[coach.drillId].attempts) || 0;
     games.coach[coach.drillId] = { level: overallLevel, attempts: prevAttempts + 1, at: new Date().toISOString().slice(0, 10) };
+    /* Per-SKILL best, keyed by skill id rather than by drill payload — this is
+       what the check-off gate in app.js reads. Best-ever, never downgraded: a
+       shaky retake shouldn't take back a skill the student already earned. */
+    if (coach.skillIds && coach.skillIds.length){
+      if (!games.coachSkill) games.coachSkill = {};
+      const today = new Date().toISOString().slice(0, 10);
+      coach.skillIds.forEach(sid => {
+        const prev = games.coachSkill[sid] || {};
+        games.coachSkill[sid] = Object.assign({}, prev, {
+          level: Math.max(prev.level || 0, overallLevel),
+          last: overallLevel,
+          at: today
+        });
+      });
+    }
     saveGames();
   }
 
