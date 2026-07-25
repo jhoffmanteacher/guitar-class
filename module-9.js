@@ -90,8 +90,8 @@ SETS.push(
               },
               {
                 label: 'Re-test 6: fingerpicking', label_es: 'Repaso 6: fingerpicking',
-                text: 'Re-test 6 — Fingerpicking (Module 8): p-i-m-a over Am, thumb on the A string, without stopping. Then change Em → Am and let the thumb switch bass strings while i-m-a stay put.',
-                text_es: 'Repaso 6 — Fingerpicking (Módulo 8): p-i-m-a sobre Am, pulgar en la cuerda La, sin detenerte. Luego cambia Em → Am y deja que el pulgar cambie de cuerda grave mientras i-m-a se quedan quietos.',
+                text: 'Re-test 6 — Fingerpicking (Module 8):<ol><li>Fingerpick p-i-m-a over Am, thumb on the A string, without stopping.</li><li>Then change Em → Am and let the thumb switch bass strings while i-m-a stay put.</li></ol>',
+                text_es: 'Repaso 6 — Fingerpicking (Módulo 8):<ol><li>Toca con fingerpicking p-i-m-a sobre Am, pulgar en la cuerda La, sin detenerte.</li><li>Luego cambia Em → Am y deja que el pulgar cambie de cuerda grave mientras i-m-a se quedan quietos.</li></ol>',
                 hint: 'The fingers keep their strings for the whole test — only the thumb travels.',
                 hint_es: 'Los dedos mantienen sus cuerdas durante toda la prueba — solo el pulgar viaja.',
                 skills: [6],
@@ -127,8 +127,8 @@ SETS.push(
             steps: [
               {
                 label: 'Warm-up: tune all 6 strings', label_es: 'Calentamiento: afina las 6 cuerdas',
-                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
-                text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
+                text: 'Start every practice session the same way:<ol><li>Tune all 6 strings to green (E A D G B e).</li><li>Then play each string open.</li></ol>You\'ve got it when: in tune before today\'s work.',
+                text_es: 'Empieza cada sesión de práctica de la misma manera:<ol><li>Afina las 6 cuerdas hasta que estén en verde (E A D G B e).</li><li>Luego toca cada cuerda al aire.</li></ol>Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 hint: 'A break detunes guitars as reliably as it makes your fingers out of practice — check first.',
                 hint_es: 'Un receso desafina las guitarras tan seguro como desentrena tus dedos — revisa primero.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -141,8 +141,8 @@ SETS.push(
             steps: [
               {
                 label: 'How to mark each re-test', label_es: 'Cómo marcar cada repaso',
-                text: 'How this works: play each re-test below, then mark its skill on the checklist. Clear it → "I\'ve got it!". Struggle → "Still working on it" — that\'s not a failure, it\'s your practice list, and the pointer next to each re-test tells you exactly which module rebuilds it.',
-                text_es: 'Cómo funciona: toca cada repaso de abajo, y luego marca su destreza en la lista de verificación. Lo apruebas → "¡Ya lo tengo!". Te cuesta → "Todavía en proceso" — eso no es un fracaso, es tu lista de práctica, y el enlace junto a cada repaso te dice exactamente cuál módulo lo reconstruye.',
+                text: 'How this works:<ol><li>Play each re-test below.</li><li>Mark its skill on the checklist.</li><li>Clear it → "I\'ve got it!". Struggle → "Still working on it".</li></ol>That\'s not a failure, it\'s your practice list, and the pointer next to each re-test tells you exactly which module rebuilds it.',
+                text_es: 'Cómo funciona:<ol><li>Toca cada repaso de abajo.</li><li>Marca su destreza en la lista de verificación.</li><li>Lo apruebas → "¡Ya lo tengo!". Te cuesta → "Todavía en proceso".</li></ol>Eso no es un fracaso, es tu lista de práctica, y el enlace junto a cada repaso te dice exactamente cuál módulo lo reconstruye.',
                 hint: 'Be strict. A generous self-check here just hides work that will come back in Module 10.',
                 hint_es: 'Sé estricto. Una autoevaluación generosa aquí solo esconde trabajo que reaparecerá en el Módulo 10.'
               },
@@ -197,8 +197,8 @@ SETS.push(
               },
               {
                 label: 'Fast round: record all six', label_es: 'Ronda rápida: grábate los seis',
-                text: 'The fast round: record yourself playing all six re-tests back to back, then listen with the checklist open and settle any you weren\'t sure about. Cleared all six? Module 9 proper starts at Set 2. Flagged some? Spend a session with the practice spots listed above first — they come back fast.',
-                text_es: 'La ronda rápida: grábate tocando los seis repasos seguidos, y luego escucha con la lista de verificación abierta y resuelve cualquiera del que no estuvieras seguro. ¿Aprobaste los seis? El Módulo 9 propiamente empieza en la Unidad 2. ¿Marcaste algunos? Dedica una sesión a los puntos de práctica listados arriba primero — vuelven rápido.',
+                text: 'The fast round:<ol><li>Record yourself playing all six re-tests back to back.</li><li>Then listen with the checklist open and settle any you weren\'t sure about.</li></ol>Cleared all six? Module 9 proper starts at Set 2. Flagged some? Spend a session with the practice spots listed above first — they come back fast.',
+                text_es: 'La ronda rápida:<ol><li>Grábate tocando los seis repasos seguidos.</li><li>Luego escucha con la lista de verificación abierta y resuelve cualquiera del que no estuvieras seguro.</li></ol>¿Aprobaste los seis? El Módulo 9 propiamente empieza en la Unidad 2. ¿Marcaste algunos? Dedica una sesión a los puntos de práctica listados arriba primero — vuelven rápido.',
                 hint: 'The recording shows exactly how you really sounded — that\'s exactly why it\'s useful.',
                 hint_es: 'La grabación muestra exactamente cómo sonaste de verdad — por eso es tan útil.'
               }
@@ -327,8 +327,8 @@ SETS.push(
             steps: [
               {
                 label: 'Name notes up the D and G strings', label_es: 'Nombra las notas por D y G',
-                text: 'Listen for it: play up the D string one fret at a time, saying each note name OUT LOUD before you check a chart. Then do the same up the G string. Notice where you hesitate — that\'s tonight\'s target.',
-                text_es: 'Escucha esto: toca hacia arriba por la cuerda Re un traste a la vez, diciendo cada nombre de nota EN VOZ ALTA antes de revisar un diagrama. Luego haz lo mismo en la cuerda Sol. Fíjate dónde dudas — ese es tu objetivo de esta noche.',
+                text: 'Listen for it:<ol><li>Play up the D string one fret at a time, saying each note name OUT LOUD before you check a chart.</li><li>Then do the same up the G string.</li><li>Notice where you hesitate — that\'s tonight\'s target.</li></ol>',
+                text_es: 'Escucha esto:<ol><li>Toca hacia arriba por la cuerda Re un traste a la vez, diciendo cada nombre de nota EN VOZ ALTA antes de revisar un diagrama.</li><li>Luego haz lo mismo en la cuerda Sol.</li><li>Fíjate dónde dudas — ese es tu objetivo de esta noche.</li></ol>',
                 hint: 'Naming a note before you check it (not after) is what actually builds the recall — reading a chart at the same time you say the name just trains you to read the chart.',
                 hint_es: 'Nombrar una nota antes de revisarla (no después) es lo que realmente construye la memoria — leer un diagrama al mismo tiempo que dices el nombre solo te entrena a leer el diagrama.',
                 skills: [1, 2],
@@ -363,8 +363,8 @@ SETS.push(
               },
               {
                 label: 'Try fret 12 on D and G', label_es: 'Prueba el traste 12 en D y G',
-                text: 'Try the top of the neck: play fret 12 on the D string, then fret 12 on the G string. Say what you notice about fret 12 compared to the open string.',
-                text_es: 'Prueba la parte alta del mástil: toca el traste 12 en la cuerda Re, y luego el traste 12 en la cuerda Sol. Di qué notas sobre el traste 12 comparado con la cuerda al aire.',
+                text: 'Try the top of the neck:<ol><li>Play fret 12 on the D string, then fret 12 on the G string.</li><li>Say what you notice about fret 12 compared to the open string.</li></ol>',
+                text_es: 'Prueba la parte alta del mástil:<ol><li>Toca el traste 12 en la cuerda Re, y luego el traste 12 en la cuerda Sol.</li><li>Di qué notas sobre el traste 12 comparado con la cuerda al aire.</li></ol>',
                 hint: 'Fret 12 is the octave marker on every string — look for the double-dot inlay as your landmark.',
                 hint_es: 'El traste 12 es el marcador de octava en cada cuerda — busca el incrustado de doble punto como tu referencia.',
                 skills: [1, 2],
@@ -403,8 +403,8 @@ SETS.push(
             steps: [
               {
                 label: 'Warm-up: tune all 6 strings', label_es: 'Calentamiento: afina las 6 cuerdas',
-                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
-                text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
+                text: 'Start every practice session the same way:<ol><li>Tune all 6 strings to green (E A D G B e).</li><li>Then play each string open.</li></ol>You\'ve got it when: in tune before today\'s work.',
+                text_es: 'Empieza cada sesión de práctica de la misma manera:<ol><li>Afina las 6 cuerdas hasta que estén en verde (E A D G B e).</li><li>Luego toca cada cuerda al aire.</li></ol>Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 hint: 'Every note-naming drill today depends on your strings actually being in tune — check first.',
                 hint_es: 'Cada ejercicio de nombrar notas de hoy depende de que tus cuerdas realmente estén afinadas — revisa primero.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -467,8 +467,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge: Sweet Child O\' Mine riff', label_es: 'Reto: riff de Sweet Child O\' Mine',
-                text: 'Challenge — Sweet Child O\' Mine, name it as you play it: watch the intro-riff clip — a riff is a short musical phrase that repeats — that you first saw in Module 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>) and learn just its first two notes, up on the D and G strings around fret 12–15. Say each note\'s NAME as you play it, using today\'s D/G-string knowledge to figure it out instead of just copying frets. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this song\'s Journey page</a>.',
-                text_es: 'Reto — Sweet Child O\' Mine, nómbralo mientras lo tocas: mira el clip del riff de intro — un riff es una frase musical corta que se repite — que viste por primera vez en el Módulo 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>) y aprende solo sus primeras dos notas, arriba en las cuerdas Re y Sol alrededor del traste 12–15. Di el NOMBRE de cada nota mientras la tocas, usando lo que sabes hoy de las cuerdas D/G para descifrarla en vez de solo copiar los trastes. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: la página de Recorrido de esta canción</a>.',
+                text: 'Challenge — Sweet Child O\' Mine, name it as you play it:<ol><li>Watch the intro-riff clip — a riff is a short musical phrase that repeats — that you first saw in Module 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>).</li><li>Learn just its first two notes, up on the D and G strings around fret 12–15.</li><li>Say each note\'s NAME as you play it, using today\'s D/G-string knowledge to figure it out instead of just copying frets.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this song\'s Journey page</a>.',
+                text_es: 'Reto — Sweet Child O\' Mine, nómbralo mientras lo tocas:<ol><li>Mira el clip del riff de intro — un riff es una frase musical corta que se repite — que viste por primera vez en el Módulo 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>).</li><li>Aprende solo sus primeras dos notas, arriba en las cuerdas Re y Sol alrededor del traste 12–15.</li><li>Di el NOMBRE de cada nota mientras la tocas, usando lo que sabes hoy de las cuerdas D/G para descifrarla en vez de solo copiar los trastes.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: la página de Recorrido de esta canción</a>.',
                 hint: 'This riff lives up the neck on strings you\'ve never named notes on before today — that\'s exactly why it\'s the reward for this set.',
                 hint_es: 'Este riff vive arriba en el mástil, en cuerdas donde nunca antes habías nombrado notas — por eso es exactamente la recompensa de esta unidad.',
                 stuck: 'Pause the video on the very first note and just name that one string/fret before moving on.',
@@ -677,8 +677,8 @@ SETS.push(
             steps: [
               {
                 label: 'Warm-up: tune all 6 strings', label_es: 'Calentamiento: afina las 6 cuerdas',
-                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
-                text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
+                text: 'Start every practice session the same way:<ol><li>Tune all 6 strings to green (E A D G B e).</li><li>Then play each string open.</li></ol>You\'ve got it when: in tune before today\'s work.',
+                text_es: 'Empieza cada sesión de práctica de la misma manera:<ol><li>Afina las 6 cuerdas hasta que estén en verde (E A D G B e).</li><li>Luego toca cada cuerda al aire.</li></ol>Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -721,8 +721,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge: landmark drill', label_es: 'Reto: ejercicio de referencias',
-                text: 'Challenge 3 — Landmark Drill (your assessment piece): name every string at the fret-5 dot, then every string at the fret-7 dot. You\'ve got it when: all six strings named correctly at both dots, no chart, within 5 seconds each.',
-                text_es: 'Reto 3 — Ejercicio de referencias (tu pieza de evaluación): nombra cada cuerda en el punto del traste 5, y luego cada cuerda en el punto del traste 7. Lo tienes cuando: las seis cuerdas nombradas correctamente en ambos puntos, sin diagrama, en menos de 5 segundos cada una.',
+                text: 'Challenge 3 — Landmark Drill (your assessment piece):<ol><li>Name every string at the fret-5 dot.</li><li>Name every string at the fret-7 dot.</li></ol>You\'ve got it when: all six strings named correctly at both dots, no chart, within 5 seconds each.',
+                text_es: 'Reto 3 — Ejercicio de referencias (tu pieza de evaluación):<ol><li>Nombra cada cuerda en el punto del traste 5.</li><li>Nombra cada cuerda en el punto del traste 7.</li></ol>Lo tienes cuando: las seis cuerdas nombradas correctamente en ambos puntos, sin diagrama, en menos de 5 segundos cada una.',
                 hint: 'Dots are the fastest way to orient yourself anywhere on the neck — this drill is worth over-practicing.',
                 hint_es: 'Los puntos son la forma más rápida de orientarte en cualquier parte del mástil — vale la pena sobre-practicar este ejercicio.',
                 stuck: 'Do the fret-5 dot on all six strings first until it\'s solid, then add fret 7.',
@@ -942,8 +942,8 @@ SETS.push(
             steps: [
               {
                 label: 'Warm-up: tune all 6 strings', label_es: 'Calentamiento: afina las 6 cuerdas',
-                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
-                text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
+                text: 'Start every practice session the same way:<ol><li>Tune all 6 strings to green (E A D G B e).</li><li>Then play each string open.</li></ol>You\'ve got it when: in tune before today\'s work.',
+                text_es: 'Empieza cada sesión de práctica de la misma manera:<ol><li>Afina las 6 cuerdas hasta que estén en verde (E A D G B e).</li><li>Luego toca cada cuerda al aire.</li></ol>Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -996,8 +996,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge: write Seven Nation Army TAB', label_es: 'Reto: escribe Seven Nation Army en TAB',
-                text: 'Challenge 2 — Write It (your assessment piece): without looking anything up, write the "Seven Nation Army" riff to blank TAB on paper from memory — you played it without looking at the chart back in Module 2. Then check yourself. You\'ve got it when: you play back EXACTLY what\'s on your page and it matches the riff note for note — every fret on the right string, in order. (The day-later, no-memory test is Challenge 4. Someone around to trade with? Even better — see Challenge 4.)',
-                text_es: 'Reto 2 — Escríbelo (tu pieza de evaluación): sin buscar nada, escribe de memoria el riff de "Seven Nation Army" en TAB en blanco sobre papel — lo tocaste sin mirar el diagrama allá en el Módulo 2. Luego compruébate. Lo tienes cuando: tocas EXACTAMENTE lo que está en tu página y coincide con el riff nota por nota — cada traste en la cuerda correcta, en orden. (La prueba de un día después, sin memoria, es el Reto 4. ¿Tienes a alguien cerca con quien intercambiar? Todavía mejor — ve el Reto 4.)',
+                text: 'Challenge 2 — Write It (your assessment piece):<ol><li>Without looking anything up, write the "Seven Nation Army" riff to blank TAB on paper from memory — you played it without looking at the chart back in Module 2.</li><li>Then check yourself.</li></ol>You\'ve got it when: you play back EXACTLY what\'s on your page and it matches the riff note for note — every fret on the right string, in order. (The day-later, no-memory test is Challenge 4. Someone around to trade with? Even better — see Challenge 4.)',
+                text_es: 'Reto 2 — Escríbelo (tu pieza de evaluación):<ol><li>Sin buscar nada, escribe de memoria el riff de "Seven Nation Army" en TAB en blanco sobre papel — lo tocaste sin mirar el diagrama allá en el Módulo 2.</li><li>Luego compruébate.</li></ol>Lo tienes cuando: tocas EXACTAMENTE lo que está en tu página y coincide con el riff nota por nota — cada traste en la cuerda correcta, en orden. (La prueba de un día después, sin memoria, es el Reto 4. ¿Tienes a alguien cerca con quien intercambiar? Todavía mejor — ve el Reto 4.)',
                 hint: 'Say each note name in your head as you write its fret — that\'s the same habit that made you fast at naming notes all module.',
                 hint_es: 'Di el nombre de cada nota en tu mente mientras escribes su traste — es el mismo hábito que te hizo rápido nombrando notas todo el módulo.',
                 stuck: 'Play the riff on your guitar first, one note at a time, writing down each fret as you go — then copy it clean.',
@@ -1014,8 +1014,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge: the G/B slash chord', label_es: 'Reto: el acorde con barra diagonal G/B',
-                text: 'Challenge 3 — Slash Chord: fret and play G/B, then compare it against a standard open G. Notice what changes and what stays the same.',
-                text_es: 'Reto 3 — Acorde con barra diagonal: trastea y toca G/B, y luego compáralo con un G abierto estándar. Fíjate qué cambia y qué se mantiene igual.',
+                text: 'Challenge 3 — Slash Chord:<ol><li>Fret and play G/B.</li><li>Compare it against a standard open G.</li><li>Notice what changes and what stays the same.</li></ol>',
+                text_es: 'Reto 3 — Acorde con barra diagonal:<ol><li>Trastea y toca G/B.</li><li>Compáralo con un G abierto estándar.</li><li>Fíjate qué cambia y qué se mantiene igual.</li></ol>',
                 hint: 'The chord shape barely changes — it\'s the LOWEST note you strum that makes it a slash chord.',
                 hint_es: 'La forma del acorde casi no cambia — es la nota MÁS GRAVE que rasgueas lo que lo convierte en un acorde con barra diagonal.',
                 stuck: 'Play the open G first, then just move your lowest-string finger to find the B.',

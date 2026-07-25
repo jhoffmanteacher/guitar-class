@@ -156,8 +156,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge: pendulum motion', label_es: 'Reto: movimiento de péndulo',
-            text: 'Challenge 1 — Pendulum Motion: mute the strings with your fretting hand and, at 60 BPM, strum just the down-up motion — down on each beat, up on each "+", counting aloud. You\'ve got it when: a free, even swing with no forearm tension — pure rhythm, no notes.<div class="strum-line">D   U   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
-            text_es: 'Reto 1 — Movimiento de péndulo: silencia las cuerdas con tu mano de trastear y, a 60 BPM, rasguea solo el movimiento abajo-arriba — abajo en cada tiempo, arriba en cada "+", contando en voz alta. Lo tienes cuando: un balanceo libre y parejo sin tensión en el antebrazo — puro ritmo, sin notas.<div class="strum-line">D   U   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
+            text: 'Challenge 1 — Pendulum Motion:<ol><li>Mute the strings with your fretting hand.</li><li>At 60 BPM, strum just the down-up motion — down on each beat, up on each "+" — counting aloud.</li></ol>You\'ve got it when: a free, even swing with no forearm tension — pure rhythm, no notes.<div class="strum-line">D   U   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
+            text_es: 'Reto 1 — Movimiento de péndulo:<ol><li>Silencia las cuerdas con tu mano de trastear.</li><li>A 60 BPM, rasguea solo el movimiento abajo-arriba — abajo en cada tiempo, arriba en cada "+" — contando en voz alta.</li></ol>Lo tienes cuando: un balanceo libre y parejo sin tensión en el antebrazo — puro ritmo, sin notas.<div class="strum-line">D   U   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
             hint: 'No chord, no notes — just the rhythm. Your wrist should swing freely like a pendulum. If your forearm is tense, slow down.',
             hint_es: 'Sin acorde, sin notas — solo el ritmo. Tu muñeca debe balancearse libremente como un péndulo. Si tu antebrazo está tenso, ve más despacio.',
             stuck: 'Drop to 50 BPM and let your hand bounce loose, like shaking water off your fingers — the down-up should feel automatic before you add any pressure.',
@@ -196,8 +196,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge: Em ↔ Am switch', label_es: 'Reto: cambio Em ↔ Am',
-            text: 'Challenge 3 — Em ↔ Am Switch (your assessment piece): switch Em ↔ Am every 2 bars while the down-up strum never stops. Set the ⏱ Timer for 3 minutes and loop it. You\'ve got it when: the strum hand keeps swinging right through every chord change — let the chord catch up.',
-            text_es: 'Reto 3 — Cambio Em ↔ Am (tu pieza de evaluación): cambia entre Em ↔ Am cada 2 compases mientras el rasgueo abajo-arriba nunca se detiene. Pon el ⏱ Temporizador en 3 minutos y repítelo. Lo tienes cuando: la mano de rasgueo sigue balanceándose durante cada cambio de acorde — deja que el acorde te alcance.',
+            text: 'Challenge 3 — Em ↔ Am Switch (your assessment piece):<ol><li>Switch Em ↔ Am every 2 bars while the down-up strum never stops.</li><li>Set the ⏱ Timer for 3 minutes and loop it.</li></ol>You\'ve got it when: the strum hand keeps swinging right through every chord change — let the chord catch up.',
+            text_es: 'Reto 3 — Cambio Em ↔ Am (tu pieza de evaluación):<ol><li>Cambia entre Em ↔ Am cada 2 compases mientras el rasgueo abajo-arriba nunca se detiene.</li><li>Pon el ⏱ Temporizador en 3 minutos y repítelo.</li></ol>Lo tienes cuando: la mano de rasgueo sigue balanceándose durante cada cambio de acorde — deja que el acorde te alcance.',
             hint: 'The #1 beginner mistake is stopping the strum to fix the chord. Keep the wrist moving — let the chord catch up.',
             hint_es: 'El error #1 de los principiantes es detener el rasgueo para arreglar el acorde. Mantén la muñeca en movimiento — deja que el acorde te alcance.',
             stuck: 'Park on a finger Em and Am share and pivot around it — don\'t lift every finger at once. Drop to 50 BPM so the change has room.',
@@ -219,8 +219,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge: half-bar switch', label_es: 'Reto: cambio de medio compás',
-            text: 'Challenge — Half-Bar Switch, Non-Stop (2 chords): you just switched Em ↔ Am every two bars. Now do it every TWO BEATS — down-up strumming the whole time, changing on beats 1 and 3, at 60 BPM. The strum hand never pauses; the chord changes between strums. You\'ve got it when: four laps where the pendulum never stops and every change lands on the beat. Press &#x25B6; to hear the target.',
-            text_es: 'Reto — Cambio de medio compás, sin parar (2 acordes): acabas de cambiar entre Em ↔ Am cada dos compases. Ahora hazlo cada DOS TIEMPOS — rasgueando abajo-arriba todo el tiempo, cambiando en los tiempos 1 y 3, a 60 BPM. La mano de rasgueo nunca pausa; el acorde cambia entre rasgueos. Lo tienes cuando: cuatro vueltas donde el péndulo nunca se detiene y cada cambio cae en el tiempo. Presiona &#x25B6; para escuchar el objetivo.',
+            text: 'Challenge — Half-Bar Switch, Non-Stop (2 chords):<ol><li>You just switched Em ↔ Am every two bars — now do it every TWO BEATS, down-up strumming the whole time, changing on beats 1 and 3, at 60 BPM.</li><li>The strum hand never pauses; the chord changes between strums.</li></ol>You\'ve got it when: four laps where the pendulum never stops and every change lands on the beat. Press &#x25B6; to hear the target.',
+            text_es: 'Reto — Cambio de medio compás, sin parar (2 acordes):<ol><li>Acabas de cambiar entre Em ↔ Am cada dos compases — ahora hazlo cada DOS TIEMPOS, rasgueando abajo-arriba todo el tiempo, cambiando en los tiempos 1 y 3, a 60 BPM.</li><li>La mano de rasgueo nunca pausa; el acorde cambia entre rasgueos.</li></ol>Lo tienes cuando: cuatro vueltas donde el péndulo nunca se detiene y cada cambio cae en el tiempo. Presiona &#x25B6; para escuchar el objetivo.',
             hint: 'Keep the wrist swinging down-up-down-up without a hitch — the fingers change underneath a moving hand. The moment you freeze to place the chord, you\'ve stopped the strum.',
             hint_es: 'Mantén la muñeca balanceándose abajo-arriba-abajo-arriba sin tropiezos — los dedos cambian debajo de una mano en movimiento. En el momento que te congelas para colocar el acorde, has detenido el rasgueo.',
             stuck: 'Drop to 50 BPM. Say "change" on the "and" after beats 2 and 4 to remind your fingers to move early.',
@@ -236,8 +236,8 @@ SETS.push(
           },
           {
             label: 'Challenge: three-chord half-bar', label_es: 'Reto: medio compás con 3 acordes',
-            text: 'Challenge — Three-Chord Half-Bar (3 chords): add G (from Module 5). Loop Em · Am · G, two beats each, the strum never stopping, at 60 BPM. You\'ve got it when: two clean laps with the pendulum unbroken through all three changes.',
-            text_es: 'Reto — Medio compás con tres acordes (3 acordes): agrega G (del Módulo 5). Repite Em · Am · G, dos tiempos cada uno, el rasgueo sin detenerse, a 60 BPM. Lo tienes cuando: dos vueltas limpias con el péndulo sin interrupciones a través de los tres cambios.',
+            text: 'Challenge — Three-Chord Half-Bar (3 chords):<ol><li>Add G (from Module 5).</li><li>Loop Em · Am · G, two beats each, the strum never stopping, at 60 BPM.</li></ol>You\'ve got it when: two clean laps with the pendulum unbroken through all three changes.',
+            text_es: 'Reto — Medio compás con tres acordes (3 acordes):<ol><li>Agrega G (del Módulo 5).</li><li>Repite Em · Am · G, dos tiempos cada uno, el rasgueo sin detenerse, a 60 BPM.</li></ol>Lo tienes cuando: dos vueltas limpias con el péndulo sin interrupciones a través de los tres cambios.',
             hint: 'Am → G moves every finger, so pre-shape G in the air while Am is still ringing. Em → Am shares your two fretting fingers — barely a move.',
             hint_es: 'Am → G mueve cada dedo, así que preforma G en el aire mientras Am todavía suena. Em → Am comparte tus dos dedos de trastear — apenas un movimiento.',
             stuck: 'Loop just Am → G until the strum survives that change, then drop Em back in front.',
@@ -550,8 +550,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge: learn the groove', label_es: 'Reto: aprende el groove',
-            text: 'Challenge 1 — Learn the Groove: mute the strings and, at 60 BPM, strum the pattern "Down, Down-Up, Up-Down-Up" (D-DU-UDU). You\'ve got it when: the wrist keeps moving on the skipped downstroke — the pick just misses on purpose.<div class="strum-line">D   ·   D   U   ·   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
-            text_es: 'Reto 1 — Aprende el groove: silencia las cuerdas y, a 60 BPM, rasguea el patrón "Abajo, Abajo-Arriba, Arriba-Abajo-Arriba" (D-DU-UDU). Lo tienes cuando: la muñeca sigue en movimiento en el golpe hacia abajo que te saltas — la púa solo falla a propósito.<div class="strum-line">D   ·   D   U   ·   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
+            text: 'Challenge 1 — Learn the Groove:<ol><li>Mute the strings.</li><li>At 60 BPM, strum the pattern "Down, Down-Up, Up-Down-Up" (D-DU-UDU).</li></ol>You\'ve got it when: the wrist keeps moving on the skipped downstroke — the pick just misses on purpose.<div class="strum-line">D   ·   D   U   ·   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
+            text_es: 'Reto 1 — Aprende el groove:<ol><li>Silencia las cuerdas.</li><li>A 60 BPM, rasguea el patrón "Abajo, Abajo-Arriba, Arriba-Abajo-Arriba" (D-DU-UDU).</li></ol>Lo tienes cuando: la muñeca sigue en movimiento en el golpe hacia abajo que te saltas — la púa solo falla a propósito.<div class="strum-line">D   ·   D   U   ·   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
             hint: 'The trickiest part is keeping the wrist moving on the skipped downstroke. The wrist still goes down — the pick just misses the strings on purpose.',
             hint_es: 'La parte más difícil es mantener la muñeca en movimiento en el golpe hacia abajo que te saltas. La muñeca sigue bajando — la púa solo falla las cuerdas a propósito.',
             stuck: 'Say it out loud — "down, down-up, up-down-up" — and air-strum with no pick first. The · dots above are the beats your hand passes but doesn\'t hit.',
@@ -587,8 +587,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge: G → D, pattern locked', label_es: 'Reto: G → D, patrón asegurado',
-            text: 'Challenge 3 — G → D, Pattern Locked (your assessment piece): loop G → D every 2 bars playing D-DU-UDU, and set the ⏱ Timer for 3 minutes to keep going. You\'ve got it when: the pattern stays identical through the change — only the chord moves (drop to 50 BPM if it falls apart).',
-            text_es: 'Reto 3 — G → D, patrón asegurado (tu pieza de evaluación): repite G → D cada 2 compases tocando D-DU-UDU, y pon el ⏱ Temporizador en 3 minutos para seguir. Lo tienes cuando: el patrón se mantiene idéntico a través del cambio — solo el acorde se mueve (baja a 50 BPM si se desarma).',
+            text: 'Challenge 3 — G → D, Pattern Locked (your assessment piece):<ol><li>Loop G → D every 2 bars playing D-DU-UDU.</li><li>Set the ⏱ Timer for 3 minutes to keep going.</li></ol>You\'ve got it when: the pattern stays identical through the change — only the chord moves (drop to 50 BPM if it falls apart).',
+            text_es: 'Reto 3 — G → D, patrón asegurado (tu pieza de evaluación):<ol><li>Repite G → D cada 2 compases tocando D-DU-UDU.</li><li>Pon el ⏱ Temporizador en 3 minutos para seguir.</li></ol>Lo tienes cuando: el patrón se mantiene idéntico a través del cambio — solo el acorde se mueve (baja a 50 BPM si se desarma).',
             hint: 'If the pattern falls apart during the chord change, slow to 50 BPM. The pattern is the GROOVE — losing it is worse than missing a note in the chord.',
             hint_es: 'Si el patrón se desarma durante el cambio de acorde, baja a 50 BPM. El patrón ES el groove — perderlo es peor que fallar una nota en el acorde.',
             stuck: 'Change the chord on the LAST upstroke of the bar, while your hand is already moving up — that\'s the free moment to jump from G to D. Loop just 2 bars until the join between the two bars (the seam) is smooth.',
@@ -619,8 +619,8 @@ SETS.push(
               },
               {
                 label: 'Challenge: Oye Mi Amor, verse', label_es: 'Reto: Oye Mi Amor, estrofa',
-                text: 'Challenge — Oye Mi Amor, verse: the verse uses just two chords, Bm · G — use the small Bm (top four strings, no barre) and play one bar of each with D-DU-UDU at 60 BPM. You\'ve got it when: four laps with the pattern unbroken and beats 2 and 4 accented so it pushes like the record.',
-                text_es: 'Reto — Oye Mi Amor, estrofa: la estrofa usa solo dos acordes, Bm · G — usa el Bm pequeño (cuatro cuerdas más agudas, sin cejilla) y toca un compás de cada uno con D-DU-UDU a 60 BPM. Lo tienes cuando: cuatro vueltas con el patrón sin interrupciones y los tiempos 2 y 4 acentuados para que empuje como la grabación.',
+                text: 'Challenge — Oye Mi Amor, verse: the verse uses just two chords, Bm · G:<ol><li>Use the small Bm (top four strings, no barre).</li><li>Play one bar of each with D-DU-UDU at 60 BPM.</li></ol>You\'ve got it when: four laps with the pattern unbroken and beats 2 and 4 accented so it pushes like the record.',
+                text_es: 'Reto — Oye Mi Amor, estrofa: la estrofa usa solo dos acordes, Bm · G:<ol><li>Usa el Bm pequeño (cuatro cuerdas más agudas, sin cejilla).</li><li>Toca un compás de cada uno con D-DU-UDU a 60 BPM.</li></ol>Lo tienes cuando: cuatro vueltas con el patrón sin interrupciones y los tiempos 2 y 4 acentuados para que empuje como la grabación.',
                 hint: 'The small Bm is the easier beginner version — the full-barre Bm (one finger pressed flat across several strings) arrives in Module 7. For now the pattern matters more than the shape.',
                 hint_es: 'El Bm pequeño es la versión más fácil para principiantes — el Bm con cejilla completa (un dedo presionado plano sobre varias cuerdas) llega en el Módulo 7. Por ahora el patrón importa más que la forma.',
                 stuck: 'Loop just the G → Bm change with one strum per bar until the landing is clean, then add the pattern.',
@@ -641,8 +641,8 @@ SETS.push(
             steps: [
               {
                 label: 'Ear Spark: rhythm echo', label_es: 'Chispa auditiva: eco de ritmo',
-                text: '⚡ Ear Spark (optional, 2 min): play any lesson video from this set and pause right after one bar of strumming — clap the rhythm back exactly, then play it as muted strums. Rhythm echo is ear training too. Got someone around? Have them clap a bar of any pattern from this set for you to echo.',
-                text_es: '⚡ Chispa auditiva (opcional, 2 min): reproduce cualquier video de lección de esta unidad y pausa justo después de un compás de rasgueo — aplaude el ritmo exactamente igual, y luego tócalo como rasgueos silenciados. El eco rítmico también es entrenamiento auditivo. ¿Tienes a alguien cerca? Pídele que aplauda un compás de cualquier patrón de esta unidad para que lo repitas.'
+                text: '⚡ Ear Spark (optional, 2 min):<ol><li>Play any lesson video from this set and pause right after one bar of strumming.</li><li>Clap the rhythm back exactly.</li><li>Play it as muted strums.</li></ol>Rhythm echo is ear training too. Got someone around? Have them clap a bar of any pattern from this set for you to echo.',
+                text_es: '⚡ Chispa auditiva (opcional, 2 min):<ol><li>Reproduce cualquier video de lección de esta unidad y pausa justo después de un compás de rasgueo.</li><li>Aplaude el ritmo exactamente igual.</li><li>Tócalo como rasgueos silenciados.</li></ol>El eco rítmico también es entrenamiento auditivo. ¿Tienes a alguien cerca? Pídele que aplauda un compás de cualquier patrón de esta unidad para que lo repitas.'
               }
             ]
           },
@@ -652,8 +652,8 @@ SETS.push(
             steps: [
               {
                 label: 'Play-along at 0.75×', label_es: 'Toca junto a 0.75×',
-                text: 'Play-along: open Station B\'s D-DU-UDU lesson video, set YouTube\'s speed to 0.75×, and strum along for the ENTIRE demo section without stopping. You\'ve got it when: you finish a full pass with the video — flubbed changes and all, don\'t stop.',
-                text_es: 'Toca junto: abre el video de la lección D-DU-UDU de la Estación B, pon la velocidad de YouTube en 0.75×, y rasguea junto con él durante TODA la sección de demostración sin detenerte. Lo tienes cuando: terminas un pase completo con el video — con cambios fallidos y todo, no te detengas.',
+                text: 'Play-along:<ol><li>Open Station B\'s D-DU-UDU lesson video.</li><li>Set YouTube\'s speed to 0.75×.</li><li>Strum along for the ENTIRE demo section without stopping.</li></ol>You\'ve got it when: you finish a full pass with the video — flubbed changes and all, don\'t stop.',
+                text_es: 'Toca junto:<ol><li>Abre el video de la lección D-DU-UDU de la Estación B.</li><li>Pon la velocidad de YouTube en 0.75×.</li><li>Rasguea junto con él durante TODA la sección de demostración sin detenerte.</li></ol>Lo tienes cuando: terminas un pase completo con el video — con cambios fallidos y todo, no te detengas.',
                 hint: 'Not stopping is the skill. Real songs don\'t wait for you, and neither does the video — keeping going after a mistake is better than starting over.',
                 hint_es: 'No detenerte es la destreza. Las canciones reales no te esperan, y el video tampoco — seguir adelante después de un error es mejor que volver a empezar.'
               }
@@ -838,8 +838,8 @@ SETS.push(
             steps: [
               {
                 label: 'Warm-up: all three feels', label_es: 'Calentamiento: las tres sensaciones',
-                text: 'Tune to green, then on a G chord play 2 bars each of: steady down-up (folk), heavy down-up (rock), and up-only on the "+" (reggae). You\'ve got it when: in tune and your hand remembers all three feels before you refine them.',
-                text_es: 'Afina hasta que esté en verde, y luego con un acorde G toca 2 compases de cada uno: abajo-arriba constante (folk), abajo-arriba pesado (rock), y solo arriba en el "+" (reggae). Lo tienes cuando: estás afinado y tu mano recuerda las tres sensaciones antes de refinarlas.',
+                text: 'Tune to green, then on a G chord play 2 bars each of:<ol><li>Steady down-up (folk).</li><li>Heavy down-up (rock).</li><li>Up-only on the "+" (reggae).</li></ol>You\'ve got it when: in tune and your hand remembers all three feels before you refine them.',
+                text_es: 'Afina hasta que esté en verde, y luego con un acorde G toca 2 compases de cada uno:<ol><li>Abajo-arriba constante (folk).</li><li>Abajo-arriba pesado (rock).</li><li>Solo arriba en el "+" (reggae).</li></ol>Lo tienes cuando: estás afinado y tu mano recuerda las tres sensaciones antes de refinarlas.',
                 hint: 'A quick 60-second pass through all three styles wakes up the patterns you\'ll polish this set.',
                 hint_es: 'Un repaso rápido de 60 segundos por los tres estilos despierta los patrones que vas a pulir en esta unidad.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -852,8 +852,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge: folk feel', label_es: 'Reto: sensación folk',
-            text: 'Challenge 1 — Folk Feel: hold G and strum all downstrokes, one per beat, at 70 BPM — quiet and steady, singalong style. You\'ve got it when: even, soft, supportive strumming with no accents sticking out.<div class="strum-line">D       D       D       D\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
-            text_es: 'Reto 1 — Sensación folk: sostén G y rasguea todo hacia abajo, uno por tiempo, a 70 BPM — tranquilo y constante, estilo para cantar junto. Lo tienes cuando: un rasgueo parejo, suave, que acompaña, sin acentos que sobresalgan.<div class="strum-line">D       D       D       D\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
+            text: 'Challenge 1 — Folk Feel:<ol><li>Hold G.</li><li>Strum all downstrokes, one per beat, at 70 BPM — quiet and steady, singalong style.</li></ol>You\'ve got it when: even, soft, supportive strumming with no accents sticking out.<div class="strum-line">D       D       D       D\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
+            text_es: 'Reto 1 — Sensación folk:<ol><li>Sostén G.</li><li>Rasguea todo hacia abajo, uno por tiempo, a 70 BPM — tranquilo y constante, estilo para cantar junto.</li></ol>Lo tienes cuando: un rasgueo parejo, suave, que acompaña, sin acentos que sobresalgan.<div class="strum-line">D       D       D       D\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
             hint: 'Folk is about supporting the singer, not standing out. Soft attack, even volume, no accents.',
             hint_es: 'El folk se trata de acompañar al cantante, no de sobresalir. Ataque suave, volumen parejo, sin acentos.',
             stuck: 'Strum from the wrist only and let the pick barely graze the strings — imagine someone is singing and you must not cover them up.',
@@ -870,8 +870,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge: rock feel', label_es: 'Reto: sensación rock',
-            text: 'Challenge 2 — Rock Feel: same G at the same tempo, but strum harder into the strings — heavy down-up-down-up accenting every down. You\'ve got it when: a thick, driving sound using arm weight, not just wrist.<div class="strum-line">D   U   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
-            text_es: 'Reto 2 — Sensación rock: el mismo G al mismo tempo, pero rasguea más fuerte hacia las cuerdas — abajo-arriba-abajo-arriba pesado acentuando cada golpe hacia abajo. Lo tienes cuando: un sonido grueso e impulsor usando el peso del brazo, no solo la muñeca.<div class="strum-line">D   U   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
+            text: 'Challenge 2 — Rock Feel:<ol><li>Hold the same G at the same tempo.</li><li>Strum harder into the strings — heavy down-up-down-up, accenting every down.</li></ol>You\'ve got it when: a thick, driving sound using arm weight, not just wrist.<div class="strum-line">D   U   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
+            text_es: 'Reto 2 — Sensación rock:<ol><li>Sostén el mismo G al mismo tempo.</li><li>Rasguea más fuerte hacia las cuerdas — abajo-arriba-abajo-arriba pesado, acentuando cada golpe hacia abajo.</li></ol>Lo tienes cuando: un sonido grueso e impulsor usando el peso del brazo, no solo la muñeca.<div class="strum-line">D   U   D   U   D   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
             hint: 'Rock strumming uses arm weight more than wrist. Let the pick go deeper into the strings. Aim for a thick, heavy sound.',
             hint_es: 'El rasgueo de rock usa el peso del brazo más que la muñeca. Deja que la púa se hunda más en las cuerdas. Apunta a un sonido grueso y pesado.',
             stuck: 'Strum from the elbow, not just the wrist — rock needs weight. Keep the accents on the downs and let the ups stay light.',
@@ -888,8 +888,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge: reggae chop', label_es: 'Reto: picoteo reggae',
-            text: 'Challenge 3 — Reggae Chop, a short, quick, muted upstroke (try it!): hold G, skip every downbeat, and strum UP only on each "+" — rest-up-rest-up. No score — play along with "Three Little Birds" to lock in the offbeat feel.<div class="strum-line">·   U   ·   U   ·   U   ·   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
-            text_es: 'Reto 3 — Picoteo reggae, un golpe hacia arriba corto, rápido y silenciado (¡pruébalo!): sostén G, sáltate cada tiempo fuerte, y rasguea hacia ARRIBA solo en cada "+" — silencio-arriba-silencio-arriba. Sin puntaje — toca junto con "Three Little Birds" para afianzar la sensación de contratiempo.<div class="strum-line">·   U   ·   U   ·   U   ·   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
+            text: 'Challenge 3 — Reggae Chop, a short, quick, muted upstroke (try it!):<ol><li>Hold G.</li><li>Skip every downbeat, and strum UP only on each "+" — rest-up-rest-up.</li></ol>No score — play along with "Three Little Birds" to lock in the offbeat feel.<div class="strum-line">·   U   ·   U   ·   U   ·   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
+            text_es: 'Reto 3 — Picoteo reggae, un golpe hacia arriba corto, rápido y silenciado (¡pruébalo!):<ol><li>Sostén G.</li><li>Sáltate cada tiempo fuerte, y rasguea hacia ARRIBA solo en cada "+" — silencio-arriba-silencio-arriba.</li></ol>Sin puntaje — toca junto con "Three Little Birds" para afianzar la sensación de contratiempo.<div class="strum-line">·   U   ·   U   ·   U   ·   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
             hint: 'Counter-intuitive at first — your hand goes down on the beats but doesn\'t hit the strings. Listen to "Three Little Birds" while you do this to lock in the feel.',
             hint_es: 'Contraintuitivo al principio — tu mano baja en los tiempos pero no toca las cuerdas. Escucha "Three Little Birds" mientras haces esto para afianzar la sensación.',
             stuck: 'Keep your hand swinging down on every number, but lift the pick away so it only catches the strings on the way back up. Count "rest-UP-rest-UP" out loud.',
@@ -907,8 +907,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge: two feels, one song', label_es: 'Reto: dos sensaciones, una canción',
-            text: 'Challenge 4 — Two Feels, One Song (your assessment piece): take G–D–Em–C and play 8 bars folk, then switch to rock for 8 bars — same chords, two clearly different feels, no break at the switch. Set the ⏱ Timer for 3 minutes and loop it.',
-            text_es: 'Reto 4 — Dos sensaciones, una canción (tu pieza de evaluación): toma G–D–Em–C y toca 8 compases estilo folk, y luego cambia a rock durante 8 compases — mismos acordes, dos sensaciones claramente distintas, sin interrupción en el cambio. Pon el ⏱ Temporizador en 3 minutos y repítelo.',
+            text: 'Challenge 4 — Two Feels, One Song (your assessment piece):<ol><li>Take G–D–Em–C and play 8 bars folk, then switch to rock for 8 bars — same chords, two clearly different feels, no break at the switch.</li><li>Set the ⏱ Timer for 3 minutes and loop it.</li></ol>',
+            text_es: 'Reto 4 — Dos sensaciones, una canción (tu pieza de evaluación):<ol><li>Toma G–D–Em–C y toca 8 compases estilo folk, y luego cambia a rock durante 8 compases — mismos acordes, dos sensaciones claramente distintas, sin interrupción en el cambio.</li><li>Pon el ⏱ Temporizador en 3 minutos y repítelo.</li></ol>',
             hint: 'The switch is the skill. Change the feel on the downbeat of a new bar so the transition lands cleanly.',
             hint_es: 'El cambio es la destreza. Cambia la sensación en el tiempo fuerte de un compás nuevo para que la transición caiga limpia.',
             stuck: 'Keep the chords and tempo identical — change ONLY your strum hand. Drill just the 2-bar seam where folk becomes rock until it\'s smooth.',
@@ -941,8 +941,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge: Watchtower, two ways', label_es: 'Reto: Watchtower, de dos formas',
-                text: 'Challenge — Watchtower, two ways: play Am · G · F with a soft folk strum for 8 bars, then the same loop rock-style — strum harder, accent the downs — for 8 bars, no break at the switch. You\'ve got it when: on a quick recording of yourself you can hear the exact bar the feel changed — Dylan\'s version becoming Hendrix\'s, live from your chair. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: five layers deep and still growing</a>.',
-                text_es: 'Reto — Watchtower, de dos formas: toca Am · G · F con un rasgueo folk suave durante 8 compases, y luego el mismo loop estilo rock — rasguea más fuerte, acentúa los golpes hacia abajo — durante 8 compases, sin interrupción en el cambio. Lo tienes cuando: en una grabación rápida de ti mismo puedes escuchar el compás exacto donde cambió la sensación — la versión de Dylan volviéndose la de Hendrix, en vivo desde tu silla. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: cinco capas de profundidad y sigue creciendo</a>.',
+                text: 'Challenge — Watchtower, two ways:<ol><li>Play Am · G · F with a soft folk strum for 8 bars.</li><li>Then play the same loop rock-style — strum harder, accent the downs — for 8 bars, no break at the switch.</li></ol>You\'ve got it when: on a quick recording of yourself you can hear the exact bar the feel changed — Dylan\'s version becoming Hendrix\'s, live from your chair. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: five layers deep and still growing</a>.',
+                text_es: 'Reto — Watchtower, de dos formas:<ol><li>Toca Am · G · F con un rasgueo folk suave durante 8 compases.</li><li>Luego toca el mismo loop estilo rock — rasguea más fuerte, acentúa los golpes hacia abajo — durante 8 compases, sin interrupción en el cambio.</li></ol>Lo tienes cuando: en una grabación rápida de ti mismo puedes escuchar el compás exacto donde cambió la sensación — la versión de Dylan volviéndose la de Hendrix, en vivo desde tu silla. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: cinco capas de profundidad y sigue creciendo</a>.',
                 hint: 'You heard exactly this in Module 1 — acoustic Dylan vs. electric Hendrix. Same chords, same tempo; ONLY your strum hand changes.',
                 hint_es: 'Escuchaste exactamente esto en el Módulo 1 — Dylan acústico vs. Hendrix eléctrico. Mismos acordes, mismo tempo; SOLO tu mano de rasgueo cambia.',
                 stuck: 'Make the switch on beat 1 of a new bar and drill just the 2-bar seam where folk becomes rock.',

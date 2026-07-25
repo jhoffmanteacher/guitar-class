@@ -229,8 +229,8 @@ SETS.push(
             steps: [
               {
                 label: 'Loosen until floppy', label_es: 'Afloja hasta que quede suelta',
-                text: 'Turn the string\'s tuning key so the pitch drops — pluck as you go and hear it sink. Keep going until the string is completely floppy against the fretboard. NEVER cut or unhook a string that\'s still tight: the stored tension can whip it at your face or scratch the top. You\'ve got it when: you can wiggle the string loosely with one finger.',
-                text_es: 'Gira la clavija de esa cuerda para que el tono baje — puntea mientras giras y escucha cómo cae. Sigue hasta que la cuerda quede completamente suelta sobre el diapasón. NUNCA cortes ni sueltes una cuerda que sigue tensa: la tensión guardada puede azotarla contra tu cara o rayar la tapa. Lo tienes cuando: puedes mover la cuerda floja con un dedo.',
+                text: 'Loosen the string safely:<ol><li>Turn the string\'s tuning key so the pitch drops — pluck as you go and hear it sink.</li><li>Keep going until the string is completely floppy against the fretboard.</li><li>NEVER cut or unhook a string that\'s still tight: the stored tension can whip it at your face or scratch the top.</li></ol>You\'ve got it when: you can wiggle the string loosely with one finger.',
+                text_es: 'Afloja la cuerda con seguridad:<ol><li>Gira la clavija de esa cuerda para que el tono baje — puntea mientras giras y escucha cómo cae.</li><li>Sigue hasta que la cuerda quede completamente suelta sobre el diapasón.</li><li>NUNCA cortes ni sueltes una cuerda que sigue tensa: la tensión guardada puede azotarla contra tu cara o rayar la tapa.</li></ol>Lo tienes cuando: puedes mover la cuerda floja con un dedo.',
                 stuck: 'Pitch going UP instead of down? You\'re turning the wrong way — or the wrong peg. Trace the string to its peg again and reverse the turn.',
                 stuck_es: '¿El tono SUBE en vez de bajar? Estás girando al revés — o la clavija equivocada. Vuelve a seguir la cuerda hasta su clavija e invierte el giro.',
                 skills: [1]
@@ -279,8 +279,8 @@ SETS.push(
             steps: [
               {
                 label: 'Thread and leave slack', label_es: 'Ensarta y deja holgura',
-                text: 'Feed the free end through the hole in the tuning post. Don\'t pull it tight — leave a hand\'s width of slack over the fretboard (about two frets\' worth of extra string). That slack becomes your 2–3 wraps. You\'ve got it when: the string is through the post with visible slack left.',
-                text_es: 'Pasa la punta libre por el agujero del poste. No la tenses — deja una holgura del ancho de una mano sobre el diapasón (como dos trastes de cuerda extra). Esa holgura se convierte en tus 2–3 vueltas. Lo tienes cuando: la cuerda pasó por el poste y queda holgura visible.',
+                text: 'Thread the string:<ol><li>Feed the free end through the hole in the tuning post.</li><li>Don\'t pull it tight — leave a hand\'s width of slack over the fretboard (about two frets\' worth of extra string).</li></ol>That slack becomes your 2–3 wraps. You\'ve got it when: the string is through the post with visible slack left.',
+                text_es: 'Ensarta la cuerda:<ol><li>Pasa la punta libre por el agujero del poste.</li><li>No la tenses — deja una holgura del ancho de una mano sobre el diapasón (como dos trastes de cuerda extra).</li></ol>Esa holgura se convierte en tus 2–3 vueltas. Lo tienes cuando: la cuerda pasó por el poste y queda holgura visible.',
                 skills: [3]
               },
               {

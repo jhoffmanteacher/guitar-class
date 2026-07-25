@@ -48,8 +48,8 @@ SETS.push(
               },
               {
                 label: 'Watch: Travis picking basics (Andy Guitar)', label_es: 'Mira: bases del Travis picking (Andy Guitar)',
-                text: 'Watch: <a href="https://youtu.be/XQiaCSabQaE" target="_blank">A Total Beginners Guide To Travis Picking – Andy Guitar</a> — a second teacher on the same pattern as the first video. Notice what Andy does differently from Justin: how he counts the thumb, and when he lets the pinch in.',
-                text_es: 'Mira: <a href="https://youtu.be/XQiaCSabQaE" target="_blank">A Total Beginners Guide To Travis Picking – Andy Guitar</a> — un segundo maestro con el mismo patrón que el primer video. Fíjate en qué hace Andy diferente a Justin: cómo cuenta el pulgar, y cuándo deja entrar el pellizco.',
+                text: 'Watch: <a href="https://youtu.be/XQiaCSabQaE" target="_blank">A Total Beginners Guide To Travis Picking – Andy Guitar</a> — a second teacher on the same pattern as the first video. Notice what Andy does differently from Justin:<ul><li>How he counts the thumb.</li><li>When he lets the pinch in.</li></ul>',
+                text_es: 'Mira: <a href="https://youtu.be/XQiaCSabQaE" target="_blank">A Total Beginners Guide To Travis Picking – Andy Guitar</a> — un segundo maestro con el mismo patrón que el primer video. Fíjate en qué hace Andy diferente a Justin:<ul><li>Cómo cuenta el pulgar.</li><li>Cuándo deja entrar el pellizco.</li></ul>',
                 hint: 'A pinch is bass and treble sounding at the same instant — the accent that makes Travis picking recognizable.',
                 hint_es: 'Un pellizco es el bajo y el agudo sonando en el mismo instante — el acento que hace reconocible al Travis picking.',
                 skills: [2, 3],
@@ -130,8 +130,8 @@ SETS.push(
             steps: [
               {
                 label: 'Warm-up: tuning check', label_es: 'Calentamiento: afinación',
-                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
-                text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
+                text: 'Start every practice session the same way:<ol><li>Tune all 6 strings to green (E A D G B e).</li><li>Play each string open.</li></ol>You\'ve got it when: in tune before today\'s work.',
+                text_es: 'Empieza cada sesión de práctica de la misma manera:<ol><li>Afina las 6 cuerdas hasta que estén en verde (E A D G B e).</li><li>Toca cada cuerda al aire.</li></ol>Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 hint: 'Fingerpicking exposes every note — an out-of-tune string is easy to hear.',
                 hint_es: 'El fingerpicking expone cada nota — una cuerda desafinada se escucha fácilmente.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -181,8 +181,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge: fills', label_es: 'Reto: rellenos',
-                text: 'Challenge 3 — Fills (a fill is a short extra run of notes between the main parts): keep the thumb going, add i on the "and" of beat 2. You\'ve got it when: the fill lands cleanly between two thumb strokes without slowing the thumb down.',
-                text_es: 'Reto 3 — Rellenos (un relleno es una pequeña serie extra de notas entre las partes principales): mantén el pulgar en marcha, agrega i en el "y" del tiempo 2. Lo tienes cuando: el relleno cae limpio entre dos golpes del pulgar sin frenarlo.',
+                text: 'Challenge 3 — Fills (a fill is a short extra run of notes between the main parts):<ul><li>Keep the thumb going.</li><li>Add i on the "and" of beat 2.</li></ul>You\'ve got it when: the fill lands cleanly between two thumb strokes without slowing the thumb down.',
+                text_es: 'Reto 3 — Rellenos (un relleno es una pequeña serie extra de notas entre las partes principales):<ul><li>Mantén el pulgar en marcha.</li><li>Agrega i en el "y" del tiempo 2.</li></ul>Lo tienes cuando: el relleno cae limpio entre dos golpes del pulgar sin frenarlo.',
                 hint: 'Fingers decorate ON TOP of a thumb that\'s already keeping a steady groove (a groove is the steady rhythmic feel) — the thumb\'s rhythm never bends to fit the fingers.',
                 hint_es: 'Los dedos decoran ENCIMA de un pulgar que ya mantiene un groove constante (un groove es la sensación rítmica estable) — el ritmo del pulgar nunca se dobla para ajustarse a los dedos.',
                 stuck: 'Isolate just the thumb + one fill note, looping it until it\'s automatic before adding more.',
@@ -221,8 +221,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge: House of the Rising Sun', label_es: 'Reto: House of the Rising Sun',
-                text: 'Challenge — House of the Rising Sun, bass + roll in 6/8: play the verse with a bass note on the downbeat (the first, strongest beat of the bar) and your fingers rolling up through each chord, following the progression. You\'ve got it when: the verse survives every chord change with the roll staying smooth.',
-                text_es: 'Reto — House of the Rising Sun, bajo + floreo en 6/8: toca la estrofa con una nota grave en el tiempo fuerte (el primer tiempo, el más fuerte del compás) y tus dedos haciendo un floreo ascendente a través de cada acorde, siguiendo la progresión. Lo tienes cuando: la estrofa sobrevive cada cambio de acorde con el floreo manteniéndose suave.',
+                text: 'Challenge — House of the Rising Sun, bass + roll in 6/8: play the verse with:<ul><li>A bass note on the downbeat (the first, strongest beat of the bar).</li><li>Your fingers rolling up through each chord, following the progression.</li></ul>You\'ve got it when: the verse survives every chord change with the roll staying smooth.',
+                text_es: 'Reto — House of the Rising Sun, bajo + floreo en 6/8: toca la estrofa con:<ul><li>Una nota grave en el tiempo fuerte (el primer tiempo, el más fuerte del compás).</li><li>Tus dedos haciendo un floreo ascendente a través de cada acorde, siguiendo la progresión.</li></ul>Lo tienes cuando: la estrofa sobrevive cada cambio de acorde con el floreo manteniéndose suave.',
                 hint: 'House of the Rising Sun is in 6/8 — felt in two (you tap two main beats per bar), the same waltz-family feel you met in Module 5. The thumb plays the bass on the downbeat; the fingers roll up through the chord between beats.',
                 hint_es: 'House of the Rising Sun está en 6/8 — se siente en dos (marcas dos tiempos principales por compás), la misma sensación de la familia del vals que conociste en el Módulo 5. El pulgar toca el bajo en el tiempo fuerte; los dedos hacen un floreo ascendente a través del acorde entre los tiempos.',
                 stuck: 'Loop just the first two chords of the verse until the pattern is rock solid before adding the rest.',
@@ -252,8 +252,8 @@ SETS.push(
             steps: [
               {
                 label: 'Play-along: the Travis pattern', label_es: 'Toca junto al video: patrón Travis',
-                text: 'Play-along: open <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">Station B\'s Travis pattern lesson video</a> (the Practice Playalong section, 8:59–11:16), set YouTube\'s speed to 0.75×, and pick along for the ENTIRE demo section without stopping. You\'ve got it when: you finish a full pass with the video — dropped pinches and all, don\'t stop.',
-                text_es: 'Toca junto al video: abre <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">Station B\'s Travis pattern lesson video</a> (la sección Practice Playalong, 8:59–11:16), pon la velocidad de YouTube en 0.75×, y toca junto a la TOTALIDAD de la sección de demostración sin detenerte. Lo tienes cuando: terminas una pasada completa con el video — con pellizcos fallados y todo, no te detengas.',
+                text: 'Play-along:<ol><li>Open <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">Station B\'s Travis pattern lesson video</a> (the Practice Playalong section, 8:59–11:16).</li><li>Set YouTube\'s speed to 0.75×.</li><li>Pick along for the ENTIRE demo section without stopping.</li></ol>You\'ve got it when: you finish a full pass with the video — dropped pinches and all, don\'t stop.',
+                text_es: 'Toca junto al video:<ol><li>Abre <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">Station B\'s Travis pattern lesson video</a> (la sección Practice Playalong, 8:59–11:16).</li><li>Pon la velocidad de YouTube en 0.75×.</li><li>Toca junto a la TOTALIDAD de la sección de demostración sin detenerte.</li></ol>Lo tienes cuando: terminas una pasada completa con el video — con pellizcos fallados y todo, no te detengas.',
                 hint: 'Not stopping is the skill. If the thumb stumbles, let the fills go and keep the bass walking until you\'re back in.',
                 hint_es: 'No detenerte es la destreza. Si el pulgar tropieza, deja ir los rellenos y mantén el bajo caminando hasta que vuelvas a estar dentro.'
               }
@@ -278,8 +278,8 @@ SETS.push(
               },
               {
                 label: 'Challenge: 4-note arpeggio', label_es: 'Reto: arpegio de 4 notas',
-                text: 'Challenge — 4-Note Arpeggio, Am then C: play a p–i–m–a arpeggio on each chord — one thumb bass, then i-m-a rolling up the top three strings — 2 bars of Am, then 2 bars of C, and loop. On Am the thumb takes the open A string; on C it slides to the 3rd-fret C on that same string. You\'ve got it when: every note is the same volume and the a-finger (the high e) doesn\'t rush ahead of the beat.',
-                text_es: 'Reto — Arpegio de 4 notas, Am y luego C: toca un arpegio p–i–m–a en cada acorde — un bajo del pulgar, y luego i-m-a en un floreo ascendente por las tres cuerdas superiores — 2 compases de Am, y luego 2 compases de C, y repite. En Am el pulgar toma la cuerda La al aire; en C se desliza al C del traste 3 de esa misma cuerda. Lo tienes cuando: cada nota tiene el mismo volumen y el dedo a (la mi aguda) no se adelanta al tiempo.',
+                text: 'Challenge — 4-Note Arpeggio, Am then C:<ol><li>Play a p–i–m–a arpeggio on each chord — one thumb bass, then i-m-a rolling up the top three strings.</li><li>Play 2 bars of Am, then 2 bars of C, and loop.</li><li>On Am the thumb takes the open A string; on C it slides to the 3rd-fret C on that same string.</li></ol>You\'ve got it when: every note is the same volume and the a-finger (the high e) doesn\'t rush ahead of the beat.',
+                text_es: 'Reto — Arpegio de 4 notas, Am y luego C:<ol><li>Toca un arpegio p–i–m–a en cada acorde — un bajo del pulgar, y luego i-m-a en un floreo ascendente por las tres cuerdas superiores.</li><li>Toca 2 compases de Am, y luego 2 compases de C, y repite.</li><li>En Am el pulgar toma la cuerda La al aire; en C se desliza al C del traste 3 de esa misma cuerda.</li></ol>Lo tienes cuando: cada nota tiene el mismo volumen y el dedo a (la mi aguda) no se adelanta al tiempo.',
                 hint: 'This is the four-even-notes drill (a drill is a short exercise you repeat to build a skill) Module 8 built the whole pattern on — the a-finger is the one most likely to play too early, so keep it as calm as the thumb.',
                 hint_es: 'Este es el ejercicio de cuatro notas parejas (un ejercicio es una rutina corta que repites para desarrollar una destreza) sobre el que el Módulo 8 construyó todo el patrón — el dedo a es el que más probablemente toque demasiado temprano, así que mantenlo tan calmado como el pulgar.',
                 stuck: 'Loop just Am until the four notes are dead even, then add C — the only thing that changes between the chords is where the thumb lands.',
@@ -465,8 +465,8 @@ SETS.push(
             steps: [
               {
                 label: 'Warm-up: tuning check', label_es: 'Calentamiento: afinación',
-                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
-                text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
+                text: 'Start every practice session the same way:<ol><li>Tune all 6 strings to green (E A D G B e).</li><li>Play each string open.</li></ol>You\'ve got it when: in tune before today\'s work.',
+                text_es: 'Empieza cada sesión de práctica de la misma manera:<ol><li>Afina las 6 cuerdas hasta que estén en verde (E A D G B e).</li><li>Toca cada cuerda al aire.</li></ol>Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 hint: 'Fingerpicking exposes every note — an out-of-tune string is easy to hear.',
                 hint_es: 'El fingerpicking expone cada nota — una cuerda desafinada se escucha fácilmente.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -731,8 +731,8 @@ SETS.push(
             steps: [
               {
                 label: 'Warm-up: tuning check', label_es: 'Calentamiento: afinación',
-                text: 'Start every practice session the same way: tune all 6 strings to green (E A D G B e), then play each string open. You\'ve got it when: in tune before today\'s work.',
-                text_es: 'Empieza cada sesión de práctica de la misma manera: afina las 6 cuerdas hasta que estén en verde (E A D G B e), y luego toca cada cuerda al aire. Lo tienes cuando: estás afinado antes del trabajo de hoy.',
+                text: 'Start every practice session the same way:<ol><li>Tune all 6 strings to green (E A D G B e).</li><li>Play each string open.</li></ol>You\'ve got it when: in tune before today\'s work.',
+                text_es: 'Empieza cada sesión de práctica de la misma manera:<ol><li>Afina las 6 cuerdas hasta que estén en verde (E A D G B e).</li><li>Toca cada cuerda al aire.</li></ol>Lo tienes cuando: estás afinado antes del trabajo de hoy.',
                 hint: 'Fingerpicking exposes every note — an out-of-tune string is easy to hear.',
                 hint_es: 'El fingerpicking expone cada nota — una cuerda desafinada se escucha fácilmente.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -781,8 +781,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge: melody on top', label_es: 'Reto: melodía arriba',
-                text: 'Challenge 3 — Melody on Top: over a C chord, keep the thumb going in steady quarters and pick a 3-note melody on strings 1–2 above it. You\'ve got it when: the thumb never wavers while the melody rides on top.',
-                text_es: 'Reto 3 — Melodía arriba: sobre un acorde de C, mantén el pulgar sonando en negras constantes y puntea una melodía de 3 notas en las cuerdas 1–2 encima. Lo tienes cuando: el pulgar nunca vacila mientras la melodía viaja arriba.',
+                text: 'Challenge 3 — Melody on Top, over a C chord:<ul><li>Keep the thumb going in steady quarters.</li><li>Pick a 3-note melody on strings 1–2 above it.</li></ul>You\'ve got it when: the thumb never wavers while the melody rides on top.',
+                text_es: 'Reto 3 — Melodía arriba, sobre un acorde de C:<ul><li>Mantén el pulgar sonando en negras constantes.</li><li>Puntea una melodía de 3 notas en las cuerdas 1–2 encima.</li></ul>Lo tienes cuando: el pulgar nunca vacila mientras la melodía viaja arriba.',
                 hint: 'Two jobs, one hand — the requinto texture in short.',
                 hint_es: 'Dos trabajos, una mano — la textura del requinto en pocas palabras.',
                 stuck: 'Isolate the thumb alone first, then add just one melody note at a time.',
@@ -799,8 +799,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge: choose your pattern', label_es: 'Reto: elige tu patrón',
-                text: 'Challenge 4 — Choose Your Pattern: run ALL patterns learned this course (6-note · Travis · pinch · 3/4) over one chord, then pick one and write it in the box below. You\'ve got it when: you\'ve named the pattern you\'ll perform with.',
-                text_es: 'Reto 4 — Elige tu patrón: corre TODOS los patrones aprendidos en este curso (6 notas · Travis · pellizco · 3/4) sobre un acorde, y luego elige uno y escríbelo en el cuadro de abajo. Lo tienes cuando: has nombrado el patrón con el que vas a interpretar.',
+                text: 'Challenge 4 — Choose Your Pattern:<ol><li>Run ALL patterns learned this course (6-note · Travis · pinch · 3/4) over one chord.</li><li>Pick one and write it in the box below.</li></ol>You\'ve got it when: you\'ve named the pattern you\'ll perform with.',
+                text_es: 'Reto 4 — Elige tu patrón:<ol><li>Corre TODOS los patrones aprendidos en este curso (6 notas · Travis · pellizco · 3/4) sobre un acorde.</li><li>Elige uno y escríbelo en el cuadro de abajo.</li></ol>Lo tienes cuando: has nombrado el patrón con el que vas a interpretar.',
                 hint: 'The smartest choice is the one you can keep unbroken at performance tempo TODAY — not the hardest one.',
                 hint_es: 'La elección más inteligente es la que puedes mantener sin interrupciones al tempo de interpretación HOY — no la más difícil.',
                 stuck: 'If none feel ready, default to the 6-note pattern from Module 8 — it\'s the most forgiving.',

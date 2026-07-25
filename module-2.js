@@ -102,8 +102,8 @@ SETS.push(
             steps: [
               {
                 label: 'Low E notes with your chart', label_es: 'Notas de la Mi grave con tu tabla',
-                text: 'Play-along preview: keep your note-name chart open and play up the low E string slowly with the audio, frets 0–12 — E · F · G · A · B · C · D · E — saying each name aloud. Lean on the chart here; you\'ll do it from memory at the practice station.<span class="step-figure"><img src="img/m2-alphabet-loop.svg" alt="Diagram of the musical alphabet A to G arranged in a loop, with an arrow showing that after G it starts over at A."></span>',
-                text_es: 'Adelanto para tocar junto: mantén abierta tu tabla de nombres de notas y toca despacio hacia arriba en la cuerda Mi grave junto con el audio, trastes 0–12 — E · F · G · A · B · C · D · E — diciendo cada nombre en voz alta. Apóyate en la tabla aquí; lo harás de memoria en la estación de práctica.<span class="step-figure"><img src="img/m2-alphabet-loop.svg" alt="Diagrama del alfabeto musical de A a G en un círculo, con una flecha que muestra que después de G se empieza de nuevo en A."></span>',
+                text: 'Play-along preview:<ol><li>Keep your note-name chart open.</li><li>Play up the low E string slowly with the audio, frets 0–12 — E · F · G · A · B · C · D · E — saying each name aloud.</li></ol>Lean on the chart here; you\'ll do it from memory at the practice station.<span class="step-figure"><img src="img/m2-alphabet-loop.svg" alt="Diagram of the musical alphabet A to G arranged in a loop, with an arrow showing that after G it starts over at A."></span>',
+                text_es: 'Adelanto para tocar junto:<ol><li>Mantén abierta tu tabla de nombres de notas.</li><li>Toca despacio hacia arriba en la cuerda Mi grave junto con el audio, trastes 0–12 — E · F · G · A · B · C · D · E — diciendo cada nombre en voz alta.</li></ol>Apóyate en la tabla aquí; lo harás de memoria en la estación de práctica.<span class="step-figure"><img src="img/m2-alphabet-loop.svg" alt="Diagrama del alfabeto musical de A a G en un círculo, con una flecha que muestra que después de G se empieza de nuevo en A."></span>',
                 hint: 'Slow is fine. Right now the goal is connecting each name to its spot — use the chart freely.',
                 hint_es: 'Ir despacio está bien. Ahora mismo la meta es conectar cada nombre con su lugar — usa la tabla libremente.',
                 skills: [2],
@@ -164,8 +164,8 @@ SETS.push(
             steps: [
               {
                 label: 'Warm-up: tune all 6 strings', label_es: 'Calentamiento: afina las 6 cuerdas',
-                text: 'Before today\'s notes: tune all 6 strings to green, low to high — E A D G B e — and say each string name as you go. Try for a faster time than last session. Click "Hear all 6 strings" for the target pitches.',
-                text_es: 'Antes de las notas de hoy: afina las 6 cuerdas en verde, de grave a aguda — E A D G B e — y di cada nombre de cuerda a medida que avanzas. Intenta lograr un tiempo más rápido que la sesión pasada. Haz clic en "Escucha las 6 cuerdas" para escuchar los tonos objetivo.',
+                text: 'Before today\'s notes:<ol><li>Tune all 6 strings to green, low to high — E A D G B e — and say each string name as you go.</li><li>Try for a faster time than last session.</li><li>Click "Hear all 6 strings" for the target pitches.</li></ol>',
+                text_es: 'Antes de las notas de hoy:<ol><li>Afina las 6 cuerdas en verde, de grave a aguda — E A D G B e — y di cada nombre de cuerda a medida que avanzas.</li><li>Intenta lograr un tiempo más rápido que la sesión pasada.</li><li>Haz clic en "Escucha las 6 cuerdas" para escuchar los tonos objetivo.</li></ol>',
                 hint: 'Tuning and the string names are Module 1 skills you keep forever — do this every practice session before you play. Going slowly works better than rushing past the note.',
                 hint_es: 'Afinar y nombrar las cuerdas son destrezas del Módulo 1 que conservas para siempre — hazlo en cada sesión de práctica antes de tocar. Ir despacio funciona mejor que pasarte de largo de la nota.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -219,8 +219,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge: A string run', label_es: 'Reto: recorrido de la cuerda La',
-                text: 'Challenge 2 — A String Run (your Set 1 check-off): same on the A string, without looking at the chart — A · B · C · D · E · F · G · A, up to fret 12 and back, one note per beat. You\'ve got it when: a clean lap with the metronome and no stalls. The Set 1 check-off tests exactly this: draw any fret at random — shuffled paper slips 0–12 work great — and name the note within 3 seconds.',
-                text_es: 'Reto 2 — Recorrido de la cuerda La (tu evaluación de la Unidad 1): lo mismo en la cuerda La, sin mirar la tabla — A · B · C · D · E · F · G · A, hasta el traste 12 y de regreso, una nota por pulso. Lo tienes cuando: una vuelta limpia con el metrónomo y sin trabarte. La evaluación de la Unidad 1 pone a prueba exactamente esto: saca un traste al azar — unos papelitos revueltos del 0–12 funcionan genial — y nombra la nota en 3 segundos.',
+                text: 'Challenge 2 — A String Run (your Set 1 check-off):<ol><li>Same run on the A string, without looking at the chart — A · B · C · D · E · F · G · A.</li><li>Up to fret 12 and back, one note per beat.</li></ol>You\'ve got it when: a clean lap with the metronome and no stalls.',
+                text_es: 'Reto 2 — Recorrido de la cuerda La (tu evaluación de la Unidad 1):<ol><li>El mismo recorrido en la cuerda La, sin mirar la tabla — A · B · C · D · E · F · G · A.</li><li>Hasta el traste 12 y de regreso, una nota por pulso.</li></ol>Lo tienes cuando: una vuelta limpia con el metrónomo y sin trabarte.',
                 hint: 'Keep the metronome at 60 BPM. If you stall on a note, that\'s the one to drill.',
                 hint_es: 'Mantén el metrónomo a 60 BPM. Si te trabas en una nota, esa es la que debes practicar.',
                 stuck: 'Drop to 50 BPM and play it cleanly there first, or cover frets 0–5 (A–D) before adding the rest.',
@@ -336,8 +336,8 @@ SETS.push(
             steps: [
               {
                 label: 'Ear Spark: name the open strings', label_es: 'Chispa auditiva: nombra las cuerdas',
-                text: '⚡ Ear Spark (optional, 2 min): shuffle six paper slips labeled E A D G B e, draw five, and record yourself plucking the open strings in that order. A few minutes later, play it back and name each string by ear before checking your slips — thickest to thinnest is E-A-D-G-B-e, and your ear learns them faster than you\'d think. Got someone around? Have them pluck while you look away instead.',
-                text_es: '⚡ Chispa de oído (opcional, 2 min): revuelve seis papelitos con las letras E A D G B e, saca cinco, y grábate pulsando las cuerdas al aire en ese orden. Unos minutos después, escucha la grabación y nombra cada cuerda de oído antes de revisar tus papelitos — de más gruesa a más delgada es E-A-D-G-B-e, y tu oído las aprende más rápido de lo que crees. ¿Tienes a alguien cerca? Pídele que pulse mientras tú miras hacia otro lado.'
+                text: '⚡ Ear Spark (optional, 2 min):<ol><li>Shuffle six paper slips labeled E A D G B e, draw five, and record yourself plucking the open strings in that order.</li><li>A few minutes later, play it back and name each string by ear before checking your slips — thickest to thinnest is E-A-D-G-B-e, and your ear learns them faster than you\'d think.</li></ol>Got someone around? Have them pluck while you look away instead.',
+                text_es: '⚡ Chispa de oído (opcional, 2 min):<ol><li>Revuelve seis papelitos con las letras E A D G B e, saca cinco, y grábate pulsando las cuerdas al aire en ese orden.</li><li>Unos minutos después, escucha la grabación y nombra cada cuerda de oído antes de revisar tus papelitos — de más gruesa a más delgada es E-A-D-G-B-e, y tu oído las aprende más rápido de lo que crees.</li></ol>¿Tienes a alguien cerca? Pídele que pulse mientras tú miras hacia otro lado.'
               }
             ]
           }
@@ -486,8 +486,8 @@ SETS.push(
             steps: [
               {
                 label: 'Read TAB: Happy Birthday', label_es: 'Lee el TAB: Happy Birthday',
-                text: 'Read this TAB: the opening of "Happy Birthday" written out on the low E string. Look at the fret numbers on the bottom line and try to play it. Click any note name below the TAB to hear how it should sound.',
-                text_es: 'Lee este TAB: el inicio de "Happy Birthday" escrito en la cuerda Mi grave. Mira los números de traste en la línea de abajo e intenta tocarlo. Haz clic en cualquier nombre de nota debajo del TAB para escuchar cómo debe sonar.',
+                text: 'Read this TAB: the opening of "Happy Birthday" written out on the low E string:<ol><li>Look at the fret numbers on the bottom line and try to play it.</li><li>Click any note name below the TAB to hear how it should sound.</li></ol>',
+                text_es: 'Lee este TAB: el inicio de "Happy Birthday" escrito en la cuerda Mi grave:<ol><li>Mira los números de traste en la línea de abajo e intenta tocarlo.</li><li>Haz clic en cualquier nombre de nota debajo del TAB para escuchar cómo debe sonar.</li></ol>',
                 hint: 'Read left-to-right, one note per beat. The numbers tell you which fret to press on the low E string. See a # (sharp)? It just means one fret higher than the plain note — F# is one fret above F. We\'ll cover sharps and flats later. For now, just trust the fret numbers.',
                 hint_es: 'Lee de izquierda a derecha, una nota por pulso. Los números te dicen qué traste presionar en la cuerda Mi grave. ¿Ves un # (sostenido)? Solo significa un traste más arriba que la nota simple — F# es un traste arriba de F. Veremos sostenidos y bemoles más adelante. Por ahora, solo confía en los números de traste.',
                 skills: [4, 5],
@@ -512,8 +512,8 @@ SETS.push(
               },
               {
                 label: 'Fret buzz self-check', label_es: 'Autorrevisión de zumbido',
-                text: 'Fret buzz self-check: play frets 1–4 on the low E string, one at a time. Press lightly until you hear buzz, then press just enough to stop it. That is the minimum pressure needed.',
-                text_es: 'Autorrevisión de zumbido: toca los trastes 1–4 en la cuerda Mi grave, uno a la vez. Presiona suave hasta que escuches zumbido, y luego presiona justo lo necesario para que pare. Esa es la presión mínima necesaria.',
+                text: 'Fret buzz self-check:<ol><li>Play frets 1–4 on the low E string, one at a time.</li><li>Press lightly until you hear buzz, then press just enough to stop it.</li></ol>That is the minimum pressure needed.',
+                text_es: 'Autorrevisión de zumbido:<ol><li>Toca los trastes 1–4 en la cuerda Mi grave, uno a la vez.</li><li>Presiona suave hasta que escuches zumbido, y luego presiona justo lo necesario para que pare.</li></ol>Esa es la presión mínima necesaria.',
                 hint: 'Most beginners press too hard. Finding the minimum pressure is a real technique.',
                 hint_es: 'La mayoría de los principiantes presiona demasiado fuerte. Encontrar la presión mínima es una técnica real.',
                 skills: [1, 2],
@@ -609,8 +609,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge: finger workout', label_es: 'Reto: ejercicio de dedos',
-            text: 'Challenge 1 — Finger Workout: play frets 1–5 on the low E string, one finger per fret, then do the same on the A string. Keep your thumb behind the neck. You\'ve got it when: every note rings clean with no buzz.<span class="step-figure"><img src="img/m2-thumb-behind-neck.svg" alt="The guitar neck seen end-on, twice: with the thumb flat on the back of the neck the fingers drop straight down, but with the thumb hooked over the top the fingers flatten and mute strings."></span>',
-            text_es: 'Reto 1 — Ejercicio de dedos: toca los trastes 1–5 en la cuerda Mi grave, un dedo por traste, y luego lo mismo en la cuerda La. Mantén el pulgar detrás del mástil. Lo tienes cuando: cada nota suena limpia sin zumbido.<span class="step-figure"><img src="img/m2-thumb-behind-neck.svg" alt="El mástil visto de frente en dos versiones: con el pulgar plano detrás del mástil los dedos caen rectos, pero con el pulgar enganchado por encima los dedos se aplastan y apagan cuerdas."></span>',
+            text: 'Challenge 1 — Finger Workout:<ol><li>Play frets 1–5 on the low E string, one finger per fret, then do the same on the A string.</li><li>Keep your thumb behind the neck.</li></ol>You\'ve got it when: every note rings clean with no buzz.<span class="step-figure"><img src="img/m2-thumb-behind-neck.svg" alt="The guitar neck seen end-on, twice: with the thumb flat on the back of the neck the fingers drop straight down, but with the thumb hooked over the top the fingers flatten and mute strings."></span>',
+            text_es: 'Reto 1 — Ejercicio de dedos:<ol><li>Toca los trastes 1–5 en la cuerda Mi grave, un dedo por traste, y luego lo mismo en la cuerda La.</li><li>Mantén el pulgar detrás del mástil.</li></ol>Lo tienes cuando: cada nota suena limpia sin zumbido.<span class="step-figure"><img src="img/m2-thumb-behind-neck.svg" alt="El mástil visto de frente en dos versiones: con el pulgar plano detrás del mástil los dedos caen rectos, pero con el pulgar enganchado por encima los dedos se aplastan y apagan cuerdas."></span>',
             hint: 'Go as slow as you need. Every note should ring cleanly with no buzz.',
             hint_es: 'Ve tan despacio como necesites. Cada nota debe sonar limpia sin zumbido.',
             stuck: 'Use just frets 1–3 with three fingers first, then add the pinky on frets 4–5.',
@@ -621,8 +621,8 @@ SETS.push(
           },
           {
             label: 'Minimum-pressure drill', label_es: 'Ejercicio de presión mínima',
-            text: 'Minimum-pressure drill: play frets 1–4 on the low E string one at a time. Press lightly until it buzzes, then add just enough to make it ring clean. That is your target pressure.',
-            text_es: 'Ejercicio de presión mínima: toca los trastes 1–4 en la cuerda Mi grave uno a la vez. Presiona suave hasta que zumbe, y luego agrega justo lo necesario para que suene limpio. Esa es tu presión objetivo.',
+            text: 'Minimum-pressure drill:<ol><li>Play frets 1–4 on the low E string one at a time.</li><li>Press lightly until it buzzes, then add just enough to make it ring clean.</li></ol>That is your target pressure.',
+            text_es: 'Ejercicio de presión mínima:<ol><li>Toca los trastes 1–4 en la cuerda Mi grave uno a la vez.</li><li>Presiona suave hasta que zumbe, y luego agrega justo lo necesario para que suene limpio.</li></ol>Esa es tu presión objetivo.',
             hint: 'Press just behind the fret, on your fingertip, thumb behind the neck. Most beginners press far too hard.',
             hint_es: 'Presiona justo detrás del traste, con la punta del dedo, pulgar detrás del mástil. La mayoría de los principiantes presiona demasiado fuerte.',
             skills: [1, 2]
@@ -768,8 +768,8 @@ SETS.push(
           },
           {
             label: 'Bonus: Sweet Child O\' Mine roots', label_es: 'Extra: raíces de Sweet Child O\' Mine',
-            text: 'Bonus riff — "Sweet Child O\' Mine" (Guns N\' Roses) bass roots on the E & A strings: play the root note under each verse chord — D · C · G · D — one per bar at 60 BPM. Click any note name to hear how it should sound. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-            text_es: 'Riff extra — raíces de bajo de "Sweet Child O\' Mine" (Guns N\' Roses) en las cuerdas Mi y La: toca la nota raíz bajo cada acorde de la estrofa — D · C · G · D — una por compás a 60 BPM. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+            text: 'Bonus riff — "Sweet Child O\' Mine" (Guns N\' Roses) bass roots on the E & A strings:<ol><li>Play the root note under each verse chord — D · C · G · D — one per bar at 60 BPM.</li><li>Click any note name to hear how it should sound.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+            text_es: 'Riff extra — raíces de bajo de "Sweet Child O\' Mine" (Guns N\' Roses) en las cuerdas Mi y La:<ol><li>Toca la nota raíz bajo cada acorde de la estrofa — D · C · G · D — una por compás a 60 BPM.</li><li>Haz clic en cualquier nombre de nota para escuchar cómo debe sonar.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
             hint: 'These are the roots of the D–C–G verse loop. Note: the original recording is tuned a half-step lower, so your notes will sound slightly higher than the recording — that\'s normal, not a mistake. The famous intro riff comes later in the course (an optional harder challenge in Module 7!).',
             hint_es: 'Estas son las raíces del bucle D–C–G de la estrofa. Nota: la grabación original está afinada medio tono más abajo, así que tus notas sonarán un poco más agudas que la grabación — eso es normal, no un error. El famoso riff de intro llega más adelante en el curso (¡un reto opcional más difícil en el Módulo 7!).',
             skills: [4, 5],
@@ -887,8 +887,8 @@ SETS.push(
               },
               {
                 label: 'Challenge: Luna bass roots', label_es: 'Reto: raíces de bajo de Luna',
-                text: 'Challenge — Luna, bass roots: Luna rides two chords — F and Am — so its bassline is two notes. Play F (low E string, fret 1) and A (open A string) as single notes, two big beats each: the song is in 6/8, so feel the pulse in 2 and land each note on a downbeat. You\'ve got it when: four laps of F → A, both notes clean with no buzz, locked to the downbeats at 60 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                text_es: 'Reto — Luna, raíces de bajo: Luna se apoya en dos acordes — F y Am — así que su línea de bajo son dos notas. Toca F (cuerda Mi grave, traste 1) y A (cuerda La al aire) como notas individuales, dos pulsos grandes cada una: la canción está en 6/8, así que siente el pulso en 2 y aterriza cada nota en un tiempo fuerte. Lo tienes cuando: cuatro vueltas de F → A, ambas notas limpias sin zumbido, ajustadas a los tiempos fuertes a 60 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+                text: 'Challenge — Luna, bass roots: Luna rides two chords — F and Am — so its bassline is two notes:<ol><li>Play F (low E string, fret 1) and A (open A string) as single notes, two big beats each.</li><li>The song is in 6/8, so feel the pulse in 2 and land each note on a downbeat.</li></ol>You\'ve got it when: four laps of F → A, both notes clean with no buzz, locked to the downbeats at 60 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text_es: 'Reto — Luna, raíces de bajo: Luna se apoya en dos acordes — F y Am — así que su línea de bajo son dos notas:<ol><li>Toca F (cuerda Mi grave, traste 1) y A (cuerda La al aire) como notas individuales, dos pulsos grandes cada una.</li><li>La canción está en 6/8, así que siente el pulso en 2 y aterriza cada nota en un tiempo fuerte.</li></ol>Lo tienes cuando: cuatro vueltas de F → A, ambas notas limpias sin zumbido, ajustadas a los tiempos fuertes a 60 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'Fret 1 is the tightest squeeze on the neck — press right behind the fret wire with the tip of your index and the F will ring clean.',
                 hint_es: 'El traste 1 es el aprieto más fuerte del mástil — presiona justo detrás del metal del traste con la punta de tu índice y el F sonará limpio.',
                 stuck: 'Park on just the F: pluck, listen, adjust, until five ring in a row. Then add the open A — that one\'s free.',
