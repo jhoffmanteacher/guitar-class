@@ -348,7 +348,7 @@ SETS.push(
     assessment: {
       goal: 'Frets a clean 2-finger power chord · Moves shape along E string without buzzing · Moves shape along A string · Mutes unused strings cleanly · Plays a chord on the beat · Reads a power chord TAB',
       goal_es: 'Trastea un acorde de potencia limpio con dos dedos · Mueve la forma por la cuerda Mi sin zumbido · Mueve la forma por la cuerda La · Silencia las cuerdas que no usa de forma limpia · Toca un acorde a tiempo · Lee un TAB de acordes de potencia',
-      performance: 'Record yourself playing the A5–G5–F5–G5 loop at 60 BPM, then listen back for muting and timing.',
+      performance: 'Record yourself playing the A5–G5–F5–G5 loop at 60 BPM, then climb the power chord shape up the A string (A5-B5-C5-D5-E5-F5-G5-A5), naming each root — listen back for muting and timing.',
       selfCheck: 'Can you fret a power chord with no buzzing from unused strings? Can you move the shape to 3 different positions without pausing?',
       selfCheck_es: '¿Puedes trastear un acorde de potencia sin zumbido de las cuerdas que no usas? ¿Puedes mover la forma a 3 posiciones distintas sin pausar?',
       standards: ['Pr.4a', 'Pr.5a', 'Re.7a']
@@ -416,7 +416,7 @@ SETS.push(
     title: 'Set 2',
     subtitle: 'Power chords with metronome · Chord changes · Strumming patterns',
     subtitle_es: 'Acordes de potencia con metrónomo · Cambios de acorde · Patrones de rasgueo',
-    objective: 'I CAN change power chords on beat 1 at 60 BPM and hold a steady 8-bar progression up to 80 BPM.',
+    objective: 'I CAN change power chords on beat 1 at 60 BPM and hold a steady 6-bar progression up to 80 BPM.',
     skillFocus: 'Changing power chords in time · Building speed with a metronome · Playing a song progression',
     skillFocus_es: 'Cambiar acordes de potencia a tiempo · Ganar velocidad con un metrónomo · Tocar la progresión de una canción',
     comingSoon: false,
@@ -611,8 +611,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Play an 8-bar progression with a steady strum',
-            title_es: 'Toca una progresión de 8 compases con un rasgueo constante',
+            title: 'Play a 6-bar progression with a steady strum',
+            title_es: 'Toca una progresión de 6 compases con un rasgueo constante',
             steps: [
           {
             label: 'Challenge: name your progression', label_es: 'Reto: nombra tu progresión',
@@ -633,10 +633,10 @@ SETS.push(
           },
           {
             label: 'Challenge: eighth-note strum', label_es: 'Reto: rasgueo de corcheas',
-            text: 'Challenge 2 — Eighth-Note Strum (one of your assessment pieces): play the A5–D5–E5 loop (two bars each) with straight eighths (down on each number, up on each "+"), counting "1 + 2 + 3 + 4 +". You\'ve got it when: eight bars clean and steady at 60, then speed up in steps (65 → 70 → 75) and hold 80 BPM for at least 15 seconds — that\'s the module bar.',
-            text_es: 'Reto 2 — Rasgueo de corcheas (una de tus piezas de evaluación): toca la vuelta A5–D5–E5 (dos compases cada uno) con corcheas rectas (abajo en cada número, arriba en cada "+"), contando "1 + 2 + 3 + 4 +". Lo tienes cuando: ocho compases limpios y constantes a 60, y luego acelera en pasos (65 → 70 → 75) y sostén 80 BPM por al menos 15 segundos — esa es la meta del módulo.',
-            hint: 'Start at 60 BPM. If it feels easy, bump up 5 BPM. The module-end self-check is an 8-bar progression changing on beat 1 at 60, then holding 80 BPM for 15 seconds with clean muting — this is that piece.',
-            hint_es: 'Empieza a 60 BPM. Si se siente fácil, sube 5 BPM. El autochequeo de fin de módulo es una progresión de 8 compases que cambia en el tiempo 1 a 60, y luego sostiene 80 BPM por 15 segundos con silenciado limpio — esta es esa pieza.',
+            text: 'Challenge 2 — Eighth-Note Strum (one of your assessment pieces): play the A5–D5–E5 loop (two bars each) with straight eighths (down on each number, up on each "+"), counting "1 + 2 + 3 + 4 +". You\'ve got it when: six bars clean and steady at 60, then speed up in steps (65 → 70 → 75) and hold 80 BPM for at least 15 seconds — that\'s the module bar.',
+            text_es: 'Reto 2 — Rasgueo de corcheas (una de tus piezas de evaluación): toca la vuelta A5–D5–E5 (dos compases cada uno) con corcheas rectas (abajo en cada número, arriba en cada "+"), contando "1 + 2 + 3 + 4 +". Lo tienes cuando: seis compases limpios y constantes a 60, y luego acelera en pasos (65 → 70 → 75) y sostén 80 BPM por al menos 15 segundos — esa es la meta del módulo.',
+            hint: 'Start at 60 BPM. If it feels easy, bump up 5 BPM. The module-end self-check is a 6-bar progression changing on beat 1 at 60, then holding 80 BPM for 15 seconds with clean muting — this is that piece.',
+            hint_es: 'Empieza a 60 BPM. Si se siente fácil, sube 5 BPM. El autochequeo de fin de módulo es una progresión de 6 compases que cambia en el tiempo 1 a 60, y luego sostiene 80 BPM por 15 segundos con silenciado limpio — esta es esa pieza.',
             stuck: 'Strum down-only on each beat first ("1 2 3 4"), then add the up-strums one at a time.',
             stuck_es: 'Rasguea solo hacia abajo en cada tiempo primero ("1 2 3 4"), y luego agrega los rasgueos hacia arriba de uno en uno.',
             levelUp: 'Hold it clean at 80 BPM, or play it straight through a full song excerpt from the songs list.',
@@ -646,8 +646,8 @@ SETS.push(
           },
           {
             label: 'Challenge: split strum (boom-chick)', label_es: 'Reto: rasgueo dividido (boom-chick)',
-            text: 'Challenge 3 — Split Strum ("boom-chick"): the other named strum for this progression. Split each pair of beats in two jobs:<ul><li>Beat 1: pick ONLY the root (your 1st-finger bass note).</li><li>Beat 2: strum the whole shape.</li></ul>Count "boom-chick, boom-chick": 1 = boom (root alone), 2 = chick (full chord), 3 = boom, 4 = chick. Play the A5–D5–E5 loop this way, two bars each at 60 BPM. Click "Hear the split strum" to hear one bar of A5 then one of D5. You\'ve got it when: eight bars where every boom is JUST the root string and every chick is the full shape — no accidental extra strings on the boom.',
-            text_es: 'Reto 3 — Rasgueo dividido ("boom-chick"): el otro rasgueo nombrado para esta progresión. Divide cada par de tiempos en dos trabajos:<ul><li>Tiempo 1: pulsa SOLO la raíz (tu nota grave del dedo 1).</li><li>Tiempo 2: rasguea toda la forma.</li></ul>Cuenta "boom-chick, boom-chick": 1 = boom (solo la raíz), 2 = chick (acorde completo), 3 = boom, 4 = chick. Toca la vuelta A5–D5–E5 así, dos compases cada uno a 60 BPM. Haz clic en "Escucha el rasgueo dividido" para oír un compás de A5 y luego uno de D5. Lo tienes cuando: ocho compases donde cada boom es SOLO la cuerda de la raíz y cada chick es la forma completa — sin cuerdas extra por accidente en el boom.',
+            text: 'Challenge 3 — Split Strum ("boom-chick"): the other named strum for this progression. Split each pair of beats in two jobs:<ul><li>Beat 1: pick ONLY the root (your 1st-finger bass note).</li><li>Beat 2: strum the whole shape.</li></ul>Count "boom-chick, boom-chick": 1 = boom (root alone), 2 = chick (full chord), 3 = boom, 4 = chick. Play the A5–D5–E5 loop this way, two bars each at 60 BPM. Click "Hear the split strum" to hear one bar of A5 then one of D5. You\'ve got it when: six bars where every boom is JUST the root string and every chick is the full shape — no accidental extra strings on the boom.',
+            text_es: 'Reto 3 — Rasgueo dividido ("boom-chick"): el otro rasgueo nombrado para esta progresión. Divide cada par de tiempos en dos trabajos:<ul><li>Tiempo 1: pulsa SOLO la raíz (tu nota grave del dedo 1).</li><li>Tiempo 2: rasguea toda la forma.</li></ul>Cuenta "boom-chick, boom-chick": 1 = boom (solo la raíz), 2 = chick (acorde completo), 3 = boom, 4 = chick. Toca la vuelta A5–D5–E5 así, dos compases cada uno a 60 BPM. Haz clic en "Escucha el rasgueo dividido" para oír un compás de A5 y luego uno de D5. Lo tienes cuando: seis compases donde cada boom es SOLO la cuerda de la raíz y cada chick es la forma completa — sin cuerdas extra por accidente en el boom.',
             hint: 'The pick does two different jobs an inch apart: a small, aimed pick stroke on just the root string, then a relaxed strum through the shape. Keep your eyes on the root string for the boom — that\'s the precision half.',
             hint_es: 'La púa hace dos trabajos distintos a poca distancia: un golpe pequeño y apuntado solo en la cuerda de la raíz, y luego un rasgueo relajado por toda la forma. Mantén la vista en la cuerda de la raíz para el boom — esa es la mitad de precisión.',
             stuck: 'Mute the strings with your fretting hand and drill just the motion: pick-strum, pick-strum, until the aim is automatic. Then fret A5 and add one chord at a time.',
@@ -811,11 +811,11 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Module-end (three tasks): (1) Play a core-song excerpt to the metronome — e.g., the Seven Nation Army riff, All Along the Watchtower\'s A5–G5–F5, or Sweet Child\'s D5–C5–G5 — switching cleanly between two power chords with roots on the same fret of the E and A strings at 60 BPM, then holding 80 BPM for at least 15 seconds. (2) Read a three-chord (I–IV–V) progression from chord symbols / TAB using a named strumming pattern (straight-eighths or split strum), and name power chords from a chord chart. (3) Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes.',
-      goal_es: 'Fin de módulo (tres tareas): (1) Toca un fragmento de canción principal con el metrónomo — p. ej., el riff de Seven Nation Army, el A5–G5–F5 de All Along the Watchtower, o el D5–C5–G5 de Sweet Child — cambiando limpiamente entre dos acordes de potencia con raíces en el mismo traste de las cuerdas Mi y La a 60 BPM, y luego sosteniendo 80 BPM por al menos 15 segundos. (2) Lee una progresión de tres acordes (I–IV–V) a partir de símbolos de acorde / TAB usando un patrón de rasgueo nombrado (corcheas rectas o rasgueo dividido), y nombra acordes de potencia a partir de un diagrama de acordes. (3) Aplaude y cuenta un ritmo de 4 compases usando redondas, blancas, negras y corcheas.',
+      goal: 'Module-end (three tasks): (1) Play a core-song excerpt to the metronome — e.g., the Seven Nation Army riff, All Along the Watchtower\'s A5–G5–F5, or Sweet Child\'s D5–C5–G5 (which switches between E- and A-string roots on the same fret) — at 60 BPM, then holding 80 BPM for at least 15 seconds. (2) Read a three-chord (I–IV–V) progression from chord symbols / TAB using a named strumming pattern (straight-eighths or split strum), and name power chords from a chord chart. (3) Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes.',
+      goal_es: 'Fin de módulo (tres tareas): (1) Toca un fragmento de canción principal con el metrónomo — p. ej., el riff de Seven Nation Army, el A5–G5–F5 de All Along the Watchtower, o el D5–C5–G5 de Sweet Child (que cambia entre raíces de las cuerdas Mi y La en el mismo traste) — a 60 BPM, y luego sosteniendo 80 BPM por al menos 15 segundos. (2) Lee una progresión de tres acordes (I–IV–V) a partir de símbolos de acorde / TAB usando un patrón de rasgueo nombrado (corcheas rectas o rasgueo dividido), y nombra acordes de potencia a partir de un diagrama de acordes. (3) Aplaude y cuenta un ritmo de 4 compases usando redondas, blancas, negras y corcheas.',
       performance: 'Record yourself: play a core-song excerpt with the metronome — changes on beat 1 at 60 BPM, then hold 80 BPM for 15 seconds; read a three-chord (I–IV–V) progression from chord symbols with your named strum; then clap and count a 4-bar rhythm. Listen back and note one thing to improve.',
-      selfCheck: 'Can you change chords on beat 1 at 60 BPM and hold 80 BPM for 15 seconds? Can you read a I–IV–V progression from chord symbols and name power chords from a chart?',
-      selfCheck_es: '¿Puedes cambiar de acorde en el tiempo 1 a 60 BPM y sostener 80 BPM por 15 segundos? ¿Puedes leer una progresión I–IV–V a partir de símbolos de acorde y nombrar acordes de potencia a partir de un diagrama?',
+      selfCheck: 'Can you change chords on beat 1 at 60 BPM and hold 80 BPM for 15 seconds? Can you read a I–IV–V progression from chord symbols and name power chords from a chart? Can you clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes?',
+      selfCheck_es: '¿Puedes cambiar de acorde en el tiempo 1 a 60 BPM y sostener 80 BPM por 15 segundos? ¿Puedes leer una progresión I–IV–V a partir de símbolos de acorde y nombrar acordes de potencia a partir de un diagrama? ¿Puedes aplaudir y contar un ritmo de 4 compases usando redondas, blancas, negras y corcheas?',
       standards: ['Pr.4a', 'Pr.5b', 'Pr.6a']
     },
 
@@ -827,10 +827,10 @@ SETS.push(
         practice: { type: 'pr', prompt: '<ol><li>Loop A5 → G5, changing on beat 1 of every bar.</li><li>Start at 60 BPM and raise the metronome +5 at a time.</li><li>Log your fastest BPM with clean changes.</li></ol>',
           prompt_es: '<ol><li>Repite A5 → G5, cambiando en el tiempo 1 de cada compás.</li><li>Empieza a 60 BPM y sube el metrónomo de 5 en 5.</li><li>Anota tu BPM más rápido con cambios limpios.</li></ol>',
           unit: 'BPM', placeholder: 'e.g. 70 — try for a higher number next session', placeholder_es: 'p. ej. 70 — intenta superarlo la próxima sesión' } },
-      { id: 'm3w2-s2', text: 'Play a full 8-bar power chord progression in time',
-        text_es: 'Tocar una progresión completa de 8 compases de acordes de potencia a tiempo',
-        gotItWhen: 'you can play through 8 bars without stopping, even if a chord change is rough — you keep going to the next downbeat.',
-        gotItWhen_es: 'puedes tocar los 8 compases sin detenerte, aunque un cambio de acorde salga imperfecto — sigues hasta el siguiente tiempo fuerte.',
+      { id: 'm3w2-s2', text: 'Play a full 6-bar power chord progression in time',
+        text_es: 'Tocar una progresión completa de 6 compases de acordes de potencia a tiempo',
+        gotItWhen: 'you can play through 6 bars without stopping, even if a chord change is rough — you keep going to the next downbeat.',
+        gotItWhen_es: 'puedes tocar los 6 compases sin detenerte, aunque un cambio de acorde salga imperfecto — sigues hasta el siguiente tiempo fuerte.',
         practice: { type: 'playSeq', label: 'Watchtower roots (A · G · F · G) — two beats each', label_es: 'Raíces de Watchtower (A · G · F · G) — dos tiempos cada una', bpm: 60,
           notes: [45, 45, 43, 43, 41, 41, 43, 43] } },
       { id: 'm3w2-s3', text: 'Play a straight-eighths strumming pattern with power chords',
@@ -916,16 +916,16 @@ MODULE_REVIEWS[3] = {
       text_es: 'Puedo leer un símbolo de acorde de potencia como "A5" y saber al instante en qué traste y cuerda va mi dedo índice', set: 'm3w1' },
     { id: 'mr3-s7', text: 'I can change power chords on beat 1 at 60 BPM without stopping',
       text_es: 'Puedo cambiar acordes de potencia en el tiempo 1 a 60 BPM sin detenerme', set: 'm3w2' },
-    { id: 'mr3-s8', text: 'I can play an 8-bar progression with a straight-eighths strum, counting "1 + 2 + 3 + 4 +"',
-      text_es: 'Puedo tocar una progresión de 8 compases con un rasgueo de corcheas rectas, contando "1 + 2 + 3 + 4 +"', set: 'm3w2' }
+    { id: 'mr3-s8', text: 'I can play a 6-bar progression with a straight-eighths strum, counting "1 + 2 + 3 + 4 +"',
+      text_es: 'Puedo tocar una progresión de 6 compases con un rasgueo de corcheas rectas, contando "1 + 2 + 3 + 4 +"', set: 'm3w2' }
   ],
   assessItems: [
-    'Play a core-song excerpt (Seven Nation Army, All Along the Watchtower\'s A5–G5–F5, or Sweet Child\'s D5–C5–G5) with changes on beat 1 at 60 BPM — including a clean switch between two power chords with roots on the same fret of the E and A strings, with unused strings muted the whole way — then hold 80 BPM for 15 seconds',
+    'Play a core-song excerpt (Seven Nation Army, All Along the Watchtower\'s A5–G5–F5, or Sweet Child\'s D5–C5–G5 — which switches between E- and A-string roots on the same fret) with changes on beat 1 at 60 BPM, unused strings muted the whole way, then hold 80 BPM for 15 seconds',
     'Read a three-chord (I–IV–V) progression from chord symbols / TAB with a named strumming pattern (straight eighths or the split strum), and name power chords from a chord chart',
     'Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes'
   ],
   assessItems_es: [
-    'Toca un fragmento de canción principal (Seven Nation Army, el A5–G5–F5 de All Along the Watchtower, o el D5–C5–G5 de Sweet Child) con cambios en el tiempo 1 a 60 BPM — incluyendo un cambio limpio entre dos acordes de potencia con raíces en el mismo traste de las cuerdas Mi y La, con las cuerdas que no usas silenciadas todo el tiempo — y luego sostén 80 BPM por 15 segundos',
+    'Toca un fragmento de canción principal (Seven Nation Army, el A5–G5–F5 de All Along the Watchtower, o el D5–C5–G5 de Sweet Child — que cambia entre raíces de las cuerdas Mi y La en el mismo traste) con cambios en el tiempo 1 a 60 BPM, con las cuerdas que no usas silenciadas todo el tiempo, y luego sostén 80 BPM por 15 segundos',
     'Lee una progresión de tres acordes (I–IV–V) a partir de símbolos de acorde / TAB con un patrón de rasgueo nombrado (corcheas rectas o el rasgueo dividido), y nombra acordes de potencia a partir de un diagrama de acordes',
     'Aplaude y cuenta un ritmo de 4 compases usando redondas, blancas, negras y corcheas'
   ],

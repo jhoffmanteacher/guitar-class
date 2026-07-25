@@ -562,8 +562,8 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Bars all 6 strings cleanly with index finger · Forms E-shape barre with no buzzing · Plays F, G, A barre chords cleanly · Names a barre chord by its root note on string 6 · Switches between two barre chords in time',
-      goal_es: 'Hace cejilla limpia en las 6 cuerdas con el dedo índice · Forma la cejilla en forma de E sin zumbido · Toca los acordes con cejilla F, G, A de forma limpia · Nombra un acorde con cejilla por su nota raíz en la cuerda 6 · Cambia entre dos acordes con cejilla a tiempo',
+      goal: 'Bars all 6 strings cleanly with index finger · Forms E-shape barre with no buzzing · Plays F, G, A barre chords cleanly · Names a barre chord by its root note on string 6 · Switches between F, G, and A barre chords in time',
+      goal_es: 'Hace cejilla limpia en las 6 cuerdas con el dedo índice · Forma la cejilla en forma de E sin zumbido · Toca los acordes con cejilla F, G, A de forma limpia · Nombra un acorde con cejilla por su nota raíz en la cuerda 6 · Cambia entre los acordes con cejilla F, G y A a tiempo',
       performance: 'Solo: record yourself playing F barre, slide to G barre, slide to A barre — one strum each, all clean. Listen back and check for buzz on the B and high E strings.',
       selfCheck: 'Can your F barre ring without buzzing? Can you name the chord when you see an E-shape barre at the 7th fret? (Answer: B major.)',
       selfCheck_es: '¿Puede tu cejilla de F sonar sin zumbido? ¿Puedes nombrar el acorde cuando ves una cejilla en forma de E en el traste 7? (Respuesta: B mayor.)',

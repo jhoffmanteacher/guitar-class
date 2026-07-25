@@ -45,7 +45,6 @@ SETS.push(
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=4_CWBgLMPCI" target="_blank">Only Got 15 Min? No Problem! Guitar Practice Tips – Lauren Bateman (0:00–5:00)</a>. Mientras miras, anota el ÚNICO hábito de práctica que ella dice que más importa — lo vas a probar en esta sesión.',
             hint: 'As you watch, think about: what is one practice habit she says makes the biggest difference? Does it match what you thought? You\'ve got it when: you can name that one habit without looking back at your notes.',
             hint_es: 'Mientras miras, piensa: ¿cuál es el hábito de práctica que ella dice que hace la mayor diferencia? ¿Coincide con lo que pensabas? Lo tienes cuando: puedes nombrar ese hábito sin volver a ver tus notas.',
-            skills: [1],
             response: { type: 'short', placeholder: 'In one sentence: what practice habit did she say matters most, and did it match what you thought?',
               placeholder_es: 'En una oración: ¿qué hábito de práctica dijo que es el más importante, y coincidió con lo que pensabas?' }
           },
@@ -193,6 +192,7 @@ SETS.push(
             text_es: 'Escribe tu meta con la guitarra en el cuadro de abajo — la vamos a repasar al final del curso. Lo tienes cuando: escribiste una meta que puedes explicar en una oración.',
             hint: 'It can be a song you want to play, a skill you want to build, or just a feeling.',
             hint_es: 'Puede ser una canción que quieras tocar, una destreza que quieras desarrollar, o solo un sentimiento.',
+            skills: [1],
             response: { type: 'short', placeholder: 'My guitar goal (one sentence): I want to…',
               placeholder_es: 'Mi meta con la guitarra (una oración): Quiero…' }
           }
@@ -454,6 +454,7 @@ SETS.push(
             stuck_es: 'Ve de grave a aguda despacio, revisando la regla mnemotécnica después de cada una: E, A, D, G, B, e. Hazlo dos veces antes de ir más rápido.',
             levelUp: 'Look away, pluck a string at random, and name it from pitch and thickness alone before you peek. Got someone around? Have them pluck one out of your sight instead.',
             levelUp_es: 'Mira hacia otro lado, pulsa una cuerda al azar, y nómbrala solo por el tono y el grosor antes de mirar. ¿Tienes a alguien cerca? Pídele que pulse una sin que la veas.',
+            skills: [4],
             response: { type: 'mc', prompt: 'Say the string names low to high — which comes right after G?',
               prompt_es: 'Di los nombres de las cuerdas de grave a aguda — ¿cuál viene justo después de G?',
               answer: 0,
@@ -546,7 +547,6 @@ SETS.push(
             stuck_es: 'Ve mucho más despacio — una cuerda cada pocos segundos. Levanta cualquier dedo que esté tocando una cuerda y deja que cada una suene por completo antes de la siguiente.',
             levelUp: 'Score 6 clean out of 6 twice in a row, then try it once more with your eyes closed.',
             levelUp_es: 'Logra 6 de 6 limpias dos veces seguidas, y luego inténtalo una vez más con los ojos cerrados.',
-            skills: [4]
           },
           {
             label: 'Happy Birthday on the low E', label_es: 'Happy Birthday en la Mi grave',
@@ -617,7 +617,7 @@ SETS.push(
     ],
 
     assessment: {
-      goal: 'Names 5+ parts of the guitar · Holds guitar with correct posture · Holds pick with correct grip · Tunes all 6 strings · Plays a short melody on the E string with clean, steady notes',
+      goal: 'Names 5+ parts of the guitar · Holds guitar with correct posture · Holds pick with correct grip · Tunes all 6 strings · Names all 6 strings from memory · Plays a short melody on the E string with clean, steady notes',
       performance: 'Record yourself tuning all six strings, then playing each open string cleanly low to high while naming it. Listen back and self-check: every string green, every note clean, every name right.',
       selfCheck: 'Can you name 5 parts of the guitar? Can you tune all 6 strings with a tuner? Can you play a short melody on the E string cleanly with no buzzing?',
       standards: ['Pr.4a', 'Pr.5a']
@@ -686,13 +686,13 @@ MODULE_REVIEWS[1] = {
   ],
   assessItems: [
     'Tune all 6 strings to green in under 2 minutes, without restarting',
-    'Name all 6 strings from memory — in order and at random',
-    'Play each open string with correct posture and pick grip — down-strokes from the wrist, every string ringing full and clean with no accidental muting from either hand'
+    'Name all 6 strings from memory, low to high and high to low',
+    'Play each open string with correct posture and pick grip, every string ringing full and clean with no accidental muting from either hand'
   ],
   assessItems_es: [
     'Afinar las 6 cuerdas en verde en menos de 2 minutos, sin reiniciar',
-    'Nombrar las 6 cuerdas de memoria — en orden y al azar',
-    'Tocar cada cuerda al aire con la postura y el agarre de púa correctos — golpes hacia abajo desde la muñeca, cada cuerda sonando plena y limpia sin que ninguna mano la apague sin querer'
+    'Nombrar las 6 cuerdas de memoria, de grave a aguda y de aguda a grave',
+    'Tocar cada cuerda al aire con la postura y el agarre de púa correctos, cada cuerda sonando plena y limpia sin que ninguna mano la apague sin querer'
   ],
   forward: 'You\'ve got a guitar that\'s in tune, a goal, and your first clean notes — <strong>Module 2 puts names on the frets</strong> so riffs and TAB start making sense. (Already played before, or coming back after a long break? <strong>Module 9, Set 1</strong> is a six-skill re-test that shows you exactly where to start.)',
   forward_es: 'Ya tienes una guitarra afinada, una meta, y tus primeras notas limpias — <strong>el Módulo 2 les pone nombre a los trastes</strong> para que los riffs y el TAB empiecen a tener sentido. (¿Ya tocabas antes, o vuelves después de un descanso largo? <strong>el Módulo 9, Unidad 1</strong> es una reevaluación de seis destrezas que te muestra exactamente por dónde empezar.)',

@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-25 — Second pass: more assessment wording fixed after an independent re-check
+
+### Changed
+
+- An independent, blind re-audit of every module's assessment text (checking
+  the previous fix pass rather than assuming it) turned up more of the same
+  kind of drift: Module 1 had a couple of mismatched skill tags and two
+  overclaims in its end-of-module recap; Module 2's Set 2 wording implied a
+  4-bar melody wasn't graded when it is; Module 3 had a wrong bar count (a
+  progression described as "8 bars" that's actually 6), a song example that
+  didn't demonstrate the technique it was cited for, and a missing
+  self-check question; Module 5 clarified an ambiguous chord-count skill;
+  Module 6 removed a mislabeled "assessment piece" tag from a step that
+  isn't the graded one; Module 7 and 8 each had a count/task mismatch
+  fixed; Module 9's recap combined two different drills into one that
+  doesn't exist; Module 12 had a performance description testing something
+  never actually taught.
+
 ## 2026-07-25 — Assessment descriptions now match what's actually graded
 
 ### Changed

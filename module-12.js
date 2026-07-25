@@ -566,7 +566,7 @@ SETS.push(
     assessment: {
       goal: 'Picks a 3/4 pattern in time · Plays "the cure" or Let It Be fingerstyle with the pattern unbroken · Explains "native style"',
       goal_es: 'Puntea un patrón en 3/4 en tiempo · Toca "the cure" o Let It Be con fingerstyle sin interrupciones en el patrón · Explica el "estilo nativo"',
-      performance: 'Pick 8 bars in 4, then 8 bars in 3, then swap back and forth — record a pass and check that beat 1 always carries the bass.',
+      performance: 'Record yourself playing the 3/4 pattern (bass-pluck-pluck) on one chord, counting aloud at 60 BPM. Then fingerpick "the cure" (Am-C-Dm-F) or Let It Be (C-G-Am-F), one bar each, with the pattern unbroken through every chord change.',
       selfCheck: 'Can you count aloud while picking in 3? Does your pattern survive the F chord?',
       selfCheck_es: '¿Puedes contar en voz alta mientras punteas en 3? ¿Tu patrón sobrevive el acorde F?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Re.8a']

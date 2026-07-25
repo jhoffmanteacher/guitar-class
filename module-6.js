@@ -196,8 +196,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge: Em ↔ Am switch', label_es: 'Reto: cambio Em ↔ Am',
-            text: 'Challenge 3 — Em ↔ Am Switch (your assessment piece):<ol><li>Switch Em ↔ Am every 2 bars while the down-up strum never stops.</li><li>Set the ⏱ Timer for 3 minutes and loop it.</li></ol>You\'ve got it when: the strum hand keeps swinging right through every chord change — let the chord catch up.',
-            text_es: 'Reto 3 — Cambio Em ↔ Am (tu pieza de evaluación):<ol><li>Cambia entre Em ↔ Am cada 2 compases mientras el rasgueo abajo-arriba nunca se detiene.</li><li>Pon el ⏱ Temporizador en 3 minutos y repítelo.</li></ol>Lo tienes cuando: la mano de rasgueo sigue balanceándose durante cada cambio de acorde — deja que el acorde te alcance.',
+            text: 'Challenge 3 — Em ↔ Am Switch:<ol><li>Switch Em ↔ Am every 2 bars while the down-up strum never stops.</li><li>Set the ⏱ Timer for 3 minutes and loop it.</li></ol>You\'ve got it when: the strum hand keeps swinging right through every chord change — let the chord catch up.',
+            text_es: 'Reto 3 — Cambio Em ↔ Am:<ol><li>Cambia entre Em ↔ Am cada 2 compases mientras el rasgueo abajo-arriba nunca se detiene.</li><li>Pon el ⏱ Temporizador en 3 minutos y repítelo.</li></ol>Lo tienes cuando: la mano de rasgueo sigue balanceándose durante cada cambio de acorde — deja que el acorde te alcance.',
             hint: 'The #1 beginner mistake is stopping the strum to fix the chord. Keep the wrist moving — let the chord catch up.',
             hint_es: 'El error #1 de los principiantes es detener el rasgueo para arreglar el acorde. Mantén la muñeca en movimiento — deja que el acorde te alcance.',
             stuck: 'Park on a finger Em and Am share and pivot around it — don\'t lift every finger at once. Drop to 50 BPM so the change has room.',

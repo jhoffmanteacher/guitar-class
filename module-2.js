@@ -968,8 +968,8 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Module-end (two tasks): (1) Play the "All Along the Watchtower" bass-note line on the low E string from memory, to the metronome at 60 BPM, with clean tone and correct fingering — or the alternate single-note root line from "the cure." (2) Sight-read a short 2-bar bass line from TAB.',
-      goal_es: 'Fin de módulo (dos tareas): (1) Toca la línea de bajo de "All Along the Watchtower" en la cuerda Mi grave de memoria, con el metrónomo a 60 BPM, con tono limpio y digitación correcta — o la línea alterna de raíces de una sola nota de "the cure." (2) Lee a primera vista una línea corta de bajo de 2 compases desde el TAB.',
+      goal: 'Module-end recording: (1) Play the "All Along the Watchtower" bass-note line on the low E string from memory, to the metronome at 60 BPM, with clean tone and correct fingering — or the alternate single-note root line from "the cure." (2) Sight-read a short 2-bar bass line from TAB.',
+      goal_es: 'Grabación de fin de módulo: (1) Toca la línea de bajo de "All Along the Watchtower" en la cuerda Mi grave de memoria, con el metrónomo a 60 BPM, con tono limpio y digitación correcta — o la línea alterna de raíces de una sola nota de "the cure." (2) Lee a primera vista una línea corta de bajo de 2 compases desde el TAB.',
       performance: 'Self-check: record yourself playing the Watchtower low-E line from memory at 60 BPM, then sight-read and play a short 2-bar bass line from TAB. Listen back and name one thing to improve.',
       selfCheck: 'Can you press a note cleanly with no buzzing? Can you read a basic TAB? Can you play a 4-bar melody in time at 60 BPM?',
       selfCheck_es: '¿Puedes presionar una nota limpia sin zumbido? ¿Puedes leer un TAB básico? ¿Puedes tocar una melodía de 4 compases a tiempo a 60 BPM?',

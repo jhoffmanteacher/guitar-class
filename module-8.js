@@ -585,7 +585,7 @@ SETS.push(
     assessment: {
       goal: 'Plays p-i-m-a-m-i pattern cleanly over one chord · Even volume across all fingers · Pattern stays steady at 70 BPM · Adapts to a different chord by moving only the thumb',
       goal_es: 'Toca el patrón p-i-m-a-m-i de forma limpia sobre un acorde · Volumen parejo en todos los dedos · El patrón se mantiene estable a 70 BPM · Se adapta a un acorde distinto moviendo solo el pulgar',
-      performance: 'Play the 6-note pattern over Em for 4 bars, then Am for 4 bars, at 70 BPM. Record yourself and listen back for even volume on every finger.',
+      performance: 'Play the 6-note pattern over Em at 70 BPM, then try 80. Record yourself and listen back for even volume on every finger, especially the "a" finger landing right on its beat.',
       selfCheck: 'Can you play 8 bars of the pattern without losing your place? Can you switch from Em to Am bass without breaking the picking?',
       selfCheck_es: '¿Puedes tocar 8 compases del patrón sin perder tu lugar? ¿Puedes cambiar del bajo de Em al de Am sin romper el punteo?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']

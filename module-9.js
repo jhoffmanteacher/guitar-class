@@ -1175,14 +1175,14 @@ MODULE_REVIEWS[9] = {
     { id: 'mr9-s6', text: 'I can write an accurate 4-bar TAB of a riff I already play, that reproduces the riff from the page alone', text_es: 'Puedo escribir un TAB preciso de 4 compases de un riff que ya toco, que reproduce el riff únicamente a partir de la página', set: 'm9w3' }
   ],
   assessItems: [
-    'Name natural notes on all six strings through fret 12 — draw shuffled flashcards to pick the spots',
+    'Name every string at the fret-5 dot and the fret-7 dot, no chart, within 5 seconds each',
     'Play a thread-song melody from TAB in a higher position',
     'Finish a 4-bar TAB you wrote yourself that passes the cold-read test — a day later, the page alone reproduces the riff (or a partner plays it back correctly)',
     'Play a melody that crosses three or more strings cleanly, every note ringing in order',
     'Read a partial-shape or slash chord chart and name which strings actually ring'
   ],
   assessItems_es: [
-    'Nombra notas naturales en las seis cuerdas hasta el traste 12 — saca tarjetas barajadas para elegir los puntos',
+    'Nombra cada cuerda en el punto del traste 5 y del traste 7, sin diagrama, en menos de 5 segundos cada una',
     'Toca una melodía de canción hilo a partir de TAB en una posición alta',
     'Termina un TAB de 4 compases que escribiste tú mismo y que pasa la prueba de lectura a primera vista — un día después, la página sola reproduce el riff (o un compañero lo toca correctamente)',
     'Toca una melodía que cruce tres o más cuerdas de forma limpia, cada nota sonando en orden',
