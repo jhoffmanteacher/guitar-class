@@ -1010,6 +1010,7 @@ MODULE_REVIEWS[8] = {
     { id: 'mr8-s3', text: 'I can pluck p-i-m-a in order on open strings at 60 BPM with even volume on every finger, including the ring (a)', text_es: 'Puedo pulsar p-i-m-a en orden en cuerdas al aire a 60 BPM con volumen parejo en cada dedo, incluyendo el anular (a)', set: 'm8w1' },
     { id: 'mr8-s4', text: 'I can play the 6-note p-i-m-a-m-i arpeggio from memory while holding a chord, every note ringing clean', text_es: 'Puedo tocar el arpegio de 6 notas p-i-m-a-m-i de memoria mientras sostengo un acorde, con cada nota sonando limpia', set: 'm8w2' },
     { id: 'mr8-s7', text: 'I can fingerpick a full 4-chord progression without the pattern breaking at any chord change', text_es: 'Puedo tocar con fingerpicking una progresión completa de 4 acordes sin que el patrón se rompa en ningún cambio de acorde', set: 'm8w3' },
+    { id: 'mr8-s8', text: 'I can demonstrate Travis picking — thumb alternating between two bass strings — steadily for at least 4 bars', text_es: 'Puedo demostrar el Travis picking — el pulgar alternando entre dos cuerdas graves — de forma constante durante al menos 4 compases', set: 'm8w3' },
     { id: 'mr8-s9', text: 'I can perform a full fingerpicked song start to finish, recovering from any mistake without stopping', text_es: 'Puedo interpretar una canción completa con fingerpicking de principio a fin, recuperándome de cualquier error sin detenerme', set: 'm8w3' }
   ],
   assessItems: [

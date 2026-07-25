@@ -499,7 +499,7 @@ SETS.push(
     assessment: {
       goal: 'Names naturals on D & G through fret 12 · Finds a named note within 5 seconds · Uses the octave shape as a shortcut',
       goal_es: 'Nombra las notas naturales en D y G hasta el traste 12 · Encuentra una nota nombrada en menos de 5 segundos · Usa la forma de octava como atajo',
-      performance: 'Draw four note flashcards and find each on the D or G string within 5 seconds — film yourself, then check every spot against a fretboard chart.',
+      performance: 'Draw 10 note flashcards, switching strings every 5 draws, and find each on the D or G string within 5 seconds — film yourself, then check every spot against a fretboard chart. Goal: 8 out of 10 correct.',
       selfCheck: 'Can you find C on the G string without counting up from open? Can you name the note two strings down and two frets up from any E-string note you know?',
       selfCheck_es: '¿Puedes encontrar C en la cuerda Sol sin contar desde el aire? ¿Puedes nombrar la nota que está dos cuerdas hacia abajo y dos trastes hacia arriba de cualquier nota de la cuerda Mi grave que conozcas?',
       standards: ['Pr.4a', 'Pr.6a']
@@ -771,7 +771,7 @@ SETS.push(
     assessment: {
       goal: 'Names naturals on all six strings · Locates any named note on the neck · Plays a melody crossing 3+ strings cleanly',
       goal_es: 'Nombra las notas naturales en las seis cuerdas · Ubica cualquier nota nombrada en el mástil · Toca una melodía que cruce 3 o más cuerdas de forma limpia',
-      performance: 'Draw one note card at random (e.g., C) and find every one below fret 12 across all six strings — then check your spots against a fretboard chart.',
+      performance: 'Name every string at the fret-5 dot, then every string at the fret-7 dot, no chart, within 5 seconds each — then play Luna\'s fingerpicked intro fragment (D, G, B, open e) cleanly in order, naming each note as you play it.',
       selfCheck: 'Can you name all six strings at the 5th-fret dot? Can you find B on three different strings?',
       selfCheck_es: '¿Puedes nombrar las seis cuerdas en el punto del traste 5? ¿Puedes encontrar B en tres cuerdas distintas?',
       standards: ['Pr.4a', 'Pr.6a']

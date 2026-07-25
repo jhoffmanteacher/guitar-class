@@ -208,7 +208,6 @@ SETS.push(
                 text_es: 'Adivina el riff (¡pruébalo!): saca de oído el riff principal de "Seven Nation Army" o "Smoke on the Water" (un riff = una frase musical corta que se repite) en la cuerda Mi grave. Sin puntaje — solo pruébalo.',
                 hint: 'Use the note-name chart. Don\'t worry about getting it perfect — the attempt trains your ear.',
                 hint_es: 'Usa la tabla de nombres de notas. No te preocupes por hacerlo perfecto — el intento entrena tu oído.',
-                skills: [5]
               }
             ]
           },
@@ -345,8 +344,8 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Names all notes on E string (frets 0–12) · Names all notes on A string (frets 0–12) · Points to a named note on the fretboard · Reads a basic fretboard note chart · Identifies notes in a familiar song',
-      goal_es: 'Nombra todas las notas en la cuerda Mi (trastes 0–12) · Nombra todas las notas en la cuerda La (trastes 0–12) · Señala una nota nombrada en el diapasón · Lee una tabla básica de notas del diapasón · Identifica notas en una canción conocida',
+      goal: 'Names all notes on E string (frets 0–12) · Names all notes on A string (frets 0–12) · Points to a named note on the fretboard · Reads a basic fretboard note chart',
+      goal_es: 'Nombra todas las notas en la cuerda Mi (trastes 0–12) · Nombra todas las notas en la cuerda La (trastes 0–12) · Señala una nota nombrada en el diapasón · Lee una tabla básica de notas del diapasón',
       performance: 'Self-quiz with shuffled note-name slips: draw a note, find it on the E or A string within 3 seconds. Then reverse it: draw a fret, name the note. 10 in a row each way.',
       selfCheck: 'Can you name every natural note on the E string without looking? Can you find any note on E or A within 3 seconds when a shuffled slip (or a friend) names it?',
       selfCheck_es: '¿Puedes nombrar cada nota natural en la cuerda Mi sin mirar? ¿Puedes encontrar cualquier nota en Mi o La en 3 segundos cuando un papelito revuelto (o un amigo) la nombra?',
@@ -969,8 +968,8 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Module-end (two tasks): (1) Play the "All Along the Watchtower" bass-note line on the low E string from memory, to the metronome at 60 BPM, with clean tone and correct fingering — or the alternate single-note root line from "the cure." (2) Name notes on the E and A strings through fret 12, and sight-read a short 2-bar bass line from TAB.',
-      goal_es: 'Fin de módulo (dos tareas): (1) Toca la línea de bajo de "All Along the Watchtower" en la cuerda Mi grave de memoria, con el metrónomo a 60 BPM, con tono limpio y digitación correcta — o la línea alterna de raíces de una sola nota de "the cure." (2) Nombra las notas en las cuerdas Mi y La hasta el traste 12, y lee a primera vista una línea corta de bajo de 2 compases desde el TAB.',
+      goal: 'Module-end (two tasks): (1) Play the "All Along the Watchtower" bass-note line on the low E string from memory, to the metronome at 60 BPM, with clean tone and correct fingering — or the alternate single-note root line from "the cure." (2) Sight-read a short 2-bar bass line from TAB.',
+      goal_es: 'Fin de módulo (dos tareas): (1) Toca la línea de bajo de "All Along the Watchtower" en la cuerda Mi grave de memoria, con el metrónomo a 60 BPM, con tono limpio y digitación correcta — o la línea alterna de raíces de una sola nota de "the cure." (2) Lee a primera vista una línea corta de bajo de 2 compases desde el TAB.',
       performance: 'Self-check: record yourself playing the Watchtower low-E line from memory at 60 BPM, then sight-read and play a short 2-bar bass line from TAB. Listen back and name one thing to improve.',
       selfCheck: 'Can you press a note cleanly with no buzzing? Can you read a basic TAB? Can you play a 4-bar melody in time at 60 BPM?',
       selfCheck_es: '¿Puedes presionar una nota limpia sin zumbido? ¿Puedes leer un TAB básico? ¿Puedes tocar una melodía de 4 compases a tiempo a 60 BPM?',

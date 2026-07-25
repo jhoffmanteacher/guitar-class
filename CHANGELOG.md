@@ -5,6 +5,25 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-25 — Assessment descriptions now match what's actually graded
+
+### Changed
+
+- Across Modules 1, 2, 4–12, the "what you'll be graded on" text for many
+  module-end and Set-end assessments was out of sync with the actual
+  recorded task — wrong bar counts, a wrong key, a dropped requirement, or
+  a task that had quietly changed without the assessment text catching up.
+  All of these now describe the real task: what you record, how long it
+  should be, and what it's checked against.
+- Module 5's Set 4 "showcase" is now labeled a **Semester 1 Showcase**
+  rather than a "Course Showcase" — it was never meant to sound like the
+  end of the whole class (Module 12 is still where the course wraps up).
+- A handful of small mismatches: a Module 7 riff description that promised
+  something the graded piece doesn't actually do, three different chord
+  lists for the same Module 7 drill, and a couple of assessment checklists
+  that were missing a skill (or crediting the wrong one) from their
+  module's end-of-module review.
+
 ## 2026-07-25 — Lesson accuracy sweep: wrong notes, a dropped chord, and mixed-up fingers fixed
 
 ### Changed

@@ -546,7 +546,7 @@ SETS.push(
             stuck_es: 'Ve mucho más despacio — una cuerda cada pocos segundos. Levanta cualquier dedo que esté tocando una cuerda y deja que cada una suene por completo antes de la siguiente.',
             levelUp: 'Score 6 clean out of 6 twice in a row, then try it once more with your eyes closed.',
             levelUp_es: 'Logra 6 de 6 limpias dos veces seguidas, y luego inténtalo una vez más con los ojos cerrados.',
-            skills: [6]
+            skills: [4]
           },
           {
             label: 'Happy Birthday on the low E', label_es: 'Happy Birthday en la Mi grave',
@@ -619,7 +619,7 @@ SETS.push(
     assessment: {
       goal: 'Names 5+ parts of the guitar · Holds guitar with correct posture · Holds pick with correct grip · Tunes all 6 strings · Plays a short melody on the E string with clean, steady notes',
       performance: 'Record yourself tuning all six strings, then playing each open string cleanly low to high while naming it. Listen back and self-check: every string green, every note clean, every name right.',
-      selfCheck: 'Can you name 5 parts of the guitar? Can you tune all 6 strings with a tuner? Can you play a single note cleanly with no buzzing?',
+      selfCheck: 'Can you name 5 parts of the guitar? Can you tune all 6 strings with a tuner? Can you play a short melody on the E string cleanly with no buzzing?',
       standards: ['Pr.4a', 'Pr.5a']
     },
 

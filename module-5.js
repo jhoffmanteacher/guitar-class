@@ -756,7 +756,7 @@ SETS.push(
     title: 'Set 3',
     subtitle: 'Chord Group 2: D, A, Em, Bm · Connecting chord groups',
     subtitle_es: 'Grupo de acordes 2: D, A, Em, Bm · Conectando grupos de acordes',
-    objective: 'I CAN fret D, A, Em, and Bm cleanly and connect Group 1 and Group 2 chords in a song.',
+    objective: 'I CAN fret D, A, and Bm cleanly and connect Group 1 and Group 2 chords in a song.',
     skillFocus: 'Fretting the D, A, and Bm chords · Connecting chord groups in a song',
     skillFocus_es: 'Trastear los acordes D, A y Bm · Conectar grupos de acordes en una canción',
     comingSoon: false,
@@ -1012,8 +1012,8 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Frets D, A, Em, Bm with clean tone · Switches D to A in time · Switches Em to Bm in time · Connects Group 1 and Group 2 chords · Plays a song using Group 2 chords · Identifies chord group from a chord chart',
-      goal_es: 'Trastea D, A, Em, Bm con tono limpio · Cambia de D a A a tiempo · Cambia de Em a Bm a tiempo · Conecta acordes del Grupo 1 y del Grupo 2 · Toca una canción usando acordes del Grupo 2 · Identifica el grupo de un acorde a partir de un diagrama',
+      goal: 'Frets D, A, and Bm with clean tone · Switches D to A in time · Switches Em to Bm in time · Connects Group 1 and Group 2 chords · Plays a song using Group 2 chords · Identifies chord group from a chord chart',
+      goal_es: 'Trastea D, A y Bm con tono limpio · Cambia de D a A a tiempo · Cambia de Em a Bm a tiempo · Conecta acordes del Grupo 1 y del Grupo 2 · Toca una canción usando acordes del Grupo 2 · Identifica el grupo de un acorde a partir de un diagrama',
       performance: 'Solo: pick three chords at random (shuffle homemade flashcards or point blind at a chord chart) and play them in sequence for 8 bars at 70 BPM — record it and listen back for clean changes.',
       selfCheck: 'Can you look at a chord chart and know immediately which "group" each chord belongs to? Can you switch D–A and Em–Bm on beat 1, working the tempo up toward 70 BPM?',
       selfCheck_es: '¿Puedes ver un diagrama de acordes y saber de inmediato a qué "grupo" pertenece cada acorde? ¿Puedes cambiar D–A y Em–Bm en el tiempo 1, subiendo el tempo hacia 70 BPM?',
@@ -1079,8 +1079,8 @@ SETS.push(
     unit: 'Module 5 · Open Chords',
     unit_es: 'Módulo 5 · Acordes al aire',
     title: 'Set 4',
-    subtitle: 'Chord Group 3: E, B7, F#m, C#m · Course showcase preparation',
-    subtitle_es: 'Grupo de acordes 3: E, B7, F#m, C#m · Preparación para la muestra del curso',
+    subtitle: 'Chord Group 3: E, B7, F#m, C#m · Semester 1 showcase preparation',
+    subtitle_es: 'Grupo de acordes 3: E, B7, F#m, C#m · Preparación para la muestra del Semestre 1',
     objective: 'I CAN fret E and B7 open chords, identify F#m and C#m shapes, and perform a chosen song with 4+ chord types.',
     skillFocus: 'Fretting the E and B7 chords · Recognizing the F#m and C#m shapes · Performing a song with several chords',
     skillFocus_es: 'Trastear los acordes E y B7 · Reconocer las formas F#m y C#m · Interpretar una canción con varios acordes',
@@ -1248,8 +1248,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge: showcase run', label_es: 'Reto: ensayo de la muestra',
-            text: 'Challenge 4 — Showcase Run (your assessment piece):<ol><li>Play your course showcase song — the one you\'re building toward performing for someone (family, a friend, or a recording) — start to finish 3 times without stopping, even through mistakes.</li><li>Time yourself.</li></ol>No score — this trains your recovery, not perfection.',
-            text_es: 'Reto 4 — Ensayo de la muestra (tu pieza de evaluación):<ol><li>Toca tu canción de la muestra del curso — la que estás construyendo para interpretar frente a alguien (familia, un amigo, o una grabación) — de principio a fin 3 veces sin detenerte, incluso con errores.</li><li>Cronométrate.</li></ol>Sin puntaje — esto entrena tu recuperación, no la perfección.',
+            text: 'Challenge 4 — Showcase Run (your assessment piece):<ol><li>Play your Semester 1 showcase song — the one you\'re building toward performing for someone (family, a friend, or a recording) — start to finish 3 times without stopping, even through mistakes.</li><li>Time yourself.</li></ol>No score — this trains your recovery, not perfection.',
+            text_es: 'Reto 4 — Ensayo de la muestra (tu pieza de evaluación):<ol><li>Toca tu canción de la muestra del Semestre 1 — la que estás construyendo para interpretar frente a alguien (familia, un amigo, o una grabación) — de principio a fin 3 veces sin detenerte, incluso con errores.</li><li>Cronométrate.</li></ol>Sin puntaje — esto entrena tu recuperación, no la perfección.',
             hint: 'Don\'t stop when you make a mistake in performance practice. The goal is to keep going. You can fix mistakes in slow practice — performance practice trains your recovery.',
             hint_es: 'No te detengas cuando cometas un error en la práctica de interpretación. El objetivo es seguir tocando. Puedes corregir errores en la práctica lenta — la práctica de interpretación entrena tu recuperación.',
             skills: [5, 6]
@@ -1286,8 +1286,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge: call & response jam', label_es: 'Reto: jam de llamada y respuesta',
-                text: 'Challenge — Call & Response (your course-wrap check piece): jam (play along freely and make up your own part) over <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a> (or any core-song ▶ &#x1F3B5; Backing track — recorded music you play along with — in Module 4\'s &#x1F3B5; Songs list).<ol><li>Improvise a call-and-response solo — play a 2-bar "question" phrase, leave a little space, then answer it with a 2-bar "response."</li><li>Stay in the minor pentatonic box from Module 4.</li></ol>You\'ve got it when: you hold the track\'s pulse start to finish with no restarts, and your response phrase clearly answers your question phrase. This is scored the same way as your Module 4 solo (Accuracy + Consistency).',
-                text_es: 'Reto — Llamada y respuesta (tu pieza de revisión de fin de curso): improvisa (toca libremente junto con la pista y crea tu propia parte) sobre <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; la pista de jam en Am</a> (o cualquier ▶ &#x1F3B5; pista de acompañamiento — música grabada con la que tocas junto — de canción principal en la lista de &#x1F3B5; Canciones del Módulo 4).<ol><li>Improvisa un solo de llamada y respuesta — toca una frase "pregunta" de 2 compases, deja un poco de espacio, y luego respóndela con una "respuesta" de 2 compases.</li><li>Quédate en la caja pentatónica menor del Módulo 4.</li></ol>Lo tienes cuando: mantienes el pulso de la pista de principio a fin sin reiniciar, y tu frase de respuesta claramente responde a tu frase de pregunta. Esto se califica de la misma manera que tu solo del Módulo 4 (Precisión + Consistencia).',
+                text: 'Challenge — Call & Response (your Semester 1 wrap-up check piece): jam (play along freely and make up your own part) over <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a> (or any core-song ▶ &#x1F3B5; Backing track — recorded music you play along with — in Module 4\'s &#x1F3B5; Songs list).<ol><li>Improvise a call-and-response solo — play a 2-bar "question" phrase, leave a little space, then answer it with a 2-bar "response."</li><li>Stay in the minor pentatonic box from Module 4.</li></ol>You\'ve got it when: you hold the track\'s pulse start to finish with no restarts, and your response phrase clearly answers your question phrase. Ungraded — a chance to revisit the Module 4 solo skill, not part of this Set\'s scored showcase.',
+                text_es: 'Reto — Llamada y respuesta (tu pieza de revisión de fin del Semestre 1): improvisa (toca libremente junto con la pista y crea tu propia parte) sobre <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; la pista de jam en Am</a> (o cualquier ▶ &#x1F3B5; pista de acompañamiento — música grabada con la que tocas junto — de canción principal en la lista de &#x1F3B5; Canciones del Módulo 4).<ol><li>Improvisa un solo de llamada y respuesta — toca una frase "pregunta" de 2 compases, deja un poco de espacio, y luego respóndela con una "respuesta" de 2 compases.</li><li>Quédate en la caja pentatónica menor del Módulo 4.</li></ol>Lo tienes cuando: mantienes el pulso de la pista de principio a fin sin reiniciar, y tu frase de respuesta claramente responde a tu frase de pregunta. Sin calificación — una oportunidad para repasar la destreza del solo del Módulo 4, no forma parte de la muestra calificada de esta unidad.',
                 hint: 'Every skill here is a Module 4 skill — this is an easy, fun review of what you already know. The &#x1F3B5; Songs list at the bottom of Module 4 has a ▶ &#x1F3B5; Backing track for every core song. If the pentatonic box feels rusty, run the Module 4 scale-climb warm-up first, then come back.',
                 hint_es: 'Cada destreza aquí es una destreza del Módulo 4 — este es un repaso fácil y divertido de lo que ya sabes. La lista de &#x1F3B5; Canciones al final del Módulo 4 tiene una ▶ &#x1F3B5; pista de acompañamiento para cada canción principal. Si la caja pentatónica se siente oxidada, corre primero el calentamiento de escalada de escala del Módulo 4, y luego regresa.',
                 stuck: 'Play a 2-bar question, then answer with the SAME rhythm on different notes — copying the rhythm is the easiest way to make two phrases talk to each other.',
@@ -1314,9 +1314,9 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Course Showcase: Perform one complete song of your choice using at least 4 chords from the course. Evaluated on chord accuracy, timing, smooth transitions, and musicality. (Separate and ungraded: your written "My Guitar Adventure — Course Check-in" reflection — just for you, not part of the showcase score.)',
-      goal_es: 'Muestra del curso: interpreta una canción completa de tu elección usando al menos 4 acordes del curso. Se evalúa la precisión de los acordes, el tiempo, las transiciones suaves y la musicalidad. (Aparte y sin calificar: tu reflexión escrita "Mi aventura con la guitarra — Check-in del curso" — solo para ti, no forma parte del puntaje de la muestra.)',
-      performance: 'Course showcase performance. Student records a full run of the chosen song (or plays it for family or friends), then reviews the recording for chord accuracy, timing, transitions, and expression.',
+      goal: 'Semester 1 Showcase: Perform one complete song of your choice using at least 4 chords from Semester 1. Evaluated on chord accuracy, timing, smooth transitions, and musicality. (Separate and ungraded: your written "My Guitar Adventure — Semester 1 Check-in" reflection — just for you, not part of the showcase score.)',
+      goal_es: 'Muestra del Semestre 1: interpreta una canción completa de tu elección usando al menos 4 acordes del Semestre 1. Se evalúa la precisión de los acordes, el tiempo, las transiciones suaves y la musicalidad. (Aparte y sin calificar: tu reflexión escrita "Mi aventura con la guitarra — Check-in del Semestre 1" — solo para ti, no forma parte del puntaje de la muestra.)',
+      performance: 'Semester 1 showcase performance. Student records a full run of the chosen song (or plays it for family or friends), then reviews the recording for chord accuracy, timing, transitions, and expression.',
       selfCheck: 'Can you play your showcase song all the way through without stopping? Can you name every chord in your song and which group it belongs to?',
       selfCheck_es: '¿Puedes tocar tu canción de la muestra de principio a fin sin detenerte? ¿Puedes nombrar cada acorde de tu canción y a qué grupo pertenece?',
       standards: ['Pr.4a', 'Pr.5b', 'Pr.6a', 'Re.9a']
@@ -1345,8 +1345,8 @@ SETS.push(
           prompt_es: 'F#m y C#m usan una forma de "cejilla". ¿Qué es una cejilla?',
           choices: ['One finger pressing across multiple strings at the same fret', 'A type of pick', 'A string-bending technique', 'Strumming with the thumb'],
           choices_es: ['Un dedo presionando a través de varias cuerdas en el mismo traste', 'Un tipo de púa', 'Una técnica de doblar cuerdas', 'Rasguear con el pulgar'], answer: 0 } },
-      { id: 'm5w4-s4', text: 'Demonstrate 3+ chord types from across the course',
-        text_es: 'Demostrar 3+ tipos de acorde de todo el curso',
+      { id: 'm5w4-s4', text: 'Demonstrate 3+ chord types from across Semester 1',
+        text_es: 'Demostrar 3+ tipos de acorde de todo el Semestre 1',
         gotItWhen: 'you can play at least one chord from each of Groups 1, 2, and 3 cleanly on demand — and name the group each belongs to.',
         gotItWhen_es: 'puedes tocar al menos un acorde de cada uno de los Grupos 1, 2 y 3 limpio a pedido — y nombrar el grupo al que pertenece cada uno.',
         practice: { type: 'mc', prompt: 'Which of these chords is from Group 2 (D, A, Em, Bm)?',
@@ -1424,24 +1424,24 @@ MODULE_REVIEWS[5] = {
       text_es: 'Puedo trastear Am y Em limpios — cada cuerda de ambos suena sin zumbido', set: 'm5w1' },
     { id: 'mr5-s3', text: 'I can fret Group 1 chords (C, G, Am, and the simplified F) with clean tone',
       text_es: 'Puedo trastear los acordes del Grupo 1 (C, G, Am, y el F simplificado) con tono limpio', set: 'm5w2' },
-    { id: 'mr5-s6', text: 'I can keep a steady 4-beat down-strum, and a down-up (1 + 2 + 3 + 4 +) pattern, through a chord change',
-      text_es: 'Puedo mantener un rasgueo constante de 4 tiempos hacia abajo, y un patrón abajo-arriba (1 + 2 + 3 + 4 +), a través de un cambio de acorde', set: 'm5w2' },
-    { id: 'mr5-s4', text: 'I can fret Group 2 chords (D, A, Em, and a partial-barre Bm) with clean tone',
-      text_es: 'Puedo trastear los acordes del Grupo 2 (D, A, Em, y un Bm con cejilla parcial) con tono limpio', set: 'm5w3' },
-    { id: 'mr5-s8', text: 'I can perform a chosen song start to finish using 4+ chords from across the course for the showcase',
-      text_es: 'Puedo interpretar una canción elegida de principio a fin usando 4+ acordes de todo el curso para la muestra', set: 'm5w4' }
+    { id: 'mr5-s6', text: 'I can keep a steady down-up (1 + 2 + 3 + 4 +) strumming pattern through a chord change',
+      text_es: 'Puedo mantener un patrón de rasgueo abajo-arriba constante (1 + 2 + 3 + 4 +) a través de un cambio de acorde', set: 'm5w2' },
+    { id: 'mr5-s4', text: 'I can fret Group 2 chords (D, A, and a partial-barre Bm) with clean tone',
+      text_es: 'Puedo trastear los acordes del Grupo 2 (D, A, y un Bm con cejilla parcial) con tono limpio', set: 'm5w3' },
+    { id: 'mr5-s8', text: 'I can perform a chosen song start to finish using 4+ chords from across Semester 1 for the showcase',
+      text_es: 'Puedo interpretar una canción elegida de principio a fin usando 4+ acordes de todo el Semestre 1 para la muestra', set: 'm5w4' }
   ],
   assessItems: [
     'Draw three chords at random (shuffle flashcards or point blind at a chart) and play them in an 8-bar progression at 70 BPM with clean changes in time',
-    'Record (or perform for someone) one core song from memory — Let It Be, Luna, or "the cure" — plus one song of your choice using at least 4 chords from the course, with clean tone and smooth transitions, then listen back and check both',
+    'Record (or perform for someone) one core song from memory — Let It Be, Luna, or "the cure" — plus one song of your choice using at least 4 chords from Semester 1, with clean tone and smooth transitions, then listen back and check both',
     'Identify and name the chords on an unlabelled chord chart',
-    'Ungraded reflection (not scored): your written "My Guitar Adventure — Course Check-in" — what changed since the Module 1 goal'
+    'Ungraded reflection (not scored): your written "My Guitar Adventure — Semester 1 Check-in" — what changed since the Module 1 goal'
   ],
   assessItems_es: [
     'Elige tres acordes al azar (mezcla tarjetas o apunta a ciegas en un diagrama) y tócalos en una progresión de 8 compases a 70 BPM con cambios limpios a tiempo',
-    'Graba (o interpreta para alguien) una canción principal de memoria — Let It Be, Luna, o "the cure" — más una canción de tu elección usando al menos 4 acordes del curso, con tono limpio y transiciones suaves, y luego escucha y revisa ambas',
+    'Graba (o interpreta para alguien) una canción principal de memoria — Let It Be, Luna, o "the cure" — más una canción de tu elección usando al menos 4 acordes del Semestre 1, con tono limpio y transiciones suaves, y luego escucha y revisa ambas',
     'Identifica y nombra los acordes en un diagrama de acordes sin etiquetar',
-    'Reflexión sin calificar (no cuenta para la nota): tu reflexión escrita "Mi aventura con la guitarra — Check-in del curso" — qué cambió desde la meta del Módulo 1'
+    'Reflexión sin calificar (no cuenta para la nota): tu reflexión escrita "Mi aventura con la guitarra — Check-in del Semestre 1" — qué cambió desde la meta del Módulo 1'
   ],
   forward: 'Every chord you can now fret is a word — <strong>Module 6 is where you learn to speak in rhythm.</strong> The down-up pattern you started here grows into full strumming patterns, accents, and syncopation that turn these shapes into real songs.',
   forward_es: 'Cada acorde que ahora puedes trastear es una palabra — <strong>el Módulo 6 es donde aprendes a hablar en ritmo.</strong> El patrón abajo-arriba que empezaste aquí crece hasta convertirse en patrones de rasgueo completos, acentos y síncopa que transforman estas formas en canciones reales.',

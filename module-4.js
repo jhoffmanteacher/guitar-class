@@ -423,8 +423,8 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Plays minor pentatonic ascending and descending · Plays major pentatonic on E & A strings · Uses alternate picking · Improvises a 2-bar phrase over a backing track · Identifies minor vs major pentatonic by ear',
-      goal_es: 'Toca la pentatónica menor subiendo y bajando · Toca la pentatónica mayor en las cuerdas Mi y La · Usa púa alterna · Improvisa una frase de 2 compases sobre una pista de acompañamiento · Identifica pentatónica menor vs mayor de oído',
+      goal: 'Plays minor pentatonic ascending and descending · Plays major pentatonic on E & A strings · Uses alternate picking · Improvises a 4-bar phrase over a backing track · Identifies minor vs major pentatonic by ear',
+      goal_es: 'Toca la pentatónica menor subiendo y bajando · Toca la pentatónica mayor en las cuerdas Mi y La · Usa púa alterna · Improvisa una frase de 4 compases sobre una pista de acompañamiento · Identifica pentatónica menor vs mayor de oído',
       performance: 'Solo: record yourself improvising 4 bars over an Am backing track — either "All Along the Watchtower" or "the cure" ▶ &#x1F3B5; Backing track button in the &#x1F3B5; Songs list at the bottom of Module 4 (both are in Am) — then listen back. Goal is one clear phrase, not speed.',
       selfCheck: 'Can you play Pattern 1 up and down without stopping? Can you position it for both Am and Em pentatonic?',
       selfCheck_es: '¿Puedes tocar el Patrón 1 subiendo y bajando sin detenerte? ¿Puedes posicionarlo tanto para Am como para Em pentatónica?',
@@ -773,9 +773,9 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Plays pentatonic across E, A, D, G strings · Crosses strings smoothly without pausing · Performs a hammer-on and pull-off · Plays a call-and-response phrase · Creates a 4-bar melodic solo · Applies to at least 2 course songs',
-      goal_es: 'Toca pentatónica en las cuerdas Mi, La, Re, Sol · Cruza cuerdas con suavidad sin pausar · Ejecuta un hammer-on y un pull-off · Toca una frase de llamada y respuesta · Crea un solo melódico de 4 compases · Lo aplica en al menos 2 canciones del curso',
-      performance: 'Solo check: record a 4-bar call-and-response solo over the Am jam track, then listen back and judge: does it resolve at the end?',
+      goal: 'Varies dynamics on purpose (p, mf, f) · Changes timbre by shifting picking-hand position · Performs a hammer-on and pull-off · Shapes a note\'s "envelope" (attack and length) · Plays a call-and-response phrase (call unresolved, response lands on root) · Names all natural notes on the D & G strings',
+      goal_es: 'Varía la dinámica a propósito (p, mf, f) · Cambia el timbre moviendo la posición de la mano de pulsar · Ejecuta un hammer-on y un pull-off · Da forma a la "envolvente" de una nota (ataque y duración) · Toca una frase de llamada y respuesta (la llamada sin resolver, la respuesta aterriza en la raíz) · Nombra todas las notas naturales en las cuerdas Re y Sol',
+      performance: 'Solo check: record a call-and-response phrase over the Am jam track — a 2-bar call, a 1-bar pause, then a 2-bar response — then listen back and judge: does the response resolve at the end?',
       selfCheck: 'Can you vary your dynamics on purpose (loud vs soft)? Can you play a clear call-and-response phrase where the "answer" lands on the root?',
       selfCheck_es: '¿Puedes variar tu dinámica a propósito (fuerte vs suave)? ¿Puedes tocar una frase clara de llamada y respuesta donde la "respuesta" aterrice en la raíz?',
       standards: ['Cr.1a', 'Pr.4a', 'Pr.5b']
@@ -1212,8 +1212,10 @@ MODULE_REVIEWS[4] = {
       text_es: 'Puedo usar púa alterna (abajo-arriba) automáticamente a 60 BPM, cada nota en un tiempo, sin perder el clic', set: 'm4w1' },
     { id: 'mr4-s3', text: 'I can position Pattern 1 as a MINOR scale (1st finger on root) or a MAJOR scale (4th finger on root) on demand from any named key',
       text_es: 'Puedo posicionar el Patrón 1 como escala MENOR (dedo índice en la raíz) o escala MAYOR (dedo meñique en la raíz) a pedido desde cualquier tonalidad nombrada', set: 'm4w1' },
-    { id: 'mr4-s6', text: 'I can perform a hammer-on and a pull-off, and add an intentional vibrato on a sustained note',
-      text_es: 'Puedo ejecutar un hammer-on y un pull-off, y agregar un vibrato intencional en una nota sostenida', set: 'm4w2' },
+    { id: 'mr4-s6', text: 'I can perform a hammer-on and a pull-off',
+      text_es: 'Puedo ejecutar un hammer-on y un pull-off', set: 'm4w2' },
+    { id: 'mr4-s9', text: 'I can add an intentional vibrato on a sustained note',
+      text_es: 'Puedo agregar un vibrato intencional en una nota sostenida', set: 'm4w3' },
     { id: 'mr4-s8', text: 'I can explain how major (1 2 3 5 6) and minor (1 ♭3 4 5 ♭7) pentatonic are built, that they\'re relative (same 5 notes), and where the ♭5 blue note goes',
       text_es: 'Puedo explicar cómo se construyen la pentatónica mayor (1 2 3 5 6) y menor (1 ♭3 4 5 ♭7), que son relativas (mismas 5 notas), y dónde va la nota de blues ♭5', set: 'm4w3' },
     { id: 'mr4-s10', text: 'I can perform my original 4-bar solo over a backing track from memory — holding its pulse with no restarts, working in at least one hammer-on, pull-off, or vibrato, and naming my phrasing strategy',
@@ -1222,12 +1224,10 @@ MODULE_REVIEWS[4] = {
       text_es: 'Puedo leer un lick pentatónico corto de 1 compás del TAB que no he practicado y tocarlo con precisión', set: 'm4w3' }
   ],
   assessItems: [
-    'Position Pattern 1 for any named major or minor key and play it ascending and descending in time, with alternate picking',
     'Perform an original 4-bar solo over a course-song backing track, holding its pulse with no restarts, using the minor pentatonic box and at least one hammer-on, pull-off, or vibrato, with clean notes throughout (no buzz or dead notes — high strings included), following a named phrasing strategy (call-and-response or four-phrase)',
     'Read a short 1-bar pentatonic lick from TAB and play it accurately'
   ],
   assessItems_es: [
-    'Posiciona el Patrón 1 para cualquier tonalidad mayor o menor nombrada y tócalo subiendo y bajando a tiempo, con púa alterna',
     'Toca un solo original de 4 compases sobre la pista de acompañamiento de una canción del curso, sosteniendo su pulso sin reiniciar, usando la caja de pentatónica menor y al menos un hammer-on, pull-off, o vibrato, con notas limpias en todo momento (sin zumbido ni notas apagadas — cuerdas agudas incluidas), siguiendo una estrategia de fraseo nombrada (llamada y respuesta o cuatro frases)',
     'Lee un lick pentatónico corto de 1 compás del TAB y tócalo con precisión'
   ],

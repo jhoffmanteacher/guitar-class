@@ -871,11 +871,11 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Names any barre chord from its root fret · Moves one shape to three named roots · Plays I–IV–V in a named key',
-      goal_es: 'Nombra cualquier acorde con cejilla a partir del traste de su raíz · Mueve una forma a tres raíces nombradas · Toca I–IV–V en una tonalidad nombrada',
-      performance: 'Draw a key at random; play its I–IV–V using at least one barre shape, changes in time at 60 BPM.',
-      selfCheck: 'Where are the two places to play C major as a barre? Which shape is friendlier to your hand today?',
-      selfCheck_es: '¿Cuáles son los dos lugares para tocar C mayor como cejilla? ¿Cuál forma es más amigable para tu mano hoy?',
+      goal: 'Names any barre chord from its root fret · Moves one shape to three named roots · Plays I–IV–V in a named key · Comps a 12-bar blues in A with shuffle feel, including the quick-change and turnaround',
+      goal_es: 'Nombra cualquier acorde con cejilla a partir del traste de su raíz · Mueve una forma a tres raíces nombradas · Toca I–IV–V en una tonalidad nombrada · Acompaña un blues de 12 compases en A con sensación de shuffle, incluyendo el cambio rápido y el giro',
+      performance: 'Draw a key at random; play its I–IV–V using at least one barre shape, changes in time at 60 BPM. Then play the 12-bar blues in A (A7–D7–E7) from memory at 60 BPM with a shuffle strum, landing the turnaround in bar 12 without stopping.',
+      selfCheck: 'Where are the two places to play C major as a barre? Which shape is friendlier to your hand today? What does the quick-change do in bar 2 of a 12-bar blues?',
+      selfCheck_es: '¿Cuáles son los dos lugares para tocar C mayor como cejilla? ¿Cuál forma es más amigable para tu mano hoy? ¿Qué hace el cambio rápido en el compás 2 de un blues de 12 compases?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
     },
 
@@ -966,7 +966,8 @@ MODULE_REVIEWS[11] = {
     { id: 'mr11-s3', text: 'I can figure out a song\'s key from the chords it uses', text_es: 'Puedo averiguar la tonalidad de una canción a partir de los acordes que usa', set: 'm11w2' },
     { id: 'mr11-s4', text: 'I can read a slash chord (like G/B) and know which note goes on the bottom', text_es: 'Puedo leer un acorde con bajo alterno (como G/B) y saber qué nota va abajo', set: 'm11w2' },
     { id: 'mr11-s5', text: 'I can name a barre chord\'s root from either the E-shape or A-shape fret', text_es: 'Puedo nombrar la raíz de un acorde con cejilla a partir del traste en forma de E o de A', set: 'm11w3' },
-    { id: 'mr11-s6', text: 'I can play a I–IV–V progression in a randomly drawn key using open or barre shapes', text_es: 'Puedo tocar una progresión I–IV–V en una tonalidad sacada al azar usando formas abiertas o con cejilla', set: 'm11w3' }
+    { id: 'mr11-s6', text: 'I can play a I–IV–V progression in a randomly drawn key using open or barre shapes', text_es: 'Puedo tocar una progresión I–IV–V en una tonalidad sacada al azar usando formas abiertas o con cejilla', set: 'm11w3' },
+    { id: 'mr11-s7', text: 'I can comp a 12-bar blues in A with shuffle feel, including the quick-change and turnaround', text_es: 'Puedo acompañar un blues de 12 compases en A con sensación de shuffle, incluyendo el cambio rápido y el giro', set: 'm11w3' }
   ],
   assessItems: [
     'Analyze a thread song\'s progression in Roman numerals and name its key',

@@ -302,7 +302,7 @@ SETS.push(
     assessment: {
       goal: 'Alternating thumb in steady quarters · Clean pinch on the downbeat · Pattern survives an Am↔C change',
       goal_es: 'Pulgar alternante en negras constantes · Pellizco limpio en el tiempo fuerte · El patrón sobrevive un cambio Am↔C',
-      performance: 'Record yourself thumb-drumming at 60 BPM for 16 bars; listen back for your thumb stopping when the fills enter.',
+      performance: 'Record yourself thumb-drumming at 60 BPM for 8 bars; listen back for your thumb stopping when the fills enter.',
       selfCheck: 'Can your thumb keep going while you talk? Does the pinch land exactly together, or does one note leak first?',
       selfCheck_es: '¿Puede tu pulgar seguir sonando mientras hablas? ¿El pellizco cae exactamente junto, o se escapa primero una nota?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']

@@ -666,7 +666,7 @@ SETS.push(
     assessment: {
       goal: 'Plays the D-DU-UDU pattern cleanly at 60 BPM (70+ is the push goal) · Accents beats 2 and 4 (backbeat) · Keeps pattern steady through a chord change · Applies pattern to a real song',
       goal_es: 'Toca el patrón D-DU-UDU de forma limpia a 60 BPM (70+ es la meta de empuje) · Acentúa los tiempos 2 y 4 (contratiempo) · Mantiene el patrón estable a través de un cambio de acorde · Aplica el patrón a una canción real',
-      performance: 'Strum D-DU-UDU on Em for 4 bars, then switch to Am for 4 more without the pattern breaking at the change. With someone around, trade fours instead: one plays Em, the other takes over on Am, and the pattern must not break at the handoff.',
+      performance: 'Strum D-DU-UDU on G for 2 bars, then switch to D for 2 more, looping for 3 minutes without the pattern breaking at the change. With someone around, trade off instead: one plays G, the other takes over on D, and the pattern must not break at the handoff.',
       selfCheck: 'Can you play D-DU-UDU without thinking about which strum is next? Can you keep the pattern going through a G-to-D change?',
       selfCheck_es: '¿Puedes tocar D-DU-UDU sin pensar en cuál rasgueo sigue? ¿Puedes mantener el patrón a través de un cambio de G a D?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
@@ -1086,10 +1086,12 @@ MODULE_REVIEWS[6] = {
   ],
   assessItems: [
     'Play Em for 4 bars, then Am for 4 bars, with a non-stop down-up strum at 60 BPM',
+    'Loop G for 2 bars, then D for 2 bars, playing D-DU-UDU with the pattern staying identical through the change',
     'Take G–D–Em–C and play it two ways — folk, then rock — switching feel with no break at the seam'
   ],
   assessItems_es: [
     'Toca Em durante 4 compases, y luego Am durante 4 compases, con un rasgueo abajo-arriba sin interrupciones a 60 BPM',
+    'Repite G durante 2 compases, y luego D durante 2 compases, tocando D-DU-UDU con el patrón idéntico a través del cambio',
     'Toma G–D–Em–C y tócalo de dos formas — folk, y luego rock — cambiando la sensación sin interrupción en la costura'
   ],
   forward: 'Module 7 is the <strong>barre-chord</strong> module — and every steady strum hand you just built is what carries you through it. The rhythm keeps going even while your fretting hand fights the hardest shapes in the course. The groove you own now is what makes a clamped, buzzy first barre still sound like music.',
