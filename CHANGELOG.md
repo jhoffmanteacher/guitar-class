@@ -5,6 +5,29 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-25 — Lesson accuracy sweep: wrong notes, a dropped chord, and mixed-up fingers fixed
+
+### Changed
+
+- "All Along the Watchtower" in Modules 6 and 7 now teaches the full
+  four-chord loop (Am–G–F–G) instead of accidentally dropping the last
+  chord — matching what you learned in Module 5 and what the record
+  actually does.
+- Module 8's Travis-picking thumb pattern on a C chord was pointing your
+  thumb at the wrong string; it now correctly walks between the A string
+  and the low E string.
+- Fixed a fingering hint in Module 2's Watchtower riff that had your pinky
+  landing on the wrong fret, and a mixed-up finger-fill description in
+  Module 12.
+- Corrected the wrong note names in the fingerpicked bonus verses on the
+  Luna and "the cure" Song Journey pages — the notes now match what you'll
+  actually hear.
+- Fixed a self-contradicting explanation in Module 11 about which chord
+  "the cure"'s walking bass line resolves back to.
+- Small cleanups: a leftover reference to the wrong instructor's name in
+  Module 12, a couple of mismatched skill tags in Module 2, and some stale
+  wording here and there.
+
 ## 2026-07-25 — The shuffle self-quiz is now a drill you can play
 
 ### Changed

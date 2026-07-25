@@ -832,8 +832,8 @@ SETS.push(
               },
               {
                 label: 'Challenge: Watchtower, all barres', label_es: 'Reto: Watchtower, todo con cejillas',
-                text: 'Challenge — Watchtower, no open chords: play Am · G · F entirely as barres, two beats per chord at 60 BPM:<ul><li>Am is the E-shape minor at fret 5 (the bar plus your open-Em fingers).</li><li>G is your E-shape major at fret 3.</li><li>F is your E-shape major at fret 1.</li></ul>You\'ve got it when: four laps using ONLY barre chords — proof you no longer need the open shapes. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: from Layer 1 to every chord a barre</a>.',
-                text_es: 'Reto — Watchtower, sin acordes abiertos: toca Am · G · F por completo como cejillas, dos tiempos por acorde a 60 BPM:<ul><li>Am es la forma menor de E en el traste 5 (la cejilla más tus dedos de Em abierto).</li><li>G es tu forma mayor de E en el traste 3.</li><li>F es tu forma mayor de E en el traste 1.</li></ul>Lo tienes cuando: cuatro vueltas usando SOLO acordes con cejilla — prueba de que ya no necesitas las formas abiertas. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: de la Capa 1 a cada acorde como cejilla</a>.',
+                text: 'Challenge — Watchtower, no open chords: play Am · G · F · G entirely as barres, two beats per chord at 60 BPM:<ul><li>Am is the E-shape minor at fret 5 (the bar plus your open-Em fingers).</li><li>G is your E-shape major at fret 3.</li><li>F is your E-shape major at fret 1.</li></ul>You\'ve got it when: four laps using ONLY barre chords — proof you no longer need the open shapes. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: from Layer 1 to every chord a barre</a>.',
+                text_es: 'Reto — Watchtower, sin acordes abiertos: toca Am · G · F · G por completo como cejillas, dos tiempos por acorde a 60 BPM:<ul><li>Am es la forma menor de E en el traste 5 (la cejilla más tus dedos de Em abierto).</li><li>G es tu forma mayor de E en el traste 3.</li><li>F es tu forma mayor de E en el traste 1.</li></ul>Lo tienes cuando: cuatro vueltas usando SOLO acordes con cejilla — prueba de que ya no necesitas las formas abiertas. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: de la Capa 1 a cada acorde como cejilla</a>.',
                 hint: 'Minor E-shape = the major shape minus the middle finger; the bar covers the note it left behind. Read the roots on string 6: fret 5 = A, fret 3 = G, fret 1 = F.',
                 hint_es: 'Forma menor de E = la forma mayor menos el dedo medio; la cejilla cubre la nota que dejó atrás. Lee las raíces en la cuerda 6: traste 5 = A, traste 3 = G, traste 1 = F.',
                 stuck: 'Get each chord clean on its own (pluck all 6 strings), then pair Am → G, and add the F last — it\'s the tightest squeeze.',
@@ -966,8 +966,8 @@ SETS.push(
           unit: 'count', placeholder: 'e.g. 10 changes — try for a higher number', placeholder_es: 'p. ej. 10 cambios — intenta superarlo' } },
       { id: 'm7w3-s6', text: 'Play a full song using only barre chords (no open chords)',
         text_es: 'Tocar una canción completa usando solo acordes con cejilla (sin acordes abiertos)',
-        gotItWhen: 'you can play "All Along the Watchtower" or another 3-chord song from start to finish using ONLY barre chords — proving you no longer need the open shapes.',
-        gotItWhen_es: 'puedes tocar "All Along the Watchtower" u otra canción de 3 acordes de principio a fin usando SOLO acordes con cejilla — probando que ya no necesitas las formas abiertas.',
+        gotItWhen: 'you can play "All Along the Watchtower" or another simple song from start to finish using ONLY barre chords — proving you no longer need the open shapes.',
+        gotItWhen_es: 'puedes tocar "All Along the Watchtower" u otra canción sencilla de principio a fin usando SOLO acordes con cejilla — probando que ya no necesitas las formas abiertas.',
         practice: { type: 'playSeq', label: 'F · C · G · D barre progression (roots)', label_es: 'Progresión de cejillas F · C · G · D (raíces)', bpm: 60,
           notes: [41, 48, 43, 50] } }
     ]

@@ -73,7 +73,7 @@ SETS.push(
                 text_es: 'Mira: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard – Marty Music</a> (0:00–4:00).',
                 hint: 'Focus on the E and A strings only for now. What patterns does he point out?',
                 hint_es: 'Concéntrate solo en las cuerdas Mi y La por ahora. ¿Qué patrones señala él?',
-                skills: [1, 3],
+                skills: [2, 3],
                 response: { type: 'short', placeholder: 'Describe one pattern he points out for finding notes on the E or A string.',
                   placeholder_es: 'Describe un patrón que él señala para encontrar notas en la cuerda Mi o La.' }
               }
@@ -89,7 +89,6 @@ SETS.push(
                 text_es: 'Escucha el inicio de "Happy Birthday" — presiona ▶ para escucharlo, luego tararea y trata de identificar qué notas de la melodía viven en la cuerda Mi o La.',
                 hint: 'Don\'t worry about playing it yet — just train your ear to connect sounds to strings.',
                 hint_es: 'No te preocupes todavía por tocarla — solo entrena tu oído para conectar sonidos con cuerdas.',
-                skills: [5],
                 playSeq: { label: 'Hear the opening', label_es: 'Escucha el inicio', bpm: 60, notes: [40, 40, 42, 40, 45, 44] },
                 response: { type: 'short', placeholder: 'Which note(s) did you find first? Where on the fretboard?',
                   placeholder_es: '¿Qué nota(s) encontraste primero? ¿Dónde en el diapasón?' }
@@ -266,7 +265,7 @@ SETS.push(
                 stuck_es: 'Quédate en el montón de solo naturales — reparte únicamente los ocho trastes naturales. Agrega el montón con sostenidos cuando logres 9 de 10.',
                 levelUp: 'Run the Shuffle on the A string too, or name a full lap going down the string (12 → 0) without counting.',
                 levelUp_es: 'Haz el ejercicio de papelitos en la cuerda La también, o nombra una vuelta completa bajando por la cuerda (12 → 0) sin contar.',
-                skills: [2, 3]
+                skills: [2]
               }
             ]
           },
@@ -743,8 +742,8 @@ SETS.push(
             label: 'Challenge: Watchtower bass riff', label_es: 'Reto: riff de bajo de Watchtower',
             text: 'Challenge 3 — Watchtower Bass Riff (your module assessment piece): using the TAB, play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. You\'ve got it when: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.<span class="step-figure"><img src="img/m2-record-assessment.svg" alt="Three steps: turn on the Chromebook camera, press record, and play the riff A G F G from memory."></span>',
             text_es: 'Reto 3 — Riff de bajo de Watchtower (tu pieza de evaluación del módulo): usando el TAB, toca la línea de bajo de "All Along the Watchtower" solo en la cuerda Mi grave — A · G · F · G, en bucle — una nota por pulso a 60 BPM. Lo tienes cuando: el riff de principio a fin de memoria, a tiempo, con tono limpio y digitación correcta. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.<span class="step-figure"><img src="img/m2-record-assessment.svg" alt="Tres pasos: enciende la cámara del Chromebook, pulsa grabar y toca el riff A, G, F, G de memoria."></span>',
-            hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A). Keep your thumb behind the neck. Let each note ring fully before the next. Drill it until you can run it with your eyes closed — then record yourself playing it: that\'s your module-end assessment piece.',
-            hint_es: 'Digitación: índice en el traste 1 (F), anular en el traste 3 (G), meñique en el traste 5 (A). Mantén el pulgar detrás del mástil. Deja que cada nota suene por completo antes de la siguiente. Practícalo hasta que puedas tocarlo con los ojos cerrados — luego grábate tocándolo: esa es tu pieza de evaluación de fin de módulo.',
+            hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A) — a one-fret stretch past your usual index=1/middle=2/ring=3/pinky=4 hand position, since this riff climbs past fret 4. Keep your thumb behind the neck. Let each note ring fully before the next. Drill it until you can run it with your eyes closed — then record yourself playing it: that\'s your module-end assessment piece.',
+            hint_es: 'Digitación: índice en el traste 1 (F), anular en el traste 3 (G), meñique en el traste 5 (A) — un estiramiento de un traste más allá de tu posición habitual índice=1/medio=2/anular=3/meñique=4, porque este riff sube más allá del traste 4. Mantén el pulgar detrás del mástil. Deja que cada nota suene por completo antes de la siguiente. Practícalo hasta que puedas tocarlo con los ojos cerrados — luego grábate tocándolo: esa es tu pieza de evaluación de fin de módulo.',
             stuck: 'Loop just F–G (frets 1–3) until the finger change is clean, then add the A on fret 5.',
             stuck_es: 'Repite solo F–G (trastes 1–3) hasta que el cambio de dedo salga limpio, y luego agrega el A en el traste 5.',
             levelUp: 'Run the whole riff with your eyes closed — that\'s the real "from memory" test.',

@@ -42,7 +42,7 @@ SETS.push(
               prompt_es: 'En la notación clásica de fingerpicking, ¿cuál dedo es "p"?',
               answer: 2,
               explain: '"p" is the thumb (from Spanish "pulgar"). The rest: i = index, m = middle, a = ring.',
-              explain_es: '"p" es el pulgar (del español "pulgar"). El resto: i = índice, m = medio, a = anular.',
+              explain_es: '"p" es el pulgar. El resto: i = índice, m = medio, a = anular.',
               choices: [
               'Index finger',
               'Middle finger',
@@ -827,8 +827,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge: Travis thumb', label_es: 'Reto: pulgar Travis',
-            text: 'Challenge 4 — Travis Thumb: warm up Travis picking on C — thumb alternating the A string (beats 1 & 3) and G string (beats 2 & 4), thumb-only at 60 BPM. Notice Travis reassigns your fingers on purpose: the thumb now claims the G string too, and the i finger takes the B — a deliberate break from Set 1\'s one-finger-per-string rule. You\'ve got it when: a steady, even alternating thumb — then add an i-pluck on the B string on each "+".',
-            text_es: 'Reto 4 — Pulgar Travis: calienta el Travis picking en C — pulgar alternando entre la cuerda La (tiempos 1 y 3) y la cuerda G (tiempos 2 y 4), solo el pulgar a 60 BPM. Fíjate que Travis reasigna tus dedos a propósito: el pulgar ahora también reclama la cuerda G, y el dedo i toma la B — una ruptura deliberada de la regla de un-dedo-por-cuerda de la Unidad 1. Lo tienes cuando: un pulgar alternante constante y parejo — y luego agrega una pulsación de i en la cuerda B en cada "+".',
+            text: 'Challenge 4 — Travis Thumb: warm up Travis picking on C — thumb alternating the A string, root C (beats 1 & 3) and the low E string, fret 3 = G, the 5th (beats 2 & 4), thumb-only at 60 BPM. That\'s the "root and the 5th" alternating bass from the intro video — both bass strings, no fingers yet. You\'ve got it when: a steady, even alternating thumb — then add an i-pluck on the B string on each "+".',
+            text_es: 'Reto 4 — Pulgar Travis: calienta el Travis picking en C — pulgar alternando entre la cuerda La, raíz C (tiempos 1 y 3) y la cuerda Mi grave, traste 3 = G, la 5ª (tiempos 2 y 4), solo el pulgar a 60 BPM. Ese es el bajo alternante de "raíz y la 5ª" del video introductorio — ambas cuerdas graves, todavía sin dedos. Lo tienes cuando: un pulgar alternante constante y parejo — y luego agrega una pulsación de i en la cuerda B en cada "+".',
             hint: 'Just the thumb! Once that\'s steady, add an i-pluck on the B string on the "+" of each beat. Travis picking adds fingers ON TOP of an already-grooving thumb.',
             hint_es: '¡Solo el pulgar! Una vez que esté estable, agrega una pulsación de i en la cuerda B en el "+" de cada tiempo. El Travis picking agrega dedos ENCIMA de un pulgar que ya tiene groove.',
             stuck: 'Thumb only, no fingers, as slow as you need — get the alternating bass rock-steady before adding anything on top.',
@@ -936,8 +936,8 @@ SETS.push(
         gotItWhen_es: 'tu pulgar toca la raíz del acorde en los tiempos 1 y 3, y una cuerda grave distinta en los tiempos 2 y 4 — de forma constante, durante al menos 4 compases.',
         practice: { type: 'mc', prompt: 'In Travis picking on a C major chord, your thumb might alternate between which two strings?',
           prompt_es: 'En el Travis picking sobre un acorde de C mayor, ¿tu pulgar podría alternar entre cuáles dos cuerdas?',
-          choices: ['B string and high e', 'A string (root C) and G string', 'High e and G string', 'Low E and high e'],
-          choices_es: ['La cuerda B y la mi aguda', 'La cuerda La (raíz de C) y la cuerda G', 'La mi aguda y la cuerda G', 'La Mi grave y la mi aguda'], answer: 1 } },
+          choices: ['B string and high e', 'A string (root C) and low E string (the 5th, G)', 'High e and G string', 'Low E and high e'],
+          choices_es: ['La cuerda B y la mi aguda', 'La cuerda La (raíz de C) y la cuerda Mi grave (la 5ª, G)', 'La mi aguda y la cuerda G', 'La Mi grave y la mi aguda'], answer: 1 } },
       { id: 'm8w3-s3', text: 'Keep the picking pattern steady through a chord change',
         text_es: 'Mantener el patrón de punteo estable a través de un cambio de acorde',
         gotItWhen: 'when the chord changes mid-song, you don\'t miss a single note in the picking pattern — the fretting hand catches up, but the picking pattern stays exact.',

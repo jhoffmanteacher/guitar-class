@@ -45,9 +45,9 @@ const MODULE_MANIFEST = [
   { num: 7, name: 'TAB Notation and Barre Chords',            name_es: 'Notación TAB y acordes con cejilla', i18nComplete: true, skillCount: 18, skillIdRe: '^m7w\\d+-s\\d+$' },
   { num: 8, name: 'Finger Picking',                           name_es: 'Fingerpicking', i18nComplete: true, skillCount: 18, skillIdRe: '^m8w\\d+-s\\d+$' },
   { num: 9,  name: 'The Full Fretboard & Writing TAB',        name_es: 'El mástil completo y cómo escribir TAB', i18nComplete: true, skillCount: 24, skillIdRe: '^m9w\\d+-s\\d+$' },
-  { num: 10, name: 'Scales, Keys & Ear Training',             name_es: 'Escalas, Tonalidades y Entrenamiento Auditivo', i18nComplete: true, skillCount: 19, skillIdRe: '^m10w\\d+-s\\d+$' },
-  { num: 11, name: 'Chords, Keys & Harmony',                  name_es: 'Acordes, Tonalidades y Armonía', i18nComplete: true, skillCount: 20, skillIdRe: '^m11w\\d+-s\\d+$' },
-  { num: 12, name: 'Fingerstyle: Travis, Waltz & Requinto',   name_es: 'Fingerstyle: Travis, Vals y Requinto', i18nComplete: true, skillCount: 18, skillIdRe: '^m12w\\d+-s\\d+$' },
+  { num: 10, name: 'Scales, Keys & Ear Training',             name_es: 'Escalas, tonalidades y entrenamiento auditivo', i18nComplete: true, skillCount: 19, skillIdRe: '^m10w\\d+-s\\d+$' },
+  { num: 11, name: 'Chords, Keys & Harmony',                  name_es: 'Acordes, tonalidades y armonía', i18nComplete: true, skillCount: 20, skillIdRe: '^m11w\\d+-s\\d+$' },
+  { num: 12, name: 'Fingerstyle: Travis, Waltz & Requinto',   name_es: 'Fingerstyle: Travis, vals y requinto', i18nComplete: true, skillCount: 18, skillIdRe: '^m12w\\d+-s\\d+$' },
   { num: 13, name: 'String Changing',                         name_es: 'Cambio de cuerdas', i18nComplete: true, skillCount: 4,  skillIdRe: '^m13w\\d+-s\\d+$' }
 ];
 
