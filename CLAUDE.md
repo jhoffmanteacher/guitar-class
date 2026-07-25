@@ -243,7 +243,8 @@ HTML / CSS / JS, then explain what you changed.
 
 ## Lessons learned
 
-### Multi-step directions get lists, not paragraphs (Jonathan, 2026-07-23)
+### Multi-step directions get lists, not paragraphs (Jonathan, 2026-07-23;
+### refined 2026-07-25)
 Any student-facing direction that packs 2–3+ sequential steps or parallel
 points into one prose paragraph should be an inline HTML list instead —
 `<ol>` for ordered steps, `<ul>` for parallel points, short lead-in clause
@@ -252,6 +253,30 @@ kept as text before the list. Applies to step `text:` fields and practice
 the identical structure in the `_es` twin. Leave alone: single actions,
 naturally flowing two-clause sentences, hints (≤2 sentences), `gotItWhen`
 strings, and input placeholders (no HTML there).
+
+**A trailing "You've got it when: …" stays as plain text AFTER `</ol>`** —
+never as a final `<li>`. Same for any other trailing matter in the string:
+a "No score —" note, a "Got someone around?" bonus, a Song Journey link, a
+`<span class="step-figure">` image (which always stays dead last). The list
+holds the directions; the success standard sits under it, where it reads as
+a promise rather than a step. (Jonathan chose this explicitly on 2026-07-25
+over folding it into the list.)
+
+**Where the bar actually sits.** Jonathan's words, 2026-07-25: *"anything
+that has multiple steps should have bullet points."* In practice: a card of
+roughly 200+ characters containing more than one thing the student DOES is a
+list. Do not skip one because the actions "flow naturally," are "one
+continuous technique," or "would need re-stitching" — re-stitch it, and
+splitting a single long sentence into two `<li>`s is fine. But the opposite
+failure is real too: a two-item list whose second item is a technique
+reminder, or a card that ends up reading like assembly instructions instead
+of a coach talking, has gone too far. Preserve the author's words either way
+— re-split and lightly re-stitch, never rewrite the voice.
+
+The 2026-07-25 sweep applied this across all 13 modules (~157 cards). If a
+card is still prose, it was left that way on purpose: single action, pure
+explanation, a bare "Watch: `<a>`video`</a>`" line, or a wrap-up reflection
+question.
 
 ### Station B video pairs — aim for two voices
 In each Station B video pair, aim for video #2 from a **different instructor**

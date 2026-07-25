@@ -70,14 +70,44 @@
 
 ## Open work
 
+- [ ] **Check the list sweep for OVER-listing (Jonathan, eyes only —
+      Modules 5 and 7 first).** The 2026-07-25 sweep converted ~157 cards;
+      Module 5 changed most (26 cards, several in a row in Station C) and
+      Module 7 next (18, mostly barre-chord finger placements). The failure
+      mode to look for is the opposite of the one that started this: a card
+      that reads like assembly instructions instead of a coach talking, or a
+      two-item list whose second item is a technique reminder ("keep the
+      thumb behind the neck") rather than a step. Those should go back to
+      prose — name the card and it's a quick revert. Deliberately left as
+      prose already: single-action cards, "Watch: <a>video</a>" lines, and
+      wrap-up reflection questions.
+
+- [ ] **Check the Coach gate with a real guitar on a school Chromebook
+      (Jonathan).** It is verified only against headless runs. Three things,
+      in priority order:
+      1. **Does "Mark it anyway" read as a legitimate choice or as
+         cheating?** This matters more than the threshold. The gate is the
+         first thing on the site that tells a student no — everything else
+         is self-directed. If the override reads as cheating, the student
+         with a dead mic stops marking skills at all and the progress data
+         gets WORSE, not better. Wording lives in `gate.*` in i18n.js.
+      2. **Is 💪 Good the right bar?** `COACH_GATE_MIN_LEVEL = 2` in app.js
+         (1 Needs work · 2 Good · 3 Great) — a one-constant change, no other
+         edit needed. If you bump into the gate yourself while playing it
+         cleanly, it is set too high. Try it with 29 other guitars audible,
+         not in a quiet room.
+      3. **Does "Practice it now" land where you'd expect?** It should open
+         that skill's practice panel and pulse its 🎤 button. Gated skills to
+         try: `m2w2-s1`, or most of Module 5 Set 2. A quiz or fretboard-game
+         skill should still mark instantly, with no card at all.
+
 - [ ] **Listening Coach check-off gate — teacher view of overrides
       (2026-07-25).** The gate records `games.coachSkill[skillId] =
       {level, last, at, override?, overrideAt?}`; `teacher.js` does not
       surface it yet. Worth adding a marker in the skills grid so a
       Coach-backed "I've got it!" reads differently from a self-declared
-      one. Also unverified with a real mic in a real classroom: is
-      `COACH_GATE_MIN_LEVEL = 2` (💪 Good) the right bar, or does a noisy
-      room make it feel punitive?
+      one — an override is a signal about the mic or the room, not just
+      about the student.
 
 - [ ] **Note Runner — live guitar check (Jonathan, on a school Chromebook if
       possible).** The new adaptive arcade game shipped verified only against
