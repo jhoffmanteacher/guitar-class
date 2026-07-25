@@ -102,8 +102,8 @@ SETS.push(
             steps: [
               {
                 label: 'Low E notes with your chart', label_es: 'Notas de la Mi grave con tu tabla',
-                text: 'Play-along preview: keep your note-name chart open and play up the low E string slowly with the audio, frets 0–12 — E · F · G · A · B · C · D · E — saying each name aloud. Lean on the chart here; you\'ll do it from memory at the practice station.',
-                text_es: 'Adelanto para tocar junto: mantén abierta tu tabla de nombres de notas y toca despacio hacia arriba en la cuerda Mi grave junto con el audio, trastes 0–12 — E · F · G · A · B · C · D · E — diciendo cada nombre en voz alta. Apóyate en la tabla aquí; lo harás de memoria en la estación de práctica.',
+                text: 'Play-along preview: keep your note-name chart open and play up the low E string slowly with the audio, frets 0–12 — E · F · G · A · B · C · D · E — saying each name aloud. Lean on the chart here; you\'ll do it from memory at the practice station.<span class="step-figure"><img src="img/m2-alphabet-loop.svg" alt="Diagram of the musical alphabet A to G arranged in a loop, with an arrow showing that after G it starts over at A."></span>',
+                text_es: 'Adelanto para tocar junto: mantén abierta tu tabla de nombres de notas y toca despacio hacia arriba en la cuerda Mi grave junto con el audio, trastes 0–12 — E · F · G · A · B · C · D · E — diciendo cada nombre en voz alta. Apóyate en la tabla aquí; lo harás de memoria en la estación de práctica.<span class="step-figure"><img src="img/m2-alphabet-loop.svg" alt="Diagrama del alfabeto musical de A a G en un círculo, con una flecha que muestra que después de G se empieza de nuevo en A."></span>',
                 hint: 'Slow is fine. Right now the goal is connecting each name to its spot — use the chart freely.',
                 hint_es: 'Ir despacio está bien. Ahora mismo la meta es conectar cada nombre con su lugar — usa la tabla libremente.',
                 skills: [2],
@@ -178,8 +178,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge: low E run', label_es: 'Reto: recorrido de la Mi grave',
-                text: 'Challenge 1 — Low E Run: play every natural note up the low E string and back down — E · F · G · A · B · C · D · E — saying each name aloud. You\'ve got it when: one clean lap (a lap = one full time through) without looking at the chart, with no mistakes.',
-                text_es: 'Reto 1 — Recorrido de la Mi grave: toca cada nota natural hacia arriba en la cuerda Mi grave y de regreso — E · F · G · A · B · C · D · E — diciendo cada nombre en voz alta. Lo tienes cuando: una vuelta limpia (una vuelta = una pasada completa) sin mirar la tabla, sin errores.',
+                text: 'Challenge 1 — Low E Run: play every natural note up the low E string and back down — E · F · G · A · B · C · D · E — saying each name aloud. You\'ve got it when: one clean lap (a lap = one full time through) without looking at the chart, with no mistakes.<span class="step-figure"><img src="img/m2-note-staircase.svg" alt="The notes E F G A B C D E drawn as an uneven staircase: most steps are two frets tall, but E to F and B to C are only one fret apart."></span>',
+                text_es: 'Reto 1 — Recorrido de la Mi grave: toca cada nota natural hacia arriba en la cuerda Mi grave y de regreso — E · F · G · A · B · C · D · E — diciendo cada nombre en voz alta. Lo tienes cuando: una vuelta limpia (una vuelta = una pasada completa) sin mirar la tabla, sin errores.<span class="step-figure"><img src="img/m2-note-staircase.svg" alt="Las notas E F G A B C D E dibujadas como una escalera desigual: la mayoría de los escalones suben dos trastes, pero de E a F y de B a C es solo un traste."></span>',
                 hint: 'Hearing + saying + playing helps you memorize it. Peek at the chart only if you\'re truly stuck. Set the ⏱ Timer (bottom of the screen) to 2 min and count how many clean laps you fit before it beeps — try for a higher number next session.',
                 hint_es: 'Escuchar + decir + tocar te ayuda a memorizarlo. Mira la tabla solo si de verdad estás atascado. Pon el ⏱ Temporizador (abajo en la pantalla) en 2 min y cuenta cuántas vueltas limpias logras antes de que suene — intenta superar el número la próxima sesión.',
                 stuck: 'Master frets 0–5 only (E–A) without looking at the chart first, then add 7–12 once those are automatic.',
@@ -246,8 +246,8 @@ SETS.push(
               },
               {
                 label: 'Shuffle self-quiz', label_es: 'Autoevaluación con papelitos',
-                text: 'Shuffle self-quiz:<ol><li>Write frets 0–12 on small scraps of paper and shuffle them.</li><li>Flip one at a time and say the A-string note within 3 seconds.</li><li>Go 10 rounds.</li></ol>Got someone around? Have them call out random frets instead — same 3-second limit.',
-                text_es: 'Autoevaluación con papelitos:<ol><li>Escribe los trastes 0–12 en pequeños papelitos y revuélvelos.</li><li>Voltea uno a la vez y di la nota de la cuerda La en 3 segundos.</li><li>Haz 10 rondas.</li></ol>¿Tienes a alguien cerca? Pídele que diga trastes al azar en su lugar — con el mismo límite de 3 segundos.',
+                text: 'Shuffle self-quiz:<ol><li>Write frets 0–12 on small scraps of paper and shuffle them.</li><li>Flip one at a time and say the A-string note within 3 seconds.</li><li>Go 10 rounds.</li></ol>Got someone around? Have them call out random frets instead — same 3-second limit.<span class="step-figure"><img src="img/m2-shuffle-slips.svg" alt="Three steps of the shuffle game: a pile of shuffled paper slips, one drawn slip showing fret 7, and the answer E said within three seconds."></span>',
+                text_es: 'Autoevaluación con papelitos:<ol><li>Escribe los trastes 0–12 en pequeños papelitos y revuélvelos.</li><li>Voltea uno a la vez y di la nota de la cuerda La en 3 segundos.</li><li>Haz 10 rondas.</li></ol>¿Tienes a alguien cerca? Pídele que diga trastes al azar en su lugar — con el mismo límite de 3 segundos.<span class="step-figure"><img src="img/m2-shuffle-slips.svg" alt="Los tres pasos del juego de papelitos: un montón de papelitos revueltos, un papelito volteado con el traste 7, y la respuesta E dicha en menos de tres segundos."></span>',
                 hint: 'No chart. If you stall on a note, loop just that part of the string until it\'s automatic.',
                 hint_es: 'Sin tabla. Si te trabas en una nota, repite solo esa parte de la cuerda hasta que sea automática.'
               },
@@ -425,8 +425,8 @@ SETS.push(
               },
               {
                 label: 'Watch: avoiding fret buzz', label_es: 'Mira: evita el zumbido',
-                text: 'Watch: <a href="https://youtu.be/IscDj_-Nr0s" target="_blank">Finger Placement to Avoid Fret Buzz (BC-106) – JustinGuitar</a> (0:00–4:00).',
-                text_es: 'Mira: <a href="https://youtu.be/IscDj_-Nr0s" target="_blank">Finger Placement to Avoid Fret Buzz (BC-106) – JustinGuitar</a> (0:00–4:00).',
+                text: 'Watch: <a href="https://youtu.be/IscDj_-Nr0s" target="_blank">Finger Placement to Avoid Fret Buzz (BC-106) – JustinGuitar</a> (0:00–4:00).<span class="step-figure"><img src="img/m2-behind-the-fret.svg" alt="Side view of a string over the frets: a fingertip just behind the fret rings clean, a fingertip too far back buzzes, and a fingertip on top of the fret wire mutes the note."></span>',
+                text_es: 'Mira: <a href="https://youtu.be/IscDj_-Nr0s" target="_blank">Finger Placement to Avoid Fret Buzz (BC-106) – JustinGuitar</a> (0:00–4:00).<span class="step-figure"><img src="img/m2-behind-the-fret.svg" alt="Vista lateral de una cuerda sobre los trastes: la yema justo detrás del traste suena limpia, muy atrás la nota zumba, y encima del traste la nota queda apagada."></span>',
                 hint: 'As he lists each cause, pause and test it on your own guitar — find your buzz before he names the fix.',
                 hint_es: 'Mientras él enumera cada causa, pausa y pruébala en tu propia guitarra — encuentra tu zumbido antes de que él nombre la solución.',
                 skills: [1, 2],
@@ -450,8 +450,8 @@ SETS.push(
               },
               {
                 label: 'Watch: how to read TAB', label_es: 'Mira: cómo leer TAB',
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=qR0O0bUl5_A" target="_blank">How to Read Guitar TAB – Lauren Bateman (0:00–4:00)</a>.',
-                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=qR0O0bUl5_A" target="_blank">How to Read Guitar TAB – Lauren Bateman (0:00–4:00)</a>.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=qR0O0bUl5_A" target="_blank">How to Read Guitar TAB – Lauren Bateman (0:00–4:00)</a>.<span class="step-figure"><img src="img/m2-tab-orientation.svg" alt="A TAB staff with its six lines labeled: the top line is the thinnest string, high e, and the bottom line is the thickest string, low E."></span>',
+                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=qR0O0bUl5_A" target="_blank">How to Read Guitar TAB – Lauren Bateman (0:00–4:00)</a>.<span class="step-figure"><img src="img/m2-tab-orientation.svg" alt="Un TAB con sus seis líneas marcadas: la línea de arriba es la cuerda más delgada, la mi aguda, y la línea de abajo es la más gruesa, la Mi grave."></span>',
                 hint: 'Pause when she shows a TAB example. Find those notes on your guitar before hitting play.',
                 hint_es: 'Pausa cuando ella muestre un ejemplo de TAB. Encuentra esas notas en tu guitarra antes de presionar reproducir.',
                 skills: [4],
@@ -604,8 +604,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge: finger workout', label_es: 'Reto: ejercicio de dedos',
-            text: 'Challenge 1 — Finger Workout: play frets 1–5 on the low E string, one finger per fret, then do the same on the A string. Keep your thumb behind the neck. You\'ve got it when: every note rings clean with no buzz.',
-            text_es: 'Reto 1 — Ejercicio de dedos: toca los trastes 1–5 en la cuerda Mi grave, un dedo por traste, y luego lo mismo en la cuerda La. Mantén el pulgar detrás del mástil. Lo tienes cuando: cada nota suena limpia sin zumbido.',
+            text: 'Challenge 1 — Finger Workout: play frets 1–5 on the low E string, one finger per fret, then do the same on the A string. Keep your thumb behind the neck. You\'ve got it when: every note rings clean with no buzz.<span class="step-figure"><img src="img/m2-thumb-behind-neck.svg" alt="The guitar neck seen end-on, twice: with the thumb flat on the back of the neck the fingers drop straight down, but with the thumb hooked over the top the fingers flatten and mute strings."></span>',
+            text_es: 'Reto 1 — Ejercicio de dedos: toca los trastes 1–5 en la cuerda Mi grave, un dedo por traste, y luego lo mismo en la cuerda La. Mantén el pulgar detrás del mástil. Lo tienes cuando: cada nota suena limpia sin zumbido.<span class="step-figure"><img src="img/m2-thumb-behind-neck.svg" alt="El mástil visto de frente en dos versiones: con el pulgar plano detrás del mástil los dedos caen rectos, pero con el pulgar enganchado por encima los dedos se aplastan y apagan cuerdas."></span>',
             hint: 'Go as slow as you need. Every note should ring cleanly with no buzz.',
             hint_es: 'Ve tan despacio como necesites. Cada nota debe sonar limpia sin zumbido.',
             stuck: 'Use just frets 1–3 with three fingers first, then add the pinky on frets 4–5.',
@@ -624,8 +624,8 @@ SETS.push(
           },
           {
             label: 'One-finger-per-fret check', label_es: 'Revisión de un dedo por traste',
-            text: 'One-finger-per-fret check: index=1, middle=2, ring=3, pinky=4 up the low E string. Every note rings — nothing buzzes or mutes. Click to hear the clean target tone.',
-            text_es: 'Revisión de un dedo por traste: índice=1, medio=2, anular=3, meñique=4 subiendo la cuerda Mi grave. Cada nota suena — nada zumba ni se apaga. Haz clic para escuchar el tono objetivo limpio.',
+            text: 'One-finger-per-fret check: index=1, middle=2, ring=3, pinky=4 up the low E string. Every note rings — nothing buzzes or mutes. Click to hear the clean target tone.<span class="step-figure"><img src="img/m2-one-finger-per-fret.svg" alt="Fretboard diagram with a numbered dot just behind each of the first four frets on the low E string: finger 1 presses fret 1, finger 2 fret 2, finger 3 fret 3, and finger 4 fret 4."></span>',
+            text_es: 'Revisión de un dedo por traste: índice=1, medio=2, anular=3, meñique=4 subiendo la cuerda Mi grave. Cada nota suena — nada zumba ni se apaga. Haz clic para escuchar el tono objetivo limpio.<span class="step-figure"><img src="img/m2-one-finger-per-fret.svg" alt="Diagrama del diapasón con un punto numerado justo detrás de cada uno de los primeros cuatro trastes en la cuerda Mi grave: el dedo 1 pisa el traste 1, el 2 el traste 2, el 3 el traste 3 y el 4 el traste 4."></span>',
             hint: 'Keep unused fingers hovering close, ready to drop down.',
             hint_es: 'Mantén los dedos que no usas flotando cerca, listos para bajar.',
             skills: [2, 3],
@@ -736,8 +736,8 @@ SETS.push(
           },
           {
             label: 'Challenge: Watchtower bass riff', label_es: 'Reto: riff de bajo de Watchtower',
-            text: 'Challenge 3 — Watchtower Bass Riff (your module assessment piece): using the TAB, play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. You\'ve got it when: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-            text_es: 'Reto 3 — Riff de bajo de Watchtower (tu pieza de evaluación del módulo): usando el TAB, toca la línea de bajo de "All Along the Watchtower" solo en la cuerda Mi grave — A · G · F · G, en bucle — una nota por pulso a 60 BPM. Lo tienes cuando: el riff de principio a fin de memoria, a tiempo, con tono limpio y digitación correcta. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+            text: 'Challenge 3 — Watchtower Bass Riff (your module assessment piece): using the TAB, play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. You\'ve got it when: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.<span class="step-figure"><img src="img/m2-record-assessment.svg" alt="Three steps: turn on the Chromebook camera, press record, and play the riff A G F G from memory."></span>',
+            text_es: 'Reto 3 — Riff de bajo de Watchtower (tu pieza de evaluación del módulo): usando el TAB, toca la línea de bajo de "All Along the Watchtower" solo en la cuerda Mi grave — A · G · F · G, en bucle — una nota por pulso a 60 BPM. Lo tienes cuando: el riff de principio a fin de memoria, a tiempo, con tono limpio y digitación correcta. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.<span class="step-figure"><img src="img/m2-record-assessment.svg" alt="Tres pasos: enciende la cámara del Chromebook, pulsa grabar y toca el riff A, G, F, G de memoria."></span>',
             hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A). Keep your thumb behind the neck. Let each note ring fully before the next. Drill it until you can run it with your eyes closed — then record yourself playing it: that\'s your module-end assessment piece.',
             hint_es: 'Digitación: índice en el traste 1 (F), anular en el traste 3 (G), meñique en el traste 5 (A). Mantén el pulgar detrás del mástil. Deja que cada nota suene por completo antes de la siguiente. Practícalo hasta que puedas tocarlo con los ojos cerrados — luego grábate tocándolo: esa es tu pieza de evaluación de fin de módulo.',
             stuck: 'Loop just F–G (frets 1–3) until the finger change is clean, then add the A on fret 5.',

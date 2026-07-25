@@ -5,6 +5,12 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-24 — Module 2, now illustrated
+
+### Added
+
+- Eight new diagrams throughout Module 2, so the trickiest ideas are pictures now, not just words: the A–G musical alphabet loop, the uneven "staircase" showing why B–C and E–F are only one fret apart, how the shuffled-slips quiz game works, exactly where your fingertip goes behind the fret, how TAB lines map to the strings (top line = thinnest!), thumb-behind-the-neck seen end-on, one-finger-per-fret with the same numbered dots as the chord diagrams, and the three-step "record your assessment on your Chromebook" guide. Every diagram has a Spanish description for screen readers and Español mode.
+
 ## 2026-07-24 — New game: Note Runner
 
 ### Added

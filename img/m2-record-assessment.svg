@@ -1,0 +1,22 @@
+<svg font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" viewBox="0 0 640 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Open your Chromebook camera, hit record, play A G F G from memory">
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <g>
+  <g transform="translate(39,22) scale(7)" fill="none" stroke="#2f2c28" stroke-width="0.38" stroke-linecap="round" stroke-linejoin="round">
+  <path d="M3 19l18 0"/><path d="M5 7a1 1 0 0 1 1 -1h12a1 1 0 0 1 1 1v8a1 1 0 0 1 -1 1h-12a1 1 0 0 1 -1 -1l0 -8"/>
+  </g>
+  <circle cx="123" cy="71" r="2.4" fill="#2f2c28"/>
+  <text x="123" y="180" font-size="15" fill="#1a1a18" text-anchor="middle" font-weight="600">Chromebook camera on</text>
+  </g>
+  <path d="M228 88 h 24 m -8 -7 l 9 7 l -9 7" stroke="#854f0b" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <g>
+  <g transform="translate(268.4,35.4) scale(4.3)" fill="none" stroke="#b3372a" stroke-width="0.7"><path d="M5 12a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/></g>
+  <circle cx="320" cy="87" r="18" fill="#b3372a"/>
+  <text x="320" y="180" font-size="15" fill="#1a1a18" text-anchor="middle" font-weight="600">hit record</text>
+  </g>
+  <path d="M388 88 h 24 m -8 -7 l 9 7 l -9 7" stroke="#854f0b" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <g>
+  <text x="522" y="80" font-size="26" font-weight="700" fill="#5b52a8" text-anchor="middle" font-family="Georgia,serif">A &#183; G &#183; F &#183; G</text>
+  <path d="M498 102 q 8 8 16 0 M 526 102 q 8 8 16 0" stroke="#2f2c28" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <text x="522" y="180" font-size="15" fill="#1a1a18" text-anchor="middle" font-weight="600">play it from memory</text>
+  </g>
+  </svg>

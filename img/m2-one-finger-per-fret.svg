@@ -1,0 +1,27 @@
+<svg font-family="-apple-system,'Segoe UI',Roboto,Arial,sans-serif" viewBox="0 0 640 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="One finger per fret: index presses fret 1, middle fret 2, ring fret 3, pinky fret 4">
+  <rect width="100%" height="100%" fill="#ffffff"/>
+  <rect x="60" y="40" width="520" height="90" fill="#fffdf8" stroke="#2f2c28" stroke-width="2"/>
+  <rect x="54" y="38" width="7" height="94" fill="#2f2c28" rx="2"/>
+  <g stroke="#2f2c28" stroke-width="2.5">
+  <path d="M185 40 V 130 M303 40 V 130 M415 40 V 130 M520 40 V 130"/>
+  </g>
+  <g stroke="#c9c2b4" stroke-linecap="round">
+  <path d="M54 52 H 580" stroke-width="1"/>
+  <path d="M54 65 H 580" stroke-width="1.2"/>
+  <path d="M54 78 H 580" stroke-width="1.5"/>
+  <path d="M54 91 H 580" stroke-width="1.8"/>
+  <path d="M54 104 H 580" stroke-width="2.2"/>
+  </g>
+  <path d="M54 117 H 580" stroke="#2f2c28" stroke-width="2.8" stroke-linecap="round"/>
+  <text x="588" y="121" font-size="13" fill="#2f2c28" font-weight="600">low E</text>
+  <g fill="#185fa5">
+  <circle cx="171" cy="117" r="12"/><circle cx="289" cy="117" r="12"/><circle cx="401" cy="117" r="12"/><circle cx="506" cy="117" r="12"/>
+  </g>
+  <g fill="#fff" font-size="14" font-weight="700" text-anchor="middle">
+  <text x="171" y="122">1</text><text x="289" y="122">2</text><text x="401" y="122">3</text><text x="506" y="122">4</text>
+  </g>
+  <g font-size="14" fill="#5e5e58" text-anchor="middle">
+  <text x="122" y="152">fret 1</text><text x="244" y="152">fret 2</text><text x="359" y="152">fret 3</text><text x="467" y="152">fret 4</text>
+  </g>
+  <text x="320" y="180" font-size="15" fill="#1a1a18" text-anchor="middle" font-weight="600">1 = index &#160;&#183;&#160; 2 = middle &#160;&#183;&#160; 3 = ring &#160;&#183;&#160; 4 = pinky</text>
+  </svg>
