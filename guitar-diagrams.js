@@ -1,0 +1,416 @@
+/* ══════════════════════════════════════════════════════════════
+   guitar-diagrams.js — SINGLE SOURCE for every chord / string /
+   fretboard / note diagram in the course.
+
+   Loaded by index.html as a plain script BEFORE app.js and
+   coach.js, both of which call these functions as globals.
+   Also loadable from Node (see tools/guitar-diagrams-cli.mjs) so
+   the teacher slide decks render the exact same shapes students
+   see on the site. Extracted from app.js 2026-07-26 — app.js no
+   longer carries a copy, so the two can never drift.
+
+   ── Themes ──
+   Default is `css`: the site's CSS custom properties, so browser
+   output is byte-for-byte what app.js produced before the split.
+   Pass a theme when rendering OUTSIDE the site, where var(--…)
+   resolves to nothing:
+     'slide'  cream #FAF6EF ground, stroke/font ×1.35 for projection
+     'web'    the site's light-mode hex, unboosted
+   A theme also switches on standalone mode: an explicit background
+   rect, a font-family on the root <svg>, and width/height attrs.
+   Geometry never changes — only colour, weight, and framing.
+   ══════════════════════════════════════════════════════════════ */
+
+var GUITAR_DIAGRAM_THEMES = {
+  /* Site rendering. Do not change these strings — they are what
+     keeps the in-browser output identical to the pre-split app.js. */
+  css: {
+    bg: 'var(--bg)', text: 'var(--text)', text2: 'var(--text2)',
+    text3: 'var(--text3)', green: 'var(--green-text)',
+    boost: 1, standalone: false,
+  },
+  slide: {
+    bg: '#FAF6EF', text: '#1a1a18', text2: '#5e5e58',
+    text3: '#585852', green: '#3b6d11',
+    boost: 1.35, standalone: true,
+  },
+  web: {
+    bg: '#ffffff', text: '#1a1a18', text2: '#5e5e58',
+    text3: '#585852', green: '#3b6d11',
+    boost: 1, standalone: true,
+  },
+};
+
+var GD_SANS = "Calibri,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif";
+
+/* Matches app.js's escHtml exactly — kept private so this file has
+   no dependency on app.js load order. */
+function gdEsc(s){
+  return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function gdTheme(opts){
+  opts = opts || {};
+  var base = GUITAR_DIAGRAM_THEMES[opts.theme || 'css'] || GUITAR_DIAGRAM_THEMES.css;
+  var t = {
+    bg: base.bg, text: base.text, text2: base.text2,
+    text3: base.text3, green: base.green,
+    boost: opts.boost != null ? opts.boost : base.boost,
+    standalone: opts.standalone != null ? opts.standalone : base.standalone,
+  };
+  if (opts.bg) t.bg = opts.bg;
+  /* boost 1 must round-trip to the original literals: +(0.9).toFixed(2) → 0.9 */
+  t.b = function(n){ return +(n * t.boost).toFixed(2); };
+  return t;
+}
+
+/* Root <svg> tag. In css mode this reproduces the original markup
+   exactly; standalone mode adds sizing and a font stack. */
+function gdOpen(W, H, t, opts, cssFontFamily){
+  var px = opts && opts.px != null ? opts.px : (t.standalone ? 4 : 0);
+  var size = px ? ' width="' + Math.round(W * px) + '" height="' + Math.round(H * px) + '"' : '';
+  var ff = t.standalone ? ' font-family="' + GD_SANS + '"'
+                        : (cssFontFamily ? ' font-family="' + cssFontFamily + '"' : '');
+  return '<svg xmlns="http://www.w3.org/2000/svg"' + size + ' viewBox="0 0 ' + W + ' ' + H + '"' + ff + '>';
+}
+
+function gdGround(W, H, t){
+  return t.standalone ? '<rect width="' + W + '" height="' + H + '" fill="' + t.bg + '"/>' : '';
+}
+
+/* Per-element font-family overrides. The site's originals name
+   -apple-system, which does not exist off macOS and falls back to a
+   serif that mangles the finger numerals. In standalone mode we emit
+   nothing and let the root GD_SANS stack apply; in css mode we emit
+   the original string verbatim so browser output stays byte-identical. */
+function gdFF(t, original){
+  return t.standalone ? '' : ' font-family="' + original + '"';
+}
+
+/* ══════════════════════════════════════════════════════════════
+   VERTICAL CHORD BOX
+   cfg = { position, chord: [[stringNum, fret, finger], …] }
+   string 6 = low E, 1 = high E · fret 'x' = mute, 0 = open
+   ══════════════════════════════════════════════════════════════ */
+function chordDiagramSVG(cfg, opts){
+  var t = gdTheme(opts);
+  opts = opts || {};
+  var label = t.standalone ? opts.label : null;   // name above the box, standalone only
+  var labelH = label ? 16 : 0;
+
+  var W = 96, H = 104 + labelH, padL = 22, padR = 14, padT = 20 + labelH, padB = 4;
+  var NUM_FRETS = 4;
+  var boxW = W - padL - padR, boxH = (H - labelH) - 20 - padB;
+  var strGap = boxW / 5, fretGap = boxH / NUM_FRETS;
+  var pos = cfg.position || 0, isOpen = pos === 0;
+  var dotR = Math.min(strGap, fretGap) * 0.36;
+  var ind = {}, chordArr = cfg.chord || [];
+  chordArr.forEach(function(e){ ind[e[0]] = { fret: e[1], finger: e[2] }; });
+
+  /* css mode keeps the original: width/height present, no root font-family */
+  var s;
+  if (t.standalone) {
+    s = gdOpen(W, H, t, opts) + gdGround(W, H, t);
+  } else {
+    s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '">';
+  }
+
+  if (label) {
+    s += '<text x="' + (W / 2) + '" y="' + (labelH - 3) + '" text-anchor="middle" font-size="' + t.b(13)
+      +  '" font-weight="700" fill="' + t.text + '">' + gdEsc(label) + '</text>';
+  }
+
+  for (var n = 6; n >= 1; n--) {
+    var xi = 6 - n, x = padL + xi * strGap, st = ind[n];
+    if (st) {
+      if (st.fret === 'x') {
+        s += '<text x="' + x + '" y="' + (padT - 7) + '" text-anchor="middle" dominant-baseline="middle" font-size="'
+          +  t.b(11) + '" fill="' + t.text2 + '"' + gdFF(t, 'sans-serif') + '>×</text>';
+      } else if (st.fret === 0) {
+        s += '<circle cx="' + x + '" cy="' + (padT - 8) + '" r="3.2" fill="none" stroke="' + t.text2
+          +  '" stroke-width="' + t.b(1.1) + '"/>';
+      }
+    }
+    s += '<line x1="' + x + '" y1="' + padT + '" x2="' + x + '" y2="' + (padT + NUM_FRETS * fretGap)
+      +  '" stroke="' + t.text3 + '" stroke-width="' + t.b(0.9) + '"/>';
+  }
+
+  if (isOpen) {
+    s += '<rect x="' + (padL - 1) + '" y="' + (padT - 2.5) + '" width="' + (boxW + 2) + '" height="3" fill="' + t.text + '" rx="1"/>';
+  } else {
+    s += '<text x="' + (padL - 5) + '" y="' + (padT + fretGap * 0.55) + '" text-anchor="end" dominant-baseline="middle" font-size="'
+      +  t.b(9) + '" fill="' + t.text2 + '"' + gdFF(t, 'sans-serif') + '>' + pos + 'fr</text>';
+  }
+
+  for (var f = 1; f <= NUM_FRETS; f++) {
+    var y = padT + f * fretGap;
+    s += '<line x1="' + padL + '" y1="' + y + '" x2="' + (padL + boxW) + '" y2="' + y
+      +  '" stroke="' + t.text3 + '" stroke-width="' + t.b(0.8) + '"/>';
+  }
+
+  chordArr.forEach(function(e){
+    var num = e[0], fr = e[1], fg = e[2];
+    if (typeof fr !== 'number' || fr <= 0) return;
+    var row = isOpen ? fr : (fr - pos + 1);
+    if (row < 1 || row > NUM_FRETS) return;
+    var cx = padL + (6 - num) * strGap, cy = padT + (row - 0.5) * fretGap;
+    s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + dotR + '" fill="' + t.text + '"/>';
+    if (fg != null && fg !== '') {
+      s += '<text x="' + cx + '" y="' + cy + '" text-anchor="middle" dominant-baseline="central" font-size="'
+        +  t.b(9) + '" font-weight="600" fill="' + t.bg + '"' + gdFF(t, '-apple-system,sans-serif') + '>' + fg + '</text>';
+    }
+  });
+
+  return s + '</svg>';
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CHORD SHAPE LIBRARY
+   ══════════════════════════════════════════════════════════════ */
+var CHORD_DIAGRAMS = {
+  'E'  : { position:0, chord:[[6,0,0],[5,2,2],[4,2,3],[3,1,1],[2,0,0],[1,0,0]] },
+  'Em' : { position:0, chord:[[6,0,0],[5,2,2],[4,2,3],[3,0,0],[2,0,0],[1,0,0]] },
+  'A'  : { position:0, chord:[[6,'x',''],[5,0,0],[4,2,1],[3,2,2],[2,2,3],[1,0,0]] },
+  'Am' : { position:0, chord:[[6,'x',''],[5,0,0],[4,2,2],[3,2,3],[2,1,1],[1,0,0]] },
+  'D'  : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,2,1],[2,3,3],[1,2,2]] },
+  'Dm' : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,2,2],[2,3,3],[1,1,1]] },
+  'G'  : { position:0, chord:[[6,3,2],[5,2,1],[4,0,0],[3,0,0],[2,0,0],[1,3,3]] },
+  'C'  : { position:0, chord:[[6,'x',''],[5,3,3],[4,2,2],[3,0,0],[2,1,1],[1,0,0]] },
+  'F'  : { position:0, chord:[[6,'x',''],[5,'x',''],[4,3,3],[3,2,2],[2,1,1],[1,1,1]] },
+  /* Bm / F#m / C#m: partial-barre (beginner) shapes — these are what Modules 5–6
+     teach. Module 7 (barre chords) skips these auto-link pop-ups entirely (see
+     wrapChordLinksIn) and renders full-barre shapes inline instead. */
+  'Bm' : { position:2, chord:[[6,'x',''],[5,'x',''],[4,4,4],[3,4,3],[2,3,2],[1,2,1]] },
+  'B7' : { position:0, chord:[[6,'x',''],[5,2,2],[4,1,1],[3,2,3],[2,0,0],[1,2,4]] },
+  'F#m': { position:2, chord:[[6,'x',''],[5,'x',''],[4,4,3],[3,2,1],[2,2,1],[1,2,1]] },
+  'C#m': { position:4, chord:[[6,'x',''],[5,'x',''],[4,6,4],[3,6,3],[2,5,2],[1,4,1]] },
+  'E5' : { position:0, chord:[[6,0,0],[5,2,3],[4,'x',''],[3,'x',''],[2,'x',''],[1,'x','']] },
+  'G5' : { position:3, chord:[[6,3,1],[5,5,3],[4,'x',''],[3,'x',''],[2,'x',''],[1,'x','']] },
+  'A5' : { position:5, chord:[[6,5,1],[5,7,3],[4,'x',''],[3,'x',''],[2,'x',''],[1,'x','']] },
+  'C5' : { position:3, chord:[[6,'x',''],[5,3,1],[4,5,3],[3,'x',''],[2,'x',''],[1,'x','']] },
+  'D5' : { position:5, chord:[[6,'x',''],[5,5,1],[4,7,3],[3,'x',''],[2,'x',''],[1,'x','']] }
+};
+
+/* Strip the SVG's fixed width/height so it scales to its container via viewBox */
+function localChordSvg(chord, opts){
+  var cfg = CHORD_DIAGRAMS[chord];
+  if (!cfg) return null;
+  return chordDiagramSVG(cfg, opts).replace(/width="\d+"\s+height="\d+"/, '');
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SINGLE-STRING CHORD BOXES — one open string, the others muted.
+   Reused via the same chordDiagramSVG renderer for consistency.
+   ══════════════════════════════════════════════════════════════ */
+var STRING_DIAGRAMS = {
+  'lowE' : { position:0, chord:[[6,0,0],[5,'x',''],[4,'x',''],[3,'x',''],[2,'x',''],[1,'x','']] },
+  'A'    : { position:0, chord:[[6,'x',''],[5,0,0],[4,'x',''],[3,'x',''],[2,'x',''],[1,'x','']] },
+  'D'    : { position:0, chord:[[6,'x',''],[5,'x',''],[4,0,0],[3,'x',''],[2,'x',''],[1,'x','']] },
+  'G'    : { position:0, chord:[[6,'x',''],[5,'x',''],[4,'x',''],[3,0,0],[2,'x',''],[1,'x','']] },
+  'B'    : { position:0, chord:[[6,'x',''],[5,'x',''],[4,'x',''],[3,'x',''],[2,0,0],[1,'x','']] },
+  'highE': { position:0, chord:[[6,'x',''],[5,'x',''],[4,'x',''],[3,'x',''],[2,'x',''],[1,0,0]] }
+};
+var STRING_LABELS = {
+  'lowE' : 'Low E (6th string)',
+  'A'    : 'A (5th string)',
+  'D'    : 'D (4th string)',
+  'G'    : 'G (3rd string)',
+  'B'    : 'B (2nd string)',
+  'highE': 'High E (1st string)'
+};
+function localStringSvg(kind, opts){
+  var cfg = STRING_DIAGRAMS[kind];
+  if (!cfg) return null;
+  return chordDiagramSVG(cfg, opts).replace(/width="\d+"\s+height="\d+"/, '');
+}
+
+var STRING_KIND_TO_NUM  = { lowE:6, A:5, D:4, G:3, B:2, highE:1 };
+var STRING_SHORT_LABEL  = { lowE:'low E', A:'A', D:'D', G:'G', B:'B', highE:'high E' };
+var STRING_NUM_TO_LABEL = { 1:'high E', 2:'B', 3:'G', 4:'D', 5:'A', 6:'low E' };
+var FRETBOARD_INLAYS = [3, 5, 7, 9, 12];
+
+/* ══════════════════════════════════════════════════════════════
+   HORIZONTAL FRETBOARD — one string highlighted, 12 frets.
+   Visually distinct from the vertical chord box so students can
+   tell at a glance that the reference is a STRING, not a shape.
+   ══════════════════════════════════════════════════════════════ */
+function localStringFretboardSvg(kind, opts){
+  var sNum = STRING_KIND_TO_NUM[kind];
+  if (!sNum) return null;
+  var t = gdTheme(opts);
+  var W = 280, H = 80, padL = 36, padR = 10, padT = 7, padB = 16;
+  var openW = 16, maxFret = 12;
+  var fretW = (W - padL - padR - openW) / maxFret;
+  var boxH = H - padT - padB;
+  var strGap = boxH / 5;
+  var nutX = padL + openW;
+  var fretX = function(f){ return nutX + f * fretW; };
+
+  var s = gdOpen(W, H, t, opts, "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif") + gdGround(W, H, t);
+
+  FRETBOARD_INLAYS.forEach(function(f){
+    var cx = nutX + (f - 0.5) * fretW, cy = padT + boxH / 2;
+    s += '<circle cx="' + cx + '" cy="' + cy + '" r="2" fill="' + t.text3 + '" opacity="0.35"/>';
+    if (f === 12) {
+      s += '<circle cx="' + cx + '" cy="' + (cy - 8) + '" r="2" fill="' + t.text3 + '" opacity="0.35"/>';
+      s += '<circle cx="' + cx + '" cy="' + (cy + 8) + '" r="2" fill="' + t.text3 + '" opacity="0.35"/>';
+    }
+  });
+
+  for (var f1 = 1; f1 <= maxFret; f1++) {
+    var x = fretX(f1);
+    s += '<line x1="' + x + '" y1="' + padT + '" x2="' + x + '" y2="' + (padT + boxH)
+      +  '" stroke="' + t.text3 + '" stroke-width="' + t.b(0.7) + '"/>';
+  }
+  s += '<rect x="' + (nutX - 1.5) + '" y="' + (padT - 1.5) + '" width="3" height="' + (boxH + 3) + '" fill="' + t.text + '" rx="0.5"/>';
+
+  for (var n = 1; n <= 6; n++) {
+    var y = padT + (n - 1) * strGap;
+    var isTarget = n === sNum;
+    var stroke = isTarget ? t.green : t.text3;
+    var sw = t.b(isTarget ? 2 : 0.7);
+    s += '<line x1="' + padL + '" y1="' + y + '" x2="' + fretX(maxFret) + '" y2="' + y
+      +  '" stroke="' + stroke + '" stroke-width="' + sw + '"/>';
+    var labelColor = isTarget ? t.green : t.text2;
+    var labelWeight = isTarget ? '600' : '400';
+    s += '<text x="' + (padL - 5) + '" y="' + y + '" text-anchor="end" dominant-baseline="central" font-size="'
+      +  t.b(8) + '" font-weight="' + labelWeight + '" fill="' + labelColor + '">' + STRING_NUM_TO_LABEL[n] + '</text>';
+  }
+
+  var targetY = padT + (sNum - 1) * strGap, openX = padL + openW / 2;
+  s += '<circle cx="' + openX + '" cy="' + targetY + '" r="4.5" fill="none" stroke="' + t.green + '" stroke-width="' + t.b(1.5) + '"/>';
+
+  for (var f2 = 0; f2 <= maxFret; f2++) {
+    var cx2 = f2 === 0 ? openX : nutX + (f2 - 0.5) * fretW;
+    s += '<text x="' + cx2 + '" y="' + (padT + boxH + 10) + '" text-anchor="middle" font-size="' + t.b(7.5)
+      +  '" fill="' + t.text2 + '">' + f2 + '</text>';
+  }
+
+  return s + '</svg>';
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SINGLE NOTE ON THE FRETBOARD
+   Strings drawn top→bottom: high E (top) to low E (bottom),
+   matching the view when looking down at your own guitar.
+   Open notes sit to the LEFT of the nut.
+   ══════════════════════════════════════════════════════════════ */
+function ordinal(n){
+  var s = ['th','st','nd','rd'], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+function noteFullLabel(note, fret, kind){
+  var str = STRING_SHORT_LABEL[kind] || kind;
+  return fret === 0 ? note + ' · ' + str + ' open'
+                    : note + ' · ' + str + ' string, ' + ordinal(fret) + ' fret';
+}
+function localNoteSvg(kind, fret, note, opts){
+  var sNum = STRING_KIND_TO_NUM[kind];
+  if (!sNum) return null;
+  var fr = Number(fret);
+  if (isNaN(fr) || fr < 0) return null;
+  var t = gdTheme(opts);
+
+  var W = 280, H = 80, padL = 36, padR = 10, padT = 7, padB = 16;
+  var openW = 16;
+  var maxFret = Math.max(8, fr + 1);
+  var fretW = (W - padL - padR - openW) / maxFret;
+  var boxH = H - padT - padB;
+  var strGap = boxH / 5;
+  var nutX = padL + openW;
+  var fretX = function(f){ return nutX + f * fretW; };
+
+  var s = gdOpen(W, H, t, opts, "-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif") + gdGround(W, H, t);
+
+  FRETBOARD_INLAYS.filter(function(f){ return f <= maxFret; }).forEach(function(f){
+    var cx = nutX + (f - 0.5) * fretW, cy = padT + boxH / 2;
+    s += '<circle cx="' + cx + '" cy="' + cy + '" r="2" fill="' + t.text3 + '" opacity="0.35"/>';
+    if (f === 12) {
+      s += '<circle cx="' + cx + '" cy="' + (cy - 8) + '" r="2" fill="' + t.text3 + '" opacity="0.35"/>';
+      s += '<circle cx="' + cx + '" cy="' + (cy + 8) + '" r="2" fill="' + t.text3 + '" opacity="0.35"/>';
+    }
+  });
+
+  for (var f1 = 1; f1 <= maxFret; f1++) {
+    var x = fretX(f1);
+    s += '<line x1="' + x + '" y1="' + padT + '" x2="' + x + '" y2="' + (padT + boxH)
+      +  '" stroke="' + t.text3 + '" stroke-width="' + t.b(0.7) + '"/>';
+  }
+  s += '<rect x="' + (nutX - 1.5) + '" y="' + (padT - 1.5) + '" width="3" height="' + (boxH + 3) + '" fill="' + t.text + '" rx="0.5"/>';
+
+  for (var n = 1; n <= 6; n++) {
+    var y = padT + (n - 1) * strGap;
+    s += '<line x1="' + padL + '" y1="' + y + '" x2="' + fretX(maxFret) + '" y2="' + y
+      +  '" stroke="' + t.text3 + '" stroke-width="' + t.b(0.7) + '"/>';
+    s += '<text x="' + (padL - 5) + '" y="' + y + '" text-anchor="end" dominant-baseline="central" font-size="'
+      +  t.b(8) + '" fill="' + t.text2 + '">' + STRING_NUM_TO_LABEL[n] + '</text>';
+  }
+
+  for (var f2 = 0; f2 <= maxFret; f2++) {
+    var cx2 = f2 === 0 ? padL + openW / 2 : nutX + (f2 - 0.5) * fretW;
+    s += '<text x="' + cx2 + '" y="' + (padT + boxH + 10) + '" text-anchor="middle" font-size="' + t.b(7.5)
+      +  '" fill="' + t.text2 + '">' + f2 + '</text>';
+  }
+
+  var targetY = padT + (sNum - 1) * strGap;
+  var targetX = fr === 0 ? padL + openW / 2 : nutX + (fr - 0.5) * fretW;
+  var isOpenNote = fr === 0;
+  if (isOpenNote) {
+    s += '<circle cx="' + targetX + '" cy="' + targetY + '" r="6.5" fill="none" stroke="' + t.text + '" stroke-width="' + t.b(1.4) + '"/>';
+  } else {
+    s += '<circle cx="' + targetX + '" cy="' + targetY + '" r="6.5" fill="' + t.text + '"/>';
+  }
+  if (note) {
+    var textFill = isOpenNote ? t.text : t.bg;
+    s += '<text x="' + targetX + '" y="' + targetY + '" text-anchor="middle" dominant-baseline="central" font-size="'
+      +  t.b(7.5) + '" font-weight="600" fill="' + textFill + '">' + gdEsc(note) + '</text>';
+  }
+
+  return s + '</svg>';
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CONTACT SHEET — every chord in one image. Slides / wall chart
+   only; never used by the site.
+   ══════════════════════════════════════════════════════════════ */
+function chordSheetSvg(names, opts){
+  names = names && names.length ? names : Object.keys(CHORD_DIAGRAMS);
+  opts = Object.assign({ theme: 'slide' }, opts || {});
+  var t = gdTheme(opts);
+  var px = opts.px != null ? opts.px : 3;
+  var cols = opts.cols || 5;
+  var CW = 96, CH = 120, GAP = 8;
+  var rows = Math.ceil(names.length / cols);
+  var W = cols * CW + (cols + 1) * GAP;
+  var H = rows * CH + (rows + 1) * GAP;
+
+  var s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + Math.round(W * px) + '" height="' + Math.round(H * px)
+        + '" viewBox="0 0 ' + W + ' ' + H + '" font-family="' + GD_SANS + '">';
+  s += '<rect width="' + W + '" height="' + H + '" fill="' + t.bg + '"/>';
+  names.forEach(function(name, i){
+    var cx = GAP + (i % cols) * (CW + GAP);
+    var cy = GAP + Math.floor(i / cols) * (CH + GAP);
+    var inner = chordSvg(name, Object.assign({}, opts, { px: 0, label: name }));
+    if (!inner) return;
+    var body = inner.replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
+    s += '<g transform="translate(' + cx + ',' + cy + ')">' + body + '</g>';
+  });
+  return s + '</svg>';
+}
+
+/* Convenience alias used by the CLI and slide builds. */
+function chordSvg(name, opts){
+  var cfg = CHORD_DIAGRAMS[name];
+  if (!cfg) return null;
+  return chordDiagramSVG(cfg, Object.assign({ theme: 'slide' }, opts || {}));
+}
+
+/* Node entry point (tools/guitar-diagrams-cli.mjs). No effect in a browser. */
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    GUITAR_DIAGRAM_THEMES, CHORD_DIAGRAMS, STRING_DIAGRAMS, STRING_LABELS,
+    STRING_KIND_TO_NUM, STRING_SHORT_LABEL, STRING_NUM_TO_LABEL, FRETBOARD_INLAYS,
+    chordDiagramSVG, localChordSvg, localStringSvg, localStringFretboardSvg,
+    localNoteSvg, noteFullLabel, ordinal, chordSvg, chordSheetSvg,
+  };
+}

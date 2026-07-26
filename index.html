@@ -324,6 +324,7 @@
 <!-- i18n.js loads BEFORE app.js/fab-tools.js/tuner.js — all three call
      t()/setLang() at parse or event time and expect it already defined. -->
 <script defer src="i18n.js"></script>
+<script defer src="guitar-diagrams.js"></script>
 <script defer src="app.js"></script>
 <!-- Split out of app.js for maintainability. Load AFTER app.js; both attach
      global functions used by onclick handlers / the auth flow at event time.
