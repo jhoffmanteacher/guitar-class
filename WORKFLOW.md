@@ -133,6 +133,31 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **Module 5 assessment settles on one song; song titles quoted
+      site-wide** — pushed `598a580` (2026-07-26, applied via cloud patch
+      pair) then `8262116` (2026-07-26, local). The cloud patch closed out
+      the last inconsistencies from the two-song assessment work (`mr5-s8`,
+      the Full Run practice counter, Set 4's skill list, and Let It Be's Set
+      2 card all still said one song) and clarified Module 3's Mystery Chart
+      ("the lowest fretted dot" → "lowest-sounding … nearest the thick
+      strings," since the app draws frets top-to-bottom so the higher fret
+      sits lower on screen; the alphabet-walk stuck-hint now covers the A
+      string too, not just low E; the unnumbered challenge got folded into
+      its set's numbering). Locally, Jonathan then reversed the two-song
+      requirement itself: Module 5's assessment now asks for ONE core song
+      from memory (Let It Be, Luna, or "the cure") — the "song of your
+      choice" requirement is gone, though its Set 4 practice material
+      (chord-mapping, the Full Run's chart-first rep) stays as optional
+      ungraded practice, not something the assessment checks. Separately,
+      every song title across all 13 modules, `coach.js`, `i18n.js`, and the
+      six Song Journey pages is now wrapped in quotation marks for
+      consistency — including shorthand nicknames ("Watchtower," "Sweet
+      Child") and "SNA" spelled out as "Seven Nation Army" — done via 7
+      parallel file-scoped agents plus a manual pass to reconcile the
+      nickname-quoting convention across them. Live-site spot-checked in the
+      browser: Module 5's self-assessment and assessment-checklist wording,
+      the "All Along the Watchtower" Song Journey page's title/heading, and
+      Module 4's shorthand-nickname challenges all confirmed correct.
 - [x] **Report-an-issue in-site form + always-top-scroll fix** — pushed
       `a86ec71` (2026-07-24). Footer's "Report a problem" now opens an
       in-site form (`openIssueModal`/`submitIssueReport`, `app.js`) instead
