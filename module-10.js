@@ -156,9 +156,9 @@ SETS.push(
             title_es: 'Construye C mayor y G mayor en una sola cuerda',
             steps: [
               {
-                label: 'Challenge: C major walk', label_es: 'Reto: caminata de C mayor',
-                text: 'Challenge 1 — C Major Walk: play the C major scale on the A string using the recipe, saying "whole, whole, half…" out loud as you go.',
-                text_es: 'Reto 1 — Caminata de C Mayor: toca la escala de C mayor en la cuerda La usando la receta, diciendo "tono, tono, semitono…" en voz alta mientras avanzas.',
+                label: 'Challenge 1 — C Major Walk', label_es: 'Reto 1 — Caminata de C Mayor',
+                text: '<ul><li>Play the C major scale on the A string using the recipe, saying "whole, whole, half…" out loud as you go.</li></ul>',
+                text_es: '<ul><li>Toca la escala de C mayor en la cuerda La usando la receta, diciendo "tono, tono, semitono…" en voz alta mientras avanzas.</li></ul>',
                 hint: 'Start on C (A string, fret 3) and let the recipe — not a chart — tell you where each next note lands.',
                 hint_es: 'Empieza en C (cuerda La, traste 3) y deja que la receta — no un diagrama — te diga dónde cae cada siguiente nota.',
                 stuck: 'Play just the first three notes (C-D-E) until the whole-whole-half feel is automatic, then keep climbing.',
@@ -169,9 +169,9 @@ SETS.push(
                 playSeq: { label: 'C major on the A string (recipe walk)', label_es: 'C mayor en la cuerda La (caminata de la receta)', bpm: 60, notes: [48, 50, 52, 53, 55, 57, 59, 60] }
               },
               {
-                label: 'Challenge: G major walk', label_es: 'Reto: caminata de G mayor',
-                text: 'Challenge 2 — G Major Walk: play the G major scale on the low E string using the same recipe, and catch the one note that needs to be sharp.',
-                text_es: 'Reto 2 — Caminata de G Mayor: toca la escala de G mayor en la cuerda Mi grave usando la misma receta, y detecta la única nota que necesita ser sostenida.',
+                label: 'Challenge 2 — G Major Walk', label_es: 'Reto 2 — Caminata de G Mayor',
+                text: '<ol><li>Play the G major scale on the low E string using the same recipe.</li><li>Catch the one note that needs to be sharp.</li></ol>',
+                text_es: '<ol><li>Toca la escala de G mayor en la cuerda Mi grave usando la misma receta.</li><li>Detecta la única nota que necesita ser sostenida.</li></ol>',
                 hint: 'Everything is identical to the C major walk except one note — the recipe itself will tell you which.',
                 hint_es: 'Todo es idéntico a la caminata de C mayor excepto una nota — la receta misma te dirá cuál.',
                 stuck: 'Play up to the 6th note first (G-A-B-C-D-E), stop, and only then figure out what the 7th note needs to be.',
@@ -188,9 +188,9 @@ SETS.push(
             title_es: 'Di la receta mientras tocas',
             steps: [
               {
-                label: 'Challenge: recipe by heart', label_es: 'Reto: la receta de memoria',
-                text: 'Challenge 3 — Recipe by Heart (your assessment piece): play the C major scale while saying "whole, whole, half, whole, whole, whole, half" out loud, no chart, no hesitating. You\'ve got it when: you can say the whole recipe from memory before you even touch the guitar.',
-                text_es: 'Reto 3 — La Receta de Memoria (tu pieza de evaluación): toca la escala de C mayor mientras dices "tono, tono, semitono, tono, tono, tono, semitono" en voz alta, sin diagrama, sin dudar. Lo tienes cuando: puedes decir toda la receta de memoria antes incluso de tocar la guitarra.',
+                label: 'Challenge 3 — Recipe by Heart (your assessment piece)', label_es: 'Reto 3 — La Receta de Memoria (tu pieza de evaluación)',
+                text: '<ul><li>Play the C major scale while saying "whole, whole, half, whole, whole, whole, half" out loud, no chart, no hesitating.</li></ul>You\'ve got it when: you can say the whole recipe from memory before you even touch the guitar.',
+                text_es: '<ul><li>Toca la escala de C mayor mientras dices "tono, tono, semitono, tono, tono, tono, semitono" en voz alta, sin diagrama, sin dudar.</li></ul>Lo tienes cuando: puedes decir toda la receta de memoria antes incluso de tocar la guitarra.',
                 hint: 'If you can say the recipe from memory, you can build ANY major scale on the spot — that\'s the whole point of memorizing it as words, not just frets.',
                 hint_es: 'Si puedes decir la receta de memoria, puedes construir CUALQUIER escala mayor al instante — ese es el punto de memorizarla como palabras, no solo como trastes.',
                 stuck: 'Say the recipe alone, away from the guitar, until it\'s automatic — then add the fretting hand back in.',
@@ -206,9 +206,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: "Let It Be" in the scale', label_es: 'Reto: "Let It Be" en la escala',
-                text: 'Challenge — "Let It Be", in the scale: hum the "Let It Be" melody while playing the C major walk underneath it, and notice every note of the tune lives inside the scale you just built.',
-                text_es: 'Reto — "Let It Be", dentro de la escala: tararea la melodía de "Let It Be" mientras tocas la caminata de C mayor debajo, y fíjate cómo cada nota de la melodía vive dentro de la escala que acabas de construir.',
+                label: 'Challenge — "Let It Be", in the scale', label_es: 'Reto — "Let It Be", dentro de la escala',
+                text: '<ol><li>Hum the "Let It Be" melody while playing the C major walk underneath it.</li><li>Notice every note of the tune lives inside the scale you just built.</li></ol>',
+                text_es: '<ol><li>Tararea la melodía de "Let It Be" mientras tocas la caminata de C mayor debajo.</li><li>Fíjate cómo cada nota de la melodía vive dentro de la escala que acabas de construir.</li></ol>',
                 hint: 'This is the payoff of today\'s whole set — a song\'s melody isn\'t random, it\'s built from the same key\'s scale.',
                 hint_es: 'Esta es la recompensa de toda la unidad de hoy — la melodía de una canción no es aleatoria, está construida a partir de la escala de su misma tonalidad.',
                 stuck: 'Just hum the first line of the melody on its own first, then play the C major walk separately, then try them together.',
@@ -430,9 +430,9 @@ SETS.push(
             title_es: 'Encuentra relativas y paralelas menores',
             steps: [
               {
-                label: 'Challenge: relative pairs drill', label_es: 'Reto: ejercicio de pares relativos',
-                text: 'Challenge 1 — Relative Pairs Drill (a drill is a short exercise you repeat to build a skill):<ol><li>Make five quick flashcards — major key on the front, relative minor on the back — C→Am, G→Em, F→Dm, D→Bm, A→F#m.</li><li>Shuffle, flip one at a time, and answer out loud before checking the back.</li><li>Then explain out loud how a PARALLEL minor would be different for the same key.</li></ol>(Got someone nearby? Have them quiz you with the cards.)',
-                text_es: 'Reto 1 — Ejercicio de Pares Relativos (un ejercicio es una actividad corta que repites para desarrollar una destreza):<ol><li>Haz cinco tarjetas rápidas — tonalidad mayor al frente, relativa menor atrás — C→Am, G→Em, F→Dm, D→Bm, A→F#m.</li><li>Mézclalas, voltea una a la vez, y responde en voz alta antes de revisar el reverso.</li><li>Luego explica en voz alta cómo sería distinta una paralela menor para esa misma tonalidad.</li></ol>(¿Tienes a alguien cerca? Pídele que te haga preguntas con las tarjetas.)',
+                label: 'Challenge 1 — Relative Pairs Drill', label_es: 'Reto 1 — Ejercicio de Pares Relativos',
+                text: 'A drill is a short exercise you repeat to build a skill.<ol><li>Make five quick flashcards — major key on the front, relative minor on the back — C→Am, G→Em, F→Dm, D→Bm, A→F#m.</li><li>Shuffle, flip one at a time, and answer out loud before checking the back.</li><li>Then explain out loud how a PARALLEL minor would be different for the same key.</li></ol>(Got someone nearby? Have them quiz you with the cards.)',
+                text_es: 'Un ejercicio es una actividad corta que repites para desarrollar una destreza.<ol><li>Haz cinco tarjetas rápidas — tonalidad mayor al frente, relativa menor atrás — C→Am, G→Em, F→Dm, D→Bm, A→F#m.</li><li>Mézclalas, voltea una a la vez, y responde en voz alta antes de revisar el reverso.</li><li>Luego explica en voz alta cómo sería distinta una paralela menor para esa misma tonalidad.</li></ol>(¿Tienes a alguien cerca? Pídele que te haga preguntas con las tarjetas.)',
                 hint: 'The shortcut: relative minor is always 3 frets down from the major root, or the major scale\'s 6th note.',
                 hint_es: 'El atajo: la relativa menor siempre está 3 trastes abajo de la raíz mayor, o es la 6ª nota de la escala mayor.',
                 stuck: 'Drill just C→Am and G→Em until those two are automatic, then add the rest.',
@@ -448,9 +448,9 @@ SETS.push(
             title_es: 'Construye y toca la escala de blues',
             steps: [
               {
-                label: 'Challenge: the blues scale', label_es: 'Reto: la escala de blues',
-                text: 'Challenge 2 — Blues Scale (your assessment piece):<ol><li>Add the b5 to A minor pentatonic box 1 and play it ascending and descending at 60 BPM.</li><li>The play button checks the ascending run — match it.</li><li>Then play the descent on your own after.</li></ol>You\'ve got it when: the added note matches what you hear from the play button, every time.',
-                text_es: 'Reto 2 — Escala de Blues (tu pieza de evaluación):<ol><li>Agrega la b5 a la caja 1 de la pentatónica menor de A y tócala subiendo y bajando a 60 BPM.</li><li>El botón de reproducir comprueba el recorrido ascendente — iguálalo.</li><li>Luego toca el descenso por tu cuenta después.</li></ol>Lo tienes cuando: la nota agregada coincide con lo que escuchas del botón de reproducir, cada vez.',
+                label: 'Challenge 2 — Blues Scale (your assessment piece)', label_es: 'Reto 2 — Escala de Blues (tu pieza de evaluación)',
+                text: '<ol><li>Add the b5 to A minor pentatonic box 1 and play it ascending and descending at 60 BPM.</li><li>The play button checks the ascending run — match it.</li><li>Then play the descent on your own after.</li></ol>You\'ve got it when: the added note matches what you hear from the play button, every time.',
+                text_es: '<ol><li>Agrega la b5 a la caja 1 de la pentatónica menor de A y tócala subiendo y bajando a 60 BPM.</li><li>El botón de reproducir comprueba el recorrido ascendente — iguálalo.</li><li>Luego toca el descenso por tu cuenta después.</li></ol>Lo tienes cuando: la nota agregada coincide con lo que escuchas del botón de reproducir, cada vez.',
                 hint: 'The b5 sits between two notes you already know in the box — it\'s one extra finger placement, not a new shape to learn from scratch.',
                 hint_es: 'La b5 se ubica entre dos notas que ya conoces en la caja — es una colocación de dedo extra, no una forma nueva que aprender desde cero.',
                 stuck: 'Play the plain minor pentatonic box first, then just add the one extra note once the rest is solid.',
@@ -467,9 +467,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: "Smoke on the Water", bluesy', label_es: 'Reto: "Smoke on the Water", con sabor a blues',
-                text: 'Challenge — "Smoke on the Water", bluesy: play the A blues scale over the feel of the riff (a riff is a short musical phrase that repeats) — this is where this scale is normally used, the sound it was built for.',
-                text_es: 'Reto — "Smoke on the Water", con sabor a blues: toca la escala de blues de A sobre la sensación del riff (un riff es una frase musical corta que se repite) — aquí es donde normalmente se usa esta escala, el sonido para el que fue creada.',
+                label: 'Challenge — "Smoke on the Water", bluesy', label_es: 'Reto — "Smoke on the Water", con sabor a blues',
+                text: '<ul><li>Play the A blues scale over the feel of the riff (a riff is a short musical phrase that repeats) — this is where this scale is normally used, the sound it was built for.</li></ul>',
+                text_es: '<ul><li>Toca la escala de blues de A sobre la sensación del riff (un riff es una frase musical corta que se repite) — aquí es donde normalmente se usa esta escala, el sonido para el que fue creada.</li></ul>',
                 hint: 'Deep Purple\'s whole riff lives in exactly this bluesy, gritty pentatonic-plus-b5 sound world.',
                 hint_es: 'Todo el riff de Deep Purple vive exactamente en este mundo sonoro bluesero y áspero de pentatónica más b5.',
                 stuck: 'Play the riff itself first to get the feel steady, then freely play the blues scale over the same groove (a groove is the steady rhythmic feel).',
@@ -725,9 +725,9 @@ SETS.push(
             title_es: 'Transpon la caja 1 a una tonalidad nombrada',
             steps: [
               {
-                label: 'Challenge: transpose drill', label_es: 'Reto: ejercicio de transposición',
-                text: 'Challenge 1 — Transpose Drill:<ol><li>Write Am, Gm, Bm, and Dm on four slips, shuffle, and draw one at a time.</li><li>Play minor pentatonic box 1 at that key\'s fret: fret 5 (Am), fret 3 (Gm), fret 7 (Bm), fret 10 (Dm — "Luna"\'s solo box!).</li></ol>You\'ve got it when: you can find any of these four positions within 5 seconds of drawing the key name.',
-                text_es: 'Reto 1 — Ejercicio de Transposición:<ol><li>Escribe Am, Gm, Bm y Dm en cuatro papelitos, mézclalos, y saca uno a la vez.</li><li>Toca la caja 1 de pentatónica menor en el traste de esa tonalidad: traste 5 (Am), traste 3 (Gm), traste 7 (Bm), traste 10 (Dm — ¡la caja del solo de "Luna"!).</li></ol>Lo tienes cuando: puedes encontrar cualquiera de estas cuatro posiciones dentro de los 5 segundos de sacar el nombre de la tonalidad.',
+                label: 'Challenge 1 — Transpose Drill', label_es: 'Reto 1 — Ejercicio de Transposición',
+                text: '<ol><li>Write Am, Gm, Bm, and Dm on four slips, shuffle, and draw one at a time.</li><li>Play minor pentatonic box 1 at that key\'s fret: fret 5 (Am), fret 3 (Gm), fret 7 (Bm), fret 10 (Dm — "Luna"\'s solo box!).</li></ol>You\'ve got it when: you can find any of these four positions within 5 seconds of drawing the key name.',
+                text_es: '<ol><li>Escribe Am, Gm, Bm y Dm en cuatro papelitos, mézclalos, y saca uno a la vez.</li><li>Toca la caja 1 de pentatónica menor en el traste de esa tonalidad: traste 5 (Am), traste 3 (Gm), traste 7 (Bm), traste 10 (Dm — ¡la caja del solo de "Luna"!).</li></ol>Lo tienes cuando: puedes encontrar cualquiera de estas cuatro posiciones dentro de los 5 segundos de sacar el nombre de la tonalidad.',
                 hint: 'Fret 10 should feel familiar — it\'s the exact box you\'ve been using for "Luna"\'s solo since Module 4, now with a name attached.',
                 hint_es: 'El traste 10 debería sentirse familiar — es exactamente la caja que has estado usando para el solo de "Luna" desde el Módulo 4, ahora con un nombre asignado.',
                 stuck: 'Drill just Am (fret 5) and Dm (fret 10) — the two you already know from real songs — before adding Gm and Bm.',
@@ -743,9 +743,9 @@ SETS.push(
             title_es: 'Cántalo, y luego tócalo',
             steps: [
               {
-                label: 'Challenge: sing, then play', label_es: 'Reto: canta y luego toca',
-                text: 'Challenge 2 — Sing-Then-Play:<ol><li>Record yourself playing 3 random notes on the low E string (frets 0–5) without watching your hand — or use the Echo Drill play button below as your note source.</li><li>Wait a moment, play the recording back, and sing the notes.</li><li>Find and play them.</li></ol>(Got someone nearby? They can play the 3 notes for you instead.)',
-                text_es: 'Reto 2 — Canta y Luego Toca:<ol><li>Grábate tocando 3 notas al azar en la cuerda Mi grave (trastes 0–5) sin mirar tu mano — o usa el botón de reproducir del Ejercicio de Eco de abajo como tu fuente de notas.</li><li>Espera un momento, reproduce la grabación, y canta las notas.</li><li>Encuéntralas y tócalas.</li></ol>(¿Tienes a alguien cerca? Puede tocarte las 3 notas en tu lugar.)',
+                label: 'Challenge 2 — Sing-Then-Play', label_es: 'Reto 2 — Canta y Luego Toca',
+                text: '<ol><li>Record yourself playing 3 random notes on the low E string (frets 0–5) without watching your hand — or use the Echo Drill play button below as your note source.</li><li>Wait a moment, play the recording back, and sing the notes.</li><li>Find and play them.</li></ol>(Got someone nearby? They can play the 3 notes for you instead.)',
+                text_es: '<ol><li>Grábate tocando 3 notas al azar en la cuerda Mi grave (trastes 0–5) sin mirar tu mano — o usa el botón de reproducir del Ejercicio de Eco de abajo como tu fuente de notas.</li><li>Espera un momento, reproduce la grabación, y canta las notas.</li><li>Encuéntralas y tócalas.</li></ol>(¿Tienes a alguien cerca? Puede tocarte las 3 notas en tu lugar.)',
                 hint: 'Sing FIRST, before you touch the guitar — that order is the whole skill.',
                 hint_es: 'Canta PRIMERO, antes de tocar la guitarra — ese orden es toda la destreza.',
                 stuck: 'Start with just one note instead of three, and build up once that\'s reliable.',
@@ -761,9 +761,9 @@ SETS.push(
             title_es: 'Repite un patrón de oído',
             steps: [
               {
-                label: 'Challenge: echo drill', label_es: 'Reto: ejercicio de eco',
-                text: 'Challenge 3 — Echo Drill (your assessment piece):<ol><li>For round 1, listen to the 3-note pattern once using the play button below, sing it back, then play it on the E or A string.</li><li>For rounds 2–4, record yourself playing 3 random notes (eyes off your hand) and echo those back the same way.</li></ol>You\'ve got it when: 3 out of 4 patterns matched correctly, by ear alone.',
-                text_es: 'Reto 3 — Ejercicio de Eco (tu pieza de evaluación):<ol><li>Para la ronda 1, escucha el patrón de 3 notas una vez usando el botón de reproducir de abajo, cántalo de vuelta, y luego tócalo en la cuerda Mi o La.</li><li>Para las rondas 2–4, grábate tocando 3 notas al azar (sin mirar tu mano) y repítelas de la misma manera.</li></ol>Lo tienes cuando: 3 de 4 patrones coincidan correctamente, solo de oído.',
+                label: 'Challenge 3 — Echo Drill (your assessment piece)', label_es: 'Reto 3 — Ejercicio de Eco (tu pieza de evaluación)',
+                text: '<ol><li>For round 1, listen to the 3-note pattern once using the play button below, sing it back, then play it on the E or A string.</li><li>For rounds 2–4, record yourself playing 3 random notes (eyes off your hand) and echo those back the same way.</li></ol>You\'ve got it when: 3 out of 4 patterns matched correctly, by ear alone.',
+                text_es: '<ol><li>Para la ronda 1, escucha el patrón de 3 notas una vez usando el botón de reproducir de abajo, cántalo de vuelta, y luego tócalo en la cuerda Mi o La.</li><li>Para las rondas 2–4, grábate tocando 3 notas al azar (sin mirar tu mano) y repítelas de la misma manera.</li></ol>Lo tienes cuando: 3 de 4 patrones coincidan correctamente, solo de oído.',
                 hint: 'Resist the urge to search fret by fret at random before you\'ve sung the pattern — singing first fixes the pitch in your ear, and that\'s what your hands need to find.',
                 hint_es: 'Resiste el impulso de buscar traste por traste al azar antes de haber cantado el patrón — cantar primero fija el tono en tu oído, y eso es lo que tus manos necesitan encontrar.',
                 stuck: 'Slow the pattern down and repeat just the first two notes until they\'re solid, then add the third.',
@@ -780,9 +780,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: the cure, by ear', label_es: 'Reto: the cure, de oído',
-                text: 'Challenge — "the cure", by ear: strum through the progression and, without looking anything up, decide by ear which chords feel bright and which feel dark.',
-                text_es: 'Reto — "the cure", de oído: rasguea la progresión y, sin buscar nada, decide de oído cuáles acordes se sienten brillantes y cuáles se sienten oscuros.',
+                label: 'Challenge — "the cure", by ear', label_es: 'Reto — "the cure", de oído',
+                text: '<ol><li>Strum through the progression.</li><li>Without looking anything up, decide by ear which chords feel bright and which feel dark.</li></ol>',
+                text_es: '<ol><li>Rasguea la progresión.</li><li>Sin buscar nada, decide de oído cuáles acordes se sienten brillantes y cuáles se sienten oscuros.</li></ol>',
                 hint: 'You already know the chord names from Module 9 — today\'s challenge is trusting your ear to sort them into bright vs dark before you check.',
                 hint_es: 'Ya conoces los nombres de los acordes desde el Módulo 9 — el reto de hoy es confiar en tu oído para clasificarlos en brillante vs. oscuro antes de comprobarlo.',
                 stuck: 'Isolate just two chords at a time and compare them directly, back and forth.',

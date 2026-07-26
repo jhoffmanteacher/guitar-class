@@ -416,9 +416,9 @@ SETS.push(
             title_es: 'Di y luego toca las cuerdas Re y Sol',
             steps: [
               {
-                label: 'Challenge: D-string naturals', label_es: 'Reto: naturales de la cuerda Re',
-                text: 'Challenge 1 — D-String Naturals: say-then-play every natural note on the D string, low to high, 0 through 12. You\'ve got it when: naming them takes under 15 seconds with no chart.',
-                text_es: 'Reto 1 — Notas naturales de la cuerda Re: di y luego toca cada nota natural de la cuerda Re, de grave a aguda, del traste 0 al 12. Lo tienes cuando: nombrarlas te toma menos de 15 segundos sin diagrama.',
+                label: 'Challenge 1 — D-String Naturals', label_es: 'Reto 1 — Notas naturales de la cuerda Re',
+                text: '<ul><li>Say-then-play every natural note on the D string, low to high, 0 through 12.</li></ul>You\'ve got it when: naming them takes under 15 seconds with no chart.',
+                text_es: '<ul><li>Di y luego toca cada nota natural de la cuerda Re, de grave a aguda, del traste 0 al 12.</li></ul>Lo tienes cuando: nombrarlas te toma menos de 15 segundos sin diagrama.',
                 hint: 'Say the note name first, THEN play it — that order is what builds the recall.',
                 hint_es: 'Di el nombre de la nota primero, y LUEGO tócala — ese orden es lo que construye la memoria.',
                 stuck: 'Cover frets 0–5 (D–A) first, get those solid, then add 7–12.',
@@ -429,9 +429,9 @@ SETS.push(
                 playSeq: { label: 'D-string naturals, low to high', label_es: 'Notas naturales de la cuerda Re, de grave a aguda', bpm: 60, notes: [50, 52, 53, 55, 57, 59, 60, 62] }
               },
               {
-                label: 'Challenge: G-string naturals', label_es: 'Reto: naturales de la cuerda Sol',
-                text: 'Challenge 2 — G-String Naturals: same drill on the G string, low to high, 0 through 12.',
-                text_es: 'Reto 2 — Notas naturales de la cuerda Sol: el mismo ejercicio en la cuerda Sol, de grave a aguda, del traste 0 al 12.',
+                label: 'Challenge 2 — G-String Naturals', label_es: 'Reto 2 — Notas naturales de la cuerda Sol',
+                text: '<ul><li>Do the same drill on the G string, low to high, 0 through 12.</li></ul>',
+                text_es: '<ul><li>Haz el mismo ejercicio en la cuerda Sol, de grave a aguda, del traste 0 al 12.</li></ul>',
                 hint: 'Each string has TWO natural half steps (notes one fret apart) between frets 0 and 12. The first one you meet going up: on D it\'s E–F (F at fret 3), on G it\'s B–C (B at fret 4, C at fret 5). The other pair sits at frets 9–10 on both strings — B–C on the D string, E–F on the G string.',
                 hint_es: 'Cada cuerda tiene DOS semitonos naturales (notas separadas por un traste) entre los trastes 0 y 12. El primero que encuentras subiendo: en D es E–F (F en el traste 3), en G es B–C (B en el traste 4, C en el traste 5). El otro par está en los trastes 9–10 en ambas cuerdas — B–C en la cuerda Re, E–F en la cuerda Sol.',
                 stuck: 'Cover frets 0–5 (G–C) first, then add 5–12.',
@@ -448,9 +448,9 @@ SETS.push(
             title_es: 'Ejercicio relámpago de tarjetas',
             steps: [
               {
-                label: 'Challenge: flashcard drill', label_es: 'Reto: ejercicio relámpago',
-                text: 'Challenge 3 — Flash Drill (your assessment piece):<ol><li>Make flashcards — write each natural note name (A through G) on its own slip of paper and shuffle them face-down.</li><li>Draw one at a time and find each drawn note on the D or G string within 5 seconds.</li><li>Switch strings every 5 draws.</li></ol>You\'ve got it when: 8 out of 10 correct within 5 seconds each, on both strings. Got someone around? Have them call the notes instead of drawing cards.',
-                text_es: 'Reto 3 — Ejercicio relámpago (tu pieza de evaluación):<ol><li>Haz tarjetas — escribe cada nombre de nota natural (de A a G) en su propia tira de papel y barájalas boca abajo.</li><li>Saca una a la vez y encuentra cada nota sacada en la cuerda Re o G en menos de 5 segundos.</li><li>Cambia de cuerda cada 5 tarjetas.</li></ol>Lo tienes cuando: 8 de 10 correctas en menos de 5 segundos cada una, en ambas cuerdas. ¿Tienes a alguien cerca? Que te diga las notas en vez de sacar tarjetas.',
+                label: 'Challenge 3 — Flash Drill (your assessment piece)', label_es: 'Reto 3 — Ejercicio relámpago (tu pieza de evaluación)',
+                text: '<ol><li>Make flashcards — write each natural note name (A through G) on its own slip of paper and shuffle them face-down.</li><li>Draw one at a time and find each drawn note on the D or G string within 5 seconds.</li><li>Switch strings every 5 draws.</li></ol>You\'ve got it when: 8 out of 10 correct within 5 seconds each, on both strings. Got someone around? Have them call the notes instead of drawing cards.',
+                text_es: '<ol><li>Haz tarjetas — escribe cada nombre de nota natural (de A a G) en su propia tira de papel y barájalas boca abajo.</li><li>Saca una a la vez y encuentra cada nota sacada en la cuerda Re o G en menos de 5 segundos.</li><li>Cambia de cuerda cada 5 tarjetas.</li></ol>Lo tienes cuando: 8 de 10 correctas en menos de 5 segundos cada una, en ambas cuerdas. ¿Tienes a alguien cerca? Que te diga las notas en vez de sacar tarjetas.',
                 hint: 'If you\'re stuck, use the octave shape from a string you already know instead of counting up one fret at a time.',
                 hint_es: 'Si te atoras, usa la forma de octava desde una cuerda que ya conozcas en vez de contar traste por traste.',
                 stuck: 'Allow 10 seconds instead of 5 until it\'s automatic, then lower the time limit again.',
@@ -466,9 +466,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: "Sweet Child O\' Mine" riff', label_es: 'Reto: riff de "Sweet Child O\' Mine"',
-                text: 'Challenge — "Sweet Child O\' Mine", name it as you play it:<ol><li>Watch the intro-riff clip — a riff is a short musical phrase that repeats — that you first saw in Module 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>).</li><li>Learn just its first two notes, up on the D and G strings around fret 12–15.</li><li>Say each note\'s NAME as you play it, using today\'s D/G-string knowledge to figure it out instead of just copying frets.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this song\'s Journey page</a>.',
-                text_es: 'Reto — "Sweet Child O\' Mine", nómbralo mientras lo tocas:<ol><li>Mira el clip del riff de intro — un riff es una frase musical corta que se repite — que viste por primera vez en el Módulo 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>).</li><li>Aprende solo sus primeras dos notas, arriba en las cuerdas Re y Sol alrededor del traste 12–15.</li><li>Di el NOMBRE de cada nota mientras la tocas, usando lo que sabes hoy de las cuerdas D/G para descifrarla en vez de solo copiar los trastes.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: la página de Recorrido de esta canción</a>.',
+                label: 'Challenge — "Sweet Child O\' Mine", name it as you play it', label_es: 'Reto — "Sweet Child O\' Mine", nómbralo mientras lo tocas',
+                text: '<ol><li>Watch the intro-riff clip — a riff is a short musical phrase that repeats — that you first saw in Module 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>).</li><li>Learn just its first two notes, up on the D and G strings around fret 12–15.</li><li>Say each note\'s NAME as you play it, using today\'s D/G-string knowledge to figure it out instead of just copying frets.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this song\'s Journey page</a>.',
+                text_es: '<ol><li>Mira el clip del riff de intro — un riff es una frase musical corta que se repite — que viste por primera vez en el Módulo 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>).</li><li>Aprende solo sus primeras dos notas, arriba en las cuerdas Re y Sol alrededor del traste 12–15.</li><li>Di el NOMBRE de cada nota mientras la tocas, usando lo que sabes hoy de las cuerdas D/G para descifrarla en vez de solo copiar los trastes.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: la página de Recorrido de esta canción</a>.',
                 hint: 'This riff lives up the neck on strings you\'ve never named notes on before today — that\'s exactly why it\'s the reward for this set.',
                 hint_es: 'Este riff vive arriba en el mástil, en cuerdas donde nunca antes habías nombrado notas — por eso es exactamente la recompensa de esta unidad.',
                 stuck: 'Pause the video on the very first note and just name that one string/fret before moving on.',
@@ -688,9 +688,9 @@ SETS.push(
             title_es: 'Di y luego toca las cuerdas B y mi aguda',
             steps: [
               {
-                label: 'Challenge: B-string naturals', label_es: 'Reto: naturales de la cuerda Si',
-                text: 'Challenge 1 — B-String Naturals: say-then-play every natural note on the B string, low to high, 0 through 12.',
-                text_es: 'Reto 1 — Notas naturales de la cuerda Si: di y luego toca cada nota natural de la cuerda Si, de grave a aguda, del traste 0 al 12.',
+                label: 'Challenge 1 — B-String Naturals', label_es: 'Reto 1 — Notas naturales de la cuerda Si',
+                text: '<ul><li>Say-then-play every natural note on the B string, low to high, 0 through 12.</li></ul>',
+                text_es: '<ul><li>Di y luego toca cada nota natural de la cuerda Si, de grave a aguda, del traste 0 al 12.</li></ul>',
                 hint: 'Remember: B to C is only ONE fret, not two — the exception to the pattern you learned on D and G.',
                 hint_es: 'Recuerda: de B a C hay solo UN traste, no dos — la excepción al patrón que aprendiste en D y G.',
                 stuck: 'Cover frets 0–5 (B–E) first, then add 5–12.',
@@ -701,9 +701,9 @@ SETS.push(
                 playSeq: { label: 'B-string naturals', label_es: 'Notas naturales de la cuerda Si', bpm: 60, notes: [59, 60, 62, 64, 65, 67, 69, 71] }
               },
               {
-                label: 'Challenge: high-e naturals', label_es: 'Reto: naturales de la mi aguda',
-                text: 'Challenge 2 — High-e Naturals: same drill on the high e string, low to high, 0 through 12 — and notice these are the exact same note names as the low E string.',
-                text_es: 'Reto 2 — Notas naturales de la mi aguda: el mismo ejercicio en la cuerda mi aguda, de grave a aguda, del traste 0 al 12 — y fíjate que son exactamente los mismos nombres de nota que la Mi grave.',
+                label: 'Challenge 2 — High-e Naturals', label_es: 'Reto 2 — Notas naturales de la mi aguda',
+                text: '<ol><li>Do the same drill on the high e string, low to high, 0 through 12.</li><li>Notice these are the exact same note names as the low E string.</li></ol>',
+                text_es: '<ol><li>Haz el mismo ejercicio en la cuerda mi aguda, de grave a aguda, del traste 0 al 12.</li><li>Fíjate que son exactamente los mismos nombres de nota que la Mi grave.</li></ol>',
                 hint: 'If you know the low E string from Module 2, you already know this string — just two octaves higher.',
                 hint_es: 'Si conoces la cuerda Mi grave del Módulo 2, ya conoces esta cuerda — solo que dos octavas más aguda.',
                 stuck: 'Say the low-E note names first, then transfer them to the high e string fret by fret.',
@@ -720,9 +720,9 @@ SETS.push(
             title_es: 'Ejercicio de referencias de las seis cuerdas',
             steps: [
               {
-                label: 'Challenge: landmark drill', label_es: 'Reto: ejercicio de referencias',
-                text: 'Challenge 3 — Landmark Drill (your assessment piece):<ol><li>Name every string at the fret-5 dot.</li><li>Name every string at the fret-7 dot.</li></ol>You\'ve got it when: all six strings named correctly at both dots, no chart, within 5 seconds each.',
-                text_es: 'Reto 3 — Ejercicio de referencias (tu pieza de evaluación):<ol><li>Nombra cada cuerda en el punto del traste 5.</li><li>Nombra cada cuerda en el punto del traste 7.</li></ol>Lo tienes cuando: las seis cuerdas nombradas correctamente en ambos puntos, sin diagrama, en menos de 5 segundos cada una.',
+                label: 'Challenge 3 — Landmark Drill (your assessment piece)', label_es: 'Reto 3 — Ejercicio de referencias (tu pieza de evaluación)',
+                text: '<ol><li>Name every string at the fret-5 dot.</li><li>Name every string at the fret-7 dot.</li></ol>You\'ve got it when: all six strings named correctly at both dots, no chart, within 5 seconds each.',
+                text_es: '<ol><li>Nombra cada cuerda en el punto del traste 5.</li><li>Nombra cada cuerda en el punto del traste 7.</li></ol>Lo tienes cuando: las seis cuerdas nombradas correctamente en ambos puntos, sin diagrama, en menos de 5 segundos cada una.',
                 hint: 'Dots are the fastest way to orient yourself anywhere on the neck — this drill is worth over-practicing.',
                 hint_es: 'Los puntos son la forma más rápida de orientarte en cualquier parte del mástil — vale la pena sobre-practicar este ejercicio.',
                 stuck: 'Do the fret-5 dot on all six strings first until it\'s solid, then add fret 7.',
@@ -738,9 +738,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: "Luna"\'s punteo line', label_es: 'Reto: línea de punteo de "Luna"',
-                text: 'Challenge — "Luna", the punteo line (punteo = the picked melody line, a Spanish guitar term): play the fingerpicked intro fragment — one note each on D, G, B and open e, four strings — reading Layer 6 TAB from <a href="tabs/luna.html#layer-6" target="_blank">"Luna"\'s Song Journey page</a> (the bonus requinto-intro layer — a requinto is a small, higher-pitched guitar that plays the lead melody). You\'ve got it when: all four notes ring cleanly in order, and you can name each one as you play it.',
-                text_es: 'Reto — "Luna", la línea de punteo (punteo = la línea melódica punteada, un término de guitarra en español): toca el fragmento de intro con fingerpicking — una nota en cada una de D, G, B y e al aire, cuatro cuerdas — leyendo el TAB de la Capa 6 de la <a href="tabs/luna.html#layer-6" target="_blank">página de Recorrido de la canción de "Luna"</a> (la capa bonus de intro con requinto — un requinto es una guitarra pequeña y más aguda que toca la melodía principal). Lo tienes cuando: las cuatro notas suenan limpias en orden, y puedes nombrar cada una mientras la tocas.',
+                label: 'Challenge — "Luna", the punteo line', label_es: 'Reto — "Luna", la línea de punteo',
+                text: 'Punteo = the picked melody line, a Spanish guitar term.<ul><li>Play the fingerpicked intro fragment — one note each on D, G, B and open e, four strings — reading Layer 6 TAB from <a href="tabs/luna.html#layer-6" target="_blank">"Luna"\'s Song Journey page</a> (the bonus requinto-intro layer — a requinto is a small, higher-pitched guitar that plays the lead melody).</li></ul>You\'ve got it when: all four notes ring cleanly in order, and you can name each one as you play it.',
+                text_es: 'Punteo = la línea melódica punteada, un término de guitarra en español.<ul><li>Toca el fragmento de intro con fingerpicking — una nota en cada una de D, G, B y e al aire, cuatro cuerdas — leyendo el TAB de la Capa 6 de la <a href="tabs/luna.html#layer-6" target="_blank">página de Recorrido de la canción de "Luna"</a> (la capa bonus de intro con requinto — un requinto es una guitarra pequeña y más aguda que toca la melodía principal).</li></ul>Lo tienes cuando: las cuatro notas suenan limpias en orden, y puedes nombrar cada una mientras la tocas.',
                 hint: 'This roll uses the little-F shape you already know from Module 5 — today\'s new skill is being able to name every note in it.',
                 hint_es: 'Este roll usa la forma de F pequeña que ya conoces del Módulo 5 — la destreza nueva de hoy es poder nombrar cada nota dentro de ella.',
                 stuck: 'Fret the little F shape first, strum it once to hear the target chord, then break it apart one string at a time.',
@@ -953,9 +953,9 @@ SETS.push(
             title_es: 'Lee un TAB en posición alta',
             steps: [
               {
-                label: 'Challenge: "Luna" warm-up read', label_es: 'Reto: calentamiento con "Luna"',
-                text: 'Challenge 1 — Warm-Up Read (down low first): read and play the little-F Layer 6 intro TAB from <a href="tabs/luna.html#layer-6" target="_blank">"Luna"\'s Song Journey page</a> — it lives around the little-F shape (D3, G2, B1, open e), down at frets 0–3. You\'ve got it when: you can read it straight through, no one walking you through it first.',
-                text_es: 'Reto 1 — Lectura de calentamiento (primero abajo): lee y toca el TAB de intro de la Capa 6 de F pequeña de la <a href="tabs/luna.html#layer-6" target="_blank">página de Recorrido de la canción de "Luna"</a> — vive alrededor de la forma de F pequeña (D3, G2, B1, e al aire), abajo en los trastes 0–3. Lo tienes cuando: puedes leerlo de corrido, sin que nadie te lo explique primero.',
+                label: 'Challenge 1 — Warm-Up Read (down low first)', label_es: 'Reto 1 — Lectura de calentamiento (primero abajo)',
+                text: '<ul><li>Read and play the little-F Layer 6 intro TAB from <a href="tabs/luna.html#layer-6" target="_blank">"Luna"\'s Song Journey page</a> — it lives around the little-F shape (D3, G2, B1, open e), down at frets 0–3.</li></ul>You\'ve got it when: you can read it straight through, no one walking you through it first.',
+                text_es: '<ul><li>Lee y toca el TAB de intro de la Capa 6 de F pequeña de la <a href="tabs/luna.html#layer-6" target="_blank">página de Recorrido de la canción de "Luna"</a> — vive alrededor de la forma de F pequeña (D3, G2, B1, e al aire), abajo en los trastes 0–3.</li></ul>Lo tienes cuando: puedes leerlo de corrido, sin que nadie te lo explique primero.',
                 hint: 'Reading TAB up the neck feels harder mostly because the numbers are less familiar, not because it\'s actually different from reading it low.',
                 hint_es: 'Leer TAB arriba del mástil se siente más difícil sobre todo porque los números son menos familiares, no porque sea realmente distinto a leerlo abajo.',
                 stuck: 'Fret the little F shape and strum it once to hear the target chord before reading the roll note by note.',
@@ -965,9 +965,9 @@ SETS.push(
                 skills: [1]
               },
               {
-                label: 'Challenge: cold read at frets 5–10', label_es: 'Reto: primera vista en trastes 5–10',
-                text: 'Challenge — Higher Still (the real up-high read): the "Luna" read above was your warm-up, down at frets 0–3 — now for the up-high part. Cold-read the 8-note line below — it lives entirely at frets 5–10, up around 7th position, crossing the D, G, and B strings. No one walks you through it first; trust the numbers. You\'ve got it when: you play all eight notes in order, in tune, reading only the TAB.',
-                text_es: 'Reto — Todavía más alto (la verdadera lectura arriba): la lectura de "Luna" de arriba fue tu calentamiento, abajo en los trastes 0–3 — ahora la parte de arriba. Lee a primera vista la línea de 8 notas de abajo — vive completamente en los trastes 5–10, arriba alrededor de la 7ª posición, cruzando las cuerdas D, G y B. Nadie te lo explica primero; confía en los números. Lo tienes cuando: tocas las ocho notas en orden, afinado, leyendo solo el TAB.',
+                label: 'Challenge — Higher Still (the real up-high read)', label_es: 'Reto — Todavía más alto (la verdadera lectura arriba)',
+                text: 'The "Luna" read above was your warm-up, down at frets 0–3 — now for the up-high part.<ul><li>Cold-read the 8-note line below — it lives entirely at frets 5–10, up around 7th position, crossing the D, G, and B strings. No one walks you through it first; trust the numbers.</li></ul>You\'ve got it when: you play all eight notes in order, in tune, reading only the TAB.',
+                text_es: 'La lectura de "Luna" de arriba fue tu calentamiento, abajo en los trastes 0–3 — ahora la parte de arriba.<ul><li>Lee a primera vista la línea de 8 notas de abajo — vive completamente en los trastes 5–10, arriba alrededor de la 7ª posición, cruzando las cuerdas D, G y B. Nadie te lo explica primero; confía en los números.</li></ul>Lo tienes cuando: tocas las ocho notas en orden, afinado, leyendo solo el TAB.',
                 hint: 'The shapes feel unfamiliar this high up, but the rule never changes: top line = thinnest string, numbers = frets. Find fret 5 (two frets past the fret-3 dot) and anchor your hand there.',
                 hint_es: 'Las formas se sienten poco familiares tan arriba, pero la regla nunca cambia: línea superior = cuerda más delgada, números = trastes. Encuentra el traste 5 (dos trastes después del punto del traste 3) y ancla tu mano ahí.',
                 stuck: 'Play it one note at a time and say each fret out loud before you fret it — decode first, speed later.',
@@ -995,9 +995,9 @@ SETS.push(
             title_es: 'Escribe tu propio TAB de memoria',
             steps: [
               {
-                label: 'Challenge: write "Seven Nation Army" TAB', label_es: 'Reto: escribe "Seven Nation Army" en TAB',
-                text: 'Challenge 2 — Write It (your assessment piece):<ol><li>Without looking anything up, write the "Seven Nation Army" riff to blank TAB on paper from memory — you played it without looking at the chart back in Module 2.</li><li>Then check yourself.</li></ol>You\'ve got it when: you play back EXACTLY what\'s on your page and it matches the riff note for note — every fret on the right string, in order. (The day-later, no-memory test is Challenge 4. Someone around to trade with? Even better — see Challenge 4.)',
-                text_es: 'Reto 2 — Escríbelo (tu pieza de evaluación):<ol><li>Sin buscar nada, escribe de memoria el riff de "Seven Nation Army" en TAB en blanco sobre papel — lo tocaste sin mirar el diagrama allá en el Módulo 2.</li><li>Luego compruébate.</li></ol>Lo tienes cuando: tocas EXACTAMENTE lo que está en tu página y coincide con el riff nota por nota — cada traste en la cuerda correcta, en orden. (La prueba de un día después, sin memoria, es el Reto 4. ¿Tienes a alguien cerca con quien intercambiar? Todavía mejor — ve el Reto 4.)',
+                label: 'Challenge 2 — Write It (your assessment piece)', label_es: 'Reto 2 — Escríbelo (tu pieza de evaluación)',
+                text: '<ol><li>Without looking anything up, write the "Seven Nation Army" riff to blank TAB on paper from memory — you played it without looking at the chart back in Module 2.</li><li>Then check yourself.</li></ol>You\'ve got it when: you play back EXACTLY what\'s on your page and it matches the riff note for note — every fret on the right string, in order. (The day-later, no-memory test is Challenge 4. Someone around to trade with? Even better — see Challenge 4.)',
+                text_es: '<ol><li>Sin buscar nada, escribe de memoria el riff de "Seven Nation Army" en TAB en blanco sobre papel — lo tocaste sin mirar el diagrama allá en el Módulo 2.</li><li>Luego compruébate.</li></ol>Lo tienes cuando: tocas EXACTAMENTE lo que está en tu página y coincide con el riff nota por nota — cada traste en la cuerda correcta, en orden. (La prueba de un día después, sin memoria, es el Reto 4. ¿Tienes a alguien cerca con quien intercambiar? Todavía mejor — ve el Reto 4.)',
                 hint: 'Say each note name in your head as you write its fret — that\'s the same habit that made you fast at naming notes all module.',
                 hint_es: 'Di el nombre de cada nota en tu mente mientras escribes su traste — es el mismo hábito que te hizo rápido nombrando notas todo el módulo.',
                 stuck: 'Play the riff on your guitar first, one note at a time, writing down each fret as you go — then copy it clean.',
@@ -1013,9 +1013,9 @@ SETS.push(
             title_es: 'Lee un acorde con barra diagonal y una forma parcial',
             steps: [
               {
-                label: 'Challenge: the G/B slash chord', label_es: 'Reto: el acorde con barra diagonal G/B',
-                text: 'Challenge 3 — Slash Chord:<ol><li>Fret and play G/B.</li><li>Compare it against a standard open G.</li><li>Notice what changes and what stays the same.</li></ol>',
-                text_es: 'Reto 3 — Acorde con barra diagonal:<ol><li>Trastea y toca G/B.</li><li>Compáralo con un G abierto estándar.</li><li>Fíjate qué cambia y qué se mantiene igual.</li></ol>',
+                label: 'Challenge 3 — Slash Chord', label_es: 'Reto 3 — Acorde con barra diagonal',
+                text: '<ol><li>Fret and play G/B.</li><li>Compare it against a standard open G.</li><li>Notice what changes and what stays the same.</li></ol>',
+                text_es: '<ol><li>Trastea y toca G/B.</li><li>Compáralo con un G abierto estándar.</li><li>Fíjate qué cambia y qué se mantiene igual.</li></ol>',
                 hint: 'The chord shape barely changes — it\'s the LOWEST note you strum that makes it a slash chord.',
                 hint_es: 'La forma del acorde casi no cambia — es la nota MÁS GRAVE que rasgueas lo que lo convierte en un acorde con barra diagonal.',
                 stuck: 'Play the open G first, then just move your lowest-string finger to find the B.',
@@ -1029,9 +1029,9 @@ SETS.push(
                 ]
               },
               {
-                label: 'Challenge: read a partial shape', label_es: 'Reto: lee una forma parcial',
-                text: 'Challenge — Read a Partial Shape: the chart below shows dots on only three strings — the rest are marked X. That\'s a partial shape: just the top slice of a chord, the way slash-chord and lead-sheet charts often print it so you can grab it fast. Fret the three dots and play. You\'ve got it when: only the three fretted strings sound, and the X\'d strings stay silent under your strum.',
-                text_es: 'Reto — Lee una forma parcial: el diagrama de abajo muestra puntos en solo tres cuerdas — el resto están marcadas con X. Eso es una forma parcial: solo la rebanada superior de un acorde, tal como los diagramas de acordes con barra diagonal y de lead sheet suelen imprimirlos para que los agarres rápido. Trastea los tres puntos y toca. Lo tienes cuando: solo suenan las tres cuerdas trasteadas, y las marcadas con X se quedan silenciosas bajo tu rasgueo.',
+                label: 'Challenge — Read a Partial Shape', label_es: 'Reto — Lee una forma parcial',
+                text: 'The chart below shows dots on only three strings — the rest are marked X. That\'s a partial shape: just the top slice of a chord, the way slash-chord and lead-sheet charts often print it so you can grab it fast.<ul><li>Fret the three dots and play.</li></ul>You\'ve got it when: only the three fretted strings sound, and the X\'d strings stay silent under your strum.',
+                text_es: 'El diagrama de abajo muestra puntos en solo tres cuerdas — el resto están marcadas con X. Eso es una forma parcial: solo la rebanada superior de un acorde, tal como los diagramas de acordes con barra diagonal y de lead sheet suelen imprimirlos para que los agarres rápido.<ul><li>Trastea los tres puntos y toca.</li></ul>Lo tienes cuando: solo suenan las tres cuerdas trasteadas, y las marcadas con X se quedan silenciosas bajo tu rasgueo.',
                 hint: 'An X over a string means "don\'t let this ring." Here the three X\'d strings are the lowest ones — brush only the top three, or lean a fretting finger against the low strings to mute them.',
                 hint_es: 'Una X sobre una cuerda significa "no dejes que suene." Aquí las tres cuerdas con X son las más graves — rasguea solo las tres de arriba, o apoya un dedo de trastear contra las cuerdas graves para silenciarlas.',
                 stuck: 'Pick the three fretted strings one at a time first, so you can hear that each one rings clean, then brush them together.',
@@ -1057,9 +1057,9 @@ SETS.push(
             title_es: 'La prueba de lectura a primera vista de TAB',
             steps: [
               {
-                label: 'Challenge: cold-read your own TAB', label_es: 'Reto: lee tu TAB a primera vista',
-                text: 'Challenge 4 — Cold-Read It: at least a day after writing your Challenge 2 TAB, take it back out and play it exactly as written — trust only the page, no memory allowed. You\'ve got it when: the riff comes out right on the first try, purely from what\'s on the paper. Got someone around who plays? Swap TABs and play each other\'s exactly as written, no explanation allowed — the ultimate readability test.',
-                text_es: 'Reto 4 — Léelo a primera vista: al menos un día después de escribir tu TAB del Reto 2, sácalo de nuevo y tócalo exactamente como está escrito — confía solo en la página, no se permite memoria. Lo tienes cuando: el riff sale bien al primer intento, únicamente a partir de lo que hay en el papel. ¿Tienes a alguien cerca que toque? Intercambien sus TABs y toquen el del otro exactamente como está escrito, sin explicaciones permitidas — la prueba definitiva de legibilidad.',
+                label: 'Challenge 4 — Cold-Read It', label_es: 'Reto 4 — Léelo a primera vista',
+                text: 'At least a day after writing your Challenge 2 TAB:<ul><li>Take it back out and play it exactly as written — trust only the page, no memory allowed.</li></ul>You\'ve got it when: the riff comes out right on the first try, purely from what\'s on the paper. Got someone around who plays? Swap TABs and play each other\'s exactly as written, no explanation allowed — the ultimate readability test.',
+                text_es: 'Al menos un día después de escribir tu TAB del Reto 2:<ul><li>Sácalo de nuevo y tócalo exactamente como está escrito — confía solo en la página, no se permite memoria.</li></ul>Lo tienes cuando: el riff sale bien al primer intento, únicamente a partir de lo que hay en el papel. ¿Tienes a alguien cerca que toque? Intercambien sus TABs y toquen el del otro exactamente como está escrito, sin explicaciones permitidas — la prueba definitiva de legibilidad.',
                 hint: 'This is the real test of whether your spacing and fret numbers were actually readable — not just correct to you.',
                 hint_es: 'Esta es la verdadera prueba de si tu espaciado y tus números de traste realmente eran legibles — no solo correctos para ti.',
                 stuck: 'If your written TAB stumps you, say the fret numbers out loud in rhythm while following the page, then add the guitar.',

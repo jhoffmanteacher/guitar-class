@@ -161,9 +161,9 @@ SETS.push(
             title_es: 'Prepara una mano de fingerpicking relajada',
             steps: [
           {
-            label: 'Challenge: hand shape', label_es: 'Reto: forma de la mano',
-            text: 'Challenge 1 — Hand Shape:<ol><li>Put the pick down.</li><li>Rest your thumb on the low E and i-m-a on the G, B, and high e strings.</li><li>Hold for 30 seconds.</li></ol>You\'ve got it when: a relaxed, arched wrist with curved fingers — like holding an apple.',
-            text_es: 'Reto 1 — Forma de la mano:<ol><li>Deja la púa a un lado.</li><li>Apoya tu pulgar en la Mi grave e i-m-a en las cuerdas G, B y mi aguda.</li><li>Sostén la posición por 30 segundos.</li></ol>Lo tienes cuando: una muñeca relajada y arqueada con dedos curvados — como si sostuvieras una manzana.',
+            label: 'Challenge 1 — Hand Shape', label_es: 'Reto 1 — Forma de la mano',
+            text: '<ol><li>Put the pick down.</li><li>Rest your thumb on the low E and i-m-a on the G, B, and high e strings.</li><li>Hold for 30 seconds.</li></ol>You\'ve got it when: a relaxed, arched wrist with curved fingers — like holding an apple.',
+            text_es: '<ol><li>Deja la púa a un lado.</li><li>Apoya tu pulgar en la Mi grave e i-m-a en las cuerdas G, B y mi aguda.</li><li>Sostén la posición por 30 segundos.</li></ol>Lo tienes cuando: una muñeca relajada y arqueada con dedos curvados — como si sostuvieras una manzana.',
             hint: 'Your wrist should be arched (curved) — not flat against the guitar body. Fingers curved as if you\'re holding an apple. Relax.',
             hint_es: 'Tu muñeca debe estar arqueada (curvada) — no plana contra el cuerpo de la guitarra. Dedos curvados como si sostuvieras una manzana. Relájate.',
             stuck: 'Drop your hand to your side and shake it loose, then place it back on the strings without tensing up — relaxed first, accurate second.',
@@ -179,9 +179,9 @@ SETS.push(
             title_es: 'Pulsa p-i-m-a — pulgar en el bajo, i-m-a en las agudas',
             steps: [
           {
-            label: 'Challenge: p-i-m-a plucks', label_es: 'Reto: pulsaciones p-i-m-a',
-            text: 'Challenge 2 — p-i-m-a Plucks (your assessment piece): pluck once with each finger in order — p (low E), i (G), m (B), a (high e) — saying each letter aloud, 8 times at 60 BPM. You\'ve got it when: the same volume from every finger, even the weaker ring (a). This open-string check is the Set 1 check-off.',
-            text_es: 'Reto 2 — Pulsaciones p-i-m-a (tu pieza de evaluación): pulsa una vez con cada dedo en orden — p (Mi grave), i (G), m (B), a (mi aguda) — diciendo cada letra en voz alta, 8 veces a 60 BPM. Lo tienes cuando: el mismo volumen en cada dedo, incluso en el anular (a), que es más débil. Esta revisión con cuerdas al aire es el chequeo de la Unidad 1.',
+            label: 'Challenge 2 — p-i-m-a Plucks (your assessment piece)', label_es: 'Reto 2 — Pulsaciones p-i-m-a (tu pieza de evaluación)',
+            text: '<ul><li>Pluck once with each finger in order — p (low E), i (G), m (B), a (high e) — saying each letter aloud, 8 times at 60 BPM.</li></ul>You\'ve got it when: the same volume from every finger, even the weaker ring (a). This open-string check is the Set 1 check-off.',
+            text_es: '<ul><li>Pulsa una vez con cada dedo en orden — p (Mi grave), i (G), m (B), a (mi aguda) — diciendo cada letra en voz alta, 8 veces a 60 BPM.</li></ul>Lo tienes cuando: el mismo volumen en cada dedo, incluso en el anular (a), que es más débil. Esta revisión con cuerdas al aire es el chequeo de la Unidad 1.',
             hint: 'No strumming, no pick. Each finger gets ONE string. Aim for the same volume from each finger — the ring finger (a) is usually the weakest at first. Set the ⏱ Timer for 2 minutes and loop it.',
             hint_es: 'Sin rasgueo, sin púa. Cada dedo tiene UNA cuerda. Apunta al mismo volumen en cada dedo — el dedo anular (a) suele ser el más débil al principio. Pon el ⏱ Temporizador en 2 minutos y repítelo.',
             stuck: 'Pluck just p then i, over and over, until those two are even — then add m, then a.',
@@ -199,9 +199,9 @@ SETS.push(
             title_es: 'Mueve el pulgar entre las cuerdas graves',
             steps: [
           {
-            label: 'Challenge: moving bass', label_es: 'Reto: bajo en movimiento',
-            text: 'Challenge 3 — Moving Bass:<ol><li>Pluck the low E string with p.</li><li>Then G-B-e with i-m-a.</li><li>Then the A string.</li><li>Then the D string with p — fingers staying put.</li></ol>You\'ve got it when: only the thumb moves to find each bass note — the i-m-a fingers stay anchored.',
-            text_es: 'Reto 3 — Bajo en movimiento:<ol><li>Pulsa la cuerda Mi grave con p.</li><li>Y luego G-B-e con i-m-a.</li><li>Luego la cuerda La.</li><li>Y luego la cuerda Re con p — los dedos se quedan quietos.</li></ol>Lo tienes cuando: solo el pulgar se mueve para encontrar cada nota grave — los dedos i-m-a se quedan anclados.',
+            label: 'Challenge 3 — Moving Bass', label_es: 'Reto 3 — Bajo en movimiento',
+            text: '<ol><li>Pluck the low E string with p.</li><li>Then G-B-e with i-m-a.</li><li>Then the A string.</li><li>Then the D string with p — fingers staying put.</li></ol>You\'ve got it when: only the thumb moves to find each bass note — the i-m-a fingers stay anchored.',
+            text_es: '<ol><li>Pulsa la cuerda Mi grave con p.</li><li>Y luego G-B-e con i-m-a.</li><li>Luego la cuerda La.</li><li>Y luego la cuerda Re con p — los dedos se quedan quietos.</li></ol>Lo tienes cuando: solo el pulgar se mueve para encontrar cada nota grave — los dedos i-m-a se quedan anclados.',
             hint: 'This is how you change chords later — the thumb finds the bass note of the chord (root) while the fingers stay anchored on the treble strings.',
             hint_es: 'Así es como cambiarás de acorde más adelante — el pulgar encuentra la nota grave del acorde (la raíz) mientras los dedos se quedan anclados en las cuerdas agudas.',
             stuck: 'Move just the thumb E → A → D with the fingers resting (not plucking) on G-B-e, until the thumb finds each bass without looking.',
@@ -218,9 +218,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: "the cure", first touch', label_es: 'Reto: "the cure", primer contacto',
-                text: 'Challenge — "the cure", first touch:<ol><li>Fret Am and pluck p (A string) · i · m · a, one note per beat at 60 BPM — that soft broken-chord sound IS the verse feel of "the cure".</li><li>Then change to C: your thumb stays on the same bass STRING — C\'s root lives on the A string too, just at the 3rd fret, where your ring finger now supplies the new bass note.</li></ol>You\'ve got it when: four clean p-i-m-a laps on Am and four on C, every note even.',
-                text_es: 'Reto — "the cure", primer contacto:<ol><li>Trastea Am y pulsa p (cuerda La) · i · m · a, una nota por tiempo a 60 BPM — ese sonido suave de acorde desglosado ES la sensación de la estrofa de "the cure".</li><li>Luego cambia a C: tu pulgar se queda en la misma CUERDA grave — la raíz de C también vive en la cuerda La, solo que en el traste 3, donde tu dedo anular ahora aporta la nueva nota grave.</li></ol>Lo tienes cuando: cuatro vueltas limpias de p-i-m-a en Am y cuatro en C, cada nota pareja.',
+                label: 'Challenge — "the cure", first touch', label_es: 'Reto — "the cure", primer contacto',
+                text: '<ol><li>Fret Am and pluck p (A string) · i · m · a, one note per beat at 60 BPM — that soft broken-chord sound IS the verse feel of "the cure".</li><li>Then change to C: your thumb stays on the same bass STRING — C\'s root lives on the A string too, just at the 3rd fret, where your ring finger now supplies the new bass note.</li></ol>You\'ve got it when: four clean p-i-m-a laps on Am and four on C, every note even.',
+                text_es: '<ol><li>Trastea Am y pulsa p (cuerda La) · i · m · a, una nota por tiempo a 60 BPM — ese sonido suave de acorde desglosado ES la sensación de la estrofa de "the cure".</li><li>Luego cambia a C: tu pulgar se queda en la misma CUERDA grave — la raíz de C también vive en la cuerda La, solo que en el traste 3, donde tu dedo anular ahora aporta la nueva nota grave.</li></ol>Lo tienes cuando: cuatro vueltas limpias de p-i-m-a en Am y cuatro en C, cada nota pareja.',
                 hint: 'Olivia\'s verse is fingerpicked for exactly this reason — soft and close. Wrist stays arched; only the fingers move.',
                 hint_es: 'La estrofa de Olivia está tocada con fingerpicking exactamente por esta razón — suave y cercana. La muñeca se mantiene arqueada; solo se mueven los dedos.',
                 stuck: 'Run p-i-m-a on open strings first (no chord at all), then add the Am under it.',
@@ -449,9 +449,9 @@ SETS.push(
             title_es: 'Toca el patrón p-i-m-a-m-i en Em',
             steps: [
           {
-            label: 'Challenge: Em pattern', label_es: 'Reto: patrón en Em',
-            text: 'Challenge 1 — Em Pattern: fret Em and play the 6-note pattern p-i-m-a-m-i at 60 BPM, one note per click, for 8 bars. You\'ve got it when: a steady, even pulse with every note ringing clean.',
-            text_es: 'Reto 1 — Patrón en Em: trastea Em y toca el patrón de 6 notas p-i-m-a-m-i a 60 BPM, una nota por clic, durante 8 compases. Lo tienes cuando: un pulso constante y parejo con cada nota sonando limpia.',
+            label: 'Challenge 1 — Em Pattern', label_es: 'Reto 1 — Patrón en Em',
+            text: '<ol><li>Fret Em.</li><li>Play the 6-note pattern p-i-m-a-m-i at 60 BPM, one note per click, for 8 bars.</li></ol>You\'ve got it when: a steady, even pulse with every note ringing clean.',
+            text_es: '<ol><li>Trastea Em.</li><li>Toca el patrón de 6 notas p-i-m-a-m-i a 60 BPM, una nota por clic, durante 8 compases.</li></ol>Lo tienes cuando: un pulso constante y parejo con cada nota sonando limpia.',
             hint: 'Count "1-2-3-4-5-6" — one number per pluck, one pluck per click — and let the six notes make one lap. Don\'t worry about exact rhythm yet; just keep the pulse steady.',
             hint_es: 'Cuenta "1-2-3-4-5-6" — un número por pulsación, una pulsación por clic — y deja que las seis notas formen una vuelta. No te preocupes todavía por el ritmo exacto; solo mantén el pulso constante.',
             stuck: 'Drop the metronome and play the pattern as slowly as you need to — get the finger order automatic first, speed comes after.',
@@ -469,9 +469,9 @@ SETS.push(
             title_es: 'Toca el patrón en Am (mueve el pulgar)',
             steps: [
           {
-            label: 'Challenge: Am pattern', label_es: 'Reto: patrón en Am',
-            text: 'Challenge 2 — Am Pattern: fret Am and play the 6-note pattern over it — thumb on the A string (Am\'s root), i-m-a still on G-B-e — 8 times. You\'ve got it when: only the thumb moves to the new bass; the fingers stay anchored. Click any note below the TAB to hear it.',
-            text_es: 'Reto 2 — Patrón en Am: trastea Am y toca el patrón de 6 notas sobre él — pulgar en la cuerda La (la raíz de Am), i-m-a siguen en G-B-e — 8 veces. Lo tienes cuando: solo el pulgar se mueve hacia el nuevo bajo; los dedos se quedan anclados. Haz clic en cualquier nota debajo del TAB para escucharla.',
+            label: 'Challenge 2 — Am Pattern', label_es: 'Reto 2 — Patrón en Am',
+            text: '<ol><li>Fret Am.</li><li>Play the 6-note pattern over it — thumb on the A string (Am\'s root), i-m-a still on G-B-e — 8 times.</li></ol>You\'ve got it when: only the thumb moves to the new bass; the fingers stay anchored. Click any note below the TAB to hear it.',
+            text_es: '<ol><li>Trastea Am.</li><li>Toca el patrón de 6 notas sobre él — pulgar en la cuerda La (la raíz de Am), i-m-a siguen en G-B-e — 8 veces.</li></ol>Lo tienes cuando: solo el pulgar se mueve hacia el nuevo bajo; los dedos se quedan anclados. Haz clic en cualquier nota debajo del TAB para escucharla.',
             hint: 'The only change from Em is which bass string the thumb plays. Fingers stay parked on G, B, high e.',
             hint_es: 'El único cambio respecto a Em es en cuál cuerda grave toca el pulgar. Los dedos se quedan estacionados en G, B, mi aguda.',
             stuck: 'Drop the pattern — just pluck the Am bass (p) and let it ring, then add i-m-a one finger at a time.',
@@ -499,9 +499,9 @@ SETS.push(
             title_es: 'Aumenta tu tempo (70+ BPM)',
             steps: [
           {
-            label: 'Challenge: raise your tempo', label_es: 'Reto: sube tu tempo',
-            text: 'Challenge 3 — Raise Your Tempo (your assessment piece): play the Em pattern at 70 BPM, then try 80. You\'ve got it when: clean at 70+ with the "a" finger landing right on its beat — drop back to 60 if it falls apart. This steady-pattern check is the Set 2 check-off.',
-            text_es: 'Reto 3 — Sube tu tempo (tu pieza de evaluación): toca el patrón de Em a 70 BPM, y luego intenta 80. Lo tienes cuando: limpio a 70+ con el dedo "a" cayendo justo en su tiempo — baja a 60 si se desarma. Esta revisión de patrón constante es el chequeo de la Unidad 2.',
+            label: 'Challenge 3 — Raise Your Tempo (your assessment piece)', label_es: 'Reto 3 — Sube tu tempo (tu pieza de evaluación)',
+            text: '<ol><li>Play the Em pattern at 70 BPM.</li><li>Try 80.</li></ol>You\'ve got it when: clean at 70+ with the "a" finger landing right on its beat — drop back to 60 if it falls apart. This steady-pattern check is the Set 2 check-off.',
+            text_es: '<ol><li>Toca el patrón de Em a 70 BPM.</li><li>Intenta 80.</li></ol>Lo tienes cuando: limpio a 70+ con el dedo "a" cayendo justo en su tiempo — baja a 60 si se desarma. Esta revisión de patrón constante es el chequeo de la Unidad 2.',
             hint: 'The most common mistake: the ring finger (a) comes in late. Pay extra attention to your ring finger — it needs to land exactly on its beat, no later. Set the ⏱ Timer for 2 minutes and loop it.',
             hint_es: 'El error más común: el dedo anular (a) llega tarde. Presta atención extra a tu dedo anular — necesita caer exactamente en su tiempo, no después. Pon el ⏱ Temporizador en 2 minutos y repítelo.',
             stuck: 'Go back to 60 BPM and stay there until it\'s effortless — a clean 60 is better than a sloppy 80 every time.',
@@ -518,9 +518,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: "the cure", verse', label_es: 'Reto: "the cure", estrofa',
-                text: 'Challenge — "the cure", verse: play the 6-note p-i-m-a-m-i pattern over the verse loop — Am · C · Dm · F, one bar each at 60 BPM. Thumb:<ul><li>A string for Am and C.</li><li>D string for Dm and F.</li><li>i-m-a never leave G-B-e.</li></ul>You\'ve got it when: one full lap with the pattern unbroken at every change.',
-                text_es: 'Reto — "the cure", estrofa: toca el patrón de 6 notas p-i-m-a-m-i sobre el loop de la estrofa — Am · C · Dm · F, un compás cada uno a 60 BPM. Pulgar:<ul><li>Cuerda La para Am y C.</li><li>Cuerda Re para Dm y F.</li><li>i-m-a nunca dejan G-B-e.</li></ul>Lo tienes cuando: una vuelta completa con el patrón sin interrupciones en cada cambio.',
+                label: 'Challenge — "the cure", verse', label_es: 'Reto — "the cure", estrofa',
+                text: 'Play the 6-note p-i-m-a-m-i pattern over the verse loop — Am · C · Dm · F, one bar each at 60 BPM. Thumb:<ul><li>A string for Am and C.</li><li>D string for Dm and F.</li><li>i-m-a never leave G-B-e.</li></ul>You\'ve got it when: one full lap with the pattern unbroken at every change.',
+                text_es: 'Toca el patrón de 6 notas p-i-m-a-m-i sobre el loop de la estrofa — Am · C · Dm · F, un compás cada uno a 60 BPM. Pulgar:<ul><li>Cuerda La para Am y C.</li><li>Cuerda Re para Dm y F.</li><li>i-m-a nunca dejan G-B-e.</li></ul>Lo tienes cuando: una vuelta completa con el patrón sin interrupciones en cada cambio.',
                 hint: 'The four bass notes pair up: Am and C both live on the A string, Dm and F both live on the D string — the thumb travels only once, at C→Dm, then stays. The fingers never move at all.',
                 hint_es: 'Las cuatro notas graves se emparejan: Am y C viven en la cuerda La, Dm y F viven en la cuerda Re — el pulgar viaja solo una vez, en C→Dm, y luego se queda. Los dedos nunca se mueven.',
                 stuck: 'Loop Am → C until your fretting hand lands on fret 3 without looking — the thumb just keeps plucking the A string — then add Dm and F as their own pair.',
@@ -769,9 +769,9 @@ SETS.push(
             title_es: 'Trastea cada acorde limpio antes de tocarlo con fingerpicking',
             steps: [
           {
-            label: 'Challenge: clean shapes first', label_es: 'Reto: formas limpias primero',
-            text: 'Challenge 1 — Clean Shapes First: before you fingerpick the progression, strum each chord once (Am, C, D, F) and check every string rings — these are the exact open chords you learned in Module 5. You\'ve got it when: all four shapes clean on a strum before you pick a single note through them.',
-            text_es: 'Reto 1 — Formas limpias primero: antes de tocar la progresión con fingerpicking, rasguea cada acorde una vez (Am, C, D, F) y revisa que suenen todas las cuerdas — estos son exactamente los acordes al aire que aprendiste en el Módulo 5. Lo tienes cuando: las cuatro formas suenan limpias con un rasgueo antes de puntear una sola nota a través de ellas.',
+            label: 'Challenge 1 — Clean Shapes First', label_es: 'Reto 1 — Formas limpias primero',
+            text: 'Before you fingerpick the progression:<ol><li>Strum each chord once (Am, C, D, F).</li><li>Check every string rings — these are the exact open chords you learned in Module 5.</li></ol>You\'ve got it when: all four shapes clean on a strum before you pick a single note through them.',
+            text_es: 'Antes de tocar la progresión con fingerpicking:<ol><li>Rasguea cada acorde una vez (Am, C, D, F).</li><li>Revisa que suenen todas las cuerdas — estos son exactamente los acordes al aire que aprendiste en el Módulo 5.</li></ol>Lo tienes cuando: las cuatro formas suenan limpias con un rasgueo antes de puntear una sola nota a través de ellas.',
             hint: 'Fingerpicking exposes every note, so a chord that was "good enough" for strumming in Module 5 needs to be truly clean here. Fix the fretting hand first; then the picking hand has something solid to work over.',
             hint_es: 'El fingerpicking expone cada nota, así que un acorde que era "suficientemente bueno" para rasguear en el Módulo 5 necesita estar de verdad limpio aquí. Arregla primero la mano de trastear; luego la mano de pulsar tiene algo sólido con qué trabajar.',
             stuck: 'Whichever shape buzzes, fix just that one — adjust your finger angle so the fingertip (not the pad) presses just behind the fret.',
@@ -787,9 +787,9 @@ SETS.push(
             title_es: 'Toca con fingerpicking una progresión de acordes completa',
             steps: [
           {
-            label: 'Challenge: full progression', label_es: 'Reto: progresión completa',
-            text: 'Challenge 2 — Full Progression: play the 6-note arpeggio over a 4-chord progression — Am–C–D–F or C–Am–F–G — 1 bar each at 60 BPM. You\'ve got it when: the thumb finds each chord\'s root bass while the fingers stay on G-B-e.',
-            text_es: 'Reto 2 — Progresión completa: toca el arpegio de 6 notas sobre una progresión de 4 acordes — Am–C–D–F o C–Am–F–G — 1 compás cada uno a 60 BPM. Lo tienes cuando: el pulgar encuentra el bajo raíz de cada acorde mientras los dedos se quedan en G-B-e.',
+            label: 'Challenge 2 — Full Progression', label_es: 'Reto 2 — Progresión completa',
+            text: '<ul><li>Play the 6-note arpeggio over a 4-chord progression — Am–C–D–F or C–Am–F–G — 1 bar each at 60 BPM.</li></ul>You\'ve got it when: the thumb finds each chord\'s root bass while the fingers stay on G-B-e.',
+            text_es: '<ul><li>Toca el arpegio de 6 notas sobre una progresión de 4 acordes — Am–C–D–F o C–Am–F–G — 1 compás cada uno a 60 BPM.</li></ul>Lo tienes cuando: el pulgar encuentra el bajo raíz de cada acorde mientras los dedos se quedan en G-B-e.',
             hint: 'For each chord, the thumb plays the ROOT bass note (Am = A string, C = A string, D = D string, F = D string). Fingers always on G-B-e.',
             hint_es: 'Para cada acorde, el pulgar toca la nota grave RAÍZ (Am = cuerda La, C = cuerda La, D = cuerda Re, F = cuerda Re). Los dedos siempre en G-B-e.',
             stuck: 'Drop to two chords (Am–C) and loop just that change until the pattern doesn\'t break, then add D and F.',
@@ -808,9 +808,9 @@ SETS.push(
             title_es: 'Pellizca el pulgar y un dedo juntos',
             steps: [
           {
-            label: 'Challenge: the pinch', label_es: 'Reto: el pellizco',
-            text: 'Challenge 3 — The Pinch: fret C and "pinch" two strings at once — thumb on the A string (root) and your "a" finger on the high e, plucked at the SAME instant, on each beat for 8 beats. You\'ve got it when: both notes sound together as one, perfectly in sync — not one slightly before the other.',
-            text_es: 'Reto 3 — El pellizco: trastea C y "pellizca" dos cuerdas a la vez — pulgar en la cuerda La (raíz) y tu dedo "a" en la mi aguda, pulsadas en el MISMO instante, en cada tiempo durante 8 tiempos. Lo tienes cuando: ambas notas suenan juntas como una sola, perfectamente sincronizadas — no una ligeramente antes que la otra.',
+            label: 'Challenge 3 — The Pinch', label_es: 'Reto 3 — El pellizco',
+            text: '<ol><li>Fret C.</li><li>"Pinch" two strings at once — thumb on the A string (root) and your "a" finger on the high e, plucked at the SAME instant, on each beat for 8 beats.</li></ol>You\'ve got it when: both notes sound together as one, perfectly in sync — not one slightly before the other.',
+            text_es: '<ol><li>Trastea C.</li><li>"Pellizca" dos cuerdas a la vez — pulgar en la cuerda La (raíz) y tu dedo "a" en la mi aguda, pulsadas en el MISMO instante, en cada tiempo durante 8 tiempos.</li></ol>Lo tienes cuando: ambas notas suenan juntas como una sola, perfectamente sincronizadas — no una ligeramente antes que la otra.',
             hint: 'A pinch is the bridge between arpeggios and Travis picking — thumb and finger move toward each other and meet. Listen for ONE sound, not a flam (two close hits).',
             hint_es: 'Un pellizco es el puente entre los arpegios y el Travis picking — el pulgar y el dedo se mueven uno hacia el otro y se encuentran. Escucha UN solo sonido, no un "flam" (dos golpes muy cercanos).',
             stuck: 'Pluck the bass and the treble separately first, slowly, then bring them closer until they land together.',
@@ -826,9 +826,9 @@ SETS.push(
             title_es: 'Prueba el Travis picking',
             steps: [
           {
-            label: 'Challenge: Travis thumb', label_es: 'Reto: pulgar Travis',
-            text: 'Challenge 4 — Travis Thumb: warm up Travis picking on C — thumb alternating the A string, root C (beats 1 & 3) and the low E string, fret 3 = G, the 5th (beats 2 & 4), thumb-only at 60 BPM. That\'s the "root and the 5th" alternating bass from the intro video — both bass strings, no fingers yet. You\'ve got it when: a steady, even alternating thumb — then add an i-pluck on the B string on each "+".',
-            text_es: 'Reto 4 — Pulgar Travis: calienta el Travis picking en C — pulgar alternando entre la cuerda La, raíz C (tiempos 1 y 3) y la cuerda Mi grave, traste 3 = G, la 5ª (tiempos 2 y 4), solo el pulgar a 60 BPM. Ese es el bajo alternante de "raíz y la 5ª" del video introductorio — ambas cuerdas graves, todavía sin dedos. Lo tienes cuando: un pulgar alternante constante y parejo — y luego agrega una pulsación de i en la cuerda B en cada "+".',
+            label: 'Challenge 4 — Travis Thumb', label_es: 'Reto 4 — Pulgar Travis',
+            text: '<ul><li>Warm up Travis picking on C — thumb alternating the A string, root C (beats 1 & 3) and the low E string, fret 3 = G, the 5th (beats 2 & 4), thumb-only at 60 BPM.</li></ul>That\'s the "root and the 5th" alternating bass from the intro video — both bass strings, no fingers yet. You\'ve got it when: a steady, even alternating thumb — then add an i-pluck on the B string on each "+".',
+            text_es: '<ul><li>Calienta el Travis picking en C — pulgar alternando entre la cuerda La, raíz C (tiempos 1 y 3) y la cuerda Mi grave, traste 3 = G, la 5ª (tiempos 2 y 4), solo el pulgar a 60 BPM.</li></ul>Ese es el bajo alternante de "raíz y la 5ª" del video introductorio — ambas cuerdas graves, todavía sin dedos. Lo tienes cuando: un pulgar alternante constante y parejo — y luego agrega una pulsación de i en la cuerda B en cada "+".',
             hint: 'Just the thumb! Once that\'s steady, add an i-pluck on the B string on the "+" of each beat. Travis picking adds fingers ON TOP of an already-grooving thumb.',
             hint_es: '¡Solo el pulgar! Una vez que esté estable, agrega una pulsación de i en la cuerda B en el "+" de cada tiempo. El Travis picking agrega dedos ENCIMA de un pulgar que ya tiene groove.',
             stuck: 'Thumb only, no fingers, as slow as you need — get the alternating bass rock-steady before adding anything on top.',
@@ -844,9 +844,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: "Let It Be", fingerpicked', label_es: 'Reto: "Let It Be" con fingerpicking',
-                text: 'Challenge — "Let It Be", fingerpicked: play the four-chord verse — C · G · Am · F — with the 6-note pattern over each chord, one bar each at 60 BPM. Thumb roots:<ul><li>C and Am on the A string.</li><li>G on the low E.</li><li>F on the D string.</li></ul>You\'ve got it when: a full verse with the pattern unbroken — the same song you strummed in Modules 5 and 6, now a lullaby. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: the fingerstyle arrangement</a>.',
-                text_es: 'Reto — "Let It Be", con fingerpicking: toca la estrofa de cuatro acordes — C · G · Am · F — con el patrón de 6 notas sobre cada acorde, un compás cada uno a 60 BPM. Raíces del pulgar:<ul><li>C y Am en la cuerda La.</li><li>G en la Mi grave.</li><li>F en la cuerda Re.</li></ul>Lo tienes cuando: una estrofa completa con el patrón sin interrupciones — la misma canción que rasgueaste en los Módulos 5 y 6, ahora una canción de cuna. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Recorrido de la canción: el arreglo fingerstyle</a>.',
+                label: 'Challenge — "Let It Be", fingerpicked', label_es: 'Reto — "Let It Be", con fingerpicking',
+                text: 'Play the four-chord verse — C · G · Am · F — with the 6-note pattern over each chord, one bar each at 60 BPM. Thumb roots:<ul><li>C and Am on the A string.</li><li>G on the low E.</li><li>F on the D string.</li></ul>You\'ve got it when: a full verse with the pattern unbroken — the same song you strummed in Modules 5 and 6, now a lullaby. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: the fingerstyle arrangement</a>.',
+                text_es: 'Toca la estrofa de cuatro acordes — C · G · Am · F — con el patrón de 6 notas sobre cada acorde, un compás cada uno a 60 BPM. Raíces del pulgar:<ul><li>C y Am en la cuerda La.</li><li>G en la Mi grave.</li><li>F en la cuerda Re.</li></ul>Lo tienes cuando: una estrofa completa con el patrón sin interrupciones — la misma canción que rasgueaste en los Módulos 5 y 6, ahora una canción de cuna. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Recorrido de la canción: el arreglo fingerstyle</a>.',
                 hint: 'Anticipate like the second lesson video showed you: the fretting hand starts moving on the pattern\'s 6th note, so beat 1 always lands ready.',
                 hint_es: 'Anticipa como te mostró el segundo video de la lección: la mano de trastear empieza a moverse en la 6ª nota del patrón, así que el tiempo 1 siempre cae listo.',
                 stuck: 'Strum each chord once to check it rings, then loop just C → G — the only change where the thumb crosses to the low E.',
@@ -884,9 +884,9 @@ SETS.push(
             title_es: 'Interpreta una canción con fingerpicking',
             steps: [
           {
-            label: 'Challenge: perform a song', label_es: 'Reto: interpreta una canción',
-            text: 'Challenge 5 — Perform It (your assessment piece — try it!): pick one song — "the cure", "Hallelujah" (from Module 5\'s song list), "Let It Be" (verse), or a choice-list song — and play it through 3 times without stopping, even with mistakes. No score — practice the recovery; keep going no matter what.',
-            text_es: 'Reto 5 — Interprétala (tu pieza de evaluación — ¡pruébalo!): elige una canción — "the cure", "Hallelujah" (de la lista de canciones del Módulo 5), "Let It Be" (estrofa), o una canción de la lista de elección — y tócala completa 3 veces sin detenerte, incluso con errores. Sin puntaje — practica la recuperación; sigue adelante pase lo que pase.',
+            label: 'Challenge 5 — Perform It (your assessment piece — try it!)', label_es: 'Reto 5 — Interprétala (tu pieza de evaluación — ¡pruébalo!)',
+            text: '<ol><li>Pick one song — "the cure", "Hallelujah" (from Module 5\'s song list), "Let It Be" (verse), or a choice-list song.</li><li>Play it through 3 times without stopping, even with mistakes.</li></ol>No score — practice the recovery; keep going no matter what.',
+            text_es: '<ol><li>Elige una canción — "the cure", "Hallelujah" (de la lista de canciones del Módulo 5), "Let It Be" (estrofa), o una canción de la lista de elección.</li><li>Tócala completa 3 veces sin detenerte, incluso con errores.</li></ol>Sin puntaje — practica la recuperación; sigue adelante pase lo que pase.',
             hint: 'Mistakes are normal — stopping is what makes them sound bad, so keep going and practice the recovery. No one to play for? Record yourself on your phone or device and watch it back — the playback shows you exactly where the pattern broke.',
             hint_es: 'Los errores son normales — detenerte es lo que los hace sonar mal, así que sigue adelante y practica la recuperación. ¿No tienes a nadie para quien tocar? Grábate en tu teléfono o dispositivo y vuelve a verlo — la grabación te muestra exactamente dónde se rompió el patrón.',
             stuck: 'Pick the shortest, slowest song you know (Hallelujah is forgiving) and play just the verse — finishing matters more than difficulty.',

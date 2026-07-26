@@ -156,9 +156,9 @@ SETS.push(
             title_es: 'Construye y toca una familia de acordes',
             steps: [
               {
-                label: 'Challenge: build the family', label_es: 'Reto: construye la familia',
-                text: 'Challenge 1 — Build the Family:<ol><li>Write out the chord families of C major and G major (six chords each) — type them below.</li><li>Play each family as open chords in order.</li></ol>',
-                text_es: 'Reto 1 — Construye la familia:<ol><li>Escribe las familias de acordes de C mayor y G mayor (seis acordes cada una) — anótalas abajo.</li><li>Toca cada familia como acordes abiertos en orden.</li></ol>',
+                label: 'Challenge 1 — Build the Family', label_es: 'Reto 1 — Construye la familia',
+                text: '<ol><li>Write out the chord families of C major and G major (six chords each) — type them below.</li><li>Play each family as open chords in order.</li></ol>',
+                text_es: '<ol><li>Escribe las familias de acordes de C mayor y G mayor (seis acordes cada una) — anótalas abajo.</li><li>Toca cada familia como acordes abiertos en orden.</li></ol>',
                 hint: 'C family: C · Dm · Em · F · G · Am. G family: G · Am · Bm · C · D · Em. Notice how much they overlap — that\'s no accident.',
                 hint_es: 'Familia de C: C · Dm · Em · F · G · Am. Familia de G: G · Am · Bm · C · D · Em. Fíjate cuánto se superponen — eso no es casualidad.',
                 stuck: 'Just play the C family first and get it solid before adding G.',
@@ -185,9 +185,9 @@ SETS.push(
             title_es: 'Tarjetas de números romanos',
             steps: [
               {
-                label: 'Challenge: numeral flashcards', label_es: 'Reto: tarjetas de números romanos',
-                text: 'Challenge 2 — Numeral Flashcards:<ol><li>Make six flashcards, one numeral each (I ii iii IV V vi).</li><li>Shuffle the deck, flip the top card, and play that chord in the key of C — no hesitating.</li><li>Run the deck twice.</li></ol>(Got a partner handy? Have them call the numerals instead.)',
-                text_es: 'Reto 2 — Tarjetas de números romanos:<ol><li>Haz seis tarjetas, un número romano en cada una (I ii iii IV V vi).</li><li>Mezcla el mazo, voltea la tarjeta de arriba, y toca ese acorde en la tonalidad de C — sin dudar.</li><li>Repite el mazo dos veces.</li></ol>(¿Tienes a alguien cerca? Pídele que diga los números romanos en tu lugar.)',
+                label: 'Challenge 2 — Numeral Flashcards', label_es: 'Reto 2 — Tarjetas de números romanos',
+                text: '<ol><li>Make six flashcards, one numeral each (I ii iii IV V vi).</li><li>Shuffle the deck, flip the top card, and play that chord in the key of C — no hesitating.</li><li>Run the deck twice.</li></ol>(Got a partner handy? Have them call the numerals instead.)',
+                text_es: '<ol><li>Haz seis tarjetas, un número romano en cada una (I ii iii IV V vi).</li><li>Mezcla el mazo, voltea la tarjeta de arriba, y toca ese acorde en la tonalidad de C — sin dudar.</li><li>Repite el mazo dos veces.</li></ol>(¿Tienes a alguien cerca? Pídele que diga los números romanos en tu lugar.)',
                 hint: 'If you know the family in order (C Dm Em F G Am), the numeral just tells you which slot to reach for.',
                 hint_es: 'Si conoces la familia en orden (C Dm Em F G Am), el número romano solo te dice cuál lugar buscar.',
                 stuck: 'Write the family out in numeral order on paper and keep it in view while you drill.',
@@ -203,9 +203,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: "Let It Be", numbered', label_es: 'Reto: "Let It Be", numerado',
-                text: 'Challenge — "Let It Be", numbered:<ol><li>Write I, V, vi, and IV on four slips.</li><li>Strum the verse drawing a slip each bar (or call the numerals aloud in a random order you set beforehand) — you have to know which chord each numeral means, not just the C–G–Am–F letters.</li></ol>You\'ve got it when: one full loop with every numeral landing on the right chord. (A partner calling numerals works too.)',
-                text_es: 'Reto — "Let It Be", numerado:<ol><li>Escribe I, V, vi y IV en cuatro papelitos.</li><li>Rasguea la estrofa sacando un papelito en cada compás (o di los números romanos en voz alta en un orden aleatorio que definas de antemano) — tienes que saber qué acorde significa cada número romano, no solo las letras C–G–Am–F.</li></ol>Lo tienes cuando: una vuelta completa con cada número romano cayendo en el acorde correcto. (Tener a alguien que diga los números romanos también funciona.)',
+                label: 'Challenge — "Let It Be", numbered', label_es: 'Reto — "Let It Be", numerado',
+                text: '<ol><li>Write I, V, vi, and IV on four slips.</li><li>Strum the verse drawing a slip each bar (or call the numerals aloud in a random order you set beforehand) — you have to know which chord each numeral means, not just the C–G–Am–F letters.</li></ol>You\'ve got it when: one full loop with every numeral landing on the right chord. (A partner calling numerals works too.)',
+                text_es: '<ol><li>Escribe I, V, vi y IV en cuatro papelitos.</li><li>Rasguea la estrofa sacando un papelito en cada compás (o di los números romanos en voz alta en un orden aleatorio que definas de antemano) — tienes que saber qué acorde significa cada número romano, no solo las letras C–G–Am–F.</li></ol>Lo tienes cuando: una vuelta completa con cada número romano cayendo en el acorde correcto. (Tener a alguien que diga los números romanos también funciona.)',
                 hint: 'This is the same verse you\'ve strummed since Module 5 — today the only new part is thinking in numerals instead of letters.',
                 hint_es: 'Esta es la misma estrofa que has rasgueado desde el Módulo 5 — hoy lo único nuevo es pensar en números romanos en lugar de letras.',
                 stuck: 'Say each chord\'s NAME out loud first, then its numeral, until the pairing sticks.',
@@ -430,9 +430,9 @@ SETS.push(
             title_es: 'Ejercicio detective de inventario de acordes',
             steps: [
               {
-                label: 'Challenge: chord inventory drill', label_es: 'Reto: ejercicio de inventario',
-                text: 'Challenge 1 — Inventory Drill (a drill is a short exercise you repeat to build a skill): four mystery chord sets on cards — G-C-D-Em, C-F-G-Am, D-G-A-Bm, Am-F-G-C — name each key before flipping the card. (Answers: G, C, D, C/Am.)',
-                text_es: 'Reto 1 — Ejercicio de inventario (un ejercicio es una práctica corta que repites para desarrollar una destreza): cuatro conjuntos misteriosos de acordes en tarjetas — G-C-D-Em, C-F-G-Am, D-G-A-Bm, Am-F-G-C — nombra cada tonalidad antes de voltear la tarjeta. (Respuestas: G, C, D, C/Am.)',
+                label: 'Challenge 1 — Inventory Drill', label_es: 'Reto 1 — Ejercicio de inventario',
+                text: 'A drill is a short exercise you repeat to build a skill.<ul><li>Name each key before flipping the card — the four mystery chord sets are G-C-D-Em, C-F-G-Am, D-G-A-Bm, Am-F-G-C.</li></ul>(Answers: G, C, D, C/Am.)',
+                text_es: 'Un ejercicio es una práctica corta que repites para desarrollar una destreza.<ul><li>Nombra cada tonalidad antes de voltear la tarjeta — los cuatro conjuntos misteriosos de acordes son G-C-D-Em, C-F-G-Am, D-G-A-Bm, Am-F-G-C.</li></ul>(Respuestas: G, C, D, C/Am.)',
                 hint: 'Find the single family that contains ALL the chords on the card — that\'s the key, before your ear even weighs in.',
                 hint_es: 'Encuentra la única familia que contiene TODOS los acordes de la tarjeta — esa es la tonalidad, incluso antes de que tu oído opine.',
                 stuck: 'Cross off keys one at a time — if even one chord doesn\'t belong to a family, that key is out.',
@@ -448,9 +448,9 @@ SETS.push(
             title_es: 'Toca y siente la base',
             steps: [
               {
-                label: 'Challenge: play and feel for home', label_es: 'Reto: toca y siente la base',
-                text: 'Challenge 2 — Play and Feel:<ol><li>Strum Am–G–F, stopping and holding each chord in turn.</li><li>Say (or type below) which one feels most like "home."</li></ol>',
-                text_es: 'Reto 2 — Toca y siente:<ol><li>Rasguea Am–G–F, deteniéndote y sosteniendo cada acorde por turno.</li><li>Di (o escribe abajo) cuál se siente más como "base."</li></ol>',
+                label: 'Challenge 2 — Play and Feel', label_es: 'Reto 2 — Toca y siente',
+                text: '<ol><li>Strum Am–G–F, stopping and holding each chord in turn.</li><li>Say (or type below) which one feels most like "home."</li></ol>',
+                text_es: '<ol><li>Rasguea Am–G–F, deteniéndote y sosteniendo cada acorde por turno.</li><li>Di (o escribe abajo) cuál se siente más como "base."</li></ol>',
                 hint: 'Play the loop a few times through first — home only reveals itself once you can hear the whole shape of the progression.',
                 hint_es: 'Toca el loop unas cuantas veces primero — la base solo se revela una vez que puedes escuchar la forma completa de la progresión.',
                 stuck: 'Play just Am, then G, then F in isolation and rate each one 1-10 for "does this feel finished."',
@@ -473,9 +473,9 @@ SETS.push(
             title_es: 'Descifra un acorde con bajo alterno',
             steps: [
               {
-                label: 'Challenge: slash chord walk', label_es: 'Reto: caminata de acorde con bajo alterno',
-                text: 'Challenge 3 — Slash Chord Walk: play C → G/B → Am as a smooth bass-line move — notice the bass note walks down one step at a time (C, B, A) while the chords change around it.',
-                text_es: 'Reto 3 — Caminata de acorde con bajo alterno: toca C → G/B → Am como un movimiento suave de línea de bajo — fíjate cómo la nota de bajo baja un paso a la vez (C, B, A) mientras los acordes cambian alrededor.',
+                label: 'Challenge 3 — Slash Chord Walk', label_es: 'Reto 3 — Caminata de acorde con bajo alterno',
+                text: '<ul><li>Play C → G/B → Am as a smooth bass-line move — notice the bass note walks down one step at a time (C, B, A) while the chords change around it.</li></ul>',
+                text_es: '<ul><li>Toca C → G/B → Am como un movimiento suave de línea de bajo — fíjate cómo la nota de bajo baja un paso a la vez (C, B, A) mientras los acordes cambian alrededor.</li></ul>',
                 hint: 'This is exactly what "the cure" does to glide from the G chord back home to Am, closing the loop — the slash chord is the piece that links the two chords smoothly.',
                 hint_es: 'Esto es exactamente lo que hace "the cure" para deslizarse del acorde de G de vuelta a la base en Am, cerrando el ciclo — el acorde con bajo alterno es la pieza que conecta los dos acordes suavemente.',
                 stuck: 'Play C and Am first without the G/B in between, then add it back and listen for how much smoother the move feels.',
@@ -496,9 +496,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: "Watchtower", numbered', label_es: 'Reto: "Watchtower", numerado',
-                text: 'Challenge — "Watchtower", fully numbered:<ol><li>Play the Am–G–F loop and label every chord\'s numeral in the key of C — vi–V–IV.</li><li>Land back on Am as the true minor-key home.</li></ol>You\'ve got it when: one clean loop, numerals called correctly on every chord.',
-                text_es: 'Reto — "Watchtower", completamente numerado:<ol><li>Toca el loop Am–G–F y etiqueta el número romano de cada acorde en la tonalidad de C — vi–V–IV.</li><li>Aterriza de vuelta en Am como la verdadera base en tonalidad menor.</li></ol>Lo tienes cuando: un loop limpio, con los números romanos dichos correctamente en cada acorde.',
+                label: 'Challenge — "Watchtower", fully numbered', label_es: 'Reto — "Watchtower", completamente numerado',
+                text: '<ol><li>Play the Am–G–F loop and label every chord\'s numeral in the key of C — vi–V–IV.</li><li>Land back on Am as the true minor-key home.</li></ol>You\'ve got it when: one clean loop, numerals called correctly on every chord.',
+                text_es: '<ol><li>Toca el loop Am–G–F y etiqueta el número romano de cada acorde en la tonalidad de C — vi–V–IV.</li><li>Aterriza de vuelta en Am como la verdadera base en tonalidad menor.</li></ol>Lo tienes cuando: un loop limpio, con los números romanos dichos correctamente en cada acorde.',
                 hint: '"Watchtower" is C major\'s relative-minor family in action — same three chords you\'ve played since Module 2, now fully numbered.',
                 hint_es: '"Watchtower" es la familia relativa menor de C mayor en acción — los mismos tres acordes que has tocado desde el Módulo 2, ahora completamente numerados.',
                 stuck: 'Number just Am and G first (vi and V), then add F (IV).',
@@ -765,9 +765,9 @@ SETS.push(
             title_es: 'Ejercicio de nombrar raíces',
             steps: [
               {
-                label: 'Challenge: root-naming drill', label_es: 'Reto: ejercicio de nombrar raíces',
-                text: 'First, warm the hand up — then the drill:<ol><li>Run a quick Finger Gym stretch (<a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym – JustinGuitar</a>) before today\'s barre-heavy work.</li><li>Challenge 1 — Root-Naming Drill: write a handful of chord names on slips, draw one, and find BOTH barre locations for it — the E-shape fret on the low E string AND the A-shape fret on the A string.</li></ol>',
-                text_es: 'Primero, calienta la mano — luego el ejercicio:<ol><li>Haz un estiramiento rápido de Gimnasio de Dedos (<a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym – JustinGuitar</a>) antes del trabajo intenso de cejillas de hoy.</li><li>Reto 1 — Ejercicio de nombrar raíces: escribe un puñado de nombres de acordes en papelitos, saca uno, y encuentra AMBAS ubicaciones de cejilla para ese acorde — el traste de la forma de E en la cuerda Mi grave Y el traste de la forma de A en la cuerda La.</li></ol>',
+                label: 'Challenge 1 — Root-Naming Drill', label_es: 'Reto 1 — Ejercicio de nombrar raíces',
+                text: 'First, warm the hand up — then the drill:<ol><li>Run a quick Finger Gym stretch (<a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym – JustinGuitar</a>) before today\'s barre-heavy work.</li><li>Write a handful of chord names on slips, draw one, and find BOTH barre locations for it — the E-shape fret on the low E string AND the A-shape fret on the A string.</li></ol>',
+                text_es: 'Primero, calienta la mano — luego el ejercicio:<ol><li>Haz un estiramiento rápido de Gimnasio de Dedos (<a href="https://youtu.be/XDt_4ha9Xjs" target="_blank">The Finger Gym – JustinGuitar</a>) antes del trabajo intenso de cejillas de hoy.</li><li>Escribe un puñado de nombres de acordes en papelitos, saca uno, y encuentra AMBAS ubicaciones de cejilla para ese acorde — el traste de la forma de E en la cuerda Mi grave Y el traste de la forma de A en la cuerda La.</li></ol>',
                 hint: 'Every chord has (at least) two barre homes — one for each shape. Module 9\'s fretboard naming is the whole trick here.',
                 hint_es: 'Cada acorde tiene (al menos) dos hogares de cejilla — uno por cada forma. El nombrado del diapasón del Módulo 9 es todo el truco aquí.',
                 stuck: 'Find the E-shape location first, get comfortable, then add the A-shape hunt.',
@@ -783,9 +783,9 @@ SETS.push(
             title_es: 'Construye I–IV–V en una tonalidad nombrada',
             steps: [
               {
-                label: 'Challenge: I–IV–V builder', label_es: 'Reto: constructor de I–IV–V',
-                text: 'Challenge 2 — I–IV–V Builder:<ol><li>Play I–IV–V in G (G open or fret-3 barre · C · D).</li><li>Then in A.</li><li>Then a key you draw at random from your chord slips.</li></ol>You\'ve got it when: clean changes in time at 60 BPM, using at least one barre shape.',
-                text_es: 'Reto 2 — Constructor de I–IV–V:<ol><li>Toca I–IV–V en G (G abierto o cejilla en el traste 3 · C · D).</li><li>Luego en A.</li><li>Luego una tonalidad que saques al azar de tus papelitos de acordes.</li></ol>Lo tienes cuando: cambios limpios y a tiempo a 60 BPM, usando al menos una forma con cejilla.',
+                label: 'Challenge 2 — I–IV–V Builder', label_es: 'Reto 2 — Constructor de I–IV–V',
+                text: '<ol><li>Play I–IV–V in G (G open or fret-3 barre · C · D).</li><li>Then in A.</li><li>Then a key you draw at random from your chord slips.</li></ol>You\'ve got it when: clean changes in time at 60 BPM, using at least one barre shape.',
+                text_es: '<ol><li>Toca I–IV–V en G (G abierto o cejilla en el traste 3 · C · D).</li><li>Luego en A.</li><li>Luego una tonalidad que saques al azar de tus papelitos de acordes.</li></ol>Lo tienes cuando: cambios limpios y a tiempo a 60 BPM, usando al menos una forma con cejilla.',
                 hint: 'Once you know I–IV–V\'s shape in one key, moving the whole progression to a new key is just sliding your hands.',
                 hint_es: 'Una vez que conoces la forma del I–IV–V en una tonalidad, mover toda la progresión a una tonalidad nueva es solo deslizar tus manos.',
                 stuck: 'Stay in G until the changes are automatic, then move the whole progression up together.',
@@ -801,9 +801,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: "Oye Mi Amor", full barre', label_es: 'Reto: "Oye Mi Amor", cejilla completa',
-                text: 'Challenge — "Oye Mi Amor", full barre: play the verse\'s Bm–G with a full A-shape barre Bm — the song\'s last beginner shortcut, gone for good. You\'ve got it when: four laps (a lap = one full time through) where the full Bm rings as clean as the G.',
-                text_es: 'Reto — "Oye Mi Amor", cejilla completa: toca el Bm–G de la estrofa con una cejilla completa en forma de A para Bm — el último atajo de principiante de la canción, desaparecido para siempre. Lo tienes cuando: cuatro vueltas (una vuelta = un recorrido completo) donde el Bm completo suena tan limpio como el G.',
+                label: 'Challenge — "Oye Mi Amor", full barre', label_es: 'Reto — "Oye Mi Amor", cejilla completa',
+                text: '<ul><li>Play the verse\'s Bm–G with a full A-shape barre Bm — the song\'s last beginner shortcut, gone for good.</li></ul>You\'ve got it when: four laps (a lap = one full time through) where the full Bm rings as clean as the G.',
+                text_es: '<ul><li>Toca el Bm–G de la estrofa con una cejilla completa en forma de A para Bm — el último atajo de principiante de la canción, desaparecido para siempre.</li></ul>Lo tienes cuando: cuatro vueltas (una vuelta = un recorrido completo) donde el Bm completo suena tan limpio como el G.',
                 hint: 'This is Module 7\'s payoff, finally put to use as a harmony tool instead of just a shape to survive.',
                 hint_es: 'Esta es la recompensa del Módulo 7, finalmente usada como herramienta de armonía en lugar de solo una forma para sobrevivir.',
                 stuck: 'Warm up the A-shape Bm alone for a minute before adding the G change.',

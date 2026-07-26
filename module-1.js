@@ -519,9 +519,9 @@ SETS.push(
             title_es: 'Afina las 6 cuerdas con un afinador',
             steps: [
           {
-            label: 'Challenge: tune all 6 strings', label_es: 'Reto: afina las 6 cuerdas',
-            text: 'Challenge 1 — Tune Challenge: get all 6 strings to green on the tuner. Race the timer — can you do it in under 2 minutes? You\'ve got it when: all 6 strings green in under 2 minutes. Log your time so you can try for a faster time next session.',
-            text_es: 'Reto 1 — Reto de afinación: pon las 6 cuerdas en verde en el afinador. Compite contra el cronómetro — ¿puedes lograrlo en menos de 2 minutos? Lo tienes cuando: las 6 cuerdas en verde en menos de 2 minutos. Anota tu tiempo para intentar superarlo en la próxima sesión.',
+            label: 'Challenge 1 — Tune Challenge', label_es: 'Reto 1 — Reto de afinación',
+            text: '<ol><li>Get all 6 strings to green on the tuner.</li><li>Race the timer — can you do it in under 2 minutes?</li></ol>You\'ve got it when: all 6 strings green in under 2 minutes. Log your time so you can try for a faster time next session.',
+            text_es: '<ol><li>Pon las 6 cuerdas en verde en el afinador.</li><li>Compite contra el cronómetro — ¿puedes lograrlo en menos de 2 minutos?</li></ol>Lo tienes cuando: las 6 cuerdas en verde en menos de 2 minutos. Anota tu tiempo para intentar superarlo en la próxima sesión.',
             hint: 'Tune low to high: E A D G B e. Going slowly works better than rushing past the note. Use the play button to hear the target pitches.',
             hint_es: 'Afina de grave a aguda: E A D G B e. Ir despacio funciona mejor que pasarte de largo de la nota. Usa el botón de reproducir para escuchar los tonos objetivo.',
             stuck: 'Tune just one string to green and leave it, then the next. Hit the play button to hear each target pitch first so your ear knows where it\'s headed.',
@@ -538,9 +538,9 @@ SETS.push(
             title_es: 'Toca una melodía en las cuerdas al aire con notas limpias y constantes',
             steps: [
           {
-            label: 'Challenge: one minute, perfect notes', label_es: 'Reto: un minuto, notas perfectas',
-            text: 'Challenge 2 — One Minute, Perfect Notes:<ol><li>For one minute, cycle through the open strings low to high (E A D G B e), saying each name out loud as you pluck.</li><li>When the minute\'s up, play one last full pass and count how many of the 6 ring perfectly clean — no buzz, no muting.</li><li>Log your score out of 6 and try for a higher score next time.</li></ol>You\'ve got it when: all 6 ring clean on that final pass.',
-            text_es: 'Reto 2 — Un minuto, notas perfectas:<ol><li>Durante un minuto, recorre las cuerdas al aire de grave a aguda (E A D G B e), diciendo cada nombre en voz alta al pulsarla.</li><li>Cuando se acabe el minuto, toca una última vuelta completa y cuenta cuántas de las 6 suenan perfectamente limpias — sin zumbido, sin apagarse.</li><li>Anota tu puntaje sobre 6 e intenta superarlo la próxima vez.</li></ol>Lo tienes cuando: las 6 suenan limpias en esa última vuelta.',
+            label: 'Challenge 2 — One Minute, Perfect Notes', label_es: 'Reto 2 — Un minuto, notas perfectas',
+            text: '<ol><li>For one minute, cycle through the open strings low to high (E A D G B e), saying each name out loud as you pluck.</li><li>When the minute\'s up, play one last full pass and count how many of the 6 ring perfectly clean — no buzz, no muting.</li><li>Log your score out of 6 and try for a higher score next time.</li></ol>You\'ve got it when: all 6 ring clean on that final pass.',
+            text_es: '<ol><li>Durante un minuto, recorre las cuerdas al aire de grave a aguda (E A D G B e), diciendo cada nombre en voz alta al pulsarla.</li><li>Cuando se acabe el minuto, toca una última vuelta completa y cuenta cuántas de las 6 suenan perfectamente limpias — sin zumbido, sin apagarse.</li><li>Anota tu puntaje sobre 6 e intenta superarlo la próxima vez.</li></ol>Lo tienes cuando: las 6 suenan limpias en esa última vuelta.',
             hint: 'These are open strings — press nothing. Let each string ring fully before moving to the next.',
             hint_es: 'Estas son cuerdas al aire — no presiones nada. Deja que cada cuerda suene por completo antes de pasar a la siguiente.',
             stuck: 'Slow way down — one string every few seconds. Lift any finger that\'s touching a string and let each one ring fully before the next.',
@@ -561,9 +561,9 @@ SETS.push(
             skills: [6]
           },
           {
-            label: 'Challenge: the "Seven Nation Army" riff', label_es: 'Reto: el riff de "Seven Nation Army"',
-            text: 'Challenge 3 — Riff Time (try it!): play the "Seven Nation Army" riff on the low E string — slow and clean. You\'ve got it when: all 7 notes in the right order, each ringing clean — speed comes later. No score on this one, just try it. Click any note name below the TAB to hear how it should sound.',
-            text_es: 'Reto 3 — Hora del riff (¡pruébalo!): toca el riff de "Seven Nation Army" en la cuerda Mi grave — despacio y limpio. Lo tienes cuando: las 7 notas en el orden correcto, cada una sonando limpia — la velocidad viene después. Este no tiene puntaje, solo pruébalo. Haz clic en cualquier nombre de nota debajo del TAB para escuchar cómo debe sonar.',
+            label: 'Challenge 3 — Riff Time (try it!)', label_es: 'Reto 3 — Hora del riff (¡pruébalo!)',
+            text: '<ul><li>Play the "Seven Nation Army" riff on the low E string — slow and clean.</li></ul>You\'ve got it when: all 7 notes in the right order, each ringing clean — speed comes later. No score on this one, just try it. Click any note name below the TAB to hear how it should sound.',
+            text_es: '<ul><li>Toca el riff de "Seven Nation Army" en la cuerda Mi grave — despacio y limpio.</li></ul>Lo tienes cuando: las 7 notas en el orden correcto, cada una sonando limpia — la velocidad viene después. Este no tiene puntaje, solo pruébalo. Haz clic en cualquier nombre de nota debajo del TAB para escuchar cómo debe sonar.',
             hint: 'Slow and clean is better than fast and buzzy. One note at a time. Set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',
             hint_es: 'Despacio y limpio es mejor que rápido y con zumbido. Una nota a la vez. Coloca la punta del dedo justo detrás del traste y presiona firme; si zumba, acércate un poco más al traste o presiona más fuerte.',
             stuck: 'Break the 7 notes into two chunks and learn the first chunk cold. Click each note name to hear its pitch, then find it before you play on.',

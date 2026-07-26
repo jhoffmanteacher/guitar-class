@@ -278,6 +278,42 @@ card is still prose, it was left that way on purpose: single action, pure
 explanation, a bare "Watch: `<a>`video`</a>`" line, or a wrap-up reflection
 question.
 
+### Challenge cards: the title lives in the label, and the body is always a
+### list (Jonathan, 2026-07-26)
+A **Challenge card** is any step whose `text` used to open `Challenge N — Title:`
+or `Challenge — Title:` (ES `Reto`). There are 195 of them across modules 1–12.
+Jonathan's complaint, 2026-07-26: *"the title and the beginning of the
+instructions are repetitive."* The settled shape:
+
+1. **The `label` carries the full title**, verbatim — `Challenge 2 — A String
+   Run (your Set 1 check-off)`, `Challenge — "Watchtower", no open chords`.
+   Keep the `Challenge N — ` / `Challenge — ` prefix and any comma-led
+   descriptive tail. Never invent or renumber. Labels render **escaped** — plain
+   text only, no HTML — and should stay under ~70 characters, so trailing matter
+   ("no score!", a definition) belongs in the text, not the title.
+2. **The `text` opens straight into the directions**, with the duplicated
+   lead-in gone.
+3. **Every Challenge card's body is a list.** This is the one place the
+   "single actions stay prose" carve-out above does NOT apply — Jonathan's
+   words, 2026-07-26: *"make sure to keep bullet points."* A one-action card
+   gets a single `<ul><li>`. A card whose two items said the same thing gets
+   them merged into one `<li>`. `<li>`s open with an imperative verb where the
+   source allows it.
+4. **A parenthetical that defines a word** (`a fill is…`, `a vamp is…`) is not
+   a subtitle — move it into the text as its own sentence above the list. A
+   parenthetical that identifies the challenge (`(your assessment piece)`,
+   `(try it!)`, `(Am ↔ C)`) stays in the title.
+5. Trailing matter and `_es` mirroring follow the rules above, unchanged.
+
+**Where this sweep went wrong the first time,** and what to watch for on any
+follow-up: agents re-stitching prose into `<li>`s invented verbs the author
+never wrote (`Set the index finger…` for `Index (i) on the G string.`),
+promoted trailing tips into required steps, split concurrent actions into a
+sequential `<ol>`, and grew existing lists. **A card that already had a list
+keeps that list byte-for-byte** — the sweep only moves the title and, where
+the card was prose, wraps it. An adversarial audit pass caught 12 such
+defects; budget for one.
+
 ### Station B video pairs — aim for two voices
 In each Station B video pair, aim for video #2 from a **different instructor**
 than video #1, teaching the same skill. Same-channel pairs are allowed when the

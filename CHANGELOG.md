@@ -89,6 +89,31 @@ see `WORKFLOW.md` and the git commit log.
   — eight perfect hits in a row and the click goes quiet, so you can feel
   yourself holding the beat without the crutch.
 
+## 2026-07-26 — Every Challenge card says its title once, and always uses bullets
+
+### Changed
+
+- **All 195 Challenge cards now put the title in the step heading, not twice.**
+  A card used to read "Challenge: A string run" in the heading and then open
+  "Challenge 2 — A String Run (your Set 1 check-off):" all over again in the
+  body. The full title now lives in the heading — so the heading tells you
+  which challenge this is and what it counts for — and the body starts
+  straight in on what to do.
+- **Every Challenge card's directions are bulleted.** Cards that were a single
+  block of prose now have a bullet; cards whose steps repeated each other have
+  been merged into one. The A String Run card that started this — "same run on
+  the A string" followed by "up to fret 12 and back" — is now one instruction
+  instead of two.
+- **Definitions moved out of the titles.** "Challenge 3 — Fills (a fill is a
+  short extra run of notes between the main parts)" now has a short heading,
+  with the definition as the first line of the card. Subtitles that say what a
+  challenge counts for — "(your assessment piece)", "(try it!)" — stayed put.
+- **A few headings gained back detail they were missing.** "Pivot Finger" is
+  "Pivot Finger (Am ↔ C)" again, and three headings that had drifted away from
+  the title in their own card body now match it.
+- "You've got it when:", "No score" notes, bonus lines, Song Journey links and
+  the step figures all stay where they were — under the list, not inside it.
+
 ## 2026-07-26 — Module 5's assessment is one song again
 
 ### Changed
