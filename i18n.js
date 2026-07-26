@@ -213,7 +213,6 @@
     // ── Tools: Metronome / Timer / Tuner ──
     'tools.metronome':     { en: 'Metronome', es: 'Metrónomo' },
     'tools.bpm':           { en: 'BPM', es: 'BPM' },
-    'tools.countIn':       { en: 'Count-in (one bar before it starts)', es: 'Conteo de entrada (un compás antes de empezar)' },
     'tools.start':         { en: 'Start', es: 'Iniciar' },
     'tools.stop':          { en: 'Stop', es: 'Detener' },
     'tools.pause':         { en: 'Pause', es: 'Pausa' },

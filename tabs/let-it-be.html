@@ -206,20 +206,19 @@ E |-------------------------|</pre>
       </div>
       <input class="bpm-slider" type="range" min="40" max="220" value="60" step="1" id="bpm-slider" oninput="onBpmSlider(this.value)">
     </div>
+    <div class="tp-ctrl">
+      <button class="tp-btn" onclick="nudgeBpm(-5)">&#x2212;5</button>
+      <button class="tp-btn" onclick="nudgeBpm(-1)">&#x2212;1</button>
+      <button class="tp-btn" onclick="nudgeBpm(1)">+1</button>
+      <button class="tp-btn" onclick="nudgeBpm(5)">+5</button>
+    </div>
+    <div class="tp-ctrl">
+      <button class="tp-btn primary" id="metro-btn" onclick="toggleMetro()">&#x25B6; <span data-i18n="tools.start">Start</span></button>
+    </div>
     <div class="timer-presets" role="radiogroup" aria-label="Time signature" onkeydown="meterKeydown(event)">
       <button type="button" class="meter-btn" id="meter-2" onclick="setMetroMeter(2)" role="radio" aria-checked="false" tabindex="-1">2/4</button>
       <button type="button" class="meter-btn sel" id="meter-4" onclick="setMetroMeter(4)" role="radio" aria-checked="true" tabindex="0">4/4</button>
       <button type="button" class="meter-btn" id="meter-3" onclick="setMetroMeter(3)" role="radio" aria-checked="false" tabindex="-1">3/4</button>
-    </div>
-    <label style="display:flex;align-items:center;gap:6px;font-size:0.8125rem;margin-bottom:10px">
-      <input type="checkbox" id="metro-countin" onchange="setMetroCountIn(this.checked)"> <span data-i18n="tools.countIn">Count-in (one bar before it starts)</span>
-    </label>
-    <div class="tp-ctrl">
-      <button class="tp-btn" onclick="nudgeBpm(-5)">&#x2212;5</button>
-      <button class="tp-btn" onclick="nudgeBpm(-1)">&#x2212;1</button>
-      <button class="tp-btn primary" id="metro-btn" onclick="toggleMetro()">&#x25B6; <span data-i18n="tools.start">Start</span></button>
-      <button class="tp-btn" onclick="nudgeBpm(1)">+1</button>
-      <button class="tp-btn" onclick="nudgeBpm(5)">+5</button>
     </div>
   </div>
   <div class="tool-popup" id="timer-popup" role="dialog" aria-label="Practice Timer">

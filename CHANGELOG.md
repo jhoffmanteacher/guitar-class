@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-26 — Cleaner metronome layout
+
+### Changed
+
+- **The metronome popup is tidier.** The Play/Stop button now stands on its
+  own instead of being squeezed between the tempo nudge buttons, and the
+  2/4 / 3/4 / 4/4 time-signature choice moved to the bottom of the popup.
+  The count-in option (a lead-in bar before the click starts) was removed —
+  it wasn't adding much and just meant one more thing to tap through.
+
 ## 2026-07-26 — A beat guide during Listening Coach checks
 
 ### Added

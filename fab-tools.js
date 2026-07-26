@@ -36,7 +36,7 @@ function toolsBeep(freq,dur,gain){
 function toolLabelHtml(icon, key){ return `${icon} <span data-i18n="${key}" translate="no" class="notranslate">${t(key)}</span>`; }
 
 /* ── Metronome ── */
-let metroRunning=false, metroInterval=null, metroMeter=4, metroCountIn=false, metroBeatIdx=0, metroCountInTimeouts=[];
+let metroRunning=false, metroInterval=null, metroMeter=4, metroBeatIdx=0;
 function getMetroMeter(){ return metroMeter; }
 function setMetroMeter(n){
   metroMeter = n;
@@ -46,7 +46,7 @@ function setMetroMeter(n){
     b.setAttribute('aria-checked', on ? 'true' : 'false');
     b.tabIndex = on ? 0 : -1;
   });
-  if(metroRunning){ stopMetro(); startMetro(false); }
+  if(metroRunning){ stopMetro(); startMetro(); }
 }
 /* Arrow-key navigation for the 2/4-4/4-3/4 radiogroup (WAI-ARIA roving-tabindex
    pattern): only the selected meter button is tabbable; arrows move selection
@@ -65,7 +65,6 @@ function meterKeydown(e){
   setMetroMeter(next);
   document.getElementById('meter-'+next).focus();
 }
-function setMetroCountIn(on){ metroCountIn = !!on; }
 /* Beat 1 of the bar rings out louder and higher — the downbeat you count "1" on
    — everything else in the bar is the plain click. */
 function tick(){
@@ -88,11 +87,9 @@ function syncMetroMutedNote(){
   if(note) note.hidden = !window.coachMicLive;
 }
 function getBpm(){ return parseInt(document.getElementById('bpm-slider').value); }
-function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; if(metroRunning){ stopMetro(); startMetro(false); } }
-function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Math.min(220,Math.max(40,getBpm()+d)); document.getElementById('bpm-display').textContent=s.value; if(metroRunning){ stopMetro(); startMetro(false); } }
-/* useCountIn defaults true (the Start button's toggle); BPM/meter changes
-   while already running pass false so they don't replay the lead-in bar. */
-function startMetro(useCountIn){
+function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; if(metroRunning){ stopMetro(); startMetro(); } }
+function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Math.min(220,Math.max(40,getBpm()+d)); document.getElementById('bpm-display').textContent=s.value; if(metroRunning){ stopMetro(); startMetro(); } }
+function startMetro(){
   // Runs even while the Coach's mic is live — tick() itself stays silent in
   // that case (see its comment), so this just keeps the visible dot/button
   // state honest instead of the Start button silently doing nothing.
@@ -100,31 +97,16 @@ function startMetro(useCountIn){
   metroBeatIdx = 0;
   document.getElementById('metro-btn').innerHTML=toolLabelHtml('&#x23F8;','tools.stop');
   const beatMs = Math.round(60000/getBpm());
-  const beginRun = () => {
-    if(!metroRunning) return;
-    metroBeatIdx = 0;
-    tick();
-    metroInterval = setInterval(tick, beatMs);
-  };
-  if(useCountIn !== false && metroCountIn){
-    const meter = getMetroMeter();
-    for(let i=0; i<meter; i++){
-      metroCountInTimeouts.push(setTimeout(()=>{ if(metroRunning) tick(); }, i*beatMs));
-    }
-    metroCountInTimeouts.push(setTimeout(beginRun, meter*beatMs));
-  } else {
-    beginRun();
-  }
+  tick();
+  metroInterval = setInterval(tick, beatMs);
 }
 function stopMetro(){
   clearInterval(metroInterval);
-  metroCountInTimeouts.forEach(clearTimeout);
-  metroCountInTimeouts = [];
   metroRunning=false;
   metroBeatIdx=0;
   document.getElementById('metro-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start');
 }
-function toggleMetro(){ if(metroRunning) stopMetro(); else startMetro(true); }
+function toggleMetro(){ if(metroRunning) stopMetro(); else startMetro(); }
 
 /* ── Timer ── */
 let timerRunning=false, timerInterval=null, timerSecs=30, timerSelected=30;
