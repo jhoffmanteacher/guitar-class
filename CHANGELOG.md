@@ -89,6 +89,23 @@ see `WORKFLOW.md` and the git commit log.
   — eight perfect hits in a row and the click goes quiet, so you can feel
   yourself holding the beat without the crutch.
 
+## 2026-07-26 — Quiz answers no longer cluster at the top
+
+### Fixed
+
+- **The correct answer moves around now.** Across the 237 graded quiz
+  questions, the right answer used to sit in the first or second slot 84% of
+  the time, and in the last slot only 2% — so a student who never picked the
+  bottom option was right 98% of the time without knowing anything. Choices
+  are now shuffled when the question is drawn on screen, and the four
+  positions come out roughly even.
+- The order is fixed per question rather than random each time, so options
+  don't jump around as you move between tabs, and everyone in the room sees
+  the same arrangement you do on the projector.
+- Options like "All of them" or "All of the pick" stay in their original
+  spot, since they only make sense there.
+- Everyone's already-answered questions still show the right result.
+
 ## 2026-07-26 — The paper drills are digital now
 
 ### Added

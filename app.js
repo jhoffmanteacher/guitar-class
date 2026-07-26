@@ -1991,7 +1991,8 @@ function buildStations(w, stationId){
         if(typeof r.answer === 'number'){
           const ansChoice = r.choices[r.answer];
           const answered = stored !== '';
-          const opts = r.choices.map((c,ci)=>{
+          const opts = mcOrder(r.choices, mcSeed(r)).map(ci=>{
+            const c = r.choices[ci];
             let cls = 'step-mc-opt';
             if(c === ansChoice) cls += ' is-answer';
             if(answered && c === stored) cls += (c === ansChoice) ? ' correct' : ' incorrect';
@@ -2891,7 +2892,9 @@ function renderPracticePanel(practice, skillId, wid){
     const storedIdx = (storedRaw === '' || storedRaw == null) ? -1 : parseInt(storedRaw, 10);
     const ansIdx = (typeof practice.answer === 'number') ? practice.answer : -1;
     const choicesEs = tf(practice,'choices');
-    const opts = practice.choices.map((c, idx)=>{
+    /* Display order is shuffled, but data-idx / storedIdx stay ORIGINAL
+       indices — this panel persists the index, not the choice text. */
+    const opts = mcOrder(practice.choices, mcSeed(practice)).map(idx=>{
       let cls = 'sk-practice-mc-opt';
       if(storedIdx === idx){
         cls += (idx === ansIdx) ? ' correct' : ' incorrect';
@@ -3590,6 +3593,59 @@ function sdCheckOff(key){
     btn.classList.add('done');
     btn.disabled = true;
   }
+}
+
+/* ── Multiple-choice answer shuffle ──────────────────────────────────────
+   Jonathan, 2026-07-26: "the quiz correct answer choices should be
+   randomized. right now the correct answers are always the first one."
+
+   Measured across all 237 graded MCs before this landed: the correct
+   choice sat at position 1 in 34% of questions, position 2 in 50%,
+   position 3 in 14%, and position 4 in just 2%. A student who simply
+   never picked the last option was right 98% of the time.
+
+   The order is DETERMINISTIC, seeded from the question's own English text
+   — not Math.random(). That matters for three reasons:
+   - The choice list re-renders constantly (tab switch, language toggle,
+     a re-render after answering). A fresh random order each time would
+     make the options jump under the student's finger.
+   - A student who answers, leaves, and comes back must see the same
+     arrangement, or their highlighted answer looks like it moved.
+   - Jonathan sees the same order the class does, so "look at the third
+     one" still works on the projector. (He chose this over a per-student
+     shuffle for exactly that reason, 2026-07-26.)
+
+   Seeding on the English text, never the Spanish, keeps the order
+   identical in both languages — the ES label rides along on the original
+   index, same as the persisted value does.
+
+   Catch-all options ("All of them", "All of the pick", "None") are pinned
+   to their original slot and the rest shuffle around them, so a question
+   whose last option summarises the others still reads correctly. The
+   pattern deliberately does NOT pin ordinary answers that merely start
+   with "All"/"Both" ("All 6 strings", "Both on E string") — pinning those
+   would freeze a real answer in place, which is the bug, not the fix. */
+const MC_PINNED = /^(all|none|both|neither)\s+of\b|^(none|all)$/i;
+function mcHash(str){
+  let h = 2166136261;
+  for(let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function mcSeed(r){ return (r.prompt || '') + '|' + (r.choices || []).join('|'); }
+/* Returns the ORIGINAL indices of `choices`, in display order. */
+function mcOrder(choices, seedStr){
+  if(!Array.isArray(choices) || choices.length < 3) return (choices||[]).map((c,i)=>i);
+  const pinned = choices.map(c => MC_PINNED.test(String(c).trim()));
+  const movable = [];
+  choices.forEach((c,i)=>{ if(!pinned[i]) movable.push(i); });
+  let s = mcHash(seedStr) || 1;
+  const rnd = () => { s ^= s << 13; s >>>= 0; s ^= s >>> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; };
+  for(let i = movable.length - 1; i > 0; i--){
+    const j = Math.floor(rnd() * (i + 1));
+    const tmp = movable[i]; movable[i] = movable[j]; movable[j] = tmp;
+  }
+  let m = 0;
+  return choices.map((c,i) => pinned[i] ? i : movable[m++]);
 }
 
 /* ── Card Deck drill (step.drill, type 'deck') ───────────────────────────

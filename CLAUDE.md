@@ -359,6 +359,39 @@ genuinely-written tasks (writing TAB from memory, spacing numbers on a
 staff). 16 partner "Got someone around?" lines survive on cards that never
 had a deck. Both are follow-up scope, not oversights.
 
+### Quiz answers are shuffled at render time (Jonathan, 2026-07-26)
+Jonathan: *"the quiz correct answer choices should be randomized. right now
+the correct answers are always the first one."* Measured across all 237
+graded MCs: position 1 held 34%, position 2 held 50%, position 3 held 14%,
+position 4 held **2%** — never picking the last option was right 98% of the
+time. After the shuffle: 28 / 28 / 23 / 21.
+
+`mcOrder(choices, seed)` returns the ORIGINAL indices in display order and
+is used by both MC render paths (the graded step quiz and the skill-practice
+panel). Things that are load-bearing:
+
+- **Deterministic, not `Math.random()`.** The seed is the question's own
+  ENGLISH prompt + choices. The list re-renders on tab switch, language
+  toggle and after answering; a fresh order each time would make options
+  jump under a student's finger and make their saved answer look like it
+  moved.
+- **Seeded on English only**, so the order is identical in both languages
+  and the ES label rides along on the original index.
+- **Same order for everyone**, including the projector. Jonathan chose this
+  over a per-student shuffle so "look at the third one" still works in class.
+- **The two storage schemes differ and both still work.** The step quiz
+  persists the choice TEXT; the practice panel persists the INDEX, so its
+  buttons keep `data-idx` on the original index and only the render order
+  moves. Do not "simplify" that away.
+- **Catch-alls are pinned** (`MC_PINNED`): `all/none/both/neither of…`, and
+  bare `None`. It deliberately does NOT pin ordinary answers that merely
+  start with All/Both — "All 6 strings", "Both on E string" are real
+  answers, and freezing them in place would recreate the bug.
+- Questions with fewer than 3 choices are left alone.
+
+Because this is render-time, **new questions can't regress** — write
+`answer: 0` every time if you like, students never see it that way.
+
 ### Station B video pairs — aim for two voices
 In each Station B video pair, aim for video #2 from a **different instructor**
 than video #1, teaching the same skill. Same-channel pairs are allowed when the
