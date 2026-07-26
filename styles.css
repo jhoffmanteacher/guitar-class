@@ -681,7 +681,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .t-wtab.on{background:var(--text);color:var(--bg);border-color:var(--text)}
 .t-wtab.locked{opacity:.4;cursor:default}
 /* Teacher view toggle + student-responses view (Session 6.2) */
-.t-viewtoggle{display:inline-flex;gap:0;margin-bottom:16px;border:1px solid var(--border2);border-radius:20px;overflow:hidden}
+.t-viewtoggle{display:inline-flex;gap:0;margin-bottom:16px;border:1px solid var(--border2);border-radius:20px;overflow:hidden;overflow-x:auto}
 .t-vt{font-size:0.875rem;padding:5px 16px;border:0;background:transparent;color:var(--text2);cursor:pointer;font-family:inherit}
 .t-vt.on{background:var(--text);color:var(--bg)}
 /* Games-access controls (teacher Games tab) */
@@ -724,12 +724,57 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .pp-mid{background:var(--amber-bg);color:var(--amber-text)}
 .pp-lo{background:#fde8e8;color:#a32d2d}
 @media (prefers-color-scheme: dark){ .pp-lo{background:#452023;color:#e09a9a} }
+/* A module with zero skills touched (no gotit, no working) reads as "not
+   reached yet", not "failing it" — same distinction .tck.no draws for an
+   untouched skill. Uses the theme variables (not a hardcoded hex like
+   pp-lo) so it's neutral in both color schemes with no extra dark-mode rule
+   needed. */
+.pp-none{background:var(--bg3);color:var(--text2)}
 .t-legend{display:flex;gap:14px;margin-top:10px;font-size:0.8125rem;color:var(--text2);align-items:center;flex-wrap:wrap}
 .t-leg{display:flex;align-items:center;gap:5px}
 .t-loading{text-align:center;padding:48px 20px;color:var(--text2);font-size:1rem}
 .t-denied{max-width:400px;margin:80px auto;padding:0 20px;text-align:center}
 .t-denied h2{font-size:1.375rem;font-weight:500;margin-bottom:10px}
 .t-denied p{font-size:1rem;color:var(--text2);line-height:1.6}
+/* ── Students view (roster bar chart + student detail) ────────────────────
+   Class-wide, like Trouble spots. The axis is proportional to each module's
+   real skillCount rather than evenly spaced (teacher.js computes the tick
+   and label positions from a running skill-count total), so a heavy module
+   like Open Chords (24 skills) visibly takes more of the bar than String
+   Changing (4). --namecol/--rightcol/--gap are scoped to .stu-chart so the
+   roster rows, the axis header, and the tick overlay all line up in one grid. */
+.stu-chart{--namecol:140px;--rightcol:110px;--gap:12px;position:relative;margin-bottom:4px}
+.stu-axis{display:grid;grid-template-columns:var(--namecol) 1fr var(--rightcol);column-gap:var(--gap);align-items:end;height:16px;margin-bottom:2px}
+.stu-axis-track{position:relative;height:100%}
+.stu-axis-num{position:absolute;bottom:0;transform:translateX(-50%);font-size:0.6875rem;color:var(--text2);white-space:nowrap;line-height:1}
+.stu-ticks{position:absolute;left:calc(var(--namecol) + var(--gap));right:calc(var(--rightcol) + var(--gap));top:0;bottom:0;pointer-events:none;z-index:0}
+.stu-tick{position:absolute;top:0;bottom:0;width:1px;background:var(--border2);opacity:.55}
+.stu-rows{position:relative;z-index:1}
+.stu-row{display:grid;grid-template-columns:var(--namecol) 1fr var(--rightcol);column-gap:var(--gap);align-items:center;padding:7px 6px;border-radius:var(--radius-sm);cursor:pointer;transition:background .12s;font:inherit;text-align:left;background:transparent;border:0;width:100%;color:inherit}
+.stu-row:hover{background:var(--bg3)}
+.stu-row:focus-visible{outline:2px solid var(--green-text);outline-offset:-2px}
+.stu-name{font-size:0.9375rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stu-track{position:relative;height:14px;border-radius:7px;background:var(--bg2);overflow:hidden;border:1px solid var(--border)}
+.stu-fill-got{position:absolute;left:0;top:0;bottom:0;background:var(--green-text)}
+.stu-fill-work{position:absolute;top:0;bottom:0;background:var(--amber-text)}
+.stu-right{font-size:0.8125rem;text-align:right;white-space:nowrap}
+.stu-right .stu-mod{color:var(--text);font-weight:600}
+.stu-right .stu-count{color:var(--text2);margin-left:3px}
+.stu-big-track{height:24px;border-radius:12px}
+@media(max-width:640px){
+  .stu-chart{--namecol:96px;--rightcol:78px;--gap:8px}
+  .stu-name{font-size:0.8125rem}
+  .stu-right{font-size:0.75rem}
+  .stu-axis-num{font-size:0.625rem}
+}
+.stu-back{font-family:inherit;font-size:0.875rem;font-weight:600;color:var(--green-text);background:none;border:0;cursor:pointer;padding:4px 2px;margin-bottom:14px;display:inline-flex;align-items:center;gap:4px}
+.stu-back:hover{text-decoration:underline}
+.stu-detail-name{font-size:1.375rem;font-weight:500;font-family:var(--font-display);margin-bottom:2px}
+.stu-detail-email{font-size:0.875rem;color:var(--text2);margin-bottom:16px}
+.stu-section-head{font-size:1rem;font-weight:600;color:var(--text);margin:22px 2px 8px;font-family:var(--font-display)}
+.stu-set-head{font-size:0.8125rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin:12px 2px 6px}
+.stu-skill-row{display:flex;align-items:center;gap:8px;padding:4px 2px;font-size:0.9375rem}
+.stu-empty{color:var(--text2);font-size:0.9375rem;padding:8px 2px}
 /* ── Chord diagrams ── */
 .chord-diagrams{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;padding:10px 12px;background:var(--bg2);border-radius:var(--radius-sm)}
 .chord-box{display:flex;flex-direction:column;align-items:center;gap:2px}

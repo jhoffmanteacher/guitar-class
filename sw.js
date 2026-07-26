@@ -14,7 +14,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-07-26-d5cfb57d51';
+const CACHE_VERSION = 'guitar-class-2026-07-26-6a11b572d8';
 
 // Static shell — everything needed to render the practice content offline.
 const ASSETS = [

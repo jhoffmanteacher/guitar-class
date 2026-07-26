@@ -31,6 +31,25 @@ async function showTeacherApp(user){
   if(toggle && !toggle.querySelector('[data-view="trouble"]')){
     toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="trouble" onclick="setTeacherView('trouble')">&#x1FA79; Trouble spots</button>`);
   }
+  if(toggle && !toggle.querySelector('[data-view="students"]')){
+    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="students" onclick="setTeacherView('students')">&#x1F464; Students</button>`);
+  }
+  // Students-view clicks (a roster row, the skills grid's name cell, the
+  // detail page's back link) go through data-uid + one delegated listener
+  // instead of building onclick="…('uid')" strings, so a Firestore uid is
+  // never interpolated into an inline JS string literal. Bound to the
+  // stable outer shell, not #t-grid-container — that element's innerHTML
+  // gets replaced on every render, but the shell doesn't, so the guard
+  // here is obviously correct rather than subtly correct.
+  const shell=document.getElementById('teacher-app');
+  if(shell && !shell.dataset.delegated){
+    shell.dataset.delegated='1';
+    shell.addEventListener('click', e=>{
+      if(e.target.closest('[data-back-to-students]')){ backToStudentsRoster(); return; }
+      const open=e.target.closest('[data-open-student]');
+      if(open) openStudentDetail(open.dataset.uid);
+    });
+  }
   // The teacher grid spans every set, so load all module data first. Sequential
   // keeps SETS in module order so the week tabs render 1→8 left to right.
   for(const m of MODULE_MANIFEST){ try{ await loadModuleData(m.num); }catch(e){} }
@@ -87,15 +106,24 @@ function renderTeacherSummary(){
     <div class="t-scard"><div class="t-scard-lbl">Not started</div><div class="t-scard-val">${none}</div></div>`;
 }
 
+/* Shared tck icon markup (✓ / ○ / –) for a skill status — used by the skills
+   grid below and by the Students detail page's skill list, so both render
+   identical DOM instead of two copies of the same three SVGs drifting apart. */
+const TCK_CHECK_SVG=`<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const TCK_WORK_SVG=`<svg width="9" height="9" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.8"/></svg>`;
+const TCK_MINUS_SVG=`<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
+function tckSpanHtml(status){
+  if(status==='gotit')   return `<span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px">${TCK_CHECK_SVG}</span>`;
+  if(status==='working') return `<span class="tck" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--amber-bg);color:var(--amber-text)">${TCK_WORK_SVG}</span>`;
+  return `<span class="tck no" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px">${TCK_MINUS_SVG}</span>`;
+}
+
 function renderTeacherGrid(){
   renderTeacherSummary();
   const w=SETS.find(x=>x.id===teacherSetId);
   if(!w||!w.skills||w.skills.length===0){ document.getElementById('t-grid-container').innerHTML='<div class="t-loading">No skills for this set yet.</div>'; return; }
   if(allStudents.length===0){ document.getElementById('t-grid-container').innerHTML='<div class="t-loading">No student data yet — students need to sign in and check off skills first.</div>'; return; }
   const sorted=[...allStudents].sort((a,b)=>w.skills.filter(s=>b.skills[s.id]==='gotit').length-w.skills.filter(s=>a.skills[s.id]==='gotit').length);
-  const checkSvg=`<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-  const workSvg=`<svg width="9" height="9" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.8"/></svg>`;
-  const minusSvg=`<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
   const headerCells=w.skills.map(s=>`<th title="${escAttr(s.text)}">${abbreviate(s.text)}</th>`).join('');
   const rows=sorted.map(stu=>{
     const done=w.skills.filter(s=>stu.skills[s.id]==='gotit').length;
@@ -103,36 +131,54 @@ function renderTeacherGrid(){
     const pct=Math.round(done/total*100);
     const pillClass=pct===100?'pp-hi':pct>=50?'pp-mid':'pp-lo';
     const displayName=stu.name||stu.email||stu.uid.slice(0,8)+'…';
-    const cells=w.skills.map(s=>{
-      const st=stu.skills[s.id]||'none';
-      if(st==='gotit')   return `<td><span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px">${checkSvg}</span></td>`;
-      if(st==='working') return `<td><span class="tck" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--amber-bg);color:var(--amber-text)">${workSvg}</span></td>`;
-      return `<td><span class="tck no" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px">${minusSvg}</span></td>`;
-    }).join('');
-    return `<tr><td class="nc" title="${escAttr(displayName)}">${escHtml(displayName)}</td>${cells}<td><span class="ppill ${pillClass}">${done} / ${total}</span></td></tr>`;
+    const cells=w.skills.map(s=>`<td>${tckSpanHtml(stu.skills[s.id]||'none')}</td>`).join('');
+    // The name cell doubles as a link into the Students detail page — handled
+    // by the delegated data-uid listener in showTeacherApp. cursor:pointer is
+    // the only visual cue, by design: a restrained "clickable row", not a link.
+    return `<tr><td class="nc" data-open-student data-uid="${escAttr(stu.uid)}" style="cursor:pointer" title="${escAttr(displayName)}">${escHtml(displayName)}</td>${cells}<td><span class="ppill ${pillClass}">${done} / ${total}</span></td></tr>`;
   }).join('');
   document.getElementById('t-grid-container').innerHTML=`<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th>${headerCells}<th>Progress</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 function abbreviate(text){ const words=text.split(' '); if(words.length<=4) return text; return words.slice(0,3).join(' ')+'…'; }
 
-/* ── Teacher view toggle: skill grid ⇄ student responses (Session 6.2) ──
-   Read-only. Uses the same one-shot student fetch (no extra reads). */
+/* ── Teacher view toggle: skill grid ⇄ responses ⇄ games ⇄ trouble ⇄
+   Students (Session 6.2, extended for the Students view) ── Read-only. Uses
+   the same one-shot student fetch (no extra reads). Students has two
+   screens (roster / one student's detail); studentDetailUid tracks which
+   one renderTeacherBody shows, kept separate from teacherView so a name
+   click in the skills grid can jump straight to a student's detail without
+   a view flag of its own. */
 let teacherView='skills';
-function setTeacherView(v){
-  teacherView=v;
+let studentDetailUid=null;
+function applyTeacherViewChrome(v){
   document.querySelectorAll('.t-vt').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
-  // The Games and Trouble-spots views are class-wide, not per-week — hide the
-  // week tabs and the skill summary while either is showing.
-  const tabs=document.getElementById('t-week-tabs'); if(tabs) tabs.style.display = (v==='games'||v==='trouble') ? 'none' : '';
-  const summ=document.getElementById('t-summary'); if(summ) summ.style.display = (v==='games'||v==='trouble') ? 'none' : '';
+  // Games, Trouble-spots and Students are all class-wide, not per-week —
+  // hide the week tabs and the skill summary while any of them is showing.
+  const classWide = v==='games'||v==='trouble'||v==='students';
+  const tabs=document.getElementById('t-week-tabs'); if(tabs) tabs.style.display = classWide ? 'none' : '';
+  const summ=document.getElementById('t-summary'); if(summ) summ.style.display = classWide ? 'none' : '';
+}
+function setTeacherView(v){
+  teacherView=v;
+  if(v==='students') studentDetailUid=null; // clicking the tab always starts back at the roster
+  applyTeacherViewChrome(v);
   renderTeacherBody();
 }
+// Jumps straight to a student's detail page — from a roster row or a name
+// cell in the skills grid — without going through the Students tab click.
+function openStudentDetail(uid){
+  teacherView='students'; studentDetailUid=uid;
+  applyTeacherViewChrome('students');
+  renderTeacherBody();
+}
+function backToStudentsRoster(){ studentDetailUid=null; renderTeacherBody(); }
 function renderTeacherBody(){
   if(teacherView==='games') renderTeacherGames();
   else if(teacherView==='responses') renderTeacherResponses();
   else if(teacherView==='trouble') renderTeacherTrouble();
+  else if(teacherView==='students') studentDetailUid ? renderTeacherStudentDetail(studentDetailUid) : renderTeacherStudents();
   else renderTeacherGrid();
 }
 
@@ -267,6 +313,18 @@ async function teacherSetStudentGames(uid, state){
   renderTeacherGames();
 }
 
+/* PR (BPM) slots store a capped {value,date} history now; older saved docs
+   still have a bare scalar for these keys — normalize both to an array.
+   Shared by renderTeacherResponses (per-set, every student) and
+   renderTeacherStudentDetail (per-student, every set) so both read PR
+   trends identically. */
+function prEntries(raw){
+  if(Array.isArray(raw)) return raw;
+  if(raw!=null && String(raw).trim()!=='') return [{value:raw, date:null}];
+  return [];
+}
+function prNum(v){ const m=String(v).match(/\d{2,3}/); return m?m[0]:null; }
+
 /* Enumerate every short free-text response slot in a set, in display order,
    rebuilding the exact keys the student app saves under
    (`${set}-${station}[-sec{n}]-${stepIndex}`). Tags PR (BPM) prompts. */
@@ -301,14 +359,6 @@ function renderTeacherResponses(){
   const slots=setShortResponses(w);
   if(slots.length===0){ box.innerHTML='<div class="t-loading">This set has no written-response prompts.</div>'; return; }
   const sorted=[...allStudents].sort((a,b)=>(a.name||a.email||a.uid).localeCompare(b.name||b.email||b.uid));
-  const prNum=v=>{ const m=String(v).match(/\d{2,3}/); return m?m[0]:null; };
-  // PR (BPM) slots store a capped {value,date} history now; older saved docs
-  // still have a bare scalar for these keys — normalize both to an array.
-  const prEntries=raw=>{
-    if(Array.isArray(raw)) return raw;
-    if(raw!=null && String(raw).trim()!=='') return [{value:raw, date:null}];
-    return [];
-  };
   let withAny=0;
   const cards=sorted.map(stu=>{
     const items=slots.map(sl=>{
@@ -334,4 +384,214 @@ function renderTeacherResponses(){
   box.innerHTML = withAny
     ? `<div class="tr-meta">${withAny} of ${allStudents.length} students have written something for ${escHtml(w.label)} · sorted by name</div><div class="tr-list">${cards}</div>`
     : `<div class="t-loading">No one has written a response for ${escHtml(w.label)} yet.</div>`;
+}
+
+/* ── Students view (roster bar chart + per-student detail) ───────────────
+   Class-wide, like Trouble spots — no new Firestore reads, just a different
+   slice of the already-loaded allStudents. A bar is always rendered by the
+   same three helpers (axis header, tick overlay, fill) fed a "skill-id
+   universe" spanning the whole 13-module course. The axis is proportional
+   to each module's real skillCount, not evenly spaced per module, so a
+   heavy module like Open Chords (24 skills) visibly takes more of the bar
+   than String Changing (4) — that's why tick/label positions are a running
+   skill-count total computed in JS, not a fixed per-column CSS width. */
+function teacherSkillUniverse(){
+  const modules=MODULE_MANIFEST.map(m=>{
+    const ids=[];
+    SETS.forEach(w=>{ if(w.moduleNum===m.num && w.skills) w.skills.forEach(sk=>ids.push(sk.id)); });
+    return {num:m.num, name:m.name, ids};
+  });
+  const total=modules.reduce((a,m)=>a+m.ids.length,0);
+  return {modules, total};
+}
+function teacherStudentTally(stu, universe){
+  let got=0, working=0, furthest=0;
+  universe.modules.forEach(m=>{
+    let mGot=0, mWork=0;
+    m.ids.forEach(id=>{ const st=stu.skills[id]; if(st==='gotit') mGot++; else if(st==='working') mWork++; });
+    got+=mGot; working+=mWork;
+    if(mGot+mWork>0) furthest=m.num; // modules are ascending, so the last touched one wins
+  });
+  return {got, working, total:got+working, furthest};
+}
+function teacherAxisHeaderHtml(universe){
+  const total=universe.total||1; let acc=0;
+  const nums=universe.modules.map(m=>{ const mid=(acc+m.ids.length/2)/total*100; acc+=m.ids.length; return `<div class="stu-axis-num" style="left:${mid}%">${m.num}</div>`; }).join('');
+  return `<div class="stu-axis"><div></div><div class="stu-axis-track">${nums}</div><div></div></div>`;
+}
+function teacherTicksHtml(universe){
+  const total=universe.total||1; let acc=0;
+  // one boundary tick after each module except the last
+  const ticks=universe.modules.slice(0,-1).map(m=>{ acc+=m.ids.length; return `<div class="stu-tick" style="left:${acc/total*100}%"></div>`; }).join('');
+  return `<div class="stu-ticks">${ticks}</div>`;
+}
+function teacherBarFillHtml(got,working,total,extraClass){
+  const t=total||1;
+  return `<div class="stu-track ${extraClass||''}">
+      <div class="stu-fill-got" style="width:${got/t*100}%"></div>
+      <div class="stu-fill-work" style="left:${got/t*100}%;width:${working/t*100}%"></div>
+    </div>`;
+}
+function renderTeacherStudents(){
+  const box=document.getElementById('t-grid-container');
+  if(allStudents.length===0){ box.innerHTML='<div class="t-loading">No student data yet — students need to sign in and check off skills first.</div>'; return; }
+  const universe=teacherSkillUniverse();
+  if(universe.total===0){
+    // No skill data loaded at all (e.g. module files failed to load) — guards
+    // the division below, since there's no meaningful axis to draw either way.
+    box.innerHTML='<div class="t-loading">No skills have been loaded yet.</div>';
+    return;
+  }
+  const rows=allStudents.map(stu=>({stu, tally:teacherStudentTally(stu, universe)})).sort((a,b)=>b.tally.total-a.tally.total);
+  const studentsCount=allStudents.length;
+  const avgPct=Math.round(rows.reduce((a,r)=>a+r.tally.total,0)/(studentsCount*universe.total)*100);
+  const furthestStu=rows[0].stu;
+  const notStarted=rows.filter(r=>r.tally.total===0).length;
+  const scard=`<div class="t-summary" style="margin-top:0">
+      <div class="t-scard"><div class="t-scard-lbl">Students</div><div class="t-scard-val">${studentsCount}</div></div>
+      <div class="t-scard"><div class="t-scard-lbl">Class average</div><div class="t-scard-val">${avgPct}%</div></div>
+      <div class="t-scard"><div class="t-scard-lbl">Furthest along</div><div class="t-scard-val" style="font-size:1.0625rem;line-height:1.5rem" title="${escAttr(furthestStu.name||furthestStu.email||furthestStu.uid)}">${escHtml(furthestStu.name||furthestStu.email||furthestStu.uid.slice(0,8)+'…')}</div></div>
+      <div class="t-scard"><div class="t-scard-lbl">Not started yet</div><div class="t-scard-val">${notStarted}</div></div>
+    </div>`;
+  const rowsHtml=rows.map(({stu,tally})=>{
+    const displayName=stu.name||stu.email||stu.uid.slice(0,8)+'…';
+    const rightLbl = tally.furthest===0
+      ? `<span class="stu-mod">&mdash;</span><span class="stu-count">0 / ${universe.total}</span>`
+      : `<span class="stu-mod">M${tally.furthest}</span><span class="stu-count">${tally.total} / ${universe.total}</span>`;
+    return `<button type="button" class="stu-row" data-open-student data-uid="${escAttr(stu.uid)}">
+        <div class="stu-name" title="${escAttr(displayName)}">${escHtml(displayName)}</div>
+        ${teacherBarFillHtml(tally.got,tally.working,universe.total)}
+        <div class="stu-right">${rightLbl}</div>
+      </button>`;
+  }).join('');
+  box.innerHTML = `${scard}
+    <div class="t-grid-wrap" style="border:0;overflow:visible">
+      <div class="stu-chart">
+        ${teacherAxisHeaderHtml(universe)}
+        <div class="stu-rows">
+          ${teacherTicksHtml(universe)}
+          ${rowsHtml}
+        </div>
+      </div>
+    </div>
+    <div class="tr-meta" style="margin-top:10px">Each bar spans the full 13-module course. Tick marks are module boundaries. Click a student to see their work.</div>`;
+}
+
+function renderTeacherStudentDetail(uid){
+  const box=document.getElementById('t-grid-container');
+  const stu=allStudents.find(s=>s.uid===uid);
+  const back=`<button type="button" class="stu-back" data-back-to-students>&#x2190; All students</button>`;
+  if(!stu){ box.innerHTML=`${back}<div class="t-loading">Could not find that student — they may have signed out or been removed.</div>`; return; }
+  const universe=teacherSkillUniverse();
+  const tally=teacherStudentTally(stu, universe);
+  const displayName=stu.name||stu.email||stu.uid.slice(0,8)+'…';
+  const email=stu.email||'(no email on file)';
+
+  // Written responses — every response across every set, grouped by module then set.
+  let responsesHtml=''; let anyResponse=false;
+  MODULE_MANIFEST.forEach(m=>{
+    let moduleBlock='';
+    SETS.forEach(w=>{
+      if(w.moduleNum!==m.num) return;
+      const slots=setShortResponses(w);
+      if(!slots.length) return;
+      const items=slots.map(sl=>{
+        if(sl.isPR){
+          const entries=prEntries(stu.responses&&stu.responses[sl.key]);
+          if(!entries.length) return '';
+          const latest=String(entries[entries.length-1].value||'').trim();
+          if(!latest) return '';
+          const n=prNum(latest);
+          const trendHtml=entries.length>1
+            ? `<span class="tr-lbl" style="opacity:.7">${entries.slice(-3).map(e=>escHtml(prNum(e.value)||e.value)).join(' &#x2192; ')}</span>` : '';
+          return `<div class="tr-item"><span class="tr-pr">&#x1F3AF; ${escHtml(sl.label)}</span><span class="tr-prval">${n?escHtml(n)+' BPM':escHtml(latest)}</span>${trendHtml}</div>`;
+        }
+        const val=(stu.responses&&stu.responses[sl.key]||'').trim();
+        if(!val) return '';
+        return `<div class="tr-item"><span class="tr-lbl">&#x270D; ${escHtml(sl.label)}</span><span class="tr-txt">${escHtml(val)}</span></div>`;
+      }).filter(Boolean).join('');
+      if(!items) return;
+      anyResponse=true;
+      moduleBlock+=`<div class="tr-card"><div class="tr-name">${escHtml(w.label)}</div>${items}</div>`;
+    });
+    if(moduleBlock) responsesHtml+=`<div class="stu-section-head" style="margin-top:${responsesHtml?'22px':'0'}">Module ${m.num} — ${escHtml(m.name)}</div>${moduleBlock}`;
+  });
+  if(!anyResponse) responsesHtml=`<div class="stu-empty">Hasn't written anything yet.</div>`;
+
+  // Module-by-module progress (13 rows) — same t-scard idiom as Trouble spots'
+  // per-module bars, but fraction-based (7 / 21) since this is one student's
+  // got+working mix, not a class-wide completion percent.
+  //
+  // A module with zero skills touched (no gotit, no working) is one the
+  // student simply HASN'T REACHED YET — this is a student-paced course, so
+  // nobody is "behind" by definition. The percentage-based pp-hi/pp-mid/pp-lo
+  // logic below would otherwise score that as 0% and paint it pp-lo (red),
+  // which reads as "failing this module" instead of "not started". Same
+  // distinction renderTeacherGrid's `.tck no` draws for an untouched skill,
+  // and the reason renderTeacherTrouble skips untouched skills entirely
+  // rather than counting them against the class. Here we can't skip the row
+  // (all 13 modules always render), so it gets the neutral `pp-none`
+  // treatment instead — muted --text2 on --bg2/--bg3, no red. The bar below
+  // needs no matching special-case: with got=working=0 both fills are
+  // already 0%-wide, so it already shows as the plain --bg2 track.
+  const modRows=universe.modules.map(m=>{
+    let got=0, working=0;
+    m.ids.forEach(id=>{ const st=stu.skills[id]; if(st==='gotit') got++; else if(st==='working') working++; });
+    const total=m.ids.length, done=got+working;
+    const pct=total?Math.round(done/total*100):0;
+    const pillClass=done===0?'pp-none':(pct===100?'pp-hi':pct>=50?'pp-mid':'pp-lo');
+    return `<div class="t-scard" style="margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px">
+        <div class="t-scard-lbl" style="margin-bottom:0" title="${escAttr(m.name)}">Module ${m.num} — ${escHtml(abbreviate(m.name))}</div>
+        <span class="ppill ${pillClass}">${done} / ${total}</span>
+      </div>
+      <div class="stu-track" style="height:6px;border-radius:4px">
+        <div class="stu-fill-got" style="width:${total?got/total*100:0}%"></div>
+        <div class="stu-fill-work" style="left:${total?got/total*100:0}%;width:${total?working/total*100:0}%"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Every skill, grouped by module then set — only modules this student has touched.
+  let skillsHtml='';
+  universe.modules.forEach(m=>{
+    const touched=m.ids.some(id=>stu.skills[id]==='gotit'||stu.skills[id]==='working');
+    if(!touched) return;
+    skillsHtml+=`<div class="stu-section-head">Module ${m.num} — ${escHtml(m.name)}</div>`;
+    SETS.forEach(w=>{
+      if(w.moduleNum!==m.num || !w.skills || !w.skills.length) return;
+      skillsHtml+=`<div class="stu-set-head">${escHtml(w.label)}</div>`;
+      w.skills.forEach(sk=>{ skillsHtml+=`<div class="stu-skill-row">${tckSpanHtml(stu.skills[sk.id]||'none')}<span>${escHtml(sk.text)}</span></div>`; });
+    });
+  });
+  if(!skillsHtml) skillsHtml='<div class="stu-empty">No skills started yet.</div>';
+
+  box.innerHTML = `
+    ${back}
+    <div class="stu-detail-name">${escHtml(displayName)}</div>
+    <div class="stu-detail-email">${escHtml(email)}</div>
+    <div class="stu-chart" style="margin-bottom:22px">
+      ${teacherAxisHeaderHtml(universe)}
+      <div class="stu-rows">
+        ${teacherTicksHtml(universe)}
+        <div style="padding:2px 0">
+          <div style="display:grid;grid-template-columns:var(--namecol) 1fr var(--rightcol);column-gap:var(--gap);align-items:center">
+            <div></div>
+            ${teacherBarFillHtml(tally.got,tally.working,universe.total,'stu-big-track')}
+            <div class="stu-right">${tally.furthest===0?'<span class="stu-mod">&mdash;</span>':'<span class="stu-mod">M'+tally.furthest+'</span>'}<span class="stu-count">${tally.total} / ${universe.total}</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stu-section-head" style="margin-top:0">Written responses</div>
+    ${responsesHtml}
+
+    <div class="stu-section-head">Module-by-module progress</div>
+    ${modRows}
+
+    <div class="stu-section-head">Skills</div>
+    ${skillsHtml}
+  `;
+  window.scrollTo({top:0});
 }
