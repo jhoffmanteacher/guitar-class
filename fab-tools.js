@@ -139,8 +139,16 @@ function togglePopup(which){
   if(which==='metro' && open) syncMetroMutedNote();
 }
 function closePopup(which){ document.getElementById(which+'-popup').classList.remove('open'); setFabExpanded(which, false); if(which==='metro') stopMetro(); if(which==='tuner') stopTuner(); }
+// Uses composedPath() (the propagation path captured at dispatch time), not
+// e.target.closest(): Start/Stop/Pause buttons replace their own innerHTML
+// on click (see toolLabelHtml call sites), which detaches whichever child
+// node the click actually landed on. closest() on a detached node can't walk
+// back up to .tool-popup, so it looked like a click "outside" and this
+// listener closed (and stopped) the tool that was just started.
 document.addEventListener('click',e=>{
-  if(!e.target.closest('.tool-popup')&&!e.target.closest('.fab')&&!e.target.closest('.fab-buttons')){
+  const path = e.composedPath();
+  const inside = path.some(el=>el.classList && (el.classList.contains('tool-popup')||el.classList.contains('fab')||el.classList.contains('fab-buttons')));
+  if(!inside){
     ['metro','timer','tuner'].forEach(closePopup);
   }
 });

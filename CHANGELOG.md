@@ -14,6 +14,13 @@ see `WORKFLOW.md` and the git commit log.
   of lining up flush with its left edge. Makes it easier to see at a glance
   which instructions belong to which step.
 
+## 2026-07-26 — Metronome Start button actually starts it
+
+### Fixed
+- **Tapping Start on the metronome now keeps it running**, instead of the
+  popup instantly closing and the click going silent. The same glitch could
+  hit the Timer's Start/Pause button too. Both are fixed.
+
 ## 2026-07-26 — Cleaner metronome layout
 
 ### Changed
