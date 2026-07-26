@@ -1686,6 +1686,13 @@ function activateSet(id){
   }
   lastSetId = id;
   if (typeof stopAnyRec === 'function') stopAnyRec();
+  // A Listening Coach check left running inline in the set/tab we're leaving
+  // just goes invisible otherwise (its DOM node stays put, only hidden by
+  // CSS) — the mic and its rAF loop would keep running unseen, permanently
+  // muting the metronome/demo audio for the rest of the session. Closing it
+  // here is a no-op when no check is open (coachClose() is safe to call
+  // unconditionally — see coach.js).
+  if (typeof coachClose === 'function') coachClose();
   document.querySelectorAll('.wpill').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   document.querySelectorAll('.week-panel').forEach(p=>p.classList.toggle('active',p.dataset.id===id));
   // Show the module-level Songs section only for the active set's module.
@@ -1850,6 +1857,10 @@ function buildSet(w){
 }
 
 function switchTab(el,wid,tab){
+  // Same reasoning as activateSet(): the tab-panel we're switching away from
+  // (e.g. Station B) might be hiding a still-running inline Coach check —
+  // close it so its mic doesn't keep running unseen. No-op if none is open.
+  if (typeof coachClose === 'function') coachClose();
   const panel=document.querySelector(`.week-panel[data-id="${wid}"]`);
   panel.querySelectorAll('.tabs > .tabs-main .tabs-card, .tabs > .tabs-songbar > .tabs-songs').forEach(t=>t.classList.remove('active'));
   panel.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
@@ -3850,8 +3861,7 @@ window.addEventListener('gc-langchange', function(){
   if(typeof populateModuleDropdown === 'function') populateModuleDropdown();
   rebuildModuleContentPanels();
   // Closed→reopen trick for the drop-over panels built at open time.
-  const shPanel = document.getElementById('songs-hub-panel');
-  if(shPanel && !shPanel.hidden && typeof toggleSongsHub === 'function'){
+  if(document.getElementById('songs-hub-overlay') && typeof toggleSongsHub === 'function'){
     toggleSongsHub(); toggleSongsHub();
   }
   /* The full-page screens are hash-based (toggling twice would churn the
@@ -4405,6 +4415,10 @@ function closeTopPanels(except){
   const SCREEN_IDS = { games: 'games-screen', 'keep-practicing': 'keep-practicing-screen', 'my-progress': 'my-progress-screen' };
   ['games', 'songs-hub', 'search', 'keep-practicing', 'my-progress'].forEach(k => {
     if(k === except) return;
+    if(k === 'songs-hub'){
+      if(document.getElementById('songs-hub-overlay') && typeof closeSongsHub === 'function') closeSongsHub();
+      return;
+    }
     const p = document.getElementById(SCREEN_IDS[k] || k + '-panel');
     if(p && !p.hasAttribute('hidden')){
       if(k === 'games' && typeof closeGamesScreen === 'function'){ closeGamesScreen(); return; }
@@ -4434,8 +4448,9 @@ function focusPanel(p){
    click "did nothing" as far as the student could see. Close whichever panel
    is covering the page and scroll up so the new set is actually visible. */
 function leaveTopPanelForSet(){
-  const covering = ['games-screen', 'songs-hub-panel', 'search-panel', 'keep-practicing-screen', 'my-progress-screen']
-    .some(id => { const el = document.getElementById(id); return el && !el.hasAttribute('hidden'); });
+  const covering = ['games-screen', 'search-panel', 'keep-practicing-screen', 'my-progress-screen']
+    .some(id => { const el = document.getElementById(id); return el && !el.hasAttribute('hidden'); })
+    || !!document.getElementById('songs-hub-overlay');
   if(!covering) return;
   closeTopPanels('');
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -4447,17 +4462,32 @@ function ensureAllModuleData(){
   return Promise.all(MODULE_MANIFEST.map(m => loadModuleData(m.num).catch(() => {})));
 }
 
-/* ── ♪ Songs hub: every song on the site, deduped, core six first ── */
-async function toggleSongsHub(){
-  const p = document.getElementById('songs-hub-panel');
+/* ── ♪ Songs hub: every song on the site, deduped, core six first ──
+   Opens as a centered popup overlay (same .daily5-overlay/.daily5-modal
+   shell as the Report-a-problem and Daily 5 popups), not a drop-over panel —
+   so it's never left stranded at the top of the page when a student is
+   scrolled deep into a practice set. */
+function songsHubEscClose(e){ if(e.key === 'Escape') closeSongsHub(); }
+function closeSongsHub(){
+  const ov = document.getElementById('songs-hub-overlay');
+  if(ov) ov.remove();
+  document.removeEventListener('keydown', songsHubEscClose);
   const btn = document.getElementById('songs-hub-btn');
-  if(!p) return;
-  const open = p.hasAttribute('hidden');
-  if(!open){ p.setAttribute('hidden', ''); if(btn) btn.setAttribute('aria-expanded', 'false'); return; }
+  if(btn) btn.setAttribute('aria-expanded', 'false');
+}
+async function toggleSongsHub(){
+  if(document.getElementById('songs-hub-overlay')){ closeSongsHub(); return; }
+  const btn = document.getElementById('songs-hub-btn');
   closeTopPanels('songs-hub');
-  p.removeAttribute('hidden');
+  const ov = document.createElement('div');
+  ov.className = 'daily5-overlay';
+  ov.id = 'songs-hub-overlay';
+  ov.innerHTML = `<div class="daily5-modal" id="songs-hub-panel" role="dialog" aria-modal="true" aria-label="${escAttr(t('hub.allSongs'))}"><div class="daily5-head"><span>&#x266A; ${t('hub.allSongs')}</span><button type="button" class="tp-close" onclick="closeSongsHub()" aria-label="${escAttr(t('hub.closeAria'))}">&#x2715;</button></div><div class="coach-tip">${t('hub.loading')}</div></div>`;
+  ov.addEventListener('click', e => { if(e.target === ov) closeSongsHub(); });
+  document.body.appendChild(ov);
+  document.addEventListener('keydown', songsHubEscClose);
   if(btn) btn.setAttribute('aria-expanded', 'true');
-  p.innerHTML = `<div class="daily5-head"><span>&#x266A; ${t('hub.allSongs')}</span><button type="button" class="tp-close" onclick="toggleSongsHub()" aria-label="${escAttr(t('hub.closeAria'))}">&#x2715;</button></div><div class="coach-tip">${t('hub.loading')}</div>`;
+  const p = document.getElementById('songs-hub-panel');
   await ensureAllModuleData();
   const byName = new Map();
   const noteSong = (song, moduleNum) => {
@@ -4513,7 +4543,7 @@ async function toggleSongsHub(){
   const groupsHtml = `<div class="sh-sec-title">${t('hub.choiceTitle')}</div>` + groups.map((g, gi) =>
     `<div class="sh-group${gi === 0 ? ' open' : ''}"><button type="button" class="sh-group-head" aria-expanded="${gi === 0}" onclick="toggleHubGroup(this)"><span>${g.title}</span><span class="sh-group-sub">${g.sub}</span><span class="sh-group-count">${t('hub.groupCount', {n: g.entries.length})}</span></button><div class="sh-group-body">${renderRows(g.entries)}</div></div>`).join('');
   const requestHtml = requestEntries.length ? `<div class="card">${renderRows(requestEntries)}</div>` : '';
-  p.innerHTML = `<div class="daily5-head"><span>&#x266A; ${t('hub.allSongs')}</span><button type="button" class="tp-close" onclick="toggleSongsHub()" aria-label="${escAttr(t('hub.closeAria'))}">&#x2715;</button></div>
+  p.innerHTML = `<div class="daily5-head"><span>&#x266A; ${t('hub.allSongs')}</span><button type="button" class="tp-close" onclick="closeSongsHub()" aria-label="${escAttr(t('hub.closeAria'))}">&#x2715;</button></div>
     <div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('hub.legendCore')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('hub.legendChoice')}</div></div>
     ${coreHtml}${groupsHtml}${requestHtml}`;
 }

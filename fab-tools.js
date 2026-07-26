@@ -73,8 +73,19 @@ function tick(){
     const accent = metroBeatIdx === 0;
     toolsBeep(accent ? 1320 : 880, accent ? 0.08 : 0.06, accent ? 0.55 : 0.4);
   }
+  syncMetroMutedNote();
   const dot=document.getElementById('metro-dot'); if(dot){ dot.classList.add('flash'); setTimeout(()=>dot.classList.remove('flash'),80); }
   metroBeatIdx = (metroBeatIdx + 1) % getMetroMeter();
+}
+/* Shows a small note in the popup when the click is running silent because
+   the Listening Coach's mic is live (an audible click would bleed into its
+   pitch/onset detection). Without this the Start button just looked broken —
+   the dot flashes, the button says Stop, but nothing plays and nothing says
+   why. Checked on every tick (so it appears/disappears live) and when the
+   popup opens. */
+function syncMetroMutedNote(){
+  const note = document.getElementById('metro-muted-note');
+  if(note) note.hidden = !window.coachMicLive;
 }
 function getBpm(){ return parseInt(document.getElementById('bpm-slider').value); }
 function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; if(metroRunning){ stopMetro(); startMetro(false); } }
@@ -82,7 +93,9 @@ function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Mat
 /* useCountIn defaults true (the Start button's toggle); BPM/meter changes
    while already running pass false so they don't replay the lead-in bar. */
 function startMetro(useCountIn){
-  if(window.coachMicLive) return;
+  // Runs even while the Coach's mic is live — tick() itself stays silent in
+  // that case (see its comment), so this just keeps the visible dot/button
+  // state honest instead of the Start button silently doing nothing.
   metroRunning = true;
   metroBeatIdx = 0;
   document.getElementById('metro-btn').innerHTML=toolLabelHtml('&#x23F8;','tools.stop');
@@ -141,6 +154,7 @@ function togglePopup(which){
       startTuner();
     } else { stopTuner(); }
   }
+  if(which==='metro' && open) syncMetroMutedNote();
 }
 function closePopup(which){ document.getElementById(which+'-popup').classList.remove('open'); setFabExpanded(which, false); if(which==='metro') stopMetro(); if(which==='tuner') stopTuner(); }
 document.addEventListener('click',e=>{

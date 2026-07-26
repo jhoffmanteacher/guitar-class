@@ -233,6 +233,8 @@
     'tools.tooLowFlat':    { en: 'Too low — tune up (flat)', es: 'Muy baja — afina hacia arriba (bemol)' },
     'tools.tunerTip':      { en: 'Noisy room? Pick your string above and play close to the computer.',
                              es: '¿Sala ruidosa? Elige tu cuerda arriba y toca cerca de la computadora.' },
+    'tools.metroMuted':    { en: '🔇 Silent while the Listening Coach’s mic is on — the beat still flashes above.',
+                             es: '🔇 Silencioso mientras el micrófono del Coach de Escucha está activo — el pulso sigue destellando arriba.' },
 
     // ── Buttons & footer ──
     'btn.markDone':          { en: 'Mark done', es: 'Marcar como hecho' },
@@ -1134,6 +1136,10 @@
       es: '¿Cómo quieres tocarlo?' },
     'games.riff.longestStreak': { en: 'Longest streak: {n} in a row.',
       es: 'Racha más larga: {n} seguidos.' },
+    'games.riff.metroOff': { en: '🔇 Click off — nice and steady!',
+      es: '🔇 Clic apagado — ¡qué firme vas!' },
+    'games.riff.metroOn': { en: '🎵 Click on',
+      es: '🎵 Clic activado' },
     'games.riff.modeKeysTap': { en: 'Keys / tap',
       es: 'Teclas / toques' },
     'games.riff.modeMyGuitar': { en: 'My guitar',

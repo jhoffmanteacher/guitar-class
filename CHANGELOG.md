@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-26 — Songs pop up properly, and the Listening Coach hears you better
+
+### Changed
+
+- **The Songs button now opens as a pop-up, not a jump to the top of the
+  page.** Tap it from anywhere — deep in a practice set, mid-scroll — and it
+  opens right where you are instead of teleporting you to the top of the
+  site.
+- **Fixed a bug where the metronome could go completely silent** after using
+  a Listening Coach drill, with no explanation why. If it's ever silent
+  because the Coach's mic is on, the metronome pop-up now says so.
+- **The Listening Coach's microphone got more sensitive** — especially
+  helpful on Chromebooks, whose built-in mics tend to run quieter, even in a
+  loud room.
+- **Riff Runner's metronome click now fades out once your timing locks in**
+  — eight perfect hits in a row and the click goes quiet, so you can feel
+  yourself holding the beat without the crutch.
+
 ## 2026-07-26 — Module 5's assessment is one song again
 
 ### Changed

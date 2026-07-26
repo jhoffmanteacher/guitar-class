@@ -61,6 +61,21 @@ const COACH_ATTACK_SKIP   = 70;     // ms after an onset before pitch readings s
 const COACH_EVENT_TAIL    = 340;    // ms of pitch readings collected after an onset
 const COACH_MAX_SLOTS     = 32;
 const COACH_BEATS_PER_CHORD = 4;
+/* Chromebook built-in mics commonly capture noticeably quieter than a
+   MacBook's, and getUserMedia is requested with autoGainControl:false (see
+   coachAcquireMicInner) — deliberately, since browser AGC pumps up the
+   background noise floor right along with a quiet player, which is the
+   opposite of what we want in a loud classroom. A fixed GainNode instead:
+   it multiplies the whole signal by a constant, so it helps a quiet mic
+   clear the ABSOLUTE floors above (COACH_PITCH_GATE, *_ONSET_FLOOR,
+   *_HF_FLOOR) without weakening the RATIO checks (*_ONSET_RATIO, *_HF_RATIO)
+   that actually separate a real strum from steady room noise — multiplying
+   both the signal and its smoothed baseline by the same constant leaves
+   their ratio unchanged. 3× is a middle-of-the-road boost: enough to lift a
+   quiet Chromebook capture into the working range, unlikely to push a
+   normal laptop mic into float clipping (GainNode output isn't hard-clipped
+   before the analyser the way speaker playback would be). */
+const COACH_MIC_GAIN = 3;
 
 function coachFootHtml(){ return '<div class="coach-foot">&#x1F512; ' + t('coach.foot') + '</div>'; }
 
@@ -343,6 +358,10 @@ async function coachAcquireMicInner(){
   }
   coachCtx = new (window.AudioContext || window.webkitAudioContext)();
   const src = coachCtx.createMediaStreamSource(coachStream);
+  // Boost quiet mics (Chromebooks especially) BEFORE any thresholding —
+  // see COACH_MIC_GAIN's comment for why a fixed gain beats re-enabling AGC.
+  const gainNode = coachCtx.createGain();
+  gainNode.gain.value = COACH_MIC_GAIN;
   const hp = coachCtx.createBiquadFilter();
   hp.type = 'highpass'; hp.frequency.value = 70; hp.Q.value = 0.7;
   const lp = coachCtx.createBiquadFilter();
@@ -350,7 +369,7 @@ async function coachAcquireMicInner(){
   coachAnalyser = coachCtx.createAnalyser();
   coachAnalyser.fftSize = COACH_FFT;
   coachAnalyser.smoothingTimeConstant = 0;
-  src.connect(hp); hp.connect(lp); lp.connect(coachAnalyser);
+  src.connect(gainNode); gainNode.connect(hp); hp.connect(lp); lp.connect(coachAnalyser);
   coachFrameBuf = new Float32Array(COACH_FFT);
   window.coachMicLive = true;   // cleared in coachMicOff — set/clear live in ONE pair
   return true;
@@ -1360,6 +1379,17 @@ function gamesStopMic(){
   fzStop();
   rnStop();
   nrStop();
+  /* Backstop: every *Stop() above only releases the mic through its own
+     micOn flag, so a state-tracking bug in any one of them (or a future
+     game that forgets the pattern) could still leave window.coachMicLive
+     stuck true — silently muting the metronome/demo audio for the rest of
+     the session (see fab-tools.js tick()/startMetro()). This umbrella is
+     called from every "leaving games/coach" path (tuner open, a Coach
+     check starting, the games panel closing, tab backgrounded), so it's
+     the single hard-to-miss place to force the flag straight if anything
+     above missed it. coachMicOff() is itself idempotent/safe to call with
+     nothing running. */
+  if (window.coachMicLive) coachMicOff();
   const screen = document.getElementById('games-screen');
   const p = document.getElementById('games-panel');
   if (screen && !screen.hasAttribute('hidden') && p &&
@@ -4176,10 +4206,25 @@ function rnClickAt(t, accent, loud){
   o.start(t); o.stop(t + 0.05);
 }
 
+/* Combo streak at which the click fades out for the rest of the round — the
+   student's timing has clearly locked onto the tempo on its own, so the
+   crutch backs off. Reuses the exact threshold the score multiplier already
+   steps up at (see rnPress/rnHudRefresh's "×2 at 8 in a row"), rather than
+   inventing a fresh number — the HUD already taught the student what "8 in
+   a row" means. No mic is involved in this game (keys/taps only), so an
+   audible click can safely keep running right up to that point with zero
+   risk of being picked up as a false "note" the way it would in a
+   mic-graded drill (see coachLoop/srLoop/nrLoop, which deliberately never
+   play a click during graded listening for exactly that reason). */
+const RN_METRONOME_FADE_COMBO = 8;
+
 /* Lookahead scheduler (the "two clocks" pattern, same as Strum Hero):
    every ~25ms, post any click due in the next ~120ms at its exact
    audio-clock time. 4 count-in clicks (beat 4 high, like coachCountIn),
-   then a quiet pulse with beat 1 of each bar accented. */
+   then a quiet pulse with beat 1 of each bar accented — until the student's
+   combo crosses RN_METRONOME_FADE_COMBO, after which play-phase clicks go
+   silent (the count-in always stays audible; s.nextClick bookkeeping still
+   advances either way so the schedule itself doesn't drift). */
 function rnSchedule(){
   const s = rn;
   if (!s || (s.phase !== 'countin' && s.phase !== 'play')) return;
@@ -4188,7 +4233,9 @@ function rnSchedule(){
     const t = s.startAt + s.nextClick * s.spb;
     if (t >= horizon) break;
     const countin = s.nextClick < 4;
-    rnClickAt(t, countin ? s.nextClick === 3 : (s.nextClick - 4) % s.bpb === 0, countin);
+    if (countin || !s.clickMuted){
+      rnClickAt(t, countin ? s.nextClick === 3 : (s.nextClick - 4) % s.bpb === 0, countin);
+    }
     s.nextClick++;
   }
 }
@@ -4241,6 +4288,7 @@ async function rnStart(){
   s.score = 0; s.combo = 0; s.maxCombo = 0; s.extras = 0;
   s.errs = [];                                     // signed press errors (s), for the early/late line
   s.sweepIdx = 0; s.lastBeat = -1; s.nextClick = 0;
+  s.clickMuted = false; s.tightCombo = 0;           // fresh round: click starts on every time
   rnRenderPlay();
   s.els = s.notes.map((_, i) => document.getElementById('rn-n-' + i));
   s.laneEls = {};
@@ -4269,12 +4317,21 @@ function rnRenderPlay(){
     `<div class="sh-hud">
        <span class="sh-score" id="rn-score">${t('games.common.score', {n: 0})}</span>
        <span class="sh-combo" id="rn-combo">&nbsp;</span>
+       <span class="rn-metro-status" id="rn-metro-status">${t('games.riff.metroOn')}</span>
        <span class="sh-bar" id="rn-bar">${t('games.riff.getReady')}</span>
      </div>
      <div class="cc-beats" id="rn-beats">${'<span class="cc-pip"></span>'.repeat(s.bpb)}</div>
      <div class="rn-track" id="rn-track">${lanes.join('')}<div class="rn-hitline"></div><div class="rn-count" id="rn-count">&nbsp;</div></div>
      <div class="coach-tip rn-center">${t('games.riff.tipPressString')}</div>
      <button type="button" class="tp-btn coach-stop" onclick="rnFinish()">&#x25A0; ${t('games.common.stop')}</button>`;
+}
+/* Reflects s.clickMuted into the HUD (fires once, right when the fade
+   happens — no need to poll it every frame). */
+function rnMetroStatusRefresh(){
+  const el = document.getElementById('rn-metro-status');
+  if (!el || !rn) return;
+  el.textContent = t(rn.clickMuted ? 'games.riff.metroOff' : 'games.riff.metroOn');
+  el.classList.toggle('rn-metro-off', !!rn.clickMuted);
 }
 
 function rnKeydown(e){
@@ -4344,20 +4401,29 @@ function rnPress(str, ts){
       n.result = 'perfect';
       s.score += 100 * mult;
       if (s.els[best]) s.els[best].classList.add('hit-perfect');
+      /* Metronome fade: only PERFECT presses (the tight window) build the
+         streak — a "good" is still a hit, but not tight enough timing to
+         start trusting the student without the click. */
+      s.tightCombo++;
+      if (!s.clickMuted && s.tightCombo >= RN_METRONOME_FADE_COMBO){
+        s.clickMuted = true;
+        rnMetroStatusRefresh();
+      }
     } else {
       n.result = 'good';
       s.score += 50 * mult;
       if (s.els[best]) s.els[best].classList.add('hit-good');
+      s.tightCombo = 0;
     }
   } else if (near >= 0){
     const n = s.notes[near];             // wrong string while a token was in its window
     n.result = 'miss';
-    s.combo = 0;
+    s.combo = 0; s.tightCombo = 0;
     if (s.els[near]) s.els[near].classList.add('miss');
     rnLaneFlash(str);
   } else if (t >= s.t0){
     s.extras++;                          // stray press, nothing near: small penalty
-    s.combo = 0;
+    s.combo = 0; s.tightCombo = 0;
     s.score = Math.max(0, s.score - 10);
     rnLaneFlash(str);
   }
@@ -4411,7 +4477,7 @@ function rnLoop(){
       if (n.t + s.good + 0.15 > now) break;
       if (!n.result){
         n.result = 'miss';
-        s.combo = 0;
+        s.combo = 0; s.tightCombo = 0;
         if (s.els[i]) s.els[i].classList.add('miss');
         rnHudRefresh();
       }
