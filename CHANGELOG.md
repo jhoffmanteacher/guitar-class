@@ -5,6 +5,30 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-26 — Showcase says both songs, Let It Be joins Module 4, and a new "name the chord" challenge
+
+### Added
+
+- **Module 3 · Mystery Chart challenge.** Three power-chord diagrams with the
+  names stripped off, and a check-yourself question. On the assessment you
+  have to read chord names *off* a chart; every drill until now went the other
+  way (name → fretboard), so this practices the direction you'll actually be
+  tested on.
+- **Module 4 · Let It Be is now in the songs list**, with its backing track —
+  so all six core songs are available to solo over, not five.
+
+### Changed
+
+- **Module 5 · the Semester 1 Showcase panel now says both songs.** It read as
+  "one song of your choice"; the actual showcase is a core song from memory
+  (Let It Be, Luna, or "the cure") *plus* a song of your choice. Anyone
+  preparing from that panel was preparing half the performance. The 70 BPM
+  three-chord progression and the unlabelled-chart naming are named there now
+  too.
+- **Module 4 backing tracks play in-page.** Seven Nation Army, Sweet Child
+  O' Mine and Luna pointed at YouTube; they now use the same course backing
+  tracks as the other songs — no leaving the site, no ads before your solo.
+
 ## 2026-07-25 — Second pass: more assessment wording fixed after an independent re-check
 
 ### Changed

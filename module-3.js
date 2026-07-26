@@ -247,6 +247,36 @@ SETS.push(
             ]
           },
           {
+            title: 'Mystery Chart — name the power chord with no label',
+            title_es: 'Diagrama misterioso — nombra el acorde de potencia sin etiqueta',
+            steps: [
+              {
+                label: 'Challenge: mystery chart', label_es: 'Reto: diagrama misterioso',
+                text: 'Challenge — Mystery Chart: the three diagrams below have NO names. This is exactly the assessment task — naming power chords on an unlabelled chart.<ol><li>Find the root: it\'s the LOWEST fretted dot — the one your index finger plays.</li><li>Ask which string it sits on (6 = E, 5 = A) and which fret.</li><li>Name that note, then add "5" — that\'s the chord.</li></ol>Say all three out loud, left to right, then check yourself with the question below.',
+                text_es: 'Reto — Diagrama misterioso: los tres diagramas de abajo NO tienen nombre. Esta es exactamente la tarea de evaluación — nombrar acordes de potencia en un diagrama sin etiquetar.<ol><li>Encuentra la raíz: es el punto trasteado MÁS GRAVE — el que toca tu dedo índice.</li><li>Pregunta en qué cuerda está (6 = Mi, 5 = La) y en qué traste.</li><li>Nombra esa nota y agrégale un "5" — ese es el acorde.</li></ol>Di los tres en voz alta, de izquierda a derecha, y luego compruébalo con la pregunta de abajo.',
+                hint: 'You already know these notes from Module 2. Low E string: fret 3 = G, fret 5 = A. A string: fret 3 = C, fret 5 = D. The index finger names the chord — the ring finger is just the 5th riding along two frets up.',
+                hint_es: 'Ya conoces estas notas del Módulo 2. Cuerda Mi grave: traste 3 = G, traste 5 = A. Cuerda La: traste 3 = C, traste 5 = D. El dedo índice le da nombre al acorde — el anular es solo la quinta que va dos trastes más arriba.',
+                stuck: 'Count up the string one fret at a time from the open string, saying the musical alphabet out loud (E F F# G...). Where you land is the root — add "5" and you have the chord name.',
+                stuck_es: 'Cuenta hacia arriba por la cuerda, un traste a la vez desde la cuerda al aire, diciendo el alfabeto musical en voz alta (E F F# G...). Donde caigas es la raíz — agrégale un "5" y tienes el nombre del acorde.',
+                levelUp: 'Cover the names on any chord chart in the songs list and name every power chord in it before you play a note.',
+                levelUp_es: 'Tapa los nombres en cualquier diagrama de acordes de la lista de canciones y nombra todos los acordes de potencia antes de tocar una sola nota.',
+                skills: [6],
+                chords: [
+                  { chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
+                  { chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
+                  { chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 }
+                ],
+                response: { type: 'mc', prompt: 'Left to right, the three unlabelled diagrams are which chords?',
+                  prompt_es: 'De izquierda a derecha, ¿qué acordes son los tres diagramas sin etiquetar?',
+                  answer: 0,
+                  explain: 'G5 · C5 · A5. The first roots on the low E string at fret 3 (G), the second on the A string at fret 3 (C), the third on the low E string at fret 5 (A). Same shape all three times — only the root moves, and the root is what names the chord.',
+                  explain_es: 'G5 · C5 · A5. El primero tiene la raíz en la cuerda Mi grave, traste 3 (G); el segundo en la cuerda La, traste 3 (C); el tercero en la Mi grave, traste 5 (A). La misma forma las tres veces — solo se mueve la raíz, y la raíz es la que le da nombre al acorde.',
+                  choices: ['G5 · C5 · A5', 'E5 · A5 · G5', 'G5 · A5 · C5', 'C5 · G5 · D5'],
+                  choices_es: ['G5 · C5 · A5', 'E5 · A5 · G5', 'G5 · A5 · C5', 'C5 · G5 · D5'] }
+              }
+            ]
+          },
+          {
             title: 'Play a power chord progression in time',
             title_es: 'Toca una progresión de acordes de potencia a tiempo',
             steps: [

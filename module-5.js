@@ -1314,11 +1314,11 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Semester 1 Showcase: Perform one complete song of your choice using at least 4 chords from Semester 1. Evaluated on chord accuracy, timing, smooth transitions, and musicality. (Separate and ungraded: your written "My Guitar Adventure — Semester 1 Check-in" reflection — just for you, not part of the showcase score.)',
-      goal_es: 'Muestra del Semestre 1: interpreta una canción completa de tu elección usando al menos 4 acordes del Semestre 1. Se evalúa la precisión de los acordes, el tiempo, las transiciones suaves y la musicalidad. (Aparte y sin calificar: tu reflexión escrita "Mi aventura con la guitarra — Check-in del Semestre 1" — solo para ti, no forma parte del puntaje de la muestra.)',
-      performance: 'Semester 1 showcase performance. Student records a full run of the chosen song (or plays it for family or friends), then reviews the recording for chord accuracy, timing, transitions, and expression.',
-      selfCheck: 'Can you play your showcase song all the way through without stopping? Can you name every chord in your song and which group it belongs to?',
-      selfCheck_es: '¿Puedes tocar tu canción de la muestra de principio a fin sin detenerte? ¿Puedes nombrar cada acorde de tu canción y a qué grupo pertenece?',
+      goal: 'Semester 1 Showcase — TWO songs: (1) one CORE open-chord song from memory — Let It Be (C–G–Am–F), Luna (F–Am–Dm), or "the cure" (Am–C–Dm–F–G/B); (2) one song of your choice using at least 4 chords from Semester 1. Also: play three chords in an 8-bar progression at 70 BPM with clean changes, and name chords on an unlabelled chord chart. Evaluated on chord accuracy, timing, smooth transitions, and musicality. (Separate and ungraded: your written "My Guitar Adventure — Semester 1 Check-in" reflection — just for you, not part of the showcase score.)',
+      goal_es: 'Muestra del Semestre 1 — DOS canciones: (1) una canción CENTRAL de acordes al aire de memoria — Let It Be (C–G–Am–F), Luna (F–Am–Dm) o "the cure" (Am–C–Dm–F–G/B); (2) una canción de tu elección usando al menos 4 acordes del Semestre 1. Además: toca tres acordes en una progresión de 8 compases a 70 BPM con cambios limpios, y nombra acordes en un diagrama sin etiquetar. Se evalúa la precisión de los acordes, el tiempo, las transiciones suaves y la musicalidad. (Aparte y sin calificar: tu reflexión escrita "Mi aventura con la guitarra — Check-in del Semestre 1" — solo para ti, no forma parte del puntaje de la muestra.)',
+      performance: 'Semester 1 showcase performance. Student records a full run of the core song from memory and of the chosen song (or plays them for family or friends), then reviews the recordings for chord accuracy, timing, transitions, and expression.',
+      selfCheck: 'Can you play your core song from memory — no chart in front of you — all the way through without stopping? Can you do the same with your chosen song? Can you name every chord in both and which group it belongs to?',
+      selfCheck_es: '¿Puedes tocar tu canción central de memoria — sin ningún diagrama delante — de principio a fin sin detenerte? ¿Puedes hacer lo mismo con la canción que elegiste? ¿Puedes nombrar cada acorde de las dos y a qué grupo pertenece?',
       standards: ['Pr.4a', 'Pr.5b', 'Pr.6a', 'Re.9a']
     },
 
@@ -1353,10 +1353,10 @@ SETS.push(
           prompt_es: '¿Cuál de estos acordes es del Grupo 2 (D, A, Em, Bm)?',
           choices: ['C major', 'G major', 'D major', 'F major'],
           choices_es: ['C mayor', 'G mayor', 'D mayor', 'F mayor'], answer: 2 } },
-      { id: 'm5w4-s5', text: 'Perform a chosen song all the way through without stopping',
-        text_es: 'Interpretar una canción elegida de principio a fin sin detenerse',
-        gotItWhen: 'you can play your showcase song start to finish — fingers arched, thumb behind the neck, the shapes held through the whole song — and even with mistakes you keep going and stay in time.',
-        gotItWhen_es: 'puedes tocar tu canción de la muestra de principio a fin — dedos arqueados, pulgar detrás del mástil, las formas sostenidas durante toda la canción — y aunque haya errores sigues tocando y te mantienes a tiempo.',
+      { id: 'm5w4-s5', text: 'Perform a core song from memory, plus a chosen song, all the way through without stopping',
+        text_es: 'Interpretar una canción central de memoria, más una canción elegida, de principio a fin sin detenerse',
+        gotItWhen: 'you can play your core song (Let It Be, Luna, or "the cure") from memory with no chart in front of you, and your chosen song too — fingers arched, thumb behind the neck, the shapes held through the whole song — and even with mistakes you keep going and stay in time.',
+        gotItWhen_es: 'puedes tocar tu canción central (Let It Be, Luna o "the cure") de memoria sin ningún diagrama delante, y también la canción que elegiste — dedos arqueados, pulgar detrás del mástil, las formas sostenidas durante toda la canción — y aunque haya errores sigues tocando y te mantienes a tiempo.',
         practice: { type: 'pr', prompt: 'Play your showcase song start to finish without stopping — mistakes are fine, stopping isn\'t. How many complete no-stop runs did you get today?',
           prompt_es: 'Toca tu canción de la muestra de principio a fin sin detenerte — los errores están bien, detenerse no. ¿Cuántas pasadas completas sin paradas lograste hoy?',
           unit: 'count', placeholder: 'e.g. 2 runs — try for a higher number', placeholder_es: 'p. ej. 2 pasadas — intenta superarlo' } },
