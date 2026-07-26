@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-26 — Listening Coach: the TAB keeps the beat
+
+### Changed
+
+- **The Listening Coach's "play now" screen is far calmer.** It used to have
+  four things moving at once — a red mic dot blinking at one speed, a blue
+  metronome dot blinking at another, the big note name swapping every beat,
+  and the row of note chips changing color as it graded you — plus the same
+  TAB printed twice, once in the card and once on the page underneath it.
+- **Now one green column steps across the TAB, one column per beat**, and
+  darkens right on the beat. That column *is* the metronome, so there's a
+  single place to look: it shows the beat, the note, and where to put your
+  finger all at once. The big letter above just names whatever the column is
+  sitting on, with the next note to its right. Chord checks work the same
+  way, with the strum row as the lane.
+- The page's copy of the TAB now hides while the card is open, so the board
+  you're reading is the board that's lighting up. Note-by-note scoring waits
+  for the report card at the end instead of flickering underneath you while
+  you play, and the beat column still fades out on its own once your timing
+  is steady.
+
 ## 2026-07-26 — Step instructions now indent under their heading
 
 ### Changed

@@ -940,7 +940,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .coach-title{font-weight:600;font-size:0.9375rem;color:var(--text)}
 .coach-mic{display:inline-flex;align-items:center;gap:5px;font-size:0.75rem;font-weight:600;color:#c0392b}
 @media(prefers-color-scheme:dark){.coach-mic{color:#f2a39c}}
-.coach-mic-dot{width:8px;height:8px;border-radius:50%;background:#e74c3c;animation:coachPulse 1.2s ease-in-out infinite}
+/* Static, deliberately: the listening screen has exactly ONE thing that
+   moves (the beat column), and a mic dot blinking at its own unrelated
+   1.2s rate was reading as a second metronome. */
+.coach-mic-dot{width:8px;height:8px;border-radius:50%;background:#e74c3c}
 @keyframes coachPulse{0%,100%{opacity:1}50%{opacity:0.35}}
 .coach-x{margin-left:auto;background:none;border:none;cursor:pointer;font-size:1.125rem;color:var(--text3);line-height:1;padding:0 2px;font-family:inherit}
 .coach-x:hover{color:var(--text)}
@@ -956,11 +959,38 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .coach-count{font-size:2.875rem;font-weight:600;text-align:center;min-height:56px;color:var(--green-text);font-variant-numeric:tabular-nums}
 .coach-live{display:flex;align-items:center;gap:8px;font-weight:600;font-size:0.9375rem;color:var(--text);margin-bottom:4px}
 .coach-live-dot{width:10px;height:10px;border-radius:50%;background:#e74c3c;animation:coachPulse 0.9s ease-in-out infinite}
-/* Beat-pulse guide (listening phase, visual only — see coachLoop/coachMatchEvent
-   in coach.js). Reuses the toolbelt Metronome's .metro-dot/.metro-dot.flash
-   for the flash itself, just resized/laid out inline for this row. */
-.coach-pulse-row{display:flex;align-items:center;gap:8px;margin:2px 0 4px}
-.coach-pulse-row .metro-dot{width:14px;height:14px;margin:0;flex:0 0 auto}
+/* ── Listening lane (2026-07-26 redesign; see coachRenderListening) ──
+   The TAB is the metronome: one green column steps across it, one column
+   per beat, and darkens ON the beat — replacing the separate .metro-dot,
+   which asked students to watch a dot and a note readout and a recoloring
+   chip strip all at once. The lane box owns the flash so melody (tab cells)
+   and chords (chip strip) share one rule. */
+/* The page's copy of the tab the open card is already showing (coachOpen). */
+.coach-dup-hidden{display:none !important}
+.coach-lane{border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg2);padding:8px 10px;margin:8px 0 4px}
+.coach-lane-head{display:flex;align-items:baseline;gap:10px;margin-bottom:6px;min-height:34px}
+.coach-lane-now{font-size:1.875rem;font-weight:700;line-height:1.1;color:var(--green-text);min-width:46px;font-variant-numeric:tabular-nums}
+.coach-lane-lbl{font-size:0.6875rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3)}
+.coach-lane-next{margin-left:auto;font-size:0.8125rem;color:var(--text2);white-space:nowrap}
+.coach-lane-foot{margin:0 0 6px}
+/* Quieter than Riff Runner's version of this line — it's a footnote here, not
+   a status the player watches. */
+.coach-lane-foot .rn-metro-status{font-size:0.75rem;font-weight:400;color:var(--text3)}
+.coach-lane .coach-tab,.coach-lane .coach-strip{margin:0}
+.coach-lane .tab-board{border:none;background:transparent;padding:0}
+/* The beat column. box-shadow bridges the gap between grid rows so six
+   separate cells read as one continuous band. */
+.tab-cell.coach-col{background:var(--green-bg);border-radius:3px;box-shadow:0 -3px 0 var(--green-bg),0 3px 0 var(--green-bg)}
+.tab-cell.coach-col .tab-fret{background:var(--green-bg)}
+.tab-note-btn.coach-col{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
+.coach-chip.coach-col{border-color:var(--green-text);background:var(--green-bg);color:var(--green-text)}
+.coach-lane.beat .tab-cell.coach-col{background:var(--green-text);box-shadow:0 -3px 0 var(--green-text),0 3px 0 var(--green-text)}
+.coach-lane.beat .tab-cell.coach-col .tab-fret{background:var(--green-text);color:var(--bg)}
+.coach-lane.beat .tab-note-btn.coach-col,.coach-lane.beat .coach-chip.coach-col{background:var(--green-text);border-color:var(--green-text);color:var(--bg)}
+/* No prefers-reduced-motion exception: the flash is a color change, not
+   movement, and it IS the metronome — muting it would remove the feature
+   rather than calm it. The pulse still fades on its own once the player is
+   steady (coachPulseFadeThreshold). */
 .coach-strip{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0}
 .coach-chip{min-width:26px;text-align:center;font-size:0.7812rem;font-weight:600;padding:4px 6px;border-radius:6px;border:1px solid var(--border2);color:var(--text2);background:var(--bg2);transition:background 0.15s,border-color 0.15s}
 .coach-chip.now{border-color:var(--green-text);box-shadow:0 0 0 2px var(--green-bg)}

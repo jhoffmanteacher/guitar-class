@@ -164,8 +164,28 @@ function coachOpen(btn){
   const anchor = btn.closest('.bpm-control-group') || btn.parentElement;
   anchor.insertAdjacentElement('afterend', card);
 
+  /* The card renders THIS tab's own board, and the page's copy of the same
+     board sits directly underneath it — the listening screen showed the
+     identical TAB twice (2026-07-26). Hide the page's for as long as the
+     card is open; coachClose puts it back. Only when the card actually has
+     a board of its own to replace it with. */
+  const hiddenTabs = [];
+  if (mode === 'melody' && tabNotes){
+    const tabBody = anchor.closest('.tab-body');
+    if (tabBody){
+      /* A class, not [hidden]: .tab-board sets display:inline-block, which
+         out-specifies the UA's [hidden]{display:none} — the attribute did
+         nothing here. */
+      tabBody.querySelectorAll(':scope > .tab-board, :scope > .tab-phrase').forEach(el => {
+        if (card.contains(el)) return;
+        el.classList.add('coach-dup-hidden');
+        hiddenTabs.push(el);
+      });
+    }
+  }
+
   coach = {
-    phase: 'ready', mode, slots, desc, bpm, tabNotes, tabDerived,
+    phase: 'ready', mode, slots, desc, bpm, tabNotes, tabDerived, hiddenTabs,
     beatMs: 60000 / bpm,
     card, streakKey: 'coachStreak:' + (btn.dataset.chords || btn.dataset.midis),
     drillId: btn.dataset.chords || btn.dataset.midis,
@@ -328,8 +348,21 @@ async function coachStartCheck(){
   /* Count-in: 4 clicks, last one higher = "go". The tab stays on screen so
      the fretting hand can get in position while the clicks run. */
   coach.phase = 'countin';
-  coachBody().innerHTML = `<div class="coach-count" id="coach-count">&nbsp;</div>` + coachTabHtml() +
-    coachChordsHtml(coach.slots[0] && coach.slots[0].chordName);
+  /* Same lane the listening screen uses, with the count digit sitting in the
+     exact spot the note readout will appear — so the eye is already in the
+     right place on beat 1 instead of hunting for what moved. */
+  const firstLabel = coach.mode === 'chords'
+    ? (coach.slots[0].chordName || coach.slots[0].label) : coach.slots[0].label;
+  coachBody().innerHTML =
+    coachChordsHtml(coach.slots[0] && coach.slots[0].chordName) +
+    `<div class="coach-lane" id="coach-lane">
+       <div class="coach-lane-head">
+         <span class="coach-lane-now" id="coach-count">&nbsp;</span>
+         <span class="coach-lane-lbl">${t('coach.lane.countIn')}</span>
+         <span class="coach-lane-next">${t('games.common.next')} ${escHtml(firstLabel)}</span>
+       </div>
+       ${coach.mode === 'melody' ? (coachTabHtml() || coachStripHtml()) : coachStripHtml()}
+     </div>`;
   coachCountIn(coach, 'coach-count', () => {
     if (!coach) return;
     coach.phase = 'listening';
@@ -444,18 +477,44 @@ function coachCountIn(state, countElId, onGo){
   state.timeouts.push(setTimeout(onGo, Math.round(4 * state.beatMs)));
 }
 
+/* Listening screen, 2026-07-26 redesign — ONE moving thing.
+   Before: a red mic dot pulsing at its own 1.2s rate, a blue metronome dot
+   pulsing at the tempo, a big note readout swapping every beat, and a
+   12-chip strip recoloring as it graded — four animations competing, plus
+   the page's copy of the same TAB right underneath the card's copy.
+   Now: the TAB itself is the metronome. One green column steps across it,
+   one column per beat, and darkens on the beat (the flash the metro dot
+   used to carry); the big readout above just names the column the beat is
+   sitting on. Chord mode gets the identical treatment with the chip strip
+   as its lane. Per-note GRADING is no longer painted mid-play — it belongs
+   to the report card, which still renders the full strip. */
 function coachRenderListening(){
+  const laneBody = coach.mode === 'melody'
+    ? (coachTabHtml() || coachStripHtml())
+    : coachStripHtml();
   coachBody().innerHTML =
-    `<div class="coach-live"><span class="coach-live-dot"></span>${t('coach.listening.live')}</div>
-     <div class="coach-pulse-row">
-       <span class="metro-dot" id="coach-pulse-dot"></span>
+    `${coachChordsHtml(coach.slots[0] && coach.slots[0].chordName)}
+     <div class="coach-lane" id="coach-lane">
+       ${coachLaneHeadHtml()}
+       ${laneBody}
+     </div>
+     <div class="coach-lane-foot">
        <span class="rn-metro-status" id="coach-pulse-status">${t('coach.pulse.on')}</span>
      </div>
-     ${coachTabHtml()}
-     ${coachNowHtml()}
-     ${coachChordsHtml(coach.slots[0] && coach.slots[0].chordName)}
-     ${coachStripHtml()}
      <button type="button" class="tp-btn coach-stop" onclick="coachFinish()">&#x25A0; ${t('coach.done.button')}</button>`;
+}
+
+/* Moves the beat column and fires the one flash on the lane. Replaces the
+   separate .metro-dot: the dot and the note readout were two things to
+   watch, and students watched neither. */
+function coachBeatRefresh(cur){
+  if (!coach || !coach.card) return;
+  coach.card.querySelectorAll('.coach-col').forEach(el => el.classList.remove('coach-col'));
+  coach.card.querySelectorAll('.coach-lane [data-seq="' + cur + '"]')
+    .forEach(el => el.classList.add('coach-col'));
+  if (coach.pulseMuted) return;   // steady player — the flash fades, the column stays
+  const lane = document.getElementById('coach-lane');
+  if (lane){ lane.classList.add('beat'); setTimeout(() => lane.classList.remove('beat'), 90); }
 }
 
 /* Big current/next readout — same pattern as Change Up: the player needs to
@@ -476,17 +535,20 @@ function coachChordsHtml(curName){
   return ccDiagramsHtml(names, curName, 'coach-dia');
 }
 
-function coachNowHtml(){
-  if (coach.mode === 'chords'){
-    if (!coach.slots.some(s => s.isChange)) return '';
-    return `<div class="cc-now"><div class="cc-chord" id="coach-chord">${escHtml(coach.slots[0].chordName)}</div>` +
-           `<div class="cc-next" id="coach-next">${t('games.common.next')} ${escHtml(coachNextChord(0) || '')}</div></div>`;
-  }
-  if (coach.mode === 'melody' && coach.slots.length > 1){
-    return `<div class="cc-now"><div class="cc-chord" id="coach-chord">${escHtml(coach.slots[0].label)}</div>` +
-           `<div class="cc-next" id="coach-next">${t('games.common.next')} ${escHtml(coach.slots[1] ? coach.slots[1].label : '')}</div></div>`;
-  }
-  return '';
+/* Lane header: what the beat column is sitting on, and what's coming.
+   Always rendered now (the old coachNowHtml bailed out on single-chord and
+   single-note drills, which left those checks with no readout at all).
+   The lead time matters — you can react to a beep as it happens, but a
+   visual cue you only see the instant it's due makes every hit late. */
+function coachLaneHeadHtml(){
+  const first = coach.slots[0];
+  const cur = coach.mode === 'chords' ? (first.chordName || first.label) : first.label;
+  const nxt = coach.mode === 'chords' ? coachNextChord(0) : (coach.slots[1] ? coach.slots[1].label : null);
+  return `<div class="coach-lane-head">
+            <span class="coach-lane-now" id="coach-chord">${escHtml(cur)}</span>
+            <span class="coach-lane-lbl">${t(coach.mode === 'chords' ? 'coach.lane.strumNow' : 'coach.lane.playNow')}</span>
+            <span class="coach-lane-next" id="coach-next">${nxt ? t('games.common.next') + ' ' + escHtml(nxt) : ''}</span>
+          </div>`;
 }
 
 function coachNextChord(cur){
@@ -498,12 +560,20 @@ function coachNextChord(cur){
 }
 
 function coachStripHtml(){
+  /* data-seq mirrors the TAB's beat addressing so the listening lane can
+     light chord-mode's strip with the exact same column code. */
   return `<div class="coach-strip">` + coach.slots.map((s, i) =>
-    `<span class="coach-chip ${s.state}" id="coach-chip-${i}" title="${escAttr(s.chordName || s.label)}">${escHtml(s.label)}</span>`
+    `<span class="coach-chip ${s.state}" id="coach-chip-${i}" data-seq="${i}" title="${escAttr(s.chordName || s.label)}">${escHtml(s.label)}</span>`
   ).join('') + `</div>`;
 }
 
 function coachChipRefresh(i){
+  /* Grading colors are the REPORT's job now (2026-07-26): recoloring chips
+     under the player mid-take was the third competing animation on the
+     listening screen, and it fought the beat column for attention. The
+     slot's state is still recorded — coachRenderReport re-renders the whole
+     strip from it a beat later. */
+  if (coach.phase === 'listening') return;
   const el = document.getElementById('coach-chip-' + i);
   if (el) el.className = 'coach-chip ' + coach.slots[i].state;
 }
@@ -599,14 +669,7 @@ function coachLoop(){
     const cur = Math.floor((now - coach.listenStart - coach.gridOffset) / coach.beatMs);
     if (cur !== coach.lastPulse && cur >= 0 && cur < coach.slots.length){
       coach.lastPulse = cur;
-      if (!coach.pulseMuted){
-        const dot = document.getElementById('coach-pulse-dot');
-        if (dot){ dot.classList.add('flash'); setTimeout(() => dot.classList.remove('flash'), 80); }
-      }
-      const prev = document.querySelector('.coach-chip.now');
-      if (prev) prev.classList.remove('now');
-      const el = document.getElementById('coach-chip-' + cur);
-      if (el) el.classList.add('now');
+      coachBeatRefresh(cur);
       const chordEl = document.getElementById('coach-chord');
       if (chordEl){
         const name = coach.mode === 'chords' ? coach.slots[cur].chordName : coach.slots[cur].label;
@@ -1086,6 +1149,7 @@ function coachClose(){
   if (coachRaf){ cancelAnimationFrame(coachRaf); coachRaf = null; }
   if (coach){
     coach.timeouts.forEach(clearTimeout);
+    (coach.hiddenTabs || []).forEach(el => el.classList.remove('coach-dup-hidden'));
     if (coach.card && coach.card.isConnected) coach.card.remove();
   }
   coachMicOff();
