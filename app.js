@@ -2490,7 +2490,7 @@ function buildModuleReview(mr){
       <label class="mr-play-label" for="${mrId}-song">${t('review.songIPlayed')}</label>
       <input type="text" id="${mrId}-song" class="mr-play-song" oninput="savePerformance(${mr.moduleNum})" value="${escAttr(perf.song||'')}">
       <div class="mr-rec" data-module="${mr.moduleNum}">
-        <div class="mr-rec-body" id="${mrId}-rec-body">${renderRecBody(mr.moduleNum)}</div>
+        <div class="mr-rec-body" id="${mrId}-rec-body">${renderRecBody(String(mr.moduleNum))}</div>
       </div>
       <div class="mr-play-rate">
         <span class="mr-play-rate-label">${t('review.howDidItGo')}</span>
@@ -2504,6 +2504,14 @@ function buildModuleReview(mr){
   const performanceHtml=`<div class="mr-assess-box">
       <div class="mr-assess-head"><span class="mr-assess-icon">&#x1F4DD;</span> ${t('review.assessHead',{n:mr.moduleNum})}</div>
       <div class="mr-assess-body">${assessBody}</div>
+      <div class="mr-rec mr-assess-rec" data-module="${mr.moduleNum}">
+        <div class="mr-assess-rec-tag">&#x1F399; ${t('review.assessRecTag')}</div>
+        <div class="mr-rec-body" id="${mrId}a-rec-body">${renderRecBody(`${mr.moduleNum}a`)}</div>
+      </div>
+      <div class="mr-assess-signup">
+        <span class="mr-assess-signup-icon">&#x1F64B;</span>
+        <div class="mr-assess-signup-text"><strong>${t('review.assessSignupHead')}</strong> ${t('review.assessSignupBody',{n:mr.moduleNum})}</div>
+      </div>
     </div>`;
   const forwardHtml = mr.forward
     ? `<div class="ablock mr-forward" style="margin-top:12px"><div class="albl">&#x1F517; ${t('review.whyMatters')}</div><div class="atxt">${tf(mr,'forward')}</div></div>`
@@ -2610,22 +2618,25 @@ function setPerformanceLevel(moduleNum, level){
 }
 
 /* ══════════════════════════════════════════════
-   RECORD YOURSELF — MediaRecorder + Firebase Storage
-   One in-memory state object per module-review panel.
+   RECORD YOURSELF — MediaRecorder
+   One in-memory state object per recorder SLOT. A slot is a string key:
+   the module number ("3") for the "Play it & Record it!" widget, and
+   "<n>a" ("3a") for the assessment practice-run widget in the same panel.
+   Two slots in one panel record independently.
    ══════════════════════════════════════════════ */
 const recState = {};
 const REC_MAX_SECS = 90;
 
-/* Renders the current state of one module-review's recording widget.
+/* Renders the current state of one recorder slot.
    Recordings are kept only in-memory for the current browser tab —
    nothing is uploaded. Students can play back and Download. */
-function renderRecBody(moduleNum){
-  const s = recState[moduleNum] || {};
+function renderRecBody(slot){
+  const s = recState[slot] || {};
   if (s.recording){
     return `<div class="mr-rec-active">
       <span class="mr-rec-dot"></span>
-      <span class="mr-rec-time" id="mr${moduleNum}-rec-time">0:00</span>
-      <button type="button" class="mr-rec-stop" onclick="stopRec(${moduleNum})">&#x25A0; ${t('rec.stop')}</button>
+      <span class="mr-rec-time" id="mr${slot}-rec-time">0:00</span>
+      <button type="button" class="mr-rec-stop" onclick="stopRec('${slot}')">&#x25A0; ${t('rec.stop')}</button>
       <span class="mr-rec-max">${t('rec.max',{s:REC_MAX_SECS})}</span>
     </div>`;
   }
@@ -2633,25 +2644,25 @@ function renderRecBody(moduleNum){
     return `<div class="mr-rec-preview">
       <audio controls src="${s.pendingBlobUrl}" class="mr-rec-audio"></audio>
       <div class="mr-rec-actions">
-        <button type="button" class="mr-rec-btn" onclick="downloadRec(${moduleNum})">&#x2B07; ${t('rec.download')}</button>
-        <button type="button" class="mr-rec-btn" onclick="discardRec(${moduleNum})">&#x21BB; ${t('rec.rerecord')}</button>
+        <button type="button" class="mr-rec-btn" onclick="downloadRec('${slot}')">&#x2B07; ${t('rec.download')}</button>
+        <button type="button" class="mr-rec-btn" onclick="discardRec('${slot}')">&#x21BB; ${t('rec.rerecord')}</button>
       </div>
       <div class="mr-rec-status">${t('rec.listenBack')}</div>
     </div>`;
   }
   return `<div class="mr-rec-idle">
-    <button type="button" class="mr-rec-btn primary" onclick="startRec(${moduleNum})">&#x1F399; ${t('rec.record')}</button>
+    <button type="button" class="mr-rec-btn primary" onclick="startRec('${slot}')">&#x1F399; ${t('rec.record')}</button>
     <span class="mr-rec-help">${t('rec.help',{s:REC_MAX_SECS})}</span>
   </div>`;
 }
 
-function refreshRecUI(moduleNum){
-  const host = document.getElementById(`mr${moduleNum}-rec-body`);
+function refreshRecUI(slot){
+  const host = document.getElementById(`mr${slot}-rec-body`);
   if (!host) return;
-  host.innerHTML = renderRecBody(moduleNum);
+  host.innerHTML = renderRecBody(slot);
 }
 
-async function startRec(moduleNum){
+async function startRec(slot){
   if (!navigator.mediaDevices || !window.MediaRecorder){
     alert(t('rec.noSupport'));
     return;
@@ -2664,39 +2675,39 @@ async function startRec(moduleNum){
     recorder.onstop = () => {
       stream.getTracks().forEach(t => t.stop());
       const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' });
-      const s = recState[moduleNum] || {};
+      const s = recState[slot] || {};
       s.recording = false;
       s.pendingBlob = blob;
       s.pendingBlobUrl = URL.createObjectURL(blob);
       s.statusMsg = '';
       if (s.timerInterval){ clearInterval(s.timerInterval); s.timerInterval = null; }
       if (s.autoStopTimeout){ clearTimeout(s.autoStopTimeout); s.autoStopTimeout = null; }
-      recState[moduleNum] = s;
-      refreshRecUI(moduleNum);
+      recState[slot] = s;
+      refreshRecUI(slot);
     };
     const start = Date.now();
-    recState[moduleNum] = {
+    recState[slot] = {
       recording: true,
       recorder,
       stream,
       startedAt: start,
       timerInterval: setInterval(() => {
-        const el = document.getElementById(`mr${moduleNum}-rec-time`);
+        const el = document.getElementById(`mr${slot}-rec-time`);
         if (!el) return;
         const sec = Math.floor((Date.now() - start) / 1000);
         el.textContent = `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`;
       }, 250),
-      autoStopTimeout: setTimeout(() => stopRec(moduleNum), REC_MAX_SECS * 1000)
+      autoStopTimeout: setTimeout(() => stopRec(slot), REC_MAX_SECS * 1000)
     };
     recorder.start();
-    refreshRecUI(moduleNum);
+    refreshRecUI(slot);
   } catch (err) {
     alert(t('rec.micFail', {err: err.message || err.name || 'permission denied'}));
   }
 }
 
-function stopRec(moduleNum){
-  const s = recState[moduleNum];
+function stopRec(slot){
+  const s = recState[slot];
   if (!s || !s.recorder) return;
   if (s.recorder.state !== 'inactive') s.recorder.stop();
 }
@@ -2710,19 +2721,19 @@ function stopAnyRec(){
   });
 }
 
-function discardRec(moduleNum){
-  const s = recState[moduleNum];
+function discardRec(slot){
+  const s = recState[slot];
   if (s && s.pendingBlobUrl) URL.revokeObjectURL(s.pendingBlobUrl);
-  delete recState[moduleNum];
-  refreshRecUI(moduleNum);
+  delete recState[slot];
+  refreshRecUI(slot);
 }
 
-function downloadRec(moduleNum){
-  const s = recState[moduleNum];
+function downloadRec(slot){
+  const s = recState[slot];
   if (!s || !s.pendingBlobUrl) return;
   const a = document.createElement('a');
   a.href = s.pendingBlobUrl;
-  a.download = `guitar-class-mr${moduleNum}-${new Date().toISOString().slice(0,10)}.webm`;
+  a.download = `guitar-class-mr${slot}-${new Date().toISOString().slice(0,10)}.webm`;
   document.body.appendChild(a);
   a.click();
   a.remove();

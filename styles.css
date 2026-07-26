@@ -147,6 +147,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .mr-assess-head{display:flex;align-items:center;gap:8px;font-size:1rem;font-weight:700;color:var(--purple-text);margin-bottom:8px}
 .mr-assess-icon{font-size:1.125rem}
 .mr-assess-body{font-size:0.9375rem;line-height:1.6;color:var(--text)}
+/* Practice-run recorder inside the assessment box (slot "<n>a"). Reuses every
+   .mr-rec-* control; only the wrapper spacing and its label are new. */
+.mr-assess-rec{margin-top:14px;padding-top:12px;border-top:1px dashed var(--purple-border)}
+.mr-assess-rec-tag{font-size:0.8125rem;font-weight:700;letter-spacing:0.02em;color:var(--purple-text)}
+/* Sign up with the teacher — the step that actually completes the assessment. */
+.mr-assess-signup{display:flex;align-items:flex-start;gap:10px;margin-top:14px;padding:12px 14px;border-radius:var(--radius-sm);background:var(--amber-bg);border:1px solid rgba(133,79,11,0.28)}
+.mr-assess-signup-icon{font-size:1.125rem;line-height:1.4}
+.mr-assess-signup-text{font-size:0.9375rem;line-height:1.55;color:var(--amber-text)}
+.mr-assess-signup-text strong{color:var(--amber-text)}
 .mr-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:0.8125rem;color:var(--text2);margin:0 0 6px 4px}
 .mr-legend-item{display:inline-flex;align-items:center;gap:6px}
 .mr-legend-dot{width:11px;height:11px;border-radius:3px;display:inline-block;flex-shrink:0}

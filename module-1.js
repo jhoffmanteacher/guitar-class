@@ -694,7 +694,7 @@ MODULE_REVIEWS[1] = {
     'Nombrar las 6 cuerdas de memoria, de grave a aguda y de aguda a grave',
     'Tocar cada cuerda al aire con la postura y el agarre de púa correctos, cada cuerda sonando plena y limpia sin que ninguna mano la apague sin querer'
   ],
-  forward: 'You\'ve got a guitar that\'s in tune, a goal, and your first clean notes — <strong>Module 2 puts names on the frets</strong> so riffs and TAB start making sense. (Already played before, or coming back after a long break? <strong>Module 9, Set 1</strong> is a six-skill re-test that shows you exactly where to start.)',
-  forward_es: 'Ya tienes una guitarra afinada, una meta, y tus primeras notas limpias — <strong>el Módulo 2 les pone nombre a los trastes</strong> para que los riffs y el TAB empiecen a tener sentido. (¿Ya tocabas antes, o vuelves después de un descanso largo? <strong>el Módulo 9, Unidad 1</strong> es una reevaluación de seis destrezas que te muestra exactamente por dónde empezar.)',
+  forward: 'You\'ve got a guitar that\'s in tune, a goal, and your first clean notes — <strong>Module 2 puts names on the frets</strong> so riffs and TAB start making sense.',
+  forward_es: 'Ya tienes una guitarra afinada, una meta, y tus primeras notas limpias — <strong>el Módulo 2 les pone nombre a los trastes</strong> para que los riffs y el TAB empiecen a tener sentido.',
   standards: ['Pr.1a', 'Pr.4a', 'Pr.5a', 'Cn.11a']
 };

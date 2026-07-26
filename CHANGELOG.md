@@ -5,6 +5,31 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-26 — Module assessments: practice recorder + sign up with your teacher
+
+### Added
+
+- **Every module assessment now has its own Record button.** The assessment
+  box at the end of a module review used to say "record yourself" without
+  giving you anything to record with — the only recorder on the page belonged
+  to the "Play it & Record it!" song section above it. There's now a practice-run
+  recorder inside the assessment box itself, independent of the song one, so a
+  practice take doesn't overwrite your performance take. Same rules as before:
+  it stays in your browser tab, nothing is uploaded, and you can play it back
+  or download it.
+- **A clear "sign up with Mr. Hoffman" step.** The assessment box now ends with
+  a highlighted note: the recording is a practice run, and the assessment itself
+  is done in person — when the recording sounds clean on every skill, sign up
+  with your teacher to take it.
+
+### Changed
+
+- **No more pointers at modules you can't open yet.** A few lessons name-dropped
+  material from far-off locked modules — Module 1's wrap-up sent returning
+  players to Module 9, Module 2 pointed at Modules 4 and 7, Module 4 and Module 5
+  at Module 7. Those asides are gone; previews of the *next* module (which is
+  what actually unlocks) stay.
+
 ## 2026-07-26 — Songs pop up properly, and the Listening Coach hears you better
 
 ### Changed
