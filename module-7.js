@@ -8,7 +8,7 @@ SETS.push(
 
   {
     id: 'm7w1',
-    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', note: 'the riff that started it all — now read it in full TAB with rhythm symbols' }],
+    songThread: [{ name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', note: 'the riff that started it all — now read it in full TAB with rhythm symbols' }],
     label: 'Set 1',
     locked: false,
     module: 'TAB Notation and Barre Chords',
@@ -58,7 +58,7 @@ SETS.push(
             ] }
           },
           {
-            label: 'Watch: the Smoke on the Water riff', label_es: 'Mira: el riff de Smoke on the Water',
+            label: 'Watch: the "Smoke on the Water" riff', label_es: 'Mira: el riff de "Smoke on the Water"',
             text: 'Watch: <a href="https://youtu.be/tCQ0r7vqkFQ" target="_blank">Smoke On The Water Guitar Lesson – Marty Music</a> (0:00–4:00). This is the riff you\'ll learn in the Practice station.',
             text_es: 'Mira: <a href="https://youtu.be/tCQ0r7vqkFQ" target="_blank">Smoke On The Water Guitar Lesson – Marty Music</a> (0:00–4:00). Este es el riff que vas a aprender en la estación de práctica.',
             hint: 'Notice that the riff uses 2-note "power chord" intervals played together — perfect example of stacked TAB numbers.',
@@ -122,9 +122,9 @@ SETS.push(
             title_es: 'Lee un riff con TAB apilado (dobles notas)',
             steps: [
           {
-            label: 'Challenge: Smoke on the Water', label_es: 'Reto: Smoke on the Water',
-            text: 'Challenge 1 — Smoke on the Water: play the main riff with index + ring locked as a unit on the A + D strings — 0/0 — 3/3 — 5/5 — 0/0 — 3/3 — 6/6 — 5/5. You\'ve got it when: both notes ring at the same volume, clean through the whole riff. Use the TAB below.',
-            text_es: 'Reto 1 — Smoke on the Water: toca el riff principal con el índice + el anular trabados como una unidad en las cuerdas La + Re — 0/0 — 3/3 — 5/5 — 0/0 — 3/3 — 6/6 — 5/5. Lo tienes cuando: ambas notas suenan al mismo volumen, limpias durante todo el riff. Usa el TAB de abajo.',
+            label: 'Challenge: "Smoke on the Water"', label_es: 'Reto: "Smoke on the Water"',
+            text: 'Challenge 1 — "Smoke on the Water": play the main riff with index + ring locked as a unit on the A + D strings — 0/0 — 3/3 — 5/5 — 0/0 — 3/3 — 6/6 — 5/5. You\'ve got it when: both notes ring at the same volume, clean through the whole riff. Use the TAB below.',
+            text_es: 'Reto 1 — "Smoke on the Water": toca el riff principal con el índice + el anular trabados como una unidad en las cuerdas La + Re — 0/0 — 3/3 — 5/5 — 0/0 — 3/3 — 6/6 — 5/5. Lo tienes cuando: ambas notas suenan al mismo volumen, limpias durante todo el riff. Usa el TAB de abajo.',
             hint: 'Use your index and ring finger together — keep them locked in shape and slide as a unit. Both notes should ring at the same volume.',
             hint_es: 'Usa tu dedo índice y tu dedo anular juntos — mantenlos trabados en forma y deslízalos como una unidad. Ambas notas deben sonar al mismo volumen.',
             stuck: 'Lock the two fingers into one shape and move them as a block — don\'t re-place them each time. Get the 0/0 → 3/3 slide clean before adding the rest.',
@@ -200,9 +200,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: Seven Nation Army rhythm', label_es: 'Reto: el ritmo real de Seven Nation Army',
-                text: 'Challenge — Seven Nation Army, the real rhythm: you\'ve played this riff since Module 1 — but always one even note per beat:<ol><li>Listen to the recording.</li><li>Find the riff\'s TAB with rhythm stems (Songsterr shows them clearly).</li><li>Play it the way the record actually goes — long notes held, quick notes tucked between beats.</li></ol>You\'ve got it when: you can play along with the record and stay locked with it. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: the riff that started it all</a>.',
-                text_es: 'Reto — Seven Nation Army, el ritmo real: has tocado este riff desde el Módulo 1 — pero siempre con una nota pareja por tiempo:<ol><li>Escucha la grabación.</li><li>Encuentra el TAB del riff con plicas de ritmo (Songsterr las muestra con claridad).</li><li>Tócalo como suena de verdad en la grabación — notas largas sostenidas, notas rápidas metidas entre los tiempos.</li></ol>Lo tienes cuando: puedes tocar junto con la grabación y mantenerte sincronizado con ella. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: el riff que lo empezó todo</a>.',
+                label: 'Challenge: "Seven Nation Army" rhythm', label_es: 'Reto: el ritmo real de "Seven Nation Army"',
+                text: 'Challenge — "Seven Nation Army", the real rhythm: you\'ve played this riff since Module 1 — but always one even note per beat:<ol><li>Listen to the recording.</li><li>Find the riff\'s TAB with rhythm stems (Songsterr shows them clearly).</li><li>Play it the way the record actually goes — long notes held, quick notes tucked between beats.</li></ol>You\'ve got it when: you can play along with the record and stay locked with it. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: the riff that started it all</a>.',
+                text_es: 'Reto — "Seven Nation Army", el ritmo real: has tocado este riff desde el Módulo 1 — pero siempre con una nota pareja por tiempo:<ol><li>Escucha la grabación.</li><li>Encuentra el TAB del riff con plicas de ritmo (Songsterr las muestra con claridad).</li><li>Tócalo como suena de verdad en la grabación — notas largas sostenidas, notas rápidas metidas entre los tiempos.</li></ol>Lo tienes cuando: puedes tocar junto con la grabación y mantenerte sincronizado con ella. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: el riff que lo empezó todo</a>.',
                 hint: 'The frets haven\'t changed since Module 1 — only the rhythm reading is new. That\'s the whole point of this set: same notes, real music. (Module 4 has a &#x25B6; button pair — straight count vs. the record — if you want to hear the two side by side again.)',
                 hint_es: 'Los trastes no han cambiado desde el Módulo 1 — solo la lectura del ritmo es nueva. Ese es todo el punto de esta unidad: mismas notas, música real. (El Módulo 4 tiene un par de botones &#x25B6; — conteo recto vs. la grabación — si quieres volver a escuchar los dos lado a lado.)',
                 stuck: 'Clap the record\'s rhythm first, no guitar. Add the frets back only once your hands know the shape of the timing.',
@@ -326,7 +326,7 @@ SETS.push(
 
   {
     id: 'm7w2',
-    songThread: [{ name: 'Sweet Child O\' Mine', journey: 'tabs/sweet-child-o-mine.html', note: 'the Module 7 finale' }],
+    songThread: [{ name: '"Sweet Child O\' Mine"', journey: 'tabs/sweet-child-o-mine.html', note: 'the Module 7 finale' }],
     label: 'Set 2',
     locked: false,
     module: 'TAB Notation and Barre Chords',
@@ -516,9 +516,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: Sweet Child O\' Mine verse', label_es: 'Reto: la estrofa de Sweet Child O\' Mine',
-                text: 'Challenge — Sweet Child O\' Mine, one-shape verse: the verse is D · C · G — and with the E-shape barre that\'s ONE shape sliding:<ul><li>D at fret 10.</li><li>C at fret 8.</li><li>G at fret 3.</li></ul>Play one clean strum per chord, then two bars each at 60 BPM. You\'ve got it when: all three ring clean — and the high frets prove the point: barres get EASIER up the neck. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is the Module 7 finale</a>.',
-                text_es: 'Reto — Sweet Child O\' Mine, estrofa de una sola forma: la estrofa es D · C · G — y con la cejilla en forma de E eso es UNA forma deslizándose:<ul><li>D en el traste 10.</li><li>C en el traste 8.</li><li>G en el traste 3.</li></ul>Toca un rasgueo limpio por acorde, y luego dos compases cada uno a 60 BPM. Lo tienes cuando: los tres suenan limpios — y los trastes altos prueban el punto: las cejillas se vuelven MÁS FÁCILES conforme subes por el mástil. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: este es el final del Módulo 7</a>.',
+                label: 'Challenge: "Sweet Child O\' Mine" verse', label_es: 'Reto: la estrofa de "Sweet Child O\' Mine"',
+                text: 'Challenge — "Sweet Child O\' Mine", one-shape verse: the verse is D · C · G — and with the E-shape barre that\'s ONE shape sliding:<ul><li>D at fret 10.</li><li>C at fret 8.</li><li>G at fret 3.</li></ul>Play one clean strum per chord, then two bars each at 60 BPM. You\'ve got it when: all three ring clean — and the high frets prove the point: barres get EASIER up the neck. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is the Module 7 finale</a>.',
+                text_es: 'Reto — "Sweet Child O\' Mine", estrofa de una sola forma: la estrofa es D · C · G — y con la cejilla en forma de E eso es UNA forma deslizándose:<ul><li>D en el traste 10.</li><li>C en el traste 8.</li><li>G en el traste 3.</li></ul>Toca un rasgueo limpio por acorde, y luego dos compases cada uno a 60 BPM. Lo tienes cuando: los tres suenan limpios — y los trastes altos prueban el punto: las cejillas se vuelven MÁS FÁCILES conforme subes por el mástil. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: este es el final del Módulo 7</a>.',
                 hint: 'Start at the top — get D clean at fret 10 where the strings are loosest, then walk the same shape down. Name each chord by its string-6 root: fret 10 = D, fret 8 = C, fret 3 = G.',
                 hint_es: 'Empieza por arriba — logra que D suene limpio en el traste 10 donde las cuerdas están más sueltas, y luego camina la misma forma hacia abajo. Nombra cada acorde por su raíz en la cuerda 6: traste 10 = D, traste 8 = C, traste 3 = G.',
                 stuck: 'Play just the roots on string 6 first (10 → 8 → 3) so the slide distances live in your arm, then add the barre on top.',
@@ -623,7 +623,7 @@ SETS.push(
 
   {
     id: 'm7w3',
-    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'every chord as a barre' }, { name: 'Luna', journey: 'tabs/luna.html', note: 'the barre upgrade — beyond Layer 5' }],
+    songThread: [{ name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', note: 'every chord as a barre' }, { name: '"Luna"', journey: 'tabs/luna.html', note: 'the barre upgrade — beyond Layer 5' }],
     label: 'Set 3',
     locked: false,
     module: 'TAB Notation and Barre Chords',
@@ -816,9 +816,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: Oye Mi Amor, full-barre Bm', label_es: 'Reto: Oye Mi Amor, Bm con cejilla',
-                text: 'Challenge — Oye Mi Amor, full barre Bm: the verse\'s small Bm graduates today:<ol><li>Index bars fret 2 (strings 5–1).</li><li>Play Bm · G one bar each with your D-DU-UDU strum at 60 BPM.</li></ol>You\'ve got it when: four laps where the full Bm rings as clean as the G — the song\'s last beginner shortcut is gone.',
-                text_es: 'Reto — Oye Mi Amor, cejilla completa de Bm: el Bm pequeño de la estrofa se gradúa hoy:<ol><li>El índice hace cejilla en el traste 2 (cuerdas 5–1).</li><li>Toca Bm · G un compás cada uno con tu rasgueo D-DU-UDU a 60 BPM.</li></ol>Lo tienes cuando: cuatro vueltas donde el Bm completo suena tan limpio como el G — el último atajo de principiante de la canción se acabó.',
+                label: 'Challenge: "Oye Mi Amor", full-barre Bm', label_es: 'Reto: "Oye Mi Amor", Bm con cejilla',
+                text: 'Challenge — "Oye Mi Amor", full barre Bm: the verse\'s small Bm graduates today:<ol><li>Index bars fret 2 (strings 5–1).</li><li>Play Bm · G one bar each with your D-DU-UDU strum at 60 BPM.</li></ol>You\'ve got it when: four laps where the full Bm rings as clean as the G — the song\'s last beginner shortcut is gone.',
+                text_es: 'Reto — "Oye Mi Amor", cejilla completa de Bm: el Bm pequeño de la estrofa se gradúa hoy:<ol><li>El índice hace cejilla en el traste 2 (cuerdas 5–1).</li><li>Toca Bm · G un compás cada uno con tu rasgueo D-DU-UDU a 60 BPM.</li></ol>Lo tienes cuando: cuatro vueltas donde el Bm completo suena tan limpio como el G — el último atajo de principiante de la canción se acabó.',
                 hint: 'It\'s built on the same fret-2 bar as your B major — the minor version just re-stacks the fingers on top. The index tip mutes string 6 for you.',
                 hint_es: 'Se construye sobre la misma cejilla del traste 2 que tu B mayor — la versión menor solo reacomoda los dedos encima. La punta del índice silencia la cuerda 6 por ti.',
                 stuck: 'Whenever the barre buzzes, fall back to the small Bm for a lap, then trade back — alternate small and full until full wins.',
@@ -831,9 +831,9 @@ SETS.push(
                 ]
               },
               {
-                label: 'Challenge: Watchtower, all barres', label_es: 'Reto: Watchtower, todo con cejillas',
-                text: 'Challenge — Watchtower, no open chords: play Am · G · F · G entirely as barres, two beats per chord at 60 BPM:<ul><li>Am is the E-shape minor at fret 5 (the bar plus your open-Em fingers).</li><li>G is your E-shape major at fret 3.</li><li>F is your E-shape major at fret 1.</li></ul>You\'ve got it when: four laps using ONLY barre chords — proof you no longer need the open shapes. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: from Layer 1 to every chord a barre</a>.',
-                text_es: 'Reto — Watchtower, sin acordes abiertos: toca Am · G · F · G por completo como cejillas, dos tiempos por acorde a 60 BPM:<ul><li>Am es la forma menor de E en el traste 5 (la cejilla más tus dedos de Em abierto).</li><li>G es tu forma mayor de E en el traste 3.</li><li>F es tu forma mayor de E en el traste 1.</li></ul>Lo tienes cuando: cuatro vueltas usando SOLO acordes con cejilla — prueba de que ya no necesitas las formas abiertas. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: de la Capa 1 a cada acorde como cejilla</a>.',
+                label: 'Challenge: "Watchtower", all barres', label_es: 'Reto: "Watchtower", todo con cejillas',
+                text: 'Challenge — "Watchtower", no open chords: play Am · G · F · G entirely as barres, two beats per chord at 60 BPM:<ul><li>Am is the E-shape minor at fret 5 (the bar plus your open-Em fingers).</li><li>G is your E-shape major at fret 3.</li><li>F is your E-shape major at fret 1.</li></ul>You\'ve got it when: four laps using ONLY barre chords — proof you no longer need the open shapes. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: from Layer 1 to every chord a barre</a>.',
+                text_es: 'Reto — "Watchtower", sin acordes abiertos: toca Am · G · F · G por completo como cejillas, dos tiempos por acorde a 60 BPM:<ul><li>Am es la forma menor de E en el traste 5 (la cejilla más tus dedos de Em abierto).</li><li>G es tu forma mayor de E en el traste 3.</li><li>F es tu forma mayor de E en el traste 1.</li></ul>Lo tienes cuando: cuatro vueltas usando SOLO acordes con cejilla — prueba de que ya no necesitas las formas abiertas. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: de la Capa 1 a cada acorde como cejilla</a>.',
                 hint: 'Minor E-shape = the major shape minus the middle finger; the bar covers the note it left behind. Read the roots on string 6: fret 5 = A, fret 3 = G, fret 1 = F.',
                 hint_es: 'Forma menor de E = la forma mayor menos el dedo medio; la cejilla cubre la nota que dejó atrás. Lee las raíces en la cuerda 6: traste 5 = A, traste 3 = G, traste 1 = F.',
                 stuck: 'Get each chord clean on its own (pluck all 6 strings), then pair Am → G, and add the F last — it\'s the tightest squeeze.',
@@ -844,12 +844,12 @@ SETS.push(
                 chords: [
                   { name: 'Am (E-shape)', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,5,'1'],[2,5,'1'],[1,5,'1']], position: 5 }
                 ],
-                response: { type: 'short', prompt: 'Personal record — clean all-barre Watchtower laps in a row. Your count today?', prompt_es: 'Récord personal — vueltas seguidas de Watchtower solo con cejillas y limpias. ¿Tu cuenta de hoy?', placeholder: 'e.g. 2 — the F still buzzes', placeholder_es: 'p. ej. 2 — el F todavía zumba' }
+                response: { type: 'short', prompt: 'Personal record — clean all-barre "Watchtower" laps in a row. Your count today?', prompt_es: 'Récord personal — vueltas seguidas de "Watchtower" solo con cejillas y limpias. ¿Tu cuenta de hoy?', placeholder: 'e.g. 2 — the F still buzzes', placeholder_es: 'p. ej. 2 — el F todavía zumba' }
               },
               {
-                label: 'Challenge: Luna, full-barre F', label_es: 'Reto: Luna, F con cejilla completa',
-                text: 'Challenge — Luna, full barre F: the little F (xx3211) graduates today:<ol><li>Index bars fret 1 across all six strings — the toughest fret on the neck to barre.</li><li>Play F ↔ Am with two downbeat strums per bar at 60 BPM.</li></ol>You\'ve got it when: four laps where all six strings of the F ring as clean as the Am — Luna\'s last beginner shortcut is gone. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: beyond Layer 5 — the barre upgrade</a>.',
-                text_es: 'Reto — Luna, cejilla completa de F: el F pequeño (xx3211) se gradúa hoy:<ol><li>El índice hace cejilla en el traste 1 a lo largo de las seis cuerdas — el traste más difícil del mástil para hacer cejilla.</li><li>Tocas F ↔ Am con dos rasgueos en el tiempo fuerte por compás a 60 BPM.</li></ol>Lo tienes cuando: cuatro vueltas donde las seis cuerdas del F suenan tan limpias como el Am — el último atajo de principiante de Luna se acabó. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: más allá de la Capa 5 — la mejora de la cejilla</a>.',
+                label: 'Challenge: "Luna", full-barre F', label_es: 'Reto: "Luna", F con cejilla completa',
+                text: 'Challenge — "Luna", full barre F: the little F (xx3211) graduates today:<ol><li>Index bars fret 1 across all six strings — the toughest fret on the neck to barre.</li><li>Play F ↔ Am with two downbeat strums per bar at 60 BPM.</li></ol>You\'ve got it when: four laps where all six strings of the F ring as clean as the Am — "Luna"\'s last beginner shortcut is gone. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: beyond Layer 5 — the barre upgrade</a>.',
+                text_es: 'Reto — "Luna", cejilla completa de F: el F pequeño (xx3211) se gradúa hoy:<ol><li>El índice hace cejilla en el traste 1 a lo largo de las seis cuerdas — el traste más difícil del mástil para hacer cejilla.</li><li>Tocas F ↔ Am con dos rasgueos en el tiempo fuerte por compás a 60 BPM.</li></ol>Lo tienes cuando: cuatro vueltas donde las seis cuerdas del F suenan tan limpias como el Am — el último atajo de principiante de "Luna" se acabó. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: más allá de la Capa 5 — la mejora de la cejilla</a>.',
                 hint: 'Roll the index onto its bony edge and add a gentle pull-back from the whole arm so the thumb doesn\'t do all the work — fret 1 needs that extra leverage on top of your thumb squeeze.',
                 hint_es: 'Rueda el índice hacia su borde óseo y agrega un ligero tirón hacia atrás desde todo el brazo para que el pulgar no haga todo el trabajo — el traste 1 necesita esa palanca extra además del apriete de tu pulgar.',
                 stuck: 'Barre just the top two strings at fret 1 and add one string per day. The six-string F takes weeks, not one day — go slow.',
@@ -860,11 +860,11 @@ SETS.push(
             ]
           },
           {
-            title: '🌶️ Level-up — the Sweet Child O\' Mine intro riff (optional harder goal)',
-            title_es: '🌶️ Sube de nivel — el riff de intro de Sweet Child O\' Mine (meta opcional más difícil)',
+            title: '🌶️ Level-up — the "Sweet Child O\' Mine" intro riff (optional harder goal)',
+            title_es: '🌶️ Sube de nivel — el riff de intro de "Sweet Child O\' Mine" (meta opcional más difícil)',
             steps: [
           {
-            label: 'Level-up: Sweet Child O\' Mine intro', label_es: 'Sube de nivel: intro de Sweet Child O\' Mine',
+            label: 'Level-up: "Sweet Child O\' Mine" intro', label_es: 'Sube de nivel: intro de "Sweet Child O\' Mine"',
             text: '🌶️ Try it: learn the most famous riff in the course. The "Sweet Child O\' Mine" intro lives up high on the D, G, and B strings around the 12th–15th frets, picked one note at a time:<ol><li>Watch <a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a> (played slow and full speed, with the TAB on screen).</li><li>Learn just the first bar.</li><li>Play it slowly.</li></ol>No score, no rush — this is a late-course optional challenge you can keep practicing a little at a time.',
             text_es: '🌶️ Pruébalo: aprende el riff más famoso del curso. La intro de "Sweet Child O\' Mine" vive arriba en las cuerdas Re, Sol y Si, alrededor de los trastes 12–15, pulsada una nota a la vez:<ol><li>Mira <a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a> (tocado lento y a velocidad completa, con el TAB en pantalla).</li><li>Aprende solo el primer compás.</li><li>Tócalo despacio.</li></ol>Sin puntaje, sin apuro — este es un reto opcional de fin de curso que puedes seguir practicando poco a poco.',
             hint: 'The lesson is in standard tuning — the same tuning your guitar is already in — so you can play along directly. (The original record is tuned a half-step lower, so you\'ll sound slightly higher than the album; that\'s normal.) Loop just the first bar until it\'s clean before adding more.',

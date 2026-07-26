@@ -18,7 +18,7 @@ SETS.push(
 
   {
     id: 'm2w1',
-    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', layer: 2, note: 'the riff on your low E string' }],
+    songThread: [{ name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 2, note: 'the riff on your low E string' }],
     label: 'Set 1',
     locked: false,
     module: 'Notes on the E & A Strings',
@@ -84,7 +84,7 @@ SETS.push(
             title_es: 'Escucha y encuentra notas de oído',
             steps: [
               {
-                label: 'Ear: find Happy Birthday notes', label_es: 'Oído: notas de Happy Birthday',
+                label: 'Ear: find "Happy Birthday" notes', label_es: 'Oído: notas de "Happy Birthday"',
                 text: 'Listen to the opening of "Happy Birthday" — press ▶ to hear it, then hum along and see if you can identify which notes of the melody live on the E or A string.',
                 text_es: 'Escucha el inicio de "Happy Birthday" — presiona ▶ para escucharlo, luego tararea y trata de identificar qué notas de la melodía viven en la cuerda Mi o La.',
                 hint: 'Don\'t worry about playing it yet — just train your ear to connect sounds to strings.',
@@ -273,9 +273,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: Seven Nation Army', label_es: 'Reto: Seven Nation Army',
-                text: 'Challenge — Seven Nation Army, without looking at the chart: play the riff on the low E string and say each note name out loud as you play it — B · B · D · B · A · G · F#. You\'ve got it when: one clean lap, no chart, every note named correctly. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                text_es: 'Reto — Seven Nation Army, sin mirar la tabla: toca el riff en la cuerda Mi grave y di cada nombre de nota en voz alta mientras lo tocas — B · B · D · B · A · G · F#. Lo tienes cuando: una vuelta limpia, sin tabla, cada nota nombrada correctamente. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+                label: 'Challenge: "Seven Nation Army"', label_es: 'Reto: "Seven Nation Army"',
+                text: 'Challenge — "Seven Nation Army," without looking at the chart: play the riff on the low E string and say each note name out loud as you play it — B · B · D · B · A · G · F#. You\'ve got it when: one clean lap, no chart, every note named correctly. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text_es: 'Reto — "Seven Nation Army," sin mirar la tabla: toca el riff en la cuerda Mi grave y di cada nombre de nota en voz alta mientras lo tocas — B · B · D · B · A · G · F#. Lo tienes cuando: una vuelta limpia, sin tabla, cada nota nombrada correctamente. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'You played this riff in Module 1 with the TAB in front of you. Today the goal is knowing WHERE you are — name it, then play it.',
                 hint_es: 'Tocaste este riff en el Módulo 1 con el TAB delante de ti. Hoy la meta es saber DÓNDE estás — nómbralo, luego tócalo.',
                 stuck: 'Do it in two halves: name-and-play B B D B, then A G F#. Join them once each half is automatic.',
@@ -392,7 +392,7 @@ SETS.push(
 
   {
     id: 'm2w2',
-    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', layer: 2, note: 'the bass-note line — your assessment piece' }, { name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', layer: 2, note: 'the riff, note by note' }, { name: 'Sweet Child O\' Mine', journey: 'tabs/sweet-child-o-mine.html', layer: 2, note: 'the bass roots' }, { name: 'Luna', journey: 'tabs/luna.html', layer: 2, note: 'the single-note line' }, { name: 'Let It Be', journey: 'tabs/let-it-be.html', layer: 2, note: 'the C–G–A–F bass outline' }],
+    songThread: [{ name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', layer: 2, note: 'the bass-note line — your assessment piece' }, { name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 2, note: 'the riff, note by note' }, { name: '"Sweet Child O\' Mine"', journey: 'tabs/sweet-child-o-mine.html', layer: 2, note: 'the bass roots' }, { name: '"Luna"', journey: 'tabs/luna.html', layer: 2, note: 'the single-note line' }, { name: '"Let It Be"', journey: 'tabs/let-it-be.html', layer: 2, note: 'the C–G–A–F bass outline' }],
     label: 'Set 2',
     locked: false,
     module: 'Notes on the E & A Strings',
@@ -483,7 +483,7 @@ SETS.push(
             title_es: 'Practica la lectura de TAB y notas limpias',
             steps: [
               {
-                label: 'Read TAB: Happy Birthday', label_es: 'Lee el TAB: Happy Birthday',
+                label: 'Read TAB: "Happy Birthday"', label_es: 'Lee el TAB: "Happy Birthday"',
                 text: 'Read this TAB: the opening of "Happy Birthday" written out on the low E string:<ol><li>Look at the fret numbers on the bottom line and try to play it.</li><li>Click any note name below the TAB to hear how it should sound.</li></ol>',
                 text_es: 'Lee este TAB: el inicio de "Happy Birthday" escrito en la cuerda Mi grave:<ol><li>Mira los números de traste en la línea de abajo e intenta tocarlo.</li><li>Haz clic en cualquier nombre de nota debajo del TAB para escuchar cómo debe sonar.</li></ol>',
                 hint: 'Read left-to-right, one note per beat. The numbers tell you which fret to press on the low E string. See a # (sharp)? It just means one fret higher than the plain note — F# is one fret above F. We\'ll cover sharps and flats later. For now, just trust the fret numbers.',
@@ -685,7 +685,7 @@ SETS.push(
             }
           },
           {
-            label: 'Challenge: play Happy Birthday', label_es: 'Reto: toca Happy Birthday',
+            label: 'Challenge: play "Happy Birthday"', label_es: 'Reto: toca "Happy Birthday"',
             text: 'Challenge 2 — Play the Tune: using the TAB, play "Happy Birthday" on the E & A strings at 60 BPM, one note per beat. You\'ve got it when: the whole melody start to finish, in time, no buzz. Click any note name to hear how it should sound.',
             text_es: 'Reto 2 — Toca la melodía: usando el TAB, toca "Happy Birthday" en las cuerdas Mi y La a 60 BPM, una nota por pulso. Lo tienes cuando: la melodía completa de principio a fin, a tiempo, sin zumbido. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar.',
             hint: 'If you buzz on a note, stop, fix your finger position, then continue. Don\'t just play through the buzz.',
@@ -738,9 +738,9 @@ SETS.push(
             }
           },
           {
-            label: 'Challenge: Watchtower bass riff', label_es: 'Reto: riff de bajo de Watchtower',
-            text: 'Challenge 3 — Watchtower Bass Riff (your module assessment piece): using the TAB, play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. You\'ve got it when: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.<span class="step-figure"><img src="img/m2-record-assessment.svg" alt="Three steps: turn on the Chromebook camera, press record, and play the riff A G F G from memory."></span>',
-            text_es: 'Reto 3 — Riff de bajo de Watchtower (tu pieza de evaluación del módulo): usando el TAB, toca la línea de bajo de "All Along the Watchtower" solo en la cuerda Mi grave — A · G · F · G, en bucle — una nota por pulso a 60 BPM. Lo tienes cuando: el riff de principio a fin de memoria, a tiempo, con tono limpio y digitación correcta. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.<span class="step-figure"><img src="img/m2-record-assessment.svg" alt="Tres pasos: enciende la cámara del Chromebook, pulsa grabar y toca el riff A, G, F, G de memoria."></span>',
+            label: 'Challenge: "Watchtower" bass riff', label_es: 'Reto: riff de bajo de "Watchtower"',
+            text: 'Challenge 3 — "Watchtower" Bass Riff (your module assessment piece): using the TAB, play the "All Along the Watchtower" bass line on the low E string only — A · G · F · G, looping — one note per beat at 60 BPM. You\'ve got it when: the riff start to finish from memory, in time, with clean tone and correct fingering. Click any note name to hear how it should sound. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.<span class="step-figure"><img src="img/m2-record-assessment.svg" alt="Three steps: turn on the Chromebook camera, press record, and play the riff A G F G from memory."></span>',
+            text_es: 'Reto 3 — Riff de bajo de "Watchtower" (tu pieza de evaluación del módulo): usando el TAB, toca la línea de bajo de "All Along the Watchtower" solo en la cuerda Mi grave — A · G · F · G, en bucle — una nota por pulso a 60 BPM. Lo tienes cuando: el riff de principio a fin de memoria, a tiempo, con tono limpio y digitación correcta. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.<span class="step-figure"><img src="img/m2-record-assessment.svg" alt="Tres pasos: enciende la cámara del Chromebook, pulsa grabar y toca el riff A, G, F, G de memoria."></span>',
             hint: 'Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A) — a one-fret stretch past your usual index=1/middle=2/ring=3/pinky=4 hand position, since this riff climbs past fret 4. Keep your thumb behind the neck. Let each note ring fully before the next. Drill it until you can run it with your eyes closed — then record yourself playing it: that\'s your module-end assessment piece.',
             hint_es: 'Digitación: índice en el traste 1 (F), anular en el traste 3 (G), meñique en el traste 5 (A) — un estiramiento de un traste más allá de tu posición habitual índice=1/medio=2/anular=3/meñique=4, porque este riff sube más allá del traste 4. Mantén el pulgar detrás del mástil. Deja que cada nota suene por completo antes de la siguiente. Practícalo hasta que puedas tocarlo con los ojos cerrados — luego grábate tocándolo: esa es tu pieza de evaluación de fin de módulo.',
             stuck: 'Loop just F–G (frets 1–3) until the finger change is clean, then add the A on fret 5.',
@@ -765,7 +765,7 @@ SETS.push(
             response: { type: 'short', prompt: 'Personal record: once it loops clean at 60, raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', prompt_es: 'Récord personal: una vez que el bucle salga limpio a 60, sube el metrónomo de 10 en 10. ¿Cuál es tu bucle LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 100 — try for a higher number next session', placeholder_es: 'ej. 100 — intenta superarlo la próxima sesión' }
           },
           {
-            label: 'Bonus: Sweet Child O\' Mine roots', label_es: 'Extra: raíces de Sweet Child O\' Mine',
+            label: 'Bonus: "Sweet Child O\' Mine" roots', label_es: 'Extra: raíces de "Sweet Child O\' Mine"',
             text: 'Bonus riff — "Sweet Child O\' Mine" (Guns N\' Roses) bass roots on the E & A strings:<ol><li>Play the root note under each verse chord — D · C · G · D — one per bar at 60 BPM.</li><li>Click any note name to hear how it should sound.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
             text_es: 'Riff extra — raíces de bajo de "Sweet Child O\' Mine" (Guns N\' Roses) en las cuerdas Mi y La:<ol><li>Toca la nota raíz bajo cada acorde de la estrofa — D · C · G · D — una por compás a 60 BPM.</li><li>Haz clic en cualquier nombre de nota para escuchar cómo debe sonar.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
             hint: 'These are the roots of the D–C–G verse loop. Note: the original recording is tuned a half-step lower, so your notes will sound slightly higher than the recording — that\'s normal, not a mistake. The famous intro riff comes later in the course (an optional harder challenge in Module 7!).',
@@ -806,9 +806,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: Watchtower bass line', label_es: 'Reto: línea de bajo de Watchtower',
-                text: 'Challenge — Watchtower bass line: play the "All Along the Watchtower" bass loop on the low E string — A · G · F · G — one note per beat at 60 BPM, four laps without stopping. You\'ve got it when: four laps, every note landing on the click. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                text_es: 'Reto — Línea de bajo de Watchtower: toca el bucle de bajo de "All Along the Watchtower" en la cuerda Mi grave — A · G · F · G — una nota por pulso a 60 BPM, cuatro vueltas sin parar. Lo tienes cuando: cuatro vueltas, cada nota cayendo con el clic. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+                label: 'Challenge: "Watchtower" bass line', label_es: 'Reto: línea de bajo de "Watchtower"',
+                text: 'Challenge — "Watchtower" bass line: play the "All Along the Watchtower" bass loop on the low E string — A · G · F · G — one note per beat at 60 BPM, four laps without stopping. You\'ve got it when: four laps, every note landing on the click. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text_es: 'Reto — Línea de bajo de "Watchtower": toca el bucle de bajo de "All Along the Watchtower" en la cuerda Mi grave — A · G · F · G — una nota por pulso a 60 BPM, cuatro vueltas sin parar. Lo tienes cuando: cuatro vueltas, cada nota cayendo con el clic. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'Three notes carry this whole song. Keep your eyes one note ahead of your pick.',
                 hint_es: 'Tres notas sostienen toda esta canción. Mantén tus ojos una nota por delante de tu púa.',
                 stuck: 'Loop just A → G until the shift is smooth, then add the F.',
@@ -829,9 +829,9 @@ SETS.push(
                 response: { type: 'short', prompt: 'How many clean laps in a row did you get at 60 BPM?', prompt_es: '¿Cuántas vueltas limpias seguidas lograste a 60 BPM?', placeholder: 'e.g. 4 — try for a higher number next session', placeholder_es: 'ej. 4 — intenta superarlo la próxima sesión' }
               },
               {
-                label: 'Challenge: Seven Nation Army, true pitch', label_es: 'Reto: Seven Nation Army, tono real',
-                text: 'Challenge — Seven Nation Army, true pitch: play the riff where the record actually lives — on the A string — E · E · G · E · D · C · B at 60 BPM. You\'ve got it when: two clean laps, and you can say which string version sounds like the recording. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                text_es: 'Reto — Seven Nation Army, tono real: toca el riff donde realmente vive en la grabación — en la cuerda La — E · E · G · E · D · C · B a 60 BPM. Lo tienes cuando: dos vueltas limpias, y puedes decir qué versión de cuerda suena como la grabación. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+                label: 'Challenge: "Seven Nation Army," true pitch', label_es: 'Reto: "Seven Nation Army," tono real',
+                text: 'Challenge — "Seven Nation Army," true pitch: play the riff where the record actually lives — on the A string — E · E · G · E · D · C · B at 60 BPM. You\'ve got it when: two clean laps, and you can say which string version sounds like the recording. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text_es: 'Reto — "Seven Nation Army," tono real: toca el riff donde realmente vive en la grabación — en la cuerda La — E · E · G · E · D · C · B a 60 BPM. Lo tienes cuando: dos vueltas limpias, y puedes decir qué versión de cuerda suena como la grabación. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'Same riff, new string, new note names. Notice how the shape of the moves feels the same even though every name changed.',
                 hint_es: 'El mismo riff, una nueva cuerda, nuevos nombres de notas. Fíjate en cómo la forma de los movimientos se siente igual aunque cada nombre cambió.',
                 stuck: 'Go back to your low-E version for one lap to remind your hand of the moves, then bring it up to the A string.',
@@ -855,7 +855,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which version do you like playing more — low E or A string — and why?', prompt_es: '¿Qué versión te gusta más tocar — Mi grave o cuerda La — y por qué?', placeholder: 'e.g. A string, it sounds like the song', placeholder_es: 'ej. cuerda La, suena como la canción' }
               },
               {
-                label: 'Challenge: the cure root line', label_es: 'Reto: línea de raíces de the cure',
+                label: 'Challenge: "the cure" root line', label_es: 'Reto: línea de raíces de "the cure"',
                 text: 'Challenge — "the cure," root line: play the roots of Olivia Rodrigo\'s "the cure" across both strings — A · C · D · F · G — two beats per note at 60 BPM. You\'ve got it when: two clean laps crossing between the A and E strings without looking down.',
                 text_es: 'Reto — "the cure," línea de raíces: toca las raíces de "the cure" de Olivia Rodrigo cruzando ambas cuerdas — A · C · D · F · G — dos pulsos por nota a 60 BPM. Lo tienes cuando: dos vueltas limpias cruzando entre las cuerdas La y Mi sin mirar hacia abajo.',
                 hint: 'This is the simplest outline of the song — next module these exact roots become power chords. Learn where they live now and Module 3 is half done.',
@@ -884,20 +884,20 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which move was harder — crossing strings from D down to F, or walking up the same string from F to G?', prompt_es: '¿Qué movimiento fue más difícil — cruzar de cuerda de D a F, o subir por la misma cuerda de F a G?', placeholder: 'e.g. D to F — big jump', placeholder_es: 'ej. D a F — un salto grande' }
               },
               {
-                label: 'Challenge: Luna bass roots', label_es: 'Reto: raíces de bajo de Luna',
-                text: 'Challenge — Luna, bass roots: Luna rides two chords — F and Am — so its bassline is two notes:<ol><li>Play F (low E string, fret 1) and A (open A string) as single notes, two big beats each.</li><li>The song is in 6/8, so feel the pulse in 2 and land each note on a downbeat.</li></ol>You\'ve got it when: four laps of F → A, both notes clean with no buzz, locked to the downbeats at 60 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                text_es: 'Reto — Luna, raíces de bajo: Luna se apoya en dos acordes — F y Am — así que su línea de bajo son dos notas:<ol><li>Toca F (cuerda Mi grave, traste 1) y A (cuerda La al aire) como notas individuales, dos pulsos grandes cada una.</li><li>La canción está en 6/8, así que siente el pulso en 2 y aterriza cada nota en un tiempo fuerte.</li></ol>Lo tienes cuando: cuatro vueltas de F → A, ambas notas limpias sin zumbido, ajustadas a los tiempos fuertes a 60 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+                label: 'Challenge: "Luna" bass roots', label_es: 'Reto: raíces de bajo de "Luna"',
+                text: 'Challenge — "Luna," bass roots: "Luna" rides two chords — F and Am — so its bassline is two notes:<ol><li>Play F (low E string, fret 1) and A (open A string) as single notes, two big beats each.</li><li>The song is in 6/8, so feel the pulse in 2 and land each note on a downbeat.</li></ol>You\'ve got it when: four laps of F → A, both notes clean with no buzz, locked to the downbeats at 60 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text_es: 'Reto — "Luna," raíces de bajo: "Luna" se apoya en dos acordes — F y Am — así que su línea de bajo son dos notas:<ol><li>Toca F (cuerda Mi grave, traste 1) y A (cuerda La al aire) como notas individuales, dos pulsos grandes cada una.</li><li>La canción está en 6/8, así que siente el pulso en 2 y aterriza cada nota en un tiempo fuerte.</li></ol>Lo tienes cuando: cuatro vueltas de F → A, ambas notas limpias sin zumbido, ajustadas a los tiempos fuertes a 60 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'Fret 1 is the tightest squeeze on the neck — press right behind the fret wire with the tip of your index and the F will ring clean.',
                 hint_es: 'El traste 1 es el aprieto más fuerte del mástil — presiona justo detrás del metal del traste con la punta de tu índice y el F sonará limpio.',
                 stuck: 'Park on just the F: pluck, listen, adjust, until five ring in a row. Then add the open A — that one\'s free.',
                 stuck_es: 'Quédate solo en el F: pulsa, escucha, ajusta, hasta que salgan cinco seguidas. Luego agrega la A al aire — esa es gratis.',
-                levelUp: 'Trade the open A for fret 5 on the low E — same note, new position. Want the simplified requinto intro line (a requinto is a small, higher-pitched guitar that plays the lead melody)? It\'s the bonus Layer 6 on the Luna Song Journey.',
-                levelUp_es: 'Cambia la A al aire por el traste 5 de la Mi grave — la misma nota, una posición nueva. ¿Quieres la línea de intro simplificada de requinto (un requinto es una guitarra pequeña y de tono más agudo que toca la melodía principal)? Es la Capa 6 extra en el Recorrido de la canción de Luna.'
+                levelUp: 'Trade the open A for fret 5 on the low E — same note, new position. Want the simplified requinto intro line (a requinto is a small, higher-pitched guitar that plays the lead melody)? It\'s the bonus Layer 6 on the "Luna" Song Journey.',
+                levelUp_es: 'Cambia la A al aire por el traste 5 de la Mi grave — la misma nota, una posición nueva. ¿Quieres la línea de intro simplificada de requinto (un requinto es una guitarra pequeña y de tono más agudo que toca la melodía principal)? Es la Capa 6 extra en el Recorrido de la canción de "Luna".'
               },
               {
-                label: 'Challenge: Let It Be bass line', label_es: 'Reto: línea de bajo de Let It Be',
-                text: 'Challenge — Let It Be, bass line: play the roots of "Let It Be" (Beatles) on the low E & A strings — C · G · A · F, two beats each at 60 BPM. These four notes are the simple bass outline of the whole song — you\'ll play "Let It Be" as a core song starting in Module 4, so learn where its roots live now. You\'ve got it when: two clean laps of C–G–A–F, every note ringing, each landing on the beat.',
-                text_es: 'Reto — Let It Be, línea de bajo: toca las raíces de "Let It Be" (Beatles) en las cuerdas Mi y La — C · G · A · F, dos pulsos cada una a 60 BPM. Estas cuatro notas son el esquema simple de bajo de toda la canción — vas a tocar "Let It Be" como canción principal a partir del Módulo 4, así que aprende dónde viven sus raíces desde ahora. Lo tienes cuando: dos vueltas limpias de C–G–A–F, cada nota sonando, cada una cayendo en el pulso.',
+                label: 'Challenge: "Let It Be" bass line', label_es: 'Reto: línea de bajo de "Let It Be"',
+                text: 'Challenge — "Let It Be," bass line: play the roots of "Let It Be" (Beatles) on the low E & A strings — C · G · A · F, two beats each at 60 BPM. These four notes are the simple bass outline of the whole song — you\'ll play "Let It Be" as a core song starting in Module 4, so learn where its roots live now. You\'ve got it when: two clean laps of C–G–A–F, every note ringing, each landing on the beat.',
+                text_es: 'Reto — "Let It Be," línea de bajo: toca las raíces de "Let It Be" (Beatles) en las cuerdas Mi y La — C · G · A · F, dos pulsos cada una a 60 BPM. Estas cuatro notas son el esquema simple de bajo de toda la canción — vas a tocar "Let It Be" como canción principal a partir del Módulo 4, así que aprende dónde viven sus raíces desde ahora. Lo tienes cuando: dos vueltas limpias de C–G–A–F, cada nota sonando, cada una cayendo en el pulso.',
                 hint: 'C is A-string fret 3 (ring finger), G is low-E fret 3 (ring finger), A is the open A string, F is low-E fret 1 (index). Watch the crossings between the two strings and keep your thumb behind the neck. Click any note name to hear how it should sound.',
                 hint_es: 'C es el traste 3 de la cuerda La (dedo anular), G es el traste 3 de la Mi grave (dedo anular), A es la cuerda La al aire, F es el traste 1 de la Mi grave (índice). Fíjate en los cruces entre las dos cuerdas y mantén el pulgar detrás del mástil. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar.',
                 stuck: 'Split it by string: play C then A (both on the A string), then G then F (both on the low E), then join all four in order.',
@@ -956,8 +956,8 @@ SETS.push(
             steps: [
               {
                 label: 'Station wrap-up', label_es: 'Cierre de la estación',
-                text: 'Which part of your Watchtower assessment riff still needs work? Write it below — that\'s your warm-up target next time you practice.',
-                text_es: '¿Qué parte de tu riff de evaluación de Watchtower todavía necesita trabajo? Escríbelo abajo — ese es tu objetivo de calentamiento la próxima vez que practiques.',
+                text: 'Which part of your "Watchtower" assessment riff still needs work? Write it below — that\'s your warm-up target next time you practice.',
+                text_es: '¿Qué parte de tu riff de evaluación de "Watchtower" todavía necesita trabajo? Escríbelo abajo — ese es tu objetivo de calentamiento la próxima vez que practiques.',
                 response: { type: 'short', placeholder: 'e.g. the F-to-G change on frets 1 and 3 is shaky',
                   placeholder_es: 'ej. el cambio de F a G en los trastes 1 y 3 sale inestable' }
               }
@@ -970,7 +970,7 @@ SETS.push(
     assessment: {
       goal: 'Module-end recording: (1) Play the "All Along the Watchtower" bass-note line on the low E string from memory, to the metronome at 60 BPM, with clean tone and correct fingering — or the alternate single-note root line from "the cure." (2) Sight-read a short 2-bar bass line from TAB.',
       goal_es: 'Grabación de fin de módulo: (1) Toca la línea de bajo de "All Along the Watchtower" en la cuerda Mi grave de memoria, con el metrónomo a 60 BPM, con tono limpio y digitación correcta — o la línea alterna de raíces de una sola nota de "the cure." (2) Lee a primera vista una línea corta de bajo de 2 compases desde el TAB.',
-      performance: 'Self-check: record yourself playing the Watchtower low-E line from memory at 60 BPM, then sight-read and play a short 2-bar bass line from TAB. Listen back and name one thing to improve.',
+      performance: 'Self-check: record yourself playing the "Watchtower" low-E line from memory at 60 BPM, then sight-read and play a short 2-bar bass line from TAB. Listen back and name one thing to improve.',
       selfCheck: 'Can you press a note cleanly with no buzzing? Can you read a basic TAB? Can you play a 4-bar melody in time at 60 BPM?',
       selfCheck_es: '¿Puedes presionar una nota limpia sin zumbido? ¿Puedes leer un TAB básico? ¿Puedes tocar una melodía de 4 compases a tiempo a 60 BPM?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Re.7a']
@@ -1013,10 +1013,10 @@ SETS.push(
           choices: ['B', 'C', 'D', 'G'], choices_es: ['B', 'C', 'D', 'G'], answer: 1 } },
       { id: 'm2w2-s5', text: 'Play a 4-bar melody in time at 60 BPM',
         text_es: 'Tocar una melodía de 4 compases a tiempo a 60 BPM',
-        gotItWhen: 'you can play the Happy Birthday phrase all the way through at 60 BPM without stopping to find a note.',
-        gotItWhen_es: 'puedes tocar la frase de Happy Birthday completa a 60 BPM sin detenerte a buscar una nota.',
-        practice: { type: 'pr', prompt: '<ol><li>Play the Happy Birthday phrase start to finish with no stops.</li><li>Start at 60 BPM and raise the metronome +5 at a time.</li><li>Log your fastest CLEAN run.</li></ol>',
-          prompt_es: '<ol><li>Toca la frase de Happy Birthday de principio a fin sin detenerte.</li><li>Empieza a 60 BPM y sube el metrónomo de 5 en 5.</li><li>Anota tu pasada LIMPIA más rápida.</li></ol>',
+        gotItWhen: 'you can play the "Happy Birthday" phrase all the way through at 60 BPM without stopping to find a note.',
+        gotItWhen_es: 'puedes tocar la frase de "Happy Birthday" completa a 60 BPM sin detenerte a buscar una nota.',
+        practice: { type: 'pr', prompt: '<ol><li>Play the "Happy Birthday" phrase start to finish with no stops.</li><li>Start at 60 BPM and raise the metronome +5 at a time.</li><li>Log your fastest CLEAN run.</li></ol>',
+          prompt_es: '<ol><li>Toca la frase de "Happy Birthday" de principio a fin sin detenerte.</li><li>Empieza a 60 BPM y sube el metrónomo de 5 en 5.</li><li>Anota tu pasada LIMPIA más rápida.</li></ol>',
           unit: 'BPM', placeholder: 'e.g. 70 — try for a higher number next session', placeholder_es: 'p. ej. 70 — intenta superarlo la próxima sesión' } },
       { id: 'm2w2-s6', text: 'Keep thumb behind the neck throughout',
         text_es: 'Mantener el pulgar detrás del mástil todo el tiempo',
@@ -1083,7 +1083,7 @@ MODULE_REVIEWS[2] = {
   ],
   assessItems: [
     'Name the notes on the E and A strings from memory through fret 12',
-    'Play “All Along the Watchtower” bass-note line using only the E string — or the single-note root line from “the cure” — from memory, to the metronome at 60 BPM without stopping, with clean tone and correct fingering (one finger per fret, thumb behind the neck)',
+    'Play "All Along the Watchtower" bass-note line using only the E string — or the single-note root line from "the cure" — from memory, to the metronome at 60 BPM without stopping, with clean tone and correct fingering (one finger per fret, thumb behind the neck)',
     'Sight-read a short 2-bar bass line from TAB and play it'
   ],
   assessItems_es: [

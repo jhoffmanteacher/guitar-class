@@ -88,7 +88,7 @@ SETS.push(
             title_es: 'Escucha el pulgar y los dedos',
             steps: [
           {
-            label: 'Listen: Dust in the Wind', label_es: 'Escucha: Dust in the Wind',
+            label: 'Listen: "Dust in the Wind"', label_es: 'Escucha: "Dust in the Wind"',
             text: 'Listen to "Dust in the Wind" by Kansas. Pay attention to the picking pattern — you can clearly hear the alternating bass (thumb) underneath the melody (fingers).',
             text_es: 'Escucha "Dust in the Wind" de Kansas. Pon atención al patrón de punteo — puedes escuchar claramente el bajo alternante (pulgar) debajo de la melodía (dedos).',
             hint: 'This song is the classic example of fingerpicking. The bass moves on every beat, the fingers play between the beats.',
@@ -218,7 +218,7 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: the cure, first touch', label_es: 'Reto: the cure, primer contacto',
+                label: 'Challenge: "the cure", first touch', label_es: 'Reto: "the cure", primer contacto',
                 text: 'Challenge — "the cure", first touch:<ol><li>Fret Am and pluck p (A string) · i · m · a, one note per beat at 60 BPM — that soft broken-chord sound IS the verse feel of "the cure".</li><li>Then change to C: your thumb stays on the same bass STRING — C\'s root lives on the A string too, just at the 3rd fret, where your ring finger now supplies the new bass note.</li></ol>You\'ve got it when: four clean p-i-m-a laps on Am and four on C, every note even.',
                 text_es: 'Reto — "the cure", primer contacto:<ol><li>Trastea Am y pulsa p (cuerda La) · i · m · a, una nota por tiempo a 60 BPM — ese sonido suave de acorde desglosado ES la sensación de la estrofa de "the cure".</li><li>Luego cambia a C: tu pulgar se queda en la misma CUERDA grave — la raíz de C también vive en la cuerda La, solo que en el traste 3, donde tu dedo anular ahora aporta la nueva nota grave.</li></ol>Lo tienes cuando: cuatro vueltas limpias de p-i-m-a en Am y cuatro en C, cada nota pareja.',
                 hint: 'Olivia\'s verse is fingerpicked for exactly this reason — soft and close. Wrist stays arched; only the fingers move.',
@@ -373,7 +373,7 @@ SETS.push(
             title_es: 'Escucha el pulso de 6 notas',
             steps: [
           {
-            label: 'Listen: Nothing Else Matters', label_es: 'Escucha: Nothing Else Matters',
+            label: 'Listen: "Nothing Else Matters"', label_es: 'Escucha: "Nothing Else Matters"',
             text: 'Listen to "Nothing Else Matters" by Metallica. The intro is entirely fingerpicked open chords. Tap along — can you feel the 6-note pulse?',
             text_es: 'Escucha "Nothing Else Matters" de Metallica. El intro son acordes al aire tocados enteramente con fingerpicking. Sigue el ritmo — ¿puedes sentir el pulso de 6 notas?',
             hint: 'James Hetfield famously taught himself this with no plan. He uses thumb-finger-thumb-finger patterns. Notice the constant thumb motion.',
@@ -518,7 +518,7 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: the cure, verse', label_es: 'Reto: the cure, estrofa',
+                label: 'Challenge: "the cure", verse', label_es: 'Reto: "the cure", estrofa',
                 text: 'Challenge — "the cure", verse: play the 6-note p-i-m-a-m-i pattern over the verse loop — Am · C · Dm · F, one bar each at 60 BPM. Thumb:<ul><li>A string for Am and C.</li><li>D string for Dm and F.</li><li>i-m-a never leave G-B-e.</li></ul>You\'ve got it when: one full lap with the pattern unbroken at every change.',
                 text_es: 'Reto — "the cure", estrofa: toca el patrón de 6 notas p-i-m-a-m-i sobre el loop de la estrofa — Am · C · Dm · F, un compás cada uno a 60 BPM. Pulgar:<ul><li>Cuerda La para Am y C.</li><li>Cuerda Re para Dm y F.</li><li>i-m-a nunca dejan G-B-e.</li></ul>Lo tienes cuando: una vuelta completa con el patrón sin interrupciones en cada cambio.',
                 hint: 'The four bass notes pair up: Am and C both live on the A string, Dm and F both live on the D string — the thumb travels only once, at C→Dm, then stays. The fingers never move at all.',
@@ -642,7 +642,7 @@ SETS.push(
 
   {
     id: 'm8w3',
-    songThread: [{ name: 'Let It Be', journey: 'tabs/let-it-be.html', note: 'the fingerpicked arrangement' }],
+    songThread: [{ name: '"Let It Be"', journey: 'tabs/let-it-be.html', note: 'the fingerpicked arrangement' }],
     label: 'Set 3',
     locked: false,
     module: 'Finger Picking',
@@ -692,7 +692,7 @@ SETS.push(
             ] }
           },
           {
-            label: 'Watch: Nothing Else Matters lesson', label_es: 'Mira: lección de Nothing Else Matters',
+            label: 'Watch: "Nothing Else Matters" lesson', label_es: 'Mira: lección de "Nothing Else Matters"',
             text: 'Watch: <a href="https://youtu.be/7silbMA9UME" target="_blank">Nothing Else Matters Guitar Lesson Part 1 – Marty Music</a> (0:00–4:00). Watch one chord change closely — notice when his fretting hand starts moving toward the next shape.',
             text_es: 'Mira: <a href="https://youtu.be/7silbMA9UME" target="_blank">Nothing Else Matters Guitar Lesson Part 1 – Marty Music</a> (0:00–4:00). Observa de cerca un cambio de acorde — fíjate cuándo su mano de trastear empieza a moverse hacia la siguiente forma.',
             hint: 'The hardest part: keeping the picking pattern PERFECTLY STEADY through a chord change. Anticipate the next chord — start moving your fretting hand on the LAST note of the current bar.',
@@ -844,9 +844,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: Let It Be, fingerpicked', label_es: 'Reto: Let It Be con fingerpicking',
-                text: 'Challenge — Let It Be, fingerpicked: play the four-chord verse — C · G · Am · F — with the 6-note pattern over each chord, one bar each at 60 BPM. Thumb roots:<ul><li>C and Am on the A string.</li><li>G on the low E.</li><li>F on the D string.</li></ul>You\'ve got it when: a full verse with the pattern unbroken — the same song you strummed in Modules 5 and 6, now a lullaby. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: the fingerstyle arrangement</a>.',
-                text_es: 'Reto — Let It Be, con fingerpicking: toca la estrofa de cuatro acordes — C · G · Am · F — con el patrón de 6 notas sobre cada acorde, un compás cada uno a 60 BPM. Raíces del pulgar:<ul><li>C y Am en la cuerda La.</li><li>G en la Mi grave.</li><li>F en la cuerda Re.</li></ul>Lo tienes cuando: una estrofa completa con el patrón sin interrupciones — la misma canción que rasgueaste en los Módulos 5 y 6, ahora una canción de cuna. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Recorrido de la canción: el arreglo fingerstyle</a>.',
+                label: 'Challenge: "Let It Be", fingerpicked', label_es: 'Reto: "Let It Be" con fingerpicking',
+                text: 'Challenge — "Let It Be", fingerpicked: play the four-chord verse — C · G · Am · F — with the 6-note pattern over each chord, one bar each at 60 BPM. Thumb roots:<ul><li>C and Am on the A string.</li><li>G on the low E.</li><li>F on the D string.</li></ul>You\'ve got it when: a full verse with the pattern unbroken — the same song you strummed in Modules 5 and 6, now a lullaby. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: the fingerstyle arrangement</a>.',
+                text_es: 'Reto — "Let It Be", con fingerpicking: toca la estrofa de cuatro acordes — C · G · Am · F — con el patrón de 6 notas sobre cada acorde, un compás cada uno a 60 BPM. Raíces del pulgar:<ul><li>C y Am en la cuerda La.</li><li>G en la Mi grave.</li><li>F en la cuerda Re.</li></ul>Lo tienes cuando: una estrofa completa con el patrón sin interrupciones — la misma canción que rasgueaste en los Módulos 5 y 6, ahora una canción de cuna. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Recorrido de la canción: el arreglo fingerstyle</a>.',
                 hint: 'Anticipate like the second lesson video showed you: the fretting hand starts moving on the pattern\'s 6th note, so beat 1 always lands ready.',
                 hint_es: 'Anticipa como te mostró el segundo video de la lección: la mano de trastear empieza a moverse en la 6ª nota del patrón, así que el tiempo 1 siempre cae listo.',
                 stuck: 'Strum each chord once to check it rings, then loop just C → G — the only change where the thumb crosses to the low E.',
@@ -905,8 +905,8 @@ SETS.push(
                 label: 'Wrap-up: halfway-point reflection', label_es: 'Cierre: reflexión de medio curso',
                 text: 'You\'ve reached the end of the first half of the course — what fingerpicking skill are you proudest of, and what\'s the one song you want to keep working on after this module? Write it below.',
                 text_es: 'Has llegado al final de la primera mitad del curso — ¿de cuál destreza de fingerpicking estás más orgulloso, y cuál es la única canción que quieres seguir trabajando después de este módulo? Escríbelo abajo.',
-                response: { type: 'short', placeholder: 'e.g. proud of clean arpeggios; want to keep working on Blackbird',
-                  placeholder_es: 'p. ej. orgulloso de mis arpegios limpios; quiero seguir trabajando en Blackbird' }
+                response: { type: 'short', placeholder: 'e.g. proud of clean arpeggios; want to keep working on "Blackbird"',
+                  placeholder_es: 'p. ej. orgulloso de mis arpegios limpios; quiero seguir trabajando en "Blackbird"' }
               }
             ]
           }

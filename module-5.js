@@ -299,7 +299,7 @@ SETS.push(
 
   {
     id: 'm5w2',
-    songThread: [{ name: 'Let It Be', journey: 'tabs/let-it-be.html', layer: 5, note: 'the real chords — C, G, Am, F' }, { name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', layer: 5, note: 'the full song with open chords' }],
+    songThread: [{ name: '"Let It Be"', journey: 'tabs/let-it-be.html', layer: 5, note: 'the real chords — C, G, Am, F' }, { name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', layer: 5, note: 'the full song with open chords' }],
     label: 'Set 2',
     locked: false,
     module: 'Open Chords',
@@ -365,7 +365,7 @@ SETS.push(
             title_es: 'Escucha los cambios de acorde',
             steps: [
           {
-            label: 'Listen: Let It Be', label_es: 'Escucha: Let It Be',
+            label: 'Listen: "Let It Be"', label_es: 'Escucha: "Let It Be"',
             text: 'Listen to "Let It Be" by The Beatles. Can you hear the C–G–Am–F chord pattern in the verse? Count the bars — how many strums per chord? <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5 — Open Chords</a>.',
             text_es: 'Escucha "Let It Be" de The Beatles. ¿Puedes oír el patrón de acordes C–G–Am–F en la estrofa? Cuenta los compases — ¿cuántos rasgueos por acorde? <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5 — Acordes al aire</a>.',
             hint: 'You don\'t need to play along yet. Just listen and map out when the chords change. This trains your ear to recognize the I–V–vi–IV progression (a lowercase numeral like vi means that chord is minor).',
@@ -497,9 +497,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: Let It Be, verse', label_es: 'Reto: Let It Be, estrofa',
-                text: 'Challenge — Let It Be, verse (assessment rehearsal):<ol><li>Play C · G · Am · F with a down-strum, four beats per chord, building from 60 to 70 BPM — a full bar per chord, patient and unhurried, twice as long as your Module 2 bass roots (which moved every two beats).</li><li>This C–G–Am–F verse is one of the three core songs you can play from memory for the module assessment — record a run and check it against the chart.</li></ol>You\'ve got it when: one full verse loop at 70 BPM, every change landing on beat 1. The record actually moves at your Module 2 pace — two beats per chord — and the Half-Bar Changes ladder later in this set gets you there. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5 — Open Chords</a>.',
-                text_es: 'Reto — Let It Be, estrofa (ensayo de evaluación):<ol><li>Toca C · G · Am · F con un rasgueo hacia abajo, cuatro tiempos por acorde, subiendo de 60 a 70 BPM — un compás completo por acorde, paciente y sin apuro, el doble de duración que tus raíces de bajo del Módulo 2 (que se movían cada dos tiempos).</li><li>Esta estrofa C–G–Am–F es una de las tres canciones principales que puedes tocar de memoria para la evaluación del módulo — graba una toma y compárala con el diagrama.</li></ol>Lo tienes cuando: una vuelta completa de la estrofa a 70 BPM, cada cambio cayendo en el tiempo 1. La grabación en realidad se mueve al ritmo de tu Módulo 2 — dos tiempos por acorde — y la escalera de Cambios de Medio Compás más adelante en esta unidad te lleva ahí. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5 — Acordes al aire</a>.',
+                label: 'Challenge: "Let It Be", verse', label_es: 'Reto: "Let It Be", estrofa',
+                text: 'Challenge — "Let It Be", verse (assessment rehearsal):<ol><li>Play C · G · Am · F with a down-strum, four beats per chord, building from 60 to 70 BPM — a full bar per chord, patient and unhurried, twice as long as your Module 2 bass roots (which moved every two beats).</li><li>This C–G–Am–F verse is one of the three core songs you can play from memory for the module assessment — record a run and check it against the chart.</li></ol>You\'ve got it when: one full verse loop at 70 BPM, every change landing on beat 1. The record actually moves at your Module 2 pace — two beats per chord — and the Half-Bar Changes ladder later in this set gets you there. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5 — Open Chords</a>.',
+                text_es: 'Reto — "Let It Be", estrofa (ensayo de evaluación):<ol><li>Toca C · G · Am · F con un rasgueo hacia abajo, cuatro tiempos por acorde, subiendo de 60 a 70 BPM — un compás completo por acorde, paciente y sin apuro, el doble de duración que tus raíces de bajo del Módulo 2 (que se movían cada dos tiempos).</li><li>Esta estrofa C–G–Am–F es una de las tres canciones principales que puedes tocar de memoria para la evaluación del módulo — graba una toma y compárala con el diagrama.</li></ol>Lo tienes cuando: una vuelta completa de la estrofa a 70 BPM, cada cambio cayendo en el tiempo 1. La grabación en realidad se mueve al ritmo de tu Módulo 2 — dos tiempos por acorde — y la escalera de Cambios de Medio Compás más adelante en esta unidad te lleva ahí. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5 — Acordes al aire</a>.',
                 hint: 'Look ahead — start forming the next chord on beat 4 of the current one. Keep your fingers arched and your thumb behind the neck so every string rings. The strum keeps moving even while fingers travel.',
                 hint_es: 'Mira hacia adelante — empieza a formar el siguiente acorde en el tiempo 4 del actual. Mantén tus dedos arqueados y tu pulgar detrás del mástil para que cada cuerda suene. El rasgueo sigue moviéndose aunque los dedos viajen.',
                 stuck: 'Isolate the roughest pair (probably C → F) and loop just those two, four beats each.',
@@ -511,12 +511,12 @@ SETS.push(
                   { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'F', chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
                 ],
-                response: { type: 'short', prompt: 'Which chord change still fights you in Let It Be?', prompt_es: '¿Qué cambio de acorde todavía te cuesta en Let It Be?', placeholder: 'e.g. C to F — fingers arrive late', placeholder_es: 'p. ej. de C a F — los dedos llegan tarde' }
+                response: { type: 'short', prompt: 'Which chord change still fights you in "Let It Be"?', prompt_es: '¿Qué cambio de acorde todavía te cuesta en "Let It Be"?', placeholder: 'e.g. C to F — fingers arrive late', placeholder_es: 'p. ej. de C a F — los dedos llegan tarde' }
               },
               {
-                label: 'Challenge: Watchtower, open chords', label_es: 'Reto: Watchtower, acordes al aire',
-                text: 'Challenge — Watchtower, open-chord version: the same loop you\'ve played as bass notes and power chords, now as full open chords — Am · G · F · G — two beats per chord at 60 BPM. You\'ve got it when: four loops, and you can hear that it\'s the SAME song you played in Modules 2 and 3. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
-                text_es: 'Reto — Watchtower, versión con acordes al aire: la misma vuelta que ya tocaste como notas de bajo y como acordes de potencia, ahora como acordes al aire completos — Am · G · F · G — dos tiempos por acorde a 60 BPM. Lo tienes cuando: cuatro vueltas, y puedes escuchar que es la MISMA canción que tocaste en los Módulos 2 y 3. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
+                label: 'Challenge: "Watchtower", open chords', label_es: 'Reto: "Watchtower", acordes al aire',
+                text: 'Challenge — "Watchtower", open-chord version: the same loop you\'ve played as bass notes and power chords, now as full open chords — Am · G · F · G — two beats per chord at 60 BPM. You\'ve got it when: four loops, and you can hear that it\'s the SAME song you played in Modules 2 and 3. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
+                text_es: 'Reto — "Watchtower", versión con acordes al aire: la misma vuelta que ya tocaste como notas de bajo y como acordes de potencia, ahora como acordes al aire completos — Am · G · F · G — dos tiempos por acorde a 60 BPM. Lo tienes cuando: cuatro vueltas, y puedes escuchar que es la MISMA canción que tocaste en los Módulos 2 y 3. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
                 hint: 'This is the third time this song has met you — bass line, power chords, now open chords. Notice the roots are identical every time.',
                 hint_es: 'Esta es la tercera vez que esta canción se cruza contigo — línea de bajo, acordes de potencia, ahora acordes al aire. Nota que las raíces son idénticas cada vez.',
                 stuck: 'Strum only beat 1 of each chord and use beats 2–4 to travel to the next shape.',
@@ -528,7 +528,7 @@ SETS.push(
                   { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
                   { name: 'F', chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
                 ],
-                response: { type: 'short', prompt: 'Bass line, power chords, or open chords — which Watchtower is your favorite so far?', prompt_es: 'Línea de bajo, acordes de potencia, o acordes al aire — ¿cuál Watchtower es tu favorito hasta ahora?', placeholder: 'e.g. open chords — it finally sounds full', placeholder_es: 'p. ej. acordes al aire — por fin suena completo' }
+                response: { type: 'short', prompt: 'Bass line, power chords, or open chords — which "Watchtower" is your favorite so far?', prompt_es: 'Línea de bajo, acordes de potencia, o acordes al aire — ¿cuál "Watchtower" es tu favorito hasta ahora?', placeholder: 'e.g. open chords — it finally sounds full', placeholder_es: 'p. ej. acordes al aire — por fin suena completo' }
               },
               {
                 label: 'Challenge: "the cure" play-along', label_es: 'Reto: toca junto a "the cure"',
@@ -599,9 +599,9 @@ SETS.push(
             playSeq: { label: 'Hear it — G·G · C·C · Am·Am (every 2 beats)', label_es: 'Escúchalo — G·G · C·C · Am·Am (cada 2 tiempos)', bpm: 60, notes: [[43,47,50,55,59,67],[43,47,50,55,59,67],[48,52,55,60,64],[48,52,55,60,64],[45,52,57,60,64],[45,52,57,60,64]] }
           },
           {
-            label: 'Challenge: Let It Be, fast (4 chords)', label_es: 'Reto: Let It Be, rápido (4 acordes)',
-            text: 'Challenge — Four-Chord Half-Bar (Let It Be, fast): the whole C · G · Am · F loop from your song, but two beats each at 60 BPM instead of a full bar. Same chords, twice the changes — this is exactly how the record\'s verse actually moves. You\'ve got it when: two clean laps, every change landing on the beat.',
-            text_es: 'Reto — Medio compás con cuatro acordes (Let It Be, rápido): toda la vuelta C · G · Am · F de tu canción, pero dos tiempos cada uno a 60 BPM en vez de un compás completo. Los mismos acordes, el doble de cambios — así es exactamente como se mueve la estrofa en la grabación. Lo tienes cuando: dos vueltas limpias, cada cambio cayendo a tiempo.',
+            label: 'Challenge: "Let It Be", fast (4 chords)', label_es: 'Reto: "Let It Be", rápido (4 acordes)',
+            text: 'Challenge — Four-Chord Half-Bar ("Let It Be", fast): the whole C · G · Am · F loop from your song, but two beats each at 60 BPM instead of a full bar. Same chords, twice the changes — this is exactly how the record\'s verse actually moves. You\'ve got it when: two clean laps, every change landing on the beat.',
+            text_es: 'Reto — Medio compás con cuatro acordes ("Let It Be", rápido): toda la vuelta C · G · Am · F de tu canción, pero dos tiempos cada uno a 60 BPM en vez de un compás completo. Los mismos acordes, el doble de cambios — así es exactamente como se mueve la estrofa en la grabación. Lo tienes cuando: dos vueltas limpias, cada cambio cayendo a tiempo.',
             hint: 'You already know this loop slow. The only new demand is your hands resetting faster — pre-shape each chord in the air while the last one is still ringing.',
             hint_es: 'Ya conoces esta vuelta despacio. La única exigencia nueva es que tus manos se reajusten más rápido — preforma cada acorde en el aire mientras el anterior sigue sonando.',
             stuck: 'Isolate the pair that lags (often G → Am or Am → F) and loop just those two at half-bar speed before running the circle.',
@@ -619,8 +619,8 @@ SETS.push(
           },
           {
             label: 'Challenge: one chord per beat', label_es: 'Reto: un acorde por tiempo',
-            text: 'Challenge — One Chord Per Beat (Let It Be, fastest): the top of the ladder — a new chord on every single beat. Play C · G · Am · F, one down-strum per beat at 60 BPM, looping. This is the real test of clean, fast switching: the next shape has to be ready before you get to it. You\'ve got it when: four laps clean at 60 — then, if you can, climb to 65.',
-            text_es: 'Reto — Un acorde por tiempo (Let It Be, lo más rápido): el escalón más alto — un acorde nuevo en cada tiempo. Toca C · G · Am · F, un rasgueo hacia abajo por tiempo a 60 BPM, repitiendo. Esta es la prueba real de cambio limpio y rápido: la siguiente forma tiene que estar lista antes de llegar a ella. Lo tienes cuando: cuatro vueltas limpias a 60 — y luego, si puedes, sube a 65.',
+            text: 'Challenge — One Chord Per Beat ("Let It Be", fastest): the top of the ladder — a new chord on every single beat. Play C · G · Am · F, one down-strum per beat at 60 BPM, looping. This is the real test of clean, fast switching: the next shape has to be ready before you get to it. You\'ve got it when: four laps clean at 60 — then, if you can, climb to 65.',
+            text_es: 'Reto — Un acorde por tiempo ("Let It Be", lo más rápido): el escalón más alto — un acorde nuevo en cada tiempo. Toca C · G · Am · F, un rasgueo hacia abajo por tiempo a 60 BPM, repitiendo. Esta es la prueba real de cambio limpio y rápido: la siguiente forma tiene que estar lista antes de llegar a ella. Lo tienes cuando: cuatro vueltas limpias a 60 — y luego, si puedes, sube a 65.',
             hint: 'At this speed you can\'t watch your hands. Trust the shapes and keep the strum steady — a change that\'s slightly buzzy but in time beats a clean one that\'s late.',
             hint_es: 'A esta velocidad no puedes mirar tus manos. Confía en las formas y mantén el rasgueo constante — un cambio con un poco de zumbido pero a tiempo es mejor que uno limpio pero tarde.',
             stuck: 'Cut it in half: loop just C · G, one per beat, until it\'s smooth, then add Am and F back one at a time.',
@@ -746,7 +746,7 @@ SETS.push(
 
   {
     id: 'm5w3',
-    songThread: [{ name: 'Luna', journey: 'tabs/luna.html', layer: 5, note: 'the F–Am vamp' }],
+    songThread: [{ name: '"Luna"', journey: 'tabs/luna.html', layer: 5, note: 'the F–Am vamp' }],
     label: 'Set 3',
     locked: false,
     module: 'Open Chords',
@@ -815,7 +815,7 @@ SETS.push(
             title_es: 'Escucha los cambios de acorde',
             steps: [
           {
-            label: 'Listen: Luna', label_es: 'Escucha: Luna',
+            label: 'Listen: "Luna"', label_es: 'Escucha: "Luna"',
             text: 'Listen to "Luna" by Peso Pluma & Junior H — the whole song uses just two chords, F and Am, with Dm making a brief passing appearance near the end of the verse and again in the closing bridge (some charts voice it as Dm9). The pulse is in 2: tap just the big downbeats and feel the chord changes land right on them.',
             text_es: 'Escucha "Luna" de Peso Pluma y Junior H — toda la canción usa solo dos acordes, F y Am, con Dm apareciendo brevemente de paso cerca del final de la estrofa y otra vez en el puente final (algunos diagramas lo interpretan como Dm9). El pulso está en 2: marca solo los tiempos fuertes y siente los cambios de acorde caer justo en ellos.',
             hint: 'F and Am are chords you already know from Group 1 — Dm passes through briefly near the end of the verse and in the closing bridge. Your ear already knows the sound — you\'re just learning to place the changes.',
@@ -933,9 +933,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: Luna, the vamp', label_es: 'Reto: Luna, el vamp',
-                text: 'Challenge — Luna, the vamp (a short chord pattern repeated over and over): F · Am — two shapes, both from Group 1 and chords you already know well, with the simplified F (xx3211). The song is in 6/8, so play two downbeat strums per bar — nothing syncopated — changing every bar at 60 BPM. You\'ve got it when: four laps (a lap = one full time through the loop) with every change landing on the downbeat and the little F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
-                text_es: 'Reto — Luna, el vamp (un patrón de acordes corto que se repite una y otra vez): F · Am — dos formas, ambas del Grupo 1 y acordes que ya conoces bien, con el F simplificado (xx3211). La canción está en 6/8, así que toca dos rasgueos en el tiempo fuerte por compás — nada sincopado — cambiando cada compás a 60 BPM. Lo tienes cuando: cuatro vueltas (una vuelta = un recorrido completo del loop) con cada cambio cayendo en el tiempo fuerte y el pequeño F sonando limpio. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
+                label: 'Challenge: "Luna", the vamp', label_es: 'Reto: "Luna", el vamp',
+                text: 'Challenge — "Luna", the vamp (a short chord pattern repeated over and over): F · Am — two shapes, both from Group 1 and chords you already know well, with the simplified F (xx3211). The song is in 6/8, so play two downbeat strums per bar — nothing syncopated — changing every bar at 60 BPM. You\'ve got it when: four laps (a lap = one full time through the loop) with every change landing on the downbeat and the little F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
+                text_es: 'Reto — "Luna", el vamp (un patrón de acordes corto que se repite una y otra vez): F · Am — dos formas, ambas del Grupo 1 y acordes que ya conoces bien, con el F simplificado (xx3211). La canción está en 6/8, así que toca dos rasgueos en el tiempo fuerte por compás — nada sincopado — cambiando cada compás a 60 BPM. Lo tienes cuando: cuatro vueltas (una vuelta = un recorrido completo del loop) con cada cambio cayendo en el tiempo fuerte y el pequeño F sonando limpio. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
                 hint: 'F and Am are already in your hands from Group 1 — the only new part is the simplified F shape (xx3211) and locking the change to the 6/8 pulse.',
                 hint_es: 'F y Am ya están en tus manos desde el Grupo 1 — lo único nuevo es la forma simplificada de F (xx3211) y ajustar el cambio al pulso de 6/8.',
                 stuck: 'Loop just F → Am until the shape change is automatic, then add the metronome at 60 BPM.',
@@ -950,9 +950,9 @@ SETS.push(
                 response: { type: 'short', prompt: 'Which change was toughest — into F, or out of it?', prompt_es: '¿Qué cambio fue el más difícil — entrar a F, o salir de él?', placeholder: 'e.g. into F — the top-string barre lands late', placeholder_es: 'p. ej. entrar a F — la cejilla en la cuerda aguda llega tarde' }
               },
               {
-                label: 'Challenge: Sweet Child, open chords', label_es: 'Reto: Sweet Child, acordes al aire',
-                text: 'Challenge — Sweet Child O\' Mine, verse (open chords): the D · C · G loop you\'ve played as bass notes (Module 2) and power chords (Module 3), now as full open chords — one bar per chord, same pacing as always, using D, C, and G shapes you already know from Group 1 and Group 2. You\'ve got it when: two full verse loops, every change landing on beat 1, all six strings ringing clean. Then press &#x25B6; on the Song Journey page and strum along with the actual record at 125 BPM — the same one-bar-per-chord pacing you already know, just at real speed. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
-                text_es: 'Reto — Sweet Child O\' Mine, estrofa (acordes al aire): la vuelta D · C · G que ya tocaste como notas de bajo (Módulo 2) y acordes de potencia (Módulo 3), ahora como acordes al aire completos — un compás por acorde, el mismo ritmo de siempre, usando las formas de D, C y G que ya conoces del Grupo 1 y el Grupo 2. Lo tienes cuando: dos vueltas completas de la estrofa, cada cambio cayendo en el tiempo 1, las seis cuerdas sonando limpias. Luego presiona &#x25B6; en la página de Recorrido de la canción y rasguea junto con la grabación real a 125 BPM — el mismo ritmo de un compás por acorde que ya conoces, solo que a velocidad real. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
+                label: 'Challenge: "Sweet Child", open chords', label_es: 'Reto: "Sweet Child", acordes al aire',
+                text: 'Challenge — "Sweet Child O\' Mine", verse (open chords): the D · C · G loop you\'ve played as bass notes (Module 2) and power chords (Module 3), now as full open chords — one bar per chord, same pacing as always, using D, C, and G shapes you already know from Group 1 and Group 2. You\'ve got it when: two full verse loops, every change landing on beat 1, all six strings ringing clean. Then press &#x25B6; on the Song Journey page and strum along with the actual record at 125 BPM — the same one-bar-per-chord pacing you already know, just at real speed. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
+                text_es: 'Reto — "Sweet Child O\' Mine", estrofa (acordes al aire): la vuelta D · C · G que ya tocaste como notas de bajo (Módulo 2) y acordes de potencia (Módulo 3), ahora como acordes al aire completos — un compás por acorde, el mismo ritmo de siempre, usando las formas de D, C y G que ya conoces del Grupo 1 y el Grupo 2. Lo tienes cuando: dos vueltas completas de la estrofa, cada cambio cayendo en el tiempo 1, las seis cuerdas sonando limpias. Luego presiona &#x25B6; en la página de Recorrido de la canción y rasguea junto con la grabación real a 125 BPM — el mismo ritmo de un compás por acorde que ya conoces, solo que a velocidad real. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
                 hint: 'D, C, and G are chords you already know solidly from Group 1 and Group 2 — the only new skill here is the switch itself. Look ahead one bar early: start shaping the next chord while the current one is still ringing.',
                 hint_es: 'D, C y G son acordes que ya conoces bien del Grupo 1 y el Grupo 2 — la única destreza nueva aquí es el cambio en sí. Mira hacia adelante un compás antes: empieza a formar el siguiente acorde mientras el actual todavía suena.',
                 stuck: 'Loop just D &rarr; C (the trickiest pair — your 2nd and 3rd fingers both move) until it\'s automatic, then add G back in.',
@@ -1061,7 +1061,7 @@ SETS.push(
         text_es: 'Tocar el vamp de "Luna" (F–Am, con un Dm de paso) usando acordes del Grupo 1 con un patrón de rasgueo',
         gotItWhen: 'you can loop the "Luna" vamp (F · Am) with steady downbeat strums at 60 BPM, every change landing on the downbeat and the simplified F (xx3211) ringing clean.',
         gotItWhen_es: 'puedes repetir el vamp de "Luna" (F · Am) con rasgueos constantes en el tiempo fuerte a 60 BPM, cada cambio cayendo en el tiempo fuerte y el F simplificado (xx3211) sonando limpio.',
-        practice: { type: 'chord', label: 'Luna vamp — simplified F and Am',
+        practice: { type: 'chord', label: '"Luna" vamp — simplified F and Am',
           chords: [
             { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
             { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
@@ -1071,7 +1071,7 @@ SETS.push(
 
   {
     id: 'm5w4',
-    songThread: [{ name: 'Luna', journey: 'tabs/luna.html', layer: 5, note: 'perform it' }],
+    songThread: [{ name: '"Luna"', journey: 'tabs/luna.html', layer: 5, note: 'perform it' }],
     label: 'Set 4',
     locked: false,
     module: 'Open Chords',
@@ -1081,9 +1081,9 @@ SETS.push(
     title: 'Set 4',
     subtitle: 'Chord Group 3: E, B7, F#m, C#m · Module 5 assessment preparation',
     subtitle_es: 'Grupo de acordes 3: E, B7, F#m, C#m · Preparación para la evaluación del Módulo 5',
-    objective: 'I CAN fret E and B7 open chords, identify F#m and C#m shapes, and perform a core song from memory plus a chosen song with 4+ chord types.',
-    skillFocus: 'Fretting the E and B7 chords · Recognizing the F#m and C#m shapes · Performing a core song from memory plus a song of your choice',
-    skillFocus_es: 'Trastear los acordes E y B7 · Reconocer las formas F#m y C#m · Interpretar una canción con varios acordes',
+    objective: 'I CAN fret E and B7 open chords, identify F#m and C#m shapes, and perform one core open-chord song from memory.',
+    skillFocus: 'Fretting the E and B7 chords · Recognizing the F#m and C#m shapes · Performing a core song from memory',
+    skillFocus_es: 'Trastear los acordes E y B7 · Reconocer las formas F#m y C#m · Interpretar una canción principal de memoria',
     comingSoon: false,
 
     stations: {
@@ -1248,8 +1248,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge: full run', label_es: 'Reto: pasada completa',
-            text: 'Challenge 4 — Full Run (your assessment piece):<ol><li>Play your performance song — the one you\'re building toward performing for someone (family, a friend, or a recording) — start to finish 3 times without stopping, even through mistakes.</li><li>Then put the chart away and run your core song (Let It Be, Luna, or &ldquo;the cure&rdquo;) from memory — that half of the assessment has no chart.</li><li>Time yourself.</li></ol>No score — this trains your recovery, not perfection.',
-            text_es: 'Reto 4 — Pasada completa (tu pieza de evaluación):<ol><li>Toca tu canción de interpretación — la que estás construyendo para interpretar frente a alguien (familia, un amigo, o una grabación) — de principio a fin 3 veces sin detenerte, incluso con errores.</li><li>Luego guarda el diagrama y toca tu canción principal (Let It Be, Luna o &ldquo;the cure&rdquo;) de memoria — esa mitad de la evaluación no lleva diagrama.</li><li>Cronométrate.</li></ol>Sin puntaje — esto entrena tu recuperación, no la perfección.',
+            text: 'Challenge 4 — Full Run:<ol><li>Optional: play your performance song — the one you\'re building toward performing for someone (family, a friend, or a recording) — start to finish 3 times without stopping, even through mistakes.</li><li>Then run your core song ("Let It Be", "Luna", or &ldquo;the cure&rdquo;) from memory with no chart — this is your assessment piece.</li><li>Time yourself.</li></ol>No score — this trains your recovery, not perfection.',
+            text_es: 'Reto 4 — Pasada completa:<ol><li>Opcional: toca tu canción de interpretación — la que estás construyendo para interpretar frente a alguien (familia, un amigo, o una grabación) — de principio a fin 3 veces sin detenerte, incluso con errores.</li><li>Luego toca tu canción principal ("Let It Be", "Luna" o &ldquo;the cure&rdquo;) de memoria sin diagrama — esta es tu pieza de evaluación.</li><li>Cronométrate.</li></ol>Sin puntaje — esto entrena tu recuperación, no la perfección.',
             hint: 'Don\'t stop when you make a mistake in performance practice. The goal is to keep going. You can fix mistakes in slow practice — performance practice trains your recovery.',
             hint_es: 'No te detengas cuando cometas un error en la práctica de interpretación. El objetivo es seguir tocando. Puedes corregir errores en la práctica lenta — la práctica de interpretación entrena tu recuperación.',
             skills: [5, 6]
@@ -1261,9 +1261,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: Luna, full-song version', label_es: 'Reto: Luna, versión de canción completa',
-                text: 'Challenge — Luna, strummed (full-song version): the full song is F · Am, with Dm making a brief passing appearance near the end of the verse and in the closing bridge.<ol><li>Play two downbeat strums per bar at 60 BPM, building toward 70.</li><li>Sing or hum "Luna, dile tú" while you play — it\'s tricky!</li></ol>You\'ve got it when: a full verse and chorus with every change on the downbeat and the F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
-                text_es: 'Reto — Luna, rasgueada (versión de canción completa): la canción completa es F · Am, con Dm apareciendo brevemente de paso cerca del final de la estrofa y en el puente final.<ol><li>Toca dos rasgueos en el tiempo fuerte por compás a 60 BPM, subiendo hacia 70.</li><li>Canta o tararea "Luna, dile tú" mientras tocas — ¡es complicado!</li></ol>Lo tienes cuando: una estrofa y un coro completos con cada cambio en el tiempo fuerte y el F sonando limpio. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
+                label: 'Challenge: "Luna", full-song version', label_es: 'Reto: "Luna", versión de canción completa',
+                text: 'Challenge — "Luna", strummed (full-song version): the full song is F · Am, with Dm making a brief passing appearance near the end of the verse and in the closing bridge.<ol><li>Play two downbeat strums per bar at 60 BPM, building toward 70.</li><li>Sing or hum "Luna, dile tú" while you play — it\'s tricky!</li></ol>You\'ve got it when: a full verse and chorus with every change on the downbeat and the F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
+                text_es: 'Reto — "Luna", rasgueada (versión de canción completa): la canción completa es F · Am, con Dm apareciendo brevemente de paso cerca del final de la estrofa y en el puente final.<ol><li>Toca dos rasgueos en el tiempo fuerte por compás a 60 BPM, subiendo hacia 70.</li><li>Canta o tararea "Luna, dile tú" mientras tocas — ¡es complicado!</li></ol>Lo tienes cuando: una estrofa y un coro completos con cada cambio en el tiempo fuerte y el F sonando limpio. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
                 hint: 'You met this vamp in Set 3 — now make it assessment-clean. F is the trickiest shape; keep your fingers arched and thumb behind the neck so all four strings you strum ring.',
                 hint_es: 'Conociste este vamp en la Unidad 3 — ahora déjalo limpio para la evaluación. F es la forma más complicada; mantén tus dedos arqueados y el pulgar detrás del mástil para que las cuatro cuerdas que rasgueas suenen.',
                 stuck: 'F is the tough one — loop Am → F on its own until the shape lands clean, then run the full F–Am (with the passing Dm near the verse\'s end and in the closing bridge).',
@@ -1276,7 +1276,7 @@ SETS.push(
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'Dm', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'2'],[2,3,'3'],[1,1,'1']], position: 0 }
                 ],
-                response: { type: 'short', prompt: 'Which core song do you most want to play start-to-finish for the assessment?', prompt_es: '¿Qué canción principal más quieres tocar de principio a fin en la evaluación?', placeholder: 'e.g. Luna, all of it', placeholder_es: 'p. ej. Luna, completa' }
+                response: { type: 'short', prompt: 'Which core song do you most want to play start-to-finish for the assessment?', prompt_es: '¿Qué canción principal más quieres tocar de principio a fin en la evaluación?', placeholder: 'e.g. "Luna", all of it', placeholder_es: 'p. ej. "Luna", completa' }
               }
             ]
           },
@@ -1314,11 +1314,11 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Module 5 assessment — TWO songs: (1) one CORE open-chord song from memory — Let It Be (C–G–Am–F), Luna (F–Am–Dm), or "the cure" (Am–C–Dm–F–G/B); (2) one song of your choice using at least 4 chords from Semester 1. Also: play three chords in an 8-bar progression at 70 BPM with clean changes, and name chords on an unlabelled chord chart. Evaluated on chord accuracy, timing, smooth transitions, and musicality. (Separate and ungraded: your written "My Guitar Adventure — Semester 1 Check-in" reflection — just for you, not part of the assessment score.)',
-      goal_es: 'Evaluación del Módulo 5 — DOS canciones: (1) una canción PRINCIPAL de acordes al aire de memoria — Let It Be (C–G–Am–F), Luna (F–Am–Dm) o "the cure" (Am–C–Dm–F–G/B); (2) una canción de tu elección usando al menos 4 acordes del Semestre 1. Además: toca tres acordes en una progresión de 8 compases a 70 BPM con cambios limpios, y nombra acordes en un diagrama sin etiquetar. Se evalúa la precisión de los acordes, el tiempo, las transiciones suaves y la musicalidad. (Aparte y sin calificar: tu reflexión escrita "Mi aventura con la guitarra — Check-in del Semestre 1" — solo para ti, no forma parte del puntaje de la evaluación.)',
-      performance: 'Module 5 assessment performance. Student records a full run of the core song from memory and of the chosen song (or plays them for family or friends), then reviews the recordings for chord accuracy, timing, transitions, and expression.',
-      selfCheck: 'Can you play your core song from memory — no chart in front of you — all the way through without stopping? Can you do the same with your chosen song? Can you name every chord in both and which group it belongs to?',
-      selfCheck_es: '¿Puedes tocar tu canción principal de memoria — sin ningún diagrama delante — de principio a fin sin detenerte? ¿Puedes hacer lo mismo con la canción que elegiste? ¿Puedes nombrar cada acorde de las dos y a qué grupo pertenece?',
+      goal: 'Module 5 assessment — perform one CORE open-chord song from memory: "Let It Be" (C–G–Am–F), "Luna" (F–Am–Dm), or "the cure" (Am–C–Dm–F–G/B). Also: play three chords in an 8-bar progression at 70 BPM with clean changes, and name chords on an unlabelled chord chart. Evaluated on chord accuracy, timing, smooth transitions, and musicality. (Separate and ungraded: your written "My Guitar Adventure — Semester 1 Check-in" reflection — just for you, not part of the assessment score.)',
+      goal_es: 'Evaluación del Módulo 5 — interpreta una canción PRINCIPAL de acordes al aire de memoria: "Let It Be" (C–G–Am–F), "Luna" (F–Am–Dm) o "the cure" (Am–C–Dm–F–G/B). Además: toca tres acordes en una progresión de 8 compases a 70 BPM con cambios limpios, y nombra acordes en un diagrama sin etiquetar. Se evalúa la precisión de los acordes, el tiempo, las transiciones suaves y la musicalidad. (Aparte y sin calificar: tu reflexión escrita "Mi aventura con la guitarra — Check-in del Semestre 1" — solo para ti, no forma parte del puntaje de la evaluación.)',
+      performance: 'Module 5 assessment performance. Student records a full run of the core song from memory (or plays it for family or friends), then reviews the recording for chord accuracy, timing, transitions, and expression.',
+      selfCheck: 'Can you play your core song from memory — no chart in front of you — all the way through without stopping? Can you name every chord in it and which group it belongs to?',
+      selfCheck_es: '¿Puedes tocar tu canción principal de memoria — sin ningún diagrama delante — de principio a fin sin detenerte? ¿Puedes nombrar cada acorde y a qué grupo pertenece?',
       standards: ['Pr.4a', 'Pr.5b', 'Pr.6a', 'Re.9a']
     },
 
@@ -1353,12 +1353,12 @@ SETS.push(
           prompt_es: '¿Cuál de estos acordes es del Grupo 2 (D, A, Em, Bm)?',
           choices: ['C major', 'G major', 'D major', 'F major'],
           choices_es: ['C mayor', 'G mayor', 'D mayor', 'F mayor'], answer: 2 } },
-      { id: 'm5w4-s5', text: 'Perform a core song from memory, plus a chosen song, all the way through without stopping',
-        text_es: 'Interpretar una canción central de memoria, más una canción elegida, de principio a fin sin detenerse',
-        gotItWhen: 'you can play your core song (Let It Be, Luna, or "the cure") from memory with no chart in front of you, and your chosen song too — fingers arched, thumb behind the neck, the shapes held through the whole song — and even with mistakes you keep going and stay in time.',
-        gotItWhen_es: 'puedes tocar tu canción principal (Let It Be, Luna o "the cure") de memoria sin ningún diagrama delante, y también la canción que elegiste — dedos arqueados, pulgar detrás del mástil, las formas sostenidas durante toda la canción — y aunque haya errores sigues tocando y te mantienes a tiempo.',
-        practice: { type: 'pr', prompt: 'Play your core song from memory, then your chosen song, start to finish without stopping — mistakes are fine, stopping isn\'t. How many complete no-stop runs did you get today (both songs counted together)?',
-          prompt_es: 'Toca tu canción principal de memoria, y luego tu canción elegida, de principio a fin sin detenerte — los errores están bien, detenerse no. ¿Cuántas pasadas completas sin paradas lograste hoy (contando las dos canciones)?',
+      { id: 'm5w4-s5', text: 'Perform a core song from memory, all the way through without stopping',
+        text_es: 'Interpretar una canción principal de memoria, de principio a fin sin detenerse',
+        gotItWhen: 'you can play your core song ("Let It Be", "Luna", or "the cure") from memory with no chart in front of you — fingers arched, thumb behind the neck, the shapes held through the whole song — and even with mistakes you keep going and stay in time.',
+        gotItWhen_es: 'puedes tocar tu canción principal ("Let It Be", "Luna" o "the cure") de memoria sin ningún diagrama delante — dedos arqueados, pulgar detrás del mástil, las formas sostenidas durante toda la canción — y aunque haya errores sigues tocando y te mantienes a tiempo.',
+        practice: { type: 'pr', prompt: 'Play your core song from memory, start to finish without stopping — mistakes are fine, stopping isn\'t. How many complete no-stop runs did you get today?',
+          prompt_es: 'Toca tu canción principal de memoria, de principio a fin sin detenerte — los errores están bien, detenerse no. ¿Cuántas pasadas completas sin paradas lograste hoy?',
           unit: 'count', placeholder: 'e.g. 2 runs — try for a higher number', placeholder_es: 'p. ej. 2 pasadas — intenta superarlo' } },
       { id: 'm5w4-s6', text: 'Maintain a steady strum pattern throughout a full song',
         text_es: 'Mantener un patrón de rasgueo constante durante una canción completa',
@@ -1428,18 +1428,18 @@ MODULE_REVIEWS[5] = {
       text_es: 'Puedo mantener un patrón de rasgueo abajo-arriba constante (1 + 2 + 3 + 4 +) a través de un cambio de acorde', set: 'm5w2' },
     { id: 'mr5-s4', text: 'I can fret Group 2 chords (D, A, and a partial-barre Bm) with clean tone',
       text_es: 'Puedo trastear los acordes del Grupo 2 (D, A, y un Bm con cejilla parcial) con tono limpio', set: 'm5w3' },
-    { id: 'mr5-s8', text: 'I can perform a core song from memory, plus a chosen song using 4+ chords from across Semester 1, start to finish for the Module 5 assessment',
-      text_es: 'Puedo interpretar una canción principal de memoria, más una canción elegida que use 4+ acordes de todo el Semestre 1, de principio a fin para la evaluación del Módulo 5', set: 'm5w4' }
+    { id: 'mr5-s8', text: 'I can perform a core song from memory, start to finish, for the Module 5 assessment',
+      text_es: 'Puedo interpretar una canción principal de memoria, de principio a fin, para la evaluación del Módulo 5', set: 'm5w4' }
   ],
   assessItems: [
     'Draw three chords at random (shuffle flashcards or point blind at a chart) and play them in an 8-bar progression at 70 BPM with clean changes in time',
-    'Record (or perform for someone) one core song from memory — Let It Be, Luna, or "the cure" — plus one song of your choice using at least 4 chords from Semester 1, with clean tone and smooth transitions, then listen back and check both',
+    'Record (or perform for someone) one core song from memory — "Let It Be", "Luna", or "the cure" — with clean tone and smooth transitions, then listen back and check it',
     'Identify and name the chords on an unlabelled chord chart',
     'Ungraded reflection (not scored): your written "My Guitar Adventure — Semester 1 Check-in" — what changed since the Module 1 goal'
   ],
   assessItems_es: [
     'Elige tres acordes al azar (mezcla tarjetas o apunta a ciegas en un diagrama) y tócalos en una progresión de 8 compases a 70 BPM con cambios limpios a tiempo',
-    'Graba (o interpreta para alguien) una canción principal de memoria — Let It Be, Luna, o "the cure" — más una canción de tu elección usando al menos 4 acordes del Semestre 1, con tono limpio y transiciones suaves, y luego escucha y revisa ambas',
+    'Graba (o interpreta para alguien) una canción principal de memoria — "Let It Be", "Luna", o "the cure" — con tono limpio y transiciones suaves, y luego escúchala y revísala',
     'Identifica y nombra los acordes en un diagrama de acordes sin etiquetar',
     'Reflexión sin calificar (no cuenta para la nota): tu reflexión escrita "Mi aventura con la guitarra — Check-in del Semestre 1" — qué cambió desde la meta del Módulo 1'
   ],

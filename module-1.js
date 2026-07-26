@@ -8,7 +8,7 @@ SETS.push(
 
   {
     id: 'w1',
-    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', layer: 1, note: 'meet the song' }],
+    songThread: [{ name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', layer: 1, note: 'meet the song' }],
     label: 'Set 1',
     locked: false,
     module: 'Introductions: You and The Guitar',
@@ -281,7 +281,7 @@ SETS.push(
 
   {
     id: 'w2',
-    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', layer: 1, note: 'meet the riff' }],
+    songThread: [{ name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 1, note: 'meet the riff' }],
     label: 'Set 2',
     locked: false,
     module: 'Introductions: You and The Guitar',
@@ -480,7 +480,7 @@ SETS.push(
             title_es: 'Adelanto del riff de "Seven Nation Army"',
             steps: [
           {
-            label: 'Preview the Seven Nation Army riff', label_es: 'Adelanto del riff de Seven Nation Army',
+            label: 'Preview the "Seven Nation Army" riff', label_es: 'Adelanto del riff de "Seven Nation Army"',
             text: 'Preview the "Seven Nation Army" riff:<ol><li>Click the note names below the TAB (the little chart below — each number is a fret to press on the low E string; 0 = open) to hear how it should sound.</li><li>Then try just the first few notes to get the feel.</li></ol>Heads up: this site teaches it as straight, even quarter notes — one per beat — to make it easy to count while you\'re learning it; the actual record swings it a bit looser than that, which you\'ll start to hear naturally once the shape feels solid. You\'ll play the whole riff at the practice station. You\'ve got it when: you can match the first three notes to what you heard. This song grows with you through the whole course — <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
             text_es: 'Adelanto del riff de "Seven Nation Army":<ol><li>Haz clic en los nombres de las notas debajo del TAB (el pequeño diagrama de abajo — cada número es un traste que debes presionar en la cuerda Mi grave; 0 = al aire) para escuchar cómo debe sonar.</li><li>Luego prueba solo las primeras notas para agarrar la sensación.</li></ol>Aviso: aquí se enseña con negras rectas y parejas — una nota por pulso — para que sea fácil de contar mientras lo aprendes; la grabación original lo toca con un poco más de swing (vaivén) que eso, algo que empezarás a notar de oído en cuanto domines bien la forma. Vas a tocar el riff completo en la estación de práctica. Lo tienes cuando: puedes hacer coincidir las primeras tres notas con lo que escuchaste. Esta canción crece contigo durante todo el curso — <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 1 de 5</a>.',
             hint: 'Listen first, then match it — one note at a time. To fret a note, set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',
@@ -549,7 +549,7 @@ SETS.push(
             levelUp_es: 'Logra 6 de 6 limpias dos veces seguidas, y luego inténtalo una vez más con los ojos cerrados.',
           },
           {
-            label: 'Happy Birthday on the low E', label_es: 'Happy Birthday en la Mi grave',
+            label: '"Happy Birthday" on the low E', label_es: '"Happy Birthday" en la Mi grave',
             text: '<ol><li>Try "Happy Birthday" on the low E string — the tutorial video in the Songs tab walks you through the note sequence, all on one string.</li><li>Practice with the Metronome (floating corner button) set to 60 BPM — beats per minute, one click a second — to keep steady.</li></ol>You\'ve got it when: you can play it start to finish with clean notes and a steady pulse.',
             text_es: '<ol><li>Prueba "Happy Birthday" en la cuerda Mi grave — el video tutorial en la pestaña de Canciones te guía por la secuencia de notas, todo en una sola cuerda.</li><li>Practica con el Metrónomo (botón flotante de la esquina) puesto en 60 BPM — pulsos por minuto, un clic por segundo — para mantenerte constante.</li></ol>Lo tienes cuando: puedes tocarla de principio a fin con notas limpias y un pulso constante.',
             hint: 'Go slow. Clean notes matter more than speed right now.',
@@ -561,7 +561,7 @@ SETS.push(
             skills: [6]
           },
           {
-            label: 'Challenge: the Seven Nation Army riff', label_es: 'Reto: el riff de Seven Nation Army',
+            label: 'Challenge: the "Seven Nation Army" riff', label_es: 'Reto: el riff de "Seven Nation Army"',
             text: 'Challenge 3 — Riff Time (try it!): play the "Seven Nation Army" riff on the low E string — slow and clean. You\'ve got it when: all 7 notes in the right order, each ringing clean — speed comes later. No score on this one, just try it. Click any note name below the TAB to hear how it should sound.',
             text_es: 'Reto 3 — Hora del riff (¡pruébalo!): toca el riff de "Seven Nation Army" en la cuerda Mi grave — despacio y limpio. Lo tienes cuando: las 7 notas en el orden correcto, cada una sonando limpia — la velocidad viene después. Este no tiene puntaje, solo pruébalo. Haz clic en cualquier nombre de nota debajo del TAB para escuchar cómo debe sonar.',
             hint: 'Slow and clean is better than fast and buzzy. One note at a time. Set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',

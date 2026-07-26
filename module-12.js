@@ -220,11 +220,11 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: House of the Rising Sun', label_es: 'Reto: House of the Rising Sun',
-                text: 'Challenge — House of the Rising Sun, bass + roll in 6/8: play the verse with:<ul><li>A bass note on the downbeat (the first, strongest beat of the bar).</li><li>Your fingers rolling up through each chord, following the progression.</li></ul>You\'ve got it when: the verse survives every chord change with the roll staying smooth.',
-                text_es: 'Reto — House of the Rising Sun, bajo + floreo en 6/8: toca la estrofa con:<ul><li>Una nota grave en el tiempo fuerte (el primer tiempo, el más fuerte del compás).</li><li>Tus dedos haciendo un floreo ascendente a través de cada acorde, siguiendo la progresión.</li></ul>Lo tienes cuando: la estrofa sobrevive cada cambio de acorde con el floreo manteniéndose suave.',
-                hint: 'House of the Rising Sun is in 6/8 — felt in two (you tap two main beats per bar), the same waltz-family feel you met in Module 5. The thumb plays the bass on the downbeat; the fingers roll up through the chord between beats.',
-                hint_es: 'House of the Rising Sun está en 6/8 — se siente en dos (marcas dos tiempos principales por compás), la misma sensación de la familia del vals que conociste en el Módulo 5. El pulgar toca el bajo en el tiempo fuerte; los dedos hacen un floreo ascendente a través del acorde entre los tiempos.',
+                label: 'Challenge: "House of the Rising Sun"', label_es: 'Reto: "House of the Rising Sun"',
+                text: 'Challenge — "House of the Rising Sun", bass + roll in 6/8: play the verse with:<ul><li>A bass note on the downbeat (the first, strongest beat of the bar).</li><li>Your fingers rolling up through each chord, following the progression.</li></ul>You\'ve got it when: the verse survives every chord change with the roll staying smooth.',
+                text_es: 'Reto — "House of the Rising Sun", bajo + floreo en 6/8: toca la estrofa con:<ul><li>Una nota grave en el tiempo fuerte (el primer tiempo, el más fuerte del compás).</li><li>Tus dedos haciendo un floreo ascendente a través de cada acorde, siguiendo la progresión.</li></ul>Lo tienes cuando: la estrofa sobrevive cada cambio de acorde con el floreo manteniéndose suave.',
+                hint: '"House of the Rising Sun" is in 6/8 — felt in two (you tap two main beats per bar), the same waltz-family feel you met in Module 5. The thumb plays the bass on the downbeat; the fingers roll up through the chord between beats.',
+                hint_es: '"House of the Rising Sun" está en 6/8 — se siente en dos (marcas dos tiempos principales por compás), la misma sensación de la familia del vals que conociste en el Módulo 5. El pulgar toca el bajo en el tiempo fuerte; los dedos hacen un floreo ascendente a través del acorde entre los tiempos.',
                 stuck: 'Loop just the first two chords of the verse until the pattern is rock solid before adding the rest.',
                 stuck_es: 'Repite solo los dos primeros acordes de la estrofa hasta que el patrón sea firme como una roca antes de agregar el resto.',
                 levelUp: 'Play the whole verse from memory, no chord chart.',
@@ -332,11 +332,11 @@ SETS.push(
         practice: { type: 'pr', prompt: '<ol><li>One minute: keep the alternating-thumb pattern going over Am ↔ C, switching every bar.</li><li>Count the changes where the thumb never stopped.</li><li>Log your best.</li></ol>',
           prompt_es: '<ol><li>Un minuto: mantén el patrón de pulgar alternante sobre Am ↔ C, cambiando cada compás.</li><li>Cuenta los cambios donde el pulgar nunca se detuvo.</li><li>Anota tu mejor número.</li></ol>',
           unit: 'count', placeholder: 'e.g. 8 changes — try for a higher number', placeholder_es: 'p. ej. 8 cambios — intenta superarlo' } },
-      { id: 'm12w1-s6', text: 'Play a bass-note + roll verse of House of the Rising Sun (thumb bass, then fingers rolling up through the chord)',
-        text_es: 'Tocar una estrofa de nota grave + floreo de House of the Rising Sun (bajo del pulgar, y luego dedos en floreo ascendente a través del acorde)',
+      { id: 'm12w1-s6', text: 'Play a bass-note + roll verse of "House of the Rising Sun" (thumb bass, then fingers rolling up through the chord)',
+        text_es: 'Tocar una estrofa de nota grave + floreo de "House of the Rising Sun" (bajo del pulgar, y luego dedos en floreo ascendente a través del acorde)',
         gotItWhen: 'the verse survives every chord change with the roll staying smooth and the thumb never stopping.',
         gotItWhen_es: 'la estrofa sobrevive cada cambio de acorde con el floreo manteniéndose suave y el pulgar sin detenerse nunca.',
-        practice: { type: 'playSeq', label: 'Am bass + roll — House of the Rising Sun feel (6/8)', label_es: 'Bajo de Am + floreo — sensación de House of the Rising Sun (6/8)', bpm: 80,
+        practice: { type: 'playSeq', label: 'Am bass + roll — "House of the Rising Sun" feel (6/8)', label_es: 'Bajo de Am + floreo — sensación de "House of the Rising Sun" (6/8)', bpm: 80,
           notes: [45, 52, 57, 60, 64, 60] } }
     ]
   },
@@ -352,7 +352,7 @@ SETS.push(
     title: 'Set 2',
     subtitle: 'Picking in 3 · "the cure" finally at home · Your pattern, your song',
     subtitle_es: 'Punteo en 3 · "the cure" por fin en su lugar · Tu patrón, tu canción',
-    objective: 'I CAN fingerpick in 3/4 time and play "the cure" and Let It Be in their native fingerstyle.',
+    objective: 'I CAN fingerpick in 3/4 time and play "the cure" and "Let It Be" in their native fingerstyle.',
     skillFocus: 'The 3/4 pattern: bass–pluck–pluck · Feeling 3 vs 4 · "Native style" — why the ◐ disappears',
     skillFocus_es: 'El patrón en 3/4: bajo–pulsación–pulsación · Sentir el 3 frente al 4 · "Estilo nativo" — por qué desaparece el ◐',
     comingSoon: false,
@@ -511,13 +511,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Fingerpick Let It Be with your own pattern',
-            title_es: 'Toca Let It Be con fingerpicking usando tu propio patrón',
+            title: 'Fingerpick "Let It Be" with your own pattern',
+            title_es: 'Toca "Let It Be" con fingerpicking usando tu propio patrón',
             steps: [
               {
-                label: 'Challenge: Let It Be', label_es: 'Reto: Let It Be',
-                text: 'Challenge 3 — Let It Be: arpeggiate C–G–Am–F, your chosen pattern, working toward 70 BPM. You\'ve got it when: one full lap (a lap = one full time through) with the pattern unbroken through all four chords.',
-                text_es: 'Reto 3 — Let It Be: arpegia C–G–Am–F con el patrón que elegiste, trabajando hacia 70 BPM. Lo tienes cuando: una vuelta completa (una vuelta = un recorrido completo) con el patrón sin interrupciones a través de los cuatro acordes.',
+                label: 'Challenge: "Let It Be"', label_es: 'Reto: "Let It Be"',
+                text: 'Challenge 3 — "Let It Be": arpeggiate C–G–Am–F, your chosen pattern, working toward 70 BPM. You\'ve got it when: one full lap (a lap = one full time through) with the pattern unbroken through all four chords.',
+                text_es: 'Reto 3 — "Let It Be": arpegia C–G–Am–F con el patrón que elegiste, trabajando hacia 70 BPM. Lo tienes cuando: una vuelta completa (una vuelta = un recorrido completo) con el patrón sin interrupciones a través de los cuatro acordes.',
                 hint: 'You already fingerpicked this verse in Module 8 — now push the tempo and choice of pattern further.',
                 hint_es: 'Ya tocaste esta estrofa con fingerpicking en el Módulo 8 — ahora empuja más el tempo y la elección del patrón.',
                 stuck: 'Drop to 50 BPM and loop just C–G until it\'s automatic.',
@@ -564,9 +564,9 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Picks a 3/4 pattern in time · Plays "the cure" or Let It Be fingerstyle with the pattern unbroken · Explains "native style"',
-      goal_es: 'Puntea un patrón en 3/4 en tiempo · Toca "the cure" o Let It Be con fingerstyle sin interrupciones en el patrón · Explica el "estilo nativo"',
-      performance: 'Record yourself playing the 3/4 pattern (bass-pluck-pluck) on one chord, counting aloud at 60 BPM. Then fingerpick "the cure" (Am-C-Dm-F) or Let It Be (C-G-Am-F), one bar each, with the pattern unbroken through every chord change.',
+      goal: 'Picks a 3/4 pattern in time · Plays "the cure" or "Let It Be" fingerstyle with the pattern unbroken · Explains "native style"',
+      goal_es: 'Puntea un patrón en 3/4 en tiempo · Toca "the cure" o "Let It Be" con fingerstyle sin interrupciones en el patrón · Explica el "estilo nativo"',
+      performance: 'Record yourself playing the 3/4 pattern (bass-pluck-pluck) on one chord, counting aloud at 60 BPM. Then fingerpick "the cure" (Am-C-Dm-F) or "Let It Be" (C-G-Am-F), one bar each, with the pattern unbroken through every chord change.',
       selfCheck: 'Can you count aloud while picking in 3? Does your pattern survive the F chord?',
       selfCheck_es: '¿Puedes contar en voz alta mientras punteas en 3? ¿Tu patrón sobrevive el acorde F?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Re.8a']
@@ -586,9 +586,9 @@ SETS.push(
         text_es: 'Tocar con fingerpicking las formas de "the cure" — su estilo nativo',
         practice: { type: 'playSeq', label: '"the cure" thumb targets — Am · C · Dm · F bass notes', label_es: 'Objetivos del pulgar en "the cure" — notas graves de Am · C · Dm · F', bpm: 60,
           notes: [45, 48, 50, 53] } },
-      { id: 'm12w2-s4', text: 'Fingerpick Let It Be\'s C–G–Am–F with a pattern of my choice',
-        text_es: 'Tocar con fingerpicking el C–G–Am–F de Let It Be con un patrón de mi elección',
-        practice: { type: 'playSeq', label: 'Let It Be thumb targets — C · G · Am · F bass notes', label_es: 'Objetivos del pulgar en Let It Be — notas graves de C · G · Am · F', bpm: 60,
+      { id: 'm12w2-s4', text: 'Fingerpick "Let It Be"\'s C–G–Am–F with a pattern of my choice',
+        text_es: 'Tocar con fingerpicking el C–G–Am–F de "Let It Be" con un patrón de mi elección',
+        practice: { type: 'playSeq', label: '"Let It Be" thumb targets — C · G · Am · F bass notes', label_es: 'Objetivos del pulgar en "Let It Be" — notas graves de C · G · Am · F', bpm: 60,
           notes: [48, 43, 45, 53] } },
       { id: 'm12w2-s5', text: 'Keep my pattern unbroken through a 4-chord progression at 70 BPM',
         text_es: 'Mantener mi patrón sin interrupciones a través de una progresión de 4 acordes a 70 BPM',
@@ -608,7 +608,7 @@ SETS.push(
 
   {
     id: 'm12w3',
-    songThread: [{ name: 'Luna', journey: 'tabs/luna.html', layer: 6, bonus: true, note: 'the fingerpicked requinto intro' }],
+    songThread: [{ name: '"Luna"', journey: 'tabs/luna.html', layer: 6, bonus: true, note: 'the fingerpicked requinto intro' }],
     label: 'Set 3',
     locked: false,
     module: 'Fingerstyle: Travis, Waltz & Requinto',
@@ -616,8 +616,8 @@ SETS.push(
     unit: 'Module 12 · Fingerstyle: Travis, Waltz & Requinto',
     unit_es: 'Módulo 12 · Fingerstyle: Travis, Vals y Requinto',
     title: 'Set 3',
-    subtitle: 'Melody on top, thumb below · Luna\'s intro for real · Choose your showcase voice',
-    subtitle_es: 'Melodía arriba, pulgar abajo · La intro de Luna de verdad · Elige tu voz de presentación',
+    subtitle: 'Melody on top, thumb below · "Luna"\'s intro for real · Choose your showcase voice',
+    subtitle_es: 'Melodía arriba, pulgar abajo · La intro de "Luna" de verdad · Elige tu voz de presentación',
     objective: 'I CAN blend melody into a picking pattern requinto-style and perform one full fingerpicked verse.',
     skillFocus: 'The requinto role in sierreño · Melody notes ride ABOVE the thumb bass · Pick the pattern you\'ll perform with',
     skillFocus_es: 'El papel del requinto en el sierreño · Las notas de la melodía viajan ENCIMA del bajo del pulgar · Elige el patrón con el que vas a interpretar',
@@ -634,28 +634,28 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: La Derrota requinto line', label_es: 'Mira: línea de requinto de La Derrota',
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=cRJb_f4-M5g" target="_blank">La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera</a> — a real requinto line from the ranchera tradition that sierreño (a Mexican acoustic-guitar style) grew out of, taught in English. Watch how his picking hand carries the melody a singer would otherwise have, then listen for the same job in Luna and Tu Boda from this module\'s song list.',
-                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=cRJb_f4-M5g" target="_blank">La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera</a> — una línea de requinto real de la tradición ranchera de la que surgió el sierreño (un estilo de guitarra acústica mexicano), enseñada en inglés. Observa cómo su mano de pulsar lleva la melodía que de otro modo tendría un cantante, y luego escucha ese mismo papel en Luna y Tu Boda de la lista de canciones de este módulo.',
-                hint: 'Requinto sings the melodic lines you\'ve been hearing in Luna and Tu Boda since the course\'s first listening drills.',
-                hint_es: 'El requinto canta las líneas melódicas que has estado escuchando en Luna y Tu Boda desde los primeros ejercicios de escucha del curso.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=cRJb_f4-M5g" target="_blank">La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera</a> — a real requinto line from the ranchera tradition that sierreño (a Mexican acoustic-guitar style) grew out of, taught in English. Watch how his picking hand carries the melody a singer would otherwise have, then listen for the same job in "Luna" and "Tu Boda" from this module\'s song list.',
+                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=cRJb_f4-M5g" target="_blank">La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera</a> — una línea de requinto real de la tradición ranchera de la que surgió el sierreño (un estilo de guitarra acústica mexicano), enseñada en inglés. Observa cómo su mano de pulsar lleva la melodía que de otro modo tendría un cantante, y luego escucha ese mismo papel en "Luna" y "Tu Boda" de la lista de canciones de este módulo.',
+                hint: 'Requinto sings the melodic lines you\'ve been hearing in "Luna" and "Tu Boda" since the course\'s first listening drills.',
+                hint_es: 'El requinto canta las líneas melódicas que has estado escuchando en "Luna" y "Tu Boda" desde los primeros ejercicios de escucha del curso.',
                 skills: [3],
                 response: { type: 'mc', prompt: 'In a sierreño group, the requinto is:',
                   prompt_es: 'En un grupo de sierreño, el requinto es:',
                   answer: 1,
-                  explain: 'Requinto sings the melodic lines you\'ve been hearing in Luna and Tu Boda since the course\'s first listening drills.',
-                  explain_es: 'El requinto canta las líneas melódicas que has estado escuchando en Luna y Tu Boda desde los primeros ejercicios de escucha del curso.',
+                  explain: 'Requinto sings the melodic lines you\'ve been hearing in "Luna" and "Tu Boda" since the course\'s first listening drills.',
+                  explain_es: 'El requinto canta las líneas melódicas que has estado escuchando en "Luna" y "Tu Boda" desde los primeros ejercicios de escucha del curso.',
                   choices: ['The bass', 'A smaller, higher-pitched guitar that carries the melody', 'The singer', 'A drum'],
                   choices_es: ['El bajo', 'Una guitarra más pequeña y más aguda que lleva la melodía', 'El cantante', 'Un tambor'] }
               },
               {
-                label: 'Watch: Luna\'s fingerpicked intro', label_es: 'Mira: la intro fingerstyle de Luna',
-                text: 'Watch: <a href="tabs/luna.html#layer-6" target="_blank">Luna\'s Song Journey — Layer 6, the fingerpicked intro</a>. This on-site lesson shows the intro rolling through the little-F shape.',
-                text_es: 'Mira: <a href="tabs/luna.html#layer-6" target="_blank">Recorrido de Luna — Capa 6, la intro con fingerpicking</a>. Esta lección del sitio muestra la intro en un floreo a través de la forma del F pequeño.',
+                label: 'Watch: "Luna"\'s fingerpicked intro', label_es: 'Mira: la intro fingerstyle de "Luna"',
+                text: 'Watch: <a href="tabs/luna.html#layer-6" target="_blank">"Luna"\'s Song Journey — Layer 6, the fingerpicked intro</a>. This on-site lesson shows the intro rolling through the little-F shape.',
+                text_es: 'Mira: <a href="tabs/luna.html#layer-6" target="_blank">Recorrido de "Luna" — Capa 6, la intro con fingerpicking</a>. Esta lección del sitio muestra la intro en un floreo a través de la forma del F pequeño.',
                 hint: 'Same little-F you learned in Module 5 — the intro arpeggiates it one note at a time.',
                 hint_es: 'El mismo F pequeño que aprendiste en el Módulo 5 — la intro lo arpegia una nota a la vez.',
                 skills: [1],
-                response: { type: 'mc', prompt: 'Luna\'s fingerpicked intro rolls through which chord shape?',
-                  prompt_es: '¿La intro de Luna con fingerpicking hace un floreo a través de cuál forma de acorde?',
+                response: { type: 'mc', prompt: '"Luna"\'s fingerpicked intro rolls through which chord shape?',
+                  prompt_es: '¿La intro de "Luna" con fingerpicking hace un floreo a través de cuál forma de acorde?',
                   answer: 1,
                   explain: 'Same little-F you learned in Module 5 — the intro arpeggiates it one note at a time (Journey Layer 6).',
                   explain_es: 'El mismo F pequeño que aprendiste en el Módulo 5 — la intro lo arpegia una nota a la vez (Recorrido, Capa 6).',
@@ -670,8 +670,8 @@ SETS.push(
             steps: [
               {
                 label: 'Listen: melody on top', label_es: 'Escucha: melodía arriba',
-                text: '"Melody on top" in fingerstyle means the melody is played on the thin, high strings while the thumb keeps the bass going underneath — two jobs, one hand. Listen for it in Luna or Tu Boda.',
-                text_es: '"Melodía arriba" en fingerstyle significa que la melodía se toca en las cuerdas delgadas y agudas mientras el pulgar mantiene el bajo sonando debajo — dos trabajos, una mano. Escúchalo en Luna o en Tu Boda.',
+                text: '"Melody on top" in fingerstyle means the melody is played on the thin, high strings while the thumb keeps the bass going underneath — two jobs, one hand. Listen for it in "Luna" or "Tu Boda".',
+                text_es: '"Melodía arriba" en fingerstyle significa que la melodía se toca en las cuerdas delgadas y agudas mientras el pulgar mantiene el bajo sonando debajo — dos trabajos, una mano. Escúchalo en "Luna" o en "Tu Boda".',
                 hint: 'Two jobs, one hand — the requinto texture in short.',
                 hint_es: 'Dos trabajos, una mano — la textura del requinto en pocas palabras.',
                 skills: [4],
@@ -740,13 +740,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Play Luna\'s fingerpicked intro',
-            title_es: 'Toca la intro de Luna con fingerpicking',
+            title: 'Play "Luna"\'s fingerpicked intro',
+            title_es: 'Toca la intro de "Luna" con fingerpicking',
             steps: [
               {
-                label: 'Challenge: Luna intro', label_es: 'Reto: intro de Luna',
-                text: 'Challenge 1 — Luna Intro: play the Layer 6 rolls from <a href="tabs/luna.html#layer-6" target="_blank">Luna\'s Song Journey page</a>, slow then at tempo. You\'ve got it when: all notes ring cleanly in order at performance tempo.',
-                text_es: 'Reto 1 — Intro de Luna: toca los floreos de la Capa 6 en la <a href="tabs/luna.html#layer-6" target="_blank">página del Recorrido de Luna</a>, despacio y luego a tempo. Lo tienes cuando: todas las notas suenan limpias en orden al tempo de interpretación.',
+                label: 'Challenge: "Luna" intro', label_es: 'Reto: intro de "Luna"',
+                text: 'Challenge 1 — "Luna" Intro: play the Layer 6 rolls from <a href="tabs/luna.html#layer-6" target="_blank">"Luna"\'s Song Journey page</a>, slow then at tempo. You\'ve got it when: all notes ring cleanly in order at performance tempo.',
+                text_es: 'Reto 1 — Intro de "Luna": toca los floreos de la Capa 6 en la <a href="tabs/luna.html#layer-6" target="_blank">página del Recorrido de "Luna"</a>, despacio y luego a tempo. Lo tienes cuando: todas las notas suenan limpias en orden al tempo de interpretación.',
                 hint: 'This roll uses the little-F shape you already know from Module 5.',
                 hint_es: 'Este floreo usa la forma del F pequeño que ya conoces del Módulo 5.',
                 stuck: 'Fret the little F shape, strum it once to hear the target chord, then break it apart one string at a time.',
@@ -758,13 +758,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Play Tu Boda\'s requinto intro line',
-            title_es: 'Toca la línea de requinto de la intro de Tu Boda',
+            title: 'Play "Tu Boda"\'s requinto intro line',
+            title_es: 'Toca la línea de requinto de la intro de "Tu Boda"',
             steps: [
               {
-                label: 'Challenge: Tu Boda requinto line', label_es: 'Reto: línea de requinto de Tu Boda',
-                text: 'Challenge 2 — Tu Boda Requinto Line: play the song\'s requinto intro line fingerstyle, following the Tu Boda tutorial video in this module\'s Songs section at the bottom of the page. You\'ve got it when: the line rings clean and in time.',
-                text_es: 'Reto 2 — Línea de requinto de Tu Boda: toca con fingerstyle la línea de requinto de la intro de la canción, siguiendo el video tutorial de Tu Boda en la sección de Canciones de este módulo, al final de la página. Lo tienes cuando: la línea suena limpia y en tiempo.',
+                label: 'Challenge: "Tu Boda" requinto line', label_es: 'Reto: línea de requinto de "Tu Boda"',
+                text: 'Challenge 2 — "Tu Boda" Requinto Line: play the song\'s requinto intro line fingerstyle, following the "Tu Boda" tutorial video in this module\'s Songs section at the bottom of the page. You\'ve got it when: the line rings clean and in time.',
+                text_es: 'Reto 2 — Línea de requinto de "Tu Boda": toca con fingerstyle la línea de requinto de la intro de la canción, siguiendo el video tutorial de "Tu Boda" en la sección de Canciones de este módulo, al final de la página. Lo tienes cuando: la línea suena limpia y en tiempo.',
                 hint: 'This is the real sierreño sound — a smaller, higher-pitched guitar carrying the melody.',
                 hint_es: 'Este es el sonido real del sierreño — una guitarra más pequeña y más aguda llevando la melodía.',
                 stuck: 'Slow the line down to half tempo and isolate just the first 4 notes.',
@@ -849,8 +849,8 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Plays the Luna intro rolls · Blends melody over a steady thumb · Performs one full fingerpicked verse, recovering from mistakes',
-      goal_es: 'Toca los floreos de la intro de Luna · Combina melodía sobre un pulgar constante · Interpreta una estrofa completa con fingerpicking, recuperándose de errores',
+      goal: 'Plays the "Luna" intro rolls · Blends melody over a steady thumb · Performs one full fingerpicked verse, recovering from mistakes',
+      goal_es: 'Toca los floreos de la intro de "Luna" · Combina melodía sobre un pulgar constante · Interpreta una estrofa completa con fingerpicking, recuperándose de errores',
       performance: 'Mini-showcase, solo edition: record one verse, listen back, and name one strength + one target yourself — and share the recording with someone if you like.',
       selfCheck: 'Can you keep the thumb going while the melody enters? Did you finish the verse even where you slipped?',
       selfCheck_es: '¿Puedes mantener el pulgar sonando mientras entra la melodía? ¿Terminaste la estrofa incluso donde te resbalaste?',
@@ -858,14 +858,14 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm12w3-s1', text: 'Play Luna\'s fingerpicked intro (Journey Layer 6) with p-i-m-a rolls',
-        text_es: 'Tocar la intro de Luna con fingerpicking (Recorrido, Capa 6) con floreos p-i-m-a',
-        practice: { type: 'playSeq', label: 'Luna requinto intro — little-F roll (D3 · G2 · B1 · open e)', label_es: 'Intro de requinto de Luna — floreo del F pequeño (D3 · G2 · B1 · e al aire)', bpm: 60,
+      { id: 'm12w3-s1', text: 'Play "Luna"\'s fingerpicked intro (Journey Layer 6) with p-i-m-a rolls',
+        text_es: 'Tocar la intro de "Luna" con fingerpicking (Recorrido, Capa 6) con floreos p-i-m-a',
+        practice: { type: 'playSeq', label: '"Luna" requinto intro — little-F roll (D3 · G2 · B1 · open e)', label_es: 'Intro de requinto de "Luna" — floreo del F pequeño (D3 · G2 · B1 · e al aire)', bpm: 60,
           notes: [53, 57, 60, 64] } },
-      { id: 'm12w3-s2', text: 'Play Tu Boda\'s requinto intro line fingerstyle',
-        text_es: 'Tocar la línea de requinto de la intro de Tu Boda con fingerstyle',
-        practice: { type: 'pr', prompt: '<ol><li>Learn the Tu Boda intro line from the tutorial.</li><li>Play it top to bottom and count your clean, no-stop passes.</li><li>Log your best.</li></ol>',
-          prompt_es: '<ol><li>Aprende la línea de la intro de Tu Boda con el tutorial.</li><li>Tócala de principio a fin y cuenta tus pasadas limpias y sin paradas.</li><li>Anota tu mejor número.</li></ol>',
+      { id: 'm12w3-s2', text: 'Play "Tu Boda"\'s requinto intro line fingerstyle',
+        text_es: 'Tocar la línea de requinto de la intro de "Tu Boda" con fingerstyle',
+        practice: { type: 'pr', prompt: '<ol><li>Learn the "Tu Boda" intro line from the tutorial.</li><li>Play it top to bottom and count your clean, no-stop passes.</li><li>Log your best.</li></ol>',
+          prompt_es: '<ol><li>Aprende la línea de la intro de "Tu Boda" con el tutorial.</li><li>Tócala de principio a fin y cuenta tus pasadas limpias y sin paradas.</li><li>Anota tu mejor número.</li></ol>',
           unit: 'count', placeholder: 'e.g. 3 clean passes — try for a higher number', placeholder_es: 'p. ej. 3 pasadas limpias — intenta superarlo' } },
       { id: 'm12w3-s3', text: 'Explain the requinto\'s role in sierreño / corridos tumbados (a modern Mexican regional style)',
         text_es: 'Explicar el papel del requinto en el sierreño / los corridos tumbados (un estilo regional mexicano moderno)',
@@ -935,16 +935,16 @@ MODULE_REVIEWS[12] = {
     { id: 'mr12-s1', text: 'I can hold a steady alternating thumb-bass in quarter notes for 8 bars without it stumbling', text_es: 'Puedo mantener un bajo del pulgar alternante y constante en negras durante 8 compases sin que tropiece', set: 'm12w1' },
     { id: 'mr12-s2', text: 'I can play a clean pinch — thumb and finger landing together — right on the downbeat', text_es: 'Puedo tocar un pellizco limpio — pulgar y dedo cayendo juntos — justo en el tiempo fuerte', set: 'm12w1' },
     { id: 'mr12-s3', text: 'I can pick a 3/4 waltz pattern (bass–pluck–pluck) in time, bass always landing on beat 1', text_es: 'Puedo puntear un patrón de vals en 3/4 (bajo–pulsación–pulsación) en tiempo, con el bajo cayendo siempre en el tiempo 1', set: 'm12w2' },
-    { id: 'mr12-s4', text: 'I can fingerpick "the cure" or Let It Be in its native style with the pattern unbroken', text_es: 'Puedo tocar "the cure" o Let It Be con fingerpicking en su estilo nativo con el patrón sin interrupciones', set: 'm12w2' },
+    { id: 'mr12-s4', text: 'I can fingerpick "the cure" or "Let It Be" in its native style with the pattern unbroken', text_es: 'Puedo tocar "the cure" o "Let It Be" con fingerpicking en su estilo nativo con el patrón sin interrupciones', set: 'm12w2' },
     { id: 'mr12-s5', text: 'I can blend a melody on top of a steady thumb bass — the requinto texture', text_es: 'Puedo combinar una melodía encima de un bajo de pulgar constante — la textura del requinto', set: 'm12w3' },
     { id: 'mr12-s6', text: 'I can perform one full fingerpicked verse start to finish, recovering from any mistake without stopping', text_es: 'Puedo interpretar una estrofa completa con fingerpicking de principio a fin, recuperándome de cualquier error sin detenerme', set: 'm12w3' }
   ],
   assessItems: [
-    'Play one full fingerpicked verse with a steady thumb bass and a clean, unbroken finger pattern — flagship options: "the cure" or Let It Be',
+    'Play one full fingerpicked verse with a steady thumb bass and a clean, unbroken finger pattern — flagship options: "the cure" or "Let It Be"',
     'Show your chosen showcase pattern and name it'
   ],
   assessItems_es: [
-    'Toca una estrofa completa con fingerpicking con un bajo de pulgar constante y un patrón de dedos limpio y sin interrupciones — opciones destacadas: "the cure" o Let It Be',
+    'Toca una estrofa completa con fingerpicking con un bajo de pulgar constante y un patrón de dedos limpio y sin interrupciones — opciones destacadas: "the cure" o "Let It Be"',
     'Muestra tu patrón de presentación elegido y nómbralo'
   ],
   forward: 'Twelve modules — the whole toolkit, twice as deep as most first-year players ever get. <strong>Now comes your capstone performance:</strong> pick your song, pick your lane — strummed, fingerpicked, or riff + solo — get it performance-ready, then record a full take or play it live for people you choose. This website got you here; the stage is yours. And after your capstone? Keep the list of songs you want to learn, and go learn them — you know how now.',

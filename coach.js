@@ -3867,28 +3867,28 @@ const RN_TIERS = [
    site's TEACHING rhythm, not the records': Seven Nation Army is taught
    as straight quarter notes (the journey page defers the real syncopation
    to external TAB), and Luna's beats are 6/8 DOWNBEATS felt in 2 — its
-   bpm is downbeat BPM and its bars are 2 beats. Sweet Child substitutes
+   bpm is downbeat BPM and its bars are 2 beats. "Sweet Child" substitutes
    the Layer-2 verse bass roots because the intro arpeggio is not tabbed
    anywhere on this site. Extra fields beyond {id,title,hint,bpm,notes}:
    sub (song-card line), bpb (beats per bar), loopBeats (lap length,
    including the closing rest), laps (times through per round). */
 const RN_SONGS = [
-  { id: 'sna', title: 'Seven Nation Army',
+  { id: 'sna', title: '"Seven Nation Army"',
     subKey: 'games.riff.song.sna.sub',
     hintKey: 'games.riff.song.sna.hint',
     bpm: 60, bpb: 4, loopBeats: 8, laps: 4,
     notes: [[6,7,0,'B'],[6,7,1,'B'],[6,10,2,'D'],[6,7,3,'B'],[6,5,4,'A'],[6,3,5,'G'],[6,2,6,'F#']] },
-  { id: 'watchtower', title: 'All Along the Watchtower',
+  { id: 'watchtower', title: '"All Along the Watchtower"',
     subKey: 'games.riff.song.watchtower.sub',
     hintKey: 'games.riff.song.watchtower.hint',
     bpm: 80, bpb: 4, loopBeats: 8, laps: 4,
     notes: [[6,5,0,'A5'],[6,3,2,'G5'],[6,1,4,'F5'],[6,3,6,'G5']] },
-  { id: 'luna', title: 'Luna',
+  { id: 'luna', title: '"Luna"',
     subKey: 'games.riff.song.luna.sub',
     hintKey: 'games.riff.song.luna.hint',
     bpm: 80, bpb: 2, loopBeats: 8, laps: 4,
     notes: [[6,1,0,'F'],[6,1,1,'F'],[5,0,2,'Am'],[5,0,3,'Am'],[6,10,4,'D'],[6,13,5,'F'],[5,10,6,'G']] },
-  { id: 'sweetchild', title: 'Sweet Child O’ Mine',
+  { id: 'sweetchild', title: '"Sweet Child O’ Mine"',
     subKey: 'games.riff.song.sweetchild.sub',
     hintKey: 'games.riff.song.sweetchild.hint',
     bpm: 60, bpb: 4, loopBeats: 16, laps: 2,

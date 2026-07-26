@@ -8,7 +8,7 @@ SETS.push(
 
   {
     id: 'm3w1',
-    songThread: [{ name: 'Seven Nation Army', journey: 'tabs/seven-nation-army.html', layer: 3, note: 'the riff as power chords' }, { name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', layer: 3, note: 'the loop as power chords' }],
+    songThread: [{ name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 3, note: 'the riff as power chords' }, { name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', layer: 3, note: 'the loop as power chords' }],
     label: 'Set 1',
     locked: false,
     module: 'Two-Finger Power Chords',
@@ -281,9 +281,9 @@ SETS.push(
             title_es: 'Toca una progresión de acordes de potencia a tiempo',
             steps: [
           {
-            label: 'Challenge: Watchtower loop', label_es: 'Reto: vuelta de Watchtower',
-            text: 'Challenge 7 — Watchtower Loop (your assessment piece): play A5–G5–F5–G5, two beats per chord at 60 BPM — this is exactly how the record cycles. You\'ve got it when: four times through, changing on the beat every time, with no stops. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-            text_es: 'Reto 7 — Vuelta de Watchtower (tu pieza de evaluación): toca A5–G5–F5–G5, dos tiempos por acorde a 60 BPM — así es exactamente como cicla la grabación. Lo tienes cuando: cuatro veces seguidas, cambiando a tiempo cada vez, sin detenerte. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
+            label: 'Challenge: "Watchtower" loop', label_es: 'Reto: vuelta de "Watchtower"',
+            text: 'Challenge 7 — "Watchtower" Loop (your assessment piece): play A5–G5–F5–G5, two beats per chord at 60 BPM — this is exactly how the record cycles. You\'ve got it when: four times through, changing on the beat every time, with no stops. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+            text_es: 'Reto 7 — Vuelta de "Watchtower" (tu pieza de evaluación): toca A5–G5–F5–G5, dos tiempos por acorde a 60 BPM — así es exactamente como cicla la grabación. Lo tienes cuando: cuatro veces seguidas, cambiando a tiempo cada vez, sin detenerte. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
             hint: 'A5 = 5th fret E string, G5 = 3rd fret E string, F5 = 1st fret E string. Shift smoothly — aim to land exactly on beat 1. (The original song uses an Am chord, but as a power chord it\'s just A5 — no major or minor.) This is your Set 1 check-off loop — record a lap and listen back.',
             hint_es: 'A5 = traste 5 de la cuerda Mi, G5 = traste 3 de la cuerda Mi, F5 = traste 1 de la cuerda Mi. Cambia con suavidad — apunta a caer exactamente en el tiempo 1. (La canción original usa un acorde de Am, pero como acorde de potencia es solo A5 — sin mayor ni menor.) Esta es tu vuelta de verificación de la Unidad 1 — graba una vuelta y escúchala después.',
             stuck: 'Loop just A5–G5 (frets 5 and 3) until that change is clean, then add F5.',
@@ -305,9 +305,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: Seven Nation Army riff', label_es: 'Reto: riff de Seven Nation Army',
-                text: 'Challenge — Seven Nation Army, verse riff: play the riff (a short musical phrase that repeats) as two-string power chords sliding along the A string, one chord per riff note at 60 BPM. You\'ve got it when: two clean laps in a row, both strings of every chord ringing. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-                text_es: 'Reto — Seven Nation Army, riff de la estrofa: toca el riff (una frase musical corta que se repite) como acordes de potencia de dos cuerdas deslizándose por la cuerda La, un acorde por nota del riff a 60 BPM. Lo tienes cuando: dos vueltas limpias seguidas, con ambas cuerdas de cada acorde sonando. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
+                label: 'Challenge: "Seven Nation Army" riff', label_es: 'Reto: riff de "Seven Nation Army"',
+                text: 'Challenge — "Seven Nation Army", verse riff: play the riff (a short musical phrase that repeats) as two-string power chords sliding along the A string, one chord per riff note at 60 BPM. You\'ve got it when: two clean laps in a row, both strings of every chord ringing. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+                text_es: 'Reto — "Seven Nation Army", riff de la estrofa: toca el riff (una frase musical corta que se repite) como acordes de potencia de dos cuerdas deslizándose por la cuerda La, un acorde por nota del riff a 60 BPM. Lo tienes cuando: dos vueltas limpias seguidas, con ambas cuerdas de cada acorde sonando. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
                 hint: 'It\'s one shape sliding — keep your grip and let your arm do the moving.',
                 hint_es: 'Es una sola forma deslizándose — mantén el agarre y deja que tu brazo haga el movimiento.',
                 stuck: 'Play roots-only (your Module 2 line), then add the second string back one chord at a time.',
@@ -436,7 +436,7 @@ SETS.push(
 
   {
     id: 'm3w2',
-    songThread: [{ name: 'Luna', journey: 'tabs/luna.html', layer: 3, note: 'the F5–A5 vamp' }, { name: 'Sweet Child O\' Mine', journey: 'tabs/sweet-child-o-mine.html', layer: 3, note: 'D5–C5–G5 — your assessment piece' }, { name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', layer: 3, note: 'the A5–G5–F5 loop' }, { name: '"the cure"', journey: 'tabs/the-cure.html', layer: 3, note: 'the changes as power chords' }],
+    songThread: [{ name: '"Luna"', journey: 'tabs/luna.html', layer: 3, note: 'the F5–A5 vamp' }, { name: '"Sweet Child O\' Mine"', journey: 'tabs/sweet-child-o-mine.html', layer: 3, note: 'D5–C5–G5 — your assessment piece' }, { name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', layer: 3, note: 'the A5–G5–F5 loop' }, { name: '"the cure"', journey: 'tabs/the-cure.html', layer: 3, note: 'the changes as power chords' }],
     label: 'Set 2',
     locked: false,
     module: 'Two-Finger Power Chords',
@@ -585,8 +585,8 @@ SETS.push(
           },
           {
             label: 'Challenge: four-chord half-bar', label_es: 'Reto: medio compás con 4 acordes',
-            text: 'Challenge — Four-Chord Half-Bar (Watchtower): the full "All Along the Watchtower" loop as low-E power chords — A5 · G5 · F5 · G5 — two beats each at 60 BPM, looping. Four chord slots inside every two bars — this is exactly how the record cycles. You\'ve got it when: four clean laps, every change landing on the beat.',
-            text_es: 'Reto — Medio compás con cuatro acordes (Watchtower): la vuelta completa de "All Along the Watchtower" como acordes de potencia en la cuerda Mi — A5 · G5 · F5 · G5 — dos tiempos cada uno a 60 BPM, repitiendo. Cuatro espacios de acorde dentro de cada dos compases — así es exactamente como cicla la grabación. Lo tienes cuando: cuatro vueltas limpias, cada cambio cayendo a tiempo.',
+            text: 'Challenge — Four-Chord Half-Bar ("Watchtower"): the full "All Along the Watchtower" loop as low-E power chords — A5 · G5 · F5 · G5 — two beats each at 60 BPM, looping. Four chord slots inside every two bars — this is exactly how the record cycles. You\'ve got it when: four clean laps, every change landing on the beat.',
+            text_es: 'Reto — Medio compás con cuatro acordes ("Watchtower"): la vuelta completa de "All Along the Watchtower" como acordes de potencia en la cuerda Mi — A5 · G5 · F5 · G5 — dos tiempos cada uno a 60 BPM, repitiendo. Cuatro espacios de acorde dentro de cada dos compases — así es exactamente como cicla la grabación. Lo tienes cuando: cuatro vueltas limpias, cada cambio cayendo a tiempo.',
             hint: 'All three roots sit on the low E string — A5 (fret 5), G5 (fret 3), F5 (fret 1). It\'s one shape walking down the neck and back up.',
             hint_es: 'Las tres raíces están en la cuerda Mi grave — A5 (traste 5), G5 (traste 3), F5 (traste 1). Es una sola forma caminando hacia abajo por el mástil y de regreso.',
             stuck: 'Play just the roots (skip the second string) for one lap to lock the walk, then add the fifth back in.',
@@ -603,8 +603,8 @@ SETS.push(
           },
           {
             label: 'Challenge: one chord per beat', label_es: 'Reto: un acorde por tiempo',
-            text: 'Challenge — One Chord Per Beat (Watchtower, fast): the top of the ladder — a new chord on every single beat. Same A5 · G5 · F5 · G5 loop, but one down-strum per beat at 60 BPM, no repeats. This is what a driving riff feels like: no time to think, the next shape has to be ready before you arrive. You\'ve got it when: four laps clean at 60, then climb 65 → 70.',
-            text_es: 'Reto — Un acorde por tiempo (Watchtower, rápido): el escalón más alto — un acorde nuevo en cada tiempo. La misma vuelta A5 · G5 · F5 · G5, pero un rasgueo hacia abajo por tiempo a 60 BPM, sin repetir. Así se siente un riff a toda marcha: sin tiempo para pensar, la siguiente forma tiene que estar lista antes de llegar. Lo tienes cuando: cuatro vueltas limpias a 60, y luego sube 65 → 70.',
+            text: 'Challenge — One Chord Per Beat ("Watchtower", fast): the top of the ladder — a new chord on every single beat. Same A5 · G5 · F5 · G5 loop, but one down-strum per beat at 60 BPM, no repeats. This is what a driving riff feels like: no time to think, the next shape has to be ready before you arrive. You\'ve got it when: four laps clean at 60, then climb 65 → 70.',
+            text_es: 'Reto — Un acorde por tiempo ("Watchtower", rápido): el escalón más alto — un acorde nuevo en cada tiempo. La misma vuelta A5 · G5 · F5 · G5, pero un rasgueo hacia abajo por tiempo a 60 BPM, sin repetir. Así se siente un riff a toda marcha: sin tiempo para pensar, la siguiente forma tiene que estar lista antes de llegar. Lo tienes cuando: cuatro vueltas limpias a 60, y luego sube 65 → 70.',
             hint: 'Because the walk is A5→G5→F5→G5, your hand moves two frets, two frets, then back two — a steady rocking slide. Feel the pattern in your arm, not your eyes.',
             hint_es: 'Como el recorrido es A5→G5→F5→G5, tu mano se mueve dos trastes, dos trastes, y luego dos hacia atrás — un vaivén constante. Siente el patrón en tu brazo, no con los ojos.',
             stuck: 'Cut it in half: loop just A5 · G5, one per beat, until it\'s smooth, then add F5.',
@@ -618,7 +618,7 @@ SETS.push(
               { name: 'F5', chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 1 }
             ],
             playSeq: { label: 'Hear it — A5·G5·F5·G5 (one chord per beat)', label_es: 'Escúchalo — A5·G5·F5·G5 (un acorde por tiempo)', bpm: 60, notes: [[45,52],[43,50],[41,48],[43,50],[45,52],[43,50],[41,48],[43,50]] },
-            response: { type: 'short', prompt: 'Your fastest CLEAN one-chord-per-beat Watchtower today (BPM)?', prompt_es: '¿Tu Watchtower a un-acorde-por-tiempo LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 70 — 80 next session', placeholder_es: 'p. ej. 70 — 80 la próxima sesión' }
+            response: { type: 'short', prompt: 'Your fastest CLEAN one-chord-per-beat "Watchtower" today (BPM)?', prompt_es: '¿Tu "Watchtower" a un-acorde-por-tiempo LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 70 — 80 next session', placeholder_es: 'p. ej. 70 — 80 la próxima sesión' }
           }
             ]
           },
@@ -704,13 +704,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Luna: F5–A5 two-shape metronome drill',
-            title_es: 'Luna: ejercicio de metrónomo con dos formas F5–A5',
+            title: '"Luna": F5–A5 two-shape metronome drill',
+            title_es: '"Luna": ejercicio de metrónomo con dos formas F5–A5',
             steps: [
           {
             label: 'Challenge: F5 ↔ A5 drill', label_es: 'Reto: ejercicio F5 ↔ A5',
-            text: 'Challenge — F5 ↔ A5 Two-Shape Drill: Luna\'s whole vamp (a vamp = a short chord pattern repeated over and over) is two power chords — F5 (root F, low E string, fret 1) and A5 (root A, fret 5) — the same two-finger shape sliding four frets. One strum per big beat: Luna is in 6/8, so strum just the downbeats, two per bar, nothing syncopated (syncopated = accents landing off the main beat). You\'ve got it when: you can switch F5 ↔ A5 landing every downbeat clean, speeding up in steps: 60 → 70 → 80 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-            text_es: 'Reto — Ejercicio de dos formas F5 ↔ A5: todo el vamp de Luna (un vamp = un patrón de acordes corto que se repite una y otra vez) son dos acordes de potencia — F5 (raíz F, cuerda Mi grave, traste 1) y A5 (raíz A, traste 5) — la misma forma de dos dedos deslizándose cuatro trastes. Un rasgueo por tiempo fuerte: Luna está en 6/8, así que rasguea solo los tiempos fuertes, dos por compás, nada sincopado (sincopado = acentos que caen fuera del tiempo principal). Lo tienes cuando: puedes cambiar F5 ↔ A5 cayendo limpio en cada tiempo fuerte, acelerando en pasos: 60 → 70 → 80 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
+            text: 'Challenge — F5 ↔ A5 Two-Shape Drill: "Luna"\'s whole vamp (a vamp = a short chord pattern repeated over and over) is two power chords — F5 (root F, low E string, fret 1) and A5 (root A, fret 5) — the same two-finger shape sliding four frets. One strum per big beat: "Luna" is in 6/8, so strum just the downbeats, two per bar, nothing syncopated (syncopated = accents landing off the main beat). You\'ve got it when: you can switch F5 ↔ A5 landing every downbeat clean, speeding up in steps: 60 → 70 → 80 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+            text_es: 'Reto — Ejercicio de dos formas F5 ↔ A5: todo el vamp de "Luna" (un vamp = un patrón de acordes corto que se repite una y otra vez) son dos acordes de potencia — F5 (raíz F, cuerda Mi grave, traste 1) y A5 (raíz A, traste 5) — la misma forma de dos dedos deslizándose cuatro trastes. Un rasgueo por tiempo fuerte: "Luna" está en 6/8, así que rasguea solo los tiempos fuertes, dos por compás, nada sincopado (sincopado = acentos que caen fuera del tiempo principal). Lo tienes cuando: puedes cambiar F5 ↔ A5 cayendo limpio en cada tiempo fuerte, acelerando en pasos: 60 → 70 → 80 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
             hint: 'A power chord has no major or minor — just root + 5th. Keep the two-finger shape locked and let your whole arm make the four-fret slide.',
             hint_es: 'Un acorde de potencia no tiene mayor ni menor — solo raíz + quinta. Mantén la forma de dos dedos fija y deja que todo tu brazo haga el deslizamiento de cuatro trastes.',
             stuck: 'Park on the slide: fret 1, fret 5, fret 1, fret 5 with no rhythm until the jump is automatic — then add the metronome at 60.',
@@ -728,15 +728,15 @@ SETS.push(
             ]
           },
           {
-            title: 'Sweet Child O\' Mine — assessment rehearsal',
-            title_es: 'Sweet Child O\' Mine — ensayo de evaluación',
+            title: '"Sweet Child O\' Mine" — assessment rehearsal',
+            title_es: '"Sweet Child O\' Mine" — ensayo de evaluación',
             steps: [
           {
-            label: 'Challenge: Sweet Child verse', label_es: 'Reto: estrofa de Sweet Child',
-            text: 'Challenge — Sweet Child Verse (assessment rehearsal): play the Guns N\' Roses verse as power chords — D5 · C5 · G5, one note per bar at 60 BPM — the same patient, one-per-bar spacing as your Module 2 bass roots, just power chords now. This is one of the songs you can use for the module self-assessment. You\'ve got it when: two clean laps, every change on beat 1, each chord ringing the full bar, muting tight. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-            text_es: 'Reto — Estrofa de Sweet Child (ensayo de evaluación): toca la estrofa de Guns N\' Roses como acordes de potencia — D5 · C5 · G5, una nota por compás a 60 BPM — el mismo espaciado paciente, una nota por compás, que tus raíces de bajo del Módulo 2, ahora con acordes de potencia. Esta es una de las canciones que puedes usar para la autoevaluación del módulo. Lo tienes cuando: dos vueltas limpias, cada cambio en el tiempo 1, cada acorde sonando el compás completo, silenciado ajustado. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
-            hint: 'On this site we play Sweet Child in standard tuning. (The famous recording is tuned a half-step down, so your D5–C5–G5 sound one fret higher than the recording — that\'s expected; don\'t retune.) D5 and C5 are A-string roots; G5 drops to the low E string. It\'s a patience test — the temptation is to rush into the next chord instead of holding the bar out.',
-            hint_es: 'En este sitio tocamos Sweet Child en afinación estándar. (La grabación famosa está afinada medio tono más abajo, así que tu D5–C5–G5 suena un traste más alto que la grabación — eso es esperado; no reafines.) D5 y C5 son raíces de la cuerda La; G5 baja a la cuerda Mi grave. Es una prueba de paciencia — la tentación es apurarte al siguiente acorde en vez de sostener el compás completo.',
+            label: 'Challenge: "Sweet Child" verse', label_es: 'Reto: estrofa de "Sweet Child"',
+            text: 'Challenge — "Sweet Child" Verse (assessment rehearsal): play the Guns N\' Roses verse as power chords — D5 · C5 · G5, one note per bar at 60 BPM — the same patient, one-per-bar spacing as your Module 2 bass roots, just power chords now. This is one of the songs you can use for the module self-assessment. You\'ve got it when: two clean laps, every change on beat 1, each chord ringing the full bar, muting tight. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+            text_es: 'Reto — Estrofa de "Sweet Child" (ensayo de evaluación): toca la estrofa de Guns N\' Roses como acordes de potencia — D5 · C5 · G5, una nota por compás a 60 BPM — el mismo espaciado paciente, una nota por compás, que tus raíces de bajo del Módulo 2, ahora con acordes de potencia. Esta es una de las canciones que puedes usar para la autoevaluación del módulo. Lo tienes cuando: dos vueltas limpias, cada cambio en el tiempo 1, cada acorde sonando el compás completo, silenciado ajustado. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
+            hint: 'On this site we play "Sweet Child" in standard tuning. (The famous recording is tuned a half-step down, so your D5–C5–G5 sound one fret higher than the recording — that\'s expected; don\'t retune.) D5 and C5 are A-string roots; G5 drops to the low E string. It\'s a patience test — the temptation is to rush into the next chord instead of holding the bar out.',
+            hint_es: 'En este sitio tocamos "Sweet Child" en afinación estándar. (La grabación famosa está afinada medio tono más abajo, así que tu D5–C5–G5 suena un traste más alto que la grabación — eso es esperado; no reafines.) D5 y C5 son raíces de la cuerda La; G5 baja a la cuerda Mi grave. Es una prueba de paciencia — la tentación es apurarte al siguiente acorde en vez de sostener el compás completo.',
             stuck: 'Loop D5 → C5 (both A-string, 2 frets apart) until smooth, then add the jump to G5 on the low E string. Count the full 4 beats out loud before each change so you don\'t rush it.',
             stuck_es: 'Repite D5 → C5 (ambas en la cuerda La, a 2 trastes de distancia) hasta que salga fluido, y luego agrega el salto a G5 en la cuerda Mi grave. Cuenta los 4 tiempos completos en voz alta antes de cada cambio para no apurarte.',
             levelUp: 'Once two full bars feels easy to hold, speed up in steps to 70, then 80 BPM — still one note per bar, just brisker.',
@@ -756,9 +756,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: Watchtower verse', label_es: 'Reto: estrofa de Watchtower',
-                text: 'Challenge — Watchtower, verse: play the "All Along the Watchtower" loop as power chords rooted on the low E string — A5 · G5 · F5 · G5 — two beats per chord at 60 BPM. You\'ve got it when: four clean laps, every change landing on the beat. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-                text_es: 'Reto — Watchtower, estrofa: toca la vuelta de "All Along the Watchtower" como acordes de potencia con raíz en la cuerda Mi grave — A5 · G5 · F5 · G5 — dos tiempos por acorde a 60 BPM. Lo tienes cuando: cuatro vueltas limpias, cada cambio cayendo a tiempo. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
+                label: 'Challenge: "Watchtower" verse', label_es: 'Reto: estrofa de "Watchtower"',
+                text: 'Challenge — "Watchtower", verse: play the "All Along the Watchtower" loop as power chords rooted on the low E string — A5 · G5 · F5 · G5 — two beats per chord at 60 BPM. You\'ve got it when: four clean laps, every change landing on the beat. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+                text_es: 'Reto — "Watchtower", estrofa: toca la vuelta de "All Along the Watchtower" como acordes de potencia con raíz en la cuerda Mi grave — A5 · G5 · F5 · G5 — dos tiempos por acorde a 60 BPM. Lo tienes cuando: cuatro vueltas limpias, cada cambio cayendo a tiempo. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
                 hint: 'Same three roots you played in Module 2 — now each root note also sounds its fifth.',
                 hint_es: 'Las mismas tres raíces que tocaste en el Módulo 2 — ahora cada nota raíz también suena su quinta.',
                 stuck: 'Drop to roots-only for a lap, then add the second string back on just the A5.',
@@ -779,7 +779,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Clean laps in a row at 60 BPM — your count?', prompt_es: 'Vueltas limpias seguidas a 60 BPM — ¿tu cuenta?', placeholder: 'e.g. 3 — F5 keeps buzzing', placeholder_es: 'p. ej. 3 — F5 sigue zumbando' }
               },
               {
-                label: 'Challenge: the cure as power chords', label_es: 'Reto: the cure con acordes de potencia',
+                label: 'Challenge: "the cure" as power chords', label_es: 'Reto: "the cure" con acordes de potencia',
                 text: 'Challenge — "the cure" as power chords (◐ optional harder challenge — try it, no score!): this gentle acoustic song isn\'t usually played this way — that\'s the point. Play its progression as power chords — A5 · C5 · D5 · F5 — two beats per chord at 60 BPM, quietly. You\'ve got it when: two laps clean AND soft — power chords don\'t have to be loud. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
                 text_es: 'Reto — "the cure" como acordes de potencia (◐ reto opcional más difícil — pruébalo, ¡sin puntaje!): esta canción acústica y suave normalmente no se toca así — ese es el punto. Toca su progresión como acordes de potencia — A5 · C5 · D5 · F5 — dos tiempos por acorde a 60 BPM, suavemente. Lo tienes cuando: dos vueltas limpias Y suaves — los acordes de potencia no tienen que ser fuertes. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
                 hint: 'You already know these roots from Module 2. The challenge here is touch: light pick, both strings ringing, no harsh sound.',
@@ -801,9 +801,9 @@ SETS.push(
                 response: { type: 'short', prompt: 'Loud vs. soft power chords — which was harder to keep clean?', prompt_es: 'Acordes de potencia fuertes vs. suaves — ¿cuál fue más difícil de mantener limpio?', placeholder: 'e.g. soft — I kept muting the D string', placeholder_es: 'p. ej. suave — seguía silenciando la cuerda Re' }
               },
               {
-                label: 'Challenge: Luna, full vamp', label_es: 'Reto: Luna, vamp completo',
-                text: 'Challenge — Luna, full vamp: the whole song rides F5 ↔ A5. Play along with the teaching arrangement — two downbeat strums per bar, changing where the record changes. You\'ve got it when: a full verse and chorus without losing a downbeat, F5 ringing as clean as A5. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-                text_es: 'Reto — Luna, vamp completo: toda la canción se apoya en F5 ↔ A5. Toca junto con el arreglo didáctico — dos rasgueos en el tiempo fuerte por compás, cambiando donde cambia la grabación. Lo tienes cuando: una estrofa y un coro completos sin perder un tiempo fuerte, con F5 sonando tan limpio como A5. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
+                label: 'Challenge: "Luna", full vamp', label_es: 'Reto: "Luna", vamp completo',
+                text: 'Challenge — "Luna", full vamp: the whole song rides F5 ↔ A5. Play along with the teaching arrangement — two downbeat strums per bar, changing where the record changes. You\'ve got it when: a full verse and chorus without losing a downbeat, F5 ringing as clean as A5. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+                text_es: 'Reto — "Luna", vamp completo: toda la canción se apoya en F5 ↔ A5. Toca junto con el arreglo didáctico — dos rasgueos en el tiempo fuerte por compás, cambiando donde cambia la grabación. Lo tienes cuando: una estrofa y un coro completos sin perder un tiempo fuerte, con F5 sonando tan limpio como A5. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
                 hint: 'This is the same F5↔A5 slide from the drill above — the only change is following where the record changes instead of a fixed count.',
                 hint_es: 'Es el mismo deslizamiento F5↔A5 del ejercicio de arriba — el único cambio es seguir donde cambia la grabación en vez de una cuenta fija.',
                 stuck: 'Loop the F5↔A5 slide with no song for a few rounds first, then drop in following the record.',
@@ -819,7 +819,7 @@ SETS.push(
                     { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] }
                   ]
                 },
-                response: { type: 'short', prompt: 'Which song did you land power chords in today, and at what BPM?', prompt_es: '¿En qué canción lograste los acordes de potencia hoy, y a qué BPM?', placeholder: 'e.g. Luna at 60 — clean', placeholder_es: 'p. ej. Luna a 60 — limpio' }
+                response: { type: 'short', prompt: 'Which song did you land power chords in today, and at what BPM?', prompt_es: '¿En qué canción lograste los acordes de potencia hoy, y a qué BPM?', placeholder: 'e.g. "Luna" at 60 — clean', placeholder_es: 'p. ej. "Luna" a 60 — limpio' }
               }
             ]
           },
@@ -841,8 +841,8 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Module-end (three tasks): (1) Play a core-song excerpt to the metronome — e.g., the Seven Nation Army riff, All Along the Watchtower\'s A5–G5–F5, or Sweet Child\'s D5–C5–G5 (which switches between E- and A-string roots on the same fret) — at 60 BPM, then holding 80 BPM for at least 15 seconds. (2) Read a three-chord (I–IV–V) progression from chord symbols / TAB using a named strumming pattern (straight-eighths or split strum), and name power chords from a chord chart. (3) Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes.',
-      goal_es: 'Fin de módulo (tres tareas): (1) Toca un fragmento de canción principal con el metrónomo — p. ej., el riff de Seven Nation Army, el A5–G5–F5 de All Along the Watchtower, o el D5–C5–G5 de Sweet Child (que cambia entre raíces de las cuerdas Mi y La en el mismo traste) — a 60 BPM, y luego sosteniendo 80 BPM por al menos 15 segundos. (2) Lee una progresión de tres acordes (I–IV–V) a partir de símbolos de acorde / TAB usando un patrón de rasgueo nombrado (corcheas rectas o rasgueo dividido), y nombra acordes de potencia a partir de un diagrama de acordes. (3) Aplaude y cuenta un ritmo de 4 compases usando redondas, blancas, negras y corcheas.',
+      goal: 'Module-end (three tasks): (1) Play a core-song excerpt to the metronome — e.g., the "Seven Nation Army" riff, "All Along the Watchtower"\'s A5–G5–F5, or "Sweet Child"\'s D5–C5–G5 (which switches between E- and A-string roots on the same fret) — at 60 BPM, then holding 80 BPM for at least 15 seconds. (2) Read a three-chord (I–IV–V) progression from chord symbols / TAB using a named strumming pattern (straight-eighths or split strum), and name power chords from a chord chart. (3) Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes.',
+      goal_es: 'Fin de módulo (tres tareas): (1) Toca un fragmento de canción principal con el metrónomo — p. ej., el riff de "Seven Nation Army", el A5–G5–F5 de "All Along the Watchtower", o el D5–C5–G5 de "Sweet Child" (que cambia entre raíces de las cuerdas Mi y La en el mismo traste) — a 60 BPM, y luego sosteniendo 80 BPM por al menos 15 segundos. (2) Lee una progresión de tres acordes (I–IV–V) a partir de símbolos de acorde / TAB usando un patrón de rasgueo nombrado (corcheas rectas o rasgueo dividido), y nombra acordes de potencia a partir de un diagrama de acordes. (3) Aplaude y cuenta un ritmo de 4 compases usando redondas, blancas, negras y corcheas.',
       performance: 'Record yourself: play a core-song excerpt with the metronome — changes on beat 1 at 60 BPM, then hold 80 BPM for 15 seconds; read a three-chord (I–IV–V) progression from chord symbols with your named strum; then clap and count a 4-bar rhythm. Listen back and note one thing to improve.',
       selfCheck: 'Can you change chords on beat 1 at 60 BPM and hold 80 BPM for 15 seconds? Can you read a I–IV–V progression from chord symbols and name power chords from a chart? Can you clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes?',
       selfCheck_es: '¿Puedes cambiar de acorde en el tiempo 1 a 60 BPM y sostener 80 BPM por 15 segundos? ¿Puedes leer una progresión I–IV–V a partir de símbolos de acorde y nombrar acordes de potencia a partir de un diagrama? ¿Puedes aplaudir y contar un ritmo de 4 compases usando redondas, blancas, negras y corcheas?',
@@ -861,7 +861,7 @@ SETS.push(
         text_es: 'Tocar una progresión completa de 6 compases de acordes de potencia a tiempo',
         gotItWhen: 'you can play through 6 bars without stopping, even if a chord change is rough — you keep going to the next downbeat.',
         gotItWhen_es: 'puedes tocar los 6 compases sin detenerte, aunque un cambio de acorde salga imperfecto — sigues hasta el siguiente tiempo fuerte.',
-        practice: { type: 'playSeq', label: 'Watchtower roots (A · G · F · G) — two beats each', label_es: 'Raíces de Watchtower (A · G · F · G) — dos tiempos cada una', bpm: 60,
+        practice: { type: 'playSeq', label: '"Watchtower" roots (A · G · F · G) — two beats each', label_es: 'Raíces de "Watchtower" (A · G · F · G) — dos tiempos cada una', bpm: 60,
           notes: [45, 45, 43, 43, 41, 41, 43, 43] } },
       { id: 'm3w2-s3', text: 'Play a straight-eighths strumming pattern with power chords',
         text_es: 'Tocar un patrón de rasgueo de corcheas rectas con acordes de potencia',
@@ -950,12 +950,12 @@ MODULE_REVIEWS[3] = {
       text_es: 'Puedo tocar una progresión de 6 compases con un rasgueo de corcheas rectas, contando "1 + 2 + 3 + 4 +"', set: 'm3w2' }
   ],
   assessItems: [
-    'Play a core-song excerpt (Seven Nation Army, All Along the Watchtower\'s A5–G5–F5, or Sweet Child\'s D5–C5–G5 — which switches between E- and A-string roots on the same fret) with changes on beat 1 at 60 BPM, unused strings muted the whole way, then hold 80 BPM for 15 seconds',
+    'Play a core-song excerpt ("Seven Nation Army", "All Along the Watchtower"\'s A5–G5–F5, or "Sweet Child"\'s D5–C5–G5 — which switches between E- and A-string roots on the same fret) with changes on beat 1 at 60 BPM, unused strings muted the whole way, then hold 80 BPM for 15 seconds',
     'Read a three-chord (I–IV–V) progression from chord symbols / TAB with a named strumming pattern (straight eighths or the split strum), and name power chords from a chord chart',
     'Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes'
   ],
   assessItems_es: [
-    'Toca un fragmento de canción principal (Seven Nation Army, el A5–G5–F5 de All Along the Watchtower, o el D5–C5–G5 de Sweet Child — que cambia entre raíces de las cuerdas Mi y La en el mismo traste) con cambios en el tiempo 1 a 60 BPM, con las cuerdas que no usas silenciadas todo el tiempo, y luego sostén 80 BPM por 15 segundos',
+    'Toca un fragmento de canción principal ("Seven Nation Army", el A5–G5–F5 de "All Along the Watchtower", o el D5–C5–G5 de "Sweet Child" — que cambia entre raíces de las cuerdas Mi y La en el mismo traste) con cambios en el tiempo 1 a 60 BPM, con las cuerdas que no usas silenciadas todo el tiempo, y luego sostén 80 BPM por 15 segundos',
     'Lee una progresión de tres acordes (I–IV–V) a partir de símbolos de acorde / TAB con un patrón de rasgueo nombrado (corcheas rectas o el rasgueo dividido), y nombra acordes de potencia a partir de un diagrama de acordes',
     'Aplaude y cuenta un ritmo de 4 compases usando redondas, blancas, negras y corcheas'
   ],

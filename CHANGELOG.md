@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-26 — Module 5's assessment is one song again
+
+### Changed
+
+- **Module 5's assessment now asks for one song — your core song from memory
+  (Let It Be, Luna, or "the cure") — not two.** The last two updates had
+  grown this into a core song *plus* a song of your choice; that's been
+  scaled back. The "song of your choice" material in Set 4 — mapping its
+  chords, rehearsing it — is still there, just as optional bonus practice,
+  not something the assessment checks.
+
 ## 2026-07-26 — Follow-up: the two-song assessment now reads the same everywhere
 
 ### Changed

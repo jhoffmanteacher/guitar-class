@@ -8,7 +8,7 @@ SETS.push(
 
   {
     id: 'm6w1',
-    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'your strumming patterns power this song' }],
+    songThread: [{ name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', note: 'your strumming patterns power this song' }],
     label: 'Set 1',
     locked: false,
     module: 'Strumming Patterns with Chords',
@@ -74,7 +74,7 @@ SETS.push(
             title_es: 'Siente el pulso en una canción real',
             steps: [
           {
-            label: 'Feel the pulse: Brown Eyed Girl', label_es: 'Siente el pulso: Brown Eyed Girl',
+            label: 'Feel the pulse: "Brown Eyed Girl"', label_es: 'Siente el pulso: "Brown Eyed Girl"',
             text: 'Listen to "Brown Eyed Girl" by Van Morrison. Tap along on your leg — down with your hand on the numbers, up on the "ands". Can you feel the 8th-note pulse?',
             text_es: 'Escucha "Brown Eyed Girl" de Van Morrison. Sigue el ritmo con la mano en tu pierna — hacia abajo en los números, hacia arriba en los "y". ¿Puedes sentir el pulso de corcheas?',
             hint: 'You don\'t need a guitar yet. Just train your body to feel the steady pulse before you add the strings.',
@@ -253,9 +253,9 @@ SETS.push(
             playSeq: { label: 'Em·Em · Am·Am · G·G roots (every 2 beats)', label_es: 'Raíces Em·Em · Am·Am · G·G (cada 2 tiempos)', bpm: 60, notes: [40, 40, 45, 45, 43, 43] }
           },
           {
-            label: 'Challenge: Let It Be, strummed', label_es: 'Reto: Let It Be, rasgueado',
-            text: 'Challenge — Four-Chord Half-Bar (Let It Be, strummed): the C · G · Am · F loop from Module 5, down-up strumming, two beats per chord at 60 BPM — this is exactly how the record\'s verse moves, not just a speed drill. Four chords at half-bar speed with the strum hand driving — this is real rhythm-guitar playing. You\'ve got it when: two clean laps, strum unbroken, every change on the beat.',
-            text_es: 'Reto — Medio compás con cuatro acordes (Let It Be, rasgueado): el loop C · G · Am · F del Módulo 5, rasgueando abajo-arriba, dos tiempos por acorde a 60 BPM — así es exactamente como se mueve la estrofa en la grabación, no es solo un ejercicio de velocidad. Cuatro acordes a velocidad de medio compás con la mano de rasgueo al mando — esto es tocar guitarra rítmica de verdad. Lo tienes cuando: dos vueltas limpias, rasgueo sin interrupciones, cada cambio a tiempo.',
+            label: 'Challenge: "Let It Be", strummed', label_es: 'Reto: "Let It Be", rasgueado',
+            text: 'Challenge — Four-Chord Half-Bar ("Let It Be", strummed): the C · G · Am · F loop from Module 5, down-up strumming, two beats per chord at 60 BPM — this is exactly how the record\'s verse moves, not just a speed drill. Four chords at half-bar speed with the strum hand driving — this is real rhythm-guitar playing. You\'ve got it when: two clean laps, strum unbroken, every change on the beat.',
+            text_es: 'Reto — Medio compás con cuatro acordes ("Let It Be", rasgueado): el loop C · G · Am · F del Módulo 5, rasgueando abajo-arriba, dos tiempos por acorde a 60 BPM — así es exactamente como se mueve la estrofa en la grabación, no es solo un ejercicio de velocidad. Cuatro acordes a velocidad de medio compás con la mano de rasgueo al mando — esto es tocar guitarra rítmica de verdad. Lo tienes cuando: dos vueltas limpias, rasgueo sin interrupciones, cada cambio a tiempo.',
             hint: 'The right hand is the drummer and never stops; the left hand catches up between strokes. Keep upstrokes light — brush only the top few strings.',
             hint_es: 'La mano derecha es el baterista y nunca se detiene; la mano izquierda se pone al día entre golpes. Mantén los golpes hacia arriba ligeros — roza solo las cuerdas más agudas.',
             stuck: 'Isolate the pair that lags (often G → Am or Am → F) and loop just those two with the strum before running the circle.',
@@ -311,9 +311,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: Watchtower, strummed', label_es: 'Reto: Watchtower, rasgueado',
-                text: 'Challenge — Watchtower, strummed: play Am · G · F (small F) · G, four beats of down-up strumming per chord at 60 BPM, the pendulum swinging through all three changes. You\'ve got it when: two full laps (a lap = one full time through the loop) where the strum hand never stops — not even when the F lands late. The record actually moves twice this fast — two beats per chord, the same half-bar pace as Module 3\'s Half-Bar Changes — try the levelUp below once this feels steady. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this song has grown with you since Module 1</a>.',
-                text_es: 'Reto — Watchtower, rasgueado: toca Am · G · F (F pequeño) · G, cuatro tiempos de rasgueo abajo-arriba por acorde a 60 BPM, el péndulo balanceándose a través de los tres cambios. Lo tienes cuando: dos vueltas completas (una vuelta = un recorrido completo del loop) donde la mano de rasgueo nunca se detiene — ni siquiera cuando el F llega tarde. La grabación en realidad se mueve al doble de esta velocidad — dos tiempos por acorde, el mismo ritmo de medio compás que los Cambios de Medio Compás del Módulo 3 — prueba el nivel superior de abajo cuando esto se sienta firme. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esta canción ha crecido contigo desde el Módulo 1</a>.',
+                label: 'Challenge: "Watchtower", strummed', label_es: 'Reto: "Watchtower", rasgueado',
+                text: 'Challenge — "Watchtower", strummed: play Am · G · F (small F) · G, four beats of down-up strumming per chord at 60 BPM, the pendulum swinging through all three changes. You\'ve got it when: two full laps (a lap = one full time through the loop) where the strum hand never stops — not even when the F lands late. The record actually moves twice this fast — two beats per chord, the same half-bar pace as Module 3\'s Half-Bar Changes — try the levelUp below once this feels steady. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this song has grown with you since Module 1</a>.',
+                text_es: 'Reto — "Watchtower", rasgueado: toca Am · G · F (F pequeño) · G, cuatro tiempos de rasgueo abajo-arriba por acorde a 60 BPM, el péndulo balanceándose a través de los tres cambios. Lo tienes cuando: dos vueltas completas (una vuelta = un recorrido completo del loop) donde la mano de rasgueo nunca se detiene — ni siquiera cuando el F llega tarde. La grabación en realidad se mueve al doble de esta velocidad — dos tiempos por acorde, el mismo ritmo de medio compás que los Cambios de Medio Compás del Módulo 3 — prueba el nivel superior de abajo cuando esto se sienta firme. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esta canción ha crecido contigo desde el Módulo 1</a>.',
                 hint: 'Same loop you strummed in Module 5 — the new skill is that your right hand is now the drummer. The chord change happens BETWEEN strums.',
                 hint_es: 'El mismo loop que rasgueaste en el Módulo 5 — la nueva destreza es que tu mano derecha ahora es el baterista. El cambio de acorde ocurre ENTRE rasgueos.',
                 stuck: 'Drop to just Am ↔ G until the strum survives that change, then add the F back.',
@@ -323,9 +323,9 @@ SETS.push(
                 skills: [2, 5]
               },
               {
-                label: 'Challenge: Knockin\' on Heaven\'s Door', label_es: 'Reto: Knockin\' on Heaven\'s Door',
-                text: 'Challenge — Knockin\' on Heaven\'s Door: play G · D · Am · C, four beats of down-up each at 60 BPM — the record is slow too, so this song never rushes you. You\'ve got it when: one full lap with even volume on downs and ups and every change landing on beat 1.',
-                text_es: 'Reto — Knockin\' on Heaven\'s Door: toca G · D · Am · C, cuatro tiempos de abajo-arriba cada uno a 60 BPM — la grabación también es lenta, así que esta canción nunca te apura. Lo tienes cuando: una vuelta completa con volumen parejo en los golpes hacia abajo y hacia arriba, y cada cambio cayendo en el tiempo 1.',
+                label: 'Challenge: "Knockin\' on Heaven\'s Door"', label_es: 'Reto: "Knockin\' on Heaven\'s Door"',
+                text: 'Challenge — "Knockin\' on Heaven\'s Door": play G · D · Am · C, four beats of down-up each at 60 BPM — the record is slow too, so this song never rushes you. You\'ve got it when: one full lap with even volume on downs and ups and every change landing on beat 1.',
+                text_es: 'Reto — "Knockin\' on Heaven\'s Door": toca G · D · Am · C, cuatro tiempos de abajo-arriba cada uno a 60 BPM — la grabación también es lenta, así que esta canción nunca te apura. Lo tienes cuando: una vuelta completa con volumen parejo en los golpes hacia abajo y hacia arriba, y cada cambio cayendo en el tiempo 1.',
                 hint: 'Dylan built this song to support a voice — soft, even 8ths are the whole job. If an upstroke catches the strings, let the pick graze just the top 3–4 strings.',
                 hint_es: 'Dylan construyó esta canción para apoyar una voz — corcheas suaves y parejas son todo el trabajo. Si un golpe hacia arriba engancha las cuerdas, deja que la púa roce solo las 3–4 cuerdas más agudas.',
                 stuck: 'Loop the G → D change alone — it\'s the only move where every finger travels.',
@@ -618,9 +618,9 @@ SETS.push(
                 playSeq: { label: '"I\'m Yours" verse roots (G · D · Em · C)', label_es: 'Raíces de la estrofa de "I\'m Yours" (G · D · Em · C)', bpm: 60, notes: [43, 50, 40, 48] }
               },
               {
-                label: 'Challenge: Oye Mi Amor, verse', label_es: 'Reto: Oye Mi Amor, estrofa',
-                text: 'Challenge — Oye Mi Amor, verse: the verse uses just two chords, Bm · G:<ol><li>Use the small Bm (top four strings, no barre).</li><li>Play one bar of each with D-DU-UDU at 60 BPM.</li></ol>You\'ve got it when: four laps with the pattern unbroken and beats 2 and 4 accented so it pushes like the record.',
-                text_es: 'Reto — Oye Mi Amor, estrofa: la estrofa usa solo dos acordes, Bm · G:<ol><li>Usa el Bm pequeño (cuatro cuerdas más agudas, sin cejilla).</li><li>Toca un compás de cada uno con D-DU-UDU a 60 BPM.</li></ol>Lo tienes cuando: cuatro vueltas con el patrón sin interrupciones y los tiempos 2 y 4 acentuados para que empuje como la grabación.',
+                label: 'Challenge: "Oye Mi Amor", verse', label_es: 'Reto: "Oye Mi Amor", estrofa',
+                text: 'Challenge — "Oye Mi Amor", verse: the verse uses just two chords, Bm · G:<ol><li>Use the small Bm (top four strings, no barre).</li><li>Play one bar of each with D-DU-UDU at 60 BPM.</li></ol>You\'ve got it when: four laps with the pattern unbroken and beats 2 and 4 accented so it pushes like the record.',
+                text_es: 'Reto — "Oye Mi Amor", estrofa: la estrofa usa solo dos acordes, Bm · G:<ol><li>Usa el Bm pequeño (cuatro cuerdas más agudas, sin cejilla).</li><li>Toca un compás de cada uno con D-DU-UDU a 60 BPM.</li></ol>Lo tienes cuando: cuatro vueltas con el patrón sin interrupciones y los tiempos 2 y 4 acentuados para que empuje como la grabación.',
                 hint: 'The small Bm is the easier beginner version — the full-barre Bm (one finger pressed flat across several strings) arrives in Module 7. For now the pattern matters more than the shape.',
                 hint_es: 'El Bm pequeño es la versión más fácil para principiantes — el Bm con cejilla completa (un dedo presionado plano sobre varias cuerdas) llega en el Módulo 7. Por ahora el patrón importa más que la forma.',
                 stuck: 'Loop just the G → Bm change with one strum per bar until the landing is clean, then add the pattern.',
@@ -720,7 +720,7 @@ SETS.push(
 
   {
     id: 'm6w3',
-    songThread: [{ name: 'All Along the Watchtower', journey: 'tabs/all-along-the-watchtower.html', note: 'five layers deep and still growing' }],
+    songThread: [{ name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', note: 'five layers deep and still growing' }],
     label: 'Set 3',
     locked: false,
     module: 'Strumming Patterns with Chords',
@@ -940,9 +940,9 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: Watchtower, two ways', label_es: 'Reto: Watchtower, de dos formas',
-                text: 'Challenge — Watchtower, two ways:<ol><li>Play Am · G · F · G with a soft folk strum for 8 bars.</li><li>Then play the same loop rock-style — strum harder, accent the downs — for 8 bars, no break at the switch.</li></ol>You\'ve got it when: on a quick recording of yourself you can hear the exact bar the feel changed — Dylan\'s version becoming Hendrix\'s, live from your chair. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: five layers deep and still growing</a>.',
-                text_es: 'Reto — Watchtower, de dos formas:<ol><li>Toca Am · G · F · G con un rasgueo folk suave durante 8 compases.</li><li>Luego toca el mismo loop estilo rock — rasguea más fuerte, acentúa los golpes hacia abajo — durante 8 compases, sin interrupción en el cambio.</li></ol>Lo tienes cuando: en una grabación rápida de ti mismo puedes escuchar el compás exacto donde cambió la sensación — la versión de Dylan volviéndose la de Hendrix, en vivo desde tu silla. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: cinco capas de profundidad y sigue creciendo</a>.',
+                label: 'Challenge: "Watchtower", two ways', label_es: 'Reto: "Watchtower", de dos formas',
+                text: 'Challenge — "Watchtower", two ways:<ol><li>Play Am · G · F · G with a soft folk strum for 8 bars.</li><li>Then play the same loop rock-style — strum harder, accent the downs — for 8 bars, no break at the switch.</li></ol>You\'ve got it when: on a quick recording of yourself you can hear the exact bar the feel changed — Dylan\'s version becoming Hendrix\'s, live from your chair. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: five layers deep and still growing</a>.',
+                text_es: 'Reto — "Watchtower", de dos formas:<ol><li>Toca Am · G · F · G con un rasgueo folk suave durante 8 compases.</li><li>Luego toca el mismo loop estilo rock — rasguea más fuerte, acentúa los golpes hacia abajo — durante 8 compases, sin interrupción en el cambio.</li></ol>Lo tienes cuando: en una grabación rápida de ti mismo puedes escuchar el compás exacto donde cambió la sensación — la versión de Dylan volviéndose la de Hendrix, en vivo desde tu silla. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: cinco capas de profundidad y sigue creciendo</a>.',
                 hint: 'You heard exactly this in Module 1 — acoustic Dylan vs. electric Hendrix. Same chords, same tempo; ONLY your strum hand changes.',
                 hint_es: 'Escuchaste exactamente esto en el Módulo 1 — Dylan acústico vs. Hendrix eléctrico. Mismos acordes, mismo tempo; SOLO tu mano de rasgueo cambia.',
                 stuck: 'Make the switch on beat 1 of a new bar and drill just the 2-bar seam where folk becomes rock.',
@@ -950,12 +950,12 @@ SETS.push(
                 levelUp: 'Add the reggae chop as a third 8-bar section — three eras of the same song.',
                 levelUp_es: 'Agrega el picoteo reggae como una tercera sección de 8 compases — tres épocas de la misma canción.',
                 skills: [5, 6],
-                response: { type: 'short', prompt: 'Which feel suited Watchtower better to your ear — folk or rock — and why?', prompt_es: '¿Qué sensación le quedó mejor a Watchtower para tu oído — folk o rock — y por qué?', placeholder: 'e.g. rock — the accents make the loop feel dangerous', placeholder_es: 'p. ej. rock — los acentos hacen que el loop se sienta peligroso' }
+                response: { type: 'short', prompt: 'Which feel suited "Watchtower" better to your ear — folk or rock — and why?', prompt_es: '¿Qué sensación le quedó mejor a "Watchtower" para tu oído — folk o rock — y por qué?', placeholder: 'e.g. rock — the accents make the loop feel dangerous', placeholder_es: 'p. ej. rock — los acentos hacen que el loop se sienta peligroso' }
               },
               {
-                label: 'Challenge: Three Little Birds', label_es: 'Reto: Three Little Birds',
-                text: 'Challenge — Three Little Birds, reggae chop: play A · D · E with up-strums only on the "+", one bar each at 70 BPM. You\'ve got it when: two laps where every hit is an offbeat — then play along with the record and disappear into it.',
-                text_es: 'Reto — Three Little Birds, picoteo reggae: toca A · D · E con golpes hacia arriba solo en el "+", un compás cada uno a 70 BPM. Lo tienes cuando: dos vueltas donde cada golpe es un contratiempo — y luego toca junto con la grabación y piérdete en ella.',
+                label: 'Challenge: "Three Little Birds"', label_es: 'Reto: "Three Little Birds"',
+                text: 'Challenge — "Three Little Birds", reggae chop: play A · D · E with up-strums only on the "+", one bar each at 70 BPM. You\'ve got it when: two laps where every hit is an offbeat — then play along with the record and disappear into it.',
+                text_es: 'Reto — "Three Little Birds", picoteo reggae: toca A · D · E con golpes hacia arriba solo en el "+", un compás cada uno a 70 BPM. Lo tienes cuando: dos vueltas donde cada golpe es un contratiempo — y luego toca junto con la grabación y piérdete en ella.',
                 hint: 'Your hand still travels down on every number — the pick just misses on purpose. The record is your metronome here; Marley\'s band never rushes.',
                 hint_es: 'Tu mano sigue bajando en cada número — la púa solo falla a propósito. La grabación es tu metrónomo aquí; la banda de Marley nunca se apura.',
                 stuck: 'Mute the strings and chop the offbeat rhythm alone until it feels natural, then add the chords.',
