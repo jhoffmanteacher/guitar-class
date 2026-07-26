@@ -285,7 +285,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .step.step-done .step-label{text-decoration:line-through;color:var(--text2);opacity:.65}
 .step-chev{font-size:0.75rem;color:var(--text3);flex-shrink:0;transition:transform 0.15s}
 .step:not(.collapsed) .step-chev{transform:rotate(90deg)}
-.step-detail{padding:2px 4px 10px 36px;font-size:0.9375rem;line-height:1.5}
+.step-detail{padding:2px 4px 10px 56px;font-size:0.9375rem;line-height:1.5}
 .step.collapsed .step-detail{display:none}
 .sh{font-size:0.875rem;color:var(--text2);margin-top:3px}
 .step-figure{display:block;margin:12px 0 4px;max-width:640px}

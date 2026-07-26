@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-26 — Step instructions now indent under their heading
+
+### Changed
+
+- **The bullet list, "You've got it when" note, and response box under each
+  numbered step now sit clearly indented under that step's heading**, instead
+  of lining up flush with its left edge. Makes it easier to see at a glance
+  which instructions belong to which step.
+
 ## 2026-07-26 — Cleaner metronome layout
 
 ### Changed
