@@ -166,6 +166,13 @@ just `setLang()` — four layers all hang off it:
 - **Reuse the glossary** at the top of `i18n.js` for recurring pedagogy terms
   (module/set/station/skill/chord/strum/fret/pick/lap/"Level up"/etc.) rather
   than inventing a fresh Spanish word each time one comes up.
+- **String names are solfège in Spanish; chord symbols and key names are
+  not.** `cuerda Mi grave`, `cuerda La`, `cuerda Re`, `cuerda Sol`,
+  `cuerda Si` — but `tonalidad de G`, `G/B`, `Am`. This is the most-repeated
+  Spanish convention on the site (100+ live instances, including
+  `MODULE_MANIFEST[2].name_es`), nothing enforces it, and `module-9.js` has
+  already broken it ~30x — one of only two high-severity findings in the
+  entire 2026-07-23 sweep. Check it whenever you touch module Spanish.
 - **How to wire a new string** — full mechanics are documented at the top of
   `i18n.js` itself (read it before adding a string); short version:
   - Static HTML → `data-i18n="key"` on the element (a child `<span>` if the
@@ -186,15 +193,17 @@ just `setLang()` — four layers all hang off it:
   an AI proofread sweep **only** when Jonathan explicitly asks for one, or
   when a student/teacher flags a specific string — never as an automatic
   step after a content batch. The **authoritative Spanish lives in the code
-  itself** — `i18n.js` (shell strings + the binding glossary at the top) and
-  the `_es` twins in each `module-N.js` — so no separate review sheet is
-  maintained. (`translations-review.md` was removed 2026-07-23 to clean up
-  the repo once the full-site sweep was complete; its final version is
-  preserved outside the repo in the Claude project as
-  `claude/translations-review-final-2026-07-23.md`, and WORKFLOW.md
-  "Recently shipped" keeps the history. The Module 13 APPLY doc's
-  suggestion to sweep its new Spanish is superseded by this policy — skip
-  it.)
+  itself** — `i18n.js` (shell strings + the binding glossary at the top),
+  the `_es` twins in each `module-N.js`, and the `data-es` attributes on the
+  six `tabs/*.html` Song Journey pages (~60–75 strings per page) — so no
+  separate review sheet is maintained. (`translations-review.md` was removed
+  2026-07-23 to clean up the repo once the full-site sweep was complete. The
+  generated review sheet that briefly replaced it was deleted 2026-07-26 as
+  well — regenerable from the code and already stale. The standing glossary,
+  the loanword policy and the settled review policy now live in the Claude
+  project as `claude/spanish-terminology.md`, and WORKFLOW.md "Recently
+  shipped" keeps the history. The Module 13 APPLY doc's suggestion to sweep
+  its new Spanish is superseded by this policy — skip it.)
 - `i18n.js` loads on **every page that uses these strings**: `index.html`
   (the full shell + coach.js) and every `tabs/*.html` Song Journey page.
   It must load **before** `app.js`, `fab-tools.js`, `tuner.js`, and (on
