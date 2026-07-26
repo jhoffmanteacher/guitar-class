@@ -1079,8 +1079,8 @@ SETS.push(
     unit: 'Module 5 · Open Chords',
     unit_es: 'Módulo 5 · Acordes al aire',
     title: 'Set 4',
-    subtitle: 'Chord Group 3: E, B7, F#m, C#m · Semester 1 showcase preparation',
-    subtitle_es: 'Grupo de acordes 3: E, B7, F#m, C#m · Preparación para la muestra del Semestre 1',
+    subtitle: 'Chord Group 3: E, B7, F#m, C#m · Module 5 assessment preparation',
+    subtitle_es: 'Grupo de acordes 3: E, B7, F#m, C#m · Preparación para la evaluación del Módulo 5',
     objective: 'I CAN fret E and B7 open chords, identify F#m and C#m shapes, and perform a chosen song with 4+ chord types.',
     skillFocus: 'Fretting the E and B7 chords · Recognizing the F#m and C#m shapes · Performing a song with several chords',
     skillFocus_es: 'Trastear los acordes E y B7 · Reconocer las formas F#m y C#m · Interpretar una canción con varios acordes',
@@ -1137,13 +1137,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Plan your showcase practice',
-            title_es: 'Planea tu práctica para la muestra',
+            title: 'Plan your performance practice',
+            title_es: 'Planea tu práctica de interpretación',
             steps: [
           {
-            label: 'Map your showcase song\'s chords', label_es: 'Ubica los acordes de tu canción',
-            text: 'Look up a chord chart for your showcase song (or one you\'ve been working on). Map out which chord groups you\'ll use. Are there any chords you need to review?',
-            text_es: 'Busca un diagrama de acordes para tu canción de la muestra (o una en la que has estado trabajando). Ubica qué grupos de acordes vas a usar. ¿Hay algún acorde que necesites repasar?',
+            label: 'Map your performance song\'s chords', label_es: 'Ubica los acordes de tu canción',
+            text: 'Look up a chord chart for your performance song (or one you\'ve been working on). Map out which chord groups you\'ll use. Are there any chords you need to review?',
+            text_es: 'Busca un diagrama de acordes para tu canción de interpretación (o una en la que has estado trabajando). Ubica qué grupos de acordes vas a usar. ¿Hay algún acorde que necesites repasar?',
             hint: 'Being intentional about your practice is a skill. Know exactly which transitions are rough and spend most of your time there — not on the parts you already know.',
             hint_es: 'Ser intencional con tu práctica es una destreza. Sabe exactamente qué transiciones están ásperas y pasa la mayor parte de tu tiempo ahí — no en las partes que ya sabes.',
             skills: [5, 6],
@@ -1152,13 +1152,13 @@ SETS.push(
           },
           {
             label: 'Revisit your Module 1 goal', label_es: 'Vuelve a tu meta del Módulo 1',
-            text: 'Re-read what you wrote back in Module 1 — your "My Guitar Adventure" goal. You set it before you could play a single chord. What has changed? Name one thing you can do now that felt impossible then, and the one thing you still want by the showcase.',
-            text_es: 'Vuelve a leer lo que escribiste en el Módulo 1 — tu meta de "Mi aventura con la guitarra". La escribiste antes de poder tocar un solo acorde. ¿Qué ha cambiado? Nombra una cosa que puedes hacer ahora que se sentía imposible entonces, y lo único que todavía quieres lograr para la muestra.',
+            text: 'Re-read what you wrote back in Module 1 — your "My Guitar Adventure" goal. You set it before you could play a single chord. What has changed? Name one thing you can do now that felt impossible then, and the one thing you still want by the end of Module 5.',
+            text_es: 'Vuelve a leer lo que escribiste en el Módulo 1 — tu meta de "Mi aventura con la guitarra". La escribiste antes de poder tocar un solo acorde. ¿Qué ha cambiado? Nombra una cosa que puedes hacer ahora que se sentía imposible entonces, y lo único que todavía quieres lograr para el final del Módulo 5.',
             hint: 'This is the same goal you\'ll reflect on in your course self-check. Be specific — "I can switch C to G without stopping" is better than "I got better."',
             hint_es: 'Esta es la misma meta sobre la que vas a reflexionar en tu autochequeo del curso. Sé específico — "puedo cambiar de C a G sin detenerme" es mejor que "mejoré".',
             skills: [5],
-            response: { type: 'short', placeholder: 'One thing you can do now that you couldn\'t in Module 1 — and one goal for the showcase.',
-              placeholder_es: 'Una cosa que puedes hacer ahora que no podías en el Módulo 1 — y una meta para la muestra.' }
+            response: { type: 'short', placeholder: 'One thing you can do now that you couldn\'t in Module 1 — and one goal for the assessment.',
+              placeholder_es: 'Una cosa que puedes hacer ahora que no podías en el Módulo 1 — y una meta para la evaluación.' }
           },
             ]
           },
@@ -1167,9 +1167,9 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
           {
-            label: 'Wrap-up: your showcase priority', label_es: 'Cierre: tu prioridad para la muestra',
-            text: 'Station Wrap-Up — pause and think: with the showcase ahead, what will eat most of your practice time between now and then — a specific chord, a transition, or keeping the strum steady?',
-            text_es: 'Cierre de la estación — pausa y piensa: con la muestra por delante, ¿qué se va a llevar la mayor parte de tu tiempo de práctica de aquí a entonces — un acorde específico, una transición, o mantener el rasgueo constante?',
+            label: 'Wrap-up: your performance priority', label_es: 'Cierre: tu prioridad de interpretación',
+            text: 'Station Wrap-Up — pause and think: with the assessment ahead, what will eat most of your practice time between now and then — a specific chord, a transition, or keeping the strum steady?',
+            text_es: 'Cierre de la estación — pausa y piensa: con la evaluación por delante, ¿qué se va a llevar la mayor parte de tu tiempo de práctica de aquí a entonces — un acorde específico, una transición, o mantener el rasgueo constante?',
             response: { type: 'short', placeholder: 'e.g. the B7→E change, and not rushing the strum',
               placeholder_es: 'p. ej. el cambio B7→E, y no apurar el rasgueo' }
           }
@@ -1178,8 +1178,8 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — Group 3 chords & showcase prep',
-        title_es: 'Estación de práctica — acordes del Grupo 3 y preparación para la muestra',
+        title: 'Practice station — Group 3 chords & assessment prep',
+        title_es: 'Estación de práctica — acordes del Grupo 3 y preparación para la evaluación',
         sections: [
           {
             title: 'Fret E major cleanly',
@@ -1243,13 +1243,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Perform your showcase song',
-            title_es: 'Interpreta tu canción de la muestra',
+            title: 'Perform your song start to finish',
+            title_es: 'Interpreta tu canción de principio a fin',
             steps: [
           {
-            label: 'Challenge: showcase run', label_es: 'Reto: ensayo de la muestra',
-            text: 'Challenge 4 — Showcase Run (your assessment piece):<ol><li>Play your Semester 1 showcase song — the one you\'re building toward performing for someone (family, a friend, or a recording) — start to finish 3 times without stopping, even through mistakes.</li><li>Time yourself.</li></ol>No score — this trains your recovery, not perfection.',
-            text_es: 'Reto 4 — Ensayo de la muestra (tu pieza de evaluación):<ol><li>Toca tu canción de la muestra del Semestre 1 — la que estás construyendo para interpretar frente a alguien (familia, un amigo, o una grabación) — de principio a fin 3 veces sin detenerte, incluso con errores.</li><li>Cronométrate.</li></ol>Sin puntaje — esto entrena tu recuperación, no la perfección.',
+            label: 'Challenge: full run', label_es: 'Reto: pasada completa',
+            text: 'Challenge 4 — Full Run (your assessment piece):<ol><li>Play your performance song — the one you\'re building toward performing for someone (family, a friend, or a recording) — start to finish 3 times without stopping, even through mistakes.</li><li>Time yourself.</li></ol>No score — this trains your recovery, not perfection.',
+            text_es: 'Reto 4 — Pasada completa (tu pieza de evaluación):<ol><li>Toca tu canción de interpretación — la que estás construyendo para interpretar frente a alguien (familia, un amigo, o una grabación) — de principio a fin 3 veces sin detenerte, incluso con errores.</li><li>Cronométrate.</li></ol>Sin puntaje — esto entrena tu recuperación, no la perfección.',
             hint: 'Don\'t stop when you make a mistake in performance practice. The goal is to keep going. You can fix mistakes in slow practice — performance practice trains your recovery.',
             hint_es: 'No te detengas cuando cometas un error en la práctica de interpretación. El objetivo es seguir tocando. Puedes corregir errores en la práctica lenta — la práctica de interpretación entrena tu recuperación.',
             skills: [5, 6]
@@ -1261,11 +1261,11 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge: Luna, showcase version', label_es: 'Reto: Luna, versión para la muestra',
-                text: 'Challenge — Luna, strummed (showcase version): the full song is F · Am, with Dm making a brief passing appearance near the end of the verse and in the closing bridge.<ol><li>Play two downbeat strums per bar at 60 BPM, building toward 70.</li><li>Sing or hum "Luna, dile tú" while you play — it\'s tricky!</li></ol>You\'ve got it when: a full verse and chorus with every change on the downbeat and the F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
-                text_es: 'Reto — Luna, rasgueada (versión para la muestra): la canción completa es F · Am, con Dm apareciendo brevemente de paso cerca del final de la estrofa y en el puente final.<ol><li>Toca dos rasgueos en el tiempo fuerte por compás a 60 BPM, subiendo hacia 70.</li><li>Canta o tararea "Luna, dile tú" mientras tocas — ¡es complicado!</li></ol>Lo tienes cuando: una estrofa y un coro completos con cada cambio en el tiempo fuerte y el F sonando limpio. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
-                hint: 'You met this vamp in Set 3 — now make it showcase-clean. F is the trickiest shape; keep your fingers arched and thumb behind the neck so all four strings you strum ring.',
-                hint_es: 'Conociste este vamp en la Unidad 3 — ahora déjalo limpio para la muestra. F es la forma más complicada; mantén tus dedos arqueados y el pulgar detrás del mástil para que las cuatro cuerdas que rasgueas suenen.',
+                label: 'Challenge: Luna, full-song version', label_es: 'Reto: Luna, versión de canción completa',
+                text: 'Challenge — Luna, strummed (full-song version): the full song is F · Am, with Dm making a brief passing appearance near the end of the verse and in the closing bridge.<ol><li>Play two downbeat strums per bar at 60 BPM, building toward 70.</li><li>Sing or hum "Luna, dile tú" while you play — it\'s tricky!</li></ol>You\'ve got it when: a full verse and chorus with every change on the downbeat and the F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
+                text_es: 'Reto — Luna, rasgueada (versión de canción completa): la canción completa es F · Am, con Dm apareciendo brevemente de paso cerca del final de la estrofa y en el puente final.<ol><li>Toca dos rasgueos en el tiempo fuerte por compás a 60 BPM, subiendo hacia 70.</li><li>Canta o tararea "Luna, dile tú" mientras tocas — ¡es complicado!</li></ol>Lo tienes cuando: una estrofa y un coro completos con cada cambio en el tiempo fuerte y el F sonando limpio. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
+                hint: 'You met this vamp in Set 3 — now make it assessment-clean. F is the trickiest shape; keep your fingers arched and thumb behind the neck so all four strings you strum ring.',
+                hint_es: 'Conociste este vamp en la Unidad 3 — ahora déjalo limpio para la evaluación. F es la forma más complicada; mantén tus dedos arqueados y el pulgar detrás del mástil para que las cuatro cuerdas que rasgueas suenen.',
                 stuck: 'F is the tough one — loop Am → F on its own until the shape lands clean, then run the full F–Am (with the passing Dm near the verse\'s end and in the closing bridge).',
                 stuck_es: 'F es el difícil — repite solo Am → F hasta que la forma caiga limpia, y luego corre el F–Am completo (con el Dm de paso cerca del final de la estrofa y en el puente final).',
                 levelUp: 'Try the down-down-up split strum on each chord, or push to 70 BPM.',
@@ -1276,7 +1276,7 @@ SETS.push(
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'Dm', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'2'],[2,3,'3'],[1,1,'1']], position: 0 }
                 ],
-                response: { type: 'short', prompt: 'Which core song do you most want to play start-to-finish at the showcase?', prompt_es: '¿Qué canción principal más quieres tocar de principio a fin en la muestra?', placeholder: 'e.g. Luna, all of it', placeholder_es: 'p. ej. Luna, completa' }
+                response: { type: 'short', prompt: 'Which core song do you most want to play start-to-finish for the assessment?', prompt_es: '¿Qué canción principal más quieres tocar de principio a fin en la evaluación?', placeholder: 'e.g. Luna, all of it', placeholder_es: 'p. ej. Luna, completa' }
               }
             ]
           },
@@ -1286,8 +1286,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge: call & response jam', label_es: 'Reto: jam de llamada y respuesta',
-                text: 'Challenge — Call & Response (your Semester 1 wrap-up check piece): jam (play along freely and make up your own part) over <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a> (or any core-song ▶ &#x1F3B5; Backing track — recorded music you play along with — in Module 4\'s &#x1F3B5; Songs list).<ol><li>Improvise a call-and-response solo — play a 2-bar "question" phrase, leave a little space, then answer it with a 2-bar "response."</li><li>Stay in the minor pentatonic box from Module 4.</li></ol>You\'ve got it when: you hold the track\'s pulse start to finish with no restarts, and your response phrase clearly answers your question phrase. Ungraded — a chance to revisit the Module 4 solo skill, not part of this Set\'s scored showcase.',
-                text_es: 'Reto — Llamada y respuesta (tu pieza de revisión de fin del Semestre 1): improvisa (toca libremente junto con la pista y crea tu propia parte) sobre <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; la pista de jam en Am</a> (o cualquier ▶ &#x1F3B5; pista de acompañamiento — música grabada con la que tocas junto — de canción principal en la lista de &#x1F3B5; Canciones del Módulo 4).<ol><li>Improvisa un solo de llamada y respuesta — toca una frase "pregunta" de 2 compases, deja un poco de espacio, y luego respóndela con una "respuesta" de 2 compases.</li><li>Quédate en la caja pentatónica menor del Módulo 4.</li></ol>Lo tienes cuando: mantienes el pulso de la pista de principio a fin sin reiniciar, y tu frase de respuesta claramente responde a tu frase de pregunta. Sin calificación — una oportunidad para repasar la destreza del solo del Módulo 4, no forma parte de la muestra calificada de esta unidad.',
+                text: 'Challenge — Call & Response (your Semester 1 wrap-up check piece): jam (play along freely and make up your own part) over <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a> (or any core-song ▶ &#x1F3B5; Backing track — recorded music you play along with — in Module 4\'s &#x1F3B5; Songs list).<ol><li>Improvise a call-and-response solo — play a 2-bar "question" phrase, leave a little space, then answer it with a 2-bar "response."</li><li>Stay in the minor pentatonic box from Module 4.</li></ol>You\'ve got it when: you hold the track\'s pulse start to finish with no restarts, and your response phrase clearly answers your question phrase. Ungraded — a chance to revisit the Module 4 solo skill, not part of this Set\'s scored assessment.',
+                text_es: 'Reto — Llamada y respuesta (tu pieza de revisión de fin del Semestre 1): improvisa (toca libremente junto con la pista y crea tu propia parte) sobre <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; la pista de jam en Am</a> (o cualquier ▶ &#x1F3B5; pista de acompañamiento — música grabada con la que tocas junto — de canción principal en la lista de &#x1F3B5; Canciones del Módulo 4).<ol><li>Improvisa un solo de llamada y respuesta — toca una frase "pregunta" de 2 compases, deja un poco de espacio, y luego respóndela con una "respuesta" de 2 compases.</li><li>Quédate en la caja pentatónica menor del Módulo 4.</li></ol>Lo tienes cuando: mantienes el pulso de la pista de principio a fin sin reiniciar, y tu frase de respuesta claramente responde a tu frase de pregunta. Sin calificación — una oportunidad para repasar la destreza del solo del Módulo 4, no forma parte de la evaluación calificada de esta unidad.',
                 hint: 'Every skill here is a Module 4 skill — this is an easy, fun review of what you already know. The &#x1F3B5; Songs list at the bottom of Module 4 has a ▶ &#x1F3B5; Backing track for every core song. If the pentatonic box feels rusty, run the Module 4 scale-climb warm-up first, then come back.',
                 hint_es: 'Cada destreza aquí es una destreza del Módulo 4 — este es un repaso fácil y divertido de lo que ya sabes. La lista de &#x1F3B5; Canciones al final del Módulo 4 tiene una ▶ &#x1F3B5; pista de acompañamiento para cada canción principal. Si la caja pentatónica se siente oxidada, corre primero el calentamiento de escalada de escala del Módulo 4, y luego regresa.',
                 stuck: 'Play a 2-bar question, then answer with the SAME rhythm on different notes — copying the rhythm is the easiest way to make two phrases talk to each other.',
@@ -1303,8 +1303,8 @@ SETS.push(
             steps: [
               {
                 label: 'Wrap-up: your pressure point', label_es: 'Cierre: tu punto débil bajo presión',
-                text: 'After today, what\'s the one part of your showcase song most likely to fall apart under pressure (recording light on, someone listening)? Type it below — that\'s exactly where your next practice starts.',
-                text_es: 'Después de hoy, ¿cuál es la única parte de tu canción de la muestra que más probablemente se desarme bajo presión (con la luz de grabación encendida, alguien escuchando)? Escríbelo abajo — ahí es exactamente donde empieza tu próxima práctica.',
+                text: 'After today, what\'s the one part of your performance song most likely to fall apart under pressure (recording light on, someone listening)? Type it below — that\'s exactly where your next practice starts.',
+                text_es: 'Después de hoy, ¿cuál es la única parte de tu canción de interpretación que más probablemente se desarme bajo presión (con la luz de grabación encendida, alguien escuchando)? Escríbelo abajo — ahí es exactamente donde empieza tu próxima práctica.',
                 response: { type: 'short', placeholder: 'e.g. the B7 in the chorus — it never lands in time', placeholder_es: 'p. ej. el B7 en el coro — nunca cae a tiempo' }
               }
             ]
@@ -1314,9 +1314,9 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Semester 1 Showcase — TWO songs: (1) one CORE open-chord song from memory — Let It Be (C–G–Am–F), Luna (F–Am–Dm), or "the cure" (Am–C–Dm–F–G/B); (2) one song of your choice using at least 4 chords from Semester 1. Also: play three chords in an 8-bar progression at 70 BPM with clean changes, and name chords on an unlabelled chord chart. Evaluated on chord accuracy, timing, smooth transitions, and musicality. (Separate and ungraded: your written "My Guitar Adventure — Semester 1 Check-in" reflection — just for you, not part of the showcase score.)',
-      goal_es: 'Muestra del Semestre 1 — DOS canciones: (1) una canción CENTRAL de acordes al aire de memoria — Let It Be (C–G–Am–F), Luna (F–Am–Dm) o "the cure" (Am–C–Dm–F–G/B); (2) una canción de tu elección usando al menos 4 acordes del Semestre 1. Además: toca tres acordes en una progresión de 8 compases a 70 BPM con cambios limpios, y nombra acordes en un diagrama sin etiquetar. Se evalúa la precisión de los acordes, el tiempo, las transiciones suaves y la musicalidad. (Aparte y sin calificar: tu reflexión escrita "Mi aventura con la guitarra — Check-in del Semestre 1" — solo para ti, no forma parte del puntaje de la muestra.)',
-      performance: 'Semester 1 showcase performance. Student records a full run of the core song from memory and of the chosen song (or plays them for family or friends), then reviews the recordings for chord accuracy, timing, transitions, and expression.',
+      goal: 'Module 5 assessment — TWO songs: (1) one CORE open-chord song from memory — Let It Be (C–G–Am–F), Luna (F–Am–Dm), or "the cure" (Am–C–Dm–F–G/B); (2) one song of your choice using at least 4 chords from Semester 1. Also: play three chords in an 8-bar progression at 70 BPM with clean changes, and name chords on an unlabelled chord chart. Evaluated on chord accuracy, timing, smooth transitions, and musicality. (Separate and ungraded: your written "My Guitar Adventure — Semester 1 Check-in" reflection — just for you, not part of the assessment score.)',
+      goal_es: 'Evaluación del Módulo 5 — DOS canciones: (1) una canción CENTRAL de acordes al aire de memoria — Let It Be (C–G–Am–F), Luna (F–Am–Dm) o "the cure" (Am–C–Dm–F–G/B); (2) una canción de tu elección usando al menos 4 acordes del Semestre 1. Además: toca tres acordes en una progresión de 8 compases a 70 BPM con cambios limpios, y nombra acordes en un diagrama sin etiquetar. Se evalúa la precisión de los acordes, el tiempo, las transiciones suaves y la musicalidad. (Aparte y sin calificar: tu reflexión escrita "Mi aventura con la guitarra — Check-in del Semestre 1" — solo para ti, no forma parte del puntaje de la evaluación.)',
+      performance: 'Module 5 assessment performance. Student records a full run of the core song from memory and of the chosen song (or plays them for family or friends), then reviews the recordings for chord accuracy, timing, transitions, and expression.',
       selfCheck: 'Can you play your core song from memory — no chart in front of you — all the way through without stopping? Can you do the same with your chosen song? Can you name every chord in both and which group it belongs to?',
       selfCheck_es: '¿Puedes tocar tu canción central de memoria — sin ningún diagrama delante — de principio a fin sin detenerte? ¿Puedes hacer lo mismo con la canción que elegiste? ¿Puedes nombrar cada acorde de las dos y a qué grupo pertenece?',
       standards: ['Pr.4a', 'Pr.5b', 'Pr.6a', 'Re.9a']
@@ -1357,8 +1357,8 @@ SETS.push(
         text_es: 'Interpretar una canción central de memoria, más una canción elegida, de principio a fin sin detenerse',
         gotItWhen: 'you can play your core song (Let It Be, Luna, or "the cure") from memory with no chart in front of you, and your chosen song too — fingers arched, thumb behind the neck, the shapes held through the whole song — and even with mistakes you keep going and stay in time.',
         gotItWhen_es: 'puedes tocar tu canción central (Let It Be, Luna o "the cure") de memoria sin ningún diagrama delante, y también la canción que elegiste — dedos arqueados, pulgar detrás del mástil, las formas sostenidas durante toda la canción — y aunque haya errores sigues tocando y te mantienes a tiempo.',
-        practice: { type: 'pr', prompt: 'Play your showcase song start to finish without stopping — mistakes are fine, stopping isn\'t. How many complete no-stop runs did you get today?',
-          prompt_es: 'Toca tu canción de la muestra de principio a fin sin detenerte — los errores están bien, detenerse no. ¿Cuántas pasadas completas sin paradas lograste hoy?',
+        practice: { type: 'pr', prompt: 'Play your performance song start to finish without stopping — mistakes are fine, stopping isn\'t. How many complete no-stop runs did you get today?',
+          prompt_es: 'Toca tu canción de interpretación de principio a fin sin detenerte — los errores están bien, detenerse no. ¿Cuántas pasadas completas sin paradas lograste hoy?',
           unit: 'count', placeholder: 'e.g. 2 runs — try for a higher number', placeholder_es: 'p. ej. 2 pasadas — intenta superarlo' } },
       { id: 'm5w4-s6', text: 'Maintain a steady strum pattern throughout a full song',
         text_es: 'Mantener un patrón de rasgueo constante durante una canción completa',
@@ -1385,7 +1385,7 @@ MODULE_SONGS[5] = [
       { name: '"the cure" — Olivia Rodrigo', meta: 'Open-chord play-along · Am–C–Dm–F–G/B', meta_es: 'Toca junto con acordes al aire · Am–C–Dm–F–G/B', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
-      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Full-song showcase · F–Am–Dm', meta_es: 'Muestra de la canción completa · F–Am–Dm', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Full-song performance · F–Am–Dm', meta_es: 'Interpretación de la canción completa · F–Am–Dm', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
       { name: '"Happy Birthday"', meta: 'Full chord arrangement — all groups reviewed (optional)', meta_es: 'Arreglo completo de acordes — repasa todos los grupos (opcional)', type: 'Supp', core: false,
@@ -1393,7 +1393,7 @@ MODULE_SONGS[5] = [
       { name: '"Seven Nation Army" — The White Stripes', meta: '◐ optional harder challenge · D–A–Em strummed adaptation', meta_es: '◐ reto opcional más difícil · adaptación rasgueada D–A–Em', type: 'Supp', core: false, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Optional showcase · D–C–G power chords (from Module 3)', meta_es: 'Muestra opcional · acordes de potencia D–C–G (del Módulo 3)', type: 'Supp', core: false, journeyUrl: 'tabs/sweet-child-o-mine.html',
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Optional performance song · D–C–G power chords (from Module 3)', meta_es: 'Canción de interpretación opcional · acordes de potencia D–C–G (del Módulo 3)', type: 'Supp', core: false, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
       { name: '"Riptide" — Vance Joy', meta: 'Am–G–C — three-chord wonder', meta_es: 'Am–G–C — maravilla de tres acordes', type: 'Choice', core: false, level: 1,
@@ -1405,7 +1405,7 @@ MODULE_SONGS[5] = [
       { name: '"Ella Baila Sola" — Eslabon Armado × Peso Pluma', meta: 'Capo 1 · Em–D–C–B7 vamp — current sierreño hit', meta_es: 'Capo 1 · vamp Em–D–C–B7 — éxito actual de sierreño', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=lZiaYpD9ZrI',
         tutorialUrl: 'https://www.youtube.com/watch?v=fciArjRISjc' },
-      { name: '"Hallelujah" — Leonard Cohen', meta: 'C–Am–F–G — beautiful showcase song', meta_es: 'C–Am–F–G — hermosa canción para la muestra', type: 'Choice', core: false, level: 2,
+      { name: '"Hallelujah" — Leonard Cohen', meta: 'C–Am–F–G — beautiful performance song', meta_es: 'C–Am–F–G — hermosa canción de interpretación', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=ttEMYvpoR-k',
         tutorialUrl: 'https://www.youtube.com/watch?v=eFLJUspLfnk' },
       { name: '"Shallow" — Lady Gaga', meta: 'Em–D–G–C–Am–D — challenge song', meta_es: 'Em–D–G–C–Am–D — canción de reto', type: 'Choice', core: false, level: 3,
@@ -1428,8 +1428,8 @@ MODULE_REVIEWS[5] = {
       text_es: 'Puedo mantener un patrón de rasgueo abajo-arriba constante (1 + 2 + 3 + 4 +) a través de un cambio de acorde', set: 'm5w2' },
     { id: 'mr5-s4', text: 'I can fret Group 2 chords (D, A, and a partial-barre Bm) with clean tone',
       text_es: 'Puedo trastear los acordes del Grupo 2 (D, A, y un Bm con cejilla parcial) con tono limpio', set: 'm5w3' },
-    { id: 'mr5-s8', text: 'I can perform a chosen song start to finish using 4+ chords from across Semester 1 for the showcase',
-      text_es: 'Puedo interpretar una canción elegida de principio a fin usando 4+ acordes de todo el Semestre 1 para la muestra', set: 'm5w4' }
+    { id: 'mr5-s8', text: 'I can perform a chosen song start to finish using 4+ chords from across Semester 1 for the Module 5 assessment',
+      text_es: 'Puedo interpretar una canción elegida de principio a fin usando 4+ acordes de todo el Semestre 1 para la evaluación del Módulo 5', set: 'm5w4' }
   ],
   assessItems: [
     'Draw three chords at random (shuffle flashcards or point blind at a chart) and play them in an 8-bar progression at 70 BPM with clean changes in time',

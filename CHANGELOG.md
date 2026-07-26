@@ -5,7 +5,7 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
-## 2026-07-26 — Showcase says both songs, Let It Be joins Module 4, and a new "name the chord" challenge
+## 2026-07-26 — Module 5's assessment says both songs, Let It Be joins Module 4, and a new "name the chord" challenge
 
 ### Added
 
@@ -14,20 +14,26 @@ see `WORKFLOW.md` and the git commit log.
   have to read chord names *off* a chart; every drill until now went the other
   way (name → fretboard), so this practices the direction you'll actually be
   tested on.
-- **Module 4 · Let It Be is now in the songs list**, with its backing track —
-  so all six core songs are available to solo over, not five.
+- **Module 4 · Let It Be is now in the songs list**, with a jam track to solo
+  over — so all six core songs are there, not five.
 
 ### Changed
 
-- **Module 5 · the Semester 1 Showcase panel now says both songs.** It read as
-  "one song of your choice"; the actual showcase is a core song from memory
-  (Let It Be, Luna, or "the cure") *plus* a song of your choice. Anyone
-  preparing from that panel was preparing half the performance. The 70 BPM
-  three-chord progression and the unlabelled-chart naming are named there now
-  too.
-- **Module 4 backing tracks play in-page.** Seven Nation Army, Sweet Child
-  O' Mine and Luna pointed at YouTube; they now use the same course backing
-  tracks as the other songs — no leaving the site, no ads before your solo.
+- **Module 5's end-of-module assessment now says both songs.** It read as "one
+  song of your choice"; it's actually a core song from memory (Let It Be,
+  Luna, or "the cure") *plus* a song of your choice. Anyone reading that panel
+  was preparing half of it. The three-chord progression at 70 BPM and naming
+  chords on an unlabelled chart are spelled out there now too.
+- **Module 4's solo tracks are all jam tracks now.** Watchtower and "the cure"
+  used the course backing tracks, which have the rhythm guitar taken out — great
+  when you're the one playing the rhythm part, wrong when you're soloing over it
+  and need a band under you. Both now use a jam track in the same key, like the
+  rest of Module 4.
+- **"Semester 1 Showcase" is now "the Module 5 assessment"** throughout Module
+  5, and "your showcase song" is "your performance song." You move through the
+  site at your own pace, so naming it after a fixed end-of-semester event was
+  misleading — it's the assessment at the end of Module 5, whenever you get
+  there.
 
 ## 2026-07-25 — Second pass: more assessment wording fixed after an independent re-check
 
