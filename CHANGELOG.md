@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-26 — Module 2's note charts are real fretboard diagrams
+
+### Changed
+
+- **Challenge 1 (Low E Run) now shows a fretboard, not a staircase.** The
+  step-figure was an abstract staircase of note names with the half-step
+  gaps called out in red. It's been replaced with a single-string fretboard
+  diagram — nut, fret wires, inlay dots, fret numbers 0–12 — with the
+  naturals marked on the string (E open, F·1, G·3, A·5, B·7, C·8, D·10,
+  E·12). Same visual vocabulary as the Find-the-Note board and the
+  string/note hover diagrams, so students see one consistent picture of the
+  neck across the site. The open-string note is a hollow circle, matching
+  the site's open-string convention.
+- **Challenge 2 (A String Run) has a matching diagram now.** It previously
+  had no figure. Same chart for the A string: A open, B·2, C·3, D·5, E·7,
+  F·8, G·10, A·12.
+
+### Removed
+
+- `img/m2-note-staircase.svg` — no longer referenced anywhere.
+
 ## 2026-07-26 — Module assessments: practice recorder + sign up with your teacher
 
 ### Added
