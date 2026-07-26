@@ -255,7 +255,14 @@ naturally flowing two-clause sentences, hints (≤2 sentences), `gotItWhen`
 strings, and input placeholders (no HTML there).
 
 **A trailing "You've got it when: …" stays as plain text AFTER `</ol>`** —
-never as a final `<li>`. Same for any other trailing matter in the string:
+never as a final `<li>`. Since 2026-07-26 it is also *styled* apart: the
+renderer wraps it in `<span class="got-it">` on the way to the screen (see
+`wrapGotItWhen()` in app.js) and CSS gives it a thin green rule and italic
+body, so it stops running on from the last bullet. Jonathan weighed giving it
+a bullet against giving it a different treatment and chose the treatment,
+precisely so the "promise rather than a step" distinction below survives.
+**Do not put the span in module data** — it is render-time so new cards get
+it free and restyling never needs a content sweep. Same for any other trailing matter in the string:
 a "No score —" note, a "Got someone around?" bonus, a Song Journey link, a
 `<span class="step-figure">` image (which always stays dead last). The list
 holds the directions; the success standard sits under it, where it reads as

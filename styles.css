@@ -1667,3 +1667,13 @@ body.games-open{overflow:hidden}
 .err-slot.correct{border-style:solid;border-color:var(--green-text);background:var(--green-bg);color:var(--green-text)}
 .err-slot.wrong{border-style:solid;border-color:var(--red-text);background:var(--red-bg);color:var(--red-text)}
 .err-pads{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;max-width:440px;margin:0 auto}
+
+/* ── "You've got it when:" — the success standard, set apart from the list ──
+   Wrapped at render time by wrapGotItWhen() in app.js, not in module data.
+   A thin rule lifts it off the left margin so it stops running on from the
+   last bullet; italic and one shade quieter so it reads as a promise rather
+   than another step. (Jonathan chose this over bulleting it, 2026-07-26.) */
+.got-it{display:block;margin-top:11px;padding-left:11px;
+  border-left:3px solid var(--green-text);color:var(--text2);font-style:italic}
+.got-it-lab{font-style:normal;font-weight:600;color:var(--green-text);margin-right:4px}
+.step-done .got-it{border-left-color:var(--border2)}

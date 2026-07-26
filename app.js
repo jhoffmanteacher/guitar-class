@@ -1916,6 +1916,7 @@ function buildStations(w, stationId){
       }
       return `<button class="rp-trigger" onclick="loadPanel('youtube','${url}','${safe}','YouTube')">&#x25B6; ${label}</button>`;
     });
+    const text2 = wrapGotItWhen(text);
     /* One-thing-per-screen: the challenge text and the DOER (play buttons,
        diagrams, TAB, responses) stay visible; supporting prose (hint, stuck,
        level-up) collapses behind a tap — never competing with the thing the
@@ -2029,7 +2030,7 @@ function buildStations(w, stationId){
       + `<span class="step-label">${escHtml(label)}</span>`
       + `<span class="step-chev" aria-hidden="true">&#x25B6;</span>`
       + `</button>`
-      + `<div class="step-detail"><span class="st-text">${text}</span><div class="step-body">${playSeqHtml}${chordsHtml}${tabHtml}${tabsHtml}${drillHtml}${respHtml}${foldsHtml}</div>${doneBtn}</div>`
+      + `<div class="step-detail"><span class="st-text">${text2}</span><div class="step-body">${playSeqHtml}${chordsHtml}${tabHtml}${tabsHtml}${drillHtml}${respHtml}${foldsHtml}</div>${doneBtn}</div>`
       + `</li>`;
    }).join('');
   };
@@ -3593,6 +3594,48 @@ function sdCheckOff(key){
     btn.classList.add('done');
     btn.disabled = true;
   }
+}
+
+/* ── "You've got it when:" gets its own typographic slot ─────────────────
+   Jonathan, 2026-07-26, looking at a swept Challenge card: the success
+   standard ran on from the last bullet in the same size and colour, so the
+   card didn't "read cleanly." He weighed giving it a bullet against giving
+   it a different treatment and chose the treatment (option B2 of the
+   mockup): a thin rule pulls it off the left margin and out of the list's
+   flow, the standard itself is italic and one shade quieter.
+
+   That preserves his 2026-07-25 call — the standard stays OUTSIDE the list,
+   "where it reads as a promise rather than a step" — while still separating
+   it visually. Bulleting it would have reversed that.
+
+   Done at render time on purpose. Wrapping it in the module data would mean
+   editing ~195 cards × EN and ES, and every card written afterwards would
+   have to remember the span. Here it is one regex, both languages, and
+   restyling later (or dropping it) is a CSS change with no content sweep.
+
+   Only the FIRST match is wrapped, and only up to the end of that sentence,
+   so anything after it — a "No score —" note, a bonus line, a Song Journey
+   link, a step-figure image — stays outside the rule, exactly where R4 puts
+   it. Cards without the phrase are returned untouched. */
+const GOT_IT_RE = /(You&#39;ve got it when:|You've got it when:|You’ve got it when:|Lo tienes cuando:)/;
+function wrapGotItWhen(html){
+  if(typeof html !== 'string') return html;
+  const m = GOT_IT_RE.exec(html);
+  if(!m) return html;
+  const head = html.slice(0, m.index);
+  const rest = html.slice(m.index + m[0].length);
+  /* Stop at the first sentence end that is followed by more content, or at
+     the first tag that starts the trailing matter — whichever comes first. */
+  const tagAt = rest.search(/<(?:span|a|div|img)\b/i);
+  let cut = rest.length;
+  if(tagAt >= 0) cut = tagAt;
+  const sentence = /\.(?=\s|$)/.exec(rest.slice(0, cut));
+  if(sentence) cut = sentence.index + 1;
+  const body = rest.slice(0, cut);
+  const tail = rest.slice(cut);
+  return head +
+    `<span class="got-it"><span class="got-it-lab">${m[0]}</span>${body}</span>` +
+    tail;
 }
 
 /* ── Multiple-choice answer shuffle ──────────────────────────────────────

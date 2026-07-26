@@ -89,6 +89,18 @@ see `WORKFLOW.md` and the git commit log.
   — eight perfect hits in a row and the click goes quiet, so you can feel
   yourself holding the beat without the crutch.
 
+## 2026-07-26 — "You've got it when" stands on its own now
+
+### Changed
+
+- **The success standard on every Challenge card is set apart from the steps.**
+  It used to run straight on from the last bullet in the same size and colour,
+  so it read like an unnumbered extra instruction. It now sits behind a thin
+  green rule, in italic and a shade quieter — still under the list rather than
+  in it, so it reads as what you're aiming for rather than one more thing to
+  do. Anything after it — a "No score" note, a bonus, a Song Journey link, a
+  diagram — stays outside, exactly where it was.
+
 ## 2026-07-26 — Quiz answers no longer cluster at the top
 
 ### Fixed
