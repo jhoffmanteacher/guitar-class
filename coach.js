@@ -61,6 +61,15 @@ const COACH_ATTACK_SKIP   = 70;     // ms after an onset before pitch readings s
 const COACH_EVENT_TAIL    = 340;    // ms of pitch readings collected after an onset
 const COACH_MAX_SLOTS     = 32;
 const COACH_BEATS_PER_CHORD = 4;
+/* Visual beat-pulse fade (listening phase only — see coachPulseFadeThreshold
+   and coachMatchEvent). No audio: the mic is live the whole time the Coach
+   is listening, so an audible click here (unlike Riff Runner's, which is
+   keys/taps only) could bleed from the speakers back into the pitch/onset
+   detector. A "tight" hit is one whose timing deviation is well inside the
+   ±0.75×beatMs window coachMatchEvent already requires just to MATCH a slot
+   — a fraction of that, not the whole thing, so "tight" stays meaningfully
+   stricter than merely "counted". */
+const COACH_PULSE_TIGHT_FRAC = 0.2;   // fraction of coach.beatMs counted as "tight" timing
 /* Chromebook built-in mics commonly capture noticeably quieter than a
    MacBook's, and getUserMedia is requested with autoGainControl:false (see
    coachAcquireMicInner) — deliberately, since browser AGC pumps up the
@@ -165,7 +174,8 @@ function coachOpen(btn){
     skillIds: (btn.dataset.coachskills || '').split(',').filter(Boolean),
     events: [], pending: null,
     gridOffset: 0, listenStart: 0, timeouts: [],
-    smoothRms: 0, smoothHf: 0, lastOnsetT: -1e9, lastPitchT: 0
+    smoothRms: 0, smoothHf: 0, lastOnsetT: -1e9, lastPitchT: 0,
+    pulseStreak: 0, pulseMuted: false   // visual beat-pulse fade state
   };
   coachRenderReady();
   card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
@@ -313,6 +323,7 @@ async function coachStartCheck(){
   coach.events = []; coach.pending = null;
   coach.gridOffset = 0; coach.smoothRms = 0; coach.smoothHf = 0; coach.lastOnsetT = -1e9;
   coach.lastPulse = -1; coach.frameNo = 0; coach.lastPitchT = 0;
+  coach.pulseStreak = 0; coach.pulseMuted = false;
 
   /* Count-in: 4 clicks, last one higher = "go". The tab stays on screen so
      the fretting hand can get in position while the clicks run. */
@@ -436,6 +447,10 @@ function coachCountIn(state, countElId, onGo){
 function coachRenderListening(){
   coachBody().innerHTML =
     `<div class="coach-live"><span class="coach-live-dot"></span>${t('coach.listening.live')}</div>
+     <div class="coach-pulse-row">
+       <span class="metro-dot" id="coach-pulse-dot"></span>
+       <span class="rn-metro-status" id="coach-pulse-status">${t('coach.pulse.on')}</span>
+     </div>
      ${coachTabHtml()}
      ${coachNowHtml()}
      ${coachChordsHtml(coach.slots[0] && coach.slots[0].chordName)}
@@ -491,6 +506,28 @@ function coachStripHtml(){
 function coachChipRefresh(i){
   const el = document.getElementById('coach-chip-' + i);
   if (el) el.className = 'coach-chip ' + coach.slots[i].state;
+}
+
+/* Reflects coach.pulseMuted into the status text — fires once, right when
+   the streak crosses the fade threshold (same pattern as Riff Runner's
+   rnMetroStatusRefresh; no need to poll it every frame). */
+function coachPulseStatusRefresh(){
+  const el = document.getElementById('coach-pulse-status');
+  if (!el || !coach) return;
+  el.textContent = t(coach.pulseMuted ? 'coach.pulse.off' : 'coach.pulse.on');
+  el.classList.toggle('rn-metro-off', !!coach.pulseMuted);
+}
+
+/* How many CONSECUTIVE tight-timing hits (see COACH_PULSE_TIGHT_FRAC) before
+   the visual beat pulse fades out — same spirit as Riff Runner's
+   RN_METRONOME_FADE_COMBO (8), but scaled to the drill length: a short
+   chord/note check can have far fewer slots than a Riff Runner round (as
+   few as 2 — see coachMinHeard's comment), so a flat 8 could be literally
+   unreachable. Roughly half the drill, floored at 3 (mirrors coachMinHeard's
+   reasoning), capped at Riff Runner's 8, and never above the slot count
+   itself so the fade stays achievable even on the shortest drills. */
+function coachPulseFadeThreshold(slotCount){
+  return Math.min(slotCount, Math.max(3, Math.min(8, Math.ceil(slotCount * 0.5))));
 }
 
 /* ══════════ Detection loop ══════════ */
@@ -562,6 +599,10 @@ function coachLoop(){
     const cur = Math.floor((now - coach.listenStart - coach.gridOffset) / coach.beatMs);
     if (cur !== coach.lastPulse && cur >= 0 && cur < coach.slots.length){
       coach.lastPulse = cur;
+      if (!coach.pulseMuted){
+        const dot = document.getElementById('coach-pulse-dot');
+        if (dot){ dot.classList.add('flash'); setTimeout(() => dot.classList.remove('flash'), 80); }
+      }
       const prev = document.querySelector('.coach-chip.now');
       if (prev) prev.classList.remove('now');
       const el = document.getElementById('coach-chip-' + cur);
@@ -710,6 +751,17 @@ function coachMatchEvent(ev){
   s.hit = ev;
   coach.gridOffset += dev * 0.15;
   coachChipRefresh(best);
+
+  /* Visual beat-pulse fade: a correct AND tight-timing hit extends the
+     streak; anything else (wrong, dim, or matched-but-loose timing) resets
+     it. Once muted, stays muted for the rest of THIS attempt (matches Riff
+     Runner — coachStartCheck resets both fields for a fresh try). */
+  const onTime = (s.state === 'ok' || s.state === 'oct') && Math.abs(dev) <= coach.beatMs * COACH_PULSE_TIGHT_FRAC;
+  coach.pulseStreak = onTime ? coach.pulseStreak + 1 : 0;
+  if (!coach.pulseMuted && coach.pulseStreak >= coachPulseFadeThreshold(coach.slots.length)){
+    coach.pulseMuted = true;
+    coachPulseStatusRefresh();
+  }
 }
 
 /* ══════════ Finish & score ══════════ */

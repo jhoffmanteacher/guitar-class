@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-26 — A beat guide during Listening Coach checks
+
+### Added
+
+- **Chord and note checks now show a pulsing beat guide while you play.** A
+  small dot ticks along with the tempo so you can feel the beat visually —
+  and once you've held tight timing for a few notes in a row, it fades out,
+  since you don't need the crutch anymore. No sound was added — the mic is
+  listening the whole time a check runs, so the guide stays visual only.
+
 ## 2026-07-26 — Module 2's note charts are real fretboard diagrams
 
 ### Changed
