@@ -5,6 +5,28 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-26 — Follow-up: the two-song assessment now reads the same everywhere
+
+### Changed
+
+- **Module 5 · the "both songs" message is consistent now.** After the earlier
+  change, a few places still described the assessment as one song: the skill
+  you rate at the end of the module, the practice counter on the performance
+  skill, the Set 4 skill list, and a line in Set 2 that called Let It Be *the*
+  from-memory song when it's one of three. All fixed.
+- **Module 5 · Full Run now drills the from-memory half.** The challenge had
+  you run your chosen song three times; it now adds a chart-away run of your
+  core song, which is what the assessment actually asks for. If you picked
+  Luna or "the cure," you were never being asked to practise from memory
+  anywhere in the module.
+- **Module 3 · the Mystery Chart challenge got clearer.** "The lowest fretted
+  dot" was ambiguous — on screen the higher fret sits lower down — so it now
+  says lowest-*sounding*, nearest the thick strings. The stuck-hint also spells
+  out the A-string alphabet, not just the low E's, and the challenge is
+  numbered like its neighbours.
+- **Module 2** now says Let It Be becomes a core song in Module 4, not Module 5
+  — it moved when Module 4 gained it.
+
 ## 2026-07-26 — Module 5's assessment says both songs, Let It Be joins Module 4, and a new "name the chord" challenge
 
 ### Added
