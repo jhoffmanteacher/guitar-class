@@ -633,3 +633,199 @@
       wrong-answer requeue, keyboard, timer, done screen, and exit cleanup
       (no leaked timer/listener) with zero console errors. **No real-guitar
       retest needed** (it never touches the mic).
+
+---
+
+## Rationale behind the CLAUDE.md rules
+
+Moved out of `CLAUDE.md` on 2026-07-26 so it stops being re-read on every turn
+of every session (it was ~8,800 tokens per turn; the trimmed file is ~3,300).
+The *rules* stay in `CLAUDE.md`; the reasoning, worked examples and history live
+here. Read this when you need the **why**.
+
+### Multi-step directions get lists (Jonathan, 2026-07-23; refined 2026-07-25)
+
+Jonathan's words, 2026-07-25: *"anything that has multiple steps should have
+bullet points."* In practice: a card of roughly 200+ characters containing more
+than one thing the student DOES is a list. Do not skip one because the actions
+"flow naturally," are "one continuous technique," or "would need re-stitching" —
+re-stitch it, and splitting a single long sentence into two `<li>`s is fine.
+
+But the opposite failure is real: a two-item list whose second item is a
+technique reminder, or a card that reads like assembly instructions instead of a
+coach talking, has gone too far. Preserve the author's words either way —
+re-split and lightly re-stitch, never rewrite the voice.
+
+The trailing "You've got it when: …" was a deliberate fork. Jonathan weighed
+giving it a bullet against giving it a different visual treatment and chose the
+treatment (2026-07-26, option B2: thin green rule, italic, one shade quieter),
+precisely so the "promise rather than a step" distinction survived. Bulleting it
+would have reversed his own 2026-07-25 call. Flagging that reversal up front is
+what produced the better answer.
+
+The 2026-07-25 sweep applied the list rule across all 13 modules (~157 cards). A
+card still in prose was left that way on purpose: single action, pure
+explanation, a bare "Watch: video" line, or a wrap-up reflection question.
+
+### Challenge cards (Jonathan, 2026-07-26)
+
+195 cards across modules 1–12 — 116 numbered `Challenge N — ` plus 79 unnumbered
+`Challenge — ` with identical duplication. Jonathan's complaint, from a Module 2
+screenshot: *"the title and the beginning of the instructions are repetitive…
+the steps are also repetitive here. 1 and 2 can be consolidated into one step
+that starts with a verb, 'play'."*
+
+His calls, via multiple choice: full title into `label` verbatim (never invent or
+renumber); body opens straight on the directions; **every** body is a list —
+*"make sure to keep bullet points"*; glossary parentheticals move into the text
+while identifying ones stay in the title.
+
+**Where the sweep went wrong the first time.** Agents re-stitching prose into
+`<li>`s invented verbs the author never wrote (`Set the index finger…` for
+`Index (i) on the G string.`), promoted trailing tips into required steps, split
+concurrent actions into a sequential `<ol>`, and grew existing lists. An
+adversarial audit pass caught 12 such defects. Budget for one on any comparable
+sweep.
+
+### Paper drills get a digital deck (Jonathan, 2026-07-26)
+
+Looking at the Module 2 Ear Spark: *"there are things like this that require
+paper. can they be made digital?"* The site already had `drill:{type:'shuffle'}`
+commented as "the digital twin of the paper shuffle self-quiz," used in only 2
+steps and only dealing frets. Generalised into `deck` and `ear`, wired into all 8
+paper drills.
+
+| type | deals | replaced |
+|---|---|---|
+| `shuffle` | frets on one string, timed | the paper shuffle self-quiz |
+| `deck` | any small card pile, optional back side | flashcards and chord slips |
+| `ear` | a hidden note sequence, played aloud | "shuffle slips, record yourself" |
+
+Decks live in `DECKS` in `app.js` (not module data) so the Spanish comes from
+`i18n.js` instead of being duplicated across thirteen module files. Ear pools
+live in `EAR_POOLS` and play through the same Karplus-Strong `playNote()` the TAB
+players use. Storage: `games.dk['<deckId>']` for best runs plus a `games.dk.at`
+day stamp, mirroring `games.sd`.
+
+Design calls, all Jonathan's:
+
+- **Self-report, not auto-grading.** What's checked is whether the student PLAYED
+  the chord, which the app cannot see. A 4-choice version would turn recall into
+  recognition — Fret Zap already owns multiple choice.
+- **Two-sided decks keep the back hidden until tapped**, so "answer out loud
+  before you check" — the one thing paper cards really provided — survives.
+- **"Put it back" re-deals that card 3 later**, the paper move of tossing the slip
+  back in the pile. Only first-try hits score.
+- **The ear sequence is never shown before the reveal.** That hiddenness IS the
+  drill; replay is unlimited and unscored, because it's an optional 2-minute
+  bonus and pressure belongs in the Shuffle Drill.
+- **No paper fallback line**, and the "Got someone around?" partner line comes off
+  any card that gets a deck.
+
+Still on paper as of 2026-07-26, deliberately or awaiting a decision: 23
+slip/flashcard mentions, almost all in `levelUp` extensions (Module 3
+power-chord flashcards, Module 9 dot-fret slips) plus genuinely-written tasks
+(writing TAB from memory, spacing numbers on a staff). 16 partner "Got someone
+around?" lines survive on cards that never had a deck.
+
+### Quiz answers are shuffled at render time (Jonathan, 2026-07-26)
+
+Jonathan: *"the quiz correct answer choices should be randomized. right now the
+correct answers are always the first one."* The premise was close but not exact,
+and the real numbers were worth reporting back: across all 237 graded MCs,
+position 1 held 34%, position 2 **50%**, position 3 14%, position 4 **2%** —
+never picking the last option was right 98% of the time. After the shuffle:
+28 / 28 / 23 / 21.
+
+`mcOrder(choices, seed)` returns the ORIGINAL indices in display order and is
+used by both MC render paths. Load-bearing details:
+
+- **Deterministic, not `Math.random()`.** Seeded on the question's own ENGLISH
+  prompt + choices. The list re-renders on tab switch, language toggle and after
+  answering; a fresh order each time would make options jump under a student's
+  finger and make a saved answer look like it moved.
+- **Seeded on English only**, so order is identical in both languages and the ES
+  label rides along on the original index.
+- **Same order for everyone**, including the projector — chosen over a
+  per-student shuffle so "look at the third one" still works in class.
+- **Two storage schemes, both still live.** The step quiz persists the choice
+  TEXT; the practice panel persists the INDEX, so its buttons keep `data-idx` on
+  the original index and only the render order moves. Do not simplify that away.
+- **Catch-alls are pinned** (`MC_PINNED`): `all/none/both/neither of…`, and bare
+  `None`. It deliberately does NOT pin ordinary answers merely starting with
+  All/Both — "All 6 strings", "Both on E string" are real answers, and freezing
+  them would recreate the bug. Jonathan's answer implied the broader rule, which
+  would have pinned 13 ordinary answers; the narrow rule shipped instead.
+
+Because this is render-time, new questions can't regress — write `answer: 0`
+every time if you like.
+
+### Never invent YouTube IDs from memory
+
+In May 2026, Modules 6–8 were drafted from recall and ~60 of the URLs were 404s.
+Training-data recall of 11-character video IDs is unreliable even for famous
+songs and well-known channels. Search-and-verify is the only safe pattern.
+Verify via oEmbed — returns JSON title/author for valid videos, 404 for
+invalid/removed — and batch the checks in parallel; it's cheap and catches
+mistakes before they ship. Pre-existing URLs in `module-1.js` through
+`module-5.js` are presumed valid.
+
+Note for cloud sessions: `WebFetch` against the oEmbed endpoint works even where
+`curl`/`wget` are blocked. `upload.wikimedia.org` and `i.ytimg.com` refuse
+connections outright.
+
+### Prefer diverse tutorial creators (audit 2026-07-10)
+
+The tutorial lineup skewed heavily toward a handful of big channels run by white
+men — Marty Music, Andy Guitar, JustinGuitar, swiftlessons, GuitarZero2Hero and
+Kurt Berg alone covered roughly half the slots. Jonathan wants students to see a
+more diverse set of teachers. The rule is *check for a strong diverse option
+first*, not *avoid the big channels at all costs* — lesson quality still wins.
+
+### Backing tracks — worked example
+
+`tabs/the-cure.html` + `module-4.js`:
+
+- `olivia-rodrigo-the-cure-backing-Am-144bpm-440hz-rhythm-down.mp3` — the default
+  clean track (`backingUrl` + `data-audio`)
+- `…-rhythm-down-metronome.mp3` — same mix with a click baked in, wired via
+  `data-audio-metronome` and surfaced as a "🎵 Metronome" toggle on the Journey
+  page that swaps the `<audio>` src while preserving playback position and state
+
+"the cure"'s original master was at 442 Hz (~8 cents sharp) and had to be
+re-exported at 440, which is where the A=440 rule came from. The `CACHE_VERSION`
+fingerprint covers every file in `audio/` for exactly this reason — re-exporting
+a track under the same filename needs the same cache-bust as a shell edit. Audio
+is fingerprinted but deliberately **not** in `sw.js`'s `ASSETS` precache list;
+that would make the service worker download every jam track at install time.
+
+### Cloud handoff — full process (refined 2026-07-23)
+
+1. **Cloud side:** run the FULL `node tools/checks.mjs` so the link check happens
+   once and `CACHE_VERSION` ships pre-bumped; commit; `git format-patch`.
+2. **Every patch ships as a PAIR** with its own `APPLY-<name>.md` — never a patch
+   alone, never instructions only in chat. The APPLY file states what the commit
+   is, which base commit it expects, the apply order if others are pending, and
+   the exact steps: `git status` (clean tree) → `git am <patch>` →
+   `node tools/checks.mjs --check --skip-links` (fast verify only — the cloud
+   already ran the full battery and the patch carries validated content
+   byte-for-byte) → `git push` → `node tools/checks.mjs --live` a minute later.
+3. **Local side:** Jonathan hands the pair to his local Claude Code.
+4. **Cloud side afterwards:** fetch origin and hard-reset the cloud clone —
+   patches applied via `git am` get new hashes, so never re-merge.
+
+### Cloud-session working notes
+
+- Clone read-only: `git clone --depth 1 https://github.com/jhoffmanteacher/guitar-class.git`
+  (no `gh` CLI in the sandbox). Shell cwd resets between calls — use absolute
+  paths. The stop-hook "unpushed commits" warning is expected: cloud sessions
+  ship patch pairs, they never push.
+- Playwright lives at `/home/claude/.npm-global/lib/node_modules/playwright`
+  (CommonJS), browsers at `/opt/pw-browsers`. Serve with `python3 -m http.server`,
+  then `devBypass()` → `onModuleChange(N)` → `switchTabById('<setId>','station-c')`.
+  Station panels are `display:none` until `switchTabById` runs — element
+  screenshots silently time out otherwise.
+- Firebase can't load in the sandbox; the dev-bypass user can't write to
+  Firestore, so `saveGames`/`saveProgress` are skipped under it.
+- Stale assumptions to avoid: `MODULE_MANIFEST` has **13** entries, not 12; there
+  is no flat songs hub; screens use `*-screen` ids, not `*-panel`.
