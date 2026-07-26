@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-26 — Numbered and bulleted steps line up now
+
+### Fixed
+
+- **Numbered and bulleted lists inside a step used to hang out to the left**,
+  with the "1." and "2." sticking past the left edge of the paragraph above
+  them. They're now indented like every other list on the site, so a card's
+  directions read as one tidy column.
+
 ## 2026-07-26 — Listening Coach: the TAB keeps the beat
 
 ### Changed

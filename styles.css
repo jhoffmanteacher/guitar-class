@@ -1707,8 +1707,13 @@ body.games-open{overflow:hidden}
    Steps live inside list markup already, so a bare <ul> in step text falls
    to the depth-2 default (hollow circles) — force solid discs. Practice
    panels now render trusted HTML in prompt/explain, so give their lists the
-   same treatment with compact Chromebook-friendly margins. */
+   same treatment with compact Chromebook-friendly margins.
+   The global reset zeroes list padding, so an <ol>/<ul> in step text used to
+   hang its markers OUT to the left of the card's text column. Indent them the
+   same 22px the practice panels use, so numbers and bullets sit inside the
+   column like every other list on the site. (.sh-list keeps its own 16px.) */
 .step ul{list-style:disc}
+.st-text ol,.st-text ul,
 .sk-practice-prompt ol,.sk-practice-prompt ul,
 .sk-practice-explain ol,.sk-practice-explain ul{margin:6px 0 4px;padding-left:22px}
 .sk-practice-prompt ul,.sk-practice-explain ul{list-style:disc}
