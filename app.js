@@ -105,7 +105,9 @@ function loadFirestoreSdk(){
     const s = document.createElement('script');
     s.src = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js';
     s.onload  = ()=>resolve();
-    s.onerror = ()=>{ _firestoreLoad=null; reject(new Error('Firestore SDK failed to load')); };
+    // Remove the failed tag so a later retry (flushSave's bounded backoff)
+    // doesn't pile up a fresh orphaned <script> in <head> on every attempt.
+    s.onerror = ()=>{ s.remove(); _firestoreLoad=null; reject(new Error('Firestore SDK failed to load')); };
     document.head.appendChild(s);
   });
   return _firestoreLoad;
@@ -458,10 +460,13 @@ function onStepMcSelect(key, btn){
    flush time, so it always sends the current values. saveProgress /
    saveResponses / saveCompleted are kept as named entry points (called from
    inline handlers and all over app.js). */
+const SAVE_MAX_AUTO_RETRIES = 5;   // then give up quietly until the next user action re-arms it
+let _saveFailCount = 0;
 function queueSave(...keys){
   if(!currentUser) return;
   keys.forEach(k=>_dirtyKeys.add(k));
   if(_dirtyKeys.has('place')) saveLocalPlace();   // local mirror, immediate
+  _saveFailCount = 0;   // a fresh user action gets its own full retry budget
   clearTimeout(saveTimer);
   setSaveMsg('Saving…');
   saveTimer = setTimeout(flushSave, 800);
@@ -482,11 +487,21 @@ async function flushSave(){
     await ensureDb();
     await db.collection('progress').doc(currentUser.uid).set(payload,{merge:true});
     setSaveMsg('Saved ✓', 2000);
+    _saveFailCount = 0;
   } catch(e){
     keys.forEach(k=>_dirtyKeys.add(k));   // keep dirty so the next save retries
-    setSaveMsg('Save failed — check connection');
+    _saveFailCount++;
     clearTimeout(saveTimer);
-    saveTimer = setTimeout(flushSave, 3000);   // auto-retry once, then re-arms again on further failure
+    if(_saveFailCount <= SAVE_MAX_AUTO_RETRIES){
+      setSaveMsg('Save failed — check connection');
+      saveTimer = setTimeout(flushSave, 3000);
+    } else {
+      // Stop auto-retrying (a persistently rejected write — e.g. dev-bypass
+      // mode, or a blocked account — would otherwise loop forever). The
+      // dirty keys stay queued; the next real save (queueSave) resets the
+      // counter and tries again.
+      setSaveMsg('Not saving — check connection');
+    }
   }
 }
 function saveResponses(){ queueSave('responses'); }
@@ -1666,6 +1681,17 @@ function toggleStepFold(btn){
   }
 }
 
+/* Generic tuning warm-up sections are superseded by the Daily 5 (which starts
+   with the tune-up) for every module except Module 1: sectionsHtml() drops
+   them from the numbered list and shows a Daily 5 pointer card instead. Any
+   code that maps a section index back to rendered DOM (search, teacher
+   dashboard response keys) must filter with this same predicate first, or
+   its indexes drift from what's actually on screen. Kept at module scope
+   (not a buildStations() closure) so buildSearchIndex() can share it. */
+function isTuningWarmupSection(sec, moduleNum){
+  return sec.title === 'Warm-up — tuning check (Module 1)' && moduleNum !== 1;
+}
+
 /* ── Stations ── */
 function buildStations(w, stationId){
   const stepsHtml=(steps,ns,numOffset=0,allowCur=true)=>{
@@ -1800,7 +1826,7 @@ function buildStations(w, stationId){
   /* Generic tuning warm-up sections are superseded by the Daily 5 (which
      starts with the tune-up): render a pointer card above the numbered
      sections instead of taking a numbered slot itself. */
-  const isTuningWarmup = sec => sec.title === 'Warm-up — tuning check (Module 1)' && w.moduleNum !== 1;
+  const isTuningWarmup = sec => isTuningWarmupSection(sec, w.moduleNum);
   // Steps done / total for a station's progress pill — mirrors stepsHtml's ns-per-section scheme.
   const stationStepCounts = (id,s) => {
     let total=0, done=0;
@@ -3487,7 +3513,9 @@ const DECKS = {
   'naturals': { kicker:'deck.kNote', hint:'deck.hFindNote',
     cards:[{f:'A'},{f:'B'},{f:'C'},{f:'D'},{f:'E'},{f:'F'},{f:'G'}] },
   'keys-IIVV': { kicker:'deck.kKey', hint:'deck.hPlayIIVV',
-    cards:[{f:'G'},{f:'A'},{f:'C'},{f:'D'},{f:'E'}] }
+    cards:[{f:'G'},{f:'A'},{f:'C'},{f:'D'},{f:'E'}] },
+  'key-inventory': { kicker:'deck.kChordSet', back:'deck.kKey', hint:'deck.hNameKey',
+    cards:[{f:'G · C · D · Em',b:'G'},{f:'C · F · G · Am',b:'C'},{f:'D · G · A · Bm',b:'D'},{f:'Am · F · G · C',b:'C / Am'}] }
 };
 const deckDrills = {};
 function dkBox(key){ return document.getElementById('dkr-' + key); }
@@ -4699,7 +4727,10 @@ async function buildSearchIndex(){
     ['b', 'c'].forEach(st => {
       const stn = w.stations && w.stations[st];
       if(!stn) return;
-      const sections = stn.sections || (stn.steps ? [{title: '', steps: stn.steps}] : []);
+      const rawSections = stn.sections || (stn.steps ? [{title: '', steps: stn.steps}] : []);
+      // Must mirror sectionsHtml()'s filtering — jumpToStep() indexes into
+      // the rendered `.stp-sec` DOM, which drops tuning-warmup sections.
+      const sections = rawSections.filter(sec => !isTuningWarmupSection(sec, w.moduleNum));
       sections.forEach((sec, secIdx) => (sec.steps || []).forEach((step, stepIdx) => {
         const text = stripTags(step.text || '');
         if(text) ix.push({ kind: 'step', moduleNum: w.moduleNum, wid: w.id, label: w.label, station: st, secIdx, stepIdx, secTitle: sec.title || '', text });

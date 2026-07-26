@@ -93,6 +93,17 @@ try {
     .filter(f => /\.(mp3|m4a|wav|ogg)$/i.test(f)).sort().map(f => `audio/${f}`);
 } catch { /* no audio/ dir yet */ }
 
+/* Same reasoning as AUDIO_FILES above, for step-figure images: img/ isn't
+   fully precached in sw.js's ASSETS list, but the SW's fetch handler still
+   runtime-caches same-origin GETs cache-first — so re-exporting a diagram at
+   the same filename never reaches a returning student unless it's also
+   fingerprinted into CACHE_VERSION. */
+let IMG_FILES = [];
+try {
+  IMG_FILES = readdirSync(join(ROOT, 'img'))
+    .filter(f => /\.(svg|png|jpe?g|webp|gif)$/i.test(f)).sort().map(f => `img/${f}`);
+} catch { /* no img/ dir yet */ }
+
 /* ════════════════════════════════════════════════════════════════════
    1. VALIDATE — load each module in a sandbox and check its Sets
    ════════════════════════════════════════════════════════════════════ */
@@ -478,7 +489,7 @@ async function checkLinks() {
    ════════════════════════════════════════════════════════════════════ */
 function fingerprint() {
   const h = createHash('sha256');
-  for (const f of [...SHELL_FILES, ...AUDIO_FILES]) {
+  for (const f of [...SHELL_FILES, ...AUDIO_FILES, ...IMG_FILES]) {
     try { h.update(f + '\0'); h.update(readFileSync(join(ROOT, f))); }
     catch { /* file may not exist (e.g. optional icon) — skip */ }
   }

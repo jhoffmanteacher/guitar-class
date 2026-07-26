@@ -5,6 +5,32 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-26 — Fixed several wrong answers and mismatched instructions
+
+### Fixed
+
+- **"Smoke on the Water" (Module 7) was taught on the wrong strings** — the
+  TAB and the quiz answer now match the linked lesson video (low E + A, not
+  A + D).
+- **The major/minor pentatonic explanation in Module 4 had it backwards** —
+  it now correctly says which note is "home" for each.
+- **A Module 3 power-chord step told you to use two different fingers for
+  the same move** (pinky in one place, "3rd finger" in another) — it's the
+  pinky, consistently now.
+- **The "one octave up" Sweet Child O' Mine example was actually three
+  octaves up** — fixed to match its own caption.
+- **Travis picking (Modules 8 and 12) taught two different alternating-bass
+  patterns for the same C chord** — both now agree.
+- **A Module 11 "guess the key" drill printed the answers right next to the
+  question** — it's now a real flip-card you can practice with.
+- **The Spanish explanation of how to read a TAB (Module 2) said the
+  opposite of the English version** — and of the module's own quiz.
+- **The tuner could get confused on the high e string** and occasionally
+  read it an octave low.
+- **A few small fixes in Module 6**: a strumming demo played the wrong
+  note, a chord-change hint was wrong, and a quiz answer contradicted its
+  own practice card.
+
 ## 2026-07-26 — Numbered and bulleted steps line up now
 
 ### Fixed

@@ -422,6 +422,7 @@
     'deck.minor-keys-box1':  { en: 'Minor keys — box 1', es: 'Tonos menores — caja 1' },
     'deck.naturals':         { en: 'Natural note deck', es: 'Baraja de notas naturales' },
     'deck.keys-IIVV':        { en: 'Key deck — I–IV–V', es: 'Baraja de tonos — I–IV–V' },
+    'deck.key-inventory':    { en: 'Key-detective deck', es: 'Baraja detective de tonos' },
     'deck.headMeta':         { en: '{n} cards', es: '{n} cartas' },
     'deck.cardOf':           { en: 'Card {n} of {total}', es: 'Carta {n} de {total}' },
     'deck.introOne':         { en: 'The deck deals you one card at a time, shuffled. Do what it says, then move on — miss one and it comes back later in the run.',
@@ -445,12 +446,15 @@
     'deck.kKey':             { en: 'key', es: 'tono' },
     'deck.kBoxFret':         { en: 'box 1 starts at fret', es: 'la caja 1 empieza en el traste' },
     'deck.kNote':            { en: 'find this note', es: 'encuentra esta nota' },
+    'deck.kChordSet':        { en: 'chord set', es: 'conjunto de acordes' },
     'deck.hPlayIt':          { en: 'Play that chord, then check yourself.', es: 'Toca ese acorde, y luego revísate.' },
     'deck.hSayIt':           { en: 'Name the relative minor out loud.', es: 'Nombra la menor relativa en voz alta.' },
     'deck.hFindBox':         { en: 'Play minor pentatonic box 1 in that key, then check the fret.',
                                es: 'Toca la caja 1 de la pentatónica menor en ese tono, y luego revisa el traste.' },
     'deck.hFindNote':        { en: 'Find and play it, then move on.', es: 'Encuéntrala, tócala y sigue.' },
     'deck.hPlayIIVV':        { en: 'Play I–IV–V in that key.', es: 'Toca I–IV–V en ese tono.' },
+    'deck.hNameKey':         { en: 'Find the single family that contains every chord in the set — say the key out loud, then check.',
+                               es: 'Encuentra la única familia que contiene todos los acordes del conjunto — di el tono en voz alta, y luego revisa.' },
 
     // ── Ear Spark drill (hidden sequence, played not written) ──
     'ear.openStrings':       { en: 'Ear Spark — open strings', es: 'Chispa auditiva — cuerdas al aire' },

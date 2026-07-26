@@ -66,9 +66,9 @@ SETS.push(
             skills: [4, 5],
             response: { type: 'mc', prompt: 'The "Smoke on the Water" main riff uses which two strings most?',
               prompt_es: '¿Cuáles dos cuerdas usa más el riff principal de "Smoke on the Water"?',
-              answer: 2,
-              explain: 'You\'ll play it as a two-note double-stop (two notes played at the same time) on the A and D strings (strings 5 and 4) — index and ring locked together as one unit.',
-              explain_es: 'Lo vas a tocar como una doble nota de dos notas (dos notas tocadas al mismo tiempo) en las cuerdas La y Re (cuerdas 5 y 4) — el índice y el anular trabados juntos como una sola unidad.',
+              answer: 1,
+              explain: 'You\'ll play it as a two-note double-stop (two notes played at the same time) on the low E and A strings (strings 6 and 5) — index on the root note, ring finger two frets higher for the top note.',
+              explain_es: 'Lo vas a tocar como una doble nota de dos notas (dos notas tocadas al mismo tiempo) en las cuerdas Mi grave y La (cuerdas 6 y 5) — el índice en la nota raíz, el anular dos trastes más arriba para la nota de encima.',
               choices: [
               'Strings 1 and 2 (high e and B)',
               'Strings 6 and 5 (low E and A)',
@@ -123,27 +123,27 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 1 — "Smoke on the Water"', label_es: 'Reto 1 — "Smoke on the Water"',
-            text: '<ul><li>Play the main riff with index + ring locked as a unit on the A + D strings — 0/0 — 3/3 — 5/5 — 0/0 — 3/3 — 6/6 — 5/5.</li></ul>You\'ve got it when: both notes ring at the same volume, clean through the whole riff. Use the TAB below.',
-            text_es: '<ul><li>Toca el riff principal con el índice + el anular trabados como una unidad en las cuerdas La + Re — 0/0 — 3/3 — 5/5 — 0/0 — 3/3 — 6/6 — 5/5.</li></ul>Lo tienes cuando: ambas notas suenan al mismo volumen, limpias durante todo el riff. Usa el TAB de abajo.',
+            text: '<ul><li>Play the main riff with index on the root note and ring finger two frets higher, on the low E + A strings — 3/5 — 6/8 — 8/10 — 3/5 — 6/8 — 9/11 — 8/10.</li></ul>You\'ve got it when: both notes ring at the same volume, clean through the whole riff. Use the TAB below.',
+            text_es: '<ul><li>Toca el riff principal con el índice en la nota raíz y el anular dos trastes más arriba, en las cuerdas Mi grave + La — 3/5 — 6/8 — 8/10 — 3/5 — 6/8 — 9/11 — 8/10.</li></ul>Lo tienes cuando: ambas notas suenan al mismo volumen, limpias durante todo el riff. Usa el TAB de abajo.',
             hint: 'Use your index and ring finger together — keep them locked in shape and slide as a unit. Both notes should ring at the same volume.',
             hint_es: 'Usa tu dedo índice y tu dedo anular juntos — mantenlos trabados en forma y deslízalos como una unidad. Ambas notas deben sonar al mismo volumen.',
-            stuck: 'Lock the two fingers into one shape and move them as a block — don\'t re-place them each time. Get the 0/0 → 3/3 slide clean before adding the rest.',
-            stuck_es: 'Traba los dos dedos en una sola forma y muévelos como un bloque — no los vuelvas a colocar cada vez. Logra que el deslizamiento 0/0 → 3/3 salga limpio antes de agregar el resto.',
+            stuck: 'Lock the two fingers into one shape and move them as a block — don\'t re-place them each time. Get the 3/5 → 6/8 slide clean before adding the rest.',
+            stuck_es: 'Traba los dos dedos en una sola forma y muévelos como un bloque — no los vuelvas a colocar cada vez. Logra que el deslizamiento 3/5 → 6/8 salga limpio antes de agregar el resto.',
             levelUp: 'Play it at 90 BPM, or add the higher part that answers the riff and closes the full version.',
             levelUp_es: 'Tócalo a 90 BPM, o agrega la parte más aguda que responde al riff y cierra la versión completa.',
             skills: [1, 4, 5],
             response: { type: 'short', prompt: 'Personal record — play it cleanly at 70 BPM, then go +10 at a time. Your fastest CLEAN "Smoke" lap (one full time through the riff) today (BPM)?', prompt_es: 'Récord personal — tócalo limpio a 70 BPM, y luego sube de 10 en 10. ¿Tu vuelta LIMPIA más rápida de "Smoke" (una vuelta = un recorrido completo del riff) hoy (BPM)?', placeholder: 'e.g. 100 — try for a higher number next time', placeholder_es: 'p. ej. 100 — intenta superarlo la próxima vez' },
             tab: {
-              caption: '"Smoke on the Water" — main riff · A + D strings together',
-              caption_es: '"Smoke on the Water" — riff principal · cuerdas La + Re juntas',
+              caption: '"Smoke on the Water" — main riff · low E + A strings together',
+              caption_es: '"Smoke on the Water" — riff principal · cuerdas Mi grave + La juntas',
               notes: [
-                { frets: [['D', 0], ['A', 0]], note: 'A+D',   midi: [50, 45] },
-                { frets: [['D', 3], ['A', 3]], note: 'C+F',   midi: [53, 48] },
-                { frets: [['D', 5], ['A', 5]], note: 'D+G',   midi: [55, 50] },
-                { frets: [['D', 0], ['A', 0]], note: 'A+D',   midi: [50, 45] },
-                { frets: [['D', 3], ['A', 3]], note: 'C+F',   midi: [53, 48] },
-                { frets: [['D', 6], ['A', 6]], note: 'D#+G#', midi: [56, 51] },
-                { frets: [['D', 5], ['A', 5]], note: 'D+G',   midi: [55, 50] }
+                { frets: [['A', 5], ['E', 3]], note: 'G5',  midi: [50, 43] },
+                { frets: [['A', 8], ['E', 6]], note: 'A#5', midi: [53, 46] },
+                { frets: [['A', 10], ['E', 8]], note: 'C5',  midi: [55, 48] },
+                { frets: [['A', 5], ['E', 3]], note: 'G5',  midi: [50, 43] },
+                { frets: [['A', 8], ['E', 6]], note: 'A#5', midi: [53, 46] },
+                { frets: [['A', 11], ['E', 9]], note: 'C#5', midi: [56, 49] },
+                { frets: [['A', 10], ['E', 8]], note: 'C5',  midi: [55, 48] }
               ]
             }
           }
@@ -299,8 +299,8 @@ SETS.push(
         text_es: 'Tocar el riff principal de "Smoke on the Water" a tiempo',
         gotItWhen: 'you can play the full riff at 70 BPM with both notes ringing together cleanly — no buzzing, no missed double-stops. (This is a straight-quarter-note teaching count — the record\'s actual rhythm has more punch and space than that.)',
         gotItWhen_es: 'puedes tocar el riff completo a 70 BPM con ambas notas sonando limpias juntas — sin zumbido, sin dobles notas falladas. (Este es un conteo de enseñanza en negras parejas — el ritmo real de la grabación tiene más contundencia y espacio que eso.)',
-        practice: { type: 'playSeq', label: '"Smoke on the Water" — D string melody only', label_es: '"Smoke on the Water" — solo la melodía en la cuerda Re', bpm: 70,
-          notes: [50, 53, 55, 50, 53, 56, 55] } },
+        practice: { type: 'playSeq', label: '"Smoke on the Water" — low E string melody only', label_es: '"Smoke on the Water" — solo la melodía en la cuerda Mi grave', bpm: 70,
+          notes: [43, 46, 48, 43, 46, 49, 48] } },
       { id: 'm7w1-s5', text: 'Play a double-stop riff from TAB',
         text_es: 'Tocar un riff con dobles cuerdas desde el TAB',
         gotItWhen: 'you can sight-read a beginner riff built from 2-note double-stops and play it cleanly the first time through at half speed.',
@@ -977,7 +977,7 @@ SETS.push(
 
 globalThis.MODULE_SONGS = globalThis.MODULE_SONGS || {};
 MODULE_SONGS[7] = [
-      { name: '"Smoke on the Water" — Deep Purple', meta: 'Iconic 2-note TAB riff · A + D strings', meta_es: 'Riff icónico de TAB de 2 notas · cuerdas La + Re', type: 'Focus', core: true,
+      { name: '"Smoke on the Water" — Deep Purple', meta: 'Iconic 2-note TAB riff · low E + A strings', meta_es: 'Riff icónico de TAB de 2 notas · cuerdas Mi grave + La', type: 'Focus', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=Q2FzZSBD5LE',
         tutorialUrl: 'https://www.youtube.com/watch?v=tCQ0r7vqkFQ' },
       { name: '"Crazy Train" — Ozzy Osbourne', meta: 'Fast intro riff · alternate picking practice', meta_es: 'Riff de intro rápido · práctica de púa alternada', type: 'Focus', core: true,

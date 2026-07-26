@@ -14,7 +14,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-07-26-5b161a66e8';
+const CACHE_VERSION = 'guitar-class-2026-07-26-48bad99753';
 
 // Static shell — everything needed to render the practice content offline.
 const ASSETS = [
@@ -84,11 +84,40 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   const req = event.request;
+  const url = new URL(req.url);
 
   // Only handle our own same-origin GETs. Everything else (Firebase,
   // YouTube embeds, Google Translate, gstatic SDKs) falls through to
   // the browser's normal network handling.
-  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) {
+  if (req.method !== 'GET' || url.origin !== self.location.origin) {
+    return;
+  }
+
+  // <audio> elements issue byte-Range requests (even on the very first
+  // load, to support seeking), which GitHub Pages answers with 206 Partial
+  // Content — the plain handler below only caches status-200 responses, so
+  // backing tracks would otherwise never get cached at all (verified: this
+  // Cache Storage implementation does NOT auto-slice a Range request against
+  // a cached full response the way some do — cache.match() just returns the
+  // whole 200 body). So: serve a CACHED full copy straight away when we have
+  // one (instant, and <audio> is fine playing a plain 200 for a range
+  // request); otherwise let the very first play hit the network exactly as
+  // before (no added latency to first sound) and cache the full file in the
+  // background via a Range-less fetch, so every later play — including
+  // offline — is served from cache.
+  if (req.headers.has('range') && /\.(mp3|m4a|wav|ogg)$/i.test(url.pathname)) {
+    event.respondWith((async () => {
+      const cache = await caches.open(CACHE_VERSION);
+      const cached = await cache.match(url.href);
+      if (cached) return cached;
+      event.waitUntil((async () => {
+        try {
+          const res = await fetch(url.href);   // no Range header — full file
+          if (res && res.status === 200 && res.type === 'basic') await cache.put(url.href, res);
+        } catch { /* offline or blocked — try again next play */ }
+      })());
+      return fetch(req);
+    })());
     return;
   }
 

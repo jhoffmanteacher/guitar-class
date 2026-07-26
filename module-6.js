@@ -183,7 +183,10 @@ SETS.push(
             levelUp: 'Speed up to 75 BPM, or hold the 8 bars without letting your eyes drop to your strumming hand.',
             levelUp_es: 'Acelera a 75 BPM, o sostén los 8 compases sin dejar que tus ojos bajen hacia tu mano de rasgueo.',
             skills: [2, 4],
-            playSeq: { label: 'Hear the 8th-note pulse', label_es: 'Escucha el pulso de corcheas', bpm: 60, notes: [60, 60, 60, 60, 60, 60, 60, 60] },
+            playSeq: { label: 'Hear the 8th-note pulse', label_es: 'Escucha el pulso de corcheas', bpm: 60, notes: [
+              {midi:64,beats:0.5},{midi:64,beats:0.5},{midi:64,beats:0.5},{midi:64,beats:0.5},
+              {midi:64,beats:0.5},{midi:64,beats:0.5},{midi:64,beats:0.5},{midi:64,beats:0.5}
+            ] },
             chords: [
               { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 }
             ]
@@ -206,7 +209,7 @@ SETS.push(
             levelUp_es: 'Cambia cada compás en lugar de cada 2, o sube a 75 BPM con el rasgueo aún sin interrupciones.',
             skills: [4, 5, 6],
             response: { type: 'short', prompt: 'Personal record — strum unbroken through Em↔Am: play it cleanly at 60 BPM, then go +10 at a time. Your fastest CLEAN switch today (BPM)?', prompt_es: 'Récord personal — rasgueo sin interrupciones a través de Em↔Am: tócalo limpio a 60 BPM, y luego sube de 10 en 10. ¿Tu cambio LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next time', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima vez' },
-            playSeq: { label: 'Em → Am roots (2 bars each)', label_es: 'Raíces Em → Am (2 compases cada una)', bpm: 60, notes: [40, 40, 45, 45] },
+            playSeq: { label: 'Em → Am roots (2 beats each)', label_es: 'Raíces Em → Am (2 tiempos cada una)', bpm: 60, notes: [40, 40, 45, 45] },
             chords: [
               { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
             ]
@@ -328,8 +331,8 @@ SETS.push(
                 text_es: '<ul><li>Toca G · D · Am · C, cuatro tiempos de abajo-arriba cada uno a 60 BPM — la grabación también es lenta, así que esta canción nunca te apura.</li></ul>Lo tienes cuando: una vuelta completa con volumen parejo en los golpes hacia abajo y hacia arriba, y cada cambio cayendo en el tiempo 1.',
                 hint: 'Dylan built this song to support a voice — soft, even 8ths are the whole job. If an upstroke catches the strings, let the pick graze just the top 3–4 strings.',
                 hint_es: 'Dylan construyó esta canción para apoyar una voz — corcheas suaves y parejas son todo el trabajo. Si un golpe hacia arriba engancha las cuerdas, deja que la púa roce solo las 3–4 cuerdas más agudas.',
-                stuck: 'Loop the G → D change alone — it\'s the only move where every finger travels.',
-                stuck_es: 'Repite solo el cambio G → D — es el único movimiento donde cada dedo viaja.',
+                stuck: 'Am → C is your rest — two fingers stay parked and only one moves. G → D, D → Am, and C → G all reset the whole hand, so loop those one at a time.',
+                stuck_es: 'Am → C es tu descanso — dos dedos se quedan quietos y solo uno se mueve. G → D, D → Am, y C → G reinician toda la mano, así que repite esos uno a la vez.',
                 levelUp: 'Sing or hum a line over your own strumming, or speed up to 70 BPM with the 8ths still even.',
                 levelUp_es: 'Canta o tararea una línea sobre tu propio rasgueo, o acelera a 70 BPM manteniendo las corcheas parejas.',
                 skills: [2, 4],
@@ -396,7 +399,7 @@ SETS.push(
         text_es: 'Tocar 4 compases de Em y luego 4 compases de Am con un rasgueo abajo-arriba continuo',
         gotItWhen: 'you can loop Em-Em-Em-Em-Am-Am-Am-Am with down-up strumming at 60 BPM and never break the rhythm — even when the chord change is imperfect.',
         gotItWhen_es: 'puedes repetir Em-Em-Em-Em-Am-Am-Am-Am con rasgueo abajo-arriba a 60 BPM sin romper nunca el ritmo — incluso cuando el cambio de acorde no es perfecto.',
-        practice: { type: 'playSeq', label: 'Em → Am roots (4 bars each)', label_es: 'Raíces Em → Am (4 compases cada una)', bpm: 60,
+        practice: { type: 'playSeq', label: 'Em → Am roots (1 bar each — loop it for the full 4+4)', label_es: 'Raíces Em → Am (1 compás cada una — repítelo para los 4+4 completos)', bpm: 60,
           notes: [40, 40, 40, 40, 45, 45, 45, 45] } }
     ]
   },
@@ -577,7 +580,7 @@ SETS.push(
             levelUp: 'Move it to G or D, or push to 75 BPM with the backbeat still landing.',
             levelUp_es: 'Muévelo a G o D, o sube a 75 BPM manteniendo el contratiempo cayendo bien.',
             skills: [2, 4, 5],
-            playSeq: { label: 'Hear Em with accent on 2 and 4', label_es: 'Escucha Em con acento en el 2 y el 4', bpm: 60, notes: [40, 47, 40, 47] }
+            playSeq: { label: 'Hear the beat — add your own accent on 2 and 4', label_es: 'Escucha el tiempo — agrega tu propio acento en el 2 y el 4', bpm: 60, notes: [40, 47, 40, 47] }
           }
             ]
           },
@@ -992,10 +995,10 @@ SETS.push(
         gotItWhen_es: 'tu rasgueo de rock tiene peso e impulso claros — reproduce una grabación rápida y puedes escuchar que lo dices en serio.',
         practice: { type: 'mc', prompt: 'What actually gives a rock strum its weight?',
           prompt_es: '¿Qué le da en realidad su peso a un rasgueo de rock?',
-          choices: ['Accented downstrokes driven from the wrist, digging a little deeper into the strings', 'Strumming as fast as possible', 'Squeezing the chord harder with the fretting hand', 'Only strumming on beat 1'],
-          choices_es: ['Golpes hacia abajo acentuados impulsados desde la muñeca, entrando un poco más profundo en las cuerdas', 'Rasguear lo más rápido posible', 'Apretar el acorde más fuerte con la mano de trastear', 'Rasguear solo en el tiempo 1'], answer: 0,
-          explain: 'Weight comes from the picking hand\'s attack, not from speed or fret-hand squeezing. Dig in on the accents and let the other strums stay lighter.',
-          explain_es: 'El peso viene del ataque de la mano de pulsar, no de la velocidad ni de apretar con la mano de trastear. Entra con fuerza en los acentos y deja los demás rasgueos más ligeros.' } },
+          choices: ['Accented downstrokes driven from the elbow, digging a little deeper into the strings', 'Strumming as fast as possible', 'Squeezing the chord harder with the fretting hand', 'Only strumming on beat 1'],
+          choices_es: ['Golpes hacia abajo acentuados impulsados desde el codo, entrando un poco más profundo en las cuerdas', 'Rasguear lo más rápido posible', 'Apretar el acorde más fuerte con la mano de trastear', 'Rasguear solo en el tiempo 1'], answer: 0,
+          explain: 'Weight comes from arm weight behind the picking hand\'s attack, not from speed or fret-hand squeezing. Strum from the elbow, dig in on the accents, and let the other strums stay lighter.',
+          explain_es: 'El peso viene del peso del brazo detrás del ataque de la mano de pulsar, no de la velocidad ni de apretar con la mano de trastear. Rasguea desde el codo, entra con fuerza en los acentos, y deja los demás rasgueos más ligeros.' } },
       { id: 'm6w3-s3', text: 'Play a reggae strum (upstrokes on the "+", downstrokes skipped)',
         text_es: 'Tocar un rasgueo reggae (golpes hacia arriba en el "+", golpes hacia abajo omitidos)',
         gotItWhen: 'you can play a reggae chop where ONLY the upstrokes hit the strings — your hand still moves on the beats, but the pick misses on purpose.',

@@ -697,8 +697,8 @@ SETS.push(
             label: 'Challenge 4 — Octave Add-On (try it!)', label_es: 'Reto 4 — Octava extra (¡pruébalo!)',
             text: '<ul><li>Add your pinky on the next string, at the same fret as your ring finger, to make a 3-note power chord.</li></ul>No score — just try it and notice how the sound changes.',
             text_es: '<ul><li>Agrega tu meñique en la siguiente cuerda, en el mismo traste que tu anular, para hacer un acorde de potencia de 3 notas.</li></ul>Sin puntaje — solo pruébalo y nota cómo cambia el sonido.',
-            hint: 'This is optional. If your power chord sounds clean as is, keep it. Only add the 3rd finger if you can do it without buzzing.',
-            hint_es: 'Esto es opcional. Si tu acorde de potencia ya suena limpio, déjalo así. Agrega el tercer dedo solo si puedes hacerlo sin zumbido.',
+            hint: 'This is optional. If your power chord sounds clean as is, keep it. Only add the pinky if you can do it without buzzing.',
+            hint_es: 'Esto es opcional. Si tu acorde de potencia ya suena limpio, déjalo así. Agrega el meñique solo si puedes hacerlo sin zumbido.',
             skills: [5]
           }
             ]
@@ -877,8 +877,8 @@ SETS.push(
           prompt_es: 'Una canción pide G5 y luego C5. ¿Dónde va tu dedo índice para cada uno?',
           choices: ['Both on E string', 'Both on A string', 'G5 on E (fret 3), C5 on A (fret 3)', 'G5 on A, C5 on E'],
           choices_es: ['Ambos en la cuerda Mi', 'Ambos en la cuerda La', 'G5 en Mi (traste 3), C5 en La (traste 3)', 'G5 en La, C5 en Mi'], answer: 2 } },
-      { id: 'm3w2-s5', text: 'Optional: add 3rd finger octave doubling to the power chord shape',
-        text_es: 'Opcional: agregar duplicación de octava con el tercer dedo a la forma del acorde de potencia',
+      { id: 'm3w2-s5', text: 'Optional: add pinky octave doubling to the power chord shape',
+        text_es: 'Opcional: agregar duplicación de octava con el meñique a la forma del acorde de potencia',
         gotItWhen: 'your pinky lands on the next string at the same fret as your ring finger and all three notes ring cleanly — no buzz, no muffled string.',
         gotItWhen_es: 'tu meñique cae en la siguiente cuerda en el mismo traste que tu anular y las tres notas suenan limpias — sin zumbido, sin cuerdas apagadas.',
         practice: { type: 'mc', prompt: 'You add your pinky on the next string, at the same fret as your ring finger. What interval (an interval = the distance between two notes) did you just add to the chord?',

@@ -71,16 +71,16 @@ SETS.push(
                 label: 'Listen: the alternating bass', label_es: 'Escucha: el bajo alternante',
                 text: 'On a C chord, the alternating thumb usually bounces between two bass strings. Listen for it in a Travis-picked recording of your choice.',
                 text_es: 'En un acorde de C, el pulgar alternante suele rebotar entre dos cuerdas graves. Escúchalo en una grabación tocada con Travis picking de tu elección.',
-                hint: 'The root (A string) and a neighbor — the C chord\'s bass lives on string 5, so the thumb anchors there.',
-                hint_es: 'La raíz (cuerda La) y una vecina — el bajo del acorde C vive en la cuerda 5, así que el pulgar se ancla ahí.',
+                hint: 'The root (A string, fret 3 = C) and its 5th, fretted on the low E string (fret 3 = G) — same alternating bass Module 8 taught for a C chord.',
+                hint_es: 'La raíz (cuerda La, traste 3 = C) y su 5ª, trasteada en la cuerda Mi grave (traste 3 = G) — el mismo bajo alternante que enseñó el Módulo 8 para un acorde de C.',
                 skills: [1, 4],
                 response: { type: 'mc', prompt: 'On a C chord, the alternating thumb usually bounces between:',
                   prompt_es: 'En un acorde de C, el pulgar alternante suele rebotar entre:',
-                  answer: 1,
-                  explain: 'The root (A string) and a neighbor — the C chord\'s bass lives on string 5, so the thumb anchors there.',
-                  explain_es: 'La raíz (cuerda La) y una vecina — el bajo del acorde C vive en la cuerda 5, así que el pulgar se ancla ahí.',
-                  choices: ['Strings 6 and 5', 'Strings 5 and 4 (or 5 and 3)', 'Strings 2 and 1', 'Any two strings at random'],
-                  choices_es: ['Las cuerdas 6 y 5', 'Las cuerdas 5 y 4 (o 5 y 3)', 'Las cuerdas 2 y 1', 'Cualquier par de cuerdas al azar'] }
+                  answer: 0,
+                  explain: 'The root (A string, fret 3 = C) and its 5th, fretted on the low E string (fret 3 = G) — the thumb reaches down to a string the open chord shape doesn\'t normally use.',
+                  explain_es: 'La raíz (cuerda La, traste 3 = C) y su 5ª, trasteada en la cuerda Mi grave (traste 3 = G) — el pulgar llega hasta una cuerda que la forma abierta del acorde normalmente no usa.',
+                  choices: ['Strings 6 and 5', 'Strings 5 and 4', 'Strings 2 and 1', 'Any two strings at random'],
+                  choices_es: ['Las cuerdas 6 y 5', 'Las cuerdas 5 y 4', 'Las cuerdas 2 y 1', 'Cualquier par de cuerdas al azar'] }
               }
             ]
           },
@@ -90,8 +90,8 @@ SETS.push(
             steps: [
               {
                 label: 'Try the alternating thumb', label_es: 'Prueba el pulgar alternante',
-                text: 'Now try it: alternate your thumb between strings 5 and 4 over a C chord, 8 bars, no finger notes yet.',
-                text_es: 'Ahora pruébalo: alterna tu pulgar entre las cuerdas 5 y 4 sobre un acorde de C, 8 compases, todavía sin notas de dedos.',
+                text: 'Now try it: alternate your thumb between strings 5 and 6 over a C chord — root on the A string (fret 3), 5th fretted on the low E string (fret 3 = G) — 8 bars, no finger notes yet.',
+                text_es: 'Ahora pruébalo: alterna tu pulgar entre las cuerdas 5 y 6 sobre un acorde de C — raíz en la cuerda La (traste 3), 5ª trasteada en la cuerda Mi grave (traste 3 = G) — 8 compases, todavía sin notas de dedos.',
                 hint: 'Rule one of Travis: the thumb never stops. Fingers can rejoin on the next beat.',
                 hint_es: 'Regla número uno del Travis picking: el pulgar nunca se detiene. Los dedos pueden reincorporarse en el siguiente tiempo.',
                 skills: [1, 5],
@@ -144,8 +144,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 1 — Thumb Only', label_es: 'Reto 1 — Solo el pulgar',
-                text: '<ul><li>Alternate strings 5↔4 in quarter notes, 60 BPM, 8 bars, zero finger notes.</li></ul>You\'ve got it when: a steady, even alternating thumb with no wobble.',
-                text_es: '<ul><li>Alterna las cuerdas 5↔4 en negras, 60 BPM, 8 compases, cero notas de dedos.</li></ul>Lo tienes cuando: un pulgar alternante constante y parejo, sin tambalearse.',
+                text: '<ul><li>Alternate strings 5↔6 in quarter notes — root on the A string (fret 3), 5th fretted on the low E string (fret 3) — 60 BPM, 8 bars, zero finger notes.</li></ul>You\'ve got it when: a steady, even alternating thumb with no wobble.',
+                text_es: '<ul><li>Alterna las cuerdas 5↔6 en negras — raíz en la cuerda La (traste 3), 5ª trasteada en la cuerda Mi grave (traste 3) — 60 BPM, 8 compases, cero notas de dedos.</li></ul>Lo tienes cuando: un pulgar alternante constante y parejo, sin tambalearse.',
                 hint: 'Compared to Module 8\'s p-i-m-a-m-i arpeggio, the thumb ALTERNATES between bass strings instead of staying put — that bounce is the whole style.',
                 hint_es: 'Comparado con el arpegio p-i-m-a-m-i del Módulo 8, el pulgar ALTERNA entre cuerdas graves en lugar de quedarse quieto — ese rebote es todo el estilo.',
                 stuck: 'Drop to half tempo and count "1-2-3-4" aloud, landing the thumb exactly on each number.',
@@ -153,7 +153,7 @@ SETS.push(
                 levelUp: 'Add a chord change Am↔C every 4 bars without the thumb missing a beat.',
                 levelUp_es: 'Agrega un cambio de acorde Am↔C cada 4 compases sin que el pulgar se pierda ni un tiempo.',
                 skills: [1, 4],
-                playSeq: { label: 'Thumb alternation on C — strings 5 & 4', label_es: 'Alternancia del pulgar en C — cuerdas 5 y 4', bpm: 60, notes: [48, 52, 48, 52] }
+                playSeq: { label: 'Thumb alternation on C — strings 5 & 6', label_es: 'Alternancia del pulgar en C — cuerdas 5 y 6', bpm: 60, notes: [48, 43, 48, 43] }
               }
             ]
           },

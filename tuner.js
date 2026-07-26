@@ -153,8 +153,13 @@ function detectPitchHPS(freqData, sampleRate, fftSize) {
   const binMax = Math.ceil(1400 / binHz);
   const numHarmonics = 5;
 
+  // Search the FULL fundamental range (up to binMax, i.e. 1400Hz — needed to
+  // reach high e at 329.63Hz). Dividing by numHarmonics here was redundant
+  // with (and much stricter than) the per-harmonic `hk < freqData.length`
+  // guard below, and capped the search at ~280Hz — below high e — so HPS
+  // could never detect it directly and fell back on a subharmonic reading.
   let bestVal = -Infinity, bestBin = -1;
-  for (let k = binMin; k <= Math.floor(binMax / numHarmonics); k++) {
+  for (let k = binMin; k <= Math.min(binMax, freqData.length - 1); k++) {
     let product = 1;
     for (let h = 1; h <= numHarmonics; h++) {
       const hk = Math.round(k * h);

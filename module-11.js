@@ -433,8 +433,9 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 1 — Inventory Drill', label_es: 'Reto 1 — Ejercicio de inventario',
-                text: 'A drill is a short exercise you repeat to build a skill.<ul><li>Name each key before flipping the card — the four mystery chord sets are G-C-D-Em, C-F-G-Am, D-G-A-Bm, Am-F-G-C.</li></ul>(Answers: G, C, D, C/Am.)',
-                text_es: 'Un ejercicio es una práctica corta que repites para desarrollar una destreza.<ul><li>Nombra cada tonalidad antes de voltear la tarjeta — los cuatro conjuntos misteriosos de acordes son G-C-D-Em, C-F-G-Am, D-G-A-Bm, Am-F-G-C.</li></ul>(Respuestas: G, C, D, C/Am.)',
+                text: 'A drill is a short exercise you repeat to build a skill.<ol><li>Run the key-detective deck below — for each mystery chord set, find the single family that contains every chord in it and say the key OUT LOUD before you flip the card.</li></ol>',
+                text_es: 'Un ejercicio es una práctica corta que repites para desarrollar una destreza.<ol><li>Corre la baraja detective de tonos de abajo — para cada conjunto misterioso de acordes, encuentra la única familia que contiene todos los acordes y di el tono EN VOZ ALTA antes de voltear la tarjeta.</li></ol>',
+                drill: { type: 'deck', deck: 'key-inventory', skill: 'm11w2-s1' },
                 hint: 'Find the single family that contains ALL the chords on the card — that\'s the key, before your ear even weighs in.',
                 hint_es: 'Encuentra la única familia que contiene TODOS los acordes de la tarjeta — esa es la tonalidad, incluso antes de que tu oído opine.',
                 stuck: 'Cross off keys one at a time — if even one chord doesn\'t belong to a family, that key is out.',

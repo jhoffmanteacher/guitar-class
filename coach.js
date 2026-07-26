@@ -289,8 +289,10 @@ function coachBody(){ return document.getElementById('coach-body'); }
 
 function coachRenderReady(msg){
   if (!coach) return;
+  const body = coachBody();
+  if (!body) return;   // card panel isn't in the DOM (e.g. replaced by a language switch)
   coach.phase = 'ready';
-  coachBody().innerHTML =
+  body.innerHTML =
     (msg ? `<div class="coach-note">${escHtml(msg)}</div>` : '') +
     `<div class="coach-target">${t('coach.target.label')} <strong>${escHtml(coach.desc)}</strong></div>
      ${coachTabHtml()}
@@ -326,6 +328,7 @@ async function coachStartCheck(){
     return;
   }
   if (coach !== session){ coachReleaseMicIfIdle(); return; }   // card closed during the prompt
+  if (!coachBody()){ coachReleaseMicIfIdle(); return; }   // card panel was replaced in the DOM during the prompt (e.g. a language switch rebuilt the module panel)
   if (document.hidden){   // tab was backgrounded while the prompt was open
     coachMicOff();
     coachRenderReady(t('coach.paused.backgrounded'));
@@ -4732,7 +4735,7 @@ function rnRenderDone(){
        <div class="coach-crit-note">${escHtml(advice)}</div>
        <div class="coach-actions">
          ${s.tier > 0 ? `<button type="button" class="${rec === 'down' ? 'coach-start' : 'tp-btn'}" onclick="rnAgain(-1)">&#x2B07; ${t('games.riff.slowerButton')}</button>` : ''}
-         <button type="button" class="${rec === 'same' ? 'coach-start' : 'tp-btn'}" onclick="rnAgain(0)">&#x21BB; ${t('games.common.again')}</button>
+         <button type="button" class="${rec === 'same' ? 'coach-start' : 'tp-btn'}" onclick="rnAgain(0)">&#x21BB; ${t('games.common.again', { bpm: rnTierBpm(song, s.tier) })}</button>
          ${canUp ? `<button type="button" class="${rec === 'up' ? 'coach-start' : 'tp-btn'}" onclick="rnAgain(1)">&#x2B06; ${t('games.riff.fasterButton')}</button>` : ''}
        </div>
        ${s.songIdx < RN_SONGS.length - 1 && rnSongUnlocked(s.songIdx + 1) ? `<button type="button" class="tp-btn" onclick="rnPick(${s.songIdx + 1})">${t('games.riff.nextSongButton')} &#x2192;</button>` : ''}

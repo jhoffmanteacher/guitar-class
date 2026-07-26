@@ -87,9 +87,19 @@ async function loadAllStudents(){
       });
       allStudents.push({uid:doc.id,skills,name:doc.data().name||'',email:doc.data().email||'',responses:doc.data().responses||{}});
     });
-    renderTeacherBody(); renderTeacherSummary();
   } catch(e){
     document.getElementById('t-grid-container').innerHTML='<div class="t-loading">Could not load student data. Check your Firebase security rules.</div>';
+    return;
+  }
+  // Rendering is deliberately OUTSIDE the fetch try/catch above — a bug in
+  // renderTeacherBody/renderTeacherSummary shouldn't be reported to the
+  // teacher as a Firestore permissions problem, which sends debugging in
+  // the wrong direction entirely.
+  try{
+    renderTeacherBody(); renderTeacherSummary();
+  } catch(e){
+    console.error('Teacher dashboard render failed:', e);
+    document.getElementById('t-grid-container').innerHTML='<div class="t-loading">Something went wrong displaying this data. Check the browser console for details.</div>';
   }
 }
 
@@ -328,6 +338,13 @@ function prNum(v){ const m=String(v).match(/\d{2,3}/); return m?m[0]:null; }
 /* Enumerate every short free-text response slot in a set, in display order,
    rebuilding the exact keys the student app saves under
    (`${set}-${station}[-sec{n}]-${stepIndex}`). Tags PR (BPM) prompts. */
+// Mirrors app.js's isTuningWarmupSection() — sectionsHtml() there drops the
+// generic tuning warm-up section from the rendered/saved section list for
+// every module except 1, so the section-index math here must match or the
+// -sec{n} keys built below point at the wrong prompt.
+function isTuningWarmupSection(sec, moduleNum){
+  return sec.title === 'Warm-up — tuning check (Module 1)' && moduleNum !== 1;
+}
 function setShortResponses(w){
   const out=[];
   ['b','c'].forEach(stationId=>{
@@ -346,7 +363,7 @@ function setShortResponses(w){
       else label=chal?chal[1].trim():'Written response';
       out.push({key:`${w.id}-${ns}-${i}`, label, isPR});
     };
-    if(stn.sections) stn.sections.forEach((sec,gi)=>(sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i)));
+    if(stn.sections) stn.sections.filter(sec=>!isTuningWarmupSection(sec,w.moduleNum)).forEach((sec,gi)=>(sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i)));
     else if(stn.steps) stn.steps.forEach((st,i)=>pushStep(st,stationId,i));
   });
   return out;
