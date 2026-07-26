@@ -763,8 +763,9 @@ SETS.push(
             steps: [
               {
                 label: 'Ear Spark: sing and find the note', label_es: 'Chispa auditiva: canta y encuentra la nota',
-                text: '⚡ Ear Spark (optional, 2 min):<ol><li>Draw three fret slips (0–5), record those notes on the low E, and turn the slips face-down.</li><li>On playback, sing each note back, hold it, then find it on the string — singing first is the whole trick.</li><li>Check the slips last.</li></ol>Got someone around? Have them play the notes instead.',
-                text_es: '⚡ Chispa auditiva (opcional, 2 min):<ol><li>Saca tres papelitos de trastes (0–5), graba esas notas en la Mi grave, y voltea los papelitos boca abajo.</li><li>Al escuchar la grabación, canta cada nota de vuelta, sostenla, y luego encuéntrala en la cuerda — cantar primero es todo el truco.</li><li>Revisa los papelitos al final.</li></ol>¿Tienes a alguien cerca? Que toque las notas en tu lugar.'
+                text: '⚡ Ear Spark (optional, 2 min):<ol><li>Press play below — the deck draws three notes from the low E string, frets 0–5, and plays them for you.</li><li>Sing each note back and hold it, then find it on the string — singing first is the whole trick.</li><li>Check yourself last.</li></ol>',
+                text_es: '⚡ Chispa auditiva (opcional, 2 min):<ol><li>Presiona reproducir abajo — la baraja saca tres notas de la cuerda Mi grave, trastes 0–5, y las toca por ti.</li><li>Canta cada nota de vuelta y sostenla, y luego encuéntrala en la cuerda — cantar primero es todo el truco.</li><li>Revísate al final.</li></ol>',
+                drill: { type: 'ear', pool: 'lowEFrets', draw: 3 },
               }
             ]
           }

@@ -314,6 +314,51 @@ keeps that list byte-for-byte** — the sweep only moves the title and, where
 the card was prose, wraps it. An adversarial audit pass caught 12 such
 defects; budget for one.
 
+### Paper drills get a digital deck (Jonathan, 2026-07-26)
+Jonathan, looking at the Module 2 Ear Spark: *"there are things like this
+that require paper. can they be made digital?"* Answer for this course:
+**yes, and there is now a widget for each shape.** Nothing student-facing
+should ask for scissors, index cards or a pen again.
+
+Three `step.drill` types, all rendered from the same dispatcher
+(`renderShuffleDrill` in app.js) and all sharing the `.sdr` chrome:
+
+| type | deals | replaced |
+|---|---|---|
+| `shuffle` | frets on one string, timed | the paper shuffle self-quiz |
+| `deck` | any small card pile, optional back side | flashcards and chord slips |
+| `ear` | a **hidden** note sequence, played aloud | "shuffle slips, record yourself, play it back later" |
+
+Wiring a new one is content, not code:
+`drill: { type:'deck', deck:'numerals-C', skill:'m11w1-s3' }`. Decks live in
+the `DECKS` table in app.js (not module data) so the Spanish comes from
+`i18n.js` instead of being duplicated card-for-card in thirteen module files.
+Ear pools live in `EAR_POOLS` and play through the same Karplus-Strong
+`playNote()` the TAB players use.
+
+Design calls, all Jonathan's on 2026-07-26:
+- **Self-report, not auto-grading.** What's being checked is whether the
+  student PLAYED the chord, which the app cannot see. A 4-choice version
+  would turn recall into recognition — Fret Zap already owns multiple choice.
+- **Two-sided decks keep the back hidden until tapped**, so "answer out loud
+  before you check" — the one thing the paper cards were really providing —
+  survives the move.
+- **"Put it back" re-deals that card 3 later**, the paper move of tossing the
+  slip back in the pile. Only first-try hits score.
+- **The ear sequence is never shown before the reveal.** That hiddenness IS
+  the drill; replay is unlimited and unscored, because it's an optional
+  2-minute bonus and pressure belongs in the Shuffle Drill.
+- **No paper fallback line, and the "Got someone around?" partner line comes
+  off any card that gets a deck.** Jonathan chose both explicitly over
+  keeping them as alternatives.
+
+Still on paper as of 2026-07-26, deliberately or awaiting a decision: 23
+remaining slip/flashcard mentions, almost all in `levelUp` extensions
+(Module 3's power-chord flashcards, Module 9's dot-fret slips) plus the
+genuinely-written tasks (writing TAB from memory, spacing numbers on a
+staff). 16 partner "Got someone around?" lines survive on cards that never
+had a deck. Both are follow-up scope, not oversights.
+
 ### Station B video pairs — aim for two voices
 In each Station B video pair, aim for video #2 from a **different instructor**
 than video #1, teaching the same skill. Same-channel pairs are allowed when the

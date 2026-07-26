@@ -3351,6 +3351,11 @@ function sdAnswerNames(c){ return c.pile === 'naturals' ? SD_NATURALS.slice() : 
 
 /* Called from stepsHtml — registers state and returns the setup screen. */
 function renderShuffleDrill(drill, key, wid){
+  /* Dispatcher for every step-level drill widget. 'shuffle' deals frets on
+     one string (below); 'deck' deals any small card pile; 'ear' deals a
+     hidden sequence and plays it. All three replaced a paper drill. */
+  if(drill && drill.type === 'deck') return renderDeckDrill(drill, key, wid);
+  if(drill && drill.type === 'ear')  return renderEarDrill(drill, key, wid);
   if(!drill || drill.type !== 'shuffle') return '';
   const prev = shuffleDrills[key];
   if(prev && prev.tick) clearInterval(prev.tick);
@@ -3585,6 +3590,244 @@ function sdCheckOff(key){
     btn.classList.add('done');
     btn.disabled = true;
   }
+}
+
+/* ── Card Deck drill (step.drill, type 'deck') ───────────────────────────
+   The digital twin of the paper flashcard/slip drills — the same job the
+   Shuffle Drill above does for frets, generalised to any small pile.
+
+   Module-data schema:
+     drill: { type:'deck', deck:'numerals-C', rounds:<int>, skill:'m11w1-s2' }
+
+   Design calls (Jonathan, 2026-07-26 — "there are things like this that
+   require paper. can they be made digital?"):
+   - TWO-SIDED decks keep the paper move that matters: the back is hidden
+     until the student taps, so "answer out loud before checking" survives.
+     One-sided decks just deal a prompt and take a self-report.
+   - Self-report, not auto-grading. What's being checked is whether they
+     PLAYED the chord — the app can't see that, and a 4-choice quiz would
+     turn recall into recognition. Fret Zap already owns multiple choice.
+   - "Put it back" re-deals that card 3 cards later: the paper move of
+     tossing the slip back into the pile. Only first-try hits score.
+   - Best run persists in the `games` save category (games.dk['<deckId>']);
+     at 100% the results screen offers the skill check-off inline.
+   Decks live here rather than in module data so the ES twin comes from
+   i18n instead of being duplicated card-for-card in every module file. */
+const DECKS = {
+  'numerals-C': { kicker:'deck.kNumeral', back:'deck.kChord', hint:'deck.hPlayIt',
+    cards:[{f:'I',b:'C'},{f:'ii',b:'Dm'},{f:'iii',b:'Em'},{f:'IV',b:'F'},{f:'V',b:'G'},{f:'vi',b:'Am'}] },
+  'numerals-letitbe': { kicker:'deck.kNumeral', back:'deck.kChord', hint:'deck.hPlayIt',
+    cards:[{f:'I',b:'C'},{f:'V',b:'G'},{f:'vi',b:'Am'},{f:'IV',b:'F'}] },
+  'relative-pairs': { kicker:'deck.kMajorKey', back:'deck.kRelMinor', hint:'deck.hSayIt',
+    cards:[{f:'C',b:'Am'},{f:'G',b:'Em'},{f:'F',b:'Dm'},{f:'D',b:'Bm'},{f:'A',b:'F#m'}] },
+  'minor-keys-box1': { kicker:'deck.kKey', back:'deck.kBoxFret', hint:'deck.hFindBox',
+    cards:[{f:'Am',b:'5'},{f:'Gm',b:'3'},{f:'Bm',b:'7'},{f:'Dm',b:'10'}] },
+  'naturals': { kicker:'deck.kNote', hint:'deck.hFindNote',
+    cards:[{f:'A'},{f:'B'},{f:'C'},{f:'D'},{f:'E'},{f:'F'},{f:'G'}] },
+  'keys-IIVV': { kicker:'deck.kKey', hint:'deck.hPlayIIVV',
+    cards:[{f:'G'},{f:'A'},{f:'C'},{f:'D'},{f:'E'}] }
+};
+const deckDrills = {};
+function dkBox(key){ return document.getElementById('dkr-' + key); }
+function dkShuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const x=a[i]; a[i]=a[j]; a[j]=x; } return a; }
+function dkBest(id){
+  let s=0; try{ s=parseInt(sessionStorage.getItem('dkBest:'+id),10)||0; }catch(e){}
+  return Math.max(s, ((games && games.dk) || {})[id] || 0);
+}
+function dkSaveBest(id, n){
+  try{ if((parseInt(sessionStorage.getItem('dkBest:'+id),10)||0) < n) sessionStorage.setItem('dkBest:'+id, String(n)); }catch(e){}
+  if(!currentUser || (typeof isDevBypassUser === 'function' && isDevBypassUser())) return;
+  if(!games.dk) games.dk = {};
+  if((games.dk[id]||0) >= n) return;
+  games.dk[id] = n;
+  games.dk.at = dayStr(new Date());   // mirrors games.sd.at — last-practised stamp
+  if(typeof saveGames === 'function') saveGames();
+}
+function renderDeckDrill(drill, key, wid){
+  const def = DECKS[drill.deck];
+  if(!def) return '';
+  deckDrills[key] = { phase:'setup', cfg:{ id:drill.deck, def, skill:drill.skill||null, wid } };
+  return `<div class="sdr dkr" id="dkr-${escAttr(key)}">${dkSetupHtml(key)}</div>`;
+}
+function dkHead(key, right){
+  const st = deckDrills[key];
+  return `<div class="sdr-head"><span>${escHtml(t('deck.' + st.cfg.id))}</span>` +
+    `<span class="sdr-meta">${escHtml(right)}</span></div>`;
+}
+function dkSetupHtml(key){
+  const st = deckDrills[key]; if(!st) return '';
+  const total = st.cfg.def.cards.length, best = dkBest(st.cfg.id);
+  return dkHead(key, t('deck.headMeta', { n: total })) +
+    `<div class="sdr-body">` +
+      `<div class="sdr-intro">${escHtml(t(st.cfg.def.back ? 'deck.introTwo' : 'deck.introOne'))}</div>` +
+      `<button type="button" class="sdr-start" onclick="dkStart('${key}')">&#x1F0CF; ${escHtml(t('deck.start'))}</button>` +
+      (best ? `<div class="sdr-best">&#x1F3C6; ${escHtml(t('deck.best', { n: best, total }))}</div>` : '') +
+    `</div>`;
+}
+function dkStart(key){
+  const st = deckDrills[key]; if(!st) return;
+  st.phase='run'; st.deck = dkShuffle(st.cfg.def.cards); st.i=0; st.hit=0;
+  st.total = st.cfg.def.cards.length; st.shown=false;
+  dkBox(key).innerHTML = dkRunHtml(key);
+}
+function dkRunHtml(key){
+  const st = deckDrills[key], def = st.cfg.def, c = st.deck[st.i];
+  const front = st.shown && def.back ? c.b : c.f;
+  const kicker = st.shown && def.back ? def.back : def.kicker;
+  const sub = st.shown && def.back ? c.f : '';
+  return dkHead(key, t('deck.cardOf', { n: st.i + 1, total: st.deck.length })) +
+    `<div class="sdr-body">` +
+      `<div class="dkr-card${st.shown ? ' flipped' : ''}"${st.shown ? '' : ` onclick="dkFlip('${key}')"`}>` +
+        `<div class="sdr-card-kicker">${escHtml(t(kicker))}</div>` +
+        `<div class="dkr-face">${escHtml(front)}</div>` +
+        (sub ? `<div class="dkr-sub">${escHtml(sub)}</div>` : '') +
+      `</div>` +
+      (st.shown
+        ? `<div class="dkr-row">` +
+            `<button type="button" class="dkr-btn good" onclick="dkNext('${key}',1)">&#x2713; ${escHtml(t('deck.hadIt'))}</button>` +
+            `<button type="button" class="dkr-btn again" onclick="dkNext('${key}',0)">&#x21BB; ${escHtml(t('deck.putBack'))}</button>` +
+          `</div>`
+        : `<div class="dkr-prompt">${escHtml(t(def.hint))}</div>` +
+          `<button type="button" class="sdr-start" onclick="dkFlip('${key}')">${escHtml(t(def.back ? 'deck.check' : 'deck.done'))}</button>`) +
+    `</div>`;
+}
+function dkFlip(key){
+  const st = deckDrills[key]; if(!st || st.shown) return;
+  st.shown = true; dkBox(key).innerHTML = dkRunHtml(key);
+}
+function dkNext(key, ok){
+  const st = deckDrills[key]; if(!st) return;
+  if(ok) st.hit++;
+  else { const c = st.deck[st.i]; st.deck.splice(Math.min(st.deck.length, st.i + 3), 0, c); }
+  st.i++; st.shown = false;
+  if(st.i >= st.deck.length){ st.phase='done'; dkSaveBest(st.cfg.id, st.hit); dkBox(key).innerHTML = dkDoneHtml(key); }
+  else dkBox(key).innerHTML = dkRunHtml(key);
+}
+function dkDoneHtml(key){
+  const st = deckDrills[key], clean = st.hit === st.total;
+  const canCheck = clean && st.cfg.skill && progress[st.cfg.skill] !== 'gotit';
+  return dkHead(key, t('deck.done')) +
+    `<div class="sdr-body">` +
+      `<div class="sdr-score">${st.hit} / ${st.total}</div>` +
+      `<div class="sdr-score-sub">${escHtml(t('deck.scoreSub'))}</div>` +
+      `<div class="sdr-verdict ${clean ? 'good' : 'mid'}">${escHtml(t(clean ? 'deck.verdictGood' : 'deck.verdictMid'))}</div>` +
+      `<div class="dkr-row">` +
+        `<button type="button" class="dkr-btn" onclick="dkStart('${key}')">&#x21BB; ${escHtml(t('deck.again'))}</button>` +
+        (canCheck ? `<button type="button" class="dkr-btn good sdr-checkoff" onclick="dkCheckOff('${key}')">${escHtml(t('drill.checkOff'))}</button>` : '') +
+      `</div>` +
+    `</div>`;
+}
+function dkCheckOff(key){
+  const st = deckDrills[key]; if(!st || !st.cfg.skill) return;
+  if(progress[st.cfg.skill] !== 'gotit' && typeof toggleSkill === 'function') toggleSkill(st.cfg.skill, st.cfg.wid, 'gotit');
+  const btn = dkBox(key) && dkBox(key).querySelector('.sdr-checkoff');
+  if(btn){ btn.textContent = '✓ ' + t('drill.checkedOff'); btn.classList.add('done'); btn.disabled = true; }
+}
+
+/* ── Ear Spark drill (step.drill, type 'ear') ────────────────────────────
+   Replaces the "shuffle six paper slips, record yourself, play it back a
+   few minutes later" Ear Sparks. The deck draws a hidden sequence and
+   plays it through the same Karplus-Strong playNote() the TAB players use,
+   so there is nothing to write down, nothing to record, and no waiting.
+
+   Module-data schema:
+     drill: { type:'ear', pool:'openStrings'|'lowEFrets', draw:5, skill:null }
+
+   Design calls (Jonathan, 2026-07-26):
+   - The sequence is never shown before the reveal — that hiddenness IS the
+     drill, and it's the one thing paper slips were actually providing.
+   - Replay is unlimited and unscored. This is an optional 2-minute ear
+     bonus, not a check-off; pressure belongs in the Shuffle Drill.
+   - Answers go in as taps in order, with undo, so a student who hears
+     note 4 first isn't forced to guess note 1 to get there. */
+const EAR_POOLS = {
+  openStrings: { midis:[40,45,50,55,59,64], labels:['E','A','D','G','B','e'], kicker:'ear.kString' },
+  lowEFrets:   { midis:[40,41,42,43,44,45], labels:['0','1','2','3','4','5'], kicker:'ear.kFret' }
+};
+const earDrills = {};
+function erBox(key){ return document.getElementById('err-' + key); }
+function renderEarDrill(drill, key, wid){
+  const pool = EAR_POOLS[drill.pool];
+  if(!pool) return '';
+  earDrills[key] = { phase:'setup', cfg:{ pool, poolId: drill.pool, draw: drill.draw || 5, wid } };
+  return `<div class="sdr err" id="err-${escAttr(key)}">${erSetupHtml(key)}</div>`;
+}
+function erHead(key, right){
+  const st = earDrills[key];
+  return `<div class="sdr-head"><span>&#x26A1; ${escHtml(t('ear.' + st.cfg.poolId))}</span>` +
+    `<span class="sdr-meta">${escHtml(right)}</span></div>`;
+}
+function erSetupHtml(key){
+  const st = earDrills[key]; if(!st) return '';
+  return erHead(key, t('ear.headMeta', { n: st.cfg.draw })) +
+    `<div class="sdr-body">` +
+      `<div class="sdr-intro">${escHtml(t('ear.intro', { n: st.cfg.draw }))}</div>` +
+      `<button type="button" class="sdr-start" onclick="erStart('${key}')">&#x25B6; ${escHtml(t('ear.start'))}</button>` +
+    `</div>`;
+}
+function erStart(key){
+  const st = earDrills[key]; if(!st) return;
+  const pool = st.cfg.pool, idx = [];
+  for(let i=0;i<st.cfg.draw;i++) idx.push(Math.floor(Math.random()*pool.midis.length));
+  st.phase='run'; st.seq = idx; st.guesses = new Array(st.cfg.draw).fill(null); st.revealed = false;
+  erBox(key).innerHTML = erRunHtml(key);
+  erPlay(key);
+}
+function erPlay(key){
+  const st = earDrills[key]; if(!st) return;
+  if(typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
+  st.seq.forEach((n, i) => setTimeout(() => playNote(st.cfg.pool.midis[n]), i * 1100));
+}
+function erRunHtml(key){
+  const st = earDrills[key], pool = st.cfg.pool;
+  const slots = st.seq.map((n, i) => {
+    const g = st.guesses[i];
+    let cls = 'err-slot';
+    if(st.revealed) cls += (g === n ? ' correct' : ' wrong');
+    else if(g != null) cls += ' filled';
+    return `<div class="${cls}">${escHtml(st.revealed ? pool.labels[n] : (g != null ? pool.labels[g] : ''))}</div>`;
+  }).join('');
+  if(st.revealed){
+    const right = st.seq.filter((n, i) => st.guesses[i] === n).length;
+    return erHead(key, t('ear.revealed')) +
+      `<div class="sdr-body"><div class="err-slots">${slots}</div>` +
+        `<div class="sdr-score">${right} / ${st.cfg.draw}</div>` +
+        `<div class="sdr-score-sub">${escHtml(t('ear.scoreSub'))}</div>` +
+        `<div class="dkr-row">` +
+          `<button type="button" class="dkr-btn" onclick="erPlay('${key}')">&#x25B6; ${escHtml(t('ear.hearAgain'))}</button>` +
+          `<button type="button" class="dkr-btn" onclick="erStart('${key}')">&#x21BB; ${escHtml(t('ear.dealMore'))}</button>` +
+        `</div></div>`;
+  }
+  const filled = st.guesses.filter(g => g != null).length;
+  const pads = pool.labels.map((l, i) =>
+    `<button type="button" class="sdr-note" onclick="erGuess('${key}',${i})">${escHtml(l)}</button>`).join('');
+  return erHead(key, t('ear.named', { n: filled, total: st.cfg.draw })) +
+    `<div class="sdr-body"><div class="err-slots">${slots}</div>` +
+      `<div class="err-pads">${pads}</div>` +
+      `<div class="dkr-row">` +
+        `<button type="button" class="dkr-btn" onclick="erPlay('${key}')">&#x25B6; ${escHtml(t('ear.playAgain'))}</button>` +
+        `<button type="button" class="dkr-btn" onclick="erUndo('${key}')">&#x2190; ${escHtml(t('ear.undo'))}</button>` +
+        (filled === st.cfg.draw ? `<button type="button" class="dkr-btn good" onclick="erReveal('${key}')">${escHtml(t('ear.check'))}</button>` : '') +
+      `</div>` +
+      `<div class="dkr-prompt">${escHtml(t('ear.' + pool.kicker.split('.')[1] + 'Hint'))}</div>` +
+    `</div>`;
+}
+function erGuess(key, i){
+  const st = earDrills[key]; if(!st || st.revealed) return;
+  const slot = st.guesses.indexOf(null);
+  if(slot < 0) return;
+  st.guesses[slot] = i; erBox(key).innerHTML = erRunHtml(key);
+}
+function erUndo(key){
+  const st = earDrills[key]; if(!st || st.revealed) return;
+  let last = -1;
+  st.guesses.forEach((g, i) => { if(g != null) last = i; });
+  if(last < 0) return;
+  st.guesses[last] = null; erBox(key).innerHTML = erRunHtml(key);
+}
+function erReveal(key){
+  const st = earDrills[key]; if(!st) return;
+  st.revealed = true; erBox(key).innerHTML = erRunHtml(key);
 }
 
 /* ── "Keep it sharp" spaced-review card ──

@@ -334,8 +334,9 @@ SETS.push(
             steps: [
               {
                 label: 'Ear Spark: name the open strings', label_es: 'Chispa auditiva: nombra las cuerdas',
-                text: '⚡ Ear Spark (optional, 2 min):<ol><li>Shuffle six paper slips labeled E A D G B e, draw five, and record yourself plucking the open strings in that order.</li><li>A few minutes later, play it back and name each string by ear before checking your slips — thickest to thinnest is E-A-D-G-B-e, and your ear learns them faster than you\'d think.</li></ol>Got someone around? Have them pluck while you look away instead.',
-                text_es: '⚡ Chispa de oído (opcional, 2 min):<ol><li>Revuelve seis papelitos con las letras E A D G B e, saca cinco, y grábate pulsando las cuerdas al aire en ese orden.</li><li>Unos minutos después, escucha la grabación y nombra cada cuerda de oído antes de revisar tus papelitos — de más gruesa a más delgada es E-A-D-G-B-e, y tu oído las aprende más rápido de lo que crees.</li></ol>¿Tienes a alguien cerca? Pídele que pulse mientras tú miras hacia otro lado.'
+                text: '⚡ Ear Spark (optional, 2 min):<ol><li>Press play below — the deck draws five open strings at random and plucks them for you, and you never see which.</li><li>Name each one by ear before you check: thickest to thinnest is E-A-D-G-B-e, and your ear learns them faster than you\'d think.</li></ol>',
+                text_es: '⚡ Chispa de oído (opcional, 2 min):<ol><li>Presiona reproducir abajo — la baraja saca cinco cuerdas al aire al azar y las pulsa por ti, y nunca ves cuáles son.</li><li>Nombra cada una de oído antes de revisar: de más gruesa a más delgada es E-A-D-G-B-e, y tu oído las aprende más rápido de lo que crees.</li></ol>',
+                drill: { type: 'ear', pool: 'openStrings', draw: 5 },
               }
             ]
           }

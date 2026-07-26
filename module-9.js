@@ -449,8 +449,9 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 3 — Flash Drill (your assessment piece)', label_es: 'Reto 3 — Ejercicio relámpago (tu pieza de evaluación)',
-                text: '<ol><li>Make flashcards — write each natural note name (A through G) on its own slip of paper and shuffle them face-down.</li><li>Draw one at a time and find each drawn note on the D or G string within 5 seconds.</li><li>Switch strings every 5 draws.</li></ol>You\'ve got it when: 8 out of 10 correct within 5 seconds each, on both strings. Got someone around? Have them call the notes instead of drawing cards.',
-                text_es: '<ol><li>Haz tarjetas — escribe cada nombre de nota natural (de A a G) en su propia tira de papel y barájalas boca abajo.</li><li>Saca una a la vez y encuentra cada nota sacada en la cuerda Re o G en menos de 5 segundos.</li><li>Cambia de cuerda cada 5 tarjetas.</li></ol>Lo tienes cuando: 8 de 10 correctas en menos de 5 segundos cada una, en ambas cuerdas. ¿Tienes a alguien cerca? Que te diga las notas en vez de sacar tarjetas.',
+                text: '<ol><li>Deal the natural-note deck below and find each note it gives you on the D or G string within 5 seconds.</li><li>Switch strings every 5 cards.</li></ol>You\'ve got it when: 8 out of 10 correct within 5 seconds each, on both strings.',
+                text_es: '<ol><li>Reparte la baraja de notas naturales de abajo y encuentra cada nota que te dé en la cuerda Re o Sol en menos de 5 segundos.</li><li>Cambia de cuerda cada 5 cartas.</li></ol>Lo tienes cuando: 8 de 10 correctas en menos de 5 segundos cada una, en ambas cuerdas.',
+                drill: { type: 'deck', deck: 'naturals' },
                 hint: 'If you\'re stuck, use the octave shape from a string you already know instead of counting up one fret at a time.',
                 hint_es: 'Si te atoras, usa la forma de octava desde una cuerda que ya conozcas en vez de contar traste por traste.',
                 stuck: 'Allow 10 seconds instead of 5 until it\'s automatic, then lower the time limit again.',

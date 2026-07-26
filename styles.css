@@ -1640,3 +1640,30 @@ body.games-open{overflow:hidden}
 .sk-practice-prompt li,.sk-practice-explain li{margin:3px 0;line-height:1.45}
 .sk-practice-explain{margin-top:8px;padding:8px 10px;font-size:0.875rem;color:var(--text2);background:var(--bg2);border-left:2px solid var(--green-text);border-radius:0 4px 4px 0;line-height:1.5}
 .sk-practice-explain[hidden]{display:none}
+
+/* ── Card Deck drill (.dkr) and Ear Spark drill (.err) ──
+   Both reuse the Shuffle Drill's .sdr chrome (purple head bar, body, score,
+   verdict pill) and add only what they need on top. See app.js. */
+.dkr-card{width:190px;min-height:150px;margin:0 auto 14px;border-radius:12px;background:var(--bg);
+  border:2px solid var(--border2);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:7px;padding:12px;user-select:none;transition:.15s}
+.dkr-card:not(.flipped){cursor:pointer}
+.dkr-card:not(.flipped):hover{border-color:var(--purple-accent)}
+.dkr-card.flipped{border-color:var(--purple-accent);background:var(--bg3)}
+.dkr-face{font-size:2.6rem;font-weight:700;line-height:1.05;text-align:center}
+.dkr-sub{font-size:0.9375rem;color:var(--text2)}
+.dkr-prompt{font-size:0.875rem;color:var(--text2);margin:0 0 11px;line-height:1.45}
+.dkr-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.dkr-btn{padding:8px 16px;border:1px solid var(--border2);background:var(--bg);color:var(--text);
+  border-radius:20px;font-size:0.9rem;font-family:inherit;cursor:pointer}
+.dkr-btn:hover{background:var(--bg3)}
+.dkr-btn.good{border-color:var(--green-text);color:var(--green-text)}
+.dkr-btn.again{border-color:var(--amber-text);color:var(--amber-text)}
+.dkr-btn.done{background:var(--green-bg);cursor:default}
+.err-slots{display:flex;gap:6px;justify-content:center;margin:0 0 13px;flex-wrap:wrap}
+.err-slot{width:46px;height:52px;border:2px dashed var(--border2);border-radius:8px;display:flex;
+  align-items:center;justify-content:center;font-weight:700;font-size:1.1rem;color:var(--text2)}
+.err-slot.filled{border-style:solid;border-color:var(--purple-accent);color:var(--text)}
+.err-slot.correct{border-style:solid;border-color:var(--green-text);background:var(--green-bg);color:var(--green-text)}
+.err-slot.wrong{border-style:solid;border-color:var(--red-text);background:var(--red-bg);color:var(--red-text)}
+.err-pads{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;max-width:440px;margin:0 auto}

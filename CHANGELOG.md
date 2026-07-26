@@ -89,6 +89,29 @@ see `WORKFLOW.md` and the git commit log.
   — eight perfect hits in a row and the click goes quiet, so you can feel
   yourself holding the beat without the crutch.
 
+## 2026-07-26 — The paper drills are digital now
+
+### Added
+
+- **Card decks.** Six drills that used to say "make five flashcards" or "write
+  Am, Gm, Bm and Dm on four slips" now deal from a shuffled deck on screen.
+  Two-sided decks — like the relative-pairs one in Module 10 — keep the answer
+  hidden until you tap the card, so you still say it out loud first. Miss one
+  and it comes back a few cards later, same as tossing a slip back in the pile.
+  Your best clean run is saved.
+- **Ear Spark plays itself.** The Module 2 and Module 4 Ear Sparks asked you to
+  shuffle paper slips, record yourself, and play it back a few minutes later.
+  Now the deck draws the notes at random and plays them for you — you never see
+  which — and you tap your answers in before checking. No slips, no recording,
+  no waiting.
+
+### Changed
+
+- The eight cards above no longer mention paper, and their "Got someone around?
+  Have them call the notes instead" lines have come off — the deck does that job.
+- Module 11's stuck-hint no longer tells you to write the chord family out on
+  paper, and Module 10's level-up no longer asks for a partner to call keys.
+
 ## 2026-07-26 — Every Challenge card says its title once, and always uses bullets
 
 ### Changed

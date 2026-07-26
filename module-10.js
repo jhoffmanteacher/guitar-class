@@ -431,8 +431,9 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 1 — Relative Pairs Drill', label_es: 'Reto 1 — Ejercicio de Pares Relativos',
-                text: 'A drill is a short exercise you repeat to build a skill.<ol><li>Make five quick flashcards — major key on the front, relative minor on the back — C→Am, G→Em, F→Dm, D→Bm, A→F#m.</li><li>Shuffle, flip one at a time, and answer out loud before checking the back.</li><li>Then explain out loud how a PARALLEL minor would be different for the same key.</li></ol>(Got someone nearby? Have them quiz you with the cards.)',
-                text_es: 'Un ejercicio es una actividad corta que repites para desarrollar una destreza.<ol><li>Haz cinco tarjetas rápidas — tonalidad mayor al frente, relativa menor atrás — C→Am, G→Em, F→Dm, D→Bm, A→F#m.</li><li>Mézclalas, voltea una a la vez, y responde en voz alta antes de revisar el reverso.</li><li>Luego explica en voz alta cómo sería distinta una paralela menor para esa misma tonalidad.</li></ol>(¿Tienes a alguien cerca? Pídele que te haga preguntas con las tarjetas.)',
+                text: 'A drill is a short exercise you repeat to build a skill.<ol><li>Run the deck below — major key on the front, relative minor on the back — and answer out loud before you check.</li><li>Then explain out loud how a PARALLEL minor would be different for the same key.</li></ol>',
+                text_es: 'Un ejercicio es una actividad corta que repites para desarrollar una destreza.<ol><li>Corre la baraja de abajo — tonalidad mayor al frente, relativa menor atrás — y responde en voz alta antes de revisar.</li><li>Luego explica en voz alta cómo sería distinta una paralela menor para esa misma tonalidad.</li></ol>',
+                drill: { type: 'deck', deck: 'relative-pairs' },
                 hint: 'The shortcut: relative minor is always 3 frets down from the major root, or the major scale\'s 6th note.',
                 hint_es: 'El atajo: la relativa menor siempre está 3 trastes abajo de la raíz mayor, o es la 6ª nota de la escala mayor.',
                 stuck: 'Drill just C→Am and G→Em until those two are automatic, then add the rest.',
@@ -726,13 +727,14 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 1 — Transpose Drill', label_es: 'Reto 1 — Ejercicio de Transposición',
-                text: '<ol><li>Write Am, Gm, Bm, and Dm on four slips, shuffle, and draw one at a time.</li><li>Play minor pentatonic box 1 at that key\'s fret: fret 5 (Am), fret 3 (Gm), fret 7 (Bm), fret 10 (Dm — "Luna"\'s solo box!).</li></ol>You\'ve got it when: you can find any of these four positions within 5 seconds of drawing the key name.',
-                text_es: '<ol><li>Escribe Am, Gm, Bm y Dm en cuatro papelitos, mézclalos, y saca uno a la vez.</li><li>Toca la caja 1 de pentatónica menor en el traste de esa tonalidad: traste 5 (Am), traste 3 (Gm), traste 7 (Bm), traste 10 (Dm — ¡la caja del solo de "Luna"!).</li></ol>Lo tienes cuando: puedes encontrar cualquiera de estas cuatro posiciones dentro de los 5 segundos de sacar el nombre de la tonalidad.',
+                text: '<ol><li>Run the key deck below and play minor pentatonic box 1 at that key\'s fret: fret 5 (Am), fret 3 (Gm), fret 7 (Bm), fret 10 (Dm — "Luna"\'s solo box!).</li></ol>You\'ve got it when: you can find any of these four positions within 5 seconds of the card turning up.',
+                text_es: '<ol><li>Corre la baraja de tonalidades de abajo y toca la caja 1 de pentatónica menor en el traste de esa tonalidad: traste 5 (Am), traste 3 (Gm), traste 7 (Bm), traste 10 (Dm — ¡la caja del solo de "Luna"!).</li></ol>Lo tienes cuando: puedes encontrar cualquiera de estas cuatro posiciones dentro de los 5 segundos de que aparezca la carta.',
+                drill: { type: 'deck', deck: 'minor-keys-box1' },
                 hint: 'Fret 10 should feel familiar — it\'s the exact box you\'ve been using for "Luna"\'s solo since Module 4, now with a name attached.',
                 hint_es: 'El traste 10 debería sentirse familiar — es exactamente la caja que has estado usando para el solo de "Luna" desde el Módulo 4, ahora con un nombre asignado.',
                 stuck: 'Drill just Am (fret 5) and Dm (fret 10) — the two you already know from real songs — before adding Gm and Bm.',
                 stuck_es: 'Practica solo Am (traste 5) y Dm (traste 10) — los dos que ya conoces de canciones reales — antes de agregar Gm y Bm.',
-                levelUp: 'Move through all four positions without stopping, or have someone call out keys for you to find blind.',
+                levelUp: 'Move through all four positions without stopping, or name the fret before the card finishes turning.',
                 levelUp_es: 'Recorre las cuatro posiciones sin detenerte, o pídele a alguien que diga tonalidades para que las encuentres a ciegas.',
                 skills: [1, 2]
               }

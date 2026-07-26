@@ -186,14 +186,15 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 2 — Numeral Flashcards', label_es: 'Reto 2 — Tarjetas de números romanos',
-                text: '<ol><li>Make six flashcards, one numeral each (I ii iii IV V vi).</li><li>Shuffle the deck, flip the top card, and play that chord in the key of C — no hesitating.</li><li>Run the deck twice.</li></ol>(Got a partner handy? Have them call the numerals instead.)',
-                text_es: '<ol><li>Haz seis tarjetas, un número romano en cada una (I ii iii IV V vi).</li><li>Mezcla el mazo, voltea la tarjeta de arriba, y toca ese acorde en la tonalidad de C — sin dudar.</li><li>Repite el mazo dos veces.</li></ol>(¿Tienes a alguien cerca? Pídele que diga los números romanos en tu lugar.)',
+                text: '<ol><li>Run the numeral deck below and play each chord it deals you in the key of C — no hesitating.</li><li>Run the deck twice.</li></ol>',
+                text_es: '<ol><li>Corre la baraja de números romanos de abajo y toca cada acorde que te reparta en la tonalidad de C — sin dudar.</li><li>Repite la baraja dos veces.</li></ol>',
+                drill: { type: 'deck', deck: 'numerals-C' },
                 hint: 'If you know the family in order (C Dm Em F G Am), the numeral just tells you which slot to reach for.',
                 hint_es: 'Si conoces la familia en orden (C Dm Em F G Am), el número romano solo te dice cuál lugar buscar.',
-                stuck: 'Write the family out in numeral order on paper and keep it in view while you drill.',
-                stuck_es: 'Escribe la familia en orden de números romanos en papel y mantenla a la vista mientras practicas.',
-                levelUp: 'Switch to the key of G, or time yourself through the deck and try to beat your best time. Ready for all seven? Look up Bdim — the vii° of C — and add a seventh card.',
-                levelUp_es: 'Cambia a la tonalidad de G, o cronométrate a través del mazo e intenta superar tu mejor tiempo. ¿Listo para los siete? Busca Bdim — el vii° de C — y agrega una séptima tarjeta.',
+                stuck: 'Keep the family in numeral order in view while you drill — C Dm Em F G Am.',
+                stuck_es: 'Mantén la familia en orden de números romanos a la vista mientras practicas — C Dm Em F G Am.',
+                levelUp: 'Switch to the key of G, or time yourself through the deck and try to beat your best time. Ready for all seven? Look up Bdim — the vii° of C — and name it at the end of every lap.',
+                levelUp_es: 'Cambia a la tonalidad de G, o cronométrate con la baraja e intenta superar tu mejor tiempo. ¿Listo para los siete? Busca Bdim — el vii° de C — y nómbralo al final de cada vuelta.',
                 skills: [1, 2]
               }
             ]
@@ -204,14 +205,15 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "Let It Be", numbered', label_es: 'Reto — "Let It Be", numerado',
-                text: '<ol><li>Write I, V, vi, and IV on four slips.</li><li>Strum the verse drawing a slip each bar (or call the numerals aloud in a random order you set beforehand) — you have to know which chord each numeral means, not just the C–G–Am–F letters.</li></ol>You\'ve got it when: one full loop with every numeral landing on the right chord. (A partner calling numerals works too.)',
-                text_es: '<ol><li>Escribe I, V, vi y IV en cuatro papelitos.</li><li>Rasguea la estrofa sacando un papelito en cada compás (o di los números romanos en voz alta en un orden aleatorio que definas de antemano) — tienes que saber qué acorde significa cada número romano, no solo las letras C–G–Am–F.</li></ol>Lo tienes cuando: una vuelta completa con cada número romano cayendo en el acorde correcto. (Tener a alguien que diga los números romanos también funciona.)',
+                text: '<ol><li>Strum the verse, playing whatever numeral the deck below deals you each bar — you have to know which chord each numeral means, not just the C–G–Am–F letters.</li></ol>You\'ve got it when: one full loop with every numeral landing on the right chord.',
+                text_es: '<ol><li>Rasguea la estrofa, tocando el número romano que la baraja de abajo te reparta en cada compás — tienes que saber qué acorde significa cada número romano, no solo las letras C–G–Am–F.</li></ol>Lo tienes cuando: una vuelta completa con cada número romano cayendo en el acorde correcto.',
+                drill: { type: 'deck', deck: 'numerals-letitbe', skill: 'm11w1-s3' },
                 hint: 'This is the same verse you\'ve strummed since Module 5 — today the only new part is thinking in numerals instead of letters.',
                 hint_es: 'Esta es la misma estrofa que has rasgueado desde el Módulo 5 — hoy lo único nuevo es pensar en números romanos en lugar de letras.',
                 stuck: 'Say each chord\'s NAME out loud first, then its numeral, until the pairing sticks.',
                 stuck_es: 'Di primero el NOMBRE de cada acorde en voz alta, y luego su número romano, hasta que la relación se fije.',
-                levelUp: 'Shuffle the slips into a new order each loop, and always land back on I to finish.',
-                levelUp_es: 'Mezcla los papelitos en un nuevo orden cada vuelta, y siempre termina cayendo en I.',
+                levelUp: 'Deal a fresh order each loop, and always land back on I to finish.',
+                levelUp_es: 'Reparte un orden nuevo cada vuelta, y siempre termina cayendo en I.',
                 skills: [3],
                 chords: [
                   { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
@@ -784,8 +786,9 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 2 — I–IV–V Builder', label_es: 'Reto 2 — Constructor de I–IV–V',
-                text: '<ol><li>Play I–IV–V in G (G open or fret-3 barre · C · D).</li><li>Then in A.</li><li>Then a key you draw at random from your chord slips.</li></ol>You\'ve got it when: clean changes in time at 60 BPM, using at least one barre shape.',
-                text_es: '<ol><li>Toca I–IV–V en G (G abierto o cejilla en el traste 3 · C · D).</li><li>Luego en A.</li><li>Luego una tonalidad que saques al azar de tus papelitos de acordes.</li></ol>Lo tienes cuando: cambios limpios y a tiempo a 60 BPM, usando al menos una forma con cejilla.',
+                text: '<ol><li>Play I–IV–V in G (G open or fret-3 barre · C · D).</li><li>Then in A.</li><li>Then in whatever key the deck below deals you.</li></ol>You\'ve got it when: clean changes in time at 60 BPM, using at least one barre shape.',
+                text_es: '<ol><li>Toca I–IV–V en G (G abierto o cejilla en el traste 3 · C · D).</li><li>Luego en A.</li><li>Luego en la tonalidad que te reparta la baraja de abajo.</li></ol>Lo tienes cuando: cambios limpios y a tiempo a 60 BPM, usando al menos una forma con cejilla.',
+                drill: { type: 'deck', deck: 'keys-IIVV' },
                 hint: 'Once you know I–IV–V\'s shape in one key, moving the whole progression to a new key is just sliding your hands.',
                 hint_es: 'Una vez que conoces la forma del I–IV–V en una tonalidad, mover toda la progresión a una tonalidad nueva es solo deslizar tus manos.',
                 stuck: 'Stay in G until the changes are automatic, then move the whole progression up together.',
