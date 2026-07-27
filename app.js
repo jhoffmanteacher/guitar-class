@@ -3181,7 +3181,10 @@ function renderShuffleDrill(drill, key, wid){
       wid:     wid
     }
   };
-  return `<div class="sdr" id="sdr-${escAttr(key)}">${sdSetupHtml(key)}</div>`;
+  // data-skill lets the shuffle-deck check-off gate find and scroll to this
+  // deck from the checklist tab (drillGatePractice).
+  const skillAttr = drill.skill ? ` data-skill="${escAttr(drill.skill)}"` : '';
+  return `<div class="sdr" id="sdr-${escAttr(key)}"${skillAttr}>${sdSetupHtml(key)}</div>`;
 }
 
 function sdHeadHtml(key, right){
@@ -3341,6 +3344,7 @@ function sdFinish(key){
   sdStop(key);
   const c = st.cfg;
   sdSaveBest(c, st.inTime);
+  sdRecordSkillBest(c, st.inTime);
 
   /* "Drill these next" — every fret that was wrong, late, or just sluggish,
      worst first. This is the thing paper slips could never tell them. */
@@ -3886,6 +3890,126 @@ function coachGatePractice(sid, wid){
   const coachBtn = panel.querySelector('.coach-btn');
   if(coachBtn) flashClass(coachBtn, 'gate-attn', 1200);
 }
+/* ══════════ Shuffle-deck check-off gate ══════════
+   A skill that has its own shuffle deck (a step with drill:{type:'shuffle',
+   skill: sid} in the same set) asks for a 9-of-10 deck run before "I've got
+   it!" can be set — the deck IS the skill ("name any fret instantly"), so a
+   pass is proof, not extra homework. Same SOFT-gate philosophy as the Coach
+   gate below: "Mark it anyway" always works and records the override for the
+   teacher view — never a punishment, just visibility. A qualifying run earned
+   ANY way opens the gate: this browser session, the per-skill best in
+   games.drillSkill, or the pile bests in games.sd — that last one matters
+   because two decks can be the same drill (m2w1-s3 and m3w1-s4 both deal the
+   A string), and a student who already proved a string shouldn't re-prove it
+   one module later. */
+const DRILL_GATE_MIN = 9;      // of 10 — matches the deck's own ≥90% check-off offer
+let drillSkillSession = {};    // sid → best this session (covers dev-bypass / signed-out)
+function skillDrillStep(sid){
+  for(const w of (SETS||[])){
+    for(const stId of ['b','c']){
+      const stn = w.stations && w.stations[stId];
+      if(!stn) continue;
+      const sections = stn.sections || (stn.steps ? [{steps: stn.steps}] : []);
+      for(const sec of sections){
+        for(const s of (sec.steps||[])){
+          if(s.drill && s.drill.type === 'shuffle' && s.drill.skill === sid)
+            return { w: w, station: stId, drill: s.drill };
+        }
+      }
+    }
+  }
+  return null;
+}
+function skillIsDrillGated(sid){ return !!skillDrillStep(sid); }
+function drillGateBest(sid){
+  const rec = (typeof games !== 'undefined' && games && games.drillSkill) ? games.drillSkill[sid] : null;
+  let best = Math.max(drillSkillSession[sid] || 0, (rec && rec.best) || 0);
+  const hit = skillDrillStep(sid);
+  if(hit){
+    const str = hit.drill.string || 'lowE';
+    best = Math.max(best,
+      sdBest({ string: str, pile: 'naturals' }),
+      sdBest({ string: str, pile: 'sharps' }));
+  }
+  return best;
+}
+/* Per-skill deck best — written on every finished run of a skill-bound deck,
+   so the teacher view can tell a deck-verified got-it from a self-declared
+   one (games.drillSkill[sid] = { best, at, override? }). */
+function sdRecordSkillBest(c, n){
+  if(!c || !c.skill) return;
+  drillSkillSession[c.skill] = Math.max(drillSkillSession[c.skill] || 0, n);
+  if(!currentUser || (typeof isDevBypassUser === 'function' && isDevBypassUser())) return;
+  if(!games.drillSkill) games.drillSkill = {};
+  const prev = games.drillSkill[c.skill] || {};
+  if((prev.best || 0) >= n) return;
+  games.drillSkill[c.skill] = Object.assign({}, prev, { best: n, at: dayStr(new Date()) });
+  saveGames();
+}
+let drillGateBypass = false;
+function openDrillGate(sid, wid){
+  closeDrillGate();
+  const sk = skillById(sid);
+  const ov = document.createElement('div');
+  ov.className = 'daily5-overlay';
+  ov.id = 'drill-gate-overlay';
+  ov.innerHTML = `<div class="daily5-modal" role="dialog" aria-modal="true" aria-label="${escAttr(t('dgate.title'))}">
+    <div class="daily5-head"><h3 style="font:inherit;margin:0">&#x1F0CF; ${t('dgate.title')}</h3>
+      <button type="button" class="tp-close" onclick="closeDrillGate()" aria-label="${escAttr(t('gate.closeAria'))}">&#x2715;</button></div>
+    ${sk ? `<p class="coach-tip">${escHtml(tf(sk,'text'))}</p>` : ''}
+    <p class="coach-tip">${escHtml(t('dgate.body'))}</p>
+    <div class="issue-actions">
+      <button type="button" class="panel-next-btn" onclick="drillGatePractice('${escAttr(sid)}','${escAttr(wid)}')">${t('dgate.goto')}</button>
+      <button type="button" class="tp-btn" onclick="drillGateMarkAnyway('${escAttr(sid)}','${escAttr(wid)}')">${t('gate.markAnyway')}</button>
+    </div>`;
+  ov.addEventListener('click', e => { if(e.target === ov) closeDrillGate(); });
+  document.body.appendChild(ov);
+  document.addEventListener('keydown', drillGateEscClose);
+}
+function drillGateEscClose(e){ if(e.key === 'Escape') closeDrillGate(); }
+function closeDrillGate(){
+  const ov = document.getElementById('drill-gate-overlay');
+  if(ov) ov.remove();
+  document.removeEventListener('keydown', drillGateEscClose);
+}
+/* "Take me to the deck" → switch to the station tab that holds it, expand
+   the step if it's collapsed, and scroll the deck into view. */
+function drillGatePractice(sid, wid){
+  closeDrillGate();
+  const hit = skillDrillStep(sid);
+  const useWid = (hit && hit.w.id) || wid;
+  if(hit) switchTabById(useWid, hit.station, true);
+  const box = document.querySelector(`.week-panel[data-id="${useWid}"] .sdr[data-skill="${CSS.escape(sid)}"]`);
+  if(!box) return;
+  const li = box.closest('li.step');
+  if(li && li.classList.contains('collapsed')){
+    const head = li.querySelector('.step-head');
+    if(head) head.click();
+  }
+  setTimeout(()=>{
+    box.scrollIntoView({ block:'center', behavior:'smooth' });
+    flashClass(box, 'gate-attn', 1200);
+  }, 60);
+}
+/* "Mark it anyway" → honour the student's call, but record the override so
+   the teacher can see the got-it had no deck run behind it. */
+function drillGateMarkAnyway(sid, wid){
+  closeDrillGate();
+  if(typeof games !== 'undefined' && games){
+    if(!games.drillSkill) games.drillSkill = {};
+    const prev = games.drillSkill[sid] || {};
+    games.drillSkill[sid] = Object.assign({}, prev, {
+      best: prev.best || 0,
+      override: true,
+      overrideAt: dayStr(new Date())
+    });
+    if(typeof saveGames === 'function' && currentUser && !isDevBypassUser()) saveGames();
+  }
+  drillGateBypass = true;
+  toggleSkill(sid, wid, 'gotit');
+  drillGateBypass = false;
+}
+
 /* "Mark it anyway" → honour the student's call, but record the override so
    the teacher can see the got-it had no Coach take behind it. */
 function coachGateMarkAnyway(sid, wid){
@@ -3912,8 +4036,9 @@ function coachGateMarkAnyway(sid, wid){
    a student who really can play it, so the modal always offers "Mark it
    anyway" — and records that they took it, so the teacher view can tell a
    Coach-backed got-it from a self-declared one. Skills practiced by mc / pr /
-   fretboard drills (the large majority) are never gated — the mic can't hear
-   a multiple-choice answer. */
+   fretboard drills are never Coach-gated — the mic can't hear a multiple-
+   choice answer — but a few of those have their own shuffle deck and go
+   through the deck gate above instead. */
 const COACH_GATE_MIN_LEVEL = 2;      // 1 Needs work · 2 Good · 3 Great
 function skillById(sid){
   for(const w of (SETS||[])){
@@ -3945,6 +4070,10 @@ function toggleSkill(sid, wid, which){
     else {
       if(!coachGateBypass && skillIsCoachGated(sid) && coachSkillBest(sid) < COACH_GATE_MIN_LEVEL){
         openCoachGate(sid, wid);
+        return false;
+      }
+      if(!drillGateBypass && !coachGateBypass && skillIsDrillGated(sid) && drillGateBest(sid) < DRILL_GATE_MIN){
+        openDrillGate(sid, wid);
         return false;
       }
       coachGateBypass = false;

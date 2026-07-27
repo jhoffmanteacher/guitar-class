@@ -210,6 +210,12 @@
     'gate.markAnyway':         { en: 'Mark it anyway', es: 'Marcarlo de todos modos' },
     'gate.closeAria':          { en: 'Close', es: 'Cerrar' },
     'gate.overrideNote':       { en: 'Marked without a Coach check — your teacher can see this.', es: 'Marcado sin revisión del Coach — tu maestro puede verlo.' },
+
+    // ── Shuffle-deck check-off gate (soft: student can always override) ──
+    'dgate.title':             { en: 'Prove it with the deck', es: 'Demuéstralo con el mazo' },
+    'dgate.body':              { en: 'This skill has its own shuffle deck, and the deck can check it off for you — 9 of 10 within the time limit, right there. Give it a run first; it takes under a minute, and it makes "I\'ve got it!" mean something.',
+                                 es: 'Esta destreza tiene su propio mazo de cartas, y el mazo puede marcarla por ti — 9 de 10 dentro del límite de tiempo, ahí mismo. Dale una vuelta primero; toma menos de un minuto, y hace que "¡Ya lo tengo!" signifique algo.' },
+    'dgate.goto':              { en: '🃏 Take me to the deck', es: '🃏 Llévame al mazo' },
     'skill.gettingIt':         { en: 'Getting it', es: 'Ya le voy agarrando' },
     'skill.gotItShort':        { en: 'Got it', es: 'Ya lo tengo' },
     'skill.checklistIntro':    { en: 'Check each skill as you practice. Use "Still working on it" while you\'re learning, then mark "I\'ve got it!" once you can do it consistently.',

@@ -5,6 +5,22 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Note-naming skills now ask you to prove it with the deck
+
+### Added
+
+- **Four skills in Modules 2 and 3 now ask for a shuffle-deck run before
+  "I've got it!"** — the note-naming skills that already have their own deck
+  (low E and A strings in Module 2, the two power-chord root climbs in
+  Module 3). When you tap "I've got it!", a pop-up offers to take you
+  straight to the deck: score 9 of 10 within the time limit and the skill
+  checks itself off, right there. If you've already hit 9 of 10 on that
+  string's deck — even in an earlier module — the check-off works like
+  before, no pop-up.
+- Like the Listening Coach pop-up, there's always a **"Mark it anyway"**
+  button — it never blocks you, and your teacher can see which check-offs
+  had a deck run behind them.
+
 ## 2026-07-27 — Module 13: removed the remaining bridge diagrams
 
 ### Removed
