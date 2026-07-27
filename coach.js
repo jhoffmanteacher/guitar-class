@@ -5231,7 +5231,13 @@ function nrReq(i){
   const a = NR_LEVELS[i].after;
   return a !== undefined ? a : i - 1;
 }
-function nrUnlocked(i){ return i === 0 || nrBestMerged(nrReq(i)) >= NR_PASS; }
+function nrUnlocked(i){
+  /* Teacher + localhost dev bypass preview any level — same rule as the
+     set gate (app.js isGatePreviewer): they're checking content and
+     demoing for the class, not earning the ladder. */
+  if (typeof isGatePreviewer === 'function' && isGatePreviewer()) return true;
+  return i === 0 || nrBestMerged(nrReq(i)) >= NR_PASS;
+}
 
 function nrStop(){
   if (nrRaf){ cancelAnimationFrame(nrRaf); nrRaf = null; }
