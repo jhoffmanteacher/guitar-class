@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Module 5: G and A lesson videos, and Group 3 slims down
+
+### Added
+
+- **Two new lesson videos — the G chord and the A chord.** Every Group 1 and
+  Group 2 chord now has a video the way C, F, D, and Bm already did.
+
+### Changed
+
+- **F#m and C#m are out of Module 5.** They were recognition-only — two
+  diagrams tucked into the E-chord video card and one "identify the shape"
+  skill. Group 3 is now E and B7. The barre shapes are still in the Chord
+  Blitz game and still come back in Module 7.
+
 ## 2026-07-27 — Module 13 is now a full restring, with step-by-step pictures
 
 ### Changed

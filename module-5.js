@@ -356,6 +356,31 @@ SETS.push(
             response: { type: 'short', placeholder: 'Which version of the F chord are you starting with (full barre or simplified)? Why?',
               placeholder_es: '¿Con qué versión del acorde F estás empezando (cejilla completa o simplificada)? ¿Por qué?' }
           },
+          {
+            label: 'Watch: the G chord', label_es: 'Mira: el acorde de G',
+            text: 'Watch: <a href="https://youtu.be/gEzwpqmt2gc" target="_blank">The G Chord (BC-131) – JustinGuitar</a> (0:00–4:00).',
+            text_es: 'Mira: <a href="https://youtu.be/gEzwpqmt2gc" target="_blank">The G Chord (BC-131) – JustinGuitar</a> (0:00–4:00).',
+            hint: 'G stretches your hand across the whole neck — fingers on the outside strings, nothing in the middle. He shows both the 3-finger and 4-finger versions; start with whichever you can play cleanly.',
+            hint_es: 'G estira tu mano a lo ancho del mástil — dedos en las cuerdas de los extremos, nada en el medio. Él muestra las versiones de 3 y de 4 dedos; empieza con la que puedas tocar limpia.',
+            skills: [3],
+            response: { type: 'mc', prompt: 'In the G chord, what are strings 2, 3, and 4 doing?',
+              prompt_es: 'En el acorde G, ¿qué están haciendo las cuerdas 2, 3 y 4?',
+              answer: 0,
+              explain: 'G puts fingers only on the outside strings — the three in the middle ring open. That gap is why the chord sounds so big, and why it feels like such a stretch at first.',
+              explain_es: 'G pone dedos solo en las cuerdas de los extremos — las tres del medio suenan al aire. Ese hueco es la razón de que el acorde suene tan grande, y de que al principio se sienta como un gran estiramiento.',
+              choices: [
+              'Ringing open — no fingers on them',
+              'Muted with the picking hand',
+              'Held down by the index finger',
+              'Skipped — you don\'t strum them'
+            ],
+              choices_es: [
+              'Sonando al aire — sin dedos encima',
+              'Silenciadas con la mano de pulsar',
+              'Presionadas por el dedo índice',
+              'Salteadas — no las rasgueas'
+            ] }
+          },
             ]
           },
           {
@@ -929,6 +954,31 @@ SETS.push(
             ] }
           },
           {
+            label: 'Watch: the A chord', label_es: 'Mira: el acorde de A',
+            text: 'Watch: <a href="https://youtu.be/VkkOFLouQDs" target="_blank">The A Chord (BC-112) – JustinGuitar</a> (0:00–4:00).',
+            text_es: 'Mira: <a href="https://youtu.be/VkkOFLouQDs" target="_blank">The A Chord (BC-112) – JustinGuitar</a> (0:00–4:00).',
+            hint: 'A crowds three fingers into a single fret. Watch how he bunches them together and sits them back from the fret wire instead of trying to spread them out.',
+            hint_es: 'A amontona tres dedos en un solo traste. Fíjate cómo los junta y los acomoda un poco atrás del alambre del traste en vez de intentar separarlos.',
+            skills: [2, 4],
+            response: { type: 'mc', prompt: 'What makes the A chord awkward for most beginners?',
+              prompt_es: '¿Qué hace que el acorde A sea incómodo para la mayoría de los principiantes?',
+              answer: 0,
+              explain: 'All three fingers share fret 2, so they compete for room. Bunching them and sitting back from the fret wire gives you the space you need.',
+              explain_es: 'Los tres dedos comparten el traste 2, así que compiten por espacio. Juntarlos y acomodarlos atrás del alambre del traste te da el espacio que necesitas.',
+              choices: [
+              'Three fingers have to fit in one fret',
+              'It needs a full barre',
+              'You strum all six strings',
+              'It uses the pinky'
+            ],
+              choices_es: [
+              'Tres dedos tienen que caber en un solo traste',
+              'Necesita una cejilla completa',
+              'Rasgueas las seis cuerdas',
+              'Usa el meñique'
+            ] }
+          },
+          {
             label: 'Watch: Bm two ways', label_es: 'Mira: Bm de dos maneras',
             text: 'Watch: <a href="https://www.youtube.com/watch?v=suJnbc2TERU" target="_blank">B minor (Bm) Chord, 2 Ways (start easy, then barre) – Guitar Goddess (0:00–4:00)</a>.',
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=suJnbc2TERU" target="_blank">B minor (Bm) Chord, 2 Ways (start easy, then barre) – Guitar Goddess (0:00–4:00)</a>.',
@@ -1250,10 +1300,10 @@ SETS.push(
     unit: 'Module 5 · Open Chords',
     unit_es: 'Módulo 5 · Acordes al aire',
     title: 'Set 4',
-    subtitle: 'Chord Group 3: E, B7, F#m, C#m · Module 5 assessment preparation',
-    subtitle_es: 'Grupo de acordes 3: E, B7, F#m, C#m · Preparación para la evaluación del Módulo 5',
-    skillFocus: 'Fretting the E and B7 chords · Recognizing the F#m and C#m shapes · Performing a core song from memory',
-    skillFocus_es: 'Trastear los acordes E y B7 · Reconocer las formas F#m y C#m · Interpretar una canción principal de memoria',
+    subtitle: 'Chord Group 3: E and B7 · Module 5 assessment preparation',
+    subtitle_es: 'Grupo de acordes 3: E y B7 · Preparación para la evaluación del Módulo 5',
+    skillFocus: 'Fretting the E and B7 chords · Performing a core song from memory',
+    skillFocus_es: 'Trastear los acordes E y B7 · Interpretar una canción principal de memoria',
     comingSoon: false,
 
     stations: {
@@ -1269,13 +1319,9 @@ SETS.push(
             label: 'Watch: the E chord', label_es: 'Mira: el acorde de E',
             text: 'Watch: <a href="https://youtu.be/8H393ryDkuY" target="_blank">The E Chord (BC-113) – JustinGuitar</a> (0:00–4:00).',
             text_es: 'Mira: <a href="https://youtu.be/8H393ryDkuY" target="_blank">The E Chord (BC-113) – JustinGuitar</a> (0:00–4:00).',
-            hint: 'E major uses three fingers — it\'s a full, rich chord. (B7, later in this set, is the one that uses all four.) Play it as he shows and take it slow, checking every string rings. The two diagrams below are F#m and C#m: Group 3 barre shapes you only need to RECOGNIZE on a chart for now, not play cleanly yet.',
-            hint_es: 'E mayor usa tres dedos — es un acorde completo y rico. (B7, más adelante en esta unidad, es el que usa los cuatro.) Tócalo como él muestra y ve despacio, revisando que cada cuerda suene. Los dos diagramas de abajo son F#m y C#m: formas de cejilla del Grupo 3 que por ahora solo necesitas RECONOCER en un diagrama, no tocarlas limpias todavía.',
-            skills: [1, 3],
-            chords: [
-              { name: 'F#m', chord: [[6,'x'],[5,'x'],[4,4,'3'],[3,2,'1'],[2,2,'1'],[1,2,'1']], position: 2 },
-              { name: 'C#m', chord: [[6,'x'],[5,4,'1'],[4,6,'3'],[3,6,'4'],[2,5,'2'],[1,4,'1']], position: 4 }
-            ],
+            hint: 'E major uses three fingers — it\'s a full, rich chord. (B7, later in this set, is the one that uses all four.) Play it as he shows and take it slow, checking every string rings.',
+            hint_es: 'E mayor usa tres dedos — es un acorde completo y rico. (B7, más adelante en esta unidad, es el que usa los cuatro.) Tócalo como él muestra y ve despacio, revisando que cada cuerda suene.',
+            skills: [1],
             response: { type: 'short', placeholder: 'Describe the sound of the E major chord — full and rich, or is a string buzzing?',
               placeholder_es: 'Describe el sonido del acorde E mayor — ¿completo y rico, o hay una cuerda zumbando?' }
           },
@@ -1507,14 +1553,6 @@ SETS.push(
           prompt_es: 'B7 se llama un acorde de "séptima dominante". ¿Qué te dice el "7" que agrega al acorde?',
           choices: ['Seven fingers', 'A 7th interval — gives it a slightly tense, jazzy/bluesy sound', 'Play on the 7th fret', 'Strum it seven times'],
           choices_es: ['Siete dedos', 'Un intervalo de 7ª — le da un sonido ligeramente tenso, jazzero/bluesero', 'Tócalo en el traste 7', 'Rasguéalo siete veces'], answer: 1 } },
-      { id: 'm5w4-s3', text: 'Identify F#m and C#m shapes on a chord diagram',
-        text_es: 'Identificar las formas F#m y C#m en un diagrama de acorde',
-        gotItWhen: 'you can see an F#m or C#m diagram and explain which version (partial barre or full barre) and which finger goes where, even if you can\'t play it cleanly yet.',
-        gotItWhen_es: 'puedes ver un diagrama de F#m o C#m y explicar qué versión es (cejilla parcial o completa) y qué dedo va dónde, incluso si todavía no puedes tocarlo limpio.',
-        practice: { type: 'mc', prompt: 'F#m and C#m use a "barre" shape. What is a barre?',
-          prompt_es: 'F#m y C#m usan una forma de "cejilla". ¿Qué es una cejilla?',
-          choices: ['One finger pressing across multiple strings at the same fret', 'A type of pick', 'A string-bending technique', 'Strumming with the thumb'],
-          choices_es: ['Un dedo presionando a través de varias cuerdas en el mismo traste', 'Un tipo de púa', 'Una técnica de doblar cuerdas', 'Rasguear con el pulgar'], answer: 0 } },
       { id: 'm5w4-s4', text: 'Demonstrate a chord from each of Semester 1\'s 3 chord groups',
         text_es: 'Demostrar un acorde de cada uno de los 3 grupos de acordes del Semestre 1',
         gotItWhen: 'you can play at least one chord from each of Groups 1, 2, and 3 cleanly on demand — and name the group each belongs to.',
