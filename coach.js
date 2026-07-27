@@ -3762,10 +3762,6 @@ async function srStart(){
   const pat = SH_PATTERNS[s.patIdx];
   s.beatMs = 60000 / s.bpm;
   s.slotMs = s.beatMs / 2;
-  /* Hit window per expected strum — wider than Strum Hero's tap windows
-     because onset detection adds its own jitter, capped so neighbouring
-     eighth slots can't both claim one strum. */
-  s.win = Math.max(90, s.beatMs * 0.22);
   /* The mic hears a strum after it happens (Chromebooks: 40–120ms). Reuse
      the per-machine offset Note Runner's slider calibrates — it's a property
      of the device, not the game — so honest strums aren't graded "late" by
@@ -3777,6 +3773,17 @@ async function srStart(){
       if (dir) s.notes.push({ t: (b * 8 + i) * s.slotMs, dir, bar: b, result: null });
     });
   }
+  /* Hit window per expected strum — wider than Strum Hero's tap windows
+     because onset detection adds its own jitter. Scaled to the PATTERN's
+     own density: 45% of the tightest gap between expected strums, so the
+     all-eighths pattern stays at the maximum where neighbouring slots
+     can't both claim one strum, while sparser patterns (downs, reggae)
+     get the extra forgiveness their spacing safely allows. Absolute
+     ceiling of 0.28 beat — further out than that isn't "on" anything. */
+  let minGap = Infinity;
+  for (let i = 1; i < s.notes.length; i++) minGap = Math.min(minGap, s.notes[i].t - s.notes[i - 1].t);
+  if (!isFinite(minGap)) minGap = s.slotMs;
+  s.win = Math.max(90, Math.min(0.28 * s.beatMs, 0.45 * minGap));
   s.errs = [];                  // signed onset errors (ms), for the early/late line
   s.extras = 0;
   s.smoothRms = 0; s.smoothHf = 0; s.lastOnsetT = -1e9; s.gridOffset = 0; s.lastSlot = -1;
@@ -3861,7 +3868,7 @@ function srLoop(){
          player — Change Up's EMA, on the eighth grid. */
       const slotIdx = Math.round(rel / s.slotMs);
       const dev = rel - slotIdx * s.slotMs;
-      if (Math.abs(dev) < s.slotMs * 0.45) s.gridOffset += dev * 0.15;
+      if (Math.abs(dev) < s.slotMs * 0.45) s.gridOffset += dev * 0.2;
       /* Nearest unconsumed expected strum within the window; anything
          else is an extra — counted, never punished live (real rooms are
          noisy, and a squeaky chair shouldn't wreck a run). */

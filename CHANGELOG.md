@@ -7,6 +7,14 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-07-27 — Strum Radar can actually hear you now
 
+### Changed
+
+- **Strum Radar is a little more forgiving on the slower patterns.** The hit
+  window now fits each pattern's own spacing: patterns with room between
+  strums (downstrums, reggae) give you more slack, while the eighth-note
+  pattern keeps the tightest window it can without confusing neighboring
+  strums. The beat guide also follows your tempo a bit more readily.
+
 ### Fixed
 
 - **Strum Radar was missing real strums played at normal volume.** It was the
