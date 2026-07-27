@@ -70,7 +70,7 @@
 
 ## Open work
 
-- [~] **2026-07-26 deep site audit — remaining backlog.** Three parallel
+- [x] **2026-07-26 deep site audit — remaining backlog.** Three parallel
   agents (core app JS · modules 8–13 · modules 1–7) plus a live browser pass
   found ~90 issues beyond what `tools/checks.mjs` can catch. All 9 Critical
   and 7 Medium items are fixed and pushed (`bc757ae`) — section-index desync,
@@ -85,12 +85,19 @@
   paper-drill remnants, `gotItWhen` coverage, song-list inconsistencies, and
   every item in the app.js/coach.js/tuner.js/teacher.js code group are now
   fixed (unpushed as of this edit — run `node tools/checks.mjs` before
-  pushing). **Still genuinely open:** the four dedicated single-chord cards
-  noted as lower-priority below; the module-4 pull-off/slide gloss
-  inconsistency; the `module-9.js`/`module-11.js` list-vs-prose spots (module-8/
-  10/12/13's were fixed, these two modules weren't re-checked); the
-  degenerate one-`<li>` list sweep; and the `m5w4` Full Run card's missing
-  Journey chip. Grouped by file so a session can take one group at a time:
+  pushing). **Closed out 2026-07-27** (via a workflow with a built-in
+  adversarial review per fix group — see each item below for what it
+  actually caught): the four dedicated single-chord cards; the module-4
+  pull-off/slide gloss inconsistency; the `module-9.js`/`module-11.js`
+  list-vs-prose spots (turned out already fixed by `eeefbda`, just
+  undocumented); and the degenerate one-`<li>` list sweep (turned out not to
+  be a bug at all — see that item). **Still genuinely open, on purpose:**
+  the `m5w4` Full Run card's missing Journey chip (no single static link
+  obviously fits a card that references whichever of three songs the
+  student picked); the three items below still marked for Jonathan
+  specifically (list-sweep over-listing check, Coach gate real-guitar test,
+  Note Runner real-guitar test) — all three need his eyes/hands, not more
+  code. Grouped by file so a session can take one group at a time:
 
   **Content — promises content the set doesn't teach (Jonathan flagged this
   one as next priority):** ⚠️ **Important finding while working this section
@@ -125,14 +132,22 @@
         `assessment.goal`(_es), and `MODULE_REVIEWS[7]` `mr7-s5`. B major
         itself is fine as-is — it's genuinely taught in m7w3 Challenge 1,
         just via the A-shape, not the E-shape m7w2 had overpromised.
-  - [ ] Lower-priority, not yet done: m5w2's individual chords (C, F, G) and
-        m5w3's A major each lack their own single-chord "Fret X cleanly"
-        challenge card the way Set 1 (Am, Em) and Set 3 (D, Bm) have —
-        they're taught folded into multi-chord cards instead. Real
-        stylistic inconsistency (skills `m5w2-s1/s2/s3` and `m5w3-s2` are
-        live checklist items), but lower value than the Dm/G-B gap above
-        since the chords ARE taught, just not with dedicated cards. Revisit
-        if there's appetite for 4 more new cards in this pattern.
+  - [x] m5w2's individual chords (C, F, G) and m5w3's A major each now have
+        their own single-chord "Fret X cleanly" challenge card, matching Set
+        1 (Am, Em) and Set 3 (D, Bm) — same voice/structure as those and the
+        Dm/G-B precedent (`<ol>` body, hint/stuck/levelUp, a chord diagram
+        reusing the fingering already taught elsewhere in the file), linked
+        to the existing `m5w2-s1/s2/s3`/`m5w3-s2` skill ids (no new skills,
+        no `config-main.js` change). Fixed 2026-07-27 via a workflow with a
+        built-in adversarial review: the reviewer caught a real
+        self-contradiction in the new "Clean F (simplified)" card's `hint` —
+        it told students to "arch the finger at the very tip" while
+        describing a 2-string mini-barre, which needs a flat finger, not an
+        arched one — corrected before landing. Browser-verified (dev bypass,
+        both languages): all three new Set 2 sections and the new Set 3
+        section render in sequence with the existing dedicated-chord cards,
+        list + trailing "You've got it when" render correctly, chord
+        diagrams display, no console errors.
 
   **Content — factual/consistency errors (module-1–7 agent):**
   - [x] `module-5.js:41-57` vs `:258-261` — "X above a string" MC keyed two
@@ -203,11 +218,15 @@
         already logged separately — don't re-sweep it. All 5 corrected
         (module-3's "Mi mayor" → "E mayor" for the chord name, plus its
         "cuerda B" → "cuerda Si").
-  - [ ] Minor ES inconsistencies: "Ear Spark" translated two ways in
+  - [x] Minor ES inconsistencies: "Ear Spark" translated two ways in
         `module-2.js:333` vs. 19 other instances — **fixed**, both now say
-        "Chispa auditiva." `module-4.js:809` vs `:1111` gloss
-        "pull-off"/"slide" inconsistently — **still open**, not touched
-        this session. A few other small ones the module-1–7 report lists
+        "Chispa auditiva." `module-4.js:~807` (inside `m4w2-s3`'s practice
+        MC) glossed "pull-off"/"slide" inconsistently — **fixed 2026-07-27**:
+        the ES choice for "snap your finger off the string sideways" had
+        been mistranslated as "deslizando" (sliding), the site's word for
+        the *slide* technique, not pull-off; corrected to "sacando … de un
+        tirón hacia el costado," matching module-7.js's own canonical
+        pull-off gloss. A few other small ones the module-1–7 report lists
         under "Minor ES" weren't individually re-checked either.
   - [x] `module-2.js:704, 721` — TAB `phrases[].label` is English-only and
         the renderer (`app.js:694`) uses `escHtml` not `tf()` for it — needs
@@ -283,11 +302,15 @@
   **Content — list-vs-prose rule (cards over ~200 chars with more than one
   action, still written as a paragraph — project rule says these should be
   `<ol>`/`<ul>`):**
-  - [ ] `module-11.js:856` (386 chars, no list) and `module-9.js:82` vs its
+  - [x] `module-11.js:856` (386 chars, no list) and `module-9.js:82` vs its
         sibling `:92` (inconsistent — one's a list, one isn't) plus
-        `module-9.js:351` — **not touched this session**, still open (both
-        modules got other edits, but these specific prose spots weren't
-        re-checked). `module-13.js:188, 248, 298, 310, 324` (all multi-action
+        `module-9.js:351` — **turned out already fixed** (checked
+        2026-07-27): commit `eeefbda` had already converted all three, its
+        own commit message and this line just never got updated to say so.
+        Verified by diffing `eeefbda` against its parent — all three are
+        correctly `<ol>`s in EN+ES, original wording preserved, nothing left
+        to do. The line-856 citation itself had also drifted with later
+        edits (the real card is now ~line 878). `module-13.js:188, 248, 298, 310, 324` (all multi-action
         prose in a module where every other procedural step is a list) —
         **fixed**, all 5 converted to `<ol>`/`<ul>`. `module-10.js:148, 422,
         718` (warm-up tuning cards, prose here but `<ol>` in every other
@@ -297,11 +320,27 @@
         module-10.js:93,629; module-11.js:36,51,312; module-12.js:428,637;
         module-13.js:207 — mostly "Watch X, then Y" cards, which are prose
         sitewide by convention; left alone as recommended.
-  - [ ] Degenerate one-`<li>` `<ul>` lists (renders as a lone bullet,
-        technically rule-compliant but maybe not intended): full list of
-        ~19 locations is in the module-8–13 agent's report, e.g.
-        `module-8.js:183`, `module-9.js:433,693,958`, `module-12.js:147,
-        166,202,224,482,501,519,537,748,766,822`. Not touched this session.
+  - [x] **Closed 2026-07-27 — turned out not to be a bug.** Degenerate
+        one-`<li>` `<ul>` lists (renders as a lone bullet): the backlog's
+        ~19 locations (`module-8.js:183`, `module-9.js:433,693,958`,
+        `module-12.js:147,166,202,224,482,501,519,537,748,766,822`) are
+        every one of them a **Challenge card** (`Challenge N — Title:`),
+        and CLAUDE.md's Challenge-card rule is explicit that these are the
+        one place the "single actions stay prose" carve-out does NOT
+        apply — "the body is always a list" and "a card that already had a
+        list keeps it byte-for-byte," full stop, regardless of length. A
+        fix agent unwrapped all 11 real locations (module-8.js:182,
+        module-12.js: nine spots) to prose on the reasoning that a
+        single-action list looked degenerate; an adversarial review agent
+        caught it against CLAUDE.md's own wording and every location was
+        reverted (`git diff --stat` confirmed both files byte-identical to
+        HEAD). Separately checked module-9.js's three citations by hand:
+        `:433` and `:693` are also Challenge cards (same rule, left alone);
+        `:958` was already a stale citation even before this session — that
+        line is now a section boundary with no list at all. **Net: nothing
+        on the site needed changing** — the original backlog item
+        misapplied the list-vs-prose rule to cards the Challenge-card rule
+        exempts.
 
   **Content — song-list inconsistencies:**
   - [x] `MODULE_SONGS[2]` omits Let It Be though `m2w2.songThread` links its
@@ -440,13 +479,30 @@
          try: `m2w2-s1`, or most of Module 5 Set 2. A quiz or fretboard-game
          skill should still mark instantly, with no card at all.
 
-- [ ] **Listening Coach check-off gate — teacher view of overrides
-      (2026-07-25).** The gate records `games.coachSkill[skillId] =
-      {level, last, at, override?, overrideAt?}`; `teacher.js` does not
-      surface it yet. Worth adding a marker in the skills grid so a
-      Coach-backed "I've got it!" reads differently from a self-declared
-      one — an override is a signal about the mic or the room, not just
-      about the student.
+- [x] **Listening Coach check-off gate — teacher view of overrides
+      (2026-07-25) — done 2026-07-27.** `teacher.js`'s skills-grid and
+      Students-detail checkmarks now read `games.coachSkill[skillId]` and
+      render three states with the SAME green check (never a worse-looking
+      mark, so an override doesn't read as a red flag on the student): a
+      solid blue ring for a genuine Listening Coach pass (tooltip shows the
+      level and date), a neutral gray DASHED ring for a gate override
+      (tooltip explains it's usually a mic/room issue, not a skill issue),
+      and the plain check unchanged for a self-declared skill with no Coach
+      data. Two new legend rows explain the icons, inserted into `#t-legend`
+      at runtime so `index.html` didn't need touching. An adversarial review
+      caught a real bug in the first pass — `override` is a one-way flag
+      nothing ever clears, so a student who overrode once and later
+      genuinely passed at a higher level would show the override marker
+      forever — fixed by checking `coachRec.level >= TEACHER_COACH_GATE_MIN_LEVEL`
+      (mirrors app.js's `COACH_GATE_MIN_LEVEL`) before ever falling back to
+      the override marker. Browser-verified (mocked `allStudents` + a
+      simulated stale-override-then-later-pass case): all three states
+      render distinctly, tooltips read correctly, the staleness case
+      correctly shows "verified" not "override." Deliberately left in
+      plain English, not wired to i18n.js — this file has zero i18n
+      anywhere else (it's gated to Jonathan's own `TEACHER_EMAIL` account),
+      so adding it just for two new strings would be new scope rather than
+      an existing pattern; flagged rather than decided silently.
 
 - [ ] **Note Runner — live guitar check (Jonathan, on a school Chromebook if
       possible).** The new adaptive arcade game shipped verified only against

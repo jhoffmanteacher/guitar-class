@@ -5,6 +5,21 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Four new chord challenges in Module 5, one Spanish fix
+
+### Added
+
+- **Module 5 now has a dedicated practice card for C, F, and G (Set 2) and A
+  major (Set 3)** — before, these four chords were only ever taught folded
+  into other cards, unlike every other chord in the module, which gets its
+  own "Fret it cleanly" challenge with a diagram and tips.
+
+### Fixed
+
+- **A Module 4 quiz answer about pull-offs was mistranslated into Spanish**
+  as "sliding" instead of "snapping the finger off" — the Spanish now
+  matches what the question is actually asking.
+
 ## 2026-07-26 — Site-wide bug sweep: Listening Coach, tuner, and a couple of wrong chord tips
 
 ### Fixed

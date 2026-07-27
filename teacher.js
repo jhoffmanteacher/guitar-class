@@ -34,6 +34,18 @@ async function showTeacherApp(user){
   if(toggle && !toggle.querySelector('[data-view="students"]')){
     toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="students" onclick="setTeacherView('students')">&#x1F464; Students</button>`);
   }
+  // Two extra legend rows for the skills grid's got-it markers — the plain
+  // green check (index.html's static legend) doesn't distinguish a Coach
+  // pass or a gate override from a self-declared "I've got it!". Inserted
+  // here rather than in index.html so the whole feature stays in this file;
+  // guarded the same way as the view-toggle buttons above.
+  const legend=document.getElementById('t-legend');
+  if(legend && !legend.querySelector('[data-leg="coach-verified"]')){
+    legend.insertAdjacentHTML('beforeend', `<div class="t-leg" data-leg="coach-verified"><span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:2px solid var(--blue-text)">${TCK_CHECK_SVG}</span> Listening Coach verified</div>`);
+  }
+  if(legend && !legend.querySelector('[data-leg="coach-override"]')){
+    legend.insertAdjacentHTML('beforeend', `<div class="t-leg" data-leg="coach-override" title="Marked without a passing Listening Coach check — usually a mic or room issue, not a sign the student can't play it."><span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:2px dashed var(--text3)">${TCK_CHECK_SVG}</span> Marked without a Coach pass</div>`);
+  }
   // Students-view clicks (a roster row, the skills grid's name cell, the
   // detail page's back link) go through data-uid + one delegated listener
   // instead of building onclick="…('uid')" strings, so a Firestore uid is
@@ -108,7 +120,8 @@ async function loadAllStudents(){
         else if(raw[k]==='working'||raw[k]==='gotit') skills[k]=raw[k];
         else skills[k]='none';
       });
-      allStudents.push({uid:doc.id,skills,name:doc.data().name||'',email:doc.data().email||'',responses:doc.data().responses||{}});
+      const gamesData=doc.data().games||{};
+      allStudents.push({uid:doc.id,skills,name:doc.data().name||'',email:doc.data().email||'',responses:doc.data().responses||{},coachSkill:gamesData.coachSkill||{}});
     });
   } catch(e){
     document.getElementById('t-grid-container').innerHTML='<div class="t-loading">Could not load student data. Check your Firebase security rules.</div>';
@@ -145,8 +158,50 @@ function renderTeacherSummary(){
 const TCK_CHECK_SVG=`<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const TCK_WORK_SVG=`<svg width="9" height="9" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="currentColor" stroke-width="1.8"/></svg>`;
 const TCK_MINUS_SVG=`<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M3 6h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>`;
-function tckSpanHtml(status){
-  if(status==='gotit')   return `<span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px">${TCK_CHECK_SVG}</span>`;
+// games.coachSkill[id].level / .last are 1/2/3 — same three tiers coach.js
+// shows the student (coach.level.needsWork/gettingIt/great in i18n.js).
+// Mirrored here in plain English rather than through t(): the teacher
+// dashboard has no i18n wiring anywhere else in this file (it's gated to a
+// single TEACHER_EMAIL account), so adding it just for these two tooltips
+// would be new, inconsistent scope rather than following existing pattern.
+const COACH_LEVEL_LABEL={1:'Needs work',2:'You’re getting it',3:'Great'};
+function coachLevelLabel(n){ return COACH_LEVEL_LABEL[n]||null; }
+/* A "gotit" cell can mean three different things underneath — plain
+   self-declared (no Coach data), a Listening Coach pass, or a checklist-gate
+   override (student clicked "Mark it anyway" because the mic/room wasn't
+   cooperating). All three still read as a normal green checkmark — the
+   distinction is a border treatment plus a tooltip, not a different color,
+   so an override never LOOKS like a failure or a lesser checkmark; it's
+   informational for the teacher, not a mark against the student (see
+   coachGateMarkAnyway in app.js). coachRec is the student's
+   games.coachSkill[skillId] record, or undefined/null for a plain self-check.
+
+   `level` is best-ever, never downgraded (coach.js: Math.max(prev.level||0,
+   overallLevel)) — but `override` IS a one-way flag that coachGateMarkAnyway
+   sets and nothing ever clears, even once a later real Coach pass updates
+   level/last/at on the same record (Object.assign keeps the old override
+   key). So a stale override must never outrank a qualifying level: check
+   level against the same COACH_GATE_MIN_LEVEL (2 = "Good") app.js uses to
+   let a skill past the gate FIRST, and only fall back to the override
+   marker when the record hasn't reached that bar. */
+const TEACHER_COACH_GATE_MIN_LEVEL=2; // keep in sync with app.js COACH_GATE_MIN_LEVEL
+function tckSpanHtml(status, coachRec){
+  if(status==='gotit'){
+    if(coachRec && coachRec.level>=TEACHER_COACH_GATE_MIN_LEVEL){
+      const lvl=coachLevelLabel(coachRec.level)||'checked';
+      const dateStr=coachRec.at||'';
+      const title=`Listening Coach verified — ${lvl}${dateStr?(' · '+dateStr):''}`;
+      return `<span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:2px solid var(--blue-text)" title="${escAttr(title)}">${TCK_CHECK_SVG}</span>`;
+    }
+    if(coachRec && coachRec.override){
+      const dateStr=coachRec.overrideAt||coachRec.at||'';
+      const priorLevel=coachLevelLabel(coachRec.level);
+      const priorPart=priorLevel?` Last Listening Coach attempt: ${priorLevel}.`:'';
+      const title=`Marked "I’ve got it!" without a passing Listening Coach check${dateStr?(' on '+dateStr):''}.${priorPart} This usually means the mic or the room wasn’t cooperating, not that the student can’t play it — worth a quick check-in if you’re not sure.`;
+      return `<span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:2px dashed var(--text3)" title="${escAttr(title)}">${TCK_CHECK_SVG}</span>`;
+    }
+    return `<span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px">${TCK_CHECK_SVG}</span>`;
+  }
   if(status==='working') return `<span class="tck" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;background:var(--amber-bg);color:var(--amber-text)">${TCK_WORK_SVG}</span>`;
   return `<span class="tck no" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px">${TCK_MINUS_SVG}</span>`;
 }
@@ -164,7 +219,7 @@ function renderTeacherGrid(){
     const pct=Math.round(done/total*100);
     const pillClass=pct===100?'pp-hi':pct>=50?'pp-mid':'pp-lo';
     const displayName=stu.name||stu.email||stu.uid.slice(0,8)+'…';
-    const cells=w.skills.map(s=>`<td>${tckSpanHtml(stu.skills[s.id]||'none')}</td>`).join('');
+    const cells=w.skills.map(s=>`<td>${tckSpanHtml(stu.skills[s.id]||'none', stu.coachSkill&&stu.coachSkill[s.id])}</td>`).join('');
     // The name cell doubles as a link into the Students detail page — handled
     // by the delegated data-uid listener in showTeacherApp. cursor:pointer is
     // the only visual cue, by design: a restrained "clickable row", not a link.
@@ -618,7 +673,7 @@ function renderTeacherStudentDetail(uid){
     SETS.forEach(w=>{
       if(w.moduleNum!==m.num || !w.skills || !w.skills.length) return;
       skillsHtml+=`<div class="stu-set-head">${escHtml(w.label)}</div>`;
-      w.skills.forEach(sk=>{ skillsHtml+=`<div class="stu-skill-row">${tckSpanHtml(stu.skills[sk.id]||'none')}<span>${escHtml(sk.text)}</span></div>`; });
+      w.skills.forEach(sk=>{ skillsHtml+=`<div class="stu-skill-row">${tckSpanHtml(stu.skills[sk.id]||'none', stu.coachSkill&&stu.coachSkill[sk.id])}<span>${escHtml(sk.text)}</span></div>`; });
     });
   });
   if(!skillsHtml) skillsHtml='<div class="stu-empty">No skills started yet.</div>';

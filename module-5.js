@@ -418,6 +418,69 @@ SETS.push(
             ]
           },
           {
+            title: 'Fret C cleanly',
+            title_es: 'Trastea C limpio',
+            steps: [
+          {
+            label: 'Challenge — Clean C', label_es: 'Reto — C limpio',
+            text: '<ol><li>Fret C major (index finger on string 2, fret 1 · middle finger on string 4, fret 2 · ring finger on string 5, fret 3).</li><li>Strum strings 5–1 (not the low E).</li></ol>You\'ve got it when: pluck string 2 (B) by itself and it rings clear — that\'s the string this chord loses most often.',
+            text_es: '<ol><li>Trastea C mayor (dedo índice en la cuerda 2, traste 1 · dedo medio en la cuerda 4, traste 2 · dedo anular en la cuerda 5, traste 3).</li><li>Rasguea las cuerdas 5–1 (no la Mi grave).</li></ol>Lo tienes cuando: pulsas la cuerda 2 (Si) sola y suena clara — esa es la cuerda que este acorde más pierde.',
+            hint: 'String 2 is the tricky one in C — your index finger has to arch up so it doesn\'t lean on it while your ring finger reaches for fret 3. Press just behind the frets, not on them.',
+            hint_es: 'La cuerda 2 es la complicada en C — tu dedo índice tiene que arquearse para no apoyarse en ella mientras tu dedo anular alcanza el traste 3. Presiona justo detrás de los trastes, no sobre ellos.',
+            stuck: 'Get string 2 ringing first with just your index finger, then add the middle finger, then the ring finger — check the sound after each one you add.',
+            stuck_es: 'Haz sonar primero la cuerda 2 solo con tu dedo índice, y luego agrega el dedo medio, y después el anular — revisa el sonido después de agregar cada uno.',
+            levelUp: 'Lift all three fingers, then drop the whole shape at once and strum — aim for every string clean, especially that B string, on the first try.',
+            levelUp_es: 'Levanta los tres dedos, y luego suelta toda la forma de una vez y rasguea — apunta a que cada cuerda suene limpia, especialmente la Si, en el primer intento.',
+            skills: [1],
+            chords: [
+              { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 }
+            ]
+          }
+            ]
+          },
+          {
+            title: 'Fret F cleanly (simplified)',
+            title_es: 'Trastea F limpio (simplificado)',
+            steps: [
+          {
+            label: 'Challenge — Clean F (simplified)', label_es: 'Reto — F limpio (simplificado)',
+            text: '<ol><li>Fret the simplified F (xx3211): index finger flat across strings 1 and 2, fret 1 · middle finger on string 3, fret 2 · ring finger on string 4, fret 3.</li><li>Strum strings 4–1 only — skip the low E and A strings.</li></ol>You\'ve got it when: all four strings ring with no buzz — check that your index finger isn\'t collapsing flat and muting one of the two strings under it.',
+            text_es: '<ol><li>Trastea el F simplificado (xx3211): dedo índice plano sobre las cuerdas 1 y 2, traste 1 · dedo medio en la cuerda 3, traste 2 · dedo anular en la cuerda 4, traste 3.</li><li>Rasguea solo las cuerdas 4–1 — sáltate la Mi grave y la La.</li></ol>Lo tienes cuando: las cuatro cuerdas suenan sin zumbido — revisa que tu dedo índice no se colapse y silencie una de las dos cuerdas que tiene debajo.',
+            hint: 'This simplified shape trades the full 6-string barre for a small 2-string mini-barre under your index finger — much easier on beginner hands. Keep that finger flat and straight across both strings — unlike your other fingers, this one can\'t arch up onto the tip, or it\'ll only touch one of the two strings instead of both.',
+            hint_es: 'Esta forma simplificada cambia la cejilla completa de 6 cuerdas por una mini-cejilla de solo 2 cuerdas bajo tu dedo índice — mucho más fácil para manos principiantes. Mantén ese dedo plano y recto sobre las dos cuerdas — a diferencia de tus otros dedos, este no puede arquearse en la punta, o solo tocará una de las dos cuerdas en vez de ambas.',
+            stuck: 'Get strings 1 and 2 ringing first under your index finger alone, then add the middle finger on string 3, then the ring finger on string 4 last.',
+            stuck_es: 'Haz sonar primero las cuerdas 1 y 2 solo con tu dedo índice, y luego agrega el dedo medio en la cuerda 3, y el anular en la cuerda 4 al final.',
+            levelUp: 'Switch Am → F without looking — your index finger barely moves. Once this simplified shape is clean every time, try the full 6-string barre version.',
+            levelUp_es: 'Cambia Am → F sin mirar — tu dedo índice casi no se mueve. Una vez que esta forma simplificada salga limpia siempre, prueba la versión con cejilla completa de 6 cuerdas.',
+            skills: [2],
+            chords: [
+              { name: 'F', chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
+            ]
+          }
+            ]
+          },
+          {
+            title: 'Fret G cleanly',
+            title_es: 'Trastea G limpio',
+            steps: [
+          {
+            label: 'Challenge — Clean G', label_es: 'Reto — G limpio',
+            text: '<ol><li>Fret G major (index finger on string 5, fret 2 · middle finger on string 6, fret 3 · ring finger on string 1, fret 3).</li><li>Strum all 6 strings.</li></ol>You\'ve got it when: every string rings — especially the open D and G strings in the middle, which beginners tend to mute by accident.',
+            text_es: '<ol><li>Trastea G mayor (dedo índice en la cuerda 5, traste 2 · dedo medio en la cuerda 6, traste 3 · dedo anular en la cuerda 1, traste 3).</li><li>Rasguea las 6 cuerdas.</li></ol>Lo tienes cuando: cada cuerda suena — especialmente las cuerdas Re y Sol al aire en el medio, que los principiantes tienden a silenciar por accidente.',
+            hint: 'Your three fingers form a wide triangle across the low and high strings, leaving the two middle strings open. Keep your fingers arched so they don\'t brush against the open D and G strings in between.',
+            hint_es: 'Tus tres dedos forman un triángulo amplio entre las cuerdas graves y agudas, dejando las dos cuerdas del medio al aire. Mantén tus dedos arqueados para que no rocen las cuerdas Re y Sol al aire de en medio.',
+            stuck: 'Get strings 6 and 1 ringing first (middle and ring fingers), then add the index finger on string 5 — check that the open D and G strings in the middle still ring clearly the whole time.',
+            stuck_es: 'Haz sonar primero las cuerdas 6 y 1 (dedos medio y anular), y luego agrega el dedo índice en la cuerda 5 — revisa que las cuerdas Re y Sol al aire en el medio sigan sonando claras todo el tiempo.',
+            levelUp: 'Switch G→C→G without looking — your ring finger barely has to travel. Or try the 4-finger version, adding a pinky on string 1, fret 3, to free up your ring finger for the next chord.',
+            levelUp_es: 'Cambia G→C→G sin mirar — tu dedo anular casi no tiene que viajar. O prueba la versión de 4 dedos, agregando el meñique en la cuerda 1, traste 3, para liberar tu dedo anular para el siguiente acorde.',
+            skills: [3],
+            chords: [
+              { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
+            ]
+          }
+            ]
+          },
+          {
             title: 'Use a common-finger pivot (Am ↔ C)',
             title_es: 'Usa un dedo pivote común (Am ↔ C)',
             steps: [
@@ -953,6 +1016,27 @@ SETS.push(
             skills: [3],
             chords: [
               { name: 'Bm', chord: [[6,'x'],[5,'x'],[4,4,'4'],[3,4,'3'],[2,3,'2'],[1,2,'1']], position: 2 }
+            ]
+          }
+            ]
+          },
+          {
+            title: 'Fret A cleanly',
+            title_es: 'Trastea A limpio',
+            steps: [
+          {
+            label: 'Challenge — Clean A', label_es: 'Reto — A limpio',
+            text: '<ol><li>Fret A major (index finger on string 4, fret 2 · middle finger on string 3, fret 2 · ring finger on string 2, fret 2).</li><li>Strum strings 5–1 (not the low E).</li></ol>You\'ve got it when: all three fingers fit on the 2nd fret without colliding, and strings 5–1 ring cleanly.',
+            text_es: '<ol><li>Trastea A mayor (dedo índice en la cuerda 4, traste 2 · dedo medio en la cuerda 3, traste 2 · dedo anular en la cuerda 2, traste 2).</li><li>Rasguea las cuerdas 5–1 (no la Mi grave).</li></ol>Lo tienes cuando: tus tres dedos caben en el traste 2 sin chocar, y las cuerdas 5–1 suenan limpias.',
+            hint: 'A is tight because all three fingers land on the same fret. Line them up like soldiers standing shoulder to shoulder, each one on its own tip, rather than spreading them out.',
+            hint_es: 'A es apretado porque los tres dedos caen en el mismo traste. Alinéalos como soldados hombro con hombro, cada uno en su propia punta, en vez de separarlos.',
+            stuck: 'Squeeze your index, middle, and ring fingers close together before you place them — arriving already tight avoids a mid-air scramble to fit all three on one fret.',
+            stuck_es: 'Junta tu dedo índice, medio y anular antes de colocarlos — llegar ya apretados evita un forcejeo en el aire para que quepan los tres en un traste.',
+            levelUp: 'Switch A→D→A without looking — both shapes live around the 2nd fret, so it\'s a short trip.',
+            levelUp_es: 'Cambia A→D→A sin mirar — ambas formas viven cerca del traste 2, así que es un viaje corto.',
+            skills: [2],
+            chords: [
+              { name: 'A', chord: [[6,'x'],[5,0],[4,2,'1'],[3,2,'2'],[2,2,'3'],[1,0]], position: 0 }
             ]
           }
             ]
