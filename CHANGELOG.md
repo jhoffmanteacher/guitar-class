@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Every practice quiz now explains the answer
+
+### Added
+
+- **85 practice quizzes that used to say only "Not quite" now teach.** After
+  you answer, a short explanation appears saying why the right answer is right
+  — and when a wrong choice is extra tempting, why it's wrong. Every
+  multiple-choice practice on the site now has one, in English and Spanish.
+
+## 2026-07-27 — Module 7: a picture of the barre chord hand
+
+### Added
+
+- **Module 7's "E-Shape Barre" challenge now shows a drawing of the hand** —
+  a front view of the index finger laid flat across all six strings with the
+  E shape stacked on top, so you can see what the chord is supposed to look
+  like before you build it.
+
 ## 2026-07-27 — Module 4: a map of pentatonic Pattern 1
 
 ### Added

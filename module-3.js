@@ -397,14 +397,18 @@ SETS.push(
         practice: { type: 'mc', prompt: 'A power chord is built from which two scale degrees (a scale degree = a note\'s number in the scale, counting up from the root)?',
           prompt_es: '¿Un acorde de potencia se construye con cuáles dos grados de la escala (un grado de la escala = el número de una nota en la escala, contando desde la raíz)?',
           choices: ['Root + 3rd', 'Root + 5th', 'Root + 7th', 'Root + octave'],
-          choices_es: ['Raíz + 3ª', 'Raíz + 5ª', 'Raíz + 7ª', 'Raíz + octava'], answer: 1 } },
+          choices_es: ['Raíz + 3ª', 'Raíz + 5ª', 'Raíz + 7ª', 'Raíz + octava'], answer: 1,
+          explain: 'A power chord is just the root and the 5th. It leaves out the 3rd — the note that would make a chord sound major or happy, or minor or sad — which is exactly why it fits over almost anything.',
+          explain_es: 'Un acorde de potencia es solo la raíz y la 5ª. Deja fuera la 3ª — la nota que haría que un acorde sonara mayor o alegre, o menor o triste — y por eso mismo encaja sobre casi cualquier cosa.' } },
       { id: 'm3w1-s2', text: 'Move the power chord shape along the E string (E5, G5, A5, B5)',
         text_es: 'Mover la forma del acorde de potencia por la cuerda Mi (E5, G5, A5, B5)',
         gotItWhen: 'you can move the same shape to any of those positions on call and name the chord without counting frets.',
         gotItWhen_es: 'puedes mover la misma forma a cualquiera de esas posiciones a pedido y nombrar el acorde sin contar trastes.',
         practice: { type: 'mc', prompt: 'Your index finger is on the low E string at fret 5. Which power chord are you playing?',
           prompt_es: 'Tu dedo índice está en la cuerda Mi grave, traste 5. ¿Qué acorde de potencia estás tocando?',
-          choices: ['G5', 'A5', 'B5', 'D5'], choices_es: ['G5', 'A5', 'B5', 'D5'], answer: 1 } },
+          choices: ['G5', 'A5', 'B5', 'D5'], choices_es: ['G5', 'A5', 'B5', 'D5'], answer: 1,
+          explain: 'The note under your index finger names the chord, and the low E string at fret 5 is A — so A5. Fret 3 would give you G5, and fret 7 would give you B5.',
+          explain_es: 'La nota bajo tu dedo índice le da nombre al acorde, y la cuerda Mi grave en el traste 5 es A — así que A5. El traste 3 te daría G5, y el traste 7 te daría B5.' } },
       { id: 'm3w1-s3', text: 'Mute unused strings with palm and fretting hand',
         text_es: 'Silenciar las cuerdas que no usas con la palma y la mano de trastear',
         gotItWhen: 'you can strum hard across all 6 strings and only the two intentional notes ring — the other 4 stay silent.',
@@ -421,7 +425,9 @@ SETS.push(
         gotItWhen_es: 'puedes desplazar la forma a la raíz de la cuerda La sin que se rompa tu silenciado con la palma — y la cuerda Mi grave se queda en silencio.',
         practice: { type: 'mc', prompt: 'Your index finger is on the A string at fret 3. Which power chord are you playing?',
           prompt_es: 'Tu dedo índice está en la cuerda La, traste 3. ¿Qué acorde de potencia estás tocando?',
-          choices: ['B5', 'C5', 'D5', 'A5'], choices_es: ['B5', 'C5', 'D5', 'A5'], answer: 1 } },
+          choices: ['B5', 'C5', 'D5', 'A5'], choices_es: ['B5', 'C5', 'D5', 'A5'], answer: 1,
+          explain: 'Your index finger sits on the root, and the A string at fret 3 is C — so C5. That same fret on the low E string would be G5, which is the easy mix-up once you start moving between the two root strings.',
+          explain_es: 'Tu dedo índice va sobre la raíz, y la cuerda La en el traste 3 es C — así que C5. Ese mismo traste en la cuerda Mi grave sería G5, y esa es la confusión fácil cuando empiezas a moverte entre las dos cuerdas de raíz.' } },
       { id: 'm3w1-s5', text: 'Play a power chord on the beat with a single down-strum',
         text_es: 'Tocar un acorde de potencia a tiempo con un solo rasgueo hacia abajo',
         gotItWhen: 'your strum lands on beat 1 with the metronome and the chord rings cleanly — no early or late attacks.',
@@ -435,7 +441,9 @@ SETS.push(
         practice: { type: 'mc', prompt: 'You see "A5" written above a bar. What does it mean?',
           prompt_es: 'Ves "A5" escrito sobre un compás. ¿Qué significa?',
           choices: ['Play just the A note', 'A power chord rooted on A', 'A major chord', 'Play the 5th fret on A string'],
-          choices_es: ['Tocar solo la nota A', 'Un acorde de potencia con raíz en A', 'Un acorde mayor', 'Tocar el traste 5 de la cuerda La'], answer: 1 } }
+          choices_es: ['Tocar solo la nota A', 'Un acorde de potencia con raíz en A', 'Un acorde mayor', 'Tocar el traste 5 de la cuerda La'], answer: 1,
+          explain: 'A "5" after the letter always means power chord — root plus 5th — so A5 is a power chord with A as its root. The 5 is not a fret number, which is the usual first guess.',
+          explain_es: 'Un "5" después de la letra siempre significa acorde de potencia — raíz más 5ª — así que A5 es un acorde de potencia con A como raíz. El 5 no es un número de traste, aunque esa suele ser la primera suposición.' } }
     ]
   },
 
@@ -880,7 +888,9 @@ SETS.push(
         practice: { type: 'mc', prompt: 'A song calls for G5 then C5. Where does your index finger go for each?',
           prompt_es: 'Una canción pide G5 y luego C5. ¿Dónde va tu dedo índice para cada uno?',
           choices: ['Both on E string', 'Both on A string', 'G5 on E (fret 3), C5 on A (fret 3)', 'G5 on A, C5 on E'],
-          choices_es: ['Ambos en la cuerda Mi', 'Ambos en la cuerda La', 'G5 en Mi (traste 3), C5 en La (traste 3)', 'G5 en La, C5 en Mi'], answer: 2 } },
+          choices_es: ['Ambos en la cuerda Mi', 'Ambos en la cuerda La', 'G5 en Mi (traste 3), C5 en La (traste 3)', 'G5 en La, C5 en Mi'], answer: 2,
+          explain: 'G is at fret 3 of the low E string and C is at fret 3 of the A string — so the fret number never changes, only the string does. Drill that one-string hop and keep your palm mute from slipping as you move.',
+          explain_es: 'G está en el traste 3 de la cuerda Mi grave y C está en el traste 3 de la cuerda La — así que el número de traste nunca cambia, solo la cuerda. Practica ese salto de una cuerda y evita que se te resbale el silenciado con la palma al moverte.' } },
       { id: 'm3w2-s5', text: 'Optional: add pinky octave doubling to the power chord shape',
         text_es: 'Opcional: agregar duplicación de octava con el meñique a la forma del acorde de potencia',
         gotItWhen: 'your pinky lands on the next string at the same fret as your ring finger and all three notes ring cleanly — no buzz, no muffled string.',
@@ -888,7 +898,9 @@ SETS.push(
         practice: { type: 'mc', prompt: 'You add your pinky on the next string, at the same fret as your ring finger. What interval (an interval = the distance between two notes) did you just add to the chord?',
           prompt_es: 'Agregas tu meñique en la siguiente cuerda, en el mismo traste que tu anular. ¿Qué intervalo (un intervalo = la distancia entre dos notas) acabas de agregar al acorde?',
           choices: ['A 3rd', 'A 5th', 'An octave (same note, higher)', 'A 7th'],
-          choices_es: ['Una 3ª', 'Una 5ª', 'Una octava (la misma nota, más aguda)', 'Una 7ª'], answer: 2 } },
+          choices_es: ['Una 3ª', 'Una 5ª', 'Una octava (la misma nota, más aguda)', 'Una 7ª'], answer: 2,
+          explain: 'Your ring finger is already on the 5th, so the next string at that same fret lands on the root again — one octave higher. Doubling the root makes the chord thicker without changing which chord it is.',
+          explain_es: 'Tu dedo anular ya está en la 5ª, así que la siguiente cuerda en ese mismo traste cae otra vez en la raíz — una octava más aguda. Duplicar la raíz engrosa el acorde sin cambiar qué acorde es.' } },
       { id: 'm3w2-s6', text: 'Clap and count a 4-bar rhythm, and name whole, half, quarter, and eighth notes',
         text_es: 'Aplaudir y contar un ritmo de 4 compases, y nombrar redondas, blancas, negras y corcheas',
         gotItWhen: 'you can clap a 4-bar line in time with the metronome and say which notes are whole, half, quarter, or eighth — and name your strum as "straight eighths".',
@@ -896,7 +908,9 @@ SETS.push(
         practice: { type: 'mc', prompt: 'A straight-eighths strum — down on each number, up on each "+", counted "1 + 2 + 3 + 4 +" — is made of which note value?',
           prompt_es: 'Un rasgueo de corcheas rectas — abajo en cada número, arriba en cada "+", contado "1 + 2 + 3 + 4 +" — está hecho de qué figura rítmica?',
           choices: ['Whole notes', 'Quarter notes', 'Eighth notes', 'Half notes'],
-          choices_es: ['Redondas', 'Negras', 'Corcheas', 'Blancas'], answer: 2 } }
+          choices_es: ['Redondas', 'Negras', 'Corcheas', 'Blancas'], answer: 2,
+          explain: 'Every "+" splits a beat in half, so you get two strums per beat — and two notes per beat is exactly what eighth notes are. Quarter notes would be one strum on each number with no "+" between them.',
+          explain_es: 'Cada "+" parte un tiempo por la mitad, así que te salen dos rasgueos por tiempo — y dos notas por tiempo es exactamente lo que son las corcheas. Las negras serían un rasgueo en cada número, sin ningún "+" en medio.' } }
     ]
   }
 
