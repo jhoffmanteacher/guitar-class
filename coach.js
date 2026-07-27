@@ -36,21 +36,17 @@
 /* ── Tunables ── */
 const COACH_FFT           = 4096;   // analyser buffer (85ms @ 48k — enough for low E)
 const COACH_PITCH_GATE    = 0.004;  // RMS floor for pitch readings
-const COACH_ONSET_FLOOR   = 0.010;  // absolute RMS floor for an onset
-const COACH_ONSET_RATIO   = 2.2;    // RMS must jump this × over the smoothed level
-const COACH_HF_FLOOR      = 0.002;  // absolute floor for the pick-attack (HF) channel
-const COACH_HF_RATIO      = 2.6;    // HF energy must jump this × over its smoothed level
-/* The two forgiving "check" flows — the Listening Coach's chord and melody
-   modes (coachLoop) and Change Up (ccLoop) — run their own, MORE SENSITIVE
-   onset thresholds than the rhythm games. They're self-checks a student does
-   solo into a Chromebook mic at a normal playing volume, and moderate strums
-   were slipping under the stricter shared COACH_* floors and scoring as misses.
-   Lowering the bar here is safe: both flows only grade a strum that lands near a
-   scheduled beat (the ±window matchers in coachMatchEvent / ccLoop), so a
-   twitchier detector doesn't invent verdicts — a stray onset with no nearby beat
-   is simply ignored. The rhythm games keep the stricter COACH_* values, where an
-   extra onset WOULD be a false strum. */
-const CHK_ONSET_FLOOR     = 0.003;  // absolute RMS floor for a check-flow onset
+/* Onset thresholds, shared by every mic flow — the Listening Coach's chord
+   and melody modes (coachLoop), Change Up (ccLoop), Note Runner, and Strum
+   Radar (srLoop). These started as the forgiving "check-flow" values while
+   the rhythm games kept a stricter set (0.010/2.2× RMS, 0.002/2.6× HF), on
+   the theory that a stray onset there would be a false strum. Real-guitar
+   testing killed that theory twice: moderate strums at normal playing volume
+   slip under the strict floors and score as misses ("the radar barely heard
+   the pattern"), while the sensitive values stay safe everywhere because
+   every flow only grades an onset that lands near a scheduled beat — a stray
+   onset with no nearby slot is counted as an "extra" at most, never a hit. */
+const CHK_ONSET_FLOOR     = 0.003;  // absolute RMS floor for an onset
 const CHK_ONSET_RATIO     = 1.4;    // RMS jump over the smoothed level
 const CHK_HF_FLOOR        = 0.0008; // absolute floor for the pick-attack channel
 const CHK_HF_RATIO        = 1.7;    // HF jump over its smoothed level
@@ -3770,6 +3766,11 @@ async function srStart(){
      because onset detection adds its own jitter, capped so neighbouring
      eighth slots can't both claim one strum. */
   s.win = Math.max(90, s.beatMs * 0.22);
+  /* The mic hears a strum after it happens (Chromebooks: 40–120ms). Reuse
+     the per-machine offset Note Runner's slider calibrates — it's a property
+     of the device, not the game — so honest strums aren't graded "late" by
+     the hardware. The easing grid then only has to absorb the human part. */
+  s.lat = nrOffset();
   s.notes = [];
   for (let b = 0; b < SR_BARS; b++){
     pat.slots.forEach((dir, i) => {
@@ -3849,13 +3850,13 @@ function srLoop(){
        channel for a strum over the still-ringing previous one — which is
        every strum after the first here). The 140ms refractory still fits:
        eighths at the 100 BPM cap arrive every 300ms. */
-    if ((rms > COACH_ONSET_FLOOR &&
-         rms > s.smoothRms * COACH_ONSET_RATIO ||
-         hf > COACH_HF_FLOOR &&
-         hf > s.smoothHf * COACH_HF_RATIO) &&
+    if ((rms > CHK_ONSET_FLOOR &&
+         rms > s.smoothRms * CHK_ONSET_RATIO ||
+         hf > CHK_HF_FLOOR &&
+         hf > s.smoothHf * CHK_HF_RATIO) &&
         now - s.lastOnsetT > COACH_ONSET_REFRACT){
       s.lastOnsetT = now;
-      const rel = now - s.listenStart - s.gridOffset;
+      const rel = now - s.listenStart - s.gridOffset - s.lat;
       /* No audible reference during play, so the grid eases toward the
          player — Change Up's EMA, on the eighth grid. */
       const slotIdx = Math.round(rel / s.slotMs);
@@ -3884,7 +3885,7 @@ function srLoop(){
     s.smoothHf = s.smoothHf * 0.82 + hf * 0.18;
 
     /* Overdue strums are misses. */
-    const relNow = now - s.listenStart - s.gridOffset;
+    const relNow = now - s.listenStart - s.gridOffset - s.lat;
     s.notes.forEach((n, i) => {
       if (!n.result && relNow > n.t + 0.7 * s.slotMs){
         n.result = 'miss';

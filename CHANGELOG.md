@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Strum Radar can actually hear you now
+
+### Fixed
+
+- **Strum Radar was missing real strums played at normal volume.** It was the
+  last mic game still listening with strict thresholds that guitar testing
+  had already shown were too high — moderate strums simply weren't detected.
+  It now uses the same sensitive detector as Change Up and the Listening
+  Coach, and it also accounts for your device's mic delay (the same
+  per-device setting Note Runner's timing slider adjusts), so honest strums
+  no longer grade as "late."
+
 ## 2026-07-27 — Assessment pieces: play them for the Listening Coach, not a camera
 
 ### Changed
