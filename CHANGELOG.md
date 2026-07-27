@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Module 9: fretboard charts for the last four strings
+
+### Added
+
+- **Single-string fretboard charts for the D, G, B, and high-e strings** on
+  Module 9's four "String Naturals" challenges — the same style as Module 2's
+  low-E and A charts, showing every natural note from the open string to
+  fret 12. Available offline like the rest of the images.
+
 ## 2026-07-27 — Practice stations show one step at a time
 
 ### Added
