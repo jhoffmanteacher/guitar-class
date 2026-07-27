@@ -467,9 +467,11 @@
       prose already: single-action cards, "Watch: <a>video</a>" lines, and
       wrap-up reflection questions.
 
-- [ ] **Check the Coach gate with a real guitar on a school Chromebook
-      (Jonathan).** It is verified only against headless runs. Three things,
-      in priority order:
+- [x] **Check the Coach gate with a real guitar — home pass done 2026-07-27:
+      "feels fair" (Jonathan, Mac, quiet room).** Wording, bar, and flow all
+      read right. One residual check rides along with the school batch below:
+      confirm the 💪 Good bar still feels fair on a Chromebook with a noisy
+      classroom around it. Original checklist, for that re-run:
       1. **Does "Mark it anyway" read as a legitimate choice or as
          cheating?** This matters more than the threshold. The gate is the
          first thing on the site that tells a student no — everything else
@@ -522,8 +524,13 @@
       What to check, in rough order:
       1. **Mic timing offset** — ✅ done on the Mac (see above); repeat once
          on a school Chromebook to confirm the 70 ms default is right there.
-      2. **Stage movement feel** — do the 90%-up / 65%-down thresholds move
-         you at a sensible pace? (`NR_UP_PCT` / `NR_DOWN_PCT` in coach.js.)
+      2. **Stage movement feel** — ⏸ **WAITING ON STUDENTS (Jonathan's call,
+         2026-07-27).** Deliberately NOT judged solo: the 90%-up / 65%-down
+         pacing is about how it feels to someone actually climbing the
+         ladder, and Jonathan plays too well for his own runs to test it.
+         He'll put it in front of a class and report back. **Don't touch
+         `NR_UP_PCT` / `NR_DOWN_PCT` until that feedback lands** — no
+         speculative retuning in the meantime.
       3. **Power-chord stages** — ✅ guitar-verified good 2026-07-27: the
          chord-tone vote grades real strums correctly.
       4. **Weak-spot re-dealing** — deliberately flub one note for a round
