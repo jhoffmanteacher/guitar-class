@@ -5,6 +5,22 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Riff Runner and Note Hunt: faster note detection
+
+### Fixed
+
+- **"My guitar" mode in Riff Runner, and Note Hunt**, were slower than they
+  should have been to recognize a note you'd just played. Both now confirm a
+  note about twice as fast, so the games feel more responsive.
+
+## 2026-07-27 — Module 13: removed the "wind the post" diagram
+
+### Removed
+
+- The **winding diagram** on the "trim the excess" step is gone — the
+  hand-sketched picture already on that step covers the same instructions, so
+  the diagram was redundant.
+
 ## 2026-07-27 — Module 13: fixed a clipped label in the winding diagram
 
 ### Fixed

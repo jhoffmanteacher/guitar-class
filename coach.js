@@ -1299,12 +1299,12 @@ function fretLoop(){
       g.needSilence = false;
     }
     if (!g.needSilence && now >= g.cooldownUntil && rms > COACH_PITCH_GATE &&
-        (g.frameNo = (g.frameNo || 0) + 1) % 3 === 0){
+        (g.frameNo = (g.frameNo || 0) + 1) % 2 === 0){
       const f = coachDetectPitch(buf, coachCtx.sampleRate);
       if (f > 0){
         g.readings.push(69 + 12 * Math.log2(f / 440));
         if (g.readings.length > 5) g.readings.shift();
-        if (g.readings.length >= 4){
+        if (g.readings.length >= 3){
           const r = g.readings;
           if (Math.max.apply(null, r) - Math.min.apply(null, r) < 0.6){
             fretJudge(Math.round(tunerMedian(r)));
@@ -4897,12 +4897,12 @@ function rnwLoop(){
     w.needSilence = false;
   }
   if (!w.needSilence && now >= w.cooldownUntil && rms > COACH_PITCH_GATE &&
-      (w.frameNo = (w.frameNo || 0) + 1) % 3 === 0){
+      (w.frameNo = (w.frameNo || 0) + 1) % 2 === 0){
     const f = coachDetectPitch(buf, coachCtx.sampleRate);
     if (f > 0){
       w.readings.push(69 + 12 * Math.log2(f / 440));
       if (w.readings.length > 5) w.readings.shift();
-      if (w.readings.length >= 4){
+      if (w.readings.length >= 3){
         const r = w.readings;
         if (Math.max.apply(null, r) - Math.min.apply(null, r) < 0.6){
           rnwJudge(Math.round(tunerMedian(r)));

@@ -10,21 +10,6 @@
 //    the _es text field carries the same drawing with Spanish labels). ──
 const M13_SVG_STYLE = 'display:block;width:100%;max-width:420px;height:auto;border:1px solid #ddd;border-radius:10px;background:#fff;margin-top:10px';
 
-// Wraps a label across multiple <tspan> lines so long EN/ES strings don't
-// run past the viewBox edge and get clipped.
-function m13WrapTspans(str, x, maxChars, lineHeight){
-  const words = str.split(' ');
-  const lines = [];
-  let cur = '';
-  for (const w of words) {
-    const test = cur ? `${cur} ${w}` : w;
-    if (test.length > maxChars && cur) { lines.push(cur); cur = w; }
-    else cur = test;
-  }
-  if (cur) lines.push(cur);
-  return lines.map((line, i) => `<tspan x="${x}" dy="${i === 0 ? 0 : lineHeight}">${line}</tspan>`).join('');
-}
-
 function m13BallEndSVG(L){
   // Cross-section of a classical tie block with a BALL-END string seated.
   return `<span class="step-figure"><svg viewBox="0 0 420 190" style="${M13_SVG_STYLE}" role="img" aria-label="${L.aria}">
@@ -64,33 +49,10 @@ function m13BridgePinSVG(L){
   </svg></span>`;
 }
 
-function m13WindingSVG(L){
-  // One tuning post, front view: string through the hole, wraps walking
-  // DOWN the post, excess to trim.
-  return `<span class="step-figure"><svg viewBox="0 0 420 210" style="${M13_SVG_STYLE}" role="img" aria-label="${L.aria}">
-    <rect x="180" y="30" width="34" height="130" rx="8" fill="#cfcfcf" stroke="#999"/>
-    <rect x="176" y="20" width="42" height="14" rx="4" fill="#bdbdbd" stroke="#999"/>
-    <ellipse cx="197" cy="52" rx="24" ry="6" fill="none" stroke="#185fa5" stroke-width="3"/>
-    <ellipse cx="197" cy="66" rx="24" ry="6" fill="none" stroke="#185fa5" stroke-width="3"/>
-    <ellipse cx="197" cy="80" rx="24" ry="6" fill="none" stroke="#185fa5" stroke-width="3"/>
-    <line x1="197" y1="44" x2="150" y2="30" stroke="#185fa5" stroke-width="3"/>
-    <line x1="221" y1="80" x2="221" y2="200" stroke="#185fa5" stroke-width="3"/>
-    <path d="M258 44 a 30 18 0 1 1 -8 -28" fill="none" stroke="#3b6d11" stroke-width="2.5"/>
-    <path d="M250 16 l 10 -2 -4 10" fill="#3b6d11"/>
-    <path d="M120 20 l22 14 m0 -14 l-22 14" stroke="#b3372a" stroke-width="2.5"/>
-    <text x="60" y="52" font-family="sans-serif" font-size="13" fill="#b3372a">${L.trim}</text>
-    <text x="240" y="66" font-family="sans-serif" font-size="12" fill="#185fa5">${m13WrapTspans(L.wraps, 240, 18, 15)}</text>
-    <text x="266" y="30" font-family="sans-serif" font-size="13" fill="#3b6d11">${L.turn}</text>
-    <text x="120" y="196" font-family="sans-serif" font-size="13" fill="#333">${L.toNutV}</text>
-  </svg></span>`;
-}
-
 const M13_D1_EN = m13BallEndSVG({ aria:'Ball-end string seated against the back of a classical tie block', toNut:'to the saddle & nut', block:'tie block (bridge)', ball:'ball end sits flat', saddle:'saddle' });
 const M13_D1_ES = m13BallEndSVG({ aria:'Cuerda con bolita asentada contra la parte trasera del bloque del puente', toNut:'hacia la selleta y la cejuela', block:'bloque del puente', ball:'la bolita queda plana', saddle:'selleta' });
 const M13_D2_EN = m13BridgePinSVG({ aria:'Steel-string bridge pin holding the ball end against the bridge plate', pull:'pull up gently', pin:'bridge pin', ball:'ball locks under the plate', bridge:'bridge' });
 const M13_D2_ES = m13BridgePinSVG({ aria:'Pin del puente sujetando la bolita contra la placa del puente', pull:'tira suave hacia arriba', pin:'pin del puente', ball:'la bolita se traba bajo la placa', bridge:'puente' });
-const M13_D3_EN = m13WindingSVG({ aria:'Tuning post with the string through the hole and two to three wraps walking down the post', trim:'trim the extra', wraps:'2–3 wraps, each BELOW the last', turn:'wind this way', toNutV:'string down to the nut slot' });
-const M13_D3_ES = m13WindingSVG({ aria:'Poste de afinación con la cuerda por el agujero y de dos a tres vueltas bajando por el poste', trim:'recorta el sobrante', wraps:'2–3 vueltas, cada una DEBAJO de la anterior', turn:'gira hacia acá', toNutV:'la cuerda baja a su ranura en la cejuela' });
 
 
 // ── Step photos (2026-07-27). Seven hand-sketched panels of the full
@@ -336,8 +298,8 @@ SETS.push(
               },
               {
                 label: 'Wind — wraps walk DOWN', label_es: 'Enrolla — las vueltas BAJAN',
-                text: `Hold light tension on the string with one hand and turn the key with the other:<ol><li>Check direction: tightening should RAISE the pitch and wrap the string so it heads straight to its nut slot.</li><li>Each new wrap goes BELOW the last one, walking down the post.</li><li>Stop at 2–3 neat wraps, string seated in its nut slot.</li></ol>You've got it when: the wraps stack cleanly with no crossing and the string sits in its nut slot.${M13_P6_EN}${M13_D3_EN}`,
-                text_es: `Mantén una tensión ligera con una mano y gira la clavija con la otra:<ol><li>Revisa la dirección: al apretar, el tono debe SUBIR y la cuerda debe salir del poste directo a su ranura en la cejuela.</li><li>Cada vuelta nueva va DEBAJO de la anterior, bajando por el poste.</li><li>Detente en 2–3 vueltas ordenadas, con la cuerda asentada en su ranura.</li></ol>Lo tienes cuando: las vueltas quedan limpias, sin cruzarse, y la cuerda descansa en su ranura de la cejuela.${M13_P6_ES}${M13_D3_ES}`,
+                text: `Hold light tension on the string with one hand and turn the key with the other:<ol><li>Check direction: tightening should RAISE the pitch and wrap the string so it heads straight to its nut slot.</li><li>Each new wrap goes BELOW the last one, walking down the post.</li><li>Stop at 2–3 neat wraps, string seated in its nut slot.</li></ol>You've got it when: the wraps stack cleanly with no crossing and the string sits in its nut slot.${M13_P6_EN}`,
+                text_es: `Mantén una tensión ligera con una mano y gira la clavija con la otra:<ol><li>Revisa la dirección: al apretar, el tono debe SUBIR y la cuerda debe salir del poste directo a su ranura en la cejuela.</li><li>Cada vuelta nueva va DEBAJO de la anterior, bajando por el poste.</li><li>Detente en 2–3 vueltas ordenadas, con la cuerda asentada en su ranura.</li></ol>Lo tienes cuando: las vueltas quedan limpias, sin cruzarse, y la cuerda descansa en su ranura de la cejuela.${M13_P6_ES}`,
                 stuck: 'Wraps piling on top of each other? Unwind, re-check your slack (a hand\'s width), and guide the string lower on the post with your free thumb as you wind.',
                 stuck_es: '¿Las vueltas se amontonan? Desenrolla, revisa tu holgura (el ancho de una mano) y guía la cuerda hacia abajo en el poste con el pulgar libre mientras enrollas.',
                 levelUp: 'Wind so the very first wrap crosses OVER the loose tail, locking it in place — the pro trick that keeps slippery nylon from creeping.',
