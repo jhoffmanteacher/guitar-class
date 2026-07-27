@@ -152,8 +152,8 @@ SETS.push(
             text_es: 'A 60 BPM, 4 rasgueos hacia abajo por compás:<ol><li>Toca 2 compases de Am.</li><li>Toca 2 compases de Em, y repite.</li></ol>Lo tienes cuando: cambias de acorde justo en el tiempo 1 cada vez — sigue rasgueando aunque falles.',
             hint: 'Even if the chord isn\'t perfect, keep strumming in time. Stopping to fix a note is the #1 habit to avoid. Fix it between bars, not mid-bar. Set the ⏱ Timer for 2 minutes and loop the switch until it beeps.',
             hint_es: 'Aunque el acorde no salga perfecto, sigue rasgueando a tiempo. Detenerte a corregir una nota es el hábito número uno que debes evitar. Corrígelo entre compases, no a mitad de uno. Pon el ⏱ Temporizador en 2 minutos y repite el cambio hasta que suene.',
-            stuck: 'Your index finger barely moves between Am and Em — anchor it: keep that finger pressed down and still while the others move. Drop to 50 BPM if 60 feels rushed.',
-            stuck_es: 'Tu dedo índice casi no se mueve entre Am y Em — ánclalo: mantenlo presionado y quieto mientras los otros se mueven. Baja a 50 BPM si 60 se siente apurado.',
+            stuck: 'One finger barely moves between the two chords: it lands on the D string, 2nd fret either way (your middle finger for Am, your ring finger for Em). Anchor there and let the other fingers do the moving. Drop to 50 BPM if 60 feels rushed.',
+            stuck_es: 'Un dedo casi no se mueve entre los dos acordes: cae en la cuerda Re, traste 2 en ambos casos (el dedo medio para Am, el anular para Em). Ánclalo ahí y deja que los otros dedos se muevan. Baja a 50 BPM si 60 se siente apurado.',
             levelUp: 'Speed up to 70 BPM, or play a down-up strum on each bar instead of straight downs.',
             levelUp_es: 'Acelera a 70 BPM, o toca un rasgueo abajo-arriba en cada compás en vez de solo rasgueos hacia abajo.',
             skills: [5, 6],
@@ -174,8 +174,8 @@ SETS.push(
                 text_es: '<ol><li>Pon el ⏱ Temporizador en 60 segundos.</li><li>Cambia Am→Em→Am→Em tantas veces como puedas. Cada cambio LIMPIO cuenta; uno con zumbido o fallado no.</li></ol>Lo tienes cuando: cuentas tus cambios limpios y escribes el número abajo — intenta superarlo la próxima vez. (Más de 20 es un buen resultado para tu primer día con acordes.)',
                 hint: 'This is the classic chord-change speed test. Quality first: a clean change you can count is better than a blurry one you can\'t.',
                 hint_es: 'Esta es la prueba clásica de velocidad de cambio de acorde. Calidad primero: un cambio limpio que puedas contar es mejor que uno confuso que no puedas.',
-                stuck: 'Keep your index finger planted (it barely moves between Am and Em) and move only the other fingers. Slow down until every change rings.',
-                stuck_es: 'Mantén tu dedo índice plantado (casi no se mueve entre Am y Em) y mueve solo los otros dedos. Baja la velocidad hasta que cada cambio suene limpio.',
+                stuck: 'One finger barely moves between the two chords — it lands on the D string, 2nd fret either way (middle finger for Am, ring finger for Em). Keep that spot anchored and move only the other fingers. Slow down until every change rings.',
+                stuck_es: 'Un dedo casi no se mueve entre los dos acordes — cae en la cuerda Re, traste 2 en ambos casos (dedo medio para Am, anular para Em). Mantén ese punto anclado y mueve solo los otros dedos. Baja la velocidad hasta que cada cambio suene limpio.',
                 levelUp: 'Add one strum on each chord before you switch, or swap in Am→C instead.',
                 levelUp_es: 'Agrega un rasgueo en cada acorde antes de cambiar, o cambia a Am→C en su lugar.',
                 skills: [5, 6],
@@ -714,8 +714,8 @@ SETS.push(
             steps: [
               {
                 label: 'Ear Spark: bright or sad?', label_es: 'Chispa auditiva: ¿alegre o triste?',
-                text: '⚡ Ear Spark (optional, 2 min): record yourself strumming C or Am, playing them a few times in a mixed-up order. On playback, say whether each one sounds bright or sad before checking — that\'s major vs minor, and you can already hear it. Got someone around? Have them strum behind your back and you name it live.',
-                text_es: '⚡ Chispa auditiva (opcional, 2 min): grábate rasgueando C o Am, tocándolos varias veces en un orden mezclado. Al escuchar la grabación, di si cada uno suena alegre o triste antes de comprobarlo — eso es mayor vs. menor, y ya puedes oírlo. ¿Tienes a alguien cerca? Que rasguee detrás de ti y tú lo nombres en vivo.'
+                text: '⚡ Ear Spark (optional, 2 min):<ol><li>Record yourself strumming C or Am, playing them a few times in a mixed-up order.</li><li>On playback, say whether each one sounds bright or sad before checking — that\'s major vs minor, and you can already hear it.</li></ol>Got someone around? Have them strum behind your back and you name it live.',
+                text_es: '⚡ Chispa auditiva (opcional, 2 min):<ol><li>Grábate rasgueando C o Am, tocándolos varias veces en un orden mezclado.</li><li>Al escuchar la grabación, di si cada uno suena alegre o triste antes de comprobarlo — eso es mayor vs. menor, y ya puedes oírlo.</li></ol>¿Tienes a alguien cerca? Que rasguee detrás de ti y tú lo nombres en vivo.'
               }
             ]
           },
@@ -948,8 +948,8 @@ SETS.push(
             hint_es: 'Esta es tu primera cejilla parcial — los dedos 1 al 4 suben como escalera por las cuerdas 1 a 4. Curva cada uno para que presione derecho hacia abajo en su propia cuerda, sin rozar al vecino.',
             stuck: 'Build it one finger at a time: index on string 1, then middle, then ring, then pinky last — check each string rings before adding the next finger.',
             stuck_es: 'Constrúyelo un dedo a la vez: índice en la cuerda 1, luego medio, luego anular, y meñique al final — revisa que cada cuerda suene antes de agregar el siguiente dedo.',
-            levelUp: 'Switch Em→Bm→Em without looking — the index finger barely has to move between them.',
-            levelUp_es: 'Cambia Em→Bm→Em sin mirar — el dedo índice casi no tiene que moverse entre ellos.',
+            levelUp: 'Switch Em→Bm→Em without looking. These two don\'t share a finger position, so it\'s a full hand relocation each time — lift all your Em fingers together and drop straight into the Bm shape.',
+            levelUp_es: 'Cambia Em→Bm→Em sin mirar. Estos dos no comparten ninguna posición de dedo, así que es una reubicación completa de la mano cada vez — levanta todos los dedos de Em juntos y colócalos directo en la forma de Bm.',
             skills: [3],
             chords: [
               { name: 'Bm', chord: [[6,'x'],[5,'x'],[4,4,'4'],[3,4,'3'],[2,3,'2'],[1,2,'1']], position: 2 }
@@ -1190,7 +1190,7 @@ SETS.push(
             skills: [1, 3],
             chords: [
               { name: 'F#m', chord: [[6,'x'],[5,'x'],[4,4,'3'],[3,2,'1'],[2,2,'1'],[1,2,'1']], position: 2 },
-              { name: 'C#m', chord: [[6,'x'],[5,'x'],[4,6,'4'],[3,6,'3'],[2,5,'2'],[1,4,'1']], position: 4 }
+              { name: 'C#m', chord: [[6,'x'],[5,4,'1'],[4,6,'3'],[3,6,'4'],[2,5,'2'],[1,4,'1']], position: 4 }
             ],
             response: { type: 'short', placeholder: 'Describe the sound of the E major chord — full and rich, or is a string buzzing?',
               placeholder_es: 'Describe el sonido del acorde E mayor — ¿completo y rico, o hay una cuerda zumbando?' }

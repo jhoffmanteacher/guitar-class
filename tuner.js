@@ -177,7 +177,14 @@ function detectPitchHPS(freqData, sampleRate, fftSize) {
   const curr = Math.pow(10, freqData[bestBin] / 20);
   const next = bestBin < freqData.length - 1 ? Math.pow(10, freqData[bestBin + 1] / 20) : 0;
   const denom = prev - 2 * curr + next;
-  const refined = denom !== 0 ? bestBin - 0.5 * (next - prev) / denom : bestBin;
+  // Clamp the offset to ±0.5 bins — the only range parabolic interpolation
+  // between three adjacent bins can validly land in. bestBin comes from the HPS
+  // product but prev/curr/next are read off the raw spectrum, so when the raw
+  // spectrum has no clean local peak there the denominator nears zero and the
+  // offset lands bins away, reporting a nonsense pitch that still passes the
+  // 60–1400Hz range check below.
+  const offset = denom !== 0 ? Math.max(-0.5, Math.min(0.5, -0.5 * (next - prev) / denom)) : 0;
+  const refined = bestBin + offset;
   const freq = refined * binHz;
   return (freq >= 60 && freq <= 1400) ? freq : -1;
 }
@@ -284,8 +291,10 @@ function tunerLoop() {
     // Kept separate from the silence countdown below — sharing one counter
     // meant a silent gap left this negative, so a re-plucked string had to
     // climb back up from a deficit before it re-locked (~0.45s of extra lag).
+    // Counts frames seen on this name INCLUDING the one that introduced it, so
+    // the >= 2 gate below is genuinely 2 frames. Starting at 0 made it 3.
     if (displayName === tunerLastNote) { tunerSameNoteCount++; }
-    else { tunerLastNote = displayName; tunerSameNoteCount = 0; }
+    else { tunerLastNote = displayName; tunerSameNoteCount = 1; }
     tunerSilenceCount = 0;   // a valid reading arrived — silence countdown resets
 
     if (tunerSameNoteCount >= 2 || tunerTargetString !== 'auto') {
@@ -342,6 +351,10 @@ async function startTuner() {
   // so a stream that resolves after close is recognised as stale below and
   // stopped immediately instead of being wired up into a "closed" tuner.
   const myStartToken = ++tunerStartToken;
+  // One mic owner at a time: a 90-second self-recording in progress stops here
+  // rather than running alongside the tuner. Guarded — stopAnyRec lives in
+  // app.js, which journey pages don't load.
+  if (typeof stopAnyRec === 'function') stopAnyRec();
   try {
     // Disable browser audio processing that distorts low-frequency guitar signals
     const stream = await navigator.mediaDevices.getUserMedia({

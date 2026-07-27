@@ -243,8 +243,8 @@ SETS.push(
               },
               {
                 label: 'Shuffle self-quiz', label_es: 'Autoevaluación con cartas',
-                text: 'Shuffle self-quiz — the deck below deals you a random fret. Say the A-string note out loud, then press it, before the ring runs out: three seconds a card, ten rounds. Miss one and it comes back later in the ten. Get 9 of 10 and you can check the skill off right there.',
-                text_es: 'Autoevaluación con cartas — el mazo de abajo te reparte un traste al azar. Di en voz alta la nota de la cuerda La y luego presiónala, antes de que el círculo se acabe: tres segundos por carta, diez rondas. Si fallas una, vuelve a salir más adelante. Logra 9 de 10 y ya puedes marcar la destreza ahí mismo.',
+                text: 'Shuffle self-quiz:<ol><li>The deck below deals you a random fret on the A string.</li><li>Say the note out loud, then press it, before the ring runs out — three seconds a card, ten rounds.</li><li>Miss one and it comes back later in the ten.</li></ol>You\'ve got it when: 9 of 10 — check the skill off right there.',
+                text_es: 'Autoevaluación con cartas:<ol><li>El mazo de abajo te reparte un traste al azar en la cuerda La.</li><li>Di la nota en voz alta y luego presiónala, antes de que el círculo se acabe — tres segundos por carta, diez rondas.</li><li>Si fallas una, vuelve a salir más adelante.</li></ol>Lo tienes cuando: 9 de 10 — marca la destreza ahí mismo.',
                 drill: { type: 'shuffle', string: 'A', maxFret: 12, rounds: 10, seconds: 3, pile: 'naturals', skill: 'm2w1-s3' },
                 hint: 'No chart. If you stall on a note, loop just that part of the string until it\'s automatic.',
                 hint_es: 'Sin tabla. Si te trabas en una nota, repite solo esa parte de la cuerda hasta que sea automática.',

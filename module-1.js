@@ -108,8 +108,8 @@ SETS.push(
             steps: [
           {
             label: 'Ear training: acoustic vs. electric', label_es: 'Oído: acústica vs. eléctrica',
-            text: 'Ear training — acoustic vs. electric. Two short clips play the SAME song, "All Along the Watchtower": <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank" data-ext="1">Clip 1 — Bob Dylan</a> and <a href="https://www.youtube.com/watch?v=TLV4_xaYynY" target="_blank" data-ext="1">Clip 2 — Jimi Hendrix</a>. As you listen, decide which clip sounds warm and woody and which sounds bright and fuzzy — that\'s the acoustic-vs-electric difference. You\'ve got it when: you can point to the electric clip and say one word for why it sounds different. This song grows with you through the whole course — <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
-            text_es: 'Entrenamiento auditivo — acústica vs. eléctrica. Dos clips cortos tocan la MISMA canción, "All Along the Watchtower": <a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank" data-ext="1">Clip 1 — Bob Dylan</a> y <a href="https://www.youtube.com/watch?v=TLV4_xaYynY" target="_blank" data-ext="1">Clip 2 — Jimi Hendrix</a>. Mientras escuchas, decide qué clip suena cálido y "de madera" y cuál suena brillante y distorsionado — esa es la diferencia entre acústica y eléctrica. Lo tienes cuando: puedes señalar el clip eléctrico y decir en una palabra por qué suena diferente. Esta canción crece contigo durante todo el curso — <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 1 de 5</a>.',
+            text: 'Ear training — acoustic vs. electric. Two short clips play the SAME song, "All Along the Watchtower":<ul><li><a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank" data-ext="1">Clip 1 — Bob Dylan</a></li><li><a href="https://www.youtube.com/watch?v=TLV4_xaYynY" target="_blank" data-ext="1">Clip 2 — Jimi Hendrix</a></li></ul>As you listen, decide which clip sounds warm and woody and which sounds bright and fuzzy — that\'s the acoustic-vs-electric difference. You\'ve got it when: you can point to the electric clip and say one word for why it sounds different. This song grows with you through the whole course — <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 1 of 5</a>.',
+            text_es: 'Entrenamiento auditivo — acústica vs. eléctrica. Dos clips cortos tocan la MISMA canción, "All Along the Watchtower":<ul><li><a href="https://www.youtube.com/watch?v=bT7Hj-ea0VE" target="_blank" data-ext="1">Clip 1 — Bob Dylan</a></li><li><a href="https://www.youtube.com/watch?v=TLV4_xaYynY" target="_blank" data-ext="1">Clip 2 — Jimi Hendrix</a></li></ul>Mientras escuchas, decide qué clip suena cálido y "de madera" y cuál suena brillante y distorsionado — esa es la diferencia entre acústica y eléctrica. Lo tienes cuando: puedes señalar el clip eléctrico y decir en una palabra por qué suena diferente. Esta canción crece contigo durante todo el curso — <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 1 de 5</a>.',
             hint: 'Acoustic guitars sound warm and woody. Electric guitars sound brighter and can be distorted or "fuzzy." Same song, very different sound.',
             hint_es: 'Las guitarras acústicas suenan cálidas y "de madera". Las eléctricas suenan más brillantes y pueden sonar distorsionadas. La misma canción, un sonido muy distinto.',
             levelUp: 'Find another song you like that has both an acoustic and an electric version, and name which recording is which.',
@@ -240,8 +240,10 @@ SETS.push(
 
     assessment: {
       goal: 'Can describe why they want to learn guitar · Can name one song that matters to them · Can describe what the guitar is doing in a song they love',
+      goal_es: 'Puede describir por qué quiere aprender guitarra · Puede nombrar una canción que le importa · Puede describir qué está haciendo la guitarra en una canción que le gusta',
       performance: 'Type your guitar goal and your song reflection into the response boxes, then say your "why guitar?" answer out loud in one or two sentences — if you can say it without hesitating, you\'ve learned it.',
       selfCheck: 'Can you name one reason you want to play? Can you name one song you\'d love to play by the end of the year?',
+      selfCheck_es: '¿Puedes nombrar una razón por la que quieres tocar? ¿Puedes nombrar una canción que te encantaría tocar para fin de año?',
       standards: ['Pr.1a', 'Cn.11a']
     },
 
@@ -472,7 +474,7 @@ SETS.push(
               'B',
               'A',
               'D',
-              'e'
+              'mi aguda'
             ] }
           }
             ]
@@ -620,8 +622,10 @@ SETS.push(
 
     assessment: {
       goal: 'Names 5+ parts of the guitar · Holds guitar with correct posture · Holds pick with correct grip · Tunes all 6 strings · Names all 6 strings from memory · Plays a short melody on the E string with clean, steady notes',
+      goal_es: 'Nombra 5+ partes de la guitarra · Sostiene la guitarra con postura correcta · Sostiene la púa con el agarre correcto · Afina las 6 cuerdas · Nombra las 6 cuerdas de memoria · Toca una melodía corta en la cuerda Mi con notas limpias y estables',
       performance: 'Record yourself tuning all six strings, then playing each open string cleanly low to high while naming it. Listen back and self-check: every string green, every note clean, every name right.',
       selfCheck: 'Can you name 5 parts of the guitar? Can you tune all 6 strings with a tuner? Can you play a short melody on the E string cleanly with no buzzing?',
+      selfCheck_es: '¿Puedes nombrar 5 partes de la guitarra? ¿Puedes afinar las 6 cuerdas con un afinador? ¿Puedes tocar una melodía corta en la cuerda Mi limpiamente sin zumbidos?',
       standards: ['Pr.4a', 'Pr.5a']
     },
 

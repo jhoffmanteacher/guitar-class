@@ -117,7 +117,7 @@ function flashTimerDisplay(){ flashClass(document.getElementById('timer-display'
 // Pulse the floating timer button too — it's visible even when the popup is closed.
 function flashTimerFab(){ flashClass(document.getElementById('fab-timer'),'fab-timer-done',3600); }
 function resetTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; } timerSecs=timerSelected; updateTimerDisplay(); document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); }
-function toggleTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); } else { timerRunning=true; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x23F8;','tools.pause'); timerInterval=setInterval(()=>{ if(timerSecs>0){ timerSecs--; updateTimerDisplay(); } else { clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); [0,0.35,0.7].forEach(d=>setTimeout(()=>toolsBeep(660,0.3),d*1000)); flashTimerDisplay(); flashTimerFab(); } },1000); } }
+function toggleTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); } else { if(timerSecs<=0){ timerSecs=timerSelected; updateTimerDisplay(); } /* already rang — Start means restart, not re-fire the alarm a second later */ timerRunning=true; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x23F8;','tools.pause'); timerInterval=setInterval(()=>{ if(timerSecs>0){ timerSecs--; updateTimerDisplay(); } else { clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); [0,0.35,0.7].forEach(d=>setTimeout(()=>toolsBeep(660,0.3),d*1000)); flashTimerDisplay(); flashTimerFab(); } },1000); } }
 
 /* ── Popup logic ── */
 function setFabExpanded(which, isOpen){ const f=document.getElementById('fab-'+which); if(f) f.setAttribute('aria-expanded', isOpen?'true':'false'); }
@@ -127,12 +127,15 @@ function togglePopup(which){
   // The tuner has no Start/Stop button — opening it starts listening, closing stops.
   // One mic owner at a time: the tuner interrupts a live Listening Coach check
   // and stops any running game mic (app.js/coach.js only — guarded, since
-  // journey pages don't have those features).
+  // journey pages don't have those features). A running metronome stops too:
+  // its clicks (880/1320Hz) sit inside the tuner's 70–1500Hz bandpass and
+  // echoCancellation is off, so they'd be heard as pitch.
   if(which==='tuner'){
     if(open){
       if(typeof coachInterrupt==='function') coachInterrupt();
       if(typeof gamesStopMic==='function') gamesStopMic();
       if(typeof stopAllDemoAudio==='function') stopAllDemoAudio();
+      if(metroRunning) stopMetro();
       startTuner();
     } else { stopTuner(); }
   }
@@ -149,7 +152,17 @@ document.addEventListener('click',e=>{
   const path = e.composedPath();
   const inside = path.some(el=>el.classList && (el.classList.contains('tool-popup')||el.classList.contains('fab')||el.classList.contains('fab-buttons')));
   if(!inside){
-    ['metro','timer','tuner'].forEach(closePopup);
+    // Only the tuner stops on a click-away — it's holding the mic, so leaving
+    // it listening in the background is a real cost. A running metronome or
+    // timer keeps running: the student tapping a lesson step or a Journey page
+    // shouldn't silently kill the click they're practicing to. Those popups
+    // just slide shut visually.
+    closePopup('tuner');
+    ['metro','timer'].forEach(w=>{
+      const el = document.getElementById(w+'-popup');
+      if(el) el.classList.remove('open');
+      setFabExpanded(w, false);
+    });
   }
 });
 // Escape closes any open tool popup (a11y)

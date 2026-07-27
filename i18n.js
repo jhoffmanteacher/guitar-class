@@ -149,6 +149,11 @@
     'header.find':     { en: 'Find', es: 'Buscar' },
     'header.signIn':   { en: 'Sign in with Google', es: 'Iniciar sesión con Google' },
     'header.signOut':  { en: 'Sign out', es: 'Cerrar sesión' },
+    'header.railToggleAria': { en: 'Open navigation menu', es: 'Abrir el menú de navegación' },
+    'header.searchAria':     { en: 'Find it — search the whole site', es: 'Buscar — busca en todo el sitio' },
+    // Tooltip on the Español button — it always names what the click DOES,
+    // so in Spanish it offers the trip back to English.
+    'header.translateTitle': { en: 'Translate to Spanish', es: 'Cambiar a inglés' },
 
     // ── Auth wall ──
     'auth.title':         { en: 'Welcome to Guitar Class', es: 'Bienvenido a la clase de guitarra' },
@@ -164,6 +169,9 @@
     // ── Nav rail ──
     'nav.module':         { en: 'Module', es: 'Módulo' },
     'nav.thisSet':        { en: 'This set', es: 'Esta unidad' },
+    'nav.prevSet':        { en: 'the previous set', es: 'la unidad anterior' },
+    'nav.comingSoonHtml': { en: 'This set\'s content will appear here when it\'s ready.<br>Check back soon!',
+      es: 'El contenido de esta unidad aparecerá aquí cuando esté listo.<br>¡Vuelve pronto!' },
     'nav.explore':        { en: 'Explore', es: 'Explorar' },
     'nav.practice':       { en: 'Practice', es: 'Practicar' },
     'nav.games':          { en: 'Games', es: 'Juegos' },
@@ -180,6 +188,14 @@
     'nav.checklistSub':   { en: 'Track what you can do', es: 'Lleva el registro de lo que ya sabes hacer' },
     'nav.previewNoteHtml':{ en: '<strong>Preview mode</strong> — set locks are off for you. Students still see them.',
                              es: '<strong>Modo de vista previa</strong> — los bloqueos de unidades están desactivados para ti. Los estudiantes todavía los ven.' },
+    // Rail landmarks, tooltips and screen-reader-only labels (index.html)
+    'nav.railAria':       { en: 'Course navigation', es: 'Navegación del curso' },
+    'nav.chooseModule':   { en: 'Choose module', es: 'Elige un módulo' },
+    'nav.moduleGoalTitle':{ en: 'Finish all skills to complete this module',
+                             es: 'Termina todas las destrezas para completar este módulo' },
+    'nav.moduleProgAria': { en: 'Module skills progress', es: 'Progreso de destrezas del módulo' },
+    'nav.setsGroupAria':  { en: 'Sets in this module', es: 'Unidades de este módulo' },
+    'nav.gamesScreenAria':{ en: 'Guitar games', es: 'Juegos de guitarra' },
 
     // ── Skill status / checklist ──
     'skill.stillWorking':      { en: 'Still working on it', es: 'Todavía lo estoy practicando' },
@@ -212,7 +228,12 @@
 
     // ── Tools: Metronome / Timer / Tuner ──
     'tools.metronome':     { en: 'Metronome', es: 'Metrónomo' },
+    'tools.closeMetroAria':{ en: 'Close metronome', es: 'Cerrar el metrónomo' },
+    'tools.closeTimerAria':{ en: 'Close timer', es: 'Cerrar el temporizador' },
+    'tools.closeTunerAria':{ en: 'Close tuner', es: 'Cerrar el afinador' },
+    'tools.meterAria':     { en: 'Time signature', es: 'Compás' },
     'tools.bpm':           { en: 'BPM', es: 'BPM' },
+    'tools.tempoBpm':      { en: 'Tempo in BPM', es: 'Tempo en BPM' },
     'tools.start':         { en: 'Start', es: 'Iniciar' },
     'tools.stop':          { en: 'Stop', es: 'Detener' },
     'tools.pause':         { en: 'Pause', es: 'Pausa' },
@@ -266,6 +287,9 @@
     'panel.embedFallbackHtml':{ en: 'Not playing? Some videos only allow playback on YouTube — {link}',
                                  es: '¿No se reproduce? Algunos videos solo permiten reproducción en YouTube — {link}' },
     'panel.watchThere':      { en: 'watch it there', es: 'míralo ahí' },
+    'panel.viewerAria':      { en: 'Resource viewer', es: 'Visor de recursos' },
+    'panel.close':           { en: 'Close', es: 'Cerrar' },
+    'panel.closeAria':       { en: 'Close viewer', es: 'Cerrar el visor' },
 
     // ── Site search ("Find it" panel — toggleSearch/runSearch in app.js) ──
     'search.title':          { en: 'Find it', es: 'Buscar' },
@@ -288,6 +312,8 @@
     // ── Step folds & responses (module content phase 2 — chrome around
     // per-step data, not the step data itself, see CLAUDE.md's module-
     // content i18n section) ──
+    'step.ariaLabel':        { en: 'Step {n} — {label}', es: 'Paso {n} — {label}' },
+    'step.ariaLabelDone':    { en: 'Step {n}, done — {label}', es: 'Paso {n}, listo — {label}' },
     'step.hint':             { en: 'Hint', es: 'Pista' },
     'step.stuck':            { en: 'Stuck?', es: '¿Atascado?' },
     'step.levelUp':          { en: 'Level up', es: 'Sube de nivel' },
@@ -413,6 +439,7 @@
     'fret.praiseMid':        { en: 'getting there!', es: '¡vas bien!' },
     'fret.praiseLow':        { en: 'reps make it stick — go again when you’re ready.', es: 'las repeticiones lo fijan — repite cuando estés listo.' },
     'fret.best':             { en: 'Best: {n}/{total}', es: 'Mejor: {n}/{total}' },
+    'fret.fretN':            { en: 'Fret {n}', es: 'Traste {n}' },
     'fret.stringLowE':       { en: 'low E', es: 'Mi grave' },
     'fret.stringA':          { en: 'A', es: 'La' },
 
@@ -546,6 +573,19 @@
     'fret.stringG':          { en: 'G', es: 'Sol' },
     'fret.stringB':          { en: 'B', es: 'Si' },
     'fret.stringHighE':      { en: 'high E', es: 'Mi agudo' },
+
+    // ── Fretboard/string diagram labels (guitar-diagrams.js) — the full
+    //    "Low E (6th string)" form used in popup + panel titles, plus the
+    //    single-note caption. Solfège names, matching fret.string* above. ──
+    'diagram.stringLowE':    { en: 'Low E (6th string)',  es: 'Mi grave (6.ª cuerda)' },
+    'diagram.stringA':       { en: 'A (5th string)',      es: 'La (5.ª cuerda)' },
+    'diagram.stringD':       { en: 'D (4th string)',      es: 'Re (4.ª cuerda)' },
+    'diagram.stringG':       { en: 'G (3rd string)',      es: 'Sol (3.ª cuerda)' },
+    'diagram.stringB':       { en: 'B (2nd string)',      es: 'Si (2.ª cuerda)' },
+    'diagram.stringHighE':   { en: 'High E (1st string)', es: 'Mi agudo (1.ª cuerda)' },
+    'diagram.noteOpen':      { en: '{note} · {string} open', es: '{note} · cuerda {string} al aire' },
+    'diagram.noteFret':      { en: '{note} · {string} string, {ord} fret',
+                               es: '{note} · cuerda {string}, traste {fret}' },
 
     // ── Sequential-gate messages + locked-pill tooltips/aria ──
     'gate.lockedUntilAria':  { en: '{set} — locked until {prev} is finished', es: '{set} — bloqueada hasta terminar {prev}' },
@@ -731,6 +771,8 @@
       es: 'La escucha ocurre aquí mismo en este dispositivo — no se graba ni se sube nada.' },
     'coach.interrupt.tunerTook': { en: 'The tuner took over the mic — tune up, then start the check again.',
       es: 'El afinador tomó el micrófono — afina, y luego empieza el chequeo de nuevo.' },
+    'coach.interrupt.micLost': { en: 'The mic switched off before your check finished — start it again when you’re ready.',
+      es: 'El micrófono se apagó antes de terminar tu chequeo — empiézalo de nuevo cuando estés listo.' },
     'coach.lane.countIn': { en: 'count in',
       es: 'cuenta' },
     'coach.lane.playNow': { en: 'play now',
@@ -1625,7 +1667,10 @@
     let str = entry ? (entry[lang] || entry.en) : key;
     if(params){
       Object.keys(params).forEach(k=>{
-        str = str.replace(new RegExp('\\{'+k+'\\}','g'), params[k]);
+        // split/join, not .replace() — a replacement string containing
+        // $&, $', $` or $1 would otherwise be treated as a special pattern
+        // (e.g. a student's raw search query echoed back through t()).
+        str = str.split('{'+k+'}').join(params[k]);
       });
     }
     return str;

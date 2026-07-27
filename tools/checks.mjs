@@ -485,9 +485,9 @@ async function checkLinks() {
 /* ════════════════════════════════════════════════════════════════════
    3. SW BUMP — make CACHE_VERSION a fingerprint of the shell files
    ════════════════════════════════════════════════════════════════════ */
-function fingerprint() {
+function fingerprint(files) {
   const h = createHash('sha256');
-  for (const f of [...SHELL_FILES, ...AUDIO_FILES, ...IMG_FILES]) {
+  for (const f of files) {
     try { h.update(f + '\0'); h.update(readFileSync(join(ROOT, f))); }
     catch { /* file may not exist (e.g. optional icon) — skip */ }
   }
@@ -557,35 +557,50 @@ function checkSdkVersion() {
   ok(`Firestore SDK version consistent (${v}) across ${files.size} files`);
 }
 
-function bumpServiceWorker() {
-  head('3. Service-worker cache version');
-  const swPath = join(ROOT, 'sw.js');
-  const src = readFileSync(swPath, 'utf8');
-  checkJourneyPaths();
-  checkSwAssets(src);
-  checkSdkVersion();
-  const fp = fingerprint();
+/* Bumps ONE named `const NAME = '...';` version constant in sw.js against a
+   fingerprint of the given files, independently of any other constant in the
+   file. Used for both CACHE_VERSION (shell + img/) and AUDIO_CACHE_VERSION
+   (audio/ only) — kept separate so a routine content push doesn't bump the
+   audio version and purge every student's cached backing tracks, while a
+   real re-exported track still bumps it and invalidates the stale cache. */
+function bumpVersionConst(constName, prefix, files, src, swPath, label) {
+  const fp = fingerprint(files);
   const date = new Date().toISOString().slice(0, 10);
-  const want = `guitar-class-${date}-${fp}`;
+  const want = `${prefix}-${date}-${fp}`;
 
-  const line = src.match(/const CACHE_VERSION = '([^']*)';/);
-  if (!line) { err('could not find CACHE_VERSION in sw.js'); problems++; return; }
+  const re = new RegExp(`const ${constName} = '([^']*)';`);
+  const line = src.match(re);
+  if (!line) { err(`could not find ${constName} in sw.js`); problems++; return src; }
   const current = line[1];
 
   // The fingerprint is what matters; the date is cosmetic. Consider it current
   // if the content fingerprint already matches (ignore a date-only difference).
   const currentFp = (current.match(/-([0-9a-f]{10})$/) || [])[1];
-  if (currentFp === fp) { ok(`up to date (${current})`); return; }
+  if (currentFp === fp) { ok(`${label} up to date (${current})`); return src; }
 
   if (CHECK_ONLY) {
-    err(`stale — shell files changed but CACHE_VERSION wasn't bumped`);
+    err(`${label} stale — files changed but ${constName} wasn't bumped`);
     console.log(`${C.dim}      is:   ${current}${C.reset}`);
     console.log(`${C.dim}      want: ${want}${C.reset}`);
     problems++;
-    return;
+    return src;
   }
-  writeFileSync(swPath, src.replace(line[0], `const CACHE_VERSION = '${want}';`));
-  ok(`bumped ${current} → ${want}`);
+  ok(`${label} bumped ${current} → ${want}`);
+  return src.replace(line[0], `const ${constName} = '${want}';`);
+}
+
+function bumpServiceWorker() {
+  head('3. Service-worker cache version');
+  const swPath = join(ROOT, 'sw.js');
+  let src = readFileSync(swPath, 'utf8');
+  checkJourneyPaths();
+  checkSwAssets(src);
+  checkSdkVersion();
+
+  const before = src;
+  src = bumpVersionConst('CACHE_VERSION', 'guitar-class', [...SHELL_FILES, ...IMG_FILES], src, swPath, 'shell cache');
+  src = bumpVersionConst('AUDIO_CACHE_VERSION', 'guitar-class-audio', AUDIO_FILES, src, swPath, 'audio cache');
+  if (!CHECK_ONLY && src !== before) writeFileSync(swPath, src);
 }
 
 /* ════════════════════════════════════════════════════════════════════ */

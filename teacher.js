@@ -46,6 +46,8 @@ async function showTeacherApp(user){
     shell.dataset.delegated='1';
     shell.addEventListener('click', e=>{
       if(e.target.closest('[data-back-to-students]')){ backToStudentsRoster(); return; }
+      const games=e.target.closest('[data-set-games]');
+      if(games){ teacherSetStudentGames(games.dataset.uid, games.dataset.state); return; }
       const open=e.target.closest('[data-open-student]');
       if(open) openStudentDetail(open.dataset.uid);
     });
@@ -283,19 +285,31 @@ function renderTeacherTrouble(){
    owns this doc; students only read it (app.js loadClassConfig). Effective
    access per student: override wins if present, else the class master. */
 let teacherClassConfig = { gamesEnabled:true, gameOverrides:{} };
+// Toggling a student's setting quickly (Default → On → Off) fires overlapping
+// reads of config/class, and they can resolve out of order — an earlier one
+// landing last would overwrite both teacherClassConfig and the repainted rows
+// with a stale value, showing "On" while Firestore holds false. Every call
+// takes a ticket; only the most recently issued one may touch state or return
+// a config to render from. A stale response resolves to null and is dropped.
+let teacherClassConfigReq = 0;
 async function loadTeacherClassConfig(){
+  const req = ++teacherClassConfigReq;
+  let cfg;
   try{
     await ensureDb();
     const doc = await db.collection('config').doc('class').get();
-    teacherClassConfig = doc.exists ? (doc.data()||{}) : {};
-  }catch(e){ teacherClassConfig = {}; }
-  if(!teacherClassConfig.gameOverrides) teacherClassConfig.gameOverrides = {};
+    cfg = doc.exists ? (doc.data()||{}) : {};
+  }catch(e){ cfg = {}; }
+  if(!cfg.gameOverrides) cfg.gameOverrides = {};
+  if(req !== teacherClassConfigReq) return null;   // a newer request is in flight — discard this one
+  teacherClassConfig = cfg;
   return teacherClassConfig;
 }
 function renderTeacherGames(){
   const box=document.getElementById('t-grid-container');
   box.innerHTML='<div class="t-loading">Loading game settings…</div>';
   loadTeacherClassConfig().then(cfg=>{
+    if(!cfg) return;   // superseded by a newer toggle — leave the newer render's DOM alone
     const classOn = cfg.gamesEnabled!==false;
     const ov = cfg.gameOverrides||{};
     const classCtl=`
@@ -314,7 +328,10 @@ function renderTeacherGames(){
       const v=ov[stu.uid];                                   // true / false / undefined
       const state=v===true?'on':v===false?'off':'default';
       const effective=v===true?true:v===false?false:classOn;
-      const seg=(s,label)=>`<button class="tg-seg-btn ${state===s?'on':''}" onclick="teacherSetStudentGames('${stu.uid}','${s}')">${label}</button>`;
+      // data-uid + the delegated listener in showTeacherApp, same as the
+      // Students view — a Firestore uid is never spliced into an inline JS
+      // string literal.
+      const seg=(s,label)=>`<button class="tg-seg-btn ${state===s?'on':''}" data-set-games data-uid="${escAttr(stu.uid)}" data-state="${s}">${label}</button>`;
       return `<tr><td class="tg-name" title="${escAttr(name)}">${escHtml(name)}</td>`+
         `<td><div class="tg-seg">${seg('default','Default')}${seg('on','On')}${seg('off','Off')}</div></td>`+
         `<td class="tg-eff">${effective?'🎮 available':'— hidden'}</td></tr>`;
@@ -480,7 +497,9 @@ function renderTeacherStudents(){
     box.innerHTML='<div class="t-loading">No skills have been loaded yet.</div>';
     return;
   }
-  const rows=allStudents.map(stu=>({stu, tally:teacherStudentTally(stu, universe)})).sort((a,b)=>b.tally.total-a.tally.total);
+  // Furthest module reached first (that's what the "Furthest along" card below
+  // reads off rows[0]), skills checked off as the tie-break within a module.
+  const rows=allStudents.map(stu=>({stu, tally:teacherStudentTally(stu, universe)})).sort((a,b)=>(b.tally.furthest-a.tally.furthest)||(b.tally.total-a.tally.total));
   const studentsCount=allStudents.length;
   const avgPct=Math.round(rows.reduce((a,r)=>a+r.tally.total,0)/(studentsCount*universe.total)*100);
   const furthestStu=rows[0].stu;

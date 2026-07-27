@@ -5,6 +5,44 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-26 — Site-wide bug sweep: Listening Coach, tuner, and a couple of wrong chord tips
+
+### Fixed
+
+- **Two Module 5 chord-switch tips gave wrong advice** — they said your index
+  finger barely moves between Am↔Em and Em↔Bm, but Em doesn't use an index
+  finger at all. The tips now point to the finger position that's actually
+  shared (or say plainly when there isn't one).
+- **Module 5's C#m chord diagram now actually shows a barre**, matching what
+  the lesson text and quiz already call it.
+- **A few cards that were still one big paragraph are now clear numbered
+  steps** — a Module 5 Ear Spark, a Module 1 ear-training card, and a Module 2
+  self-quiz.
+- **The Listening Coach could freeze mid-check** if you tapped "Keep
+  practicing" or "My progress" while it was listening — fixed, along with a
+  couple of scoring edge cases on short drills.
+- **The tuner and the metronome could interfere with each other** — the
+  metronome's clicks could sometimes throw off the tuner's pitch reading.
+  Also, a running metronome or timer no longer stops just because you tapped
+  something else on the page.
+- **Skill "check it off" buttons could silently fail** to check anything off
+  when a Listening Coach check was required first — they now stay live so
+  you can try again.
+- **Card Deck's "clean run" scoring now only counts cards you got right on
+  the first try** — putting a card back and getting it later no longer
+  counts as clean.
+- **A finished practice timer now restarts properly** when you press Start
+  again, instead of ringing the alarm one more time.
+- **Fixed a caching bug that could re-download every backing track after any
+  site update** — a fresh push now only re-downloads tracks that actually
+  changed, not your whole library.
+- On a shared Chromebook, **one student's practice history could carry over
+  into another student's account** — practice logs and your last-visited
+  page are now kept separate per student.
+- A handful of screen-reader labels and button tooltips that stayed in
+  English in Spanish mode are now translated, including the Español button's
+  own tooltip.
+
 ## 2026-07-26 — More content fixes, new practice decks, and missing "you've got it when" targets
 
 ### Fixed

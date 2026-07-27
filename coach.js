@@ -97,6 +97,7 @@ window.coachMicLive = false; // read by app.js to silence ▶ Play while listeni
 
 /* onclick target for every coach button app.js renders. */
 function coachOpen(btn){
+  if (typeof stopAnyRec === 'function') stopAnyRec();   // an in-progress self-recording also owns the mic
   gamesStopMic();                     // a running game owns the shared mic — evict it
                                       // cleanly (its UI resets) before coachClose()
                                       // tears the stream down
@@ -307,7 +308,7 @@ function coachRenderReady(msg){
 
 function coachNudgeBpm(d){
   if (!coach || coach.phase !== 'ready') return;
-  coach.bpm = Math.min(120, Math.max(40, coach.bpm + d));
+  coach.bpm = Math.min(120, Math.max(30, coach.bpm + d));   // floor matches coachOpen's accepted minimum, or "−" could raise the tempo on a slow step
   coach.beatMs = 60000 / coach.bpm;
   const el = document.getElementById('coach-bpm-readout');
   if (el) el.textContent = coach.bpm + ' BPM';
@@ -367,7 +368,7 @@ async function coachStartCheck(){
        ${coach.mode === 'melody' ? (coachTabHtml() || coachStripHtml()) : coachStripHtml()}
      </div>`;
   coachCountIn(coach, 'coach-count', () => {
-    if (!coach) return;
+    if (!coach || !coachBody()) return;   // card panel may have been replaced in the DOM during the count-in (e.g. a language switch rebuilt the module panel)
     coach.phase = 'listening';
     coachRenderListening();
   });
@@ -606,7 +607,8 @@ function coachPulseFadeThreshold(slotCount){
 /* ══════════ Detection loop ══════════ */
 
 function coachLoop(){
-  if (!coach || !coachAnalyser) return;
+  if (!coach) return;
+  if (!coachAnalyser){ coachInterrupt(t('coach.interrupt.micLost')); return; }   // mic was torn down by something other than coachInterrupt/coachClose — don't freeze mid-take
   if (!coach.card.isConnected){ coachStopAll(); return; }   // set re-rendered under us
 
   // No notes to score during the count-in, but keep the level trackers
@@ -1031,7 +1033,7 @@ function coachScorePitch(){
 function coachScoreTiming(){
   const name = t('coach.crit.timing.name'), icon = '&#x1F941;';
   const devs = coach.slots.filter(s => s.hit && s.hit.devMs != null).map(s => s.hit.devMs);
-  if (devs.length < 3) return { name, icon, level: 1, sentence: t('coach.crit.timing.notEnough') };
+  if (devs.length < 3) return { name, icon, level: 0, sentence: t('coach.crit.timing.notEnough') };
   const onMs = Math.max(90, coach.beatMs * 0.18), closeMs = onMs * 2;
   const on = devs.filter(d => Math.abs(d) <= onMs).length;
   const close = devs.filter(d => Math.abs(d) <= closeMs).length;
@@ -1468,17 +1470,22 @@ function closeGamesScreen(){
   gamesClosePanel();
 }
 function gamesClosePanel(){
-  gamesStopMic();
+  // Any hash change away from '#games' (e.g. tapping "Keep practicing" or "My
+  // progress" while a standalone Coach check is running) fires this via the
+  // hashchange listener below, whether or not the games screen was ever open.
+  // Only tear down the mic when there's actually a games panel to close —
+  // otherwise this silently kills an unrelated in-progress Coach check.
   const screen = document.getElementById('games-screen');
-  const wasOpen = screen && !screen.hasAttribute('hidden');
-  if (screen) screen.setAttribute('hidden', '');
+  if (!screen || screen.hasAttribute('hidden')) return;
+  gamesStopMic();
+  screen.setAttribute('hidden', '');
   document.body.classList.remove('games-open');
   const p = document.getElementById('games-panel');
   if (p) p.innerHTML = '';
   const btn = document.getElementById('games-btn');
   if (btn){
     btn.setAttribute('aria-expanded', 'false');
-    if (wasOpen) btn.focus();   // return focus to where the dialog was opened
+    btn.focus();   // return focus to where the dialog was opened
   }
 }
 window.addEventListener('hashchange', () => {
@@ -2081,7 +2088,7 @@ function ccRenderDone(){
     if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
       const old = (games.cc && games.cc.bestBpm) || 0;
       if (cc.bpm > old){
-        games.cc = { bestBpm: cc.bpm, progression: prog, at: new Date().toISOString().slice(0, 10) };
+        games.cc = { bestBpm: cc.bpm, progression: cc.chords, at: new Date().toISOString().slice(0, 10) };
         saveGames();
       }
     }
@@ -5323,14 +5330,18 @@ function nrRenderReady(msg){
 /* ── "Hear an example" — one generated round through the pluck synth,
    scheduled on the audio clock (rnPluckAt is Riff Runner's). ── */
 
-function nrHear(){
+async function nrHear(){
   const s = nr;
   if (!s || s.phase !== 'ready') return;
   if (s.pv){ nrHearStop(); return; }
   if (typeof getAudioCtx !== 'function') return;
   stopAllDemoAudio();
   const ctx = getAudioCtx();
-  if (ctx.state === 'suspended'){ try { ctx.resume(); } catch(e){} }
+  if (ctx.state === 'suspended'){
+    try { await ctx.resume(); } catch(e){}
+  }
+  if (nr !== s || s.phase !== 'ready' || s.pv) return;   // switched during the resume
+  if (!nrBody()){ nrHearStop(); return; }
   const lv = NR_LEVELS[s.level];
   const spb = 60 / lv.bpm;
   const notes = nrGen(lv).filter(n => !n.rest);

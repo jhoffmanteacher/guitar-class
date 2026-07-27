@@ -120,6 +120,11 @@ async function ensureDb(){
   return db;
 }
 let currentUser = null;
+// Scopes a per-device localStorage key to the signed-in student, so a shared
+// Chromebook can't have one student's practice log or last-place bleed into
+// the next student's Firestore doc. Falls back to an unscoped device bucket
+// when nobody's signed in (e.g. before auth resolves).
+function _uidKey(base){ return (currentUser && currentUser.uid) ? base+':'+currentUser.uid : base; }
 let progress    = {};
 let responses   = {};
 let completed   = {};
@@ -400,16 +405,16 @@ function applyGamesAccess(){
    flaky connection, or in dev-bypass mode. */
 function restoreLocalPlace(){
   try{
-    const m = parseInt(localStorage.getItem('gc-lastModule'));
-    const s = localStorage.getItem('gc-lastSet');
+    const m = parseInt(localStorage.getItem(_uidKey('gc-lastModule')));
+    const s = localStorage.getItem(_uidKey('gc-lastSet'));
     if(m) lastModuleNum = m;
     if(s) lastSetId = s;
   }catch(e){/* localStorage may be unavailable (private mode) — ignore */}
 }
 function saveLocalPlace(){
   try{
-    localStorage.setItem('gc-lastModule', String(lastModuleNum||1));
-    if(lastSetId) localStorage.setItem('gc-lastSet', lastSetId);
+    localStorage.setItem(_uidKey('gc-lastModule'), String(lastModuleNum||1));
+    if(lastSetId) localStorage.setItem(_uidKey('gc-lastSet'), lastSetId);
   }catch(e){/* ignore */}
 }
 
@@ -1339,7 +1344,7 @@ function isSetLocked(w){
 // The set immediately before w in its module (for "finish X first" hints).
 function prevSetLabel(w){
   const arr = SETS.filter(x=>x.moduleNum===w.moduleNum);
-  return (arr[arr.indexOf(w)-1] || {}).label || 'the previous set';
+  return (arr[arr.indexOf(w)-1] || {}).label || t('nav.prevSet');
 }
 
 // Tiny transient toast for gate hints — makes its own element and self-dismisses.
@@ -1566,7 +1571,7 @@ function buildComingSoon(w){
   const header = buildSetHeader(w);
   const sub = w.subtitle ? `<h2 class="obj-main">${tf(w,'subtitle')}</h2>` : '';
   return `<div class="obj-card set-head">${header}${sub}</div>
-  <div class="coming"><div class="big">&#x1F3B8;</div><p>This set's content will appear here when it's ready.<br>Check back soon!</p></div>`;
+  <div class="coming"><div class="big">&#x1F3B8;</div><p>${t('nav.comingSoonHtml')}</p></div>`;
 }
 
 function buildSet(w){
@@ -1762,7 +1767,7 @@ function buildStations(w, stationId){
       // expecting evenly picked onsets would fail correct technique.
       const hasHolds = (ps.notes || []).some(n => n && typeof n === 'object' && !Array.isArray(n));
       return ` <span class="bpm-control-group">` +
-        `<button type="button" class="play-seq-btn" data-midis="${escAttr(midis)}" onclick="playSequenceFromGroup(this)" title="Play all notes">&#x25B6; ${escHtml(label)}</button>` +
+        `<button type="button" class="play-seq-btn" data-midis="${escAttr(midis)}" onclick="playSequenceFromGroup(this)" title="${escAttr(t('step.playAll'))}">&#x25B6; ${escHtml(label)}</button>` +
         renderBpmControl(key, bpm, minBpm, maxBpm) +
         (hasHolds || hasChordsCoach ? '' : coachBtnHtml(midis, null, stepSkillIds(w, s))) +
         `</span>`;
@@ -1825,7 +1830,7 @@ function buildStations(w, stationId){
     const skillsAttr = (s.skills && s.skills.length) ? ` data-skills="${s.skills.join(',')}"` : '';
     const label = stepLabel(s);
     const num = numOffset + i + 1;
-    const ariaLabel = `Step ${num}${isDone ? ', done' : ''} — ${label}`;
+    const ariaLabel = t(isDone ? 'step.ariaLabelDone' : 'step.ariaLabel', { n: num, label });
     const statusIcon = isDone ? '&#x2713;' : String(num);
     return `<li class="step${isDone ? ' step-done' : ''}${isCur ? ' cur' : ''}${isCur ? '' : ' collapsed'}"${skillsAttr} data-num="${num}">`
       + `<button type="button" class="step-head" aria-expanded="${isCur}" onclick="toggleStepOpen(this)" aria-label="${escAttr(ariaLabel)}">`
@@ -2576,7 +2581,7 @@ function playSeqControlsHtml(practice, skillId){
   const midis = JSON.stringify(practice.notes || []);
   const hasHolds = (practice.notes || []).some(n => n && typeof n === 'object' && !Array.isArray(n));
   return `<div class="bpm-control-group">` +
-    `<button type="button" class="play-seq-btn" data-midis="${escAttr(midis)}" onclick="playSequenceFromGroup(this)" title="Play all notes">&#x25B6; ${escHtml(label)}</button>` +
+    `<button type="button" class="play-seq-btn" data-midis="${escAttr(midis)}" onclick="playSequenceFromGroup(this)" title="${escAttr(t('step.playAll'))}">&#x25B6; ${escHtml(label)}</button>` +
     renderBpmControl(key, bpm, minBpm, maxBpm) +
     (hasHolds ? '' : coachBtnHtml(midis, null, skillId)) +
   `</div>`;
@@ -2758,11 +2763,11 @@ function onPracticeMcSelect(skillId, idx, ansIdx, btnEl){
 /* ── Practice log: { [skillId]: {reps, todayCount, lastDay, last, best} } ── */
 const REP_GOAL = 3;   // gentle daily target per skill — no timers, just dots
 function loadLocalPracticeLog(){
-  try{ return JSON.parse(localStorage.getItem('practiceLog')) || {}; }catch(e){ return {}; }
+  try{ return JSON.parse(localStorage.getItem(_uidKey('practiceLog'))) || {}; }catch(e){ return {}; }
 }
 let practiceLog = loadLocalPracticeLog();
 function savePracticeLogLocal(){
-  try{ localStorage.setItem('practiceLog', JSON.stringify(practiceLog)); }catch(e){}
+  try{ localStorage.setItem(_uidKey('practiceLog'), JSON.stringify(practiceLog)); }catch(e){}
 }
 function savePracticeLog(){
   savePracticeLogLocal();   // offline/dev-bypass copy, always
@@ -2967,7 +2972,7 @@ function fgBoardSvg(sid, kind){
     const bandTop = multi ? stringYs[i] - rowGap / 2 : wireTop - 8;
     const bandH   = multi ? rowGap : (wireBot - wireTop) + 16;
     for(let f = 0; f <= maxF; f++){
-      s += `<rect class="fg-hit" x="${colX(f)}" y="${bandTop}" width="${colW(f)}" height="${bandH}" rx="6" onclick="fgClick('${sid}','${k}',${f})" aria-label="${escAttr(t(FRET_STRING_KEY[k]))} — fret ${f}"><title>Fret ${f}</title></rect>`;
+      s += `<rect class="fg-hit" x="${colX(f)}" y="${bandTop}" width="${colW(f)}" height="${bandH}" rx="6" onclick="fgClick('${sid}','${k}',${f})" aria-label="${escAttr(t(FRET_STRING_KEY[k]))} — ${escAttr(t('fret.fretN',{n:f}))}"><title>${escHtml(t('fret.fretN',{n:f}))}</title></rect>`;
     }
   });
   return s + '</svg>';
@@ -2991,13 +2996,14 @@ function fgStart(sid){
     if(!pools[k].length) pools[k] = refill(k);
     prompts.push({ str: k, note: pools[k].pop() });
   }
-  fretGames[sid] = { kind, prompts, idx: 0, score: 0, missed: false, done: false };
+  fretGames[sid] = { kind, prompts, idx: 0, score: 0, missed: false, done: false, locked: false };
   fgRenderPrompt(sid);
 }
 function fgRenderPrompt(sid){
   const st = fretGames[sid];
   const wrap = document.getElementById('fg-' + sid);
   if(!st || !wrap) return;
+  st.locked = false;   // fresh prompt on screen — re-enable clicks (guards the 650ms transition below)
   const p = st.prompts[st.idx];
   const pp = { note: p.note, string: t(FRET_STRING_KEY[p.str] || 'fret.stringLowE') };
   const cp = { i: st.idx + 1, total: FG_ROUND };
@@ -3009,13 +3015,14 @@ function fgRenderPrompt(sid){
 function fgClick(sid, strKind, fret){
   const st = fretGames[sid];
   const wrap = document.getElementById('fg-' + sid);
-  if(!st || st.done || !wrap) return;
+  if(!st || st.done || st.locked || !wrap) return;
   const p = st.prompts[st.idx];
   const fb = wrap.querySelector('.fg-fb');
   const marker = document.getElementById(`fgm-${sid}-${strKind}-${fret}`);
   if(strKind === p.str && (FG_NATURALS[strKind] || {})[fret] === p.note){
     if(!st.missed) st.score++;
     st.missed = false;
+    st.locked = true;   // hold input until the next prompt renders, so a click during the transition isn't scored against the wrong prompt
     if(marker) flashClass(marker, 'fg-good', 650);
     fb.innerHTML = `<span class="fg-fb-good" data-i18n="fret.gotIt">${t('fret.gotIt')}</span>`;
     st.idx++;
@@ -3364,7 +3371,7 @@ function sdCheckOff(key){
   const st = shuffleDrills[key];
   if(!st || !st.cfg.skill) return;
   if(progress[st.cfg.skill] !== 'gotit' && typeof toggleSkill === 'function'){
-    toggleSkill(st.cfg.skill, st.cfg.wid, 'gotit');
+    if(toggleSkill(st.cfg.skill, st.cfg.wid, 'gotit') === false) return;   // coach gate opened instead — button stays live for a retry
   }
   const box = sdBox(key);
   const btn = box && box.querySelector('.sdr-checkoff');
@@ -3552,6 +3559,7 @@ function dkStart(key){
   const st = deckDrills[key]; if(!st) return;
   st.phase='run'; st.deck = dkShuffle(st.cfg.def.cards); st.i=0; st.hit=0;
   st.total = st.cfg.def.cards.length; st.shown=false;
+  st.seen = new Set();   // cards already presented once — a later "Had it" doesn't count toward the first-try score
   dkBox(key).innerHTML = dkRunHtml(key);
 }
 function dkRunHtml(key){
@@ -3581,8 +3589,11 @@ function dkFlip(key){
 }
 function dkNext(key, ok){
   const st = deckDrills[key]; if(!st) return;
-  if(ok) st.hit++;
-  else { const c = st.deck[st.i]; st.deck.splice(Math.min(st.deck.length, st.i + 3), 0, c); }
+  const c = st.deck[st.i];
+  const firstTry = !st.seen.has(c);
+  st.seen.add(c);
+  if(ok){ if(firstTry) st.hit++; }
+  else { st.deck.splice(Math.min(st.deck.length, st.i + 3), 0, c); }
   st.i++; st.shown = false;
   if(st.i >= st.deck.length){ st.phase='done'; dkSaveBest(st.cfg.id, st.hit); dkBox(key).innerHTML = dkDoneHtml(key); }
   else dkBox(key).innerHTML = dkRunHtml(key);
@@ -3603,7 +3614,9 @@ function dkDoneHtml(key){
 }
 function dkCheckOff(key){
   const st = deckDrills[key]; if(!st || !st.cfg.skill) return;
-  if(progress[st.cfg.skill] !== 'gotit' && typeof toggleSkill === 'function') toggleSkill(st.cfg.skill, st.cfg.wid, 'gotit');
+  if(progress[st.cfg.skill] !== 'gotit' && typeof toggleSkill === 'function'){
+    if(toggleSkill(st.cfg.skill, st.cfg.wid, 'gotit') === false) return;   // coach gate opened instead — button stays live for a retry
+  }
   const btn = dkBox(key) && dkBox(key).querySelector('.sdr-checkoff');
   if(btn){ btn.textContent = '✓ ' + t('drill.checkedOff'); btn.classList.add('done'); btn.disabled = true; }
 }
@@ -3730,7 +3743,7 @@ function erCheckOff(key){
   const st = earDrills[key];
   if(!st || !st.cfg.skill) return;
   if(progress[st.cfg.skill] !== 'gotit' && typeof toggleSkill === 'function'){
-    toggleSkill(st.cfg.skill, st.cfg.wid, 'gotit');
+    if(toggleSkill(st.cfg.skill, st.cfg.wid, 'gotit') === false) return;   // coach gate opened instead — button stays live for a retry
   }
   const box = erBox(key);
   const btn = box && box.querySelector('.sdr-checkoff');
@@ -3895,7 +3908,7 @@ function toggleSkill(sid, wid, which){
     else {
       if(!coachGateBypass && skillIsCoachGated(sid) && coachSkillBest(sid) < COACH_GATE_MIN_LEVEL){
         openCoachGate(sid, wid);
-        return;
+        return false;
       }
       coachGateBypass = false;
       progress[sid]='gotit'; bumpPracticeStreak();
@@ -3944,6 +3957,7 @@ function toggleSkill(sid, wid, which){
   renderProgressStrip();
   refreshReviewCards();   // "Keep it sharp" card reacts to got-it changes
   saveProgress();
+  return true;
 }
 
 /* ── Translate toggle ── */
@@ -4104,7 +4118,7 @@ function stopPlaySeq(){
   if(!playSeqState) return;
   playSeqState.timeouts.forEach(clearTimeout);
   if(playSeqState.btn){
-    playSeqState.btn.innerHTML = playSeqState.idleHtml || '&#x25B6; Play all';
+    playSeqState.btn.innerHTML = playSeqState.idleHtml || ('&#x25B6; ' + escHtml(t('step.playAll')));
     playSeqState.btn.classList.remove('playing');
   }
   if(playSeqState.tabRoot){
@@ -4160,7 +4174,7 @@ function playSequence(midis, bpm, btnEl){
   const idleHtml = btnEl ? btnEl.innerHTML : null;
   playSeqState = { timeouts, btn: btnEl, idleHtml, tabRoot };
   if(btnEl){
-    btnEl.innerHTML = '&#x23F8; Stop';
+    btnEl.innerHTML = '&#x23F8; ' + escHtml(t('tools.stop'));
     btnEl.classList.add('playing');
   }
 }
@@ -4181,7 +4195,7 @@ function renderBpmControl(key, value, minBpm, maxBpm){
   const max = maxBpm || 120;
   const v = Math.max(min, Math.min(max, value || 60));
   return `<span class="bpm-control">` +
-    `<input type="range" class="bpm-slider" min="${min}" max="${max}" step="1" value="${v}" data-key="${escAttr(key)}" aria-label="Tempo in BPM" oninput="onBpmSliderChange(this)">` +
+    `<input type="range" class="bpm-slider" min="${min}" max="${max}" step="1" value="${v}" data-key="${escAttr(key)}" aria-label="${escAttr(t('tools.tempoBpm'))}" oninput="onBpmSliderChange(this)">` +
     `<span class="bpm-readout">${v} BPM</span>` +
   `</span>`;
 }

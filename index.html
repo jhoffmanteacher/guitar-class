@@ -57,7 +57,7 @@
      service worker still precaches every module file for offline use. -->
 <header class="header">
   <div style="display:flex;align-items:center;gap:10px;min-width:0">
-    <button type="button" class="rail-toggle" id="rail-toggle-btn" onclick="toggleRail()" aria-expanded="false" aria-controls="nav-rail" aria-label="Open navigation menu">
+    <button type="button" class="rail-toggle" id="rail-toggle-btn" onclick="toggleRail()" aria-expanded="false" aria-controls="nav-rail" aria-label="Open navigation menu" data-i18n-attr="aria-label:header.railToggleAria">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
     <svg class="header-mark" width="27" height="27" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -69,11 +69,11 @@
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
-    <button type="button" class="header-search-btn" id="search-btn" onclick="toggleSearch()" aria-expanded="false" aria-controls="search-panel" aria-label="Find it — search the whole site" style="display:none">
+    <button type="button" class="header-search-btn" id="search-btn" onclick="toggleSearch()" aria-expanded="false" aria-controls="search-panel" aria-label="Find it — search the whole site" data-i18n-attr="aria-label:header.searchAria" style="display:none">
       <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.7-4.7"/></svg></span>
       <span class="header-search-label" data-i18n="header.find">Find</span>
     </button>
-    <button class="btn-translate" id="btn-translate" onclick="toggleTranslate()" title="Translate to Spanish">
+    <button class="btn-translate" id="btn-translate" onclick="toggleTranslate()" title="Translate to Spanish" data-i18n-attr="title:header.translateTitle">
       <span>&#x1F310;</span><span id="translate-label">Español</span>
     </button>
     <div class="user-area" id="user-area">
@@ -94,17 +94,17 @@
 <div id="app" style="display:none">
   <div class="app-layout">
     <!-- ══ LEFT NAV RAIL — module picker, progress, station switcher, Explore ══ -->
-    <aside class="rail" id="nav-rail" aria-label="Course navigation">
+    <aside class="rail" id="nav-rail" aria-label="Course navigation" data-i18n-attr="aria-label:nav.railAria">
       <div class="rail-scroll">
         <div class="preview-note" id="preview-note" hidden>&#x1F513; <span data-i18n-html="nav.previewNoteHtml"><strong>Preview mode</strong> &mdash; set locks are off for you. Students still see them.</span></div>
         <div class="rail-group g-module">
-          <span class="rail-sec-label"><span data-i18n="nav.module">Module</span><span class="sec-goal" id="rail-module-goal" title="Finish all skills to complete this module" aria-hidden="true">&#x1F3C6;</span></span>
-          <label class="sr-only" for="module-select">Choose module</label>
+          <span class="rail-sec-label"><span data-i18n="nav.module">Module</span><span class="sec-goal" id="rail-module-goal" title="Finish all skills to complete this module" data-i18n-attr="title:nav.moduleGoalTitle" aria-hidden="true">&#x1F3C6;</span></span>
+          <label class="sr-only" for="module-select" data-i18n="nav.chooseModule">Choose module</label>
           <select class="module-select" id="module-select" onchange="leaveTopPanelForSet(); onModuleChange(this.value); saveProgress()"></select>
-          <div class="rail-mod-prog" id="rail-mod-prog" role="progressbar" aria-label="Module skills progress" aria-valuemin="0" hidden>
+          <div class="rail-mod-prog" id="rail-mod-prog" role="progressbar" aria-label="Module skills progress" data-i18n-attr="aria-label:nav.moduleProgAria" aria-valuemin="0" hidden>
             <div class="rmp-bar"><div class="rmp-fill" id="rmp-fill"></div></div><span class="rmp-lbl" id="rmp-lbl" aria-hidden="true"></span>
           </div>
-          <div class="week-pills" id="week-pills" role="group" aria-label="Sets in this module"></div>
+          <div class="week-pills" id="week-pills" role="group" aria-label="Sets in this module" data-i18n-attr="aria-label:nav.setsGroupAria"></div>
         </div>
         <div class="rail-group g-set" id="rail-set-group">
           <span class="rail-sec-label" id="rail-set-label" data-i18n="nav.thisSet">This set</span>
@@ -120,7 +120,7 @@
             </button>
           </div>
         </div>
-        <nav class="rail-group g-explore" aria-label="Explore">
+        <nav class="rail-group g-explore" aria-label="Explore" data-i18n-attr="aria-label:nav.explore">
           <span class="rail-sec-label" data-i18n="nav.explore">Explore</span>
           <div class="nav-list">
             <button type="button" class="nav-btn active" id="practice-nav-btn" aria-current="page" onclick="returnToPractice()">
@@ -141,7 +141,7 @@
     <main class="main" id="main-content">
       <!-- Guitar Games: a full-screen arcade "page" (own #games URL hash,
            browser Back exits). Lives inside #app so it can't show pre-auth. -->
-      <div class="games-screen" id="games-screen" role="dialog" aria-modal="true" aria-label="Guitar games" hidden>
+      <div class="games-screen" id="games-screen" role="dialog" aria-modal="true" aria-label="Guitar games" data-i18n-attr="aria-label:nav.gamesScreenAria" hidden>
         <div class="games-shell">
           <div class="games-topbar">
             <button type="button" class="games-exit" onclick="closeGamesScreen()">&larr; <span data-i18n="btn.backToPractice">Back to practice</span></button>
@@ -155,7 +155,7 @@
       <!-- Keep practicing + My progress: full-screen "pages" in the site's
            normal look (own URL hash, browser Back exits) — same pattern as
            the Games arcade above, minus the arcade styling. -->
-      <div class="page-screen" id="keep-practicing-screen" role="dialog" aria-modal="true" aria-label="Keep practicing" hidden>
+      <div class="page-screen" id="keep-practicing-screen" role="dialog" aria-modal="true" aria-label="Keep practicing" data-i18n-attr="aria-label:nav.keepPracticing" hidden>
         <div class="page-shell">
           <div class="page-topbar">
             <button type="button" class="page-exit" onclick="closeKeepPracticingScreen()">&larr; <span data-i18n="btn.backToPractice">Back to practice</span></button>
@@ -165,7 +165,7 @@
           <div class="page-body" id="keep-practicing-body"></div>
         </div>
       </div>
-      <div class="page-screen" id="my-progress-screen" role="dialog" aria-modal="true" aria-label="My progress" hidden>
+      <div class="page-screen" id="my-progress-screen" role="dialog" aria-modal="true" aria-label="My progress" data-i18n-attr="aria-label:nav.myProgress" hidden>
         <div class="page-shell">
           <div class="page-topbar">
             <button type="button" class="page-exit" onclick="closeMyProgressScreen()">&larr; <span data-i18n="btn.backToPractice">Back to practice</span></button>
@@ -177,10 +177,10 @@
       </div>
       <div id="week-panels"></div>
       <div class="fab-group" id="fab-group" style="display:none">
-        <div class="tool-popup" id="metro-popup" role="dialog" aria-label="Metronome">
+        <div class="tool-popup" id="metro-popup" role="dialog" aria-label="Metronome" data-i18n-attr="aria-label:tools.metronome">
           <div class="tp-head">
             <span class="tp-title">&#x1F3B5; <span data-i18n="tools.metronome">Metronome</span></span>
-            <button class="tp-close" onclick="closePopup('metro')" aria-label="Close metronome">&#x2715;</button>
+            <button class="tp-close" onclick="closePopup('metro')" aria-label="Close metronome" data-i18n-attr="aria-label:tools.closeMetroAria">&#x2715;</button>
           </div>
           <div class="metro-dot" id="metro-dot"></div>
           <div class="metro-muted-note" id="metro-muted-note" hidden data-i18n="tools.metroMuted">🔇 Silent while the Listening Coach's mic is on — the beat still flashes above.</div>
@@ -200,16 +200,16 @@
           <div class="tp-ctrl">
             <button class="tp-btn primary" id="metro-btn" onclick="toggleMetro()">&#x25B6; <span data-i18n="tools.start">Start</span></button>
           </div>
-          <div class="timer-presets" role="radiogroup" aria-label="Time signature" onkeydown="meterKeydown(event)">
+          <div class="timer-presets" role="radiogroup" aria-label="Time signature" data-i18n-attr="aria-label:tools.meterAria" onkeydown="meterKeydown(event)">
             <button type="button" class="meter-btn" id="meter-2" onclick="setMetroMeter(2)" role="radio" aria-checked="false" tabindex="-1">2/4</button>
             <button type="button" class="meter-btn sel" id="meter-4" onclick="setMetroMeter(4)" role="radio" aria-checked="true" tabindex="0">4/4</button>
             <button type="button" class="meter-btn" id="meter-3" onclick="setMetroMeter(3)" role="radio" aria-checked="false" tabindex="-1">3/4</button>
           </div>
         </div>
-        <div class="tool-popup" id="timer-popup" role="dialog" aria-label="Practice Timer">
+        <div class="tool-popup" id="timer-popup" role="dialog" aria-label="Practice Timer" data-i18n-attr="aria-label:tools.timerTitle">
           <div class="tp-head">
             <span class="tp-title">&#x23F1; <span data-i18n="tools.timerTitle">Practice Timer</span></span>
-            <button class="tp-close" onclick="closePopup('timer')" aria-label="Close timer">&#x2715;</button>
+            <button class="tp-close" onclick="closePopup('timer')" aria-label="Close timer" data-i18n-attr="aria-label:tools.closeTimerAria">&#x2715;</button>
           </div>
           <div class="timer-display" id="timer-display">0:30</div>
           <div class="timer-presets">
@@ -225,10 +225,10 @@
             <button class="tp-btn primary-g" id="timer-btn" onclick="toggleTimer()">&#x25B6; <span data-i18n="tools.start">Start</span></button>
           </div>
         </div>
-        <div class="tool-popup" id="tuner-popup" role="dialog" aria-label="Tuner">
+        <div class="tool-popup" id="tuner-popup" role="dialog" aria-label="Tuner" data-i18n-attr="aria-label:tools.tuner">
           <div class="tp-head">
             <span class="tp-title">&#x1F3B8; <span data-i18n="tools.tuner">Tuner</span></span>
-            <button class="tp-close" onclick="closePopup('tuner')" aria-label="Close tuner">&#x2715;</button>
+            <button class="tp-close" onclick="closePopup('tuner')" aria-label="Close tuner" data-i18n-attr="aria-label:tools.closeTunerAria">&#x2715;</button>
           </div>
           <div class="tuner-strings notranslate" id="tuner-strings" translate="no">
             <button class="ts-btn active" data-string="auto" onclick="selectTunerString('auto')" data-i18n="tools.auto">Auto</button>
@@ -272,7 +272,7 @@
        so the step's questions stay visible and usable behind it. Drag by
        the header; ✕ or Escape closes (removing the iframe stops video). -->
   <div class="video-overlay" id="video-overlay" hidden>
-    <div class="video-modal" role="dialog" aria-label="Resource viewer">
+    <div class="video-modal" role="dialog" aria-label="Resource viewer" data-i18n-attr="aria-label:panel.viewerAria">
       <div class="vm-head">
         <div class="rp-meta" id="rp-meta"></div>
         <div class="rp-actions">
@@ -280,7 +280,7 @@
             <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M8 1h3m0 0v3m0-3L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Open in new tab
           </a>
-          <button class="rp-close" id="rp-close" onclick="clearPanel()" title="Close" aria-label="Close viewer">&#x2715;</button>
+          <button class="rp-close" id="rp-close" onclick="clearPanel()" title="Close" aria-label="Close viewer" data-i18n-attr="title:panel.close;aria-label:panel.closeAria">&#x2715;</button>
         </div>
       </div>
       <div class="rp-content" id="rp-content">

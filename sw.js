@@ -14,7 +14,19 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-07-27-4cd60c5761';
+const CACHE_VERSION = 'guitar-class-2026-07-27-95e0f855ba';
+
+// Backing-track audio lives in its OWN cache, versioned independently of the
+// shell (see tools/checks.mjs, which fingerprints audio/ separately and
+// bumps this only when a track's bytes actually change). CACHE_VERSION is a
+// fingerprint of the shell + img/, which changes on nearly every push — if
+// audio shared that cache, every deploy would purge every student's already-
+// downloaded backing tracks (~200MB) for no reason, forcing a full
+// re-download over school Wi-Fi. Splitting the version keeps a routine JS/
+// content push from touching cached audio, while a real re-exported track
+// still invalidates it (both versions are swept the same way at activate).
+const AUDIO_CACHE_VERSION = 'guitar-class-audio-2026-07-27-d6169a1b0b';
+const AUDIO_RE = /\.(mp3|m4a|wav|ogg)$/i;
 
 // Static shell — everything needed to render the practice content offline.
 const ASSETS = [
@@ -76,7 +88,7 @@ self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
       .then(keys => Promise.all(
-        keys.filter(k => k !== CACHE_VERSION).map(k => caches.delete(k))
+        keys.filter(k => k !== CACHE_VERSION && k !== AUDIO_CACHE_VERSION).map(k => caches.delete(k))
       ))
       .then(() => self.clients.claim())
   );
@@ -105,9 +117,11 @@ self.addEventListener('fetch', event => {
   // before (no added latency to first sound) and cache the full file in the
   // background via a Range-less fetch, so every later play — including
   // offline — is served from cache.
-  if (req.headers.has('range') && /\.(mp3|m4a|wav|ogg)$/i.test(url.pathname)) {
+  const isAudio = AUDIO_RE.test(url.pathname);
+
+  if (req.headers.has('range') && isAudio) {
     event.respondWith((async () => {
-      const cache = await caches.open(CACHE_VERSION);
+      const cache = await caches.open(AUDIO_CACHE_VERSION);
       const cached = await cache.match(url.href);
       if (cached) return cached;
       event.waitUntil((async () => {
@@ -121,25 +135,28 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  event.respondWith(
-    caches.open(CACHE_VERSION).then(cache =>
-      cache.match(req).then(cached => {
-        const network = fetch(req)
-          .then(res => {
-            // Only cache good, basic (same-origin) responses.
-            if (res && res.status === 200 && res.type === 'basic') {
-              cache.put(req, res.clone());
-            }
-            return res;
-          })
-          .catch(() => null);
-
-        // Serve cache first if we have it; otherwise wait on the network.
-        // For navigations that miss both, fall back to the cached shell.
-        return cached || network.then(res =>
-          res || (req.mode === 'navigate' ? cache.match('./index.html') : undefined)
-        );
+  event.respondWith((async () => {
+    const cache = await caches.open(isAudio ? AUDIO_CACHE_VERSION : CACHE_VERSION);
+    const cached = await cache.match(req);
+    const network = fetch(req)
+      .then(res => {
+        // Only cache good, basic (same-origin) responses.
+        if (res && res.status === 200 && res.type === 'basic') {
+          cache.put(req, res.clone());
+        }
+        return res;
       })
-    )
-  );
+      .catch(() => null);
+    // Keep the SW alive for the background refresh even when `cached`
+    // already satisfied respondWith below — otherwise the browser can
+    // terminate the worker before cache.put() lands.
+    event.waitUntil(network);
+
+    // Serve cache first if we have it; otherwise wait on the network.
+    // For navigations that miss both, fall back to the cached shell.
+    if (cached) return cached;
+    const res = await network;
+    // isAudio is never true for a navigation, so `cache` here is always CACHE_VERSION.
+    return res || (req.mode === 'navigate' ? cache.match('./index.html') : undefined);
+  })());
 });

@@ -210,14 +210,42 @@ var STRING_DIAGRAMS = {
   'B'    : { position:0, chord:[[6,'x',''],[5,'x',''],[4,'x',''],[3,'x',''],[2,0,0],[1,'x','']] },
   'highE': { position:0, chord:[[6,'x',''],[5,'x',''],[4,'x',''],[3,'x',''],[2,'x',''],[1,0,0]] }
 };
-var STRING_LABELS = {
-  'lowE' : 'Low E (6th string)',
-  'A'    : 'A (5th string)',
-  'D'    : 'D (4th string)',
-  'G'    : 'G (3rd string)',
-  'B'    : 'B (2nd string)',
-  'highE': 'High E (1st string)'
-};
+/* ── String names students read (popups, panel titles, the row labels
+   baked into every fretboard SVG) go through i18n.js's global t() so
+   Spanish shows solfège — cuerda Mi grave / La / Re / Sol / Si / Mi
+   agudo — instead of English letters. Looked up lazily, on property
+   read, so a language switch is picked up by the next redraw. gdT()
+   falls back to the English literal when t() isn't loaded (the Node
+   CLI in tools/ requires this file standalone). NOTE: several SVG
+   builders below shadow `t` with the theme object, hence window.t. ── */
+function gdT(key, fallback, params){
+  var fn = (typeof window !== 'undefined') && window.t;
+  return (typeof fn === 'function') ? fn(key, params) : fallback;
+}
+function gdLang(){
+  var fn = (typeof window !== 'undefined') && window.getLang;
+  return (typeof fn === 'function') ? fn() : 'en';
+}
+/* {prop: [i18n key, English fallback]} → object whose values are looked
+   up at read time, so existing MAP[key] call sites keep working. */
+function gdLabelMap(spec){
+  var o = {};
+  Object.keys(spec).forEach(function(k){
+    Object.defineProperty(o, k, {
+      enumerable: true,
+      get: function(){ return gdT(spec[k][0], spec[k][1]); }
+    });
+  });
+  return o;
+}
+var STRING_LABELS = gdLabelMap({
+  'lowE' : ['diagram.stringLowE',  'Low E (6th string)'],
+  'A'    : ['diagram.stringA',     'A (5th string)'],
+  'D'    : ['diagram.stringD',     'D (4th string)'],
+  'G'    : ['diagram.stringG',     'G (3rd string)'],
+  'B'    : ['diagram.stringB',     'B (2nd string)'],
+  'highE': ['diagram.stringHighE', 'High E (1st string)']
+});
 function localStringSvg(kind, opts){
   var cfg = STRING_DIAGRAMS[kind];
   if (!cfg) return null;
@@ -225,8 +253,14 @@ function localStringSvg(kind, opts){
 }
 
 var STRING_KIND_TO_NUM  = { lowE:6, A:5, D:4, G:3, B:2, highE:1 };
-var STRING_SHORT_LABEL  = { lowE:'low E', A:'A', D:'D', G:'G', B:'B', highE:'high E' };
-var STRING_NUM_TO_LABEL = { 1:'high E', 2:'B', 3:'G', 4:'D', 5:'A', 6:'low E' };
+var STRING_SHORT_LABEL  = gdLabelMap({
+  lowE:['fret.stringLowE','low E'], A:['fret.stringA','A'], D:['fret.stringD','D'],
+  G:['fret.stringG','G'], B:['fret.stringB','B'], highE:['fret.stringHighE','high E']
+});
+var STRING_NUM_TO_LABEL = gdLabelMap({
+  1:['fret.stringHighE','high E'], 2:['fret.stringB','B'], 3:['fret.stringG','G'],
+  4:['fret.stringD','D'], 5:['fret.stringA','A'], 6:['fret.stringLowE','low E']
+});
 var FRETBOARD_INLAYS = [3, 5, 7, 9, 12];
 
 /* ══════════════════════════════════════════════════════════════
@@ -296,13 +330,19 @@ function localStringFretboardSvg(kind, opts){
    Open notes sit to the LEFT of the nut.
    ══════════════════════════════════════════════════════════════ */
 function ordinal(n){
+  // Spanish: frets are masculine ("el traste 6.º"). String numbers are
+  // feminine and are spelled out in the diagram.string* keys instead.
+  if (gdLang() === 'es') return n + '.º';
   var s = ['th','st','nd','rd'], v = n % 100;
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 function noteFullLabel(note, fret, kind){
   var str = STRING_SHORT_LABEL[kind] || kind;
-  return fret === 0 ? note + ' · ' + str + ' open'
-                    : note + ' · ' + str + ' string, ' + ordinal(fret) + ' fret';
+  return fret === 0
+    ? gdT('diagram.noteOpen', note + ' · ' + str + ' open',
+          { note: note, string: str })
+    : gdT('diagram.noteFret', note + ' · ' + str + ' string, ' + ordinal(fret) + ' fret',
+          { note: note, string: str, ord: ordinal(fret), fret: fret });
 }
 function localNoteSvg(kind, fret, note, opts){
   var sNum = STRING_KIND_TO_NUM[kind];
