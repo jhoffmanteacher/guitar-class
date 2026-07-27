@@ -187,18 +187,6 @@ async function ensureModuleRendered(num){
     markModulePanelTranslated(div, num);
     c.appendChild(div);
   }
-  // Module-level "🎵 Songs" collapsible, appended after this module's panels
-  // (modules 2–12; module 1 keeps its per-set song tabs via buildSet).
-  if(num!==1){
-    const songsHtml = buildModuleSongs(num);
-    if(songsHtml){
-      const div=document.createElement('div');
-      div.className='module-songs'; div.dataset.module=num;
-      div.innerHTML=songsHtml;
-      markModulePanelTranslated(div, num);
-      c.appendChild(div);
-    }
-  }
   // Idempotent: already-wrapped spans are skipped (see CHORD_SKIP_CLASSES).
   wrapAllChordLinks();
   // A module can be rendered for the first time long after page load (lazy,
@@ -1511,9 +1499,6 @@ function activateSet(id){
   }
   document.querySelectorAll('.wpill').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   document.querySelectorAll('.week-panel').forEach(p=>p.classList.toggle('active',p.dataset.id===id));
-  // Show the module-level Songs section only for the active set's module.
-  const activeMod = /^mr\d+$/.test(id) ? parseInt(id.slice(2)) : (SETS.find(x=>x.id===id)||{}).moduleNum;
-  document.querySelectorAll('.module-songs').forEach(el=>el.classList.toggle('active', parseInt(el.dataset.module)===activeMod));
   renderChordBoxes();
   syncRailStations();   // refresh the rail's "This set" station switcher for the new set
   // Every set opens at the top, every time — no scroll-position memory.
@@ -2181,13 +2166,6 @@ function updateProgressPill(li){
   pill.textContent = t('progress.stepsDone', {done, total});
 }
 
-function toggleStationSection(btn){
-  const item = btn.closest('.sc-sec');
-  const open = item.classList.toggle('open');
-  btn.setAttribute('aria-expanded', open);
-  renderChordBoxes();
-}
-
 /* ── Songs ── */
 function diffLabel(level){
   return level===1 ? t('songs.diff1') : level===2 ? t('songs.diff2') : level===3 ? t('songs.diff3') : '';
@@ -2221,45 +2199,13 @@ function buildSongs(w){
   return `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('songs.core')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('songs.choice')}</div>${diffLegend}</div><div class="card">${rows}${requestSlot}</div>`;
 }
 
-/* Module-level songs (modules 2–12): one consolidated "🎵 Songs" list per module,
-   read from MODULE_SONGS[num] and rendered as a collapsible .sc-sec section after
-   the module's set panels (see ensureModuleRendered). Module 1 keeps its per-set
-   lists via buildSongs above. Returns '' if the module has no song list. */
-function buildModuleSongs(moduleNum){
-  const list = (globalThis.MODULE_SONGS && MODULE_SONGS[moduleNum]) || [];
-  if(!list.length) return '';
-  const rows = list.map((s,i)=>{
-    const vids = songVidButtonsHtml(s, kind=>`loadModuleSongVid(${moduleNum},${i},'${kind}')`);
-    if(s.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="${escAttr(t('songs.oneSongLayers'))}">&#x1F9F5; ${t('songs.songJourney')}</button>`);
-    const vidsEl = vids.length ? `<div class="song-vids">${vids.join('')}</div>` : '';
-    return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div><div class="sname">${s.name}</div><div class="smeta">${diffDotsHtml(s.level)}${tf(s,'meta')}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${s.type}</span></div>`;
-  }).join('');
-  const diffLegend = `<div class="leg"><span class="song-diff diff-1">&#x25CF;<span class="song-diff-empty">&#x25CB;&#x25CB;</span></span>&#x2192;<span class="song-diff diff-3">&#x25CF;&#x25CF;&#x25CF;</span> ${t('songs.diffLegend')}</div>`;
-  const legend = `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('songs.core')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('songs.choice')}</div>${diffLegend}</div>`;
-  // Collapsible section (toggleStationSection); starts closed so it sits
-  // quietly below the set content.
-  return `<div class="sc-sec">
-      <h3><button type="button" class="sc-sec-head" aria-expanded="false" onclick="toggleStationSection(this)">
-        <span class="sc-sec-chev">&#x25B6;</span>
-        <span class="sc-sec-title">&#x1F3B5; ${t('nav.songs')}</span>
-      </button></h3>
-      <div class="sc-sec-body">${legend}<div class="card">${rows}</div></div>
-    </div>`;
-}
-
-// Video links for a module-level song (indexes MODULE_SONGS, same launcher).
-function loadModuleSongVid(moduleNum, idx, kind){
-  const list = (globalThis.MODULE_SONGS && MODULE_SONGS[moduleNum]) || [];
-  openSongVid(list[idx], kind);
-}
-
 function loadSong(wid, idx){
   const w=SETS.find(x=>x.id===wid); if(!w) return;
   const s=w.songs[idx]; if(!s||!s.url) return;
   loadPanel('youtube', s.url, s.name, s.type);
 }
 
-/* THE song-video launcher — every song list (per-set, per-module, Songs hub)
+/* THE song-video launcher — every song list (per-set, Songs hub)
    routes through this so the kind dispatch and subtitles can't drift. */
 function openSongVid(s, kind){
   if(!s) return;
@@ -4340,11 +4286,6 @@ function rebuildModuleContentPanels(){
     }
     markModulePanelTranslated(panel, num);
   });
-  document.querySelectorAll('.module-songs').forEach(div=>{
-    const num = Number(div.dataset.module);
-    const html = buildModuleSongs(num);
-    if(html){ div.innerHTML = html; markModulePanelTranslated(div, num); }
-  });
   if(typeof wrapAllChordLinks === 'function') wrapAllChordLinks();
   if(typeof applyI18n === 'function'){
     const c = document.getElementById('week-panels');
@@ -5027,8 +4968,8 @@ async function toggleSongsHub(){
   const row = (e) => {
     const idx = rowIdx++;
     const sg = e.song;
-    /* Index-based handlers (like loadModuleSongVid): song names with
-       apostrophes (Sweet Child O' Mine…) break when inlined into onclick. */
+    /* Index-based handlers: song names with apostrophes (Sweet Child O'
+       Mine…) break when inlined into onclick. */
     const vids = [];
     if(sg.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'journey')" title="${escAttr(t('songs.oneSongLayers'))}">&#x1F9F5; ${t('songs.songJourney')}</button>`);
     if(sg.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="songsHubVid(${idx},'tutorial')"><span class="svb-play">&#x25B6;</span>${t('songs.tutorial')}</button>`);

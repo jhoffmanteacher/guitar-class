@@ -68,7 +68,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    sticky header. scroll-margin-top makes every such target land just below
    the header instead. Journey pages (tabs/) have their own styles and no
    sticky header, so their "open at the top" behavior is untouched. */
-.tabs,.tab-panel,.week-panel,li.step,.sc-sec,.wpill,.step-folds,
+.tabs,.tab-panel,.week-panel,li.step,.wpill,.step-folds,
 #games-screen,#songs-hub-panel,#search-panel,#keep-practicing-screen,#my-progress-screen{
   scroll-margin-top:calc(var(--hdr) + 10px)}
 .user-area{display:flex;align-items:center;gap:10px}
@@ -190,8 +190,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .mr-rec-actions{display:flex;gap:8px;flex-wrap:wrap}
 .mr-rec-status{font-size:0.8125rem;color:var(--text2);line-height:1.4}
 .week-panel{display:none}.week-panel.active{display:block}
-/* Module-level "🎵 Songs" section: shown only for the active set's module (toggled in activateSet) */
-.module-songs{display:none;margin-top:16px}.module-songs.active{display:block}
 .obj-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
 .obj-unit{font-size:0.8125rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:5px}
 .obj-set{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)}
@@ -875,21 +873,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .tab-choice-content{display:none}
 .tab-choice-content.expanded{display:block;margin-top:2px}
 .tab-choice-content .tab{margin-top:0}
-/* Station C — collapsible skill sections (guided by the module review) */
 /* Station step-list sections (Concept B): plain group-label dividers, not
    their own accordion — every step is a row from the start. */
 .stp-sec-label{padding:16px 2px 6px;margin-top:2px;font-size:0.75rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);border-top:2px solid var(--border2)}
-.sc-sec{border-radius:8px;overflow:hidden;background:var(--bg)}
-.sc-sec-head{width:100%;font-family:inherit;font-size:0.9375rem;font-weight:500;text-align:left;padding:11px 4px;background:transparent;border:0;border-bottom:1px solid var(--border);border-radius:0;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:10px;line-height:1.3}
-.sc-sec-head:hover{background:var(--bg2)}
-.sc-sec.open .sc-sec-head{background:transparent;color:var(--green-text)}
-.sc-sec-chev{font-size:0.75rem;color:var(--green-text);flex-shrink:0;transition:transform 0.15s}
-.sc-sec.open .sc-sec-chev{transform:rotate(90deg)}
-.sc-sec-title{display:flex;align-items:center;gap:8px}
-.sc-sec-num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;flex-shrink:0;font-size:0.75rem;font-weight:600;border-radius:50%;background:var(--green-text);color:#fff}
-.sc-sec-body{display:none;padding:8px 14px 6px}
-.sc-sec.open .sc-sec-body{display:block}
-.sc-sec-body .steps{margin:0}
 .chord-popup{position:absolute;z-index:1000;background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 12px;box-shadow:0 4px 18px rgba(0,0,0,0.20);pointer-events:none;display:none;flex-direction:column;align-items:center;gap:4px;max-width:220px}
 .chord-popup.wide{max-width:360px}
 .chord-popup.visible{display:flex}
@@ -958,8 +944,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .tp-checklist .save-ind{display:none !important}
   .tp-checklist .skbox{border:1px solid var(--text2) !important}
 
-  /* Reveal collapsed station-C skill sections + their bodies */
-  .sc-sec-body,.sk-helper,.sk-practice-panel{display:block !important}
+  /* Reveal collapsed station-C skill sections */
+  .sk-helper,.sk-practice-panel{display:block !important}
   .dp.hidden{display:block !important}
 
   /* Expand every step (compact-checklist rows collapse on screen; print shows all) */
@@ -985,7 +971,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .main{max-width:100% !important;width:100% !important;flex:none !important;padding:0 !important;overflow:visible !important}
 
   /* Avoid awkward breaks mid-step / mid-diagram */
-  .step,.tab,.chord-diagrams,.obj-card,.sc-sec,.stp-sec{break-inside:avoid;page-break-inside:avoid}
+  .step,.tab,.chord-diagrams,.obj-card,.stp-sec{break-inside:avoid;page-break-inside:avoid}
 
   /* Print-only set title so the handout is labelled */
   .week-panel.active::before{
@@ -996,7 +982,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   /* Routine-only print (the card's own 🖨 button adds body.print-routine):
      the active review panel prints just the routine card, black on white. */
   body.print-routine .week-panel.active > *:not(.routine-card){display:none !important}
-  body.print-routine .module-songs,body.print-routine .daily5-panel{display:none !important}
+  body.print-routine .daily5-panel{display:none !important}
   body.print-routine .routine-card{border:1px solid #000;page-break-inside:avoid}
   body.print-routine .routine-print-btn,body.print-routine .mr-review-link{display:none !important}
   body.print-routine .week-panel.active::before{content:'Guitar Class — 10-Minute Practice Routine'}

@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Removed the per-module "Songs" fold
+
+### Removed
+
+- **The collapsible "🎵 Songs" section that sat below each module's stations**
+  (Modules 2–12). Every song is still browsable from the "Songs" link in the
+  left sidebar, and Module 1's per-set Songs tab is unchanged.
+
 ## 2026-07-27 — Spanish string-name cleanup + Journey page fixes
 
 ### Fixed
