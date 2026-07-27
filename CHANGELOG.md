@@ -5,6 +5,36 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Module 13 is now a full restring, with step-by-step pictures
+
+### Changed
+
+- **Module 13 is now "Changing Your Strings"** and the assessment is a **full
+  six-string restring**, not a single string. You still work one string at a
+  time — that part hasn't changed — but the graded attempt is the whole set.
+- **The four graded skills are new**, and they match the rubric your teacher
+  uses: **Anchored** (every string secured at both ends, on its own post),
+  **Wound** (2–3 neat wraps per post, walking down, excess trimmed), **In tune**
+  (stretched and re-tuned at least twice, in tune at the final check), and
+  **Finished in time** (all six done and your station clear inside 40 minutes).
+- **There's a 40-minute clock on the graded restring.** It starts when your
+  teacher says begin and stops when you raise your hand *and* your station is
+  clear. Practice runs are untimed.
+- **Anchored, Wound, and In tune are judged only on the strings you actually
+  installed**, so a string you didn't get to only costs you once.
+- **Tuning is graded on the two stretch-and-re-tune passes, not on the guitar
+  still being in tune tomorrow.** A brand-new nylon set keeps drifting for days
+  no matter how well you work — that's the strings, not you.
+
+### Added
+
+- **Seven hand-drawn pictures through the process** — loosening, pulling the
+  string off the post, freeing it at the bridge, seating the new ball end,
+  threading the post, winding the wraps down, and tuning up. They sit right in
+  the steps they belong to, in both languages.
+- **A "what station clear means" step**, so there's no guessing about what has
+  to be true before you raise your hand.
+
 ## 2026-07-27 — Four new chord challenges in Module 5, one Spanish fix
 
 ### Added
