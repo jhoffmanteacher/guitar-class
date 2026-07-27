@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Full fretboard diagrams for the natural-notes drills
+
+### Changed
+
+- **The "name every natural note on this string" diagrams** (Modules 2 and 9)
+  now show the whole 6-string fretboard, with your string highlighted and its
+  notes circled — instead of one flat line with no other strings for context.
+
+### Added
+
+- **Module 4's D String Map and G String Map challenges** now have the same
+  fretboard diagram to go with the drill.
+
 ## 2026-07-27 — More Spanish string-name cleanup
 
 ### Fixed

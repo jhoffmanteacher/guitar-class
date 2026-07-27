@@ -342,12 +342,14 @@ var NATURALS_LIGHT_GREEN = '#eaf3de';
 
 function localStringNaturalsSvg(kind, opts){
   var sNum = STRING_KIND_TO_NUM[kind];
-  var notes = STRING_NATURALS[kind];
-  if (!sNum || !notes) return null;
+  var allNotes = STRING_NATURALS[kind];
+  if (!sNum || !allNotes) return null;
   var t = gdTheme(opts);
+  var maxFret = (opts && opts.maxFret) || 12;
+  var notes = allNotes.filter(function(pair){ return pair[0] <= maxFret; });
 
   var W = 640, H = 244, padL = 62, padR = 20, padT = 22, padB = 56;
-  var openW = 26, maxFret = 12;
+  var openW = 26;
   var fretW = (W - padL - padR - openW) / maxFret;
   var boxH = H - padT - padB;
   var strGap = boxH / 5;
@@ -357,7 +359,7 @@ function localStringNaturalsSvg(kind, opts){
 
   var s = gdOpen(W, H, t, opts, "-apple-system,'Segoe UI',Roboto,Arial,sans-serif") + gdGround(W, H, t);
 
-  FRETBOARD_INLAYS.forEach(function(f){
+  FRETBOARD_INLAYS.filter(function(f){ return f <= maxFret; }).forEach(function(f){
     var cx = nutX + (f - 0.5) * fretW;
     s += '<circle cx="' + cx + '" cy="' + midY + '" r="3" fill="' + t.text3 + '" opacity="0.35"/>';
     if (f === 12) {

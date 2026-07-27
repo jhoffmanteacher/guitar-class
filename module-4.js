@@ -672,8 +672,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 3 — D String Map', label_es: 'Reto 3 — Mapa de la cuerda Re',
-            text: '<ul><li>Play the natural notes on the D string — D · E · F · G · A · B · C (frets 0–10) — slowly, saying each name aloud.</li></ul>You\'ve got it when: a clean lap up and back, without looking at the chart. Click "Play all" to hear it at 60 BPM.',
-            text_es: '<ul><li>Toca las notas naturales de la cuerda Re — D · E · F · G · A · B · C (trastes 0–10) — despacio, diciendo cada nombre en voz alta.</li></ul>Lo tienes cuando: una vuelta limpia subiendo y bajando, sin mirar el diagrama. Presiona "Tocar todo" para escucharlo a 60 BPM.',
+            text: '<ul><li>Play the natural notes on the D string — D · E · F · G · A · B · C (frets 0–10) — slowly, saying each name aloud.</li></ul>You\'ve got it when: a clean lap up and back, without looking at the chart. Click "Play all" to hear it at 60 BPM.<span class="step-figure"><img src="img/m4-d-naturals.svg" alt="A fretboard diagram of the D string, frets 0 to 10, with the natural notes marked: D open, E at fret 2, F at fret 3, G at fret 5, A at fret 7, B at fret 9, and C at fret 10."></span>',
+            text_es: '<ul><li>Toca las notas naturales de la cuerda Re — D · E · F · G · A · B · C (trastes 0–10) — despacio, diciendo cada nombre en voz alta.</li></ul>Lo tienes cuando: una vuelta limpia subiendo y bajando, sin mirar el diagrama. Presiona "Tocar todo" para escucharlo a 60 BPM.<span class="step-figure"><img src="img/m4-d-naturals.svg" alt="Un diagrama del diapasón de la cuerda Re, trastes 0 a 10, con las notas naturales marcadas: D al aire, E en el traste 2, F en el 3, G en el 5, A en el 7, B en el 9, y C en el 10."></span>',
             hint: 'Same musical alphabet pattern you know from E and A strings. Find the pattern — it repeats! Set the ⏱ Timer for 2 minutes and see how many laps you get without looking at the chart.',
             hint_es: 'Es el mismo patrón de alfabeto musical que conoces de las cuerdas Mi y La. Encuentra el patrón — ¡se repite! Pon el ⏱ Temporizador en 2 minutos y ve cuántas vueltas logras sin mirar el diagrama.',
             stuck: 'Cover the chart and name just the first five notes (frets 0, 2, 3, 5, 7 — D, E, F, G, A) — find E–F and B–C, the two one-fret jumps, and the rest falls into place.',
@@ -686,8 +686,8 @@ SETS.push(
           },
           {
             label: 'Challenge 4 — G String Map', label_es: 'Reto 4 — Mapa de la cuerda Sol',
-            text: '<ul><li>Play the same on the G string — G · A · B · C · D · E · F (frets 0–10), slowly, names aloud.</li></ul>You\'ve got it when: a clean lap up and back, without looking at the chart.',
-            text_es: '<ul><li>Toca lo mismo en la cuerda Sol — G · A · B · C · D · E · F (trastes 0–10), despacio, nombres en voz alta.</li></ul>Lo tienes cuando: una vuelta limpia subiendo y bajando, sin mirar el diagrama.',
+            text: '<ul><li>Play the same on the G string — G · A · B · C · D · E · F (frets 0–10), slowly, names aloud.</li></ul>You\'ve got it when: a clean lap up and back, without looking at the chart.<span class="step-figure"><img src="img/m4-g-naturals.svg" alt="A fretboard diagram of the G string, frets 0 to 10, with the natural notes marked: G open, A at fret 2, B at fret 4, C at fret 5, D at fret 7, E at fret 9, and F at fret 10."></span>',
+            text_es: '<ul><li>Toca lo mismo en la cuerda Sol — G · A · B · C · D · E · F (trastes 0–10), despacio, nombres en voz alta.</li></ul>Lo tienes cuando: una vuelta limpia subiendo y bajando, sin mirar el diagrama.<span class="step-figure"><img src="img/m4-g-naturals.svg" alt="Un diagrama del diapasón de la cuerda Sol, trastes 0 a 10, con las notas naturales marcadas: G al aire, A en el traste 2, B en el 4, C en el 5, D en el 7, E en el 9, y F en el 10."></span>',
             hint: 'Notice the same pattern of whole and half steps — the musical alphabet behaves the same way on every string.',
             hint_es: 'Fíjate en el mismo patrón de tonos y semitonos — el alfabeto musical se comporta igual en cada cuerda.',
             stuck: 'Find the two half steps first — B–C (frets 4–5) and E–F (frets 9–10) — then fill in the whole-step gaps between them.',
