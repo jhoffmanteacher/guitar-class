@@ -10,6 +10,21 @@
 //    the _es text field carries the same drawing with Spanish labels). ──
 const M13_SVG_STYLE = 'display:block;width:100%;max-width:420px;height:auto;border:1px solid #ddd;border-radius:10px;background:#fff;margin-top:10px';
 
+// Wraps a label across multiple <tspan> lines so long EN/ES strings don't
+// run past the viewBox edge and get clipped.
+function m13WrapTspans(str, x, maxChars, lineHeight){
+  const words = str.split(' ');
+  const lines = [];
+  let cur = '';
+  for (const w of words) {
+    const test = cur ? `${cur} ${w}` : w;
+    if (test.length > maxChars && cur) { lines.push(cur); cur = w; }
+    else cur = test;
+  }
+  if (cur) lines.push(cur);
+  return lines.map((line, i) => `<tspan x="${x}" dy="${i === 0 ? 0 : lineHeight}">${line}</tspan>`).join('');
+}
+
 function m13BallEndSVG(L){
   // Cross-section of a classical tie block with a BALL-END string seated.
   return `<span class="step-figure"><svg viewBox="0 0 420 190" style="${M13_SVG_STYLE}" role="img" aria-label="${L.aria}">
@@ -64,7 +79,7 @@ function m13WindingSVG(L){
     <path d="M250 16 l 10 -2 -4 10" fill="#3b6d11"/>
     <path d="M120 20 l22 14 m0 -14 l-22 14" stroke="#b3372a" stroke-width="2.5"/>
     <text x="60" y="52" font-family="sans-serif" font-size="13" fill="#b3372a">${L.trim}</text>
-    <text x="240" y="72" font-family="sans-serif" font-size="13" fill="#185fa5">${L.wraps}</text>
+    <text x="240" y="66" font-family="sans-serif" font-size="12" fill="#185fa5">${m13WrapTspans(L.wraps, 240, 18, 15)}</text>
     <text x="266" y="30" font-family="sans-serif" font-size="13" fill="#3b6d11">${L.turn}</text>
     <text x="120" y="196" font-family="sans-serif" font-size="13" fill="#333">${L.toNutV}</text>
   </svg></span>`;

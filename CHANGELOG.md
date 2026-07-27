@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Module 13: fixed a clipped label in the winding diagram
+
+### Fixed
+
+- The **"wind the post" diagram** in Module 13 had a label that ran off the
+  edge of the picture in both English and Spanish, so part of the instruction
+  was cut off. It now wraps onto its own lines and is fully readable.
+
 ## 2026-07-27 — Module 5: G and A lesson videos, and Group 3 slims down
 
 ### Added
