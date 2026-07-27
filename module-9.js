@@ -1065,9 +1065,9 @@ SETS.push(
                   prompt_es: 'En este diagrama de forma parcial, ¿cuáles cuerdas realmente suenan cuando lo tocas?',
                   answer: 1,
                   explain: 'An X above a string means don\'t play it. Strings 6, 5, and 4 are X\'d, so only the top three — G, B, and high e — ring out. A partial shape is just a full chord\'s top slice.',
-                  explain_es: 'Una X sobre una cuerda significa que no la toques. Las cuerdas 6, 5 y 4 tienen X, así que solo suenan las tres de arriba — G, B y mi aguda. Una forma parcial es solo la rebanada superior de un acorde completo.',
+                  explain_es: 'Una X sobre una cuerda significa que no la toques. Las cuerdas 6, 5 y 4 tienen X, así que solo suenan las tres de arriba — Sol, Si y mi aguda. Una forma parcial es solo la rebanada superior de un acorde completo.',
                   choices: ['All six strings', 'Only the three fretted strings — G, B, and high e', 'Only the strings marked X', 'The three lowest strings'],
-                  choices_es: ['Las seis cuerdas', 'Solo las tres cuerdas trasteadas — G, B y mi aguda', 'Solo las cuerdas marcadas con X', 'Las tres cuerdas más graves'] }
+                  choices_es: ['Las seis cuerdas', 'Solo las tres cuerdas trasteadas — Sol, Si y mi aguda', 'Solo las cuerdas marcadas con X', 'Las tres cuerdas más graves'] }
               }
             ]
           },

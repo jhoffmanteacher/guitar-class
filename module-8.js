@@ -206,7 +206,7 @@ SETS.push(
             stuck: 'Move just the thumb E → A → D with the fingers resting (not plucking) on G-B-e, until the thumb finds each bass without looking.',
             stuck_es: 'Mueve solo el pulgar Mi → La → Re con los dedos apoyados (sin pulsar) en Sol, Si y mi aguda, hasta que el pulgar encuentre cada nota grave sin mirar.',
             levelUp: 'Call out the bass string a beat before you play it, or shift E → A → D → A → E in a continuous loop without stopping.',
-            levelUp_es: 'Anuncia la cuerda grave un tiempo antes de tocarla, o cambia E → A → D → A → E en un loop continuo sin detenerte.',
+            levelUp_es: 'Anuncia la cuerda grave un tiempo antes de tocarla, o cambia Mi → La → Re → La → Mi en un loop continuo sin detenerte.',
             skills: [2, 3, 6],
             playSeq: { label: 'Thumb shifts: E · A · D bass with i-m-a above', label_es: 'Cambios del pulgar: bajo E · A · D con i-m-a arriba', bpm: 60, notes: [40, 55, 59, 64, 45, 55, 59, 64, 50, 55, 59, 64] }
           }
@@ -254,7 +254,7 @@ SETS.push(
 
     assessment: {
       goal: 'Holds correct fingerpicking hand position · Assigns p to bass, i-m-a to G-B-e · Plucks each open string with the correct finger · Plays through p-i-m-a in order without looking',
-      goal_es: 'Mantiene una posición correcta de la mano de fingerpicking · Asigna p al bajo, i-m-a a G-B-e · Pulsa cada cuerda al aire con el dedo correcto · Toca p-i-m-a en orden sin mirar',
+      goal_es: 'Mantiene una posición correcta de la mano de fingerpicking · Asigna p al bajo, i-m-a a Sol, Si y mi aguda · Pulsa cada cuerda al aire con el dedo correcto · Toca p-i-m-a en orden sin mirar',
       performance: 'Play p-i-m-a on open strings at 60 BPM for 8 reps. Check your own hand position in a mirror or on your device\'s camera — wrist arched, fingers curved.',
       selfCheck: 'Can you pluck a string with your "a" finger without looking? Can you keep your wrist arched for 30 seconds without it collapsing?',
       selfCheck_es: '¿Puedes pulsar una cuerda con tu dedo "a" sin mirar? ¿Puedes mantener tu muñeca arqueada durante 30 segundos sin que se colapse?',
@@ -404,7 +404,7 @@ SETS.push(
           {
             label: 'Try it: the pattern on Em', label_es: 'Pruébalo: el patrón en Em',
             text: 'Now try it: fret Em and play the 6-note p-i-m-a-m-i arpeggio:<ol><li>Click any note below the TAB to hear it.</li><li>Then play the staircase yourself — thumb on the low E (Em\'s root), i-m-a on G-B-e, then back down m-i.</li></ol>',
-            text_es: 'Ahora pruébalo: trastea Em y toca el arpegio de 6 notas p-i-m-a-m-i:<ol><li>Haz clic en cualquier nota debajo del TAB para escucharla.</li><li>Luego toca la escalera tú mismo — pulgar en la Mi grave (la raíz de Em), i-m-a en G-B-e, y luego de vuelta hacia abajo m-i.</li></ol>',
+            text_es: 'Ahora pruébalo: trastea Em y toca el arpegio de 6 notas p-i-m-a-m-i:<ol><li>Haz clic en cualquier nota debajo del TAB para escucharla.</li><li>Luego toca la escalera tú mismo — pulgar en la Mi grave (la raíz de Em), i-m-a en Sol, Si y mi aguda, y luego de vuelta hacia abajo m-i.</li></ol>',
             hint: 'Em is all open strings on the treble side, so you can focus entirely on the picking hand. Read the TAB left to right — the bass note starts it, then the fingers climb and come back.',
             hint_es: 'Em son todas cuerdas al aire del lado agudo, así que puedes concentrarte por completo en la mano de pulsar. Lee el TAB de izquierda a derecha — la nota grave lo empieza, y luego los dedos suben y vuelven.',
             skills: [1, 2, 3],
@@ -483,7 +483,7 @@ SETS.push(
           {
             label: 'Challenge 2 — Am Pattern', label_es: 'Reto 2 — Patrón en Am',
             text: '<ol><li>Fret Am.</li><li>Play the 6-note pattern over it — thumb on the A string (Am\'s root), i-m-a still on G-B-e — 8 times.</li></ol>You\'ve got it when: only the thumb moves to the new bass; the fingers stay anchored. Click any note below the TAB to hear it.',
-            text_es: '<ol><li>Trastea Am.</li><li>Toca el patrón de 6 notas sobre él — pulgar en la cuerda La (la raíz de Am), i-m-a siguen en G-B-e — 8 veces.</li></ol>Lo tienes cuando: solo el pulgar se mueve hacia el nuevo bajo; los dedos se quedan anclados. Haz clic en cualquier nota debajo del TAB para escucharla.',
+            text_es: '<ol><li>Trastea Am.</li><li>Toca el patrón de 6 notas sobre él — pulgar en la cuerda La (la raíz de Am), i-m-a siguen en Sol, Si y mi aguda — 8 veces.</li></ol>Lo tienes cuando: solo el pulgar se mueve hacia el nuevo bajo; los dedos se quedan anclados. Haz clic en cualquier nota debajo del TAB para escucharla.',
             hint: 'The only change from Em is which bass string the thumb plays. Fingers stay parked on G, B, high e.',
             hint_es: 'El único cambio respecto a Em es en cuál cuerda grave toca el pulgar. Los dedos se quedan estacionados en G, B, mi aguda.',
             stuck: 'Drop the pattern — just pluck the Am bass (p) and let it ring, then add i-m-a one finger at a time.',
@@ -532,7 +532,7 @@ SETS.push(
               {
                 label: 'Challenge — "the cure", verse', label_es: 'Reto — "the cure", estrofa',
                 text: 'Play the 6-note p-i-m-a-m-i pattern over the verse loop — Am · C · Dm · F, one bar each at 60 BPM. Thumb:<ul><li>A string for Am and C.</li><li>D string for Dm and F.</li><li>i-m-a never leave G-B-e.</li></ul>You\'ve got it when: one full lap with the pattern unbroken at every change.',
-                text_es: 'Toca el patrón de 6 notas p-i-m-a-m-i sobre el loop de la estrofa — Am · C · Dm · F, un compás cada uno a 60 BPM. Pulgar:<ul><li>Cuerda La para Am y C.</li><li>Cuerda Re para Dm y F.</li><li>i-m-a nunca dejan G-B-e.</li></ul>Lo tienes cuando: una vuelta completa con el patrón sin interrupciones en cada cambio.',
+                text_es: 'Toca el patrón de 6 notas p-i-m-a-m-i sobre el loop de la estrofa — Am · C · Dm · F, un compás cada uno a 60 BPM. Pulgar:<ul><li>Cuerda La para Am y C.</li><li>Cuerda Re para Dm y F.</li><li>i-m-a nunca dejan Sol, Si y mi aguda.</li></ul>Lo tienes cuando: una vuelta completa con el patrón sin interrupciones en cada cambio.',
                 hint: 'The four bass notes pair up: Am and C both live on the A string, Dm and F both live on the D string — the thumb travels only once, at C→Dm, then stays. The fingers never move at all.',
                 hint_es: 'Las cuatro notas graves se emparejan: Am y C viven en la cuerda La, Dm y F viven en la cuerda Re — el pulgar viaja solo una vez, en C→Dm, y luego se queda. Los dedos nunca se mueven.',
                 stuck: 'Loop Am → C until your fretting hand lands on fret 3 without looking — the thumb just keeps plucking the A string — then add Dm and F as their own pair.',
@@ -738,7 +738,7 @@ SETS.push(
           {
             label: 'Try it: the arpeggio on C', label_es: 'Pruébalo: el arpegio en C',
             text: 'Now try it: fret C and play the 6-note arpeggio over it:<ol><li>Click any note below the TAB to hear it.</li><li>Then play the staircase — thumb on the A string\'s 3rd fret (C\'s root), i-m-a on G-B-e, then back down m-i.</li></ol>',
-            text_es: 'Ahora pruébalo: trastea C y toca el arpegio de 6 notas sobre él:<ol><li>Haz clic en cualquier nota debajo del TAB para escucharla.</li><li>Luego toca la escalera — pulgar en el traste 3 de la cuerda La (la raíz de C), i-m-a en G-B-e, y luego de vuelta hacia abajo m-i.</li></ol>',
+            text_es: 'Ahora pruébalo: trastea C y toca el arpegio de 6 notas sobre él:<ol><li>Haz clic en cualquier nota debajo del TAB para escucharla.</li><li>Luego toca la escalera — pulgar en el traste 3 de la cuerda La (la raíz de C), i-m-a en Sol, Si y mi aguda, y luego de vuelta hacia abajo m-i.</li></ol>',
             hint: 'C uses the same picking pattern as Em and Am — only the thumb\'s bass note changes. Read the TAB left to right and match each pluck.',
             hint_es: 'C usa el mismo patrón de punteo que Em y Am — solo cambia la nota grave del pulgar. Lee el TAB de izquierda a derecha y haz coincidir cada pulsación.',
             skills: [1, 3, 4],
@@ -817,7 +817,7 @@ SETS.push(
             text: '<ul><li>Play the 6-note arpeggio over a 4-chord progression — Am–C–D–F or C–Am–F–G — 1 bar each at 60 BPM.</li></ul>You\'ve got it when: the thumb finds each chord\'s root bass while the fingers stay on G-B-e.',
             text_es: '<ul><li>Toca el arpegio de 6 notas sobre una progresión de 4 acordes — Am–C–D–F o C–Am–F–G — 1 compás cada uno a 60 BPM.</li></ul>Lo tienes cuando: el pulgar encuentra el bajo raíz de cada acorde mientras los dedos se quedan en Sol, Si y mi aguda.',
             hint: 'For each chord, the thumb plays the ROOT bass note (Am = A string, C = A string, D = D string, F = D string). Fingers always on G-B-e.',
-            hint_es: 'Para cada acorde, el pulgar toca la nota grave RAÍZ (Am = cuerda La, C = cuerda La, D = cuerda Re, F = cuerda Re). Los dedos siempre en G-B-e.',
+            hint_es: 'Para cada acorde, el pulgar toca la nota grave RAÍZ (Am = cuerda La, C = cuerda La, D = cuerda Re, F = cuerda Re). Los dedos siempre en Sol, Si y mi aguda.',
             stuck: 'Drop to two chords (Am–C) and loop just that change until the pattern doesn\'t break, then add D and F.',
             stuck_es: 'Baja a dos acordes (Am–C) y repite solo ese cambio hasta que el patrón no se rompa, y luego agrega D y F.',
             levelUp: 'Run the full four-chord loop without a single broken pattern, or nudge the metronome to 70 BPM.',
@@ -1032,7 +1032,7 @@ MODULE_REVIEWS[8] = {
   module_es: 'Fingerpicking',
   skills: [
     { id: 'mr8-s1', text: 'I can hold a relaxed fingerpicking hand — wrist arched, fingers curved — for 30 seconds without it collapsing flat', text_es: 'Puedo mantener una mano de fingerpicking relajada — muñeca arqueada, dedos curvados — durante 30 segundos sin que se aplane', set: 'm8w1' },
-    { id: 'mr8-s2', text: 'I can assign p to the bass strings and i-m-a to G-B-e, and put any finger on its string without looking', text_es: 'Puedo asignar p a las cuerdas graves e i-m-a a G-B-e, y poner cualquier dedo en su cuerda sin mirar', set: 'm8w1' },
+    { id: 'mr8-s2', text: 'I can assign p to the bass strings and i-m-a to G-B-e, and put any finger on its string without looking', text_es: 'Puedo asignar p a las cuerdas graves e i-m-a a Sol, Si y mi aguda, y poner cualquier dedo en su cuerda sin mirar', set: 'm8w1' },
     { id: 'mr8-s3', text: 'I can pluck p-i-m-a in order on open strings at 60 BPM with even volume on every finger, including the ring (a)', text_es: 'Puedo pulsar p-i-m-a en orden en cuerdas al aire a 60 BPM con volumen parejo en cada dedo, incluyendo el anular (a)', set: 'm8w1' },
     { id: 'mr8-s4', text: 'I can play the 6-note p-i-m-a-m-i arpeggio from memory while holding a chord, every note ringing clean', text_es: 'Puedo tocar el arpegio de 6 notas p-i-m-a-m-i de memoria mientras sostengo un acorde, con cada nota sonando limpia', set: 'm8w2' },
     { id: 'mr8-s5', text: 'I can fingerpick a full 4-chord progression without the pattern breaking at any chord change', text_es: 'Puedo tocar con fingerpicking una progresión completa de 4 acordes sin que el patrón se rompa en ningún cambio de acorde', set: 'm8w3' },

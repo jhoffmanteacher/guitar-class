@@ -50,7 +50,9 @@ a{color:var(--brand)}
 .crumb-left{display:flex;align-items:center;gap:12px}
 #save-msg{color:var(--text3);white-space:nowrap}
 #google_translate_element{display:none}
-.btn-translate{font:inherit;padding:4px 10px;font-size:0.75rem;border:1px solid var(--border2);border-radius:20px;background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:5px}
+.btn-translate{font:inherit;padding:4px 10px;font-size:0.75rem;border:1px solid var(--border2);border-radius:20px;background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:5px;position:relative}
+.btn-translate::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:max(100%,44px);height:max(100%,44px)}
 .btn-translate:hover{background:var(--bg3)}
 .btn-translate.active{background:var(--bg3);color:var(--brand);border-color:var(--brand)}
 header.song{border-bottom:1px solid var(--border2);padding-bottom:18px;margin-bottom:8px}

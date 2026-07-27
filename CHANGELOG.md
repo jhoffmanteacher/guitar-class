@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Spanish string-name cleanup + Journey page fixes
+
+### Fixed
+
+- **A few leftover letter-style string names in Modules 8–9's Spanish** (like
+  "G-B-e") now read as solfège ("Sol, Si y mi aguda"), matching the rest of
+  the site.
+- **The tuner's popup tip now renders small and centered on the six Song
+  Journey pages** instead of full-size — it was missing its style there.
+- **Slightly bigger tap targets on the Journey pages' close and translate
+  buttons**, matching the rest of the site.
+
 ## 2026-07-27 — Module 9: fretboard charts for the last four strings
 
 ### Added
