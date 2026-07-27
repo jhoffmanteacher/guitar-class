@@ -18,7 +18,6 @@ SETS.push(
     title: 'Set 1',
     subtitle: 'Multi-line TAB · Rhythm in TAB · Single-note riffs and double-stop riffs',
     subtitle_es: 'TAB de varias líneas · Ritmo en el TAB · Riffs de notas individuales y riffs con dobles cuerdas',
-    objective: 'I CAN read multi-line TAB with rhythm symbols and play a real riff (a short musical phrase that repeats) built from double-stops (a double-stop is two notes played together, stacked in the TAB).',
     skillFocus: 'Reading multi-line TAB and rhythm symbols · Playing slides, hammer-ons, and pull-offs · Playing a double-stop riff',
     skillFocus_es: 'Leer TAB de varias líneas y símbolos de ritmo · Tocar deslizamientos, hammer-ons y pull-offs · Tocar un riff con dobles cuerdas',
     comingSoon: false,
@@ -163,7 +162,7 @@ SETS.push(
             stuck_es: 'Baja a 50 BPM y mantén la púa estricta abajo-arriba-abajo-arriba — parejo y lento es mejor que rápido y descuidado. Repite solo las primeras 4 notas hasta que salgan automáticas.',
             levelUp: 'Push to 80 BPM, or play it twice through with no stumble.',
             levelUp_es: 'Sube a 80 BPM, o tócalo dos veces seguidas sin tropiezos.',
-            skills: [2, 3, 5],
+            skills: [2],
             tab: {
               caption: 'Alternate-picking workout riff · low E and A strings',
               caption_es: 'Riff de ejercicio de púa alternada · cuerdas Mi grave y La',
@@ -336,7 +335,6 @@ SETS.push(
     title: 'Set 2',
     subtitle: 'E-shape barre chords · F, G, A barre · Moving the shape up the neck',
     subtitle_es: 'Acordes con cejilla en forma de E · Cejilla de F, G, A · Mover la forma por el mástil',
-    objective: 'I CAN form a clean E-shape barre chord and move it up the neck to play F, G, A, and B major.',
     skillFocus: 'Forming a clean E-shape barre chord · Moving the barre up the neck · Naming barre chords by their root',
     skillFocus_es: 'Formar una cejilla limpia en forma de E · Mover la cejilla por el mástil · Nombrar acordes con cejilla por su raíz',
     comingSoon: false,
@@ -461,7 +459,7 @@ SETS.push(
             stuck_es: 'Si el F completo todavía no suena, vuelve solo al acorde de potencia F5 (cuerdas 6–5) y agrega una cuerda a la vez hacia arriba — la cejilla completa llega al final.',
             levelUp: 'Do the same reveal at G (fret 3): play G5, then stack the full G barre on top and hear the power chord inside it.',
             levelUp_es: 'Haz la misma revelación en G (traste 3): toca G5, y luego apila la cejilla completa de G encima y escucha el acorde de potencia dentro de ella.',
-            skills: [3, 4],
+            skills: [4, 5],
             chords: [
               { name: 'F5', chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 0 },
               { name: 'F major', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
@@ -591,7 +589,7 @@ SETS.push(
         text_es: 'Formar un acorde con cejilla en forma de E en el traste 5 (A mayor) de forma limpia',
         gotItWhen: 'you can pluck each of the 6 strings individually in your A barre and every one rings — no muffled string from a cramped finger.',
         gotItWhen_es: 'puedes puntear cada una de las 6 cuerdas por separado en tu cejilla de A y todas suenan — sin ninguna cuerda apagada por un dedo acalambrado.',
-        practice: { type: 'chord', label: 'A major — E-shape barre at fret 5',
+        practice: { type: 'chord', label: 'A major — E-shape barre at fret 5', label_es: 'A mayor — cejilla en forma de E en el traste 5',
           chords: [
             { name: 'A major', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,6,'2'],[2,5,'1'],[1,5,'1']], position: 5 }
           ] } },
@@ -599,7 +597,7 @@ SETS.push(
         text_es: 'Tocar la cejilla de F mayor en el traste 1',
         gotItWhen: 'your F barre at the 1st fret rings cleanly on at least 5 of 6 strings — including the B string, which is the trickiest for the bar.',
         gotItWhen_es: 'tu cejilla de F en el traste 1 suena limpia en al menos 5 de las 6 cuerdas — incluyendo la cuerda Si, que es la más difícil para la cejilla.',
-        practice: { type: 'chord', label: 'F major — E-shape barre at fret 1',
+        practice: { type: 'chord', label: 'F major — E-shape barre at fret 1', label_es: 'F mayor — cejilla en forma de E en el traste 1',
           chords: [
             { name: 'F major', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
           ] } },
@@ -631,9 +629,8 @@ SETS.push(
     unit: 'Module 7 · TAB Notation and Barre Chords',
     unit_es: 'Módulo 7 · Notación TAB y acordes con cejilla',
     title: 'Set 3',
-    subtitle: 'A-shape barre chords · Bb, B, C barre · Combining E-shape and A-shape',
-    subtitle_es: 'Acordes con cejilla en forma de A · Cejilla de Bb, B, C · Combinar forma de E y forma de A',
-    objective: 'I CAN form a clean A-shape barre chord and combine E-shape and A-shape barre chords in a real song.',
+    subtitle: 'A-shape barre chords, starting on B · C, D, E barre · Combining E-shape and A-shape',
+    subtitle_es: 'Acordes con cejilla en forma de A, empezando en B · Cejilla de C, D, E · Combinar forma de E y forma de A',
     skillFocus: 'Forming a clean A-shape barre chord · Naming A-shape chords by their root · Combining E-shape and A-shape chords in a song',
     skillFocus_es: 'Formar una cejilla limpia en forma de A · Nombrar acordes en forma de A por su raíz · Combinar acordes en forma de E y de A en una canción',
     comingSoon: false,
@@ -868,8 +865,7 @@ SETS.push(
             text: '🌶️ Try it: learn the most famous riff in the course. The "Sweet Child O\' Mine" intro lives up high on the D, G, and B strings around the 12th–15th frets, picked one note at a time:<ol><li>Watch <a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a> (played slow and full speed, with the TAB on screen).</li><li>Learn just the first bar.</li><li>Play it slowly.</li></ol>No score, no rush — this is a late-course optional challenge you can keep practicing a little at a time.',
             text_es: '🌶️ Pruébalo: aprende el riff más famoso del curso. La intro de "Sweet Child O\' Mine" vive arriba en las cuerdas Re, Sol y Si, alrededor de los trastes 12–15, pulsada una nota a la vez:<ol><li>Mira <a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a> (tocado lento y a velocidad completa, con el TAB en pantalla).</li><li>Aprende solo el primer compás.</li><li>Tócalo despacio.</li></ol>Sin puntaje, sin apuro — este es un reto opcional de fin de curso que puedes seguir practicando poco a poco.',
             hint: 'The lesson is in standard tuning — the same tuning your guitar is already in — so you can play along directly. (The original record is tuned a half-step lower, so you\'ll sound slightly higher than the album; that\'s normal.) Loop just the first bar until it\'s clean before adding more.',
-            hint_es: 'La lección está en afinación estándar — la misma afinación en la que ya está tu guitarra — así que puedes tocar junto directamente. (La grabación original está afinada medio tono más abajo, así que vas a sonar ligeramente más agudo que el álbum; eso es normal.) Repite solo el primer compás hasta que salga limpio antes de agregar más.',
-            skills: [3, 6]
+            hint_es: 'La lección está en afinación estándar — la misma afinación en la que ya está tu guitarra — así que puedes tocar junto directamente. (La grabación original está afinada medio tono más abajo, así que vas a sonar ligeramente más agudo que el álbum; eso es normal.) Repite solo el primer compás hasta que salga limpio antes de agregar más.'
           }
             ]
           },
@@ -914,8 +910,8 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Forms A-shape barre cleanly · Plays Bb, C, D as A-shape barre · Names an A-shape barre by its root on string 5 · Switches between E-shape and A-shape barre in a progression · Plays a full song using only barre chords',
-      goal_es: 'Forma la cejilla en forma de A de manera limpia · Toca Bb, C, D como cejilla en forma de A · Nombra una cejilla en forma de A por su raíz en la cuerda 5 · Cambia entre cejilla en forma de E y de A en una progresión · Toca una canción completa usando solo acordes con cejilla',
+      goal: 'Forms an A-shape barre cleanly (B major) · Plays C, D, E as A-shape barre · Names an A-shape barre by its root on string 5 · Switches between E-shape and A-shape barre in a progression · Plays a full song using only barre chords',
+      goal_es: 'Forma la cejilla en forma de A de manera limpia (B mayor) · Toca C, D, E como cejilla en forma de A · Nombra una cejilla en forma de A por su raíz en la cuerda 5 · Cambia entre cejilla en forma de E y de A en una progresión · Toca una canción completa usando solo acordes con cejilla',
       performance: 'Solo: record yourself playing a 4-chord progression (e.g., F-C-G-D or Am-G-F-C) entirely with barre chords, 2 bars each, at 60 BPM. Listen back for clean tone on every chord.',
       selfCheck: 'Can you play the same chord (say F major) two different ways — as E-shape and as A-shape? Can you switch between the two shapes mid-song without thinking?',
       selfCheck_es: '¿Puedes tocar el mismo acorde (digamos F mayor) de dos formas distintas — como forma de E y como forma de A? ¿Puedes cambiar entre las dos formas a mitad de la canción sin pensarlo?',
@@ -927,7 +923,7 @@ SETS.push(
         text_es: 'Formar un acorde con cejilla en forma de A de manera limpia en el traste 2 (B mayor)',
         gotItWhen: 'your B barre rings cleanly on strings 5 to 1 — and string 6 (low E) is muted by your index finger so it doesn\'t accidentally sound.',
         gotItWhen_es: 'tu cejilla de B suena limpia en las cuerdas 5 a 1 — y la cuerda 6 (Mi grave) está silenciada por tu dedo índice para que no suene por accidente.',
-        practice: { type: 'chord', label: 'B major — A-shape barre at fret 2',
+        practice: { type: 'chord', label: 'B major — A-shape barre at fret 2', label_es: 'B mayor — cejilla en forma de A en el traste 2',
           chords: [
             { name: 'B major', chord: [[6,'x'],[5,2,'1'],[4,4,'3'],[3,4,'3'],[2,4,'3'],[1,2,'1']], position: 2 }
           ] } },
@@ -947,15 +943,15 @@ SETS.push(
           prompt_es: 'Si tocas un acorde con cejilla en forma de A con tu dedo índice en el traste 5 de la cuerda 5, ¿qué acorde es?',
           choices: ['C major', 'D major', 'E major', 'A major'],
           choices_es: ['C mayor', 'D mayor', 'E mayor', 'A mayor'], answer: 1 } },
-      { id: 'm7w3-s4', text: 'Play Bb, C, and D as A-shape barre chords',
-        text_es: 'Tocar Bb, C, y D como acordes con cejilla en forma de A',
-        gotItWhen: 'you can slide the A-shape between Bb (1st fret), C (3rd fret), and D (5th fret) and each chord rings cleanly with no muffled strings.',
-        gotItWhen_es: 'puedes deslizar la forma de A entre Bb (traste 1), C (traste 3), y D (traste 5) y cada acorde suena limpio sin cuerdas apagadas.',
-        practice: { type: 'chord', label: 'One A-shape, three roots — Bb · C · D',
+      { id: 'm7w3-s4', text: 'Play C, D, and E as A-shape barre chords',
+        text_es: 'Tocar C, D, y E como acordes con cejilla en forma de A',
+        gotItWhen: 'you can slide the A-shape between C (3rd fret), D (5th fret), and E (7th fret) and each chord rings cleanly with no muffled strings.',
+        gotItWhen_es: 'puedes deslizar la forma de A entre C (traste 3), D (traste 5), y E (traste 7) y cada acorde suena limpio sin cuerdas apagadas.',
+        practice: { type: 'chord', label: 'One A-shape, three roots — C · D · E', label_es: 'Una forma de A, tres raíces — C · D · E',
           chords: [
-            { name: 'Bb major (A-shape)', chord: [[6,'x'],[5,1,'1'],[4,3,'3'],[3,3,'3'],[2,3,'3'],[1,1,'1']], position: 1 },
             { name: 'C', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,5,'3'],[2,5,'3'],[1,3,'1']], position: 3 },
-            { name: 'D', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,7,'3'],[2,7,'3'],[1,5,'1']], position: 5 }
+            { name: 'D', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,7,'3'],[2,7,'3'],[1,5,'1']], position: 5 },
+            { name: 'E', chord: [[6,'x'],[5,7,'1'],[4,9,'3'],[3,9,'3'],[2,9,'3'],[1,7,'1']], position: 7 }
           ] } },
       { id: 'm7w3-s5', text: 'Switch between an E-shape barre and an A-shape barre in time',
         text_es: 'Cambiar entre una cejilla en forma de E y una cejilla en forma de A a tiempo',
@@ -983,7 +979,7 @@ MODULE_SONGS[7] = [
       { name: '"Crazy Train" — Ozzy Osbourne', meta: 'Fast intro riff · alternate picking practice', meta_es: 'Riff de intro rápido · práctica de púa alternada', type: 'Focus', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=FVovq9TGBw0',
         tutorialUrl: 'https://www.youtube.com/watch?v=61YCfNHZuHE' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Single-note riff with rhythm variations', meta_es: 'Riff de una sola nota con variaciones rítmicas', type: 'Core', core: true,
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'Single-note riff with rhythm variations', meta_es: 'Riff de una sola nota con variaciones rítmicas', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Hey Jude" — The Beatles', meta: 'F major in the chorus · perfect E-shape barre application', meta_es: 'F mayor en el coro · aplicación perfecta de la cejilla en forma de E', type: 'Focus', core: true,
@@ -1033,8 +1029,8 @@ MODULE_REVIEWS[7] = {
       text_es: 'Puedo hacer cejilla en las 6 cuerdas con mi dedo índice para que todas suenen', set: 'm7w2' },
     { id: 'mr7-s4', text: 'I can form an E-shape barre and play F, G, and A cleanly, naming each by its root on string 6',
       text_es: 'Puedo formar una cejilla en forma de E y tocar F, G, y A de forma limpia, nombrando cada uno por su raíz en la cuerda 6', set: 'm7w2' },
-    { id: 'mr7-s5', text: 'I can form an A-shape barre and play Bb, C, and D cleanly, naming each by its root on string 5',
-      text_es: 'Puedo formar una cejilla en forma de A y tocar Bb, C, y D de forma limpia, nombrando cada uno por su raíz en la cuerda 5', set: 'm7w3' },
+    { id: 'mr7-s5', text: 'I can form an A-shape barre and play C, D, and E cleanly, naming each by its root on string 5',
+      text_es: 'Puedo formar una cejilla en forma de A y tocar C, D, y E de forma limpia, nombrando cada uno por su raíz en la cuerda 5', set: 'm7w3' },
     { id: 'mr7-s6', text: 'I can find both "homes" for a chord — its E-shape (string-6 root) and A-shape (string-5 root) — and switch between the two shapes in a progression',
       text_es: 'Puedo encontrar los dos "hogares" de un acorde — su forma de E (raíz en la cuerda 6) y su forma de A (raíz en la cuerda 5) — y cambiar entre las dos formas en una progresión', set: 'm7w3' }
   ],

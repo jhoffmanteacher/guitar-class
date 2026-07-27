@@ -5,6 +5,53 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-26 — More content fixes, new practice decks, and missing "you've got it when" targets
+
+### Fixed
+
+- **A Module 5 quiz question answered itself two different ways** — both the
+  question and the practice version now agree that an "X" on a chord diagram
+  means "don't play that string."
+- **"Knockin' on Heaven's Door" (Module 6) is now taught with its real bar
+  lengths** — Am and C each hold for two full bars, not one, matching the
+  actual song instead of an evenly-spaced simplification.
+- **Dm and the G/B "bass turnaround" now have real teaching content in
+  Module 5** — two new practice cards with diagrams and hints, so "the cure"
+  is fully playable as one of the songs you can perform for the Module 5
+  check-off.
+- **Fixed a few chord-progression mistakes**: "Happy Birthday" (Module 6) was
+  shown with a progression that doesn't belong to it; Seven Nation Army's
+  strummed version (Module 5) listed the wrong chords; a Module 2 note
+  example said "one octave up" when it's actually a fourth.
+- **Let It Be and "the cure" now show up everywhere they should** in the
+  Songs lists for Modules 2, 3, and 6, including a working 🧵 Song Journey
+  link for Seven Nation Army in Module 7 that was missing one.
+- **Replaced the last few "grab some index cards" instructions with real
+  practice decks and drills you can run right on the page** — in Modules 2,
+  3, 5, 8, 9, 10, and 11. Nothing left on the site should ask you to cut up
+  paper or find a partner to quiz you.
+- **Added "you've got it when…" success criteria to skills that were
+  missing them**, mostly in Modules 8 through 13, so it's clearer what
+  "done" looks like before you check a skill off.
+- **Module 12's wrap-up now mentions Module 13** instead of sounding like
+  the course ends there.
+- **Module 8's fingerpicking practice stations now open with the same
+  tuning-check warm-up every other module's stations have.**
+- **Fixed several Spanish translations that didn't match the English** —
+  a couple of leftover "ask a partner" instructions in Module 10 and
+  elsewhere, a chord-count example in Module 3, and a handful of spots using
+  "cuerda B" instead of the site's usual "cuerda Si." The search box, save
+  indicator, and a few pop-up labels also now translate into Spanish instead
+  of staying in English.
+- **A Module 4 songwriting example mixed notes from two different scales**,
+  making it unplayable as written — the example now uses one consistent
+  scale throughout.
+- **Fixed a hint in Module 5 that pointed at a shared finger position
+  between two chords that don't actually share one** — it now points at a
+  pair of chords that do.
+- **Fixed several "📍 Show me where" buttons that had stopped working**
+  because the skill they were supposed to jump to wasn't linked correctly.
+
 ## 2026-07-26 — Fixed several wrong answers and mismatched instructions
 
 ### Fixed

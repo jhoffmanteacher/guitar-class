@@ -21,8 +21,8 @@ const STRING_TARGETS = { 'E2': 82.41, 'A2': 110.00, 'D3': 146.83, 'G3': 196.00, 
 let tunerRunning = false, tunerStream = null, tunerCtx = null,
     tunerAnalyser = null, tunerFreqAnalyser = null, tunerRaf = null, tunerLoopTimeout = null,
     tunerHP = null, tunerLP = null,
-    tunerLastNote = null, tunerStableCount = 0, tunerSmoothedFreq = 0,
-    tunerTargetString = 'auto',
+    tunerLastNote = null, tunerSameNoteCount = 0, tunerSilenceCount = 0, tunerSmoothedFreq = 0,
+    tunerTargetString = 'auto', tunerStartToken = 0,
     tunerShownCents = null, tunerInTune = false;
 
 /* Anti-jitter layer: a short rolling-median window sits between the raw
@@ -68,7 +68,7 @@ function tunerStabilise(freq) {
   return tunerMedian(tunerFreqWindow);
 }
 function tunerResetSmoothing() {
-  tunerSmoothedFreq = 0; tunerStableCount = 0; tunerLastNote = null;
+  tunerSmoothedFreq = 0; tunerSameNoteCount = 0; tunerSilenceCount = 0; tunerLastNote = null;
   tunerFreqWindow = []; tunerJumpCount = 0;
   tunerShownCents = null; tunerInTune = false;
 }
@@ -281,10 +281,14 @@ function tunerLoop() {
 
     // Require 2 consecutive frames on the same note name before switching the
     // display (auto mode) so the readout can't flicker between neighbours.
-    if (displayName === tunerLastNote) { tunerStableCount++; }
-    else { tunerLastNote = displayName; tunerStableCount = 0; }
+    // Kept separate from the silence countdown below — sharing one counter
+    // meant a silent gap left this negative, so a re-plucked string had to
+    // climb back up from a deficit before it re-locked (~0.45s of extra lag).
+    if (displayName === tunerLastNote) { tunerSameNoteCount++; }
+    else { tunerLastNote = displayName; tunerSameNoteCount = 0; }
+    tunerSilenceCount = 0;   // a valid reading arrived — silence countdown resets
 
-    if (tunerStableCount >= 2 || tunerTargetString !== 'auto') {
+    if (tunerSameNoteCount >= 2 || tunerTargetString !== 'auto') {
       noteEl.textContent = displayName;
       freqEl.textContent = displayHz + ' Hz';
       // Needle hysteresis: ignore sub-2-cent wiggle so the needle settles
@@ -318,8 +322,8 @@ function tunerLoop() {
     }
   } else {
     // No pitch this frame — keep the last reading briefly; only clear on sustained silence.
-    tunerStableCount--;
-    if (tunerStableCount < -8) {
+    tunerSilenceCount++;
+    if (tunerSilenceCount > 8) {
       tunerResetSmoothing();
       noteEl.classList.remove('in-tune', 'in-tune-pop');
       noteEl.textContent = '—'; setToolText(freqEl, 'tools.playAString');
@@ -333,12 +337,24 @@ function tunerLoop() {
 }
 
 async function startTuner() {
+  // Closing the popup while getUserMedia is still pending must not leave a
+  // live mic stream orphaned. Each call claims a token; stopTuner() bumps it,
+  // so a stream that resolves after close is recognised as stale below and
+  // stopped immediately instead of being wired up into a "closed" tuner.
+  const myStartToken = ++tunerStartToken;
   try {
     // Disable browser audio processing that distorts low-frequency guitar signals
-    tunerStream = await navigator.mediaDevices.getUserMedia({
+    const stream = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
       video: false
     });
+    if (myStartToken !== tunerStartToken) {
+      // Popup was closed (or reopened) while the mic permission prompt was
+      // pending — this stream is stale, never got wired up. Stop it now.
+      stream.getTracks().forEach(t => t.stop());
+      return;
+    }
+    tunerStream = stream;
     tunerCtx = new (window.AudioContext || window.webkitAudioContext)();
     const src = tunerCtx.createMediaStreamSource(tunerStream);
 
@@ -374,6 +390,7 @@ async function startTuner() {
 }
 
 function stopTuner() {
+  tunerStartToken++;   // invalidate any startTuner() call still awaiting getUserMedia
   tunerRunning = false;
   if (tunerLoopTimeout){ clearTimeout(tunerLoopTimeout); tunerLoopTimeout = null; }
   if (tunerRaf)    cancelAnimationFrame(tunerRaf);

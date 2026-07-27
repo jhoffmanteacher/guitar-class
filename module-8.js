@@ -17,7 +17,6 @@ SETS.push(
     title: 'Set 1',
     subtitle: 'Hand position · p-i-m-a · Thumb on bass · Fingers on treble',
     subtitle_es: 'Posición de la mano · p-i-m-a · Pulgar en el bajo · Dedos en las agudas',
-    objective: 'I CAN hold a relaxed fingerpicking hand position and pluck the bass strings (the low, thick strings) with my thumb and the treble strings (the high, thin strings) with i-m-a fingers.',
     skillFocus: 'A relaxed fingerpicking hand position · Thumb on the bass strings, fingers on the treble · Rest stroke vs. free stroke',
     skillFocus_es: 'Una posición relajada de la mano de fingerpicking · Pulgar en las cuerdas graves, dedos en las agudas · Apoyando (toque de apoyo) vs. tirando (toque libre)',
     comingSoon: false,
@@ -317,7 +316,6 @@ SETS.push(
     title: 'Set 2',
     subtitle: 'Basic PIMA pattern · The classic arpeggio (the notes of a chord played one at a time) · Over a single chord',
     subtitle_es: 'Patrón básico PIMA · El arpegio clásico (las notas de un acorde tocadas una a la vez) · Sobre un solo acorde',
-    objective: 'I CAN play a basic p-i-m-a-m-i fingerpicking arpeggio pattern cleanly over a single open chord at 70 BPM.',
     skillFocus: 'Playing a PIMA arpeggio pattern · Keeping even timing and volume · Picking through a held chord',
     skillFocus_es: 'Tocar un patrón de arpegio PIMA · Mantener el tiempo y el volumen parejos · Puntear a través de un acorde sostenido',
     comingSoon: false,
@@ -444,6 +442,20 @@ SETS.push(
         title: 'Practice station — the 6-note pattern',
         title_es: 'Estación de práctica — el patrón de 6 notas',
         sections: [
+          {
+            title: 'Warm-up — tuning check (Module 1)',
+            title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
+            steps: [
+              {
+                label: 'Warm-up: tuning check', label_es: 'Calentamiento: afinación',
+                text: 'Start every practice session the same way:<ol><li>Tune all 6 strings to green (E A D G B e).</li><li>Then play each string open.</li></ol>You\'ve got it when: in tune before today\'s work.',
+                text_es: 'Empieza cada sesión de práctica de la misma manera:<ol><li>Afina las 6 cuerdas hasta que estén en verde (E A D G B e).</li><li>Luego toca cada cuerda al aire.</li></ol>Lo tienes cuando: estás afinado antes del trabajo de hoy.',
+                hint: 'Every note in an arpeggio rings on its own with nothing to cover it up — an out-of-tune string stands out even more once the thumb starts moving between chords.',
+                hint_es: 'En un arpegio cada nota suena sola, sin nada que la disimule — una cuerda desafinada se nota todavía más una vez que el pulgar empieza a moverse entre acordes.',
+                playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
+              }
+            ]
+          },
           {
             title: 'Play the p-i-m-a-m-i pattern on Em',
             title_es: 'Toca el patrón p-i-m-a-m-i en Em',
@@ -573,8 +585,9 @@ SETS.push(
             steps: [
               {
                 label: 'Ear Spark: name the bass string', label_es: 'Chispa auditiva: nombra el bajo',
-                text: '⚡ Ear Spark (optional, 2 min):<ol><li>Fingerpick Am leading with the thumb on either the A string or the D string — a few times in a mixed-up order, recorded.</li><li>On playback, name which string the bass note was each time — low vs high bass is a fingerpicker\'s first ear skill.</li></ol>Got someone around? Have them pick while you listen.',
-                text_es: '⚡ Chispa auditiva (opcional, 2 min):<ol><li>Toca Am con fingerpicking empezando con el pulgar en la cuerda La o en la cuerda Re — varias veces en un orden mezclado, grabado.</li><li>Al escuchar la grabación, nombra en cuál cuerda estaba la nota grave cada vez — grave vs. agudo en el bajo es la primera destreza auditiva de un fingerpicker.</li></ol>¿Tienes a alguien cerca? Pídele que toque mientras tú escuchas.'
+                text: '⚡ Ear Spark (optional, 2 min):<ol><li>Press play below — the deck draws a random mix of Am\'s A-string and D-string bass notes and plays them for you, and you never see which.</li><li>Name each one by ear before you check: A string is Am\'s root (low), D string is the passing bass a step higher — low vs. high bass is a fingerpicker\'s first ear skill.</li></ol>',
+                text_es: '⚡ Chispa auditiva (opcional, 2 min):<ol><li>Presiona reproducir abajo — la baraja saca una mezcla al azar de notas graves de Am en la cuerda La y en la cuerda Re, y las toca por ti, sin que veas cuáles son.</li><li>Nombra cada una de oído antes de revisar: la cuerda La es la raíz de Am (grave), la cuerda Re es el bajo de paso, un poco más agudo — grave vs. agudo en el bajo es la primera destreza auditiva de un fingerpicker.</li></ol>',
+                drill: { type: 'ear', pool: 'amBassAD', draw: 5, skill: 'm8w1-s6' }
               }
             ]
           }
@@ -652,7 +665,6 @@ SETS.push(
     title: 'Set 3',
     subtitle: 'Fingerpick a full progression · Travis picking intro · Performance song',
     subtitle_es: 'Fingerpicking sobre una progresión completa · Introducción al Travis picking · Canción de interpretación',
-    objective: 'I CAN fingerpick through a full chord progression in time and perform one fingerpicked song from start to finish.',
     skillFocus: 'Fingerpicking through a chord progression · An intro to Travis picking · Performing a fingerpicked song',
     skillFocus_es: 'Tocar con fingerpicking a través de una progresión de acordes · Una introducción al Travis picking · Interpretar una canción con fingerpicking',
     comingSoon: false,
@@ -764,6 +776,20 @@ SETS.push(
         title: 'Practice station — full progressions & performance',
         title_es: 'Estación de práctica — progresiones completas e interpretación',
         sections: [
+          {
+            title: 'Warm-up — tuning check (Module 1)',
+            title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
+            steps: [
+              {
+                label: 'Warm-up: tuning check', label_es: 'Calentamiento: afinación',
+                text: 'Start every practice session the same way:<ol><li>Tune all 6 strings to green (E A D G B e).</li><li>Then play each string open.</li></ol>You\'ve got it when: in tune before today\'s work.',
+                text_es: 'Empieza cada sesión de práctica de la misma manera:<ol><li>Afina las 6 cuerdas hasta que estén en verde (E A D G B e).</li><li>Luego toca cada cuerda al aire.</li></ol>Lo tienes cuando: estás afinado antes del trabajo de hoy.',
+                hint: 'You\'re about to fingerpick full progressions and a whole song — an out-of-tune string will stick out through all of it, so check first.',
+                hint_es: 'Estás a punto de tocar con fingerpicking progresiones completas y una canción entera — una cuerda desafinada se va a notar durante todo el recorrido, así que revisa primero.',
+                playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
+              }
+            ]
+          },
           {
             title: 'Fret each chord clean before you fingerpick it',
             title_es: 'Trastea cada acorde limpio antes de tocarlo con fingerpicking',
@@ -1009,9 +1035,9 @@ MODULE_REVIEWS[8] = {
     { id: 'mr8-s2', text: 'I can assign p to the bass strings and i-m-a to G-B-e, and put any finger on its string without looking', text_es: 'Puedo asignar p a las cuerdas graves e i-m-a a G-B-e, y poner cualquier dedo en su cuerda sin mirar', set: 'm8w1' },
     { id: 'mr8-s3', text: 'I can pluck p-i-m-a in order on open strings at 60 BPM with even volume on every finger, including the ring (a)', text_es: 'Puedo pulsar p-i-m-a en orden en cuerdas al aire a 60 BPM con volumen parejo en cada dedo, incluyendo el anular (a)', set: 'm8w1' },
     { id: 'mr8-s4', text: 'I can play the 6-note p-i-m-a-m-i arpeggio from memory while holding a chord, every note ringing clean', text_es: 'Puedo tocar el arpegio de 6 notas p-i-m-a-m-i de memoria mientras sostengo un acorde, con cada nota sonando limpia', set: 'm8w2' },
-    { id: 'mr8-s7', text: 'I can fingerpick a full 4-chord progression without the pattern breaking at any chord change', text_es: 'Puedo tocar con fingerpicking una progresión completa de 4 acordes sin que el patrón se rompa en ningún cambio de acorde', set: 'm8w3' },
-    { id: 'mr8-s8', text: 'I can demonstrate Travis picking — thumb alternating between two bass strings — steadily for at least 4 bars', text_es: 'Puedo demostrar el Travis picking — el pulgar alternando entre dos cuerdas graves — de forma constante durante al menos 4 compases', set: 'm8w3' },
-    { id: 'mr8-s9', text: 'I can perform a full fingerpicked song start to finish, recovering from any mistake without stopping', text_es: 'Puedo interpretar una canción completa con fingerpicking de principio a fin, recuperándome de cualquier error sin detenerme', set: 'm8w3' }
+    { id: 'mr8-s5', text: 'I can fingerpick a full 4-chord progression without the pattern breaking at any chord change', text_es: 'Puedo tocar con fingerpicking una progresión completa de 4 acordes sin que el patrón se rompa en ningún cambio de acorde', set: 'm8w3' },
+    { id: 'mr8-s6', text: 'I can demonstrate Travis picking — thumb alternating between two bass strings — steadily for at least 4 bars', text_es: 'Puedo demostrar el Travis picking — el pulgar alternando entre dos cuerdas graves — de forma constante durante al menos 4 compases', set: 'm8w3' },
+    { id: 'mr8-s7', text: 'I can perform a full fingerpicked song start to finish, recovering from any mistake without stopping', text_es: 'Puedo interpretar una canción completa con fingerpicking de principio a fin, recuperándome de cualquier error sin detenerme', set: 'm8w3' }
   ],
   assessItems: [
     'Fingerpick a 4-chord progression with the 6-note arpeggio, keeping the pattern unbroken through every chord change',

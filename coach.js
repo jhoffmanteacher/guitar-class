@@ -213,7 +213,7 @@ function coachChordSlots(chords){
           midi: midis.length ? Math.min.apply(null, midis) : null,
           classes: midis.map(x => ((x % 12) + 12) % 12),
           label: b === 0 ? ch.n : '·',
-          isChange: b === 0 && slots.length > 0,
+          isChange: b === 0 && slots.length > 0 && slots[slots.length - 1].chordName !== ch.n,
           chordName: ch.n,
           state: 'pending', hit: null
         });
@@ -1134,9 +1134,12 @@ function coachScoreCompletion(){
     level = 3; sentence = t('coach.crit.completion.great');
   } else if (coverage >= 0.65 && tailMiss <= 2){
     level = 2;
-    const gapAt = hitIdx.find((v, k) => k > 0 && v - hitIdx[k - 1] - 1 >= 2);
-    sentence = gapAt != null
-      ? t('coach.crit.completion.gapAt', { beat: gapAt + 1 })
+    // Report the first MISSED beat, not the hit that resumes after it —
+    // hitIdx[k] is the resuming hit, so the gap actually starts right
+    // after the previous hit, hitIdx[k - 1].
+    const gapK = hitIdx.findIndex((v, k) => k > 0 && v - hitIdx[k - 1] - 1 >= 2);
+    sentence = gapK > 0
+      ? t('coach.crit.completion.gapAt', { beat: hitIdx[gapK - 1] + 2 })
       : t('coach.crit.completion.mostly');
   } else {
     level = 1;
@@ -5538,7 +5541,10 @@ function nrRenderPlay(){
 function nrLoop(){
   const s = nr;
   if (!s || (s.phase !== 'countin' && s.phase !== 'play')) return;
-  if (!nrBody() || !document.getElementById('nr-track')){ nrStop(); return; }
+  // Analyser gone (another feature took the mic) or panel closed under us —
+  // same guard every other mic loop uses, so a lost mic stops the round
+  // instead of silently reading as misses and demoting the adaptive stage.
+  if (!coachAnalyser || !nrBody() || !document.getElementById('nr-track')){ nrStop(); return; }
   const now = performance.now();
 
   /* count-in digits are drawn by coachCountIn's timeouts; clear on go */

@@ -28,7 +28,6 @@ SETS.push(
     title: 'Set 1',
     subtitle: 'Musical alphabet · Note names on E & A · Fretboard reading',
     subtitle_es: 'Alfabeto musical · Nombres de notas en Mi y La · Lectura del diapasón',
-    objective: 'I CAN name all notes on the E and A strings (frets 0–12) and identify them on a fretboard diagram.',
     skillFocus: 'Natural notes on the E and A strings · Reading notes on a fretboard chart',
     skillFocus_es: 'Notas naturales en las cuerdas Mi y La · Lectura de notas en un diagrama del diapasón',
     comingSoon: false,
@@ -105,7 +104,7 @@ SETS.push(
                 text_es: 'Adelanto para tocar junto:<ol><li>Mantén abierta tu tabla de nombres de notas.</li><li>Toca despacio hacia arriba en la cuerda Mi grave junto con el audio, trastes 0–12 — E · F · G · A · B · C · D · E — diciendo cada nombre en voz alta.</li></ol>Apóyate en la tabla aquí; lo harás de memoria en la estación de práctica.<span class="step-figure"><img src="img/m2-alphabet-loop.svg" alt="Diagrama del alfabeto musical de A a G en un círculo, con una flecha que muestra que después de G se empieza de nuevo en A."></span>',
                 hint: 'Slow is fine. Right now the goal is connecting each name to its spot — use the chart freely.',
                 hint_es: 'Ir despacio está bien. Ahora mismo la meta es conectar cada nombre con su lugar — usa la tabla libremente.',
-                skills: [2],
+                skills: [2, 5],
                 playSeq: { label: 'Play all', label_es: 'Tocar todo', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] },
                 response: { type: 'mc', prompt: 'On the low E string, what note is at fret 10?',
                   prompt_es: 'En la cuerda Mi grave, ¿qué nota está en el traste 10?',
@@ -131,7 +130,7 @@ SETS.push(
                 text_es: 'La misma idea en la cuerda La, todavía con tu tabla: A · B · C · D · E · F · G · A (trastes 0–12), hacia arriba y de regreso, nombres en voz alta.',
                 hint: 'Notice fret 5 of the A string is the same note as the open D string — that connection helps later.',
                 hint_es: 'Fíjate que el traste 5 de la cuerda La es la misma nota que la cuerda Re al aire — esa conexión ayuda más adelante.',
-                skills: [3],
+                skills: [3, 5],
                 playSeq: { label: 'Play all', label_es: 'Tocar todo', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] },
                 response: { type: 'short', placeholder: 'What did you notice about any of the notes? Did any two notes feel or sound similar?',
                   placeholder_es: '¿Qué notaste sobre alguna de las notas? ¿Alguna se sintió o sonó parecida a otra?' }
@@ -223,8 +222,8 @@ SETS.push(
                 hint_es: 'Mantén el metrónomo a 60 BPM. Si te trabas en una nota, esa es la que debes practicar.',
                 stuck: 'Drop to 50 BPM and play it cleanly there first, or cover frets 0–5 (A–D) before adding the rest.',
                 stuck_es: 'Baja a 50 BPM y tócalo limpio ahí primero, o cubre los trastes 0–5 (A–D) antes de agregar el resto.',
-                levelUp: 'Lap it at 80 BPM, or draw shuffled fret slips and name each on the spot. Got someone around? Have them call out random frets instead.',
-                levelUp_es: 'Haz la vuelta a 80 BPM, o saca papelitos revueltos de trastes y nombra cada uno al instante. ¿Tienes a alguien cerca? Pídele que diga trastes al azar en su lugar.',
+                levelUp: 'Lap it at 80 BPM. Then try the Shuffle self-quiz deck below for random frets instead of a memorized order.',
+                levelUp_es: 'Haz la vuelta a 80 BPM. Luego prueba el mazo de autoevaluación con cartas de abajo para trastes al azar en lugar de un orden memorizado.',
                 skills: [3],
                 playSeq: { label: 'Play all', label_es: 'Tocar todo', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] },
                 response: { type: 'short', prompt: 'Personal record: play it cleanly at 60, then raise the metronome +10 at a time. Your fastest CLEAN A-string lap today (BPM)?', prompt_es: 'Récord personal: tócalo limpio a 60, y luego sube el metrónomo de 10 en 10. ¿Cuál es tu vuelta LIMPIA más rápida en la cuerda La hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next session', placeholder_es: 'ej. 80 — intenta superarlo la próxima sesión' }
@@ -244,27 +243,27 @@ SETS.push(
               },
               {
                 label: 'Shuffle self-quiz', label_es: 'Autoevaluación con cartas',
-                text: 'Shuffle self-quiz — the deck below deals you a random fret. Say the A-string note out loud, then press it, before the ring runs out: three seconds a card, ten rounds. Miss one and it comes back later in the ten. Nine in time and you can check the skill off right there.',
-                text_es: 'Autoevaluación con cartas — el mazo de abajo te reparte un traste al azar. Di en voz alta la nota de la cuerda La y luego presiónala, antes de que el círculo se acabe: tres segundos por carta, diez rondas. Si fallas una, vuelve a salir más adelante. Nueve a tiempo y ya puedes marcar la destreza ahí mismo.',
+                text: 'Shuffle self-quiz — the deck below deals you a random fret. Say the A-string note out loud, then press it, before the ring runs out: three seconds a card, ten rounds. Miss one and it comes back later in the ten. Get 9 of 10 and you can check the skill off right there.',
+                text_es: 'Autoevaluación con cartas — el mazo de abajo te reparte un traste al azar. Di en voz alta la nota de la cuerda La y luego presiónala, antes de que el círculo se acabe: tres segundos por carta, diez rondas. Si fallas una, vuelve a salir más adelante. Logra 9 de 10 y ya puedes marcar la destreza ahí mismo.',
                 drill: { type: 'shuffle', string: 'A', maxFret: 12, rounds: 10, seconds: 3, pile: 'naturals', skill: 'm2w1-s3' },
                 hint: 'No chart. If you stall on a note, loop just that part of the string until it\'s automatic.',
                 hint_es: 'Sin tabla. Si te trabas en una nota, repite solo esa parte de la cuerda hasta que sea automática.',
-                levelUp: 'Switch to the sharps pile — all 13 frets, sharps included. Got someone around? Have them call out random frets while you answer on the guitar.',
-                levelUp_es: 'Cambia al montón con sostenidos — los 13 trastes, sostenidos incluidos. ¿Tienes a alguien cerca? Pídele que diga trastes al azar mientras tú respondes en la guitarra.',
-                skills: [3]
+                levelUp: 'Switch to the sharps pile — all 13 frets, sharps included.',
+                levelUp_es: 'Cambia al montón con sostenidos — los 13 trastes, sostenidos incluidos.',
+                skills: [3, 4]
               },
               {
                 label: 'Challenge 3 — Shuffle Run', label_es: 'Reto 3 — Recorrido con cartas',
-                text: '<ol><li>Play the same deck, now on the low E string — and this time name it AND play it before the ring runs out.</li><li>Keep the guitar in hand for this one: the app checks the name, your ear checks the note.</li></ol>You\'ve got it when: 10 in a row with no counting up from E.',
-                text_es: '<ol><li>Toca el mismo mazo, ahora en la cuerda Mi grave — y esta vez nómbrala Y tócala antes de que se acabe el círculo.</li><li>Mantén la guitarra en la mano: la app revisa el nombre, tu oído revisa la nota.</li></ol>Lo tienes cuando: 10 seguidas sin contar desde E.',
+                text: '<ol><li>Play the same deck, now on the low E string — and this time name it AND play it before the ring runs out.</li><li>Keep the guitar in hand for this one: the app checks the name, your ear checks the note.</li></ol>You\'ve got it when: 9 of 10, no counting up from E.',
+                text_es: '<ol><li>Toca el mismo mazo, ahora en la cuerda Mi grave — y esta vez nómbrala Y tócala antes de que se acabe el círculo.</li><li>Mantén la guitarra en la mano: la app revisa el nombre, tu oído revisa la nota.</li></ol>Lo tienes cuando: 9 de 10, sin contar desde E.',
                 drill: { type: 'shuffle', string: 'lowE', maxFret: 12, rounds: 10, seconds: 3, pile: 'naturals', skill: 'm2w1-s2' },
                 hint: 'The 3-second limit is the real test. You\'re jumping to random frets, not running a memorized lap — that\'s what "name any fret instantly" really means.',
                 hint_es: 'El límite de 3 segundos es la verdadera prueba. Estás saltando a trastes al azar, no haciendo una vuelta memorizada — eso es lo que de verdad significa "nombrar cualquier traste al instante".',
                 stuck: 'Stay on the naturals pile — it deals only the eight natural frets. Add the sharps pile once you hit 9 of 10.',
                 stuck_es: 'Quédate en el montón de solo naturales — reparte únicamente los ocho trastes naturales. Agrega el montón con sostenidos cuando logres 9 de 10.',
-                levelUp: 'Run the Shuffle on the A string too, or name a full lap going down the string (12 → 0) without counting.',
-                levelUp_es: 'Haz el ejercicio de papelitos en la cuerda La también, o nombra una vuelta completa bajando por la cuerda (12 → 0) sin contar.',
-                skills: [2]
+                levelUp: 'Run the Shuffle deck on the A string too, or name a full lap going down the string (12 → 0) without counting.',
+                levelUp_es: 'Haz el mazo de cartas en la cuerda La también, o nombra una vuelta completa bajando por la cuerda (12 → 0) sin contar.',
+                skills: [2, 4]
               }
             ]
           },
@@ -280,8 +279,8 @@ SETS.push(
                 hint_es: 'Tocaste este riff en el Módulo 1 con el TAB delante de ti. Hoy la meta es saber DÓNDE estás — nómbralo, luego tócalo.',
                 stuck: 'Do it in two halves: name-and-play B B D B, then A G F#. Join them once each half is automatic.',
                 stuck_es: 'Hazlo en dos mitades: nombra y toca B B D B, luego A G F#. Únelas una vez que cada mitad sea automática.',
-                levelUp: 'Close your eyes for a lap, or play it one octave-position up starting at fret 7 of the A string.',
-                levelUp_es: 'Cierra los ojos para una vuelta, o tócalo una octava más arriba empezando en el traste 7 de la cuerda La.',
+                levelUp: 'Close your eyes for a lap, or play it a fourth higher, starting at fret 7 of the A string.',
+                levelUp_es: 'Cierra los ojos para una vuelta, o tócalo una cuarta más arriba, empezando en el traste 7 de la cuerda La.',
                 skills: [2, 3],
                 tab: {
                   caption: '"Seven Nation Army" — riff · Low E string · say each note name',
@@ -330,12 +329,12 @@ SETS.push(
           },
           {
             title: '⚡ Ear Spark — optional ear bonus',
-            title_es: '⚡ Chispa de oído — bono opcional',
+            title_es: '⚡ Chispa auditiva — bono opcional de oído',
             steps: [
               {
                 label: 'Ear Spark: name the open strings', label_es: 'Chispa auditiva: nombra las cuerdas',
                 text: '⚡ Ear Spark (optional, 2 min):<ol><li>Press play below — the deck draws five open strings at random and plucks them for you, and you never see which.</li><li>Name each one by ear before you check: thickest to thinnest is E-A-D-G-B-e, and your ear learns them faster than you\'d think.</li></ol>',
-                text_es: '⚡ Chispa de oído (opcional, 2 min):<ol><li>Presiona reproducir abajo — la baraja saca cinco cuerdas al aire al azar y las pulsa por ti, y nunca ves cuáles son.</li><li>Nombra cada una de oído antes de revisar: de más gruesa a más delgada es E-A-D-G-B-e, y tu oído las aprende más rápido de lo que crees.</li></ol>',
+                text_es: '⚡ Chispa auditiva (opcional, 2 min):<ol><li>Presiona reproducir abajo — la baraja saca cinco cuerdas al aire al azar y las pulsa por ti, y nunca ves cuáles son.</li><li>Nombra cada una de oído antes de revisar: de más gruesa a más delgada es E-A-D-G-B-e, y tu oído las aprende más rápido de lo que crees.</li></ol>',
                 drill: { type: 'ear', pool: 'openStrings', draw: 5 },
               }
             ]
@@ -347,7 +346,7 @@ SETS.push(
     assessment: {
       goal: 'Names all notes on E string (frets 0–12) · Names all notes on A string (frets 0–12) · Points to a named note on the fretboard · Reads a basic fretboard note chart',
       goal_es: 'Nombra todas las notas en la cuerda Mi (trastes 0–12) · Nombra todas las notas en la cuerda La (trastes 0–12) · Señala una nota nombrada en el diapasón · Lee una tabla básica de notas del diapasón',
-      performance: 'Self-quiz with shuffled note-name slips: draw a note, find it on the E or A string within 3 seconds. Then reverse it: draw a fret, name the note. 10 in a row each way.',
+      performance: 'Self-quiz with shuffled note-name slips: draw a note, find it on the E or A string within 3 seconds. Then reverse it: draw a fret, name the note. 9 of 10 each way.',
       selfCheck: 'Can you name every natural note on the E string without looking? Can you find any note on E or A within 3 seconds when a shuffled slip (or a friend) names it?',
       selfCheck_es: '¿Puedes nombrar cada nota natural en la cuerda Mi sin mirar? ¿Puedes encontrar cualquier nota en Mi o La en 3 segundos cuando un papelito revuelto (o un amigo) la nombra?',
       standards: ['Re.7a', 'Pr.4a']
@@ -365,19 +364,19 @@ SETS.push(
         text_es: 'Nombrar todas las notas naturales en la cuerda Mi (trastes 0–12)',
         gotItWhen: 'you can draw any fret 0–12 at random — shuffled slip, or someone calling it out — and say the low-E note name instantly, without counting up from E.',
         gotItWhen_es: 'puedes sacar cualquier traste del 0 al 12 al azar — un papelito revuelto, o alguien que lo diga — y decir el nombre de la nota en la Mi grave al instante, sin contar desde E.',
-        practice: { type: 'fretboard', string: 'lowE', label: 'Find the note — low E string', bpm: 60,
+        practice: { type: 'fretboard', string: 'lowE', label: 'Find the note — low E string', label_es: 'Encuentra la nota — cuerda Mi grave', bpm: 60,
           notes: [40, 41, 43, 45, 47, 48, 50, 52] } },
       { id: 'm2w1-s3', text: 'Name all natural notes on the A string (frets 0–12)',
         text_es: 'Nombrar todas las notas naturales en la cuerda La (trastes 0–12)',
         gotItWhen: 'you can draw any fret 0–12 at random — shuffled slip, or someone calling it out — and say the A-string note name instantly, without counting up from A.',
         gotItWhen_es: 'puedes sacar cualquier traste del 0 al 12 al azar — un papelito revuelto, o alguien que lo diga — y decir el nombre de la nota en la cuerda La al instante, sin contar desde A.',
-        practice: { type: 'fretboard', string: 'A', label: 'Find the note — A string', bpm: 60,
+        practice: { type: 'fretboard', string: 'A', label: 'Find the note — A string', label_es: 'Encuentra la nota — cuerda La', bpm: 60,
           notes: [45, 47, 48, 50, 52, 53, 55, 57] } },
       { id: 'm2w1-s4', text: 'Point to any named note on E or A string when called out',
         text_es: 'Señalar cualquier nota nombrada en la cuerda Mi o La cuando se diga en voz alta',
         gotItWhen: 'you draw a note name from your shuffled slips (or someone calls one out) and you can put your finger on it within 3 seconds without looking at a chart.',
         gotItWhen_es: 'sacas un nombre de nota de tus papelitos revueltos (o alguien lo dice) y puedes poner tu dedo ahí en 3 segundos sin mirar una tabla.',
-        practice: { type: 'fretboard', string: 'both', label: 'Find the note — E and A strings' } },
+        practice: { type: 'fretboard', string: 'both', label: 'Find the note — E and A strings', label_es: 'Encuentra la nota — cuerdas Mi y La' } },
       { id: 'm2w1-s5', text: 'Read a basic fretboard note-name chart',
         text_es: 'Leer una tabla básica de nombres de notas del diapasón',
         gotItWhen: 'you can use the chart to look up a note you don\'t know yet — you understand what the rows and columns mean.',
@@ -403,7 +402,6 @@ SETS.push(
     title: 'Set 2',
     subtitle: 'Finger placement · Clean tone · TAB reading · 4-bar melodies',
     subtitle_es: 'Colocación de los dedos · Tono limpio · Lectura de TAB · Melodías de 4 compases',
-    objective: 'I CAN press notes cleanly with correct finger placement, read basic TAB, and play a 4-bar melody in time.',
     skillFocus: 'Fretting notes cleanly · Reading basic TAB · Playing a melody in time',
     skillFocus_es: 'Trastear notas limpias · Leer TAB básico · Tocar una melodía a tiempo',
     comingSoon: false,
@@ -702,6 +700,7 @@ SETS.push(
               phrases: [
                 {
                   label: '"Hap-py birth-day to you · Hap-py birth-day to you"',
+                  label_es: '"Hap-py birth-day to you · Hap-py birth-day to you"',
                   notes: [
                     { string: 'E', fret: 0, note: 'E',  midi: 40 },
                     { string: 'E', fret: 0, note: 'E',  midi: 40 },
@@ -719,6 +718,7 @@ SETS.push(
                 },
                 {
                   label: '"Hap-py birth-day dear ___ · Hap-py birth-day to you"',
+                  label_es: '"Hap-py birth-day dear ___ · Hap-py birth-day to you"',
                   notes: [
                     { string: 'E', fret: 0, note: 'E',  midi: 40 },
                     { string: 'E', fret: 0, note: 'E',  midi: 40 },
@@ -857,8 +857,8 @@ SETS.push(
               },
               {
                 label: 'Challenge — "the cure," root line', label_es: 'Reto — "the cure," línea de raíces',
-                text: '<ul><li>Play the roots of Olivia Rodrigo\'s "the cure" across both strings — A · C · D · F · G — two beats per note at 60 BPM.</li></ul>You\'ve got it when: two clean laps crossing between the A and E strings without looking down.',
-                text_es: '<ul><li>Toca las raíces de "the cure" de Olivia Rodrigo cruzando ambas cuerdas — A · C · D · F · G — dos pulsos por nota a 60 BPM.</li></ul>Lo tienes cuando: dos vueltas limpias cruzando entre las cuerdas La y Mi sin mirar hacia abajo.',
+                text: '<ul><li>Play the roots of Olivia Rodrigo\'s "the cure" across both strings — A · C · D · F · G — two beats per note at 60 BPM.</li></ul>You\'ve got it when: two clean laps crossing between the A and E strings without looking down. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text_es: '<ul><li>Toca las raíces de "the cure" de Olivia Rodrigo cruzando ambas cuerdas — A · C · D · F · G — dos pulsos por nota a 60 BPM.</li></ul>Lo tienes cuando: dos vueltas limpias cruzando entre las cuerdas La y Mi sin mirar hacia abajo. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'This is the simplest outline of the song — next module these exact roots become power chords. Learn where they live now and Module 3 is half done.',
                 hint_es: 'Este es el esquema más simple de la canción — en el próximo módulo estas mismas raíces se convierten en acordes de potencia. Aprende dónde viven ahora y el Módulo 3 estará medio hecho.',
                 stuck: 'Split it by string: A · C · D on the A string first, then F · G on the low E, then join them.',
@@ -897,8 +897,8 @@ SETS.push(
               },
               {
                 label: 'Challenge — "Let It Be," bass line', label_es: 'Reto — "Let It Be," línea de bajo',
-                text: '<ul><li>Play the roots of "Let It Be" (Beatles) on the low E & A strings — C · G · A · F, two beats each at 60 BPM.</li></ul>These four notes are the simple bass outline of the whole song, so learn where its roots live now. You\'ve got it when: two clean laps of C–G–A–F, every note ringing, each landing on the beat.',
-                text_es: '<ul><li>Toca las raíces de "Let It Be" (Beatles) en las cuerdas Mi y La — C · G · A · F, dos pulsos cada una a 60 BPM.</li></ul>Estas cuatro notas son el esquema simple de bajo de toda la canción, así que aprende dónde viven sus raíces desde ahora. Lo tienes cuando: dos vueltas limpias de C–G–A–F, cada nota sonando, cada una cayendo en el pulso.',
+                text: '<ul><li>Play the roots of "Let It Be" (Beatles) on the low E & A strings — C · G · A · F, two beats each at 60 BPM.</li></ul>These four notes are the simple bass outline of the whole song, so learn where its roots live now. You\'ve got it when: two clean laps of C–G–A–F, every note ringing, each landing on the beat. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text_es: '<ul><li>Toca las raíces de "Let It Be" (Beatles) en las cuerdas Mi y La — C · G · A · F, dos pulsos cada una a 60 BPM.</li></ul>Estas cuatro notas son el esquema simple de bajo de toda la canción, así que aprende dónde viven sus raíces desde ahora. Lo tienes cuando: dos vueltas limpias de C–G–A–F, cada nota sonando, cada una cayendo en el pulso. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'C is A-string fret 3 (ring finger), G is low-E fret 3 (ring finger), A is the open A string, F is low-E fret 1 (index). Watch the crossings between the two strings and keep your thumb behind the neck. Click any note name to hear how it should sound.',
                 hint_es: 'C es el traste 3 de la cuerda La (dedo anular), G es el traste 3 de la Mi grave (dedo anular), A es la cuerda La al aire, F es el traste 1 de la Mi grave (índice). Fíjate en los cruces entre las dos cuerdas y mantén el pulgar detrás del mástil. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar.',
                 stuck: 'Split it by string: play C then A (both on the A string), then G then F (both on the low E), then join all four in order.',
@@ -1051,6 +1051,9 @@ MODULE_SONGS[2] = [
       { name: '"the cure" — Olivia Rodrigo', meta: 'Play the bassline as single-note roots (A C D F G)', meta_es: 'Toca la línea de bajo como notas individuales (A C D F G)', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
+      { name: '"Let It Be" — The Beatles', meta: 'Play the bassline as single-note roots (C G A F)', meta_es: 'Toca la línea de bajo como notas individuales (C G A F)', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
+        originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
+        tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8' },
       { name: '"Happy Birthday"', meta: 'Play full melody on E & A strings from TAB', meta_es: 'Toca la melodía completa en las cuerdas Mi y La usando el TAB', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
       { name: '"Smoke on the Water" — Deep Purple', meta: 'E string TAB — iconic beginner riff', meta_es: 'TAB en la cuerda Mi — un riff icónico para principiantes', type: 'Choice', core: false, level: 1,

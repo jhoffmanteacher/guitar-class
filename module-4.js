@@ -18,7 +18,6 @@ SETS.push(
     title: 'Set 1',
     subtitle: 'Pentatonic Pattern 1 · Major & minor positioning · Improvising on E & A strings',
     subtitle_es: 'Patrón pentatónico 1 · Posicionamiento mayor y menor · Improvisar en las cuerdas Mi y La',
-    objective: 'I CAN play Pentatonic Pattern 1 ascending and descending, and position it for major and minor keys.',
     skillFocus: 'Playing Pentatonic Pattern 1 · Positioning it for major and minor keys · Improvising with the scale',
     skillFocus_es: 'Tocar el Patrón pentatónico 1 · Posicionarlo para tonalidades mayores y menores · Improvisar con la escala',
     comingSoon: false,
@@ -64,7 +63,7 @@ SETS.push(
             text_es: 'Mira: <a href="https://youtu.be/m_IiyJu60-c?t=105" target="_blank">Major Pentatonic Scale – Marty Music</a> (el enlace salta a 1:45, donde empieza la lección — mira hasta cerca de 4:00). Mientras miras:<ol><li>Encuentra la nota raíz en tu propio mástil.</li><li>Toca la forma una vez antes de responder abajo.</li></ol>',
             hint: 'Focus on the Pattern 1 shape — how does it sit on the neck? Notice where the root note is.',
             hint_es: 'Concéntrate en la forma del Patrón 1 — ¿cómo se ubica en el mástil? Fíjate en dónde está la nota raíz.',
-            skills: [1, 3],
+            skills: [1, 4],
             response: { type: 'short', placeholder: 'Describe the Pattern 1 shape. Where is the root note?',
               placeholder_es: 'Describe la forma del Patrón 1. ¿Dónde está la nota raíz?' }
           }
@@ -490,7 +489,6 @@ SETS.push(
     title: 'Set 2',
     subtitle: 'Tone parameters · Phrasing strategies · Notes on D & G strings',
     subtitle_es: 'Parámetros de tono · Estrategias de fraseo · Notas en las cuerdas Re y Sol',
-    objective: 'I CAN use dynamics, timbre, and note shape to play expressively, and phrase a solo using call-and-response.',
     skillFocus: 'Playing expressively with dynamics and tone · Phrasing a solo with call-and-response · Notes on the D and G strings',
     skillFocus_es: 'Tocar con expresividad usando dinámica y tono · Frasear un solo con llamada y respuesta · Notas en las cuerdas Re y Sol',
     comingSoon: false,
@@ -520,7 +518,7 @@ SETS.push(
             text_es: 'Mira: <a href="https://youtu.be/7hDdZAjKBjY" target="_blank">Hammer-Ons & Pull-Offs Explained – JustinGuitar</a> (0:00–3:00). Mientras miras, prueba un hammer-on en tu propia guitarra:<ol><li>Pulsa la cuerda Re al aire.</li><li>Luego martilla tu dedo sobre el traste 2 sin pulsar de nuevo.</li></ol>',
             hint: 'These are your first "expressive" techniques. A hammer-on connects two notes with one pick stroke — it changes the shape (envelope) of the notes.',
             hint_es: 'Estas son tus primeras técnicas "expresivas." Un hammer-on conecta dos notas con un solo golpe de púa — cambia la forma (envolvente) de las notas.',
-            skills: [3],
+            skills: [3, 4],
             response: { type: 'mc', prompt: 'A hammer-on connects two notes using how many pick strokes?',
               prompt_es: 'Un hammer-on conecta dos notas usando cuántos golpes de púa?',
               answer: 0,
@@ -551,7 +549,7 @@ SETS.push(
             text_es: 'Experimenta con el timbre:<ol><li>Toca una nota cerca del puente.</li><li>Y luego toca la misma nota cerca del mástil.</li></ol>¿Escuchas la diferencia? Brillante vs cálido. Intenta igualar el estado de ánimo de una canción que conozcas.',
             hint: 'There\'s no wrong answer here. Your picking hand position is a real-time tone control. Move it consciously.',
             hint_es: 'No hay respuesta incorrecta aquí. La posición de tu mano de pulsar es un control de tono en tiempo real. Muévela con intención.',
-            skills: [2, 4],
+            skills: [2],
             response: { type: 'mc', prompt: 'Which picking position sounds BRIGHTER?',
               prompt_es: '¿Qué posición de pulsado suena más BRILLANTE?',
               answer: 0,
@@ -731,8 +729,8 @@ SETS.push(
               },
               {
                 label: 'Challenge — Solo over "the cure"', label_es: 'Reto — Solo sobre "the cure"',
-                text: 'Olivia\'s song is soft — so your solo has to be too. Improvise eight bars in Am pentatonic Pattern 1 at a whisper:<ul><li>Light pick.</li><li>Slow phrases.</li><li>Lots of space.</li></ul>You\'ve got it when: eight bars where the quietest note is as clean as your loudest.',
-                text_es: 'La canción de Olivia es suave — así que tu solo también tiene que serlo. Improvisa ocho compases en el Patrón pentatónico 1 de Am en un susurro:<ul><li>Púa ligera.</li><li>Frases lentas.</li><li>Mucho espacio.</li></ul>Lo tienes cuando: ocho compases donde la nota más suave está tan limpia como la más fuerte.',
+                text: 'Olivia\'s song is soft — so your solo has to be too. Improvise eight bars in Am pentatonic Pattern 1 at a whisper:<ul><li>Light pick.</li><li>Slow phrases.</li><li>Lots of space.</li></ul>You\'ve got it when: eight bars where the quietest note is as clean as your loudest. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
+                text_es: 'La canción de Olivia es suave — así que tu solo también tiene que serlo. Improvisa ocho compases en el Patrón pentatónico 1 de Am en un susurro:<ul><li>Púa ligera.</li><li>Frases lentas.</li><li>Mucho espacio.</li></ul>Lo tienes cuando: ocho compases donde la nota más suave está tan limpia como la más fuerte. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 4 de 5</a>.',
                 hint: 'Playing quietly is a skill, not a limitation. Every buzz and mistake hides at loud volume and shows at soft — this is an honesty check.',
                 hint_es: 'Tocar suave es una destreza, no una limitación. Cada zumbido y error se esconde a volumen fuerte y se nota a volumen suave — esto es una prueba de honestidad.',
                 stuck: 'Rule of 3 at half speed: three notes, whisper volume, one phrase per two bars.',
@@ -855,7 +853,6 @@ SETS.push(
     title: 'Set 3',
     subtitle: 'Scale theory · Blues scale · Compose an original solo',
     subtitle_es: 'Teoría de escalas · Escala de blues · Compón un solo original',
-    objective: 'I CAN explain how the pentatonic scale is built, add the blues note, and compose an original 4-bar solo.',
     skillFocus: 'How pentatonic and blues scales are built · Transposing to new keys · Composing and performing your own solo',
     skillFocus_es: 'Cómo se construyen las escalas pentatónica y de blues · Transponer a nuevas tonalidades · Componer y tocar tu propio solo',
     comingSoon: false,
@@ -916,7 +913,7 @@ SETS.push(
             text_es: 'Revisión de teoría: la escala de blues agrega una nota a la pentatónica menor — la ♭5 (quinta bemol). En A menor, esa nota es Eb. Presiona "Escucha la escala de blues de A" abajo y escucha la nota extra que no estaba en la pentatónica menor simple — esa es la nota de blues.',
             hint: 'In Pattern 1 for A minor, the ♭5 sits between the 4 and 5 on the A string — fret 6, right between the 4 at fret 5 and the 5 at fret 7. It\'s a "passing tone" — it creates tension that wants to resolve.',
             hint_es: 'En el Patrón 1 de A menor, la ♭5 se ubica entre el 4 y el 5 en la cuerda La — traste 6, justo entre el 4 en el traste 5 y el 5 en el traste 7. Es una "nota de paso" — crea tensión que quiere resolverse.',
-            skills: [4, 5],
+            skills: [4],
             playSeq: { label: 'Hear the A blues scale (listen for the blue note)', label_es: 'Escucha la escala de blues de A (escucha la nota de blues)', bpm: 70, notes: [45, 48, 50, 51, 52, 55, 57] },
             response: { type: 'mc', prompt: 'What is the "blue note" added to the minor pentatonic to make a blues scale?',
               prompt_es: '¿Cuál es la "nota de blues" que se agrega a la pentatónica menor para hacer una escala de blues?',
@@ -985,7 +982,7 @@ SETS.push(
             stuck_es: 'Anota las cinco notas una vez (A C D E G). Ahora encierra A en tu mente y llámala menor; encierra C y llámala mayor. Mismas notas, nota base distinta.',
             levelUp: 'Find another relative pair from memory — G major and its relative minor (E minor) — and prove they share five notes.',
             levelUp_es: 'Encuentra otro par relativo de memoria — G mayor y su relativa menor (E menor) — y comprueba que comparten cinco notas.',
-            skills: [1, 2],
+            skills: [1, 2, 5],
             response: { type: 'short', placeholder: 'C major pent: C D E G A · A minor pent: A C D E G — what do you notice?',
               placeholder_es: 'C mayor pent: C D E G A · A menor pent: A C D E G — ¿qué notas?' }
           }
@@ -997,8 +994,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 2 — Compose It', label_es: 'Reto 2 — Compónlo',
-            text: '<ol><li>Write a 4-bar solo as scale-degree numbers (e.g. 1 3 5 3 | 6 5 3 1 | …).</li><li>Then play exactly what you wrote, varying the rhythms.</li></ol>You\'ve got it when: a deliberate 4-bar line you can play back the same way twice. Type your 4 bars into the box below so you have them next session.',
-            text_es: '<ol><li>Escribe un solo de 4 compases como números de grado de escala (p. ej. 1 3 5 3 | 6 5 3 1 | …).</li><li>Luego toca exactamente lo que escribiste, variando los ritmos.</li></ol>Lo tienes cuando: una línea deliberada de 4 compases que puedes volver a tocar de la misma manera dos veces. Escribe tus 4 compases en el cuadro de abajo para tenerlos la próxima sesión.',
+            text: '<ol><li>Write a 4-bar solo as scale-degree numbers (e.g. 1 ♭3 5 ♭3 | ♭7 5 ♭3 1 | …).</li><li>Then play exactly what you wrote, varying the rhythms.</li></ol>You\'ve got it when: a deliberate 4-bar line you can play back the same way twice. Type your 4 bars into the box below so you have them next session.',
+            text_es: '<ol><li>Escribe un solo de 4 compases como números de grado de escala (p. ej. 1 ♭3 5 ♭3 | ♭7 5 ♭3 1 | …).</li><li>Luego toca exactamente lo que escribiste, variando los ritmos.</li></ol>Lo tienes cuando: una línea deliberada de 4 compases que puedes volver a tocar de la misma manera dos veces. Escribe tus 4 compases en el cuadro de abajo para tenerlos la próxima sesión.',
             hint: 'Write first, then play! It\'s okay if it sounds simple. The goal is to make a deliberate musical decision, not to improvise randomly.',
             hint_es: '¡Escribe primero, y luego toca! Está bien si suena simple. El objetivo es tomar una decisión musical deliberada, no improvisar al azar.',
             stuck: 'Start with just bar 1 — pick 4 scale degrees you like, play them, and only move on once that bar sounds good. Repeat it for bar 3 if you\'re stuck for ideas.',
@@ -1006,7 +1003,7 @@ SETS.push(
             levelUp: 'Make bar 4 answer bar 2 (end on the root, 1), or add a hammer-on or the ♭5 blue note as a passing tone somewhere.',
             levelUp_es: 'Haz que el compás 4 responda al compás 2 (termina en la raíz, 1), o agrega un hammer-on o la nota de blues ♭5 como nota de paso en algún lugar.',
             skills: [6, 7],
-            response: { type: 'short', prompt: 'Write your 4-bar solo as scale-degree numbers (use | between bars):', prompt_es: 'Escribe tu solo de 4 compases como números de grado de escala (usa | entre compases):', placeholder: 'e.g. 1 3 5 3 | 6 5 3 1 | 5 4 ♭3 1 | 1 — — —', placeholder_es: 'p. ej. 1 3 5 3 | 6 5 3 1 | 5 4 ♭3 1 | 1 — — —' }
+            response: { type: 'short', prompt: 'Write your 4-bar solo as scale-degree numbers (use | between bars):', prompt_es: 'Escribe tu solo de 4 compases como números de grado de escala (usa | entre compases):', placeholder: 'e.g. 1 ♭3 5 ♭3 | ♭7 5 ♭3 1 | 5 4 ♭3 1 | 1 — — —', placeholder_es: 'p. ej. 1 ♭3 5 ♭3 | ♭7 5 ♭3 1 | 5 4 ♭3 1 | 1 — — —' }
           }
             ]
           },
@@ -1107,8 +1104,8 @@ SETS.push(
         gotItWhen_es: 'tu dedo se mece hacia adelante y atrás en una nota sostenida y la altura oscila intencionalmente — no por nervios que hacen temblar la mano.',
         practice: { type: 'mc', prompt: 'Your vibrato sounds like nervous shaking instead of music. What\'s the fix?',
           prompt_es: 'Tu vibrato suena como un temblor nervioso en vez de música. ¿Cuál es el arreglo?',
-          choices: ['Shake your whole hand faster', 'Slide your finger up and down along the string', 'Press harder so the note can\'t move at all', 'Slow down — rock the finger in an even, repeating rhythm'],
-          choices_es: ['Sacudir toda tu mano más rápido', 'Deslizar tu dedo hacia arriba y abajo a lo largo de la cuerda', 'Presionar más fuerte para que la nota no pueda moverse', 'Ir más despacio — mecer el dedo en un ritmo parejo y repetido'], answer: 3,
+          choices: ['Shake your whole hand faster', 'Slide your finger along the string to a new fret', 'Press harder so the note can\'t move at all', 'Slow down — rock the finger in an even, repeating rhythm'],
+          choices_es: ['Sacudir toda tu mano más rápido', 'Deslizar tu dedo a lo largo de la cuerda hasta un traste nuevo', 'Presionar más fuerte para que la nota no pueda moverse', 'Ir más despacio — mecer el dedo en un ritmo parejo y repetido'], answer: 3,
           explain: 'Good vibrato is a controlled, even wobble; speed comes later. Sliding changes frets, and pressing harder kills the movement entirely.',
           explain_es: 'El buen vibrato es una oscilación controlada y pareja; la velocidad viene después. Deslizar cambia de traste, y presionar más fuerte mata el movimiento por completo.' } },
       { id: 'm4w3-s4', text: 'Identify and play the ♭5 blues note within Pattern 1',

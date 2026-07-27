@@ -18,7 +18,6 @@ SETS.push(
     title: 'Set 1',
     subtitle: 'The down-up foundation · 8th-note pulse · Counting "1 + 2 + 3 + 4 +"',
     subtitle_es: 'La base abajo-arriba · Pulso de corcheas · Contar "1 + 2 + 3 + 4 +"',
-    objective: 'I CAN play a steady down-up 8th-note strum pattern over open chords without losing the beat — playing it cleanly at 60 BPM, then trying 70.',
     skillFocus: 'Keeping a steady down-up strum · Counting 8th notes · Strumming through chord changes',
     skillFocus_es: 'Mantener un rasgueo abajo-arriba constante · Contar corcheas · Rasguear a través de cambios de acorde',
     comingSoon: false,
@@ -79,7 +78,7 @@ SETS.push(
             text_es: 'Escucha "Brown Eyed Girl" de Van Morrison. Sigue el ritmo con la mano en tu pierna — hacia abajo en los números, hacia arriba en los "y". ¿Puedes sentir el pulso de corcheas?',
             hint: 'You don\'t need a guitar yet. Just train your body to feel the steady pulse before you add the strings.',
             hint_es: 'Todavía no necesitas una guitarra. Solo entrena tu cuerpo para sentir el pulso constante antes de agregar las cuerdas.',
-            skills: [3, 4],
+            skills: [2, 3],
             response: { type: 'mc', prompt: 'In a down-up 8th-note pattern, how many total strums (down + up) happen in one bar of 4 beats?',
               prompt_es: 'En un patrón de corcheas abajo-arriba, ¿cuántos rasgueos en total (abajo + arriba) ocurren en un compás de 4 tiempos?',
               answer: 2,
@@ -247,7 +246,7 @@ SETS.push(
             stuck_es: 'Repite solo Am → G hasta que el rasgueo sobreviva ese cambio, y luego vuelve a poner Em al frente.',
             levelUp: 'Speed up to 70 BPM, or count "1 + 2 + 3 + 4 +" aloud the whole time.',
             levelUp_es: 'Acelera a 70 BPM, o cuenta "1 + 2 + 3 + 4 +" en voz alta todo el tiempo.',
-            skills: [5, 6],
+            skills: [4, 5],
             chords: [
               { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 },
               { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
@@ -265,7 +264,7 @@ SETS.push(
             stuck_es: 'Aísla el par que se atrasa (a menudo G → Am o Am → F) y repite solo esos dos con el rasgueo antes de correr el círculo completo.',
             levelUp: 'Push to 70 BPM, or move on to the every-beat drill below.',
             levelUp_es: 'Sube a 70 BPM, o pasa al ejercicio de cada tiempo de abajo.',
-            skills: [5, 6],
+            skills: [4, 5],
             chords: [
               { name: 'C',  chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
               { name: 'G',  chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
@@ -299,7 +298,7 @@ SETS.push(
             stuck_es: 'Baja a 50 BPM y deja que algunos cambios suenen un poco con zumbido — aquí el objetivo es el tiempo del cambio, no un tono perfecto. Límpialo a medida que se asiente la velocidad.',
             levelUp: 'Hold it clean at 70 BPM, or try Am · G one per beat (every finger moves — much harder).',
             levelUp_es: 'Mantenlo limpio a 70 BPM, o prueba Am · G uno por tiempo (cada dedo se mueve — mucho más difícil).',
-            skills: [5, 6],
+            skills: [4, 5],
             chords: [
               { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 },
               { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
@@ -327,12 +326,12 @@ SETS.push(
               },
               {
                 label: 'Challenge — "Knockin\' on Heaven\'s Door"', label_es: 'Reto — "Knockin\' on Heaven\'s Door"',
-                text: '<ul><li>Play G · D · Am · C, four beats of down-up each at 60 BPM — the record is slow too, so this song never rushes you.</li></ul>You\'ve got it when: one full lap with even volume on downs and ups and every change landing on beat 1.',
-                text_es: '<ul><li>Toca G · D · Am · C, cuatro tiempos de abajo-arriba cada uno a 60 BPM — la grabación también es lenta, así que esta canción nunca te apura.</li></ul>Lo tienes cuando: una vuelta completa con volumen parejo en los golpes hacia abajo y hacia arriba, y cada cambio cayendo en el tiempo 1.',
+                text: '<ul><li>Play the real bar lengths — G · D · Am · Am · G · D · C · C — four beats of down-up per bar at 60 BPM. Am and C each hold for two full bars; the record is slow too, so this song never rushes you.</li></ul>You\'ve got it when: one full lap (all eight bars) with even volume on downs and ups and every change landing on beat 1.',
+                text_es: '<ul><li>Toca la duración real de los compases — G · D · Am · Am · G · D · C · C — cuatro tiempos de abajo-arriba por compás a 60 BPM. Am y C se sostienen cada uno durante dos compases completos; la grabación también es lenta, así que esta canción nunca te apura.</li></ul>Lo tienes cuando: una vuelta completa (los ocho compases) con volumen parejo en los golpes hacia abajo y hacia arriba, y cada cambio cayendo en el tiempo 1.',
                 hint: 'Dylan built this song to support a voice — soft, even 8ths are the whole job. If an upstroke catches the strings, let the pick graze just the top 3–4 strings.',
                 hint_es: 'Dylan construyó esta canción para apoyar una voz — corcheas suaves y parejas son todo el trabajo. Si un golpe hacia arriba engancha las cuerdas, deja que la púa roce solo las 3–4 cuerdas más agudas.',
-                stuck: 'Am → C is your rest — two fingers stay parked and only one moves. G → D, D → Am, and C → G all reset the whole hand, so loop those one at a time.',
-                stuck_es: 'Am → C es tu descanso — dos dedos se quedan quietos y solo uno se mueve. G → D, D → Am, y C → G reinician toda la mano, así que repite esos uno a la vez.',
+                stuck: 'Am and C each get two full bars, so those are your breathing room — no change to make until the bar after next. G → D, D → Am, Am → G, D → C, and C → G all reset the whole hand, so loop those one at a time.',
+                stuck_es: 'Am y C se sostienen cada uno durante dos compases completos, así que esos son tu momento de respiro — no hay que cambiar hasta el compás siguiente. G → D, D → Am, Am → G, D → C, y C → G reinician toda la mano, así que repite esos uno a la vez.',
                 levelUp: 'Sing or hum a line over your own strumming, or speed up to 70 BPM with the 8ths still even.',
                 levelUp_es: 'Canta o tararea una línea sobre tu propio rasgueo, o acelera a 70 BPM manteniendo las corcheas parejas.',
                 skills: [2, 4],
@@ -415,7 +414,6 @@ SETS.push(
     title: 'Set 2',
     subtitle: 'The "D-DU-UDU" pattern · Rests and accents · Adding groove (the steady rhythmic feel)',
     subtitle_es: 'El patrón "D-DU-UDU" · Silencios y acentos · Agregar groove (la sensación rítmica constante)',
-    objective: 'I CAN play the classic D-DU-UDU strum pattern at 60 BPM — pushing toward 70+ — and apply it to a real song with chord changes.',
     skillFocus: 'Playing the D-DU-UDU strum pattern · Adding accents and rests · Reading strum-pattern notation',
     skillFocus_es: 'Tocar el patrón de rasgueo D-DU-UDU · Agregar acentos y silencios · Leer la notación de patrones de rasgueo',
     comingSoon: false,
@@ -460,7 +458,7 @@ SETS.push(
             text_es: 'Mira: <a href="https://youtu.be/0JDGO0n6tjw" target="_blank">Step-by-Step Easy Strumming Patterns – Marty Music</a> (0:00–3:00). Tu tarea mientras miras: aplaude un poco más fuerte en los tiempos 2 y 4 junto con él, y siente cómo ese "contratiempo" le da groove al patrón.',
             hint: 'Marty stacks patterns from easiest to harder, accenting beats 2 and 4 as he goes. The accents give the strum a "backbeat" feel, like a drummer\'s snare.',
             hint_es: 'Marty apila patrones de más fácil a más difícil, acentuando los tiempos 2 y 4 a medida que avanza. Los acentos le dan al rasgueo una sensación de "contratiempo", como el tambor de un baterista.',
-            skills: [3, 4],
+            skills: [1, 3],
             response: { type: 'short', placeholder: 'Why might emphasizing beats 2 and 4 (instead of 1 and 3) make a strum pattern sound more "groovy"?',
               placeholder_es: '¿Por qué acentuar los tiempos 2 y 4 (en lugar de 1 y 3) podría hacer que un patrón de rasgueo suene con más "groove"?' }
           }
@@ -476,7 +474,7 @@ SETS.push(
             text_es: 'Escucha "I\'m Yours" de Jason Mraz. Marca el patrón D-DU-UDU en tu pierna junto con la canción. ¿Dónde se repite el patrón?',
             hint: 'The pattern is one bar long and repeats throughout the whole song. Once you have it, you have most of his song.',
             hint_es: 'El patrón dura un compás y se repite durante toda la canción. Una vez que lo dominas, tienes la mayor parte de la canción.',
-            skills: [4, 5],
+            skills: [1, 5],
             response: { type: 'mc', prompt: 'A one-bar strum pattern in 4/4 time covers how many BEATS?',
               prompt_es: 'Un patrón de rasgueo de un compás en tiempo 4/4 cubre cuántos TIEMPOS?',
               answer: 1,
@@ -561,7 +559,7 @@ SETS.push(
             stuck_es: 'Dilo en voz alta — "abajo, abajo-arriba, arriba-abajo-arriba" — y rasguea en el aire sin púa primero. Los puntos · de arriba son los tiempos que tu mano pasa pero no toca.',
             levelUp: 'Run it at 75 BPM, or accent the very first down of each bar so the pattern has a clear "top".',
             levelUp_es: 'Tócalo a 75 BPM, o acentúa el primer golpe hacia abajo de cada compás para que el patrón tenga un "inicio" claro.',
-            skills: [1, 2, 3]
+            skills: [1, 2, 6]
           }
             ]
           },
@@ -579,7 +577,7 @@ SETS.push(
             stuck_es: 'Deja los acentos por ahora y solo logra que la forma D-DU-UDU salga limpia durante 8 compases; agrega los golpes más fuertes en 2 y 4 una vez que el patrón salga en piloto automático.',
             levelUp: 'Move it to G or D, or push to 75 BPM with the backbeat still landing.',
             levelUp_es: 'Muévelo a G o D, o sube a 75 BPM manteniendo el contratiempo cayendo bien.',
-            skills: [2, 4, 5],
+            skills: [1, 3],
             playSeq: { label: 'Hear the beat — add your own accent on 2 and 4', label_es: 'Escucha el tiempo — agrega tu propio acento en el 2 y el 4', bpm: 60, notes: [40, 47, 40, 47] }
           }
             ]
@@ -598,7 +596,7 @@ SETS.push(
             stuck_es: 'Cambia el acorde en el ÚLTIMO golpe hacia arriba del compás, mientras tu mano ya está subiendo — ese es el momento libre para saltar de G a D. Repite solo 2 compases hasta que la unión entre ambos (la costura) salga fluida.',
             levelUp: 'Add a third chord (G → D → Em), or run it at 75 BPM with no break at the change.',
             levelUp_es: 'Agrega un tercer acorde (G → D → Em), o tócalo a 75 BPM sin interrupción en el cambio.',
-            skills: [4, 5, 6],
+            skills: [1, 4],
             response: { type: 'short', prompt: 'Personal record — D-DU-UDU through the G→D change: play it cleanly at 60 BPM, then go +10 at a time. Your fastest CLEAN loop today (BPM)?', prompt_es: 'Récord personal — D-DU-UDU a través del cambio G→D: tócalo limpio a 60 BPM, y luego sube de 10 en 10. ¿Tu vuelta LIMPIA más rápida hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next time', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima vez' }
           }
             ]
@@ -733,7 +731,6 @@ SETS.push(
     title: 'Set 3',
     subtitle: 'Multiple strum patterns · Folk, rock, reggae styles · Choosing the right groove',
     subtitle_es: 'Varios patrones de rasgueo · Estilos folk, rock, reggae · Elegir el groove correcto',
-    objective: 'I CAN play 2+ different strum patterns over the same chord progression and choose a pattern that fits a song\'s style.',
     skillFocus: 'Playing different strum styles · Matching a pattern to the song · Switching patterns mid-song',
     skillFocus_es: 'Tocar distintos estilos de rasgueo · Ajustar un patrón a la canción · Cambiar de patrón a mitad de la canción',
     comingSoon: false,
@@ -794,7 +791,7 @@ SETS.push(
             text_es: 'Compara dos grabaciones: "Three Little Birds" (Bob Marley — reggae) y "Bad Moon Rising" (CCR — rock). Velocidad parecida, sensación muy distinta. ¿Qué hace la diferencia?',
             hint: 'It\'s almost entirely the strum pattern. Reggae emphasizes the offbeats (the "+"); rock emphasizes the downbeats (the numbers).',
             hint_es: 'Es casi por completo el patrón de rasgueo. El reggae enfatiza los contratiempos (el "+"); el rock enfatiza los tiempos fuertes (los números).',
-            skills: [4, 5],
+            skills: [2, 3],
             response: { type: 'short', placeholder: 'In one sentence: what is the biggest difference between the reggae strum and the rock strum?',
               placeholder_es: 'En una oración: ¿cuál es la mayor diferencia entre el rasgueo de reggae y el de rock?' }
           }
@@ -1041,10 +1038,10 @@ MODULE_SONGS[6] = [
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Am–G–F–G · steady down-up over chord changes', meta_es: 'Am–G–F–G · abajo-arriba constante a través de cambios de acorde', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Knockin\' on Heaven\'s Door" — Dylan', meta: 'G–D–Am–C · slow tempo, perfect for first strum patterns', meta_es: 'G–D–Am–C · tempo lento, perfecto para los primeros patrones de rasgueo', type: 'Focus', core: true,
+      { name: '"Knockin\' on Heaven\'s Door" — Dylan', meta: 'G–D–Am–Am–G–D–C–C · slow tempo, perfect for first strum patterns', meta_es: 'G–D–Am–Am–G–D–C–C · tempo lento, perfecto para los primeros patrones de rasgueo', type: 'Focus', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=rm9coqlk8fY',
         tutorialUrl: 'https://www.youtube.com/watch?v=pWIL4N6QZ-Y' },
-      { name: '"Happy Birthday"', meta: 'Apply D-DU-UDU to C–G–Am–F arrangement', meta_es: 'Aplica D-DU-UDU al arreglo C–G–Am–F', type: 'Focus', core: true,
+      { name: '"Happy Birthday"', meta: 'Apply D-DU-UDU to C–F–C–G–C arrangement', meta_es: 'Aplica D-DU-UDU al arreglo C–F–C–G–C', type: 'Focus', core: true,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
       { name: '"I\'m Yours" — Jason Mraz', meta: 'G–D–Em–C · iconic D-DU-UDU strum', meta_es: 'G–D–Em–C · rasgueo icónico D-DU-UDU', type: 'Focus', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=EkHTsc9PU2A',
@@ -1055,7 +1052,7 @@ MODULE_SONGS[6] = [
       { name: '"Bad Moon Rising" — CCR', meta: 'D–A–G · driving rock-style strum', meta_es: 'D–A–G · rasgueo impulsor estilo rock', type: 'Focus', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=5BmEGm-mraE',
         tutorialUrl: 'https://www.youtube.com/watch?v=liBI2yT_fpw' },
-      { name: '"Let It Be" — The Beatles', meta: 'C–G–Am–F · slow, even pattern', meta_es: 'C–G–Am–F · patrón lento y parejo', type: 'Choice', core: false, level: 2, journeyUrl: 'tabs/let-it-be.html',
+      { name: '"Let It Be" — The Beatles', meta: 'C–G–Am–F · slow, even pattern', meta_es: 'C–G–Am–F · patrón lento y parejo', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
         tutorialUrl: 'https://www.youtube.com/watch?v=gGt0akED_UU' },
       { name: '"Oye Mi Amor" — Maná', meta: 'Syncopated Latin strum on the verse · Bm (partial barre)–G', meta_es: 'Rasgueo latino sincopado en la estrofa · Bm (cejilla parcial)–G', type: 'Choice', core: false, level: 2,

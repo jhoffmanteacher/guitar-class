@@ -70,6 +70,345 @@
 
 ## Open work
 
+- [~] **2026-07-26 deep site audit — remaining backlog.** Three parallel
+  agents (core app JS · modules 8–13 · modules 1–7) plus a live browser pass
+  found ~90 issues beyond what `tools/checks.mjs` can catch. All 9 Critical
+  and 7 Medium items are fixed and pushed (`bc757ae`) — section-index desync,
+  Coach mic race, Smoke on the Water strings, the major/minor rule, the
+  pinky/3rd-finger contradiction, the Sweet Child TAB octave error, the
+  Module 8/12 Travis-picking contradiction, the self-answering Module 11
+  drill, the backwards Spanish TAB explanation, the tuner high-e bug, the
+  save-retry loop, teacher-dashboard error mislabeling, the untranslated
+  `{bpm}` string, several Module 6 mismatches, `img/` missing from the cache
+  fingerprint, and SW audio caching. **A later 2026-07-26 session worked the
+  rest of this list** — content errors, skill-tag mismatches, i18n gaps,
+  paper-drill remnants, `gotItWhen` coverage, song-list inconsistencies, and
+  every item in the app.js/coach.js/tuner.js/teacher.js code group are now
+  fixed (unpushed as of this edit — run `node tools/checks.mjs` before
+  pushing). **Still genuinely open:** the four dedicated single-chord cards
+  noted as lower-priority below; the module-4 pull-off/slide gloss
+  inconsistency; the `module-9.js`/`module-11.js` list-vs-prose spots (module-8/
+  10/12/13's were fixed, these two modules weren't re-checked); the
+  degenerate one-`<li>` list sweep; and the `m5w4` Full Run card's missing
+  Journey chip. Grouped by file so a session can take one group at a time:
+
+  **Content — promises content the set doesn't teach (Jonathan flagged this
+  one as next priority):** ⚠️ **Important finding while working this section
+  (2026-07-26):** `objective` and the whole `assessment` object
+  (`goal`/`performance`/`selfCheck`/`standards`) were **dead fields** —
+  `buildAssess()`/`buildVideos()` in `app.js` are defined but never called
+  anywhere, confirmed by grep. So most of this category's "promise" was
+  never actually shown to a student — only the live fields (`subtitle`,
+  and the `skills[]` checklist itself) matter. **Resolved 2026-07-26:**
+  removed the dead `objective: 'I CAN…'` field entirely — all 36 occurrences
+  across module-1.js…module-13.js, plus the now-pointless `checks.mjs`
+  validation for it (`skillFocus`/`unit` already cover that ground live, per
+  the `buildSet()` comment in app.js). `assessment` (`goal`/`performance`/
+  `selfCheck`/`standards`) was left in place — still dead code-wise, but
+  Jonathan confirmed its content (which songs/chords are assessed) is
+  meaningful to him even unrendered, so don't delete it without asking.
+  - [x] `module-5.js` (m5w2) — Dm and G/B now have real teaching content:
+        two new challenge cards ("Fret Dm cleanly", "Play the G/B bass
+        turnaround") with diagrams, hint/stuck/levelUp prose, and two new
+        skills (`m5w2-s7`, `m5w2-s8`), inserted right before the "the cure"
+        song card so the shapes are taught before they're used. Confirmed
+        real (not dead-field only): Jonathan wants "the cure" performable as
+        one of the three Module 5 assessment song options, and Dm/G-B are
+        needed to actually play it. `config-main.js` skillCount 5: 24→26.
+  - [x] `module-7.js` — m7w2's `objective` trimmed to drop the B-major
+        overreach (dead field, but cheap to fix). m7w3's three conflicting
+        A-shape chord lists (subtitle "Bb·B·C" / skill+assessment "Bb·C·D" /
+        actual drill "C·D·E") unified on **C·D·E** — matches the live
+        `subtitle` and the actual "A-Shape Slide" challenge card content.
+        Fixed in `subtitle`(_es), skill `m7w3-s4` (text/gotItWhen/practice —
+        this one's a live checklist item, not a dead field), the dead
+        `assessment.goal`(_es), and `MODULE_REVIEWS[7]` `mr7-s5`. B major
+        itself is fine as-is — it's genuinely taught in m7w3 Challenge 1,
+        just via the A-shape, not the E-shape m7w2 had overpromised.
+  - [ ] Lower-priority, not yet done: m5w2's individual chords (C, F, G) and
+        m5w3's A major each lack their own single-chord "Fret X cleanly"
+        challenge card the way Set 1 (Am, Em) and Set 3 (D, Bm) have —
+        they're taught folded into multi-chord cards instead. Real
+        stylistic inconsistency (skills `m5w2-s1/s2/s3` and `m5w3-s2` are
+        live checklist items), but lower value than the Dm/G-B gap above
+        since the chords ARE taught, just not with dedicated cards. Revisit
+        if there's appetite for 4 more new cards in this pattern.
+
+  **Content — factual/consistency errors (module-1–7 agent):**
+  - [x] `module-5.js:41-57` vs `:258-261` — "X above a string" MC keyed two
+        contradictory ways ("don't play it" vs "mute it"). Both now say
+        "skip it" — no more "mute it" alternative.
+  - [x] `module-5.js:434` — sends students to find a shared pivot finger
+        between C and G that doesn't exist in this module's shapes (own
+        `:484`/`:589` admit it). `levelUp` now points at Am↔F instead.
+  - [x] `module-5.js:955` — "all six strings ringing clean" on a D/C chord
+        pair that only uses 4–5 strings. Reworded to "every string you
+        strum ringing clean."
+  - [x] `module-4.js:1010` — composition example mixes major- and
+        minor-pentatonic scale degrees; unplayable as written. Rewritten to
+        `1 ♭3 5 ♭3 | ♭7 5 ♭3 1` — consistent minor-pentatonic degrees.
+  - [x] `module-2.js:770-780` and `:263`/`:247`/`:258` — SNA riff described
+        three ways on one card; three different pass thresholds for one
+        drill ("9 in a row" vs "10 in a row" vs "9 of 10"). All instances
+        (drill text, assessment `performance`) now read "9 of 10."
+  - [x] `module-2.js:283` (EN) / ES twin — "one octave up" from low-E fret 7
+        is actually a 4th, not an octave. Now says "a fourth higher."
+  - [x] **DECISION MADE 2026-07-26:** `module-6.js` — "Knockin' on Heaven's
+        Door" was **rewritten to the real bar lengths**
+        `|G|D|Am|Am|G|D|C|C|` (Am and C each hold two bars), not just
+        re-labeled — `text`/`stuck`/`levelUp` and the `MODULE_SONGS[6]`
+        meta line all updated. Chose "teach it right" over "label the
+        simplification," the opposite of "the cure"'s power-chord
+        treatment (Jonathan's call for this song).
+  - [x] `module-1.js:60` — `explain` references a "wiping the strings"
+        choice that doesn't exist among the MC options (leftover text).
+        Sentence removed.
+  - [x] `module-1.js:650` — `w2-s3` choice "All of the pick" accidentally
+        matches the `MC_PINNED` "all/none/both/neither of" regex and never
+        shuffles position. Reworded to "The whole pick, gripped at the
+        edge" — no longer matches the pin regex.
+
+  **Content — mis-tagged/missing skill links (module-1–7 agent, not
+  individually verified, spot-check before batch-fixing):**
+  - [x] `skills:[n]` pointing at the wrong skill id: `module-4.js:67, 554,
+        919, 988`; `module-3.js:504, 687`; `module-5.js:804, 823, 945,
+        1104, 1198, 1219, 1240`; `module-6.js:82, 247, 265, 299, 460, 476,
+        561, 579, 598, 794`; `module-7.js:166, 464, 872`. Knock-on: 8
+        skills across M1–7 are tagged on no step at all, so their "📍 Show
+        me where" button silently disappears — `w1-s2, w1-s3, w2-s1, w2-s2,
+        w2-s3` (module-1), `m2w1-s4, m2w1-s5` (module-2), `m5w4-s4`
+        (module-5). All corrected/added — every referenced line now points
+        at a real skill id, and the 8 previously-orphaned skills are each
+        tagged on at least one step.
+
+  **Content — i18n drift and Spanish glossary (all three agents):**
+  - [x] `module-2.js:265` — EN levelUp says "run the Shuffle deck"; ES says
+        "haz el ejercicio de papelitos" (paper slips) — the pre-digitization
+        version. ES now matches EN.
+  - [x] `module-1.js` — 8 "You've got it when:" standards live inside
+        `hint:` instead of `text:`, where `wrapGotItWhen` can't reach them
+        (`:37-437`, spot-check each). Modules 2–7 have zero instances of
+        this — Module 1 only. All 8 moved into `text`/`text_es`.
+  - [x] `module-10.js:737/738` — ES `levelUp` says something different from
+        EN (tells the student to "ask someone to call out keys" — a
+        pre-digitization partner-drill leftover). ES rewritten to match EN
+        ("name the fret before the card finishes turning").
+  - [x] `module-12.js:256` — `text_es` keeps an English link label
+        ("Station B's Travis pattern lesson video") instead of using
+        `nav.stationBTitle`. Translated inline.
+  - [x] Solfège-vs-letter convention slips (`cuerda B` should be `cuerda
+        Si`, etc.): `module-5.js:571, 588, 703, 705`, `module-3.js:370`;
+        conversely `module-3.js:368/370` solfège-izes a chord name (should
+        stay a letter). Module-9's known ~30-instance version of this is
+        already logged separately — don't re-sweep it. All 5 corrected
+        (module-3's "Mi mayor" → "E mayor" for the chord name, plus its
+        "cuerda B" → "cuerda Si").
+  - [ ] Minor ES inconsistencies: "Ear Spark" translated two ways in
+        `module-2.js:333` vs. 19 other instances — **fixed**, both now say
+        "Chispa auditiva." `module-4.js:809` vs `:1111` gloss
+        "pull-off"/"slide" inconsistently — **still open**, not touched
+        this session. A few other small ones the module-1–7 report lists
+        under "Minor ES" weren't individually re-checked either.
+  - [x] `module-2.js:704, 721` — TAB `phrases[].label` is English-only and
+        the renderer (`app.js:694`) uses `escHtml` not `tf()` for it — needs
+        a renderer fix, not just a data fix. Module 2 is the only module
+        using `phrases:`. Renderer now does `escHtml(tf(p,'label'))`, and
+        both Happy Birthday phrase labels got `label_es` twins.
+
+  **Content — paper-drill remnants that should be digital decks (project
+  rule: no scissors/index cards/pen anywhere student-facing):**
+  - [x] `module-2.js:226` — draw shuffled fret slips, right above the
+        digital deck that already does this. `levelUp` now points at the
+        Shuffle self-quiz deck instead.
+  - [x] `module-3.js:187, 233, 369` — homemade flashcards / paper slips;
+        Module 3 has zero `drill:` widgets despite Challenges 3–5 being
+        textbook `deck`/`shuffle` cases. Now has 4: a new `deck:
+        'power-chord-shapes'`, two `shuffle` drills (low-E and A-string
+        roots), and `deck: 'e5-vs-emajor'` for the Ear Spark card.
+  - [x] `module-5.js:740, 1017` + `MODULE_REVIEWS[5].assessItems` — shuffle
+        homemade chord flashcards (a textbook `deck` case). New `deck:
+        'chords-group1'`/`'chords-m5'` cards added; performance/assessItems
+        text now says "run the chord deck."
+  - [x] `module-8.js:571-578` — the one Ear Spark on the site with no
+        `drill:{type:'ear'}` wiring; needs a new `EAR_POOLS` entry (neither
+        existing pool covers "A-string vs D-string bass under Am"). New
+        `amBassAD` pool added to `EAR_POOLS` in app.js and wired in.
+  - [x] `module-9.js`, `module-10.js`, `module-11.js` — several
+        assessment/performance fields still say "shuffle flashcards" /
+        "draw a slip" even though the matching digital deck already exists
+        a few lines away (`module-9.js:503,518,519,731,788`;
+        `module-10.js:519,818`; `module-11.js:681,771`). Also leftover
+        partner-dependency lines: `module-9.js:439,712,1062,1068`,
+        `module-10.js:750,774`, `module-11.js:777`. All reworded to
+        reference the existing deck/drill; a re-grep of all three modules
+        for "flashcard/papelito/Got someone/partner" now comes back clean.
+  - [x] `module-2.js:252` — the one card in M1–7 with a `drill:` that still
+        keeps the "Got someone around?" partner line the project rule says
+        to drop once a card has a deck. Line removed.
+
+  **Content — coverage gaps (module-8–13 agent):**
+  - [x] `gotItWhen` is blank on ~57 skills across Modules 10–12 (module-9 is
+        partially thin too) — coverage is ~75% in Modules 1–8 and craters to
+        4-10% in 10–12. Full id list is in the agent's report (already
+        summarized in this session's chat log — re-run the module-8–13
+        review agent if that transcript isn't handy, rather than
+        re-deriving by hand). Verified 2026-07-26: every skill in Modules
+        8–13 now has a `gotItWhen`/`gotItWhen_es` pair (0 missing, checked
+        programmatically).
+  - [x] `module-12.js` — `MODULE_REVIEWS[12].forward` never mentions
+        Module 13, so a student finishing Module 12 is told the course is
+        over. `forward`/`forward_es` now describe Module 13 before the
+        capstone-performance paragraph.
+  - [x] `practice.label` i18n holes the checker can't see (only validated
+        for `type==='playSeq'`, but `fretboard`/`chord` types render it
+        too): `module-9.js:514,517,784,787,790`, `module-11.js:902`. Same
+        gap exists sitewide (module-2 ×3, module-5 ×1, module-7 ×4) — worth
+        fixing `tools/checks.mjs`'s scope, not just the data. Both fixed:
+        `checks.mjs` now requires `label_es` for `fretboard`/`chord` too,
+        and all the flagged data locations (module-2 ×3, module-5 ×1,
+        module-7 ×4, module-9, module-11) got their `label_es`.
+  - [x] `module-9.js:970-990` — a "7th-position" cold-read line actually
+        spans frets 5–10 (six frets); either it's really 5th position with
+        a stretch, or drop the position-number claim. Reworded to "5th
+        position with a stretch up to fret 10" throughout (text, hint,
+        tab caption, playSeq label).
+  - [x] `module-8.js` — Sets 2 and 3 (`m8w2`, `m8w3`) are missing the
+        "Warm-up — tuning check" section every other set in Modules 1,
+        9–12 opens with. Both sections added.
+  - [x] `module-8.js` — `MODULE_REVIEWS[8].skills` ids skip s5/s6
+        (`mr8-s1,s2,s3,s4,s7,s8,s9`) — harmless (ids are just storage
+        keys) but suggests two review rows were deleted without
+        renumbering. Renumbered to `s1`–`s7` with no gap.
+
+  **Content — list-vs-prose rule (cards over ~200 chars with more than one
+  action, still written as a paragraph — project rule says these should be
+  `<ol>`/`<ul>`):**
+  - [ ] `module-11.js:856` (386 chars, no list) and `module-9.js:82` vs its
+        sibling `:92` (inconsistent — one's a list, one isn't) plus
+        `module-9.js:351` — **not touched this session**, still open (both
+        modules got other edits, but these specific prose spots weren't
+        re-checked). `module-13.js:188, 248, 298, 310, 324` (all multi-action
+        prose in a module where every other procedural step is a list) —
+        **fixed**, all 5 converted to `<ol>`/`<ul>`. `module-10.js:148, 422,
+        718` (warm-up tuning cards, prose here but `<ol>` in every other
+        module) — **fixed**, all 3 converted (module-8's two new warm-up
+        cards were also written as lists from the start). Lower-confidence/
+        optional per the agent: module-8.js:35,361; module-9.js:36,109;
+        module-10.js:93,629; module-11.js:36,51,312; module-12.js:428,637;
+        module-13.js:207 — mostly "Watch X, then Y" cards, which are prose
+        sitewide by convention; left alone as recommended.
+  - [ ] Degenerate one-`<li>` `<ul>` lists (renders as a lone bullet,
+        technically rule-compliant but maybe not intended): full list of
+        ~19 locations is in the module-8–13 agent's report, e.g.
+        `module-8.js:183`, `module-9.js:433,693,958`, `module-12.js:147,
+        166,202,224,482,501,519,537,748,766,822`. Not touched this session.
+
+  **Content — song-list inconsistencies:**
+  - [x] `MODULE_SONGS[2]` omits Let It Be though `m2w2.songThread` links its
+        Layer 2; `MODULE_SONGS[3]` omits "the cure" though m3w2 has a full
+        challenge + thread entry. Both added as Core rows.
+  - [x] `MODULE_SONGS[7]`'s Seven Nation Army is `type:'Core'` but has no
+        `journeyUrl` — the only Core row site-wide with no 🧵 button.
+        `journeyUrl: 'tabs/seven-nation-army.html'` added.
+  - [x] `MODULE_SONGS[6]` demotes Let It Be to `type:'Choice', core:false`
+        in the one module that builds a challenge on its verse. Promoted to
+        `type:'Core', core:true`.
+  - [ ] Five core-song challenge cards lack the inline Journey chip their
+        siblings have: `m2w2` "the cure"/"Let It Be", `m4w2` "the cure",
+        `m5w2` "the cure", `m5w4` Full Run. **4 of 5 fixed** — only `m5w4`
+        Full Run (which references whichever of three songs the student
+        picked, not one fixed song) still lacks a chip; left open since a
+        single static link doesn't obviously fit that card.
+  - [x] `module-6.js:1044`-ish gives "Happy Birthday" Let It Be's
+        progression (C–G–Am–F — Happy Birthday has no Am); `module-5.js`
+        gives SNA "D–A–Em" when the site's own Layer 5 page teaches
+        Em–G–D–C. Happy Birthday corrected to C–F–C–G–C; SNA corrected to
+        Em–G–D–C (EN and ES both, in the `meta` line).
+
+  **Code — app.js / coach.js / tuner.js / teacher.js (all fixed
+  2026-07-26; full original detail was in that session's chat transcript
+  from the core-app review agent):**
+  - [x] `tuner.js` `startTuner()` is fire-and-forget — closing the tuner
+        popup while `getUserMedia` is pending can orphan a live mic stream.
+        Fixed with a `tunerStartToken` counter — a stream that resolves
+        after `stopTuner()` bumped the token is recognized as stale and
+        stopped immediately.
+  - [x] `app.js` Shuffle Drill: resetting mid-round leaves a pending
+        `setTimeout` that fires against a rebuilt (differently-shaped)
+        state and throws; also its countdown `setInterval` is never
+        cleared on `activateSet` navigation, leaking one 12.5 Hz interval
+        per set left mid-drill. Both fixed: pending timeouts are tracked
+        and cleared (`st.pending`), and `activateSet` now calls `sdStop()`
+        on every shuffle drill on set-switch.
+  - [x] `coach.js` single-chord checks: `isChange` logic marks a slot as a
+        "change" even when it's the same chord repeating, making the
+        `'coach.crit.changes.onlyOne'` message unreachable and mis-grading
+        one-chord drills as "changes came in late." Fixed — `isChange` now
+        also checks the previous slot's chord name differs.
+  - [x] `coach.js` `nrLoop` (Note Runner) doesn't bail when the analyser
+        disappears — every other mic loop in the file does. Can silently
+        demote a student's adaptive stage on a lost mic instead of
+        triggering the `micSuspect` guard. `!coachAnalyser` added to the
+        bail-out guard, matching the other mic loops.
+  - [x] `teacher.js` — module-load failures inside `loadAllStudents`'s
+        per-module loop are silently swallowed (`catch(e){}`), which
+        quietly shrinks the skill universe and inflates every percentage
+        with no warning. (The loop actually lives in `showTeacherApp`, not
+        `loadAllStudents` — same bug, corrected location.) Failures are now
+        logged to the console and surfaced as a warning banner above the
+        summary cards (`showTeacherLoadWarning`).
+  - [x] `coach.js` `coachScoreCompletion` reports the wrong beat number for
+        a gap (off-by-one in the `hitIdx.find` callback). Fixed to report
+        the first missed beat, not the resuming hit.
+  - [x] `tuner.js` `tunerStableCount` double-duty bug: the same counter
+        tracks "same-note frames" and "silence countdown," causing a
+        ~0.45s lag re-detecting a re-plucked string after a silent gap
+        (Auto mode only). Split into `tunerSameNoteCount` and
+        `tunerSilenceCount`.
+  - [x] `tabs/journey.js` — a rating click during the initial Firestore
+        `get()` can be silently overwritten when `applyRatings` replaces
+        the DOM right after; the pending save then reads the overwritten
+        state. Fixed with a `locallyClickedLayers` guard — `applyRatings`
+        skips any layer the student already clicked this page load.
+  - [x] `app.js:2303,2307` — reflection textarea isn't HTML-escaped on
+        re-render (self-only scope, not cross-user exploitable, but XSS-shaped).
+        Both `escHtml()`-wrapped now.
+  - [x] `teacher.js:127` — `abbreviate(s.text)` goes into `innerHTML` raw
+        while every other call site escapes it. `escHtml()` added.
+  - [x] Dead code: `buildVideos()`/`buildAssess()` in app.js are never
+        called — meaning every set's `assessment`/`objective` field is
+        written but never rendered anywhere. Worth deciding delete-vs-wire-up;
+        several of the "assessment promises content the set doesn't teach"
+        items above might be moot if this is intentionally dead.
+        **DECISION MADE 2026-07-26:** both functions **deleted** from
+        app.js (not wired up) — `objective` was removed from module data
+        (see the top item), `assessment` was kept as data-only per
+        Jonathan's call. `buildStations()`'s no-stationId branch and
+        `openSt()` were also unreachable — both **deleted**.
+        `btn.classList.add('incomplete')` referenced a CSS class with no
+        stylesheet rule — **removed**.
+  - [x] i18n gaps outside `tools/checks.mjs`'s scope: `buildSearchIndex`
+        never routes through `tf()`, so Spanish-mode search misses
+        Spanish-only content; several hardcoded-English shell strings
+        (search panel, save indicator, popup labels, embed fallback) bypass
+        `t()` entirely — full list in the JS audit's chat transcript.
+        `i18n.js` also doesn't set `document.documentElement.lang` on
+        initial page load (only on toggle), and `applyI18n`'s
+        `JSON.parse(params)` isn't guarded against one malformed
+        `data-i18n-params` aborting the whole pass. All fixed:
+        `buildSearchIndex` now indexes via `tf()` (and invalidates the
+        cached index on language change); the search panel, save
+        indicator, popup labels, and embed fallback all moved into
+        `i18n.js` (`search.*`, `save.*`, `popup.*`, `panel.*` keys, EN+ES);
+        `documentElement.lang` is set on initial load; `JSON.parse` failures
+        in `applyI18n` are now caught per-element.
+  - [x] **DECISION MADE 2026-07-26:** `blend-words-game.html` (unrelated
+        phonics game living in this repo) isn't in `sw.js` ASSETS or
+        `tools/checks.mjs`'s SHELL_FILES, so it's never precached or
+        syntax-checked. **Left out of the deploy pipeline on purpose** —
+        Jonathan confirmed it isn't meant to ship through this site's
+        build; not wired into `sw.js` or `checks.mjs`.
+
 - [ ] **Check the list sweep for OVER-listing (Jonathan, eyes only —
       Modules 5 and 7 first).** The 2026-07-25 sweep converted ~157 cards;
       Module 5 changed most (26 cards, several in a row in Station C) and

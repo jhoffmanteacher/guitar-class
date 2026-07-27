@@ -249,6 +249,42 @@
     'btn.top':               { en: 'Top', es: 'Arriba' },
     'btn.reportProblem':     { en: 'Report a problem', es: 'Reportar un problema' },
 
+    // ── Save indicator (the small "Saving…/Saved ✓" strip under a set or
+    // module review — setSaveMsg() in app.js) ──
+    'save.saving':           { en: 'Saving…', es: 'Guardando…' },
+    'save.saved':            { en: 'Saved ✓', es: 'Guardado ✓' },
+    'save.failed':           { en: 'Save failed — check connection', es: 'No se pudo guardar — revisa tu conexión' },
+    'save.notSaving':        { en: 'Not saving — check connection', es: 'No se está guardando — revisa tu conexión' },
+
+    // ── Chord/string/note link hover popups (onChordLinkHover etc.) ──
+    'popup.chordDiagram':    { en: 'Guitar chord diagram', es: 'Diagrama de acorde de guitarra' },
+    'popup.openString':      { en: 'Open string', es: 'Cuerda al aire' },
+    'popup.singleNote':      { en: 'Single note', es: 'Nota individual' },
+    'popup.clickToOpen':     { en: 'Click to open', es: 'Toca para abrir' },
+
+    // ── Resource viewer (loadPanel) — video embed fallback ──
+    'panel.embedFallbackHtml':{ en: 'Not playing? Some videos only allow playback on YouTube — {link}',
+                                 es: '¿No se reproduce? Algunos videos solo permiten reproducción en YouTube — {link}' },
+    'panel.watchThere':      { en: 'watch it there', es: 'míralo ahí' },
+
+    // ── Site search ("Find it" panel — toggleSearch/runSearch in app.js) ──
+    'search.title':          { en: 'Find it', es: 'Buscar' },
+    'search.closeAria':      { en: 'Close search', es: 'Cerrar la búsqueda' },
+    'search.placeholder':    { en: 'Try "F chord", "folk strum", "pentatonic"…', es: 'Prueba "acorde F", "rasgueo folk", "pentatónica"…' },
+    'search.ariaLabel':      { en: 'Search the whole site', es: 'Buscar en todo el sitio' },
+    'search.gettingReady':   { en: 'Getting search ready…', es: 'Preparando la búsqueda…' },
+    'search.intro':          { en: 'Search every step, skill, and set across all {n} modules.',
+                                es: 'Busca en cada paso, destreza y unidad de los {n} módulos.' },
+    'search.typeMore':       { en: 'Type at least two letters…', es: 'Escribe al menos dos letras…' },
+    'search.noChordSongs':   { en: 'No songs use only {chords} yet — try adding another chord.',
+                                es: 'Todavía no hay canciones que usen solo {chords} — intenta agregar otro acorde.' },
+    'search.noMatches':      { en: 'No matches for “{q}” — try a shorter word.',
+                                es: 'No hay resultados para “{q}” — intenta con una palabra más corta.' },
+    'search.whereSong':      { en: 'Module {n} · Song', es: 'Módulo {n} · Canción' },
+    'search.whereSet':       { en: 'Module {n} · {label}', es: 'Módulo {n} · {label}' },
+    'search.whereStation':   { en: ' · Station {station}', es: ' · Estación {station}' },
+    'search.whereSkill':     { en: ' · Skill', es: ' · Destreza' },
+
     // ── Step folds & responses (module content phase 2 — chrome around
     // per-step data, not the step data itself, see CLAUDE.md's module-
     // content i18n section) ──
@@ -278,6 +314,8 @@
     'songs.original':        { en: 'Original', es: 'Original' },
     'songs.tutorial':        { en: 'Tutorial', es: 'Tutorial' },
     'songs.backingTrack':    { en: 'Backing track', es: 'Pista de acompañamiento' },
+    'songs.backingTrackHint':{ en: 'Backing track — it repeats on its own; press play and solo over it',
+                                es: 'Pista de acompañamiento — se repite sola; presiona play e improvisa (solo) encima' },
     'songs.songJourney':     { en: 'Song Journey', es: 'Recorrido de la canción' },
     'songs.yourPick':        { en: 'Your pick — bring your own song!', es: 'Tu elección — ¡trae tu propia canción!' },
     'songs.yourPickBody':    { en: "Got a song you want to learn? Search YouTube for a beginner tutorial and use this module's skills on it.",
@@ -423,6 +461,10 @@
     'deck.naturals':         { en: 'Natural note deck', es: 'Baraja de notas naturales' },
     'deck.keys-IIVV':        { en: 'Key deck — I–IV–V', es: 'Baraja de tonos — I–IV–V' },
     'deck.key-inventory':    { en: 'Key-detective deck', es: 'Baraja detective de tonos' },
+    'deck.power-chord-shapes':{ en: 'Power chord shape deck', es: 'Baraja de formas de acorde de potencia' },
+    'deck.e5-vs-emajor':     { en: 'Power vs. full chord deck', es: 'Baraja de acorde de potencia vs. completo' },
+    'deck.chords-group1':    { en: 'Group 1 chord deck', es: 'Baraja de acordes del grupo 1' },
+    'deck.chords-m5':        { en: 'Module 5 chord deck', es: 'Baraja de acordes del módulo 5' },
     'deck.headMeta':         { en: '{n} cards', es: '{n} cartas' },
     'deck.cardOf':           { en: 'Card {n} of {total}', es: 'Carta {n} de {total}' },
     'deck.introOne':         { en: 'The deck deals you one card at a time, shuffled. Do what it says, then move on — miss one and it comes back later in the run.',
@@ -447,6 +489,9 @@
     'deck.kBoxFret':         { en: 'box 1 starts at fret', es: 'la caja 1 empieza en el traste' },
     'deck.kNote':            { en: 'find this note', es: 'encuentra esta nota' },
     'deck.kChordSet':        { en: 'chord set', es: 'conjunto de acordes' },
+    'deck.kPlayChord':       { en: 'play this chord', es: 'toca este acorde' },
+    'deck.kChordName':       { en: 'play this chord', es: 'toca este acorde' },
+    'deck.hPlayChord':       { en: 'Play it, then move on.', es: 'Tócalo, y sigue.' },
     'deck.hPlayIt':          { en: 'Play that chord, then check yourself.', es: 'Toca ese acorde, y luego revísate.' },
     'deck.hSayIt':           { en: 'Name the relative minor out loud.', es: 'Nombra la menor relativa en voz alta.' },
     'deck.hFindBox':         { en: 'Play minor pentatonic box 1 in that key, then check the fret.',
@@ -459,6 +504,7 @@
     // ── Ear Spark drill (hidden sequence, played not written) ──
     'ear.openStrings':       { en: 'Ear Spark — open strings', es: 'Chispa auditiva — cuerdas al aire' },
     'ear.lowEFrets':         { en: 'Ear Spark — low E, frets 0–5', es: 'Chispa auditiva — Mi grave, trastes 0–5' },
+    'ear.amBassAD':          { en: 'Ear Spark — A-string vs. D-string bass (Am)', es: 'Chispa auditiva — bajo en La vs. Re (Am)' },
     'ear.headMeta':          { en: '{n} notes', es: '{n} notas' },
     'ear.intro':             { en: 'The deck draws {n} at random and plays them — you never see which. Name them back in order, then check.',
                                es: 'La baraja saca {n} al azar y las toca — nunca ves cuáles son. Nómbralas en orden y luego revisa.' },
@@ -473,8 +519,11 @@
     'ear.scoreSub':          { en: 'named by ear', es: 'nombradas de oído' },
     'ear.kString':           { en: 'string', es: 'cuerda' },
     'ear.kFret':             { en: 'fret', es: 'traste' },
+    'ear.kBassString':       { en: 'bass string', es: 'cuerda del bajo' },
     'ear.kStringHint':       { en: 'Thickest to thinnest is E–A–D–G–B–e.', es: 'De la más gruesa a la más delgada: E–A–D–G–B–e.' },
     'ear.kFretHint':         { en: 'Every note is on the low E string, frets 0–5.', es: 'Cada nota está en la cuerda Mi grave, trastes 0–5.' },
+    'ear.kBassStringHint':   { en: 'A string is Am\'s root and rings lower; D string is the passing bass, a step higher.',
+                               es: 'La cuerda La es la raíz de Am y suena más grave; la cuerda Re es el bajo de paso, un poco más agudo.' },
 
     // ── PR ladder practice panel (personal-record history) ──
     'pr.latest':             { en: 'Latest: {v}', es: 'Último: {v}' },
@@ -1597,16 +1646,26 @@
     el.classList.add('notranslate');
   }
 
+  // data-i18n-params carries a JSON-stringified object written by app.js at
+  // render time — a single malformed/truncated attribute (e.g. a value with
+  // an unescaped quote) used to throw and abort applyI18n() partway through
+  // the whole document, leaving everything after it untranslated. Parse
+  // failures are now caught per-element so only that one element is skipped.
+  function parseI18nParams(el){
+    const params = el.getAttribute('data-i18n-params');
+    if(!params) return null;
+    try { return JSON.parse(params); }
+    catch(e){ return null; }
+  }
+
   function applyI18n(root){
     root = root || document;
     root.querySelectorAll('[data-i18n]').forEach(el=>{
-      const params = el.getAttribute('data-i18n-params');
-      el.textContent = t(el.getAttribute('data-i18n'), params ? JSON.parse(params) : null);
+      el.textContent = t(el.getAttribute('data-i18n'), parseI18nParams(el));
       markTranslated(el);
     });
     root.querySelectorAll('[data-i18n-html]').forEach(el=>{
-      const params = el.getAttribute('data-i18n-params');
-      el.innerHTML = t(el.getAttribute('data-i18n-html'), params ? JSON.parse(params) : null);
+      el.innerHTML = t(el.getAttribute('data-i18n-html'), parseI18nParams(el));
       markTranslated(el);
     });
     root.querySelectorAll('[data-i18n-attr]').forEach(el=>{
@@ -1645,5 +1704,9 @@
   // Script is `defer`d, so the DOM is already parsed — apply immediately,
   // whether the persisted language is 'en' (no-op-ish) or 'es' (a returning
   // student who chose Spanish shouldn't see a flash of English first).
+  // documentElement.lang used to only get set inside the setLang() toggle
+  // handler, so a Spanish-preferring returning visitor kept lang="en" (or
+  // whatever the static HTML shipped with) until they touched the toggle.
+  document.documentElement.lang = lang;
   applyI18n(document);
 })();

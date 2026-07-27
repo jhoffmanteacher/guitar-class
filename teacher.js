@@ -52,7 +52,15 @@ async function showTeacherApp(user){
   }
   // The teacher grid spans every set, so load all module data first. Sequential
   // keeps SETS in module order so the week tabs render 1→8 left to right.
-  for(const m of MODULE_MANIFEST){ try{ await loadModuleData(m.num); }catch(e){} }
+  // A module that fails to load silently shrinks the skill universe and
+  // inflates every percentage below, so failures are logged and surfaced
+  // rather than swallowed.
+  const moduleLoadErrors=[];
+  for(const m of MODULE_MANIFEST){
+    try{ await loadModuleData(m.num); }
+    catch(e){ console.warn(`Teacher dashboard: failed to load skill data for Module ${m.num}`, e); moduleLoadErrors.push(m.num); }
+  }
+  showTeacherLoadWarning(moduleLoadErrors);
   renderTeacherSetTabs();
   const firstSet=SETS.find(w=>!w.locked&&w.skills&&w.skills.length>0);
   if(firstSet){ teacherSetId=firstSet.id; activateTeacherSetTab(firstSet.id); }
@@ -71,6 +79,19 @@ function renderTeacherSetTabs(){
   });
 }
 function activateTeacherSetTab(id){ document.querySelectorAll('.t-wtab').forEach(b=>b.classList.toggle('on',b.dataset.id===id)); }
+
+// Shown above the summary cards when one or more modules failed to load in
+// showTeacherApp — a plain sibling node (not inside #t-summary, which
+// renderTeacherSummary overwrites wholesale) so it survives every re-render.
+function showTeacherLoadWarning(moduleNums){
+  const existing=document.getElementById('t-load-warning');
+  if(existing) existing.remove();
+  if(!moduleNums||!moduleNums.length) return;
+  const summaryEl=document.getElementById('t-summary');
+  if(!summaryEl) return;
+  const label=moduleNums.length===1?`Module ${moduleNums[0]}`:`Modules ${moduleNums.join(', ')}`;
+  summaryEl.insertAdjacentHTML('beforebegin', `<div id="t-load-warning" class="t-loading">&#x26A0;&#xFE0F; ${escHtml(label)} skill data failed to load — counts and percentages below may be incomplete. Check the browser console for details, or reload.</div>`);
+}
 
 async function loadAllStudents(){
   try{
@@ -134,7 +155,7 @@ function renderTeacherGrid(){
   if(!w||!w.skills||w.skills.length===0){ document.getElementById('t-grid-container').innerHTML='<div class="t-loading">No skills for this set yet.</div>'; return; }
   if(allStudents.length===0){ document.getElementById('t-grid-container').innerHTML='<div class="t-loading">No student data yet — students need to sign in and check off skills first.</div>'; return; }
   const sorted=[...allStudents].sort((a,b)=>w.skills.filter(s=>b.skills[s.id]==='gotit').length-w.skills.filter(s=>a.skills[s.id]==='gotit').length);
-  const headerCells=w.skills.map(s=>`<th title="${escAttr(s.text)}">${abbreviate(s.text)}</th>`).join('');
+  const headerCells=w.skills.map(s=>`<th title="${escAttr(s.text)}">${escHtml(abbreviate(s.text))}</th>`).join('');
   const rows=sorted.map(stu=>{
     const done=w.skills.filter(s=>stu.skills[s.id]==='gotit').length;
     const total=w.skills.length;

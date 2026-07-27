@@ -182,8 +182,6 @@ function validateModules() {
       }
       if (s.skills !== undefined && !Array.isArray(s.skills))
         { err(`${where}: "skills" should be an array`); problems++; }
-      if (!s.comingSoon && !s.objective)
-        { warn(`${where}: no "objective" (fine for placeholders)`); warnings++; }
       allSets.push(s);
     }
   }
@@ -374,7 +372,7 @@ function checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsBy
           if (sk.practice) {
             reqEs(skWhere, sk.practice, 'prompt');
             reqEsArray(skWhere, sk.practice, 'choices');
-            if (sk.practice.type === 'playSeq') reqEs(skWhere, sk.practice, 'label');
+            if (sk.practice.type === 'playSeq' || sk.practice.type === 'fretboard' || sk.practice.type === 'chord') reqEs(skWhere, sk.practice, 'label');
           }
         });
       }

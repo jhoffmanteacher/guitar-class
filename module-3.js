@@ -18,7 +18,6 @@ SETS.push(
     title: 'Set 1',
     subtitle: 'Power chord shape · Moving on E & A strings · Muting',
     subtitle_es: 'Forma del acorde de potencia · Moverse por las cuerdas Mi y La · Silenciar cuerdas',
-    objective: 'I CAN fret a clean 2-finger power chord and move the shape along the E and A strings.',
     skillFocus: 'Fretting a clean power chord · Moving the shape along the E and A strings · Reading power-chord TAB',
     skillFocus_es: 'Trastear un acorde de potencia limpio · Mover la forma por las cuerdas Mi y La · Leer TAB de acordes de potencia',
     comingSoon: false,
@@ -184,9 +183,10 @@ SETS.push(
             hint_es: 'Mantén la misma forma de dedos y solo muévela por el mástil. La distancia entre tus dos dedos nunca cambia.',
             stuck: 'Park on just G5 and A5 (both E-string) and switch between them until it\'s smooth, then add the A-string chords.',
             stuck_es: 'Quédate solo con G5 y A5 (ambos en la cuerda Mi) y alterna entre ellos hasta que salga fluido, y luego agrega los acordes de la cuerda La.',
-            levelUp: 'Make quick flashcards (E5, A5, C5, D5…), shuffle them, and find each chord within 3 seconds of flipping a card — no counting frets. Got someone around? Have them call out chords instead.',
-            levelUp_es: 'Haz tarjetas rápidas (E5, A5, C5, D5…), mézclalas, y encuentra cada acorde en menos de 3 segundos al voltear una tarjeta — sin contar trastes. ¿Tienes a alguien cerca? Pídele que diga los acordes en voz alta en tu lugar.',
+            levelUp: 'Run the deck below and find each chord within 3 seconds of flipping a card — no counting frets.',
+            levelUp_es: 'Corre la baraja de abajo y encuentra cada acorde en menos de 3 segundos al voltear una carta — sin contar trastes.',
             skills: [2, 4],
+            drill: { type: 'deck', deck: 'power-chord-shapes' },
             chords: [
               { name: 'G5', chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
               { name: 'A5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 },
@@ -208,9 +208,10 @@ SETS.push(
             hint_es: 'Aprendiste todas las notas de la cuerda Mi grave en el Módulo 2 — es el mismo mapa. La raíz es donde sea que esté tu dedo índice. Toca las notas naturales; sáltate los sostenidos por ahora.',
             stuck: 'Do frets 0–7 only first (E5–B5), then add 8–12 once those are automatic.',
             stuck_es: 'Haz solo los trastes 0–7 primero (E5–B5), y luego agrega el 8–12 una vez que esos sean automáticos.',
-            levelUp: 'Name your way back DOWN the string (12 → 0) without counting, or do the lap (a lap = one full time through) at 80 BPM.',
-            levelUp_es: 'Nombra tu camino de regreso BAJANDO por la cuerda (12 → 0) sin contar, o haz la vuelta (una vuelta = un recorrido completo) a 80 BPM.',
+            levelUp: 'Name your way back DOWN the string (12 → 0) without counting, do the lap (a lap = one full time through) at 80 BPM, or run the shuffle drill below for frets in random order.',
+            levelUp_es: 'Nombra tu camino de regreso BAJANDO por la cuerda (12 → 0) sin contar, haz la vuelta (una vuelta = un recorrido completo) a 80 BPM, o corre el ejercicio de mezcla de abajo para trastes en orden aleatorio.',
             skills: [2],
+            drill: { type: 'shuffle', string: 'lowE', maxFret: 12, rounds: 10, seconds: 3, pile: 'naturals', skill: 'm3w1-s2' },
             chords: [
               { name: 'E5', chord: [[6,0],[5,2,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 0 },
               { name: 'F5', chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 1 },
@@ -230,9 +231,10 @@ SETS.push(
             hint_es: 'Estas son las notas de la cuerda La del Módulo 2. Mantén la Mi grave silenciada para que solo suene el acorde de potencia. La misma nota, un nuevo hogar — así funciona el diapasón.',
             stuck: 'Cover frets 0–5 (A5–D5) without looking at the chart first, then add the rest.',
             stuck_es: 'Cubre los trastes 0–5 (A5–D5) sin mirar el diagrama primero, y luego agrega el resto.',
-            levelUp: 'Write random frets (0–12) for either string on flashcards, shuffle, and name each root on the spot as you flip. Got someone around? Have them call out frets instead.',
-            levelUp_es: 'Escribe trastes al azar (0–12) de cualquiera de las dos cuerdas en tarjetas, mézclalas, y nombra cada raíz al instante al voltearlas. ¿Tienes a alguien cerca? Pídele que diga los trastes en voz alta en tu lugar.',
+            levelUp: 'Run the shuffle drill below — random frets on the A string, name each root on the spot as it deals.',
+            levelUp_es: 'Corre el ejercicio de mezcla de abajo — trastes al azar en la cuerda La, nombra cada raíz al instante en que la reparta.',
             skills: [4],
+            drill: { type: 'shuffle', string: 'A', maxFret: 12, rounds: 10, seconds: 3, pile: 'naturals', skill: 'm3w1-s4' },
             chords: [
               { name: 'A5', chord: [[6,'x'],[5,0],[4,2,'3'],[3,'x'],[2,'x'],[1,'x']], position: 0 },
               { name: 'B5', chord: [[6,'x'],[5,2,'1'],[4,4,'3'],[3,'x'],[2,'x'],[1,'x']], position: 2 },
@@ -365,9 +367,10 @@ SETS.push(
             title_es: '⚡ Chispa auditiva — bono opcional de oído',
             steps: [
               {
-                label: 'Ear Spark: E5 vs. E major', label_es: 'Chispa auditiva: E5 vs. Mi mayor',
-                text: '⚡ Ear Spark (optional, 2 min):<ol><li>First, build a full open E major — it\'s your E5 (open low E + A string, 2nd fret) with two notes added: G string, 1st fret and D string, 2nd fret, letting the open B and high e ring too.</li><li>Now write "power" on a few paper slips and "full" on a few others, shuffle them face-down.</li><li>Draw one at a time: play E5 for a "power" slip or the full E major for a "full" slip, a few reps.</li><li>On playback, call each one "power" or "full" before flipping the slip to check — power chords are hollow, with no major/minor color.</li></ol>Got someone around? Have them play while you look away.',
-                text_es: '⚡ Chispa auditiva (opcional, 2 min):<ol><li>Primero, arma un Mi mayor al aire completo — es tu E5 (Mi grave al aire + cuerda La, traste 2) con dos notas agregadas: cuerda Sol, traste 1 y cuerda Re, traste 2, dejando sonar también la B y la mi aguda al aire.</li><li>Ahora escribe "potencia" en algunos papelitos y "completo" en otros, mézclalos boca abajo.</li><li>Saca uno a la vez: toca E5 para un papelito de "potencia" o el Mi mayor completo para uno de "completo", varias repeticiones.</li><li>Al escuchar, di "potencia" o "completo" antes de voltear el papelito para comprobar — los acordes de potencia suenan huecos, sin color mayor o menor.</li></ol>¿Tienes a alguien cerca? Que toque mientras miras hacia otro lado.'
+                label: 'Ear Spark: E5 vs. E major', label_es: 'Chispa auditiva: E5 vs. E mayor',
+                text: '⚡ Ear Spark (optional, 2 min):<ol><li>First, build a full open E major — it\'s your E5 (open low E + A string, 2nd fret) with two notes added: G string, 1st fret and D string, 2nd fret, letting the open B and high e ring too.</li><li>Run the deck below — it deals you "E5" or "E". Play whichever chord it names, a few reps of each.</li><li>Listen for the difference each time: power chords are hollow, with no major/minor color.</li></ol>',
+                text_es: '⚡ Chispa auditiva (opcional, 2 min):<ol><li>Primero, arma un E mayor al aire completo — es tu E5 (Mi grave al aire + cuerda La, traste 2) con dos notas agregadas: cuerda Sol, traste 1 y cuerda Re, traste 2, dejando sonar también la Si y la mi aguda al aire.</li><li>Corre la baraja de abajo — te reparte "E5" o "E". Toca el acorde que indique, varias repeticiones de cada uno.</li><li>Escucha la diferencia cada vez: los acordes de potencia suenan huecos, sin color mayor o menor.</li></ol>',
+                drill: { type: 'deck', deck: 'e5-vs-emajor' }
               }
             ]
           }
@@ -446,7 +449,6 @@ SETS.push(
     title: 'Set 2',
     subtitle: 'Power chords with metronome · Chord changes · Strumming patterns',
     subtitle_es: 'Acordes de potencia con metrónomo · Cambios de acorde · Patrones de rasgueo',
-    objective: 'I CAN change power chords on beat 1 at 60 BPM and hold a steady 6-bar progression up to 80 BPM.',
     skillFocus: 'Changing power chords in time · Building speed with a metronome · Playing a song progression',
     skillFocus_es: 'Cambiar acordes de potencia a tiempo · Ganar velocidad con un metrónomo · Tocar la progresión de una canción',
     comingSoon: false,
@@ -501,7 +503,7 @@ SETS.push(
             text_es: 'Mira: <a href="https://youtu.be/q8SHmo1-dac" target="_blank">3 Tips to NAIL Alternate Picking (build speed) – JustinGuitar</a> (0:00–3:00). Púa alterna significa abajo-arriba-abajo-arriba estricto — cada golpe hacia abajo va seguido de uno hacia arriba, así que la púa nunca viaja en la misma dirección dos veces seguidas. Mira su método de pasos de tempo para ganar velocidad.',
             hint: 'Notice his method for building tempo gradually. As he describes it, try it: play your "Watchtower" loop at 60 BPM, then bump to 65, then 70.',
             hint_es: 'Fíjate en su método para subir el tempo gradualmente. Mientras lo describe, pruébalo: toca tu vuelta de "Watchtower" a 60 BPM, y luego sube a 65 y a 70.',
-            skills: [1, 2],
+            skills: [2, 3],
             response: { type: 'short', placeholder: 'In one sentence, describe his method for building up tempo gradually.',
               placeholder_es: 'En una oración, describe su método para subir el tempo gradualmente.' }
           }
@@ -684,7 +686,7 @@ SETS.push(
             stuck_es: 'Silencia las cuerdas con tu mano de trastear y ejercita solo el movimiento: pulsa-rasguea, pulsa-rasguea, hasta que la puntería sea automática. Luego trastea A5 y agrega un acorde a la vez.',
             levelUp: 'Split strum the whole I–IV–V from chord symbols only, or mix it: two bars split strum, two bars straight eighths — feel how the same chords groove two different ways (a groove = the steady rhythmic feel).',
             levelUp_es: 'Haz el rasgueo dividido de todo el I–IV–V solo a partir de los símbolos de acorde, o combínalo: dos compases de rasgueo dividido, dos compases de corcheas rectas — siente cómo los mismos acordes groovean de dos formas distintas (un groove = la sensación rítmica constante).',
-            skills: [3, 4],
+            skills: [2, 4],
             playSeq: { label: 'Hear the split strum', label_es: 'Escucha el rasgueo dividido', bpm: 70, notes: [45, [45,52], 45, [45,52], 50, [50,57], 50, [50,57]] }
           }
             ]
@@ -912,6 +914,9 @@ MODULE_SONGS[3] = [
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Verse: D5–C5–G5 power chord loop', meta_es: 'Verso: vuelta de acordes de potencia D5–C5–G5', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
+      { name: '"the cure" — Olivia Rodrigo', meta: '◐ Power chord arrangement (a gentle song played louder, on purpose) · A5–C5–D5–F5', meta_es: '◐ Arreglo con acordes de potencia (una canción suave tocada más fuerte, a propósito) · A5–C5–D5–F5', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
+        originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
+        tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY' },
       { name: '"Happy Birthday"', meta: 'Full power chord arrangement (optional)', meta_es: 'Arreglo completo con acordes de potencia (opcional)', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
       { name: '"Smells Like Teen Spirit" — Nirvana', meta: 'F Bb Ab Db power chord progression', meta_es: 'Progresión de acordes de potencia F Bb Ab Db', type: 'Choice', core: false, level: 2,

@@ -237,12 +237,20 @@ updateProgressPill();
 applyJourneyLang(getLang());
 window.scrollTo(0, 0);
 
-/* ── Layer self-rating ── */
+/* ── Layer self-rating ──
+   locallyClickedLayers tracks which layers the student has rated by hand
+   this page load. It guards against a race with the initial Firestore
+   `get()` below: if a click lands on a layer before that read resolves,
+   `applyRatings` must not blow the click away when it paints the saved
+   state over the DOM — the pending debounced save reads ratings back out
+   of the DOM, so an overwritten button silently loses the click. */
+var locallyClickedLayers = {};
 function rate(btn){
   var group = btn.closest('.rate');
   group.querySelectorAll('button').forEach(function(b){ b.classList.remove('on'); b.setAttribute('aria-checked', 'false'); });
   btn.classList.add('on');
   btn.setAttribute('aria-checked', 'true');
+  locallyClickedLayers[group.dataset.layer] = true;
   paintChip(btn.closest('.layer'));
   updateProgressPill();
   queueSave();
@@ -259,6 +267,10 @@ function currentRatings(){
 
 function applyRatings(saved){
   Object.keys(saved || {}).forEach(function(layer){
+    /* A click already landed on this layer before this (one-time, initial)
+       load resolved — the local click wins, don't overwrite it with
+       whatever was saved before that click happened. */
+    if(locallyClickedLayers[layer]) return;
     var g = document.querySelector('.rate[data-layer="' + layer + '"]');
     if(!g) return;
     g.querySelectorAll('button').forEach(function(b){

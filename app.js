@@ -468,7 +468,7 @@ function queueSave(...keys){
   if(_dirtyKeys.has('place')) saveLocalPlace();   // local mirror, immediate
   _saveFailCount = 0;   // a fresh user action gets its own full retry budget
   clearTimeout(saveTimer);
-  setSaveMsg('Saving…');
+  setSaveMsg('save.saving');
   saveTimer = setTimeout(flushSave, 800);
 }
 async function flushSave(){
@@ -486,21 +486,21 @@ async function flushSave(){
   try{
     await ensureDb();
     await db.collection('progress').doc(currentUser.uid).set(payload,{merge:true});
-    setSaveMsg('Saved ✓', 2000);
+    setSaveMsg('save.saved', 2000);
     _saveFailCount = 0;
   } catch(e){
     keys.forEach(k=>_dirtyKeys.add(k));   // keep dirty so the next save retries
     _saveFailCount++;
     clearTimeout(saveTimer);
     if(_saveFailCount <= SAVE_MAX_AUTO_RETRIES){
-      setSaveMsg('Save failed — check connection');
+      setSaveMsg('save.failed');
       saveTimer = setTimeout(flushSave, 3000);
     } else {
       // Stop auto-retrying (a persistently rejected write — e.g. dev-bypass
       // mode, or a blocked account — would otherwise loop forever). The
       // dirty keys stay queued; the next real save (queueSave) resets the
       // counter and tries again.
-      setSaveMsg('Not saving — check connection');
+      setSaveMsg('save.notSaving');
     }
   }
 }
@@ -533,9 +533,16 @@ function bumpPracticeStreak(){
   saveStreak();
 }
 let _saveMsgT = null;
-function setSaveMsg(msg, clearAfterMs){
+// `key` is an i18n key (or '' to clear) — save-ind elements are tagged
+// data-i18n so a language switch mid-message (e.g. still showing "Saving…"
+// when the toggle is hit) re-resolves it instead of staying stuck in
+// whichever language it was first drawn in.
+function setSaveMsg(key, clearAfterMs){
   clearTimeout(_saveMsgT);
-  document.querySelectorAll('.save-ind').forEach(el=>el.textContent=msg);
+  document.querySelectorAll('.save-ind').forEach(el=>{
+    if(key){ el.textContent = t(key); el.setAttribute('data-i18n', key); }
+    else { el.textContent = ''; el.removeAttribute('data-i18n'); }
+  });
   if(clearAfterMs) _saveMsgT = setTimeout(()=>setSaveMsg(''), clearAfterMs);
 }
 
@@ -706,7 +713,7 @@ function buildTab(spec, opts){
     const blocks = spec.phrases.map(p => {
       const block = `
       <div class="tab-phrase">
-        ${p.label ? `<div class="tab-phrase-label">${escHtml(p.label)}</div>` : ''}
+        ${p.label ? `<div class="tab-phrase-label">${escHtml(tf(p,'label'))}</div>` : ''}
         ${renderTabBlock(p.notes, seqOff)}
       </div>`;
       seqOff += (p.notes || []).length;
@@ -992,7 +999,7 @@ function onChordLinkClick(e){
   if (!chord) return;
   hideChordPopup();
   /* For chord type, the 2nd arg carries the chord NAME (loadPanel renders it locally) */
-  loadPanel('chord', chord, chord, 'Guitar chord diagram');
+  loadPanel('chord', chord, chord, t('popup.chordDiagram'));
 }
 
 /* Floating hover preview — one shared popup element reused for every link */
@@ -1025,7 +1032,7 @@ function onChordLinkHover(){
   const svg = localChordSvg(chord);
   if (!svg) return;
   popup.classList.remove('wide');
-  popup.innerHTML = `<div class="chord-popup-name">${chord}</div><div class="chord-popup-svg">${svg}</div><div class="chord-popup-hint">Click to open</div>`;
+  popup.innerHTML = `<div class="chord-popup-name">${chord}</div><div class="chord-popup-svg">${svg}</div><div class="chord-popup-hint">${escHtml(t('popup.clickToOpen'))}</div>`;
   popup.classList.add('visible');
   positionChordPopup(popup, this);
 }
@@ -1035,7 +1042,7 @@ function onStringLinkClick(e){
   if (!kind) return;
   hideChordPopup();
   const label = STRING_LABELS[kind] || kind;
-  loadPanel('string', kind, label, 'Open string');
+  loadPanel('string', kind, label, t('popup.openString'));
 }
 function onStringLinkHover(){
   const kind = this.dataset.string;
@@ -1045,7 +1052,7 @@ function onStringLinkHover(){
   if (!svg) return;
   const label = STRING_LABELS[kind] || kind;
   popup.classList.add('wide');
-  popup.innerHTML = `<div class="chord-popup-name">${label}</div><div class="chord-popup-svg">${svg}</div><div class="chord-popup-hint">Click to open</div>`;
+  popup.innerHTML = `<div class="chord-popup-name">${label}</div><div class="chord-popup-svg">${svg}</div><div class="chord-popup-hint">${escHtml(t('popup.clickToOpen'))}</div>`;
   popup.classList.add('visible');
   positionChordPopup(popup, this);
 }
@@ -1058,7 +1065,7 @@ function onNoteLinkClick(e){
   hideChordPopup();
   const label = noteFullLabel(note, fret, kind);
   /* Encode payload in the URL slot as "kind|fret|note" */
-  loadPanel('note', `${kind}|${fret}|${note}`, label, 'Single note');
+  loadPanel('note', `${kind}|${fret}|${note}`, label, t('popup.singleNote'));
 }
 function onNoteLinkHover(){
   const kind = this.dataset.string;
@@ -1070,7 +1077,7 @@ function onNoteLinkHover(){
   if (!svg) return;
   const hint = noteFullLabel(note, fret, kind);
   popup.classList.add('wide');
-  popup.innerHTML = `<div class="chord-popup-name">${note}</div><div class="chord-popup-svg">${svg}</div><div class="chord-popup-hint">${escHtml(hint)} · Click to open</div>`;
+  popup.innerHTML = `<div class="chord-popup-name">${note}</div><div class="chord-popup-svg">${svg}</div><div class="chord-popup-hint">${escHtml(hint)} · ${escHtml(t('popup.clickToOpen'))}</div>`;
   popup.classList.add('visible');
   positionChordPopup(popup, this);
 }
@@ -1407,7 +1414,6 @@ function renderPills(moduleNum){
     } else if(!locked && done>0){
       // Started but not finished: full name + a small fraction. Untouched sets
       // stay clean (just the name) until the first skill is marked got-it.
-      btn.classList.add('incomplete');
       const frac = document.createElement('span');
       frac.className = 'wpill-frac';
       frac.textContent = ` · ${done}/${total}`;
@@ -1471,6 +1477,14 @@ function activateSet(id){
   // here is a no-op when no check is open (coachClose() is safe to call
   // unconditionally — see coach.js).
   if (typeof coachClose === 'function') coachClose();
+  // A Shuffle Drill's countdown interval (and any pending "next card" timer)
+  // keeps running even after its panel is hidden by CSS on set-switch — it's
+  // never rebuilt like a language-switch re-render, so nothing else stops
+  // it. Stopping every drill here (harmless no-op for ones not mid-round)
+  // is simpler than tracking which set each key belongs to.
+  if(typeof shuffleDrills === 'object' && typeof sdStop === 'function'){
+    Object.keys(shuffleDrills).forEach(k=>sdStop(k));
+  }
   document.querySelectorAll('.wpill').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
   document.querySelectorAll('.week-panel').forEach(p=>p.classList.toggle('active',p.dataset.id===id));
   // Show the module-level Songs section only for the active set's module.
@@ -1888,25 +1902,14 @@ function buildStations(w, stationId){
       ${body}
     </div>`;
   };
-  if(stationId){
-    const s = stationId === 'b' ? w.stations.b : w.stations.c;
-    const badge = stationId === 'b' ? t('nav.stationBTitle') : t('nav.stationCTitle');
-    const badgeClass = stationId === 'b' ? 'bb' : 'bc';
-    return dp(stationId, '', badge, badgeClass, s);
-  }
-  return `
-    <div class="st-grid">
-      <div class="stc" id="${w.id}-sc-b" role="button" tabindex="0" aria-label="Open Station B — Computer station" onclick="openSt('${w.id}','b')">
-        <div class="st-ico">&#x1F4BB;</div><span class="st-badge bb">Station B</span>
-        <div class="st-name">Computer station</div><div class="st-desc">Watch · Listen · Practice</div>
-      </div>
-      <div class="stc" id="${w.id}-sc-c" role="button" tabindex="0" aria-label="Open Station C — Practice station" onclick="openSt('${w.id}','c')">
-        <div class="st-ico">&#x1F3B8;</div><span class="st-badge bc">Station C</span>
-        <div class="st-name">Practice station</div><div class="st-desc">Independent drill</div>
-      </div>
-    </div>
-    ${dp('b',' hidden','Station B','bb',w.stations.b)}
-    ${dp('c',' hidden','Station C','bc',w.stations.c)}`;
+  // buildStations() is always called with an explicit stationId ('b' or
+  // 'c' — confirmed by grep, both call sites pass one), so this used to
+  // branch on a station-picker grid (with openSt() as its onclick handler)
+  // that could never render. Removed 2026-07-26; openSt() removed with it.
+  const s = stationId === 'b' ? w.stations.b : w.stations.c;
+  const badge = stationId === 'b' ? t('nav.stationBTitle') : t('nav.stationCTitle');
+  const badgeClass = stationId === 'b' ? 'bb' : 'bc';
+  return dp(stationId, '', badge, badgeClass, s);
 }
 
 // "Mark done" ⇄ "✓ Done" — a state-and-language-dependent label, so the
@@ -2010,14 +2013,6 @@ function toggleStationSection(btn){
   renderChordBoxes();
 }
 
-function openSt(wid,s){
-  ['b','c'].forEach(x=>{
-    document.getElementById(`${wid}-sc-${x}`).classList.toggle('active',x===s);
-    document.getElementById(`${wid}-dp-${x}`).classList.toggle('hidden',x!==s);
-  });
-  renderChordBoxes();
-}
-
 /* ── Songs ── */
 function diffLabel(level){
   return level===1 ? t('songs.diff1') : level===2 ? t('songs.diff2') : level===3 ? t('songs.diff3') : '';
@@ -2095,27 +2090,13 @@ function openSongVid(s, kind){
   if(!s) return;
   if(kind==='journey'){ if(s.journeyUrl) window.open(s.journeyUrl, '_blank', 'noopener'); return; }
   if(kind==='original'){ if(s.originalUrl) window.open(s.originalUrl, '_blank', 'noopener'); return; }
-  if(kind==='backing'){ if(s.backingUrl) loadPanel(/\.(mp3|m4a|ogg|wav)(\?|$)/i.test(s.backingUrl)?'audio':'youtube', s.backingUrl, s.name, 'Backing track — it repeats on its own; press play and solo over it'); return; }
-  if(s.tutorialUrl) loadPanel('youtube', s.tutorialUrl, s.name, 'Tutorial');
+  if(kind==='backing'){ if(s.backingUrl) loadPanel(/\.(mp3|m4a|ogg|wav)(\?|$)/i.test(s.backingUrl)?'audio':'youtube', s.backingUrl, s.name, t('songs.backingTrackHint')); return; }
+  if(s.tutorialUrl) loadPanel('youtube', s.tutorialUrl, s.name, t('songs.tutorial'));
 }
 function loadSongVid(wid, idx, kind){
   const w=SETS.find(x=>x.id===wid); if(!w) return;
   openSongVid(w.songs[idx], kind);
 }
-/* ── Videos ── */
-function buildVideos(w){
-  const rows=w.videos.map(v=>`<div class="vid-row"><div><div class="vname"><button class="rp-trigger" onclick="loadPanel('youtube','${v.url}','${v.name.replace(/'/g,"\\'")}','${v.source.replace(/'/g,"\\'")}')">&#x25B6; ${v.name}</button></div><div class="vsrc">${v.source}</div>${v.rec?'<span class="vrec">&#x2605; Recommended</span>':''}</div></div>`).join('');
-  return `<div class="card">${rows}</div>`;
-}
-
-/* ── Assessment ── */
-function buildAssess(w){
-  const a=w.assessment;
-  return `<div class="ablock"><div class="albl">${t('assess.goal')}</div><div class="atxt">${tf(a,'goal')}</div></div>
-    <div class="ablock"><div class="albl">${t('assess.selfCheck')}</div><div class="atxt">${tf(a,'selfCheck')}</div></div>
-    <div class="ablock"><div class="albl">${t('assess.standards')}</div><div>${a.standards.map(s=>`<span class="spill">${s}</span>`).join('')}</div></div>`;
-}
-
 /* ── 10-Minute Routine card (module review) + Daily 5 panel ──
    Both assemble themselves from the module's already-loaded SETS data, so
    future content edits propagate automatically. Read-only: no Firebase writes. */
@@ -2326,11 +2307,11 @@ function buildModuleReview(mr){
     </div>
     <div class="ablock" style="margin-top:18px">
       <div class="albl"><span class="mr-q-num">${clickedNum}.</span> ${t('review.whatClicked')}</div>
-      <textarea id="${mrId}-clicked" class="reflection-ta" placeholder="${escAttr(t('review.whatClickedPh'))}" oninput="saveReflection(${mr.moduleNum})">${saved.clicked||''}</textarea>
+      <textarea id="${mrId}-clicked" class="reflection-ta" placeholder="${escAttr(t('review.whatClickedPh'))}" oninput="saveReflection(${mr.moduleNum})">${escHtml(saved.clicked||'')}</textarea>
     </div>
     <div class="ablock" style="margin-top:12px">
       <div class="albl"><span class="mr-q-num">${hardNum}.</span> ${t('review.whatsHard')}</div>
-      <textarea id="${mrId}-hard" class="reflection-ta" placeholder="${escAttr(t('review.whatsHardPh'))}" oninput="saveReflection(${mr.moduleNum})">${saved.hard||''}</textarea>
+      <textarea id="${mrId}-hard" class="reflection-ta" placeholder="${escAttr(t('review.whatsHardPh'))}" oninput="saveReflection(${mr.moduleNum})">${escHtml(saved.hard||'')}</textarea>
     </div>
     ${playHtml}
     ${performanceHtml}
@@ -3152,8 +3133,12 @@ function renderShuffleDrill(drill, key, wid){
   if(!drill || drill.type !== 'shuffle') return '';
   const prev = shuffleDrills[key];
   if(prev && prev.tick) clearInterval(prev.tick);
+  // A round in flight schedules a setTimeout (sdAnswer → sdNext) that would
+  // otherwise fire against this freshly-rebuilt (differently-shaped) state
+  // and throw — cancel it along with the tick.
+  if(prev && prev.pending) clearTimeout(prev.pending);
   shuffleDrills[key] = {
-    phase: 'setup', tick: null,
+    phase: 'setup', tick: null, pending: null,
     cfg: {
       string:  drill.string || 'lowE',
       rounds:  drill.rounds || SD_ROUNDS,
@@ -3202,6 +3187,10 @@ function sdPickPile(key, pile){
 function sdStart(key){
   const st = shuffleDrills[key], box = sdBox(key);
   if(!st || !box) return;
+  // A previous round's pending "advance to next card" timeout could still be
+  // in flight if Start/Again was clicked right after answering — cancel it
+  // so it doesn't fire mid-new-round against the state we're about to reset.
+  if(st.pending){ clearTimeout(st.pending); st.pending = null; }
   st.phase = 'play';
   st.round = 0; st.inTime = 0;
   st.results = []; st.requeue = []; st.deck = sdShuffle(sdFrets(st.cfg));
@@ -3233,6 +3222,7 @@ function sdNext(key){
 function sdStop(key){
   const st = shuffleDrills[key];
   if(st && st.tick){ clearInterval(st.tick); st.tick = null; }
+  if(st && st.pending){ clearTimeout(st.pending); st.pending = null; }
 }
 
 function sdPlayHtml(key){
@@ -3311,7 +3301,7 @@ function sdAnswer(key, pick){
   }
   // The reward for a right answer is hearing the note you just named.
   if(ok && typeof playNote === 'function') playNote(SD_OPEN_MIDI[c.string] + st.cur.fret);
-  setTimeout(() => sdNext(key), inTime ? 620 : 1500);
+  st.pending = setTimeout(() => { st.pending = null; sdNext(key); }, inTime ? 620 : 1500);
 }
 
 function sdFinish(key){
@@ -3515,7 +3505,11 @@ const DECKS = {
   'keys-IIVV': { kicker:'deck.kKey', hint:'deck.hPlayIIVV',
     cards:[{f:'G'},{f:'A'},{f:'C'},{f:'D'},{f:'E'}] },
   'key-inventory': { kicker:'deck.kChordSet', back:'deck.kKey', hint:'deck.hNameKey',
-    cards:[{f:'G · C · D · Em',b:'G'},{f:'C · F · G · Am',b:'C'},{f:'D · G · A · Bm',b:'D'},{f:'Am · F · G · C',b:'C / Am'}] }
+    cards:[{f:'G · C · D · Em',b:'G'},{f:'C · F · G · Am',b:'C'},{f:'D · G · A · Bm',b:'D'},{f:'Am · F · G · C',b:'C / Am'}] },
+  'power-chord-shapes': { kicker:'deck.kPlayChord', hint:'deck.hPlayChord', cards:[{f:'A5'},{f:'G5'},{f:'C5'},{f:'D5'}] },
+  'e5-vs-emajor': { kicker:'deck.kPlayChord', hint:'deck.hPlayChord', cards:[{f:'E5'},{f:'E'},{f:'E5'},{f:'E'}] },
+  'chords-group1': { kicker:'deck.kChordName', hint:'deck.hPlayIt', cards:[{f:'C'},{f:'G'},{f:'Am'},{f:'F'}] },
+  'chords-m5': { kicker:'deck.kChordName', hint:'deck.hPlayIt', cards:[{f:'C'},{f:'G'},{f:'Am'},{f:'F'},{f:'D'},{f:'A'},{f:'Em'},{f:'Bm'}] }
 };
 const deckDrills = {};
 function dkBox(key){ return document.getElementById('dkr-' + key); }
@@ -3632,14 +3626,21 @@ function dkCheckOff(key){
      note 4 first isn't forced to guess note 1 to get there. */
 const EAR_POOLS = {
   openStrings: { midis:[40,45,50,55,59,64], labels:['E','A','D','G','B','e'], kicker:'ear.kString' },
-  lowEFrets:   { midis:[40,41,42,43,44,45], labels:['0','1','2','3','4','5'], kicker:'ear.kFret' }
+  lowEFrets:   { midis:[40,41,42,43,44,45], labels:['0','1','2','3','4','5'], kicker:'ear.kFret' },
+  // A-string vs D-string bass under Am (module-8.js, m8w1 Station C) — a
+  // 2-option pool, same shape as the binary-choice style of lowEFrets, just
+  // with 2 distinct values instead of 6.
+  amBassAD:    { midis:[45,50], labels:['A','D'], kicker:'ear.kBassString' }
 };
 const earDrills = {};
 function erBox(key){ return document.getElementById('err-' + key); }
 function renderEarDrill(drill, key, wid){
   const pool = EAR_POOLS[drill.pool];
   if(!pool) return '';
-  earDrills[key] = { phase:'setup', cfg:{ pool, poolId: drill.pool, draw: drill.draw || 5, wid } };
+  // skill: optional, same job as the Shuffle/Deck drills' cfg.skill — a
+  // clean reveal (every note named right) offers the check-off inline
+  // instead of sending the student to the checklist tab to do it from memory.
+  earDrills[key] = { phase:'setup', cfg:{ pool, poolId: drill.pool, draw: drill.draw || 5, skill: drill.skill || null, wid } };
   return `<div class="sdr err" id="err-${escAttr(key)}">${erSetupHtml(key)}</div>`;
 }
 function erHead(key, right){
@@ -3679,6 +3680,8 @@ function erRunHtml(key){
   }).join('');
   if(st.revealed){
     const right = st.seq.filter((n, i) => st.guesses[i] === n).length;
+    const clean = right === st.cfg.draw;
+    const canCheck = clean && st.cfg.skill && progress[st.cfg.skill] !== 'gotit';
     return erHead(key, t('ear.revealed')) +
       `<div class="sdr-body"><div class="err-slots">${slots}</div>` +
         `<div class="sdr-score">${right} / ${st.cfg.draw}</div>` +
@@ -3686,6 +3689,7 @@ function erRunHtml(key){
         `<div class="dkr-row">` +
           `<button type="button" class="dkr-btn" onclick="erPlay('${key}')">&#x25B6; ${escHtml(t('ear.hearAgain'))}</button>` +
           `<button type="button" class="dkr-btn" onclick="erStart('${key}')">&#x21BB; ${escHtml(t('ear.dealMore'))}</button>` +
+          (canCheck ? `<button type="button" class="dkr-btn good sdr-checkoff" onclick="erCheckOff('${key}')">${escHtml(t('drill.checkOff'))}</button>` : '') +
         `</div></div>`;
   }
   const filled = st.guesses.filter(g => g != null).length;
@@ -3718,6 +3722,23 @@ function erUndo(key){
 function erReveal(key){
   const st = earDrills[key]; if(!st) return;
   st.revealed = true; erBox(key).innerHTML = erRunHtml(key);
+}
+/* 100%-clean reveal earns the offer to check the skill off right here,
+   the same "no memory trip to the checklist tab" move as sdCheckOff/
+   dkCheckOff use for the other two drill types. */
+function erCheckOff(key){
+  const st = earDrills[key];
+  if(!st || !st.cfg.skill) return;
+  if(progress[st.cfg.skill] !== 'gotit' && typeof toggleSkill === 'function'){
+    toggleSkill(st.cfg.skill, st.cfg.wid, 'gotit');
+  }
+  const box = erBox(key);
+  const btn = box && box.querySelector('.sdr-checkoff');
+  if(btn){
+    btn.textContent = '✓ ' + t('drill.checkedOff');
+    btn.classList.add('done');
+    btn.disabled = true;
+  }
 }
 
 /* ── "Keep it sharp" spaced-review card ──
@@ -4000,6 +4021,10 @@ function rebuildModuleContentPanels(){
   }
 }
 window.addEventListener('gc-langchange', function(){
+  // buildSearchIndex() now bakes in the CURRENT language via tf() — without
+  // invalidating the cache here, a student who opened search before
+  // switching to Spanish would keep matching only the stale English index.
+  if(typeof searchIndex !== 'undefined') searchIndex = null;
   if(typeof lastModuleNum !== 'undefined' && document.getElementById('week-pills')) renderPills(lastModuleNum);
   if(typeof syncRailStations === 'function') syncRailStations();
   if(typeof populateModuleDropdown === 'function') populateModuleDropdown();
@@ -4305,7 +4330,7 @@ function loadPanel(type,url,title,subtitle){
     // Some videos (age-restricted / label-limited) only play on YouTube itself,
     // and embed failures can't be detected cross-origin — always offer the out.
     wrap.innerHTML=`<div class="rp-video-box"><iframe src="${embedUrl}" allowfullscreen allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>
-      <div class="rp-embed-fallback">Not playing? Some videos only allow playback on YouTube — <a href="${escAttr(url)}" target="_blank" rel="noopener">watch it there &#x2197;</a></div>`;
+      <div class="rp-embed-fallback">${t('panel.embedFallbackHtml',{link:`<a href="${escAttr(url)}" target="_blank" rel="noopener">${escHtml(t('panel.watchThere'))} &#x2197;</a>`})}</div>`;
   } else if(type==='audio'){
     // Local backing track — an <audio> player that loops on its own.
     wrap.className='rp-iframe-wrap rp-audio';
@@ -4719,10 +4744,13 @@ async function buildSearchIndex(){
   const ix = [];
   SETS.forEach(w => {
     if(w.comingSoon) return;
-    if(w.unit) ix.push({ kind: 'set', moduleNum: w.moduleNum, wid: w.id, label: w.label, text: w.unit });
+    // tf() picks the _es twin when the student is in Spanish mode (falling
+    // back to English where no twin exists yet) — without it, Spanish-mode
+    // search only ever matched English-only indexed text.
+    if(w.unit) ix.push({ kind: 'set', moduleNum: w.moduleNum, wid: w.id, label: w.label, text: tf(w, 'unit') });
     (w.skills || []).forEach(sk => {
       const num = (sk.id.match(/-s(\d+)$/) || [])[1];
-      ix.push({ kind: 'skill', moduleNum: w.moduleNum, wid: w.id, label: w.label, text: sk.text, skillNum: num ? Number(num) : null });
+      ix.push({ kind: 'skill', moduleNum: w.moduleNum, wid: w.id, label: w.label, text: tf(sk, 'text'), skillNum: num ? Number(num) : null });
     });
     ['b', 'c'].forEach(st => {
       const stn = w.stations && w.stations[st];
@@ -4732,7 +4760,7 @@ async function buildSearchIndex(){
       // the rendered `.stp-sec` DOM, which drops tuning-warmup sections.
       const sections = rawSections.filter(sec => !isTuningWarmupSection(sec, w.moduleNum));
       sections.forEach((sec, secIdx) => (sec.steps || []).forEach((step, stepIdx) => {
-        const text = stripTags(step.text || '');
+        const text = stripTags(tf(step, 'text') || '');
         if(text) ix.push({ kind: 'step', moduleNum: w.moduleNum, wid: w.id, label: w.label, station: st, secIdx, stepIdx, secTitle: sec.title || '', text });
       }));
     });
@@ -4744,7 +4772,11 @@ async function buildSearchIndex(){
   const songSeen = new Map();
   const indexSong = (song, moduleNum, wid) => {
     if(!song || !song.name) return;
+    // Chord names are matched against the always-English `meta` (chord
+    // symbols aren't translated), but the indexed/displayed text uses
+    // tf() so Spanish-mode search matches the meta_es wording too.
     const metaText = song.meta || '';
+    const metaTextShown = tf(song, 'meta') || '';
     const chords = new Set();
     const re = new RegExp(CHORD_RE.source, 'g');
     let m;
@@ -4758,7 +4790,7 @@ async function buildSearchIndex(){
       chords.forEach(c => { if(!existing.chords.includes(c)) existing.chords.push(c); });
       return;
     }
-    const entry = { kind: 'song', moduleNum, wid, text: song.name + (metaText ? ' ' + metaText : ''), chords: [...chords] };
+    const entry = { kind: 'song', moduleNum, wid, text: song.name + (metaTextShown ? ' ' + metaTextShown : ''), chords: [...chords] };
     songSeen.set(song.name, entry);
     ix.push(entry);
   };
@@ -4776,20 +4808,20 @@ async function toggleSearch(){
   closeTopPanels('search');
   p.removeAttribute('hidden');
   if(btn) btn.setAttribute('aria-expanded', 'true');
-  p.innerHTML = `<div class="daily5-head"><span>&#x1F50D; Find it</span><button type="button" class="tp-close" onclick="toggleSearch()" aria-label="Close search">&#x2715;</button></div>
-    <input type="search" class="search-input" id="search-input" placeholder="Try &quot;F chord&quot;, &quot;folk strum&quot;, &quot;pentatonic&quot;…" oninput="runSearch(this.value)" aria-label="Search the whole site">
-    <div id="search-results" class="search-results"><div class="coach-tip">Getting search ready…</div></div>`;
+  p.innerHTML = `<div class="daily5-head"><span>&#x1F50D; <span data-i18n="search.title">${escHtml(t('search.title'))}</span></span><button type="button" class="tp-close" onclick="toggleSearch()" aria-label="${escAttr(t('search.closeAria'))}" data-i18n-attr="aria-label:search.closeAria">&#x2715;</button></div>
+    <input type="search" class="search-input" id="search-input" placeholder="${escAttr(t('search.placeholder'))}" oninput="runSearch(this.value)" aria-label="${escAttr(t('search.ariaLabel'))}" data-i18n-attr="placeholder:search.placeholder;aria-label:search.ariaLabel">
+    <div id="search-results" class="search-results"><div class="coach-tip" data-i18n="search.gettingReady">${escHtml(t('search.gettingReady'))}</div></div>`;
   const input = document.getElementById('search-input');
   if(input) input.focus();
   if(!searchIndex) searchIndex = await buildSearchIndex();
   const res = document.getElementById('search-results');
-  if(res && res.querySelector('.coach-tip')) res.innerHTML = `<div class="coach-tip">Search every step, skill, and set across all ${MODULE_MANIFEST.length} modules.</div>`;
+  if(res && res.querySelector('.coach-tip')) res.innerHTML = `<div class="coach-tip" data-i18n="search.intro" data-i18n-params="${escAttr(JSON.stringify({n:MODULE_MANIFEST.length}))}">${escHtml(t('search.intro',{n:MODULE_MANIFEST.length}))}</div>`;
 }
 function runSearch(q){
   const res = document.getElementById('search-results');
   if(!res || !searchIndex) return;
   q = (q || '').trim().toLowerCase();
-  if(q.length < 2){ res.innerHTML = `<div class="coach-tip">Type at least two letters…</div>`; return; }
+  if(q.length < 2){ res.innerHTML = `<div class="coach-tip">${escHtml(t('search.typeMore'))}</div>`; return; }
   const terms = q.split(/\s+/).filter(Boolean);
   /* "G C D" — a space-separated list of known chord names — asks "what can I
      play with just these shapes?" rather than a text search. Match songs
@@ -4819,8 +4851,8 @@ function runSearch(q){
   const top = scored.slice(0, 25);
   if(!top.length){
     res.innerHTML = isChordQuery
-      ? `<div class="coach-tip">No songs use only ${escHtml(terms.join(', ').toUpperCase())} yet — try adding another chord.</div>`
-      : `<div class="coach-tip">No matches for &ldquo;${escHtml(q)}&rdquo; — try a shorter word.</div>`;
+      ? `<div class="coach-tip">${escHtml(t('search.noChordSongs',{chords:terms.join(', ').toUpperCase()}))}</div>`
+      : `<div class="coach-tip">${escHtml(t('search.noMatches',{q}))}</div>`;
     return;
   }
   const snippet = (text) => {
@@ -4833,9 +4865,9 @@ function runSearch(q){
   };
   res.innerHTML = top.map(({e}) => {
     const where = e.kind === 'song'
-      ? `Module ${e.moduleNum} · Song`
-      : `Module ${e.moduleNum} · ${escHtml(e.label || '')}` +
-        (e.kind === 'step' ? ` · Station ${e.station.toUpperCase()}` : e.kind === 'skill' ? ' · Skill' : '');
+      ? t('search.whereSong', {n:e.moduleNum})
+      : t('search.whereSet', {n:e.moduleNum, label:escHtml(e.label || '')}) +
+        (e.kind === 'step' ? t('search.whereStation', {station:e.station.toUpperCase()}) : e.kind === 'skill' ? t('search.whereSkill') : '');
     const onclick = e.kind === 'step'
       ? `searchGo(${e.moduleNum},'${e.wid}','${e.station}',${e.secIdx},${e.stepIdx})`
       : e.kind === 'skill' && e.skillNum != null

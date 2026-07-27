@@ -90,8 +90,6 @@ SETS.push(
     title: 'Set 1',
     subtitle: 'Old string off safely · New string seated & wound · In tune and holding',
     subtitle_es: 'La cuerda vieja fuera con seguridad · La nueva asentada y enrollada · Afinada y estable',
-    objective: 'I CAN change a guitar string start to finish — remove the old one safely, seat and wind the new one correctly, and bring it up to pitch so it stays in tune.',
-    objective_es: 'PUEDO cambiar una cuerda de guitarra de principio a fin — quitar la vieja con seguridad, asentar y enrollar la nueva correctamente, y afinarla para que se mantenga.',
     skillFocus: 'Old string off safely · Ball end seated at the bridge · Neat wraps at the post · Tuned, stretched, holding pitch',
     skillFocus_es: 'La cuerda vieja fuera con seguridad · La bolita asentada en el puente · Vueltas ordenadas en el poste · Afinada, estirada y estable',
     comingSoon: false,
@@ -185,8 +183,8 @@ SETS.push(
               },
               {
                 label: 'One string at a time', label_es: 'Una cuerda a la vez',
-                text: 'In class we change ONE string at a time. The other five stay tuned, keeping tension on the neck and giving you five in-tune neighbors to tune against. You\'ve got it when: you can point to the string you\'re changing and name which peg and which bridge spot belong to it.',
-                text_es: 'En clase cambiamos UNA cuerda a la vez. Las otras cinco quedan afinadas, mantienen la tensión del mástil y te dan cinco vecinas afinadas como referencia. Lo tienes cuando: puedes señalar la cuerda que vas a cambiar y decir cuál clavija y cuál punto del puente le corresponden.',
+                text: 'In class we change ONE string at a time. Leaving the other five tuned:<ul><li>Keeps tension on the neck.</li><li>Gives you five in-tune neighbors to tune against.</li></ul>You\'ve got it when: you can point to the string you\'re changing and name which peg and which bridge spot belong to it.',
+                text_es: 'En clase cambiamos UNA cuerda a la vez. Dejar las otras cinco afinadas:<ul><li>Mantiene la tensión del mástil.</li><li>Te da cinco vecinas afinadas como referencia.</li></ul>Lo tienes cuando: puedes señalar la cuerda que vas a cambiar y decir cuál clavija y cuál punto del puente le corresponden.',
                 hint: 'Follow your string with a finger from the bridge all the way up to its tuning peg before you loosen anything — turning the wrong peg is the #1 mistake.',
                 hint_es: 'Sigue tu cuerda con un dedo desde el puente hasta su clavija antes de aflojar nada — girar la clavija equivocada es el error #1.',
                 skills: [1]
@@ -245,8 +243,8 @@ SETS.push(
               },
               {
                 label: 'Coil and toss', label_es: 'Enrolla y a la basura',
-                text: 'Coil the old string into a loop (wrap it around your hand a few times), and put it straight in the trash. String ends are sharp — a loose string on the floor finds someone\'s foot. You\'ve got it when: the old string is coiled in the trash and your workspace is clear.',
-                text_es: 'Enrolla la cuerda vieja en un aro (dale unas vueltas alrededor de tu mano) y ponla directo en la basura. Las puntas son filosas — una cuerda suelta en el piso encuentra el pie de alguien. Lo tienes cuando: la cuerda vieja está enrollada en la basura y tu espacio quedó despejado.',
+                text: 'Dispose of the old string safely:<ol><li>Coil it into a loop (wrap it around your hand a few times).</li><li>Put it straight in the trash — string ends are sharp, and a loose string on the floor finds someone\'s foot.</li></ol>You\'ve got it when: the old string is coiled in the trash and your workspace is clear.',
+                text_es: 'Desecha la cuerda vieja con seguridad:<ol><li>Enróllala en un aro (dale unas vueltas alrededor de tu mano).</li><li>Ponla directo en la basura — las puntas son filosas, y una cuerda suelta en el piso encuentra el pie de alguien.</li></ol>Lo tienes cuando: la cuerda vieja está enrollada en la basura y tu espacio quedó despejado.',
                 skills: [1]
               }
             ]
@@ -295,8 +293,8 @@ SETS.push(
               },
               {
                 label: 'Trim the excess', label_es: 'Recorta el sobrante',
-                text: 'Cut the leftover tail close to the post with wire cutters or scissors (nylon cuts easily; steel needs cutters). A long tail buzzes, pokes fingers, and looks unfinished. You\'ve got it when: nothing sticks out more than about half a centimeter.',
-                text_es: 'Corta la punta sobrante al ras del poste con cortador o tijeras (el nylon se corta fácil; el acero necesita cortador). Una punta larga vibra, pica dedos y se ve descuidada. Lo tienes cuando: nada sobresale más de medio centímetro.',
+                text: 'Cut the leftover tail close to the post with wire cutters or scissors (nylon cuts easily; steel needs cutters). A long tail:<ul><li>Buzzes.</li><li>Pokes fingers.</li><li>Looks unfinished.</li></ul>You\'ve got it when: nothing sticks out more than about half a centimeter.',
+                text_es: 'Corta la punta sobrante al ras del poste con cortador o tijeras (el nylon se corta fácil; el acero necesita cortador). Una punta larga:<ul><li>Vibra.</li><li>Pica dedos.</li><li>Se ve descuidada.</li></ul>Lo tienes cuando: nada sobresale más de medio centímetro.',
                 skills: [3]
               }
             ]
@@ -307,8 +305,8 @@ SETS.push(
             steps: [
               {
                 label: 'Bring it to pitch', label_es: 'Llévala a su tono',
-                text: 'Open the tuner (toolbar) and bring the new string up to its note. Come up TO the pitch from below — if you overshoot, drop below and come back up. You\'ve got it when: the tuner reads in tune three plucks in a row.',
-                text_es: 'Abre el afinador (en la barra de herramientas) y sube la cuerda nueva hasta su nota. Llega AL tono desde abajo — si te pasas, baja y vuelve a subir. Lo tienes cuando: el afinador marca afinada tres punteos seguidos.',
+                text: 'Bring the new string to pitch:<ol><li>Open the tuner (toolbar).</li><li>Bring the string up to its note, coming up TO the pitch from below.</li><li>If you overshoot, drop below and come back up.</li></ol>You\'ve got it when: the tuner reads in tune three plucks in a row.',
+                text_es: 'Lleva la cuerda nueva a su tono:<ol><li>Abre el afinador (en la barra de herramientas).</li><li>Sube la cuerda hasta su nota, llegando AL tono desde abajo.</li><li>Si te pasas, baja y vuelve a subir.</li></ol>Lo tienes cuando: el afinador marca afinada tres punteos seguidos.',
                 skills: [4]
               },
               {
@@ -321,8 +319,8 @@ SETS.push(
               },
               {
                 label: 'The hold test', label_es: 'La prueba final',
-                text: 'Play something — a riff, a chord, one lap of the Daily 5. Then check the tuner again. In tune? The change is complete and the guitar is ready for the next player. You\'ve got it when: the string reads in tune AFTER being played.',
-                text_es: 'Toca algo — un riff, un acorde, una vuelta del Daily 5. Luego revisa el afinador otra vez. ¿Sigue afinada? El cambio está completo y la guitarra queda lista para quien siga. Lo tienes cuando: la cuerda marca afinada DESPUÉS de tocarla.',
+                text: 'Confirm the change holds:<ol><li>Play something — a riff, a chord, one lap of the Daily 5.</li><li>Check the tuner again.</li></ol>In tune? The change is complete and the guitar is ready for the next player. You\'ve got it when: the string reads in tune AFTER being played.',
+                text_es: 'Confirma que el cambio se mantiene:<ol><li>Toca algo — un riff, un acorde, una vuelta del Daily 5.</li><li>Revisa el afinador otra vez.</li></ol>¿Sigue afinada? El cambio está completo y la guitarra queda lista para quien siga. Lo tienes cuando: la cuerda marca afinada DESPUÉS de tocarla.',
                 skills: [4]
               }
             ]
