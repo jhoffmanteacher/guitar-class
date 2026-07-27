@@ -13,6 +13,51 @@ see `WORKFLOW.md` and the git commit log.
   bridge-pin drawing) are gone from the "seat the new string at the bridge"
   steps, leaving only the hand-sketched pictures and the step-by-step text.
 
+## 2026-07-27 — Site-wide audit: game fairness, saved progress, and Spanish fixes
+
+### Fixed
+
+- **Un-checking a step now sticks.** Before, un-marking a step you'd tapped by
+  mistake looked right on screen but the check mark came back the next time
+  you opened the site. It now stays un-checked everywhere.
+- **Note Runner plays fair with the mic timing offset.** Raising the offset
+  (like the game itself suggests when it says you're landing late) no longer
+  turns on-time notes into misses — and no longer drops you a level for them.
+- **Note Runner's count-in numbers now clear off the screen** after round 1,
+  instead of a big "4" sitting on top of the notes for every later round.
+- **Riff Runner "My guitar" and Note Hunt listen more carefully.** Yesterday's
+  faster note detection could grade the very start of your pick attack;
+  detection is still fast but now waits for the note itself.
+- **"Practice again" on a review card works from any module** — it used to
+  blank the whole lesson area if the skill came from a module you weren't in.
+- **"Practice it now" in the Listening Coach pop-up** now actually opens the
+  practice panel when you got there from a Station C drill.
+- **Module 8's Ear Spark check-off now checks the right skill** (Set 2's
+  "switch the thumb at a chord change") instead of silently marking a Set 1
+  skill.
+- **The practice timer keeps honest time** even if you switch tabs or close
+  the laptop lid — it counts real minutes now, not just moments the tab was
+  awake.
+- **Dragging the metronome's BPM slider no longer machine-guns clicks** while
+  it's running; the tempo just changes smoothly.
+- **The tuner on Song Journey pages turns the mic off** when you switch away
+  from the tab, like the main app already did.
+- **The "Mic on" dot only shows when the mic is actually on.**
+- **Chord names inside step instructions are tappable again** — the hover /
+  tap chord diagrams had quietly stopped working in step text (they still
+  worked in hints).
+- **"Happy Birthday" in Module 6 now asks for a waltz strum in 3** — the old
+  card suggested a 4-beat pattern that can't fit a 3/4 song.
+- **Seven Nation Army's Journey page no longer calls the low-E version "an
+  octave down"** — it isn't one; the wording now just says it sounds lower.
+- **Spanish fixes:** the Watchtower Journey page's closing note was cut off
+  mid-sentence in Spanish; string names in Modules 8–10 now use solfège
+  (cuerda Sol, Si, mi aguda) consistently; key names on Journey pages and in
+  Riff Runner cards now stay as letters (A menor, C mayor) to match the rest
+  of the site; Modules 10–12 titles match their menu capitalization.
+- **Module 2's diagrams now work offline on the first visit**, like Module
+  13's photos already did.
+
 ## 2026-07-27 — Riff Runner and Note Hunt: faster note detection
 
 ### Fixed

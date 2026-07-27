@@ -58,15 +58,15 @@ SETS.push(
           {
             label: 'Watch: p-i-m-a finger assignments', label_es: 'Mira: asignación de dedos p-i-m-a',
             text: 'Watch: <a href="https://youtu.be/K2Z3RZc5t-A" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (0:00–4:00). Pause when he assigns the fingers and place yours the same way: p on the bass, i-m-a on G-B-e.',
-            text_es: 'Mira: <a href="https://youtu.be/K2Z3RZc5t-A" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (0:00–4:00). Pausa cuando asigna los dedos y coloca los tuyos de la misma manera: p en el bajo, i-m-a en G-B-e.',
+            text_es: 'Mira: <a href="https://youtu.be/K2Z3RZc5t-A" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (0:00–4:00). Pausa cuando asigna los dedos y coloca los tuyos de la misma manera: p en el bajo, i-m-a en Sol, Si y mi aguda.',
             hint: 'Justin\'s assignment: thumb handles strings 6, 5, 4 (the bass) and i-m-a handle strings 3, 2, 1 (treble). One finger per string is the goal.',
             hint_es: 'La asignación de Justin: el pulgar se encarga de las cuerdas 6, 5, 4 (el bajo) y i-m-a se encargan de las cuerdas 3, 2, 1 (las agudas). Un dedo por cuerda es la meta.',
             skills: [2, 3],
             response: { type: 'mc', prompt: 'Which finger normally plucks the B string (string 2)?',
-              prompt_es: '¿Cuál dedo pulsa normalmente la cuerda B (cuerda 2)?',
+              prompt_es: '¿Cuál dedo pulsa normalmente la cuerda Si (cuerda 2)?',
               answer: 2,
               explain: 'Each finger gets a "home" string: i on G (3), m on B (2), a on high e (1). So the B string is m (middle).',
-              explain_es: 'Cada dedo tiene una cuerda "de base": i en G (3), m en B (2), a en mi aguda (1). Así que la cuerda B es m (medio).',
+              explain_es: 'Cada dedo tiene una cuerda "de base": i en Sol (3), m en Si (2), a en mi aguda (1). Así que la cuerda Si es m (medio).',
               choices: [
               'p (thumb)',
               'i (index)',
@@ -162,7 +162,7 @@ SETS.push(
           {
             label: 'Challenge 1 — Hand Shape', label_es: 'Reto 1 — Forma de la mano',
             text: '<ol><li>Put the pick down.</li><li>Rest your thumb on the low E and i-m-a on the G, B, and high e strings.</li><li>Hold for 30 seconds.</li></ol>You\'ve got it when: a relaxed, arched wrist with curved fingers — like holding an apple.',
-            text_es: '<ol><li>Deja la púa a un lado.</li><li>Apoya tu pulgar en la Mi grave e i-m-a en las cuerdas G, B y mi aguda.</li><li>Sostén la posición por 30 segundos.</li></ol>Lo tienes cuando: una muñeca relajada y arqueada con dedos curvados — como si sostuvieras una manzana.',
+            text_es: '<ol><li>Deja la púa a un lado.</li><li>Apoya tu pulgar en la Mi grave e i-m-a en las cuerdas Sol, Si y mi aguda.</li><li>Sostén la posición por 30 segundos.</li></ol>Lo tienes cuando: una muñeca relajada y arqueada con dedos curvados — como si sostuvieras una manzana.',
             hint: 'Your wrist should be arched (curved) — not flat against the guitar body. Fingers curved as if you\'re holding an apple. Relax.',
             hint_es: 'Tu muñeca debe estar arqueada (curvada) — no plana contra el cuerpo de la guitarra. Dedos curvados como si sostuvieras una manzana. Relájate.',
             stuck: 'Drop your hand to your side and shake it loose, then place it back on the strings without tensing up — relaxed first, accurate second.',
@@ -200,11 +200,11 @@ SETS.push(
           {
             label: 'Challenge 3 — Moving Bass', label_es: 'Reto 3 — Bajo en movimiento',
             text: '<ol><li>Pluck the low E string with p.</li><li>Then G-B-e with i-m-a.</li><li>Then the A string.</li><li>Then the D string with p — fingers staying put.</li></ol>You\'ve got it when: only the thumb moves to find each bass note — the i-m-a fingers stay anchored.',
-            text_es: '<ol><li>Pulsa la cuerda Mi grave con p.</li><li>Y luego G-B-e con i-m-a.</li><li>Luego la cuerda La.</li><li>Y luego la cuerda Re con p — los dedos se quedan quietos.</li></ol>Lo tienes cuando: solo el pulgar se mueve para encontrar cada nota grave — los dedos i-m-a se quedan anclados.',
+            text_es: '<ol><li>Pulsa la cuerda Mi grave con p.</li><li>Y luego Sol, Si y mi aguda con i-m-a.</li><li>Luego la cuerda La.</li><li>Y luego la cuerda Re con p — los dedos se quedan quietos.</li></ol>Lo tienes cuando: solo el pulgar se mueve para encontrar cada nota grave — los dedos i-m-a se quedan anclados.',
             hint: 'This is how you change chords later — the thumb finds the bass note of the chord (root) while the fingers stay anchored on the treble strings.',
             hint_es: 'Así es como cambiarás de acorde más adelante — el pulgar encuentra la nota grave del acorde (la raíz) mientras los dedos se quedan anclados en las cuerdas agudas.',
             stuck: 'Move just the thumb E → A → D with the fingers resting (not plucking) on G-B-e, until the thumb finds each bass without looking.',
-            stuck_es: 'Mueve solo el pulgar E → A → D con los dedos apoyados (sin pulsar) en G-B-e, hasta que el pulgar encuentre cada nota grave sin mirar.',
+            stuck_es: 'Mueve solo el pulgar Mi → La → Re con los dedos apoyados (sin pulsar) en Sol, Si y mi aguda, hasta que el pulgar encuentre cada nota grave sin mirar.',
             levelUp: 'Call out the bass string a beat before you play it, or shift E → A → D → A → E in a continuous loop without stopping.',
             levelUp_es: 'Anuncia la cuerda grave un tiempo antes de tocarla, o cambia E → A → D → A → E en un loop continuo sin detenerte.',
             skills: [2, 3, 6],
@@ -275,7 +275,7 @@ SETS.push(
         gotItWhen: 'you can say "p = thumb / bass strings, i = index / G, m = middle / B, a = ring / high e" without hesitating — and assign a finger to any string on demand.',
         gotItWhen_es: 'puedes decir "p = pulgar / cuerdas graves, i = índice / G, m = medio / B, a = anular / mi aguda" sin dudar — y asignar un dedo a cualquier cuerda cuando se te pida.',
         practice: { type: 'mc', prompt: 'In p-i-m-a notation, which finger handles the G string (string 3)?',
-          prompt_es: 'En la notación p-i-m-a, ¿cuál dedo se encarga de la cuerda G (cuerda 3)?',
+          prompt_es: 'En la notación p-i-m-a, ¿cuál dedo se encarga de la cuerda Sol (cuerda 3)?',
           choices: ['p (thumb)', 'i (index)', 'm (middle)', 'a (ring)'],
           choices_es: ['p (pulgar)', 'i (índice)', 'm (medio)', 'a (anular)'], answer: 1 } },
       { id: 'm8w1-s3', text: 'Pluck the low E string cleanly with my thumb (p)',
@@ -285,7 +285,7 @@ SETS.push(
         practice: { type: 'playSeq', label: 'Thumb only — low E · A · D bass strings', label_es: 'Solo el pulgar — cuerdas graves Mi · La · Re', bpm: 60,
           notes: [40, 45, 50] } },
       { id: 'm8w1-s4', text: 'Pluck the G, B, and high e strings with i, m, a fingers respectively',
-        text_es: 'Pulsar las cuerdas G, B y mi aguda con los dedos i, m, a respectivamente',
+        text_es: 'Pulsar las cuerdas Sol, Si y mi aguda con los dedos i, m, a respectivamente',
         gotItWhen: 'each finger goes to its assigned string without you having to look — and all three sound roughly equal in volume.',
         gotItWhen_es: 'cada dedo va a su cuerda asignada sin que tengas que mirar — y los tres suenan más o menos con el mismo volumen.',
         practice: { type: 'playSeq', label: 'i · m · a on G · B · e', label_es: 'i · m · a en G · B · e', bpm: 60,
@@ -293,14 +293,14 @@ SETS.push(
       { id: 'm8w1-s5', text: 'Pluck p-i-m-a in order on open strings at 60 BPM',
         text_es: 'Pulsar p-i-m-a en orden en cuerdas al aire a 60 BPM',
         gotItWhen: 'you can pluck low E (p), G (i), B (m), high e (a) in order, four times in a row at 60 BPM, all four notes equal in volume.',
-        gotItWhen_es: 'puedes pulsar Mi grave (p), G (i), B (m), mi aguda (a) en orden, cuatro veces seguidas a 60 BPM, con las cuatro notas iguales en volumen.',
-        practice: { type: 'playSeq', label: 'p-i-m-a (low E · G · B · e) at 60 BPM', label_es: 'p-i-m-a (Mi grave · G · B · e) a 60 BPM', bpm: 60,
+        gotItWhen_es: 'puedes pulsar Mi grave (p), Sol (i), Si (m), mi aguda (a) en orden, cuatro veces seguidas a 60 BPM, con las cuatro notas iguales en volumen.',
+        practice: { type: 'playSeq', label: 'p-i-m-a (low E · G · B · e) at 60 BPM', label_es: 'p-i-m-a (Mi grave · Sol · Si · mi aguda) a 60 BPM', bpm: 60,
           notes: [40, 55, 59, 64] } },
       { id: 'm8w1-s6', text: 'Move the thumb to a different bass string while i-m-a stay on G, B, e',
-        text_es: 'Mover el pulgar a una cuerda grave distinta mientras i-m-a se quedan en G, B, e',
+        text_es: 'Mover el pulgar a una cuerda grave distinta mientras i-m-a se quedan en Sol, Si y mi aguda',
         gotItWhen: 'when the chord changes from Em to Am, your thumb shifts from the low E string to the A string (finding the new root) while your i-m-a fingers stay anchored on G-B-e the whole time.',
-        gotItWhen_es: 'cuando el acorde cambia de Em a Am, tu pulgar se mueve de la cuerda Mi grave a la cuerda La (encontrando la nueva raíz) mientras tus dedos i-m-a se quedan anclados en G-B-e todo el tiempo.',
-        practice: { type: 'playSeq', label: 'p walks E → A → D while i·m·a stay on G · B · e', label_es: 'p camina por Mi → La → Re mientras i·m·a se quedan en G · B · e', bpm: 60,
+        gotItWhen_es: 'cuando el acorde cambia de Em a Am, tu pulgar se mueve de la cuerda Mi grave a la cuerda La (encontrando la nueva raíz) mientras tus dedos i-m-a se quedan anclados en Sol, Si y mi aguda todo el tiempo.',
+        practice: { type: 'playSeq', label: 'p walks E → A → D while i·m·a stay on G · B · e', label_es: 'p camina por Mi → La → Re mientras i·m·a se quedan en Sol · Si · mi aguda', bpm: 60,
           notes: [40, 55, 59, 64, 45, 55, 59, 64, 50, 55, 59, 64] } }
     ]
   },
@@ -587,7 +587,7 @@ SETS.push(
                 label: 'Ear Spark: name the bass string', label_es: 'Chispa auditiva: nombra el bajo',
                 text: '⚡ Ear Spark (optional, 2 min):<ol><li>Press play below — the deck draws a random mix of Am\'s A-string and D-string bass notes and plays them for you, and you never see which.</li><li>Name each one by ear before you check: A string is Am\'s root (low), D string is the passing bass a step higher — low vs. high bass is a fingerpicker\'s first ear skill.</li></ol>',
                 text_es: '⚡ Chispa auditiva (opcional, 2 min):<ol><li>Presiona reproducir abajo — la baraja saca una mezcla al azar de notas graves de Am en la cuerda La y en la cuerda Re, y las toca por ti, sin que veas cuáles son.</li><li>Nombra cada una de oído antes de revisar: la cuerda La es la raíz de Am (grave), la cuerda Re es el bajo de paso, un poco más agudo — grave vs. agudo en el bajo es la primera destreza auditiva de un fingerpicker.</li></ol>',
-                drill: { type: 'ear', pool: 'amBassAD', draw: 5, skill: 'm8w1-s6' }
+                drill: { type: 'ear', pool: 'amBassAD', draw: 5, skill: 'm8w2-s6' }
               }
             ]
           }
@@ -630,7 +630,7 @@ SETS.push(
       { id: 'm8w2-s4', text: 'Play the pattern over Am (thumb on A string)',
         text_es: 'Tocar el patrón sobre Am (pulgar en la cuerda La)',
         gotItWhen: 'you can switch your THUMB from low E to A string when the chord changes Em → Am, while i-m-a stay on G-B-e the whole time.',
-        gotItWhen_es: 'puedes cambiar tu PULGAR de la Mi grave a la cuerda La cuando el acorde cambia de Em → Am, mientras i-m-a se quedan en G-B-e todo el tiempo.',
+        gotItWhen_es: 'puedes cambiar tu PULGAR de la Mi grave a la cuerda La cuando el acorde cambia de Em → Am, mientras i-m-a se quedan en Sol, Si y mi aguda todo el tiempo.',
         practice: { type: 'playSeq', label: 'Am arpeggio p-i-m-a-m-i', label_es: 'Arpegio de Am p-i-m-a-m-i', bpm: 60,
           notes: [45, 57, 60, 64, 60, 57] } },
       { id: 'm8w2-s5', text: 'Keep the pattern steady at 70 BPM for 4+ bars',
@@ -643,7 +643,7 @@ SETS.push(
       { id: 'm8w2-s6', text: 'Switch the thumb to a new bass string at a chord change',
         text_es: 'Cambiar el pulgar a una nueva cuerda grave en un cambio de acorde',
         gotItWhen: 'at a chord change, only your thumb moves to find the new root note — i-m-a stay parked on G, B, high e. The pattern continues uninterrupted.',
-        gotItWhen_es: 'en un cambio de acorde, solo tu pulgar se mueve para encontrar la nueva nota raíz — i-m-a se quedan estacionados en G, B, mi aguda. El patrón continúa sin interrupciones.',
+        gotItWhen_es: 'en un cambio de acorde, solo tu pulgar se mueve para encontrar la nueva nota raíz — i-m-a se quedan estacionados en Sol, Si y mi aguda. El patrón continúa sin interrupciones.',
         practice: { type: 'mc', prompt: 'You\'re fingerpicking and the chord changes Em → Am. What changes for your PICKING hand?',
           prompt_es: 'Estás tocando fingerpicking y el acorde cambia de Em → Am. ¿Qué cambia para tu mano de PUNTEO?',
           choices: ['Only the thumb — it moves from the low E string to the A string; i-m-a stay put', 'All four fingers shift up one string', 'Nothing at all, ever', 'i-m-a move to new strings; the thumb stays'],
@@ -815,7 +815,7 @@ SETS.push(
           {
             label: 'Challenge 2 — Full Progression', label_es: 'Reto 2 — Progresión completa',
             text: '<ul><li>Play the 6-note arpeggio over a 4-chord progression — Am–C–D–F or C–Am–F–G — 1 bar each at 60 BPM.</li></ul>You\'ve got it when: the thumb finds each chord\'s root bass while the fingers stay on G-B-e.',
-            text_es: '<ul><li>Toca el arpegio de 6 notas sobre una progresión de 4 acordes — Am–C–D–F o C–Am–F–G — 1 compás cada uno a 60 BPM.</li></ul>Lo tienes cuando: el pulgar encuentra el bajo raíz de cada acorde mientras los dedos se quedan en G-B-e.',
+            text_es: '<ul><li>Toca el arpegio de 6 notas sobre una progresión de 4 acordes — Am–C–D–F o C–Am–F–G — 1 compás cada uno a 60 BPM.</li></ul>Lo tienes cuando: el pulgar encuentra el bajo raíz de cada acorde mientras los dedos se quedan en Sol, Si y mi aguda.',
             hint: 'For each chord, the thumb plays the ROOT bass note (Am = A string, C = A string, D = D string, F = D string). Fingers always on G-B-e.',
             hint_es: 'Para cada acorde, el pulgar toca la nota grave RAÍZ (Am = cuerda La, C = cuerda La, D = cuerda Re, F = cuerda Re). Los dedos siempre en G-B-e.',
             stuck: 'Drop to two chords (Am–C) and loop just that change until the pattern doesn\'t break, then add D and F.',
@@ -842,7 +842,7 @@ SETS.push(
             stuck: 'Pluck the bass and the treble separately first, slowly, then bring them closer until they land together.',
             stuck_es: 'Pulsa el bajo y la aguda por separado primero, despacio, y luego acércalos hasta que caigan juntos.',
             levelUp: 'Pinch on beats 1 & 3 and fill beats 2 & 4 with a single i-pluck on the B string — that\'s the Travis groove (its steady rhythmic feel) starting to form.',
-            levelUp_es: 'Pellizca en los tiempos 1 y 3 y rellena los tiempos 2 y 4 con una sola pulsación de i en la cuerda B — así empieza a formarse el groove del Travis picking (su sensación rítmica constante).',
+            levelUp_es: 'Pellizca en los tiempos 1 y 3 y rellena los tiempos 2 y 4 con una sola pulsación de i en la cuerda Si — así empieza a formarse el groove del Travis picking (su sensación rítmica constante).',
             skills: [2, 4]
           }
             ]
@@ -854,9 +854,9 @@ SETS.push(
           {
             label: 'Challenge 4 — Travis Thumb', label_es: 'Reto 4 — Pulgar Travis',
             text: '<ul><li>Warm up Travis picking on C — thumb alternating the A string, root C (beats 1 & 3) and the low E string, fret 3 = G, the 5th (beats 2 & 4), thumb-only at 60 BPM.</li></ul>That\'s the "root and the 5th" alternating bass from the intro video — both bass strings, no fingers yet. You\'ve got it when: a steady, even alternating thumb — then add an i-pluck on the B string on each "+".',
-            text_es: '<ul><li>Calienta el Travis picking en C — pulgar alternando entre la cuerda La, raíz C (tiempos 1 y 3) y la cuerda Mi grave, traste 3 = G, la 5ª (tiempos 2 y 4), solo el pulgar a 60 BPM.</li></ul>Ese es el bajo alternante de "raíz y la 5ª" del video introductorio — ambas cuerdas graves, todavía sin dedos. Lo tienes cuando: un pulgar alternante constante y parejo — y luego agrega una pulsación de i en la cuerda B en cada "+".',
+            text_es: '<ul><li>Calienta el Travis picking en C — pulgar alternando entre la cuerda La, raíz C (tiempos 1 y 3) y la cuerda Mi grave, traste 3 = G, la 5ª (tiempos 2 y 4), solo el pulgar a 60 BPM.</li></ul>Ese es el bajo alternante de "raíz y la 5ª" del video introductorio — ambas cuerdas graves, todavía sin dedos. Lo tienes cuando: un pulgar alternante constante y parejo — y luego agrega una pulsación de i en la cuerda Si en cada "+".',
             hint: 'Just the thumb! Once that\'s steady, add an i-pluck on the B string on the "+" of each beat. Travis picking adds fingers ON TOP of an already-grooving thumb.',
-            hint_es: '¡Solo el pulgar! Una vez que esté estable, agrega una pulsación de i en la cuerda B en el "+" de cada tiempo. El Travis picking agrega dedos ENCIMA de un pulgar que ya tiene groove.',
+            hint_es: '¡Solo el pulgar! Una vez que esté estable, agrega una pulsación de i en la cuerda Si en el "+" de cada tiempo. El Travis picking agrega dedos ENCIMA de un pulgar que ya tiene groove.',
             stuck: 'Thumb only, no fingers, as slow as you need — get the alternating bass rock-steady before adding anything on top.',
             stuck_es: 'Solo el pulgar, sin dedos, tan despacio como necesites — logra que el bajo alternante sea firme como una roca antes de agregar algo encima.',
             levelUp: 'Add the i-pluck on every "+", or carry the alternating thumb through a C → Am change without it stumbling.',
@@ -963,7 +963,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'In Travis picking on a C major chord, your thumb might alternate between which two strings?',
           prompt_es: 'En el Travis picking sobre un acorde de C mayor, ¿tu pulgar podría alternar entre cuáles dos cuerdas?',
           choices: ['B string and high e', 'A string (root C) and low E string (the 5th, G)', 'High e and G string', 'Low E and high e'],
-          choices_es: ['La cuerda B y la mi aguda', 'La cuerda La (raíz de C) y la cuerda Mi grave (la 5ª, G)', 'La mi aguda y la cuerda G', 'La Mi grave y la mi aguda'], answer: 1 } },
+          choices_es: ['La cuerda Si y la mi aguda', 'La cuerda La (raíz de C) y la cuerda Mi grave (la 5ª, G)', 'La mi aguda y la cuerda Sol', 'La Mi grave y la mi aguda'], answer: 1 } },
       { id: 'm8w3-s3', text: 'Keep the picking pattern steady through a chord change',
         text_es: 'Mantener el patrón de punteo estable a través de un cambio de acorde',
         gotItWhen: 'when the chord changes mid-song, you don\'t miss a single note in the picking pattern — the fretting hand catches up, but the picking pattern stays exact.',

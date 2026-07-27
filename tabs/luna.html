@@ -135,8 +135,8 @@ E |--1----5--------|</pre>
   <section class="layer l4 closed" id="layer-4">
     <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-4-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">4</span><span class="layer-title" data-es="Solo pentatónico">Pentatonic Solo</span><span class="layer-unit" data-es="Módulo 4">Module 4</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-4-body">
-      <p data-es="&quot;Luna&quot; vive en Fa mayor, y la relativa menor de Fa es Re — así que el Patrón 1 de la pentatónica de Re menor (raíz Re, traste 10 de la cuerda Mi grave) es tu caja (el bloque de trastes donde se ubica un patrón de escala), colocada en la posición más aguda del semestre.">"Luna" lives in F major, and F's relative minor is D — so D minor pentatonic Pattern 1 (root D, low E fret 10) is your box (the block of frets where a scale pattern sits), parked at the semester's highest position.</p>
-<pre class="tab"><span data-es="Tus tres notas para empezar — pentatónica de Re menor, Patrón 1 (posición 10)">Your three starting notes — D minor pentatonic, Pattern 1 (10th position)</span>
+      <p data-es="&quot;Luna&quot; vive en F mayor, y la relativa menor de F es D — así que el Patrón 1 de la pentatónica de D menor (raíz D, traste 10 de la cuerda Mi grave) es tu caja (el bloque de trastes donde se ubica un patrón de escala), colocada en la posición más aguda del semestre.">"Luna" lives in F major, and F's relative minor is D — so D minor pentatonic Pattern 1 (root D, low E fret 10) is your box (the block of frets where a scale pattern sits), parked at the semester's highest position.</p>
+<pre class="tab"><span data-es="Tus tres notas para empezar — pentatónica de D menor, Patrón 1 (posición 10)">Your three starting notes — D minor pentatonic, Pattern 1 (10th position)</span>
         D         F         G
 e |----------------------------------|
 B |----------------------------------|
@@ -144,9 +144,9 @@ G |----------------------------------|
 D |----------------------------------|
 A |--------------------10------------|
 E |--10------13-----------------------|</pre>
-      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; improvisa sobre el bucle de acordes — pulsa &#x25B6; &#x1F3B5; Pista de acompañamiento en la tarjeta de &quot;Luna&quot; en el Módulo 4 para tocar encima e improvisar. Termina cada frase en Re — la nota donde descansa la música — para que cada idea suene terminada."><b>Play it:</b> improvise over the chord loop — hit &#x25B6; &#x1F3B5; Backing track on the "Luna" card in Module 4 to play along and improvise over. End every phrase on D — the note the music rests on — so each idea sounds finished.</div>
-      <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Alterna solo Re y Fa (trastes 10 y 13 en la cuerda Mi grave) de ida y vuelta, cambiando solo el ritmo, hasta que aparezca una idea.">Trade just D and F (frets 10 and 13 on the low E) back and forth, changing only the rhythm, until an idea appears.</div></details>
-      <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Sostén la Fa (traste 13) un poco más para un sentimiento más triste y anhelante, o desliza toda la caja hasta la posición abierta y compara cómo suenan.">Hold the F (fret 13) a little longer for a sadder, longing feel, or slide the whole box down to open position and compare how they sound.</div></details>
+      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; improvisa sobre el bucle de acordes — pulsa &#x25B6; &#x1F3B5; Pista de acompañamiento en la tarjeta de &quot;Luna&quot; en el Módulo 4 para tocar encima e improvisar. Termina cada frase en D — la nota donde descansa la música — para que cada idea suene terminada."><b>Play it:</b> improvise over the chord loop — hit &#x25B6; &#x1F3B5; Backing track on the "Luna" card in Module 4 to play along and improvise over. End every phrase on D — the note the music rests on — so each idea sounds finished.</div>
+      <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Alterna solo D y F (trastes 10 y 13 en la cuerda Mi grave) de ida y vuelta, cambiando solo el ritmo, hasta que aparezca una idea.">Trade just D and F (frets 10 and 13 on the low E) back and forth, changing only the rhythm, until an idea appears.</div></details>
+      <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Sostén la F (traste 13) un poco más para un sentimiento más triste y anhelante, o desliza toda la caja hasta la posición abierta y compara cómo suenan.">Hold the F (fret 13) a little longer for a sadder, longing feel, or slide the whole box down to open position and compare how they sound.</div></details>
       <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="4">
         <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
@@ -211,10 +211,10 @@ E |-----------------|</pre>
 <!-- Floating Tuner/Timer/Metronome — same markup+behavior as the main app
      (fab-tools.js + tuner.js), so these practice aids are available here too. -->
 <div class="fab-group" id="fab-group">
-  <div class="tool-popup" id="metro-popup" role="dialog" aria-label="Metronome">
+  <div class="tool-popup" id="metro-popup" role="dialog" aria-label="Metronome" data-i18n-attr="aria-label:tools.metronome">
     <div class="tp-head">
       <span class="tp-title">&#x1F3B5; <span data-i18n="tools.metronome">Metronome</span></span>
-      <button class="tp-close" onclick="closePopup('metro')" aria-label="Close metronome">&#x2715;</button>
+      <button class="tp-close" onclick="closePopup('metro')" aria-label="Close metronome" data-i18n-attr="aria-label:tools.closeMetroAria">&#x2715;</button>
     </div>
     <div class="metro-dot" id="metro-dot"></div>
     <div class="bpm-row">
@@ -233,16 +233,16 @@ E |-----------------|</pre>
     <div class="tp-ctrl">
       <button class="tp-btn primary" id="metro-btn" onclick="toggleMetro()">&#x25B6; <span data-i18n="tools.start">Start</span></button>
     </div>
-    <div class="timer-presets" role="radiogroup" aria-label="Time signature" onkeydown="meterKeydown(event)">
+    <div class="timer-presets" role="radiogroup" aria-label="Time signature" data-i18n-attr="aria-label:tools.meterAria" onkeydown="meterKeydown(event)">
       <button type="button" class="meter-btn" id="meter-2" onclick="setMetroMeter(2)" role="radio" aria-checked="false" tabindex="-1">2/4</button>
       <button type="button" class="meter-btn sel" id="meter-4" onclick="setMetroMeter(4)" role="radio" aria-checked="true" tabindex="0">4/4</button>
       <button type="button" class="meter-btn" id="meter-3" onclick="setMetroMeter(3)" role="radio" aria-checked="false" tabindex="-1">3/4</button>
     </div>
   </div>
-  <div class="tool-popup" id="timer-popup" role="dialog" aria-label="Practice Timer">
+  <div class="tool-popup" id="timer-popup" role="dialog" aria-label="Practice Timer" data-i18n-attr="aria-label:tools.timerTitle">
     <div class="tp-head">
       <span class="tp-title">&#x23F1; <span data-i18n="tools.timerTitle">Practice Timer</span></span>
-      <button class="tp-close" onclick="closePopup('timer')" aria-label="Close timer">&#x2715;</button>
+      <button class="tp-close" onclick="closePopup('timer')" aria-label="Close timer" data-i18n-attr="aria-label:tools.closeTimerAria">&#x2715;</button>
     </div>
     <div class="timer-display" id="timer-display">0:30</div>
     <div class="timer-presets">
@@ -258,10 +258,10 @@ E |-----------------|</pre>
       <button class="tp-btn primary-g" id="timer-btn" onclick="toggleTimer()">&#x25B6; <span data-i18n="tools.start">Start</span></button>
     </div>
   </div>
-  <div class="tool-popup" id="tuner-popup" role="dialog" aria-label="Tuner">
+  <div class="tool-popup" id="tuner-popup" role="dialog" aria-label="Tuner" data-i18n-attr="aria-label:tools.tuner">
     <div class="tp-head">
       <span class="tp-title">&#x1F3B8; <span data-i18n="tools.tuner">Tuner</span></span>
-      <button class="tp-close" onclick="closePopup('tuner')" aria-label="Close tuner">&#x2715;</button>
+      <button class="tp-close" onclick="closePopup('tuner')" aria-label="Close tuner" data-i18n-attr="aria-label:tools.closeTunerAria">&#x2715;</button>
     </div>
     <div class="tuner-strings notranslate" id="tuner-strings" translate="no">
       <button class="ts-btn active" data-string="auto" onclick="selectTunerString('auto')" data-i18n="tools.auto">Auto</button>

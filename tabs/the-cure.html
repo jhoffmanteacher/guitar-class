@@ -132,8 +132,8 @@ E |-----------------1----3---------|</pre>
   <section class="layer l4 closed" id="layer-4">
     <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-4-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">4</span><span class="layer-title" data-es="Solo pentatónico">Pentatonic Solo</span><span class="layer-unit" data-es="Módulo 4">Module 4</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-4-body">
-      <p data-es="El arreglo didáctico está en La menor, así que la pentatónica de La menor encaja sobre cada acorde. La canción de Olivia es suave — así que tu solo también tiene que serlo. Empieza con tres notas y deja huecos de silencio entre nota y nota — el espacio es parte de la música.">The teaching arrangement sits in A minor, so A minor pentatonic fits over every chord. Olivia's song is soft — so your solo has to be too. Start with three notes and leave gaps of silence between notes — the space is part of the music.</p>
-<pre class="tab"><span data-es="Tus tres notas para empezar — pentatónica de La menor, Patrón 1 (5ª posición)">Your three starting notes — A minor pentatonic, Pattern 1 (5th position)</span>
+      <p data-es="El arreglo didáctico está en A menor, así que la pentatónica de A menor encaja sobre cada acorde. La canción de Olivia es suave — así que tu solo también tiene que serlo. Empieza con tres notas y deja huecos de silencio entre nota y nota — el espacio es parte de la música.">The teaching arrangement sits in A minor, so A minor pentatonic fits over every chord. Olivia's song is soft — so your solo has to be too. Start with three notes and leave gaps of silence between notes — the space is part of the music.</p>
+<pre class="tab"><span data-es="Tus tres notas para empezar — pentatónica de A menor, Patrón 1 (5ª posición)">Your three starting notes — A minor pentatonic, Pattern 1 (5th position)</span>
         A         C         D
 e |----------------------------------|
 B |----------------------------------|
@@ -141,9 +141,9 @@ G |----------------------------------|
 D |----------------------------------|
 A |--------------------5-------------|
 E |--5-------8-----------------------|</pre>
-      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; improvisa 8 compases sobre el ciclo de acordes casi susurrando — púa ligera, frases lentas, mucho espacio. Empieza o termina cada frase en La — esa es la 'nota base', donde la música descansa. Lo tienes cuando: tu nota más suave suena tan limpia como la más fuerte."><b>Play it:</b> improvise 8 bars over the chord loop at a whisper — light pick, slow phrases, lots of space. Start or end every phrase on A — that's 'home', the note the music rests on. You've got it when: your quietest note is as clean as your loudest.</div>
+      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; improvisa 8 compases sobre el ciclo de acordes casi susurrando — púa ligera, frases lentas, mucho espacio. Empieza o termina cada frase en A — esa es la 'nota base', donde la música descansa. Lo tienes cuando: tu nota más suave suena tan limpia como la más fuerte."><b>Play it:</b> improvise 8 bars over the chord loop at a whisper — light pick, slow phrases, lots of space. Start or end every phrase on A — that's 'home', the note the music rests on. You've got it when: your quietest note is as clean as your loudest.</div>
       <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Solo negras, frases de dos tiempos, silencios de dos tiempos.">Quarter notes only, two-beat phrases, two-beat rests.</div></details>
-      <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Prueba pregunta-y-respuesta — una pregunta de 2 compases que termina lejos de la nota base, y una respuesta de 2 compases que termina en La.">Try call-and-response — a 2-bar question that ends away from the home note, and a 2-bar answer that ends on A.</div></details>
+      <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Prueba pregunta-y-respuesta — una pregunta de 2 compases que termina lejos de la nota base, y una respuesta de 2 compases que termina en A.">Try call-and-response — a 2-bar question that ends away from the home note, and a 2-bar answer that ends on A.</div></details>
       <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="4">
         <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
@@ -210,10 +210,10 @@ E |-------------------------|</pre>
 <!-- Floating Tuner/Timer/Metronome — same markup+behavior as the main app
      (fab-tools.js + tuner.js), so these practice aids are available here too. -->
 <div class="fab-group" id="fab-group">
-  <div class="tool-popup" id="metro-popup" role="dialog" aria-label="Metronome">
+  <div class="tool-popup" id="metro-popup" role="dialog" aria-label="Metronome" data-i18n-attr="aria-label:tools.metronome">
     <div class="tp-head">
       <span class="tp-title">&#x1F3B5; <span data-i18n="tools.metronome">Metronome</span></span>
-      <button class="tp-close" onclick="closePopup('metro')" aria-label="Close metronome">&#x2715;</button>
+      <button class="tp-close" onclick="closePopup('metro')" aria-label="Close metronome" data-i18n-attr="aria-label:tools.closeMetroAria">&#x2715;</button>
     </div>
     <div class="metro-dot" id="metro-dot"></div>
     <div class="bpm-row">
@@ -232,16 +232,16 @@ E |-------------------------|</pre>
     <div class="tp-ctrl">
       <button class="tp-btn primary" id="metro-btn" onclick="toggleMetro()">&#x25B6; <span data-i18n="tools.start">Start</span></button>
     </div>
-    <div class="timer-presets" role="radiogroup" aria-label="Time signature" onkeydown="meterKeydown(event)">
+    <div class="timer-presets" role="radiogroup" aria-label="Time signature" data-i18n-attr="aria-label:tools.meterAria" onkeydown="meterKeydown(event)">
       <button type="button" class="meter-btn" id="meter-2" onclick="setMetroMeter(2)" role="radio" aria-checked="false" tabindex="-1">2/4</button>
       <button type="button" class="meter-btn sel" id="meter-4" onclick="setMetroMeter(4)" role="radio" aria-checked="true" tabindex="0">4/4</button>
       <button type="button" class="meter-btn" id="meter-3" onclick="setMetroMeter(3)" role="radio" aria-checked="false" tabindex="-1">3/4</button>
     </div>
   </div>
-  <div class="tool-popup" id="timer-popup" role="dialog" aria-label="Practice Timer">
+  <div class="tool-popup" id="timer-popup" role="dialog" aria-label="Practice Timer" data-i18n-attr="aria-label:tools.timerTitle">
     <div class="tp-head">
       <span class="tp-title">&#x23F1; <span data-i18n="tools.timerTitle">Practice Timer</span></span>
-      <button class="tp-close" onclick="closePopup('timer')" aria-label="Close timer">&#x2715;</button>
+      <button class="tp-close" onclick="closePopup('timer')" aria-label="Close timer" data-i18n-attr="aria-label:tools.closeTimerAria">&#x2715;</button>
     </div>
     <div class="timer-display" id="timer-display">0:30</div>
     <div class="timer-presets">
@@ -257,10 +257,10 @@ E |-------------------------|</pre>
       <button class="tp-btn primary-g" id="timer-btn" onclick="toggleTimer()">&#x25B6; <span data-i18n="tools.start">Start</span></button>
     </div>
   </div>
-  <div class="tool-popup" id="tuner-popup" role="dialog" aria-label="Tuner">
+  <div class="tool-popup" id="tuner-popup" role="dialog" aria-label="Tuner" data-i18n-attr="aria-label:tools.tuner">
     <div class="tp-head">
       <span class="tp-title">&#x1F3B8; <span data-i18n="tools.tuner">Tuner</span></span>
-      <button class="tp-close" onclick="closePopup('tuner')" aria-label="Close tuner">&#x2715;</button>
+      <button class="tp-close" onclick="closePopup('tuner')" aria-label="Close tuner" data-i18n-attr="aria-label:tools.closeTunerAria">&#x2715;</button>
     </div>
     <div class="tuner-strings notranslate" id="tuner-strings" translate="no">
       <button class="ts-btn active" data-string="auto" onclick="selectTunerString('auto')" data-i18n="tools.auto">Auto</button>
