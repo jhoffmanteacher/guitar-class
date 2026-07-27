@@ -312,6 +312,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .sh{font-size:0.875rem;color:var(--text2);margin-top:3px}
 .step-figure{display:block;margin:12px 0 4px;max-width:640px}
 .step-figure img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--border2);background:#fff}
+.step-figure.dual{display:flex;gap:10px}
+.step-figure.dual img{width:calc(50% - 5px)}
 .sh-list{font-size:0.875rem;color:var(--text2);margin-top:5px;padding-left:16px;display:flex;flex-direction:column;gap:3px}
 .sh-list li{line-height:1.5}
 .step-resp{margin-top:10px;background:var(--blue-bg);border-radius:8px;padding:10px 12px}

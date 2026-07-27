@@ -18,6 +18,15 @@ see `WORKFLOW.md` and the git commit log.
 - **Module 4's D String Map and G String Map challenges** now have the same
   fretboard diagram to go with the drill.
 
+## 2026-07-27 — Better hand-position pictures in Module 2
+
+### Changed
+
+- **The thumb-position picture in Module 2's finger workout** is now two
+  hand-drawn photos of an actual fretting hand — one showing where the thumb
+  sits behind the neck, one a close-up of the fingers arched over the frets —
+  replacing the old diagram.
+
 ## 2026-07-27 — More Spanish string-name cleanup
 
 ### Fixed
