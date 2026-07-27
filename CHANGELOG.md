@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Module 4: a map of pentatonic Pattern 1
+
+### Added
+
+- **Module 4's "Move the Box" challenge now has a fretboard diagram** of
+  Pattern 1 at frets 5–8 — finger numbers on every note, the three root-note
+  A's marked solid, in the same style as the string-map diagrams. English and
+  Spanish.
+
 ## 2026-07-27 — New diagrams: string names and the fingerpicking hand
 
 ### Added

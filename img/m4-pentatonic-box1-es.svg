@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="976" viewBox="0 0 640 244" font-family="Calibri,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+<rect width="640" height="244" fill="#ffffff"/>
+<circle cx="156" cy="105" r="3" fill="#585852" opacity="0.35"/>
+<circle cx="420" cy="105" r="3" fill="#585852" opacity="0.35"/>
+<line x1="90" y1="22" x2="90" y2="188" stroke="#585852" stroke-width="1"/>
+<line x1="222" y1="22" x2="222" y2="188" stroke="#585852" stroke-width="1"/>
+<line x1="354" y1="22" x2="354" y2="188" stroke="#585852" stroke-width="1"/>
+<line x1="486" y1="22" x2="486" y2="188" stroke="#585852" stroke-width="1"/>
+<line x1="618" y1="22" x2="618" y2="188" stroke="#585852" stroke-width="1"/>
+<line x1="90" y1="22" x2="618" y2="22" stroke="#585852" stroke-width="1" stroke-linecap="round"/>
+<text x="82" y="22" text-anchor="end" dominant-baseline="central" font-size="13" fill="#5e5e58">mi aguda</text>
+<line x1="90" y1="55.2" x2="618" y2="55.2" stroke="#585852" stroke-width="1" stroke-linecap="round"/>
+<text x="82" y="55.2" text-anchor="end" dominant-baseline="central" font-size="13" fill="#5e5e58">Si</text>
+<line x1="90" y1="88.4" x2="618" y2="88.4" stroke="#585852" stroke-width="1" stroke-linecap="round"/>
+<text x="82" y="88.4" text-anchor="end" dominant-baseline="central" font-size="13" fill="#5e5e58">Sol</text>
+<line x1="90" y1="121.6" x2="618" y2="121.6" stroke="#585852" stroke-width="1" stroke-linecap="round"/>
+<text x="82" y="121.6" text-anchor="end" dominant-baseline="central" font-size="13" fill="#5e5e58">Re</text>
+<line x1="90" y1="154.8" x2="618" y2="154.8" stroke="#585852" stroke-width="1" stroke-linecap="round"/>
+<text x="82" y="154.8" text-anchor="end" dominant-baseline="central" font-size="13" fill="#5e5e58">La</text>
+<line x1="90" y1="188" x2="618" y2="188" stroke="#585852" stroke-width="1" stroke-linecap="round"/>
+<text x="82" y="188" text-anchor="end" dominant-baseline="central" font-size="13" fill="#5e5e58">Mi grave</text>
+<g stroke="#3b6d11" stroke-width="1.8">
+<circle cx="156" cy="55.2" r="12" fill="#eaf3de"/><circle cx="552" cy="55.2" r="12" fill="#eaf3de"/>
+<circle cx="156" cy="88.4" r="12" fill="#eaf3de"/><circle cx="420" cy="88.4" r="12" fill="#eaf3de"/>
+<circle cx="156" cy="154.8" r="12" fill="#eaf3de"/><circle cx="420" cy="154.8" r="12" fill="#eaf3de"/>
+<circle cx="552" cy="22" r="12" fill="#eaf3de"/><circle cx="552" cy="188" r="12" fill="#eaf3de"/>
+</g>
+<circle cx="156" cy="22" r="12" fill="#3b6d11"/>
+<circle cx="420" cy="121.6" r="12" fill="#3b6d11"/>
+<circle cx="156" cy="188" r="12" fill="#3b6d11"/>
+<circle cx="156" cy="121.6" r="12" fill="#eaf3de" stroke="#3b6d11" stroke-width="1.8"/>
+<g font-size="13" font-weight="700" fill="#1a1a18" text-anchor="middle" dominant-baseline="central">
+<text x="156" y="55.2">1</text><text x="552" y="55.2">4</text>
+<text x="156" y="88.4">1</text><text x="420" y="88.4">3</text>
+<text x="156" y="121.6">1</text>
+<text x="156" y="154.8">1</text><text x="420" y="154.8">3</text>
+<text x="552" y="22">4</text><text x="552" y="188">4</text>
+</g>
+<g font-size="13" font-weight="700" fill="#ffffff" text-anchor="middle" dominant-baseline="central">
+<text x="156" y="22">1</text><text x="420" y="121.6">3</text><text x="156" y="188">1</text>
+</g>
+<g font-size="12" fill="#5e5e58" text-anchor="middle">
+<text x="156" y="210">5</text><text x="288" y="210">6</text><text x="420" y="210">7</text><text x="552" y="210">8</text>
+</g>
+<text x="320" y="232" font-size="12.5" fill="#1a1a18" text-anchor="middle" font-weight="600">A menor pentatónica, Patrón 1 &#160;—&#160; 1 = índice &#183; 3 = anular &#183; 4 = meñique &#160;—&#160; sólidos = raíz (A)</text>
+</svg>
