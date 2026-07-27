@@ -4706,9 +4706,6 @@ async function toggleSongsHub(){
   const row = (e) => {
     const idx = rowIdx++;
     const sg = e.song;
-    const mods = [...e.modules].sort((a, b) => a - b);
-    const modBtns = mods.map(m =>
-      `<button type="button" class="sh-mod-btn" onclick="songHubGoModule(${m})" title="${escAttr(t('hub.openModuleTitle',{n:m}))}">M${m}</button>`).join('');
     /* Index-based handlers (like loadModuleSongVid): song names with
        apostrophes (Sweet Child O' Mine…) break when inlined into onclick. */
     const vids = [];
@@ -4717,7 +4714,7 @@ async function toggleSongsHub(){
     if(sg.backingUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'backing')"><span class="svb-play">&#x25B6;</span>&#x1F3B5; ${t('hub.backing')}${sg.backingKey ? ` (${escHtml(sg.backingKey)})` : ''}</button>`);
     if(sg.originalUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'original')" title="${escAttr(t('songs.opensYoutube'))}"><span class="svb-play">&#x25B6;</span>${t('songs.original')} <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
     return `<div class="song-row"><div class="dot ${sg.core ? 'dc' : 'dch'}"></div>
-      <div><div class="sname">${escHtml(sg.name)}</div><div class="smeta">${sg.meta ? escHtml(sg.meta) + ' · ' : ''}${t('hub.taughtIn')} ${modBtns}</div></div>
+      <div><div class="sname">${escHtml(sg.name)}</div>${sg.meta ? `<div class="smeta">${escHtml(sg.meta)}</div>` : ''}</div>
       ${vids.length ? `<div class="song-vids">${vids.join('')}</div>` : ''}
       <span class="stag ${sg.core ? 'stag-core' : ''}">${escHtml(sg.type || t(sg.core ? 'hub.tagCore' : 'hub.tagChoice'))}</span></div>`;
   };

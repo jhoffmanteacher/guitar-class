@@ -1148,8 +1148,6 @@ body.viewer-open .fab-buttons{display:none}
 .sk-where-btn:hover{text-decoration:underline}
 li.step.step-flash{animation:stepFlash 2.6s ease-out}
 @keyframes stepFlash{0%,55%{background:var(--blue-bg);border-radius:8px}100%{background:transparent}}
-.sh-mod-btn{font-family:inherit;font-size:0.75rem;font-weight:700;padding:1px 8px;margin:0 2px;border-radius:10px;border:1px solid var(--blue-text);background:transparent;color:var(--blue-text);cursor:pointer}
-.sh-mod-btn:hover{background:var(--blue-bg)}
 .search-input{width:100%;font-family:inherit;font-size:0.9375rem;padding:9px 14px;border:1px solid var(--border2);border-radius:20px;background:var(--bg2);color:var(--text);margin-bottom:10px}
 .search-input:focus{outline:none;border-color:var(--blue-text)}
 .search-results{display:flex;flex-direction:column;gap:6px;max-height:420px;overflow-y:auto}
@@ -1526,10 +1524,10 @@ body.games-open{overflow:hidden}
   width:max(100%,44px);height:max(100%,44px)}
 /* Overlay hit area, capped at 36px tall — controls that sit inline with text
    or in tight rows, where a full 44px halo would swallow neighbors' taps */
-.song-vid-btn,.play-seq-btn,.coach-btn,.step-done-btn,.sh-mod-btn,.sk-toggle,
+.song-vid-btn,.play-seq-btn,.coach-btn,.step-done-btn,.sk-toggle,
 .sk-where-btn,.mr-review-link,.st-note-link,.sk-practice-btn,.rp-trigger,.step-fold-pill{position:relative}
 .song-vid-btn::after,.play-seq-btn::after,.coach-btn::after,.step-done-btn::after,
-.sh-mod-btn::after,.sk-toggle::after,.sk-where-btn::after,.mr-review-link::after,
+.sk-toggle::after,.sk-where-btn::after,.mr-review-link::after,
 .st-note-link::after,.sk-practice-btn::after,.rp-trigger::after,.step-fold-pill::after{
   content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   width:max(100%,44px);height:max(100%,36px)}
