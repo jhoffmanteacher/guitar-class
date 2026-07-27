@@ -232,6 +232,13 @@
     'progress.skillsMastered': { en: '{done} of {total} skills mastered across all {modules} modules.',
                                  es: '{done} de {total} destrezas dominadas en los {modules} módulos.' },
 
+    // ── Focus mode (station cards: one step at a time vs. the full list) ──
+    'fm.stepOf':               { en: 'Step {n} of {m}', es: 'Paso {n} de {m}' },
+    'fm.back':                 { en: '← Back', es: '← Atrás' },
+    'fm.next':                 { en: 'Next →', es: 'Siguiente →' },
+    'fm.listView':             { en: 'All steps', es: 'Todos los pasos' },
+    'fm.focusView':            { en: 'One at a time', es: 'De uno en uno' },
+
     // ── Tools: Metronome / Timer / Tuner ──
     'tools.metronome':     { en: 'Metronome', es: 'Metrónomo' },
     'tools.closeMetroAria':{ en: 'Close metronome', es: 'Cerrar el metrónomo' },

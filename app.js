@@ -1732,8 +1732,18 @@ function isTuningWarmupSection(sec, moduleNum){
 
 /* ── Stations ── */
 function buildStations(w, stationId){
-  const stepsHtml=(steps,ns,numOffset=0,allowCur=true)=>{
+  /* Focus mode is a site-wide view pref, read once per build: it only changes
+     which rows the card SHOWS, never which one is `.cur` (that stays "first
+     not-done step"), so the same markup serves both views and the toggle can
+     flip live without a rebuild. `openNum` is set by stepsHtml() below as it
+     emits the one open row, so the stepper bar can label it "Step n of m". */
+  const focusMode = stationViewIsFocus();
+  let openNum = 0;
+  const stepsHtml=(steps,ns,numOffset=0,allowCur=true,openIfNoCur=false)=>{
    const curIdx = allowCur ? steps.findIndex((st,idx)=>completed[`${w.id}-${ns}-${idx}`]!==true) : -1;
+   // Every step done → no `.cur` anywhere. Focus mode hides collapsed rows, so
+   // a card with nothing open would render empty: step 1 stays open instead.
+   const openIdx = curIdx >= 0 ? curIdx : (openIfNoCur ? 0 : -1);
    return steps.map((s,i)=>{
     const text=tf(s,'text').replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
       const safe=label.replace(/'/g,"\\'");
@@ -1844,6 +1854,7 @@ function buildStations(w, stationId){
     const doneKey = `${w.id}-${ns}-${i}`;
     const isDone = completed[doneKey] === true;
     const isCur = i === curIdx;
+    const isOpen = i === openIdx;
     // Mark-done is the last row of the step.
     const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${stepDoneHtml(isDone)}</button></div>`;
     const skillsAttr = (s.skills && s.skills.length) ? ` data-skills="${s.skills.join(',')}"` : '';
@@ -1851,8 +1862,9 @@ function buildStations(w, stationId){
     const num = numOffset + i + 1;
     const ariaLabel = t(isDone ? 'step.ariaLabelDone' : 'step.ariaLabel', { n: num, label });
     const statusIcon = isDone ? '&#x2713;' : String(num);
-    return `<li class="step${isDone ? ' step-done' : ''}${isCur ? ' cur' : ''}${isCur ? '' : ' collapsed'}"${skillsAttr} data-num="${num}">`
-      + `<button type="button" class="step-head" aria-expanded="${isCur}" onclick="toggleStepOpen(this)" aria-label="${escAttr(ariaLabel)}">`
+    if(isOpen) openNum = num;
+    return `<li class="step${isDone ? ' step-done' : ''}${isCur ? ' cur' : ''}${isOpen ? '' : ' collapsed'}"${skillsAttr} data-num="${num}">`
+      + `<button type="button" class="step-head" aria-expanded="${isOpen}" onclick="toggleStepOpen(this)" aria-label="${escAttr(ariaLabel)}">`
       + `<span class="step-status" aria-hidden="true">${statusIcon}</span>`
       + `<span class="step-label">${escHtml(label)}</span>`
       + `<span class="step-chev" aria-hidden="true">&#x25B6;</span>`
@@ -1894,15 +1906,21 @@ function buildStations(w, stationId){
     // one per section — once an earlier section's current step has claimed
     // it, every later section (even ones with their own incomplete steps)
     // stays fully collapsed until the student works down to it.
+    // Focus mode hides every section label except the one holding the open
+    // step (`.sec-cur`, kept in sync by syncStationFocus() as the student
+    // moves) — the heading of the group you're actually in, nothing else.
     let numOffset = 0, foundCur = false;
+    const noneLeft = focusMode && !real.some((sec,gi)=>sec.steps.some((st,idx)=>completed[`${w.id}-${baseNs}-sec${gi}-${idx}`]!==true));
     return reminder + real.map((sec,gi)=>{
     const ns = `${baseNs}-sec${gi}`;
     const allowCur = !foundCur;
-    const html = `<div class="stp-sec">
+    const hasCur = allowCur && sec.steps.some((st,idx)=>completed[`${w.id}-${ns}-${idx}`]!==true);
+    const openIfNoCur = noneLeft && gi === 0;   // whole station done → section 1, step 1 stays open
+    const html = `<div class="stp-sec${(hasCur || openIfNoCur) ? ' sec-cur' : ''}">
       <div class="stp-sec-label">${tf(sec,'title')}</div>
-      <ul class="steps">${stepsHtml(sec.steps, ns, numOffset, allowCur)}</ul>
+      <ul class="steps">${stepsHtml(sec.steps, ns, numOffset, allowCur, openIfNoCur)}</ul>
     </div>`;
-    if(allowCur && sec.steps.some((st,idx)=>completed[`${w.id}-${ns}-${idx}`]!==true)) foundCur = true;
+    if(hasCur) foundCur = true;
     numOffset += sec.steps.length;
     return html;
   }).join('');
@@ -1910,7 +1928,7 @@ function buildStations(w, stationId){
   const dp=(id,cls,badge,badgeClass,s)=>{
     const body = (s.sections && s.sections.length)
       ? sectionsHtml(s.sections, id)
-      : `<ul class="steps">${stepsHtml(s.steps, id)}</ul>`;
+      : `<ul class="steps">${stepsHtml(s.steps, id, 0, true, focusMode)}</ul>`;
     /* Stations don't have to happen in one sitting: first pass should be
        B→C (B teaches what C drills), but returning straight to C on a
        later day is spaced practice — say so, so nobody feels off-track. */
@@ -1919,11 +1937,28 @@ function buildStations(w, stationId){
       : '';
     const {total: stepTotal, done: stepDone} = stationStepCounts(id, s);
     const pillHtml = stepTotal > 0 ? `<span class="prog-pill" data-i18n="progress.stepsDone" data-i18n-params="${escAttr(JSON.stringify({done:stepDone,total:stepTotal}))}">${t('progress.stepsDone',{done:stepDone,total:stepTotal})}</span>` : '';
+    /* Stepper bar: where-am-I counter (focus mode only) + the view toggle,
+       which stays visible in BOTH views — it's the only way back to focus. */
+    const countParams = {n: openNum || 1, m: stepTotal};
+    const toggleKey = focusMode ? 'fm.listView' : 'fm.focusView';
+    const stepperHtml = stepTotal > 0 ? `<div class="dp-stepper">`
+      + `<span class="fm-count" aria-live="polite" data-i18n="fm.stepOf" data-i18n-params="${escAttr(JSON.stringify(countParams))}">${t('fm.stepOf', countParams)}</span>`
+      + `<button type="button" class="fm-toggle" onclick="toggleStationView()" data-i18n="${toggleKey}">${t(toggleKey)}</button>`
+      + `</div>` : '';
+    /* Back/Next lives once per card at the very end: in focus mode every other
+       row is display:none, so it lands directly under the open step's detail
+       (no per-step copies to keep in sync). Hidden entirely in list mode. */
+    const navHtml = stepTotal > 1 ? `<div class="dp-stepnav">`
+      + `<button type="button" class="fm-nav fm-back" onclick="stationStepNav(this,-1)" data-i18n="fm.back"${(openNum || 1) <= 1 ? ' hidden' : ''}>${t('fm.back')}</button>`
+      + `<button type="button" class="fm-nav fm-next" onclick="stationStepNav(this,1)" data-i18n="fm.next"${(openNum || 1) >= stepTotal ? ' hidden' : ''}>${t('fm.next')}</button>`
+      + `</div>` : '';
     return `
-    <div class="dp${cls}" id="${w.id}-dp-${id}">
+    <div class="dp${cls}${focusMode ? ' focus' : ''}" id="${w.id}-dp-${id}">
       <div class="dp-head"><span class="st-badge ${badgeClass}">${badge}</span><h3 class="dp-title">${tf(s,'title')}</h3>${pillHtml}</div>
+      ${stepperHtml}
       ${flexNote}
       ${body}
+      ${navHtml}
     </div>`;
   };
   // buildStations() is always called with an explicit stationId ('b' or
@@ -1961,62 +1996,174 @@ function toggleStepDone(btn, key){
   updateProgressPill(li);
 }
 
-// Close every other step in the same section/list, leaving `keep` untouched.
-function closeOtherSteps(ul, keep){
-  if(!ul) return;
-  ul.querySelectorAll(':scope > li.step').forEach(other=>{
+/* ── Focus mode ("one at a time") ──────────────────────────────────────
+   A site-wide view pref, not per-station: a student who wants one step on
+   screen wants it everywhere. Unset = focus, so the default install opens
+   on the calmer view; only an explicit 'list' opts out. */
+function stationViewMode(){
+  try{ return localStorage.getItem('stationView') === 'list' ? 'list' : 'focus'; }
+  catch(e){ return 'focus'; }
+}
+function stationViewIsFocus(){ return stationViewMode() === 'focus'; }
+
+/* Flip the pref and re-skin every card already on the page — the open step,
+   the responses typed into it and any running drill all survive, so this
+   never rebuilds. */
+function toggleStationView(){
+  const focus = !stationViewIsFocus();
+  try{ localStorage.setItem('stationView', focus ? 'focus' : 'list'); }catch(e){}
+  document.querySelectorAll('.dp').forEach(dp=>applyStationView(dp, focus));
+  renderChordBoxes();
+}
+function applyStationView(dp, focus){
+  dp.classList.toggle('focus', focus);
+  /* Entering focus mode: land on exactly one row. List view can leave none
+     open (everything collapsed → an empty card) or several ("Show me where"
+     lights up every step that teaches a skill), so pick the first open one,
+     or the first not-done step, and close the rest. */
+  if(focus){
+    const steps = [...dp.querySelectorAll('li.step')];
+    const target = dp.querySelector('li.step:not(.collapsed)')
+      || steps.find(li=>!li.classList.contains('step-done')) || steps[0];
+    if(target){
+      closeOtherStepsInDp(dp, target);
+      target.classList.remove('collapsed');
+      const h = target.querySelector('.step-head');
+      if(h) h.setAttribute('aria-expanded','true');
+    }
+  }
+  const toggle = dp.querySelector('.fm-toggle');
+  if(toggle){
+    const key = focus ? 'fm.listView' : 'fm.focusView';
+    toggle.setAttribute('data-i18n', key);
+    toggle.textContent = t(key);
+  }
+  syncStationFocus(dp);
+}
+
+/* Keep the focus-mode chrome pointed at whichever row is open: the one
+   section label that shows, the "Step n of m" counter, and whether Back /
+   Next are reachable. Safe (and cheap) to call in list mode too. */
+function syncStationFocus(dp){
+  if(!dp) return;
+  const steps = [...dp.querySelectorAll('li.step')];
+  const open = dp.querySelector('li.step:not(.collapsed)');
+  dp.querySelectorAll('.stp-sec').forEach(sec=>sec.classList.toggle('sec-cur', !!open && sec.contains(open)));
+  const count = dp.querySelector('.fm-count');
+  if(count){
+    const idx = open ? steps.indexOf(open) : -1;
+    const params = {n: open ? (Number(open.dataset.num) || idx + 1) : 1, m: steps.length};
+    count.setAttribute('data-i18n-params', JSON.stringify(params));
+    count.textContent = t('fm.stepOf', params);
+  }
+  const nav = dp.querySelector('.dp-stepnav');
+  if(nav){
+    const idx = open ? steps.indexOf(open) : -1;
+    const back = nav.querySelector('.fm-back'), next = nav.querySelector('.fm-next');
+    if(back) back.hidden = idx <= 0;
+    if(next) next.hidden = idx < 0 || idx >= steps.length - 1;
+  }
+}
+
+/* Back / Next: move the open row across the WHOLE card (sections included)
+   without touching done state — reading ahead isn't the same as finishing. */
+function stationStepNav(btn, dir){
+  const dp = btn.closest('.dp');
+  if(!dp) return;
+  const steps = [...dp.querySelectorAll('li.step')];
+  const open = dp.querySelector('li.step:not(.collapsed)');
+  const idx = open ? steps.indexOf(open) : -1;
+  const target = idx < 0 ? steps[0] : steps[idx + dir];
+  if(!target) return;
+  expandStepEl(target);
+  nudgeStepIntoView(target, true);
+}
+
+/* Collapsing a taller open step ABOVE this one shortens the page, which
+   can yank the just-opened step up under the sticky header. After layout
+   settles, nudge it back into view — scroll-margin-top (styles.css) makes
+   scrollIntoView land below the header, not at viewport top. `force` also
+   pulls a step that landed BELOW the fold up (Back/Next navigation). */
+function nudgeStepIntoView(li, force){
+  if(!li) return;
+  requestAnimationFrame(()=>{
+    const hdr = document.querySelector('.header');
+    const hdrH = hdr ? hdr.offsetHeight : 0;
+    const top = li.getBoundingClientRect().top;
+    if(top < hdrH || (force && top > window.innerHeight - 80)) li.scrollIntoView({block:'start'});
+  });
+}
+
+// Close every other step in the whole card, leaving `keep` untouched. Card-wide,
+// not per-section: two sections could each hold an open step otherwise, which is
+// exactly one step too many in either view.
+function closeOtherStepsInDp(root, keep){
+  if(!root) return;
+  root.querySelectorAll('li.step').forEach(other=>{
     if(other===keep) return;
     other.classList.add('collapsed');
     const h = other.querySelector('.step-head');
     if(h) h.setAttribute('aria-expanded','false');
   });
 }
+// A step always lives inside a .dp; the ul fallback just keeps this honest.
+function stepScope(li){ return li.closest('.dp') || li.closest('ul.steps'); }
 
 function toggleStepOpen(btn){
   const li = btn.closest('.step');
-  const ul = li.closest('ul.steps');
+  const dp = li.closest('.dp');
   const willOpen = li.classList.contains('collapsed');
-  closeOtherSteps(ul, li);
+  /* In focus mode the head is the open step's HEADING, not a collapse
+     control — closing it would leave the card blank, so taps no-op. */
+  if(!willOpen && dp && dp.classList.contains('focus')) return;
+  closeOtherStepsInDp(stepScope(li), li);
   li.classList.toggle('collapsed', !willOpen);
   btn.setAttribute('aria-expanded', String(willOpen));
+  syncStationFocus(dp);
   renderChordBoxes();
-  /* Collapsing a taller open step ABOVE this one shortens the page, which
-     can yank the just-opened step up under the sticky header. After layout
-     settles, nudge it back into view — scroll-margin-top (styles.css) makes
-     scrollIntoView land below the header, not at viewport top. */
-  if(willOpen) requestAnimationFrame(()=>{
-    const hdr = document.querySelector('.header');
-    const hdrH = hdr ? hdr.offsetHeight : 0;
-    if(li.getBoundingClientRect().top < hdrH) li.scrollIntoView({block:'start'});
-  });
+  if(willOpen) nudgeStepIntoView(li);
 }
 
-// Deep links (search, "Show me where") land on a collapsed row — open it in place.
-function expandStepEl(li){
+/* Deep links (search, "Show me where") land on a collapsed row — open it in
+   place. `keepOthers` lets one caller (showSkillLesson in list view) light up
+   several rows at once; everything else keeps the single-open rule. */
+function expandStepEl(li, keepOthers){
   if(!li) return;
-  closeOtherSteps(li.closest('ul.steps'), li);
+  if(!keepOthers) closeOtherStepsInDp(stepScope(li), li);
   li.classList.remove('collapsed');
   const head = li.querySelector('.step-head');
   if(head) head.setAttribute('aria-expanded','true');
+  syncStationFocus(li.closest('.dp'));
   renderChordBoxes();
 }
 
 // Mark done: collapse this row, drop its .cur badge, and open the next not-done step.
 function collapseAndAdvance(li){
-  li.classList.remove('cur');
-  li.classList.add('collapsed');
-  const head = li.querySelector('.step-head');
-  if(head) head.setAttribute('aria-expanded','false');
-  const ul = li.closest('ul.steps');
-  if(!ul) return;
-  const siblings = [...ul.querySelectorAll(':scope > li.step')];
-  const next = siblings.slice(siblings.indexOf(li)+1).find(sib=>!sib.classList.contains('step-done'));
+  const dp = li.closest('.dp');
+  const scope = stepScope(li);
+  const steps = scope ? [...scope.querySelectorAll('li.step')] : [li];
+  // `.cur` is "the resume point", so exactly one row wears it card-wide —
+  // marking a step done out of order used to leave a second one behind.
+  steps.forEach(st=>st.classList.remove('cur'));
+  // Card-wide, so finishing a section's last step advances into the next one
+  // instead of dead-ending at the section boundary.
+  const next = steps.slice(steps.indexOf(li)+1).find(sib=>!sib.classList.contains('step-done'));
+  const focus = !!dp && dp.classList.contains('focus');
+  // Nothing left to advance to: focus mode would go blank, so the finished
+  // step stays open with its ✓. List mode collapses it as it always has.
+  if(next || !focus){
+    li.classList.add('collapsed');
+    const head = li.querySelector('.step-head');
+    if(head) head.setAttribute('aria-expanded','false');
+  }
   if(next){
     next.classList.remove('collapsed');
     next.classList.add('cur');
     const nh = next.querySelector('.step-head');
     if(nh) nh.setAttribute('aria-expanded','true');
+    if(focus) nudgeStepIntoView(next);
   }
+  syncStationFocus(dp);
   renderChordBoxes();
 }
 
@@ -4713,8 +4860,12 @@ function showSkillLesson(wid, n){
   const matches = [...panel.querySelectorAll('li.step[data-skills]')]
     .filter(li => li.dataset.skills.split(',').includes(String(n)));
   if(!matches.length) return;
-  matches.forEach(li => {
-    expandStepEl(li);
+  /* Focus mode shows exactly one row, so "show me where" points at the first
+     step that teaches the skill; list view still lights up all of them. */
+  const dp = matches[0].closest('.dp');
+  const targets = (dp && dp.classList.contains('focus')) ? matches.slice(0, 1) : matches;
+  targets.forEach((li, i) => {
+    expandStepEl(li, i > 0);
     flashClass(li, 'step-flash', 2600);
   });
   matches[0].scrollIntoView({ block: 'center', behavior: 'smooth' });
