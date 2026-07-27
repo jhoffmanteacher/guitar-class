@@ -425,8 +425,8 @@ SETS.push(
             steps: [
           {
             label: 'Name the 6 strings', label_es: 'Nombra las 6 cuerdas',
-            text: 'Type the 6 string names from memory, low to high, in the box below. Mnemonic: Eddie Ate Dynamite, Good Bye Eddie. You\'ve got it when: you can type all six in order without peeking at the mnemonic.',
-            text_es: 'Escribe de memoria los nombres de las 6 cuerdas, de grave a aguda, en el cuadro de abajo. Regla mnemotécnica: Eddie Ate Dynamite, Good Bye Eddie. Lo tienes cuando: puedes escribir las seis en orden sin mirar la regla mnemotécnica.',
+            text: 'Type the 6 string names from memory, low to high, in the box below. Mnemonic: Eddie Ate Dynamite, Good Bye Eddie. You\'ve got it when: you can type all six in order without peeking at the mnemonic.<span class="step-figure"><img src="img/m1-string-names-en.svg" alt="Diagram of the six guitar strings side by side, thickest to thinnest: E, A, D, G, B, e — with one word of the mnemonic Eddie Ate Dynamite Good Bye Eddie under each string."></span>',
+            text_es: 'Escribe de memoria los nombres de las 6 cuerdas, de grave a aguda, en el cuadro de abajo. Regla mnemotécnica: Eddie Ate Dynamite, Good Bye Eddie. Lo tienes cuando: puedes escribir las seis en orden sin mirar la regla mnemotécnica.<span class="step-figure"><img src="img/m1-string-names-es.svg" alt="Diagrama de las seis cuerdas de la guitarra en orden, de la más gruesa a la más delgada: E, A, D, G, B, e — con una palabra de la regla mnemotécnica Eddie Ate Dynamite Good Bye Eddie bajo cada cuerda."></span>',
             stuck: 'Type just the first letters — E A D G B E — using "Eddie Ate Dynamite, Good Bye Eddie." Clear it, then type them again from memory.',
             stuck_es: 'Escribe solo las primeras letras — E A D G B E — usando "Eddie Ate Dynamite, Good Bye Eddie". Bórralo, y luego escríbelas otra vez de memoria.',
             levelUp: 'Say the six string names high to low (e B G D A E) without pausing.',
