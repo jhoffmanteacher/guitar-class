@@ -5,6 +5,22 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Assessment pieces: play them for the Listening Coach, not a camera
+
+### Changed
+
+- **The old "turn on the Chromebook camera and record yourself" instructions
+  are gone.** The Module 2 Watchtower assessment card no longer shows the
+  camera-recording diagram — instead, its hint points you to the 🎤 Listening
+  Coach button right below the TAB, which listens while you play and gives you
+  feedback on the spot. The Module 4 solo challenge still has you record a
+  take to listen back to, but it no longer implies you need the camera on —
+  audio is all it takes.
+- **Note Runner's mic timing slider now explains itself.** The tip under the
+  slider tells you what to do in both directions — told you're "late"? Raise
+  it. Told you're "rushing"? Lower it — and the "rushing" results message now
+  mentions the slider too, just like the "late" one always did.
+
 ## 2026-07-27 — Every practice quiz now explains the answer
 
 ### Added
