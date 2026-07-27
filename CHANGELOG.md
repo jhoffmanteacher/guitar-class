@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Module 8: a picture for the fingerpicking hand
+
+### Added
+
+- **Module 8's "Hand Shape" challenge now has a diagram** showing which
+  picking-hand finger takes which string — thumb (p) on low E and sitting
+  forward of the fingers, i–m–a on G, B, and high e, with a reminder that the
+  thumb also covers A and D. Available in English and Spanish.
+
 ## 2026-07-27 — Spanish polish: tooltips, the chord pop-up, and the 404 page
 
 ### Changed
