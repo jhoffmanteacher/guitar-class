@@ -352,12 +352,19 @@
   - [x] `MODULE_SONGS[6]` demotes Let It Be to `type:'Choice', core:false`
         in the one module that builds a challenge on its verse. Promoted to
         `type:'Core', core:true`.
-  - [ ] Five core-song challenge cards lack the inline Journey chip their
+  - [x] Five core-song challenge cards lack the inline Journey chip their
         siblings have: `m2w2` "the cure"/"Let It Be", `m4w2` "the cure",
-        `m5w2` "the cure", `m5w4` Full Run. **4 of 5 fixed** — only `m5w4`
-        Full Run (which references whichever of three songs the student
-        picked, not one fixed song) still lacks a chip; left open since a
-        single static link doesn't obviously fit that card.
+        `m5w2` "the cure", `m5w4` Full Run. **All 5 now fixed.** `m5w4` Full
+        Run (`module-5.js`, Challenge 4) was the holdout — it names whichever
+        of three songs the student picked, not one fixed song, so a single
+        static chip didn't fit. Resolved 2026-07-27 (Jonathan's call): dropped
+        the card's separate "optional: play your performance song" step
+        (that concept still lives elsewhere in the Set, e.g. "Map your
+        performance song's chords") and reworded the assessment step to "Pick
+        one of the three core songs," linking each song name inline to its
+        own Journey page (`tabs/let-it-be.html` / `tabs/luna.html` /
+        `tabs/the-cure.html`) rather than one trailing chip. EN/ES both
+        updated; `checks.mjs --skip-links --check` passes.
   - [x] `module-6.js:1044`-ish gives "Happy Birthday" Let It Be's
         progression (C–G–Am–F — Happy Birthday has no Am); `module-5.js`
         gives SNA "D–A–Em" when the site's own Layer 5 page teaches
