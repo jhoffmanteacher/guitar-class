@@ -513,17 +513,19 @@
 
 - [ ] **Note Runner — live guitar check (Jonathan, on a school Chromebook if
       possible).** The new adaptive arcade game shipped verified only against
-      headless fake-mic runs; nobody has played it with a real guitar yet.
+      headless fake-mic runs. **Progress 2026-07-27 (Mac, home):** timing
+      offset checked — Jonathan's Mac wants ~35 ms, so the slider works as
+      designed and now steps by 5 (the 70 ms default stays: it's tuned for
+      Chromebook mics — re-verify at school); **power-chord stages
+      guitar-verified good**; teacher account now sees every level unlocked
+      (isGatePreviewer in nrUnlocked) so any stage can be tested directly.
       What to check, in rough order:
-      1. **Mic timing offset** — play a few melody rounds dead on the beat;
-         if the results keep saying "late," raise the home-screen slider
-         until it stops and report the number (we'll bake it in as the
-         default instead of 70 ms).
+      1. **Mic timing offset** — ✅ done on the Mac (see above); repeat once
+         on a school Chromebook to confirm the 70 ms default is right there.
       2. **Stage movement feel** — do the 90%-up / 65%-down thresholds move
          you at a sensible pace? (`NR_UP_PCT` / `NR_DOWN_PCT` in coach.js.)
-      3. **Power-chord stages** — strums are louder and messier than single
-         notes; if grading feels wrong there specifically, that's the
-         chord-tone vote, not the offset.
+      3. **Power-chord stages** — ✅ guitar-verified good 2026-07-27: the
+         chord-tone vote grades real strums correctly.
       4. **Weak-spot re-dealing** — deliberately flub one note for a round
          or two, then confirm it starts showing up more and the results
          screen names it ("Coming back around until they're clean: …").
