@@ -48,6 +48,8 @@ const USAGE = `guitar-diagrams-cli.mjs
   chord <Name>            vertical chord box          e.g. chord Am
   string <kind>           12-fret single string       e.g. string A
                           kinds: ${Object.keys(GD.STRING_KIND_TO_NUM).join(' ')}
+  naturals <kind>         6-string board, naturals     e.g. naturals A
+                          circled on one string
   note <kind> <fret> <N>  one note on the fretboard   e.g. note A 7 E
   sheet [Name ...]        contact sheet of chords
   list                    chord names in the library
@@ -60,6 +62,7 @@ const opts = { theme };
 let svg = null;
 if (cmd === 'chord')       svg = GD.chordSvg(a[0], { ...opts, label: wantLabel ? a[0] : undefined });
 else if (cmd === 'string') svg = GD.localStringFretboardSvg(a[0], opts);
+else if (cmd === 'naturals') svg = GD.localStringNaturalsSvg(a[0], opts);
 else if (cmd === 'note')   svg = GD.localNoteSvg(a[0], a[1], a[2], opts);
 else if (cmd === 'sheet')  svg = GD.chordSheetSvg(a, opts);
 else if (cmd === 'list') { console.log(Object.keys(GD.CHORD_DIAGRAMS).join(' ')); process.exit(0); }
