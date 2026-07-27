@@ -303,7 +303,7 @@ SETS.push(
     unit_es: 'Módulo 11 · Acordes, tonalidades y armonía',
     title: 'Set 2',
     subtitle: 'The chord inventory trick · I–IV–V vs the famous four · Slash chords decoded',
-    subtitle_es: 'El truco del inventario de acordes · I–IV–V vs. los famosos cuatro · Acordes con bajo alterno descifrados',
+    subtitle_es: 'El truco del inventario de acordes · I–IV–V vs. los famosos cuatro · Acordes con barra diagonal descifrados',
     skillFocus: 'Match the inventory to a family · The home chord feels like rest · G/B = G chord, B bass',
     skillFocus_es: 'Compara el inventario con una familia · El acorde base se siente como reposo · G/B = acorde de G, bajo en B',
     comingSoon: false,
@@ -483,18 +483,18 @@ SETS.push(
           },
           {
             title: 'Decode a slash chord',
-            title_es: 'Descifra un acorde con bajo alterno',
+            title_es: 'Descifra un acorde con barra diagonal',
             steps: [
               {
-                label: 'Challenge 3 — Slash Chord Walk', label_es: 'Reto 3 — Caminata de acorde con bajo alterno',
+                label: 'Challenge 3 — Slash Chord Walk', label_es: 'Reto 3 — Caminata de acorde con barra diagonal',
                 text: '<ul><li>Play C → G/B → Am as a smooth bass-line move — notice the bass note walks down one step at a time (C, B, A) while the chords change around it.</li></ul>',
                 text_es: '<ul><li>Toca C → G/B → Am como un movimiento suave de línea de bajo — fíjate cómo la nota de bajo baja un paso a la vez (C, B, A) mientras los acordes cambian alrededor.</li></ul>',
                 hint: 'This is exactly what "the cure" does to glide from the G chord back home to Am, closing the loop — the slash chord is the piece that links the two chords smoothly.',
-                hint_es: 'Esto es exactamente lo que hace "the cure" para deslizarse del acorde de G de vuelta a la base en Am, cerrando el ciclo — el acorde con bajo alterno es la pieza que conecta los dos acordes suavemente.',
+                hint_es: 'Esto es exactamente lo que hace "the cure" para deslizarse del acorde de G de vuelta a la base en Am, cerrando el ciclo — el acorde con barra diagonal es la pieza que conecta los dos acordes suavemente.',
                 stuck: 'Play C and Am first without the G/B in between, then add it back and listen for how much smoother the move feels.',
                 stuck_es: 'Toca C y Am primero sin el G/B en medio, y luego agrégalo de vuelta y escucha cuánto más suave se siente el movimiento.',
                 levelUp: 'Try the reverse walk, Am → G/B → C, or find another slash chord to decode.',
-                levelUp_es: 'Prueba la caminata al revés, Am → G/B → C, o encuentra otro acorde con bajo alterno para descifrar.',
+                levelUp_es: 'Prueba la caminata al revés, Am → G/B → C, o encuentra otro acorde con barra diagonal para descifrar.',
                 skills: [5],
                 chords: [
                   { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
@@ -546,7 +546,7 @@ SETS.push(
 
     assessment: {
       goal: 'Finds a key from a chord inventory · Recognizes I–IV–V and I–V–vi–IV · Decodes a slash chord',
-      goal_es: 'Encuentra una tonalidad a partir de un inventario de acordes · Reconoce I–IV–V y I–V–vi–IV · Descifra un acorde con bajo alterno',
+      goal_es: 'Encuentra una tonalidad a partir de un inventario de acordes · Reconoce I–IV–V y I–V–vi–IV · Descifra un acorde con barra diagonal',
       performance: 'Key detective: pull up the chord list of a real song you haven\'t analyzed yet; deduce the key and defend your answer.',
       selfCheck: 'A song uses D, G, A, and Bm — what key? What does the B in G/B do?',
       selfCheck_es: 'Una canción usa D, G, A y Bm — ¿qué tonalidad? ¿Qué hace la B en G/B?',
@@ -585,7 +585,7 @@ SETS.push(
           explain: 'Key = the resting place your ear hears, not the first chord (plenty of songs start away from home). Hum along and notice where the loop feels finished — that\'s Am.',
           explain_es: 'La tonalidad = el punto de descanso que escucha tu oído, no el primer acorde (muchas canciones empiezan lejos de la base). Tararea y nota dónde la vuelta se siente terminada — eso es Am.' } },
       { id: 'm11w2-s5', text: 'Explain what a slash chord tells you (chord / bass note)',
-        text_es: 'Explicar qué te dice un acorde con bajo alterno (acorde / nota de bajo)',
+        text_es: 'Explicar qué te dice un acorde con barra diagonal (acorde / nota de bajo)',
         gotItWhen: 'you can say that in a chord like G/B, G is the shape you finger and B is the lowest note you make sure sounds — and play C to G/B to Am with the bass walking smoothly down.',
         gotItWhen_es: 'puedes decir que en un acorde como G/B, G es la forma que digitas y B es la nota más grave que aseguras que suene — y tocar C a G/B a Am con el bajo bajando suavemente.',
         practice: { type: 'mc', prompt: 'In Am/E, your lowest sounding note should be:', prompt_es: 'En Am/E, tu nota más grave debería ser:', choices: ['A', 'C', 'E', 'G'], choices_es: ['A', 'C', 'E', 'G'], answer: 2 } },
@@ -1001,7 +1001,7 @@ MODULE_REVIEWS[11] = {
     { id: 'mr11-s1', text: 'I can build a triad (root–3rd–5th) from any major scale', text_es: 'Puedo construir una tríada (raíz–3ª–5ª) a partir de cualquier escala mayor', set: 'm11w1' },
     { id: 'mr11-s2', text: 'I can label a chord progression with Roman numerals, including "Luna"\'s F–Am vamp as I–iii', text_es: 'Puedo etiquetar una progresión de acordes con números romanos, incluyendo el vamp F–Am de "Luna" como I–iii', set: 'm11w1' },
     { id: 'mr11-s3', text: 'I can figure out a song\'s key from the chords it uses', text_es: 'Puedo averiguar la tonalidad de una canción a partir de los acordes que usa', set: 'm11w2' },
-    { id: 'mr11-s4', text: 'I can read a slash chord (like G/B) and know which note goes on the bottom', text_es: 'Puedo leer un acorde con bajo alterno (como G/B) y saber qué nota va abajo', set: 'm11w2' },
+    { id: 'mr11-s4', text: 'I can read a slash chord (like G/B) and know which note goes on the bottom', text_es: 'Puedo leer un acorde con barra diagonal (como G/B) y saber qué nota va abajo', set: 'm11w2' },
     { id: 'mr11-s5', text: 'I can name a barre chord\'s root from either the E-shape or A-shape fret', text_es: 'Puedo nombrar la raíz de un acorde con cejilla a partir del traste en forma de E o de A', set: 'm11w3' },
     { id: 'mr11-s6', text: 'I can play a I–IV–V progression in a randomly drawn key using open or barre shapes', text_es: 'Puedo tocar una progresión I–IV–V en una tonalidad sacada al azar usando formas abiertas o con cejilla', set: 'm11w3' },
     { id: 'mr11-s7', text: 'I can comp a 12-bar blues in A with shuffle feel, including the quick-change and turnaround', text_es: 'Puedo acompañar un blues de 12 compases en A con sensación de shuffle, incluyendo el cambio rápido y el giro', set: 'm11w3' }

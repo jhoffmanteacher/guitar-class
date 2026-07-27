@@ -71,5 +71,5 @@ const WARMUP_BANK = [
   { label: 'Open-string skip picking', label_es: 'Pulsado salteado en cuerdas al aire', bpm: 60,
     notes: [40, 50, 45, 55, 50, 59, 55, 64],
     text: 'Picking hand only: E then D, A then G, D then B, G then e — skip a string on every jump, alternate picking. Slow and even is better than fast and sloppy.',
-    text_es: 'Solo la mano que puntea: Mi grave y luego Re, La y luego Sol, Re y luego Si, Sol y luego mi agudo — salta una cuerda en cada salto, alternando la púa. Lento y parejo es mejor que rápido y descuidado.' }
+    text_es: 'Solo la mano que puntea: Mi grave y luego Re, La y luego Sol, Re y luego Si, Sol y luego mi aguda — salta una cuerda en cada salto, alternando la púa. Lento y parejo es mejor que rápido y descuidado.' }
 ];

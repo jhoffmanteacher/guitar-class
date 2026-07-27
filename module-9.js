@@ -640,8 +640,8 @@ SETS.push(
                   answer: 2,
                   explain: 'B(0)→C(1)→D(3)→E(5). B at fret 5 = E, the open high-e — that\'s exactly how you tune by ear.',
                   explain_es: 'B(0)→C(1)→D(3)→E(5). B en el traste 5 = E, la mi aguda al aire — así es exactamente como afinas de oído.',
-                  choices: ['G', 'D', 'High e', 'A'],
-                  choices_es: ['G', 'D', 'Mi aguda', 'A'] }
+                  choices: ['G', 'D', 'high e', 'A'],
+                  choices_es: ['Sol', 'Re', 'Mi aguda', 'La'] }
               },
               {
                 label: 'Try fret 7 on every string', label_es: 'Prueba el traste 7 en cada cuerda',

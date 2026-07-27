@@ -5,6 +5,30 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Spanish polish: tooltips, the chord pop-up, and the 404 page
+
+### Changed
+
+- **Hover tips now switch to Spanish** — the small labels that appear when you
+  rest the mouse on buttons (play a note, print a set or routine, "Show me
+  where", the Listening Coach button, and more) used to stay in English.
+- **The chord pop-up viewer speaks Spanish** — its "Play chord" button and the
+  message shown when a chord has no diagram.
+- **The "page not found" page appears in Spanish** for students using Español.
+- **"Slash chord" now has one Spanish name everywhere**: *acorde con barra
+  diagonal*. Module 11 used to call it *acorde con bajo alterno*, which was too
+  easy to confuse with the fingerpicking term *bajo alternante*.
+
+### Fixed
+
+- **"mi aguda"** — the high e string was called "mi agudo" in a few spots
+  (the Fret Zap game, diagram labels, Module 13, and a warm-up), and a Module 9
+  quiz now names all its strings in solfège (Sol, Re, Mi aguda, La).
+- **Module 2's two hand photos now stack on phones** instead of shrinking to
+  half width side by side.
+- **Module 4's two fretboard diagrams now work offline** — they were the only
+  figures missing from the offline bundle.
+
 ## 2026-07-27 — Module 2's teaching diagrams now speak Spanish
 
 ### Changed

@@ -42,7 +42,7 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-<a class="skip-link" href="#main-content">Skip to content</a>
+<a class="skip-link" href="#main-content" data-i18n="a11y.skipToContent">Skip to content</a>
 <script defer src="firebase-config.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script defer src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -278,7 +278,7 @@
         <div class="rp-actions">
           <a class="rp-newtab" id="rp-newtab" href="#" target="_blank" rel="noopener">
             <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M5 2H2a1 1 0 00-1 1v7a1 1 0 001 1h7a1 1 0 001-1V7M8 1h3m0 0v3m0-3L5 7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Open in new tab
+            <span data-i18n="panel.openNewTab">Open in new tab</span>
           </a>
           <button class="rp-close" id="rp-close" onclick="clearPanel()" title="Close" aria-label="Close viewer" data-i18n-attr="title:panel.close;aria-label:panel.closeAria">&#x2715;</button>
         </div>

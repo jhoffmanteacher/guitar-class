@@ -36,6 +36,19 @@
     document.getElementById('nf-home').href = root + 'index.html';
   });
 })();
+/* Match the student's saved language. This page is standalone (no i18n.js),
+   so it uses the Song Journey pages' data-es pattern: the Español toggle on
+   the main site stores 'gc-lang', and we swap each tagged element's text. */
+document.addEventListener('DOMContentLoaded', function(){
+  var es = false;
+  try { es = localStorage.getItem('gc-lang') === 'es'; } catch(e){}
+  if(!es) return;
+  document.documentElement.lang = 'es';
+  document.title = 'Página no encontrada · Clase de guitarra · Sequoia HS';
+  document.querySelectorAll('[data-es]').forEach(function(el){
+    el.textContent = el.getAttribute('data-es');
+  });
+});
 </script>
 <style>
   body{min-height:100vh;display:flex;flex-direction:column}
@@ -57,10 +70,10 @@
 </header>
 <main class="notfound-main">
   <div class="notfound-emoji">&#x1F3B8;</div>
-  <h1>That page isn't here &mdash; but your guitar class is.</h1>
-  <p>The link you followed doesn't match a page on this site anymore.</p>
-  <a class="notfound-home" id="nf-home" href="./index.html">Back to Guitar Class</a>
-  <p class="notfound-sub">Looking for a song? All six Song Journeys are on the home page.</p>
+  <h1 data-es="Esa página no está aquí — pero tu clase de guitarra sí.">That page isn't here &mdash; but your guitar class is.</h1>
+  <p data-es="El enlace que seguiste ya no corresponde a una página de este sitio.">The link you followed doesn't match a page on this site anymore.</p>
+  <a class="notfound-home" id="nf-home" href="./index.html" data-es="Volver a la clase de guitarra">Back to Guitar Class</a>
+  <p class="notfound-sub" data-es="¿Buscas una canción? Los seis Recorridos de las canciones están en la página principal.">Looking for a song? All six Song Journeys are on the home page.</p>
 </main>
 </body>
 </html>

@@ -658,7 +658,7 @@ function renderTabBlock(notes, seqOffset){
   notes.forEach((n, ci) => {
     const midis = (Array.isArray(n.midi) ? n.midi : [n.midi]).map(Number);
     const midisAttr = escAttr(JSON.stringify(midis));
-    noteBtns.push(`<button type="button" class="tab-note-btn" data-seq="${off + ci}" data-midis="${midisAttr}" onclick="playBeat(this)" title="Play ${escAttr(n.note)}">${escHtml(n.note)}<span class="tab-spkr">&#x1F50A;</span></button>`);
+    noteBtns.push(`<button type="button" class="tab-note-btn" data-seq="${off + ci}" data-midis="${midisAttr}" onclick="playBeat(this)" title="${escAttr(t('tab.playNote',{note:n.note}))}">${escHtml(n.note)}<span class="tab-spkr">&#x1F50A;</span></button>`);
   });
   return `
     <div class="tab-board">
@@ -711,7 +711,7 @@ function buildTab(spec, opts){
     // either — same rationale as noCoach below.
     const hasHolds = allMidis.some(n => n && typeof n === 'object' && !Array.isArray(n));
     controlsHtml = `<div class="tab-controls"><span class="bpm-control-group">` +
-      `<button type="button" class="play-seq-btn" data-midis="${escAttr(midisAttr)}" onclick="playSequenceFromGroup(this)" title="Play this tab">&#x25B6; ${t('tab.playTab')}</button>` +
+      `<button type="button" class="play-seq-btn" data-midis="${escAttr(midisAttr)}" onclick="playSequenceFromGroup(this)" title="${escAttr(t('tab.playTabTitle'))}">&#x25B6; ${t('tab.playTab')}</button>` +
       renderBpmControl(keyPrefix, bpm, minBpm, maxBpm) +
       // noCoach: tabs with slurred notes (hammer-ons/pull-offs) aren't
       // one-pick-per-note, so a mic check would fail correct technique.
@@ -1581,7 +1581,7 @@ function buildComingSoon(w){
 function buildSet(w){
   // Small "Set N" pill, then the topic as the large title, then generalized
   // skill bullets (the old "I CAN…" objective line is no longer shown).
-  const printBtn = `<button type="button" class="print-set-btn" onclick="printSet('${w.id}')" title="Print this set as a one-page handout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg><span data-i18n="btn.printSet">${t('btn.printSet')}</span></button>`;
+  const printBtn = `<button type="button" class="print-set-btn" onclick="printSet('${w.id}')" title="${escAttr(t('btn.printSetTitle'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg><span data-i18n="btn.printSet">${t('btn.printSet')}</span></button>`;
   const pill = `<div class="obj-set">${w.title ? `<span class="obj-set-tag" data-i18n-setlabel="${escAttr(w.title)}" translate="no">${escHtml(tSetLabel(w.title))}</span>` : ''}${printBtn}</div>`;
   const titleHtml = w.unit ? `<h2 class="obj-main obj-topic">${tf(w,'unit')}</h2>` : '';
   const items = (tf(w,'skillFocus')||'').split(' · ')
@@ -1602,7 +1602,7 @@ function buildSet(w){
         const names = entries.map(t => {
           const url = t.journey ? (t.layer ? `${t.journey}#layer-${t.layer}` : t.journey) : null;
           return url
-            ? `<a class="song-thread-link" href="${escAttr(url)}" target="_blank" rel="noopener" title="Open this layer on the Song Journey page">${escHtml(t.name)}</a>`
+            ? `<a class="song-thread-link" href="${escAttr(url)}" target="_blank" rel="noopener" title="${escAttr(t('songs.openLayerTitle'))}">${escHtml(t.name)}</a>`
             : `<span class="song-thread-name">${escHtml(t.name)}</span>`;
         }).join(', ');
         const layers = entries.map(t => t.layer);
@@ -1734,7 +1734,7 @@ function buildStations(w, stationId){
       const safe=label.replace(/'/g,"\\'");
       // data-ext links can't be embedded (official recordings block it) — open on YouTube in a new tab.
       if(/data-ext/.test(attrs)){
-        return `<button class="rp-trigger" onclick="window.open('${url}','_blank','noopener')" title="Opens on YouTube in a new tab">&#x25B6; ${label} <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`;
+        return `<button class="rp-trigger" onclick="window.open('${url}','_blank','noopener')" title="${escAttr(t('panel.opensOnYouTube'))}">&#x25B6; ${label} <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`;
       }
       return `<button class="rp-trigger" onclick="loadPanel('youtube','${url}','${safe}','YouTube')">&#x25B6; ${label}</button>`;
     });
@@ -2302,7 +2302,7 @@ function buildModuleRoutine(moduleNum){
   return `<div class="routine-card">
     <div class="routine-head">
       <span class="routine-title">&#x1F552; ${t('routine.title')}</span>
-      <button type="button" class="routine-print-btn" onclick="printRoutine()" title="Print this routine">&#x1F5A8; ${t('routine.print')}</button>
+      <button type="button" class="routine-print-btn" onclick="printRoutine()" title="${escAttr(t('routine.printTitle'))}">&#x1F5A8; ${t('routine.print')}</button>
     </div>
     <ol class="routine-list">${items}</ol>
     <div class="routine-foot">${t('routine.foot')}</div>
@@ -2365,7 +2365,7 @@ function buildModuleReview(mr){
     const lvl=progress[s.id];
     const btn=(n)=>`<button class="mr-rb lvl${n}${lvl===String(n)?' active':''}" onclick="setSkillLevel('${s.id}','${mrId}','${n}')">${n}</button>`;
     const reviewLink = s.set
-      ? `<button type="button" class="mr-review-link" onclick="goToSet('${s.set}')" title="Go back to the lesson for this skill">&#8617; ${t('review.reviewThis')}</button>`
+      ? `<button type="button" class="mr-review-link" onclick="goToSet('${s.set}')" title="${escAttr(t('review.backToLesson'))}">&#8617; ${t('review.reviewThis')}</button>`
       : '';
     return `<div class="mr-row">
       <div class="mr-skill-text"><span class="mr-q-num">${qNum}.</span> ${tf(s,'text')}${reviewLink}</div>
@@ -2649,7 +2649,7 @@ function buildChecklist(w){
         <button type="button" class="sk-practice-btn" onclick="togglePracticePanel('${s.id}', this)" aria-expanded="false" aria-controls="pp-${s.id}"><span class="sk-practice-btn-arrow">▸</span> ${t('step.practiceThis')}</button>` : '';
     const skillNum = (s.id.match(/-s(\d+)$/) || [])[1];
     const whereBtn = (skillNum && skillTaughtStation(w, Number(skillNum)))
-      ? `<button type="button" class="sk-where-btn" onclick="showSkillLesson('${w.id}', ${skillNum})" title="Jump to the steps that teach this">&#x1F4CD; <span data-i18n="skill.showMeWhere">${t('skill.showMeWhere')}</span></button>` : '';
+      ? `<button type="button" class="sk-where-btn" onclick="showSkillLesson('${w.id}', ${skillNum})" title="${escAttr(t('skill.jumpToSteps'))}">&#x1F4CD; <span data-i18n="skill.showMeWhere">${t('skill.showMeWhere')}</span></button>` : '';
     const practicePanel = s.practice ? renderPracticePanel(s.practice, s.id, w.id) : '';
     return `<div class="skill-row" data-sid="${escAttr(s.id)}">
       <div class="sktxt"><div class="sn" style="flex-shrink:0;margin-top:0;margin-right:8px">${i+1}</div><div class="sk-body"><div class="sk-label">${skillText}</div>${helper}${practiceBtn}${whereBtn}</div></div>
@@ -4502,7 +4502,7 @@ function stepSkillIds(w, step){
 }
 function coachBtnHtml(midisJson, tabNotesJson, skillIds){
   const tabAttr = tabNotesJson ? ` data-tabnotes="${escAttr(tabNotesJson)}"` : '';
-  return `<button type="button" class="coach-btn" data-midis="${escAttr(midisJson)}"${tabAttr}${coachSkillsAttr(skillIds)} onclick="coachOpen(this)" title="Play it into the mic and get feedback">&#x1F3A4; <span data-i18n="coach.btn">${t('coach.btn')}</span></button>`;
+  return `<button type="button" class="coach-btn" data-midis="${escAttr(midisJson)}"${tabAttr}${coachSkillsAttr(skillIds)} onclick="coachOpen(this)" title="${escAttr(t('coach.btnTitle'))}">&#x1F3A4; <span data-i18n="coach.btn">${t('coach.btn')}</span></button>`;
 }
 /* Chord steps: build [{n:name, m:[midis]}] from the step's own diagram
    specs (same fret math as chordMidis — frets are absolute). */
@@ -4622,12 +4622,12 @@ function loadPanel(type,url,title,subtitle){
     if (svg){
       const hasAudio = chordMidis(chordName).length > 0;
       const playBtn = hasAudio
-        ? `<button type="button" class="rp-chord-play" onclick="strumChord('${escAttr(chordName)}', this)" title="Strum this chord">&#x25B6; Play chord</button>`
+        ? `<button type="button" class="rp-chord-play" onclick="strumChord('${escAttr(chordName)}', this)" title="${escAttr(t('panel.strumChord'))}" data-i18n-attr="title:panel.strumChord">&#x25B6; <span data-i18n="panel.playChord">${escHtml(t('panel.playChord'))}</span></button>`
         : '';
       wrap.innerHTML = `<div class="rp-chord-svg">${svg}</div>${playBtn}`;
       newtab.classList.remove('visible'); // local render — no external URL to open
     } else {
-      wrap.innerHTML = `<div class="rp-chord-err">No diagram available for "${escHtml(chordName)}".</div>`;
+      wrap.innerHTML = `<div class="rp-chord-err" data-i18n="panel.noDiagram" data-i18n-params="${escAttr(JSON.stringify({name:chordName}))}">${escHtml(t('panel.noDiagram',{name:chordName}))}</div>`;
       newtab.classList.remove('visible');
     }
   } else if(type==='string'){
@@ -4874,18 +4874,6 @@ function closeTopPanels(except){
       if(b) b.setAttribute('aria-expanded', 'false');
     }
   });
-}
-
-/* Move keyboard/screen-reader focus into a just-opened top-bar panel — mirrors
-   toggleSearch()'s explicit focus of its input. The panel's own close button
-   is always present and focusable, so focus lands there when the panel has no
-   more specific "first interactive thing" of its own. */
-function focusPanel(p){
-  if(!p) return;
-  const close = p.querySelector('.tp-close');
-  if(close){ close.focus(); return; }
-  p.setAttribute('tabindex', '-1');
-  p.focus();
 }
 
 /* Picking a Set or Module review from the rail while Songs/Search/Games is

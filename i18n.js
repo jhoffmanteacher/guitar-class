@@ -117,7 +117,8 @@
                                                relativa mayor (la relativa)
        parallel minor                       → la paralela menor
        slash chord (G/B)                    → acorde con barra diagonal
-                                               (module-9's shipped usage)
+                                               (site-wide; NOT "bajo alterno",
+                                               which reads as alternating bass)
        thread song (core song threaded      → canción hilo (coined course
          through the whole course)             term, deliberate — mirrors
                                                the coined English)
@@ -125,7 +126,6 @@
                                                treatment as riff/vamp/chug)
        key (musical key, e.g. "key of C")   → tonalidad
        triad                                → tríada
-       slash chord                          → acorde con bajo alterno
        home chord (the tonic chord, e.g. the I) → acorde base (pairs with
                                                "home note" → "nota base")
        E-shape / A-shape (barre chord)      → forma de E / forma de A
@@ -226,6 +226,7 @@
     'skill.whatDoesThisLookLike':{ en: 'What does this look like?', es: '¿Cómo se ve esto?' },
     'skill.youveGotItWhen':     { en: "You've got it when:", es: 'Lo tienes cuando:' },
     'skill.showMeWhere':        { en: 'Show me where', es: 'Muéstrame dónde' },
+    'skill.jumpToSteps':        { en: 'Jump to the steps that teach this', es: 'Ir a los pasos que enseñan esto' },
 
     // ── Progress strings (parameterized — never concatenate numbers by hand) ──
     'progress.stepsDone':      { en: '{done} of {total} steps done', es: '{done} de {total} pasos completados' },
@@ -273,6 +274,7 @@
     'btn.markDone':          { en: 'Mark done', es: 'Marcar como hecho' },
     'btn.doneWord':          { en: 'Done', es: 'Hecho' },
     'btn.printSet':          { en: 'Print this set', es: 'Imprimir esta unidad' },
+    'btn.printSetTitle':     { en: 'Print this set as a one-page handout', es: 'Imprimir esta unidad como hoja de una página' },
     'btn.nextStationC':      { en: 'Next: Station C — practice it', es: 'Siguiente: Estación C — a practicar' },
     'btn.nextChecklist':     { en: 'Next: My skills checklist', es: 'Siguiente: Mi lista de destrezas' },
     'btn.next':              { en: 'Next:', es: 'Siguiente:' },
@@ -303,6 +305,12 @@
     'panel.viewerAria':      { en: 'Resource viewer', es: 'Visor de recursos' },
     'panel.close':           { en: 'Close', es: 'Cerrar' },
     'panel.closeAria':       { en: 'Close viewer', es: 'Cerrar el visor' },
+    'panel.openNewTab':      { en: 'Open in new tab', es: 'Abrir en una pestaña nueva' },
+    'panel.opensOnYouTube':  { en: 'Opens on YouTube in a new tab', es: 'Se abre en YouTube en una pestaña nueva' },
+    'panel.playChord':       { en: 'Play chord', es: 'Tocar el acorde' },
+    'panel.strumChord':      { en: 'Strum this chord', es: 'Rasguea este acorde' },
+    'panel.noDiagram':       { en: 'No diagram available for "{name}".', es: 'No hay diagrama disponible para "{name}".' },
+    'a11y.skipToContent':    { en: 'Skip to content', es: 'Saltar al contenido' },
 
     // ── Site search ("Find it" panel — toggleSearch/runSearch in app.js) ──
     'search.title':          { en: 'Find it', es: 'Buscar' },
@@ -356,6 +364,7 @@
     'songs.backingTrackHint':{ en: 'Backing track — it repeats on its own; press play and solo over it',
                                 es: 'Pista de acompañamiento — se repite sola; presiona play e improvisa (solo) encima' },
     'songs.songJourney':     { en: 'Song Journey', es: 'Recorrido de la canción' },
+    'songs.openLayerTitle':  { en: 'Open this layer on the Song Journey page', es: 'Abrir esta capa en la página del Recorrido de la canción' },
     'songs.yourPick':        { en: 'Your pick — bring your own song!', es: 'Tu elección — ¡trae tu propia canción!' },
     'songs.yourPickBody':    { en: "Got a song you want to learn? Search YouTube for a beginner tutorial and use this module's skills on it.",
                                 es: '¿Tienes una canción que quieres aprender? Busca en YouTube un tutorial para principiantes y aplica las destrezas de este módulo.' },
@@ -393,10 +402,12 @@
     'review.previewBodyHtml':{ en: 'Mark every skill on every set as &ldquo;I&rsquo;ve got it!&rdquo; to unlock this self-assessment.',
                                 es: 'Marca cada destreza de cada unidad como &ldquo;¡Ya lo tengo!&rdquo; para desbloquear esta autoevaluación.' },
     'review.reviewThis':     { en: 'Review this', es: 'Repasar esto' },
+    'review.backToLesson':   { en: 'Go back to the lesson for this skill', es: 'Volver a la lección de esta destreza' },
 
     // ── 10-minute practice routine card (module review) ──
     'routine.title':         { en: 'Your 10-minute practice routine', es: 'Tu rutina de práctica de 10 minutos' },
     'routine.print':         { en: 'Print', es: 'Imprimir' },
+    'routine.printTitle':    { en: 'Print this routine', es: 'Imprimir esta rutina' },
     'routine.foot':          { en: "Built from this module's sets — short on time? Do steps 1–3 — that's still good.",
                                 es: 'Armada con las unidades de este módulo — ¿poco tiempo? Haz los pasos 1–3 — ya es una buena práctica.' },
     'routine.tuneUp':        { en: 'Tune up', es: 'Afina' },
@@ -412,6 +423,8 @@
     // ── TAB blocks ──
     'tab.label':             { en: 'Tab', es: 'Tab' },
     'tab.playTab':           { en: 'Play tab', es: 'Tocar el tab' },
+    'tab.playTabTitle':      { en: 'Play this tab', es: 'Tocar este tab' },
+    'tab.playNote':          { en: 'Play {note}', es: 'Tocar {note}' },
     'tab.defaultTitle':      { en: 'Tab', es: 'Tab' },
     'tab.showTabLabel':      { en: 'Show TAB:', es: 'Mostrar TAB:' },
 
@@ -585,7 +598,7 @@
     'fret.stringD':          { en: 'D', es: 'Re' },
     'fret.stringG':          { en: 'G', es: 'Sol' },
     'fret.stringB':          { en: 'B', es: 'Si' },
-    'fret.stringHighE':      { en: 'high E', es: 'Mi agudo' },
+    'fret.stringHighE':      { en: 'high E', es: 'Mi aguda' },
 
     // ── Fretboard/string diagram labels (guitar-diagrams.js) — the full
     //    "Low E (6th string)" form used in popup + panel titles, plus the
@@ -595,7 +608,7 @@
     'diagram.stringD':       { en: 'D (4th string)',      es: 'Re (4.ª cuerda)' },
     'diagram.stringG':       { en: 'G (3rd string)',      es: 'Sol (3.ª cuerda)' },
     'diagram.stringB':       { en: 'B (2nd string)',      es: 'Si (2.ª cuerda)' },
-    'diagram.stringHighE':   { en: 'High E (1st string)', es: 'Mi agudo (1.ª cuerda)' },
+    'diagram.stringHighE':   { en: 'High E (1st string)', es: 'Mi aguda (1.ª cuerda)' },
     'diagram.noteOpen':      { en: '{note} · {string} open', es: '{note} · cuerda {string} al aire' },
     'diagram.noteFret':      { en: '{note} · {string} string, {ord} fret',
                                es: '{note} · cuerda {string}, traste {fret}' },
@@ -668,6 +681,8 @@
 
     // ── 🎧 Listening Coach + 🎮 Games arcade (coach.js — every
     //    student-facing string; render-time t() calls, hand-written ES) ──
+    'coach.btnTitle': { en: 'Play it into the mic and get feedback',
+      es: 'Tócalo al micrófono y recibe retroalimentación' },
     'coach.btn': { en: 'Listening Coach — click here to get feedback',
       es: 'Entrenador de Escucha — haz clic aquí para recibir comentarios' },
     'coach.close': { en: 'Close',
