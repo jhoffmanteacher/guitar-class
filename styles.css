@@ -1169,6 +1169,12 @@ body.viewer-open .fab-buttons{display:none}
 }
 
 /* ── Navigation: panel footers, back-to-top, skill jumps, Songs hub, search ── */
+/* Focus mode shows one step at a time with its own Back/Next (.dp-stepnav) —
+   the "Next: My skills checklist" footer below only belongs at the very end
+   of the station; mid-station it duplicated Next and confused which button
+   advanced what. List mode still shows every step at once, so the footer
+   stays a normal end-of-scroll "keep going" prompt there. */
+.dp.focus:not(.at-end) ~ .panel-next{display:none}
 .panel-next{margin:22px 0 4px;display:flex;justify-content:flex-end}
 .panel-next-btn{font-family:inherit;font-size:0.9062rem;font-weight:600;padding:9px 18px;border-radius:20px;border:1px solid var(--brand);background:var(--brand);color:var(--brand-text);cursor:pointer;transition:background .12s}
 .panel-next-btn:hover{background:var(--brand-hover)}

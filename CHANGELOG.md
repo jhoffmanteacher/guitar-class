@@ -25,6 +25,13 @@ see `WORKFLOW.md` and the git commit log.
   reads: do this, and here's how you know you've got it. Nothing was cut;
   everything moved is one tap away, in both English and Spanish.
 
+### Fixed
+
+- **"Next: My skills checklist" no longer shows up mid-station in one-at-a-time
+  view.** It used to sit right under every step's own Next button, which made
+  it look like there were two different "Next" buttons on screen. Now it only
+  appears once you've reached the station's last step.
+
 ## 2026-07-27 — Note-naming skills now ask you to prove it with the deck
 
 ### Added

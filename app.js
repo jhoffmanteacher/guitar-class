@@ -1952,8 +1952,12 @@ function buildStations(w, stationId){
       + `<button type="button" class="fm-nav fm-back" onclick="stationStepNav(this,-1)" data-i18n="fm.back"${(openNum || 1) <= 1 ? ' hidden' : ''}>${t('fm.back')}</button>`
       + `<button type="button" class="fm-nav fm-next" onclick="stationStepNav(this,1)" data-i18n="fm.next"${(openNum || 1) >= stepTotal ? ' hidden' : ''}>${t('fm.next')}</button>`
       + `</div>` : '';
+    // .at-end drives whether the panel's "Next: My skills checklist" footer
+    // shows in focus mode (CSS, styles.css) — only once there's no further
+    // step to advance to, kept live by syncStationFocus() as the student moves.
+    const atEnd = (openNum || 1) >= stepTotal;
     return `
-    <div class="dp${cls}${focusMode ? ' focus' : ''}" id="${w.id}-dp-${id}">
+    <div class="dp${cls}${focusMode ? ' focus' : ''}${atEnd ? ' at-end' : ''}" id="${w.id}-dp-${id}">
       <div class="dp-head"><span class="st-badge ${badgeClass}">${badge}</span><h3 class="dp-title">${tf(s,'title')}</h3>${pillHtml}</div>
       ${stepperHtml}
       ${flexNote}
@@ -2048,17 +2052,17 @@ function syncStationFocus(dp){
   if(!dp) return;
   const steps = [...dp.querySelectorAll('li.step')];
   const open = dp.querySelector('li.step:not(.collapsed)');
+  const idx = open ? steps.indexOf(open) : -1;
   dp.querySelectorAll('.stp-sec').forEach(sec=>sec.classList.toggle('sec-cur', !!open && sec.contains(open)));
   const count = dp.querySelector('.fm-count');
   if(count){
-    const idx = open ? steps.indexOf(open) : -1;
     const params = {n: open ? (Number(open.dataset.num) || idx + 1) : 1, m: steps.length};
     count.setAttribute('data-i18n-params', JSON.stringify(params));
     count.textContent = t('fm.stepOf', params);
   }
+  dp.classList.toggle('at-end', idx < 0 || idx >= steps.length - 1);
   const nav = dp.querySelector('.dp-stepnav');
   if(nav){
-    const idx = open ? steps.indexOf(open) : -1;
     const back = nav.querySelector('.fm-back'), next = nav.querySelector('.fm-next');
     if(back) back.hidden = idx <= 0;
     if(next) next.hidden = idx < 0 || idx >= steps.length - 1;
