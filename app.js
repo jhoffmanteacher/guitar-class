@@ -303,7 +303,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     if(IS_TEACHER_MODE){ showTeacherApp(user); }
     else { await loadProgress(); await loadClassConfig(); showApp(user); }
   } else {
-    currentUser = null; progress = {}; responses = {}; completed = {}; games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true;
     practiceLog = loadLocalPracticeLog();   // per-skill rep history: back to the local copy on sign-out
     _moduleStripStates = {};   // next user's first strip render is a first paint, not a celebration
     document.getElementById('auth-wall').style.display='block';
@@ -312,7 +312,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     document.getElementById('teacher-denied').style.display='none';
     document.getElementById('fab-group').style.display='none';
     document.getElementById('search-btn').style.display='none';
-    document.getElementById('user-area').innerHTML='<button class="btn-sign" onclick="signIn()">Sign in with Google</button>';
+    document.getElementById('user-area').innerHTML=`<button class="btn-sign" onclick="signIn()" data-i18n="header.signIn">${t('header.signIn')}</button>`;
   }
 });
 
@@ -484,13 +484,24 @@ async function flushSave(){
   if(keys.has('skills'))    payload.skills    = progress;
   if(keys.has('place')){    payload.lastModule = lastModuleNum; payload.lastSet = lastSetId||null; }
   if(keys.has('responses')) payload.responses = responses;
-  if(keys.has('completed')) payload.completed = completed;
+  let sentDeletes = null;
+  if(keys.has('completed')){
+    // Copy, so the FieldValue.delete() sentinels never leak into local state.
+    payload.completed = Object.assign({}, completed);
+    if(completedDeletes.size){
+      sentDeletes = [...completedDeletes];
+      sentDeletes.forEach(k=>{ payload.completed[k] = firebase.firestore.FieldValue.delete(); });
+    }
+  }
   if(keys.has('games'))     payload.games     = games;
   if(keys.has('streak'))    payload.streak    = streak;
   if(keys.has('practiceLog')) payload.practiceLog = practiceLog;
   try{
     await ensureDb();
     await db.collection('progress').doc(currentUser.uid).set(payload,{merge:true});
+    // Only now that the write landed: retire the deletes it carried. Keys
+    // un-marked DURING the write stay queued for the next flush.
+    if(sentDeletes) sentDeletes.forEach(k=>completedDeletes.delete(k));
     setSaveMsg('save.saved', 2000);
     _saveFailCount = 0;
   } catch(e){
@@ -511,8 +522,16 @@ async function flushSave(){
 }
 function saveResponses(){ queueSave('responses'); }
 
+/* Un-marked step keys awaiting a Firestore delete. flushSave writes with
+   set(…,{merge:true}), which preserves any key missing from the payload — so
+   `delete completed[key]` alone never un-marks the step server-side. Each
+   un-marked key is queued here, written as FieldValue.delete() on the next
+   flush, and cleared only after that write lands (a failed write retries it,
+   same as the dirty keys). */
+let completedDeletes = new Set();
 function onCompleteChange(key, isDone){
-  if(isDone) completed[key] = true; else delete completed[key];
+  if(isDone){ completed[key] = true; completedDeletes.delete(key); }
+  else { delete completed[key]; completedDeletes.add(key); }
   saveCompleted();
 }
 function saveCompleted(){ queueSave('completed'); }
@@ -1095,7 +1114,7 @@ window.addEventListener('resize', hideChordPopup);
 
 function wrapAllChordLinks(){
   /* Step text + per-step hints (single line and bulleted) */
-  document.querySelectorAll('.dp .step .st').forEach(wrapChordLinksIn);
+  document.querySelectorAll('.dp .step .st-text').forEach(wrapChordLinksIn);
   document.querySelectorAll('.dp .step .sh').forEach(wrapChordLinksIn);
   document.querySelectorAll('.dp .step .sh-list li').forEach(wrapChordLinksIn);
   /* Step-response prompts (the question text above MC/short-answer inputs) */
@@ -2598,6 +2617,10 @@ function renderPracticePanel(practice, skillId, wid){
   }
   if(practice.type === 'fretboard'){
     /* Find-the-Note game: practice.string 'lowE' | 'A' | 'both' (see fgBoardSvg). */
+    // A rebuild (language switch, panel re-render) puts the setup screen back
+    // on top of whatever round was in flight — drop the stale state so the
+    // student starts fresh, like the shuffle/deck/ear drills reset theirs.
+    delete fretGames[skillId];
     const kind = practice.string || 'lowE';
     const e = practiceLog[skillId];
     const bestHtml = (e && e.best != null)
@@ -3795,8 +3818,18 @@ function refreshReviewCards(){
     if(typeof applyI18n === 'function') applyI18n(el);
   });
 }
-/* "Practice again" → jump to that skill's row and open its practice panel. */
-function reviewJump(sid, wid){
+/* "Practice again" → jump to that skill's row and open its practice panel.
+   Review cards can point cross-module (Search / Songs hub load every module's
+   data into SETS without rendering its panels), so activate the target module
+   first — same pattern as searchGoSkill/jumpToStep — or activateSet lands on
+   a panel that was never built and the lesson area goes blank. */
+async function reviewJump(sid, wid){
+  const w = SETS.find(x => x.id === wid);
+  if(!w) return;
+  const sel = document.getElementById('module-select');
+  if(sel) sel.value = String(w.moduleNum);
+  await onModuleChange(w.moduleNum, wid);
+  saveProgress();
   activateSet(wid);
   switchTabById(wid, 'checklist', true);
   const row = document.querySelector(`.week-panel[data-id="${wid}"] .skill-row[data-sid="${CSS.escape(sid)}"]`);
@@ -3823,7 +3856,7 @@ function openCoachGate(sid, wid){
     ${sk ? `<p class="coach-tip">${escHtml(tf(sk,'text'))}</p>` : ''}
     <p class="coach-tip">${escHtml(t('gate.body'))}</p>
     <div class="issue-actions">
-      <button type="button" class="panel-next-btn" onclick="coachGatePractice('${escAttr(sid)}')">${t('gate.practice')}</button>
+      <button type="button" class="panel-next-btn" onclick="coachGatePractice('${escAttr(sid)}','${escAttr(wid)}')">${t('gate.practice')}</button>
       <button type="button" class="tp-btn" onclick="coachGateMarkAnyway('${escAttr(sid)}','${escAttr(wid)}')">${t('gate.markAnyway')}</button>
     </div>`;
   ov.addEventListener('click', e => { if(e.target === ov) closeCoachGate(); });
@@ -3837,11 +3870,15 @@ function closeCoachGate(){
   document.removeEventListener('keydown', coachGateEscClose);
 }
 /* "Practice it now" → close the gate and open that skill's practice panel,
-   where the Listening Coach button lives. */
-function coachGatePractice(sid){
+   where the Listening Coach button lives. The gate can open from any station
+   tab (Station C offers inline check-offs), but the practice panel lives in
+   the checklist tab — switch there first or everything below happens inside
+   display:none. */
+function coachGatePractice(sid, wid){
   closeCoachGate();
   const panel = document.getElementById('pp-'+sid);
   if(!panel) return;
+  if(wid) switchTabById(wid, 'checklist', true);
   panel.removeAttribute('hidden');
   const btn = document.querySelector(`[aria-controls="pp-${CSS.escape(sid)}"]`);
   if(btn) btn.setAttribute('aria-expanded','true');

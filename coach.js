@@ -1260,7 +1260,7 @@ function fretSetLevel(i){
 function fretNewRound(levelIdx){
   fretGame = { level: levelIdx, tries: 0, results: [], phase: 'play',
                prompt: null, readings: [], cooldownUntil: 0, needSilence: false,
-               hint: '', flash: null, frameNo: 0 };
+               hint: '', flash: null, lastPitchT: 0 };
   fretNextPrompt();
 }
 
@@ -1298,8 +1298,14 @@ function fretLoop(){
     if (g.needSilence && (rms < COACH_PITCH_GATE * 0.7 || now > g.cooldownUntil + 1800)){
       g.needSilence = false;
     }
+    /* Readings are spaced by wall clock, not frame parity: the analyser
+       window is ~43ms, so readings closer together than that all see the
+       SAME window (and can sit inside the pick attack). >=40ms apart makes
+       the 3-reading consensus span more than one window at any refresh
+       rate — same spacing nrLoop uses. */
     if (!g.needSilence && now >= g.cooldownUntil && rms > COACH_PITCH_GATE &&
-        (g.frameNo = (g.frameNo || 0) + 1) % 2 === 0){
+        now - (g.lastPitchT || 0) >= 40){
+      g.lastPitchT = now;
       const f = coachDetectPitch(buf, coachCtx.sampleRate);
       if (f > 0){
         g.readings.push(69 + 12 * Math.log2(f / 440));
@@ -4819,7 +4825,7 @@ async function rnwStart(){
     notes: song.notes.map(nt => ({ string: nt[0], fret: nt[1], label: nt[3] || '',
       midi: STRING_OPEN_MIDI[nt[0]] + nt[1], beat: nt[2], result: null })),
     cur: 0, tries: 0, firstTry: 0, readings: [],
-    needSilence: false, cooldownUntil: 0, frameNo: 0, hint: '', heard: ''
+    needSilence: false, cooldownUntil: 0, lastPitchT: 0, advTimer: null, hint: '', heard: ''
   };
   rnwRender();
   if (rnRaf) cancelAnimationFrame(rnRaf);
@@ -4896,8 +4902,14 @@ function rnwLoop(){
   if (w.needSilence && (rms < COACH_PITCH_GATE * 0.7 || now > w.cooldownUntil + 1800)){
     w.needSilence = false;
   }
+  /* Readings are spaced by wall clock, not frame parity: the analyser
+     window is ~43ms, so readings closer together than that all see the
+     SAME window (and can sit inside the pick attack). >=40ms apart makes
+     the 3-reading consensus span more than one window at any refresh
+     rate — same spacing nrLoop uses. */
   if (!w.needSilence && now >= w.cooldownUntil && rms > COACH_PITCH_GATE &&
-      (w.frameNo = (w.frameNo || 0) + 1) % 2 === 0){
+      now - (w.lastPitchT || 0) >= 40){
+    w.lastPitchT = now;
     const f = coachDetectPitch(buf, coachCtx.sampleRate);
     if (f > 0){
       w.readings.push(69 + 12 * Math.log2(f / 440));
@@ -4929,7 +4941,10 @@ function rnwJudge(midi){
     rnwFeedback('&#x2713; ' + escHtml(n.label || coachNoteName(n.midi)), 'ok');
     const el = document.getElementById('rnw-n-' + w.cur);
     if (el) el.classList.add('rnw-hit');
-    rn.timeouts.push(setTimeout(rnwAdvance, 220));
+    /* Stored on w as well as rn.timeouts: rnwAdvance clears it, so a Skip
+       tapped inside the 220ms can't stack a second advance on top. */
+    w.advTimer = setTimeout(rnwAdvance, 220);
+    rn.timeouts.push(w.advTimer);
     return;
   }
   const heard = coachNoteName(midi);
@@ -4956,6 +4971,9 @@ function rnwFeedback(html, cls){
 function rnwAdvance(){
   if (!rn || rn.phase !== 'wait') return;
   const w = rn.wait;
+  /* Any pending auto-advance dies here — whether this call IS that timer
+     firing or a Skip beat it to the punch, the note advances exactly once. */
+  if (w.advTimer){ clearTimeout(w.advTimer); w.advTimer = null; }
   w.cur++;
   w.tries = 0;
   w.readings = [];
@@ -5501,6 +5519,7 @@ async function nrStart(){
   s.score = 0; s.combo = 0; s.maxCombo = 0;
   s.errs = [];
   s.sweepIdx = 0; s.lastBeat = -1;
+  s.countCleared = false;   // else round 2+ never wipes the count-in "4" off the track
   s.smoothRms = 0; s.smoothHf = 0; s.lastOnsetT = -1e9; s.lastPitchT = 0; s.pending = null;
 
   nrRenderPlay();
@@ -5629,7 +5648,11 @@ function nrLoop(){
     while (s.sweepIdx < s.playable.length && s.playable[s.sweepIdx].result) s.sweepIdx++;
     for (let i = s.sweepIdx; i < s.playable.length; i++){
       const n = s.playable[i];
-      if (n.t + s.goodMs + COACH_EVENT_TAIL + 60 > now) break;
+      /* nrOffset() is added because scoring subtracts it from onset times
+         (tEv = p.t - nrOffset() in nrFinalizeEvent) — without it, a raised
+         mic-offset lets the sweep call "miss" on a pluck whose event is
+         still inside the shifted window, before it can finalize. */
+      if (n.t + s.goodMs + nrOffset() + COACH_EVENT_TAIL + 60 > now) break;
       if (!n.result){
         n.result = 'miss';
         s.combo = 0;

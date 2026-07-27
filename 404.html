@@ -20,7 +20,23 @@
 ">
 <title>Page not found · Guitar Class · Sequoia HS</title>
 <meta name="description" content="That page isn't here — but your guitar class is.">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css" id="nf-css">
+<script>
+/* GitHub Pages serves this page AT the missing URL, so the document base is
+   whatever broken path was requested — a nested miss like /guitar-class/tabs/x
+   would resolve the relative styles.css / index.html links against /tabs/.
+   Compute the site root instead: on *.github.io the site lives one segment
+   deep (/guitar-class/); on Live Server it's just /. The relative attributes
+   above and below stay as the no-JS fallback (correct for top-level misses).
+   No hardcoded repo name — the first path segment IS the repo on Pages. */
+(function(){
+  var root = location.pathname.split('/').slice(0, location.hostname.endsWith('github.io') ? 2 : 1).join('/') + '/';
+  document.getElementById('nf-css').href = root + 'styles.css';
+  document.addEventListener('DOMContentLoaded', function(){
+    document.getElementById('nf-home').href = root + 'index.html';
+  });
+})();
+</script>
 <style>
   body{min-height:100vh;display:flex;flex-direction:column}
   .notfound-main{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:48px 20px}
@@ -43,7 +59,7 @@
   <div class="notfound-emoji">&#x1F3B8;</div>
   <h1>That page isn't here &mdash; but your guitar class is.</h1>
   <p>The link you followed doesn't match a page on this site anymore.</p>
-  <a class="notfound-home" href="./index.html">Back to Guitar Class</a>
+  <a class="notfound-home" id="nf-home" href="./index.html">Back to Guitar Class</a>
   <p class="notfound-sub">Looking for a song? All six Song Journeys are on the home page.</p>
 </main>
 </body>

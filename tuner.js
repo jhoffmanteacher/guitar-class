@@ -424,3 +424,16 @@ function stopTuner() {
 
 /* No Start/Stop button — opening the tuner popup starts listening, closing it
    stops (wired in app.js togglePopup/closePopup). */
+
+/* Privacy + battery: the mic never keeps running in a tab the student isn't
+   looking at. Lives HERE (not just in coach.js's visibilitychange handler,
+   which only index.html loads) so the six Journey pages get it too. Goes
+   through closePopup — the normal stop path — so the popup slides shut and
+   the readout resets exactly as a manual close would. Idempotent: on
+   index.html coach.js's handler may also run (coachEvictTuner), but whichever
+   fires second sees tunerRunning already false and does nothing. */
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden || !tunerRunning) return;
+  if (typeof closePopup === 'function') closePopup('tuner');
+  else stopTuner();   // fab-tools.js missing (shouldn't happen) — still drop the mic
+});

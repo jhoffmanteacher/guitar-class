@@ -87,7 +87,16 @@ function syncMetroMutedNote(){
   if(note) note.hidden = !window.coachMicLive;
 }
 function getBpm(){ return parseInt(document.getElementById('bpm-slider').value); }
-function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; if(metroRunning){ stopMetro(); startMetro(); } }
+/* Retime a running click to the current BPM WITHOUT startMetro()'s immediate
+   synchronous tick(): a slider drag fires many input events a second, and a
+   beep per event was a machine-gun burst. Swaps only the interval, so the
+   accent keeps its place in the bar instead of resetting to beat 1 per event. */
+function retimeMetro(){
+  if(!metroRunning) return;
+  clearInterval(metroInterval);
+  metroInterval = setInterval(tick, Math.round(60000/getBpm()));
+}
+function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; retimeMetro(); }
 function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Math.min(220,Math.max(40,getBpm()+d)); document.getElementById('bpm-display').textContent=s.value; if(metroRunning){ stopMetro(); startMetro(); } }
 function startMetro(){
   // Runs even while the Coach's mic is live — tick() itself stays silent in
@@ -109,7 +118,11 @@ function stopMetro(){
 function toggleMetro(){ if(metroRunning) stopMetro(); else startMetro(); }
 
 /* ── Timer ── */
-let timerRunning=false, timerInterval=null, timerSecs=30, timerSelected=30;
+// timerEndAt: wall-clock deadline while running. The countdown is recomputed
+// from it on every tick instead of decrementing per tick — a hidden/suspended
+// tab throttles or stalls setInterval, and counting ticks made the timer run
+// long and ring late. Paused state keeps only timerSecs (remaining seconds).
+let timerRunning=false, timerInterval=null, timerSecs=30, timerSelected=30, timerEndAt=0;
 function setTimerSecs(secs){ timerSelected=secs; timerSecs=secs; if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); } updateTimerDisplay(); [30,60,120,180,240,300].forEach(s=>{ const el=document.getElementById('tp-'+s); if(el) el.classList.toggle('sel',s===secs); }); }
 function updateTimerDisplay(){ const m=Math.floor(timerSecs/60),s=timerSecs%60; document.getElementById('timer-display').textContent=m+':'+(s<10?'0':'')+s; }
 // Flash the display when time's up — visible across a loud room without headphones.
@@ -117,7 +130,7 @@ function flashTimerDisplay(){ flashClass(document.getElementById('timer-display'
 // Pulse the floating timer button too — it's visible even when the popup is closed.
 function flashTimerFab(){ flashClass(document.getElementById('fab-timer'),'fab-timer-done',3600); }
 function resetTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; } timerSecs=timerSelected; updateTimerDisplay(); document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); }
-function toggleTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); } else { if(timerSecs<=0){ timerSecs=timerSelected; updateTimerDisplay(); } /* already rang — Start means restart, not re-fire the alarm a second later */ timerRunning=true; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x23F8;','tools.pause'); timerInterval=setInterval(()=>{ if(timerSecs>0){ timerSecs--; updateTimerDisplay(); } else { clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); [0,0.35,0.7].forEach(d=>setTimeout(()=>toolsBeep(660,0.3),d*1000)); flashTimerDisplay(); flashTimerFab(); } },1000); } }
+function toggleTimer(){ if(timerRunning){ /* pause: bank the true remaining seconds off the deadline (the last tick may be stale if the tab was hidden) */ timerSecs=Math.max(0,Math.ceil((timerEndAt-Date.now())/1000)); updateTimerDisplay(); clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); } else { if(timerSecs<=0){ timerSecs=timerSelected; updateTimerDisplay(); } /* already rang — Start means restart, not re-fire the alarm a second later */ timerRunning=true; timerEndAt=Date.now()+timerSecs*1000; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x23F8;','tools.pause'); timerInterval=setInterval(()=>{ timerSecs=Math.max(0,Math.ceil((timerEndAt-Date.now())/1000)); updateTimerDisplay(); if(timerSecs<=0){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); [0,0.35,0.7].forEach(d=>setTimeout(()=>toolsBeep(660,0.3),d*1000)); flashTimerDisplay(); flashTimerFab(); } },1000); } }
 
 /* ── Popup logic ── */
 function setFabExpanded(which, isOpen){ const f=document.getElementById('fab-'+which); if(f) f.setAttribute('aria-expanded', isOpen?'true':'false'); }

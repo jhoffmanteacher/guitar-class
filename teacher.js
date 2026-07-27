@@ -364,6 +364,7 @@ function renderTeacherGames(){
   const box=document.getElementById('t-grid-container');
   box.innerHTML='<div class="t-loading">Loading game settings…</div>';
   loadTeacherClassConfig().then(cfg=>{
+    if(teacherView!=='games') return;   // teacher switched views while the get was in flight — don't stomp the current view's DOM
     if(!cfg) return;   // superseded by a newer toggle — leave the newer render's DOM alone
     const classOn = cfg.gamesEnabled!==false;
     const ov = cfg.gameOverrides||{};
@@ -401,7 +402,7 @@ async function teacherSetClassGames(enabled){
     await ensureDb();
     await db.collection('config').doc('class').set({gamesEnabled:enabled},{merge:true});
   }catch(e){ alert('Could not save that change — check your connection and Firestore rules.'); }
-  renderTeacherGames();
+  if(teacherView==='games') renderTeacherGames();   // skip if the view changed while the save was in flight
 }
 async function teacherSetStudentGames(uid, state){
   try{
@@ -413,7 +414,7 @@ async function teacherSetStudentGames(uid, state){
     else { const val=state==='on'; patch={gameOverrides:{[uid]:val}}; teacherClassConfig.gameOverrides[uid]=val; }
     await db.collection('config').doc('class').set(patch,{merge:true});
   }catch(e){ alert('Could not save that change — check your connection and Firestore rules.'); }
-  renderTeacherGames();
+  if(teacherView==='games') renderTeacherGames();   // skip if the view changed while the save was in flight
 }
 
 /* PR (BPM) slots store a capped {value,date} history now; older saved docs
@@ -559,10 +560,15 @@ function renderTeacherStudents(){
   const avgPct=Math.round(rows.reduce((a,r)=>a+r.tally.total,0)/(studentsCount*universe.total)*100);
   const furthestStu=rows[0].stu;
   const notStarted=rows.filter(r=>r.tally.total===0).length;
+  // Nobody has checked anything off yet → rows[0] is an arbitrary student;
+  // show the same &mdash; the per-row labels use rather than naming one.
+  const furthestVal=rows[0].tally.total>0
+    ? `<div class="t-scard-val" style="font-size:1.0625rem;line-height:1.5rem" title="${escAttr(furthestStu.name||furthestStu.email||furthestStu.uid)}">${escHtml(furthestStu.name||furthestStu.email||furthestStu.uid.slice(0,8)+'…')}</div>`
+    : `<div class="t-scard-val">&mdash;</div>`;
   const scard=`<div class="t-summary" style="margin-top:0">
       <div class="t-scard"><div class="t-scard-lbl">Students</div><div class="t-scard-val">${studentsCount}</div></div>
       <div class="t-scard"><div class="t-scard-lbl">Class average</div><div class="t-scard-val">${avgPct}%</div></div>
-      <div class="t-scard"><div class="t-scard-lbl">Furthest along</div><div class="t-scard-val" style="font-size:1.0625rem;line-height:1.5rem" title="${escAttr(furthestStu.name||furthestStu.email||furthestStu.uid)}">${escHtml(furthestStu.name||furthestStu.email||furthestStu.uid.slice(0,8)+'…')}</div></div>
+      <div class="t-scard"><div class="t-scard-lbl">Furthest along</div>${furthestVal}</div>
       <div class="t-scard"><div class="t-scard-lbl">Not started yet</div><div class="t-scard-val">${notStarted}</div></div>
     </div>`;
   const rowsHtml=rows.map(({stu,tally})=>{
