@@ -5,6 +5,26 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Practice stations show one step at a time
+
+### Added
+
+- **Focus mode on every practice station** — station pages now show just the
+  step you're on, with a "Step 4 of 16" counter, Back / Next buttons, and
+  the section heading you're in. Marking a step done advances to the next
+  one, across section boundaries. An **"All steps"** button at the top of
+  the card brings back the full list at any time (and "One at a time"
+  switches back); the choice sticks on your device. Printed handouts are
+  unchanged — they always show the whole station.
+
+### Changed
+
+- **Long challenge steps now lead with the task.** On 35 of the wordiest
+  steps (Modules 1–12), the background story, counting walk-throughs, and
+  technique reminders moved into the 💡 Hint fold — the step itself now
+  reads: do this, and here's how you know you've got it. Nothing was cut;
+  everything moved is one tap away, in both English and Spanish.
+
 ## 2026-07-27 — Note-naming skills now ask you to prove it with the deck
 
 ### Added
