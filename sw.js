@@ -14,7 +14,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-07-27-25da1ca712';
+const CACHE_VERSION = 'guitar-class-2026-07-27-d7fd54a84e';
 
 // Backing-track audio lives in its OWN cache, versioned independently of the
 // shell (see tools/checks.mjs, which fingerprints audio/ separately and
@@ -52,13 +52,18 @@ const ASSETS = [
   './icon-512-maskable.png',
   './img/posture-check.jpg',
   './img/m2-a-naturals.svg',
-  './img/m2-alphabet-loop.svg',
+  './img/m2-alphabet-loop-en.svg',
+  './img/m2-alphabet-loop-es.svg',
   './img/m2-arched-fingers-front.jpg',
-  './img/m2-behind-the-fret.svg',
+  './img/m2-behind-the-fret-en.svg',
+  './img/m2-behind-the-fret-es.svg',
   './img/m2-low-e-naturals.svg',
-  './img/m2-one-finger-per-fret.svg',
-  './img/m2-record-assessment.svg',
-  './img/m2-tab-orientation.svg',
+  './img/m2-one-finger-per-fret-en.svg',
+  './img/m2-one-finger-per-fret-es.svg',
+  './img/m2-record-assessment-en.svg',
+  './img/m2-record-assessment-es.svg',
+  './img/m2-tab-orientation-en.svg',
+  './img/m2-tab-orientation-es.svg',
   './img/m2-thumb-hand-position.jpg',
   './img/m9-b-naturals.svg',
   './img/m9-d-naturals.svg',

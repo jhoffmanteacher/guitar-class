@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="976" viewBox="0 0 640 244" font-family="Calibri,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+<rect width="640" height="244" fill="#ffffff"/>
+<ellipse cx="320" cy="122" rx="200" ry="62" fill="none" stroke="#585852" stroke-width="2" stroke-dasharray="2 7" stroke-linecap="round" opacity="0.45"/>
+<g font-size="30" font-weight="700" fill="#1a1a18" text-anchor="middle" style="paint-order:stroke" stroke="#ffffff" stroke-width="10" stroke-linejoin="round">
+<text x="320" y="72">A</text><text x="476" y="95">B</text><text x="515" y="145">C</text><text x="407" y="192">D</text>
+<text x="233" y="192">E</text><text x="125" y="145">F</text><text x="164" y="95">G</text>
+</g>
+<path d="M 178 72 Q 235 40 288 58" fill="none" stroke="#3b6d11" stroke-width="4" stroke-linecap="round"/>
+<path d="M288 58 l -15 -8 m 15 8 l -16 6" stroke="#3b6d11" stroke-width="4" fill="none" stroke-linecap="round"/>
+<text x="110" y="38" font-size="14.5" font-weight="600" fill="#3b6d11">after G, start over at A</text>
+<text x="320" y="232" font-size="15" fill="#5e5e58" text-anchor="middle" font-weight="600">the musical alphabet is only A–G — no H, it just repeats</text>
+</svg>

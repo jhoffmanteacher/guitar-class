@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="976" viewBox="0 0 640 244" font-family="Calibri,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+<rect width="640" height="244" fill="#ffffff"/>
+<rect x="20" y="154" width="600" height="42" rx="4" fill="#fffdf8" stroke="#1a1a18" stroke-width="2"/>
+<g fill="#f0eee6" stroke="#1a1a18" stroke-width="2">
+<rect x="176" y="130" width="9" height="26" rx="4.5"/>
+<rect x="396" y="130" width="9" height="26" rx="4.5"/>
+<rect x="576" y="130" width="9" height="26" rx="4.5"/>
+</g>
+<path d="M20 128 H 620" stroke="#1a1a18" stroke-width="3" stroke-linecap="round"/>
+<text x="24" y="116" font-size="13.5" fill="#5e5e58">← cejuela</text>
+<rect x="105" y="60" width="26" height="70" rx="13" fill="#ffffff" stroke="#b3372a" stroke-width="2.4"/>
+<text x="118" y="48" font-size="24" font-weight="700" fill="#b3372a" text-anchor="middle">✗</text>
+<path d="M138 122 q 8 -10 16 0 q 8 10 16 0" stroke="#b3372a" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+<text x="118" y="226" font-size="13" font-weight="600" fill="#b3372a" text-anchor="middle">muy atrás = zumba</text>
+<rect x="359" y="60" width="26" height="70" rx="13" fill="#eaf3de" stroke="#3b6d11" stroke-width="2.6"/>
+<text x="372" y="48" font-size="26" font-weight="700" fill="#3b6d11" text-anchor="middle">✓</text>
+<text x="372" y="226" font-size="13" font-weight="700" fill="#3b6d11" text-anchor="middle">justo detrás = limpia</text>
+<rect x="567" y="60" width="26" height="70" rx="13" fill="#ffffff" stroke="#b3372a" stroke-width="2.4"/>
+<text x="580" y="48" font-size="24" font-weight="700" fill="#b3372a" text-anchor="middle">✗</text>
+<text x="544" y="226" font-size="13" font-weight="600" fill="#b3372a" text-anchor="middle">encima del traste = apagada</text>
+</svg>

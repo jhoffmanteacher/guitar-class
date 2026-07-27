@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Module 2's teaching diagrams now speak Spanish
+
+### Changed
+
+- **Five Module 2 diagrams** (the A–G alphabet loop, where to press to avoid
+  fret buzz, TAB orientation, one-finger-per-fret, and the record-your-riff
+  steps) now switch to Spanish along with the rest of the page — the labels
+  inside each picture used to stay in English. They were also redrawn in the
+  same style as the new fretboard diagrams, so Module 2 looks like one set.
+
 ## 2026-07-27 — Full fretboard diagrams for the natural-notes drills
 
 ### Changed

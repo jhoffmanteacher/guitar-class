@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2560" height="976" viewBox="0 0 640 244" font-family="Calibri,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+<rect width="640" height="244" fill="#ffffff"/>
+<g>
+<g transform="translate(39,44) scale(7)" fill="none" stroke="#1a1a18" stroke-width="0.38" stroke-linecap="round" stroke-linejoin="round">
+<path d="M3 19l18 0"/><path d="M5 7a1 1 0 0 1 1 -1h12a1 1 0 0 1 1 1v8a1 1 0 0 1 -1 1h-12a1 1 0 0 1 -1 -1l0 -8"/>
+</g>
+<circle cx="123" cy="93" r="2.4" fill="#1a1a18"/>
+<text x="123" y="202" font-size="14" fill="#1a1a18" text-anchor="middle" font-weight="600">enciende la cámara del Chromebook</text>
+</g>
+<path d="M228 110 h 24 m -8 -7 l 9 7 l -9 7" stroke="#5e5e58" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<g>
+<g transform="translate(268.4,57.4) scale(4.3)" fill="none" stroke="#b3372a" stroke-width="0.7"><path d="M5 12a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"/></g>
+<circle cx="320" cy="109" r="18" fill="#b3372a"/>
+<text x="320" y="202" font-size="14" fill="#1a1a18" text-anchor="middle" font-weight="600">pulsa grabar</text>
+</g>
+<path d="M388 110 h 24 m -8 -7 l 9 7 l -9 7" stroke="#5e5e58" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+<g>
+<text x="522" y="102" font-size="26" font-weight="700" fill="#3b6d11" text-anchor="middle">A &#183; G &#183; F &#183; G</text>
+<path d="M498 124 q 8 8 16 0 M 526 124 q 8 8 16 0" stroke="#1a1a18" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+<text x="522" y="202" font-size="14" fill="#1a1a18" text-anchor="middle" font-weight="600">tócalo de memoria</text>
+</g>
+</svg>
