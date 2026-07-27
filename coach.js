@@ -5255,7 +5255,7 @@ function nrRenderHome(){
        <span class="rn-song-sub">${nrLevelMeta(lv)}</span></div>
      <div class="rn-center"><button type="button" class="coach-start nr-play" onclick="nrPlayAdaptive()">&#x1F3B8; ${t('games.nr.playButton')}</button></div>
      <div class="nr-slider"><label for="nr-off">${t('games.nr.offsetLabel')}</label>
-       <input type="range" id="nr-off" min="0" max="250" step="10" value="${nrOffset()}" oninput="nrSetOffset(this.value)">
+       <input type="range" id="nr-off" min="0" max="250" step="5" value="${nrOffset()}" oninput="nrSetOffset(this.value)">
        <span id="nr-off-lbl">${nrOffset()} ms</span></div>
      <div class="coach-tip rn-center">${t('games.nr.offsetTip')}</div>
      <div class="rn-center"><button type="button" class="tp-btn" onclick="nrShowSelect()">&#x1F3AF; ${t('games.nr.practiceDoor')}</button></div>`;
@@ -5340,7 +5340,7 @@ function nrRenderReady(msg){
      </div>
      <div class="rn-center"><button type="button" class="coach-start" onclick="nrStart()">&#x1F3B8; ${t('games.nr.startButton')}</button></div>
      <div class="nr-slider"><label for="nr-off">${t('games.nr.offsetLabel')}</label>
-       <input type="range" id="nr-off" min="0" max="250" step="10" value="${nrOffset()}" oninput="nrSetOffset(this.value)">
+       <input type="range" id="nr-off" min="0" max="250" step="5" value="${nrOffset()}" oninput="nrSetOffset(this.value)">
        <span id="nr-off-lbl">${nrOffset()} ms</span></div>
      <div class="coach-tip rn-center">${t('games.nr.offsetTip')}</div>
      <div class="coach-tip rn-center">${t('games.nr.clickNote')}</div>`;
