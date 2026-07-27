@@ -347,7 +347,7 @@ SETS.push(
               {
                 label: 'Octave shape: find the twin note', label_es: 'Forma de octava: la nota gemela',
                 text: 'Now try it:<ol><li>Starting from any note you already know on the low E or A string, use the octave shape (two strings down, two frets up) to find its twin on the D or G string.</li><li>Try it from three different starting notes.</li></ol>',
-                text_es: 'Ahora pruébalo:<ol><li>Empezando desde cualquier nota que ya conozcas en la cuerda Mi grave o La, usa la forma de octava (dos cuerdas hacia abajo, dos trastes hacia arriba) para encontrar su gemela en la cuerda Re o G.</li><li>Pruébalo desde tres notas de partida distintas.</li></ol>',
+                text_es: 'Ahora pruébalo:<ol><li>Empezando desde cualquier nota que ya conozcas en la cuerda Mi grave o La, usa la forma de octava (dos cuerdas hacia abajo, dos trastes hacia arriba) para encontrar su gemela en la cuerda Re o Sol.</li><li>Pruébalo desde tres notas de partida distintas.</li></ol>',
                 hint: 'This is the whole point of the octave shape — it turns one memorized note into a second one for free, anywhere on the neck.',
                 hint_es: 'Este es todo el sentido de la forma de octava — convierte una nota memorizada en una segunda gratis, en cualquier parte del mástil.',
                 skills: [4, 6],
@@ -383,7 +383,7 @@ SETS.push(
               {
                 label: 'Which string stuck faster?', label_es: '¿Cuál cuerda se te quedó más rápido?',
                 text: 'Station Wrap-Up — which string\'s notes stuck faster today, D or G, and what trick helped?',
-                text_es: 'Cierre de la estación — ¿las notas de cuál cuerda se te quedaron más rápido hoy, D o G, y qué truco ayudó?',
+                text_es: 'Cierre de la estación — ¿las notas de cuál cuerda se te quedaron más rápido hoy, Re o Sol, y qué truco ayudó?',
                 response: { type: 'short', placeholder: 'e.g. G was easier — its B–C half step gave me a landmark at fret 4; the octave shape helped me check myself',
                   placeholder_es: 'p. ej. G fue más fácil — su semitono B–C me dio una referencia en el traste 4; la forma de octava me ayudó a comprobarme' }
               }
@@ -516,7 +516,7 @@ SETS.push(
         gotItWhen_es: 'nombrarlas todas, de grave a aguda, te toma menos de 15 segundos sin diagrama.',
         practice: { type: 'fretboard', string: 'G', label: 'Find the note — G string', label_es: 'Encuentra la nota — cuerda Sol', bpm: 60, notes: [55, 57, 59, 60, 62, 64, 65, 67] } },
       { id: 'm9w1-s3', text: 'Find any named note (dealt from the natural-note deck) on the D or G string within 5 seconds',
-        text_es: 'Encontrar cualquier nota nombrada (repartida de la baraja de notas naturales) en la cuerda Re o G en menos de 5 segundos',
+        text_es: 'Encontrar cualquier nota nombrada (repartida de la baraja de notas naturales) en la cuerda Re o Sol en menos de 5 segundos',
         gotItWhen: 'you can find 8 out of 10 dealt notes on the D or G string within 5 seconds each.',
         gotItWhen_es: 'encuentras 8 de 10 notas repartidas en la cuerda Re o Sol en menos de 5 segundos cada una.',
         practice: { type: 'mc', prompt: 'On the D string, G is at which fret?', prompt_es: 'En la cuerda Re, ¿en cuál traste está G?', choices: ['3', '5', '7', '9'], choices_es: ['3', '5', '7', '9'], answer: 1 } },

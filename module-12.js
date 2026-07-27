@@ -273,7 +273,7 @@ SETS.push(
                 levelUp: 'Run the staircase up and back down (p-i-m-a-m-i) without looking at your picking hand.',
                 levelUp_es: 'Corre la escalera subiendo y bajando (p-i-m-a-m-i) sin mirar tu mano de pulsar.',
                 skills: [1, 3],
-                playSeq: { label: 'p-i-m-a on open strings — A, G, B, e (twice through)', label_es: 'p-i-m-a en cuerdas al aire — La, G, B, e (dos veces seguidas)', bpm: 60, notes: [45, 55, 59, 64, 45, 55, 59, 64] }
+                playSeq: { label: 'p-i-m-a on open strings — A, G, B, e (twice through)', label_es: 'p-i-m-a en cuerdas al aire — La, Sol, Si, mi aguda (dos veces seguidas)', bpm: 60, notes: [45, 55, 59, 64, 45, 55, 59, 64] }
               },
               {
                 label: 'Challenge — 4-Note Arpeggio, Am then C', label_es: 'Reto — Arpegio de 4 notas, Am y luego C',

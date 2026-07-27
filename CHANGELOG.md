@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — More Spanish string-name cleanup
+
+### Fixed
+
+- **More leftover letter-style string names in Modules 8, 9, and 12's Spanish**
+  (like "G-B-e" and "cuerda Re o G") now read as solfège ("Sol, Si y mi aguda",
+  "cuerda Re o Sol"), finishing the sweep started earlier today.
+
 ## 2026-07-27 — Removed the per-module "Songs" fold
 
 ### Removed

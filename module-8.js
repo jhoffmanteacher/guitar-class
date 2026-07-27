@@ -105,13 +105,13 @@ SETS.push(
           {
             label: 'Try it: p-i-m-a on open strings', label_es: 'Pruébalo: p-i-m-a al aire',
             text: 'Now try it: pluck p-i-m-a on open strings — low E (p), G (i), B (m), high e (a):<ol><li>Click any note below the TAB to hear it.</li><li>Then play the staircase on your own guitar, one finger per string.</li></ol>',
-            text_es: 'Ahora pruébalo: pulsa p-i-m-a en cuerdas al aire — Mi grave (p), G (i), B (m), mi aguda (a):<ol><li>Haz clic en cualquier nota debajo del TAB para escucharla.</li><li>Luego toca la escalera en tu propia guitarra, un dedo por cuerda.</li></ol>',
+            text_es: 'Ahora pruébalo: pulsa p-i-m-a en cuerdas al aire — Mi grave (p), Sol (i), Si (m), mi aguda (a):<ol><li>Haz clic en cualquier nota debajo del TAB para escucharla.</li><li>Luego toca la escalera en tu propia guitarra, un dedo por cuerda.</li></ol>',
             hint: 'No pick, no chord yet — just the right hand. Each pluck lands on its own string, reading left to right. Aim for the same volume from every finger.',
             hint_es: 'Sin púa, sin acorde todavía — solo la mano derecha. Cada pulsación cae en su propia cuerda, leyendo de izquierda a derecha. Apunta al mismo volumen en cada dedo.',
             skills: [3, 4, 5],
             tab: {
               caption: 'p-i-m-a on open strings · low E · G · B · high e',
-              caption_es: 'p-i-m-a en cuerdas al aire · Mi grave · G · B · mi aguda',
+              caption_es: 'p-i-m-a en cuerdas al aire · Mi grave · Sol · Si · mi aguda',
               notes: [
                 { string: 'E', fret: 0, note: 'E', midi: 40 },
                 { string: 'G', fret: 0, note: 'G', midi: 55 },
@@ -208,7 +208,7 @@ SETS.push(
             levelUp: 'Call out the bass string a beat before you play it, or shift E → A → D → A → E in a continuous loop without stopping.',
             levelUp_es: 'Anuncia la cuerda grave un tiempo antes de tocarla, o cambia Mi → La → Re → La → Mi en un loop continuo sin detenerte.',
             skills: [2, 3, 6],
-            playSeq: { label: 'Thumb shifts: E · A · D bass with i-m-a above', label_es: 'Cambios del pulgar: bajo E · A · D con i-m-a arriba', bpm: 60, notes: [40, 55, 59, 64, 45, 55, 59, 64, 50, 55, 59, 64] }
+            playSeq: { label: 'Thumb shifts: E · A · D bass with i-m-a above', label_es: 'Cambios del pulgar: bajo Mi · La · Re con i-m-a arriba', bpm: 60, notes: [40, 55, 59, 64, 45, 55, 59, 64, 50, 55, 59, 64] }
           }
             ]
           },
@@ -273,7 +273,7 @@ SETS.push(
       { id: 'm8w1-s2', text: 'Identify p, i, m, a finger letters and their string assignments',
         text_es: 'Identificar las letras de dedos p, i, m, a y sus cuerdas asignadas',
         gotItWhen: 'you can say "p = thumb / bass strings, i = index / G, m = middle / B, a = ring / high e" without hesitating — and assign a finger to any string on demand.',
-        gotItWhen_es: 'puedes decir "p = pulgar / cuerdas graves, i = índice / G, m = medio / B, a = anular / mi aguda" sin dudar — y asignar un dedo a cualquier cuerda cuando se te pida.',
+        gotItWhen_es: 'puedes decir "p = pulgar / cuerdas graves, i = índice / Sol, m = medio / Si, a = anular / mi aguda" sin dudar — y asignar un dedo a cualquier cuerda cuando se te pida.',
         practice: { type: 'mc', prompt: 'In p-i-m-a notation, which finger handles the G string (string 3)?',
           prompt_es: 'En la notación p-i-m-a, ¿cuál dedo se encarga de la cuerda Sol (cuerda 3)?',
           choices: ['p (thumb)', 'i (index)', 'm (middle)', 'a (ring)'],
@@ -288,7 +288,7 @@ SETS.push(
         text_es: 'Pulsar las cuerdas Sol, Si y mi aguda con los dedos i, m, a respectivamente',
         gotItWhen: 'each finger goes to its assigned string without you having to look — and all three sound roughly equal in volume.',
         gotItWhen_es: 'cada dedo va a su cuerda asignada sin que tengas que mirar — y los tres suenan más o menos con el mismo volumen.',
-        practice: { type: 'playSeq', label: 'i · m · a on G · B · e', label_es: 'i · m · a en G · B · e', bpm: 60,
+        practice: { type: 'playSeq', label: 'i · m · a on G · B · e', label_es: 'i · m · a en Sol · Si · mi aguda', bpm: 60,
           notes: [55, 59, 64] } },
       { id: 'm8w1-s5', text: 'Pluck p-i-m-a in order on open strings at 60 BPM',
         text_es: 'Pulsar p-i-m-a en orden en cuerdas al aire a 60 BPM',
@@ -485,7 +485,7 @@ SETS.push(
             text: '<ol><li>Fret Am.</li><li>Play the 6-note pattern over it — thumb on the A string (Am\'s root), i-m-a still on G-B-e — 8 times.</li></ol>You\'ve got it when: only the thumb moves to the new bass; the fingers stay anchored. Click any note below the TAB to hear it.',
             text_es: '<ol><li>Trastea Am.</li><li>Toca el patrón de 6 notas sobre él — pulgar en la cuerda La (la raíz de Am), i-m-a siguen en Sol, Si y mi aguda — 8 veces.</li></ol>Lo tienes cuando: solo el pulgar se mueve hacia el nuevo bajo; los dedos se quedan anclados. Haz clic en cualquier nota debajo del TAB para escucharla.',
             hint: 'The only change from Em is which bass string the thumb plays. Fingers stay parked on G, B, high e.',
-            hint_es: 'El único cambio respecto a Em es en cuál cuerda grave toca el pulgar. Los dedos se quedan estacionados en G, B, mi aguda.',
+            hint_es: 'El único cambio respecto a Em es en cuál cuerda grave toca el pulgar. Los dedos se quedan estacionados en Sol, Si y mi aguda.',
             stuck: 'Drop the pattern — just pluck the Am bass (p) and let it ring, then add i-m-a one finger at a time.',
             stuck_es: 'Deja el patrón — solo pulsa el bajo de Am (p) y deja que suene, y luego agrega i-m-a un dedo a la vez.',
             levelUp: 'Switch Em → Am every 2 bars without breaking the pulse — only the thumb relocates.',
