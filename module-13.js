@@ -6,55 +6,6 @@
 //  steel-string. Edit this file to change Module 13 content.
 // ============================================================
 
-// ── Shared step diagrams (inline SVG so the labels can be translated —
-//    the _es text field carries the same drawing with Spanish labels). ──
-const M13_SVG_STYLE = 'display:block;width:100%;max-width:420px;height:auto;border:1px solid #ddd;border-radius:10px;background:#fff;margin-top:10px';
-
-function m13BallEndSVG(L){
-  // Cross-section of a classical tie block with a BALL-END string seated.
-  return `<span class="step-figure"><svg viewBox="0 0 420 190" style="${M13_SVG_STYLE}" role="img" aria-label="${L.aria}">
-    <rect x="0" y="120" width="420" height="8" fill="#d9c9a3"/>
-    <rect x="120" y="88" width="150" height="52" rx="6" fill="#8a5a33"/>
-    <rect x="132" y="62" width="10" height="28" rx="2" fill="#f2ede2" stroke="#bbb"/>
-    <path d="M10 40 Q 90 40 135 62" fill="none" stroke="#185fa5" stroke-width="3"/>
-    <line x1="137" y1="90" x2="137" y2="108" stroke="#185fa5" stroke-width="3"/>
-    <line x1="137" y1="108" x2="252" y2="108" stroke="#185fa5" stroke-width="3"/>
-    <circle cx="262" cy="108" r="9" fill="#b3372a"/>
-    <line x1="271" y1="99" x2="271" y2="117" stroke="#6b3d1f" stroke-width="3"/>
-    <path d="M60 30 l-26 8 26 8" fill="none" stroke="#3b6d11" stroke-width="2.5"/>
-    <text x="70" y="36" font-family="sans-serif" font-size="13" fill="#3b6d11">${L.toNut}</text>
-    <text x="120" y="165" font-family="sans-serif" font-size="13" fill="#333">${L.block}</text>
-    <text x="240" y="88" font-family="sans-serif" font-size="13" fill="#b3372a">${L.ball}</text>
-    <text x="112" y="52" font-family="sans-serif" font-size="13" fill="#555">${L.saddle}</text>
-  </svg></span>`;
-}
-
-function m13BridgePinSVG(L){
-  // Cross-section of a steel-string bridge: pin in its hole, ball locked
-  // against the bridge plate, string running up and out.
-  return `<span class="step-figure"><svg viewBox="0 0 420 200" style="${M13_SVG_STYLE}" role="img" aria-label="${L.aria}">
-    <rect x="90" y="70" width="240" height="26" rx="6" fill="#8a5a33"/>
-    <rect x="0" y="96" width="420" height="10" fill="#d9c9a3"/>
-    <rect x="60" y="106" width="300" height="10" fill="#c9b183"/>
-    <path d="M196 40 L212 40 L208 96 L200 96 Z" fill="#f2ede2" stroke="#999"/>
-    <circle cx="204" cy="34" r="8" fill="#f2ede2" stroke="#999"/>
-    <circle cx="188" cy="112" r="8" fill="#b3372a"/>
-    <path d="M192 104 Q 196 70 196 40" fill="none" stroke="#185fa5" stroke-width="3"/>
-    <path d="M196 40 Q 150 20 40 24" fill="none" stroke="#185fa5" stroke-width="3"/>
-    <path d="M300 30 l0 -18 m-6 8 l6 -8 6 8" fill="none" stroke="#3b6d11" stroke-width="2.5"/>
-    <text x="312" y="22" font-family="sans-serif" font-size="13" fill="#3b6d11">${L.pull}</text>
-    <text x="222" y="38" font-family="sans-serif" font-size="13" fill="#555">${L.pin}</text>
-    <text x="120" y="145" font-family="sans-serif" font-size="13" fill="#b3372a">${L.ball}</text>
-    <text x="90" y="66" font-family="sans-serif" font-size="13" fill="#333">${L.bridge}</text>
-  </svg></span>`;
-}
-
-const M13_D1_EN = m13BallEndSVG({ aria:'Ball-end string seated against the back of a classical tie block', toNut:'to the saddle & nut', block:'tie block (bridge)', ball:'ball end sits flat', saddle:'saddle' });
-const M13_D1_ES = m13BallEndSVG({ aria:'Cuerda con bolita asentada contra la parte trasera del bloque del puente', toNut:'hacia la selleta y la cejuela', block:'bloque del puente', ball:'la bolita queda plana', saddle:'selleta' });
-const M13_D2_EN = m13BridgePinSVG({ aria:'Steel-string bridge pin holding the ball end against the bridge plate', pull:'pull up gently', pin:'bridge pin', ball:'ball locks under the plate', bridge:'bridge' });
-const M13_D2_ES = m13BridgePinSVG({ aria:'Pin del puente sujetando la bolita contra la placa del puente', pull:'tira suave hacia arriba', pin:'pin del puente', ball:'la bolita se traba bajo la placa', bridge:'puente' });
-
-
 // ── Step photos (2026-07-27). Seven hand-sketched panels of the full
 //    process, one figure per step. Art only — the captions live in the step
 //    text so they translate with everything else. ──
@@ -270,16 +221,16 @@ SETS.push(
             steps: [
               {
                 label: 'Nylon: ball end at the tie block', label_es: 'Nylon: la bolita en el bloque del puente',
-                text: `Our classroom strings are ball-end nylon — no tie knot needed:<ol><li>Check the package and pick the right string for the slot you just emptied.</li><li>Push the plain end through the tie block hole, entering from the soundhole side.</li><li>Pull it through until the ball reaches the block.</li><li>Pull snug so the ball sits FLAT against the back of the tie block.</li></ol>You've got it when: a gentle tug doesn't shift the ball at all.${M13_P4_EN}${M13_D1_EN}`,
-                text_es: `Nuestras cuerdas del salón son de nylon con bolita — no se necesita nudo:<ol><li>Revisa el paquete y elige la cuerda correcta para el lugar que acabas de dejar libre.</li><li>Pasa la punta lisa por el agujero del bloque, entrando por el lado de la boca.</li><li>Jálala hasta que la bolita llegue al bloque.</li><li>Tensa hasta que la bolita quede PLANA contra la parte trasera del bloque.</li></ol>Lo tienes cuando: un jalón suave no mueve la bolita para nada.${M13_P4_ES}${M13_D1_ES}`,
+                text: `Our classroom strings are ball-end nylon — no tie knot needed:<ol><li>Check the package and pick the right string for the slot you just emptied.</li><li>Push the plain end through the tie block hole, entering from the soundhole side.</li><li>Pull it through until the ball reaches the block.</li><li>Pull snug so the ball sits FLAT against the back of the tie block.</li></ol>You've got it when: a gentle tug doesn't shift the ball at all.${M13_P4_EN}`,
+                text_es: `Nuestras cuerdas del salón son de nylon con bolita — no se necesita nudo:<ol><li>Revisa el paquete y elige la cuerda correcta para el lugar que acabas de dejar libre.</li><li>Pasa la punta lisa por el agujero del bloque, entrando por el lado de la boca.</li><li>Jálala hasta que la bolita llegue al bloque.</li><li>Tensa hasta que la bolita quede PLANA contra la parte trasera del bloque.</li></ol>Lo tienes cuando: un jalón suave no mueve la bolita para nada.${M13_P4_ES}`,
                 hint: 'The ball should touch the wood of the block itself, not hang below it or wedge sideways. If it sits crooked, feed a little string back and re-seat it.',
                 hint_es: 'La bolita debe tocar la madera del bloque, no colgar por debajo ni quedar de lado. Si queda chueca, regresa un poco de cuerda y asiéntala de nuevo.',
                 skills: [1]
               },
               {
                 label: 'Steel: bridge pin', label_es: 'Acero: el pin del puente',
-                text: `On a steel-string acoustic the ball end lives under the bridge:<ol><li>Drop the ball end into the pin hole.</li><li>Insert the bridge pin with its groove facing the string (toward the soundhole).</li><li>Press the pin down while pulling the string gently UP — you'll feel the ball lock against the bridge plate.</li></ol>You've got it when: the pin stays put and the string doesn't pull free with a gentle tug.${M13_D2_EN}`,
-                text_es: `En una acústica de cuerdas de acero la bolita vive debajo del puente:<ol><li>Deja caer la bolita en el agujero del pin.</li><li>Mete el pin con su ranura mirando hacia la cuerda (hacia la boca).</li><li>Presiona el pin hacia abajo mientras jalas la cuerda suave hacia ARRIBA — sentirás la bolita trabarse contra la placa del puente.</li></ol>Lo tienes cuando: el pin se queda en su lugar y la cuerda no se sale con un jalón suave.${M13_D2_ES}`,
+                text: `On a steel-string acoustic the ball end lives under the bridge:<ol><li>Drop the ball end into the pin hole.</li><li>Insert the bridge pin with its groove facing the string (toward the soundhole).</li><li>Press the pin down while pulling the string gently UP — you'll feel the ball lock against the bridge plate.</li></ol>You've got it when: the pin stays put and the string doesn't pull free with a gentle tug.`,
+                text_es: `En una acústica de cuerdas de acero la bolita vive debajo del puente:<ol><li>Deja caer la bolita en el agujero del pin.</li><li>Mete el pin con su ranura mirando hacia la cuerda (hacia la boca).</li><li>Presiona el pin hacia abajo mientras jalas la cuerda suave hacia ARRIBA — sentirás la bolita trabarse contra la placa del puente.</li></ol>Lo tienes cuando: el pin se queda en su lugar y la cuerda no se sale con un jalón suave.`,
                 stuck: 'Pin keeps popping up as you tune? The ball is riding on the pin\'s tip instead of the plate. Take it out and re-seat: ball in first, pin after, pull up while pressing down.',
                 stuck_es: '¿El pin se levanta al afinar? La bolita está montada en la punta del pin y no en la placa. Sácalo y asienta de nuevo: primero la bolita, luego el pin, jala hacia arriba mientras presionas.',
                 skills: [1]

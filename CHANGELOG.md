@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Module 13: removed the remaining bridge diagrams
+
+### Removed
+
+- The two remaining **cross-section diagrams** (the tie-block drawing and the
+  bridge-pin drawing) are gone from the "seat the new string at the bridge"
+  steps, leaving only the hand-sketched pictures and the step-by-step text.
+
 ## 2026-07-27 — Riff Runner and Note Hunt: faster note detection
 
 ### Fixed
