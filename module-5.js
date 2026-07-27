@@ -980,13 +980,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Random chord draw — Groups 1 & 2',
-            title_es: 'Sorteo de acordes al azar — Grupos 1 y 2',
+            title: 'Random chord draw — every chord so far',
+            title_es: 'Sorteo de acordes al azar — todos los acordes hasta ahora',
             steps: [
               {
                 label: 'Challenge — Cross-Group Chord Draw', label_es: 'Reto — Sorteo de acordes entre grupos',
-                text: '<ol><li>Run the deck below — it mixes every Group 1 and Group 2 chord.</li><li>Play three cards in a row cleanly, back to back, before the next set of three.</li></ol>You\'ve got it when: three cards in a row with no pause between them — working toward the assessment\'s 8-bar-at-70-BPM standard.',
-                text_es: '<ol><li>Corre la baraja de abajo — mezcla todos los acordes del Grupo 1 y del Grupo 2.</li><li>Toca tres cartas seguidas limpiamente, una tras otra, antes del siguiente grupo de tres.</li></ol>Lo tienes cuando: tres cartas seguidas sin pausa entre ellas — acercándote al estándar de la evaluación de 8 compases a 70 BPM.',
+                text: '<ol><li>Run the deck below — it mixes every Group 1 and Group 2 chord, plus Dm and the G/B turnaround from "the cure."</li><li>Play three cards in a row cleanly, back to back, before the next set of three.</li></ol>You\'ve got it when: three cards in a row with no pause between them — working toward the assessment\'s 8-bar-at-70-BPM standard.',
+                text_es: '<ol><li>Corre la baraja de abajo — mezcla todos los acordes del Grupo 1 y del Grupo 2, más Dm y el giro G/B de "the cure."</li><li>Toca tres cartas seguidas limpiamente, una tras otra, antes del siguiente grupo de tres.</li></ol>Lo tienes cuando: tres cartas seguidas sin pausa entre ellas — acercándote al estándar de la evaluación de 8 compases a 70 BPM.',
                 drill: { type: 'deck', deck: 'chords-m5', skill: 'm5w3-s5' },
                 hint: 'This replaces flashcards you\'d shuffle by hand — same idea, already shuffled for you.',
                 hint_es: 'Esto reemplaza las tarjetas que barajarías a mano — la misma idea, ya barajada para ti.',
@@ -1101,7 +1101,7 @@ SETS.push(
     assessment: {
       goal: 'Frets D, A, and Bm with clean tone · Switches D to A in time · Switches Em to Bm in time · Connects Group 1 and Group 2 chords · Plays a song using Group 2 chords · Identifies chord group from a chord chart',
       goal_es: 'Trastea D, A y Bm con tono limpio · Cambia de D a A a tiempo · Cambia de Em a Bm a tiempo · Conecta acordes del Grupo 1 y del Grupo 2 · Toca una canción usando acordes del Grupo 2 · Identifica el grupo de un acorde a partir de un diagrama',
-      performance: 'Solo: run the chord deck (mixes Group 1 and Group 2) for three cards in a row, then play them in sequence for 8 bars at 70 BPM — record it and listen back for clean changes.',
+      performance: 'Solo: run the chord deck (mixes Group 1 and Group 2, plus Dm and the G/B turnaround) for three cards in a row, then play them in sequence for 8 bars at 70 BPM — record it and listen back for clean changes.',
       selfCheck: 'Can you look at a chord chart and know immediately which "group" each chord belongs to? Can you switch D–A and Em–Bm on beat 1, working the tempo up toward 70 BPM?',
       selfCheck_es: '¿Puedes ver un diagrama de acordes y saber de inmediato a qué "grupo" pertenece cada acorde? ¿Puedes cambiar D–A y Em–Bm en el tiempo 1, subiendo el tempo hacia 70 BPM?',
       standards: ['Pr.4a', 'Pr.5a', 'Cn.11b']

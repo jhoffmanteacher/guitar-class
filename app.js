@@ -3509,7 +3509,7 @@ const DECKS = {
   'power-chord-shapes': { kicker:'deck.kPlayChord', hint:'deck.hPlayChord', cards:[{f:'A5'},{f:'G5'},{f:'C5'},{f:'D5'}] },
   'e5-vs-emajor': { kicker:'deck.kPlayChord', hint:'deck.hPlayChord', cards:[{f:'E5'},{f:'E'},{f:'E5'},{f:'E'}] },
   'chords-group1': { kicker:'deck.kChordName', hint:'deck.hPlayIt', cards:[{f:'C'},{f:'G'},{f:'Am'},{f:'F'}] },
-  'chords-m5': { kicker:'deck.kChordName', hint:'deck.hPlayIt', cards:[{f:'C'},{f:'G'},{f:'Am'},{f:'F'},{f:'D'},{f:'A'},{f:'Em'},{f:'Bm'}] }
+  'chords-m5': { kicker:'deck.kChordName', hint:'deck.hPlayIt', cards:[{f:'C'},{f:'G'},{f:'Am'},{f:'F'},{f:'D'},{f:'A'},{f:'Em'},{f:'Bm'},{f:'Dm'},{f:'G/B'}] }
 };
 const deckDrills = {};
 function dkBox(key){ return document.getElementById('dkr-' + key); }

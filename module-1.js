@@ -688,13 +688,13 @@ MODULE_REVIEWS[1] = {
   ],
   assessItems: [
     'Tune all 6 strings to green in under 2 minutes, without restarting',
-    'Name all 6 strings from memory, low to high and high to low',
-    'Play each open string with correct posture and pick grip, every string ringing full and clean with no accidental muting from either hand'
+    'Name all 6 strings from memory, low to high, high to low, and at random',
+    'Play each open string with correct posture and pick grip — using down-strokes from the wrist — every string ringing full and clean with no accidental muting from either hand'
   ],
   assessItems_es: [
     'Afinar las 6 cuerdas en verde en menos de 2 minutos, sin reiniciar',
-    'Nombrar las 6 cuerdas de memoria, de grave a aguda y de aguda a grave',
-    'Tocar cada cuerda al aire con la postura y el agarre de púa correctos, cada cuerda sonando plena y limpia sin que ninguna mano la apague sin querer'
+    'Nombrar las 6 cuerdas de memoria, de grave a aguda, de aguda a grave, y al azar',
+    'Tocar cada cuerda al aire con la postura y el agarre de púa correctos — con golpes hacia abajo desde la muñeca — cada cuerda sonando plena y limpia sin que ninguna mano la apague sin querer'
   ],
   forward: 'You\'ve got a guitar that\'s in tune, a goal, and your first clean notes — <strong>Module 2 puts names on the frets</strong> so riffs and TAB start making sense.',
   forward_es: 'Ya tienes una guitarra afinada, una meta, y tus primeras notas limpias — <strong>el Módulo 2 les pone nombre a los trastes</strong> para que los riffs y el TAB empiecen a tener sentido.',
