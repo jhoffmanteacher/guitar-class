@@ -1647,7 +1647,7 @@ function activateSet(id){
   renderChordBoxes();
   syncRailStations();   // refresh the rail's "This set" station switcher for the new set
   // Every set opens at the top, every time — no scroll-position memory.
-  window.scrollTo(0, 0);
+  scrollPaneTop();
 }
 
 /* ── Rail station switcher ─────────────────────────────────────────────
@@ -1704,7 +1704,7 @@ function syncRailStations(){
    and return to the practice view. Reuses the existing close-all helper. */
 function returnToPractice(){
   if(typeof closeTopPanels === 'function') closeTopPanels();
-  window.scrollTo({ top:0, behavior:'smooth' });
+  scrollPaneTop(true);
 }
 
 /* Set/review panels are now built per-module, on demand, by
@@ -2250,8 +2250,13 @@ function nudgeStepIntoView(li, force){
   requestAnimationFrame(()=>{
     const hdr = document.querySelector('.header');
     const hdrH = hdr ? hdr.offsetHeight : 0;
+    /* The lesson scrolls inside .main now, so "hidden at the top" means
+       behind the sticky set band at the top of THAT scrollport, not behind
+       the header — the header sits above the scrollport entirely. */
+    const eyebrow = document.querySelector('.week-panel.active .set-eyebrow');
+    const coverTo = eyebrow ? eyebrow.getBoundingClientRect().bottom : hdrH;
     const top = li.getBoundingClientRect().top;
-    if(top < hdrH || (force && top > window.innerHeight - 80)) li.scrollIntoView({block:'start'});
+    if(top < coverTo || (force && top > window.innerHeight - 80)) li.scrollIntoView({block:'start'});
   });
 }
 
@@ -5176,13 +5181,34 @@ async function jumpToStep(moduleNum, wid, station, secIdx, stepIdx){
   }
 }
 
+/* ── Scroll pane ──
+   The reading column is its own scroll container (.main / #main-content, see
+   "Two panes, two scrollbars" in styles.css), so window.scrollTo no longer
+   moves the lesson — the document itself never scrolls while the app shell is
+   up. Everything that used to scroll "the page" goes through here instead.
+   Falls back to the window for the teacher dashboard and the auth wall, which
+   live outside the locked shell and still scroll normally. */
+function scrollPane(){
+  const m = document.getElementById('main-content');
+  return (m && m.scrollHeight > m.clientHeight) ? m : window;
+}
+function scrollPaneTop(smooth){
+  scrollPane().scrollTo({ top:0, behavior: smooth ? 'smooth' : 'auto' });
+}
+
 /* ── Back to top ── */
 function initBackToTop(){
   const btn = document.getElementById('back-to-top');
   if(!btn) return;
-  window.addEventListener('scroll', () => {
-    btn.classList.toggle('show', window.scrollY > 600);
-  }, { passive: true });
+  const main = document.getElementById('main-content');
+  const onScroll = () => {
+    const y = main ? main.scrollTop : window.scrollY;
+    btn.classList.toggle('show', y > 600);
+  };
+  /* capture:true — the scroll events that matter now fire on .main, and
+     scroll doesn't bubble, so a listener bound to window only sees them on
+     the way down. */
+  window.addEventListener('scroll', onScroll, { passive: true, capture: true });
 }
 initBackToTop();
 
@@ -5221,7 +5247,7 @@ function leaveTopPanelForSet(){
     || !!document.getElementById('songs-hub-overlay');
   if(!covering) return;
   closeTopPanels('');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  scrollPaneTop(true);
 }
 
 /* Load every module's data (not its panels) — the Songs hub and search

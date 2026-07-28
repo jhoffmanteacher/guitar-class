@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — The menu and the lesson scroll separately
+
+### Changed
+
+- **Scrolling a lesson no longer moves the left menu, and scrolling the menu
+  no longer moves the lesson.** They're two independent panes now, so a long
+  step list stays put while you go looking for another set — and the module
+  picker, sets and stations never scroll off the screen.
+- **Tuner, Timer and Metronome are locked to the bottom corner of the menu.**
+  They're smaller now — icon over label — and they stay there no matter how
+  far you scroll, so they're always one click away.
+
 ## 2026-07-28 — Set title stays pinned while you scroll
 
 ### Changed

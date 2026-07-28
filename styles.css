@@ -20,6 +20,9 @@
   --shadow-raised:0 10px 36px rgba(30,27,70,0.28);
   --radius:10px;--radius-sm:6px;
   --hdr:70px;
+  /* height of the sticky .set-eyebrow band — the only thing that overlaps a
+     scroll target inside the .main scrollport (see scroll-margin-top below) */
+  --eyebrow:56px;
   /* Brand plum (header, skip-link) + cool neutral-gray left-nav rail surface */
   --brand:#514a7d;
   --rail-bg:#e2e3e1;
@@ -44,7 +47,7 @@
     --brand-hover:#544d80;
   }
 }
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg2);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg2);color:var(--text);min-height:100dvh;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 .header{background:var(--brand);color:#fff;border-bottom:1px solid rgba(255,255,255,0.10);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:20;box-shadow:0 1px 2px rgba(0,0,0,0.08)}
 .header-title{font-size:1.375rem;font-weight:600;color:#fff;line-height:1.2;letter-spacing:-0.01em;font-family:var(--font-display)}
 .header-sub{font-size:0.875rem;color:rgba(255,255,255,0.82);margin-top:2px;line-height:1.25}
@@ -71,6 +74,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .tabs,.tab-panel,.week-panel,li.step,.wpill,.step-folds,
 #games-screen,#songs-hub-panel,#search-panel,#keep-practicing-screen,#my-progress-screen{
   scroll-margin-top:calc(var(--hdr) + 10px)}
+/* …except inside the app shell, where .main is its own scroll container: the
+   header is outside that scrollport and can't cover anything, so the only
+   thing overlapping a scroll target is the sticky .set-eyebrow band. */
+.app-layout .tabs,.app-layout .tab-panel,.app-layout .week-panel,.app-layout li.step,
+.app-layout .wpill,.app-layout .step-folds,.app-layout #songs-hub-panel,
+.app-layout #search-panel,.app-layout #keep-practicing-screen,.app-layout #my-progress-screen{
+  scroll-margin-top:var(--eyebrow)}
 .user-area{display:flex;align-items:center;gap:10px}
 .avatar{width:32px;height:32px;border-radius:50%;object-fit:cover}
 .avatar-init{width:32px;height:32px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:0.9375rem;font-weight:500;color:var(--text2)}
@@ -201,8 +211,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    identity while the rest of the set scrolls beneath it; objectives and the
    song-thread link fold behind a quiet native <details> dropdown, closed by
    default. */
+/* top:0, not top:var(--hdr) — the band is sticky inside .main's own scrollport
+   now (see "Two panes, two scrollbars"), whose top edge already sits under
+   the header. Offsetting by the header height again would leave a 70px dead
+   strip of lesson text scrolling past above it. */
 .set-eyebrow{display:flex;align-items:center;gap:10px;
-  position:sticky;top:var(--hdr);z-index:50;background:var(--bg);
+  position:sticky;top:0;z-index:50;background:var(--bg);
   margin:0 0 14px;padding:10px 0;border-bottom:1px solid var(--border)}
 .set-eyebrow-title{font-size:0.9375rem;font-weight:600;color:var(--text)}
 .set-eyebrow .print-set-btn{margin-left:auto}
@@ -526,18 +540,35 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    Games/Songs/Find nav all live in a sticky left column. Warm ivory surface,
    flat sections separated by whitespace + small uppercase labels (no boxed
    panels). The full-width plum .header stays above it (L-shaped frame). */
-.app-layout{display:flex;align-items:stretch;min-height:calc(100vh - var(--hdr))}
+/* ── Two panes, two scrollbars ──
+   The shell is pinned to the viewport and each column scrolls on its own:
+   the rail's nav list scrolls inside .rail-scroll, the reading column scrolls
+   inside .main. Previously both rode one document scrollbar — the rail was
+   position:sticky, so it stayed put only as a side effect of the page being
+   taller than it, and a wheel over the rail still scrolled the lesson.
+   #app (not body) carries the lock so the auth wall, the paused screen and
+   the teacher dashboard — all outside #app — keep ordinary page scrolling. */
+#app{height:calc(100dvh - var(--hdr));overflow:hidden}
+.app-layout{display:flex;align-items:stretch;height:100%;min-height:0}
 /* overflow-x:clip, not hidden: hidden creates a scroll container, which
    disables position:sticky for the .set-eyebrow band inside it. clip
    trims the same wide content (see comment above) without that side effect. */
-.app-layout .main{flex:1;min-width:0;max-width:820px;margin:0;padding:24px 28px 60px;overflow-x:clip}
+/* overscroll-behavior:contain stops a flick that bottoms out the lesson from
+   handing the leftover scroll to the page behind it (rubber-banding the whole
+   shell on trackpads and iOS).
+   The top gap is a margin on the children, not padding here: padding on a
+   scroll container insets where position:sticky pins, which left a 24px strip
+   of lesson text scrolling past ABOVE the sticky .set-eyebrow band. .main is
+   a BFC (it scrolls), so the margin can't collapse out through it. Skipped
+   for the full-viewport .games-screen / .page-screen overlays and the footer,
+   which set their own spacing. */
+.app-layout .main{flex:1;min-width:0;max-width:820px;margin:0;padding:0 28px 60px;
+  overflow-x:clip;overflow-y:auto;overscroll-behavior:contain}
+.app-layout .main > :not(.games-screen):not(.page-screen):not(.student-footer){margin-top:24px}
 @media(min-width:1240px){.app-layout .main{margin:0 auto}}
 .rail{width:252px;flex:0 0 252px;background:var(--rail-bg);color:var(--text);
-  position:sticky;top:var(--hdr);height:calc(100vh - var(--hdr));
-  border-right:1px solid var(--border);display:flex;flex-direction:column}
-/* padding-bottom clears the fixed .rail-tools dock (~140px) so the last nav
-   item can still scroll fully into view above it instead of hiding under it. */
-.rail-scroll{display:flex;flex-direction:column;gap:24px;padding:20px 14px 160px;overflow-y:auto;flex:1;min-height:0}
+  height:100%;border-right:1px solid var(--border);display:flex;flex-direction:column}
+.rail-scroll{display:flex;flex-direction:column;gap:24px;padding:20px 14px 24px;overflow-y:auto;overscroll-behavior:contain;flex:1;min-height:0}
 .rail-group{padding:0 2px}
 .rail-sec-label{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.09em;
   color:var(--text3);font-weight:600;margin-bottom:9px;display:flex;align-items:center;gap:7px}
@@ -630,11 +661,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   body.rail-open .rail-backdrop{display:block}
   body.rail-open{overflow:hidden}
   .rail-scroll{overflow-y:auto;padding-bottom:20px}
-  .app-layout .main{max-width:100%;padding:20px 16px 50px}
-  /* The drawer itself is already position:fixed and slides as one unit, so
-     the dock goes back to being an ordinary flex child docked at its bottom
-     instead of a second independent fixed element. */
-  .rail-tools{position:relative;left:auto;bottom:auto;width:auto;z-index:auto}
+  .app-layout .main{max-width:100%;padding:0 16px 50px}
+  .app-layout .main > :not(.games-screen):not(.page-screen):not(.student-footer){margin-top:20px}
+  /* Bigger touch targets in the drawer — 44px minimum. The dock itself needs
+     no override: the drawer is a full-height flex column too, so the dock is
+     already pinned to its bottom. */
+  .rail-tools .fab{min-height:52px}
 }
 @media(prefers-reduced-motion:reduce){.rail{transition:none}}
 .st-text{display:block;max-width:72ch}
@@ -669,32 +701,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .rp-trigger{display:inline-flex;align-items:center;gap:4px;color:var(--blue-text);cursor:pointer;font-size:0.9375rem;font-weight:500;background:none;border:none;padding:0;font-family:inherit;text-align:left;line-height:1.5}
 .rp-trigger:hover{text-decoration:underline}
 /* ── Iframe drag shield — blocks iframe from stealing mouse events during resize ── */
-/* ── Practice tools, docked at the bottom of the left rail ──
-   position:fixed (not sticky, and not just "last flex child of the sticky
-   rail") on purpose: .rail is position:sticky, which only stays pinned while
-   its containing block (.app-layout) has scrollable room below it. On a
-   short step/station (main content shorter than the rail's own nav list),
-   .app-layout has almost no slack, so the sticky rail — and this dock riding
-   at its bottom — unstuck and drifted upward with the very first scroll
-   tick, instead of staying anchored like the old corner FAB did. Pinning the
-   dock straight to the viewport sidesteps that container-height dependency
-   entirely: it's anchored to the rail's left edge/width so it still reads as
-   "part of the rail," but it can never scroll away regardless of how tall
-   (or short) the surrounding content is. Reverted to in-flow for the
-   off-canvas mobile drawer below — there the whole rail is already
-   position:fixed and slides as one unit, so this would just double up. */
-.rail-tools{position:fixed;left:0;bottom:0;width:252px;background:var(--rail-bg);border-top:1px solid var(--border);padding:8px 10px;z-index:40}
+/* ── Practice tools, locked to the bottom of the rail ──
+   Plain flow, no position:fixed: the rail is a full-height flex column now
+   (see "Two panes, two scrollbars"), so .rail-scroll takes all the slack and
+   this dock simply sits at the bottom of the column and never moves. The old
+   fixed-to-the-viewport version only existed because the rail used to be
+   position:sticky inside a page-level scroll, where a bottom flex child
+   drifted upward the moment the sticky came unstuck.
+   Compact by design — three tools in 252px, so the label goes under the icon
+   rather than beside it. */
+.rail-tools{flex:0 0 auto;background:var(--rail-bg);border-top:1px solid var(--border);padding:8px;position:relative}
 .fab-group{display:flex;flex-direction:column;gap:8px}
-.fab-buttons{display:flex;flex-direction:column;gap:8px}
+.fab-buttons{display:flex;flex-direction:row;gap:4px}
 .fab{display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:999px;border:1px solid;font-size:0.9375rem;font-weight:500;cursor:pointer;transition:opacity 0.15s;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,0.10);font-family:inherit;appearance:none;-webkit-appearance:none;text-align:left;line-height:1.2;background:var(--bg);border-color:var(--border2);color:var(--text)}
 .fab:hover{background:var(--bg3);opacity:1}
 .fab svg{width:15px;height:15px;flex-shrink:0}
 .fab-metro svg{color:var(--blue-text)}
 .fab-timer svg{color:var(--green-text)}
 .fab-tune svg{color:var(--purple-accent)}
-/* In-rail restyle: pills become nav-style rows, full width */
-.rail-tools .fab{width:100%;justify-content:flex-start;box-shadow:none;background:transparent;border-color:transparent;border-radius:8px;padding:8px 11px;font-size:0.875rem}
-.rail-tools .fab:hover{background:rgba(0,0,0,0.05)}
+/* In-dock restyle: three small stacked icon-over-label tiles, one row */
+.rail-tools .fab{flex:1 1 0;min-width:0;flex-direction:column;justify-content:center;gap:3px;
+  padding:7px 2px;border-radius:8px;font-size:0.6875rem;font-weight:600;letter-spacing:0.01em;
+  text-align:center;box-shadow:none;background:transparent;border-color:transparent;color:var(--text2)}
+.rail-tools .fab span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.rail-tools .fab svg{width:17px;height:17px}
+.rail-tools .fab:hover{background:rgba(0,0,0,0.05);color:var(--text)}
+.rail-tools .fab[aria-expanded="true"]{background:var(--purple-bg);color:var(--purple-text)}
 /* Popups open upward above the dock, filling the rail's width */
 .rail-tools .tool-popup{position:absolute;left:8px;right:8px;bottom:calc(100% + 6px);width:auto;z-index:70;box-shadow:var(--shadow-raised)}
 .tool-popup{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:16px;width:240px;box-shadow:var(--shadow-raised);display:none}

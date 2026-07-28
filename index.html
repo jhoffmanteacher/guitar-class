@@ -136,6 +136,11 @@
           </div>
         </nav>
       </div>
+      <!-- ══ Practice tools — a compact dock locked to the bottom of the rail.
+           Sibling of .rail-scroll, not inside it: the rail is a full-height
+           flex column, so the scrolling nav list takes the slack (flex:1) and
+           this stays put at the bottom no matter how far that list scrolls.
+           No position:fixed needed — see styles.css. ══ -->
       <div class="rail-tools">
         <div class="fab-group" id="fab-group" style="display:none">
           <div class="tool-popup" id="metro-popup" role="dialog" aria-label="Metronome" data-i18n-attr="aria-label:tools.metronome">
@@ -281,6 +286,13 @@
         </div>
       </div>
       <div id="week-panels"></div>
+      <!-- The footer rides at the end of the reading column, not below the
+           whole shell: .main is its own scroll container now, so anything
+           outside it would sit off-screen with nothing to scroll it. -->
+      <footer class="student-footer">
+        <span class="sf-left">Sequoia HS Music &middot; Mr. Hoffman</span>
+        <a class="sf-report" id="sf-report" href="mailto:jhoffman@seq.org" onclick="return handleReportClick(this)" data-i18n="btn.reportProblem">Report a problem</a>
+      </footer>
     </main>
   </div>
   <!-- Resource viewer: videos/docs/diagrams open in a floating mini-player
@@ -309,11 +321,7 @@
       </div>
     </div>
   </div>
-  <button type="button" class="back-to-top" id="back-to-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" data-i18n-attr="aria-label:btn.backToTop;title:btn.backToTop" aria-label="Back to top" title="Back to top">&#x2191; <span data-i18n="btn.top">Top</span></button>
-  <footer class="student-footer">
-    <span class="sf-left">Sequoia HS Music · Mr. Hoffman</span>
-    <a class="sf-report" id="sf-report" href="mailto:jhoffman@seq.org" onclick="return handleReportClick(this)" data-i18n="btn.reportProblem">Report a problem</a>
-  </footer>
+  <button type="button" class="back-to-top" id="back-to-top" onclick="scrollPaneTop(true)" data-i18n-attr="aria-label:btn.backToTop;title:btn.backToTop" aria-label="Back to top" title="Back to top">&#x2191; <span data-i18n="btn.top">Top</span></button>
 </div>
 <div id="teacher-app" style="display:none">
   <div class="t-main">
