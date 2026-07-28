@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — Tuner, Timer, and Metronome now share one "Tools" button
+
+### Changed
+
+- **The three floating practice tools now live behind a single "Tools"
+  button** in the corner, instead of three separate pills always taking up
+  space. Tap it to expand the Tuner, Timer, and Metronome; tap it again, hit
+  Escape, or tap elsewhere on the page to put them away. A running Timer
+  still visibly pulses this button when it goes off, even if the tools are
+  tucked away.
+
 ## 2026-07-28 — Guitar Games looks like the rest of the site
 
 ### Changed

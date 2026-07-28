@@ -4,13 +4,16 @@
    tokens journey-theme.css adds specifically for this file (load that
    first). Paired with tuner.js + fab-tools.js. */
 .fab-group{position:fixed;bottom:24px;right:24px;display:flex;flex-direction:column;align-items:flex-end;gap:10px;z-index:100}
-.fab-buttons{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.fab-buttons{display:none;flex-direction:column;align-items:flex-end;gap:8px}
+.fab-group.tools-open .fab-buttons{display:flex}
 .fab{display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:999px;border:1px solid;font-size:0.9375rem;font-weight:500;cursor:pointer;transition:opacity 0.15s;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,0.10);font-family:inherit;appearance:none;-webkit-appearance:none;text-align:left;line-height:1.2;background:var(--bg);border-color:var(--border2);color:var(--text)}
 .fab:hover{background:var(--bg3);opacity:1}
 .fab svg{width:15px;height:15px;flex-shrink:0}
 .fab-metro svg{color:var(--blue-text)}
 .fab-timer svg{color:var(--green-text)}
 .fab-tune svg{color:var(--purple-accent)}
+.fab-launcher svg{color:var(--text2)}
+.fab-launcher[aria-expanded="true"]{background:var(--bg3)}
 .tool-popup{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:16px;width:240px;box-shadow:var(--shadow-raised);display:none}
 .tool-popup.open{display:block}
 .tuner-note{font-size:3.125rem;font-weight:500;text-align:center;line-height:1;color:var(--text);min-height:56px;margin-bottom:2px}

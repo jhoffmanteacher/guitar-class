@@ -258,6 +258,7 @@
     'fm.focusView':            { en: 'One at a time', es: 'De uno en uno' },
 
     // ── Tools: Metronome / Timer / Tuner ──
+    'tools.launcher':      { en: 'Tools', es: 'Herramientas' },
     'tools.metronome':     { en: 'Metronome', es: 'Metrónomo' },
     'tools.closeMetroAria':{ en: 'Close metronome', es: 'Cerrar el metrónomo' },
     'tools.closeTimerAria':{ en: 'Close timer', es: 'Cerrar el temporizador' },
