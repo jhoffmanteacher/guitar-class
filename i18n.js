@@ -183,6 +183,11 @@
     'nav.prevSet':        { en: 'the previous set', es: 'la unidad anterior' },
     'nav.comingSoonHtml': { en: 'This set\'s content will appear here when it\'s ready.<br>Check back soon!',
       es: 'El contenido de esta unidad aparecerá aquí cuando esté listo.<br>¡Vuelve pronto!' },
+    // Shown via gateToast() when a module-N.js file never arrives (offline and
+    // not precached, or blocked by a school content filter) — app.js bails back
+    // to the module still on screen, and without this the click looked broken.
+    'module.loadFailed':  { en: 'Couldn\'t load that module — check your connection and try again.',
+      es: 'No se pudo cargar ese módulo — revisa tu conexión e inténtalo de nuevo.' },
     'nav.explore':        { en: 'Explore', es: 'Explorar' },
     'nav.practice':       { en: 'Practice', es: 'Practicar' },
     'nav.games':          { en: 'Games', es: 'Juegos' },
@@ -265,6 +270,10 @@
     'tools.reset':         { en: 'Reset', es: 'Reiniciar' },
     'tools.timerTitle':    { en: 'Practice Timer', es: 'Temporizador de práctica' },
     'tools.timer':         { en: 'Timer', es: 'Temporizador' },
+    // Group names for the two button rows whose pick used to be a CSS class
+    // only (timer presets, tuner string locks) — see index.html.
+    'tools.timerLengthAria':{ en: 'Timer length', es: 'Duración del temporizador' },
+    'tools.tunerStringAria':{ en: 'Which string to tune', es: 'Qué cuerda afinar' },
     'tools.tuner':         { en: 'Tuner', es: 'Afinador' },
     'tools.auto':          { en: 'Auto', es: 'Auto' },
     'tools.flat':          { en: 'flat', es: 'bemol' },
