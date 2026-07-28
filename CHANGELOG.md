@@ -5,6 +5,29 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Right key for "Smoke on the Water", and safer string changing
+
+### Fixed
+
+- **The "Smoke on the Water" drill was in the wrong key.** Module 10 asked you
+  to play the A blues scale over a riff that's actually in G, so the scale
+  fought the riff instead of fitting it. It now moves you to the G blues scale
+  — the same box shape, three frets down. The hint points out something worth
+  seeing: the riff's own notes (G, B♭, C, D♭) are the first four notes of that
+  scale, and the D♭ is the very ♭5 you just learned to add.
+
+### Added
+
+- **Module 13 now warns you about string types.** Nylon guitars take nylon
+  strings and steel-string guitars take steel — they're not interchangeable,
+  and steel on a classical guitar pulls hard enough to lift the bridge off.
+- **Two safety details that were missing:** hold the offcut as you cut it so it
+  can't fly, and keep your face out of line with the headstock while tuning up
+  — a string is most likely to break coming up to pitch, right at eye height.
+- **Safe practice now counts.** The rule about never cutting a string under
+  tension used to say it wasn't graded. It's now a stop: do that and the
+  attempt restarts, however well the rest went.
+
 ## 2026-07-27 — String changing: winding steps that match our guitars
 
 ### Fixed

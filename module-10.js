@@ -485,14 +485,14 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "Smoke on the Water", bluesy', label_es: 'Reto — "Smoke on the Water", con sabor a blues',
-                text: '<ul><li>Play the A blues scale over the feel of the riff (a riff is a short musical phrase that repeats) — this is where this scale is normally used, the sound it was built for.</li></ul>',
-                text_es: '<ul><li>Toca la escala de blues de A sobre la sensación del riff (un riff es una frase musical corta que se repite) — aquí es donde normalmente se usa esta escala, el sonido para el que fue creada.</li></ul>',
-                hint: 'Deep Purple\'s whole riff lives in exactly this bluesy, gritty pentatonic-plus-b5 sound world.',
-                hint_es: 'Todo el riff de Deep Purple vive exactamente en este mundo sonoro bluesero y áspero de pentatónica más b5.',
+                text: 'The riff (a riff is a short musical phrase that repeats) is in G, so the blues scale has to move there too — same shape, three frets down from where you built it:<ol><li>Play the G blues scale: the same box, starting at fret 3 on the low E string.</li><li>Play it over the feel of the riff. This is where this scale is normally used — the sound it was built for.</li></ol>You\'ve got it when: the scale sounds at home over the riff instead of fighting it.',
+                text_es: 'El riff (un riff es una frase musical corta que se repite) está en G, así que la escala de blues también tiene que mudarse — la misma forma, tres trastes más abajo de donde la armaste:<ol><li>Toca la escala de blues de G: la misma caja, empezando en el traste 3 de la cuerda Mi grave.</li><li>Tócala sobre la sensación del riff. Aquí es donde normalmente se usa esta escala — el sonido para el que fue creada.</li></ol>Lo tienes cuando: la escala suena en casa sobre el riff en vez de pelearse con él.',
+                hint: 'Look at the riff\'s own notes: G, Bb, C, then that Db before it falls back to C. Those are the first four notes of the G blues scale — and the Db IS the b5, the note you just added. The riff is not just in the same world as this scale; it is built out of it.',
+                hint_es: 'Fíjate en las notas del riff: G, Bb, C, y ese Db antes de volver a C. Son las primeras cuatro notas de la escala de blues de G — y el Db ES el b5, la nota que acabas de agregar. El riff no solo vive en el mismo mundo que esta escala; está hecho de ella.',
                 stuck: 'Play the riff itself first to get the feel steady, then freely play the blues scale over the same groove (a groove is the steady rhythmic feel).',
                 stuck_es: 'Toca primero el riff mismo para asentar la sensación, y luego toca libremente la escala de blues sobre el mismo groove (un groove es la sensación rítmica constante).',
-                levelUp: 'Try soloing over the riff using only the blues scale, no other notes.',
-                levelUp_es: 'Intenta improvisar un solo sobre el riff usando solo la escala de blues, sin otras notas.',
+                levelUp: 'Try soloing over the riff using only the G blues scale, no other notes — and land on G to finish.',
+                levelUp_es: 'Intenta improvisar un solo sobre el riff usando solo la escala de blues de G, sin otras notas — y termina cayendo en G.',
                 skills: [5, 6]
               }
             ]
