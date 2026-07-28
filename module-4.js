@@ -760,13 +760,13 @@ SETS.push(
             ]
           },
           {
-            title: '⚡ Ear Spark — optional ear bonus',
-            title_es: '⚡ Chispa auditiva — bono opcional de oído',
+            title: 'Ear Spark — optional ear bonus',
+            title_es: 'Chispa auditiva — bono opcional de oído',
             steps: [
               {
                 label: 'Ear Spark: sing and find the note', label_es: 'Chispa auditiva: canta y encuentra la nota',
-                text: '⚡ Ear Spark (optional, 2 min):<ol><li>Press play below — the deck draws three notes from the low E string, frets 0–5, and plays them for you.</li><li>Sing each note back and hold it, then find it on the string — singing first is the whole trick.</li><li>Check yourself last.</li></ol>',
-                text_es: '⚡ Chispa auditiva (opcional, 2 min):<ol><li>Presiona reproducir abajo — la baraja saca tres notas de la cuerda Mi grave, trastes 0–5, y las toca por ti.</li><li>Canta cada nota de vuelta y sostenla, y luego encuéntrala en la cuerda — cantar primero es todo el truco.</li><li>Revísate al final.</li></ol>',
+                text: 'Ear Spark (optional, 2 min):<ol><li>Press play below — the deck draws three notes from the low E string, frets 0–5, and plays them for you.</li><li>Sing each note back and hold it, then find it on the string — singing first is the whole trick.</li><li>Check yourself last.</li></ol>',
+                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Presiona reproducir abajo — la baraja saca tres notas de la cuerda Mi grave, trastes 0–5, y las toca por ti.</li><li>Canta cada nota de vuelta y sostenla, y luego encuéntrala en la cuerda — cantar primero es todo el truco.</li><li>Revísate al final.</li></ol>',
                 drill: { type: 'ear', pool: 'lowEFrets', draw: 3 },
               }
             ]

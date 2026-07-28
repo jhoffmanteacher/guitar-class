@@ -644,13 +644,13 @@ SETS.push(
             ]
           },
           {
-            title: '⚡ Ear Spark — optional ear bonus',
-            title_es: '⚡ Chispa auditiva — bono opcional de oído',
+            title: 'Ear Spark — optional ear bonus',
+            title_es: 'Chispa auditiva — bono opcional de oído',
             steps: [
               {
                 label: 'Ear Spark: rhythm echo', label_es: 'Chispa auditiva: eco de ritmo',
-                text: '⚡ Ear Spark (optional, 2 min):<ol><li>Play any lesson video from this set and pause right after one bar of strumming.</li><li>Clap the rhythm back exactly.</li><li>Play it as muted strums.</li></ol>Rhythm echo is ear training too. Got someone around? Have them clap a bar of any pattern from this set for you to echo.',
-                text_es: '⚡ Chispa auditiva (opcional, 2 min):<ol><li>Reproduce cualquier video de lección de esta unidad y pausa justo después de un compás de rasgueo.</li><li>Aplaude el ritmo exactamente igual.</li><li>Tócalo como rasgueos silenciados.</li></ol>El eco rítmico también es entrenamiento auditivo. ¿Tienes a alguien cerca? Pídele que aplauda un compás de cualquier patrón de esta unidad para que lo repitas.'
+                text: 'Ear Spark (optional, 2 min):<ol><li>Play any lesson video from this set and pause right after one bar of strumming.</li><li>Clap the rhythm back exactly.</li><li>Play it as muted strums.</li></ol>Rhythm echo is ear training too. Got someone around? Have them clap a bar of any pattern from this set for you to echo.',
+                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Reproduce cualquier video de lección de esta unidad y pausa justo después de un compás de rasgueo.</li><li>Aplaude el ritmo exactamente igual.</li><li>Tócalo como rasgueos silenciados.</li></ol>El eco rítmico también es entrenamiento auditivo. ¿Tienes a alguien cerca? Pídele que aplauda un compás de cualquier patrón de esta unidad para que lo repitas.'
               }
             ]
           },

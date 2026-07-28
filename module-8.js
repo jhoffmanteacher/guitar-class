@@ -584,13 +584,13 @@ SETS.push(
             ]
           },
           {
-            title: '⚡ Ear Spark — optional ear bonus',
-            title_es: '⚡ Chispa auditiva — bono opcional de oído',
+            title: 'Ear Spark — optional ear bonus',
+            title_es: 'Chispa auditiva — bono opcional de oído',
             steps: [
               {
                 label: 'Ear Spark: name the bass string', label_es: 'Chispa auditiva: nombra el bajo',
-                text: '⚡ Ear Spark (optional, 2 min):<ol><li>Press play below — the deck draws a random mix of Am\'s A-string and D-string bass notes and plays them for you, and you never see which.</li><li>Name each one by ear before you check: A string is Am\'s root (low), D string is the passing bass a step higher — low vs. high bass is a fingerpicker\'s first ear skill.</li></ol>',
-                text_es: '⚡ Chispa auditiva (opcional, 2 min):<ol><li>Presiona reproducir abajo — la baraja saca una mezcla al azar de notas graves de Am en la cuerda La y en la cuerda Re, y las toca por ti, sin que veas cuáles son.</li><li>Nombra cada una de oído antes de revisar: la cuerda La es la raíz de Am (grave), la cuerda Re es el bajo de paso, un poco más agudo — grave vs. agudo en el bajo es la primera destreza auditiva de un fingerpicker.</li></ol>',
+                text: 'Ear Spark (optional, 2 min):<ol><li>Press play below — the deck draws a random mix of Am\'s A-string and D-string bass notes and plays them for you, and you never see which.</li><li>Name each one by ear before you check: A string is Am\'s root (low), D string is the passing bass a step higher — low vs. high bass is a fingerpicker\'s first ear skill.</li></ol>',
+                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Presiona reproducir abajo — la baraja saca una mezcla al azar de notas graves de Am en la cuerda La y en la cuerda Re, y las toca por ti, sin que veas cuáles son.</li><li>Nombra cada una de oído antes de revisar: la cuerda La es la raíz de Am (grave), la cuerda Re es el bajo de paso, un poco más agudo — grave vs. agudo en el bajo es la primera destreza auditiva de un fingerpicker.</li></ol>',
                 drill: { type: 'ear', pool: 'amBassAD', draw: 5, skill: 'm8w2-s6' }
               }
             ]

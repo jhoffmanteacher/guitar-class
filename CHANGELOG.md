@@ -41,6 +41,8 @@ see `WORKFLOW.md` and the git commit log.
   a game you haven't unlocked yet, and the "nothing is recorded" note under the
   Listening Coach, match too. Your streaks, best scores and trophies keep their
   emoji — those are meant to be a little loud.
+- **The Ear Spark bonus cards** in Modules 2–8 now use the same drawn bolt as
+  the Daily 5, in English and Spanish.
 
 ## 2026-07-28 — Games, Songs, Keep practicing and My progress all open the same way
 

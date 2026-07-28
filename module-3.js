@@ -363,13 +363,13 @@ SETS.push(
             ]
           },
           {
-            title: '⚡ Ear Spark — optional ear bonus',
-            title_es: '⚡ Chispa auditiva — bono opcional de oído',
+            title: 'Ear Spark — optional ear bonus',
+            title_es: 'Chispa auditiva — bono opcional de oído',
             steps: [
               {
                 label: 'Ear Spark: E5 vs. E major', label_es: 'Chispa auditiva: E5 vs. E mayor',
-                text: '⚡ Ear Spark (optional, 2 min):<ol><li>First, build a full open E major — it\'s your E5 (open low E + A string, 2nd fret) with two notes added: G string, 1st fret and D string, 2nd fret, letting the open B and high e ring too.</li><li>Run the deck below — it deals you "E5" or "E". Play whichever chord it names, a few reps of each.</li><li>Listen for the difference each time.</li></ol>',
-                text_es: '⚡ Chispa auditiva (opcional, 2 min):<ol><li>Primero, arma un E mayor al aire completo — es tu E5 (Mi grave al aire + cuerda La, traste 2) con dos notas agregadas: cuerda Sol, traste 1 y cuerda Re, traste 2, dejando sonar también la Si y la mi aguda al aire.</li><li>Corre la baraja de abajo — te reparte "E5" o "E". Toca el acorde que indique, varias repeticiones de cada uno.</li><li>Escucha la diferencia cada vez.</li></ol>',
+                text: 'Ear Spark (optional, 2 min):<ol><li>First, build a full open E major — it\'s your E5 (open low E + A string, 2nd fret) with two notes added: G string, 1st fret and D string, 2nd fret, letting the open B and high e ring too.</li><li>Run the deck below — it deals you "E5" or "E". Play whichever chord it names, a few reps of each.</li><li>Listen for the difference each time.</li></ol>',
+                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Primero, arma un E mayor al aire completo — es tu E5 (Mi grave al aire + cuerda La, traste 2) con dos notas agregadas: cuerda Sol, traste 1 y cuerda Re, traste 2, dejando sonar también la Si y la mi aguda al aire.</li><li>Corre la baraja de abajo — te reparte "E5" o "E". Toca el acorde que indique, varias repeticiones de cada uno.</li><li>Escucha la diferencia cada vez.</li></ol>',
                 hint: 'What you\'re listening for each time: power chords are hollow, with no major/minor color.',
                 hint_es: 'Lo que escuchas cada vez: los acordes de potencia suenan huecos, sin color mayor o menor.',
                 drill: { type: 'deck', deck: 'e5-vs-emajor' }

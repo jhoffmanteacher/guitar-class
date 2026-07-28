@@ -1973,6 +1973,24 @@ function isTuningWarmupSection(sec, moduleNum){
   return sec.title === 'Warm-up — tuning check (Module 1)' && moduleNum !== 1;
 }
 
+/* The bolt that marks the Daily 5 and the Ear Spark cards. Lives here rather
+   than in module data: an icon is presentation, so a card can't ship with the
+   wrong one, and re-styling every bolt is a one-line change. */
+const ICO_BOLT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ' +
+  'style="width:1em;height:1em;vertical-align:-0.15em"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>';
+
+/* Ear Spark — the optional ear-training bonus at the end of a station. Matched
+   on the English title the same way isTuningWarmupSection() does, so the _es
+   twin and any future translation come along for free. The step's own lead-in
+   is matched on the untranslated `text` for the same reason. */
+function isEarSparkSection(sec){
+  return sec.title === 'Ear Spark — optional ear bonus';
+}
+function isEarSparkStep(s){
+  return /^Ear Spark \(/.test(s.text || '');
+}
+
 /* ── Stations ── */
 function buildStations(w, stationId){
   /* Focus mode is a site-wide view pref, read once per build: it only changes
@@ -1988,7 +2006,7 @@ function buildStations(w, stationId){
    // a card with nothing open would render empty: step 1 stays open instead.
    const openIdx = curIdx >= 0 ? curIdx : (openIfNoCur ? 0 : -1);
    return steps.map((s,i)=>{
-    const text=tf(s,'text').replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
+    const text=((isEarSparkStep(s) ? ICO_BOLT + ' ' : '') + tf(s,'text')).replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
       const safe=label.replace(/'/g,"\\'");
       // data-ext links can't be embedded (official recordings block it) — open on YouTube in a new tab.
       if(/data-ext/.test(attrs)){
@@ -2137,7 +2155,7 @@ function buildStations(w, stationId){
   };
   const sectionsHtml=(sections,baseNs)=>{
     const reminder = sections.some(isTuningWarmup)
-      ? `<div class="daily5-inline">${t('daily5.tuneWarmupHtml',{btn:`<button type="button" class="daily5-inline-btn" onclick="openDaily5Here()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> ${t('daily5.openToday')}</button>`})}</div>`
+      ? `<div class="daily5-inline">${t('daily5.tuneWarmupHtml',{btn:`<button type="button" class="daily5-inline-btn" onclick="openDaily5Here()">${ICO_BOLT} ${t('daily5.openToday')}</button>`})}</div>`
       : '';
     const real = sections.filter(sec => !isTuningWarmup(sec));
     // Sections are plain group labels now, not their own accordion — every
@@ -2161,7 +2179,7 @@ function buildStations(w, stationId){
     const hasCur = allowCur && sec.steps.some((st,idx)=>completed[`${w.id}-${ns}-${idx}`]!==true);
     const openIfNoCur = noneLeft && gi === 0;   // whole station done → section 1, step 1 stays open
     const html = `<div class="stp-sec${(hasCur || openIfNoCur) ? ' sec-cur' : ''}">
-      <div class="stp-sec-label">${tf(sec,'title')}</div>
+      <div class="stp-sec-label">${isEarSparkSection(sec) ? ICO_BOLT + ' ' : ''}${tf(sec,'title')}</div>
       <ul class="steps">${stepsHtml(sec.steps, ns, numOffset, allowCur, openIfNoCur)}</ul>
     </div>`;
     if(hasCur) foundCur = true;
@@ -2604,7 +2622,7 @@ function buildDaily5(){
   if(pick) items+=li(2,t('daily5.todaysDrill'),`&mdash; ${t('daily5.fromModule',{num, set: tSetLabel(pick.set.label)})} ${escHtml(truncateText(stripTags(tf(pick.step,'text')),160))}<br>${routinePlaySeq(pick.step.playSeq,'bpm:daily5:drill')}`);
   const streakChip = streak.count > 1
     ? `<span class="games-card-best">&#x1F525; ${t('daily5.streak',{n:streak.count})}</span>` : '';
-  return `<div class="daily5-head"><div style="display:flex;align-items:center;gap:8px"><h3 style="font:inherit;margin:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> ${t('daily5.title')}</h3>${streakChip}</div><button type="button" class="tp-close" onclick="closeDaily5()" aria-label="${escAttr(t('daily5.closeAria'))}">&#x2715;</button></div>
+  return `<div class="daily5-head"><div style="display:flex;align-items:center;gap:8px"><h3 style="font:inherit;margin:0">${ICO_BOLT} ${t('daily5.title')}</h3>${streakChip}</div><button type="button" class="tp-close" onclick="closeDaily5()" aria-label="${escAttr(t('daily5.closeAria'))}">&#x2715;</button></div>
     <ol class="routine-list">${items}</ol>`;
 }
 /* Station C's warm-up card opens the Daily 5 as a popup over the activities —
@@ -4056,7 +4074,7 @@ function renderEarDrill(drill, key, wid){
 }
 function erHead(key, right){
   const st = earDrills[key];
-  return `<div class="sdr-head"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> ${escHtml(t('ear.' + st.cfg.poolId))}</span>` +
+  return `<div class="sdr-head"><span>${ICO_BOLT} ${escHtml(t('ear.' + st.cfg.poolId))}</span>` +
     `<span class="sdr-meta">${escHtml(right)}</span></div>`;
 }
 function erSetupHtml(key){

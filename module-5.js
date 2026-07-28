@@ -803,13 +803,13 @@ SETS.push(
             ]
           },
           {
-            title: '⚡ Ear Spark — optional ear bonus',
-            title_es: '⚡ Chispa auditiva — bono opcional de oído',
+            title: 'Ear Spark — optional ear bonus',
+            title_es: 'Chispa auditiva — bono opcional de oído',
             steps: [
               {
                 label: 'Ear Spark: bright or sad?', label_es: 'Chispa auditiva: ¿alegre o triste?',
-                text: '⚡ Ear Spark (optional, 2 min):<ol><li>Record yourself strumming C or Am, playing them a few times in a mixed-up order.</li><li>On playback, say whether each one sounds bright or sad before checking — that\'s major vs minor, and you can already hear it.</li></ol>Got someone around? Have them strum behind your back and you name it live.',
-                text_es: '⚡ Chispa auditiva (opcional, 2 min):<ol><li>Grábate rasgueando C o Am, tocándolos varias veces en un orden mezclado.</li><li>Al escuchar la grabación, di si cada uno suena alegre o triste antes de comprobarlo — eso es mayor vs. menor, y ya puedes oírlo.</li></ol>¿Tienes a alguien cerca? Que rasguee detrás de ti y tú lo nombres en vivo.'
+                text: 'Ear Spark (optional, 2 min):<ol><li>Record yourself strumming C or Am, playing them a few times in a mixed-up order.</li><li>On playback, say whether each one sounds bright or sad before checking — that\'s major vs minor, and you can already hear it.</li></ol>Got someone around? Have them strum behind your back and you name it live.',
+                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Grábate rasgueando C o Am, tocándolos varias veces en un orden mezclado.</li><li>Al escuchar la grabación, di si cada uno suena alegre o triste antes de comprobarlo — eso es mayor vs. menor, y ya puedes oírlo.</li></ol>¿Tienes a alguien cerca? Que rasguee detrás de ti y tú lo nombres en vivo.'
               }
             ]
           },
