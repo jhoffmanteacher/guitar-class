@@ -656,7 +656,6 @@
     // ── ♪ Songs hub panel ──
     'hub.allSongs':          { en: 'All the songs', es: 'Todas las canciones' },
     'hub.loading':           { en: 'Loading the song list…', es: 'Cargando la lista de canciones…' },
-    'hub.closeAria':         { en: 'Close songs', es: 'Cerrar canciones' },
     'hub.legendCore':        { en: 'Core — everyone learns these', es: 'Básicas — todos las aprenden' },
     'hub.legendChoice':      { en: 'Choice menu', es: 'Menú a elección' },
     'hub.backing':           { en: 'Backing', es: 'Pista' },

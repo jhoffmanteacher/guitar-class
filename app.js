@@ -369,11 +369,10 @@ function showApp(user){
   maybeShowApp_gamesHash();
 }
 
+/* A bookmarked/reloaded explore-page URL (#games, #songs, #keep-practicing,
+   #my-progress) opens that page once the app is on screen. */
 function maybeShowApp_gamesHash(){
-  if(location.hash==='#games' && typeof openGamesScreen==='function'){ openGamesScreen(); return true; }
-  if(location.hash==='#keep-practicing'){ openKeepPracticingScreen(); return true; }
-  if(location.hash==='#my-progress'){ openMyProgressScreen(); return true; }
-  return false;
+  routeExploreHash();
 }
 
 /* ── Firestore ── */
@@ -1700,11 +1699,82 @@ function syncRailStations(){
   });
 }
 
-/* "Practice" nav item: leave whatever overlay is open (Games/Songs hub/Search)
-   and return to the practice view. Reuses the existing close-all helper. */
+/* ── Explore pages: Games · Songs · Keep practicing · My progress ──
+   All four behave identically — they load INTO the main column (the rail and
+   header stay put), each owns a URL hash so browser Back exits, and the rail
+   item lights up while its page is open. Songs was a centred modal and the
+   other three were fixed full-viewport overlays until 2026-07-28; four
+   sibling nav items opening three different ways read as breakage. Anything
+   new in this group joins the table below rather than inventing a fourth. */
+const EXPLORE_PAGES = [
+  { hash: '#games',           screen: 'games-screen',           btn: 'games-btn' },
+  { hash: '#songs',           screen: 'songs-screen',           btn: 'songs-hub-btn' },
+  { hash: '#keep-practicing', screen: 'keep-practicing-screen', btn: 'keep-practicing-btn' },
+  { hash: '#my-progress',     screen: 'my-progress-screen',     btn: 'my-progress-btn' },
+];
+/* Single source of truth for "which explore page is showing": reads the DOM
+   rather than tracking state, so it stays right no matter which path opened
+   or closed a page (click, hash, Back button, teacher turning games off). */
+let practiceScrollTop = 0;
+function syncExploreNav(){
+  const open = EXPLORE_PAGES.find(p => {
+    const el = document.getElementById(p.screen);
+    return el && !el.hasAttribute('hidden');
+  });
+  /* Hides #week-panels: the practice view is swapped OUT, not covered up, so
+     .main would otherwise clamp its scroll to the short explore page and lose
+     the student's place in a long set. Stash it on the way in, put it back on
+     the way out — that's what made the old fixed overlays feel harmless. */
+  const wasOpen = document.body.classList.contains('explore-open');
+  document.body.classList.toggle('explore-open', !!open);
+  /* Set the position AFTER the class toggle, and read scrollPane() fresh:
+     showing/hiding a screen changes .main's height, which decides both
+     whether it scrolls at all and how far. (Don't defer this to a
+     requestAnimationFrame — those don't run in a background tab, so the
+     student would come back to a page that hadn't restored itself.) */
+  if(!!open !== wasOpen) scrollPane().scrollTo({ top: open ? 0 : practiceScrollTop });
+  const activeId = open ? open.btn : 'practice-nav-btn';
+  [...EXPLORE_PAGES.map(p => p.btn), 'practice-nav-btn'].forEach(id => {
+    const b = document.getElementById(id);
+    if(!b) return;
+    const on = id === activeId;
+    b.classList.toggle('active', on);
+    if(on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
+}
+
+/* Hash router for all four pages. Closes the others FIRST (through their
+   panel-only close fns, which don't touch the hash — the hash is already
+   whatever we're routing to), then opens the target. */
+function routeExploreHash(){
+  const h = location.hash;
+  /* Remember the student's place in the set BEFORE anything is shown or
+     hidden — once a screen is in the flow, .main's scrollTop has already
+     been shifted by scroll anchoring and no longer means what it says. */
+  if(!document.body.classList.contains('explore-open') && EXPLORE_PAGES.some(p => p.hash === h)){
+    practiceScrollTop = paneScrollTop();
+  }
+  if(h !== '#games' && typeof gamesClosePanel === 'function') gamesClosePanel();
+  if(h !== '#songs') songsClosePanel();
+  if(h !== '#keep-practicing') kpClosePanel();
+  if(h !== '#my-progress') mpClosePanel();
+  if(h === '#games' && typeof openGamesScreen === 'function') openGamesScreen();
+  else if(h === '#songs') openSongsScreen();
+  else if(h === '#keep-practicing') openKeepPracticingScreen();
+  else if(h === '#my-progress') openMyProgressScreen();
+  syncExploreNav();
+}
+window.addEventListener('hashchange', routeExploreHash);
+
+/* "Practice" nav item: leave whatever explore page or panel is open and
+   return to the practice view. Reuses the existing close-all helper. */
 function returnToPractice(){
+  // Leaving an explore page restores the student's place in the set
+  // (syncExploreNav); a plain "Practice" click with nothing open still
+  // means "take me back to the top".
+  const fromExplore = document.body.classList.contains('explore-open');
   if(typeof closeTopPanels === 'function') closeTopPanels();
-  scrollPaneTop(true);
+  if(!fromExplore) scrollPaneTop(true);
 }
 
 /* Set/review panels are now built per-module, on demand, by
@@ -4480,13 +4550,11 @@ window.addEventListener('gc-langchange', function(){
   if(typeof syncRailStations === 'function') syncRailStations();
   if(typeof populateModuleDropdown === 'function') populateModuleDropdown();
   rebuildModuleContentPanels();
-  // Closed→reopen trick for the drop-over panels built at open time.
-  if(document.getElementById('songs-hub-overlay') && typeof toggleSongsHub === 'function'){
-    toggleSongsHub(); toggleSongsHub();
-  }
-  /* The full-page screens are hash-based (toggling twice would churn the
+  /* The explore pages are hash-based (toggling twice would churn the
      browser history), so an open one just re-renders its body in place —
      the topbar labels are data-i18n-tagged and already re-translated. */
+  const songsScreen = document.getElementById('songs-screen');
+  if(songsScreen && !songsScreen.hidden && typeof renderSongsHub === 'function') renderSongsHub();
   const kpScreen = document.getElementById('keep-practicing-screen');
   if(kpScreen && !kpScreen.hidden && typeof renderKeepPracticing === 'function') renderKeepPracticing();
   const mpScreen = document.getElementById('my-progress-screen');
@@ -5195,6 +5263,11 @@ function scrollPane(){
 function scrollPaneTop(smooth){
   scrollPane().scrollTo({ top:0, behavior: smooth ? 'smooth' : 'auto' });
 }
+/* Where the reading pane is right now — window has scrollY, .main scrollTop. */
+function paneScrollTop(){
+  const p = scrollPane();
+  return (p === window) ? window.scrollY : p.scrollTop;
+}
 
 /* ── Back to top ── */
 function initBackToTop(){
@@ -5218,16 +5291,13 @@ initBackToTop();
 function closeTopPanels(except){
   /* Hash-based full pages close through their own close fns (which clear
      the URL hash); plain drop-over panels just get hidden. */
-  const SCREEN_IDS = { games: 'games-screen', 'keep-practicing': 'keep-practicing-screen', 'my-progress': 'my-progress-screen' };
+  const SCREEN_IDS = { games: 'games-screen', 'songs-hub': 'songs-screen', 'keep-practicing': 'keep-practicing-screen', 'my-progress': 'my-progress-screen' };
   ['games', 'songs-hub', 'search', 'keep-practicing', 'my-progress'].forEach(k => {
     if(k === except) return;
-    if(k === 'songs-hub'){
-      if(document.getElementById('songs-hub-overlay') && typeof closeSongsHub === 'function') closeSongsHub();
-      return;
-    }
     const p = document.getElementById(SCREEN_IDS[k] || k + '-panel');
     if(p && !p.hasAttribute('hidden')){
       if(k === 'games' && typeof closeGamesScreen === 'function'){ closeGamesScreen(); return; }
+      if(k === 'songs-hub'){ closeSongsScreen(); return; }
       if(k === 'keep-practicing'){ closeKeepPracticingScreen(); return; }
       if(k === 'my-progress'){ closeMyProgressScreen(); return; }
       p.setAttribute('hidden', '');
@@ -5242,9 +5312,8 @@ function closeTopPanels(except){
    click "did nothing" as far as the student could see. Close whichever panel
    is covering the page and scroll up so the new set is actually visible. */
 function leaveTopPanelForSet(){
-  const covering = ['games-screen', 'search-panel', 'keep-practicing-screen', 'my-progress-screen']
-    .some(id => { const el = document.getElementById(id); return el && !el.hasAttribute('hidden'); })
-    || !!document.getElementById('songs-hub-overlay');
+  const covering = ['games-screen', 'search-panel', 'songs-screen', 'keep-practicing-screen', 'my-progress-screen']
+    .some(id => { const el = document.getElementById(id); return el && !el.hasAttribute('hidden'); });
   if(!covering) return;
   closeTopPanels('');
   scrollPaneTop(true);
@@ -5257,31 +5326,40 @@ function ensureAllModuleData(){
 }
 
 /* ── ♪ Songs hub: every song on the site, deduped, core six first ──
-   Opens as a centered popup overlay (same .daily5-overlay/.daily5-modal
-   shell as the Report-a-problem and Daily 5 popups), not a drop-over panel —
-   so it's never left stranded at the top of the page when a student is
-   scrolled deep into a practice set. */
-function songsHubEscClose(e){ if(e.key === 'Escape') closeSongsHub(); }
-function closeSongsHub(){
-  const ov = document.getElementById('songs-hub-overlay');
-  if(ov) ov.remove();
-  document.removeEventListener('keydown', songsHubEscClose);
-  const btn = document.getElementById('songs-hub-btn');
-  if(btn) btn.setAttribute('aria-expanded', 'false');
+   An explore page in the main column (#songs), like its three rail
+   neighbours — see EXPLORE_PAGES. */
+function toggleSongsHub(){
+  const screen = document.getElementById('songs-screen');
+  if(!screen) return;
+  if(screen.hasAttribute('hidden')) location.hash = 'songs';
+  else closeSongsScreen();
 }
-async function toggleSongsHub(){
-  if(document.getElementById('songs-hub-overlay')){ closeSongsHub(); return; }
+function closeSongsScreen(){
+  if(location.hash === '#songs'){ location.hash = ''; return; }  // hashchange finishes the job
+  songsClosePanel();
+}
+function songsClosePanel(){
+  const screen = document.getElementById('songs-screen');
+  const wasOpen = screen && !screen.hasAttribute('hidden');
+  if(screen) screen.setAttribute('hidden', '');
   const btn = document.getElementById('songs-hub-btn');
+  if(btn && wasOpen) btn.focus();   // return focus to where the page was opened
+  syncExploreNav();
+}
+function openSongsScreen(){
+  const screen = document.getElementById('songs-screen');
+  if(!screen || !screen.hasAttribute('hidden')) return;
   closeTopPanels('songs-hub');
-  const ov = document.createElement('div');
-  ov.className = 'daily5-overlay';
-  ov.id = 'songs-hub-overlay';
-  ov.innerHTML = `<div class="daily5-modal" id="songs-hub-panel" role="dialog" aria-modal="true" aria-label="${escAttr(t('hub.allSongs'))}"><div class="daily5-head"><span>&#x266A; ${t('hub.allSongs')}</span><button type="button" class="tp-close" onclick="closeSongsHub()" aria-label="${escAttr(t('hub.closeAria'))}">&#x2715;</button></div><div class="coach-tip">${t('hub.loading')}</div></div>`;
-  ov.addEventListener('click', e => { if(e.target === ov) closeSongsHub(); });
-  document.body.appendChild(ov);
-  document.addEventListener('keydown', songsHubEscClose);
-  if(btn) btn.setAttribute('aria-expanded', 'true');
-  const p = document.getElementById('songs-hub-panel');
+  screen.removeAttribute('hidden');
+  syncExploreNav();
+  const exit = screen.querySelector('.page-exit');
+  if(exit) exit.focus();
+  renderSongsHub();
+}
+async function renderSongsHub(){
+  const p = document.getElementById('songs-screen-body');
+  if(!p) return;
+  p.innerHTML = `<div class="coach-tip">${t('hub.loading')}</div>`;
   await ensureAllModuleData();
   const byName = new Map();
   const noteSong = (song, moduleNum) => {
@@ -5338,8 +5416,7 @@ async function toggleSongsHub(){
   const groupsHtml = `<div class="sh-sec-title">${t('hub.choiceTitle')}</div>` + groups.map((g, gi) =>
     `<div class="sh-group${gi === 0 ? ' open' : ''}"><button type="button" class="sh-group-head" aria-expanded="${gi === 0}" onclick="toggleHubGroup(this)"><span>${g.title}</span><span class="sh-group-sub">${g.sub}</span><span class="sh-group-count">${t('hub.groupCount', {n: g.entries.length})}</span></button><div class="sh-group-body">${renderRows(g.entries)}</div></div>`).join('');
   const requestHtml = requestEntries.length ? `<div class="card">${renderRows(requestEntries)}</div>` : '';
-  p.innerHTML = `<div class="daily5-head"><span>&#x266A; ${t('hub.allSongs')}</span><button type="button" class="tp-close" onclick="closeSongsHub()" aria-label="${escAttr(t('hub.closeAria'))}">&#x2715;</button></div>
-    <div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('hub.legendCore')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('hub.legendChoice')}</div></div>
+  p.innerHTML = `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('hub.legendCore')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('hub.legendChoice')}</div></div>
     ${coreHtml}${groupsHtml}${requestHtml}`;
 }
 
@@ -5561,10 +5638,8 @@ function openKeepPracticingScreen(){
   if(!screen || !screen.hasAttribute('hidden')) return;
   closeTopPanels('keep-practicing');
   screen.removeAttribute('hidden');
-  document.body.classList.add('page-screen-open');
-  const btn = document.getElementById('keep-practicing-btn');
-  if(btn) btn.setAttribute('aria-expanded', 'true');
-  /* Focus follows into the dialog; kpClosePanel hands it back to the button. */
+  syncExploreNav();
+  /* Focus follows into the page; kpClosePanel hands it back to the button. */
   const exit = screen.querySelector('.page-exit');
   if(exit) exit.focus();
   renderKeepPracticing();
@@ -5609,12 +5684,9 @@ function kpClosePanel(){
   const screen = document.getElementById('keep-practicing-screen');
   const wasOpen = screen && !screen.hasAttribute('hidden');
   if(screen) screen.setAttribute('hidden', '');
-  if(!document.querySelector('.page-screen:not([hidden])')) document.body.classList.remove('page-screen-open');
   const btn = document.getElementById('keep-practicing-btn');
-  if(btn){
-    btn.setAttribute('aria-expanded', 'false');
-    if(wasOpen) btn.focus();   // return focus to where the dialog was opened
-  }
+  if(btn && wasOpen) btn.focus();   // return focus to where the page was opened
+  syncExploreNav();
 }
 
 /* ── 📊 My progress: done/total for every module + a total mastered count.
@@ -5630,9 +5702,7 @@ function openMyProgressScreen(){
   if(!screen || !screen.hasAttribute('hidden')) return;
   closeTopPanels('my-progress');
   screen.removeAttribute('hidden');
-  document.body.classList.add('page-screen-open');
-  const btn = document.getElementById('my-progress-btn');
-  if(btn) btn.setAttribute('aria-expanded', 'true');
+  syncExploreNav();
   const exit = screen.querySelector('.page-exit');
   if(exit) exit.focus();
   renderMyProgress();
@@ -5645,12 +5715,9 @@ function mpClosePanel(){
   const screen = document.getElementById('my-progress-screen');
   const wasOpen = screen && !screen.hasAttribute('hidden');
   if(screen) screen.setAttribute('hidden', '');
-  if(!document.querySelector('.page-screen:not([hidden])')) document.body.classList.remove('page-screen-open');
   const btn = document.getElementById('my-progress-btn');
-  if(btn){
-    btn.setAttribute('aria-expanded', 'false');
-    if(wasOpen) btn.focus();
-  }
+  if(btn && wasOpen) btn.focus();   // return focus to where the page was opened
+  syncExploreNav();
 }
 function renderMyProgress(){
   const bodyEl = document.getElementById('my-progress-body');
@@ -5674,15 +5741,6 @@ function renderMyProgress(){
     <div class="card">${overallRow}${rows}</div>`;
   if(typeof applyI18n === 'function') applyI18n(bodyEl);
 }
-
-/* Hash router for the two full-page screens (the games arcade has its own
-   listener in coach.js; its else-branch close is a safe no-op here). */
-window.addEventListener('hashchange', () => {
-  if(location.hash === '#keep-practicing') openKeepPracticingScreen();
-  else kpClosePanel();
-  if(location.hash === '#my-progress') openMyProgressScreen();
-  else mpClosePanel();
-});
 
 /* ════════════════════════════════════════════════
    Service worker — light PWA / offline resilience.

@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — Games, Songs, Keep practicing and My progress all open the same way
+
+### Changed
+
+- **The four "Explore" menu items now open right where your lesson was, with
+  the menu still beside them.** Songs used to pop open a small floating box in
+  the middle of the screen, and Games, Keep practicing and My progress each
+  took over the whole window and hid the menu. Now all four open in the same
+  place, and the menu item you're on lights up so it's clear where you are.
+- **You can hop straight from one to another** — Games to Songs to My
+  progress — without backing out to your lesson in between.
+- **Going back to your lesson puts you where you left off**, instead of at the
+  top of the page. The Back button and "← Back to practice" both work.
+
 ## 2026-07-28 — The menu and the lesson scroll separately
 
 ### Changed

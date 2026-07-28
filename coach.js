@@ -1461,9 +1461,11 @@ function fretRender(){
    check starting) goes through gamesStopMic() so the mic never lingers.
    ════════════════════════════════════════════════════════════════════ */
 
-/* The games live on their own full-screen "page": #games in the URL, the
-   browser Back button exits, and the look is its own (arcade shell around
-   a normal-theme stage so the game internals render as designed). */
+/* The games live on their own page in the main column: #games in the URL,
+   the browser Back button exits, and the look is its own (arcade gradient
+   shell around a normal-theme stage so the game internals render as
+   designed). One of the four EXPLORE_PAGES in app.js — the rail and header
+   stay visible, so don't restore the old fixed full-viewport treatment. */
 function toggleGames(){
   const screen = document.getElementById('games-screen');
   if (!screen) return;
@@ -1486,13 +1488,10 @@ function openGamesScreen(){
   coachEvictTuner();
   if (typeof closeTopPanels === 'function') closeTopPanels('games');
   screen.removeAttribute('hidden');
-  document.body.classList.add('games-open');
-  const btn = document.getElementById('games-btn');
-  if (btn) btn.setAttribute('aria-expanded', 'true');
+  if (typeof syncExploreNav === 'function') syncExploreNav();
   gamesShow('hub');
-  /* Keyboard/screen-reader users: focus follows into the dialog (the page
-     behind stays in the DOM; aria-modal on #games-screen tells AT to
-     ignore it). gamesClosePanel hands focus back to the Games button. */
+  /* Keyboard/screen-reader users: focus follows into the page.
+     gamesClosePanel hands focus back to the Games button. */
   const exit = screen.querySelector('.games-exit');
   if (exit) exit.focus();
 }
@@ -1503,26 +1502,21 @@ function closeGamesScreen(){
 function gamesClosePanel(){
   // Any hash change away from '#games' (e.g. tapping "Keep practicing" or "My
   // progress" while a standalone Coach check is running) fires this via the
-  // hashchange listener below, whether or not the games screen was ever open.
+  // hash router in app.js, whether or not the games screen was ever open.
   // Only tear down the mic when there's actually a games panel to close —
   // otherwise this silently kills an unrelated in-progress Coach check.
   const screen = document.getElementById('games-screen');
   if (!screen || screen.hasAttribute('hidden')) return;
   gamesStopMic();
   screen.setAttribute('hidden', '');
-  document.body.classList.remove('games-open');
   const p = document.getElementById('games-panel');
   if (p) p.innerHTML = '';
   const btn = document.getElementById('games-btn');
-  if (btn){
-    btn.setAttribute('aria-expanded', 'false');
-    btn.focus();   // return focus to where the dialog was opened
-  }
+  if (btn) btn.focus();   // return focus to where the page was opened
+  if (typeof syncExploreNav === 'function') syncExploreNav();
 }
-window.addEventListener('hashchange', () => {
-  if (location.hash === '#games') openGamesScreen();
-  else gamesClosePanel();
-});
+/* No hashchange listener here — routeExploreHash() in app.js drives all four
+   explore pages from one place. */
 
 /* Stops every running game (mic or not — Chord Blitz has no mic but its
    clock must die too). Called by app.js when the tuner opens, and by
