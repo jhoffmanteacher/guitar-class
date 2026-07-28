@@ -1058,11 +1058,17 @@ function coachScoreTiming(){
 function coachScoreTempo(){
   const name = t('coach.crit.tempo.name'), icon = '&#x23F1;';
   const ts = coach.events.filter(e => e.slot >= 0).map(e => e.t).sort((a, b) => a - b);
-  if (ts.length < 6) return { name, icon, level: 2, sentence: t('coach.crit.tempo.tooShort') };
+  /* "Can't judge" bails out at level 0, NOT 2 — same as coachScoreTiming's
+     notEnough and coachScoreChanges' notApplicable. Level 0 drops the
+     criterion out of `applicable` in coachRenderReport; a level 2 would keep
+     it in and make greats === applicable.length unreachable, so a 4–5 note
+     melody drill (never 6 events) could never score Great no matter how well
+     it was played — and games.coachSkill[sid].level stayed capped at 2. */
+  if (ts.length < 6) return { name, icon, level: 0, sentence: t('coach.crit.tempo.tooShort') };
   const iois = [];
   for (let i = 1; i < ts.length; i++) iois.push(ts[i] - ts[i - 1]);
   const med = tunerMedian(iois);
-  if (!(med > 0)) return { name, icon, level: 2, sentence: t('coach.crit.tempo.unclear') };
+  if (!(med > 0)) return { name, icon, level: 0, sentence: t('coach.crit.tempo.unclear') };
   const pos = [0];
   for (const d of iois) pos.push(pos[pos.length - 1] + Math.max(1, Math.round(d / med)));
   const pts = ts.map((t, i) => ({ x: pos[i], y: t }));
@@ -1077,7 +1083,7 @@ function coachScoreTempo(){
     return beat > 0 ? 60000 / beat : null;
   };
   const b1 = bpmOf(pts.slice(0, half)), b2 = bpmOf(pts.slice(-half)), bAll = bpmOf(pts);
-  if (!b1 || !b2 || !bAll) return { name, icon, level: 2, sentence: t('coach.crit.tempo.unclear') };
+  if (!b1 || !b2 || !bAll) return { name, icon, level: 0, sentence: t('coach.crit.tempo.unclear') };   // degenerate fit — same "can't judge" as above
   const drift = Math.abs(b2 - b1) / coach.bpm;
   let level, sentence;
   if (drift <= 0.07){
@@ -1216,7 +1222,9 @@ const FRET_ROUND = 10;
 
 let fretRunning = false, fretGame = null, fretRaf = null;
 
-async function fretStart(){
+/* levelIdx is optional: the restart paths pass the level they want so a
+   browser with sessionStorage blocked doesn't silently drop back to level 1. */
+async function fretStart(levelIdx){
   if (fretRunning) return;
   coachClose();                                        // one mic owner at a time
   ccStop();
@@ -1234,8 +1242,8 @@ async function fretStart(){
   stopAllDemoAudio();
   fretRunning = true;
   window.coachMicLive = true;   // stream may already be open from a prior owner
-  let lvl = 1;
-  try { lvl = parseInt(sessionStorage.getItem('fretLevel'), 10); } catch(e){}
+  let lvl = levelIdx;
+  if (lvl == null){ try { lvl = parseInt(sessionStorage.getItem('fretLevel'), 10); } catch(e){} }
   if (!(lvl >= 0 && lvl < FRET_GAME_LEVELS.length)) lvl = 1;
   fretNewRound(lvl);
   if (fretRaf) cancelAnimationFrame(fretRaf);
@@ -1248,9 +1256,14 @@ function fretStop(){
   fretGame = null;
 }
 
+/* Also the "play again" path off the done screen. A finished round has
+   released the mic (see fretFinish), so starting the next one has to go back
+   through fretStart to re-acquire it — otherwise the prompt renders over a
+   dead analyser and the game sits there saying "Listening…" forever. */
 function fretSetLevel(i){
   try { sessionStorage.setItem('fretLevel', String(i)); } catch(e){}
-  fretNewRound(i);
+  if (fretRunning) fretNewRound(i);
+  else fretStart(i);
 }
 
 function fretNewRound(levelIdx){
@@ -1317,7 +1330,11 @@ function fretLoop(){
       g.readings = [];      // pluck decayed between readings — start fresh
     }
   }
-  fretRaf = requestAnimationFrame(fretLoop);
+  // Re-arm only while the round is live: fretJudge/fretSkip can end it
+  // mid-frame (fretFinish), and re-arming unconditionally would overwrite the
+  // fretRaf that fretFinish just cleared with a live handle to a loop that's
+  // already over.
+  if (fretRunning) fretRaf = requestAnimationFrame(fretLoop);
 }
 
 /* Round over → cross-session best to the student's progress doc. Skipped in
@@ -1333,6 +1350,23 @@ function fretSaveRound(g){
   }
 }
 
+/* Round over → save, release the mic, render the done screen. The mic-off is
+   the whole point: fretLoop re-arms every frame as long as fretRunning is
+   true and #fret-body exists — and the done screen renders INTO #fret-body —
+   so without this the mic stays live after the last prompt, window.coachMicLive
+   stays true, and that silently blocks demo audio (app.js) and mutes the
+   metronome (fab-tools.js) site-wide until the panel is closed. Every other
+   mic game releases at finish (ccFinish, srFinish, rnFinish, nrFinish).
+   Unlike fretStop this KEEPS fretGame — the done screen renders from it. */
+function fretFinish(g){
+  g.phase = 'done';
+  fretSaveRound(g);
+  if (fretRaf){ cancelAnimationFrame(fretRaf); fretRaf = null; }
+  fretRunning = false;   // clear before coachMicOff so coachReleaseMicIfIdle agrees
+  coachMicOff();
+  fretRender();
+}
+
 function fretJudge(midi){
   const g = fretGame, p = g.prompt;
   g.readings = [];
@@ -1344,12 +1378,7 @@ function fretJudge(midi){
     g.results.push(first);
     g.hint = '';
     g.flash = { text: '&#x2713; ' + t(first ? 'games.fret.firstTry' : 'games.fret.gotThere', { note: escHtml(p.note) }) };
-    if (g.results.length >= FRET_ROUND){
-      g.phase = 'done';
-      fretSaveRound(g);
-      fretRender();
-      return;
-    }
+    if (g.results.length >= FRET_ROUND){ fretFinish(g); return; }
     fretRender();
     setTimeout(() => { if (fretGame === g && g.phase === 'play') fretNextPrompt(); }, 900);
     return;
@@ -1377,7 +1406,7 @@ function fretSkip(){
   g.results.push(false);
   g.hint = t('games.fret.skipReveal', { fret: p.f, note: p.note, string: fretStringName(p.s) });
   g.cooldownUntil = performance.now() + 1600;
-  if (g.results.length >= FRET_ROUND){ g.phase = 'done'; fretSaveRound(g); fretRender(); return; }
+  if (g.results.length >= FRET_ROUND){ fretFinish(g); return; }
   fretRender();
   setTimeout(() => { if (fretGame === g && g.phase === 'play') fretNextPrompt(); }, 1600);
 }
@@ -1405,7 +1434,7 @@ function fretRender(){
     body.innerHTML = pills + dots +
       `<div class="fret-score">&#x1F3AF; ${t('games.fret.scoreLine', { score, total: FRET_ROUND })}</div>
        <div class="coach-tip">${msg}</div>
-       <button type="button" class="coach-start" onclick="fretNewRound(${g.level})">&#x21BB; ${t('games.common.playAgain')}</button>` + foot;
+       <button type="button" class="coach-start" onclick="fretSetLevel(${g.level})">&#x21BB; ${t('games.common.playAgain')}</button>` + foot;
     return;
   }
   const p = g.prompt;
@@ -3800,6 +3829,14 @@ async function srStart(){
 function srRenderPlay(){
   const body = srBody();
   if (!body || !sr) return;
+  /* This replaces the count-in DOM with a fresh #sr-strip that has no .cur
+     cell, so the slot counter has to start over with it. srLoop's play block
+     also runs during the count-in (srEarly rewards a slightly-early first
+     strum), and now that the display clock no longer subtracts the mic
+     latency, slot 0 can be ticked against the count-in DOM a few ms before
+     this runs. Without the reset, cur===lastSlot===0 afterwards and beat 1 of
+     bar 1 never lights at all. */
+  sr.lastSlot = -1;
   const pat = SH_PATTERNS[sr.patIdx];
   const chips = sr.notes.map((n, i) =>
     `<span class="coach-chip pending" id="sr-chip-${i}" title="${t('games.radar.barTooltip', {n: n.bar + 1})}">${n.dir}</span>`
@@ -3900,7 +3937,16 @@ function srLoop(){
       }
     });
 
-    const cur = Math.floor(relNow / s.slotMs);
+    /* Display runs on the UN-latency-shifted clock. s.lat converts a mic
+       arrival time back into the moment the strum was played, which is exactly
+       right for matching and for the miss sweep above — but the highlighted
+       cell and the beat pips have to sit on the beat the student is hearing
+       right now, not on a beat s.lat in the past. At the slider's 250ms max
+       that's ~42% of an eighth slot at 50 BPM of visible lag. The grid ease
+       stays in (that's the display following the player, on purpose — see
+       srSlotTick); only the hardware offset comes out. nrLoop draws off the
+       raw `now - s.listenStart` for the same reason. */
+    const cur = Math.floor((now - s.listenStart - s.gridOffset) / s.slotMs);
     if (cur !== s.lastSlot && cur >= 0){ s.lastSlot = cur; srSlotTick(cur); }
 
     if (now > s.listenStart + (SR_BARS * 4 + 1) * s.beatMs){ srFinish(); return; }
@@ -5684,7 +5730,7 @@ function nrLoop(){
       document.querySelectorAll('#nr-beats .cc-pip').forEach((el, i) =>
         el.classList.toggle('on', i === ((beat % 4) + 4) % 4));
     }
-    if (now > s.listenStart + s.totalBeats * s.beatMs + COACH_EVENT_TAIL + 300){ nrFinish(); return; }
+    if (now > s.listenStart + s.totalBeats * s.beatMs + COACH_EVENT_TAIL + 300){ nrFinish(true); return; }   // played through — this one counts
   }
   nrRaf = requestAnimationFrame(nrLoop);
 }
@@ -5811,7 +5857,17 @@ function nrHud(){
   }
 }
 
-function nrFinish(){
+/* `complete` is passed only by nrLoop, when the round played all the way to
+   its last beat. Every other caller is the ■ Stop button, i.e. the student
+   walked out mid-round — and an abandoned round is NOT a failed round. The
+   fill-in below marks every note that never came due as a 'miss', so without
+   this distinction, tapping Stop during the count-in would charge ~16
+   positions into the weak map and demote the adaptive stage off a round where
+   nothing was ever played (acc 0, and the mic-problem guard can't rescue it
+   either — an abandoned round has no 'unclear' results to trip it). Riff
+   Runner and Strum Radar guard their writes the same way, on acc > 0.
+   A round that ran to the end and went badly still counts as a failure. */
+function nrFinish(complete){
   if (!nr || (nr.phase !== 'play' && nr.phase !== 'countin')) return;
   const s = nr;
   if (nrRaf){ cancelAnimationFrame(nrRaf); nrRaf = null; }
@@ -5831,18 +5887,21 @@ function nrFinish(){
   s.prevBest = nrBestMerged(s.level);
 
   /* Weak-map upkeep: misses and wrong notes charge a position up; clean
-     hits pay it back down until the entry retires. */
+     hits pay it back down until the entry retires. Completed rounds only —
+     the early-Stop fill-in isn't evidence about the student's fretboard. */
   const wk = nrWeak();
   let wkChanged = false;
-  s.playable.forEach(n => {
-    const k = nrWeakKey(n);
-    if (n.result === 'miss' || n.result === 'pitch'){
-      wk[k] = Math.min(6, (wk[k] || 0) + 2); wkChanged = true;
-    } else if (wk[k]){
-      wk[k] -= 1; wkChanged = true;
-      if (wk[k] <= 0) delete wk[k];
-    }
-  });
+  if (complete){
+    s.playable.forEach(n => {
+      const k = nrWeakKey(n);
+      if (n.result === 'miss' || n.result === 'pitch'){
+        wk[k] = Math.min(6, (wk[k] || 0) + 2); wkChanged = true;
+      } else if (wk[k]){
+        wk[k] -= 1; wkChanged = true;
+        if (wk[k] <= 0) delete wk[k];
+      }
+    });
+  }
 
   /* Adaptive stage move. An unclear-heavy round is a MIC problem, not a
      student problem — hold the stage and say so instead of demoting. */
@@ -5851,8 +5910,12 @@ function nrFinish(){
     const unclear = s.playable.filter(n => n.result === 'pitch' && n.unclear).length;
     s.micSuspect = total > 0 && unclear >= Math.max(3, Math.round(total * 0.4));
     let move = 0;
-    if (s.acc >= NR_UP_PCT) move = 1;
-    else if (s.acc < NR_DOWN_PCT && !s.micSuspect) move = -1;
+    if (complete){
+      if (s.acc >= NR_UP_PCT) move = 1;
+      else if (s.acc < NR_DOWN_PCT && !s.micSuspect) move = -1;
+    }
+    /* move stays 0 on an early Stop: the stage holds, and nrRenderDone falls
+       through to its "staying here" line — no new string needed. */
     s.stageWas = s.stagePos;
     s.stagePos = Math.max(0, Math.min(NR_ADAPT_ORDER.length - 1, s.stagePos + move));
     s.stageMove = s.stagePos - s.stageWas;

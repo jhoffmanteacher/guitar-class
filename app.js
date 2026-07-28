@@ -150,7 +150,10 @@ function loadModuleData(num){
     const s = document.createElement('script');
     s.src = `module-${num}.js`;
     s.onload  = ()=>resolve();
-    s.onerror = ()=>{ delete _moduleLoads[num]; reject(new Error('module '+num+' failed to load')); };
+    // Drop the promise so a later visit retries — and remove the failed tag
+    // with it, or every retry orphans another dead <script> in <head>
+    // (loadFirestoreSdk does the same for the same reason).
+    s.onerror = ()=>{ s.remove(); delete _moduleLoads[num]; reject(new Error('module '+num+' failed to load')); };
     document.head.appendChild(s);
   });
   return _moduleLoads[num];
@@ -312,7 +315,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
       if(accountPaused) showPausedScreen(user); else showApp(user);
     }
   } else {
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; progressLoadFailed = false;
     practiceLog = loadLocalPracticeLog();   // per-skill rep history: back to the local copy on sign-out
     _moduleStripStates = {};   // next user's first strip render is a first paint, not a celebration
     document.getElementById('auth-wall').style.display='block';
@@ -374,7 +377,16 @@ function maybeShowApp_gamesHash(){
 }
 
 /* ── Firestore ── */
+/* Did we actually read this student's doc? A failed read leaves every local
+   store empty — which is indistinguishable from a brand-new student unless we
+   say so. Two things key off this flag, because "empty" means "unknown", not
+   "nothing there": the sequential gate stops locking (their real work is on the
+   server, and a blocked school network must not wall them out of sets they
+   finished weeks ago), and the derived save categories are held back so a
+   session started from a blank slate can't overwrite the real record. */
+let progressLoadFailed = false;
 async function loadProgress(){
+  progressLoadFailed = false;
   try{
     await ensureDb();
     const doc = await db.collection('progress').doc(currentUser.uid).get();
@@ -400,7 +412,7 @@ async function loadProgress(){
       practiceLog   = doc.data().practiceLog || loadLocalPracticeLog();
       savePracticeLogLocal();
     } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); restoreLocalPlace(); }
-  } catch(e){ progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); restoreLocalPlace(); }
+  } catch(e){ progressLoadFailed=true; console.warn('[guitar-class] progress load failed — running read-only on derived data', e); progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); restoreLocalPlace(); }
 }
 
 /* ── Games access (teacher-controlled) ──
@@ -511,9 +523,23 @@ function onStepMcSelect(key, btn){
    inline handlers and all over app.js). */
 const SAVE_MAX_AUTO_RETRIES = 5;   // then give up quietly until the next user action re-arms it
 let _saveFailCount = 0;
+/* Categories whose new value is computed FROM the old one: a streak count, an
+   all-time best, a rep tally. If loadProgress() never read the doc, every one
+   of them restarts from zero — and because flushSave writes {merge:true},
+   Firestore happily merges that zero-based leaf over the real one (streak 15 →
+   1; a 10/10 arcade best → 4; 47 reps → 1). The other categories are safe to
+   keep writing: skills, responses and completed are statements the student
+   makes outright this session, and merge leaves every key they didn't touch
+   alone. So we hold back only these three, and only until a load succeeds —
+   skipping a save costs one session's streak bump; letting it through costs
+   the record itself. */
+const LOAD_DEPENDENT_SAVE_KEYS = new Set(['streak','games','practiceLog']);
 function queueSave(...keys){
   if(!currentUser) return;
-  keys.forEach(k=>_dirtyKeys.add(k));
+  keys.forEach(k=>{ if(!(progressLoadFailed && LOAD_DEPENDENT_SAVE_KEYS.has(k))) _dirtyKeys.add(k); });
+  // Everything asked for was held back — say so rather than flash a false
+  // "Saved ✓" (or arm a flush with nothing in it).
+  if(!_dirtyKeys.size){ setSaveMsg('save.notSaving'); return; }
   if(_dirtyKeys.has('place')) saveLocalPlace();   // local mirror, immediate
   _saveFailCount = 0;   // a fresh user action gets its own full retry budget
   clearTimeout(saveTimer);
@@ -1419,6 +1445,7 @@ function isSetLocked(w){
   if(!w) return true;
   if(w.locked || w.comingSoon) return true;          // static/unbuilt stays locked for everyone
   if(isGatePreviewer()) return false;                // teacher/dev: skip the sequential gate
+  if(progressLoadFailed) return false;               // we don't know what they've done — never re-lock on a guess
   const moduleSets = SETS.filter(x=>x.moduleNum===w.moduleNum);
   const idx = moduleSets.indexOf(w);
   if(idx<=0) return false;
@@ -1449,14 +1476,53 @@ function gateToast(msg){
   _gateToastTimer = setTimeout(()=>el.classList.remove('show'), 2800);
 }
 
+/* Every module change takes a ticket; only the most recently issued one may
+   touch state after its await (same pattern as teacher.js's
+   loadTeacherClassConfig). ensureModuleRendered fetches a <script>, so two
+   overlapping calls resolve in file-size order, not call order: renderAll fires
+   onModuleChange(1, …) un-awaited, the student picks Module 7 before module-1.js
+   lands, the smaller module-7.js wins the race — and then Module 1's
+   continuation repaints the pills and activates a Module 1 set underneath a
+   dropdown reading "Module 7". A stale ticket now just bails. */
+let _moduleChangeReq = 0;
 async function onModuleChange(moduleNum, restoreSetId){
   moduleNum = parseInt(moduleNum);
+  const req = ++_moduleChangeReq;
+  const prevModuleNum = lastModuleNum, prevSetId = lastSetId;
   lastModuleNum = moduleNum;
+  // Drop a last-set id belonging to the module we're leaving. The dropdown's
+  // onchange calls saveProgress() without awaiting us, so a flush landing
+  // before activateSet would otherwise persist the new module paired with the
+  // old module's set id — a pair that restores to nothing next login.
+  if(lastSetId !== `mr${moduleNum}` && !SETS.some(w=>w.id===lastSetId && w.moduleNum===moduleNum)) lastSetId = null;
   document.getElementById('module-select').value = moduleNum;
   // Fetch + build this module's panels on first visit before showing them.
-  await ensureModuleRendered(moduleNum);
+  try{
+    await ensureModuleRendered(moduleNum);
+  }catch(e){
+    // module-N.js never arrived (offline + not precached, or a bad deploy).
+    // Bail quietly back to the module still on screen rather than let the
+    // rejection escape into the global safety net's "Something went wrong"
+    // banner over a blank pane — this call is fired un-awaited from renderAll,
+    // the dropdown's onchange and songHubGoModule, so nothing else catches it.
+    console.warn('[guitar-class] module '+moduleNum+' failed to load', e);
+    if(req === _moduleChangeReq){
+      lastModuleNum = prevModuleNum; lastSetId = prevSetId;
+      const sel = document.getElementById('module-select');
+      if(sel) sel.value = prevModuleNum;
+      /* Say something. Swallowing the rejection removed the only signal a
+         student used to get here (the global unhandledrejection banner), and
+         on the very first render there is no module already on screen to fall
+         back to — so without this they'd sit looking at an empty pane with no
+         explanation and no retry. Re-picking the same module in the dropdown
+         fires no change event, so the toast has to name the retry. */
+      gateToast(t('module.loadFailed'));
+    }
+    return;
+  }
+  if(req !== _moduleChangeReq) return;   // a newer module change is in flight — leave its DOM alone
   const moduleSets = SETS.filter(w=>w.moduleNum===moduleNum);
-  if(!moduleSets.length) return;   // load failed (e.g. offline + not precached)
+  if(!moduleSets.length) return;   // file loaded but defined no sets
   renderPills(moduleNum);
   renderProgressStrip();   // refresh the "you are here" indicator
   const isReviewId = restoreSetId === `mr${moduleNum}` && MODULE_REVIEWS[moduleNum];
@@ -4657,6 +4723,9 @@ document.addEventListener('keydown',e=>{
    so every rp-trigger / song / chord-link call site works unchanged — the
    content opens in a draggable floating card and the page stays usable,
    so a step's questions are visible while its video plays. */
+/* Where focus was before the video viewer opened, so clearPanel can put it
+   back (see loadPanel). */
+let viewerReturnFocus = null;
 function loadPanel(type,url,title,subtitle){
   const overlay=document.getElementById('video-overlay');
   const content=document.getElementById('rp-content');
@@ -4665,6 +4734,17 @@ function loadPanel(type,url,title,subtitle){
   const newtab=document.getElementById('rp-newtab');
   const close=document.getElementById('rp-close');
   overlay.hidden=false;
+  /* Move focus into the player and remember where it came from. Without this a
+     keyboard user activating a video link keeps focus behind the viewer and
+     tabs through the rest of the step — quiz buttons, got-it checkboxes —
+     before ever reaching Close. Focus the CONTAINER, not the close button, so
+     the next Tab lands on "Open in new tab" and the whole dialog is reachable
+     going forward. No focus trap: this player is deliberately non-modal (it's
+     draggable and the page stays usable behind it), so Tab must be able to
+     leave. */
+  viewerReturnFocus = document.activeElement;
+  const modal = overlay.querySelector('.video-modal');
+  if(modal) modal.focus();
   document.body.classList.add('viewer-open');   // hides the FAB pills (they covered the player's controls)
   clampViewer(overlay);   // a drag on a bigger window could strand it off-screen
   content.classList.add('visible'); newtab.classList.add('visible'); close.classList.add('visible');
@@ -4747,6 +4827,12 @@ function clearPanel(){
   wrap.className='rp-iframe-wrap'; wrap.innerHTML='';   // removing the iframe stops playback
   if(overlay) overlay.hidden=true;
   document.body.classList.remove('viewer-open');
+  /* Hand focus back to whatever opened the player. The document.contains guard
+     matters: the trigger usually lives in step HTML that gets re-rendered on a
+     language switch or a set change, so the element we saved may be detached —
+     focusing it then would silently drop focus to <body>. */
+  if(viewerReturnFocus && document.contains(viewerReturnFocus)) viewerReturnFocus.focus();
+  viewerReturnFocus = null;
 }
 
 /* Keep the mini-player inside the viewport (after drags / window resizes). */

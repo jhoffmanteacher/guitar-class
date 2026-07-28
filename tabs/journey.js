@@ -7,6 +7,23 @@
    in, or a school filter blocks the Firebase SDK, the highlight quietly
    stays session-only (same behavior the page always had). */
 var fbUser = null, fbDb = null, saveTimer = null, dirty = false;
+/* A rating clicked before Firebase auth resolved — flush it as soon as
+   fbUser exists (see queueSave / the onAuthStateChanged handler).
+
+   `authSettled` bounds that to the PAGE-BOOT race only, and it matters on a
+   shared Chromebook. Firebase auth persistence is shared across tabs, so a
+   journey page left open while signed out will receive an onAuthStateChanged
+   for whoever signs in NEXT — in another tab, minutes later. Flushing
+   pendingSave on that would write the previous student's ratings straight
+   into the new student's doc, unprompted, and {merge:true} would overwrite
+   their real values for those layers. So: flush only on the first auth
+   resolution after load (the student who was already sitting here), and on
+   any later change of user, throw the pending ratings away instead.
+
+   `sdkFailed` is sticky because the failure is: once the Firestore script
+   404s, fbUser never arrives, so every subsequent click needs to be told,
+   not just the one that raced the onerror. */
+var pendingSave = false, authSettled = false, sdkFailed = false;
 var userInteracted = false;
 
 /* Always open at the very top — regardless of a #layer-N hash in the URL
@@ -200,6 +217,22 @@ function togglePlayalong(btn){
       box.appendChild(f);
     }
     box.dataset.loaded = '1';
+  } else {
+    /* Already built. Collapsing only sets `hidden` (display:none), which does
+       NOT stop an <audio> element — the loop would keep playing with no
+       visible transport to stop it. Pause on collapse, and resume on re-open
+       only if collapsing is what paused it, so a student who pressed pause on
+       the player doesn't get the track restarted behind their back. */
+    var player = box.querySelector('audio');
+    if(player){
+      if(!opening && !player.paused){
+        player.pause();
+        box.dataset.autopaused = '1';
+      } else if(opening && box.dataset.autopaused){
+        delete box.dataset.autopaused;
+        player.play().catch(function(){});
+      }
+    }
   }
   box.hidden = !opening;
   btn.setAttribute('aria-expanded', opening ? 'true' : 'false');
@@ -300,8 +333,20 @@ function setSaveMsg(key){
    of clicks becomes one write, and a failed write stays dirty so the next
    click retries it. */
 function queueSave(){
-  if(!fbUser) return;
   dirty = true;
+  /* Ratings are clickable from the moment the HTML parses, but `fbUser`
+     only lands after load → onAuthStateChanged → the injected Firestore
+     SDK — seconds later on school Wi-Fi. Don't drop the click: remember
+     that something is unsaved and flush once `fbUser` arrives. One flush
+     covers every layer rated in that window, because flushSave rebuilds
+     the whole rating map from the DOM (see currentRatings). */
+  /* The SDK never arrived (school filter, dead Wi-Fi). fbUser will never be
+     set, so every later click would return silently while the chip paints
+     "✓ 3" and the pill counts it — the page looks saved and isn't. Say so on
+     every click, not just the one that happened to race the script's
+     onerror. */
+  if(sdkFailed){ setSaveMsg('journey.saveFailed'); return; }
+  if(!fbUser){ pendingSave = true; return; }
   setSaveMsg('journey.saving');
   clearTimeout(saveTimer);
   saveTimer = setTimeout(flushSave, 800);
@@ -332,16 +377,41 @@ window.addEventListener('load', function(){
   if(typeof firebase === 'undefined' || typeof firebaseConfig === 'undefined') return;
   firebase.initializeApp(firebaseConfig);
   firebase.auth().onAuthStateChanged(function(user){
-    if(!user){ setSaveMsg('journey.signin'); return; }
+    // A signed-out resolution still settles the boot race: anything rated
+    // before this point belongs to nobody we can write for, and must NOT be
+    // held for whoever signs in next.
+    if(!user){ authSettled = true; pendingSave = false; setSaveMsg('journey.signin'); return; }
+    // A DIFFERENT student just signed in (shared Chromebook, another tab).
+    // Drop the previous student's unsaved ratings rather than writing them
+    // into this one's doc, and clear the local-click guard so the read below
+    // can repaint what THIS student actually saved.
+    if(authSettled && fbUser && fbUser.uid !== user.uid){
+      pendingSave = false; dirty = false; locallyClickedLayers = {};
+    }
+    var firstResolution = !authSettled;
+    authSettled = true;
     loadFirestoreSdk().then(function(){
       fbDb = firebase.firestore();
       fbUser = user;
       setSaveMsg('');
+      /* Anything rated while we were still booting has been sitting in the
+         DOM unsaved — write it now, before the read below, so a student who
+         taps a layer the second the page appears keeps that rating. The set
+         merges, so it can't clobber layers saved on another day. Boot race
+         only: see authSettled above for why a later sign-in must not flush. */
+      if(pendingSave && firstResolution){ pendingSave = false; flushSave(); }
+      else pendingSave = false;
       return fbDb.collection('progress').doc(user.uid).get();
     }).then(function(doc){
       var data = doc && doc.exists ? doc.data() : null;
       applyRatings(data && data.songRatings && data.songRatings[SONG_ID]);
-    }).catch(function(){ /* offline first read is fine — clicks still queue saves */ });
+    }).catch(function(){
+      /* An offline first read is fine — clicks still queue saves. But if the
+         Firestore SDK itself never loaded, fbUser never arrives and NOTHING
+         can be written, now or later; latch that so every click says so
+         rather than only the one that happened to race this rejection. */
+      if(!fbUser){ sdkFailed = true; setSaveMsg('journey.saveFailed'); }
+    });
   });
   // Best-effort flush if the tab closes inside the debounce window.
   window.addEventListener('pagehide', function(){ if(dirty){ clearTimeout(saveTimer); flushSave(); } });
