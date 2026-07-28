@@ -629,6 +629,115 @@ function syntaxCheck() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   0b. RENDER SMOKE TEST — actually build every set.
+
+   Why this exists: on 2026-07-27 an i18n conversion added a t() call
+   inside a callback whose parameter was already named `t`, shadowing the
+   global i18n t(). buildSet() threw on all 21 sets with a songThread, so
+   NO module content rendered — and every check above passed, because the
+   file is syntactically valid and the module DATA is fine. The bug was
+   only visible by running the renderer.
+
+   So: load the real i18n.js + guitar-diagrams.js + module data + app.js
+   in a vm against a minimal DOM stub, then call buildSet() on all 36
+   sets. No jsdom dependency (the repo has no build step and no
+   node_modules) — the stub only needs to be good enough for app.js to
+   reach its string-building code, which is where content bugs live.
+
+   If app.js grows a load-time dependency the stub doesn't cover, this
+   reports "harness could not load" as a WARNING rather than failing the
+   push — a stale harness must never block a good push. A set that throws
+   or renders suspiciously short IS a hard failure.
+   ════════════════════════════════════════════════════════════════════ */
+function renderCheck() {
+  head('0b. Render smoke test (build every set)');
+
+  const stubStyle = () => ({ setProperty(){}, removeProperty(){}, getPropertyValue(){ return ''; } });
+  const el = () => ({
+    style: stubStyle(), dataset: {}, children: [],
+    classList: { add(){}, remove(){}, toggle(){}, contains(){ return false; } },
+    innerHTML: '', textContent: '', value: '', hidden: false, checked: false,
+    addEventListener(){}, removeEventListener(){}, appendChild(){}, removeChild(){}, remove(){},
+    setAttribute(){}, getAttribute(){ return null; }, removeAttribute(){}, hasAttribute(){ return false; },
+    querySelector(){ return el(); }, querySelectorAll(){ return []; }, closest(){ return null; },
+    focus(){}, blur(){}, click(){}, scrollIntoView(){}, insertAdjacentHTML(){}, cloneNode(){ return el(); },
+    getBoundingClientRect(){ return { top:0, left:0, width:0, height:0, bottom:0, right:0 }; },
+  });
+  const storage = () => ({ _d:{}, getItem(k){ return this._d[k] ?? null; }, setItem(k,v){ this._d[k]=String(v); },
+                           removeItem(k){ delete this._d[k]; }, clear(){ this._d={}; } });
+
+  const ctx = {
+    console: { log(){}, warn(){}, error(){}, info(){} },
+    document: {
+      documentElement: el(), head: el(), body: el(),
+      getElementById(){ return el(); }, querySelector(){ return el(); }, querySelectorAll(){ return []; },
+      createElement(){ return el(); }, createDocumentFragment(){ return el(); },
+      addEventListener(){}, removeEventListener(){},
+      fonts: { ready: Promise.resolve() }, hidden: false, visibilityState: 'visible',
+    },
+    localStorage: storage(), sessionStorage: storage(),
+    location: { hostname:'localhost', href:'http://localhost/', pathname:'/', search:'', hash:'', reload(){} },
+    history: { scrollRestoration:'auto', replaceState(){}, pushState(){} },
+    navigator: { userAgent:'node', language:'en', onLine:true },
+    setTimeout, clearTimeout, setInterval, clearInterval,
+    requestAnimationFrame: () => 0, cancelAnimationFrame(){},
+    matchMedia: () => ({ matches:false, addEventListener(){}, addListener(){} }),
+    getComputedStyle: () => ({ getPropertyValue: () => '' }),
+    fetch: () => Promise.reject(new Error('no network in the render smoke test')),
+    CustomEvent: class { constructor(t, o){ this.type = t; Object.assign(this, o || {}); } },
+    Image: class {}, Audio: class { play(){ return Promise.resolve(); } pause(){} },
+    AudioContext: class {
+      createOscillator(){ return { connect(){}, start(){}, stop(){}, frequency:{ value:0 } }; }
+      createGain(){ return { connect(){}, gain:{ value:0, setValueAtTime(){} } }; }
+      close(){}
+    },
+    performance: { now: () => 0 },
+    addEventListener(){}, removeEventListener(){}, dispatchEvent(){}, scrollTo(){},
+    innerWidth: 1280, innerHeight: 800, devicePixelRatio: 1,
+  };
+  ctx.window = ctx; ctx.globalThis = ctx; ctx.self = ctx;
+
+  const FILES = ['i18n.js', 'guitar-diagrams.js', 'config-main.js',
+    ...MODULE_FILES, 'app.js'];
+  try {
+    vm.createContext(ctx);
+    for (const f of FILES) vm.runInContext(readFileSync(join(ROOT, f), 'utf8'), ctx, { filename: f });
+  } catch (e) {
+    warn(`render harness could not load (${e.message}) — renderer NOT smoke-tested`);
+    console.log(`${C.dim}  if app.js gained a new load-time browser dependency, extend the stub in renderCheck()${C.reset}`);
+    warnings++;
+    return;
+  }
+
+  const sets = vm.runInContext('typeof SETS !== "undefined" ? SETS : []', ctx) || [];
+  const buildSet = vm.runInContext('typeof buildSet === "function" ? buildSet : null', ctx);
+  if (!sets.length || !buildSet) {
+    warn('render harness loaded but found no SETS/buildSet — renderer NOT smoke-tested');
+    warnings++;
+    return;
+  }
+
+  let bad = 0;
+  for (const w of sets) {
+    let html;
+    try {
+      html = buildSet(w);
+    } catch (e) {
+      err(`${w.id}: buildSet() threw — ${e.message}`);
+      bad++; problems++;
+      continue;
+    }
+    // A set that renders almost nothing means the builder bailed early
+    // rather than threw — just as broken from the student's side.
+    if (!html || html.length < 200) {
+      err(`${w.id}: rendered only ${html ? html.length : 0} chars — builder bailed early`);
+      bad++; problems++;
+    }
+  }
+  if (!bad) ok(`all ${sets.length} sets render`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    POST-PUSH: --live — confirm GitHub Pages actually deployed what we
    pushed, by comparing the live sw.js CACHE_VERSION against local.
    Catches a failed/stuck Pages build (students would silently keep the
@@ -668,6 +777,7 @@ async function liveCheck() {
   }
   console.log(`${C.bold}Guitar Class — pre-push checks${C.reset}${CHECK_ONLY ? `  ${C.dim}(check-only)${C.reset}` : ''}`);
   syntaxCheck();
+  renderCheck();
   validateModules();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
