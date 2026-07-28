@@ -259,7 +259,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .dp-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
 .dp-title{font-size:1.125rem;font-weight:600}
 .dp-time{font-size:0.875rem;color:var(--text2);margin-left:auto}
-.prog-pill{margin-left:auto;font-size:0.8125rem;font-weight:600;color:var(--text2);background:var(--bg3);border-radius:12px;padding:3px 10px;white-space:nowrap}
+.prog-pill-wrap{margin-left:auto;display:inline-flex;align-items:center;gap:6px}
+.prog-pill{font-size:0.8125rem;font-weight:600;color:var(--text2);background:var(--bg3);border-radius:12px;padding:3px 10px;white-space:nowrap}
+.prog-mini{width:44px;height:5px;border-radius:3px;background:var(--bg3);overflow:hidden}
+.prog-mini i{display:block;height:100%;background:var(--green-text)}
 .steps{list-style:none}
 /* ── Focus mode: one step at a time (default view) ──────────────────────
    Same markup as the full list; only what's VISIBLE changes, so the toggle
@@ -449,9 +452,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .skchk-cell.gotit-col.active .skbox{background:var(--green-bg);border-color:var(--green-text)}
 .prog-wrap{margin:14px 0 4px}
 .prog-row{display:flex;align-items:center;gap:8px}
-.prog-bg{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden}
-.prog-fill{height:100%;background:var(--green-text);border-radius:3px;transition:width 0.3s}
-.prog-lbl{font-size:0.875rem;color:var(--text2);min-width:36px;text-align:right}
+.prog-bg{flex:1;height:10px;background:var(--bg3);border-radius:5px;overflow:hidden}
+.prog-fill{height:100%;background:var(--green-text);border-radius:5px;transition:width 0.3s}
+.prog-lbl{font-size:0.875rem;font-weight:600;color:var(--text);min-width:36px;text-align:right}
 .save-ind{font-size:0.8125rem;color:var(--text3);text-align:right;margin-top:8px;min-height:16px}
 .coming{text-align:center;padding:48px 20px;color:var(--text2)}
 .coming .big{font-size:2.375rem;margin-bottom:12px}
@@ -1632,7 +1635,7 @@ body.games-open{overflow:hidden}
       that otherwise hides inside the module dropdown's labels ── */
 .rail-mod-prog{display:flex;align-items:center;gap:8px;margin-top:8px}
 .rail-mod-prog[hidden]{display:none}
-.rmp-bar{flex:1;height:5px;background:rgba(0,0,0,0.09);border-radius:3px;overflow:hidden}
+.rmp-bar{flex:1;height:8px;background:rgba(0,0,0,0.09);border-radius:3px;overflow:hidden}
 .rmp-fill{height:100%;background:var(--green-text);border-radius:3px;transition:width .3s}
 .rmp-lbl{font-size:0.75rem;color:var(--text2);font-variant-numeric:tabular-nums;white-space:nowrap}
 @media(prefers-color-scheme:dark){.rmp-bar{background:rgba(255,255,255,0.10)}}

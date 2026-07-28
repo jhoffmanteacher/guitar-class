@@ -2068,7 +2068,10 @@ function buildStations(w, stationId){
       ? `<div class="st-flex-note">${t('note.firstTimeHtml',{btn:`<button type="button" class="st-note-link" onclick="switchTabById('${w.id}','station-b')">${t('nav.stationBTitle')}</button>`})}</div>`
       : '';
     const {total: stepTotal, done: stepDone} = stationStepCounts(id, s);
-    const pillHtml = stepTotal > 0 ? `<span class="prog-pill" data-i18n="progress.stepsDone" data-i18n-params="${escAttr(JSON.stringify({done:stepDone,total:stepTotal}))}">${t('progress.stepsDone',{done:stepDone,total:stepTotal})}</span>` : '';
+    const pillHtml = stepTotal > 0 ? `<span class="prog-pill-wrap">`
+      + `<span class="prog-pill" data-i18n="progress.stepsDone" data-i18n-params="${escAttr(JSON.stringify({done:stepDone,total:stepTotal}))}">${t('progress.stepsDone',{done:stepDone,total:stepTotal})}</span>`
+      + `<span class="prog-mini"><i style="width:${Math.round(stepDone/stepTotal*100)}%"></i></span>`
+      + `</span>` : '';
     /* Stepper bar: where-am-I counter (focus mode only) + the view toggle,
        which stays visible in BOTH views — it's the only way back to focus. */
     const countParams = {n: openNum || 1, m: stepTotal};
@@ -2312,6 +2315,8 @@ function updateProgressPill(li){
   const done = dp.querySelectorAll('li.step.step-done').length;
   pill.setAttribute('data-i18n-params', JSON.stringify({done, total}));
   pill.textContent = t('progress.stepsDone', {done, total});
+  const mini = dp.querySelector('.prog-mini i');
+  if(mini) mini.style.width = `${Math.round(total ? done/total*100 : 0)}%`;
 }
 
 /* ── Songs ── */
@@ -5609,8 +5614,13 @@ function renderMyProgress(){
       <div class="prog-wrap"><div class="prog-row"><div class="prog-bg"><div class="prog-fill" style="width:${pct}%"></div></div><div class="prog-lbl">${done} / ${total}</div></div></div>
     </div>`;
   }).join('');
+  const totalPct = totalAll ? Math.round(totalDone / totalAll * 100) : 0;
+  const overallRow = `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="font-size:0.875rem;font-weight:600">${t('progress.overall')}</div>
+      <div class="prog-wrap"><div class="prog-row"><div class="prog-bg"><div class="prog-fill" style="width:${totalPct}%"></div></div><div class="prog-lbl">${totalDone} / ${totalAll}</div></div></div>
+    </div>`;
   bodyEl.innerHTML = `<div class="coach-tip" data-i18n="progress.skillsMastered" data-i18n-params="${escAttr(JSON.stringify({done:totalDone,total:totalAll,modules:MODULE_MANIFEST.length}))}">${t('progress.skillsMastered',{done:totalDone,total:totalAll,modules:MODULE_MANIFEST.length})}</div>
-    <div class="card">${rows}</div>`;
+    <div class="card">${overallRow}${rows}</div>`;
   if(typeof applyI18n === 'function') applyI18n(bodyEl);
 }
 

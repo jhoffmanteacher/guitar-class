@@ -248,6 +248,7 @@
     'progress.stepsDone':      { en: '{done} of {total} steps done', es: '{done} de {total} pasos completados' },
     'progress.skillsMastered': { en: '{done} of {total} skills mastered across all {modules} modules.',
                                  es: '{done} de {total} destrezas dominadas en los {modules} módulos.' },
+    'progress.overall':        { en: 'Overall', es: 'En total' },
 
     // ── Focus mode (station cards: one step at a time vs. the full list) ──
     'fm.stepOf':               { en: 'Step {n} of {m}', es: 'Paso {n} de {m}' },
