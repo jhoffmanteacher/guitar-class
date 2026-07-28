@@ -181,6 +181,7 @@
     'nav.module':         { en: 'Module', es: 'Módulo' },
     'nav.thisSet':        { en: 'This set', es: 'Esta unidad' },
     'nav.prevSet':        { en: 'the previous set', es: 'la unidad anterior' },
+    'set.about':          { en: 'About this set', es: 'Sobre esta unidad' },
     'nav.comingSoonHtml': { en: 'This set\'s content will appear here when it\'s ready.<br>Check back soon!',
       es: 'El contenido de esta unidad aparecerá aquí cuando esté listo.<br>¡Vuelve pronto!' },
     // Shown via gateToast() when a module-N.js file never arrives (offline and

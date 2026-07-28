@@ -1191,7 +1191,7 @@ function wrapAllChordLinks(){
   /* Step-response prompts (the question text above MC/short-answer inputs) */
   document.querySelectorAll('.dp .step .step-resp-prompt').forEach(wrapChordLinksIn);
   /* Objectives at the top of each set */
-  document.querySelectorAll('.obj-card .obj-main, .obj-card .obj-sub, .obj-card .obj-set-sub, .obj-card .obj-skill-item').forEach(wrapChordLinksIn);
+  document.querySelectorAll('.obj-card .obj-main, .obj-card .obj-sub, .obj-card .obj-set-sub, .obj-card .obj-skill-item, .set-about .obj-skill-item, .set-eyebrow-title').forEach(wrapChordLinksIn);
   /* Song list — names and meta lines often mention chords ("uses G and C") */
   document.querySelectorAll('.song-row .sname, .song-row .smeta').forEach(wrapChordLinksIn);
   /* Skills checklist — skill labels and helper text */
@@ -1710,25 +1710,23 @@ function returnToPractice(){
 /* Set/review panels are now built per-module, on demand, by
    ensureModuleRendered() (defined near the top of this file). */
 
-function buildSetHeader(w){
-  const pill = w.title ? `<span class="obj-set-tag" data-i18n-setlabel="${escAttr(w.title)}" translate="no">${escHtml(tSetLabel(w.title))}</span>` : '';
-  const crumb = w.unit ? `<span class="obj-unit">${w.unit}</span>` : '';
-  return (pill || crumb) ? `<div class="obj-set">${pill}${crumb}</div>` : '';
-}
-
 function buildComingSoon(w){
-  const header = buildSetHeader(w);
-  const sub = w.subtitle ? `<h2 class="obj-main">${tf(w,'subtitle')}</h2>` : '';
-  return `<div class="obj-card set-head">${header}${sub}</div>
+  const setTag = w.title ? `<span class="obj-set-tag" data-i18n-setlabel="${escAttr(w.title)}" translate="no">${escHtml(tSetLabel(w.title))}</span>` : '';
+  const titleSpan = w.unit ? `<span class="set-eyebrow-title">${w.unit}</span>` : '';
+  const eyebrow = (setTag || titleSpan) ? `<div class="set-eyebrow">${setTag}${titleSpan}</div>` : '';
+  const sub = w.subtitle ? `<p class="obj-sub">${tf(w,'subtitle')}</p>` : '';
+  return `${eyebrow}${sub}
   <div class="coming"><div class="big">&#x1F3B8;</div><p>${t('nav.comingSoonHtml')}</p></div>`;
 }
 
 function buildSet(w){
-  // Small "Set N" pill, then the topic as the large title, then generalized
-  // skill bullets (the old "I CAN…" objective line is no longer shown).
+  // Compact eyebrow line — "Set N" pill, topic, Print — carries identity;
+  // skill bullets and the song-thread link fold behind "About this set"
+  // (the old "I CAN…" objective line is no longer shown).
   const printBtn = `<button type="button" class="print-set-btn" onclick="printSet('${w.id}')" title="${escAttr(t('btn.printSetTitle'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg><span data-i18n="btn.printSet">${t('btn.printSet')}</span></button>`;
-  const pill = `<div class="obj-set">${w.title ? `<span class="obj-set-tag" data-i18n-setlabel="${escAttr(w.title)}" translate="no">${escHtml(tSetLabel(w.title))}</span>` : ''}${printBtn}</div>`;
-  const titleHtml = w.unit ? `<h2 class="obj-main obj-topic">${tf(w,'unit')}</h2>` : '';
+  const setTag = w.title ? `<span class="obj-set-tag" data-i18n-setlabel="${escAttr(w.title)}" translate="no">${escHtml(tSetLabel(w.title))}</span>` : '';
+  const titleSpan = w.unit ? `<span class="set-eyebrow-title">${tf(w,'unit')}</span>` : '';
+  const eyebrow = `<div class="set-eyebrow">${setTag}${titleSpan}${printBtn}</div>`;
   const items = (tf(w,'skillFocus')||'').split(' · ')
     .map(s => s.trim())
     .filter(Boolean)
@@ -1761,6 +1759,7 @@ function buildSet(w){
         return `<div class="song-thread">&#x1F3B8; ${lede} ${names}</div>`;
       })()
     : '';
+  const about = (skills || thread) ? `<details class="set-about"><summary>${t('set.about')}</summary>${skills}${thread}</details>` : '';
   /* Single-flow sets (e.g. Module 13 · String Changing): only station b
      exists — one "learn the process" card straight into the checklist, no
      Station B/C framing. The card's labels come from the set's own fields
@@ -1782,7 +1781,7 @@ function buildSet(w){
           <span class="tabs-card-title"><span class="tabs-card-num">2</span>${t('nav.stationCTitle')}</span>
           <span class="tabs-card-sub">${t('nav.stationCSub')}</span>
         </button>`;
-  return `<div class="obj-card set-head">${titleHtml}${pill}${skills}${thread}</div>
+  return `${eyebrow}${about}
   <div class="tabs">
     <div class="tabs-songbar">
       ${w.songs ? `<button type="button" class="tabs-songs tab-songs" onclick="switchTab(this,'${w.id}','songs')">&#9835; ${t('nav.songs')}</button>` : ''}
@@ -1826,13 +1825,21 @@ function printSet(wid){ window.print(); }
    hidden fold panels don't print, so unhide them for the print pass and
    restore afterwards. */
 let _printOpened = [];
+// Same problem for the "About this set" disclosure: a closed <details>
+// prints nothing, so a printed set sheet would silently lose its objectives
+// and song-thread line unless it's forced open for the print pass.
+let _printOpenedDetails = [];
 window.addEventListener('beforeprint', ()=>{
   _printOpened = [...document.querySelectorAll('.step-fold-panel[hidden]')];
   _printOpened.forEach(d=>d.removeAttribute('hidden'));
+  _printOpenedDetails = [...document.querySelectorAll('.set-about:not([open])')];
+  _printOpenedDetails.forEach(d=>d.setAttribute('open',''));
 });
 window.addEventListener('afterprint', ()=>{
   _printOpened.forEach(d=>d.setAttribute('hidden',''));
   _printOpened = [];
+  _printOpenedDetails.forEach(d=>d.removeAttribute('open'));
+  _printOpenedDetails = [];
 });
 
 /* Hint / Stuck? / Level up pill tapped: open that pill's panel full-width

@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — A quieter set header, with objectives one tap away
+
+### Changed
+
+- **The module/set header is now a single compact line** — the set number,
+  the topic, and Print — instead of a full card. Tap "About this set" to
+  see the skills you're working on and which song they build.
+
 ## 2026-07-28 — A dashed underline means "locked," so we stopped using it elsewhere
 
 ### Changed

@@ -193,24 +193,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .mr-rec-status{font-size:0.8125rem;color:var(--text2);line-height:1.4}
 .week-panel{display:none}.week-panel.active{display:block}
 .obj-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
-.obj-unit{font-size:0.8125rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:5px}
-.obj-set{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid var(--border)}
-.obj-set-tag{font-size:1rem;font-weight:600;color:var(--text)}
-.obj-set-sub{font-size:0.9375rem;color:var(--text2);line-height:1.4}
 .obj-main{font-size:1.0625rem;font-weight:500;line-height:1.5;margin-bottom:5px}
 .obj-sub{font-size:0.9375rem;color:var(--text2);line-height:1.6}
-/* Set-header redesign (applied to buildSet + buildComingSoon cards) */
-.obj-card.set-head .obj-set{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;padding-bottom:0;border-bottom:none}
-.obj-card.set-head .obj-set .print-set-btn{margin-left:auto}
-.obj-card.set-head .obj-topic{margin-bottom:12px}
-.obj-card.set-head .obj-set-tag{display:inline-block;background:var(--blue-bg);color:var(--blue-text);font-size:0.75rem;font-weight:500;letter-spacing:.4px;padding:3px 10px;border-radius:999px;text-transform:uppercase}
-.obj-card.set-head .obj-unit{font-size:0.75rem;color:var(--text3);text-transform:none;letter-spacing:0;margin-bottom:0;line-height:1.3}
-.obj-card.set-head .obj-main{font-size:1.125rem;font-weight:500;line-height:1.3;margin-bottom:0;font-family:var(--font-display)}
-.obj-card.set-head .obj-i-can{color:var(--blue-text)}
+/* Set eyebrow + "About this set" disclosure (applied to buildSet + buildComingSoon).
+   The context card stops being a card — one compact eyebrow row above the
+   station card carries identity; objectives and the song-thread link fold
+   behind a quiet native <details> disclosure, closed by default. */
+.set-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.set-eyebrow-title{font-size:0.9375rem;font-weight:600;color:var(--text)}
+.set-eyebrow .print-set-btn{margin-left:auto}
+.obj-set-tag{display:inline-block;background:var(--blue-bg);color:var(--blue-text);font-size:0.75rem;font-weight:500;letter-spacing:.4px;padding:3px 10px;border-radius:999px;text-transform:uppercase}
+.set-about{margin:0 0 14px;font-size:0.875rem;color:var(--text2)}
+.set-about summary{cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:0.8438rem;font-weight:600;font-family:inherit;line-height:inherit;color:var(--text2);padding:5px 12px;border:1px solid transparent;border-radius:14px;background:transparent;user-select:none;list-style:none}
+.set-about summary::-webkit-details-marker{display:none}
+.set-about summary::before{content:'▸';font-size:0.75rem;transition:transform .15s}
+.set-about[open] summary::before{transform:rotate(90deg)}
+.set-about summary:hover,.set-about[open] summary{color:var(--text);border-color:var(--text2)}
+.set-about .obj-skill-list{margin-top:10px}
 .obj-skill-label{font-size:0.75rem;color:var(--text3);letter-spacing:.4px;text-transform:uppercase;margin-top:10px;margin-bottom:5px}
 .obj-skill-list{list-style:disc;margin:0;padding-left:20px}
 .obj-skill-item{color:var(--text2);font-size:0.875rem;line-height:1.5}
-@media (max-width:420px){.obj-card.set-head .obj-main{font-size:0.9375rem}}
 .tabs{margin-bottom:16px}
 .tabs-songbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px}
 .print-set-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;font-size:0.7812rem;font-weight:500;font-family:inherit;line-height:1.2;color:var(--text2);background:transparent;border:1px solid transparent;border-radius:14px;cursor:pointer;transition:background 0.15s,border-color 0.15s,color 0.15s}
@@ -995,7 +997,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .main{max-width:100% !important;width:100% !important;flex:none !important;padding:0 !important;overflow:visible !important}
 
   /* Avoid awkward breaks mid-step / mid-diagram */
-  .step,.tab,.chord-diagrams,.obj-card,.stp-sec{break-inside:avoid;page-break-inside:avoid}
+  .step,.tab,.chord-diagrams,.obj-card,.stp-sec,.set-eyebrow,.set-about{break-inside:avoid;page-break-inside:avoid}
 
   /* Print-only set title so the handout is labelled */
   .week-panel.active::before{
