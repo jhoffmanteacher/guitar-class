@@ -82,7 +82,7 @@ const COACH_PULSE_TIGHT_FRAC = 0.2;   // fraction of coach.beatMs counted as "ti
    before the analyser the way speaker playback would be). */
 const COACH_MIC_GAIN = 3;
 
-function coachFootHtml(){ return '<div class="coach-foot">&#x1F512; ' + t('coach.foot') + '</div>'; }
+function coachFootHtml(){ return '<div class="coach-foot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> ' + t('coach.foot') + '</div>'; }
 
 let coach = null;            // active check session (null = no card open)
 let coachStream = null, coachCtx = null, coachAnalyser = null, coachRaf = null,
@@ -4195,7 +4195,7 @@ function rnRenderSelect(){
     const b = rnBestMerged(song.id);
     let meta;
     if (!unlocked){
-      meta = `<span class="rn-song-lock">&#x1F512; ${t('games.riff.clearToUnlock', {title: escHtml(RN_SONGS[i - 1].title)})}</span>`;
+      meta = `<span class="rn-song-lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> ${t('games.riff.clearToUnlock', {title: escHtml(RN_SONGS[i - 1].title)})}</span>`;
     } else if (b){
       meta = `<span class="rn-song-best">${t('games.riff.bestPercent', {pct: b.acc})}${b.tier >= 0 ? ' &middot; ' + t('games.riff.clearedTier', {tier: rnTierName(b.tier)}) : ''}</span>`;
     } else {
@@ -5322,7 +5322,7 @@ function nrRenderSelect(){
     const b = nrBestMerged(i);
     let meta;
     if (!un){
-      meta = `<span class="rn-song-lock">&#x1F512; ${t('games.nr.clearToUnlock', {pct: NR_PASS, n: nrReq(i) + 1})}</span>`;
+      meta = `<span class="rn-song-lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> ${t('games.nr.clearToUnlock', {pct: NR_PASS, n: nrReq(i) + 1})}</span>`;
     } else if (b > 0){
       meta = `<span class="rn-song-best">${t('games.nr.bestPercent', {pct: b})}${b >= NR_PASS ? ' &middot; ' + t('games.nr.clearedFlag') : ''}</span>`;
     } else {
