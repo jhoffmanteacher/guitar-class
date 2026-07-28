@@ -1599,15 +1599,17 @@ function buildSet(w){
   const thread = (w.songThread && w.songThread.length)
     ? (()=>{
         const entries = w.songThread;
-        const names = entries.map(t => {
-          const url = t.journey ? (t.layer ? `${t.journey}#layer-${t.layer}` : t.journey) : null;
+        /* NB: don't name this callback param `t` — it would shadow the global
+           i18n t() that the title string below needs. */
+        const names = entries.map(song => {
+          const url = song.journey ? (song.layer ? `${song.journey}#layer-${song.layer}` : song.journey) : null;
           return url
-            ? `<a class="song-thread-link" href="${escAttr(url)}" target="_blank" rel="noopener" title="${escAttr(t('songs.openLayerTitle'))}">${escHtml(t.name)}</a>`
-            : `<span class="song-thread-name">${escHtml(t.name)}</span>`;
+            ? `<a class="song-thread-link" href="${escAttr(url)}" target="_blank" rel="noopener" title="${escAttr(t('songs.openLayerTitle'))}">${escHtml(song.name)}</a>`
+            : `<span class="song-thread-name">${escHtml(song.name)}</span>`;
         }).join(', ');
-        const layers = entries.map(t => t.layer);
+        const layers = entries.map(song => song.layer);
         const sameLayer = layers[0] != null && layers.every(l => l === layers[0]);
-        const sameBonus = entries.every(t => !!t.bonus === !!entries[0].bonus);
+        const sameBonus = entries.every(song => !!song.bonus === !!entries[0].bonus);
         const lede = (sameLayer && sameBonus && entries[0].bonus) ? t('thread.bonusLayer')
           : sameLayer ? t('thread.buildsLayer', {n: layers[0]})
           : t('thread.grows');

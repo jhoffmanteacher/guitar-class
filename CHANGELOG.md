@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Module content is back
+
+### Fixed
+
+- **Every module's lesson content was blank.** Opening any module showed an
+  empty page and a "Something went wrong — please refresh" message, and
+  refreshing didn't help. A change made earlier the same day broke the line
+  that names which song layer a set builds, and that one line stopped every
+  set on the site from drawing. All 13 modules load normally again. No saved
+  progress was affected — the checklists, responses, and practice records
+  were never touched.
+
 ## 2026-07-27 — Strum Radar can actually hear you now
 
 ### Changed
