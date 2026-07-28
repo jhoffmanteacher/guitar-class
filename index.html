@@ -74,7 +74,7 @@
       <span class="header-search-label" data-i18n="header.find">Find</span>
     </button>
     <button class="btn-translate" id="btn-translate" onclick="toggleTranslate()" title="Translate to Spanish" data-i18n-attr="title:header.translateTitle">
-      <span>&#x1F310;</span><span id="translate-label">Español</span>
+      <span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/></svg></span><span id="translate-label">Español</span>
     </button>
     <div class="user-area" id="user-area">
       <button class="btn-sign" onclick="signIn()" data-i18n="header.signIn">Sign in with Google</button>
@@ -96,9 +96,9 @@
     <!-- ══ LEFT NAV RAIL — module picker, progress, station switcher, Explore ══ -->
     <aside class="rail" id="nav-rail" aria-label="Course navigation" data-i18n-attr="aria-label:nav.railAria">
       <div class="rail-scroll">
-        <div class="preview-note" id="preview-note" hidden>&#x1F513; <span data-i18n-html="nav.previewNoteHtml"><strong>Preview mode</strong> &mdash; set locks are off for you. Students still see them.</span></div>
+        <div class="preview-note" id="preview-note" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg> <span data-i18n-html="nav.previewNoteHtml"><strong>Preview mode</strong> &mdash; set locks are off for you. Students still see them.</span></div>
         <div class="rail-group g-module">
-          <span class="rail-sec-label"><span data-i18n="nav.module">Module</span><span class="sec-goal" id="rail-module-goal" title="Finish all skills to complete this module" data-i18n-attr="title:nav.moduleGoalTitle" aria-hidden="true">&#x1F3C6;</span></span>
+          <span class="rail-sec-label"><span data-i18n="nav.module">Module</span><span class="sec-goal" id="rail-module-goal" title="Finish all skills to complete this module" data-i18n-attr="title:nav.moduleGoalTitle" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 5H4.5A2.5 2.5 0 0 0 7 8.5"/><path d="M17 5h2.5A2.5 2.5 0 0 1 17 8.5"/><path d="M12 13v3"/><path d="M9 20h6"/><path d="M9.5 20 10 16h4l.5 4"/></svg></span></span>
           <label class="sr-only" for="module-select" data-i18n="nav.chooseModule">Choose module</label>
           <select class="module-select" id="module-select" onchange="leaveTopPanelForSet(); onModuleChange(this.value); saveProgress()"></select>
           <div class="rail-mod-prog" id="rail-mod-prog" role="progressbar" aria-label="Module skills progress" data-i18n-attr="aria-label:nav.moduleProgAria" aria-valuemin="0" hidden>
@@ -145,11 +145,11 @@
         <div class="fab-group" id="fab-group" style="display:none">
           <div class="tool-popup" id="metro-popup" role="dialog" aria-label="Metronome" data-i18n-attr="aria-label:tools.metronome">
             <div class="tp-head">
-              <span class="tp-title">&#x1F3B5; <span data-i18n="tools.metronome">Metronome</span></span>
+              <span class="tp-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 3 19 21 12 17 5 21 12 3"/><line x1="12" y1="10" x2="12" y2="17"/></svg> <span data-i18n="tools.metronome">Metronome</span></span>
               <button class="tp-close" onclick="closePopup('metro')" aria-label="Close metronome" data-i18n-attr="aria-label:tools.closeMetroAria">&#x2715;</button>
             </div>
             <div class="metro-dot" id="metro-dot"></div>
-            <div class="metro-muted-note" id="metro-muted-note" hidden data-i18n="tools.metroMuted">🔇 Silent while the Listening Coach's mic is on — the beat still flashes above.</div>
+            <div class="metro-muted-note" id="metro-muted-note" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg><span data-i18n="tools.metroMuted">Silent while the Listening Coach's mic is on — the beat still flashes above.</span></div>
             <div class="bpm-row">
               <div>
                 <div class="bpm-num" id="bpm-display">60</div>
@@ -178,7 +178,7 @@
           </div>
           <div class="tool-popup" id="timer-popup" role="dialog" aria-label="Practice Timer" data-i18n-attr="aria-label:tools.timerTitle">
             <div class="tp-head">
-              <span class="tp-title">&#x23F1; <span data-i18n="tools.timerTitle">Practice Timer</span></span>
+              <span class="tp-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6M12 3v2"/></svg> <span data-i18n="tools.timerTitle">Practice Timer</span></span>
               <button class="tp-close" onclick="closePopup('timer')" aria-label="Close timer" data-i18n-attr="aria-label:tools.closeTimerAria">&#x2715;</button>
             </div>
             <div class="timer-display" id="timer-display">0:30</div>
@@ -201,7 +201,7 @@
           </div>
           <div class="tool-popup" id="tuner-popup" role="dialog" aria-label="Tuner" data-i18n-attr="aria-label:tools.tuner">
             <div class="tp-head">
-              <span class="tp-title">&#x1F3B8; <span data-i18n="tools.tuner">Tuner</span></span>
+              <span class="tp-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> <span data-i18n="tools.tuner">Tuner</span></span>
               <button class="tp-close" onclick="closePopup('tuner')" aria-label="Close tuner" data-i18n-attr="aria-label:tools.closeTunerAria">&#x2715;</button>
             </div>
             <!-- role="radiogroup" + aria-checked + roving tabindex, as on the
@@ -272,7 +272,7 @@
         <div class="page-shell">
           <div class="page-topbar">
             <button type="button" class="page-exit" onclick="returnToPractice()">&larr; <span data-i18n="btn.backToPractice">Back to practice</span></button>
-            <div class="page-title">&#x266A; <span data-i18n="hub.allSongs">All songs</span></div>
+            <div class="page-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> <span data-i18n="hub.allSongs">All songs</span></div>
             <span class="page-topbar-spacer"></span>
           </div>
           <div class="page-body" id="songs-screen-body"></div>
@@ -282,7 +282,7 @@
         <div class="page-shell">
           <div class="page-topbar">
             <button type="button" class="page-exit" onclick="closeKeepPracticingScreen()">&larr; <span data-i18n="btn.backToPractice">Back to practice</span></button>
-            <div class="page-title">&#x1F501; <span data-i18n="nav.keepPracticing">Keep practicing</span></div>
+            <div class="page-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 2l4 4-4 4"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg> <span data-i18n="nav.keepPracticing">Keep practicing</span></div>
             <span class="page-topbar-spacer"></span>
           </div>
           <div class="page-body" id="keep-practicing-body"></div>
@@ -292,7 +292,7 @@
         <div class="page-shell">
           <div class="page-topbar">
             <button type="button" class="page-exit" onclick="closeMyProgressScreen()">&larr; <span data-i18n="btn.backToPractice">Back to practice</span></button>
-            <div class="page-title">&#x1F4CA; <span data-i18n="nav.myProgress">My progress</span></div>
+            <div class="page-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/></svg> <span data-i18n="nav.myProgress">My progress</span></div>
             <span class="page-topbar-spacer"></span>
           </div>
           <div class="page-body" id="my-progress-body"></div>
@@ -353,8 +353,8 @@
          the static ones weren't. aria-pressed degrades cleanly instead. -->
     <div class="t-viewtoggle" id="t-viewtoggle" role="group" aria-label="Dashboard view" onclick="syncPressedGroup('#t-viewtoggle','.t-vt','on')">
       <button type="button" class="t-vt on" data-view="skills" onclick="setTeacherView('skills')" aria-pressed="true">Skills grid</button>
-      <button type="button" class="t-vt" data-view="responses" onclick="setTeacherView('responses')" aria-pressed="false">&#x270D; Responses</button>
-      <button type="button" class="t-vt" data-view="games" onclick="setTeacherView('games')" aria-pressed="false">&#x1F3AE; Games</button>
+      <button type="button" class="t-vt" data-view="responses" onclick="setTeacherView('responses')" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> Responses</button>
+      <button type="button" class="t-vt" data-view="games" onclick="setTeacherView('games')" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6.5" width="19" height="11" rx="5.5"/><path d="M7 9.5v3M5.5 11h3"/><circle cx="15.7" cy="10.7" r="0.95" fill="currentColor" stroke="none"/><circle cx="17.6" cy="12.6" r="0.95" fill="currentColor" stroke="none"/></svg> Games</button>
     </div>
     <div class="t-week-tabs" id="t-week-tabs"></div>
     <div id="t-grid-container"><div class="t-loading">Loading student data…</div></div>

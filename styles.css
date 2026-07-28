@@ -28,6 +28,10 @@
   --rail-bg:#e2e3e1;
   --font-display:'Fraunces',ui-serif,Georgia,serif;
   --brand-text:#fff;--brand-hover:#5d5590;
+  /* Mask-image icons for pseudo-elements (::before can't hold an inline <svg>).
+     Stroke color inside the data URI is irrelevant — only its alpha is used;
+     the element's own background-color (usually currentColor) paints it. */
+  --icon-lock:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='11' width='14' height='9' rx='2'/%3E%3Cpath d='M8 11V7a4 4 0 0 1 8 0v4'/%3E%3C/svg%3E");
 }
 @media(prefers-color-scheme:dark){
   :root{
@@ -90,6 +94,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .btn-out{padding:5px 12px;font-size:0.875rem;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--text2);cursor:pointer}
 .btn-out:hover{background:var(--bg3)}
 .btn-translate{padding:5px 12px;font-size:0.875rem;border:1px solid var(--border2);border-radius:20px;background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:5px}
+.btn-translate .ico{width:15px;height:15px;flex:0 0 15px;display:flex}
 .btn-translate:hover{background:var(--bg3)}
 .btn-translate.active{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-text)}
 #google_translate_element{display:none}
@@ -107,9 +112,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .wpill:hover:not(.locked){border-color:var(--text2);color:var(--text)}
 .wpill.active{background:var(--text);color:var(--bg);border-color:var(--text)}
 .wpill.locked{color:var(--text3);cursor:pointer}
-/* Sequential-gate lock: a 🔒 before a set that isn't unlocked yet. The review
-   pill has its own lock rule below, so exclude it to avoid two padlocks. */
-.wpill.locked:not(.review-pill)::before{content:'\1F512';margin-right:5px;font-size:0.8125rem;opacity:.85}
+/* Sequential-gate lock: a stroke padlock before a set that isn't unlocked
+   yet, matching the site's other stroke icons (mask-image so it inherits
+   currentColor instead of shipping a fixed-color emoji). The review pill
+   has its own lock rule below, so exclude it here to avoid two padlocks. */
+.wpill.locked:not(.review-pill)::before{content:'';display:inline-block;width:11px;height:11px;margin-right:5px;vertical-align:-1px;opacity:.85;background-color:currentColor;-webkit-mask-image:var(--icon-lock);mask-image:var(--icon-lock);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center}
 .wpill.complete:not(.active){background:var(--green-bg);color:var(--green-text);border-color:var(--green-text)}
 .wpill-check{font-weight:700;margin-right:5px}
 .wpill-frac{font-size:0.75rem;margin-left:1px;font-variant-numeric:tabular-nums;color:var(--amber-text)}
@@ -120,7 +127,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .wpill.review-pill:hover{background:var(--purple-bg);border-color:var(--purple-text);color:var(--purple-text)}
 .wpill.review-pill.active{background:var(--purple-text);color:var(--bg);border-color:var(--purple-text);border-style:solid}
 .wpill.review-pill.locked{color:var(--purple-accent)}
-.wpill.review-pill.locked::before{content:'\1F512';margin-right:5px;font-size:0.8125rem;opacity:.85}
+.wpill.review-pill.locked::before{content:'';display:inline-block;width:11px;height:11px;margin-right:5px;vertical-align:-1px;opacity:.85;background-color:currentColor;-webkit-mask-image:var(--icon-lock);mask-image:var(--icon-lock);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center}
 .week-panel.mr-locked .mr-rb,
 .week-panel.mr-locked .reflection-ta,
 .week-panel.mr-locked .mr-play-song,
@@ -324,7 +331,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .fm-next{margin-left:auto}
 /* Shared numbered-circle badge — also used by the skill-checklist grid (.sktxt .sn) */
 .sn{width:20px;height:20px;border-radius:50%;background:var(--bg2);font-size:0.8125rem;font-weight:500;color:var(--text2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
-.step{padding:2px 0}
+/* border-left reserves the accent's width on every row (not just .cur) so
+   turning the accent on/off is a color swap, never a layout shift. */
+.step{padding:2px 0;border-left:3px solid transparent;transition:border-color .15s ease,box-shadow .15s ease}
+.step.cur{border-left-color:var(--purple-accent);box-shadow:var(--shadow-card);border-radius:0 8px 8px 0}
+@media(prefers-reduced-motion:reduce){.step{transition:none}}
 /* Hairline between rows so consecutive collapsed steps don't blend together
    — matches the approved mockup's .b-row divider. Adjacent-sibling selector
    so the very first step under a section label (which already has its own
@@ -355,6 +366,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .sh-list li{line-height:1.5}
 .step-resp{margin-top:10px;background:var(--blue-bg);border-radius:8px;padding:10px 12px}
 .step-resp-label{font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--blue-text);margin-bottom:6px}
+.step-resp-label svg{width:13px;height:13px;vertical-align:-2px;margin-right:2px}
 .step-resp-prompt{font-size:0.875rem;font-weight:500;color:var(--text);margin-bottom:5px}
 .step-resp-input{width:100%;min-height:54px;padding:7px 9px;font-family:inherit;font-size:0.9062rem;line-height:1.45;color:var(--text);background:var(--bg);border:1px solid var(--border);border-radius:6px;resize:vertical;box-sizing:border-box}
 .step-resp-input:focus{outline:none;border-color:var(--blue-text);box-shadow:0 0 0 2px var(--blue-bg)}
@@ -507,7 +519,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .routine-card{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
 .routine-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
 .routine-title{font-size:1rem;font-weight:700}
+.routine-title svg{width:15px;height:15px;vertical-align:-2px;margin-right:2px}
 .routine-print-btn{border:1px solid var(--border2);background:var(--bg2);color:var(--text2);border-radius:8px;padding:4px 10px;font-size:0.8125rem;cursor:pointer}
+.routine-print-btn svg{width:13px;height:13px;vertical-align:-2px;margin-right:2px}
 .routine-print-btn:hover{color:var(--text);border-color:var(--text2)}
 .routine-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
 .routine-item{display:flex;gap:10px;align-items:flex-start;font-size:0.9062rem;line-height:1.5}
@@ -573,8 +587,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .rail-sec-label{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.09em;
   color:var(--text3);font-weight:600;margin-bottom:9px;display:flex;align-items:center;gap:7px}
 /* module-complete reward badge: greyed until the CURRENT module is fully done */
-.sec-goal{margin-left:auto;font-size:0.9375rem;line-height:1;opacity:0.4;filter:grayscale(1)}
-.sec-goal.earned{opacity:1;filter:none}
+.sec-goal{margin-left:auto;display:inline-flex;color:var(--text3)}
+.sec-goal svg{width:15px;height:15px}
+.sec-goal.earned{color:var(--purple-accent)}
 /* module dropdown fills the rail width */
 .rail .module-select{width:100%;max-width:none;flex:none}
 /* Set switcher: the wpills sit side by side as buttons under the module
@@ -749,7 +764,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .ts-btn:hover{background:var(--bg3)}
 .ts-btn.active{background:var(--purple-bg);border-color:var(--purple-accent);color:var(--purple-text);font-weight:500}
 .tp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.tp-title{font-size:0.9375rem;font-weight:500}
+.tp-title{font-size:0.9375rem;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.tp-title svg{width:16px;height:16px;flex:0 0 16px}
 .tp-close{background:none;border:none;cursor:pointer;font-size:1.25rem;color:var(--text3);line-height:1;padding:0 2px;font-family:inherit}
 .tp-close:hover{color:var(--text)}
 .bpm-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
@@ -774,6 +790,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .metro-dot{width:28px;height:28px;border-radius:50%;background:var(--blue-bg);border:2px solid var(--blue-text);margin:0 auto 14px;transition:background 0.05s,transform 0.05s}
 .metro-dot.flash{background:var(--blue-text);transform:scale(1.25)}
 .metro-muted-note{font-size:0.75rem;text-align:center;color:var(--amber-text);background:var(--amber-bg);border-radius:var(--radius-sm);padding:5px 8px;margin:-4px 0 12px}
+.metro-muted-note svg{width:13px;height:13px;vertical-align:-2px;margin-right:3px}
 .timer-presets{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
 .timer-presets button{flex:1;min-width:44px;padding:5px 4px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg2);font-size:0.8125rem;cursor:pointer;color:var(--text);font-family:inherit;white-space:nowrap}
 .timer-presets button:hover{background:var(--bg3)}
@@ -795,6 +812,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .t-viewtoggle{display:inline-flex;gap:0;margin-bottom:16px;border:1px solid var(--border2);border-radius:20px;overflow:hidden;overflow-x:auto}
 .t-vt{font-size:0.875rem;padding:5px 16px;border:0;background:transparent;color:var(--text2);cursor:pointer;font-family:inherit}
 .t-vt.on{background:var(--text);color:var(--bg)}
+.t-vt svg,.tg-class-lbl svg,.tg-eff svg,.tr-lbl svg,.tr-pr svg{width:14px;height:14px;vertical-align:-2px;margin-right:3px}
 /* Games-access controls (teacher Games tab) */
 .tg-class{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:14px 16px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg2);margin-bottom:8px}
 .tg-class-lbl{font-weight:600;font-size:0.9375rem}
@@ -1392,6 +1410,7 @@ body.explore-open #week-panels{display:none}
 .page-topbar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
 .page-topbar-spacer{flex:1}
 .page-title{font-size:1.25rem;font-weight:600;font-family:var(--font-display)}
+.page-title svg{width:19px;height:19px;vertical-align:-3px;margin-right:1px}
 .page-exit{font-family:inherit;font-size:0.875rem;font-weight:600;padding:8px 16px;border-radius:20px;border:1px solid var(--border2);background:var(--bg);color:var(--text);cursor:pointer;white-space:nowrap}
 .page-exit:hover{background:var(--bg3)}
 

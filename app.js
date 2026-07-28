@@ -740,7 +740,7 @@ function renderTabBlock(notes, seqOffset){
   notes.forEach((n, ci) => {
     const midis = (Array.isArray(n.midi) ? n.midi : [n.midi]).map(Number);
     const midisAttr = escAttr(JSON.stringify(midis));
-    noteBtns.push(`<button type="button" class="tab-note-btn" data-seq="${off + ci}" data-midis="${midisAttr}" onclick="playBeat(this)" title="${escAttr(t('tab.playNote',{note:n.note}))}">${escHtml(n.note)}<span class="tab-spkr">&#x1F50A;</span></button>`);
+    noteBtns.push(`<button type="button" class="tab-note-btn" data-seq="${off + ci}" data-midis="${midisAttr}" onclick="playBeat(this)" title="${escAttr(t('tab.playNote',{note:n.note}))}">${escHtml(n.note)}<span class="tab-spkr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 8a5 5 0 0 1 0 8"/></svg></span></button>`);
   });
   return `
     <div class="tab-board">
@@ -757,7 +757,7 @@ function buildTab(spec, opts){
      If both are present and distinct, caption stays in the body. */
   const headTitle = (spec.title && tf(spec,'title')) || (spec.caption && tf(spec,'caption')) || t('tab.defaultTitle');
   const showCaptionInBody = !!spec.title && !!spec.caption && spec.title !== spec.caption;
-  const headHtml = `<div class="tab-head"><span class="tab-icon">&#x1F3B8;</span><span class="tab-title">${escHtml(headTitle)}</span><span class="tab-kind">${t('tab.label')}</span></div>`;
+  const headHtml = `<div class="tab-head"><span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span><span class="tab-title">${escHtml(headTitle)}</span><span class="tab-kind">${t('tab.label')}</span></div>`;
   const captionHtml = showCaptionInBody ? `<div class="tab-caption">${escHtml(tf(spec,'caption'))}</div>` : '';
   /* Collect all midis (across phrases if any) so the tab play-all walks the whole melody.
      A note can carry an optional beats:N (default 1) to hold longer than one beat —
@@ -1786,7 +1786,7 @@ function buildComingSoon(w){
   const eyebrow = (setTag || titleSpan) ? `<div class="set-eyebrow">${setTag}${titleSpan}</div>` : '';
   const sub = w.subtitle ? `<p class="obj-sub">${tf(w,'subtitle')}</p>` : '';
   return `${eyebrow}${sub}
-  <div class="coming"><div class="big">&#x1F3B8;</div><p>${t('nav.comingSoonHtml')}</p></div>`;
+  <div class="coming"><div class="big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div><p>${t('nav.comingSoonHtml')}</p></div>`;
 }
 
 function buildSet(w){
@@ -1825,7 +1825,7 @@ function buildSet(w){
         const lede = (sameLayer && sameBonus && entries[0].bonus) ? t('thread.bonusLayer')
           : sameLayer ? t('thread.buildsLayer', {n: layers[0]})
           : t('thread.grows');
-        return `<div class="song-thread">&#x1F3B8; ${lede} ${names}</div>`;
+        return `<div class="song-thread"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> ${lede} ${names}</div>`;
       })()
     : '';
   const about = (skills || thread) ? `<details class="set-about"><summary>${t('set.about')}</summary><div class="set-about-panel">${skills}${thread}</div></details>` : '';
@@ -1989,10 +1989,10 @@ function buildStations(w, stationId){
       const bullets = hint.split(/(?<=\.(?=\s))(?=\s*[A-Z])|\n/).map(b=>b.trim()).filter(Boolean);
       const inner = bullets.length <= 1 ? `<div class="sh">${hint}</div>`
         : `<ul class="sh-list">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
-      folds.push({key:'hint', icon:'&#x1F4A1;', label:t('step.hint'), body:inner});
+      folds.push({key:'hint', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.7.6 1 1.4 1 2.5h6c0-1.1.3-1.9 1-2.5A6 6 0 0 0 12 3z"/></svg>', label:t('step.hint'), body:inner});
     }
-    if(s.stuck) folds.push({key:'stuck', icon:'&#x1FA9C;', label:t('step.stuck'), body:`<div class="step-branch step-stuck">${tf(s,'stuck')}</div>`});
-    if(s.levelUp) folds.push({key:'levelup', icon:'&#x1F336;&#xFE0F;', label:t('step.levelUp'), body:`<div class="step-branch step-levelup">${tf(s,'levelUp')}</div>`});
+    if(s.stuck) folds.push({key:'stuck', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2 1.8-2 3.5"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/></svg>', label:t('step.stuck'), body:`<div class="step-branch step-stuck">${tf(s,'stuck')}</div>`});
+    if(s.levelUp) folds.push({key:'levelup', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>', label:t('step.levelUp'), body:`<div class="step-branch step-levelup">${tf(s,'levelUp')}</div>`});
     const foldsHtml = folds.length ? (()=>{
       const idBase = `${w.id}-${ns}-${i}-fold`;
       const pills = folds.map(f=>`<button type="button" class="step-fold-pill step-${f.key}-fold" aria-expanded="false" aria-controls="${idBase}-${f.key}" onclick="toggleStepFold(this)">${f.icon} ${f.label}</button>`).join('');
@@ -2036,7 +2036,7 @@ function buildStations(w, stationId){
       const isPR = s.response.type === 'short' && (/personal record/i.test(s.response.prompt||'') || /\bBPM\b/i.test(s.response.prompt||''));
       const stored = isPR ? prLatestValue(responses[key]) : (responses[key] || '');
       const promptHtml = s.response.prompt ? `<div class="step-resp-prompt">${escHtml(tf(s.response,'prompt'))}</div>` : '';
-      const labelHtml = `<div class="step-resp-label">&#x270F;&#xFE0F; ${t('step.yourResponse')}</div>`;
+      const labelHtml = `<div class="step-resp-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> ${t('step.yourResponse')}</div>`;
       if(s.response.type === 'short'){
         const ph = s.response.placeholder ? tf(s.response,'placeholder') : t('step.answerPlaceholder');
         const prAttrs = isPR ? ` onblur="onResponsePRBlur('${key}')"` : '';
@@ -2086,8 +2086,9 @@ function buildStations(w, stationId){
     const ariaLabel = t(isDone ? 'step.ariaLabelDone' : 'step.ariaLabel', { n: num, label });
     const statusIcon = isDone ? '&#x2713;' : String(num);
     if(isOpen) openNum = num;
+    const curAttr = isCur ? ' aria-current="step"' : '';
     return `<li class="step${isDone ? ' step-done' : ''}${isCur ? ' cur' : ''}${isOpen ? '' : ' collapsed'}"${skillsAttr} data-num="${num}">`
-      + `<button type="button" class="step-head" aria-expanded="${isOpen}" onclick="toggleStepOpen(this)" aria-label="${escAttr(ariaLabel)}">`
+      + `<button type="button" class="step-head" aria-expanded="${isOpen}" onclick="toggleStepOpen(this)" aria-label="${escAttr(ariaLabel)}"${curAttr}>`
       + `<span class="step-status" aria-hidden="true">${statusIcon}</span>`
       + `<span class="step-label">${escHtml(label)}</span>`
       + `<span class="step-chev" aria-hidden="true">&#x25B6;</span>`
@@ -2380,7 +2381,11 @@ function collapseAndAdvance(li){
   const steps = scope ? [...scope.querySelectorAll('li.step')] : [li];
   // `.cur` is "the resume point", so exactly one row wears it card-wide —
   // marking a step done out of order used to leave a second one behind.
-  steps.forEach(st=>st.classList.remove('cur'));
+  steps.forEach(st=>{
+    st.classList.remove('cur');
+    const h = st.querySelector('.step-head');
+    if(h) h.removeAttribute('aria-current');
+  });
   // Card-wide, so finishing a section's last step advances into the next one
   // instead of dead-ending at the section boundary.
   const next = steps.slice(steps.indexOf(li)+1).find(sib=>!sib.classList.contains('step-done'));
@@ -2396,7 +2401,7 @@ function collapseAndAdvance(li){
     next.classList.remove('collapsed');
     next.classList.add('cur');
     const nh = next.querySelector('.step-head');
-    if(nh) nh.setAttribute('aria-expanded','true');
+    if(nh){ nh.setAttribute('aria-expanded','true'); nh.setAttribute('aria-current','step'); }
     if(focus) nudgeStepIntoView(next);
   }
   syncStationFocus(dp);
@@ -2431,7 +2436,7 @@ function songVidButtonsHtml(s, onclickFor){
   const vids = [];
   if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="${onclickFor('original')}" title="${escAttr(t('songs.opensYoutube'))}"><span class="svb-play">&#x25B6;</span>${t('songs.original')} <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
   if(s.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="${onclickFor('tutorial')}"><span class="svb-play">&#x25B6;</span>${t('songs.tutorial')}</button>`);
-  if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="${onclickFor('backing')}" title="${escAttr(t('songs.jamTrackTitle'))}"><span class="svb-play">&#x25B6;</span>&#x1F3B5; ${t('songs.backingTrack')}${s.backingKey?` (${s.backingKey})`:''}</button>`);
+  if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="${onclickFor('backing')}" title="${escAttr(t('songs.jamTrackTitle'))}"><span class="svb-play">&#x25B6;</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> ${t('songs.backingTrack')}${s.backingKey?` (${s.backingKey})`:''}</button>`);
   return vids;
 }
 function buildSongs(w){
@@ -2439,11 +2444,11 @@ function buildSongs(w){
     const nameEl = s.url ? `<button class="rp-trigger" onclick="loadSong('${w.id}',${i})">${s.name}</button>` : s.name;
     const vids = songVidButtonsHtml(s, kind=>`loadSongVid('${w.id}',${i},'${kind}')`);
     // Song Journey pages are same-origin (tabs/*.html), opened in a new tab so app state stays put.
-    if(s.journeyUrl) vids.push(`<button class="song-vid-btn journey" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="${escAttr(t('songs.oneSongLayers'))}">&#x1F9F5; ${t('songs.songJourney')}</button>`);
+    if(s.journeyUrl) vids.push(`<button class="song-vid-btn journey" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="${escAttr(t('songs.oneSongLayers'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> ${t('songs.songJourney')}</button>`);
     const vidsEl = vids.length ? `<div class="song-vids">${vids.join('')}</div>` : '';
     return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div class="song-name-col"><div class="sname">${nameEl}</div><div class="smeta">${diffDotsHtml(s.level)}${tf(s,'meta')}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${s.type}</span></div>`;
   }).join('');
-  const requestSlot = `<div class="song-row song-request"><div class="song-request-ico">&#x1F3A4;</div><div><div class="sname">${t('songs.yourPick')}</div><div class="smeta">${t('songs.yourPickBody')}</div></div></div>`;
+  const requestSlot = `<div class="song-row song-request"><div class="song-request-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg></div><div><div class="sname">${t('songs.yourPick')}</div><div class="smeta">${t('songs.yourPickBody')}</div></div></div>`;
   const diffLegend = `<div class="leg"><span class="song-diff diff-1">&#x25CF;<span class="song-diff-empty">&#x25CB;&#x25CB;</span></span>&#x2192;<span class="song-diff diff-3">&#x25CF;&#x25CF;&#x25CF;</span> ${t('songs.diffLegend')}</div>`;
   return `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('songs.core')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('songs.choice')}</div>${diffLegend}</div><div class="card">${rows}${requestSlot}</div>`;
 }
@@ -2550,8 +2555,8 @@ function buildModuleRoutine(moduleNum){
   if(song) items+=li(2,t('routine.song'),`&mdash; ${escHtml(truncateText(stripTags(tf(song.step,'text')),220))} ${setLink(song)}`);
   return `<div class="routine-card">
     <div class="routine-head">
-      <span class="routine-title">&#x1F552; ${t('routine.title')}</span>
-      <button type="button" class="routine-print-btn" onclick="printRoutine()" title="${escAttr(t('routine.printTitle'))}">&#x1F5A8; ${t('routine.print')}</button>
+      <span class="routine-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 3"/><path d="M9 3h6M12 3v2"/></svg> ${t('routine.title')}</span>
+      <button type="button" class="routine-print-btn" onclick="printRoutine()" title="${escAttr(t('routine.printTitle'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg> ${t('routine.print')}</button>
     </div>
     <ol class="routine-list">${items}</ol>
     <div class="routine-foot">${t('routine.foot')}</div>
@@ -2627,7 +2632,7 @@ function buildModuleReview(mr){
   const pLvl=perf.level;
   const pBtn=(n)=>`<button class="mr-rb lvl${n}${pLvl===String(n)?' active':''}" onclick="setPerformanceLevel(${mr.moduleNum},'${n}')">${n}</button>`;
   const playHtml=`<div class="mr-play">
-      <span class="mr-play-tag">&#x1F3B8; <span class="mr-q-num">${playNum}.</span> ${t('review.playRecord')}</span>
+      <span class="mr-play-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> <span class="mr-q-num">${playNum}.</span> ${t('review.playRecord')}</span>
       <div class="mr-play-prompt">${t('review.playPrompt')}</div>
       <label class="mr-play-label" for="${mrId}-song">${t('review.songIPlayed')}</label>
       <input type="text" id="${mrId}-song" class="mr-play-song" oninput="savePerformance(${mr.moduleNum})" value="${escAttr(perf.song||'')}">
@@ -2644,24 +2649,24 @@ function buildModuleReview(mr){
     ? `${t('review.assessBodyItems')}<ul class="mr-assess-list">${mr.assessItems.map((i,ii)=>`<li>${assessItemsEs[ii]}</li>`).join('')}</ul>`
     : t('review.assessBodyDflt');
   const performanceHtml=`<div class="mr-assess-box">
-      <div class="mr-assess-head"><span class="mr-assess-icon">&#x1F4DD;</span> ${t('review.assessHead',{n:mr.moduleNum})}</div>
+      <div class="mr-assess-head"><span class="mr-assess-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v-.5a1.5 1.5 0 0 1 3 0V3"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></span> ${t('review.assessHead',{n:mr.moduleNum})}</div>
       <div class="mr-assess-body">${assessBody}</div>
       <div class="mr-rec mr-assess-rec" data-module="${mr.moduleNum}">
-        <div class="mr-assess-rec-tag">&#x1F399; ${t('review.assessRecTag')}</div>
+        <div class="mr-assess-rec-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> ${t('review.assessRecTag')}</div>
         <div class="mr-rec-body" id="${mrId}a-rec-body">${renderRecBody(`${mr.moduleNum}a`)}</div>
       </div>
       <div class="mr-assess-signup">
-        <span class="mr-assess-signup-icon">&#x1F64B;</span>
+        <span class="mr-assess-signup-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 3v4M16 3v4"/><path d="M9 15l2 2 4-4"/></svg></span>
         <div class="mr-assess-signup-text"><strong>${t('review.assessSignupHead')}</strong> ${t('review.assessSignupBody',{n:mr.moduleNum})}</div>
       </div>
     </div>`;
   const forwardHtml = mr.forward
-    ? `<div class="ablock mr-forward" style="margin-top:12px"><div class="albl">&#x1F517; ${t('review.whyMatters')}</div><div class="atxt">${tf(mr,'forward')}</div></div>`
+    ? `<div class="ablock mr-forward" style="margin-top:12px"><div class="albl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 15l6-6"/><path d="M8 12l-1.5 1.5a3.5 3.5 0 0 0 5 5L13 17"/><path d="M16 12l1.5-1.5a3.5 3.5 0 0 0-5-5L11 7"/></svg> ${t('review.whyMatters')}</div><div class="atxt">${tf(mr,'forward')}</div></div>`
     : '';
   return `
     ${buildModuleRoutine(mr.moduleNum)}
     <div class="mr-locked-banner">
-      <span class="mr-locked-banner-icon">&#x1F512;</span>
+      <span class="mr-locked-banner-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
       <div><strong>${t('review.previewOnly')}</strong> ${t('review.previewBodyHtml')}</div>
     </div>
     <div class="obj-card">
@@ -2793,7 +2798,7 @@ function renderRecBody(slot){
     </div>`;
   }
   return `<div class="mr-rec-idle">
-    <button type="button" class="mr-rec-btn primary" onclick="startRec('${slot}')">&#x1F399; ${t('rec.record')}</button>
+    <button type="button" class="mr-rec-btn primary" onclick="startRec('${slot}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> ${t('rec.record')}</button>
     <span class="mr-rec-help">${t('rec.help',{s:REC_MAX_SECS})}</span>
   </div>`;
 }
@@ -2898,7 +2903,7 @@ function buildChecklist(w){
         <button type="button" class="sk-practice-btn" onclick="togglePracticePanel('${s.id}', this)" aria-expanded="false" aria-controls="pp-${s.id}"><span class="sk-practice-btn-arrow">▸</span> ${t('step.practiceThis')}</button>` : '';
     const skillNum = (s.id.match(/-s(\d+)$/) || [])[1];
     const whereBtn = (skillNum && skillTaughtStation(w, Number(skillNum)))
-      ? `<button type="button" class="sk-where-btn" onclick="showSkillLesson('${w.id}', ${skillNum})" title="${escAttr(t('skill.jumpToSteps'))}">&#x1F4CD; <span data-i18n="skill.showMeWhere">${t('skill.showMeWhere')}</span></button>` : '';
+      ? `<button type="button" class="sk-where-btn" onclick="showSkillLesson('${w.id}', ${skillNum})" title="${escAttr(t('skill.jumpToSteps'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.3"/></svg> <span data-i18n="skill.showMeWhere">${t('skill.showMeWhere')}</span></button>` : '';
     const practicePanel = s.practice ? renderPracticePanel(s.practice, s.id, w.id) : '';
     return `<div class="skill-row" data-sid="${escAttr(s.id)}">
       <div class="sktxt"><div class="sn" style="flex-shrink:0;margin-top:0;margin-right:8px">${i+1}</div><div class="sk-body"><div class="sk-label">${skillText}</div>${helper}${practiceBtn}${whereBtn}</div></div>
@@ -3552,7 +3557,7 @@ function sdSetupHtml(key){
       `<div class="sdr-intro">${escHtml(t('drill.intro'))}</div>` +
       `<div class="sdr-pills">${pill('naturals', t('drill.pileNaturals'))}${pill('sharps', t('drill.pileSharps'))}</div>` +
       `<button type="button" class="sdr-start" onclick="sdStart('${key}')">&#x25B6; ${escHtml(t('drill.start'))}</button>` +
-      (best ? `<div class="sdr-best">&#x1F3C6; ${escHtml(t('drill.best', { n: best, total: c.rounds }))}</div>` : '') +
+      (best ? `<div class="sdr-best"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 5H4.5A2.5 2.5 0 0 0 7 8.5"/><path d="M17 5h2.5A2.5 2.5 0 0 1 17 8.5"/><path d="M12 13v3"/><path d="M9 20h6"/><path d="M9.5 20 10 16h4l.5 4"/></svg> ${escHtml(t('drill.best', { n: best, total: c.rounds }))}</div>` : '') +
     `</div>`;
 }
 
@@ -3924,8 +3929,8 @@ function dkSetupHtml(key){
   return dkHead(key, t('deck.headMeta', { n: total })) +
     `<div class="sdr-body">` +
       `<div class="sdr-intro">${escHtml(t(st.cfg.def.back ? 'deck.introTwo' : 'deck.introOne'))}</div>` +
-      `<button type="button" class="sdr-start" onclick="dkStart('${key}')">&#x1F0CF; ${escHtml(t('deck.start'))}</button>` +
-      (best ? `<div class="sdr-best">&#x1F3C6; ${escHtml(t('deck.best', { n: best, total }))}</div>` : '') +
+      `<button type="button" class="sdr-start" onclick="dkStart('${key}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="4" y="7" width="12" height="15" rx="2"/><rect x="8" y="3" width="12" height="15" rx="2"/></svg> ${escHtml(t('deck.start'))}</button>` +
+      (best ? `<div class="sdr-best"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 5H4.5A2.5 2.5 0 0 0 7 8.5"/><path d="M17 5h2.5A2.5 2.5 0 0 1 17 8.5"/><path d="M12 13v3"/><path d="M9 20h6"/><path d="M9.5 20 10 16h4l.5 4"/></svg> ${escHtml(t('deck.best', { n: best, total }))}</div>` : '') +
     `</div>`;
 }
 function dkStart(key){
@@ -4201,12 +4206,12 @@ function openCoachGate(sid, wid){
   ov.className = 'daily5-overlay';
   ov.id = 'coach-gate-overlay';
   ov.innerHTML = `<div class="daily5-modal" role="dialog" aria-modal="true" aria-label="${escAttr(t('gate.title'))}">
-    <div class="daily5-head"><h3 style="font:inherit;margin:0">&#x1F3A4; ${t('gate.title')}</h3>
+    <div class="daily5-head"><h3 style="font:inherit;margin:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px;vertical-align:-2px;margin-right:2px"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> ${t('gate.title')}</h3>
       <button type="button" class="tp-close" onclick="closeCoachGate()" aria-label="${escAttr(t('gate.closeAria'))}">&#x2715;</button></div>
     ${sk ? `<p class="coach-tip">${escHtml(tf(sk,'text'))}</p>` : ''}
     <p class="coach-tip">${escHtml(t('gate.body'))}</p>
     <div class="issue-actions">
-      <button type="button" class="panel-next-btn" onclick="coachGatePractice('${escAttr(sid)}','${escAttr(wid)}')">${t('gate.practice')}</button>
+      <button type="button" class="panel-next-btn" onclick="coachGatePractice('${escAttr(sid)}','${escAttr(wid)}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px;vertical-align:-2px;margin-right:2px"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> ${t('gate.practice')}</button>
       <button type="button" class="tp-btn" onclick="coachGateMarkAnyway('${escAttr(sid)}','${escAttr(wid)}')">${t('gate.markAnyway')}</button>
     </div>`;
   ov.addEventListener('click', e => { if(e.target === ov) closeCoachGate(); });
@@ -4300,12 +4305,12 @@ function openDrillGate(sid, wid){
   ov.className = 'daily5-overlay';
   ov.id = 'drill-gate-overlay';
   ov.innerHTML = `<div class="daily5-modal" role="dialog" aria-modal="true" aria-label="${escAttr(t('dgate.title'))}">
-    <div class="daily5-head"><h3 style="font:inherit;margin:0">&#x1F0CF; ${t('dgate.title')}</h3>
+    <div class="daily5-head"><h3 style="font:inherit;margin:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px;vertical-align:-2px;margin-right:2px"><rect x="4" y="7" width="12" height="15" rx="2"/><rect x="8" y="3" width="12" height="15" rx="2"/></svg> ${t('dgate.title')}</h3>
       <button type="button" class="tp-close" onclick="closeDrillGate()" aria-label="${escAttr(t('gate.closeAria'))}">&#x2715;</button></div>
     ${sk ? `<p class="coach-tip">${escHtml(tf(sk,'text'))}</p>` : ''}
     <p class="coach-tip">${escHtml(t('dgate.body'))}</p>
     <div class="issue-actions">
-      <button type="button" class="panel-next-btn" onclick="drillGatePractice('${escAttr(sid)}','${escAttr(wid)}')">${t('dgate.goto')}</button>
+      <button type="button" class="panel-next-btn" onclick="drillGatePractice('${escAttr(sid)}','${escAttr(wid)}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px;vertical-align:-2px;margin-right:2px"><rect x="4" y="7" width="12" height="15" rx="2"/><rect x="8" y="3" width="12" height="15" rx="2"/></svg> ${t('dgate.goto')}</button>
       <button type="button" class="tp-btn" onclick="drillGateMarkAnyway('${escAttr(sid)}','${escAttr(wid)}')">${t('gate.markAnyway')}</button>
     </div>`;
   ov.addEventListener('click', e => { if(e.target === ov) closeDrillGate(); });
@@ -4890,7 +4895,7 @@ function stepSkillIds(w, step){
 }
 function coachBtnHtml(midisJson, tabNotesJson, skillIds){
   const tabAttr = tabNotesJson ? ` data-tabnotes="${escAttr(tabNotesJson)}"` : '';
-  return `<button type="button" class="coach-btn" data-midis="${escAttr(midisJson)}"${tabAttr}${coachSkillsAttr(skillIds)} onclick="coachOpen(this)" title="${escAttr(t('coach.btnTitle'))}">&#x1F3A4; <span data-i18n="coach.btn">${t('coach.btn')}</span></button>`;
+  return `<button type="button" class="coach-btn" data-midis="${escAttr(midisJson)}"${tabAttr}${coachSkillsAttr(skillIds)} onclick="coachOpen(this)" title="${escAttr(t('coach.btnTitle'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="coach.btn">${t('coach.btn')}</span></button>`;
 }
 /* Chord steps: build [{n:name, m:[midis]}] from the step's own diagram
    specs (same fret math as chordMidis — frets are absolute). */
@@ -4900,7 +4905,7 @@ function coachChordBtnRowHtml(chords, skillIds){
     m: chordSpecMidis(c.chord)
   })).filter(c=>c.m.length);
   if(!spec.length) return '';
-  return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}"${coachSkillsAttr(skillIds)} onclick="coachOpen(this)" title="4 count-in clicks, then strum on every beat — the mic listens and gives feedback">&#x1F3A4; <span data-i18n="coach.btn">${t('coach.btn')}</span></button></div>`;
+  return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}"${coachSkillsAttr(skillIds)} onclick="coachOpen(this)" title="4 count-in clicks, then strum on every beat — the mic listens and gives feedback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="coach.btn">${t('coach.btn')}</span></button></div>`;
 }
 /* One-shot animation helper: restart a CSS animation class even if it's
    already applied (remove → force reflow → add), then clear it after ms. */
@@ -5398,9 +5403,9 @@ async function renderSongsHub(){
     /* Index-based handlers: song names with apostrophes (Sweet Child O'
        Mine…) break when inlined into onclick. */
     const vids = [];
-    if(sg.journeyUrl) vids.push(`<button class="song-vid-btn journey" onclick="songsHubVid(${idx},'journey')" title="${escAttr(t('songs.oneSongLayers'))}">&#x1F9F5; ${t('songs.songJourney')}</button>`);
+    if(sg.journeyUrl) vids.push(`<button class="song-vid-btn journey" onclick="songsHubVid(${idx},'journey')" title="${escAttr(t('songs.oneSongLayers'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> ${t('songs.songJourney')}</button>`);
     if(sg.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="songsHubVid(${idx},'tutorial')"><span class="svb-play">&#x25B6;</span>${t('songs.tutorial')}</button>`);
-    if(sg.backingUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'backing')"><span class="svb-play">&#x25B6;</span>&#x1F3B5; ${t('hub.backing')}${sg.backingKey ? ` (${escHtml(sg.backingKey)})` : ''}</button>`);
+    if(sg.backingUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'backing')"><span class="svb-play">&#x25B6;</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> ${t('hub.backing')}${sg.backingKey ? ` (${escHtml(sg.backingKey)})` : ''}</button>`);
     if(sg.originalUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'original')" title="${escAttr(t('songs.opensYoutube'))}"><span class="svb-play">&#x25B6;</span>${t('songs.original')} <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
     // The six pinned rows sit directly under the "Core songs" section header,
     // where the tag would just repeat it — suppress there only; Focus songs
@@ -5511,7 +5516,7 @@ async function toggleSearch(){
   closeTopPanels('search');
   p.removeAttribute('hidden');
   if(btn) btn.setAttribute('aria-expanded', 'true');
-  p.innerHTML = `<div class="daily5-head"><span>&#x1F50D; <span data-i18n="search.title">${escHtml(t('search.title'))}</span></span><button type="button" class="tp-close" onclick="toggleSearch()" aria-label="${escAttr(t('search.closeAria'))}" data-i18n-attr="aria-label:search.closeAria">&#x2715;</button></div>
+  p.innerHTML = `<div class="daily5-head"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.7-4.7"/></svg> <span data-i18n="search.title">${escHtml(t('search.title'))}</span></span><button type="button" class="tp-close" onclick="toggleSearch()" aria-label="${escAttr(t('search.closeAria'))}" data-i18n-attr="aria-label:search.closeAria">&#x2715;</button></div>
     <input type="search" class="search-input" id="search-input" placeholder="${escAttr(t('search.placeholder'))}" oninput="runSearch(this.value)" aria-label="${escAttr(t('search.ariaLabel'))}" data-i18n-attr="placeholder:search.placeholder;aria-label:search.ariaLabel">
     <div id="search-results" class="search-results"><div class="coach-tip" data-i18n="search.gettingReady">${escHtml(t('search.gettingReady'))}</div></div>`;
   const input = document.getElementById('search-input');

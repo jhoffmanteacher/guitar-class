@@ -223,7 +223,7 @@
     'gate.title':              { en: 'Let the Coach hear it first', es: 'Deja que el Coach lo escuche primero' },
     'gate.body':               { en: 'The Listening Coach hasn\'t heard you play this one at 💪 Good yet. Play it into the mic first — it only takes a minute, and it makes "I\'ve got it!" mean something.',
                                  es: 'El Coach de Escucha todavía no te ha escuchado tocar esto a nivel 💪 Bien. Tócalo al micrófono primero — solo toma un minuto, y hace que "¡Ya lo tengo!" signifique algo.' },
-    'gate.practice':           { en: '🎤 Practice it now', es: '🎤 Practicarlo ahora' },
+    'gate.practice':           { en: 'Practice it now', es: 'Practicarlo ahora' },
     'gate.markAnyway':         { en: 'Mark it anyway', es: 'Marcarlo de todos modos' },
     'gate.closeAria':          { en: 'Close', es: 'Cerrar' },
     'gate.overrideNote':       { en: 'Marked without a Coach check — your teacher can see this.', es: 'Marcado sin revisión del Coach — tu maestro puede verlo.' },
@@ -232,7 +232,7 @@
     'dgate.title':             { en: 'Prove it with the deck', es: 'Demuéstralo con el mazo' },
     'dgate.body':              { en: 'This skill has its own shuffle deck, and the deck can check it off for you — 9 of 10 within the time limit, right there. Give it a run first; it takes under a minute, and it makes "I\'ve got it!" mean something.',
                                  es: 'Esta destreza tiene su propio mazo de cartas, y el mazo puede marcarla por ti — 9 de 10 dentro del límite de tiempo, ahí mismo. Dale una vuelta primero; toma menos de un minuto, y hace que "¡Ya lo tengo!" signifique algo.' },
-    'dgate.goto':              { en: '🃏 Take me to the deck', es: '🃏 Llévame al mazo' },
+    'dgate.goto':              { en: 'Take me to the deck', es: 'Llévame al mazo' },
     'skill.gettingIt':         { en: 'Getting it', es: 'Ya le voy agarrando' },
     'skill.gotItShort':        { en: 'Got it', es: 'Ya lo tengo' },
     'skill.checklistIntro':    { en: 'Check each skill as you practice. Use "Still working on it" while you\'re learning, then mark "I\'ve got it!" once you can do it consistently.',
@@ -290,8 +290,8 @@
     'tools.tooLowFlat':    { en: 'Too low — tune up (flat)', es: 'Muy baja — afina hacia arriba (bemol)' },
     'tools.tunerTip':      { en: 'Noisy room? Pick your string above and play close to the computer.',
                              es: '¿Sala ruidosa? Elige tu cuerda arriba y toca cerca de la computadora.' },
-    'tools.metroMuted':    { en: '🔇 Silent while the Listening Coach’s mic is on — the beat still flashes above.',
-                             es: '🔇 Silencioso mientras el micrófono del Coach de Escucha está activo — el pulso sigue destellando arriba.' },
+    'tools.metroMuted':    { en: 'Silent while the Listening Coach’s mic is on — the beat still flashes above.',
+                             es: 'Silencioso mientras el micrófono del Coach de Escucha está activo — el pulso sigue destellando arriba.' },
 
     // ── Buttons & footer ──
     'btn.markDone':          { en: 'Mark done', es: 'Marcar como hecho' },
@@ -457,8 +457,8 @@
     'thread.grows':          { en: 'This set grows:', es: 'Esta unidad hace crecer:' },
 
     // ── "First time on this set?" flex-practice note ──
-    'note.firstTimeHtml':    { en: '&#x1F9ED; <strong>First time on this set?</strong> Do {btn} first — watch the lessons, then come back here and drill. Back on another day just to practice? Perfect — practicing on different days helps you remember.',
-                                es: '&#x1F9ED; <strong>¿Primera vez en esta unidad?</strong> Primero haz {btn} — mira las lecciones y luego vuelve aquí a practicar. ¿Volviste otro día solo a practicar? Perfecto — practicar en días distintos te ayuda a recordar mejor.' },
+    'note.firstTimeHtml':    { en: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5L10 14l1.5-4.5L16 8z"/></svg> <strong>First time on this set?</strong> Do {btn} first — watch the lessons, then come back here and drill. Back on another day just to practice? Perfect — practicing on different days helps you remember.',
+                                es: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5L10 14l1.5-4.5L16 8z"/></svg> <strong>¿Primera vez en esta unidad?</strong> Primero haz {btn} — mira las lecciones y luego vuelve aquí a practicar. ¿Volviste otro día solo a practicar? Perfecto — practicar en días distintos te ayuda a recordar mejor.' },
     'daily5.tuneWarmupHtml': { en: '&#x26A1; <strong>Tune and warm up first:</strong> today’s Daily 5 has tuning, a finger warm-up, and one drill (a short exercise you repeat to build a skill) from this module — five minutes and your hands are ready. {btn}',
                                 es: '&#x26A1; <strong>Primero afina y calienta:</strong> el Daily 5 de hoy tiene afinación, un calentamiento de dedos, y un ejercicio de este módulo — cinco minutos y tus manos estarán listas. {btn}' },
     'daily5.openToday':      { en: 'Open today’s Daily 5', es: 'Abrir el Daily 5 de hoy' },

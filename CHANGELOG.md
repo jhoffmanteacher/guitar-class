@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — Clearer "what's next," and cleaner icons everywhere
+
+### Changed
+
+- **The step you're on now stands out.** A purple line and a filled step
+  number mark the step you should do next, so it's easy to find your place
+  again after a checkbox tap or a switch between stations.
+- **Icons across the site now match the app's style** instead of mixing in
+  phone-style emoji, which used to look different depending on the device.
+  Locks, the module trophy, the Español globe, the tool icons, and dozens of
+  smaller icons in the practice steps, Module Review, and Songs are now the
+  same clean line-icon style throughout.
+
 ## 2026-07-28 — Games, Songs, Keep practicing and My progress all open the same way
 
 ### Changed
