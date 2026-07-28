@@ -5602,6 +5602,7 @@ function nrRenderPlay(){
        <span class="sh-bar" id="nr-bar">${t('games.nr.getReady')}</span>
      </div>
      <div class="cc-beats" id="nr-beats">${'<span class="cc-pip"></span>'.repeat(4)}</div>
+     ${nrRaceHtml()}
      <div class="rn-track nr-track" id="nr-track">${lanes.join('')}${rests}<div class="rn-hitline"></div><div class="rn-count" id="nr-count">&nbsp;</div></div>
      <div class="coach-tip rn-center">${t('games.nr.tipPlay')}</div>
      <button type="button" class="tp-btn coach-stop" onclick="nrFinish()">&#x25A0; ${t('games.common.stop')}</button>`;
@@ -5652,6 +5653,8 @@ function nrLoop(){
     }
     if (s.pending && now - s.pending.t > COACH_EVENT_TAIL) nrFinalizeEvent();
   }
+
+  nrRaceFrame(now);   // the race lane above the track — see NR_RUNNER_SVG
 
   /* ── token scroll: pure function of the clock (JS transforms, not CSS
      animations — reduced-motion zeroes those). ── */
@@ -5749,6 +5752,140 @@ function nrComboPop(mult){
   b.textContent = '×' + mult;
   track.appendChild(b);
   s.timeouts.push(setTimeout(() => b.remove(), 950));
+}
+
+/* ══ RACE LANE — the little guitar running for the finish flag ══════════
+   Sits above the TAB track. One rule: the runner's distance along the road
+   is *notes landed ÷ notes in the level*. That makes it honest in three
+   ways at once —
+
+     • where it stops IS the round's accuracy, the number the results
+       screen reports, so the picture can never disagree with the score;
+     • the checkpoint flag sits exactly on NR_PASS, so "did I get past the
+       marker?" and "did I unlock the next level?" are the same question,
+       and it moves if that constant ever does;
+     • a miss costs ground the runner never gets back — it doesn't
+       reverse (nothing un-plays a note), it just stops gaining, which is
+       what falling behind in a race actually looks like.
+
+   Speed is the other half of the ask. Distance-per-note is fixed, so a
+   faster level lands notes more often and the runner covers the road
+   faster on its own. On top of that its leg cycle is tied to how many
+   notes are arriving *right now* (a 2-second window either side of the
+   playhead), so eighth-notes at 100 BPM visibly sprint where quarters at
+   60 lope — and a live combo multiplier kicks in speed lines.
+
+   No live percentage is drawn, deliberately: at bar 1 of 4 the runner is
+   correctly a quarter of the way along, and a "25%" label next to it
+   would read as a failing grade instead of a distance.
+
+   State hangs off the round object (s.race*) and is reset by spotting a
+   fresh #nr-runner element rather than by a hook in nrStart — so this
+   whole block is two call sites: the markup in nrRenderPlay, the frame in
+   nrLoop. ══════════════════════════════════════════════════════════════ */
+
+/* The runner: an ordinary guitar — two bouts, neck straight up the same
+   axis — stood on a pair of stubby legs and tipped forward into the run.
+   The lean lives on the .nr-gtr group alone, pivoting at the hips, so the
+   legs stay planted and vertical while the body leans; putting it on the
+   whole sprite would tilt the legs too and it would read as falling over.
+   Legs draw first so the lower bout overlaps their tops. Fixed wood
+   colours rather than theme variables: it's an object in the world, and
+   the same browns read on either background. */
+const NR_RUNNER_SVG =
+  `<span class="nr-runner-art" aria-hidden="true">
+     <span class="nr-runner-lines"></span>
+     <svg viewBox="0 0 40 44" width="36" height="40">
+       <g class="nr-legs" fill="none" stroke="#6b4a2a" stroke-width="3.2" stroke-linecap="round">
+         <path class="nr-leg-a" d="M15 35 L12 43.5"/>
+         <path class="nr-leg-b" d="M21 35 L25 42.5"/>
+       </g>
+       <g class="nr-gtr">
+         <path d="M18 17 L18 5" fill="none" stroke="#6b4a2a" stroke-width="3.4" stroke-linecap="round"/>
+         <circle cx="18" cy="3.6" r="2.4" fill="#4d3418"/>
+         <ellipse cx="18" cy="21" rx="6.8" ry="6.2" fill="#c98a3f"/>
+         <ellipse cx="18" cy="30" rx="8.6" ry="7.6" fill="#c98a3f"/>
+         <circle cx="18" cy="26.4" r="2.8" fill="#3a2412"/>
+         <!-- six strings read as three at this size; they run the whole way,
+              over the soundhole, and the bridge caps them like the real thing -->
+         <g stroke="#f7ead6" stroke-width="0.55" opacity="0.9">
+           <path d="M16.9 4.6 L16.9 33.2"/>
+           <path d="M18 4.3 L18 33.2"/>
+           <path d="M19.1 4.6 L19.1 33.2"/>
+         </g>
+         <rect x="14.6" y="32.6" width="6.8" height="1.6" rx="0.8" fill="#4d3418"/>
+       </g>
+     </svg>
+   </span>`;
+
+function nrRaceMotionOk(){
+  return !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+}
+
+function nrRaceHtml(){
+  return `<div class="nr-race" id="nr-race" role="img" aria-label="${t('games.nr.race.aria')}">
+       <div class="nr-race-lane">
+         <div class="nr-race-ground" aria-hidden="true"></div>
+         <div class="nr-race-gate" style="left:${NR_PASS}%" data-lbl="${t('games.nr.race.unlock')}" aria-hidden="true"></div>
+         <div class="nr-runner" id="nr-runner">${NR_RUNNER_SVG}</div>
+       </div>
+       <span class="nr-race-flag" aria-hidden="true">&#x1F3C1;</span>
+     </div>`;
+}
+
+function nrRaceFrame(now){
+  const s = nr;
+  const run = document.getElementById('nr-runner');
+  if (!s || !run) return;
+  const lane = run.parentElement;
+  const total = s.playable ? s.playable.length : 0;
+  if (!lane || !total) return;
+
+  /* New round: nrRenderPlay built a fresh runner, so the old distance is
+     stale. (Cheaper and harder to forget than resetting in nrStart.) */
+  if (s.raceEl !== run){
+    s.raceEl = run;
+    s.raceP = 0; s.raceCycle = 0; s.raceWon = false;
+  }
+
+  let hits = 0;
+  for (let i = 0; i < total; i++){
+    const r = s.playable[i].result;
+    if (r === 'perfect' || r === 'good') hits++;
+  }
+  const target = hits / total;
+  /* Glide toward the true distance instead of teleporting, so a hit reads
+     as a stride rather than a jump cut. Reduced motion snaps. */
+  const motion = nrRaceMotionOk();
+  s.raceP += (target - s.raceP) * (motion ? 0.12 : 1);
+  run.style.transform = 'translateX(' + (s.raceP * lane.clientWidth) + 'px)';
+
+  if (!motion) return;   // position carries the information; the rest is flourish
+
+  /* Notes arriving around the playhead → leg cycle. Retuned only when it
+     moves enough to see, since this runs every frame. */
+  let near = 0;
+  for (let i = 0; i < total; i++){
+    const dt = s.playable[i].t - now;
+    if (dt > -2000 && dt < 2000) near++;
+  }
+  const rate = near / 4;                                        // notes per second
+  const cycle = Math.max(150, Math.min(760, 760 / Math.max(0.6, rate)));
+  if (Math.abs(cycle - s.raceCycle) > 12){
+    s.raceCycle = cycle;
+    run.style.setProperty('--nr-run-ms', cycle.toFixed(0) + 'ms');
+  }
+  run.classList.toggle('running', s.phase === 'play' && rate > 0);
+  run.classList.toggle('boost', s.combo >= 8);                  // ×2 and up — see nrFinalizeEvent
+
+  if (!s.raceWon && target >= 0.999){
+    s.raceWon = true;
+    const race = document.getElementById('nr-race');
+    if (race){
+      race.classList.add('won');
+      s.timeouts.push(setTimeout(() => race.classList.remove('won'), 1400));
+    }
+  }
 }
 
 /* An event finished collecting readings: consensus pitch (the Coach's

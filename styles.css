@@ -1532,6 +1532,57 @@ body.games-open{overflow:hidden}
   .nr-burst,.nr-combo-pop{display:none}
   .nr-token.hit-perfect .rn-token-fret{animation:none}
 }
+/* ── Race lane: the little guitar running for the finish flag ──
+   #nr-runner carries the JS translateX (distance = notes landed ÷ notes
+   in the level); .nr-runner-art inside it carries every CSS animation, so
+   the two never fight over transform. --nr-run-ms is written per frame
+   from the current note rate. */
+.nr-race{position:relative;height:66px;margin:6px 0 2px;border:1px solid var(--border);border-radius:var(--radius);background:linear-gradient(180deg,var(--bg2) 0 74%,var(--bg3) 74%);overflow:hidden}
+.nr-race-lane{position:absolute;left:8px;right:44px;top:0;bottom:0}
+.nr-race-ground{position:absolute;left:0;right:-44px;top:49px;height:2px;background:var(--border2)}
+.nr-race-gate{position:absolute;top:10px;height:39px;width:2px;margin-left:-1px;background:var(--green-text);opacity:0.5}
+.nr-race-gate::after{content:attr(data-lbl);position:absolute;left:50%;top:41px;transform:translateX(-50%);font-size:0.625rem;font-weight:700;line-height:1;color:var(--green-text);white-space:nowrap}
+.nr-race-flag{position:absolute;right:8px;bottom:15px;font-size:1.375rem;line-height:1}
+.nr-runner{position:absolute;left:0;bottom:15px;width:36px;height:40px;will-change:transform}
+.nr-runner-art{position:relative;display:block}
+/* the forward lean, pivoted at the hips — body only, legs stay vertical */
+.nr-gtr{transform-box:fill-box;transform-origin:50% 100%;transform:rotate(15deg);transition:transform .25s ease-out}
+.nr-runner.boost .nr-gtr{transform:rotate(21deg)}
+/* Three tapered streaks trailing the runner — the element is the long
+   middle one, its two pseudo-elements the shorter outer pair. Uneven
+   lengths and staggered timing are what make them read as speed rather
+   than as a shape. */
+.nr-runner-lines{position:absolute;right:100%;top:19px;width:0;height:2px;margin-right:5px;
+  border-radius:2px;background:var(--text3);opacity:0}
+.nr-runner-lines::before,.nr-runner-lines::after{content:'';position:absolute;right:0;height:2px;
+  border-radius:2px;background:var(--text3)}
+.nr-runner-lines::before{top:-6px;width:58%}
+.nr-runner-lines::after{top:6px;width:78%}
+/* running: body bobs, legs alternate — all at the note-rate cycle */
+.nr-runner.running .nr-runner-art{animation:nr-run-bob var(--nr-run-ms,420ms) ease-in-out infinite}
+.nr-runner.running .nr-leg-a{animation:nr-leg-fwd var(--nr-run-ms,420ms) ease-in-out infinite}
+.nr-runner.running .nr-leg-b{animation:nr-leg-back var(--nr-run-ms,420ms) ease-in-out infinite}
+.nr-runner.boost .nr-runner-lines{width:26px;opacity:0.75;animation:nr-run-lines var(--nr-run-ms,420ms) linear infinite}
+.nr-runner.boost .nr-runner-lines::before{animation:nr-run-lines var(--nr-run-ms,420ms) linear .09s infinite}
+.nr-runner.boost .nr-runner-lines::after{animation:nr-run-lines var(--nr-run-ms,420ms) linear .18s infinite}
+/* fill-box so each leg swings from its own hip, not the SVG's corner */
+.nr-legs path{transform-box:fill-box;transform-origin:50% 0}
+@keyframes nr-run-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes nr-leg-fwd{0%,100%{transform:rotate(-26deg)}50%{transform:rotate(24deg)}}
+@keyframes nr-leg-back{0%,100%{transform:rotate(24deg)}50%{transform:rotate(-26deg)}}
+@keyframes nr-run-lines{0%{opacity:0.85;transform:translateX(3px) scaleX(.7)}100%{opacity:0.05;transform:translateX(-9px) scaleX(1)}}
+/* reached the flag — a clean sweep of the level */
+.nr-race.won{animation:nr-race-won 1.4s ease-out}
+.nr-race.won .nr-race-flag{animation:nr-flag-wave .42s ease-in-out 3}
+@keyframes nr-race-won{0%,100%{background-color:transparent}25%{background-color:var(--green-bg)}}
+@keyframes nr-flag-wave{0%,100%{transform:rotate(0) scale(1)}50%{transform:rotate(-14deg) scale(1.25)}}
+@media (prefers-reduced-motion:reduce){
+  .nr-runner.boost .nr-runner-lines,.nr-runner.boost .nr-runner-lines::before,
+  .nr-runner.boost .nr-runner-lines::after{display:none}
+  .nr-runner.running .nr-runner-art,.nr-runner.running .nr-leg-a,
+  .nr-runner.running .nr-leg-b,.nr-race.won,.nr-race.won .nr-race-flag{animation:none}
+  .nr-gtr{transition:none}
+}
 
 /* ── Challenge Day (occasional, module-gated pick-one inside the Daily 5) ── */
 

@@ -75,6 +75,12 @@ see `WORKFLOW.md` and the git commit log.
 
 ### Added
 
+- **Note Runner now has a race.** A little guitar runs along a track above the
+  notes, and it moves forward every time you land one. How far it gets is
+  exactly how much of the level you played, so the flag at the end means a
+  clean round — and the green marker partway along is the line you have to
+  pass to unlock the next level. It runs faster on the faster levels, because
+  the notes are coming at it faster.
 - **Module 13 now warns you about string types.** Nylon guitars take nylon
   strings and steel-string guitars take steel — they're not interchangeable,
   and steel on a classical guitar pulls hard enough to lift the bridge off.
