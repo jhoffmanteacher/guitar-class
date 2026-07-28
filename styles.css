@@ -212,7 +212,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 @media (max-width:420px){.obj-card.set-head .obj-main{font-size:1.25rem}}
 .tabs{margin-bottom:16px}
 .tabs-songbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px}
-.print-set-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;font-size:0.7812rem;font-weight:500;font-family:inherit;line-height:1.2;color:var(--text2);background:var(--bg2);border:1px solid var(--border);border-radius:14px;cursor:pointer;transition:background 0.15s,border-color 0.15s,color 0.15s}
+.print-set-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;font-size:0.7812rem;font-weight:500;font-family:inherit;line-height:1.2;color:var(--text2);background:transparent;border:1px solid transparent;border-radius:14px;cursor:pointer;transition:background 0.15s,border-color 0.15s,color 0.15s}
 .print-set-btn svg{width:13px;height:13px;flex-shrink:0}
 .print-set-btn:hover{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-text)}
 .tabs-songs{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;font-size:0.7812rem;color:var(--text2);background:var(--bg2);border:1px solid var(--border);border-radius:14px;cursor:pointer;font-weight:500;font-family:inherit;line-height:1.2;transition:background 0.15s,border-color 0.15s,color 0.15s}
@@ -282,7 +282,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    collapse to nothing, so it sits directly under that step's detail. */
 .dp-stepnav{display:flex;align-items:center;gap:8px;margin-top:4px;padding-left:56px}
 .dp:not(.focus) .dp-stepnav{display:none}
-.fm-nav{font-family:inherit;font-size:0.8125rem;font-weight:600;color:var(--text2);background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:6px 14px;cursor:pointer}
+.fm-nav{font-family:inherit;font-size:0.8125rem;font-weight:600;color:var(--text);background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:6px 14px;cursor:pointer}
 .fm-nav:hover{color:var(--text);border-color:var(--text2)}
 .fm-nav[hidden]{display:none}
 .fm-next{margin-left:auto}
@@ -341,8 +341,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .step-resp-saved{font-size:0.7812rem;color:var(--text2);margin-top:3px;min-height:13px}
 /* ── Per-step "Mark done" toggle (collapsed/current state is .step-detail above) ── */
 .step-done-row{margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.step-done-btn{display:inline-flex;align-items:center;gap:5px;font-family:inherit;font-size:0.7812rem;font-weight:600;color:var(--green-text);background:var(--green-bg);border:1px solid var(--green-text);border-radius:14px;padding:3px 12px;cursor:pointer}
-.step-done-btn:hover{filter:brightness(0.97)}
+.step-done-btn{display:inline-flex;align-items:center;gap:5px;font-family:inherit;font-size:0.875rem;font-weight:600;color:#fff;background:var(--brand);border:1px solid var(--brand);border-radius:18px;padding:8px 18px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,0.22)}
+.step-done-btn:hover{background:var(--brand-hover)}
+.step-done-btn:active{transform:translateY(3px);box-shadow:none}
+.step-done-btn.is-done{color:var(--green-text);background:var(--green-bg);border-color:var(--green-text);font-size:0.7812rem;padding:3px 12px;border-radius:14px;box-shadow:none;transform:none}
+.step-done-btn.is-done:hover{filter:brightness(0.97);background:var(--green-bg)}
+.step-done-btn.is-done:active{transform:none}
 /* When a step is marked done, dim + strike its full text (still viewable by re-expanding) */
 .step-done .st-text{text-decoration:line-through;color:var(--text2);opacity:.65}
 .skill-badge{display:inline-flex;align-items:center;justify-content:center;min-width:42px;height:20px;border-radius:10px;background:var(--blue-bg);border:none;font-size:0.75rem;font-weight:500;color:var(--blue-text);flex-shrink:0;margin-left:5px;vertical-align:middle;padding:0 7px;white-space:nowrap}
@@ -1246,7 +1250,7 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
    expanding a panel never shoves the other pills onto a new line. ── */
 .step-folds{margin-top:8px}
 .step-folds-row{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px}
-.step-fold-pill{cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:0.8438rem;font-weight:600;font-family:inherit;line-height:inherit;color:var(--text2);padding:5px 12px;border:1px solid var(--border);border-radius:14px;background:var(--bg2);user-select:none}
+.step-fold-pill{cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:0.8438rem;font-weight:600;font-family:inherit;line-height:inherit;color:var(--text2);padding:5px 12px;border:1px solid transparent;border-radius:14px;background:transparent;user-select:none}
 .step-fold-pill::before{content:'▸';font-size:0.75rem;transition:transform .15s}
 .step-fold-pill[aria-expanded="true"]::before{transform:rotate(90deg)}
 .step-fold-pill:hover,.step-fold-pill[aria-expanded="true"]{color:var(--text);border-color:var(--text2)}

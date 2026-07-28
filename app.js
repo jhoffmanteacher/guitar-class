@@ -1988,7 +1988,7 @@ function buildStations(w, stationId){
     const isCur = i === curIdx;
     const isOpen = i === openIdx;
     // Mark-done is the last row of the step.
-    const doneBtn = `<div class="step-done-row"><button class="step-done-btn" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${stepDoneHtml(isDone)}</button></div>`;
+    const doneBtn = `<div class="step-done-row"><button class="step-done-btn${isDone ? ' is-done' : ''}" type="button" aria-pressed="${isDone}" onclick="toggleStepDone(this,'${doneKey}')">${stepDoneHtml(isDone)}</button></div>`;
     const skillsAttr = (s.skills && s.skills.length) ? ` data-skills="${s.skills.join(',')}"` : '';
     const label = stepLabel(s);
     const num = numOffset + i + 1;
@@ -2119,6 +2119,7 @@ function toggleStepDone(btn, key){
   const li = btn.closest('.step');
   const nowDone = !li.classList.contains('step-done');
   li.classList.toggle('step-done', nowDone);
+  btn.classList.toggle('is-done', nowDone);
   btn.setAttribute('aria-pressed', nowDone);
   btn.innerHTML = stepDoneHtml(nowDone);
   const status = li.querySelector('.step-status');
