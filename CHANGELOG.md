@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — Tuner, Timer, and Metronome stay put while you scroll
+
+### Fixed
+
+- **Tuner, Timer, and Metronome now stay pinned to the bottom of the side
+  rail no matter how far you scroll down a step.** Right after today's move
+  into the rail, they could drift out of view partway down a short step —
+  fixed.
+
 ## 2026-07-28 — Tuner, Timer, and Metronome now live in the side rail
 
 ### Changed

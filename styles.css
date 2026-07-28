@@ -517,7 +517,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .rail{width:252px;flex:0 0 252px;background:var(--rail-bg);color:var(--text);
   position:sticky;top:var(--hdr);height:calc(100vh - var(--hdr));
   border-right:1px solid var(--border);display:flex;flex-direction:column}
-.rail-scroll{display:flex;flex-direction:column;gap:24px;padding:20px 14px;overflow-y:auto;flex:1;min-height:0}
+/* padding-bottom clears the fixed .rail-tools dock (~140px) so the last nav
+   item can still scroll fully into view above it instead of hiding under it. */
+.rail-scroll{display:flex;flex-direction:column;gap:24px;padding:20px 14px 160px;overflow-y:auto;flex:1;min-height:0}
 .rail-group{padding:0 2px}
 .rail-sec-label{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.09em;
   color:var(--text3);font-weight:600;margin-bottom:9px;display:flex;align-items:center;gap:7px}
@@ -609,8 +611,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   body.rail-open .rail{transform:translateX(0)}
   body.rail-open .rail-backdrop{display:block}
   body.rail-open{overflow:hidden}
-  .rail-scroll{overflow-y:auto}
+  .rail-scroll{overflow-y:auto;padding-bottom:20px}
   .app-layout .main{max-width:100%;padding:20px 16px 50px}
+  /* The drawer itself is already position:fixed and slides as one unit, so
+     the dock goes back to being an ordinary flex child docked at its bottom
+     instead of a second independent fixed element. */
+  .rail-tools{position:relative;left:auto;bottom:auto;width:auto;z-index:auto}
 }
 @media(prefers-reduced-motion:reduce){.rail{transition:none}}
 .st-text{display:block;max-width:72ch}
@@ -645,8 +651,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .rp-trigger{display:inline-flex;align-items:center;gap:4px;color:var(--blue-text);cursor:pointer;font-size:0.9375rem;font-weight:500;background:none;border:none;padding:0;font-family:inherit;text-align:left;line-height:1.5}
 .rp-trigger:hover{text-decoration:underline}
 /* ── Iframe drag shield — blocks iframe from stealing mouse events during resize ── */
-/* ── Practice tools, docked at the bottom of the left rail ── */
-.rail-tools{position:relative;border-top:1px solid var(--border);padding:8px 10px}
+/* ── Practice tools, docked at the bottom of the left rail ──
+   position:fixed (not sticky, and not just "last flex child of the sticky
+   rail") on purpose: .rail is position:sticky, which only stays pinned while
+   its containing block (.app-layout) has scrollable room below it. On a
+   short step/station (main content shorter than the rail's own nav list),
+   .app-layout has almost no slack, so the sticky rail — and this dock riding
+   at its bottom — unstuck and drifted upward with the very first scroll
+   tick, instead of staying anchored like the old corner FAB did. Pinning the
+   dock straight to the viewport sidesteps that container-height dependency
+   entirely: it's anchored to the rail's left edge/width so it still reads as
+   "part of the rail," but it can never scroll away regardless of how tall
+   (or short) the surrounding content is. Reverted to in-flow for the
+   off-canvas mobile drawer below — there the whole rail is already
+   position:fixed and slides as one unit, so this would just double up. */
+.rail-tools{position:fixed;left:0;bottom:0;width:252px;background:var(--rail-bg);border-top:1px solid var(--border);padding:8px 10px;z-index:40}
 .fab-group{display:flex;flex-direction:column;gap:8px}
 .fab-buttons{display:flex;flex-direction:column;gap:8px}
 .fab{display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:999px;border:1px solid;font-size:0.9375rem;font-weight:500;cursor:pointer;transition:opacity 0.15s;user-select:none;box-shadow:0 2px 8px rgba(0,0,0,0.10);font-family:inherit;appearance:none;-webkit-appearance:none;text-align:left;line-height:1.2;background:var(--bg);border-color:var(--border2);color:var(--text)}
