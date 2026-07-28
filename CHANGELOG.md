@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Your teacher can put an account on hold
+
+### Added
+
+- **Paused accounts.** Mr. Hoffman can put an account on hold from the teacher
+  dashboard. If yours is paused you can still sign in, but instead of the site
+  you'll see a short message explaining it and telling you to talk to him in
+  class. **None of your work is lost** — everything you've checked off, written
+  and practiced is saved exactly as you left it, and it all comes straight back
+  the moment the hold is lifted.
+
 ## 2026-07-27 — Signing out now really signs you out
 
 ### Fixed

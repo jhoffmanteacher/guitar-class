@@ -131,6 +131,7 @@ let completed   = {};
 let games       = {};   // per-game bests from the games arcade (coach.js) — its own save category
 let streak      = { count:0, lastDay:null };   // site-wide practice streak, independent of any one game
 let gamesAccessOn = true; // whether the Games arcade is available to THIS student (teacher-controlled; see loadClassConfig)
+let accountPaused = false; // teacher put this student on hold (see loadClassConfig / showPausedScreen)
 let saveTimer   = null;
 
 /* ── Lazy module loading ──
@@ -306,7 +307,10 @@ if(auth) auth.onAuthStateChanged(async user=>{
   if(user){
     currentUser = user;
     if(IS_TEACHER_MODE){ showTeacherApp(user); }
-    else { await loadProgress(); await loadClassConfig(); showApp(user); }
+    else {
+      await loadProgress(); await loadClassConfig();
+      if(accountPaused) showPausedScreen(user); else showApp(user);
+    }
   } else {
     currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true;
     practiceLog = loadLocalPracticeLog();   // per-skill rep history: back to the local copy on sign-out
@@ -320,6 +324,36 @@ if(auth) auth.onAuthStateChanged(async user=>{
     document.getElementById('user-area').innerHTML=`<button class="btn-sign" onclick="signIn()" data-i18n="header.signIn">${t('header.signIn')}</button>`;
   }
 });
+
+/* Teacher put this student on hold — they authenticated fine, so this is a
+   message, not an error. Progress is untouched and comes straight back when
+   the hold is lifted, and the copy says so: a student who thinks their work
+   is gone will panic (and go make a second account). Sign out stays reachable
+   so a shared Chromebook isn't stuck on one student's paused screen. */
+function showPausedScreen(user){
+  document.getElementById('auth-wall').style.display='none';
+  document.getElementById('app').style.display='none';
+  document.getElementById('teacher-app').style.display='none';
+  document.getElementById('fab-group').style.display='none';
+  document.getElementById('search-btn').style.display='none';
+  let el=document.getElementById('paused-screen');
+  if(!el){
+    el=document.createElement('div');
+    el.id='paused-screen';
+    el.className='paused-screen';
+    document.querySelector('.wrap, main, body').appendChild(el);
+  }
+  el.innerHTML=
+    `<div class="paused-card">`+
+      `<div class="paused-icon" aria-hidden="true">&#x23F8;&#xFE0F;</div>`+
+      `<h2 data-i18n="paused.title">${escHtml(t('paused.title'))}</h2>`+
+      `<p data-i18n="paused.body">${escHtml(t('paused.body'))}</p>`+
+      `<p class="paused-safe" data-i18n="paused.safe">${escHtml(t('paused.safe'))}</p>`+
+      `<button class="btn-sign" onclick="signOut()" data-i18n="header.signOut">${escHtml(t('header.signOut'))}</button>`+
+    `</div>`;
+  el.style.display='block';
+  document.getElementById('user-area').innerHTML=userHeaderHtml(user);
+}
 
 function showApp(user){
   document.getElementById('auth-wall').style.display='none';
@@ -378,12 +412,17 @@ async function loadProgress(){
    connection hiccup never locks a student out of the arcade. */
 async function loadClassConfig(){
   gamesAccessOn = true;
+  accountPaused = false;
   try{
     await ensureDb();
     if(!db) return;
     const doc = await db.collection('config').doc('class').get();
     if(!doc.exists) return;
     const d = doc.data()||{};
+    // Teacher-set hold (teacher.js Manage view). Classroom management, not
+    // security — the real boundary is the Firestore rules, which already
+    // stop a student reading or writing anyone else's doc.
+    accountPaused = (d.paused||{})[currentUser.uid] === true;
     const ov = (d.gameOverrides||{})[currentUser.uid];
     if(ov===true)       gamesAccessOn = true;
     else if(ov===false) gamesAccessOn = false;

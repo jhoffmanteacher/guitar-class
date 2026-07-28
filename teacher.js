@@ -13,6 +13,16 @@
    ══════════════════════════════════════════════ */
 const IS_TEACHER_MODE=new URLSearchParams(window.location.search).has('teacher');
 let teacherSetId=null, allStudents=[];
+/* Archived students are hidden from every dashboard view without touching
+   their progress doc. allStudentsRaw holds the full roster straight from
+   Firestore; allStudents is the filtered list that every existing view
+   already reads, so archiving needs no changes in those views. Flip
+   teacherShowArchived (Manage view) to fold them back in. */
+let allStudentsRaw=[], teacherShowArchived=false;
+function teacherApplyRosterFilter(){
+  const arch=(teacherClassConfig&&teacherClassConfig.archived)||{};
+  allStudents = teacherShowArchived ? [...allStudentsRaw] : allStudentsRaw.filter(s=>!arch[s.uid]);
+}
 
 async function showTeacherApp(user){
   document.getElementById('auth-wall').style.display='none';
@@ -33,6 +43,9 @@ async function showTeacherApp(user){
   }
   if(toggle && !toggle.querySelector('[data-view="students"]')){
     toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="students" onclick="setTeacherView('students')">&#x1F464; Students</button>`);
+  }
+  if(toggle && !toggle.querySelector('[data-view="manage"]')){
+    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="manage" onclick="setTeacherView('manage')">&#x2699;&#xFE0F; Manage</button>`);
   }
   // Two extra legend rows for the skills grid's got-it markers — the plain
   // green check (index.html's static legend) doesn't distinguish a Coach
@@ -63,6 +76,11 @@ async function showTeacherApp(user){
       if(e.target.closest('[data-back-to-students]')){ backToStudentsRoster(); return; }
       const games=e.target.closest('[data-set-games]');
       if(games){ teacherSetStudentGames(games.dataset.uid, games.dataset.state); return; }
+      if(e.target.closest('[data-toggle-archived]')){ teacherToggleShowArchived(); return; }
+      const paused=e.target.closest('[data-set-paused]');
+      if(paused){ teacherSetStudentPaused(paused.dataset.uid, paused.dataset.state); return; }
+      const archived=e.target.closest('[data-set-archived]');
+      if(archived){ teacherSetStudentArchived(archived.dataset.uid, archived.dataset.state); return; }
       const open=e.target.closest('[data-open-student]');
       if(open) openStudentDetail(open.dataset.uid);
     });
@@ -114,7 +132,7 @@ async function loadAllStudents(){
   try{
     await ensureDb();
     const snap=await db.collection('progress').get();
-    allStudents=[];
+    allStudentsRaw=[];
     snap.forEach(doc=>{
       const raw=doc.data().skills||{};
       const skills={};
@@ -124,8 +142,13 @@ async function loadAllStudents(){
         else skills[k]='none';
       });
       const gamesData=doc.data().games||{};
-      allStudents.push({uid:doc.id,skills,name:doc.data().name||'',email:doc.data().email||'',responses:doc.data().responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{}});
+      allStudentsRaw.push({uid:doc.id,skills,name:doc.data().name||'',email:doc.data().email||'',responses:doc.data().responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{}});
     });
+    // Pause/archive flags live in config/class, so it has to be in hand
+    // before the roster is filtered — otherwise the first paint shows
+    // archived students and then blinks them away.
+    await loadTeacherClassConfig();
+    teacherApplyRosterFilter();
   } catch(e){
     document.getElementById('t-grid-container').innerHTML='<div class="t-loading">Could not load student data. Check your Firebase security rules.</div>';
     return;
@@ -263,7 +286,7 @@ function applyTeacherViewChrome(v){
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
   // Games, Trouble-spots and Students are all class-wide, not per-week —
   // hide the week tabs and the skill summary while any of them is showing.
-  const classWide = v==='games'||v==='trouble'||v==='students';
+  const classWide = v==='games'||v==='trouble'||v==='students'||v==='manage';
   const tabs=document.getElementById('t-week-tabs'); if(tabs) tabs.style.display = classWide ? 'none' : '';
   const summ=document.getElementById('t-summary'); if(summ) summ.style.display = classWide ? 'none' : '';
 }
@@ -286,6 +309,7 @@ function renderTeacherBody(){
   else if(teacherView==='responses') renderTeacherResponses();
   else if(teacherView==='trouble') renderTeacherTrouble();
   else if(teacherView==='students') studentDetailUid ? renderTeacherStudentDetail(studentDetailUid) : renderTeacherStudents();
+  else if(teacherView==='manage') renderTeacherManage();
   else renderTeacherGrid();
 }
 
@@ -422,6 +446,93 @@ async function teacherSetClassGames(enabled){
     await db.collection('config').doc('class').set({gamesEnabled:enabled},{merge:true});
   }catch(e){ alert('Could not save that change — check your connection and Firestore rules.'); }
   if(teacherView==='games') renderTeacherGames();   // skip if the view changed while the save was in flight
+}
+/* ── Manage view: pause + archive ───────────────────────────────────────
+   Both live in config/class next to gameOverrides, as uid → true maps.
+   That matters for two reasons: the teacher can already write config/class
+   under the existing Firestore rules (student docs are read-only to the
+   teacher), and neither action touches a student's progress doc — so
+   nothing here can destroy work, and both are reversible.
+
+   Pause is enforced in app.js at sign-in (see loadClassConfig). It is a
+   classroom-management tool, not a security boundary: a student who opens
+   DevTools can bypass a client-side check. Anything that must be
+   *enforced* belongs in the Firestore rules. */
+function renderTeacherManage(){
+  const box=document.getElementById('t-grid-container');
+  box.innerHTML='<div class="t-loading">Loading student settings…</div>';
+  loadTeacherClassConfig().then(cfg=>{
+    if(teacherView!=='manage') return;   // switched views mid-flight — don't stomp the new view's DOM
+    if(!cfg) return;                     // superseded by a newer toggle
+    teacherApplyRosterFilter();
+    const paused=cfg.paused||{}, arch=cfg.archived||{};
+    const archCount=allStudentsRaw.filter(s=>arch[s.uid]).length;
+    const pausedCount=allStudentsRaw.filter(s=>paused[s.uid]).length;
+    const head=`
+      <div class="tg-class">
+        <div class="tg-class-lbl">&#x1F464; Student access</div>
+        <div class="tg-seg">
+          <button class="tg-seg-btn ${teacherShowArchived?'on':''}" data-toggle-archived>${teacherShowArchived?'Hiding nothing':'Show archived'}${archCount?` (${archCount})`:''}</button>
+        </div>
+      </div>
+      <div class="tg-note"><strong>Paused</strong> students can sign in but see a "your access is paused" message instead of the site — use it for a temporary hold, then un-pause. <strong>Archived</strong> students are hidden from every dashboard view; their work is kept and comes back if you restore them. Pausing takes effect the next time that student loads the site.</div>`;
+    if(allStudentsRaw.length===0){ box.innerHTML=head+'<div class="t-loading">No students yet — they’ll appear here once they sign in.</div>'; return; }
+    const list=(teacherShowArchived?allStudentsRaw:allStudentsRaw.filter(s=>!arch[s.uid]))
+      .sort((a,b)=>(a.name||a.email||a.uid).localeCompare(b.name||b.email||b.uid));
+    if(list.length===0){ box.innerHTML=head+'<div class="t-loading">Every student is archived. Use “Show archived” to bring them back.</div>'; return; }
+    const rows=list.map(stu=>{
+      const name=stu.name||stu.email||stu.uid.slice(0,8)+'…';
+      const isPaused=!!paused[stu.uid], isArch=!!arch[stu.uid];
+      // data-uid + the delegated listener in showTeacherApp — a Firestore
+      // uid is never spliced into an inline JS string literal.
+      const pauseBtns=
+        `<button class="tg-seg-btn ${!isPaused?'on':''}" data-set-paused data-uid="${escAttr(stu.uid)}" data-state="active">Active</button>`+
+        `<button class="tg-seg-btn ${isPaused?'on':''}" data-set-paused data-uid="${escAttr(stu.uid)}" data-state="paused">Paused</button>`;
+      const archBtn=`<button class="tg-seg-btn ${isArch?'on':''}" data-set-archived data-uid="${escAttr(stu.uid)}" data-state="${isArch?'restore':'archive'}">${isArch?'Restore':'Archive'}</button>`;
+      const status=isArch?'&#x1F4E6; archived':isPaused?'&#x23F8;&#xFE0F; paused':'&#x2713; active';
+      return `<tr${isArch?' style="opacity:.55"':''}><td class="tg-name" title="${escAttr(name)}">${escHtml(name)}</td>`+
+        `<td><div class="tg-seg">${pauseBtns}</div></td>`+
+        `<td><div class="tg-seg">${archBtn}</div></td>`+
+        `<td class="tg-eff">${status}</td></tr>`;
+    }).join('');
+    const summary=(pausedCount||archCount)
+      ? `<div class="tg-note">${pausedCount} paused · ${archCount} archived</div>` : '';
+    box.innerHTML=head+
+      `<div class="tg-grid-wrap"><table class="tg-table"><thead><tr><th>Student</th><th>Access</th><th>Roster</th><th>Right now</th></tr></thead><tbody>${rows}</tbody></table></div>`+summary;
+  });
+}
+async function teacherSetStudentPaused(uid, state){
+  const on = state==='paused';
+  try{
+    await ensureDb();
+    if(!teacherClassConfig.paused) teacherClassConfig.paused={};
+    const fv=firebase.firestore.FieldValue;
+    // Clear the flag rather than writing false, so config/class doesn't
+    // accumulate a row per student who was ever paused.
+    const patch = on ? {paused:{[uid]:true}} : {paused:{[uid]:fv.delete()}};
+    if(on) teacherClassConfig.paused[uid]=true; else delete teacherClassConfig.paused[uid];
+    await db.collection('config').doc('class').set(patch,{merge:true});
+  }catch(e){ alert('Could not save that change — check your connection and Firestore rules.'); }
+  if(teacherView==='manage') renderTeacherManage();
+}
+async function teacherSetStudentArchived(uid, state){
+  const on = state==='archive';
+  try{
+    await ensureDb();
+    if(!teacherClassConfig.archived) teacherClassConfig.archived={};
+    const fv=firebase.firestore.FieldValue;
+    const patch = on ? {archived:{[uid]:true}} : {archived:{[uid]:fv.delete()}};
+    if(on) teacherClassConfig.archived[uid]=true; else delete teacherClassConfig.archived[uid];
+    await db.collection('config').doc('class').set(patch,{merge:true});
+  }catch(e){ alert('Could not save that change — check your connection and Firestore rules.'); }
+  teacherApplyRosterFilter();
+  if(teacherView==='manage') renderTeacherManage();
+  else renderTeacherBody();   // roster changed under whichever view is showing
+}
+function teacherToggleShowArchived(){
+  teacherShowArchived=!teacherShowArchived;
+  teacherApplyRosterFilter();
+  if(teacherView==='manage') renderTeacherManage();
 }
 async function teacherSetStudentGames(uid, state){
   try{

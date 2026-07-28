@@ -149,6 +149,17 @@
     'header.find':     { en: 'Find', es: 'Buscar' },
     'header.signIn':   { en: 'Sign in with Google', es: 'Iniciar sesión con Google' },
     'header.signOut':  { en: 'Sign out', es: 'Cerrar sesión' },
+
+    /* Teacher-set hold (teacher.js Manage view → app.js showPausedScreen).
+       Deliberately says the work is safe: a student who reads "paused" as
+       "deleted" panics, and the usual next move is a second Google account,
+       which splits their progress across two docs for good. */
+    'paused.title': { en: 'Your access is paused',
+                      es: 'Tu acceso está en pausa' },
+    'paused.body':  { en: 'Mr. Hoffman has put your account on hold. Talk to him in class and he can turn it back on.',
+                      es: 'El Sr. Hoffman puso tu cuenta en pausa. Habla con él en clase y puede volver a activarla.' },
+    'paused.safe':  { en: 'Nothing you have done is lost — all of your progress is saved and will be right where you left it.',
+                      es: 'No se ha perdido nada de lo que hiciste — todo tu progreso está guardado y estará justo donde lo dejaste.' },
     'header.railToggleAria': { en: 'Open navigation menu', es: 'Abrir el menú de navegación' },
     'header.searchAria':     { en: 'Find it — search the whole site', es: 'Buscar — busca en todo el sitio' },
     // Tooltip on the Español button — it always names what the click DOES,
