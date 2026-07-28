@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — Guitar Games looks like the rest of the site
+
+### Changed
+
+- **The games arcade now matches the site's own look** instead of standing
+  apart from it — calmer plum backdrop, the same display type used in the
+  header, and each game's color strip now uses a color already found
+  elsewhere on the site, so the arcade feels like the same site having fun.
+
 ## 2026-07-28 — A clearer practice page: one button, one focus
 
 ### Changed
