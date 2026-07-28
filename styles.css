@@ -196,19 +196,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .obj-main{font-size:1.0625rem;font-weight:500;line-height:1.5;margin-bottom:5px}
 .obj-sub{font-size:0.9375rem;color:var(--text2);line-height:1.6}
 /* Set eyebrow + "About this set" disclosure (applied to buildSet + buildComingSoon).
-   The context card stops being a card — one compact eyebrow row above the
-   station card carries identity; objectives and the song-thread link fold
-   behind a quiet native <details> disclosure, closed by default. */
-.set-eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+   The context card stops being a card — one sticky identity band (pinned
+   under the app header, see .set-eyebrow position:sticky below) carries
+   identity while the rest of the set scrolls beneath it; objectives and the
+   song-thread link fold behind a quiet native <details> dropdown, closed by
+   default. */
+.set-eyebrow{display:flex;align-items:center;gap:10px;
+  position:sticky;top:var(--hdr);z-index:50;background:var(--bg);
+  margin:0 0 14px;padding:10px 0;border-bottom:1px solid var(--border)}
 .set-eyebrow-title{font-size:0.9375rem;font-weight:600;color:var(--text)}
 .set-eyebrow .print-set-btn{margin-left:auto}
 .obj-set-tag{display:inline-block;background:var(--blue-bg);color:var(--blue-text);font-size:0.75rem;font-weight:500;letter-spacing:.4px;padding:3px 10px;border-radius:999px;text-transform:uppercase}
-.set-about{margin:0 0 14px;font-size:0.875rem;color:var(--text2)}
+.set-about{font-size:0.875rem;color:var(--text2)}
+/* Inside the band, "About this set" opens as a floating dropdown instead of
+   pushing the band's own height around. Only the panel (skills + thread) is
+   positioned — the <summary> pill stays put in the band's flow, so it can't
+   jump when opened; .set-eyebrow (sticky) is the positioned ancestor the
+   panel's top/left resolve against. */
+.set-eyebrow .set-about{margin:0 0 0 6px}
+.set-eyebrow .set-about summary{padding:3px 10px}
 .set-about summary{cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-size:0.8438rem;font-weight:600;font-family:inherit;line-height:inherit;color:var(--text2);padding:5px 12px;border:1px solid transparent;border-radius:14px;background:transparent;user-select:none;list-style:none}
 .set-about summary::-webkit-details-marker{display:none}
 .set-about summary::before{content:'▸';font-size:0.75rem;transition:transform .15s}
 .set-about[open] summary::before{transform:rotate(90deg)}
 .set-about summary:hover,.set-about[open] summary{color:var(--text);border-color:var(--text2)}
+.set-eyebrow .set-about[open] .set-about-panel{
+  position:absolute;top:100%;left:-6px;min-width:560px;max-width:720px;
+  z-index:51;background:var(--bg);border:1px solid var(--border);
+  border-radius:12px;padding:8px 14px 12px;box-shadow:var(--shadow-raised)}
 .set-about .obj-skill-list{margin-top:10px}
 .obj-skill-label{font-size:0.75rem;color:var(--text3);letter-spacing:.4px;text-transform:uppercase;margin-top:10px;margin-bottom:5px}
 .obj-skill-list{list-style:disc;margin:0;padding-left:20px}
@@ -512,7 +527,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    flat sections separated by whitespace + small uppercase labels (no boxed
    panels). The full-width plum .header stays above it (L-shaped frame). */
 .app-layout{display:flex;align-items:stretch;min-height:calc(100vh - var(--hdr))}
-.app-layout .main{flex:1;min-width:0;max-width:820px;margin:0;padding:24px 28px 60px;overflow-x:hidden}
+/* overflow-x:clip, not hidden: hidden creates a scroll container, which
+   disables position:sticky for the .set-eyebrow band inside it. clip
+   trims the same wide content (see comment above) without that side effect. */
+.app-layout .main{flex:1;min-width:0;max-width:820px;margin:0;padding:24px 28px 60px;overflow-x:clip}
 @media(min-width:1240px){.app-layout .main{margin:0 auto}}
 .rail{width:252px;flex:0 0 252px;background:var(--rail-bg);color:var(--text);
   position:sticky;top:var(--hdr);height:calc(100vh - var(--hdr));
@@ -1016,6 +1034,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   /* Layout: single column, no sticky, allow full height */
   .app-layout{display:block !important}
   .main{max-width:100% !important;width:100% !important;flex:none !important;padding:0 !important;overflow:visible !important}
+  .set-eyebrow{position:static !important}
+  /* The "About this set" panel floats via position:absolute on screen (see
+     .set-eyebrow .set-about[open] .set-about-panel); beforeprint force-opens
+     it, so print it in-flow like the pre-dropdown layout instead of as a
+     floating box. */
+  .set-about[open] .set-about-panel{position:static !important;box-shadow:none !important;
+    border:none !important;padding:0 !important;max-width:none !important;min-width:0 !important}
 
   /* Avoid awkward breaks mid-step / mid-diagram */
   .step,.tab,.chord-diagrams,.obj-card,.stp-sec,.set-eyebrow,.set-about{break-inside:avoid;page-break-inside:avoid}

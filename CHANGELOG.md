@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — Set title stays pinned while you scroll
+
+### Changed
+
+- **The set title bar (Set N, the topic, "About this set", Print) now stays
+  pinned at the top of the page as you scroll through a long step list**,
+  instead of scrolling away after the first few steps. "About this set" opens
+  as a small dropdown right under the title instead of pushing the page down.
+
 ## 2026-07-28 — Sweet Child O' Mine's solo box, fully mapped
 
 ### Changed
