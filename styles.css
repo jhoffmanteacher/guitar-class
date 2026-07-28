@@ -198,18 +198,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .obj-main{font-size:1.0625rem;font-weight:500;line-height:1.5;margin-bottom:5px}
 .obj-sub{font-size:0.9375rem;color:var(--text2);line-height:1.6}
 /* Set-header redesign (applied to buildSet + buildComingSoon cards) */
-.obj-card.set-head{border-left:3px solid var(--blue-text);border-top-left-radius:0;border-bottom-left-radius:0}
 .obj-card.set-head .obj-set{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px;padding-bottom:0;border-bottom:none}
 .obj-card.set-head .obj-set .print-set-btn{margin-left:auto}
 .obj-card.set-head .obj-topic{margin-bottom:12px}
 .obj-card.set-head .obj-set-tag{display:inline-block;background:var(--blue-bg);color:var(--blue-text);font-size:0.75rem;font-weight:500;letter-spacing:.4px;padding:3px 10px;border-radius:999px;text-transform:uppercase}
 .obj-card.set-head .obj-unit{font-size:0.75rem;color:var(--text3);text-transform:none;letter-spacing:0;margin-bottom:0;line-height:1.3}
-.obj-card.set-head .obj-main{font-size:1.5rem;font-weight:500;line-height:1.3;margin-bottom:0;font-family:var(--font-display)}
+.obj-card.set-head .obj-main{font-size:1.125rem;font-weight:500;line-height:1.3;margin-bottom:0;font-family:var(--font-display)}
 .obj-card.set-head .obj-i-can{color:var(--blue-text)}
-.obj-skill-label{font-size:0.75rem;color:var(--text3);letter-spacing:.4px;text-transform:uppercase;margin-top:16px;margin-bottom:8px}
+.obj-skill-label{font-size:0.75rem;color:var(--text3);letter-spacing:.4px;text-transform:uppercase;margin-top:10px;margin-bottom:5px}
 .obj-skill-list{list-style:disc;margin:0;padding-left:20px}
-.obj-skill-item{color:var(--text);font-size:0.9375rem;line-height:1.6}
-@media (max-width:420px){.obj-card.set-head .obj-main{font-size:1.25rem}}
+.obj-skill-item{color:var(--text2);font-size:0.875rem;line-height:1.5}
+@media (max-width:420px){.obj-card.set-head .obj-main{font-size:0.9375rem}}
 .tabs{margin-bottom:16px}
 .tabs-songbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px}
 .print-set-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;font-size:0.7812rem;font-weight:500;font-family:inherit;line-height:1.2;color:var(--text2);background:transparent;border:1px solid transparent;border-radius:14px;cursor:pointer;transition:background 0.15s,border-color 0.15s,color 0.15s}
@@ -255,10 +254,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .bc{background:var(--amber-bg);color:var(--amber-text)}
 .st-name{font-size:0.9375rem;font-weight:500;margin-bottom:2px}
 .st-desc{font-size:0.875rem;color:var(--text2)}
-.dp{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
+.dp{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--purple-accent);border-top-left-radius:0;border-bottom-left-radius:0;border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
 .dp.hidden{display:none}
 .dp-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
-.dp-title{font-size:1rem;font-weight:500}
+.dp-title{font-size:1.125rem;font-weight:600}
 .dp-time{font-size:0.875rem;color:var(--text2);margin-left:auto}
 .prog-pill{margin-left:auto;font-size:0.8125rem;font-weight:600;color:var(--text2);background:var(--bg3);border-radius:12px;padding:3px 10px;white-space:nowrap}
 .steps{list-style:none}
@@ -266,7 +265,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    Same markup as the full list; only what's VISIBLE changes, so the toggle
    flips live and nothing in an open step is re-rendered. */
 .dp-stepper{display:flex;align-items:center;gap:8px;margin:-6px 0 12px;font-size:0.8125rem;color:var(--text3)}
-.fm-count{font-weight:600}
+.fm-count{font-weight:600;color:var(--text)}
 .dp:not(.focus) .fm-count{display:none}
 .fm-toggle{margin-left:auto;font-family:inherit;font-size:0.75rem;font-weight:600;color:var(--text2);background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:3px 10px;cursor:pointer}
 .fm-toggle:hover{color:var(--text);border-color:var(--text2)}
@@ -275,6 +274,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .dp.focus .step-chev{display:none}
 .dp.focus .step-head{cursor:default}
 .dp.focus .step-head:hover{background:transparent}
+.dp.focus .step-head{font-size:1.0625rem;font-weight:600}
 /* Only the group you're actually in keeps its label. */
 .dp.focus .stp-sec-label{display:none}
 .dp.focus .stp-sec.sec-cur .stp-sec-label{display:block}
