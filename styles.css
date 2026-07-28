@@ -104,6 +104,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .wpill-check{font-weight:700;margin-right:5px}
 .wpill-frac{font-size:0.75rem;margin-left:1px;font-variant-numeric:tabular-nums;color:var(--amber-text)}
 .wpill.active .wpill-frac{color:inherit;opacity:.85}
+/* Dashed means "locked / provisional / dev-only" — nothing else. An ordinary
+   content link is never dashed (see .song-thread-link, a solid underline). */
 .wpill.review-pill{border-style:dashed;border-color:var(--purple-accent);color:var(--purple-text);background:var(--purple-bg2)}
 .wpill.review-pill:hover{background:var(--purple-bg);border-color:var(--purple-text);color:var(--purple-text)}
 .wpill.review-pill.active{background:var(--purple-text);color:var(--bg);border-color:var(--purple-text);border-style:solid}
@@ -1240,7 +1242,7 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 
 /* ── Song-thread badges: which core song this set unlocks ── */
 .song-thread{margin-top:10px;font-size:0.8438rem;font-weight:600;color:var(--text2);line-height:1.6}
-.song-thread-link{color:var(--green-text);text-decoration:none;border-bottom:1px dashed var(--green-text)}
+.song-thread-link{color:var(--green-text);text-decoration:none;border-bottom:1px solid var(--green-text)}
 .song-thread-link:hover{background:var(--green-bg)}
 .song-echo{min-height:0;font-size:0.875rem;font-weight:600;color:var(--green-text);opacity:0;transition:opacity .3s;margin-top:6px}
 .song-echo.show{opacity:1}
@@ -1292,6 +1294,15 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
    plum backdrop around a normal-theme stage so the
    game widgets render as designed)
    ══════════════════════════════════════════════ */
+/* ── One meaning per exit idiom, site-wide ──
+   Full-page screens (own URL hash, replace the whole view: Games, Keep
+   practicing, My progress) exit via a top-left "← Back to practice" pill
+   — .page-exit here, .games-exit on the arcade (same geometry, its
+   white-on-dark coloring is the one deliberate variant).
+   Overlay dialogs (float over the current view, click-away/Escape closes
+   them: Songs hub, Daily 5, Search, the report-a-problem and check-off
+   gates) exit via a top-right × — .tp-close.
+   Copy whichever pattern matches how the new screen behaves; don't mix them. */
 /* ── Full-page top-bar screens (Keep practicing · My progress): the games-
       screen pattern in the site's normal look — own URL hash, Back exits ── */
 .page-screen{position:fixed;inset:0;z-index:120;overflow-y:auto;background:var(--bg2)}

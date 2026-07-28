@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — A dashed underline means "locked," so we stopped using it elsewhere
+
+### Changed
+
+- **A song's linked chat thread now has a plain solid underline** instead of
+  a dashed one — dashed styling is reserved for locked-until-earned and
+  provisional/dev-only spots elsewhere on the site, and this link isn't
+  either of those.
+
 ## 2026-07-28 — More room in the "All the songs" list
 
 ### Changed
