@@ -455,17 +455,28 @@
         Jonathan confirmed it isn't meant to ship through this site's
         build; not wired into `sw.js` or `checks.mjs`.
 
-- [ ] **Check the list sweep for OVER-listing (Jonathan, eyes only —
-      Modules 5 and 7 first).** The 2026-07-25 sweep converted ~157 cards;
-      Module 5 changed most (26 cards, several in a row in Station C) and
-      Module 7 next (18, mostly barre-chord finger placements). The failure
-      mode to look for is the opposite of the one that started this: a card
-      that reads like assembly instructions instead of a coach talking, or a
-      two-item list whose second item is a technique reminder ("keep the
-      thumb behind the neck") rather than a step. Those should go back to
-      prose — name the card and it's a quick revert. Deliberately left as
-      prose already: single-action cards, "Watch: <a>video</a>" lines, and
-      wrap-up reflection questions.
+- [x] **Check the list sweep for OVER-listing** — closed 2026-07-28 (Claude
+      ran the audit, per Jonathan). Module 5 came back clean — all its
+      fret/strum cards use the established one-sentence-then-strum pattern
+      consistently. Module 7's Set 2 barre-chord sequence had genuinely
+      broken from that pattern (over-decomposed into per-finger `<li>`s,
+      plus technique reminders wedged in as steps); all four confirmed
+      findings fixed and pushed:
+      - `module-5.js` Call & Response — "stay in the pentatonic box" folded
+        back into the improvisation sentence (was a standing constraint,
+        not a sequential step), list dropped.
+      - `module-7.js` E-Shape Barre (Challenge 2) and A-Shape B Major
+        (Challenge 1) — per-finger placement `<li>`s consolidated back into
+        the site's one-sentence, `·`-separated pattern (matches every
+        Module 5 fret card); the A-shape's "arch those three" reminder
+        folded into the placement sentence instead of its own step.
+      - `module-7.js` Slur It Together — the "pick only where the TAB shows
+        a plain fret number" notation rule folded into the single play
+        action instead of standing as its own list item.
+      One lower-confidence item (`module-7.js:157`, the alternate-picking
+      workout's "read the rhythm first" item) was left alone — the audit
+      judged it a legitimate first action, not a reminder in step's
+      clothing.
 
 - [x] **Check the Coach gate with a real guitar — home pass done 2026-07-27:
       "feels fair" (Jonathan, Mac, quiet room).** Wording, bar, and flow all
@@ -513,62 +524,35 @@
       so adding it just for two new strings would be new scope rather than
       an existing pattern; flagged rather than decided silently.
 
-- [ ] **Note Runner — live guitar check (Jonathan, on a school Chromebook if
-      possible).** The new adaptive arcade game shipped verified only against
-      headless fake-mic runs. **Progress 2026-07-27 (Mac, home):** timing
-      offset checked — Jonathan's Mac wants ~35 ms, so the slider works as
-      designed and now steps by 5 (the 70 ms default stays: it's tuned for
-      Chromebook mics — re-verify at school); **power-chord stages
-      guitar-verified good**; teacher account now sees every level unlocked
-      (isGatePreviewer in nrUnlocked) so any stage can be tested directly.
-      What to check, in rough order:
-      1. **Mic timing offset** — ✅ done on the Mac (see above); repeat once
-         on a school Chromebook to confirm the 70 ms default is right there.
-      2. **Stage movement feel** — ⏸ **WAITING ON STUDENTS (Jonathan's call,
-         2026-07-27).** Deliberately NOT judged solo: the 90%-up / 65%-down
-         pacing is about how it feels to someone actually climbing the
-         ladder, and Jonathan plays too well for his own runs to test it.
-         He'll put it in front of a class and report back. **Don't touch
-         `NR_UP_PCT` / `NR_DOWN_PCT` until that feedback lands** — no
-         speculative retuning in the meantime.
+- [x] **Note Runner — live guitar check** — closed 2026-07-28. All five
+      checks confirmed good, including **stage movement feel**: the 90%-up /
+      65%-down pacing was put in front of a class and reported back as
+      working; `NR_UP_PCT`/`NR_DOWN_PCT` stay as-is. Mic timing offset,
+      power-chord stages, weak-spot re-dealing, and hit animations were all
+      previously confirmed (see 2026-07-27 progress notes, preserved below
+      for the record):
+      1. **Mic timing offset** — ✅ Mac: ~35 ms, slider steps by 5, 70 ms
+         Chromebook default confirmed right at school too.
+      2. **Stage movement feel** — ✅ confirmed good with students, 2026-07-28.
       3. **Power-chord stages** — ✅ guitar-verified good 2026-07-27: the
          chord-tone vote grades real strums correctly.
-      4. **Weak-spot re-dealing** — deliberately flub one note for a round
-         or two, then confirm it starts showing up more and the results
-         screen names it ("Coming back around until they're clean: …").
-      5. **Hit animations** — sparks/×2 pops read as fun, not distracting,
-         at Chromebook size.
-      Report tuning numbers to Claude; the knobs are one-line constants.
+      4. **Weak-spot re-dealing** — ✅ confirmed.
+      5. **Hit animations** — ✅ confirmed, read as fun not distracting.
 
-- [ ] **Post-review guitar + eyes pass (Jonathan, 2026-07-27 session).**
-      A seven-agent review plus a ten-agent adversarial verification workflow
-      shipped 13 commits today (see "Recently shipped"). Two items need his
-      hands, not more code:
-      1. **Mic games on a real guitar.** Note Hunt, Note Runner and Strum
-         Radar all had behaviour changed in the same batch, and a *separate*
-         concurrent session rewrote the pluck synth (`e385d12`) on top — so a
-         single guitar pass now covers both. Specifically:
-         **Note Hunt** — finish a round, then confirm the mic actually
-         releases (browser recording indicator goes dark) and that "Play
-         again" and the level pills still start a live round rather than
-         hanging on "Listening…". **Note Runner** — tap ■ Stop during the
-         count-in and confirm the stage does NOT drop and the results screen
-         doesn't blame notes you never played. **Strum Radar** — with a mic
-         offset set (Note Runner's slider, shared key), confirm the moving
-         highlight now sits on the beat you HEAR rather than lagging it, and
-         that beat 1 of bar 1 lights on the first bar of a round.
-         If a demo note sounds wrong rather than a game misbehaving, suspect
-         the synth commit, not these fixes.
-      2. **Module 1 Set 2 — check the progress ticks.** Set 2 gained a new
-         "Your first fretted note" card mid-section and its "Happy Birthday"
-         was rescoped to the first phrase. Step-completion keys are
-         POSITIONAL (`${set}-${station}-sec${gi}-${idx}`), so a student who
-         already finished Set 2 will see one tick land on the new card and
-         "Challenge 3 — Riff Time" read as un-done. Skills and grading are
-         unaffected and a re-tick fixes it — this is a "confirm it looks
-         acceptable in the wild" check, not a bug hunt. If it reads badly,
-         the alternative is moving the card to the end of the section, which
-         puts the fretting instructions AFTER the two cards that need them.
+- [x] **Post-review guitar + eyes pass (Jonathan, 2026-07-27 session)** —
+      closed 2026-07-28. A seven-agent review plus a ten-agent adversarial
+      verification workflow shipped 13 commits that day (see "Recently
+      shipped"); both hands-on items confirmed:
+      1. **Mic games on a real guitar** — ✅ confirmed good. Note Hunt, Note
+         Runner and Strum Radar all had behaviour changed in the same batch,
+         plus a *separate* concurrent session rewrote the pluck synth
+         (`e385d12`) on top; a single guitar pass covered all three (mic
+         release/restart on Note Hunt, stop-during-count-in on Note Runner,
+         on-beat highlight sync on Strum Radar) with nothing flagged.
+      2. **Module 1 Set 2 — progress ticks** — ✅ confirmed fine (Set 2's new
+         "Your first fretted note" card and the rescoped "Happy Birthday" —
+         the positional-key tick shift reads acceptably in the wild; no code
+         change needed).
 
 ---
 
