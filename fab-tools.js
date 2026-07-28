@@ -188,29 +188,11 @@ function updateTimerDisplay(){ const m=Math.floor(timerSecs/60),s=timerSecs%60; 
 // Flash the display when time's up — visible across a loud room without headphones.
 function flashTimerDisplay(){ flashClass(document.getElementById('timer-display'),'timer-done-flash',2400); }
 // Pulse the floating timer button too — it's visible even when the popup is closed.
-// Also pulse the Tools launcher: when the stack is collapsed, the timer FAB itself
-// is hidden, and the launcher is the only visible cue left for a loud room.
-function flashTimerFab(){ flashClass(document.getElementById('fab-timer'),'fab-timer-done',3600); flashClass(document.getElementById('fab-launcher'),'fab-timer-done',3600); }
+// The timer FAB is now permanently docked in the rail, so this alone still
+// lands the classroom cue — no separate launcher to also flash.
+function flashTimerFab(){ flashClass(document.getElementById('fab-timer'),'fab-timer-done',3600); }
 function resetTimer(){ if(timerRunning){ clearInterval(timerInterval); timerRunning=false; } timerSecs=timerSelected; updateTimerDisplay(); document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); }
 function toggleTimer(){ if(timerRunning){ /* pause: bank the true remaining seconds off the deadline (the last tick may be stale if the tab was hidden) */ timerSecs=Math.max(0,Math.ceil((timerEndAt-Date.now())/1000)); updateTimerDisplay(); clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); } else { if(timerSecs<=0){ timerSecs=timerSelected; updateTimerDisplay(); } /* already rang — Start means restart, not re-fire the alarm a second later */ timerRunning=true; timerEndAt=Date.now()+timerSecs*1000; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x23F8;','tools.pause'); timerInterval=setInterval(()=>{ timerSecs=Math.max(0,Math.ceil((timerEndAt-Date.now())/1000)); updateTimerDisplay(); if(timerSecs<=0){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); [0,0.35,0.7].forEach(d=>setTimeout(()=>toolsBeep(660,0.3),d*1000)); flashTimerDisplay(); flashTimerFab(); } },1000); } }
-
-/* ── Tools launcher — collapses the three FABs into one pill; expanding
-   reveals them upward (the launcher is the last, bottom-anchored child of
-   .fab-group). Doesn't auto-collapse when a popup closes — students toggle
-   tools rapidly — only the launcher click, Escape, and an outside click
-   collapse the stack. ── */
-function setToolsOpen(open){
-  const group = document.getElementById('fab-group');
-  if(!group) return;
-  group.classList.toggle('tools-open', open);
-  const launcher = document.getElementById('fab-launcher');
-  if(launcher) launcher.setAttribute('aria-expanded', open?'true':'false');
-}
-function toggleTools(){
-  const group = document.getElementById('fab-group');
-  if(!group) return;
-  setToolsOpen(!group.classList.contains('tools-open'));
-}
 
 /* ── Popup logic ── */
 function setFabExpanded(which, isOpen){ const f=document.getElementById('fab-'+which); if(f) f.setAttribute('aria-expanded', isOpen?'true':'false'); }
@@ -276,26 +258,19 @@ document.addEventListener('click',e=>{
     // it listening in the background is a real cost. A running metronome or
     // timer keeps running: the student tapping a lesson step or a Journey page
     // shouldn't silently kill the click they're practicing to. Those popups
-    // just slide shut visually. The Tools stack itself still collapses.
+    // just slide shut visually.
     closePopup('tuner');
     ['metro','timer'].forEach(w=>{
       const el = document.getElementById(w+'-popup');
       if(el) el.classList.remove('open');
       setFabExpanded(w, false);
     });
-    setToolsOpen(false);
   }
 });
-// Escape closes any open tool popup (a11y) and collapses the Tools stack.
+// Escape closes any open tool popup (a11y)
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
-  const group = document.getElementById('fab-group');
-  const hadFocus = group && group.contains(document.activeElement);
   ['metro','timer','tuner'].forEach(w=>{ const el=document.getElementById(w+'-popup'); if(el&&el.classList.contains('open')) closePopup(w); });
-  if(group && group.classList.contains('tools-open')){
-    setToolsOpen(false);
-    if(hadFocus){ const launcher=document.getElementById('fab-launcher'); if(launcher) launcher.focus(); }
-  }
 });
 
 /* ── Focus trap for the full-screen overlays (a11y) ──

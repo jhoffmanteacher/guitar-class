@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — Tuner, Timer, and Metronome now live in the side rail
+
+### Changed
+
+- **Tuner, Timer, and Metronome moved into the left navigation rail** as a
+  small always-visible row at the bottom, instead of floating pills in the
+  corner of the screen. One tap opens each tool right where it now lives;
+  nothing floats over your work anymore.
+
 ## 2026-07-28 — A quieter set header, with objectives one tap away
 
 ### Changed
