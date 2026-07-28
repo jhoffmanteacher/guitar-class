@@ -5,6 +5,46 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — A big round of fixes across the site
+
+### Fixed
+
+- **Your ratings on the Song Journey pages could vanish.** Tapping a layer
+  rating in the first few seconds after the page opened looked like it saved —
+  the ✓ appeared and the counter went up — but nothing was written, and it was
+  gone the next day. Those early taps are now saved properly. If the site
+  genuinely can't reach the server, it now tells you instead of pretending.
+- **Collapsing the play-along player left the track playing.** With the panel
+  closed there was no way to stop it short of leaving the page. It pauses now,
+  and picks back up if you re-open it.
+- **Note Hunt kept the microphone on after the round ended**, which quietly
+  silenced the metronome and the demo audio everywhere else until you closed
+  the panel.
+- **Stopping a Note Runner round early counted as failing it.** Tapping ■ Stop
+  during the count-in could knock your level back and mark notes as ones you
+  struggle with, even though you never played any. Only rounds you actually
+  play through count now.
+- **Strum Radar's moving highlight ran late** on devices with a mic delay set,
+  so following it made you strum behind the beat. The highlight now sits on the
+  beat you're hearing. The first beat of the first bar also lights properly.
+- **A short, perfectly played drill could never score "Great"** in the Listening
+  Coach — the tempo check reported "too short to tell" in a way that quietly
+  capped your result at "Good work."
+- **If the site failed to reach your saved progress**, it used to treat you as a
+  brand-new student: everything unticked, later sets locked. It now leaves your
+  sets open and stops itself from overwriting your streak, your arcade records
+  and your practice history with blanks.
+- **Switching modules quickly on a slow connection** could leave the menu
+  showing one module and the page showing another, and could lose your place.
+- **A module that fails to load now says so** instead of showing a blank page.
+
+### Changed
+
+- **Keyboard and screen-reader support.** Pop-up panels now keep the keyboard
+  inside them while open and hand focus back when they close, the video player
+  takes focus when it opens, and the timer, tuner-string and tempo controls
+  announce what they are and which one is selected.
+
 ## 2026-07-27 — Right key for "Smoke on the Water", and safer string changing
 
 ### Fixed
