@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — A clearer practice page: one button, one focus
+
+### Changed
+
+- **"Mark done" is now the one obvious button on the page** — filled in and
+  easy to spot, so it's always clear what to press next. Once a step is
+  checked off, that button quiets down to a small green pill so it doesn't
+  keep competing for attention.
+- **The current step is the star of the page**, not the module info above it.
+  The module card is smaller and sits back as context; the step you're
+  actually working on stands out with a purple accent stripe.
+- **Progress is easier to see at a glance** — a small bar now sits next to
+  the step counter on every station, and My Progress has a new bar showing
+  your total progress across all modules up top.
+- **The sidebar is calmer** — station rows no longer carry a background tint
+  before you've picked one, and the highlight for whatever's selected now
+  matches everywhere (sets, stations, and Explore links alike).
+
 ## 2026-07-28 — The site's demo notes now play in tune
 
 ### Fixed

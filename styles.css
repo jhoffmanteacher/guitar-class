@@ -539,26 +539,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .rs-text{display:flex;flex-direction:column;line-height:1.2;min-width:0}
 .rs-title{font-size:0.875rem;font-weight:600}
 .rs-sub{font-size:0.75rem;color:var(--text2);margin-top:1px}
-/* Station rows + badges keep a soft tint of their own color at all times, so
-   B/C/checklist stay visually distinct even before you pick one. Hover deepens
-   the tint a step; active (below) goes to the full pastel wash. */
-.rail-station.st-b{background:color-mix(in srgb, var(--blue-bg) 55%, var(--rail-bg))}
-.rail-station.st-c{background:color-mix(in srgb, var(--green-bg) 55%, var(--rail-bg))}
-.rail-station.st-chk{background:color-mix(in srgb, var(--amber-bg) 55%, var(--rail-bg))}
-.rail-station.st-b:hover{background:color-mix(in srgb, var(--blue-bg) 75%, var(--rail-bg))}
-.rail-station.st-c:hover{background:color-mix(in srgb, var(--green-bg) 75%, var(--rail-bg))}
-.rail-station.st-chk:hover{background:color-mix(in srgb, var(--amber-bg) 75%, var(--rail-bg))}
+/* Station rows stay neutral until picked — the colored .rs-num badge is the
+   only identity cue before selection; generic hover (.rail-station:hover,
+   above) covers the unpicked-row hover state. Active goes to a single
+   purple wash (below), same selection metaphor as sets and Explore. */
 .rail-station.st-b .rs-num{background:var(--blue-bg);color:var(--blue-text)}
 .rail-station.st-c .rs-num{background:var(--green-bg);color:var(--green-text)}
 .rail-station.st-chk .rs-num{background:var(--amber-bg);color:var(--amber-text)}
-/* Active station = a soft wash of its own station color (muted trace of the
-   old color-coding — no hard borders, calm claude.ai-style pill) */
-.rail-station.active.st-b{background:var(--blue-bg)}
-.rail-station.active.st-b .rs-title{color:var(--blue-text)}   .rail-station.active.st-b .rs-num{background:var(--blue-text);color:#fff}
-.rail-station.active.st-c{background:var(--green-bg)}
-.rail-station.active.st-c .rs-title{color:var(--green-text)}  .rail-station.active.st-c .rs-num{background:var(--green-text);color:#fff}
-.rail-station.active.st-chk{background:var(--amber-bg)}
-.rail-station.active.st-chk .rs-title{color:var(--amber-text)} .rail-station.active.st-chk .rs-num{background:var(--amber-text);color:#fff}
+/* Active station = the same purple wash as sets and Explore — one selection
+   metaphor for the whole rail. The .rs-num badge keeps its own station
+   color (see above); no white-on-color inversion. */
+.rail-station.active{background:var(--purple-bg)}
+.rail-station.active .rs-title{color:var(--purple-text)}
 /* Explore nav */
 .nav-list{display:flex;flex-direction:column;gap:4px}
 .nav-btn{display:flex;align-items:center;gap:11px;width:100%;text-align:left;
@@ -1642,8 +1634,8 @@ body.games-open{overflow:hidden}
 
 /* ── Teacher/dev preview badge — shown only when the set-gate bypass is on,
       so preview mode can't be mistaken for the student view ── */
-.preview-note{font-size:0.75rem;line-height:1.45;color:var(--amber-text);background:var(--amber-bg);
-  border:1px dashed var(--amber-text);border-radius:8px;padding:7px 10px}
+.preview-note{font-size:0.75rem;line-height:1.45;color:var(--text2);background:var(--bg2);
+  border:1px dashed var(--border2);border-radius:8px;padding:7px 10px}
 .preview-note[hidden]{display:none}
 
 /* ══ PROTOTYPE — practice reps · Find-the-Note game · "Keep it sharp" ══ */
