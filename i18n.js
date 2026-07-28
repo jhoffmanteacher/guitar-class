@@ -168,8 +168,8 @@
 
     // ── Auth wall ──
     'auth.title':         { en: 'Welcome to Guitar Class', es: 'Bienvenido a la clase de guitarra' },
-    'auth.body':          { en: 'Sign in with your school Google account to access your weekly materials and track your progress across any device.',
-                             es: 'Inicia sesión con tu cuenta de Google de la escuela para acceder a tus materiales semanales y llevar el registro de tu progreso en cualquier dispositivo.' },
+    'auth.body':          { en: 'Sign in with your school Google account to access practice materials and assessment information for class.',
+                             es: 'Inicia sesión con tu cuenta de Google de la escuela para acceder a los materiales de práctica y la información de evaluación de la clase.' },
     'auth.fallbackTitle': { en: "Can't reach the sign-in service", es: 'No se pudo conectar con el servicio de inicio de sesión' },
     'auth.fallbackBody':  { en: "The sign-in service couldn't load on this network — a Wi-Fi or content filter may be blocking it. Try again or switch to a different network.",
                              es: 'El servicio de inicio de sesión no se pudo cargar en esta red — un filtro de Wi-Fi o de contenido podría estar bloqueándolo. Intenta de nuevo o cambia de red.' },
