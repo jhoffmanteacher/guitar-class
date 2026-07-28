@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — Sweet Child O' Mine's solo box, fully mapped
+
+### Changed
+
+- **The "Sweet Child O' Mine" Song Journey's Pentatonic Solo layer now shows
+  the full E minor pentatonic box** (all five notes, both in open position
+  and up at the 12th fret) instead of just a few sample notes, and points you
+  to the Module 4 "Backing track (Em/G)" jam — a separate E minor loop, since
+  the solo isn't in the same key as the verse's G backing track at the top of
+  the page.
+
 ## 2026-07-28 — Module reviews aligned with the curriculum map (Units 1–5)
 
 ### Changed
