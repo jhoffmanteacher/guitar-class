@@ -30,6 +30,10 @@ see `WORKFLOW.md` and the git commit log.
   Locks, the module trophy, the Español globe, the tool icons, and dozens of
   smaller icons in the practice steps, Module Review, and Songs are now the
   same clean line-icon style throughout.
+- **A few more emoji rounded up.** The lightning bolt on the Daily 5 (both the
+  "open today's warm-up" button and the popup's heading) and on the ear-training
+  drill, the pause mark on the Stop button while a play-along is running, and
+  the pause mark on the "access is paused" screen are all line icons now too.
 
 ## 2026-07-28 — Games, Songs, Keep practicing and My progress all open the same way
 

@@ -348,7 +348,7 @@ function showPausedScreen(user){
   }
   el.innerHTML=
     `<div class="paused-card">`+
-      `<div class="paused-icon" aria-hidden="true">&#x23F8;&#xFE0F;</div>`+
+      `<div class="paused-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;display:block;margin:0 auto"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></svg></div>`+
       `<h2 data-i18n="paused.title">${escHtml(t('paused.title'))}</h2>`+
       `<p data-i18n="paused.body">${escHtml(t('paused.body'))}</p>`+
       `<p class="paused-safe" data-i18n="paused.safe">${escHtml(t('paused.safe'))}</p>`+
@@ -2137,7 +2137,7 @@ function buildStations(w, stationId){
   };
   const sectionsHtml=(sections,baseNs)=>{
     const reminder = sections.some(isTuningWarmup)
-      ? `<div class="daily5-inline">${t('daily5.tuneWarmupHtml',{btn:`<button type="button" class="daily5-inline-btn" onclick="openDaily5Here()">&#x26A1; ${t('daily5.openToday')}</button>`})}</div>`
+      ? `<div class="daily5-inline">${t('daily5.tuneWarmupHtml',{btn:`<button type="button" class="daily5-inline-btn" onclick="openDaily5Here()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> ${t('daily5.openToday')}</button>`})}</div>`
       : '';
     const real = sections.filter(sec => !isTuningWarmup(sec));
     // Sections are plain group labels now, not their own accordion — every
@@ -2604,7 +2604,7 @@ function buildDaily5(){
   if(pick) items+=li(2,t('daily5.todaysDrill'),`&mdash; ${t('daily5.fromModule',{num, set: tSetLabel(pick.set.label)})} ${escHtml(truncateText(stripTags(tf(pick.step,'text')),160))}<br>${routinePlaySeq(pick.step.playSeq,'bpm:daily5:drill')}`);
   const streakChip = streak.count > 1
     ? `<span class="games-card-best">&#x1F525; ${t('daily5.streak',{n:streak.count})}</span>` : '';
-  return `<div class="daily5-head"><div style="display:flex;align-items:center;gap:8px"><h3 style="font:inherit;margin:0">&#x26A1; ${t('daily5.title')}</h3>${streakChip}</div><button type="button" class="tp-close" onclick="closeDaily5()" aria-label="${escAttr(t('daily5.closeAria'))}">&#x2715;</button></div>
+  return `<div class="daily5-head"><div style="display:flex;align-items:center;gap:8px"><h3 style="font:inherit;margin:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> ${t('daily5.title')}</h3>${streakChip}</div><button type="button" class="tp-close" onclick="closeDaily5()" aria-label="${escAttr(t('daily5.closeAria'))}">&#x2715;</button></div>
     <ol class="routine-list">${items}</ol>`;
 }
 /* Station C's warm-up card opens the Daily 5 as a popup over the activities —
@@ -4056,7 +4056,7 @@ function renderEarDrill(drill, key, wid){
 }
 function erHead(key, right){
   const st = earDrills[key];
-  return `<div class="sdr-head"><span>&#x26A1; ${escHtml(t('ear.' + st.cfg.poolId))}</span>` +
+  return `<div class="sdr-head"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> ${escHtml(t('ear.' + st.cfg.poolId))}</span>` +
     `<span class="sdr-meta">${escHtml(right)}</span></div>`;
 }
 function erSetupHtml(key){
@@ -4845,7 +4845,7 @@ function playSequence(midis, bpm, btnEl){
   const idleHtml = btnEl ? btnEl.innerHTML : null;
   playSeqState = { timeouts, btn: btnEl, idleHtml, tabRoot };
   if(btnEl){
-    btnEl.innerHTML = '&#x23F8; ' + escHtml(t('tools.stop'));
+    btnEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 5v14M15 5v14"/></svg> ' + escHtml(t('tools.stop'));
     btnEl.classList.add('playing');
   }
 }
