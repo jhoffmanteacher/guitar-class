@@ -1391,9 +1391,30 @@ function isSetComplete(w){
   return skills.every(s=>progress[s.id]==='gotit');
 }
 
+// Has the student actually worked in this set? Any skill they've touched
+// (either column of the checklist) or any step they've marked done counts.
+// A locked set can't be opened, so progress inside one is proof they had
+// access to it at some point.
+function hasProgressIn(w){
+  if(!w) return false;
+  if((w.skills||[]).some(s=>progress[s.id]==='gotit' || progress[s.id]==='working')) return true;
+  const prefix = w.id + '-';
+  return Object.keys(completed||{}).some(k=>completed[k]===true && k.startsWith(prefix));
+}
+
 // Sequential gate: a set stays locked until the set before it (in module order)
 // is finished, so students work a module in order — the same lock-until-complete
 // idea as Module Review, applied to every set. The first set is always open.
+//
+// The gate is a HIGH-WATER MARK, not a live derivation: once a student has
+// worked in a set it never re-locks. Previously this was computed purely from
+// current state, so demoting one skill back to "still working on it" re-locked
+// the FOLLOWING set even when that set was already finished — the checklist's
+// two columns are a deliberate toggle pair, so that's an invited action (and a
+// trackpad mis-tap does it). A single tap in Set 1 could hide a completed Set 2
+// behind a lock while Sets 3 and 4 stayed open, and activateSet's backstop then
+// refused to reopen it. Punishing honest self-correction is exactly backwards —
+// we want students marking "still working on it" freely.
 function isSetLocked(w){
   if(!w) return true;
   if(w.locked || w.comingSoon) return true;          // static/unbuilt stays locked for everyone
@@ -1401,6 +1422,7 @@ function isSetLocked(w){
   const moduleSets = SETS.filter(x=>x.moduleNum===w.moduleNum);
   const idx = moduleSets.indexOf(w);
   if(idx<=0) return false;
+  if(hasProgressIn(w)) return false;                 // already been here — never lock them back out
   return !isSetComplete(moduleSets[idx-1]);
 }
 

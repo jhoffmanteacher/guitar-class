@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Changing your mind on a skill can't lock you out
+
+### Fixed
+
+- **Moving a skill back to "still working on it" could lock the next set.**
+  If you'd finished a set and then honestly re-marked one of its skills as
+  still in progress — or just mis-tapped — the set after it could snap back to
+  🔒, even though you had already finished that set too, and tapping it only
+  told you to finish the previous set first. Sets you've already worked in now
+  stay open for good. Marking a skill honestly should never cost you access to
+  your own work.
+
 ## 2026-07-27 — Your teacher can put an account on hold
 
 ### Added
