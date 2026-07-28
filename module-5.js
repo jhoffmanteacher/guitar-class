@@ -1660,6 +1660,8 @@ MODULE_REVIEWS[5] = {
       text_es: 'Puedo mantener un patrón de rasgueo abajo-arriba constante (1 + 2 + 3 + 4 +) a través de un cambio de acorde', set: 'm5w2' },
     { id: 'mr5-s4', text: 'I can fret Group 2 chords (D, A, and the four-finger Bm) with clean tone',
       text_es: 'Puedo trastear los acordes del Grupo 2 (D, A, y el Bm de cuatro dedos) con tono limpio', set: 'm5w3' },
+    { id: 'mr5-s9', text: 'I can draw three chords at random from the deck and play them in an 8-bar progression at 70 BPM with clean changes',
+      text_es: 'Puedo sacar tres acordes al azar de la baraja y tocarlos en una progresión de 8 compases a 70 BPM con cambios limpios', set: 'm5w3' },
     { id: 'mr5-s8', text: 'I can perform a core song from memory, start to finish, for the Module 5 assessment',
       text_es: 'Puedo interpretar una canción principal de memoria, de principio a fin, para la evaluación del Módulo 5', set: 'm5w4' }
   ],

@@ -708,7 +708,8 @@ MODULE_REVIEWS[1] = {
     { id: 'mr1-s2', text: 'I can name 5+ parts of the guitar', text_es: 'Puedo nombrar 5 o más partes de la guitarra', set: 'w2' },
     { id: 'mr1-s3', text: 'I can tune all 6 strings with a tuner', text_es: 'Puedo afinar las 6 cuerdas con un afinador', set: 'w2' },
     { id: 'mr1-s4', text: 'I can play a short melody on the E string with clean, steady notes', text_es: 'Puedo tocar una melodía corta en la cuerda Mi con notas limpias y constantes', set: 'w2' },
-    { id: 'mr1-s5', text: 'I can hold the guitar and pick correctly and make every open string ring clean', text_es: 'Puedo sostener la guitarra y la púa correctamente, y hacer que cada cuerda al aire suene limpia', set: 'w2' }
+    { id: 'mr1-s5', text: 'I can hold the guitar and pick correctly and make every open string ring clean', text_es: 'Puedo sostener la guitarra y la púa correctamente, y hacer que cada cuerda al aire suene limpia', set: 'w2' },
+    { id: 'mr1-s6', text: 'I can name all 6 strings from memory (E A D G B e) — in order and at random', text_es: 'Puedo nombrar las 6 cuerdas de memoria (E A D G B e) — en orden y al azar', set: 'w2' }
   ],
   assessItems: [
     'Tune all 6 strings to green in under 2 minutes, without restarting',

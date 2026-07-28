@@ -1088,7 +1088,8 @@ MODULE_REVIEWS[2] = {
     { id: 'mr2-s3', text: 'I can name all natural notes on the A string (frets 0–12)', text_es: 'Puedo nombrar todas las notas naturales en la cuerda La (trastes 0–12)', set: 'm2w1' },
     { id: 'mr2-s4', text: 'I can press notes cleanly with no fret buzz', text_es: 'Puedo presionar notas limpias sin zumbido', set: 'm2w2' },
     { id: 'mr2-s6', text: 'I can use one finger per fret (index=1, middle=2, ring=3, pinky=4)', text_es: 'Puedo usar un dedo por traste (índice=1, medio=2, anular=3, meñique=4)', set: 'm2w2' },
-    { id: 'mr2-s5', text: 'I can read a basic TAB and play a 4-bar melody in time at 60 BPM', text_es: 'Puedo leer un TAB básico y tocar una melodía de 4 compases a tiempo a 60 BPM', set: 'm2w2' }
+    { id: 'mr2-s5', text: 'I can read a basic TAB and play a 4-bar melody in time at 60 BPM', text_es: 'Puedo leer un TAB básico y tocar una melodía de 4 compases a tiempo a 60 BPM', set: 'm2w2' },
+    { id: 'mr2-s7', text: 'I can play the "Watchtower" bass line — or "the cure" root line — from memory at 60 BPM with clean tone and correct fingering', text_es: 'Puedo tocar la línea de bajo de "Watchtower" — o la línea de raíces de "the cure" — de memoria a 60 BPM con tono limpio y digitación correcta', set: 'm2w2' }
   ],
   assessItems: [
     'Name the notes on the E and A strings from memory through fret 12',

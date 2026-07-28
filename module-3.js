@@ -968,7 +968,13 @@ MODULE_REVIEWS[3] = {
     { id: 'mr3-s7', text: 'I can change power chords on beat 1 at 60 BPM without stopping',
       text_es: 'Puedo cambiar acordes de potencia en el tiempo 1 a 60 BPM sin detenerme', set: 'm3w2' },
     { id: 'mr3-s8', text: 'I can play a 6-bar progression with a straight-eighths strum, counting "1 + 2 + 3 + 4 +"',
-      text_es: 'Puedo tocar una progresión de 6 compases con un rasgueo de corcheas rectas, contando "1 + 2 + 3 + 4 +"', set: 'm3w2' }
+      text_es: 'Puedo tocar una progresión de 6 compases con un rasgueo de corcheas rectas, contando "1 + 2 + 3 + 4 +"', set: 'm3w2' },
+    { id: 'mr3-s9', text: 'I can hold a power-chord progression at 80 BPM for 15 seconds with clean muting',
+      text_es: 'Puedo sostener una progresión de acordes de potencia a 80 BPM por 15 segundos con silenciado limpio', set: 'm3w2' },
+    { id: 'mr3-s10', text: 'I can play the split strum ("boom-chick") — just the root on beat 1, the full shape on beat 2',
+      text_es: 'Puedo tocar el rasgueo dividido ("boom-chick") — solo la raíz en el tiempo 1, la forma completa en el tiempo 2', set: 'm3w2' },
+    { id: 'mr3-s11', text: 'I can clap and count a 4-bar rhythm and name which notes are whole, half, quarter, and eighth notes',
+      text_es: 'Puedo aplaudir y contar un ritmo de 4 compases y nombrar cuáles notas son redondas, blancas, negras y corcheas', set: 'm3w2' }
   ],
   assessItems: [
     'Play a core-song excerpt ("Seven Nation Army", "All Along the Watchtower"\'s A5–G5–F5, or "Sweet Child"\'s D5–C5–G5 — which switches between E- and A-string roots on the same fret) with changes on beat 1 at 60 BPM, unused strings muted the whole way, then hold 80 BPM for 15 seconds',
