@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — String changing: winding steps that match our guitars
+
+### Fixed
+
+- **The winding instructions described the wrong kind of guitar.** Module 13
+  told you every wrap should go "below the last one, walking down the post" —
+  that's how a steel-string guitar works. Our classical guitars have a slotted
+  headstock, where the tuners are rollers lying sideways: there is no "down" to
+  wind along, so it was asking for something you couldn't actually do on the
+  guitar in your hands. **And it was part of your grade.** The winding step is
+  now split into a nylon path and a steel path, like the bridge step already
+  was, and the checklist accepts either.
+- **Locking the tail is now a step, not a bonus tip.** Trapping the loose end
+  under the first wrap was listed as an optional "level up." On nylon it's the
+  thing that stops the string slipping, so it's now part of the instructions.
+- **Nylon wrap count corrected** — 3 to 5 wraps, not the 2 to 3 a steel string
+  wants. Nylon is slicker and stretches more, so it needs the extra turns.
+
 ## 2026-07-27 — Changing your mind on a skill can't lock you out
 
 ### Fixed
