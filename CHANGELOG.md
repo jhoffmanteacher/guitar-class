@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — The site's demo notes now play in tune
+
+### Fixed
+
+- **Every note button, TAB playback and chord demo was slightly sharp — and the
+  higher the note, the worse it got.** Notes above the 12th fret were off by as
+  much as a third of a semitone, which meant that if you tuned or checked
+  yourself against them, you were matching the wrong pitch. They're now within
+  a couple of cents, which is closer than anyone can hear.
+- **Chords played straight down (rather than strummed) distorted on the
+  attack** — six notes at once overloaded the output. Chords now sit at about
+  the same loudness as a single note.
+- **Low notes ended with a faint click** instead of fading out.
+- **"Hear it" and the demo players kept sounding for a moment after you started
+  a Listening Coach exercise**, so a leftover note could land in the mic while
+  it was scoring you. Demo audio now stops immediately.
+
 ## 2026-07-27 — A big round of fixes across the site
 
 ### Fixed

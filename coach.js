@@ -4295,32 +4295,11 @@ function rnSetMode(guitar){
    source so an early Stop can silence notes that haven't sounded yet. */
 function rnPluckAt(midi, t){
   const ctx = getAudioCtx();
-  const freq = 440 * Math.pow(2, (midi - 69) / 12);
-  const sr = ctx.sampleRate;
-  const period = Math.max(2, Math.floor(sr / freq));
-  const total = Math.floor(sr * 1.5);
-  const ring = new Float32Array(period);
-  let prev = 0;
-  for (let i = 0; i < period; i++){
-    const noise = Math.random() * 2 - 1;
-    prev = 0.5 * (noise + prev);
-    ring[i] = prev;
-  }
-  const buffer = ctx.createBuffer(1, total, sr);
-  const data = buffer.getChannelData(0);
-  const decay = 0.984;
-  let idx = 0;
-  for (let i = 0; i < total; i++){
-    data[i] = ring[idx];
-    const next = (idx + 1) % period;
-    ring[idx] = decay * 0.5 * (ring[idx] + ring[next]);
-    idx = next;
-  }
   const src = ctx.createBufferSource();
-  src.buffer = buffer;
+  src.buffer = ksPluckCached(ctx, midi);   // shared with playNote — app.js loads first on index.html
   const g = ctx.createGain();
-  g.gain.value = 0.6;
-  src.connect(g); g.connect(ctx.destination);
+  g.gain.value = PLUCK_VOICE_GAIN;
+  src.connect(g); g.connect(getPluckBus());
   src.start(t);
   return src;
 }

@@ -697,8 +697,9 @@ function strumChord(chordName, btnEl){
   const ctx = getAudioCtx();
   if (ctx.state === 'suspended') ctx.resume();
   const stepMs = 35;
+  const vg = chordGain(midis.length, true);
   midis.forEach((m, i) => {
-    chordStrumTimeouts.push(setTimeout(() => playNote(m), i * stepMs));
+    chordStrumTimeouts.push(setTimeout(() => playNote(m, vg), i * stepMs));
   });
   if (btnEl){
     btnEl.classList.add('playing');
@@ -4472,50 +4473,188 @@ window.addEventListener('gc-langchange', function(){
 let audioCtx=null;
 function getAudioCtx(){ if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
 function beep(freq,dur,gain){ const ctx=getAudioCtx(); const o=ctx.createOscillator(),g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=freq; g.gain.setValueAtTime(gain==null?0.4:gain,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur); o.start(); o.stop(ctx.currentTime+dur); }
-/* Reusable single-note player. Karplus-Strong plucked-string
-   synthesis: a short noise burst is fed into a feedback delay
-   line whose length equals one period of the target pitch. A
-   one-pole lowpass in the loop causes harmonics to decay over
-   time — high notes fade faster than low notes, like a real
-   guitar string. midi=69 → A4 (440Hz). */
-function playNote(midi){
+/* Every synthesized pluck goes through one shared bus, so a single gain
+   node can silence notes that are already sounding — see killRingingPlucks. */
+let pluckBus = null;
+function getPluckBus(){
   const ctx = getAudioCtx();
-  if (ctx.state === 'suspended') ctx.resume();
-  const freq = 440 * Math.pow(2, (midi - 69) / 12);
+  if(!pluckBus || pluckBus.context !== ctx){
+    pluckBus = ctx.createGain();
+    pluckBus.gain.value = 1;
+    pluckBus.connect(ctx.destination);
+  }
+  return pluckBus;
+}
+/* Cancelling the timeouts that schedule notes isn't enough to stop the sound:
+   a note struck a moment ago already has its whole tail committed to an
+   AudioBufferSourceNode and will keep ringing into a live mic. Duck the bus
+   instead, then reopen it for whatever gets played next. */
+function killRingingPlucks(){
+  if(!pluckBus) return;
+  const ctx = pluckBus.context, now = ctx.currentTime;
+  pluckBus.gain.cancelScheduledValues(now);
+  pluckBus.gain.setValueAtTime(pluckBus.gain.value, now);
+  pluckBus.gain.linearRampToValueAtTime(0, now + 0.02);   // short fade, not a hard cut — a cut clicks
+  pluckBus.gain.setValueAtTime(1, now + 0.03);
+}
+/* Karplus-Strong plucked-string synthesis: a short noise burst is fed into a
+   feedback delay line whose length equals one period of the target pitch. A
+   lowpass in the loop makes harmonics decay over time — high notes fade faster
+   than low notes, like a real guitar string. midi=69 → A4 (440Hz).
+
+   The delay line is tuned to a FRACTIONAL length. An integer-only line can
+   only sound pitches that divide the sample rate evenly, which ran as much as
+   37 cents sharp in the high register — a third of a semitone, on a site where
+   students train their ears against these notes. The leftover fraction goes
+   through a first-order allpass, which delays without dulling the tone the way
+   plain interpolation would.
+
+   Bare Karplus-Strong sounds synthetic mostly because of what it leaves out,
+   so three things get added on top: a pick-position comb, the click of the
+   pick itself, and a pair of body resonances. */
+const PLUCK_VOICE_GAIN = 0.45;   // every buffer is peak-normalized, so this alone sets note level
+function ksPluckBuffer(ctx, midi){
   const sr = ctx.sampleRate;
-  const period = Math.max(2, Math.floor(sr / freq));
-  const total = Math.floor(sr * 1.5);
-  const ring = new Float32Array(period);
+  const freq = 440 * Math.pow(2, (midi - 69) / 12);
+  const bright = Math.min(1, Math.max(0, (midi - 40) / 48));   // 0 at the low E, 1 at the top of the range
+  /* Loop filter is a two-tap FIR (1-b, b): b = 0.5 is the classic averager,
+     lower b damps less and rings brighter. Its group delay is exactly b
+     samples, which the tuning below has to account for. */
+  const b = 0.44 + 0.06 * bright;
+  /* Loop gain, nudged closer to 1 down low so a wound bass string sustains
+     like one instead of dying off with the trebles. */
+  const decay = 0.9884 - 0.0052 * bright;
+  /* Total loop delay has to equal one period; the loop filter already supplies
+     b samples of it, so the delay line carries the rest. */
+  let target = Math.max(2.1, sr / freq - b);
+  let len = Math.floor(target), frac = target - len;
+  /* An allpass is least accurate — and rings longest — as its delay nears
+     zero, so borrow a whole sample to keep the fraction off the floor. */
+  if (frac < 0.1 && len > 2){ len -= 1; frac += 1; }
+  const ap = (1 - frac) / (1 + frac);
+  /* Excitation: white noise, lowpassed to take the fizz off the attack. */
+  const ring = new Float32Array(len);
   let prev = 0;
-  for (let i = 0; i < period; i++){
-    const noise = Math.random() * 2 - 1;
-    prev = 0.5 * (noise + prev);
+  for (let i = 0; i < len; i++){
+    prev = 0.5 * ((Math.random() * 2 - 1) + prev);
     ring[i] = prev;
   }
+  /* Pick position. Plucking a fifth of the way along a string kills every
+     harmonic with a node at that point — this comb is most of what separates
+     a picked guitar from a generic plucked tone. Removing the mean afterwards
+     matters too: DC sails through the loop filter untouched and turns into a
+     thump plus wasted headroom. */
+  const pick = Math.max(1, Math.round(0.19 * len));
+  const exc = new Float32Array(len);
+  let sum = 0;
+  for (let i = 0; i < len; i++){
+    exc[i] = ring[i] - ring[(i - pick + len) % len];
+    sum += exc[i];
+  }
+  const dc = sum / len;
+  for (let i = 0; i < len; i++) ring[i] = exc[i] - dc;
+  /* Render only as long as the note can still be heard. A high E is silent
+     inside half a second, so a flat 1.5s buffer was mostly wasted work. */
+  const total = Math.floor(sr * Math.min(2.0, Math.max(0.45,
+    Math.log(0.002) / (freq * Math.log(decay)))));
   const buffer = ctx.createBuffer(1, total, sr);
   const data = buffer.getChannelData(0);
-  const decay = 0.984;
-  let idx = 0;
+  let idx = 0, lpPrev = 0, apIn = 0, apOut = 0;
   for (let i = 0; i < total; i++){
-    data[i] = ring[idx];
-    const next = (idx + 1) % period;
-    ring[idx] = decay * 0.5 * (ring[idx] + ring[next]);
-    idx = next;
+    const out = ring[idx];
+    data[i] = out;
+    const lp = (1 - b) * out + b * lpPrev;  // loop filter (worth b samples of delay)
+    lpPrev = out;
+    const y = ap * lp + apIn - ap * apOut;  // allpass carries the fractional remainder
+    apIn = lp; apOut = y;
+    ring[idx] = decay * y;
+    idx = (idx + 1) % len;
   }
+  /* The pick striking the string — a few ms of bright noise the string model
+     itself can't produce. */
+  const clickN = Math.min(total, Math.floor(sr * 0.004));
+  for (let i = 0; i < clickN; i++){
+    data[i] += (Math.random() * 2 - 1) * 0.28 * Math.pow(1 - i / clickN, 3);
+  }
+  /* The box: the Helmholtz air resonance and the main top resonance, as two
+     cheap 2-pole resonators mixed in under the string. Low mix — this is the
+     difference between "warm" and "boomy". */
+  const body = new Float32Array(total);
+  for (let k = 0; k < 2; k++){
+    const f0 = k ? 214 : 102, q = k ? 11 : 14, mix = k ? 0.32 : 0.5;
+    const w = 2 * Math.PI * f0 / sr, r = Math.exp(-w / (2 * q));
+    const a1 = 2 * r * Math.cos(w), a2 = -r * r, gg = (1 - r) * Math.sin(w);
+    let y1 = 0, y2 = 0;
+    for (let i = 0; i < total; i++){
+      const y = gg * data[i] + a1 * y1 + a2 * y2;
+      y2 = y1; y1 = y;
+      body[i] += mix * y;
+    }
+  }
+  /* Normalize to a known peak so PLUCK_VOICE_GAIN is the only thing deciding
+     loudness — otherwise the body mix would make level depend on pitch. */
+  let peak = 0;
+  for (let i = 0; i < total; i++){
+    data[i] = data[i] * 0.86 + body[i];
+    const a = Math.abs(data[i]);
+    if (a > peak) peak = a;
+  }
+  if (peak > 0){ for (let i = 0; i < total; i++) data[i] /= peak; }
+  /* A low string is still at ~15% amplitude when the buffer ends; stopping
+     there mid-waveform is an audible click. Ramp the last few ms to nothing. */
+  const fade = Math.min(total, Math.floor(sr * 0.04));
+  for (let i = 0; i < fade; i++){
+    data[total - fade + i] *= 1 - i / fade;
+  }
+  return buffer;
+}
+/* Rendering a note is now ~5 passes over as much as 2s of audio, which is a
+   visible hitch on a school Chromebook when a six-note chord lands. Cache the
+   buffers — an AudioBuffer can back any number of sources. Two variants per
+   pitch, alternated, so a repeated note isn't audibly identical each time;
+   the cap keeps a long TAB from holding tens of MB (a 2s buffer is ~384KB). */
+const PLUCK_CACHE_MAX = 24;
+let pluckCache = new Map(), pluckVariant = 0;
+function ksPluckCached(ctx, midi){
+  const key = ctx.sampleRate + ':' + midi + ':' + (pluckVariant++ & 1);
+  let buf = pluckCache.get(key);
+  if (buf){                        // refresh recency: re-inserting moves it to the end
+    pluckCache.delete(key);
+  } else {
+    buf = ksPluckBuffer(ctx, midi);
+  }
+  pluckCache.set(key, buf);
+  while (pluckCache.size > PLUCK_CACHE_MAX) pluckCache.delete(pluckCache.keys().next().value);
+  return buf;
+}
+/* Reusable single-note player. gain defaults to a single note's level; callers
+   sounding several notes at once pass it down so the sum stays in headroom. */
+function playNote(midi, gain){
+  const ctx = getAudioCtx();
+  if (ctx.state === 'suspended') ctx.resume();
   const src = ctx.createBufferSource();
-  src.buffer = buffer;
+  src.buffer = ksPluckCached(ctx, midi);
   const g = ctx.createGain();
-  g.gain.value = 0.6;
+  g.gain.value = (gain == null) ? PLUCK_VOICE_GAIN : gain;
   src.connect(g);
-  g.connect(ctx.destination);
+  g.connect(getPluckBus());
   src.start();
+}
+/* Six notes struck together at full level peaked around 1.5 and clipped on the
+   attack. Struck at once their peaks pile up, so split by √n; spread across a
+   strum they barely overlap, and √n would leave the strum quieter than a
+   single note. */
+function chordGain(n, strummed){
+  n = Math.max(1, n);
+  return PLUCK_VOICE_GAIN / Math.pow(n, strummed ? 0.25 : 0.5);
 }
 /* Play one TAB beat: 1 midi = single note, N midis = chord, all at once. */
 function playBeat(btnEl){
   if(window.coachMicLive) return;  // demo audio would score itself while the Coach listens
   let midis = [];
   try { midis = JSON.parse(btnEl.dataset.midis || '[]'); } catch (e) { return; }
-  midis.forEach(m => playNote(Number(m)));
+  const g = chordGain(midis.length);
+  midis.forEach(m => playNote(Number(m), g));
 }
 let playSeqState = null;
 function stopPlaySeq(){
@@ -4537,6 +4676,7 @@ function stopAllDemoAudio(){
   stopPlaySeq();
   chordStrumTimeouts.forEach(clearTimeout);
   chordStrumTimeouts = [];
+  killRingingPlucks();   // the timeouts above only stop notes that haven't sounded yet
   // clearing the strum timeouts also cancels their '.playing' cleanup — sweep it
   document.querySelectorAll('.playing').forEach(el => el.classList.remove('playing'));
   // metroRunning/stopMetro live in fab-tools.js (always loaded alongside
@@ -4567,7 +4707,9 @@ function playSequence(midis, bpm, btnEl){
     const at = cursor;
     cursor += beats * interval;
     return setTimeout(() => {
-      (Array.isArray(pitches) ? pitches : [pitches]).forEach(x => playNote(Number(x)));
+      const list = Array.isArray(pitches) ? pitches : [pitches];
+      const vg = chordGain(list.length);
+      list.forEach(x => playNote(Number(x), vg));
       if(tabRoot){
         tabRoot.querySelectorAll('.beat-now').forEach(el=>el.classList.remove('beat-now'));
         tabRoot.querySelectorAll(`[data-seq="${i}"]`).forEach(el=>el.classList.add('beat-now'));
