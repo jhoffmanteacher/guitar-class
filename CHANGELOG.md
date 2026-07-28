@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — More room in the "All the songs" list
+
+### Changed
+
+- **The "All the songs" popup is wider**, so song titles and the row of
+  video buttons next to them have room to breathe — long titles no longer
+  break awkwardly in the middle of a word.
+- **Dropped the repeated "Core" label** under the Core songs section — the
+  section heading already says it, so those rows show just the title and
+  video buttons now.
+- **Song Journey is now the obvious first choice** on songs that have one —
+  it's colored to stand out from Tutorial/Backing/Original, since it's the
+  course's own deep-dive content for that song.
+
 ## 2026-07-28 — Tuner, Timer, and Metronome now share one "Tools" button
 
 ### Changed

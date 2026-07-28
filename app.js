@@ -2343,9 +2343,9 @@ function buildSongs(w){
     const nameEl = s.url ? `<button class="rp-trigger" onclick="loadSong('${w.id}',${i})">${s.name}</button>` : s.name;
     const vids = songVidButtonsHtml(s, kind=>`loadSongVid('${w.id}',${i},'${kind}')`);
     // Song Journey pages are same-origin (tabs/*.html), opened in a new tab so app state stays put.
-    if(s.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="${escAttr(t('songs.oneSongLayers'))}">&#x1F9F5; ${t('songs.songJourney')}</button>`);
+    if(s.journeyUrl) vids.push(`<button class="song-vid-btn journey" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="${escAttr(t('songs.oneSongLayers'))}">&#x1F9F5; ${t('songs.songJourney')}</button>`);
     const vidsEl = vids.length ? `<div class="song-vids">${vids.join('')}</div>` : '';
-    return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div><div class="sname">${nameEl}</div><div class="smeta">${diffDotsHtml(s.level)}${tf(s,'meta')}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${s.type}</span></div>`;
+    return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div class="song-name-col"><div class="sname">${nameEl}</div><div class="smeta">${diffDotsHtml(s.level)}${tf(s,'meta')}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${s.type}</span></div>`;
   }).join('');
   const requestSlot = `<div class="song-row song-request"><div class="song-request-ico">&#x1F3A4;</div><div><div class="sname">${t('songs.yourPick')}</div><div class="smeta">${t('songs.yourPickBody')}</div></div></div>`;
   const diffLegend = `<div class="leg"><span class="song-diff diff-1">&#x25CF;<span class="song-diff-empty">&#x25CB;&#x25CB;</span></span>&#x2192;<span class="song-diff diff-3">&#x25CF;&#x25CF;&#x25CF;</span> ${t('songs.diffLegend')}</div>`;
@@ -5273,14 +5273,18 @@ async function toggleSongsHub(){
     /* Index-based handlers: song names with apostrophes (Sweet Child O'
        Mine…) break when inlined into onclick. */
     const vids = [];
-    if(sg.journeyUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'journey')" title="${escAttr(t('songs.oneSongLayers'))}">&#x1F9F5; ${t('songs.songJourney')}</button>`);
+    if(sg.journeyUrl) vids.push(`<button class="song-vid-btn journey" onclick="songsHubVid(${idx},'journey')" title="${escAttr(t('songs.oneSongLayers'))}">&#x1F9F5; ${t('songs.songJourney')}</button>`);
     if(sg.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="songsHubVid(${idx},'tutorial')"><span class="svb-play">&#x25B6;</span>${t('songs.tutorial')}</button>`);
     if(sg.backingUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'backing')"><span class="svb-play">&#x25B6;</span>&#x1F3B5; ${t('hub.backing')}${sg.backingKey ? ` (${escHtml(sg.backingKey)})` : ''}</button>`);
     if(sg.originalUrl) vids.push(`<button class="song-vid-btn" onclick="songsHubVid(${idx},'original')" title="${escAttr(t('songs.opensYoutube'))}"><span class="svb-play">&#x25B6;</span>${t('songs.original')} <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
+    // The six pinned rows sit directly under the "Core songs" section header,
+    // where the tag would just repeat it — suppress there only; Focus songs
+    // (core:true, type:'Focus') still show their tag inside the choice groups.
+    const tagHtml = isCoreSix(e) ? '' : `<span class="stag ${sg.core ? 'stag-core' : ''}">${escHtml(sg.type || t(sg.core ? 'hub.tagCore' : 'hub.tagChoice'))}</span>`;
     return `<div class="song-row"><div class="dot ${sg.core ? 'dc' : 'dch'}"></div>
-      <div><div class="sname">${escHtml(sg.name)}</div>${sg.meta ? `<div class="smeta">${escHtml(sg.meta)}</div>` : ''}</div>
+      <div class="song-name-col"><div class="sname">${escHtml(sg.name)}</div>${sg.meta ? `<div class="smeta">${escHtml(sg.meta)}</div>` : ''}</div>
       ${vids.length ? `<div class="song-vids">${vids.join('')}</div>` : ''}
-      <span class="stag ${sg.core ? 'stag-core' : ''}">${escHtml(sg.type || t(sg.core ? 'hub.tagCore' : 'hub.tagChoice'))}</span></div>`;
+      ${tagHtml}</div>`;
   };
   const renderRows = list => list.map(row).join('');
   const coreHtml = `<div class="sh-sec-title">${t('hub.coreTitle')}</div><div class="card">${renderRows(coreEntries)}</div>`;

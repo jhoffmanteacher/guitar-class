@@ -360,6 +360,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:4px 16px;margin-bottom:12px}
 .song-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
 .song-row:last-child{border-bottom:none}
+/* The name column wins the width fight with .song-vids so long titles
+   ("Junior H") don't break mid-word; the hub's rows get more affordances
+   per row than the in-panel list, so they're allowed to wrap to a second
+   line instead of crushing the name at narrower widths. */
+.song-name-col{flex:1 1 180px;min-width:0}
+#songs-hub-panel .song-row{flex-wrap:wrap}
 .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
 .dc{background:var(--blue-text)}.dch{background:var(--text3)}
 .sname{font-size:0.9375rem;font-weight:500}
@@ -391,6 +397,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .song-vid-btn{display:inline-flex;align-items:center;gap:5px;font-size:0.8125rem;padding:3px 9px;border-radius:14px;background:transparent;color:var(--text2);border:1px solid transparent;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background 0.1s,border-color 0.1s,color 0.1s}
 .song-vid-btn:hover{background:var(--bg2);border-color:var(--text2);color:var(--text)}
 .song-vid-btn .svb-play{color:var(--green-text);font-size:0.75rem;line-height:1}
+/* Song Journey is the course's own deep content — the leading affordance
+   among the four a row can show. */
+.song-vid-btn.journey{color:var(--blue-text)}
 .legend{display:flex;gap:14px;margin-bottom:8px}
 .leg{display:flex;align-items:center;gap:5px;font-size:0.875rem;color:var(--text2)}
 .vid-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
@@ -1264,6 +1273,9 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
    activities (above the FABs at z 100 and the mini-player at z 90). */
 .daily5-overlay{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,0.45);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:48px 16px 24px}
 .daily5-modal{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:16px 18px;width:min(560px,100%);max-height:calc(100vh - 72px);overflow-y:auto;box-shadow:0 12px 40px rgba(0,0,0,0.30)}
+/* Songs hub: a table of songs with four affordances needs more room than the
+   Daily 5's width — scoped by id so the shared .daily5-modal stays 560px. */
+#songs-hub-panel{width:min(680px,100%)}
 
 /* Report-an-issue modal reuses the .daily5-overlay/.daily5-modal shell above. */
 .issue-actions{display:flex;justify-content:flex-end;margin-top:10px}
