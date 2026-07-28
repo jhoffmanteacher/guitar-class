@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — Games gets the whole screen back
+
+### Changed
+
+- **Guitar Games now takes over the full window again.** Once you're playing,
+  the menu and the header step out of the way so the game has the whole screen
+  — handy on a phone, and less to look at while you're watching the beat.
+  Songs, Keep practicing and My progress still open beside the menu the way
+  they do now. "Back to practice" (or your browser's Back button) returns you
+  to exactly the step you left.
+- **The Back button under a practice step now lines up with the left edge** of
+  the card, opposite Next, instead of sitting slightly indented.
+
 ## 2026-07-28 — Clearer "what's next," and cleaner icons everywhere
 
 ### Changed

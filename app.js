@@ -1700,14 +1700,21 @@ function syncRailStations(){
 }
 
 /* ── Explore pages: Games · Songs · Keep practicing · My progress ──
-   All four behave identically — they load INTO the main column (the rail and
-   header stay put), each owns a URL hash so browser Back exits, and the rail
-   item lights up while its page is open. Songs was a centred modal and the
-   other three were fixed full-viewport overlays until 2026-07-28; four
-   sibling nav items opening three different ways read as breakage. Anything
-   new in this group joins the table below rather than inventing a fourth. */
+   All four share the plumbing — one hash each (browser Back exits), one
+   router, one close path, and the rail item lights up while its page is open.
+   They differ in one axis only, `overlay`:
+     overlay: false (Songs · Keep practicing · My progress) — loads INTO the
+       main column, replacing #week-panels while the rail and header stay put,
+       so a student can hop between them the way they hop between sets.
+     overlay: true (Games) — takes the whole viewport, covering rail and
+       header. Jonathan asked for this on 2026-07-28, the day after the three
+       screens were unified: the arcade is a place you go, not a page you
+       browse, and the rail's practice scaffolding is noise once you're
+       playing.
+   Anything new in this group joins the table below and picks one of those two,
+   rather than inventing a third. */
 const EXPLORE_PAGES = [
-  { hash: '#games',           screen: 'games-screen',           btn: 'games-btn' },
+  { hash: '#games',           screen: 'games-screen',           btn: 'games-btn', overlay: true },
   { hash: '#songs',           screen: 'songs-screen',           btn: 'songs-hub-btn' },
   { hash: '#keep-practicing', screen: 'keep-practicing-screen', btn: 'keep-practicing-btn' },
   { hash: '#my-progress',     screen: 'my-progress-screen',     btn: 'my-progress-btn' },
@@ -1721,18 +1728,22 @@ function syncExploreNav(){
     const el = document.getElementById(p.screen);
     return el && !el.hasAttribute('hidden');
   });
-  /* Hides #week-panels: the practice view is swapped OUT, not covered up, so
-     .main would otherwise clamp its scroll to the short explore page and lose
-     the student's place in a long set. Stash it on the way in, put it back on
-     the way out — that's what made the old fixed overlays feel harmless. */
+  /* In-column pages hide #week-panels: the practice view is swapped OUT, not
+     covered up, so .main would otherwise clamp its scroll to the short explore
+     page and lose the student's place in a long set. Stash it on the way in,
+     put it back on the way out. An overlay page (Games) leaves the practice
+     view mounted underneath, so it needs neither — just a locked body scroll
+     so the page behind it can't rubber-band. */
+  const inColumn = !!open && !open.overlay;
   const wasOpen = document.body.classList.contains('explore-open');
-  document.body.classList.toggle('explore-open', !!open);
+  document.body.classList.toggle('explore-open', inColumn);
+  document.body.classList.toggle('games-open', !!open && !!open.overlay);
   /* Set the position AFTER the class toggle, and read scrollPane() fresh:
      showing/hiding a screen changes .main's height, which decides both
      whether it scrolls at all and how far. (Don't defer this to a
      requestAnimationFrame — those don't run in a background tab, so the
      student would come back to a page that hadn't restored itself.) */
-  if(!!open !== wasOpen) scrollPane().scrollTo({ top: open ? 0 : practiceScrollTop });
+  if(inColumn !== wasOpen) scrollPane().scrollTo({ top: inColumn ? 0 : practiceScrollTop });
   const activeId = open ? open.btn : 'practice-nav-btn';
   [...EXPLORE_PAGES.map(p => p.btn), 'practice-nav-btn'].forEach(id => {
     const b = document.getElementById(id);
@@ -1740,6 +1751,9 @@ function syncExploreNav(){
     const on = id === activeId;
     b.classList.toggle('active', on);
     if(on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    // Only the overlay page's button carries aria-expanded (see index.html);
+    // the in-column ones are navigation, not disclosure, so leave them alone.
+    if(b.hasAttribute('aria-expanded')) b.setAttribute('aria-expanded', String(on));
   });
 }
 
@@ -1750,8 +1764,11 @@ function routeExploreHash(){
   const h = location.hash;
   /* Remember the student's place in the set BEFORE anything is shown or
      hidden — once a screen is in the flow, .main's scrollTop has already
-     been shifted by scroll anchoring and no longer means what it says. */
-  if(!document.body.classList.contains('explore-open') && EXPLORE_PAGES.some(p => p.hash === h)){
+     been shifted by scroll anchoring and no longer means what it says.
+     Overlay pages don't take the practice view out of the flow, so there's
+     nothing to stash for them (and arriving at Songs *from* Games still reads
+     the live practice scrollTop, which is exactly the right one). */
+  if(!document.body.classList.contains('explore-open') && EXPLORE_PAGES.some(p => p.hash === h && !p.overlay)){
     practiceScrollTop = paneScrollTop();
   }
   if(h !== '#games' && typeof gamesClosePanel === 'function') gamesClosePanel();
@@ -1771,8 +1788,11 @@ window.addEventListener('hashchange', routeExploreHash);
 function returnToPractice(){
   // Leaving an explore page restores the student's place in the set
   // (syncExploreNav); a plain "Practice" click with nothing open still
-  // means "take me back to the top".
-  const fromExplore = document.body.classList.contains('explore-open');
+  // means "take me back to the top". Games counts as an explore page here
+  // even though it's an overlay — it never moved the practice view, so
+  // scrolling it to the top on the way out would lose the student's place.
+  const fromExplore = document.body.classList.contains('explore-open')
+    || document.body.classList.contains('games-open');
   if(typeof closeTopPanels === 'function') closeTopPanels();
   if(!fromExplore) scrollPaneTop(true);
 }

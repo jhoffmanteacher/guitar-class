@@ -1461,11 +1461,12 @@ function fretRender(){
    check starting) goes through gamesStopMic() so the mic never lingers.
    ════════════════════════════════════════════════════════════════════ */
 
-/* The games live on their own page in the main column: #games in the URL,
-   the browser Back button exits, and the look is its own (arcade gradient
-   shell around a normal-theme stage so the game internals render as
-   designed). One of the four EXPLORE_PAGES in app.js — the rail and header
-   stay visible, so don't restore the old fixed full-viewport treatment. */
+/* The games live on their own full-viewport page: #games in the URL, the
+   browser Back button exits, and the look is its own (arcade gradient shell
+   around a normal-theme stage so the game internals render as designed).
+   One of the four EXPLORE_PAGES in app.js, and the only one flagged
+   `overlay: true` — it covers the rail and header rather than loading into
+   the main column. See that table for why. */
 function toggleGames(){
   const screen = document.getElementById('games-screen');
   if (!screen) return;
