@@ -1,0 +1,88 @@
+rules_version = '2';
+
+/* ══════════════════════════════════════════════════════════════════════
+   Guitar Class — Firestore security rules
+
+   THESE RULES ARE THE REAL SECURITY BOUNDARY. Everything in the app is
+   client-side and therefore bypassable from DevTools: the ?teacher=true
+   dashboard gate is a div swap, and the "paused" flag is a rendering
+   choice. Only what is written here actually stops anyone.
+
+   This file is the source of truth, but editing it changes NOTHING on its
+   own — GitHub Pages does not deploy Firestore rules. Paste the contents
+   into Firebase console → Firestore Database → Rules → Publish (or run
+   `firebase deploy --only firestore:rules` if the CLI is ever set up).
+   Keep this file and the console in sync; if they drift, the console wins
+   and this file becomes a lie.
+
+   The app only ever touches three paths (verified against app.js,
+   teacher.js and tabs/journey.js):
+     progress/{uid}   one doc per student: skills, responses, completed,
+                      games, streak, practiceLog, name, email
+     config/class     one shared doc: gamesEnabled, gameOverrides,
+                      paused, archived  (teacher writes, students read)
+     issueReports/*   student-filed problem reports
+
+   Anything not matched below is denied by default. Do not add a catch-all.
+   ══════════════════════════════════════════════════════════════════════ */
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* The one teacher account. email_verified matters: without it, anyone
+       who could register this address under a provider that doesn't verify
+       (enabling Email/Password is a single console toggle with no footprint
+       in this repo) would read every student's work. Google sign-in — the
+       only provider the app uses — always sets email_verified, so adding
+       this does not lock the real teacher out. */
+    function isTeacher() {
+      return request.auth != null
+          && request.auth.token.email == 'jhoffman@seq.org'
+          && request.auth.token.email_verified == true;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /* One document per student, keyed by uid.
+
+       A student reads and writes ONLY their own. The teacher gets read —
+       deliberately NOT write. The dashboard never needs to modify student
+       work (pause and archive live in config/class precisely so they
+       don't), and withholding write means a compromised teacher session
+       cannot erase the class. If a destructive "wipe progress" button is
+       ever added, it needs `allow delete: if isTeacher()` here, and that
+       trade-off should be a deliberate decision rather than a default. */
+    match /progress/{userId} {
+      allow read, write: if isSignedIn() && request.auth.uid == userId;
+      allow read: if isTeacher();
+    }
+
+    /* Class-wide settings. Every signed-in student must read this doc —
+       app.js loadClassConfig() needs gamesEnabled/gameOverrides for the
+       arcade and `paused` for the access hold — so it cannot be
+       teacher-only.
+
+       What that exposes: the uid→bool maps for the whole class. It is
+       limited in practice, because uids are opaque and a student cannot
+       read anyone else's progress doc to map a uid back to a name. If that
+       ever stops being acceptable, the fix is structural rather than a
+       rules tweak: split into config/students/{uid} docs so each student
+       can read only their own row. */
+    match /config/{doc} {
+      allow read:  if isSignedIn();
+      allow write: if isTeacher();
+    }
+
+    /* Student-filed issue reports. A student may file one under their own
+       uid and cannot read the pile back — reports can name other students,
+       so they are teacher-eyes-only. No update or delete for anyone: a
+       report should not be editable after filing. */
+    match /issueReports/{reportId} {
+      allow create: if isSignedIn()
+                    && request.resource.data.uid == request.auth.uid;
+      allow read:   if isTeacher();
+    }
+  }
+}

@@ -535,6 +535,40 @@ function checkJourneyPaths() {
    URL fragment independently in app.js, index.html, and each tabs/*.html
    page (sw.js doesn't reference it directly). Nothing else catches a page
    drifting to a different version, so diff every occurrence found. */
+/* The teacher's email is the ONLY thing separating the dashboard's data
+   from every student, and it is written in two places: TEACHER_EMAIL in
+   firebase-config.js (which decides what the UI shows) and isTeacher() in
+   firestore.rules (which decides what Firestore actually hands over). If
+   they drift, the failure is silent and one-directional — the dashboard
+   renders, then every read comes back empty or permission-denied.
+
+   This cannot verify what the Firebase console has DEPLOYED; rules are
+   published by hand there. It only keeps the repo self-consistent. */
+function checkFirestoreRules() {
+  const rulesPath = join(ROOT, 'firestore.rules');
+  let rules;
+  try { rules = readFileSync(rulesPath, 'utf8'); }
+  catch { warn('no firestore.rules in the repo — the security rules exist only in the Firebase console, unversioned'); warnings++; return; }
+
+  const cfg = readFileSync(join(ROOT, 'firebase-config.js'), 'utf8');
+  const cfgEmail = (cfg.match(/TEACHER_EMAIL\s*=\s*['"]([^'"]+)['"]/) || [])[1];
+  const ruleEmails = [...rules.matchAll(/token\.email\s*==\s*['"]([^'"]+)['"]/g)].map(m => m[1]);
+
+  if (!cfgEmail) { warn('could not read TEACHER_EMAIL from firebase-config.js'); warnings++; return; }
+  if (!ruleEmails.length) { err('firestore.rules has no teacher email check — the dashboard would be readable by any signed-in student'); problems++; return; }
+  const mismatched = [...new Set(ruleEmails)].filter(e => e !== cfgEmail);
+  if (mismatched.length) {
+    err(`teacher email drift: firebase-config.js has "${cfgEmail}", firestore.rules has "${mismatched.join('", "')}"`);
+    problems++;
+  } else {
+    ok(`firestore.rules teacher email matches firebase-config.js (${cfgEmail})`);
+  }
+  if (!/email_verified/.test(rules)) {
+    warn('firestore.rules does not check email_verified — an unverified account could claim the teacher address');
+    warnings++;
+  }
+}
+
 function checkSdkVersion() {
   const FILES = ['app.js', 'sw.js', 'index.html', ...TAB_PAGES];
   const found = new Map();   // version → Set(files)
@@ -596,6 +630,7 @@ function bumpServiceWorker() {
   checkJourneyPaths();
   checkSwAssets(src);
   checkSdkVersion();
+  checkFirestoreRules();
 
   const before = src;
   src = bumpVersionConst('CACHE_VERSION', 'guitar-class', [...SHELL_FILES, ...IMG_FILES], src, swPath, 'shell cache');
