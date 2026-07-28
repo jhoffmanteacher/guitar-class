@@ -154,27 +154,27 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 2 — Alternate-picking workout', label_es: 'Reto 2 — Ejercicio de púa alternada',
-            text: '<ul><li>Play this riff on the low E and A strings with strict alternate picking — one stroke per note, alternating down-up.</li></ul>You\'ve got it when: clean and even at 60 BPM before you speed it up.',
-            text_es: '<ul><li>Toca este riff en las cuerdas Mi grave y La con púa alternada estricta — un golpe de púa por nota, alternando abajo-arriba.</li></ul>Lo tienes cuando: sale limpio y parejo a 60 BPM antes de acelerarlo.',
-            hint: 'Use alternate picking (down-up-down-up). The riff is fast — start at 60 BPM and only speed up when it\'s clean. Set the ⏱ Timer for 2 minutes and loop it.',
-            hint_es: 'Usa púa alternada (abajo-arriba-abajo-arriba). El riff es rápido — empieza a 60 BPM y solo acelera cuando salga limpio. Pon el ⏱ Temporizador en 2 minutos y repítelo.',
+            text: '<ul><li>Read the rhythm first: notes 2 and 3 are a beamed pair of 8th notes (two squeezed into one beat), notes 1 and 4–7 are quarter notes (one beat each), and the last note is a half note (held two full beats).</li><li>Then play the riff on the low E and A strings with strict alternate picking — one stroke per note, alternating down-up.</li></ul>You\'ve got it when: clean and even at 60 BPM before you speed it up, with the 8th-note pair and the held last note clearly different from the quarters.',
+            text_es: '<ul><li>Lee el ritmo primero: las notas 2 y 3 son un par de corcheas unidas por barra (dos metidas en un solo tiempo), las notas 1 y 4–7 son negras (un tiempo cada una), y la última nota es una blanca (sostenida dos tiempos completos).</li><li>Luego toca el riff en las cuerdas Mi grave y La con púa alternada estricta — un golpe de púa por nota, alternando abajo-arriba.</li></ul>Lo tienes cuando: sale limpio y parejo a 60 BPM antes de acelerarlo, con el par de corcheas y la última nota sostenida claramente distintas de las negras.',
+            hint: 'Use alternate picking (down-up-down-up). Tap ▶ on the TAB to hear the rhythm — the two 8th notes go by twice as fast as the quarters, and the last note rings for two beats. Start at 60 BPM and only speed up when it\'s clean. Set the ⏱ Timer for 2 minutes and loop it.',
+            hint_es: 'Usa púa alternada (abajo-arriba-abajo-arriba). Toca ▶ en el TAB para escuchar el ritmo — las dos corcheas pasan al doble de velocidad que las negras, y la última nota suena dos tiempos. Empieza a 60 BPM y solo acelera cuando salga limpio. Pon el ⏱ Temporizador en 2 minutos y repítelo.',
             stuck: 'Drop to 50 BPM and keep strict down-up-down-up picking — even and slow is better than fast and sloppy. Loop just the first 4 notes until they\'re automatic.',
             stuck_es: 'Baja a 50 BPM y mantén la púa estricta abajo-arriba-abajo-arriba — parejo y lento es mejor que rápido y descuidado. Repite solo las primeras 4 notas hasta que salgan automáticas.',
             levelUp: 'Push to 80 BPM, or play it twice through with no stumble.',
             levelUp_es: 'Sube a 80 BPM, o tócalo dos veces seguidas sin tropiezos.',
             skills: [2],
             tab: {
-              caption: 'Alternate-picking workout riff · low E and A strings',
-              caption_es: 'Riff de ejercicio de púa alternada · cuerdas Mi grave y La',
+              caption: 'Alternate-picking workout riff · low E and A strings · 2 bars: quarter, two 8ths, quarter, quarter | quarter, quarter, half',
+              caption_es: 'Riff de ejercicio de púa alternada · cuerdas Mi grave y La · 2 compases: negra, dos corcheas, negra, negra | negra, negra, blanca',
               notes: [
-                { string: 'A', fret: 7, note: 'E',  midi: 52 },
-                { string: 'E', fret: 7, note: 'B',  midi: 47 },
-                { string: 'A', fret: 5, note: 'D',  midi: 50 },
-                { string: 'E', fret: 5, note: 'A',  midi: 45 },
-                { string: 'A', fret: 3, note: 'C',  midi: 48 },
-                { string: 'E', fret: 3, note: 'G',  midi: 43 },
-                { string: 'A', fret: 2, note: 'B',  midi: 47 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 }
+                { string: 'A', fret: 7, note: 'E',  midi: 52, beats: 1 },
+                { string: 'E', fret: 7, note: 'B',  midi: 47, beats: 0.5 },
+                { string: 'A', fret: 5, note: 'D',  midi: 50, beats: 0.5 },
+                { string: 'E', fret: 5, note: 'A',  midi: 45, beats: 1 },
+                { string: 'A', fret: 3, note: 'C',  midi: 48, beats: 1 },
+                { string: 'E', fret: 3, note: 'G',  midi: 43, beats: 1 },
+                { string: 'A', fret: 2, note: 'B',  midi: 47, beats: 1 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40, beats: 2 }
               ]
             }
           }
@@ -660,8 +660,8 @@ SETS.push(
             label: 'Watch: the A-shape barre', label_es: 'Mira: la cejilla en forma de A',
             text: 'Watch: <a href="https://youtu.be/C7k0CWgI-xI" target="_blank">A Shape Major Barre Chords on Guitar – JustinGuitar</a> (0:00–4:00).',
             text_es: 'Mira: <a href="https://youtu.be/C7k0CWgI-xI" target="_blank">A Shape Major Barre Chords on Guitar – JustinGuitar</a> (0:00–4:00).',
-            hint: 'The A-shape uses the open A major chord, moved up the neck. Some players bar strings 2, 3, 4 with their RING finger only — it\'s a different technique from the E-shape.',
-            hint_es: 'La forma de A usa el acorde abierto de A mayor, movido por el mástil. Algunos guitarristas hacen cejilla en las cuerdas 2, 3, 4 solo con el dedo ANULAR — es una técnica distinta a la de la forma de E.',
+            hint: 'The A-shape uses the open A major chord, moved up the neck. You may see players flatten their RING finger alone across strings 4, 3 and 2 — in this module we use one finger per string instead (middle, ring, pinky), because that keeps string 1 free to ring.',
+            hint_es: 'La forma de A usa el acorde abierto de A mayor, movido por el mástil. Puede que veas guitarristas que aplanan solo su dedo ANULAR sobre las cuerdas 4, 3 y 2 — en este módulo usamos un dedo por cuerda (medio, anular y meñique), porque así la cuerda 1 queda libre para sonar.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'The A-shape barre chord places its ROOT note on which string?',
               prompt_es: '¿En cuál cuerda coloca su nota RAÍZ el acorde con cejilla en forma de A?',
@@ -701,7 +701,7 @@ SETS.push(
             label: 'Wrap-up: E-shape or A-shape?', label_es: 'Cierre: ¿forma de E o forma de A?',
             text: 'Station Wrap-Up — you now know both barre shapes. Which feels harder right now — the E-shape (root on string 6) or the A-shape (root on string 5) — and what makes it tougher for your hand?',
             text_es: 'Cierre de la estación — ahora conoces las dos formas de cejilla. ¿Cuál se siente más difícil ahora mismo — la forma de E (raíz en la cuerda 6) o la forma de A (raíz en la cuerda 5) — y qué la hace más dura para tu mano?',
-            response: { type: 'short', placeholder: 'e.g. the A-shape — barring 4-3-2 with my ring finger is awkward', placeholder_es: 'p. ej. la forma de A — hacer cejilla en 4-3-2 con mi anular se siente incómodo' }
+            response: { type: 'short', placeholder: 'e.g. the A-shape — stacking three fingers on strings 4-3-2 is awkward', placeholder_es: 'p. ej. la forma de A — apilar tres dedos en las cuerdas 4-3-2 se siente incómodo' }
           }
             ]
           }
@@ -717,17 +717,17 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 1 — A-Shape B Major', label_es: 'Reto 1 — B mayor en forma de A',
-            text: '<ol><li>Index bars all 6 strings at fret 2.</li><li>Fingers on strings 4/3/2 at fret 4.</li><li>Strum strings 5–1 (let the index mute string 6).</li></ol>You\'ve got it when: a clean B major with the string-5 bass ringing and no low E.',
-            text_es: '<ol><li>El índice hace cejilla en las 6 cuerdas en el traste 2.</li><li>Los dedos en las cuerdas 4/3/2 en el traste 4.</li><li>Rasguea las cuerdas 5–1 (deja que el índice silencie la cuerda 6).</li></ol>Lo tienes cuando: un B mayor limpio con el bajo de la cuerda 5 sonando y sin Mi grave.',
+            text: '<ol><li>Index bars all 6 strings at fret 2.</li><li>Middle finger on string 4, ring finger on string 3, pinky on string 2 — all at fret 4, one finger per string.</li><li>Arch those three so they stay off string 1.</li><li>Strum strings 5–1 (let the index mute string 6).</li></ol>You\'ve got it when: a clean B major with the string-5 bass ringing, the high e ringing too, and no low E.',
+            text_es: '<ol><li>El índice hace cejilla en las 6 cuerdas en el traste 2.</li><li>El dedo medio en la cuerda 4, el anular en la cuerda 3 y el meñique en la cuerda 2 — todos en el traste 4, un dedo por cuerda.</li><li>Arquea esos tres dedos para que no toquen la cuerda 1.</li><li>Rasguea las cuerdas 5–1 (deja que el índice silencie la cuerda 6).</li></ol>Lo tienes cuando: un B mayor limpio con el bajo de la cuerda 5 sonando, la mi aguda sonando también, y sin Mi grave.',
             hint: 'Avoid the low E string (string 6) — your index finger mutes it for you. Aim your strum from string 5 downward.',
             hint_es: 'Evita la cuerda Mi grave (cuerda 6) — tu dedo índice la silencia por ti. Apunta tu rasgueo desde la cuerda 5 hacia abajo.',
-            stuck: 'Stage it: (1) bar fret 2 and get strings 5 and 1 ringing, (2) add the ring-finger sub-barre on strings 4-3-2 at fret 4 last. The ring finger is the tricky part — arch it so the high E still rings. Cramping is normal; shake your hand loose.',
-            stuck_es: 'Hazlo por etapas: (1) haz la cejilla en el traste 2 y logra que suenen las cuerdas 5 y 1, (2) agrega al final la sub-cejilla del dedo anular en las cuerdas 4-3-2 en el traste 4. El dedo anular es la parte difícil — arquéalo para que la mi aguda siga sonando. Acalambrarse es normal; sacude tu mano para relajarla.',
-            levelUp: 'Slide the whole A-shape up to C (3rd fret) and keep it clean.',
-            levelUp_es: 'Desliza toda la forma de A hasta C (traste 3) y mantenla limpia.',
+            stuck: 'Stage it: (1) bar fret 2 and get strings 5 and 1 ringing, (2) add the middle, ring and pinky on strings 4-3-2 at fret 4 last, one at a time. The pinky is the tricky one — stand it up on its tip so it presses string 2 without leaning on string 1. Cramping is normal; shake your hand loose.',
+            stuck_es: 'Hazlo por etapas: (1) haz la cejilla en el traste 2 y logra que suenen las cuerdas 5 y 1, (2) agrega al final el medio, el anular y el meñique en las cuerdas 4-3-2 en el traste 4, uno por uno. El meñique es el difícil — párala sobre su punta para que presione la cuerda 2 sin recargarse en la cuerda 1. Acalambrarse es normal; sacude tu mano para relajarla.',
+            levelUp: 'Slide the whole A-shape up to C (3rd fret) and keep it clean. Or try the shortcut many players use: flatten your ring finger alone across strings 4-3-2 as a small sub-barre. It is quicker to grab, but it usually lies down onto string 1 and deadens it — only count it when the high e still rings.',
+            levelUp_es: 'Desliza toda la forma de A hasta C (traste 3) y mantenla limpia. O prueba el atajo que usan muchos guitarristas: aplana solo tu dedo anular sobre las cuerdas 4-3-2 como una sub-cejilla pequeña. Se agarra más rápido, pero normalmente se acuesta sobre la cuerda 1 y la apaga — solo cuéntalo cuando la mi aguda siga sonando.',
             skills: [1, 2, 3],
             chords: [
-              { name: 'B major', chord: [[6,'x'],[5,2,'1'],[4,4,'3'],[3,4,'3'],[2,4,'3'],[1,2,'1']], position: 2 }
+              { name: 'B major', chord: [[6,'x'],[5,2,'1'],[4,4,'2'],[3,4,'3'],[2,4,'4'],[1,2,'1']], position: 2 }
             ]
           }
             ]
@@ -748,9 +748,9 @@ SETS.push(
             levelUp_es: 'Toca C→D→E a tiempo a 70 BPM, o agrega F en el traste 8.',
             skills: [3, 4],
             chords: [
-              { name: 'C', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,5,'3'],[2,5,'3'],[1,3,'1']], position: 3 },
-              { name: 'D', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,7,'3'],[2,7,'3'],[1,5,'1']], position: 5 },
-              { name: 'E', chord: [[6,'x'],[5,7,'1'],[4,9,'3'],[3,9,'3'],[2,9,'3'],[1,7,'1']], position: 7 }
+              { name: 'C', chord: [[6,'x'],[5,3,'1'],[4,5,'2'],[3,5,'3'],[2,5,'4'],[1,3,'1']], position: 3 },
+              { name: 'D', chord: [[6,'x'],[5,5,'1'],[4,7,'2'],[3,7,'3'],[2,7,'4'],[1,5,'1']], position: 5 },
+              { name: 'E', chord: [[6,'x'],[5,7,'1'],[4,9,'2'],[3,9,'3'],[2,9,'4'],[1,7,'1']], position: 7 }
             ]
           }
             ]
@@ -772,7 +772,7 @@ SETS.push(
             skills: [5, 6],
             chords: [
               { name: 'F (E-shape)', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
-              { name: 'F (A-shape)', chord: [[6,'x'],[5,8,'1'],[4,10,'3'],[3,10,'3'],[2,10,'3'],[1,8,'1']], position: 8 }
+              { name: 'F (A-shape)', chord: [[6,'x'],[5,8,'1'],[4,10,'2'],[3,10,'3'],[2,10,'4'],[1,8,'1']], position: 8 }
             ]
           }
             ]
@@ -795,9 +795,9 @@ SETS.push(
             response: { type: 'short', prompt: 'Personal record — play the F–C–G–D switch cleanly at 60 BPM, then go +5 at a time. Your fastest CLEAN loop today (BPM)?', prompt_es: 'Récord personal — toca el cambio F–C–G–D limpio a 60 BPM, y luego sube de 5 en 5. ¿Tu vuelta LIMPIA más rápida hoy (BPM)?', placeholder: 'e.g. 70 — try for a higher number next time', placeholder_es: 'p. ej. 70 — intenta superarlo la próxima vez' },
             chords: [
               { name: 'F', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
-              { name: 'C', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,5,'3'],[2,5,'3'],[1,3,'1']], position: 3 },
+              { name: 'C', chord: [[6,'x'],[5,3,'1'],[4,5,'2'],[3,5,'3'],[2,5,'4'],[1,3,'1']], position: 3 },
               { name: 'G', chord: [[6,3,'1'],[5,5,'3'],[4,5,'4'],[3,4,'2'],[2,3,'1'],[1,3,'1']], position: 3 },
-              { name: 'D', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,7,'3'],[2,7,'3'],[1,5,'1']], position: 5 }
+              { name: 'D', chord: [[6,'x'],[5,5,'1'],[4,7,'2'],[3,7,'3'],[2,7,'4'],[1,5,'1']], position: 5 }
             ]
           }
             ]
@@ -901,19 +901,19 @@ SETS.push(
                 label: 'Challenge — F# and Bb, the last two', label_es: 'Reto — F# y Bb, las últimas dos',
                 text: '<ol><li>F# major is your E-shape barre at fret 2 (root F# on string 6).</li><li>Bb major is your A-shape barre at fret 1 (root Bb on string 5, low E muted).</li><li>Play each one cleanly, then trade F# ↔ Bb, one strum apiece.</li></ol>You\'ve got it when: both ring clean at these tight low frets and you can name each by its root.',
                 text_es: '<ol><li>F# mayor es tu cejilla en forma de E en el traste 2 (raíz F# en la cuerda 6).</li><li>Bb mayor es tu cejilla en forma de A en el traste 1 (raíz Bb en la cuerda 5, Mi grave silenciada).</li><li>Toca cada una de forma limpia, y luego alterna F# ↔ Bb, un rasgueo cada una.</li></ol>Lo tienes cuando: ambas suenan limpias en estos trastes bajos y apretados y puedes nombrar cada una por su raíz.',
-                hint: 'You\'ve slid both barre shapes all over the neck — these two are the lowest, and the last two shapes left in this module. Same two shapes you already own, just parked down low where the strings fight hardest. F#: the E-shape bar on fret 2 — one fret above the open E chord. Bb: the A-shape bar on fret 1 — index bars the strings, your ring finger sub-barres strings 4-3-2 at fret 3 (the same sub-barre you drilled on B, C and D), and your index mutes the low E — one fret above the open A chord. Read the roots: string 6 fret 2 = F#, string 5 fret 1 = Bb. Tap ▶ to hear each chord.',
-                hint_es: 'Has deslizado ambas formas de cejilla por todo el mástil — estas dos son las más bajas, y las últimas dos formas que quedan en este módulo. Las mismas dos formas que ya dominas, solo que ubicadas abajo donde las cuerdas pelean más. F#: la cejilla en forma de E en el traste 2 — un traste arriba del acorde abierto de E. Bb: la cejilla en forma de A en el traste 1 — el índice hace la cejilla en las cuerdas, tu dedo anular hace la sub-cejilla en las cuerdas 4-3-2 en el traste 3 (la misma sub-cejilla que ejercitaste en B, C y D), y tu índice silencia la Mi grave — un traste arriba del acorde abierto de A. Lee las raíces: cuerda 6 traste 2 = F#, cuerda 5 traste 1 = Bb. Toca ▶ para escuchar cada acorde.',
-                stuck: 'These sit at the tightest end of the neck, so build each in stages — and if fret 1 or 2 buzzes, prove the shape higher up first, then walk it down. For Bb, get the string-5 bass and the ring-finger sub-barre ringing before you add the high E. Cramping is normal; shake your hand loose.',
-                stuck_es: 'Estos caen en el extremo más apretado del mástil, así que construye cada uno por etapas — y si el traste 1 o 2 zumba, prueba la forma más arriba primero, y luego bájala. Para Bb, logra que suenen el bajo de la cuerda 5 y la sub-cejilla del anular antes de agregar la mi aguda. Acalambrarse es normal; sacude tu mano para relajarla.',
+                hint: 'You\'ve slid both barre shapes all over the neck — these two are the lowest, and the last two shapes left in this module. Same two shapes you already own, just parked down low where the strings fight hardest. F#: the E-shape bar on fret 2 — one fret above the open E chord. Bb: the A-shape bar on fret 1 — index bars the strings, your middle, ring and pinky take strings 4-3-2 at fret 3 (one finger per string, the same way you built B, C and D), and your index mutes the low E — one fret above the open A chord. Read the roots: string 6 fret 2 = F#, string 5 fret 1 = Bb. Tap ▶ to hear each chord.',
+                hint_es: 'Has deslizado ambas formas de cejilla por todo el mástil — estas dos son las más bajas, y las últimas dos formas que quedan en este módulo. Las mismas dos formas que ya dominas, solo que ubicadas abajo donde las cuerdas pelean más. F#: la cejilla en forma de E en el traste 2 — un traste arriba del acorde abierto de E. Bb: la cejilla en forma de A en el traste 1 — el índice hace la cejilla en las cuerdas, tu medio, tu anular y tu meñique toman las cuerdas 4-3-2 en el traste 3 (un dedo por cuerda, igual que como armaste B, C y D), y tu índice silencia la Mi grave — un traste arriba del acorde abierto de A. Lee las raíces: cuerda 6 traste 2 = F#, cuerda 5 traste 1 = Bb. Toca ▶ para escuchar cada acorde.',
+                stuck: 'These sit at the tightest end of the neck, so build each in stages — and if fret 1 or 2 buzzes, prove the shape higher up first, then walk it down. For Bb, get the string-5 bass and the three fingers on strings 4-3-2 ringing before you add the high e. Cramping is normal; shake your hand loose.',
+                stuck_es: 'Estos caen en el extremo más apretado del mástil, así que construye cada uno por etapas — y si el traste 1 o 2 zumba, prueba la forma más arriba primero, y luego bájala. Para Bb, logra que suenen el bajo de la cuerda 5 y los tres dedos en las cuerdas 4-3-2 antes de agregar la mi aguda. Acalambrarse es normal; sacude tu mano para relajarla.',
                 levelUp: 'Hear them in real music: F# is all over "Hotel California"; Bb is the fourth chord of the key (the IV chord) in "Hey Jude." Or slide each shape up one fret and name the new chord (G, and B).',
                 levelUp_es: 'Escúchalas en música real: F# está por toda "Hotel California"; Bb es el cuarto acorde de la tonalidad (el acorde IV) en "Hey Jude". O desliza cada forma un traste hacia arriba y nombra el acorde nuevo (G, y B).',
                 skills: [3, 4, 5],
                 chords: [
                   { name: 'F# major (E-shape)', chord: [[6,2,'1'],[5,4,'3'],[4,4,'4'],[3,3,'2'],[2,2,'1'],[1,2,'1']], position: 2 },
-                  { name: 'Bb major (A-shape)', chord: [[6,'x'],[5,1,'1'],[4,3,'3'],[3,3,'3'],[2,3,'3'],[1,1,'1']], position: 1 }
+                  { name: 'Bb major (A-shape)', chord: [[6,'x'],[5,1,'1'],[4,3,'2'],[3,3,'3'],[2,3,'4'],[1,1,'1']], position: 1 }
                 ],
                 playSeq: { label: 'Hear F# major, then Bb major', label_es: 'Escucha F# mayor, y luego Bb mayor', bpm: 50, notes: [[42,49,54,58,61,66],[46,53,58,62,65]] },
-                response: { type: 'short', prompt: 'Which of the two low barres — F# or Bb — rings less cleanly right now? Name it for your next warm-up.', prompt_es: '¿Cuál de las dos cejillas bajas — F# o Bb — suena menos limpia ahora mismo? Nómbrala para tu próximo calentamiento.', placeholder: 'e.g. Bb — my ring-finger sub-barre deadens the high E', placeholder_es: 'p. ej. Bb — mi sub-cejilla del anular apaga la mi aguda' }
+                response: { type: 'short', prompt: 'Which of the two low barres — F# or Bb — rings less cleanly right now? Name it for your next warm-up.', prompt_es: '¿Cuál de las dos cejillas bajas — F# o Bb — suena menos limpia ahora mismo? Nómbrala para tu próximo calentamiento.', placeholder: 'e.g. Bb — my pinky on string 2 keeps leaning on the high e', placeholder_es: 'p. ej. Bb — mi meñique en la cuerda 2 se sigue recargando en la mi aguda' }
               }
             ]
           }
@@ -937,7 +937,7 @@ SETS.push(
         gotItWhen_es: 'tu cejilla de B suena limpia en las cuerdas 5 a 1 — y la cuerda 6 (Mi grave) está silenciada por tu dedo índice para que no suene por accidente.',
         practice: { type: 'chord', label: 'B major — A-shape barre at fret 2', label_es: 'B mayor — cejilla en forma de A en el traste 2',
           chords: [
-            { name: 'B major', chord: [[6,'x'],[5,2,'1'],[4,4,'3'],[3,4,'3'],[2,4,'3'],[1,2,'1']], position: 2 }
+            { name: 'B major', chord: [[6,'x'],[5,2,'1'],[4,4,'2'],[3,4,'3'],[2,4,'4'],[1,2,'1']], position: 2 }
           ] } },
       { id: 'm7w3-s2', text: 'Mute string 6 (low E) when playing an A-shape barre',
         text_es: 'Silenciar la cuerda 6 (Mi grave) al tocar una cejilla en forma de A',
@@ -965,9 +965,9 @@ SETS.push(
         gotItWhen_es: 'puedes deslizar la forma de A entre C (traste 3), D (traste 5), y E (traste 7) y cada acorde suena limpio sin cuerdas apagadas.',
         practice: { type: 'chord', label: 'One A-shape, three roots — C · D · E', label_es: 'Una forma de A, tres raíces — C · D · E',
           chords: [
-            { name: 'C', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,5,'3'],[2,5,'3'],[1,3,'1']], position: 3 },
-            { name: 'D', chord: [[6,'x'],[5,5,'1'],[4,7,'3'],[3,7,'3'],[2,7,'3'],[1,5,'1']], position: 5 },
-            { name: 'E', chord: [[6,'x'],[5,7,'1'],[4,9,'3'],[3,9,'3'],[2,9,'3'],[1,7,'1']], position: 7 }
+            { name: 'C', chord: [[6,'x'],[5,3,'1'],[4,5,'2'],[3,5,'3'],[2,5,'4'],[1,3,'1']], position: 3 },
+            { name: 'D', chord: [[6,'x'],[5,5,'1'],[4,7,'2'],[3,7,'3'],[2,7,'4'],[1,5,'1']], position: 5 },
+            { name: 'E', chord: [[6,'x'],[5,7,'1'],[4,9,'2'],[3,9,'3'],[2,9,'4'],[1,7,'1']], position: 7 }
           ] } },
       { id: 'm7w3-s5', text: 'Switch between an E-shape barre and an A-shape barre in time',
         text_es: 'Cambiar entre una cejilla en forma de E y una cejilla en forma de A a tiempo',
@@ -1051,11 +1051,11 @@ MODULE_REVIEWS[7] = {
       text_es: 'Puedo encontrar los dos "hogares" de un acorde — su forma de E (raíz en la cuerda 6) y su forma de A (raíz en la cuerda 5) — y cambiar entre las dos formas en una progresión', set: 'm7w3' }
   ],
   assessItems: [
-    'Play F barre → slide to G → slide to A, one clean strum each (E-shape, root on string 6)',
+    'Play F barre → slide to G → slide to A, one strum each (E-shape, root on string 6). G and A ring on all 6 strings; F counts when at least 5 of the 6 ring. If F still will not speak, show G and A clean plus a six-string bar at fret 5 with your index finger alone — that is the same strength, one step back',
     'Play a 4-chord progression mixing E-shape and A-shape barres (e.g. F–C–G–D), 2 bars each, at 60 BPM'
   ],
   assessItems_es: [
-    'Toca la cejilla de F → deslízala a G → deslízala a A, un rasgueo limpio cada una (forma de E, raíz en la cuerda 6)',
+    'Toca la cejilla de F → deslízala a G → deslízala a A, un rasgueo cada una (forma de E, raíz en la cuerda 6). G y A suenan en las 6 cuerdas; el F cuenta cuando al menos 5 de las 6 suenan. Si el F todavía no habla, muestra G y A limpios más una cejilla de seis cuerdas en el traste 5 solo con el dedo índice — es la misma fuerza, un paso atrás',
     'Toca una progresión de 4 acordes mezclando cejillas en forma de E y de A (p. ej. F–C–G–D), 2 compases cada uno, a 60 BPM'
   ],
   forward: 'Module 8 hands the spotlight to your <strong>picking hand</strong>. Every barre and open shape you can now hold becomes a chord frame that fingerpicking decorates one string at a time — the fretting work you just did is exactly what makes those patterns sound full.',

@@ -466,8 +466,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "Sweet Child O\' Mine", name it as you play it', label_es: 'Reto — "Sweet Child O\' Mine", nómbralo mientras lo tocas',
-                text: '<ol><li>Watch the intro-riff clip you first saw in Module 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>).</li><li>Learn just its first two notes, up on the D and G strings around fret 12–15.</li><li>Say each note\'s NAME as you play it, using today\'s D/G-string knowledge to figure it out instead of just copying frets.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this song\'s Journey page</a>.',
-                text_es: '<ol><li>Mira el clip del riff de intro que viste por primera vez en el Módulo 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>).</li><li>Aprende solo sus primeras dos notas, arriba en las cuerdas Re y Sol alrededor del traste 12–15.</li><li>Di el NOMBRE de cada nota mientras la tocas, usando lo que sabes hoy de las cuerdas Re y Sol para descifrarla en vez de solo copiar los trastes.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: la página de Recorrido de esta canción</a>.',
+                text: '<ol><li>Watch the intro-riff clip you first saw in Module 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>).</li><li>Learn just its first two notes, up on the D and G strings around fret 12–15.</li><li>Say each note\'s NAME as you play it, using today\'s D/G-string knowledge to figure it out instead of just copying frets.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this song\'s Journey page</a> — the full intro riff isn\'t there yet on purpose; it waits for you at the end of the course.',
+                text_es: '<ol><li>Mira el clip del riff de intro que viste por primera vez en el Módulo 7 (<a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a>).</li><li>Aprende solo sus primeras dos notas, arriba en las cuerdas Re y Sol alrededor del traste 12–15.</li><li>Di el NOMBRE de cada nota mientras la tocas, usando lo que sabes hoy de las cuerdas Re y Sol para descifrarla en vez de solo copiar los trastes.</li></ol><a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: la página de Recorrido de esta canción</a> — el riff de intro completo todavía no está ahí a propósito; te espera al final del curso.',
                 hint: 'A riff is a short musical phrase that repeats. This riff lives up the neck on strings you\'ve never named notes on before today — that\'s exactly why it\'s the reward for this set.',
                 hint_es: 'Un riff es una frase musical corta que se repite. Este riff vive arriba en el mástil, en cuerdas donde nunca antes habías nombrado notas — por eso es exactamente la recompensa de esta unidad.',
                 stuck: 'Pause the video on the very first note and just name that one string/fret before moving on.',
@@ -532,8 +532,8 @@ SETS.push(
           choices_es: ['Dos cuerdas hacia abajo, dos trastes hacia arriba', 'Dos cuerdas hacia abajo, el mismo traste', 'Una cuerda hacia abajo, dos trastes hacia arriba', 'Dos cuerdas hacia abajo, tres trastes hacia arriba'], answer: 0,
           explain: 'Starting from the low E or A string, the same note repeats two strings toward the floor and two frets toward the body. The three-fret version is real, but only once the B string is part of the jump — D to B, or G to high e.',
           explain_es: 'Partiendo de la cuerda Mi grave o La, la misma nota se repite dos cuerdas hacia el suelo y dos trastes hacia el cuerpo. La versión de tres trastes existe, pero solo cuando la cuerda Si entra en el salto — de Re a Si, o de Sol a mi aguda.' } },
-      { id: 'm9w1-s5', text: 'Play the "Sweet Child O\' Mine" intro fragment on the D and G strings from TAB',
-        text_es: 'Tocar el fragmento de intro de "Sweet Child O\' Mine" en las cuerdas Re y Sol a partir del TAB',
+      { id: 'm9w1-s5', text: 'Play the "Sweet Child O\' Mine" intro fragment on the D and G strings and name each note',
+        text_es: 'Tocar el fragmento de intro de "Sweet Child O\' Mine" en las cuerdas Re y Sol y nombrar cada nota',
         gotItWhen: 'you can play the first two notes of the intro up around fret 12–15 and name each one as you play it.',
         gotItWhen_es: 'puedes tocar las primeras dos notas de la intro alrededor del traste 12–15 y nombrar cada una mientras la tocas.',
         practice: { type: 'mc', prompt: 'The "Sweet Child" intro TAB starts at fret 12 on the D string. Using today\'s fretboard knowledge, what note is that?',
@@ -1128,8 +1128,8 @@ SETS.push(
     skills: [
       { id: 'm9w3-s1', text: 'Read and play a TAB phrase written above fret 5',
         text_es: 'Leer y tocar una frase de TAB escrita arriba del traste 5',
-        gotItWhen: 'you can cold-read an 8-note line living entirely above fret 5, in tune, using only the TAB.',
-        gotItWhen_es: 'puedes leer a primera vista una línea de 8 notas que vive completamente arriba del traste 5, afinada, usando solo el TAB.',
+        gotItWhen: 'you can cold-read an 8-note line living entirely at fret 5 and above, in tune, using only the TAB.',
+        gotItWhen_es: 'puedes leer a primera vista una línea de 8 notas que vive completamente en el traste 5 y más arriba, afinada, usando solo el TAB.',
         practice: { type: 'mc', prompt: 'A high-position TAB shows "10" on the B-string line. What is it?',
           prompt_es: 'Un TAB en posición alta muestra "10" en la línea de la cuerda Si. ¿Qué es?',
           choices: ['One note — B string, fret 10', 'Two notes — fret 1, then fret 0', 'Finger 1, then an open string', 'Strings 1 and 0 played together'],

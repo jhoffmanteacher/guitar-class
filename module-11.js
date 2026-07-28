@@ -70,8 +70,8 @@ SETS.push(
                 label: 'Numerals in "Let It Be"', label_es: 'Números romanos en "Let It Be"',
                 text: 'Listen for it: play through "Let It Be"\'s C–G–Am–F loop and, before checking, guess which numeral each chord is in the key of C.',
                 text_es: 'Escucha con atención: toca el loop C–G–Am–F de "Let It Be" y, antes de revisar, adivina qué número romano es cada acorde en la tonalidad de C.',
-                hint: 'C is home (I), so everything else numbers off of it — G is a fifth up, Am shares C\'s notes, F is a fourth up.',
-                hint_es: 'C es la base (I), así que todo lo demás se numera a partir de ella — G es una quinta arriba, Am comparte las notas de C, F es una cuarta arriba.',
+                hint: 'C is home (I), so count each other chord\'s root up the C scale (C-D-E-F-G-A-B) to get its number: G is the 5th note up, so V; A is the 6th, so Am is vi; F is the 4th, so IV. Counting scale degrees is the only test that works — every chord in the key shares C\'s notes, so "it uses C\'s notes" can never tell two of them apart.',
+                hint_es: 'C es la base (I), así que cuenta la raíz de cada otro acorde subiendo por la escala de C (C-D-E-F-G-A-B) para sacar su número: G es la 5ª nota, así que V; A es la 6ª, así que Am es vi; F es la 4ª, así que IV. Contar grados de la escala es la única prueba que funciona — todos los acordes de la tonalidad comparten las notas de C, así que "usa las notas de C" nunca puede distinguir uno de otro.',
                 skills: [3],
                 response: { type: 'mc', prompt: '"Let It Be"\'s C–G–Am–F in the key of C is:',
                   prompt_es: 'El C–G–Am–F de "Let It Be" en la tonalidad de C es:',
@@ -91,8 +91,8 @@ SETS.push(
                 label: 'Build triads up the C scale', label_es: 'Construye tríadas en la escala de C',
                 text: 'Now try it: build a triad on every note of the C major scale (C-D-E-F-G-A-B) and see which come out major and which come out minor.',
                 text_es: 'Ahora pruébalo: construye una tríada en cada nota de la escala de C mayor (C-D-E-F-G-A-B) y observa cuáles salen mayores y cuáles salen menores.',
-                hint: 'You\'ll get major-minor-minor-major-major-minor-diminished — the same pattern in every major key.',
-                hint_es: 'Obtendrás mayor-menor-menor-mayor-mayor-menor-disminuido — el mismo patrón en cualquier tonalidad mayor.',
+                hint: 'You\'ll get major-minor-minor-major-major-minor-diminished — the same pattern in every major key. Diminished means a minor chord squeezed one fret smaller at the top, so it sounds tense and unfinished; it is the 7th one, and it is rare in the songs you play.',
+                hint_es: 'Obtendrás mayor-menor-menor-mayor-mayor-menor-disminuido — el mismo patrón en cualquier tonalidad mayor. Disminuido significa un acorde menor apretado un traste más en la parte de arriba, así que suena tenso y sin terminar; es el número 7 y es raro en las canciones que tocas.',
                 skills: [4, 5],
                 response: { type: 'mc', prompt: 'The chord family of C major is:',
                   prompt_es: 'La familia de acordes de C mayor es:',
@@ -192,8 +192,8 @@ SETS.push(
                 hint_es: 'Si conoces la familia en orden (C Dm Em F G Am), el número romano solo te dice cuál lugar buscar.',
                 stuck: 'Keep the family in numeral order in view while you drill — C Dm Em F G Am.',
                 stuck_es: 'Mantén la familia en orden de números romanos a la vista mientras practicas — C Dm Em F G Am.',
-                levelUp: 'Switch to the key of G, or time yourself through the deck and try to beat your best time. Ready for all seven? Look up Bdim — the vii° of C — and name it at the end of every lap.',
-                levelUp_es: 'Cambia a la tonalidad de G, o cronométrate con la baraja e intenta superar tu mejor tiempo. ¿Listo para los siete? Busca Bdim — el vii° de C — y nómbralo al final de cada vuelta.',
+                levelUp: 'Switch to the key of G, or time yourself through the deck and try to beat your best time. Ready for all seven? Look up Bdim — the vii° of C, where the little ° means diminished, that tense unfinished-sounding 7th chord of the family — and name it at the end of every lap.',
+                levelUp_es: 'Cambia a la tonalidad de G, o cronométrate con la baraja e intenta superar tu mejor tiempo. ¿Listo para los siete? Busca Bdim — el vii° de C, donde el pequeño ° significa disminuido, ese acorde tenso y sin terminar que es el 7º de la familia — y nómbralo al final de cada vuelta.',
                 skills: [1, 2]
               }
             ]
@@ -584,8 +584,8 @@ SETS.push(
           prompt_es: '"the cure" va Am–C–Dm–F en la tonalidad de C. ¿Cuál cadena de números romanos es la correcta?',
           choices: ['vi–I–ii–IV', 'I–III–IV–VI — number them in the order they appear', 'vi–I–iv–IV — Dm is minor, so it\'s iv', 'i–III–iv–VI — the song starts on Am, so Am is i'],
           choices_es: ['vi–I–ii–IV', 'I–III–IV–VI — se numeran en el orden en que aparecen', 'vi–I–iv–IV — Dm es menor, así que es iv', 'i–III–iv–VI — la canción empieza en Am, así que Am es i'], answer: 0,
-          explain: 'In C: Am=vi, C=I, Dm=ii, F=IV. Dm is lowercase ii (2nd scale degree, minor chord) — "iv" would mean a minor chord built on F.',
-          explain_es: 'En C: Am=vi, C=I, Dm=ii, F=IV. Dm es ii en minúscula (2º grado de la escala, acorde menor) — "iv" significaría un acorde menor construido sobre F.' } },
+          explain: 'In C: Am=vi, C=I, Dm=ii, F=IV. Dm is lowercase ii (2nd scale degree, minor chord) — "iv" would mean a minor chord built on F. Fair warning on the last option: i–III–iv–VI really is a correct A-minor reading of this same loop, because C major and A minor share every note and both readings describe the same music. This question asked for the C reading. Its reasoning is still off, though — a song\'s first chord is not what picks the key; where the loop comes to rest is.',
+          explain_es: 'En C: Am=vi, C=I, Dm=ii, F=IV. Dm es ii en minúscula (2º grado de la escala, acorde menor) — "iv" significaría un acorde menor construido sobre F. Una aclaración justa sobre la última opción: i–III–iv–VI sí es una lectura correcta en A menor de este mismo loop, porque C mayor y A menor comparten todas sus notas y las dos lecturas describen la misma música. Esta pregunta pedía la lectura en C. Su razonamiento sigue estando mal, eso sí — el primer acorde de una canción no es lo que elige la tonalidad; lo que la elige es dónde el loop llega a descansar.' } },
       { id: 'm11w2-s4', text: 'Find "Watchtower"\'s key from Am–G–F and say why Am is home',
         text_es: 'Encontrar la tonalidad de "Watchtower" a partir de Am–G–F y decir por qué Am es la base',
         gotItWhen: 'you can name Am as the home chord of "Watchtower"\'s Am–G–F loop by ear, and explain that home is where the loop feels finished, not just the first chord played.',
@@ -611,8 +611,8 @@ SETS.push(
           prompt_es: 'Una canción usa G, C y D — todos mayores. Nombra la tonalidad y los números romanos.',
           choices: ['G major — I, IV, V', 'C major — V, I, II', 'D major — IV, VII, I', 'Can\'t tell from chords alone'],
           choices_es: ['G mayor — I, IV, V', 'C mayor — V, I, II', 'D mayor — IV, VII, I', 'No se puede saber solo con los acordes'], answer: 0,
-          explain: 'Only G major contains G, C, AND D as majors — in C the "D" chord would be Dm (ii). Three majors a whole step apart are almost always I, IV, V.',
-          explain_es: 'Solo G mayor contiene G, C Y D como mayores — en C el acorde de "D" sería Dm (ii). Tres mayores separados así casi siempre son I, IV, V.' } }
+          explain: 'Only G major contains G, C, AND D as majors — in C the "D" chord would be Dm (ii). In any major key the three major chords are I, IV and V, and IV and V always sit a whole step apart — here that pair is C and D. I is a fourth below IV, so the shortcut is: find the two majors a whole step apart, then count a fourth down from the lower one. C down a fourth is G, which is the key.',
+          explain_es: 'Solo G mayor contiene G, C Y D como mayores — en C el acorde de "D" sería Dm (ii). En cualquier tonalidad mayor los tres acordes mayores son I, IV y V, y IV y V siempre están separados por un tono — aquí ese par es C y D. El I está una cuarta debajo del IV, así que el atajo es: encuentra los dos mayores separados por un tono, y luego cuenta una cuarta hacia abajo desde el más grave. C una cuarta abajo es G, y esa es la tonalidad.' } }
     ]
   },
 

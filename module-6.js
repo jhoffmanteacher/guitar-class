@@ -210,6 +210,7 @@ SETS.push(
             response: { type: 'short', prompt: 'Personal record — strum unbroken through Em↔Am: play it cleanly at 60 BPM, then go +10 at a time. Your fastest CLEAN switch today (BPM)?', prompt_es: 'Récord personal — rasgueo sin interrupciones a través de Em↔Am: tócalo limpio a 60 BPM, y luego sube de 10 en 10. ¿Tu cambio LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next time', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima vez' },
             playSeq: { label: 'Em → Am roots (2 beats each)', label_es: 'Raíces Em → Am (2 tiempos cada una)', bpm: 60, notes: [40, 40, 45, 45] },
             chords: [
+              { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 },
               { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
             ]
           }
@@ -437,8 +438,8 @@ SETS.push(
             label: 'Watch: the D-DU-UDU pattern', label_es: 'Mira: el patrón D-DU-UDU',
             text: 'Watch: <a href="https://youtu.be/6LmQCdt_ZhQ" target="_blank">The Most Common Strumming Pattern of All Time! – JustinGuitar</a> (0:00–4:00). Your task while you watch: air-strum along and find the two moments the pick misses — the wrist keeps swinging, but on purpose it skips one upstroke and one downstroke.',
             text_es: 'Mira: <a href="https://youtu.be/6LmQCdt_ZhQ" target="_blank">The Most Common Strumming Pattern of All Time! – JustinGuitar</a> (0:00–4:00). Tu tarea mientras miras: rasguea en el aire junto con él y encuentra los dos momentos en que la púa falla a propósito — la muñeca sigue balanceándose, pero se salta un golpe hacia arriba y uno hacia abajo a propósito.',
-            hint: 'Justin calls it the pattern you can always rely on — D-DU-UDU. Listen for which strums he skips: the wrist still moves, but the pick doesn\'t hit the strings on those beats.',
-            hint_es: 'Justin lo llama el patrón en el que siempre puedes confiar — D-DU-UDU. Escucha cuáles rasgueos se salta: la muñeca sigue moviéndose, pero la púa no toca las cuerdas en esos tiempos.',
+            hint: 'You already met this pattern in Module 5, where it was called the folk strum (D · D U · U D U) — it\'s the same six strums. What\'s new here is naming it, counting it out loud, and making it survive a chord change. Justin calls it the pattern you can always rely on — D-DU-UDU. Listen for which strums he skips: the wrist still moves, but the pick doesn\'t hit the strings on those two slots.',
+            hint_es: 'Ya conociste este patrón en el Módulo 5, donde se llamaba el rasgueo folk (D · D U · U D U) — son los mismos seis rasgueos. Lo nuevo aquí es nombrarlo, contarlo en voz alta, y lograr que sobreviva a un cambio de acorde. Justin lo llama el patrón en el que siempre puedes confiar — D-DU-UDU. Escucha cuáles rasgueos se salta: la muñeca sigue moviéndose, pero la púa no toca las cuerdas en esos dos espacios.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'In the D-DU-UDU pattern, which UPSTROKE is skipped (the wrist swings up but the pick misses)?',
               prompt_es: 'En el patrón D-DU-UDU, ¿cuál GOLPE HACIA ARRIBA se salta (la muñeca sube pero la púa falla)?',
@@ -481,22 +482,22 @@ SETS.push(
             hint: 'The pattern is one bar long and repeats throughout the whole song. Once you have it, you have most of his song.',
             hint_es: 'El patrón dura un compás y se repite durante toda la canción. Una vez que lo dominas, tienes la mayor parte de la canción.',
             skills: [1, 5],
-            response: { type: 'mc', prompt: 'A one-bar strum pattern in 4/4 time covers how many BEATS?',
-              prompt_es: 'Un patrón de rasgueo de un compás en tiempo 4/4 cubre cuántos TIEMPOS?',
+            response: { type: 'mc', prompt: 'You count one bar as "1 + 2 + 3 + 4 +". How many strum SLOTS is that — counting every down and every up?',
+              prompt_es: 'Cuentas un compás como "1 y 2 y 3 y 4 y". ¿Cuántos ESPACIOS de rasgueo son — contando cada golpe hacia abajo y cada uno hacia arriba?',
               answer: 1,
-              explain: 'The top number of 4/4 means 4 beats (counts) per bar — "1, 2, 3, 4." Add the "+" upbeats and you get 8 eighth-note slots, but the bar is 4 counts.',
-              explain_es: 'El número de arriba en 4/4 significa 4 tiempos (conteos) por compás — "1, 2, 3, 4". Agrega los contratiempos "+" y obtienes 8 espacios de corchea, pero el compás son 4 conteos.',
+              explain: 'Four beats, each split into a down (the number) and an up (the "+"), gives 8 slots in the bar. D-DU-UDU only strums six of them — the other two are the skipped "+" of beat 1 and the down on beat 3 — but the bar is still 8 slots wide.',
+              explain_es: 'Cuatro tiempos, cada uno dividido en un golpe hacia abajo (el número) y uno hacia arriba (el "y"), dan 8 espacios en el compás. D-DU-UDU solo rasguea seis — los otros dos son el "y" del tiempo 1 y el "abajo" del tiempo 3 que se saltan — pero el compás sigue midiendo 8 espacios.',
               choices: [
-              '2',
-              '4',
-              '8',
-              '16'
+              '4 — one slot per beat',
+              '8 — a down and an up on every beat',
+              '6 — D-DU-UDU only strums six times',
+              '16 — that would be two bars\' worth'
             ],
               choices_es: [
-              '2',
-              '4',
-              '8',
-              '16'
+              '4 — un espacio por tiempo',
+              '8 — un golpe hacia abajo y uno hacia arriba en cada tiempo',
+              '6 — D-DU-UDU solo rasguea seis veces',
+              '16 — eso serían dos compases'
             ] }
           }
             ]
@@ -545,8 +546,8 @@ SETS.push(
                 label: 'Warm-up: tune + down-up', label_es: 'Calentamiento: afina + abajo-arriba',
                 text: 'Tune all 6 strings to green, then warm the strum hand: 4 bars of steady down-up on Em at 60 BPM (Set 1). You\'ve got it when: in tune and the pendulum already swinging before you add the new pattern.',
                 text_es: 'Afina las 6 cuerdas hasta que estén en verde, y luego calienta la mano de rasgueo: 4 compases de abajo-arriba constante en Em a 60 BPM (Unidad 1). Lo tienes cuando: estás afinado y el péndulo ya está balanceándose antes de agregar el nuevo patrón.',
-                hint: 'Look back: D-DU-UDU is just the down-up you already own with two strums left out. Get the even swing going first.',
-                hint_es: 'Recuerda: D-DU-UDU es solo el abajo-arriba que ya dominas con dos rasgueos omitidos. Primero logra que el balanceo parejo funcione.',
+                hint: 'Look back: D-DU-UDU is just the down-up you already own with two strums left out — the same six strums you met in Module 5 as the folk strum. Get the even swing going first.',
+                hint_es: 'Recuerda: D-DU-UDU es solo el abajo-arriba que ya dominas con dos rasgueos omitidos — los mismos seis rasgueos que conociste en el Módulo 5 como el rasgueo folk. Primero logra que el balanceo parejo funcione.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -857,15 +858,15 @@ SETS.push(
             ]
           },
           {
-            title: 'Play a folk strum',
-            title_es: 'Toca un rasgueo folk',
+            title: 'Play a folk feel',
+            title_es: 'Toca una sensación folk',
             steps: [
           {
             label: 'Challenge 1 — Folk Feel', label_es: 'Reto 1 — Sensación folk',
             text: '<ol><li>Hold G.</li><li>Strum all downstrokes, one per beat, at 70 BPM — quiet and steady, singalong style.</li></ol>You\'ve got it when: even, soft, supportive strumming with no accents sticking out.<div class="strum-line">D       D       D       D\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
             text_es: '<ol><li>Sostén G.</li><li>Rasguea todo hacia abajo, uno por tiempo, a 70 BPM — tranquilo y constante, estilo para cantar junto.</li></ol>Lo tienes cuando: un rasgueo parejo, suave, que acompaña, sin acentos que sobresalgan.<div class="strum-line">D       D       D       D\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
-            hint: 'Folk is about supporting the singer, not standing out. Soft attack, even volume, no accents.',
-            hint_es: 'El folk se trata de acompañar al cantante, no de sobresalir. Ataque suave, volumen parejo, sin acentos.',
+            hint: 'Folk here means a FEEL, not one particular pattern — it\'s about supporting the singer instead of standing out. Soft attack, even volume, no accents. Module 5\'s "folk strum" (D · D U · U D U) played gently counts as a folk feel too; these steady downstrokes are just the plainest version of it.',
+            hint_es: 'Folk aquí significa una SENSACIÓN, no un patrón concreto — se trata de acompañar al cantante en vez de sobresalir. Ataque suave, volumen parejo, sin acentos. El "rasgueo folk" del Módulo 5 (D · D U · U D U) tocado con suavidad también cuenta como sensación folk; estos golpes hacia abajo constantes son solo su versión más simple.',
             stuck: 'Strum from the wrist only and let the pick barely graze the strings — imagine someone is singing and you must not cover them up.',
             stuck_es: 'Rasguea solo desde la muñeca y deja que la púa apenas roce las cuerdas — imagina que alguien está cantando y no debes taparlo.',
             levelUp: 'Add a gentle up-strum on the "+" of beats 2 and 4 for a fuller singalong feel.',
@@ -990,8 +991,8 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm6w3-s1', text: 'Play a folk strum (gentle, even all-downstrokes or simple down-up)',
-        text_es: 'Tocar un rasgueo folk (suave, parejo, todo hacia abajo o abajo-arriba simple)',
+      { id: 'm6w3-s1', text: 'Play a folk FEEL — gentle, even downstrokes that sit under a singer (a touch, not a particular pattern)',
+        text_es: 'Tocar una SENSACIÓN folk — golpes hacia abajo suaves y parejos que se quedan debajo del cantante (un toque, no un patrón concreto)',
         gotItWhen: 'you can play a chord progression with even, soft downstrokes that supports a singer — no accents, no aggressive attack.',
         gotItWhen_es: 'puedes tocar una progresión de acordes con golpes hacia abajo parejos y suaves que acompañan a un cantante — sin acentos, sin ataque agresivo.',
         practice: { type: 'playSeq', label: 'Folk feel — soft, even strums (G root, one per beat)', label_es: 'Sensación folk — rasgueos suaves y parejos (raíz de G, uno por tiempo)', bpm: 70,
@@ -1069,7 +1070,7 @@ MODULE_SONGS[6] = [
       { name: '"Let It Be" — The Beatles', meta: 'C–G–Am–F · slow, even pattern', meta_es: 'C–G–Am–F · patrón lento y parejo', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
         tutorialUrl: 'https://www.youtube.com/watch?v=gGt0akED_UU' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Syncopated Latin strum on the verse · Bm (partial barre)–G', meta_es: 'Rasgueo latino sincopado en la estrofa · Bm (cejilla parcial)–G', type: 'Choice', core: false, level: 2,
+      { name: '"Oye Mi Amor" — Maná', meta: 'Syncopated Latin strum on the verse · Bm (four-finger shape)–G', meta_es: 'Rasgueo latino sincopado en la estrofa · Bm (forma de cuatro dedos)–G', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
         tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
       { name: '"Tu Boda" — Oscar Maydon × Fuerza Regida', meta: 'Corrido / sierreño strum · current Spanish-language style', meta_es: 'Rasgueo de corrido / sierreño · estilo actual en español', type: 'Choice', core: false, level: 3,
