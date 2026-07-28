@@ -1025,23 +1025,35 @@ SETS.push(
             steps: [
           {
             label: 'Challenge — Cold Read (Knowledge & Reading)', label_es: 'Reto — Lectura a primera vista (Conocimiento y lectura)',
-            text: 'Here\'s a 1-bar lick (a lick = a short solo phrase) in the A minor pentatonic box you haven\'t drilled:<ol><li>DECODE it from the TAB first — name each string and fret, left to right.</li><li>Then play it.</li></ol>You\'ve got it when: you can read a short 1-bar pentatonic lick straight from TAB and play it accurately, without anyone demonstrating it first.',
-            text_es: 'Aquí tienes un lick de 1 compás (un lick = una frase corta de solo) en la caja de A menor pentatónica que no has ejercitado:<ol><li>DECODIFÍCALO del TAB primero — nombra cada cuerda y traste, de izquierda a derecha.</li><li>Luego tócalo.</li></ol>Lo tienes cuando: puedes leer un lick pentatónico corto de 1 compás directamente del TAB y tocarlo con precisión, sin que nadie te lo demuestre primero.',
-            hint: 'At the module self-assessment you\'ll read a NEW 1-bar lick cold — this is Task 2. Read before you press Play. Bottom TAB line = low E, top line = high e; the number is the fret. Say it out loud — "G string, fret 5, that\'s C" — as you go, then hit Play all to check yourself.',
-            hint_es: 'En la autoevaluación del módulo vas a leer un lick de 1 compás NUEVO a primera vista — esta es la Tarea 2. Lee antes de presionar Tocar. La línea inferior del TAB = Mi grave, la línea superior = mi aguda; el número es el traste. Dilo en voz alta — "cuerda Sol, traste 5, eso es C" — mientras avanzas, y luego presiona Tocar todo para comprobarte.',
+            text: 'Here\'s a 4-bar lick (a lick = a short solo phrase) in the A minor pentatonic box you haven\'t drilled:<ol><li>DECODE it from the TAB first — name each string and fret, left to right.</li><li>Then play it.</li></ol>You\'ve got it when: you can read a short 4-bar pentatonic lick straight from TAB and play it accurately, without anyone demonstrating it first.',
+            text_es: 'Aquí tienes un lick de 4 compases (un lick = una frase corta de solo) en la caja de A menor pentatónica que no has ejercitado:<ol><li>DECODIFÍCALO del TAB primero — nombra cada cuerda y traste, de izquierda a derecha.</li><li>Luego tócalo.</li></ol>Lo tienes cuando: puedes leer un lick pentatónico corto de 4 compases directamente del TAB y tocarlo con precisión, sin que nadie te lo demuestre primero.',
+            hint: 'At the module self-assessment you\'ll read a NEW 4-bar lick cold — this is Task 2. Read before you press Play. Bottom TAB line = low E, top line = high e; the number is the fret. Say it out loud — "G string, fret 5, that\'s C" — as you go, then hit Play all to check yourself.',
+            hint_es: 'En la autoevaluación del módulo vas a leer un lick de 4 compases NUEVO a primera vista — esta es la Tarea 2. Lee antes de presionar Tocar. La línea inferior del TAB = Mi grave, la línea superior = mi aguda; el número es el traste. Dilo en voz alta — "cuerda Sol, traste 5, eso es C" — mientras avanzas, y luego presiona Tocar todo para comprobarte.',
             stuck: 'Take it two notes at a time. Find the first note on the neck and play it, then the next — speed comes after the map is clear.',
             stuck_es: 'Tómalo de a dos notas. Encuentra la primera nota en el mástil y tócala, y luego la siguiente — la velocidad llega después de que el mapa esté claro.',
             levelUp: 'Read it backwards (right to left), or move the same shape to the E minor box (open-string root) and read it there.',
             levelUp_es: 'Léelo al revés (de derecha a izquierda), o mueve la misma forma a la caja de E menor (raíz en cuerda al aire) y léelo ahí.',
             skills: [8],
             tab: {
-              caption: 'Cold-read lick · A minor pentatonic box · one bar',
-              caption_es: 'Lick a primera vista · caja de A menor pentatónica · un compás',
+              caption: 'Cold-read lick · A minor pentatonic box · four bars',
+              caption_es: 'Lick a primera vista · caja de A menor pentatónica · cuatro compases',
               notes: [
+                // Bar 1 — climb from the low root
+                { string: 'E', fret: 5, note: 'A', midi: 45 },
+                { string: 'E', fret: 8, note: 'C', midi: 48 },
+                { string: 'A', fret: 5, note: 'D', midi: 50 },
+                { string: 'A', fret: 7, note: 'E', midi: 52 },
+                // Bar 2 — through the middle strings
                 { string: 'D', fret: 5, note: 'G', midi: 55 },
                 { string: 'D', fret: 7, note: 'A', midi: 57 },
                 { string: 'G', fret: 5, note: 'C', midi: 60 },
                 { string: 'G', fret: 7, note: 'D', midi: 62 },
+                // Bar 3 — peak and turn
+                { string: 'B', fret: 5, note: 'E', midi: 64 },
+                { string: 'B', fret: 8, note: 'G', midi: 67 },
+                { string: 'e', fret: 5, note: 'A', midi: 69 },
+                { string: 'B', fret: 8, note: 'G', midi: 67 },
+                // Bar 4 — come home to the root
                 { string: 'B', fret: 5, note: 'E', midi: 64 },
                 { string: 'G', fret: 7, note: 'D', midi: 62 },
                 { string: 'G', fret: 5, note: 'C', midi: 60 },
@@ -1087,9 +1099,9 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Module-end (two tasks): (1) Perform an original 4-bar solo over a course-song backing track, holding the track\'s pulse start to finish — use the full minor pentatonic box, include at least one hammer-on, pull-off, or vibrato, and follow a named phrasing strategy (call-and-response or four-phrase). (2) Read a short 1-bar pentatonic lick from TAB and play it.',
-      goal_es: 'Fin de módulo (dos tareas): (1) Toca un solo original de 4 compases sobre la pista de acompañamiento de una canción del curso, sosteniendo el pulso de la pista de principio a fin — usa la caja completa de pentatónica menor, incluye al menos un hammer-on, pull-off, o vibrato, y sigue una estrategia de fraseo nombrada (llamada y respuesta o cuatro frases). (2) Lee un lick pentatónico corto de 1 compás del TAB y tócalo.',
-      performance: 'Solo: record your original 4-bar solo over a core-song backing track, saying your phrasing strategy (call-and-response or four-phrase) out loud on the recording, then listen back; then sight-read and play a short 1-bar pentatonic lick from TAB.',
+      goal: 'Module-end (two tasks): (1) Perform an original 4-bar solo over a course-song backing track, holding the track\'s pulse start to finish — use the full minor pentatonic box, include at least one hammer-on, pull-off, or vibrato, and follow a named phrasing strategy (call-and-response or four-phrase). (2) Read a short 4-bar pentatonic lick from TAB and play it.',
+      goal_es: 'Fin de módulo (dos tareas): (1) Toca un solo original de 4 compases sobre la pista de acompañamiento de una canción del curso, sosteniendo el pulso de la pista de principio a fin — usa la caja completa de pentatónica menor, incluye al menos un hammer-on, pull-off, o vibrato, y sigue una estrategia de fraseo nombrada (llamada y respuesta o cuatro frases). (2) Lee un lick pentatónico corto de 4 compases del TAB y tócalo.',
+      performance: 'Solo: record your original 4-bar solo over a core-song backing track, saying your phrasing strategy (call-and-response or four-phrase) out loud on the recording, then listen back; then sight-read and play a short 4-bar pentatonic lick from TAB.',
       selfCheck: 'Can you explain the difference between major and minor pentatonic? Can you add the blues note? Can you perform your original solo without looking at your notes?',
       selfCheck_es: '¿Puedes explicar la diferencia entre pentatónica mayor y menor? ¿Puedes agregar la nota de blues? ¿Puedes tocar tu solo original sin mirar tus notas?',
       standards: ['Cr.1a', 'Cr.2a', 'Pr.6a']
@@ -1159,10 +1171,10 @@ SETS.push(
         practice: { type: 'pr', prompt: '<ol><li>Play your 4-bar solo over the backing track, holding its pulse.</li><li>Count how many times in a row you get through with no restart.</li><li>Log your best streak.</li></ol>',
           prompt_es: '<ol><li>Toca tu solo de 4 compases sobre la pista de acompañamiento, sosteniendo su pulso.</li><li>Cuenta cuántas veces seguidas puedes completarlo sin reiniciar.</li><li>Anota tu mejor racha.</li></ol>',
           unit: 'count', placeholder: 'e.g. 3 in a row — try for a longer streak', placeholder_es: 'p. ej. 3 seguidas — intenta una racha más larga' } },
-      { id: 'm4w3-s8', text: 'Sight-read a short 1-bar pentatonic lick from TAB and play it',
-        text_es: 'Leer a primera vista un lick pentatónico corto de 1 compás del TAB y tocarlo',
-        gotItWhen: 'you can decode a 1-bar pentatonic lick straight from the TAB — one you haven\'t drilled — and play it accurately without anyone demonstrating it first.',
-        gotItWhen_es: 'puedes decodificar un lick pentatónico de 1 compás directamente del TAB — uno que no has ejercitado — y tocarlo con precisión sin que nadie te lo demuestre primero.',
+      { id: 'm4w3-s8', text: 'Sight-read a short 4-bar pentatonic lick from TAB and play it',
+        text_es: 'Leer a primera vista un lick pentatónico corto de 4 compases del TAB y tocarlo',
+        gotItWhen: 'you can decode a 4-bar pentatonic lick straight from the TAB — one you haven\'t drilled — and play it accurately without anyone demonstrating it first.',
+        gotItWhen_es: 'puedes decodificar un lick pentatónico de 4 compases directamente del TAB — uno que no has ejercitado — y tocarlo con precisión sin que nadie te lo demuestre primero.',
         practice: { type: 'mc', prompt: 'A TAB line shows "5 7" on the G-string line. What do those numbers tell you?',
           prompt_es: 'Una línea de TAB muestra "5 7" en la línea de la cuerda Sol. ¿Qué te dicen esos números?',
           choices: ['Which frets to press on the G string — fret 5, then fret 7', 'Which fingers to use — like the numbers on a chord diagram', 'How many times to pick each note', 'Which beats of the bar the notes land on'],
@@ -1247,18 +1259,16 @@ MODULE_REVIEWS[4] = {
       text_es: 'Puedo explicar cómo se construyen la pentatónica mayor (1 2 3 5 6) y menor (1 ♭3 4 5 ♭7), que son relativas (mismas 5 notas), y dónde va la nota de blues ♭5', set: 'm4w3' },
     { id: 'mr4-s10', text: 'I can perform my original 4-bar solo over a backing track from memory — holding its pulse with no restarts, working in at least one hammer-on, pull-off, or vibrato, and naming my phrasing strategy',
       text_es: 'Puedo tocar mi solo original de 4 compases sobre una pista de acompañamiento de memoria — sosteniendo su pulso sin reiniciar, incorporando al menos un hammer-on, pull-off, o vibrato, y nombrando mi estrategia de fraseo', set: 'm4w3' },
-    { id: 'mr4-s11', text: 'I can read a short 1-bar pentatonic lick from TAB that I haven\'t practiced and play it accurately',
-      text_es: 'Puedo leer un lick pentatónico corto de 1 compás del TAB que no he practicado y tocarlo con precisión', set: 'm4w3' }
+    { id: 'mr4-s11', text: 'I can read a short 4-bar pentatonic lick from TAB that I haven\'t practiced and play it accurately',
+      text_es: 'Puedo leer un lick pentatónico corto de 4 compases del TAB que no he practicado y tocarlo con precisión', set: 'm4w3' }
   ],
   assessItems: [
-    'Perform an original 4-bar solo over a course-song backing track, holding its pulse with no restarts, using the minor pentatonic box and at least one hammer-on, pull-off, or vibrato, with clean notes throughout (no buzz or dead notes — high strings included), following a named phrasing strategy (call-and-response or four-phrase), and with at least one deliberate loud/soft contrast you can point to on the recording',
-    'Name the natural notes on the D and G strings from memory through fret 10',
-    'Read a short 1-bar pentatonic lick from TAB and play it accurately'
+    'Perform an original 4-bar solo over a course-song backing track, holding its pulse with no restarts, using the minor pentatonic box and at least one hammer-on, pull-off, or vibrato, with clean notes throughout (no buzz or dead notes — high strings included), following a named phrasing strategy (call-and-response or four-phrase)',
+    'Read a short 4-bar pentatonic lick from TAB and play it accurately'
   ],
   assessItems_es: [
-    'Toca un solo original de 4 compases sobre la pista de acompañamiento de una canción del curso, sosteniendo su pulso sin reiniciar, usando la caja de pentatónica menor y al menos un hammer-on, pull-off, o vibrato, con notas limpias en todo momento (sin zumbido ni notas apagadas — cuerdas agudas incluidas), siguiendo una estrategia de fraseo nombrada (llamada y respuesta o cuatro frases), y con al menos un contraste deliberado de fuerte/suave que puedas señalar en la grabación',
-    'Nombra de memoria las notas naturales de las cuerdas Re y Sol hasta el traste 10',
-    'Lee un lick pentatónico corto de 1 compás del TAB y tócalo con precisión'
+    'Toca un solo original de 4 compases sobre la pista de acompañamiento de una canción del curso, sosteniendo su pulso sin reiniciar, usando la caja de pentatónica menor y al menos un hammer-on, pull-off, o vibrato, con notas limpias en todo momento (sin zumbido ni notas apagadas — cuerdas agudas incluidas), siguiendo una estrategia de fraseo nombrada (llamada y respuesta o cuatro frases)',
+    'Lee un lick pentatónico corto de 4 compases del TAB y tócalo con precisión'
   ],
   forward: 'Those single pentatonic notes you\'ve been soloing with don\'t disappear in <strong>Module 5</strong> — you stack them. The open chords you\'ll build there (Am, C, G, D…) are made of these same notes. And the clean fretting and finger independence you sharpened here are exactly what makes a chord ring without buzzing. You\'ll go from playing one note at a time to playing five at once.',
   forward_es: 'Esas notas pentatónicas individuales con las que has estado improvisando no desaparecen en el <strong>Módulo 5</strong> — las apilas. Los acordes abiertos que vas a construir ahí (Am, C, G, D…) están hechos de estas mismas notas. Y el trasteo limpio y la independencia de dedos que perfeccionaste aquí son exactamente lo que hace que un acorde suene sin zumbido. Vas a pasar de tocar una nota a la vez a tocar cinco a la vez.',
