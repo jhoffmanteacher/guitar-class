@@ -5,6 +5,25 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — Module reviews aligned with the curriculum map (Units 1–5)
+
+### Changed
+
+- **Module 4's assessment now matches the curriculum map exactly:** the
+  sight-reading task is a 4-bar pentatonic lick (was 1 bar — the cold-read
+  drill grew to match), and two extras that the map never graded — naming
+  the D & G string notes, and a deliberate loud/soft contrast in the solo —
+  are no longer part of the graded list. Both are still taught and still
+  on the practice checklist.
+
+### Added
+
+- **Six new self-rating rows on the module review checklists**, so every
+  graded skill can be self-rated 1/2/3: string names (Module 1), the
+  memorized bass line (Module 2), the 80 BPM hold, split strum, and
+  clap-and-count (Module 3), and the three-random-chords progression
+  (Module 5).
+
 ## 2026-07-28 — Tuner, Timer, and Metronome stay put while you scroll
 
 ### Fixed
