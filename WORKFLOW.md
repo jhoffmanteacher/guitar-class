@@ -540,9 +540,97 @@
          at Chromebook size.
       Report tuning numbers to Claude; the knobs are one-line constants.
 
+- [ ] **Post-review guitar + eyes pass (Jonathan, 2026-07-27 session).**
+      A seven-agent review plus a ten-agent adversarial verification workflow
+      shipped 13 commits today (see "Recently shipped"). Two items need his
+      hands, not more code:
+      1. **Mic games on a real guitar.** Note Hunt, Note Runner and Strum
+         Radar all had behaviour changed in the same batch, and a *separate*
+         concurrent session rewrote the pluck synth (`e385d12`) on top — so a
+         single guitar pass now covers both. Specifically:
+         **Note Hunt** — finish a round, then confirm the mic actually
+         releases (browser recording indicator goes dark) and that "Play
+         again" and the level pills still start a live round rather than
+         hanging on "Listening…". **Note Runner** — tap ■ Stop during the
+         count-in and confirm the stage does NOT drop and the results screen
+         doesn't blame notes you never played. **Strum Radar** — with a mic
+         offset set (Note Runner's slider, shared key), confirm the moving
+         highlight now sits on the beat you HEAR rather than lagging it, and
+         that beat 1 of bar 1 lights on the first bar of a round.
+         If a demo note sounds wrong rather than a game misbehaving, suspect
+         the synth commit, not these fixes.
+      2. **Module 1 Set 2 — check the progress ticks.** Set 2 gained a new
+         "Your first fretted note" card mid-section and its "Happy Birthday"
+         was rescoped to the first phrase. Step-completion keys are
+         POSITIONAL (`${set}-${station}-sec${gi}-${idx}`), so a student who
+         already finished Set 2 will see one tick land on the new card and
+         "Challenge 3 — Riff Time" read as un-done. Skills and grading are
+         unaffected and a re-tick fixes it — this is a "confirm it looks
+         acceptable in the wild" check, not a bug hunt. If it reads badly,
+         the alternative is moving the card to the end of the section, which
+         puts the fretting instructions AFTER the two cards that need them.
+
 ---
 
 ## Recently shipped (post-archive)
+
+- [x] **2026-07-27 — site-wide review: outage fix + 13 commits.** Started as
+      "check the site for errors" and immediately found the **whole site was
+      down**: `buildSet()`'s song-thread block named its `map` callback
+      parameter `t`, shadowing the global i18n `t()`, so every set with a
+      `songThread` threw and **no module content rendered at all** (`3ab369d`).
+      Introduced hours earlier the same day by an i18n conversion
+      (`29c5187`) that added a `t()` call inside that callback. The failure
+      was sticky: `_modulesRendered.add(num)` ran before the throw, so
+      switching modules never rebuilt for the rest of the session — refreshing
+      genuinely could not help. **Every existing check passed**, because the
+      file was syntactically valid and the module DATA was fine. Hence
+      `dcdb372`: `checks.mjs` now has a **render smoke test** that loads
+      i18n + diagrams + module data + app.js in a vm against a minimal DOM
+      stub and calls `buildSet()` on all 36 sets. Verified by reintroducing
+      the bug (21 sets fail, exit 1). A harness that can't load degrades to a
+      WARNING, never a blocked push — a stale stub must not become a reason to
+      delete the safety net.
+
+      Also shipped: sign-out now flushes the pending debounced save and hard
+      reloads (a got-it ticked seconds before signing out was dropped, and
+      `_modulesRendered` + the built DOM + `sessionStorage` bests survived
+      into the next student on a shared Chromebook) and two service-worker
+      correctness fixes — `waitUntil` the `cache.put`, not the fetch, and
+      install with `{cache:'reload'}` so a new `CACHE_VERSION` can't be filled
+      from stale HTTP copies (`b70621e`); teacher **pause + archive**
+      (`90c486e`, both uid→bool maps in `config/class` so they need no rules
+      change and can't destroy work); the sequential gate became a
+      **high-water mark** (`6b2c19b` — un-ticking one skill re-locked the
+      next set even when it was finished); Module 13's winding rewritten for
+      the **classical slotted headstock** it was always taught on
+      (`7631362` — the graded criterion demanded "wraps walking down the
+      post", which a horizontal roller cannot do; the sketch was already
+      correct, only the words were wrong) plus steel-vs-nylon and safety
+      additions (`7f22360`); Module 10's "Smoke on the Water" moved from the
+      A blues scale to **G**, the riff's actual key (`7f22360`); the
+      Firestore rules **versioned** as `firestore.rules` + a teacher-email
+      drift check (`44a4adf`, published to the console by Jonathan the same
+      day — GitHub Pages does NOT deploy rules); then a seven-agent fix sweep
+      with a ten-agent adversarial verification workflow — eight runtime
+      defects (`127bb19`), keyboard/screen-reader (`475e3b0`), curriculum
+      across M1–M12 (`569fd3d`), and Module 12's forward no longer promising
+      a capstone that doesn't exist (`ae6f27f`).
+
+      **Why the verification pass earned its cost:** it confirmed four
+      defects *in the fixes themselves* and refuted three others. The worst
+      was self-inflicted — the new "flush pending ratings once auth arrives"
+      logic in `tabs/journey.js` didn't record WHOSE ratings they were, and
+      Firebase auth persistence is shared across tabs, so a journey page left
+      open while signed out would flush the previous student's ratings into
+      the next student's doc unprompted. That is the exact cross-student
+      class `b70621e` had just removed, reintroduced by a fix for something
+      else. Three agents also **corrected the briefs they were given** (a
+      "C major" MIDI list that was actually B Locrian; rhythm data summing to
+      7 beats not 8; an A-shape sub-barre defect claimed in two files that a
+      grep proved existed in one). Lesson worth keeping: brief agents to find
+      problems rather than confirm work, and verify structured claims against
+      the data before relaying them.
 
 - [x] **Module 5 assessment settles on one song; song titles quoted
       site-wide** — pushed `598a580` (2026-07-26, applied via cloud patch
