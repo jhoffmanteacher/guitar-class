@@ -34,6 +34,13 @@ see `WORKFLOW.md` and the git commit log.
   "open today's warm-up" button and the popup's heading) and on the ear-training
   drill, the pause mark on the Stop button while a play-along is running, and
   the pause mark on the "access is paused" screen are all line icons now too.
+- **Every game in the arcade has a new icon.** All nine — Note Hunt, Change Up,
+  Strum Radar, Riff Roulette, Note Runner, Riff Runner, Chord Blitz, Fret Zap
+  and Strum Hero — now use the same drawn line style as the rest of the site,
+  and each game's card and its heading always show the same icon. The lock on
+  a game you haven't unlocked yet, and the "nothing is recorded" note under the
+  Listening Coach, match too. Your streaks, best scores and trophies keep their
+  emoji — those are meant to be a little loud.
 
 ## 2026-07-28 — Games, Songs, Keep practicing and My progress all open the same way
 

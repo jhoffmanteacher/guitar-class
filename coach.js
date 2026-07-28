@@ -1569,16 +1569,47 @@ function gamesHeadHtml(title, inGame){
    the order shown within each section. titleKey/descKey are resolved at
    render time in gamesRenderHub()'s card() — never here (this table is
    built once at load, so t() here would freeze one language in). */
+/* One stroke icon per game, in the site's line-icon style — used BOTH on the
+   hub card and in that game's heading, so the two can't drift apart. The cards
+   size them at 2.25rem via .games-card-ico; the heading picks up the title's
+   size. Emoji used to fill this slot, which rendered differently on every
+   Chromebook and phone. */
+const gIco = paths =>
+  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ' +
+  'style="width:1em;height:1em;vertical-align:-0.15em">' + paths + '</svg>';
+
+const GAME_ICO = {
+  // Note Hunt — a target: find the named note on the fretboard.
+  fret:       gIco('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>'),
+  // Change Up — repeat arrows: switch between two chords, over and over.
+  cc:         gIco('<path d="M17 2l4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>'),
+  // Strum Radar — signal waves picking up your strum.
+  radar:      gIco('<circle cx="12" cy="19" r="1.4" fill="currentColor" stroke="none"/><path d="M8.5 15.5a5 5 0 0 1 7 0"/><path d="M5 12a9.5 9.5 0 0 1 14 0"/>'),
+  // Riff Roulette — a spinning wheel.
+  roulette:   gIco('<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M12 3v6.5M12 14.5V21M3 12h6.5M14.5 12H21"/>'),
+  // Note Runner — a note travelling, speed lines behind it.
+  noterunner: gIco('<circle cx="9" cy="17" r="3"/><path d="M12 17V4l7 2.5"/><path d="M2 9h3.5M2 13h2.5"/>'),
+  // Riff Runner — a running figure.
+  runner:     gIco('<circle cx="15.5" cy="4.5" r="2"/><path d="M14 8.5 10.5 10.5l1.5 4-3 6"/><path d="M12 14.5l4 1 1.5 5"/><path d="M14 8.5 17.5 10l3 2.5"/><path d="M10.5 10.5 6.5 12"/>'),
+  // Chord Blitz — a lightning bolt (speed round).
+  blitz:      gIco('<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/>'),
+  // Fret Zap — a fretboard with one fret lit up: name that note, fast.
+  fretzap:    gIco('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M9 5v14M15 5v14"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/>'),
+  // Strum Hero — down-strum and up-strum arrows, as they're written in music.
+  strum:      gIco('<path d="M8 4v14M8 18l-3-3M8 18l3-3"/><path d="M16 20V6M16 6l-3 3M16 6l3 3"/>'),
+};
+
 const GAMES_META = [
-  { key:'fret',     cls:'gc-hunt',     ico:'&#x1F3AF;', titleKey:'games.fret.title',  guitar:true,  descKey:'games.fret.desc' },
-  { key:'cc',       cls:'gc-change',   ico:'&#x1F501;', titleKey:'games.cc.title',    guitar:true,  descKey:'games.cc.desc' },
-  { key:'radar',    cls:'gc-radar',    ico:'&#x1F4E1;', titleKey:'games.radar.title', guitar:true,  descKey:'games.radar.desc' },
-  { key:'roulette', cls:'gc-roulette', ico:'&#x1F3B0;', titleKey:'games.rr.title',    guitar:true,  descKey:'games.rr.desc' },
-  { key:'noterunner', cls:'gc-noterun', ico:'&#x1F3BC;', titleKey:'games.nr.title',   guitar:true,  descKey:'games.nr.desc' },
-  { key:'runner',   cls:'gc-runner',   ico:'&#x1F3C3;', titleKey:'games.riff.title',  guitar:false, descKey:'games.riff.desc' },
-  { key:'blitz',    cls:'gc-blitz',    ico:'&#x26A1;',  titleKey:'games.cb.title',    guitar:false, descKey:'games.cb.desc' },
-  { key:'fretzap',  cls:'gc-fretzap',  ico:'&#x1F4A5;', titleKey:'games.fz.title',    guitar:false, descKey:'games.fz.desc' },
-  { key:'strum',    cls:'gc-strum',    ico:'&#x1F3B8;', titleKey:'games.sh.title',    guitar:false, descKey:'games.sh.desc' },
+  { key:'fret',     cls:'gc-hunt',     ico:GAME_ICO.fret,       titleKey:'games.fret.title',  guitar:true,  descKey:'games.fret.desc' },
+  { key:'cc',       cls:'gc-change',   ico:GAME_ICO.cc,         titleKey:'games.cc.title',    guitar:true,  descKey:'games.cc.desc' },
+  { key:'radar',    cls:'gc-radar',    ico:GAME_ICO.radar,      titleKey:'games.radar.title', guitar:true,  descKey:'games.radar.desc' },
+  { key:'roulette', cls:'gc-roulette', ico:GAME_ICO.roulette,   titleKey:'games.rr.title',    guitar:true,  descKey:'games.rr.desc' },
+  { key:'noterunner', cls:'gc-noterun', ico:GAME_ICO.noterunner, titleKey:'games.nr.title',   guitar:true,  descKey:'games.nr.desc' },
+  { key:'runner',   cls:'gc-runner',   ico:GAME_ICO.runner,     titleKey:'games.riff.title',  guitar:false, descKey:'games.riff.desc' },
+  { key:'blitz',    cls:'gc-blitz',    ico:GAME_ICO.blitz,      titleKey:'games.cb.title',    guitar:false, descKey:'games.cb.desc' },
+  { key:'fretzap',  cls:'gc-fretzap',  ico:GAME_ICO.fretzap,    titleKey:'games.fz.title',    guitar:false, descKey:'games.fz.desc' },
+  { key:'strum',    cls:'gc-strum',    ico:GAME_ICO.strum,      titleKey:'games.sh.title',    guitar:false, descKey:'games.sh.desc' },
 ];
 
 /* Card chip for a game's best score. Prefers the all-time best persisted in
@@ -1691,47 +1722,47 @@ function gamesShow(view){
     return;
   }
   if (view === 'fret'){
-    p.innerHTML = gamesHeadHtml('&#x1F3AF; ' + t('games.fret.title'), true) + `<div id="fret-body"></div>`;
+    p.innerHTML = gamesHeadHtml(GAME_ICO.fret + ' ' + t('games.fret.title'), true) + `<div id="fret-body"></div>`;
     fretStart();
     return;
   }
   if (view === 'cc'){
-    p.innerHTML = gamesHeadHtml('&#x1F501; ' + t('games.cc.title'), true) + `<div id="cc-body"></div>`;
+    p.innerHTML = gamesHeadHtml(GAME_ICO.cc + ' ' + t('games.cc.title'), true) + `<div id="cc-body"></div>`;
     ccSetup();
     return;
   }
   if (view === 'blitz'){
-    p.innerHTML = gamesHeadHtml('&#x26A1; ' + t('games.cb.title'), true) + `<div id="cb-body"></div>`;
+    p.innerHTML = gamesHeadHtml(GAME_ICO.blitz + ' ' + t('games.cb.title'), true) + `<div id="cb-body"></div>`;
     cbSetup();
     return;
   }
   if (view === 'strum'){
-    p.innerHTML = gamesHeadHtml('&#x1F3B8; ' + t('games.sh.title'), true) + `<div id="sh-body"></div>`;
+    p.innerHTML = gamesHeadHtml(GAME_ICO.strum + ' ' + t('games.sh.title'), true) + `<div id="sh-body"></div>`;
     shSetup();
     return;
   }
   if (view === 'radar'){
-    p.innerHTML = gamesHeadHtml('&#x1F4E1; ' + t('games.radar.title'), true) + `<div id="sr-body"></div>`;
+    p.innerHTML = gamesHeadHtml(GAME_ICO.radar + ' ' + t('games.radar.title'), true) + `<div id="sr-body"></div>`;
     srSetup();
     return;
   }
   if (view === 'roulette'){
-    p.innerHTML = gamesHeadHtml('&#x1F3B0; ' + t('games.rr.title'), true) + `<div id="rr-body"></div>`;
+    p.innerHTML = gamesHeadHtml(GAME_ICO.roulette + ' ' + t('games.rr.title'), true) + `<div id="rr-body"></div>`;
     rrSetup();
     return;
   }
   if (view === 'fretzap'){
-    p.innerHTML = gamesHeadHtml('&#x1F4A5; ' + t('games.fz.title'), true) + `<div id="fz-body"></div>`;
+    p.innerHTML = gamesHeadHtml(GAME_ICO.fretzap + ' ' + t('games.fz.title'), true) + `<div id="fz-body"></div>`;
     fzSetup();
     return;
   }
   if (view === 'runner'){
-    p.innerHTML = gamesHeadHtml('&#x1F3C3; ' + t('games.riff.title'), true) + `<div id="rn-body"></div>`;
+    p.innerHTML = gamesHeadHtml(GAME_ICO.runner + ' ' + t('games.riff.title'), true) + `<div id="rn-body"></div>`;
     rnSetup();
     return;
   }
   if (view === 'noterunner'){
-    p.innerHTML = gamesHeadHtml('&#x1F3BC; ' + t('games.nr.title'), true) + `<div id="nr-body"></div>`;
+    p.innerHTML = gamesHeadHtml(GAME_ICO.noterunner + ' ' + t('games.nr.title'), true) + `<div id="nr-body"></div>`;
     nrSetup();
     return;
   }
@@ -2409,7 +2440,7 @@ function cbRenderDone(){
   body.innerHTML =
     `<div class="coach-report">
        <div class="cb-done-score">${cb.score}</div>
-       <div class="coach-overall">&#x26A1; ${t(cb.answered === 1 ? 'games.common.cardsAnsweredOne' : 'games.common.cardsAnsweredMany', { answered: cb.answered, correct: cb.correct, acc })}</div>
+       <div class="coach-overall">${GAME_ICO.blitz} ${t(cb.answered === 1 ? 'games.common.cardsAnsweredOne' : 'games.common.cardsAnsweredMany', { answered: cb.answered, correct: cb.correct, acc })}</div>
        ${bestLine}
        <div class="coach-actions">
          <button type="button" class="coach-start" onclick="cbStart()">&#x21BB; ${t('games.common.playAgain')}</button>
