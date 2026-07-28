@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — Arcade XP, a daily goal, and a streak
+
+### Added
+
+- **The Games arcade now tracks XP, a daily goal, and its own streak.** A bar
+  at the top of the games menu shows how close you are to today's goal, and
+  once you've played on back-to-back days it shows a streak count too. Every
+  finished round counts — you don't have to beat your best score to earn XP,
+  just play.
+
 ## 2026-07-28 — Games gets the whole screen back
 
 ### Changed

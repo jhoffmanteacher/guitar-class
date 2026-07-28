@@ -1344,10 +1344,9 @@ function fretSaveRound(g){
   if (typeof saveGames !== 'function' || !currentUser || isDevBypassUser()) return;
   const score = g.results.filter(Boolean).length;
   const old = (games.fret && games.fret.best) || 0;
-  if (score > old){
-    games.fret = { best: score, level: g.level, at: new Date().toISOString().slice(0, 10) };
-    saveGames();
-  }
+  const isNewBest = score > old;
+  if (isNewBest) games.fret = { best: score, level: g.level, at: new Date().toISOString().slice(0, 10) };
+  awardArcadeXp(isNewBest);
 }
 
 /* Round over → save, release the mic, render the done screen. The mic-off is
@@ -1624,6 +1623,62 @@ function gamesBestChip(allTime, today, unit){
   return `<span class="games-card-best">&#x1F3C6; ${label}: ${v}${unit || ''}</span>`;
 }
 
+/* Arcade meta-layer: XP + a daily goal + a streak of its own — separate from
+   any one game's own record (Riff Roulette keeps its bespoke games.rr streak
+   untouched) and from the site-wide practice streak in app.js. Lives in
+   games.meta, inside the games save category (already in
+   LOAD_DEPENDENT_SAVE_KEYS, so no new Firestore plumbing). Uses app.js's
+   dayStr() — the student's local calendar day, same as the site-wide streak
+   — not the UTC date the per-game "at" fields use, since a streak has to
+   agree with the day the student actually experienced.
+   Call once per finished round, win or not: flat base XP for playing, plus
+   a small bonus for a new personal best. Skipped in dev bypass, same as
+   every other games.* write (Firestore rejects that uid) and
+   bumpPracticeStreak. */
+const ARCADE_XP_BASE = 10, ARCADE_XP_BEST_BONUS = 5, ARCADE_DAILY_XP_GOAL = 30;
+function awardArcadeXp(gotNewBest){
+  if (!currentUser || isDevBypassUser()) return;
+  const today = dayStr(new Date());
+  const m = games.meta || (games.meta = { xp: 0, xpToday: 0, xpDay: null, streak: { count: 0, lastDay: null } });
+  if (m.xpDay !== today){ m.xpToday = 0; m.xpDay = today; }
+  const gained = ARCADE_XP_BASE + (gotNewBest ? ARCADE_XP_BEST_BONUS : 0);
+  m.xp = (m.xp || 0) + gained;
+  m.xpToday += gained;
+  if (m.streak.lastDay !== today){
+    const y = new Date();
+    y.setDate(y.getDate() - 1);
+    m.streak.count = m.streak.lastDay === dayStr(y) ? (m.streak.count || 0) + 1 : 1;
+    m.streak.lastDay = today;
+  }
+  saveGames();
+}
+
+/* Meta bar shown above the hub sections: today's XP toward the daily goal,
+   plus the arcade streak once it's alive (today or still winnable — same
+   "alive" rule as rrStreakAlive). */
+function gamesMetaBarHtml(){
+  const m = (typeof games !== 'undefined' && games && games.meta) || null;
+  const today = dayStr(new Date());
+  const xpToday = (m && m.xpDay === today) ? (m.xpToday || 0) : 0;
+  const pct = Math.min(100, Math.round(100 * xpToday / ARCADE_DAILY_XP_GOAL));
+  const goalMet = xpToday >= ARCADE_DAILY_XP_GOAL;
+  let streakChip = '';
+  if (m && m.streak && m.streak.count > 1 && m.streak.lastDay){
+    const y = new Date();
+    y.setDate(y.getDate() - 1);
+    const alive = m.streak.lastDay === today || m.streak.lastDay === dayStr(y);
+    if (alive) streakChip = `<span class="games-meta-streak">&#x1F525; ${t('games.meta.streak', { n: m.streak.count })}</span>`;
+  }
+  return `
+    <div class="games-meta-bar">
+      <div class="games-meta-goal">
+        <span class="games-meta-label">${goalMet ? t('games.meta.goalMet') : t('games.meta.xpToday', { xp: xpToday, goal: ARCADE_DAILY_XP_GOAL })}</span>
+        <div class="games-meta-bar-track"><div class="games-meta-bar-fill" style="width:${pct}%"></div></div>
+      </div>
+      ${streakChip}
+    </div>`;
+}
+
 function gamesRenderHub(p){
   const saved = (typeof games !== 'undefined' && games) || {};
   let ccBest = 0;
@@ -1708,6 +1763,7 @@ function gamesRenderHub(p){
      <div class="games-grid">${list.map(card).join('')}</div>`;
   p.innerHTML =
     `<div class="games-tagline">${t('games.hub.tagline')}</div>
+     ${gamesMetaBarHtml()}
      ${section('&#x1F3B8; ' + t('games.hub.sectionGuitar'), GAMES_META.filter(g=>g.guitar))}
      ${section('&#x1F5B1;&#xFE0F; ' + t('games.hub.sectionNoGuitar'), GAMES_META.filter(g=>!g.guitar))}
      ${coachFootHtml()}`;
@@ -2144,10 +2200,9 @@ function ccRenderDone(){
        (Firestore rejects that uid; the session best above still counts). */
     if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
       const old = (games.cc && games.cc.bestBpm) || 0;
-      if (cc.bpm > old){
-        games.cc = { bestBpm: cc.bpm, progression: cc.chords, at: new Date().toISOString().slice(0, 10) };
-        saveGames();
-      }
+      const isNewBest = cc.bpm > old;
+      if (isNewBest) games.cc = { bestBpm: cc.bpm, progression: cc.chords, at: new Date().toISOString().slice(0, 10) };
+      awardArcadeXp(isNewBest);
     }
   } else if (r >= 0.5){
     const early = t(cc.bpc >= 4 ? 'games.cc.early.bar' : cc.bpc === 2 ? 'games.cc.early.half' : 'games.cc.early.beat');
@@ -2419,10 +2474,9 @@ function cbFinish(){
      (Firestore rejects that uid; the session best above still counts). */
   if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
     const old = (games.cb && games.cb.best) || 0;
-    if (cb.score > old){
-      games.cb = { best: cb.score, deck: cb.deck, dir: cb.dir, at: new Date().toISOString().slice(0, 10) };
-      saveGames();
-    }
+    const isNewBest = cb.score > old;
+    if (isNewBest) games.cb = { best: cb.score, deck: cb.deck, dir: cb.dir, at: new Date().toISOString().slice(0, 10) };
+    awardArcadeXp(isNewBest);
   }
   cbRenderDone();
 }
@@ -2680,10 +2734,9 @@ function fzFinish(){
      (Firestore rejects that uid; the session best above still counts). */
   if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
     const old = (games.fz && games.fz.best) || 0;
-    if (fz.score > old){
-      games.fz = { best: fz.score, deck: fz.deck, at: new Date().toISOString().slice(0, 10) };
-      saveGames();
-    }
+    const isNewBest = fz.score > old;
+    if (isNewBest) games.fz = { best: fz.score, deck: fz.deck, at: new Date().toISOString().slice(0, 10) };
+    awardArcadeXp(isNewBest);
   }
   fzRenderDone();
 }
@@ -3107,10 +3160,9 @@ function shFinish(){
      (Firestore rejects that uid; the session best above still counts). */
   if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
     const old = (games.sh && games.sh.best) || 0;
-    if (s.score > old){
-      games.sh = { best: s.score, pattern: pat.id, bpm: s.bpm, at: new Date().toISOString().slice(0, 10) };
-      saveGames();
-    }
+    const isNewBest = s.score > old;
+    if (isNewBest) games.sh = { best: s.score, pattern: pat.id, bpm: s.bpm, at: new Date().toISOString().slice(0, 10) };
+    awardArcadeXp(isNewBest);
   }
   shRenderDone();
 }
@@ -3677,9 +3729,10 @@ function rrSetDone(ptsTotal){
     g.days = (g.days || 0) + 1;
     g.lastDay = today;
   }
-  if (ptsTotal > (g.best || 0)) g.best = ptsTotal;
+  const isNewBest = ptsTotal > (g.best || 0);
+  if (isNewBest) g.best = ptsTotal;
   games.rr = g;
-  saveGames();
+  awardArcadeXp(isNewBest);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -4002,10 +4055,9 @@ function srFinish(){
      (Firestore rejects that uid; the session best above still counts). */
   if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
     const old = (games.sr && games.sr.best) || 0;
-    if (s.acc > old){
-      games.sr = { best: s.acc, pattern: pat.id, bpm: s.bpm, at: new Date().toISOString().slice(0, 10) };
-      saveGames();
-    }
+    const isNewBest = s.acc > old;
+    if (isNewBest) games.sr = { best: s.acc, pattern: pat.id, bpm: s.bpm, at: new Date().toISOString().slice(0, 10) };
+    awardArcadeXp(isNewBest);
   }
   srRenderDone();
 }
@@ -4722,13 +4774,14 @@ function rnFinish(){
      dev bypass (Firestore rejects that uid; the session best still counts). */
   if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
     const g = (games.rn && games.rn.songs && games.rn.songs[song.id]) || { acc: 0, tier: -1 };
-    if (s.acc > g.acc || cleared > g.tier){
+    const isNewBest = s.acc > g.acc || cleared > g.tier;
+    if (isNewBest){
       if (!games.rn) games.rn = { songs: {} };
       if (!games.rn.songs) games.rn.songs = {};
       games.rn.songs[song.id] = { acc: Math.max(g.acc, s.acc), tier: Math.max(g.tier, cleared) };
       games.rn.at = new Date().toISOString().slice(0, 10);
-      saveGames();
     }
+    awardArcadeXp(isNewBest);
   }
   rnRenderDone();
 }
@@ -6097,14 +6150,12 @@ function nrFinish(complete){
   if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
     if (!games.nr) games.nr = {};
     if (!games.nr.levels) games.nr.levels = {};
-    let dirty = false;
-    if (s.acc > (games.nr.levels[s.level] || 0)){ games.nr.levels[s.level] = s.acc; dirty = true; }
+    let dirty = false, isNewBest = false;
+    if (s.acc > (games.nr.levels[s.level] || 0)){ games.nr.levels[s.level] = s.acc; dirty = true; isNewBest = true; }
     if (s.adaptive && games.nr.stage !== s.stagePos){ games.nr.stage = s.stagePos; dirty = true; }
     if (wkChanged){ games.nr.weak = wk; dirty = true; }
-    if (dirty){
-      games.nr.at = new Date().toISOString().slice(0, 10);
-      saveGames();
-    }
+    if (dirty) games.nr.at = new Date().toISOString().slice(0, 10);
+    awardArcadeXp(isNewBest);
   }
   nrRenderDone(nPerfect, nGood, nPitch, total);
 }

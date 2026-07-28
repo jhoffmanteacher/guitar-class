@@ -1436,6 +1436,13 @@ body.games-open{overflow:hidden}
 .games-logo{flex:1;text-align:center;font-family:var(--font-display);font-size:1.375rem;font-weight:600;letter-spacing:-0.01em;color:#fff;text-shadow:none}
 .games-stage{background:var(--bg);border-radius:18px;padding:18px;box-shadow:0 14px 44px rgba(0,0,0,0.4)}
 .games-tagline{text-align:center;font-size:0.9375rem;font-weight:600;color:var(--text2);margin:2px 0 14px}
+/* arcade meta-layer: today's XP toward the daily goal + the arcade streak */
+.games-meta-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;margin:0 0 16px;padding:10px 14px;border-radius:14px;border:1px solid var(--border2);background:var(--bg2)}
+.games-meta-goal{flex:1 1 200px;min-width:160px}
+.games-meta-label{font-size:0.8125rem;font-weight:700;color:var(--text2)}
+.games-meta-bar-track{margin-top:5px;height:8px;border-radius:999px;background:var(--border2);overflow:hidden}
+.games-meta-bar-fill{height:100%;border-radius:999px;background:var(--purple-accent);transition:width .3s}
+.games-meta-streak{font-size:0.8125rem;font-weight:700;color:var(--amber-text);background:var(--amber-bg);border:1px solid var(--amber-text);border-radius:999px;padding:3px 12px;white-space:nowrap}
 .games-game-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
 .games-game-title{font-size:1.0625rem;font-weight:700;color:var(--text)}
 /* funner hub cards: big icon, colored crown, arcade hover lift */
