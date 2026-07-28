@@ -230,8 +230,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .obj-skill-item{color:var(--text2);font-size:0.875rem;line-height:1.5}
 .tabs{margin-bottom:16px}
 .tabs-songbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px}
-.print-set-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;font-size:0.7812rem;font-weight:500;font-family:inherit;line-height:1.2;color:var(--text2);background:transparent;border:1px solid transparent;border-radius:14px;cursor:pointer;transition:background 0.15s,border-color 0.15s,color 0.15s}
-.print-set-btn svg{width:13px;height:13px;flex-shrink:0}
+.print-set-btn{display:inline-flex;align-items:center;justify-content:center;padding:7px;font-family:inherit;color:var(--text2);background:transparent;border:1px solid transparent;border-radius:14px;cursor:pointer;transition:background 0.15s,border-color 0.15s,color 0.15s}
+.print-set-btn svg{width:15px;height:15px;flex-shrink:0}
 .print-set-btn:hover{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-text)}
 .tabs-songs{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;font-size:0.7812rem;color:var(--text2);background:var(--bg2);border:1px solid var(--border);border-radius:14px;cursor:pointer;font-weight:500;font-family:inherit;line-height:1.2;transition:background 0.15s,border-color 0.15s,color 0.15s}
 .tabs-songs::before{content:'Reference';font-size:0.75rem;font-weight:700;letter-spacing:0.08em;color:var(--text3);padding-right:7px;border-right:1px solid var(--border);margin-right:2px;text-transform:uppercase}
