@@ -5550,7 +5550,7 @@ async function nrStart(){
   s.goodMs = Math.min(180, 0.45 * minGap);
   s.perfectMs = Math.min(90, s.goodMs * 0.55);
 
-  s.score = 0; s.combo = 0; s.maxCombo = 0;
+  s.score = 0; s.combo = 0; s.maxCombo = 0; s.missStreak = 0;
   s.errs = [];
   s.sweepIdx = 0; s.lastBeat = -1;
   s.countCleared = false;   // else round 2+ never wipes the count-in "4" off the track
@@ -5693,6 +5693,8 @@ function nrLoop(){
       if (!n.result){
         n.result = 'miss';
         s.combo = 0;
+        s.missStreak++;
+        if (s.missStreak >= 2) nrRaceSlip();
         nrMark(n, 'miss');
         nrHud();
       }
@@ -5759,9 +5761,13 @@ function nrComboPop(mult){
      • the checkpoint flag sits exactly on NR_PASS, so "did I get past the
        marker?" and "did I unlock the next level?" are the same question,
        and it moves if that constant ever does;
-     • a miss costs ground the runner never gets back — it doesn't
-       reverse (nothing un-plays a note), it just stops gaining, which is
-       what falling behind in a race actually looks like.
+     • a single miss just stops the runner gaining ground — nothing
+       un-plays a note, so it can't lose distance it already earned. Two
+       or more misses in a row (nrRaceSlip) are different: the runner
+       visibly stumbles backward, then eases back to the accuracy line
+       as the slip decays (s.raceSlip) — a beat or two, not a hard reset.
+       That temporary dip is motion-only: reduced motion skips the slip
+       and keeps snapping straight to the true accuracy line.
 
    Speed is the other half of the ask. Distance-per-note is fixed, so a
    faster level lands notes more often and the runner covers the road
@@ -5817,6 +5823,18 @@ function nrRaceMotionOk(){
   return !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 }
 
+/* Called once per note that extends a miss streak to 2+ (s.missStreak,
+   tracked in nrFinalizeEvent and the sweep-timeout miss in nrLoop; a
+   'pitch' wrong-note counts same as a timed-out 'miss'). Each call adds
+   more backward slip, capped so a long streak can't shove the runner all
+   the way to the start line; nrRaceFrame decays it back toward zero every
+   frame it runs, so the dip reads as a stumble, not a demotion. */
+function nrRaceSlip(){
+  const s = nr;
+  if (!s) return;
+  s.raceSlip = Math.min(0.18, (s.raceSlip || 0) + 0.05);
+}
+
 function nrRaceHtml(){
   return `<div class="nr-race" id="nr-race" role="img" aria-label="${t('games.nr.race.aria')}">
        <div class="nr-race-lane">
@@ -5840,7 +5858,7 @@ function nrRaceFrame(now){
      stale. (Cheaper and harder to forget than resetting in nrStart.) */
   if (s.raceEl !== run){
     s.raceEl = run;
-    s.raceP = 0; s.raceCycle = 0; s.raceWon = false;
+    s.raceP = 0; s.raceCycle = 0; s.raceWon = false; s.raceSlip = 0;
   }
 
   let hits = 0;
@@ -5850,9 +5868,12 @@ function nrRaceFrame(now){
   }
   const target = hits / total;
   /* Glide toward the true distance instead of teleporting, so a hit reads
-     as a stride rather than a jump cut. Reduced motion snaps. */
+     as a stride rather than a jump cut. Reduced motion snaps straight to
+     the true accuracy line, ignoring raceSlip — see nrRaceSlip. */
   const motion = nrRaceMotionOk();
-  s.raceP += (target - s.raceP) * (motion ? 0.12 : 1);
+  const effTarget = motion ? Math.max(0, target - (s.raceSlip || 0)) : target;
+  s.raceP += (effTarget - s.raceP) * (motion ? 0.12 : 1);
+  if (motion && s.raceSlip) s.raceSlip *= 0.94;   // eases back over a beat or two
   run.style.transform = 'translateX(' + (s.raceP * lane.clientWidth) + 'px)';
 
   if (!motion) return;   // position carries the information; the rest is flourish
@@ -5936,6 +5957,7 @@ function nrFinalizeEvent(){
   if (pitchOk){
     const prevMult = Math.min(4, 1 + Math.floor(s.combo / 8));
     s.combo++;
+    s.missStreak = 0;
     if (s.combo > s.maxCombo) s.maxCombo = s.combo;
     const mult = Math.min(4, 1 + Math.floor(s.combo / 8));
     if (bestAbs <= s.perfectMs){
@@ -5951,6 +5973,8 @@ function nrFinalizeEvent(){
        The unclear flag feeds the mic-problem guard in nrFinish. */
     n.result = 'pitch'; n.unclear = unclear;
     s.combo = 0; s.score += 20; nrMark(n, 'nr-hit-pitch');
+    s.missStreak++;
+    if (s.missStreak >= 2) nrRaceSlip();
   }
   nrHud();
 }
