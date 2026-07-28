@@ -265,7 +265,24 @@ function signIn(){
       showAuthError(t('auth.signInFailed'));
     });
 }
-function signOut(){ auth.signOut(); }
+/* Sign-out on a shared Chromebook has to be a hard reset, not a state reset.
+   Two things went wrong when it wasn't:
+     1. A debounced save still inside its 800 ms window was dropped — flushSave
+        bails on !currentUser, so a got-it ticked right before signing out never
+        reached Firestore. Flush first, while we still have a user to write as.
+     2. Plenty of per-student state lives outside the variables the
+        onAuthStateChanged(null) branch clears: _modulesRendered plus the built
+        #week-panels DOM (so the next student saw the previous one's rendered
+        answers and check-offs), drillSkillSession, and every sessionStorage
+        best (sdBest / nrBestSession / rrPts / coachStreak — coach.js has no
+        auth hook at all). Reloading clears the lot in one move and can't drift
+        out of sync the way an ever-growing manual reset list does. */
+async function signOut(){
+  try { clearTimeout(saveTimer); await flushSave(); } catch(e){}
+  try { sessionStorage.clear(); } catch(e){}
+  try { if(auth) await auth.signOut(); } catch(e){}
+  location.reload();
+}
 
 // Dev bypass is for local UI testing only. Only show/allow it when the site is
 // running on localhost — never on the live (GitHub Pages) site.

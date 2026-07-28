@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-27 — Signing out now really signs you out
+
+### Fixed
+
+- **The last thing you did before signing out could be lost.** Ticking a skill
+  or marking a step done and then immediately signing out — the normal
+  end-of-period habit — could drop that change before it saved. Sign-out now
+  finishes saving before it lets go.
+- **On a shared computer, the next person could see your work on screen.**
+  After signing out, some of the previous student's lesson page — typed
+  answers, checked-off steps, ticked skills — could still be showing when the
+  next student signed in, even though their own saved progress was correct.
+  Signing out now clears the screen completely.
+- **A pushed fix could fail to reach you.** Updates could be stored using
+  older copies of the files, so a browser looked up to date while still
+  running old code. Updates are now always fetched fresh.
+
 ## 2026-07-27 — Module content is back
 
 ### Fixed

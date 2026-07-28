@@ -14,7 +14,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-07-28-3c01e62fa4';
+const CACHE_VERSION = 'guitar-class-2026-07-28-44171f92f0';
 
 // Backing-track audio lives in its OWN cache, versioned independently of the
 // shell (see tools/checks.mjs, which fingerprints audio/ separately and
@@ -111,7 +111,13 @@ const ASSETS = [
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_VERSION)
-      .then(cache => cache.addAll(ASSETS))
+      // {cache:'reload'} forces each asset to come from the network. A plain
+      // addAll() reads through the browser's HTTP cache, so a brand-new
+      // CACHE_VERSION could be filled with the *old* files GitHub Pages was
+      // still serving from max-age — the student auto-reloads onto a cache
+      // that looks current and is stale. That is exactly how a pushed fix
+      // fails to reach the class.
+      .then(cache => cache.addAll(ASSETS.map(u => new Request(u, { cache: 'reload' }))))
       // New SW takes over without waiting for all tabs to close.
       .then(() => self.skipWaiting())
   );
@@ -175,14 +181,16 @@ self.addEventListener('fetch', event => {
       .then(res => {
         // Only cache good, basic (same-origin) responses.
         if (res && res.status === 200 && res.type === 'basic') {
-          cache.put(req, res.clone());
+          // waitUntil the PUT itself, not just the fetch. `network` settles as
+          // soon as the response headers land, so passing it to waitUntil (as
+          // this used to) left the body still streaming into the cache with
+          // nothing keeping the worker alive — on a slow connection the entry
+          // silently never landed, and the file was missing offline.
+          event.waitUntil(cache.put(req, res.clone()));
         }
         return res;
       })
       .catch(() => null);
-    // Keep the SW alive for the background refresh even when `cached`
-    // already satisfied respondWith below — otherwise the browser can
-    // terminate the worker before cache.put() lands.
     event.waitUntil(network);
 
     // Serve cache first if we have it; otherwise wait on the network.
