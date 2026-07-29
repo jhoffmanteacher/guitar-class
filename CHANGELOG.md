@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-29 — First In-Class Activity: Playing Happy Birthday
+
+### Added
+
+- **The first In-Class Activities entry is live**, dated 9/1: "Playing Happy
+  Birthday — Part 1: Find Your Notes." Listen to the same melody played three
+  very different ways, then learn the simple fret pattern on the low E and A
+  strings that unlocks the whole tune, ending with the full TAB split into
+  four bite-sized phrases you can play and hear at any tempo.
+
 ## 2026-07-29 — In-Class Activities
 
 ### Added

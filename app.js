@@ -5860,19 +5860,24 @@ function caFormatDate(iso){
   const lang = (typeof getLang === 'function' && getLang() === 'es') ? 'es' : 'en';
   return d.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { weekday:'short', month:'numeric', day:'numeric' });
 }
-function caStepHtml(step){
+function caStepHtml(a, step, si){
   const parts = [];
   if(step.figure) parts.push(`<span class="step-figure"><img src="${escAttr(step.figure)}" alt=""></span>`);
   if(step.video && step.video.id){
     const url = `https://www.youtube.com/watch?v=${encodeURIComponent(step.video.id)}${step.video.start ? `&start=${Number(step.video.start)}` : ''}`;
-    parts.push(`<button type="button" class="rp-trigger" onclick="loadPanel('youtube','${escAttr(url)}','${escAttr(t('nav.classActivities'))}','YouTube')">&#x25B6; ${escHtml(t('ca.watchVideo'))}</button>`);
+    const vLabel = step.video.label ? escHtml(tf(step.video, 'label')) : escHtml(t('ca.watchVideo'));
+    parts.push(`<button type="button" class="rp-trigger" onclick="loadPanel('youtube','${escAttr(url)}','${escAttr(t('nav.classActivities'))}','YouTube')">&#x25B6; ${vLabel}</button>`);
   }
-  return `<li>${escHtml(tf(step,'text'))}${parts.join('')}</li>`;
+  if(step.tab) parts.push(buildTab(step.tab, { keyPrefix: `bpm:ca:${a.id}:${si}:tab` }));
+  // Step text is first-party authored HTML, same trust level as module step
+  // content — trusted (not escHtml'd) so <ol>/<ul> markup renders per the
+  // house list rule, and wrapGotItWhen() can style the got-it-when sentence.
+  return `<li>${wrapGotItWhen(tf(step,'text'))}${parts.join('')}</li>`;
 }
 function caActivityCardHtml(a){
   const done = classActivities[a.id] === true;
   const open = caOpenId === a.id;
-  const stepsHtml = (a.steps || []).map(caStepHtml).join('');
+  const stepsHtml = (a.steps || []).map((s, si) => caStepHtml(a, s, si)).join('');
   const markLabel = done ? t('ca.completed') : t('ca.markComplete');
   return `<details class="ca-card" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary">

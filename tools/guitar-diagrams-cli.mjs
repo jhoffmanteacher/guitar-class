@@ -7,6 +7,7 @@
      node tools/guitar-diagrams-cli.mjs chord Am -o Am.png
      node tools/guitar-diagrams-cli.mjs chord Am --label -o Am.png
      node tools/guitar-diagrams-cli.mjs string A -o Astring.png
+     node tools/guitar-diagrams-cli.mjs notes lowE "0:E,2:F#,4:G#,5:A" -o hb-lowE.svg
      node tools/guitar-diagrams-cli.mjs note A 7 E -o A7.png
      node tools/guitar-diagrams-cli.mjs sheet -o all-chords.png
      node tools/guitar-diagrams-cli.mjs list
@@ -51,6 +52,9 @@ const USAGE = `guitar-diagrams-cli.mjs
   naturals <kind> [max]   6-string board, naturals     e.g. naturals A
                           circled on one string       e.g. naturals D 10
                           (max fret defaults to 12)
+  notes <kind> <list>     6-string board, an explicit  e.g. notes lowE
+                          fret:label list circled on   "0:E,2:F#,4:G#,5:A"
+                          one string (sharps OK)
   note <kind> <fret> <N>  one note on the fretboard   e.g. note A 7 E
   sheet [Name ...]        contact sheet of chords
   list                    chord names in the library
@@ -64,6 +68,10 @@ let svg = null;
 if (cmd === 'chord')       svg = GD.chordSvg(a[0], { ...opts, label: wantLabel ? a[0] : undefined });
 else if (cmd === 'string') svg = GD.localStringFretboardSvg(a[0], opts);
 else if (cmd === 'naturals') svg = GD.localStringNaturalsSvg(a[0], { ...opts, maxFret: a[1] ? Number(a[1]) : undefined });
+else if (cmd === 'notes') svg = GD.localStringNotesSvg(a[0], (a[1] || '').split(',').map((pair) => {
+  const [fret, label] = pair.split(':');
+  return [Number(fret), label];
+}), opts);
 else if (cmd === 'note')   svg = GD.localNoteSvg(a[0], a[1], a[2], opts);
 else if (cmd === 'sheet')  svg = GD.chordSheetSvg(a, opts);
 else if (cmd === 'list') { console.log(Object.keys(GD.CHORD_DIAGRAMS).join(' ')); process.exit(0); }

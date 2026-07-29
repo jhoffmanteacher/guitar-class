@@ -455,6 +455,29 @@ function validateClassActivities() {
         }
         if (s.video) {
           if (!s.video.id || /placeholder/i.test(s.video.id)) { err(`${sWhere}: video.id is missing or a placeholder — verify via oEmbed before shipping (see CLAUDE.md "Videos")`); problems++; }
+          if (s.video.label) reqEs(sWhere, s.video, 'label');
+        }
+        if (s.tab) {
+          const tWhere = `${sWhere} · tab`;
+          reqEs(tWhere, s.tab, 'caption');
+          reqEs(tWhere, s.tab, 'title');
+          const strRe = /^[eBGDAE]$/;
+          const checkNote = (n, where) => {
+            if (!n || typeof n !== 'object') { err(`${where}: not an object`); problems++; return; }
+            if (!strRe.test(n.string || '')) { err(`${where}: string "${n.string}" is not one of e/B/G/D/A/E`); problems++; }
+            if (!Number.isInteger(n.fret) || n.fret < 0) { err(`${where}: fret "${n.fret}" is not an integer >= 0`); problems++; }
+            if (!hasVal(n.note)) { err(`${where}: missing "note"`); problems++; }
+            if (typeof n.midi !== 'number') { err(`${where}: midi "${n.midi}" is not numeric`); problems++; }
+          };
+          if (Array.isArray(s.tab.phrases)) {
+            s.tab.phrases.forEach((p, pi) => {
+              const pWhere = `${tWhere} · phrases[${pi}]`;
+              reqEs(pWhere, p, 'label');
+              (p.notes || []).forEach((n, ni) => checkNote(n, `${pWhere} · notes[${ni}]`));
+            });
+          } else if (Array.isArray(s.tab.notes)) {
+            s.tab.notes.forEach((n, ni) => checkNote(n, `${tWhere} · notes[${ni}]`));
+          }
         }
       });
     }

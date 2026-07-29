@@ -341,12 +341,23 @@ var STRING_NATURALS = {
 var NATURALS_LIGHT_GREEN = '#eaf3de';
 
 function localStringNaturalsSvg(kind, opts){
-  var sNum = STRING_KIND_TO_NUM[kind];
   var allNotes = STRING_NATURALS[kind];
-  if (!sNum || !allNotes) return null;
-  var t = gdTheme(opts);
+  if (!allNotes) return null;
   var maxFret = (opts && opts.maxFret) || 12;
   var notes = allNotes.filter(function(pair){ return pair[0] <= maxFret; });
+  return localStringNotesSvg(kind, notes, opts);
+}
+/* Same board as localStringNaturalsSvg, but the circled/lettered notes along
+   the target string are an explicit [fret, label] list instead of always
+   being STRING_NATURALS — lets a figure show only the notes a specific
+   melody uses (sharps included), like the In-Class Activities Happy
+   Birthday figures. localStringNaturalsSvg is just this with the full
+   natural-note table. */
+function localStringNotesSvg(kind, notes, opts){
+  var sNum = STRING_KIND_TO_NUM[kind];
+  if (!sNum || !notes) return null;
+  var t = gdTheme(opts);
+  var maxFret = (opts && opts.maxFret) || 12;
 
   var W = 640, H = 244, padL = 62, padR = 20, padT = 22, padB = 56;
   var openW = 26;
@@ -543,6 +554,6 @@ if (typeof module !== 'undefined' && module.exports) {
     STRING_KIND_TO_NUM, STRING_SHORT_LABEL, STRING_NUM_TO_LABEL, FRETBOARD_INLAYS,
     STRING_NATURALS,
     chordDiagramSVG, localChordSvg, localStringSvg, localStringFretboardSvg,
-    localStringNaturalsSvg, localNoteSvg, noteFullLabel, ordinal, chordSvg, chordSheetSvg,
+    localStringNaturalsSvg, localStringNotesSvg, localNoteSvg, noteFullLabel, ordinal, chordSvg, chordSheetSvg,
   };
 }
