@@ -2,8 +2,14 @@
    Guitar Class — In-Class Activities (teacher-curated, day-specific work
    pushed out alongside the self-paced modules)
 
-   An activity is LIVE the moment its entry lands on main — there is no
-   toggle, flag, or admin switch. Activities never retire: this file is a
+   An activity is LIVE the moment its entry lands on main — that's still the
+   default and the only way to publish one; there is no draft/staging state
+   here. The one override is a teacher-only "hide" toggle (Class activities
+   view in teacher.js, backed by config/class.hiddenActivities in Firestore —
+   see loadClassConfig() in app.js) for the rare case of pulling something
+   back temporarily after an early push; a hidden activity is exactly as if
+   it hadn't shipped, and un-hiding it makes it live again on the student's
+   next page load. Activities never retire otherwise: this file is a
    permanent archive, newest first at render time (app.js sorts, this file
    doesn't need to be kept in date order).
 
@@ -22,6 +28,10 @@
      id:      'ca-2026-09-15',   // permanent, ^ca-\d{4}-\d{2}-\d{2}(-[b-z])?$
      date:    '2026-09-15',      // ISO — display + sort only; the id stays
                                   // fixed even if the date is later corrected
+     number:  1,                 // permanent once shipped, same rule as id —
+                                  // the sequence students hear it by ("Activity
+                                  // #1"). Renders as "#N - Title"; don't bake
+                                  // the "#N - " prefix into title itself.
      title:    'Power Chord Relay',
      title_es: 'Relevo de acordes de poder',
      intro:    'One or two sentences of context — why today\'s in-class work
@@ -77,6 +87,7 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-2026-09-01',
     date:  '2026-09-01',
+    number: 1,
     title:    'Playing Happy Birthday — Part 1: Find Your Notes',
     title_es: 'Tocando Happy Birthday — Parte 1: Encuentra tus notas',
     intro:    'Before you can play a song, your fingers need to know where its notes live. Today: hear the song a few ways, then learn one fret shape that unlocks the whole melody — starting from the open low E string.',

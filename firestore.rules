@@ -20,7 +20,8 @@ rules_version = '2';
      progress/{uid}   one doc per student: skills, responses, completed,
                       games, streak, practiceLog, name, email
      config/class     one shared doc: gamesEnabled, gameOverrides,
-                      paused, archived  (teacher writes, students read)
+                      paused, archived, hiddenActivities
+                      (teacher writes, students read)
      issueReports/*   student-filed problem reports
 
    Anything not matched below is denied by default. Do not add a catch-all.
@@ -61,15 +62,18 @@ service cloud.firestore {
 
     /* Class-wide settings. Every signed-in student must read this doc —
        app.js loadClassConfig() needs gamesEnabled/gameOverrides for the
-       arcade and `paused` for the access hold — so it cannot be
-       teacher-only.
+       arcade, `paused` for the access hold, and `hiddenActivities` to skip
+       any In-Class Activity the teacher has temporarily pulled back — so it
+       cannot be teacher-only.
 
-       What that exposes: the uid→bool maps for the whole class. It is
-       limited in practice, because uids are opaque and a student cannot
-       read anyone else's progress doc to map a uid back to a name. If that
-       ever stops being acceptable, the fix is structural rather than a
-       rules tweak: split into config/students/{uid} docs so each student
-       can read only their own row. */
+       What that exposes: the uid→bool maps for the whole class (plus an
+       activity-id→bool map, which isn't sensitive — activity ids already
+       ship to every client in class-activities.js). It is limited in
+       practice, because uids are opaque and a student cannot read anyone
+       else's progress doc to map a uid back to a name. If that ever stops
+       being acceptable, the fix is structural rather than a rules tweak:
+       split into config/students/{uid} docs so each student can read only
+       their own row. */
     match /config/{doc} {
       allow read:  if isSignedIn();
       allow write: if isTeacher();

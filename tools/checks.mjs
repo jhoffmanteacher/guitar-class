@@ -428,6 +428,7 @@ function validateClassActivities() {
   const idRe = /^ca-\d{4}-\d{2}-\d{2}(-[b-z])?$/;
   const dateRe = /^\d{4}-\d{2}-\d{2}$/;
   const seenIds = new Set();
+  const seenNumbers = new Set();
   const hasVal = v => v !== undefined && v !== null && v !== '';
   const reqEs = (where, obj, field) => {
     if (!obj || !hasVal(obj[field])) return;
@@ -441,6 +442,9 @@ function validateClassActivities() {
     else if (seenIds.has(a.id)) { err(`${where}: duplicate id "${a.id}"`); problems++; }
     else seenIds.add(a.id);
     if (!dateRe.test(a.date || '')) { err(`${where}: date "${a.date}" is not ISO (YYYY-MM-DD)`); problems++; }
+    if (!Number.isInteger(a.number) || a.number < 1) { err(`${where}: number "${a.number}" is not a positive integer`); problems++; }
+    else if (seenNumbers.has(a.number)) { err(`${where}: duplicate number ${a.number}`); problems++; }
+    else seenNumbers.add(a.number);
     reqEs(where, a, 'title');
     reqEs(where, a, 'intro');
     if (!Array.isArray(a.steps) || !a.steps.length) { err(`${where}: "steps" should be a non-empty array`); problems++; }

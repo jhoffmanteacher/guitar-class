@@ -84,6 +84,8 @@ async function showTeacherApp(user){
       if(paused){ teacherSetStudentPaused(paused.dataset.uid, paused.dataset.state); return; }
       const archived=e.target.closest('[data-set-archived]');
       if(archived){ teacherSetStudentArchived(archived.dataset.uid, archived.dataset.state); return; }
+      const actHidden=e.target.closest('[data-set-activity-hidden]');
+      if(actHidden){ teacherSetActivityHidden(actHidden.dataset.id, actHidden.dataset.state); return; }
       const open=e.target.closest('[data-open-student]');
       if(open) openStudentDetail(open.dataset.uid);
     });
@@ -381,9 +383,17 @@ function renderTeacherTrouble(){
 }
 
 /* ── Class activities (v1, teacher-only) ── One row per In-Class Activity,
-   newest first, with a done count and an expandable "who hasn't finished"
-   list. Reads classActivities off the SAME student docs the Students tab
-   already fetched (loadAllStudents) — no second Firestore read path. */
+   newest first, with a done count, an expandable "who hasn't finished"
+   list, and a Visible/Hidden toggle. Reads classActivities off the SAME
+   student docs the Students tab already fetched (loadAllStudents) — no
+   second Firestore read path for completion data.
+
+   Hidden state lives in config/class.hiddenActivities (id -> true), right
+   alongside gameOverrides/paused/archived — same doc, same teacher-writes/
+   students-read rule, same reason: ship=live is the default and permanent
+   publish path (git push), this toggle only exists to pull back something
+   pushed early, temporarily. See loadClassConfig() in app.js for the
+   student-facing read. */
 function renderTeacherActivities(){
   const box=document.getElementById('t-grid-container');
   const activities=(window.CLASS_ACTIVITIES||[]);
@@ -395,18 +405,46 @@ function renderTeacherActivities(){
     box.innerHTML='<div class="t-loading">No student data yet — students need to sign in first.</div>';
     return;
   }
-  const sorted=[...activities].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
-  const total=allStudents.length;
-  const rows=sorted.map(a=>{
-    const notDone=allStudents.filter(s=>(s.classActivities||{})[a.id]!==true);
-    const doneCount=total-notDone.length;
-    const listHtml=notDone.length
-      ? notDone.map(s=>`<div style="padding:2px 0">${escHtml(s.name||'(no name)')}${s.email?` &middot; ${escHtml(s.email)}`:''}</div>`).join('')
-      : '<div style="padding:2px 0">Everyone has finished this one.</div>';
-    return `<tr><td>${escHtml(a.date)}</td><td class="nc" title="${escAttr(a.title)}">${escHtml(a.title)}</td><td>${doneCount} / ${total} students</td>
-      <td><details><summary>Who hasn't finished (${notDone.length})</summary>${listHtml}</details></td></tr>`;
-  }).join('');
-  box.innerHTML=`<div class="t-grid-wrap"><table><thead><tr><th>Date</th><th class="nc">Activity</th><th>Done</th><th>Not yet</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  box.innerHTML='<div class="t-loading">Loading…</div>';
+  loadTeacherClassConfig().then(cfg=>{
+    if(teacherView!=='activities') return;   // switched views mid-flight
+    if(!cfg) return;                         // superseded by a newer toggle
+    const hidden=cfg.hiddenActivities||{};
+    const sorted=[...activities].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+    const total=allStudents.length;
+    const rows=sorted.map(a=>{
+      const notDone=allStudents.filter(s=>(s.classActivities||{})[a.id]!==true);
+      const doneCount=total-notDone.length;
+      const listHtml=notDone.length
+        ? notDone.map(s=>`<div style="padding:2px 0">${escHtml(s.name||'(no name)')}${s.email?` &middot; ${escHtml(s.email)}`:''}</div>`).join('')
+        : '<div style="padding:2px 0">Everyone has finished this one.</div>';
+      const isHidden=!!hidden[a.id];
+      // data-id + the delegated listener in showTeacherApp — an activity id
+      // is never spliced into an inline JS string literal.
+      const visBtns=
+        `<button class="tg-seg-btn ${!isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="show">Visible</button>`+
+        `<button class="tg-seg-btn ${isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="hide">Hidden</button>`;
+      return `<tr${isHidden?' style="opacity:.55"':''}><td>${escHtml(a.date)}</td><td class="nc" title="${escAttr(a.title)}">${escHtml(a.title)}</td><td>${doneCount} / ${total} students</td>
+        <td><details><summary>Who hasn't finished (${notDone.length})</summary>${listHtml}</details></td>
+        <td><div class="tg-seg">${visBtns}</div></td></tr>`;
+    }).join('');
+    box.innerHTML=`<div class="tg-note">Hidden activities disappear from the site for students — same as if they hadn't been pushed yet. Use it to pull back something posted early; un-hide any time.</div>`+
+      `<div class="t-grid-wrap"><table><thead><tr><th>Date</th><th class="nc">Activity</th><th>Done</th><th>Not yet</th><th>Visibility</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  });
+}
+async function teacherSetActivityHidden(id, state){
+  const on = state==='hide';
+  try{
+    await ensureDb();
+    if(!teacherClassConfig.hiddenActivities) teacherClassConfig.hiddenActivities={};
+    const fv=firebase.firestore.FieldValue;
+    // Clear the flag rather than writing false, so config/class doesn't
+    // accumulate a row per activity that was ever hidden.
+    const patch = on ? {hiddenActivities:{[id]:true}} : {hiddenActivities:{[id]:fv.delete()}};
+    if(on) teacherClassConfig.hiddenActivities[id]=true; else delete teacherClassConfig.hiddenActivities[id];
+    await db.collection('config').doc('class').set(patch,{merge:true});
+  }catch(e){ alert('Could not save that change — check your connection and Firestore rules.'); }
+  if(teacherView==='activities') renderTeacherActivities();
 }
 
 /* ── Games access (teacher control) ──────────────────────────────────────

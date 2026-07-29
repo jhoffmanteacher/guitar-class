@@ -9,11 +9,13 @@ see `WORKFLOW.md` and the git commit log.
 
 ### Added
 
-- **The first In-Class Activities entry is live**, dated 9/1: "Playing Happy
-  Birthday — Part 1: Find Your Notes." Listen to the same melody played three
-  very different ways, then learn the simple fret pattern on the low E and A
-  strings that unlocks the whole tune, ending with the full TAB split into
-  four bite-sized phrases you can play and hear at any tempo.
+- **The first In-Class Activities entry is live**, dated 9/1: "#1 - Playing
+  Happy Birthday — Part 1: Find Your Notes." Listen to the same melody played
+  three very different ways, then learn the simple fret pattern on the low E
+  and A strings that unlocks the whole tune, ending with the full TAB split
+  into four bite-sized phrases you can play and hear at any tempo. Each
+  activity now carries a number, so you and your classmates can refer to
+  "Activity #1" and mean the same thing.
 
 ## 2026-07-29 — In-Class Activities
 
