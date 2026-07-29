@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-29 — In-Class Activities
+
+### Added
+
+- **A new "In-Class Activities" page in the Explore menu.** This is where
+  day-specific class work will show up alongside the regular modules — watch
+  for the amber icon. There's nothing here yet; activities will appear as
+  your class does them, newest first, and once something's posted you'll get
+  a one-time reminder if you haven't checked it off yet.
+
 ## 2026-07-28 — Three new arcade games
 
 ### Added

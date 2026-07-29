@@ -14,6 +14,11 @@
   --green-bg:#eaf3de;--green-text:#3b6d11;
   --amber-bg:#faeeda;--amber-text:#854f0b;
   --red-bg:#fbe9e7;--red-text:#b3372a;
+  /* In-Class Activities accent — deliberately a different amber than
+     --amber-text/--amber-bg above (which already mean "working" on the
+     skill checklist): this one has to read as "class work", not module
+     progress. See the In-Class Activities work order. */
+  --ca-accent:#b45309;--ca-accent-soft:#e0a25c;--ca-accent-bg:#fbf0de;
   --purple-bg:#eeedfe;--purple-bg2:#f6f5fe;--purple-text:#3c3489;
   --purple-border:#c5c0ee;--purple-accent:#5b52a8;
   --shadow-card:0 1px 5px rgba(30,27,70,0.07);
@@ -42,6 +47,7 @@
     --green-bg:#1e4208;--green-text:#a8d070;
     --amber-bg:#4a2a04;--amber-text:#f0b84a;
     --red-bg:#4a1710;--red-text:#f0968a;
+    --ca-accent:#f2a33d;--ca-accent-soft:#8a5a1e;--ca-accent-bg:#3a2708;
     --purple-bg:#2b2752;--purple-bg2:#262244;--purple-text:#c7c1f5;
     --purple-border:#4a4390;--purple-accent:#8f85e8;
     --shadow-card:0 1px 5px rgba(0,0,0,0.4);
@@ -644,6 +650,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .nav-btn:hover{background:rgba(0,0,0,0.05)}
 .nav-btn.active{background:var(--purple-bg);color:var(--purple-text);font-weight:600}
 .nav-btn.active .ico{color:var(--purple-accent)}
+/* ca-nav keeps its amber icon even when active — the point is that this
+   item never blends into the purple "you're here" treatment shared by
+   every other nav item, since it's a different kind of thing (class work,
+   not a module page). */
+.nav-btn.ca-nav .ico{color:var(--ca-accent)}
+.nav-btn.ca-nav.active .ico{color:var(--ca-accent)}
 @media(prefers-color-scheme:dark){
   .nav-btn:hover,.rail-station:hover,.rail-tools .fab:hover{background:rgba(255,255,255,0.06)}
   .rs-num{background:rgba(255,255,255,0.09)}
@@ -1419,6 +1431,31 @@ body.explore-open #week-panels{display:none}
 .page-title svg{width:19px;height:19px;vertical-align:-3px;margin-right:1px}
 .page-exit{font-family:inherit;font-size:0.875rem;font-weight:600;padding:8px 16px;border-radius:20px;border:1px solid var(--border2);background:var(--bg);color:var(--text);cursor:pointer;white-space:nowrap}
 .page-exit:hover{background:var(--bg3)}
+
+/* ── In-Class Activities — amber accent family (--ca-accent/-soft/-bg) ──
+   Same .page-screen shell as Songs/Keep practicing/My progress; only the
+   accent differs, on purpose — this is class work, not module work. */
+.ca-screen .page-topbar{border-bottom:2px solid var(--ca-accent);padding-bottom:12px}
+.ca-screen .page-title svg{color:var(--ca-accent)}
+.ca-card{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--ca-accent);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
+.ca-card-summary{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;list-style:none}
+.ca-card-summary::-webkit-details-marker{display:none}
+.ca-card-summary::before{content:'';width:8px;height:8px;border-right:2px solid var(--text3);border-bottom:2px solid var(--text3);transform:rotate(-45deg);transition:transform .15s;flex-shrink:0}
+.ca-card[open] .ca-card-summary::before{transform:rotate(45deg)}
+.ca-card-title{font-weight:600;flex:1;min-width:0}
+.ca-done-mark{color:var(--green-text);flex-shrink:0;display:flex}
+.ca-card-body{padding:0 14px 14px}
+.ca-chip{font-size:0.75rem;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--ca-accent-bg);color:var(--ca-accent);white-space:nowrap;flex-shrink:0}
+.ca-steps{margin:8px 0 12px 1.25em;font-size:0.9375rem;line-height:1.55}
+.ca-steps li{margin-bottom:8px}
+.ca-mark-btn{font-family:inherit;font-size:0.875rem;font-weight:600;padding:9px 16px;border-radius:20px;border:1px solid var(--ca-accent);background:var(--ca-accent);color:#fff;cursor:pointer}
+.ca-mark-btn:hover{opacity:0.88}
+.ca-mark-btn.done{background:var(--ca-accent-bg);color:var(--ca-accent);font-weight:500}
+.ca-reminder-modal{border-top:3px solid var(--ca-accent)}
+.ca-reminder-list{list-style:none;margin:10px 0;padding:0;font-size:0.9375rem}
+.ca-reminder-list li{padding:6px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.ca-reminder-list li:last-child{border-bottom:none}
+.ca-reminder-more{color:var(--text2);font-size:0.875rem}
 
 /* The arcade takes the whole viewport — rail and header included. It's the one
    explore page that does (Jonathan's call, 2026-07-28): the arcade is a place

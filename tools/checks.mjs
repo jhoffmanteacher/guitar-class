@@ -74,7 +74,7 @@ try {
 } catch { /* no tabs/ dir yet */ }
 
 const SHELL_FILES = [
-  'index.html', '404.html', 'styles.css', 'i18n.js', 'guitar-diagrams.js', 'app.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js', 'config-main.js',
+  'index.html', '404.html', 'styles.css', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'app.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js', 'config-main.js',
   'firebase-config.js', 'manifest.json', 'icon.svg',
   ...MODULE_FILES,
   ...TAB_PAGES,
@@ -400,6 +400,67 @@ function checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsBy
   }
 
   if (problems === 0) ok(`${completeModules.length} module${completeModules.length > 1 ? 's' : ''} marked i18nComplete — every required field has a Spanish twin`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1d. IN-CLASS ACTIVITIES — class-activities.js loads cleanly and every
+   entry (once any exist — v1 ships CLASS_ACTIVITIES empty) matches the
+   schema documented at the top of that file: permanent id shape, ISO
+   date, an _es twin on every required string, and any figure/video
+   referenced actually exists / isn't a placeholder.
+   ════════════════════════════════════════════════════════════════════ */
+function validateClassActivities() {
+  head('1d. In-Class Activities data');
+  let src;
+  try { src = readFileSync(join(ROOT, 'class-activities.js'), 'utf8'); }
+  catch { err('class-activities.js is missing'); problems++; return; }
+
+  const sandbox = { console };
+  sandbox.window = sandbox;
+  vm.createContext(sandbox);
+  try { vm.runInContext(src, sandbox, { filename: 'class-activities.js' }); }
+  catch (e) { err(`class-activities.js failed to load: ${e.message}`); problems++; return; }
+
+  const activities = sandbox.CLASS_ACTIVITIES;
+  if (!Array.isArray(activities)) { err('class-activities.js must set window.CLASS_ACTIVITIES to an array'); problems++; return; }
+  if (activities.length === 0) { ok('CLASS_ACTIVITIES is empty (v1 ships empty)'); return; }
+
+  const idRe = /^ca-\d{4}-\d{2}-\d{2}(-[b-z])?$/;
+  const dateRe = /^\d{4}-\d{2}-\d{2}$/;
+  const seenIds = new Set();
+  const hasVal = v => v !== undefined && v !== null && v !== '';
+  const reqEs = (where, obj, field) => {
+    if (!obj || !hasVal(obj[field])) return;
+    if (!hasVal(obj[field + '_es'])) { err(`${where}: missing "${field}_es"`); problems++; }
+  };
+
+  activities.forEach((a, i) => {
+    const where = `CLASS_ACTIVITIES[${i}]`;
+    if (!a || typeof a !== 'object') { err(`${where}: not an object`); problems++; return; }
+    if (!idRe.test(a.id || '')) { err(`${where}: id "${a.id}" doesn't match ^ca-\\d{4}-\\d{2}-\\d{2}(-[b-z])?$`); problems++; }
+    else if (seenIds.has(a.id)) { err(`${where}: duplicate id "${a.id}"`); problems++; }
+    else seenIds.add(a.id);
+    if (!dateRe.test(a.date || '')) { err(`${where}: date "${a.date}" is not ISO (YYYY-MM-DD)`); problems++; }
+    reqEs(where, a, 'title');
+    reqEs(where, a, 'intro');
+    if (!Array.isArray(a.steps) || !a.steps.length) { err(`${where}: "steps" should be a non-empty array`); problems++; }
+    else {
+      a.steps.forEach((s, si) => {
+        const sWhere = `${where} · steps[${si}]`;
+        if (!s || typeof s !== 'object') { err(`${sWhere}: not an object`); problems++; return; }
+        reqEs(sWhere, s, 'text');
+        if (s.figure) {
+          try { readFileSync(join(ROOT, s.figure)); }
+          catch { err(`${sWhere}: figure "${s.figure}" does not exist`); problems++; }
+        }
+        if (s.video) {
+          if (!s.video.id || /placeholder/i.test(s.video.id)) { err(`${sWhere}: video.id is missing or a placeholder — verify via oEmbed before shipping (see CLAUDE.md "Videos")`); problems++; }
+        }
+      });
+    }
+  });
+
+  if (problems === 0) ok(`${activities.length} class activit${activities.length === 1 ? 'y' : 'ies'} — all valid`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -732,7 +793,7 @@ function renderCheck() {
   };
   ctx.window = ctx; ctx.globalThis = ctx; ctx.self = ctx;
 
-  const FILES = ['i18n.js', 'guitar-diagrams.js', 'config-main.js',
+  const FILES = ['i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'config-main.js',
     ...MODULE_FILES, 'app.js'];
   try {
     vm.createContext(ctx);
@@ -814,6 +875,7 @@ async function liveCheck() {
   syntaxCheck();
   renderCheck();
   validateModules();
+  validateClassActivities();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

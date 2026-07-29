@@ -47,6 +47,9 @@ async function showTeacherApp(user){
   if(toggle && !toggle.querySelector('[data-view="manage"]')){
     toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="manage" onclick="setTeacherView('manage')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg> Manage</button>`);
   }
+  if(toggle && !toggle.querySelector('[data-view="activities"]')){
+    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="activities" onclick="setTeacherView('activities')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/></svg> Class activities</button>`);
+  }
   // Two extra legend rows for the skills grid's got-it markers — the plain
   // green check (index.html's static legend) doesn't distinguish a Coach
   // pass or a gate override from a self-declared "I've got it!". Inserted
@@ -142,7 +145,7 @@ async function loadAllStudents(){
         else skills[k]='none';
       });
       const gamesData=doc.data().games||{};
-      allStudentsRaw.push({uid:doc.id,skills,name:doc.data().name||'',email:doc.data().email||'',responses:doc.data().responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{}});
+      allStudentsRaw.push({uid:doc.id,skills,name:doc.data().name||'',email:doc.data().email||'',responses:doc.data().responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:doc.data().classActivities||{}});
     });
     // Pause/archive flags live in config/class, so it has to be in hand
     // before the roster is filtered — otherwise the first paint shows
@@ -286,7 +289,7 @@ function applyTeacherViewChrome(v){
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
   // Games, Trouble-spots and Students are all class-wide, not per-week —
   // hide the week tabs and the skill summary while any of them is showing.
-  const classWide = v==='games'||v==='trouble'||v==='students'||v==='manage';
+  const classWide = v==='games'||v==='trouble'||v==='students'||v==='manage'||v==='activities';
   const tabs=document.getElementById('t-week-tabs'); if(tabs) tabs.style.display = classWide ? 'none' : '';
   const summ=document.getElementById('t-summary'); if(summ) summ.style.display = classWide ? 'none' : '';
 }
@@ -310,6 +313,7 @@ function renderTeacherBody(){
   else if(teacherView==='trouble') renderTeacherTrouble();
   else if(teacherView==='students') studentDetailUid ? renderTeacherStudentDetail(studentDetailUid) : renderTeacherStudents();
   else if(teacherView==='manage') renderTeacherManage();
+  else if(teacherView==='activities') renderTeacherActivities();
   else renderTeacherGrid();
 }
 
@@ -374,6 +378,35 @@ function renderTeacherTrouble(){
     ${modBars}
     <div class="t-scard-lbl" style="margin:16px 0 8px">Least-mastered skills</div>
     ${skillTable}`;
+}
+
+/* ── Class activities (v1, teacher-only) ── One row per In-Class Activity,
+   newest first, with a done count and an expandable "who hasn't finished"
+   list. Reads classActivities off the SAME student docs the Students tab
+   already fetched (loadAllStudents) — no second Firestore read path. */
+function renderTeacherActivities(){
+  const box=document.getElementById('t-grid-container');
+  const activities=(window.CLASS_ACTIVITIES||[]);
+  if(!activities.length){
+    box.innerHTML='<div class="t-loading">No activities yet — they\'ll appear here once one is pushed to the site.</div>';
+    return;
+  }
+  if(allStudents.length===0){
+    box.innerHTML='<div class="t-loading">No student data yet — students need to sign in first.</div>';
+    return;
+  }
+  const sorted=[...activities].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+  const total=allStudents.length;
+  const rows=sorted.map(a=>{
+    const notDone=allStudents.filter(s=>(s.classActivities||{})[a.id]!==true);
+    const doneCount=total-notDone.length;
+    const listHtml=notDone.length
+      ? notDone.map(s=>`<div style="padding:2px 0">${escHtml(s.name||'(no name)')}${s.email?` &middot; ${escHtml(s.email)}`:''}</div>`).join('')
+      : '<div style="padding:2px 0">Everyone has finished this one.</div>';
+    return `<tr><td>${escHtml(a.date)}</td><td class="nc" title="${escAttr(a.title)}">${escHtml(a.title)}</td><td>${doneCount} / ${total} students</td>
+      <td><details><summary>Who hasn't finished (${notDone.length})</summary>${listHtml}</details></td></tr>`;
+  }).join('');
+  box.innerHTML=`<div class="t-grid-wrap"><table><thead><tr><th>Date</th><th class="nc">Activity</th><th>Done</th><th>Not yet</th></tr></thead><tbody>${rows}</tbody></table></div>`;
 }
 
 /* ── Games access (teacher control) ──────────────────────────────────────

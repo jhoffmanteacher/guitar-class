@@ -14,7 +14,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-07-29-559010043f';
+const CACHE_VERSION = 'guitar-class-2026-07-29-aae570c7ed';
 
 // Backing-track audio lives in its OWN cache, versioned independently of the
 // shell (see tools/checks.mjs, which fingerprints audio/ separately and
@@ -37,6 +37,7 @@ const ASSETS = [
   './fonts/fraunces.woff2',
   './i18n.js',
   './guitar-diagrams.js',
+  './class-activities.js',
   './app.js',
   './fab-tools.js',
   './tuner.js',

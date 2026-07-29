@@ -51,6 +51,10 @@
      ensureDb() in app.js — keeping it off the initial sign-in-screen paint.
      signIn() pre-warms it during the Google popup so it's ready on return. -->
 <script defer src="config-main.js"></script>
+<!-- Teacher-curated In-Class Activities — a data file like config-main.js,
+     loaded early so window.CLASS_ACTIVITIES exists before app.js builds
+     the nav/screen off it. -->
+<script defer src="class-activities.js"></script>
 <!-- module-N.js files are NO LONGER loaded here. They're fetched on demand
      the first time a student opens that module (see loadModuleData in app.js),
      so first load only parses one module's data instead of all eight. The
@@ -136,6 +140,10 @@
               <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5l3.2 3.2"/></svg></span><span data-i18n="nav.keepPracticing">Keep practicing</span></button>
             <button type="button" class="nav-btn" id="my-progress-btn" onclick="toggleMyProgress()">
               <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M12 20V4M20 20v-7"/></svg></span><span data-i18n="nav.myProgress">My progress</span></button>
+            <!-- ca-nav: amber icon tint (styles.css) marks this as class work,
+                 not module work — see the In-Class Activities work order. -->
+            <button type="button" class="nav-btn ca-nav" id="class-activities-btn" onclick="toggleClassActivities()">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/></svg></span><span data-i18n="nav.classActivities">In-Class Activities</span></button>
           </div>
         </nav>
       </div>
@@ -302,6 +310,16 @@
             <span class="page-topbar-spacer"></span>
           </div>
           <div class="page-body" id="my-progress-body"></div>
+        </div>
+      </div>
+      <div class="page-screen ca-screen" id="class-activities-screen" role="region" aria-label="In-class activities" data-i18n-attr="aria-label:nav.classActivities" hidden>
+        <div class="page-shell">
+          <div class="page-topbar">
+            <button type="button" class="page-exit" onclick="closeClassActivitiesScreen()">&larr; <span data-i18n="btn.backToPractice">Back to practice</span></button>
+            <div class="page-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/></svg> <span data-i18n="nav.classActivities">In-Class Activities</span></div>
+            <span class="page-topbar-spacer"></span>
+          </div>
+          <div class="page-body" id="class-activities-body"></div>
         </div>
       </div>
       <div id="week-panels"></div>

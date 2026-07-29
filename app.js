@@ -128,6 +128,7 @@ function _uidKey(base){ return (currentUser && currentUser.uid) ? base+':'+curre
 let progress    = {};
 let responses   = {};
 let completed   = {};
+let classActivities = {};   // In-Class Activities completion: id → true (own top-level Firestore field, not a `completed` key — see the work order this shipped from)
 let games       = {};   // per-game bests from the games arcade (coach.js) — its own save category
 let streak      = { count:0, lastDay:null };   // site-wide practice streak, independent of any one game
 let gamesAccessOn = true; // whether the Games arcade is available to THIS student (teacher-controlled; see loadClassConfig)
@@ -200,7 +201,7 @@ async function ensureModuleRendered(num){
   // until the next language toggle. Mark them right away instead of waiting.
   if(typeof applyI18n === 'function') applyI18n(c);
 }
-let _dirtyKeys = new Set();   // which categories need writing: skills · place · responses · completed · games · streak · practiceLog
+let _dirtyKeys = new Set();   // which categories need writing: skills · place · responses · completed · classActivities · games · streak · practiceLog
 const escAttr = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const escHtml = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
@@ -315,7 +316,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
       if(accountPaused) showPausedScreen(user); else showApp(user);
     }
   } else {
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; progressLoadFailed = false;
     practiceLog = loadLocalPracticeLog();   // per-skill rep history: back to the local copy on sign-out
     _moduleStripStates = {};   // next user's first strip render is a first paint, not a celebration
     document.getElementById('auth-wall').style.display='block';
@@ -367,6 +368,7 @@ function showApp(user){
   renderAll();
   applyGamesAccess();
   maybeShowApp_gamesHash();
+  maybeShowCaReminder();
 }
 
 /* A bookmarked/reloaded explore-page URL (#games, #songs, #keep-practicing,
@@ -403,6 +405,7 @@ async function loadProgress(){
       lastSetId     = doc.data().lastSet||null;
       responses     = doc.data().responses || {};
       completed     = doc.data().completed || {};
+      classActivities = doc.data().classActivities || {};
       games         = doc.data().games || {};
       streak        = doc.data().streak || { count:0, lastDay:null };
       // practiceLog (per-skill rep history): Firestore is the source of truth
@@ -410,8 +413,8 @@ async function loadProgress(){
       // predate the field, then mirror back so the offline copy stays fresh.
       practiceLog   = doc.data().practiceLog || loadLocalPracticeLog();
       savePracticeLogLocal();
-    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); restoreLocalPlace(); }
-  } catch(e){ progressLoadFailed=true; console.warn('[guitar-class] progress load failed — running read-only on derived data', e); progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); restoreLocalPlace(); }
+    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); restoreLocalPlace(); }
+  } catch(e){ progressLoadFailed=true; console.warn('[guitar-class] progress load failed — running read-only on derived data', e); progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); restoreLocalPlace(); }
 }
 
 /* ── Games access (teacher-controlled) ──
@@ -554,12 +557,21 @@ async function flushSave(){
   if(keys.has('place')){    payload.lastModule = lastModuleNum; payload.lastSet = lastSetId||null; }
   if(keys.has('responses')) payload.responses = responses;
   let sentDeletes = null;
+  let sentCaDeletes = null;
   if(keys.has('completed')){
     // Copy, so the FieldValue.delete() sentinels never leak into local state.
     payload.completed = Object.assign({}, completed);
     if(completedDeletes.size){
       sentDeletes = [...completedDeletes];
       sentDeletes.forEach(k=>{ payload.completed[k] = firebase.firestore.FieldValue.delete(); });
+    }
+  }
+  if(keys.has('classActivities')){
+    // Copy, so the FieldValue.delete() sentinels never leak into local state.
+    payload.classActivities = Object.assign({}, classActivities);
+    if(classActivitiesDeletes.size){
+      sentCaDeletes = [...classActivitiesDeletes];
+      sentCaDeletes.forEach(k=>{ payload.classActivities[k] = firebase.firestore.FieldValue.delete(); });
     }
   }
   if(keys.has('games'))     payload.games     = games;
@@ -571,6 +583,7 @@ async function flushSave(){
     // Only now that the write landed: retire the deletes it carried. Keys
     // un-marked DURING the write stay queued for the next flush.
     if(sentDeletes) sentDeletes.forEach(k=>completedDeletes.delete(k));
+    if(sentCaDeletes) sentCaDeletes.forEach(k=>classActivitiesDeletes.delete(k));
     setSaveMsg('save.saved', 2000);
     _saveFailCount = 0;
   } catch(e){
@@ -604,6 +617,16 @@ function onCompleteChange(key, isDone){
   saveCompleted();
 }
 function saveCompleted(){ queueSave('completed'); }
+
+// Same shape as completed/completedDeletes/onCompleteChange/saveCompleted
+// above, for In-Class Activities' own top-level Firestore field.
+let classActivitiesDeletes = new Set();
+function onClassActivityChange(id, isDone){
+  if(isDone){ classActivities[id] = true; classActivitiesDeletes.delete(id); }
+  else { delete classActivities[id]; classActivitiesDeletes.add(id); }
+  saveClassActivities();
+}
+function saveClassActivities(){ queueSave('classActivities'); }
 function saveGames(){ queueSave('games'); }   // per-game bests (games arcade, coach.js)
 function saveStreak(){ queueSave('streak'); }
 
@@ -1718,6 +1741,7 @@ const EXPLORE_PAGES = [
   { hash: '#songs',           screen: 'songs-screen',           btn: 'songs-hub-btn' },
   { hash: '#keep-practicing', screen: 'keep-practicing-screen', btn: 'keep-practicing-btn' },
   { hash: '#my-progress',     screen: 'my-progress-screen',     btn: 'my-progress-btn' },
+  { hash: '#class-activities', screen: 'class-activities-screen', btn: 'class-activities-btn' },
 ];
 /* Single source of truth for "which explore page is showing": reads the DOM
    rather than tracking state, so it stays right no matter which path opened
@@ -1775,10 +1799,12 @@ function routeExploreHash(){
   if(h !== '#songs') songsClosePanel();
   if(h !== '#keep-practicing') kpClosePanel();
   if(h !== '#my-progress') mpClosePanel();
+  if(h !== '#class-activities') caClosePanel();
   if(h === '#games' && typeof openGamesScreen === 'function') openGamesScreen();
   else if(h === '#songs') openSongsScreen();
   else if(h === '#keep-practicing') openKeepPracticingScreen();
   else if(h === '#my-progress') openMyProgressScreen();
+  else if(h === '#class-activities') openClassActivitiesScreen();
   syncExploreNav();
 }
 window.addEventListener('hashchange', routeExploreHash);
@@ -4602,6 +4628,8 @@ window.addEventListener('gc-langchange', function(){
   if(kpScreen && !kpScreen.hidden && typeof renderKeepPracticing === 'function') renderKeepPracticing();
   const mpScreen = document.getElementById('my-progress-screen');
   if(mpScreen && !mpScreen.hidden && typeof renderMyProgress === 'function') renderMyProgress();
+  const caScreen = document.getElementById('class-activities-screen');
+  if(caScreen && !caScreen.hidden && typeof renderClassActivities === 'function') renderClassActivities();
   // A live Daily 5 overlay just rebuilds its modal body in place.
   const d5 = document.querySelector('#daily5-overlay .daily5-modal');
   if(d5 && typeof buildDaily5 === 'function'){
@@ -5334,8 +5362,8 @@ initBackToTop();
 function closeTopPanels(except){
   /* Hash-based full pages close through their own close fns (which clear
      the URL hash); plain drop-over panels just get hidden. */
-  const SCREEN_IDS = { games: 'games-screen', 'songs-hub': 'songs-screen', 'keep-practicing': 'keep-practicing-screen', 'my-progress': 'my-progress-screen' };
-  ['games', 'songs-hub', 'search', 'keep-practicing', 'my-progress'].forEach(k => {
+  const SCREEN_IDS = { games: 'games-screen', 'songs-hub': 'songs-screen', 'keep-practicing': 'keep-practicing-screen', 'my-progress': 'my-progress-screen', 'class-activities': 'class-activities-screen' };
+  ['games', 'songs-hub', 'search', 'keep-practicing', 'my-progress', 'class-activities'].forEach(k => {
     if(k === except) return;
     const p = document.getElementById(SCREEN_IDS[k] || k + '-panel');
     if(p && !p.hasAttribute('hidden')){
@@ -5343,6 +5371,7 @@ function closeTopPanels(except){
       if(k === 'songs-hub'){ closeSongsScreen(); return; }
       if(k === 'keep-practicing'){ closeKeepPracticingScreen(); return; }
       if(k === 'my-progress'){ closeMyProgressScreen(); return; }
+      if(k === 'class-activities'){ closeClassActivitiesScreen(); return; }
       p.setAttribute('hidden', '');
       const b = document.getElementById(k + '-btn');
       if(b) b.setAttribute('aria-expanded', 'false');
@@ -5355,7 +5384,7 @@ function closeTopPanels(except){
    click "did nothing" as far as the student could see. Close whichever panel
    is covering the page and scroll up so the new set is actually visible. */
 function leaveTopPanelForSet(){
-  const covering = ['games-screen', 'search-panel', 'songs-screen', 'keep-practicing-screen', 'my-progress-screen']
+  const covering = ['games-screen', 'search-panel', 'songs-screen', 'keep-practicing-screen', 'my-progress-screen', 'class-activities-screen']
     .some(id => { const el = document.getElementById(id); return el && !el.hasAttribute('hidden'); });
   if(!covering) return;
   closeTopPanels('');
@@ -5783,6 +5812,142 @@ function renderMyProgress(){
   bodyEl.innerHTML = `<div class="coach-tip" data-i18n="progress.skillsMastered" data-i18n-params="${escAttr(JSON.stringify({done:totalDone,total:totalAll,modules:MODULE_MANIFEST.length}))}">${t('progress.skillsMastered',{done:totalDone,total:totalAll,modules:MODULE_MANIFEST.length})}</div>
     <div class="card">${overallRow}${rows}</div>`;
   if(typeof applyI18n === 'function') applyI18n(bodyEl);
+}
+
+/* ── ✓ In-Class Activities: teacher-curated, day-specific work pushed out
+   alongside the self-paced modules ── An explore page in the main column
+   (#class-activities), same plumbing as its rail neighbours above (see
+   EXPLORE_PAGES). An activity is LIVE the moment its entry is on main —
+   there is no toggle — and activities never retire; this page is a
+   permanent archive, newest first. Own lightweight renderer (not the .dp
+   station-card builder — see the work order this shipped from): activities
+   are simple enough that reusing the station machinery would drag in focus
+   mode, the footer gate and stepper logic for no benefit. */
+function toggleClassActivities(){
+  const screen = document.getElementById('class-activities-screen');
+  if(!screen) return;
+  if(screen.hasAttribute('hidden')) location.hash = 'class-activities';
+  else closeClassActivitiesScreen();
+}
+function closeClassActivitiesScreen(){
+  if(location.hash === '#class-activities'){ location.hash = ''; return; }  // hashchange finishes the job
+  caClosePanel();
+}
+function caClosePanel(){
+  const screen = document.getElementById('class-activities-screen');
+  const wasOpen = screen && !screen.hasAttribute('hidden');
+  if(screen) screen.setAttribute('hidden', '');
+  const btn = document.getElementById('class-activities-btn');
+  if(btn && wasOpen) btn.focus();   // return focus to where the page was opened
+  syncExploreNav();
+}
+function openClassActivitiesScreen(){
+  const screen = document.getElementById('class-activities-screen');
+  if(!screen || !screen.hasAttribute('hidden')) return;
+  closeTopPanels('class-activities');
+  screen.removeAttribute('hidden');
+  syncExploreNav();
+  const exit = screen.querySelector('.page-exit');
+  if(exit) exit.focus();
+  renderClassActivities();
+}
+// Which activity card is expanded, so a re-render (Mark complete, language
+// switch) doesn't collapse the one the student is looking at.
+let caOpenId = null;
+function caFormatDate(iso){
+  const d = new Date(iso + 'T00:00:00');
+  if(isNaN(d)) return iso;
+  const lang = (typeof getLang === 'function' && getLang() === 'es') ? 'es' : 'en';
+  return d.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { weekday:'short', month:'numeric', day:'numeric' });
+}
+function caStepHtml(step){
+  const parts = [];
+  if(step.figure) parts.push(`<span class="step-figure"><img src="${escAttr(step.figure)}" alt=""></span>`);
+  if(step.video && step.video.id){
+    const url = `https://www.youtube.com/watch?v=${encodeURIComponent(step.video.id)}${step.video.start ? `&start=${Number(step.video.start)}` : ''}`;
+    parts.push(`<button type="button" class="rp-trigger" onclick="loadPanel('youtube','${escAttr(url)}','${escAttr(t('nav.classActivities'))}','YouTube')">&#x25B6; ${escHtml(t('ca.watchVideo'))}</button>`);
+  }
+  return `<li>${escHtml(tf(step,'text'))}${parts.join('')}</li>`;
+}
+function caActivityCardHtml(a){
+  const done = classActivities[a.id] === true;
+  const open = caOpenId === a.id;
+  const stepsHtml = (a.steps || []).map(caStepHtml).join('');
+  const markLabel = done ? t('ca.completed') : t('ca.markComplete');
+  return `<details class="ca-card" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
+    <summary class="ca-card-summary">
+      <span class="ca-chip">${escHtml(caFormatDate(a.date))}</span>
+      <span class="ca-card-title">${escHtml(tf(a,'title'))}</span>
+      ${done ? `<span class="ca-done-mark" aria-hidden="true">${TCK_CHECK_SVG_INLINE}</span>` : ''}
+    </summary>
+    <div class="ca-card-body">
+      <p class="coach-tip">${escHtml(tf(a,'intro'))}</p>
+      ${stepsHtml ? `<ol class="ca-steps">${stepsHtml}</ol>` : ''}
+      <button type="button" class="ca-mark-btn ${done ? 'done' : ''}" onclick="caToggleComplete('${escAttr(a.id)}')">${escHtml(markLabel)}</button>
+    </div>
+  </details>`;
+}
+// The .dp card builder's ✓ glyph, borrowed as a plain inline SVG so this
+// renderer doesn't have to pull in station-card CSS classes for one icon.
+const TCK_CHECK_SVG_INLINE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px"><path d="M5 12l5 5L19 7"/></svg>';
+function caOnToggle(details){
+  caOpenId = details.open ? details.dataset.id : (caOpenId === details.dataset.id ? null : caOpenId);
+}
+function caToggleComplete(id){
+  const isDone = classActivities[id] === true;
+  onClassActivityChange(id, !isDone);
+  caOpenId = id;   // keep the card open through the re-render
+  renderClassActivities();
+}
+function renderClassActivities(){
+  const bodyEl = document.getElementById('class-activities-body');
+  if(!bodyEl) return;
+  const list = [...(window.CLASS_ACTIVITIES || [])].sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+  if(!list.length){
+    bodyEl.innerHTML = `<div class="coach-tip" data-i18n="ca.empty">${escHtml(t('ca.empty'))}</div>`;
+  } else {
+    bodyEl.innerHTML = list.map(caActivityCardHtml).join('');
+  }
+  if(typeof applyI18n === 'function') applyI18n(bodyEl);
+}
+
+/* ── Reminder popup: unfinished activities, once per visit ──
+   Shown only after a successful progress load for a signed-in, non-dev
+   student — an empty classActivities from a failed load is indistinguishable
+   from "nothing done yet", so we can't tell a real gap from a read error. */
+function maybeShowCaReminder(){
+  if(progressLoadFailed || isDevBypassUser()) return;
+  const pending = (window.CLASS_ACTIVITIES || []).filter(a => classActivities[a.id] !== true);
+  if(!pending.length) return;
+  try{ if(sessionStorage.getItem('caReminderShown') === '1') return; }catch(e){}
+  const shown = pending.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+  const more = pending.length - shown.length;
+  const itemsHtml = shown.map(a => `<li><span class="ca-chip">${escHtml(caFormatDate(a.date))}</span> ${escHtml(tf(a,'title'))}</li>`).join('');
+  const ov = document.createElement('div');
+  ov.className = 'daily5-overlay ca-reminder-overlay';
+  ov.id = 'ca-reminder-overlay';
+  ov.innerHTML = `<div class="daily5-modal ca-reminder-modal" role="dialog" aria-modal="true" aria-label="${escAttr(t('ca.reminderTitle'))}">
+    <div class="daily5-head"><h3 style="font:inherit;margin:0">${escHtml(t('ca.reminderTitle'))}</h3>
+      <button type="button" class="tp-close" onclick="closeCaReminder()" aria-label="${escAttr(t('gate.closeAria'))}">&#x2715;</button></div>
+    <ul class="ca-reminder-list">${itemsHtml}${more > 0 ? `<li class="ca-reminder-more">${escHtml(t('ca.reminderMore',{n:more}))}</li>` : ''}</ul>
+    <div class="issue-actions">
+      <button type="button" class="ca-mark-btn" onclick="caReminderGo()">${escHtml(t('ca.reminderGo'))}</button>
+      <button type="button" class="tp-btn" onclick="closeCaReminder()">${escHtml(t('ca.reminderLater'))}</button>
+    </div>`;
+  ov.addEventListener('click', e => { if(e.target === ov) closeCaReminder(); });
+  document.body.appendChild(ov);
+  document.addEventListener('keydown', caReminderEscClose);
+  try{ sessionStorage.setItem('caReminderShown', '1'); }catch(e){}
+}
+function caReminderEscClose(e){ if(e.key === 'Escape') closeCaReminder(); }
+function closeCaReminder(){
+  const ov = document.getElementById('ca-reminder-overlay');
+  if(ov) ov.remove();
+  document.removeEventListener('keydown', caReminderEscClose);
+}
+function caReminderGo(){
+  closeCaReminder();
+  location.hash = 'class-activities';
 }
 
 /* ════════════════════════════════════════════════
