@@ -127,6 +127,10 @@
         <nav class="rail-group g-explore" aria-label="Explore" data-i18n-attr="aria-label:nav.explore">
           <span class="rail-sec-label" data-i18n="nav.explore">Explore</span>
           <div class="nav-list">
+            <!-- ca-nav: amber icon tint (styles.css) marks this as class work,
+                 not module work — see the In-Class Activities work order. -->
+            <button type="button" class="nav-btn ca-nav" id="class-activities-btn" onclick="toggleClassActivities()">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/></svg></span><span data-i18n="nav.classActivities">In-Class Activities</span></button>
             <button type="button" class="nav-btn active" id="practice-nav-btn" aria-current="page" onclick="returnToPractice()">
               <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7C10.3 5.9 7.8 5.4 4 5.4V18c3.8 0 6.3.5 8 1.6 1.7-1.1 4.2-1.6 8-1.6V5.4c-3.8 0-6.3.5-8 1.6z"/><path d="M12 7v12.6"/></svg></span><span data-i18n="nav.practice">Practice</span></button>
             <!-- aria-expanded/-controls only on Games: it's the one nav item
@@ -140,10 +144,6 @@
               <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v5l3.2 3.2"/></svg></span><span data-i18n="nav.keepPracticing">Keep practicing</span></button>
             <button type="button" class="nav-btn" id="my-progress-btn" onclick="toggleMyProgress()">
               <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M12 20V4M20 20v-7"/></svg></span><span data-i18n="nav.myProgress">My progress</span></button>
-            <!-- ca-nav: amber icon tint (styles.css) marks this as class work,
-                 not module work — see the In-Class Activities work order. -->
-            <button type="button" class="nav-btn ca-nav" id="class-activities-btn" onclick="toggleClassActivities()">
-              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/></svg></span><span data-i18n="nav.classActivities">In-Class Activities</span></button>
           </div>
         </nav>
       </div>

@@ -344,6 +344,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    turning the accent on/off is a color swap, never a layout shift. */
 .step{padding:2px 0;border-left:3px solid transparent;transition:border-color .15s ease,box-shadow .15s ease}
 .step.cur{border-left-color:var(--purple-accent);box-shadow:var(--shadow-card);border-radius:0 8px 8px 0}
+/* Focus mode shows exactly one step, already marked current by the .dp
+   panel's own left accent — a second accent on the step itself just
+   doubles the same cue into one long line. */
+.dp.focus .step.cur{border-left-color:transparent}
 @media(prefers-reduced-motion:reduce){.step{transition:none}}
 /* Hairline between rows so consecutive collapsed steps don't blend together
    — matches the approved mockup's .b-row divider. Adjacent-sibling selector
