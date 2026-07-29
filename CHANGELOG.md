@@ -5,6 +5,21 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-28 — Three new arcade games
+
+### Added
+
+- **Chord Detective** — a 60-second ear-training round. Tap Play to hear a
+  chord with nothing shown, and name it from four choices purely by ear.
+  Same streak-and-scoring feel as Chord Blitz, but for your ears instead of
+  your eyes.
+- **Name That Riff** — hear one of the class's four note-by-note riffs
+  (Seven Nation Army, Watchtower, Luna, Sweet Child O' Mine) and pick the
+  song from the other three.
+- **Pentatonic Simon** — a classic call-and-response memory game using the
+  pentatonic pattern you already know. Watch and listen to a growing note
+  sequence, then tap it back in order — how long a sequence can you hold?
+
 ## 2026-07-28 — Arcade XP, a daily goal, and a streak
 
 ### Added

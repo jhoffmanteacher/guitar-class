@@ -1533,6 +1533,9 @@ function gamesStopMic(){
   fzStop();
   rnStop();
   nrStop();
+  cdStop();
+  ntrStop();
+  psStop();
   /* Backstop: every *Stop() above only releases the mic through its own
      micOn flag, so a state-tracking bug in any one of them (or a future
      game that forgets the pattern) could still leave window.coachMicLive
@@ -1551,7 +1554,8 @@ function gamesStopMic(){
        document.getElementById('cb-body') || document.getElementById('sh-body') ||
        document.getElementById('rr-body') || document.getElementById('sr-body') ||
        document.getElementById('fz-body') || document.getElementById('rn-body') ||
-       document.getElementById('nr-body'))){
+       document.getElementById('nr-body') || document.getElementById('cd-body') ||
+       document.getElementById('ntr-body') || document.getElementById('ps-body'))){
     gamesRenderHub(p);
   }
 }
@@ -1597,6 +1601,12 @@ const GAME_ICO = {
   fretzap:    gIco('<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M9 5v14M15 5v14"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/>'),
   // Strum Hero — down-strum and up-strum arrows, as they're written in music.
   strum:      gIco('<path d="M8 4v14M8 18l-3-3M8 18l3-3"/><path d="M16 20V6M16 6l-3 3M16 6l3 3"/>'),
+  // Chord Detective — headphones: identify the chord by ear, no diagram shown.
+  detective:  gIco('<path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="2" y="13" width="5" height="7" rx="2"/><rect x="17" y="13" width="5" height="7" rx="2"/>'),
+  // Name That Riff — an audio waveform: hear the riff, name the song.
+  riffid:     gIco('<path d="M4 14v-4M8 17v-10M12 19v-14M16 17v-10M20 14v-4"/>'),
+  // Pentatonic Simon — a 4-pad call-and-response grid.
+  simon:      gIco('<rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/>'),
 };
 
 const GAMES_META = [
@@ -1609,6 +1619,9 @@ const GAMES_META = [
   { key:'blitz',    cls:'gc-blitz',    ico:GAME_ICO.blitz,      titleKey:'games.cb.title',    guitar:false, descKey:'games.cb.desc' },
   { key:'fretzap',  cls:'gc-fretzap',  ico:GAME_ICO.fretzap,    titleKey:'games.fz.title',    guitar:false, descKey:'games.fz.desc' },
   { key:'strum',    cls:'gc-strum',    ico:GAME_ICO.strum,      titleKey:'games.sh.title',    guitar:false, descKey:'games.sh.desc' },
+  { key:'detective', cls:'gc-detective', ico:GAME_ICO.detective, titleKey:'games.cd.title',   guitar:false, descKey:'games.cd.desc' },
+  { key:'riffid',   cls:'gc-riffid',   ico:GAME_ICO.riffid,     titleKey:'games.ntr.title',   guitar:false, descKey:'games.ntr.desc' },
+  { key:'simon',    cls:'gc-simon',    ico:GAME_ICO.simon,      titleKey:'games.ps.title',    guitar:false, descKey:'games.ps.desc' },
 ];
 
 /* Card chip for a game's best score. Prefers the all-time best persisted in
@@ -1749,8 +1762,21 @@ function gamesRenderHub(p){
     for (const k in saved.nr.levels) nrAllTime = Math.max(nrAllTime, saved.nr.levels[k] || 0);
   }
   const nrChip = gamesBestChip(nrAllTime, nrSess, '%');
+  let cdBest = 0;
+  try {
+    for (const d of CD_DECKS){
+      cdBest = Math.max(cdBest, parseInt(sessionStorage.getItem(cdBestKey(d.id)), 10) || 0);
+    }
+  } catch(e){}
+  const cdChip = gamesBestChip(saved.cd && saved.cd.best, cdBest);
+  let ntrBest = 0;
+  try { ntrBest = parseInt(sessionStorage.getItem('ntrBest'), 10) || 0; } catch(e){}
+  const ntrChip = gamesBestChip(saved.ntr && saved.ntr.best, ntrBest);
+  let psBest = 0;
+  try { psBest = parseInt(sessionStorage.getItem('psBest'), 10) || 0; } catch(e){}
+  const psChip = gamesBestChip(saved.ps && saved.ps.best, psBest);
   /* Per-game best chips, keyed by game. */
-  const chips = { fret:fretChip, cc:ccChip, blitz:cbChip, fretzap:fzChip, strum:shChip, radar:srChip, roulette:rrChip, runner:rnChip, noterunner:nrChip };
+  const chips = { fret:fretChip, cc:ccChip, blitz:cbChip, fretzap:fzChip, strum:shChip, radar:srChip, roulette:rrChip, runner:rnChip, noterunner:nrChip, detective:cdChip, riffid:ntrChip, simon:psChip };
   const card = g => `
        <button type="button" class="games-card ${g.cls}" onclick="gamesShow('${g.key}')">
          <span class="games-card-ico">${g.ico}</span>
@@ -1820,6 +1846,21 @@ function gamesShow(view){
   if (view === 'noterunner'){
     p.innerHTML = gamesHeadHtml(GAME_ICO.noterunner + ' ' + t('games.nr.title'), true) + `<div id="nr-body"></div>`;
     nrSetup();
+    return;
+  }
+  if (view === 'detective'){
+    p.innerHTML = gamesHeadHtml(GAME_ICO.detective + ' ' + t('games.cd.title'), true) + `<div id="cd-body"></div>`;
+    cdSetup();
+    return;
+  }
+  if (view === 'riffid'){
+    p.innerHTML = gamesHeadHtml(GAME_ICO.riffid + ' ' + t('games.ntr.title'), true) + `<div id="ntr-body"></div>`;
+    ntrSetup();
+    return;
+  }
+  if (view === 'simon'){
+    p.innerHTML = gamesHeadHtml(GAME_ICO.simon + ' ' + t('games.ps.title'), true) + `<div id="ps-body"></div>`;
+    psSetup();
     return;
   }
 }
@@ -2499,6 +2540,616 @@ function cbRenderDone(){
        <div class="coach-actions">
          <button type="button" class="coach-start" onclick="cbStart()">&#x21BB; ${t('games.common.playAgain')}</button>
          <button type="button" class="tp-btn" onclick="cbSetup()">${t('games.cb.changeDeck')}</button>
+       </div>
+     </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   CHORD DETECTIVE — 60-second ear-training sprint, Chord Blitz's twin
+   with the diagram replaced by a Play button: strumChord() plays a taught
+   chord with NOTHING shown, and you name it from four choices purely by
+   ear. No name/spot toggle (Chord Blitz already owns diagram literacy —
+   this game is ear-only, that's the whole point). Same requeue/streak/
+   scoring mechanics as Chord Blitz, deliberately, so a student who's
+   learned one already knows how to play the other.
+   ════════════════════════════════════════════════════════════════════ */
+
+const CD_SECONDS = 60;
+const CD_DECKS = [
+  { id: 'open',  labelKey: 'games.cd.deck.open',  chords: ['E','Em','A','Am','D','Dm','G','C','F'] },
+  { id: 'barre', labelKey: 'games.cd.deck.barre', chords: ['Bm','B7','F#m','C#m'] },
+  { id: 'all',   labelKey: 'games.cd.deck.all',   chords: ['E','Em','A','Am','D','Dm','G','C','F','Bm','B7','F#m','C#m'] }
+];
+
+let cd = null, cdTick = null;
+
+function cdStop(){
+  if (cdTick){ clearInterval(cdTick); cdTick = null; }
+  document.removeEventListener('keydown', cdKeydown);
+  if (cd){
+    (cd.timeouts || []).forEach(clearTimeout);
+    cd = null;
+  }
+}
+
+function cdBody(){ return document.getElementById('cd-body'); }
+function cdBestKey(deck){ return 'cdBest:' + deck; }
+function cdDeckChords(){
+  const d = CD_DECKS.find(x => x.id === cd.deck);
+  return (d || CD_DECKS[0]).chords;
+}
+
+function cdSetup(){
+  let deck = 'open';
+  try { deck = sessionStorage.getItem('cdDeck') || deck; } catch(e){}
+  if (!CD_DECKS.some(d => d.id === deck)) deck = 'open';
+  cd = { phase: 'setup', deck, timeouts: [] };
+  cdRenderSetup();
+}
+
+function cdPickDeck(id){
+  if (!cd) return;
+  cd.deck = id;
+  try { sessionStorage.setItem('cdDeck', id); } catch(e){}
+  cdRenderSetup();
+}
+
+function cdRenderSetup(){
+  const body = cdBody();
+  if (!body || !cd) return;
+  const deckPills = CD_DECKS.map(d =>
+    `<button type="button" class="ts-btn${d.id === cd.deck ? ' active' : ''}" onclick="cdPickDeck('${d.id}')">${escHtml(t(d.labelKey))}</button>`
+  ).join('');
+  let best = 0;
+  try { best = parseInt(sessionStorage.getItem(cdBestKey(cd.deck)), 10) || 0; } catch(e){}
+  body.innerHTML =
+    `<div class="cc-group"><div class="cc-group-title">${t('games.common.deck')}</div><div class="fret-levels">${deckPills}</div></div>
+     <div class="coach-tip">${t('games.cd.tip')}</div>
+     ${best ? `<div class="cb-setup-best">&#x1F3C6; ${t('games.common.bestTodayLabel')}: ${best}</div>` : ''}
+     <button type="button" class="coach-start" onclick="cdStart()">&#x25B6; ${t('games.cd.startButton')}</button>`;
+}
+
+function cdStart(){
+  if (!cd || cd.phase === 'play') return;
+  coachClose(); coachEvictTuner();   // one mic/audio owner at a time
+  const s = cd;
+  s.phase = 'play';
+  s.score = 0; s.streak = 0; s.answered = 0; s.correct = 0;
+  s.cur = null; s.prev = null; s.opts = [];
+  s.requeue = []; s.locked = false;
+  (s.timeouts || []).forEach(clearTimeout);
+  s.timeouts = [];
+  s.endAt = performance.now() + CD_SECONDS * 1000;
+  document.addEventListener('keydown', cdKeydown);   // laptop: 1–4 answer
+  if (cdTick) clearInterval(cdTick);
+  cdTick = setInterval(cdTimerTick, 200);
+  cdNext();
+}
+
+function cdTimerTick(){
+  if (!cd || cd.phase !== 'play'){
+    if (cdTick){ clearInterval(cdTick); cdTick = null; }
+    return;
+  }
+  if (!cdBody()){ cdStop(); return; }   // panel swapped under us
+  const left = cd.endAt - performance.now();
+  const el = document.getElementById('cd-timer');
+  if (el){
+    el.textContent = cbFmtTime(left);
+    el.classList.toggle('low', left <= 10000);
+  }
+  if (left <= 0) cdFinish();
+}
+
+function cdKeydown(e){
+  if (e.repeat) return;
+  if (!cd || cd.phase !== 'play' || cd.locked) return;
+  const tag = (e.target && e.target.tagName) || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  const i = ['1', '2', '3', '4'].indexOf(e.key);
+  if (i >= 0) cdAnswer(i);
+}
+
+/* A missed chord is due again 3–5 cards later; otherwise random from the
+   deck. Never the same card twice in a row. */
+function cdPickCard(){
+  const i = cd.requeue.findIndex(q => q.due <= cd.answered && q.name !== cd.prev);
+  if (i >= 0) return cd.requeue.splice(i, 1)[0].name;
+  const pool = cdDeckChords().filter(n => n !== cd.prev);
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function cdOptions(correct){
+  let pool = cdDeckChords().filter(n => n !== correct);
+  if (pool.length < 3){   // tiny deck: borrow distractors from the full library
+    const all = CD_DECKS[CD_DECKS.length - 1].chords;
+    pool = pool.concat(all.filter(n => n !== correct && pool.indexOf(n) < 0));
+  }
+  const opts = cbShuffle(pool.slice()).slice(0, 3);
+  opts.push(correct);
+  return cbShuffle(opts);
+}
+
+function cdPlay(){
+  if (!cd || !cd.cur) return;
+  if (typeof strumChord === 'function') strumChord(cd.cur);
+}
+
+function cdNext(){
+  if (!cd || cd.phase !== 'play') return;
+  const body = cdBody();
+  if (!body){ cdStop(); return; }
+  const s = cd;
+  s.cur = cdPickCard();
+  s.prev = s.cur;
+  s.opts = cdOptions(s.cur);
+  s.locked = false;
+  const answers = s.opts.map((n, i) =>
+    `<button type="button" class="cb-answer" id="cd-opt-${i}" onclick="cdAnswer(${i})"><span class="cb-key">${i + 1}</span>${escHtml(n)}</button>`
+  ).join('');
+  const mult = Math.min(4, 1 + Math.floor(s.streak / 5));
+  const left = s.endAt - performance.now();
+  body.innerHTML =
+    `<div class="cb-hud">
+       <span class="cb-timer${left <= 10000 ? ' low' : ''}" id="cd-timer">${cbFmtTime(left)}</span>
+       <span class="cb-score" id="cd-score">${t('games.common.score', { n: s.score })}</span>
+       <span class="cb-streak" id="cd-streak">${s.streak >= 2 ? '&#x1F525; ' + t('games.common.inARow', { n: s.streak }) + (mult > 1 ? ' &mdash; &times;' + mult : '') : '&nbsp;'}</span>
+     </div>
+     <div class="cb-prompt"><button type="button" class="cd-play-btn" onclick="cdPlay()">&#x25B6; ${t('games.cd.playButton')}</button></div>
+     <div class="cb-answers">${answers}</div>`;
+  cdPlay();
+}
+
+function cdAnswer(i){
+  if (!cd || cd.phase !== 'play' || cd.locked) return;
+  const s = cd;
+  const pick = s.opts[i];
+  if (!pick) return;
+  s.answered++;
+  if (pick === s.cur){
+    s.correct++;
+    s.streak++;
+    s.score += 10 * Math.min(4, 1 + Math.floor(s.streak / 5));
+    cdNext();
+    return;
+  }
+  /* Wrong: show the right button for a beat (inputs locked), requeue the card. */
+  s.score = Math.max(0, s.score - 5);
+  s.streak = 0;
+  s.requeue.push({ name: s.cur, due: s.answered + 2 + Math.floor(Math.random() * 3) });
+  s.locked = true;
+  const hit = document.getElementById('cd-opt-' + i);
+  if (hit) hit.classList.add('wrong');
+  const right = document.getElementById('cd-opt-' + s.opts.indexOf(s.cur));
+  if (right) right.classList.add('reveal');
+  const scoreEl = document.getElementById('cd-score');
+  if (scoreEl) scoreEl.textContent = t('games.common.score', { n: s.score });
+  const streakEl = document.getElementById('cd-streak');
+  if (streakEl) streakEl.innerHTML = '&nbsp;';
+  s.timeouts.push(setTimeout(() => {
+    if (cd !== s || s.phase !== 'play') return;
+    cdNext();
+  }, 800));
+}
+
+function cdFinish(){
+  if (!cd || cd.phase !== 'play') return;
+  if (cdTick){ clearInterval(cdTick); cdTick = null; }
+  cd.timeouts.forEach(clearTimeout);
+  cd.timeouts = [];
+  cd.phase = 'done';
+  cd.prevBest = 0;
+  try {
+    const k = cdBestKey(cd.deck);
+    cd.prevBest = parseInt(sessionStorage.getItem(k), 10) || 0;
+    if (cd.score > cd.prevBest) sessionStorage.setItem(k, String(cd.score));
+  } catch(e){}
+  /* Cross-session best → the student's progress doc. Skipped in dev bypass
+     (Firestore rejects that uid; the session best above still counts). */
+  if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
+    const old = (games.cd && games.cd.best) || 0;
+    const isNewBest = cd.score > old;
+    if (isNewBest) games.cd = { best: cd.score, deck: cd.deck, at: new Date().toISOString().slice(0, 10) };
+    awardArcadeXp(isNewBest);
+  }
+  cdRenderDone();
+}
+
+function cdRenderDone(){
+  const body = cdBody();
+  if (!body || !cd) return;
+  const acc = cd.answered ? Math.round(100 * cd.correct / cd.answered) : 0;
+  let bestLine = '';
+  if (cd.prevBest > 0 && cd.score > cd.prevBest){
+    bestLine = `<div class="cb-newbest">&#x1F3C6; ${t('games.common.newBest', { value: cd.prevBest })}</div>`;
+  } else if (cd.prevBest > 0){
+    bestLine = `<div class="coach-tip">${t('games.common.bestTodayLabel')}: ${cd.prevBest}.</div>`;
+  }
+  body.innerHTML =
+    `<div class="coach-report">
+       <div class="cb-done-score">${cd.score}</div>
+       <div class="coach-overall">${GAME_ICO.detective} ${t(cd.answered === 1 ? 'games.common.cardsAnsweredOne' : 'games.common.cardsAnsweredMany', { answered: cd.answered, correct: cd.correct, acc })}</div>
+       ${bestLine}
+       <div class="coach-actions">
+         <button type="button" class="coach-start" onclick="cdStart()">&#x21BB; ${t('games.common.playAgain')}</button>
+         <button type="button" class="tp-btn" onclick="cdSetup()">${t('games.cd.changeDeck')}</button>
+       </div>
+     </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   NAME THAT RIFF — 60-second ear-training sprint over the 4 core songs
+   that have real note-level TAB data (RN_SONGS, the same list Riff
+   Runner scrolls through — no new riffs invented). A riff plays at its
+   song's real tempo, no notation shown, and you pick the song title from
+   the other three. Only 4 possible answers exist total (there's only 4
+   riffs with this data), so every round shows all four — the challenge
+   is telling the riffs apart by ear, not narrowing a bigger pool. Same
+   streak/requeue/scoring shape as Chord Blitz and Chord Detective.
+   ════════════════════════════════════════════════════════════════════ */
+
+const NTR_SECONDS = 60;
+
+let ntr = null, ntrTick = null;
+
+function ntrStop(){
+  if (ntrTick){ clearInterval(ntrTick); ntrTick = null; }
+  document.removeEventListener('keydown', ntrKeydown);
+  if (ntr){
+    (ntr.timeouts || []).forEach(clearTimeout);
+    ntr = null;
+  }
+}
+
+function ntrBody(){ return document.getElementById('ntr-body'); }
+
+function ntrSetup(){
+  ntr = { phase: 'setup', timeouts: [] };
+  ntrRenderSetup();
+}
+
+function ntrRenderSetup(){
+  const body = ntrBody();
+  if (!body || !ntr) return;
+  let best = 0;
+  try { best = parseInt(sessionStorage.getItem('ntrBest'), 10) || 0; } catch(e){}
+  body.innerHTML =
+    `<div class="coach-tip">${t('games.ntr.tip')}</div>
+     ${best ? `<div class="cb-setup-best">&#x1F3C6; ${t('games.common.bestTodayLabel')}: ${best}</div>` : ''}
+     <button type="button" class="coach-start" onclick="ntrStart()">&#x25B6; ${t('games.ntr.startButton')}</button>`;
+}
+
+function ntrStart(){
+  if (!ntr || ntr.phase === 'play') return;
+  coachClose(); coachEvictTuner();   // one mic/audio owner at a time
+  const s = ntr;
+  s.phase = 'play';
+  s.score = 0; s.streak = 0; s.answered = 0; s.correct = 0;
+  s.cur = null; s.prevId = null;
+  s.requeue = []; s.locked = false;
+  (s.timeouts || []).forEach(clearTimeout);
+  s.timeouts = [];
+  s.endAt = performance.now() + NTR_SECONDS * 1000;
+  document.addEventListener('keydown', ntrKeydown);   // laptop: 1–4 answer
+  if (ntrTick) clearInterval(ntrTick);
+  ntrTick = setInterval(ntrTimerTick, 200);
+  ntrNext();
+}
+
+function ntrTimerTick(){
+  if (!ntr || ntr.phase !== 'play'){
+    if (ntrTick){ clearInterval(ntrTick); ntrTick = null; }
+    return;
+  }
+  if (!ntrBody()){ ntrStop(); return; }   // panel swapped under us
+  const left = ntr.endAt - performance.now();
+  const el = document.getElementById('ntr-timer');
+  if (el){
+    el.textContent = cbFmtTime(left);
+    el.classList.toggle('low', left <= 10000);
+  }
+  if (left <= 0) ntrFinish();
+}
+
+function ntrKeydown(e){
+  if (e.repeat) return;
+  if (!ntr || ntr.phase !== 'play' || ntr.locked) return;
+  const tag = (e.target && e.target.tagName) || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  const i = ['1', '2', '3', '4'].indexOf(e.key);
+  if (i >= 0) ntrAnswer(i);
+}
+
+/* A missed riff is due again 2–4 cards later; otherwise random from the
+   4 songs. Never the same song twice in a row. */
+function ntrPickCard(){
+  const i = ntr.requeue.findIndex(q => q.due <= ntr.answered && q.id !== ntr.prevId);
+  if (i >= 0) return RN_SONGS.find(s => s.id === ntr.requeue.splice(i, 1)[0].id);
+  const pool = RN_SONGS.filter(s => s.id !== ntr.prevId);
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function ntrPlay(){
+  if (!ntr || !ntr.cur) return;
+  if (typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
+  const song = ntr.cur;
+  const msPerBeat = 60000 / song.bpm;
+  song.notes.forEach(nt => {
+    const midi = STRING_OPEN_MIDI[nt[0]] + nt[1];
+    const at = nt[2] * msPerBeat;
+    ntr.timeouts.push(setTimeout(() => { if (typeof playNote === 'function') playNote(midi); }, at));
+  });
+}
+
+function ntrNext(){
+  if (!ntr || ntr.phase !== 'play') return;
+  const body = ntrBody();
+  if (!body){ ntrStop(); return; }
+  const s = ntr;
+  s.cur = ntrPickCard();
+  s.prevId = s.cur.id;
+  s.locked = false;
+  const opts = cbShuffle(RN_SONGS.slice());
+  s.opts = opts;
+  const answers = opts.map((song, i) =>
+    `<button type="button" class="cb-answer" id="ntr-opt-${i}" onclick="ntrAnswer(${i})"><span class="cb-key">${i + 1}</span>${escHtml(song.title)}</button>`
+  ).join('');
+  const mult = Math.min(4, 1 + Math.floor(s.streak / 5));
+  const left = s.endAt - performance.now();
+  body.innerHTML =
+    `<div class="cb-hud">
+       <span class="cb-timer${left <= 10000 ? ' low' : ''}" id="ntr-timer">${cbFmtTime(left)}</span>
+       <span class="cb-score" id="ntr-score">${t('games.common.score', { n: s.score })}</span>
+       <span class="cb-streak" id="ntr-streak">${s.streak >= 2 ? '&#x1F525; ' + t('games.common.inARow', { n: s.streak }) + (mult > 1 ? ' &mdash; &times;' + mult : '') : '&nbsp;'}</span>
+     </div>
+     <div class="cb-prompt"><button type="button" class="cd-play-btn" onclick="ntrPlay()">&#x25B6; ${t('games.ntr.playButton')}</button></div>
+     <div class="cb-answers">${answers}</div>`;
+  ntrPlay();
+}
+
+function ntrAnswer(i){
+  if (!ntr || ntr.phase !== 'play' || ntr.locked) return;
+  const s = ntr;
+  const pick = s.opts[i];
+  if (!pick) return;
+  s.answered++;
+  if (pick.id === s.cur.id){
+    s.correct++;
+    s.streak++;
+    s.score += 10 * Math.min(4, 1 + Math.floor(s.streak / 5));
+    ntrNext();
+    return;
+  }
+  /* Wrong: show the right button for a beat (inputs locked), requeue the card. */
+  s.score = Math.max(0, s.score - 5);
+  s.streak = 0;
+  s.requeue.push({ id: s.cur.id, due: s.answered + 2 + Math.floor(Math.random() * 3) });
+  s.locked = true;
+  const hit = document.getElementById('ntr-opt-' + i);
+  if (hit) hit.classList.add('wrong');
+  const right = document.getElementById('ntr-opt-' + s.opts.findIndex(x => x.id === s.cur.id));
+  if (right) right.classList.add('reveal');
+  const scoreEl = document.getElementById('ntr-score');
+  if (scoreEl) scoreEl.textContent = t('games.common.score', { n: s.score });
+  const streakEl = document.getElementById('ntr-streak');
+  if (streakEl) streakEl.innerHTML = '&nbsp;';
+  s.timeouts.push(setTimeout(() => {
+    if (ntr !== s || s.phase !== 'play') return;
+    ntrNext();
+  }, 800));
+}
+
+function ntrFinish(){
+  if (!ntr || ntr.phase !== 'play') return;
+  if (ntrTick){ clearInterval(ntrTick); ntrTick = null; }
+  ntr.timeouts.forEach(clearTimeout);
+  ntr.timeouts = [];
+  ntr.phase = 'done';
+  ntr.prevBest = 0;
+  try {
+    ntr.prevBest = parseInt(sessionStorage.getItem('ntrBest'), 10) || 0;
+    if (ntr.score > ntr.prevBest) sessionStorage.setItem('ntrBest', String(ntr.score));
+  } catch(e){}
+  /* Cross-session best → the student's progress doc. Skipped in dev bypass
+     (Firestore rejects that uid; the session best above still counts). */
+  if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
+    const old = (games.ntr && games.ntr.best) || 0;
+    const isNewBest = ntr.score > old;
+    if (isNewBest) games.ntr = { best: ntr.score, at: new Date().toISOString().slice(0, 10) };
+    awardArcadeXp(isNewBest);
+  }
+  ntrRenderDone();
+}
+
+function ntrRenderDone(){
+  const body = ntrBody();
+  if (!body || !ntr) return;
+  const acc = ntr.answered ? Math.round(100 * ntr.correct / ntr.answered) : 0;
+  let bestLine = '';
+  if (ntr.prevBest > 0 && ntr.score > ntr.prevBest){
+    bestLine = `<div class="cb-newbest">&#x1F3C6; ${t('games.common.newBest', { value: ntr.prevBest })}</div>`;
+  } else if (ntr.prevBest > 0){
+    bestLine = `<div class="coach-tip">${t('games.common.bestTodayLabel')}: ${ntr.prevBest}.</div>`;
+  }
+  body.innerHTML =
+    `<div class="coach-report">
+       <div class="cb-done-score">${ntr.score}</div>
+       <div class="coach-overall">${GAME_ICO.riffid} ${t(ntr.answered === 1 ? 'games.common.cardsAnsweredOne' : 'games.common.cardsAnsweredMany', { answered: ntr.answered, correct: ntr.correct, acc })}</div>
+       ${bestLine}
+       <div class="coach-actions">
+         <button type="button" class="coach-start" onclick="ntrStart()">&#x21BB; ${t('games.common.playAgain')}</button>
+       </div>
+     </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   PENTATONIC SIMON — classic call-and-response memory game, notes drawn
+   from Am minor pentatonic Pattern 1 (Module 4/9's already-verified
+   ascending run — see module-9.js's m9w0-s3 playSeq, notes
+   [45,48,50,52,55,57,...]). Six pads = one full octave of the pattern
+   (root, ♭3, 4, 5, ♭7, root). The game plays a growing sequence, you tap
+   it back in order; one octave, endurance-style — no timer, no decks,
+   just how long a sequence you can hold. Longest clean sequence is the
+   score, persisted like every other game's best. */
+
+const PS_NOTES = [45, 48, 50, 52, 55, 57];   // A2 C3 D3 E3 G3 A3 — Pattern 1, one octave
+const PS_SHOW_MS = 650;
+
+let ps = null;
+
+function psStop(){
+  if (ps){
+    (ps.timeouts || []).forEach(clearTimeout);
+    document.removeEventListener('keydown', psKeydown);
+    ps = null;
+  }
+}
+
+function psBody(){ return document.getElementById('ps-body'); }
+
+function psSetup(){
+  ps = { phase: 'setup', timeouts: [] };
+  psRenderSetup();
+}
+
+function psRenderSetup(){
+  const body = psBody();
+  if (!body || !ps) return;
+  let best = 0;
+  try { best = parseInt(sessionStorage.getItem('psBest'), 10) || 0; } catch(e){}
+  body.innerHTML =
+    `<div class="coach-tip">${t('games.ps.tip')}</div>
+     ${best ? `<div class="cb-setup-best">&#x1F3C6; ${t('games.common.bestTodayLabel')}: ${best}</div>` : ''}
+     <button type="button" class="coach-start" onclick="psStart()">&#x25B6; ${t('games.ps.startButton')}</button>`;
+}
+
+function psPadHtml(){
+  let pads = '';
+  for (let i = 0; i < PS_NOTES.length; i++){
+    pads += `<button type="button" class="ps-pad" id="ps-pad-${i}" onclick="psTap(${i})"><span class="ps-pad-key">${i + 1}</span></button>`;
+  }
+  return `<div class="ps-pads">${pads}</div>`;
+}
+
+function psStart(){
+  if (!ps || ps.phase === 'play') return;
+  coachClose(); coachEvictTuner();   // one mic/audio owner at a time
+  const s = ps;
+  s.phase = 'play';
+  s.seq = []; s.round = 0; s.inputIdx = 0; s.showing = true;
+  (s.timeouts || []).forEach(clearTimeout);
+  s.timeouts = [];
+  document.addEventListener('keydown', psKeydown);
+  const body = psBody();
+  if (body){
+    body.innerHTML =
+      `<div class="cb-hud">
+         <span class="cb-score" id="ps-round">${t('games.ps.round', { n: 0 })}</span>
+       </div>
+       ${psPadHtml()}
+       <div class="coach-tip" id="ps-status">${t('games.ps.watch')}</div>`;
+  }
+  psGrow();
+}
+
+function psKeydown(e){
+  if (e.repeat) return;
+  if (!ps || ps.phase !== 'play' || ps.showing) return;
+  const tag = (e.target && e.target.tagName) || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  const i = ['1', '2', '3', '4', '5', '6'].indexOf(e.key);
+  if (i >= 0) psTap(i);
+}
+
+function psFlash(i, on){
+  const pad = document.getElementById('ps-pad-' + i);
+  if (pad) pad.classList.toggle('lit', on);
+}
+
+function psGrow(){
+  const s = ps;
+  if (!s || s.phase !== 'play') return;
+  s.seq.push(Math.floor(Math.random() * PS_NOTES.length));
+  s.showing = true; s.inputIdx = 0;
+  const statusEl = document.getElementById('ps-status');
+  if (statusEl) statusEl.textContent = t('games.ps.watch');
+  s.seq.forEach((padIdx, i) => {
+    s.timeouts.push(setTimeout(() => {
+      if (!ps || ps !== s) return;
+      psFlash(padIdx, true);
+      if (typeof playNote === 'function') playNote(PS_NOTES[padIdx]);
+      s.timeouts.push(setTimeout(() => psFlash(padIdx, false), PS_SHOW_MS * 0.6));
+    }, i * PS_SHOW_MS));
+  });
+  s.timeouts.push(setTimeout(() => {
+    if (!ps || ps !== s) return;
+    s.showing = false;
+    const el = document.getElementById('ps-status');
+    if (el) el.textContent = t('games.ps.yourTurn');
+  }, s.seq.length * PS_SHOW_MS));
+}
+
+function psTap(i){
+  const s = ps;
+  if (!s || s.phase !== 'play' || s.showing) return;
+  psFlash(i, true);
+  s.timeouts.push(setTimeout(() => psFlash(i, false), 180));
+  if (typeof playNote === 'function') playNote(PS_NOTES[i]);
+  if (i !== s.seq[s.inputIdx]){
+    psFinish();
+    return;
+  }
+  s.inputIdx++;
+  if (s.inputIdx === s.seq.length){
+    s.round++;
+    const roundEl = document.getElementById('ps-round');
+    if (roundEl) roundEl.textContent = t('games.ps.round', { n: s.round });
+    s.showing = true;
+    const statusEl = document.getElementById('ps-status');
+    if (statusEl) statusEl.textContent = t('games.ps.nice');
+    s.timeouts.push(setTimeout(() => psGrow(), 900));
+  }
+}
+
+function psFinish(){
+  const s = ps;
+  if (!s || s.phase !== 'play') return;
+  s.phase = 'done';
+  s.timeouts.forEach(clearTimeout);
+  s.timeouts = [];
+  document.removeEventListener('keydown', psKeydown);
+  s.prevBest = 0;
+  try {
+    s.prevBest = parseInt(sessionStorage.getItem('psBest'), 10) || 0;
+    if (s.round > s.prevBest) sessionStorage.setItem('psBest', String(s.round));
+  } catch(e){}
+  /* Cross-session best → the student's progress doc. Skipped in dev bypass
+     (Firestore rejects that uid; the session best above still counts). */
+  if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
+    const old = (games.ps && games.ps.best) || 0;
+    const isNewBest = s.round > old;
+    if (isNewBest) games.ps = { best: s.round, at: new Date().toISOString().slice(0, 10) };
+    awardArcadeXp(isNewBest);
+  }
+  psRenderDone();
+}
+
+function psRenderDone(){
+  const body = psBody();
+  if (!body || !ps) return;
+  let bestLine = '';
+  if (ps.prevBest > 0 && ps.round > ps.prevBest){
+    bestLine = `<div class="cb-newbest">&#x1F3C6; ${t('games.common.newBest', { value: ps.prevBest })}</div>`;
+  } else if (ps.prevBest > 0){
+    bestLine = `<div class="coach-tip">${t('games.common.bestTodayLabel')}: ${ps.prevBest}.</div>`;
+  }
+  body.innerHTML =
+    `<div class="coach-report">
+       <div class="cb-done-score">${ps.round}</div>
+       <div class="coach-overall">${GAME_ICO.simon} ${t('games.ps.roundsCleared', { n: ps.round })}</div>
+       ${bestLine}
+       <div class="coach-actions">
+         <button type="button" class="coach-start" onclick="psStart()">&#x21BB; ${t('games.common.playAgain')}</button>
        </div>
      </div>`;
 }

@@ -1675,6 +1675,27 @@ body.games-open{overflow:hidden}
   .nr-burst,.nr-combo-pop{display:none}
   .nr-token.hit-perfect .rn-token-fret{animation:none}
 }
+
+/* ── Chord Detective / Name That Riff — Chord Blitz's MC-quiz shell
+   (.cb-hud/.cb-prompt/.cb-answer etc.), just with a Play button standing
+   in for the diagram/name prompt. ── */
+.games-card.gc-detective::before{background:var(--purple-accent)}
+.games-card.gc-riffid::before{background:var(--amber-text)}
+.cd-play-btn{font-family:inherit;font-size:1.0625rem;font-weight:700;padding:20px 40px;border-radius:999px;border:none;background:var(--purple-accent);color:var(--bg);cursor:pointer}
+.cd-play-btn:hover{filter:brightness(1.1)}
+.cd-play-btn:active{transform:translateY(2px)}
+
+/* ── Pentatonic Simon — call-and-response pad grid, one pad per note of
+   one pentatonic-Pattern-1 octave. ── */
+.games-card.gc-simon::before{background:var(--green-text)}
+.ps-pads{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.ps-pad{position:relative;aspect-ratio:1;font-family:inherit;border-radius:14px;border:1px solid var(--border2);background:var(--bg2);cursor:pointer;transition:transform .1s,background .1s,border-color .1s}
+.ps-pad:hover{transform:translateY(-2px);border-color:var(--purple-accent)}
+.ps-pad:active{transform:translateY(1px)}
+.ps-pad.lit{background:var(--purple-accent);border-color:var(--purple-accent)}
+.ps-pad-key{position:absolute;top:6px;left:8px;font-size:0.75rem;font-weight:600;color:var(--text3)}
+.ps-pad.lit .ps-pad-key{color:var(--bg)}
+
 /* ── Race lane: the little guitar running for the finish flag ──
    #nr-runner carries the JS translateX (distance = notes landed ÷ notes
    in the level); .nr-runner-art inside it carries every CSS animation, so
