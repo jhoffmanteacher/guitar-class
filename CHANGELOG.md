@@ -5,6 +5,26 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-30 — Song fact fixes from a full core-song audit
+
+### Fixed
+
+- **"the cure" turnaround described accurately.** Two theory cards (Modules 9
+  and 11) said the song walks C straight into G/B — in the song, the G/B glide
+  actually lands after the F chord on its way back to Am. The bass-walk
+  exercise is unchanged; the description of what the song does is now right.
+- **"Let It Be" tempo claims corrected.** Two cards called 60 BPM "the
+  record's actual pace" — the record runs at about 71 BPM (the same speed as
+  the play-along track). 60 BPM is now clearly labeled practice speed.
+- **Fingerpicked bonus layers now match the Module 8 pattern.** The
+  fingerpicked-verse layers on the "Let It Be" and "the cure" Song Journey
+  pages taught the 6-note roll, but both songs are in 4/4 — they now use the
+  8-note p-i-m-a-m-i-m-i stretch (two notes per beat), exactly as Module 8
+  teaches it.
+- **Module 11 chord diagrams show the full barre F.** Four diagrams still
+  showed the simplified little-F shape; from Module 7 on you play the full
+  barre, so the diagrams now match.
+
 ## 2026-07-29 — First In-Class Activity: Playing Happy Birthday
 
 ### Added

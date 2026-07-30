@@ -655,8 +655,8 @@ SETS.push(
                 hint_es: 'Un compás completo por acorde — paciente y sin apuro, el doble de duración que tus raíces de bajo del Módulo 2, que se movían cada dos tiempos. Esta estrofa C–G–Am–F es una de las tres canciones principales que puedes tocar de memoria para la evaluación del módulo. La grabación en realidad se mueve al ritmo de tu Módulo 2 — dos tiempos por acorde — y la escalera de Cambios de Medio Compás más adelante en esta unidad te lleva ahí. Mira hacia adelante — empieza a formar el siguiente acorde en el tiempo 4 del actual. Mantén tus dedos arqueados y tu pulgar detrás del mástil para que cada cuerda suene. El rasgueo sigue moviéndose aunque los dedos viajen.',
                 stuck: 'Isolate the roughest pair (probably C → F) and loop just those two, four beats each.',
                 stuck_es: 'Aísla el par más difícil (probablemente C → F) y repite solo esos dos, cuatro tiempos cada uno.',
-                levelUp: 'Add the chorus turnaround (a short chord move that leads back to the start) — Am · G · F · C — or drop to two beats per chord at the same 60 BPM, the record\'s actual pace.',
-                levelUp_es: 'Agrega el giro del coro (un movimiento corto de acordes que regresa al inicio) — Am · G · F · C — o baja a dos tiempos por acorde al mismo 60 BPM, el ritmo real de la grabación.',
+                levelUp: 'Add the chorus turnaround (a short chord move that leads back to the start) — Am · G · F · C — or drop to two beats per chord at the same 60 BPM — the record\'s real changes at practice speed (the record itself runs a bit faster, about 71 BPM).',
+                levelUp_es: 'Agrega el giro del coro (un movimiento corto de acordes que regresa al inicio) — Am · G · F · C — o baja a dos tiempos por acorde al mismo 60 BPM — los cambios reales de la grabación a velocidad de práctica (la grabación va un poco más rápido, a unos 71 BPM).',
                 skills: [3, 6],
                 chords: [
                   { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },

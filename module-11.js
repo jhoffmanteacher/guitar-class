@@ -170,7 +170,7 @@ SETS.push(
                   { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'Dm', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'2'],[2,3,'3'],[1,1,'1']], position: 0 },
                   { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 },
-                  { name: 'F', chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
+                  { name: 'F', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
                   { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'D', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 },
@@ -218,7 +218,7 @@ SETS.push(
                   { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
-                  { name: 'F', chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
+                  { name: 'F', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
                 ]
               }
             ]
@@ -484,7 +484,7 @@ SETS.push(
                 chords: [
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
-                  { name: 'F', chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
+                  { name: 'F', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
                 ]
               }
             ]
@@ -497,8 +497,8 @@ SETS.push(
                 label: 'Challenge 3 — Slash Chord Walk', label_es: 'Reto 3 — Caminata de acorde con barra diagonal',
                 text: '<ul><li>Play C → G/B → Am as a smooth bass-line move — notice the bass note walks down one step at a time (C, B, A) while the chords change around it.</li></ul>',
                 text_es: '<ul><li>Toca C → G/B → Am como un movimiento suave de línea de bajo — fíjate cómo la nota de bajo baja un paso a la vez (C, B, A) mientras los acordes cambian alrededor.</li></ul>',
-                hint: 'This is exactly what "the cure" does to glide from the G chord back home to Am, closing the loop — the slash chord is the piece that links the two chords smoothly.',
-                hint_es: 'Esto es exactamente lo que hace "the cure" para deslizarse del acorde de G de vuelta a la base en Am, cerrando el ciclo — el acorde con barra diagonal es la pieza que conecta los dos acordes suavemente.',
+                hint: '"the cure" uses this same G/B — it lands right after the F chord and glides the loop back home to Am, closing the cycle — the slash chord is the piece that links two chords smoothly.',
+                hint_es: '"the cure" usa este mismo G/B — llega justo después del acorde de F y desliza el ciclo de vuelta a la base en Am, cerrando la vuelta — el acorde con barra diagonal es la pieza que conecta dos acordes suavemente.',
                 stuck: 'Play C and Am first without the G/B in between, then add it back and listen for how much smoother the move feels.',
                 stuck_es: 'Toca C y Am primero sin el G/B en medio, y luego agrégalo de vuelta y escucha cuánto más suave se siente el movimiento.',
                 levelUp: 'Try the reverse walk, Am → G/B → C, or find another slash chord to decode.',
@@ -530,7 +530,7 @@ SETS.push(
                 chords: [
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
-                  { name: 'F', chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
+                  { name: 'F', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
                 ]
               }
             ]
