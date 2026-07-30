@@ -88,46 +88,59 @@ window.CLASS_ACTIVITIES = [
     id:    'ca-2026-09-01',
     date:  '2026-09-01',
     number: 1,
-    title:    'Playing Happy Birthday — Part 1: Find Your Notes',
-    title_es: 'Tocando Happy Birthday — Parte 1: Encuentra tus notas',
-    intro:    'Before you can play a song, your fingers need to know where its notes live. Today: hear the song a few ways, then learn one fret shape that unlocks the whole melody — starting from the open low E string.',
-    intro_es: 'Antes de poder tocar una canción, tus dedos necesitan saber dónde viven sus notas. Hoy: escucha la canción de varias maneras, y luego aprende un patrón de trastes que desbloquea toda la melodía, empezando desde la cuerda Mi grave al aire.',
+    title:    'Playing Happy Birthday — Practice',
+    title_es: 'Tocando Happy Birthday — Práctica',
+    intro:    'You already know the shape. Today: drill it string by string, put it together, then push the tempo as far as it\'ll go.',
+    intro_es: 'Ya conoces el patrón. Hoy: practícalo cuerda por cuerda, júntalo todo, y después empuja el tempo todo lo que puedas.',
     steps: [
       {
-        text: 'Same melody, three very different sounds. Listen to 30–45 seconds of this solo fingerstyle version. What one word describes its sound?',
-        text_es: 'La misma melodía, tres sonidos muy diferentes. Escucha 30–45 segundos de esta versión solista en fingerstyle. ¿Qué palabra describe su sonido?',
-        video: { id: 'zQ8MIPlNGP0', label: 'Fingerstyle guitar', label_es: 'Guitarra fingerstyle' },
-      },
-      {
-        text: 'Now a mariachi version — same notes, whole different feel. Tell a neighbor: what changed?',
-        text_es: 'Ahora una versión de mariachi — las mismas notas, una sensación totalmente distinta. Cuéntale a un compañero: ¿qué cambió?',
-        video: { id: 'OcuP7gNWCDA', label: 'Mariachi', label_es: 'Mariachi' },
-      },
-      {
-        text: 'Last one: electric rock. You\'ve got it when: you can name one thing all three versions share and one thing that made each one different.',
-        text_es: 'Última: rock eléctrico. Lo tienes cuando: puedes nombrar algo que las tres versiones comparten y algo que hizo diferente a cada una.',
-        video: { id: 'WlC0O_UXXA0', label: 'Electric rock', label_es: 'Rock eléctrico' },
-      },
-      {
         figure: 'img/ca-hb-low-e.svg',
-        text: 'This song starts on a note you don\'t even have to fret: the open low E string (the thickest one). Every other note on this string sits in one small shape:<ol><li>Play the open string. That\'s E — home base.</li><li>Press fret 2 — F#. (A # means "sharp": one fret higher than the plain note.)</li><li>Press fret 4 — G#.</li><li>Press fret 5 — right at the first dot on the neck. That\'s A.</li></ol>The dots at frets 3, 5, 7, 9 (and the double dot at 12) are a map — you never have to count frets from the end. You\'ve got it when: you can play E, F#, G#, A up and back down, saying each name out loud, landing on A by its dot without counting.',
-        text_es: 'Esta canción empieza en una nota que ni siquiera tienes que trastear: la cuerda Mi grave al aire (la más gruesa). Cada otra nota de esta cuerda cabe en un patrón sencillo:<ol><li>Toca la cuerda al aire. Esa es E — tu punto de partida.</li><li>Presiona el traste 2 — F#. (Un # significa "sostenido": un traste más alto que la nota natural.)</li><li>Presiona el traste 4 — G#.</li><li>Presiona el traste 5 — justo en el primer punto del diapasón. Esa es A.</li></ol>Los puntos en los trastes 3, 5, 7, 9 (y el punto doble en el 12) son un mapa — nunca tienes que contar trastes desde el final. Lo tienes cuando: puedes tocar E, F#, G#, A subiendo y bajando, diciendo cada nombre en voz alta, y llegar a A por su punto sin contar.',
+        text: 'Open string is home base. Frets 2, 4, 5 make the shape on the low E string — the dot at fret 5 is your landing mark.',
+        text_es: 'La cuerda al aire es tu punto de partida. Los trastes 2, 4 y 5 forman el patrón en la cuerda Mi grave — el punto en el traste 5 es tu marca de referencia.',
       },
       {
         figure: 'img/ca-hb-a.svg',
-        text: 'Here\'s the trick that unlocks the rest of the song: the A string (next one down) uses the SAME shape.<ol><li>Open string — A. Home base again.</li><li>Fret 2 — B.</li><li>Fret 4 — C#.</li><li>Fret 5, at the dot — D.</li><li>One new spot: fret 7, at the next dot — E.</li></ol>You\'ve got it when: a partner calls out any note from either string chart and you land on it within 3 seconds — dots first, counting never.',
-        text_es: 'Aquí está el truco que desbloquea el resto de la canción: la cuerda La (la siguiente hacia abajo) usa la MISMA forma.<ol><li>Cuerda al aire — A. Tu punto de partida otra vez.</li><li>Traste 2 — B.</li><li>Traste 4 — C#.</li><li>Traste 5, en el punto — D.</li><li>Un lugar nuevo: traste 7, en el siguiente punto — E.</li></ol>Lo tienes cuando: un compañero dice cualquier nota de cualquiera de los dos diagramas y la encuentras en 3 segundos o menos — primero por los puntos, nunca contando.',
+        text: 'Same shape, one string over: the A string. Frets 2, 4, 5, and now 7 — the dots at 5 and 7 are your landing marks.',
+        text_es: 'El mismo patrón, una cuerda hacia abajo: la cuerda La. Trastes 2, 4, 5 y ahora también el 7 — los puntos en el 5 y el 7 son tus marcas de referencia.',
       },
       {
-        text: 'Go back through every fretted note you just found — both strings:<ol><li>Press just behind the fret wire (not on top of it), fingertip curled.</li><li>Pick the string once. Clean, or buzzy?</li><li>If it buzzes: press a little harder and scoot closer to the fret wire. Pick again.</li><li>Play each note 4 times in a row, clean.</li></ol>You\'ve got it when: every note in both charts rings clean 4 times — those are all the notes in "Happy Birthday".',
-        text_es: 'Repasa cada nota trasteada que acabas de encontrar — en las dos cuerdas:<ol><li>Presiona justo detrás del traste (no encima), con la punta del dedo curvada.</li><li>Toca la cuerda una vez. ¿Suena limpia o zumba?</li><li>Si zumba: presiona un poco más fuerte y acércate más al traste. Vuelve a tocar.</li><li>Toca cada nota 4 veces seguidas, limpia.</li></ol>Lo tienes cuando: cada nota de los dos diagramas suena limpia 4 veces — esas son todas las notas de "Happy Birthday".',
-      },
-      {
-        text: 'Read the TAB below — the numbers are fret numbers, 0 means open string. Every note is one you just found. Start slow; click Play tab to hear it. You\'ve got it when: you play phrase 1 four times through without stopping.',
-        text_es: 'Lee el TAB de abajo — los números son números de traste, 0 significa cuerda al aire. Cada nota es una que ya encontraste. Empieza lento; haz clic en Play tab para escucharlo. Lo tienes cuando: tocas la frase 1 cuatro veces seguidas sin detenerte.',
+        text: 'This line is every note on the low E string. Set your BPM to 70 and play it through.\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'Esta línea son todas las notas de la cuerda Mi grave. Pon tu BPM en 70 y tócala completa.\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
-          caption: '"Happy Birthday" — first half · E & A strings · start on the open low E',
-          caption_es: '"Happy Birthday" — primera mitad · cuerdas Mi y La · empieza en la Mi grave al aire',
+          caption: 'E string only — no jumps',
+          caption_es: 'Solo cuerda Mi grave — sin saltos',
+          notes: [
+            { string: 'E', fret: 0, note: 'E',  midi: 40 },
+            { string: 'E', fret: 0, note: 'E',  midi: 40 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'E', fret: 0, note: 'E',  midi: 40 },
+            { string: 'E', fret: 5, note: 'A',  midi: 45 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44 }
+          ]
+        },
+      },
+      {
+        text: 'Same drill, the A string this time.\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'El mismo ejercicio, ahora en la cuerda La.\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        tab: {
+          caption: 'A string only — same idea, one string over',
+          caption_es: 'Solo cuerda La — la misma idea, una cuerda hacia abajo',
+          notes: [
+            { string: 'A', fret: 5, note: 'D',  midi: 50 },
+            { string: 'A', fret: 5, note: 'D',  midi: 50 },
+            { string: 'A', fret: 4, note: 'C#', midi: 49 },
+            { string: 'A', fret: 0, note: 'A',  midi: 45 },
+            { string: 'A', fret: 2, note: 'B',  midi: 47 },
+            { string: 'A', fret: 0, note: 'A',  midi: 45 }
+          ]
+        },
+      },
+      {
+        text: 'Now the two strings back to back — this is the first half of the song.\nYou\'ve got it when: phrase 1 and phrase 2, four times through, without stopping.',
+        text_es: 'Ahora las dos cuerdas seguidas — esta es la primera mitad de la canción.\nLo tienes cuando: la frase 1 y la frase 2, cuatro veces seguidas, sin detenerte.',
+        tab: {
+          caption: 'First half · E string into A string, no pause',
+          caption_es: 'Primera mitad · de la cuerda Mi grave a la cuerda La, sin pausa',
           phrases: [
             {
               label: '"Hap-py birth-day to you"',
@@ -157,12 +170,36 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Finish the song. Phrase 3 leaps up to the E at fret 7 on the A string — that\'s a dot, so let it catch your eye before your finger jumps. Take it as slow as you need. You\'ve got it when: you can play all four phrases back to back, any speed, without stopping.',
-        text_es: 'Termina la canción. La frase 3 salta hasta el E en el traste 7 de la cuerda La — ese es un punto, así que déjalo llamar tu atención antes de que salte el dedo. Tómalo tan lento como necesites. Lo tienes cuando: puedes tocar las cuatro frases seguidas, a cualquier velocidad, sin detenerte.',
+        text: 'Add the second half — start to finish, no stopping in between. The leap to fret 7 on the A string is the one tricky spot; it\'s a dot, so let your eye catch it before your finger jumps.\nYou\'ve got it when: all four phrases back to back, any speed, without stopping.',
+        text_es: 'Agrega la segunda mitad — de principio a fin, sin detenerte entre medio. El salto al traste 7 en la cuerda La es el único punto difícil; es un punto en el diapasón, así que deja que lo capte tu ojo antes de que salte tu dedo.\nLo tienes cuando: las cuatro frases seguidas, a cualquier velocidad, sin detenerte.',
         tab: {
-          caption: '"Happy Birthday" — second half · the jump to fret 7 is the hard part',
-          caption_es: '"Happy Birthday" — segunda mitad · el salto al traste 7 es la parte difícil',
+          caption: 'Whole song · the jump to fret 7 is the hard part',
+          caption_es: 'Canción completa · el salto al traste 7 es la parte difícil',
           phrases: [
+            {
+              label: '"Hap-py birth-day to you"',
+              label_es: '"Hap-py birth-day to you"',
+              notes: [
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 2, note: 'F#', midi: 42 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                { string: 'E', fret: 4, note: 'G#', midi: 44 }
+              ]
+            },
+            {
+              label: '"Hap-py birth-day to you" (again)',
+              label_es: '"Hap-py birth-day to you" (otra vez)',
+              notes: [
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 2, note: 'F#', midi: 42 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'A', fret: 2, note: 'B',  midi: 47 },
+                { string: 'A', fret: 0, note: 'A',  midi: 45 }
+              ]
+            },
             {
               label: '"Hap-py birth-day dear ______"',
               label_es: '"Hap-py birth-day dear ______"',
@@ -190,6 +227,10 @@ window.CLASS_ACTIVITIES = [
             }
           ]
         },
+      },
+      {
+        text: 'Play the full song again, chasing speed this time. Every clean pass, raise the BPM on the player above by 10 and go again.\nYou\'ve got it when: you\'ve raised the tempo at least three times without breaking down.',
+        text_es: 'Toca la canción completa otra vez, esta vez persiguiendo la velocidad. Cada vez que te salga limpia, sube el BPM en el reproductor de arriba 10 puntos y vuelve a intentarlo.\nLo tienes cuando: subiste el tempo al menos tres veces sin perder el ritmo.',
       },
     ],
   },

@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-30 — Activity #1 reworked into a hands-on practice session
+
+### Changed
+
+- **"Activity #1 - Playing Happy Birthday" is now pure practice**, since the
+  melody's already been taught in class: drill the low E string alone, then
+  the A string alone, put the two halves together, play the whole song, then
+  chase the tempo as high as it'll go. The listening clips are gone — this
+  round is guitars-in-hand from the first step.
+
 ## 2026-07-30 — Song fact fixes from a full core-song audit
 
 ### Fixed
