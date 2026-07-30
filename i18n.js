@@ -245,6 +245,7 @@
     'ca.reminderGo':           { en: 'Go to activities', es: 'Ir a las actividades' },
     'ca.reminderLater':        { en: 'Not now', es: 'Ahora no' },
     'ca.watchVideo':           { en: 'Watch video', es: 'Ver video' },
+    'ca.stepLabel':            { en: 'Step {n}', es: 'Paso {n}' },
     'skill.gettingIt':         { en: 'Getting it', es: 'Ya le voy agarrando' },
     'skill.gotItShort':        { en: 'Got it', es: 'Ya lo tengo' },
     'skill.checklistIntro':    { en: 'Check each skill as you practice. Use "Still working on it" while you\'re learning, then mark "I\'ve got it!" once you can do it consistently.',

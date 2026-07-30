@@ -5861,13 +5861,28 @@ function openClassActivitiesScreen(){
 // Which activity card is expanded, so a re-render (Mark complete, language
 // switch) doesn't collapse the one the student is looking at.
 let caOpenId = null;
+// Per-step accordion state — session-only (no Firestore, no localStorage;
+// resets on reload by design, unlike the module-step checklist). caStepOpen
+// maps activity id -> open step index (-1 = none); caStepDone maps
+// "activityId:stepIndex" -> true. Read at render time by caActivityCardHtml,
+// then kept in sync by direct DOM edits in caToggleStepOpen/caMarkStepDone so
+// marking a step done doesn't force a full re-render of the card (which would
+// cut off any playing TAB audio in other steps).
+let caStepOpen = {};
+let caStepDone = {};
+function caDefaultOpenStep(a){
+  const steps = a.steps || [];
+  for(let i=0;i<steps.length;i++) if(caStepDone[`${a.id}:${i}`] !== true) return i;
+  return -1;
+}
+function caStepStatusHtml(n, isDone){ return isDone ? '&#x2713;' : String(n); }
 function caFormatDate(iso){
   const d = new Date(iso + 'T00:00:00');
   if(isNaN(d)) return iso;
   const lang = (typeof getLang === 'function' && getLang() === 'es') ? 'es' : 'en';
   return d.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { weekday:'short', month:'numeric', day:'numeric' });
 }
-function caStepHtml(a, step, si){
+function caStepHtml(a, step, si, isOpen, isDone){
   const parts = [];
   if(step.figure) parts.push(`<span class="step-figure"><img src="${escAttr(step.figure)}" alt=""></span>`);
   if(step.video && step.video.id){
@@ -5879,12 +5894,22 @@ function caStepHtml(a, step, si){
   // Step text is first-party authored HTML, same trust level as module step
   // content — trusted (not escHtml'd) so <ol>/<ul> markup renders per the
   // house list rule, and wrapGotItWhen() can style the got-it-when sentence.
-  return `<li>${wrapGotItWhen(tf(step,'text'))}${parts.join('')}</li>`;
+  const detailHtml = `${wrapGotItWhen(tf(step,'text'))}${parts.join('')}`
+    + `<div class="ca-step-done-row"><button type="button" class="ca-step-donebtn${isDone ? ' is-done' : ''}" onclick="caMarkStepDone(this,'${escAttr(a.id)}',${si})">${stepDoneHtml(isDone)}</button></div>`;
+  return `<li class="ca-step${isDone ? ' ca-step-done' : ''}${isOpen ? '' : ' ca-step-collapsed'}" data-idx="${si}">`
+    + `<button type="button" class="ca-step-head" aria-expanded="${isOpen}" onclick="caToggleStepOpen(this)">`
+    + `<span class="ca-step-status" aria-hidden="true">${caStepStatusHtml(si + 1, isDone)}</span>`
+    + `<span class="ca-step-label">${escHtml(t('ca.stepLabel', {n: si + 1}))}</span>`
+    + `<span class="ca-step-chev" aria-hidden="true">&#9656;</span>`
+    + `</button>`
+    + `<div class="ca-step-detail">${detailHtml}</div>`
+    + `</li>`;
 }
 function caActivityCardHtml(a){
   const done = classActivities[a.id] === true;
   const open = caOpenId === a.id;
-  const stepsHtml = (a.steps || []).map((s, si) => caStepHtml(a, s, si)).join('');
+  const openStepIdx = caStepOpen[a.id] !== undefined ? caStepOpen[a.id] : caDefaultOpenStep(a);
+  const stepsHtml = (a.steps || []).map((s, si) => caStepHtml(a, s, si, si === openStepIdx, caStepDone[`${a.id}:${si}`] === true)).join('');
   const markLabel = done ? t('ca.completed') : t('ca.markComplete');
   const titleHtml = (a.number ? `#${Number(a.number)} - ` : '') + escHtml(tf(a,'title'));
   return `<details class="ca-card" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
@@ -5905,6 +5930,53 @@ function caActivityCardHtml(a){
 const TCK_CHECK_SVG_INLINE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:14px;height:14px"><path d="M5 12l5 5L19 7"/></svg>';
 function caOnToggle(details){
   caOpenId = details.open ? details.dataset.id : (caOpenId === details.dataset.id ? null : caOpenId);
+}
+// Steps within one activity are a single-open accordion, independent of the
+// module-station .dp builder's own step/focus-mode machinery (deliberately —
+// see class-activities.js's schema comment). Pure DOM edits, no re-render, so
+// a step toggle can't cut off audio playing in a sibling step's TAB player.
+function caToggleStepOpen(btn){
+  const li = btn.closest('.ca-step');
+  const list = li.closest('.ca-steps');
+  const willOpen = li.classList.contains('ca-step-collapsed');
+  list.querySelectorAll('.ca-step').forEach(other => {
+    if(other === li) return;
+    other.classList.add('ca-step-collapsed');
+    const h = other.querySelector('.ca-step-head');
+    if(h) h.setAttribute('aria-expanded', 'false');
+  });
+  li.classList.toggle('ca-step-collapsed', !willOpen);
+  btn.setAttribute('aria-expanded', String(willOpen));
+  const activityId = list.closest('.ca-card').dataset.id;
+  caStepOpen[activityId] = willOpen ? Number(li.dataset.idx) : -1;
+}
+// Mark this step done, then collapse it and open the next not-done step —
+// same "collapse and advance" feel as the module-step checklist, but
+// scoped to one flat step list (no sections/focus-mode) and never saved.
+function caMarkStepDone(btn, id, si){
+  const key = `${id}:${si}`;
+  const nowDone = caStepDone[key] !== true;
+  caStepDone[key] = nowDone;
+  const li = btn.closest('.ca-step');
+  li.classList.toggle('ca-step-done', nowDone);
+  btn.classList.toggle('is-done', nowDone);
+  btn.innerHTML = stepDoneHtml(nowDone);
+  const status = li.querySelector('.ca-step-status');
+  if(status) status.innerHTML = caStepStatusHtml(si + 1, nowDone);
+  if(!nowDone) return;   // unmarking just restores the number/label above
+  li.classList.add('ca-step-collapsed');
+  const head = li.querySelector('.ca-step-head');
+  if(head) head.setAttribute('aria-expanded', 'false');
+  const list = li.closest('.ca-steps');
+  const siblings = [...list.querySelectorAll('.ca-step')];
+  const next = siblings.slice(siblings.indexOf(li) + 1).find(s => !s.classList.contains('ca-step-done'));
+  caStepOpen[id] = next ? Number(next.dataset.idx) : -1;
+  if(next){
+    next.classList.remove('ca-step-collapsed');
+    const nh = next.querySelector('.ca-step-head');
+    if(nh) nh.setAttribute('aria-expanded', 'true');
+    next.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+  }
 }
 function caToggleComplete(id){
   const isDone = classActivities[id] === true;

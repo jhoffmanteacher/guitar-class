@@ -1456,11 +1456,30 @@ body.explore-open #week-panels{display:none}
 .ca-done-mark{color:var(--green-text);flex-shrink:0;display:flex}
 .ca-card-body{padding:0 14px 14px}
 .ca-chip{font-size:0.75rem;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--ca-accent-bg);color:var(--ca-accent);white-space:nowrap;flex-shrink:0}
-.ca-steps{margin:8px 0 12px 1.25em;font-size:0.9375rem;line-height:1.55}
-.ca-steps li{margin-bottom:8px}
+.ca-steps{list-style:none;margin:8px 0 12px;padding:0;font-size:0.9375rem;line-height:1.55}
 .ca-mark-btn{font-family:inherit;font-size:0.875rem;font-weight:600;padding:9px 16px;border-radius:20px;border:1px solid var(--ca-accent);background:var(--ca-accent);color:#fff;cursor:pointer}
 .ca-mark-btn:hover{opacity:0.88}
 .ca-mark-btn.done{background:var(--ca-accent-bg);color:var(--ca-accent);font-weight:500}
+/* Per-step accordion — independent of the module-station .dp builder's
+   .step/.step-head system (own CSS namespace, same visual language), and
+   session-only: no persistence, so a reload always reopens at step 1. */
+.ca-step{padding:2px 0;border-left:3px solid transparent}
+.ca-step + .ca-step{border-top:1px solid var(--border)}
+.ca-step-head{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:8px 4px;font-family:inherit;font-size:0.9375rem;text-align:left;background:transparent;border:0;border-radius:8px;color:var(--text);cursor:pointer}
+.ca-step-head:hover{background:var(--bg2)}
+.ca-step-head:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
+.ca-step-status{width:22px;height:22px;border-radius:50%;background:var(--bg3);color:var(--text2);font-size:0.8125rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ca-step.ca-step-done .ca-step-status{background:var(--green-bg);color:var(--green-text)}
+.ca-step-label{flex:1;min-width:0;line-height:1.4}
+.ca-step.ca-step-done .ca-step-label{text-decoration:line-through;color:var(--text2);opacity:.65}
+.ca-step-chev{font-size:0.75rem;color:var(--text3);flex-shrink:0;transition:transform .15s}
+.ca-step:not(.ca-step-collapsed) .ca-step-chev{transform:rotate(90deg)}
+.ca-step-detail{padding:2px 4px 14px 56px;font-size:0.9375rem;line-height:1.55}
+.ca-step.ca-step-collapsed .ca-step-detail{display:none}
+.ca-step-done-row{margin-top:10px}
+.ca-step-donebtn{font-family:inherit;font-size:0.8438rem;font-weight:600;padding:7px 14px;border-radius:16px;border:1px solid var(--ca-accent);background:transparent;color:var(--ca-accent);cursor:pointer}
+.ca-step-donebtn:hover{background:var(--ca-accent-bg)}
+.ca-step-donebtn.is-done{background:var(--ca-accent-bg)}
 .ca-reminder-modal{border-top:3px solid var(--ca-accent)}
 .ca-reminder-list{list-style:none;margin:10px 0;padding:0;font-size:0.9375rem}
 .ca-reminder-list li{padding:6px 0;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
