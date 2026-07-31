@@ -1613,6 +1613,7 @@ function gamesStopMic(){
   cdStop();
   ntrStop();
   psStop();
+  psgStop();
   /* Backstop: every *Stop() above only releases the mic through its own
      micOn flag, so a state-tracking bug in any one of them (or a future
      game that forgets the pattern) could still leave window.coachMicLive
@@ -1632,7 +1633,8 @@ function gamesStopMic(){
        document.getElementById('rr-body') || document.getElementById('sr-body') ||
        document.getElementById('fz-body') || document.getElementById('rn-body') ||
        document.getElementById('nr-body') || document.getElementById('cd-body') ||
-       document.getElementById('ntr-body') || document.getElementById('ps-body'))){
+       document.getElementById('ntr-body') || document.getElementById('ps-body') ||
+       document.getElementById('psg-body'))){
     gamesRenderHub(p);
   }
 }
@@ -1684,6 +1686,9 @@ const GAME_ICO = {
   riffid:     gIco('<path d="M4 14v-4M8 17v-10M12 19v-14M16 17v-10M20 14v-4"/>'),
   // Pentatonic Simon — a 4-pad call-and-response grid.
   simon:      gIco('<rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/>'),
+  // Pentatonic Simon Guitar Hero — the same pad grid, but the fourth pad is
+  // a waveform: this one answers back through the mic.
+  simonguitar: gIco('<rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><path d="M13 17.5v3M16 14.5v9M19 16.5v5M21.8 18.5v1"/>'),
 };
 
 const GAMES_META = [
@@ -1692,6 +1697,7 @@ const GAMES_META = [
   { key:'radar',    cls:'gc-radar',    ico:GAME_ICO.radar,      titleKey:'games.radar.title', guitar:true,  descKey:'games.radar.desc' },
   { key:'roulette', cls:'gc-roulette', ico:GAME_ICO.roulette,   titleKey:'games.rr.title',    guitar:true,  descKey:'games.rr.desc' },
   { key:'noterunner', cls:'gc-noterun', ico:GAME_ICO.noterunner, titleKey:'games.nr.title',   guitar:true,  descKey:'games.nr.desc' },
+  { key:'simonguitar', cls:'gc-simonguitar', ico:GAME_ICO.simonguitar, titleKey:'games.psg.title', guitar:true, descKey:'games.psg.desc' },
   { key:'runner',   cls:'gc-runner',   ico:GAME_ICO.runner,     titleKey:'games.riff.title',  guitar:false, descKey:'games.riff.desc' },
   { key:'blitz',    cls:'gc-blitz',    ico:GAME_ICO.blitz,      titleKey:'games.cb.title',    guitar:false, descKey:'games.cb.desc' },
   { key:'fretzap',  cls:'gc-fretzap',  ico:GAME_ICO.fretzap,    titleKey:'games.fz.title',    guitar:false, descKey:'games.fz.desc' },
@@ -1852,8 +1858,11 @@ function gamesRenderHub(p){
   let psBest = 0;
   try { psBest = parseInt(sessionStorage.getItem('psBest'), 10) || 0; } catch(e){}
   const psChip = gamesBestChip(saved.ps && saved.ps.best, psBest);
+  let psgBest = 0;
+  try { psgBest = parseInt(sessionStorage.getItem('psgBest'), 10) || 0; } catch(e){}
+  const psgChip = gamesBestChip(saved.psg && saved.psg.best, psgBest);
   /* Per-game best chips, keyed by game. */
-  const chips = { fret:fretChip, cc:ccChip, blitz:cbChip, fretzap:fzChip, strum:shChip, radar:srChip, roulette:rrChip, runner:rnChip, noterunner:nrChip, detective:cdChip, riffid:ntrChip, simon:psChip };
+  const chips = { fret:fretChip, cc:ccChip, blitz:cbChip, fretzap:fzChip, strum:shChip, radar:srChip, roulette:rrChip, runner:rnChip, noterunner:nrChip, detective:cdChip, riffid:ntrChip, simon:psChip, simonguitar:psgChip };
   const card = g => `
        <button type="button" class="games-card ${g.cls}" onclick="gamesShow('${g.key}')">
          <span class="games-card-ico">${g.ico}</span>
@@ -1938,6 +1947,11 @@ function gamesShow(view){
   if (view === 'simon'){
     p.innerHTML = gamesHeadHtml(GAME_ICO.simon + ' ' + t('games.ps.title'), true) + `<div id="ps-body"></div>`;
     psSetup();
+    return;
+  }
+  if (view === 'simonguitar'){
+    p.innerHTML = gamesHeadHtml(GAME_ICO.simonguitar + ' ' + t('games.psg.title'), true) + `<div id="psg-body"></div>`;
+    psgSetup();
     return;
   }
 }
@@ -3230,6 +3244,322 @@ function psRenderDone(){
          <button type="button" class="coach-start" onclick="psStart()">&#x21BB; ${t('games.common.playAgain')}</button>
        </div>
      </div>`;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   PENTATONIC SIMON GUITAR HERO — the same growing-sequence memory game
+   as Pentatonic Simon above, with the guitar as the controller. Same six
+   notes (PS_NOTES — one octave of Am pentatonic Pattern 1 at fret 5), so
+   the two games are genuinely the same game and share their strings
+   where the wording is identical; the ONLY difference is that the answer
+   comes through the mic instead of through a tap.
+
+   Detection is fretLoop's, not nrLoop's: one pluck at a time, no onset
+   detector, no clock. The first frame over COACH_PITCH_GATE after silence
+   IS the pluck; readings wait out COACH_ATTACK_SKIP, are spaced ≥40ms so
+   the 3-reading consensus spans more than one analyser window, and a
+   spread under 0.6 semitones commits the median. There is no timer
+   anywhere — a student can take as long as they like on each note.
+
+   The pads are DISPLAY ONLY here (divs, not buttons): they name the note
+   and its string+fret so the pattern stays on screen, they light during
+   playback, and they go green/red as the mic judges. Two of the six pads
+   are A an octave apart (6th/5 and 4th/7), so judging is exact-midi —
+   an octave slip is a real miss and the done screen says so.
+
+   ⚠️ The reference notes play through the SPEAKERS while the mic is live.
+   Nothing is judged while `showing` is true, and when your turn opens the
+   loop waits for the room to fall back under the gate (needSilence) before
+   the first reading, so the last ringing demo note can't answer for you.
+   ════════════════════════════════════════════════════════════════════ */
+
+/* Fretboard home for each PS_NOTES entry — Pattern 1 rooted at fret 5.
+   Asserted against STRING_OPEN_MIDI at load so a future edit to PS_NOTES
+   can't silently leave the labels pointing at the wrong frets. */
+const PSG_POS = [
+  { string: 6, fret: 5 },   // A2 45
+  { string: 6, fret: 8 },   // C3 48
+  { string: 5, fret: 5 },   // D3 50
+  { string: 5, fret: 7 },   // E3 52
+  { string: 4, fret: 5 },   // G3 55
+  { string: 4, fret: 7 }    // A3 57
+];
+PSG_POS.forEach((p, i) => {
+  if (STRING_OPEN_MIDI[p.string] + p.fret !== PS_NOTES[i])
+    console.warn('PSG_POS[' + i + '] does not match PS_NOTES[' + i + ']');
+});
+const PSG_SHOW_MS = 750;   // a touch slower than Simon's 650 — you have to read the position, not just the colour
+
+let psg = null, psgRunning = false, psgRaf = null;
+
+function psgBody(){ return document.getElementById('psg-body'); }
+
+function psgStop(){
+  if (psgRaf){ cancelAnimationFrame(psgRaf); psgRaf = null; }
+  if (psg) (psg.timeouts || []).forEach(clearTimeout);
+  if (psgRunning){ psgRunning = false; coachMicOff(); }
+  psg = null;
+}
+
+function psgSetup(){
+  psgStop();
+  psg = { phase: 'setup', timeouts: [] };
+  psgRenderSetup();
+}
+
+/* One pad. `state` is '', 'lit', 'ok' or 'bad'. */
+function psgPadHtml(i, state){
+  const p = PSG_POS[i];
+  const pos = t('games.psg.padPos', { string: fretStringName(p.string), fret: p.fret });
+  return `<div class="psg-pad${state ? ' ' + state : ''}" id="psg-pad-${i}">` +
+         `<span class="psg-pad-note">${escHtml(coachNoteName(PS_NOTES[i]))}</span>` +
+         `<span class="psg-pad-pos">${escHtml(pos)}</span></div>`;
+}
+function psgPadsHtml(){
+  let pads = '';
+  for (let i = 0; i < PS_NOTES.length; i++) pads += psgPadHtml(i, '');
+  return `<div class="psg-pads">${pads}</div>`;
+}
+
+function psgRenderSetup(){
+  const body = psgBody();
+  if (!body || !psg) return;
+  let best = 0;
+  try { best = parseInt(sessionStorage.getItem('psgBest'), 10) || 0; } catch(e){}
+  body.innerHTML =
+    `<div class="coach-tip">${t('games.psg.tip')}</div>
+     <div class="psg-legend">${t('games.psg.legend')}</div>
+     ${psgPadsHtml()}
+     ${best ? `<div class="cb-setup-best">&#x1F3C6; ${t('games.common.bestTodayLabel')}: ${best}</div>` : ''}
+     <button type="button" class="coach-start" onclick="psgStart()">&#x25B6; ${t('games.psg.startButton')}</button>` +
+    coachFootHtml();
+}
+
+/* Also the "play again" path off the done screen: a finished run has released
+   the mic (psgFinish), so the next one has to come back through here to
+   re-acquire it — otherwise the pads render over a dead analyser and the game
+   sits on "Listening…" forever. Same trap fretSetLevel documents. */
+async function psgStart(){
+  if (psgRunning) return;
+  coachClose();                    // one mic owner at a time
+  ccStop();
+  psStop();                        // the tap-pad twin owns no mic, but its timers would keep firing
+  coachEvictTuner();
+  const body = psgBody();
+  if (!body) return;
+  body.innerHTML = `<div class="coach-tip">${t('games.psg.startingMic')}</div>`;
+  if (!coachStream && !(await coachAcquireMic())){
+    const b2 = psgBody();
+    if (b2) b2.innerHTML = `<div class="coach-note">${t('games.psg.micDenied')}</div>`;
+    return;
+  }
+  await coachEnsureRunning();
+  if (!psgBody()){ coachReleaseMicIfIdle(); return; }        // panel closed during the permission prompt
+  if (document.hidden){ coachMicOff(); gamesShow('hub'); return; }
+  stopAllDemoAudio();
+  psgRunning = true;
+  window.coachMicLive = true;      // stream may already be open from a prior owner
+  psg = { phase: 'play', timeouts: [], seq: [], round: 0, inputIdx: 0, showing: true,
+          readings: [], attackT: 0, lastPitchT: 0, needSilence: true, armAt: 0,
+          heard: '', missPad: -1, prevBest: 0 };
+  psgBody().innerHTML =
+    `<div class="cb-hud"><span class="cb-score" id="psg-round">${t('games.ps.round', { n: 0 })}</span></div>
+     <div class="psg-dots" id="psg-dots"></div>
+     ${psgPadsHtml()}
+     <div class="psg-status" id="psg-status">${t('games.ps.watch')}</div>` +
+    coachFootHtml();
+  psgGrow();
+  if (psgRaf) cancelAnimationFrame(psgRaf);
+  psgLoop();
+}
+
+function psgMark(i, state){
+  const pad = document.getElementById('psg-pad-' + i);
+  if (!pad) return;
+  pad.classList.remove('lit', 'ok', 'bad');
+  if (state) pad.classList.add(state);
+}
+function psgClearMarks(){ for (let i = 0; i < PS_NOTES.length; i++) psgMark(i, ''); }
+
+function psgStatus(html){
+  const el = document.getElementById('psg-status');
+  if (el) el.innerHTML = html;
+}
+function psgListeningHtml(){
+  return `<span class="coach-live-dot"></span>${t('games.psg.yourTurn')}`;
+}
+
+function psgDots(){
+  const el = document.getElementById('psg-dots');
+  const s = psg;
+  if (!el || !s) return;
+  el.innerHTML = s.seq.map((_, i) => {
+    let c = 'fret-dot';
+    if (i < s.inputIdx) c += ' hit';
+    else if (i === s.inputIdx && !s.showing) c += ' cur';
+    return `<span class="${c}"></span>`;
+  }).join('');
+}
+
+/* One more note on the end, then play the whole thing back. */
+function psgGrow(){
+  const s = psg;
+  if (!s || s.phase !== 'play') return;
+  s.seq.push(Math.floor(Math.random() * PS_NOTES.length));
+  s.showing = true; s.inputIdx = 0; s.readings = []; s.attackT = 0;
+  psgClearMarks();
+  psgDots();
+  psgStatus(t('games.ps.watch'));
+  s.seq.forEach((padIdx, i) => {
+    s.timeouts.push(setTimeout(() => {
+      if (psg !== s || s.phase !== 'play') return;
+      psgMark(padIdx, 'lit');
+      if (typeof playNote === 'function') playNote(PS_NOTES[padIdx]);
+      s.timeouts.push(setTimeout(() => { if (psg === s) psgMark(padIdx, ''); }, PSG_SHOW_MS * 0.6));
+    }, i * PSG_SHOW_MS));
+  });
+  /* Hand over. needSilence + armAt keep the loop deaf until the last demo
+     note has decayed, so the speakers can't answer the prompt. */
+  s.timeouts.push(setTimeout(() => {
+    if (psg !== s || s.phase !== 'play') return;
+    s.showing = false;
+    s.needSilence = true;
+    s.readings = []; s.attackT = 0;
+    s.armAt = performance.now() + 250;
+    psgClearMarks();
+    psgDots();
+    psgStatus(psgListeningHtml());
+  }, s.seq.length * PSG_SHOW_MS + 300));
+}
+
+function psgLoop(){
+  if (!psgRunning) return;
+  // Analyser gone (another feature took the mic) or panel closed under us:
+  // stop cleanly instead of leaving a deaf "Listening…" UI running.
+  if (!coachAnalyser || !psgBody()){ psgStop(); return; }
+  const s = psg;
+  const now = performance.now();
+  if (s && s.phase === 'play' && !s.showing){
+    const rms = coachReadFrame();
+    const buf = coachFrameBuf;
+    /* One pluck = one answer: after judging, wait for the note to decay
+       below the gate (or 1.8s, whichever comes first) before listening again. */
+    if (s.needSilence && (rms < COACH_PITCH_GATE * 0.7 || now > s.armAt + 1800)) s.needSilence = false;
+    if (!s.needSilence && now >= s.armAt && rms > COACH_PITCH_GATE){
+      if (!s.attackT) s.attackT = now;
+      if (now - s.attackT >= COACH_ATTACK_SKIP && now - (s.lastPitchT || 0) >= 40){
+        s.lastPitchT = now;
+        const f = coachDetectPitch(buf, coachCtx.sampleRate);
+        if (f > 0){
+          s.readings.push(69 + 12 * Math.log2(f / 440));
+          if (s.readings.length > 5) s.readings.shift();
+          if (s.readings.length >= 3){
+            const r = s.readings;
+            if (Math.max.apply(null, r) - Math.min.apply(null, r) < 0.6) psgJudge(Math.round(tunerMedian(r)));
+          }
+        }
+      }
+    } else if (rms < COACH_PITCH_GATE * 0.5){
+      s.readings = [];
+      s.attackT = 0;    // note died — the next gate crossing is a new pluck
+    }
+  }
+  // Re-arm only while the run is live: psgJudge can end it mid-frame, and
+  // re-arming unconditionally would overwrite the handle psgFinish just cleared.
+  if (psgRunning) psgRaf = requestAnimationFrame(psgLoop);
+}
+
+function psgJudge(midi){
+  const s = psg;
+  if (!s || s.phase !== 'play' || s.showing) return;
+  s.readings = [];
+  s.attackT = 0;
+  s.needSilence = true;
+  s.armAt = performance.now() + 450;
+  const padIdx = s.seq[s.inputIdx];
+  if (midi !== PS_NOTES[padIdx]){
+    s.heard = coachNoteName(midi);
+    s.missPad = padIdx;
+    psgMark(padIdx, 'bad');
+    psgFinish();
+    return;
+  }
+  psgMark(padIdx, 'ok');
+  s.timeouts.push(setTimeout(() => { if (psg === s && s.phase === 'play') psgMark(padIdx, ''); }, 360));
+  s.inputIdx++;
+  psgDots();
+  if (s.inputIdx < s.seq.length) return;
+  /* Sequence cleared — freeze input (showing) so a ringing last note can't
+     be read as the first note of the next round, then grow. */
+  s.round++;
+  s.showing = true;
+  const roundEl = document.getElementById('psg-round');
+  if (roundEl) roundEl.textContent = t('games.ps.round', { n: s.round });
+  psgStatus(t('games.ps.nice'));
+  s.timeouts.push(setTimeout(() => { if (psg === s && s.phase === 'play') psgGrow(); }, 1200));
+}
+
+/* Run over → save, release the mic, render the done screen. The mic-off
+   matters: psgLoop re-arms every frame while psgRunning is true and
+   #psg-body exists — and the done screen renders INTO #psg-body — so
+   without it the mic stays live, window.coachMicLive stays true, and that
+   silently mutes the metronome and demo audio site-wide. Unlike psgStop
+   this KEEPS psg: the done screen renders from it. */
+function psgFinish(){
+  const s = psg;
+  if (!s || s.phase !== 'play') return;
+  s.phase = 'done';
+  s.timeouts.forEach(clearTimeout);
+  s.timeouts = [];
+  if (psgRaf){ cancelAnimationFrame(psgRaf); psgRaf = null; }
+  psgRunning = false;          // clear before coachMicOff so coachReleaseMicIfIdle agrees
+  coachMicOff();
+  try {
+    s.prevBest = parseInt(sessionStorage.getItem('psgBest'), 10) || 0;
+    if (s.round > s.prevBest) sessionStorage.setItem('psgBest', String(s.round));
+  } catch(e){}
+  /* Cross-session best → the student's progress doc. Skipped in dev bypass
+     (Firestore rejects that uid; the session best above still counts). */
+  if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
+    const old = (games.psg && games.psg.best) || 0;
+    const isNewBest = s.round > old;
+    if (isNewBest) games.psg = { best: s.round, at: new Date().toISOString().slice(0, 10) };
+    awardArcadeXp(isNewBest);
+  }
+  psgRenderDone();
+}
+
+function psgRenderDone(){
+  const body = psgBody();
+  const s = psg;
+  if (!body || !s) return;
+  let bestLine = '';
+  if (s.prevBest > 0 && s.round > s.prevBest){
+    bestLine = `<div class="cb-newbest">&#x1F3C6; ${t('games.common.newBest', { value: s.prevBest })}</div>`;
+  } else if (s.prevBest > 0){
+    bestLine = `<div class="coach-tip">${t('games.common.bestTodayLabel')}: ${s.prevBest}.</div>`;
+  }
+  let missLine = '';
+  if (s.missPad >= 0){
+    const p = PSG_POS[s.missPad];
+    missLine = `<div class="coach-note">${escHtml(t('games.psg.wrongNote', {
+      heard: s.heard,
+      want: coachNoteName(PS_NOTES[s.missPad]),
+      string: fretStringName(p.string),
+      fret: p.fret
+    }))}</div>`;
+  }
+  body.innerHTML =
+    `<div class="coach-report">
+       <div class="cb-done-score">${s.round}</div>
+       <div class="coach-overall">${GAME_ICO.simonguitar} ${t('games.ps.roundsCleared', { n: s.round })}</div>
+       ${missLine}
+       ${bestLine}
+       <div class="coach-tip">${t('games.psg.tuneTip')}</div>
+       <div class="coach-actions">
+         <button type="button" class="coach-start" onclick="psgStart()">&#x21BB; ${t('games.common.playAgain')}</button>
+       </div>
+     </div>` + coachFootHtml();
 }
 
 /* ════════════════════════════════════════════════════════════════════

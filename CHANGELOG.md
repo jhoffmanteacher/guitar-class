@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-31 — New game: Pentatonic Simon Guitar Hero
+
+### Added
+
+- **A new game in the 🎸 guitar section of the arcade: Pentatonic Simon Guitar
+  Hero.** It's the same growing-sequence memory game as Pentatonic Simon, but
+  you answer on your real guitar instead of tapping — the mic listens for every
+  note. Six positions, one octave of pentatonic Pattern 1 at fret 5. Each pad
+  names the note along with its string and fret, so the pattern stays on screen
+  while you play. Every clean round adds one more note, and there's no timer,
+  so you can take as long as you want on each one. One wrong note ends the run,
+  and the score screen tells you what it heard and what it was waiting for.
+
 ## 2026-07-31 — Video links now skip the intro and stop before the outro
 
 ### Improved
@@ -34,7 +47,6 @@ see `WORKFLOW.md` and the git commit log.
   climb at fret 12, then connect the two in a single unbroken run.
 
 English and Spanish throughout.
-
 ## 2026-07-31 — More descriptive Challenge titles across every module
 
 ### Improved

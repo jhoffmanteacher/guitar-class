@@ -1320,6 +1320,33 @@
       es: 'Observa y escucha…' },
     'games.ps.yourTurn': { en: 'Your turn — repeat it back.',
       es: 'Tu turno — repítela.' },
+    /* Pentatonic Simon Guitar Hero. It is the same game as games.ps.* with the
+       guitar as the controller, so it deliberately reuses games.ps.round /
+       .watch / .nice / .roundsCleared rather than duplicating them — only the
+       strings that actually differ (you PLAY it back, and the mic can mishear)
+       live here. */
+    'games.psg.desc': { en: 'The same growing sequence — but you answer on your real guitar. The mic listens for every note of Pattern 1.',
+      es: 'La misma secuencia que va creciendo — pero respondes en tu guitarra de verdad. El micrófono escucha cada nota del Patrón 1.' },
+    'games.psg.legend': { en: 'Your six notes — Pattern 1 starting at fret 5.',
+      es: 'Tus seis notas — el Patrón 1 empezando en el traste 5.' },
+    'games.psg.micDenied': { en: 'Mic access denied — check browser permissions, then close and reopen the game.',
+      es: 'Acceso al micrófono denegado — revisa los permisos del navegador, luego cierra y vuelve a abrir el juego.' },
+    'games.psg.padPos': { en: '{string} · fret {fret}',
+      es: 'cuerda {string} · traste {fret}' },
+    'games.psg.startButton': { en: 'Start — guitar in hand',
+      es: 'Empezar — guitarra en mano' },
+    'games.psg.startingMic': { en: 'Starting the mic…',
+      es: 'Encendiendo el micrófono…' },
+    'games.psg.tip': { en: 'Six positions, one octave of pentatonic Pattern 1 at fret 5. Watch and listen to the sequence, then play it back on your guitar in the same order — the mic checks each note. Each clean round adds one more note. No timer, so take your time; one wrong note ends the run.',
+      es: 'Seis posiciones, una octava del Patrón pentatónico 1 en el traste 5. Observa y escucha la secuencia, y luego tócala en tu guitarra en el mismo orden — el micrófono revisa cada nota. Cada ronda limpia agrega una nota más. No hay cronómetro, así que tómate tu tiempo; una nota equivocada termina la partida.' },
+    'games.psg.title': { en: 'Pentatonic Simon Guitar Hero',
+      es: 'Simón pentatónico: héroe de la guitarra' },
+    'games.psg.tuneTip': { en: 'The mic hears pitch, not intent — if it keeps mishearing you, tune up and play a little closer to the mic.',
+      es: 'El micrófono escucha la afinación, no la intención — si sigue oyéndote mal, afina y toca un poco más cerca del micrófono.' },
+    'games.psg.wrongNote': { en: 'I heard {heard}. The next note was {want} — {string} string, fret {fret}.',
+      es: 'Escuché {heard}. La siguiente nota era {want} — cuerda {string}, traste {fret}.' },
+    'games.psg.yourTurn': { en: 'Your turn — play it back.',
+      es: 'Tu turno — tócala.' },
     'games.radar.advice.one': { en: 'Say the pattern out loud while you strum — it really helps.',
       es: 'Di el patrón en voz alta mientras rasgueas — ayuda muchísimo.' },
     'games.radar.advice.three': { en: 'Level up: try it 5 BPM faster, or switch chords each bar on your own.',

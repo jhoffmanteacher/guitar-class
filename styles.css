@@ -1775,6 +1775,29 @@ body.games-open{overflow:hidden}
 .ps-pad-key{position:absolute;top:6px;left:8px;font-size:0.75rem;font-weight:600;color:var(--text3)}
 .ps-pad.lit .ps-pad-key{color:var(--bg)}
 
+/* ── Pentatonic Simon Guitar Hero — same grid, but the pads are DISPLAY
+   ONLY (divs, no hover/press states): they name the note and its
+   string+fret, light purple while the sequence plays, then go green/red
+   as the mic judges what you played. .psg-dots reuses .fret-dot for the
+   dot itself and only adds wrapping — a long run makes more dots than
+   Note Hunt's fixed ten. ── */
+.games-card.gc-simonguitar::before{background:var(--amber-text)}
+.psg-legend{font-size:0.8125rem;color:var(--text2);text-align:center;margin-top:10px}
+.psg-pads{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+/* aspect-ratio keeps the Simon square on a phone; the cap stops six of them
+   filling half a desktop panel — they're read, not tapped. */
+.psg-pad{position:relative;aspect-ratio:1;max-height:132px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:4px;text-align:center;border-radius:14px;border:1px solid var(--border2);background:var(--bg2);transition:background .1s,border-color .1s}
+.psg-pad-note{font-size:1.5rem;font-weight:800;line-height:1;color:var(--text)}
+.psg-pad-pos{font-size:0.625rem;font-weight:600;line-height:1.15;color:var(--text3)}
+.psg-pad.lit{background:var(--purple-accent);border-color:var(--purple-accent)}
+.psg-pad.lit .psg-pad-note,.psg-pad.lit .psg-pad-pos{color:var(--bg)}
+.psg-pad.ok{background:var(--green-bg);border-color:var(--green-text)}
+.psg-pad.ok .psg-pad-note{color:var(--green-text)}
+.psg-pad.bad{background:var(--red-bg);border-color:var(--red-text)}
+.psg-pad.bad .psg-pad-note{color:var(--red-text)}
+.psg-dots{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;justify-content:center}
+.psg-status{font-size:0.9375rem;color:var(--text2);text-align:center;min-height:1.4em}
+
 /* ── Race lane: the little guitar running for the finish flag ──
    #nr-runner carries the JS translateX (distance = notes landed ÷ notes
    in the level); .nr-runner-art inside it carries every CSS animation, so
