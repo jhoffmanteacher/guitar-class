@@ -12,6 +12,9 @@ see `WORKFLOW.md` and the git commit log.
 - **The "Take me to the deck" button in the practice check-off popup now
   actually takes you there.** It used to leave you on the checklist tab with
   nothing visibly happening, so the deck was easy to miss.
+- **Each shuffle deck now shows which string it's for in bold, larger type**
+  ("The A string — frets 0–12"), so back-to-back decks for different strings
+  are easier to tell apart at a glance.
 
 ## 2026-07-31 — Note Hunt and Note Runner ignore the pick scrape
 
