@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-31 — Fixed "Take me to the deck" not switching tabs
+
+### Fixed
+
+- **The "Take me to the deck" button in the practice check-off popup now
+  actually takes you there.** It used to leave you on the checklist tab with
+  nothing visibly happening, so the deck was easy to miss.
+
 ## 2026-07-31 — Note Hunt and Note Runner ignore the pick scrape
 
 ### Fixed

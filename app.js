@@ -4414,9 +4414,18 @@ function drillGatePractice(sid, wid){
   closeDrillGate();
   const hit = skillDrillStep(sid);
   const useWid = (hit && hit.w.id) || wid;
-  if(hit) switchTabById(useWid, hit.station, true);
+  /* switchTabById resolves `${wid}-${tab}`, and the station panels are
+     `${wid}-station-b` / `-station-c`. Passing the bare letter looked up an
+     id that does not exist, so the tab never switched and the scroll below
+     silently targeted a display:none element. */
+  if(hit) switchTabById(useWid, 'station-' + hit.station, true);
   const box = document.querySelector(`.week-panel[data-id="${useWid}"] .sdr[data-skill="${CSS.escape(sid)}"]`);
-  if(!box) return;
+  if(!box){
+    /* Never dead-end the student: land them on the station at least. */
+    const stn = hit && document.getElementById(`${useWid}-station-${hit.station}`);
+    if(stn) stn.scrollIntoView({ block:'start', behavior:'smooth' });
+    return;
+  }
   const li = box.closest('li.step');
   if(li && li.classList.contains('collapsed')){
     const head = li.querySelector('.step-head');
