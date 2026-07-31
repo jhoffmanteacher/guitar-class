@@ -5629,12 +5629,20 @@ function foldWordStart(hay, term){
 }
 /* Every entry carries `hay` (everything worth matching, folded) and `title`
    (the name-ish part, for ranking). `text` stays the display string. */
+// A query typed in either language has to match regardless of which
+// language the UI is currently showing, so hay always folds in BOTH the
+// English and Spanish variant of a field — not just the one tf() would
+// display. bothLangs() is the hay-only counterpart to tf()'s display pick.
+function bothLangs(obj, field){
+  if(!obj) return '';
+  return [obj[field], obj[field + '_es']].filter(Boolean).join(' ');
+}
 function searchEntry(e){
   const mod = (typeof MODULE_MANIFEST !== 'undefined' && MODULE_MANIFEST.find(m => m.num === e.moduleNum)) || null;
-  const modName = mod ? (tf(mod, 'name') || mod.name || '') : '';
+  const modName = mod ? bothLangs(mod, 'name') : '';
   e.title = e.title || '';
   e.fTitle = searchFold(e.title);
-  e.hay = searchFold([e.text, e.title, e.label, e.secTitle, modName, 'module ' + e.moduleNum, 'módulo ' + e.moduleNum].filter(Boolean).join(' '));
+  e.hay = searchFold([e.text, e.hayExtra, e.title, e.label, e.secTitle, modName, 'module ' + e.moduleNum, 'módulo ' + e.moduleNum].filter(Boolean).join(' '));
   return e;
 }
 
@@ -5646,11 +5654,13 @@ async function buildSearchIndex(){
     if(w.comingSoon) return;
     // tf() picks the _es twin when the student is in Spanish mode (falling
     // back to English where no twin exists yet) — without it, Spanish-mode
-    // search only ever matched English-only indexed text.
-    if(w.unit) ix.push(searchEntry({ kind: 'set', moduleNum: w.moduleNum, wid: w.id, label: w.label, title: [w.label, tf(w, 'unit')].filter(Boolean).join(' '), text: tf(w, 'unit') }));
+    // search only ever matched English-only indexed text. hayExtra carries
+    // the OTHER language's raw text so a query matches either language
+    // regardless of which one tf() is currently displaying.
+    if(w.unit) ix.push(searchEntry({ kind: 'set', moduleNum: w.moduleNum, wid: w.id, label: w.label, title: [w.label, tf(w, 'unit')].filter(Boolean).join(' '), text: tf(w, 'unit'), hayExtra: bothLangs(w, 'unit') }));
     (w.skills || []).forEach(sk => {
       const num = (sk.id.match(/-s(\d+)$/) || [])[1];
-      ix.push(searchEntry({ kind: 'skill', moduleNum: w.moduleNum, wid: w.id, label: w.label, title: tf(sk, 'text'), text: tf(sk, 'text'), skillNum: num ? Number(num) : null }));
+      ix.push(searchEntry({ kind: 'skill', moduleNum: w.moduleNum, wid: w.id, label: w.label, title: tf(sk, 'text'), text: tf(sk, 'text'), skillNum: num ? Number(num) : null, hayExtra: bothLangs(sk, 'text') }));
     });
     ['b', 'c'].forEach(st => {
       const stn = w.stations && w.stations[st];
@@ -5661,7 +5671,8 @@ async function buildSearchIndex(){
       const sections = rawSections.filter(sec => !isTuningWarmupSection(sec, w.moduleNum));
       sections.forEach((sec, secIdx) => (sec.steps || []).forEach((step, stepIdx) => {
         const text = stripTags(tf(step, 'text') || '');
-        if(text) ix.push(searchEntry({ kind: 'step', moduleNum: w.moduleNum, wid: w.id, label: w.label, station: st, secIdx, stepIdx, secTitle: sec.title || '', title: stripTags(tf(step, 'label') || '') || (sec.title || ''), text }));
+        const hayExtra = [stripTags(step.text_es || ''), stripTags(step.label_es || ''), sec.title_es || ''].filter(Boolean).join(' ');
+        if(text) ix.push(searchEntry({ kind: 'step', moduleNum: w.moduleNum, wid: w.id, label: w.label, station: st, secIdx, stepIdx, secTitle: sec.title || '', title: stripTags(tf(step, 'label') || '') || (sec.title || ''), text, hayExtra }));
       }));
     });
   });
@@ -5690,7 +5701,8 @@ async function buildSearchIndex(){
       chords.forEach(c => { if(!existing.chords.includes(c)) existing.chords.push(c); });
       return;
     }
-    const entry = searchEntry({ kind: 'song', moduleNum, wid, title: song.name, text: song.name + (metaTextShown ? ' ' + metaTextShown : ''), chords: [...chords] });
+    const hayExtra = [bothLangs(song, 'meta'), bothLangs(song, 'name')].filter(Boolean).join(' ');
+    const entry = searchEntry({ kind: 'song', moduleNum, wid, title: song.name, text: song.name + (metaTextShown ? ' ' + metaTextShown : ''), chords: [...chords], hayExtra });
     songSeen.set(song.name, entry);
     ix.push(entry);
   };
