@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-31 — A second "Level up" on every Song Journey pentatonic solo
+
+### Added
+
+- **Every Song Journey's Pentatonic Solo layer now has a second "Level up" — the
+  whole box.** Layer 4 still starts you on three notes; the new fold hands you
+  the full minor-pentatonic Pattern 1 box in TAB, at that song's own position —
+  open position for "Seven Nation Army," 5th fret for "All Along the
+  Watchtower," "Let It Be," and "the cure," 10th fret for "Luna" — so a student
+  who is ready can use the whole shape without leaving the page.
+- **"Sweet Child O' Mine" gets the parallel version.** Both of its boxes were
+  already printed in that layer, so instead of repeating them its second Level
+  up is the two-octave climb: run the open box one note at a time, make the same
+  climb at fret 12, then connect the two in a single unbroken run.
+
+English and Spanish throughout.
+
 ## 2026-07-31 — More descriptive Challenge titles across every module
 
 ### Improved
