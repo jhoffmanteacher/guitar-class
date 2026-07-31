@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-31 — Note Hunt and Note Runner ignore the pick scrape
+
+### Fixed
+
+- **Note Hunt and Note Runner's Wait Mode now ignore the scratch of the pick
+  and listen only to the note itself**, so a scrape before the pluck can't be
+  mistaken for your answer.
+
+### Behind the scenes
+
+- Cleaned up a couple of small inconsistencies (an HTML tag and an overly
+  long Spanish label) found in a routine audit.
+
 ## 2026-07-31 — Fixed Listening Coach and Tuner going silent on Mac
 
 ### Fixed

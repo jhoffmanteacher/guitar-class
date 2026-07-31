@@ -1348,7 +1348,7 @@ function fretNextPrompt(){
   } while (g.prompt && p.m === g.prompt.m && p.s === g.prompt.s && ++guard < 20);
   p.note = coachNoteName(p.m);
   g.prompt = p;
-  g.tries = 0; g.hint = ''; g.flash = null; g.readings = [];
+  g.tries = 0; g.hint = ''; g.flash = null; g.readings = []; g.attackT = 0;
   fretRender();
 }
 
@@ -1373,22 +1373,29 @@ function fretLoop(){
        SAME window (and can sit inside the pick attack). >=40ms apart makes
        the 3-reading consensus span more than one window at any refresh
        rate — same spacing nrLoop uses. */
-    if (!g.needSilence && now >= g.cooldownUntil && rms > COACH_PITCH_GATE &&
-        now - (g.lastPitchT || 0) >= 40){
-      g.lastPitchT = now;
-      const f = coachDetectPitch(buf, coachCtx.sampleRate);
-      if (f > 0){
-        g.readings.push(69 + 12 * Math.log2(f / 440));
-        if (g.readings.length > 5) g.readings.shift();
-        if (g.readings.length >= 3){
-          const r = g.readings;
-          if (Math.max.apply(null, r) - Math.min.apply(null, r) < 0.6){
-            fretJudge(Math.round(tunerMedian(r)));
+    if (!g.needSilence && now >= g.cooldownUntil && rms > COACH_PITCH_GATE){
+      /* No onset detector in this loop — the first frame over the gate after
+         silence IS the pluck. Readings wait out COACH_ATTACK_SKIP from there,
+         same guard the Coach and Note Runner use from their onset timestamp. */
+      if (!g.attackT) g.attackT = now;
+      if (now - g.attackT >= COACH_ATTACK_SKIP &&
+          now - (g.lastPitchT || 0) >= 40){
+        g.lastPitchT = now;
+        const f = coachDetectPitch(buf, coachCtx.sampleRate);
+        if (f > 0){
+          g.readings.push(69 + 12 * Math.log2(f / 440));
+          if (g.readings.length > 5) g.readings.shift();
+          if (g.readings.length >= 3){
+            const r = g.readings;
+            if (Math.max.apply(null, r) - Math.min.apply(null, r) < 0.6){
+              fretJudge(Math.round(tunerMedian(r)));
+            }
           }
         }
       }
-    } else if (rms < COACH_PITCH_GATE * 0.5 && g.readings.length){
-      g.readings = [];      // pluck decayed between readings — start fresh
+    } else if (rms < COACH_PITCH_GATE * 0.5){
+      g.readings = [];
+      g.attackT = 0;    // note died — next gate crossing is a new pluck
     }
   }
   // Re-arm only while the round is live: fretJudge/fretSkip can end it
@@ -1430,6 +1437,7 @@ function fretFinish(g){
 function fretJudge(midi){
   const g = fretGame, p = g.prompt;
   g.readings = [];
+  g.attackT = 0;
   g.needSilence = true;
   g.cooldownUntil = performance.now() + 700;
   g.tries++;
@@ -1466,6 +1474,7 @@ function fretSkip(){
   g.results.push(false);
   g.hint = t('games.fret.skipReveal', { fret: p.f, note: p.note, string: fretStringName(p.s) });
   g.cooldownUntil = performance.now() + 1600;
+  g.attackT = 0;
   if (g.results.length >= FRET_ROUND){ fretFinish(g); return; }
   fretRender();
   setTimeout(() => { if (fretGame === g && g.phase === 'play') fretNextPrompt(); }, 1600);
@@ -5734,22 +5743,29 @@ function rnwLoop(){
      SAME window (and can sit inside the pick attack). >=40ms apart makes
      the 3-reading consensus span more than one window at any refresh
      rate — same spacing nrLoop uses. */
-  if (!w.needSilence && now >= w.cooldownUntil && rms > COACH_PITCH_GATE &&
-      now - (w.lastPitchT || 0) >= 40){
-    w.lastPitchT = now;
-    const f = coachDetectPitch(buf, coachCtx.sampleRate);
-    if (f > 0){
-      w.readings.push(69 + 12 * Math.log2(f / 440));
-      if (w.readings.length > 5) w.readings.shift();
-      if (w.readings.length >= 3){
-        const r = w.readings;
-        if (Math.max.apply(null, r) - Math.min.apply(null, r) < 0.6){
-          rnwJudge(Math.round(tunerMedian(r)));
+  if (!w.needSilence && now >= w.cooldownUntil && rms > COACH_PITCH_GATE){
+    /* No onset detector in this loop — the first frame over the gate after
+       silence IS the pluck. Readings wait out COACH_ATTACK_SKIP from there,
+       same guard the Coach and Note Runner use from their onset timestamp. */
+    if (!w.attackT) w.attackT = now;
+    if (now - w.attackT >= COACH_ATTACK_SKIP &&
+        now - (w.lastPitchT || 0) >= 40){
+      w.lastPitchT = now;
+      const f = coachDetectPitch(buf, coachCtx.sampleRate);
+      if (f > 0){
+        w.readings.push(69 + 12 * Math.log2(f / 440));
+        if (w.readings.length > 5) w.readings.shift();
+        if (w.readings.length >= 3){
+          const r = w.readings;
+          if (Math.max.apply(null, r) - Math.min.apply(null, r) < 0.6){
+            rnwJudge(Math.round(tunerMedian(r)));
+          }
         }
       }
     }
-  } else if (rms < COACH_PITCH_GATE * 0.5 && w.readings.length){
-    w.readings = [];   // pluck decayed mid-reading — start fresh
+  } else if (rms < COACH_PITCH_GATE * 0.5){
+    w.readings = [];
+    w.attackT = 0;    // note died — next gate crossing is a new pluck
   }
   rnRaf = requestAnimationFrame(rnwLoop);
 }
@@ -5757,6 +5773,7 @@ function rnwLoop(){
 function rnwJudge(midi){
   const w = rn.wait, n = w.notes[w.cur];
   w.readings = [];
+  w.attackT = 0;
   w.needSilence = true;
   w.cooldownUntil = performance.now() + 350;
   w.tries++;
@@ -5804,6 +5821,7 @@ function rnwAdvance(){
   w.cur++;
   w.tries = 0;
   w.readings = [];
+  w.attackT = 0;
   if (w.cur >= w.notes.length){ rnwFinish(); return; }
   /* Update the target readout + slide the lane; don't re-render the whole
      panel so the mic loop and lane keep running smoothly. */
