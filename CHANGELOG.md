@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-31 — More descriptive Challenge titles across every module
+
+### Improved
+
+- **Challenge titles across all 12 modules now say what the card is actually
+  about**, not just "Challenge 2." For example, "Play the Tune" now reads
+  "'Happy Birthday' Full Melody at 60 BPM," and "Full Progression" now reads
+  "Eight-Note Pattern Over 4 Chords" — so you can tell what you're about to
+  work on before you open the card.
+
 ## 2026-07-31 — Fixed "Take me to the deck" not switching tabs
 
 ### Fixed

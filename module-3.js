@@ -543,7 +543,7 @@ SETS.push(
             title_es: 'Cambia acordes de potencia en el tiempo 1 a 60 BPM',
             steps: [
           {
-            label: 'Challenge 1 — Loop in Time', label_es: 'Reto 1 — Vuelta a tiempo',
+            label: 'Challenge 1 — "Watchtower" Loop in Time', label_es: 'Reto 1 — Vuelta de "Watchtower" a tiempo',
             text: '<ul><li>Play the "Watchtower" loop (A5–G5–F5–G5) at 60 BPM, each chord one bar (4 beats), four times through.</li></ul>You\'ve got it when: every chord change lands on beat 1, with no stops.',
             text_es: '<ul><li>Toca la vuelta de "Watchtower" (A5–G5–F5–G5) a 60 BPM, cada acorde un compás (4 tiempos), cuatro veces seguidas.</li></ul>Lo tienes cuando: cada cambio de acorde cae en el tiempo 1, sin detenerte.',
             hint: 'If you miss beat 1, keep going — don\'t stop. Staying in time matters more than the perfect change right now.',

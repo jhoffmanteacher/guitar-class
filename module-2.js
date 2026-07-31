@@ -607,7 +607,7 @@ SETS.push(
             title_es: 'Presiona notas limpias sin zumbido',
             steps: [
           {
-            label: 'Challenge 1 — Finger Workout', label_es: 'Reto 1 — Ejercicio de dedos',
+            label: 'Challenge 1 — Frets 1–5 on Low E & A Strings', label_es: 'Reto 1 — Trastes 1–5 en cuerdas Mi grave y La',
             text: '<ol><li>Play frets 1–5 on the low E string, one finger per fret, then do the same on the A string.</li><li>Keep your thumb behind the neck.</li></ol>You\'ve got it when: every note rings clean with no buzz.<span class="step-figure dual"><img src="img/m2-thumb-hand-position.jpg" alt="Hand-drawn diagram of a fretting hand: thumb positioned directly behind the index finger on the back of the neck, fingers arched over the frets, wrist straight."><img src="img/m2-arched-fingers-front.jpg" alt="Close-up front view of four fingers arched over the fretboard, each fingertip pressing down just behind a fret."></span>',
             text_es: '<ol><li>Toca los trastes 1–5 en la cuerda Mi grave, un dedo por traste, y luego lo mismo en la cuerda La.</li><li>Mantén el pulgar detrás del mástil.</li></ol>Lo tienes cuando: cada nota suena limpia sin zumbido.<span class="step-figure dual"><img src="img/m2-thumb-hand-position.jpg" alt="Dibujo de una mano trasteando: el pulgar colocado justo detrás del dedo índice en la parte trasera del mástil, los dedos arqueados sobre los trastes, la muñeca recta."><img src="img/m2-arched-fingers-front.jpg" alt="Vista frontal de cerca de cuatro dedos arqueados sobre el diapasón, cada yema presionando justo detrás de un traste."></span>',
             hint: 'Go as slow as you need. Every note should ring cleanly with no buzz.',
@@ -686,7 +686,7 @@ SETS.push(
             }
           },
           {
-            label: 'Challenge 2 — Play the Tune', label_es: 'Reto 2 — Toca la melodía',
+            label: 'Challenge 2 — "Happy Birthday" Full Melody at 60 BPM', label_es: 'Reto 2 — "Happy Birthday" melodía completa a 60 BPM',
             text: 'Using the TAB:<ul><li>Play "Happy Birthday" on the E & A strings at 60 BPM, one note per beat.</li></ul>You\'ve got it when: the whole melody start to finish, in time, no buzz. Click any note name to hear how it should sound.',
             text_es: 'Usando el TAB:<ul><li>Toca "Happy Birthday" en las cuerdas Mi y La a 60 BPM, una nota por pulso.</li></ul>Lo tienes cuando: la melodía completa de principio a fin, a tiempo, sin zumbido. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar.',
             hint: 'If you buzz on a note, stop, fix your finger position, then continue. Don\'t just play through the buzz.',

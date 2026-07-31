@@ -195,7 +195,7 @@ SETS.push(
             title_es: 'Posiciona el Patrón 1 para mayor y menor',
             steps: [
           {
-            label: 'Challenge 2 — Move the Box', label_es: 'Reto 2 — Mueve la caja',
+            label: 'Challenge 2 — Move the Box: A Minor to E Minor', label_es: 'Reto 2 — Mueve la caja: de A menor a E menor',
             text: 'A box = the block of frets where a scale pattern sits.<ol><li>Play Pattern 1 as A minor pentatonic (1st finger, 5th fret, string 6) up and down using the TAB map.</li><li>Then shift it to E minor pentatonic (open-string root).</li></ol>You\'ve got it when: both positions clean — same shape, two spots on the neck.<span class="step-figure"><img src="img/m4-pentatonic-box1-en.svg" alt="Fretboard diagram of A minor pentatonic Pattern 1, frets 5 to 8: finger 1 on fret 5 of every string, finger 4 on fret 8 of the low E, B, and high e strings, and finger 3 on fret 7 of the A, D, and G strings. The root note A is marked solid at fret 5 on the low E and high e strings and at fret 7 on the D string."></span>',
             text_es: 'Una caja = el bloque de trastes donde se ubica un patrón de escala.<ol><li>Toca el Patrón 1 como A menor pentatónica (dedo índice, traste 5, cuerda 6) subiendo y bajando usando el mapa de TAB.</li><li>Luego cámbialo a E menor pentatónica (raíz en cuerda al aire).</li></ol>Lo tienes cuando: ambas posiciones limpias — misma forma, dos lugares en el mástil.<span class="step-figure"><img src="img/m4-pentatonic-box1-es.svg" alt="Diagrama del diapasón del Patrón 1 de A menor pentatónica, trastes 5 a 8: el dedo 1 en el traste 5 de todas las cuerdas, el dedo 4 en el traste 8 de las cuerdas Mi grave, Si y mi aguda, y el dedo 3 en el traste 7 de las cuerdas La, Re y Sol. La nota raíz A está marcada en sólido en el traste 5 de la Mi grave y la mi aguda, y en el traste 7 de la cuerda Re."></span>',
             hint: 'A minor: your hand sits around frets 5–8. E minor: the open strings do your 1st finger\'s job, and your other fingers play frets 2 and 3.',
@@ -1005,7 +1005,7 @@ SETS.push(
             title_es: 'Compón un solo de 4 compases',
             steps: [
           {
-            label: 'Challenge 2 — Compose It', label_es: 'Reto 2 — Compónlo',
+            label: 'Challenge 2 — Compose It in Scale Degrees', label_es: 'Reto 2 — Compónlo en grados de escala',
             text: '<ol><li>Write a 4-bar solo as scale-degree numbers (e.g. 1 ♭3 5 ♭3 | ♭7 5 ♭3 1 | …).</li><li>Then play exactly what you wrote, varying the rhythms.</li></ol>You\'ve got it when: a deliberate 4-bar line you can play back the same way twice. Type your 4 bars into the box below so you have them next session.',
             text_es: '<ol><li>Escribe un solo de 4 compases como números de grado de escala (p. ej. 1 ♭3 5 ♭3 | ♭7 5 ♭3 1 | …).</li><li>Luego toca exactamente lo que escribiste, variando los ritmos.</li></ol>Lo tienes cuando: una línea deliberada de 4 compases que puedes volver a tocar de la misma manera dos veces. Escribe tus 4 compases en el cuadro de abajo para tenerlos la próxima sesión.',
             hint: 'Write first, then play! It\'s okay if it sounds simple. The goal is to make a deliberate musical decision, not to improvise randomly.',
@@ -1068,7 +1068,7 @@ SETS.push(
             title_es: 'Toca tu solo original',
             steps: [
           {
-            label: 'Challenge 3 — Perform It (your assessment piece — try it!)', label_es: 'Reto 3 — Tócalo (tu pieza de evaluación — ¡pruébala!)',
+            label: 'Challenge 3 — Record Over the Am Jam Track (your assessment piece)', label_es: 'Reto 3 — Graba sobre la pista de jam en Am (tu pieza de evaluación)',
             text: 'Play your 4-bar solo over a core-song backing track — start with <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a> — working in at least one hammer-on, pull-off, or vibrato:<ol><li>Record your take.</li><li>Say your phrasing strategy (call-and-response or four-phrase) out loud on the recording.</li><li>Listen back.</li></ol>You\'ve got it when: you hold the backing track\'s pulse start to finish with no restarts, and you can name your phrasing strategy.',
             text_es: 'Toca tu solo de 4 compases sobre la pista de acompañamiento de una canción principal — empieza con <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; la pista de jam en Am</a> — incorporando al menos un hammer-on, pull-off, o vibrato:<ol><li>Graba tu toma.</li><li>Di en voz alta tu estrategia de fraseo (llamada y respuesta o cuatro frases) en la grabación.</li><li>Escúchala después.</li></ol>Lo tienes cuando: sostienes el pulso de la pista de principio a fin sin reiniciar, y puedes nombrar tu estrategia de fraseo.',
             hint: 'You can also pick any core song\'s ▶ &#x1F3B5; Backing track from the &#x1F3B5; Songs list at the bottom of this module. Include at least one technique (hammer-on, pull-off, or vibrato) in your solo. Don\'t just run up and down the scale — play musical ideas! Recording your take counts as performing — pressing record adds just enough pressure — and the playback shows you exactly where to tighten up.',

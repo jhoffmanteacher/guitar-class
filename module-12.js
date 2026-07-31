@@ -142,7 +142,7 @@ SETS.push(
             title_es: 'Alterna el pulgar entre dos cuerdas graves',
             steps: [
               {
-                label: 'Challenge 1 — Thumb Only', label_es: 'Reto 1 — Solo el pulgar',
+                label: 'Challenge 1 — Alternating Thumb, No Fingers', label_es: 'Reto 1 — Pulgar alternante, sin dedos',
                 text: '<ul><li>Alternate strings 5↔6 in quarter notes — root on the A string (fret 3), 5th fretted on the low E string (fret 3) — 60 BPM, 8 bars, zero finger notes.</li></ul>You\'ve got it when: a steady, even alternating thumb with no wobble.',
                 text_es: '<ul><li>Alterna las cuerdas 5↔6 en negras — raíz en la cuerda La (traste 3), 5ª trasteada en la cuerda Mi grave (traste 3) — 60 BPM, 8 compases, cero notas de dedos.</li></ul>Lo tienes cuando: un pulgar alternante constante y parejo, sin tambalearse.',
                 hint: 'Compared to Module 8\'s p-i-m-a-m-i arpeggio, the thumb ALTERNATES between bass strings instead of staying put — that bounce is the whole style.',
@@ -179,7 +179,7 @@ SETS.push(
             title_es: 'Agrega rellenos de dedos',
             steps: [
               {
-                label: 'Challenge 3 — Fills', label_es: 'Reto 3 — Rellenos',
+                label: 'Challenge 3 — i-Finger Fill', label_es: 'Reto 3 — Relleno del dedo i',
                 text: 'A fill is a short extra run of notes between the main parts.<ul><li>Keep the thumb going.</li><li>Add i on the "and" of beat 2.</li></ul>You\'ve got it when: the fill lands cleanly between two thumb strokes without slowing the thumb down.',
                 text_es: 'Un relleno es una pequeña serie extra de notas entre las partes principales.<ul><li>Mantén el pulgar en marcha.</li><li>Agrega i en el "y" del tiempo 2.</li></ul>Lo tienes cuando: el relleno cae limpio entre dos golpes del pulgar sin frenarlo.',
                 hint: 'Fingers decorate ON TOP of a thumb that\'s already keeping a steady groove (a groove is the steady rhythmic feel) — the thumb\'s rhythm never bends to fit the fingers.',
@@ -488,7 +488,7 @@ SETS.push(
             title_es: 'Cuenta y puntea un patrón en 3/4',
             steps: [
               {
-                label: 'Challenge 1 — Count-and-Pick', label_es: 'Reto 1 — Cuenta y puntea',
+                label: 'Challenge 1 — 3/4 Count-and-Pick', label_es: 'Reto 1 — Cuenta y puntea en 3/4',
                 text: '<ul><li>Play the 3/4 pattern (bass–pluck–pluck) on one chord, counting aloud, 60 BPM.</li></ul>You\'ve got it when: a steady 3-count with the bass landing exactly on beat 1 every bar.',
                 text_es: '<ul><li>Toca el patrón en 3/4 (bajo–pulsación–pulsación) sobre un acorde, contando en voz alta, 60 BPM.</li></ul>Lo tienes cuando: un conteo de 3 constante con el bajo cayendo exactamente en el tiempo 1 de cada compás.',
                 hint: 'Beat 1 is the strongest — land the bass note exactly on it every bar, and the two plucks fall into place after.',
@@ -803,7 +803,7 @@ SETS.push(
             title_es: 'Combina melodía sobre un pulgar constante',
             steps: [
               {
-                label: 'Challenge 3 — Melody on Top', label_es: 'Reto 3 — Melodía arriba',
+                label: 'Challenge 3 — 3-Note Melody over C', label_es: 'Reto 3 — Melodía de 3 notas sobre C',
                 text: 'Over a C chord:<ul><li>Keep the thumb going in steady quarters.</li><li>Pick a 3-note melody on strings 1–2 above it.</li></ul>You\'ve got it when: the thumb never wavers while the melody rides on top.',
                 text_es: 'Sobre un acorde de C:<ul><li>Mantén el pulgar sonando en negras constantes.</li><li>Puntea una melodía de 3 notas en las cuerdas 1–2 encima.</li></ul>Lo tienes cuando: el pulgar nunca vacila mientras la melodía viaja arriba.',
                 hint: 'Two jobs, one hand — the requinto texture in short.',

@@ -557,7 +557,7 @@ SETS.push(
             title_es: 'Aprende el patrón D-DU-UDU',
             steps: [
           {
-            label: 'Challenge 1 — Learn the Groove', label_es: 'Reto 1 — Aprende el groove',
+            label: 'Challenge 1 — D-DU-UDU, Muted Strings', label_es: 'Reto 1 — D-DU-UDU con cuerdas silenciadas',
             text: '<ol><li>Mute the strings.</li><li>At 60 BPM, strum the pattern "Down, Down-Up, Up-Down-Up" (D-DU-UDU).</li></ol>You\'ve got it when: the wrist keeps moving on the skipped downstroke — the pick just misses on purpose.<div class="strum-line">D   ·   D   U   ·   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
             text_es: '<ol><li>Silencia las cuerdas.</li><li>A 60 BPM, rasguea el patrón "Abajo, Abajo-Arriba, Arriba-Abajo-Arriba" (D-DU-UDU).</li></ol>Lo tienes cuando: la muñeca sigue en movimiento en el golpe hacia abajo que te saltas — la púa solo falla a propósito.<div class="strum-line">D   ·   D   U   ·   U   D   U\n<span class="su-count">1   +   2   +   3   +   4   +</span></div>',
             hint: 'The trickiest part is keeping the wrist moving on the skipped downstroke. The wrist still goes down — the pick just misses the strings on purpose.',
@@ -575,7 +575,7 @@ SETS.push(
             title_es: 'Toca el patrón con acentos de contratiempo',
             steps: [
           {
-            label: 'Challenge 2 — Pattern on Em', label_es: 'Reto 2 — Patrón en Em',
+            label: 'Challenge 2 — D-DU-UDU on Em', label_es: 'Reto 2 — D-DU-UDU en Em',
             text: '<ol><li>Fret Em.</li><li>Play D-DU-UDU at 60 BPM for 8 bars, counting aloud and accenting beats 2 and 4.</li></ol>You\'ve got it when: 8 clean bars with a clear "snare hit" feel on 2 and 4.',
             text_es: '<ol><li>Trastea Em.</li><li>Toca D-DU-UDU a 60 BPM durante 8 compases, contando en voz alta y acentuando los tiempos 2 y 4.</li></ol>Lo tienes cuando: 8 compases limpios con una sensación clara de "golpe de tarola" en el 2 y el 4.',
             hint: 'Add accents on beats 2 and 4 — those downstrokes should be a little louder. Feel the "snare hit" on those beats.',
@@ -937,7 +937,7 @@ SETS.push(
             title_es: 'Improvisa sobre el groove con el Patrón Pentatónico 1',
             steps: [
           {
-            label: 'Challenge 5 — Trade Off (try it!)', label_es: 'Reto 5 — Intercambio (¡pruébalo!)',
+            label: 'Challenge 5 — Trade Off: Strum, Then Solo (try it!)', label_es: 'Reto 5 — Túrnate: rasgueo y solo (¡pruébalo!)',
             text: '<ol><li>Loop the backing roots below — or record yourself strumming 8 bars of a progression (try Am–G–C or G–D–Em–C) with any pattern from this module.</li><li>Solo over it using Pentatonic Pattern 1 from Module 4.</li><li>Take turns with yourself every 8 bars: strum one pass, then solo over the next.</li></ol>No score — aim for one clear musical idea, not a flurry of notes.',
             text_es: '<ol><li>Repite las raíces de fondo de abajo — o grábate rasgueando 8 compases de una progresión (prueba Am–G–C o G–D–Em–C) con cualquier patrón de este módulo.</li><li>Improvisa sobre ella usando el Patrón Pentatónico 1 del Módulo 4.</li><li>Túrnate contigo mismo cada 8 compases: rasguea un pase, y luego improvisa en el siguiente.</li></ol>Sin puntaje — apunta a una idea musical clara, no a una ráfaga de notas.',
             hint: 'Am–G–C fits A minor pentatonic; a major-key progression fits major pentatonic. This is the reward: the scale you learned in Module 4 lives on top of the chords you strum here. Leave space — silence is part of a solo. Got another guitarist around? One strums, one solos, swap after 8 bars.',

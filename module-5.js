@@ -1483,7 +1483,7 @@ SETS.push(
             title_es: 'Interpreta tu canción de principio a fin',
             steps: [
           {
-            label: 'Challenge 4 — Full Run', label_es: 'Reto 4 — Pasada completa',
+            label: 'Challenge 4 — Full Run From Memory (your assessment piece)', label_es: 'Reto 4 — Pasada completa de memoria (tu pieza de evaluación)',
             text: '<ol><li>Pick one of the three core songs — <a href="tabs/let-it-be.html" target="_blank">"Let It Be"</a>, <a href="tabs/luna.html" target="_blank">"Luna"</a>, or <a href="tabs/the-cure.html" target="_blank">&ldquo;the cure&rdquo;</a> — and run it from memory with no chart. This is your assessment piece, Layer 5 of 5 of that song\'s &#x1F9F5; Song Journey.</li><li>Time yourself.</li></ol>No score — this trains your recovery, not perfection.',
             text_es: '<ol><li>Elige una de las tres canciones principales — <a href="tabs/let-it-be.html" target="_blank">"Let It Be"</a>, <a href="tabs/luna.html" target="_blank">"Luna"</a>, o <a href="tabs/the-cure.html" target="_blank">&ldquo;the cure&rdquo;</a> — y tócala de memoria sin diagrama. Esta es tu pieza de evaluación, la Capa 5 de 5 del &#x1F9F5; Recorrido de la canción de esa canción.</li><li>Cronométrate.</li></ol>Sin puntaje — esto entrena tu recuperación, no la perfección.',
             hint: 'Don\'t stop when you make a mistake in performance practice. The goal is to keep going. You can fix mistakes in slow practice — performance practice trains your recovery.',

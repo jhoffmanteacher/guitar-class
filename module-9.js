@@ -446,7 +446,7 @@ SETS.push(
             title_es: 'Ejercicio relámpago de tarjetas',
             steps: [
               {
-                label: 'Challenge 3 — Flash Drill (your assessment piece)', label_es: 'Reto 3 — Ejercicio relámpago (tu pieza de evaluación)',
+                label: 'Challenge 3 — D & G Naturals Flash Drill (your assessment piece)', label_es: 'Reto 3 — Relámpago de naturales en Re y Sol (tu pieza de evaluación)',
                 text: '<ol><li>Deal the natural-note deck below and find each note it gives you on the D or G string within 5 seconds.</li><li>Switch strings every 5 cards.</li></ol>You\'ve got it when: 8 out of 10 correct within 5 seconds each, on both strings.',
                 text_es: '<ol><li>Reparte la baraja de notas naturales de abajo y encuentra cada nota que te dé en la cuerda Re o Sol en menos de 5 segundos.</li><li>Cambia de cuerda cada 5 cartas.</li></ol>Lo tienes cuando: 8 de 10 correctas en menos de 5 segundos cada una, en ambas cuerdas.',
                 drill: { type: 'deck', deck: 'naturals' },
@@ -734,7 +734,7 @@ SETS.push(
             title_es: 'Ejercicio de referencias de las seis cuerdas',
             steps: [
               {
-                label: 'Challenge 3 — Landmark Drill (your assessment piece)', label_es: 'Reto 3 — Ejercicio de referencias (tu pieza de evaluación)',
+                label: 'Challenge 3 — Six-String Dot Landmarks (your assessment piece)', label_es: 'Reto 3 — Puntos de referencia en 6 cuerdas (tu pieza de evaluación)',
                 text: '<ol><li>Name every string at the fret-5 dot.</li><li>Name every string at the fret-7 dot.</li></ol>You\'ve got it when: all six strings named correctly at both dots, no chart, within 5 seconds each.',
                 text_es: '<ol><li>Nombra cada cuerda en el punto del traste 5.</li><li>Nombra cada cuerda en el punto del traste 7.</li></ol>Lo tienes cuando: las seis cuerdas nombradas correctamente en ambos puntos, sin diagrama, en menos de 5 segundos cada una.',
                 hint: 'Dots are the fastest way to orient yourself anywhere on the neck — this drill is worth over-practicing.',
@@ -982,7 +982,7 @@ SETS.push(
             title_es: 'Lee un TAB en posición alta',
             steps: [
               {
-                label: 'Challenge 1 — Warm-Up Read (down low first)', label_es: 'Reto 1 — Lectura de calentamiento (primero abajo)',
+                label: 'Challenge 1 — "Luna" Warm-Up Read (down low first)', label_es: 'Reto 1 — "Luna", lectura de calentamiento (primero abajo)',
                 text: '<ul><li>Read and play the little-F Layer 6 intro TAB from <a href="tabs/luna.html#layer-6" target="_blank">"Luna"\'s Song Journey page</a> — it lives around the little-F shape (D3, G2, B1, open e), down at frets 0–3.</li></ul>You\'ve got it when: you can read it straight through, no one walking you through it first.',
                 text_es: '<ul><li>Lee y toca el TAB de intro de la Capa 6 de F pequeña de la <a href="tabs/luna.html#layer-6" target="_blank">página de Recorrido de la canción de "Luna"</a> — vive alrededor de la forma de F pequeña (D3, G2, B1, e al aire), abajo en los trastes 0–3.</li></ul>Lo tienes cuando: puedes leerlo de corrido, sin que nadie te lo explique primero.',
                 hint: 'Reading TAB up the neck feels harder mostly because the numbers are less familiar, not because it\'s actually different from reading it low.',
@@ -1024,7 +1024,7 @@ SETS.push(
             title_es: 'Escribe tu propio TAB de memoria',
             steps: [
               {
-                label: 'Challenge 2 — Write It (your assessment piece)', label_es: 'Reto 2 — Escríbelo (tu pieza de evaluación)',
+                label: 'Challenge 2 — Write "Seven Nation Army" (your assessment piece)', label_es: 'Reto 2 — Escribe "Seven Nation Army" (tu pieza de evaluación)',
                 text: '<ol><li>Without looking anything up, write the "Seven Nation Army" riff to blank TAB on paper from memory — you played it without looking at the chart back in Module 2.</li><li>Then check yourself.</li></ol>You\'ve got it when: you play back EXACTLY what\'s on your page and it matches the riff note for note — every fret on the right string, in order. (The day-later, no-memory test is Challenge 4 — see it below.)',
                 text_es: '<ol><li>Sin buscar nada, escribe de memoria el riff de "Seven Nation Army" en TAB en blanco sobre papel — lo tocaste sin mirar el diagrama allá en el Módulo 2.</li><li>Luego compruébate.</li></ol>Lo tienes cuando: tocas EXACTAMENTE lo que está en tu página y coincide con el riff nota por nota — cada traste en la cuerda correcta, en orden. (La prueba de un día después, sin memoria, es el Reto 4 — ve abajo.)',
                 hint: 'Say each note name in your head as you write its fret — that\'s the same habit that made you fast at naming notes all module.',
@@ -1042,7 +1042,7 @@ SETS.push(
             title_es: 'Lee un acorde con barra diagonal y una forma parcial',
             steps: [
               {
-                label: 'Challenge 3 — Slash Chord', label_es: 'Reto 3 — Acorde con barra diagonal',
+                label: 'Challenge 3 — G/B Slash Chord', label_es: 'Reto 3 — G/B, acorde con barra diagonal',
                 text: '<ol><li>Fret and play G/B.</li><li>Compare it against a standard open G.</li><li>Notice what changes and what stays the same.</li></ol>',
                 text_es: '<ol><li>Trastea y toca G/B.</li><li>Compáralo con un G abierto estándar.</li><li>Fíjate qué cambia y qué se mantiene igual.</li></ol>',
                 hint: 'The chord shape barely changes — it\'s the LOWEST note you strum that makes it a slash chord.',
@@ -1086,7 +1086,7 @@ SETS.push(
             title_es: 'La prueba de lectura a primera vista de TAB',
             steps: [
               {
-                label: 'Challenge 4 — Cold-Read It', label_es: 'Reto 4 — Léelo a primera vista',
+                label: 'Challenge 4 — Cold-Read Your "Seven Nation Army" TAB', label_es: 'Reto 4 — Lee a primera vista tu TAB de "Seven Nation Army"',
                 text: 'At least a day after writing your Challenge 2 TAB:<ul><li>Take it back out and play it exactly as written — trust only the page, no memory allowed.</li></ul>You\'ve got it when: the riff comes out right on the first try, purely from what\'s on the paper — that\'s the ultimate readability test.',
                 text_es: 'Al menos un día después de escribir tu TAB del Reto 2:<ul><li>Sácalo de nuevo y tócalo exactamente como está escrito — confía solo en la página, no se permite memoria.</li></ul>Lo tienes cuando: el riff sale bien al primer intento, únicamente a partir de lo que hay en el papel — esa es la prueba definitiva de legibilidad.',
                 hint: 'This is the real test of whether your spacing and fret numbers were actually readable — not just correct to you.',

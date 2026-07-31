@@ -523,7 +523,7 @@ SETS.push(
             title_es: 'Afina las 6 cuerdas con un afinador',
             steps: [
           {
-            label: 'Challenge 1 — Tune Challenge', label_es: 'Reto 1 — Reto de afinación',
+            label: 'Challenge 1 — Tune-Up Under 2 Minutes', label_es: 'Reto 1 — Afinación en menos de 2 minutos',
             text: '<ol><li>Get all 6 strings to green on the tuner.</li><li>Race the timer — can you do it in under 2 minutes?</li></ol>You\'ve got it when: all 6 strings green in under 2 minutes. Log your time so you can try for a faster time next session.',
             text_es: '<ol><li>Pon las 6 cuerdas en verde en el afinador.</li><li>Compite contra el cronómetro — ¿puedes lograrlo en menos de 2 minutos?</li></ol>Lo tienes cuando: las 6 cuerdas en verde en menos de 2 minutos. Anota tu tiempo para intentar superarlo en la próxima sesión.',
             hint: 'Tune low to high: E A D G B e. Going slowly works better than rushing past the note. Use the play button to hear the target pitches.',
@@ -578,7 +578,7 @@ SETS.push(
             playSeq: { label: 'Hear the first phrase', label_es: 'Escucha la primera frase', bpm: 60, notes: [40, 40, 42, 40, 45, 44] }
           },
           {
-            label: 'Challenge 3 — Riff Time (try it!)', label_es: 'Reto 3 — Hora del riff (¡pruébalo!)',
+            label: 'Challenge 3 — "Seven Nation Army" Riff (try it!)', label_es: 'Reto 3 — Riff de "Seven Nation Army" (¡pruébalo!)',
             text: '<ul><li>Play the "Seven Nation Army" riff on the low E string — slow and clean.</li></ul>You\'ve got it when: all 7 notes in the right order, each ringing clean — speed comes later. No score on this one, just try it. Click any note name below the TAB to hear how it should sound.',
             text_es: '<ul><li>Toca el riff de "Seven Nation Army" en la cuerda Mi grave — despacio y limpio.</li></ul>Lo tienes cuando: las 7 notas en el orden correcto, cada una sonando limpia — la velocidad viene después. Este no tiene puntaje, solo pruébalo. Haz clic en cualquier nombre de nota debajo del TAB para escuchar cómo debe sonar.',
             hint: 'Slow and clean is better than fast and buzzy. One note at a time. Set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder. Two heads-ups about how this version sounds: we play it as straight, even quarter notes — one per beat — so it\'s easy to count, and on the low E string it sits a fourth lower than the record, so it won\'t line up with the recording yet. Module 2 moves it up to true pitch on the A string.',

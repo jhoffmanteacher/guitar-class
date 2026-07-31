@@ -160,7 +160,7 @@ SETS.push(
             title_es: 'Prepara una mano de fingerpicking relajada',
             steps: [
           {
-            label: 'Challenge 1 — Hand Shape', label_es: 'Reto 1 — Forma de la mano',
+            label: 'Challenge 1 — p-i-m-a Hand Shape', label_es: 'Reto 1 — Forma de la mano p-i-m-a',
             text: '<ol><li>Put the pick down.</li><li>Rest your thumb on the low E and i-m-a on the G, B, and high e strings.</li><li>Hold for 30 seconds.</li></ol>You\'ve got it when: a relaxed, arched wrist with curved fingers — like holding an apple.<span class="step-figure"><img src="img/m8-pima-map-en.svg" alt="Diagram of the picking-hand finger assignments: the thumb, p, rests on the low E string sitting forward of the fingers, i is on the G string, m on the B string, and a on the high e string; dashed marks show p also covers the A and D strings."></span>',
             text_es: '<ol><li>Deja la púa a un lado.</li><li>Apoya tu pulgar en la Mi grave e i-m-a en las cuerdas Sol, Si y mi aguda.</li><li>Sostén la posición por 30 segundos.</li></ol>Lo tienes cuando: una muñeca relajada y arqueada con dedos curvados — como si sostuvieras una manzana.<span class="step-figure"><img src="img/m8-pima-map-es.svg" alt="Diagrama de la asignación de dedos de la mano de pulsar: el pulgar, p, se apoya en la cuerda Mi grave por delante de los dedos, i va en la cuerda Sol, m en la cuerda Si y a en la cuerda mi aguda; unas marcas punteadas muestran que p también cubre las cuerdas La y Re."></span>',
             hint: 'Your wrist should be arched (curved) — not flat against the guitar body. Fingers curved as if you\'re holding an apple. Relax.',
@@ -515,7 +515,7 @@ SETS.push(
             title_es: 'Aumenta tu tempo (70+ BPM)',
             steps: [
           {
-            label: 'Challenge 3 — Raise Your Tempo (your assessment piece)', label_es: 'Reto 3 — Sube tu tempo (tu pieza de evaluación)',
+            label: 'Challenge 3 — Em Pattern at 70+ BPM (your assessment piece)', label_es: 'Reto 3 — Patrón en Em a 70+ BPM (tu pieza de evaluación)',
             text: '<ol><li>Play the Em pattern at 70 BPM.</li><li>Try 80.</li></ol>You\'ve got it when: clean at 70+ with the "a" finger landing right on its beat — drop back to 60 if it falls apart. This steady-pattern check is the Set 2 check-off.',
             text_es: '<ol><li>Toca el patrón de Em a 70 BPM.</li><li>Intenta 80.</li></ol>Lo tienes cuando: limpio a 70+ con el dedo "a" cayendo justo en su tiempo — baja a 60 si se desarma. Esta revisión de patrón constante es el chequeo de la Unidad 2.',
             hint: 'The most common mistake: the ring finger (a) comes in late. Pay extra attention to your ring finger — it needs to land exactly on its beat, no later. Set the ⏱ Timer for 2 minutes and loop it.',
@@ -803,7 +803,7 @@ SETS.push(
             title_es: 'Trastea cada acorde limpio antes de tocarlo con fingerpicking',
             steps: [
           {
-            label: 'Challenge 1 — Clean Shapes First', label_es: 'Reto 1 — Formas limpias primero',
+            label: 'Challenge 1 — Clean Am–C–D–F Shapes', label_es: 'Reto 1 — Formas limpias de Am–C–D–F',
             text: 'Before you fingerpick the progression:<ol><li>Strum each chord once (Am, C, D, F).</li><li>Check every string rings — these are the exact open chords you learned in Module 5.</li></ol>You\'ve got it when: all four shapes clean on a strum before you pick a single note through them.',
             text_es: 'Antes de tocar la progresión con fingerpicking:<ol><li>Rasguea cada acorde una vez (Am, C, D, F).</li><li>Revisa que suenen todas las cuerdas — estos son exactamente los acordes al aire que aprendiste en el Módulo 5.</li></ol>Lo tienes cuando: las cuatro formas suenan limpias con un rasgueo antes de puntear una sola nota a través de ellas.',
             hint: 'Fingerpicking exposes every note, so a chord that was "good enough" for strumming in Module 5 needs to be truly clean here. Fix the fretting hand first; then the picking hand has something solid to work over.',
@@ -821,7 +821,7 @@ SETS.push(
             title_es: 'Toca con fingerpicking una progresión de acordes completa',
             steps: [
           {
-            label: 'Challenge 2 — Full Progression', label_es: 'Reto 2 — Progresión completa',
+            label: 'Challenge 2 — Eight-Note Pattern Over 4 Chords', label_es: 'Reto 2 — Patrón de ocho notas sobre 4 acordes',
             text: 'These progressions are in 4/4 — four beats a bar — so use the eight-note stretch, p-i-m-a-m-i-m-i, two notes per beat:<ul><li>Play it over a 4-chord progression — Am–C–D–F or C–Am–F–G — 1 bar each at 60 BPM.</li></ul>You\'ve got it when: the thumb finds each chord\'s root bass while the fingers stay on G-B-e.',
             text_es: 'Estas progresiones están en 4/4 — cuatro tiempos por compás — así que usa el estiramiento de ocho notas, p-i-m-a-m-i-m-i, dos notas por tiempo:<ul><li>Tócalo sobre una progresión de 4 acordes — Am–C–D–F o C–Am–F–G — 1 compás cada uno a 60 BPM.</li></ul>Lo tienes cuando: el pulgar encuentra el bajo raíz de cada acorde mientras los dedos se quedan en Sol, Si y mi aguda.',
             hint: 'The six-note pattern is a 6/8 pattern — it does not divide evenly into a 4/4 bar, which is why it stretches to eight here. Too many? Use the four-note p-i-m-a from Set 1, one note per beat. For each chord, the thumb plays the ROOT bass note (Am = A string, C = A string, D = D string, F = D string). Fingers always on G-B-e.',
@@ -921,7 +921,7 @@ SETS.push(
             title_es: 'Interpreta una canción con fingerpicking',
             steps: [
           {
-            label: 'Challenge 5 — Perform It (your assessment piece — try it!)', label_es: 'Reto 5 — Interprétala (tu pieza de evaluación — ¡pruébalo!)',
+            label: 'Challenge 5 — Fingerpick a Full Song (assessment piece — try it!)', label_es: 'Reto 5 — Toca una canción completa (pieza de evaluación — ¡pruébalo!)',
             text: '<ol><li>Pick one song — "the cure", "Hallelujah" (from Module 5\'s song list), "Let It Be" (verse), or a choice-list song.</li><li>Play it through 3 times without stopping, even with mistakes.</li></ol>No score — practice the recovery; keep going no matter what.',
             text_es: '<ol><li>Elige una canción — "the cure", "Hallelujah" (de la lista de canciones del Módulo 5), "Let It Be" (estrofa), o una canción de la lista de elección.</li><li>Tócala completa 3 veces sin detenerte, incluso con errores.</li></ol>Sin puntaje — practica la recuperación; sigue adelante pase lo que pase.',
             hint: 'Mistakes are normal — stopping is what makes them sound bad, so keep going and practice the recovery. No one to play for? Record yourself on your phone or device and watch it back — the playback shows you exactly where the pattern broke.',

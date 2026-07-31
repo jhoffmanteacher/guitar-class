@@ -155,7 +155,7 @@ SETS.push(
             title_es: 'Construye y toca una familia de acordes',
             steps: [
               {
-                label: 'Challenge 1 — Build the Family', label_es: 'Reto 1 — Construye la familia',
+                label: 'Challenge 1 — C and G Chord Families', label_es: 'Reto 1 — Familias de acordes de C y G',
                 text: '<ol><li>Write out the chord families of C major and G major (six chords each) — type them below.</li><li>Play each family as open chords in order.</li></ol>',
                 text_es: '<ol><li>Escribe las familias de acordes de C mayor y G mayor (seis acordes cada una) — anótalas abajo.</li><li>Toca cada familia como acordes abiertos en orden.</li></ol>',
                 hint: 'C family: C · Dm · Em · F · G · Am. G family: G · Am · Bm · C · D · Em. Notice how much they overlap — that\'s no accident.',
@@ -450,7 +450,7 @@ SETS.push(
             title_es: 'Ejercicio detective de inventario de acordes',
             steps: [
               {
-                label: 'Challenge 1 — Inventory Drill', label_es: 'Reto 1 — Ejercicio de inventario',
+                label: 'Challenge 1 — Name the Key from a Chord Set', label_es: 'Reto 1 — Nombra la tonalidad de un conjunto de acordes',
                 text: 'A drill is a short exercise you repeat to build a skill.<ol><li>Run the key-detective deck below — for each mystery chord set, find the single family that contains every chord in it and say the key OUT LOUD before you flip the card.</li></ol>',
                 text_es: 'Un ejercicio es una práctica corta que repites para desarrollar una destreza.<ol><li>Corre la baraja detective de tonos de abajo — para cada conjunto misterioso de acordes, encuentra la única familia que contiene todos los acordes y di el tono EN VOZ ALTA antes de voltear la tarjeta.</li></ol>',
                 drill: { type: 'deck', deck: 'key-inventory', skill: 'm11w2-s1' },
@@ -469,7 +469,7 @@ SETS.push(
             title_es: 'Toca y siente la base',
             steps: [
               {
-                label: 'Challenge 2 — Play and Feel', label_es: 'Reto 2 — Toca y siente',
+                label: 'Challenge 2 — Which Chord Feels Like Home? Am–G–F', label_es: 'Reto 2 — ¿Cuál acorde se siente como base? Am–G–F',
                 text: '<ol><li>Strum Am–G–F, stopping and holding each chord in turn.</li><li>Say (or type below) which one feels most like "home."</li></ol>',
                 text_es: '<ol><li>Rasguea Am–G–F, deteniéndote y sosteniendo cada acorde por turno.</li><li>Di (o escribe abajo) cuál se siente más como "base."</li></ol>',
                 hint: 'Play the loop a few times through first — home only reveals itself once you can hear the whole shape of the progression.',

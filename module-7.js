@@ -185,7 +185,7 @@ SETS.push(
             title_es: 'Encuentra y lee un TAB por tu cuenta',
             steps: [
           {
-            label: 'Challenge 3 — Find a Riff (try it!)', label_es: 'Reto 3 — Encuentra un riff (¡pruébalo!)',
+            label: 'Challenge 3 — Find a TAB: "Iron Man" or "Sunshine of Your Love"', label_es: 'Reto 3 — Encuentra un TAB: "Iron Man" o "Sunshine of Your Love"',
             text: '<ol><li>Pick "Iron Man" or "Sunshine of Your Love".</li><li>Find a TAB online.</li><li>Play through it once.</li></ol>No score — see which rhythm symbols you can spot above the numbers.',
             text_es: '<ol><li>Elige "Iron Man" o "Sunshine of Your Love".</li><li>Encuentra un TAB en línea.</li><li>Tócalo una vez de principio a fin.</li></ol>Sin puntaje — fíjate en qué símbolos de ritmo puedes reconocer arriba de los números.',
             hint: 'Most beginner TAB sites (Songsterr, Ultimate Guitar) show the rhythm. Look for the stem marks above each number.',
@@ -782,7 +782,7 @@ SETS.push(
             title_es: 'Combina las cejillas en forma de E y de A',
             steps: [
           {
-            label: 'Challenge 4 — Shape Combo (your assessment piece)', label_es: 'Reto 4 — Combo de formas (tu pieza de evaluación)',
+            label: 'Challenge 4 — Shape Combo: F–C–G–D (your assessment piece)', label_es: 'Reto 4 — Combo de formas: F–C–G–D (tu pieza de evaluación)',
             text: 'Alternate E-shape and A-shape, 2 bars each at 60 BPM:<ul><li>F (E-shape, 1st fret).</li><li>C (A-shape, 3rd fret).</li><li>G (E-shape, 3rd fret).</li><li>D (A-shape, 5th fret).</li></ul>You\'ve got it when: smooth switches between the two shapes, landing each change on beat 1.',
             text_es: 'Alterna forma de E y forma de A, 2 compases cada uno a 60 BPM:<ul><li>F (forma de E, traste 1).</li><li>C (forma de A, traste 3).</li><li>G (forma de E, traste 3).</li><li>D (forma de A, traste 5).</li></ul>Lo tienes cuando: cambios fluidos entre las dos formas, cayendo cada cambio en el tiempo 1.',
             hint: 'You\'re alternating between E-shape and A-shape with each chord change. This is what real songs ask for. Notice that some chord changes are tiny hand moves — barely shift positions.',
