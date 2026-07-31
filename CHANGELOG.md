@@ -32,6 +32,32 @@ English and Spanish throughout.
   "Eight-Note Pattern Over 4 Chords" — so you can tell what you're about to
   work on before you open the card.
 
+## 2026-07-31 — Back button and search fixes
+
+### Fixed
+
+- **The Back button now takes you where you'd expect.** Closing Songs, Games,
+  Keep practicing, My progress or Class activities used to leave a phantom
+  step in your history, so the next Back tap popped the page you'd just closed
+  right back open. Back now goes back, and "Back to practice" always lands on
+  the practice view in one tap.
+- **Back (or the phone's back gesture) closes the search panel** instead of
+  leaving the site. Escape closes it too.
+
+### Changed
+
+- **Search understands accents.** Typing "cancion" finds "Canción" and
+  "pentatonica" finds "pentatónica" — no accent key required.
+- **Search stopped giving up early.** It used to stop scanning after the first
+  400 hits, so common words like "chord" never turned up anything from the
+  later modules. It now looks at everything and shows the best matches first.
+- **Better results, better ordering.** Set names, section titles and module
+  names are searchable now, matches on a name beat matches buried mid-sentence,
+  and your words are highlighted in each result.
+- **Typing a word that doesn't fit no longer dead-ends.** If nothing matches
+  every word, you get the closest matches instead of "no results".
+- **Results show a count**, and chord searches accept commas ("g, c, d").
+
 ## 2026-07-31 — Fixed "Take me to the deck" not switching tabs
 
 ### Fixed

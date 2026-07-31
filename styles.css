@@ -1335,6 +1335,9 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 .search-hit:hover{border-color:var(--blue-text);background:var(--blue-bg)}
 .search-hit-where{font-size:0.75rem;font-weight:700;color:var(--blue-text);letter-spacing:.2px}
 .search-hit-text{font-size:0.8438rem;color:var(--text);line-height:1.4}
+.search-mark{background:var(--blue-bg);color:var(--blue-text);font-weight:700;border-radius:3px;padding:0 1px}
+.search-count{font-size:0.75rem;font-weight:700;color:var(--muted);letter-spacing:.2px;padding:0 2px 2px}
+.search-count.search-loose{color:var(--blue-text);font-weight:600;letter-spacing:0;line-height:1.35}
 .st-flex-note{font-size:0.875rem;color:var(--text2);background:var(--bg3);border-radius:8px;padding:11px 14px;margin:2px 0 8px;line-height:1.55}
 .st-note-link{font-family:inherit;font-size:inherit;font-weight:600;padding:0;background:none;border:none;color:var(--blue-text);cursor:pointer;text-decoration:underline}
 
