@@ -780,6 +780,20 @@ function renderTabBlock(notes, seqOffset){
       </div>
     </div>`;
 }
+/* A wide TAB grid scrolls via .tab-board's overflow-x:auto, but macOS hides
+   the scrollbar and a plain two-finger swipe defaults to vertical — so a
+   student's normal scroll gesture over the grid just moves the page and the
+   grid looks frozen. Redirect vertical wheel input into horizontal scroll
+   whenever the cursor is over a grid that actually overflows, so the same
+   gesture that scrolls everything else scrolls this too. Genuine horizontal
+   swipes (trackpad deltaX) pass through untouched. */
+document.addEventListener('wheel', e => {
+  const tb = e.target.closest && e.target.closest('.tab-board');
+  if (!tb || tb.scrollWidth <= tb.clientWidth) return;
+  if (Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;
+  tb.scrollLeft += e.deltaY;
+  e.preventDefault();
+}, { passive: false });
 function buildTab(spec, opts){
   if (!spec) return '';
   const keyPrefix = (opts && opts.keyPrefix) || '';
