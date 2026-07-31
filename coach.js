@@ -1546,7 +1546,7 @@ function fretRender(){
 function toggleGames(){
   const screen = document.getElementById('games-screen');
   if (!screen) return;
-  if (screen.hasAttribute('hidden')) location.hash = 'games';
+  if (screen.hasAttribute('hidden')) goExploreHash('games');
   else closeGamesScreen();
 }
 function openGamesScreen(){
@@ -1555,7 +1555,7 @@ function openGamesScreen(){
   /* Teacher-controlled access: if games are turned off for this student, don't
      open — even via a bookmarked #games hash (the button is already hidden). */
   if (typeof gamesAccessOn !== 'undefined' && !gamesAccessOn){
-    if (location.hash === '#games') location.hash = '';
+    if (location.hash === '#games') exitExploreHash();
     return;
   }
   /* A Coach check or the tuner may still hold the mic (coachMicLive mutes
@@ -1573,7 +1573,7 @@ function openGamesScreen(){
   if (exit) exit.focus();
 }
 function closeGamesScreen(){
-  if (location.hash === '#games'){ location.hash = ''; return; }  // hashchange finishes the job
+  if (location.hash === '#games'){ exitExploreHash(); return; }  // the router finishes the job
   gamesClosePanel();
 }
 function gamesClosePanel(){

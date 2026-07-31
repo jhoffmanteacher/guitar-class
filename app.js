@@ -458,7 +458,7 @@ function applyGamesAccess(){
   if(!gamesAccessOn){
     const screen = document.getElementById('games-screen');
     if(screen && !screen.hasAttribute('hidden')){
-      if(location.hash==='#games') location.hash='';
+      if(location.hash==='#games') exitExploreHash();
       if(typeof gamesClosePanel==='function') gamesClosePanel();
     }
   }
@@ -1802,11 +1802,50 @@ function syncExploreNav(){
   });
 }
 
-/* Hash router for all four pages. Closes the others FIRST (through their
+/* ── Back-button history for the explore pages ─────────────────────────────
+   Opening a page pushes ONE history entry; the on-page ✕ / "Back to practice"
+   walks back through every entry this visit pushed. Before this, closing a
+   page *pushed* an empty '#' on top of the entry that had opened it, so the
+   student's next Back tap re-opened the page they had just closed — the
+   "Back doesn't take me to the page I was on" bug.
+
+   The depth rides along in history.state rather than in a module-level
+   counter, so it stays honest when the student mixes the browser's own
+   Back/Forward buttons with the on-page ones. An entry we didn't push (a
+   bookmarked or reloaded '#songs' URL) reports depth 0 and exits by
+   rewriting the URL in place — never push a '#' the student has to Back
+   through twice. */
+function exploreDepth(){ return (history.state && history.state.xDepth) || 0; }
+
+/* Open an explore page. pushState rather than `location.hash =` so the entry
+   can carry its depth; pushState fires no event, so route by hand. */
+function goExploreHash(hash){
+  const h = '#' + hash;
+  if(location.hash === h) return;
+  history.pushState({ xDepth: exploreDepth() + 1 }, '', h);
+  routeExploreHash();
+}
+
+/* Leave the explore pages and land back on the practice view. */
+function exitExploreHash(){
+  const d = exploreDepth();
+  if(d > 0){ history.go(-d); return; }   // async: popstate → routeExploreHash()
+  history.replaceState(null, '', location.pathname + location.search);
+  routeExploreHash();
+}
+
+/* Hash router for all the pages. Closes the others FIRST (through their
    panel-only close fns, which don't touch the hash — the hash is already
    whatever we're routing to), then opens the target. */
+let lastRoutedHash = null;
 function routeExploreHash(){
   const h = location.hash;
+  /* A back/forward across a hash-only entry fires popstate *and* hashchange
+     in most browsers, and goExploreHash routes by hand on top of that.
+     Routing is idempotent, but the scroll stash below is not — so bail on a
+     repeat of the hash we already routed to. */
+  if(h === lastRoutedHash) return;
+  lastRoutedHash = h;
   /* Remember the student's place in the set BEFORE anything is shown or
      hidden — once a screen is in the flow, .main's scrollTop has already
      been shifted by scroll anchoring and no longer means what it says.
@@ -1821,14 +1860,19 @@ function routeExploreHash(){
   if(h !== '#keep-practicing') kpClosePanel();
   if(h !== '#my-progress') mpClosePanel();
   if(h !== '#class-activities') caClosePanel();
+  if(h !== '#search') searchClosePanel();
   if(h === '#games' && typeof openGamesScreen === 'function') openGamesScreen();
   else if(h === '#songs') openSongsScreen();
   else if(h === '#keep-practicing') openKeepPracticingScreen();
   else if(h === '#my-progress') openMyProgressScreen();
   else if(h === '#class-activities') openClassActivitiesScreen();
+  else if(h === '#search') openSearchPanel();
   syncExploreNav();
 }
 window.addEventListener('hashchange', routeExploreHash);
+/* pushState/go() traversals fire popstate, not hashchange — listen for both
+   (the lastRoutedHash guard above absorbs the browsers that fire both). */
+window.addEventListener('popstate', routeExploreHash);
 
 /* "Practice" nav item: leave whatever explore page or panel is open and
    return to the practice view. Reuses the existing close-all helper. */
@@ -5404,6 +5448,7 @@ function closeTopPanels(except){
       if(k === 'keep-practicing'){ closeKeepPracticingScreen(); return; }
       if(k === 'my-progress'){ closeMyProgressScreen(); return; }
       if(k === 'class-activities'){ closeClassActivitiesScreen(); return; }
+      if(k === 'search'){ closeSearchPanel(); return; }
       p.setAttribute('hidden', '');
       const b = document.getElementById(k + '-btn');
       if(b) b.setAttribute('aria-expanded', 'false');
@@ -5435,11 +5480,11 @@ function ensureAllModuleData(){
 function toggleSongsHub(){
   const screen = document.getElementById('songs-screen');
   if(!screen) return;
-  if(screen.hasAttribute('hidden')) location.hash = 'songs';
+  if(screen.hasAttribute('hidden')) goExploreHash('songs');
   else closeSongsScreen();
 }
 function closeSongsScreen(){
-  if(location.hash === '#songs'){ location.hash = ''; return; }  // hashchange finishes the job
+  if(location.hash === '#songs'){ exitExploreHash(); return; }  // the router finishes the job
   songsClosePanel();
 }
 function songsClosePanel(){
@@ -5545,6 +5590,54 @@ async function songHubGoModule(m){
 }
 
 /* ── 🔍 Site search: steps, skills, and set titles across all modules ── */
+
+/* Fold case AND accents, so a student typing "cancion", "pentatonica" or
+   "MI GRAVE" finds "canción", "pentatónica" and "Mi grave". Half the site is
+   in Spanish and nobody reaches for the accent key on a Chromebook.
+   Length-preserving on purpose — the highlighter maps folded match offsets
+   straight back onto the raw text, so one character in must be one character
+   out. Anything that would change length (İ, emoji) is left alone. */
+const _foldCharCache = new Map();
+function foldChar(ch){
+  let v = _foldCharCache.get(ch);
+  if(v === undefined){
+    const lo = ch.toLowerCase();
+    if(lo.length !== ch.length) v = ch;
+    else {
+      const n = lo.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      v = n.length === ch.length ? n : lo;
+    }
+    _foldCharCache.set(ch, v);
+  }
+  return v;
+}
+function searchFold(s){
+  let out = '';
+  const str = s || '';
+  for(let i = 0; i < str.length; i++) out += foldChar(str[i]);
+  return out;
+}
+/* Does `term` start a word in `hay`? A hit at a word boundary is what the
+   student meant; one buried mid-word ("am" inside "frame") usually isn't. */
+function foldWordStart(hay, term){
+  let i = hay.indexOf(term);
+  while(i !== -1){
+    if(i === 0 || !/[a-z0-9]/.test(hay[i - 1])) return true;
+    i = hay.indexOf(term, i + 1);
+  }
+  return false;
+}
+/* Every entry carries `hay` (everything worth matching, folded) and `title`
+   (the name-ish part, for ranking). `text` stays the display string. */
+function searchEntry(e){
+  const mod = (typeof MODULE_MANIFEST !== 'undefined' && MODULE_MANIFEST.find(m => m.num === e.moduleNum)) || null;
+  const modName = mod ? (tf(mod, 'name') || mod.name || '') : '';
+  e.title = e.title || '';
+  e.fTitle = searchFold(e.title);
+  e.hay = searchFold([e.text, e.title, e.label, e.secTitle, modName, 'module ' + e.moduleNum, 'módulo ' + e.moduleNum].filter(Boolean).join(' '));
+  return e;
+}
+
 let searchIndex = null;
 async function buildSearchIndex(){
   await ensureAllModuleData();
@@ -5554,10 +5647,10 @@ async function buildSearchIndex(){
     // tf() picks the _es twin when the student is in Spanish mode (falling
     // back to English where no twin exists yet) — without it, Spanish-mode
     // search only ever matched English-only indexed text.
-    if(w.unit) ix.push({ kind: 'set', moduleNum: w.moduleNum, wid: w.id, label: w.label, text: tf(w, 'unit') });
+    if(w.unit) ix.push(searchEntry({ kind: 'set', moduleNum: w.moduleNum, wid: w.id, label: w.label, title: [w.label, tf(w, 'unit')].filter(Boolean).join(' '), text: tf(w, 'unit') }));
     (w.skills || []).forEach(sk => {
       const num = (sk.id.match(/-s(\d+)$/) || [])[1];
-      ix.push({ kind: 'skill', moduleNum: w.moduleNum, wid: w.id, label: w.label, text: tf(sk, 'text'), skillNum: num ? Number(num) : null });
+      ix.push(searchEntry({ kind: 'skill', moduleNum: w.moduleNum, wid: w.id, label: w.label, title: tf(sk, 'text'), text: tf(sk, 'text'), skillNum: num ? Number(num) : null }));
     });
     ['b', 'c'].forEach(st => {
       const stn = w.stations && w.stations[st];
@@ -5568,7 +5661,7 @@ async function buildSearchIndex(){
       const sections = rawSections.filter(sec => !isTuningWarmupSection(sec, w.moduleNum));
       sections.forEach((sec, secIdx) => (sec.steps || []).forEach((step, stepIdx) => {
         const text = stripTags(tf(step, 'text') || '');
-        if(text) ix.push({ kind: 'step', moduleNum: w.moduleNum, wid: w.id, label: w.label, station: st, secIdx, stepIdx, secTitle: sec.title || '', text });
+        if(text) ix.push(searchEntry({ kind: 'step', moduleNum: w.moduleNum, wid: w.id, label: w.label, station: st, secIdx, stepIdx, secTitle: sec.title || '', title: stripTags(tf(step, 'label') || '') || (sec.title || ''), text }));
       }));
     });
   });
@@ -5597,7 +5690,7 @@ async function buildSearchIndex(){
       chords.forEach(c => { if(!existing.chords.includes(c)) existing.chords.push(c); });
       return;
     }
-    const entry = { kind: 'song', moduleNum, wid, text: song.name + (metaTextShown ? ' ' + metaTextShown : ''), chords: [...chords] };
+    const entry = searchEntry({ kind: 'song', moduleNum, wid, title: song.name, text: song.name + (metaTextShown ? ' ' + metaTextShown : ''), chords: [...chords] });
     songSeen.set(song.name, entry);
     ix.push(entry);
   };
@@ -5606,71 +5699,165 @@ async function buildSearchIndex(){
   Object.keys(MS2).forEach(m => (MS2[m] || []).forEach(sg => indexSong(sg, Number(m), null)));
   return ix;
 }
-async function toggleSearch(){
+/* The search panel is routed like the explore pages (#search), so the phone's
+   Back gesture closes it instead of leaving the site. toggleSearch stays the
+   name the header button and the panel's ✕ call. */
+function toggleSearch(){
+  const p = document.getElementById('search-panel');
+  if(!p) return;
+  if(p.hasAttribute('hidden')) goExploreHash('search');
+  else closeSearchPanel();
+}
+function closeSearchPanel(){
+  if(location.hash === '#search'){ exitExploreHash(); return; }  // the router finishes the job
+  searchClosePanel();
+}
+function searchClosePanel(){
+  const p = document.getElementById('search-panel');
+  if(!p || p.hasAttribute('hidden')) return;
+  p.setAttribute('hidden', '');
+  const btn = document.getElementById('search-btn');
+  if(btn){ btn.setAttribute('aria-expanded', 'false'); btn.focus(); }
+}
+async function openSearchPanel(){
   const p = document.getElementById('search-panel');
   const btn = document.getElementById('search-btn');
-  if(!p) return;
-  const open = p.hasAttribute('hidden');
-  if(!open){ p.setAttribute('hidden', ''); if(btn) btn.setAttribute('aria-expanded', 'false'); return; }
+  if(!p || !p.hasAttribute('hidden')) return;
   closeTopPanels('search');
   p.removeAttribute('hidden');
   if(btn) btn.setAttribute('aria-expanded', 'true');
   p.innerHTML = `<div class="daily5-head"><span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.7-4.7"/></svg> <span data-i18n="search.title">${escHtml(t('search.title'))}</span></span><button type="button" class="tp-close" onclick="toggleSearch()" aria-label="${escAttr(t('search.closeAria'))}" data-i18n-attr="aria-label:search.closeAria">&#x2715;</button></div>
-    <input type="search" class="search-input" id="search-input" placeholder="${escAttr(t('search.placeholder'))}" oninput="runSearch(this.value)" aria-label="${escAttr(t('search.ariaLabel'))}" data-i18n-attr="placeholder:search.placeholder;aria-label:search.ariaLabel">
-    <div id="search-results" class="search-results"><div class="coach-tip" data-i18n="search.gettingReady">${escHtml(t('search.gettingReady'))}</div></div>`;
+    <input type="search" class="search-input" id="search-input" placeholder="${escAttr(t('search.placeholder'))}" oninput="onSearchInput(this.value)" onkeydown="if(event.key==='Escape'){event.preventDefault();closeSearchPanel();}" aria-label="${escAttr(t('search.ariaLabel'))}" data-i18n-attr="placeholder:search.placeholder;aria-label:search.ariaLabel">
+    <div id="search-results" class="search-results" aria-live="polite"><div class="coach-tip" data-i18n="search.gettingReady">${escHtml(t('search.gettingReady'))}</div></div>`;
   const input = document.getElementById('search-input');
   if(input) input.focus();
   if(!searchIndex) searchIndex = await buildSearchIndex();
   const res = document.getElementById('search-results');
   if(res && res.querySelector('.coach-tip')) res.innerHTML = `<div class="coach-tip" data-i18n="search.intro" data-i18n-params="${escAttr(JSON.stringify({n:MODULE_MANIFEST.length}))}">${escHtml(t('search.intro',{n:MODULE_MANIFEST.length}))}</div>`;
 }
+
+/* Typing on a Chromebook fires oninput per keystroke; re-scanning the whole
+   index on each one made the box feel sticky. One pass per pause instead. */
+let _searchTimer = null;
+function onSearchInput(v){
+  clearTimeout(_searchTimer);
+  _searchTimer = setTimeout(() => runSearch(v), 120);
+}
+
+/* Wrap every matched term in the snippet. Offsets come from the folded copy,
+   which is length-preserving (see foldChar), so they map straight back onto
+   the raw text and the accents survive in what the student reads. */
+function searchHighlight(raw, terms){
+  const f = searchFold(raw);
+  const ranges = [];
+  terms.forEach(term => {
+    if(term.length < 2) return;
+    let i = f.indexOf(term);
+    while(i !== -1){ ranges.push([i, i + term.length]); i = f.indexOf(term, i + term.length); }
+  });
+  if(!ranges.length) return escHtml(raw);
+  ranges.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  // Merge overlapping/touching runs so "chord" inside "chord chart" doesn't
+  // come out as two <mark>s with a seam down the middle.
+  const merged = [];
+  for(const r of ranges){
+    const last = merged[merged.length - 1];
+    if(last && r[0] <= last[1]) last[1] = Math.max(last[1], r[1]);
+    else merged.push([r[0], r[1]]);
+  }
+  let out = '', at = 0;
+  for(const [s, e] of merged){
+    out += escHtml(raw.slice(at, s)) + '<mark class="search-mark">' + escHtml(raw.slice(s, e)) + '</mark>';
+    at = e;
+  }
+  return out + escHtml(raw.slice(at));
+}
+
 function runSearch(q){
   const res = document.getElementById('search-results');
   if(!res || !searchIndex) return;
-  q = (q || '').trim().toLowerCase();
+  const rawQ = (q || '').trim();
+  q = searchFold(rawQ);
   if(q.length < 2){ res.innerHTML = `<div class="coach-tip">${escHtml(t('search.typeMore'))}</div>`; return; }
-  const terms = q.split(/\s+/).filter(Boolean);
-  /* "G C D" — a space-separated list of known chord names — asks "what can I
-     play with just these shapes?" rather than a text search. Match songs
-     whose whole indexed chord set is covered by the chords the student named
-     (a student who knows only G, C, D can play a song that uses G and C, but
-     not one that also needs Em). Needs 2+ terms so an ordinary word that
-     happens to share a chord's spelling (e.g. "am") doesn't get hijacked. */
+  // Commas are how people actually write a chord list ("g, c, d").
+  const terms = q.split(/[\s,]+/).filter(Boolean);
+  /* "G C D" — a list of known chord names — asks "what can I play with just
+     these shapes?" rather than a text search. Match songs whose whole indexed
+     chord set is covered by the chords the student named (knowing G, C, D
+     gets you a song that uses G and C, but not one that also needs Em). Needs
+     2+ terms so an ordinary word that happens to share a chord's spelling
+     (e.g. "am") doesn't get hijacked. */
   const isChordQuery = terms.length >= 2 && terms.every(t => CHORD_NAME_LOOKUP.has(t));
-  const scored = [];
+  let scored = [];
+  let loose = false;
   if(isChordQuery){
     const known = new Set(terms.map(t => CHORD_NAME_LOOKUP.get(t)));
     for(const e of searchIndex){
       if(e.kind !== 'song' || !e.chords || !e.chords.length) continue;
       if(!e.chords.every(c => known.has(c))) continue;
       scored.push({ e, score: e.chords.length });
-      if(scored.length > 400) break;
     }
   } else {
+    /* Rank rather than take-the-first-400: the old loop broke out of the scan
+       as soon as it had 400 hits, so a common word like "chord" never reached
+       the later modules at all. The index is a few thousand short strings —
+       scanning all of it costs under a millisecond. */
+    const KIND_BONUS = { song: 3, skill: 2, set: 2, step: 0 };
+    const rank = (e, needAll) => {
+      const hay = e.hay, ttl = e.fTitle;
+      const hits = terms.filter(t => hay.includes(t)).length;
+      if(needAll ? hits < terms.length : hits === 0) return -1;
+      let s = hits * 2;
+      if(ttl === q) s += 14;                                  // the student typed the name
+      else if(ttl.startsWith(q)) s += 8;
+      else if(ttl.includes(q)) s += 5;
+      if(hay.includes(q)) s += 3;                             // all terms together, in order
+      if(terms.every(t => foldWordStart(ttl, t))) s += 3;
+      else if(terms.every(t => foldWordStart(hay, t))) s += 2; // whole words beat mid-word
+      s += KIND_BONUS[e.kind] || 0;
+      return s;
+    };
     for(const e of searchIndex){
-      const hay = e.text.toLowerCase();
-      if(!terms.every(t => hay.includes(t))) continue;
-      scored.push({ e, score: (e.kind === 'skill' ? 2 : e.kind === 'set' ? 1 : 0) + (hay.indexOf(terms[0]) < 40 ? 1 : 0) });
-      if(scored.length > 400) break;
+      const s = rank(e, true);
+      if(s >= 0) scored.push({ e, score: s });
+    }
+    /* Nothing matched every word — usually one extra or misspelt word in an
+       otherwise fine query. Show the best partial matches instead of a dead
+       end, and say that's what they are. */
+    if(!scored.length && terms.length > 1){
+      loose = true;
+      for(const e of searchIndex){
+        const s = rank(e, false);
+        if(s >= 0) scored.push({ e, score: s });
+      }
     }
   }
-  scored.sort((a, b) => b.score - a.score || a.e.moduleNum - b.e.moduleNum);
-  const top = scored.slice(0, 25);
+  scored.sort((a, b) => b.score - a.score || a.e.moduleNum - b.e.moduleNum || a.e.kind.localeCompare(b.e.kind));
+  const LIMIT = 25;
+  const total = scored.length;
+  const top = scored.slice(0, LIMIT);
   if(!top.length){
     res.innerHTML = isChordQuery
       ? `<div class="coach-tip">${escHtml(t('search.noChordSongs',{chords:terms.join(', ').toUpperCase()}))}</div>`
-      : `<div class="coach-tip">${escHtml(t('search.noMatches',{q}))}</div>`;
+      : `<div class="coach-tip">${escHtml(t('search.noMatches',{q:rawQ}))}</div>`;
     return;
   }
   const snippet = (text) => {
-    const at = text.toLowerCase().indexOf(terms[0]);
+    const f = searchFold(text);
+    // Centre on the FIRST term that actually appears, not blindly on terms[0].
+    let at = -1;
+    for(const term of terms){ const i = f.indexOf(term); if(i !== -1 && (at === -1 || i < at)) at = i; }
     const start = Math.max(0, at - 30);
     let cut = text.slice(start, start + 110);
-    if(start > 0) cut = '…' + cut;
-    if(start + 110 < text.length) cut += '…';
-    return escHtml(cut);
+    let html = searchHighlight(cut, terms);
+    if(start > 0) html = '…' + html;
+    if(start + 110 < text.length) html += '…';
+    return html;
   };
-  res.innerHTML = top.map(({e}) => {
+  const head = loose
+    ? `<div class="search-count search-loose">${escHtml(t('search.loose',{q:rawQ}))}</div>`
+    : `<div class="search-count">${escHtml(total > LIMIT ? t('search.countCapped',{shown:LIMIT, n:total}) : t('search.count',{n:total}))}</div>`;
+  res.innerHTML = head + top.map(({e}) => {
     const where = e.kind === 'song'
       ? t('search.whereSong', {n:e.moduleNum})
       : t('search.whereSet', {n:e.moduleNum, label:escHtml(e.label || '')}) +
@@ -5734,7 +5921,7 @@ async function searchGoSet(moduleNum, wid){
 function toggleKeepPracticing(){
   const screen = document.getElementById('keep-practicing-screen');
   if(!screen) return;
-  if(screen.hasAttribute('hidden')) location.hash = 'keep-practicing';
+  if(screen.hasAttribute('hidden')) goExploreHash('keep-practicing');
   else closeKeepPracticingScreen();
 }
 function openKeepPracticingScreen(){
@@ -5781,7 +5968,7 @@ async function renderKeepPracticing(){
   }).join('');
 }
 function closeKeepPracticingScreen(){
-  if(location.hash === '#keep-practicing'){ location.hash = ''; return; }  // hashchange finishes the job
+  if(location.hash === '#keep-practicing'){ exitExploreHash(); return; }  // the router finishes the job
   kpClosePanel();
 }
 function kpClosePanel(){
@@ -5798,7 +5985,7 @@ function kpClosePanel(){
 function toggleMyProgress(){
   const screen = document.getElementById('my-progress-screen');
   if(!screen) return;
-  if(screen.hasAttribute('hidden')) location.hash = 'my-progress';
+  if(screen.hasAttribute('hidden')) goExploreHash('my-progress');
   else closeMyProgressScreen();
 }
 function openMyProgressScreen(){
@@ -5812,7 +5999,7 @@ function openMyProgressScreen(){
   renderMyProgress();
 }
 function closeMyProgressScreen(){
-  if(location.hash === '#my-progress'){ location.hash = ''; return; }  // hashchange finishes the job
+  if(location.hash === '#my-progress'){ exitExploreHash(); return; }  // the router finishes the job
   mpClosePanel();
 }
 function mpClosePanel(){
@@ -5858,11 +6045,11 @@ function renderMyProgress(){
 function toggleClassActivities(){
   const screen = document.getElementById('class-activities-screen');
   if(!screen) return;
-  if(screen.hasAttribute('hidden')) location.hash = 'class-activities';
+  if(screen.hasAttribute('hidden')) goExploreHash('class-activities');
   else closeClassActivitiesScreen();
 }
 function closeClassActivitiesScreen(){
-  if(location.hash === '#class-activities'){ location.hash = ''; return; }  // hashchange finishes the job
+  if(location.hash === '#class-activities'){ exitExploreHash(); return; }  // the router finishes the job
   caClosePanel();
 }
 function caClosePanel(){
@@ -6058,7 +6245,7 @@ function closeCaReminder(){
 }
 function caReminderGo(){
   closeCaReminder();
-  location.hash = 'class-activities';
+  goExploreHash('class-activities');
 }
 
 /* ════════════════════════════════════════════════
