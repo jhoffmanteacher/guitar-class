@@ -579,8 +579,8 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: finishing on B and high e', label_es: 'Mira: termina en Si y mi aguda',
-                text: 'Watch: <a href="https://youtu.be/WQ8DSYD2kvw?t=172" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (6:00–end), finishing the fretboard on the B and high-e strings.',
-                text_es: 'Mira: <a href="https://youtu.be/WQ8DSYD2kvw?t=172" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (6:00–final), terminando el mástil en las cuerdas Si y mi aguda.',
+                text: 'Watch: <a href="https://youtu.be/WQ8DSYD2kvw?t=360" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (6:00–end), finishing the fretboard on the B and high-e strings.',
+                text_es: 'Mira: <a href="https://youtu.be/WQ8DSYD2kvw?t=360" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (6:00–final), terminando el mástil en las cuerdas Si y mi aguda.',
                 hint: 'Notice the B string breaks the pattern you learned last set — it\'s tuned a half-step "early," which shifts every shape crossing onto it.',
                 hint_es: 'Fíjate que la cuerda Si rompe el patrón que aprendiste la unidad pasada — está afinada un semitono "antes," lo cual desplaza cualquier forma que cruce hacia ella.',
                 skills: [1, 2],
