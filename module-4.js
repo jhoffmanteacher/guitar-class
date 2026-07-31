@@ -367,8 +367,8 @@ SETS.push(
               },
               {
                 label: 'Challenge — Solo over "Luna"', label_es: 'Reto — Solo sobre "Luna"',
-                text: 'Your box is D minor pentatonic Pattern 1 — root D, low E fret 10. Jam over <a href="https://www.youtube.com/watch?v=wBxFnX_V9mQ" target="_blank">▶ &#x1F3B5; a slow Dm practice jam (Luna\'s solo key)</a>:<ol><li>Improvise four bars using only the three notes marked below.</li><li>Improvise four more, adding a fourth note from the box.</li></ol>You\'ve got it when: eight bars where every phrase starts or ends on D. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
-                text_es: 'Tu caja es el Patrón pentatónico 1 de D menor — raíz D, cuerda Mi grave traste 10. Toca sobre <a href="https://www.youtube.com/watch?v=wBxFnX_V9mQ" target="_blank">▶ &#x1F3B5; una pista de jam lenta en D menor (la tonalidad del solo de Luna)</a>:<ol><li>Improvisa cuatro compases usando solo las tres notas marcadas abajo.</li><li>Improvisa cuatro más, agregando una cuarta nota de la caja.</li></ol>Lo tienes cuando: ocho compases donde cada frase empieza o termina en D. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 4 de 5</a>.',
+                text: 'Your box is D minor pentatonic Pattern 1 — root D, low E fret 10. Jam over <a href="https://www.youtube.com/watch?v=wBxFnX_V9mQ&t=84" target="_blank">▶ &#x1F3B5; a slow Dm practice jam (Luna\'s solo key)</a>:<ol><li>Improvise four bars using only the three notes marked below.</li><li>Improvise four more, adding a fourth note from the box.</li></ol>You\'ve got it when: eight bars where every phrase starts or ends on D. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
+                text_es: 'Tu caja es el Patrón pentatónico 1 de D menor — raíz D, cuerda Mi grave traste 10. Toca sobre <a href="https://www.youtube.com/watch?v=wBxFnX_V9mQ&t=84" target="_blank">▶ &#x1F3B5; una pista de jam lenta en D menor (la tonalidad del solo de Luna)</a>:<ol><li>Improvisa cuatro compases usando solo las tres notas marcadas abajo.</li><li>Improvisa cuatro más, agregando una cuarta nota de la caja.</li></ol>Lo tienes cuando: ocho compases donde cada frase empieza o termina en D. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 4 de 5</a>.',
                 hint: '"Luna" lives in F major, and F\'s relative minor is D — that\'s why D minor pentatonic is your box here. Same Pattern 1 shape you\'ve been drilling — just at fret 10, the course\'s highest position. This high up, the frets sit closer together, so the stretch is easier than it looks.',
                 hint_es: '"Luna" vive en F mayor, y la relativa menor de F es D — por eso la pentatónica de D menor es tu caja aquí. La misma forma del Patrón 1 que has estado ejercitando — solo que en el traste 10, la posición más alta del curso. Tan arriba, los trastes están más juntos, así que el estiramiento es más fácil de lo que parece.',
                 stuck: 'Trade just D and F (frets 10 and 13 on the low E) back and forth, changing only the rhythm, until an idea appears.',
@@ -508,8 +508,8 @@ SETS.push(
             steps: [
           {
             label: 'Watch: using the minor pentatonic', label_es: 'Mira: usar la pentatónica menor',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M" target="_blank">How to USE the Minor Pentatonic Scale – Lauren Bateman (0:00–4:00)</a> to refresh the shape. Then YOU add the expression the video doesn\'t:<ol><li>Pick one note from the pattern.</li><li>Play it loud, then soft.</li></ol>That difference in volume is dynamics.',
-            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M" target="_blank">How to USE the Minor Pentatonic Scale – Lauren Bateman (0:00–4:00)</a> para repasar la forma. Luego TÚ agregas la expresión que el video no muestra:<ol><li>Elige una nota del patrón.</li><li>Tócala fuerte, y luego suave.</li></ol>Esa diferencia de volumen es la dinámica.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M&t=31" target="_blank">How to USE the Minor Pentatonic Scale – Lauren Bateman (0:00–4:00)</a> to refresh the shape. Then YOU add the expression the video doesn\'t:<ol><li>Pick one note from the pattern.</li><li>Play it loud, then soft.</li></ol>That difference in volume is dynamics.',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M&t=31" target="_blank">How to USE the Minor Pentatonic Scale – Lauren Bateman (0:00–4:00)</a> para repasar la forma. Luego TÚ agregas la expresión que el video no muestra:<ol><li>Elige una nota del patrón.</li><li>Tócala fuerte, y luego suave.</li></ol>Esa diferencia de volumen es la dinámica.',
             hint: 'The video shows the notes; the dynamics are on you. Play one note loud, then whisper-soft, and listen for how much the FEEL changes even though the note doesn\'t.',
             hint_es: 'El video muestra las notas; la dinámica depende de ti. Toca una nota fuerte, y luego en un susurro suave, y escucha cuánto cambia la SENSACIÓN aunque la nota no cambie.',
             skills: [1, 2],
@@ -880,8 +880,8 @@ SETS.push(
             steps: [
           {
             label: 'Re-watch: major/minor connection', label_es: 'Vuelve a mirar: conexión mayor/menor',
-            text: 'Re-watch the same video from Set 1 — <a href="https://youtu.be/m_IiyJu60-c?t=105" target="_blank">Major Pentatonic Scale – Marty Music</a> (the link skips the intro) — this time listening for the major/minor connection. Then prove it on your own neck:<ol><li>Play Pattern 1 and call the low E root (1st finger) "home" for minor.</li><li>Then treat the note three frets higher (4th finger, same string) as "home" and hear the same shape turn major.</li></ol>',
-            text_es: 'Vuelve a mirar el mismo video de la Unidad 1 — <a href="https://youtu.be/m_IiyJu60-c?t=105" target="_blank">Major Pentatonic Scale – Marty Music</a> (el enlace se salta la intro) — esta vez escuchando la conexión mayor/menor. Luego compruébalo en tu propio mástil:<ol><li>Toca el Patrón 1 y llama "nota base" a la raíz de la Mi grave (dedo 1º) para menor.</li><li>Luego trata la nota tres trastes más arriba (dedo 4º, misma cuerda) como "nota base" y escucha cómo la misma forma se vuelve mayor.</li></ol>',
+            text: 'Re-watch the same video from Set 1 — <a href="https://youtu.be/m_IiyJu60-c?t=44" target="_blank">Major Pentatonic Scale – Marty Music</a> (the link skips the intro) — this time listening for the major/minor connection. Then prove it on your own neck:<ol><li>Play Pattern 1 and call the low E root (1st finger) "home" for minor.</li><li>Then treat the note three frets higher (4th finger, same string) as "home" and hear the same shape turn major.</li></ol>',
+            text_es: 'Vuelve a mirar el mismo video de la Unidad 1 — <a href="https://youtu.be/m_IiyJu60-c?t=44" target="_blank">Major Pentatonic Scale – Marty Music</a> (el enlace se salta la intro) — esta vez escuchando la conexión mayor/menor. Luego compruébalo en tu propio mástil:<ol><li>Toca el Patrón 1 y llama "nota base" a la raíz de la Mi grave (dedo 1º) para menor.</li><li>Luego trata la nota tres trastes más arriba (dedo 4º, misma cuerda) como "nota base" y escucha cómo la misma forma se vuelve mayor.</li></ol>',
             hint: 'Same five notes, two names: whichever note you treat as "home" (the root) decides whether it sounds major or minor. Watch for that connection, then prove it on your own neck. Your hand stays parked in one place — only which note you call "home" changes.',
             hint_es: 'Las mismas cinco notas, dos nombres: la nota que trates como "nota base" (la raíz) decide si suena mayor o menor. Fíjate en esa conexión, y luego compruébala en tu propio mástil. Tu mano se queda quieta en un lugar — solo cambia qué nota llamas "nota base."',
             skills: [1, 2],
@@ -890,8 +890,8 @@ SETS.push(
           },
           {
             label: 'Watch: vibrato technique', label_es: 'Mira: técnica de vibrato',
-            text: 'Watch: <a href="https://youtu.be/WNWqobkgdBA" target="_blank">Vibrato Technique (Hand Movement, TE-103) – JustinGuitar</a> (0:00–3:00). As you watch, try it yourself on the 5th fret of string 1 — rock the finger back and forth gently and listen for the pitch to wobble.',
-            text_es: 'Mira: <a href="https://youtu.be/WNWqobkgdBA" target="_blank">Vibrato Technique (Hand Movement, TE-103) – JustinGuitar</a> (0:00–3:00). Mientras miras, pruébalo tú mismo en el traste 5 de la cuerda 1 — mece el dedo hacia adelante y atrás suavemente y escucha cómo la nota oscila.',
+            text: 'Watch: <a href="https://youtu.be/WNWqobkgdBA?t=93" target="_blank">Vibrato Technique (Hand Movement, TE-103) – JustinGuitar</a> (0:00–3:00). As you watch, try it yourself on the 5th fret of string 1 — rock the finger back and forth gently and listen for the pitch to wobble.',
+            text_es: 'Mira: <a href="https://youtu.be/WNWqobkgdBA?t=93" target="_blank">Vibrato Technique (Hand Movement, TE-103) – JustinGuitar</a> (0:00–3:00). Mientras miras, pruébalo tú mismo en el traste 5 de la cuerda 1 — mece el dedo hacia adelante y atrás suavemente y escucha cómo la nota oscila.',
             hint: 'Vibrato is a small, controlled pitch wobble on a sustained note. Try it on the 5th fret, string 1. Rock your finger back and forth gently. It takes weeks to develop — just start!',
             hint_es: 'El vibrato es una pequeña oscilación controlada de la altura de una nota sostenida. Pruébalo en el traste 5, cuerda 1. Mece tu dedo hacia adelante y atrás suavemente. Toma semanas desarrollarlo — ¡solo empieza!',
             skills: [3],
@@ -1196,11 +1196,11 @@ MODULE_SONGS[4] = [
       { name: '"the cure" — Olivia Rodrigo', meta: 'Full solo · A minor pentatonic', meta_es: 'Solo completo · A menor pentatónica', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',
         originalUrl: 'https://www.youtube.com/watch?v=B402rKl4bUg',
         tutorialUrl: 'https://www.youtube.com/watch?v=adW_zSkClaY',
-        backingUrl: 'https://www.youtube.com/watch?v=4M-RBg-ULb8',
+        backingUrl: 'https://www.youtube.com/watch?v=4M-RBg-ULb8&start=16',
         backingKey: 'Am' },
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Full solo over D–C–G · G major / E minor pentatonic', meta_es: 'Solo completo sobre D–C–G · G mayor / E menor pentatónica', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM',
+        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM&start=282&end=938',
         backingUrl: 'https://www.youtube.com/watch?v=AFbg4SgEwBg',
         backingKey: 'Em/G' },
       { name: '"Seven Nation Army" — The White Stripes', meta: 'E minor pentatonic solo', meta_es: 'Solo en E menor pentatónica', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
@@ -1211,7 +1211,7 @@ MODULE_SONGS[4] = [
       { name: '"Luna" — Peso Pluma, Junior H', meta: 'Full solo using Dm pentatonic (root D, low E fret 10)', meta_es: 'Solo completo usando Dm pentatónica (raíz D, Mi grave traste 10)', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok',
-        backingUrl: 'https://www.youtube.com/watch?v=wBxFnX_V9mQ',
+        backingUrl: 'https://www.youtube.com/watch?v=wBxFnX_V9mQ&start=84',
         backingKey: 'Dm' },
       { name: '"Let It Be" — The Beatles', meta: 'Am / C-major pentatonic solo over C–G–Am–F', meta_es: 'Solo en Am / C mayor pentatónica sobre C–G–Am–F', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
@@ -1219,12 +1219,12 @@ MODULE_SONGS[4] = [
         backingUrl: 'https://www.youtube.com/watch?v=bCl8YuqHURE',
         backingKey: 'C' },
       { name: '"Happy Birthday"', meta: 'Full melodic reharmonization using pentatonic (optional)', meta_es: 'Rearmonización melódica completa usando pentatónica (opcional)', type: 'Supp', core: false,
-        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w&start=46' },
       { name: '"12-bar blues in E"', meta: 'E minor pentatonic — classic improv context', meta_es: 'E menor pentatónica — contexto clásico de improvisación', type: 'Choice', core: false, level: 1,
         tutorialUrl: 'https://www.youtube.com/watch?v=pJL2j2v6XZM' },
       { name: '"La Bamba" — Ritchie Valens', meta: 'C major pentatonic — bright and fun', meta_es: 'C mayor pentatónica — brillante y divertida', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=BycLmWI97Nc',
-        tutorialUrl: 'https://www.youtube.com/watch?v=o-SdTXIAvTE' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=o-SdTXIAvTE&start=52' },
       { name: '"Back in Black" — AC/DC', meta: 'Simplified solo intro — A minor pentatonic', meta_es: 'Intro de solo simplificada — A menor pentatónica', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=pAgnJDJN4VA',
         tutorialUrl: 'https://www.youtube.com/watch?v=aeYDJciDuao' },
@@ -1233,7 +1233,7 @@ MODULE_SONGS[4] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=dutLP1SoSLs' },
       { name: '"Purple Haze" — Jimi Hendrix', meta: 'E pentatonic box — full pattern', meta_es: 'Caja de E pentatónica — patrón completo', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=WGoDaYjdfSg',
-        tutorialUrl: 'https://www.youtube.com/watch?v=gKhmARXdWGE' }
+        tutorialUrl: 'https://www.youtube.com/watch?v=gKhmARXdWGE&start=8' }
     ];
 
 MODULE_REVIEWS[4] = {

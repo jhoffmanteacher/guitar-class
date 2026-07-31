@@ -5099,7 +5099,9 @@ function loadPanel(type,url,title,subtitle){
     if(ytMatch){
       // carry a ?t=/&start= timestamp into the embed so timed links land right
       const tMatch=url.match(/[?&](?:t|start)=(\d+)/);
-      embedUrl=`https://www.youtube.com/embed/${ytMatch[1]}?rel=0&modestbranding=1${tMatch?`&start=${tMatch[1]}`:''}`;
+      // end= is embed-only and a soft stop — the player pauses there, but the student can still scrub past it
+      const endMatch=url.match(/[?&]end=(\d+)/);
+      embedUrl=`https://www.youtube.com/embed/${ytMatch[1]}?rel=0&modestbranding=1${tMatch?`&start=${tMatch[1]}`:''}${endMatch?`&end=${endMatch[1]}`:''}`;
     }
     wrap.className='rp-iframe-wrap rp-youtube';
     // Some videos (age-restricted / label-limited) only play on YouTube itself,

@@ -32,8 +32,8 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: chords in any key', label_es: 'Mira: acordes en cualquier tonalidad',
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=jGh2Erg-o8E" target="_blank">Encontrar los acordes en cualquier tonalidad – Maru Martinez (0:00–7:27)</a> (in Spanish — turn on English captions if you need them; the on-screen diagrams carry the lesson). Watch how she builds a chord on every note of the scale — that\'s the "chord family" you\'ll be naming with Roman numerals today.',
-                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=jGh2Erg-o8E" target="_blank">Encontrar los acordes en cualquier tonalidad – Maru Martinez (0:00–7:27)</a> (en español — activa los subtítulos en inglés si los necesitas; los diagramas en pantalla llevan la lección). Mira cómo ella construye un acorde en cada nota de la escala — esa es la "familia de acordes" que vas a nombrar con números romanos hoy.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=jGh2Erg-o8E&t=41" target="_blank">Encontrar los acordes en cualquier tonalidad – Maru Martinez (0:00–7:27)</a> (in Spanish — turn on English captions if you need them; the on-screen diagrams carry the lesson). Watch how she builds a chord on every note of the scale — that\'s the "chord family" you\'ll be naming with Roman numerals today.',
+                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=jGh2Erg-o8E&t=41" target="_blank">Encontrar los acordes en cualquier tonalidad – Maru Martinez (0:00–7:27)</a> (en español — activa los subtítulos en inglés si los necesitas; los diagramas en pantalla llevan la lección). Mira cómo ella construye un acorde en cada nota de la escala — esa es la "familia de acordes" que vas a nombrar con números romanos hoy.',
                 hint: 'Every chord you\'ve ever strummed is built from a scale — today you learn the recipe that turns one scale into a whole family of chords.',
                 hint_es: 'Cada acorde que has rasgueado alguna vez se construye a partir de una escala — hoy aprendes la receta que convierte una escala en toda una familia de acordes.',
                 skills: [1],
@@ -327,8 +327,8 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: chords that sound good together', label_es: 'Mira: acordes que suenan bien juntos',
-                text: 'Watch: <a href="https://youtu.be/6U8-Y7DEzOE" target="_blank">What chords sound good together? | Music theory ep. 7 – Paul Davids</a> — a second voice on the chord families you built in Set 1. Paul shows why a key\'s chords belong together; your job is to run it backwards: given a song\'s chords, name the key.',
-                text_es: 'Mira: <a href="https://youtu.be/6U8-Y7DEzOE" target="_blank">What chords sound good together? | Music theory ep. 7 – Paul Davids</a> — una segunda voz sobre las familias de acordes que construiste en la Unidad 1. Paul muestra por qué los acordes de una tonalidad pertenecen juntos; tu trabajo es hacerlo al revés: dados los acordes de una canción, nombrar la tonalidad.',
+                text: 'Watch: <a href="https://youtu.be/6U8-Y7DEzOE?t=69" target="_blank">What chords sound good together? | Music theory ep. 7 – Paul Davids</a> — a second voice on the chord families you built in Set 1. Paul shows why a key\'s chords belong together; your job is to run it backwards: given a song\'s chords, name the key.',
+                text_es: 'Mira: <a href="https://youtu.be/6U8-Y7DEzOE?t=69" target="_blank">What chords sound good together? | Music theory ep. 7 – Paul Davids</a> — una segunda voz sobre las familias de acordes que construiste en la Unidad 1. Paul muestra por qué los acordes de una tonalidad pertenecen juntos; tu trabajo es hacerlo al revés: dados los acordes de una canción, nombrar la tonalidad.',
                 hint: 'You already know each key\'s chord family from Set 1 — this is just running that lookup backwards.',
                 hint_es: 'Ya conoces la familia de acordes de cada tonalidad desde la Unidad 1 — esto es solo hacer esa búsqueda al revés.',
                 skills: [1],

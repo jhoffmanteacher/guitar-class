@@ -289,8 +289,8 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: note system on D and G', label_es: 'Mira: sistema de notas en Re y Sol',
-                text: 'Watch: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (0:00–6:00). Follow along on your own guitar as he walks the D and G strings.',
-                text_es: 'Mira: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (0:00–6:00). Sigue el ritmo en tu propia guitarra mientras él recorre las cuerdas Re y Sol.',
+                text: 'Watch: <a href="https://youtu.be/WQ8DSYD2kvw?t=172" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (0:00–6:00). Follow along on your own guitar as he walks the D and G strings.',
+                text_es: 'Mira: <a href="https://youtu.be/WQ8DSYD2kvw?t=172" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (0:00–6:00). Sigue el ritmo en tu propia guitarra mientras él recorre las cuerdas Re y Sol.',
                 hint: 'Marty builds the fretboard the same way you already know the E and A strings from Module 2 — natural notes, then the sharps and flats that sit between them.',
                 hint_es: 'Marty construye el mástil de la misma manera que ya conoces las cuerdas Mi y La del Módulo 2 — notas naturales, y luego los sostenidos y bemoles que están entre ellas.',
                 skills: [1, 2],
@@ -579,8 +579,8 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: finishing on B and high e', label_es: 'Mira: termina en Si y mi aguda',
-                text: 'Watch: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (6:00–end), finishing the fretboard on the B and high-e strings.',
-                text_es: 'Mira: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (6:00–final), terminando el mástil en las cuerdas Si y mi aguda.',
+                text: 'Watch: <a href="https://youtu.be/WQ8DSYD2kvw?t=172" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (6:00–end), finishing the fretboard on the B and high-e strings.',
+                text_es: 'Mira: <a href="https://youtu.be/WQ8DSYD2kvw?t=172" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (6:00–final), terminando el mástil en las cuerdas Si y mi aguda.',
                 hint: 'Notice the B string breaks the pattern you learned last set — it\'s tuned a half-step "early," which shifts every shape crossing onto it.',
                 hint_es: 'Fíjate que la cuerda Si rompe el patrón que aprendiste la unidad pasada — está afinada un semitono "antes," lo cual desplaza cualquier forma que cruce hacia ella.',
                 skills: [1, 2],
@@ -594,8 +594,8 @@ SETS.push(
               },
               {
                 label: 'Watch: octaves and the B-string bump', label_es: 'Mira: octavas y el desfase de la cuerda Si',
-                text: 'Watch: <a href="https://youtu.be/wElX3v3POWU" target="_blank">Finding Notes On The Guitar Neck Using Octaves – JustinGuitar</a>. Pay close attention to what changes when the shape crosses onto the B string — that\'s today\'s 3-fret bump.',
-                text_es: 'Mira: <a href="https://youtu.be/wElX3v3POWU" target="_blank">Finding Notes On The Guitar Neck Using Octaves – JustinGuitar</a>. Presta mucha atención a qué cambia cuando la forma cruza hacia la cuerda Si — ese es el desfase de 3 trastes de hoy.',
+                text: 'Watch: <a href="https://youtu.be/wElX3v3POWU?t=87" target="_blank">Finding Notes On The Guitar Neck Using Octaves – JustinGuitar</a>. Pay close attention to what changes when the shape crosses onto the B string — that\'s today\'s 3-fret bump.',
+                text_es: 'Mira: <a href="https://youtu.be/wElX3v3POWU?t=87" target="_blank">Finding Notes On The Guitar Neck Using Octaves – JustinGuitar</a>. Presta mucha atención a qué cambia cuando la forma cruza hacia la cuerda Si — ese es el desfase de 3 trastes de hoy.',
                 hint: 'Every octave shape you\'ve used so far has been "two strings down, two frets up." Crossing onto B (or e) adds one extra fret — watch for it in the video.',
                 hint_es: 'Toda forma de octava que has usado hasta ahora ha sido "dos cuerdas hacia abajo, dos trastes hacia arriba." Cruzar hacia la Si (o la mi aguda) agrega un traste extra — obsérvalo en el video.',
                 skills: [4],
@@ -859,8 +859,8 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: TAB reading refresher', label_es: 'Mira: repaso de lectura de TAB',
-                text: 'Watch: <a href="https://youtu.be/qR0O0bUl5_A" target="_blank">How to Read Guitar TAB - A Better Way To Read Music – Lauren Bateman</a> as a refresher, paying attention to how string order and chord stacks are shown.',
-                text_es: 'Mira: <a href="https://youtu.be/qR0O0bUl5_A" target="_blank">How to Read Guitar TAB - A Better Way To Read Music – Lauren Bateman</a> como repaso, prestando atención a cómo se muestran el orden de las cuerdas y las pilas de acordes.',
+                text: 'Watch: <a href="https://youtu.be/qR0O0bUl5_A?t=32" target="_blank">How to Read Guitar TAB - A Better Way To Read Music – Lauren Bateman</a> as a refresher, paying attention to how string order and chord stacks are shown.',
+                text_es: 'Mira: <a href="https://youtu.be/qR0O0bUl5_A?t=32" target="_blank">How to Read Guitar TAB - A Better Way To Read Music – Lauren Bateman</a> como repaso, prestando atención a cómo se muestran el orden de las cuerdas y las pilas de acordes.',
                 hint: 'You met TAB reading back in Module 2 — today\'s new ground is reading it confidently ABOVE fret 5, and writing your own.',
                 hint_es: 'Conociste la lectura de TAB en el Módulo 2 — el terreno nuevo de hoy es leerlo con confianza ARRIBA del traste 5, y escribir el tuyo propio.',
                 skills: [1],
@@ -1189,7 +1189,7 @@ globalThis.MODULE_SONGS = globalThis.MODULE_SONGS || {};
 MODULE_SONGS[9] = [
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Map the intro up the neck — D & G strings', meta_es: 'Ubica la intro arriba del mástil — cuerdas Re y Sol', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM&start=282&end=938' },
       { name: '"Luna" — Peso Pluma, Junior H', meta: 'Punteo line crossing three strings', meta_es: 'Línea de punteo que cruza tres cuerdas', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
@@ -1201,7 +1201,7 @@ MODULE_SONGS[9] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=B5M5tVc7XZA' },
       { name: '"Just Like Heaven" — The Cure', meta: 'Arpeggiated riff — read it up the neck', meta_es: 'Riff arpegiado — léelo arriba del mástil', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=n3nPiBai66M',
-        tutorialUrl: 'https://www.youtube.com/watch?v=fEgsKS_IcQA' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=fEgsKS_IcQA&start=98&end=587' },
       { name: '"Smoke on the Water" — Deep Purple', meta: 'Write its riff as TAB — the classic starter riff', meta_es: 'Escribe su riff como TAB — el clásico riff para principiantes', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=Q2FzZSBD5LE',
         tutorialUrl: 'https://www.youtube.com/watch?v=QkT5yLP5VQA' }

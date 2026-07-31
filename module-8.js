@@ -32,8 +32,8 @@ SETS.push(
             steps: [
           {
             label: 'Watch: fingerpicking basics', label_es: 'Mira: fundamentos de fingerpicking',
-            text: 'Watch: <a href="https://youtu.be/YZkkUjDDamA" target="_blank">Beginner Fingerpicking Made Easy: Pinch, Pluck, & Play! – Marty Music</a> (0:00–5:00). As you watch, copy his RIGHT-HAND shape on your own guitar — thumb resting on the low E, fingers curved over the treble strings.',
-            text_es: 'Mira: <a href="https://youtu.be/YZkkUjDDamA" target="_blank">Beginner Fingerpicking Made Easy: Pinch, Pluck, & Play! – Marty Music</a> (0:00–5:00). Mientras miras, copia su forma de la MANO DERECHA en tu propia guitarra — pulgar apoyado en la Mi grave, dedos curvados sobre las cuerdas agudas.',
+            text: 'Watch: <a href="https://youtu.be/YZkkUjDDamA?t=52" target="_blank">Beginner Fingerpicking Made Easy: Pinch, Pluck, & Play! – Marty Music</a> (0:00–5:00). As you watch, copy his RIGHT-HAND shape on your own guitar — thumb resting on the low E, fingers curved over the treble strings.',
+            text_es: 'Mira: <a href="https://youtu.be/YZkkUjDDamA?t=52" target="_blank">Beginner Fingerpicking Made Easy: Pinch, Pluck, & Play! – Marty Music</a> (0:00–5:00). Mientras miras, copia su forma de la MANO DERECHA en tu propia guitarra — pulgar apoyado en la Mi grave, dedos curvados sobre las cuerdas agudas.',
             hint: 'Watch the right hand: wrist arched, fingers curved like he\'s holding a small ball. The thumb sits FORWARD of the fingers, not tucked under them.',
             hint_es: 'Observa la mano derecha: muñeca arqueada, dedos curvados como si sostuviera una pelotita. El pulgar se ubica ADELANTE de los dedos, no metido debajo de ellos.',
             skills: [1, 2],
@@ -57,8 +57,8 @@ SETS.push(
           },
           {
             label: 'Watch: p-i-m-a finger assignments', label_es: 'Mira: asignación de dedos p-i-m-a',
-            text: 'Watch: <a href="https://youtu.be/K2Z3RZc5t-A" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (0:00–4:00). Pause when he assigns the fingers and place yours the same way: p on the bass, i-m-a on G-B-e.',
-            text_es: 'Mira: <a href="https://youtu.be/K2Z3RZc5t-A" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (0:00–4:00). Pausa cuando asigna los dedos y coloca los tuyos de la misma manera: p en el bajo, i-m-a en Sol, Si y mi aguda.',
+            text: 'Watch: <a href="https://youtu.be/K2Z3RZc5t-A?t=54" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (0:00–4:00). Pause when he assigns the fingers and place yours the same way: p on the bass, i-m-a on G-B-e.',
+            text_es: 'Mira: <a href="https://youtu.be/K2Z3RZc5t-A?t=54" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (0:00–4:00). Pausa cuando asigna los dedos y coloca los tuyos de la misma manera: p en el bajo, i-m-a en Sol, Si y mi aguda.',
             hint: 'Justin\'s assignment: thumb handles strings 6, 5, 4 (the bass) and i-m-a handle strings 3, 2, 1 (treble). One finger per string is the goal.',
             hint_es: 'La asignación de Justin: el pulgar se encarga de las cuerdas 6, 5, 4 (el bajo) y i-m-a se encargan de las cuerdas 3, 2, 1 (las agudas). Un dedo por cuerda es la meta.',
             skills: [2, 3],
@@ -335,8 +335,8 @@ SETS.push(
             steps: [
           {
             label: 'Watch: count the 6-note cycle', label_es: 'Mira: cuenta el ciclo de 6 notas',
-            text: 'Watch: <a href="https://youtu.be/K2Z3RZc5t-A" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (revisit 0:00–4:00). This time, watch one full pattern cycle and count the notes out loud with him.',
-            text_es: 'Mira: <a href="https://youtu.be/K2Z3RZc5t-A" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (revisita 0:00–4:00). Esta vez, mira un ciclo completo del patrón y cuenta las notas en voz alta con él.',
+            text: 'Watch: <a href="https://youtu.be/K2Z3RZc5t-A?t=54" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (revisit 0:00–4:00). This time, watch one full pattern cycle and count the notes out loud with him.',
+            text_es: 'Mira: <a href="https://youtu.be/K2Z3RZc5t-A?t=54" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (revisita 0:00–4:00). Esta vez, mira un ciclo completo del patrón y cuenta las notas en voz alta con él.',
             hint: 'The "p-i-m-a-m-i" cycle (6 notes per bar) is one of the most-used patterns in folk and pop. It creates a flowing, arpeggiated feel under a chord.',
             hint_es: 'El ciclo "p-i-m-a-m-i" (6 notas por compás) es uno de los patrones más usados en folk y pop. Crea una sensación fluida y arpegiada debajo de un acorde.',
             skills: [1, 2],
@@ -1029,7 +1029,7 @@ MODULE_SONGS[8] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=q9dyAQLYybU' },
       { name: '"Sailor Song" — Gigi Perez', meta: 'Fingerpicked verse · capo IV (G-shapes)', meta_es: 'Estrofa con fingerpicking · capo en el traste 4 (formas de G)', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=1lrFsXkT_rM',
-        tutorialUrl: 'https://www.youtube.com/watch?v=rpoyXduMZZw' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=rpoyXduMZZw&end=551' },
       { name: '"Blackbird" — The Beatles', meta: 'Advanced fingerpicking · course capstone challenge', meta_es: 'Fingerpicking avanzado · reto final del curso', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=Man4Xw8Xypo',
         tutorialUrl: 'https://www.youtube.com/watch?v=Qqw15309knU' },
@@ -1038,7 +1038,7 @@ MODULE_SONGS[8] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=AlElh28IumI' },
       { name: '"Just Like Heaven" — The Cure', meta: 'Iconic arpeggiated intro riff — dreamy chord-picking', meta_es: 'Riff de intro arpegiado e icónico — punteo de acordes soñador', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=n3nPiBai66M',
-        tutorialUrl: 'https://www.youtube.com/watch?v=fEgsKS_IcQA' }
+        tutorialUrl: 'https://www.youtube.com/watch?v=fEgsKS_IcQA&start=98&end=587' }
     ];
 
 MODULE_REVIEWS[8] = {

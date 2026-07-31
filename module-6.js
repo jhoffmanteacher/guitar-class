@@ -782,8 +782,8 @@ SETS.push(
           },
           {
             label: 'Watch: strumming exercise (Andy Guitar)', label_es: 'Mira: ejercicio de rasgueo (Andy Guitar)',
-            text: 'Watch: <a href="https://youtu.be/vMt8T5Jqf10" target="_blank">Best Strumming Exercise For Beginners and Improvers – Andy Guitar</a> — a different teacher\'s method for building ANY pattern. Strum along with his exercise in real time, and notice how his approach differs from Justin\'s in the first video.',
-            text_es: 'Mira: <a href="https://youtu.be/vMt8T5Jqf10" target="_blank">Best Strumming Exercise For Beginners and Improvers – Andy Guitar</a> — el método de un maestro distinto para construir CUALQUIER patrón. Rasguea junto con su ejercicio en tiempo real, y fíjate en cómo su enfoque difiere del de Justin en el primer video.',
+            text: 'Watch: <a href="https://youtu.be/vMt8T5Jqf10?t=39" target="_blank">Best Strumming Exercise For Beginners and Improvers – Andy Guitar</a> — a different teacher\'s method for building ANY pattern. Strum along with his exercise in real time, and notice how his approach differs from Justin\'s in the first video.',
+            text_es: 'Mira: <a href="https://youtu.be/vMt8T5Jqf10?t=39" target="_blank">Best Strumming Exercise For Beginners and Improvers – Andy Guitar</a> — el método de un maestro distinto para construir CUALQUIER patrón. Rasguea junto con su ejercicio en tiempo real, y fíjate en cómo su enfoque difiere del de Justin en el primer video.',
             hint: 'There is no single "correct" pattern for a song — listen to the original recording and feel which fits. Andy\'s exercise builds the control to play whichever one you choose.',
             hint_es: 'No hay un único patrón "correcto" para una canción — escucha la grabación original y siente cuál encaja. El ejercicio de Andy construye el control para tocar el que elijas.',
             skills: [4, 5],
@@ -1055,9 +1055,9 @@ MODULE_SONGS[6] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"Knockin\' on Heaven\'s Door" — Dylan', meta: 'G–D–Am–Am–G–D–C–C · slow tempo, perfect for first strum patterns', meta_es: 'G–D–Am–Am–G–D–C–C · tempo lento, perfecto para los primeros patrones de rasgueo', type: 'Focus', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=rm9coqlk8fY',
-        tutorialUrl: 'https://www.youtube.com/watch?v=pWIL4N6QZ-Y' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=pWIL4N6QZ-Y&start=55&end=529' },
       { name: '"Happy Birthday"', meta: 'C–F–C–G–C · waltz strum in 3 (D · D · D, strong beat 1)', meta_es: 'C–F–C–G–C · rasgueo de vals en 3 (D · D · D, tiempo 1 fuerte)', type: 'Focus', core: true,
-        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w&start=46' },
       { name: '"I\'m Yours" — Jason Mraz', meta: 'G–D–Em–C · iconic D-DU-UDU strum', meta_es: 'G–D–Em–C · rasgueo icónico D-DU-UDU', type: 'Focus', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=EkHTsc9PU2A',
         tutorialUrl: 'https://www.youtube.com/watch?v=6ugeJWAMz6w' },
@@ -1066,7 +1066,7 @@ MODULE_SONGS[6] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=61pk1YH9Lu0' },
       { name: '"Bad Moon Rising" — CCR', meta: 'D–A–G · driving rock-style strum', meta_es: 'D–A–G · rasgueo impulsor estilo rock', type: 'Focus', core: true,
         originalUrl: 'https://www.youtube.com/watch?v=5BmEGm-mraE',
-        tutorialUrl: 'https://www.youtube.com/watch?v=liBI2yT_fpw' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=liBI2yT_fpw&start=84&end=251' },
       { name: '"Let It Be" — The Beatles', meta: 'C–G–Am–F · slow, even pattern', meta_es: 'C–G–Am–F · patrón lento y parejo', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
         tutorialUrl: 'https://www.youtube.com/watch?v=gGt0akED_UU' },
@@ -1084,7 +1084,7 @@ MODULE_SONGS[6] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=zx3Tv5uBAaE' },
       { name: '"Buffalo Soldier" — Bob Marley', meta: 'Bm–G–D–A · reggae offbeat practice', meta_es: 'Bm–G–D–A · práctica de contratiempo reggae', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=uMUQMSXLlHM',
-        tutorialUrl: 'https://www.youtube.com/watch?v=rNSq3E3KfMk' }
+        tutorialUrl: 'https://www.youtube.com/watch?v=rNSq3E3KfMk&start=94&end=522' }
     ];
 
 MODULE_REVIEWS[6] = {

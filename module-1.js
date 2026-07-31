@@ -49,8 +49,8 @@ SETS.push(
           },
           {
             label: 'Watch: caring for your guitar', label_es: 'Mira: cuidado de la guitarra',
-            text: 'Watch: <a href="https://youtu.be/PyWZYHy17As" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a> (you only need the first ~3 minutes — cleaning, humidity, and basic care; after that it\'s a string-changing demo you won\'t need yet). While you watch, note two things that can damage a guitar and how to avoid each — good habits now keep your guitar playable for years. You\'ve got it when: you can name two ways to keep a guitar safe.',
-            text_es: 'Mira: <a href="https://youtu.be/PyWZYHy17As" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a> (solo necesitas los primeros ~3 minutos — limpieza, humedad y cuidados básicos; después de eso es una demostración de cambio de cuerdas que todavía no necesitas). Mientras miras, anota dos cosas que pueden dañar una guitarra y cómo evitar cada una — los buenos hábitos desde ahora mantienen tu guitarra tocable por años. Lo tienes cuando: puedes nombrar dos maneras de mantener segura una guitarra.',
+            text: 'Watch: <a href="https://youtu.be/PyWZYHy17As?t=26" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a> (you only need the first ~3 minutes — cleaning, humidity, and basic care; after that it\'s a string-changing demo you won\'t need yet). While you watch, note two things that can damage a guitar and how to avoid each — good habits now keep your guitar playable for years. You\'ve got it when: you can name two ways to keep a guitar safe.',
+            text_es: 'Mira: <a href="https://youtu.be/PyWZYHy17As?t=26" target="_blank">Caring for Your Acoustic Guitar – Marty Music</a> (solo necesitas los primeros ~3 minutos — limpieza, humedad y cuidados básicos; después de eso es una demostración de cambio de cuerdas que todavía no necesitas). Mientras miras, anota dos cosas que pueden dañar una guitarra y cómo evitar cada una — los buenos hábitos desde ahora mantienen tu guitarra tocable por años. Lo tienes cuando: puedes nombrar dos maneras de mantener segura una guitarra.',
             hint: 'Notice how he handles and stores the guitar. You\'ll practice the safe set-down at the practice station next.',
             hint_es: 'Fíjate en cómo él manipula y guarda la guitarra. Vas a practicar cómo dejarla con cuidado en la siguiente estación de práctica.',
             response: { type: 'mc', prompt: 'Three of these are safe — one can actually damage an acoustic guitar. Which one?',
@@ -230,12 +230,12 @@ SETS.push(
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Listen — a riff-driven song we return to later', meta_es: 'Escucha — una canción basada en un riff a la que volveremos más adelante', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
-        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM&start=282&end=938' },
       { name: '"Luna" — Peso Pluma, Junior H', meta: 'Listen — our Latin core song, back all course long', meta_es: 'Escucha — nuestra canción principal en español, presente durante todo el curso', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
       { name: '"Happy Birthday"', meta: 'First real song — melody on the low E string', meta_es: 'Tu primera canción real — melodía en la cuerda Mi grave', type: 'Supp', core: false,
-        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' }
+        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w&start=46' }
     ],
 
     assessment: {
@@ -308,8 +308,8 @@ SETS.push(
             steps: [
           {
             label: 'Watch: tuning with a tuner', label_es: 'Mira: afinar con afinador',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=bTvmDGDuUZ4" target="_blank">How to Tune a Guitar for Beginners with a Tuner – Lauren Bateman (0:00–4:30)</a> (this site also has a built-in tuner in the corner toolbar):<ol><li>Have your tuner ready.</li><li>Follow along on your own guitar, matching one string at a time as she goes.</li></ol>You\'ve got it when: you can tell whether a note is too high or too low before the tuner shows you.',
-            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=bTvmDGDuUZ4" target="_blank">How to Tune a Guitar for Beginners with a Tuner – Lauren Bateman (0:00–4:30)</a> (este sitio también tiene un afinador integrado en la barra de la esquina):<ol><li>Ten tu afinador listo.</li><li>Sigue el video en tu propia guitarra, afinando una cuerda a la vez a medida que ella avanza.</li></ol>Lo tienes cuando: puedes saber si una nota está muy alta o muy baja antes de que el afinador te lo muestre.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=bTvmDGDuUZ4&t=32" target="_blank">How to Tune a Guitar for Beginners with a Tuner – Lauren Bateman (0:00–4:30)</a> (this site also has a built-in tuner in the corner toolbar):<ol><li>Have your tuner ready.</li><li>Follow along on your own guitar, matching one string at a time as she goes.</li></ol>You\'ve got it when: you can tell whether a note is too high or too low before the tuner shows you.',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=bTvmDGDuUZ4&t=32" target="_blank">How to Tune a Guitar for Beginners with a Tuner – Lauren Bateman (0:00–4:30)</a> (este sitio también tiene un afinador integrado en la barra de la esquina):<ol><li>Ten tu afinador listo.</li><li>Sigue el video en tu propia guitarra, afinando una cuerda a la vez a medida que ella avanza.</li></ol>Lo tienes cuando: puedes saber si una nota está muy alta o muy baja antes de que el afinador te lo muestre.',
             hint: 'Headphones on. Notice the order of the strings and what "in tune" sounds like.',
             hint_es: 'Ponte los audífonos. Fíjate en el orden de las cuerdas y en cómo suena "afinado".',
             stuck: 'Pause after each string and tune just that one before moving on. If the tuner jumps around, pluck a little softer and let the note ring.',
@@ -336,8 +336,8 @@ SETS.push(
           },
           {
             label: 'Watch: parts of the guitar', label_es: 'Mira: las partes de la guitarra',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=lWnbBIs6-P4" target="_blank">Parts of Acoustic Guitar (Beginner Lesson #2) – Guitar Goddess (0:00–4:00)</a>. As she names each part, point to it on your own guitar and say the name out loud. You\'ve got it when: you can point to and name at least 5 parts without the video.',
-            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=lWnbBIs6-P4" target="_blank">Parts of Acoustic Guitar (Beginner Lesson #2) – Guitar Goddess (0:00–4:00)</a>. Mientras ella nombra cada parte, señálala en tu propia guitarra y di el nombre en voz alta. Lo tienes cuando: puedes señalar y nombrar al menos 5 partes sin el video.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=lWnbBIs6-P4&t=16" target="_blank">Parts of Acoustic Guitar (Beginner Lesson #2) – Guitar Goddess (0:00–4:00)</a>. As she names each part, point to it on your own guitar and say the name out loud. You\'ve got it when: you can point to and name at least 5 parts without the video.',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=lWnbBIs6-P4&t=16" target="_blank">Parts of Acoustic Guitar (Beginner Lesson #2) – Guitar Goddess (0:00–4:00)</a>. Mientras ella nombra cada parte, señálala en tu propia guitarra y di el nombre en voz alta. Lo tienes cuando: puedes señalar y nombrar al menos 5 partes sin el video.',
             hint: 'Write down 5 parts you can now name from memory.',
             hint_es: 'Anota 5 partes que ahora puedas nombrar de memoria.',
             skills: [1],
@@ -361,8 +361,8 @@ SETS.push(
           },
           {
             label: 'Watch: how to hold the guitar', label_es: 'Mira: cómo sostener la guitarra',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=eyrgiiONULE" target="_blank">How to Hold Your Guitar Comfortably – Lauren Bateman (0:00–4:00)</a>. While you watch, set up in your chair and copy her position piece by piece:<ul><li>Feet.</li><li>Guitar on leg.</li><li>Back.</li><li>Strumming arm.</li></ul>You\'ve got it when: you can look away from the screen and your guitar stays put without your fretting hand holding it up.',
-            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=eyrgiiONULE" target="_blank">How to Hold Your Guitar Comfortably – Lauren Bateman (0:00–4:00)</a>. Mientras miras, acomódate en tu silla y copia su posición paso a paso:<ul><li>Pies.</li><li>Guitarra sobre la pierna.</li><li>Espalda.</li><li>Brazo de rasgueo.</li></ul>Lo tienes cuando: puedes dejar de mirar la pantalla y tu guitarra se queda en su lugar sin que tu mano de trastear la sostenga.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=eyrgiiONULE&t=20" target="_blank">How to Hold Your Guitar Comfortably – Lauren Bateman (0:00–4:00)</a>. While you watch, set up in your chair and copy her position piece by piece:<ul><li>Feet.</li><li>Guitar on leg.</li><li>Back.</li><li>Strumming arm.</li></ul>You\'ve got it when: you can look away from the screen and your guitar stays put without your fretting hand holding it up.',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=eyrgiiONULE&t=20" target="_blank">How to Hold Your Guitar Comfortably – Lauren Bateman (0:00–4:00)</a>. Mientras miras, acomódate en tu silla y copia su posición paso a paso:<ul><li>Pies.</li><li>Guitarra sobre la pierna.</li><li>Espalda.</li><li>Brazo de rasgueo.</li></ul>Lo tienes cuando: puedes dejar de mirar la pantalla y tu guitarra se queda en su lugar sin que tu mano de trastear la sostenga.',
             hint: 'Notice where the guitar rests and how the back stays straight.',
             hint_es: 'Fíjate en dónde descansa la guitarra y en cómo la espalda se mantiene derecha.',
             stuck: 'Pause at each position checkpoint and match one thing at a time: feet flat first, then guitar on the right leg, then straighten the back. Prop up your phone and film a few seconds, then compare yourself to the freeze-frame.',
@@ -390,8 +390,8 @@ SETS.push(
           },
           {
             label: 'Watch: how to hold the pick', label_es: 'Mira: cómo agarrar la púa',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=TKO8NLOdSwQ" target="_blank">How To Hold A Guitar Pick for Beginners: Right vs Wrong – Lauren Bateman (0:00–4:00)</a>. Grab a pick and copy her grip as you watch:<ol><li>Rest it on your bent index finger.</li><li>Then press your thumb on top.</li></ol>You\'ve got it when: only a small tip of the pick pokes past your thumb and it doesn\'t slip when you strum.',
-            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=TKO8NLOdSwQ" target="_blank">How To Hold A Guitar Pick for Beginners: Right vs Wrong – Lauren Bateman (0:00–4:00)</a>. Toma una púa y copia su agarre mientras miras:<ol><li>Apóyala sobre tu dedo índice doblado.</li><li>Luego presiona el pulgar encima.</li></ol>Lo tienes cuando: solo asoma una puntita de la púa más allá del pulgar y no se resbala al rasguear.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=TKO8NLOdSwQ&t=30" target="_blank">How To Hold A Guitar Pick for Beginners: Right vs Wrong – Lauren Bateman (0:00–4:00)</a>. Grab a pick and copy her grip as you watch:<ol><li>Rest it on your bent index finger.</li><li>Then press your thumb on top.</li></ol>You\'ve got it when: only a small tip of the pick pokes past your thumb and it doesn\'t slip when you strum.',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=TKO8NLOdSwQ&t=30" target="_blank">How To Hold A Guitar Pick for Beginners: Right vs Wrong – Lauren Bateman (0:00–4:00)</a>. Toma una púa y copia su agarre mientras miras:<ol><li>Apóyala sobre tu dedo índice doblado.</li><li>Luego presiona el pulgar encima.</li></ol>Lo tienes cuando: solo asoma una puntita de la púa más allá del pulgar y no se resbala al rasguear.',
             hint: 'Write down: what are the two most common pick-holding mistakes?',
             hint_es: 'Anota: ¿cuáles son los dos errores más comunes al sostener la púa?',
             stuck: 'Hold the pick still and just brush it down across the strings with your whole forearm. If it flips or drops, let a little less tip show and relax your grip.',
@@ -436,8 +436,8 @@ SETS.push(
           },
           {
             label: 'Watch: picking single strings', label_es: 'Mira: pulsar cuerdas sueltas',
-            text: 'Watch: <a href="https://youtu.be/Z1ETtvhPqdQ" target="_blank">Picking Individual Strings (BC-166) – JustinGuitar</a>. Copy him on your own guitar — pick one open string over and over, aiming for the same clean sound every time. You\'ve got it when: you can pick a single string five times and it rings clean every time — no buzz, no catching a neighbor string.',
-            text_es: 'Mira: <a href="https://youtu.be/Z1ETtvhPqdQ" target="_blank">Picking Individual Strings (BC-166) – JustinGuitar</a>. Cópialo en tu propia guitarra — pulsa una cuerda al aire una y otra vez, buscando el mismo sonido limpio cada vez. Lo tienes cuando: puedes pulsar una sola cuerda cinco veces y suena limpia todas las veces — sin zumbido, sin rozar la cuerda vecina.',
+            text: 'Watch: <a href="https://youtu.be/Z1ETtvhPqdQ?t=33" target="_blank">Picking Individual Strings (BC-166) – JustinGuitar</a>. Copy him on your own guitar — pick one open string over and over, aiming for the same clean sound every time. You\'ve got it when: you can pick a single string five times and it rings clean every time — no buzz, no catching a neighbor string.',
+            text_es: 'Mira: <a href="https://youtu.be/Z1ETtvhPqdQ?t=33" target="_blank">Picking Individual Strings (BC-166) – JustinGuitar</a>. Cópialo en tu propia guitarra — pulsa una cuerda al aire una y otra vez, buscando el mismo sonido limpio cada vez. Lo tienes cuando: puedes pulsar una sola cuerda cinco veces y suena limpia todas las veces — sin zumbido, sin rozar la cuerda vecina.',
             hint: 'Watch his picking hand and how light his fretting touch is. Clean single notes are the whole goal of your first melody.',
             hint_es: 'Fíjate en su mano de pulsar y en lo ligero que es su toque al trastear. Las notas individuales limpias son toda la meta de tu primera melodía.',
             stuck: 'Rest your picking hand lightly on the guitar and pick just the low E string slowly. If you hit two strings, aim a little more and use a smaller motion.',
@@ -613,10 +613,10 @@ SETS.push(
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Happy Birthday"', meta: 'Play the first phrase on the low E string — first real song! (full melody in Module 2)', meta_es: 'Toca la primera frase en la cuerda Mi grave — ¡tu primera canción real! (melodía completa en el Módulo 2)', type: 'Supp', core: false,
-        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w&start=46' },
       { name: '"Sailor Song" — Gigi Perez', meta: 'Listen — fingerpicked vs. strummed guitar', meta_es: 'Escucha — guitarra punteada con los dedos vs. rasgueada', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=1lrFsXkT_rM',
-        tutorialUrl: 'https://www.youtube.com/watch?v=rpoyXduMZZw' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=rpoyXduMZZw&end=551' },
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', meta_es: 'Escucha e identifica los sonidos de la guitarra', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
@@ -625,12 +625,12 @@ SETS.push(
       { name: '"Mary Had a Little Lamb"', meta: 'E & A strings', meta_es: 'Cuerdas Mi y La', type: 'Choice', core: false, level: 1,
         tutorialUrl: 'https://www.youtube.com/watch?v=8gK9n9vrt3g' },
       { name: '"Jingle Bells"', meta: 'Open strings only', meta_es: 'Solo cuerdas al aire', type: 'Choice', core: false, level: 1,
-        tutorialUrl: 'https://www.youtube.com/watch?v=qM_Yar0xqRk' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=qM_Yar0xqRk&start=49' },
       { name: '"Twinkle Twinkle"', meta: 'E & A strings', meta_es: 'Cuerdas Mi y La', type: 'Choice', core: false, level: 1,
         tutorialUrl: 'https://www.youtube.com/watch?v=NPS5xuRCA6w' },
       { name: '"The Simpsons Theme"', meta: 'E string only', meta_es: 'Solo la cuerda Mi', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=aPzS3QYb868',
-        tutorialUrl: 'https://www.youtube.com/watch?v=lGwNWYzYuIk' }
+        tutorialUrl: 'https://www.youtube.com/watch?v=lGwNWYzYuIk&start=24&end=149' }
     ],
 
     assessment: {

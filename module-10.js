@@ -32,8 +32,8 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: the major scale recipe', label_es: 'Mira: la receta de la escala mayor',
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=fnVlMjza32c" target="_blank">What is a Major Scale Guitar Lesson - Music Theory For Guitar – Lauren Bateman (0:00–5:12)</a>. Follow along as she lays out the whole/half-step recipe — the exact formula you\'ll use to build C and G major yourself.',
-                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=fnVlMjza32c" target="_blank">What is a Major Scale Guitar Lesson - Music Theory For Guitar – Lauren Bateman (0:00–5:12)</a>. Sigue el video mientras ella explica la receta de tonos y semitonos — la fórmula exacta que usarás para construir C mayor y G mayor tú mismo.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=fnVlMjza32c&t=55" target="_blank">What is a Major Scale Guitar Lesson - Music Theory For Guitar – Lauren Bateman (0:00–5:12)</a>. Follow along as she lays out the whole/half-step recipe — the exact formula you\'ll use to build C and G major yourself.',
+                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=fnVlMjza32c&t=55" target="_blank">What is a Major Scale Guitar Lesson - Music Theory For Guitar – Lauren Bateman (0:00–5:12)</a>. Sigue el video mientras ella explica la receta de tonos y semitonos — la fórmula exacta que usarás para construir C mayor y G mayor tú mismo.',
                 hint: 'The recipe is a formula — the exact same seven-step pattern of whole and half steps, starting from any note, builds that note\'s major scale.',
                 hint_es: 'La receta es una fórmula — el mismo patrón de siete pasos de tonos y semitonos, empezando desde cualquier nota, construye la escala mayor de esa nota.',
                 skills: [1],
@@ -47,8 +47,8 @@ SETS.push(
               },
               {
                 label: 'Watch: the major pentatonic scale', label_es: 'Mira: la pentatónica mayor',
-                text: 'Watch: <a href="https://youtu.be/m_IiyJu60-c" target="_blank">How to Play the Major Pentatonic Scale: Your Guide to Beautiful Solos – Marty Music</a>. This is where the pentatonic sound you\'ve been soloing with since Module 4 actually comes from.',
-                text_es: 'Mira: <a href="https://youtu.be/m_IiyJu60-c" target="_blank">How to Play the Major Pentatonic Scale: Your Guide to Beautiful Solos – Marty Music</a>. Aquí es de donde realmente viene el sonido pentatónico con el que has estado improvisando desde el Módulo 4.',
+                text: 'Watch: <a href="https://youtu.be/m_IiyJu60-c?t=44" target="_blank">How to Play the Major Pentatonic Scale: Your Guide to Beautiful Solos – Marty Music</a>. This is where the pentatonic sound you\'ve been soloing with since Module 4 actually comes from.',
+                text_es: 'Mira: <a href="https://youtu.be/m_IiyJu60-c?t=44" target="_blank">How to Play the Major Pentatonic Scale: Your Guide to Beautiful Solos – Marty Music</a>. Aquí es de donde realmente viene el sonido pentatónico con el que has estado improvisando desde el Módulo 4.',
                 hint: 'Major pentatonic isn\'t a separate scale to memorize — it\'s the major scale with two notes lifted out.',
                 hint_es: 'La pentatónica mayor no es una escala separada para memorizar — es la escala mayor con dos notas quitadas.',
                 skills: [5],
@@ -338,8 +338,8 @@ SETS.push(
               },
               {
                 label: 'Watch: the blues scale', label_es: 'Mira: la escala de blues',
-                text: 'Watch: <a href="https://youtu.be/EILFkSGNkdA" target="_blank">The First Scale Beginners Should Learn for BLUES GUITAR – JustinGuitar</a>. Listen for the one extra note added to the minor pentatonic box you already know — that\'s the b5.',
-                text_es: 'Mira: <a href="https://youtu.be/EILFkSGNkdA" target="_blank">The First Scale Beginners Should Learn for BLUES GUITAR – JustinGuitar</a>. Escucha la única nota extra que se agrega a la caja de pentatónica menor que ya conoces — esa es la b5.',
+                text: 'Watch: <a href="https://youtu.be/EILFkSGNkdA?t=55" target="_blank">The First Scale Beginners Should Learn for BLUES GUITAR – JustinGuitar</a>. Listen for the one extra note added to the minor pentatonic box you already know — that\'s the b5.',
+                text_es: 'Mira: <a href="https://youtu.be/EILFkSGNkdA?t=55" target="_blank">The First Scale Beginners Should Learn for BLUES GUITAR – JustinGuitar</a>. Escucha la única nota extra que se agrega a la caja de pentatónica menor que ya conoces — esa es la b5.',
                 hint: 'The blues scale is just minor pentatonic plus one extra note — listen for where it gets added in the video.',
                 hint_es: 'La escala de blues es simplemente la pentatónica menor más una nota extra — escucha dónde se agrega en el video.',
                 skills: [4],
@@ -629,8 +629,8 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: the movable pentatonic box', label_es: 'Mira: la caja pentatónica móvil',
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M" target="_blank">HOW TO USE The Minor Pentatonic Scale on the Guitar – Lauren Bateman (0:00–5:00)</a>, watching the shape as a MOVABLE pattern rather than a fixed one.',
-                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M" target="_blank">HOW TO USE The Minor Pentatonic Scale on the Guitar – Lauren Bateman (0:00–5:00)</a>, observando la forma como un patrón MÓVIL en lugar de uno fijo.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M&t=31" target="_blank">HOW TO USE The Minor Pentatonic Scale on the Guitar – Lauren Bateman (0:00–5:00)</a>, watching the shape as a MOVABLE pattern rather than a fixed one.',
+                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M&t=31" target="_blank">HOW TO USE The Minor Pentatonic Scale on the Guitar – Lauren Bateman (0:00–5:00)</a>, observando la forma como un patrón MÓVIL en lugar de uno fijo.',
                 hint: 'Nothing about the shape changes when you slide it — only the fret you start on, which renames the key.',
                 hint_es: 'Nada de la forma cambia cuando la deslizas — solo el traste en el que empiezas, que renombra la tonalidad.',
                 skills: [1],

@@ -47,8 +47,8 @@ SETS.push(
               },
               {
                 label: 'Watch: Travis picking basics (Andy Guitar)', label_es: 'Mira: bases del Travis picking (Andy Guitar)',
-                text: 'Watch: <a href="https://youtu.be/XQiaCSabQaE" target="_blank">A Total Beginners Guide To Travis Picking – Andy Guitar</a> — a second teacher on the same pattern as the first video. Notice what Andy does differently from Lauren:<ul><li>How he counts the thumb.</li><li>When he lets the pinch in.</li></ul>',
-                text_es: 'Mira: <a href="https://youtu.be/XQiaCSabQaE" target="_blank">A Total Beginners Guide To Travis Picking – Andy Guitar</a> — un segundo maestro con el mismo patrón que el primer video. Fíjate en qué hace Andy diferente a Lauren:<ul><li>Cómo cuenta el pulgar.</li><li>Cuándo deja entrar el pellizco.</li></ul>',
+                text: 'Watch: <a href="https://youtu.be/XQiaCSabQaE?t=36" target="_blank">A Total Beginners Guide To Travis Picking – Andy Guitar</a> — a second teacher on the same pattern as the first video. Notice what Andy does differently from Lauren:<ul><li>How he counts the thumb.</li><li>When he lets the pinch in.</li></ul>',
+                text_es: 'Mira: <a href="https://youtu.be/XQiaCSabQaE?t=36" target="_blank">A Total Beginners Guide To Travis Picking – Andy Guitar</a> — un segundo maestro con el mismo patrón que el primer video. Fíjate en qué hace Andy diferente a Lauren:<ul><li>Cómo cuenta el pulgar.</li><li>Cuándo deja entrar el pellizco.</li></ul>',
                 hint: 'A pinch is bass and treble sounding at the same instant — the accent that makes Travis picking recognizable.',
                 hint_es: 'Un pellizco es el bajo y el agudo sonando en el mismo instante — el acento que hace reconocible al Travis picking.',
                 skills: [2, 3],
@@ -955,13 +955,13 @@ MODULE_SONGS[12] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=AlElh28IumI' },
       { name: '"Sailor Song" — Gigi Perez', meta: 'Fingerpicked verse, capo IV — pattern endurance', meta_es: 'Estrofa con fingerpicking, capo en el traste 4 — resistencia del patrón', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=1lrFsXkT_rM',
-        tutorialUrl: 'https://www.youtube.com/watch?v=rpoyXduMZZw' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=rpoyXduMZZw&end=551' },
       { name: '"Blackbird" — The Beatles', meta: 'The capstone challenge — pinches and moving shapes', meta_es: 'El reto final del curso — pellizcos y formas en movimiento', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=Man4Xw8Xypo',
         tutorialUrl: 'https://www.youtube.com/watch?v=Qqw15309knU' },
       { name: '"Just Like Heaven" — The Cure', meta: 'Turn the arpeggiated riff (short repeated phrase) into a picking pattern', meta_es: 'Convierte el riff arpegiado (frase corta repetida) en un patrón de punteo', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=n3nPiBai66M',
-        tutorialUrl: 'https://www.youtube.com/watch?v=fEgsKS_IcQA' }
+        tutorialUrl: 'https://www.youtube.com/watch?v=fEgsKS_IcQA&start=98&end=587' }
     ];
 
 MODULE_REVIEWS[12] = {

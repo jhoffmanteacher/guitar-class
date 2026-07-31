@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-31 — Video links now skip the intro and stop before the outro
+
+### Improved
+
+- **Tutorial and backing-track videos now jump straight to the lesson** instead
+  of opening on someone's intro or channel plug, and on lessons where the video
+  keeps going past what you need, it now stops itself before the outro/plug at
+  the end — you can still scrub past it if you want to keep watching.
+- **A few in-lesson "Watch" links now start a little later in the video too**,
+  landing right where that step's instructions pick up.
+- **Fixed two lesson notes that stated a video ran longer than it actually
+  does** — the listed watch time now matches the real video length.
+
 ## 2026-07-31 — A second "Level up" on every Song Journey pentatonic solo
 
 ### Added
