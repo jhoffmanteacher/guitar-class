@@ -569,6 +569,13 @@ function coachBeatRefresh(cur){
   coach.card.querySelectorAll('.coach-col').forEach(el => el.classList.remove('coach-col'));
   coach.card.querySelectorAll('.coach-lane [data-seq="' + cur + '"]')
     .forEach(el => el.classList.add('coach-col'));
+  /* A melody TAB wider than its box would otherwise walk off the right edge
+     as the beat column advances, leaving the player scrolling to find where
+     the beat currently is. Follow it — one marker per column (the note
+     button row), 'nearest' so it only moves once the column nears the edge
+     rather than re-centering every beat. */
+  const marker = coach.card.querySelector('.coach-lane .tab-note-btn[data-seq="' + cur + '"]');
+  if (marker) marker.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' });
   if (coach.pulseMuted) return;   // steady player — the flash fades, the column stays
   const lane = document.getElementById('coach-lane');
   if (lane){ lane.classList.add('beat'); setTimeout(() => lane.classList.remove('beat'), 90); }
