@@ -394,6 +394,20 @@ async function startTuner() {
     tunerLP.connect(tunerAnalyser);
     tunerLP.connect(tunerFreqAnalyser);
 
+    // Safari creates a context `suspended` when construction happens after an
+    // awaited getUserMedia — the user-gesture window has already closed by
+    // then. A suspended context's analyser reads all zeros, so the tuner
+    // never picks up a pitch. Chrome credits the page's earlier gesture and
+    // is unaffected either way.
+    if (tunerCtx.state !== 'running'){
+      try { await tunerCtx.resume(); } catch(e){}
+    }
+    // Belt-and-suspenders: Safari can also suspend a live context on an audio
+    // route change (AirPods connecting/disconnecting mid-session).
+    tunerCtx.onstatechange = () => {
+      if (tunerCtx && tunerCtx.state === 'suspended') tunerCtx.resume().catch(()=>{});
+    };
+
     tunerRunning = true; tunerResetSmoothing();
     setToolText(document.getElementById('tuner-freq'), 'tools.listening');
     tunerLoop();

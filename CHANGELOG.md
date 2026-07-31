@@ -5,6 +5,26 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-31 — Fixed Listening Coach and Tuner going silent on Mac
+
+### Fixed
+
+- **Listening Coach and Tuner now hear you on Safari/Mac.** On some Macs the
+  mic would connect but every take came back "I couldn't hear that" no matter
+  how loud you played — the browser was starting the audio connection paused
+  and never un-pausing it. Both tools now make sure that connection is
+  actually running before listening.
+
+### Added
+
+- **The mic indicator now names your microphone** (e.g. "Listening — MacBook
+  Pro Microphone"), so it's obvious if the wrong device got picked up.
+- **A small level meter** next to it fills in as it hears sound, so you can
+  tell at a glance whether it's picking anything up at all.
+- **A troubleshooting tip on a "couldn't hear" result** — check the right mic
+  is selected, and on a Mac, that Mic Mode in Control Center is set to
+  Standard (Voice Isolation filters out guitars).
+
 ## 2026-07-30 — Activity #1 reworked into a hands-on practice session
 
 ### Changed

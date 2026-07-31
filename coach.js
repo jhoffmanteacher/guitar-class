@@ -324,6 +324,7 @@ async function coachStartCheck(){
     if (coach === session) coachRenderReady(t('coach.mic.denied'));
     return;
   }
+  await coachEnsureRunning();
   if (coach !== session){ coachReleaseMicIfIdle(); return; }   // card closed during the prompt
   if (!coachBody()){ coachReleaseMicIfIdle(); return; }   // card panel was replaced in the DOM during the prompt (e.g. a language switch rebuilt the module panel)
   if (document.hidden){   // tab was backgrounded while the prompt was open
@@ -336,7 +337,18 @@ async function coachStartCheck(){
      permission prompt was open — so the mic doesn't score the speakers. */
   stopAllDemoAudio();
   const micEl = document.getElementById('coach-mic');
-  if (micEl) micEl.hidden = false;
+  if (micEl){
+    micEl.hidden = false;
+    /* Surface the active capture device so a wrong-mic pickup (AirPods,
+       iPhone Continuity camera mic) is self-evident rather than reading as
+       a "couldn't hear" false failure. */
+    const track = coachStream && coachStream.getAudioTracks()[0];
+    const label = track && track.label ? track.label : '';
+    micEl.innerHTML = '<span class="coach-mic-dot"></span>' +
+      (label ? t('coach.micOnDevice', { device: escHtml(label) }) : t('coach.micOn')) +
+      '<span class="coach-mic-level" id="coach-mic-level"><i></i><i></i><i></i></span>';
+    coachMicLevelLast = -1;   // new <i> elements — force the next frame to (re)apply lit classes
+  }
 
   /* Fresh attempt state */
   coach.slots.forEach(s => { s.state = 'pending'; s.hit = null; });
@@ -415,8 +427,32 @@ async function coachAcquireMicInner(){
   coachAnalyser.smoothingTimeConstant = 0;
   src.connect(gainNode); gainNode.connect(hp); hp.connect(lp); lp.connect(coachAnalyser);
   coachFrameBuf = new Float32Array(COACH_FFT);
+  // Safari creates a context `suspended` when construction happens after an
+  // awaited getUserMedia — the user-gesture window has already closed by
+  // then. A suspended context's analyser reads all zeros: RMS 0, no onsets,
+  // no pitch, every take reports "couldn't hear." Chrome credits the page's
+  // earlier gesture and is unaffected either way.
+  if (coachCtx.state !== 'running'){
+    try { await coachCtx.resume(); } catch(e){}
+  }
+  // Belt-and-suspenders: Safari can also suspend a live context on an audio
+  // route change (AirPods connecting/disconnecting mid-session).
+  coachCtx.onstatechange = () => {
+    if (coachCtx && coachCtx.state === 'suspended') coachCtx.resume().catch(()=>{});
+  };
   window.coachMicLive = true;   // cleared in coachMicOff — set/clear live in ONE pair
   return true;
+}
+
+/* Re-resume at every check start, not just at acquisition — covers the same
+   Safari route-change suspension as coachAcquireMicInner's statechange
+   listener, for the case where it fires between checks rather than during
+   one. Silent on failure; the mic-level chip is what surfaces a still-dead
+   context to the student. */
+async function coachEnsureRunning(){
+  if (coachCtx && coachCtx.state !== 'running'){
+    try { await coachCtx.resume(); } catch(e){}
+  }
 }
 
 /* A stale caller (its card/panel closed during the permission prompt) must
@@ -453,7 +489,28 @@ function coachReadFrame(){
     dsum += d * d;
   }
   coachHfRms = Math.sqrt(dsum / N);
-  return Math.sqrt(sum / N);
+  const rms = Math.sqrt(sum / N);
+  coachUpdateMicLevel(rms);
+  return rms;
+}
+
+/* Peripheral 3-bar level chip next to the mic indicator, driven off the RMS
+   this frame already computed (no extra analyser read). A flat chip during
+   a take means no signal is reaching the analyser at all — a suspended
+   context, a muted device, or Voice Isolation stripping the guitar out —
+   versus a moving chip with a "couldn't hear" verdict, which means the
+   student really was playing quietly. Segment thresholds are well below the
+   pitch/onset gates on purpose: this is a presence indicator, not a
+   loudness judgement. */
+let coachMicLevelLast = -1;
+function coachUpdateMicLevel(rms){
+  const el = document.getElementById('coach-mic-level');
+  if (!el) return;
+  const level = rms >= 0.01 ? 3 : rms >= 0.003 ? 2 : rms >= 0.001 ? 1 : 0;
+  if (level === coachMicLevelLast) return;
+  coachMicLevelLast = level;
+  const bars = el.children;
+  for (let i = 0; i < bars.length; i++) bars[i].classList.toggle('lit', i < level);
 }
 
 /* Shared 4-click count-in: schedules the beeps + count digits on state's
@@ -864,8 +921,11 @@ function coachRenderReport(){
 
   /* Too little signal → honest "couldn't hear", never a wrong verdict. */
   if (matched.length < coachMinHeard(slots.length)){
+    const isMac = /Mac/.test(navigator.platform || '') || /Macintosh/.test(navigator.userAgent || '');
+    const micHint = t('coach.report.micHint') + (isMac ? ' ' + t('coach.report.micHintMac') : '');
     coachBody().innerHTML =
       `<div class="coach-note">&#x1F914; ${t(coach.mode === 'chords' ? 'coach.report.couldntHearChords' : 'coach.report.couldntHearMelody')}</div>
+       <div class="coach-tip">${micHint}</div>
        ${coachStripHtml()}
        <div class="coach-actions">
          <button type="button" class="coach-start" onclick="coachStartCheck()">&#x21BB; ${t('coach.tryAgain')}</button>
@@ -1237,6 +1297,7 @@ async function fretStart(levelIdx){
     if (b2) b2.innerHTML = `<div class="coach-note">${t('games.fret.micDenied')}</div>`;
     return;
   }
+  await coachEnsureRunning();
   if (!document.getElementById('fret-body')){ coachReleaseMicIfIdle(); return; }   // panel closed during the prompt
   if (document.hidden){ coachMicOff(); gamesShow('hub'); return; }   // backgrounded during the prompt
   stopAllDemoAudio();
@@ -2031,6 +2092,7 @@ async function ccStart(){
     if (cc === session) ccRenderSetup(t('games.cc.micDenied'));
     return;
   }
+  await coachEnsureRunning();
   if (cc !== session){ coachReleaseMicIfIdle(); return; }   // panel closed during the prompt
   if (document.hidden){
     coachMicOff();
@@ -4511,6 +4573,7 @@ async function srStart(){
     if (sr === s) srRenderSetup(t('games.common.micAccessDenied'));
     return;
   }
+  await coachEnsureRunning();
   if (!srBody()){ coachReleaseMicIfIdle(); return; }   // panel closed during the prompt
   if (document.hidden){ coachMicOff(); gamesShow('hub'); return; }   // backgrounded during the prompt
   if (sr !== s){ coachReleaseMicIfIdle(); return; }    // a new session started under us
@@ -5571,6 +5634,7 @@ async function rnwStart(){
     if (rn === s){ s.phase = 'ready'; rnRenderReady(t('games.common.micAccessDenied')); }
     return;
   }
+  await coachEnsureRunning();
   if (rn !== s || !rnBody()){ coachReleaseMicIfIdle(); return; }   // panel closed during the prompt
   if (document.hidden){
     coachMicOff();
@@ -6256,6 +6320,7 @@ async function nrStart(){
     if (nr === s){ s.phase = 'ready'; nrRenderReady(t('games.common.micAccessDenied')); }
     return;
   }
+  await coachEnsureRunning();
   if (nr !== s || !nrBody()){ coachReleaseMicIfIdle(); return; }
   if (document.hidden){
     coachMicOff();

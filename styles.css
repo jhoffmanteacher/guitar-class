@@ -1154,6 +1154,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    moves (the beat column), and a mic dot blinking at its own unrelated
    1.2s rate was reading as a second metronome. */
 .coach-mic-dot{width:8px;height:8px;border-radius:50%;background:#e74c3c}
+.coach-mic-level{display:inline-flex;align-items:flex-end;gap:1px;height:8px;margin-left:2px}
+.coach-mic-level i{width:2px;height:100%;background:currentColor;opacity:0.25;border-radius:1px}
+.coach-mic-level i.lit{opacity:1}
 @keyframes coachPulse{0%,100%{opacity:1}50%{opacity:0.35}}
 .coach-x{margin-left:auto;background:none;border:none;cursor:pointer;font-size:1.125rem;color:var(--text3);line-height:1;padding:0 2px;font-family:inherit}
 .coach-x:hover{color:var(--text)}
