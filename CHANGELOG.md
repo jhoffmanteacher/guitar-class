@@ -9,13 +9,15 @@ see `WORKFLOW.md` and the git commit log.
 
 ### Changed
 
-- **Three lesson videos now come from new teachers.** The pick-holding
-  lesson (Module 1) and the first strumming lesson (Module 6) are now
-  Spanish-language lessons from guitarraviva and Christianvib — two of the
-  biggest guitar channels in Spanish; the English cards note you can turn
-  on captions, and the hands on screen carry both lessons. The D-chord
-  lesson (Module 5) is now from Guitar Goddess. All three were checked
-  live before swapping; every quiz on those cards still works unchanged.
+- **Some lessons now come in both languages.** The pick-holding lesson
+  (Module 1) and the first strumming lesson (Module 6) each gained a
+  "Same lesson in Spanish" link — from guitarraviva and Christianvib, two
+  of the biggest Spanish-language guitar channels — right next to the
+  English video. The chord-families lesson (Module 11) now leads with an
+  English video from EricBlackmonGuitar, with the Spanish Guitarra con
+  Maru lesson as its second option. The D-chord lesson (Module 5) is now
+  taught by Guitar Goddess. Every video was checked live before linking;
+  all the quizzes on those cards work unchanged.
 
 ## 2026-08-01 — Two new arcade games
 
