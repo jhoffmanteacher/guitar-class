@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-01 — Song Journey TAB check
+
+### Fixed
+
+- **Every TAB on the six Song Journey pages was note-checked** (all 35 blocks,
+  fret by fret). Real fixes: "Seven Nation Army"'s singalong grid showed one
+  beat per chord when the song (and its own caption) has two — it now counts
+  all four beats per bar like every other page; a "Luna" Level-up sent the
+  solo box to a position that clashes with the song's key (now fret 5, which
+  fits); a "Let It Be" line had its note-sharing claim backwards (A minor
+  pentatonic lives inside C major, not the other way around).
+- **Small notation cleanups:** the "Sweet Child" verse tabs now say (loop) so
+  the last D doesn't read as a fourth chord, "the cure"'s bonus fingerpicking
+  layer explains that each chord stretches to a full bar there, a misaligned
+  chord label and a few ragged barlines were straightened, and one Spanish
+  string name got its missing "grave."
+
 ## 2026-07-31 — Core-song fact checks
 
 ### Fixed
