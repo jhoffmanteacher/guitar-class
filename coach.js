@@ -412,34 +412,44 @@ async function coachAcquireMicInner(){
   } catch(e) {
     return false;
   }
-  coachCtx = new (window.AudioContext || window.webkitAudioContext)();
-  const src = coachCtx.createMediaStreamSource(coachStream);
-  // Boost quiet mics (Chromebooks especially) BEFORE any thresholding —
-  // see COACH_MIC_GAIN's comment for why a fixed gain beats re-enabling AGC.
-  const gainNode = coachCtx.createGain();
-  gainNode.gain.value = COACH_MIC_GAIN;
-  const hp = coachCtx.createBiquadFilter();
-  hp.type = 'highpass'; hp.frequency.value = 70; hp.Q.value = 0.7;
-  const lp = coachCtx.createBiquadFilter();
-  lp.type = 'lowpass'; lp.frequency.value = 1500; lp.Q.value = 0.7;
-  coachAnalyser = coachCtx.createAnalyser();
-  coachAnalyser.fftSize = COACH_FFT;
-  coachAnalyser.smoothingTimeConstant = 0;
-  src.connect(gainNode); gainNode.connect(hp); hp.connect(lp); lp.connect(coachAnalyser);
-  coachFrameBuf = new Float32Array(COACH_FFT);
-  // Safari creates a context `suspended` when construction happens after an
-  // awaited getUserMedia — the user-gesture window has already closed by
-  // then. A suspended context's analyser reads all zeros: RMS 0, no onsets,
-  // no pitch, every take reports "couldn't hear." Chrome credits the page's
-  // earlier gesture and is unaffected either way.
-  if (coachCtx.state !== 'running'){
-    try { await coachCtx.resume(); } catch(e){}
+  // getUserMedia already succeeded and coachStream is live at this point —
+  // if any node construction below throws (e.g. a browser's audio-context
+  // limit after many opens/closes in one session), fall through to the catch
+  // and release the stream rather than leaving the mic hot with no caller
+  // able to retry (coachAcquireMic has no try/catch around this call).
+  try {
+    coachCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const src = coachCtx.createMediaStreamSource(coachStream);
+    // Boost quiet mics (Chromebooks especially) BEFORE any thresholding —
+    // see COACH_MIC_GAIN's comment for why a fixed gain beats re-enabling AGC.
+    const gainNode = coachCtx.createGain();
+    gainNode.gain.value = COACH_MIC_GAIN;
+    const hp = coachCtx.createBiquadFilter();
+    hp.type = 'highpass'; hp.frequency.value = 70; hp.Q.value = 0.7;
+    const lp = coachCtx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 1500; lp.Q.value = 0.7;
+    coachAnalyser = coachCtx.createAnalyser();
+    coachAnalyser.fftSize = COACH_FFT;
+    coachAnalyser.smoothingTimeConstant = 0;
+    src.connect(gainNode); gainNode.connect(hp); hp.connect(lp); lp.connect(coachAnalyser);
+    coachFrameBuf = new Float32Array(COACH_FFT);
+    // Safari creates a context `suspended` when construction happens after an
+    // awaited getUserMedia — the user-gesture window has already closed by
+    // then. A suspended context's analyser reads all zeros: RMS 0, no onsets,
+    // no pitch, every take reports "couldn't hear." Chrome credits the page's
+    // earlier gesture and is unaffected either way.
+    if (coachCtx.state !== 'running'){
+      try { await coachCtx.resume(); } catch(e){}
+    }
+    // Belt-and-suspenders: Safari can also suspend a live context on an audio
+    // route change (AirPods connecting/disconnecting mid-session).
+    coachCtx.onstatechange = () => {
+      if (coachCtx && coachCtx.state === 'suspended') coachCtx.resume().catch(()=>{});
+    };
+  } catch(e) {
+    coachMicOff();
+    return false;
   }
-  // Belt-and-suspenders: Safari can also suspend a live context on an audio
-  // route change (AirPods connecting/disconnecting mid-session).
-  coachCtx.onstatechange = () => {
-    if (coachCtx && coachCtx.state === 'suspended') coachCtx.resume().catch(()=>{});
-  };
   window.coachMicLive = true;   // cleared in coachMicOff — set/clear live in ONE pair
   return true;
 }
@@ -3477,7 +3487,11 @@ function psgJudge(midi){
   s.needSilence = true;
   s.armAt = performance.now() + 450;
   const padIdx = s.seq[s.inputIdx];
-  if (midi !== PS_NOTES[padIdx]){
+  // Accept the octave above too — a Chromebook mic often hears the low
+  // strings' 2nd harmonic louder than the fundamental (same physics as
+  // tuner.js's octave guard and coachMatchEvent/nrFinalizeEvent elsewhere in
+  // this file), and PS_NOTES sits entirely in that low A2–A3 register.
+  if (midi !== PS_NOTES[padIdx] && midi !== PS_NOTES[padIdx] + 12){
     s.heard = coachNoteName(midi);
     s.missPad = padIdx;
     psgMark(padIdx, 'bad');

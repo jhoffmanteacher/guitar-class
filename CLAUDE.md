@@ -91,9 +91,11 @@ swapped by `journey.js`).
   Spanish word each time.
 - **String names are solfège; chord symbols and key names are not.**
   `cuerda Mi grave`, `cuerda La`, `cuerda Sol` — but `tonalidad de G`, `G/B`,
-  `Am`. Most-repeated ES convention on the site, nothing enforces it, and
-  `module-9.js` has already broken it ~30×. Check it whenever you touch module
-  Spanish.
+  `Am`. Most-repeated ES convention on the site, nothing enforces it. A 2026-07-31
+  sweep found and fixed the last 2 remaining `module-9.js` violations (a much
+  older ~30-instance count had already been mostly cleaned up before then) —
+  still worth a check whenever you touch module Spanish, since nothing enforces
+  it.
 - **How to wire a string** — mechanics are documented at the top of `i18n.js`;
   read that before adding one. Short version: static HTML gets
   `data-i18n="key"` (or `-attr` / `-html`); dynamic strings call

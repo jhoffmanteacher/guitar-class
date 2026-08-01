@@ -214,7 +214,13 @@ function togglePopup(which){
       startTuner();
     } else { stopTuner(); }
   }
-  if(which==='metro' && open) syncMetroMutedNote();
+  if(which==='metro' && open){
+    // Mirror the tuner's guard in the other direction: its bandpass filter runs
+    // with echoCancellation off, so the metronome's clicks would be heard as
+    // pitch and produce bogus readings if the tuner is still listening.
+    if(typeof tunerRunning!=='undefined' && tunerRunning) stopTuner();
+    syncMetroMutedNote();
+  }
   /* Keyboard: the popups sit BEFORE .fab-buttons in the source, so after
      pressing Enter on a FAB the next Tab went to the next FAB, not into the
      popup that just opened — the popup's controls were only reachable by
@@ -231,7 +237,8 @@ function togglePopup(which){
     if(first) first.focus();
   }
 }
-function closePopup(which){
+function closePopup(which, stopAudio){
+  if(stopAudio===undefined) stopAudio=true;
   const el = document.getElementById(which+'-popup');
   /* Only pull focus back to the FAB if it was actually inside the popup —
      Escape and ✕ qualify; the click-away listener below does not (the student
@@ -240,8 +247,12 @@ function closePopup(which){
   const hadFocus = el && el.contains(document.activeElement);
   if(el) el.classList.remove('open');
   setFabExpanded(which, false);
-  if(which==='metro') stopMetro();
+  // stopAudio=false (used by Escape, below) skips killing a running metronome
+  // click — same reasoning as the click-away listener: the student shouldn't
+  // silently lose the click they're practicing to just for dismissing the popup.
+  // The tuner always stops: it's the one holding the mic.
   if(which==='tuner') stopTuner();
+  if(which==='metro' && stopAudio) stopMetro();
   if(hadFocus){ const fab = document.getElementById('fab-'+which); if(fab) fab.focus(); }
 }
 // Uses composedPath() (the propagation path captured at dispatch time), not
@@ -267,10 +278,13 @@ document.addEventListener('click',e=>{
     });
   }
 });
-// Escape closes any open tool popup (a11y)
+// Escape closes any open tool popup (a11y). Mirrors the click-away listener
+// above: a running metronome/timer keeps running (stopAudio=false) so
+// dismissing the popup with Escape can't silently kill the click a student is
+// practicing to — only the tuner (mic-holding) always stops.
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
-  ['metro','timer','tuner'].forEach(w=>{ const el=document.getElementById(w+'-popup'); if(el&&el.classList.contains('open')) closePopup(w); });
+  ['metro','timer','tuner'].forEach(w=>{ const el=document.getElementById(w+'-popup'); if(el&&el.classList.contains('open')) closePopup(w, w==='tuner'); });
 });
 
 /* ── Focus trap for the full-screen overlays (a11y) ──

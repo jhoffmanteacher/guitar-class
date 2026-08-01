@@ -5,6 +5,41 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-31 — Site-wide bug sweep
+
+### Fixed
+
+- **Pentatonic Simon Guitar Hero no longer ends your run on a correct note.**
+  If your mic picked up the note an octave higher than you actually played it
+  (common on laptop/Chromebook mics for the low strings), the game used to
+  call it wrong and end the round — it now accepts either octave, same as
+  every other mic-graded game on the site.
+- **The Tuner and Metronome no longer interfere with each other.** Opening the
+  Metronome while the Tuner was still listening used to make the click get
+  picked up as a note and throw off your tuning reading — the Tuner now stops
+  automatically. And pressing Escape to close the Metronome popup no longer
+  silently stops a click you're practicing to — same as clicking away, it just
+  slides shut and keeps playing.
+- **Search no longer swallows a query you typed before it finished loading.**
+  On a slow connection, typing into search right when you opened it could get
+  lost with no results ever showing up — it now re-runs your search as soon
+  as it's ready.
+- **The "the cure" play-along card now teaches the G/B turnaround by default**
+  instead of a plain G, since G/B is the actual turnaround used in the song
+  and in the assessment — you'll still see plain G offered as an easier
+  starting point if you need it.
+- Fixed a few small Module 5 inconsistencies: the Sweet Child O' Mine songs-list
+  description now matches what Module 5 actually teaches (open chords, not
+  power chords), the Group 2 chord list now consistently includes Em, and the
+  Am↔Em "anchor" hint no longer implies one finger stays down when it's really
+  two different fingers landing on the same fret.
+- Two Module 8 fingerpicking cards ("the cure" and "Let It Be") now note that
+  their slow one-bar-per-chord practice pace is a teaching count — the real
+  recordings move about twice as fast.
+- Fixed a couple of leftover Spanish string-name translations in Module 9 that
+  used the English letter (e.g. "Cuerda D") instead of the correct solfège
+  term ("Cuerda Re").
+
 ## 2026-07-31 — New game: Pentatonic Simon Guitar Hero
 
 ### Added

@@ -5745,7 +5745,14 @@ async function openSearchPanel(){
   if(input) input.focus();
   if(!searchIndex) searchIndex = await buildSearchIndex();
   const res = document.getElementById('search-results');
-  if(res && res.querySelector('.coach-tip')) res.innerHTML = `<div class="coach-tip" data-i18n="search.intro" data-i18n-params="${escAttr(JSON.stringify({n:MODULE_MANIFEST.length}))}">${escHtml(t('search.intro',{n:MODULE_MANIFEST.length}))}</div>`;
+  // The student may have already typed a query while the index was still
+  // loading (a real wait on slow Wi-Fi/Chromebooks, since this fetches every
+  // not-yet-loaded module file) — onSearchInput's runSearch bailed out with
+  // no index and never retried, so re-run their query now instead of
+  // clobbering it with the generic intro tip.
+  const liveQuery = document.getElementById('search-input');
+  if(liveQuery && liveQuery.value.trim().length >= 2) runSearch(liveQuery.value);
+  else if(res && res.querySelector('.coach-tip')) res.innerHTML = `<div class="coach-tip" data-i18n="search.intro" data-i18n-params="${escAttr(JSON.stringify({n:MODULE_MANIFEST.length}))}">${escHtml(t('search.intro',{n:MODULE_MANIFEST.length}))}</div>`;
 }
 
 /* Typing on a Chromebook fires oninput per keystroke; re-scanning the whole

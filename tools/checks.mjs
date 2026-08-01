@@ -204,10 +204,17 @@ function validateModules() {
   // those two fields duplicate data that lives in the module files. Verify they
   // still match the real set-skills — see the sync rule in CLAUDE.md.
   const skillsByModule = new Map();     // moduleNum → [skill id, …]
+  const seenSkillIds = new Map();       // moduleNum → Set of skill ids seen so far
   for (const s of allSets) {
     const n = Number(s.moduleNum);
     if (!skillsByModule.has(n)) skillsByModule.set(n, []);
+    if (!seenSkillIds.has(n)) seenSkillIds.set(n, new Set());
+    const seenInModule = seenSkillIds.get(n);
     const ids = (Array.isArray(s.skills) ? s.skills : []).map(sk => sk && sk.id).filter(Boolean);
+    for (const id of ids) {
+      if (seenInModule.has(id)) { err(`Module ${n} · set "${s.id}": duplicate skill id "${id}"`); problems++; }
+      else seenInModule.add(id);
+    }
     skillsByModule.get(n).push(...ids);
   }
   for (const m of manifest) {
@@ -326,11 +333,14 @@ function checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsBy
       reqEs(where, w, 'unit');
       reqEs(where, w, 'skillFocus');
       reqEs(where, w, 'subtitle');
+      reqEs(where, w, 'checklistSub');
 
       for (const stId of Object.keys(w.stations || {})) {
         const st = w.stations[stId];
         const stWhere = `${where} · station "${stId}"`;
         reqEs(stWhere, st, 'title');
+        reqEs(stWhere, st, 'tabTitle');
+        reqEs(stWhere, st, 'tabSub');
         const sections = st.sections || (st.steps ? [{ title: '', steps: st.steps }] : []);
         sections.forEach((sec, si) => {
           const secWhere = `${stWhere} · section ${si + 1}`;
@@ -349,6 +359,7 @@ function checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsBy
               reqEsArray(stepWhere, step.response, 'choices');
             }
             if (step.playSeq) reqEs(stepWhere, step.playSeq, 'label');
+            if (step.video) reqEs(stepWhere, step.video, 'label');
             if (step.tab) { reqEs(stepWhere, step.tab, 'caption'); reqEs(stepWhere, step.tab, 'title'); }
             if (Array.isArray(step.tabs)) {
               step.tabs.forEach((t, ti) => {
@@ -373,6 +384,7 @@ function checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsBy
             reqEs(skWhere, sk.practice, 'prompt');
             reqEsArray(skWhere, sk.practice, 'choices');
             if (sk.practice.type === 'playSeq' || sk.practice.type === 'fretboard' || sk.practice.type === 'chord') reqEs(skWhere, sk.practice, 'label');
+            if (sk.practice.type === 'mc') reqEs(skWhere, sk.practice, 'explain');
           }
         });
       }

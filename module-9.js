@@ -336,7 +336,7 @@ SETS.push(
                   explain: 'From the low E or A string, the octave lives two strings toward the floor and two frets toward the body.',
                   explain_es: 'Desde la cuerda Mi grave o La, la octava vive dos cuerdas hacia el piso y dos trastes hacia el cuerpo de la guitarra.',
                   choices: ['D string, fret 7', 'G string, fret 5', 'D string, fret 5', 'A string, fret 7'],
-                  choices_es: ['Cuerda D, traste 7', 'Cuerda G, traste 5', 'Cuerda D, traste 5', 'Cuerda A, traste 7'] }
+                  choices_es: ['Cuerda Re, traste 7', 'Cuerda Sol, traste 5', 'Cuerda Re, traste 5', 'Cuerda La, traste 7'] }
               }
             ]
           },
@@ -1145,7 +1145,7 @@ SETS.push(
           choices: ['The 3rd line from the bottom', 'The 3rd line from the top', 'The bottom line — thickest string goes lowest, D is thick-ish', 'Any line, as long as you label it'],
           choices_es: ['La 3ª línea desde abajo', 'La 3ª línea desde arriba', 'La línea de abajo — la cuerda más gruesa va más abajo, y la Re es algo gruesa', 'Cualquier línea, siempre que la etiquetes'], answer: 0,
           explain: 'TAB lines mirror the strings with the low E at the bottom: E-A-D from the bottom up, so the D string is line 3. Writing it on the wrong line is the #1 TAB-writing error.',
-          explain_es: 'Las líneas del TAB reflejan las cuerdas con la Mi grave abajo: E-A-D de abajo hacia arriba, así que la cuerda Re es la línea 3. Escribirla en la línea equivocada es el error número uno al escribir TAB.' } },
+          explain_es: 'Las líneas del TAB reflejan las cuerdas con la Mi grave abajo: Mi grave-La-Re de abajo hacia arriba, así que la cuerda Re es la línea 3. Escribirla en la línea equivocada es el error número uno al escribir TAB.' } },
       { id: 'm9w3-s3', text: 'Space my TAB so the rhythm is readable',
         text_es: 'Espaciar mi TAB para que el ritmo sea legible',
         gotItWhen: 'your spacing alone shows the rhythm clearly enough that a stranger could read it without you explaining it.',

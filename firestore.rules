@@ -73,8 +73,11 @@ service cloud.firestore {
        else's progress doc to map a uid back to a name. If that ever stops
        being acceptable, the fix is structural rather than a rules tweak:
        split into config/students/{uid} docs so each student can read only
-       their own row. */
-    match /config/{doc} {
+       their own row.
+
+       Scoped to the specific "class" doc — config/{doc} would let any
+       signed-in user read every doc under config/, not just this one. */
+    match /config/class {
       allow read:  if isSignedIn();
       allow write: if isTeacher();
     }

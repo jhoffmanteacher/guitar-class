@@ -171,7 +171,7 @@ async function loadAllStudents(){
 }
 
 function renderTeacherSummary(){
-  const w=SETS.find(x=>x.id===teacherSetId); if(!w||!w.skills) return;
+  const w=SETS.find(x=>x.id===teacherSetId); if(!w||!w.skills||!w.skills.length) return;
   const total=allStudents.length;
   const complete=allStudents.filter(s=>w.skills.every(sk=>s.skills[sk.id]==='gotit')).length;
   const none=allStudents.filter(s=>w.skills.every(sk=>!s.skills[sk.id]||s.skills[sk.id]==='none')).length;
