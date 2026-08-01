@@ -5,6 +5,21 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-01 — Two new arcade games
+
+### Added
+
+- **Pattern Detective** — the arcade's last two planned games begin landing:
+  a bar of strumming is written out (D and U arrows), the same or a different
+  bar plays out loud with a click marking the beats, and you judge whether
+  what you heard matches what you see. Uses the same four strum patterns as
+  Strum Hero. No guitar needed; keys 1–2 answer on a laptop.
+- **Build-a-Chord** — chord diagrams in reverse: a chord name comes up and
+  you place its fingers on a blank grid, mute or open each string, then
+  check. A miss tells you how many strings are off (not which!); the third
+  miss shows you the shape and moves on. Two decks: your first six chords,
+  or all ten open shapes. Both games feed the arcade XP goal and streak.
+
 ## 2026-08-01 — Video title check
 
 ### Fixed

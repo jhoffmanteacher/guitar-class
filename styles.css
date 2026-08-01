@@ -1842,6 +1842,44 @@ body.games-open{overflow:hidden}
 .psg-dots{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;justify-content:center}
 .psg-status{font-size:0.9375rem;color:var(--text2);text-align:center;min-height:1.4em}
 
+/* ── Pattern Detective: reuses the Strum Radar notation strip and the
+   Chord Blitz HUD/answers wholesale — only the card accent is its own. ── */
+.games-card.gc-patterndet::before{background:var(--blue-text)}
+
+/* ── Build-a-Chord: a tappable blank chord grid. Columns are strings
+   (low E leftmost, matching every diagram on the site); the header row
+   toggles open (O) / muted (×); rows are frets 1–4. A wrong check
+   flashes the offending string columns; a right one turns the dots
+   green for the celebration beat. ── */
+.games-card.gc-buildchord::before{background:var(--red-text)}
+.bc-prompt{text-align:center;font-size:1.375rem;font-weight:800;margin:10px 0 2px}
+.bc-grid{display:flex;gap:6px;justify-content:center;margin:12px 0}
+.bc-col{display:flex;flex-direction:column;gap:5px;border-radius:10px;padding:3px}
+/* A miss flashes the whole grid, deliberately not the offending strings —
+   per-string highlights would hand students a guided solver. */
+.bc-grid.miss{box-shadow:inset 0 0 0 2px var(--red-text);border-radius:12px}
+.bc-status{text-align:center;font-size:0.875rem;font-weight:600;color:var(--red-text);min-height:1.3em}
+.cb-answer:disabled{opacity:.45;cursor:default}
+.bc-fretcol{padding-right:0}
+.bc-head-spacer,.bc-fretnum{width:16px;height:34px;display:flex;align-items:center;justify-content:center;font-size:0.8125rem;font-weight:600;color:var(--text3)}
+.bc-fretnum{height:44px}
+.bc-head{width:44px;height:34px;border:1px dashed var(--border);border-radius:999px;background:transparent;color:var(--text2);font-size:1rem;font-weight:700;cursor:pointer;font-family:inherit}
+.bc-head:hover{color:var(--text);border-color:var(--text3)}
+.bc-head.muted{color:var(--red-text);border-color:var(--red-text);border-style:solid}
+.bc-cell{width:44px;height:44px;border:1px solid var(--border);border-radius:10px;background:var(--bg2);cursor:pointer;position:relative;padding:0}
+.bc-cell:hover{border-color:var(--text3)}
+.bc-cell.on::after{content:'';position:absolute;inset:0;margin:auto;width:22px;height:22px;border-radius:50%;background:var(--text)}
+.bc-grid.right .bc-cell.on::after{background:var(--green-text)}
+.bc-grid.right .bc-head{border-color:var(--green-text)}
+.bc-actions{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:6px}
+.bc-reveal-line{text-align:center}
+@media (max-width:480px){
+  .bc-cell,.bc-head{width:34px}
+  .bc-cell{height:38px}
+  .bc-fretnum{height:38px}
+  .bc-grid{gap:4px}
+}
+
 /* ── Race lane: the little guitar running for the finish flag ──
    #nr-runner carries the JS translateX (distance = notes landed ÷ notes
    in the level); .nr-runner-art inside it carries every CSS animation, so
