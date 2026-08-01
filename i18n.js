@@ -958,6 +958,8 @@
       es: '90 segundos: aparece el nombre de un acorde y tú colocas sus dedos en una cuadrícula vacía. Diagramas al revés — esto construye memoria real de los acordes.' },
     'games.bc.doneLine': { en: 'You built {built} chords — {acc}% right on the first check.',
       es: 'Construiste {built} acordes — {acc}% correctos a la primera revisión.' },
+    'games.bc.doneLineOne': { en: 'You built 1 chord — {acc}% right on the first check.',
+      es: 'Construiste 1 acorde — {acc}% correcto a la primera revisión.' },
     'games.bc.nextButton': { en: 'Next chord',
       es: 'Siguiente acorde' },
     'games.bc.offByMany': { en: '{n} strings are off.',

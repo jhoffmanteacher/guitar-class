@@ -7834,15 +7834,24 @@ function bcRenderGrid(){
   if (wrap) wrap.innerHTML = bcGridHtml();
 }
 
+/* Editing the grid clears the stale "N strings are off" line — it described
+   the shape as it was at the last Check, not the one being built now. */
+function bcClearStatus(){
+  const status = document.getElementById('bc-status');
+  if (status) status.innerHTML = '&nbsp;';
+}
+
 function bcHead(st){
   if (!bc || bc.phase !== 'play' || bc.locked || bc.revealed) return;
   bc.shape[st] = bc.shape[st] === 'x' ? 0 : 'x';
+  bcClearStatus();
   bcRenderGrid();
 }
 
 function bcTap(st, f){
   if (!bc || bc.phase !== 'play' || bc.locked || bc.revealed) return;
   bc.shape[st] = bc.shape[st] === f ? 0 : f;
+  bcClearStatus();
   bcRenderGrid();
 }
 
@@ -7973,7 +7982,7 @@ function bcRenderDone(){
   body.innerHTML =
     `<div class="coach-report">
        <div class="cb-done-score">${bc.score}</div>
-       <div class="coach-overall">${GAME_ICO.buildchord} ${t('games.bc.doneLine', { built: bc.built, acc })}</div>
+       <div class="coach-overall">${GAME_ICO.buildchord} ${t(bc.built === 1 ? 'games.bc.doneLineOne' : 'games.bc.doneLine', { built: bc.built, acc })}</div>
        ${bestLine}
        <div class="coach-actions">
          <button type="button" class="coach-start" onclick="bcStart()">&#x21BB; ${t('games.common.playAgain')}</button>
