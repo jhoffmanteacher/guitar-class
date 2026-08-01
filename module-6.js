@@ -50,7 +50,7 @@ SETS.push(
               'Look at your strumming hand the whole time'
             ],
               choices_es: [
-              'Mantener la muñeca moviéndose como un péndulo, incluso entre rasgueos',
+              'Mantener la muñeca en péndulo, incluso entre rasgueos',
               'Rasguear lo más fuerte posible',
               'Usar una púa muy gruesa',
               'Mirar tu mano de rasgueo todo el tiempo'
@@ -360,8 +360,8 @@ SETS.push(
         gotItWhen_es: 'puedes mirar tu mano de rasgueo en un espejo o en un video rápido del teléfono y ver que nunca se detiene por completo — la muñeca siempre viaja hacia abajo o hacia arriba, incluso cuando te saltas un rasgueo.',
         practice: { type: 'mc', prompt: 'When the wrist "stops" between strums, what usually goes wrong?',
           prompt_es: 'Cuando la muñeca "se detiene" entre rasgueos, ¿qué suele salir mal?',
-          choices: ['Nothing — it should stop', 'You lose the pulse and the timing falls apart', 'The pick gets dropped', 'The chord sounds louder'],
-          choices_es: ['Nada — debería detenerse', 'Pierdes el pulso y el tiempo se desmorona', 'Se te cae la púa', 'El acorde suena más fuerte'], answer: 1,
+          choices: ['Nothing — stopping keeps the strums cleaner', 'You lose the pulse and drift off the beat', 'The pick slips out of your fingers', 'The chord rings louder on the next strum'],
+          choices_es: ['Nada — detenerse mantiene los rasgueos más limpios', 'Pierdes el pulso y te sales del tiempo', 'La púa se te resbala de los dedos', 'El acorde suena más fuerte en el siguiente rasgueo'], answer: 1,
           explain: 'The pendulum swing IS your sense of the beat — stop the hand and you lose the pulse, so the next strum lands early or late. Keep it traveling even on strums you skip.',
           explain_es: 'El balanceo de péndulo ES tu sentido del tiempo — si detienes la mano pierdes el pulso, y el siguiente rasgueo cae temprano o tarde. Mantenla viajando incluso en los rasgueos que te saltas.' } },
       { id: 'm6w1-s2', text: 'Play a steady down-up 8th-note pattern at 60 BPM for 8 bars',
@@ -387,8 +387,8 @@ SETS.push(
         gotItWhen_es: 'tus golpes hacia abajo y hacia arriba suenan más o menos con el mismo volumen — ninguno domina al otro, y tu púa no engancha las cuerdas en el camino hacia arriba.',
         practice: { type: 'mc', prompt: 'Your upstrokes sound weak and clunky compared to your downstrokes. What\'s the classic fix?',
           prompt_es: 'Tus golpes hacia arriba suenan débiles y torpes comparados con los de abajo. ¿Cuál es el arreglo clásico?',
-          choices: ['Relax the wrist and let the upstroke brush just the top few strings', 'Grip the pick harder and dig in on the way up', 'Skip the upstrokes until they\'re perfect', 'Swing the whole arm up for more power'],
-          choices_es: ['Relajar la muñeca y dejar que el golpe hacia arriba roce solo las primeras cuerdas agudas', 'Apretar más la púa y clavarla en el camino hacia arriba', 'Saltarte los golpes hacia arriba hasta que salgan perfectos', 'Subir todo el brazo para tener más fuerza'], answer: 0,
+          choices: ['Relax the wrist and brush just the top few strings', 'Grip the pick harder and dig in on the way up', 'Skip the upstrokes until they\'re perfect', 'Swing the whole arm up for more power'],
+          choices_es: ['Relajar la muñeca y rozar solo las cuerdas agudas', 'Apretar más la púa y clavarla en el camino hacia arriba', 'Saltarte los golpes hacia arriba hasta que salgan perfectos', 'Subir todo el brazo para tener más fuerza'], answer: 0,
           explain: 'Upstrokes aren\'t downstrokes in reverse — a relaxed wrist brushing the top 3–4 strings sounds even. Gripping harder or using the whole arm makes the catch worse.',
           explain_es: 'Los golpes hacia arriba no son los de abajo al revés — una muñeca relajada rozando las 3–4 cuerdas agudas suena pareja. Apretar más o usar todo el brazo empeora el enganche.' } },
       { id: 'm6w1-s5', text: 'Keep the strum hand moving through a chord change',
@@ -495,7 +495,7 @@ SETS.push(
             ],
               choices_es: [
               '4 — un espacio por tiempo',
-              '8 — un golpe hacia abajo y uno hacia arriba en cada tiempo',
+              '8 — abajo y arriba en cada tiempo',
               '6 — D-DU-UDU solo rasguea seis veces',
               '16 — eso serían dos compases'
             ] }
@@ -694,8 +694,8 @@ SETS.push(
         gotItWhen_es: 'en el rasgueo "saltado" del patrón, tu muñeca sigue bajando — solo la púa no toca las cuerdas. Un video rápido del teléfono (o un espejo) muestra el movimiento claramente.',
         practice: { type: 'mc', prompt: 'When you "skip" a strum in the D-DU-UDU pattern, what does your wrist do?',
           prompt_es: 'Cuando te "saltas" un rasgueo en el patrón D-DU-UDU, ¿qué hace tu muñeca?',
-          choices: ['Stops completely', 'Keeps moving in the pendulum — the pick just misses the strings', 'Lifts up away from the guitar', 'Locks for a beat'],
-          choices_es: ['Se detiene por completo', 'Sigue moviéndose en el péndulo — la púa solo falla las cuerdas', 'Se levanta lejos de la guitarra', 'Se bloquea por un tiempo'], answer: 1,
+          choices: ['Stops completely and waits for the next strum', 'Keeps its full swing, missing the strings', 'Lifts up and away from the guitar', 'Locks in place for a full beat'],
+          choices_es: ['Se detiene por completo y espera al siguiente rasgueo', 'Mantiene todo su balanceo, fallando las cuerdas', 'Se levanta y se aleja de la guitarra', 'Se bloquea en su lugar por un tiempo completo'], answer: 1,
           explain: 'A skipped strum is a miss on purpose — the wrist keeps its full swing and the pick simply travels past the strings without touching them. Stopping the hand would throw off every strum after it.',
           explain_es: 'Un rasgueo saltado es una falla a propósito — la muñeca mantiene todo su balanceo y la púa simplemente pasa junto a las cuerdas sin tocarlas. Detener la mano descuadraría todos los rasgueos que vienen después.' } },
       { id: 'm6w2-s3', text: 'Accent beats 2 and 4 (the "backbeat")',
@@ -723,8 +723,8 @@ SETS.push(
         gotItWhen_es: 'puedes mirar un patrón de rasgueo escrito (p. ej., "↓ ↓↑ ↑↓↑") y tocarlo correctamente la primera vez, sin que alguien lo demuestre.',
         practice: { type: 'mc', prompt: 'In strum notation, what does the symbol "↑" mean?',
           prompt_es: 'En la notación de rasgueo, ¿qué significa el símbolo "↑"?',
-          choices: ['Strum up (toward the ceiling, away from the floor)', 'Strum down', 'Mute the strings', 'Hold the chord'],
-          choices_es: ['Rasguear hacia arriba (hacia el techo, lejos del suelo)', 'Rasguear hacia abajo', 'Silenciar las cuerdas', 'Sostener el acorde'], answer: 0,
+          choices: ['Strum up, toward the ceiling', 'Strum down, toward the floor', 'Mute the strings with your palm', 'Hold the chord without strumming'],
+          choices_es: ['Rasguear hacia arriba, hacia el techo', 'Rasguear hacia abajo, hacia el suelo', 'Silenciar las cuerdas con la palma', 'Sostener el acorde sin rasguear'], answer: 0,
           explain: 'The arrow points the way your hand travels: "↑" is an upstroke, moving from the thin strings toward the thick ones. "↓" is a downstroke, the other direction.',
           explain_es: 'La flecha apunta hacia donde viaja tu mano: "↑" es un rasgueo hacia arriba, moviéndose de las cuerdas delgadas hacia las gruesas. "↓" es un rasgueo hacia abajo, en la otra dirección.' } }
     ]
@@ -769,13 +769,13 @@ SETS.push(
               explain_es: 'El reggae vive en el contratiempo — golpes hacia arriba nítidos en el "+" de cada tiempo mientras los tiempos fuertes quedan vacíos. Ese "picoteo" en el contratiempo — los músicos de reggae lo llaman "skank" — es lo que hace que el reggae suene a reggae.',
               choices: [
               'Loud downstrokes on beat 1',
-              'Upstrokes on the "+" (and) of each beat, with the downstrokes skipped',
+              'Upstrokes on the "+" (and) of each beat',
               'Strumming only on beat 4',
               'Fast, constant 16th-note strumming throughout'
             ],
               choices_es: [
               'Golpes fuertes hacia abajo en el tiempo 1',
-              'Golpes hacia arriba en el "+" (y) de cada tiempo, saltándose los golpes hacia abajo',
+              'Golpes hacia arriba en el "+" (y) de cada tiempo',
               'Rasguear solo en el tiempo 4',
               'Rasgueo rápido y constante de semicorcheas todo el tiempo'
             ] }
@@ -1003,8 +1003,8 @@ SETS.push(
         gotItWhen_es: 'tu rasgueo de rock tiene peso e impulso claros — reproduce una grabación rápida y puedes escuchar que lo dices en serio.',
         practice: { type: 'mc', prompt: 'What actually gives a rock strum its weight?',
           prompt_es: '¿Qué le da en realidad su peso a un rasgueo de rock?',
-          choices: ['Accented downstrokes driven from the elbow, digging a little deeper into the strings', 'Strumming as fast as possible', 'Squeezing the chord harder with the fretting hand', 'Only strumming on beat 1'],
-          choices_es: ['Golpes hacia abajo acentuados impulsados desde el codo, entrando un poco más profundo en las cuerdas', 'Rasguear lo más rápido posible', 'Apretar el acorde más fuerte con la mano de trastear', 'Rasguear solo en el tiempo 1'], answer: 0,
+          choices: ['Accented downstrokes driven from the elbow', 'Strumming as fast as possible', 'Squeezing the chord harder with the fretting hand', 'Only strumming on beat 1'],
+          choices_es: ['Golpes hacia abajo acentuados impulsados desde el codo', 'Rasguear lo más rápido posible', 'Apretar el acorde más fuerte con la mano de trastear', 'Rasguear solo en el tiempo 1'], answer: 0,
           explain: 'Weight comes from arm weight behind the picking hand\'s attack, not from speed or fret-hand squeezing. Strum from the elbow, dig in on the accents, and let the other strums stay lighter.',
           explain_es: 'El peso viene del peso del brazo detrás del ataque de la mano de pulsar, no de la velocidad ni de apretar con la mano de trastear. Rasguea desde el codo, entra con fuerza en los acentos, y deja los demás rasgueos más ligeros.' } },
       { id: 'm6w3-s3', text: 'Play a reggae strum (upstrokes on the "+", downstrokes skipped)',
@@ -1013,8 +1013,8 @@ SETS.push(
         gotItWhen_es: 'puedes tocar un picoteo reggae donde SOLO los golpes hacia arriba tocan las cuerdas — tu mano sigue moviéndose en los tiempos, pero la púa falla a propósito.',
         practice: { type: 'mc', prompt: 'In a reggae offbeat strum, the strings are hit on which counts?',
           prompt_es: 'En un rasgueo de contratiempo reggae, ¿en cuáles tiempos se tocan las cuerdas?',
-          choices: ['1, 2, 3, 4 (the numbers)', 'The "+" of each beat (between numbers)', 'Only beat 1', 'Continuously'],
-          choices_es: ['1, 2, 3, 4 (los números)', 'El "+" de cada tiempo (entre números)', 'Solo el tiempo 1', 'Continuamente'], answer: 1,
+          choices: ['1, 2, 3, 4 (the numbers)', 'The "+" between the numbers', 'Only beat 1 of each bar', 'Continuously, on every count'],
+          choices_es: ['1, 2, 3, 4 (los números)', 'El "+" entre los números', 'Solo el tiempo 1 de cada compás', 'Continuamente, en cada conteo'], answer: 1,
           explain: 'Reggae leaves the numbered beats empty and chops only on the "+" between them. Hitting the numbers instead gives you an ordinary strum — the offbeat is the whole sound.',
           explain_es: 'El reggae deja vacíos los tiempos numerados y solo golpea en el "+" entre ellos. Tocar en los números te da un rasgueo común y corriente — el contratiempo es todo el sonido.' } },
       { id: 'm6w3-s4', text: 'Choose a strum pattern that matches a song\'s style',

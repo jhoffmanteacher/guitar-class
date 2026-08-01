@@ -296,8 +296,8 @@ SETS.push(
         gotItWhen_es: 'puedes ver "5h7" o "7p5" o "5/7" en un TAB y saber exactamente qué debe hacer tu mano de trastear — sin tener que buscarlo.',
         practice: { type: 'mc', prompt: 'In TAB, "5h7" tells you to:',
           prompt_es: 'En el TAB, "5h7" te dice que:',
-          choices: ['Pick the 5th fret note, then HAMMER your finger onto the 7th fret without re-picking', 'Pick both notes hard', 'Hold the 5th fret for 7 beats', 'Skip to the 7th fret'],
-          choices_es: ['Pulses la nota del traste 5, y luego hagas un HAMMER-ON hacia el traste 7 sin volver a pulsar', 'Pulses ambas notas fuerte', 'Sostengas el traste 5 durante 7 tiempos', 'Saltes directo al traste 7'], answer: 0,
+          choices: ['Pick fret 5, then HAMMER onto fret 7', 'Pick both notes hard, one after the other', 'Hold the 5th fret for 7 beats', 'Skip straight to the 7th fret'],
+          choices_es: ['Pulses el traste 5 y luego hagas un HAMMER-ON al traste 7', 'Pulses ambas notas fuerte, una después de la otra', 'Sostengas el traste 5 durante 7 tiempos', 'Saltes directo al traste 7'], answer: 0,
           explain: 'The "h" means hammer-on: pick the first note only, then slam a finger down on the higher fret so the second note sounds by itself. Picking both would lose the point — the smooth, connected sound comes from the fretting hand alone.',
           explain_es: 'La "h" significa hammer-on: pulsa solo la primera nota y después deja caer un dedo con fuerza en el traste más alto para que la segunda nota suene sola. Pulsar las dos perdería el objetivo — el sonido suave y ligado viene solo de la mano de trastear.' } },
       { id: 'm7w1-s4', text: 'Play the "Smoke on the Water" main riff in time',
@@ -322,8 +322,8 @@ SETS.push(
         gotItWhen_es: 'puedes elegir una canción que te guste, encontrar un TAB para principiantes (Ultimate Guitar, Songsterr), y tocar al menos una sección sin pedir ayuda.',
         practice: { type: 'mc', prompt: 'You find three different TABs of the same song online. How do you decide which one to trust?',
           prompt_es: 'Encuentras tres TABs diferentes de la misma canción en línea. ¿Cómo decides en cuál confiar?',
-          choices: ['Play the first riff of each and keep the one that sounds like the record', 'The highest star rating is always the correct one', 'The longest, most detailed one', 'The first search result'],
-          choices_es: ['Toca el primer riff de cada uno y quédate con el que suena como la grabación', 'La calificación de estrellas más alta siempre es la correcta', 'El más largo y detallado', 'El primer resultado de búsqueda'], answer: 0,
+          choices: ['Play the first riff of each against the record', 'The highest star rating is always the correct one', 'The longest, most detailed one', 'The first search result'],
+          choices_es: ['Toca el primer riff de cada uno contra la grabación', 'La calificación de estrellas más alta siempre es la correcta', 'El más largo y detallado', 'El primer resultado de búsqueda'], answer: 0,
           explain: 'Ratings are a good starting filter, but fan TABs are often wrong — your ear against the recording is the real referee.',
           explain_es: 'Las calificaciones son un buen filtro inicial, pero los TABs de fans a menudo están mal — tu oído contra la grabación es el verdadero árbitro.' } }
     ]
@@ -367,14 +367,14 @@ SETS.push(
               explain: 'Plant the thumb on the BACK of the neck, roughly behind your index finger. That gives the squeezing leverage a barre needs — wrapping it over the top kills your strength.',
               explain_es: 'Planta el pulgar en la PARTE TRASERA del mástil, más o menos detrás de tu dedo índice. Eso da la palanca de apriete que una cejilla necesita — envolverlo por encima del mástil te quita fuerza.',
               choices: [
-              'Wrapped over the top of the neck',
-              'On the BACK of the neck, roughly behind your index finger',
+              'Wrapped over the top of the neck like a baseball bat',
+              'On the BACK of the neck, behind your index finger',
               'Pointing toward the ceiling',
               'It doesn\'t matter where the thumb goes'
             ],
               choices_es: [
-              'Envuelto por encima del mástil',
-              'En la PARTE TRASERA del mástil, más o menos detrás de tu dedo índice',
+              'Envuelto por encima del mástil, como un bate de béisbol',
+              'En la PARTE TRASERA del mástil, detrás de tu dedo índice',
               'Apuntando hacia el techo',
               'No importa dónde vaya el pulgar'
             ] }
@@ -581,8 +581,8 @@ SETS.push(
         gotItWhen_es: 'con solo tu dedo índice plano sobre el traste 5, puedes rasguear y cada una de las 6 cuerdas suena — sin cuerdas apagadas, sin zumbido.',
         practice: { type: 'mc', prompt: 'Which side of your index finger is best for a clean barre?',
           prompt_es: '¿Qué lado de tu dedo índice es mejor para una cejilla limpia?',
-          choices: ['The fleshy front pad', 'The bony outer edge (rolled slightly)', 'Either works equally well', 'The fingernail side'],
-          choices_es: ['La almohadilla carnosa de enfrente', 'El borde óseo exterior (ligeramente rodado)', 'Cualquiera de los dos funciona igual', 'El lado de la uña'], answer: 1,
+          choices: ['The fleshy front pad, laid perfectly flat', 'The bony outer edge, rolled slightly', 'Either side works equally well', 'The fingernail side of the finger'],
+          choices_es: ['La almohadilla carnosa de enfrente, bien plana', 'El borde óseo exterior, ligeramente rodado', 'Cualquiera de los dos lados funciona igual', 'El lado de la uña del dedo'], answer: 1,
           explain: 'Roll the finger slightly onto its bony outer edge — that side is hard and flat, so it presses all six strings evenly. The soft front pad has creases at the joints, and strings sink into them and buzz.',
           explain_es: 'Rueda el dedo un poco hacia su borde óseo exterior — ese lado es duro y plano, así que presiona las seis cuerdas de forma pareja. La almohadilla blanda de enfrente tiene pliegues en las articulaciones, y las cuerdas se hunden ahí y zumban.' } },
       { id: 'm7w2-s2', text: 'Position my thumb correctly behind the neck for barre chords',
@@ -945,8 +945,8 @@ SETS.push(
         gotItWhen_es: 'tu dedo índice silencia ligeramente la cuerda 6 para que no tengas que pensar en evitarla al rasguear — incluso un rasgueo un poco amplio suena bien.',
         practice: { type: 'mc', prompt: 'In an A-shape barre chord, what happens to the low E string (string 6)?',
           prompt_es: 'En un acorde con cejilla en forma de A, ¿qué pasa con la cuerda Mi grave (cuerda 6)?',
-          choices: ['It rings as part of the chord', 'It is muted by the side of your index finger', 'You skip your strum carefully', 'You tune it to a different note'],
-          choices_es: ['Suena como parte del acorde', 'Está silenciada por el costado de tu dedo índice', 'Te saltas esa cuerda con cuidado al rasguear', 'La afinas a una nota distinta'], answer: 1,
+          choices: ['It rings out as part of the chord', 'It is muted by your index finger', 'You skip your strum carefully', 'You tune it to a different note'],
+          choices_es: ['Resuena como parte del acorde', 'Está silenciada por tu dedo índice', 'Te saltas esa cuerda con cuidado al rasguear', 'La afinas a una nota distinta'], answer: 1,
           explain: 'The side of your index finger leans over and rests on string 6 just enough to deaden it, so even a wide strum still sounds right. An A-shape has its root on string 5 — if the low E rings, the chord loses its solid root note underneath.',
           explain_es: 'El costado de tu dedo índice se inclina y se apoya en la cuerda 6 lo justo para apagarla, así que incluso un rasgueo amplio suena bien. La forma de A tiene su raíz en la cuerda 5 — si la Mi grave suena, el acorde pierde su raíz firme en el bajo.' } },
       { id: 'm7w3-s3', text: 'Name an A-shape barre chord by its root note on string 5',

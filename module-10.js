@@ -271,8 +271,8 @@ SETS.push(
         gotItWhen_es: 'puedes completar la frase "esta canción está en G" explicando, con tus propias palabras, que sus notas y acordes vienen de la escala de G mayor y G se siente como el hogar.',
         practice: { type: 'mc', prompt: '"This song is in A" most nearly means:',
           prompt_es: '"Esta canción está en A" quiere decir principalmente que:',
-          choices: ['It starts loud', 'Its notes & chords come from the A major scale and A feels like home', 'It uses only the A string', 'It\'s at 100 BPM'],
-          choices_es: ['Empieza fuerte', 'Sus notas y acordes vienen de la escala de A mayor y A se siente como el hogar', 'Usa solo la cuerda La', 'Está a 100 BPM'], answer: 1,
+          choices: ['It starts loud and stays loud all the way through', 'Its notes & chords come from the A major scale', 'It uses only notes played on the A string', 'It\'s at a tempo of 100 beats per minute'],
+          choices_es: ['Empieza fuerte y se mantiene así toda la canción', 'Sus notas y acordes vienen de la escala de A mayor', 'Usa solo notas tocadas en la cuerda La', 'Está a un tempo de 100 pulsos por minuto'], answer: 1,
           explain: 'A key names two things: the scale a song draws its notes and chords from, and the note that feels like home. It says nothing about how loud or how fast the song is.',
           explain_es: 'Una tonalidad nombra dos cosas: la escala de la que la canción saca sus notas y acordes, y la nota que se siente como el hogar. No dice nada sobre qué tan fuerte ni qué tan rápida es la canción.' } },
       { id: 'm10w1-s5', text: 'Explain how major pentatonic relates to the major scale',
@@ -654,8 +654,8 @@ SETS.push(
                   answer: 1,
                   explain: 'If you can sing it, you know it — your hands just have to find what your voice already solved.',
                   explain_es: 'Si puedes cantarla, la conoces — tus manos solo tienen que encontrar lo que tu voz ya resolvió.',
-                  choices: ['Guess randomly', 'Sing it, then hunt for your sung notes on one string', 'Look up the TAB', 'Play every fret until something works'],
-                  choices_es: ['Adivinar al azar', 'Cantarla, y luego buscar las notas cantadas en una sola cuerda', 'Buscar el TAB', 'Tocar cada traste hasta que algo funcione'] }
+                  choices: ['Guess randomly and hope you land on the right note', 'Sing it, then find your sung notes on one string', 'Look up the TAB and read it note by note', 'Play every fret until something works'],
+                  choices_es: ['Adivinar al azar y esperar caer en la nota correcta', 'Cantarla, y luego encontrar las notas cantadas en una cuerda', 'Buscar el TAB y leerlo nota por nota', 'Tocar cada traste hasta que algo funcione'] }
               },
               {
                 label: 'Optional watch: building your ear', label_es: 'Opcional: desarrolla tu oído',
@@ -703,8 +703,8 @@ SETS.push(
                   answer: 1,
                   explain: 'The pattern is a movable shape — slide the whole thing so its ROOT lands on the new key\'s note.',
                   explain_es: 'El patrón es una forma móvil — desliza todo el conjunto para que su RAÍZ caiga en la nota de la nueva tonalidad.',
-                  choices: ['Playing it faster', 'Moving it to a different key, keeping its shape', 'Playing it backwards', 'Adding more notes'],
-                  choices_es: ['Tocarlo más rápido', 'Moverlo a una tonalidad distinta, manteniendo su forma', 'Tocarlo al revés', 'Agregar más notas'] }
+                  choices: ['Playing it faster than the original tempo', 'Moving it to a new key, keeping its shape', 'Playing it backwards, last note first', 'Adding more notes to fill it out'],
+                  choices_es: ['Tocarlo más rápido que el tempo original', 'Moverlo a una tonalidad nueva, manteniendo su forma', 'Tocarlo al revés, la última nota primero', 'Agregar más notas para rellenarlo'] }
               },
               {
                 label: 'Predict the new fret', label_es: 'Predice el nuevo traste',
@@ -871,8 +871,8 @@ SETS.push(
         gotItWhen_es: 'puedes deslizar toda la forma de un riff hacia arriba o abajo del mástil a una nueva tonalidad y tocarlo, manteniendo cada distancia interna de trastes exactamente igual.',
         practice: { type: 'mc', prompt: 'A riff starts on G (low E string, fret 3). To play the same riff in A, what do you do?',
           prompt_es: 'Un riff empieza en G (cuerda Mi grave, traste 3). Para tocar el mismo riff en A, ¿qué haces?',
-          choices: ['Slide the whole shape up 2 frets and keep every distance the same', 'Play the same frets but on the A string', 'Move only the first note up 2 frets', 'Relearn the riff from a new TAB'],
-          choices_es: ['Deslizar toda la forma 2 trastes hacia arriba y mantener todas las distancias iguales', 'Tocar los mismos trastes pero en la cuerda La', 'Mover solo la primera nota 2 trastes arriba', 'Volver a aprender el riff de un TAB nuevo'], answer: 0,
+          choices: ['Slide the whole shape up 2 frets', 'Play the same frets but on the A string', 'Move only the first note up 2 frets', 'Relearn the riff from a new TAB'],
+          choices_es: ['Deslizar toda la forma 2 trastes hacia arriba', 'Tocar los mismos trastes pero en la cuerda La', 'Mover solo la primera nota 2 trastes arriba', 'Volver a aprender el riff de un TAB nuevo'], answer: 0,
           explain: 'Transposing on one string is pure sliding — move the whole shape by the distance between old and new root (G→A = 2 frets). The internal distances never change.',
           explain_es: 'Transportar en una cuerda es puro deslizamiento — mueve toda la forma la distancia entre la raíz vieja y la nueva (G→A = 2 trastes). Las distancias internas nunca cambian.' } },
       { id: 'm10w3-s3', text: 'Sing a short pattern, then find and play it on one string',
@@ -881,8 +881,8 @@ SETS.push(
         gotItWhen_es: 'cantas un patrón primero, y luego encuentras sus trastes correspondientes en una sola cuerda de oído — la nota trasteada y tu voz se funden en un solo sonido, sin oscilación.',
         practice: { type: 'mc', prompt: 'You sang a note and you\'re hunting for it on the B string. How do you know you\'ve found the right fret?',
           prompt_es: 'Cantaste una nota y la estás buscando en la cuerda Si. ¿Cómo sabes que encontraste el traste correcto?',
-          choices: ['The fretted note and your voice blend into one sound — no wobble between them', 'The tuner shows the string is in tune', 'It\'s the fret that sounds loudest', 'Any nearby fret counts if you sing along'],
-          choices_es: ['La nota trasteada y tu voz se funden en un solo sonido — sin oscilación entre ellas', 'El afinador muestra que la cuerda está afinada', 'Es el traste que suena más fuerte', 'Cualquier traste cercano cuenta si cantas junto'], answer: 0,
+          choices: ['The fretted note and your voice blend into one sound', 'The tuner shows the string is in tune already', 'It\'s the fret that rings out the loudest', 'Any nearby fret counts if you sing along'],
+          choices_es: ['La nota trasteada y tu voz se funden en un solo sonido', 'El afinador muestra que la cuerda ya está afinada', 'Es el traste que suena más fuerte de todos', 'Cualquier traste cercano cuenta si cantas junto'], answer: 0,
           explain: 'Matching pitch feels like the two sounds lock together; a close-but-wrong fret makes an audible beating wobble. The tuner checks the string, not your melody.',
           explain_es: 'Igualar el tono se siente como si los dos sonidos se acoplaran; un traste cercano pero equivocado produce una oscilación audible. El afinador revisa la cuerda, no tu melodía.' } },
       { id: 'm10w3-s4', text: 'Tell major from minor by ear',

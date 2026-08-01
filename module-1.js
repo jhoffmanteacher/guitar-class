@@ -254,8 +254,8 @@ SETS.push(
         gotItWhen_es: 'puedes responder "¿por qué guitarra?" en una o dos oraciones sin dudar — y la respuesta es tuya, no de alguien más.',
         practice: { type: 'mc', prompt: 'Which of these makes the STRONGEST guitar goal to write down?',
           prompt_es: '¿Cuál de estas es la meta de guitarra MÁS SÓLIDA para escribir?',
-          choices: ['A specific goal you care about — like playing a riff from your favorite song', '"Get good at guitar" — the broader the better', 'Whatever song your friend thinks you should learn', 'No goal — goals take the fun out of playing'],
-          choices_es: ['Una meta específica que te importa — como tocar un riff de tu canción favorita', '"Volverme bueno con la guitarra" — entre más amplia, mejor', 'La canción que tu amigo cree que deberías aprender', 'Sin meta — las metas le quitan lo divertido a tocar'], answer: 0,
+          choices: ['A specific goal you care about — one riff from a song you love', '"Get good at guitar" — the broader the better', 'Whatever song your friend thinks you should learn instead of yours', 'No goal — goals take the fun out of playing'],
+          choices_es: ['Una meta específica que te importa — un riff de una canción que amas', '"Volverme bueno con la guitarra" — entre más amplia, mejor', 'La canción que tu amigo cree que deberías aprender en vez de la tuya', 'Sin meta — las metas le quitan lo divertido a tocar'], answer: 0,
           explain: 'A specific goal that\'s yours tells you exactly what to practice next. Vague or borrowed goals are the ones that fade by week three.',
           explain_es: 'Una meta específica y tuya te dice exactamente qué practicar después. Las metas vagas o prestadas son las que se desvanecen a la tercera semana.' } },
       { id: 'w1-s2', text: 'I can name one song that matters to me',
@@ -382,10 +382,10 @@ SETS.push(
               'On the chair\'s armrest'
             ],
               choices_es: [
-              'Sobre tu pierna — la mano de trastear queda libre',
+              'Sobre tu pierna — la mano de trastear libre',
               'Sostenida por tu mano de trastear',
-              'Recostada contra tu pecho',
-              'Sobre el brazo de la silla'
+              'Recostada hacia atrás contra tu pecho',
+              'Apoyada sobre el brazo de la silla'
             ] }
           },
           {
@@ -649,8 +649,8 @@ SETS.push(
         gotItWhen_es: 'puedes señalar y nombrar cada parte en una guitarra real sin revisar un diagrama.',
         practice: { type: 'mc', prompt: 'A string is sounding too low and you want to raise its pitch. Which part do you turn?',
           prompt_es: 'Una cuerda suena demasiado baja y quieres subir su tono. ¿Qué parte giras?',
-          choices: ['The tuning peg on the headstock', 'The nut', 'The saddle', 'The soundhole'],
-          choices_es: ['La clavija en el clavijero', 'La cejuela', 'La selleta', 'La boca de la guitarra'], answer: 0,
+          choices: ['The tuning peg on the headstock', 'The nut at the top of the neck', 'The saddle on the bridge', 'The soundhole in the body'],
+          choices_es: ['La clavija en el clavijero', 'La cejuela en la punta del mástil', 'La selleta sobre el puente', 'La boca en el cuerpo de la guitarra'], answer: 0,
           explain: 'Only the tuning peg changes a string\'s tension, and tension is what sets the pitch. The nut and saddle are the fixed strips the string rests on at each end — real parts, but nothing you turn — and the soundhole is just an opening in the body.',
           explain_es: 'Solo la clavija cambia la tensión de una cuerda, y la tensión es lo que fija el tono. La cejuela y la selleta son las tiras fijas donde se apoya la cuerda en cada extremo — partes reales, pero no se giran — y la boca es simplemente una abertura en el cuerpo.' } },
       { id: 'w2-s2', text: 'Hold the guitar with correct sitting posture',
@@ -669,10 +669,10 @@ SETS.push(
         gotItWhen_es: 'tu púa se mantiene en su lugar al rasguear, solo asoma una puntita más allá del pulgar, y tu muñeca se mantiene relajada.',
         practice: { type: 'mc', prompt: 'Your pick keeps twisting sideways in your fingers halfway through a strum. What\'s the most likely fix?',
           prompt_es: 'Tu púa se sigue girando de lado entre tus dedos a mitad del rasgueo. ¿Cuál es la solución más probable?',
-          choices: ['Pull it back so only about 3–4 mm of tip shows, and hold it firm but relaxed', 'Squeeze the pick as hard as you can', 'Strum faster so the pick has less time to move', 'Switch to a much thinner pick'],
-          choices_es: ['Métela más para que solo asomen unos 3–4 mm de punta, y sostenla firme pero relajada', 'Aprieta la púa lo más fuerte que puedas', 'Rasguea más rápido para que la púa tenga menos tiempo de moverse', 'Cámbiate a una púa mucho más delgada'], answer: 0,
-          explain: 'A pick that twists is almost always sticking out too far — the strings catch the extra tip and lever it around. Back it off to the 3–4 mm target. Squeezing harder just tires your hand out, and a thinner pick bends and flops more, not less.',
-          explain_es: 'Una púa que se gira casi siempre es una púa que asoma demasiado — las cuerdas atrapan esa punta de más y la hacen girar. Vuelve al objetivo de 3–4 mm. Apretar más fuerte solo te cansa la mano, y una púa más delgada se dobla más, no menos.' } },
+          choices: ['Pull it back so only about 3–4 mm of tip shows', 'Squeeze the pick as hard as you can', 'Strum faster so the pick has less time to move around', 'Switch to a much thinner pick'],
+          choices_es: ['Métela más para que solo asomen unos 3–4 mm de punta', 'Aprieta la púa lo más fuerte que puedas', 'Rasguea más rápido para que la púa tenga menos tiempo de moverse de lugar', 'Cámbiate a una púa mucho más delgada'], answer: 0,
+          explain: 'A pick that twists is almost always sticking out too far — the strings catch the extra tip and lever it around. Back it off to the 3–4 mm target and hold it firm but relaxed. Squeezing harder just tires your hand out, and a thinner pick bends and flops more, not less.',
+          explain_es: 'Una púa que se gira casi siempre es una púa que asoma demasiado — las cuerdas atrapan esa punta de más y la hacen girar. Vuelve al objetivo de 3–4 mm y sostenla firme pero relajada. Apretar más fuerte solo te cansa la mano, y una púa más delgada se dobla más, no menos.' } },
       { id: 'w2-s4', text: 'Name all 6 strings from memory (E A D G B e)',
         text_es: 'Nombrar las 6 cuerdas de memoria (E A D G B e)',
         gotItWhen: 'you can say E-A-D-G-B-e low to high — and high to low — without pausing or saying the mnemonic out loud.',

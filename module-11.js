@@ -42,8 +42,8 @@ SETS.push(
                   answer: 1,
                   explain: 'Skip-a-note, skip-a-note: C-E-G makes the C chord. Every chord you\'ve strummed is one of these plus doubled notes.',
                   explain_es: 'Salta una nota, salta una nota: C-E-G arma el acorde de C. Cada acorde que has rasgueado es uno de estos más notas duplicadas.',
-                  choices: ['Any three notes', 'Every other note of a scale: root, 3rd, 5th', 'Three notes on one string', 'The same note in three octaves'],
-                  choices_es: ['Cualquier tres notas', 'Cada otra nota de una escala: raíz, 3ª, 5ª', 'Tres notas en una sola cuerda', 'La misma nota en tres octavas'] }
+                  choices: ['Any three notes you like from the key', 'Every other note of a scale: root, 3rd, 5th', 'Three notes side by side on one string', 'The same note in three different octaves'],
+                  choices_es: ['Cualquier tres notas que te gusten de la tonalidad', 'Cada otra nota de una escala: raíz, 3ª, 5ª', 'Tres notas seguidas en una sola cuerda', 'La misma nota en tres octavas distintas'] }
               },
               {
                 label: 'Watch: how chords are built', label_es: 'Mira: cómo se construyen los acordes',
@@ -294,8 +294,8 @@ SETS.push(
         gotItWhen_es: 'puedes explicar que Am es el acorde iii de F mayor (construido sobre la 3ª nota de la escala) y nombrar el Dm de paso como vi.',
         practice: { type: 'mc', prompt: '"Luna" vamps F → Am in the key of F major. What numeral does Am get?',
           prompt_es: '"Luna" alterna F → Am en la tonalidad de F mayor. ¿Qué número romano recibe Am?',
-          choices: ['iii — A is the 3rd note of the F scale, and the chord is minor', 'vi — minor chords are always vi', 'III — uppercase, it\'s the 3rd chord', 'ii — it comes second in the vamp'],
-          choices_es: ['iii — A es la 3ª nota de la escala de F, y el acorde es menor', 'vi — los acordes menores siempre son vi', 'III — mayúscula, es el 3er acorde', 'ii — viene en segundo lugar en el vamp'], answer: 0,
+          choices: ['iii — A is the 3rd note of the F scale', 'vi — every minor chord in a key is vi', 'III — uppercase, since it is the 3rd chord', 'ii — it comes second in the vamp order'],
+          choices_es: ['iii — A es la 3ª nota de la escala de F', 'vi — todo acorde menor de una tonalidad es vi', 'III — mayúscula, porque es el 3er acorde', 'ii — viene en segundo lugar en el orden del vamp'], answer: 0,
           explain: 'Count up the F major scale — F(1) G(2) A(3) — so Am is the 3rd chord, written lowercase iii because it\'s minor. (The passing Dm is vi.)',
           explain_es: 'Cuenta la escala de F mayor — F(1) G(2) A(3) — así que Am es el 3er acorde, escrito iii en minúscula porque es menor. (El Dm de paso es vi.)' } }
     ]
@@ -409,8 +409,8 @@ SETS.push(
                   answer: 1,
                   explain: 'Inventory → family → then let your ear pick the home chord (major key or its relative minor).',
                   explain_es: 'Inventario → familia → y luego deja que tu oído elija el acorde base (la tonalidad mayor o su relativa menor).',
-                  choices: ['Count the chords', 'See which single family contains ALL the chords', 'Find the loudest chord', 'Check the tempo'],
-                  choices_es: ['Contar los acordes', 'Ver cuál única familia contiene TODOS los acordes', 'Encontrar el acorde más fuerte', 'Revisar el tempo'] }
+                  choices: ['Count how many chords the song uses', 'See which family contains ALL the chords', 'Find the chord that is played loudest', 'Check the tempo marking at the top'],
+                  choices_es: ['Contar cuántos acordes usa la canción', 'Ver cuál familia contiene TODOS los acordes', 'Encontrar el acorde que se toca más fuerte', 'Revisar la indicación de tempo al inicio'] }
               }
             ]
           },
@@ -592,8 +592,8 @@ SETS.push(
         gotItWhen_es: 'puedes nombrar Am como el acorde base del loop Am–G–F de "Watchtower" de oído, y explicar que la base es donde el loop se siente terminado, no solo el primer acorde que se toca.',
         practice: { type: 'mc', prompt: '"Watchtower" loops Am–G–F. What actually tells you the key is A minor?',
           prompt_es: '"Watchtower" repite Am–G–F. ¿Qué te dice en realidad que la tonalidad es A menor?',
-          choices: ['Every phrase pulls back to Am and rests there — home is where the music resolves', 'The first chord of a song is always its key', 'It has more minor chords than major ones', 'F comes last alphabetically'],
-          choices_es: ['Cada frase regresa a Am y descansa ahí — la base es donde la música se resuelve', 'El primer acorde de una canción siempre es su tonalidad', 'Tiene más acordes menores que mayores', 'F va al final alfabéticamente'], answer: 0,
+          choices: ['Every phrase pulls back to Am and rests there', 'The first chord of a song is always its key', 'It has more minor chords than major ones', 'F comes last alphabetically of the three'],
+          choices_es: ['Cada frase regresa a Am y descansa ahí', 'El primer acorde de una canción siempre es su tonalidad', 'Tiene más acordes menores que mayores', 'F va al final alfabéticamente de los tres'], answer: 0,
           explain: 'Key = the resting place your ear hears, not the first chord (plenty of songs start away from home). Hum along and notice where the loop feels finished — that\'s Am.',
           explain_es: 'La tonalidad = el punto de descanso que escucha tu oído, no el primer acorde (muchas canciones empiezan lejos de la base). Tararea y nota dónde la vuelta se siente terminada — eso es Am.' } },
       { id: 'm11w2-s5', text: 'Explain what a slash chord tells you (chord / bass note)',
@@ -652,8 +652,8 @@ SETS.push(
                   answer: 1,
                   explain: 'The low-E root names it — barre fret 3 and the low E says G, so it\'s G major. Module 9 pays off.',
                   explain_es: 'La raíz en la Mi grave lo nombra — cejilla en el traste 3 y la Mi grave da G, así que es G mayor. El Módulo 9 rinde frutos.',
-                  choices: ['The fret your pinky is on', 'The note under your barre on the low E string', 'The key of the song', 'The A string'],
-                  choices_es: ['El traste donde está tu meñique', 'La nota debajo de tu cejilla en la cuerda Mi grave', 'La tonalidad de la canción', 'La cuerda La'] }
+                  choices: ['The fret your pinky is holding down', 'The note under your barre on the low E string', 'The key the song is written in', 'The A string, whatever fret you barre'],
+                  choices_es: ['El traste donde tu meñique está pisando', 'La nota debajo de tu cejilla en la cuerda Mi grave', 'La tonalidad en que está escrita la canción', 'La cuerda La, sea cual sea el traste de la cejilla'] }
               },
               {
                 label: 'Watch: A-shape barre chords', label_es: 'Mira: cejillas en forma de A',
@@ -724,8 +724,8 @@ SETS.push(
                   answer: 0,
                   explain: 'Slide the shape, and the root fret renames it — one grip, the whole chromatic set.',
                   explain_es: 'Desliza la forma, y el traste de la raíz la renombra — un solo agarre, todo el conjunto cromático.',
-                  choices: ['You can barre at each of the 12 frets before the octave repeats', 'Guitars have 12 strings', 'You use 12 fingers', 'It doesn\'t — each shape is one chord'],
-                  choices_es: ['Puedes poner la cejilla en cada uno de los 12 trastes antes de que se repita la octava', 'Las guitarras tienen 12 cuerdas', 'Usas 12 dedos', 'No lo hace — cada forma es un solo acorde'] }
+                  choices: ['There are 12 frets before the octave repeats', 'A guitar has 12 strings to barre across', 'The shape needs 12 different fingerings', 'It doesn\'t — each shape is only ever one chord'],
+                  choices_es: ['Hay 12 trastes antes de que se repita la octava', 'Una guitarra tiene 12 cuerdas para cejillar', 'La forma necesita 12 digitaciones distintas', 'No lo hace — cada forma es un solo acorde, nada más'] }
               }
             ]
           },
@@ -939,8 +939,8 @@ SETS.push(
         gotItWhen_es: 'puedes tocar un I–IV–V limpio en la tonalidad que te reparta la baraja, con cambios a tiempo a 60 BPM, usando al menos una forma con cejilla.',
         practice: { type: 'mc', prompt: 'Your I chord is an E-shape barre at fret 3 (G). Where do IV and V live?',
           prompt_es: 'Tu acorde I es una cejilla en forma de E en el traste 3 (G). ¿Dónde viven el IV y el V?',
-          choices: ['A-shape at the SAME fret (C), then A-shape 2 frets up (D)', 'E-shape at frets 4 and 5', 'A-shape at frets 1 and 2', 'Only the open C and D shapes work'],
-          choices_es: ['Forma de A en el MISMO traste (C), y luego forma de A 2 trastes arriba (D)', 'Forma de E en los trastes 4 y 5', 'Forma de A en los trastes 1 y 2', 'Solo funcionan las formas abiertas de C y D'], answer: 0,
+          choices: ['A-shape at the SAME fret (C), then 2 frets up (D)', 'E-shape at frets 4 and 5, right above the I', 'A-shape at frets 1 and 2, down near the nut', 'Only the open C and D shapes work here'],
+          choices_es: ['Forma de A en el MISMO traste (C), y luego 2 trastes arriba (D)', 'Forma de E en los trastes 4 y 5, justo arriba del I', 'Forma de A en los trastes 1 y 2, cerca de la cejuela', 'Solo funcionan aquí las formas abiertas de C y D'], answer: 0,
           explain: 'The movable I–IV–V grip: IV sits on the A-shape at the I chord\'s fret, and V is 2 frets above it. Learn it once and it works in every key.',
           explain_es: 'El agarre movible de I–IV–V: el IV se ubica en la forma de A en el traste del acorde I, y el V está 2 trastes arriba. Apréndelo una vez y funciona en todas las tonalidades.' } },
       { id: 'm11w3-s4', text: 'Move one barre shape to three different named roots',
@@ -982,8 +982,8 @@ SETS.push(
         gotItWhen_es: 'puedes decir qué hace el compás 2 en un blues de cambio rápido y aterrizar el giro de E7 en el compás 12 sin detenerte.',
         practice: { type: 'mc', prompt: 'In a 12-bar blues in A, what does the "quick change" do?',
           prompt_es: 'En un blues de 12 compases en A, ¿qué hace el "cambio rápido"?',
-          choices: ['Jumps to the IV chord (D7) in bar 2 instead of staying on A7', 'Doubles the tempo for one bar', 'Skips the turnaround entirely', 'Changes key halfway through'],
-          choices_es: ['Salta al acorde IV (D7) en el compás 2 en vez de quedarse en A7', 'Duplica el tempo por un compás', 'Se salta el giro por completo', 'Cambia de tonalidad a la mitad'], answer: 0,
+          choices: ['Jumps to the IV chord (D7) early, in bar 2', 'Doubles the tempo for one bar, then back', 'Skips the turnaround entirely in bar 12', 'Changes key halfway through the 12 bars'],
+          choices_es: ['Salta al acorde IV (D7) temprano, en el compás 2', 'Duplica el tempo por un compás, y luego vuelve', 'Se salta el giro por completo en el compás 12', 'Cambia de tonalidad a la mitad de los 12 compases'], answer: 0,
           explain: 'Quick change = an early visit to IV in bar 2, back to I in bar 3. The turnaround is the other bookend: V (E7) in bar 12 pulling you back to the top.',
           explain_es: 'Cambio rápido = una visita temprana al IV en el compás 2, de vuelta al I en el compás 3. El giro es el otro extremo: el V (E7) en el compás 12 jalándote de regreso al inicio.' } }
     ]

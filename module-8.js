@@ -387,13 +387,13 @@ SETS.push(
               explain: 'The thumb is the anchor — it stays on a bass string and lays down the foundation while i, m, and a handle the higher, faster notes.',
               explain_es: 'El pulgar es el ancla — se queda en una cuerda grave y sienta la base mientras i, m y a se encargan de las notas más agudas y rápidas.',
               choices: [
-              'It moves least — it stays on a bass string and provides the foundation',
+              'It moves least — it stays on a bass string',
               'It moves fastest, switching strings every beat',
               'It doesn\'t play at all in arpeggios',
               'It plays the highest notes'
             ],
               choices_es: [
-              'Es el que menos se mueve — se queda en una cuerda grave y da la base',
+              'Es el que menos se mueve — se queda en una cuerda grave',
               'Es el que más rápido se mueve, cambiando de cuerda en cada tiempo',
               'No toca para nada en los arpegios',
               'Toca las notas más agudas'
@@ -654,8 +654,8 @@ SETS.push(
         gotItWhen_es: 'en un cambio de acorde, solo tu pulgar se mueve para encontrar la nueva nota raíz — i-m-a se quedan estacionados en Sol, Si y mi aguda. El patrón continúa sin interrupciones.',
         practice: { type: 'mc', prompt: 'You\'re fingerpicking and the chord changes Em → Am. What changes for your PICKING hand?',
           prompt_es: 'Estás tocando fingerpicking y el acorde cambia de Em → Am. ¿Qué cambia para tu mano de PUNTEO?',
-          choices: ['Only the thumb — it moves from the low E string to the A string; i-m-a stay put', 'All four fingers shift up one string', 'Nothing at all, ever', 'i-m-a move to new strings; the thumb stays'],
-          choices_es: ['Solo el pulgar — se mueve de la cuerda Mi grave a la cuerda La; i-m-a se quedan en su lugar', 'Los cuatro dedos suben una cuerda', 'Nada en absoluto, nunca', 'i-m-a se mueven a cuerdas nuevas; el pulgar se queda'], answer: 0,
+          choices: ['Only the thumb — it shifts from low E to the A string', 'All four fingers shift up one string', 'Nothing at all, ever', 'i-m-a move to new strings; the thumb stays put'],
+          choices_es: ['Solo el pulgar — pasa de la cuerda Mi grave a la cuerda La', 'Los cuatro dedos suben una cuerda', 'Nada en absoluto, nunca', 'i-m-a se mueven a cuerdas nuevas; el pulgar se queda en su lugar'], answer: 0,
           explain: 'The thumb hunts the new root; i-m-a stay parked on G, B, and high e. Moving everything is what breaks the pattern at changes.',
           explain_es: 'El pulgar busca la nueva raíz; i-m-a se quedan estacionados en Sol, Si y mi aguda. Mover todo es lo que rompe el patrón en los cambios.' } }
     ]
@@ -700,13 +700,13 @@ SETS.push(
               explain_es: 'El "motor" del Travis picking es el pulgar alternando entre dos cuerdas graves (normalmente la raíz y la quinta) en tiempo constante, mientras los dedos agregan melodía encima.',
               choices: [
               'Plays the same bass note over and over',
-              'Alternates between two bass notes — usually the root and the 5th',
+              'Alternates between two bass notes',
               'Doesn\'t play at all',
               'Plays the melody'
             ],
               choices_es: [
               'Toca la misma nota grave una y otra vez',
-              'Alterna entre dos notas graves — normalmente la raíz y la quinta',
+              'Alterna entre dos notas graves',
               'No toca en absoluto',
               'Toca la melodía'
             ] }
@@ -973,8 +973,8 @@ SETS.push(
         gotItWhen_es: 'tu pulgar toca la raíz del acorde en los tiempos 1 y 3, y una cuerda grave distinta en los tiempos 2 y 4 — de forma constante, durante al menos 4 compases.',
         practice: { type: 'mc', prompt: 'In Travis picking on a C major chord, your thumb might alternate between which two strings?',
           prompt_es: 'En el Travis picking sobre un acorde de C mayor, ¿tu pulgar podría alternar entre cuáles dos cuerdas?',
-          choices: ['B string and high e', 'A string (root C) and low E string (the 5th, G)', 'High e and G string', 'Low E and high e'],
-          choices_es: ['La cuerda Si y la mi aguda', 'La cuerda La (raíz de C) y la cuerda Mi grave (la 5ª, G)', 'La mi aguda y la cuerda Sol', 'La Mi grave y la mi aguda'], answer: 1,
+          choices: ['B string and high e string', 'A string (root C) and low E string', 'High e string and G string', 'Low E string and high e string'],
+          choices_es: ['La cuerda Si y la cuerda mi aguda', 'La cuerda La (raíz de C) y la cuerda Mi grave', 'La cuerda mi aguda y la cuerda Sol', 'La cuerda Mi grave y la cuerda mi aguda'], answer: 1,
           explain: 'Travis picking alternates the thumb between two BASS strings — on C, the root C on the A string and the G under it on the low E string. Any answer with treble strings is wrong: those belong to i, m and a.',
           explain_es: 'El Travis picking alterna el pulgar entre dos cuerdas GRAVES — en C, la raíz C en la cuerda La y el G debajo en la cuerda Mi grave. Cualquier respuesta con cuerdas agudas está mal: esas les pertenecen a i, m y a.' } },
       { id: 'm8w3-s3', text: 'Keep the picking pattern steady through a chord change',
@@ -990,8 +990,8 @@ SETS.push(
         gotItWhen_es: 'tu mano de trastear empieza a reposicionarse para el siguiente acorde ANTES de que termine el compás actual — para cuando empieza el nuevo compás, ya estás listo.',
         practice: { type: 'mc', prompt: 'When should your FRETTING hand start moving toward the next chord?',
           prompt_es: '¿Cuándo debería tu mano de TRASTEAR empezar a moverse hacia el siguiente acorde?',
-          choices: ['On the first beat of the new bar', 'On the LAST note of the current bar — anticipate', 'Halfway through the current bar', 'Never — wait for the change'],
-          choices_es: ['En el primer tiempo del nuevo compás', 'En la ÚLTIMA nota del compás actual — anticipa', 'A la mitad del compás actual', 'Nunca — espera al cambio'], answer: 1,
+          choices: ['On the first beat of the new bar', 'On the LAST note of the current bar', 'Halfway through the current bar', 'Never — wait for the change'],
+          choices_es: ['En el primer tiempo del nuevo compás', 'En la ÚLTIMA nota del compás actual', 'A la mitad del compás actual', 'Nunca — espera al cambio'], answer: 1,
           explain: 'Chord changes arrive late because the hand leaves late. Starting the move on the last note of the bar buys you a full beat of travel time, so the picking hand never has to pause and wait.',
           explain_es: 'Los cambios de acorde llegan tarde porque la mano sale tarde. Empezar el movimiento en la última nota del compás te da un tiempo completo de viaje, así la mano de punteo nunca tiene que detenerse a esperar.' } },
       { id: 'm8w3-s5', text: 'Play a full verse of a fingerpicked song from start to finish',
@@ -1007,10 +1007,10 @@ SETS.push(
         gotItWhen_es: 'puedes interpretar tu canción elegida para alguien — en persona o en una grabación que compartas — de principio a fin, con fingerpicking, y recuperarte de cualquier error sin desmoronarte.',
         practice: { type: 'mc', prompt: 'Mid-performance you flub a note. What do experienced players do?',
           prompt_es: 'A mitad de la presentación fallas una nota. ¿Qué hacen los músicos con experiencia?',
-          choices: ['Keep the pattern going and rejoin — most listeners never notice', 'Stop and restart the song from the top', 'Apologize and point out the mistake', 'Slow way down until confidence returns'],
-          choices_es: ['Mantienen el patrón y se reincorporan — la mayoría de los oyentes nunca lo nota', 'Se detienen y reinician la canción desde el principio', 'Se disculpan y señalan el error', 'Bajan mucho la velocidad hasta que vuelve la confianza'], answer: 0,
-          explain: 'The pulse is the performance — a dropped note vanishes if the rhythm survives. Stopping or announcing the mistake is what audiences actually remember.',
-          explain_es: 'El pulso es la presentación — una nota perdida desaparece si el ritmo sobrevive. Detenerse o anunciar el error es lo que el público de verdad recuerda.' } }
+          choices: ['Keep the pattern going and rejoin', 'Stop and restart the song from the top', 'Apologize and point out the mistake', 'Slow way down until confidence returns'],
+          choices_es: ['Mantienen el patrón y se reincorporan', 'Se detienen y reinician la canción desde el principio', 'Se disculpan y señalan el error', 'Bajan mucho la velocidad hasta que vuelve la confianza'], answer: 0,
+          explain: 'The pulse is the performance — a dropped note vanishes if the rhythm survives, and most listeners never notice it. Stopping or announcing the mistake is what audiences actually remember.',
+          explain_es: 'El pulso es la presentación — una nota perdida desaparece si el ritmo sobrevive, y la mayoría de los oyentes ni la nota. Detenerse o anunciar el error es lo que el público de verdad recuerda.' } }
     ]
   }
 

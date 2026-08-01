@@ -440,16 +440,16 @@ SETS.push(
                   explain: 'Light or too-far-from-the-fret pressure can\'t fully close the string — the #1 beginner cause. A wrong pick, bad tuning, or low volume won\'t make a note buzz.',
                   explain_es: 'Una presión ligera o muy alejada del traste no puede cerrar bien la cuerda — la causa número uno en principiantes. Una púa equivocada, una mala afinación o un volumen bajo no hacen que una nota zumbe.',
                   choices: [
-                  'Pressing the string too lightly, or too far from the fret',
-                  'Using the wrong pick',
-                  'The guitar being out of tune',
-                  'Strumming too quietly'
+                  'Pressing too lightly, or too far from the fret',
+                  'Using a pick that\'s the wrong thickness',
+                  'The guitar being slightly out of tune',
+                  'Strumming too quietly for the note to ring'
                 ],
                   choices_es: [
-                  'Presionar la cuerda demasiado suave, o muy lejos del traste',
-                  'Usar la púa equivocada',
-                  'Que la guitarra esté desafinada',
-                  'Rasguear demasiado suave'
+                  'Presionar demasiado suave, o muy lejos del traste',
+                  'Usar una púa del grosor equivocado',
+                  'Que la guitarra esté un poco desafinada',
+                  'Rasguear demasiado suave para que la nota suene'
                 ] }
               },
               {
@@ -646,16 +646,16 @@ SETS.push(
               explain: 'With good placement, buzz usually means too little pressure or a fingertip leaning over and deadening the string. Pressing harder isn\'t the fix — a vertical fingertip is.',
               explain_es: 'Con buena colocación, el zumbido usualmente significa muy poca presión o una punta del dedo inclinada que apaga la cuerda. Presionar más fuerte no es la solución — un dedo vertical sí lo es.',
               choices: [
-              'Too little pressure, or a fingertip leaning over and muting the string',
-              'Pressing too hard on the string',
-              'The string is too new',
-              'Holding the pick too tightly'
+              'Too little pressure, or a fingertip leaning over',
+              'Pressing too hard and bending the string sharp',
+              'The string is too new to ring properly',
+              'Holding the pick too tightly in your strumming hand'
             ],
               choices_es: [
-              'Muy poca presión, o una punta del dedo inclinada que apaga la cuerda',
-              'Presionar demasiado fuerte la cuerda',
-              'La cuerda es demasiado nueva',
-              'Sostener la púa demasiado apretada'
+              'Muy poca presión, o una punta del dedo inclinada',
+              'Presionar demasiado fuerte y subir el tono de la cuerda',
+              'La cuerda es demasiado nueva para sonar bien',
+              'Sostener la púa demasiado apretada en tu mano de rasgueo'
             ] }
           }
             ]

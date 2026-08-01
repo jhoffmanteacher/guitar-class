@@ -77,15 +77,15 @@ SETS.push(
             label: 'Position Pattern 1 as C major', label_es: 'Posiciona el Patrón 1 en C mayor',
             text: 'Try positioning Pattern 1 as C major pentatonic:<ol><li>Place your 4th finger on the 8th fret of string 6 (the note C).</li><li>Play the pattern up and down slowly.</li><li>Click "Hear C major pentatonic" below to check your ear against it.</li></ol>',
             text_es: 'Intenta posicionar el Patrón 1 como C mayor pentatónica:<ol><li>Coloca tu dedo meñique (4º) en el traste 8 de la cuerda 6 (la nota C).</li><li>Toca el patrón hacia arriba y hacia abajo despacio.</li><li>Presiona "Escucha C mayor pentatónica" abajo para comprobarlo con tu oído.</li></ol>',
-            hint: 'Major pentatonic: 4th finger on root. Minor pentatonic: 1st finger on root. Same pattern — different finger on the starting note.',
-            hint_es: 'Pentatónica mayor: dedo 4º (meñique) en la raíz. Pentatónica menor: dedo 1º (índice) en la raíz. Mismo patrón — dedo distinto en la nota inicial.',
+            hint: 'The pattern shape never changes between major and minor — the only thing that changes is which finger owns the root note. Once you know that, you can slide the same shape to any key without relearning it.',
+            hint_es: 'La forma del patrón nunca cambia entre mayor y menor — lo único que cambia es qué dedo se queda con la nota raíz. Una vez que lo sabes, puedes deslizar la misma forma a cualquier tonalidad sin volver a aprenderla.',
             skills: [3, 4],
             playSeq: { label: 'Hear C major pentatonic', label_es: 'Escucha C mayor pentatónica', bpm: 60, notes: [48, 50, 52, 55, 57, 60] },
-            response: { type: 'mc', prompt: 'For MAJOR pentatonic in Pattern 1, which finger plays the root note?',
-              prompt_es: 'Para la pentatónica MAYOR en el Patrón 1, ¿qué dedo toca la nota raíz?',
+            response: { type: 'mc', prompt: 'You slide Pattern 1 up the neck to play G MAJOR pentatonic instead of C. Which finger lands on the root note now?',
+              prompt_es: 'Deslizas el Patrón 1 por el mástil para tocar G MAYOR pentatónica en vez de C. ¿Qué dedo cae ahora en la nota raíz?',
               answer: 0,
-              explain: 'Same shape, different root: in MAJOR pentatonic your 4th finger (pinky) sits on the root; in minor it\'s the 1st finger.',
-              explain_es: 'Misma forma, raíz distinta: en la pentatónica MAYOR tu dedo 4º (meñique) se coloca en la raíz; en la menor es el dedo 1º (índice).',
+              explain: 'The finger doesn\'t change with the key — only with major vs minor. In MAJOR pentatonic your 4th finger (pinky) sits on the root wherever you move the shape; in minor it\'s the 1st finger.',
+              explain_es: 'El dedo no cambia con la tonalidad — solo cambia entre mayor y menor. En la pentatónica MAYOR tu dedo 4º (meñique) se coloca en la raíz donde sea que muevas la forma; en la menor es el dedo 1º (índice).',
               choices: [
               '4th finger (pinky)',
               '1st finger (index)',
@@ -474,10 +474,10 @@ SETS.push(
         gotItWhen_es: 'puedes tocar una frase de 2 compases que se sienta intencionada — no aleatoria — usando solo 2 o 3 notas del patrón.',
         practice: { type: 'mc', prompt: 'What makes a short improvised phrase sound intentional instead of random?',
           prompt_es: '¿Qué hace que una frase improvisada corta suene intencionada en vez de aleatoria?',
-          choices: ['Using as many different notes as possible', 'Playing it as fast as you can', 'Never repeating anything', 'Repeating a small idea, varying it, and leaving space between phrases'],
-          choices_es: ['Usar tantas notas diferentes como sea posible', 'Tocarla lo más rápido que puedas', 'Nunca repetir nada', 'Repetir una idea pequeña, variarla, y dejar espacio entre frases'], answer: 3,
-          explain: 'Repetition with small changes is what makes a phrase sound "meant." More notes and more speed usually make it sound MORE random, not less.',
-          explain_es: 'La repetición con pequeños cambios es lo que hace que una frase suene "a propósito". Más notas y más velocidad normalmente la hacen sonar MÁS aleatoria, no menos.' } }
+          choices: ['Using as many different notes as possible', 'Playing it as fast as you can', 'Never repeating anything', 'Repeating an idea, varying it, and leaving space'],
+          choices_es: ['Usar tantas notas diferentes como sea posible', 'Tocarla lo más rápido que puedas', 'Nunca repetir nada', 'Repetir una idea, variarla, y dejar espacio'], answer: 3,
+          explain: 'Repetition with small changes — and space between the phrases — is what makes a phrase sound "meant." More notes and more speed usually make it sound MORE random, not less.',
+          explain_es: 'La repetición con pequeños cambios — y el espacio entre las frases — es lo que hace que una frase suene "a propósito". Más notas y más velocidad normalmente la hacen sonar MÁS aleatoria, no menos.' } }
     ]
   },
 
@@ -810,7 +810,7 @@ SETS.push(
         gotItWhen_es: 'puedes producir la segunda nota sin ningún golpe de púa — y suena tan claro como una nota pulsada.',
         practice: { type: 'mc', prompt: 'On a pull-off, your finger starts on the higher fret. How do you make the SECOND note sound?',
           prompt_es: 'En un pull-off, tu dedo empieza en el traste más alto. ¿Cómo haces sonar la SEGUNDA nota?',
-          choices: ['Pluck it with your picking hand', 'Snap your finger off the string sideways', 'Hammer down on a lower fret', 'Bend the string up'], choices_es: ['Pulsándola con tu mano de pulsar', 'Sacando tu dedo de la cuerda de un tirón hacia el costado', 'Martillando sobre un traste más bajo', 'Doblando la cuerda hacia arriba'], answer: 1,
+          choices: ['Pluck it with your picking hand', 'Snap your finger off the string sideways', 'Hammer down on a lower fret', 'Bend the string up'], choices_es: ['Pulsándola con tu mano de pulsar', 'Sacando el dedo de un tirón hacia el costado', 'Martillando sobre un traste más bajo', 'Doblando la cuerda hacia arriba'], answer: 1,
           explain: 'A pull-off sounds because your finger flicks sideways off the string and plucks it on the way out — no pick stroke at all. Picking the second note would give you the same pitch, but then it isn\'t a pull-off.',
           explain_es: 'Un pull-off suena porque tu dedo sale de la cuerda hacia el costado y la pulsa al salir — sin ningún golpe de púa. Pulsar la segunda nota te daría la misma altura, pero entonces ya no es un pull-off.' } },
       { id: 'm4w2-s4', text: 'Use "envelope": vary attack (attack = how hard and suddenly a note starts) and note length intentionally',
@@ -819,8 +819,8 @@ SETS.push(
         gotItWhen_es: 'puedes tocar una nota corta y aguda y una nota larga y sostenida a pedido, y la diferencia es obvia al escuchar la grabación.',
         practice: { type: 'mc', prompt: 'You want a short, sharp "stab" of a note. What do you do?',
           prompt_es: 'Quieres una nota corta y punzante, como una "puñalada". ¿Qué haces?',
-          choices: ['Pick softly and let the note ring out', 'Pick firmly, then quickly stop the string from ringing', 'Just turn the volume up', 'Bend the string as you pick it'],
-          choices_es: ['Pulsar suave y dejar que la nota suene', 'Pulsar firme, y luego detener rápido el sonido de la cuerda', 'Solo subir el volumen', 'Doblar la cuerda mientras la pulsas'], answer: 1,
+          choices: ['Pick softly and let the note ring out on its own', 'Pick firmly, then stop the string ringing', 'Just turn the volume up', 'Bend the string as you pick it'],
+          choices_es: ['Pulsar suave y dejar que la nota suene por sí sola', 'Pulsar firme, y luego detener el sonido de la cuerda', 'Solo subir el volumen', 'Doblar la cuerda mientras la pulsas'], answer: 1,
           explain: 'Attack (how hard the note starts) plus length (how soon you stop it) are the two ends of a note\'s envelope — a stab is a hard attack cut short.',
           explain_es: 'El ataque (qué tan fuerte empieza la nota) más la duración (qué tan pronto la detienes) son los dos extremos de la envolvente de una nota — una nota punzante es un ataque fuerte cortado en seco.' } },
       { id: 'm4w2-s5', text: 'Play a one-note solo that uses dynamics and rhythm for expression',
@@ -892,8 +892,8 @@ SETS.push(
             label: 'Watch: vibrato technique', label_es: 'Mira: técnica de vibrato',
             text: 'Watch: <a href="https://youtu.be/WNWqobkgdBA?t=93" target="_blank">Vibrato Technique (Hand Movement, TE-103) – JustinGuitar</a> (0:00–3:00). As you watch, try it yourself on the 5th fret of string 1 — rock the finger back and forth gently and listen for the pitch to wobble.',
             text_es: 'Mira: <a href="https://youtu.be/WNWqobkgdBA?t=93" target="_blank">Vibrato Technique (Hand Movement, TE-103) – JustinGuitar</a> (0:00–3:00). Mientras miras, pruébalo tú mismo en el traste 5 de la cuerda 1 — mece el dedo hacia adelante y atrás suavemente y escucha cómo la nota oscila.',
-            hint: 'Vibrato is a small, controlled pitch wobble on a sustained note. Try it on the 5th fret, string 1. Rock your finger back and forth gently. It takes weeks to develop — just start!',
-            hint_es: 'El vibrato es una pequeña oscilación controlada de la altura de una nota sostenida. Pruébalo en el traste 5, cuerda 1. Mece tu dedo hacia adelante y atrás suavemente. Toma semanas desarrollarlo — ¡solo empieza!',
+            hint: 'Keep the fingertip planted — the motion comes from the wrist, not from sliding along the string. Listen closely to what happens to the note while your finger rocks, and how it differs from a bend. It takes weeks to develop — just start!',
+            hint_es: 'Mantén la yema plantada — el movimiento viene de la muñeca, no de deslizarte por la cuerda. Escucha con atención qué le pasa a la nota mientras tu dedo se mece, y en qué se diferencia de un bend. Toma semanas desarrollarlo — ¡solo empieza!',
             skills: [3],
             response: { type: 'mc', prompt: 'Vibrato is best described as:',
               prompt_es: 'El vibrato se describe mejor como:',
@@ -901,15 +901,15 @@ SETS.push(
               explain: 'Vibrato is a small, controlled, repeating pitch wobble on a held note — it adds life and sustain. A one-time push up to a new pitch is a bend, not vibrato.',
               explain_es: 'El vibrato es una pequeña oscilación controlada y repetida de la altura en una nota sostenida — le agrega vida y sostenimiento. Un empujón único hacia una nueva altura es un bend, no vibrato.',
               choices: [
-              'A small, controlled pitch wobble on a sustained note',
+              'A small, controlled pitch wobble on a held note',
               'Playing two notes at the same time',
-              'Bending the string up a whole step',
+              'Bending the string up a whole step and holding it',
               'Sliding between two frets quickly'
             ],
               choices_es: [
               'Una pequeña oscilación controlada de la altura en una nota sostenida',
               'Tocar dos notas al mismo tiempo',
-              'Doblar la cuerda hacia arriba un tono completo',
+              'Doblar la cuerda hacia arriba un tono completo y sostenerla',
               'Deslizarse rápido entre dos trastes'
             ] }
           }

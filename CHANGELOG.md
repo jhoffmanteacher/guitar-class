@@ -5,6 +5,21 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-31 — Fairer quizzes
+
+### Fixed
+
+- **The longest answer is no longer usually the right one.** In 64 quiz
+  questions across the site, the correct choice was noticeably the longest —
+  a pattern test-savvy students learn to exploit. Correct answers were trimmed
+  to their core claim (the trimmed explanation still appears after you answer)
+  and thin wrong answers got real substance, in English and Spanish alike.
+- **Hints no longer hand you the quiz answer.** Six hints stated their
+  question's answer word for word right above it — they now coach you on where
+  to look or how to think instead. One Module 4 question about pentatonic
+  roots was upgraded to ask about sliding the pattern to a new key, since the
+  lesson right above it unavoidably teaches the old answer.
+
 ## 2026-07-31 — Full-site error sweep
 
 ### Fixed

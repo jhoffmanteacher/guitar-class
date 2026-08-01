@@ -42,8 +42,8 @@ SETS.push(
                   answer: 1,
                   explain: 'The thumb keeps everything moving — steady quarter notes on two bass strings while the fingers decorate on top.',
                   explain_es: 'El pulgar mantiene todo en movimiento — negras constantes en dos cuerdas graves mientras los dedos decoran encima.',
-                  choices: ['Play melody', 'Alternate steadily between two bass strings like a drummer', 'Strum', 'Rest'],
-                  choices_es: ['Tocar la melodía', 'Alternar constantemente entre dos cuerdas graves como un baterista', 'Rasguear', 'Descansar'] }
+                  choices: ['Play the melody on the top strings', 'Alternate steadily between two bass strings', 'Strum full chords on every beat', 'Rest while the fingers do the work'],
+                  choices_es: ['Tocar la melodía en las cuerdas agudas', 'Alternar constantemente entre dos cuerdas graves', 'Rasguear acordes completos en cada tiempo', 'Descansar mientras los dedos hacen el trabajo'] }
               },
               {
                 label: 'Watch: Travis picking basics (Andy Guitar)', label_es: 'Mira: bases del Travis picking (Andy Guitar)',
@@ -57,8 +57,8 @@ SETS.push(
                   answer: 1,
                   explain: 'Bass and treble sound at the same instant — the accent that makes Travis picking recognizable.',
                   explain_es: 'El bajo y el agudo suenan en el mismo instante — el acento que hace reconocible al Travis picking.',
-                  choices: ['Two fingers on one string', 'Thumb and a finger plucking together on the beat', 'Muting the strings', 'A very quiet note'],
-                  choices_es: ['Dos dedos en una cuerda', 'El pulgar y un dedo pulsando juntos en el tiempo', 'Silenciar las cuerdas', 'Una nota muy suave'] }
+                  choices: ['Two fingers plucking one string at once', 'Thumb and a finger plucking together', 'Muting the strings with your palm', 'A very quiet note between beats'],
+                  choices_es: ['Dos dedos pulsando una cuerda a la vez', 'El pulgar y un dedo pulsando juntos', 'Silenciar las cuerdas con la palma', 'Una nota muy suave entre los tiempos'] }
               }
             ]
           },
@@ -445,8 +445,8 @@ SETS.push(
                   answer: 1,
                   explain: 'Fingerpicking IS the song\'s native style — no more "against the grain."',
                   explain_es: 'El fingerpicking ES el estilo nativo de la canción — ya no está más "a contrapelo".',
-                  choices: ['It\'s easier', 'Fingerpicking IS the song\'s native style — no more "against the grain"', 'It uses fewer chords', 'The flag was a mistake'],
-                  choices_es: ['Es más fácil', 'El fingerpicking ES el estilo nativo de la canción — ya no está "a contrapelo"', 'Usa menos acordes', 'La marca fue un error'] }
+                  choices: ['It\'s easier than strumming the chords', 'Fingerpicking IS the song\'s native style', 'It uses fewer chords than the strummed version', 'The flag was a mistake in the first place'],
+                  choices_es: ['Es más fácil que rasguear los acordes', 'El fingerpicking ES el estilo nativo de la canción', 'Usa menos acordes que la versión rasgueada', 'La marca fue un error desde el principio'] }
               }
             ]
           },
@@ -623,8 +623,8 @@ SETS.push(
         gotItWhen_es: 'la sensación de vals nunca se rompe, de principio a fin.',
         practice: { type: 'mc', prompt: 'Happy Birthday is in 3/4. How does your bass–pluck–pluck pattern line up with the count?',
           prompt_es: 'Happy Birthday está en 3/4. ¿Cómo se alinea tu patrón bajo–pulsación–pulsación con el conteo?',
-          choices: ['Thumb bass on beat 1, finger plucks on beats 2 and 3', 'Bass on every one of the three beats', 'Plucks on 1 and 2, bass on 3', 'Same as 4/4 — just play it faster'],
-          choices_es: ['Bajo del pulgar en el tiempo 1, pulsaciones de los dedos en los tiempos 2 y 3', 'Bajo en cada uno de los tres tiempos', 'Pulsaciones en el 1 y el 2, bajo en el 3', 'Igual que en 4/4 — solo tócalo más rápido'], answer: 0,
+          choices: ['Thumb bass on 1, finger plucks on 2 and 3', 'Bass on every one of the three beats', 'Plucks on beats 1 and 2, bass on beat 3', 'Same as 4/4 — just play it a bit faster'],
+          choices_es: ['Bajo del pulgar en el 1, pulsaciones en el 2 y el 3', 'Bajo en cada uno de los tres tiempos', 'Pulsaciones en los tiempos 1 y 2, bajo en el 3', 'Igual que en 4/4 — solo tócalo un poco más rápido'], answer: 0,
           explain: 'The waltz\'s "ONE-two-three" lives in the thumb: bass anchors beat 1, the plucks float on 2 and 3. Treating it like fast 4/4 is what erases the waltz feel.',
           explain_es: 'El "UN-dos-tres" del vals vive en el pulgar: el bajo ancla el tiempo 1, las pulsaciones flotan en el 2 y el 3. Tratarlo como un 4/4 rápido es lo que borra la sensación de vals.' } }
     ]
@@ -667,8 +667,8 @@ SETS.push(
                   answer: 1,
                   explain: 'Requinto sings the melodic lines you\'ve been hearing in "Luna" and "Tu Boda" since the course\'s first listening drills.',
                   explain_es: 'El requinto canta las líneas melódicas que has estado escuchando en "Luna" y "Tu Boda" desde los primeros ejercicios de escucha del curso.',
-                  choices: ['The bass', 'A smaller, higher-pitched guitar that carries the melody', 'The singer', 'A drum'],
-                  choices_es: ['El bajo', 'Una guitarra más pequeña y más aguda que lleva la melodía', 'El cantante', 'Un tambor'] }
+                  choices: ['The bass instrument of the group', 'A smaller, higher-pitched guitar', 'The lead singer out in front', 'A drum that keeps the beat'],
+                  choices_es: ['El instrumento de bajo del grupo', 'Una guitarra más pequeña y más aguda', 'El cantante principal al frente', 'Un tambor que marca el pulso'] }
               },
               {
                 label: 'Watch: "Luna"\'s fingerpicked intro', label_es: 'Mira: la intro fingerstyle de "Luna"',
@@ -682,8 +682,8 @@ SETS.push(
                   answer: 1,
                   explain: 'Same little-F you learned in Module 5 — the intro arpeggiates it one note at a time (Journey Layer 6). One change: it lets the high e ring OPEN instead of fretting it, so the four notes you roll are F · A · C · open E.',
                   explain_es: 'El mismo F pequeño que aprendiste en el Módulo 5 — la intro lo arpegia una nota a la vez (Recorrido, Capa 6). Un cambio: deja sonar la mi aguda AL AIRE en vez de trastearla, así que las cuatro notas del floreo son F · A · C · E al aire.',
-                  choices: ['Full barre F', 'The little F shape with the high e left open (xx3210)', 'Open C', 'Am'],
-                  choices_es: ['F con cejilla completa', 'La forma del F pequeño con la mi aguda al aire (xx3210)', 'C al aire', 'Am'] }
+                  choices: ['Full barre F with all six strings fretted', 'The little F shape with the high e open (xx3210)', 'Open C, all the way down at the nut', 'Am, fingers on the middle three strings'],
+                  choices_es: ['F con cejilla completa, las seis cuerdas trasteadas', 'La forma del F pequeño con la mi aguda al aire (xx3210)', 'C al aire, hasta abajo junto a la cejuela', 'Am, con los dedos en las tres cuerdas centrales'] }
               }
             ]
           },
@@ -703,8 +703,8 @@ SETS.push(
                   answer: 1,
                   explain: 'The melody is played on the thin, high strings while the thumb keeps the bass going underneath.',
                   explain_es: 'La melodía se toca en las cuerdas delgadas y agudas mientras el pulgar mantiene el bajo sonando debajo.',
-                  choices: ['Play only high notes', 'The melody is played on the thin, high strings while the thumb keeps the bass going underneath', 'The melody comes first, chords after', 'Sing while playing'],
-                  choices_es: ['Tocar solo notas agudas', 'La melodía se toca en las cuerdas delgadas y agudas mientras el pulgar mantiene el bajo sonando debajo', 'La melodía va primero, los acordes después', 'Cantar mientras tocas'] }
+                  choices: ['Play only high notes, no bass at all', 'The melody rides on the thin, high strings', 'The melody comes first, chords after', 'Sing the melody while you play chords'],
+                  choices_es: ['Tocar solo notas agudas, sin nada de bajo', 'La melodía va sobre las cuerdas delgadas y agudas', 'La melodía va primero, los acordes después', 'Cantar la melodía mientras tocas los acordes'] }
               }
             ]
           },
@@ -724,8 +724,8 @@ SETS.push(
                   answer: 1,
                   explain: 'Sierreño is an acoustic, fingerpicked tradition — this is its real tone.',
                   explain_es: 'El sierreño es una tradición acústica de fingerpicking — este es su verdadero sonido.',
-                  choices: ['It\'s louder', 'Sierreño is an acoustic, fingerpicked tradition — this is its real tone', 'It isn\'t', 'Distortion is illegal'],
-                  choices_es: ['Es más fuerte', 'El sierreño es una tradición acústica de fingerpicking — este es su verdadero sonido', 'No es así', 'La distorsión es ilegal'] }
+                  choices: ['It\'s louder than power chords ever were', 'Sierreño is an acoustic, fingerpicked tradition', 'It isn\'t — the two sound exactly the same', 'Distortion is illegal on these songs'],
+                  choices_es: ['Es más fuerte de lo que fueron los acordes de potencia', 'El sierreño es una tradición acústica de fingerpicking', 'No es así — los dos suenan exactamente igual', 'La distorsión es ilegal en estas canciones'] }
               }
             ]
           },
@@ -901,7 +901,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'The requinto\'s job in the group is:',
           prompt_es: 'El trabajo del requinto en el grupo es:',
           choices: ['Rhythm chords', 'The melodic lead lines', 'Bass', 'Percussion'],
-          choices_es: ['Acordes de ritmo', 'Las líneas melódicas principales', 'El bajo', 'La percusión'], answer: 1,
+          choices_es: ['Acordes de ritmo', 'Las melodías principales', 'El bajo', 'La percusión'], answer: 1,
           explain: 'The requinto is the small, higher-pitched guitar that sings the melody lines over the group — the part you hear in "Luna" and "Tu Boda." Rhythm chords and bass are other players\' jobs.',
           explain_es: 'El requinto es la guitarra pequeña y más aguda que canta las líneas melódicas sobre el grupo — la parte que escuchas en "Luna" y "Tu Boda". Los acordes de ritmo y el bajo son trabajo de otros músicos.' } },
       { id: 'm12w3-s4', text: 'Blend melody notes into a picking pattern — tune on top, thumb bass below',
@@ -911,7 +911,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'You\'re blending a tune into your picking pattern, requinto-style. Where do the melody notes go?',
           prompt_es: 'Estás combinando una melodía en tu patrón de punteo, al estilo requinto. ¿Dónde van las notas de la melodía?',
           choices: ['On the high strings, riding above the thumb\'s steady bass', 'In the bass — the thumb carries the tune', 'On whichever string has a free finger', 'You pause the bass whenever the melody plays'],
-          choices_es: ['En las cuerdas agudas, viajando encima del bajo constante del pulgar', 'En el bajo — el pulgar lleva la melodía', 'En la cuerda que tenga un dedo libre', 'Pausas el bajo cada vez que suena la melodía'], answer: 0,
+          choices_es: ['En las agudas, encima del bajo constante del pulgar', 'En el bajo — el pulgar lleva la melodía', 'En la cuerda que tenga un dedo libre', 'Pausas el bajo cada vez que suena la melodía'], answer: 0,
           explain: 'Two jobs, one hand: the thumb never stops the bass, and i-m-a sing the tune on top. Stopping the bass for the melody is the habit this skill breaks.',
           explain_es: 'Dos trabajos, una mano: el pulgar nunca detiene el bajo, e i-m-a cantan la melodía encima. Detener el bajo para la melodía es el hábito que esta destreza rompe.' } },
       { id: 'm12w3-s5', text: 'Choose and name the picking pattern I\'ll perform with',
@@ -920,8 +920,8 @@ SETS.push(
         gotItWhen_es: 'has nombrado el patrón con el que vas a interpretar — el que ya puedes mantener sin interrupciones al tempo de interpretación.',
         practice: { type: 'mc', prompt: 'Your showcase pattern should be the one that:',
           prompt_es: 'Tu patrón de presentación debería ser el que:',
-          choices: ['Impresses the most', 'Never breaks at performance tempo', 'Uses all four fingers', 'Is newest'],
-          choices_es: ['Impresiona más', 'Nunca se rompe al tempo de interpretación', 'Usa los cuatro dedos', 'Es el más nuevo'], answer: 1,
+          choices: ['Impresses the audience the most', 'Never breaks at performance tempo', 'Uses all four picking fingers', 'Is the newest one you learned'],
+          choices_es: ['Impresiona más al público', 'Nunca se rompe al tempo de interpretación', 'Usa los cuatro dedos de punteo', 'Es el más nuevo que aprendiste'], answer: 1,
           explain: 'What an audience hears is steadiness, so pick the pattern you can hold at full speed without stumbling. The flashiest or newest pattern is the one most likely to break down while you perform.',
           explain_es: 'Lo que el público escucha es la constancia, así que elige el patrón que puedes mantener a toda velocidad sin tropezar. El patrón más vistoso o más nuevo es el que más probablemente se rompe mientras interpretas.' } },
       { id: 'm12w3-s6', text: 'Perform one full fingerpicked verse start to finish, recovering from any mistake',
