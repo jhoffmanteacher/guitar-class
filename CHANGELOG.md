@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-31 — Core-song fact checks
+
+### Fixed
+
+- **"Luna"'s song map places the Dm correctly now** — it makes one brief
+  appearance in the song's opening lines, not "near the end of the verse and
+  in the closing bridge," and the unsupported Dm9 note is gone. The Layer 5
+  play-along instruction matches.
+- **"the cure"'s listening layer** now says the song *starts* quiet and keeps
+  building to its big ending — the old text claimed the chorus "grows without
+  ever getting loud," which isn't how the record goes.
+
 ## 2026-07-31 — Choice-song chords verified
 
 ### Fixed

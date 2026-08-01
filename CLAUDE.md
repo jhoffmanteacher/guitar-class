@@ -190,7 +190,11 @@ from Moises; ffmpeg/rubberband only as fallback.
 - **Let It Be** — verse `C–G–Am–F`, **two beats per chord**, ~71–76 BPM.
 - **"the cure"** — `Am–C–Dm–F` + `G/B` turnaround, **two felt beats per chord**
   (track reads 144 BPM but feels ~72). Tell students "big slow beats, about 72."
-  No capo, by design.
+  No capo, by design. **Module 12's fingerpicking-as-native-style framing stays**
+  (Jonathan's call, 2026-07-31): the record's guitar is rapidly strummed, but
+  the fingerstyle arrangement and its ◐-comes-off lesson are a deliberate
+  teaching arrangement — don't flag it against the record. Same for the single
+  Am–C–Dm–F+G/B loop (a composite of the record's verse and chorus).
 - **Luna** — F–Am vamp; Dm is a passing chord, no C; 6/8 felt in 2; no capo
   (simplified F `xx3211` until Module 7); solos use D minor pentatonic Pattern 1
   at fret 10; ◐ in Module 3. Its Module 4 `backingUrl` stays the generic YouTube
