@@ -6062,10 +6062,26 @@ function srCandidates(){
   const pool = outside.length >= 4 ? outside : all;
   return pool.sort((a, b) => a.last - b.last).slice(0, 4).map(c => c.sid);
 }
+// Reads today's already-stored snapshot without computing a new one — safe
+// to call before every module is loaded into SETS (srCandidates() needs the
+// full catalogue to know what's "outside the current module"). Returns []
+// when nothing's stored yet for today; the snapshot is only ever first
+// computed by srLoadTodayIds(), from renderDailyReview(), which awaits
+// ensureAllModuleData() first.
+function srStoredTodayIds(){
+  const today = dayStr(new Date());
+  let stored = null;
+  try{ stored = JSON.parse(localStorage.getItem(_uidKey('gc-srPicks'))); }catch(e){}
+  return (stored && stored.day === today && Array.isArray(stored.ids))
+    ? stored.ids.filter(sid => skillById(sid))
+    : [];
+}
 // Today's 4 picks are stable all day (no reshuffling as they're completed) —
 // stashed per-student in localStorage, keyed on the calendar day so a new
 // day naturally recomputes. Ids that no longer resolve to a skill (content
-// changed under a stale snapshot) are dropped, not replaced mid-day.
+// changed under a stale snapshot) are dropped, not replaced mid-day. Only
+// call this after ensureAllModuleData() — srCandidates() reads SETS
+// directly, which otherwise may hold just the student's current module.
 function srLoadTodayIds(){
   const today = dayStr(new Date());
   let stored = null;
@@ -6091,13 +6107,20 @@ function srDaysLabel(sid){
 // All 4 picks reviewed today → +10 XP into the arcade meta-layer, once per
 // day. Called both after every logged rep and on every Daily Review page
 // open/render, so the bonus lands whether or not the student is looking at
-// the page when they finish the fourth one.
+// the page when they finish the fourth one. Without an explicit `ids` (the
+// logPracticeRep path — any rep, anywhere on the site, not just Daily
+// Review), this must NOT be the thing that first computes today's snapshot:
+// srCandidates() needs every module loaded into SETS to know what's outside
+// the student's current one, and logPracticeRep never awaits that. Reading
+// only what's already stored means a rep logged before the student has ever
+// opened Daily Review today is simply a no-op here — the snapshot gets
+// created correctly, once, from renderDailyReview()'s awaited call instead.
 function srCheckComplete(ids){
   // Same guard as bumpPracticeStreak/awardArcadeXp — the dev-bypass uid is
   // rejected by the Firestore rules, so skip the write (and the XP) rather
   // than let queueSave retry a doomed save.
   if(!currentUser || (typeof isDevBypassUser === 'function' && isDevBypassUser())) return;
-  ids = ids || srLoadTodayIds();
+  ids = ids || srStoredTodayIds();
   if(!ids.length || !ids.every(sid => daysSinceLastRep(sid) === 0)) return;
   const today = dayStr(new Date());
   if(games.srBonusDay === today) return;
