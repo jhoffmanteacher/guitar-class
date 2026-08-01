@@ -184,6 +184,10 @@ from Moises; ffmpeg/rubberband only as fallback.
 
 ## Settled song facts — do not re-flag in audits
 
+**Don't verify tempo/BPM claims in song audits** (Jonathan, 2026-07-31) —
+check chords, keys, and capo claims only. BPM databases disagree with each
+other and the site's tempo numbers are close enough for teaching.
+
 - **All Along the Watchtower** — `Am–G–F–G` loop (power chords `A5–G5–F5–G5`),
   **two beats per chord**. The map's "Am–G–F" is shorthand.
 - **Sweet Child O' Mine** — verse `D–C–G`, **full bar each**, ~123–125 BPM.
