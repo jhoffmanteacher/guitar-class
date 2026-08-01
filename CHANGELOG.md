@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-01 — Website tour for new students
+
+### Added
+
+- **A guided tour of the site, at `/tour.html`** — thirteen screens, in English
+  and Spanish, walking a brand-new student through the whole website using real
+  pictures of it: signing in, finding the menu, how modules and sets unlock,
+  the Station B → Station C → checklist path, marking skills honestly, the
+  Listening Coach, Songs, the games and review tools, and the Find and Español
+  buttons. It ends with four quick questions so students can check they know
+  their way around. Meant for the first day of class; it stands on its own and
+  isn't linked from inside the site, so it can be handed out as a link.
+
 ## 2026-08-01 — Fairer quiz choices, and guardrails so these errors stay fixed
 
 ### Removed
