@@ -315,6 +315,8 @@
     'tools.ladderMiss':    { en: 'Had mistakes', es: 'Con errores' },
     'tools.ladderUp':      { en: 'Tempo up! Now {bpm} BPM', es: '¡Sube el tempo! Ahora {bpm} BPM' },
     'tools.ladderDown':    { en: 'Back to {bpm} BPM — nail it here first', es: 'Bajamos a {bpm} BPM — domínalo aquí primero' },
+    'tools.ladderMax':     { en: 'Top of the ladder — holding at {bpm} BPM', es: 'Tope de la escalera — nos quedamos en {bpm} BPM' },
+    'tools.ladderMin':     { en: 'Bottom of the ladder — steady at {bpm} BPM', es: 'Base de la escalera — seguimos en {bpm} BPM' },
 
     // ── Buttons & footer ──
     'btn.markDone':          { en: 'Mark done', es: 'Marcar como hecho' },
@@ -722,15 +724,16 @@
 
     // ── 🗓️ Daily Review (spaced review) page ──
     'sr.title':               { en: 'Daily Review', es: 'Repaso del día' },
-    'sr.tagline':             { en: "Four quick visits to skills you've already earned — so they stay earned.",
-                               es: 'Cuatro visitas rápidas a destrezas que ya dominaste — para que sigan dominadas.' },
+    'sr.tagline':             { en: "Quick visits to skills you've already earned — so they stay earned.",
+                               es: 'Visitas rápidas a destrezas que ya dominaste — para que sigan dominadas.' },
     'sr.progress':            { en: '{done} of {total} reviewed today', es: '{done} de {total} repasadas hoy' },
     'sr.daysAgo':             { en: 'Last practiced {n} days ago', es: 'Última práctica hace {n} días' },
+    'sr.daysAgo1':            { en: 'Last practiced yesterday', es: 'Última práctica: ayer' },
     'sr.neverSince':          { en: 'Not practiced since you learned it', es: 'Sin practicar desde que la aprendiste' },
     'sr.go':                  { en: 'Practice this', es: 'Practicar esta' },
     'sr.doneToday':           { en: 'Reviewed today', es: 'Repasada hoy' },
-    'sr.allDone':             { en: 'All four reviewed — old skills, still sharp. +10 XP',
-                               es: 'Las cuatro repasadas — destrezas antiguas, siempre a punto. +10 XP' },
+    'sr.allDone':             { en: 'All reviewed — old skills, still sharp. +10 XP',
+                               es: 'Todas repasadas — destrezas antiguas, siempre a punto. +10 XP' },
     'sr.empty':               { en: 'Nothing to review yet — earn a few skills first, then check back.',
                                es: 'Aún no hay nada para repasar — domina algunas destrezas primero y vuelve después.' },
 

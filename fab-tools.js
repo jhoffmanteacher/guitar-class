@@ -150,8 +150,8 @@ function retimeMetro(){
   clearInterval(metroInterval);
   metroInterval = setInterval(tick, Math.round(60000/getBpm()));
 }
-function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; retimeMetro(); }
-function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Math.min(220,Math.max(40,getBpm()+d)); document.getElementById('bpm-display').textContent=s.value; if(metroRunning){ stopMetro(); startMetro(); } }
+function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; retimeMetro(); ladderShowDefault(); }
+function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Math.min(220,Math.max(40,getBpm()+d)); document.getElementById('bpm-display').textContent=s.value; if(metroRunning){ stopMetro(); startMetro(); } ladderShowDefault(); }
 
 /* ── Tempo ladder ──
    Self-report, not mic detection — matches the site's self-check philosophy
@@ -177,6 +177,11 @@ function ladderSetStatus(key, params){
   el.setAttribute('data-i18n-params', JSON.stringify(params));
   el.textContent=t(key, params);
 }
+// Also called from onBpmSlider/nudgeBpm (declared above, runs after this
+// file's globals exist) so the "…at {bpm} BPM" line tracks a manual tempo
+// change instead of quoting whatever the BPM was when the ladder opened.
+// Overwriting a still-flashing up/down message there is deliberate — a
+// manual BPM change makes that message stale too.
 function ladderShowDefault(){ ladderSetStatus('tools.ladderStatus', {n:ladderCleans, bpm:getBpm()}); }
 function toggleLadder(){
   ladderOn=!ladderOn;
@@ -196,18 +201,24 @@ function ladderFlashStatus(key, bpm){
   clearTimeout(ladderFlashTimeout);
   ladderFlashTimeout=setTimeout(ladderShowDefault, 2500);
 }
+// At the slider's 40/220 clamp there's nothing left to change — say so
+// instead of announcing a tempo move that didn't happen.
 function ladderClean(){
   ladderCleans++;
   if(ladderCleans>=2){
     ladderCleans=0;
-    ladderFlashStatus('tools.ladderUp', ladderSetBpm(getBpm()+5));
+    const before=getBpm();
+    const after=ladderSetBpm(before+5);
+    ladderFlashStatus(after>before ? 'tools.ladderUp' : 'tools.ladderMax', after);
   } else {
     ladderShowDefault();
   }
 }
 function ladderMiss(){
   ladderCleans=0;
-  ladderFlashStatus('tools.ladderDown', ladderSetBpm(getBpm()-5));
+  const before=getBpm();
+  const after=ladderSetBpm(before-5);
+  ladderFlashStatus(after<before ? 'tools.ladderDown' : 'tools.ladderMin', after);
 }
 
 function startMetro(){
@@ -289,8 +300,11 @@ function togglePopup(which){
   }
   // Populates the idle recorder body on open. Guarded: refreshRecUI lives in
   // app.js, which the tabs/*.html Journey pages don't load, but they still
-  // load this file verbatim for the shared Tuner/Timer/Metronome.
-  if(which==='rec' && open && typeof refreshRecUI==='function'){
+  // load this file verbatim for the shared Tuner/Timer/Metronome. Idle-only
+  // (!recState.fab): re-opening the popup during a recording or a playing
+  // preview must not innerHTML-rebuild the body — that would reset the
+  // take's timer display or stop the <audio> mid-listen-back.
+  if(which==='rec' && open && typeof refreshRecUI==='function' && !recState.fab){
     refreshRecUI('fab');
   }
   /* Keyboard: the popups sit BEFORE .fab-buttons in the source, so after

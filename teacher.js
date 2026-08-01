@@ -717,7 +717,9 @@ async function renderTeacherReports(){
     await ensureDb();
     snap=await db.collection('issueReports').orderBy('createdAt','desc').limit(50).get();
   } catch(e){
-    box.innerHTML='<div class="t-loading">Could not load reports. Check your Firebase security rules.</div>';
+    // Same stale-view guard as the success path below — without it a failing
+    // read paints this error over whichever view the teacher switched to.
+    if(teacherView==='reports') box.innerHTML='<div class="t-loading">Could not load reports. Check your Firebase security rules.</div>';
     return;
   }
   if(teacherView!=='reports') return;   // teacher switched views while the read was in flight
@@ -789,7 +791,7 @@ function renderTeacherStudents(){
   }
   // Furthest module reached first (that's what the "Furthest along" card below
   // reads off rows[0]), skills checked off as the tie-break within a module.
-  const rows=allStudents.map(stu=>({stu, tally:teacherStudentTally(stu, universe)})).sort((a,b)=>(b.tally.furthest-a.tally.furthest)||(b.tally.total-a.tally.total));
+  const rows=allStudents.map(stu=>({stu, tally:teacherStudentTally(stu, universe)})).sort((a,b)=>(b.tally.furthest-a.tally.furthest)||(b.tally.got-a.tally.got));
   const studentsCount=allStudents.length;
   const avgPct=Math.round(rows.reduce((a,r)=>a+r.tally.got,0)/(studentsCount*universe.total)*100);
   const furthestStu=rows[0].stu;

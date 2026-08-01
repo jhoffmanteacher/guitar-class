@@ -58,8 +58,10 @@ if('scrollRestoration' in history) history.scrollRestoration = 'manual';
         + 'background:#514a7d;color:#fff;font:14px/1.45 system-ui,-apple-system,sans-serif;'
         + 'box-shadow:0 6px 24px rgba(0,0,0,.28)';
       const msg = document.createElement('span');
+      msg.setAttribute('data-i18n', 'offline.body');   // setLang's applyI18n(document) sweep retranslates a banner that's up during a language switch
       msg.textContent = t('offline.body');
       const close = document.createElement('button');
+      close.setAttribute('data-i18n-attr', 'aria-label:offline.dismiss');
       close.setAttribute('aria-label', t('offline.dismiss'));
       close.textContent = '×';
       close.style.cssText = 'position:absolute;top:8px;right:12px;background:none;border:0;'
@@ -1672,7 +1674,7 @@ function activateSet(id){
     }
   }
   lastSetId = id;
-  if (typeof stopAnyRec === 'function') stopAnyRec();
+  if (typeof stopAnyRec === 'function') stopAnyRec({keepFab:true});
   // A Listening Coach check left running inline in the set/tab we're leaving
   // just goes invisible otherwise (its DOM node stays put, only hidden by
   // CSS) — the mic and its rAF loop would keep running unseen, permanently
@@ -1880,6 +1882,16 @@ function routeExploreHash(){
   else if(h === '#search') openSearchPanel();
   syncExploreNav();
 }
+/* The skip link's default #main-content jump would drop a foreign hash into
+   the history — exitExploreHash's history.go(-d) can then land on it, and
+   routeExploreHash (correctly, above) ignores hashes it doesn't own, which
+   left a ✕ click dead until pressed a second time. Focus the target
+   directly instead: same destination, no history entry. */
+document.querySelector('.skip-link')?.addEventListener('click', e => {
+  e.preventDefault();
+  const m = document.getElementById('main-content');
+  if(m) m.focus();
+});
 window.addEventListener('hashchange', routeExploreHash);
 /* pushState/go() traversals fire popstate, not hashchange — listen for both
    (the lastRoutedHash guard above absorbs the browsers that fire both). */
@@ -2967,8 +2979,16 @@ async function startRec(slot){
     alert(t('rec.noSupport'));
     return;
   }
+  // Re-entry guard: a second tap while getUserMedia's permission prompt is
+  // still up (or while already recording) would overwrite recState[slot]
+  // below and orphan the first stream — mic stays live with nothing left
+  // holding a reference to stop it.
+  if (recState[slot] && (recState[slot].starting || recState[slot].recording)) return;
+  if (recState[slot] && recState[slot].pendingBlobUrl) URL.revokeObjectURL(recState[slot].pendingBlobUrl);
+  recState[slot] = { starting: true };
+  let stream = null;
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    stream = await navigator.mediaDevices.getUserMedia({ audio:true });
     const recorder = new MediaRecorder(stream);
     const chunks = [];
     recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
@@ -3002,6 +3022,15 @@ async function startRec(slot){
     recorder.start();
     refreshRecUI(slot);
   } catch (err) {
+    // Also reached when the MediaRecorder constructor or start() throws
+    // AFTER the mic was granted — release the stream, or it stays live with
+    // no UI and no recState entry left to stop it.
+    if (stream) stream.getTracks().forEach(tr => tr.stop());
+    const s = recState[slot];
+    if (s && s.timerInterval) clearInterval(s.timerInterval);
+    if (s && s.autoStopTimeout) clearTimeout(s.autoStopTimeout);
+    delete recState[slot];
+    refreshRecUI(slot);
     alert(t('rec.micFail', {err: err.message || err.name || 'permission denied'}));
   }
 }
@@ -3014,9 +3043,14 @@ function stopRec(slot){
 
 /* Navigating away mid-recording would otherwise leave the mic live for up
    to REC_MAX_SECS — every other mic feature on the site stops on navigation,
-   so the recorder does too. Called from activateSet. */
-function stopAnyRec(){
+   so the recorder does too. Called from activateSet (which passes keepFab:
+   the rail recorder is a persistent site-wide tool with a pulsing tile —
+   switching sets to read a chord chart mid-take shouldn't truncate it) and,
+   without options, from startTuner/coachOpen (those need the mic itself, so
+   every slot stops, fab included). */
+function stopAnyRec(opts){
   Object.keys(recState).forEach(m => {
+    if (opts && opts.keepFab && m === 'fab') return;
     if (recState[m] && recState[m].recording) stopRec(m);
   });
 }
@@ -4749,6 +4783,10 @@ window.addEventListener('gc-langchange', function(){
     d5.setAttribute('aria-label', t('daily5.title'));
     d5.innerHTML = buildDaily5();
   }
+  // The rail Recorder popup body bakes t() results in with no data-i18n tags
+  // (renderRecBody), and #mrfab-rec-body sits outside the module panels the
+  // rebuild above covers — re-render it in place or it stays half-English.
+  refreshRecUI('fab');
 });
 
 /* ══════════════════════════════════════════════
@@ -5122,6 +5160,10 @@ function setRailOpen(open){
 }
 function toggleRail(){ setRailOpen(!document.body.classList.contains('rail-open')); }
 function closeRail(){ setRailOpen(false); }
+// Stamp the closed state once at load — setRailOpen is the only writer of
+// `inert`, so without this a narrow first paint keeps the transform-hidden
+// drawer's ~13 controls tabbable until the drawer has been toggled once.
+setRailOpen(false);
 window.addEventListener('resize', () => {
   if(!isNarrowLayout()){
     closeRail();
@@ -5513,9 +5555,13 @@ function leaveTopPanelForSet(){
 }
 
 /* Load every module's data (not its panels) — the Songs hub and search
-   need the whole catalogue. Modules are small and the SW precaches them. */
+   need the whole catalogue. Modules are small and the SW precaches them.
+   Resolves true only when EVERY module actually loaded — Daily Review uses
+   that to avoid persisting a picks snapshot computed from a partial
+   catalogue (a script that 404'd on flaky wifi). Other callers ignore it. */
 function ensureAllModuleData(){
-  return Promise.all(MODULE_MANIFEST.map(m => loadModuleData(m.num).catch(() => {})));
+  return Promise.all(MODULE_MANIFEST.map(m => loadModuleData(m.num).then(() => true).catch(() => false)))
+    .then(flags => flags.every(Boolean));
 }
 
 /* ── ♪ Songs hub: every song on the site, deduped, core six first ──
@@ -6076,21 +6122,35 @@ function srStoredTodayIds(){
     ? stored.ids.filter(sid => skillById(sid))
     : [];
 }
-// Today's 4 picks are stable all day (no reshuffling as they're completed) —
+// Today's picks are stable all day (no reshuffling as they're completed) —
 // stashed per-student in localStorage, keyed on the calendar day so a new
 // day naturally recomputes. Ids that no longer resolve to a skill (content
-// changed under a stale snapshot) are dropped, not replaced mid-day. Only
-// call this after ensureAllModuleData() — srCandidates() reads SETS
-// directly, which otherwise may hold just the student's current module.
-function srLoadTodayIds(){
+// changed under a stale snapshot) are dropped, not replaced mid-day. A short
+// snapshot (fewer than 4 — the student hadn't earned enough skills when the
+// page was first opened today) does top up from fresh candidates, otherwise
+// day 1 would freeze "Nothing to review yet" until midnight no matter how
+// many skills were earned that afternoon; already-stored picks stay put, and
+// a page already completed today (bonus banked) stops growing. Only call
+// this after ensureAllModuleData() — srCandidates() reads SETS directly,
+// which otherwise may hold just the student's current module. canPersist:
+// false skips the localStorage write — used when a module file failed to
+// load, so a picks list computed from a partial catalogue can't get locked
+// in for the day (same poisoning class the logPracticeRep path guards).
+function srLoadTodayIds(canPersist){
   const today = dayStr(new Date());
   let stored = null;
   try{ stored = JSON.parse(localStorage.getItem(_uidKey('gc-srPicks'))); }catch(e){}
-  if(stored && stored.day === today && Array.isArray(stored.ids)){
-    return stored.ids.filter(sid => skillById(sid));
+  let ids = (stored && stored.day === today && Array.isArray(stored.ids))
+    ? stored.ids.filter(sid => skillById(sid))
+    : null;
+  if(ids === null || (ids.length < 4 && games.srBonusDay !== today)){
+    const have = new Set(ids || []);
+    const fresh = srCandidates().filter(sid => !have.has(sid));
+    ids = (ids || []).concat(fresh).slice(0, 4);
   }
-  const ids = srCandidates();
-  try{ localStorage.setItem(_uidKey('gc-srPicks'), JSON.stringify({ day: today, ids })); }catch(e){}
+  if(canPersist !== false){
+    try{ localStorage.setItem(_uidKey('gc-srPicks'), JSON.stringify({ day: today, ids })); }catch(e){}
+  }
   return ids;
 }
 function srSkillWith(sid){
@@ -6102,7 +6162,10 @@ function srSkillWith(sid){
 }
 function srDaysLabel(sid){
   const d = daysSinceLastRep(sid);
-  return d < 0 ? { key:'sr.neverSince', params:null } : { key:'sr.daysAgo', params:{n:d} };
+  if(d < 0) return { key:'sr.neverSince', params:null };
+  // n === 1 gets its own key — "1 days ago" / "hace 1 días" reads broken in
+  // both languages (same singular split as rep.lastYesterday).
+  return d === 1 ? { key:'sr.daysAgo1', params:null } : { key:'sr.daysAgo', params:{n:d} };
 }
 // All 4 picks reviewed today → +10 XP into the arcade meta-layer, once per
 // day. Called both after every logged rep and on every Daily Review page
@@ -6124,9 +6187,12 @@ function srCheckComplete(ids){
   if(!ids.length || !ids.every(sid => daysSinceLastRep(sid) === 0)) return;
   const today = dayStr(new Date());
   if(games.srBonusDay === today) return;
+  // Don't burn the once-a-day flag unless the XP can actually land — if
+  // coach.js failed to load, leave it unclaimed so a later render retries.
+  if(typeof awardArcadeXp !== 'function') return;
   games.srBonusDay = today;
   saveGames();
-  if(typeof awardArcadeXp === 'function') awardArcadeXp(false);
+  awardArcadeXp(false);
 }
 function srRefreshIfOpen(){
   const screen = document.getElementById('sr-screen');
@@ -6135,6 +6201,11 @@ function srRefreshIfOpen(){
 // Closes the full-screen page first — reviewJump scrolls/flashes a row
 // underneath it, which the student can't see while the page still covers it.
 function srPracticeThis(sid, wid){
+  // Closing goes through exitExploreHash → an async popstate that restores
+  // practiceScrollTop (stashed when this page opened) — which would land on
+  // top of reviewJump's scrollIntoView. Same race leaveTopPanelForSet
+  // defends against, same fix: the jump owns the scroll now.
+  practiceScrollTop = 0;
   closeDailyReviewScreen();
   reviewJump(sid, wid);
 }
@@ -6158,8 +6229,8 @@ async function renderDailyReview(){
   const bodyEl = document.getElementById('sr-screen-body');
   if(!bodyEl) return;
   bodyEl.innerHTML = `<div class="coach-tip">${t('kp.loading')}</div>`;
-  await ensureAllModuleData();
-  const ids = srLoadTodayIds();
+  const catalogueComplete = await ensureAllModuleData();
+  const ids = srLoadTodayIds(catalogueComplete);
   srCheckComplete(ids);
   if(!ids.length){
     bodyEl.innerHTML = `<div class="coach-tip" data-i18n="sr.empty">${t('sr.empty')}</div>`;

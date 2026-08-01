@@ -2309,7 +2309,11 @@ function ccFinish(){
   if (cc.micOn){ coachMicOff(); cc.micOn = false; }
   cc.phase = 'done';
   const oldBest = (games.cc && games.cc.bestBpm) || 0;
-  cc.isNewBest = cc.bpm > oldBest;
+  // New-best only counts on a run clean enough to save — ccRenderDone's
+  // r >= 0.85 branch is what writes games.cc.bestBpm, so a bombed run at a
+  // high BPM would otherwise re-collect the +5 bonus on every attempt.
+  const ccOk = cc.changes.filter(c => c.result === 'ok').length;
+  cc.isNewBest = cc.changes.length > 0 && ccOk / cc.changes.length >= 0.85 && cc.bpm > oldBest;
   awardArcadeXp(cc.isNewBest);
   ccRenderDone();
 }

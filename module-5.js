@@ -1247,8 +1247,8 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Frets D, A, and Bm with clean tone · Switches D to A in time · Switches Em to Bm in time · Connects Group 1 and Group 2 chords · Plays a song using Group 2 chords · Identifies chord group from a chord chart',
-      goal_es: 'Trastea D, A y Bm con tono limpio · Cambia de D a A a tiempo · Cambia de Em a Bm a tiempo · Conecta acordes del Grupo 1 y del Grupo 2 · Toca una canción usando acordes del Grupo 2 · Identifica el grupo de un acorde a partir de un diagrama',
+      goal: 'Frets the Group 2 chords (D, A, Em, and the four-finger Bm) with clean tone · Switches D to A in time · Switches Em to Bm in time · Connects Group 1 and Group 2 chords · Plays a song using Group 2 chords · Identifies chord group from a chord chart',
+      goal_es: 'Trastea los acordes del Grupo 2 (D, A, Em y el Bm de cuatro dedos) con tono limpio · Cambia de D a A a tiempo · Cambia de Em a Bm a tiempo · Conecta acordes del Grupo 1 y del Grupo 2 · Toca una canción usando acordes del Grupo 2 · Identifica el grupo de un acorde a partir de un diagrama',
       performance: 'Solo: run the chord deck (mixes Group 1 and Group 2, plus Dm and the G/B turnaround) for three cards in a row, then play them in sequence for 8 bars at 70 BPM — record it and listen back for clean changes.',
       selfCheck: 'Can you look at a chord chart and know immediately which "group" each chord belongs to? Can you switch D–A and Em–Bm on beat 1, working the tempo up toward 70 BPM?',
       selfCheck_es: '¿Puedes ver un diagrama de acordes y saber de inmediato a qué "grupo" pertenece cada acorde? ¿Puedes cambiar D–A y Em–Bm en el tiempo 1, subiendo el tempo hacia 70 BPM?',

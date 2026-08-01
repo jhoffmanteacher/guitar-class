@@ -5,6 +5,33 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-31 — Review-pass fixes for the new practice tools
+
+### Fixed
+
+- **Daily Review no longer gets stuck on "Nothing to review yet."** If you
+  opened the page before earning any skills (or with only one or two), it
+  locked in that short list for the whole day — now skills you earn during
+  the day join today's review list, up to the usual four.
+- **The Recorder can't leave the microphone stuck on anymore.** Double-tapping
+  Record while the permission prompt was up left an invisible recording
+  running until you closed the tab. Switching sets mid-take also no longer
+  cuts your recording short — the rail Recorder keeps rolling while you look
+  at a chord chart.
+- **The Tempo ladder's status line follows the tempo now.** Dragging the BPM
+  slider used to leave it reading the old number, and at the slider's limits
+  (40/220 BPM) it claimed the tempo changed when it couldn't — it now says
+  it's holding steady there.
+- **The four practice-tool tiles are a 2×2 grid**, so "Metronome",
+  "Temporizador" and friends aren't squeezed into "Metro…" anymore.
+- **Small polish everywhere:** "Last practiced 1 days ago" now reads
+  "yesterday" (both languages), stray \*\*asterisks\*\* were removed from a
+  Module 10 card, a Module 12 quiz no longer refers to a chord shape "you
+  just learned" before it's taught, the Module 5 assessment goal lists the
+  full Group 2 (D, A, Em, Bm), the Recorder popup fully switches languages
+  with the Español button, and the "Skip to content" link no longer makes
+  the next ✕ button need two clicks.
+
 ## 2026-07-31 — Three new practice tools
 
 ### Added
