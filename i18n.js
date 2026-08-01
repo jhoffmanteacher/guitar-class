@@ -307,6 +307,14 @@
                              es: '¿Sala ruidosa? Elige tu cuerda arriba y toca cerca de la computadora.' },
     'tools.metroMuted':    { en: 'Silent while the Listening Coach’s mic is on — the beat still flashes above.',
                              es: 'Silencioso mientras el micrófono del Coach de Escucha está activo — el pulso sigue destellando arriba.' },
+    'tools.ladder':        { en: 'Tempo ladder', es: 'Escalera de tempo' },
+    'tools.ladderHint':    { en: 'Play your part once through, then tap how it went. Two clean laps in a row raise the tempo; a slip brings it back down.',
+                             es: 'Toca tu parte una vez completa y marca cómo salió. Dos vueltas limpias seguidas suben el tempo; un fallo lo baja de nuevo.' },
+    'tools.ladderStatus':  { en: '{n} of 2 clean laps at {bpm} BPM', es: '{n} de 2 vueltas limpias a {bpm} BPM' },
+    'tools.ladderClean':   { en: 'Clean lap', es: 'Vuelta limpia' },
+    'tools.ladderMiss':    { en: 'Had mistakes', es: 'Con errores' },
+    'tools.ladderUp':      { en: 'Tempo up! Now {bpm} BPM', es: '¡Sube el tempo! Ahora {bpm} BPM' },
+    'tools.ladderDown':    { en: 'Back to {bpm} BPM — nail it here first', es: 'Bajamos a {bpm} BPM — domínalo aquí primero' },
 
     // ── Buttons & footer ──
     'btn.markDone':          { en: 'Mark done', es: 'Marcar como hecho' },
@@ -711,6 +719,20 @@
     'kp.loading':            { en: 'Loading…', es: 'Cargando…' },
     'kp.emptyHtml':          { en: 'Nothing marked &ldquo;still working on it&rdquo; right now — mark a skill that way on any checklist and it\'ll show up here.',
                                es: 'No hay nada marcado como &ldquo;todavía lo estoy practicando&rdquo; — marca así una destreza en cualquier lista y aparecerá aquí.' },
+
+    // ── 🗓️ Daily Review (spaced review) page ──
+    'sr.title':               { en: 'Daily Review', es: 'Repaso del día' },
+    'sr.tagline':             { en: "Four quick visits to skills you've already earned — so they stay earned.",
+                               es: 'Cuatro visitas rápidas a destrezas que ya dominaste — para que sigan dominadas.' },
+    'sr.progress':            { en: '{done} of {total} reviewed today', es: '{done} de {total} repasadas hoy' },
+    'sr.daysAgo':             { en: 'Last practiced {n} days ago', es: 'Última práctica hace {n} días' },
+    'sr.neverSince':          { en: 'Not practiced since you learned it', es: 'Sin practicar desde que la aprendiste' },
+    'sr.go':                  { en: 'Practice this', es: 'Practicar esta' },
+    'sr.doneToday':           { en: 'Reviewed today', es: 'Repasada hoy' },
+    'sr.allDone':             { en: 'All four reviewed — old skills, still sharp. +10 XP',
+                               es: 'Las cuatro repasadas — destrezas antiguas, siempre a punto. +10 XP' },
+    'sr.empty':               { en: 'Nothing to review yet — earn a few skills first, then check back.',
+                               es: 'Aún no hay nada para repasar — domina algunas destrezas primero y vuelve después.' },
 
     // ── ⚡ Daily 5 modal ──
     'daily5.title':          { en: 'Daily 5 — today’s warm-up', es: 'Daily 5 — el calentamiento de hoy' },
@@ -1827,7 +1849,15 @@
                                es: 'Escúchala cuantas veces quieras. Descárgala para guardar una copia.' },
     'rec.noSupport':         { en: 'This browser does not support audio recording. Try Chrome, Edge, or Firefox on a desktop.',
                                es: 'Este navegador no permite grabar audio. Prueba Chrome, Edge o Firefox en una computadora.' },
-    'rec.micFail':           { en: 'Could not start microphone: {err}', es: 'No se pudo iniciar el micrófono: {err}' }
+    'rec.micFail':           { en: 'Could not start microphone: {err}', es: 'No se pudo iniciar el micrófono: {err}' },
+
+    // ── Recorder rail tool (fourth FAB, reuses the widget above) ──
+    'tools.recorder':        { en: 'Recorder', es: 'Grabadora' },
+    'tools.closeRecAria':    { en: 'Close recorder', es: 'Cerrar la grabadora' },
+    'rec.checkTitle':        { en: 'Listen back and ask yourself:', es: 'Escucha la grabación y pregúntate:' },
+    'rec.checkBeat':         { en: 'Did every chord change land on the beat?', es: '¿Cada cambio de acorde cayó en el tiempo?' },
+    'rec.checkBuzz':         { en: 'Any buzzing or muted strings?', es: '¿Se oye algún zumbido o alguna cuerda apagada?' },
+    'rec.checkTempo':        { en: 'Did the tempo stay steady from start to finish?', es: '¿El tempo se mantuvo estable de principio a fin?' }
   };
 
   let lang = 'en';
