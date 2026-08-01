@@ -682,9 +682,9 @@ SETS.push(
             ] }
           },
           {
-            label: 'Watch: rewatch, A-shape focus', label_es: 'Mira: repaso enfocado en la forma de A',
-            text: 'Watch: <a href="https://youtu.be/MpMhueVEz2g?t=30" target="_blank">Basic Barre Chords (CH-006) – JustinGuitar</a> (0:30–4:00 — rewatch with A-shape focus).',
-            text_es: 'Mira: <a href="https://youtu.be/MpMhueVEz2g?t=30" target="_blank">Basic Barre Chords (CH-006) – JustinGuitar</a> (0:30–4:00 — vuelve a verlo enfocándote en la forma de A).',
+            label: 'Watch: the series continues — A-shape', label_es: 'Mira: la serie continúa — forma de A',
+            text: 'Watch: <a href="https://youtu.be/ioU_ItTzm90" target="_blank">Basic Barré Chords #3 — the A shape (CH-006) – JustinGuitar</a> (0:00–4:00). Same series as the E-shape video you watched earlier — this installment is the A-shape.',
+            text_es: 'Mira: <a href="https://youtu.be/ioU_ItTzm90" target="_blank">Basic Barré Chords #3 — the A shape (CH-006) – JustinGuitar</a> (0:00–4:00). La misma serie que el video de la forma de E que viste antes — esta entrega es la forma de A.',
             hint: 'B major is a great A-shape practice chord — it lives at the 2nd fret with the root on string 5. You may hear a muted high E (string 1) in some videos — many players let the ring finger mute it, and that\'s a real technique. In this module, though, we arch the fingers so string 1 rings.',
             hint_es: 'B mayor es un gran acorde de práctica para la forma de A — vive en el traste 2 con la raíz en la cuerda 5. Puede que escuches una mi aguda (cuerda 1) silenciada en algunos videos — muchos guitarristas dejan que el dedo anular la silencie, y esa es una técnica real. En este módulo, sin embargo, arqueamos los dedos para que la cuerda 1 suene.',
             skills: [3, 4],

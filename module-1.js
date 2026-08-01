@@ -627,7 +627,7 @@ SETS.push(
       { name: '"Jingle Bells"', meta: 'Open strings only', meta_es: 'Solo cuerdas al aire', type: 'Choice', core: false, level: 1,
         tutorialUrl: 'https://www.youtube.com/watch?v=qM_Yar0xqRk&start=49' },
       { name: '"Twinkle Twinkle"', meta: 'E & A strings', meta_es: 'Cuerdas Mi y La', type: 'Choice', core: false, level: 1,
-        tutorialUrl: 'https://www.youtube.com/watch?v=NPS5xuRCA6w&t=16' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=NPS5xuRCA6w' },
       { name: '"The Simpsons Theme"', meta: 'E string only', meta_es: 'Solo la cuerda Mi', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=aPzS3QYb868',
         tutorialUrl: 'https://www.youtube.com/watch?v=lGwNWYzYuIk&start=24&end=149' }
