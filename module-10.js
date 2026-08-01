@@ -932,7 +932,7 @@ MODULE_SONGS[10] = [
       { name: '"Smoke on the Water" — Deep Purple', meta: 'Blues scale where it\'s normally used', meta_es: 'La escala de blues donde normalmente se usa', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=Q2FzZSBD5LE',
         tutorialUrl: 'https://www.youtube.com/watch?v=QkT5yLP5VQA' },
-      { name: '"Beat It" — Michael Jackson', meta: 'The Em pentatonic solo — name the key by ear', meta_es: 'El solo de pentatónica de Em — nombra la tonalidad de oído', type: 'Choice', core: false, level: 2,
+      { name: '"Beat It" — Michael Jackson', meta: 'The Em pentatonic solo — name the key by ear (the record sits a half step low)', meta_es: 'El solo de pentatónica de Em — nombra la tonalidad de oído (la grabación suena medio tono abajo)', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=oRdxUFDoQe0',
         tutorialUrl: 'https://www.youtube.com/watch?v=B5M5tVc7XZA' },
       { name: '"Ella Baila Sola" — Eslabon Armado × Peso Pluma', meta: 'Hear major vs minor in the progression', meta_es: 'Escucha mayor vs. menor en la progresión', type: 'Choice', core: false, level: 2,

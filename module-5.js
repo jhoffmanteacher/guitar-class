@@ -1636,7 +1636,7 @@ MODULE_SONGS[5] = [
       { name: '"No Woman No Cry" — Bob Marley', meta: 'C–G–Am–F — beautiful and rhythmic', meta_es: 'C–G–Am–F — hermosa y rítmica', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=IT8XvzIfi4U',
         tutorialUrl: 'https://www.youtube.com/watch?v=qK4NutAn3rg' },
-      { name: '"Ella Baila Sola" — Eslabon Armado × Peso Pluma', meta: 'Capo 1 · Em–D–C–B7 vamp — current sierreño hit', meta_es: 'Capo 1 · vamp Em–D–C–B7 — éxito actual de sierreño', type: 'Choice', core: false, level: 2,
+      { name: '"Ella Baila Sola" — Eslabon Armado × Peso Pluma', meta: 'Capo 1 · C–D–B7–Em vamp — current sierreño hit', meta_es: 'Capo 1 · vamp C–D–B7–Em — éxito actual de sierreño', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=lZiaYpD9ZrI',
         tutorialUrl: 'https://www.youtube.com/watch?v=fciArjRISjc' },
       { name: '"Hallelujah" — Leonard Cohen', meta: 'C–Am–F–G — beautiful performance song', meta_es: 'C–Am–F–G — hermosa canción de interpretación', type: 'Choice', core: false, level: 2,

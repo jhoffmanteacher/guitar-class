@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-31 — Choice-song chords verified
+
+### Fixed
+
+- **Every chord, key, and capo claim on the Choice song lists was checked
+  against real charts** (two independent sources per song, eighteen songs).
+  Fifteen were already right; three needed fixes:
+  - **"Buffalo Soldier"** is A–F#m–D (the site said Bm–G–D–A — the song has no
+    G chord).
+  - **"Ella Baila Sola"** keeps its capo-1 chords but in the song's real
+    order: C–D–B7–Em (was Em–D–C–B7).
+  - **"Beat It"** now notes the record sits a half step low, so naming the
+    key by ear lands where it should.
+
 ## 2026-07-31 — "Oye Mi Amor" chords corrected
 
 ### Fixed

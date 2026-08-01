@@ -1082,7 +1082,7 @@ MODULE_SONGS[6] = [
       { name: '"Wagon Wheel" — Old Crow Medicine Show', meta: 'G–D–Em–C · folk strum classic', meta_es: 'G–D–Em–C · clásico rasgueo folk', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=1gX1EP6mG-E',
         tutorialUrl: 'https://www.youtube.com/watch?v=zx3Tv5uBAaE' },
-      { name: '"Buffalo Soldier" — Bob Marley', meta: 'Bm–G–D–A · reggae offbeat practice', meta_es: 'Bm–G–D–A · práctica de contratiempo reggae', type: 'Choice', core: false, level: 2,
+      { name: '"Buffalo Soldier" — Bob Marley', meta: 'A–F#m–D · reggae offbeat practice', meta_es: 'A–F#m–D · práctica de contratiempo reggae', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=uMUQMSXLlHM',
         tutorialUrl: 'https://www.youtube.com/watch?v=rNSq3E3KfMk&start=94&end=522' }
     ];
