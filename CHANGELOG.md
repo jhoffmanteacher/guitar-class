@@ -16,6 +16,13 @@ see `WORKFLOW.md` and the git commit log.
 - **"the cure"'s listening layer** now says the song *starts* quiet and keeps
   building to its big ending — the old text claimed the chorus "grows without
   ever getting loud," which isn't how the record goes.
+- **The "Sweet Child" riff challenge in Module 9 names the right strings** —
+  the riff's second note is the famous skip up to the B string, not the G
+  string; the card now walks the first four notes correctly.
+- **The Module 5 "Sweet Child" verse challenge points at the play-along
+  track**, not "the actual record" — the record is tuned a half step down, so
+  strumming along with it in standard tuning would sound sour. The ▶ button
+  was already playing the in-tune track; the words just said otherwise.
 
 ## 2026-07-31 — Choice-song chords verified
 
