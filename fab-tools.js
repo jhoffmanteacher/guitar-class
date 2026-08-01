@@ -199,6 +199,18 @@ function setFabExpanded(which, isOpen){ const f=document.getElementById('fab-'+w
 function togglePopup(which){
   const open=document.getElementById(which+'-popup').classList.toggle('open');
   setFabExpanded(which, open);
+  // All three rail-tool popups share one absolute box in .rail-tools — opening
+  // a second one on top of a still-open one hid the first with no way to
+  // close it (click-away bails when the click path contains .fab*). Closing
+  // siblings here covers it; stopAudio=false leaves a running metronome click
+  // alone (deliberate, see closePopup above), while closePopup already stops
+  // the tuner engine, so the tuner-specific stopTuner() below is redundant.
+  if(open){
+    ['metro','timer','tuner'].filter(w=>w!==which).forEach(w=>{
+      const el = document.getElementById(w+'-popup');
+      if(el && el.classList.contains('open')) closePopup(w, false);
+    });
+  }
   // The tuner has no Start/Stop button — opening it starts listening, closing stops.
   // One mic owner at a time: the tuner interrupts a live Listening Coach check
   // and stops any running game mic (app.js/coach.js only — guarded, since
@@ -215,10 +227,6 @@ function togglePopup(which){
     } else { stopTuner(); }
   }
   if(which==='metro' && open){
-    // Mirror the tuner's guard in the other direction: its bandpass filter runs
-    // with echoCancellation off, so the metronome's clicks would be heard as
-    // pitch and produce bogus readings if the tuner is still listening.
-    if(typeof tunerRunning!=='undefined' && tunerRunning) stopTuner();
     syncMetroMutedNote();
   }
   /* Keyboard: the popups sit BEFORE .fab-buttons in the source, so after
@@ -288,16 +296,19 @@ document.addEventListener('keydown',e=>{
 });
 
 /* ── Focus trap for the full-screen overlays (a11y) ──
-   #games-screen, #keep-practicing-screen and #my-progress-screen are
-   position:fixed;inset:0;z-index:120 and set aria-modal="true". aria-modal
-   removes the page behind them from the accessibility TREE but does nothing to
-   TAB ORDER, and body{overflow:hidden} doesn't either — so one Shift+Tab off
-   "Back to practice" landed on the header's Español toggle: focused, invisible
-   behind an opaque overlay, no way to tell where you were. Keep Tab inside
-   whichever overlay is open.
+   #games-screen is position:fixed;inset:0;z-index:120 and sets
+   aria-modal="true". aria-modal removes the page behind it from the
+   accessibility TREE but does nothing to TAB ORDER, and body{overflow:hidden}
+   doesn't either — so one Shift+Tab off "Back to practice" landed on the
+   header's Español toggle: focused, invisible behind an opaque overlay, no way
+   to tell where you were. Keep Tab inside whichever overlay is open.
    Deliberately NOT applied to #video-overlay: that one is a non-modal floating
    mini-player (z-index 90, no aria-modal) whose whole point is that the step
    behind it stays usable — trapping there would be a bug, not a fix.
+   Also NOT applied to .page-screen (Songs / Keep practicing / My progress /
+   In-Class Activities): those are role="region", in-column panels that replace
+   the practice panels while the rail and header stay put and reachable — not
+   modal, so trapping there would make the rail/header/tools keyboard-unreachable.
    Lives in this file because it's the shared, dependency-free tools script;
    the tabs/*.html Journey pages have no such overlays, so it returns on the
    first querySelector there.
@@ -307,7 +318,7 @@ document.addEventListener('keydown',e=>{
    over 120). They're appended to <body> after #app, so the LAST match in
    document order is the topmost one — trap that, or a modal stacked over the
    games screen would be the one thing Tab couldn't reach. */
-const MODAL_OVERLAY_SEL = '.games-screen:not([hidden]), .page-screen:not([hidden]), .daily5-overlay';
+const MODAL_OVERLAY_SEL = '.games-screen:not([hidden]), .daily5-overlay';
 const MODAL_FOCUSABLE_SEL = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), iframe, [tabindex]:not([tabindex="-1"])';
 document.addEventListener('keydown', e => {
   if(e.key !== 'Tab') return;

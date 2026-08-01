@@ -73,8 +73,8 @@ SETS.push(
                 hint: 'The root (A string, fret 3 = C) and its 5th, fretted on the low E string (fret 3 = G) — same alternating bass Module 8 taught for a C chord.',
                 hint_es: 'La raíz (cuerda La, traste 3 = C) y su 5ª, trasteada en la cuerda Mi grave (traste 3 = G) — el mismo bajo alternante que enseñó el Módulo 8 para un acorde de C.',
                 skills: [1, 4],
-                response: { type: 'mc', prompt: 'On a C chord, the alternating thumb usually bounces between:',
-                  prompt_es: 'En un acorde de C, el pulgar alternante suele rebotar entre:',
+                response: { type: 'mc', prompt: 'In the C shape you just learned (5th fretted on the low E string), the alternating thumb bounces between:',
+                  prompt_es: 'En la forma de C que acabas de aprender (con la 5ª trasteada en la cuerda Mi grave), el pulgar alternante rebota entre:',
                   answer: 0,
                   explain: 'The root (A string, fret 3 = C) and its 5th, fretted on the low E string (fret 3 = G) — the thumb reaches down to a string the open chord shape doesn\'t normally use.',
                   explain_es: 'La raíz (cuerda La, traste 3 = C) y su 5ª, trasteada en la cuerda Mi grave (traste 3 = G) — el pulgar llega hasta una cuerda que la forma abierta del acorde normalmente no usa.',
@@ -208,7 +208,7 @@ SETS.push(
                 levelUp_es: 'Corre Am → C → Am → C durante 8 compases sin un solo tiempo roto.',
                 skills: [5],
                 chords: [
-                  { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
+                  { name: 'C', chord: [[6,3,'4'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
                 ]
               }
@@ -289,7 +289,7 @@ SETS.push(
                 playSeq: { label: 'Hear one p-i-m-a lap on Am, then C — loop it 2 bars each', label_es: 'Escucha una vuelta p-i-m-a en Am, y luego en C — repítelo 2 compases cada uno', bpm: 60, notes: [45, 57, 60, 64, 48, 55, 60, 64] },
                 chords: [
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
-                  { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 }
+                  { name: 'C', chord: [[6,3,'4'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 }
                 ]
               }
             ]

@@ -50,6 +50,9 @@ async function showTeacherApp(user){
   if(toggle && !toggle.querySelector('[data-view="activities"]')){
     toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="activities" onclick="setTeacherView('activities')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/></svg> Class activities</button>`);
   }
+  if(toggle && !toggle.querySelector('[data-view="reports"]')){
+    toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="reports" onclick="setTeacherView('reports')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/></svg> Reports</button>`);
+  }
   // Two extra legend rows for the skills grid's got-it markers — the plain
   // green check (index.html's static legend) doesn't distinguish a Coach
   // pass or a gate override from a self-declared "I've got it!". Inserted
@@ -291,7 +294,7 @@ function applyTeacherViewChrome(v){
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
   // Games, Trouble-spots and Students are all class-wide, not per-week —
   // hide the week tabs and the skill summary while any of them is showing.
-  const classWide = v==='games'||v==='trouble'||v==='students'||v==='manage'||v==='activities';
+  const classWide = v==='games'||v==='trouble'||v==='students'||v==='manage'||v==='activities'||v==='reports';
   const tabs=document.getElementById('t-week-tabs'); if(tabs) tabs.style.display = classWide ? 'none' : '';
   const summ=document.getElementById('t-summary'); if(summ) summ.style.display = classWide ? 'none' : '';
 }
@@ -316,6 +319,7 @@ function renderTeacherBody(){
   else if(teacherView==='students') studentDetailUid ? renderTeacherStudentDetail(studentDetailUid) : renderTeacherStudents();
   else if(teacherView==='manage') renderTeacherManage();
   else if(teacherView==='activities') renderTeacherActivities();
+  else if(teacherView==='reports') renderTeacherReports();
   else renderTeacherGrid();
 }
 
@@ -700,6 +704,33 @@ function renderTeacherResponses(){
     : `<div class="t-loading">No one has written a response for ${escHtml(w.label)} yet.</div>`;
 }
 
+/* ── Reports view — student-filed issue reports (read-only) ──────────────
+   issueReports (app.js submitIssueReport) is write-only from the student
+   side — firestore.rules grants the teacher a read, but until now nothing
+   read it back, so a filed report was only visible in the Firebase console.
+   One Firestore read per view-open; not cached, since nothing else here is. */
+async function renderTeacherReports(){
+  const box=document.getElementById('t-grid-container');
+  box.innerHTML='<div class="t-loading">Loading reports…</div>';
+  let snap;
+  try{
+    await ensureDb();
+    snap=await db.collection('issueReports').orderBy('createdAt','desc').limit(50).get();
+  } catch(e){
+    box.innerHTML='<div class="t-loading">Could not load reports. Check your Firebase security rules.</div>';
+    return;
+  }
+  if(teacherView!=='reports') return;   // teacher switched views while the read was in flight
+  if(snap.empty){ box.innerHTML='<div class="t-loading">No issue reports yet.</div>'; return; }
+  const rows=snap.docs.map(doc=>{
+    const d=doc.data();
+    const when=(d.createdAt&&d.createdAt.toDate) ? d.createdAt.toDate().toLocaleString() : '—';
+    const who=d.name||d.email||d.uid||'—';
+    return `<tr><td class="nc" title="${escAttr(who)}">${escHtml(who)}</td><td>${escHtml(when)}</td><td>${escHtml(d.location||'')}</td><td>${escHtml(d.message||'')}</td></tr>`;
+  }).join('');
+  box.innerHTML=`<div class="t-grid-wrap"><table><thead><tr><th class="nc">Student</th><th>When</th><th>Where</th><th>Message</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
 /* ── Students view (roster bar chart + per-student detail) ───────────────
    Class-wide, like Trouble spots — no new Firestore reads, just a different
    slice of the already-loaded allStudents. A bar is always rendered by the
@@ -760,7 +791,7 @@ function renderTeacherStudents(){
   // reads off rows[0]), skills checked off as the tie-break within a module.
   const rows=allStudents.map(stu=>({stu, tally:teacherStudentTally(stu, universe)})).sort((a,b)=>(b.tally.furthest-a.tally.furthest)||(b.tally.total-a.tally.total));
   const studentsCount=allStudents.length;
-  const avgPct=Math.round(rows.reduce((a,r)=>a+r.tally.total,0)/(studentsCount*universe.total)*100);
+  const avgPct=Math.round(rows.reduce((a,r)=>a+r.tally.got,0)/(studentsCount*universe.total)*100);
   const furthestStu=rows[0].stu;
   const notStarted=rows.filter(r=>r.tally.total===0).length;
   // Nobody has checked anything off yet → rows[0] is an arbitrary student;
@@ -778,7 +809,7 @@ function renderTeacherStudents(){
     const displayName=stu.name||stu.email||stu.uid.slice(0,8)+'…';
     const rightLbl = tally.furthest===0
       ? `<span class="stu-mod">&mdash;</span><span class="stu-count">0 / ${universe.total}</span>`
-      : `<span class="stu-mod">M${tally.furthest}</span><span class="stu-count">${tally.total} / ${universe.total}</span>`;
+      : `<span class="stu-mod">M${tally.furthest}</span><span class="stu-count">${tally.got} / ${universe.total}</span>`;
     return `<button type="button" class="stu-row" data-open-student data-uid="${escAttr(stu.uid)}">
         <div class="stu-name" title="${escAttr(displayName)}">${escHtml(displayName)}</div>
         ${teacherBarFillHtml(tally.got,tally.working,universe.total)}

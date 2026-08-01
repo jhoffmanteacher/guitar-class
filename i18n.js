@@ -211,7 +211,11 @@
     'nav.chooseModule':   { en: 'Choose module', es: 'Elige un módulo' },
     'nav.moduleGoalTitle':{ en: 'Finish all skills to complete this module',
                              es: 'Termina todas las destrezas para completar este módulo' },
+    // Rail module-goal tooltip once every skill is got-it — {n} is the module number.
+    'nav.moduleComplete': { en: 'Module {n} complete!', es: '¡Módulo {n} completo!' },
     'nav.moduleProgAria': { en: 'Module skills progress', es: 'Progreso de destrezas del módulo' },
+    // aria-valuetext on the rail module progress bar — {done}/{total} skills got-it.
+    'nav.moduleProgValue':{ en: '{done} of {total} skills', es: '{done} de {total} destrezas' },
     'nav.setsGroupAria':  { en: 'Sets in this module', es: 'Unidades de este módulo' },
     'nav.gamesScreenAria':{ en: 'Guitar games', es: 'Juegos de guitarra' },
 
@@ -227,7 +231,6 @@
     'gate.practice':           { en: 'Practice it now', es: 'Practicarlo ahora' },
     'gate.markAnyway':         { en: 'Mark it anyway', es: 'Marcarlo de todos modos' },
     'gate.closeAria':          { en: 'Close', es: 'Cerrar' },
-    'gate.overrideNote':       { en: 'Marked without a Coach check — your teacher can see this.', es: 'Marcado sin revisión del Coach — tu maestro puede verlo.' },
 
     // ── Shuffle-deck check-off gate (soft: student can always override) ──
     'dgate.title':             { en: 'Prove it with the deck', es: 'Demuéstralo con el mazo' },
@@ -272,7 +275,6 @@
     'fm.focusView':            { en: 'One at a time', es: 'De uno en uno' },
 
     // ── Tools: Metronome / Timer / Tuner ──
-    'tools.launcher':      { en: 'Tools', es: 'Herramientas' },
     'tools.metronome':     { en: 'Metronome', es: 'Metrónomo' },
     'tools.closeMetroAria':{ en: 'Close metronome', es: 'Cerrar el metrónomo' },
     'tools.closeTimerAria':{ en: 'Close timer', es: 'Cerrar el temporizador' },
@@ -328,6 +330,11 @@
     'save.failed':           { en: 'Save failed — check connection', es: 'No se pudo guardar — revisa tu conexión' },
     'save.notSaving':        { en: 'Not saving — check connection', es: 'No se está guardando — revisa tu conexión' },
 
+    // ── Offline banner (app.js, near the top) ──
+    'offline.body':          { en: "You're offline — practice pages still work; videos and saving resume when you reconnect.",
+                                es: 'Estás sin conexión — las páginas de práctica siguen funcionando; los videos y el guardado se reanudan al reconectarte.' },
+    'offline.dismiss':       { en: 'Dismiss', es: 'Cerrar' },
+
     // ── Chord/string/note link hover popups (onChordLinkHover etc.) ──
     'popup.chordDiagram':    { en: 'Guitar chord diagram', es: 'Diagrama de acorde de guitarra' },
     'popup.openString':      { en: 'Open string', es: 'Cuerda al aire' },
@@ -346,6 +353,8 @@
     'panel.playChord':       { en: 'Play chord', es: 'Tocar el acorde' },
     'panel.strumChord':      { en: 'Strum this chord', es: 'Rasguea este acorde' },
     'panel.noDiagram':       { en: 'No diagram available for "{name}".', es: 'No hay diagrama disponible para "{name}".' },
+    // Same fallback, note-lookup path (rpShowPanel's type==='note' branch) — kept as its own key since the param is {note}, not {name}.
+    'rp.noDiagram':          { en: 'No diagram for {note}', es: 'No hay diagrama para {note}' },
     'a11y.skipToContent':    { en: 'Skip to content', es: 'Saltar al contenido' },
 
     // ── Site search ("Find it" panel — toggleSearch/runSearch in app.js) ──
@@ -385,9 +394,7 @@
     'step.correct':          { en: 'Correct!', es: '¡Correcto!' },
     'step.notQuite':         { en: 'Not quite — try again.', es: 'Casi — inténtalo de nuevo.' },
 
-    // ── Assessment block (goal / self-check / standards labels) ──
-    'assess.goal':           { en: 'Assessment goal', es: 'Objetivo de la evaluación' },
-    'assess.selfCheck':      { en: 'Self-check', es: 'Autoevaluación' },
+    // ── Assessment block (standards label) ──
     'assess.standards':      { en: 'NAfME standards', es: 'Estándares NAfME' },
 
     // ── Songs list (per-set and per-module "🎵 Songs") ──
@@ -411,7 +418,21 @@
     'songs.opensYoutube':    { en: 'Opens in YouTube', es: 'Se abre en YouTube' },
     'songs.jamTrackTitle':   { en: 'Jam track — backing music to play along with; make up your own melody (solo) over it',
                                 es: 'Pista de acompañamiento — música de fondo para tocar junto con ella; improvisa tu propia melodía (solo) encima.' },
+    // Song Journey pages' own playalong button — different copy from
+    // songs.jamTrackTitle above (this one names the layer, not a solo), so it
+    // needs its own key rather than a reuse.
+    'journey.jamTrackTitle': { en: "Jam track — backing music to play along with; play the layer you're working on over it",
+                                es: 'Pista de acompañamiento — música de fondo para tocar junto con ella; toca la capa en la que estás trabajando encima.' },
     'songs.oneSongLayers':   { en: 'One song, five layers', es: 'Una canción, cinco capas' },
+    // Song-thread echo — a fresh "I've got it!" in a badged set names the song
+    // that just grew. Bonus layers get their own key rather than splicing an
+    // untranslated "Bonus " word into the middle of the Spanish sentence.
+    'songs.echoLayer':       { en: '\u{1F3B8} You just built more of {name} — that’s Layer {layer} work.',
+                                es: '\u{1F3B8} Acabas de construir más de {name} — eso es trabajo de la Capa {layer}.' },
+    'songs.echoLayerBonus':  { en: '\u{1F3B8} You just built more of {name} — that’s Bonus Layer {layer} work.',
+                                es: '\u{1F3B8} Acabas de construir más de {name} — eso es trabajo de la Capa {layer} de bono.' },
+    'songs.echoPlain':       { en: '\u{1F3B8} You can now play more of {name}.',
+                                es: '\u{1F3B8} Ya puedes tocar más de {name}.' },
 
     // ── Module review (self-assessment panel) ──
     'review.tag':            { en: 'Module {n} self-assessment', es: 'Autoevaluación del módulo {n}' },
@@ -687,13 +708,9 @@
     'hub.groupCount':        { en: '{n} songs', es: '{n} canciones' },
 
     // ── 🔁 Keep practicing panel ──
-    'kp.closeAria':          { en: 'Close keep practicing', es: 'Cerrar seguir practicando' },
     'kp.loading':            { en: 'Loading…', es: 'Cargando…' },
     'kp.emptyHtml':          { en: 'Nothing marked &ldquo;still working on it&rdquo; right now — mark a skill that way on any checklist and it\'ll show up here.',
                                es: 'No hay nada marcado como &ldquo;todavía lo estoy practicando&rdquo; — marca así una destreza en cualquier lista y aparecerá aquí.' },
-
-    // ── 📊 My progress panel ──
-    'mp.closeAria':          { en: 'Close my progress', es: 'Cerrar mi progreso' },
 
     // ── ⚡ Daily 5 modal ──
     'daily5.title':          { en: 'Daily 5 — today’s warm-up', es: 'Daily 5 — el calentamiento de hoy' },
@@ -722,6 +739,10 @@
     //    student-facing string; render-time t() calls, hand-written ES) ──
     'coach.btnTitle': { en: 'Play it into the mic and get feedback',
       es: 'Tócalo al micrófono y recibe retroalimentación' },
+    // Chord-strum flavor of the Coach button (coachChordBtnRowHtml) — different
+    // copy from coach.btnTitle above, so it needs its own key, not a reuse.
+    'coach.chordBtnTitle': { en: '4 count-in clicks, then strum on every beat — the mic listens and gives feedback',
+      es: '4 clics de cuenta, luego rasguea en cada tiempo — el micrófono escucha y da retroalimentación' },
     'coach.btn': { en: 'Listening Coach — click here to get feedback',
       es: 'Entrenador de Escucha — haz clic aquí para recibir comentarios' },
     'coach.close': { en: 'Close',
@@ -854,8 +875,6 @@
       es: 'Excelente' },
     'coach.level.needsWork': { en: 'Needs work',
       es: 'Necesita trabajo' },
-    'coach.listening.live': { en: 'Listening — play now!',
-      es: 'Escuchando — ¡toca ahora!' },
     'coach.mic.denied': { en: 'Mic access denied — check browser permissions, then try again.',
       es: 'Acceso al micrófono denegado — revisa los permisos del navegador y vuelve a intentarlo.' },
     'coach.micOn': { en: 'mic on',
@@ -1794,8 +1813,6 @@
                                es: 'Gracias — ¡recibido! El Sr. Hoffman lo va a revisar.' },
     'issue.failed':          { en: "Couldn't send that — check your connection and try again, or email jhoffman@seq.org directly.",
                                es: 'No se pudo enviar — revisa tu conexión e intenta de nuevo, o escribe directamente a jhoffman@seq.org.' },
-    'issue.bypassNote':      { en: "Reports don't save in dev/testing mode.",
-                               es: 'Los reportes no se guardan en modo de prueba.' },
     'issue.emptyWarn':       { en: 'Type a quick description first.', es: 'Escribe una breve descripción primero.' },
 
     // ── Module-review recording widget (renderRecBody) ──

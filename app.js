@@ -58,9 +58,9 @@ if('scrollRestoration' in history) history.scrollRestoration = 'manual';
         + 'background:#514a7d;color:#fff;font:14px/1.45 system-ui,-apple-system,sans-serif;'
         + 'box-shadow:0 6px 24px rgba(0,0,0,.28)';
       const msg = document.createElement('span');
-      msg.textContent = "You're offline — practice pages still work; videos and saving resume when you reconnect.";
+      msg.textContent = t('offline.body');
       const close = document.createElement('button');
-      close.setAttribute('aria-label','Dismiss');
+      close.setAttribute('aria-label', t('offline.dismiss'));
       close.textContent = '×';
       close.style.cssText = 'position:absolute;top:8px;right:12px;background:none;border:0;'
         + 'color:#fff;font-size:1.25rem;line-height:1;cursor:pointer';
@@ -318,6 +318,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     }
   } else {
     currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; hiddenActivityIds = {}; progressLoadFailed = false;
+    if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     practiceLog = loadLocalPracticeLog();   // per-skill rep history: back to the local copy on sign-out
     _moduleStripStates = {};   // next user's first strip render is a first paint, not a celebration
     document.getElementById('auth-wall').style.display='block';
@@ -1318,8 +1319,8 @@ function renderProgressStrip(){
     const earned = !!(currentInfo && currentInfo.state === 'complete');
     goalEl.classList.toggle('earned', earned);
     goalEl.title = earned
-      ? `Module ${currentInfo.num} complete!`
-      : 'Finish all skills to complete this module';
+      ? t('nav.moduleComplete', { n: currentInfo.num })
+      : t('nav.moduleGoalTitle');
   }
   // Rail module progress bar — same "clean until started" rule as the pills:
   // hidden until the first skill in the module is marked got-it.
@@ -1334,7 +1335,7 @@ function renderProgressStrip(){
       if(lbl)  lbl.textContent = `${currentInfo.done}/${currentInfo.total}`;
       prog.setAttribute('aria-valuemax', String(currentInfo.total));
       prog.setAttribute('aria-valuenow', String(currentInfo.done));
-      prog.setAttribute('aria-valuetext', `${currentInfo.done} of ${currentInfo.total} skills`);
+      prog.setAttribute('aria-valuetext', t('nav.moduleProgValue', { done: currentInfo.done, total: currentInfo.total }));
     }
   }
 }
@@ -1634,6 +1635,7 @@ function renderPills(moduleNum){
     } else {
       btn.onclick=()=>{ leaveTopPanelForSet(); lastSetId=w.id; activateSet(w.id); saveProgress(); };
     }
+    btn.classList.toggle('active', btn.dataset.id===lastSetId);
     c.appendChild(btn);
   });
 
@@ -1648,6 +1650,7 @@ function renderPills(moduleNum){
     rbtn.setAttribute('translate','no'); rbtn.classList.add('notranslate');
     rbtn.title = locked ? t('gate.reviewPreviewTitle') : '';
     rbtn.onclick=()=>{ leaveTopPanelForSet(); lastSetId=`mr${moduleNum}`; activateSet(`mr${moduleNum}`); saveProgress(); };
+    rbtn.classList.toggle('active', rbtn.dataset.id===lastSetId);
     c.appendChild(rbtn);
     // Sync preview/locked state onto the review's panel so its inputs disable themselves
     const panel = document.querySelector(`.week-panel[data-id="mr${moduleNum}"]`);
@@ -1838,8 +1841,13 @@ function exitExploreHash(){
    panel-only close fns, which don't touch the hash — the hash is already
    whatever we're routing to), then opens the target. */
 let lastRoutedHash = null;
+const EXPLORE_HASHES = ['', '#games', '#songs', '#keep-practicing', '#my-progress', '#class-activities', '#search'];
 function routeExploreHash(){
   const h = location.hash;
+  // A hash this router doesn't own (e.g. #main-content from the skip link)
+  // must fall through untouched — otherwise it would close every explore
+  // panel + search out from under whatever the student was reading.
+  if(!EXPLORE_HASHES.includes(h)) return;
   /* A back/forward across a hash-only entry fires popstate *and* hashchange
      in most browsers, and goExploreHash routes by hand on top of that.
      Routing is idempotent, but the scroll stash below is not — so bail on a
@@ -1989,6 +1997,11 @@ function switchTab(el,wid,tab){
   // (e.g. Station B) might be hiding a still-running inline Coach check —
   // close it so its mic doesn't keep running unseen. No-op if none is open.
   if (typeof coachClose === 'function') coachClose();
+  // A running Shuffle Drill on the tab we're leaving keeps its interval alive
+  // under display:none otherwise — same reasoning as activateSet()'s sweep.
+  if(typeof shuffleDrills === 'object' && typeof sdStop === 'function'){
+    Object.keys(shuffleDrills).forEach(k=>sdStop(k));
+  }
   const panel=document.querySelector(`.week-panel[data-id="${wid}"]`);
   panel.querySelectorAll('.tabs > .tabs-main .tabs-card, .tabs > .tabs-songbar > .tabs-songs').forEach(t=>t.classList.remove('active'));
   panel.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
@@ -2115,7 +2128,7 @@ function buildStations(w, stationId){
     const folds = [];
     if(s.hint){
       const hint = tf(s,'hint');
-      const bullets = hint.split(/(?<=\.(?=\s))(?=\s*[A-Z])|\n/).map(b=>b.trim()).filter(Boolean);
+      const bullets = hint.split(/(?<=\.(?=\s))(?=\s*[A-ZÁÉÍÓÚÜÑ¿¡])|\n/).map(b=>b.trim()).filter(Boolean);
       const inner = bullets.length <= 1 ? `<div class="sh">${hint}</div>`
         : `<ul class="sh-list">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
       folds.push({key:'hint', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.7.6 1 1.4 1 2.5h6c0-1.1.3-1.9 1-2.5A6 6 0 0 0 12 3z"/></svg>', label:t('step.hint'), body:inner});
@@ -2194,7 +2207,7 @@ function buildStations(w, stationId){
         // Reflection / observation MCs stay unkeyed — record the pick only.
         const opts = r.choices.map((c,ci)=>{
           const checked = stored===c ? 'checked' : '';
-          return `<label class="step-resp-mc-opt"><input type="radio" name="resp-${key}" ${checked} onchange="onResponseChange('${key}', '${escAttr(c)}')"><span>${escHtml(choicesEs[ci])}</span></label>`;
+          return `<label class="step-resp-mc-opt"><input type="radio" name="resp-${key}" ${checked} data-choice="${escAttr(c)}" onchange="onResponseChange('${key}', this.dataset.choice)"><span>${escHtml(choicesEs[ci])}</span></label>`;
         }).join('');
         return `<div class="step-resp">${labelHtml}${promptHtml}<div class="step-resp-mc">${opts}</div></div>`;
       }
@@ -2350,7 +2363,7 @@ function toggleStepDone(btn, key){
   if(status) status.textContent = nowDone ? '✓' : (li.dataset.num || status.textContent);
   const head = li.querySelector('.step-head');
   const labelEl = li.querySelector('.step-label');
-  if(head) head.setAttribute('aria-label', `Step ${li.dataset.num}${nowDone ? ', done' : ''} — ${labelEl ? labelEl.textContent : ''}`);
+  if(head) head.setAttribute('aria-label', t(nowDone ? 'step.ariaLabelDone' : 'step.ariaLabel', { n: li.dataset.num, label: labelEl ? labelEl.textContent : '' }));
   // Un-marking done just updates the icon above — no forced expand/collapse.
   if(nowDone) collapseAndAdvance(li);
   onCompleteChange(key, nowDone);
@@ -2711,7 +2724,9 @@ function buildDaily5(){
   items+=li(1,t('routine.tuneUp'),t('daily5.tuneUpBody'));
   items+=li(2,t('daily5.warmUp'),`&mdash; ${escHtml(tf(wu,'text'))}<br>${routinePlaySeq(wu,'bpm:daily5:wu')}`);
   if(pick) items+=li(2,t('daily5.todaysDrill'),`&mdash; ${t('daily5.fromModule',{num, set: tSetLabel(pick.set.label)})} ${escHtml(truncateText(stripTags(tf(pick.step,'text')),160))}<br>${routinePlaySeq(pick.step.playSeq,'bpm:daily5:drill')}`);
-  const streakChip = streak.count > 1
+  const y=new Date(); y.setDate(y.getDate()-1);
+  const streakAlive = streak.lastDay===dayStr(new Date()) || streak.lastDay===dayStr(y);
+  const streakChip = (streak.count > 1 && streakAlive)
     ? `<span class="games-card-best">&#x1F525; ${t('daily5.streak',{n:streak.count})}</span>` : '';
   return `<div class="daily5-head"><div style="display:flex;align-items:center;gap:8px"><h3 style="font:inherit;margin:0">${ICO_BOLT} ${t('daily5.title')}</h3>${streakChip}</div><button type="button" class="tp-close" onclick="closeDaily5()" aria-label="${escAttr(t('daily5.closeAria'))}">&#x2715;</button></div>
     <ol class="routine-list">${items}</ol>`;
@@ -4154,13 +4169,21 @@ const EAR_POOLS = {
 };
 const earDrills = {};
 function erBox(key){ return document.getElementById('err-' + key); }
+function erStop(key){
+  const st = earDrills[key];
+  if(st && st.timeouts) st.timeouts.forEach(clearTimeout);
+}
+function erStopAll(){
+  Object.keys(earDrills).forEach(erStop);
+}
 function renderEarDrill(drill, key, wid){
   const pool = EAR_POOLS[drill.pool];
   if(!pool) return '';
+  erStop(key);   // a re-render (new set, language toggle) must not leave the old card's notes playing
   // skill: optional, same job as the Shuffle/Deck drills' cfg.skill — a
   // clean reveal (every note named right) offers the check-off inline
   // instead of sending the student to the checklist tab to do it from memory.
-  earDrills[key] = { phase:'setup', cfg:{ pool, poolId: drill.pool, draw: drill.draw || 5, skill: drill.skill || null, wid } };
+  earDrills[key] = { phase:'setup', cfg:{ pool, poolId: drill.pool, draw: drill.draw || 5, skill: drill.skill || null, wid }, timeouts: [] };
   return `<div class="sdr err" id="err-${escAttr(key)}">${erSetupHtml(key)}</div>`;
 }
 function erHead(key, right){
@@ -4187,7 +4210,9 @@ function erStart(key){
 function erPlay(key){
   const st = earDrills[key]; if(!st) return;
   if(typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
-  st.seq.forEach((n, i) => setTimeout(() => playNote(st.cfg.pool.midis[n]), i * 1100));
+  (st.timeouts || []).forEach(clearTimeout);
+  st.timeouts = [];
+  st.seq.forEach((n, i) => st.timeouts.push(setTimeout(() => playNote(st.cfg.pool.midis[n]), i * 1100)));
 }
 function erRunHtml(key){
   const st = earDrills[key], pool = st.cfg.pool;
@@ -4594,10 +4619,10 @@ function toggleSkill(sid, wid, which){
     if(progress[sid]==='gotit' && w.songThread && w.songThread.length){
       const echoEl = document.getElementById('se-'+wid);
       if(echoEl){
-        const t = w.songThread[(done - 1) % w.songThread.length];
-        echoEl.textContent = t.layer
-          ? `\u{1F3B8} You just built more of ${t.name} — that\u2019s ${t.bonus ? 'Bonus ' : ''}Layer ${t.layer} work.`
-          : `\u{1F3B8} You can now play more of ${t.name}.`;
+        const thread = w.songThread[(done - 1) % w.songThread.length];
+        echoEl.textContent = thread.layer
+          ? t(thread.bonus ? 'songs.echoLayerBonus' : 'songs.echoLayer', { name: thread.name, layer: thread.layer })
+          : t('songs.echoPlain', { name: thread.name });
         echoEl.classList.add('show');
         clearTimeout(echoEl._echoT);
         echoEl._echoT = setTimeout(()=>{ echoEl.classList.remove('show'); }, 5000);
@@ -4921,6 +4946,7 @@ function stopAllDemoAudio(){
   stopPlaySeq();
   chordStrumTimeouts.forEach(clearTimeout);
   chordStrumTimeouts = [];
+  erStopAll();
   killRingingPlucks();   // the timeouts above only stop notes that haven't sounded yet
   // clearing the strum timeouts also cancels their '.playing' cleanup — sweep it
   document.querySelectorAll('.playing').forEach(el => el.classList.remove('playing'));
@@ -5045,15 +5071,7 @@ function coachChordBtnRowHtml(chords, skillIds){
     m: chordSpecMidis(c.chord)
   })).filter(c=>c.m.length);
   if(!spec.length) return '';
-  return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}"${coachSkillsAttr(skillIds)} onclick="coachOpen(this)" title="4 count-in clicks, then strum on every beat — the mic listens and gives feedback"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="coach.btn">${t('coach.btn')}</span></button></div>`;
-}
-/* One-shot animation helper: restart a CSS animation class even if it's
-   already applied (remove → force reflow → add), then clear it after ms. */
-function flashClass(el, cls, ms){
-  if(!el) return;
-  el.classList.remove(cls); void el.offsetWidth;
-  el.classList.add(cls);
-  setTimeout(()=>el.classList.remove(cls), ms);
+  return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}"${coachSkillsAttr(skillIds)} onclick="coachOpen(this)" title="${escAttr(t('coach.chordBtnTitle'))}" data-i18n-attr="title:coach.chordBtnTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="coach.btn">${t('coach.btn')}</span></button></div>`;
 }
 // Escape closes the video/games overlays (a11y). Tool-popup closing
 // (metronome/timer/tuner) is handled by fab-tools.js's own Escape listener.
@@ -5083,10 +5101,20 @@ function setRailOpen(open){
   document.body.classList.toggle('rail-open', open);
   const btn = document.getElementById('rail-toggle-btn');
   if(btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  // The closed drawer is only transform-hidden — its ~13 controls stay
+  // tabbable and in the a11y tree at narrow widths without this.
+  const railEl = document.getElementById('nav-rail');
+  if(railEl && isNarrowLayout()) railEl.inert = !open;
 }
 function toggleRail(){ setRailOpen(!document.body.classList.contains('rail-open')); }
 function closeRail(){ setRailOpen(false); }
-window.addEventListener('resize', () => { if(!isNarrowLayout()) closeRail(); });
+window.addEventListener('resize', () => {
+  if(!isNarrowLayout()){
+    closeRail();
+    const railEl = document.getElementById('nav-rail');
+    if(railEl) railEl.inert = false;
+  }
+});
 // Picking a station or an Explore item shows the main content — close the
 // drawer so students actually see it instead of the nav still covering it.
 document.getElementById('nav-rail')?.addEventListener('click', e => {
@@ -5201,7 +5229,7 @@ function loadPanel(type,url,title,subtitle){
       wrap.innerHTML = `<div class="rp-chord-svg">${svg}</div>`;
       newtab.classList.remove('visible');
     } else {
-      wrap.innerHTML = `<div class="rp-chord-err">No diagram for ${escHtml(note||'')}</div>`;
+      wrap.innerHTML = `<div class="rp-chord-err" data-i18n="rp.noDiagram" data-i18n-params="${escAttr(JSON.stringify({note:note||''}))}">${escHtml(t('rp.noDiagram',{note:note||''}))}</div>`;
       newtab.classList.remove('visible');
     }
   }
@@ -5464,6 +5492,7 @@ function leaveTopPanelForSet(){
   const covering = ['games-screen', 'search-panel', 'songs-screen', 'keep-practicing-screen', 'my-progress-screen', 'class-activities-screen']
     .some(id => { const el = document.getElementById(id); return el && !el.hasAttribute('hidden'); });
   if(!covering) return;
+  practiceScrollTop = 0;   // the async popstate below would otherwise restore the OLD set's scroll offset after activateSet scrolls to top
   closeTopPanels('');
   scrollPaneTop(true);
 }

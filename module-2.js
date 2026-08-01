@@ -608,8 +608,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 1 — Frets 1–5 on Low E & A Strings', label_es: 'Reto 1 — Trastes 1–5 en cuerdas Mi grave y La',
-            text: '<ol><li>Play frets 1–5 on the low E string, one finger per fret, then do the same on the A string.</li><li>Keep your thumb behind the neck.</li></ol>You\'ve got it when: every note rings clean with no buzz.<span class="step-figure dual"><img src="img/m2-thumb-hand-position.jpg" alt="Hand-drawn diagram of a fretting hand: thumb positioned directly behind the index finger on the back of the neck, fingers arched over the frets, wrist straight."><img src="img/m2-arched-fingers-front.jpg" alt="Close-up front view of four fingers arched over the fretboard, each fingertip pressing down just behind a fret."></span>',
-            text_es: '<ol><li>Toca los trastes 1–5 en la cuerda Mi grave, un dedo por traste, y luego lo mismo en la cuerda La.</li><li>Mantén el pulgar detrás del mástil.</li></ol>Lo tienes cuando: cada nota suena limpia sin zumbido.<span class="step-figure dual"><img src="img/m2-thumb-hand-position.jpg" alt="Dibujo de una mano trasteando: el pulgar colocado justo detrás del dedo índice en la parte trasera del mástil, los dedos arqueados sobre los trastes, la muñeca recta."><img src="img/m2-arched-fingers-front.jpg" alt="Vista frontal de cerca de cuatro dedos arqueados sobre el diapasón, cada yema presionando justo detrás de un traste."></span>',
+            text: '<ol><li>Play frets 1–5 on the low E string, one finger per fret, then do the same on the A string.</li><li>Keep your thumb behind the neck.</li></ol>You\'ve got it when: every note rings clean with no buzz.<span class="step-figure dual"><img src="img/m2-thumb-hand-position.jpg" alt="Hand-drawn diagram of a fretting hand: thumb positioned roughly behind the middle finger on the back of the neck, fingers arched over the frets, wrist straight."><img src="img/m2-arched-fingers-front.jpg" alt="Close-up front view of four fingers arched over the fretboard, each fingertip pressing down just behind a fret."></span>',
+            text_es: '<ol><li>Toca los trastes 1–5 en la cuerda Mi grave, un dedo por traste, y luego lo mismo en la cuerda La.</li><li>Mantén el pulgar detrás del mástil.</li></ol>Lo tienes cuando: cada nota suena limpia sin zumbido.<span class="step-figure dual"><img src="img/m2-thumb-hand-position.jpg" alt="Dibujo de una mano trasteando: el pulgar colocado más o menos detrás del dedo medio en la parte trasera del mástil, los dedos arqueados sobre los trastes, la muñeca recta."><img src="img/m2-arched-fingers-front.jpg" alt="Vista frontal de cerca de cuatro dedos arqueados sobre el diapasón, cada yema presionando justo detrás de un traste."></span>',
             hint: 'Go as slow as you need. Every note should ring cleanly with no buzz.',
             hint_es: 'Ve tan despacio como necesites. Cada nota debe sonar limpia sin zumbido.',
             stuck: 'Use just frets 1–3 with three fingers first, then add the pinky on frets 4–5.',
@@ -1093,12 +1093,12 @@ MODULE_REVIEWS[2] = {
   ],
   assessItems: [
     'Name the notes on the E and A strings from memory through fret 12',
-    'Play "All Along the Watchtower" bass-note line using only the E string — or the single-note root line from "the cure" — from memory, to the metronome at 60 BPM without stopping, with clean tone and correct fingering (one finger per fret, thumb behind the neck)',
+    'Play "All Along the Watchtower" bass-note line using only the E string — or the single-note root line from "the cure" — from memory, to the metronome at 60 BPM without stopping, with clean tone and correct fingering (fingertips just behind the fret, thumb behind the neck)',
     'Sight-read a short 2-bar bass line from TAB and play it'
   ],
   assessItems_es: [
     'Nombrar las notas en las cuerdas Mi y La de memoria hasta el traste 12',
-    'Tocar la línea de bajo de "All Along the Watchtower" usando solo la cuerda Mi grave — o la línea alterna de raíces de una sola nota de "the cure" — de memoria, con el metrónomo a 60 BPM sin detenerse, con tono limpio y digitación correcta (un dedo por traste, pulgar detrás del mástil)',
+    'Tocar la línea de bajo de "All Along the Watchtower" usando solo la cuerda Mi grave — o la línea alterna de raíces de una sola nota de "the cure" — de memoria, con el metrónomo a 60 BPM sin detenerse, con tono limpio y digitación correcta (las yemas justo detrás del traste, pulgar detrás del mástil)',
     'Leer a primera vista una línea corta de bajo de 2 compases desde el TAB y tocarla'
   ],
   forward: 'The E &amp; A notes you just learned become the <strong>roots of every power chord in Module 3</strong> — when you play an A5 or G5, you\'re landing on the exact frets you just memorized. Knowing the fretboard is what lets you move chords around freely.',

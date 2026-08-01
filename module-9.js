@@ -602,8 +602,8 @@ SETS.push(
                 response: { type: 'mc', prompt: 'The octave shape coming FROM the D or G string onto the B or e string moves:',
                   prompt_es: 'La forma de octava que va DESDE la cuerda Re o Sol hacia la cuerda Si o mi aguda se mueve:',
                   answer: 1,
-                  explain: 'The B string is tuned a step "early," so every shape crossing onto B (or e) stretches one extra fret — the B-string bump.',
-                  explain_es: 'La cuerda Si está afinada un paso "antes," así que toda forma que cruce hacia la Si (o la mi aguda) se estira un traste extra — el desfase de la cuerda Si.',
+                  explain: 'The B string is tuned a half-step "early," so every shape crossing onto B (or e) stretches one extra fret — the B-string bump.',
+                  explain_es: 'La cuerda Si está afinada un semitono "antes," así que toda forma que cruce hacia la Si (o la mi aguda) se estira un traste extra — el desfase de la cuerda Si.',
                   choices: ['Two strings down, two frets up', 'Two strings down, three frets up', 'Two strings down, same fret', 'One string down, three frets up'],
                   choices_es: ['Dos cuerdas hacia abajo, dos trastes hacia arriba', 'Dos cuerdas hacia abajo, tres trastes hacia arriba', 'Dos cuerdas hacia abajo, el mismo traste', 'Una cuerda hacia abajo, tres trastes hacia arriba'] }
               }
@@ -1047,14 +1047,14 @@ SETS.push(
                 text_es: '<ol><li>Trastea y toca G/B.</li><li>Compáralo con un G abierto estándar.</li><li>Fíjate qué cambia y qué se mantiene igual.</li></ol>',
                 hint: 'The chord shape barely changes — it\'s the LOWEST note you strum that makes it a slash chord.',
                 hint_es: 'La forma del acorde casi no cambia — es la nota MÁS GRAVE que rasgueas lo que lo convierte en un acorde con barra diagonal.',
-                stuck: 'Play the open G first, then just move your lowest-string finger to find the B.',
-                stuck_es: 'Toca el G abierto primero, y luego solo mueve tu dedo de la cuerda más grave para encontrar la B.',
+                stuck: 'Play the open G first, then lift your finger off the low E string and start your strum on the A string — the B (A string, fret 2) is already under your finger.',
+                stuck_es: 'Toca el G abierto primero, luego levanta el dedo de la cuerda Mi grave y empieza tu rasgueo en la cuerda La — la B (cuerda La, traste 2) ya está bajo tu dedo.',
                 levelUp: 'Walk C → G/B → Am as a smooth bass-line move — then listen for the same G/B glide in "the cure", where it pulls the loop from F back home to Am.',
                 levelUp_es: 'Camina C → G/B → Am como un movimiento suave de línea de bajo — luego busca el mismo deslizamiento con G/B en "the cure", donde lleva el ciclo de F de vuelta a la base en Am.',
                 skills: [4],
                 chords: [
                   { name: 'G/B', chord: [[6,'x'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
-                  { name: 'G', chord: [[6,3,'3'],[5,2,'2'],[4,0],[3,0],[2,0],[1,3,'4']], position: 0 }
+                  { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
                 ]
               },
               {

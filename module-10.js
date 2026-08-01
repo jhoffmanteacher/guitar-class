@@ -293,7 +293,7 @@ SETS.push(
           choices: ['G A B C D E F G', 'G A B C D E F# G', 'G A Bb C D E F# G', 'G B D G B D G'],
           choices_es: ['G A B C D E F G', 'G A B C D E F# G', 'G A Bb C D E F# G', 'G B D G B D G'], answer: 1,
           explain: 'Run the W-W-H-W-W-W-H recipe from G and the 7th note lands on F#, not F — forgetting that sharp is the classic slip. (C major is the one key with no sharps or flats.)',
-          explain_es: 'Aplica la receta W-W-H-W-W-W-H desde G y la 7ª nota cae en F#, no en F — olvidar ese sostenido es el desliz clásico. (C mayor es la única tonalidad sin sostenidos ni bemoles.)' } }
+          explain_es: 'Aplica la receta T-T-S-T-T-T-S desde G y la 7ª nota cae en F#, no en F — olvidar ese sostenido es el desliz clásico. (C mayor es la única tonalidad sin sostenidos ni bemoles.)' } }
     ]
   },
 
@@ -359,16 +359,16 @@ SETS.push(
             steps: [
               {
                 label: 'Ear training: relative vs. parallel', label_es: 'Oído: relativa vs. paralela',
-                text: 'Listen for it:<ol><li>Play a C major chord, then an A minor chord, then a C minor chord (Cm = your full Bm barre shape from Module 7, slid up one fret to fret 3).</li><li>C-to-Am shares every note (relative); C-to-Cm shares only the root (parallel).</li><li>Notice how different Am and Cm sound from each other, even though both are "C\'s minor."</li></ol>',
-                text_es: 'Escucha esto:<ol><li>Toca un acorde de C mayor, luego un acorde de A menor, y luego un acorde de C menor (Cm = tu forma completa de cejilla de Bm del Módulo 7, deslizada un traste hacia arriba, al traste 3).</li><li>C a Am comparte cada nota (relativa); C a Cm comparte solo la raíz (paralela).</li><li>Fíjate qué tan diferentes suenan Am y Cm entre sí, aunque ambos sean "el menor de C."</li></ol>',
+                text: 'Listen for it:<ol><li>Play a C major chord, then an A minor chord, then a C minor chord (Cm = your full Bm barre shape from Module 7, slid up one fret to fret 3).</li><li>the **keys** of C major and A minor use the same seven notes — that\'s why the chords sound so closely related; C-to-Cm shares only the root (parallel).</li><li>Notice how different Am and Cm sound from each other, even though both are "C\'s minor."</li></ol>',
+                text_es: 'Escucha esto:<ol><li>Toca un acorde de C mayor, luego un acorde de A menor, y luego un acorde de C menor (Cm = tu forma completa de cejilla de Bm del Módulo 7, deslizada un traste hacia arriba, al traste 3).</li><li>las **tonalidades** de C mayor y A menor usan las mismas siete notas — por eso los acordes suenan tan emparentados; C a Cm comparte solo la raíz (paralela).</li><li>Fíjate qué tan diferentes suenan Am y Cm entre sí, aunque ambos sean "el menor de C."</li></ol>',
                 hint: 'These two ideas get mixed up constantly — the exercise is hearing that "C\'s relative minor" and "C\'s parallel minor" are two completely different chords.',
                 hint_es: 'Estas dos ideas se confunden constantemente — el ejercicio es escuchar que "la relativa menor de C" y "la paralela menor de C" son dos acordes completamente distintos.',
                 skills: [2],
                 response: { type: 'mc', prompt: 'Relative minor vs parallel minor — the difference is:',
                   prompt_es: 'La relativa menor frente a la paralela menor — la diferencia es:',
                   answer: 0,
-                  explain: 'A minor is C major\'s relative (same notes). C minor is C major\'s parallel (same root, different notes).',
-                  explain_es: 'A menor es la relativa de C mayor (mismas notas). C menor es la paralela de C mayor (misma raíz, notas distintas).',
+                  explain: 'The key of A minor uses the exact same seven notes as C major (relative). The key of C minor shares only the root with C major (parallel).',
+                  explain_es: 'La tonalidad de A menor usa las mismas siete notas que C mayor (relativa). La tonalidad de C menor solo comparte la raíz con C mayor (paralela).',
                   choices: ['Relative shares the same NOTES; parallel shares the same ROOT', 'They\'re two names for one thing', 'Parallel shares the notes; relative shares the root', 'Neither involves minor'],
                   choices_es: ['La relativa comparte las mismas NOTAS; la paralela comparte la misma RAÍZ', 'Son dos nombres para la misma cosa', 'La paralela comparte las notas; la relativa comparte la raíz', 'Ninguna de las dos involucra menor'] }
               }
@@ -485,8 +485,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "Smoke on the Water", bluesy', label_es: 'Reto — "Smoke on the Water", con sabor a blues',
-                text: 'The riff (a riff is a short musical phrase that repeats) is in G, so the blues scale has to move there too — same shape, three frets down from where you built it:<ol><li>Play the G blues scale: the same box, starting at fret 3 on the low E string.</li><li>Play it over the feel of the riff. This is where this scale is normally used — the sound it was built for.</li></ol>You\'ve got it when: the scale sounds at home over the riff instead of fighting it.',
-                text_es: 'El riff (un riff es una frase musical corta que se repite) está en G, así que la escala de blues también tiene que mudarse — la misma forma, tres trastes más abajo de donde la armaste:<ol><li>Toca la escala de blues de G: la misma caja, empezando en el traste 3 de la cuerda Mi grave.</li><li>Tócala sobre la sensación del riff. Aquí es donde normalmente se usa esta escala — el sonido para el que fue creada.</li></ol>Lo tienes cuando: la escala suena en casa sobre el riff en vez de pelearse con él.',
+                text: 'The riff (a riff is a short musical phrase that repeats) is in G, so the blues scale has to move there too — same shape, two frets down from where you built it:<ol><li>Play the G blues scale: the same box, starting at fret 3 on the low E string.</li><li>Play it over the feel of the riff. This is where this scale is normally used — the sound it was built for.</li></ol>You\'ve got it when: the scale sounds at home over the riff instead of fighting it.',
+                text_es: 'El riff (un riff es una frase musical corta que se repite) está en G, así que la escala de blues también tiene que mudarse — la misma forma, dos trastes más abajo de donde la armaste:<ol><li>Toca la escala de blues de G: la misma caja, empezando en el traste 3 de la cuerda Mi grave.</li><li>Tócala sobre la sensación del riff. Aquí es donde normalmente se usa esta escala — el sonido para el que fue creada.</li></ol>Lo tienes cuando: la escala suena en casa sobre el riff en vez de pelearse con él.',
                 hint: 'Look at the riff\'s own notes: G, Bb, C, then that Db before it falls back to C. Those are the first four notes of the G blues scale — and the Db IS the b5, the note you just added. The riff is not just in the same world as this scale; it is built out of it.',
                 hint_es: 'Fíjate en las notas del riff: G, Bb, C, y ese Db antes de volver a C. Son las primeras cuatro notas de la escala de blues de G — y el Db ES el b5, la nota que acabas de agregar. El riff no solo vive en el mismo mundo que esta escala; está hecho de ella.',
                 stuck: 'Play the riff itself first to get the feel steady, then freely play the blues scale over the same groove (a groove is the steady rhythmic feel).',

@@ -5,6 +5,41 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-31 — Site review fixes
+
+### Fixed
+
+- **The "Seven Nation Army" real-rhythm riff card now actually loops in 4/4.**
+  The last note was cut a beat and a half short, so looping it against the
+  record drifted out of time — it now holds the record's real length.
+- **String-changing directions for nylon strings were backwards.** The card
+  said to feed the ball end in from the soundhole side; it should be the tail
+  side (the face away from the soundhole) — the old wording would have pulled
+  the ball right back out under tension.
+- **The blues-scale shift for "Smoke on the Water" said three frets instead of
+  two.** Fixed the wording so it matches where the scale box actually sits.
+- **Module 12's C chord diagrams now show the bass note you actually play.**
+  The pictures had the low E string muted, but the Travis-picking pattern this
+  set teaches uses that string as the alternating bass — the diagram and the
+  playing were disagreeing with each other.
+- **Rail tool popups (Tuner / Timer / Metronome) no longer cover each other
+  up.** Opening a second one used to hide whichever was already open with no
+  way to close it — opening one now closes the others first.
+- **Name That Riff no longer stacks overlapping riffs** if you answer fast or
+  replay a clip mid-round.
+- **Change Up now always awards XP at the end of a round**, not just on a
+  round you pass — same as every other arcade game.
+- **Pentatonic Simon Guitar Hero's octave forgiveness was slightly too
+  generous** — it could occasionally accept the wrong pad as correct because
+  two of the pads share the same note name an octave apart. Tightened so that
+  specific mix-up is caught again.
+- **Spanish-mode fixes:** several tool tooltips (rail popups, the chord-strum
+  button, the offline banner, Song Journey pages' jam-track and translate
+  buttons) were still showing English after switching to Español — they're
+  translated now. Spanish hints in a handful of sets weren't splitting into
+  bullet lists the way their English versions did (accented capital letters
+  and ¿¡ weren't recognized as list breaks) — fixed.
+
 ## 2026-07-31 — Site-wide bug sweep
 
 ### Fixed

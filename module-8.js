@@ -180,7 +180,7 @@ SETS.push(
           {
             label: 'Challenge 2 — p-i-m-a Plucks (your assessment piece)', label_es: 'Reto 2 — Pulsaciones p-i-m-a (tu pieza de evaluación)',
             text: '<ul><li>Pluck once with each finger in order — p (low E), i (G), m (B), a (high e) — saying each letter aloud, 8 times at 60 BPM.</li></ul>You\'ve got it when: the same volume from every finger, even the weaker ring (a). This open-string check is the Set 1 check-off.',
-            text_es: '<ul><li>Pulsa una vez con cada dedo en orden — p (Mi grave), i (G), m (B), a (mi aguda) — diciendo cada letra en voz alta, 8 veces a 60 BPM.</li></ul>Lo tienes cuando: el mismo volumen en cada dedo, incluso en el anular (a), que es más débil. Esta revisión con cuerdas al aire es el chequeo de la Unidad 1.',
+            text_es: '<ul><li>Pulsa una vez con cada dedo en orden — p (Mi grave), i (Sol), m (Si), a (mi aguda) — diciendo cada letra en voz alta, 8 veces a 60 BPM.</li></ul>Lo tienes cuando: el mismo volumen en cada dedo, incluso en el anular (a), que es más débil. Esta revisión con cuerdas al aire es el chequeo de la Unidad 1.',
             hint: 'No strumming, no pick. Each finger gets ONE string. Aim for the same volume from each finger — the ring finger (a) is usually the weakest at first. Set the ⏱ Timer for 2 minutes and loop it.',
             hint_es: 'Sin rasgueo, sin púa. Cada dedo tiene UNA cuerda. Apunta al mismo volumen en cada dedo — el dedo anular (a) suele ser el más débil al principio. Pon el ⏱ Temporizador en 2 minutos y repítelo.',
             stuck: 'Pluck just p then i, over and over, until those two are even — then add m, then a.',

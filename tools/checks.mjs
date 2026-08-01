@@ -503,6 +503,313 @@ function validateClassActivities() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   Shared helpers: extract a real JS value out of source text without a
+   full parser, by tracking brace/paren/bracket depth and string/comment
+   state char-by-char. Used by the 1e/1f/1g checks below instead of
+   regexing whole object literals (which breaks on the `{param}` curly
+   braces that live INSIDE i18n string values).
+   ════════════════════════════════════════════════════════════════════ */
+function skipStringOrComment(src, i) {
+  // Called only when src[i] opens a string/comment; returns the index just
+  // past it, or null if `i` isn't the start of one.
+  const c = src[i], d = src[i + 1];
+  if (c === "'" || c === '"' || c === '`') {
+    let j = i + 1;
+    while (j < src.length && src[j] !== c) { if (src[j] === '\\') j++; j++; }
+    return j + 1;
+  }
+  if (c === '/' && d === '/') {
+    let j = i + 2;
+    while (j < src.length && src[j] !== '\n') j++;
+    return j;
+  }
+  if (c === '/' && d === '*') {
+    let j = i + 2;
+    while (j < src.length && !(src[j] === '*' && src[j + 1] === '/')) j++;
+    return j + 2;
+  }
+  return null;
+}
+// Finds `startMarker{...}` and returns the `{...}` text with braces balanced,
+// ignoring braces that appear inside strings/comments.
+function extractBalancedObjectText(src, startMarker) {
+  const markerIdx = src.indexOf(startMarker);
+  if (markerIdx < 0) return null;
+  const start = src.indexOf('{', markerIdx);
+  if (start < 0) return null;
+  let depth = 0;
+  for (let i = start; i < src.length; i++) {
+    const skip = skipStringOrComment(src, i);
+    if (skip !== null) { i = skip - 1; continue; }
+    if (src[i] === '{') depth++;
+    else if (src[i] === '}') { depth--; if (depth === 0) return src.slice(start, i + 1); }
+  }
+  return null;
+}
+// Evaluates a `const NAME = { ... };` object literal in isolation (no
+// dependency on the rest of the file) via vm, so DECKS/EAR_POOLS/etc. get
+// read the same way the browser would build them, not guessed at with regex.
+function loadConstObject(src, constName) {
+  const text = extractBalancedObjectText(src, `const ${constName} = `);
+  if (!text) throw new Error(`could not find "const ${constName} = {...}" in source`);
+  return vm.runInNewContext(`(${text})`, vm.createContext({}));
+}
+// Blanks out comments (line count preserved, so error locations stay
+// accurate), leaving string contents untouched.
+function stripJsComments(src) {
+  let out = '';
+  for (let i = 0; i < src.length; ) {
+    const c = src[i], d = src[i + 1];
+    if (c === "'" || c === '"' || c === '`') {
+      const skip = skipStringOrComment(src, i);
+      out += src.slice(i, skip);
+      i = skip;
+      continue;
+    }
+    if (c === '/' && d === '/') {
+      let j = i;
+      while (j < src.length && src[j] !== '\n') j++;
+      out += ' '.repeat(j - i);
+      i = j;
+      continue;
+    }
+    if (c === '/' && d === '*') {
+      let j = i + 2;
+      while (j < src.length && !(src[j] === '*' && src[j + 1] === '/')) j++;
+      j = Math.min(j + 2, src.length);
+      out += src.slice(i, j).replace(/[^\n]/g, ' ');
+      i = j;
+      continue;
+    }
+    out += c;
+    i++;
+  }
+  return out;
+}
+// Every top-level `function name(...)` / `async function name(...)`
+// declaration in a classic (non-module) script. This codebase writes every
+// top-level declaration flush at column 0 and every nested one indented
+// (verified across all seven classic scripts) — a per-line anchor is both
+// simpler and more reliable here than brace-depth tracking, which a regex
+// literal containing an apostrophe (e.g. `/isn't/`) silently desyncs by
+// misreading the apostrophe as a string opening.
+function topLevelFunctionDecls(src) {
+  const clean = stripJsComments(src);
+  const decls = [];
+  const re = /^(?:async\s+)?function\s+([A-Za-z_$][A-Za-z0-9_$]*)\s*\(/gm;
+  let m;
+  while ((m = re.exec(clean))) decls.push({ name: m[1], index: m.index });
+  return decls;
+}
+// Body text of ONE top-level declaration, given its start index in the
+// ORIGINAL (unstripped) source — only used to byte-compare the one known
+// intentional duplicate, so brace-depth tracking's rare regex-literal
+// blind spot only ever risks that single comparison, never the name scan.
+function functionBodyAt(src, startIndex) {
+  let j = src.indexOf('(', startIndex);
+  let pd = 0;
+  for (; j < src.length; j++) {
+    const s2 = skipStringOrComment(src, j);
+    if (s2 !== null) { j = s2 - 1; continue; }
+    if (src[j] === '(') pd++;
+    else if (src[j] === ')') { pd--; if (pd === 0) { j++; break; } }
+  }
+  while (j < src.length && src[j] !== '{') j++;
+  let bd = 0, k = j;
+  for (; k < src.length; k++) {
+    const s3 = skipStringOrComment(src, k);
+    if (s3 !== null) { k = s3 - 1; continue; }
+    if (src[k] === '{') bd++;
+    else if (src[k] === '}') { bd--; if (bd === 0) { k++; break; } }
+  }
+  return src.slice(startIndex, k);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1e. I18N TABLE PARITY — the hand-written i18n.js table (app SHELL
+   strings — see 1b above for module/lesson content, a separate table).
+   Extracts the real I18N object by vm-executing i18n.js with minimal
+   DOM/localStorage stubs, so this checks the object the browser would
+   actually build, not a regex guess at where the object literal ends.
+   ════════════════════════════════════════════════════════════════════ */
+function loadI18nTable() {
+  const src = readFileSync(join(ROOT, 'i18n.js'), 'utf8');
+  const patched = src.replace('const I18N = {', 'const I18N = globalThis.__I18N_TABLE__ = {');
+  if (patched === src) throw new Error('could not find "const I18N = {" — has i18n.js been restructured?');
+  const doc = { documentElement: {}, querySelectorAll: () => [], addEventListener(){} };
+  const sandbox = {
+    document: doc,
+    localStorage: { getItem(){ return null; }, setItem(){} },
+    CustomEvent: function(){},
+    console,
+  };
+  sandbox.window = sandbox;
+  sandbox.globalThis = sandbox;
+  sandbox.self = sandbox;
+  vm.createContext(sandbox);
+  vm.runInContext(patched, sandbox, { filename: 'i18n.js' });
+  return sandbox.__I18N_TABLE__;
+}
+
+// en uses {ord}, es uses {fret} — a deliberate exception, not a drift bug.
+const I18N_PARAM_EXCEPTIONS = new Set(['diagram.noteFret']);
+
+function checkI18nParity() {
+  head('1e. i18n key parity (en/es + params)');
+  let I18N;
+  try { I18N = loadI18nTable(); }
+  catch (e) { err(`could not load i18n.js's I18N table: ${e.message}`); problems++; return; }
+  const keys = Object.keys(I18N);
+  const paramsOf = s => [...new Set(String(s).match(/\{[a-zA-Z0-9_]+\}/g) || [])].sort().join('|');
+  let bad = 0;
+  for (const k of keys) {
+    const entry = I18N[k];
+    if (!entry || typeof entry !== 'object') { err(`i18n.js: '${k}' is not an {en, es} object`); problems++; bad++; continue; }
+    if (typeof entry.en !== 'string' || !entry.en) { err(`i18n.js: '${k}' is missing "en"`); problems++; bad++; continue; }
+    if (typeof entry.es !== 'string' || !entry.es) { err(`i18n.js: '${k}' is missing "es"`); problems++; bad++; continue; }
+    if (I18N_PARAM_EXCEPTIONS.has(k)) continue;
+    const pe = paramsOf(entry.en), pf = paramsOf(entry.es);
+    if (pe !== pf) { err(`i18n.js: '${k}' param mismatch — en:[${pe}] es:[${pf}]`); problems++; bad++; }
+  }
+  if (bad === 0) ok(`${keys.length} i18n.js keys — every one has en+es and matching {param}s`);
+  return I18N;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1f. I18N KEY REFERENCES — every literal t('...'), data-i18n,
+   data-i18n-attr reference across the shipped shell scripts + HTML must
+   resolve to a real i18n.js key (data-i18n-setlabel is exempt — it goes
+   through tSetLabel() against curriculum data, not the I18N table).
+   Dynamic key families (built as `t('prefix.' + someId)` at runtime, so no
+   literal string for the regex below to find) are enumerated straight from
+   their real sources — DECKS/EAR_POOLS ids in app.js, FRET_STRING_NAMES
+   values in coach.js — instead of guessed at.
+   ════════════════════════════════════════════════════════════════════ */
+const I18N_SCAN_JS_FILES = ['app.js', 'coach.js', 'fab-tools.js', 'tuner.js', 'teacher.js',
+  'guitar-diagrams.js', 'class-activities.js', 'config-main.js', 'i18n.js'];
+
+// (stripJsComments lives in the shared-helpers block above — i18n.js's own
+// top-of-file "how to add a key" doc comment uses example strings like
+// data-i18n="your.key" that would otherwise false-positive as a missing key.)
+function scanI18nRefs(file, KEYS, used, missing) {
+  let src;
+  try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { return; }
+  if (/\.js$/.test(file)) src = stripJsComments(src);
+  const lines = src.split('\n');
+  lines.forEach((ln, i) => {
+    let m;
+    // literal t('key') / t("key") — t(variable) / t('a'+b) calls are dynamic,
+    // deliberately not matched here (nothing after the quote but the quote).
+    const tRe = /(?:^|[^A-Za-z0-9_$.])t\(\s*(['"])([^'"\n]+)\1\s*[,)]/g;
+    while ((m = tRe.exec(ln))) {
+      const k = m[2]; used.add(k);
+      if (!KEYS.has(k)) missing.push({ file, line: i + 1, key: k });
+    }
+    // data-i18n="key" / data-i18n-html="key" (both plain and \"-escaped, for
+    // template-literal HTML built inside a .js file) — -attr/-setlabel skipped.
+    const dRe = /data-i18n(?:-html)?=\\?["']([a-zA-Z0-9_.]+)\\?["']/g;
+    while ((m = dRe.exec(ln))) {
+      const k = m[1]; used.add(k);
+      if (!KEYS.has(k)) missing.push({ file, line: i + 1, key: k });
+    }
+    // data-i18n-attr="attr:key;attr2:key2" (one or more attr:key pairs)
+    const aRe = /data-i18n-attr=\\?["']([^"'\\]+)\\?["']/g;
+    while ((m = aRe.exec(ln))) {
+      m[1].split(';').forEach(pair => {
+        const key = (pair.split(':')[1] || '').trim();
+        if (key) { used.add(key); if (!KEYS.has(key)) missing.push({ file, line: i + 1, key }); }
+      });
+    }
+  });
+}
+
+function checkMissingI18nKeys(I18N) {
+  head('1f. i18n key references resolve');
+  if (!I18N) { warn('skipped — the i18n.js table failed to load (see 1e above)'); warnings++; return; }
+  const KEYS = new Set(Object.keys(I18N));
+
+  let dynamicBad = 0;
+  try {
+    const DECKS = loadConstObject(readFileSync(join(ROOT, 'app.js'), 'utf8'), 'DECKS');
+    for (const id of Object.keys(DECKS)) {
+      const k = 'deck.' + id;
+      if (!KEYS.has(k)) { err(`app.js DECKS['${id}'] has no matching i18n key '${k}'`); problems++; dynamicBad++; }
+    }
+  } catch (e) { warn(`could not enumerate DECKS from app.js: ${e.message}`); warnings++; }
+  try {
+    const EAR_POOLS = loadConstObject(readFileSync(join(ROOT, 'app.js'), 'utf8'), 'EAR_POOLS');
+    for (const id of Object.keys(EAR_POOLS)) {
+      const k = 'ear.' + id;
+      if (!KEYS.has(k)) { err(`app.js EAR_POOLS['${id}'] has no matching i18n key '${k}'`); problems++; dynamicBad++; }
+    }
+  } catch (e) { warn(`could not enumerate EAR_POOLS from app.js: ${e.message}`); warnings++; }
+  try {
+    const FRET_STRING_NAMES = loadConstObject(readFileSync(join(ROOT, 'coach.js'), 'utf8'), 'FRET_STRING_NAMES');
+    for (const suffix of Object.values(FRET_STRING_NAMES)) {
+      const k = 'games.fret.string.' + suffix;
+      if (!KEYS.has(k)) { err(`coach.js FRET_STRING_NAMES has no matching i18n key '${k}'`); problems++; dynamicBad++; }
+    }
+  } catch (e) { warn(`could not enumerate FRET_STRING_NAMES from coach.js: ${e.message}`); warnings++; }
+
+  const used = new Set(), missing = [];
+  const htmlFiles = ['index.html', '404.html', ...TAB_PAGES.filter(f => f.endsWith('.html'))];
+  for (const f of I18N_SCAN_JS_FILES) scanI18nRefs(f, KEYS, used, missing);
+  for (const f of MODULE_FILES) scanI18nRefs(f, KEYS, used, missing);
+  for (const f of htmlFiles) scanI18nRefs(f, KEYS, used, missing);
+
+  for (const m of missing) { err(`${m.file}:${m.line} references i18n key '${m.key}' which does not exist`); problems++; }
+  if (missing.length === 0 && dynamicBad === 0) {
+    ok(`every i18n key reference across ${I18N_SCAN_JS_FILES.length + MODULE_FILES.length + htmlFiles.length} files (+ the dynamic deck/ear/fret-string families) resolves`);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1g. DUPLICATE TOP-LEVEL GLOBALS — a same-named top-level function in two
+   shipped classic scripts silently lets whichever loads LAST win, with no
+   error (see fab-tools.js/app.js's flashClass history). Two mirrors are
+   deliberate and stay allowed as long as the bodies are byte-identical
+   (whitespace aside); any other repeated name, or the two known mirrors
+   drifting apart, is a real bug.
+   ════════════════════════════════════════════════════════════════════ */
+const DUPLICATE_GLOBALS_ALLOWED = new Set(['isTuningWarmupSection']);
+const CLASSIC_SCRIPTS = ['app.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js',
+  'config-main.js', 'guitar-diagrams.js', 'class-activities.js', ...MODULE_FILES];
+
+function checkDuplicateGlobals() {
+  head('1g. Duplicate top-level globals');
+  const byName = new Map();   // name → [{file, src, index}]
+  for (const file of CLASSIC_SCRIPTS) {
+    let src;
+    try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    for (const d of topLevelFunctionDecls(src)) {
+      if (!byName.has(d.name)) byName.set(d.name, []);
+      byName.get(d.name).push({ file, src, index: d.index });
+    }
+  }
+  let bad = 0;
+  // Regression guard for Phase 3.8: flashClass must stay fab-tools.js-only.
+  if ((byName.get('flashClass') || []).some(o => o.file === 'app.js')) {
+    err("flashClass has reappeared in app.js — fab-tools.js is meant to be its only definition (loads on every page app.js does)");
+    problems++; bad++;
+  }
+  for (const [name, occurrences] of byName) {
+    if (occurrences.length < 2) continue;
+    const files = occurrences.map(o => o.file);
+    if (DUPLICATE_GLOBALS_ALLOWED.has(name)) {
+      const bodies = new Set(occurrences.map(o => functionBodyAt(o.src, o.index).replace(/\s+/g, ' ').trim()));
+      if (bodies.size > 1) {
+        err(`'${name}' is mirrored in ${files.join(', ')} but the bodies no longer match — the intentional mirror has drifted`);
+        problems++; bad++;
+      }
+      continue;
+    }
+    err(`'${name}' is defined as a top-level function in more than one shipped script (${files.join(', ')}) — whichever loads LAST silently wins`);
+    problems++; bad++;
+  }
+  if (bad === 0) ok('no unexpected duplicate top-level function names across shipped classic scripts');
+}
+
+/* ════════════════════════════════════════════════════════════════════
    2. LINKS — verify external YouTube / Google-Docs URLs still resolve
    ════════════════════════════════════════════════════════════════════ */
 function collectUrls() {
@@ -915,6 +1222,9 @@ async function liveCheck() {
   renderCheck();
   validateModules();
   validateClassActivities();
+  const i18nTable = checkI18nParity();
+  checkMissingI18nKeys(i18nTable);
+  checkDuplicateGlobals();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

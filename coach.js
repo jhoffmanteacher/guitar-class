@@ -473,7 +473,7 @@ function coachReleaseMicIfIdle(){
   setTimeout(() => {
     const active = (coach && (coach.phase === 'countin' || coach.phase === 'listening')) ||
                    fretRunning || (cc && cc.micOn) || (sr && sr.micOn) || (rn && rn.micOn) ||
-                   (nr && nr.micOn);
+                   (nr && nr.micOn) || psgRunning;
     if (!active) coachMicOff();
   }, 0);
 }
@@ -2308,6 +2308,9 @@ function ccFinish(){
   });
   if (cc.micOn){ coachMicOff(); cc.micOn = false; }
   cc.phase = 'done';
+  const oldBest = (games.cc && games.cc.bestBpm) || 0;
+  cc.isNewBest = cc.bpm > oldBest;
+  awardArcadeXp(cc.isNewBest);
   ccRenderDone();
 }
 
@@ -2341,11 +2344,8 @@ function ccRenderDone(){
     } catch(e){}
     /* Cross-session best → the student's progress doc. Skipped in dev bypass
        (Firestore rejects that uid; the session best above still counts). */
-    if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
-      const old = (games.cc && games.cc.bestBpm) || 0;
-      const isNewBest = cc.bpm > old;
-      if (isNewBest) games.cc = { bestBpm: cc.bpm, progression: cc.chords, at: new Date().toISOString().slice(0, 10) };
-      awardArcadeXp(isNewBest);
+    if (typeof saveGames === 'function' && currentUser && !isDevBypassUser() && cc.isNewBest){
+      games.cc = { bestBpm: cc.bpm, progression: cc.chords, at: new Date().toISOString().slice(0, 10) };
     }
   } else if (r >= 0.5){
     const early = t(cc.bpc >= 4 ? 'games.cc.early.bar' : cc.bpc === 2 ? 'games.cc.early.half' : 'games.cc.early.beat');
@@ -2899,6 +2899,7 @@ function ntrStop(){
   document.removeEventListener('keydown', ntrKeydown);
   if (ntr){
     (ntr.timeouts || []).forEach(clearTimeout);
+    (ntr.noteTimeouts || []).forEach(clearTimeout);
     ntr = null;
   }
 }
@@ -2906,7 +2907,7 @@ function ntrStop(){
 function ntrBody(){ return document.getElementById('ntr-body'); }
 
 function ntrSetup(){
-  ntr = { phase: 'setup', timeouts: [] };
+  ntr = { phase: 'setup', timeouts: [], noteTimeouts: [] };
   ntrRenderSetup();
 }
 
@@ -2974,12 +2975,18 @@ function ntrPickCard(){
 function ntrPlay(){
   if (!ntr || !ntr.cur) return;
   if (typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
-  const song = ntr.cur;
+  (ntr.noteTimeouts || []).forEach(clearTimeout);
+  ntr.noteTimeouts = [];
+  const s = ntr;
+  const song = s.cur;
   const msPerBeat = 60000 / song.bpm;
   song.notes.forEach(nt => {
     const midi = STRING_OPEN_MIDI[nt[0]] + nt[1];
     const at = nt[2] * msPerBeat;
-    ntr.timeouts.push(setTimeout(() => { if (typeof playNote === 'function') playNote(midi); }, at));
+    s.noteTimeouts.push(setTimeout(() => {
+      if (ntr !== s || s.cur !== song) return;
+      if (typeof playNote === 'function') playNote(midi);
+    }, at));
   });
 }
 
@@ -3046,6 +3053,8 @@ function ntrFinish(){
   if (ntrTick){ clearInterval(ntrTick); ntrTick = null; }
   ntr.timeouts.forEach(clearTimeout);
   ntr.timeouts = [];
+  (ntr.noteTimeouts || []).forEach(clearTimeout);
+  ntr.noteTimeouts = [];
   ntr.phase = 'done';
   ntr.prevBest = 0;
   try {
@@ -3274,8 +3283,12 @@ function psRenderDone(){
    The pads are DISPLAY ONLY here (divs, not buttons): they name the note
    and its string+fret so the pattern stays on screen, they light during
    playback, and they go green/red as the mic judges. Two of the six pads
-   are A an octave apart (6th/5 and 4th/7), so judging is exact-midi —
-   an octave slip is a real miss and the done screen says so.
+   are A an octave apart (pad 0 = A2, pad 5 = A3), so judging THOSE two is
+   exact-midi — mixing them up is a real miss. The other four pads also
+   accept the octave above (see psgJudge's octOk) since a Chromebook mic
+   often hears the low strings' 2nd harmonic louder than the fundamental —
+   that tolerance is skipped wherever the octave-up note would collide
+   with another pad's own target, i.e. pad 0.
 
    ⚠️ The reference notes play through the SPEAKERS while the mic is live.
    Nothing is judged while `showing` is true, and when your turn opens the
@@ -3490,8 +3503,11 @@ function psgJudge(midi){
   // Accept the octave above too — a Chromebook mic often hears the low
   // strings' 2nd harmonic louder than the fundamental (same physics as
   // tuner.js's octave guard and coachMatchEvent/nrFinalizeEvent elsewhere in
-  // this file), and PS_NOTES sits entirely in that low A2–A3 register.
-  if (midi !== PS_NOTES[padIdx] && midi !== PS_NOTES[padIdx] + 12){
+  // this file). Skipped when that octave note is itself another pad's target
+  // (true for pad 0 — A2+12 = A3 = pad 5) so a wrong-pad answer can't slip by.
+  const oct = PS_NOTES[padIdx] + 12;
+  const octOk = PS_NOTES.indexOf(oct) < 0 && midi === oct;
+  if (midi !== PS_NOTES[padIdx] && !octOk){
     s.heard = coachNoteName(midi);
     s.missPad = padIdx;
     psgMark(padIdx, 'bad');
@@ -6379,6 +6395,15 @@ function nrStagePos(){
 }
 function nrSetStagePos(p){
   try { sessionStorage.setItem('nrStagePos', String(p)); } catch(e){}
+}
+/* A non-button sign-out (token revoked, remote sign-out) skips app.js's normal
+   reload, so Note Runner's module-level caches would otherwise survive into
+   the next signed-in user's session and leak student A's weak-spot map into
+   student B's Firestore doc. Call this from the auth-null branch — but NEVER
+   reload there, since that branch also fires on every cold signed-out load. */
+function gamesResetForUser(){
+  nrWeakMap = null;
+  try { sessionStorage.removeItem('nrStagePos'); } catch(e){}
 }
 
 function nrBody(){ return document.getElementById('nr-body'); }

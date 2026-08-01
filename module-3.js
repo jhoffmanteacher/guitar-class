@@ -368,8 +368,8 @@ SETS.push(
             steps: [
               {
                 label: 'Ear Spark: E5 vs. E major', label_es: 'Chispa auditiva: E5 vs. E mayor',
-                text: 'Ear Spark (optional, 2 min):<ol><li>First, build a full open E major — it\'s your E5 (open low E + A string, 2nd fret) with two notes added: G string, 1st fret and D string, 2nd fret, letting the open B and high e ring too.</li><li>Run the deck below — it deals you "E5" or "E". Play whichever chord it names, a few reps of each.</li><li>Listen for the difference each time.</li></ol>',
-                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Primero, arma un E mayor al aire completo — es tu E5 (Mi grave al aire + cuerda La, traste 2) con dos notas agregadas: cuerda Sol, traste 1 y cuerda Re, traste 2, dejando sonar también la Si y la mi aguda al aire.</li><li>Corre la baraja de abajo — te reparte "E5" o "E". Toca el acorde que indique, varias repeticiones de cada uno.</li><li>Escucha la diferencia cada vez.</li></ol>',
+                text: 'Ear Spark (optional, 2 min):<ol><li>First, build a full open E major — it\'s your E5 (open low E + A string, 2nd fret) with two notes added: G string, 1st fret and D string, 2nd fret, letting the open B and high e ring too (index on G string fret 1, middle on A string fret 2, ring on D string fret 2) — you\'ll meet chords like this properly in Module 5.</li><li>Run the deck below — it deals you "E5" or "E". Play whichever chord it names, a few reps of each.</li><li>Listen for the difference each time.</li></ol>',
+                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Primero, arma un E mayor al aire completo — es tu E5 (Mi grave al aire + cuerda La, traste 2) con dos notas agregadas: cuerda Sol, traste 1 y cuerda Re, traste 2, dejando sonar también la Si y la mi aguda al aire (índice en la cuerda Sol traste 1, medio en la cuerda La traste 2, anular en la cuerda Re traste 2) — conocerás bien acordes así en el Módulo 5.</li><li>Corre la baraja de abajo — te reparte "E5" o "E". Toca el acorde que indique, varias repeticiones de cada uno.</li><li>Escucha la diferencia cada vez.</li></ol>',
                 hint: 'What you\'re listening for each time: power chords are hollow, with no major/minor color.',
                 hint_es: 'Lo que escuchas cada vez: los acordes de potencia suenan huecos, sin color mayor o menor.',
                 drill: { type: 'deck', deck: 'e5-vs-emajor' }
@@ -562,8 +562,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge — Half-Bar Power Switches (2 chords)', label_es: 'Reto — Cambios de potencia por medio compás (2 acordes)',
-            text: 'Real riffs change faster than once a bar.<ul><li>Keep A5 and D5, but switch every TWO beats — two down-strums on A5, two on D5, and repeat, at 60 BPM.</li></ul>That\'s a change every half-bar, twice as often as the loops so far. You\'ve got it when: four laps where every switch lands right on the beat, no stops. Press &#x25B6; to hear the target.',
-            text_es: 'Los riffs reales cambian más rápido que una vez por compás.<ul><li>Mantén A5 y D5, pero cambia cada DOS tiempos — dos rasgueos hacia abajo en A5, dos en D5, y repite, a 60 BPM.</li></ul>Eso es un cambio cada medio compás, el doble de seguido que las vueltas de antes. Lo tienes cuando: cuatro vueltas donde cada cambio cae justo en el tiempo, sin detenerte. Presiona &#x25B6; para escuchar el objetivo.',
+            text: 'Real riffs change faster than once a bar.<ul><li>Keep A5 and D5, but switch every TWO beats — two down-strums on A5, two on D5, and repeat, at 60 BPM.</li></ul>That\'s a change every half-bar, twice as often as this bar-long loop. You\'ve got it when: four laps where every switch lands right on the beat, no stops. Press &#x25B6; to hear the target.',
+            text_es: 'Los riffs reales cambian más rápido que una vez por compás.<ul><li>Mantén A5 y D5, pero cambia cada DOS tiempos — dos rasgueos hacia abajo en A5, dos en D5, y repite, a 60 BPM.</li></ul>Eso es un cambio cada medio compás, el doble de seguido que esta vuelta de un compás entero. Lo tienes cuando: cuatro vueltas donde cada cambio cae justo en el tiempo, sin detenerte. Presiona &#x25B6; para escuchar el objetivo.',
             hint: 'A5 and D5 are the same shape one string apart — A5 roots on the low E (fret 5), D5 on the A string (fret 5). Shift the whole shape across and keep your two fingers glued together.',
             hint_es: 'A5 y D5 son la misma forma a una cuerda de distancia — A5 tiene su raíz en la Mi grave (traste 5), D5 en la cuerda La (traste 5). Desplaza toda la forma y mantén tus dos dedos pegados.',
             stuck: 'Drop to 50 BPM. Start moving your fingers to the next chord on the "and" after beat 2, so the shape is ready before the switch.',
@@ -697,7 +697,7 @@ SETS.push(
             levelUp: 'Split strum the whole I–IV–V from chord symbols only, or mix it: two bars split strum, two bars straight eighths — feel how the same chords groove two different ways (a groove = the steady rhythmic feel).',
             levelUp_es: 'Haz el rasgueo dividido de todo el I–IV–V solo a partir de los símbolos de acorde, o combínalo: dos compases de rasgueo dividido, dos compases de corcheas rectas — siente cómo los mismos acordes groovean de dos formas distintas (un groove = la sensación rítmica constante).',
             skills: [2, 4],
-            playSeq: { label: 'Hear the split strum', label_es: 'Escucha el rasgueo dividido', bpm: 70, notes: [45, [45,52], 45, [45,52], 50, [50,57], 50, [50,57]] }
+            playSeq: { label: 'Hear the split strum', label_es: 'Escucha el rasgueo dividido', bpm: 60, notes: [45, [45,52], 45, [45,52], 50, [50,57], 50, [50,57]] }
           }
             ]
           },
