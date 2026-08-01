@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-01 — Video title check
+
+### Fixed
+
+- **Every lesson video's on-site title now matches the real video** — all 166
+  videos were re-checked against what YouTube actually serves (the link
+  checker only proves a video loads; this pass proves it's still the right
+  one). Six links had drifted: the hammer-on video no longer claims to also
+  cover pull-offs (the card teaches the pull-off itself), Marty's song-ideas
+  and first-power-chord videos, Justin's fret-buzz and practice-routine
+  videos, and the Spanish chord-family lesson (credited to the channel
+  "Guitarra con Maru") all show their real titles now. No video needed
+  replacing — every one still teaches what its card says.
+
 ## 2026-08-01 — Full-site error sweep
 
 ### Fixed

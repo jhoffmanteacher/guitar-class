@@ -1349,8 +1349,8 @@ SETS.push(
           },
           {
             label: 'Watch: how to practice effectively', label_es: 'Mira: cómo practicar con eficacia',
-            text: 'Watch: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">How to Practice Effectively – JustinGuitar</a> (0:00–4:00).',
-            text_es: 'Mira: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">How to Practice Effectively – JustinGuitar</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">Lesson 1 Practice Routine – JustinGuitar</a> (0:00–4:00).',
+            text_es: 'Mira: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">Lesson 1 Practice Routine – JustinGuitar</a> (0:00–4:00).',
             hint: 'Key idea: practice doesn\'t make perfect — practice makes permanent: whatever you repeat becomes the habit, good or bad. Are you practicing your mistakes or your solutions? This matters most before a performance.',
             hint_es: 'Idea clave: la práctica no hace la perfección — la práctica hace permanente: lo que sea que repitas se convierte en el hábito, bueno o malo. ¿Estás practicando tus errores o tus soluciones? Esto importa más antes de una presentación.',
             skills: [5],

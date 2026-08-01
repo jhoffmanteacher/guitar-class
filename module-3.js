@@ -80,8 +80,8 @@ SETS.push(
           },
           {
             label: 'Watch: playing power chords', label_es: 'Mira: tocar acordes de potencia',
-            text: 'Watch: <a href="https://youtu.be/DVveuwoVmmY?t=82" target="_blank">Power Chords for Beginners – Marty Music</a> (0:00–3:00).',
-            text_es: 'Mira: <a href="https://youtu.be/DVveuwoVmmY?t=82" target="_blank">Power Chords for Beginners – Marty Music</a> (0:00–3:00).',
+            text: 'Watch: <a href="https://youtu.be/DVveuwoVmmY?t=82" target="_blank">Your Very First Guitar Power Chord Lesson – Marty Music</a> (0:00–3:00).',
+            text_es: 'Mira: <a href="https://youtu.be/DVveuwoVmmY?t=82" target="_blank">Your Very First Guitar Power Chord Lesson – Marty Music</a> (0:00–3:00).',
             hint: 'Notice how he moves the same shape to different positions. As he does, slide your own shape along to A5 and G5 with him.',
             hint_es: 'Fíjate en cómo él mueve la misma forma a distintas posiciones. Mientras lo hace, desliza tu propia forma hasta A5 y G5 junto con él.',
             skills: [2, 4],
@@ -498,9 +498,9 @@ SETS.push(
             ] }
           },
           {
-            label: 'Watch: easy power-chord songs', label_es: 'Mira: canciones con acordes de potencia',
-            text: 'Watch: <a href="https://youtu.be/m3dYOsXbWII?t=20" target="_blank">Easy Power-Chord Songs Everyone Should Know – Marty Music</a> (0:00–3:00).',
-            text_es: 'Mira: <a href="https://youtu.be/m3dYOsXbWII?t=20" target="_blank">Easy Power-Chord Songs Everyone Should Know – Marty Music</a> (0:00–3:00).',
+            label: 'Watch: easy rock songs to explore', label_es: 'Mira: canciones de rock fáciles para explorar',
+            text: 'Watch: <a href="https://youtu.be/m3dYOsXbWII?t=20" target="_blank">Easy Electric Guitar Songs Everyone Should Know – Marty Music</a> (0:00–3:00).',
+            text_es: 'Mira: <a href="https://youtu.be/m3dYOsXbWII?t=20" target="_blank">Easy Electric Guitar Songs Everyone Should Know – Marty Music</a> (0:00–3:00).',
             hint: 'Pick one song you recognize and try to play along as it plays. Match the strum timing to what you hear.',
             hint_es: 'Elige una canción que reconozcas e intenta tocarla junto con el video. Iguala el momento del rasgueo con lo que escuchas.',
             skills: [3, 4],

@@ -429,8 +429,8 @@ SETS.push(
               },
               {
                 label: 'Watch: avoiding fret buzz', label_es: 'Mira: evita el zumbido',
-                text: 'Watch: <a href="https://youtu.be/IscDj_-Nr0s" target="_blank">Finger Placement to Avoid Fret Buzz (BC-106) – JustinGuitar</a> (0:00–4:00).<span class="step-figure"><img src="img/m2-behind-the-fret-en.svg" alt="Side view of a string over the frets: a fingertip just behind the fret rings clean, a fingertip too far back buzzes, and a fingertip on top of the fret wire mutes the note."></span>',
-                text_es: 'Mira: <a href="https://youtu.be/IscDj_-Nr0s" target="_blank">Finger Placement to Avoid Fret Buzz (BC-106) – JustinGuitar</a> (0:00–4:00).<span class="step-figure"><img src="img/m2-behind-the-fret-es.svg" alt="Vista lateral de una cuerda sobre los trastes: la yema justo detrás del traste suena limpia, muy atrás la nota zumba, y encima del traste la nota queda apagada."></span>',
+                text: 'Watch: <a href="https://youtu.be/IscDj_-Nr0s" target="_blank">Body Posture and Finger Placement Exercise (BC-106) – JustinGuitar</a> (0:00–4:00).<span class="step-figure"><img src="img/m2-behind-the-fret-en.svg" alt="Side view of a string over the frets: a fingertip just behind the fret rings clean, a fingertip too far back buzzes, and a fingertip on top of the fret wire mutes the note."></span>',
+                text_es: 'Mira: <a href="https://youtu.be/IscDj_-Nr0s" target="_blank">Body Posture and Finger Placement Exercise (BC-106) – JustinGuitar</a> (0:00–4:00).<span class="step-figure"><img src="img/m2-behind-the-fret-es.svg" alt="Vista lateral de una cuerda sobre los trastes: la yema justo detrás del traste suena limpia, muy atrás la nota zumba, y encima del traste la nota queda apagada."></span>',
                 hint: 'As he lists each cause, pause and test it on your own guitar — find your buzz before he names the fix.',
                 hint_es: 'Mientras él enumera cada causa, pausa y pruébala en tu propia guitarra — encuentra tu zumbido antes de que él nombre la solución.',
                 skills: [1, 2],
