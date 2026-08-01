@@ -374,7 +374,7 @@ function showApp(user){
 }
 
 /* A bookmarked/reloaded explore-page URL (#games, #songs, #keep-practicing,
-   #my-progress) opens that page once the app is on screen. */
+   #daily-review, #my-progress) opens that page once the app is on screen. */
 function maybeShowApp_gamesHash(){
   routeExploreHash();
 }
@@ -1764,6 +1764,7 @@ const EXPLORE_PAGES = [
   { hash: '#games',           screen: 'games-screen',           btn: 'games-btn', overlay: true },
   { hash: '#songs',           screen: 'songs-screen',           btn: 'songs-hub-btn' },
   { hash: '#keep-practicing', screen: 'keep-practicing-screen', btn: 'keep-practicing-btn' },
+  { hash: '#daily-review',    screen: 'sr-screen',              btn: 'sr-btn' },
   { hash: '#my-progress',     screen: 'my-progress-screen',     btn: 'my-progress-btn' },
   { hash: '#class-activities', screen: 'class-activities-screen', btn: 'class-activities-btn' },
 ];
@@ -1841,7 +1842,7 @@ function exitExploreHash(){
    panel-only close fns, which don't touch the hash — the hash is already
    whatever we're routing to), then opens the target. */
 let lastRoutedHash = null;
-const EXPLORE_HASHES = ['', '#games', '#songs', '#keep-practicing', '#my-progress', '#class-activities', '#search'];
+const EXPLORE_HASHES = ['', '#games', '#songs', '#keep-practicing', '#daily-review', '#my-progress', '#class-activities', '#search'];
 function routeExploreHash(){
   const h = location.hash;
   // A hash this router doesn't own (e.g. #main-content from the skip link)
@@ -1866,12 +1867,14 @@ function routeExploreHash(){
   if(h !== '#games' && typeof gamesClosePanel === 'function') gamesClosePanel();
   if(h !== '#songs') songsClosePanel();
   if(h !== '#keep-practicing') kpClosePanel();
+  if(h !== '#daily-review') srClosePanel();
   if(h !== '#my-progress') mpClosePanel();
   if(h !== '#class-activities') caClosePanel();
   if(h !== '#search') searchClosePanel();
   if(h === '#games' && typeof openGamesScreen === 'function') openGamesScreen();
   else if(h === '#songs') openSongsScreen();
   else if(h === '#keep-practicing') openKeepPracticingScreen();
+  else if(h === '#daily-review') openDailyReviewScreen();
   else if(h === '#my-progress') openMyProgressScreen();
   else if(h === '#class-activities') openClassActivitiesScreen();
   else if(h === '#search') openSearchPanel();
@@ -2951,6 +2954,12 @@ function refreshRecUI(slot){
   const host = document.getElementById(`mr${slot}-rec-body`);
   if (!host) return;
   host.innerHTML = renderRecBody(slot);
+  // The rail recorder tile pulses red while its slot is recording, visible
+  // even with the popup closed — mirrors the timer FAB's done-flash cue.
+  if (slot === 'fab'){
+    const fab = document.getElementById('fab-rec');
+    if (fab) fab.classList.toggle('rec-live', !!(recState.fab && recState.fab.recording));
+  }
 }
 
 async function startRec(slot){
@@ -3325,6 +3334,8 @@ function logPracticeRep(sid, opts){
   savePracticeLog();
   refreshRepStrips(sid);
   refreshReviewCards();
+  if(typeof srCheckComplete === 'function') srCheckComplete();
+  if(typeof srRefreshIfOpen === 'function') srRefreshIfOpen();
 }
 function logCleanRep(sid, btnEl){
   logPracticeRep(sid);
@@ -4318,6 +4329,7 @@ function reviewCardHtml(){
     <div class="review-head"><span aria-hidden="true">&#x2726;</span><span data-i18n="review.title">${t('review.title')}</span></div>
     <div class="review-explainer" data-i18n="review.explainer">${t('review.explainer')}</div>
     <div class="review-items">${items}</div>
+    <button type="button" class="review-sr-link" onclick="goExploreHash('daily-review')"><span data-i18n="sr.title">${t('sr.title')}</span> &rarr;</button>
   </div>`;
 }
 function refreshReviewCards(){
@@ -4725,6 +4737,8 @@ window.addEventListener('gc-langchange', function(){
   if(songsScreen && !songsScreen.hidden && typeof renderSongsHub === 'function') renderSongsHub();
   const kpScreen = document.getElementById('keep-practicing-screen');
   if(kpScreen && !kpScreen.hidden && typeof renderKeepPracticing === 'function') renderKeepPracticing();
+  const srScreen = document.getElementById('sr-screen');
+  if(srScreen && !srScreen.hidden && typeof renderDailyReview === 'function') renderDailyReview();
   const mpScreen = document.getElementById('my-progress-screen');
   if(mpScreen && !mpScreen.hidden && typeof renderMyProgress === 'function') renderMyProgress();
   const caScreen = document.getElementById('class-activities-screen');
@@ -5466,14 +5480,15 @@ initBackToTop();
 function closeTopPanels(except){
   /* Hash-based full pages close through their own close fns (which clear
      the URL hash); plain drop-over panels just get hidden. */
-  const SCREEN_IDS = { games: 'games-screen', 'songs-hub': 'songs-screen', 'keep-practicing': 'keep-practicing-screen', 'my-progress': 'my-progress-screen', 'class-activities': 'class-activities-screen' };
-  ['games', 'songs-hub', 'search', 'keep-practicing', 'my-progress', 'class-activities'].forEach(k => {
+  const SCREEN_IDS = { games: 'games-screen', 'songs-hub': 'songs-screen', 'keep-practicing': 'keep-practicing-screen', 'daily-review': 'sr-screen', 'my-progress': 'my-progress-screen', 'class-activities': 'class-activities-screen' };
+  ['games', 'songs-hub', 'search', 'keep-practicing', 'daily-review', 'my-progress', 'class-activities'].forEach(k => {
     if(k === except) return;
     const p = document.getElementById(SCREEN_IDS[k] || k + '-panel');
     if(p && !p.hasAttribute('hidden')){
       if(k === 'games' && typeof closeGamesScreen === 'function'){ closeGamesScreen(); return; }
       if(k === 'songs-hub'){ closeSongsScreen(); return; }
       if(k === 'keep-practicing'){ closeKeepPracticingScreen(); return; }
+      if(k === 'daily-review'){ closeDailyReviewScreen(); return; }
       if(k === 'my-progress'){ closeMyProgressScreen(); return; }
       if(k === 'class-activities'){ closeClassActivitiesScreen(); return; }
       if(k === 'search'){ closeSearchPanel(); return; }
@@ -5489,7 +5504,7 @@ function closeTopPanels(except){
    click "did nothing" as far as the student could see. Close whichever panel
    is covering the page and scroll up so the new set is actually visible. */
 function leaveTopPanelForSet(){
-  const covering = ['games-screen', 'search-panel', 'songs-screen', 'keep-practicing-screen', 'my-progress-screen', 'class-activities-screen']
+  const covering = ['games-screen', 'search-panel', 'songs-screen', 'keep-practicing-screen', 'sr-screen', 'my-progress-screen', 'class-activities-screen']
     .some(id => { const el = document.getElementById(id); return el && !el.hasAttribute('hidden'); });
   if(!covering) return;
   practiceScrollTop = 0;   // the async popstate below would otherwise restore the OLD set's scroll offset after activateSet scrolls to top
@@ -6024,6 +6039,149 @@ function kpClosePanel(){
   const wasOpen = screen && !screen.hasAttribute('hidden');
   if(screen) screen.setAttribute('hidden', '');
   const btn = document.getElementById('keep-practicing-btn');
+  if(btn && wasOpen) btn.focus();   // return focus to where the page was opened
+  syncExploreNav();
+}
+
+/* ── 🗓️ Daily Review (spaced review): its own full-screen page — #daily-review
+   in the URL, same pattern as Keep practicing above. Four already-earned
+   skills (progress==='gotit'), preferring ones outside the module the
+   student is currently in (those are already in rotation) and weighted
+   toward whichever has gone longest without a rep. This is the retention
+   fix for "learned it in Module 3, lost it by Module 9" — deliberately
+   named "Daily Review", not "warm-up" (WARMUP_BANK/daily5.* already own
+   that word for the Daily 5 finger-gym). */
+function srCandidates(){
+  const all = [];
+  SETS.forEach(w => (w.skills || []).forEach(s => {
+    if(!s.practice || progress[s.id] !== 'gotit') return;
+    const e = practiceLog[s.id];
+    all.push({ sid: s.id, moduleNum: w.moduleNum, last: (e && e.last) || 0 });
+  }));
+  const outside = all.filter(c => c.moduleNum !== lastModuleNum);
+  const pool = outside.length >= 4 ? outside : all;
+  return pool.sort((a, b) => a.last - b.last).slice(0, 4).map(c => c.sid);
+}
+// Today's 4 picks are stable all day (no reshuffling as they're completed) —
+// stashed per-student in localStorage, keyed on the calendar day so a new
+// day naturally recomputes. Ids that no longer resolve to a skill (content
+// changed under a stale snapshot) are dropped, not replaced mid-day.
+function srLoadTodayIds(){
+  const today = dayStr(new Date());
+  let stored = null;
+  try{ stored = JSON.parse(localStorage.getItem(_uidKey('gc-srPicks'))); }catch(e){}
+  if(stored && stored.day === today && Array.isArray(stored.ids)){
+    return stored.ids.filter(sid => skillById(sid));
+  }
+  const ids = srCandidates();
+  try{ localStorage.setItem(_uidKey('gc-srPicks'), JSON.stringify({ day: today, ids })); }catch(e){}
+  return ids;
+}
+function srSkillWith(sid){
+  for(const w of (SETS || [])){
+    const hit = (w.skills || []).find(x => x.id === sid);
+    if(hit) return { s: hit, w };
+  }
+  return null;
+}
+function srDaysLabel(sid){
+  const d = daysSinceLastRep(sid);
+  return d < 0 ? { key:'sr.neverSince', params:null } : { key:'sr.daysAgo', params:{n:d} };
+}
+// All 4 picks reviewed today → +10 XP into the arcade meta-layer, once per
+// day. Called both after every logged rep and on every Daily Review page
+// open/render, so the bonus lands whether or not the student is looking at
+// the page when they finish the fourth one.
+function srCheckComplete(ids){
+  // Same guard as bumpPracticeStreak/awardArcadeXp — the dev-bypass uid is
+  // rejected by the Firestore rules, so skip the write (and the XP) rather
+  // than let queueSave retry a doomed save.
+  if(!currentUser || (typeof isDevBypassUser === 'function' && isDevBypassUser())) return;
+  ids = ids || srLoadTodayIds();
+  if(!ids.length || !ids.every(sid => daysSinceLastRep(sid) === 0)) return;
+  const today = dayStr(new Date());
+  if(games.srBonusDay === today) return;
+  games.srBonusDay = today;
+  saveGames();
+  if(typeof awardArcadeXp === 'function') awardArcadeXp(false);
+}
+function srRefreshIfOpen(){
+  const screen = document.getElementById('sr-screen');
+  if(screen && !screen.hasAttribute('hidden') && typeof renderDailyReview === 'function') renderDailyReview();
+}
+// Closes the full-screen page first — reviewJump scrolls/flashes a row
+// underneath it, which the student can't see while the page still covers it.
+function srPracticeThis(sid, wid){
+  closeDailyReviewScreen();
+  reviewJump(sid, wid);
+}
+function toggleDailyReview(){
+  const screen = document.getElementById('sr-screen');
+  if(!screen) return;
+  if(screen.hasAttribute('hidden')) goExploreHash('daily-review');
+  else closeDailyReviewScreen();
+}
+function openDailyReviewScreen(){
+  const screen = document.getElementById('sr-screen');
+  if(!screen || !screen.hasAttribute('hidden')) return;
+  closeTopPanels('daily-review');
+  screen.removeAttribute('hidden');
+  syncExploreNav();
+  const exit = screen.querySelector('.page-exit');
+  if(exit) exit.focus();
+  renderDailyReview();
+}
+async function renderDailyReview(){
+  const bodyEl = document.getElementById('sr-screen-body');
+  if(!bodyEl) return;
+  bodyEl.innerHTML = `<div class="coach-tip">${t('kp.loading')}</div>`;
+  await ensureAllModuleData();
+  const ids = srLoadTodayIds();
+  srCheckComplete(ids);
+  if(!ids.length){
+    bodyEl.innerHTML = `<div class="coach-tip" data-i18n="sr.empty">${t('sr.empty')}</div>`;
+    return;
+  }
+  const picks = ids.map(srSkillWith).filter(Boolean);
+  const doneCount = picks.filter(p => daysSinceLastRep(p.s.id) === 0).length;
+  const allDone = doneCount >= picks.length;
+  const progressParams = { done: doneCount, total: picks.length };
+  const rows = picks.map(p => {
+    const doneToday = daysSinceLastRep(p.s.id) === 0;
+    const m = MODULE_MANIFEST.find(x => x.num === p.w.moduleNum);
+    const modLabel = `${t('nav.module')} ${p.w.moduleNum}${m ? ` — ${escHtml(tf(m,'name'))}` : ''} &middot; ${escHtml(tSetLabel(p.w.label))}`;
+    // The recency chip is redundant with the "Reviewed today" badge once a
+    // pick is done — omit it there rather than show "0 days ago".
+    const last = srDaysLabel(p.s.id);
+    const whenHtml = doneToday ? '' : `<span class="sr-card-when" data-i18n="${last.key}"${last.params ? ` data-i18n-params='${escAttr(JSON.stringify(last.params))}'` : ''}>${t(last.key, last.params)}</span>`;
+    return `<div class="sr-card${doneToday ? ' sr-done' : ''}">
+      <div class="sr-card-main">
+        <div class="sr-card-text">${tf(p.s,'text')}</div>
+        <div class="sr-card-meta">
+          <span class="sr-card-mod">${modLabel}</span>
+          ${whenHtml}
+        </div>
+      </div>
+      ${doneToday
+        ? `<span class="sr-card-check" data-i18n="sr.doneToday">${t('sr.doneToday')}</span>`
+        : `<button type="button" class="sr-go-btn" onclick="srPracticeThis('${p.s.id}','${p.w.id}')" data-i18n="sr.go">${t('sr.go')}</button>`}
+    </div>`;
+  }).join('');
+  bodyEl.innerHTML =
+    `<div class="sr-tagline" data-i18n="sr.tagline">${t('sr.tagline')}</div>
+    <div class="sr-progress" data-i18n="sr.progress" data-i18n-params='${escAttr(JSON.stringify(progressParams))}'>${t('sr.progress', progressParams)}</div>
+    ${allDone ? `<div class="sr-alldone" data-i18n="sr.allDone">${t('sr.allDone')}</div>` : ''}
+    <div class="sr-cards">${rows}</div>`;
+}
+function closeDailyReviewScreen(){
+  if(location.hash === '#daily-review'){ exitExploreHash(); return; }  // the router finishes the job
+  srClosePanel();
+}
+function srClosePanel(){
+  const screen = document.getElementById('sr-screen');
+  const wasOpen = screen && !screen.hasAttribute('hidden');
+  if(screen) screen.setAttribute('hidden', '');
+  const btn = document.getElementById('sr-btn');
   if(btn && wasOpen) btn.focus();   // return focus to where the page was opened
   syncExploreNav();
 }

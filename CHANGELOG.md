@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-31 — Three new practice tools
+
+### Added
+
+- **The Metronome has a Tempo ladder now.** Turn it on, play a pass, and tap
+  "Clean lap" or "Had mistakes" — two clean laps in a row bumps the tempo up
+  5 BPM, and a slip brings it back down. A guided way to work up to speed
+  instead of guessing what tempo to try next.
+- **A Recorder tile joined Tuner / Timer / Metronome in the practice-tools
+  dock.** Record up to 90 seconds, play it back, and check yourself against a
+  short listen-back checklist (on the beat? buzzing strings? steady tempo?).
+  Nothing uploads — it stays on your device until you close the tab.
+- **A new Daily Review page brings back four skills you've already earned**,
+  oldest-practiced first, so what you learned in an early module doesn't fade
+  by the time you reach a later one. Finish all four in a day for a small XP
+  bonus.
+
 ## 2026-07-31 — Site review fixes
 
 ### Fixed

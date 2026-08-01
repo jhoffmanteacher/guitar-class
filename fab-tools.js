@@ -152,6 +152,64 @@ function retimeMetro(){
 }
 function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; retimeMetro(); }
 function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Math.min(220,Math.max(40,getBpm()+d)); document.getElementById('bpm-display').textContent=s.value; if(metroRunning){ stopMetro(); startMetro(); } }
+
+/* ── Tempo ladder ──
+   Self-report, not mic detection — matches the site's self-check philosophy
+   and works with both hands on the guitar between passes. Two clean laps in
+   a row bump the BPM +5; a miss drops it 5 and resets the streak. Runs
+   independently of metroRunning: a student may ladder against a backing
+   track with the click off. */
+let ladderOn=false, ladderCleans=0, ladderFlashTimeout=null;
+function ladderSetBpm(v){
+  const s=document.getElementById('bpm-slider');
+  if(!s) return v;
+  v=Math.min(220,Math.max(40,v));
+  s.value=v;
+  onBpmSlider(v);
+  return v;
+}
+// Rewrites data-i18n/-params on #ladder-status so a later language switch
+// (setLang's applyI18n sweep) can still recompute whichever line is showing.
+function ladderSetStatus(key, params){
+  const el=document.getElementById('ladder-status');
+  if(!el) return;
+  el.setAttribute('data-i18n', key);
+  el.setAttribute('data-i18n-params', JSON.stringify(params));
+  el.textContent=t(key, params);
+}
+function ladderShowDefault(){ ladderSetStatus('tools.ladderStatus', {n:ladderCleans, bpm:getBpm()}); }
+function toggleLadder(){
+  ladderOn=!ladderOn;
+  ladderCleans=0;
+  clearTimeout(ladderFlashTimeout);
+  const btn=document.getElementById('ladder-toggle'), box=document.getElementById('ladder-box');
+  if(btn) btn.setAttribute('aria-pressed', ladderOn?'true':'false');
+  if(box) box.hidden=!ladderOn;
+  if(ladderOn) ladderShowDefault();
+}
+// Swaps the status line to the up/down message, then reverts to the plain
+// count after ~2.5s — the timeout id is tracked so rapid taps don't stack
+// multiple reverts on top of each other.
+function ladderFlashStatus(key, bpm){
+  ladderSetStatus(key, {bpm});
+  flashClass(document.getElementById('ladder-status'), 'flash', 500);
+  clearTimeout(ladderFlashTimeout);
+  ladderFlashTimeout=setTimeout(ladderShowDefault, 2500);
+}
+function ladderClean(){
+  ladderCleans++;
+  if(ladderCleans>=2){
+    ladderCleans=0;
+    ladderFlashStatus('tools.ladderUp', ladderSetBpm(getBpm()+5));
+  } else {
+    ladderShowDefault();
+  }
+}
+function ladderMiss(){
+  ladderCleans=0;
+  ladderFlashStatus('tools.ladderDown', ladderSetBpm(getBpm()-5));
+}
+
 function startMetro(){
   // Runs even while the Coach's mic is live — tick() itself stays silent in
   // that case (see its comment), so this just keeps the visible dot/button
@@ -206,7 +264,7 @@ function togglePopup(which){
   // alone (deliberate, see closePopup above), while closePopup already stops
   // the tuner engine, so the tuner-specific stopTuner() below is redundant.
   if(open){
-    ['metro','timer','tuner'].filter(w=>w!==which).forEach(w=>{
+    ['metro','timer','tuner','rec'].filter(w=>w!==which).forEach(w=>{
       const el = document.getElementById(w+'-popup');
       if(el && el.classList.contains('open')) closePopup(w, false);
     });
@@ -228,6 +286,12 @@ function togglePopup(which){
   }
   if(which==='metro' && open){
     syncMetroMutedNote();
+  }
+  // Populates the idle recorder body on open. Guarded: refreshRecUI lives in
+  // app.js, which the tabs/*.html Journey pages don't load, but they still
+  // load this file verbatim for the shared Tuner/Timer/Metronome.
+  if(which==='rec' && open && typeof refreshRecUI==='function'){
+    refreshRecUI('fab');
   }
   /* Keyboard: the popups sit BEFORE .fab-buttons in the source, so after
      pressing Enter on a FAB the next Tab went to the next FAB, not into the
@@ -279,7 +343,7 @@ document.addEventListener('click',e=>{
     // shouldn't silently kill the click they're practicing to. Those popups
     // just slide shut visually.
     closePopup('tuner');
-    ['metro','timer'].forEach(w=>{
+    ['metro','timer','rec'].forEach(w=>{
       const el = document.getElementById(w+'-popup');
       if(el) el.classList.remove('open');
       setFabExpanded(w, false);
@@ -292,7 +356,7 @@ document.addEventListener('click',e=>{
 // practicing to — only the tuner (mic-holding) always stops.
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape') return;
-  ['metro','timer','tuner'].forEach(w=>{ const el=document.getElementById(w+'-popup'); if(el&&el.classList.contains('open')) closePopup(w, w==='tuner'); });
+  ['metro','timer','tuner','rec'].forEach(w=>{ const el=document.getElementById(w+'-popup'); if(el&&el.classList.contains('open')) closePopup(w, w==='tuner'); });
 });
 
 /* ── Focus trap for the full-screen overlays (a11y) ──
