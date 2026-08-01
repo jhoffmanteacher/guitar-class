@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-31 — Strumming photo added
+
+### Added
+
+- **A photo now shows the down-up strumming motion.** The Module 6 pendulum
+  challenge and the Module 5 down-up strum challenge both show a strumming hand
+  with an arrow tracing the down-up swing, so you can see the relaxed wrist
+  motion the cards describe.
+
 ## 2026-07-31 — Site review fixes
 
 ### Fixed
