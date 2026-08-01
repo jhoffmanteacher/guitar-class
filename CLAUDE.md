@@ -206,6 +206,9 @@ from Moises; ffmpeg/rubberband only as fallback.
   call, 2026-07-31). It coexists with Module 12's "six eighth notes grouped
   into two big beats" and Luna's "felt in 2" — count-in-six and feel-in-two are
   the same meter at different zoom levels, not a contradiction. Don't flag.
+- **Module 5's assessment intentionally skips E/B7** (Jonathan's call,
+  2026-07-31). Group 3 is covered by the mr5-s5 review check; the assessment
+  piece stays on Let It Be / Luna / "the cure". Don't flag.
 
 ## How to work with Jonathan
 
