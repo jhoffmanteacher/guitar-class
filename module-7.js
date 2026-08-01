@@ -826,14 +826,14 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "Oye Mi Amor", full barre Bm', label_es: 'Reto — "Oye Mi Amor", cejilla completa de Bm',
-                text: 'The verse\'s small Bm graduates today:<ol><li>Index bars fret 2 (strings 5–1).</li><li>Play Bm · G one bar each with your D-DU-UDU strum at 60 BPM.</li></ol>You\'ve got it when: four laps where the full Bm rings as clean as the G — the song\'s last beginner shortcut is gone.',
-                text_es: 'El Bm pequeño de la estrofa se gradúa hoy:<ol><li>El índice hace cejilla en el traste 2 (cuerdas 5–1).</li><li>Toca Bm · G un compás cada uno con tu rasgueo D-DU-UDU a 60 BPM.</li></ol>Lo tienes cuando: cuatro vueltas donde el Bm completo suena tan limpio como el G — el último atajo de principiante de la canción se acabó.',
+                text: 'The verse\'s small Bm graduates today:<ol><li>Index bars fret 2 (strings 5–1).</li><li>Play Bm · A one bar each with your D-DU-UDU strum at 60 BPM.</li></ol>You\'ve got it when: four laps where the full Bm rings as clean as the A — the song\'s last beginner shortcut is gone.',
+                text_es: 'El Bm pequeño de la estrofa se gradúa hoy:<ol><li>El índice hace cejilla en el traste 2 (cuerdas 5–1).</li><li>Toca Bm · A un compás cada uno con tu rasgueo D-DU-UDU a 60 BPM.</li></ol>Lo tienes cuando: cuatro vueltas donde el Bm completo suena tan limpio como el A — el último atajo de principiante de la canción se acabó.',
                 hint: 'It\'s built on the same fret-2 bar as your B major — the minor version just re-stacks the fingers on top. The index tip mutes string 6 for you.',
                 hint_es: 'Se construye sobre la misma cejilla del traste 2 que tu B mayor — la versión menor solo reacomoda los dedos encima. La punta del índice silencia la cuerda 6 por ti.',
                 stuck: 'Whenever the barre buzzes, fall back to the small Bm for a lap, then trade back — alternate small and full until full wins.',
                 stuck_es: 'Cada vez que la cejilla zumbe, vuelve al Bm pequeño por una vuelta, y luego cambia de vuelta — alterna el pequeño y el completo hasta que gane el completo.',
-                levelUp: 'Play the chorus (A · D · E · D) as barres too — the whole song with no open chords.',
-                levelUp_es: 'Toca también el coro (A · D · E · D) como cejillas — la canción entera sin acordes abiertos.',
+                levelUp: 'Play the chorus (D · A · Bm · G) as barres too — the whole song with no open chords.',
+                levelUp_es: 'Toca también el coro (D · A · Bm · G) como cejillas — la canción entera sin acordes abiertos.',
                 skills: [1, 2],
                 chords: [
                   { name: 'Bm (full barre)', chord: [[6,'x'],[5,2,'1'],[4,4,'3'],[3,4,'4'],[2,3,'2'],[1,2,'1']], position: 2 }
@@ -1015,7 +1015,7 @@ MODULE_SONGS[7] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
       { name: '"Happy Birthday"', meta: 'Play it entirely with barre chords', meta_es: 'Tócala por completo con acordes con cejilla', type: 'Focus', core: true,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w&start=46' },
-      { name: '"Oye Mi Amor" — Maná', meta: 'Full barre-chord progression · Bm–G', meta_es: 'Progresión completa de acordes con cejilla · Bm–G', type: 'Choice', core: false, level: 3,
+      { name: '"Oye Mi Amor" — Maná', meta: 'Full barre-chord progression · Bm–A', meta_es: 'Progresión completa de acordes con cejilla · Bm–A', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
         tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
       { name: '"Tu Boda" — Oscar Maydon × Fuerza Regida', meta: 'Barre-chord sierreño progression', meta_es: 'Progresión sierreña con acordes con cejilla', type: 'Choice', core: false, level: 3,

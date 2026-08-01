@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-31 — "Oye Mi Amor" chords corrected
+
+### Fixed
+
+- **"Oye Mi Amor" now shows the song's real chords.** The verse is Bm–A (the
+  site said Bm–G), and the chorus is D · A · Bm · G (the site said A · D · E ·
+  D — the song has no E chord at all). Fixed in the Module 6 strum challenge,
+  the Module 7 and Module 11 barre challenges, and the song lists. Verified
+  against two independent chord charts; the song stays in the key of Bm with
+  no capo.
+
 ## 2026-07-31 — Fairer quizzes
 
 ### Fixed

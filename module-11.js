@@ -841,14 +841,14 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "Oye Mi Amor", full barre', label_es: 'Reto — "Oye Mi Amor", cejilla completa',
-                text: '<ul><li>Play the verse\'s Bm–G with a full A-shape barre Bm — the song\'s last beginner shortcut, gone for good.</li></ul>You\'ve got it when: four laps (a lap = one full time through) where the full Bm rings as clean as the G.',
-                text_es: '<ul><li>Toca el Bm–G de la estrofa con una cejilla completa en forma de A para Bm — el último atajo de principiante de la canción, desaparecido para siempre.</li></ul>Lo tienes cuando: cuatro vueltas (una vuelta = un recorrido completo) donde el Bm completo suena tan limpio como el G.',
+                text: '<ul><li>Play the verse\'s Bm–A with a full A-shape barre Bm — the song\'s last beginner shortcut, gone for good.</li></ul>You\'ve got it when: four laps (a lap = one full time through) where the full Bm rings as clean as the A.',
+                text_es: '<ul><li>Toca el Bm–A de la estrofa con una cejilla completa en forma de A para Bm — el último atajo de principiante de la canción, desaparecido para siempre.</li></ul>Lo tienes cuando: cuatro vueltas (una vuelta = un recorrido completo) donde el Bm completo suena tan limpio como el A.',
                 hint: 'This is Module 7\'s payoff, finally put to use as a harmony tool instead of just a shape to survive.',
                 hint_es: 'Esta es la recompensa del Módulo 7, finalmente usada como herramienta de armonía en lugar de solo una forma para sobrevivir.',
-                stuck: 'Warm up the A-shape Bm alone for a minute before adding the G change.',
-                stuck_es: 'Calienta el Bm en forma de A solo durante un minuto antes de agregar el cambio a G.',
-                levelUp: 'Explain out loud why Bm is the vi chord of D major — check the inventory: both Bm and G live in D\'s family — using what you learned in Set 1.',
-                levelUp_es: 'Explica en voz alta por qué Bm es el acorde vi de D mayor — revisa el inventario: tanto Bm como G viven en la familia de D — usando lo que aprendiste en la Unidad 1.',
+                stuck: 'Warm up the A-shape Bm alone for a minute before adding the A change.',
+                stuck_es: 'Calienta el Bm en forma de A solo durante un minuto antes de agregar el cambio hacia A.',
+                levelUp: 'Explain out loud why Bm is the vi chord of D major — check the inventory: both Bm and A live in D\'s family — using what you learned in Set 1.',
+                levelUp_es: 'Explica en voz alta por qué Bm es el acorde vi de D mayor — revisa el inventario: tanto Bm como A viven en la familia de D — usando lo que aprendiste en la Unidad 1.',
                 skills: [6],
                 chords: [
                   { name: 'Bm (A-shape barre)', chord: [[6,'x'],[5,2,'1'],[4,4,'3'],[3,4,'4'],[2,3,'2'],[1,2,'1']], position: 2 },
