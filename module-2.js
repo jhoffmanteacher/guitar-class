@@ -419,8 +419,8 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: spider exercises', label_es: 'Mira: ejercicios de araña',
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=DBNNf4Ri3yc" target="_blank">Spider Exercises: Finger Dexterity #1 – Lauren Bateman (0:00–3:56)</a>.',
-                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=DBNNf4Ri3yc" target="_blank">Spider Exercises: Finger Dexterity #1 – Lauren Bateman (0:00–3:56)</a>.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=DBNNf4Ri3yc&t=18" target="_blank">Spider Exercises: Finger Dexterity #1 – Lauren Bateman (0:18–3:56)</a>.',
+                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=DBNNf4Ri3yc&t=18" target="_blank">Spider Exercises: Finger Dexterity #1 – Lauren Bateman (0:18–3:56)</a>.',
                 hint: 'Try each exercise slowly on your guitar as she demonstrates. Slow and clean is better than fast and buzzy, every time.',
                 hint_es: 'Prueba cada ejercicio despacio en tu guitarra mientras ella lo demuestra. Despacio y limpio es siempre mejor que rápido y con zumbido.',
                 skills: [1, 2, 3],

@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-01 — Lesson videos start where the teaching starts
+
+### Changed
+
+- **Thirteen lesson videos now skip the intro.** Videos that opened with a
+  greeting, a channel plug, or a full play-through of the song before any
+  teaching now start you right at the lesson — anywhere from 8 seconds to
+  1:50 in. The "(0:00–4:00)" watch ranges on those cards were updated to
+  match, so what the card says is what you get. Everything else about the
+  cards is unchanged, and you can always scrub back if you want the intro.
+
 ## 2026-08-01 — More voices in the lesson videos
 
 ### Changed

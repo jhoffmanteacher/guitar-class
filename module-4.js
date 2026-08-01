@@ -1230,7 +1230,7 @@ MODULE_SONGS[4] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=aeYDJciDuao' },
       { name: '"Boom Boom" — John Lee Hooker', meta: 'E blues pentatonic — call and response phrasing', meta_es: 'E blues pentatónica — fraseo de llamada y respuesta', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=jZv04xAejrc',
-        tutorialUrl: 'https://www.youtube.com/watch?v=dutLP1SoSLs' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=dutLP1SoSLs&t=8' },
       { name: '"Purple Haze" — Jimi Hendrix', meta: 'E pentatonic box — full pattern', meta_es: 'Caja de E pentatónica — patrón completo', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=WGoDaYjdfSg',
         tutorialUrl: 'https://www.youtube.com/watch?v=gKhmARXdWGE&start=8' }

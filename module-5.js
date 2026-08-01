@@ -57,8 +57,8 @@ SETS.push(
           },
           {
             label: 'Watch: first chords Em & Asus2', label_es: 'Mira: primeros acordes Em y Asus2',
-            text: 'Watch: <a href="https://youtu.be/HNSaXAe8tyg" target="_blank">Your Very First Chords: Em & Asus2 – Marty Music</a> (0:00–5:00).',
-            text_es: 'Mira: <a href="https://youtu.be/HNSaXAe8tyg" target="_blank">Your Very First Chords: Em & Asus2 – Marty Music</a> (0:00–5:00).',
+            text: 'Watch: <a href="https://youtu.be/HNSaXAe8tyg?t=57" target="_blank">Your Very First Chords: Em & Asus2 – Marty Music</a> (0:57–5:00).',
+            text_es: 'Mira: <a href="https://youtu.be/HNSaXAe8tyg?t=57" target="_blank">Your Very First Chords: Em & Asus2 – Marty Music</a> (0:57–5:00).',
             hint: 'Try placing your fingers as he shows Em, then strum it before watching more. Does every string ring? If not, check which finger is accidentally muting a string. Keep your fretting hand relaxed — a tense hand makes the notes sound bad.',
             hint_es: 'Prueba colocar tus dedos como él muestra para Em, y luego rasguéalo antes de seguir viendo. ¿Suenan todas las cuerdas? Si no, revisa qué dedo está silenciando una cuerda por accidente. Mantén tu mano de trastear relajada — una mano tensa hace que las notas suenen mal.',
             skills: [4],
@@ -329,8 +329,8 @@ SETS.push(
             steps: [
           {
             label: 'Watch: the C chord', label_es: 'Mira: el acorde de C',
-            text: 'Watch: <a href="https://youtu.be/RBYqdBqogo4" target="_blank">The C Chord (BC-132) – JustinGuitar</a> (0:00–4:00).',
-            text_es: 'Mira: <a href="https://youtu.be/RBYqdBqogo4" target="_blank">The C Chord (BC-132) – JustinGuitar</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/RBYqdBqogo4?t=58" target="_blank">The C Chord (BC-132) – JustinGuitar</a> (0:58–4:00).',
+            text_es: 'Mira: <a href="https://youtu.be/RBYqdBqogo4?t=58" target="_blank">The C Chord (BC-132) – JustinGuitar</a> (0:58–4:00).',
             hint: 'He names one habit as the "secret" to a perfect chord change. Listen for the moment he says it, then rewatch his fretting hand and work out exactly when that habit happens relative to the strum.',
             hint_es: 'Él nombra un hábito como el "secreto" para un cambio de acorde perfecto. Escucha el momento en que lo dice, y luego vuelve a mirar su mano de trastes y descubre exactamente cuándo ocurre ese hábito en relación con el rasgueo.',
             skills: [1, 2, 3, 4],
@@ -364,8 +364,8 @@ SETS.push(
           },
           {
             label: 'Watch: the G chord', label_es: 'Mira: el acorde de G',
-            text: 'Watch: <a href="https://youtu.be/gEzwpqmt2gc" target="_blank">The G Chord (BC-131) – JustinGuitar</a> (0:00–4:00).',
-            text_es: 'Mira: <a href="https://youtu.be/gEzwpqmt2gc" target="_blank">The G Chord (BC-131) – JustinGuitar</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/gEzwpqmt2gc?t=61" target="_blank">The G Chord (BC-131) – JustinGuitar</a> (1:01–4:00).',
+            text_es: 'Mira: <a href="https://youtu.be/gEzwpqmt2gc?t=61" target="_blank">The G Chord (BC-131) – JustinGuitar</a> (1:01–4:00).',
             hint: 'G stretches your hand across the whole neck — fingers on the outside strings, nothing in the middle. He shows both the 3-finger and 4-finger versions; start with whichever you can play cleanly.',
             hint_es: 'G estira tu mano a lo ancho del mástil — dedos en las cuerdas de los extremos, nada en el medio. Él muestra las versiones de 3 y de 4 dedos; empieza con la que puedas tocar limpia.',
             skills: [3],
@@ -1339,8 +1339,8 @@ SETS.push(
             steps: [
           {
             label: 'Watch: the E chord', label_es: 'Mira: el acorde de E',
-            text: 'Watch: <a href="https://youtu.be/8H393ryDkuY" target="_blank">The E Chord (BC-113) – JustinGuitar</a> (0:00–4:00).',
-            text_es: 'Mira: <a href="https://youtu.be/8H393ryDkuY" target="_blank">The E Chord (BC-113) – JustinGuitar</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/8H393ryDkuY?t=48" target="_blank">The E Chord (BC-113) – JustinGuitar</a> (0:48–4:00).',
+            text_es: 'Mira: <a href="https://youtu.be/8H393ryDkuY?t=48" target="_blank">The E Chord (BC-113) – JustinGuitar</a> (0:48–4:00).',
             hint: 'E major uses three fingers — it\'s a full, rich chord. (B7, later in this set, is the one that uses all four.) Play it as he shows and take it slow, checking every string rings.',
             hint_es: 'E mayor usa tres dedos — es un acorde completo y rico. (B7, más adelante en esta unidad, es el que usa los cuatro.) Tócalo como él muestra y ve despacio, revisando que cada cuerda suene.',
             skills: [1],

@@ -1026,7 +1026,7 @@ MODULE_SONGS[8] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8' },
       { name: '"House of the Rising Sun" — The Animals', meta: 'Am–C–D–F–Am–C–E–E · the classic fingerpicked song', meta_es: 'Am–C–D–F–Am–C–E–E · la canción clásica de fingerpicking', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=N4bFqW_eu2I',
-        tutorialUrl: 'https://www.youtube.com/watch?v=q9dyAQLYybU' },
+        tutorialUrl: 'https://www.youtube.com/watch?v=q9dyAQLYybU&t=40' },
       { name: '"Sailor Song" — Gigi Perez', meta: 'Fingerpicked verse · capo IV (G-shapes)', meta_es: 'Estrofa con fingerpicking · capo en el traste 4 (formas de G)', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=1lrFsXkT_rM',
         tutorialUrl: 'https://www.youtube.com/watch?v=rpoyXduMZZw&end=551' },
