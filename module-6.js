@@ -33,10 +33,10 @@ SETS.push(
             steps: [
           {
             label: 'Watch: the strumming wrist', label_es: 'Mira: la muñeca de rasgueo',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=SdLsQuvsuO0" target="_blank">Strumming Patterns for Absolute Beginners – Lauren Bateman (0:00–4:00)</a>. Your task while you watch: keep your eyes on her strumming wrist and count how many times it changes direction in one bar.',
-            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=SdLsQuvsuO0" target="_blank">Strumming Patterns for Absolute Beginners – Lauren Bateman (0:00–4:00)</a>. Tu tarea mientras miras: mantén los ojos en su muñeca de rasgueo y cuenta cuántas veces cambia de dirección en un compás.',
-            hint: 'Pay close attention to her wrist — it never stops moving, even when she isn\'t hitting the strings. The pendulum motion is the secret.',
-            hint_es: 'Presta mucha atención a su muñeca — nunca deja de moverse, incluso cuando no está tocando las cuerdas. El movimiento de péndulo es el secreto.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=zEDxLaZi9Ug" target="_blank">Rasgueos de Guitarra / Lección para Principiantes – Christianvib</a> (in Spanish — turn on English captions if you need them; the strumming hand on screen carries the lesson). Your task while you watch: keep your eyes on the strumming wrist and count how many times it changes direction in one bar.',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=zEDxLaZi9Ug" target="_blank">Rasgueos de Guitarra / Lección para Principiantes – Christianvib</a>. Tu tarea mientras miras: mantén los ojos en la muñeca de rasgueo y cuenta cuántas veces cambia de dirección en un compás.',
+            hint: 'Pay close attention to the wrist on screen — it never stops moving, even between hits on the strings. The pendulum motion is the secret.',
+            hint_es: 'Presta mucha atención a la muñeca en pantalla — nunca deja de moverse, incluso entre golpes a las cuerdas. El movimiento de péndulo es el secreto.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'What is the SINGLE most important habit for good strumming?',
               prompt_es: '¿Cuál es el ÚNICO hábito más importante para un buen rasgueo?',

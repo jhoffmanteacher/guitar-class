@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-01 — More voices in the lesson videos
+
+### Changed
+
+- **Three lesson videos now come from new teachers.** The pick-holding
+  lesson (Module 1) and the first strumming lesson (Module 6) are now
+  Spanish-language lessons from guitarraviva and Christianvib — two of the
+  biggest guitar channels in Spanish; the English cards note you can turn
+  on captions, and the hands on screen carry both lessons. The D-chord
+  lesson (Module 5) is now from Guitar Goddess. All three were checked
+  live before swapping; every quiz on those cards still works unchanged.
+
 ## 2026-08-01 — Two new arcade games
 
 ### Added

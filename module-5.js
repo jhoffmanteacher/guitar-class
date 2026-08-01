@@ -945,8 +945,8 @@ SETS.push(
             steps: [
           {
             label: 'Watch: the D major chord', label_es: 'Mira: el acorde de D mayor',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=VKgyE6g2Y-s" target="_blank">How to Play a D Major Chord – Lauren Bateman (0:00–4:00)</a>.',
-            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=VKgyE6g2Y-s" target="_blank">How to Play a D Major Chord – Lauren Bateman (0:00–4:00)</a>.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=xHiJ1jAkemM" target="_blank">D Major Chord: Beginner Guitar Lesson – Guitar Goddess</a>.',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=xHiJ1jAkemM" target="_blank">D Major Chord: Beginner Guitar Lesson – Guitar Goddess</a>.',
             hint: 'Don\'t just copy fret numbers — look at the outline her three fingers draw on the top three strings and name that geometric shape to yourself. Then build the same outline on your own neck.',
             hint_es: 'No copies solo los números de traste — mira el contorno que dibujan sus tres dedos en las tres cuerdas agudas y ponle nombre a esa figura geométrica. Luego arma el mismo contorno en tu propio mástil.',
             skills: [1, 2, 3, 4],
