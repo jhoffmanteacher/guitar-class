@@ -620,8 +620,6 @@ SETS.push(
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', meta_es: 'Escucha e identifica los sonidos de la guitarra', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Ode to Joy"', meta: 'E string only — great first melody', meta_es: 'Solo la cuerda Mi — una gran primera melodía', type: 'Choice', core: false, level: 1,
-        tutorialUrl: 'https://www.youtube.com/watch?v=PRZh_Wv3IQQ&t=43' },
       { name: '"Mary Had a Little Lamb"', meta: 'E & A strings', meta_es: 'Cuerdas Mi y La', type: 'Choice', core: false, level: 1,
         tutorialUrl: 'https://www.youtube.com/watch?v=8gK9n9vrt3g' },
       { name: '"Jingle Bells"', meta: 'Open strings only', meta_es: 'Solo cuerdas al aire', type: 'Choice', core: false, level: 1,

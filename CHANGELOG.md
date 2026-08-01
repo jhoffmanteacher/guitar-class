@@ -7,6 +7,13 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-08-01 — Fairer quiz choices, and guardrails so these errors stay fixed
 
+### Removed
+
+- **"Ode to Joy" is gone from the site** — both the Module 1 song choice
+  (its tutorial video didn't match what the card promised) and the Module 2
+  TAB-reading option. That Module 2 step now features "Mary Had a Little
+  Lamb" as its song.
+
 ### Fixed
 
 - **No more guessing the quiz answer by length.** Fifteen more questions

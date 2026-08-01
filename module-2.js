@@ -535,35 +535,13 @@ SETS.push(
                 ] }
               },
               {
-                label: 'Read TAB: choose a song', label_es: 'Lee el TAB: elige una canción',
-                text: 'Try reading the TAB for "Ode to Joy" or "Mary Had a Little Lamb". Play it through at least once — slow and clean. Click a song below to open its TAB.',
-                text_es: 'Intenta leer el TAB de "Ode to Joy" o "Mary Had a Little Lamb". Tócalo completo al menos una vez — despacio y limpio. Haz clic en una canción abajo para abrir su TAB.',
+                label: 'Read TAB: play a song', label_es: 'Lee el TAB: toca una canción',
+                text: 'Try reading the TAB for "Mary Had a Little Lamb". Play it through at least once — slow and clean. Click the song below to open its TAB.',
+                text_es: 'Intenta leer el TAB de "Mary Had a Little Lamb". Tócalo completo al menos una vez — despacio y limpio. Haz clic en la canción abajo para abrir su TAB.',
                 hint: 'If you get stuck on a note, use your note-name chart to find it. TAB numbers = fret numbers.',
                 hint_es: 'Si te atascas en una nota, usa tu tabla de nombres de notas para encontrarla. Los números del TAB = números de traste.',
                 skills: [4, 5],
                 tabs: [
-                  {
-                    title: '"Ode to Joy" — opening phrase',
-                    title_es: '"Ode to Joy" — frase inicial',
-                    caption: 'A string · frets 3–10 · go slow',
-                    caption_es: 'Cuerda La · trastes 3–10 · ve despacio',
-                    notes: [
-                      { string: 'A', fret: 7,  note: 'E',  midi: 52 },
-                      { string: 'A', fret: 7,  note: 'E',  midi: 52 },
-                      { string: 'A', fret: 8,  note: 'F',  midi: 53 },
-                      { string: 'A', fret: 10, note: 'G',  midi: 55 },
-                      { string: 'A', fret: 10, note: 'G',  midi: 55 },
-                      { string: 'A', fret: 8,  note: 'F',  midi: 53 },
-                      { string: 'A', fret: 7,  note: 'E',  midi: 52 },
-                      { string: 'A', fret: 5,  note: 'D',  midi: 50 },
-                      { string: 'A', fret: 3,  note: 'C',  midi: 48 },
-                      { string: 'A', fret: 3,  note: 'C',  midi: 48 },
-                      { string: 'A', fret: 5,  note: 'D',  midi: 50 },
-                      { string: 'A', fret: 7,  note: 'E',  midi: 52 },
-                      { string: 'A', fret: 7,  note: 'E',  midi: 52 },
-                      { string: 'A', fret: 5,  note: 'D',  midi: 50 }
-                    ]
-                  },
                   {
                     title: '"Mary Had a Little Lamb" — opening phrase',
                     title_es: '"Mary Had a Little Lamb" — frase inicial',
