@@ -436,8 +436,8 @@ SETS.push(
             hint_es: 'Saber dónde vive la raíz de un acorde en el mástil es la misma destreza de nombrar notas del Módulo 2. La raíz te dice el nombre del acorde.',
             stuck: 'Use the Module 2 note map — the root is the lowest string you actually strum. Find that one note first, then build the shape around it.',
             stuck_es: 'Usa el mapa de notas del Módulo 2 — la raíz es la cuerda más grave que realmente rasgueas. Encuentra esa nota primero, y luego arma la forma alrededor de ella.',
-            levelUp: 'Name the roots of D, A, and Em too — you\'ll meet those chords next set.',
-            levelUp_es: 'Nombra también las raíces de D, A y Em — vas a conocer esos acordes en la próxima unidad.',
+            levelUp: 'Name the root of Em, which you already know from Set 1 — then name the roots of D and A, the chords you\'ll meet next set.',
+            levelUp_es: 'Nombra la raíz de Em, que ya conoces de la Unidad 1 — y luego nombra las raíces de D y A, los acordes que vas a conocer en la próxima unidad.',
             skills: [1],
             chords: [
               { name: 'C',  chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
@@ -502,8 +502,8 @@ SETS.push(
             hint_es: 'Tus tres dedos forman un triángulo amplio entre las cuerdas graves y agudas, dejando las dos cuerdas del medio al aire. Mantén tus dedos arqueados para que no rocen las cuerdas Re y Sol al aire de en medio.',
             stuck: 'Get strings 6 and 1 ringing first (middle and ring fingers), then add the index finger on string 5 — check that the open D and G strings in the middle still ring clearly the whole time.',
             stuck_es: 'Haz sonar primero las cuerdas 6 y 1 (dedos medio y anular), y luego agrega el dedo índice en la cuerda 5 — revisa que las cuerdas Re y Sol al aire en el medio sigan sonando claras todo el tiempo.',
-            levelUp: 'Switch G→C→G without looking — your ring finger barely has to travel. Or try the 4-finger version, adding a pinky on string 1, fret 3, to free up your ring finger for the next chord.',
-            levelUp_es: 'Cambia G→C→G sin mirar — tu dedo anular casi no tiene que viajar. O prueba la versión de 4 dedos, agregando el meñique en la cuerda 1, traste 3, para liberar tu dedo anular para el siguiente acorde.',
+            levelUp: 'Switch G→C→G without looking. Or try the 4-finger version: your ring finger moves over to string 2, fret 3, and your pinky takes string 1, fret 3.',
+            levelUp_es: 'Cambia G→C→G sin mirar. O prueba la versión de 4 dedos: tu dedo anular se mueve a la cuerda 2, traste 3, y tu meñique toma la cuerda 1, traste 3.',
             skills: [3],
             chords: [
               { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 }
@@ -521,8 +521,8 @@ SETS.push(
             text_es: '<ul><li>Cambia Am ↔ C manteniendo tu dedo índice plantado en la cuerda 2, traste 1, moviendo solo los otros dedos.</li></ul>Lo tienes cuando: cambios limpios en ambas direcciones sin levantar nunca el dedo pivote.',
             hint: 'Common-finger pivots cut your transition time in half. Look for other chords in this group that share a finger position.',
             hint_es: 'Los pivotes de dedo común reducen tu tiempo de transición a la mitad. Busca otros acordes de este grupo que compartan una posición de dedo.',
-            stuck: 'Rest your index lightly on string 2 / fret 1 and refuse to lift it — move only the middle and ring fingers.',
-            stuck_es: 'Apoya tu índice suavemente en la cuerda 2 / traste 1 y niégate a levantarlo — mueve solo los dedos medio y anular.',
+            stuck: 'Rest your index lightly on string 2 / fret 1 and refuse to lift it — your middle finger stays put on string 4 / fret 2 as well, so the only finger that moves is your ring finger.',
+            stuck_es: 'Apoya tu índice suavemente en la cuerda 2 / traste 1 y niégate a levantarlo — tu dedo medio también se queda quieto en la cuerda 4 / traste 2, así que el único dedo que se mueve es el anular.',
             levelUp: 'This same index-finger anchor also works switching Am ↔ F — try that pair next.',
             levelUp_es: 'Este mismo anclaje del dedo índice también funciona al cambiar Am ↔ F — prueba ese par a continuación.',
             skills: [4, 6]
@@ -609,8 +609,8 @@ SETS.push(
             label: 'Challenge — Clean Dm', label_es: 'Reto — Dm limpio',
             text: '<ol><li>Fret Dm (index finger on string 1, fret 1 · middle finger on string 3, fret 2 · ring finger on string 2, fret 3 — string 4 rings open).</li><li>Strum strings 4–1 only (not the low E or A strings).</li></ol>You\'ve got it when: all four strings ring clean — this is the one new chord shape "the cure" needs.',
             text_es: '<ol><li>Trastea Dm (dedo índice en la cuerda 1, traste 1 · dedo medio en la cuerda 3, traste 2 · dedo anular en la cuerda 2, traste 3 — la cuerda 4 suena al aire).</li><li>Rasguea solo las cuerdas 4–1 (no la Mi grave ni la La).</li></ol>Lo tienes cuando: las cuatro cuerdas suenan limpias — esta es la única forma de acorde nueva que necesita "the cure".',
-            hint: 'Dm is a small triangle on the top three strings — the same shape family as D major, just shifted down one string. Keep your fingers arched and your thumb behind the neck so string 1 doesn\'t get muted.',
-            hint_es: 'Dm es un pequeño triángulo en las tres cuerdas agudas — la misma familia de forma que D mayor, solo que corrida una cuerda hacia abajo. Mantén tus dedos arqueados y tu pulgar detrás del mástil para que la cuerda 1 no se silencie.',
+            hint: 'Dm is a small triangle on the top three strings — the same three strings D major uses, with the string 1 note moved down one fret (fret 2 becomes fret 1). Keep your fingers arched and your thumb behind the neck so string 1 doesn\'t get muted.',
+            hint_es: 'Dm es un pequeño triángulo en las tres cuerdas agudas — las mismas tres cuerdas que usa D mayor, con la nota de la cuerda 1 bajada un traste (el traste 2 se vuelve el traste 1). Mantén tus dedos arqueados y tu pulgar detrás del mástil para que la cuerda 1 no se silencie.',
             stuck: 'Get strings 1 and 2 ringing first (index + ring), then add the middle finger on string 3. Most buzz comes from a finger lying too flat — sit up on the very tip.',
             stuck_es: 'Haz sonar primero las cuerdas 1 y 2 (índice + anular), y luego agrega el dedo medio en la cuerda 3. La mayoría del zumbido viene de un dedo demasiado plano — apóyate justo en la punta.',
             levelUp: 'Switch Am → Dm without looking — your index finger barely has to move. Then move on to the G/B turnaround below.',
@@ -651,8 +651,8 @@ SETS.push(
                 label: 'Challenge — "Let It Be", verse (assessment rehearsal)', label_es: 'Reto — "Let It Be", estrofa (ensayo de evaluación)',
                 text: '<ol><li>Play C · G · Am · F with a down-strum, four beats per chord, building from 60 to 70 BPM.</li><li>Record a run and check it against the chart.</li></ol>You\'ve got it when: one full verse loop at 70 BPM, every change landing on beat 1. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5 — Open Chords</a>.',
                 text_es: '<ol><li>Toca C · G · Am · F con un rasgueo hacia abajo, cuatro tiempos por acorde, subiendo de 60 a 70 BPM.</li><li>Graba una toma y compárala con el diagrama.</li></ol>Lo tienes cuando: una vuelta completa de la estrofa a 70 BPM, cada cambio cayendo en el tiempo 1. <a href="tabs/let-it-be.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5 — Acordes al aire</a>.',
-                hint: 'A full bar per chord — patient and unhurried, twice as long as your Module 2 bass roots, which moved every two beats. This C–G–Am–F verse is one of the three core songs you can play from memory for the module assessment. The record actually moves at your Module 2 pace — two beats per chord — and the Half-Bar Changes ladder later in this set gets you there. Look ahead — start forming the next chord on beat 4 of the current one. Keep your fingers arched and your thumb behind the neck so every string rings. The strum keeps moving even while fingers travel.',
-                hint_es: 'Un compás completo por acorde — paciente y sin apuro, el doble de duración que tus raíces de bajo del Módulo 2, que se movían cada dos tiempos. Esta estrofa C–G–Am–F es una de las tres canciones principales que puedes tocar de memoria para la evaluación del módulo. La grabación en realidad se mueve al ritmo de tu Módulo 2 — dos tiempos por acorde — y la escalera de Cambios de Medio Compás más adelante en esta unidad te lleva ahí. Mira hacia adelante — empieza a formar el siguiente acorde en el tiempo 4 del actual. Mantén tus dedos arqueados y tu pulgar detrás del mástil para que cada cuerda suene. El rasgueo sigue moviéndose aunque los dedos viajen.',
+                hint: 'A full bar per chord — patient and unhurried, twice as long as your Module 2 bass roots, which moved every two beats. This C–G–Am–F verse is one of the three songs you can choose from to play from memory for the module assessment. The record actually moves at your Module 2 pace — two beats per chord — and the Half-Bar Changes ladder later in this set gets you there. Look ahead — start forming the next chord on beat 4 of the current one. Keep your fingers arched and your thumb behind the neck so every string rings. The strum keeps moving even while fingers travel.',
+                hint_es: 'Un compás completo por acorde — paciente y sin apuro, el doble de duración que tus raíces de bajo del Módulo 2, que se movían cada dos tiempos. Esta estrofa C–G–Am–F es una de las tres canciones entre las que puedes elegir para tocar de memoria en la evaluación del módulo. La grabación en realidad se mueve al ritmo de tu Módulo 2 — dos tiempos por acorde — y la escalera de Cambios de Medio Compás más adelante en esta unidad te lleva ahí. Mira hacia adelante — empieza a formar el siguiente acorde en el tiempo 4 del actual. Mantén tus dedos arqueados y tu pulgar detrás del mástil para que cada cuerda suene. El rasgueo sigue moviéndose aunque los dedos viajen.',
                 stuck: 'Isolate the roughest pair (probably C → F) and loop just those two, four beats each.',
                 stuck_es: 'Aísla el par más difícil (probablemente C → F) y repite solo esos dos, cuatro tiempos cada uno.',
                 levelUp: 'Add the chorus turnaround (a short chord move that leads back to the start) — Am · G · F · C — or drop to two beats per chord at the same 60 BPM — the record\'s real changes at practice speed (the record itself runs a bit faster, about 71 BPM).',
@@ -676,6 +676,7 @@ SETS.push(
                 levelUp_es: 'Un tiempo por acorde, o alterna: una vuelta con acordes al aire, una vuelta con acordes de potencia, sin detenerte.',
                 skills: [3, 6],
                 chords: [
+                  { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
                   { name: 'F', chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
                 ],
@@ -691,7 +692,7 @@ SETS.push(
                 stuck_es: 'Deja Am · C · Dm · F limpios en posición abierta primero, y luego agrega el giro G/B — o vuelve a un G normal si saltarte la cuerda grave te complica, y cambia a G/B cuando la vuelta esté firme.',
                 levelUp: 'Switch to a down-up strum. Ready for the real thing? Press &#x25B6; on the Song Journey page and play along with the actual 144 BPM backing track.',
                 levelUp_es: 'Cambia a un rasgueo abajo-arriba. ¿Listo para lo real? Presiona &#x25B6; en la página de Recorrido de la canción y toca junto con la pista base real a 144 BPM.',
-                skills: [5, 6],
+                skills: [6, 7, 8],
                 chords: [
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'C',  chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
@@ -716,8 +717,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge — Half-Bar Changes (2 chords)', label_es: 'Reto — Cambios de medio compás (2 acordes)',
-            text: 'So far you\'ve changed once a bar. Real songs move faster. Switch Am ↔ C every TWO beats, at 60 BPM:<ol><li>Two down-strums on Am.</li><li>Two down-strums on C, and repeat.</li></ol>That\'s twice as many changes as the loop you just played. You\'ve got it when: four laps where every switch lands right on beat 1 and 3, no stops. Press &#x25B6; to hear the target.',
-            text_es: 'Hasta ahora has cambiado una vez por compás. Las canciones reales se mueven más rápido. Cambia Am ↔ C cada DOS tiempos, a 60 BPM:<ol><li>Dos rasgueos hacia abajo en Am.</li><li>Dos rasgueos hacia abajo en C, y repite.</li></ol>Eso es el doble de cambios que la vuelta que acabas de tocar. Lo tienes cuando: cuatro vueltas donde cada cambio cae justo en el tiempo 1 y 3, sin detenerte. Presiona &#x25B6; para escuchar el objetivo.',
+            text: 'Your "Let It Be" verse held each chord a full bar. Here you double that rate — switch Am ↔ C every TWO beats, at 60 BPM:<ol><li>Two down-strums on Am.</li><li>Two down-strums on C, and repeat.</li></ol>That\'s twice as many changes as that four-beats-per-chord verse loop. You\'ve got it when: four laps where every switch lands right on beat 1 and 3, no stops. Press &#x25B6; to hear the target.',
+            text_es: 'Tu estrofa de "Let It Be" sostenía cada acorde un compás completo. Aquí duplicas ese ritmo — cambia Am ↔ C cada DOS tiempos, a 60 BPM:<ol><li>Dos rasgueos hacia abajo en Am.</li><li>Dos rasgueos hacia abajo en C, y repite.</li></ol>Eso es el doble de cambios que esa vuelta de la estrofa de cuatro tiempos por acorde. Lo tienes cuando: cuatro vueltas donde cada cambio cae justo en el tiempo 1 y 3, sin detenerte. Presiona &#x25B6; para escuchar el objetivo.',
             hint: 'Am and C share an anchor: your 1st finger stays on the B string (fret 1) and your 2nd finger stays on the D string (fret 2). Only your 3rd finger jumps (to the A string for C). Pivot on the two fingers that don\'t move.',
             hint_es: 'Am y C comparten un ancla: tu dedo 1 se queda en la cuerda Si (traste 1) y tu dedo 2 se queda en la cuerda Re (traste 2). Solo tu dedo 3 salta (a la cuerda La para C). Pivotea con los dos dedos que no se mueven.',
             stuck: 'Drop to 50 BPM. Start moving your 3rd finger on the "and" after beat 2, so C is ready before you strum it.',
@@ -776,8 +777,8 @@ SETS.push(
             hint_es: 'A esta velocidad no puedes mirar tus manos. Confía en las formas y mantén el rasgueo constante — un cambio con un poco de zumbido pero a tiempo es mejor que uno limpio pero tarde.',
             stuck: 'Cut it in half: loop just C · G, one per beat, until it\'s smooth, then add Am and F back one at a time.',
             stuck_es: 'Divide a la mitad: repite solo C · G, uno por tiempo, hasta que sea fluido, y luego agrega de vuelta Am y F de uno en uno.',
-            levelUp: 'Hold it clean at 70 BPM, or try G · D · Em · C one per beat once you\'ve met D and Em elsewhere.',
-            levelUp_es: 'Mantenlo limpio a 70 BPM, o prueba G · D · Em · C uno por tiempo una vez que hayas conocido D y Em en otra parte.',
+            levelUp: 'Hold it clean at 70 BPM, or try G · D · Em · C one per beat — you already know Em from Set 1, so wait until you\'ve met D next set.',
+            levelUp_es: 'Mantenlo limpio a 70 BPM, o prueba G · D · Em · C uno por tiempo — ya conoces Em de la Unidad 1, así que espera a haber conocido D en la próxima unidad.',
             skills: [5, 6],
             chords: [
               { name: 'C',  chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
@@ -1194,6 +1195,7 @@ SETS.push(
                 stuck_es: 'Repite solo D &rarr; C (el par más difícil — tus dedos 2 y 3 se mueven ambos) hasta que sea automático, y luego vuelve a agregar G.',
                 levelUp: 'Try the down-up 8th-note strum from earlier in this Set, or hum the famous intro riff while you strum the verse underneath it.',
                 levelUp_es: 'Prueba el rasgueo de corcheas abajo-arriba de antes en esta unidad, o tararea el famoso riff de la intro mientras rasgueas la estrofa debajo.',
+                skills: [1, 5],
                 chords: [
                   { name: 'D', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 },
                   { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
@@ -1484,8 +1486,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 4 — Full Run From Memory (your assessment piece)', label_es: 'Reto 4 — Pasada completa de memoria (tu pieza de evaluación)',
-            text: '<ol><li>Pick one of the three core songs — <a href="tabs/let-it-be.html" target="_blank">"Let It Be"</a>, <a href="tabs/luna.html" target="_blank">"Luna"</a>, or <a href="tabs/the-cure.html" target="_blank">&ldquo;the cure&rdquo;</a> — and run it from memory with no chart. This is your assessment piece, Layer 5 of 5 of that song\'s &#x1F9F5; Song Journey.</li><li>Time yourself.</li></ol>No score — this trains your recovery, not perfection.',
-            text_es: '<ol><li>Elige una de las tres canciones principales — <a href="tabs/let-it-be.html" target="_blank">"Let It Be"</a>, <a href="tabs/luna.html" target="_blank">"Luna"</a>, o <a href="tabs/the-cure.html" target="_blank">&ldquo;the cure&rdquo;</a> — y tócala de memoria sin diagrama. Esta es tu pieza de evaluación, la Capa 5 de 5 del &#x1F9F5; Recorrido de la canción de esa canción.</li><li>Cronométrate.</li></ol>Sin puntaje — esto entrena tu recuperación, no la perfección.',
+            text: '<ol><li>Pick one of these three songs — <a href="tabs/let-it-be.html" target="_blank">"Let It Be"</a>, <a href="tabs/luna.html" target="_blank">"Luna"</a>, or <a href="tabs/the-cure.html" target="_blank">&ldquo;the cure&rdquo;</a> — and run it from memory with no chart. This is your assessment piece, Layer 5 of 5 of that song\'s &#x1F9F5; Song Journey.</li><li>Time yourself.</li></ol>No score — this trains your recovery, not perfection.',
+            text_es: '<ol><li>Elige una de estas tres canciones — <a href="tabs/let-it-be.html" target="_blank">"Let It Be"</a>, <a href="tabs/luna.html" target="_blank">"Luna"</a>, o <a href="tabs/the-cure.html" target="_blank">&ldquo;the cure&rdquo;</a> — y tócala de memoria sin diagrama. Esta es tu pieza de evaluación, la Capa 5 de 5 del &#x1F9F5; Recorrido de la canción de esa canción.</li><li>Cronométrate.</li></ol>Sin puntaje — esto entrena tu recuperación, no la perfección.',
             hint: 'Don\'t stop when you make a mistake in performance practice. The goal is to keep going. You can fix mistakes in slow practice — performance practice trains your recovery.',
             hint_es: 'No te detengas cuando cometas un error en la práctica de interpretación. El objetivo es seguir tocando. Puedes corregir errores en la práctica lenta — la práctica de interpretación entrena tu recuperación.',
             skills: [5, 6]
@@ -1522,8 +1524,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — Call & Response (your Module 5 wrap-up jam)', label_es: 'Reto — Llamada y respuesta (tu jam de cierre del Módulo 5)',
-                text: 'Jam (play along freely and make up your own part) over <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a>. Improvise a call-and-response solo, staying in the minor pentatonic box from Module 4 — play a 2-bar "question" phrase, leave a little space, then answer it with a 2-bar "response." You\'ve got it when: you hold the track\'s pulse start to finish with no restarts, and your response phrase clearly answers your question phrase.',
-                text_es: 'Improvisa (toca libremente junto con la pista y crea tu propia parte) sobre <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; la pista de jam en Am</a>. Improvisa un solo de llamada y respuesta, quedándote en la caja pentatónica menor del Módulo 4 — toca una frase "pregunta" de 2 compases, deja un poco de espacio, y luego respóndela con una "respuesta" de 2 compases. Lo tienes cuando: mantienes el pulso de la pista de principio a fin sin reiniciar, y tu frase de respuesta claramente responde a tu frase de pregunta.',
+                text: 'Jam (play along freely and make up your own part) over <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; the Am jam track</a>, improvising a call-and-response solo and staying in the minor pentatonic box from Module 4:<ol><li>Play a 2-bar "question" phrase.</li><li>Leave a little space.</li><li>Answer it with a 2-bar "response."</li></ol>You\'ve got it when: you hold the track\'s pulse start to finish with no restarts, and your response phrase clearly answers your question phrase.',
+                text_es: 'Improvisa (toca libremente junto con la pista y crea tu propia parte) sobre <a href="https://www.youtube.com/watch?v=Vq8cApzOdy8" target="_blank">▶ &#x1F3B5; la pista de jam en Am</a>, improvisando un solo de llamada y respuesta y quedándote en la caja pentatónica menor del Módulo 4:<ol><li>Toca una frase "pregunta" de 2 compases.</li><li>Deja un poco de espacio.</li><li>Respóndela con una "respuesta" de 2 compases.</li></ol>Lo tienes cuando: mantienes el pulso de la pista de principio a fin sin reiniciar, y tu frase de respuesta claramente responde a tu frase de pregunta.',
                 hint: 'This one is ungraded — a chance to revisit the Module 4 solo skill, not part of this Set\'s scored assessment. Every skill here is a Module 4 skill, so it\'s an easy, fun review of what you already know. You can also jam over any core song\'s ▶ &#x1F3B5; Backing track — recorded music you play along with — from the &#x1F3B5; Songs list at the bottom of Module 4, which has one for every core song. If the pentatonic box feels rusty, run the Module 4 scale-climb warm-up first, then come back.',
                 hint_es: 'Este no lleva calificación — es una oportunidad para repasar la destreza del solo del Módulo 4, no forma parte de la evaluación calificada de esta unidad. Cada destreza aquí es una destreza del Módulo 4, así que es un repaso fácil y divertido de lo que ya sabes. También puedes tocar sobre la ▶ &#x1F3B5; pista de acompañamiento — música grabada con la que tocas junto — de cualquier canción principal en la lista de &#x1F3B5; Canciones al final del Módulo 4, que tiene una para cada canción principal. Si la caja pentatónica se siente oxidada, corre primero el calentamiento de escalada de escala del Módulo 4, y luego regresa.',
                 stuck: 'Play a 2-bar question, then answer with the SAME rhythm on different notes — copying the rhythm is the easiest way to make two phrases talk to each other.',
@@ -1579,8 +1581,8 @@ SETS.push(
         text_es: 'Demostrar un acorde de cada uno de los 3 grupos de acordes del Semestre 1',
         gotItWhen: 'you can play at least one chord from each of Groups 1, 2, and 3 cleanly on demand — and name the group each belongs to.',
         gotItWhen_es: 'puedes tocar al menos un acorde de cada uno de los Grupos 1, 2 y 3 limpio a pedido — y nombrar el grupo al que pertenece cada uno.',
-        practice: { type: 'mc', prompt: 'Which of these chords is from Group 2 (D, A, Em, Bm)?',
-          prompt_es: '¿Cuál de estos acordes es del Grupo 2 (D, A, Em, Bm)?',
+        practice: { type: 'mc', prompt: 'Which of these chords is from Group 2?',
+          prompt_es: '¿Cuál de estos acordes es del Grupo 2?',
           choices: ['C major', 'G major', 'D major', 'F major'],
           choices_es: ['C mayor', 'G mayor', 'D mayor', 'F mayor'], answer: 2,
           explain: 'Group 2 is the second batch of open chords you learned — D, A, Em, and Bm — so D major is the one here. C, G, and F all came earlier, in Group 1.',
@@ -1622,10 +1624,10 @@ MODULE_SONGS[5] = [
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
       { name: '"Happy Birthday"', meta: 'Full chord arrangement — all groups reviewed (optional)', meta_es: 'Arreglo completo de acordes — repasa todos los grupos (opcional)', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w&start=46' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: '◐ optional harder challenge · Em–G–D–C strummed adaptation', meta_es: '◐ reto opcional más difícil · adaptación rasgueada Em–G–D–C', type: 'Supp', core: false, journeyUrl: 'tabs/seven-nation-army.html',
+      { name: '"Seven Nation Army" — The White Stripes', meta: '◐ Strummed Em–G–D–C adaptation (a riff song played as chords, in a different style than the original on purpose)', meta_es: '◐ Adaptación rasgueada Em–G–D–C (una canción de riff tocada como acordes, a propósito en un estilo distinto al original)', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Open-chord play-along · D–C–G at full record tempo', meta_es: 'Toca junto con acordes al aire · D–C–G al tempo real de la grabación', type: 'Supp', core: false, journeyUrl: 'tabs/sweet-child-o-mine.html',
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Open-chord play-along · D–C–G at full record tempo', meta_es: 'Toca junto con acordes al aire · D–C–G al tempo real de la grabación', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM&start=282&end=938' },
       { name: '"Riptide" — Vance Joy', meta: 'Am–G–C — three-chord wonder', meta_es: 'Am–G–C — maravilla de tres acordes', type: 'Choice', core: false, level: 1,
@@ -1662,6 +1664,8 @@ MODULE_REVIEWS[5] = {
       text_es: 'Puedo trastear los acordes del Grupo 2 (D, A, Em, y el Bm de cuatro dedos) con tono limpio', set: 'm5w3' },
     { id: 'mr5-s9', text: 'I can draw three chords at random from the deck and play them in an 8-bar progression at 70 BPM with clean changes',
       text_es: 'Puedo sacar tres acordes al azar de la baraja y tocarlos en una progresión de 8 compases a 70 BPM con cambios limpios', set: 'm5w3' },
+    { id: 'mr5-s5', text: 'I can fret Group 3 chords (E and B7) with clean tone',
+      text_es: 'Puedo trastear los acordes del Grupo 3 (E y B7) con tono limpio', set: 'm5w4' },
     { id: 'mr5-s8', text: 'I can perform a core song from memory, start to finish, for the Module 5 assessment',
       text_es: 'Puedo interpretar una canción principal de memoria, de principio a fin, para la evaluación del Módulo 5', set: 'm5w4' }
   ],

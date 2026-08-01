@@ -156,8 +156,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 1 — C and G Chord Families', label_es: 'Reto 1 — Familias de acordes de C y G',
-                text: '<ol><li>Write out the chord families of C major and G major (six chords each) — type them below.</li><li>Play each family as open chords in order.</li></ol>',
-                text_es: '<ol><li>Escribe las familias de acordes de C mayor y G mayor (seis acordes cada una) — anótalas abajo.</li><li>Toca cada familia como acordes abiertos en orden.</li></ol>',
+                text: '<ol><li>Write out the chord families of C major and G major (six chords each) — type them below.</li><li>Play each family\'s chords in order.</li></ol>',
+                text_es: '<ol><li>Escribe las familias de acordes de C mayor y G mayor (seis acordes cada una) — anótalas abajo.</li><li>Toca los acordes de cada familia en orden.</li></ol>',
                 hint: 'C family: C · Dm · Em · F · G · Am. G family: G · Am · Bm · C · D · Em. Notice how much they overlap — that\'s no accident.',
                 hint_es: 'Familia de C: C · Dm · Em · F · G · Am. Familia de G: G · Am · Bm · C · D · Em. Fíjate cuánto se superponen — eso no es casualidad.',
                 stuck: 'Just play the C family first and get it solid before adding G.',
@@ -174,7 +174,7 @@ SETS.push(
                   { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'D', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 },
-                  { name: 'Bm', chord: [[6,'x'],[5,'x'],[4,4,'4'],[3,4,'3'],[2,3,'2'],[1,2,'1']], position: 0 }
+                  { name: 'Bm', chord: [[6,'x'],[5,2,'1'],[4,4,'3'],[3,4,'4'],[2,3,'2'],[1,2,'1']], position: 2 }
                 ]
               }
             ]
@@ -452,7 +452,7 @@ SETS.push(
               {
                 label: 'Challenge 1 — Name the Key from a Chord Set', label_es: 'Reto 1 — Nombra la tonalidad de un conjunto de acordes',
                 text: 'A drill is a short exercise you repeat to build a skill.<ol><li>Run the key-detective deck below — for each mystery chord set, find the single family that contains every chord in it and say the key OUT LOUD before you flip the card.</li></ol>',
-                text_es: 'Un ejercicio es una práctica corta que repites para desarrollar una destreza.<ol><li>Corre la baraja detective de tonos de abajo — para cada conjunto misterioso de acordes, encuentra la única familia que contiene todos los acordes y di el tono EN VOZ ALTA antes de voltear la tarjeta.</li></ol>',
+                text_es: 'Un ejercicio es una actividad corta que repites para desarrollar una destreza.<ol><li>Corre la baraja detective de tonalidades de abajo — para cada conjunto misterioso de acordes, encuentra la única familia que contiene todos los acordes y di la tonalidad EN VOZ ALTA antes de voltear la tarjeta.</li></ol>',
                 drill: { type: 'deck', deck: 'key-inventory', skill: 'm11w2-s1' },
                 hint: 'Find the single family that contains ALL the chords on the card — that\'s the key, before your ear even weighs in.',
                 hint_es: 'Encuentra la única familia que contiene TODOS los acordes de la tarjeta — esa es la tonalidad, incluso antes de que tu oído opine.',
@@ -625,10 +625,10 @@ SETS.push(
     unit: 'Module 11 · Chords, Keys & Harmony',
     unit_es: 'Módulo 11 · Acordes, tonalidades y armonía',
     title: 'Set 3',
-    subtitle: 'One shape, twelve chords · Root names the chord · Play I–IV–V anywhere',
-    subtitle_es: 'Una forma, doce acordes · La raíz nombra el acorde · Toca I–IV–V en cualquier lugar',
-    skillFocus: 'E-shape root on the low E · A-shape root on the A string · Your Module 9 fretboard knowledge names every barre',
-    skillFocus_es: 'Raíz de la forma de E en la Mi grave · Raíz de la forma de A en la cuerda La · Tu conocimiento del diapasón del Módulo 9 nombra cada cejilla',
+    subtitle: 'One shape, twelve chords · Root names the chord · Play I–IV–V anywhere · Comp a 12-bar blues',
+    subtitle_es: 'Una forma, doce acordes · La raíz nombra el acorde · Toca I–IV–V en cualquier lugar · Acompaña un blues de 12 compases',
+    skillFocus: 'E-shape root on the low E · A-shape root on the A string · Your Module 9 fretboard knowledge names every barre · The 12-bar blues in A, with its quick-change and turnaround',
+    skillFocus_es: 'Raíz de la forma de E en la Mi grave · Raíz de la forma de A en la cuerda La · Tu conocimiento del diapasón del Módulo 9 nombra cada cejilla · El blues de 12 compases en A, con su cambio rápido y su giro',
     comingSoon: false,
 
     stations: {

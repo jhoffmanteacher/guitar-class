@@ -2985,10 +2985,23 @@ async function startRec(slot){
   // holding a reference to stop it.
   if (recState[slot] && (recState[slot].starting || recState[slot].recording)) return;
   if (recState[slot] && recState[slot].pendingBlobUrl) URL.revokeObjectURL(recState[slot].pendingBlobUrl);
+  // One mic owner at a time (the tuner/Coach/games all evict each other the
+  // same way): recording alongside the Coach's processing-off stream would
+  // put two sessions with conflicting constraints on the same device.
+  if (typeof coachInterrupt === 'function') coachInterrupt();
+  if (typeof gamesStopMic === 'function') gamesStopMic();
+  if (typeof stopTuner === 'function') stopTuner();
   recState[slot] = { starting: true };
+  const pending = recState[slot];
   let stream = null;
   try {
     stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+    // The slot was cleared (stopAnyRec) or restarted while the permission
+    // prompt was up — release the just-granted stream and bow out quietly.
+    if (recState[slot] !== pending){
+      stream.getTracks().forEach(tr => tr.stop());
+      return;
+    }
     const recorder = new MediaRecorder(stream);
     const chunks = [];
     recorder.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
@@ -3027,11 +3040,16 @@ async function startRec(slot){
     // no UI and no recState entry left to stop it.
     if (stream) stream.getTracks().forEach(tr => tr.stop());
     const s = recState[slot];
-    if (s && s.timerInterval) clearInterval(s.timerInterval);
-    if (s && s.autoStopTimeout) clearTimeout(s.autoStopTimeout);
-    delete recState[slot];
-    refreshRecUI(slot);
-    alert(t('rec.micFail', {err: err.message || err.name || 'permission denied'}));
+    // Only clean up (and alert about) an entry this invocation owns — the
+    // slot may have been cleared by stopAnyRec during the permission prompt
+    // and even restarted by a fresh tap since.
+    if (s && (s === pending || s.stream === stream)){
+      if (s.timerInterval) clearInterval(s.timerInterval);
+      if (s.autoStopTimeout) clearTimeout(s.autoStopTimeout);
+      delete recState[slot];
+      refreshRecUI(slot);
+      alert(t('rec.micFail', {err: err.message || err.name || 'permission denied'}));
+    }
   }
 }
 
@@ -3051,7 +3069,13 @@ function stopRec(slot){
 function stopAnyRec(opts){
   Object.keys(recState).forEach(m => {
     if (opts && opts.keepFab && m === 'fab') return;
-    if (recState[m] && recState[m].recording) stopRec(m);
+    const s = recState[m];
+    if (!s) return;
+    if (s.recording) stopRec(m);
+    // A slot still waiting on getUserMedia has no recorder to stop — drop
+    // the entry so the slot isn't stuck in `starting` forever; startRec sees
+    // the swap and releases the stream if permission is granted later.
+    else if (s.starting){ delete recState[m]; refreshRecUI(m); }
   });
 }
 
@@ -4022,6 +4046,14 @@ function wrapGotItWhen(html){
    with "All"/"Both" ("All 6 strings", "Both on E string") — pinning those
    would freeze a real answer in place, which is the bug, not the fix. */
 const MC_PINNED = /^(all|none|both|neither)\s+of\b|^(none|all)$/i;
+/* Catch-alls the regex can't classify without over-matching ordinary answers
+   ("All three notes at once, as a chord" in module-9 is a real distractor,
+   not a summary). Content-coupled: reword one of these choices in module
+   data and this entry must change with it — nothing enforces the link. */
+const MC_PINNED_EXACT = new Set([
+  'All three show note sequences',                     // module-5
+  "Anywhere — the thumb doesn't affect your fingers",  // module-2
+]);
 function mcHash(str){
   let h = 2166136261;
   for(let i=0;i<str.length;i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
@@ -4031,7 +4063,10 @@ function mcSeed(r){ return (r.prompt || '') + '|' + (r.choices || []).join('|');
 /* Returns the ORIGINAL indices of `choices`, in display order. */
 function mcOrder(choices, seedStr){
   if(!Array.isArray(choices) || choices.length < 3) return (choices||[]).map((c,i)=>i);
-  const pinned = choices.map(c => MC_PINNED.test(String(c).trim()));
+  const pinned = choices.map(c => {
+    const s = String(c).trim();
+    return MC_PINNED.test(s) || MC_PINNED_EXACT.has(s);
+  });
   const movable = [];
   choices.forEach((c,i)=>{ if(!pinned[i]) movable.push(i); });
   let s = mcHash(seedStr) || 1;
@@ -4207,7 +4242,7 @@ function dkCheckOff(key){
 const EAR_POOLS = {
   openStrings: { midis:[40,45,50,55,59,64], labels:['E','A','D','G','B','e'], kicker:'ear.kString' },
   lowEFrets:   { midis:[40,41,42,43,44,45], labels:['0','1','2','3','4','5'], kicker:'ear.kFret' },
-  // A-string vs D-string bass under Am (module-8.js, m8w1 Station C) — a
+  // A-string vs D-string bass under Am (module-8.js, m8w2 Station C) — a
   // 2-option pool, same shape as the binary-choice style of lowEFrets, just
   // with 2 distinct values instead of 6.
   amBassAD:    { midis:[45,50], labels:['A','D'], kicker:'ear.kBassString' }
@@ -4395,6 +4430,10 @@ async function reviewJump(sid, wid){
   setTimeout(()=>{
     row.scrollIntoView({ behavior:'smooth', block:'center' });
     flashClass(row, 'review-flash', 1800);
+    // Keyboard path: closing the Daily Review page bounced focus back to the
+    // rail button (srClosePanel) — move it to the row we just jumped to.
+    row.setAttribute('tabindex','-1');
+    row.focus({ preventScroll:true });
   }, 60);
 }
 
@@ -4786,7 +4825,9 @@ window.addEventListener('gc-langchange', function(){
   // The rail Recorder popup body bakes t() results in with no data-i18n tags
   // (renderRecBody), and #mrfab-rec-body sits outside the module panels the
   // rebuild above covers — re-render it in place or it stays half-English.
-  refreshRecUI('fab');
+  // Idle-only, same guard as togglePopup: rebuilding mid-recording or during
+  // a listen-back would reset the timer display / stop the <audio> at 0:00.
+  if (!recState.fab) refreshRecUI('fab');
 });
 
 /* ══════════════════════════════════════════════
@@ -5165,10 +5206,15 @@ function closeRail(){ setRailOpen(false); }
 // drawer's ~13 controls tabbable until the drawer has been toggled once.
 setRailOpen(false);
 window.addEventListener('resize', () => {
+  const railEl = document.getElementById('nav-rail');
   if(!isNarrowLayout()){
     closeRail();
-    const railEl = document.getElementById('nav-rail');
     if(railEl) railEl.inert = false;
+  } else if(railEl && !document.body.classList.contains('rail-open')){
+    // Wide→narrow (window resize, tablet rotate): the drawer is closed but
+    // was last stamped at a wide width, where setRailOpen skips the inert
+    // write — stamp it now or its controls stay tabbable while hidden.
+    railEl.inert = true;
   }
 });
 // Picking a station or an Explore item shows the main content — close the
@@ -6113,14 +6159,23 @@ function srCandidates(){
 // full catalogue to know what's "outside the current module"). Returns []
 // when nothing's stored yet for today; the snapshot is only ever first
 // computed by srLoadTodayIds(), from renderDailyReview(), which awaits
-// ensureAllModuleData() first.
+// ensureAllModuleData() first. Stale ids (module IS loaded, skill gone —
+// content changed under the snapshot) are dropped; ids from modules not yet
+// in SETS are kept — daysSinceLastRep reads practiceLog, which doesn't need
+// the module file, and dropping them would let srCheckComplete's no-arg
+// path judge "all reviewed" against just the loaded subset and burn the
+// once-a-day bonus early.
 function srStoredTodayIds(){
   const today = dayStr(new Date());
   let stored = null;
   try{ stored = JSON.parse(localStorage.getItem(_uidKey('gc-srPicks'))); }catch(e){}
-  return (stored && stored.day === today && Array.isArray(stored.ids))
-    ? stored.ids.filter(sid => skillById(sid))
-    : [];
+  if(!(stored && stored.day === today && Array.isArray(stored.ids))) return [];
+  const loaded = new Set(SETS.map(w => w.moduleNum));
+  return stored.ids.filter(sid => {
+    if(skillById(sid)) return true;
+    const m = /^m(\d+)/.exec(sid);
+    return !!m && !loaded.has(+m[1]);
+  });
 }
 // Today's picks are stable all day (no reshuffling as they're completed) —
 // stashed per-student in localStorage, keyed on the calendar day so a new

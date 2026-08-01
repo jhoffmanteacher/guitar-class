@@ -199,8 +199,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 3 — Moving Bass', label_es: 'Reto 3 — Bajo en movimiento',
-            text: '<ol><li>Pluck the low E string with p.</li><li>Then G-B-e with i-m-a.</li><li>Then the A string.</li><li>Then the D string with p — fingers staying put.</li></ol>You\'ve got it when: only the thumb moves to find each bass note — the i-m-a fingers stay anchored.',
-            text_es: '<ol><li>Pulsa la cuerda Mi grave con p.</li><li>Y luego Sol, Si y mi aguda con i-m-a.</li><li>Luego la cuerda La.</li><li>Y luego la cuerda Re con p — los dedos se quedan quietos.</li></ol>Lo tienes cuando: solo el pulgar se mueve para encontrar cada nota grave — los dedos i-m-a se quedan anclados.',
+            text: '<ol><li>Pluck the low E string with p.</li><li>Then G-B-e with i-m-a.</li><li>Then the A string with p, followed by that same G-B-e with i-m-a.</li><li>Then the D string with p, again followed by G-B-e with i-m-a — fingers staying put the whole time.</li></ol>You\'ve got it when: only the thumb moves to find each bass note — the i-m-a fingers stay anchored.',
+            text_es: '<ol><li>Pulsa la cuerda Mi grave con p.</li><li>Y luego Sol, Si y mi aguda con i-m-a.</li><li>Luego la cuerda La con p, seguida de esas mismas Sol, Si y mi aguda con i-m-a.</li><li>Y luego la cuerda Re con p, otra vez seguida de Sol, Si y mi aguda con i-m-a — los dedos se quedan quietos todo el tiempo.</li></ol>Lo tienes cuando: solo el pulgar se mueve para encontrar cada nota grave — los dedos i-m-a se quedan anclados.',
             hint: 'This is how you change chords later — the thumb finds the bass note of the chord (root) while the fingers stay anchored on the treble strings.',
             hint_es: 'Así es como cambiarás de acorde más adelante — el pulgar encuentra la nota grave del acorde (la raíz) mientras los dedos se quedan anclados en las cuerdas agudas.',
             stuck: 'Move just the thumb E → A → D with the fingers resting (not plucking) on G-B-e, until the thumb finds each bass without looking.',
@@ -589,8 +589,8 @@ SETS.push(
             steps: [
               {
                 label: 'Ear Spark: name the bass string', label_es: 'Chispa auditiva: nombra el bajo',
-                text: 'Ear Spark (optional, 2 min):<ol><li>Press play below — the deck draws a random mix of Am\'s A-string and D-string bass notes and plays them for you, and you never see which.</li><li>Name each one by ear before you check: A string is Am\'s root (low), D string is the passing bass a step higher — low vs. high bass is a fingerpicker\'s first ear skill.</li></ol>',
-                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Presiona reproducir abajo — la baraja saca una mezcla al azar de notas graves de Am en la cuerda La y en la cuerda Re, y las toca por ti, sin que veas cuáles son.</li><li>Nombra cada una de oído antes de revisar: la cuerda La es la raíz de Am (grave), la cuerda Re es el bajo de paso, un poco más agudo — grave vs. agudo en el bajo es la primera destreza auditiva de un fingerpicker.</li></ol>',
+                text: 'Ear Spark (optional, 2 min):<ol><li>Press play below — the deck draws a random mix of Am\'s A-string and D-string bass notes and plays them for you, and you never see which.</li><li>Name each one by ear before you check: A string is Am\'s root (low), D string is the passing bass a fourth higher (five frets up) — low vs. high bass is a fingerpicker\'s first ear skill.</li></ol>',
+                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Presiona reproducir abajo — la baraja saca una mezcla al azar de notas graves de Am en la cuerda La y en la cuerda Re, y las toca por ti, sin que veas cuáles son.</li><li>Nombra cada una de oído antes de revisar: la cuerda La es la raíz de Am (grave), la cuerda Re es el bajo de paso, una cuarta más aguda (cinco trastes más arriba) — grave vs. agudo en el bajo es la primera destreza auditiva de un fingerpicker.</li></ol>',
                 drill: { type: 'ear', pool: 'amBassAD', draw: 5, skill: 'm8w2-s6' }
               }
             ]
@@ -963,8 +963,8 @@ SETS.push(
     skills: [
       { id: 'm8w3-s1', text: 'Fingerpick a 4-chord progression with the pattern unbroken',
         text_es: 'Tocar con fingerpicking una progresión de 4 acordes con el patrón sin interrupciones',
-        gotItWhen: 'you can play Am–C–D–F (or another 4-chord progression) with the 6-note arpeggio over each chord, and the pattern never breaks at a chord change.',
-        gotItWhen_es: 'puedes tocar Am–C–D–F (u otra progresión de 4 acordes) con el arpegio de 6 notas sobre cada acorde, y el patrón nunca se rompe en un cambio de acorde.',
+        gotItWhen: 'you can play Am–C–D–F (or another 4-chord progression) with the eight-note stretch, p-i-m-a-m-i-m-i, over each chord, and the pattern never breaks at a chord change.',
+        gotItWhen_es: 'puedes tocar Am–C–D–F (u otra progresión de 4 acordes) con el estiramiento de ocho notas, p-i-m-a-m-i-m-i, sobre cada acorde, y el patrón nunca se rompe en un cambio de acorde.',
         practice: { type: 'playSeq', label: 'Am · C · D · F bass roots', label_es: 'Raíces graves Am · C · D · F', bpm: 60,
           notes: [45, 48, 50, 53] } },
       { id: 'm8w3-s2', text: 'Demonstrate Travis picking — thumb alternates between two bass strings',

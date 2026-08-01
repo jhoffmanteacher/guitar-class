@@ -202,6 +202,10 @@ from Moises; ffmpeg/rubberband only as fallback.
 - **Solo work uses YouTube jam tracks, not the course mp3s** — the mp3s are
   rhythm-stripped so the student plays the rhythm part. Local mp3s stay the
   play-along tracks on Journey pages.
+- **Module 8's "6/8 = six beats to a bar" is correct as taught** (Jonathan's
+  call, 2026-07-31). It coexists with Module 12's "six eighth notes grouped
+  into two big beats" and Luna's "felt in 2" — count-in-six and feel-in-two are
+  the same meter at different zoom levels, not a contradiction. Don't flag.
 
 ## How to work with Jonathan
 

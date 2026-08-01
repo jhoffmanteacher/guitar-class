@@ -76,7 +76,7 @@ SETS.push(
             hint_es: 'Fíjate en la forma con dos dedos — qué dedo va dónde, y cómo la nota bajo tu dedo índice le da nombre al acorde. Prueba la forma en tu guitarra mientras ella la muestra.',
             skills: [1, 3],
             response: { type: 'short', placeholder: 'Describe the power chord shape in your own words — which fingers go where, and what names the chord?',
-              placeholder_es: 'Describe con tus propias palabras la forma del acorde de potencia — qué dedo va dónde, y qué le da el nombre al acorde?' }
+              placeholder_es: 'Describe con tus propias palabras la forma del acorde de potencia — ¿qué dedo va dónde, y qué le da el nombre al acorde?' }
           },
           {
             label: 'Watch: playing power chords', label_es: 'Mira: tocar acordes de potencia',
@@ -562,8 +562,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge — Half-Bar Power Switches (2 chords)', label_es: 'Reto — Cambios de potencia por medio compás (2 acordes)',
-            text: 'Real riffs change faster than once a bar.<ul><li>Keep A5 and D5, but switch every TWO beats — two down-strums on A5, two on D5, and repeat, at 60 BPM.</li></ul>That\'s a change every half-bar, twice as often as this bar-long loop. You\'ve got it when: four laps where every switch lands right on the beat, no stops. Press &#x25B6; to hear the target.',
-            text_es: 'Los riffs reales cambian más rápido que una vez por compás.<ul><li>Mantén A5 y D5, pero cambia cada DOS tiempos — dos rasgueos hacia abajo en A5, dos en D5, y repite, a 60 BPM.</li></ul>Eso es un cambio cada medio compás, el doble de seguido que esta vuelta de un compás entero. Lo tienes cuando: cuatro vueltas donde cada cambio cae justo en el tiempo, sin detenerte. Presiona &#x25B6; para escuchar el objetivo.',
+            text: 'Real riffs change faster than once a bar.<ul><li>Bring back A5 and D5 from Set 1, but switch every TWO beats — two down-strums on A5, two on D5, and repeat, at 60 BPM.</li></ul>That\'s a change every half-bar, twice as often as this bar-long loop. You\'ve got it when: four laps where every switch lands right on the beat, no stops. Press &#x25B6; to hear the target.',
+            text_es: 'Los riffs reales cambian más rápido que una vez por compás.<ul><li>Retoma A5 y D5 de la Unidad 1, pero cambia cada DOS tiempos — dos rasgueos hacia abajo en A5, dos en D5, y repite, a 60 BPM.</li></ul>Eso es un cambio cada medio compás, el doble de seguido que esta vuelta de un compás entero. Lo tienes cuando: cuatro vueltas donde cada cambio cae justo en el tiempo, sin detenerte. Presiona &#x25B6; para escuchar el objetivo.',
             hint: 'A5 and D5 are the same shape one string apart — A5 roots on the low E (fret 5), D5 on the A string (fret 5). Shift the whole shape across and keep your two fingers glued together.',
             hint_es: 'A5 y D5 son la misma forma a una cuerda de distancia — A5 tiene su raíz en la Mi grave (traste 5), D5 en la cuerda La (traste 5). Desplaza toda la forma y mantén tus dos dedos pegados.',
             stuck: 'Drop to 50 BPM. Start moving your fingers to the next chord on the "and" after beat 2, so the shape is ready before the switch.',
@@ -791,7 +791,7 @@ SETS.push(
                 response: { type: 'short', prompt: 'Clean laps in a row at 60 BPM — your count?', prompt_es: 'Vueltas limpias seguidas a 60 BPM — ¿tu cuenta?', placeholder: 'e.g. 3 — F5 keeps buzzing', placeholder_es: 'p. ej. 3 — F5 sigue zumbando' }
               },
               {
-                label: 'Challenge — "the cure" as power chords (◐ optional harder challenge)', label_es: 'Reto — "the cure" como acordes de potencia (◐ reto opcional más difícil)',
+                label: 'Challenge — "the cure" as power chords (◐ played against its natural style)', label_es: 'Reto — "the cure" como acordes de potencia (◐ tocada en contra de su estilo natural)',
                 text: 'This gentle acoustic song isn\'t usually played this way — that\'s the point.<ul><li>Play its progression as power chords — A5 · C5 · D5 · F5 — two beats per chord at 60 BPM, quietly.</li></ul>You\'ve got it when: two laps clean AND soft — power chords don\'t have to be loud. No score — just try it. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
                 text_es: 'Esta canción acústica y suave normalmente no se toca así — ese es el punto.<ul><li>Toca su progresión como acordes de potencia — A5 · C5 · D5 · F5 — dos tiempos por acorde a 60 BPM, suavemente.</li></ul>Lo tienes cuando: dos vueltas limpias Y suaves — los acordes de potencia no tienen que ser fuertes. Sin puntaje — solo pruébalo. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
                 hint: 'You already know these roots from Module 2. The challenge here is touch: light pick, both strings ringing, no harsh sound.',
@@ -879,7 +879,7 @@ SETS.push(
         text_es: 'Tocar un patrón de rasgueo de corcheas rectas con acordes de potencia',
         gotItWhen: 'you can strum down on each number and up on each "+" across a bar and count "1 + 2 + 3 + 4 +" aloud without losing the strum.',
         gotItWhen_es: 'puedes rasguear hacia abajo en cada número y hacia arriba en cada "+" a lo largo de un compás y contar "1 + 2 + 3 + 4 +" en voz alta sin perder el rasgueo.',
-        practice: { type: 'playSeq', label: 'Eighth-note pulse on A — strum along, counting "1 + 2 + 3 + 4 +"', label_es: 'Pulso de corcheas en La — rasguea al ritmo, contando "1 + 2 + 3 + 4 +"', bpm: 80,
+        practice: { type: 'playSeq', label: 'Eighth-note pulse on A — strum along, counting "1 + 2 + 3 + 4 +"', label_es: 'Pulso de corcheas en La — rasguea al ritmo, contando "1 + 2 + 3 + 4 +"', bpm: 160,
           notes: [45, 45, 45, 45, 45, 45, 45, 45] } },
       { id: 'm3w2-s4', text: 'Apply power chords on both E and A string roots in the same song',
         text_es: 'Aplicar acordes de potencia con raíces tanto en la cuerda Mi como en la La dentro de la misma canción',
@@ -905,8 +905,8 @@ SETS.push(
         text_es: 'Aplaudir y contar un ritmo de 4 compases, y nombrar redondas, blancas, negras y corcheas',
         gotItWhen: 'you can clap a 4-bar line in time with the metronome and say which notes are whole, half, quarter, or eighth — and name your strum as "straight eighths".',
         gotItWhen_es: 'puedes aplaudir una línea de 4 compases a tiempo con el metrónomo y decir cuáles notas son redondas, blancas, negras o corcheas — y nombrar tu rasgueo como "corcheas rectas".',
-        practice: { type: 'mc', prompt: 'A straight-eighths strum — down on each number, up on each "+", counted "1 + 2 + 3 + 4 +" — is made of which note value?',
-          prompt_es: 'Un rasgueo de corcheas rectas — abajo en cada número, arriba en cada "+", contado "1 + 2 + 3 + 4 +" — está hecho de qué figura rítmica?',
+        practice: { type: 'mc', prompt: 'You strum down on each number and up on each "+", counting "1 + 2 + 3 + 4 +" — two strums per beat. Which note value are you playing?',
+          prompt_es: 'Rasgueas hacia abajo en cada número y hacia arriba en cada "+", contando "1 + 2 + 3 + 4 +" — dos rasgueos por tiempo. ¿Qué figura rítmica estás tocando?',
           choices: ['Whole notes', 'Quarter notes', 'Eighth notes', 'Half notes'],
           choices_es: ['Redondas', 'Negras', 'Corcheas', 'Blancas'], answer: 2,
           explain: 'Every "+" splits a beat in half, so you get two strums per beat — and two notes per beat is exactly what eighth notes are. Quarter notes would be one strum on each number with no "+" between them.',

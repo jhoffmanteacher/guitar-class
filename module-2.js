@@ -223,7 +223,7 @@ SETS.push(
                 stuck: 'Drop to 50 BPM and play it cleanly there first, or cover frets 0–5 (A–D) before adding the rest.',
                 stuck_es: 'Baja a 50 BPM y tócalo limpio ahí primero, o cubre los trastes 0–5 (A–D) antes de agregar el resto.',
                 levelUp: 'Lap it at 80 BPM. Then try the Shuffle self-quiz deck below for random frets instead of a memorized order.',
-                levelUp_es: 'Haz la vuelta a 80 BPM. Luego prueba el mazo de autoevaluación con cartas de abajo para trastes al azar en lugar de un orden memorizado.',
+                levelUp_es: 'Haz la vuelta a 80 BPM. Luego prueba la baraja de autoevaluación con cartas de abajo para trastes al azar en lugar de un orden memorizado.',
                 skills: [3],
                 playSeq: { label: 'Play all', label_es: 'Tocar todo', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] },
                 response: { type: 'short', prompt: 'Personal record: play it cleanly at 60, then raise the metronome +10 at a time. Your fastest CLEAN A-string lap today (BPM)?', prompt_es: 'Récord personal: tócalo limpio a 60, y luego sube el metrónomo de 10 en 10. ¿Cuál es tu vuelta LIMPIA más rápida en la cuerda La hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next session', placeholder_es: 'ej. 80 — intenta superarlo la próxima sesión' }
@@ -244,7 +244,7 @@ SETS.push(
               {
                 label: 'Shuffle self-quiz', label_es: 'Autoevaluación con cartas',
                 text: 'Shuffle self-quiz:<ol><li>The deck below deals you a random fret on the A string.</li><li>Say the note out loud, then press it, before the ring runs out — three seconds a card, ten rounds.</li><li>Miss one and it comes back later in the ten.</li></ol>You\'ve got it when: 9 of 10 — check the skill off right there.',
-                text_es: 'Autoevaluación con cartas:<ol><li>El mazo de abajo te reparte un traste al azar en la cuerda La.</li><li>Di la nota en voz alta y luego presiónala, antes de que el círculo se acabe — tres segundos por carta, diez rondas.</li><li>Si fallas una, vuelve a salir más adelante.</li></ol>Lo tienes cuando: 9 de 10 — marca la destreza ahí mismo.',
+                text_es: 'Autoevaluación con cartas:<ol><li>La baraja de abajo te reparte un traste al azar en la cuerda La.</li><li>Di la nota en voz alta y luego presiónala, antes de que el círculo se acabe — tres segundos por carta, diez rondas.</li><li>Si fallas una, vuelve a salir más adelante.</li></ol>Lo tienes cuando: 9 de 10 — marca la destreza ahí mismo.',
                 drill: { type: 'shuffle', string: 'A', maxFret: 12, rounds: 10, seconds: 3, pile: 'naturals', skill: 'm2w1-s3' },
                 hint: 'No chart. If you stall on a note, loop just that part of the string until it\'s automatic.',
                 hint_es: 'Sin tabla. Si te trabas en una nota, repite solo esa parte de la cuerda hasta que sea automática.',
@@ -253,16 +253,16 @@ SETS.push(
                 skills: [3, 4]
               },
               {
-                label: 'Challenge 3 — Shuffle Run', label_es: 'Reto 3 — Recorrido con cartas',
-                text: '<ol><li>Play the same deck, now on the low E string — and this time name it AND play it before the ring runs out.</li><li>Keep the guitar in hand for this one: the app checks the name, your ear checks the note.</li></ol>You\'ve got it when: 9 of 10, no counting up from E.',
-                text_es: '<ol><li>Toca el mismo mazo, ahora en la cuerda Mi grave — y esta vez nómbrala Y tócala antes de que se acabe el círculo.</li><li>Mantén la guitarra en la mano: la app revisa el nombre, tu oído revisa la nota.</li></ol>Lo tienes cuando: 9 de 10, sin contar desde E.',
+                label: 'Challenge 3 — Shuffle Run (low E review)', label_es: 'Reto 3 — Recorrido con cartas (repaso de la cuerda Mi grave)',
+                text: 'This one goes back to the low E string you named earlier — same deck, harder job.<ol><li>Run it on the low E string, and this time name the note AND play it before the ring runs out.</li><li>Keep the guitar in hand for this one: the app checks the name, your ear checks the note.</li></ol>You\'ve got it when: 9 of 10 on the low E, no counting up from E.',
+                text_es: 'Esta vuelve a la cuerda Mi grave que nombraste antes — la misma baraja, con una tarea más difícil.<ol><li>Córrela en la cuerda Mi grave, y esta vez nombra la nota Y tócala antes de que se acabe el círculo.</li><li>Mantén la guitarra en la mano: la app revisa el nombre, tu oído revisa la nota.</li></ol>Lo tienes cuando: 9 de 10 en la Mi grave, sin contar desde E.',
                 drill: { type: 'shuffle', string: 'lowE', maxFret: 12, rounds: 10, seconds: 3, pile: 'naturals', skill: 'm2w1-s2' },
                 hint: 'The 3-second limit is the real test. You\'re jumping to random frets, not running a memorized lap — that\'s what "name any fret instantly" really means.',
                 hint_es: 'El límite de 3 segundos es la verdadera prueba. Estás saltando a trastes al azar, no haciendo una vuelta memorizada — eso es lo que de verdad significa "nombrar cualquier traste al instante".',
                 stuck: 'Stay on the naturals pile — it deals only the eight natural frets. Add the sharps pile once you hit 9 of 10.',
                 stuck_es: 'Quédate en el montón de solo naturales — reparte únicamente los ocho trastes naturales. Agrega el montón con sostenidos cuando logres 9 de 10.',
                 levelUp: 'Run the Shuffle deck on the A string too, or name a full lap going down the string (12 → 0) without counting.',
-                levelUp_es: 'Haz el mazo de cartas en la cuerda La también, o nombra una vuelta completa bajando por la cuerda (12 → 0) sin contar.',
+                levelUp_es: 'Haz la baraja de cartas en la cuerda La también, o nombra una vuelta completa bajando por la cuerda (12 → 0) sin contar.',
                 skills: [2, 4]
               }
             ]
@@ -365,13 +365,13 @@ SETS.push(
       { id: 'm2w1-s2', text: 'Name all natural notes on the E string (frets 0–12)',
         text_es: 'Nombrar todas las notas naturales en la cuerda Mi (trastes 0–12)',
         gotItWhen: 'the shuffle deck can deal you any NATURAL fret 0–12 at random and you say the low-E note name instantly, before the ring runs out, without counting up from E — 9 of 10. (The sharps pile is the level-up.)',
-        gotItWhen_es: 'el mazo de cartas puede repartirte cualquier traste NATURAL del 0 al 12 al azar y dices el nombre de la nota en la Mi grave al instante, antes de que se acabe el círculo, sin contar desde E — 9 de 10. (El montón con sostenidos es el nivel extra.)',
+        gotItWhen_es: 'la baraja de cartas puede repartirte cualquier traste NATURAL del 0 al 12 al azar y dices el nombre de la nota en la Mi grave al instante, antes de que se acabe el círculo, sin contar desde E — 9 de 10. (El montón con sostenidos es el nivel extra.)',
         practice: { type: 'fretboard', string: 'lowE', label: 'Find the note — low E string', label_es: 'Encuentra la nota — cuerda Mi grave', bpm: 60,
           notes: [40, 41, 43, 45, 47, 48, 50, 52] } },
       { id: 'm2w1-s3', text: 'Name all natural notes on the A string (frets 0–12)',
         text_es: 'Nombrar todas las notas naturales en la cuerda La (trastes 0–12)',
         gotItWhen: 'the shuffle deck can deal you any NATURAL fret 0–12 at random and you say the A-string note name instantly, before the ring runs out, without counting up from A — 9 of 10. (The sharps pile is the level-up.)',
-        gotItWhen_es: 'el mazo de cartas puede repartirte cualquier traste NATURAL del 0 al 12 al azar y dices el nombre de la nota en la cuerda La al instante, antes de que se acabe el círculo, sin contar desde A — 9 de 10. (El montón con sostenidos es el nivel extra.)',
+        gotItWhen_es: 'la baraja de cartas puede repartirte cualquier traste NATURAL del 0 al 12 al azar y dices el nombre de la nota en la cuerda La al instante, antes de que se acabe el círculo, sin contar desde A — 9 de 10. (El montón con sostenidos es el nivel extra.)',
         practice: { type: 'fretboard', string: 'A', label: 'Find the note — A string', label_es: 'Encuentra la nota — cuerda La', bpm: 60,
           notes: [45, 47, 48, 50, 52, 53, 55, 57] } },
       { id: 'm2w1-s4', text: 'Point to any named note on E or A string when called out',
@@ -607,13 +607,13 @@ SETS.push(
             title_es: 'Presiona notas limpias sin zumbido',
             steps: [
           {
-            label: 'Challenge 1 — Frets 1–5 on Low E & A Strings', label_es: 'Reto 1 — Trastes 1–5 en cuerdas Mi grave y La',
-            text: '<ol><li>Play frets 1–5 on the low E string, one finger per fret, then do the same on the A string.</li><li>Keep your thumb behind the neck.</li></ol>You\'ve got it when: every note rings clean with no buzz.<span class="step-figure dual"><img src="img/m2-thumb-hand-position.jpg" alt="Hand-drawn diagram of a fretting hand: thumb positioned roughly behind the middle finger on the back of the neck, fingers arched over the frets, wrist straight."><img src="img/m2-arched-fingers-front.jpg" alt="Close-up front view of four fingers arched over the fretboard, each fingertip pressing down just behind a fret."></span>',
-            text_es: '<ol><li>Toca los trastes 1–5 en la cuerda Mi grave, un dedo por traste, y luego lo mismo en la cuerda La.</li><li>Mantén el pulgar detrás del mástil.</li></ol>Lo tienes cuando: cada nota suena limpia sin zumbido.<span class="step-figure dual"><img src="img/m2-thumb-hand-position.jpg" alt="Dibujo de una mano trasteando: el pulgar colocado más o menos detrás del dedo medio en la parte trasera del mástil, los dedos arqueados sobre los trastes, la muñeca recta."><img src="img/m2-arched-fingers-front.jpg" alt="Vista frontal de cerca de cuatro dedos arqueados sobre el diapasón, cada yema presionando justo detrás de un traste."></span>',
+            label: 'Challenge 1 — Frets 1–4 on Low E & A Strings', label_es: 'Reto 1 — Trastes 1–4 en cuerdas Mi grave y La',
+            text: '<ol><li>Play frets 1–4 on the low E string, one finger per fret, then do the same on the A string.</li><li>Keep your thumb behind the neck.</li></ol>You\'ve got it when: every note rings clean with no buzz.<span class="step-figure dual"><img src="img/m2-thumb-hand-position.jpg" alt="Hand-drawn diagram of a fretting hand: thumb positioned roughly behind the middle finger on the back of the neck, fingers arched over the frets, wrist straight."><img src="img/m2-arched-fingers-front.jpg" alt="Close-up front view of four fingers arched over the fretboard, each fingertip pressing down just behind a fret."></span>',
+            text_es: '<ol><li>Toca los trastes 1–4 en la cuerda Mi grave, un dedo por traste, y luego lo mismo en la cuerda La.</li><li>Mantén el pulgar detrás del mástil.</li></ol>Lo tienes cuando: cada nota suena limpia sin zumbido.<span class="step-figure dual"><img src="img/m2-thumb-hand-position.jpg" alt="Dibujo de una mano trasteando: el pulgar colocado más o menos detrás del dedo medio en la parte trasera del mástil, los dedos arqueados sobre los trastes, la muñeca recta."><img src="img/m2-arched-fingers-front.jpg" alt="Vista frontal de cerca de cuatro dedos arqueados sobre el diapasón, cada yema presionando justo detrás de un traste."></span>',
             hint: 'Go as slow as you need. Every note should ring cleanly with no buzz.',
             hint_es: 'Ve tan despacio como necesites. Cada nota debe sonar limpia sin zumbido.',
-            stuck: 'Use just frets 1–3 with three fingers first, then add the pinky on frets 4–5.',
-            stuck_es: 'Usa solo los trastes 1–3 con tres dedos primero, y luego agrega el meñique en los trastes 4–5.',
+            stuck: 'Use just frets 1–3 with three fingers first, then add the pinky on fret 4.',
+            stuck_es: 'Usa solo los trastes 1–3 con tres dedos primero, y luego agrega el meñique en el traste 4.',
             levelUp: 'Run the same 1-2-3-4 pattern starting at fret 5, where the stretches are smaller — notice the difference.',
             levelUp_es: 'Haz el mismo patrón 1-2-3-4 empezando en el traste 5, donde los estiramientos son más pequeños — nota la diferencia.',
             skills: [1, 2, 3, 6]
@@ -778,14 +778,14 @@ SETS.push(
               caption: '"Sweet Child O\' Mine" — verse bass roots · E & A strings · 60 BPM',
               caption_es: '"Sweet Child O\' Mine" — raíces de bajo de la estrofa · cuerdas Mi y La · 60 BPM',
               notes: [
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'E', fret: 3, note: 'G', midi: 43 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 }
+                { string: 'A', fret: 5, note: 'D', midi: 50, beats: 2 },
+                { string: 'A', fret: 5, note: 'D', midi: 50, beats: 2 },
+                { string: 'A', fret: 3, note: 'C', midi: 48, beats: 2 },
+                { string: 'A', fret: 3, note: 'C', midi: 48, beats: 2 },
+                { string: 'E', fret: 3, note: 'G', midi: 43, beats: 2 },
+                { string: 'E', fret: 3, note: 'G', midi: 43, beats: 2 },
+                { string: 'A', fret: 5, note: 'D', midi: 50, beats: 2 },
+                { string: 'A', fret: 5, note: 'D', midi: 50, beats: 2 }
               ]
             }
           },
@@ -895,7 +895,8 @@ SETS.push(
                 stuck: 'Park on just the F: pluck, listen, adjust, until five ring in a row. Then add the open A — that one\'s free.',
                 stuck_es: 'Quédate solo en el F: pulsa, escucha, ajusta, hasta que salgan cinco seguidas. Luego agrega la A al aire — esa es gratis.',
                 levelUp: 'Trade the open A for fret 5 on the low E — same note, new position. Want the simplified requinto intro line (a requinto is a small, higher-pitched guitar that plays the lead melody)? It\'s the bonus Layer 6 on the "Luna" Song Journey.',
-                levelUp_es: 'Cambia la A al aire por el traste 5 de la Mi grave — la misma nota, una posición nueva. ¿Quieres la línea de intro simplificada de requinto (un requinto es una guitarra pequeña y de tono más agudo que toca la melodía principal)? Es la Capa 6 extra en el Recorrido de la canción de "Luna".'
+                levelUp_es: 'Cambia la A al aire por el traste 5 de la Mi grave — la misma nota, una posición nueva. ¿Quieres la línea de intro simplificada de requinto (un requinto es una guitarra pequeña y de tono más agudo que toca la melodía principal)? Es la Capa 6 extra en el Recorrido de la canción de "Luna".',
+                skills: [1, 2, 5]
               },
               {
                 label: 'Challenge — "Let It Be," bass line', label_es: 'Reto — "Let It Be," línea de bajo',

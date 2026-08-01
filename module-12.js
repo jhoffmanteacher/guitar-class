@@ -280,7 +280,7 @@ SETS.push(
                 text: '<ol><li>Play a p–i–m–a arpeggio on each chord — one thumb bass, then i-m-a rolling up the top three strings.</li><li>Play 2 bars of Am, then 2 bars of C, and loop.</li><li>On Am the thumb takes the open A string; on C it slides to the 3rd-fret C on that same string.</li></ol>You\'ve got it when: every note is the same volume and the a-finger (the high e) doesn\'t rush ahead of the beat.',
                 text_es: '<ol><li>Toca un arpegio p–i–m–a en cada acorde — un bajo del pulgar, y luego i-m-a en un floreo ascendente por las tres cuerdas superiores.</li><li>Toca 2 compases de Am, y luego 2 compases de C, y repite.</li><li>En Am el pulgar toma la cuerda La al aire; en C se desliza al C del traste 3 de esa misma cuerda.</li></ol>Lo tienes cuando: cada nota tiene el mismo volumen y el dedo a (la mi aguda) no se adelanta al tiempo.',
                 hint: 'This is the four-even-notes drill (a drill is a short exercise you repeat to build a skill) Module 8 built the whole pattern on — the a-finger is the one most likely to play too early, so keep it as calm as the thumb.',
-                hint_es: 'Este es el ejercicio de cuatro notas parejas (un ejercicio es una rutina corta que repites para desarrollar una destreza) sobre el que el Módulo 8 construyó todo el patrón — el dedo a es el que más probablemente toque demasiado temprano, así que mantenlo tan calmado como el pulgar.',
+                hint_es: 'Este es el ejercicio de cuatro notas parejas (un ejercicio es una actividad corta que repites para desarrollar una destreza) sobre el que el Módulo 8 construyó todo el patrón — el dedo a es el que más probablemente toque demasiado temprano, así que mantenlo tan calmado como el pulgar.',
                 stuck: 'Loop just Am until the four notes are dead even, then add C — the only thing that changes between the chords is where the thumb lands.',
                 stuck_es: 'Repite solo Am hasta que las cuatro notas estén perfectamente parejas, y luego agrega C — lo único que cambia entre los acordes es dónde cae el pulgar.',
                 levelUp: 'Fold the same p-i-m-a shape into this set\'s Travis pattern — and, when you reach Set 2, into the 3/4 waltz pattern too — keeping every note even.',
@@ -327,8 +327,8 @@ SETS.push(
         text_es: 'Agregar un relleno del dedo i en el "y" del tiempo 2 mientras el pulgar sigue alternando',
         gotItWhen: 'the i-finger fill lands cleanly between two thumb strokes without slowing the thumb down.',
         gotItWhen_es: 'el relleno del dedo i cae limpio entre dos golpes del pulgar sin frenarlo.',
-        practice: { type: 'playSeq', label: 'Thumb keeps alternating, i fills in between — C: bass · G-string · bass · G-string', label_es: 'El pulgar sigue alternando, i rellena en medio — C: bajo · cuerda Sol · bajo · cuerda Sol', bpm: 60,
-          notes: [48, 55, 43, 55] } },
+        practice: { type: 'playSeq', label: 'Thumb on beats 1-2-3-4, i-finger fill on the "and" of 2 — C', label_es: 'Pulgar en los tiempos 1-2-3-4, relleno del dedo i en el "y" del 2 — C', bpm: 60,
+          notes: [48, { midi: 43, beats: 0.5 }, { midi: 55, beats: 0.5 }, 48, 43] } },
       { id: 'm12w1-s4', text: 'Play a Travis-feel pattern over C at 60 BPM for 8 bars',
         text_es: 'Tocar un patrón con sensación Travis sobre C a 60 BPM durante 8 compases',
         gotItWhen: 'the Travis-feel pattern loops over C at 60 BPM for a full 8 bars without breaking.',
@@ -682,8 +682,8 @@ SETS.push(
                   answer: 1,
                   explain: 'Same little-F you learned in Module 5 — the intro arpeggiates it one note at a time (Journey Layer 6). One change: it lets the high e ring OPEN instead of fretting it, so the four notes you roll are F · A · C · open E.',
                   explain_es: 'El mismo F pequeño que aprendiste en el Módulo 5 — la intro lo arpegia una nota a la vez (Recorrido, Capa 6). Un cambio: deja sonar la mi aguda AL AIRE en vez de trastearla, así que las cuatro notas del floreo son F · A · C · E al aire.',
-                  choices: ['Full barre F', 'The little F (xx3211), high e left open', 'Open C', 'Am'],
-                  choices_es: ['F con cejilla completa', 'El F pequeño (xx3211), con la mi aguda al aire', 'C al aire', 'Am'] }
+                  choices: ['Full barre F', 'The little F shape with the high e left open (xx3210)', 'Open C', 'Am'],
+                  choices_es: ['F con cejilla completa', 'La forma del F pequeño con la mi aguda al aire (xx3210)', 'C al aire', 'Am'] }
               }
             ]
           },

@@ -150,8 +150,8 @@ function retimeMetro(){
   clearInterval(metroInterval);
   metroInterval = setInterval(tick, Math.round(60000/getBpm()));
 }
-function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; retimeMetro(); ladderShowDefault(); }
-function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Math.min(220,Math.max(40,getBpm()+d)); document.getElementById('bpm-display').textContent=s.value; if(metroRunning){ stopMetro(); startMetro(); } ladderShowDefault(); }
+function onBpmSlider(val){ document.getElementById('bpm-display').textContent=val; retimeMetro(); ladderCleans=0; ladderShowDefault(); }
+function nudgeBpm(d){ const s=document.getElementById('bpm-slider'); s.value=Math.min(220,Math.max(40,getBpm()+d)); document.getElementById('bpm-display').textContent=s.value; if(metroRunning){ stopMetro(); startMetro(); } ladderCleans=0; ladderShowDefault(); }
 
 /* ── Tempo ladder ──
    Self-report, not mic detection — matches the site's self-check philosophy
@@ -180,8 +180,11 @@ function ladderSetStatus(key, params){
 // Also called from onBpmSlider/nudgeBpm (declared above, runs after this
 // file's globals exist) so the "…at {bpm} BPM" line tracks a manual tempo
 // change instead of quoting whatever the BPM was when the ladder opened.
-// Overwriting a still-flashing up/down message there is deliberate — a
-// manual BPM change makes that message stale too.
+// Those callers also zero ladderCleans first — a lap proven at the old
+// tempo mustn't count toward a +5 bump at the new one. (The ladder's own
+// bump path resets the streak before moving the slider, so the extra zero
+// there is a no-op.) Overwriting a still-flashing up/down message is
+// deliberate — a manual BPM change makes that message stale too.
 function ladderShowDefault(){ ladderSetStatus('tools.ladderStatus', {n:ladderCleans, bpm:getBpm()}); }
 function toggleLadder(){
   ladderOn=!ladderOn;

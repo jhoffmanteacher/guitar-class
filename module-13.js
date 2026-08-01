@@ -190,22 +190,19 @@ SETS.push(
                 text: `Loosen the string safely:<ol><li>Turn that string's tuning key so the pitch drops — pluck as you go and hear it sink.</li><li>Keep going until the string is completely floppy against the fretboard.</li><li>NEVER cut or unhook a string that's still tight: the stored tension can whip it at your face or scratch the top.</li></ol>This one is not a scoring row — it is a stop. Cut or unhook a string that is still under tension and your attempt ends there and restarts, however good the rest of it was. Every string, every time. You've got it when: you can wiggle the string loosely with one finger.${M13_P1_EN}`,
                 text_es: `Afloja la cuerda con seguridad:<ol><li>Gira la clavija de esa cuerda para que el tono baje — puntea mientras giras y escucha cómo cae.</li><li>Sigue hasta que la cuerda quede completamente suelta sobre el diapasón.</li><li>NUNCA cortes ni sueltes una cuerda que sigue tensa: la tensión guardada puede azotarla contra tu cara o rayar la tapa.</li></ol>Esta no es una fila de puntos — es un alto. Si cortas o sueltas una cuerda que sigue tensa, tu intento termina ahí y vuelve a empezar, por bien que hubiera ido lo demás. En cada cuerda, siempre. Lo tienes cuando: puedes mover la cuerda floja con un dedo.${M13_P1_ES}`,
                 stuck: 'Pitch going UP instead of down? You\'re turning the wrong way — or the wrong peg. Trace the string to its peg again and reverse the turn.',
-                stuck_es: '¿El tono SUBE en vez de bajar? Estás girando al revés — o la clavija equivocada. Vuelve a seguir la cuerda hasta su clavija e invierte el giro.',
-                skills: [4]
+                stuck_es: '¿El tono SUBE en vez de bajar? Estás girando al revés — o la clavija equivocada. Vuelve a seguir la cuerda hasta su clavija e invierte el giro.'
               },
               {
                 label: 'Free it at the post', label_es: 'Suéltala en el poste',
                 text: `With the string floppy, unwind the last wraps at the post and slide the end out of the post hole. Nothing should need forcing — if it does, the string is not loose enough yet. You've got it when: the end comes free without pinging or snagging.${M13_P2_EN}`,
-                text_es: `Con la cuerda suelta, desenrolla las últimas vueltas del poste y saca la punta del agujero. Nada debería costar trabajo — si cuesta, la cuerda todavía no está lo bastante floja. Lo tienes cuando: la punta sale sin saltar ni atorarse.${M13_P2_ES}`,
-                skills: [4]
+                text_es: `Con la cuerda suelta, desenrolla las últimas vueltas del poste y saca la punta del agujero. Nada debería costar trabajo — si cuesta, la cuerda todavía no está lo bastante floja. Lo tienes cuando: la punta sale sin saltar ni atorarse.${M13_P2_ES}`
               },
               {
                 label: 'Free it at the bridge', label_es: 'Suéltala en el puente',
                 text: `At the bridge:<ul><li>Nylon ball-end (our guitars): draw the string back out through the tie block hole.</li><li>Steel: ease the bridge pin out — a winder's notch is made for this — and lift the ball out.</li></ul>You've got it when: the string is off with nothing forced and nothing pinging loose.${M13_P3_EN}`,
                 text_es: `En el puente:<ul><li>Nylon con bolita (nuestras guitarras): regresa la cuerda por el agujero del bloque del puente.</li><li>Acero: saca el pin del puente con cuidado — la muesca de la manivela es para eso — y levanta la bolita.</li></ul>Lo tienes cuando: la cuerda salió sin forzar nada y sin que nada saltara.${M13_P3_ES}`,
                 hint: 'Bridge pin stuck? Never pry with pliers against the bridge — push the ball end down into the guitar a little first, then pull the pin straight up.',
-                hint_es: '¿Pin atorado? Nunca hagas palanca con pinzas contra el puente — primero empuja la bolita un poco hacia adentro y luego jala el pin recto hacia arriba.',
-                skills: [4]
+                hint_es: '¿Pin atorado? Nunca hagas palanca con pinzas contra el puente — primero empuja la bolita un poco hacia adentro y luego jala el pin recto hacia arriba.'
               },
               {
                 label: 'Coil and toss', label_es: 'Enrolla y a la basura',
@@ -243,8 +240,8 @@ SETS.push(
             steps: [
               {
                 label: 'Thread and leave slack', label_es: 'Ensarta y deja holgura',
-                text: `Thread the string:<ol><li>Guide it over its own slot in the nut.</li><li>Feed the free end through the hole in the tuning post.</li><li>Don't pull it tight — leave a hand's width of slack over the fretboard (about two frets' worth of extra string).</li></ol>That slack becomes your wraps — a hand's width is enough for either guitar. You've got it when: the string is through the post with visible slack left.${M13_P5_EN}`,
-                text_es: `Ensarta la cuerda:<ol><li>Guíala por su propia ranura en la cejuela.</li><li>Pasa la punta libre por el agujero del poste.</li><li>No la tenses — deja una holgura del ancho de una mano sobre el diapasón (como dos trastes de cuerda extra).</li></ol>Esa holgura se convierte en tus vueltas — el ancho de una mano alcanza para cualquiera de las dos guitarras. Lo tienes cuando: la cuerda pasó por el poste y queda holgura visible.${M13_P5_ES}`,
+                text: `Thread the string:<ol><li>Guide it over its own slot in the nut.</li><li>Feed the free end through the hole in the tuning post.</li><li>Don't pull it tight — leave slack over the fretboard: a hand's width (about two frets' worth of extra string) on our classical guitars, but only about two finger-widths on a steel-string.</li></ol>That slack becomes your wraps, and the two guitars want different amounts: a hand's width gives the 3–5 wraps a classical roller needs, while two finger-widths — pull the string just past its post and stop — gives the 2–3 wraps a steel-string post needs. You've got it when: the string is through the post with visible slack left.${M13_P5_EN}`,
+                text_es: `Ensarta la cuerda:<ol><li>Guíala por su propia ranura en la cejuela.</li><li>Pasa la punta libre por el agujero del poste.</li><li>No la tenses — deja holgura sobre el diapasón: el ancho de una mano (como dos trastes de cuerda extra) en nuestras guitarras clásicas, pero solo como dos dedos de ancho en una de acero.</li></ol>Esa holgura se convierte en tus vueltas, y cada guitarra pide una cantidad distinta: el ancho de una mano da las 3–5 vueltas que necesita el rodillo de una clásica, mientras que dos dedos de ancho — jala la cuerda apenas más allá de su poste y detente — dan las 2–3 vueltas que necesita el poste de una de acero. Lo tienes cuando: la cuerda pasó por el poste y queda holgura visible.${M13_P5_ES}`,
                 skills: [2]
               },
               {
@@ -261,8 +258,8 @@ SETS.push(
                 label: 'Steel: wraps walk DOWN the post', label_es: 'Acero: las vueltas BAJAN por el poste',
                 text: `A steel-string guitar has upright posts standing out of the headstock face, so its wraps do have a direction — downward. Hold light tension with one hand and turn the key with the other:<ol><li>Check direction: tightening should RAISE the pitch and wrap the string so it heads straight to its nut slot.</li><li>Make the first wrap cross OVER the loose tail to lock it, then bring the rest below it.</li><li>Each new wrap goes BELOW the last one, walking down the post toward the headstock.</li><li>Stop at 2–3 neat wraps, string seated in its nut slot.</li></ol>Wraps that walk down press the string into its nut slot and help it hold pitch. You've got it when: the wraps stack downward with no crossing and the string sits in its nut slot.`,
                 text_es: `Una guitarra de cuerdas de acero tiene postes verticales que salen de la cara del clavijero, así que ahí las vueltas sí tienen dirección — hacia abajo. Mantén una tensión ligera con una mano y gira la clavija con la otra:<ol><li>Revisa la dirección: al apretar, el tono debe SUBIR y la cuerda debe salir directo a su ranura en la cejuela.</li><li>Haz que la primera vuelta cruce POR ENCIMA de la punta suelta para atraparla, y baja las demás por debajo.</li><li>Cada vuelta nueva va DEBAJO de la anterior, bajando por el poste hacia el clavijero.</li><li>Detente en 2–3 vueltas ordenadas, con la cuerda asentada en su ranura.</li></ol>Las vueltas que bajan empujan la cuerda hacia su ranura de la cejuela y la ayudan a mantener el tono. Lo tienes cuando: las vueltas se apilan hacia abajo sin cruzarse y la cuerda descansa en su ranura.`,
-                stuck: 'Wraps piling on top of each other? Unwind, re-check your slack (a hand\'s width), and guide the string lower on the post with your free thumb as you wind.',
-                stuck_es: '¿Las vueltas se amontonan? Desenrolla, revisa tu holgura (el ancho de una mano) y guía la cuerda hacia abajo en el poste con el pulgar libre mientras enrollas.',
+                stuck: 'Wraps piling on top of each other? Unwind, re-check your slack (about two finger-widths on a steel-string), and guide the string lower on the post with your free thumb as you wind.',
+                stuck_es: '¿Las vueltas se amontonan? Desenrolla, revisa tu holgura (como dos dedos de ancho en una de acero) y guía la cuerda hacia abajo en el poste con el pulgar libre mientras enrollas.',
                 skills: [2]
               },
               {

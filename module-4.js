@@ -76,7 +76,7 @@ SETS.push(
           {
             label: 'Position Pattern 1 as C major', label_es: 'Posiciona el Patrón 1 en C mayor',
             text: 'Try positioning Pattern 1 as C major pentatonic:<ol><li>Place your 4th finger on the 8th fret of string 6 (the note C).</li><li>Play the pattern up and down slowly.</li><li>Click "Hear C major pentatonic" below to check your ear against it.</li></ol>',
-            text_es: 'Intenta posicionar el Patrón 1 como C mayor pentatónica:<ol><li>Coloca tu dedo anular (4º) en el traste 8 de la cuerda 6 (la nota C).</li><li>Toca el patrón hacia arriba y hacia abajo despacio.</li><li>Presiona "Escucha C mayor pentatónica" abajo para comprobarlo con tu oído.</li></ol>',
+            text_es: 'Intenta posicionar el Patrón 1 como C mayor pentatónica:<ol><li>Coloca tu dedo meñique (4º) en el traste 8 de la cuerda 6 (la nota C).</li><li>Toca el patrón hacia arriba y hacia abajo despacio.</li><li>Presiona "Escucha C mayor pentatónica" abajo para comprobarlo con tu oído.</li></ol>',
             hint: 'Major pentatonic: 4th finger on root. Minor pentatonic: 1st finger on root. Same pattern — different finger on the starting note.',
             hint_es: 'Pentatónica mayor: dedo 4º (meñique) en la raíz. Pentatónica menor: dedo 1º (índice) en la raíz. Mismo patrón — dedo distinto en la nota inicial.',
             skills: [3, 4],
@@ -307,8 +307,8 @@ SETS.push(
               },
               {
                 label: 'Challenge — "Watchtower", the real rhythm', label_es: 'Reto — "Watchtower", el ritmo real',
-                text: '<ol><li>Listen to the recording.</li><li>Find the riff\'s TAB with rhythm stems (Songsterr shows them clearly).</li><li>Play it the way the record actually goes — each root held a full two beats, not one.</li></ol>You\'ve got it when: you can loop A · G · F · G along with the record and stay locked with it. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: revisit Layer 2 of 5</a>.',
-                text_es: '<ol><li>Escucha la grabación.</li><li>Busca el TAB del riff con plicas de ritmo (Songsterr las muestra claramente).</li><li>Tócalo como realmente suena en el disco — cada raíz sostenida dos tiempos completos, no uno.</li></ol>Lo tienes cuando: puedes repetir A · G · F · G junto con la grabación y mantenerte sincronizado. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: vuelve a la Capa 2 de 5</a>.',
+                text: '<ol><li>Listen to the recording.</li><li>Find the riff\'s TAB with rhythm stems (Songsterr shows them clearly).</li><li>Play it the way the record actually goes — each root held a full two beats, just as you played it back in Module 3.</li></ol>You\'ve got it when: you can loop A · G · F · G along with the record and stay locked with it. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: revisit Layer 2 of 5</a>.',
+                text_es: '<ol><li>Escucha la grabación.</li><li>Busca el TAB del riff con plicas de ritmo (Songsterr las muestra claramente).</li><li>Tócalo como realmente suena en el disco — cada raíz sostenida dos tiempos completos, igual que la tocaste en el Módulo 3.</li></ol>Lo tienes cuando: puedes repetir A · G · F · G junto con la grabación y mantenerte sincronizado. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: vuelve a la Capa 2 de 5</a>.',
                 hint: 'You already know this loop holds each root for two beats — you played it that way as power chords back in Module 3. What\'s new here is where the rhythm comes FROM: you read it off the TAB\'s rhythm stems instead of being told it, and you lock to the record instead of a metronome. A click waits for nobody but stays perfectly even; a record breathes, and you have to follow it.',
                 hint_es: 'Ya sabes que esta vuelta sostiene cada raíz dos tiempos — la tocaste así como acordes de potencia en el Módulo 3. Lo nuevo aquí es DE DÓNDE viene el ritmo: lo lees en las plicas de ritmo del TAB en vez de que te lo digan, y te sincronizas con la grabación en vez de con un metrónomo. Un clic no espera a nadie pero se mantiene perfectamente parejo; una grabación respira, y tú tienes que seguirla.',
                 stuck: 'Clap the record\'s rhythm first, no guitar — one clap per root, holding through the silence — then add the frets back once your hands know the shape of the timing.',
@@ -369,8 +369,8 @@ SETS.push(
                 label: 'Challenge — Solo over "Luna"', label_es: 'Reto — Solo sobre "Luna"',
                 text: 'Your box is D minor pentatonic Pattern 1 — root D, low E fret 10. Jam over <a href="https://www.youtube.com/watch?v=wBxFnX_V9mQ&t=84" target="_blank">▶ &#x1F3B5; a slow Dm practice jam (Luna\'s solo key)</a>:<ol><li>Improvise four bars using only the three notes marked below.</li><li>Improvise four more, adding a fourth note from the box.</li></ol>You\'ve got it when: eight bars where every phrase starts or ends on D. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
                 text_es: 'Tu caja es el Patrón pentatónico 1 de D menor — raíz D, cuerda Mi grave traste 10. Toca sobre <a href="https://www.youtube.com/watch?v=wBxFnX_V9mQ&t=84" target="_blank">▶ &#x1F3B5; una pista de jam lenta en D menor (la tonalidad del solo de Luna)</a>:<ol><li>Improvisa cuatro compases usando solo las tres notas marcadas abajo.</li><li>Improvisa cuatro más, agregando una cuarta nota de la caja.</li></ol>Lo tienes cuando: ocho compases donde cada frase empieza o termina en D. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 4 de 5</a>.',
-                hint: '"Luna" lives in F major, and F\'s relative minor is D — that\'s why D minor pentatonic is your box here. Same Pattern 1 shape you\'ve been drilling — just at fret 10, the course\'s highest position. This high up, the frets sit closer together, so the stretch is easier than it looks.',
-                hint_es: '"Luna" vive en F mayor, y la relativa menor de F es D — por eso la pentatónica de D menor es tu caja aquí. La misma forma del Patrón 1 que has estado ejercitando — solo que en el traste 10, la posición más alta del curso. Tan arriba, los trastes están más juntos, así que el estiramiento es más fácil de lo que parece.',
+                hint: '"Luna" lives in F major, and F\'s relative minor is D — that\'s why D minor pentatonic is your box here. Same Pattern 1 shape you\'ve been drilling — just at fret 10, the highest position you\'ve played so far. This high up, the frets sit closer together, so the stretch is easier than it looks.',
+                hint_es: '"Luna" vive en F mayor, y la relativa menor de F es D — por eso la pentatónica de D menor es tu caja aquí. La misma forma del Patrón 1 que has estado ejercitando — solo que en el traste 10, la posición más alta que has tocado hasta ahora. Tan arriba, los trastes están más juntos, así que el estiramiento es más fácil de lo que parece.',
                 stuck: 'Trade just D and F (frets 10 and 13 on the low E) back and forth, changing only the rhythm, until an idea appears.',
                 stuck_es: 'Intercambia solo D y F (trastes 10 y 13 en la Mi grave), cambiando solo el ritmo, hasta que aparezca una idea.',
                 levelUp: 'End every phrase on D so each idea arrives home — or hold the F (fret 13) a little longer for a sadder, longing feel.',
@@ -514,7 +514,7 @@ SETS.push(
             hint_es: 'El video muestra las notas; la dinámica depende de ti. Toca una nota fuerte, y luego en un susurro suave, y escucha cuánto cambia la SENSACIÓN aunque la nota no cambie.',
             skills: [1, 2],
             response: { type: 'short', placeholder: 'Describe your own loud-then-soft experiment: which note, and what changed in the sound?',
-              placeholder_es: 'Describe tu propio experimento fuerte-luego-suave: qué nota, y qué cambió en el sonido?' }
+              placeholder_es: 'Describe tu propio experimento fuerte-luego-suave: ¿qué nota, y qué cambió en el sonido?' }
           },
           {
             label: 'Watch: hammer-ons and pull-offs', label_es: 'Mira: hammer-ons y pull-offs',
@@ -524,7 +524,7 @@ SETS.push(
             hint_es: 'Estas son tus primeras técnicas "expresivas." Un hammer-on conecta dos notas con un solo golpe de púa — cambia la forma (envolvente) de las notas. Un pull-off es el mismo truco pero bajando: tu dedo pulsa la cuerda al salir, así que la nota más grave suena sin ningún golpe de púa.',
             skills: [3, 4],
             response: { type: 'mc', prompt: 'A hammer-on connects two notes using how many pick strokes?',
-              prompt_es: 'Un hammer-on conecta dos notas usando cuántos golpes de púa?',
+              prompt_es: '¿Un hammer-on conecta dos notas usando cuántos golpes de púa?',
               answer: 0,
               explain: 'You pick the first note once, then "hammer" a finger onto the higher fret to sound the second note — one pick stroke for both.',
               explain_es: 'Pulsas la primera nota una vez, y luego "martillas" un dedo sobre el traste más alto para sonar la segunda nota — un golpe de púa para las dos.',
@@ -1025,8 +1025,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge — Cold Read (Knowledge & Reading)', label_es: 'Reto — Lectura a primera vista (Conocimiento y lectura)',
-            text: 'Here\'s a 4-bar lick (a lick = a short solo phrase) in the A minor pentatonic box you haven\'t drilled:<ol><li>DECODE it from the TAB first — name each string and fret, left to right.</li><li>Then play it.</li></ol>You\'ve got it when: you can read a short 4-bar pentatonic lick straight from TAB and play it accurately, without anyone demonstrating it first.',
-            text_es: 'Aquí tienes un lick de 4 compases (un lick = una frase corta de solo) en la caja de A menor pentatónica que no has ejercitado:<ol><li>DECODIFÍCALO del TAB primero — nombra cada cuerda y traste, de izquierda a derecha.</li><li>Luego tócalo.</li></ol>Lo tienes cuando: puedes leer un lick pentatónico corto de 4 compases directamente del TAB y tocarlo con precisión, sin que nadie te lo demuestre primero.',
+            text: 'Here\'s a 4-bar lick (a lick = a short solo phrase) in the A minor pentatonic box. It starts from the ascending run you already know, then turns around and comes back down a new way:<ol><li>DECODE it from the TAB first — name each string and fret, left to right.</li><li>Then play it cold, without pressing Play first.</li></ol>You\'ve got it when: you can read a short 4-bar pentatonic lick straight from TAB and play it accurately, without anyone demonstrating it first.',
+            text_es: 'Aquí tienes un lick de 4 compases (un lick = una frase corta de solo) en la caja de A menor pentatónica. Empieza con el recorrido ascendente que ya conoces, y luego da la vuelta y baja de una forma nueva:<ol><li>DECODIFÍCALO del TAB primero — nombra cada cuerda y traste, de izquierda a derecha.</li><li>Luego tócalo a primera vista, sin presionar Tocar antes.</li></ol>Lo tienes cuando: puedes leer un lick pentatónico corto de 4 compases directamente del TAB y tocarlo con precisión, sin que nadie te lo demuestre primero.',
             hint: 'At the module self-assessment you\'ll read a NEW 4-bar lick cold — this is Task 2. Read before you press Play. Bottom TAB line = low E, top line = high e; the number is the fret. Say it out loud — "G string, fret 5, that\'s C" — as you go, then hit Play all to check yourself.',
             hint_es: 'En la autoevaluación del módulo vas a leer un lick de 4 compases NUEVO a primera vista — esta es la Tarea 2. Lee antes de presionar Tocar. La línea inferior del TAB = Mi grave, la línea superior = mi aguda; el número es el traste. Dilo en voz alta — "cuerda Sol, traste 5, eso es C" — mientras avanzas, y luego presiona Tocar todo para comprobarte.',
             stuck: 'Take it two notes at a time. Find the first note on the neck and play it, then the next — speed comes after the map is clear.',
@@ -1173,8 +1173,8 @@ SETS.push(
           unit: 'count', placeholder: 'e.g. 3 in a row — try for a longer streak', placeholder_es: 'p. ej. 3 seguidas — intenta una racha más larga' } },
       { id: 'm4w3-s8', text: 'Sight-read a short 4-bar pentatonic lick from TAB and play it',
         text_es: 'Leer a primera vista un lick pentatónico corto de 4 compases del TAB y tocarlo',
-        gotItWhen: 'you can decode a 4-bar pentatonic lick straight from the TAB — one you haven\'t drilled — and play it accurately without anyone demonstrating it first.',
-        gotItWhen_es: 'puedes decodificar un lick pentatónico de 4 compases directamente del TAB — uno que no has ejercitado — y tocarlo con precisión sin que nadie te lo demuestre primero.',
+        gotItWhen: 'you can decode a 4-bar pentatonic lick straight from the TAB — reading it cold, without hearing it first — and play it accurately without anyone demonstrating it.',
+        gotItWhen_es: 'puedes decodificar un lick pentatónico de 4 compases directamente del TAB — leyéndolo a primera vista, sin escucharlo antes — y tocarlo con precisión sin que nadie te lo demuestre.',
         practice: { type: 'mc', prompt: 'A TAB line shows "5 7" on the G-string line. What do those numbers tell you?',
           prompt_es: 'Una línea de TAB muestra "5 7" en la línea de la cuerda Sol. ¿Qué te dicen esos números?',
           choices: ['Which frets to press on the G string — fret 5, then fret 7', 'Which fingers to use — like the numbers on a chord diagram', 'How many times to pick each note', 'Which beats of the bar the notes land on'],

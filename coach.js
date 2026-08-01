@@ -404,6 +404,13 @@ function coachAcquireMic(){
   return coachAcquirePending;
 }
 async function coachAcquireMicInner(){
+  // One mic owner at a time: the rail/module recorder holds a plain
+  // {audio:true} stream (all processing on) — stop it before opening this
+  // processing-off stream, or two sessions with conflicting constraints
+  // share the device and the recorder captures the game's reference tones.
+  // Covers every coachAcquireMic call site (games included), not just
+  // coachOpen's own stopAnyRec.
+  if (typeof stopAnyRec === 'function') stopAnyRec();
   try {
     coachStream = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },

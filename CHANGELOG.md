@@ -5,6 +5,50 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-07-31 — Full-site error sweep
+
+### Fixed
+
+- **Lesson cards that told your fingers the wrong thing:** the 4-finger G now
+  says where each finger actually goes (ring finger moves to string 2 so the
+  pinky can take string 1), the Am↔C switch keeps the right fingers planted
+  (only the ring finger moves), Dm is described as one **fret** lower than D —
+  not one string over — the B and Bb barre cards no longer ask your index to
+  fret and mute string 6 at the same time, and Module 2's stretch drill covers
+  frets 1–4 (four fingers, four frets — not five).
+- **A Module 4 card's Spanish named the wrong finger** — it said ring finger
+  (anular) where the English said pinky (meñique).
+- **Demo audio now matches the directions:** Module 2's root-strike loop rings
+  each root two beats like the text says, Module 3's eighth-note pulse plays at
+  the promised speed, and Module 12's thumb-and-fill demo actually plays the
+  fill on the "and" of 2. Buttons that promised accents the audio can't make
+  now tell you to add the accent yourself.
+- **The Luna fingerpicking roll says to leave the high e string open** — it
+  looks like the little F, but fretting the high e the little-F way plays the
+  wrong note. Module 8's fingerstyle checklist now asks for the eight-note
+  pattern over 4/4 progressions, matching its own lesson card.
+- **Daily Review's +10 XP bonus can't fire early anymore.** Practicing one of
+  today's review skills before ever opening the page could bank the bonus off
+  a partial list and block it for the rest of the day.
+- **Recorder:** it now trades the microphone cleanly with the tuner, Listening
+  Coach and games (one owner at a time, both directions), an abandoned
+  permission prompt no longer freezes the Record button until reload, and
+  switching to Español mid-listen-back no longer stops your take at 0:00.
+- **Tempo ladder:** moving the BPM slider resets the clean-lap streak, so one
+  lap at the new tempo can't cash in a streak earned at the old one.
+- **String changing (Module 13):** the slack guide now gives steel-string
+  guitars their own measure (about two finger-widths) instead of the classical
+  hand's width, which wound too many wraps on a steel post.
+- **Module 5's review list gained a Group 3 check** (E and B7 with clean tone)
+  — those two chords were the only ones never reviewed.
+- **Many small repairs across every module:** quiz questions no longer contain
+  their own answers, "catch-all" quiz options keep their place instead of
+  shuffling above the options they refer to, the Watchtower card now shows the
+  Am diagram it names, Module 11's chord-family chart uses the full-barre Bm
+  from Module 7, Spanish consistently says "baraja" for card decks and
+  "tonalidad" for keys, missing ¿ marks were added, and Modules 10–11 now
+  mention their 12-bar blues sections in the set descriptions.
+
 ## 2026-07-31 — Review-pass fixes for the new practice tools
 
 ### Fixed
