@@ -419,8 +419,8 @@ SETS.push(
                 text_es: '<ul><li>Di y luego toca cada nota natural de la cuerda Re, de grave a aguda, del traste 0 al 12.</li></ul>Lo tienes cuando: nombrarlas te toma menos de 15 segundos sin diagrama.<span class="step-figure"><img src="img/m9-d-naturals.svg" alt="Un diagrama del diapasón de la cuerda Re, trastes 0 a 12, con las notas naturales marcadas: D al aire, E en el traste 2, F en el 3, G en el 5, A en el 7, B en el 9, C en el 10, y D de nuevo en el traste 12."></span>',
                 hint: 'Say the note name first, THEN play it — that order is what builds the recall.',
                 hint_es: 'Di el nombre de la nota primero, y LUEGO tócala — ese orden es lo que construye la memoria.',
-                stuck: 'Cover frets 0–5 (D–A) first, get those solid, then add 7–12.',
-                stuck_es: 'Cubre primero los trastes 0–5 (D–A), domínalos, y luego agrega 7–12.',
+                stuck: 'Cover frets 0–5 (D–G) first, get those solid, then add 7–12.',
+                stuck_es: 'Cubre primero los trastes 0–5 (D–G), domínalos, y luego agrega 7–12.',
                 levelUp: 'Say-then-play backwards, high to low.',
                 levelUp_es: 'Di y luego toca al revés, de aguda a grave.',
                 skills: [1],
@@ -447,8 +447,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 3 — D & G Naturals Flash Drill (your assessment piece)', label_es: 'Reto 3 — Relámpago de naturales en Re y Sol (tu pieza de evaluación)',
-                text: '<ol><li>Deal the natural-note deck below and find each note it gives you on the D or G string within 5 seconds.</li><li>Switch strings every 5 cards.</li></ol>You\'ve got it when: 8 out of 10 correct within 5 seconds each, on both strings.',
-                text_es: '<ol><li>Reparte la baraja de notas naturales de abajo y encuentra cada nota que te dé en la cuerda Re o Sol en menos de 5 segundos.</li><li>Cambia de cuerda cada 5 cartas.</li></ol>Lo tienes cuando: 8 de 10 correctas en menos de 5 segundos cada una, en ambas cuerdas.',
+                text: '<ol><li>Deal the natural-note deck below and find each note it gives you on the D or G string within 5 seconds.</li><li>Switch strings halfway through the deck.</li></ol>You\'ve got it when: 6 out of 7 correct within 5 seconds each, on both strings.',
+                text_es: '<ol><li>Reparte la baraja de notas naturales de abajo y encuentra cada nota que te dé en la cuerda Re o Sol en menos de 5 segundos.</li><li>Cambia de cuerda a la mitad de la baraja.</li></ol>Lo tienes cuando: 6 de 7 correctas en menos de 5 segundos cada una, en ambas cuerdas.',
                 drill: { type: 'deck', deck: 'naturals' },
                 hint: 'If you\'re stuck, use the octave shape from a string you already know instead of counting up one fret at a time.',
                 hint_es: 'Si te atoras, usa la forma de octava desde una cuerda que ya conozcas en vez de contar traste por traste.',
@@ -498,7 +498,7 @@ SETS.push(
     assessment: {
       goal: 'Names naturals on D & G through fret 12 · Finds a named note within 5 seconds · Uses the octave shape as a shortcut',
       goal_es: 'Nombra las notas naturales en Re y Sol hasta el traste 12 · Encuentra una nota nombrada en menos de 5 segundos · Usa la forma de octava como atajo',
-      performance: 'Deal 10 cards from the natural-note deck, switching strings every 5 draws, and find each on the D or G string within 5 seconds — film yourself, then check every spot against a fretboard chart. Goal: 8 out of 10 correct.',
+      performance: 'Deal the full 7-card natural-note deck, switching strings halfway through, and find each on the D or G string within 5 seconds — film yourself, then check every spot against a fretboard chart. Goal: 6 out of 7 correct.',
       selfCheck: 'Can you find C on the G string without counting up from open? Can you name the note two strings down and two frets up from any E-string note you know?',
       selfCheck_es: '¿Puedes encontrar C en la cuerda Sol sin contar desde el aire? ¿Puedes nombrar la nota que está dos cuerdas hacia abajo y dos trastes hacia arriba de cualquier nota de la cuerda Mi grave que conozcas?',
       standards: ['Pr.4a', 'Pr.6a']
@@ -517,8 +517,8 @@ SETS.push(
         practice: { type: 'fretboard', string: 'G', label: 'Find the note — G string', label_es: 'Encuentra la nota — cuerda Sol', bpm: 60, notes: [55, 57, 59, 60, 62, 64, 65, 67] } },
       { id: 'm9w1-s3', text: 'Find any named note (dealt from the natural-note deck) on the D or G string within 5 seconds',
         text_es: 'Encontrar cualquier nota nombrada (repartida de la baraja de notas naturales) en la cuerda Re o Sol en menos de 5 segundos',
-        gotItWhen: 'you can find 8 out of 10 dealt notes on the D or G string within 5 seconds each.',
-        gotItWhen_es: 'encuentras 8 de 10 notas repartidas en la cuerda Re o Sol en menos de 5 segundos cada una.',
+        gotItWhen: 'you can find 6 out of 7 dealt notes on the D or G string within 5 seconds each.',
+        gotItWhen_es: 'encuentras 6 de 7 notas repartidas en la cuerda Re o Sol en menos de 5 segundos cada una.',
         practice: { type: 'mc', prompt: 'On the D string, G is at which fret?', prompt_es: 'En la cuerda Re, ¿en cuál traste está G?', choices: ['3', '5', '7', '9'], choices_es: ['3', '5', '7', '9'], answer: 1,
           explain: 'Count up from the open D: D#(1), E(2), F(3), F#(4), G(5). Fret 3 is tempting because that\'s where G lives on the low E string — but every string has its own map.',
           explain_es: 'Cuenta desde la cuerda Re al aire: D#(1), E(2), F(3), F#(4), G(5). El traste 3 es tentador porque ahí vive G en la cuerda Mi grave — pero cada cuerda tiene su propio mapa.' } },
@@ -867,8 +867,8 @@ SETS.push(
                 response: { type: 'mc', prompt: 'In TAB, the TOP line represents:',
                   prompt_es: 'En el TAB, la línea SUPERIOR representa:',
                   answer: 1,
-                  explain: 'TAB mirrors the guitar as you look down at it — thinnest string on top. It\'s the most common beginner reading mistake.',
-                  explain_es: 'El TAB refleja la guitarra tal como la ves desde arriba — la cuerda más delgada arriba. Es el error de lectura más común entre principiantes.',
+                  explain: 'TAB puts the highest-sounding string on top — the thinnest one. That\'s the OPPOSITE of what you see looking down at your own guitar, which is why it\'s the most common beginner reading mistake.',
+                  explain_es: 'El TAB pone la cuerda más aguda arriba — la más delgada. Es lo CONTRARIO de lo que ves al mirar tu guitarra desde arriba, y por eso es el error de lectura más común entre principiantes.',
                   choices: ['The low E string (thickest)', 'The high e string (thinnest)', 'Whichever string you like', 'The B string'],
                   choices_es: ['La cuerda Mi grave (la más gruesa)', 'La cuerda mi aguda (la más delgada)', 'La que tú prefieras', 'La cuerda Si'] }
               },

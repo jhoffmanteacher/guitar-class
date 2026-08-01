@@ -589,8 +589,8 @@ SETS.push(
             steps: [
               {
                 label: 'Ear Spark: name the bass string', label_es: 'Chispa auditiva: nombra el bajo',
-                text: 'Ear Spark (optional, 2 min):<ol><li>Press play below — the deck draws a random mix of Am\'s A-string and D-string bass notes and plays them for you, and you never see which.</li><li>Name each one by ear before you check: A string is Am\'s root (low), D string is the passing bass a fourth higher (five frets up) — low vs. high bass is a fingerpicker\'s first ear skill.</li></ol>',
-                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Presiona reproducir abajo — la baraja saca una mezcla al azar de notas graves de Am en la cuerda La y en la cuerda Re, y las toca por ti, sin que veas cuáles son.</li><li>Nombra cada una de oído antes de revisar: la cuerda La es la raíz de Am (grave), la cuerda Re es el bajo de paso, una cuarta más aguda (cinco trastes más arriba) — grave vs. agudo en el bajo es la primera destreza auditiva de un fingerpicker.</li></ol>',
+                text: 'Ear Spark (optional, 2 min):<ol><li>Press play below — the deck draws a random mix of the two open bass strings your thumb lives on and plays them for you, and you never see which.</li><li>Name each one by ear before you check: the open A string is Am\'s root (low), the open D string is Dm\'s root, a fourth higher (five frets up) — low vs. high bass is a fingerpicker\'s first ear skill.</li></ol>',
+                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Presiona reproducir abajo — la baraja saca una mezcla al azar de las dos cuerdas graves al aire donde vive tu pulgar y las toca por ti, sin que veas cuáles son.</li><li>Nombra cada una de oído antes de revisar: la cuerda La al aire es la raíz de Am (grave), la cuerda Re al aire es la raíz de Dm, una cuarta más aguda (cinco trastes más arriba) — grave vs. agudo en el bajo es la primera destreza auditiva de un fingerpicker.</li></ol>',
                 drill: { type: 'ear', pool: 'amBassAD', draw: 5, skill: 'm8w2-s6' }
               }
             ]

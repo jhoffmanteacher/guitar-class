@@ -646,8 +646,8 @@
     'ear.kBassString':       { en: 'bass string', es: 'cuerda del bajo' },
     'ear.kStringHint':       { en: 'Thickest to thinnest is E–A–D–G–B–e.', es: 'De la más gruesa a la más delgada: E–A–D–G–B–e.' },
     'ear.kFretHint':         { en: 'Every note is on the low E string, frets 0–5.', es: 'Cada nota está en la cuerda Mi grave, trastes 0–5.' },
-    'ear.kBassStringHint':   { en: 'A string is Am\'s root and rings lower; D string is the passing bass, a step higher.',
-                               es: 'La cuerda La es la raíz de Am y suena más grave; la cuerda Re es el bajo de paso, un poco más agudo.' },
+    'ear.kBassStringHint':   { en: 'A string is Am\'s root and rings lower; D string is Dm\'s root, a fourth higher.',
+                               es: 'La cuerda La es la raíz de Am y suena más grave; la cuerda Re es la raíz de Dm, una cuarta más aguda.' },
 
     // ── PR ladder practice panel (personal-record history) ──
     'pr.latest':             { en: 'Latest: {v}', es: 'Último: {v}' },

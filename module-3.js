@@ -544,8 +544,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 1 — "Watchtower" Loop in Time', label_es: 'Reto 1 — Vuelta de "Watchtower" a tiempo',
-            text: '<ul><li>Play the "Watchtower" loop (A5–G5–F5–G5) at 60 BPM, each chord one bar (4 beats), four times through.</li></ul>You\'ve got it when: every chord change lands on beat 1, with no stops.',
-            text_es: '<ul><li>Toca la vuelta de "Watchtower" (A5–G5–F5–G5) a 60 BPM, cada acorde un compás (4 tiempos), cuatro veces seguidas.</li></ul>Lo tienes cuando: cada cambio de acorde cae en el tiempo 1, sin detenerte.',
+            text: '<ul><li>Play the "Watchtower" loop (A5–G5–F5–G5) at 60 BPM, each chord stretched to one full bar (4 beats) — slower than the record on purpose, so the changes have room — four times through.</li></ul>You\'ve got it when: every chord change lands on beat 1, with no stops.',
+            text_es: '<ul><li>Toca la vuelta de "Watchtower" (A5–G5–F5–G5) a 60 BPM, cada acorde estirado a un compás entero (4 tiempos) — más lento que la grabación a propósito, para que los cambios tengan espacio — cuatro veces seguidas.</li></ul>Lo tienes cuando: cada cambio de acorde cae en el tiempo 1, sin detenerte.',
             hint: 'If you miss beat 1, keep going — don\'t stop. Staying in time matters more than the perfect change right now.',
             hint_es: 'Si te pierdes el tiempo 1, sigue tocando — no te detengas. Mantenerte a tiempo importa más que el cambio perfecto por ahora.',
             stuck: 'Drop to 50 BPM and get it clean there first; play through a missed change instead of stopping to fix it.',

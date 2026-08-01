@@ -2407,7 +2407,7 @@ const CB_SECONDS = 90;
 const CB_DECKS = [
   { id: 'open',  labelKey: 'games.cb.deck.open',  chords: ['E','Em','A','Am','D','Dm','G','C','F'] },
   { id: 'power', labelKey: 'games.cb.deck.power', chords: ['E5','G5','A5','C5','D5'] },
-  { id: 'barre', labelKey: 'games.cb.deck.barre', chords: ['Bm','B7','F#m','C#m'] },
+  { id: 'barre', labelKey: 'games.cb.deck.barre', chords: ['Bm','F#m','C#m'] },
   { id: 'all',   labelKey: 'games.cb.deck.all',   chords: ['E','Em','A','Am','D','Dm','G','C','F','E5','G5','A5','C5','D5','Bm','B7','F#m','C#m'] }
 ];
 
@@ -2670,7 +2670,7 @@ function cbRenderDone(){
 const CD_SECONDS = 60;
 const CD_DECKS = [
   { id: 'open',  labelKey: 'games.cd.deck.open',  chords: ['E','Em','A','Am','D','Dm','G','C','F'] },
-  { id: 'barre', labelKey: 'games.cd.deck.barre', chords: ['Bm','B7','F#m','C#m'] },
+  { id: 'barre', labelKey: 'games.cd.deck.barre', chords: ['Bm','F#m','C#m'] },
   { id: 'all',   labelKey: 'games.cd.deck.all',   chords: ['E','Em','A','Am','D','Dm','G','C','F','Bm','B7','F#m','C#m'] }
 ];
 

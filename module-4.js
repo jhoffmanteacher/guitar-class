@@ -81,7 +81,7 @@ SETS.push(
             hint_es: 'La forma del patrón nunca cambia entre mayor y menor — lo único que cambia es qué dedo se queda con la nota raíz. Una vez que lo sabes, puedes deslizar la misma forma a cualquier tonalidad sin volver a aprenderla.',
             skills: [3, 4],
             playSeq: { label: 'Hear C major pentatonic', label_es: 'Escucha C mayor pentatónica', bpm: 60, notes: [48, 50, 52, 55, 57, 60] },
-            response: { type: 'mc', prompt: 'You slide Pattern 1 up the neck to play G MAJOR pentatonic instead of C. Which finger lands on the root note now?',
+            response: { type: 'mc', prompt: 'You slide Pattern 1 along the neck to play G MAJOR pentatonic instead of C. Which finger lands on the root note now?',
               prompt_es: 'Deslizas el Patrón 1 por el mástil para tocar G MAYOR pentatónica en vez de C. ¿Qué dedo cae ahora en la nota raíz?',
               answer: 0,
               explain: 'The finger doesn\'t change with the key — only with major vs minor. In MAJOR pentatonic your 4th finger (pinky) sits on the root wherever you move the shape; in minor it\'s the 1st finger.',

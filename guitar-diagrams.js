@@ -428,7 +428,8 @@ function localStringNotesSvg(kind, notes, opts){
 /* ══════════════════════════════════════════════════════════════
    SINGLE NOTE ON THE FRETBOARD
    Strings drawn top→bottom: high E (top) to low E (bottom),
-   matching the view when looking down at your own guitar.
+   matching TAB convention (highest pitch on top — the reverse
+   of the view looking down at your own guitar).
    Open notes sit to the LEFT of the nut.
    ══════════════════════════════════════════════════════════════ */
 function ordinal(n){

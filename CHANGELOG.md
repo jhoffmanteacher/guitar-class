@@ -5,6 +5,39 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-01 — Full-site error sweep
+
+### Fixed
+
+- **A dozen fact and consistency fixes across the modules**, found by a
+  fresh adversarial audit of all 13 modules, the games, and the chord data:
+  - Module 4's pentatonic quiz said you slide "up the neck" to reach G major
+    from C — G's home is actually five frets *down*; the question now just
+    says "along the neck" (the answer was always right).
+  - Module 3's Set 2 "Watchtower" challenge now says its bar-long chords are
+    a deliberate slow-down — Set 1 had just taught the record's two-beat cycle.
+  - Module 5's waltz lesson pointed to "House of the Rising Sun" as an in-3
+    song; Module 12 (correctly) teaches that song is in 6/8, so the example is
+    now "Happy Birthday."
+  - Module 5's G/B turnaround now describes all three fingers of the G shape
+    instead of quietly dropping one.
+  - Module 7 no longer claims the "Smoke on the Water" record uses power-chord
+    pairs on the low strings — it now says that's *your* version and notes
+    Ritchie Blackmore actually plucks fourths on the D and G strings; the
+    "higher part" Level-up now spells out the real closing phrase.
+  - Module 8's ear bonus (and its arcade hint) called the open D string "Am's
+    passing bass, a step higher" — it's Dm's root, a fourth higher.
+  - Module 9's D-string drill labeled frets 0–5 as "D–A" (fret 5 is G), asked
+    for "8 out of 10" from a 7-card deck (now 6 of 7), and explained TAB as
+    matching the look-down view of your guitar — it's the opposite, as
+    Module 2's own figure says.
+  - Module 11's "Oye Mi Amor" barre challenge asked for Bm–A but showed a G
+    diagram — it now shows the A.
+  - The arcade's "Partial barres" deck included B7, which is an open chord —
+    it now holds just the three real partial barres (B7 stays in "All chords").
+  - The "Sweet Child" Journey page now calls the verse loop by its chords
+    (D–C–G) instead of "the G verse loop."
+
 ## 2026-08-01 — Song Journey TAB check
 
 ### Fixed
