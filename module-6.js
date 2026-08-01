@@ -45,13 +45,13 @@ SETS.push(
               explain_es: 'Mantén la muñeca balanceándose como un péndulo todo el tiempo — incluso en los rasgueos que te saltas, sigue moviéndose. Ese movimiento constante es lo que hace que el rasgueo sea estable y relajado.',
               choices: [
               'Keep the wrist moving like a pendulum, even between strums',
-              'Strum as loudly as possible',
+              'Strum every chord as loudly as you possibly can',
               'Use a very thick pick',
               'Look at your strumming hand the whole time'
             ],
               choices_es: [
               'Mantener la muñeca en péndulo, incluso entre rasgueos',
-              'Rasguear lo más fuerte posible',
+              'Rasguear cada acorde lo más fuerte que puedas',
               'Usar una púa muy gruesa',
               'Mirar tu mano de rasgueo todo el tiempo'
             ] }
@@ -378,7 +378,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'In "1 + 2 + 3 + 4 +", which counts are the DOWNSTROKES?',
           prompt_es: 'En "1 + 2 + 3 + 4 +", ¿cuáles tiempos son los GOLPES HACIA ABAJO?',
           choices: ['The "+" (and) counts', 'The numbers (1, 2, 3, 4)', 'All of them', 'Only beat 1'],
-          choices_es: ['Los "+" (y)', 'Los números (1, 2, 3, 4)', 'Todos', 'Solo el tiempo 1'], answer: 1,
+          choices_es: ['Los tiempos de "+" (la "y")', 'Los números (1, 2, 3, 4)', 'Todos', 'Solo el tiempo 1'], answer: 1,
           explain: 'The numbers are the beats, and your hand is always traveling down when a beat arrives — so numbers = downstrokes, "+" = upstrokes. Keeping that fixed means you never have to decide mid-bar.',
           explain_es: 'Los números son los tiempos, y tu mano siempre va bajando cuando llega un tiempo — así que números = rasgueos hacia abajo, "+" = rasgueos hacia arriba. Mantener eso fijo hace que nunca tengas que decidirlo a mitad del compás.' } },
       { id: 'm6w1-s4', text: 'Strum with even volume — downstrokes and upstrokes feel equally controlled',

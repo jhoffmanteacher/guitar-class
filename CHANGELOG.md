@@ -5,6 +5,25 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-01 — Fairer quiz choices, and guardrails so these errors stay fixed
+
+### Fixed
+
+- **No more guessing the quiz answer by length.** Fifteen more questions
+  (across Modules 1–6, 11 and 12, in English and Spanish) had a right answer
+  that was noticeably the longest choice. The choices are rebalanced — mostly
+  by giving a wrong answer the same level of detail — so you have to know the
+  material, not the pattern.
+- **Module 11's Spanish chord-family video label** now says where the video
+  really starts (0:41, past the intro), matching where the link takes you.
+
+### Changed
+
+- Behind the scenes, the site's pre-publish checks now catch all three of
+  these error families automatically — answer-length giveaways, video labels
+  that disagree with where the link starts, and lesson links whose text no
+  longer matches the video's real title — so they can't quietly come back.
+
 ## 2026-08-01 — Error-sweep fixes: video times, Luna facts, arcade polish
 
 ### Fixed

@@ -32,8 +32,8 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: chords in any key', label_es: 'Mira: acordes en cualquier tonalidad',
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=CyF2enNO7oY" target="_blank">Play All 7 Diatonic Chords In Any Key – EricBlackmonGuitar</a>. Same lesson in Spanish: <a href="https://www.youtube.com/watch?v=jGh2Erg-o8E&t=41" target="_blank">Encontrar los acordes en cualquier tonalidad – Guitarra con Maru (0:00–7:27)</a>. Watch how a chord gets built on every note of the scale — that\'s the "chord family" you\'ll be naming with Roman numerals today.',
-                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=CyF2enNO7oY" target="_blank">Play All 7 Diatonic Chords In Any Key – EricBlackmonGuitar</a> (en inglés). La misma lección en español: <a href="https://www.youtube.com/watch?v=jGh2Erg-o8E&t=41" target="_blank">Encontrar los acordes en cualquier tonalidad – Guitarra con Maru (0:00–7:27)</a>. Mira cómo se construye un acorde en cada nota de la escala — esa es la "familia de acordes" que vas a nombrar con números romanos hoy.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=CyF2enNO7oY" target="_blank">Play All 7 Diatonic Chords In Any Key – EricBlackmonGuitar</a>. Same lesson in Spanish: <a href="https://www.youtube.com/watch?v=jGh2Erg-o8E&t=41" target="_blank">Encontrar los acordes en cualquier tonalidad – Guitarra con Maru (0:41–7:27)</a>. Watch how a chord gets built on every note of the scale — that\'s the "chord family" you\'ll be naming with Roman numerals today.',
+                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=CyF2enNO7oY" target="_blank">Play All 7 Diatonic Chords In Any Key – EricBlackmonGuitar</a> (en inglés). La misma lección en español: <a href="https://www.youtube.com/watch?v=jGh2Erg-o8E&t=41" target="_blank">Encontrar los acordes en cualquier tonalidad – Guitarra con Maru (0:41–7:27)</a>. Mira cómo se construye un acorde en cada nota de la escala — esa es la "familia de acordes" que vas a nombrar con números romanos hoy.',
                 hint: 'Every chord you\'ve ever strummed is built from a scale — today you learn the recipe that turns one scale into a whole family of chords.',
                 hint_es: 'Cada acorde que has rasgueado alguna vez se construye a partir de una escala — hoy aprendes la receta que convierte una escala en toda una familia de acordes.',
                 skills: [1],
@@ -775,8 +775,8 @@ SETS.push(
                   answer: 1,
                   explain: 'Swing the pair — DAH-da DAH-da. Even eighths make it rock; long-short makes it blues.',
                   explain_es: 'Balancea el par — DAH-da DAH-da. Las corcheas parejas lo hacen sonar a rock; largo-corto lo hace sonar a blues.',
-                  choices: ['Perfectly even', 'Long-short, like a heartbeat', 'As fast as possible', 'Only on downbeats'],
-                  choices_es: ['Perfectamente parejas', 'Largo-corto, como un latido', 'Lo más rápido posible', 'Solo en los tiempos fuertes'] }
+                  choices: ['Perfectly even, like a metronome', 'Long-short, like a heartbeat', 'As fast as possible', 'Only on downbeats'],
+                  choices_es: ['Perfectamente parejas, como un metrónomo', 'Largo-corto, como un latido', 'Lo más rápido posible', 'Solo en los tiempos fuertes'] }
               }
             ]
           }
@@ -966,8 +966,8 @@ SETS.push(
         gotItWhen_es: 'puedes decir cuándo elegirías una cejilla (raíces sin forma abierta, como Bb o F#) frente a un acorde abierto (un sonido más grande y resonante), en lugar de elegir uno por costumbre.',
         practice: { type: 'mc', prompt: 'When is a BARRE voicing the better pick for a progression?',
           prompt_es: '¿Cuándo es el acorde con cejilla la mejor opción para una progresión?',
-          choices: ['When the roots have no open shape (Bb, F#…) — one movable grip covers them all', 'Always — barre chords are more advanced, so they\'re better', 'When you want ringing open strings in the sound', 'Never — open shapes cover every song'],
-          choices_es: ['Cuando las raíces no tienen forma abierta (Bb, F#…) — un solo agarre movible las cubre todas', 'Siempre — los acordes con cejilla son más avanzados, así que son mejores', 'Cuando quieres cuerdas al aire sonando en el sonido', 'Nunca — las formas abiertas cubren todas las canciones'], answer: 0,
+          choices: ['When the roots have no open shape (Bb, F#…) — one movable grip covers them all', 'Always — barre chords are more advanced, so they\'re automatically better', 'When you want ringing open strings in the sound', 'Never — open shapes cover every song'],
+          choices_es: ['Cuando las raíces no tienen forma abierta (Bb, F#…) — un solo agarre movible las cubre todas', 'Siempre — los acordes con cejilla son más avanzados, así que son automáticamente mejores', 'Cuando quieres cuerdas al aire sonando en el sonido', 'Nunca — las formas abiertas cubren todas las canciones'], answer: 0,
           explain: 'It\'s a sound-and-logistics choice, not a skill ranking: barres reach any root and mute cleanly; open shapes ring bigger. Pick per progression, not by difficulty.',
           explain_es: 'Es una decisión de sonido y logística, no un ranking de destreza: las cejillas alcanzan cualquier raíz y se silencian limpio; las formas abiertas suenan más grandes. Elige según la progresión, no por dificultad.' } },
       { id: 'm11w3-s7', text: 'Comp a 12-bar blues in A with shuffle feel (A7–D7–E7)',

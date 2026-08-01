@@ -415,8 +415,8 @@ SETS.push(
         gotItWhen_es: 'puedes rasguear fuerte las 6 cuerdas y solo suenan las dos notas intencionadas — las otras 4 quedan en silencio, con tus dedos de trastear inclinados sobre las cuerdas más DELGADAS y la palma de tu mano de pulsar cubriendo las más GRUESAS (en un E5 no hay ninguna, así que la mano de trastear lo hace todo).',
         practice: { type: 'mc', prompt: 'You strum all 6 strings on an E-root power chord, but extra strings keep ringing. What\'s the real fix?',
           prompt_es: 'Rasgueas las 6 cuerdas en un acorde de potencia con raíz en Mi, pero siguen sonando cuerdas de más. ¿Cuál es el verdadero arreglo?',
-          choices: ['Strum much more softly', 'Aim your strum so you only ever hit the two strings you want', 'Let your fretting fingers lean lightly against the unused strings to mute them', 'Press the unused strings all the way down with spare fingers'],
-          choices_es: ['Rasguear mucho más suave', 'Apuntar tu rasgueo para golpear solo las dos cuerdas que quieres', 'Apoyar suavemente los dedos de trastear en las cuerdas sin usar para silenciarlas', 'Presionar las cuerdas sin usar hasta el fondo con los dedos libres'], answer: 2,
+          choices: ['Strum much more softly', 'Aim your strum so carefully that you only ever hit the two strings you want', 'Let your fretting fingers lean lightly against the unused strings to mute them', 'Press the unused strings all the way down with spare fingers'],
+          choices_es: ['Rasguear mucho más suave', 'Apuntar tu rasgueo con tanto cuidado que solo golpees las dos cuerdas que quieres', 'Apoyar suavemente los dedos de trastear en las cuerdas sin usar para silenciarlas', 'Presionar las cuerdas sin usar hasta el fondo con los dedos libres'], answer: 2,
           explain: 'Muting comes from the fretting hand touching — not pressing — the strings you don\'t want. Perfect strum aim isn\'t reliable; pros strum through the mute.',
           explain_es: 'El silenciado viene de la mano de trastear tocando — sin presionar — las cuerdas que no quieres. Apuntar perfecto no es confiable; los profesionales rasguean a través del silenciado.' } },
       { id: 'm3w1-s4', text: 'Move the power chord shape along the A string (A5, C5, D5)',
@@ -492,7 +492,7 @@ SETS.push(
             ],
               choices_es: [
               'Unos 10 BPM más lento de lo que crees necesitar',
-              'Lo más rápido que puedas tocar',
+              'Lo más rápido que puedas llegar a tocar',
               'No importa — elige cualquier tempo',
               'Siempre 120 BPM'
             ] }

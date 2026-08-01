@@ -264,8 +264,8 @@ SETS.push(
         gotItWhen_es: 'puedes nombrar la canción al instante y decir una razón por la que te importa — sin tener que pensarlo.',
         practice: { type: 'mc', prompt: 'You\'re picking the one song that matters to you for this course. What\'s the best test that it\'s the right pick?',
           prompt_es: 'Estás eligiendo la canción que es importante para ti en este curso. ¿Cuál es la mejor prueba de que es la elección correcta?',
-          choices: ['It\'s simple enough to play in your first week', 'It\'s high on the charts right now', 'You love it and can point to what the guitar is doing in it', 'Your friends would all pick the same song'],
-          choices_es: ['Es lo bastante simple para tocarla en tu primera semana', 'Está alta en las listas de popularidad ahora mismo', 'La amas y puedes señalar qué está haciendo la guitarra en ella', 'Todos tus amigos elegirían la misma canción'], answer: 2,
+          choices: ['It\'s simple enough that you could play it in your first week', 'It\'s high on the charts right now', 'You love it and can point to what the guitar is doing in it', 'Your friends would all pick the same song'],
+          choices_es: ['Es lo bastante simple como para poder tocarla en tu primera semana', 'Está alta en las listas de popularidad ahora mismo', 'La amas y puedes señalar qué está haciendo la guitarra en ella', 'Todos tus amigos elegirían la misma canción'], answer: 2,
           explain: 'The song\'s job is to keep you motivated, so it has to matter to YOU — how hard it is doesn\'t matter yet. You\'ll grow toward it all course long.',
           explain_es: 'El trabajo de la canción es mantenerte motivado, así que tiene que importarte a TI — lo difícil que sea todavía no importa. Vas a crecer hacia ella durante todo el curso.' } },
       { id: 'w1-s3', text: 'I can describe what the guitar is doing in a song I love',
@@ -377,13 +377,13 @@ SETS.push(
               explain_es: 'El cuerpo de la guitarra descansa sobre tu pierna — tu mano de trastear debe estar libre para moverse, no sosteniendo el mástil.',
               choices: [
               'On your leg — the fretting hand stays free',
-              'Held up by your fretting hand',
+              'Held up by your fretting hand gripping the neck',
               'Leaning back against your chest',
               'On the chair\'s armrest'
             ],
               choices_es: [
               'Sobre tu pierna — la mano de trastear libre',
-              'Sostenida por tu mano de trastear',
+              'Sostenida por tu mano de trastear apretando el mástil',
               'Recostada hacia atrás contra tu pecho',
               'Apoyada sobre el brazo de la silla'
             ] }

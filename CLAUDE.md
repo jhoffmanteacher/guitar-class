@@ -66,6 +66,14 @@ A tracked pre-commit hook at `.githooks/pre-commit` runs the fast offline checks
 on every commit. Per-machine setup, once: `git config core.hooksPath .githooks`
 (done on the Mac; **needed on Windows**). Bypass with `--no-verify`.
 
+### ⚠️ Sweep findings ratchet into checks.mjs
+Any sweep or audit that finds **3+ instances of a mechanically-detectable error
+class** must add a permanent detector for that class to `checks.mjs` in the same
+session. Never leave a detector script in a session scratchpad — the 2026-07-31
+MC-tell audit died that way and the class recurred in the next sweep. Ratchets
+so far: MC answer-length tells (1h), watch-range labels ↔ `t=` params (1i),
+video-title drift (inside the link check).
+
 ### ⚠️ Editing a module's skills? Update `MODULE_MANIFEST` in `config-main.js`
 Add or remove a `skills:` entry and you must bump that module's `skillCount`.
 `checks.mjs` fails the push if they drift — fix `config-main.js` when flagged.

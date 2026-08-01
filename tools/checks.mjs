@@ -242,6 +242,7 @@ function validateModules() {
   if (problems === 0) ok(`${allSets.length} Sets across ${MODULE_FILES.length} modules — all valid`);
   checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsByModule);
   validateNoteBeats(allSets);
+  checkMcAnswerTells(allSets);
   return allSets;
 }
 
@@ -293,6 +294,110 @@ function validateNoteBeats(allSets) {
   }
 
   if (problems === 0) ok('all note "beats" fields (where present) are valid');
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1h. MC ANSWER-LENGTH TELLS — a keyed choice that is markedly the
+   longest lets students guess without knowing the material. Two sweeps
+   (2026-07-31, 2026-08-01) found and fixed this class by hand; this
+   makes it structural. Flags any 3+-choice MC, in EITHER language,
+   whose keyed answer is strictly longest, ≥1.3× the runner-up, and
+   ≥8 characters longer. Fix by trimming the keyed answer or giving a
+   distractor the same level of detail — not by padding with filler.
+   ════════════════════════════════════════════════════════════════════ */
+function checkMcAnswerTells(allSets) {
+  head('1h. MC answer-length tells');
+  const RATIO = 1.3, MIN_DIFF = 8;
+  let total = 0, bad = 0;
+
+  const checkLang = (choices, answer, where, lang) => {
+    const lens = choices.map(c => String(c).length);
+    const key = lens[answer];
+    const second = Math.max(...lens.filter((_, i) => i !== answer));
+    if (key > second && key >= RATIO * second && key - second >= MIN_DIFF) {
+      err(`${where} [${lang}]: keyed answer is the giveaway-longest choice (${key} vs ${second} chars) — "${String(choices[answer]).slice(0, 50)}…"`);
+      problems++; bad++;
+    }
+  };
+  const checkMc = (mc, where) => {
+    if (!mc || mc.type !== 'mc' || !Array.isArray(mc.choices) || typeof mc.answer !== 'number') return;
+    if (mc.choices.length < 3 || !mc.choices[mc.answer]) return;
+    total++;
+    checkLang(mc.choices, mc.answer, where, 'en');
+    if (Array.isArray(mc.choices_es) && mc.choices_es.length === mc.choices.length)
+      checkLang(mc.choices_es, mc.answer, where, 'es');
+  };
+  const walk = (obj, where) => {
+    if (!obj || typeof obj !== 'object') return;
+    if (obj.type === 'mc') checkMc(obj, where);
+    for (const [k, v] of Object.entries(obj)) {
+      if (k.endsWith('_es')) continue;
+      if (v && typeof v === 'object') walk(v, where);
+    }
+  };
+  for (const w of allSets) {
+    for (const stId of Object.keys(w.stations || {})) {
+      const st = w.stations[stId];
+      const sections = st.sections || (st.steps ? [{ steps: st.steps }] : []);
+      sections.forEach(sec => (sec.steps || []).forEach((step, i) =>
+        walk(step, `set "${w.id}" · station "${stId}" · step ${i + 1}`)));
+    }
+    (Array.isArray(w.skills) ? w.skills : []).forEach(sk =>
+      walk(sk && sk.practice, `set "${w.id}" · skill "${sk && sk.id}" · practice`));
+  }
+  if (bad === 0) ok(`no answer-length tells across ${total} MCs (checked in both languages)`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1i. WATCH-RANGE LABELS ↔ URL TIME PARAMS — lesson links carry a
+   "(M:SS–M:SS)" label (inside the anchor text or right after </a>)
+   telling students what part of the video the card uses, and the URL
+   often carries t=/start=(&end=) doing the seek. Editing one without
+   the other shipped 20 stale labels across two sweeps; this pins them
+   together. A label with no time param must start at 0:00.
+   ════════════════════════════════════════════════════════════════════ */
+function checkWatchRanges() {
+  head('1i. Watch-range labels match URL time params');
+  const toSec = (m, s) => Number(m) * 60 + Number(s);
+  const fmt = sec => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
+  const RANGE = /^\s*\((\d+):(\d{2})\s*[–—-]\s*(?:(\d+):(\d{2}))?[^)]*\)/;
+  let ranged = 0, bad = 0;
+
+  for (const file of [...MODULE_FILES, 'config-main.js', 'index.html']) {
+    const lines = readFileSync(join(ROOT, file), 'utf8').split('\n');
+    lines.forEach((line, li) => {
+      const where = `${file}:${li + 1}`;
+      let consumed = 0;
+      for (const m of line.matchAll(/<a href="([^"]+)"[^>]*>([^<]*)<\/a>(\s*\([^)]*\))?/g)) {
+        const [, href, label, after] = m;
+        if (!/youtu\.be|youtube\.com/.test(href)) continue;
+        // the range lives in the anchor text, or in the parens right after it
+        const r = label.match(/\((\d+):(\d{2})\s*[–—-]\s*(?:(\d+):(\d{2}))?[^)]*\)/) ||
+                  (after && after.match(RANGE));
+        if (!r) continue;
+        ranged++; consumed++;
+        const start = toSec(r[1], r[2]);
+        const end = r[3] !== undefined ? toSec(r[3], r[4]) : null;
+        const t = href.match(/[?&](?:t|start)=(\d+)/);
+        const e = href.match(/[?&]end=(\d+)/);
+        const tSec = t ? Number(t[1]) : 0;
+        if (tSec !== start) {
+          err(`${where}: watch-range label starts at ${fmt(start)} but the URL ${t ? `seeks to t=${t[1]} (${fmt(tSec)})` : 'has no time param (starts 0:00)'} — align them`);
+          problems++; bad++;
+        }
+        if (e && end !== null && Number(e[1]) !== end) {
+          err(`${where}: watch-range label ends at ${fmt(end)} but the URL has end=${e[1]} (${fmt(Number(e[1]))}) — align them`);
+          problems++; bad++;
+        }
+      }
+      const totalRanges = (line.match(/\(\d+:\d{2}\s*[–—-]/g) || []).length;
+      if (totalRanges > consumed && /youtu/.test(line)) {
+        warn(`${where}: ${totalRanges - consumed} "(M:SS–…)" range(s) not attached to a YouTube anchor — can't verify against a time param`);
+        warnings++;
+      }
+    });
+  }
+  if (bad === 0) ok(`${ranged} watch-range labels agree with their URLs' time params`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -813,7 +918,8 @@ function checkDuplicateGlobals() {
    2. LINKS — verify external YouTube / Google-Docs URLs still resolve
    ════════════════════════════════════════════════════════════════════ */
 function collectUrls() {
-  const urls = new Map();  // url → Set(files it appears in)
+  const urls = new Map();          // url → Set(files it appears in)
+  const anchorLabels = new Map();  // youtube url → Set(anchor texts, range labels stripped)
   for (const file of [...MODULE_FILES, 'config-main.js', 'index.html']) {
     const src = readFileSync(join(ROOT, file), 'utf8');
     for (const m of src.matchAll(/https?:\/\/[^\s"'<>)]+/g)) {
@@ -822,8 +928,20 @@ function collectUrls() {
       if (!urls.has(u)) urls.set(u, new Set());
       urls.get(u).add(file);
     }
+    // Anchor text for each YouTube link, so checkLinks can compare it with
+    // the real title oEmbed reports (a renamed video otherwise drifts silently).
+    // Only "Title – Channel" style anchors qualify — descriptive link text
+    // ("a slow Dm practice jam") intentionally doesn't quote the title.
+    for (const m of src.matchAll(/<a href="(https?:\/\/[^"]+)"[^>]*>([^<]+)<\/a>/g)) {
+      const u = m[1];
+      if (!/youtube\.com|youtu\.be/.test(u)) continue;
+      const label = m[2].replace(/\\'/g, "'").replace(/\(\d+:\d{2}[^)]*\)/g, '').trim();
+      if (!label || !label.includes(' – ')) continue;
+      if (!anchorLabels.has(u)) anchorLabels.set(u, new Set());
+      anchorLabels.get(u).add(label);
+    }
   }
-  return urls;
+  return { urls, anchorLabels };
 }
 
 function youtubeId(url) {
@@ -845,7 +963,10 @@ async function checkOne(url) {
       // oEmbed: 200 + JSON for a live public video, 401/403/404 otherwise.
       const r = await fetchWithTimeout(
         `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`);
-      if (r.ok) return { url, state: 'ok' };
+      if (r.ok) {
+        const j = await r.json().catch(() => null);
+        return { url, state: 'ok', title: j && j.title, author: j && j.author_name };
+      }
       if (r.status === 401 || r.status === 403) return { url, state: 'private', detail: `HTTP ${r.status}` };
       return { url, state: 'dead', detail: `HTTP ${r.status}` };
     }
@@ -862,7 +983,7 @@ async function checkOne(url) {
 
 async function checkLinks() {
   head('2. Checking external links');
-  const urls = collectUrls();
+  const { urls, anchorLabels } = collectUrls();
   const list = [...urls.keys()];
   console.log(`${C.dim}  ${list.length} unique YouTube / Docs links…${C.reset}`);
 
@@ -885,6 +1006,26 @@ async function checkLinks() {
   }
   for (const r of priv) { warn(`private/blocked: ${r.url} (${r.detail}) — verify manually`); warnings++; }
   for (const r of errored) { warn(`could not reach: ${r.url} (${r.detail}) — network?`); warnings++; }
+
+  // Title drift: the anchor text students see should still resemble the video's
+  // real title (creators rename videos; two drifted titles shipped unnoticed
+  // before the 2026-08-01 sweep). Warning-level — token overlap is a heuristic.
+  const norm = s => s.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  let drifted = 0;
+  for (const r of results) {
+    if (r.state !== 'ok' || !r.title) continue;
+    for (const label of anchorLabels.get(r.url) || []) {
+      const have = norm(`${r.title} ${r.author || ''}`).replace(/ /g, '');
+      const toks = norm(label).split(' ').filter(w => w.length >= 3);
+      if (!toks.length) continue;
+      const hit = toks.filter(t => have.includes(t)).length;
+      if (hit / toks.length < 0.5) {
+        warn(`title drift? link text "${label}" vs actual "${r.title}" (${r.author || '?'}) — ${r.url}`);
+        warnings++; drifted++;
+      }
+    }
+  }
+  if (drifted === 0) ok('anchor texts still match the videos\' real titles');
 
   if (dead.length === 0) ok(`no dead links (${results.length - priv.length - errored.length} reachable)`);
 }
@@ -1225,6 +1366,7 @@ async function liveCheck() {
   const i18nTable = checkI18nParity();
   checkMissingI18nKeys(i18nTable);
   checkDuplicateGlobals();
+  checkWatchRanges();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

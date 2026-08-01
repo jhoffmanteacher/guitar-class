@@ -1032,7 +1032,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'While you\'re fretting notes, where should your thumb be?',
           prompt_es: 'Mientras trasteas notas, ¿dónde debe estar tu pulgar?',
           choices: ['Hooked over the top of the neck', 'Pressed flat along the side of the fretboard', 'On the back of the neck, roughly behind your middle finger', 'Anywhere — the thumb doesn\'t affect your fingers'],
-          choices_es: ['Enganchado por encima del mástil', 'Presionado plano contra el costado del diapasón', 'En la parte de atrás del mástil, más o menos detrás de tu dedo medio', 'En cualquier lugar — el pulgar no afecta a tus dedos'], answer: 2,
+          choices_es: ['Enganchado por encima del mástil', 'Presionado plano contra el costado del diapasón', 'Atrás del mástil, más o menos detrás de tu dedo medio', 'En cualquier lugar — el pulgar no afecta a tus dedos'], answer: 2,
           explain: 'A thumb behind the neck lets your fingers arch and stretch. Hooking it over the top locks your hand and flattens your fingers onto neighboring strings.',
           explain_es: 'Un pulgar detrás del mástil deja que tus dedos se arqueen y se estiren. Engancharlo por encima bloquea tu mano y aplana los dedos sobre las cuerdas vecinas.' } }
     ]
