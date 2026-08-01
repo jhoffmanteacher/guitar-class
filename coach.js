@@ -2435,7 +2435,7 @@ const CB_SECONDS = 90;
 // labelKey resolved at render time in cbRenderSetup() — never here (this
 // table is built once at load, so t() here would freeze one language in).
 const CB_DECKS = [
-  { id: 'open',  labelKey: 'games.cb.deck.open',  chords: ['E','Em','A','Am','D','Dm','G','C','F'] },
+  { id: 'open',  labelKey: 'games.cb.deck.open',  chords: ['E','Em','A','Am','D','Dm','G','C','F','B7'] },
   { id: 'power', labelKey: 'games.cb.deck.power', chords: ['E5','G5','A5','C5','D5'] },
   { id: 'barre', labelKey: 'games.cb.deck.barre', chords: ['Bm','F#m','C#m'] },
   { id: 'all',   labelKey: 'games.cb.deck.all',   chords: ['E','Em','A','Am','D','Dm','G','C','F','E5','G5','A5','C5','D5','Bm','B7','F#m','C#m'] }
@@ -7500,18 +7500,19 @@ function pdStripHtml(pat){
   ).join('') + `</div>`;
 }
 
-/* One short metronome-style click, scheduled inline — the four beat
-   clicks are the temporal reference that makes on-beat vs off-beat
-   patterns tellable at all (all-downs and reggae have identical spacing;
-   only the clicks reveal which side of the beat the strums sit on). */
-function pdClick(){
+/* One short metronome-style click at an exact audio-clock time — the
+   four beat clicks are the temporal reference that makes on-beat vs
+   off-beat patterns tellable at all (all-downs and reggae have identical
+   spacing; only the clicks reveal which side of the beat the strums sit
+   on). */
+function pdClickAt(at){
   const ctx = getAudioCtx();
   const o = ctx.createOscillator(), g = ctx.createGain();
   o.type = 'square'; o.frequency.value = 1500;
-  g.gain.setValueAtTime(0.1, ctx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.05);
+  g.gain.setValueAtTime(0.1, at);
+  g.gain.exponentialRampToValueAtTime(0.0001, at + 0.05);
   o.connect(g); g.connect(ctx.destination);
-  o.start(); o.stop(ctx.currentTime + 0.06);
+  o.start(at); o.stop(at + 0.06);
 }
 
 /* Audibly strum the PLAYED pattern's bar on Am: a down sweeps every
@@ -7533,17 +7534,24 @@ function pdPlayBar(){
   (s.audioT || []).forEach(clearTimeout);
   s.audioT = [];
   const eighthMs = 60000 / PD_BPM / 2;
-  [0, 2, 4, 6].forEach(i => {   // beat clicks on 1, 2, 3, 4
-    s.audioT.push(setTimeout(() => { if (pd === s && s.phase === 'play') pdClick(); }, Math.round(i * eighthMs)));
-  });
+  /* Two clocks (Strum Hero's shSchedule pattern): every sound starts at
+     an exact audio-clock time; its setTimeout only has to fire in the
+     ~60ms cushion before it. On the JS clock alone, one GC pause would
+     smear where the strums sit against the clicks — the one cue the
+     whole judgement rests on. Cancellation still works: clearing a
+     pending timeout cancels its not-yet-created sound. */
+  const base = ctx.currentTime + 0.09;
+  const schedule = (ms, fn) => {
+    const at = base + ms / 1000;
+    s.audioT.push(setTimeout(() => { if (pd === s && s.phase === 'play') fn(at); }, Math.max(0, Math.round(ms + 30))));
+  };
+  [0, 2, 4, 6].forEach(i => schedule(i * eighthMs, pdClickAt));   // beat clicks on 1, 2, 3, 4
   s.played.slots.forEach((dir, i) => {
     if (!dir) return;
     const order = dir === 'D' ? midis : midis.slice(-4).reverse();
     const stepMs = dir === 'D' ? 30 : 18;
     const vg = chordGain(order.length, true) * (dir === 'U' ? 0.8 : 1);
-    order.forEach((m, j) => {
-      s.audioT.push(setTimeout(() => { if (pd === s && s.phase === 'play') playNote(m, vg); }, Math.round(i * eighthMs + j * stepMs)));
-    });
+    order.forEach((m, j) => schedule(i * eighthMs + j * stepMs, at => playNote(m, vg, at)));
   });
 }
 
@@ -7563,9 +7571,9 @@ function pdNext(){
       const others = SH_PATTERNS.filter(p => p.id !== s.shown.id);
       s.played = others[Math.floor(Math.random() * others.length)];
     }
-    const key = s.shown.id + '/' + s.played.id;
-    if (key !== s.prevKey){ s.prevKey = key; break; }
+    if (s.shown.id + '/' + s.played.id !== s.prevKey) break;
   }
+  s.prevKey = s.shown.id + '/' + s.played.id;
   /* Answers stay locked until the bar has fully played — deciding without
      listening would otherwise be a coin flip worth mashing (2 choices).
      The buttons unlock exactly when the last eighth ends. */
@@ -7706,7 +7714,18 @@ function bcBody(){ return document.getElementById('bc-body'); }
 function bcBestKey(deck){ return 'bcBest:' + deck; }
 function bcDeckChords(){
   const d = BC_DECKS.find(x => x.id === bc.deck);
-  return (d || BC_DECKS[0]).chords;
+  /* The grid renders frets 1–4 only. A shape living up the neck
+     (position > 0, e.g. Bm or C#m) could never be built OR revealed —
+     an unwinnable round — so refuse it loudly if one ever lands in
+     BC_DECKS. bcTargetShape reads frets as absolute grid rows. */
+  return (d || BC_DECKS[0]).chords.filter(n => {
+    const def = typeof CHORD_DIAGRAMS !== 'undefined' && CHORD_DIAGRAMS[n];
+    if (def && def.position > 0){
+      console.warn('Build-a-Chord: skipping ' + n + ' — its shape sits at position ' + def.position + ', off the 1-4 grid');
+      return false;
+    }
+    return true;
+  });
 }
 
 function bcSetup(){
@@ -7746,7 +7765,8 @@ function bcStart(){
   s.phase = 'play';
   s.score = 0; s.streak = 0; s.done = 0; s.built = 0; s.firstTry = 0;
   s.cur = null; s.prev = null;
-  s.requeue = []; s.locked = false; s.flashT = null; s.checkGuard = 0;
+  s.requeue = []; s.locked = false; s.checkGuard = 0;
+  if (s.flashT){ clearTimeout(s.flashT); s.flashT = null; }
   (s.timeouts || []).forEach(clearTimeout);
   s.timeouts = [];
   s.endAt = performance.now() + BC_SECONDS * 1000;
@@ -7820,9 +7840,12 @@ function bcGridHtml(){
     [1, 2, 3, 4].map(f => `<span class="bc-fretnum">${f}</span>`).join('') + `</div>`;
   const cols = strings.map(st => {
     const v = s.shape[st];
-    const head = `<button type="button" class="bc-head${v === 'x' ? ' muted' : ''}" onclick="bcHead(${st})">${v === 'x' ? '&times;' : 'O'}</button>`;
+    /* Header circle matches the site's diagram notation: O above an OPEN
+       string, × above a muted one, nothing above a fretted one — showing
+       O over a placed finger would teach the wrong reading. */
+    const head = `<button type="button" class="bc-head${v === 'x' ? ' muted' : ''}" onclick="bcHead(${st})" aria-label="${t('games.bc.headLabel', { string: st })}">${v === 'x' ? '&times;' : (v === 0 ? 'O' : '&nbsp;')}</button>`;
     const cells = [1, 2, 3, 4].map(f =>
-      `<button type="button" class="bc-cell${v === f ? ' on' : ''}" onclick="bcTap(${st},${f})"></button>`
+      `<button type="button" class="bc-cell${v === f ? ' on' : ''}" onclick="bcTap(${st},${f})" aria-label="${t('games.bc.cellLabel', { string: st, fret: f })}"${v === f ? ' aria-pressed="true"' : ''}></button>`
     ).join('');
     return `<div class="bc-col" id="bc-col-${st}">${head}${cells}</div>`;
   }).join('');
@@ -7831,7 +7854,17 @@ function bcGridHtml(){
 
 function bcRenderGrid(){
   const wrap = document.getElementById('bc-grid-wrap');
-  if (wrap) wrap.innerHTML = bcGridHtml();
+  if (!wrap) return;
+  /* innerHTML replacement drops keyboard focus to <body> — put it back on
+     the same button, or building a 4-finger shape means re-tabbing from
+     the top after every single tap. */
+  const focused = document.activeElement;
+  const key = focused && wrap.contains(focused) ? focused.getAttribute('onclick') : null;
+  wrap.innerHTML = bcGridHtml();
+  if (key){
+    const again = wrap.querySelector(`[onclick="${key}"]`);
+    if (again) again.focus();
+  }
 }
 
 /* Editing the grid clears the stale "N strings are off" line — it described
@@ -7855,14 +7888,18 @@ function bcTap(st, f){
   bcRenderGrid();
 }
 
+function bcStreakHtml(s){
+  const mult = Math.min(4, 1 + Math.floor(s.streak / 5));
+  return s.streak >= 2 ? '&#x1F525; ' + t('games.common.inARow', { n: s.streak }) + (mult > 1 ? ' &mdash; &times;' + mult : '') : '&nbsp;';
+}
+
 function bcRenderPlay(){
   const body = bcBody();
   if (!body || !bc) return;
   const s = bc;
-  const mult = Math.min(4, 1 + Math.floor(s.streak / 5));
   const left = s.endAt - performance.now();
   const actions = s.revealed
-    ? `<div class="coach-tip bc-reveal-line">${t('games.bc.revealLine', { name: s.cur })}</div>
+    ? `<div class="coach-tip bc-reveal-line">${t('games.bc.revealLine', { name: escHtml(s.cur) })}</div>
        <button type="button" class="coach-start" onclick="bcNextBtn()">${t('games.bc.nextButton')} &#x2192;</button>`
     : `<button type="button" class="coach-start" onclick="bcCheck()">&#x2713; ${t('games.bc.checkButton')}</button>
        ${s.misses >= 2 ? `<button type="button" class="tp-btn" onclick="bcReveal()">${t('games.bc.showMe')}</button>` : ''}`;
@@ -7870,9 +7907,9 @@ function bcRenderPlay(){
     `<div class="cb-hud">
        <span class="cb-timer${left <= 10000 ? ' low' : ''}" id="bc-timer">${cbFmtTime(left)}</span>
        <span class="cb-score" id="bc-score">${t('games.common.score', { n: s.score })}</span>
-       <span class="cb-streak" id="bc-streak">${s.streak >= 2 ? '&#x1F525; ' + t('games.common.inARow', { n: s.streak }) + (mult > 1 ? ' &mdash; &times;' + mult : '') : '&nbsp;'}</span>
+       <span class="cb-streak" id="bc-streak">${bcStreakHtml(s)}</span>
      </div>
-     <div class="bc-prompt">${t('games.bc.buildPrompt', { name: s.cur })}</div>
+     <div class="bc-prompt">${t('games.bc.buildPrompt', { name: escHtml(s.cur) })}</div>
      <div id="bc-grid-wrap">${bcGridHtml()}</div>
      <div class="bc-status" id="bc-status">&nbsp;</div>
      <div class="bc-actions">${actions}</div>`;
@@ -7893,6 +7930,8 @@ function bcCheck(){
     if (typeof strumChord === 'function') strumChord(s.cur);   // reward: hear what you built
     const scoreEl = document.getElementById('bc-score');
     if (scoreEl) scoreEl.textContent = t('games.common.score', { n: s.score });
+    const streakEl = document.getElementById('bc-streak');
+    if (streakEl) streakEl.innerHTML = bcStreakHtml(s);   // the streak (and its ×2/×3) just changed
     const grid = document.getElementById('bc-grid');
     if (grid) grid.classList.add('right');
     s.timeouts.push(setTimeout(() => {
@@ -7913,6 +7952,10 @@ function bcCheck(){
     s.queued = true;
   }
   if (s.misses >= 3){ bcReveal(); return; }
+  /* Debounce: a double-tap (or doubled Enter) on a wrong shape would
+     otherwise burn two misses and double the penalty — one grade per
+     gesture. The grid itself stays editable for fixing. */
+  s.checkGuard = performance.now() + 350;
   const scoreEl = document.getElementById('bc-score');
   if (scoreEl) scoreEl.textContent = t('games.common.score', { n: s.score });
   const streakEl = document.getElementById('bc-streak');
@@ -7932,6 +7975,9 @@ function bcCheck(){
 
 function bcReveal(){
   if (!bc || bc.phase !== 'play' || bc.locked || bc.revealed) return;
+  /* Same debounce as Check: when the second miss re-renders the actions
+     row, the Show-me button appears under a double-tap's second tap. */
+  if (performance.now() < (bc.checkGuard || 0)) return;
   bc.shape = bcTargetShape(bc.cur);
   bc.revealed = true;
   bc.streak = 0;

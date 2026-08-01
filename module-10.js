@@ -32,8 +32,8 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: the major scale recipe', label_es: 'Mira: la receta de la escala mayor',
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=fnVlMjza32c&t=55" target="_blank">What is a Major Scale Guitar Lesson - Music Theory For Guitar – Lauren Bateman (0:00–5:12)</a>. Follow along as she lays out the whole/half-step recipe — the exact formula you\'ll use to build C and G major yourself.',
-                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=fnVlMjza32c&t=55" target="_blank">What is a Major Scale Guitar Lesson - Music Theory For Guitar – Lauren Bateman (0:00–5:12)</a>. Sigue el video mientras ella explica la receta de tonos y semitonos — la fórmula exacta que usarás para construir C mayor y G mayor tú mismo.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=fnVlMjza32c&t=55" target="_blank">What is a Major Scale Guitar Lesson - Music Theory For Guitar – Lauren Bateman (0:55–5:12)</a>. Follow along as she lays out the whole/half-step recipe — the exact formula you\'ll use to build C and G major yourself.',
+                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=fnVlMjza32c&t=55" target="_blank">What is a Major Scale Guitar Lesson - Music Theory For Guitar – Lauren Bateman (0:55–5:12)</a>. Sigue el video mientras ella explica la receta de tonos y semitonos — la fórmula exacta que usarás para construir C mayor y G mayor tú mismo.',
                 hint: 'The recipe is a formula — the exact same seven-step pattern of whole and half steps, starting from any note, builds that note\'s major scale.',
                 hint_es: 'La receta es una fórmula — el mismo patrón de siete pasos de tonos y semitonos, empezando desde cualquier nota, construye la escala mayor de esa nota.',
                 skills: [1],
@@ -629,8 +629,8 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: the movable pentatonic box', label_es: 'Mira: la caja pentatónica móvil',
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M&t=31" target="_blank">HOW TO USE The Minor Pentatonic Scale on the Guitar – Lauren Bateman (0:00–5:00)</a>, watching the shape as a MOVABLE pattern rather than a fixed one.',
-                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M&t=31" target="_blank">HOW TO USE The Minor Pentatonic Scale on the Guitar – Lauren Bateman (0:00–5:00)</a>, observando la forma como un patrón MÓVIL en lugar de uno fijo.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M&t=31" target="_blank">HOW TO USE The Minor Pentatonic Scale on the Guitar – Lauren Bateman (0:31–5:00)</a>, watching the shape as a MOVABLE pattern rather than a fixed one.',
+                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M&t=31" target="_blank">HOW TO USE The Minor Pentatonic Scale on the Guitar – Lauren Bateman (0:31–5:00)</a>, observando la forma como un patrón MÓVIL en lugar de uno fijo.',
                 hint: 'Nothing about the shape changes when you slide it — only the fret you start on, which renames the key.',
                 hint_es: 'Nada de la forma cambia cuando la deslizas — solo el traste en el que empiezas, que renombra la tonalidad.',
                 skills: [1],
@@ -704,7 +704,7 @@ SETS.push(
                   explain: 'The pattern is a movable shape — slide the whole thing so its ROOT lands on the new key\'s note.',
                   explain_es: 'El patrón es una forma móvil — desliza todo el conjunto para que su RAÍZ caiga en la nota de la nueva tonalidad.',
                   choices: ['Playing it faster than the original tempo', 'Moving it to a new key, keeping its shape', 'Playing it backwards, last note first', 'Adding more notes to fill it out'],
-                  choices_es: ['Tocarlo más rápido que el tempo original', 'Moverlo a una tonalidad nueva, manteniendo su forma', 'Tocarlo al revés, la última nota primero', 'Agregar más notas para rellenarlo'] }
+                  choices_es: ['Tocarlo más rápido que el tempo original', 'Moverlo a otra tonalidad, manteniendo su forma', 'Tocarlo al revés, la última nota primero', 'Agregar más notas para rellenarlo'] }
               },
               {
                 label: 'Predict the new fret', label_es: 'Predice el nuevo traste',

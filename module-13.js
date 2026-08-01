@@ -102,7 +102,7 @@ SETS.push(
           prompt: 'Your six strings are on and in tune at 38 minutes. Before you raise your hand you should:',
           prompt_es: 'Tus seis cuerdas están puestas y afinadas a los 38 minutos. Antes de levantar la mano debes:',
           choices: ['Raise your hand right away — the strings are what count', 'Coil the old strings into the trash and put the tools back', 'Start loosening them again to double-check', 'Leave the old strings for whoever cleans up'],
-          choices_es: ['Levantar la mano de inmediato — lo que cuenta son las cuerdas', 'Enrollar las cuerdas viejas, echarlas a la basura y guardar las herramientas', 'Empezar a aflojarlas otra vez para revisar', 'Dejar las cuerdas viejas para quien limpie'],
+          choices_es: ['Levantar la mano de inmediato — lo que cuenta son las cuerdas', 'Enrollar las cuerdas viejas en la basura y guardar las herramientas', 'Empezar a aflojarlas otra vez para revisar', 'Dejar las cuerdas viejas para quien limpie'],
           answer: 1,
           explain: 'The clock does not stop until the station is clear. Old string ends are sharp, and a loose string on the floor finds someone\'s foot — clearing up is part of finishing the job.',
           explain_es: 'El reloj no se detiene hasta que el lugar está recogido. Las puntas de las cuerdas viejas son filosas, y una cuerda suelta en el piso encuentra el pie de alguien — recoger es parte de terminar el trabajo.' } }

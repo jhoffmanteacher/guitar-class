@@ -289,8 +289,8 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: note system on D and G', label_es: 'Mira: sistema de notas en Re y Sol',
-                text: 'Watch: <a href="https://youtu.be/WQ8DSYD2kvw?t=172" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (0:00–6:00). Follow along on your own guitar as he walks the D and G strings.',
-                text_es: 'Mira: <a href="https://youtu.be/WQ8DSYD2kvw?t=172" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (0:00–6:00). Sigue el ritmo en tu propia guitarra mientras él recorre las cuerdas Re y Sol.',
+                text: 'Watch: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (0:00–6:00). Follow along on your own guitar as he walks the D and G strings.',
+                text_es: 'Mira: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard (Start With This Simple System) – Marty Music</a> (0:00–6:00). Sigue el ritmo en tu propia guitarra mientras él recorre las cuerdas Re y Sol.',
                 hint: 'Marty builds the fretboard the same way you already know the E and A strings from Module 2 — natural notes, then the sharps and flats that sit between them.',
                 hint_es: 'Marty construye el mástil de la misma manera que ya conoces las cuerdas Mi y La del Módulo 2 — notas naturales, y luego los sostenidos y bemoles que están entre ellas.',
                 skills: [1, 2],

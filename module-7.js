@@ -58,8 +58,8 @@ SETS.push(
           },
           {
             label: 'Watch: the "Smoke on the Water" riff', label_es: 'Mira: el riff de "Smoke on the Water"',
-            text: 'Watch: <a href="https://youtu.be/tCQ0r7vqkFQ?t=58" target="_blank">Smoke On The Water Guitar Lesson – Marty Music</a> (0:00–4:00). This is the riff you\'ll learn in the Practice station.',
-            text_es: 'Mira: <a href="https://youtu.be/tCQ0r7vqkFQ?t=58" target="_blank">Smoke On The Water Guitar Lesson – Marty Music</a> (0:00–4:00). Este es el riff que vas a aprender en la estación de práctica.',
+            text: 'Watch: <a href="https://youtu.be/tCQ0r7vqkFQ?t=58" target="_blank">Smoke On The Water Guitar Lesson – Marty Music</a> (0:58–4:00). This is the riff you\'ll learn in the Practice station.',
+            text_es: 'Mira: <a href="https://youtu.be/tCQ0r7vqkFQ?t=58" target="_blank">Smoke On The Water Guitar Lesson – Marty Music</a> (0:58–4:00). Este es el riff que vas a aprender en la estación de práctica.',
             hint: 'Notice that your version of the riff uses 2-note "power chord" intervals played together — a perfect example of stacked TAB numbers. (On the record, Ritchie Blackmore actually plucks pairs of notes a fourth apart on the D and G strings — the low-string version here is the classic way to learn it.)',
             hint_es: 'Fíjate que tu versión del riff usa intervalos de "acorde de potencia" de 2 notas tocadas juntas — un ejemplo perfecto de números apilados en el TAB. (En la grabación, Ritchie Blackmore en realidad puntea pares de notas a una cuarta de distancia en las cuerdas Re y Sol — la versión en cuerdas graves de aquí es la manera clásica de aprenderlo.)',
             skills: [4, 5],

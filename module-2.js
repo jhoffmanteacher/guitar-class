@@ -68,8 +68,8 @@ SETS.push(
               },
               {
                 label: 'Watch: notes on the fretboard', label_es: 'Mira: notas en el mástil',
-                text: 'Watch: <a href="https://youtu.be/WQ8DSYD2kvw?t=172" target="_blank">Learn Every Note on the Fretboard – Marty Music</a> (0:00–4:00).',
-                text_es: 'Mira: <a href="https://youtu.be/WQ8DSYD2kvw?t=172" target="_blank">Learn Every Note on the Fretboard – Marty Music</a> (0:00–4:00).',
+                text: 'Watch: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard – Marty Music</a> (0:00–4:00).',
+                text_es: 'Mira: <a href="https://youtu.be/WQ8DSYD2kvw" target="_blank">Learn Every Note on the Fretboard – Marty Music</a> (0:00–4:00).',
                 hint: 'Focus on the E and A strings only for now. What patterns does he point out?',
                 hint_es: 'Concéntrate solo en las cuerdas Mi y La por ahora. ¿Qué patrones señala él?',
                 skills: [2, 3],
@@ -454,8 +454,8 @@ SETS.push(
               },
               {
                 label: 'Watch: how to read TAB', label_es: 'Mira: cómo leer TAB',
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=qR0O0bUl5_A&t=32" target="_blank">How to Read Guitar TAB – Lauren Bateman (0:00–4:00)</a>.<span class="step-figure"><img src="img/m2-tab-orientation-en.svg" alt="A TAB staff with its six lines labeled: the top line is the thinnest string, high e, and the bottom line is the thickest string, low E."></span>',
-                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=qR0O0bUl5_A&t=32" target="_blank">How to Read Guitar TAB – Lauren Bateman (0:00–4:00)</a>.<span class="step-figure"><img src="img/m2-tab-orientation-es.svg" alt="Un TAB con sus seis líneas marcadas: la línea de arriba es la cuerda más delgada, la mi aguda, y la línea de abajo es la más gruesa, la Mi grave."></span>',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=qR0O0bUl5_A&t=32" target="_blank">How to Read Guitar TAB – Lauren Bateman (0:32–4:00)</a>.<span class="step-figure"><img src="img/m2-tab-orientation-en.svg" alt="A TAB staff with its six lines labeled: the top line is the thinnest string, high e, and the bottom line is the thickest string, low E."></span>',
+                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=qR0O0bUl5_A&t=32" target="_blank">How to Read Guitar TAB – Lauren Bateman (0:32–4:00)</a>.<span class="step-figure"><img src="img/m2-tab-orientation-es.svg" alt="Un TAB con sus seis líneas marcadas: la línea de arriba es la cuerda más delgada, la mi aguda, y la línea de abajo es la más gruesa, la Mi grave."></span>',
                 hint: 'Pause when she shows a TAB example. Find those notes on your guitar before hitting play.',
                 hint_es: 'Pausa cuando ella muestre un ejemplo de TAB. Encuentra esas notas en tu guitarra antes de presionar reproducir.',
                 skills: [4],

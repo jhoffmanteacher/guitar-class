@@ -921,7 +921,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'Your showcase pattern should be the one that:',
           prompt_es: 'Tu patrón de presentación debería ser el que:',
           choices: ['Impresses the audience the most', 'Never breaks at performance tempo', 'Uses all four picking fingers', 'Is the newest one you learned'],
-          choices_es: ['Impresiona más al público', 'Nunca se rompe al tempo de interpretación', 'Usa los cuatro dedos de punteo', 'Es el más nuevo que aprendiste'], answer: 1,
+          choices_es: ['Impresiona más al público', 'Nunca se rompe al tempo de interpretación', 'Usa los cuatro dedos de la mano de punteo', 'Es el más nuevo que aprendiste'], answer: 1,
           explain: 'What an audience hears is steadiness, so pick the pattern you can hold at full speed without stumbling. The flashiest or newest pattern is the one most likely to break down while you perform.',
           explain_es: 'Lo que el público escucha es la constancia, así que elige el patrón que puedes mantener a toda velocidad sin tropezar. El patrón más vistoso o más nuevo es el que más probablemente se rompe mientras interpretas.' } },
       { id: 'm12w3-s6', text: 'Perform one full fingerpicked verse start to finish, recovering from any mistake',

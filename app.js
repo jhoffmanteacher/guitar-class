@@ -4992,7 +4992,7 @@ function ksPluckCached(ctx, midi){
 }
 /* Reusable single-note player. gain defaults to a single note's level; callers
    sounding several notes at once pass it down so the sum stays in headroom. */
-function playNote(midi, gain){
+function playNote(midi, gain, when){
   const ctx = getAudioCtx();
   if (ctx.state === 'suspended') ctx.resume();
   const src = ctx.createBufferSource();
@@ -5001,7 +5001,7 @@ function playNote(midi, gain){
   g.gain.value = (gain == null) ? PLUCK_VOICE_GAIN : gain;
   src.connect(g);
   g.connect(getPluckBus());
-  src.start();
+  src.start(when || 0);   // optional audio-clock start time; 0 = now
 }
 /* Six notes struck together at full level peaked around 1.5 and clipped on the
    attack. Struck at once their peaks pile up, so split by √n; spread across a

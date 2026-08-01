@@ -57,8 +57,8 @@ SETS.push(
           },
           {
             label: 'Watch: first chords Em & Asus2', label_es: 'Mira: primeros acordes Em y Asus2',
-            text: 'Watch: <a href="https://youtu.be/HNSaXAe8tyg?t=57" target="_blank">Your Very First Chords: Em & Asus2 – Marty Music</a> (0:57–5:00).',
-            text_es: 'Mira: <a href="https://youtu.be/HNSaXAe8tyg?t=57" target="_blank">Your Very First Chords: Em & Asus2 – Marty Music</a> (0:57–5:00).',
+            text: 'Watch: <a href="https://youtu.be/HNSaXAe8tyg?t=57" target="_blank">Your Very First Guitar Lesson (E Minor + Asus2) – Marty Music</a> (0:57–5:00).',
+            text_es: 'Mira: <a href="https://youtu.be/HNSaXAe8tyg?t=57" target="_blank">Your Very First Guitar Lesson (E Minor + Asus2) – Marty Music</a> (0:57–5:00).',
             hint: 'Try placing your fingers as he shows Em, then strum it before watching more. Does every string ring? If not, check which finger is accidentally muting a string. Keep your fretting hand relaxed — a tense hand makes the notes sound bad.',
             hint_es: 'Prueba colocar tus dedos como él muestra para Em, y luego rasguéalo antes de seguir viendo. ¿Suenan todas las cuerdas? Si no, revisa qué dedo está silenciando una cuerda por accidente. Mantén tu mano de trastear relajada — una mano tensa hace que las notas suenen mal.',
             skills: [4],
@@ -970,8 +970,8 @@ SETS.push(
           },
           {
             label: 'Watch: the A chord', label_es: 'Mira: el acorde de A',
-            text: 'Watch: <a href="https://youtu.be/VkkOFLouQDs?t=88" target="_blank">The A Chord (BC-112) – JustinGuitar</a> (0:00–4:00).',
-            text_es: 'Mira: <a href="https://youtu.be/VkkOFLouQDs?t=88" target="_blank">The A Chord (BC-112) – JustinGuitar</a> (0:00–4:00).',
+            text: 'Watch: <a href="https://youtu.be/VkkOFLouQDs" target="_blank">The A Chord (BC-112) – JustinGuitar</a> (0:00–4:00).',
+            text_es: 'Mira: <a href="https://youtu.be/VkkOFLouQDs" target="_blank">The A Chord (BC-112) – JustinGuitar</a> (0:00–4:00).',
             hint: 'Pause the video the moment his A chord is fully formed and count what has to share space in there. How he packs and angles those fingers is the whole trick — copy the arrangement, not just the fret numbers.',
             hint_es: 'Pausa el video en el momento en que su acorde A esté completamente formado y cuenta qué tiene que compartir espacio ahí. Cómo acomoda e inclina esos dedos es todo el truco — copia el acomodo, no solo los números de traste.',
             skills: [2, 4],
@@ -995,8 +995,8 @@ SETS.push(
           },
           {
             label: 'Watch: Bm two ways', label_es: 'Mira: Bm de dos maneras',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=suJnbc2TERU&t=32" target="_blank">B minor (Bm) Chord, 2 Ways (start easy, then barre) – Guitar Goddess (0:00–3:12)</a>.',
-            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=suJnbc2TERU&t=32" target="_blank">B minor (Bm) Chord, 2 Ways (start easy, then barre) – Guitar Goddess (0:00–3:12)</a>.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=suJnbc2TERU&t=32" target="_blank">B minor (Bm) Chord, 2 Ways (start easy, then barre) – Guitar Goddess (0:32–3:12)</a>.',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=suJnbc2TERU&t=32" target="_blank">B minor (Bm) Chord, 2 Ways (start easy, then barre) – Guitar Goddess (0:32–3:12)</a>.',
             hint: 'Bm is the trickiest chord in this group. The four-finger version (xx4432) is the most accessible — one finger per string, no barre anywhere in it. Don\'t try the full barre version yet (that\'s Module 7) — focus on getting a clean sound first.',
             hint_es: 'Bm es el acorde más complicado de este grupo. La versión de cuatro dedos (xx4432) es la más accesible — un dedo por cuerda, sin ninguna cejilla. No intentes todavía la versión con cejilla completa (eso es el Módulo 7) — concéntrate primero en lograr un sonido limpio.',
             skills: [3],
@@ -1014,8 +1014,8 @@ SETS.push(
             steps: [
           {
             label: 'Listen: "Luna"', label_es: 'Escucha: "Luna"',
-            text: 'Listen to "Luna" by Peso Pluma & Junior H — the whole song uses just two chords, F and Am, with Dm making a brief passing appearance near the end of the verse and again in the closing bridge (some charts voice it as Dm9). The pulse is in 2: tap just the big downbeats and feel the chord changes land right on them.',
-            text_es: 'Escucha "Luna" de Peso Pluma y Junior H — toda la canción usa solo dos acordes, F y Am, con Dm apareciendo brevemente de paso cerca del final de la estrofa y otra vez en el puente final (algunos diagramas lo interpretan como Dm9). El pulso está en 2: marca solo los tiempos fuertes y siente los cambios de acorde caer justo en ellos.',
+            text: 'Listen to "Luna" by Peso Pluma & Junior H — the whole song uses just two chords, F and Am, with Dm making one brief passing appearance in the song\'s opening lines. The pulse is in 2: tap just the big downbeats and feel the chord changes land right on them.',
+            text_es: 'Escucha "Luna" de Peso Pluma y Junior H — toda la canción usa solo dos acordes, F y Am, con Dm haciendo una sola aparición breve de paso en las primeras líneas de la canción. El pulso está en 2: marca solo los tiempos fuertes y siente los cambios de acorde caer justo en ellos.',
             hint: 'F and Am are chords you already know from Group 1 — Dm passes through briefly near the end of the verse and in the closing bridge. Your ear already knows the sound — you\'re just learning to place the changes.',
             hint_es: 'F y Am son acordes que ya conoces del Grupo 1 — Dm pasa brevemente cerca del final de la estrofa y en el puente final. Tu oído ya conoce el sonido — solo estás aprendiendo a ubicar los cambios.',
             skills: [6],
@@ -1176,8 +1176,8 @@ SETS.push(
                 hint_es: 'Un vamp es un patrón de acordes corto que se repite una y otra vez. F y Am son acordes que ya conoces bien del Grupo 1 — lo único nuevo es la forma simplificada de F (xx3211) y ajustar el cambio al pulso de 6/8.',
                 stuck: 'Loop just F → Am until the shape change is automatic, then add the metronome at 60 BPM.',
                 stuck_es: 'Repite solo F → Am hasta que el cambio de forma sea automático, y luego agrega el metrónomo a 60 BPM.',
-                levelUp: 'Drop in the passing Dm near the end of the verse (some charts voice it as Dm9), or push the tempo to 70 BPM.',
-                levelUp_es: 'Agrega el Dm de paso cerca del final de la estrofa (algunos diagramas lo interpretan como Dm9), o empuja el tempo a 70 BPM.',
+                levelUp: 'Drop in the passing Dm in the song\'s opening lines, or push the tempo to 70 BPM.',
+                levelUp_es: 'Agrega el Dm de paso en las primeras líneas de la canción, o empuja el tempo a 70 BPM.',
                 skills: [6],
                 chords: [
                   { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
@@ -1500,12 +1500,12 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "Luna", strummed (full-song version)', label_es: 'Reto — "Luna", rasgueada (versión de canción completa)',
-                text: 'The full song is F · Am, with Dm making a brief passing appearance near the end of the verse and in the closing bridge.<ol><li>Play two downbeat strums per bar at 60 BPM, building toward 70.</li><li>Sing or hum "Luna, dile tú" while you play — it\'s tricky!</li></ol>You\'ve got it when: a full verse and chorus with every change on the downbeat and the F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
-                text_es: 'La canción completa es F · Am, con Dm apareciendo brevemente de paso cerca del final de la estrofa y en el puente final.<ol><li>Toca dos rasgueos en el tiempo fuerte por compás a 60 BPM, subiendo hacia 70.</li><li>Canta o tararea "Luna, dile tú" mientras tocas — ¡es complicado!</li></ol>Lo tienes cuando: una estrofa y un coro completos con cada cambio en el tiempo fuerte y el F sonando limpio. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
+                text: 'The full song is F · Am, with Dm making one brief passing appearance in the song\'s opening lines.<ol><li>Play two downbeat strums per bar at 60 BPM, building toward 70.</li><li>Sing or hum "Luna, dile tú" while you play — it\'s tricky!</li></ol>You\'ve got it when: a full verse and chorus with every change on the downbeat and the F ringing clean. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 5 of 5</a>.',
+                text_es: 'La canción completa es F · Am, con Dm haciendo una sola aparición breve de paso en las primeras líneas de la canción.<ol><li>Toca dos rasgueos en el tiempo fuerte por compás a 60 BPM, subiendo hacia 70.</li><li>Canta o tararea "Luna, dile tú" mientras tocas — ¡es complicado!</li></ol>Lo tienes cuando: una estrofa y un coro completos con cada cambio en el tiempo fuerte y el F sonando limpio. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 5 de 5</a>.',
                 hint: 'You met this vamp in Set 3 — now make it assessment-clean. F is the trickiest shape; keep your fingers arched and thumb behind the neck so all four strings you strum ring.',
                 hint_es: 'Conociste este vamp en la Unidad 3 — ahora déjalo limpio para la evaluación. F es la forma más complicada; mantén tus dedos arqueados y el pulgar detrás del mástil para que las cuatro cuerdas que rasgueas suenen.',
-                stuck: 'F is the tough one — loop Am → F on its own until the shape lands clean, then run the full F–Am (with the passing Dm near the verse\'s end and in the closing bridge).',
-                stuck_es: 'F es el difícil — repite solo Am → F hasta que la forma caiga limpia, y luego corre el F–Am completo (con el Dm de paso cerca del final de la estrofa y en el puente final).',
+                stuck: 'F is the tough one — loop Am → F on its own until the shape lands clean, then run the full F–Am (with the passing Dm in the song\'s opening lines).',
+                stuck_es: 'F es el difícil — repite solo Am → F hasta que la forma caiga limpia, y luego corre el F–Am completo (con el Dm de paso en las primeras líneas de la canción).',
                 levelUp: 'Try the down-down-up split strum on each chord, or push to 70 BPM.',
                 levelUp_es: 'Prueba el rasgueo dividido abajo-abajo-arriba en cada acorde, o empuja a 70 BPM.',
                 skills: [5, 6],

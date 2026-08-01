@@ -5,6 +5,40 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-01 — Error-sweep fixes: video times, Luna facts, arcade polish
+
+### Fixed
+
+- **Nineteen more video cards now say where the video really starts.** An
+  earlier round of intro-skips added start times to some links without
+  updating the "(0:00–4:00)" labels next to them, so the card promised the
+  video from the top but the link jumped in partway. Labels now match the
+  links. Five links whose jump-in point looked auto-generated and wrong
+  (they skipped past a minute or more of actual teaching) go back to
+  starting at 0:00.
+- **Two video titles corrected** to match what the video is actually called
+  on YouTube (the Module 5 Em & Asus2 lesson and the Module 6 strumming
+  lesson).
+- **Luna's Dm now taught the same everywhere.** Module 5 still said the
+  passing Dm lands "near the end of the verse and in the closing bridge";
+  the Song Journey page had already been corrected to its one appearance in
+  the song's opening lines. Module 5 now agrees, in both languages.
+- **Fairer quizzes in Spanish.** Five questions where the right answer was
+  still noticeably the longest choice in Spanish (but not in English) got
+  rebalanced Spanish choices.
+- **Build-a-Chord polish:** the circle above a string now reads like a real
+  chord diagram (O only when the string is open — nothing above a fretted
+  string), a fast double-tap on "Check my chord" no longer costs two misses,
+  the streak flame updates the moment you earn it, and the grid works
+  properly with a keyboard and screen reader.
+- **Pattern Detective's clicks and strums** are now scheduled on the audio
+  clock, so a slow computer can't smear the timing you're being asked to
+  judge.
+- **Chord Blitz's "Open chords" deck now includes B7**, matching
+  Build-a-Chord's "All open chords" deck.
+- **The Spanish arcade now says "Acordes de potencia"** for the power-chord
+  deck instead of the untranslated "Power chords".
+
 ## 2026-08-01 — Lesson videos start where the teaching starts
 
 ### Changed

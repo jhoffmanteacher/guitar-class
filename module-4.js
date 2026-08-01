@@ -508,8 +508,8 @@ SETS.push(
             steps: [
           {
             label: 'Watch: using the minor pentatonic', label_es: 'Mira: usar la pentatónica menor',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M&t=31" target="_blank">How to USE the Minor Pentatonic Scale – Lauren Bateman (0:00–4:00)</a> to refresh the shape. Then YOU add the expression the video doesn\'t:<ol><li>Pick one note from the pattern.</li><li>Play it loud, then soft.</li></ol>That difference in volume is dynamics.',
-            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M&t=31" target="_blank">How to USE the Minor Pentatonic Scale – Lauren Bateman (0:00–4:00)</a> para repasar la forma. Luego TÚ agregas la expresión que el video no muestra:<ol><li>Elige una nota del patrón.</li><li>Tócala fuerte, y luego suave.</li></ol>Esa diferencia de volumen es la dinámica.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M&t=31" target="_blank">How to USE the Minor Pentatonic Scale – Lauren Bateman (0:31–4:00)</a> to refresh the shape. Then YOU add the expression the video doesn\'t:<ol><li>Pick one note from the pattern.</li><li>Play it loud, then soft.</li></ol>That difference in volume is dynamics.',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=1mT5nUE0o7M&t=31" target="_blank">How to USE the Minor Pentatonic Scale – Lauren Bateman (0:31–4:00)</a> para repasar la forma. Luego TÚ agregas la expresión que el video no muestra:<ol><li>Elige una nota del patrón.</li><li>Tócala fuerte, y luego suave.</li></ol>Esa diferencia de volumen es la dinámica.',
             hint: 'The video shows the notes; the dynamics are on you. Play one note loud, then whisper-soft, and listen for how much the FEEL changes even though the note doesn\'t.',
             hint_es: 'El video muestra las notas; la dinámica depende de ti. Toca una nota fuerte, y luego en un susurro suave, y escucha cuánto cambia la SENSACIÓN aunque la nota no cambie.',
             skills: [1, 2],
@@ -830,7 +830,7 @@ SETS.push(
         practice: { type: 'mc', prompt: 'Your solo is stuck on ONE note for 8 bars. What keeps a listener interested?',
           prompt_es: 'Tu solo está atascado en UNA sola nota durante 8 compases. ¿Qué mantiene interesado al oyente?',
           choices: ['Nothing — you need more notes to be interesting', 'Playing that note as fast as possible the whole time', 'Changing the rhythm, volume, and note length as you go', 'Holding one long note for all 8 bars'],
-          choices_es: ['Nada — necesitas más notas para ser interesante', 'Tocar esa nota lo más rápido posible todo el tiempo', 'Cambiar el ritmo, el volumen y la duración de la nota sobre la marcha', 'Sostener una sola nota larga durante los 8 compases'], answer: 2,
+          choices_es: ['Nada — necesitas más notas para ser interesante', 'Tocar esa nota lo más rápido posible todo el tiempo', 'Ir cambiando el ritmo, el volumen y la duración de la nota', 'Sostener una sola nota larga durante los 8 compases'], answer: 2,
           explain: 'Rhythm, dynamics, and space are expression tools that don\'t need new notes — that\'s the whole point of the one-note solo.',
           explain_es: 'El ritmo, la dinámica y el espacio son herramientas de expresión que no necesitan notas nuevas — ese es todo el punto del solo de una nota.' } },
       { id: 'm4w2-s6', text: 'Improvise a call-and-response phrase (call ends off root; response lands on root)',
@@ -890,8 +890,8 @@ SETS.push(
           },
           {
             label: 'Watch: vibrato technique', label_es: 'Mira: técnica de vibrato',
-            text: 'Watch: <a href="https://youtu.be/WNWqobkgdBA?t=93" target="_blank">Vibrato Technique (Hand Movement, TE-103) – JustinGuitar</a> (0:00–3:00). As you watch, try it yourself on the 5th fret of string 1 — rock the finger back and forth gently and listen for the pitch to wobble.',
-            text_es: 'Mira: <a href="https://youtu.be/WNWqobkgdBA?t=93" target="_blank">Vibrato Technique (Hand Movement, TE-103) – JustinGuitar</a> (0:00–3:00). Mientras miras, pruébalo tú mismo en el traste 5 de la cuerda 1 — mece el dedo hacia adelante y atrás suavemente y escucha cómo la nota oscila.',
+            text: 'Watch: <a href="https://youtu.be/WNWqobkgdBA" target="_blank">Vibrato Technique (Hand Movement, TE-103) – JustinGuitar</a> (0:00–3:00). As you watch, try it yourself on the 5th fret of string 1 — rock the finger back and forth gently and listen for the pitch to wobble.',
+            text_es: 'Mira: <a href="https://youtu.be/WNWqobkgdBA" target="_blank">Vibrato Technique (Hand Movement, TE-103) – JustinGuitar</a> (0:00–3:00). Mientras miras, pruébalo tú mismo en el traste 5 de la cuerda 1 — mece el dedo hacia adelante y atrás suavemente y escucha cómo la nota oscila.',
             hint: 'Keep the fingertip planted — the motion comes from the wrist, not from sliding along the string. Listen closely to what happens to the note while your finger rocks, and how it differs from a bend. It takes weeks to develop — just start!',
             hint_es: 'Mantén la yema plantada — el movimiento viene de la muñeca, no de deslizarte por la cuerda. Escucha con atención qué le pasa a la nota mientras tu dedo se mece, y en qué se diferencia de un bend. Toma semanas desarrollarlo — ¡solo empieza!',
             skills: [3],
@@ -909,7 +909,7 @@ SETS.push(
               choices_es: [
               'Una pequeña oscilación controlada de la altura en una nota sostenida',
               'Tocar dos notas al mismo tiempo',
-              'Doblar la cuerda hacia arriba un tono completo y sostenerla',
+              'Doblar la cuerda hacia arriba un tono completo y sostenerla arriba',
               'Deslizarse rápido entre dos trastes'
             ] }
           }

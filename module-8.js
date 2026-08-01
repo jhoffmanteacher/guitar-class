@@ -32,8 +32,8 @@ SETS.push(
             steps: [
           {
             label: 'Watch: fingerpicking basics', label_es: 'Mira: fundamentos de fingerpicking',
-            text: 'Watch: <a href="https://youtu.be/YZkkUjDDamA?t=52" target="_blank">Beginner Fingerpicking Made Easy: Pinch, Pluck, & Play! – Marty Music</a> (0:00–5:00). As you watch, copy his RIGHT-HAND shape on your own guitar — thumb resting on the low E, fingers curved over the treble strings.',
-            text_es: 'Mira: <a href="https://youtu.be/YZkkUjDDamA?t=52" target="_blank">Beginner Fingerpicking Made Easy: Pinch, Pluck, & Play! – Marty Music</a> (0:00–5:00). Mientras miras, copia su forma de la MANO DERECHA en tu propia guitarra — pulgar apoyado en la Mi grave, dedos curvados sobre las cuerdas agudas.',
+            text: 'Watch: <a href="https://youtu.be/YZkkUjDDamA?t=52" target="_blank">Beginner Fingerpicking Made Easy: Pinch, Pluck, & Play! – Marty Music</a> (0:52–5:00). As you watch, copy his RIGHT-HAND shape on your own guitar — thumb resting on the low E, fingers curved over the treble strings.',
+            text_es: 'Mira: <a href="https://youtu.be/YZkkUjDDamA?t=52" target="_blank">Beginner Fingerpicking Made Easy: Pinch, Pluck, & Play! – Marty Music</a> (0:52–5:00). Mientras miras, copia su forma de la MANO DERECHA en tu propia guitarra — pulgar apoyado en la Mi grave, dedos curvados sobre las cuerdas agudas.',
             hint: 'Watch the right hand: wrist arched, fingers curved like he\'s holding a small ball. The thumb sits FORWARD of the fingers, not tucked under them.',
             hint_es: 'Observa la mano derecha: muñeca arqueada, dedos curvados como si sostuviera una pelotita. El pulgar se ubica ADELANTE de los dedos, no metido debajo de ellos.',
             skills: [1, 2],
@@ -57,8 +57,8 @@ SETS.push(
           },
           {
             label: 'Watch: p-i-m-a finger assignments', label_es: 'Mira: asignación de dedos p-i-m-a',
-            text: 'Watch: <a href="https://youtu.be/K2Z3RZc5t-A?t=54" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (0:00–4:00). Pause when he assigns the fingers and place yours the same way: p on the bass, i-m-a on G-B-e.',
-            text_es: 'Mira: <a href="https://youtu.be/K2Z3RZc5t-A?t=54" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (0:00–4:00). Pausa cuando asigna los dedos y coloca los tuyos de la misma manera: p en el bajo, i-m-a en Sol, Si y mi aguda.',
+            text: 'Watch: <a href="https://youtu.be/K2Z3RZc5t-A?t=54" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (0:54–4:00). Pause when he assigns the fingers and place yours the same way: p on the bass, i-m-a on G-B-e.',
+            text_es: 'Mira: <a href="https://youtu.be/K2Z3RZc5t-A?t=54" target="_blank">Basic Fingerstyle – Travis Finger Picking (FO-108) – JustinGuitar</a> (0:54–4:00). Pausa cuando asigna los dedos y coloca los tuyos de la misma manera: p en el bajo, i-m-a en Sol, Si y mi aguda.',
             hint: 'Justin\'s assignment: thumb handles strings 6, 5, 4 (the bass) and i-m-a handle strings 3, 2, 1 (treble). One finger per string is the goal.',
             hint_es: 'La asignación de Justin: el pulgar se encarga de las cuerdas 6, 5, 4 (el bajo) y i-m-a se encargan de las cuerdas 3, 2, 1 (las agudas). Un dedo por cuerda es la meta.',
             skills: [2, 3],
