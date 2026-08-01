@@ -23,6 +23,10 @@ see `WORKFLOW.md` and the git commit log.
   track**, not "the actual record" — the record is tuned a half step down, so
   strumming along with it in standard tuning would sound sour. The ▶ button
   was already playing the in-tune track; the words just said otherwise.
+- **The "Sweet Child" solo is labeled E minor everywhere now.** The Module 4
+  song card said "G major / E minor pentatonic" and its backing-track button
+  read "(Em/G)" — both now say Em, matching how the solo lessons already
+  teach it.
 
 ## 2026-07-31 — Choice-song chords verified
 
