@@ -53,6 +53,9 @@ body{font-family:var(--font-body);background:var(--bg2);color:var(--text);line-h
 .cap{font-size:.74rem;color:var(--text2);margin-top:3px;text-align:center}
 .shot-row{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;margin-bottom:2px}
 .shot-row>.shotwrap{flex:1 1 220px;min-width:0}
+.shotframe{position:relative;display:inline-block;max-width:100%}
+.shotframe .shot{display:block}
+.callout{position:absolute;border:2.5px solid #d92d2c;border-radius:6px;box-shadow:0 0 0 2px rgba(255,255,255,.9);pointer-events:none}
 .q{margin-bottom:10px}
 .q-text{font-weight:600;font-size:.95rem;margin-bottom:5px}
 .q-opt{display:block;width:100%;text-align:left;padding:8px 12px;margin-bottom:4px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);background:#fff;font-family:inherit;font-size:.88rem;cursor:pointer}
@@ -92,35 +95,35 @@ button:focus-visible,.dot:focus-visible{outline:3px solid var(--brand);outline-o
 <section class="slide" data-slide>
   <h2 data-t="s0h"></h2>
   <div class="lede" data-t="s0p"></div>
-  <div class="shotwrap"><img class="shot " src="tour-img/overview.webp" alt="" data-alt="overview"><p class="cap" data-t="cap0"></p></div>
+  <div class="shotwrap"><div class="shotframe"><img class="shot " src="tour-img/overview.webp" alt="" data-alt="overview"><span class="callout" style="left:2%;top:39.3%;width:20%;height:6.3%"></span><span class="callout" style="left:2%;top:46.9%;width:20%;height:6.1%"></span></div><p class="cap" data-t="cap0"></p></div>
 </section>
 
 <!-- 1 Sign in -->
 <section class="slide" data-slide>
   <h2 data-t="s1h"></h2>
   <div class="lede" data-t="s1p"></div>
-  <div class="shotwrap"><img class="shot " src="tour-img/signin.webp" alt="" data-alt="signin"><p class="cap" data-t="cap1"></p></div>
+  <div class="shotwrap"><div class="shotframe"><img class="shot " src="tour-img/signin.webp" alt="" data-alt="signin"><span class="callout" style="left:23%;top:76%;width:54%;height:21.5%"></span></div><p class="cap" data-t="cap1"></p></div>
 </section>
 
 <!-- 2 Modules & locks -->
 <section class="slide" data-slide>
   <h2 data-t="s2h"></h2>
   <div class="lede" data-t="s2p"></div>
-  <div class="shotwrap"><img class="shot narrow" src="tour-img/modules-sets.webp" alt="" data-alt="modules-sets"><p class="cap" data-t="cap2"></p></div>
+  <div class="shotwrap"><div class="shotframe"><img class="shot narrow" src="tour-img/modules-sets.webp" alt="" data-alt="modules-sets"><span class="callout" style="left:1%;top:14.8%;width:98%;height:24%"></span><span class="callout" style="left:1%;top:45.9%;width:98%;height:25%"></span></div><p class="cap" data-t="cap2"></p></div>
 </section>
 
 <!-- 3 This set: B → C → checklist -->
 <section class="slide" data-slide>
   <h2 data-t="s3h"></h2>
   <div class="lede" data-t="s3p"></div>
-  <div class="shotwrap"><img class="shot narrow" src="tour-img/this-set.webp" alt="" data-alt="this-set"><p class="cap" data-t="cap3"></p></div>
+  <div class="shotwrap"><div class="shotframe"><img class="shot narrow" src="tour-img/this-set.webp" alt="" data-alt="this-set"><span class="callout" style="left:1%;top:12%;width:98%;height:29%"></span><span class="callout" style="left:1%;top:45%;width:98%;height:20%"></span><span class="callout" style="left:1%;top:76.5%;width:98%;height:20%"></span></div><p class="cap" data-t="cap3"></p></div>
 </section>
 
 <!-- 4 Station B viewer -->
 <section class="slide" data-slide>
   <h2 data-t="s4h"></h2>
   <div class="lede" data-t="s4p"></div>
-  <div class="shotwrap"><img class="shot " src="tour-img/station-b.webp" alt="" data-alt="station-b"><p class="cap" data-t="cap4"></p></div>
+  <div class="shotwrap"><div class="shotframe"><img class="shot " src="tour-img/station-b.webp" alt="" data-alt="station-b"><span class="callout" style="left:2.7%;top:20.7%;width:9.5%;height:3.3%"></span><span class="callout" style="left:86%;top:20%;width:13%;height:4.3%"></span><span class="callout" style="left:10%;top:57%;width:10%;height:3.4%"></span><span class="callout" style="left:87%;top:72.3%;width:11.5%;height:5.8%"></span></div><p class="cap" data-t="cap4"></p></div>
 </section>
 
 <!-- 5 Listening Coach -->
@@ -128,8 +131,8 @@ button:focus-visible,.dot:focus-visible{outline:3px solid var(--brand);outline-o
   <h2 data-t="s5h"></h2>
   <div class="lede" data-t="s5p"></div>
   <div class="shot-row">
-    <div class="shotwrap"><img class="shot narrow" src="tour-img/coach-button.webp" alt="" data-alt="coach-button"><p class="cap" data-t="cap5a"></p></div>
-    <div class="shotwrap"><img class="shot narrow" src="tour-img/coach-card.webp" alt="" data-alt="coach-card"><p class="cap" data-t="cap5b"></p></div>
+    <div class="shotwrap"><div class="shotframe"><img class="shot narrow" src="tour-img/coach-button.webp" alt="" data-alt="coach-button"><span class="callout" style="left:48%;top:84.8%;width:47%;height:9.5%"></span></div><p class="cap" data-t="cap5a"></p></div>
+    <div class="shotwrap"><div class="shotframe"><img class="shot narrow" src="tour-img/coach-card.webp" alt="" data-alt="coach-card"><span class="callout" style="left:0.5%;top:80%;width:31%;height:9.8%"></span></div><p class="cap" data-t="cap5b"></p></div>
   </div>
 </section>
 
@@ -137,28 +140,31 @@ button:focus-visible,.dot:focus-visible{outline:3px solid var(--brand);outline-o
 <section class="slide" data-slide>
   <h2 data-t="s6h"></h2>
   <div class="lede" data-t="s6p"></div>
-  <div class="shotwrap"><img class="shot " src="tour-img/checklist.webp" alt="" data-alt="checklist"><p class="cap" data-t="cap6"></p></div>
+  <div class="shotwrap"><div class="shotframe"><img class="shot " src="tour-img/checklist.webp" alt="" data-alt="checklist"><span class="callout" style="left:77.9%;top:25%;width:11.3%;height:8.8%"></span><span class="callout" style="left:89.2%;top:25%;width:10.8%;height:8.8%"></span></div><p class="cap" data-t="cap6"></p></div>
 </section>
 
 <!-- 7 Songs -->
 <section class="slide" data-slide>
   <h2 data-t="s7h"></h2>
   <div class="lede" data-t="s7p"></div>
-  <div class="shotwrap"><img class="shot " src="tour-img/songs.webp" alt="" data-alt="songs"><p class="cap" data-t="cap7"></p></div>
+  <div class="shotwrap"><div class="shotframe"><img class="shot " src="tour-img/songs.webp" alt="" data-alt="songs"><span class="callout" style="left:0.5%;top:17.8%;width:13%;height:4.2%"></span><span class="callout" style="left:58.5%;top:24.3%;width:16%;height:3.3%"></span><span class="callout" style="left:0.5%;top:83.8%;width:14.5%;height:4.2%"></span></div><p class="cap" data-t="cap7"></p></div>
 </section>
 
 <!-- 8 Explore -->
 <section class="slide" data-slide>
   <h2 data-t="s8h"></h2>
   <div class="lede" data-t="s8p"></div>
-  <div class="shotwrap"><img class="shot narrow" src="tour-img/explore.webp" alt="" data-alt="explore"><p class="cap" data-t="cap8"></p></div>
+  <div class="shotwrap"><div class="shotframe"><img class="shot narrow" src="tour-img/explore.webp" alt="" data-alt="explore"><span class="callout" style="left:7%;top:8.2%;width:69%;height:8.4%"></span><span class="callout" style="left:7%;top:35.8%;width:69%;height:7.4%"></span><span class="callout" style="left:7%;top:62.4%;width:69%;height:7.4%"></span><span class="callout" style="left:7%;top:76%;width:69%;height:7.4%"></span><span class="callout" style="left:7%;top:89.5%;width:69%;height:7.4%"></span></div><p class="cap" data-t="cap8"></p></div>
 </section>
 
 <!-- 9 Tools -->
 <section class="slide" data-slide>
   <h2 data-t="s9h"></h2>
   <div class="lede" data-t="s9p"></div>
-  <div class="shotwrap" style="display:flex;gap:14px;justify-content:center;align-items:flex-start;flex-wrap:wrap"><img class="shot narrow" src="tour-img/tools.webp" alt="" data-alt="tools"><img class="shot narrow" src="tour-img/metronome.webp" alt="" data-alt="metronome"></div>
+  <div class="shotwrap" style="display:flex;gap:14px;justify-content:center;align-items:flex-start;flex-wrap:wrap">
+    <div class="shotframe"><img class="shot narrow" src="tour-img/tools.webp" alt="" data-alt="tools"><span class="callout" style="left:12.9%;top:13.3%;width:26.4%;height:29.2%"></span><span class="callout" style="left:60.2%;top:13.3%;width:26.5%;height:29.2%"></span><span class="callout" style="left:12.9%;top:57.1%;width:26.4%;height:28.1%"></span><span class="callout" style="left:60.2%;top:57.1%;width:26.5%;height:28.1%"></span></div>
+    <img class="shot narrow" src="tour-img/metronome.webp" alt="" data-alt="metronome">
+  </div>
   <p class="cap" data-t="cap9"></p>
 </section>
 
@@ -166,7 +172,7 @@ button:focus-visible,.dot:focus-visible{outline:3px solid var(--brand);outline-o
 <section class="slide" data-slide>
   <h2 data-t="s10h"></h2>
   <div class="lede" data-t="s10p"></div>
-  <div class="shotwrap"><img class="shot " src="tour-img/header.webp" alt="" data-alt="header"><p class="cap" data-t="cap10"></p></div>
+  <div class="shotwrap"><div class="shotframe"><img class="shot " src="tour-img/header.webp" alt="" data-alt="header"><span class="callout" style="left:67.5%;top:20%;width:6.5%;height:60%"></span><span class="callout" style="left:74.3%;top:20%;width:7.8%;height:60%"></span></div><p class="cap" data-t="cap10"></p></div>
 </section>
 
 <!-- 11 Quiz -->
