@@ -558,6 +558,46 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-08-04 — Set peek: read-only preview of a locked set.** Extended
+      the existing Module Review preview idiom (`mr-locked` class + disabled
+      controls + a banner, all synced by `renderPills`) to ordinary sets.
+      Tapping a sequentially-gated locked pill now opens the set read-only
+      (`activateSet(id, {peek:true})` sets a `set-peek` class on its panel)
+      instead of just toasting. Two-phase work order: Phase 1 was a design
+      memo + worked example (Module 2 Set 2) that stopped for approval before
+      touching every set; Phase 2 was the full rollout.
+      **Write-surface audit went wider than the brief:** the brief named
+      checklist toggles, step-done buttons and drill check-off buttons, but
+      grepping every `queueSave`-reachable path from inside a set panel also
+      turned up Shuffle Drill's and Deck Drill's best-score saves
+      (`sdSaveBest`/`sdRecordSkillBest` in `sdFinish`, `dkSaveBest` in
+      `dkNext`) — both fire on drill completion independent of any
+      check-off, so a peek that only guarded `toggleSkill`/`toggleStepDone`
+      would still have let a peeking student silently write a `games` best.
+      Guarded those too; drills stay playable during a peek, only the save
+      is suppressed. All progress-writing paths funnel through guarded
+      choke points (`toggleSkill`'s own top, plus the two drill-save sites)
+      rather than needing a check at every call site — the coach/drill gate
+      "mark it anyway" paths and the three `.sdr-checkoff` buttons all
+      route through `toggleSkill`, so guarding it once covers all of them.
+      **Caught before rollout, not after:** Phase 1's worked example only
+      exercised the sequential gate, and the peek wiring didn't yet
+      distinguish that from a *static* `locked`/`comingSoon` set (no build
+      content, nothing to preview) — the assumption that only sequentially-
+      gated sets get a peek was in the brief but not yet in the code.
+      Caught by re-reading the brief before Phase 2's rollout, not by a
+      user report; no live set currently sets `comingSoon: true` so this
+      was never visibly broken, but the schema field is real and future
+      content would have hit it. Fixed by threading a `staticClosed` check
+      through both `renderPills`' pill wiring and `activateSet`'s own
+      backstop, so even a direct/stale call can't force a peek onto a set
+      with nothing built. Peek state is DOM-derived, not a tracked
+      variable (`.week-panel.active.set-peek`), matching the project's
+      existing preference (see `syncExploreNav`'s reasoning) — this also
+      keeps the pill rail's "you are here" highlight correct across
+      unrelated re-renders (language switch, a skill toggled in another
+      tab) without a second source of truth to keep in sync.
+
 - [x] **2026-07-27 — site-wide review: outage fix + 13 commits.** Started as
       "check the site for errors" and immediately found the **whole site was
       down**: `buildSet()`'s song-thread block named its `map` callback

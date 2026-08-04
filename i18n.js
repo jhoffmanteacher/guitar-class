@@ -696,6 +696,11 @@
                                es: 'Solo vista previa — termina de marcar cada destreza de cada unidad con "¡Ya lo tengo!" para desbloquear esta autoevaluación.' },
     'gate.pillAllComplete':  { en: '{set} — all {total} skills complete', es: '{set} — las {total} destrezas completas' },
     'gate.pillProgress':     { en: '{set} — {done} of {total} skills done', es: '{set} — {done} de {total} destrezas listas' },
+    // ── Set peek (read-only preview of a locked set) — EN draft, ES flagged for Jonathan's sweep ──
+    'gate.peekBanner':       { en: 'Preview — finish {prev} first to start working here.',
+                               es: 'Vista previa — primero termina {prev} para empezar a trabajar aquí.' },
+    'gate.peekPillTitle':    { en: 'Preview available — finish {prev} to unlock.',
+                               es: 'Vista previa disponible — termina {prev} para desbloquear.' },
 
     // ── Skills-checklist cell aria-labels (fuller than the title tooltips) ──
     'skill.ariaStillWorking': { en: 'Still working on it: {skill}', es: 'Todavía lo estoy practicando: {skill}' },

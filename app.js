@@ -1506,6 +1506,18 @@ function prevSetLabel(w){
   return (arr[arr.indexOf(w)-1] || {}).label || t('nav.prevSet');
 }
 
+// Is this set's panel currently open in read-only peek mode? DOM-derived
+// (the 'set-peek' class on its .week-panel) rather than a tracked variable —
+// same reasoning as syncExploreNav. Every write path reachable from inside a
+// set panel (toggleSkill, toggleStepDone, drill best-score saves) checks this
+// before touching progress/completed/games, so a peek can never leave a mark
+// even if the CSS pointer-events:none disable is bypassed by keyboard input
+// or future markup drift.
+function isSetPeeking(wid){
+  const p = document.querySelector(`.week-panel[data-id="${CSS.escape(wid)}"]`);
+  return !!(p && p.classList.contains('set-peek'));
+}
+
 // Tiny transient toast for gate hints — makes its own element and self-dismisses.
 let _gateToastTimer = null;
 function gateToast(msg){
@@ -1600,6 +1612,24 @@ function renderPills(moduleNum){
   const sets = SETS.filter(w=>w.moduleNum===moduleNum);
   // 4+ sets: compact the buttons so they still fit on one rail row
   c.classList.toggle('wp-many', sets.length>3);
+  // A set that just became genuinely unlocked (finished the one before it,
+  // possibly in another tab) sheds any leftover peek state from before —
+  // otherwise the panel would still fail-safe as read-only after the real
+  // unlock. A still-locked set keeps whatever peek state activateSet gave it.
+  sets.forEach(w=>{
+    if(!isSetLocked(w)){
+      const p = document.querySelector(`.week-panel[data-id="${w.id}"]`);
+      if(p) p.classList.remove('set-peek');
+    }
+  });
+  // The pill rail is rebuilt from scratch below and normally highlights
+  // lastSetId — but a peek never touches lastSetId (nothing about a peek is
+  // persisted), so the peeked pill would lose its "you are here" highlight on
+  // any unrelated re-render (language switch, a skill toggled in another
+  // tab). Derive it from the DOM instead: whichever panel is both .active and
+  // .set-peek is the one being previewed right now.
+  const peekedPanel = document.querySelector('.week-panel.active.set-peek');
+  const peekedId = peekedPanel ? peekedPanel.dataset.id : null;
   sets.forEach(w=>{
     const btn = document.createElement('button');
     const locked = isSetLocked(w);
@@ -1627,17 +1657,26 @@ function renderPills(moduleNum){
       btn.innerHTML = `<span data-i18n-setlabel="${escAttr(w.label)}" translate="no" class="notranslate">${escHtml(tSetLabel(w.label))}</span>`;
     }
     if(locked){
-      // Sequential gate: opens once the set before it is finished. Keep the
-      // pill tappable so it explains why instead of doing nothing.
+      // Static locked/comingSoon sets have nothing built yet — no preview,
+      // same "explain why" toast as always. Only the sequential gate (a set
+      // whose predecessor just isn't finished yet) offers a peek — same
+      // idiom as the Module Review preview.
+      const staticClosed = !!(w.locked || w.comingSoon);
       const gp = { set: tSetLabel(w.label), prev: tSetLabel(prevSetLabel(w)) };
-      btn.setAttribute('aria-disabled','true');
-      btn.setAttribute('aria-label', t('gate.lockedUntilAria', gp));
-      btn.title = t('gate.lockedTitle', gp);
-      btn.onclick = ()=> gateToast(t('gate.finishFirstLong', { set: tSetLabel(w.label), prev: tSetLabel(prevSetLabel(w)) }));
+      if(staticClosed){
+        btn.setAttribute('aria-disabled','true');
+        btn.setAttribute('aria-label', t('gate.lockedUntilAria', gp));
+        btn.title = t('gate.lockedTitle', gp);
+        btn.onclick = ()=> gateToast(t('gate.finishFirstLong', gp));
+      } else {
+        btn.setAttribute('aria-label', t('gate.peekPillTitle', gp));
+        btn.title = t('gate.peekPillTitle', gp);
+        btn.onclick = ()=>{ leaveTopPanelForSet(); activateSet(w.id, {peek:true}); };
+      }
     } else {
       btn.onclick=()=>{ leaveTopPanelForSet(); lastSetId=w.id; activateSet(w.id); saveProgress(); };
     }
-    btn.classList.toggle('active', btn.dataset.id===lastSetId);
+    btn.classList.toggle('active', btn.dataset.id===(peekedId || lastSetId));
     c.appendChild(btn);
   });
 
@@ -1662,18 +1701,24 @@ function renderPills(moduleNum){
 
 window.addEventListener('pagehide', function(){ if(_dirtyKeys.size){ clearTimeout(saveTimer); flushSave(); } });
 
-function activateSet(id){
+function activateSet(id, opts){
+  // opts.peek: open a locked set read-only instead of bouncing off the gate
+  // (renderPills' locked-pill onclick uses this). A peek must leave nothing
+  // behind — no lastSetId, no saveProgress — so a reload always restores the
+  // student to their real frontier, never the set they were just previewing.
+  // Static locked/comingSoon sets have nothing built to preview — peek only
+  // ever applies to the sequential gate (see renderPills' matching check).
+  const isMr = /^mr\d+$/.test(id);
+  const w = isMr ? null : SETS.find(x=>x.id===id);
+  const peek = !!(opts && opts.peek) && !!w && !(w.locked || w.comingSoon);
   // Sequential-gate backstop: never open a set that's still locked (e.g. from a
-  // stale search deep-link). Explain why and stay put. Module Review (mrN) is
-  // intentionally preview-openable while locked, so it's exempt.
-  if(!/^mr\d+$/.test(id)){
-    const w = SETS.find(x=>x.id===id);
-    if(w && isSetLocked(w)){
-      gateToast(t('gate.finishFirstShort', { set: tSetLabel(w.label), prev: tSetLabel(prevSetLabel(w)) }));
-      return;
-    }
+  // stale search deep-link) UNLESS this is an intentional peek. Module Review
+  // (mrN) is intentionally preview-openable while locked, so it's exempt too.
+  if(w && isSetLocked(w) && !peek){
+    gateToast(t('gate.finishFirstShort', { set: tSetLabel(w.label), prev: tSetLabel(prevSetLabel(w)) }));
+    return;
   }
-  lastSetId = id;
+  if(!peek) lastSetId = id;
   if (typeof stopAnyRec === 'function') stopAnyRec({keepFab:true});
   // A Listening Coach check left running inline in the set/tab we're leaving
   // just goes invisible otherwise (its DOM node stays put, only hidden by
@@ -1691,7 +1736,11 @@ function activateSet(id){
     Object.keys(shuffleDrills).forEach(k=>sdStop(k));
   }
   document.querySelectorAll('.wpill').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
-  document.querySelectorAll('.week-panel').forEach(p=>p.classList.toggle('active',p.dataset.id===id));
+  document.querySelectorAll('.week-panel').forEach(p=>{
+    const isTarget = p.dataset.id===id;
+    p.classList.toggle('active', isTarget);
+    if(isTarget) p.classList.toggle('set-peek', peek);
+  });
   renderChordBoxes();
   syncRailStations();   // refresh the rail's "This set" station switcher for the new set
   // Every set opens at the top, every time — no scroll-position memory.
@@ -1964,6 +2013,13 @@ function buildSet(w){
     : '';
   const about = (skills || thread) ? `<details class="set-about"><summary>${t('set.about')}</summary><div class="set-about-panel">${skills}${thread}</div></details>` : '';
   const eyebrow = `<div class="set-eyebrow">${setTag}${titleSpan}${about}${printBtn}</div>`;
+  // Always in the DOM (like mr-locked-banner), shown only when the panel
+  // carries .set-peek — so it needs no rebuild to appear/disappear as the
+  // gate state changes, only the class toggle renderPills/activateSet do.
+  const peekBanner = `<div class="set-peek-banner">
+      <span class="set-peek-banner-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
+      <div>${t('gate.peekBanner', { prev: tSetLabel(prevSetLabel(w)) })}</div>
+    </div>`;
   /* Single-flow sets (e.g. Module 13 · String Changing): only station b
      exists — one "learn the process" card straight into the checklist, no
      Station B/C framing. The card's labels come from the set's own fields
@@ -1985,7 +2041,7 @@ function buildSet(w){
           <span class="tabs-card-title"><span class="tabs-card-num">2</span>${t('nav.stationCTitle')}</span>
           <span class="tabs-card-sub">${t('nav.stationCSub')}</span>
         </button>`;
-  return `${eyebrow}
+  return `${peekBanner}${eyebrow}
   <div class="tabs">
     <div class="tabs-songbar">
       ${w.songs ? `<button type="button" class="tabs-songs tab-songs" onclick="switchTab(this,'${w.id}','songs')">&#9835; ${t('nav.songs')}</button>` : ''}
@@ -2368,6 +2424,7 @@ function stepDoneHtml(isDone){
     : `<span data-i18n="btn.markDone" translate="no" class="notranslate">${t('btn.markDone')}</span>`;
 }
 function toggleStepDone(btn, key){
+  if(btn.closest('.week-panel.set-peek')) return;   // read-only preview — no writes
   const li = btn.closest('.step');
   const nowDone = !li.classList.contains('step-done');
   li.classList.toggle('step-done', nowDone);
@@ -3907,8 +3964,12 @@ function sdFinish(key){
   st.phase = 'done';
   sdStop(key);
   const c = st.cfg;
-  sdSaveBest(c, st.inTime);
-  sdRecordSkillBest(c, st.inTime);
+  // A peeked set stays playable (the drill itself is view/practice content),
+  // but the round's result must not persist — same invariant as toggleSkill.
+  if(!isSetPeeking(c.wid)){
+    sdSaveBest(c, st.inTime);
+    sdRecordSkillBest(c, st.inTime);
+  }
 
   /* "Drill these next" — every fret that was wrong, late, or just sluggish,
      worst first. This is the thing paper slips could never tell them. */
@@ -4197,7 +4258,7 @@ function dkNext(key, ok){
   if(ok){ if(firstTry) st.hit++; }
   else { st.deck.splice(Math.min(st.deck.length, st.i + 3), 0, c); }
   st.i++; st.shown = false;
-  if(st.i >= st.deck.length){ st.phase='done'; dkSaveBest(st.cfg.id, st.hit); dkBox(key).innerHTML = dkDoneHtml(key); }
+  if(st.i >= st.deck.length){ st.phase='done'; if(!isSetPeeking(st.cfg.wid)) dkSaveBest(st.cfg.id, st.hit); dkBox(key).innerHTML = dkDoneHtml(key); }
   else dkBox(key).innerHTML = dkRunHtml(key);
 }
 function dkDoneHtml(key){
@@ -4659,6 +4720,11 @@ function coachSkillBest(sid){
    toggleSkill skips the gate exactly once. */
 let coachGateBypass = false;
 function toggleSkill(sid, wid, which){
+  // A peeked set is read-only — this single guard covers every path that
+  // reaches toggleSkill: the checklist cells directly, plus the drill
+  // check-off buttons and both gate modals' "Mark it anyway", which all call
+  // this function rather than writing progress themselves.
+  if(isSetPeeking(wid)) return false;
   const cur = progress[sid]||'none';
   if(which==='working'){
     if(cur==='gotit') progress[sid]='working';

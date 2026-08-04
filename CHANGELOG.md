@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-04 — Peek at a locked set before you unlock it
+
+### Added
+
+- **Tapping a locked set now opens a read-only preview** instead of just a
+  "finish the set before this one first" message. You can read through the
+  lesson, watch the videos, and try the practice drills — a banner at the top
+  reminds you what to finish first, and nothing you do there gets checked off
+  or saved until you actually unlock it for real. Sets that aren't built yet
+  still just say so, same as before.
+
 ## 2026-08-01 — Website tour for new students
 
 ### Added

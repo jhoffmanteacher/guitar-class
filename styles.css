@@ -144,6 +144,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .mr-locked-banner{display:none}
 .week-panel.mr-locked .mr-locked-banner{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1px solid var(--purple-border);background:var(--purple-bg);border-radius:var(--radius);color:var(--purple-text);font-size:0.9375rem;line-height:1.5;margin-bottom:14px}
 .mr-locked-banner-icon{font-size:1.125rem;line-height:1.4;flex-shrink:0}
+/* Set peek — read-only preview of a locked set, same idiom as mr-locked above. */
+.week-panel.set-peek .skchk-cell,
+.week-panel.set-peek .step-done-btn,
+.week-panel.set-peek .sdr-checkoff{pointer-events:none;opacity:.55}
+.set-peek-banner{display:none}
+.week-panel.set-peek .set-peek-banner{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1px solid var(--purple-border);background:var(--purple-bg);border-radius:var(--radius);color:var(--purple-text);font-size:0.9375rem;line-height:1.5;margin-bottom:14px}
+.set-peek-banner-icon{font-size:1.125rem;line-height:1.4;flex-shrink:0}
 .reflection-ta{width:100%;box-sizing:border-box;border:1px solid var(--border2);border-radius:var(--radius);padding:10px 13px;font-size:0.9375rem;font-family:inherit;font-weight:500;color:var(--text);background:var(--bg);resize:vertical;min-height:68px;line-height:1.5}
 .reflection-ta::placeholder{color:var(--text2);font-weight:400}
 /* Transient hint toast (e.g. tapping a locked set) — self-made element, no markup needed. */
@@ -1101,7 +1108,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   #google_translate_element,.btn-translate,.user-area,
   .print-set-btn,.daily5-panel,.daily5-btn,.daily5-overlay,.games-screen,.page-screen,
   .back-to-top,.panel-next,.sk-where-btn,.st-flex-note,
-  .step-done-row,.mr-rec,.mr-locked-banner{display:none !important}
+  .step-done-row,.mr-rec,.mr-locked-banner,.set-peek-banner{display:none !important}
 
   /* Only the active set prints; expand BOTH stations + the checklist, drop songs */
   .week-panel{display:none !important}
