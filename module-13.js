@@ -195,10 +195,10 @@ SETS.push(
               },
               {
                 label: 'Free it at the bridge', label_es: 'Suéltala en el puente',
-                text: `At the bridge:<ul><li>Nylon ball-end (our guitars): draw the string back out through the tie block hole.</li><li>Steel: ease the bridge pin out — a winder's notch is made for this — and lift the ball out.</li></ul>You've got it when: the string is off with nothing forced and nothing pinging loose.${M13_P3_EN}`,
-                text_es: `En el puente:<ul><li>Nylon con bolita (nuestras guitarras): regresa la cuerda por el agujero del bloque del puente.</li><li>Acero: saca el pin del puente con cuidado — la muesca de la manivela es para eso — y levanta la bolita.</li></ul>Lo tienes cuando: la cuerda salió sin forzar nada y sin que nada saltara.${M13_P3_ES}`,
-                hint: 'Bridge pin stuck? Never pry with pliers against the bridge — push the ball end down into the guitar a little first, then pull the pin straight up.',
-                hint_es: '¿Pin atorado? Nunca hagas palanca con pinzas contra el puente — primero empuja la bolita un poco hacia adentro y luego jala el pin recto hacia arriba.'
+                text: `At the bridge:<ul><li>Nylon ball-end (our guitars): draw the string back out through the tie block hole.</li><li>Nylon tied (older classicals, no ball end): pick the knot loose at the tie block, then pull the string free.</li><li>Steel: ease the bridge pin out — a winder's notch is made for this — and lift the ball out.</li></ul>You've got it when: the string is off with nothing forced and nothing pinging loose.${M13_P3_EN}`,
+                text_es: `En el puente:<ul><li>Nylon con bolita (nuestras guitarras): regresa la cuerda por el agujero del bloque del puente.</li><li>Nylon anudado (clásicas más antiguas, sin bolita): afloja el nudo en el bloque del puente y luego saca la cuerda.</li><li>Acero: saca el pin del puente con cuidado — la muesca de la manivela es para eso — y levanta la bolita.</li></ul>Lo tienes cuando: la cuerda salió sin forzar nada y sin que nada saltara.${M13_P3_ES}`,
+                hint: 'Bridge pin stuck? Never pry with pliers against the bridge — push the ball end down into the guitar a little first, then pull the pin straight up. Knot won\'t budge? Pick the first wrap loose with a fingernail or pick before pulling — don\'t yank it, nylon frays.',
+                hint_es: '¿Pin atorado? Nunca hagas palanca con pinzas contra el puente — primero empuja la bolita un poco hacia adentro y luego jala el pin recto hacia arriba. ¿El nudo no cede? Afloja la primera vuelta con la uña o una púa antes de jalar — no tires de golpe, el nylon se deshilacha.'
               },
               {
                 label: 'Coil and toss', label_es: 'Enrolla y a la basura',

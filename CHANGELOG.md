@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-04 — Module 13: restring process updates
+
+### Changed
+
+- **The Takamine nylon-restring video now jumps straight to 2:15**, past the
+  intro, to the actual restring steps.
+- **Dropped the steel-string change video** from the "Watch the full process"
+  section — one fewer video to sit through.
+- **"Free it at the bridge" now covers tied nylon strings, not just ball-end**
+  — if your string ties on with a knot instead of a ball end, there's a step
+  for untying it (and a tip for a stuck knot) alongside the ball-end and
+  steel bridge-pin instructions.
+
+### Added
+
+- **A new sketch panel for "Coil and toss"** — shows coiling the old string
+  and binning it, matching the other step panels.
+
 ## 2026-08-04 — Module 13: "finished in time" wording matches the rubric
 
 ### Changed
