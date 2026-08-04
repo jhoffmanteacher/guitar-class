@@ -558,6 +558,49 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-08-04 — Cross-module gate: Set 1 locked until prior module +
+      review done (work order, pasted in chat — no saved file).** Pushed
+      `937ff9a`. Executed end to end, single session/commit. New
+      `isModuleGateLocked(moduleNum)` chains modules
+      1→12 — a module's Set 1 stays locked until every built set AND every
+      Module Review self-rating row of the PREVIOUS module is done; Module
+      13 (String Changing) sits outside the chain, always open; existing
+      progress anywhere in a module keeps it open for good (same
+      never-re-lock principle as `hasProgressIn`). `isSetLocked`'s
+      first-set case now defers to it instead of always returning
+      unlocked. Locked Set 1 gets the existing read-only peek treatment for
+      free, plus module-flavored gate strings at the four sites that
+      already had set-flavored ones (`isModuleGateCase(w)` picks between
+      them). `onModuleChange` opens a fully-locked module's target in peek
+      instead of bouncing off `activateSet`'s backstop. Dropdown gets a 🔒
+      tail. **One correctness fix beyond the work order's literal spec:**
+      module data is lazy-loaded per module, so a fresh page load may not
+      have the PREVIOUS module's data yet when the dropdown first paints —
+      `isModuleGateLocked` would then read "nothing built" and hold the
+      gate, flashing 🔒 on modules that are actually done. Fixed by queuing
+      a one-time background `ensureAllModuleData()` in `renderAll()` and
+      redrawing the dropdown when it lands — every `module-N.js` is already
+      service-worker precached, so this costs no extra network round trip.
+      Confirmed the bug and the fix in-browser by forcing a module's data
+      out of `SETS`/`MODULE_REVIEWS` mid-session and reloading state:
+      without the fix the dropdown shows a stale 🔒 on the first paint (and
+      never corrects itself since nothing else re-triggers a load); with it,
+      it self-corrects within ~1s with no reload. `setSkillLevel` now also
+      calls `renderPills`/`populateModuleDropdown` after a rating, mirroring
+      `toggleSkill`, so finishing the last `mrN` row unlocks the next module
+      live. Browser-verified (dev bypass + `isGatePreviewer` forced off to
+      simulate a real student): M1 Set 1 open; dropdown shows 🔒 on 2–12,
+      none on 1 or 13; Module 3 lands on Set 1 in EN+ES peek with the
+      module-flavored banner and inert checklist; Module 13 open+writable
+      with zero progress; a peeked checkbox write is silently blocked
+      (progress byte-identical before/after); completing Module 1 + rating
+      every `mr1` row live-unlocks Module 2's dropdown entry without
+      navigating away. `node tools/checks.mjs` (full, 180-link check
+      included) clean. New i18n keys (`gate.peekPillTitleModule`,
+      `gate.peekBannerModule`, `gate.finishFirstShortModule`,
+      `gate.unlocksAfterModule`) are EN-final, ES-draft — pending Jonathan's
+      independent Spanish sweep.
+
 - [x] **2026-08-04 — Paper retirement, part 2 (work order).** Pushed
       `8f7287b`. Executed `3-workorder-2026-08-04-paper-retirement.md`,
       Phases 1+2, with a STOP for Jonathan's approval in between. Module 9's
