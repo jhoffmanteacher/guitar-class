@@ -593,8 +593,8 @@ SETS.push(
                 text: '<ol><li>Run the Group 1 chord deck below.</li><li>Play whatever chord it deals you cleanly before moving to the next card.</li></ol>You\'ve got it when: you run the whole deck with no hesitation on any chord.',
                 text_es: '<ol><li>Corre la baraja de acordes del Grupo 1 de abajo.</li><li>Toca limpio el acorde que te reparta antes de pasar a la siguiente carta.</li></ol>Lo tienes cuando: corres toda la baraja sin dudar en ningún acorde.',
                 drill: { type: 'deck', deck: 'chords-group1', skill: 'm5w2-s6' },
-                hint: 'This is the same "point blind at the chart" drill, just shuffled for you — no fumbling for paper flashcards mid-practice.',
-                hint_es: 'Es el mismo ejercicio de "apuntar a ciegas al diagrama", solo que ya está barajado para ti — sin andar buscando tarjetas de papel a mitad de la práctica.',
+                hint: 'This is the same "point blind at the chart" drill, just shuffled for you.',
+                hint_es: 'Es el mismo ejercicio de "apuntar a ciegas al diagrama", solo que ya está barajado para ti.',
                 levelUp: 'Time yourself through the deck, or run it at 70 BPM with a metronome click on beat 1.',
                 levelUp_es: 'Cronométrate corriendo la baraja, o hazlo a 70 BPM con el metrónomo marcando el tiempo 1.',
                 skills: [6]
@@ -1137,8 +1137,8 @@ SETS.push(
                 text: '<ol><li>Run the deck below — it mixes every Group 1 and Group 2 chord, plus Dm and the G/B turnaround from "the cure."</li><li>Play three cards in a row cleanly, back to back, before the next set of three.</li></ol>You\'ve got it when: three cards in a row with no pause between them — working toward the assessment\'s 8-bar-at-70-BPM standard.',
                 text_es: '<ol><li>Corre la baraja de abajo — mezcla todos los acordes del Grupo 1 y del Grupo 2, más Dm y el giro G/B de "the cure."</li><li>Toca tres cartas seguidas limpiamente, una tras otra, antes del siguiente grupo de tres.</li></ol>Lo tienes cuando: tres cartas seguidas sin pausa entre ellas — acercándote al estándar de la evaluación de 8 compases a 70 BPM.',
                 drill: { type: 'deck', deck: 'chords-m5', skill: 'm5w3-s5' },
-                hint: 'This replaces flashcards you\'d shuffle by hand — same idea, already shuffled for you.',
-                hint_es: 'Esto reemplaza las tarjetas que barajarías a mano — la misma idea, ya barajada para ti.',
+                hint: 'This replaces flashcards — same idea, already shuffled for you.',
+                hint_es: 'Esto reemplaza las tarjetas — la misma idea, ya barajada para ti.',
                 levelUp: 'Add the metronome at 70 BPM and don\'t let a card break your strum.',
                 levelUp_es: 'Agrega el metrónomo a 70 BPM y no dejes que ninguna carta rompa tu rasgueo.',
                 skills: [5]

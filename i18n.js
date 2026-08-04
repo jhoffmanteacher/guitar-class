@@ -583,6 +583,7 @@
     'deck.relative-pairs':   { en: 'Relative pairs', es: 'Pares relativos' },
     'deck.minor-keys-box1':  { en: 'Minor keys — box 1', es: 'Tonos menores — caja 1' },
     'deck.naturals':         { en: 'Natural note deck', es: 'Baraja de notas naturales' },
+    'deck.naturals-plus':    { en: 'Natural + sharp/flat note deck', es: 'Baraja de notas naturales + sostenidos/bemoles' },
     'deck.keys-IIVV':        { en: 'Key deck — I–IV–V', es: 'Baraja de tonos — I–IV–V' },
     'deck.key-inventory':    { en: 'Key-detective deck', es: 'Baraja detective de tonos' },
     'deck.power-chord-shapes':{ en: 'Power chord shape deck', es: 'Baraja de formas de acorde de potencia' },

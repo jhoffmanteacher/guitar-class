@@ -454,9 +454,17 @@ SETS.push(
                 hint_es: 'Si te atoras, usa la forma de octava desde una cuerda que ya conozcas en vez de contar traste por traste.',
                 stuck: 'Allow 10 seconds instead of 5 until it\'s automatic, then lower the time limit again.',
                 stuck_es: 'Permite 10 segundos en vez de 5 hasta que sea automático, y luego baja el límite de tiempo de nuevo.',
-                levelUp: 'Add sharp and flat cards too (F#, Bb), or drop to a 3-second limit.',
-                levelUp_es: 'Agrega también tarjetas de sostenidos y bemoles (F#, Bb), o baja el límite a 3 segundos.',
+                levelUp: 'Deal the level-up deck below with the sharps and flats added, or drop to a 3-second limit.',
+                levelUp_es: 'Reparte la baraja de nivel extra de abajo con los sostenidos y bemoles agregados, o baja el límite a 3 segundos.',
                 skills: [3, 4]
+              },
+              {
+                label: 'Level-up: naturals + sharps & flats (optional)', label_es: 'Nivel extra: naturales + sostenidos y bemoles (opcional)',
+                text: 'Deal the deck below — it adds F# and Bb to the natural notes. Find each one on the D or G string within 5 seconds, same as before.',
+                text_es: 'Reparte la baraja de abajo — agrega F# y Bb a las notas naturales. Encuentra cada una en la cuerda Re o Sol en menos de 5 segundos, igual que antes.',
+                drill: { type: 'deck', deck: 'naturals-plus' },
+                hint: 'Same trick as before — the octave shape gets you there fast, even with the sharps and flats mixed in.',
+                hint_es: 'El mismo truco de antes — la forma de octava te lleva rápido, incluso con los sostenidos y bemoles mezclados.'
               }
             ]
           },
@@ -930,11 +938,11 @@ SETS.push(
                   choices_es: ['Tocar un acorde de G, y luego uno de B', 'Un acorde de G con B como su nota más grave', 'Un acorde de B con G como su nota más aguda', 'G o B, cualquiera de los dos, tú eliges'] }
               },
               {
-                label: 'Try spacing TAB rhythm on paper', label_es: 'Prueba espaciar el ritmo en papel',
-                text: 'Try spacing a few numbers on paper the way you would in written TAB, then check: could someone else tell the rhythm from your spacing alone?',
-                text_es: 'Prueba espaciar unos números en papel de la manera que lo harías en un TAB escrito, y luego revisa: ¿podría alguien más deducir el ritmo solo por tu espaciado?',
-                hint: 'Cramped numbers are the single most common reason a hand-written TAB is unplayable for anyone but the person who wrote it.',
-                hint_es: 'Los números amontonados son la razón más común por la que un TAB escrito a mano resulta imposible de tocar para cualquiera que no sea quien lo escribió.',
+                label: 'Try spacing TAB rhythm', label_es: 'Prueba espaciar el ritmo del TAB',
+                text: 'Try spacing a few numbers the way you would in written TAB, then check: could someone else tell the rhythm from your spacing alone?',
+                text_es: 'Prueba espaciar unos números de la manera que lo harías en un TAB escrito, y luego revisa: ¿podría alguien más deducir el ritmo solo por tu espaciado?',
+                hint: 'Cramped numbers are the single most common reason a TAB is unplayable for anyone but the person who wrote it.',
+                hint_es: 'Los números amontonados son la razón más común por la que un TAB resulta imposible de tocar para cualquiera que no sea quien lo escribió.',
                 skills: [3],
                 response: { type: 'mc', prompt: 'When you write your own TAB, the most important thing to keep readable is:',
                   prompt_es: 'Cuando escribes tu propio TAB, lo más importante que debes mantener legible es:',
@@ -1025,15 +1033,18 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 2 — Write "Seven Nation Army" (your assessment piece)', label_es: 'Reto 2 — Escribe "Seven Nation Army" (tu pieza de evaluación)',
-                text: '<ol><li>Without looking anything up, write the "Seven Nation Army" riff to blank TAB on paper from memory — you played it without looking at the chart back in Module 2.</li><li>Then check yourself.</li></ol>You\'ve got it when: you play back EXACTLY what\'s on your page and it matches the riff note for note — every fret on the right string, in order. (The day-later, no-memory test is Challenge 4 — see it below.)',
-                text_es: '<ol><li>Sin buscar nada, escribe de memoria el riff de "Seven Nation Army" en TAB en blanco sobre papel — lo tocaste sin mirar el diagrama allá en el Módulo 2.</li><li>Luego compruébate.</li></ol>Lo tienes cuando: tocas EXACTAMENTE lo que está en tu página y coincide con el riff nota por nota — cada traste en la cuerda correcta, en orden. (La prueba de un día después, sin memoria, es el Reto 4 — ve abajo.)',
+                text: '<ol><li>Without looking anything up, write the "Seven Nation Army" riff as TAB in the box below, from memory — you played it without looking at the chart back in Module 2.</li><li>Then check yourself.</li></ol>You\'ve got it when: you play back EXACTLY what you typed and it matches the riff note for note — every fret on the right string, in order. (The day-later, no-memory test is Challenge 4 — see it below.)',
+                text_es: '<ol><li>Sin buscar nada, escribe de memoria el riff de "Seven Nation Army" como TAB en el cuadro de abajo — lo tocaste sin mirar el diagrama allá en el Módulo 2.</li><li>Luego compruébate.</li></ol>Lo tienes cuando: tocas EXACTAMENTE lo que escribiste y coincide con el riff nota por nota — cada traste en la cuerda correcta, en orden. (La prueba de un día después, sin memoria, es el Reto 4 — ve abajo.)',
                 hint: 'Say each note name in your head as you write its fret — that\'s the same habit that made you fast at naming notes all module.',
                 hint_es: 'Di el nombre de cada nota en tu mente mientras escribes su traste — es el mismo hábito que te hizo rápido nombrando notas todo el módulo.',
-                stuck: 'Play the riff on your guitar first, one note at a time, writing down each fret as you go — then copy it clean.',
-                stuck_es: 'Toca el riff en tu guitarra primero, una nota a la vez, escribiendo cada traste mientras avanzas — y luego cópialo limpio.',
+                stuck: 'Play the riff on your guitar first, one note at a time, typing each fret as you go — then clean up the spacing once you\'re done.',
+                stuck_es: 'Toca el riff en tu guitarra primero, una nota a la vez, escribiendo cada traste en el cuadro mientras avanzas — y luego limpia el espaciado al final.',
                 levelUp: 'Write a second 4-bar riff of your choice from memory, or write the riff transposed to a different starting fret.',
                 levelUp_es: 'Escribe un segundo riff de 4 compases de tu elección de memoria, o escribe el riff transportado a un traste de partida distinto.',
-                skills: [2, 3]
+                skills: [2, 3],
+                response: { type: 'short', prompt: 'Write the riff as one-string TAB (string, then frets in order):',
+                  prompt_es: 'Escribe el riff como TAB de una cuerda (cuerda, luego trastes en orden):',
+                  placeholder: 'e.g. E|—7—7—10—7—5—3—2—', placeholder_es: 'p. ej. E|—7—7—10—7—5—3—2—' }
               }
             ]
           },
@@ -1087,12 +1098,12 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 4 — Cold-Read Your "Seven Nation Army" TAB', label_es: 'Reto 4 — Lee a primera vista tu TAB de "Seven Nation Army"',
-                text: 'At least a day after writing your Challenge 2 TAB:<ul><li>Take it back out and play it exactly as written — trust only the page, no memory allowed.</li></ul>You\'ve got it when: the riff comes out right on the first try, purely from what\'s on the paper — that\'s the ultimate readability test.',
-                text_es: 'Al menos un día después de escribir tu TAB del Reto 2:<ul><li>Sácalo de nuevo y tócalo exactamente como está escrito — confía solo en la página, no se permite memoria.</li></ul>Lo tienes cuando: el riff sale bien al primer intento, únicamente a partir de lo que hay en el papel — esa es la prueba definitiva de legibilidad.',
+                text: 'At least a day after writing your Challenge 2 TAB:<ul><li>Open Challenge 2 above, look at what you typed, and play it back exactly as written — trust only what you typed, no memory allowed.</li></ul>You\'ve got it when: the riff comes out right on the first try, purely from what you typed — that\'s the ultimate readability test.',
+                text_es: 'Al menos un día después de escribir tu TAB del Reto 2:<ul><li>Abre el Reto 2 de arriba, mira lo que escribiste, y tócalo exactamente como está — confía solo en lo que escribiste, no se permite memoria.</li></ul>Lo tienes cuando: el riff sale bien al primer intento, únicamente a partir de lo que escribiste — esa es la prueba definitiva de legibilidad.',
                 hint: 'This is the real test of whether your spacing and fret numbers were actually readable — not just correct to you.',
                 hint_es: 'Esta es la verdadera prueba de si tu espaciado y tus números de traste realmente eran legibles — no solo correctos para ti.',
-                stuck: 'If your written TAB stumps you, say the fret numbers out loud in rhythm while following the page, then add the guitar.',
-                stuck_es: 'Si tu TAB escrito te confunde, di los números de traste en voz alta con el ritmo mientras sigues la página, y luego agrega la guitarra.',
+                stuck: 'If your own TAB stumps you, say the fret numbers out loud in rhythm while following what you typed, then add the guitar.',
+                stuck_es: 'Si tu propio TAB te confunde, di los números de traste en voz alta con el ritmo mientras sigues lo que escribiste, y luego agrega la guitarra.',
                 levelUp: 'Write and cold-read a second riff.',
                 levelUp_es: 'Escribe y lee a primera vista un segundo riff.',
                 skills: [6]

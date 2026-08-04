@@ -5,6 +5,26 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-04 — Module 9: the last two paper drills go digital
+
+### Changed
+
+- **Module 9's "Write Seven Nation Army from memory" and its day-later
+  cold-read now use a text box in the app** instead of asking you to write
+  TAB on paper — type your riff in Challenge 2, then reopen it for Challenge
+  4 and play back exactly what you typed.
+- **Two Module 5 hints that compared the chord decks to paper flashcards**
+  got trimmed — the decks never needed the comparison, and it was confusing
+  students who never used paper flashcards here in the first place.
+- **The "space out TAB rhythm" step in Module 9 no longer mentions paper**
+  — same quiz, just reworded.
+
+### Added
+
+- **A new optional level-up deck for Module 9's naturals flash drill** —
+  deal it right after the base drill for a harder version that mixes in F#
+  and Bb, instead of just dropping the time limit.
+
 ## 2026-08-04 — Small-patches bundle: Sweet Child labels, a tempo target, wording polish
 
 ### Changed

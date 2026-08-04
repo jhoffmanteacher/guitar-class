@@ -4174,6 +4174,8 @@ const DECKS = {
     cards:[{f:'Am',b:'5'},{f:'Gm',b:'3'},{f:'Bm',b:'7'},{f:'Dm',b:'10'}] },
   'naturals': { kicker:'deck.kNote', hint:'deck.hFindNote',
     cards:[{f:'A'},{f:'B'},{f:'C'},{f:'D'},{f:'E'},{f:'F'},{f:'G'}] },
+  'naturals-plus': { kicker:'deck.kNote', hint:'deck.hFindNote',
+    cards:[{f:'A'},{f:'B'},{f:'C'},{f:'D'},{f:'E'},{f:'F'},{f:'G'},{f:'F#'},{f:'Bb'}] },
   'keys-IIVV': { kicker:'deck.kKey', hint:'deck.hPlayIIVV',
     cards:[{f:'G'},{f:'A'},{f:'C'},{f:'D'},{f:'E'}] },
   'key-inventory': { kicker:'deck.kChordSet', back:'deck.kKey', hint:'deck.hNameKey',
