@@ -559,7 +559,7 @@
 ## Recently shipped (post-archive)
 
 - [x] **2026-08-04 — Small-patches bundle (work order, 8 decided items).**
-      Pushed `<pending>`. Executed `workorder-2026-08-04-small-patches.md`
+      Pushed `e89fd6d`. Executed `workorder-2026-08-04-small-patches.md`
       end to end in a worktree: two calibration numbers (module-5's Am↔Em
       target 20→16; `m3w2-s1`'s beat-1 tempo 60→70 BPM, dropping the now-moot
       "70+ is optional" clause and bumping the practice placeholder 70→75);
