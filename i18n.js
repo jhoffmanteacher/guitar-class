@@ -702,6 +702,17 @@
                                es: 'Vista previa — primero termina {prev} para empezar a trabajar aquí.' },
     'gate.peekPillTitle':    { en: 'Preview available — finish {prev} to unlock.',
                                es: 'Vista previa disponible — termina {prev} para desbloquear.' },
+    // ── Cross-module gate (Set 1 locked until the PREVIOUS MODULE + its Module
+    // Review are done) — module-flavored twins of the four strings above, used
+    // only for a module's Set 1. EN final, ES draft flagged for Jonathan's sweep.
+    'gate.peekPillTitleModule': { en: 'Preview available — finish Module {num} ({mod}) to unlock.',
+                               es: 'Vista previa disponible — termina el Módulo {num} ({mod}) para desbloquear.' },
+    'gate.peekBannerModule': { en: 'Preview — finish Module {num} ({mod}), including its Module Review, to start working here.',
+                               es: 'Vista previa — termina el Módulo {num} ({mod}), incluido su Repaso del módulo, para empezar a trabajar aquí.' },
+    'gate.finishFirstShortModule': { en: 'Finish Module {num} first to start {set}.',
+                               es: 'Primero termina el Módulo {num} para empezar {set}.' },
+    'gate.unlocksAfterModule': { en: '{set} unlocks after Module {num} ({mod}) is finished — every set and its Module Review.',
+                               es: '{set} se desbloquea cuando termines el Módulo {num} ({mod}) — cada unidad y su Repaso del módulo.' },
 
     // ── Skills-checklist cell aria-labels (fuller than the title tooltips) ──
     'skill.ariaStillWorking': { en: 'Still working on it: {skill}', es: 'Todavía lo estoy practicando: {skill}' },

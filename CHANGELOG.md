@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-04 — Modules now unlock in order
+
+### Added
+
+- **Each module's first set now stays locked until you finish the module
+  before it** — every set, plus its Module Review. You can still look ahead:
+  pick a locked module from the Module dropdown and its first set opens in a
+  read-only preview, with a banner naming what to finish first. Nothing you've
+  already done gets re-locked. Module 13 (Changing Your Strings) is unaffected
+  — it's always open.
+
 ## 2026-08-04 — Module 9: the last two paper drills go digital
 
 ### Changed

@@ -676,7 +676,26 @@ function setSaveMsg(key, clearAfterMs){
 let lastModuleNum = 1;
 let lastSetId = null;
 
-function renderAll(){ populateModuleDropdown(); onModuleChange(lastModuleNum||1, lastSetId); renderChordBoxes(); syncPreviewNote(); }
+let _fullModuleDataQueued = false;
+function renderAll(){
+  populateModuleDropdown();
+  onModuleChange(lastModuleNum||1, lastSetId);
+  renderChordBoxes();
+  syncPreviewNote();
+  // The dropdown's 🔒 lock marker (isModuleGateLocked) judges "previous
+  // module complete" from that module's own SETS/MODULE_REVIEWS data — lazy-
+  // loaded per module (ensureModuleRendered), so right after login only the
+  // CURRENT module (if that) has loaded. An unloaded previous module reads
+  // as "nothing built yet" and holds the gate, so a fresh page load can
+  // flash 🔒 on modules that are actually done. Every module-N.js is already
+  // service-worker precached, so loading them all costs no extra network
+  // round trip — queue it once and redraw the dropdown when it lands so any
+  // wrong guess corrects itself without the student having to touch anything.
+  if(!_fullModuleDataQueued){
+    _fullModuleDataQueued = true;
+    ensureAllModuleData().then(()=> populateModuleDropdown());
+  }
+}
 
 /* Teacher/dev accounts skip the sequential set gate (isGatePreviewer), which
    makes their view quietly different from a student's — no 🔒 anywhere. This
@@ -1276,6 +1295,7 @@ function populateModuleDropdown(){
     let tail = '';
     if(state==='complete') tail = ` · ${total}/${total} ✓`;
     else if(state==='partial') tail = ` · ${done}/${total}`;
+    if(isModuleGateLocked(m.num)) tail += ' · 🔒';
     opt.textContent = `${t('nav.module')} ${m.num} — ${tf(m,'name')}${tail}`;
     sel.appendChild(opt);
   });
@@ -1475,9 +1495,42 @@ function hasProgressIn(w){
   return Object.keys(completed||{}).some(k=>completed[k]===true && k.startsWith(prefix));
 }
 
+// Cross-module gate: a module's Set 1 stays locked until the PREVIOUS module
+// is fully done — every built set complete AND every Module Review
+// self-rating row rated. Module 13 (String Changing) sits outside the chain
+// entirely: it's a single-flow module, always open, blocks nothing. Existing
+// progress anywhere in a module (any set skill, any step, any review rating)
+// keeps that module open for good — same never-re-lock principle as
+// hasProgressIn/isSetLocked below.
+function isModuleGateLocked(moduleNum){
+  if(moduleNum <= 1) return false;                 // Module 1 is the start
+  if(moduleNum === 13) return false;               // String Changing: outside the chain, always open
+  if(isGatePreviewer()) return false;
+  if(progressLoadFailed) return false;             // never re-lock on a guess
+  // Existing progress anywhere in THIS module keeps it open (never re-lock)
+  const mySets = SETS.filter(w=>w.moduleNum===moduleNum);
+  if(mySets.some(w=>hasProgressIn(w))) return false;
+  const myMr = MODULE_REVIEWS[moduleNum];
+  if(myMr && (myMr.skills||[]).some(s=>{ const v=progress[s.id]; return v==='1'||v==='2'||v==='3'; })) return false;
+  // Previous module: every BUILT set complete...
+  const prevNum = moduleNum - 1;
+  const prevSets = SETS.filter(w=>w.moduleNum===prevNum && !w.locked && !w.comingSoon);
+  if(!prevSets.length) return true;                // nothing built to complete yet — hold the gate
+  if(!prevSets.every(w=>isSetComplete(w))) return true;
+  // ...and every Module Review self-rating row rated (if a review exists)
+  const mr = MODULE_REVIEWS[prevNum];
+  if(mr && (mr.skills||[]).length){
+    return !(mr.skills.every(s=>{ const v=progress[s.id]; return v==='1'||v==='2'||v==='3'; }));
+  }
+  return false;
+}
+
 // Sequential gate: a set stays locked until the set before it (in module order)
 // is finished, so students work a module in order — the same lock-until-complete
-// idea as Module Review, applied to every set. The first set is always open.
+// idea as Module Review, applied to every set. The first set of a module is
+// gated on the PREVIOUS MODULE being fully done (isModuleGateLocked) instead —
+// see that function's own header for what "fully done" means and the Module 13
+// carve-out.
 //
 // The gate is a HIGH-WATER MARK, not a live derivation: once a student has
 // worked in a set it never re-locks. Previously this was computed purely from
@@ -1495,8 +1548,8 @@ function isSetLocked(w){
   if(progressLoadFailed) return false;               // we don't know what they've done — never re-lock on a guess
   const moduleSets = SETS.filter(x=>x.moduleNum===w.moduleNum);
   const idx = moduleSets.indexOf(w);
-  if(idx<=0) return false;
   if(hasProgressIn(w)) return false;                 // already been here — never lock them back out
+  if(idx<=0) return isModuleGateLocked(w.moduleNum); // first set: gated on the PREVIOUS MODULE
   return !isSetComplete(moduleSets[idx-1]);
 }
 
@@ -1504,6 +1557,23 @@ function isSetLocked(w){
 function prevSetLabel(w){
   const arr = SETS.filter(x=>x.moduleNum===w.moduleNum);
   return (arr[arr.indexOf(w)-1] || {}).label || t('nav.prevSet');
+}
+
+// True when w is a module's Set 1 held closed by the cross-module gate (not
+// the ordinary in-module set-to-set gate) — the case that gets module-flavored
+// gate strings ("finish Module N") instead of set-flavored ones ("finish Set 1").
+function isModuleGateCase(w){
+  if(!w) return false;
+  const moduleSets = SETS.filter(x=>x.moduleNum===w.moduleNum);
+  return moduleSets.indexOf(w)<=0 && isModuleGateLocked(w.moduleNum);
+}
+
+// {num, mod} for the module-flavored gate strings — the previous module's
+// number and localized name.
+function prevModuleGateParams(w){
+  const num = w.moduleNum - 1;
+  const m = MODULE_MANIFEST.find(x=>x.num===num);
+  return { num, mod: m ? tf(m,'name') : '' };
 }
 
 // Is this set's panel currently open in read-only peek mode? DOM-derived
@@ -1595,7 +1665,13 @@ async function onModuleChange(moduleNum, restoreSetId){
     ? restoreSetId : frontier;
   // Never open onto a set the sequential gate has locked.
   if(!/^mr\d+$/.test(target) && isSetLocked(moduleSets.find(w=>w.id===target))) target = frontier;
-  activateSet(target);
+  // A fully-locked module's only reachable target is its module-gated Set 1
+  // (the frontier resolver above can't find anything else unlocked) — open
+  // it read-only instead of letting activateSet's backstop bounce off it and
+  // leave a dead screen.
+  const tw = moduleSets.find(w=>w.id===target);
+  if(tw && isSetLocked(tw)) activateSet(target, {peek:true});
+  else activateSet(target);
 }
 
 // Per-set completion tally from the student's own progress.
@@ -1668,6 +1744,11 @@ function renderPills(moduleNum){
         btn.setAttribute('aria-label', t('gate.lockedUntilAria', gp));
         btn.title = t('gate.lockedTitle', gp);
         btn.onclick = ()=> gateToast(t('gate.finishFirstLong', gp));
+      } else if(isModuleGateCase(w)){
+        const mgp = prevModuleGateParams(w);
+        btn.setAttribute('aria-label', t('gate.peekPillTitleModule', mgp));
+        btn.title = t('gate.peekPillTitleModule', mgp);
+        btn.onclick = ()=>{ leaveTopPanelForSet(); activateSet(w.id, {peek:true}); };
       } else {
         btn.setAttribute('aria-label', t('gate.peekPillTitle', gp));
         btn.title = t('gate.peekPillTitle', gp);
@@ -1715,7 +1796,9 @@ function activateSet(id, opts){
   // stale search deep-link) UNLESS this is an intentional peek. Module Review
   // (mrN) is intentionally preview-openable while locked, so it's exempt too.
   if(w && isSetLocked(w) && !peek){
-    gateToast(t('gate.finishFirstShort', { set: tSetLabel(w.label), prev: tSetLabel(prevSetLabel(w)) }));
+    gateToast(isModuleGateCase(w)
+      ? t('gate.finishFirstShortModule', { set: tSetLabel(w.label), ...prevModuleGateParams(w) })
+      : t('gate.finishFirstShort', { set: tSetLabel(w.label), prev: tSetLabel(prevSetLabel(w)) }));
     return;
   }
   if(!peek) lastSetId = id;
@@ -2018,7 +2101,7 @@ function buildSet(w){
   // gate state changes, only the class toggle renderPills/activateSet do.
   const peekBanner = `<div class="set-peek-banner">
       <span class="set-peek-banner-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
-      <div>${t('gate.peekBanner', { prev: tSetLabel(prevSetLabel(w)) })}</div>
+      <div>${isModuleGateCase(w) ? t('gate.peekBannerModule', prevModuleGateParams(w)) : t('gate.peekBanner', { prev: tSetLabel(prevSetLabel(w)) })}</div>
     </div>`;
   /* Single-flow sets (e.g. Module 13 · String Changing): only station b
      exists — one "learn the process" card straight into the checklist, no
@@ -2952,6 +3035,12 @@ function setSkillLevel(sid, mrId, level){
       b.classList.toggle('active', lvl === n);
     });
   });
+  // Rating the last mrN row can be the exact action that finishes a module
+  // and unlocks the next one's Set 1 — same live-refresh toggleSkill already
+  // does for the plain got-it gate, so the 🔒 (dropdown) and peek banner
+  // (pill rail) drop without a reload.
+  renderPills(lastModuleNum);
+  populateModuleDropdown();
   saveProgress();
 }
 
@@ -6114,7 +6203,9 @@ async function gatedJumpGuard(moduleNum, wid){
   if(sel) sel.value = String(moduleNum);
   await onModuleChange(moduleNum);
   saveProgress();
-  gateToast(t('gate.unlocksAfter', { set: tSetLabel(w.label), prev: tSetLabel(prevSetLabel(w)) }));
+  gateToast(isModuleGateCase(w)
+    ? t('gate.unlocksAfterModule', { set: tSetLabel(w.label), ...prevModuleGateParams(w) })
+    : t('gate.unlocksAfter', { set: tSetLabel(w.label), prev: tSetLabel(prevSetLabel(w)) }));
   return true;
 }
 async function searchGoSkill(moduleNum, wid, skillNum){
