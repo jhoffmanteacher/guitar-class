@@ -38,10 +38,11 @@
       it touches — you never need to write it by hand. This stops
       Google Translate from re-translating our already-Spanish text
       when both layers are active at once.
-   6. See translations-review.md (repo root) for the full EN/ES table
-      in one place — hand it to a bilingual reviewer if you want a
-      human spot-check (Jonathan doesn't speak Spanish, so this file
-      IS the final Spanish until someone checks it).
+   6. There is no human bilingual reviewer, and no generated EN/ES
+      review sheet — translations-review.md was deleted 2026-07-23
+      and stays gone (it drifted out of date the moment a key was
+      added). The QA gate is a careful pass against the glossary
+      below at write time. This file IS the final Spanish.
    ══════════════════════════════════════════════════════════════ */
 (function(){
 
@@ -697,20 +698,20 @@
                                es: 'Solo vista previa — termina de marcar cada destreza de cada unidad con "¡Ya lo tengo!" para desbloquear esta autoevaluación.' },
     'gate.pillAllComplete':  { en: '{set} — all {total} skills complete', es: '{set} — las {total} destrezas completas' },
     'gate.pillProgress':     { en: '{set} — {done} of {total} skills done', es: '{set} — {done} de {total} destrezas listas' },
-    // ── Set peek (read-only preview of a locked set) — EN draft, ES flagged for Jonathan's sweep ──
+    // ── Set peek (read-only preview of a locked set) — EN and ES both final (ES swept 2026-08-04) ──
     'gate.peekBanner':       { en: 'Preview — finish {prev} first to start working here.',
                                es: 'Vista previa — primero termina {prev} para empezar a trabajar aquí.' },
     'gate.peekPillTitle':    { en: 'Preview available — finish {prev} to unlock.',
                                es: 'Vista previa disponible — termina {prev} para desbloquear.' },
     // ── Cross-module gate (Set 1 locked until the PREVIOUS MODULE + its Module
     // Review are done) — module-flavored twins of the four strings above, used
-    // only for a module's Set 1. EN final, ES draft flagged for Jonathan's sweep.
+    // only for a module's Set 1. EN and ES both final (ES swept 2026-08-04).
     'gate.peekPillTitleModule': { en: 'Preview available — finish Module {num} ({mod}) to unlock.',
                                es: 'Vista previa disponible — termina el Módulo {num} ({mod}) para desbloquear.' },
     'gate.peekBannerModule': { en: 'Preview — finish Module {num} ({mod}), including its Module Review, to start working here.',
                                es: 'Vista previa — termina el Módulo {num} ({mod}), incluido su Repaso del módulo, para empezar a trabajar aquí.' },
     'gate.finishFirstShortModule': { en: 'Finish Module {num} first to start {set}.',
-                               es: 'Primero termina el Módulo {num} para empezar {set}.' },
+                               es: 'Primero termina el Módulo {num} para empezar la {set}.' },
     'gate.unlocksAfterModule': { en: '{set} unlocks after Module {num} ({mod}) is finished — every set and its Module Review.',
                                es: '{set} se desbloquea cuando termines el Módulo {num} ({mod}) — cada unidad y su Repaso del módulo.' },
 
