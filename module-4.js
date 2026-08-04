@@ -664,8 +664,8 @@ SETS.push(
             hint_es: 'Piénsalo como una pregunta y respuesta musical. La llamada se siente sin resolver; la respuesta se siente como si llegara a algún lugar.',
             stuck: 'Use just 2–3 notes for both call and response — end the response on A (the root) every time so the "answer" always lands home.',
             stuck_es: 'Usa solo 2–3 notas tanto para la llamada como para la respuesta — termina la respuesta en A (la raíz) cada vez para que la "respuesta" siempre llegue a la nota base.',
-            levelUp: 'Record a 2-bar call and answer it live over the playback, or make the call longer than the response so the answer feels like a punchline. (Someone around? Trade: you call, they answer.)',
-            levelUp_es: 'Graba una llamada de 2 compases y respóndela en vivo sobre la grabación, o haz que la llamada sea más larga que la respuesta para que la respuesta se sienta como un remate. (¿Tienes a alguien cerca? Intercambien: tú llamas, ellos responden.)',
+            levelUp: 'Record a 2-bar call and answer it live over the playback, or make the call longer than the response so the answer feels like a punchline.',
+            levelUp_es: 'Graba una llamada de 2 compases y respóndela en vivo sobre la grabación, o haz que la llamada sea más larga que la respuesta para que la respuesta se sienta como un remate.',
             skills: [5, 6]
           }
             ]

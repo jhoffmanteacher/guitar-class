@@ -720,7 +720,7 @@ SETS.push(
             title_es: '"Luna": ejercicio de metrónomo con dos formas F5–A5',
             steps: [
           {
-            label: 'Challenge — F5 ↔ A5 Two-Shape Drill', label_es: 'Reto — Ejercicio de dos formas F5 ↔ A5',
+            label: 'Challenge — F5 ↔ A5 Two-Shape Drill ("Luna")', label_es: 'Reto — Ejercicio de dos formas F5 ↔ A5 ("Luna")',
             text: '<ol><li>Slide the same two-finger shape four frets between F5 (root F, low E string, fret 1) and A5 (root A, fret 5).</li><li>Strum one per big beat: "Luna" is in 6/8, so strum just the downbeats, two per bar, nothing syncopated (syncopated = accents landing off the main beat).</li></ol>You\'ve got it when: you can switch F5 ↔ A5 landing every downbeat clean, speeding up in steps: 60 → 70 → 80 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
             text_es: '<ol><li>Desliza la misma forma de dos dedos cuatro trastes entre F5 (raíz F, cuerda Mi grave, traste 1) y A5 (raíz A, traste 5).</li><li>Rasguea uno por tiempo fuerte: "Luna" está en 6/8, así que rasguea solo los tiempos fuertes, dos por compás, nada sincopado (sincopado = acentos que caen fuera del tiempo principal).</li></ol>Lo tienes cuando: puedes cambiar F5 ↔ A5 cayendo limpio en cada tiempo fuerte, acelerando en pasos: 60 → 70 → 80 BPM. <a href="tabs/luna.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
             hint: '"Luna"\'s whole vamp is these two power chords (a vamp = a short chord pattern repeated over and over). A power chord has no major or minor — just root + 5th. Keep the two-finger shape locked and let your whole arm make the four-fret slide.',
@@ -744,9 +744,9 @@ SETS.push(
             title_es: '"Sweet Child O\' Mine" — ensayo de evaluación',
             steps: [
           {
-            label: 'Challenge — "Sweet Child" Verse (assessment rehearsal)', label_es: 'Reto — Estrofa de "Sweet Child" (ensayo de evaluación)',
-            text: '<ul><li>Play the Guns N\' Roses verse as power chords — D5 · C5 · G5, one note per bar at 60 BPM.</li></ul>You\'ve got it when: two clean laps, every change on beat 1, each chord ringing the full bar, muting tight. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-            text_es: '<ul><li>Toca la estrofa de Guns N\' Roses como acordes de potencia — D5 · C5 · G5, una nota por compás a 60 BPM.</li></ul>Lo tienes cuando: dos vueltas limpias, cada cambio en el tiempo 1, cada acorde sonando el compás completo, silenciado ajustado. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
+            label: 'Challenge — "Sweet Child" Intro/Verse/Chorus (assessment rehearsal)', label_es: 'Reto — Intro/estrofa/coro de "Sweet Child" (ensayo de evaluación)',
+            text: '<ul><li>Play the Guns N\' Roses intro/verse/chorus as power chords — D5 · C5 · G5, one note per bar at 60 BPM.</li></ul>You\'ve got it when: two clean laps, every change on beat 1, each chord ringing the full bar, muting tight. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+            text_es: '<ul><li>Toca el intro/estrofa/coro de Guns N\' Roses como acordes de potencia — D5 · C5 · G5, una nota por compás a 60 BPM.</li></ul>Lo tienes cuando: dos vueltas limpias, cada cambio en el tiempo 1, cada acorde sonando el compás completo, silenciado ajustado. <a href="tabs/sweet-child-o-mine.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
             hint: 'This is one of the songs you can use for the module self-assessment, and it uses the same patient, one-per-bar spacing as your Module 2 bass roots — just power chords now. On this site we play "Sweet Child" in standard tuning. (The famous recording is tuned a half-step down, so your D5–C5–G5 sound one fret higher than the recording — that\'s expected; don\'t retune.) D5 and C5 are A-string roots; G5 drops to the low E string. It\'s a patience test — the temptation is to rush into the next chord instead of holding the bar out.',
             hint_es: 'Esta es una de las canciones que puedes usar para la autoevaluación del módulo, y usa el mismo espaciado paciente, una nota por compás, que tus raíces de bajo del Módulo 2 — ahora con acordes de potencia. En este sitio tocamos "Sweet Child" en afinación estándar. (La grabación famosa está afinada medio tono más abajo, así que tu D5–C5–G5 suena un traste más alto que la grabación — eso es esperado; no reafines.) D5 y C5 son raíces de la cuerda La; G5 baja a la cuerda Mi grave. Es una prueba de paciencia — la tentación es apurarte al siguiente acorde en vez de sostener el compás completo.',
             stuck: 'Loop D5 → C5 (both A-string, 2 frets apart) until smooth, then add the jump to G5 on the low E string. Count the full 4 beats out loud before each change so you don\'t rush it.',
@@ -862,13 +862,13 @@ SETS.push(
     },
 
     skills: [
-      { id: 'm3w2-s1', text: 'Change power chords on beat 1 at 60 BPM',
-        text_es: 'Cambiar acordes de potencia en el tiempo 1 a 60 BPM',
-        gotItWhen: 'your chord changes land exactly on beat 1 with the metronome at 60 BPM and you don\'t need to pause or restart (70+ BPM is an optional harder challenge).',
-        gotItWhen_es: 'tus cambios de acorde caen exactamente en el tiempo 1 con el metrónomo a 60 BPM y no necesitas pausar ni reiniciar (70+ BPM es un reto opcional más difícil).',
+      { id: 'm3w2-s1', text: 'Change power chords on beat 1 at 70 BPM',
+        text_es: 'Cambiar acordes de potencia en el tiempo 1 a 70 BPM',
+        gotItWhen: 'your chord changes land exactly on beat 1 with the metronome at 70 BPM and you don\'t need to pause or restart.',
+        gotItWhen_es: 'tus cambios de acorde caen exactamente en el tiempo 1 con el metrónomo a 70 BPM y no necesitas pausar ni reiniciar.',
         practice: { type: 'pr', prompt: '<ol><li>Loop A5 → G5, changing on beat 1 of every bar.</li><li>Start at 60 BPM and raise the metronome +5 at a time.</li><li>Log your fastest BPM with clean changes.</li></ol>',
           prompt_es: '<ol><li>Repite A5 → G5, cambiando en el tiempo 1 de cada compás.</li><li>Empieza a 60 BPM y sube el metrónomo de 5 en 5.</li><li>Anota tu BPM más rápido con cambios limpios.</li></ol>',
-          unit: 'BPM', placeholder: 'e.g. 70 — try for a higher number next session', placeholder_es: 'p. ej. 70 — intenta superarlo la próxima sesión' } },
+          unit: 'BPM', placeholder: 'e.g. 75 — try for a higher number next session', placeholder_es: 'p. ej. 75 — intenta superarlo la próxima sesión' } },
       { id: 'm3w2-s2', text: 'Play a full 6-bar power chord progression in time',
         text_es: 'Tocar una progresión completa de 6 compases de acordes de potencia a tiempo',
         gotItWhen: 'you can play through 6 bars without stopping, even if a chord change is rough — you keep going to the next downbeat.',
@@ -927,7 +927,7 @@ MODULE_SONGS[3] = [
       { name: '"Luna" — Peso Pluma, Junior H', meta: '◐ Sierreño vamp → power-chord version (on purpose, in a different style than the original)', meta_es: '◐ Vamp de sierreño → versión con acordes de potencia (a propósito, en un estilo distinto al original)', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
-      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Verse: D5–C5–G5 power chord loop', meta_es: 'Verso: vuelta de acordes de potencia D5–C5–G5', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
+      { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Intro/Verse/Chorus: D5–C5–G5 power chord loop', meta_es: 'Intro/estrofa/coro: vuelta de acordes de potencia D5–C5–G5', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM&start=282&end=938' },
       { name: '"the cure" — Olivia Rodrigo', meta: '◐ Power chord arrangement (a gentle song played louder, on purpose) · A5–C5–D5–F5', meta_es: '◐ Arreglo con acordes de potencia (una canción suave tocada más fuerte, a propósito) · A5–C5–D5–F5', type: 'Core', core: true, journeyUrl: 'tabs/the-cure.html',

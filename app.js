@@ -3166,7 +3166,7 @@ function buildChecklist(w){
     const skillText = tf(s,'text');
     const helper = s.gotItWhen ? `
         <button type="button" class="sk-toggle" onclick="toggleGotIt('${s.id}', this)" aria-expanded="false" aria-controls="gi-${s.id}"><span class="sk-toggle-arrow">▾</span> <span data-i18n="skill.whatDoesThisLookLike">${t('skill.whatDoesThisLookLike')}</span></button>
-        <div class="sk-helper" id="gi-${s.id}" hidden><strong data-i18n="skill.youveGotItWhen">${t('skill.youveGotItWhen')}</strong> ${tf(s,'gotItWhen')}</div>` : '';
+        <div class="sk-helper" id="gi-${s.id}" hidden><strong class="got-it-lab" data-i18n="skill.youveGotItWhen">${t('skill.youveGotItWhen')}</strong>${tf(s,'gotItWhen')}</div>` : '';
     const practiceBtn = s.practice ? `
         <button type="button" class="sk-practice-btn" onclick="togglePracticePanel('${s.id}', this)" aria-expanded="false" aria-controls="pp-${s.id}"><span class="sk-practice-btn-arrow">▸</span> ${t('step.practiceThis')}</button>` : '';
     const skillNum = (s.id.match(/-s(\d+)$/) || [])[1];
@@ -3281,7 +3281,7 @@ function renderPracticePanel(practice, skillId, wid){
     `</div>`;
   }
   if(practice.type === 'pr'){
-    /* Structured PR ladder: {type:'pr', prompt, unit:'BPM'|'count',
+    /* Structured tempo ladder: {type:'pr', prompt, unit:'BPM'|'count',
        placeholder}. Persists through the SAME path as the regex-promoted PR
        steps — responses[`practice-<skillId>`] as an 8-entry {value,date}
        history via onResponseChange(key, value, true) — but declared in data,
@@ -3457,7 +3457,7 @@ function logCleanRep(sid, btnEl){
   if(btnEl) flashClass(btnEl, 'rep-logged', 500);
 }
 
-/* ── PR ladder helpers (practice.type === 'pr') ──
+/* ── tempo ladder helpers (practice.type === 'pr') ──
    The stored shape is the standard PR history array ({value,date}×≤8, see
    onResponseChange) under responses[`practice-<skillId>`]; these render it. */
 function prHistoryValues(key){
@@ -4105,7 +4105,9 @@ function wrapGotItWhen(html){
    whose last option summarises the others still reads correctly. The
    pattern deliberately does NOT pin ordinary answers that merely start
    with "All"/"Both" ("All 6 strings", "Both on E string") — pinning those
-   would freeze a real answer in place, which is the bug, not the fix. */
+   would freeze a real answer in place, which is the bug, not the fix.
+   Ratified narrow (Jonathan, 2026-08-04): pin genuine catch-alls only;
+   ordinary compound answers shuffle. */
 const MC_PINNED = /^(all|none|both|neither)\s+of\b|^(none|all)$/i;
 /* Catch-alls the regex can't classify without over-matching ordinary answers
    ("All three notes at once, as a chord" in module-9 is a real distractor,

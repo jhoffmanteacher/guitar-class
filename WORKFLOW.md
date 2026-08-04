@@ -558,6 +558,40 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-08-04 — Small-patches bundle (work order, 8 decided items).**
+      Pushed `<pending>`. Executed `workorder-2026-08-04-small-patches.md`
+      end to end in a worktree: two calibration numbers (module-5's Am↔Em
+      target 20→16; `m3w2-s1`'s beat-1 tempo 60→70 BPM, dropping the now-moot
+      "70+ is optional" clause and bumping the practice placeholder 70→75);
+      renamed the "PR ladder" code-comment vocabulary to "tempo ladder" in
+      4 spots (i18n.js, 2× app.js, module-2.js header) — comments only, the
+      `pr` practice type and `pr.*` i18n keys are untouched; retitled Sweet
+      Child O' Mine's power-chord challenge from "Verse" to "Intro/Verse/
+      Chorus" (label, body text, and the song-list meta chip in module-3.js)
+      per Jonathan's ruling that the D5–C5–G5 loop isn't verse-exclusive;
+      reworded `i18n.js` `review.playPrompt`'s first sentence; cut the last
+      3 EN/ES "grab a friend" partner-line survivors (module-6.js and
+      module-7.js Ear Sparks, a module-4.js Level-up) that the 07-27 pass
+      missed; appended the narrow-pin ratification line to the `MC_PINNED`
+      comment in app.js (no behavior change); gave the skills-checklist's
+      "You've got it when" `<strong>` the `.got-it-lab` class so it matches
+      the step-card version.
+      **Heading-specificity audit ran as a sweep + adversarial-audit pair**
+      (per the sub-agent-sweep rule) — 203 `Challenge` labels across all 12
+      module files, each checked against its own step body for an unnamed
+      song: found exactly **one** real gap (`module-3.js` "F5 ↔ A5 Two-Shape
+      Drill" → `("Luna")`, since the step is Luna's vamp but didn't say so),
+      the rest genuinely generic drills or already-named. The audit agent
+      independently re-derived the same 203-item list, spot-checked 56+
+      step bodies including all 6 boundary cases the sweep agent flagged as
+      deliberately-left-alone, and confirmed the 1-fix result holds — no
+      false positives, no false negatives.
+      **Item 17 (teacher.js uid-in-onclick) verified already fixed:** every
+      `data-uid`-bearing control routes through the delegated listener on
+      `#teacher-app`; the remaining inline `onclick="..."` calls only ever
+      pass static literals (view names, `true`/`false`), never a Firestore
+      uid. No code change needed, closed by verification alone.
+
 - [x] **2026-08-04 — Set peek: read-only preview of a locked set.** Pushed
       `a648364`. Extended
       the existing Module Review preview idiom (`mr-locked` class + disabled

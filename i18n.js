@@ -455,8 +455,8 @@
     'review.whatsHardPh':    { en: 'e.g. My ring finger keeps slipping off the fret…',
                                 es: 'por ejemplo: mi dedo anular se me resbala del traste…' },
     'review.playRecord':     { en: 'Play it & Record it!', es: '¡Tócala y grábate!' },
-    'review.playPrompt':     { en: 'Perform a core song from this module — or a song of your choice that uses these skills. Then listen back to your recording and reflect on what could be improved.',
-                                es: 'Toca una canción principal de este módulo, o una canción de tu elección que use estas destrezas. Luego escucha tu grabación y reflexiona sobre qué podrías mejorar.' },
+    'review.playPrompt':     { en: 'Perform a song from this module — a core song, or one of your choice that uses these skills. Then listen back to your recording and reflect on what could be improved.',
+                                es: 'Toca una canción de este módulo — una canción principal, o una de tu elección que use estas destrezas. Luego escucha tu grabación y reflexiona sobre qué podrías mejorar.' },
     'review.songIPlayed':    { en: 'Song I played', es: 'Canción que toqué' },
     'review.howDidItGo':     { en: 'How did it go?', es: '¿Cómo te fue?' },
     'review.assessBodyItems':{ en: "Do a practice run first: record yourself doing the module assessment, then check the recording against these skills:",
@@ -649,7 +649,7 @@
     'ear.kBassStringHint':   { en: 'A string is Am\'s root and rings lower; D string is Dm\'s root, a fourth higher.',
                                es: 'La cuerda La es la raíz de Am y suena más grave; la cuerda Re es la raíz de Dm, una cuarta más aguda.' },
 
-    // ── PR ladder practice panel (personal-record history) ──
+    // ── tempo ladder practice panel (personal-record history) ──
     'pr.latest':             { en: 'Latest: {v}', es: 'Último: {v}' },
     'pr.best':               { en: 'Best: {v}', es: 'Mejor: {v}' },
     'pr.noneYet':            { en: 'No personal record yet — set your first!', es: 'Aún no hay récord personal — ¡marca el primero!' },

@@ -5,6 +5,35 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-04 — Small-patches bundle: Sweet Child labels, a tempo target, wording polish
+
+### Changed
+
+- **Sweet Child O' Mine's power-chord challenge is now labeled
+  "Intro/Verse/Chorus"** instead of just "Verse" — the D5–C5–G5 chords you're
+  practicing there show up in more than one part of the song, so the label
+  (and the song list's chip) now says so.
+- **Module 3's beat-1 power-chord tempo target moved from 60 BPM to 70 BPM**
+  — the old "70+ is an optional harder challenge" note is gone since 70 is
+  just the target now.
+- **The Am↔Em one-minute-changes card now says "16 is a good result for your
+  first day on chords"** instead of "Over 20."
+- **A "Luna" fingerprint got added to one Module 3 challenge's label**
+  ("F5 ↔ A5 Two-Shape Drill") — it's Luna's vamp, but the label didn't say
+  so before.
+- **The Module Review "Perform a song" prompt reads a little more naturally**
+  in both languages.
+- **The "You've got it when" label in the skills checklist** now uses the
+  same bold green style as the one on step cards, so the two match side by
+  side.
+
+### Removed
+
+- **A few leftover "grab a friend" lines are gone** — two optional Ear Spark
+  bonuses (Modules 6 and 7) and a Module 4 Level-up still asked for a
+  practice partner; the site's been solo-first since last year, so those
+  didn't belong.
+
 ## 2026-08-04 — Peek at a locked set before you unlock it
 
 ### Added

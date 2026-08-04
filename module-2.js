@@ -6,7 +6,7 @@
 //  ★ TEMPLATE MODULE — pattern source for all other modules.
 //    When building or upgrading another module, copy the patterns
 //    here (named challenges w/ "You've got it when:", Stuck?/Level up,
-//    exit tickets, PR ladders, self-contained gotItWhens,
+//    exit tickets, tempo ladders, self-contained gotItWhens,
 //    forward link in the module review). See WORKFLOW.md Appendix A
 //    for the full checklist. Frozen 2026-06-11 after Session 1.4.
 //    Known open item: Set 2 computer station keeps 3 short timestamped

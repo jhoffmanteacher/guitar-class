@@ -556,8 +556,8 @@ SETS.push(
             steps: [
               {
                 label: 'Ear Spark: little F vs. barre F', label_es: 'Chispa auditiva: F pequeño vs. cejilla',
-                text: 'Ear Spark (optional, 2 min):<ol><li>Record F both ways — the little F (xx3211) and the full barre — a few reps in a random order you don\'t write down.</li><li>On playback, guess which is which by listening for the low bass note only the barre has (same chord, different voice).</li></ol>Got someone around? Have them play and you call it.',
-                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Grábate tocando F de las dos formas — el F pequeño (xx3211) y la cejilla completa — unas cuantas veces en un orden aleatorio que no anotes.</li><li>Al reproducirlo, adivina cuál es cuál escuchando la nota grave que solo tiene la cejilla (mismo acorde, voz distinta).</li></ol>¿Tienes a alguien cerca? Que toque y tú adivinas.'
+                text: 'Ear Spark (optional, 2 min):<ol><li>Record F both ways — the little F (xx3211) and the full barre — a few reps in a random order you don\'t write down.</li><li>On playback, guess which is which by listening for the low bass note only the barre has (same chord, different voice).</li></ol>',
+                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Grábate tocando F de las dos formas — el F pequeño (xx3211) y la cejilla completa — unas cuantas veces en un orden aleatorio que no anotes.</li><li>Al reproducirlo, adivina cuál es cuál escuchando la nota grave que solo tiene la cejilla (mismo acorde, voz distinta).</li></ol>'
               }
             ]
           }
