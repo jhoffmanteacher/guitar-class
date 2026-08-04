@@ -158,15 +158,9 @@ SETS.push(
             title_es: 'Mira el proceso completo',
             steps: [
               {
-                label: 'Watch: steel-string change', label_es: 'Mira: cambio en cuerdas de acero',
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=F3kyhAQMefg" target="_blank">How To Change Acoustic Guitar Strings - Pro Tips for Beginners – Lauren Bateman</a>. Watch for the bridge-pin trick and the wraps walking down the post.',
-                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=F3kyhAQMefg" target="_blank">How To Change Acoustic Guitar Strings - Pro Tips for Beginners – Lauren Bateman</a> (en inglés). Fíjate en el truco del pin del puente y en las vueltas que bajan por el poste.',
-                skills: [1, 2]
-              },
-              {
                 label: 'Watch: nylon restring', label_es: 'Mira: cambio en guitarra de nylon',
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=qfOUA-S1qgk" target="_blank">Tech Corner: How to Restring Your Nylon String Guitar – Takamine Guitars</a>. One difference from our classroom: the video ties the traditional knot at the bridge — our strings have BALL ENDS, so you\'ll skip the knot (next section shows how).',
-                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=qfOUA-S1qgk" target="_blank">Tech Corner: How to Restring Your Nylon String Guitar – Takamine Guitars</a> (en inglés). Una diferencia con nuestro salón: el video hace el nudo tradicional en el puente — nuestras cuerdas tienen BOLITA, así que el nudo no se hace (la siguiente sección muestra cómo).',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=qfOUA-S1qgk&t=135" target="_blank">Tech Corner: How to Restring Your Nylon String Guitar – Takamine Guitars (2:15–)</a>. One difference from our classroom: the video ties the traditional knot at the bridge — our strings have BALL ENDS, so you\'ll skip the knot (next section shows how).',
+                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=qfOUA-S1qgk&t=135" target="_blank">Tech Corner: How to Restring Your Nylon String Guitar – Takamine Guitars (2:15–)</a> (en inglés). Una diferencia con nuestro salón: el video hace el nudo tradicional en el puente — nuestras cuerdas tienen BOLITA, así que el nudo no se hace (la siguiente sección muestra cómo).',
                 skills: [1]
               },
               {
