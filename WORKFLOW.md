@@ -558,6 +558,32 @@
 
 ## Recently shipped (post-archive)
 
+- [x] **2026-08-04 — Paper retirement, part 2 (work order).** Pushed
+      `8f7287b`. Executed `3-workorder-2026-08-04-paper-retirement.md`,
+      Phases 1+2, with a STOP for Jonathan's approval in between. Module 9's
+      last two genuine paper drills went digital: Challenge 2 ("Seven
+      Nation Army" from memory) and Challenge 4 (day-later cold-read) now
+      use a persisted free-text box, same mechanism as module-4.js's "type
+      your 4 bars" step. The "Try spacing TAB rhythm" step kept its graded
+      MC quiz per Jonathan's direction — no second response slot exists on
+      a step, so the Phase-1 worked example (swap MC for free-text) got
+      sent back; the shipped version just drops the paper/hand-written
+      wording from label/text/hint. Two module-5.js chord-deck hints lost
+      their "paper flashcards"/"shuffle by hand" clauses. New optional
+      `naturals-plus` level-up deck (naturals + F#/Bb) added to `app.js`
+      `DECKS`, wired as an untracked bonus step in module-9.js — Option A
+      of the work order's two choices. Sweep of every `module-*.js` +
+      `tabs/*.html`, both languages, for paper/slip/flashcard/index
+      card/cut out/papel/tarjeta/baraja/recorta found zero remaining
+      genuine paper references after the fix (all other hits are guitar
+      mechanics, the guitar's musical "role" in Spanish, or already-digital
+      deck content). `node tools/checks.mjs` (full, 180-link check
+      included) clean.
+      **Landed on top of a concurrent session's push** (`8a5e369`, a
+      styles.css banner-color change) — rebased cleanly, only conflict was
+      the `sw.js` `CACHE_VERSION` line, resolved by re-running `checks.mjs`
+      against the merged file state rather than picking either side.
+
 - [x] **2026-08-04 — Small-patches bundle (work order, 8 decided items).**
       Pushed `e89fd6d`. Executed `workorder-2026-08-04-small-patches.md`
       end to end in a worktree: two calibration numbers (module-5's Am↔Em
