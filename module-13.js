@@ -26,6 +26,8 @@ const M13_P6_EN = m13Photo('m13-step-6-lock-and-wind.png', 'Sketch of two hands 
 const M13_P6_ES = m13Photo('m13-step-6-lock-and-wind.png', 'Dibujo de dos manos enrollando en el clavijero ranurado de una guitarra clásica, con un pulgar guiando la cuerda a lo largo del rodillo para que las vueltas queden una al lado de la otra, y flechas que las muestran avanzando hacia la ranura de la cejuela.');
 const M13_P7_EN = m13Photo('m13-step-7-tune-and-stretch.png', 'Sketch of a clip-on tuner on a classical headstock while a string is brought up to pitch.');
 const M13_P7_ES = m13Photo('m13-step-7-tune-and-stretch.png', 'Dibujo de un afinador de pinza en un clavijero clásico mientras se sube una cuerda a su tono.');
+const M13_P8_EN = m13Photo('m13-step-8-coil-and-bin.png', 'Sketch of two hands coiling an old string into a loop, with an arrow pointing into a wastebasket.');
+const M13_P8_ES = m13Photo('m13-step-8-coil-and-bin.png', 'Dibujo de dos manos enrollando una cuerda vieja en un aro, con una flecha hacia el bote de basura.');
 
 SETS.push(
 
@@ -206,8 +208,8 @@ SETS.push(
               },
               {
                 label: 'Coil and toss', label_es: 'Enrolla y a la basura',
-                text: 'Deal with the old string the moment it comes off:<ol><li>Coil it into a loop (wrap it around your hand a few times).</li><li>Put it straight in the trash — string ends are sharp, and a loose string on the floor finds someone\'s foot.</li></ol>Do this each time rather than saving six for the end; a pile of old strings is how a station ends up not clear at 40 minutes. You\'ve got it when: no old string ever touches the floor.',
-                text_es: 'Ocúpate de la cuerda vieja en cuanto sale:<ol><li>Enróllala en un aro (dale unas vueltas alrededor de tu mano).</li><li>Ponla directo en la basura — las puntas son filosas, y una cuerda suelta en el piso encuentra el pie de alguien.</li></ol>Hazlo cada vez en lugar de juntar seis para el final; un montón de cuerdas viejas es justo lo que deja un lugar sin recoger a los 40 minutos. Lo tienes cuando: ninguna cuerda vieja toca el piso.',
+                text: 'Deal with the old string the moment it comes off:<ol><li>Coil it into a loop (wrap it around your hand a few times).</li><li>Put it straight in the trash — string ends are sharp, and a loose string on the floor finds someone\'s foot.</li></ol>Do this each time rather than saving six for the end; a pile of old strings is how a station ends up not clear at 40 minutes. You\'ve got it when: no old string ever touches the floor.' + M13_P8_EN,
+                text_es: 'Ocúpate de la cuerda vieja en cuanto sale:<ol><li>Enróllala en un aro (dale unas vueltas alrededor de tu mano).</li><li>Ponla directo en la basura — las puntas son filosas, y una cuerda suelta en el piso encuentra el pie de alguien.</li></ol>Hazlo cada vez en lugar de juntar seis para el final; un montón de cuerdas viejas es justo lo que deja un lugar sin recoger a los 40 minutos. Lo tienes cuando: ninguna cuerda vieja toca el piso.' + M13_P8_ES,
                 skills: [4]
               }
             ]

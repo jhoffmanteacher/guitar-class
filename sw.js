@@ -14,7 +14,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-08-04-1529c470a1';
+const CACHE_VERSION = 'guitar-class-2026-08-04-32c378c3aa';
 
 // Backing-track audio lives in its OWN cache, versioned independently of the
 // shell (see tools/checks.mjs, which fingerprints audio/ separately and
@@ -88,6 +88,7 @@ const ASSETS = [
   './img/m13-step-5-thread-the-post.png',
   './img/m13-step-6-lock-and-wind.png',
   './img/m13-step-7-tune-and-stretch.png',
+  './img/m13-step-8-coil-and-bin.png',
   './module-1.js',
   './module-2.js',
   './module-3.js',
