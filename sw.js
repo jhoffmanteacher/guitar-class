@@ -53,6 +53,7 @@ const ASSETS = [
   './icon-192-maskable.png',
   './icon-512-maskable.png',
   './img/posture-check.jpg',
+  './img/m6-strum-pendulum.jpg',
   './img/ca-hb-low-e.svg',
   './img/ca-hb-a.svg',
   './img/m1-string-names-en.svg',

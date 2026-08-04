@@ -5,6 +5,13 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-04 — Fixed a blank image when offline
+
+### Fixed
+
+- The strumming-pendulum picture in Modules 5 and 6 wasn't saved for offline
+  use, so it could show up blank without an internet connection. Fixed.
+
 ## 2026-08-04 — Modules now unlock in order
 
 ### Added
