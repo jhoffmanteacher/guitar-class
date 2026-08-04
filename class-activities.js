@@ -234,4 +234,88 @@ window.CLASS_ACTIVITIES = [
       },
     ],
   },
+  {
+    id:    'ca-2026-09-15',
+    date:  '2026-09-15',
+    number: 2,
+    title:    'Finger Gym',
+    title_es: 'Gimnasio de Dedos',
+    intro:    'Today isn\'t a song day — it\'s a training day. Three events in the first five frets: the Ladder, the Spider, the Reach. You\'re chasing a personal record, not a grade.',
+    intro_es: 'Hoy no es día de canciones — es día de entrenamiento. Tres eventos en los primeros cinco trastes: la Escalera, la Araña y el Estiramiento. Vas por un récord personal, no por una calificación.',
+    steps: [
+      {
+        figure: 'img/ca-fg-gym-zone.svg',
+        text: 'This is the gym: the first five frets of the low E string (the thickest one). A fret is the space between two metal strips — fret 1 is closest to the tuning pegs.',
+        text_es: 'Este es el gimnasio: los primeros cinco trastes de la cuerda Mi grave (la más gruesa). Un traste es el espacio entre dos barras de metal — el traste 1 es el más cercano a las clavijas.',
+      },
+      {
+        text: 'Event 1 — the Ladder. One finger per fret: index on 1, middle on 2, ring on 3, pinky on 4. Fingertips on their tips, thumb behind the neck. Set the BPM to 50, one note per click.\nYou\'ve got it when: all four notes ring clean — no buzz — three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'Evento 1 — la Escalera. Un dedo por traste: índice en el 1, medio en el 2, anular en el 3, meñique en el 4. Puntas de los dedos, pulgar detrás del mástil. Pon el BPM en 50, una nota por clic.\nLo tienes cuando: las cuatro notas suenan limpias — sin zumbido — tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        tab: {
+          caption: 'The Ladder · position 1',
+          caption_es: 'La Escalera · posición 1',
+          notes: [
+            { string: 'E', fret: 1, note: 'F',  midi: 41 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44 }
+          ]
+        },
+      },
+      {
+        text: 'Now add the shift: climb 1-2-3-4, slide your whole hand up one fret, climb 2-3-4-5. The hand moves as one piece — the fingers keep their spacing.\nYou\'ve got it when: two full climbs back to back and your thumb stays behind the neck the whole way.',
+        text_es: 'Ahora agrega el cambio: sube 1-2-3-4, desliza toda la mano un traste hacia arriba, y sube 2-3-4-5. La mano se mueve como una sola pieza — los dedos mantienen su separación.\nLo tienes cuando: dos subidas completas seguidas y tu pulgar se queda detrás del mástil todo el tiempo.',
+        tab: {
+          caption: 'The Ladder · with the shift',
+          caption_es: 'La Escalera · con el cambio',
+          notes: [
+            { string: 'E', fret: 1, note: 'F',  midi: 41 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44 },
+            { string: 'E', fret: 5, note: 'A',  midi: 45 }
+          ]
+        },
+      },
+      {
+        text: 'Event 2 — the Spider. Same four fingers, but now they alternate between two strings: low E, A, low E, A. The trap: finger 3 wants to follow finger 2 onto the A string — send it back down to the low E. Then shift up one fret and repeat.\nYou\'ve got it when: one full pass with every note on the right string, any speed.',
+        text_es: 'Evento 2 — la Araña. Los mismos cuatro dedos, pero ahora alternan entre dos cuerdas: Mi grave, La, Mi grave, La. La trampa: el dedo 3 quiere seguir al dedo 2 hacia la cuerda La — mándalo de vuelta a la cuerda Mi grave. Después sube un traste y repite.\nLo tienes cuando: una pasada completa con cada nota en la cuerda correcta, a cualquier velocidad.',
+        tab: {
+          caption: 'The Spider · cross the strings',
+          caption_es: 'La Araña · cruza las cuerdas',
+          notes: [
+            { string: 'E', fret: 1, note: 'F',  midi: 41 },
+            { string: 'A', fret: 2, note: 'B',  midi: 47 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43 },
+            { string: 'A', fret: 4, note: 'C#', midi: 49 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'A', fret: 3, note: 'C',  midi: 48 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44 },
+            { string: 'A', fret: 5, note: 'D',  midi: 50 }
+          ]
+        },
+      },
+      {
+        text: 'Event 3 — the Reach. Plant finger 1 on fret 1 and leave it there. Reach your pinky to fret 5, then bring it back. Stretch, never pain — if it hurts, stop. Reaching fret 4 instead counts too; the stretch grows over weeks.\nYou\'ve got it when: four reaches in a row and finger 1 never lifts.',
+        text_es: 'Evento 3 — el Estiramiento. Planta el dedo 1 en el traste 1 y déjalo ahí. Estira el meñique hasta el traste 5, y regrésalo. Estira sin dolor — si duele, detente. Llegar al traste 4 también cuenta; el estiramiento crece con las semanas.\nLo tienes cuando: cuatro estiramientos seguidos y el dedo 1 nunca se levanta.',
+        tab: {
+          caption: 'The Reach · finger 1 stays down',
+          caption_es: 'El Estiramiento · el dedo 1 no se levanta',
+          notes: [
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 }
+          ]
+        },
+      },
+      {
+        text: 'The circuit: Ladder ×4, Spider ×4, Reach ×4 — that\'s one set. Start at 50 BPM. Every clean set, raise the BPM by 10: 50 is bronze, 60 is silver, 70 is gold. Write down your best clean BPM — that\'s your record to beat next Finger Gym day.\nYou\'ve got it when: two full sets done and today\'s best BPM is written down.',
+        text_es: 'El circuito: Escalera ×4, Araña ×4, Estiramiento ×4 — eso es una serie. Empieza en 50 BPM. Cada serie limpia, sube el BPM 10 puntos: 50 es bronce, 60 es plata, 70 es oro. Anota tu mejor BPM limpio — ese es el récord que vas a superar el próximo día de Gimnasio de Dedos.\nLo tienes cuando: dos series completas hechas y tu mejor BPM de hoy está anotado.',
+      },
+    ],
+  },
 ];

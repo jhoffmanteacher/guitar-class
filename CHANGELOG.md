@@ -5,6 +5,14 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-04 — New in-class activity: Finger Gym
+
+### Added
+
+- **"Finger Gym" in-class activity**, running 2026-09-15 — three finger-strength
+  events in the first five frets (the Ladder, the Spider, the Reach), ending in
+  a BPM personal-record circuit. Companion to the in-class Finger Gym deck.
+
 ## 2026-08-04 — Module 13: restring process updates
 
 ### Changed
