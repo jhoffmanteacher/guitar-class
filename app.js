@@ -6712,10 +6712,22 @@ function caToggleComplete(id){
   caOpenId = id;   // keep the card open through the re-render
   renderClassActivities();
 }
+/* An activity is visible to students once its `date` has arrived (local
+   calendar day) — same "hidden until it happens" default as the reminder
+   popup below, so an activity queued for a future lesson doesn't leak to
+   students who click ahead. The teacher-only hide toggle (hiddenActivityIds,
+   see loadClassConfig()) is independent and can hide/reveal on top of this.
+   Dev-bypass users skip the date gate — the whole point of that mode is
+   previewing UI that isn't live yet. */
+function caIsVisible(a){
+  if(hiddenActivityIds[a.id] === true) return false;
+  if(isDevBypassUser()) return true;
+  return a.date <= dayStr(new Date());
+}
 function renderClassActivities(){
   const bodyEl = document.getElementById('class-activities-body');
   if(!bodyEl) return;
-  const list = (window.CLASS_ACTIVITIES || []).filter(a => hiddenActivityIds[a.id] !== true)
+  const list = (window.CLASS_ACTIVITIES || []).filter(caIsVisible)
     .sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
   if(!list.length){
     bodyEl.innerHTML = `<div class="coach-tip" data-i18n="ca.empty">${escHtml(t('ca.empty'))}</div>`;
@@ -6731,7 +6743,7 @@ function renderClassActivities(){
    from "nothing done yet", so we can't tell a real gap from a read error. */
 function maybeShowCaReminder(){
   if(progressLoadFailed || isDevBypassUser()) return;
-  const pending = (window.CLASS_ACTIVITIES || []).filter(a => classActivities[a.id] !== true && hiddenActivityIds[a.id] !== true);
+  const pending = (window.CLASS_ACTIVITIES || []).filter(a => classActivities[a.id] !== true && caIsVisible(a));
   if(!pending.length) return;
   try{ if(sessionStorage.getItem('caReminderShown') === '1') return; }catch(e){}
   const shown = pending.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);

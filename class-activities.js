@@ -2,16 +2,23 @@
    Guitar Class — In-Class Activities (teacher-curated, day-specific work
    pushed out alongside the self-paced modules)
 
-   An activity is LIVE the moment its entry lands on main — that's still the
-   default and the only way to publish one; there is no draft/staging state
-   here. The one override is a teacher-only "hide" toggle (Class activities
-   view in teacher.js, backed by config/class.hiddenActivities in Firestore —
-   see loadClassConfig() in app.js) for the rare case of pulling something
-   back temporarily after an early push; a hidden activity is exactly as if
-   it hadn't shipped, and un-hiding it makes it live again on the student's
-   next page load. Activities never retire otherwise: this file is a
-   permanent archive, newest first at render time (app.js sorts, this file
-   doesn't need to be kept in date order).
+   An activity's entry can land on main any time before its lesson — pushing
+   early to get checks/review out of the way is fine and expected. Students
+   only see it once its `date` arrives, though: app.js's caIsVisible() gates
+   the student-facing list (and the "unfinished activities" reminder popup)
+   on `a.date <= ` today's local date, so a future-dated entry sits invisibly
+   on main until its day, no draft/staging state needed. The teacher's Class
+   activities view (teacher.js) shows every activity regardless of date, with
+   a "scheduled" note on ones still in the future, and always has full access
+   to the separate manual "hide" toggle (config/class.hiddenActivities in
+   Firestore, read by loadClassConfig() in app.js) for pulling something back
+   temporarily after it's gone live — that toggle and the date gate are
+   independent, either one hides. A hidden or not-yet-dated activity is
+   exactly as if it hadn't shipped; it un-hides itself automatically on its
+   date, or immediately on teacher un-hide, next page load either way.
+   Activities never retire otherwise: this file is a permanent archive,
+   newest first at render time (app.js sorts, this file doesn't need to be
+   kept in date order).
 
    ids are PERMANENT — never renumber or reuse one. Student completion is
    keyed to the id in Firestore (classActivities: { [id]: true }), same

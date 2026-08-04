@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-04 — In-class activities stay hidden until their date
+
+### Changed
+
+- **An in-class activity no longer shows up on the site until its lesson
+  date arrives.** Before, pushing an activity made it visible to everyone
+  right away, even if the lesson was weeks out. Now it appears — and shows
+  up in the "unfinished activities" reminder — starting on its own date.
+  Teachers still see every activity, including upcoming ones, in the Class
+  activities view, and can still hide/unhide anything by hand.
+
 ## 2026-08-04 — New in-class activity: Finger Gym
 
 ### Added

@@ -394,10 +394,16 @@ function renderTeacherTrouble(){
 
    Hidden state lives in config/class.hiddenActivities (id -> true), right
    alongside gameOverrides/paused/archived — same doc, same teacher-writes/
-   students-read rule, same reason: ship=live is the default and permanent
-   publish path (git push), this toggle only exists to pull back something
-   pushed early, temporarily. See loadClassConfig() in app.js for the
-   student-facing read. */
+   students-read rule, same reason: git push is the permanent publish path,
+   this toggle only exists to pull back something pushed early, temporarily.
+   See loadClassConfig() in app.js for the student-facing read.
+
+   This table lists every activity regardless of date — that's deliberate,
+   so a future lesson's entry can be pushed and reviewed here ahead of time.
+   Students don't see that gap: app.js's caIsVisible() also hides any
+   activity whose `date` hasn't arrived yet, independent of this toggle. A
+   future-dated row gets a "Scheduled" note next to its date so the Visible/
+   Hidden toggle here isn't mistaken for the whole story. */
 function renderTeacherActivities(){
   const box=document.getElementById('t-grid-container');
   const activities=(window.CLASS_ACTIVITIES||[]);
@@ -414,6 +420,7 @@ function renderTeacherActivities(){
     if(teacherView!=='activities') return;   // switched views mid-flight
     if(!cfg) return;                         // superseded by a newer toggle
     const hidden=cfg.hiddenActivities||{};
+    const today=dayStr(new Date());
     const sorted=[...activities].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
     const total=allStudents.length;
     const rows=sorted.map(a=>{
@@ -423,16 +430,18 @@ function renderTeacherActivities(){
         ? notDone.map(s=>`<div style="padding:2px 0">${escHtml(s.name||'(no name)')}${s.email?` &middot; ${escHtml(s.email)}`:''}</div>`).join('')
         : '<div style="padding:2px 0">Everyone has finished this one.</div>';
       const isHidden=!!hidden[a.id];
+      const isScheduled=a.date>today;
       // data-id + the delegated listener in showTeacherApp — an activity id
       // is never spliced into an inline JS string literal.
       const visBtns=
         `<button class="tg-seg-btn ${!isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="show">Visible</button>`+
         `<button class="tg-seg-btn ${isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="hide">Hidden</button>`;
-      return `<tr${isHidden?' style="opacity:.55"':''}><td>${escHtml(a.date)}</td><td class="nc" title="${escAttr(a.title)}">${escHtml(a.title)}</td><td>${doneCount} / ${total} students</td>
+      const dateCell=escHtml(a.date)+(isScheduled?' <span style="opacity:.65;font-size:.85em">(scheduled)</span>':'');
+      return `<tr${isHidden?' style="opacity:.55"':''}><td>${dateCell}</td><td class="nc" title="${escAttr(a.title)}">${escHtml(a.title)}</td><td>${doneCount} / ${total} students</td>
         <td><details><summary>Who hasn't finished (${notDone.length})</summary>${listHtml}</details></td>
         <td><div class="tg-seg">${visBtns}</div></td></tr>`;
     }).join('');
-    box.innerHTML=`<div class="tg-note">Hidden activities disappear from the site for students — same as if they hadn't been pushed yet. Use it to pull back something posted early; un-hide any time.</div>`+
+    box.innerHTML=`<div class="tg-note">Hidden activities disappear from the site for students — same as if they hadn't been pushed yet, same as any activity marked (scheduled) below: students can't see it until its date arrives, regardless of this toggle. Use Hidden to pull back something already live; un-hide any time.</div>`+
       `<div class="t-grid-wrap"><table><thead><tr><th>Date</th><th class="nc">Activity</th><th>Done</th><th>Not yet</th><th>Visibility</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   });
 }
