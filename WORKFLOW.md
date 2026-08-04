@@ -558,7 +558,8 @@
 
 ## Recently shipped (post-archive)
 
-- [x] **2026-08-04 — Set peek: read-only preview of a locked set.** Extended
+- [x] **2026-08-04 — Set peek: read-only preview of a locked set.** Pushed
+      `a648364`. Extended
       the existing Module Review preview idiom (`mr-locked` class + disabled
       controls + a banner, all synced by `renderPills`) to ordinary sets.
       Tapping a sequentially-gated locked pill now opens the set read-only
