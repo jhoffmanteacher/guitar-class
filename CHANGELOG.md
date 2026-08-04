@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-04 — Module 13: "finished in time" wording matches the rubric
+
+### Changed
+
+- **Module 13's "finished in time" step now says "at least four strings
+  done"** instead of "all six" — matching what the grading rubric actually
+  requires for full credit. Getting all six strings on in 40 minutes still
+  earns the top score; that's called out explicitly in the wording now.
+
 ## 2026-08-04 — Fixed a blank image when offline
 
 ### Fixed
