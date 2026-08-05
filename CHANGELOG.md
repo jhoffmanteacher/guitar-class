@@ -5,6 +5,28 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-05 — Pre-deployment content sweep
+
+### Fixed
+
+- A couple of practice cards in Modules 5 and 9 had an extra instruction
+  tacked on as plain text instead of being part of the numbered steps —
+  now it's step 3 like it should be.
+- Two Module 7 barre-chord challenge cards had explanation text sitting
+  between the steps and the "you've got it when," which broke the
+  list-only layout those cards are supposed to have. Reworded so the
+  explanation leads in and the steps stay a clean list.
+- The Module 9 song list said "Luna"'s picked intro line crosses three
+  strings — it's actually four (D, G, B, and open high e), matching the
+  lesson itself.
+- A Module 9 mastery check asked you to name a note that the same
+  lesson explicitly calls a "sneak preview" you're not expected to know
+  yet — reworded so the bar matches what's actually taught.
+- Module 13's "Anchored" skill only described the classical-guitar tie
+  block method, even though the same lesson also teaches bridge-pin
+  anchoring for steel-string guitars. Now it covers both, like the
+  "Wound" skill next to it already did.
+
 ## 2026-08-04 — In-class activities stay hidden until their date
 
 ### Changed

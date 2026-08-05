@@ -809,8 +809,8 @@ SETS.push(
             steps: [
               {
                 label: 'Ear Spark: bright or sad?', label_es: 'Chispa auditiva: ¿alegre o triste?',
-                text: 'Ear Spark (optional, 2 min):<ol><li>Record yourself strumming C or Am, playing them a few times in a mixed-up order.</li><li>On playback, say whether each one sounds bright or sad before checking — that\'s major vs minor, and you can already hear it.</li></ol>Try it live too: strum one from memory without looking at your fingers, then check which one you played.',
-                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Grábate rasgueando C o Am, tocándolos varias veces en un orden mezclado.</li><li>Al escuchar la grabación, di si cada uno suena alegre o triste antes de comprobarlo — eso es mayor vs. menor, y ya puedes oírlo.</li></ol>Pruébalo también en vivo: rasguea uno de memoria sin mirar tus dedos, y luego comprueba cuál tocaste.'
+                text: 'Ear Spark (optional, 2 min):<ol><li>Record yourself strumming C or Am, playing them a few times in a mixed-up order.</li><li>On playback, say whether each one sounds bright or sad before checking — that\'s major vs minor, and you can already hear it.</li><li>Try it live too: strum one from memory without looking at your fingers, then check which one you played.</li></ol>',
+                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Grábate rasgueando C o Am, tocándolos varias veces en un orden mezclado.</li><li>Al escuchar la grabación, di si cada uno suena alegre o triste antes de comprobarlo — eso es mayor vs. menor, y ya puedes oírlo.</li><li>Pruébalo también en vivo: rasguea uno de memoria sin mirar tus dedos, y luego comprueba cuál tocaste.</li></ol>'
               }
             ]
           },

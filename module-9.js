@@ -32,8 +32,8 @@ SETS.push(
             steps: [
               {
                 label: 'How the checkpoint works', label_es: 'Cómo funciona el chequeo',
-                text: 'This set has zero new material. It\'s a checkpoint: six things you could already do before the break. Play each one RIGHT NOW as you read it, then answer honestly — solid, shaky, or gone. Nothing here is graded; a "gone" just tells you where to spend your first practice session.',
-                text_es: 'Esta unidad no tiene material nuevo. Es un chequeo: seis cosas que ya podías hacer antes del receso. Toca cada una AHORA MISMO mientras la lees, y luego responde con honestidad — sólida, insegura, o perdida. Nada de esto se califica; un "perdida" solo te dice dónde pasar tu primera sesión de práctica.',
+                text: 'This set has zero new material. It\'s a checkpoint: six things you could already do before the break.<ol><li>Play each one RIGHT NOW as you read it.</li><li>Answer honestly — solid, shaky, or gone.</li></ol>Nothing here is graded; a "gone" just tells you where to spend your first practice session.',
+                text_es: 'Esta unidad no tiene material nuevo. Es un chequeo: seis cosas que ya podías hacer antes del receso.<ol><li>Toca cada una AHORA MISMO mientras la lees.</li><li>Responde con honestidad — sólida, insegura, o perdida.</li></ol>Nada de esto se califica; un "perdida" solo te dice dónde pasar tu primera sesión de práctica.',
                 hint: 'Everyone loses a little over a break. Finding out exactly what you lost is the fastest way to get it back — usually it returns in a day or two, not weeks.',
                 hint_es: 'Todos pierden algo durante un receso. Descubrir exactamente qué perdiste es la forma más rápida de recuperarlo — normalmente vuelve en un día o dos, no en semanas.'
               },
@@ -542,8 +542,8 @@ SETS.push(
           explain_es: 'Partiendo de la cuerda Mi grave o La, la misma nota se repite dos cuerdas hacia el suelo y dos trastes hacia el cuerpo. La versión de tres trastes existe, pero solo cuando la cuerda Si entra en el salto — de Re a Si, o de Sol a mi aguda.' } },
       { id: 'm9w1-s5', text: 'Play the "Sweet Child O\' Mine" intro fragment on the D and G strings and name each note',
         text_es: 'Tocar el fragmento de intro de "Sweet Child O\' Mine" en las cuerdas Re y Sol y nombrar cada nota',
-        gotItWhen: 'you can play the first two notes of the intro up around fret 12–15 and name each one as you play it.',
-        gotItWhen_es: 'puedes tocar las primeras dos notas de la intro alrededor del traste 12–15 y nombrar cada una mientras la tocas.',
+        gotItWhen: 'you can play the first two notes of the intro up around fret 12–15 and name the D-string one — the B-string note right after it is a sneak preview, not something you\'re expected to name yet.',
+        gotItWhen_es: 'puedes tocar las primeras dos notas de la intro alrededor del traste 12–15 y nombrar la de la cuerda Re — la nota de la cuerda Si justo después es un adelanto, no algo que se espera que nombres todavía.',
         practice: { type: 'mc', prompt: 'The "Sweet Child" intro TAB starts at fret 12 on the D string. Using today\'s fretboard knowledge, what note is that?',
           prompt_es: 'El TAB de la intro de "Sweet Child" empieza en el traste 12 de la cuerda Re. Usando lo que sabes hoy del diapasón, ¿qué nota es?',
           choices: ['D — fret 12 repeats the open string\'s name', 'C — one below the octave', 'E — fret 12 is always E', 'Notes don\'t have names above fret 5'],
@@ -1201,7 +1201,7 @@ MODULE_SONGS[9] = [
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Map the intro up the neck — D & G strings', meta_es: 'Ubica la intro arriba del mástil — cuerdas Re y Sol', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
         originalUrl: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
         tutorialUrl: 'https://www.youtube.com/watch?v=0ASVeXINKYM&start=282&end=938' },
-      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Punteo line crossing three strings', meta_es: 'Línea de punteo que cruza tres cuerdas', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
+      { name: '"Luna" — Peso Pluma, Junior H', meta: 'Punteo line crossing four strings', meta_es: 'Línea de punteo que cruza cuatro cuerdas', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
       { name: '"Seven Nation Army" — The White Stripes', meta: 'Write the riff out as TAB yourself', meta_es: 'Escribe el riff como TAB tú mismo', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',

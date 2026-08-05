@@ -6,7 +6,7 @@
 //  steel-string. Edit this file to change Module 13 content.
 // ============================================================
 
-// ── Step photos (2026-07-27). Seven hand-sketched panels of the full
+// ── Step photos (2026-07-27). Eight hand-sketched panels of the full
 //    process, one figure per step. Art only — the captions live in the step
 //    text so they translate with everything else. ──
 const m13Photo = (file, alt) =>
@@ -57,10 +57,10 @@ SETS.push(
 
     skills: [
       { id: 'm13w1-s1',
-        text: 'Anchored — every string secured at both ends, ball end flat at the tie block and each string on its own post',
-        text_es: 'Anclada — cada cuerda sujeta en ambos extremos, la bolita plana en el bloque del puente y cada cuerda en su propio poste',
-        gotItWhen: 'Every string you installed sits flat against the back of the tie block and runs to its own post in the right order, thickest to thinnest — and a gentle tug moves nothing.',
-        gotItWhen_es: 'Cada cuerda que instalaste queda plana contra la parte trasera del bloque del puente y llega a su propio poste en el orden correcto, de la más gruesa a la más delgada — y un jalón suave no mueve nada.',
+        text: 'Anchored — every string secured at both ends and on its own post: ball end flat at the tie block on a classical, or locked against the bridge plate under a bridge pin on a steel-string',
+        text_es: 'Anclada — cada cuerda sujeta en ambos extremos y en su propio poste: la bolita plana en el bloque del puente en una clásica, o trabada contra la placa del puente bajo un pin en una de acero',
+        gotItWhen: 'Every string you installed runs to its own post in the right order, thickest to thinnest, with a gentle tug moving nothing — the ball end sits flat against the back of the tie block on a classical, or locks against the bridge plate under its pin on a steel-string.',
+        gotItWhen_es: 'Cada cuerda que instalaste llega a su propio poste en el orden correcto, de la más gruesa a la más delgada, y un jalón suave no mueve nada — la bolita queda plana contra la parte trasera del bloque del puente en una clásica, o se traba contra la placa del puente bajo su pin en una de acero.',
         practice: { type: 'mc',
           prompt: 'Our nylon strings have ball ends. At the tie block that means:',
           prompt_es: 'Nuestras cuerdas de nylon tienen bolita. En el bloque del puente eso significa:',
