@@ -112,13 +112,28 @@ async function showTeacherApp(user){
 
 function renderTeacherSetTabs(){
   const c=document.getElementById('t-week-tabs'); c.innerHTML='';
-  SETS.forEach(w=>{
-    if(!w.skills||w.skills.length===0) return;
-    const btn=document.createElement('button');
-    btn.className='t-wtab'+(w.locked?' locked':'')+(w.id===teacherSetId?' on':'');
-    btn.textContent=w.label; btn.dataset.id=w.id;
-    if(!w.locked) btn.onclick=()=>{ teacherSetId=w.id; activateTeacherSetTab(w.id); renderTeacherBody(); };
-    c.appendChild(btn);
+  // One row per module: a compact "M5 · Open Chords" label followed by that
+  // module's Set N pills. MODULE_MANIFEST order keeps modules 1→13 top to
+  // bottom; a module with no visible sets (skills not yet loaded) is skipped
+  // entirely rather than showing an empty row.
+  MODULE_MANIFEST.forEach(m=>{
+    const modSets=SETS.filter(w=>w.moduleNum===m.num&&w.skills&&w.skills.length>0);
+    if(modSets.length===0) return;
+    const group=document.createElement('div');
+    group.className='t-week-group';
+    const label=document.createElement('span');
+    label.className='t-week-modlabel';
+    label.textContent=`M${m.num} · ${abbreviate(m.name)}`;
+    label.title=`Module ${m.num} — ${m.name}`;
+    group.appendChild(label);
+    modSets.forEach(w=>{
+      const btn=document.createElement('button');
+      btn.className='t-wtab'+(w.locked?' locked':'')+(w.id===teacherSetId?' on':'');
+      btn.textContent=w.label; btn.dataset.id=w.id;
+      if(!w.locked) btn.onclick=()=>{ teacherSetId=w.id; activateTeacherSetTab(w.id); renderTeacherBody(); };
+      group.appendChild(btn);
+    });
+    c.appendChild(group);
   });
 }
 function activateTeacherSetTab(id){ document.querySelectorAll('.t-wtab').forEach(b=>b.classList.toggle('on',b.dataset.id===id)); }
