@@ -117,31 +117,55 @@ async function showTeacherApp(user){
   loadAllStudents();
 }
 
+// A prior version stacked all 13 modules as one row each — always tall,
+// however few sets a module had. This renders a single "Module: [dropdown]"
+// row plus a pill row for ONLY the currently-selected module's sets, so the
+// student table below starts right after two short rows instead of 13.
 function renderTeacherSetTabs(){
   const c=document.getElementById('t-week-tabs'); c.innerHTML='';
-  // One row per module: a compact "M5 · Open Chords" label followed by that
-  // module's Set N pills. MODULE_MANIFEST order keeps modules 1→13 top to
-  // bottom; a module with no visible sets (skills not yet loaded) is skipped
-  // entirely rather than showing an empty row.
-  MODULE_MANIFEST.forEach(m=>{
-    const modSets=SETS.filter(w=>w.moduleNum===m.num&&w.skills&&w.skills.length>0);
-    if(modSets.length===0) return;
-    const group=document.createElement('div');
-    group.className='t-week-group';
-    const label=document.createElement('span');
-    label.className='t-week-modlabel';
-    label.textContent=`M${m.num} · ${abbreviate(m.name)}`;
-    label.title=`Module ${m.num} — ${m.name}`;
-    group.appendChild(label);
-    modSets.forEach(w=>{
-      const btn=document.createElement('button');
-      btn.className='t-wtab'+(w.locked?' locked':'')+(w.id===teacherSetId?' on':'');
-      btn.textContent=w.label; btn.dataset.id=w.id;
-      if(!w.locked) btn.onclick=()=>{ teacherSetId=w.id; activateTeacherSetTab(w.id); renderTeacherBody(); };
-      group.appendChild(btn);
-    });
-    c.appendChild(group);
+  const modsWithSets=MODULE_MANIFEST.filter(m=>SETS.some(w=>w.moduleNum===m.num&&w.skills&&w.skills.length>0));
+  if(modsWithSets.length===0) return;
+  const curSet=SETS.find(w=>w.id===teacherSetId);
+  const curModNum=curSet?curSet.moduleNum:modsWithSets[0].num;
+
+  const selectWrap=document.createElement('div');
+  selectWrap.className='module-select-wrap';
+  const label=document.createElement('label');
+  label.className='module-select-label';
+  label.htmlFor='t-module-select';
+  label.textContent='Module';
+  const select=document.createElement('select');
+  select.className='module-select';
+  select.id='t-module-select';
+  modsWithSets.forEach(m=>{
+    const opt=document.createElement('option');
+    opt.value=m.num;
+    opt.textContent=`M${m.num} · ${m.name}`;
+    if(m.num===curModNum) opt.selected=true;
+    select.appendChild(opt);
   });
+  select.onchange=()=>{
+    const modNum=Number(select.value);
+    const modSets=SETS.filter(w=>w.moduleNum===modNum&&w.skills&&w.skills.length>0);
+    const target=modSets.find(w=>!w.locked)||modSets[0];
+    if(target) teacherSetId=target.id;
+    renderTeacherSetTabs();
+    renderTeacherBody();
+  };
+  selectWrap.appendChild(label); selectWrap.appendChild(select);
+  c.appendChild(selectWrap);
+
+  const group=document.createElement('div');
+  group.className='t-week-group';
+  const modSets=SETS.filter(w=>w.moduleNum===curModNum&&w.skills&&w.skills.length>0);
+  modSets.forEach(w=>{
+    const btn=document.createElement('button');
+    btn.className='t-wtab'+(w.locked?' locked':'')+(w.id===teacherSetId?' on':'');
+    btn.textContent=w.label; btn.dataset.id=w.id;
+    if(!w.locked) btn.onclick=()=>{ teacherSetId=w.id; activateTeacherSetTab(w.id); renderTeacherBody(); };
+    group.appendChild(btn);
+  });
+  c.appendChild(group);
 }
 function activateTeacherSetTab(id){ document.querySelectorAll('.t-wtab').forEach(b=>b.classList.toggle('on',b.dataset.id===id)); }
 
