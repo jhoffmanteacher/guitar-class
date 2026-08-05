@@ -1547,6 +1547,14 @@ body.explore-open #week-panels{display:none}
 .ca-step:not(.ca-step-collapsed) .ca-step-chev{transform:rotate(90deg)}
 .ca-step-detail{padding:2px 4px 14px 56px;font-size:0.9375rem;line-height:1.55}
 .ca-step.ca-step-collapsed .ca-step-detail{display:none}
+/* Activity-step tab widgets: the shared .tab is inline-block and lands mid-line
+   after step text — force block + left edge here, and a size up so fret numbers
+   read from a music stand. Scoped to activities only; module pages unchanged. */
+.ca-step-detail .tab{display:block;width:fit-content;margin:12px 0 8px}
+.ca-step-detail .tab-cell{height:14px}
+.ca-step-detail .tab-cell .tab-fret{font-size:0.9375rem}
+.ca-step-detail .tab-str-label{font-size:0.875rem}
+.ca-step-detail .tab-note-btn{font-size:0.875rem;min-width:32px;padding:7px 6px}
 .ca-step-done-row{margin-top:10px}
 .ca-step-donebtn{font-family:inherit;font-size:0.8438rem;font-weight:600;padding:7px 14px;border-radius:16px;border:1px solid var(--ca-accent);background:transparent;color:var(--ca-accent);cursor:pointer}
 .ca-step-donebtn:hover{background:var(--ca-accent-bg)}

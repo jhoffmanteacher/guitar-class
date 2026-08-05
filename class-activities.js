@@ -576,9 +576,9 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Hoy hay dos exigencias nuevas: saltar sobre una cuerda sin tocarla, y estirar un traste más allá de donde tu mano quiere llegar.',
     steps: [
       {
-        figure: 'img/ca-fg-gym-zone.svg',
-        text: 'Same five frets as always. Today the distance is sideways — across strings — as well as along the neck.',
-        text_es: 'Los mismos cinco trastes de siempre. Hoy la distancia también es de lado — entre cuerdas — además de a lo largo del mástil.',
+        figure: 'img/ca-fg-gym-zone-skip.svg',
+        text: 'The gym grows today: three strings deep — low E, A, and D — and one fret wider, out to fret 6. The distance is sideways now as well as along the neck.',
+        text_es: 'Hoy el gimnasio crece: tres cuerdas de profundidad — Mi grave, La y Re — y un traste más de ancho, hasta el traste 6. Ahora la distancia también es de lado, además de a lo largo del mástil.',
       },
       {
         text: 'The skip. Index on the low E string at fret 1, then ring on the D string at fret 3 — jumping over the A string without letting it sound. Pick straight down onto the string you want.\nYou\'ve got it when: eight jumps in a row and the A string never rings. Hear it ring twice? Drop the BPM by 10 and try again.',
