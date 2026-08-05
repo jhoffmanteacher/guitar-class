@@ -41,7 +41,7 @@
     <span class="prog-pill">0 of 6 layers rated</span>
   </header>
 
-  <p class="journey-note" data-es="Una canción, cinco capas. Cada módulo de este semestre vuelves a esta canción con una destreza nueva — y cada vez se hace más grande. También hay una capa de bono — un relleno de solista al estilo Hendrix (Capa 6) — para cuando estés listo para un reto más difícil.">One song, five layers. Every module this semester, you come back to this song with a new skill — and it gets bigger every time. There's also a bonus layer — a Hendrix-style lead fill (Layer 6) — once you're ready for a harder challenge.</p>
+  <p class="journey-note" data-es="Una canción, cinco capas. Cada módulo de este semestre vuelves a esta canción con una destreza nueva — y cada vez se hace más grande. También hay una capa de bono — un punteo de tres partes al estilo Hendrix (Capa 6) — para cuando estés listo para un reto más difícil.">One song, five layers. Every module this semester, you come back to this song with a new skill — and it gets bigger every time. There's also a bonus layer — a three-part Hendrix-style lead (Layer 6) — once you're ready for a harder challenge.</p>
 
   <div class="songmap" data-es="&lt;b&gt;Mapa de la canción:&lt;/b&gt; toda la canción es un solo ciclo de tres acordes — &lt;b&gt;Am &middot; G &middot; F &middot; G&lt;/b&gt; — que se repite bajo cada verso y cada solo.
     Dylan canta encima; Hendrix hace solos encima. Todo lo de abajo es ese ciclo a distinta profundidad.
@@ -51,11 +51,34 @@
     <br><em style="color:var(--text3);font-size:0.8125rem">All layers are teaching arrangements at 60 BPM — simplified for learning, not note-for-note transcriptions.</em>
   </div>
 
+  <div class="anatomy">
+    <p class="anatomy-lead" data-es="Anatomía de la canción — el mapa del camino de la grabación de Hendrix, y dónde vive cada sección en esta página:">Song anatomy — the road map of the Hendrix recording, and where each section lives on this page:</p>
+    <div class="anatomy-row"><b data-es="Intro">Intro</b><span data-es="la banda golpea el ciclo; la líder vuela por encima">the band slams the loop; the lead flies over the top</span><span class="an-layers" data-es="Capas 3 &middot; 6">Layers 3 &middot; 6</span></div>
+    <div class="anatomy-row"><b data-es="Verso 1">Verse 1</b><span data-es="la voz monta el ciclo; la líder responde entre líneas">the voice rides the loop; the lead answers between lines</span><span class="an-layers" data-es="Capas 2 &middot; 5 &middot; 6">Layers 2 &middot; 5 &middot; 6</span></div>
+    <div class="anatomy-row"><b data-es="Primer solo">First solo</b><span data-es="un solo corto salido directo de la caja">a short solo straight out of the box</span><span class="an-layers" data-es="Capa 4">Layer 4</span></div>
+    <div class="anatomy-row"><b data-es="Verso 2">Verse 2</b><span data-es="el mismo ciclo, tocado más grande">the same loop, played bigger</span><span class="an-layers" data-es="Capas 3 &middot; 5">Layers 3 &middot; 5</span></div>
+    <div class="anatomy-row"><b data-es="El gran solo">The big solo</b><span data-es="melodía, luego slide, luego wah — un solo, varias voces">melody, then slide, then wah — one solo, several voices</span><span class="an-layers" data-es="Capa 4">Layer 4</span></div>
+    <div class="anatomy-row"><b data-es="Verso 3 + final">Verse 3 + outro</b><span data-es="por fin el verso del título, y un solo hasta el desvanecimiento">the title verse at last, then a solo out to the fade</span><span class="an-layers" data-es="Capas 5 &middot; 4">Layers 5 &middot; 4</span></div>
+  </div>
+
   <div class="playalong">
     <button type="button" class="playalong-btn" onclick="togglePlayalong(this)" aria-expanded="false" title="Jam track — backing music to play along with; play the layer you're working on over it" data-i18n-attr="title:journey.jamTrackTitle" data-es="&lt;span class=&quot;pa-play&quot;&gt;&#x25B6;&lt;/span&gt; &#x1F3B5; Toca encima — bucle de acompañamiento (Am)"><span class="pa-play">&#x25B6;</span> &#x1F3B5; Play along — jam loop (Am)</button>
     <div class="playalong-frame playalong-frame--audio" id="playalong-frame" data-audio="../audio/neil-young-all-along-the-watchtower-backing-Am-115bpm-440hz-rhythm-down.mp3" data-audio-metronome="../audio/neil-young-all-along-the-watchtower-backing-Am-115bpm-440hz-rhythm-down-metronome.mp3" data-audio-slow="../audio/neil-young-all-along-the-watchtower-backing-Am-90bpm-440hz-rhythm-down.mp3" data-audio-slow-metronome="../audio/neil-young-all-along-the-watchtower-backing-Am-90bpm-440hz-rhythm-down-metronome.mp3" data-bpm="115" data-bpm-slow="90" hidden></div>
-    <p class="playalong-note" data-es="Esta pista corre a 115 BPM, dos tiempos por acorde — el ciclo real del disco, más rápido que tus capas de práctica a 60 BPM. ¿Todavía no llegas? Activa el botón &#x1F422; Lento (90 BPM) para un escalón intermedio antes del tempo completo.">This track runs at 115 BPM, two beats per chord — the record's real cycle, faster than your 60 BPM practice layers. Not there yet? Toggle &#x1F422; Slow (90 BPM) for a stepping stone before the full tempo.</p>
+    <p class="playalong-note" data-es="Esta pista corre a 115 BPM, dos tiempos por acorde — el ciclo real de la interpretación, más rápido que tus capas de práctica a 60 BPM. ¿Todavía no llegas? Activa el botón &#x1F422; Lento (90 BPM) para un escalón intermedio antes del tempo completo.">This track runs at 115 BPM, two beats per chord — the real performance cycle, faster than your 60 BPM practice layers. Not there yet? Toggle &#x1F422; Slow (90 BPM) for a stepping stone before the full tempo.</p>
   </div>
+
+  <details class="story" id="story">
+    <summary><span class="story-icon" aria-hidden="true">&#128214;</span><span class="story-title" data-es="La historia">The Story</span><span class="story-sub" data-es="de dónde viene y qué escuchar">where it came from &amp; what to hear</span><span class="story-chevron" aria-hidden="true">&#9662;</span></summary>
+    <div class="story-body">
+      <p data-es="Un poco de historia: Dylan la escribió en 1967 para su austero álbum &quot;John Wesley Harding&quot; — tres versos cortos, sin coro, todo en dos minutos y medio. Jimi Hendrix la escuchó a las pocas semanas y la reconstruyó por completo; su versión se convirtió en su mayor éxito en Estados Unidos, y a Dylan le gustó tanto que empezó a tocar la canción a la manera de Hendrix. Escucha con atención y oirás una segunda guitarra bajo todo: una acústica de 12 cuerdas rasgueando de principio a fin. Y las versiones siguieron llegando — el bucle de acompañamiento de esta página está construido a partir de la rugiente versión de Neil Young en el concierto del 30.º aniversario de Dylan en 1992.">Quick history: Dylan wrote it in 1967 for his stripped-down album &quot;John Wesley Harding&quot; — three short verses, no chorus, over in two and a half minutes. Jimi Hendrix heard it within weeks and rebuilt it completely; his version became his biggest American hit, and Dylan liked it so much he started playing the song Hendrix's way. Listen closely and you'll hear a second guitar under everything: a 12-string acoustic strumming the whole ride. And the covers kept coming — the play-along loop on this page is built from Neil Young's roaring version at Dylan's 30th-anniversary concert in 1992.</p>
+      <p class="story-maplead" data-es="Qué escuchar — un mapa de escucha para tu primera pasada por la grabación de Hendrix:">What to hear — a listening map for your first pass through the Hendrix recording:</p>
+      <div class="branch" data-es="&lt;b&gt;Los primeros segundos&lt;/b&gt; — la canción entera llega de golpe: el ciclo Am &middot; G &middot; F &middot; G, tocado fuerte. Cuéntalo antes de que pase nada más."><b>The first seconds</b> — the whole song arrives at once: the Am &middot; G &middot; F &middot; G loop, hit hard. Count it before anything else happens.</div>
+<div class="branch" data-es="&lt;b&gt;Dos guitarras&lt;/b&gt; — la eléctrica de Hendrix al frente, y una acústica de 12 cuerdas rasgueando por debajo de principio a fin. Intenta oírlas por separado."><b>Two guitars</b> — Hendrix's electric out front, and a 12-string acoustic strumming underneath from start to finish. Try to hear them separately.</div>
+<div class="branch" data-es="&lt;b&gt;Entre las frases de la voz&lt;/b&gt; — la guitarra líder responde a cada línea que canta la voz. Esa conversación es lo que enseña la Capa 6."><b>Between the vocal lines</b> — the lead guitar answers every line the voice sings. That conversation is what Layer 6 teaches.</div>
+<div class="branch" data-es="&lt;b&gt;El gran solo&lt;/b&gt; — un solo con varias personalidades seguidas: melodía limpia, luego notas deslizadas, luego el pedal wah haciendo &quot;hablar&quot; a la guitarra. Cuenta las secciones cuando cambian."><b>The big solo</b> — one solo with several personalities in a row: clean melody, then sliding notes, then the wah pedal making the guitar &quot;talk&quot;. Count the sections as they change.</div>
+<div class="branch" data-es="&lt;b&gt;El último verso&lt;/b&gt; — la línea del título (&quot;All along the watchtower&hellip;&quot;) no llega hasta el verso final. Fíjate cómo la banda se eleva cuando aterriza."><b>The last verse</b> — the title line (&quot;All along the watchtower&hellip;&quot;) doesn't arrive until the final verse. Notice how the band lifts when it lands.</div>
+    </div>
+  </details>
 
   <!-- LAYER 1 -->
   <section class="layer l1" id="layer-1">
@@ -117,6 +140,11 @@ E |--5---------3-------|--1---------3-------|</pre>
       <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; dos tiempos por acorde a &lt;b&gt;60 BPM&lt;/b&gt;, cuatro vueltas limpias, cada cambio cayendo en el tiempo. Mantén el agarre — es una sola forma, tu brazo hace el movimiento."><b>Play it:</b> two beats per chord at <b>60 BPM</b>, four clean laps, every change landing on the beat. Keep your grip — it's one shape, your arm does the moving.</div>
       <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Baja a solo raíces (tu línea de la Capa 2) durante una vuelta, y luego vuelve a añadir la segunda cuerda solo en el A5.">Drop to roots-only (your Layer 2 line) for a lap, then add the second string back on just the A5.</div></details>
       <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Un tiempo por acorde — el mismo 60 BPM, el doble de cambios — o apaga con la palma en el verso (apoya el costado de tu mano de rasgueo sobre las cuerdas para un sonido corto y apagado), y deja que las cuerdas suenen más fuerte en una vuelta grande.">One beat per chord — same 60 BPM, twice the changes — or palm-mute the verse (rest the side of your strumming hand on the strings for a short, muffled sound), then let the strings ring louder for a big lap.</div></details>
+      <details class="fold"><summary data-es="Sube de nivel: el pulso del disco">Level up: the record's pulse</summary><div class="branch" data-es="El disco corre a 115 BPM con un rasgueo abajo, abajo-arriba en cada acorde. Constrúyelo a 60 primero, y luego persigue el bucle de acompañamiento de arriba de la página.">The record runs at 115 BPM with a down, down-up strum on every chord. Build it at 60 first, then chase the play-along loop at the top of the page.</div>
+<pre class="tab"><span data-es="El pulso del disco — arreglo didáctico &middot; D = abajo &middot; U = arriba">The record's pulse — teaching arrangement &middot; D = down &middot; U = up</span>
+|  A5      G5      |  F5      G5      |
+   D   DU  D   DU     D   DU  D   DU
+   1   2+  3   4+     1   2+  3   4+</pre></details>
       <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="3">
         <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
@@ -151,6 +179,23 @@ G |--5-------7-----------------------|
 D |--5-------7-----------------------|
 A |--5-------7-----------------------|
 E |--5----------8--------------------|</pre></details>
+      <details class="fold"><summary data-es="Sube de nivel: dos licks al estilo Hendrix">Level up: two Hendrix-style licks</summary><div class="branch" data-es="Dos licks (frases cortas de solo) de una sola caja para arrancar tus solos. Róbalos y luego dóblalos: cambia una nota, cambia el ritmo, hazlos tuyos.">Two licks (short solo phrases) from the same box to start your solos. Steal them, then bend them: change one note, change the rhythm, make them yours.</div>
+<pre class="tab"><span data-es="Lick 1 — la bajada &middot; negras &middot; aterriza en A">Lick 1 — the roll-down &middot; quarter notes &middot; lands on A</span>
+     C    A    G    A
+e |--<span class="hl">8</span>----<span class="hl">5</span>---------<span class="hl">5</span>--|
+B |------------<span class="hl">8</span>-------|
+G |--------------------|
+D |--------------------|
+A |--------------------|
+E |--------------------|</pre>
+<pre class="tab"><span data-es="Lick 2 — el deslizado &middot; / = deslizar (pulsa una vez, sigue presionando, desliza) &middot; deja sonar la A">Lick 2 — the slide-in &middot; / = slide (pick once, keep pressing, glide) &middot; let the A ring</span>
+     G/A       C    A
+e |--------------------|
+B |--------------------|
+G |------------<span class="hl">5</span>-------|
+D |--<span class="hl">5</span>/<span class="hl">7</span>------------<span class="hl">7</span>--|
+A |--------------------|
+E |--------------------|</pre></details>
       <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="4">
         <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
@@ -176,6 +221,11 @@ E |--5----------8--------------------|</pre></details>
 |  Am        G        |  F         G        |  (loop)
    1    2    3    4      1    2    3    4</pre>
       <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; rasgueos hacia abajo, dos tiempos por acorde, cuatro vueltas — y escúchalo bien: es la MISMA canción que tocaste en los Módulos 2 y 3, sonando completa por fin."><b>Play it:</b> down-strums, two beats per chord, four loops — and listen for it: this is the SAME song you played in Modules 2 and 3, finally sounding full.</div>
+<pre class="tab"><span data-es="El rasgueo para cantar — arreglo didáctico &middot; D = abajo &middot; U = arriba">The singalong strum — teaching arrangement &middot; D = down &middot; U = up</span>
+|  Am      G       |  F       G       |
+   D   DU  D   DU     D   DU  D   DU
+   1   2+  3   4+     1   2+  3   4+</pre>
+      <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; cambia los rasgueos simples por abajo &middot; abajo-arriba en cada acorde — abajo en el tiempo, abajo-arriba partiendo el segundo tiempo. Muñeca suelta; el rasgueo hacia arriba solo roza las tres cuerdas de arriba."><b>Play it:</b> swap the plain down-strums for down &middot; down-up on each chord — down on the beat, down-up splitting the second beat. Loose wrist; the up-strum only brushes the top three strings.</div>
       <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Rasguea solo el tiempo 1 de cada acorde y usa los tiempos en silencio para viajar a la siguiente forma.">Strum only beat 1 of each chord and use the silent beats to travel to the next shape.</div></details>
       <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Intercambia vueltas con un compañero tocando los acordes de potencia de la Capa 3 — Dylan y Hendrix al mismo tiempo — o tararea un verso sobre tu propio rasgueo. O prueba la Capa 6 de bono más abajo — el relleno al estilo Hendrix que responde al canto.">Trade loops with a partner playing Layer 3 power chords — Dylan and Hendrix at the same time — or hum a verse over your own strumming. Or try the bonus Layer 6 below — the Hendrix-style fill that answers the singing.</div></details>
       <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="5">
@@ -193,8 +243,8 @@ E |--5----------8--------------------|</pre></details>
     <h2 class="layer-h"><button type="button" class="layer-head" aria-expanded="false" aria-controls="layer-6-body" onclick="toggleLayer(this)"><span class="layer-num" aria-hidden="true">6</span><span class="layer-title" data-es="Punteo de Hendrix">Hendrix Lead</span><span class="layer-unit" data-es="Extra">Bonus</span><span class="layer-rate-chip" aria-hidden="true"></span><span class="layer-chevron" aria-hidden="true">&#9662;</span></button></h2>
     <div class="layer-body" id="layer-6-body">
       <div class="grain" data-es="Capa extra — reto opcional más difícil, sin puntuación. Mejor cuando la caja pentatónica de la Capa 4 ya se sienta automática.">Bonus layer — optional harder challenge, no score. Best once Layer 4's pentatonic box feels automatic.</div>
-      <p data-es="Hendrix nunca se limita a rasguear esta canción — entre las frases de la voz, su guitarra le responde al cantante con rellenos cortos (un relleno es una pasada extra corta entre las partes principales). Este vive por completo en la caja del Patrón 1 que aprendiste en la Capa 4: tres notas, tocadas como una frase de pregunta y respuesta sobre el ciclo. Cada nota ya está bajo tus dedos.">Hendrix never just strums this song — between vocal lines, his guitar answers the singer with short fills (a fill is a short extra run between main parts). This one lives entirely in the Pattern 1 box you learned in Layer 4: three notes, played as one question-and-answer phrase over the loop. Every note is already under your fingers.</p>
-<pre class="tab"><span data-es="Relleno al estilo Hendrix — arreglo didáctico &middot; Patrón 1 de la pentatónica de A menor &middot; una nota por tiempo &middot; 60 BPM">Hendrix-style fill — teaching arrangement &middot; Am pentatonic Pattern 1 &middot; one note per beat &middot; 60 BPM</span>
+      <p data-es="Hendrix nunca se limita a rasguear esta canción — entre las frases de la voz, su guitarra le responde al cantante con rellenos cortos (un relleno es una pasada extra corta entre las partes principales). Este vive por completo en la caja del Patrón 1 que aprendiste en la Capa 4: tres notas, tocadas como una frase de pregunta y respuesta sobre el ciclo. Cada nota ya está bajo tus dedos. Abajo hay tres partes: la respuesta, la entrada y la subida — todas de la misma caja.">Hendrix never just strums this song — between vocal lines, his guitar answers the singer with short fills (a fill is a short extra run between main parts). This one lives entirely in the Pattern 1 box you learned in Layer 4: three notes, played as one question-and-answer phrase over the loop. Every note is already under your fingers. Three parts below: the answer, the entrance, and the climb — all from the same box.</p>
+<pre class="tab"><span data-es="Parte A — la respuesta del verso &middot; arreglo didáctico &middot; una nota por tiempo &middot; 60 BPM">Part A — the verse answer &middot; teaching arrangement &middot; one note per beat &middot; 60 BPM</span>
      Am        G          F         G
      A    C    A    G     C    G    A
 e |--------------------|--------------------|
@@ -204,8 +254,28 @@ D |--<span class="hl">7</span>---------<span class="hl">7</span>----<span class=
 A |--------------------|--------------------|
 E |--------------------|--------------------|</pre>
       <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; una nota por tiempo a &lt;b&gt;60 BPM&lt;/b&gt;, la mano fija en 5.ª posición — índice en el traste 5, anular en el traste 7. El compás 1 hace la pregunta: A (cuerda Re, traste 7), C (cuerda Sol, traste 5), A, y luego G (cuerda Re, traste 5). El compás 2 responde: C, G, y aterriza en A — déjala sonar dos tiempos mientras el ciclo vuelve a casa, a Am."><b>Play it:</b> one note per beat at <b>60 BPM</b>, hand parked in 5th position — index on fret 5, ring on fret 7. Bar 1 asks the question: A (D string, fret 7), C (G string, fret 5), A, then G (D string, fret 5). Bar 2 answers: C, G, and lands on A — let it ring two beats while the loop comes home to Am.</div>
+<pre class="tab"><span data-es="Parte B — la entrada &middot; / = deslizar (pulsa una vez, sigue presionando, desliza) &middot; deja sonar la A">Part B — the entrance &middot; / = slide (pick once, keep pressing, glide) &middot; let the A ring</span>
+     Am        G          F         G
+     G/A       C    D     C    A
+e |--------------------|--------------------|
+B |--------------------|--------------------|
+G |------------<span class="hl">5</span>----<span class="hl">7</span>--|--<span class="hl">5</span>-----------------|
+D |--<span class="hl">5</span>/<span class="hl">7</span>---------------|-------<span class="hl">7</span>------------|
+A |--------------------|--------------------|
+E |--------------------|--------------------|</pre>
+      <div class="playline" data-es="&lt;b&gt;Parte B:&lt;/b&gt; desliza por la cuerda Re del traste 5 al 7 — pulsa una vez, desliza, aterriza en A y déjala cantar dos tiempos. Luego responde: C (cuerda Sol, traste 5), D (traste 7), C otra vez, y a casa con A (cuerda Re, traste 7), sonando hasta que el ciclo reinicia."><b>Part B:</b> slide up the D string from fret 5 into fret 7 — pick once, glide, land on A and let it sing two beats. Then answer: C (G string, fret 5), D (fret 7), C again, and home to A (D string, fret 7), ringing until the loop restarts.</div>
+<pre class="tab"><span data-es="Parte C — la subida y la caída &middot; negras &middot; hasta la cima de la caja y de vuelta a casa">Part C — the climb and the fall &middot; quarter notes &middot; to the top of the box and back home</span>
+     Am        G          F         G
+     A    C    D    E     C    A    G    A
+e |--------------------|--<span class="hl">8</span>----<span class="hl">5</span>---------<span class="hl">5</span>--|
+B |-----------------<span class="hl">5</span>--|------------<span class="hl">8</span>-------|
+G |-------<span class="hl">5</span>----<span class="hl">7</span>-------|--------------------|
+D |--<span class="hl">7</span>-----------------|--------------------|
+A |--------------------|--------------------|
+E |--------------------|--------------------|</pre>
+      <div class="playline" data-es="&lt;b&gt;Parte C:&lt;/b&gt; el compás 1 sube la caja nota a nota: A, C, D, E. El compás 2 salta a la cima y cae a casa: C aguda (cuerda Mi aguda, traste 8), A, G (cuerda Si, traste 8), y aterriza en A. Esta es la forma de un final de Hendrix — hasta la cima, y luego a casa."><b>Part C:</b> bar 1 climbs the box a note at a time: A, C, D, E. Bar 2 leaps to the peak and falls home: high C (high e, fret 8), A, G (B string, fret 8), and land on A. This is the shape of a Hendrix ending — up to the peak, then home.</div>
       <details class="fold"><summary data-es="&iquest;Atascado?">Stuck?</summary><div class="branch" data-es="Repite solo el cruce de cuerdas — A (cuerda Re, traste 7) a C (cuerda Sol, traste 5) y de vuelta — hasta que sea automático, y luego añade el resto una nota a la vez.">Loop just the string cross — A (D string, fret 7) to C (G string, fret 5) and back — until it's automatic, then add the rest one note at a time.</div></details>
-      <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Tócalo como lo usa Hendrix: rasguea una vuelta del ciclo de la Capa 5, mete este relleno, y vuelve al rasgueo. Aún mejor con un compañero — uno rasguea como Dylan, otro responde como Hendrix, y luego cambian. O escribe tu propia respuesta: conserva el compás 1 e inventa un compás 2 nuevo con cualquier nota del Patrón 1 que aterrice en A.">Play it the way Hendrix uses it: strum a lap of the Layer 5 loop, drop in this fill, then go back to strumming. Even better with a partner — one strums Dylan, one answers as Hendrix, then trade. Or write your own answer: keep bar 1, and invent a new bar 2 from any Pattern 1 notes that lands on A.</div></details>
+      <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Tócalo como lo usa Hendrix: rasguea una vuelta del ciclo de la Capa 5, mete la Parte A, y vuelve al rasgueo. Abre tu siguiente vuelta con la Parte B, y guarda la Parte C para el gran final. Aún mejor con un compañero — uno rasguea como Dylan, otro responde como Hendrix, y luego cambian. O escribe tu propia respuesta: conserva el compás 1 e inventa un compás 2 nuevo con cualquier nota del Patrón 1 que aterrice en A.">Play it the way Hendrix uses it: strum a lap of the Layer 5 loop, drop in Part A, then go back to strumming. Open your next lap with Part B, and save Part C for the big finish. Even better with a partner — one strums Dylan, one answers as Hendrix, then trade. Or write your own answer: keep bar 1, and invent a new bar 2 from any Pattern 1 notes that lands on A.</div></details>
       <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="6">
         <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
         <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>

@@ -134,3 +134,28 @@ footer{margin-top:36px;font-size:0.7813rem;color:var(--text3);border-top:1px sol
   .layer.closed .layer-body{display:block}
   .layer-head{cursor:default}
 }
+
+/* Song anatomy roadmap — v2 depth pass, shared by all journey pages */
+.anatomy{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin:-14px 0 30px}
+.anatomy-lead{margin:0 0 6px;font-size:0.875rem;font-weight:600}
+.anatomy-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;padding:5px 0;border-top:1px dashed var(--border);font-size:0.8438rem}
+.anatomy-row:first-of-type{border-top:0}
+.anatomy-row>b{flex:0 0 108px;font-weight:600}
+.anatomy-row>span{color:var(--text2)}
+.anatomy-row .an-layers{margin-left:auto;color:var(--text3);font-size:0.7813rem;white-space:nowrap;padding-left:8px}
+
+/* Story card — context & listening, deliberately separate from the rated
+   layers: a plain <details>, so journey.js (pill count, accordion) never
+   sees it. Shared by all journey pages. */
+.story{border:1px solid var(--border);border-radius:12px;margin-bottom:22px;background:var(--bg)}
+.story>summary{display:flex;align-items:center;gap:10px;min-height:48px;padding:12px 16px;background:var(--bg2);border-radius:12px;cursor:pointer;list-style:none;font-weight:600}
+.story>summary::-webkit-details-marker{display:none}
+.story[open]>summary{border-bottom:1px solid var(--border);border-radius:12px 12px 0 0}
+.story-icon{font-size:1.05rem}
+.story-sub{color:var(--text3);font-weight:400;font-size:0.8125rem}
+.story-chevron{margin-left:auto;color:var(--text3);transition:transform 0.15s}
+.story[open] .story-chevron{transform:rotate(180deg)}
+.story-body{padding:14px 16px}
+.story-body p{margin:0 0 10px;font-size:0.9063rem}
+.story-maplead{font-weight:600;font-size:0.875rem}
+.story-body .branch{margin-bottom:8px}
