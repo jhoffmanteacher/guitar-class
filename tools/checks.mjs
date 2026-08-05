@@ -522,9 +522,11 @@ function checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsBy
 /* ════════════════════════════════════════════════════════════════════
    1d. IN-CLASS ACTIVITIES — class-activities.js loads cleanly and every
    entry (once any exist — v1 ships CLASS_ACTIVITIES empty) matches the
-   schema documented at the top of that file: permanent id shape, ISO
-   date, an _es twin on every required string, and any figure/video
-   referenced actually exists / isn't a placeholder.
+   schema documented at the top of that file: permanent id shape locked to
+   the number (`ca-<number>`), NO `date` field (release dates live in
+   Firestore config/class.activityDates now, set from the teacher console —
+   see app.js/teacher.js), an _es twin on every required string, and any
+   figure/video referenced actually exists / isn't a placeholder.
    ════════════════════════════════════════════════════════════════════ */
 function validateClassActivities() {
   head('1d. In-Class Activities data');
@@ -542,8 +544,7 @@ function validateClassActivities() {
   if (!Array.isArray(activities)) { err('class-activities.js must set window.CLASS_ACTIVITIES to an array'); problems++; return; }
   if (activities.length === 0) { ok('CLASS_ACTIVITIES is empty (v1 ships empty)'); return; }
 
-  const idRe = /^ca-\d{4}-\d{2}-\d{2}(-[b-z])?$/;
-  const dateRe = /^\d{4}-\d{2}-\d{2}$/;
+  const idRe = /^ca-\d+$/;
   const seenIds = new Set();
   const seenNumbers = new Set();
   const hasVal = v => v !== undefined && v !== null && v !== '';
@@ -555,13 +556,16 @@ function validateClassActivities() {
   activities.forEach((a, i) => {
     const where = `CLASS_ACTIVITIES[${i}]`;
     if (!a || typeof a !== 'object') { err(`${where}: not an object`); problems++; return; }
-    if (!idRe.test(a.id || '')) { err(`${where}: id "${a.id}" doesn't match ^ca-\\d{4}-\\d{2}-\\d{2}(-[b-z])?$`); problems++; }
+    if ('date' in a) { err(`${where}: has a "date" field — release dates now live in Firestore (config/class.activityDates), not class-activities.js`); problems++; }
+    if (!idRe.test(a.id || '')) { err(`${where}: id "${a.id}" doesn't match ^ca-\\d+$`); problems++; }
     else if (seenIds.has(a.id)) { err(`${where}: duplicate id "${a.id}"`); problems++; }
     else seenIds.add(a.id);
-    if (!dateRe.test(a.date || '')) { err(`${where}: date "${a.date}" is not ISO (YYYY-MM-DD)`); problems++; }
     if (!Number.isInteger(a.number) || a.number < 1) { err(`${where}: number "${a.number}" is not a positive integer`); problems++; }
     else if (seenNumbers.has(a.number)) { err(`${where}: duplicate number ${a.number}`); problems++; }
     else seenNumbers.add(a.number);
+    if (idRe.test(a.id || '') && Number.isInteger(a.number) && a.id !== `ca-${a.number}`) {
+      err(`${where}: id "${a.id}" must equal "ca-" + number ("ca-${a.number}")`); problems++;
+    }
     reqEs(where, a, 'title');
     reqEs(where, a, 'intro');
     if (!Array.isArray(a.steps) || !a.steps.length) { err(`${where}: "steps" should be a non-empty array`); problems++; }

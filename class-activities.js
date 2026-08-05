@@ -2,28 +2,31 @@
    Guitar Class — In-Class Activities (teacher-curated, day-specific work
    pushed out alongside the self-paced modules)
 
-   An activity's entry can land on main any time before its lesson — pushing
-   early to get checks/review out of the way is fine and expected. Students
-   only see it once its `date` arrives, though: app.js's caIsVisible() gates
-   the student-facing list (and the "unfinished activities" reminder popup)
-   on `a.date <= ` today's local date, so a future-dated entry sits invisibly
-   on main until its day, no draft/staging state needed. The teacher's Class
-   activities view (teacher.js) shows every activity regardless of date, with
-   a "scheduled" note on ones still in the future, and always has full access
-   to the separate manual "hide" toggle (config/class.hiddenActivities in
-   Firestore, read by loadClassConfig() in app.js) for pulling something back
-   temporarily after it's gone live — that toggle and the date gate are
-   independent, either one hides. A hidden or not-yet-dated activity is
-   exactly as if it hadn't shipped; it un-hides itself automatically on its
-   date, or immediately on teacher un-hide, next page load either way.
-   Activities never retire otherwise: this file is a permanent archive,
-   newest first at render time (app.js sorts, this file doesn't need to be
-   kept in date order).
+   An activity's entry lands on main UNDATED and invisible to students — this
+   file carries no release date at all. The teacher sets (or edits, or clears)
+   the release date from the Class activities view in teacher.js, which
+   writes it to config/class.activityDates ({ id -> 'YYYY-MM-DD' } in
+   Firestore). app.js's caIsVisible() gates the student-facing list (and the
+   "unfinished activities" reminder popup) on that date having arrived
+   (local calendar day); an activity with no entry in activityDates — which
+   is every activity the moment it's authored — simply never shows. No
+   draft/staging state needed: pushing early to get checks/review out of the
+   way is fine and expected, since the console date is what actually turns it
+   on. The teacher's Class activities view lists every activity regardless of
+   date, with a note distinguishing "no date — hidden from students" from a
+   future-scheduled one, and always has full access to the separate manual
+   "hide" toggle (config/class.hiddenActivities, read by loadClassConfig() in
+   app.js) for pulling something back temporarily after it's gone live — that
+   toggle and the date gate are independent, either one hides. Activities
+   never retire otherwise: this file is a permanent archive, newest-dated
+   first at render time (app.js sorts, this file doesn't need to be kept in
+   any order).
 
-   ids are PERMANENT — never renumber or reuse one. Student completion is
-   keyed to the id in Firestore (classActivities: { [id]: true }), same
-   rule as skill ids in the module files. If two activities land on the
-   same day, suffix the second id -b, -c… (ca-2026-09-15-b).
+   ids are PERMANENT — never renumber or reuse one. `ca-<number>` — the
+   number is already unique, so the id is too, and there's no date-collision
+   case to suffix around anymore. Student completion is keyed to the id in
+   Firestore (classActivities: { [id]: true }), same rule as skill ids in the
+   module files.
 
    Every display string carries an `_es` twin, same convention as module
    files — rendered through tf(obj, field) in app.js (see the "field on a
@@ -32,12 +35,10 @@
 
    SCHEMA
    {
-     id:      'ca-2026-09-15',   // permanent, ^ca-\d{4}-\d{2}-\d{2}(-[b-z])?$
-     date:    '2026-09-15',      // ISO — display + sort only; the id stays
-                                  // fixed even if the date is later corrected
-     number:  1,                 // permanent once shipped, same rule as id —
+     id:      'ca-3',            // permanent, must equal 'ca-' + number
+     number:  3,                 // permanent once shipped, same rule as id —
                                   // the sequence students hear it by ("Activity
-                                  // #1"). Renders as "#N - Title"; don't bake
+                                  // #3"). Renders as "#N - Title"; don't bake
                                   // the "#N - " prefix into title itself.
      title:    'Power Chord Relay',
      title_es: 'Relevo de acordes de poder',
@@ -92,8 +93,7 @@
    ════════════════════════════════════════════════════════════════════ */
 window.CLASS_ACTIVITIES = [
   {
-    id:    'ca-2026-09-01',
-    date:  '2026-09-01',
+    id:    'ca-1',
     number: 1,
     title:    'Playing Happy Birthday — Practice',
     title_es: 'Tocando Happy Birthday — Práctica',
@@ -242,8 +242,7 @@ window.CLASS_ACTIVITIES = [
     ],
   },
   {
-    id:    'ca-2026-09-15',
-    date:  '2026-09-15',
+    id:    'ca-2',
     number: 2,
     title:    'Finger Gym',
     title_es: 'Gimnasio de Dedos',
@@ -322,6 +321,403 @@ window.CLASS_ACTIVITIES = [
       {
         text: 'The circuit: Ladder ×4, Spider ×4, Reach ×4 — that\'s one set. Start at 50 BPM. Every clean set, raise the BPM by 10: 50 is bronze, 60 is silver, 70 is gold. Write down your best clean BPM — that\'s your record to beat next Finger Gym day.\nYou\'ve got it when: two full sets done and today\'s best BPM is written down.',
         text_es: 'El circuito: Escalera ×4, Araña ×4, Estiramiento ×4 — eso es una serie. Empieza en 50 BPM. Cada serie limpia, sube el BPM 10 puntos: 50 es bronce, 60 es plata, 70 es oro. Anota tu mejor BPM limpio — ese es el récord que vas a superar el próximo día de Gimnasio de Dedos.\nLo tienes cuando: dos series completas hechas y tu mejor BPM de hoy está anotado.',
+      },
+    ],
+  },
+  {
+    id:    'ca-3',
+    number: 3,
+    title:    'Finger Gym 2 — Down and Across',
+    title_es: 'Gimnasio de Dedos 2 — Bajando y cruzando',
+    intro:    'Last Gym went up. Today you come back down, then take the Ladder onto all six strings. Going down is harder than going up — the pinky has to lead.',
+    intro_es: 'El Gimnasio pasado subiste. Hoy vas a bajar, y después vas a llevar la Escalera a las seis cuerdas. Bajar es más difícil que subir — el meñique tiene que ir primero.',
+    steps: [
+      {
+        figure: 'img/ca-fg-gym-zone.svg',
+        text: 'Same gym as last time: the first five frets. What changes today is the direction you travel and how many strings you use.',
+        text_es: 'El mismo gimnasio que la vez pasada: los primeros cinco trastes. Lo que cambia hoy es la dirección en la que te mueves y cuántas cuerdas usas.',
+      },
+      {
+        text: 'The Ladder backwards. Pinky on fret 4 first, then ring on 3, middle on 2, index on 1. Set the BPM to 50. Your pinky is the weakest finger and it goes first — that\'s the whole point.\nYou\'ve got it when: all four notes ring clean — no buzz — three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La Escalera al revés. Primero el meñique en el traste 4, después el anular en el 3, el medio en el 2 y el índice en el 1. Pon el BPM en 50. Tu meñique es el dedo más débil y va primero — de eso se trata.\nLo tienes cuando: las cuatro notas suenan limpias — sin zumbido — tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        tab: {
+          caption: 'Down the Ladder · pinky leads',
+          caption_es: 'Bajando la Escalera · el meñique va primero',
+          notes: [
+            { string: 'E', fret: 4, note: 'G#', midi: 44 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'E', fret: 1, note: 'F',  midi: 41 }
+          ]
+        },
+      },
+      {
+        text: 'Up and straight back down, no pause at the top. The turnaround is the tricky spot — fret 4 gets played once, not twice.\nYou\'ve got it when: four times through without stopping.',
+        text_es: 'Sube y baja de inmediato, sin pausa arriba. La vuelta es el punto difícil — el traste 4 se toca una sola vez, no dos.\nLo tienes cuando: cuatro veces seguidas sin detenerte.',
+        tab: {
+          caption: 'Up and back · one turnaround',
+          caption_es: 'Subir y bajar · una vuelta',
+          notes: [
+            { string: 'E', fret: 1, note: 'F',  midi: 41 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'E', fret: 1, note: 'F',  midi: 41 }
+          ]
+        },
+      },
+      {
+        text: 'Move the same climb over: the A string, then the D string. The shape never changes — only which string your fingers land on.\nYou\'ve got it when: no buzz on any of the four notes, on both strings.',
+        text_es: 'Mueve la misma subida: la cuerda La, y después la cuerda Re. El patrón nunca cambia — solo cambia en qué cuerda caen tus dedos.\nLo tienes cuando: sin zumbido en ninguna de las cuatro notas, en las dos cuerdas.',
+        tab: {
+          caption: 'A string, then D string',
+          caption_es: 'Cuerda La, después cuerda Re',
+          notes: [
+            { string: 'A', fret: 1, note: 'A#', midi: 46 },
+            { string: 'A', fret: 2, note: 'B',  midi: 47 },
+            { string: 'A', fret: 3, note: 'C',  midi: 48 },
+            { string: 'A', fret: 4, note: 'C#', midi: 49 },
+            { string: 'D', fret: 1, note: 'D#', midi: 51 },
+            { string: 'D', fret: 2, note: 'E',  midi: 52 },
+            { string: 'D', fret: 3, note: 'F',  midi: 53 },
+            { string: 'D', fret: 4, note: 'F#', midi: 54 }
+          ]
+        },
+      },
+      {
+        text: 'Now the three thin strings — G, B, and high e. They buzz more easily because they\'re thinner, so press just behind the fret, not on top of it.\nYou\'ve got it when: all three strings, no stopping, any speed.',
+        text_es: 'Ahora las tres cuerdas delgadas — Sol, Si y Mi aguda. Zumban más fácil porque son más delgadas, así que presiona justo detrás del traste, no encima.\nLo tienes cuando: las tres cuerdas, sin detenerte, a cualquier velocidad.',
+        tab: {
+          caption: 'G · B · high e — thin strings buzz easier',
+          caption_es: 'Sol · Si · Mi aguda — las delgadas zumban más fácil',
+          notes: [
+            { string: 'G', fret: 1, note: 'G#', midi: 56 },
+            { string: 'G', fret: 2, note: 'A',  midi: 57 },
+            { string: 'G', fret: 3, note: 'A#', midi: 58 },
+            { string: 'G', fret: 4, note: 'B',  midi: 59 },
+            { string: 'B', fret: 1, note: 'C',  midi: 60 },
+            { string: 'B', fret: 2, note: 'C#', midi: 61 },
+            { string: 'B', fret: 3, note: 'D',  midi: 62 },
+            { string: 'B', fret: 4, note: 'D#', midi: 63 },
+            { string: 'e', fret: 1, note: 'F',  midi: 65 },
+            { string: 'e', fret: 2, note: 'F#', midi: 66 },
+            { string: 'e', fret: 3, note: 'G',  midi: 67 },
+            { string: 'e', fret: 4, note: 'G#', midi: 68 }
+          ]
+        },
+      },
+      {
+        text: 'The circuit: climb up and back down on all six strings — low E to high e and home again. That\'s one set. Every clean set, raise the BPM by 10 and write down your best.\nYou\'ve got it when: two full sets done and today\'s best clean BPM is written down.',
+        text_es: 'El circuito: sube y baja en las seis cuerdas — de la Mi grave a la Mi aguda y de regreso. Esa es una serie. Cada serie limpia, sube el BPM 10 puntos y anota tu mejor marca.\nLo tienes cuando: dos series completas hechas y tu mejor BPM limpio de hoy está anotado.',
+      },
+    ],
+  },
+  {
+    id:    'ca-4',
+    number: 4,
+    title:    'Finger Gym 3 — Up the Neck',
+    title_es: 'Gimnasio de Dedos 3 — Subiendo el mástil',
+    intro:    'So far the gym has lived in the first five frets. Today you move it up the neck. The frets get narrower as you climb, so the same shape feels different in every position.',
+    intro_es: 'Hasta ahora el gimnasio ha vivido en los primeros cinco trastes. Hoy lo mueves hacia arriba del mástil. Los trastes se hacen más angostos mientras subes, así que el mismo patrón se siente distinto en cada posición.',
+    steps: [
+      {
+        figure: 'img/ca-fg-dots.svg',
+        text: 'The dots on the neck are your landing marks: frets 5, 7, 9, and the double dot at 12. Learn to find them with your eyes before your hand goes there.',
+        text_es: 'Los puntos en el mástil son tus marcas de referencia: los trastes 5, 7, 9 y el punto doble en el 12. Aprende a encontrarlos con la vista antes de que llegue tu mano.',
+      },
+      {
+        text: 'The Ladder in 5th position: index on fret 5, one finger per fret up to 8. Your index finger sits on a dot — that\'s how you know you\'re home. BPM 50.\nYou\'ve got it when: all four notes clean, no buzz, three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La Escalera en la 5.ª posición: índice en el traste 5, un dedo por traste hasta el 8. Tu índice queda sobre un punto — así sabes que estás en tu lugar. BPM 50.\nLo tienes cuando: las cuatro notas limpias, sin zumbido, tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        tab: {
+          caption: '5th position · index on the dot',
+          caption_es: '5.ª posición · el índice sobre el punto',
+          notes: [
+            { string: 'E', fret: 5, note: 'A',  midi: 45 },
+            { string: 'E', fret: 6, note: 'A#', midi: 46 },
+            { string: 'E', fret: 7, note: 'B',  midi: 47 },
+            { string: 'E', fret: 8, note: 'C',  midi: 48 }
+          ]
+        },
+      },
+      {
+        text: 'Add the shift, two frets up this time: climb 5-6-7-8, slide the whole hand to 7, climb 7-8-9-10. The hand travels as one piece.\nYou\'ve got it when: two full climbs back to back and your thumb stays behind the neck the whole way.',
+        text_es: 'Agrega el cambio, esta vez dos trastes: sube 5-6-7-8, desliza toda la mano al 7 y sube 7-8-9-10. La mano viaja como una sola pieza.\nLo tienes cuando: dos subidas completas seguidas y tu pulgar se queda detrás del mástil todo el tiempo.',
+        tab: {
+          caption: '5th position into 7th',
+          caption_es: 'De la 5.ª posición a la 7.ª',
+          notes: [
+            { string: 'E', fret: 5,  note: 'A',  midi: 45 },
+            { string: 'E', fret: 6,  note: 'A#', midi: 46 },
+            { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+            { string: 'E', fret: 8,  note: 'C',  midi: 48 },
+            { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+            { string: 'E', fret: 8,  note: 'C',  midi: 48 },
+            { string: 'E', fret: 9,  note: 'C#', midi: 49 },
+            { string: 'E', fret: 10, note: 'D',  midi: 50 }
+          ]
+        },
+      },
+      {
+        text: 'Now the jump. Index on fret 1, then straight to fret 5, then to fret 9 — one note each, no walking up. Look at the dot, then move. After three tries, look away and let your hand find it.\nYou\'ve got it when: you can look away and land all three, three times out of three.',
+        text_es: 'Ahora el salto. Índice en el traste 1, después directo al 5, después al 9 — una nota en cada uno, sin caminar. Mira el punto y muévete. Después de tres intentos, voltea la mirada y deja que tu mano lo encuentre.\nLo tienes cuando: puedes voltear la mirada y caer en los tres, tres de tres veces.',
+        tab: {
+          caption: 'Jump · fret 1 to 5 to 9',
+          caption_es: 'Salto · del traste 1 al 5 al 9',
+          notes: [
+            { string: 'E', fret: 1, note: 'F',  midi: 41 },
+            { string: 'E', fret: 5, note: 'A',  midi: 45 },
+            { string: 'E', fret: 9, note: 'C#', midi: 49 }
+          ]
+        },
+      },
+      {
+        text: 'The Ladder in 9th position, up to the double dot at 12. These frets are the narrowest on the neck, so your fingers are crowded — keep them on their tips or they\'ll bump each other.\nYou\'ve got it when: no buzz on any of the four.',
+        text_es: 'La Escalera en la 9.ª posición, hasta el punto doble del traste 12. Estos son los trastes más angostos del mástil, así que tus dedos van apretados — mantenlos sobre las puntas o se van a chocar entre sí.\nLo tienes cuando: sin zumbido en ninguna de las cuatro.',
+        tab: {
+          caption: '9th position · narrowest frets',
+          caption_es: '9.ª posición · los trastes más angostos',
+          notes: [
+            { string: 'E', fret: 9,  note: 'C#', midi: 49 },
+            { string: 'E', fret: 10, note: 'D',  midi: 50 },
+            { string: 'E', fret: 11, note: 'D#', midi: 51 },
+            { string: 'E', fret: 12, note: 'E',  midi: 52 }
+          ]
+        },
+      },
+      {
+        text: 'The circuit: Ladder in 1st position, 5th, then 9th, then all the way back down — that\'s one set. Every clean set, raise the BPM by 10 and write down your best.\nYou\'ve got it when: two full sets done and today\'s best clean BPM is written down.',
+        text_es: 'El circuito: la Escalera en la 1.ª posición, la 5.ª, la 9.ª, y de regreso hasta abajo — esa es una serie. Cada serie limpia, sube el BPM 10 puntos y anota tu mejor marca.\nLo tienes cuando: dos series completas hechas y tu mejor BPM limpio de hoy está anotado.',
+      },
+    ],
+  },
+  {
+    id:    'ca-5',
+    number: 5,
+    title:    'Finger Gym 4 — Leave Them Down',
+    title_es: 'Gimnasio de Dedos 4 — Déjalos abajo',
+    intro:    'Until now your fingers took turns. Today they stay down. Every finger that has already played keeps touching the string — that\'s what makes chords possible later.',
+    intro_es: 'Hasta ahora tus dedos se tomaban turnos. Hoy se quedan abajo. Cada dedo que ya tocó sigue apoyado en la cuerda — eso es lo que hace posibles los acordes más adelante.',
+    steps: [
+      {
+        figure: 'img/ca-fg-gym-zone.svg',
+        text: 'Back to the first five frets. The notes are the same as Gym 1 — what changes is that nothing lifts.',
+        text_es: 'De vuelta a los primeros cinco trastes. Las notas son las mismas del Gimnasio 1 — lo que cambia es que nada se levanta.',
+      },
+      {
+        text: 'Plant-as-you-go. Climb 1-2-3-4, but each finger stays where it lands. By the last note all four fingers are on the string at once. BPM 50.\nYou\'ve got it when: at fret 4 all four fingers are still touching, three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'Planta y sigue. Sube 1-2-3-4, pero cada dedo se queda donde cayó. En la última nota los cuatro dedos están sobre la cuerda a la vez. BPM 50.\nLo tienes cuando: al llegar al traste 4 los cuatro dedos siguen apoyados, tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        tab: {
+          caption: 'Plant as you go · nothing lifts',
+          caption_es: 'Planta y sigue · nada se levanta',
+          notes: [
+            { string: 'E', fret: 1, note: 'F',  midi: 41 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44 }
+          ]
+        },
+      },
+      {
+        text: 'Pair 1-3: alternate index on fret 1 and ring on fret 3, back and forth. The two fingers not playing stay down on their frets. This is finger independence — one finger moving while the others don\'t.\nYou\'ve got it when: eight clean alternations in a row.',
+        text_es: 'Pareja 1-3: alterna el índice en el traste 1 y el anular en el traste 3, de ida y vuelta. Los dos dedos que no tocan se quedan abajo en sus trastes. Esto es independencia de dedos — un dedo se mueve mientras los otros no.\nLo tienes cuando: ocho alternancias limpias seguidas.',
+        tab: {
+          caption: 'Pair 1-3',
+          caption_es: 'Pareja 1-3',
+          notes: [
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 }
+          ]
+        },
+      },
+      {
+        text: 'Pair 3-4 — ring and pinky, the hardest pair on the hand. They share a tendon, so they want to move together. Go slow enough that only one moves at a time.\nYou\'ve got it when: eight in a row, no buzz, and the other fingers never leave the string.',
+        text_es: 'Pareja 3-4 — anular y meñique, la pareja más difícil de la mano. Comparten un tendón, así que quieren moverse juntos. Ve lo suficientemente lento para que solo uno se mueva a la vez.\nLo tienes cuando: ocho seguidas, sin zumbido, y los otros dedos nunca dejan la cuerda.',
+        tab: {
+          caption: 'Pair 3-4 · the hard one',
+          caption_es: 'Pareja 3-4 · la difícil',
+          notes: [
+            { string: 'E', fret: 3, note: 'G',  midi: 43 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44 }
+          ]
+        },
+      },
+      {
+        text: 'Out of order: 1-3-2-4. Fingers keep landing and staying, but not in a line — your middle finger has to reach past a finger that\'s already down.\nYou\'ve got it when: four times through without stopping.',
+        text_es: 'Fuera de orden: 1-3-2-4. Los dedos siguen cayendo y quedándose, pero no en fila — tu dedo medio tiene que pasar por encima de un dedo que ya está abajo.\nLo tienes cuando: cuatro veces seguidas sin detenerte.',
+        tab: {
+          caption: 'Out of order · 1-3-2-4',
+          caption_es: 'Fuera de orden · 1-3-2-4',
+          notes: [
+            { string: 'E', fret: 1, note: 'F',  midi: 41 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44 }
+          ]
+        },
+      },
+      {
+        text: 'The circuit: 1-3-2-4 on the low E string, then the A string, then the D string, fingers staying down the whole way. That\'s one set. Every clean set, raise the BPM by 10 and write down your best.\nYou\'ve got it when: two full sets done and today\'s best clean BPM is written down.',
+        text_es: 'El circuito: 1-3-2-4 en la cuerda Mi grave, después en la cuerda La, después en la cuerda Re, con los dedos abajo todo el tiempo. Esa es una serie. Cada serie limpia, sube el BPM 10 puntos y anota tu mejor marca.\nLo tienes cuando: dos series completas hechas y tu mejor BPM limpio de hoy está anotado.',
+      },
+    ],
+  },
+  {
+    id:    'ca-6',
+    number: 6,
+    title:    'Finger Gym 5 — Skip and Stretch',
+    title_es: 'Gimnasio de Dedos 5 — Salta y estira',
+    intro:    'Two new demands today: skipping over a string without hitting it, and reaching one fret farther than your hand wants to go.',
+    intro_es: 'Hoy hay dos exigencias nuevas: saltar sobre una cuerda sin tocarla, y estirar un traste más allá de donde tu mano quiere llegar.',
+    steps: [
+      {
+        figure: 'img/ca-fg-gym-zone.svg',
+        text: 'Same five frets as always. Today the distance is sideways — across strings — as well as along the neck.',
+        text_es: 'Los mismos cinco trastes de siempre. Hoy la distancia también es de lado — entre cuerdas — además de a lo largo del mástil.',
+      },
+      {
+        text: 'The skip. Index on the low E string at fret 1, then ring on the D string at fret 3 — jumping over the A string without letting it sound. Pick straight down onto the string you want.\nYou\'ve got it when: eight jumps in a row and the A string never rings. Hear it ring twice? Drop the BPM by 10 and try again.',
+        text_es: 'El salto. Índice en la cuerda Mi grave, traste 1, después anular en la cuerda Re, traste 3 — saltando por encima de la cuerda La sin dejarla sonar. Pulsa directo hacia abajo sobre la cuerda que quieres.\nLo tienes cuando: ocho saltos seguidos y la cuerda La nunca suena. ¿La oyes sonar dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        tab: {
+          caption: 'The skip · over the A string',
+          caption_es: 'El salto · por encima de la cuerda La',
+          notes: [
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'D', fret: 3, note: 'F', midi: 53 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'D', fret: 3, note: 'F', midi: 53 }
+          ]
+        },
+      },
+      {
+        text: 'The Spider with a skip. Same alternating pattern as always, but between the low E and D strings instead of neighbours. Then shift up one fret and repeat.\nYou\'ve got it when: one full pass with every note on the right string, any speed.',
+        text_es: 'La Araña con salto. El mismo patrón alternado de siempre, pero entre la cuerda Mi grave y la cuerda Re, no entre vecinas. Después sube un traste y repite.\nLo tienes cuando: una pasada completa con cada nota en la cuerda correcta, a cualquier velocidad.',
+        tab: {
+          caption: 'Spider · low E to D, skipping A',
+          caption_es: 'Araña · de Mi grave a Re, saltando La',
+          notes: [
+            { string: 'E', fret: 1, note: 'F',  midi: 41 },
+            { string: 'D', fret: 2, note: 'E',  midi: 52 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43 },
+            { string: 'D', fret: 4, note: 'F#', midi: 54 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'D', fret: 3, note: 'F',  midi: 53 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44 },
+            { string: 'D', fret: 5, note: 'G',  midi: 55 }
+          ]
+        },
+      },
+      {
+        text: 'The wide Reach. Index plants on fret 1 and stays. Pinky goes to fret 6 — one farther than last time. Stretch, never pain; if the wrist hurts, stop. Fret 5 still counts, and it still gets you stronger.\nYou\'ve got it when: four reaches in a row and finger 1 never lifts.',
+        text_es: 'El Estiramiento ancho. El índice se planta en el traste 1 y se queda. El meñique va al traste 6 — uno más que la vez pasada. Estira sin dolor; si te duele la muñeca, detente. El traste 5 sigue contando, y sigue haciéndote más fuerte.\nLo tienes cuando: cuatro estiramientos seguidos y el dedo 1 nunca se levanta.',
+        tab: {
+          caption: 'Wide Reach · fret 1 to fret 6',
+          caption_es: 'Estiramiento ancho · del traste 1 al 6',
+          notes: [
+            { string: 'E', fret: 1, note: 'F',  midi: 41 },
+            { string: 'E', fret: 6, note: 'A#', midi: 46 },
+            { string: 'E', fret: 1, note: 'F',  midi: 41 },
+            { string: 'E', fret: 6, note: 'A#', midi: 46 }
+          ]
+        },
+      },
+      {
+        text: 'Reach across strings: index on the low E at fret 2, pinky on the A string at fret 5. Both notes ring together if you can hold the shape — this is what a power chord will feel like.\nYou\'ve got it when: both notes ring at the same time, four times in a row.',
+        text_es: 'Estiramiento entre cuerdas: índice en la cuerda Mi grave, traste 2, y meñique en la cuerda La, traste 5. Las dos notas suenan juntas si puedes sostener la forma — así se va a sentir un acorde de poder.\nLo tienes cuando: las dos notas suenan al mismo tiempo, cuatro veces seguidas.',
+        tab: {
+          caption: 'Across the strings · both notes ringing',
+          caption_es: 'Entre cuerdas · las dos notas suenan',
+          notes: [
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'A', fret: 5, note: 'D',  midi: 50 }
+          ]
+        },
+      },
+      {
+        text: 'The circuit: skip Spider ×4, wide Reach ×4, across-the-strings ×4 — that\'s one set. Every clean set, raise the BPM by 10 and write down your best.\nYou\'ve got it when: two full sets done and today\'s best clean BPM is written down.',
+        text_es: 'El circuito: Araña con salto ×4, Estiramiento ancho ×4, entre cuerdas ×4 — esa es una serie. Cada serie limpia, sube el BPM 10 puntos y anota tu mejor marca.\nLo tienes cuando: dos series completas hechas y tu mejor BPM limpio de hoy está anotado.',
+      },
+    ],
+  },
+  {
+    id:    'ca-7',
+    number: 7,
+    title:    'Finger Gym 6 — The Meet',
+    title_es: 'Gimnasio de Dedos 6 — La competencia',
+    intro:    'Meet day. Nothing new to learn — everything you\'ve built, run back to back, at the fastest tempo you can keep clean. Bring your record from last Gym.',
+    intro_es: 'Día de competencia. No hay nada nuevo que aprender — todo lo que has construido, seguido y sin parar, al tempo más rápido que puedas mantener limpio. Trae tu récord del Gimnasio pasado.',
+    steps: [
+      {
+        figure: 'img/ca-fg-gym-zone.svg',
+        text: 'Three events, same as always: the Ladder, the Spider, the Reach. Today they get run for time and tempo instead of learned.',
+        text_es: 'Tres eventos, como siempre: la Escalera, la Araña y el Estiramiento. Hoy se corren por tiempo y tempo, no se aprenden.',
+      },
+      {
+        text: 'Warm up the Ladder with its shift. Start 10 BPM below your record — you\'re loosening the hand, not competing yet.\nYou\'ve got it when: two clean climbs in a row with no buzz.',
+        text_es: 'Calienta la Escalera con su cambio. Empieza 10 BPM por debajo de tu récord — estás soltando la mano, todavía no compites.\nLo tienes cuando: dos subidas limpias seguidas, sin zumbido.',
+        tab: {
+          caption: 'Warm-up · Ladder with the shift',
+          caption_es: 'Calentamiento · Escalera con el cambio',
+          notes: [
+            { string: 'E', fret: 1, note: 'F',  midi: 41 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44 },
+            { string: 'E', fret: 5, note: 'A',  midi: 45 }
+          ]
+        },
+      },
+      {
+        text: 'Event 2 at your record tempo. Set the BPM to the number you wrote down last Gym and play the Spider there.\nYou\'ve got it when: one clean pass at your record BPM, every note on the right string. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'Evento 2 a tu tempo récord. Pon el BPM en el número que anotaste el Gimnasio pasado y toca la Araña ahí.\nLo tienes cuando: una pasada limpia a tu BPM récord, con cada nota en la cuerda correcta. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        tab: {
+          caption: 'Spider · at your record BPM',
+          caption_es: 'Araña · a tu BPM récord',
+          notes: [
+            { string: 'E', fret: 1, note: 'F',  midi: 41 },
+            { string: 'A', fret: 2, note: 'B',  midi: 47 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43 },
+            { string: 'A', fret: 4, note: 'C#', midi: 49 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'A', fret: 3, note: 'C',  midi: 48 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44 },
+            { string: 'A', fret: 5, note: 'D',  midi: 50 }
+          ]
+        },
+      },
+      {
+        text: 'Reach endurance — eight reaches without stopping, twice as many as usual. The hand will start to complain around six; that\'s the part that builds strength. Pain is different from work: if it hurts, stop.\nYou\'ve got it when: eight reaches without stopping and finger 1 never lifts.',
+        text_es: 'Resistencia en el Estiramiento — ocho estiramientos sin detenerte, el doble de lo normal. La mano va a empezar a quejarse cerca del sexto; esa es la parte que construye fuerza. El dolor es distinto del esfuerzo: si duele, detente.\nLo tienes cuando: ocho estiramientos sin detenerte y el dedo 1 nunca se levanta.',
+        tab: {
+          caption: 'Reach endurance · eight in a row',
+          caption_es: 'Resistencia · ocho seguidos',
+          notes: [
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 1, note: 'F', midi: 41 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 }
+          ]
+        },
+      },
+      {
+        text: 'The whole circuit, twice through, without putting the guitar down between sets. Ladder ×4, Spider ×4, Reach ×4, then again.\nYou\'ve got it when: two sets back to back with no break in between.',
+        text_es: 'El circuito completo, dos veces, sin bajar la guitarra entre series. Escalera ×4, Araña ×4, Estiramiento ×4, y otra vez.\nLo tienes cuando: dos series seguidas sin descanso entre ellas.',
+      },
+      {
+        text: 'Record attempt. Set the BPM to your record and go up by 10 every clean set. Stop when a set breaks down — the last clean number is your new record. Write it down.\nYou\'ve got it when: you\'ve written down a number and you know whether it beat the old one.',
+        text_es: 'Intento de récord. Pon el BPM en tu récord y súbelo 10 puntos con cada serie limpia. Detente cuando una serie se rompa — el último número limpio es tu récord nuevo. Anótalo.\nLo tienes cuando: anotaste un número y sabes si superó el anterior.',
       },
     ],
   },

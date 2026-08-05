@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-05 — Five more Finger Gym in-class activities
+
+### Added
+
+- **Finger Gym 2 through Finger Gym 6** — the same Ladder/Spider/Reach
+  events, each day adding one new demand: descending and all six strings,
+  position shifts up the neck (5th and 9th), fingers staying planted,
+  string skipping and a wider reach, and a final stamina day with a
+  personal-record attempt. Like every in-class activity now, each one
+  stays invisible until its day is scheduled from the teacher console.
+
 ## 2026-08-05 — Pre-deployment content sweep
 
 ### Fixed
