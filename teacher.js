@@ -89,6 +89,9 @@ async function showTeacherApp(user){
       if(archived){ teacherSetStudentArchived(archived.dataset.uid, archived.dataset.state); return; }
       const actHidden=e.target.closest('[data-set-activity-hidden]');
       if(actHidden){ teacherSetActivityHidden(actHidden.dataset.id, actHidden.dataset.state); return; }
+      const openAct=e.target.closest('[data-open-activity]');
+      if(openAct){ openActivityDetail(openAct.dataset.id); return; }
+      if(e.target.closest('[data-back-to-activities]')){ backToActivitiesList(); return; }
       const open=e.target.closest('[data-open-student]');
       if(open) openStudentDetail(open.dataset.uid);
     });
@@ -335,6 +338,11 @@ function abbreviate(text){ const words=text.split(' '); if(words.length<=4) retu
    a view flag of its own. */
 let teacherView='skills';
 let studentDetailUid=null;
+// Which activity's detail is showing in the Class activities view — same
+// "list vs. one detail page" split as studentDetailUid above, its own flag
+// so a title click in the activities table can drill in without a view
+// flag of its own either.
+let activityDetailId=null;
 function applyTeacherViewChrome(v){
   document.querySelectorAll('.t-vt').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
@@ -347,6 +355,7 @@ function applyTeacherViewChrome(v){
 function setTeacherView(v){
   teacherView=v;
   if(v==='students') studentDetailUid=null; // clicking the tab always starts back at the roster
+  if(v==='activities') activityDetailId=null; // same — the tab always starts back at the list
   applyTeacherViewChrome(v);
   renderTeacherBody();
 }
@@ -358,6 +367,14 @@ function openStudentDetail(uid){
   renderTeacherBody();
 }
 function backToStudentsRoster(){ studentDetailUid=null; renderTeacherBody(); }
+// Jumps straight to one activity's detail page — from the Class activities
+// table's title cell.
+function openActivityDetail(id){
+  teacherView='activities'; activityDetailId=id;
+  applyTeacherViewChrome('activities');
+  renderTeacherBody();
+}
+function backToActivitiesList(){ activityDetailId=null; renderTeacherBody(); }
 function renderTeacherBody(){
   if(teacherView==='games') renderTeacherGames();
   else if(teacherView==='responses') renderTeacherResponses();
@@ -459,6 +476,7 @@ function renderTeacherTrouble(){
    its lesson. See loadClassConfig() in app.js for the student-facing read. */
 function renderTeacherActivities(){
   const box=document.getElementById('t-grid-container');
+  if(activityDetailId){ renderTeacherActivityDetail(activityDetailId); return; }
   const activities=(window.CLASS_ACTIVITIES||[]);
   if(!activities.length){
     box.innerHTML='<div class="t-loading">No activities yet — they\'ll appear here once one is pushed to the site.</div>';
@@ -504,13 +522,54 @@ function renderTeacherActivities(){
         ? ' <span style="opacity:.65;font-size:.85em">(no date — hidden from students)</span>'
         : (isScheduled ? ' <span style="opacity:.65;font-size:.85em">(scheduled)</span>' : '');
       const dateCell=`<input type="date" class="t-date-input" data-set-activity-date data-id="${escAttr(a.id)}" value="${escAttr(dateVal)}">${dateNote}`;
-      return `<tr${isHidden?' style="opacity:.55"':''}><td>${dateCell}</td><td class="nc" title="${escAttr(a.title)}">${escHtml(a.title)}</td><td>${doneCount} / ${total} students</td>
+      // The title cell doubles as a link into the activity's detail page —
+      // handled by the delegated data-id listener in showTeacherApp, same
+      // "clickable row, cursor:pointer only" idiom as the Students name cell.
+      return `<tr${isHidden?' style="opacity:.55"':''}><td>${dateCell}</td><td class="nc" data-open-activity data-id="${escAttr(a.id)}" style="cursor:pointer" title="${escAttr(a.title)}">${escHtml(a.title)}</td><td>${doneCount} / ${total} students</td>
         <td><details><summary>Who hasn't finished (${notDone.length})</summary>${listHtml}</details></td>
         <td><div class="tg-seg">${visBtns}</div></td></tr>`;
     }).join('');
     box.innerHTML=`<div class="tg-note">An activity with no date set is invisible to students — that's its normal starting state, not an error; set one here to publish it. Hidden activities disappear for students regardless of date, same as if they hadn't been pushed yet. Use Hidden to pull back something already live; un-hide any time.</div>`+
       `<div class="t-grid-wrap"><table><thead><tr><th>Date</th><th class="nc">Activity</th><th>Done</th><th>Not yet</th><th>Visibility</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   });
+}
+// One activity's full content, read-only — the actual "click to go to the
+// activity" destination. Built straight from window.CLASS_ACTIVITIES (the
+// same source the student-facing card in app.js reads), not from
+// caActivityCardHtml() in app.js: that renderer is wired to the signed-in
+// student's OWN classActivities/caStepDone/caOpenId state and to #app being
+// visible (its video button opens the in-page YouTube panel, which lives
+// inside #app — hidden the whole time the teacher dashboard is up). A
+// teacher previewing a student's activity shouldn't touch either, so this is
+// its own small renderer: plain step list, a real YouTube link instead of
+// the in-page panel, no "mark complete" affordance. Reuses existing
+// classes(.stu-back/.stu-section-head/.tr-card/.coach-tip/.step-figure) so
+// it needs no CSS of its own. English-only, like the rest of teacher.js —
+// activity titles/text aren't run through tf() here either.
+function renderTeacherActivityDetail(id){
+  const box=document.getElementById('t-grid-container');
+  const back=`<button type="button" class="stu-back" data-back-to-activities>&#x2190; All activities</button>`;
+  const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
+  if(!a){ box.innerHTML=`${back}<div class="t-loading">Could not find that activity — it may have been renamed or removed.</div>`; return; }
+  const stepsHtml=(a.steps||[]).map((s,si)=>{
+    const media=[];
+    if(s.figure) media.push(`<span class="step-figure"><img src="${escAttr(s.figure)}" alt=""></span>`);
+    if(s.video && s.video.id){
+      const url=`https://www.youtube.com/watch?v=${encodeURIComponent(s.video.id)}${s.video.start?`&start=${Number(s.video.start)}`:''}`;
+      const vLabel=s.video.label?escHtml(s.video.label):'Watch video';
+      // A real link, not the loadPanel()/rp-trigger in-app YouTube panel —
+      // that panel's markup lives inside #app, which teacher mode never shows.
+      media.push(`<a class="rp-trigger" href="${escAttr(url)}" target="_blank" rel="noopener">&#x25B6; ${vLabel}</a>`);
+    }
+    // suppressCoach: the Listening Coach mic-check button opens a panel
+    // that's also inside #app — pointless (and confusing) to show here.
+    if(s.tab) media.push(buildTab(s.tab,{keyPrefix:`bpm:ca-preview:${a.id}:${si}:tab`,suppressCoach:true}));
+    return `<div class="tr-card" style="margin-bottom:12px"><div class="tr-name">Step ${si+1}</div>${wrapGotItWhen(s.text||'')}${media.join('')}</div>`;
+  }).join('');
+  box.innerHTML=`${back}
+    <div class="stu-section-head" style="margin-top:0">${a.number?`#${Number(a.number)} - `:''}${escHtml(a.title)}</div>
+    ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
+    ${stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>'}`;
 }
 async function teacherSetActivityHidden(id, state){
   const on = state==='hide';
