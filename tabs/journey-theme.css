@@ -38,12 +38,17 @@
   pre.tab{background:#141518;color:#e8eaee}
 }
 *{box-sizing:border-box;margin:0;padding:0}
+/* Base type size for the whole page: every rule below is sized in rem, so
+   this one line scales all of them together (~+2pt over the 16px browser
+   default). Side padding widened to match — bigger text, same reading
+   measure. */
+html{font-size:18px}
 /* Keyboard focus indicator (a11y) — matches the main app's :focus-visible */
 :focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important}
 }
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;padding:20px 16px 64px;-webkit-font-smoothing:antialiased}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;padding:20px 24px 64px;-webkit-font-smoothing:antialiased}
 .wrap{max-width:760px;margin:0 auto}
 a{color:var(--brand)}
 .crumb{font-size:0.8125rem;color:var(--text2);margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -127,7 +132,7 @@ pre.tab .hl{color:#ffd479}
 .rate button.on{background:var(--text);color:var(--bg);border-color:var(--text)}
 .rate-key{font-size:0.75rem;color:var(--text3)}
 footer{margin-top:36px;font-size:0.7813rem;color:var(--text3);border-top:1px solid var(--border);padding-top:14px}
-@media (max-width:480px){ h1{font-size:1.5rem} pre.tab{font-size:0.75rem} }
+@media (max-width:480px){ h1{font-size:1.5rem} pre.tab{font-size:0.75rem} body{padding-left:16px;padding-right:16px} }
 @media print{
   .btn-translate,.layer-chevron,#save-msg,.playalong{display:none}
   .layer{break-inside:avoid;margin-bottom:16px}
