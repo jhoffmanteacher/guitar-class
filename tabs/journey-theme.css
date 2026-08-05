@@ -55,7 +55,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    760px minus .75in (72px) off each side; body padding above matches so
    narrower/tablet screens, where padding is the binding constraint, get
    the same extra margin. */
-.wrap{max-width:616px;margin:0 auto}
+.wrap{max-width:760px;margin:0 auto}
 a{color:var(--brand)}
 .crumb{font-size:0.8125rem;color:var(--text2);margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .crumb-left{display:flex;align-items:center;gap:12px}
@@ -170,3 +170,19 @@ footer{margin-top:36px;font-size:0.7813rem;color:var(--text3);border-top:1px sol
 .story-body p{margin:0 0 10px;font-size:0.9063rem}
 .story-maplead{font-weight:600;font-size:0.875rem}
 .story-body .branch{margin-bottom:8px}
+
+/* ── Layer 4 skill ladder ──
+   The rungs are the module's real progression (Rule of 3 → whole box →
+   dress-ups → licks), so they render as always-visible numbered steps on a
+   rail — visually distinct from the gray optional "Level up" folds. The
+   rating key on ladder layers maps 1/2/3 onto the rungs. */
+.ladder-lead{font-size:0.875rem;color:var(--text2);margin-bottom:12px}
+.ladder{position:relative;margin:2px 0 10px;padding-left:38px}
+.ladder::before{content:"";position:absolute;left:12px;top:12px;bottom:12px;width:2px;background:var(--border2);border-radius:1px}
+.rung{position:relative;margin-bottom:22px}
+.rung:last-child{margin-bottom:6px}
+.rung-num{position:absolute;left:-38px;top:-1px;width:26px;height:26px;border-radius:50%;background:var(--bg);border:2px solid var(--l4);color:var(--l4);font-weight:700;font-size:0.8125rem;display:flex;align-items:center;justify-content:center}
+.rung-title{font-weight:700;font-size:0.9375rem;color:var(--text);margin-bottom:6px}
+.rung-title small{font-weight:600;font-size:0.75rem;color:var(--text3)}
+.rung .branch{margin-top:0}
+

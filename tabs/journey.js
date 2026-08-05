@@ -73,6 +73,14 @@ function allLayers(){
   return Array.prototype.slice.call(document.querySelectorAll('.layer'));
 }
 
+/* Bonus layers (.bonus) carry no rating widget, so the progress pill and the
+   first-unrated-layer scan only look at core layers — a bonus layer would
+   otherwise always read as "unrated" and skew both. The accordion itself
+   still includes bonus layers (allLayers, above). */
+function coreLayers(){
+  return Array.prototype.slice.call(document.querySelectorAll('.layer:not(.bonus)'));
+}
+
 function closeLayer(section){
   section.classList.add('closed');
   var btn = section.querySelector('.layer-head');
@@ -95,7 +103,7 @@ function toggleLayer(btn){
 }
 
 function firstUnratedLayer(){
-  return allLayers().filter(function(s){
+  return coreLayers().filter(function(s){
     var chip = s.querySelector('.layer-rate-chip');
     return chip && !chip.textContent;
   })[0];
@@ -242,7 +250,7 @@ function togglePlayalong(btn){
 function updateProgressPill(){
   var pill = document.querySelector('.prog-pill');
   if(!pill) return;
-  var layers = allLayers();
+  var layers = coreLayers();
   var rated = layers.filter(function(s){
     var chip = s.querySelector('.layer-rate-chip');
     return chip && chip.textContent;

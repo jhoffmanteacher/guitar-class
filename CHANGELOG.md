@@ -5,6 +5,35 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-05 — Solo-layer ladders, bonus layers stop asking for a rating
+
+### Changed
+
+- **Every Song Journey's Pentatonic Solo layer is now a numbered ladder** —
+  Rule of 3, the whole box, dress-ups, and licks show as always-visible
+  numbered steps instead of a flat pile of "Level up" folds, so the skill
+  order is visible at a glance. "All Along the Watchtower" has three rungs
+  (no dress-ups step); the other five songs have four. Each rung's rating
+  hint now names the actual skill instead of a generic "getting started /
+  steady / solid."
+- **Bonus layers no longer ask for a rating** — the slide solo, Hendrix
+  lead, intro riff, requinto parts, and fingerpicked verses are optional
+  extra credit with no score, so their rating row and header checkmark are
+  gone. The progress pill now counts only the five graded layers ("N of 5
+  layers rated") on every page.
+- Every layer's rating hint got more specific across all six pages — e.g.
+  Listen's key now reads "heard it once through / answered the questions /
+  can hum the main hook from memory" instead of the generic three-tier text.
+- Song Journey pages are a bit wider (760px) to fit the new ladder layout.
+
+### Fixed
+
+- A couple of "Level up" pointers to Module challenges were sitting below
+  all the layers, easy to miss — they now live inside the layer they point
+  from, as a "Next:" line.
+- Two pages said their practice layers were "above" the play-along track
+  when the track sits at the top of the page — fixed to "below."
+
 ## 2026-08-05 — Fingerpicking completions and a deeper Watchtower page
 
 ### Added
