@@ -244,8 +244,8 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-2',
     number: 2,
-    title:    'Finger Gym',
-    title_es: 'Gimnasio de Dedos',
+    title:    'Finger Gym 1',
+    title_es: 'Gimnasio de Dedos 1',
     intro:    'Today isn\'t a song day — it\'s a training day. Three events in the first five frets: the Ladder, the Spider, the Reach. You\'re chasing a personal record, not a grade.',
     intro_es: 'Hoy no es día de canciones — es día de entrenamiento. Tres eventos en los primeros cinco trastes: la Escalera, la Araña y el Estiramiento. Vas por un récord personal, no por una calificación.',
     steps: [
