@@ -92,6 +92,13 @@ async function showTeacherApp(user){
       const open=e.target.closest('[data-open-student]');
       if(open) openStudentDetail(open.dataset.uid);
     });
+    // Same delegation pattern as the click listener above, on the same stable
+    // shell — the date <input> in renderTeacherActivities re-renders often,
+    // this listener doesn't need to.
+    shell.addEventListener('change', e=>{
+      const actDate=e.target.closest('[data-set-activity-date]');
+      if(actDate) teacherSetActivityDate(actDate.dataset.id, actDate.value);
+    });
   }
   // The teacher grid spans every set, so load all module data first. Sequential
   // keeps SETS in module order so the week tabs render 1→8 left to right.
@@ -401,24 +408,31 @@ function renderTeacherTrouble(){
     ${skillTable}`;
 }
 
-/* ── Class activities (v1, teacher-only) ── One row per In-Class Activity,
-   newest first, with a done count, an expandable "who hasn't finished"
-   list, and a Visible/Hidden toggle. Reads classActivities off the SAME
-   student docs the Students tab already fetched (loadAllStudents) — no
-   second Firestore read path for completion data.
+/* ── Class activities (teacher-only) ── One row per In-Class Activity, dated
+   ones newest first then undated ones, with a done count, an expandable
+   "who hasn't finished" list, a release-date input, and a Visible/Hidden
+   toggle. Reads classActivities off the SAME student docs the Students tab
+   already fetched (loadAllStudents) — no second Firestore read path for
+   completion data.
 
-   Hidden state lives in config/class.hiddenActivities (id -> true), right
-   alongside gameOverrides/paused/archived — same doc, same teacher-writes/
-   students-read rule, same reason: git push is the permanent publish path,
-   this toggle only exists to pull back something pushed early, temporarily.
-   See loadClassConfig() in app.js for the student-facing read.
+   class-activities.js ships every entry undated — the date <input> here IS
+   the publish switch: app.js's caIsVisible() hides an activity from students
+   until config/class.activityDates has an id -> 'YYYY-MM-DD' entry for it
+   whose date has arrived, so "no date set" (the state every new activity
+   arrives in) is normal, not an error, and gets its own note rather than
+   reading like a blank/broken cell. Clearing the input unsets the date and
+   the activity goes dark again.
 
-   This table lists every activity regardless of date — that's deliberate,
-   so a future lesson's entry can be pushed and reviewed here ahead of time.
-   Students don't see that gap: app.js's caIsVisible() also hides any
-   activity whose `date` hasn't arrived yet, independent of this toggle. A
-   future-dated row gets a "Scheduled" note next to its date so the Visible/
-   Hidden toggle here isn't mistaken for the whole story. */
+   The hide toggle lives in config/class.hiddenActivities (id -> true), same
+   doc, same teacher-writes/students-read rule, same reason: git push is the
+   permanent content-publish path, this toggle only exists to pull back
+   something already dated, temporarily. It's independent of the date — a
+   dated-but-hidden activity, and an undated one, both read the same to a
+   student (invisible), but the two knobs don't affect each other.
+
+   This table lists every activity regardless of date — deliberate, so a
+   future or not-yet-dated activity can be pushed and reviewed here ahead of
+   its lesson. See loadClassConfig() in app.js for the student-facing read. */
 function renderTeacherActivities(){
   const box=document.getElementById('t-grid-container');
   const activities=(window.CLASS_ACTIVITIES||[]);
@@ -435,8 +449,18 @@ function renderTeacherActivities(){
     if(teacherView!=='activities') return;   // switched views mid-flight
     if(!cfg) return;                         // superseded by a newer toggle
     const hidden=cfg.hiddenActivities||{};
+    const dates=cfg.activityDates||{};
     const today=dayStr(new Date());
-    const sorted=[...activities].sort((a,b)=>b.date.localeCompare(a.date)||b.id.localeCompare(a.id));
+    // Dated activities first (newest date first), then undated ones, each
+    // group tiebroken by number descending — id localeCompare would misorder
+    // ca-10 before ca-2, so this sorts on the numeric field instead.
+    const sorted=[...activities].sort((a,b)=>{
+      const da=dates[a.id]||'', db=dates[b.id]||'';
+      if(da && db) return db.localeCompare(da) || (b.number-a.number);
+      if(da && !db) return -1;
+      if(!da && db) return 1;
+      return b.number-a.number;
+    });
     const total=allStudents.length;
     const rows=sorted.map(a=>{
       const notDone=allStudents.filter(s=>(s.classActivities||{})[a.id]!==true);
@@ -445,18 +469,22 @@ function renderTeacherActivities(){
         ? notDone.map(s=>`<div style="padding:2px 0">${escHtml(s.name||'(no name)')}${s.email?` &middot; ${escHtml(s.email)}`:''}</div>`).join('')
         : '<div style="padding:2px 0">Everyone has finished this one.</div>';
       const isHidden=!!hidden[a.id];
-      const isScheduled=a.date>today;
-      // data-id + the delegated listener in showTeacherApp — an activity id
+      const dateVal=dates[a.id]||'';
+      const isScheduled=dateVal && dateVal>today;
+      // data-id + the delegated listeners in showTeacherApp — an activity id
       // is never spliced into an inline JS string literal.
       const visBtns=
         `<button class="tg-seg-btn ${!isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="show">Visible</button>`+
         `<button class="tg-seg-btn ${isHidden?'on':''}" data-set-activity-hidden data-id="${escAttr(a.id)}" data-state="hide">Hidden</button>`;
-      const dateCell=escHtml(a.date)+(isScheduled?' <span style="opacity:.65;font-size:.85em">(scheduled)</span>':'');
+      const dateNote = !dateVal
+        ? ' <span style="opacity:.65;font-size:.85em">(no date — hidden from students)</span>'
+        : (isScheduled ? ' <span style="opacity:.65;font-size:.85em">(scheduled)</span>' : '');
+      const dateCell=`<input type="date" class="t-date-input" data-set-activity-date data-id="${escAttr(a.id)}" value="${escAttr(dateVal)}">${dateNote}`;
       return `<tr${isHidden?' style="opacity:.55"':''}><td>${dateCell}</td><td class="nc" title="${escAttr(a.title)}">${escHtml(a.title)}</td><td>${doneCount} / ${total} students</td>
         <td><details><summary>Who hasn't finished (${notDone.length})</summary>${listHtml}</details></td>
         <td><div class="tg-seg">${visBtns}</div></td></tr>`;
     }).join('');
-    box.innerHTML=`<div class="tg-note">Hidden activities disappear from the site for students — same as if they hadn't been pushed yet, same as any activity marked (scheduled) below: students can't see it until its date arrives, regardless of this toggle. Use Hidden to pull back something already live; un-hide any time.</div>`+
+    box.innerHTML=`<div class="tg-note">An activity with no date set is invisible to students — that's its normal starting state, not an error; set one here to publish it. Hidden activities disappear for students regardless of date, same as if they hadn't been pushed yet. Use Hidden to pull back something already live; un-hide any time.</div>`+
       `<div class="t-grid-wrap"><table><thead><tr><th>Date</th><th class="nc">Activity</th><th>Done</th><th>Not yet</th><th>Visibility</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   });
 }
@@ -470,6 +498,24 @@ async function teacherSetActivityHidden(id, state){
     // accumulate a row per activity that was ever hidden.
     const patch = on ? {hiddenActivities:{[id]:true}} : {hiddenActivities:{[id]:fv.delete()}};
     if(on) teacherClassConfig.hiddenActivities[id]=true; else delete teacherClassConfig.hiddenActivities[id];
+    await db.collection('config').doc('class').set(patch,{merge:true});
+  }catch(e){ alert('Could not save that change — check your connection and Firestore rules.'); }
+  if(teacherView==='activities') renderTeacherActivities();
+}
+// The actual publish switch for an activity — see the schema note at the top
+// of renderTeacherActivities. Mirrors teacherSetActivityHidden's write shape
+// exactly, just against a different map on the same doc.
+async function teacherSetActivityDate(id, value){
+  const dateRe=/^\d{4}-\d{2}-\d{2}$/;
+  if(value && !dateRe.test(value)) return;   // malformed <input> value — ignore rather than write garbage
+  try{
+    await ensureDb();
+    if(!teacherClassConfig.activityDates) teacherClassConfig.activityDates={};
+    const fv=firebase.firestore.FieldValue;
+    // Clear the field rather than writing '', so config/class doesn't
+    // accumulate a row per activity that was ever dated then un-dated.
+    const patch = value ? {activityDates:{[id]:value}} : {activityDates:{[id]:fv.delete()}};
+    if(value) teacherClassConfig.activityDates[id]=value; else delete teacherClassConfig.activityDates[id];
     await db.collection('config').doc('class').set(patch,{merge:true});
   }catch(e){ alert('Could not save that change — check your connection and Firestore rules.'); }
   if(teacherView==='activities') renderTeacherActivities();

@@ -136,6 +136,7 @@ let streak      = { count:0, lastDay:null };   // site-wide practice streak, ind
 let gamesAccessOn = true; // whether the Games arcade is available to THIS student (teacher-controlled; see loadClassConfig)
 let accountPaused = false; // teacher put this student on hold (see loadClassConfig / showPausedScreen)
 let hiddenActivityIds = {}; // In-Class Activities the teacher has temporarily hidden (see loadClassConfig) — id -> true
+let activityDates = {}; // In-Class Activities release dates, teacher-set in the console (see loadClassConfig) — id -> 'YYYY-MM-DD'
 let saveTimer   = null;
 
 /* ── Lazy module loading ──
@@ -319,7 +320,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
       if(accountPaused) showPausedScreen(user); else showApp(user);
     }
   } else {
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; hiddenActivityIds = {}; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; hiddenActivityIds = {}; activityDates = {}; progressLoadFailed = false;
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     practiceLog = loadLocalPracticeLog();   // per-skill rep history: back to the local copy on sign-out
     _moduleStripStates = {};   // next user's first strip render is a first paint, not a celebration
@@ -432,11 +433,12 @@ async function loadClassConfig(){
   gamesAccessOn = true;
   accountPaused = false;
   hiddenActivityIds = {};
+  activityDates = {};
   try{
     await ensureDb();
-    if(!db) return;
+    if(!db){ restoreActivityDatesFromCache(); return; }
     const doc = await db.collection('config').doc('class').get();
-    if(!doc.exists) return;
+    if(!doc.exists){ restoreActivityDatesFromCache(); return; }
     const d = doc.data()||{};
     // Teacher-set hold (teacher.js Manage view). Classroom management, not
     // security — the real boundary is the Firestore rules, which already
@@ -451,7 +453,25 @@ async function loadClassConfig(){
     // that's missing or fails to load leaves this {} (fail open: a student
     // sees the activity), same convention as gamesAccessOn above.
     hiddenActivityIds = d.hiddenActivities || {};
-  }catch(e){ /* leave games on, nothing hidden */ }
+    // Release dates (teacher.js Class activities view) — the actual on/off
+    // switch for an activity now that class-activities.js ships them undated.
+    // Unlike hiddenActivityIds, a failed/missing read here must NOT fail
+    // open (that would show every activity, dated or not, to everyone) —
+    // it fails to the last successfully loaded copy in localStorage instead,
+    // via restoreActivityDatesFromCache() in every early-return/catch path.
+    activityDates = d.activityDates || {};
+    try{ localStorage.setItem('caDates', JSON.stringify(activityDates)); }catch(e){}
+  }catch(e){ restoreActivityDatesFromCache(); /* leave games on, nothing hidden */ }
+}
+// A student who has loaded config at least once keeps seeing that last-known
+// set of release dates through a later offline/blocked read, rather than
+// every activity going dark. A student who has NEVER loaded config sees no
+// activities — acceptable, since they also have no progress connection yet.
+function restoreActivityDatesFromCache(){
+  try{
+    const raw = localStorage.getItem('caDates');
+    if(raw) activityDates = JSON.parse(raw) || {};
+  }catch(e){ /* ignore — activityDates stays {} */ }
 }
 /* Show/hide the 🎮 Games button to match this student's access, and if games
    get turned off while the arcade is open, close it. */
@@ -6605,6 +6625,7 @@ function caDefaultOpenStep(a){
 }
 function caStepStatusHtml(n, isDone){ return isDone ? '&#x2713;' : String(n); }
 function caFormatDate(iso){
+  if(!iso) return '';
   const d = new Date(iso + 'T00:00:00');
   if(isNaN(d)) return iso;
   const lang = (typeof getLang === 'function' && getLang() === 'es') ? 'es' : 'en';
@@ -6642,7 +6663,7 @@ function caActivityCardHtml(a){
   const titleHtml = (a.number ? `#${Number(a.number)} - ` : '') + escHtml(tf(a,'title'));
   return `<details class="ca-card" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary">
-      <span class="ca-chip">${escHtml(caFormatDate(a.date))}</span>
+      <span class="ca-chip">${escHtml(caFormatDate(caDate(a)))}</span>
       <span class="ca-card-title">${titleHtml}</span>
       ${done ? `<span class="ca-done-mark" aria-hidden="true">${TCK_CHECK_SVG_INLINE}</span>` : ''}
     </summary>
@@ -6712,23 +6733,33 @@ function caToggleComplete(id){
   caOpenId = id;   // keep the card open through the re-render
   renderClassActivities();
 }
-/* An activity is visible to students once its `date` has arrived (local
-   calendar day) — same "hidden until it happens" default as the reminder
-   popup below, so an activity queued for a future lesson doesn't leak to
-   students who click ahead. The teacher-only hide toggle (hiddenActivityIds,
-   see loadClassConfig()) is independent and can hide/reveal on top of this.
+// The teacher-console release date for this activity, or null if unset —
+// see activityDates in loadClassConfig(). class-activities.js entries carry
+// no date field of their own anymore; this is the only place that resolves one.
+function caDate(a){ return activityDates[a.id] || null; }
+/* An activity is visible to students once its console-set release date has
+   arrived (local calendar day) — same "hidden until it happens" default as
+   the reminder popup below, so an activity with no date set yet (every
+   activity's starting state) or a future one doesn't leak to students who
+   click ahead. The teacher-only hide toggle (hiddenActivityIds, see
+   loadClassConfig()) is independent and can hide/reveal on top of this.
    Dev-bypass users skip the date gate — the whole point of that mode is
    previewing UI that isn't live yet. */
 function caIsVisible(a){
   if(hiddenActivityIds[a.id] === true) return false;
   if(isDevBypassUser()) return true;
-  return a.date <= dayStr(new Date());
+  const d = caDate(a);
+  return d ? d <= dayStr(new Date()) : false;
 }
 function renderClassActivities(){
   const bodyEl = document.getElementById('class-activities-body');
   if(!bodyEl) return;
+  // Everything in this list is visible, hence dated — except under dev
+  // bypass, where caIsVisible skips the date gate and caDate(a) can be null.
+  // Treat null as '' so an undated entry sinks to the bottom of the sort
+  // instead of localeCompare throwing on a non-string.
   const list = (window.CLASS_ACTIVITIES || []).filter(caIsVisible)
-    .sort((a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id));
+    .sort((a, b) => (caDate(b) || '').localeCompare(caDate(a) || '') || (b.number - a.number));
   if(!list.length){
     bodyEl.innerHTML = `<div class="coach-tip" data-i18n="ca.empty">${escHtml(t('ca.empty'))}</div>`;
   } else {
@@ -6746,9 +6777,9 @@ function maybeShowCaReminder(){
   const pending = (window.CLASS_ACTIVITIES || []).filter(a => classActivities[a.id] !== true && caIsVisible(a));
   if(!pending.length) return;
   try{ if(sessionStorage.getItem('caReminderShown') === '1') return; }catch(e){}
-  const shown = pending.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+  const shown = pending.slice().sort((a, b) => (caDate(b) || '').localeCompare(caDate(a) || '')).slice(0, 5);
   const more = pending.length - shown.length;
-  const itemsHtml = shown.map(a => `<li><span class="ca-chip">${escHtml(caFormatDate(a.date))}</span> ${escHtml(tf(a,'title'))}</li>`).join('');
+  const itemsHtml = shown.map(a => `<li><span class="ca-chip">${escHtml(caFormatDate(caDate(a)))}</span> ${escHtml(tf(a,'title'))}</li>`).join('');
   const ov = document.createElement('div');
   ov.className = 'daily5-overlay ca-reminder-overlay';
   ov.id = 'ca-reminder-overlay';
