@@ -5,6 +5,30 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-05 — Bonus lead layers and chord cards for the rest of the Song Journeys
+
+### Added
+
+- **"Sweet Child O' Mine" Layer 6 — The Intro Riff** — a teaching
+  arrangement of the famous opening riff, built inside the same fret
+  zone Layer 4 already taught.
+- **"Seven Nation Army" Layer 6 — The Slide Solo** — the main riff
+  played an octave up on the high e string, showing how the same
+  shape moves around the neck.
+- **"Let It Be" Layer 7 — The Solo** — an original lead phrase over
+  the song's chord loop: a rising question answered by the "let it
+  be" melody, with a sing-it-first tip in the Stuck? fold.
+- **Chord diagram cards** added to Sweet Child O' Mine, Seven Nation
+  Army, Let It Be, and "the cure" — open chords now show right on the
+  page instead of just in the tab.
+
+### Fixed
+
+- **Measure bars** added to the bass and power-chord tabs on Watchtower,
+  Sweet Child O' Mine, Seven Nation Army, Let It Be, and "the cure" —
+  each riff and loop is now marked off bar by bar so it's easier to
+  count along, including "the cure"'s short 2-beat turnaround bar.
+
 ## 2026-08-05 — Luna: requinto lead bonus layer + bass tab fix
 
 ### Added
