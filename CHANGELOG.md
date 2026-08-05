@@ -5,6 +5,32 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-05 — Fingerpicking completions and a deeper Watchtower page
+
+### Added
+
+- **"Let It Be" and "the cure" verse fingerpicking, completed** — chord
+  diagram cards for every verse chord (C · G · Am · F for Let It Be, Am ·
+  C · Dm · F for "the cure"), each captioned with the thumb note it starts
+  on, plus a bar-by-bar tab walking the whole verse chord by chord. "the
+  cure"'s caption notes the record actually changes chords twice as fast
+  as the tab shows.
+- **"Luna" Requinto Intro gets its chord card** — the little F shape now
+  shows right on the page, captioned "hold it — the high e stays open."
+- **"All Along the Watchtower" page goes much deeper**:
+  - A new "The Story" stop above Layer 1 — the song's history plus a
+    five-item listening map for what to notice, so it's there without
+    being one more layer to check off.
+  - A song anatomy roadmap showing the six sections, what the guitar
+    does in each, and which layer teaches it.
+  - "The record's pulse" — a down/down-up strum chart at the song's real
+    tempo.
+  - A singalong strum chart with its own play-along line.
+  - Two Hendrix-style licks — a roll-down and a slide-in.
+  - The lead layer expands to three parts: the verse answer phrase
+    (already on the site), a new entrance slide-in, and a climb-and-fall
+    to close it out.
+
 ## 2026-08-05 — "Luna" requinto definition and full bridge lead
 
 ### Added
