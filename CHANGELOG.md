@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-05 — "Luna" requinto definition and full bridge lead
+
+### Added
+
+- **"Luna" Layer 7 expanded to the whole lead in four parts** — Part A keeps
+  the low chord-shape answers; new Parts B–D teach the bridge lead up the
+  neck: the fret-12 slide phrase (E–F an octave up), the fret-17 drumroll
+  and 18–13–12 fall, and the whole bridge doubled in sierreño sixths on the
+  G string (double stops, pick + middle finger). Per-part Play it lines,
+  high-fret and slide tips added to the Stuck? fold, and the Level up
+  arrangement now walks the full song shape.
+
+### Fixed
+
+- **Requinto is now defined before it's used** — a one-line definition sits
+  in the always-visible song map, above Layer 1's "what does the requinto
+  add" question; it was previously only inside the collapsed "More about
+  this song" fold. First mention in the journey note de-jargoned to "main
+  lead line," and the fold's now-redundant parenthetical trimmed. Both
+  languages.
+
 ## 2026-08-05 — Bonus lead layers and chord cards for the rest of the Song Journeys
 
 ### Added
