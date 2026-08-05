@@ -5,6 +5,30 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-05 — Readiness checkboxes replace ratings, floating backing-track button
+
+### Changed
+
+- **Song Journey layers now use a simple "I'm ready for the next layer"
+  checkbox** instead of the old 1–3 rating buttons. Checking a box shows a
+  concrete "Check it when: …" bar (the old top rating level), checks off the
+  layer's header ✓, and opens the next layer for you automatically —
+  checking the last graded layer opens the bonus layer as your reward.
+  Unchecking just clears the checkmark; it doesn't move you anywhere. The
+  progress pill now reads "N of 5 layers ready."
+- **Returning to a Song Journey page picks up where you left off** — a
+  signed-in student who hasn't clicked anything yet opens straight to their
+  first un-checked layer (still scrolled to the top of the page). A link to
+  a specific layer still wins over that.
+- **A new floating "Backing track" button** sits above the Tuner on every
+  Song Journey page, so you can start or stop the play-along track from
+  anywhere on the page without scrolling back up to the top box (which
+  still works too, and still has the Slow/Metronome toggles). On "Sweet
+  Child O' Mine" it's labeled "Jam loop" to match the top button.
+- The top play-along button's label is now "backing track" instead of "jam
+  loop" on the songs that already called it that everywhere else (Watchtower,
+  Let It Be, Luna, "the cure") — just a wording match, nothing else changed.
+
 ## 2026-08-05 — Solo-layer ladders, bonus layers stop asking for a rating
 
 ### Changed

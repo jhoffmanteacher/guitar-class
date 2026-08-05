@@ -767,7 +767,7 @@
 
     // ── Song Journey pages (tabs/journey.js dynamic strings — the page
     //    content itself is hand-translated per-page via data-es) ──
-    'journey.progPill':      { en: '{rated} of {n} layers rated', es: '{rated} de {n} capas evaluadas' },
+    'journey.progPill':      { en: '{ready} of {n} layers ready', es: '{ready} de {n} capas listas' },
     'journey.saving':        { en: 'Saving…', es: 'Guardando…' },
     'journey.saved':         { en: 'Saved ✓', es: 'Guardado ✓' },
     'journey.saveFailed':    { en: 'Save failed — check connection', es: 'No se pudo guardar — revisa tu conexión' },
@@ -776,6 +776,7 @@
     'journey.slow':          { en: 'Slow ({bpm} BPM)', es: 'Lento ({bpm} BPM)' },
     'journey.rateAria':      { en: 'Rate this layer', es: 'Evalúa esta capa' },
     'journey.playalongTitle':{ en: 'Play-along backing track', es: 'Pista de acompañamiento para tocar encima' },
+    'journey.trackFabAria':  { en: 'Play backing track', es: 'Reproducir pista de acompañamiento' },
 
 
     // ── 🎧 Listening Coach + 🎮 Games arcade (coach.js — every

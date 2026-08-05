@@ -38,7 +38,7 @@
     <h1>"All Along the Watchtower"</h1>
     <div class="song-artist" data-es="Bob Dylan &middot; popularizada por Jimi Hendrix">Bob Dylan &middot; made famous by Jimi Hendrix</div>
     <span class="thread-badge" data-es="&#x1F9F5; Canción hilo — aparece en los 5 módulos">&#x1F9F5; Thread song — it appears across all 5 modules</span>
-    <span class="prog-pill">0 of 5 layers rated</span>
+    <span class="prog-pill">0 of 5 layers ready</span>
   </header>
 
   <p class="journey-note" data-es="Una canción, cinco capas. Cada módulo de este semestre vuelves a esta canción con una destreza nueva — y cada vez se hace más grande. También hay una capa de bono — un punteo de tres partes al estilo Hendrix (Capa 6) — para cuando estés listo para un reto más difícil.">One song, five layers. Every module this semester, you come back to this song with a new skill — and it gets bigger every time. There's also a bonus layer — a three-part Hendrix-style lead (Layer 6) — once you're ready for a harder challenge.</p>
@@ -62,7 +62,7 @@
   </div>
 
   <div class="playalong">
-    <button type="button" class="playalong-btn" onclick="togglePlayalong(this)" aria-expanded="false" title="Jam track — backing music to play along with; play the layer you're working on over it" data-i18n-attr="title:journey.jamTrackTitle" data-es="&lt;span class=&quot;pa-play&quot;&gt;&#x25B6;&lt;/span&gt; &#x1F3B5; Toca encima — bucle de acompañamiento (Am)"><span class="pa-play">&#x25B6;</span> &#x1F3B5; Play along — jam loop (Am)</button>
+    <button type="button" class="playalong-btn" onclick="togglePlayalong(this)" aria-expanded="false" title="Jam track — backing music to play along with; play the layer you're working on over it" data-i18n-attr="title:journey.jamTrackTitle" data-es="&lt;span class=&quot;pa-play&quot;&gt;&#x25B6;&lt;/span&gt; &#x1F3B5; Toca encima — pista de acompañamiento (Am)"><span class="pa-play">&#x25B6;</span> &#x1F3B5; Play along — backing track (Am)</button>
     <div class="playalong-frame playalong-frame--audio" id="playalong-frame" data-audio="../audio/neil-young-all-along-the-watchtower-backing-Am-115bpm-440hz-rhythm-down.mp3" data-audio-metronome="../audio/neil-young-all-along-the-watchtower-backing-Am-115bpm-440hz-rhythm-down-metronome.mp3" data-audio-slow="../audio/neil-young-all-along-the-watchtower-backing-Am-90bpm-440hz-rhythm-down.mp3" data-audio-slow-metronome="../audio/neil-young-all-along-the-watchtower-backing-Am-90bpm-440hz-rhythm-down-metronome.mp3" data-bpm="115" data-bpm-slow="90" hidden></div>
     <p class="playalong-note" data-es="Esta pista corre a 115 BPM — el pulso real de la interpretación, más rápido que tus capas de práctica a 60 BPM. ¿Todavía no llegas? Activa el botón &#x1F422; Lento (90 BPM) para un escalón intermedio antes del tempo completo.">This track runs at 115 BPM — the real performance pulse, faster than your 60 BPM practice layers. Not there yet? Toggle &#x1F422; Slow (90 BPM) for a stepping stone before the full tempo.</p>
   </div>
@@ -89,12 +89,10 @@
       <div class="playline" data-es="&lt;b&gt;Hazlo:&lt;/b&gt; escucha el primer minuto de las dos versiones. Una guitarra es acústica, la otra es eléctrica — decide cuál es cuál, y nombra una palabra para cómo &lt;em&gt;se siente&lt;/em&gt; cada versión."><b>Do it:</b> listen to the opening minute of both versions. One guitar is acoustic, one is electric — decide which is which, and name one word for how each version <em>feels</em>.</div>
       <div class="branch" data-es="&lt;b&gt;Responde:&lt;/b&gt; Dylan la escribió — entonces ¿por qué la mayoría conoce la versión de Hendrix? ¿Qué aportó esa versión?"><b>Respond:</b> Dylan wrote it — so why do most people know the Hendrix version? What did the cover add?</div>
       <div class="branch" data-es="&lt;b&gt;Conecta:&lt;/b&gt; nombra otra canción donde una versión se hizo más famosa que el original."><b>Connect:</b> name another song where a cover became more famous than the original.</div>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="1">
-        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key" data-es="1 la escuché completa &middot; 2 respondí las preguntas &middot; 3 puedo tararear la idea principal de memoria">1 heard it once through &middot; 2 answered the questions &middot; 3 can hum the main hook from memory</span>
+      <div class="ready-row" data-layer="1">
+        <label class="ready-label"><input type="checkbox" class="ready-box" onchange="readyChanged(this)">
+        <span data-es="Ya puedo pasar a la siguiente capa de esta canción">I'm ready for the next layer of learning this song</span></label>
+        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; hayas respondido las preguntas y puedas tararear la idea principal de memoria."><b>Check it when:</b> you've answered the questions and can hum the main hook from memory.</div>
       </div>
     </div>
   </section>
@@ -115,12 +113,10 @@ E |--5----3----1----3--|--5----3----1----3--|</pre>
       <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; una nota por tiempo a &lt;b&gt;60 BPM&lt;/b&gt;, cuatro vueltas (una vuelta = una pasada completa del ciclo) sin parar. Digitación: índice en el traste 1 (F), anular en el traste 3 (G), meñique en el traste 5 (A) — sin saltos, cada dedo tiene su lugar."><b>Play it:</b> one note per beat at <b>60 BPM</b>, four laps (a lap = one full time through the loop) without stopping. Fingering: index on fret 1 (F), ring on fret 3 (G), pinky on fret 5 (A) — no jumping, every finger has a home.</div>
       <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Repite solo F &rarr; G (trastes 1–3) hasta que el cambio salga limpio, y luego añade el A en el traste 5.">Loop just F&nbsp;&rarr;&nbsp;G (frets 1–3) until the change is clean, then add the A on fret 5.</div></details>
       <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Di el nombre de cada nota en voz alta mientras tocas, o toca todo el ciclo con los ojos cerrados.">Say each note name out loud as you play, or run the whole loop with your eyes closed.</div></details>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="2">
-        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key" data-es="1 con el diagrama &middot; 2 de memoria, con pausas &middot; 3 de memoria a 60 BPM, sin parar">1 with the chart &middot; 2 from memory, stops allowed &middot; 3 from memory at 60 BPM, no stops</span>
+      <div class="ready-row" data-layer="2">
+        <label class="ready-label"><input type="checkbox" class="ready-box" onchange="readyChanged(this)">
+        <span data-es="Ya puedo pasar a la siguiente capa de esta canción">I'm ready for the next layer of learning this song</span></label>
+        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; puedas tocarla de memoria a 60 BPM, sin parar."><b>Check it when:</b> you can play it from memory at 60 BPM, no stops.</div>
       </div>
     </div>
   </section>
@@ -141,12 +137,10 @@ E |--5---------3-------|--1---------3-------|</pre>
       <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; dos tiempos por acorde a &lt;b&gt;60 BPM&lt;/b&gt;, cuatro vueltas limpias, cada cambio cayendo en el tiempo. Mantén el agarre — es una sola forma, tu brazo hace el movimiento."><b>Play it:</b> two beats per chord at <b>60 BPM</b>, four clean laps, every change landing on the beat. Keep your grip — it's one shape, your arm does the moving.</div>
       <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Baja a solo raíces (tu línea de la Capa 2) durante una vuelta, y luego vuelve a añadir la segunda cuerda solo en el A5.">Drop to roots-only (your Layer 2 line) for a lap, then add the second string back on just the A5.</div></details>
       <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Un tiempo por acorde — el mismo 60 BPM, el doble de cambios — o apaga con la palma en el verso (apoya el costado de tu mano de rasgueo sobre las cuerdas para un sonido corto y apagado), y deja que las cuerdas suenen más fuerte en una vuelta grande.">One beat per chord — same 60 BPM, twice the changes — or palm-mute the verse (rest the side of your strumming hand on the strings for a short, muffled sound), then let the strings ring louder for a big lap.</div></details>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="3">
-        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key" data-es="1 cada cuerda suena limpia, a cualquier velocidad &middot; 2 el bucle a 60 BPM con pausas &middot; 3 el bucle a 60 BPM sin parar">1 every string rings clean, any speed &middot; 2 the loop at 60 BPM with stops &middot; 3 the loop at 60 BPM, no stops</span>
+      <div class="ready-row" data-layer="3">
+        <label class="ready-label"><input type="checkbox" class="ready-box" onchange="readyChanged(this)">
+        <span data-es="Ya puedo pasar a la siguiente capa de esta canción">I'm ready for the next layer of learning this song</span></label>
+        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; el bucle corre a 60 BPM, cada cuerda limpia, sin parar."><b>Check it when:</b> the loop runs at 60 BPM, every string ringing clean, no stops.</div>
       </div>
     </div>
   </section>
@@ -208,12 +202,10 @@ E |--------------------|</pre>
       </div>
       <details class="fold"><summary data-es="Sube de nivel: tensión y resolución">Level up: tension and release</summary><div class="branch" data-es="Empieza una frase durante el compás de F y resuélvela en el compás de Am — eso es tensión y resolución de verdad.">Start a phrase during the F bar and resolve it on the Am bar — that's real tension and release.</div></details>
       <div class="branch" data-es="&lt;b&gt;Siguiente:&lt;/b&gt; ¿Listo para tocarla de verdad? El reto &quot;Watchtower, el ritmo real&quot; del Módulo 4, Unidad 1 hace que tu línea de bajo encaje con el tiempo real de dos-tiempos-por-acorde del disco."><b>Next:</b> Ready to play it for real? Module 4, Set 1's "Watchtower, the real rhythm" challenge gets your bass line matching the record's actual two-beats-per-chord timing.</div>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="4">
-        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key" data-es="1 Regla de 3 sólida &middot; 2 la caja completa en los dedos &middot; 3 licks en mis solos">1 Rule of 3 solid &middot; 2 the whole box under my fingers &middot; 3 licks in my solos</span>
+      <div class="ready-row" data-layer="4">
+        <label class="ready-label"><input type="checkbox" class="ready-box" onchange="readyChanged(this)">
+        <span data-es="Ya puedo pasar a la siguiente capa de esta canción">I'm ready for the next layer of learning this song</span></label>
+        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; hayas subido los tres peldaños — licks en tus solos."><b>Check it when:</b> you've climbed all three rungs — licks in your solos.</div>
       </div>
     </div>
   </section>
@@ -235,12 +227,10 @@ E |--------------------|</pre>
       <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; rasgueos hacia abajo, dos tiempos por acorde, cuatro vueltas — y escúchalo bien: es la MISMA canción que tocaste en los Módulos 2 y 3, sonando completa por fin."><b>Play it:</b> down-strums, two beats per chord, four loops — and listen for it: this is the SAME song you played in Modules 2 and 3, finally sounding full.</div>
       <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Rasguea solo el tiempo 1 de cada acorde y usa los tiempos en silencio para viajar a la siguiente forma.">Strum only beat 1 of each chord and use the silent beats to travel to the next shape.</div></details>
       <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Intercambia vueltas con un compañero tocando los acordes de potencia de la Capa 3 — Dylan y Hendrix al mismo tiempo — o tararea un verso sobre tu propio rasgueo. O prueba la Capa 6 de bono más abajo — el relleno al estilo Hendrix que responde al canto.">Trade loops with a partner playing Layer 3 power chords — Dylan and Hendrix at the same time — or hum a verse over your own strumming. Or try the bonus Layer 6 below — the Hendrix-style fill that answers the singing.</div></details>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="5">
-        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key" data-es="1 cada forma suena limpia &middot; 2 el ciclo con pausas entre cambios &middot; 3 el ciclo a 60 BPM, cambios a tiempo">1 each shape rings clean &middot; 2 the loop with pauses between changes &middot; 3 the loop at 60 BPM, changes on the beat</span>
+      <div class="ready-row" data-layer="5">
+        <label class="ready-label"><input type="checkbox" class="ready-box" onchange="readyChanged(this)">
+        <span data-es="Ya puedo pasar a la siguiente capa de esta canción">I'm ready for the next layer of learning this song</span></label>
+        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; el ciclo completo corre a 60 BPM con los cambios a tiempo."><b>Check it when:</b> the full loop runs at 60 BPM with changes on the beat.</div>
       </div>
     </div>
   </section>
@@ -366,6 +356,7 @@ E |--------------------|--------------------|</pre>
     <div class="tuner-tip" data-i18n="tools.tunerTip">Noisy room? Pick your string above and play close to the computer.</div>
   </div>
   <div class="fab-buttons" id="fab-buttons">
+    <button type="button" class="fab-track" id="fab-track" onclick="toggleTrackFab()" aria-pressed="false" aria-label="Play backing track" data-i18n-attr="aria-label:journey.trackFabAria" data-es="&lt;span class=&quot;pa-play&quot;&gt;&#x25B6;&lt;/span&gt; &#x1F3B5; Pista de acompañamiento"><span class="pa-play">&#x25B6;</span> &#x1F3B5; Backing track</button>
     <button type="button" class="fab fab-tune" id="fab-tuner" onclick="togglePopup('tuner')" aria-controls="tuner-popup" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
       <span data-i18n="tools.tuner">Tuner</span>

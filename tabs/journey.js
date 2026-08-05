@@ -1,8 +1,8 @@
 /* Shared script for the Song Journey pages (tabs/*.html) — translate toggle,
-   layer accordion, and layer self-rating. Each page sets `var SONG_ID = '...'`
+   layer accordion, and layer readiness checkboxes. Each page sets `var SONG_ID = '...'`
    in its own inline <script> before loading this file.
-   Ratings save into the SAME Firestore doc the main app uses
-   (progress/{uid}), under songRatings.<song-id>.<layer> — so no new
+   Readiness saves into the SAME Firestore doc the main app uses
+   (progress/{uid}), under songReady.<song-id>.<layer> — so no new
    collections and no security-rule changes. If the student isn't signed
    in, or a school filter blocks the Firebase SDK, the highlight quietly
    stays session-only (same behavior the page always had). */
@@ -102,10 +102,10 @@ function toggleLayer(btn){
   else closeLayer(section);
 }
 
-function firstUnratedLayer(){
+function firstUnreadyLayer(){
   return coreLayers().filter(function(s){
-    var chip = s.querySelector('.layer-rate-chip');
-    return chip && !chip.textContent;
+    var box = s.querySelector('.ready-box');
+    return box && !box.checked;
   })[0];
 }
 
@@ -143,79 +143,105 @@ window.addEventListener('beforeprint', function(){
    The Slow and Metronome toggles are independent, so the audio source is
    picked from whichever of the four combinations is active. Switching the
    Slow toggle mid-song rescales currentTime by the tempo ratio so playback
-   resumes at the same musical position instead of the same second. */
+   resumes at the same musical position instead of the same second.
+
+   ensurePlayer() builds the <audio> element (and its Slow/Metronome
+   toggles) exactly once, however it's first reached — the top play-along
+   box (togglePlayalong) and the floating backing-track pill (toggleTrackFab)
+   both call it, so there's only ever one player on the page. */
+function ensurePlayer(){
+  var box = document.getElementById('playalong-frame');
+  if(!box || !box.dataset.audio) return null;
+  if(box.dataset.loaded) return box.querySelector('audio');
+
+  var a = document.createElement('audio');
+  a.controls = true;
+  a.loop = true;
+  a.preload = 'none';
+  a.title = t('journey.playalongTitle');
+
+  var metroOn = false, slowOn = false;
+
+  var currentSrc = function(){
+    if(slowOn) return metroOn ? box.dataset.audioSlowMetronome : box.dataset.audioSlow;
+    return metroOn ? box.dataset.audioMetronome : box.dataset.audio;
+  };
+
+  var switchSrc = function(rescale){
+    var wasPlaying = !a.paused;
+    var t = a.currentTime;
+    if(rescale){
+      var bpm = parseFloat(box.dataset.bpm);
+      var bpmSlow = parseFloat(box.dataset.bpmSlow);
+      if(bpm && bpmSlow) t = slowOn ? t * (bpm / bpmSlow) : t * (bpmSlow / bpm);
+    }
+    var resume = function(){
+      a.currentTime = t;
+      if(wasPlaying) a.play().catch(function(){});
+      a.removeEventListener('loadedmetadata', resume);
+    };
+    a.addEventListener('loadedmetadata', resume);
+    a.src = currentSrc();
+    a.load();
+  };
+
+  a.src = currentSrc();
+
+  if(box.dataset.audioSlow){
+    var slowBtn = document.createElement('button');
+    slowBtn.type = 'button';
+    slowBtn.className = 'metronome-toggle';
+    slowBtn.setAttribute('aria-pressed', 'false');
+    slowBtn.innerHTML = '&#x1F422; <span data-i18n="journey.slow" data-i18n-params=\'{"bpm":"' + box.dataset.bpmSlow + '"}\'></span>';
+    slowBtn.onclick = function(){
+      slowOn = !slowOn;
+      slowBtn.classList.toggle('on', slowOn);
+      slowBtn.setAttribute('aria-pressed', slowOn ? 'true' : 'false');
+      switchSrc(true);
+    };
+    box.appendChild(slowBtn);
+  }
+
+  if(box.dataset.audioMetronome){
+    var metroBtn = document.createElement('button');
+    metroBtn.type = 'button';
+    metroBtn.className = 'metronome-toggle';
+    metroBtn.setAttribute('aria-pressed', 'false');
+    metroBtn.innerHTML = '&#x1F3B5; <span data-i18n="tools.metronome"></span>';
+    metroBtn.onclick = function(){
+      metroOn = !metroOn;
+      metroBtn.classList.toggle('on', metroOn);
+      metroBtn.setAttribute('aria-pressed', metroOn ? 'true' : 'false');
+      switchSrc(false);
+    };
+    box.appendChild(metroBtn);
+  }
+
+  box.appendChild(a);
+  applyI18n(box);  /* fill the lazily-created toggle labels in the current language */
+
+  /* Keep the floating Track pill's aria-pressed in sync with actual
+     playback, however playback started or stopped (the pill, the top
+     box's native controls, or the auto-pause-on-collapse below) —
+     assistive tech only, the pill's ▶ glyph and styling never change. */
+  var fabBtn = document.getElementById('fab-track');
+  if(fabBtn){
+    a.addEventListener('play', function(){ fabBtn.setAttribute('aria-pressed', 'true'); });
+    a.addEventListener('pause', function(){ fabBtn.setAttribute('aria-pressed', 'false'); });
+  }
+
+  box.dataset.loaded = '1';
+  return a;
+}
+
 function togglePlayalong(btn){
   var box = document.getElementById('playalong-frame');
   if(!box) return;
   var opening = box.hidden;
   if(opening && !box.dataset.loaded){
     if(box.dataset.audio){
-      var a = document.createElement('audio');
-      a.controls = true;
-      a.loop = true;
-      a.preload = 'none';
-      a.title = t('journey.playalongTitle');
-
-      var metroOn = false, slowOn = false;
-
-      var currentSrc = function(){
-        if(slowOn) return metroOn ? box.dataset.audioSlowMetronome : box.dataset.audioSlow;
-        return metroOn ? box.dataset.audioMetronome : box.dataset.audio;
-      };
-
-      var switchSrc = function(rescale){
-        var wasPlaying = !a.paused;
-        var t = a.currentTime;
-        if(rescale){
-          var bpm = parseFloat(box.dataset.bpm);
-          var bpmSlow = parseFloat(box.dataset.bpmSlow);
-          if(bpm && bpmSlow) t = slowOn ? t * (bpm / bpmSlow) : t * (bpmSlow / bpm);
-        }
-        var resume = function(){
-          a.currentTime = t;
-          if(wasPlaying) a.play().catch(function(){});
-          a.removeEventListener('loadedmetadata', resume);
-        };
-        a.addEventListener('loadedmetadata', resume);
-        a.src = currentSrc();
-        a.load();
-      };
-
-      a.src = currentSrc();
-
-      if(box.dataset.audioSlow){
-        var slowBtn = document.createElement('button');
-        slowBtn.type = 'button';
-        slowBtn.className = 'metronome-toggle';
-        slowBtn.setAttribute('aria-pressed', 'false');
-        slowBtn.innerHTML = '&#x1F422; <span data-i18n="journey.slow" data-i18n-params=\'{"bpm":"' + box.dataset.bpmSlow + '"}\'></span>';
-        slowBtn.onclick = function(){
-          slowOn = !slowOn;
-          slowBtn.classList.toggle('on', slowOn);
-          slowBtn.setAttribute('aria-pressed', slowOn ? 'true' : 'false');
-          switchSrc(true);
-        };
-        box.appendChild(slowBtn);
-      }
-
-      if(box.dataset.audioMetronome){
-        var metroBtn = document.createElement('button');
-        metroBtn.type = 'button';
-        metroBtn.className = 'metronome-toggle';
-        metroBtn.setAttribute('aria-pressed', 'false');
-        metroBtn.innerHTML = '&#x1F3B5; <span data-i18n="tools.metronome"></span>';
-        metroBtn.onclick = function(){
-          metroOn = !metroOn;
-          metroBtn.classList.toggle('on', metroOn);
-          metroBtn.setAttribute('aria-pressed', metroOn ? 'true' : 'false');
-          switchSrc(false);
-        };
-        box.appendChild(metroBtn);
-      }
-
-      box.appendChild(a);
-      applyI18n(box);  /* fill the lazily-created toggle labels in the current language */
-      a.play().catch(function(){ /* autoplay may be blocked — the controls still work */ });
+      var a = ensurePlayer();
+      if(a) a.play().catch(function(){ /* autoplay may be blocked — the controls still work */ });
     } else {
       var f = document.createElement('iframe');
       f.src = 'https://www.youtube.com/embed/' + box.dataset.video;
@@ -223,8 +249,8 @@ function togglePlayalong(btn){
       f.allow = 'autoplay; encrypted-media; picture-in-picture';
       f.allowFullscreen = true;
       box.appendChild(f);
+      box.dataset.loaded = '1';
     }
-    box.dataset.loaded = '1';
   } else {
     /* Already built. Collapsing only sets `hidden` (display:none), which does
        NOT stop an <audio> element — the loop would keep playing with no
@@ -246,84 +272,107 @@ function togglePlayalong(btn){
   btn.setAttribute('aria-expanded', opening ? 'true' : 'false');
 }
 
+/* Floating backing-track pill — play/pause only, doesn't touch the top
+   box's `hidden` state (that stays under togglePlayalong). */
+function toggleTrackFab(){
+  var a = ensurePlayer();
+  if(!a) return;
+  a.paused ? a.play().catch(function(){}) : a.pause();
+}
+
 /* ── Progress pill ── */
 function updateProgressPill(){
   var pill = document.querySelector('.prog-pill');
   if(!pill) return;
   var layers = coreLayers();
-  var rated = layers.filter(function(s){
-    var chip = s.querySelector('.layer-rate-chip');
-    return chip && chip.textContent;
+  var ready = layers.filter(function(s){
+    var box = s.querySelector('.ready-box');
+    return box && box.checked;
   }).length;
-  pill.textContent = t('journey.progPill', { rated: rated, n: layers.length });
+  pill.textContent = t('journey.progPill', { ready: ready, n: layers.length });
 }
 
-function paintChip(section){
+/* Shared by readyChanged and applyReady so the chip-painting logic (text +
+   the .ok class the CSS keys its green background off of) lives in one
+   place. */
+function paintChip(section, ready){
   if(!section) return;
   var chip = section.querySelector('.layer-rate-chip');
   if(!chip) return;
-  var on = section.querySelector('.rate button.on');
-  chip.textContent = on ? ('✓ ' + on.textContent) : '';
+  chip.textContent = ready ? '✓' : '';
+  chip.classList.toggle('ok', ready);
 }
 
 /* Run immediately (script loads at end of body, DOM is already parsed):
    a hash link always wins for which layer opens; otherwise Layer 1 stays
-   open (its default HTML state) until saved ratings arrive. Don't scroll
+   open (its default HTML state) until saved readiness arrives. Don't scroll
    on this initial call — the page always opens at the top (see the
    scrollRestoration/scrollTo block above). */
 openFromHash(false);
 updateProgressPill();
+/* Future-proofing: every page currently ships data-audio, but a page that
+   doesn't shouldn't show a Track pill with nothing to play. */
+(function(){
+  var fabBtn = document.getElementById('fab-track');
+  var frame = document.getElementById('playalong-frame');
+  if(fabBtn && (!frame || !frame.dataset.audio)) fabBtn.hidden = true;
+})();
 /* A returning student who chose Spanish shouldn't see a flash of English —
    i18n.js (loaded just above) already restored gc-lang, so swap now. */
 applyJourneyLang(getLang());
 window.scrollTo(0, 0);
 
-/* ── Layer self-rating ──
-   locallyClickedLayers tracks which layers the student has rated by hand
+/* ── Layer readiness ──
+   locallyClickedLayers tracks which layers the student has checked by hand
    this page load. It guards against a race with the initial Firestore
    `get()` below: if a click lands on a layer before that read resolves,
-   `applyRatings` must not blow the click away when it paints the saved
-   state over the DOM — the pending debounced save reads ratings back out
-   of the DOM, so an overwritten button silently loses the click. */
+   `applyReady` must not blow the click away when it paints the saved
+   state over the DOM — the pending debounced save reads readiness back out
+   of the DOM, so an overwritten checkbox silently loses the click. */
 var locallyClickedLayers = {};
-function rate(btn){
-  var group = btn.closest('.rate');
-  group.querySelectorAll('button').forEach(function(b){ b.classList.remove('on'); b.setAttribute('aria-checked', 'false'); });
-  btn.classList.add('on');
-  btn.setAttribute('aria-checked', 'true');
-  locallyClickedLayers[group.dataset.layer] = true;
-  paintChip(btn.closest('.layer'));
+function readyChanged(box){
+  var row = box.closest('.ready-row');
+  var section = box.closest('.layer');
+  locallyClickedLayers[row.dataset.layer] = true;
+  paintChip(section, box.checked);
   updateProgressPill();
   queueSave();
+  /* Checking (not unchecking) advances to the next layer in document order
+     — bonus included, so checking the last core layer opens the first
+     bonus layer as the reward. Unchecking navigates nowhere. */
+  if(box.checked){
+    userInteracted = true;
+    var layers = allLayers();
+    var next = layers[layers.indexOf(section) + 1];
+    if(next) openLayer(next, true);
+  }
 }
 
-function currentRatings(){
+function currentReady(){
   var out = {};
-  document.querySelectorAll('.rate').forEach(function(g){
-    var on = g.querySelector('button.on');
-    if(on) out[g.dataset.layer] = parseInt(on.textContent, 10);
+  document.querySelectorAll('.ready-row').forEach(function(g){
+    var box = g.querySelector('.ready-box');
+    out[g.dataset.layer] = !!(box && box.checked);
   });
   return out;
 }
 
-function applyRatings(saved){
+function applyReady(saved){
   Object.keys(saved || {}).forEach(function(layer){
     /* A click already landed on this layer before this (one-time, initial)
        load resolved — the local click wins, don't overwrite it with
        whatever was saved before that click happened. */
     if(locallyClickedLayers[layer]) return;
-    var g = document.querySelector('.rate[data-layer="' + layer + '"]');
+    var g = document.querySelector('.ready-row[data-layer="' + layer + '"]');
     if(!g) return;
-    g.querySelectorAll('button').forEach(function(b){
-      var on = parseInt(b.textContent, 10) === saved[layer];
-      b.classList.toggle('on', on);
-      b.setAttribute('aria-checked', on ? 'true' : 'false');
-    });
-    paintChip(g.closest('.layer'));
+    var box = g.querySelector('.ready-box');
+    if(!box) return;
+    box.checked = !!saved[layer];
+    paintChip(g.closest('.layer'), box.checked);
   });
   updateProgressPill();
-  if(!userInteracted){
-    var target = firstUnratedLayer();
+  if(!userInteracted && !location.hash){
+    var target = firstUnreadyLayer();
     if(target) openLayer(target, false);
   }
 }
@@ -342,12 +391,12 @@ function setSaveMsg(key){
    click retries it. */
 function queueSave(){
   dirty = true;
-  /* Ratings are clickable from the moment the HTML parses, but `fbUser`
+  /* Checkboxes are clickable from the moment the HTML parses, but `fbUser`
      only lands after load → onAuthStateChanged → the injected Firestore
      SDK — seconds later on school Wi-Fi. Don't drop the click: remember
      that something is unsaved and flush once `fbUser` arrives. One flush
-     covers every layer rated in that window, because flushSave rebuilds
-     the whole rating map from the DOM (see currentRatings). */
+     covers every layer checked in that window, because flushSave rebuilds
+     the whole readiness map from the DOM (see currentReady). */
   /* The SDK never arrived (school filter, dead Wi-Fi). fbUser will never be
      set, so every later click would return silently while the chip paints
      "✓ 3" and the pill counts it — the page looks saved and isn't. Say so on
@@ -363,8 +412,8 @@ function queueSave(){
 function flushSave(){
   if(!fbUser || !dirty) return;
   dirty = false;
-  var payload = { songRatings: {} };
-  payload.songRatings[SONG_ID] = currentRatings();
+  var payload = { songReady: {} };
+  payload.songReady[SONG_ID] = currentReady();
   fbDb.collection('progress').doc(fbUser.uid).set(payload, { merge: true })
     .then(function(){ setSaveMsg('journey.saved'); setTimeout(function(){ setSaveMsg(''); }, 2000); })
     .catch(function(){ dirty = true; setSaveMsg('journey.saveFailed'); });
@@ -412,7 +461,7 @@ window.addEventListener('load', function(){
       return fbDb.collection('progress').doc(user.uid).get();
     }).then(function(doc){
       var data = doc && doc.exists ? doc.data() : null;
-      applyRatings(data && data.songRatings && data.songRatings[SONG_ID]);
+      applyReady(data && data.songReady && data.songReady[SONG_ID]);
     }).catch(function(){
       /* An offline first read is fine — clicks still queue saves. But if the
          Firestore SDK itself never loaded, fbUser never arrives and NOTHING

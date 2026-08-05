@@ -38,7 +38,7 @@
     <h1>"Sweet Child O' Mine"</h1>
     <div class="song-artist">Guns N' Roses</div>
     <span class="thread-badge" data-es="&#x1F9F5; Canción hilo — crece a través de los Módulos 1–5, con un final en el Módulo 7">&#x1F9F5; Thread song — it grows through Modules 1–5, with a Module 7 finale</span>
-    <span class="prog-pill">0 of 5 layers rated</span>
+    <span class="prog-pill">0 of 5 layers ready</span>
   </header>
 
   <p class="journey-note" data-es="Una canción, cinco capas. A medida que tus destrezas crecen este semestre, vuelves a esta canción con una herramienta nueva — y cada vez se hace más grande. También hay una capa de bono — el famoso riff de la intro (Capa 6) — para cuando estés listo para un reto más difícil.">One song, five layers. As your skills grow this semester, you come back to this song with a new tool — and it gets bigger every time. There's also a bonus layer — the famous intro riff (Layer 6) — once you're ready for a harder challenge.</p>
@@ -52,7 +52,7 @@
   </div>
 
   <div class="playalong">
-    <button type="button" class="playalong-btn" onclick="togglePlayalong(this)" aria-expanded="false" title="Jam track — backing music to play along with; play the layer you're working on over it" data-i18n-attr="title:journey.jamTrackTitle" data-es="&lt;span class=&quot;pa-play&quot;&gt;&#x25B6;&lt;/span&gt; &#x1F3B5; Toca encima — bucle de acompañamiento (G)"><span class="pa-play">&#x25B6;</span> &#x1F3B5; Play along — jam loop (G)</button>
+    <button type="button" class="playalong-btn" onclick="togglePlayalong(this)" aria-expanded="false" title="Jam track — backing music to play along with; play the layer you're working on over it" data-i18n-attr="title:journey.jamTrackTitle" data-es="&lt;span class=&quot;pa-play&quot;&gt;&#x25B6;&lt;/span&gt; &#x1F3B5; Toca encima — bucle para improvisar (G)"><span class="pa-play">&#x25B6;</span> &#x1F3B5; Play along — jam loop (G)</button>
     <div class="playalong-frame playalong-frame--audio" id="playalong-frame" data-audio="../audio/guns-n-roses-sweet-child-o-mine-backing-G-125bpm-440hz-rhythm-down.mp3" data-audio-metronome="../audio/guns-n-roses-sweet-child-o-mine-backing-G-125bpm-440hz-rhythm-down-metronome.mp3" data-audio-slow="../audio/guns-n-roses-sweet-child-o-mine-backing-G-100bpm-440hz-rhythm-down.mp3" data-audio-slow-metronome="../audio/guns-n-roses-sweet-child-o-mine-backing-G-100bpm-440hz-rhythm-down-metronome.mp3" data-bpm="125" data-bpm-slow="100" hidden></div>
     <p class="playalong-note" data-es="Esta pista corre a la velocidad del disco (125 BPM) — mucho más rápido que las capas de 60 BPM de abajo. Espera que se sienta rápida al principio; esa es la idea. &iquest;Todavía no llegas? Activa &#x1F422; Lento (100 BPM) como escalón intermedio antes del tempo completo.">This track runs at record speed (125 BPM) — much faster than the 60 BPM layers below. Expect it to feel brisk at first; that's the point. Not there yet? Toggle &#x1F422; Slow (100 BPM) for a stepping stone before the full tempo.</p>
   </div>
@@ -65,12 +65,10 @@
       <div class="playline" data-es="&lt;b&gt;Hazlo:&lt;/b&gt; escucha el primer minuto. Cuenta cuántas veces se repite el riff de la intro antes de que empiece la voz, y fíjate en el momento en que entra la batería."><b>Do it:</b> listen to the first minute. Count how many times the intro riff repeats before the vocals start, and notice the moment the drums arrive.</div>
       <div class="branch" data-es="&lt;b&gt;Responde:&lt;/b&gt; &iquest;la intro es de notas sueltas o acordes rasgueados? &iquest;Cómo lo sabes?"><b>Respond:</b> is the intro single notes or strummed chords? How can you tell?</div>
       <div class="branch" data-es="&lt;b&gt;Conecta:&lt;/b&gt; nombra otra canción donde el riff de la intro ES el gancho (la parte pegajosa que recuerdas) — reconoces la canción desde los primeros dos segundos."><b>Connect:</b> name another song where the intro riff IS the hook (the catchy part you remember) — you know the song from the first two seconds.</div>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="1">
-        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key" data-es="1 la escuché completa &middot; 2 respondí las preguntas &middot; 3 puedo tararear la idea principal de memoria">1 heard it once through &middot; 2 answered the questions &middot; 3 can hum the main hook from memory</span>
+      <div class="ready-row" data-layer="1">
+        <label class="ready-label"><input type="checkbox" class="ready-box" onchange="readyChanged(this)">
+        <span data-es="Ya puedo pasar a la siguiente capa de esta canción">I'm ready for the next layer of learning this song</span></label>
+        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; hayas respondido las preguntas y puedas tararear la idea principal de memoria."><b>Check it when:</b> you've answered the questions and can hum the main hook from memory.</div>
       </div>
     </div>
   </section>
@@ -91,12 +89,10 @@ E |--------|--------|--3-----|--------|</pre>
       <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; una nota por compás a &lt;b&gt;60 BPM&lt;/b&gt;, dejando que cada una suene los cuatro tiempos. Di los nombres de las notas en voz alta — D, C, G — mientras las tocas."><b>Play it:</b> one note per bar at <b>60 BPM</b>, letting each ring all four beats. Say the note names out loud — D, C, G — as you land them.</div>
       <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Repite solo D&nbsp;&rarr;&nbsp;C (trastes 5–3 en la cuerda La) hasta que el cambio salga limpio, luego añade la G en la Mi grave.">Loop just D&nbsp;&rarr;&nbsp;C (frets 5–3 on the A string) until the shift is clean, then add the G on the low E.</div></details>
       <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Toca cada raíz cuatro veces (una por tiempo) en vez de dejarla sonar — ahora eres el bajista.">Play each root four times (one per beat) instead of letting it ring — now you're the bass player.</div></details>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="2">
-        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key" data-es="1 con el diagrama &middot; 2 de memoria, con pausas &middot; 3 de memoria a 60 BPM, sin parar">1 with the chart &middot; 2 from memory, stops allowed &middot; 3 from memory at 60 BPM, no stops</span>
+      <div class="ready-row" data-layer="2">
+        <label class="ready-label"><input type="checkbox" class="ready-box" onchange="readyChanged(this)">
+        <span data-es="Ya puedo pasar a la siguiente capa de esta canción">I'm ready for the next layer of learning this song</span></label>
+        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; puedas tocarla de memoria a 60 BPM, sin parar."><b>Check it when:</b> you can play it from memory at 60 BPM, no stops.</div>
       </div>
     </div>
   </section>
@@ -117,12 +113,10 @@ E |--------|--------|--3-----|--------|</pre>
       <div class="playline" data-es="&lt;b&gt;Tócalo:&lt;/b&gt; cuatro tiempos por acorde — un compás cada uno, igual que tus raíces de bajo de la Capa 2 — a &lt;b&gt;60 BPM&lt;/b&gt;, cuatro vueltas limpias (una vuelta = una pasada completa del ciclo), con las dos cuerdas de cada acorde sonando. Cuidado con el G5 — la raíz baja a la cuerda Mi grave."><b>Play it:</b> four beats per chord — one bar each, same as your Layer 2 bass roots — at <b>60 BPM</b>, four clean laps (a lap = one full time through the loop), both strings of every chord ringing. Watch the G5 — the root drops to the low E string.</div>
       <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Solo raíces (tu línea de la Capa 2) durante una vuelta, luego vuelve a añadir la quinta solo en el D5.">Roots-only (your Layer 2 line) for a lap, then add the fifth back on just the D5.</div></details>
       <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="Apaga con la palma el verso (apoya el costado de tu mano de rasgueo sobre las cuerdas para un sonido corto y apagado) para lograr el chug de la grabación (un rasgueo corto, apagado y contundente), luego deja que las cuerdas suenen más fuerte para una vuelta grande.">Palm-mute the verse (rest the side of your strumming hand on the strings for a short, muffled sound) for the recording's chug (a short, muted, punchy strum), then let the strings ring louder for a big lap.</div></details>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="3">
-        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key" data-es="1 cada cuerda suena limpia, a cualquier velocidad &middot; 2 el bucle a 60 BPM con pausas &middot; 3 el bucle a 60 BPM sin parar">1 every string rings clean, any speed &middot; 2 the loop at 60 BPM with stops &middot; 3 the loop at 60 BPM, no stops</span>
+      <div class="ready-row" data-layer="3">
+        <label class="ready-label"><input type="checkbox" class="ready-box" onchange="readyChanged(this)">
+        <span data-es="Ya puedo pasar a la siguiente capa de esta canción">I'm ready for the next layer of learning this song</span></label>
+        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; el bucle corre a 60 BPM, cada cuerda limpia, sin parar."><b>Check it when:</b> the loop runs at 60 BPM, every string ringing clean, no stops.</div>
       </div>
     </div>
   </section>
@@ -202,12 +196,10 @@ E |--------------------|</pre>
         </div>
       </div>
       <details class="fold"><summary data-es="Sube de nivel: desliza entre posiciones">Level up: slide between positions</summary><div class="branch" data-es="Desliza entre las dos posiciones a mitad de frase, o sostén tu nota más larga un compás extra y déjala cantar.">Slide between the two positions mid-phrase, or hold your longest note an extra bar and let it sing.</div></details>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="4">
-        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key" data-es="1 Regla de 3 sólida &middot; 2 las dos cajas conectadas &middot; 3 adornos y licks en mis solos">1 Rule of 3 solid &middot; 2 the two boxes connected &middot; 3 dress-ups &amp; licks in my solos</span>
+      <div class="ready-row" data-layer="4">
+        <label class="ready-label"><input type="checkbox" class="ready-box" onchange="readyChanged(this)">
+        <span data-es="Ya puedo pasar a la siguiente capa de esta canción">I'm ready for the next layer of learning this song</span></label>
+        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; hayas subido los cuatro peldaños — adornos y licks en tus solos."><b>Check it when:</b> you've climbed all four rungs — dress-ups and licks in your solos.</div>
       </div>
     </div>
   </section>
@@ -230,12 +222,10 @@ E |--------------------|</pre>
       <details class="fold"><summary data-es="¿Atascado?">Stuck?</summary><div class="branch" data-es="Rasguea solo el tiempo 1 de cada acorde y usa los tiempos 2–4 para viajar a la siguiente forma.">Strum only beat 1 of each chord and use beats 2–4 to travel to the next shape.</div></details>
       <details class="fold"><summary data-es="Sube de nivel">Level up</summary><div class="branch" data-es="El Módulo 7 es el final de esta canción — haz cejilla en todo el verso (una cejilla presiona un dedo plano a través de varias cuerdas), y el famoso riff de la intro (por los trastes 12–15) es el reto más difícil — pruébalo ahora en la Capa 6 de bono más abajo.">Module 7 is this song's finale — barre the whole verse (a barre presses one finger flat across several strings), and the famous intro riff (up around the 12th–15th frets) is the hardest challenge — try it now in the bonus Layer 6 below.</div></details>
       <div class="branch" data-es="&lt;b&gt;Siguiente:&lt;/b&gt; &iquest;Listo para tocarla de verdad? El reto &ldquo;Llévalo a una canción&rdquo; del Módulo 5, Unidad 3 lleva este verso hasta los 125 BPM reales del disco."><b>Next:</b> Ready to play it for real? Module 5, Set 3's "Take It to a Song" challenge takes this verse up to the record's actual 125 BPM.</div>
-      <div class="rate" role="radiogroup" aria-label="Rate this layer" data-i18n-attr="aria-label:journey.rateAria" data-layer="5">
-        <span class="rate-label" data-es="Evalúa esta capa:">Rate this layer:</span>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">1</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">2</button>
-        <button type="button" role="radio" aria-checked="false" onclick="rate(this)">3</button>
-        <span class="rate-key" data-es="1 cada forma suena limpia &middot; 2 el ciclo con pausas entre cambios &middot; 3 el ciclo a 60 BPM, cambios a tiempo">1 each shape rings clean &middot; 2 the loop with pauses between changes &middot; 3 the loop at 60 BPM, changes on the beat</span>
+      <div class="ready-row" data-layer="5">
+        <label class="ready-label"><input type="checkbox" class="ready-box" onchange="readyChanged(this)">
+        <span data-es="Ya puedo pasar a la siguiente capa de esta canción">I'm ready for the next layer of learning this song</span></label>
+        <div class="ready-when" data-es="&lt;b&gt;Márcala cuando:&lt;/b&gt; el ciclo completo corre a 60 BPM con los cambios a tiempo."><b>Check it when:</b> the full loop runs at 60 BPM with changes on the beat.</div>
       </div>
     </div>
   </section>
@@ -340,6 +330,7 @@ E |--------------------|--------------------|</pre>
     <div class="tuner-tip" data-i18n="tools.tunerTip">Noisy room? Pick your string above and play close to the computer.</div>
   </div>
   <div class="fab-buttons" id="fab-buttons">
+    <button type="button" class="fab-track" id="fab-track" onclick="toggleTrackFab()" aria-pressed="false" aria-label="Play backing track" data-i18n-attr="aria-label:journey.trackFabAria" data-es="&lt;span class=&quot;pa-play&quot;&gt;&#x25B6;&lt;/span&gt; &#x1F3B5; Bucle para improvisar"><span class="pa-play">&#x25B6;</span> &#x1F3B5; Jam loop</button>
     <button type="button" class="fab fab-tune" id="fab-tuner" onclick="togglePopup('tuner')" aria-controls="tuner-popup" aria-expanded="false">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
       <span data-i18n="tools.tuner">Tuner</span>
