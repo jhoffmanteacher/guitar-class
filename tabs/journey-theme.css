@@ -61,7 +61,7 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:4px
 .song-artist{font-size:0.9375rem;color:var(--text2)}
 .thread-badge{display:inline-block;margin-top:10px;font-size:0.75rem;font-weight:600;padding:3px 10px;border-radius:12px;background:var(--bg3);color:var(--text2)}
 .prog-pill{display:inline-block;margin-top:10px;margin-left:8px;font-size:0.75rem;font-weight:600;padding:3px 10px;border-radius:12px;background:var(--purple-bg,var(--bg3));color:var(--purple-text,var(--brand))}
-.journey-note{font-size:0.875rem;color:var(--text2);margin:16px 0 26px;max-width:60ch}
+.journey-note{font-size:0.875rem;color:var(--text2);margin:16px 0 26px}
 .songmap{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:30px;font-size:0.875rem}
 .songmap b{font-weight:600}
 .songmap-more{margin-top:8px}
@@ -79,7 +79,7 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:4px
 .layer-head[aria-expanded="true"] .layer-chevron{transform:rotate(180deg)}
 .layer.closed .layer-body{display:none}
 .layer-body{padding:16px}
-.layer-body p{font-size:0.9063rem;margin-bottom:12px;max-width:62ch}
+.layer-body p{font-size:0.9063rem;margin-bottom:12px}
 .l1 .layer-num{background:var(--l1)} .l2 .layer-num{background:var(--l2)}
 .l3 .layer-num{background:var(--l3)} .l4 .layer-num{background:var(--l4)}
 .l5 .layer-num{background:var(--l5)} .l6 .layer-num{background:var(--l6)}

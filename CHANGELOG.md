@@ -19,13 +19,10 @@ see `WORKFLOW.md` and the git commit log.
   shows right on the page, captioned "hold it — the high e stays open."
 - **"All Along the Watchtower" page goes much deeper**:
   - A new "The Story" stop above Layer 1 — the song's history plus a
-    five-item listening map for what to notice, so it's there without
+    six-item listening map for what to notice, so it's there without
     being one more layer to check off.
   - A song anatomy roadmap showing the six sections, what the guitar
     does in each, and which layer teaches it.
-  - "The record's pulse" — a down/down-up strum chart at the song's real
-    tempo.
-  - A singalong strum chart with its own play-along line.
   - Two Hendrix-style licks — a roll-down and a slide-in.
   - The lead layer expands to three parts: the verse answer phrase
     (already on the site), a new entrance slide-in, and a climb-and-fall
