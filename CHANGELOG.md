@@ -5,6 +5,26 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-05 — Luna: requinto lead bonus layer + bass tab fix
+
+### Added
+
+- **"Luna" Layer 7 — Requinto Lead** — a second bonus layer that teaches
+  a simplified requinto lead line. Students hold the little F and Am
+  shapes and pick single notes out of them; every note of the lead sits
+  inside a shape they already know. Open-chord diagrams (F, Am, Dm) are
+  displayed right in the layer, rendered live from guitar-diagrams.js —
+  the first journey page to do so, and the model for adding lead parts
+  and chord diagrams to the other song journeys.
+
+### Fixed
+
+- **"Luna" harmonic rhythm** — the song sits two bars per chord, so the
+  Layer 2 bass tab is now a four-bar loop (F, F, A, A — one pluck at the
+  start of each bar), the Layer 5 vamp reads | F | F | Am | Am |, and
+  the Layer 3 power-chord instructions say "changing every two bars."
+  Captions and surrounding text updated to match, EN + ES.
+
 ## 2026-08-05 — Five more Finger Gym in-class activities
 
 ### Added
