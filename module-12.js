@@ -78,8 +78,8 @@ SETS.push(
                   answer: 0,
                   explain: 'The root (A string, fret 3 = C) and its 5th, fretted on the low E string (fret 3 = G) — the thumb reaches down to a string the open chord shape doesn\'t normally use.',
                   explain_es: 'La raíz (cuerda La, traste 3 = C) y su 5ª, trasteada en la cuerda Mi grave (traste 3 = G) — el pulgar llega hasta una cuerda que la forma abierta del acorde normalmente no usa.',
-                  choices: ['Strings 6 and 5', 'Strings 5 and 4', 'Strings 2 and 1', 'Any two strings at random'],
-                  choices_es: ['Las cuerdas 6 y 5', 'Las cuerdas 5 y 4', 'Las cuerdas 2 y 1', 'Cualquier par de cuerdas al azar'] }
+                  choices: ['The low E and A strings', 'The A and D strings', 'The B and high e strings', 'Any two strings at random'],
+                  choices_es: ['Las cuerdas Mi grave y La', 'Las cuerdas La y Re', 'Las cuerdas Si y mi aguda', 'Cualquier par de cuerdas al azar'] }
               }
             ]
           },
@@ -89,8 +89,8 @@ SETS.push(
             steps: [
               {
                 label: 'Try the alternating thumb', label_es: 'Prueba el pulgar alternante',
-                text: 'Now try it: alternate your thumb between strings 5 and 6 over a C chord — root on the A string (fret 3), 5th fretted on the low E string (fret 3 = G) — 8 bars, no finger notes yet.',
-                text_es: 'Ahora pruébalo: alterna tu pulgar entre las cuerdas 5 y 6 sobre un acorde de C — raíz en la cuerda La (traste 3), 5ª trasteada en la cuerda Mi grave (traste 3 = G) — 8 compases, todavía sin notas de dedos.',
+                text: 'Now try it: alternate your thumb between the A and low E strings over a C chord — root on the A string (fret 3), 5th fretted on the low E string (fret 3 = G) — 8 bars, no finger notes yet.',
+                text_es: 'Ahora pruébalo: alterna tu pulgar entre las cuerdas La y Mi grave sobre un acorde de C — raíz en la cuerda La (traste 3), 5ª trasteada en la cuerda Mi grave (traste 3 = G) — 8 compases, todavía sin notas de dedos.',
                 hint: 'Rule one of Travis: the thumb never stops. Fingers can rejoin on the next beat.',
                 hint_es: 'Regla número uno del Travis picking: el pulgar nunca se detiene. Los dedos pueden reincorporarse en el siguiente tiempo.',
                 skills: [1, 5],
@@ -143,8 +143,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 1 — Alternating Thumb, No Fingers', label_es: 'Reto 1 — Pulgar alternante, sin dedos',
-                text: '<ul><li>Alternate strings 5↔6 in quarter notes — root on the A string (fret 3), 5th fretted on the low E string (fret 3) — 60 BPM, 8 bars, zero finger notes.</li></ul>You\'ve got it when: a steady, even alternating thumb with no wobble.',
-                text_es: '<ul><li>Alterna las cuerdas 5↔6 en negras — raíz en la cuerda La (traste 3), 5ª trasteada en la cuerda Mi grave (traste 3) — 60 BPM, 8 compases, cero notas de dedos.</li></ul>Lo tienes cuando: un pulgar alternante constante y parejo, sin tambalearse.',
+                text: '<ul><li>Alternate between the A and low E strings in quarter notes — root on the A string (fret 3), 5th fretted on the low E string (fret 3) — 60 BPM, 8 bars, zero finger notes.</li></ul>You\'ve got it when: a steady, even alternating thumb with no wobble.',
+                text_es: '<ul><li>Alterna entre la cuerda La y la Mi grave en negras — raíz en la cuerda La (traste 3), 5ª trasteada en la cuerda Mi grave (traste 3) — 60 BPM, 8 compases, cero notas de dedos.</li></ul>Lo tienes cuando: un pulgar alternante constante y parejo, sin tambalearse.',
                 hint: 'Compared to Module 8\'s p-i-m-a-m-i arpeggio, the thumb ALTERNATES between bass strings instead of staying put — that bounce is the whole style.',
                 hint_es: 'Comparado con el arpegio p-i-m-a-m-i del Módulo 8, el pulgar ALTERNA entre cuerdas graves en lugar de quedarse quieto — ese rebote es todo el estilo.',
                 stuck: 'Drop to half tempo and count "1-2-3-4" aloud, landing the thumb exactly on each number.',
@@ -152,7 +152,7 @@ SETS.push(
                 levelUp: 'Add a chord change Am↔C every 4 bars without the thumb missing a beat.',
                 levelUp_es: 'Agrega un cambio de acorde Am↔C cada 4 compases sin que el pulgar se pierda ni un tiempo.',
                 skills: [1, 4],
-                playSeq: { label: 'Thumb alternation on C — strings 5 & 6', label_es: 'Alternancia del pulgar en C — cuerdas 5 y 6', bpm: 60, notes: [48, 43, 48, 43] }
+                playSeq: { label: 'Thumb alternation on C — the A and low E strings', label_es: 'Alternancia del pulgar en C — las cuerdas La y Mi grave', bpm: 60, notes: [48, 43, 48, 43] }
               }
             ]
           },
@@ -162,8 +162,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 2 — The Pinch', label_es: 'Reto 2 — El pellizco',
-                text: '<ul><li>Pinch (thumb string 5 + m on string 2) on beat 1, thumb alone beats 2–4.</li></ul>You\'ve got it when: both notes of the pinch sound together as one, perfectly in sync.',
-                text_es: '<ul><li>Pellizca (pulgar en la cuerda 5 + m en la cuerda 2) en el tiempo 1, pulgar solo en los tiempos 2–4.</li></ul>Lo tienes cuando: ambas notas del pellizco suenan juntas como una sola, perfectamente sincronizadas.',
+                text: '<ul><li>Pinch (thumb on the A string + m on the B string) on beat 1, thumb alone beats 2–4.</li></ul>You\'ve got it when: both notes of the pinch sound together as one, perfectly in sync.',
+                text_es: '<ul><li>Pellizca (pulgar en la cuerda La + m en la cuerda Si) en el tiempo 1, pulgar solo en los tiempos 2–4.</li></ul>Lo tienes cuando: ambas notas del pellizco suenan juntas como una sola, perfectamente sincronizadas.',
                 hint: 'A pinch is the bridge between arpeggios and Travis picking — thumb and finger move toward each other and meet.',
                 hint_es: 'Un pellizco es el puente entre los arpegios y el Travis picking — el pulgar y el dedo se mueven uno hacia el otro y se encuentran.',
                 stuck: 'Pluck the bass and the treble separately first, slowly, then bring them closer until they land together.',
@@ -264,10 +264,10 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — Claw Check', label_es: 'Reto — Revisión de la garra',
-                text: 'Plant all four picking fingers at once:<ul><li>Thumb (p) resting on the bass strings 6/5/4.</li><li>Index (i) on the G string.</li><li>Middle (m) on the B string.</li><li>Ring (a) on the high e.</li><li>Then pluck p–i–m–a on the open strings, twice through at 60 BPM.</li></ul>You\'ve got it when: each finger plays in order, one string each, with no two fingers grabbing the same string.',
-                text_es: 'Planta los cuatro dedos de pulsar a la vez:<ul><li>Pulgar (p) apoyado en las cuerdas graves 6/5/4.</li><li>Índice (i) en la cuerda Sol.</li><li>Medio (m) en la cuerda Si.</li><li>Anular (a) en la mi aguda.</li><li>Luego pulsa p–i–m–a en las cuerdas al aire, dos veces seguidas a 60 BPM.</li></ul>Lo tienes cuando: cada dedo toca en orden, una cuerda cada uno, sin que dos dedos agarren la misma cuerda.',
-                hint: 'This is a 60-second reactivation of Module 8, not a re-teach — it\'s the picking hand you built back then, so warm it up any time it feels out of practice, including right now before your next run. p owns the three bass strings (6/5/4); i-G, m-B, a-high-e never trade places. Set the assignment once and your hand stops hunting for strings.',
-                hint_es: 'Esta es una reactivación de 60 segundos del Módulo 8, no una nueva enseñanza — es la mano de pulsar que construiste allá, así que caliéntala cuando sea que se sienta oxidada, incluso ahora mismo antes de tu próxima corrida. p es dueño de las tres cuerdas graves (6/5/4); i-Sol, m-Si, a-mi aguda nunca intercambian lugares. Fija la asignación una vez y tu mano deja de buscar cuerdas a tientas.',
+                text: 'Plant all four picking fingers at once:<ul><li>Thumb (p) resting on the bass strings (low E, A, D).</li><li>Index (i) on the G string.</li><li>Middle (m) on the B string.</li><li>Ring (a) on the high e.</li><li>Then pluck p–i–m–a on the open strings, twice through at 60 BPM.</li></ul>You\'ve got it when: each finger plays in order, one string each, with no two fingers grabbing the same string.',
+                text_es: 'Planta los cuatro dedos de pulsar a la vez:<ul><li>Pulgar (p) apoyado en las cuerdas graves (Mi grave, La, Re).</li><li>Índice (i) en la cuerda Sol.</li><li>Medio (m) en la cuerda Si.</li><li>Anular (a) en la mi aguda.</li><li>Luego pulsa p–i–m–a en las cuerdas al aire, dos veces seguidas a 60 BPM.</li></ul>Lo tienes cuando: cada dedo toca en orden, una cuerda cada uno, sin que dos dedos agarren la misma cuerda.',
+                hint: 'This is a 60-second reactivation of Module 8, not a re-teach — it\'s the picking hand you built back then, so warm it up any time it feels out of practice, including right now before your next run. p owns the three bass strings (low E, A, D); i-G, m-B, a-high-e never trade places. Set the assignment once and your hand stops hunting for strings.',
+                hint_es: 'Esta es una reactivación de 60 segundos del Módulo 8, no una nueva enseñanza — es la mano de pulsar que construiste allá, así que caliéntala cuando sea que se sienta oxidada, incluso ahora mismo antes de tu próxima corrida. p es dueño de las tres cuerdas graves (Mi grave, La, Re); i-Sol, m-Si, a-mi aguda nunca intercambian lugares. Fija la asignación una vez y tu mano deja de buscar cuerdas a tientas.',
                 stuck: 'Plant all four fingers silently first and feel each one touching its string, then pluck slowly — p, then i, then m, then a — before you add the metronome.',
                 stuck_es: 'Planta los cuatro dedos en silencio primero y siente cada uno tocando su cuerda, y luego pulsa despacio — p, luego i, luego m, luego a — antes de agregar el metrónomo.',
                 levelUp: 'Run the staircase up and back down (p-i-m-a-m-i) without looking at your picking hand.',
@@ -310,9 +310,9 @@ SETS.push(
     skills: [
       { id: 'm12w1-s1', text: 'Alternate the thumb between two bass strings in steady quarter notes',
         text_es: 'Alternar el pulgar entre dos cuerdas graves en negras constantes',
-        gotItWhen: 'the thumb bounces evenly between strings 5 and 6 in steady quarter notes, with no wobble.',
-        gotItWhen_es: 'el pulgar rebota parejo entre las cuerdas 5 y 6 en negras constantes, sin tambalearse.',
-        practice: { type: 'playSeq', label: 'Thumb alternation on C — strings 5 & 6', label_es: 'Alternancia del pulgar en C — cuerdas 5 y 6', bpm: 60, notes: [48, 43, 48, 43] } },
+        gotItWhen: 'the thumb bounces evenly between the A and low E strings in steady quarter notes, with no wobble.',
+        gotItWhen_es: 'el pulgar rebota parejo entre las cuerdas La y Mi grave en negras constantes, sin tambalearse.',
+        practice: { type: 'playSeq', label: 'Thumb alternation on C — the A and low E strings', label_es: 'Alternancia del pulgar en C — las cuerdas La y Mi grave', bpm: 60, notes: [48, 43, 48, 43] } },
       { id: 'm12w1-s2', text: 'Play a pinch (thumb + finger together) on the downbeat',
         text_es: 'Tocar un pellizco (pulgar + dedo juntos) en el tiempo fuerte',
         gotItWhen: 'both notes of the pinch land together as one, perfectly in sync, right on the downbeat.',
@@ -714,8 +714,8 @@ SETS.push(
             steps: [
               {
                 label: 'Try melody on top over C', label_es: 'Prueba la melodía arriba sobre C',
-                text: 'Now try it: over a C chord, keep the thumb on steady quarters and pick a 3-note melody on strings 1–2 on top.',
-                text_es: 'Ahora pruébalo: sobre un acorde de C, mantén el pulgar en negras constantes y puntea una melodía de 3 notas en las cuerdas 1–2 encima.',
+                text: 'Now try it: over a C chord, keep the thumb on steady quarters and pick a 3-note melody on the high e and B strings on top.',
+                text_es: 'Ahora pruébalo: sobre un acorde de C, mantén el pulgar en negras constantes y puntea una melodía de 3 notas en las cuerdas mi aguda y Si encima.',
                 hint: 'Fingerpicking makes our regional-Mexican songs sound MORE authentic than power chords did — sierreño is an acoustic, fingerpicked tradition, and this is its real tone.',
                 hint_es: 'El fingerpicking hace que nuestras canciones de música regional mexicana suenen MÁS auténticas de lo que sonaban con acordes de potencia — el sierreño es una tradición acústica de fingerpicking, y este es su verdadero sonido.',
                 skills: [4, 5],
@@ -804,8 +804,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge 3 — 3-Note Melody over C', label_es: 'Reto 3 — Melodía de 3 notas sobre C',
-                text: 'Over a C chord:<ul><li>Keep the thumb going in steady quarters.</li><li>Pick a 3-note melody on strings 1–2 above it.</li></ul>You\'ve got it when: the thumb never wavers while the melody rides on top.',
-                text_es: 'Sobre un acorde de C:<ul><li>Mantén el pulgar sonando en negras constantes.</li><li>Puntea una melodía de 3 notas en las cuerdas 1–2 encima.</li></ul>Lo tienes cuando: el pulgar nunca vacila mientras la melodía viaja arriba.',
+                text: 'Over a C chord:<ul><li>Keep the thumb going in steady quarters.</li><li>Pick a 3-note melody on the high e and B strings above it.</li></ul>You\'ve got it when: the thumb never wavers while the melody rides on top.',
+                text_es: 'Sobre un acorde de C:<ul><li>Mantén el pulgar sonando en negras constantes.</li><li>Puntea una melodía de 3 notas en las cuerdas mi aguda y Si encima.</li></ul>Lo tienes cuando: el pulgar nunca vacila mientras la melodía viaja arriba.',
                 hint: 'Two jobs, one hand — the requinto texture in short.',
                 hint_es: 'Dos trabajos, una mano — la textura del requinto en pocas palabras.',
                 stuck: 'Isolate the thumb alone first, then add just one melody note at a time.',

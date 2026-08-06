@@ -5,6 +5,50 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-06 — Strings called by name everywhere, clearer Modules 1–6 after a student walkthrough
+
+### Changed
+
+- **Strings are now always called by their names** — low E, A, D, G, B, high e
+  (Mi grave … mi aguda in Spanish) — instead of "string 6" / "string 1", across
+  every module. You no longer need to know the numbering convention to follow a
+  hands-on instruction like "vibrato on the 5th fret of the high e string." The
+  only numbers left are in the two Module 7 questions that teach how chord
+  charts count strings, and each one now says which string the number means.
+- **Watchtower's "real rhythm" challenge (Module 4) is now an ear challenge** —
+  instead of going off to find a TAB with rhythm stems, you count along with the
+  record and catch where each chord lands: in the verses the G sneaks in on
+  beat 4, and in the chorus the changes come on beat 3 (the two-beats-per-chord
+  version you already know from Module 3). The play button now plays the verse
+  rhythm.
+- **The Dm chord (Module 5) is now taught on its own** — the hint walks the
+  actual shape (a small triangle on the top three strings) instead of comparing
+  it to D major, which you only meet in the next Set.
+- **One tempo ladder for Module 3's chord changes:** the skill check-off is
+  60 BPM, the Module Review keeps 60 (changes) and 80 (hold), and the
+  assessment is 80 BPM held for 15 seconds — three steps up, no more mixed
+  numbers.
+- **Every Module 5 practice station now starts with the tuning warm-up**, same
+  as Modules 4 and 6 — Sets 2, 3, and 4 had been skipping the ritual.
+- **Clearer first steps in Modules 1 and 2:** Module 2's first video question
+  now asks about the open strings the video actually covers; the "what comes
+  after G?" question says "in the musical alphabet" so G# doesn't trick you;
+  the note-chart steps now show the fret-by-fret note map right in the step;
+  and Module 1's "first fretted note" no longer pretends the riff preview
+  didn't happen.
+- **The Tuner and Metronome directions now say where the tools actually live**
+  — at the bottom of the left menu (behind ☰ on a phone) — instead of "the
+  corner button."
+- **The header now fits on phones** — one compact row instead of a tall
+  stack of wrapped text under overlapping buttons.
+- Small fixes from the same walkthrough: the G/B card explains why the diagram
+  ✕'s the low E while your finger stays planted; Sweet Child's level-up points
+  to Set 2 (where the down-up strum lives); a Module 6 strum-pattern answer
+  choice no longer miscounts the strums; the Module 4 scale-degree warm-up
+  explains what "♭3" means on the spot; the Finger Gym stretch no longer
+  claims to be the power-chord shape; and Module 1's assessment no longer
+  grades a wrist technique the module never taught.
+
 ## 2026-08-05 — Readiness checkboxes replace ratings, floating backing-track button
 
 ### Changed

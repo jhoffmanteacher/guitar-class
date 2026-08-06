@@ -48,22 +48,22 @@ SETS.push(
                 hint: 'Play along on your guitar as he goes through each note on both strings. Pause and find each note before he names it.',
                 hint_es: 'Toca junto con él en tu guitarra mientras recorre cada nota en las dos cuerdas. Pausa y encuentra cada nota antes de que él la nombre.',
                 skills: [1, 2, 3],
-                response: { type: 'mc', prompt: 'On the low E string, which note is at fret 5?',
-                  prompt_es: 'En la cuerda Mi grave, ¿qué nota está en el traste 5?',
+                response: { type: 'mc', prompt: 'From thickest string to thinnest, the open notes are:',
+                  prompt_es: 'De la cuerda más gruesa a la más delgada, las notas al aire son:',
                   answer: 0,
-                  explain: 'Fret 5 of the low E is A — the same pitch as the open A string right next to it.',
-                  explain_es: 'El traste 5 de la Mi grave es A — el mismo tono que la cuerda La al aire, justo al lado.',
+                  explain: 'Thickest to thinnest: E · A · D · G · B · e. The fat low E sits nearest your face; the thin little e sits nearest the floor.',
+                  explain_es: 'De la más gruesa a la más delgada: E · A · D · G · B · e. La Mi grave gruesa queda más cerca de tu cara; la mi aguda delgada queda más cerca del piso.',
                   choices: [
-                  'A',
-                  'D',
-                  'G',
-                  'F'
+                  'E · A · D · G · B · e',
+                  'e · B · G · D · A · E',
+                  'E · B · G · D · A · e',
+                  'E · A · D · G · B · C'
                 ],
                   choices_es: [
-                  'A',
-                  'D',
-                  'G',
-                  'F'
+                  'E · A · D · G · B · e',
+                  'e · B · G · D · A · E',
+                  'E · B · G · D · A · e',
+                  'E · A · D · G · B · C'
                 ] }
               },
               {
@@ -95,15 +95,15 @@ SETS.push(
             ]
           },
           {
-            title: 'Play along with your note chart',
-            title_es: 'Toca junto con tu tabla de notas',
+            title: 'Play along with the note map',
+            title_es: 'Toca junto con el mapa de notas',
             steps: [
               {
-                label: 'Low E notes with your chart', label_es: 'Notas de la Mi grave con tu tabla',
-                text: 'Play-along preview:<ol><li>Keep your note-name chart open.</li><li>Play up the low E string slowly with the audio, frets 0–12 — E · F · G · A · B · C · D · E — saying each name aloud.</li></ol>Lean on the chart here; you\'ll do it from memory at the practice station.<span class="step-figure"><img src="img/m2-alphabet-loop-en.svg" alt="Diagram of the musical alphabet A to G arranged in a loop, with an arrow showing that after G it starts over at A."></span>',
-                text_es: 'Adelanto para tocar junto:<ol><li>Mantén abierta tu tabla de nombres de notas.</li><li>Toca despacio hacia arriba en la cuerda Mi grave junto con el audio, trastes 0–12 — E · F · G · A · B · C · D · E — diciendo cada nombre en voz alta.</li></ol>Apóyate en la tabla aquí; lo harás de memoria en la estación de práctica.<span class="step-figure"><img src="img/m2-alphabet-loop-es.svg" alt="Diagrama del alfabeto musical de A a G en un círculo, con una flecha que muestra que después de G se empieza de nuevo en A."></span>',
-                hint: 'Slow is fine. Right now the goal is connecting each name to its spot — use the chart freely. Why the names land where they do: twelve frets take you through twelve notes, one fret at a time, and one fret up from a note is that note SHARP (F to F#). But E–F and B–C have nothing in between them — the gap there is one fret (a half step), while every other gap is two frets (a whole step). That\'s exactly why the naturals bunch up at frets 0–1 (E to F) and again at frets 7–8 (B to C).',
-                hint_es: 'Ir despacio está bien. Ahora mismo la meta es conectar cada nombre con su lugar — usa la tabla libremente. Por qué los nombres caen donde caen: doce trastes te llevan por doce notas, un traste a la vez, y un traste arriba de una nota es esa nota SOSTENIDA (de F a F#). Pero entre E–F y entre B–C no hay nada — ahí la distancia es de un traste (un semitono), mientras que cualquier otra distancia es de dos trastes (un tono). Por eso mismo las notas naturales se juntan en los trastes 0–1 (de E a F) y otra vez en los trastes 7–8 (de B a C).',
+                label: 'Low E notes with the note map', label_es: 'Notas de la Mi grave con el mapa de notas',
+                text: 'Play-along preview:<ol><li>Keep this note map in view — on the low E string, frets 0 · 1 · 3 · 5 · 7 · 8 · 10 · 12 are E · F · G · A · B · C · D · E.</li><li>Play up the low E string slowly with the audio, saying each name aloud.</li></ol>Lean on the map here; you\'ll do it from memory at the practice station.<span class="step-figure"><img src="img/m2-alphabet-loop-en.svg" alt="Diagram of the musical alphabet A to G arranged in a loop, with an arrow showing that after G it starts over at A."></span>',
+                text_es: 'Adelanto para tocar junto:<ol><li>Mantén este mapa de notas a la vista — en la cuerda Mi grave, los trastes 0 · 1 · 3 · 5 · 7 · 8 · 10 · 12 son E · F · G · A · B · C · D · E.</li><li>Toca despacio hacia arriba en la cuerda Mi grave junto con el audio, diciendo cada nombre en voz alta.</li></ol>Apóyate en el mapa aquí; lo harás de memoria en la estación de práctica.<span class="step-figure"><img src="img/m2-alphabet-loop-es.svg" alt="Diagrama del alfabeto musical de A a G en un círculo, con una flecha que muestra que después de G se empieza de nuevo en A."></span>',
+                hint: 'Slow is fine. Right now the goal is connecting each name to its spot — use the map freely. Why the names land where they do: twelve frets take you through twelve notes, one fret at a time, and one fret up from a note is that note SHARP (F to F#). But E–F and B–C have nothing in between them — the gap there is one fret (a half step), while every other gap is two frets (a whole step). That\'s exactly why the naturals bunch up at frets 0–1 (E to F) and again at frets 7–8 (B to C).',
+                hint_es: 'Ir despacio está bien. Ahora mismo la meta es conectar cada nombre con su lugar — usa el mapa libremente. Por qué los nombres caen donde caen: doce trastes te llevan por doce notas, un traste a la vez, y un traste arriba de una nota es esa nota SOSTENIDA (de F a F#). Pero entre E–F y entre B–C no hay nada — ahí la distancia es de un traste (un semitono), mientras que cualquier otra distancia es de dos trastes (un tono). Por eso mismo las notas naturales se juntan en los trastes 0–1 (de E a F) y otra vez en los trastes 7–8 (de B a C).',
                 skills: [2, 5],
                 playSeq: { label: 'Play all', label_es: 'Tocar todo', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] },
                 response: { type: 'mc', prompt: 'On the low E string, what note is at fret 10?',
@@ -205,8 +205,8 @@ SETS.push(
                 label: 'Ear: name that riff', label_es: 'Oído: adivina el riff',
                 text: 'Name That Riff (try it!): pick out the "Seven Nation Army" or "Smoke on the Water" main riff (a riff = a short musical phrase that repeats) by ear on the low E string. No score — just try it.',
                 text_es: 'Adivina el riff (¡pruébalo!): saca de oído el riff principal de "Seven Nation Army" o "Smoke on the Water" (un riff = una frase musical corta que se repite) en la cuerda Mi grave. Sin puntaje — solo pruébalo.',
-                hint: 'Use the note-name chart. Don\'t worry about getting it perfect — the attempt trains your ear.',
-                hint_es: 'Usa la tabla de nombres de notas. No te preocupes por hacerlo perfecto — el intento entrena tu oído.',
+                hint: 'Use the low-E note map from the play-along step (frets 0 · 1 · 3 · 5 · 7 · 8 · 10 · 12). Don\'t worry about getting it perfect — the attempt trains your ear.',
+                hint_es: 'Usa el mapa de notas de la Mi grave del paso para tocar junto (trastes 0 · 1 · 3 · 5 · 7 · 8 · 10 · 12). No te preocupes por hacerlo perfecto — el intento entrena tu oído.',
               }
             ]
           },
@@ -357,8 +357,8 @@ SETS.push(
         text_es: 'Recitar el alfabeto musical (A B C D E F G) de memoria',
         gotItWhen: 'you can say A B C D E F G — and what comes after G — without pausing or looking at anything.',
         gotItWhen_es: 'puedes decir A B C D E F G — y lo que viene después de G — sin pausar ni mirar nada.',
-        practice: { type: 'mc', prompt: 'What note comes after G?',
-          prompt_es: '¿Qué nota viene después de G?',
+        practice: { type: 'mc', prompt: 'In the musical alphabet, what note (letter) comes after G?',
+          prompt_es: 'En el alfabeto musical, ¿qué nota (letra) viene después de G?',
           choices: ['G#', 'A', 'A#', 'It starts over at C'], choices_es: ['G#', 'A', 'A#', 'Vuelve a empezar en C'], answer: 1,
           explain: 'The musical alphabet only runs A through G, then loops straight back to A. G# is a real note, but it sits between G and A — it isn\'t the next letter.',
           explain_es: 'El alfabeto musical solo va de A a G, y luego vuelve directo a A. G# sí es una nota real, pero está entre G y A — no es la siguiente letra.' } },
@@ -538,8 +538,8 @@ SETS.push(
                 label: 'Read TAB: play a song', label_es: 'Lee el TAB: toca una canción',
                 text: 'Try reading the TAB for "Mary Had a Little Lamb". Play it through at least once — slow and clean. Click the song below to open its TAB.',
                 text_es: 'Intenta leer el TAB de "Mary Had a Little Lamb". Tócalo completo al menos una vez — despacio y limpio. Haz clic en la canción abajo para abrir su TAB.',
-                hint: 'If you get stuck on a note, use your note-name chart to find it. TAB numbers = fret numbers.',
-                hint_es: 'Si te atascas en una nota, usa tu tabla de nombres de notas para encontrarla. Los números del TAB = números de traste.',
+                hint: 'If you get stuck on a note, remember: TAB numbers = fret numbers. Count up the A string to that fret and play it.',
+                hint_es: 'Si te atascas en una nota, recuerda: los números del TAB = números de traste. Cuenta hacia arriba en la cuerda La hasta ese traste y tócala.',
                 skills: [4, 5],
                 tabs: [
                   {

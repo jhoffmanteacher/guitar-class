@@ -111,10 +111,10 @@ SETS.push(
             steps: [
           {
             label: 'Wrap-up: today\'s hardest part', label_es: 'Cierre: lo más difícil de hoy',
-            text: 'Station Wrap-Up — pause and think: which felt harder today — getting both notes to ring clean, or stopping the other strings from sounding? What started to help?',
-            text_es: 'Cierre de la estación — pausa y piensa: ¿qué se sintió más difícil hoy — lograr que las dos notas suenen limpias, o evitar que sonaran las otras cuerdas? ¿Qué empezó a ayudarte?',
-            response: { type: 'short', placeholder: 'e.g. muting — my strumming hand kept letting the high strings ring',
-              placeholder_es: 'p. ej. silenciar — mi mano de rasgueo seguía dejando sonar las cuerdas agudas' }
+            text: 'Station Wrap-Up — pause and think: which felt harder today — getting both notes to ring clean, or building the shape quickly from the diagram? What started to help?',
+            text_es: 'Cierre de la estación — pausa y piensa: ¿qué se sintió más difícil hoy — lograr que las dos notas suenen limpias, o armar la forma rápido a partir del diagrama? ¿Qué empezó a ayudarte?',
+            response: { type: 'short', placeholder: 'e.g. building the shape — my fingers kept landing one string off',
+              placeholder_es: 'p. ej. armar la forma — mis dedos seguían cayendo una cuerda al lado' }
           }
             ]
           }
@@ -284,8 +284,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 7 — "Watchtower" Loop (your assessment piece)', label_es: 'Reto 7 — Vuelta de "Watchtower" (tu pieza de evaluación)',
-            text: '<ul><li>Play A5–G5–F5–G5, two beats per chord at 60 BPM — this is exactly how the record cycles.</li></ul>You\'ve got it when: four times through, changing on the beat every time, with no stops. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
-            text_es: '<ul><li>Toca A5–G5–F5–G5, dos tiempos por acorde a 60 BPM — así es exactamente como cicla la grabación.</li></ul>Lo tienes cuando: cuatro veces seguidas, cambiando a tiempo cada vez, sin detenerte. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
+            text: '<ul><li>Play A5–G5–F5–G5, two beats per chord at 60 BPM — this is exactly how the record\'s chorus cycles.</li></ul>You\'ve got it when: four times through, changing on the beat every time, with no stops. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 3 of 5</a>.',
+            text_es: '<ul><li>Toca A5–G5–F5–G5, dos tiempos por acorde a 60 BPM — así es exactamente como cicla el coro de la grabación.</li></ul>Lo tienes cuando: cuatro veces seguidas, cambiando a tiempo cada vez, sin detenerte. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
             hint: 'A5 = 5th fret E string, G5 = 3rd fret E string, F5 = 1st fret E string. Shift smoothly — aim to land exactly on beat 1. (The original song uses an Am chord, but as a power chord it\'s just A5 — no major or minor.) This is your Set 1 check-off loop — record a lap and listen back.',
             hint_es: 'A5 = traste 5 de la cuerda Mi, G5 = traste 3 de la cuerda Mi, F5 = traste 1 de la cuerda Mi. Cambia con suavidad — apunta a caer exactamente en el tiempo 1. (La canción original usa un acorde de Am, pero como acorde de potencia es solo A5 — sin mayor ni menor.) Esta es tu vuelta de verificación de la Unidad 1 — graba una vuelta y escúchala después.',
             stuck: 'Loop just A5–G5 (frets 5 and 3) until that change is clean, then add F5.',
@@ -853,19 +853,19 @@ SETS.push(
     },
 
     assessment: {
-      goal: 'Module-end (three tasks): (1) Play a core-song excerpt to the metronome — e.g., the "Seven Nation Army" riff, "All Along the Watchtower"\'s A5–G5–F5, or "Sweet Child"\'s D5–C5–G5 (which switches between E- and A-string roots on the same fret) — at 60 BPM, then holding 80 BPM for at least 15 seconds. (2) Read a three-chord (I–IV–V) progression from chord symbols / TAB using a named strumming pattern (straight-eighths or split strum), and name power chords from a chord chart. (3) Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes.',
-      goal_es: 'Fin de módulo (tres tareas): (1) Toca un fragmento de canción principal con el metrónomo — p. ej., el riff de "Seven Nation Army", el A5–G5–F5 de "All Along the Watchtower", o el D5–C5–G5 de "Sweet Child" (que cambia entre raíces de las cuerdas Mi y La en el mismo traste) — a 60 BPM, y luego sosteniendo 80 BPM por al menos 15 segundos. (2) Lee una progresión de tres acordes (I–IV–V) a partir de símbolos de acorde / TAB usando un patrón de rasgueo nombrado (corcheas rectas o rasgueo dividido), y nombra acordes de potencia a partir de un diagrama de acordes. (3) Aplaude y cuenta un ritmo de 4 compases usando redondas, blancas, negras y corcheas.',
-      performance: 'Record yourself: play a core-song excerpt with the metronome — changes on beat 1 at 60 BPM, then hold 80 BPM for 15 seconds; read a three-chord (I–IV–V) progression from chord symbols with your named strum; then clap and count a 4-bar rhythm. Listen back and note one thing to improve.',
-      selfCheck: 'Can you change chords on beat 1 at 60 BPM and hold 80 BPM for 15 seconds? Can you read a I–IV–V progression from chord symbols and name power chords from a chart? Can you clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes?',
-      selfCheck_es: '¿Puedes cambiar de acorde en el tiempo 1 a 60 BPM y sostener 80 BPM por 15 segundos? ¿Puedes leer una progresión I–IV–V a partir de símbolos de acorde y nombrar acordes de potencia a partir de un diagrama? ¿Puedes aplaudir y contar un ritmo de 4 compases usando redondas, blancas, negras y corcheas?',
+      goal: 'Module-end (three tasks): (1) Play a core-song excerpt to the metronome — e.g., the "Seven Nation Army" riff, "All Along the Watchtower"\'s A5–G5–F5, or "Sweet Child"\'s D5–C5–G5 (which switches between E- and A-string roots on the same fret) — at 80 BPM, holding it for at least 15 seconds. (2) Read a three-chord (I–IV–V) progression from chord symbols / TAB using a named strumming pattern (straight-eighths or split strum), and name power chords from a chord chart. (3) Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes.',
+      goal_es: 'Fin de módulo (tres tareas): (1) Toca un fragmento de canción principal con el metrónomo — p. ej., el riff de "Seven Nation Army", el A5–G5–F5 de "All Along the Watchtower", o el D5–C5–G5 de "Sweet Child" (que cambia entre raíces de las cuerdas Mi y La en el mismo traste) — a 80 BPM, sosteniéndolo por al menos 15 segundos. (2) Lee una progresión de tres acordes (I–IV–V) a partir de símbolos de acorde / TAB usando un patrón de rasgueo nombrado (corcheas rectas o rasgueo dividido), y nombra acordes de potencia a partir de un diagrama de acordes. (3) Aplaude y cuenta un ritmo de 4 compases usando redondas, blancas, negras y corcheas.',
+      performance: 'Record yourself: play a core-song excerpt with the metronome — changes on beat 1 at 80 BPM, held for at least 15 seconds; read a three-chord (I–IV–V) progression from chord symbols with your named strum; then clap and count a 4-bar rhythm. Listen back and note one thing to improve.',
+      selfCheck: 'Can you change chords on beat 1 and hold 80 BPM for at least 15 seconds? Can you read a I–IV–V progression from chord symbols and name power chords from a chart? Can you clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes?',
+      selfCheck_es: '¿Puedes cambiar de acorde en el tiempo 1 y sostener 80 BPM por al menos 15 segundos? ¿Puedes leer una progresión I–IV–V a partir de símbolos de acorde y nombrar acordes de potencia a partir de un diagrama? ¿Puedes aplaudir y contar un ritmo de 4 compases usando redondas, blancas, negras y corcheas?',
       standards: ['Pr.4a', 'Pr.5b', 'Pr.6a']
     },
 
     skills: [
-      { id: 'm3w2-s1', text: 'Change power chords on beat 1 at 70 BPM',
-        text_es: 'Cambiar acordes de potencia en el tiempo 1 a 70 BPM',
-        gotItWhen: 'your chord changes land exactly on beat 1 with the metronome at 70 BPM and you don\'t need to pause or restart.',
-        gotItWhen_es: 'tus cambios de acorde caen exactamente en el tiempo 1 con el metrónomo a 70 BPM y no necesitas pausar ni reiniciar.',
+      { id: 'm3w2-s1', text: 'Change power chords on beat 1 at 60 BPM',
+        text_es: 'Cambiar acordes de potencia en el tiempo 1 a 60 BPM',
+        gotItWhen: 'your chord changes land exactly on beat 1 with the metronome at 60 BPM and you don\'t need to pause or restart.',
+        gotItWhen_es: 'tus cambios de acorde caen exactamente en el tiempo 1 con el metrónomo a 60 BPM y no necesitas pausar ni reiniciar.',
         practice: { type: 'pr', prompt: '<ol><li>Loop A5 → G5, changing on beat 1 of every bar.</li><li>Start at 60 BPM and raise the metronome +5 at a time.</li><li>Log your fastest BPM with clean changes.</li></ol>',
           prompt_es: '<ol><li>Repite A5 → G5, cambiando en el tiempo 1 de cada compás.</li><li>Empieza a 60 BPM y sube el metrónomo de 5 en 5.</li><li>Anota tu BPM más rápido con cambios limpios.</li></ol>',
           unit: 'BPM', placeholder: 'e.g. 75 — try for a higher number next session', placeholder_es: 'p. ej. 75 — intenta superarlo la próxima sesión' } },
@@ -977,12 +977,12 @@ MODULE_REVIEWS[3] = {
       text_es: 'Puedo aplaudir y contar un ritmo de 4 compases y nombrar cuáles notas son redondas, blancas, negras y corcheas', set: 'm3w2' }
   ],
   assessItems: [
-    'Play a core-song excerpt ("Seven Nation Army", "All Along the Watchtower"\'s A5–G5–F5, or "Sweet Child"\'s D5–C5–G5 — which switches between E- and A-string roots on the same fret) with changes on beat 1 at 60 BPM, unused strings muted the whole way, then hold 80 BPM for 15 seconds',
+    'Play a core-song excerpt ("Seven Nation Army", "All Along the Watchtower"\'s A5–G5–F5, or "Sweet Child"\'s D5–C5–G5 — which switches between E- and A-string roots on the same fret) with changes on beat 1 at 80 BPM, unused strings muted the whole way, holding it for at least 15 seconds',
     'Read a three-chord (I–IV–V) progression from chord symbols / TAB with a named strumming pattern (straight eighths or the split strum), and name power chords from a chord chart',
     'Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes'
   ],
   assessItems_es: [
-    'Toca un fragmento de canción principal ("Seven Nation Army", el A5–G5–F5 de "All Along the Watchtower", o el D5–C5–G5 de "Sweet Child" — que cambia entre raíces de las cuerdas Mi y La en el mismo traste) con cambios en el tiempo 1 a 60 BPM, con las cuerdas que no usas silenciadas todo el tiempo, y luego sostén 80 BPM por 15 segundos',
+    'Toca un fragmento de canción principal ("Seven Nation Army", el A5–G5–F5 de "All Along the Watchtower", o el D5–C5–G5 de "Sweet Child" — que cambia entre raíces de las cuerdas Mi y La en el mismo traste) con cambios en el tiempo 1 a 80 BPM, con las cuerdas que no usas silenciadas todo el tiempo, sosteniéndolo por al menos 15 segundos',
     'Lee una progresión de tres acordes (I–IV–V) a partir de símbolos de acorde / TAB con un patrón de rasgueo nombrado (corcheas rectas o el rasgueo dividido), y nombra acordes de potencia a partir de un diagrama de acordes',
     'Aplaude y cuenta un ritmo de 4 compases usando redondas, blancas, negras y corcheas'
   ],

@@ -627,8 +627,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Reach across strings: index on the low E at fret 2, pinky on the A string at fret 5. Both notes ring together if you can hold the shape — this is what a power chord will feel like.\nYou\'ve got it when: both notes ring at the same time, four times in a row.',
-        text_es: 'Estiramiento entre cuerdas: índice en la cuerda Mi grave, traste 2, y meñique en la cuerda La, traste 5. Las dos notas suenan juntas si puedes sostener la forma — así se va a sentir un acorde de poder.\nLo tienes cuando: las dos notas suenan al mismo tiempo, cuatro veces seguidas.',
+        text: 'Reach across strings: index on the low E at fret 2, pinky on the A string at fret 5. Both notes ring together if you can hold the shape — a stretch that builds the reach and control you\'ll need for power chords (their real shape is a bit different; Module 3 teaches it).\nYou\'ve got it when: both notes ring at the same time, four times in a row.',
+        text_es: 'Estiramiento entre cuerdas: índice en la cuerda Mi grave, traste 2, y meñique en la cuerda La, traste 5. Las dos notas suenan juntas si puedes sostener la forma — un estiramiento que construye el alcance y el control que vas a necesitar para los acordes de potencia (su forma real es un poco distinta; el Módulo 3 la enseña).\nLo tienes cuando: las dos notas suenan al mismo tiempo, cuatro veces seguidas.',
         tab: {
           caption: 'Across the strings · both notes ringing',
           caption_es: 'Entre cuerdas · las dos notas suenan',

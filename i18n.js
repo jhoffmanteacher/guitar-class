@@ -97,7 +97,7 @@
                                                treatment as riff/vamp/chug)
        double-stop (two notes played together) → doble nota / dobles notas
        sub-barre (ring-finger mini-barre inside a → sub-cejilla
-         full barre shape, e.g. strings 4-3-2)
+         full barre shape, e.g. the D·G·B strings)
        fingerpicking / fingerstyle          → fingerpicking / fingerstyle
                                                (kept — same loanword
                                                treatment as riff/vamp/chug)
@@ -483,8 +483,8 @@
     'routine.foot':          { en: "Built from this module's sets — short on time? Do steps 1–3 — that's still good.",
                                 es: 'Armada con las unidades de este módulo — ¿poco tiempo? Haz los pasos 1–3 — ya es una buena práctica.' },
     'routine.tuneUp':        { en: 'Tune up', es: 'Afina' },
-    'routine.tuneUpBody':    { en: '— open the Tuner (corner button) and tune all six strings until the tuner turns green.',
-                                es: '— abre el Afinador (botón de la esquina) y afina las seis cuerdas hasta que el afinador se ponga verde.' },
+    'routine.tuneUpBody':    { en: '— open the Tuner (in the tools at the bottom of the left menu) and tune all six strings until the tuner turns green.',
+                                es: '— abre el Afinador (en las herramientas al final del menú izquierdo) y afina las seis cuerdas hasta que el afinador se ponga verde.' },
     'routine.fingerGym':     { en: 'Finger Gym', es: 'Gimnasia de dedos' },
     'routine.skillDrill':    { en: 'Skill drill', es: 'Ejercicio de destreza' },
     'routine.chordScaleWork':{ en: 'Chord / scale work', es: 'Trabajo de acordes / escalas' },
@@ -758,8 +758,8 @@
     // ── ⚡ Daily 5 modal ──
     'daily5.title':          { en: 'Daily 5 — today’s warm-up', es: 'Daily 5 — el calentamiento de hoy' },
     'daily5.closeAria':      { en: 'Close Daily 5', es: 'Cerrar el Daily 5' },
-    'daily5.tuneUpBody':     { en: '— tune all six strings until the tuner turns green (use the corner Tuner).',
-                               es: '— afina las seis cuerdas hasta que el afinador se ponga verde (usa el Afinador de la esquina).' },
+    'daily5.tuneUpBody':     { en: '— tune all six strings until the tuner turns green (use the Tuner in the tools at the bottom of the left menu).',
+                               es: '— afina las seis cuerdas hasta que el afinador se ponga verde (usa el Afinador en las herramientas al final del menú izquierdo).' },
     'daily5.warmUp':         { en: 'Warm-up', es: 'Calentamiento' },
     'daily5.todaysDrill':    { en: 'Today’s drill', es: 'El ejercicio de hoy' },
     'daily5.fromModule':     { en: 'from Module {num}, {set}:', es: 'del Módulo {num}, {set}:' },
@@ -1692,10 +1692,10 @@
       es: 'Cejilla completa de F: pisa, rasguea una vez, sostén unos 4 segundos, y luego relaja la mano por completo. Repite hasta que termine el tiempo.' },
     'games.rr.card25': { en: 'Make the E-shape barre at fret 1 (that is F), then slide the whole shape up 3 frets and back, strumming once at each stop.',
       es: 'Haz la cejilla en forma de E en el traste 1 (eso es F), y luego desliza toda la forma 3 trastes hacia arriba y de regreso, rasgueando una vez en cada parada.' },
-    'games.rr.card26': { en: 'Fingerpick Am: thumb plays string 5, then your first, second, and third fingers play strings 3, 2, 1 — one at a time, one note per click.',
-      es: 'Fingerpicking en Am: el pulgar toca la cuerda 5, y luego tus dedos índice, medio y anular tocan las cuerdas 3, 2, 1 — uno a la vez, una nota por clic.' },
-    'games.rr.card27': { en: 'Hold Em and let your thumb walk: string 6, string 4, string 6, string 4 — one pluck per click, steady like a heartbeat.',
-      es: 'Sostén Em y deja que tu pulgar camine: cuerda 6, cuerda 4, cuerda 6, cuerda 4 — un pulso por clic, constante como un latido.' },
+    'games.rr.card26': { en: 'Fingerpick Am: thumb plays the A string, then your first, second, and third fingers play the G, B, and high e strings — one at a time, one note per click.',
+      es: 'Fingerpicking en Am: el pulgar toca la cuerda La, y luego tus dedos índice, medio y anular tocan las cuerdas Sol, Si y mi aguda — uno a la vez, una nota por clic.' },
+    'games.rr.card27': { en: 'Hold Em and let your thumb walk: the low E string, the D string, the low E string, the D string — one pluck per click, steady like a heartbeat.',
+      es: 'Sostén Em y deja que tu pulgar camine: la cuerda Mi grave, la cuerda Re, la cuerda Mi grave, la cuerda Re — un pulso por clic, constante como un latido.' },
     'games.rr.card28': { en: 'Pick a dot fret — 3, 5, 7, or 9. Pluck that fret on all 6 strings, thickest to thinnest, saying each note’s name out loud as you go. Made the trip? Pick a new dot fret and go again.',
       es: 'Elige un traste marcado — 3, 5, 7 o 9. Pulsa ese traste en las 6 cuerdas, de la más gruesa a la más fina, diciendo en voz alta el nombre de cada nota. ¿Terminaste el recorrido? Elige otro traste marcado y hazlo de nuevo.' },
     'games.rr.card29': { en: 'Play the first four notes of the "Seven Nation Army" riff, then say each one the way you’d write it in TAB — string, then fret (like “A string, fret 7”). Play it once more to check yourself.',

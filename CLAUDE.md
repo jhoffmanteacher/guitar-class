@@ -149,6 +149,13 @@ got-it-when styling are both render-time, so new cards inherit them and neither
 can regress. Reach for the renderer first whenever a change is about how
 something looks or is ordered rather than what it says.
 
+**Strings are named, never numbered, in student-facing text** (Jonathan,
+2026-08-06): low E · A · D · G · B · high e; ES uses solfège (cuerda Mi grave …
+cuerda mi aguda). Chord-chart shorthand like `xx4432` is notation and stays.
+The only surviving digits are Module 7's two root-naming MCs, each anchored
+"string 6 (the low E)". Enforced by checks.mjs (1j) — new numbered-string prose
+fails the push.
+
 **Paper drills get a digital deck.** Nothing student-facing should ask for
 scissors, index cards or a pen. Three `step.drill` types share one dispatcher:
 `shuffle` (frets on one string, timed), `deck` (any card pile, optional back),
@@ -196,8 +203,12 @@ from Moises; ffmpeg/rubberband only as fallback.
 check chords, keys, and capo claims only. BPM databases disagree with each
 other and the site's tempo numbers are close enough for teaching.
 
-- **All Along the Watchtower** — `Am–G–F–G` loop (power chords `A5–G5–F5–G5`),
-  **two beats per chord**. The map's "Am–G–F" is shorthand.
+- **All Along the Watchtower** — `Am–G–F–G` loop (power chords `A5–G5–F5–G5`).
+  **Chorus: two beats per chord** (change on beat 3) — the version every teaching
+  layer through Module 3 and the Journey page uses. **Verses: the root holds
+  beats 1–3 and each G lands on beat 4** (Jonathan, 2026-08-06); Module 4's
+  "real rhythm" step teaches that distinction by ear. The map's "Am–G–F" is
+  shorthand.
 - **Sweet Child O' Mine** — verse `D–C–G`, **full bar each**, ~123–125 BPM.
 - **Let It Be** — verse `C–G–Am–F`, **two beats per chord**, ~71–76 BPM.
 - **"the cure"** — `Am–C–Dm–F` + `G/B` turnaround, **two felt beats per chord**

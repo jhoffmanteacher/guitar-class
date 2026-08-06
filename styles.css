@@ -1389,13 +1389,25 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 
 .header-mark{flex-shrink:0}
 
-/* ── Design pass: header on small phones ── */
+/* ── Design pass: header on small phones ──
+   The right-hand button row (Find · Español · avatar · name · Sign out) is
+   ~300px wide and can't wrap, so on a 390px phone the title was left ~60px
+   and wrapped one word per line, stacking the header several lines tall
+   under the buttons. Reclaim the space: drop the subtitle and the user's
+   display name (avatar + Sign out remain), clamp the title to two lines,
+   and tighten the gaps. */
 @media (max-width:480px){
-  .header{padding:10px 12px}
-  .header-title{font-size:1.0625rem}
-  .header-sub{font-size:0.75rem;margin-top:1px}
+  .header{padding:10px 12px;gap:8px}
+  .header>div{gap:6px !important;min-width:0}
+  .header>div:first-child{flex:1 1 auto}
+  .header>div:last-child{flex:0 0 auto}
+  .header-title{font-size:1rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .header-sub{display:none}
+  .header .user-name{display:none}
+  .user-area{gap:6px}
   .btn-translate{padding:4px 9px;font-size:0.8125rem}
-  .header-mark{width:22px;height:22px}
+  .btn-out,.btn-sign{padding:4px 9px;font-size:0.8125rem}
+  .header-mark{display:none}
 }
 
 /* ── Design pass: tuner "in tune!" success moment ── */

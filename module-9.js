@@ -1085,8 +1085,8 @@ SETS.push(
                 response: { type: 'mc', prompt: 'On this partial-shape chart, which strings actually ring when you play it?',
                   prompt_es: 'En este diagrama de forma parcial, ¿cuáles cuerdas realmente suenan cuando lo tocas?',
                   answer: 1,
-                  explain: 'An X above a string means don\'t play it. Strings 6, 5, and 4 are X\'d, so only the top three — G, B, and high e — ring out. A partial shape is just a full chord\'s top slice.',
-                  explain_es: 'Una X sobre una cuerda significa que no la toques. Las cuerdas 6, 5 y 4 tienen X, así que solo suenan las tres de arriba — Sol, Si y mi aguda. Una forma parcial es solo la rebanada superior de un acorde completo.',
+                  explain: 'An X above a string means don\'t play it. The three lowest strings — low E, A, and D — are X\'d, so only the top three — G, B, and high e — ring out. A partial shape is just a full chord\'s top slice.',
+                  explain_es: 'Una X sobre una cuerda significa que no la toques. Las tres cuerdas más graves — Mi grave, La y Re — tienen X, así que solo suenan las tres de arriba — Sol, Si y mi aguda. Una forma parcial es solo la rebanada superior de un acorde completo.',
                   choices: ['All six strings, top to bottom', 'Only the three fretted strings', 'Only the strings marked with an X', 'The three lowest strings only'],
                   choices_es: ['Las seis cuerdas, de arriba a abajo', 'Solo las tres cuerdas trasteadas', 'Solo las cuerdas marcadas con X', 'Solo las tres cuerdas más graves'] }
               }
@@ -1143,8 +1143,8 @@ SETS.push(
         gotItWhen_es: 'puedes leer a primera vista una línea de 8 notas que vive completamente en el traste 5 y más arriba, afinada, usando solo el TAB.',
         practice: { type: 'mc', prompt: 'A high-position TAB shows "10" on the B-string line. What is it?',
           prompt_es: 'Un TAB en posición alta muestra "10" en la línea de la cuerda Si. ¿Qué es?',
-          choices: ['One note — B string, fret 10', 'Two notes — fret 1, then fret 0', 'Finger 1, then an open string', 'Strings 1 and 0 played together'],
-          choices_es: ['Una nota — cuerda Si, traste 10', 'Dos notas — traste 1, y luego traste 0', 'Dedo 1, y luego una cuerda al aire', 'Las cuerdas 1 y 0 tocadas juntas'], answer: 0,
+          choices: ['One note — B string, fret 10', 'Two notes — fret 1, then fret 0', 'Finger 1, then an open string', 'Two strings played at the same time'],
+          choices_es: ['Una nota — cuerda Si, traste 10', 'Dos notas — traste 1, y luego traste 0', 'Dedo 1, y luego una cuerda al aire', 'Dos cuerdas tocadas al mismo tiempo'], answer: 0,
           explain: 'Above fret 9, TAB numbers go double-digit — "10" is one fret, not a 1 and a 0. Spacing (or a dash) is what separates two real notes.',
           explain_es: 'Arriba del traste 9, los números del TAB pasan a dos dígitos — "10" es un solo traste, no un 1 y un 0. El espaciado (o un guion) es lo que separa dos notas reales.' } },
       { id: 'm9w3-s2', text: 'Write an accurate 4-bar TAB of a riff I can already play',

@@ -448,13 +448,13 @@ SETS.push(
               explain_es: 'Leyendo "D - DU - UDU" sobre "1 + 2 + 3 + 4 +", el golpe hacia arriba que se salta es el "+" del tiempo 1 — la muñeca sube pero la púa falla a propósito. (El tiempo 3, un golpe hacia abajo, es el otro que se salta.)',
               choices: [
               'The "+" of beat 1',
-              'Beat 2 (the third strum)',
+              'The "+" of beat 2',
               'The "+" of beat 4',
               'Beat 1'
             ],
               choices_es: [
               'El "+" del tiempo 1',
-              'El tiempo 2 (el tercer rasgueo)',
+              'El "+" del tiempo 2',
               'El "+" del tiempo 4',
               'El tiempo 1'
             ] }
@@ -816,8 +816,8 @@ SETS.push(
             label: 'Refresh the C chord', label_es: 'Repasa el acorde C',
             text: 'The progressions today lean on <strong>C</strong> — your shape from Module 5, back again. Form it from the diagram and strum the top five strings (the low E is muted) until it rings clean.',
             text_es: 'Las progresiones de hoy se apoyan en <strong>C</strong> — tu forma del Módulo 5, de vuelta. Fórmala a partir del diagrama y rasguea las cinco cuerdas más agudas (la Mi grave está silenciada) hasta que suene limpio.',
-            hint: 'C skips the lowest string (the X on string 6). Your ring finger reaches to the 3rd fret of the A string — a big stretch at first.',
-            hint_es: 'C se salta la cuerda más grave (la X en la cuerda 6). Tu dedo anular se estira hasta el traste 3 de la cuerda La — un gran estiramiento al principio.',
+            hint: 'C skips the lowest string (the X on the low E). Your ring finger reaches to the 3rd fret of the A string — a big stretch at first.',
+            hint_es: 'C se salta la cuerda más grave (la X en la cuerda Mi grave). Tu dedo anular se estira hasta el traste 3 de la cuerda La — un gran estiramiento al principio.',
             chords: [
               { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 }
             ]

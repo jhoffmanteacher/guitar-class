@@ -349,6 +349,37 @@ function checkMcAnswerTells(allSets) {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1j. NUMBERED STRINGS IN STUDENT-FACING TEXT — course convention
+   (Jonathan, 2026-08-06): strings are named (low E · A · D · G · B ·
+   high e; ES solfège cuerda Mi grave … mi aguda), never numbered. A
+   2026-08-06 sweep converted ~90 instances across modules 4–8 and 12.
+   The ONLY allowed form is a digit immediately anchored to its name —
+   "string 6 (the low E)" / "cuerda 5 (la La)" — used where a card
+   deliberately teaches chart numbering (two Module 7 MCs). Chord
+   shorthand like xx4432 carries no "string/cuerda" word and never
+   matches. Fix by naming the string, not by adding an anchor.
+   ════════════════════════════════════════════════════════════════════ */
+function checkNumberedStrings() {
+  head('1j. Numbered strings in student-facing text');
+  const RE = /\b(?:string|strings|cuerda|cuerdas) [0-6]\b/gi;
+  let bad = 0, anchored = 0;
+  for (const file of [...MODULE_FILES, 'class-activities.js', 'i18n.js']) {
+    const lines = readFileSync(join(ROOT, file), 'utf8').split('\n');
+    lines.forEach((line, li) => {
+      for (const m of line.matchAll(RE)) {
+        const after = line.slice(m.index + m[0].length);
+        const before = line.slice(Math.max(0, m.index - 12), m.index);
+        if (/^ \((?:the|la|el) /.test(after)) { anchored++; continue; }   // "string 6 (the low E)" teaching anchor
+        if (/(?:\b[ADGBEadgbe]|aguda|grave)\s$/.test(before)) continue;   // "the A string 4 times" — named string + a count, not a numbered string
+        err(`${file}:${li + 1}: numbered string in student-facing text — "${line.slice(Math.max(0, m.index - 20), m.index + m[0].length + 20).trim()}" (use the string's name)`);
+        problems++; bad++;
+      }
+    });
+  }
+  if (bad === 0) ok(`no numbered strings in student-facing text (${anchored} anchored teaching exception${anchored === 1 ? '' : 's'} allowed)`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1i. WATCH-RANGE LABELS ↔ URL TIME PARAMS — lesson links carry a
    "(M:SS–M:SS)" label (inside the anchor text or right after </a>)
    telling students what part of the video the card uses, and the URL
@@ -1371,6 +1402,7 @@ async function liveCheck() {
   checkMissingI18nKeys(i18nTable);
   checkDuplicateGlobals();
   checkWatchRanges();
+  checkNumberedStrings();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();
