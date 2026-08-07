@@ -227,8 +227,24 @@ other and the site's tempo numbers are close enough for teaching.
   Dm jam loop by design — the local mp3 is the Journey-page track.
 - **Core songs are exactly six**: Seven Nation Army, Watchtower, Sweet Child,
   Luna, Let It Be, "the cure". The six `tabs/` Journey pages cover them
-  completely — don't flag others as missing. Tu Boda and Oye Mi Amor are Choice
-  songs.
+  completely — don't flag others as missing. Oye Mi Amor and "Está Dañada"
+  (Iván Cornejo) are Choice songs.
+- **"Tu Boda" was removed site-wide 2026-08-07** — its lyrics describe violence
+  against the bride at her wedding and drew femicide-advocacy criticism in
+  Mexico. Don't reintroduce it. **"Está Dañada" (Iván Cornejo) took its slot**
+  in Modules 6, 7, 8, 12 and now anchors m12w3-s2's requinto challenge (E major
+  / C#m, no capo; the intro is a fingerpicked single-note line that slides on
+  the thin strings).
+- **A Choice song may anchor a graded skill** — `core: false` is not a bar.
+  m12w3-s2 ("Está Dañada") and m12w1-s6 ("House of the Rising Sun") both do.
+  "Core" means *threaded through the course with a `tabs/` Journey page*, not
+  *the only songs a skill may name*. Don't flag it as a defect.
+- **Step `skills: [n]` resolves to the id SUFFIX, not the array position**
+  (`stepSkillIds` in `app.js`), and skill progress is keyed by `skill.id`. So
+  removing a skill and leaving a numbering gap is SAFE; renumbering the
+  survivors would silently reassign students' stored check-offs. Removing a
+  *section* is the destructive one — `${setId}-${station}-sec${gi}-${i}` is
+  positional, so every later section in that station shifts.
 - **Solo work uses YouTube jam tracks, not the course mp3s** — the mp3s are
   rhythm-stripped so the student plays the rhythm part. Local mp3s stay the
   play-along tracks on Journey pages.
