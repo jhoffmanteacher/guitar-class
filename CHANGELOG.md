@@ -41,6 +41,11 @@ see `WORKFLOW.md` and the git commit log.
   corner button."
 - **The header now fits on phones** — one compact row instead of a tall
   stack of wrapped text under overlapping buttons.
+- **The menu's Station B label now matches the station you land on.** It used
+  to always read "Watch · Listen · Practice," even on the two sets that call
+  themselves something else — Module 1 Set 1 is "Watch · Listen · Reflect"
+  (there's nothing to play yet in that set) and Module 9 Set 1 is "Where do I
+  start?". The menu now says whatever the set says, in both languages.
 - Small fixes from the same walkthrough: the G/B card explains why the diagram
   ✕'s the low E while your finger stays planted; Sweet Child's level-up points
   to Set 2 (where the down-up strum lives); a Module 6 strum-pattern answer

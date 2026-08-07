@@ -1857,6 +1857,21 @@ function activateSet(id, opts){
    print all keep working unchanged — these helpers just drive it and mirror
    the active state back into the rail. */
 function activeWeekPanel(){ return document.querySelector('.week-panel.active'); }
+/* The rail's Station B sub-label was a hardcoded "Watch · Listen · Practice"
+   while the set's own panel header could say something else — Module 1 Set 1
+   reads "…Reflect" (nothing is played in that set; the skills are all "I can
+   describe…"), and Module 9 Set 1 reads "Where do I start?". Both are
+   deliberate, so mirror the set's own wording instead of flattening it: take
+   whatever follows the em-dash in "Computer station — X" (same shape in both
+   languages, so no per-language parsing), falling back to the generic label
+   for a title that carries no dash. Read through tf(), so a language switch
+   re-derives it — same pattern as the single-flow tabSub override below. */
+function railStationBSub(w){
+  const raw = (w && w.stations && w.stations.b && w.stations.b.title) ? tf(w.stations.b, 'title') : '';
+  const i = raw.indexOf('—');
+  const tail = i >= 0 ? raw.slice(i + 1).trim() : '';
+  return tail || t('nav.stationBSub');
+}
 function railStation(tab){
   const panel = activeWeekPanel();
   if(!panel) return;
@@ -1887,7 +1902,7 @@ function syncRailStations(){
   const bSub = list.querySelector('.rail-station.st-b .rs-sub');
   if(bNum) bNum.textContent = single ? '1' : 'B';
   if(bTitle) bTitle.textContent = (single && w.stations.b.tabTitle) ? tf(w.stations.b,'tabTitle') : t('nav.stationBTitle');
-  if(bSub) bSub.textContent = (single && w.stations.b.tabSub) ? tf(w.stations.b,'tabSub') : t('nav.stationBSub');
+  if(bSub) bSub.textContent = (single && w.stations.b.tabSub) ? tf(w.stations.b,'tabSub') : railStationBSub(w);
   const chkSubEl = list.querySelector('.rail-station.st-chk .rs-sub');
   if(chkSubEl) chkSubEl.textContent = (single && w.checklistSub) ? tf(w,'checklistSub') : t('nav.checklistSub');
   // Reflect whichever tab-panel is currently active back onto the rail buttons.

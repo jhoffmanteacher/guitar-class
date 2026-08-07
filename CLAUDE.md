@@ -208,7 +208,10 @@ other and the site's tempo numbers are close enough for teaching.
   layer through Module 3 and the Journey page uses. **Verses: the root holds
   beats 1–3 and each G lands on beat 4** (Jonathan, 2026-08-06); Module 4's
   "real rhythm" step teaches that distinction by ear. The map's "Am–G–F" is
-  shorthand.
+  shorthand. **The `neil-young-…` audio slug is CORRECT** — the play-along
+  loop is built from Neil Young's 1992 Dylan-30th-anniversary performance,
+  which the Journey page's history paragraph states outright. The slug names
+  the source recording, not the song's credited writer. Don't "fix" it.
 - **Sweet Child O' Mine** — verse `D–C–G`, **full bar each**, ~123–125 BPM.
 - **Let It Be** — verse `C–G–Am–F`, **two beats per chord**, ~71–76 BPM.
 - **"the cure"** — `Am–C–Dm–F` + `G/B` turnaround, **two felt beats per chord**
