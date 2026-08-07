@@ -657,16 +657,16 @@ SETS.push(
             steps: [
               {
                 label: 'Watch: La Derrota requinto line', label_es: 'Mira: línea de requinto de La Derrota',
-                text: 'Watch: <a href="https://www.youtube.com/watch?v=cRJb_f4-M5g" target="_blank">La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera</a> — a real requinto line from the ranchera tradition that sierreño (a Mexican acoustic-guitar style) grew out of, taught in English. Watch how his picking hand carries the melody a singer would otherwise have, then listen for the same job in "Luna" and "Tu Boda" from this module\'s song list.',
-                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=cRJb_f4-M5g" target="_blank">La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera</a> — una línea de requinto real de la tradición ranchera de la que surgió el sierreño (un estilo de guitarra acústica mexicano), enseñada en inglés. Observa cómo su mano de pulsar lleva la melodía que de otro modo tendría un cantante, y luego escucha ese mismo papel en "Luna" y "Tu Boda" de la lista de canciones de este módulo.',
-                hint: 'Requinto sings the melodic lines you\'ve been hearing in "Luna" and "Tu Boda" since the course\'s first listening drills.',
-                hint_es: 'El requinto canta las líneas melódicas que has estado escuchando en "Luna" y "Tu Boda" desde los primeros ejercicios de escucha del curso.',
+                text: 'Watch: <a href="https://www.youtube.com/watch?v=cRJb_f4-M5g" target="_blank">La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera</a> — a real requinto line from the ranchera tradition that sierreño (a Mexican acoustic-guitar style) grew out of, taught in English. Watch how his picking hand carries the melody a singer would otherwise have, then listen for the same job in "Luna" from this module\'s song list.',
+                text_es: 'Mira: <a href="https://www.youtube.com/watch?v=cRJb_f4-M5g" target="_blank">La Derrota (Vicente Fernández) — requinto lesson, part 1 (English) – Jorge Aguilera</a> — una línea de requinto real de la tradición ranchera de la que surgió el sierreño (un estilo de guitarra acústica mexicano), enseñada en inglés. Observa cómo su mano de pulsar lleva la melodía que de otro modo tendría un cantante, y luego escucha ese mismo papel en "Luna" de la lista de canciones de este módulo.',
+                hint: 'Requinto sings the melodic lines you\'ve been hearing in "Luna" since the course\'s first listening drills.',
+                hint_es: 'El requinto canta las líneas melódicas que has estado escuchando en "Luna" desde los primeros ejercicios de escucha del curso.',
                 skills: [3],
                 response: { type: 'mc', prompt: 'In a sierreño group, the requinto is:',
                   prompt_es: 'En un grupo de sierreño, el requinto es:',
                   answer: 1,
-                  explain: 'Requinto sings the melodic lines you\'ve been hearing in "Luna" and "Tu Boda" since the course\'s first listening drills.',
-                  explain_es: 'El requinto canta las líneas melódicas que has estado escuchando en "Luna" y "Tu Boda" desde los primeros ejercicios de escucha del curso.',
+                  explain: 'Requinto sings the melodic lines you\'ve been hearing in "Luna" since the course\'s first listening drills.',
+                  explain_es: 'El requinto canta las líneas melódicas que has estado escuchando en "Luna" desde los primeros ejercicios de escucha del curso.',
                   choices: ['The bass instrument of the group', 'A smaller, higher-pitched guitar', 'The lead singer out in front', 'A drum that keeps the beat'],
                   choices_es: ['El instrumento de bajo del grupo', 'Una guitarra más pequeña y más aguda', 'El cantante principal al frente', 'Un tambor que marca el pulso'] }
               },
@@ -693,8 +693,8 @@ SETS.push(
             steps: [
               {
                 label: 'Listen: melody on top', label_es: 'Escucha: melodía arriba',
-                text: '"Melody on top" in fingerstyle means the melody is played on the thin, high strings while the thumb keeps the bass going underneath — two jobs, one hand. Listen for it in "Luna" or "Tu Boda".',
-                text_es: '"Melodía arriba" en fingerstyle significa que la melodía se toca en las cuerdas delgadas y agudas mientras el pulgar mantiene el bajo sonando debajo — dos trabajos, una mano. Escúchalo en "Luna" o en "Tu Boda".',
+                text: '"Melody on top" in fingerstyle means the melody is played on the thin, high strings while the thumb keeps the bass going underneath — two jobs, one hand. Listen for it in "Luna".',
+                text_es: '"Melodía arriba" en fingerstyle significa que la melodía se toca en las cuerdas delgadas y agudas mientras el pulgar mantiene el bajo sonando debajo — dos trabajos, una mano. Escúchalo en "Luna".',
                 hint: 'Two jobs, one hand — the requinto texture in short.',
                 hint_es: 'Dos trabajos, una mano — la textura del requinto en pocas palabras.',
                 skills: [4],
@@ -777,24 +777,6 @@ SETS.push(
                 levelUp: 'Play it twice through without stopping, or add it as your performance intro.',
                 levelUp_es: 'Tócala dos veces seguidas sin detenerte, o agrégala como tu intro de interpretación.',
                 skills: [1]
-              }
-            ]
-          },
-          {
-            title: 'Play "Tu Boda"\'s requinto intro line',
-            title_es: 'Toca la línea de requinto de la intro de "Tu Boda"',
-            steps: [
-              {
-                label: 'Challenge 2 — "Tu Boda" Requinto Line', label_es: 'Reto 2 — Línea de requinto de "Tu Boda"',
-                text: '<ul><li>Play the song\'s requinto intro line fingerstyle, following the "Tu Boda" tutorial video in this module\'s Songs section at the bottom of the page.</li></ul>You\'ve got it when: the line rings clean and in time.',
-                text_es: '<ul><li>Toca con fingerstyle la línea de requinto de la intro de la canción, siguiendo el video tutorial de "Tu Boda" en la sección de Canciones de este módulo, al final de la página.</li></ul>Lo tienes cuando: la línea suena limpia y en tiempo.',
-                hint: 'This is the real sierreño sound — a smaller, higher-pitched guitar carrying the melody.',
-                hint_es: 'Este es el sonido real del sierreño — una guitarra más pequeña y más aguda llevando la melodía.',
-                stuck: 'Slow the line down to half tempo and isolate just the first 4 notes.',
-                stuck_es: 'Baja la línea a la mitad del tempo y aísla solo las primeras 4 notas.',
-                levelUp: 'Play it at full performance tempo.',
-                levelUp_es: 'Tócala al tempo completo de interpretación.',
-                skills: [2]
               }
             ]
           },
@@ -887,23 +869,16 @@ SETS.push(
         gotItWhen_es: 'todas las notas de la intro de "Luna" suenan limpias en orden al tempo de interpretación.',
         practice: { type: 'playSeq', label: '"Luna" requinto intro — little-F roll (D3 · G2 · B1 · open e)', label_es: 'Intro de requinto de "Luna" — floreo del F pequeño (D3 · G2 · B1 · e al aire)', bpm: 60,
           notes: [53, 57, 60, 64] } },
-      { id: 'm12w3-s2', text: 'Play "Tu Boda"\'s requinto intro line fingerstyle',
-        text_es: 'Tocar la línea de requinto de la intro de "Tu Boda" con fingerstyle',
-        gotItWhen: 'the "Tu Boda" line rings clean and in time.',
-        gotItWhen_es: 'la línea de "Tu Boda" suena limpia y en tiempo.',
-        practice: { type: 'pr', prompt: '<ol><li>Learn the "Tu Boda" intro line from the tutorial.</li><li>Play it top to bottom and count your clean, no-stop passes.</li><li>Log your best.</li></ol>',
-          prompt_es: '<ol><li>Aprende la línea de la intro de "Tu Boda" con el tutorial.</li><li>Tócala de principio a fin y cuenta tus pasadas limpias y sin paradas.</li><li>Anota tu mejor número.</li></ol>',
-          unit: 'count', placeholder: 'e.g. 3 clean passes — try for a higher number', placeholder_es: 'p. ej. 3 pasadas limpias — intenta superarlo' } },
       { id: 'm12w3-s3', text: 'Explain the requinto\'s role in sierreño / corridos tumbados (a modern Mexican regional style)',
         text_es: 'Explicar el papel del requinto en el sierreño / los corridos tumbados (un estilo regional mexicano moderno)',
-        gotItWhen: 'you can explain that the requinto carries the melodic lead lines — the role you\'ve heard in "Luna" and "Tu Boda."',
-        gotItWhen_es: 'puedes explicar que el requinto lleva las líneas melódicas principales — el papel que has escuchado en "Luna" y "Tu Boda."',
+        gotItWhen: 'you can explain that the requinto carries the melodic lead lines — the role you\'ve heard in "Luna."',
+        gotItWhen_es: 'puedes explicar que el requinto lleva las líneas melódicas principales — el papel que has escuchado en "Luna."',
         practice: { type: 'mc', prompt: 'The requinto\'s job in the group is:',
           prompt_es: 'El trabajo del requinto en el grupo es:',
           choices: ['Strumming the rhythm chords', 'The melodic lead lines', 'Bass', 'Percussion'],
           choices_es: ['Rasguear los acordes de ritmo', 'Las melodías principales', 'El bajo', 'La percusión'], answer: 1,
-          explain: 'The requinto is the small, higher-pitched guitar that sings the melody lines over the group — the part you hear in "Luna" and "Tu Boda." Rhythm chords and bass are other players\' jobs.',
-          explain_es: 'El requinto es la guitarra pequeña y más aguda que canta las líneas melódicas sobre el grupo — la parte que escuchas en "Luna" y "Tu Boda". Los acordes de ritmo y el bajo son trabajo de otros músicos.' } },
+          explain: 'The requinto is the small, higher-pitched guitar that sings the melody lines over the group — the part you hear in "Luna." Rhythm chords and bass are other players\' jobs.',
+          explain_es: 'El requinto es la guitarra pequeña y más aguda que canta las líneas melódicas sobre el grupo — la parte que escuchas en "Luna". Los acordes de ritmo y el bajo son trabajo de otros músicos.' } },
       { id: 'm12w3-s4', text: 'Blend melody notes into a picking pattern — tune on top, thumb bass below',
         text_es: 'Combinar notas de melodía en un patrón de punteo — melodía arriba, bajo del pulgar debajo',
         gotItWhen: 'the thumb never wavers while the melody rides on top.',
@@ -950,9 +925,6 @@ MODULE_SONGS[12] = [
       { name: '"House of the Rising Sun" — The Animals', meta: 'Bass note + rolling arpeggio in 6/8 — the fingerpicking classic', meta_es: 'Nota grave + arpegio en floreo en 6/8 — el clásico del fingerpicking', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=N4bFqW_eu2I',
         tutorialUrl: 'https://www.youtube.com/watch?v=q9dyAQLYybU' },
-      { name: '"Tu Boda" — Oscar Maydon × Fuerza Regida', meta: 'Requinto intro line, fingerstyle — the real sierreño sound', meta_es: 'Línea de requinto de la intro, con fingerstyle — el sonido real del sierreño', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=_ymicn0_GYc',
-        tutorialUrl: 'https://www.youtube.com/watch?v=AlElh28IumI' },
       { name: '"Sailor Song" — Gigi Perez', meta: 'Fingerpicked verse, capo IV — pattern endurance', meta_es: 'Estrofa con fingerpicking, capo en el traste 4 — resistencia del patrón', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=1lrFsXkT_rM',
         tutorialUrl: 'https://www.youtube.com/watch?v=rpoyXduMZZw&end=551' },

@@ -1035,9 +1035,6 @@ MODULE_SONGS[8] = [
       { name: '"Blackbird" — The Beatles', meta: 'Advanced fingerpicking · course capstone challenge', meta_es: 'Fingerpicking avanzado · reto final del curso', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=Man4Xw8Xypo',
         tutorialUrl: 'https://www.youtube.com/watch?v=Qqw15309knU' },
-      { name: '"Tu Boda" — Oscar Maydon × Fuerza Regida', meta: 'Sierreño-style fingerpicking', meta_es: 'Fingerpicking estilo sierreño', type: 'Choice', core: false, level: 3,
-        originalUrl: 'https://www.youtube.com/watch?v=_ymicn0_GYc',
-        tutorialUrl: 'https://www.youtube.com/watch?v=AlElh28IumI' },
       { name: '"Just Like Heaven" — The Cure', meta: 'Iconic arpeggiated intro riff — dreamy chord-picking', meta_es: 'Riff de intro arpegiado e icónico — punteo de acordes soñador', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=n3nPiBai66M',
         tutorialUrl: 'https://www.youtube.com/watch?v=fEgsKS_IcQA&start=98&end=587' }

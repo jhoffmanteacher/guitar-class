@@ -7,6 +7,15 @@ see `WORKFLOW.md` and the git commit log.
 
 ## 2026-08-07 — Clearer Modules 7–12 after a student walkthrough
 
+### Removed
+
+- **"Tu Boda" has been taken off the site.** It was a Choice song in Modules 6,
+  7, 8 and 12, and Module 12 had a challenge and a skill built on its requinto
+  intro line. The lyrics aren't appropriate for class, so the song, its videos,
+  and everything built on it are gone. Module 12's requinto lesson continues on
+  **"Luna,"** which teaches the same melody-over-thumb technique. A replacement
+  sierreño song will be added later.
+
 ### Changed
 
 - **One name for the song you perform: your "performance song."** Module 12 used
