@@ -1036,7 +1036,7 @@ MODULE_REVIEWS[11] = {
     'Toca una progresión I–IV–V en una tonalidad que saques al azar — formas abiertas o con cejilla',
     'Acompaña un blues de 12 compases en A con sensación de shuffle, y luego haz un solo sobre una grabación de tu propio acompañamiento — con otro músico, acompaña mientras el otro hace el solo y luego cambien'
   ],
-  forward: 'You can name what every chord is DOING now, and one barre grip just became twelve chords. <strong>Module 12 is the fun final stretch — you\'ll use everything you\'ve learned:</strong> we study fingerstyle in detail — alternating thumb, waltz patterns, and the requinto sound — everything you need to pick your showcase song.',
-  forward_es: 'Ahora puedes nombrar qué está HACIENDO cada acorde, y un solo agarre de cejilla se acaba de convertir en doce acordes. <strong>El Módulo 12 es el divertido tramo final — vas a usar todo lo que has aprendido:</strong> estudiamos el fingerstyle a fondo — pulgar alternante, patrones de vals y el sonido de requinto — todo lo que necesitas para elegir tu canción de presentación.',
+  forward: 'You can name what every chord is DOING now, and one barre grip just became twelve chords. <strong>Module 12 is the fun final stretch — you\'ll use everything you\'ve learned:</strong> we study fingerstyle in detail — alternating thumb, waltz patterns, and the requinto sound — everything you need to pick your performance song.',
+  forward_es: 'Ahora puedes nombrar qué está HACIENDO cada acorde, y un solo agarre de cejilla se acaba de convertir en doce acordes. <strong>El Módulo 12 es el divertido tramo final — vas a usar todo lo que has aprendido:</strong> estudiamos el fingerstyle a fondo — pulgar alternante, patrones de vals y el sonido de requinto — todo lo que necesitas para elegir tu canción de interpretación.',
   standards: ['Pr.4a', 'Pr.6a', 'Cn.10a', 'Re.9a']
 };

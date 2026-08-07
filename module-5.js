@@ -1407,9 +1407,9 @@ SETS.push(
             title_es: 'Planea tu práctica de interpretación',
             steps: [
           {
-            label: 'Map your performance song\'s chords', label_es: 'Ubica los acordes de tu canción de interpretación',
-            text: 'Look up a chord chart for your performance song (or one you\'ve been working on). Map out which chord groups you\'ll use. Are there any chords you need to review?',
-            text_es: 'Busca un diagrama de acordes para tu canción de interpretación (o una en la que has estado trabajando). Ubica qué grupos de acordes vas a usar. ¿Hay algún acorde que necesites repasar?',
+            label: 'Map your song\'s chords', label_es: 'Ubica los acordes de tu canción',
+            text: 'Look up a chord chart for a song you\'ve been working on. Map out which chord groups you\'ll use. Are there any chords you need to review?',
+            text_es: 'Busca un diagrama de acordes para una canción en la que has estado trabajando. Ubica qué grupos de acordes vas a usar. ¿Hay algún acorde que necesites repasar?',
             hint: 'Being intentional about your practice is a skill. Know exactly which transitions are rough and spend most of your time there — not on the parts you already know.',
             hint_es: 'Ser intencional con tu práctica es una destreza. Sabe exactamente qué transiciones están ásperas y pasa la mayor parte de tu tiempo ahí — no en las partes que ya sabes.',
             skills: [4, 5, 6],
@@ -1583,8 +1583,8 @@ SETS.push(
             steps: [
               {
                 label: 'Wrap-up: your pressure point', label_es: 'Cierre: tu punto débil bajo presión',
-                text: 'After today, what\'s the one part of your performance song most likely to fall apart under pressure (recording light on, someone listening)? Type it below — that\'s exactly where your next practice starts.',
-                text_es: 'Después de hoy, ¿cuál es la única parte de tu canción de interpretación que más probablemente se desarme bajo presión (con la luz de grabación encendida, alguien escuchando)? Escríbelo abajo — ahí es exactamente donde empieza tu próxima práctica.',
+                text: 'After today, what\'s the one part of the song you\'re working on most likely to fall apart under pressure (recording light on, someone listening)? Type it below — that\'s exactly where your next practice starts.',
+                text_es: 'Después de hoy, ¿cuál es la única parte de la canción en la que estás trabajando que más probablemente se desarme bajo presión (con la luz de grabación encendida, alguien escuchando)? Escríbelo abajo — ahí es exactamente donde empieza tu próxima práctica.',
                 response: { type: 'short', placeholder: 'e.g. the B7 in the chorus — it never lands in time', placeholder_es: 'p. ej. el B7 en el coro — nunca cae a tiempo' }
               }
             ]
@@ -1681,7 +1681,7 @@ MODULE_SONGS[5] = [
       { name: '"Ella Baila Sola" — Eslabon Armado × Peso Pluma', meta: 'Capo 1 · C–D–B7–Em vamp — current sierreño hit', meta_es: 'Capo 1 · vamp C–D–B7–Em — éxito actual de sierreño', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=lZiaYpD9ZrI',
         tutorialUrl: 'https://www.youtube.com/watch?v=fciArjRISjc' },
-      { name: '"Hallelujah" — Leonard Cohen', meta: 'C–Am–F–G — beautiful performance song', meta_es: 'C–Am–F–G — hermosa canción de interpretación', type: 'Choice', core: false, level: 2,
+      { name: '"Hallelujah" — Leonard Cohen', meta: 'C–Am–F–G — beautiful song to play start to finish', meta_es: 'C–Am–F–G — hermosa canción para tocar de principio a fin', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=ttEMYvpoR-k',
         tutorialUrl: 'https://www.youtube.com/watch?v=eFLJUspLfnk' },
       { name: '"Shallow" — Lady Gaga', meta: 'Em–D–G–C–Am–D — challenge song', meta_es: 'Em–D–G–C–Am–D — canción de reto', type: 'Choice', core: false, level: 3,

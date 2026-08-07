@@ -640,8 +640,8 @@ SETS.push(
     unit: 'Module 12 · Fingerstyle: Travis, Waltz & Requinto',
     unit_es: 'Módulo 12 · Fingerstyle: Travis, vals y requinto',
     title: 'Set 3',
-    subtitle: 'Melody on top, thumb below · "Luna"\'s intro for real · Choose your showcase voice',
-    subtitle_es: 'Melodía arriba, pulgar abajo · La intro de "Luna" de verdad · Elige tu voz de presentación',
+    subtitle: 'Melody on top, thumb below · "Luna"\'s intro for real · Choose your performance voice',
+    subtitle_es: 'Melodía arriba, pulgar abajo · La intro de "Luna" de verdad · Elige tu voz de interpretación',
     skillFocus: 'The requinto role in sierreño · Melody notes ride ABOVE the thumb bass · Pick the pattern you\'ll perform with',
     skillFocus_es: 'El papel del requinto en el sierreño · Las notas de la melodía viajan ENCIMA del bajo del pulgar · Elige el patrón con el que vas a interpretar',
     comingSoon: false,
@@ -745,8 +745,8 @@ SETS.push(
         ]
       },
       c: {
-        title: 'Practice station — requinto texture & your showcase pattern',
-        title_es: 'Estación de práctica — la textura del requinto y tu patrón de presentación',
+        title: 'Practice station — requinto texture & your performance pattern',
+        title_es: 'Estación de práctica — la textura del requinto y tu patrón de interpretación',
         sections: [
           {
             title: 'Warm-up — tuning check (Module 1)',
@@ -774,8 +774,8 @@ SETS.push(
                 hint_es: 'Este floreo usa la forma del F pequeño que ya conoces del Módulo 5.',
                 stuck: 'Fret the little F shape, strum it once to hear the target chord, then break it apart one string at a time.',
                 stuck_es: 'Trastea la forma del F pequeño, rasguéala una vez para escuchar el acorde objetivo, y luego desármala una cuerda a la vez.',
-                levelUp: 'Play it twice through without stopping, or add it as your showcase intro.',
-                levelUp_es: 'Tócala dos veces seguidas sin detenerte, o agrégala como tu intro de presentación.',
+                levelUp: 'Play it twice through without stopping, or add it as your performance intro.',
+                levelUp_es: 'Tócala dos veces seguidas sin detenerte, o agrégala como tu intro de interpretación.',
                 skills: [1]
               }
             ]
@@ -817,8 +817,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Choose your showcase pattern',
-            title_es: 'Elige tu patrón de presentación',
+            title: 'Choose your performance pattern',
+            title_es: 'Elige tu patrón de interpretación',
             steps: [
               {
                 label: 'Challenge 4 — Choose Your Pattern', label_es: 'Reto 4 — Elige tu patrón',
@@ -842,8 +842,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — Full-Verse Rehearsal (your assessment piece)', label_es: 'Reto — Ensayo de la estrofa completa (tu pieza de evaluación)',
-                text: '<ul><li>Play one complete fingerpicked verse of your showcase song, no stopping, mistakes recovered.</li></ul>You\'ve got it when: you reach the last bar without stopping.',
-                text_es: '<ul><li>Toca una estrofa completa con fingerpicking de tu canción de presentación, sin detenerte, recuperándote de los errores.</li></ul>Lo tienes cuando: llegas al último compás sin detenerte.',
+                text: '<ul><li>Play one complete fingerpicked verse of your performance song, no stopping, mistakes recovered.</li></ul>You\'ve got it when: you reach the last bar without stopping.',
+                text_es: '<ul><li>Toca una estrofa completa con fingerpicking de tu canción de interpretación, sin detenerte, recuperándote de los errores.</li></ul>Lo tienes cuando: llegas al último compás sin detenerte.',
                 hint: 'Performances reward reliability, not difficulty — pick the pattern that never breaks, then make it musical.',
                 hint_es: 'Las interpretaciones premian la confiabilidad, no la dificultad — elige el patrón que nunca se rompe, y luego hazlo musical.',
                 stuck: 'Slow the whole verse down until you can finish it clean, even at half speed.',
@@ -859,9 +859,9 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
               {
-                label: 'Wrap-up: your showcase song', label_es: 'Cierre: tu canción de presentación',
-                text: 'Name your showcase song and pattern — and the one spot you\'ll drill this week. Write it below.',
-                text_es: 'Nombra tu canción y patrón de presentación — y el único punto que vas a practicar esta semana. Escríbelo abajo.',
+                label: 'Wrap-up: your performance song', label_es: 'Cierre: tu canción de interpretación',
+                text: 'Name your performance song and pattern — and the one spot you\'ll drill this week. Write it below.',
+                text_es: 'Nombra tu canción y patrón de interpretación — y el único punto que vas a practicar esta semana. Escríbelo abajo.',
                 response: { type: 'short', placeholder: 'e.g. "the cure," 6-note pattern — the Dm-to-F change still stumbles',
                   placeholder_es: 'p. ej. "the cure," patrón de 6 notas — el cambio de Dm a F todavía tropieza' }
               }
@@ -874,7 +874,7 @@ SETS.push(
     assessment: {
       goal: 'Plays the "Luna" intro rolls · Blends melody over a steady thumb · Performs one full fingerpicked verse, recovering from mistakes',
       goal_es: 'Toca los floreos de la intro de "Luna" · Combina melodía sobre un pulgar constante · Interpreta una estrofa completa con fingerpicking, recuperándose de errores',
-      performance: 'Mini-showcase, solo edition: record one verse, listen back, and name one strength + one target yourself — and share the recording with someone if you like.',
+      performance: 'Mini-performance, solo edition: record one verse, listen back, and name one strength + one target yourself — and share the recording with someone if you like.',
       selfCheck: 'Can you keep the thumb going while the melody enters? Did you finish the verse even where you slipped?',
       selfCheck_es: '¿Puedes mantener el pulgar sonando mientras entra la melodía? ¿Terminaste la estrofa incluso donde te resbalaste?',
       standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Cn.11a']
@@ -918,8 +918,8 @@ SETS.push(
         text_es: 'Elegir y nombrar el patrón de punteo con el que voy a interpretar',
         gotItWhen: 'you\'ve named the pattern you\'ll perform with — the one you can already hold unbroken at performance tempo.',
         gotItWhen_es: 'has nombrado el patrón con el que vas a interpretar — el que ya puedes mantener sin interrupciones al tempo de interpretación.',
-        practice: { type: 'mc', prompt: 'Your showcase pattern should be the one that:',
-          prompt_es: 'Tu patrón de presentación debería ser el que:',
+        practice: { type: 'mc', prompt: 'Your performance pattern should be the one that:',
+          prompt_es: 'Tu patrón de interpretación debería ser el que:',
           choices: ['Impresses the audience the most', 'Never breaks at performance tempo', 'Uses all four picking fingers', 'Is the newest one you learned'],
           choices_es: ['Impresiona más al público', 'Nunca se rompe al tempo de interpretación', 'Usa los cuatro dedos de la mano de punteo', 'Es el más nuevo que aprendiste'], answer: 1,
           explain: 'What an audience hears is steadiness, so pick the pattern you can hold at full speed without stumbling. The flashiest or newest pattern is the one most likely to break down while you perform.',
@@ -978,11 +978,11 @@ MODULE_REVIEWS[12] = {
   ],
   assessItems: [
     'Play one full fingerpicked verse with a steady thumb bass and a clean, unbroken finger pattern — flagship options: "the cure" or "Let It Be"',
-    'Show your chosen showcase pattern and name it'
+    'Show your chosen performance pattern and name it'
   ],
   assessItems_es: [
     'Toca una estrofa completa con fingerpicking con un bajo de pulgar constante y un patrón de dedos limpio y sin interrupciones — opciones destacadas: "the cure" o "Let It Be"',
-    'Muestra tu patrón de presentación elegido y nómbralo'
+    'Muestra tu patrón de interpretación elegido y nómbralo'
   ],
   forward: 'Twelve modules — the whole toolkit, twice as deep as most first-year players ever get. <strong>Module 13 teaches the one hands-on skill every guitarist eventually needs:</strong> changing a string safely, seating it at the bridge, winding it clean at the post, and tuning it so it holds pitch. After that, the next song is your call: pick one, pick your lane — strummed, fingerpicked, or riff + solo — and get it performance-ready the way you now know how, whether that ends in a recording, a room full of people, or just you playing it right. This website got you here; the stage is yours. Keep a list of the songs you want to learn, and go learn them — you know how now.',
   forward_es: 'Doce módulos — el kit de herramientas completo, el doble de profundo de lo que la mayoría de los guitarristas de primer año llegan a alcanzar. <strong>El Módulo 13 enseña la destreza práctica que todo guitarrista termina necesitando:</strong> cambiar una cuerda de forma segura, asentarla en el puente, enrollarla limpia en la clavija, y afinarla para que se mantenga en tono. Después de eso, la siguiente canción la eliges tú: escoge una, escoge tu camino — rasgueada, con fingerpicking, o riff + solo — y déjala lista para interpretar como ya sabes hacerlo, ya sea que termine en una grabación, en un cuarto lleno de gente, o simplemente en ti tocándola bien. Este sitio web te trajo hasta aquí; el escenario es tuyo. Guarda una lista de las canciones que quieres aprender, y ve a aprenderlas — ya sabes cómo.',

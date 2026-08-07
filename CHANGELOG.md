@@ -9,6 +9,16 @@ see `WORKFLOW.md` and the git commit log.
 
 ### Changed
 
+- **One name for the song you perform: your "performance song."** Module 12 used
+  to call it your "showcase song," which made it sound like a different
+  assignment from the one Modules 8 and 11 talk about. It's the same song, so
+  it now has the same name everywhere (*canción de interpretación* in Spanish).
+- **Module 5 no longer asks you to have a performance song picked.** Choosing
+  that song is Module 12's job. Module 5's planning and pressure-point cards now
+  just say "the song you're working on," so you're not being asked to commit to
+  a piece six modules early. Module 5 still teaches performance *practice* —
+  playing through without stopping.
+
 - **Module 7 no longer sends you to a specific TAB website.** The school
   Chromebook filter blocks them, so the cards now tell you what to look for —
   the rhythm stem marks above the numbers — instead of naming a site you can't

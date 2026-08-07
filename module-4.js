@@ -1076,7 +1076,7 @@ SETS.push(
             stuck: 'Drop the backing track and play your written 4 bars alone, slowly, until they\'re solid — then add the track back and just one technique.',
             stuck_es: 'Quita la pista de acompañamiento y toca tus 4 compases escritos solo, despacio, hasta que estén sólidos — y luego vuelve a agregar la pista y solo una técnica.',
             levelUp: 'Perform it standing, record a performance take, or play it for someone at home — or transpose your solo to E minor and play it from the open-string box.',
-            levelUp_es: 'Tócalo de pie, graba una toma de presentación, o tócalo para alguien en casa — o transpón tu solo a E menor y tócalo desde la caja con raíz en cuerda al aire.',
+            levelUp_es: 'Tócalo de pie, graba una toma de interpretación, o tócalo para alguien en casa — o transpón tu solo a E menor y tócalo desde la caja con raíz en cuerda al aire.',
             skills: [3, 6, 7]
           }
             ]
