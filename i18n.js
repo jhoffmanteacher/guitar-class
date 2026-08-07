@@ -142,6 +142,13 @@
        downbeat (first/strongest beat of a bar) → tiempo fuerte
        fill (short extra run between main parts) → relleno
        roll (fingerpicked ascending run through a chord) → floreo
+       showcase song (the Module 12 final piece) → canción de presentación
+                                               (NOT "la muestra" — retired
+                                               2026-08-07. Module 5/8 call
+                                               theirs a "performance song" →
+                                               canción de interpretación;
+                                               separate EN terms, kept apart
+                                               in ES until Jonathan unifies)
   */
   const I18N = {
     // ── Header ──
