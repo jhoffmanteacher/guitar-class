@@ -1379,8 +1379,8 @@ SETS.push(
             label: 'Watch: how to practice effectively', label_es: 'Mira: cómo practicar con eficacia',
             text: 'Watch: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">Lesson 1 Practice Routine – JustinGuitar</a> (0:00–4:00).',
             text_es: 'Mira: <a href="https://youtu.be/uBZsLmmOz9I" target="_blank">Lesson 1 Practice Routine – JustinGuitar</a> (0:00–4:00).',
-            hint: 'Key idea: practice doesn\'t make perfect — practice makes permanent: whatever you repeat becomes the habit, good or bad. Are you practicing your mistakes or your solutions? This matters most before a performance.',
-            hint_es: 'Idea clave: la práctica no hace la perfección — la práctica hace permanente: lo que sea que repitas se convierte en el hábito, bueno o malo. ¿Estás practicando tus errores o tus soluciones? Esto importa más antes de una presentación.',
+            hint: 'Key idea: practice doesn\'t make perfect — practice makes permanent: whatever you repeat becomes the habit, good or bad. Are you practicing your mistakes or your solutions? This matters most when the assessment is close.',
+            hint_es: 'Idea clave: la práctica no hace la perfección — la práctica hace permanente: lo que sea que repitas se convierte en el hábito, bueno o malo. ¿Estás practicando tus errores o tus soluciones? Esto importa más cuando la evaluación está cerca.',
             skills: [5],
             response: { type: 'mc', prompt: 'What is the KEY idea from this video about practice?',
               prompt_es: '¿Cuál es la idea CLAVE de este video sobre la práctica?',
@@ -1390,21 +1390,21 @@ SETS.push(
               choices: [
               'Practice makes permanent — so practice the solution, not the mistake',
               'Practice makes perfect — repetition is all that matters',
-              'You only need to practice the day before a performance',
+              'You only need to practice the day before the assessment',
               'Speed matters more than accuracy'
             ],
               choices_es: [
               'La práctica hace permanente — así que practica la solución, no el error',
               'La práctica hace la perfección — solo la repetición importa',
-              'Solo necesitas practicar el día antes de una presentación',
+              'Solo necesitas practicar el día antes de la evaluación',
               'La velocidad importa más que la precisión'
             ] }
           },
             ]
           },
           {
-            title: 'Plan your performance practice',
-            title_es: 'Planea tu práctica de interpretación',
+            title: 'Plan your practice',
+            title_es: 'Planea tu práctica',
             steps: [
           {
             label: 'Map your song\'s chords', label_es: 'Ubica los acordes de tu canción',
@@ -1433,7 +1433,7 @@ SETS.push(
             title_es: 'Cierre de la estación',
             steps: [
           {
-            label: 'Wrap-up: your performance priority', label_es: 'Cierre: tu prioridad de interpretación',
+            label: 'Wrap-up: your practice priority', label_es: 'Cierre: tu prioridad de práctica',
             text: 'Station Wrap-Up — pause and think: with the assessment ahead, what will eat most of your practice time between now and then — a specific chord, a transition, or keeping the strum steady?',
             text_es: 'Cierre de la estación — pausa y piensa: con la evaluación por delante, ¿qué se va a llevar la mayor parte de tu tiempo de práctica de aquí a entonces — un acorde específico, una transición, o mantener el rasgueo constante?',
             response: { type: 'short', placeholder: 'e.g. the B7→E change, and not rushing the strum',
@@ -1530,8 +1530,8 @@ SETS.push(
             label: 'Challenge 4 — Full Run From Memory (your assessment piece)', label_es: 'Reto 4 — Pasada completa de memoria (tu pieza de evaluación)',
             text: '<ol><li>Pick one of these three songs — <a href="tabs/let-it-be.html" target="_blank">"Let It Be"</a>, <a href="tabs/luna.html" target="_blank">"Luna"</a>, or <a href="tabs/the-cure.html" target="_blank">&ldquo;the cure&rdquo;</a> — and run it from memory with no chart. This is your assessment piece, Layer 5 of 5 of that song\'s &#x1F9F5; Song Journey.</li><li>Time yourself.</li></ol>No score — this trains your recovery, not perfection.',
             text_es: '<ol><li>Elige una de estas tres canciones — <a href="tabs/let-it-be.html" target="_blank">"Let It Be"</a>, <a href="tabs/luna.html" target="_blank">"Luna"</a>, o <a href="tabs/the-cure.html" target="_blank">&ldquo;the cure&rdquo;</a> — y tócala de memoria sin diagrama. Esta es tu pieza de evaluación, la Capa 5 de 5 del &#x1F9F5; Recorrido de la canción de esa canción.</li><li>Cronométrate.</li></ol>Sin puntaje — esto entrena tu recuperación, no la perfección.',
-            hint: 'Don\'t stop when you make a mistake in performance practice. The goal is to keep going. You can fix mistakes in slow practice — performance practice trains your recovery.',
-            hint_es: 'No te detengas cuando cometas un error en la práctica de interpretación. El objetivo es seguir tocando. Puedes corregir errores en la práctica lenta — la práctica de interpretación entrena tu recuperación.',
+            hint: 'Don\'t stop when you make a mistake in a full run. The goal is to keep going. You can fix mistakes in slow practice — a full run trains your recovery.',
+            hint_es: 'No te detengas cuando cometas un error en una pasada completa. El objetivo es seguir tocando. Puedes corregir errores en la práctica lenta — una pasada completa entrena tu recuperación.',
             skills: [5, 6]
           }
             ]

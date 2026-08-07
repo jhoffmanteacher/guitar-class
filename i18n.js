@@ -150,10 +150,12 @@
                                                the last holdout. Module 5 does
                                                not name a performance song at
                                                all; choosing one is Module 12's
-                                               job. Module 5 still teaches
-                                               "performance practice" — playing
-                                               through without stopping — which
-                                               is the technique, not the piece.)
+                                               job. Module 5 also drops the
+                                               "performance practice" framing
+                                               (2026-08-07) — it names the
+                                               assessment, and a full-run
+                                               mistake is "a full run" /
+                                               "una pasada completa".)
   */
   const I18N = {
     // ── Header ──

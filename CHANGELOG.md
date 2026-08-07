@@ -16,8 +16,13 @@ see `WORKFLOW.md` and the git commit log.
 - **Module 5 no longer asks you to have a performance song picked.** Choosing
   that song is Module 12's job. Module 5's planning and pressure-point cards now
   just say "the song you're working on," so you're not being asked to commit to
-  a piece six modules early. Module 5 still teaches performance *practice* —
-  playing through without stopping.
+  a piece six modules early.
+- **Module 5 talks about the assessment instead of "a performance."** The
+  practice-planning section is now just "Plan your practice," and the full-run
+  challenge says a mistake in *a full run* is one you play through — same
+  advice, without implying there's a performance coming that isn't on your
+  calendar. The one thing you're actually working toward in Module 5 is the
+  assessment, so that's what the cards name.
 
 - **Module 7 no longer sends you to a specific TAB website.** The school
   Chromebook filter blocks them, so the cards now tell you what to look for —
