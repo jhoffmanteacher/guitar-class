@@ -1035,6 +1035,9 @@ MODULE_SONGS[8] = [
       { name: '"Blackbird" — The Beatles', meta: 'Advanced fingerpicking · course capstone challenge', meta_es: 'Fingerpicking avanzado · reto final del curso', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=Man4Xw8Xypo',
         tutorialUrl: 'https://www.youtube.com/watch?v=Qqw15309knU' },
+      { name: '"Está Dañada" — Iván Cornejo', meta: 'Fingerpicked sierreño intro', meta_es: 'Intro sierreña con fingerpicking', type: 'Choice', core: false, level: 3,
+        originalUrl: 'https://www.youtube.com/watch?v=rBLLbgD0FsM',
+        tutorialUrl: 'https://www.youtube.com/watch?v=DjSzkgEeddc' },
       { name: '"Just Like Heaven" — The Cure', meta: 'Iconic arpeggiated intro riff — dreamy chord-picking', meta_es: 'Riff de intro arpegiado e icónico — punteo de acordes soñador', type: 'Choice', core: false, level: 2,
         originalUrl: 'https://www.youtube.com/watch?v=n3nPiBai66M',
         tutorialUrl: 'https://www.youtube.com/watch?v=fEgsKS_IcQA&start=98&end=587' }
