@@ -188,8 +188,8 @@ SETS.push(
             label: 'Challenge 3 — Find a TAB: "Iron Man" or "Sunshine of Your Love"', label_es: 'Reto 3 — Encuentra un TAB: "Iron Man" o "Sunshine of Your Love"',
             text: '<ol><li>Pick "Iron Man" or "Sunshine of Your Love".</li><li>Find a TAB online.</li><li>Play through it once.</li></ol>No score — see which rhythm symbols you can spot above the numbers.',
             text_es: '<ol><li>Elige "Iron Man" o "Sunshine of Your Love".</li><li>Encuentra un TAB en línea.</li><li>Tócalo una vez de principio a fin.</li></ol>Sin puntaje — fíjate en qué símbolos de ritmo puedes reconocer arriba de los números.',
-            hint: 'Most beginner TAB sites (Songsterr, Ultimate Guitar) show the rhythm. Look for the stem marks above each number.',
-            hint_es: 'La mayoría de los sitios de TAB para principiantes (Songsterr, Ultimate Guitar) muestran el ritmo. Busca las marcas de plica arriba de cada número.',
+            hint: 'Most beginner TAB sites show the rhythm. Look for the stem marks above each number.',
+            hint_es: 'La mayoría de los sitios de TAB para principiantes muestran el ritmo. Busca las marcas de plica arriba de cada número.',
             skills: [3, 6]
           }
             ]
@@ -200,8 +200,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — "Seven Nation Army", the real rhythm', label_es: 'Reto — "Seven Nation Army", el ritmo real',
-                text: 'You\'ve played this riff since Module 1 — but always one even note per beat:<ol><li>Listen to the recording.</li><li>Find the riff\'s TAB with rhythm stems (Songsterr shows them clearly).</li><li>Play it the way the record actually goes — long notes held, quick notes tucked between beats.</li></ol>You\'ve got it when: you can play along with the record and stay locked with it. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: the riff that started it all</a>.',
-                text_es: 'Has tocado este riff desde el Módulo 1 — pero siempre con una nota pareja por tiempo:<ol><li>Escucha la grabación.</li><li>Encuentra el TAB del riff con plicas de ritmo (Songsterr las muestra con claridad).</li><li>Tócalo como suena de verdad en la grabación — notas largas sostenidas, notas rápidas metidas entre los tiempos.</li></ol>Lo tienes cuando: puedes tocar junto con la grabación y mantenerte sincronizado con ella. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: el riff que lo empezó todo</a>.',
+                text: 'You\'ve played this riff since Module 1 — but always one even note per beat:<ol><li>Listen to the recording.</li><li>Find the riff\'s TAB with rhythm stems — the stem marks sit above the numbers.</li><li>Play it the way the record actually goes — long notes held, quick notes tucked between beats.</li></ol>You\'ve got it when: you can play along with the record and stay locked with it. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: the riff that started it all</a>.',
+                text_es: 'Has tocado este riff desde el Módulo 1 — pero siempre con una nota pareja por tiempo:<ol><li>Escucha la grabación.</li><li>Encuentra el TAB del riff con plicas de ritmo — las marcas de plica van arriba de los números.</li><li>Tócalo como suena de verdad en la grabación — notas largas sostenidas, notas rápidas metidas entre los tiempos.</li></ol>Lo tienes cuando: puedes tocar junto con la grabación y mantenerte sincronizado con ella. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: el riff que lo empezó todo</a>.',
                 hint: 'The frets haven\'t changed since Module 1 — only the rhythm reading is new. That\'s the whole point of this set: same notes, real music. (Module 4 has a &#x25B6; button pair — straight count vs. the record — if you want to hear the two side by side again.)',
                 hint_es: 'Los trastes no han cambiado desde el Módulo 1 — solo la lectura del ritmo es nueva. Ese es todo el punto de esta unidad: mismas notas, música real. (El Módulo 4 tiene un par de botones &#x25B6; — conteo recto vs. la grabación — si quieres volver a escuchar los dos lado a lado.)',
                 stuck: 'Clap the record\'s rhythm first, no guitar. Add the frets back only once your hands know the shape of the timing.',
@@ -318,8 +318,8 @@ SETS.push(
           explain_es: 'Una doble nota necesita un solo golpe que atraviese ambas cuerdas — amplía un poco el movimiento. Presionar más fuerte o culpar al TAB no mueve la púa.' } },
       { id: 'm7w1-s6', text: 'Find a TAB online for a new song and play through it',
         text_es: 'Encontrar un TAB en línea para una canción nueva y tocarlo de principio a fin',
-        gotItWhen: 'you can pick a song you like, find a beginner TAB (Ultimate Guitar, Songsterr), and get through at least one section without asking for help.',
-        gotItWhen_es: 'puedes elegir una canción que te guste, encontrar un TAB para principiantes (Ultimate Guitar, Songsterr), y tocar al menos una sección sin pedir ayuda.',
+        gotItWhen: 'you can pick a song you like, find a beginner TAB for it, and get through at least one section without asking for help.',
+        gotItWhen_es: 'puedes elegir una canción que te guste, encontrar un TAB para principiantes de esa canción, y tocar al menos una sección sin pedir ayuda.',
         practice: { type: 'mc', prompt: 'You find three different TABs of the same song online. How do you decide which one to trust?',
           prompt_es: 'Encuentras tres TABs diferentes de la misma canción en línea. ¿Cómo decides en cuál confiar?',
           choices: ['Play the first riff of each against the record', 'The highest star rating is always the correct one', 'The longest, most detailed one', 'The first search result'],

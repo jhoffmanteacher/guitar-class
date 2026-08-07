@@ -9,6 +9,11 @@ see `WORKFLOW.md` and the git commit log.
 
 ### Changed
 
+- **Module 7 no longer sends you to a specific TAB website.** The school
+  Chromebook filter blocks them, so the cards now tell you what to look for —
+  the rhythm stem marks above the numbers — instead of naming a site you can't
+  reach. Finding a TAB online is still the skill; you just pick where.
+
 - **The "write Seven Nation Army in TAB" challenge (Module 9) no longer shows
   you the answer** — the example in the answer box is now a different riff, so
   it shows you the format instead of handing you the notes.

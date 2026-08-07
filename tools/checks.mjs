@@ -380,6 +380,31 @@ function checkNumberedStrings() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1k. FILTER-BLOCKED TAB SITES BY NAME — student-facing text must not
+   send students to a specific external TAB site. School Chromebooks
+   filter them, so a named site is a dead end mid-challenge (Jonathan,
+   2026-08-07). A 2026-08-07 sweep pulled 6 instances (3 EN/ES pairs)
+   out of module-7.js. The cards still teach "find a TAB online" — it
+   is naming the destination that breaks. Fix by describing what to
+   look for (rhythm stems above the numbers), not where to go.
+   ════════════════════════════════════════════════════════════════════ */
+function checkBlockedTabSites() {
+  head('1k. Filter-blocked TAB sites named in student-facing text');
+  const RE = /songsterr|ultimate[\s-]?guitar/gi;
+  let bad = 0;
+  for (const file of [...MODULE_FILES, 'class-activities.js', 'i18n.js', 'index.html', ...TAB_PAGES]) {
+    const lines = readFileSync(join(ROOT, file), 'utf8').split('\n');
+    lines.forEach((line, li) => {
+      for (const m of line.matchAll(RE)) {
+        err(`${file}:${li + 1}: names a filter-blocked TAB site — "${line.slice(Math.max(0, m.index - 30), m.index + m[0].length + 30).trim()}" (describe what to look for, not which site)`);
+        problems++; bad++;
+      }
+    });
+  }
+  if (bad === 0) ok('no filter-blocked TAB sites named in student-facing text');
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1i. WATCH-RANGE LABELS ↔ URL TIME PARAMS — lesson links carry a
    "(M:SS–M:SS)" label (inside the anchor text or right after </a>)
    telling students what part of the video the card uses, and the URL
@@ -1403,6 +1428,7 @@ async function liveCheck() {
   checkDuplicateGlobals();
   checkWatchRanges();
   checkNumberedStrings();
+  checkBlockedTabSites();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();
