@@ -542,8 +542,8 @@ SETS.push(
           explain_es: 'Partiendo de la cuerda Mi grave o La, la misma nota se repite dos cuerdas hacia el suelo y dos trastes hacia el cuerpo. La versión de tres trastes existe, pero solo cuando la cuerda Si entra en el salto — de Re a Si, o de Sol a mi aguda.' } },
       { id: 'm9w1-s5', text: 'Play the "Sweet Child O\' Mine" intro fragment on the D and G strings and name each note',
         text_es: 'Tocar el fragmento de intro de "Sweet Child O\' Mine" en las cuerdas Re y Sol y nombrar cada nota',
-        gotItWhen: 'you can play the first two notes of the intro up around fret 12–15 and name the D-string one — the B-string note right after it is a sneak preview, not something you\'re expected to name yet.',
-        gotItWhen_es: 'puedes tocar las primeras dos notas de la intro alrededor del traste 12–15 y nombrar la de la cuerda Re — la nota de la cuerda Si justo después es un adelanto, no algo que se espera que nombres todavía.',
+        gotItWhen: 'you can play the intro\'s first four notes up around frets 12–15 and name the three on the D and G strings — the B-string note is a sneak preview, not something you\'re expected to name yet.',
+        gotItWhen_es: 'puedes tocar las primeras cuatro notas de la intro alrededor de los trastes 12–15 y nombrar las tres de las cuerdas Re y Sol — la nota de la cuerda Si es un adelanto, no algo que se espera que nombres todavía.',
         practice: { type: 'mc', prompt: 'The "Sweet Child" intro TAB starts at fret 12 on the D string. Using today\'s fretboard knowledge, what note is that?',
           prompt_es: 'El TAB de la intro de "Sweet Child" empieza en el traste 12 de la cuerda Re. Usando lo que sabes hoy del diapasón, ¿qué nota es?',
           choices: ['D — fret 12 repeats the open string\'s name', 'C — one below the octave', 'E — fret 12 is always E', 'Notes don\'t have names above fret 5'],
@@ -1044,7 +1044,7 @@ SETS.push(
                 skills: [2, 3],
                 response: { type: 'short', prompt: 'Write the riff as one-string TAB (string, then frets in order):',
                   prompt_es: 'Escribe el riff como TAB de una cuerda (cuerda, luego trastes en orden):',
-                  placeholder: 'e.g. E|—7—7—10—7—5—3—2—', placeholder_es: 'p. ej. E|—7—7—10—7—5—3—2—' }
+                  placeholder: 'e.g. D|—0—2—3—2—0— (string, then frets in order)', placeholder_es: 'p. ej. D|—0—2—3—2—0— (cuerda, y luego los trastes en orden)' }
               }
             ]
           },

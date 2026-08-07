@@ -457,8 +457,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge — Spot the Power Chord', label_es: 'Reto — Encuentra el acorde de potencia',
-            text: 'That F major barre you just formed has the F5 power chord you learned in Module 3 hiding inside it:<ol><li>Form your F major barre.</li><li>Look at just the low E and A strings — low E (fret 1) + A (fret 3). That\'s F5. The barre just stacks the rest of the chord on top.</li></ol>You\'ve got it when: play F5 alone, then add the barre fingers to make full F — and hear the power chord living inside it.',
-            text_es: 'Esa cejilla de F mayor que acabas de formar tiene escondido dentro el acorde de potencia F5 que aprendiste en el Módulo 3:<ol><li>Forma tu cejilla de F mayor.</li><li>Mira solo las cuerdas Mi grave y La — Mi grave (traste 1) + La (traste 3). Eso es F5. La cejilla solo apila el resto del acorde encima.</li></ol>Lo tienes cuando: toca F5 solo, y luego agrega los dedos de la cejilla para formar el F completo — y escucha el acorde de potencia viviendo dentro de él.',
+            text: 'The F major barre you\'re about to build (next challenge) has the F5 power chord you learned in Module 3 hiding inside it:<ol><li>Form your F major barre.</li><li>Look at just the low E and A strings — low E (fret 1) + A (fret 3). That\'s F5. The barre just stacks the rest of the chord on top.</li></ol>You\'ve got it when: play F5 alone, then add the barre fingers to make full F — and hear the power chord living inside it.',
+            text_es: 'La cejilla de F mayor que estás por construir (en el siguiente reto) tiene escondido dentro el acorde de potencia F5 que aprendiste en el Módulo 3:<ol><li>Forma tu cejilla de F mayor.</li><li>Mira solo las cuerdas Mi grave y La — Mi grave (traste 1) + La (traste 3). Eso es F5. La cejilla solo apila el resto del acorde encima.</li></ol>Lo tienes cuando: toca F5 solo, y luego agrega los dedos de la cejilla para formar el F completo — y escucha el acorde de potencia viviendo dentro de él.',
             hint: 'Barre chords feel less scary once you see them as a power chord you already know, plus a few extra notes. And just like a power chord, you name the barre by its root on the low E string — that\'s your Module 2 + Module 3 skills combining.',
             hint_es: 'Los acordes con cejilla dan menos miedo una vez que los ves como un acorde de potencia que ya conoces, más algunas notas extra. Y al igual que un acorde de potencia, nombras la cejilla por su raíz en la cuerda Mi grave — eso es tus destrezas del Módulo 2 y el Módulo 3 combinándose.',
             stuck: 'If full F won\'t ring yet, fall back to just the F5 power chord (the low E and A strings) and add one string at a time upward — the full bar comes last.',
@@ -864,7 +864,11 @@ SETS.push(
                 stuck: 'Barre just the top two strings at fret 1 and add one string per day. The six-string F takes weeks, not one day — go slow.',
                 stuck_es: 'Haz cejilla solo en las dos cuerdas más agudas en el traste 1 y agrega una cuerda por día. El F de seis cuerdas toma semanas, no un día — ve despacio.',
                 levelUp: 'Slide the same barre shape to fret 5 — that\'s A major, and suddenly you can play every major chord on the neck.',
-                levelUp_es: 'Desliza la misma forma de cejilla al traste 5 — eso es A mayor, y de repente puedes tocar todos los acordes mayores del mástil.'
+                levelUp_es: 'Desliza la misma forma de cejilla al traste 5 — eso es A mayor, y de repente puedes tocar todos los acordes mayores del mástil.',
+                skills: [6],
+                chords: [
+                  { name: 'F major (E-shape)', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
+                ]
               }
             ]
           },

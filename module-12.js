@@ -110,10 +110,10 @@ SETS.push(
             steps: [
               {
                 label: 'Station wrap-up', label_es: 'Cierre de la estación',
-                text: 'Station Wrap-Up — pause and think: what tempo could you hold the alternating thumb today without it stumbling?',
-                text_es: 'Cierre de la estación — pausa y piensa: ¿a qué tempo pudiste mantener el pulgar alternante hoy sin que tropezara?',
-                response: { type: 'short', placeholder: 'e.g. solid at 60 BPM; at 70 my thumb followed my fingers and fell apart',
-                  placeholder_es: 'p. ej. firme a 60 BPM; a 70 mi pulgar siguió a mis dedos y se desarmó' }
+                text: 'Station Wrap-Up — pause and think: in your own words, why does the thumb count as "the drummer" in Travis picking — what breaks if it stops?',
+                text_es: 'Cierre de la estación — pausa y piensa: con tus propias palabras, ¿por qué el pulgar cuenta como "el baterista" del Travis picking — qué se rompe si se detiene?',
+                response: { type: 'short', placeholder: 'e.g. the bass is the beat — if the thumb stops, the whole groove collapses',
+                  placeholder_es: 'p. ej. el bajo es el pulso — si el pulgar se detiene, todo el groove se derrumba' }
               }
             ]
           }
@@ -238,8 +238,8 @@ SETS.push(
             steps: [
               {
                 label: 'Wrap-up: write your tempo target', label_es: 'Cierre: escribe tu objetivo de tempo',
-                text: 'What tempo could you hold the alternating thumb today without it stumbling? Write it below — that\'s your warm-up target next time.',
-                text_es: '¿A qué tempo pudiste mantener el pulgar alternante hoy sin que tropezara? Escríbelo abajo — ese es tu objetivo de calentamiento la próxima vez.',
+                text: 'What tempo could you hold the alternating thumb today without it stumbling? Write it below — that\'s your warm-up target next time. (Don\'t stop yet — two more sections below!)',
+                text_es: '¿A qué tempo pudiste mantener el pulgar alternante hoy sin que tropezara? Escríbelo abajo — ese es tu objetivo de calentamiento la próxima vez. (¡No te detengas todavía — faltan dos secciones más abajo!)',
                 response: { type: 'short', placeholder: 'e.g. solid at 60 BPM; at 70 my thumb followed my fingers and fell apart',
                   placeholder_es: 'p. ej. firme a 60 BPM; a 70 mi pulgar siguió a mis dedos y se desarmó' }
               }
@@ -456,10 +456,10 @@ SETS.push(
             steps: [
               {
                 label: 'Station wrap-up', label_es: 'Cierre de la estación',
-                text: 'Station Wrap-Up — pause and think: which felt more natural — picking in 4 or in 3? What does the waltz feel do to the song?',
-                text_es: 'Cierre de la estación — pausa y piensa: ¿qué se sintió más natural — puntear en 4 o en 3? ¿Qué le hace la sensación de vals a la canción?',
-                response: { type: 'short', placeholder: 'e.g. 3 kept surprising me — but it makes Happy Birthday float instead of march',
-                  placeholder_es: 'p. ej. el 3 me seguía sorprendiendo — pero hace que Happy Birthday flote en lugar de marchar' }
+                text: 'Station Wrap-Up — pause and think: how would you explain to a friend the difference between counting in 4 and counting in 3, without playing a note?',
+                text_es: 'Cierre de la estación — pausa y piensa: ¿cómo le explicarías a un amigo la diferencia entre contar en 4 y contar en 3, sin tocar una sola nota?',
+                response: { type: 'short', placeholder: 'e.g. in 3 the bass comes back one beat sooner — ONE-two-three instead of ONE-two-three-four',
+                  placeholder_es: 'p. ej. en 3 el bajo regresa un tiempo antes — UN-dos-tres en lugar de UN-dos-tres-cuatro' }
               }
             ]
           }
@@ -735,10 +735,10 @@ SETS.push(
             steps: [
               {
                 label: 'Station wrap-up', label_es: 'Cierre de la estación',
-                text: 'Station Wrap-Up — pause and think: name your showcase song and pattern — and the one spot you\'ll drill this week.',
-                text_es: 'Cierre de la estación — pausa y piensa: nombra tu canción y patrón de presentación — y el único punto que vas a practicar esta semana.',
-                response: { type: 'short', placeholder: 'e.g. "the cure," 6-note pattern — the Dm-to-F change still stumbles',
-                  placeholder_es: 'p. ej. "the cure," patrón de 6 notas — el cambio de Dm a F todavía tropieza' }
+                text: 'Station Wrap-Up — pause and think: what does the requinto add to a sierreño song that strummed chords alone can\'t?',
+                text_es: 'Cierre de la estación — pausa y piensa: ¿qué le aporta el requinto a una canción de sierreño que los acordes rasgueados por sí solos no pueden?',
+                response: { type: 'short', placeholder: 'e.g. the melody — it sings the line a voice would carry',
+                  placeholder_es: 'p. ej. la melodía — canta la línea que llevaría una voz' }
               }
             ]
           }

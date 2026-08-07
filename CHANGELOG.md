@@ -5,6 +5,34 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-07 — Clearer Modules 7–12 after a student walkthrough
+
+### Changed
+
+- **The "write Seven Nation Army in TAB" challenge (Module 9) no longer shows
+  you the answer** — the example in the answer box is now a different riff, so
+  it shows you the format instead of handing you the notes.
+- **"Spot the Power Chord" (Module 7) no longer says you already built F** —
+  you build the barre at the 5th fret first, so the card now points forward to
+  the F you're about to make.
+- **"the cure" now shows up in Module 8's Song Journey links** — both
+  fingerpicking challenges link straight to its Journey page, and each Set says
+  which layer of the song it grows.
+- **Module 8's 6/8 challenge doesn't overclaim any more** — it names the 6/8
+  pulse as the one you've felt in "Luna" since Module 2, just counted out note
+  by note this time.
+- **Module 12's Station B wrap-ups now ask something different from Station C** —
+  B asks you to explain the idea in your own words, C keeps the practical note
+  you'll want written down.
+- **Module 12's first wrap-up tells you there's more below**, so you don't stop
+  early.
+- **The "Luna" full-barre challenge (Module 7) now shows the F chord diagram**
+  and counts toward its skill check-off.
+- Smaller wording fixes: the Module 10 "the cure" hint credits the right module
+  for the chord names, the Module 9 Sweet Child skill matches the four notes the
+  challenge actually asks for, and Module 11's Spanish now says
+  "canción de presentación" like the rest of the site.
+
 ## 2026-08-06 — Strings called by name everywhere, clearer Modules 1–6 after a student walkthrough
 
 ### Changed
