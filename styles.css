@@ -468,7 +468,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .sh-group-count{margin-left:auto;font-size:0.8125rem;font-weight:500;color:var(--text2);white-space:nowrap}
 .sh-group-body{display:none;padding:0 14px 4px;border-top:1px solid var(--border)}
 .sh-group.open .sh-group-body{display:block}
-.song-vids{display:flex;gap:6px;margin-left:auto;flex-shrink:0;align-items:center}
+/* flex-shrink:0 keeps the buttons from being squeezed, but on its own it let a
+   Core row's three buttons run past the row on a narrow phone — Spanish only,
+   since "Recorrido de la canción" is ~2x the width of "Song Journey" (found
+   2026-08-08). max-width caps the group at the row so flex-wrap can act; the
+   buttons stack instead of overflowing, and justify-content keeps the wrapped
+   line right-aligned like the unwrapped one. No-op wherever they already fit. */
+.song-vids{display:flex;gap:6px;margin-left:auto;flex-shrink:0;align-items:center;
+  flex-wrap:wrap;max-width:100%;justify-content:flex-end}
 .song-vid-btn{display:inline-flex;align-items:center;gap:5px;font-size:0.8125rem;padding:3px 9px;border-radius:14px;background:transparent;color:var(--text2);border:1px solid transparent;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background 0.1s,border-color 0.1s,color 0.1s}
 .song-vid-btn:hover{background:var(--bg2);border-color:var(--text2);color:var(--text)}
 .song-vid-btn .svb-play{color:var(--green-text);font-size:0.75rem;line-height:1}

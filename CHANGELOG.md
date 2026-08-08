@@ -20,6 +20,9 @@ see `WORKFLOW.md` and the git commit log.
   song descriptions on the "All the songs" page stayed in English even though
   the Spanish was already written — every song, not just the new ones. They now
   switch with the rest of the page.
+- **The Songs page fits on a phone in Spanish.** The six core songs' buttons ran
+  off the right edge of the screen, because "Recorrido de la canción" is much
+  wider than "Song Journey". They now wrap onto a second line instead.
 - **The song labels are in Spanish too** — Core, Choice, Focus and Supp now read
   Básica, A elección, Destacada and Complementaria, in both the Songs page and each
   module's own song list.
