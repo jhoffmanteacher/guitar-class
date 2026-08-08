@@ -21,7 +21,7 @@ see `WORKFLOW.md` and the git commit log.
   the Spanish was already written — every song, not just the new ones. They now
   switch with the rest of the page.
 - **The song labels are in Spanish too** — Core, Choice, Focus and Supp now read
-  Básica, A elección, Destacada and Extra, in both the Songs page and each
+  Básica, A elección, Destacada and Complementaria, in both the Songs page and each
   module's own song list.
 
 ### Added
