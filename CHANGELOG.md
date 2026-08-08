@@ -14,6 +14,13 @@ see `WORKFLOW.md` and the git commit log.
   intro line. The lyrics aren't appropriate for class, so the song, its videos,
   and everything built on it are gone.
 
+### Fixed
+
+- **The Songs page now describes every song in Spanish.** In Español mode the
+  song descriptions on the "All the songs" page stayed in English even though
+  the Spanish was already written — every song, not just the new ones. They now
+  switch with the rest of the page.
+
 ### Added
 
 - **New sierreño song: "Está Dañada" — Iván Cornejo.** It takes the slot the

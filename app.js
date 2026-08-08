@@ -5886,7 +5886,7 @@ async function renderSongsHub(){
     // (core:true, type:'Focus') still show their tag inside the choice groups.
     const tagHtml = isCoreSix(e) ? '' : `<span class="stag ${sg.core ? 'stag-core' : ''}">${escHtml(sg.type || t(sg.core ? 'hub.tagCore' : 'hub.tagChoice'))}</span>`;
     return `<div class="song-row"><div class="dot ${sg.core ? 'dc' : 'dch'}"></div>
-      <div class="song-name-col"><div class="sname">${escHtml(sg.name)}</div>${sg.meta ? `<div class="smeta">${escHtml(sg.meta)}</div>` : ''}</div>
+      <div class="song-name-col"><div class="sname">${escHtml(sg.name)}</div>${sg.meta ? `<div class="smeta">${escHtml(tf(sg, 'meta'))}</div>` : ''}</div>
       ${vids.length ? `<div class="song-vids">${vids.join('')}</div>` : ''}
       ${tagHtml}</div>`;
   };
