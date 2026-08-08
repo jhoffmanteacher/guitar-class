@@ -741,6 +741,10 @@
     'hub.backing':           { en: 'Backing', es: 'Pista' },
     'hub.tagCore':           { en: 'Core', es: 'Básica' },
     'hub.tagChoice':         { en: 'Choice', es: 'A elección' },
+    /* Song-list badges. All four agree with "canción" (feminine). ES stays short
+       so the badge doesn't wrap: "Extra" for Supp rather than "Complementaria". */
+    'hub.tagFocus':          { en: 'Focus', es: 'Destacada' },
+    'hub.tagSupp':           { en: 'Supp', es: 'Extra' },
     'hub.coreTitle':         { en: 'Core songs', es: 'Canciones básicas' },
     'hub.choiceTitle':       { en: 'Choice menu', es: 'Menú a elección' },
     'hub.groupRiffs':        { en: 'First riffs & single notes', es: 'Primeros riffs y notas individuales' },

@@ -2771,6 +2771,16 @@ function songVidButtonsHtml(s, onclickFor){
   if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="${onclickFor('backing')}" title="${escAttr(t('songs.jamTrackTitle'))}"><span class="svb-play">&#x25B6;</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> ${t('songs.backingTrack')}${s.backingKey?` (${s.backingKey})`:''}</button>`);
   return vids;
 }
+/* Song-list badge ("Core" / "Choice" / "Focus" / "Supp"). The type lives in the
+   module data as an English keyword, so it has to go through i18n here or the
+   badge stays English in Español mode — which it did site-wide until 2026-08-08.
+   Unknown types fall back to the raw keyword rather than rendering blank. */
+function songTypeLabel(type, core){
+  const key = { Core: 'hub.tagCore', Choice: 'hub.tagChoice',
+                Focus: 'hub.tagFocus', Supp: 'hub.tagSupp' }[type];
+  if(key) return t(key);
+  return type || t(core ? 'hub.tagCore' : 'hub.tagChoice');
+}
 function buildSongs(w){
   const rows=w.songs.map((s,i)=>{
     const nameEl = s.url ? `<button class="rp-trigger" onclick="loadSong('${w.id}',${i})">${s.name}</button>` : s.name;
@@ -2778,7 +2788,7 @@ function buildSongs(w){
     // Song Journey pages are same-origin (tabs/*.html), opened in a new tab so app state stays put.
     if(s.journeyUrl) vids.push(`<button class="song-vid-btn journey" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="${escAttr(t('songs.oneSongLayers'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> ${t('songs.songJourney')}</button>`);
     const vidsEl = vids.length ? `<div class="song-vids">${vids.join('')}</div>` : '';
-    return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div class="song-name-col"><div class="sname">${nameEl}</div><div class="smeta">${diffDotsHtml(s.level)}${tf(s,'meta')}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${s.type}</span></div>`;
+    return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div class="song-name-col"><div class="sname">${nameEl}</div><div class="smeta">${diffDotsHtml(s.level)}${tf(s,'meta')}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${escHtml(songTypeLabel(s.type, s.core))}</span></div>`;
   }).join('');
   const requestSlot = `<div class="song-row song-request"><div class="song-request-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg></div><div><div class="sname">${t('songs.yourPick')}</div><div class="smeta">${t('songs.yourPickBody')}</div></div></div>`;
   const diffLegend = `<div class="leg"><span class="song-diff diff-1">&#x25CF;<span class="song-diff-empty">&#x25CB;&#x25CB;</span></span>&#x2192;<span class="song-diff diff-3">&#x25CF;&#x25CF;&#x25CF;</span> ${t('songs.diffLegend')}</div>`;
@@ -5884,7 +5894,7 @@ async function renderSongsHub(){
     // The six pinned rows sit directly under the "Core songs" section header,
     // where the tag would just repeat it — suppress there only; Focus songs
     // (core:true, type:'Focus') still show their tag inside the choice groups.
-    const tagHtml = isCoreSix(e) ? '' : `<span class="stag ${sg.core ? 'stag-core' : ''}">${escHtml(sg.type || t(sg.core ? 'hub.tagCore' : 'hub.tagChoice'))}</span>`;
+    const tagHtml = isCoreSix(e) ? '' : `<span class="stag ${sg.core ? 'stag-core' : ''}">${escHtml(songTypeLabel(sg.type, sg.core))}</span>`;
     return `<div class="song-row"><div class="dot ${sg.core ? 'dc' : 'dch'}"></div>
       <div class="song-name-col"><div class="sname">${escHtml(sg.name)}</div>${sg.meta ? `<div class="smeta">${escHtml(tf(sg, 'meta'))}</div>` : ''}</div>
       ${vids.length ? `<div class="song-vids">${vids.join('')}</div>` : ''}
