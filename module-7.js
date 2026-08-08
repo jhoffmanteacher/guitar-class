@@ -1022,7 +1022,7 @@ MODULE_SONGS[7] = [
       { name: '"Oye Mi Amor" — Maná', meta: 'Full barre-chord progression · Bm–A', meta_es: 'Progresión completa de acordes con cejilla · Bm–A', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=UlkG3DmZJEI',
         tutorialUrl: 'https://www.youtube.com/watch?v=F4BbTdP2v70' },
-      { name: '"Está Dañada" — Iván Cornejo', meta: 'C#m–E–A–G# · barre-chord sierreño progression', meta_es: 'C#m–E–A–G# · progresión sierreña con acordes con cejilla', type: 'Choice', core: false, level: 3,
+      { name: '"Está Dañada" — Iván Cornejo', meta: 'C#m–E–A · barre the C#m instead of using a capo', meta_es: 'C#m–E–A · haz cejilla en el C#m en lugar de usar capo', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=rBLLbgD0FsM',
         tutorialUrl: 'https://www.youtube.com/watch?v=DjSzkgEeddc' },
       { name: '"Hotel California" — Eagles', meta: 'Bm–F#–A–E·G–D–Em–F# · lots of barre practice', meta_es: 'Bm–F#–A–E·G–D–Em–F# · mucha práctica de cejilla', type: 'Choice', core: false, level: 3,
