@@ -195,7 +195,7 @@
     // ── Nav rail ──
     'nav.module':         { en: 'Module', es: 'Módulo' },
     'nav.thisSet':        { en: 'This set', es: 'Esta unidad' },
-    'nav.prevSet':        { en: 'the previous set', es: 'la unidad anterior' },
+    'nav.prevSet':        { en: 'the previous set', es: 'unidad anterior' },
     'set.about':          { en: 'About this set', es: 'Sobre esta unidad' },
     'nav.comingSoonHtml': { en: 'This set\'s content will appear here when it\'s ready.<br>Check back soon!',
       es: 'El contenido de esta unidad aparecerá aquí cuando esté listo.<br>¡Vuelve pronto!' },
@@ -707,13 +707,13 @@
                                es: '{note} · cuerda {string}, traste {ord}' },
 
     // ── Sequential-gate messages + locked-pill tooltips/aria ──
-    'gate.lockedUntilAria':  { en: '{set} — locked until {prev} is finished', es: '{set} — bloqueada hasta terminar {prev}' },
+    'gate.lockedUntilAria':  { en: '{set} — locked until {prev} is finished', es: '{set} — bloqueada hasta terminar la {prev}' },
     'gate.lockedTitle':      { en: 'Locked — mark every skill in {prev} as "I\'ve got it!" to unlock {set}.',
-                               es: 'Bloqueada — marca cada destreza de {prev} como "¡Ya lo tengo!" para desbloquear {set}.' },
+                               es: 'Bloqueada — marca cada destreza de la {prev} como "¡Ya lo tengo!" para desbloquear la {set}.' },
     'gate.finishFirstLong':  { en: 'Finish {prev} first — mark all its skills "I\'ve got it!" to unlock {set}.',
-                               es: 'Primero termina {prev} — marca todas sus destrezas con "¡Ya lo tengo!" para desbloquear {set}.' },
-    'gate.finishFirstShort': { en: 'Finish {prev} first to unlock {set}.', es: 'Primero termina {prev} para desbloquear {set}.' },
-    'gate.unlocksAfter':     { en: '{set} unlocks after you finish {prev}.', es: '{set} se desbloquea cuando termines {prev}.' },
+                               es: 'Primero termina la {prev} — marca todas sus destrezas con "¡Ya lo tengo!" para desbloquear la {set}.' },
+    'gate.finishFirstShort': { en: 'Finish {prev} first to unlock {set}.', es: 'Primero termina la {prev} para desbloquear la {set}.' },
+    'gate.unlocksAfter':     { en: '{set} unlocks after you finish {prev}.', es: 'La {set} se desbloquea cuando termines la {prev}.' },
     'gate.reviewPreviewTitle': { en: 'Preview only — finish marking every skill on every set as "I\'ve got it!" to unlock this self-assessment.',
                                es: 'Solo vista previa — termina de marcar cada destreza de cada unidad con "¡Ya lo tengo!" para desbloquear esta autoevaluación.' },
     'gate.pillAllComplete':  { en: '{set} — all {total} skills complete', es: '{set} — las {total} destrezas completas' },
