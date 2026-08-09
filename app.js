@@ -418,8 +418,10 @@ async function loadProgress(){
       // predate the field, then mirror back so the offline copy stays fresh.
       practiceLog   = doc.data().practiceLog || loadLocalPracticeLog();
       savePracticeLogLocal();
-    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); restoreLocalPlace(); }
-  } catch(e){ progressLoadFailed=true; console.warn('[guitar-class] progress load failed — running read-only on derived data', e); progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); restoreLocalPlace(); }
+      songReady     = doc.data().songReady || {};
+      songReadyAt   = doc.data().songReadyAt || {};
+    } else { progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; restoreLocalPlace(); }
+  } catch(e){ progressLoadFailed=true; console.warn('[guitar-class] progress load failed — running read-only on derived data', e); progress={}; lastModuleNum=1; lastSetId=null; responses={}; completed={}; classActivities={}; games={}; streak={ count:0, lastDay:null }; practiceLog=loadLocalPracticeLog(); songReady={}; songReadyAt={}; restoreLocalPlace(); }
 }
 
 /* ── Games access (teacher-controlled) ──
@@ -695,6 +697,11 @@ function setSaveMsg(key, clearAfterMs){
 /* ── Render ── */
 let lastModuleNum = 1;
 let lastSetId = null;
+/* Song Journey readiness, read-only here: written by tabs/journey.js into the
+   same progress doc (songReady[songId] = {layer: bool}, songReadyAt[songId] =
+   ms). The resume card is the only consumer — never write these from app.js. */
+let songReady = {};
+let songReadyAt = {};
 
 let _fullModuleDataQueued = false;
 function renderAll(){
@@ -1692,6 +1699,9 @@ async function onModuleChange(moduleNum, restoreSetId){
   const tw = moduleSets.find(w=>w.id===target);
   if(tw && isSetLocked(tw)) activateSet(target, {peek:true});
   else activateSet(target);
+  // First completed render of the session: the restored set is on screen and
+  // its data is loaded, so the resume card can finally compute step counts.
+  if(!_resumeCardBuilt){ _resumeCardBuilt = true; renderResumeCard(); }
 }
 
 // Per-set completion tally from the student's own progress.
@@ -1700,6 +1710,126 @@ function setCompletion(w){
   const skills = (w.skills && w.skills.length) ? w.skills : [];
   const done = skills.filter(s=>progress[s.id]==='gotit').length;
   return { done, total: skills.length };
+}
+
+/* ── "Pick up where you left off" resume card ──
+   One card above the set panels, filled once per page load (onModuleChange's
+   first completed run), so a student sitting down at Station C lands on a
+   one-tap route back to exactly where they stopped — the right station tab
+   in their current set, and the Song Journey they touched most recently.
+   Session-only: dismissing or using it removes it until the next page load,
+   which on a class Chromebook means the next class period. Read-only over
+   `completed` / `songReady` — it never writes progress. */
+const SONG_JOURNEYS = [
+  { id:'seven-nation-army',        name:'Seven Nation Army',        url:'tabs/seven-nation-army.html' },
+  { id:'all-along-the-watchtower', name:'All Along the Watchtower', url:'tabs/all-along-the-watchtower.html' },
+  { id:'sweet-child-o-mine',       name:'Sweet Child O\u2019 Mine', url:'tabs/sweet-child-o-mine.html' },
+  { id:'luna',                     name:'Luna',                     url:'tabs/luna.html' },
+  { id:'let-it-be',                name:'Let It Be',                url:'tabs/let-it-be.html' },
+  { id:'the-cure',                 name:'the cure',                 url:'tabs/the-cure.html' },
+];
+let _resumeCardBuilt = false;    // build once per page load…
+let _resumeCardClosed = false;   // …and never resurrect after dismiss/use
+
+/* Steps done / total for one station of a set — a standalone twin of
+   buildStations' stationStepCounts (same ns-per-section key scheme, same
+   tuning-warm-up exclusion), kept separate because the resume card needs
+   counts for BOTH stations, not just the panel being built. If the key
+   scheme ever changes, change both. */
+function resumeStationCounts(w, stationId){
+  const s = w.stations && w.stations[stationId];
+  if(!s) return null;
+  let total=0, done=0;
+  const count=(steps,ns)=>steps.forEach((st,idx)=>{
+    total++;
+    if(completed[`${w.id}-${ns}-${idx}`]===true) done++;
+  });
+  if(s.sections && s.sections.length){
+    s.sections.filter(sec=>!isTuningWarmupSection(sec, w.moduleNum))
+      .forEach((sec,gi)=>count(sec.steps, `${stationId}-sec${gi}`));
+  } else if(s.steps){
+    count(s.steps, stationId);
+  }
+  return { total, done };
+}
+
+/* The module row's target: first station (B before C) with steps left, else
+   the skills checklist. null for module reviews / coming-soon panels — those
+   restore on their own and have no station tabs to point at. */
+function resumeModuleTarget(){
+  const panel = activeWeekPanel();
+  if(!panel) return null;
+  const w = SETS.find(x=>x.id===panel.dataset.id);
+  if(!w || w.comingSoon) return null;
+  for(const st of ['b','c']){
+    const p = resumeStationCounts(w, st);
+    if(p && p.total && p.done < p.total) return { w, station:st, tab:'station-'+st, done:p.done, total:p.total };
+  }
+  const pb = resumeStationCounts(w, 'b');
+  return (pb && pb.total) ? { w, station:null, tab:'checklist' } : null;
+}
+
+/* The song row: the most recently touched Journey that still has unchecked
+   layers. Docs from before the songReadyAt stamp existed sort as 0 and fall
+   back to canonical song order — still a sensible pick, just not recency. */
+function resumeSongPick(){
+  const c = SONG_JOURNEYS.map(sj=>{
+    const map = songReady && songReady[sj.id];
+    if(!map) return null;
+    const keys = Object.keys(map);
+    if(!keys.length) return null;
+    const ready = keys.filter(k=>map[k]===true).length;
+    return { song:sj, ready, total:keys.length, at:(songReadyAt && songReadyAt[sj.id]) || 0 };
+  }).filter(Boolean).filter(x=>x.ready < x.total);
+  if(!c.length) return null;
+  c.sort((a,b)=>b.at-a.at);
+  return c[0];
+}
+
+function renderResumeCard(){
+  const host = document.getElementById('resume-card');
+  if(!host || _resumeCardClosed) return;
+  const song = resumeSongPick();
+  // Day-one students (no step checked anywhere, no song touched) skip the
+  // card entirely — "resume" would be noise on a first visit.
+  const anyProgress = Object.keys(completed||{}).some(k=>completed[k]===true);
+  const mod = anyProgress ? resumeModuleTarget() : null;
+  if(!mod && !song){ host.hidden = true; host.innerHTML=''; return; }
+  const rows = [];
+  if(mod){
+    const meta = mod.station
+      ? `${t(mod.station==='b' ? 'nav.stationBTitle' : 'nav.stationCTitle')} · ${t('progress.stepsDone',{done:mod.done,total:mod.total})}`
+      : t('resume.checklistNext');
+    rows.push(`<div class="resume-row">
+      <div class="resume-what"><strong>${escHtml(tSetLabel(mod.w.label))}</strong><span class="resume-meta">${escHtml(meta)}</span></div>
+      <button type="button" class="resume-go" onclick="resumeGoModule('${escAttr(mod.w.id)}','${escAttr(mod.tab)}')">${t('resume.continue')}</button>
+    </div>`);
+  }
+  if(song){
+    rows.push(`<div class="resume-row">
+      <div class="resume-what"><strong>${escHtml(song.song.name)}</strong><span class="resume-meta">${escHtml(t('journey.progPill',{ready:song.ready,n:song.total}))}</span></div>
+      <button type="button" class="resume-go" onclick="resumeGoSong('${escAttr(song.song.url)}')">${t('resume.open')}</button>
+    </div>`);
+  }
+  host.innerHTML = `<div class="resume-head">
+      <span class="resume-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5"/><path d="M9 2h6"/></svg> ${t('resume.title')}</span>
+      <button type="button" class="resume-close" onclick="dismissResumeCard()" aria-label="${escAttr(t('resume.dismiss'))}" title="${escAttr(t('resume.dismiss'))}">&times;</button>
+    </div>${rows.join('')}`;
+  host.hidden = false;
+}
+
+function dismissResumeCard(){
+  _resumeCardClosed = true;
+  const host = document.getElementById('resume-card');
+  if(host){ host.hidden = true; host.innerHTML=''; }
+}
+function resumeGoModule(setId, tab){
+  dismissResumeCard();
+  switchTabById(setId, tab);
+}
+function resumeGoSong(url){
+  dismissResumeCard();
+  window.open(url, '_blank', 'noopener');
 }
 
 function renderPills(moduleNum){
@@ -5015,6 +5145,8 @@ window.addEventListener('gc-langchange', function(){
   // switching to Spanish would keep matching only the stale English index.
   if(typeof searchIndex !== 'undefined') searchIndex = null;
   if(typeof lastModuleNum !== 'undefined' && document.getElementById('week-pills')) renderPills(lastModuleNum);
+  // Rebuild the resume card in the new language (no-op if dismissed/unused).
+  if(_resumeCardBuilt && !_resumeCardClosed) renderResumeCard();
   if(typeof syncRailStations === 'function') syncRailStations();
   if(typeof populateModuleDropdown === 'function') populateModuleDropdown();
   rebuildModuleContentPanels();

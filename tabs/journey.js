@@ -412,8 +412,12 @@ function queueSave(){
 function flushSave(){
   if(!fbUser || !dirty) return;
   dirty = false;
-  var payload = { songReady: {} };
+  var payload = { songReady: {}, songReadyAt: {} };
   payload.songReady[SONG_ID] = currentReady();
+  /* Per-song "last touched" stamp (ms). The main app's resume card sorts on
+     it to say which song the student was working on most recently; legacy
+     docs without it fall back to first-unfinished order over there. */
+  payload.songReadyAt[SONG_ID] = Date.now();
   fbDb.collection('progress').doc(fbUser.uid).set(payload, { merge: true })
     .then(function(){ setSaveMsg('journey.saved'); setTimeout(function(){ setSaveMsg(''); }, 2000); })
     .catch(function(){ dirty = true; setSaveMsg('journey.saveFailed'); });

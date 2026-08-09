@@ -278,6 +278,12 @@
 
     // ── Progress strings (parameterized — never concatenate numbers by hand) ──
     'progress.stepsDone':      { en: '{done} of {total} steps done', es: '{done} de {total} pasos completados' },
+    /* "Pick up where you left off" card (renderResumeCard, app.js) */
+    'resume.title':         { en: 'Pick up where you left off', es: 'Retoma donde lo dejaste' },
+    'resume.continue':      { en: 'Continue', es: 'Continuar' },
+    'resume.open':          { en: 'Open', es: 'Abrir' },
+    'resume.checklistNext': { en: 'All steps done — next: My skills checklist', es: 'Todos los pasos completados — siguiente: Mi lista de destrezas' },
+    'resume.dismiss':       { en: 'Hide this', es: 'Ocultar esto' },
     'progress.skillsMastered': { en: '{done} of {total} skills mastered across all {modules} modules.',
                                  es: '{done} de {total} destrezas dominadas en los {modules} módulos.' },
     'progress.overall':        { en: 'Overall', es: 'En total' },

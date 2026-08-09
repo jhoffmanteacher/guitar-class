@@ -1122,6 +1122,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 
   /* Hide all on-screen chrome */
   .header,.rail,.rail-backdrop,.skip-link,.module-select-wrap,.module-strip,.module-strip-label,.week-pills,
+  .resume-card,
   .student-footer,
   .video-overlay,
   .fab-group,.tabs,.save-ind,
@@ -2243,3 +2244,27 @@ body.games-open{overflow:hidden}
   border-left:3px solid var(--green-text);color:var(--text2);font-style:italic}
 .got-it-lab{font-style:normal;font-weight:600;color:var(--green-text);margin-right:4px}
 .step-done .got-it{border-left-color:var(--border2)}
+
+/* ── "Pick up where you left off" resume card (renderResumeCard, app.js) ──
+   One quiet purple-tinted card above the set panels: a title row, then one
+   row per resume target (current set's station · most recent Song Journey),
+   each with a single filled action button. Session-only, so no persistence
+   styling — dismissing it just empties the container. */
+.resume-card{background:var(--purple-bg2);border:1px solid var(--purple-border);
+  border-radius:var(--radius);box-shadow:var(--shadow-card);
+  padding:12px 14px;margin:0 0 16px}
+.resume-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.resume-title{display:flex;align-items:center;gap:7px;font-weight:700;color:var(--purple-text)}
+.resume-title svg{width:1.05em;height:1.05em;flex:none}
+.resume-close{background:none;border:0;color:var(--text3);font-size:1.35rem;line-height:1;
+  padding:2px 6px;cursor:pointer;border-radius:var(--radius-sm)}
+.resume-close:hover{color:var(--text);background:var(--purple-bg)}
+.resume-row{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:8px 0;border-top:1px solid var(--purple-border)}
+.resume-row:first-of-type{border-top:0}
+.resume-what{display:flex;flex-direction:column;gap:2px;min-width:0}
+.resume-what strong{color:var(--text);font-size:0.9375rem}
+.resume-meta{color:var(--text2);font-size:0.8125rem}
+.resume-go{flex:none;background:var(--purple-accent);color:#fff;border:0;font-weight:700;
+  font-size:0.875rem;padding:8px 16px;border-radius:999px;cursor:pointer;min-height:38px}
+.resume-go:hover{background:var(--purple-text)}

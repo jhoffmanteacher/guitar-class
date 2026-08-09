@@ -360,6 +360,9 @@
           <div class="page-body" id="class-activities-body"></div>
         </div>
       </div>
+      <!-- "Pick up where you left off" — filled once per page load by
+           renderResumeCard() (app.js); stays hidden for brand-new students. -->
+      <div id="resume-card" class="resume-card" hidden></div>
       <div id="week-panels"></div>
       <!-- The footer rides at the end of the reading column, not below the
            whole shell: .main is its own scroll container now, so anything

@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-09 — "Pick up where you left off"
+
+### Added
+
+- **A new card at the top of the practice page shows exactly where you
+  stopped last time** — the station you were working through in your current
+  set (with how many steps are done) and the Song Journey you touched most
+  recently (with how many layers you've marked ready). One tap on Continue
+  or Open takes you straight there, so you can get playing without hunting
+  for your spot. The × hides it until next time; brand-new students won't
+  see it until there's something to come back to.
+
 ## 2026-08-09 — Fixes from a full-site error sweep
 
 ### Fixed
