@@ -2414,6 +2414,26 @@ function isEarSparkStep(s){
   return /^Ear Spark \(/.test(s.text || '');
 }
 
+/* The chili that marks the spicy optional level-up card (Module 7's Sweet
+   Child intro riff). Same rule as ICO_BOLT: the icon is presentation, so it
+   lives here — module data stays plain text. */
+const ICO_CHILI = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" ' +
+  'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ' +
+  'style="width:1em;height:1em;vertical-align:-0.15em">' +
+  '<path d="M16.5 7.5c1.2-.4 2.1-1.3 2.5-2.5"/>' +
+  '<path d="M19 5c1 0 2-.3 2.7-1"/>' +
+  '<path d="M16.5 7.5c2 .8 3 2.8 2.4 5.4-.7 3.2-3.4 6.3-7.4 7.9-3.2 1.3-6.5 1.2-8.5-.3 2.6-.2 4.6-1.2 6-2.9 1-1.2 1.6-2.7 2-4.5.5-2.6 2.2-4.8 5.5-5.6z"/></svg>';
+
+/* Spicy level-up — the optional harder-goal card. Matched on the English
+   title/text the same way isEarSparkSection()/isEarSparkStep() are, so the
+   _es twin and any future translation come along for free. */
+function isSpicyLevelUpSection(sec){
+  return /^Level-up — the "Sweet Child/.test(sec.title || '');
+}
+function isSpicyLevelUpStep(s){
+  return /^Try it: learn the most famous riff/.test(s.text || '');
+}
+
 /* ── Stations ── */
 function buildStations(w, stationId){
   /* Focus mode is a site-wide view pref, read once per build: it only changes
@@ -2429,7 +2449,7 @@ function buildStations(w, stationId){
    // a card with nothing open would render empty: step 1 stays open instead.
    const openIdx = curIdx >= 0 ? curIdx : (openIfNoCur ? 0 : -1);
    return steps.map((s,i)=>{
-    const text=((isEarSparkStep(s) ? ICO_BOLT + ' ' : '') + tf(s,'text')).replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
+    const text=((isEarSparkStep(s) ? ICO_BOLT + ' ' : isSpicyLevelUpStep(s) ? ICO_CHILI + ' ' : '') + tf(s,'text')).replace(/<a href="(https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)[^"]*)"([^>]*)>([^<]*)<\/a>/g,(match,url,attrs,label)=>{
       const safe=label.replace(/'/g,"\\'");
       // data-ext links can't be embedded (official recordings block it) — open on YouTube in a new tab.
       if(/data-ext/.test(attrs)){
@@ -2602,7 +2622,7 @@ function buildStations(w, stationId){
     const hasCur = allowCur && sec.steps.some((st,idx)=>completed[`${w.id}-${ns}-${idx}`]!==true);
     const openIfNoCur = noneLeft && gi === 0;   // whole station done → section 1, step 1 stays open
     const html = `<div class="stp-sec${(hasCur || openIfNoCur) ? ' sec-cur' : ''}">
-      <div class="stp-sec-label">${isEarSparkSection(sec) ? ICO_BOLT + ' ' : ''}${tf(sec,'title')}</div>
+      <div class="stp-sec-label">${isEarSparkSection(sec) ? ICO_BOLT + ' ' : isSpicyLevelUpSection(sec) ? ICO_CHILI + ' ' : ''}${tf(sec,'title')}</div>
       <ul class="steps">${stepsHtml(sec.steps, ns, numOffset, allowCur, openIfNoCur)}</ul>
     </div>`;
     if(hasCur) foundCur = true;

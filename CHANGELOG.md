@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-09 — Module 7 tidy-up: the last challenge gets its number
+
+### Changed
+
+- **The F# and Bb barre challenge is now "Challenge 5"** — it was the only
+  challenge in the module without a number.
+- **The chili on the Sweet Child O' Mine level-up card is now a drawn icon**
+  matching the rest of the site's icon style, instead of a phone-style emoji
+  that looked different depending on the device.
+
 ## 2026-08-09 — "Pick up where you left off"
 
 ### Added

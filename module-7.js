@@ -873,13 +873,13 @@ SETS.push(
             ]
           },
           {
-            title: '🌶️ Level-up — the "Sweet Child O\' Mine" intro riff (optional harder goal)',
-            title_es: '🌶️ Sube de nivel — el riff de intro de "Sweet Child O\' Mine" (meta opcional más difícil)',
+            title: 'Level-up — the "Sweet Child O\' Mine" intro riff (optional harder goal)',
+            title_es: 'Sube de nivel — el riff de intro de "Sweet Child O\' Mine" (meta opcional más difícil)',
             steps: [
           {
             label: 'Level-up: "Sweet Child O\' Mine" intro', label_es: 'Sube de nivel: intro de "Sweet Child O\' Mine"',
-            text: '🌶️ Try it: learn the most famous riff in the course.<ol><li>Watch <a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a> (played slow and full speed, with the TAB on screen).</li><li>Learn just the first bar.</li><li>Play it slowly.</li></ol>No score, no rush — this is a late-course optional challenge you can keep practicing a little at a time.',
-            text_es: '🌶️ Pruébalo: aprende el riff más famoso del curso.<ol><li>Mira <a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a> (tocado lento y a velocidad completa, con el TAB en pantalla).</li><li>Aprende solo el primer compás.</li><li>Tócalo despacio.</li></ol>Sin puntaje, sin apuro — este es un reto opcional de fin de curso que puedes seguir practicando poco a poco.',
+            text: 'Try it: learn the most famous riff in the course.<ol><li>Watch <a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a> (played slow and full speed, with the TAB on screen).</li><li>Learn just the first bar.</li><li>Play it slowly.</li></ol>No score, no rush — this is a late-course optional challenge you can keep practicing a little at a time.',
+            text_es: 'Pruébalo: aprende el riff más famoso del curso.<ol><li>Mira <a href="https://www.youtube.com/watch?v=EBNlYH4P5r8" target="_blank">Sweet Child O\' Mine Intro in Standard Tuning – Jbf Music &amp; Guitar</a> (tocado lento y a velocidad completa, con el TAB en pantalla).</li><li>Aprende solo el primer compás.</li><li>Tócalo despacio.</li></ol>Sin puntaje, sin apuro — este es un reto opcional de fin de curso que puedes seguir practicando poco a poco.',
             hint: 'The "Sweet Child O\' Mine" intro lives up high on the D, G, and B strings around the 12th–15th frets, picked one note at a time. The lesson is in standard tuning — the same tuning your guitar is already in — so you can play along directly. (The original record is tuned a half-step lower, so you\'ll sound slightly higher than the album; that\'s normal.) Loop just the first bar until it\'s clean before adding more.',
             hint_es: 'La intro de "Sweet Child O\' Mine" vive arriba en las cuerdas Re, Sol y Si, alrededor de los trastes 12–15, pulsada una nota a la vez. La lección está en afinación estándar — la misma afinación en la que ya está tu guitarra — así que puedes tocar junto directamente. (La grabación original está afinada medio tono más abajo, así que vas a sonar ligeramente más agudo que el álbum; eso es normal.) Repite solo el primer compás hasta que salga limpio antes de agregar más.'
           }
@@ -902,7 +902,7 @@ SETS.push(
             title_es: 'Las últimas dos cejillas — F# y Bb',
             steps: [
               {
-                label: 'Challenge — F# and Bb, the last two', label_es: 'Reto — F# y Bb, las últimas dos',
+                label: 'Challenge 5 — F# and Bb, the last two', label_es: 'Reto 5 — F# y Bb, las últimas dos',
                 text: '<ol><li>F# major is your E-shape barre at fret 2 (root F# on the low E string).</li><li>Bb major is your A-shape barre at fret 1 (root Bb on the A string, low E muted).</li><li>Play each one cleanly, then trade F# ↔ Bb, one strum apiece.</li></ol>You\'ve got it when: both ring clean at these tight low frets and you can name each by its root.',
                 text_es: '<ol><li>F# mayor es tu cejilla en forma de E en el traste 2 (raíz F# en la cuerda Mi grave).</li><li>Bb mayor es tu cejilla en forma de A en el traste 1 (raíz Bb en la cuerda La, Mi grave silenciada).</li><li>Toca cada una de forma limpia, y luego alterna F# ↔ Bb, un rasgueo cada una.</li></ol>Lo tienes cuando: ambas suenan limpias en estos trastes bajos y apretados y puedes nombrar cada una por su raíz.',
                 hint: 'You\'ve slid both barre shapes all over the neck — these two are the lowest, and the last two shapes left in this module. Same two shapes you already own, just parked down low where the strings fight hardest. F#: the E-shape bar on fret 2 — one fret above the open E chord. Bb: the A-shape bar on fret 1 — the index bars from the A string down with its tip leaning over the low E string just enough to deaden it, and your middle, ring and pinky take the D, G, and B strings at fret 3 (one finger per string, the same way you built B, C and D) — one fret above the open A chord. Read the roots: the low E string fret 2 = F#, the A string fret 1 = Bb. Tap ▶ to hear each chord.',
