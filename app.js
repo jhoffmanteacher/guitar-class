@@ -4691,8 +4691,19 @@ function coachGatePractice(sid, wid){
    because two decks can be the same drill (m2w1-s3 and m3w1-s4 both deal the
    A string), and a student who already proved a string shouldn't re-prove it
    one module later. */
-const DRILL_GATE_MIN = 9;      // of 10 — matches the deck's own ≥90% check-off offer
+const DRILL_GATE_PCT = 0.9;    // matches the deck's own ≥90% check-off offer
 let drillSkillSession = {};    // sid → best this session (covers dev-bypass / signed-out)
+/* The gate threshold as a raw hit-count, scaled to the drill's own rounds
+   (falls back to SD_ROUNDS if the skill isn't drill-gated — callers only use
+   this after confirming skillIsDrillGated(sid)). Was a bare "9" that only
+   happened to equal 90% because every shuffle drill today uses rounds:10 —
+   a future drill with fewer rounds would make the old constant unreachable
+   even on a perfect run. */
+function drillGateThreshold(sid){
+  const hit = skillDrillStep(sid);
+  const rounds = (hit && hit.drill.rounds) || SD_ROUNDS;
+  return Math.ceil(rounds * DRILL_GATE_PCT);
+}
 function skillDrillStep(sid){
   for(const w of (SETS||[])){
     for(const stId of ['b','c']){
@@ -4875,7 +4886,7 @@ function toggleSkill(sid, wid, which){
         openCoachGate(sid, wid);
         return false;
       }
-      if(!drillGateBypass && !coachGateBypass && skillIsDrillGated(sid) && drillGateBest(sid) < DRILL_GATE_MIN){
+      if(!drillGateBypass && !coachGateBypass && skillIsDrillGated(sid) && drillGateBest(sid) < drillGateThreshold(sid)){
         openDrillGate(sid, wid);
         return false;
       }

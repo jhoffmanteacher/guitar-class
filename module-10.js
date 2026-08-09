@@ -399,7 +399,7 @@ SETS.push(
                 text_es: 'Pruébalo con "Luna": su solo vive en la pentatónica menor de D aunque la canción esté en F mayor. Descubre por qué usando lo que acabas de aprender sobre tonalidades relativas.',
                 hint: 'D minor is exactly 3 frets down from F — the same relative relationship you just used on "Watchtower".',
                 hint_es: 'D menor está exactamente 3 trastes abajo de F — la misma relación relativa que acabas de usar en "Watchtower".',
-                skills: [5],
+                skills: [6],
                 response: { type: 'mc', prompt: '"Luna" is in F major, which is exactly why its solo uses:',
                   prompt_es: '"Luna" está en F mayor, y por eso mismo su solo usa:',
                   answer: 1,
@@ -493,7 +493,7 @@ SETS.push(
                 stuck_es: 'Toca primero el riff mismo para asentar la sensación, y luego toca libremente la escala de blues sobre el mismo groove (un groove es la sensación rítmica constante).',
                 levelUp: 'Try soloing over the riff using only the G blues scale, no other notes — and land on G to finish.',
                 levelUp_es: 'Intenta improvisar un solo sobre el riff usando solo la escala de blues de G, sin otras notas — y termina cayendo en G.',
-                skills: [5, 6]
+                skills: [5, 7]
               }
             ]
           },

@@ -661,7 +661,7 @@ SETS.push(
                 text_es: 'Mira: <a href="https://youtu.be/C7k0CWgI-xI" target="_blank">A Shape Major Barre Chords on Guitar (my best tricks and exercises) – JustinGuitar</a>. Fíjate que ahora la raíz vive en la cuerda La, no en la Mi grave.',
                 hint: 'Same idea as the E-shape, different string — the A-shape root is always on the A string.',
                 hint_es: 'Misma idea que la forma de E, distinta cuerda — la raíz de la forma de A siempre está en la cuerda La.',
-                skills: [1],
+                skills: [2],
                 response: { type: 'mc', prompt: 'The A-shape barre chord takes its NAME from:',
                   prompt_es: 'El acorde con cejilla en forma de A toma su NOMBRE de:',
                   answer: 0,

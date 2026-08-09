@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-09 — Fixes from a full-site error sweep
+
+### Fixed
+
+- **Two Module 10 steps now check off the right skill.** "Why 'Luna's solo is
+  in D minor" and the "Smoke on the Water" challenge were quietly crediting a
+  different skill than the one they actually teach — fixed, no change to what
+  you read or do.
+- **A Module 11 quiz now checks off A-shape barre chords, not E-shape.** The
+  "Watch: A-shape barre chords" step's quiz was crediting the wrong skill.
+- **Fret labels read correctly in Spanish again.** Chord-diagram tooltips like
+  "traste 6.º" were showing the plain number ("traste 6") instead.
+- **The Listening Coach's "Good" rating can appear again on short drills.**
+  A scoring bug made it skip straight from "Needs work" to "Great" on drills
+  with only two graded criteria — you'd never see "Good" in between.
+- **Strum Hero and Strum Radar now track your best per pattern, not overall.**
+  A genuine new best on a harder pattern could get silently ignored — and miss
+  its XP bonus — if an easier pattern already scored higher.
+- **The Finger Gym "circuit" activities now read as a checklist**, not one
+  run-on paragraph, so the steps are easier to follow mid-workout.
+
 ## 2026-08-07 — Clearer Modules 7–12 after a student walkthrough
 
 ### Removed

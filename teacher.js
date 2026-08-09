@@ -573,16 +573,23 @@ function renderTeacherActivityDetail(id){
 }
 async function teacherSetActivityHidden(id, state){
   const on = state==='hide';
+  if(!teacherClassConfig.hiddenActivities) teacherClassConfig.hiddenActivities={};
+  const had = Object.prototype.hasOwnProperty.call(teacherClassConfig.hiddenActivities, id);
+  const prev = teacherClassConfig.hiddenActivities[id];
+  if(on) teacherClassConfig.hiddenActivities[id]=true; else delete teacherClassConfig.hiddenActivities[id];
   try{
     await ensureDb();
-    if(!teacherClassConfig.hiddenActivities) teacherClassConfig.hiddenActivities={};
     const fv=firebase.firestore.FieldValue;
     // Clear the flag rather than writing false, so config/class doesn't
     // accumulate a row per activity that was ever hidden.
     const patch = on ? {hiddenActivities:{[id]:true}} : {hiddenActivities:{[id]:fv.delete()}};
-    if(on) teacherClassConfig.hiddenActivities[id]=true; else delete teacherClassConfig.hiddenActivities[id];
     await db.collection('config').doc('class').set(patch,{merge:true});
-  }catch(e){ alert('Could not save that change — check your connection and Firestore rules.'); }
+  }catch(e){
+    // Save failed — undo the optimistic local mutation so the re-render
+    // below reflects what Firestore actually holds, not what we hoped for.
+    if(had) teacherClassConfig.hiddenActivities[id]=prev; else delete teacherClassConfig.hiddenActivities[id];
+    alert('Could not save that change — check your connection and Firestore rules.');
+  }
   if(teacherView==='activities') renderTeacherActivities();
 }
 // The actual publish switch for an activity — see the schema note at the top
@@ -591,16 +598,21 @@ async function teacherSetActivityHidden(id, state){
 async function teacherSetActivityDate(id, value){
   const dateRe=/^\d{4}-\d{2}-\d{2}$/;
   if(value && !dateRe.test(value)) return;   // malformed <input> value — ignore rather than write garbage
+  if(!teacherClassConfig.activityDates) teacherClassConfig.activityDates={};
+  const had = Object.prototype.hasOwnProperty.call(teacherClassConfig.activityDates, id);
+  const prev = teacherClassConfig.activityDates[id];
+  if(value) teacherClassConfig.activityDates[id]=value; else delete teacherClassConfig.activityDates[id];
   try{
     await ensureDb();
-    if(!teacherClassConfig.activityDates) teacherClassConfig.activityDates={};
     const fv=firebase.firestore.FieldValue;
     // Clear the field rather than writing '', so config/class doesn't
     // accumulate a row per activity that was ever dated then un-dated.
     const patch = value ? {activityDates:{[id]:value}} : {activityDates:{[id]:fv.delete()}};
-    if(value) teacherClassConfig.activityDates[id]=value; else delete teacherClassConfig.activityDates[id];
     await db.collection('config').doc('class').set(patch,{merge:true});
-  }catch(e){ alert('Could not save that change — check your connection and Firestore rules.'); }
+  }catch(e){
+    if(had) teacherClassConfig.activityDates[id]=prev; else delete teacherClassConfig.activityDates[id];
+    alert('Could not save that change — check your connection and Firestore rules.');
+  }
   if(teacherView==='activities') renderTeacherActivities();
 }
 
@@ -668,11 +680,15 @@ function renderTeacherGames(){
   });
 }
 async function teacherSetClassGames(enabled){
+  const prev = teacherClassConfig.gamesEnabled;
   teacherClassConfig.gamesEnabled=enabled;
   try{
     await ensureDb();
     await db.collection('config').doc('class').set({gamesEnabled:enabled},{merge:true});
-  }catch(e){ alert('Could not save that change — check your connection and Firestore rules.'); }
+  }catch(e){
+    teacherClassConfig.gamesEnabled = prev;
+    alert('Could not save that change — check your connection and Firestore rules.');
+  }
   if(teacherView==='games') renderTeacherGames();   // skip if the view changed while the save was in flight
 }
 /* ── Manage view: pause + archive ───────────────────────────────────────
@@ -733,28 +749,38 @@ function renderTeacherManage(){
 }
 async function teacherSetStudentPaused(uid, state){
   const on = state==='paused';
+  if(!teacherClassConfig.paused) teacherClassConfig.paused={};
+  const had = Object.prototype.hasOwnProperty.call(teacherClassConfig.paused, uid);
+  const prev = teacherClassConfig.paused[uid];
+  if(on) teacherClassConfig.paused[uid]=true; else delete teacherClassConfig.paused[uid];
   try{
     await ensureDb();
-    if(!teacherClassConfig.paused) teacherClassConfig.paused={};
     const fv=firebase.firestore.FieldValue;
     // Clear the flag rather than writing false, so config/class doesn't
     // accumulate a row per student who was ever paused.
     const patch = on ? {paused:{[uid]:true}} : {paused:{[uid]:fv.delete()}};
-    if(on) teacherClassConfig.paused[uid]=true; else delete teacherClassConfig.paused[uid];
     await db.collection('config').doc('class').set(patch,{merge:true});
-  }catch(e){ alert('Could not save that change — check your connection and Firestore rules.'); }
+  }catch(e){
+    if(had) teacherClassConfig.paused[uid]=prev; else delete teacherClassConfig.paused[uid];
+    alert('Could not save that change — check your connection and Firestore rules.');
+  }
   if(teacherView==='manage') renderTeacherManage();
 }
 async function teacherSetStudentArchived(uid, state){
   const on = state==='archive';
+  if(!teacherClassConfig.archived) teacherClassConfig.archived={};
+  const had = Object.prototype.hasOwnProperty.call(teacherClassConfig.archived, uid);
+  const prev = teacherClassConfig.archived[uid];
+  if(on) teacherClassConfig.archived[uid]=true; else delete teacherClassConfig.archived[uid];
   try{
     await ensureDb();
-    if(!teacherClassConfig.archived) teacherClassConfig.archived={};
     const fv=firebase.firestore.FieldValue;
     const patch = on ? {archived:{[uid]:true}} : {archived:{[uid]:fv.delete()}};
-    if(on) teacherClassConfig.archived[uid]=true; else delete teacherClassConfig.archived[uid];
     await db.collection('config').doc('class').set(patch,{merge:true});
-  }catch(e){ alert('Could not save that change — check your connection and Firestore rules.'); }
+  }catch(e){
+    if(had) teacherClassConfig.archived[uid]=prev; else delete teacherClassConfig.archived[uid];
+    alert('Could not save that change — check your connection and Firestore rules.');
+  }
   teacherApplyRosterFilter();
   if(teacherView==='manage') renderTeacherManage();
   else renderTeacherBody();   // roster changed under whichever view is showing
@@ -765,15 +791,22 @@ function teacherToggleShowArchived(){
   if(teacherView==='manage') renderTeacherManage();
 }
 async function teacherSetStudentGames(uid, state){
+  if(!teacherClassConfig.gameOverrides) teacherClassConfig.gameOverrides={};
+  const had = Object.prototype.hasOwnProperty.call(teacherClassConfig.gameOverrides, uid);
+  const prev = teacherClassConfig.gameOverrides[uid];
+  if(state==='default') delete teacherClassConfig.gameOverrides[uid];
+  else teacherClassConfig.gameOverrides[uid] = state==='on';
   try{
     await ensureDb();
     const fv=firebase.firestore.FieldValue;
-    if(!teacherClassConfig.gameOverrides) teacherClassConfig.gameOverrides={};
-    let patch;
-    if(state==='default'){ patch={gameOverrides:{[uid]:fv.delete()}}; delete teacherClassConfig.gameOverrides[uid]; }
-    else { const val=state==='on'; patch={gameOverrides:{[uid]:val}}; teacherClassConfig.gameOverrides[uid]=val; }
+    const patch = state==='default'
+      ? {gameOverrides:{[uid]:fv.delete()}}
+      : {gameOverrides:{[uid]:state==='on'}};
     await db.collection('config').doc('class').set(patch,{merge:true});
-  }catch(e){ alert('Could not save that change — check your connection and Firestore rules.'); }
+  }catch(e){
+    if(had) teacherClassConfig.gameOverrides[uid]=prev; else delete teacherClassConfig.gameOverrides[uid];
+    alert('Could not save that change — check your connection and Firestore rules.');
+  }
   if(teacherView==='games') renderTeacherGames();   // skip if the view changed while the save was in flight
 }
 
@@ -792,13 +825,13 @@ function prNum(v){ const m=String(v).match(/\d{2,3}/); return m?m[0]:null; }
 /* Enumerate every short free-text response slot in a set, in display order,
    rebuilding the exact keys the student app saves under
    (`${set}-${station}[-sec{n}]-${stepIndex}`). Tags PR (BPM) prompts. */
-// Mirrors app.js's isTuningWarmupSection() — sectionsHtml() there drops the
+// isTuningWarmupSection() is defined in app.js, loaded before this file on
+// every page that includes teacher.js — sectionsHtml() there drops the
 // generic tuning warm-up section from the rendered/saved section list for
-// every module except 1, so the section-index math here must match or the
-// -sec{n} keys built below point at the wrong prompt.
-function isTuningWarmupSection(sec, moduleNum){
-  return sec.title === 'Warm-up — tuning check (Module 1)' && moduleNum !== 1;
-}
+// every module except 1, so the section-index math here relies on that same
+// global function rather than keeping its own copy (both are classic
+// scripts sharing one global scope; a second definition here would silently
+// shadow app.js's instead of independently verifying it).
 function setShortResponses(w){
   const out=[];
   ['b','c'].forEach(stationId=>{
@@ -808,7 +841,10 @@ function setShortResponses(w){
       const prompt=st.response.prompt||'';
       const isPR=/personal record/i.test(prompt)||/\bBPM\b/i.test(prompt);
       let label;
-      const chal=(st.text||'').match(/Challenge\s*\d+\s*[—–-]\s*([^:(]+)/);
+      // The "Challenge N — Title" prefix lives in step.label now (text opens
+      // straight into directions per the current content-authoring
+      // convention) — match against label, not text, or this never fires.
+      const chal=(st.label||'').match(/Challenge\s*\d+\s*[—–-]\s*([^:(]+)/);
       const ph=st.response.placeholder||'';
       if(isPR) label=chal?('PR — '+chal[1].trim()):'Personal record (BPM)';
       else if(/wrap-?up|reflect/i.test(st.text||'')) label='Wrap-up reflection';

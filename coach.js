@@ -970,7 +970,13 @@ function coachRenderReport(){
   const LVL = { 1: t('coach.level.needsWork'), 2: t('coach.level.gettingIt'), 3: t('coach.level.great') };
   const applicable = crits.filter(c => c.level > 0);
   const greats = applicable.filter(c => c.level === 3).length;
-  const overallLevel = greats === applicable.length ? 3 : (greats >= 2 ? 2 : 1);
+  /* "Good" (level 2) needs >=2 greats — except when only 2 criteria are
+     applicable (short melody drills routinely land here: changes is always
+     0 in melody mode, and timing/tempo can bail too), where requiring 2
+     greats is unreachable without also being a perfect 3. Drop to >=1 only
+     in that case so the middle tier stays reachable. */
+  const overallLevel = greats === applicable.length ? 3
+    : (greats >= (applicable.length === 2 ? 1 : 2) ? 2 : 1);
   let overall;
   if (greats === applicable.length) overall = '&#x1F31F; ' + t('coach.overall.great');
   else if (greats >= 2)             overall = '&#x1F4AA; ' + t('coach.overall.good');
@@ -4289,9 +4295,11 @@ function shFinish(){
   /* Cross-session best → the student's progress doc. Skipped in dev bypass
      (Firestore rejects that uid; the session best above still counts). */
   if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
-    const old = (games.sh && games.sh.best) || 0;
+    // games.sh is keyed by pattern id — a best on "reggae" must not be
+    // shadowed by (or silently overwrite) a higher score on "downs".
+    const old = (games.sh && games.sh[pat.id] && games.sh[pat.id].best) || 0;
     const isNewBest = s.score > old;
-    if (isNewBest) games.sh = { best: s.score, pattern: pat.id, bpm: s.bpm, at: new Date().toISOString().slice(0, 10) };
+    if (isNewBest) games.sh = Object.assign({}, games.sh, { [pat.id]: { best: s.score, bpm: s.bpm, at: new Date().toISOString().slice(0, 10) } });
     awardArcadeXp(isNewBest);
   }
   shRenderDone();
@@ -5185,9 +5193,10 @@ function srFinish(){
   /* Cross-session best → the student's progress doc. Skipped in dev bypass
      (Firestore rejects that uid; the session best above still counts). */
   if (typeof saveGames === 'function' && currentUser && !isDevBypassUser()){
-    const old = (games.sr && games.sr.best) || 0;
+    // games.sr is keyed by pattern id — same fix as Strum Hero's games.sh.
+    const old = (games.sr && games.sr[pat.id] && games.sr[pat.id].best) || 0;
     const isNewBest = s.acc > old;
-    if (isNewBest) games.sr = { best: s.acc, pattern: pat.id, bpm: s.bpm, at: new Date().toISOString().slice(0, 10) };
+    if (isNewBest) games.sr = Object.assign({}, games.sr, { [pat.id]: { best: s.acc, bpm: s.bpm, at: new Date().toISOString().slice(0, 10) } });
     awardArcadeXp(isNewBest);
   }
   srRenderDone();

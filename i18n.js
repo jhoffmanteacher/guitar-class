@@ -698,7 +698,7 @@
     'diagram.stringHighE':   { en: 'High E (1st string)', es: 'Mi aguda (1.ª cuerda)' },
     'diagram.noteOpen':      { en: '{note} · {string} open', es: '{note} · cuerda {string} al aire' },
     'diagram.noteFret':      { en: '{note} · {string} string, {ord} fret',
-                               es: '{note} · cuerda {string}, traste {fret}' },
+                               es: '{note} · cuerda {string}, traste {ord}' },
 
     // ── Sequential-gate messages + locked-pill tooltips/aria ──
     'gate.lockedUntilAria':  { en: '{set} — locked until {prev} is finished', es: '{set} — bloqueada hasta terminar {prev}' },
@@ -793,7 +793,6 @@
     'journey.signin':        { en: 'Sign in on the class site to save your ratings',
                                es: 'Inicia sesión en el sitio de la clase para guardar tus evaluaciones' },
     'journey.slow':          { en: 'Slow ({bpm} BPM)', es: 'Lento ({bpm} BPM)' },
-    'journey.rateAria':      { en: 'Rate this layer', es: 'Evalúa esta capa' },
     'journey.playalongTitle':{ en: 'Play-along backing track', es: 'Pista de acompañamiento para tocar encima' },
     'journey.trackFabAria':  { en: 'Play backing track', es: 'Reproducir pista de acompañamiento' },
 
