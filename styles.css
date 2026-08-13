@@ -1591,6 +1591,20 @@ body.explore-open #week-panels{display:none}
 .ca-reminder-list li:last-child{border-bottom:none}
 .ca-reminder-more{color:var(--text2);font-size:0.875rem}
 
+/* Module-review assessment pop-up — fires when the student opens the review
+   panel; the full assessment box still lives at the bottom of that panel, so
+   this is a heads-up, not a replacement. Purple to match .mr-assess-box. */
+.mr-assess-modal{border-top:3px solid var(--purple-accent)}
+.mr-assess-pop-body{font-size:0.9375rem;line-height:1.6;color:var(--text)}
+.mr-assess-pop-body p{margin:0 0 8px}
+.mr-assess-pop-note{color:var(--text2);margin-top:10px}
+.mr-assess-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:14px}
+.mr-assess-actions button{font-family:inherit;font-size:0.875rem;font-weight:600;padding:9px 16px;border-radius:20px;cursor:pointer}
+.mr-assess-go{border:1px solid var(--purple-accent);background:var(--purple-bg);color:var(--purple-text)}
+.mr-assess-go:hover{opacity:0.88}
+.mr-assess-later{border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-weight:500}
+.mr-assess-later:hover{background:var(--bg3)}
+
 /* The arcade takes the whole viewport — rail and header included. It's the one
    explore page that does (Jonathan's call, 2026-07-28): the arcade is a place
    you go, not a page you browse, and the practice scaffolding is noise once a
@@ -1990,7 +2004,7 @@ body.games-open{overflow:hidden}
    ════════════════════════════════════════════════════════════════ */
 .rail-toggle{width:44px;height:44px}
 .mr-rb{width:44px;height:44px}
-.tp-btn,.ts-btn,.timer-presets button{min-height:44px}
+.tp-btn,.ts-btn,.timer-presets button,.mr-assess-actions button{min-height:44px}
 .nav-btn,.rail-station,.wpill,.module-select,.search-input,
 .panel-next-btn,.coach-start,.back-to-top,.tab-choice-btn{min-height:44px}
 .step-resp-mc-opt,.step-mc-keyed .step-mc-opt,.sk-practice-mc-opt{min-height:44px}

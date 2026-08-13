@@ -1978,6 +1978,8 @@ function activateSet(id, opts){
   syncRailStations();   // refresh the rail's "This set" station switcher for the new set
   // Every set opens at the top, every time — no scroll-position memory.
   scrollPaneTop();
+  // Opening the Module Review pops the assessment heads-up (once per visit).
+  if(isMr) maybeShowMrAssess(parseInt(id.slice(2),10));
 }
 
 /* ── Rail station switcher ─────────────────────────────────────────────
@@ -3190,6 +3192,58 @@ function buildModuleReview(mr){
       <div>${mr.standards.map(s=>`<span class="spill">${s}</span>`).join('')}</div>
     </div>
     <div class="save-ind" id="${mrId}-save-ind" style="margin-top:10px" aria-live="polite"></div>`;
+}
+
+/* ── Assessment pop-up, once per module per visit ──
+   The assessment box itself stays where it has always been, at the bottom of
+   the review panel — this only fires when the student opens the panel, so the
+   in-person assessment can't be scrolled past unseen. Skipped on a locked
+   (preview) panel: the review isn't theirs to take yet, and the popup would
+   fire every session for a student just clicking ahead. Session-scoped like
+   the class-activities reminder, so it doesn't nag on every set switch. */
+function maybeShowMrAssess(moduleNum){
+  const mr = MODULE_REVIEWS[moduleNum];
+  if(!mr) return;
+  if(isReviewPanelLocked(`mr${moduleNum}`)) return;
+  const seenKey = `mrAssessShown:${moduleNum}`;
+  try{ if(sessionStorage.getItem(seenKey) === '1') return; }catch(e){}
+  closeMrAssess();   // never stack two overlays on the same id
+  const ov = document.createElement('div');
+  ov.className = 'daily5-overlay';
+  ov.id = 'mr-assess-overlay';
+  ov.dataset.module = moduleNum;   // so setLang can rebuild the body in place
+  ov.innerHTML = `<div class="daily5-modal mr-assess-modal" role="dialog" aria-modal="true" aria-label="${escAttr(t('review.assessHead',{n:moduleNum}))}">${buildMrAssessPop(moduleNum)}</div>`;
+  ov.addEventListener('click', e => { if(e.target === ov) closeMrAssess(); });
+  document.body.appendChild(ov);
+  document.addEventListener('keydown', mrAssessEscClose);
+  try{ sessionStorage.setItem(seenKey, '1'); }catch(e){}
+}
+/* Modal body, split out so a language switch can re-render it in place —
+   same treatment setLang gives the Daily 5 overlay. */
+function buildMrAssessPop(moduleNum){
+  const mr = MODULE_REVIEWS[moduleNum];
+  const itemsTf = tf(mr,'assessItems');
+  const body = (mr.assessItems && mr.assessItems.length)
+    ? `<p>${t('review.assessPopIntro',{n:moduleNum})}</p><ul class="mr-assess-list">${mr.assessItems.map((i,ii)=>`<li>${itemsTf[ii]}</li>`).join('')}</ul>`
+    : `<p>${t('review.assessPopIntroDflt',{n:moduleNum})}</p>`;
+  return `<div class="daily5-head"><h3 style="font:inherit;margin:0"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:16px;height:16px;vertical-align:-2px;margin-right:2px"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3v-.5a1.5 1.5 0 0 1 3 0V3"/><path d="M8 9h8M8 13h8M8 17h5"/></svg> ${t('review.assessHead',{n:moduleNum})}</h3>
+      <button type="button" class="tp-close" onclick="closeMrAssess()" aria-label="${escAttr(t('gate.closeAria'))}">&#x2715;</button></div>
+    <div class="mr-assess-pop-body">${body}<p class="mr-assess-pop-note">${t('review.assessPopNote')}</p></div>
+    <div class="mr-assess-actions">
+      <button type="button" class="mr-assess-go" onclick="mrAssessGo(${moduleNum})">${escHtml(t('review.assessPopGo'))}</button>
+      <button type="button" class="mr-assess-later" onclick="closeMrAssess()">${escHtml(t('review.assessPopLater'))}</button>
+    </div>`;
+}
+function mrAssessEscClose(e){ if(e.key === 'Escape') closeMrAssess(); }
+function closeMrAssess(){
+  const ov = document.getElementById('mr-assess-overlay');
+  if(ov) ov.remove();
+  document.removeEventListener('keydown', mrAssessEscClose);
+}
+function mrAssessGo(moduleNum){
+  closeMrAssess();
+  const box = document.querySelector(`.week-panel[data-id="mr${moduleNum}"] .mr-assess-box`);
+  if(box) box.scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 /* Jump from a module-review skill back to the lesson set that teaches it. */
@@ -5188,6 +5242,16 @@ window.addEventListener('gc-langchange', function(){
   if(d5 && typeof buildDaily5 === 'function'){
     d5.setAttribute('aria-label', t('daily5.title'));
     d5.innerHTML = buildDaily5();
+  }
+  // Same for an open module-review assessment pop-up.
+  const mrOv = document.getElementById('mr-assess-overlay');
+  if(mrOv && typeof buildMrAssessPop === 'function'){
+    const n = parseInt(mrOv.dataset.module, 10);
+    const modal = mrOv.querySelector('.mr-assess-modal');
+    if(modal){
+      modal.setAttribute('aria-label', t('review.assessHead',{n}));
+      modal.innerHTML = buildMrAssessPop(n);
+    }
   }
   // The rail Recorder popup body bakes t() results in with no data-i18n tags
   // (renderRecBody), and #mrfab-rec-body sits outside the module panels the

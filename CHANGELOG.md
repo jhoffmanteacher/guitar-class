@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-13 — The module assessment says hello when you open the review
+
+### Added
+
+- **Opening a Module Review now pops up a short heads-up about that module's
+  assessment** — what you'll be asked to play for your teacher, listed out.
+  "Take me to it" jumps straight down to the assessment box, or you can close
+  it and keep scrolling. The assessment box itself hasn't moved; it's still at
+  the bottom of the review page with the practice-run recorder, exactly where
+  it has always been. The pop-up appears once per module each time you visit
+  the site, and only once the review page is unlocked.
+
 ## 2026-08-09 — Module 7 tidy-up: the last challenge gets its number
 
 ### Changed
