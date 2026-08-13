@@ -1600,8 +1600,6 @@ body.explore-open #week-panels{display:none}
 .mr-assess-pop-note{color:var(--text2);margin-top:10px}
 .mr-assess-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end;margin-top:14px}
 .mr-assess-actions button{font-family:inherit;font-size:0.875rem;font-weight:600;padding:9px 16px;border-radius:20px;cursor:pointer}
-.mr-assess-go{border:1px solid var(--purple-accent);background:var(--purple-bg);color:var(--purple-text)}
-.mr-assess-go:hover{opacity:0.88}
 .mr-assess-later{border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-weight:500}
 .mr-assess-later:hover{background:var(--bg3)}
 

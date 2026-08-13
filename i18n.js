@@ -495,7 +495,6 @@
                                 es: 'Atención: la evaluación del módulo {n} te pide demostrar en persona las destrezas de esta página ante tu maestro.' },
     'review.assessPopNote':  { en: "It's all waiting at the bottom of this page: do a practice run, record it, and check yourself against the list before you sign up.",
                                 es: 'Todo te espera al final de esta página: haz un ensayo de práctica, grábate y revísate con la lista antes de apuntarte.' },
-    'review.assessPopGo':    { en: 'Take me to it', es: 'Llévame ahí' },
     'review.assessPopLater': { en: 'Got it', es: 'Entendido' },
     'review.whyMatters':     { en: 'Why this matters', es: 'Por qué esto importa' },
     'review.previewOnly':    { en: 'Preview only.', es: 'Solo vista previa.' },

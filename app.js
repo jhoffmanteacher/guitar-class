@@ -3230,7 +3230,6 @@ function buildMrAssessPop(moduleNum){
       <button type="button" class="tp-close" onclick="closeMrAssess()" aria-label="${escAttr(t('gate.closeAria'))}">&#x2715;</button></div>
     <div class="mr-assess-pop-body">${body}<p class="mr-assess-pop-note">${t('review.assessPopNote')}</p></div>
     <div class="mr-assess-actions">
-      <button type="button" class="mr-assess-go" onclick="mrAssessGo(${moduleNum})">${escHtml(t('review.assessPopGo'))}</button>
       <button type="button" class="mr-assess-later" onclick="closeMrAssess()">${escHtml(t('review.assessPopLater'))}</button>
     </div>`;
 }
@@ -3240,12 +3239,6 @@ function closeMrAssess(){
   if(ov) ov.remove();
   document.removeEventListener('keydown', mrAssessEscClose);
 }
-function mrAssessGo(moduleNum){
-  closeMrAssess();
-  const box = document.querySelector(`.week-panel[data-id="mr${moduleNum}"] .mr-assess-box`);
-  if(box) box.scrollIntoView({behavior:'smooth', block:'start'});
-}
-
 /* Jump from a module-review skill back to the lesson set that teaches it. */
 function goToSet(setId){
   lastSetId = setId;

@@ -11,8 +11,8 @@ see `WORKFLOW.md` and the git commit log.
 
 - **Opening a Module Review now pops up a short heads-up about that module's
   assessment** — what you'll be asked to play for your teacher, listed out.
-  "Take me to it" jumps straight down to the assessment box, or you can close
-  it and keep scrolling. The assessment box itself hasn't moved; it's still at
+  Close it with "Got it" and keep scrolling — the assessment box itself
+  hasn't moved. It's still at
   the bottom of the review page with the practice-run recorder, exactly where
   it has always been. The pop-up appears once per module each time you visit
   the site, and only once the review page is unlocked.
