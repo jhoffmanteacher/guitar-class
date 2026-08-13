@@ -3194,19 +3194,17 @@ function buildModuleReview(mr){
     <div class="save-ind" id="${mrId}-save-ind" style="margin-top:10px" aria-live="polite"></div>`;
 }
 
-/* ── Assessment pop-up, once per module per visit ──
+/* ── Assessment pop-up, every time the review is opened ──
    The assessment box itself stays where it has always been, at the bottom of
-   the review panel — this only fires when the student opens the panel, so the
-   in-person assessment can't be scrolled past unseen. Skipped on a locked
-   (preview) panel: the review isn't theirs to take yet, and the popup would
-   fire every session for a student just clicking ahead. Session-scoped like
-   the class-activities reminder, so it doesn't nag on every set switch. */
+   the review panel — this fires whenever the student opens the panel, so the
+   in-person assessment can't be scrolled past unseen. Deliberately NOT
+   once-per-visit (Jonathan's call, 2026-08-13): the point is that every trip
+   to the review restates what the assessment asks for. Skipped on a locked
+   (preview) panel — the review isn't theirs to take yet. */
 function maybeShowMrAssess(moduleNum){
   const mr = MODULE_REVIEWS[moduleNum];
   if(!mr) return;
   if(isReviewPanelLocked(`mr${moduleNum}`)) return;
-  const seenKey = `mrAssessShown:${moduleNum}`;
-  try{ if(sessionStorage.getItem(seenKey) === '1') return; }catch(e){}
   closeMrAssess();   // never stack two overlays on the same id
   const ov = document.createElement('div');
   ov.className = 'daily5-overlay';
@@ -3216,7 +3214,6 @@ function maybeShowMrAssess(moduleNum){
   ov.addEventListener('click', e => { if(e.target === ov) closeMrAssess(); });
   document.body.appendChild(ov);
   document.addEventListener('keydown', mrAssessEscClose);
-  try{ sessionStorage.setItem(seenKey, '1'); }catch(e){}
 }
 /* Modal body, split out so a language switch can re-render it in place —
    same treatment setLang gives the Daily 5 overlay. */

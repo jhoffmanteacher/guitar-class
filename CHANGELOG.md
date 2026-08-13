@@ -14,8 +14,8 @@ see `WORKFLOW.md` and the git commit log.
   Close it with "Got it" and keep scrolling — the assessment box itself
   hasn't moved. It's still at
   the bottom of the review page with the practice-run recorder, exactly where
-  it has always been. The pop-up appears once per module each time you visit
-  the site, and only once the review page is unlocked.
+  it has always been. The pop-up appears every time you open a review page
+  that's unlocked, so the assessment is never a surprise.
 
 ## 2026-08-09 — Module 7 tidy-up: the last challenge gets its number
 
