@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-16 — A Mood Chart in the side menu
+
+### Added
+
+- **New "Mood Chart" link in the Explore menu** — opens a reference page that
+  maps six moods (Peaceful, Inspiring, Joyful, Sorrowful, Dark, Aggressive) to
+  the musical choices that create them: dynamics, tempo, rhythm, and texture.
+  Tap any word for a plain-English definition, and rhythm words include a
+  song to hear it in. Opens in a new tab so your place in the module stays put.
+
 ## 2026-08-13 — The module assessment says hello when you open the review
 
 ### Added

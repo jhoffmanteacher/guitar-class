@@ -208,6 +208,7 @@
     'nav.practice':       { en: 'Practice', es: 'Practicar' },
     'nav.games':          { en: 'Games', es: 'Juegos' },
     'nav.songs':          { en: 'Songs', es: 'Canciones' },
+    'nav.moodChart':      { en: 'Mood Chart', es: 'Tabla de estados de ánimo' },
     'nav.keepPracticing': { en: 'Keep practicing', es: 'Sigue practicando' },
     'nav.myProgress':     { en: 'My progress', es: 'Mi progreso' },
     'nav.classActivities':{ en: 'In-Class Activities', es: 'Actividades de clase' },
