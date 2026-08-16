@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mood and how it is made</title>
+<style>
+:root{
+  --ink:#2d2d2a; --gray:#6e6e69; --bg:#ffffff;
+  --peaceful:#c0dd97; --peaceful-dark:#3d4730;
+  --inspiring:#cecbf6; --inspiring-dark:#42414f;
+  --joyful:#fac775; --joyful-dark:#504025;
+  --sorrowful:#b5d4f4; --sorrowful-dark:#3a444e;
+  --dark:#d3d1c7; --dark-dark:#444340;
+  --aggressive:#f09595; --aggressive-dark:#4d3030;
+  --dyn:#a8decb; --dyn-tint:#e1f5ee; --dyn-dark:#32433d;
+  --tempo:#f5c4b3; --tempo-tint:#faece7; --tempo-dark:#4a3b36;
+  --rhythm:#f4c0d1; --rhythm-tint:#fbeaf0; --rhythm-dark:#493a3f;
+  --texture:#fac775; --texture-tint:#faeeda; --texture-dark:#4b3c23;
+  --radius:10px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.35;
+}
+.wrap{max-width:1180px; margin:0 auto; padding:28px 20px 60px}
+h1{font-size:clamp(1.6rem,3.5vw,2.1rem); margin:0 0 4px; letter-spacing:-0.01em}
+.sub{color:var(--gray); font-size:.95rem; margin:0 0 26px}
+
+/* ---------- matrix ---------- */
+.chart{display:grid; grid-template-columns:minmax(230px,1.9fr) repeat(4,1fr); gap:10px}
+.moodgroup{display:contents}
+.colhead{border-radius:6px; padding:8px 12px 9px; align-self:end}
+.colhead b{display:block; font-size:.85rem}
+.colhead span{display:block; font-size:.72rem; opacity:.85}
+.colhead.dyn{background:var(--dyn); color:var(--dyn-dark)}
+.colhead.tempo{background:var(--tempo); color:var(--tempo-dark)}
+.colhead.rhythm{background:var(--rhythm); color:var(--rhythm-dark)}
+.colhead.texture{background:var(--texture); color:var(--texture-dark)}
+.spacer{background:none}
+
+.mood{border-radius:var(--radius); padding:14px 18px}
+.mood h2{margin:0 0 8px; font-size:1.5rem}
+.mood ul{list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(3,1fr); gap:3px 10px; font-size:.98rem}
+.mood.peaceful{background:var(--peaceful); color:var(--peaceful-dark)}
+.mood.inspiring{background:var(--inspiring); color:var(--inspiring-dark)}
+.mood.joyful{background:var(--joyful); color:var(--joyful-dark)}
+.mood.sorrowful{background:var(--sorrowful); color:var(--sorrowful-dark)}
+.mood.dark{background:var(--dark); color:var(--dark-dark)}
+.mood.aggressive{background:var(--aggressive); color:var(--aggressive-dark)}
+
+.cell{border-radius:8px; padding:10px 8px; display:flex; flex-direction:column; align-items:flex-start; gap:2px}
+.cell.dyn{background:var(--dyn-tint)}
+.cell.tempo{background:var(--tempo-tint)}
+.cell.rhythm{background:var(--rhythm-tint)}
+.cell.texture{background:var(--texture-tint)}
+.cell .cat{display:none}
+
+.word{
+  appearance:none; border:0; background:transparent; color:var(--ink);
+  font:inherit; font-size:.92rem; padding:3px 7px; border-radius:6px;
+  cursor:pointer; text-align:left;
+}
+.word:hover{background:rgba(0,0,0,.07)}
+.word:focus-visible{outline:2px solid var(--ink); outline-offset:1px}
+.word[aria-expanded="true"]{background:rgba(0,0,0,.12)}
+
+/* ---------- popover ---------- */
+.pop{
+  position:absolute; z-index:50; max-width:290px; min-width:220px;
+  background:#fff; border-radius:12px; padding:13px 15px 14px;
+  box-shadow:0 6px 24px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.06);
+  border-top:5px solid var(--gray);
+}
+.pop[data-cat="Dynamics"]{border-top-color:var(--dyn)}
+.pop[data-cat="Tempo"]{border-top-color:var(--tempo)}
+.pop[data-cat="Rhythm"]{border-top-color:var(--rhythm)}
+.pop[data-cat="Texture"]{border-top-color:var(--texture)}
+.pop .eyebrow{font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--gray); margin:0 0 3px}
+.pop h3{margin:0 0 5px; font-size:1.1rem}
+.pop p{margin:0; font-size:.92rem}
+.pop .hear{display:inline-block; margin-top:9px; font-size:.88rem; font-weight:600; color:var(--rhythm-dark); text-decoration:underline; text-underline-offset:2px}
+.pop .close{
+  position:absolute; top:6px; right:8px; appearance:none; border:0; background:none;
+  font-size:1.05rem; line-height:1; color:var(--gray); cursor:pointer; padding:4px;
+}
+.pop .close:focus-visible{outline:2px solid var(--ink)}
+.backdrop{display:none}
+
+/* ---------- small screens ---------- */
+@media (max-width:900px){
+  .chart{grid-template-columns:1fr; gap:14px}
+  .colhead,.spacer{display:none}
+  .moodgroup{display:block; border-radius:var(--radius); overflow:hidden; box-shadow:0 0 0 1px rgba(0,0,0,.05)}
+  .mood{border-radius:0}
+  .mood ul{grid-template-columns:repeat(2,1fr)}
+  .cell{border-radius:0; padding:10px 14px}
+  .cell .cat{display:block; font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; font-weight:700; margin-bottom:2px}
+  .cell.dyn .cat{color:var(--dyn-dark)}
+  .cell.tempo .cat{color:var(--tempo-dark)}
+  .cell.rhythm .cat{color:var(--rhythm-dark)}
+  .cell.texture .cat{color:var(--texture-dark)}
+  .cell{flex-direction:row; flex-wrap:wrap; align-items:center; gap:2px 4px}
+  .cell .cat{flex-basis:100%}
+}
+@media (max-width:640px){
+  .pop{
+    position:fixed; left:12px; right:12px; bottom:12px; top:auto;
+    max-width:none; min-width:0;
+  }
+  .backdrop{display:block; position:fixed; inset:0; background:rgba(0,0,0,.25); z-index:40}
+  .backdrop[hidden]{display:none}
+}
+@media (prefers-reduced-motion:no-preference){
+  .pop{animation:pop .12s ease-out}
+  @keyframes pop{from{opacity:0; transform:translateY(4px)}to{opacity:1; transform:none}}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Mood and how it is made</h1>
+  <p class="sub">Pick a mood, then choose one option from each column. Tap any word to see what it means &mdash; rhythm words include a listening example.</p>
+  <div class="chart" id="chart"></div>
+</div>
+
+<div class="backdrop" id="backdrop" hidden></div>
+
+<script>
+const DATA = {"moods": [{"name": "Peaceful", "specifics": ["Calm", "Serene", "Dreamy", "Gentle", "Floating", "Content"]}, {"name": "Inspiring", "specifics": ["Triumphant", "Heroic", "Uplifting", "Majestic", "Determined", "Soaring"]}, {"name": "Joyful", "specifics": ["Playful", "Celebratory", "Sunny", "Hopeful", "Cheerful", "Carefree"]}, {"name": "Sorrowful", "specifics": ["Melancholy", "Mournful", "Lonely", "Wistful", "Grieving", "Weary"]}, {"name": "Dark", "specifics": ["Ominous", "Menacing", "Eerie", "Brooding", "Haunting", "Uneasy"]}, {"name": "Aggressive", "specifics": ["Angry", "Frantic", "Relentless", "Defiant", "Fierce", "Bitter"]}], "dynamics": [["Soft", "Smooth", "Even", "Barely there"], ["Full", "Swelling", "Powerful", "Booming"], ["Light", "Bursting", "Growing", "Accented"], ["Hushed", "Faint", "Dying away", "Small swells"], ["Quiet", "Subdued", "Creeping louder", "Sudden loud"], ["Loud", "Blasting", "Crashing", "Slamming"]], "tempo": [["Slow", "Unhurried", "Relaxed", "Drifting"], ["Broad", "Stately", "Measured", "Gathering"], ["Brisk", "Lively", "Quickening", "Dancing"], ["Slow", "Stretched", "Dragging", "Halting"], ["Slow", "Deliberate", "Crawling", "Lurching"], ["Fast", "Driving", "Racing", "Breakneck"]], "rhythm": [["Rocking", "Swaying", "Breathing", "Steady pulse"], ["Marching", "Long-short", "Strong beats", "Rolling"], ["Bouncy", "Skipping", "Off-beat", "Chattering"], ["Sparse", "Uneven", "Heartbeat", "Sighing"], ["Irregular", "Repeating", "Sudden stops", "Ticking pulse"], ["Jagged", "Chopped", "Off-balance", "Hammering"]], "texture": [["Open", "Airy", "Simple", "Flowing"], ["Thick", "Layered", "Rich", "Unison"], ["Busy", "Bubbly", "Interlocking", "Call-and-answer"], ["Thin", "Bare", "Solo", "Empty"], ["Murky", "Hollow", "Low", "Rumbling"], ["Dense", "Grinding", "Crushing", "Wall of sound"]], "defs": {"Dynamics": {"Soft": "gentle, low volume", "Smooth": "no bumps or sudden changes in volume", "Even": "stays at one level the whole time", "Barely there": "so quiet you almost lose it", "Full": "big, room-filling volume", "Swelling": "grows louder in one long wave", "Powerful": "strong and loud without strain", "Booming": "huge and thundering", "Light": "quiet, with a delicate touch", "Bursting": "quick pops of sudden loudness", "Growing": "gets louder little by little", "Accented": "some notes punched harder than others", "Hushed": "quiet, like a whisper", "Faint": "so soft it seems far away", "Dying away": "trails off to silence", "Small swells": "little rises that sink back down", "Quiet": "low volume", "Subdued": "held back, kept under a lid", "Creeping louder": "slowly, steadily rising", "Sudden loud": "a jump-scare hit out of the quiet", "Loud": "high volume", "Blasting": "about as loud as it gets", "Crashing": "heavy slams of sound", "Slamming": "every hit lands at full force"}, "Tempo": {"Slow": "below walking pace", "Unhurried": "no rush at all", "Relaxed": "an easygoing speed", "Drifting": "floats along with no push", "Broad": "a big, wide, spacious pace", "Stately": "dignified, like a procession", "Measured": "calm and evenly paced", "Gathering": "slowly picking up speed", "Brisk": "quick and energetic", "Lively": "upbeat and always moving", "Quickening": "speeding up", "Dancing": "moves like feet on a dance floor", "Stretched": "time pulled longer than feels natural", "Dragging": "heavy and effortful, behind the beat", "Halting": "keeps hesitating and pausing", "Deliberate": "slow on purpose, step by step", "Crawling": "about as slow as music moves", "Lurching": "staggers - surges, then stalls", "Fast": "well above walking pace", "Driving": "pushes forward without letting up", "Racing": "sprinting speed", "Breakneck": "dangerously, thrillingly fast"}, "Texture": {"Open": "lots of room between the sounds", "Airy": "light, with space to float", "Simple": "just a part or two", "Flowing": "one smooth, connected line", "Thick": "many sounds at once", "Layered": "parts stacked on top of each other", "Rich": "full and deep", "Unison": "everyone playing the same thing together", "Busy": "lots of parts moving at once", "Bubbly": "quick little parts fizzing around", "Interlocking": "parts fitting together like gears", "Call-and-answer": "one part asks, another replies", "Thin": "only a little sound", "Bare": "stripped down to almost nothing", "Solo": "one voice alone", "Empty": "mostly silence around one sound", "Murky": "blurred and hard to see into", "Hollow": "something missing in the middle", "Low": "everything down in the deep register", "Rumbling": "a shaking layer underneath everything", "Dense": "packed tight with no gaps", "Grinding": "low parts churning against each other", "Crushing": "a piled-up weight of sound", "Wall of sound": "everything, everywhere, all at once"}, "Rhythm": {"Rocking": "Gently tips back and forth between two notes or chords, like a cradle.", "Swaying": "A smooth side-to-side feel in threes, like slow dancing.", "Breathing": "Phrases stretch and settle like slow, deep breaths - no hard beat.", "Steady pulse": "The same soft beat over and over, never rushing.", "Marching": "Crisp, even beats you could walk in step to.", "Long-short": "A proud strut: LONG-short, LONG-short (a dotted rhythm).", "Strong beats": "Heavy hits everyone can stomp or clap along to.", "Rolling": "Notes keep tumbling forward in even waves, like wheels turning.", "Bouncy": "Notes spring up off the beat like a ball bouncing.", "Skipping": "A quick, light triple feel - skipping instead of walking.", "Off-beat": "Hits land between the main beats - the reggae upstroke “and.”", "Chattering": "Fast, light, repeated notes, like excited talk.", "Sparse": "Only a few notes, far apart, with silence in between.", "Uneven": "Notes drift in unsteady time instead of a strict beat.", "Heartbeat": "A slow, heavy pulse that keeps aching forward.", "Sighing": "Two-note pairs that fall like a sigh - strong, then soft.", "Irregular": "The pattern keeps changing, so you never know where the next hit lands.", "Repeating": "One short pattern loops over and over until it feels menacing.", "Sudden stops": "The music slams into silence without warning.", "Ticking pulse": "A dry, clock-like tick that never lets up.", "Jagged": "Sharp bursts of fast notes with sudden jabs and turns.", "Chopped": "Short, cut-off chords with the ring choked - like palm-muted strums.", "Off-balance": "The count feels lopsided, like walking with a limp (this one is in 7).", "Hammering": "The same heavy hit pounded again and again, machine-steady."}}, "hear": {"Rocking": {"title": "Brahms, Lullaby", "url": "https://www.youtube.com/watch?v=3nNvz8UFEHY"}, "Swaying": {"title": "Henry Mancini, Moon River", "url": "https://www.youtube.com/watch?v=Ozg3P3LrJs8"}, "Breathing": {"title": "Barber, Adagio for Strings", "url": "https://www.youtube.com/watch?v=VLR7s8Rq7Dw"}, "Steady pulse": {"title": "Satie, Gymnopedie No. 1", "url": "https://www.youtube.com/watch?v=cic1RNHXa-k"}, "Marching": {"title": "Sousa, Stars and Stripes Forever", "url": "https://www.youtube.com/watch?v=a-7XWhyvIpE"}, "Long-short": {"title": "Elgar, Pomp and Circumstance", "url": "https://www.youtube.com/watch?v=Spx4kmY67Wc"}, "Strong beats": {"title": "Queen, We Will Rock You", "url": "https://www.youtube.com/watch?v=-tJYN-eG1zk"}, "Rolling": {"title": "Journey, Don't Stop Believin'", "url": "https://www.youtube.com/watch?v=1k8craCGpgs"}, "Bouncy": {"title": "Katrina and the Waves, Walking on Sunshine", "url": "https://www.youtube.com/watch?v=iPUmE-tne5U"}, "Skipping": {"title": "The Irish Washerwoman jig", "url": "https://www.youtube.com/watch?v=r_Ti0FbbWZU"}, "Off-beat": {"title": "Bob Marley, Stir It Up", "url": "https://www.youtube.com/watch?v=1hwL3S3Gtzs"}, "Chattering": {"title": "The Beatles, Ob-La-Di Ob-La-Da", "url": "https://www.youtube.com/watch?v=_J9NpHKrKMw"}, "Sparse": {"title": "Miles Davis, Blue in Green", "url": "https://www.youtube.com/watch?v=TLDflhhdPCg"}, "Uneven": {"title": "Billie Holiday, Strange Fruit", "url": "https://www.youtube.com/watch?v=U-EhtNjUJAU"}, "Heartbeat": {"title": "Mozart, Requiem Lacrimosa", "url": "https://www.youtube.com/watch?v=mhYCaQkbkyw"}, "Sighing": {"title": "Purcell, Dido's Lament", "url": "https://www.youtube.com/watch?v=PeB4cpRq16M"}, "Irregular": {"title": "Stravinsky, Rite of Spring Augurs of Spring", "url": "https://www.youtube.com/watch?v=jwcPdC548dM"}, "Repeating": {"title": "John Williams, Jaws theme", "url": "https://www.youtube.com/watch?v=b-ot470Cmjk"}, "Sudden stops": {"title": "Beethoven, Symphony No. 5 opening", "url": "https://www.youtube.com/watch?v=I7AQeN-x_Xs"}, "Ticking pulse": {"title": "Pink Floyd, Time", "url": "https://www.youtube.com/watch?v=Qr0-7Ds79zo"}, "Jagged": {"title": "Rush, YYZ", "url": "https://www.youtube.com/watch?v=ftVTWDrtrlc"}, "Chopped": {"title": "AC/DC, Back in Black", "url": "https://www.youtube.com/watch?v=pAgnJDJN4VA"}, "Off-balance": {"title": "Pink Floyd, Money", "url": "https://www.youtube.com/watch?v=-0kcet4aPpQ"}, "Hammering": {"title": "Metallica, One", "url": "https://www.youtube.com/watch?v=WM8bTdBs-cw"}}};
+
+const CATS = [
+  {key:"dynamics", name:"Dynamics", q:"How loud?", cls:"dyn"},
+  {key:"tempo",    name:"Tempo",    q:"How fast?", cls:"tempo"},
+  {key:"rhythm",   name:"Rhythm",   q:"What pattern?", cls:"rhythm"},
+  {key:"texture",  name:"Texture",  q:"Thick or thin?", cls:"texture"},
+];
+
+const chart = document.getElementById("chart");
+const backdrop = document.getElementById("backdrop");
+
+/* headers */
+chart.insertAdjacentHTML("beforeend", '<div class="spacer"></div>' + CATS.map(c =>
+  `<div class="colhead ${c.cls}"><b>${c.name}</b><span>${c.q}</span></div>`).join(""));
+
+/* rows */
+DATA.moods.forEach((m, i) => {
+  const slug = m.name.toLowerCase();
+  const moodHtml =
+    `<div class="mood ${slug}"><h2>${m.name}</h2><ul>` +
+    m.specifics.map(s => `<li>${s}</li>`).join("") + `</ul></div>`;
+  const cells = CATS.map(c => {
+    const words = DATA[c.key][i].map(w =>
+      `<button class="word" type="button" data-cat="${c.name}" data-word="${w}" aria-expanded="false" aria-haspopup="dialog">${w}</button>`
+    ).join("");
+    return `<div class="cell ${c.cls}"><span class="cat">${c.name} &mdash; ${c.q}</span>${words}</div>`;
+  }).join("");
+
+  chart.insertAdjacentHTML("beforeend", `<div class="moodgroup">${moodHtml}${cells}</div>`);
+});
+
+/* popover */
+let pop = null, openBtn = null;
+
+function closePop(){
+  if (pop) pop.remove();
+  pop = null;
+  backdrop.hidden = true;
+  if (openBtn){ openBtn.setAttribute("aria-expanded","false"); openBtn.focus(); openBtn = null; }
+}
+
+function openPop(btn){
+  closePop();
+  const cat = btn.dataset.cat, word = btn.dataset.word;
+  let def = DATA.defs[cat][word];
+  def = def.charAt(0).toUpperCase() + def.slice(1);
+  if (!/[.!?]$/.test(def)) def += ".";
+  const q = CATS.find(c => c.name === cat).q;
+  const hear = (cat === "Rhythm" && DATA.hear[word])
+    ? `<a class="hear" href="${DATA.hear[word].url}" target="_blank" rel="noopener">Hear it: ${DATA.hear[word].title} &rarr;</a>` : "";
+  pop = document.createElement("div");
+  pop.className = "pop";
+  pop.dataset.cat = cat;
+  pop.setAttribute("role","dialog");
+  pop.setAttribute("aria-label", word);
+  pop.innerHTML =
+    `<button class="close" type="button" aria-label="Close">&times;</button>` +
+    `<p class="eyebrow">${cat} &mdash; ${q}</p><h3>${word}</h3><p>${def}</p>${hear}`;
+  document.body.appendChild(pop);
+
+  const small = window.matchMedia("(max-width:640px)").matches;
+  if (small){
+    backdrop.hidden = false;
+  } else {
+    const r = btn.getBoundingClientRect();
+    const pw = pop.offsetWidth, ph = pop.offsetHeight;
+    let x = r.left + window.scrollX;
+    let y = r.bottom + window.scrollY + 6;
+    if (x + pw > window.scrollX + document.documentElement.clientWidth - 8)
+      x = window.scrollX + document.documentElement.clientWidth - pw - 8;
+    if (r.bottom + ph + 12 > window.innerHeight)
+      y = r.top + window.scrollY - ph - 6;
+    pop.style.left = x + "px";
+    pop.style.top = Math.max(y, window.scrollY + 8) + "px";
+  }
+  openBtn = btn;
+  btn.setAttribute("aria-expanded","true");
+  pop.querySelector(".close").addEventListener("click", closePop);
+}
+
+document.addEventListener("click", e => {
+  const btn = e.target.closest(".word");
+  if (btn){
+    if (btn === openBtn){ closePop(); } else { openPop(btn); }
+    e.stopPropagation();
+    return;
+  }
+  if (pop && !e.target.closest(".pop")) closePop();
+});
+backdrop.addEventListener("click", closePop);
+document.addEventListener("keydown", e => { if (e.key === "Escape") closePop(); });
+</script>
+</body>
+</html>
