@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-19 — New in-class activity: Happy Birthday — First Notes
+
+### Added
+
+- **"Happy Birthday — First Notes" in-class activity**, scheduled for
+  2026-08-24 — your first time pressing a string down. Everything stays on
+  the low E string: find fret 5 by the dot, land on it cleanly, play the
+  "Hap-py birth-day" chunk, then the whole first line, and finish by
+  climbing the BPM as far as it'll go. Like every in-class activity, it
+  stays invisible until its day is scheduled from the teacher console.
+
 ## 2026-08-16 — A Mood Chart in the side menu
 
 ### Added
