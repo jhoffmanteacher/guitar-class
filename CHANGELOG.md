@@ -5,7 +5,7 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
-## 2026-08-19 — New in-class activity: Happy Birthday — First Notes
+## 2026-08-19 — A new in-class activity, and a way back from the Mood Chart
 
 ### Added
 
@@ -15,6 +15,10 @@ see `WORKFLOW.md` and the git commit log.
   "Hap-py birth-day" chunk, then the whole first line, and finish by
   climbing the BPM as far as it'll go. Like every in-class activity, it
   stays invisible until its day is scheduled from the teacher console.
+- **A "Back to class site" link at the top of the Mood Chart.** The chart opens
+  in its own tab, so the browser's Back button had nothing to go back to. The
+  link returns you to the class site — and if the tab you came from is still
+  open, it hops you straight back to it instead of loading a second copy.
 
 ## 2026-08-16 — A Mood Chart in the side menu
 
