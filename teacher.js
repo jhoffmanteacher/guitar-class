@@ -950,6 +950,70 @@ function teacherStudentTally(stu, universe){
   });
   return {got, working, total:got+working, furthest};
 }
+/* ── Module Review self-ratings (student detail only) ────────────────────
+   The cross-module gate in app.js (isModuleGateLocked) needs TWO things
+   before the next module opens: every built set in the module complete,
+   AND every Module Review row rated 1–3. Set skills are visible all over
+   this dashboard; the mrN rows were visible on no teacher screen at all —
+   so the single most common reason a student sits stuck ("finished every
+   set, never rated the review") had no signal anywhere, and the only way
+   to find it was the Firebase console.
+
+   Deliberately NOT folded into teacherSkillUniverse(): that universe drives
+   the roster bar's axis, its boundary ticks, the N / total count and
+   `furthest`. Folding ~90 review rows into it would shift every student's
+   bar and quietly redefine what the roster chart measures. This is an
+   additive block instead — nothing else on any screen changes. */
+function teacherReviewUniverse(){
+  return MODULE_MANIFEST.map(m=>{
+    const mr=MODULE_REVIEWS[m.num];
+    return {num:m.num, name:m.name, skills:(mr&&mr.skills)||[]};
+  }).filter(x=>x.skills.length);
+}
+// Rated means 1, 2 or 3 — the same three string values isModuleGateLocked
+// accepts. Anything else (undefined, '', 'none') is an unrated row.
+function isRated(v){ return v==='1'||v==='2'||v==='3'; }
+function teacherReviewTally(stu, skills){
+  let rated=0;
+  skills.forEach(s=>{ if(isRated(stu.skills[s.id])) rated++; });
+  return {rated, total:skills.length};
+}
+/* Rating chip: 1/2/3 or the same – used for an untouched skill. Level 1 gets
+   the neutral --bg3/--text2 treatment rather than red, for the reason spelled
+   out on modRows below — this is a self-paced course and "still learning" is
+   a legitimate place to be, not a failing grade. */
+const MR_LEVEL_LABEL={'1':'1 — still learning','2':'2 — getting it','3':'3 — got it'};
+function trkSpanHtml(v){
+  const base='display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;font-size:0.75rem;font-weight:600;border-radius:6px';
+  if(!isRated(v)) return `<span class="tck no" style="${base}" title="Not rated yet">${TCK_MINUS_SVG}</span>`;
+  const skin = v==='3' ? 'background:var(--green-bg);color:var(--green-text)'
+             : v==='2' ? 'background:var(--amber-bg);color:var(--amber-text)'
+             : 'background:var(--bg3);color:var(--text2)';
+  return `<span style="${base};${skin}" title="${escAttr(MR_LEVEL_LABEL[v])}">${escHtml(v)}</span>`;
+}
+/* Display hint only — isModuleGateLocked in app.js remains the source of
+   truth, and is not reimplemented here (its high-water-mark rules are
+   deliberately forgiving in ways a read-only dashboard doesn't need). This
+   answers one narrow question: has this student finished every built set in
+   the module, not yet started the next one, and left review rows unrated? If
+   so, those rows are what's holding the next module shut. The "hasn't started
+   the next one" half matters — a student already working in Module N+1 got in
+   somehow, so flagging their old review rows as a blocker would be a lie. */
+function teacherReviewIsBlocking(stu, moduleNum, tally){
+  if(tally.rated>=tally.total) return false;
+  const nextNum=moduleNum+1;
+  if(nextNum>12) return false;                       // Module 13 sits outside the chain
+  const mySets=SETS.filter(w=>w.moduleNum===moduleNum && !w.locked && !w.comingSoon);
+  if(!mySets.length) return false;
+  const allDone=mySets.every(w=>(w.skills||[]).every(sk=>stu.skills[sk.id]==='gotit'));
+  if(!allDone) return false;
+  const nextSets=SETS.filter(w=>w.moduleNum===nextNum);
+  if(!nextSets.length) return false;                 // nothing built there to be locked out of
+  const startedNext=nextSets.some(w=>(w.skills||[]).some(sk=>{
+    const st=stu.skills[sk.id]; return st==='gotit'||st==='working';
+  }));
+  return !startedNext;
+}
 function teacherAxisHeaderHtml(universe){
   const total=universe.total||1; let acc=0;
   const nums=universe.modules.map(m=>{ const mid=(acc+m.ids.length/2)/total*100; acc+=m.ids.length; return `<div class="stu-axis-num" style="left:${mid}%">${m.num}</div>`; }).join('');
@@ -1095,6 +1159,37 @@ function renderTeacherStudentDetail(uid){
     </div>`;
   }).join('');
 
+  // Module Review self-ratings — one card per module the student has reached.
+  // "Reached" is the same touched test the Skills list below uses (any set
+  // skill marked got-it or still-working), widened to include a module where
+  // they've rated a review row but touched no set, so a review can never be
+  // rendered invisible by the very rows that are missing.
+  let reviewsHtml='';
+  teacherReviewUniverse().forEach(rm=>{
+    const skillMod=universe.modules.find(m=>m.num===rm.num);
+    const touchedSets=!!(skillMod&&skillMod.ids.some(id=>stu.skills[id]==='gotit'||stu.skills[id]==='working'));
+    const tally=teacherReviewTally(stu, rm.skills);
+    if(!touchedSets && !tally.rated) return;
+    const blocking=teacherReviewIsBlocking(stu, rm.num, tally);
+    const pillClass=tally.rated===tally.total?'pp-hi':(blocking?'pp-lo':(tally.rated?'pp-mid':'pp-none'));
+    const flag=blocking
+      ? `<div class="tg-note" style="margin:0 0 8px">Every set in this module is done, but ${tally.total-tally.rated} review row${tally.total-tally.rated===1?'':'s'} ${tally.total-tally.rated===1?'is':'are'} unrated — that's what's keeping Module ${rm.num+1} shut.</div>`
+      : '';
+    const rows=rm.skills.map(sk=>
+      `<div class="stu-skill-row">${trkSpanHtml(stu.skills[sk.id])}<span>${escHtml(sk.text)}</span></div>`).join('');
+    reviewsHtml+=`<div class="t-scard" style="margin-bottom:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px">
+        <div class="t-scard-lbl" style="margin-bottom:0" title="${escAttr(rm.name)}">Module ${rm.num} — ${escHtml(abbreviate(rm.name))}</div>
+        <span class="ppill ${pillClass}">${tally.rated} / ${tally.total} rated</span>
+      </div>
+      ${flag}${rows}
+    </div>`;
+  });
+  const reviewsNote=reviewsHtml
+    ? `<div class="tg-note">A module's next module stays locked until every set in it is complete <strong>and</strong> every row here is rated 1–3. These rows appear on no other screen, so an unrated review is the usual reason a student says they're stuck.</div>`
+    : '';
+  if(!reviewsHtml) reviewsHtml=`<div class="stu-empty">Hasn't reached a Module Review yet.</div>`;
+
   // Every skill, grouped by module then set — only modules this student has touched.
   let skillsHtml='';
   universe.modules.forEach(m=>{
@@ -1132,6 +1227,9 @@ function renderTeacherStudentDetail(uid){
 
     <div class="stu-section-head">Module-by-module progress</div>
     ${modRows}
+
+    <div class="stu-section-head">Module Review self-ratings</div>
+    ${reviewsNote}${reviewsHtml}
 
     <div class="stu-section-head">Skills</div>
     ${skillsHtml}
