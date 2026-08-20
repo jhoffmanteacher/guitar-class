@@ -578,8 +578,9 @@ function checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsBy
 /* ════════════════════════════════════════════════════════════════════
    1d. IN-CLASS ACTIVITIES — class-activities.js loads cleanly and every
    entry (once any exist — v1 ships CLASS_ACTIVITIES empty) matches the
-   schema documented at the top of that file: permanent id shape locked to
-   the number (`ca-<number>`), NO `date` field (release dates live in
+   schema documented at the top of that file: a permanent, unique `ca-<n>`
+   id (an authoring counter — NOT locked to `number`, which is the
+   resequence-able teaching order and has to run 1..N), NO `date` field (release dates live in
    Firestore config/class.activityDates now, set from the teacher console —
    see app.js/teacher.js), an _es twin on every required string, and any
    figure/video referenced actually exists / isn't a placeholder.
@@ -619,9 +620,6 @@ function validateClassActivities() {
     if (!Number.isInteger(a.number) || a.number < 1) { err(`${where}: number "${a.number}" is not a positive integer`); problems++; }
     else if (seenNumbers.has(a.number)) { err(`${where}: duplicate number ${a.number}`); problems++; }
     else seenNumbers.add(a.number);
-    if (idRe.test(a.id || '') && Number.isInteger(a.number) && a.id !== `ca-${a.number}`) {
-      err(`${where}: id "${a.id}" must equal "ca-" + number ("ca-${a.number}")`); problems++;
-    }
     reqEs(where, a, 'title');
     reqEs(where, a, 'intro');
     if (!Array.isArray(a.steps) || !a.steps.length) { err(`${where}: "steps" should be a non-empty array`); problems++; }
@@ -664,7 +662,20 @@ function validateClassActivities() {
     }
   });
 
-  if (problems === 0) ok(`${activities.length} class activit${activities.length === 1 ? 'y' : 'ies'} — all valid`);
+  // `number` is teaching order, deliberately decoupled from the id (see the
+  // header of class-activities.js) — so instead of pinning it to the id, pin
+  // the SET: 1..N, no gaps. A gap is the tell that a resequence was left
+  // half-done, and it would show students a jump like "#3 … #5".
+  if (seenNumbers.size === activities.length) {
+    const missing = [];
+    for (let n = 1; n <= activities.length; n++) if (!seenNumbers.has(n)) missing.push(n);
+    if (missing.length) {
+      err(`CLASS_ACTIVITIES: "number" must run 1..${activities.length} with no gaps — missing ${missing.join(', ')}`);
+      problems++;
+    }
+  }
+
+  if (problems === 0) ok(`${activities.length} class activit${activities.length === 1 ? 'y' : 'ies'} — all valid, teaching order 1..${activities.length}`);
 }
 
 /* ════════════════════════════════════════════════════════════════════

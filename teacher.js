@@ -522,10 +522,14 @@ function renderTeacherActivities(){
         ? ' <span style="opacity:.65;font-size:.85em">(no date — hidden from students)</span>'
         : (isScheduled ? ' <span style="opacity:.65;font-size:.85em">(scheduled)</span>' : '');
       const dateCell=`<input type="date" class="t-date-input" data-set-activity-date data-id="${escAttr(a.id)}" value="${escAttr(dateVal)}">${dateNote}`;
+      // Same "#N - Title" form the student card (app.js) and the activity
+      // detail page use, so the number reads as part of the name rather than
+      // needing its own column — and survives the cell's ellipsis truncation.
+      const numTitle=(a.number?`#${Number(a.number)} - `:'')+a.title;
       // The title cell doubles as a link into the activity's detail page —
       // handled by the delegated data-id listener in showTeacherApp, same
       // "clickable row, cursor:pointer only" idiom as the Students name cell.
-      return `<tr${isHidden?' style="opacity:.55"':''}><td>${dateCell}</td><td class="nc" data-open-activity data-id="${escAttr(a.id)}" style="cursor:pointer" title="${escAttr(a.title)}">${escHtml(a.title)}</td><td>${doneCount} / ${total} students</td>
+      return `<tr${isHidden?' style="opacity:.55"':''}><td>${dateCell}</td><td class="nc" data-open-activity data-id="${escAttr(a.id)}" style="cursor:pointer" title="${escAttr(numTitle)}">${escHtml(numTitle)}</td><td>${doneCount} / ${total} students</td>
         <td><details><summary>Who hasn't finished (${notDone.length})</summary>${listHtml}</details></td>
         <td><div class="tg-seg">${visBtns}</div></td></tr>`;
     }).join('');

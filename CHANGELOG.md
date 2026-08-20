@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-20 — In-class activities are numbered in teaching order
+
+### Changed
+
+- **Activity numbers now follow the order you'll be taught them**, not the
+  order they were written. "Happy Birthday — First Notes" is now **#1** and
+  "Playing Happy Birthday — Practice" is **#2**, with the six Finger Gyms
+  following as #3–#8. Your finished check-marks are untouched — an activity
+  keeps its own permanent id behind the scenes, so only the number you see
+  changed.
+
 ## 2026-08-19 — A new in-class activity, and a way back from the Mood Chart
 
 ### Added

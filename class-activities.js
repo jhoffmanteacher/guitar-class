@@ -22,11 +22,22 @@
    first at render time (app.js sorts, this file doesn't need to be kept in
    any order).
 
-   ids are PERMANENT — never renumber or reuse one. `ca-<number>` — the
-   number is already unique, so the id is too, and there's no date-collision
-   case to suffix around anymore. Student completion is keyed to the id in
-   Firestore (classActivities: { [id]: true }), same rule as skill ids in the
-   module files.
+   ids are PERMANENT — never renumber or reuse one. Student completion is
+   keyed to the id in Firestore (classActivities: { [id]: true }), same rule
+   as skill ids in the module files. An id is `ca-<n>` where n is simply the
+   next integer never yet used (max existing + 1) — an authoring counter, not
+   a display number.
+
+   `number` is the TEACHING-ORDER number, and it is NOT locked to the id.
+   It's the only number a student ever sees ("#3 - Finger Gym 1"), so it has
+   to follow the order the class is actually taught in, which isn't the order
+   activities get authored in — an activity written late can be taught first.
+   Resequencing `number` is therefore expected and safe: nothing is keyed to
+   it (ids are), it only drives the "#N - " prefix and the sort tiebreak in
+   app.js / teacher.js. Keep the set contiguous 1..N with no gaps or
+   duplicates — checks.mjs (1d) enforces that, and enforces id uniqueness
+   separately. Renumbering ids to match is the one thing that would break
+   students' saved progress; don't.
 
    Every display string carries an `_es` twin, same convention as module
    files — rendered through tf(obj, field) in app.js (see the "field on a
@@ -35,11 +46,11 @@
 
    SCHEMA
    {
-     id:      'ca-3',            // permanent, must equal 'ca-' + number
-     number:  3,                 // permanent once shipped, same rule as id —
-                                  // the sequence students hear it by ("Activity
-                                  // #3"). Renders as "#N - Title"; don't bake
-                                  // the "#N - " prefix into title itself.
+     id:      'ca-9',            // permanent — next unused 'ca-<n>' counter
+     number:  3,                 // teaching-order position, resequence freely
+                                  // (see above) — the "#3" a student sees.
+                                  // Renders as "#N - Title"; don't bake the
+                                  // "#N - " prefix into title itself.
      title:    'Power Chord Relay',
      title_es: 'Relevo de acordes de poder',
      intro:    'One or two sentences of context — why today\'s in-class work
@@ -94,7 +105,7 @@
 window.CLASS_ACTIVITIES = [
   {
     id:    'ca-1',
-    number: 1,
+    number: 2,
     title:    'Playing Happy Birthday — Practice',
     title_es: 'Tocando Happy Birthday — Práctica',
     intro:    'You already know the shape. Today: drill it string by string, put it together, then push the tempo as far as it\'ll go.',
@@ -243,7 +254,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-2',
-    number: 2,
+    number: 3,
     title:    'Finger Gym 1',
     title_es: 'Gimnasio de Dedos 1',
     intro:    'Today isn\'t a song day — it\'s a training day. Three events in the first five frets: the Ladder, the Spider, the Reach. You\'re chasing a personal record, not a grade.',
@@ -326,7 +337,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-3',
-    number: 3,
+    number: 4,
     title:    'Finger Gym 2 — Down and Across',
     title_es: 'Gimnasio de Dedos 2 — Bajando y cruzando',
     intro:    'Last Gym went up. Today you come back down, then take the Ladder onto all six strings. Going down is harder than going up — the pinky has to lead.',
@@ -416,7 +427,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-4',
-    number: 4,
+    number: 5,
     title:    'Finger Gym 3 — Up the Neck',
     title_es: 'Gimnasio de Dedos 3 — Subiendo el mástil',
     intro:    'So far the gym has lived in the first five frets. Today you move it up the neck. The frets get narrower as you climb, so the same shape feels different in every position.',
@@ -494,7 +505,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-5',
-    number: 5,
+    number: 6,
     title:    'Finger Gym 4 — Leave Them Down',
     title_es: 'Gimnasio de Dedos 4 — Déjalos abajo',
     intro:    'Until now your fingers took turns. Today they stay down. Every finger that has already played keeps touching the string — that\'s what makes chords possible later.',
@@ -569,7 +580,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-6',
-    number: 6,
+    number: 7,
     title:    'Finger Gym 5 — Skip and Stretch',
     title_es: 'Gimnasio de Dedos 5 — Salta y estira',
     intro:    'Two new demands today: skipping over a string without hitting it, and reaching one fret farther than your hand wants to go.',
@@ -646,7 +657,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-7',
-    number: 7,
+    number: 8,
     title:    'Finger Gym 6 — The Meet',
     title_es: 'Gimnasio de Dedos 6 — La competencia',
     intro:    'Meet day. Nothing new to learn — everything you\'ve built, run back to back, at the fastest tempo you can keep clean. Bring your record from last Gym.',
@@ -723,7 +734,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-8',
-    number: 8,
+    number: 1,
     title:    'Happy Birthday — First Notes',
     title_es: 'Happy Birthday — Primeras notas',
     intro:    'You can already pluck the open strings. Today you press one down: one string, one phrase, and the dots on the neck show you where to land.',
