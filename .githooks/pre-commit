@@ -19,14 +19,35 @@
 # Find the repo root so this works no matter where git invokes it from.
 ROOT=$(git rev-parse --show-toplevel)
 
-# If node isn't on PATH, don't block the commit — just warn. The explicit
-# push-time check is the real gate; a missing toolchain shouldn't wedge work.
-if ! command -v node >/dev/null 2>&1; then
-  printf '\033[33m!\033[0m pre-commit: node not found on PATH — skipping checks (run "node tools/checks.mjs" before pushing)\n'
+# Locate node. PATH first — that's the normal case, and the only one on the
+# Mac. On Windows, git hooks run under Git Bash, which does NOT inherit the
+# PATH entry the Node installer adds for cmd/PowerShell: `node` resolves fine
+# in a terminal but not here, so the hook quietly skipped every commit while
+# looking like it was installed and working. Fall back to the standard install
+# locations before giving up.
+NODE=""
+if command -v node >/dev/null 2>&1; then
+  NODE=node
+else
+  for candidate in \
+    "/c/Program Files/nodejs/node.exe" \
+    "/c/Program Files (x86)/nodejs/node.exe" \
+    "$LOCALAPPDATA/Programs/nodejs/node.exe" \
+    "/usr/local/bin/node" \
+    "/opt/homebrew/bin/node"
+  do
+    if [ -x "$candidate" ]; then NODE="$candidate"; break; fi
+  done
+fi
+
+# Still nothing — don't block the commit, just warn. The explicit push-time
+# check is the real gate; a missing toolchain shouldn't wedge work.
+if [ -z "$NODE" ]; then
+  printf '\033[33m!\033[0m pre-commit: node not found — skipping checks (run "node tools/checks.mjs" before pushing)\n'
   exit 0
 fi
 
-node "$ROOT/tools/checks.mjs" --check --skip-links
+"$NODE" "$ROOT/tools/checks.mjs" --check --skip-links
 status=$?
 
 if [ "$status" -ne 0 ]; then
