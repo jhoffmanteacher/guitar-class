@@ -20,7 +20,8 @@ rules_version = '2';
      progress/{uid}   one doc per student: skills, responses, completed,
                       games, streak, practiceLog, name, email
      config/class     one shared doc: gamesEnabled, gameOverrides,
-                      paused, archived, hiddenActivities
+                      paused, archived, hiddenActivities, activityDates,
+                      activityTitles
                       (teacher writes, students read)
      issueReports/*   student-filed problem reports
 

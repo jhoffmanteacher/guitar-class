@@ -15,6 +15,10 @@ see `WORKFLOW.md` and the git commit log.
   following as #3–#8. Your finished check-marks are untouched — an activity
   keeps its own permanent id behind the scenes, so only the number you see
   changed.
+- **Activities can now be renamed.** Mr. Hoffman can give an activity a
+  clearer name from his end, and it updates for everyone. A freshly renamed
+  activity shows its new English name to Spanish readers too, until the
+  Spanish version catches up in a later update.
 
 ## 2026-08-19 — A new in-class activity, and a way back from the Mood Chart
 

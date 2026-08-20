@@ -89,6 +89,16 @@ async function showTeacherApp(user){
       if(archived){ teacherSetStudentArchived(archived.dataset.uid, archived.dataset.state); return; }
       const actHidden=e.target.closest('[data-set-activity-hidden]');
       if(actHidden){ teacherSetActivityHidden(actHidden.dataset.id, actHidden.dataset.state); return; }
+      // Rename controls sit INSIDE the title cell, which is itself the
+      // data-open-activity link — so they have to be matched before it, or
+      // clicking the pencil would navigate away instead of opening the editor.
+      const actRename=e.target.closest('[data-rename-activity]');
+      if(actRename){ activityEditId=actRename.dataset.id; renderTeacherActivities(); return; }
+      if(e.target.closest('[data-rename-cancel]')){ activityEditId=null; renderTeacherActivities(); return; }
+      const actSave=e.target.closest('[data-rename-save]');
+      if(actSave){ teacherSaveActivityTitle(actSave.dataset.id); return; }
+      const actReset=e.target.closest('[data-rename-reset]');
+      if(actReset){ teacherSetActivityTitle(actReset.dataset.id, ''); return; }
       const openAct=e.target.closest('[data-open-activity]');
       if(openAct){ openActivityDetail(openAct.dataset.id); return; }
       if(e.target.closest('[data-back-to-activities]')){ backToActivitiesList(); return; }
@@ -101,6 +111,14 @@ async function showTeacherApp(user){
     shell.addEventListener('change', e=>{
       const actDate=e.target.closest('[data-set-activity-date]');
       if(actDate) teacherSetActivityDate(actDate.dataset.id, actDate.value);
+    });
+    // Enter saves, Escape backs out — the rename box is a one-line field in a
+    // table cell, not a form, so there's no submit event to lean on.
+    shell.addEventListener('keydown', e=>{
+      const box=e.target.closest('.t-act-title-edit');
+      if(!box) return;
+      if(e.key==='Enter'){ e.preventDefault(); teacherSaveActivityTitle(box.dataset.id); }
+      else if(e.key==='Escape'){ e.preventDefault(); activityEditId=null; renderTeacherActivities(); }
     });
   }
   // The teacher grid spans every set, so load all module data first. Sequential
@@ -343,6 +361,9 @@ let studentDetailUid=null;
 // so a title click in the activities table can drill in without a view
 // flag of its own either.
 let activityDetailId=null;
+// Which row (if any) currently has its rename box open. Purely local view
+// state, cleared on every save/cancel and whenever the tab is re-entered.
+let activityEditId=null;
 function applyTeacherViewChrome(v){
   document.querySelectorAll('.t-vt').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
@@ -355,7 +376,7 @@ function applyTeacherViewChrome(v){
 function setTeacherView(v){
   teacherView=v;
   if(v==='students') studentDetailUid=null; // clicking the tab always starts back at the roster
-  if(v==='activities') activityDetailId=null; // same — the tab always starts back at the list
+  if(v==='activities'){ activityDetailId=null; activityEditId=null; } // same — the tab always starts back at the list, nothing mid-rename
   applyTeacherViewChrome(v);
   renderTeacherBody();
 }
@@ -524,18 +545,106 @@ function renderTeacherActivities(){
       const dateCell=`<input type="date" class="t-date-input" data-set-activity-date data-id="${escAttr(a.id)}" value="${escAttr(dateVal)}">${dateNote}`;
       // Same "#N - Title" form the student card (app.js) and the activity
       // detail page use, so the number reads as part of the name rather than
-      // needing its own column — and survives the cell's ellipsis truncation.
-      const numTitle=(a.number?`#${Number(a.number)} - `:'')+a.title;
-      // The title cell doubles as a link into the activity's detail page —
-      // handled by the delegated data-id listener in showTeacherApp, same
-      // "clickable row, cursor:pointer only" idiom as the Students name cell.
-      return `<tr${isHidden?' style="opacity:.55"':''}><td>${dateCell}</td><td class="nc" data-open-activity data-id="${escAttr(a.id)}" style="cursor:pointer" title="${escAttr(numTitle)}">${escHtml(numTitle)}</td><td>${doneCount} / ${total} students</td>
+      // the column needing its own.
+      const num=a.number?`#${Number(a.number)} - `:'';
+      const shown=teacherActivityTitle(a,cfg);
+      const renamed=shown!==a.title;
+      let titleCell;
+      if(activityEditId===a.id){
+        // Not wrapped in data-open-activity — a click anywhere in an open
+        // editor (including a mis-aimed one) must not navigate off the row
+        // and throw away what's been typed.
+        titleCell=`<td class="nc">`
+          +`<span class="t-act-title-lbl">${escHtml(num)}rename (English)</span>`
+          +`<input type="text" class="t-act-title-edit" data-id="${escAttr(a.id)}" value="${escAttr(shown)}" maxlength="120" spellcheck="false">`
+          +`<span class="t-act-title-hint">Students see this right away, in English in both languages, until the Spanish twin ships in the next update.</span>`
+          +`<div style="margin-top:7px;display:flex;gap:6px;flex-wrap:wrap">`
+          +`<button class="tg-seg-btn on" data-rename-save data-id="${escAttr(a.id)}">Save</button>`
+          +`<button class="tg-seg-btn" data-rename-cancel>Cancel</button>`
+          +(renamed?`<button class="tg-seg-btn" data-rename-reset data-id="${escAttr(a.id)}">Undo rename</button>`:'')
+          +`</div></td>`;
+      }else{
+        // The title cell doubles as a link into the activity's detail page —
+        // handled by the delegated data-id listener in showTeacherApp, same
+        // "clickable row, cursor:pointer only" idiom as the Students name cell.
+        const renameNote=renamed
+          ? `<span class="t-act-title-hint">Renamed — students see this in both languages until the Spanish twin ships. Was: ${escHtml(a.title)}</span>`
+          : '';
+        titleCell=`<td class="nc" data-open-activity data-id="${escAttr(a.id)}" style="cursor:pointer" title="${escAttr(num+shown)}">`
+          +`${escHtml(num+shown)} `
+          +`<button class="t-act-pencil" data-rename-activity data-id="${escAttr(a.id)}" title="Rename this activity" aria-label="Rename ${escAttr(shown)}">&#x270E;</button>`
+          +`${renameNote}</td>`;
+      }
+      return `<tr${isHidden?' style="opacity:.55"':''}><td>${dateCell}</td>${titleCell}<td>${doneCount} / ${total} students</td>
         <td><details><summary>Who hasn't finished (${notDone.length})</summary>${listHtml}</details></td>
         <td><div class="tg-seg">${visBtns}</div></td></tr>`;
     }).join('');
-    box.innerHTML=`<div class="tg-note">An activity with no date set is invisible to students — that's its normal starting state, not an error; set one here to publish it. Hidden activities disappear for students regardless of date, same as if they hadn't been pushed yet. Use Hidden to pull back something already live; un-hide any time.</div>`+
-      `<div class="t-grid-wrap"><table><thead><tr><th>Date</th><th class="nc">Activity</th><th>Done</th><th>Not yet</th><th>Visibility</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    box.innerHTML=`<div class="tg-note">An activity with no date set is invisible to students — that's its normal starting state, not an error; set one here to publish it. Hidden activities disappear for students regardless of date, same as if they hadn't been pushed yet. Use Hidden to pull back something already live; un-hide any time. The &#x270E; next to a title renames the activity for everyone.</div>`+
+      `<div class="t-grid-wrap t-act-wrap"><table><thead><tr><th>Date</th><th class="nc">Activity</th><th>Done</th><th>Not yet</th><th>Visibility</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    // Opening the editor is a full re-render, so focus has to be re-placed
+    // afterwards or the pencil click would leave you looking at a box you
+    // still have to click into. select() so typing replaces the old name.
+    if(activityEditId){
+      const inp=box.querySelector('.t-act-title-edit');
+      if(inp){ inp.focus(); inp.select(); }
+    }
   });
+}
+/* The name to SHOW for an activity in the console: the teacher's rename if
+   one is live, otherwise the title class-activities.js ships. Deliberately
+   mirrors caTitle() in app.js rather than sharing it — app.js's copy reads
+   the student-side `activityTitles` global, this one reads the config object
+   the activities table already has in hand, and both apply the same `base`
+   staleness rule (see caTitle's comment for what `base` buys us). If that
+   rule changes, change it in both. */
+function teacherActivityTitle(a, cfg){
+  const o=((cfg&&cfg.activityTitles)||{})[a.id];
+  return (o && o.en && o.base===a.title) ? o.en : a.title;
+}
+// Read the open editor's box and hand it to the writer. Split out from
+// teacherSetActivityTitle so Enter, the Save button and a future affordance
+// all reach the same value without each re-finding the input.
+function teacherSaveActivityTitle(id){
+  const inp=document.querySelector(`.t-act-title-edit[data-id="${CSS.escape(id)}"]`);
+  teacherSetActivityTitle(id, inp ? inp.value : '');
+}
+/* Write (or clear) a rename. Same optimistic-then-roll-back write shape as
+   teacherSetActivityHidden/Date above, against a third map on the same doc.
+
+   Two cases clear the override outright rather than storing it: an empty box,
+   and a value equal to the shipped title — both mean "no rename", and storing
+   either would leave a row in config/class that does nothing but has to be
+   reasoned about later.
+
+   `base` freezes the shipped title this rename was typed against, which is
+   what lets the override expire by itself once the name is folded into
+   class-activities.js properly. caTitle() in app.js enforces it. */
+async function teacherSetActivityTitle(id, value){
+  const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
+  if(!a) return;
+  const name=String(value||'').trim().slice(0,120);
+  const clear=!name || name===a.title;
+  if(!teacherClassConfig.activityTitles) teacherClassConfig.activityTitles={};
+  const had=Object.prototype.hasOwnProperty.call(teacherClassConfig.activityTitles, id);
+  const prev=teacherClassConfig.activityTitles[id];
+  if(clear) delete teacherClassConfig.activityTitles[id];
+  else teacherClassConfig.activityTitles[id]={en:name, base:a.title};
+  activityEditId=null;
+  try{
+    await ensureDb();
+    const fv=firebase.firestore.FieldValue;
+    const patch = clear ? {activityTitles:{[id]:fv.delete()}} : {activityTitles:{[id]:{en:name, base:a.title}}};
+    await db.collection('config').doc('class').set(patch,{merge:true});
+  }catch(e){
+    if(had) teacherClassConfig.activityTitles[id]=prev; else delete teacherClassConfig.activityTitles[id];
+    // Leave the editor exactly as it is — re-rendering here would repaint the
+    // box from the server's (unchanged) copy and silently discard what was
+    // typed, which on a flaky connection is the worst possible outcome.
+    activityEditId=id;
+    alert('Could not save that rename — check your connection and Firestore rules. What you typed is still in the box.');
+    return;
+  }
+  if(teacherView==='activities') renderTeacherActivities();
 }
 // One activity's full content, read-only — the actual "click to go to the
 // activity" destination. Built straight from window.CLASS_ACTIVITIES (the
@@ -571,7 +680,7 @@ function renderTeacherActivityDetail(id){
     return `<div class="tr-card" style="margin-bottom:12px"><div class="tr-name">Step ${si+1}</div>${wrapGotItWhen(s.text||'')}${media.join('')}</div>`;
   }).join('');
   box.innerHTML=`${back}
-    <div class="stu-section-head" style="margin-top:0">${a.number?`#${Number(a.number)} - `:''}${escHtml(a.title)}</div>
+    <div class="stu-section-head" style="margin-top:0">${a.number?`#${Number(a.number)} - `:''}${escHtml(teacherActivityTitle(a,teacherClassConfig))}</div>
     ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
     ${stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>'}`;
 }

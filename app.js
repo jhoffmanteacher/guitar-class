@@ -137,6 +137,7 @@ let gamesAccessOn = true; // whether the Games arcade is available to THIS stude
 let accountPaused = false; // teacher put this student on hold (see loadClassConfig / showPausedScreen)
 let hiddenActivityIds = {}; // In-Class Activities the teacher has temporarily hidden (see loadClassConfig) — id -> true
 let activityDates = {}; // In-Class Activities release dates, teacher-set in the console (see loadClassConfig) — id -> 'YYYY-MM-DD'
+let activityTitles = {}; // In-Class Activity renames, teacher-set in the console (see loadClassConfig / caTitle) — id -> { en, base }
 let saveTimer   = null;
 
 /* ── Lazy module loading ──
@@ -320,7 +321,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
       if(accountPaused) showPausedScreen(user); else showApp(user);
     }
   } else {
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; hiddenActivityIds = {}; activityDates = {}; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; progressLoadFailed = false;
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     practiceLog = loadLocalPracticeLog();   // per-skill rep history: back to the local copy on sign-out
     _moduleStripStates = {};   // next user's first strip render is a first paint, not a celebration
@@ -436,6 +437,7 @@ async function loadClassConfig(){
   accountPaused = false;
   hiddenActivityIds = {};
   activityDates = {};
+  activityTitles = {};
   try{
     await ensureDb();
     if(!db){ restoreActivityDatesFromCache(); return; }
@@ -463,6 +465,11 @@ async function loadClassConfig(){
     // via restoreActivityDatesFromCache() in every early-return/catch path.
     activityDates = d.activityDates || {};
     try{ localStorage.setItem('caDates', JSON.stringify(activityDates)); }catch(e){}
+    // Teacher renames (teacher.js Class activities view) — id -> { en, base }.
+    // Fails open to {} like hiddenActivityIds rather than to a cache like the
+    // dates: losing a rename shows the shipped title, which is a cosmetic
+    // fallback, not a leak of unreleased content. See caTitle().
+    activityTitles = d.activityTitles || {};
   }catch(e){ restoreActivityDatesFromCache(); /* leave games on, nothing hidden */ }
 }
 // A student who has loaded config at least once keeps seeing that last-known
@@ -6902,7 +6909,7 @@ function caActivityCardHtml(a){
   const openStepIdx = caStepOpen[a.id] !== undefined ? caStepOpen[a.id] : caDefaultOpenStep(a);
   const stepsHtml = (a.steps || []).map((s, si) => caStepHtml(a, s, si, si === openStepIdx, caStepDone[`${a.id}:${si}`] === true)).join('');
   const markLabel = done ? t('ca.completed') : t('ca.markComplete');
-  const titleHtml = (a.number ? `#${Number(a.number)} - ` : '') + escHtml(tf(a,'title'));
+  const titleHtml = (a.number ? `#${Number(a.number)} - ` : '') + escHtml(caTitle(a));
   return `<details class="ca-card" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary">
       <span class="ca-chip">${escHtml(caFormatDate(caDate(a)))}</span>
@@ -6979,6 +6986,30 @@ function caToggleComplete(id){
 // see activityDates in loadClassConfig(). class-activities.js entries carry
 // no date field of their own anymore; this is the only place that resolves one.
 function caDate(a){ return activityDates[a.id] || null; }
+/* The activity's display title, with a teacher rename applied if one is live.
+   Renames are typed in the console (teacher.js) and land in
+   config/class.activityTitles as { en, base } — see loadClassConfig().
+
+   `base` is the SHIPPED title the rename was typed against, and it's what
+   makes a rename a temporary patch instead of a permanent shadow: the
+   override only applies while the shipped title still equals `base`. So the
+   loop is — Jonathan renames in the console (live immediately, English in
+   both languages, which is the honest cost of an instant rename by someone
+   who doesn't write Spanish); the next code session folds that name into
+   class-activities.js as a proper title/title_es pair; the shipped title now
+   differs from `base`, the override silently expires, and Spanish students
+   get real Spanish. No cleanup write to Firestore needed, and no way for a
+   forgotten override to keep an English name pinned over a translated one.
+
+   `es` is honoured if it's ever set, so a future console field for it (or a
+   hand-written doc edit) works without touching this. */
+function caTitle(a){
+  const o = activityTitles[a.id];
+  if(o && o.en && o.base === a.title){
+    return (typeof getLang === 'function' && getLang()==='es' && o.es) ? o.es : o.en;
+  }
+  return tf(a,'title');
+}
 /* An activity is visible to students once its console-set release date has
    arrived (local calendar day) — same "hidden until it happens" default as
    the reminder popup below, so an activity with no date set yet (every
@@ -7021,7 +7052,7 @@ function maybeShowCaReminder(){
   try{ if(sessionStorage.getItem('caReminderShown') === '1') return; }catch(e){}
   const shown = pending.slice().sort((a, b) => (caDate(b) || '').localeCompare(caDate(a) || '')).slice(0, 5);
   const more = pending.length - shown.length;
-  const itemsHtml = shown.map(a => `<li><span class="ca-chip">${escHtml(caFormatDate(caDate(a)))}</span> ${escHtml(tf(a,'title'))}</li>`).join('');
+  const itemsHtml = shown.map(a => `<li><span class="ca-chip">${escHtml(caFormatDate(caDate(a)))}</span> ${escHtml(caTitle(a))}</li>`).join('');
   const ov = document.createElement('div');
   ov.className = 'daily5-overlay ca-reminder-overlay';
   ov.id = 'ca-reminder-overlay';

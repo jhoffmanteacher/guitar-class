@@ -39,6 +39,19 @@
    separately. Renumbering ids to match is the one thing that would break
    students' saved progress; don't.
 
+   RENAMES FROM THE CONSOLE — the teacher can rename an activity from the
+   Class activities table, which writes config/class.activityTitles as
+   { id -> { en, base } } and shows that name to students immediately, in
+   BOTH languages (Jonathan doesn't write Spanish, and a stale correct-Spanish
+   name would be worse than a fresh English one). `base` is the shipped title
+   the rename was typed against, and the override applies only while
+   `title` still equals it. So folding a rename in here — set `title` to the
+   new name, write a real `title_es` — expires the override automatically;
+   there's no Firestore cleanup step and no way for an old console rename to
+   shadow a newly translated title. If you see a name in the console that
+   isn't in this file, that's a rename waiting to be folded in. See caTitle()
+   in app.js and teacherActivityTitle() in teacher.js.
+
    Every display string carries an `_es` twin, same convention as module
    files — rendered through tf(obj, field) in app.js (see the "field on a
    Set/skill/song/etc." comment there). Never ship an English-only string;
