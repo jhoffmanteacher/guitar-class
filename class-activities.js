@@ -742,12 +742,12 @@ window.CLASS_ACTIVITIES = [
     steps: [
       {
         figure: 'img/ca-hb-low-e.svg',
-        text: 'This is the low E string — the thick one, closest to your face. The whole phrase lives here: the open string (0 = no finger), and frets 2, 4 and 5. The dot at fret 5 is your landing mark.',
-        text_es: 'Esta es la cuerda Mi grave — la más gruesa, la que queda más cerca de tu cara. Toda la frase vive aquí: la cuerda al aire (0 = sin dedo), y los trastes 2, 4 y 5. El punto en el traste 5 es tu marca para caer.',
+        text: 'This is the low E string — the thick one, closest to your face. The whole phrase lives here: the open string (0 = no finger) is the note E, fret 2 is F#, fret 4 is G#, and fret 5 is A. The faint dots on the neck — frets 3, 5, 7, 9 and 12 — are a map, and the dot at fret 5 is your landing mark.',
+        text_es: 'Esta es la cuerda Mi grave — la más gruesa, la que queda más cerca de tu cara. Toda la frase vive aquí: la cuerda al aire (0 = sin dedo) es la nota E, el traste 2 es F#, el traste 4 es G# y el traste 5 es A. Los puntos tenues del mástil — trastes 3, 5, 7, 9 y 12 — son un mapa, y el punto en el traste 5 es tu marca para caer.',
       },
       {
-        text: '<ol><li>Fingertip just behind fret 5 — next to the metal strip, not on top of it. Thumb behind the neck.</li><li>Pluck it. A rattly, dead sound is a buzz — slide the fingertip closer to the fret and press again.</li><li>Now the move: pluck the open string, then land on fret 5 and pluck again. Let the dot catch your eye before your finger jumps.</li></ol>You\'ve got it when: three landings in a row ring clean, no buzz. Buzz twice? Slide the fingertip closer to the fret and press with the very tip.',
-        text_es: '<ol><li>La punta del dedo justo detrás del traste 5 — pegada a la barrita de metal, no encima de ella. El pulgar detrás del mástil.</li><li>Tócala. Un sonido que traquetea o suena apagado es un zumbido — desliza la punta del dedo más cerca del traste y presiona otra vez.</li><li>Ahora el movimiento: toca la cuerda al aire, luego cae en el traste 5 y toca otra vez. Deja que el punto te llame la atención antes de que salte el dedo.</li></ol>Lo tienes cuando: tres caídas seguidas suenan limpias, sin zumbido. ¿Zumbó dos veces? Desliza la punta del dedo más cerca del traste y presiona con la puntita.',
+        text: '<ol><li>Fingertip just behind fret 5 — next to the metal strip, not on top of it. Thumb behind the neck.</li><li>Pluck it. A rattly, dead sound is a buzz — slide the fingertip closer to the fret and press again.</li><li>Now the move: pluck the open string, then land on fret 5 and pluck again. Let the dot catch your eye before your finger jumps.</li></ol>You\'ve got it when: three landings in a row on A ring clean, no buzz. Buzz twice? Slide the fingertip closer to the fret and press with the very tip.',
+        text_es: '<ol><li>La punta del dedo justo detrás del traste 5 — pegada a la barrita de metal, no encima de ella. El pulgar detrás del mástil.</li><li>Tócala. Un sonido que traquetea o suena apagado es un zumbido — desliza la punta del dedo más cerca del traste y presiona otra vez.</li><li>Ahora el movimiento: toca la cuerda al aire, luego cae en el traste 5 y toca otra vez. Deja que el punto te llame la atención antes de que salte el dedo.</li></ol>Lo tienes cuando: tres caídas seguidas en A suenan limpias, sin zumbido. ¿Zumbó dos veces? Desliza la punta del dedo más cerca del traste y presiona con la puntita.',
         tab: {
           caption: 'Open E → fret 5 · land on the dot',
           caption_es: 'Mi al aire → traste 5 · cae en el punto',
@@ -774,8 +774,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Put it together: the chunk, then the landing — fret 5, then fret 4. That\'s the whole first line of the song.\nYou\'ve got it when: three times through without stopping, saying the words as you play.',
-        text_es: 'Júntalo todo: el fragmento y luego la caída — traste 5 y luego traste 4. Esa es la primera línea completa de la canción.\nLo tienes cuando: tres veces seguidas sin detenerte, diciendo las palabras mientras tocas.',
+        text: 'Put it together: the chunk, then the landing — fret 5, then fret 4. That\'s the whole first line of the song.\nYou\'ve got it when: three clean runs without stopping, saying the words as you play.',
+        text_es: 'Júntalo todo: el fragmento y luego la caída — traste 5 y luego traste 4. Esa es la primera línea completa de la canción.\nLo tienes cuando: tres pasadas limpias sin detenerte, diciendo las palabras mientras tocas.',
         tab: {
           caption: 'Phrase 1 · all on the low E string',
           caption_es: 'Frase 1 · todo en la cuerda Mi grave',
@@ -796,8 +796,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Keep going — there\'s no finish line on this one. Set the player above to 60 BPM and play the phrase with the beat. Every clean pass, raise the BPM by 10.\nYou\'ve got it when: you\'ve raised the BPM twice without breaking down — then keep climbing.',
-        text_es: 'Sigue — aquí no hay meta final. Pon el reproductor de arriba en 60 BPM y toca la frase con el pulso. Con cada pasada limpia, súbele 10 al BPM.\nLo tienes cuando: ya subiste el BPM dos veces sin perder el ritmo — y de ahí, sigue subiendo.',
+        text: 'Keep going — there\'s no finish line on this one. Set the player above to 60 BPM and play the phrase with the beat. Every clean pass, raise the BPM by 10.\nYou\'ve got it when: you\'ve raised the BPM twice without breaking down — then keep climbing. Fast already? Say each note\'s name as you land it — E, F#, G#, A.',
+        text_es: 'Sigue — aquí no hay meta final. Pon el reproductor de arriba en 60 BPM y toca la frase con el pulso. Con cada pasada limpia, súbele 10 al BPM.\nLo tienes cuando: ya subiste el BPM dos veces sin perder el ritmo — y de ahí, sigue subiendo. ¿Ya vas rápido? Di el nombre de cada nota al caer en ella — E, F#, G#, A.',
       },
     ],
   },
