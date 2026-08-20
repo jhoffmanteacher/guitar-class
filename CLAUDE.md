@@ -64,7 +64,13 @@ after pushing; local sessions only, cloud can't reach the live site).
 
 A tracked pre-commit hook at `.githooks/pre-commit` runs the fast offline checks
 on every commit. Per-machine setup, once: `git config core.hooksPath .githooks`
-(done on the Mac; **needed on Windows**). Bypass with `--no-verify`.
+— **done on both machines**. Bypass with `--no-verify`.
+
+The hook resolves `node` itself rather than trusting PATH: on Windows it runs
+under Git Bash, which doesn't inherit the PATH entry the Node installer adds
+for cmd/PowerShell, so it fell through to its "skipping checks" warning on
+every commit while looking installed (fixed 2026-08-20). If you ever see that
+warning, the hook is a no-op — run `node tools/checks.mjs` by hand.
 
 ### ⚠️ Sweep findings ratchet into checks.mjs
 Any sweep or audit that finds **3+ instances of a mechanically-detectable error
