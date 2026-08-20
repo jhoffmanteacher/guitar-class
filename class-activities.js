@@ -793,8 +793,8 @@ window.CLASS_ACTIVITIES = [
         text: 'The first four notes: open, open, fret 2, open. Say the words while you play — "Hap-py birth-day."\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Stop, fix the finger, then go again.',
         text_es: 'Las primeras cuatro notas: al aire, al aire, traste 2, al aire. Di las palabras mientras tocas — "Hap-py birth-day."\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Detente, arregla el dedo y vuelve a intentarlo.',
         tab: {
-          caption: '"Hap-py birth-day" — the first chunk',
-          caption_es: '"Hap-py birth-day" — el primer fragmento',
+          caption: '"Hap-py birth-day" — the first four notes',
+          caption_es: '"Hap-py birth-day" — las primeras cuatro notas',
           notes: [
             { string: 'E', fret: 0, note: 'E',  midi: 40 },
             { string: 'E', fret: 0, note: 'E',  midi: 40 },
@@ -804,8 +804,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Put it together: the chunk, then the landing — fret 5, then fret 4. That\'s the whole first line of the song.\nYou\'ve got it when: three clean runs without stopping, saying the words as you play.',
-        text_es: 'Júntalo todo: el fragmento y luego la caída — traste 5 y luego traste 4. Esa es la primera línea completa de la canción.\nLo tienes cuando: tres pasadas limpias sin detenerte, diciendo las palabras mientras tocas.',
+        text: 'Now the whole line. Play the four notes you just learned — "Hap-py birth-day" — then two more for "to you": fret 5, then fret 4, right next door. Six notes, and that\'s the first line of the song.\nYou\'ve got it when: three clean runs without stopping, saying the words as you play.',
+        text_es: 'Ahora la línea completa. Toca las cuatro notas que acabas de aprender — "Hap-py birth-day" — y luego dos más para "to you": traste 5 y luego traste 4, justo al lado. Seis notas, y esa es la primera línea de la canción.\nLo tienes cuando: tres pasadas limpias sin detenerte, diciendo las palabras mientras tocas.',
         tab: {
           caption: 'Phrase 1 · all on the low E string',
           caption_es: 'Frase 1 · todo en la cuerda Mi grave',

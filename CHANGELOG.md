@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-20 — Song Journey pages: screen-reader fixes
+
+### Fixed
+
+- **The tempo slider, timer-length buttons, and tuner string buttons on all
+  six Song Journey pages** (Watchtower, Sweet Child, Luna, Let It Be, "the
+  cure", Seven Nation Army) now announce properly to screen readers — they'd
+  fallen behind the same controls in the main app, which got this fix
+  earlier.
+- **A Module 3 challenge card title was too long** and is now shorter, with
+  its explanation of the ◐ symbol moved into the step text where it belongs.
+
 ## 2026-08-20 — In-class activities are numbered in teaching order
 
 ### Changed

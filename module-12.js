@@ -967,7 +967,7 @@ MODULE_SONGS[12] = [
 MODULE_REVIEWS[12] = {
   moduleNum: 12,
   module: 'Fingerstyle: Travis, Waltz & Requinto',
-  module_es: 'Fingerstyle: Travis, Vals y Requinto',
+  module_es: 'Fingerstyle: Travis, vals y requinto',
   skills: [
     { id: 'mr12-s1', text: 'I can hold a steady alternating thumb-bass in quarter notes for 8 bars without it stumbling', text_es: 'Puedo mantener un bajo del pulgar alternante y constante en negras durante 8 compases sin que tropiece', set: 'm12w1' },
     { id: 'mr12-s2', text: 'I can play a clean pinch — thumb and finger landing together — right on the downbeat', text_es: 'Puedo tocar un pellizco limpio — pulgar y dedo cayendo juntos — justo en el tiempo fuerte', set: 'm12w1' },

@@ -222,7 +222,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .mr-rec-stop{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;font-size:0.9062rem;font-family:inherit;border:1px solid #d63838;color:#fff;background:#d63838;border-radius:20px;cursor:pointer}
 .mr-rec-stop:hover{filter:brightness(0.93)}
 .mr-rec-max{font-size:0.8125rem;color:var(--text2)}
-.mr-rec-preview,.mr-rec-saved{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.mr-rec-preview{display:flex;flex-direction:column;gap:8px;margin-top:6px}
 .mr-rec-audio{width:100%;max-width:100%;height:36px}
 .mr-rec-actions{display:flex;gap:8px;flex-wrap:wrap}
 .mr-rec-status{font-size:0.8125rem;color:var(--text2);line-height:1.4}
@@ -306,22 +306,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .tabs-card .tabs-card-title{font-size:0.9375rem}
 }
 .tab-panel{display:none}.tab-panel.active{display:block}
-.st-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px}
-.stc{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:border-color 0.15s}
-.stc:hover{border-color:var(--border2)}
-.stc.active{border:1.5px solid var(--blue-text)}
-.st-ico{font-size:1.875rem;margin-bottom:8px}
 .st-badge{font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:6px}
-.ba{background:var(--blue-bg);color:var(--blue-text)}
 .bb{background:var(--green-bg);color:var(--green-text)}
 .bc{background:var(--amber-bg);color:var(--amber-text)}
-.st-name{font-size:0.9375rem;font-weight:500;margin-bottom:2px}
-.st-desc{font-size:0.875rem;color:var(--text2)}
 .dp{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--purple-accent);border-top-left-radius:0;border-bottom-left-radius:0;border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
 .dp.hidden{display:none}
 .dp-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
 .dp-title{font-size:1.125rem;font-weight:600}
-.dp-time{font-size:0.875rem;color:var(--text2);margin-left:auto}
 .prog-pill-wrap{margin-left:auto;display:inline-flex;align-items:center;gap:6px}
 .prog-pill{font-size:0.8125rem;font-weight:600;color:var(--text2);background:var(--bg3);border-radius:12px;padding:3px 10px;white-space:nowrap}
 .prog-mini{width:44px;height:5px;border-radius:3px;background:var(--bg3);overflow:hidden}
@@ -416,7 +407,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .step-mc-keyed.answered .step-mc-opt.incorrect{background:var(--amber-bg);border-color:var(--amber-text);color:var(--amber-text)}
 .step-mc-explain{display:none;margin-top:7px;font-size:0.8438rem;line-height:1.45;color:var(--text2);padding:6px 10px;border-left:3px solid var(--green-text);background:var(--bg2);border-radius:0 6px 6px 0}
 .step-mc-keyed.answered + .step-mc-explain{display:block}
-.step-resp-saved{font-size:0.7812rem;color:var(--text2);margin-top:3px;min-height:13px}
 /* ── Per-step "Mark done" toggle (collapsed/current state is .step-detail above) ── */
 .step-done-row{margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .step-done-btn{display:inline-flex;align-items:center;gap:5px;font-family:inherit;font-size:0.875rem;font-weight:600;color:#fff;background:var(--brand);border:1px solid var(--brand);border-radius:18px;padding:8px 18px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,0.22)}
@@ -431,7 +421,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .step-branch{font-size:0.8438rem;line-height:1.45;color:var(--text2);padding:5px 10px;border-radius:7px}
 .step-stuck{background:var(--blue-bg)}
 .step-levelup{background:var(--green-bg)}
-.step-branch-tag{font-weight:700;color:var(--text)}
 .card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:4px 16px;margin-bottom:12px}
 .song-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
 .song-row:last-child{border-bottom:none}
@@ -490,13 +479,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .song-vid-btn.journey{color:var(--blue-text)}
 .legend{display:flex;gap:14px;margin-bottom:8px}
 .leg{display:flex;align-items:center;gap:5px;font-size:0.875rem;color:var(--text2)}
-.vid-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
-.vid-row:last-child{border-bottom:none}
-.vname{font-size:0.9375rem;font-weight:500}
-.vname a{color:var(--blue-text);text-decoration:none}
-.vname a:hover{text-decoration:underline}
-.vsrc{font-size:0.875rem;color:var(--text2);margin-top:1px}
-.vrec{font-size:0.75rem;padding:2px 7px;border-radius:10px;background:var(--amber-bg);color:var(--amber-text);margin-top:3px;display:inline-block}
 .ablock{background:var(--bg3);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:8px}
 .albl{font-size:0.8125rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);margin-bottom:4px}
 .atxt{font-size:0.9375rem;line-height:1.6}
@@ -572,14 +554,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .routine-body{flex:1}
 .routine-body .bpm-control-group{margin-top:4px}
 .routine-foot{margin-top:12px;font-size:0.7812rem;color:var(--text3)}
-.daily5-btn{border:1px solid var(--border2);background:var(--bg);color:var(--text2);border-radius:20px;padding:5px 14px;font-size:0.875rem;cursor:pointer;transition:all .15s}
-.daily5-btn:hover{color:var(--text);border-color:var(--text2)}
-.daily5-btn[aria-expanded="true"]{background:var(--text);color:var(--bg);border-color:var(--text)}
 .daily5-panel{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px}
 .daily5-head{display:flex;align-items:center;justify-content:space-between;font-size:0.9375rem;font-weight:700;margin-bottom:10px}
-.daily5-break{margin-top:12px;border-top:1px solid var(--border);padding-top:10px}
-.daily5-break summary{cursor:pointer;font-size:0.875rem;font-weight:600;color:var(--text2)}
-.daily5-break-note{font-size:0.8125rem;color:var(--text3);margin:8px 0 6px}
 .module-select-label{font-size:0.8125rem;text-transform:uppercase;letter-spacing:.05em;color:var(--text2);white-space:nowrap}
 .module-select{font-size:0.9375rem;padding:6px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);cursor:pointer;flex:1;max-width:320px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%236b6b65' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
 .module-select:focus{outline:none;border-color:var(--blue-text)}
@@ -767,8 +743,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .rp-meta-title{font-size:0.9375rem;font-weight:500;color:var(--text);margin-bottom:2px}
 .rp-meta-sub{font-size:0.8125rem;color:var(--text2)}
 
-.rp-link{color:var(--blue-text);text-decoration:none;cursor:pointer;border-bottom:1px solid transparent;transition:border-color 0.1s}
-.rp-link:hover{border-bottom-color:var(--blue-text)}
 .rp-trigger{display:inline-flex;align-items:center;gap:4px;color:var(--blue-text);cursor:pointer;font-size:0.9375rem;font-weight:500;background:none;border:none;padding:0;font-family:inherit;text-align:left;line-height:1.5}
 .rp-trigger:hover{text-decoration:underline}
 /* ── Iframe drag shield — blocks iframe from stealing mouse events during resize ── */
@@ -845,8 +819,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .tp-btn:hover{background:var(--bg3)}
 .tp-btn.primary{background:var(--blue-bg);border-color:var(--blue-text);color:var(--blue-text);font-weight:500}
 .tp-btn.primary-g{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text);font-weight:500}
-.tp-btn.primary-t{width:100%;padding:7px 0;border-radius:var(--radius-sm);border:1px solid var(--purple-accent);background:var(--purple-bg);color:var(--purple-text);font-weight:500;font-size:0.875rem;cursor:pointer;font-family:inherit}
-.tp-btn.primary:hover,.tp-btn.primary-g:hover,.tp-btn.primary-t:hover{opacity:0.85}
+.tp-btn.primary:hover,.tp-btn.primary-g:hover{opacity:0.85}
 .timer-display{font-size:2.25rem;font-weight:500;text-align:center;letter-spacing:2px;margin:4px 0 12px;color:var(--text);border-radius:8px}
 @keyframes timerDoneFlash{0%,100%{background:transparent;color:var(--text)}50%{background:var(--green-text);color:var(--bg)}}
 .timer-done-flash{animation:timerDoneFlash 0.6s ease-in-out 4}
@@ -885,7 +858,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .t-scard-val{font-size:1.5rem;font-weight:500}
 .t-week-tabs{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
 .t-week-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.t-week-modlabel{font-size:0.8125rem;font-weight:600;color:var(--text2);white-space:nowrap;margin-right:2px;min-width:88px}
 .t-wtab{font-size:0.875rem;padding:4px 12px;border-radius:20px;border:1px solid var(--border2);background:transparent;color:var(--text2);cursor:pointer}
 .t-wtab.on{background:var(--text);color:var(--bg);border-color:var(--text)}
 .t-wtab.locked{opacity:.4;cursor:default}
@@ -1132,13 +1104,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   body{background:#fff !important}
 
   /* Hide all on-screen chrome */
-  .header,.rail,.rail-backdrop,.skip-link,.module-select-wrap,.module-strip,.module-strip-label,.week-pills,
+  .header,.rail,.rail-backdrop,.skip-link,.module-select-wrap,.week-pills,
   .resume-card,
   .student-footer,
   .video-overlay,
   .fab-group,.tabs,.save-ind,
   #google_translate_element,.btn-translate,.user-area,
-  .print-set-btn,.daily5-panel,.daily5-btn,.daily5-overlay,.games-screen,.page-screen,
+  .print-set-btn,.daily5-panel,.daily5-overlay,.games-screen,.page-screen,
   .back-to-top,.panel-next,.sk-where-btn,.st-flex-note,
   .step-done-row,.mr-rec,.mr-locked-banner,.set-peek-banner{display:none !important}
 
@@ -1326,7 +1298,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 
 /* ── 🎮 Games panel (hub + Note Hunt + Change Up), coach.js ── */
 .games-panel{padding:0}
-.games-head-actions{display:flex;gap:10px;align-items:center}
 .games-back{background:none;border:none;cursor:pointer;font-size:0.8125rem;font-weight:600;color:var(--blue-text);font-family:inherit;padding:0}
 .games-back:hover{text-decoration:underline}
 .games-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin:4px 0 10px}
@@ -2026,9 +1997,9 @@ body.games-open{overflow:hidden}
 .bpm-slider{height:28px}
 /* Overlay hit area, full 44px — isolated controls with clear space around them */
 .btn-sign,.btn-out,.btn-translate,.tp-close,.coach-x,.rp-close,.rp-newtab,
-.daily5-btn,.games-back,.routine-print-btn,.print-set-btn,.tabs-songs{position:relative}
+.games-back,.routine-print-btn,.print-set-btn,.tabs-songs{position:relative}
 .btn-sign::after,.btn-out::after,.btn-translate::after,.tp-close::after,.coach-x::after,
-.rp-close::after,.rp-newtab::after,.daily5-btn::after,.games-back::after,
+.rp-close::after,.rp-newtab::after,.games-back::after,
 .routine-print-btn::after,.print-set-btn::after,.tabs-songs::after{
   content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   width:max(100%,44px);height:max(100%,44px)}

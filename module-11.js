@@ -1016,7 +1016,7 @@ MODULE_SONGS[11] = [
 MODULE_REVIEWS[11] = {
   moduleNum: 11,
   module: 'Chords, Keys & Harmony',
-  module_es: 'Acordes, Tonalidades y Armonía',
+  module_es: 'Acordes, tonalidades y armonía',
   skills: [
     { id: 'mr11-s1', text: 'I can build a triad (root–3rd–5th) from any major scale', text_es: 'Puedo construir una tríada (raíz–3ª–5ª) a partir de cualquier escala mayor', set: 'm11w1' },
     { id: 'mr11-s2', text: 'I can label a chord progression with Roman numerals, including "Luna"\'s F–Am vamp as I–iii', text_es: 'Puedo etiquetar una progresión de acordes con números romanos, incluyendo el vamp F–Am de "Luna" como I–iii', set: 'm11w1' },

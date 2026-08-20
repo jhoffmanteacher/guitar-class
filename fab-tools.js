@@ -251,10 +251,11 @@ function toggleMetro(){ if(metroRunning) stopMetro(); else startMetro(); }
 let timerRunning=false, timerInterval=null, timerSecs=30, timerSelected=30, timerEndAt=0;
 function setTimerSecs(secs){ timerSelected=secs; timerSecs=secs; if(timerRunning){ clearInterval(timerInterval); timerRunning=false; document.getElementById('timer-btn').innerHTML=toolLabelHtml('&#x25B6;','tools.start'); } updateTimerDisplay(); [30,60,120,180,240,300].forEach(s=>{ const el=document.getElementById('tp-'+s); if(!el) return; const on = s===secs; el.classList.toggle('sel',on);
   /* ARIA half of the selection, so it isn't carried by the .sel class alone.
-     Guarded on role="radio": the tabs/*.html Journey pages ship the same preset
-     markup WITHOUT the radiogroup wiring, and setting tabIndex=-1 there would
-     make five of the six presets unreachable by keyboard with no arrow-key
-     handler to get back to them. */
+     Guarded on role="radio" defensively — every popup that ships this preset
+     markup (index.html and all 6 tabs/*.html Journey pages, since 2026-08-20)
+     carries the radiogroup wiring, but the check stays so a future popup that
+     reuses .timer-presets without it can't strand tabIndex=-1 on unreachable
+     buttons. */
   if(el.getAttribute('role')==='radio'){ el.setAttribute('aria-checked', on?'true':'false'); el.tabIndex = on?0:-1; } }); }
 function updateTimerDisplay(){ const m=Math.floor(timerSecs/60),s=timerSecs%60; document.getElementById('timer-display').textContent=m+':'+(s<10?'0':'')+s; }
 // Flash the display when time's up — visible across a loud room without headphones.

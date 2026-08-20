@@ -946,7 +946,7 @@ MODULE_SONGS[10] = [
 MODULE_REVIEWS[10] = {
   moduleNum: 10,
   module: 'Scales, Keys & Ear Training',
-  module_es: 'Escalas, Tonalidades y Entrenamiento Auditivo',
+  module_es: 'Escalas, tonalidades y entrenamiento auditivo',
   skills: [
     { id: 'mr10-s1', text: 'I can say the major-scale recipe (W-W-H-W-W-W-H) from memory', text_es: 'Puedo decir la receta de la escala mayor (T-T-S-T-T-T-S) de memoria', set: 'm10w1' },
     { id: 'mr10-s2', text: 'I can spell C major and G major note-by-note out loud', text_es: 'Puedo deletrear C mayor y G mayor nota por nota en voz alta', set: 'm10w1' },
