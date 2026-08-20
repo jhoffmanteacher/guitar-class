@@ -29,7 +29,7 @@
    a display number.
 
    `number` is the TEACHING-ORDER number, and it is NOT locked to the id.
-   It's the only number a student ever sees ("#3 - Finger Gym 1"), so it has
+   It's the only number a student ever sees ("#3 - Finger Gym 3"), so it has
    to follow the order the class is actually taught in, which isn't the order
    activities get authored in — an activity written late can be taught first.
    Resequencing `number` is therefore expected and safe: nothing is keyed to
@@ -38,6 +38,15 @@
    duplicates — checks.mjs (1d) enforces that, and enforces id uniqueness
    separately. Renumbering ids to match is the one thing that would break
    students' saved progress; don't.
+
+   A NUMBER BAKED INTO A TITLE MOVES WITH THE RENUMBER. Some titles carry
+   their own number ("Finger Gym 3"), and a student looking at
+   "#5 - Finger Gym 3" has no way to tell which of the two is the real
+   position. So resequencing `number` is never done alone — in the same edit,
+   retype the digit in `title` AND `title_es`, and chase any
+   "same as Gym 3" / "del Gimnasio 3" cross-reference in another activity's
+   step text. checks.mjs (1l) fails the push when a title's number disagrees
+   with its `number`, in either language.
 
    RENAMES FROM THE CONSOLE — the teacher can rename an activity from the
    Class activities table, which writes config/class.activityTitles as
@@ -268,8 +277,8 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-2',
     number: 3,
-    title:    'Finger Gym 1',
-    title_es: 'Gimnasio de Dedos 1',
+    title:    'Finger Gym 3',
+    title_es: 'Gimnasio de Dedos 3',
     intro:    'Today isn\'t a song day — it\'s a training day. Three events in the first five frets: the Ladder, the Spider, the Reach. You\'re chasing a personal record, not a grade.',
     intro_es: 'Hoy no es día de canciones — es día de entrenamiento. Tres eventos en los primeros cinco trastes: la Escalera, la Araña y el Estiramiento. Vas por un récord personal, no por una calificación.',
     steps: [
@@ -351,8 +360,8 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-3',
     number: 4,
-    title:    'Finger Gym 2 — Down and Across',
-    title_es: 'Gimnasio de Dedos 2 — Bajando y cruzando',
+    title:    'Finger Gym 4 — Down and Across',
+    title_es: 'Gimnasio de Dedos 4 — Bajando y cruzando',
     intro:    'Last Gym went up. Today you come back down, then take the Ladder onto all six strings. Going down is harder than going up — the pinky has to lead.',
     intro_es: 'El Gimnasio pasado subiste. Hoy vas a bajar, y después vas a llevar la Escalera a las seis cuerdas. Bajar es más difícil que subir — el meñique tiene que ir primero.',
     steps: [
@@ -441,8 +450,8 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-4',
     number: 5,
-    title:    'Finger Gym 3 — Up the Neck',
-    title_es: 'Gimnasio de Dedos 3 — Subiendo el mástil',
+    title:    'Finger Gym 5 — Up the Neck',
+    title_es: 'Gimnasio de Dedos 5 — Subiendo el mástil',
     intro:    'So far the gym has lived in the first five frets. Today you move it up the neck. The frets get narrower as you climb, so the same shape feels different in every position.',
     intro_es: 'Hasta ahora el gimnasio ha vivido en los primeros cinco trastes. Hoy lo mueves hacia arriba del mástil. Los trastes se hacen más angostos mientras subes, así que el mismo patrón se siente distinto en cada posición.',
     steps: [
@@ -519,15 +528,15 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-5',
     number: 6,
-    title:    'Finger Gym 4 — Leave Them Down',
-    title_es: 'Gimnasio de Dedos 4 — Déjalos abajo',
+    title:    'Finger Gym 6 — Leave Them Down',
+    title_es: 'Gimnasio de Dedos 6 — Déjalos abajo',
     intro:    'Until now your fingers took turns. Today they stay down. Every finger that has already played keeps touching the string — that\'s what makes chords possible later.',
     intro_es: 'Hasta ahora tus dedos se tomaban turnos. Hoy se quedan abajo. Cada dedo que ya tocó sigue apoyado en la cuerda — eso es lo que hace posibles los acordes más adelante.',
     steps: [
       {
         figure: 'img/ca-fg-gym-zone.svg',
-        text: 'Back to the first five frets. The notes are the same as Gym 1 — what changes is that nothing lifts.',
-        text_es: 'De vuelta a los primeros cinco trastes. Las notas son las mismas del Gimnasio 1 — lo que cambia es que nada se levanta.',
+        text: 'Back to the first five frets. The notes are the same as Gym 3 — what changes is that nothing lifts.',
+        text_es: 'De vuelta a los primeros cinco trastes. Las notas son las mismas del Gimnasio 3 — lo que cambia es que nada se levanta.',
       },
       {
         text: 'Plant-as-you-go. Climb 1-2-3-4, but each finger stays where it lands. By the last note all four fingers are on the string at once. BPM 50.\nYou\'ve got it when: at fret 4 all four fingers are still touching, three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
@@ -594,8 +603,8 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-6',
     number: 7,
-    title:    'Finger Gym 5 — Skip and Stretch',
-    title_es: 'Gimnasio de Dedos 5 — Salta y estira',
+    title:    'Finger Gym 7 — Skip and Stretch',
+    title_es: 'Gimnasio de Dedos 7 — Salta y estira',
     intro:    'Two new demands today: skipping over a string without hitting it, and reaching one fret farther than your hand wants to go.',
     intro_es: 'Hoy hay dos exigencias nuevas: saltar sobre una cuerda sin tocarla, y estirar un traste más allá de donde tu mano quiere llegar.',
     steps: [
@@ -671,8 +680,8 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-7',
     number: 8,
-    title:    'Finger Gym 6 — The Meet',
-    title_es: 'Gimnasio de Dedos 6 — La competencia',
+    title:    'Finger Gym 8 — The Meet',
+    title_es: 'Gimnasio de Dedos 8 — La competencia',
     intro:    'Meet day. Nothing new to learn — everything you\'ve built, run back to back, at the fastest tempo you can keep clean. Bring your record from last Gym.',
     intro_es: 'Día de competencia. No hay nada nuevo que aprender — todo lo que has construido, seguido y sin parar, al tempo más rápido que puedas mantener limpio. Trae tu récord del Gimnasio pasado.',
     steps: [

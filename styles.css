@@ -936,7 +936,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .t-grid-wrap td.nc{text-align:left;font-size:0.9375rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
 /* Class activities only. The 130px name column above is sized for the skills
    grid, where dozens of check columns compete for width — but this table has
-   five columns and activity titles are sentences ("#3 - Finger Gym 2 — Down
+   five columns and activity titles are sentences ("#4 - Finger Gym 4 — Down
    and Across"), so there ellipsis hid the part that identifies the row. Wrap
    instead of truncating, and let the column take a third of the table. */
 .t-act-wrap th.nc,.t-act-wrap td.nc{width:34%;min-width:220px;max-width:none;white-space:normal;line-height:1.35}
@@ -2221,11 +2221,20 @@ body.games-open{overflow:hidden}
    The global reset zeroes list padding, so an <ol>/<ul> in step text used to
    hang its markers OUT to the left of the card's text column. Indent them the
    same 22px the practice panels use, so numbers and bullets sit inside the
-   column like every other list on the site. (.sh-list keeps its own 16px.) */
+   column like every other list on the site. (.sh-list keeps its own 16px.)
+   In-class activities render the same trusted step HTML in two more places —
+   .ca-step-detail (student) and .ca-prev-step (the teacher console's activity
+   preview) — so they get the same indent. .ca-step-detail also sits inside the
+   <ol class="ca-steps"> wrapper, which puts a bare <ul> at depth 2 (hollow
+   circles) exactly like .step ul, so force discs there too. */
 .step ul{list-style:disc}
 .st-text ol,.st-text ul,
+.ca-step-detail ol,.ca-step-detail ul,
+.ca-prev-step ol,.ca-prev-step ul,
 .sk-practice-prompt ol,.sk-practice-prompt ul,
 .sk-practice-explain ol,.sk-practice-explain ul{margin:6px 0 4px;padding-left:22px}
+.ca-step-detail ul,.ca-prev-step ul{list-style:disc}
+.ca-step-detail li,.ca-prev-step li{margin:3px 0}
 .sk-practice-prompt ul,.sk-practice-explain ul{list-style:disc}
 .sk-practice-prompt li,.sk-practice-explain li{margin:3px 0;line-height:1.45}
 .sk-practice-explain{margin-top:8px;padding:8px 10px;font-size:0.875rem;color:var(--text2);background:var(--bg2);border-left:2px solid var(--green-text);border-radius:0 4px 4px 0;line-height:1.5}

@@ -72,7 +72,17 @@ class** must add a permanent detector for that class to `checks.mjs` in the same
 session. Never leave a detector script in a session scratchpad — the 2026-07-31
 MC-tell audit died that way and the class recurred in the next sweep. Ratchets
 so far: MC answer-length tells (1h), watch-range labels ↔ `t=` params (1i),
-video-title drift (inside the link check).
+activity title numbers ↔ `number` (1l), video-title drift (inside the link
+check).
+
+### ⚠️ Renumbering an in-class activity retitles it too
+`number` in `class-activities.js` drives the "#N - " prefix students see. When a
+title carries its own number ("Finger Gym 3"), resequencing `number` without
+retyping the title ships "#5 - Finger Gym 3" — two numbers, neither obviously
+the real one. Change `number`, `title`, `title_es`, and any "same as Gym 3" /
+"del Gimnasio 3" cross-reference in another activity's step text in the SAME
+edit. checks.mjs 1l fails the push otherwise. Ids (`ca-<n>`) never move —
+student progress is keyed to them.
 
 ### ⚠️ Editing a module's skills? Update `MODULE_MANIFEST` in `config-main.js`
 Add or remove a `skills:` entry and you must bump that module's `skillCount`.

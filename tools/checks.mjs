@@ -676,6 +676,40 @@ function validateClassActivities() {
   }
 
   if (problems === 0) ok(`${activities.length} class activit${activities.length === 1 ? 'y' : 'ies'} — all valid, teaching order 1..${activities.length}`);
+  checkActivityTitleNumbers(activities);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1l. ACTIVITY TITLE NUMBERS ↔ `number` — some activity titles carry a
+   number of their own ("Finger Gym 3"), and students see BOTH it and
+   the "#N - " prefix the renderer builds from `number`. Resequencing
+   `number` without retyping the title left all six Finger Gyms reading
+   "#5 - Finger Gym 3" (2026-08-20), with no way for a student to tell
+   which digit was the real position. Pin them together, in EN and ES.
+
+   Only a number in "series position" is checked — one that ends the
+   title or is followed by a — / – / - / : separator. A number that is
+   part of the prose ("Play 3 Chords", "Happy Birthday in 6/8") is left
+   alone. If a title ever legitimately ends in a non-position number,
+   reword it rather than loosening this.
+   ════════════════════════════════════════════════════════════════════ */
+function checkActivityTitleNumbers(activities) {
+  head('1l. Activity title numbers match `number`');
+  // A standalone integer that ends the string or hands off to a separator.
+  const POS_RE = /(?:^|\s)(\d+)(?=\s*(?:[—–:-]\s|$))/;
+  let bad = 0;
+  for (const a of activities) {
+    for (const field of ['title', 'title_es']) {
+      const title = a[field];
+      if (typeof title !== 'string') continue;
+      const m = POS_RE.exec(title);
+      if (!m) continue;
+      if (Number(m[1]) === a.number) continue;
+      err(`${a.id}: ${field} "${title}" says ${m[1]} but number is ${a.number} — a renumber has to retype the digit in the title too (see class-activities.js header)`);
+      problems++; bad++;
+    }
+  }
+  if (bad === 0) ok('every numbered activity title matches its teaching-order number');
 }
 
 /* ════════════════════════════════════════════════════════════════════

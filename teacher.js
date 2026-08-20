@@ -677,7 +677,7 @@ function renderTeacherActivityDetail(id){
     // suppressCoach: the Listening Coach mic-check button opens a panel
     // that's also inside #app — pointless (and confusing) to show here.
     if(s.tab) media.push(buildTab(s.tab,{keyPrefix:`bpm:ca-preview:${a.id}:${si}:tab`,suppressCoach:true}));
-    return `<div class="tr-card" style="margin-bottom:12px"><div class="tr-name">Step ${si+1}</div>${wrapGotItWhen(s.text||'')}${media.join('')}</div>`;
+    return `<div class="tr-card ca-prev-step" style="margin-bottom:12px"><div class="tr-name">Step ${si+1}</div>${wrapGotItWhen(s.text||'')}${media.join('')}</div>`;
   }).join('');
   box.innerHTML=`${back}
     <div class="stu-section-head" style="margin-top:0">${a.number?`#${Number(a.number)} - `:''}${escHtml(teacherActivityTitle(a,teacherClassConfig))}</div>

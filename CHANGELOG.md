@@ -15,10 +15,22 @@ see `WORKFLOW.md` and the git commit log.
   following as #3–#8. Your finished check-marks are untouched — an activity
   keeps its own permanent id behind the scenes, so only the number you see
   changed.
+- **The Finger Gyms are renamed to match those numbers.** "Finger Gym 1" is
+  now **Finger Gym 3**, and so on up to **Finger Gym 8 — The Meet**, so the
+  number in the name and the "#" number in front of it always say the same
+  thing.
+
 - **Activities can now be renamed.** Mr. Hoffman can give an activity a
   clearer name from his end, and it updates for everyone. A freshly renamed
   activity shows its new English name to Spanish readers too, until the
   Spanish version catches up in a later update.
+
+### Fixed
+
+- **Numbered and bulleted lists inside an activity's steps line up properly
+  again.** The numbers used to hang out past the left edge of the card with
+  the text wrapping underneath them; now they sit inside the text column like
+  every other list on the site.
 
 ## 2026-08-19 — A new in-class activity, and a way back from the Mood Chart
 
