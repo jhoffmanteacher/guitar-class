@@ -66,11 +66,30 @@ A tracked pre-commit hook at `.githooks/pre-commit` runs the fast offline checks
 on every commit. Per-machine setup, once: `git config core.hooksPath .githooks`
 — **done on both machines**. Bypass with `--no-verify`.
 
-The hook resolves `node` itself rather than trusting PATH: on Windows it runs
-under Git Bash, which doesn't inherit the PATH entry the Node installer adds
-for cmd/PowerShell, so it fell through to its "skipping checks" warning on
-every commit while looking installed (fixed 2026-08-20). If you ever see that
-warning, the hook is a no-op — run `node tools/checks.mjs` by hand.
+A second tracked hook, `.githooks/pre-push`, runs the same fast offline checks
+again at push time. Not redundant: **git doesn't run `pre-commit` on merge
+commits at all**, so a merge can carry a stale `sw.js` past every per-commit
+check — on 2026-08-20 one reached `main` that way. Pre-push is the last moment
+anything is still local. Both hooks skip the network; the full
+`node tools/checks.mjs` is still the real gate.
+
+Both hooks resolve `node` themselves rather than trusting PATH: on Windows they
+run under Git Bash, which doesn't inherit the PATH entry the Node installer
+adds for cmd/PowerShell, so `pre-commit` fell through to its "skipping checks"
+warning on every commit while looking installed (fixed 2026-08-20). If you ever
+see that warning, the hook is a no-op — run `node tools/checks.mjs` by hand.
+Keep the candidate-path list identical in both hooks.
+
+### ⚠️ Parallel sessions: a worktree pushes its OWN branch, never `main`
+Jonathan runs several sessions at once in `.claude/worktrees/*` (gitignored, so
+they never leak into a commit). Worktrees isolate *files* — they still share one
+repository and one `origin`, so isolation ends at the push. A session in a
+worktree pushes its own branch (`git push -u origin <branch>`); landing on
+`main` is a separate, deliberate act. On 2026-08-20 a worktree session merged
+`main` into its branch and pushed that merge straight onto `origin/main`, which
+is how a feature-branch commit became `main`'s tip. Before pushing, always
+`git fetch` and check `git log --oneline HEAD..origin/main` — another session
+may have moved things since the turn began.
 
 ### ⚠️ Sweep findings ratchet into checks.mjs
 Any sweep or audit that finds **3+ instances of a mechanically-detectable error

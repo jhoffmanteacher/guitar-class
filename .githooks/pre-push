@@ -1,0 +1,78 @@
+#!/bin/sh
+# ════════════════════════════════════════════════════════════════════
+#  Guitar Class — pre-push safeguard
+#
+#  The gap this closes: git does NOT run the pre-commit hook on merge
+#  commits. So a merge could carry a stale sw.js CACHE_VERSION onto main
+#  with every per-commit check having passed — and on 2026-08-20 one did,
+#  landing a fingerprint that no longer described the files it named.
+#  Pushing is the last moment anything is still local, so the fingerprint
+#  check belongs here too, not only at commit time.
+#
+#  Runs the FAST, OFFLINE, read-only checks (--check changes no files):
+#
+#    • validates every module-N.js and class-activities.js
+#    • confirms sw.js's CACHE_VERSION matches the current shell files
+#
+#  NOT a replacement for the full `node tools/checks.mjs` before a push —
+#  that one also link-checks ~180 external URLs and auto-bumps sw.js. This
+#  hook deliberately skips the network so it can't add a minute to every
+#  push. It's the floor, not the gate. (See CLAUDE.md.)
+#
+#  core.hooksPath is repo-level config, so this applies in every worktree
+#  automatically — no per-worktree setup.
+#
+#  Bypass once with:  git push --no-verify
+# ════════════════════════════════════════════════════════════════════
+
+ROOT=$(git rev-parse --show-toplevel)
+
+# Nothing to check on a pure delete (`git push origin :branch`) — git feeds
+# an all-zero local sha for those, and there's no tree to validate.
+deleting_only=1
+while read -r _local_ref local_sha _remote_ref _remote_sha; do
+  [ -z "$local_sha" ] && continue
+  case "$local_sha" in
+    *[!0]*) deleting_only=0 ;;
+  esac
+done
+if [ "$deleting_only" -eq 1 ]; then
+  exit 0
+fi
+
+# Same node resolution as .githooks/pre-commit — Git Bash on Windows doesn't
+# inherit the PATH entry the Node installer adds for cmd/PowerShell, so PATH
+# alone silently turns this hook into a no-op. Keep the two lists in sync.
+NODE=""
+if command -v node >/dev/null 2>&1; then
+  NODE=node
+else
+  for candidate in \
+    "/c/Program Files/nodejs/node.exe" \
+    "/c/Program Files (x86)/nodejs/node.exe" \
+    "$LOCALAPPDATA/Programs/nodejs/node.exe" \
+    "/usr/local/bin/node" \
+    "/opt/homebrew/bin/node"
+  do
+    if [ -x "$candidate" ]; then NODE="$candidate"; break; fi
+  done
+fi
+
+if [ -z "$NODE" ]; then
+  printf '\033[33m!\033[0m pre-push: node not found — skipping checks (run "node tools/checks.mjs" before pushing)\n'
+  exit 0
+fi
+
+"$NODE" "$ROOT/tools/checks.mjs" --check --skip-links
+status=$?
+
+if [ "$status" -ne 0 ]; then
+  printf '\n\033[31m✗ pre-push checks failed — push aborted.\033[0m\n'
+  printf '  Nothing left your machine. Run the full checks, which fixes the\n'
+  printf '  service-worker version for you:\n\n'
+  printf '      node tools/checks.mjs\n\n'
+  printf '  then commit the change and push again.\n'
+  printf '  (To bypass just this once: git push --no-verify)\n'
+fi
+
+exit $status
