@@ -936,7 +936,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .t-grid-wrap td.nc{text-align:left;font-size:0.9375rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
 /* Class activities only. The 130px name column above is sized for the skills
    grid, where dozens of check columns compete for width — but this table has
-   five columns and activity titles are sentences ("#4 - Finger Gym 4 — Down
+   five columns and activity titles are sentences ("#4 - Finger Gym 2 — Down
    and Across"), so there ellipsis hid the part that identifies the row. Wrap
    instead of truncating, and let the column take a third of the table. */
 .t-act-wrap th.nc,.t-act-wrap td.nc{width:34%;min-width:220px;max-width:none;white-space:normal;line-height:1.35}
