@@ -680,36 +680,59 @@ function validateClassActivities() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   1l. ACTIVITY TITLE NUMBERS ↔ `number` — some activity titles carry a
-   number of their own ("Finger Gym 3"), and students see BOTH it and
-   the "#N - " prefix the renderer builds from `number`. Resequencing
-   `number` without retyping the title left all six Finger Gyms reading
-   "#5 - Finger Gym 3" (2026-08-20), with no way for a student to tell
-   which digit was the real position. Pin them together, in EN and ES.
+   1l. SERIES NUMBERS INSIDE ACTIVITY TITLES — some activities come in a
+   named series ("Finger Gym 1", "Finger Gym 2", …). That digit counts
+   within the series, NOT within the course: the first Finger Gym is
+   Finger Gym 1 even though the class meets it as activity #3 (Jonathan,
+   2026-08-20). So it is deliberately independent of `number`, and this
+   check does NOT pin the two together — an earlier version did, which is
+   what pushed the series to 3..8 in the first place.
 
-   Only a number in "series position" is checked — one that ends the
-   title or is followed by a — / – / - / : separator. A number that is
-   part of the prose ("Play 3 Chords", "Happy Birthday in 6/8") is left
-   alone. If a title ever legitimately ends in a non-position number,
-   reword it rather than loosening this.
+   What it does enforce is that each series reads 1, 2, 3, … in teaching
+   order: group titles by the words before the digit, sort by `number`,
+   and fail on a gap, a duplicate, or a backwards jump. Inserting a Gym
+   in the middle therefore still means retyping every later Gym's digit.
+   EN and ES are grouped separately, so a translated series has to stay
+   in step with itself too.
+
+   Only a number in "series position" counts — one that ends the title or
+   is followed by a — / – / - / : separator. A number that is part of the
+   prose ("Play 3 Chords", "Happy Birthday in 6/8") is left alone. If a
+   title ever legitimately ends in a non-series number, reword it rather
+   than loosening this.
    ════════════════════════════════════════════════════════════════════ */
 function checkActivityTitleNumbers(activities) {
-  head('1l. Activity title numbers match `number`');
+  head('1l. Numbered activity series run 1..N in teaching order');
   // A standalone integer that ends the string or hands off to a separator.
   const POS_RE = /(?:^|\s)(\d+)(?=\s*(?:[—–:-]\s|$))/;
-  let bad = 0;
+  // series key -> [{ id, number, seriesNum, title }], one map per language.
+  const series = new Map();
   for (const a of activities) {
     for (const field of ['title', 'title_es']) {
       const title = a[field];
       if (typeof title !== 'string') continue;
       const m = POS_RE.exec(title);
       if (!m) continue;
-      if (Number(m[1]) === a.number) continue;
-      err(`${a.id}: ${field} "${title}" says ${m[1]} but number is ${a.number} — a renumber has to retype the digit in the title too (see class-activities.js header)`);
-      problems++; bad++;
+      const name = title.slice(0, m.index).trim();
+      if (!name) continue;               // a bare "3" is prose, not a series
+      const key = `${field}::${name.toLowerCase()}`;
+      if (!series.has(key)) series.set(key, { field, name, entries: [] });
+      series.get(key).entries.push({ id: a.id, number: a.number, seriesNum: Number(m[1]), title });
     }
   }
-  if (bad === 0) ok('every numbered activity title matches its teaching-order number');
+  let bad = 0;
+  for (const { field, name, entries } of series.values()) {
+    entries.sort((x, y) => x.number - y.number);
+    entries.forEach((e, i) => {
+      if (e.seriesNum === i + 1) return;
+      err(`${e.id}: ${field} "${e.title}" is #${i + 1} of the "${name}" series (by teaching order) but reads ${e.seriesNum} — the series has to run 1..${entries.length} (see class-activities.js header)`);
+      problems++; bad++;
+    });
+  }
+  if (bad === 0) {
+    const n = series.size;
+    ok(n ? `${n} numbered title series — each runs 1..N in teaching order` : 'no numbered activity title series');
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════════

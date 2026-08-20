@@ -97,16 +97,18 @@ class** must add a permanent detector for that class to `checks.mjs` in the same
 session. Never leave a detector script in a session scratchpad — the 2026-07-31
 MC-tell audit died that way and the class recurred in the next sweep. Ratchets
 so far: MC answer-length tells (1h), watch-range labels ↔ `t=` params (1i),
-activity title numbers ↔ `number` (1l), video-title drift (inside the link
+activity title series numbering (1l), video-title drift (inside the link
 check).
 
-### ⚠️ Renumbering an in-class activity retitles it too
-`number` in `class-activities.js` drives the "#N - " prefix students see. When a
-title carries its own number ("Finger Gym 3"), resequencing `number` without
-retyping the title ships "#5 - Finger Gym 3" — two numbers, neither obviously
-the real one. Change `number`, `title`, `title_es`, and any "same as Gym 3" /
-"del Gimnasio 3" cross-reference in another activity's step text in the SAME
-edit. checks.mjs 1l fails the push otherwise. Ids (`ca-<n>`) never move —
+### ⚠️ A number in an activity title is a SERIES number, not `number`
+`number` in `class-activities.js` drives the "#N - " prefix students see. A
+digit inside the title counts within its own series instead: the first Finger
+Gym is **Finger Gym 1** even though the class meets it as activity **#3**
+(Jonathan, 2026-08-20). Don't "fix" `#3 - Finger Gym 1` — that's the intended
+reading. What a series must be is contiguous 1..N in teaching order, EN and ES,
+which checks.mjs 1l enforces; inserting one in the middle means retyping every
+later title's digit plus any "same as Gym 1" / "del Gimnasio 1" cross-reference
+in another activity's step text, in the SAME edit. Ids (`ca-<n>`) never move —
 student progress is keyed to them.
 
 ### ⚠️ Editing a module's skills? Update `MODULE_MANIFEST` in `config-main.js`

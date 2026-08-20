@@ -15,10 +15,10 @@ see `WORKFLOW.md` and the git commit log.
   following as #3–#8. Your finished check-marks are untouched — an activity
   keeps its own permanent id behind the scenes, so only the number you see
   changed.
-- **The Finger Gyms are renamed to match those numbers.** "Finger Gym 1" is
-  now **Finger Gym 3**, and so on up to **Finger Gym 8 — The Meet**, so the
-  number in the name and the "#" number in front of it always say the same
-  thing.
+- **The Finger Gyms keep their own count.** The first one is still
+  **Finger Gym 1** even though it's activity **#3**, on up to
+  **Finger Gym 6 — The Meet** at #8. The "#" number tells you where you are in
+  the course; the name tells you which Gym it is.
 
 - **Activities can now be renamed.** Mr. Hoffman can give an activity a
   clearer name from his end, and it updates for everyone. A freshly renamed
