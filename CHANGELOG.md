@@ -26,6 +26,8 @@ see `WORKFLOW.md` and the git commit log.
 - The tuning video card and the Tune-Up challenge now tell you to say the
   target letter out loud before you pluck, and to check the letter before
   trusting the needle.
+- The tuning card now has a second video, from a different teacher, covering
+  the same wrong-note mistake.
 
 ## 2026-08-20 — Song Journey pages: screen-reader fixes
 
