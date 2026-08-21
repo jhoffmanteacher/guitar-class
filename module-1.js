@@ -308,8 +308,8 @@ SETS.push(
             steps: [
           {
             label: 'Watch: tuning with a tuner', label_es: 'Mira: afinar con afinador',
-            text: 'Watch: <a href="https://www.youtube.com/watch?v=bTvmDGDuUZ4&t=32" target="_blank">How to Tune a Guitar for Beginners with a Tuner – Lauren Bateman (0:32–4:30)</a> (this site also has a built-in Tuner — find the tools at the bottom of the left menu; on a phone, open the ☰ menu first):<ol><li>Have your tuner ready.</li><li>Follow along on your own guitar, matching one string at a time as she goes.</li></ol>You\'ve got it when: you can tell whether a note is too high or too low before the tuner shows you.',
-            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=bTvmDGDuUZ4&t=32" target="_blank">How to Tune a Guitar for Beginners with a Tuner – Lauren Bateman (0:32–4:30)</a> (este sitio también tiene un Afinador integrado — busca las herramientas al final del menú izquierdo; en un teléfono, abre primero el menú ☰):<ol><li>Ten tu afinador listo.</li><li>Sigue el video en tu propia guitarra, afinando una cuerda a la vez a medida que ella avanza.</li></ol>Lo tienes cuando: puedes saber si una nota está muy alta o muy baja antes de que el afinador te lo muestre.',
+            text: 'Watch: <a href="https://www.youtube.com/watch?v=bTvmDGDuUZ4&t=32" target="_blank">How to Tune a Guitar for Beginners with a Tuner – Lauren Bateman (0:32–4:30)</a> (this site also has a built-in Tuner — find the tools at the bottom of the left menu; on a phone, open the ☰ menu first):<ol><li>Have your tuner ready.</li><li>Before you pluck each string, say its target letter out loud: "This is the A string — I want to see A."</li><li>Follow along on your own guitar, matching one string at a time as she goes.</li></ol>You\'ve got it when: you can tell whether a note is too high or too low before the tuner shows you. (Two more tuning cards are at the end of this section — "Read the tuner" and "Right needle, wrong letter.")',
+            text_es: 'Mira: <a href="https://www.youtube.com/watch?v=bTvmDGDuUZ4&t=32" target="_blank">How to Tune a Guitar for Beginners with a Tuner – Lauren Bateman (0:32–4:30)</a> (este sitio también tiene un Afinador integrado — busca las herramientas al final del menú izquierdo; en un teléfono, abre primero el menú ☰):<ol><li>Ten tu afinador listo.</li><li>Antes de pulsar cada cuerda, di su letra meta en voz alta: "Esta es la cuerda La — quiero ver A."</li><li>Sigue el video en tu propia guitarra, afinando una cuerda a la vez a medida que ella avanza.</li></ol>Lo tienes cuando: puedes saber si una nota está muy alta o muy baja antes de que el afinador te lo muestre. (Hay dos tarjetas más de afinación al final de esta sección — "Lee el afinador" y "Aguja bien, letra equivocada".)',
             hint: 'Headphones on. Notice the order of the strings and what "in tune" sounds like.',
             hint_es: 'Ponte los audífonos. Fíjate en el orden de las cuerdas y en cómo suena "afinado".',
             stuck: 'Pause after each string and tune just that one before moving on. If the tuner jumps around, pluck a little softer and let the note ring.',
@@ -415,6 +415,64 @@ SETS.push(
               'Solo 1 mm, casi nada',
               'Cerca de un centímetro',
               'La púa completa, agarrada por el borde'
+            ] }
+          },
+          {
+            label: 'Read the tuner: letter first, then needle', label_es: 'Lee el afinador: primero la letra, luego la aguja',
+            text: 'A tuner tells you two things, and you read them in this order:<ol><li><strong>The letter</strong> is the note the tuner hears. Check it first — it must match the string you are tuning (low E · A · D · G · B · high e).</li><li><strong>The needle</strong> says how close you are. Left of center = too LOW → <strong>tighten</strong> the peg. Right of center = too HIGH → <strong>loosen</strong> the peg. Center / green = done.</li><li>Not sure which way a peg turns? Use the test: turn a <em>tiny</em> bit, pluck, and watch. If the needle moved <em>toward</em> the middle, keep going. If it moved <em>away</em>, reverse.</li></ol>Tip for the site Tuner: tap your string\'s letter instead of Auto and it will say tighten or loosen even when you are a whole note off. You\'ve got it when: you can say "too low, tighten" or "too high, loosen" out loud before you touch the peg.',
+            text_es: 'El afinador te dice dos cosas, y las lees en este orden:<ol><li><strong>La letra</strong> es la nota que el afinador escucha. Revísala primero — debe coincidir con la cuerda que estás afinando (Mi grave · La · Re · Sol · Si · mi aguda).</li><li><strong>La aguja</strong> dice qué tan cerca estás. A la izquierda del centro = muy BAJA → <strong>aprieta</strong> la clavija. A la derecha del centro = muy ALTA → <strong>afloja</strong> la clavija. Centro / verde = listo.</li><li>¿No sabes hacia qué lado gira una clavija? Usa la prueba: gira un <em>poquito</em>, pulsa y observa. Si la aguja se movió <em>hacia</em> el centro, sigue. Si se alejó, gira al revés.</li></ol>Consejo para el Afinador del sitio: toca la letra de tu cuerda en vez de Auto y te dirá aprieta o afloja aunque estés una nota entera lejos. Lo tienes cuando: puedes decir "muy baja, aprieto" o "muy alta, aflojo" en voz alta antes de tocar la clavija.',
+            hint: 'Tighter string = higher note. Looser string = lower note. That is the whole rule — the peg direction is just whatever makes the string tighter.',
+            hint_es: 'Cuerda más tensa = nota más aguda. Cuerda más floja = nota más grave. Esa es toda la regla — la dirección de la clavija es simplemente la que tensa la cuerda.',
+            stuck: 'Turn the peg a tiny bit and listen: did the note go up or down? Up means you are tightening. Now you know which way is which on that peg.',
+            stuck_es: 'Gira la clavija un poquito y escucha: ¿la nota subió o bajó? Si subió, estás apretando. Ahora ya sabes cuál lado es cuál en esa clavija.',
+            levelUp: 'Detune one string a little without looking, then say out loud what the tuner will show BEFORE you pluck it. Pluck and check.',
+            levelUp_es: 'Desafina una cuerda un poco sin mirar, y di en voz alta qué va a mostrar el afinador ANTES de pulsarla. Pulsa y comprueba.',
+            skills: [5],
+            response: { type: 'mc', prompt: 'The needle is to the RIGHT of center. What does that mean, and what do you do?',
+              prompt_es: 'La aguja está a la DERECHA del centro. ¿Qué significa y qué haces?',
+              answer: 0,
+              explain: 'Right of center means the note is too high (sharp). Loosen the peg a little so the string relaxes and the pitch drops back to the middle.',
+              explain_es: 'A la derecha del centro significa que la nota está muy alta (sostenida). Afloja un poco la clavija para que la cuerda se relaje y el tono baje hasta el centro.',
+              choices: [
+              'Too high — loosen the peg a little',
+              'Too low — tighten the peg a little',
+              'In tune — move to the next string',
+              'The tuner is broken — restart it'
+            ],
+              choices_es: [
+              'Muy alta — afloja un poco la clavija',
+              'Muy baja — aprieta un poco la clavija',
+              'Afinada — pasa a la siguiente cuerda',
+              'El afinador está roto — reinícialo'
+            ] }
+          },
+          {
+            label: 'Right needle, wrong letter', label_es: 'Aguja bien, letra equivocada',
+            text: 'A green needle only means you are exactly on <em>some</em> note — not always the right one. If your A string reads a perfect green G, it is still a whole step too low. Use the note circle:<ol><li>Find your string\'s target letter (the blue circles: E · A · D · G · B · E).</li><li>Find the letter the tuner shows. Is it <strong>before</strong> your target going around the circle (too LOW → tighten) or <strong>after</strong> it (too HIGH → loosen)?</li><li>More than 2 steps away from the target? Stop and ask — that is where strings break.</li></ol>You\'ve got it when: you never call a string "done" until the letter AND the needle are both right.<span class="step-figure"><img src="img/m1-note-circle-en.svg" alt="The twelve notes E, F, F sharp, G, G sharp, A, A sharp, B, C, C sharp, D, D sharp arranged in a circle with the six string targets E, A, D, G and B in blue; a clockwise arrow labeled higher equals tighten, the other way lower equals loosen."></span>',
+            text_es: 'Una aguja verde solo significa que estás exactamente en <em>alguna</em> nota — no siempre la correcta. Si tu cuerda La marca un G verde perfecto, todavía está un tono entero muy baja. Usa el círculo de notas:<ol><li>Encuentra la letra meta de tu cuerda (los círculos azules: E · A · D · G · B · E).</li><li>Encuentra la letra que muestra el afinador. ¿Está <strong>antes</strong> de tu meta siguiendo el círculo (muy BAJA → aprieta) o <strong>después</strong> (muy ALTA → afloja)?</li><li>¿Más de 2 pasos de distancia de la meta? Detente y pregunta — ahí es donde se rompen las cuerdas.</li></ol>Lo tienes cuando: nunca das una cuerda por "lista" hasta que la letra Y la aguja estén bien.<span class="step-figure"><img src="img/m1-note-circle-es.svg" alt="Las doce notas E, F, F sostenido, G, G sostenido, A, A sostenido, B, C, C sostenido, D, D sostenido en un círculo, con las metas de las seis cuerdas E, A, D, G y B en azul; una flecha en sentido horario dice más aguda igual aprieta, y al revés más grave igual afloja."></span>',
+            hint: 'The letters go around like a clock: E F F# G G# A A# B C C# D D# and back to E. Sharps (#) sit between the plain letters.',
+            hint_es: 'Las letras dan la vuelta como un reloj: E F F# G G# A A# B C C# D D# y de regreso a E. Los sostenidos (#) van entre las letras simples.',
+            stuck: 'Say the target letter, then the letter you see, then walk the circle from one to the other with your finger. Short walk forward = tighten. Short walk backward = loosen.',
+            stuck_es: 'Di la letra meta, luego la letra que ves, y recorre el círculo con el dedo de una a la otra. Recorrido corto hacia adelante = aprieta. Recorrido corto hacia atrás = afloja.',
+            levelUp: 'Without a guitar: a D string shows a green E. Too high or too low? Now a G string shows F#. Answer both in under 5 seconds.',
+            levelUp_es: 'Sin guitarra: una cuerda Re muestra un E verde. ¿Muy alta o muy baja? Ahora una cuerda Sol muestra F#. Responde ambas en menos de 5 segundos.',
+            skills: [5],
+            response: { type: 'mc', prompt: 'You are tuning the A string. The tuner shows a green G. What do you do?',
+              prompt_es: 'Estás afinando la cuerda La. El afinador muestra un G verde. ¿Qué haces?',
+              answer: 0,
+              explain: 'G comes just before A on the circle, so the string is too low. Tighten a little until the letter flips to A, then bring the needle to the middle. Green on the wrong letter is not done.',
+              explain_es: 'G está justo antes de A en el círculo, así que la cuerda está muy baja. Aprieta un poco hasta que la letra cambie a A, y luego lleva la aguja al centro. Verde en la letra equivocada no es estar lista.',
+              choices: [
+              'Tighten it — G is before A, so it is too low',
+              'Loosen it — G is after A, so it is too high',
+              'Nothing — green means it is in tune',
+              'Switch the tuner to a different string'
+            ],
+              choices_es: [
+              'Apriétala — G está antes de A, así que está muy baja',
+              'Aflójala — G está después de A, así que está muy alta',
+              'Nada — verde significa que está afinada',
+              'Cambia el afinador a otra cuerda'
             ] }
           }
             ]
@@ -526,8 +584,8 @@ SETS.push(
             label: 'Challenge 1 — Tune-Up Under 2 Minutes', label_es: 'Reto 1 — Afinación en menos de 2 minutos',
             text: '<ol><li>Get all 6 strings to green on the tuner.</li><li>Race the timer — can you do it in under 2 minutes?</li></ol>You\'ve got it when: all 6 strings green in under 2 minutes. Log your time so you can try for a faster time next session.',
             text_es: '<ol><li>Pon las 6 cuerdas en verde en el afinador.</li><li>Compite contra el cronómetro — ¿puedes lograrlo en menos de 2 minutos?</li></ol>Lo tienes cuando: las 6 cuerdas en verde en menos de 2 minutos. Anota tu tiempo para intentar superarlo en la próxima sesión.',
-            hint: 'Tune low to high: E A D G B e. Going slowly works better than rushing past the note. Use the play button to hear the target pitches.',
-            hint_es: 'Afina de grave a aguda: E A D G B e. Ir despacio funciona mejor que pasarte de largo de la nota. Usa el botón de reproducir para escuchar los tonos objetivo.',
+            hint: 'Tune low to high: E A D G B e. Say each target letter before you pluck, and check the letter before you trust the needle — a green G on the A string is not done. Use the play button to hear the target pitches.',
+            hint_es: 'Afina de grave a aguda: E A D G B e. Di cada letra meta antes de pulsar, y revisa la letra antes de confiar en la aguja — un G verde en la cuerda La no está lista. Usa el botón de reproducir para escuchar los tonos objetivo.',
             stuck: 'Tune just one string to green and leave it, then the next. Hit the play button to hear each target pitch first so your ear knows where it\'s headed.',
             stuck_es: 'Afina solo una cuerda hasta que quede en verde y déjala, luego la siguiente. Presiona el botón de reproducir primero para escuchar cada tono objetivo y que tu oído sepa hacia dónde va.',
             levelUp: 'Log this session\'s time and try to make your time 15 seconds faster next session.',

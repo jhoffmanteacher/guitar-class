@@ -5,6 +5,28 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-20 — Tuning: which way to turn, and the wrong-letter trap
+
+### Added
+
+- **Two new Module 1 · Set 2 cards** at the end of the "Watch the lesson
+  videos" section. *Read the tuner: letter first, then needle* teaches the
+  order to read a tuner in, what left/right of center means (too low →
+  tighten, too high → loosen), and the turn-pluck-check test for a peg you
+  don't know the direction of. *Right needle, wrong letter* explains why a
+  green needle on the wrong note is not "done" and walks the twelve-note
+  circle to decide tighten vs. loosen — with a new note-circle diagram (EN/ES).
+  Both cards have a quiz and count toward the "Tune all 6 strings" skill.
+
+### Changed
+
+- **The site Tuner now says what to do** — "Too low — tighten the peg" /
+  "Too high — loosen the peg" instead of "tune up" / "tune down," which
+  students read as a direction on the peg.
+- The tuning video card and the Tune-Up challenge now tell you to say the
+  target letter out loud before you pluck, and to check the letter before
+  trusting the needle.
+
 ## 2026-08-20 — Song Journey pages: screen-reader fixes
 
 ### Fixed
