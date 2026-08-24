@@ -105,8 +105,8 @@ SETS.push(
             steps: [
           {
             label: 'Form Em and Am', label_es: 'Forma Em y Am',
-            text: 'Meet your two chords for today: <strong>Em</strong> and <strong>Am</strong> (from Module 5). Form each shape from the diagram and strum once to make sure every string rings — you\'ll switch between these two for the rest of this set.',
-            text_es: 'Conoce tus dos acordes de hoy: <strong>Em</strong> y <strong>Am</strong> (del Módulo 5). Forma cada forma a partir del diagrama y rasguea una vez para asegurarte de que suenen todas las cuerdas — vas a alternar entre estos dos durante el resto de esta unidad.',
+            text: 'Form your two chords for today, <strong>Em</strong> and <strong>Am</strong> (from Module 5), from the diagram, and strum once to make sure every string rings — you\'ll switch between these two for the rest of this set.',
+            text_es: 'Forma tus dos acordes de hoy, <strong>Em</strong> y <strong>Am</strong> (del Módulo 5), a partir del diagrama, y rasguea una vez para asegurarte de que suenen todas las cuerdas — vas a alternar entre estos dos durante el resto de esta unidad.',
             hint: 'Em uses two fingers; Am adds a third. The diagrams show exactly where each finger goes. Clean chords now make the strumming sound good later.',
             hint_es: 'Em usa dos dedos; Am agrega un tercero. Los diagramas muestran exactamente dónde va cada dedo. Acordes limpios ahora hacen que el rasgueo suene mejor después.',
             chords: [
@@ -222,8 +222,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge — Half-Bar Switch, Non-Stop (2 chords)', label_es: 'Reto — Cambio de medio compás, sin parar (2 acordes)',
-            text: '<ol><li>You just switched Em ↔ Am every two bars — now do it every TWO BEATS, down-up strumming the whole time, changing on beats 1 and 3, at 60 BPM.</li><li>The strum hand never pauses; the chord changes between strums.</li></ol>You\'ve got it when: four laps where the pendulum never stops and every change lands on the beat. Press &#x25B6; to hear the target.',
-            text_es: '<ol><li>Acabas de cambiar entre Em ↔ Am cada dos compases — ahora hazlo cada DOS TIEMPOS, rasgueando abajo-arriba todo el tiempo, cambiando en los tiempos 1 y 3, a 60 BPM.</li><li>La mano de rasgueo nunca pausa; el acorde cambia entre rasgueos.</li></ol>Lo tienes cuando: cuatro vueltas donde el péndulo nunca se detiene y cada cambio cae en el tiempo. Presiona &#x25B6; para escuchar el objetivo.',
+            text: '<ol><li>Switch Em ↔ Am every TWO BEATS instead of every two bars — down-up strumming the whole time, changing on beats 1 and 3, at 60 BPM.</li><li>The strum hand never pauses; the chord changes between strums.</li></ol>You\'ve got it when: four laps where the pendulum never stops and every change lands on the beat. Press &#x25B6; to hear the target.',
+            text_es: '<ol><li>Cambia entre Em ↔ Am cada DOS TIEMPOS en lugar de cada dos compases — rasgueando abajo-arriba todo el tiempo, cambiando en los tiempos 1 y 3, a 60 BPM.</li><li>La mano de rasgueo nunca pausa; el acorde cambia entre rasgueos.</li></ol>Lo tienes cuando: cuatro vueltas donde el péndulo nunca se detiene y cada cambio cae en el tiempo. Presiona &#x25B6; para escuchar el objetivo.',
             hint: 'Keep the wrist swinging down-up-down-up without a hitch — the fingers change underneath a moving hand. The moment you freeze to place the chord, you\'ve stopped the strum.',
             hint_es: 'Mantén la muñeca balanceándose abajo-arriba-abajo-arriba sin tropiezos — los dedos cambian debajo de una mano en movimiento. En el momento que te congelas para colocar el acorde, has detenido el rasgueo.',
             stuck: 'Drop to 50 BPM. Say "change" on the "and" after beats 2 and 4 to remind your fingers to move early.',
@@ -257,8 +257,8 @@ SETS.push(
           },
           {
             label: 'Challenge — Four-Chord Half-Bar ("Let It Be", strummed)', label_es: 'Reto — Medio compás con cuatro acordes ("Let It Be", rasgueado)',
-            text: 'Four chords at half-bar speed with the strum hand driving — this is real rhythm-guitar playing.<ul><li>Play the C · G · Am · F loop from Module 5, down-up strumming, two beats per chord at 60 BPM — this is exactly how the record\'s verse moves, just slowed from its real ~71 BPM, not just a speed drill.</li></ul>You\'ve got it when: two clean laps, strum unbroken, every change on the beat.',
-            text_es: 'Cuatro acordes a velocidad de medio compás con la mano de rasgueo al mando — esto es tocar guitarra rítmica de verdad.<ul><li>Toca el loop C · G · Am · F del Módulo 5, rasgueando abajo-arriba, dos tiempos por acorde a 60 BPM — así es exactamente como se mueve la estrofa en la grabación, solo más lento que sus ~71 BPM reales, no es solo un ejercicio de velocidad.</li></ul>Lo tienes cuando: dos vueltas limpias, rasgueo sin interrupciones, cada cambio a tiempo.',
+            text: '<ul><li>Play the C · G · Am · F loop from Module 5 — down-up strumming, two beats per chord at 60 BPM. This is real rhythm-guitar playing at half-bar speed with the strum hand driving, and exactly how the record\'s verse moves, just slowed from its real ~71 BPM, not just a speed drill.</li></ul>You\'ve got it when: two clean laps, strum unbroken, every change on the beat.',
+            text_es: '<ul><li>Toca el loop C · G · Am · F del Módulo 5 — rasgueando abajo-arriba, dos tiempos por acorde a 60 BPM. Esto es tocar guitarra rítmica de verdad a velocidad de medio compás con la mano de rasgueo al mando, y así es exactamente como se mueve la estrofa en la grabación, solo más lento que sus ~71 BPM reales, no es solo un ejercicio de velocidad.</li></ul>Lo tienes cuando: dos vueltas limpias, rasgueo sin interrupciones, cada cambio a tiempo.',
             hint: 'The right hand is the drummer and never stops; the left hand catches up between strokes. Keep upstrokes light — brush only the top few strings.',
             hint_es: 'La mano derecha es el baterista y nunca se detiene; la mano izquierda se pone al día entre golpes. Mantén los golpes hacia arriba ligeros — roza solo las cuerdas más agudas.',
             stuck: 'Isolate the pair that lags (often G → Am or Am → F) and loop just those two with the strum before running the circle.',
@@ -291,8 +291,8 @@ SETS.push(
           },
           {
             label: 'Challenge — One Chord Per Beat (fastest)', label_es: 'Reto — Un acorde por tiempo (el más rápido)',
-            text: 'The top of the ladder.<ul><li>Switch Em ↔ Am on every single beat — one down-strum per beat, a new chord each time, at 60 BPM, the strum still non-stop.</li></ul>You\'ve got it when: four laps clean at 60 where the change happens the instant your hand lifts for the next strum.',
-            text_es: 'La cima de la escalera.<ul><li>Cambia entre Em ↔ Am en cada tiempo — un golpe hacia abajo por tiempo, un acorde nuevo cada vez, a 60 BPM, el rasgueo sigue sin detenerse.</li></ul>Lo tienes cuando: cuatro vueltas limpias a 60 donde el cambio ocurre en el instante en que tu mano se levanta para el siguiente rasgueo.',
+            text: '<ul><li>Switch Em ↔ Am on every single beat — one down-strum per beat, a new chord each time, at 60 BPM, the strum still non-stop — the top of the ladder.</li></ul>You\'ve got it when: four laps clean at 60 where the change happens the instant your hand lifts for the next strum.',
+            text_es: '<ul><li>Cambia entre Em ↔ Am en cada tiempo — un golpe hacia abajo por tiempo, un acorde nuevo cada vez, a 60 BPM, el rasgueo sigue sin detenerse — la cima de la escalera.</li></ul>Lo tienes cuando: cuatro vueltas limpias a 60 donde el cambio ocurre en el instante en que tu mano se levanta para el siguiente rasgueo.',
             hint: 'Em and Am share two fingers, so this is the easiest pair to change every beat — perfect for training raw speed. Trust the shared fingers and move only what has to move.',
             hint_es: 'Em y Am comparten dos dedos, así que es el par más fácil para cambiar en cada tiempo — perfecto para entrenar velocidad pura. Confía en los dedos compartidos y mueve solo lo que tiene que moverse.',
             stuck: 'Slow to 50 BPM and let some changes be a little buzzy — here the goal is the timing of the switch, not perfect tone. Clean it up as the speed settles.',
@@ -508,8 +508,8 @@ SETS.push(
             steps: [
           {
             label: 'Form G and D', label_es: 'Forma G y D',
-            text: 'Today\'s pattern lands on <strong>G</strong> and <strong>D</strong>. Form each shape from the diagram and strum once cleanly before you add the D-DU-UDU rhythm.',
-            text_es: 'El patrón de hoy cae sobre <strong>G</strong> y <strong>D</strong>. Forma cada forma a partir del diagrama y rasguea una vez de forma limpia antes de agregar el ritmo D-DU-UDU.',
+            text: 'Form <strong>G</strong> and <strong>D</strong> from the diagram — today\'s pattern lands on these two — and strum once cleanly before you add the D-DU-UDU rhythm.',
+            text_es: 'Forma <strong>G</strong> y <strong>D</strong> a partir del diagrama — el patrón de hoy cae sobre estos dos — y rasguea una vez de forma limpia antes de agregar el ritmo D-DU-UDU.',
             hint: 'G is a full six-string chord; D skips the two lowest strings (the X marks). Get them ringing clean first — the rhythm is easier when the chord isn\'t fighting you.',
             hint_es: 'G es un acorde completo de seis cuerdas; D se salta las dos cuerdas más graves (las marcas X). Primero logra que suenen limpios — el ritmo es más fácil cuando el acorde no está peleando contigo.',
             chords: [
@@ -614,8 +614,8 @@ SETS.push(
             steps: [
               {
                 label: 'Challenge — I\'m Yours, verse', label_es: 'Reto — I\'m Yours, estrofa',
-                text: 'This is THE song this pattern is famous for.<ul><li>Play G · D · Em · C with D-DU-UDU, one bar per chord at 60 BPM.</li></ul>You\'ve got it when: the verse loop start to finish with the pattern identical on every chord — even when a chord lands imperfect, the groove holds.',
-                text_es: 'Esta es LA canción por la que este patrón es famoso.<ul><li>Toca G · D · Em · C con D-DU-UDU, un compás por acorde a 60 BPM.</li></ul>Lo tienes cuando: el loop de la estrofa de principio a fin con el patrón idéntico en cada acorde — incluso cuando un acorde no sale perfecto, el groove se mantiene.',
+                text: '<ul><li>Play G · D · Em · C with D-DU-UDU, one bar per chord at 60 BPM — this is THE song this pattern is famous for.</li></ul>You\'ve got it when: the verse loop start to finish with the pattern identical on every chord — even when a chord lands imperfect, the groove holds.',
+                text_es: '<ul><li>Toca G · D · Em · C con D-DU-UDU, un compás por acorde a 60 BPM — esta es LA canción por la que este patrón es famoso.</li></ul>Lo tienes cuando: el loop de la estrofa de principio a fin con el patrón idéntico en cada acorde — incluso cuando un acorde no sale perfecto, el groove se mantiene.',
                 hint: 'The pattern IS the song here. If it breaks at a change, the fix is Challenge 3\'s trick: jump chords on the last upstroke of the bar.',
                 hint_es: 'El patrón ES la canción aquí. Si se rompe en un cambio, el arreglo es el truco del Reto 3: salta de acorde en el último golpe hacia arriba del compás.',
                 stuck: 'Play the loop with one strum per bar until the changes are clean, then layer the pattern back on.',
@@ -627,8 +627,8 @@ SETS.push(
               },
               {
                 label: 'Challenge — "Oye Mi Amor", verse', label_es: 'Reto — "Oye Mi Amor", estrofa',
-                text: 'The verse uses just two chords, Bm · A:<ol><li>Use the small Bm (top four strings, no barre).</li><li>Play one bar of each with D-DU-UDU at 60 BPM.</li></ol>You\'ve got it when: four laps with the pattern unbroken and beats 2 and 4 accented so it pushes like the record.',
-                text_es: 'La estrofa usa solo dos acordes, Bm · A:<ol><li>Usa el Bm pequeño (cuatro cuerdas más agudas, sin cejilla).</li><li>Toca un compás de cada uno con D-DU-UDU a 60 BPM.</li></ol>Lo tienes cuando: cuatro vueltas con el patrón sin interrupciones y los tiempos 2 y 4 acentuados para que empuje como la grabación.',
+                text: '<ol><li>Use the small Bm (top four strings, no barre) for the verse\'s two chords, Bm · A.</li><li>Play one bar of each with D-DU-UDU at 60 BPM.</li></ol>You\'ve got it when: four laps with the pattern unbroken and beats 2 and 4 accented so it pushes like the record.',
+                text_es: '<ol><li>Usa el Bm pequeño (cuatro cuerdas más agudas, sin cejilla) para los dos acordes de la estrofa, Bm · A.</li><li>Toca un compás de cada uno con D-DU-UDU a 60 BPM.</li></ol>Lo tienes cuando: cuatro vueltas con el patrón sin interrupciones y los tiempos 2 y 4 acentuados para que empuje como la grabación.',
                 hint: 'The small Bm is the easier beginner version — the full-barre Bm (one finger pressed flat across several strings) arrives in Module 7. For now the pattern matters more than the shape.',
                 hint_es: 'El Bm pequeño es la versión más fácil para principiantes — el Bm con cejilla completa (un dedo presionado plano sobre varias cuerdas) llega en el Módulo 7. Por ahora el patrón importa más que la forma.',
                 stuck: 'Loop just the A → Bm change with one strum per bar until the landing is clean, then add the pattern.',
@@ -660,8 +660,8 @@ SETS.push(
             steps: [
               {
                 label: 'Play-along at 0.75×', label_es: 'Toca junto a 0.75×',
-                text: 'Play-along:<ol><li>Open Station B\'s D-DU-UDU lesson video.</li><li>Set YouTube\'s speed to 0.75×.</li><li>Strum along for the ENTIRE demo section without stopping.</li></ol>You\'ve got it when: you finish a full pass with the video — flubbed changes and all, don\'t stop.',
-                text_es: 'Toca junto:<ol><li>Abre el video de la lección D-DU-UDU de la Estación B.</li><li>Pon la velocidad de YouTube en 0.75×.</li><li>Rasguea junto con él durante TODA la sección de demostración sin detenerte.</li></ol>Lo tienes cuando: terminas un pase completo con el video — con cambios fallidos y todo, no te detengas.',
+                text: '<ol><li>Open Station B\'s D-DU-UDU lesson video.</li><li>Set YouTube\'s speed to 0.75×.</li><li>Strum along for the ENTIRE demo section without stopping.</li></ol>You\'ve got it when: you finish a full pass with the video — flubbed changes and all, don\'t stop.',
+                text_es: '<ol><li>Abre el video de la lección D-DU-UDU de la Estación B.</li><li>Pon la velocidad de YouTube en 0.75×.</li><li>Rasguea junto con él durante TODA la sección de demostración sin detenerte.</li></ol>Lo tienes cuando: terminas un pase completo con el video — con cambios fallidos y todo, no te detengas.',
                 hint: 'Not stopping is the skill. Real songs don\'t wait for you, and neither does the video — keeping going after a mistake is better than starting over.',
                 hint_es: 'No detenerte es la destreza. Las canciones reales no te esperan, y el video tampoco — seguir adelante después de un error es mejor que volver a empezar.'
               }
@@ -814,8 +814,8 @@ SETS.push(
             steps: [
           {
             label: 'Refresh the C chord', label_es: 'Repasa el acorde C',
-            text: 'The progressions today lean on <strong>C</strong> — your shape from Module 5, back again. Form it from the diagram and strum the top five strings (the low E is muted) until it rings clean.',
-            text_es: 'Las progresiones de hoy se apoyan en <strong>C</strong> — tu forma del Módulo 5, de vuelta. Fórmala a partir del diagrama y rasguea las cinco cuerdas más agudas (la Mi grave está silenciada) hasta que suene limpio.',
+            text: 'Form <strong>C</strong> from the diagram — today\'s progressions lean on it, your shape from Module 5, back again — and strum the top five strings (the low E is muted) until it rings clean.',
+            text_es: 'Forma <strong>C</strong> a partir del diagrama — las progresiones de hoy se apoyan en él, tu forma del Módulo 5, de vuelta — y rasguea las cinco cuerdas más agudas (la Mi grave está silenciada) hasta que suene limpio.',
             hint: 'C skips the lowest string (the X on the low E). Your ring finger reaches to the 3rd fret of the A string — a big stretch at first.',
             hint_es: 'C se salta la cuerda más grave (la X en la cuerda Mi grave). Tu dedo anular se estira hasta el traste 3 de la cuerda La — un gran estiramiento al principio.',
             chords: [

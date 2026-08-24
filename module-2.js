@@ -126,8 +126,8 @@ SETS.push(
               },
               {
                 label: 'A string notes with your chart', label_es: 'Notas de la cuerda La con tu tabla',
-                text: 'Same idea on the A string, still with your chart: A · B · C · D · E · F · G · A (frets 0–12), up then back down, names aloud.',
-                text_es: 'La misma idea en la cuerda La, todavía con tu tabla: A · B · C · D · E · F · G · A (trastes 0–12), hacia arriba y de regreso, nombres en voz alta.',
+                text: 'Play the same idea on the A string, still with your chart: A · B · C · D · E · F · G · A (frets 0–12), up then back down, names aloud.',
+                text_es: 'Toca la misma idea en la cuerda La, todavía con tu tabla: A · B · C · D · E · F · G · A (trastes 0–12), hacia arriba y de regreso, nombres en voz alta.',
                 hint: 'Notice fret 5 of the A string is the same note as the open D string — that connection helps later. The same half-step rule applies here: B–C and E–F are one fret apart, everything else is two, which is why C sits at fret 3 and F at fret 8.',
                 hint_es: 'Fíjate que el traste 5 de la cuerda La es la misma nota que la cuerda Re al aire — esa conexión ayuda más adelante. Aquí aplica la misma regla del semitono: B–C y E–F están a un traste, todo lo demás a dos, y por eso C queda en el traste 3 y F en el traste 8.',
                 skills: [3, 5],
@@ -162,8 +162,8 @@ SETS.push(
             steps: [
               {
                 label: 'Warm-up: tune all 6 strings', label_es: 'Calentamiento: afina las 6 cuerdas',
-                text: 'Before today\'s notes:<ol><li>Tune all 6 strings to green, low to high — E A D G B e — and say each string name as you go.</li><li>Try for a faster time than last session.</li><li>Click "Hear all 6 strings" for the target pitches.</li></ol>',
-                text_es: 'Antes de las notas de hoy:<ol><li>Afina las 6 cuerdas en verde, de grave a aguda — E A D G B e — y di cada nombre de cuerda a medida que avanzas.</li><li>Intenta lograr un tiempo más rápido que la sesión pasada.</li><li>Haz clic en "Escucha las 6 cuerdas" para escuchar los tonos objetivo.</li></ol>',
+                text: '<ol><li>Tune all 6 strings to green, low to high — E A D G B e — and say each string name as you go.</li><li>Try for a faster time than last session.</li><li>Click "Hear all 6 strings" for the target pitches.</li></ol>',
+                text_es: '<ol><li>Afina las 6 cuerdas en verde, de grave a aguda — E A D G B e — y di cada nombre de cuerda a medida que avanzas.</li><li>Intenta lograr un tiempo más rápido que la sesión pasada.</li><li>Haz clic en "Escucha las 6 cuerdas" para escuchar los tonos objetivo.</li></ol>',
                 hint: 'Tuning and the string names are Module 1 skills you keep forever — do this every practice session before you play. Going slowly works better than rushing past the note.',
                 hint_es: 'Afinar y nombrar las cuerdas son destrezas del Módulo 1 que conservas para siempre — hazlo en cada sesión de práctica antes de tocar. Ir despacio funciona mejor que pasarte de largo de la nota.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
@@ -254,8 +254,8 @@ SETS.push(
               },
               {
                 label: 'Challenge 3 — Shuffle Run (low E review)', label_es: 'Reto 3 — Recorrido con cartas (repaso de la cuerda Mi grave)',
-                text: 'This one goes back to the low E string you named earlier — same deck, harder job.<ol><li>Run it on the low E string, and this time name the note AND play it before the ring runs out.</li><li>Keep the guitar in hand for this one: the app checks the name, your ear checks the note.</li></ol>You\'ve got it when: 9 of 10 on the low E, no counting up from E.',
-                text_es: 'Esta vuelve a la cuerda Mi grave que nombraste antes — la misma baraja, con una tarea más difícil.<ol><li>Córrela en la cuerda Mi grave, y esta vez nombra la nota Y tócala antes de que se acabe el círculo.</li><li>Mantén la guitarra en la mano: la app revisa el nombre, tu oído revisa la nota.</li></ol>Lo tienes cuando: 9 de 10 en la Mi grave, sin contar desde E.',
+                text: '<ol><li>Run the same shuffle deck again, this time on the low E string you named earlier — harder job: name the note AND play it before the ring runs out.</li><li>Keep the guitar in hand for this one: the app checks the name, your ear checks the note.</li></ol>You\'ve got it when: 9 of 10 on the low E, no counting up from E.',
+                text_es: '<ol><li>Corre la misma baraja otra vez, ahora en la cuerda Mi grave que nombraste antes — con una tarea más difícil: nombra la nota Y tócala antes de que se acabe el círculo.</li><li>Mantén la guitarra en la mano: la app revisa el nombre, tu oído revisa la nota.</li></ol>Lo tienes cuando: 9 de 10 en la Mi grave, sin contar desde E.',
                 drill: { type: 'shuffle', string: 'lowE', maxFret: 12, rounds: 10, seconds: 3, pile: 'naturals', skill: 'm2w1-s2' },
                 hint: 'The 3-second limit is the real test. You\'re jumping to random frets, not running a memorized lap — that\'s what "name any fret instantly" really means.',
                 hint_es: 'El límite de 3 segundos es la verdadera prueba. Estás saltando a trastes al azar, no haciendo una vuelta memorizada — eso es lo que de verdad significa "nombrar cualquier traste al instante".',
@@ -905,8 +905,8 @@ SETS.push(
               },
               {
                 label: 'Challenge — Mystery TAB (sight-read it cold)', label_es: 'Reto — TAB misterioso (léelo a primera vista, en frío)',
-                text: 'Here\'s a 2-bar melody you\'ve never heard.<ol><li>Do NOT press ▶ Play tab first.</li><li>Read it straight off the page — work out each string and fret and play all the way through, one note per beat at 60 BPM.</li><li>THEN press ▶ Play tab to check yourself.</li></ol>You\'ve got it when: you play it correctly on the first cold read, before ever hearing it.',
-                text_es: 'Aquí hay una melodía de 2 compases que nunca has escuchado.<ol><li>NO presiones ▶ Tocar el tab primero.</li><li>Léela directo de la página — descifra cada cuerda y traste y tócala completa, una nota por pulso a 60 BPM.</li><li>LUEGO presiona ▶ Tocar el tab para revisarte.</li></ol>Lo tienes cuando: la tocas correctamente en la primera lectura en frío, antes de escucharla siquiera.',
+                text: 'Mystery TAB, cold read — a 2-bar melody you\'ve never heard:<ol><li>Do NOT press ▶ Play tab first.</li><li>Read it straight off the page — work out each string and fret and play all the way through, one note per beat at 60 BPM.</li><li>THEN press ▶ Play tab to check yourself.</li></ol>You\'ve got it when: you play it correctly on the first cold read, before ever hearing it.',
+                text_es: 'TAB misterioso, lectura en frío — una melodía de 2 compases que nunca has escuchado:<ol><li>NO presiones ▶ Tocar el tab primero.</li><li>Léela directo de la página — descifra cada cuerda y traste y tócala completa, una nota por pulso a 60 BPM.</li><li>LUEGO presiona ▶ Tocar el tab para revisarte.</li></ol>Lo tienes cuando: la tocas correctamente en la primera lectura en frío, antes de escucharla siquiera.',
                 hint: 'Reading it cold is real sight-reading, and it\'s exactly what your module assessment asks for. This is the whole point of sight-reading: playing music you don\'t already know by ear. Bottom line = low E, the line above it = A, the next one up = D. Every fret here is 0–3 on the A and D strings. Say each note name before you pluck it, then use ▶ Play tab as your answer key — only after you\'ve played it yourself.',
                 hint_es: 'Leerla en frío es lectura a primera vista real, y es exactamente lo que pide tu evaluación del módulo. Este es todo el punto de la lectura a primera vista: tocar música que todavía no conoces de oído. Línea de abajo = Mi grave, la línea justo encima = La, la siguiente hacia arriba = Re. Cada traste aquí es 0–3 en las cuerdas La y Re. Di cada nombre de nota antes de pulsarla, y luego usa ▶ Tocar el tab como tu clave de respuestas — solo después de haberla tocado tú.',
                 stuck: 'Break it into two 1-bar halves: read and play the first four notes clean, then the last four, then join them. Peeking at your note-name chart to find a fret is fine — hitting Play tab to hear the tune first is not (hearing it cold is the part you\'re testing).',

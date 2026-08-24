@@ -89,8 +89,8 @@ SETS.push(
             steps: [
               {
                 label: 'Try the alternating thumb', label_es: 'Prueba el pulgar alternante',
-                text: 'Now try it: alternate your thumb between the A and low E strings over a C chord — root on the A string (fret 3), 5th fretted on the low E string (fret 3 = G) — 8 bars, no finger notes yet.',
-                text_es: 'Ahora pruébalo: alterna tu pulgar entre las cuerdas La y Mi grave sobre un acorde de C — raíz en la cuerda La (traste 3), 5ª trasteada en la cuerda Mi grave (traste 3 = G) — 8 compases, todavía sin notas de dedos.',
+                text: 'Alternate your thumb between the A and low E strings over a C chord — root on the A string (fret 3), 5th fretted on the low E string (fret 3 = G) — 8 bars, no finger notes yet.',
+                text_es: 'Alterna tu pulgar entre las cuerdas La y Mi grave sobre un acorde de C — raíz en la cuerda La (traste 3), 5ª trasteada en la cuerda Mi grave (traste 3 = G) — 8 compases, todavía sin notas de dedos.',
                 hint: 'Rule one of Travis: the thumb never stops. Fingers can rejoin on the next beat.',
                 hint_es: 'Regla número uno del Travis picking: el pulgar nunca se detiene. Los dedos pueden reincorporarse en el siguiente tiempo.',
                 skills: [1, 5],
@@ -714,8 +714,8 @@ SETS.push(
             steps: [
               {
                 label: 'Try melody on top over C', label_es: 'Prueba la melodía arriba sobre C',
-                text: 'Now try it: over a C chord, keep the thumb on steady quarters and pick a 3-note melody on the high e and B strings on top.',
-                text_es: 'Ahora pruébalo: sobre un acorde de C, mantén el pulgar en negras constantes y puntea una melodía de 3 notas en las cuerdas mi aguda y Si encima.',
+                text: 'Over a C chord, keep the thumb on steady quarters and pick a 3-note melody on the high e and B strings on top.',
+                text_es: 'Sobre un acorde de C, mantén el pulgar en negras constantes y puntea una melodía de 3 notas en las cuerdas mi aguda y Si encima.',
                 hint: 'Fingerpicking makes our regional-Mexican songs sound MORE authentic than power chords did — sierreño is an acoustic, fingerpicked tradition, and this is its real tone.',
                 hint_es: 'El fingerpicking hace que nuestras canciones de música regional mexicana suenen MÁS auténticas de lo que sonaban con acordes de potencia — el sierreño es una tradición acústica de fingerpicking, y este es su verdadero sonido.',
                 skills: [4, 5],

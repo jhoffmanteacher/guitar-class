@@ -405,6 +405,36 @@ function checkBlockedTabSites() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1m. NARRATIVE LEAD-INS IN STEP TEXT — a step's `text`/`text_es` opens
+   directly with the verb, not an announcement that an instruction is
+   coming. A 2026-08-24 sweep removed ~45 instances of a handful of
+   recurring phrases across every module + class-activities.js
+   (Jonathan): "Now …", "Try it …", "Listen for it …", "Ahora …". Not
+   every narrative lead-in is mechanically detectable — that sweep also
+   hand-rewrote plenty of one-off descriptive openers — but these
+   specific phrases recur, so catch a relapse of exactly those.
+   ════════════════════════════════════════════════════════════════════ */
+function checkNarrativeLeadIns() {
+  head('1m. Narrative lead-ins in step text');
+  const FIELD_RE = /\b(text|text_es):\s*'((?:\\.|[^'\\])*)'/g;
+  const LEAD_IN = /^(Now\b|Try it\b|Listen for it\b|Ahora\b)/;
+  let bad = 0;
+  for (const file of [...MODULE_FILES, 'class-activities.js']) {
+    const lines = readFileSync(join(ROOT, file), 'utf8').split('\n');
+    lines.forEach((line, li) => {
+      for (const m of line.matchAll(FIELD_RE)) {
+        const val = m[2];
+        if (LEAD_IN.test(val)) {
+          err(`${file}:${li + 1}: ${m[1]} opens with a narrative lead-in instead of the verb — "${val.slice(0, 50)}${val.length > 50 ? '…' : ''}"`);
+          problems++; bad++;
+        }
+      }
+    });
+  }
+  if (bad === 0) ok('no narrative lead-ins at the start of step text');
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1i. WATCH-RANGE LABELS ↔ URL TIME PARAMS — lesson links carry a
    "(M:SS–M:SS)" label (inside the anchor text or right after </a>)
    telling students what part of the video the card uses, and the URL
@@ -1497,6 +1527,7 @@ async function liveCheck() {
   checkWatchRanges();
   checkNumberedStrings();
   checkBlockedTabSites();
+  checkNarrativeLeadIns();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

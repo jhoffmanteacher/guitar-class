@@ -68,8 +68,8 @@ SETS.push(
             steps: [
               {
                 label: 'Numerals in "Let It Be"', label_es: 'Números romanos en "Let It Be"',
-                text: 'Listen for it: play through "Let It Be"\'s C–G–Am–F loop and, before checking, guess which numeral each chord is in the key of C.',
-                text_es: 'Escucha con atención: toca el loop C–G–Am–F de "Let It Be" y, antes de revisar, adivina qué número romano es cada acorde en la tonalidad de C.',
+                text: 'Play through "Let It Be"\'s C–G–Am–F loop and, before checking, guess which numeral each chord is in the key of C.',
+                text_es: 'Toca el loop C–G–Am–F de "Let It Be" y, antes de revisar, adivina qué número romano es cada acorde en la tonalidad de C.',
                 hint: 'C is home (I), so count each other chord\'s root up the C scale (C-D-E-F-G-A-B) to get its number: G is the 5th note up, so V; A is the 6th, so Am is vi; F is the 4th, so IV. Counting scale degrees is the only test that works — every chord in the key shares C\'s notes, so "it uses C\'s notes" can never tell two of them apart.',
                 hint_es: 'C es la base (I), así que cuenta la raíz de cada otro acorde subiendo por la escala de C (C-D-E-F-G-A-B) para sacar su número: G es la 5ª nota, así que V; A es la 6ª, así que Am es vi; F es la 4ª, así que IV. Contar grados de la escala es la única prueba que funciona — todos los acordes de la tonalidad comparten las notas de C, así que "usa las notas de C" nunca puede distinguir uno de otro.',
                 skills: [3],
@@ -89,8 +89,8 @@ SETS.push(
             steps: [
               {
                 label: 'Build triads up the C scale', label_es: 'Construye tríadas en la escala de C',
-                text: 'Now try it: build a triad on every note of the C major scale (C-D-E-F-G-A-B) and see which come out major and which come out minor.',
-                text_es: 'Ahora pruébalo: construye una tríada en cada nota de la escala de C mayor (C-D-E-F-G-A-B) y observa cuáles salen mayores y cuáles salen menores.',
+                text: 'Build a triad on every note of the C major scale (C-D-E-F-G-A-B) and see which come out major and which come out minor.',
+                text_es: 'Construye una tríada en cada nota de la escala de C mayor (C-D-E-F-G-A-B) y observa cuáles salen mayores y cuáles salen menores.',
                 hint: 'You\'ll get major-minor-minor-major-major-minor-diminished — the same pattern in every major key. Diminished means a minor chord squeezed one fret smaller at the top, so it sounds tense and unfinished; it is the 7th one, and it is rare in the songs you play.',
                 hint_es: 'Obtendrás mayor-menor-menor-mayor-mayor-menor-disminuido — el mismo patrón en cualquier tonalidad mayor. Disminuido significa un acorde menor apretado un traste más en la parte de arriba, así que suena tenso y sin terminar; es el número 7 y es raro en las canciones que tocas.',
                 skills: [4, 5],
@@ -104,8 +104,8 @@ SETS.push(
               },
               {
                 label: '"Luna": place Am in the key of F', label_es: '"Luna": ubica Am en la tonalidad de F',
-                text: 'Try it on "Luna": F and Am aren\'t I–IV or I–V — figure out which scale degree Am is built on in the key of F before checking.',
-                text_es: 'Pruébalo con "Luna": F y Am no son I–IV ni I–V — averigua sobre cuál grado de la escala está construido Am en la tonalidad de F antes de revisar.',
+                text: 'Figure out which scale degree Am is built on in the key of F before checking — "Luna" vamps between F and Am, and they aren\'t I–IV or I–V.',
+                text_es: 'Averigua sobre cuál grado de la escala está construido Am en la tonalidad de F antes de revisar — "Luna" hace un vamp entre F y Am, y no son I–IV ni I–V.',
                 hint: 'Count up the F major scale: F(I) G(ii) A(iii) — Am is built on the THIRD note.',
                 hint_es: 'Cuenta hacia arriba en la escala de F mayor: F(I) G(ii) A(iii) — Am está construido sobre la TERCERA nota.',
                 skills: [6],
@@ -363,8 +363,8 @@ SETS.push(
             steps: [
               {
                 label: 'Find I–IV–V in A', label_es: 'Encuentra I–IV–V en A',
-                text: 'Listen for it: count up the A major scale to find its I, IV, and V chords before checking your answer.',
-                text_es: 'Escucha con atención: cuenta hacia arriba en la escala de A mayor para encontrar sus acordes I, IV y V antes de revisar tu respuesta.',
+                text: 'Count up the A major scale to find its I, IV, and V chords before checking your answer.',
+                text_es: 'Cuenta hacia arriba en la escala de A mayor para encontrar sus acordes I, IV y V antes de revisar tu respuesta.',
                 hint: 'I–IV–V is the foundation progression behind blues, rock, and a lot of cumbia — worth having on instant recall in any key.',
                 hint_es: 'I–IV–V es la progresión fundamental detrás del blues, el rock y buena parte de la cumbia — vale la pena tenerla lista al instante en cualquier tonalidad.',
                 skills: [2],
@@ -384,8 +384,8 @@ SETS.push(
             steps: [
               {
                 label: 'Number "the cure"\'s chords', label_es: 'Numera los acordes de "the cure"',
-                text: 'Now try it: number "the cure"\'s chords — Am–C–Dm–F–G/B — in the key of C before checking.',
-                text_es: 'Ahora pruébalo: numera los acordes de "the cure" — Am–C–Dm–F–G/B — en la tonalidad de C antes de revisar.',
+                text: 'Number "the cure"\'s chords — Am–C–Dm–F–G/B — in the key of C before checking.',
+                text_es: 'Numera los acordes de "the cure" — Am–C–Dm–F–G/B — en la tonalidad de C antes de revisar.',
                 hint: 'Ignore the slash for a moment and number the chord names first — the bass note is a separate question.',
                 hint_es: 'Ignora la barra diagonal por un momento y numera primero los nombres de los acordes — la nota de bajo es una pregunta aparte.',
                 skills: [3],
@@ -399,8 +399,8 @@ SETS.push(
               },
               {
                 label: 'Find the family fast', label_es: 'Encuentra la familia rápido',
-                text: 'Try it fast: given only a chord list (no song name), find the single family that contains every chord before you do anything else.',
-                text_es: 'Pruébalo rápido: dada solo una lista de acordes (sin nombre de canción), encuentra la única familia que contiene todos los acordes antes de hacer cualquier otra cosa.',
+                text: 'Given only a chord list (no song name), find the single family that contains every chord fast, before you do anything else.',
+                text_es: 'Dada solo una lista de acordes (sin nombre de canción), encuentra rápido la única familia que contiene todos los acordes antes de hacer cualquier otra cosa.',
                 hint: 'Inventory first, family second, home-chord-by-ear last — in that order, every time.',
                 hint_es: 'Primero el inventario, después la familia, y al final el acorde base por oído — en ese orden, siempre.',
                 skills: [6],
@@ -678,8 +678,8 @@ SETS.push(
             steps: [
               {
                 label: 'Find the A-shape root', label_es: 'Encuentra la raíz de la forma de A',
-                text: 'Listen for it: play an A-shape barre at fret 5 and name its root before checking — remember the root lives on the A string this time, not the low E.',
-                text_es: 'Escucha con atención: toca una cejilla en forma de A en el traste 5 y nombra su raíz antes de revisar — recuerda que esta vez la raíz vive en la cuerda La, no en la Mi grave.',
+                text: 'Play an A-shape barre at fret 5 and name its root before checking — remember the root lives on the A string this time, not the low E.',
+                text_es: 'Toca una cejilla en forma de A en el traste 5 y nombra su raíz antes de revisar — recuerda que esta vez la raíz vive en la cuerda La, no en la Mi grave.',
                 hint: 'Count up the A string from open: A-A#-B-C-C#-D. Fret 5 lands on D.',
                 hint_es: 'Cuenta hacia arriba en la cuerda La desde el aire: A-A#-B-C-C#-D. El traste 5 cae en D.',
                 skills: [2],
@@ -699,8 +699,8 @@ SETS.push(
             steps: [
               {
                 label: 'Find B major as a barre', label_es: 'Encuentra B mayor con cejilla',
-                text: 'Now try it: find B major using the A-shape barre — count up the A string until you hit B before you fret anything.',
-                text_es: 'Ahora pruébalo: encuentra B mayor usando la cejilla en forma de A — cuenta hacia arriba en la cuerda La hasta llegar a B antes de trastear nada.',
+                text: 'Find B major using the A-shape barre — count up the A string until you hit B before you fret anything.',
+                text_es: 'Encuentra B mayor usando la cejilla en forma de A — cuenta hacia arriba en la cuerda La hasta llegar a B antes de trastear nada.',
                 hint: 'A string: A(0)-A#(1)-B(2). B is only two frets up.',
                 hint_es: 'Cuerda La: A(0)-A#(1)-B(2). B está a solo dos trastes de distancia.',
                 skills: [2],
@@ -714,8 +714,8 @@ SETS.push(
               },
               {
                 label: 'Name all 12 roots', label_es: 'Nombra las 12 raíces',
-                text: 'Try it: run through all 12 chromatic notes out loud and, for each, name the fret where an E-shape barre would land on that root — you\'ll drill this same idea for both shapes at the practice station.',
-                text_es: 'Pruébalo: recorre en voz alta las 12 notas cromáticas y, para cada una, nombra el traste donde caería una cejilla en forma de E sobre esa raíz — vas a practicar esta misma idea con ambas formas en la estación de práctica.',
+                text: 'Run through all 12 chromatic notes out loud and, for each, name the fret where an E-shape barre would land on that root — you\'ll drill this same idea for both shapes at the practice station.',
+                text_es: 'Recorre en voz alta las 12 notas cromáticas y, para cada una, nombra el traste donde caería una cejilla en forma de E sobre esa raíz — vas a practicar esta misma idea con ambas formas en la estación de práctica.',
                 hint: 'One shape, twelve chords — the ONLY thing that changes is which fret you barre.',
                 hint_es: 'Una forma, doce acordes — lo ÚNICO que cambia es en cuál traste pones la cejilla.',
                 skills: [5],
@@ -897,8 +897,8 @@ SETS.push(
               },
               {
                 label: 'Comp the full 12 bars', label_es: 'Acompaña los 12 compases completos',
-                text: 'Put it together:<ol><li>Comp the full 12 bars from memory with shuffle feel at 60 BPM.</li><li>Record a pass and loop your recording.</li><li>Solo over your own comping with A minor pentatonic (your Module 4 box at fret 5).</li></ol>You\'ve got it when: a full chorus of each job (one chorus = one full trip through the 12 bars) — comping without losing the form, soloing without losing the changes.',
-                text_es: 'Júntalo todo:<ol><li>Acompaña los 12 compases completos de memoria con sensación de shuffle a 60 BPM.</li><li>Graba una pasada y repite tu grabación en loop.</li><li>Haz un solo sobre tu propio acompañamiento con la pentatónica menor de A (tu caja del Módulo 4 en el traste 5).</li></ol>Lo tienes cuando: una ronda completa de cada trabajo (una ronda = un recorrido completo por los 12 compases) — acompañar sin perder la forma, hacer un solo sin perder los cambios.',
+                text: '<ol><li>Comp the full 12 bars from memory with shuffle feel at 60 BPM.</li><li>Record a pass and loop your recording.</li><li>Solo over your own comping with A minor pentatonic (your Module 4 box at fret 5).</li></ol>You\'ve got it when: a full chorus of each job (one chorus = one full trip through the 12 bars) — comping without losing the form, soloing without losing the changes.',
+                text_es: '<ol><li>Acompaña los 12 compases completos de memoria con sensación de shuffle a 60 BPM.</li><li>Graba una pasada y repite tu grabación en loop.</li><li>Haz un solo sobre tu propio acompañamiento con la pentatónica menor de A (tu caja del Módulo 4 en el traste 5).</li></ol>Lo tienes cuando: una ronda completa de cada trabajo (una ronda = un recorrido completo por los 12 compases) — acompañar sin perder la forma, hacer un solo sin perder los cambios.',
                 hint: 'Comping = playing the backing chords while someone else solos. When the loop comes back to A7, land on an A — hearing that "home" arrival is the most important thing. Playing with someone? One comps while the other solos, then swap.',
                 hint_es: 'Acompañar = tocar los acordes de base mientras alguien más hace un solo. Cuando el loop vuelve a A7, aterriza en una A — escuchar esa llegada a "casa" es lo más importante. ¿Tocando con alguien? Uno acompaña mientras el otro hace el solo, y luego cambian.',
                 skills: [7, 8]

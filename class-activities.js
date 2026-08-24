@@ -188,8 +188,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Now the two strings back to back — this is the first half of the song.\nYou\'ve got it when: phrase 1 and phrase 2, four times through, without stopping.',
-        text_es: 'Ahora las dos cuerdas seguidas — esta es la primera mitad de la canción.\nLo tienes cuando: la frase 1 y la frase 2, cuatro veces seguidas, sin detenerte.',
+        text: 'Play the two strings back to back — this is the first half of the song.\nYou\'ve got it when: phrase 1 and phrase 2, four times through, without stopping.',
+        text_es: 'Toca las dos cuerdas seguidas — esta es la primera mitad de la canción.\nLo tienes cuando: la frase 1 y la frase 2, cuatro veces seguidas, sin detenerte.',
         tab: {
           caption: 'First half · E string into A string, no pause',
           caption_es: 'Primera mitad · de la cuerda Mi grave a la cuerda La, sin pausa',
@@ -314,8 +314,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Now add the shift: climb 1-2-3-4, slide your whole hand up one fret, climb 2-3-4-5. The hand moves as one piece — the fingers keep their spacing.\nYou\'ve got it when: two full climbs back to back and your thumb stays behind the neck the whole way.',
-        text_es: 'Ahora agrega el cambio: sube 1-2-3-4, desliza toda la mano un traste hacia arriba, y sube 2-3-4-5. La mano se mueve como una sola pieza — los dedos mantienen su separación.\nLo tienes cuando: dos subidas completas seguidas y tu pulgar se queda detrás del mástil todo el tiempo.',
+        text: 'Add the shift: climb 1-2-3-4, slide your whole hand up one fret, climb 2-3-4-5. The hand moves as one piece — the fingers keep their spacing.\nYou\'ve got it when: two full climbs back to back and your thumb stays behind the neck the whole way.',
+        text_es: 'Agrega el cambio: sube 1-2-3-4, desliza toda la mano un traste hacia arriba, y sube 2-3-4-5. La mano se mueve como una sola pieza — los dedos mantienen su separación.\nLo tienes cuando: dos subidas completas seguidas y tu pulgar se queda detrás del mástil todo el tiempo.',
         tab: {
           caption: 'The Ladder · with the shift',
           caption_es: 'La Escalera · con el cambio',
@@ -432,8 +432,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Now the three thin strings — G, B, and high e. They buzz more easily because they\'re thinner, so press just behind the fret, not on top of it.\nYou\'ve got it when: all three strings, no stopping, any speed.',
-        text_es: 'Ahora las tres cuerdas delgadas — Sol, Si y Mi aguda. Zumban más fácil porque son más delgadas, así que presiona justo detrás del traste, no encima.\nLo tienes cuando: las tres cuerdas, sin detenerte, a cualquier velocidad.',
+        text: 'Move to the three thin strings — G, B, and high e. They buzz more easily because they\'re thinner, so press just behind the fret, not on top of it.\nYou\'ve got it when: all three strings, no stopping, any speed.',
+        text_es: 'Muévete a las tres cuerdas delgadas — Sol, Si y Mi aguda. Zumban más fácil porque son más delgadas, así que presiona justo detrás del traste, no encima.\nLo tienes cuando: las tres cuerdas, sin detenerte, a cualquier velocidad.',
         tab: {
           caption: 'G · B · high e — thin strings buzz easier',
           caption_es: 'Sol · Si · Mi aguda — las delgadas zumban más fácil',
@@ -505,8 +505,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Now the jump. Index on fret 1, then straight to fret 5, then to fret 9 — one note each, no walking up. Look at the dot, then move. After three tries, look away and let your hand find it.\nYou\'ve got it when: you can look away and land all three, three times out of three.',
-        text_es: 'Ahora el salto. Índice en el traste 1, después directo al 5, después al 9 — una nota en cada uno, sin caminar. Mira el punto y muévete. Después de tres intentos, voltea la mirada y deja que tu mano lo encuentre.\nLo tienes cuando: puedes voltear la mirada y caer en los tres, tres de tres veces.',
+        text: 'Play the jump: index on fret 1, then straight to fret 5, then to fret 9 — one note each, no walking up. Look at the dot, then move. After three tries, look away and let your hand find it.\nYou\'ve got it when: you can look away and land all three, three times out of three.',
+        text_es: 'Toca el salto: índice en el traste 1, después directo al 5, después al 9 — una nota en cada uno, sin caminar. Mira el punto y muévete. Después de tres intentos, voltea la mirada y deja que tu mano lo encuentre.\nLo tienes cuando: puedes voltear la mirada y caer en los tres, tres de tres veces.',
         tab: {
           caption: 'Jump · fret 1 to 5 to 9',
           caption_es: 'Salto · del traste 1 al 5 al 9',
@@ -780,8 +780,8 @@ window.CLASS_ACTIVITIES = [
         text_es: 'Esta es la cuerda Mi grave — la más gruesa, la que queda más cerca de tu cara. Toda la frase vive aquí: la cuerda al aire (0 = sin dedo) es la nota E, el traste 2 es F#, el traste 4 es G# y el traste 5 es A. Los puntos tenues del mástil — trastes 3, 5, 7, 9 y 12 — son un mapa, y el punto en el traste 5 es tu marca para caer.',
       },
       {
-        text: '<ol><li>Fingertip just behind fret 5 — next to the metal strip, not on top of it. Thumb behind the neck.</li><li>Pluck it. A rattly, dead sound is a buzz — slide the fingertip closer to the fret and press again.</li><li>Now the move: pluck the open string, then land on fret 5 and pluck again. Let the dot catch your eye before your finger jumps.</li></ol>You\'ve got it when: three landings in a row on A ring clean, no buzz. Buzz twice? Slide the fingertip closer to the fret and press with the very tip.',
-        text_es: '<ol><li>La punta del dedo justo detrás del traste 5 — pegada a la barrita de metal, no encima de ella. El pulgar detrás del mástil.</li><li>Tócala. Un sonido que traquetea o suena apagado es un zumbido — desliza la punta del dedo más cerca del traste y presiona otra vez.</li><li>Ahora el movimiento: toca la cuerda al aire, luego cae en el traste 5 y toca otra vez. Deja que el punto te llame la atención antes de que salte el dedo.</li></ol>Lo tienes cuando: tres caídas seguidas en A suenan limpias, sin zumbido. ¿Zumbó dos veces? Desliza la punta del dedo más cerca del traste y presiona con la puntita.',
+        text: '<ol><li>Fingertip just behind fret 5 — next to the metal strip, not on top of it. Thumb behind the neck.</li><li>Pluck it. A rattly, dead sound is a buzz — slide the fingertip closer to the fret and press again.</li><li>Pluck the open string, then land on fret 5 and pluck again. Let the dot catch your eye before your finger jumps.</li></ol>You\'ve got it when: three landings in a row on A ring clean, no buzz. Buzz twice? Slide the fingertip closer to the fret and press with the very tip.',
+        text_es: '<ol><li>La punta del dedo justo detrás del traste 5 — pegada a la barrita de metal, no encima de ella. El pulgar detrás del mástil.</li><li>Tócala. Un sonido que traquetea o suena apagado es un zumbido — desliza la punta del dedo más cerca del traste y presiona otra vez.</li><li>Toca la cuerda al aire, luego cae en el traste 5 y toca otra vez. Deja que el punto te llame la atención antes de que salte el dedo.</li></ol>Lo tienes cuando: tres caídas seguidas en A suenan limpias, sin zumbido. ¿Zumbó dos veces? Desliza la punta del dedo más cerca del traste y presiona con la puntita.',
         tab: {
           caption: 'Open E → fret 5 · land on the dot',
           caption_es: 'Mi al aire → traste 5 · cae en el punto',
@@ -808,8 +808,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Now the whole line. Play the four notes you just learned — "Hap-py birth-day" — then two more for "to you": fret 5, then fret 4, right next door. Six notes, and that\'s the first line of the song.\nYou\'ve got it when: three clean runs without stopping, saying the words as you play.',
-        text_es: 'Ahora la línea completa. Toca las cuatro notas que acabas de aprender — "Hap-py birth-day" — y luego dos más para "to you": traste 5 y luego traste 4, justo al lado. Seis notas, y esa es la primera línea de la canción.\nLo tienes cuando: tres pasadas limpias sin detenerte, diciendo las palabras mientras tocas.',
+        text: 'Play the four notes you just learned — "Hap-py birth-day" — then two more for "to you": fret 5, then fret 4, right next door. Six notes, and that\'s the first line of the song.\nYou\'ve got it when: three clean runs without stopping, saying the words as you play.',
+        text_es: 'Toca las cuatro notas que acabas de aprender — "Hap-py birth-day" — y luego dos más para "to you": traste 5 y luego traste 4, justo al lado. Seis notas, y esa es la primera línea de la canción.\nLo tienes cuando: tres pasadas limpias sin detenerte, diciendo las palabras mientras tocas.',
         tab: {
           caption: 'Phrase 1 · all on the low E string',
           caption_es: 'Frase 1 · todo en la cuerda Mi grave',

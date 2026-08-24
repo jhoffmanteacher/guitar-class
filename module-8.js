@@ -105,8 +105,8 @@ SETS.push(
             steps: [
           {
             label: 'Try it: p-i-m-a on open strings', label_es: 'Pruébalo: p-i-m-a al aire',
-            text: 'Now try it: pluck p-i-m-a on open strings — low E (p), G (i), B (m), high e (a):<ol><li>Click any note below the TAB to hear it.</li><li>Then play the staircase on your own guitar, one finger per string.</li></ol>',
-            text_es: 'Ahora pruébalo: pulsa p-i-m-a en cuerdas al aire — Mi grave (p), Sol (i), Si (m), mi aguda (a):<ol><li>Haz clic en cualquier nota debajo del TAB para escucharla.</li><li>Luego toca la escalera en tu propia guitarra, un dedo por cuerda.</li></ol>',
+            text: 'Pluck p-i-m-a on open strings — low E (p), G (i), B (m), high e (a):<ol><li>Click any note below the TAB to hear it.</li><li>Then play the staircase on your own guitar, one finger per string.</li></ol>',
+            text_es: 'Pulsa p-i-m-a en cuerdas al aire — Mi grave (p), Sol (i), Si (m), mi aguda (a):<ol><li>Haz clic en cualquier nota debajo del TAB para escucharla.</li><li>Luego toca la escalera en tu propia guitarra, un dedo por cuerda.</li></ol>',
             hint: 'No pick, no chord yet — just the right hand. Each pluck lands on its own string, reading left to right. Aim for the same volume from every finger.',
             hint_es: 'Sin púa, sin acorde todavía — solo la mano derecha. Cada pulsación cae en su propia cuerda, leyendo de izquierda a derecha. Apunta al mismo volumen en cada dedo.',
             skills: [3, 4, 5],
@@ -409,8 +409,8 @@ SETS.push(
             steps: [
           {
             label: 'Try it: the pattern on Em', label_es: 'Pruébalo: el patrón en Em',
-            text: 'Now try it: fret Em and play the 6-note p-i-m-a-m-i arpeggio:<ol><li>Click any note below the TAB to hear it.</li><li>Then play the staircase yourself — thumb on the low E (Em\'s root), i-m-a on G-B-e, then back down m-i.</li></ol>',
-            text_es: 'Ahora pruébalo: trastea Em y toca el arpegio de 6 notas p-i-m-a-m-i:<ol><li>Haz clic en cualquier nota debajo del TAB para escucharla.</li><li>Luego toca la escalera tú mismo — pulgar en la Mi grave (la raíz de Em), i-m-a en Sol, Si y mi aguda, y luego de vuelta hacia abajo m-i.</li></ol>',
+            text: 'Fret Em and play the 6-note p-i-m-a-m-i arpeggio:<ol><li>Click any note below the TAB to hear it.</li><li>Then play the staircase yourself — thumb on the low E (Em\'s root), i-m-a on G-B-e, then back down m-i.</li></ol>',
+            text_es: 'Trastea Em y toca el arpegio de 6 notas p-i-m-a-m-i:<ol><li>Haz clic en cualquier nota debajo del TAB para escucharla.</li><li>Luego toca la escalera tú mismo — pulgar en la Mi grave (la raíz de Em), i-m-a en Sol, Si y mi aguda, y luego de vuelta hacia abajo m-i.</li></ol>',
             hint: 'Em is all open strings on the treble side, so you can focus entirely on the picking hand. Read the TAB left to right — the bass note starts it, then the fingers climb and come back.',
             hint_es: 'Em son todas cuerdas al aire del lado agudo, así que puedes concentrarte por completo en la mano de pulsar. Lee el TAB de izquierda a derecha — la nota grave lo empieza, y luego los dedos suben y vuelven.',
             skills: [1, 2, 3],
@@ -747,8 +747,8 @@ SETS.push(
             steps: [
           {
             label: 'Try it: the arpeggio on C', label_es: 'Pruébalo: el arpegio en C',
-            text: 'Now try it: fret C and play the 6-note arpeggio over it:<ol><li>Click any note below the TAB to hear it.</li><li>Then play the staircase — thumb on the A string\'s 3rd fret (C\'s root), i-m-a on G-B-e, then back down m-i.</li></ol>',
-            text_es: 'Ahora pruébalo: trastea C y toca el arpegio de 6 notas sobre él:<ol><li>Haz clic en cualquier nota debajo del TAB para escucharla.</li><li>Luego toca la escalera — pulgar en el traste 3 de la cuerda La (la raíz de C), i-m-a en Sol, Si y mi aguda, y luego de vuelta hacia abajo m-i.</li></ol>',
+            text: 'Fret C and play the 6-note arpeggio over it:<ol><li>Click any note below the TAB to hear it.</li><li>Then play the staircase — thumb on the A string\'s 3rd fret (C\'s root), i-m-a on G-B-e, then back down m-i.</li></ol>',
+            text_es: 'Trastea C y toca el arpegio de 6 notas sobre él:<ol><li>Haz clic en cualquier nota debajo del TAB para escucharla.</li><li>Luego toca la escalera — pulgar en el traste 3 de la cuerda La (la raíz de C), i-m-a en Sol, Si y mi aguda, y luego de vuelta hacia abajo m-i.</li></ol>',
             hint: 'C uses the same picking pattern as Em and Am — only the thumb\'s bass note changes. Read the TAB left to right and match each pluck.',
             hint_es: 'C usa el mismo patrón de punteo que Em y Am — solo cambia la nota grave del pulgar. Lee el TAB de izquierda a derecha y haz coincidir cada pulsación.',
             skills: [1, 3, 4],

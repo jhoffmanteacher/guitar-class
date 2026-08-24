@@ -68,8 +68,8 @@ SETS.push(
             steps: [
               {
                 label: 'Hear the recipe in the frets', label_es: 'Escucha la receta en los trastes',
-                text: 'Listen for it: play up the C major scale on one string, saying "whole, whole, half, whole, whole, whole, half" out loud on every step. The distances should match the frets you\'re moving.',
-                text_es: 'Escucha esto: toca la escala de C mayor subiendo en una sola cuerda, diciendo "tono, tono, semitono, tono, tono, tono, semitono" en voz alta en cada paso. Las distancias deben coincidir con los trastes que te mueves.',
+                text: 'Play up the C major scale on one string, saying "whole, whole, half, whole, whole, whole, half" out loud on every step. The distances should match the frets you\'re moving.',
+                text_es: 'Toca la escala de C mayor subiendo en una sola cuerda, diciendo "tono, tono, semitono, tono, tono, tono, semitono" en voz alta en cada paso. Las distancias deben coincidir con los trastes que te mueves.',
                 hint: 'On guitar, a whole step and a half step are just fret distances — say the word, then check it\'s 2 frets (whole) or 1 fret (half).',
                 hint_es: 'En la guitarra, un tono y un semitono son solo distancias de trastes — di la palabra, y luego comprueba que sean 2 trastes (tono) o 1 traste (semitono).',
                 skills: [2],
@@ -89,8 +89,8 @@ SETS.push(
             steps: [
               {
                 label: 'Build C major with the recipe', label_es: 'Construye C mayor con la receta',
-                text: 'Now try it: run the same W-W-H-W-W-W-H recipe starting from C first — your baseline — and notice you never need a sharp or flat. That clean run is what makes the odd note stand out when you try G next.',
-                text_es: 'Ahora pruébalo: corre la misma receta T-T-S-T-T-T-S empezando primero desde C — tu punto de referencia — y fíjate que nunca necesitas un sostenido ni un bemol. Ese recorrido limpio es lo que hace que la nota rara resalte cuando pruebes G a continuación.',
+                text: 'Run the same W-W-H-W-W-W-H recipe starting from C first — your baseline — and notice you never need a sharp or flat. That clean run is what makes the odd note stand out when you try G next.',
+                text_es: 'Corre la misma receta T-T-S-T-T-T-S empezando primero desde C — tu punto de referencia — y fíjate que nunca necesitas un sostenido ni un bemol. Ese recorrido limpio es lo que hace que la nota rara resalte cuando pruebes G a continuación.',
                 hint: 'C major is the recipe\'s starting-point example — every other major key is the same shape, just starting somewhere else.',
                 hint_es: 'C mayor es el ejemplo de punto de partida de la receta — cada otra tonalidad mayor es la misma forma, solo que empieza en otro lugar.',
                 skills: [6],
@@ -104,8 +104,8 @@ SETS.push(
               },
               {
                 label: 'Try the recipe from G', label_es: 'Prueba la receta desde G',
-                text: 'Try it again starting from G, on one string — follow the recipe exactly and see what note comes out different from the rest.',
-                text_es: 'Pruébalo otra vez empezando desde G, en una sola cuerda — sigue la receta exactamente y observa qué nota sale distinta de las demás.',
+                text: 'Follow the recipe exactly, starting from G this time on one string, and see what note comes out different from the rest.',
+                text_es: 'Sigue la receta exactamente, esta vez empezando desde G, en una sola cuerda, y observa qué nota sale distinta de las demás.',
                 hint: 'Follow W-W-H-W-W-W-H from G one step at a time; the recipe itself will tell you which note needs raising.',
                 hint_es: 'Sigue T-T-S-T-T-T-S desde G un paso a la vez; la receta misma te dirá cuál nota necesita subirse.',
                 skills: [3],
@@ -359,8 +359,8 @@ SETS.push(
             steps: [
               {
                 label: 'Ear training: relative vs. parallel', label_es: 'Oído: relativa vs. paralela',
-                text: 'Listen for it:<ol><li>Play a C major chord, then an A minor chord, then a C minor chord (Cm = your full Bm barre shape from Module 7, slid up one fret to fret 3).</li><li>The keys of C major and A minor use the same seven notes — that\'s why the chords sound so closely related; C-to-Cm shares only the root (parallel).</li><li>Notice how different Am and Cm sound from each other, even though both are "C\'s minor."</li></ol>',
-                text_es: 'Escucha esto:<ol><li>Toca un acorde de C mayor, luego un acorde de A menor, y luego un acorde de C menor (Cm = tu forma completa de cejilla de Bm del Módulo 7, deslizada un traste hacia arriba, al traste 3).</li><li>Las tonalidades de C mayor y A menor usan las mismas siete notas — por eso los acordes suenan tan emparentados; C a Cm comparte solo la raíz (paralela).</li><li>Fíjate qué tan diferentes suenan Am y Cm entre sí, aunque ambos sean "el menor de C."</li></ol>',
+                text: '<ol><li>Play a C major chord, then an A minor chord, then a C minor chord (Cm = your full Bm barre shape from Module 7, slid up one fret to fret 3).</li><li>The keys of C major and A minor use the same seven notes — that\'s why the chords sound so closely related; C-to-Cm shares only the root (parallel).</li><li>Notice how different Am and Cm sound from each other, even though both are "C\'s minor."</li></ol>',
+                text_es: '<ol><li>Toca un acorde de C mayor, luego un acorde de A menor, y luego un acorde de C menor (Cm = tu forma completa de cejilla de Bm del Módulo 7, deslizada un traste hacia arriba, al traste 3).</li><li>Las tonalidades de C mayor y A menor usan las mismas siete notas — por eso los acordes suenan tan emparentados; C a Cm comparte solo la raíz (paralela).</li><li>Fíjate qué tan diferentes suenan Am y Cm entre sí, aunque ambos sean "el menor de C."</li></ol>',
                 hint: 'These two ideas get mixed up constantly — the exercise is hearing that "C\'s relative minor" and "C\'s parallel minor" are two completely different chords.',
                 hint_es: 'Estas dos ideas se confunden constantemente — el ejercicio es escuchar que "la relativa menor de C" y "la paralela menor de C" son dos acordes completamente distintos.',
                 skills: [2],
@@ -380,8 +380,8 @@ SETS.push(
             steps: [
               {
                 label: 'Find "Watchtower"\'s relative major', label_es: 'La relativa mayor de "Watchtower"',
-                text: 'Now try it: "All Along the Watchtower" loops in A minor. Find its relative major by sliding 3 frets up from A — check your answer before moving on.',
-                text_es: 'Ahora pruébalo: "All Along the Watchtower" gira en A menor. Encuentra su relativa mayor deslizando 3 trastes hacia arriba desde A — comprueba tu respuesta antes de seguir.',
+                text: 'Find the relative major of "All Along the Watchtower" (it loops in A minor) by sliding 3 frets up from A — check your answer before moving on.',
+                text_es: 'Encuentra la relativa mayor de "All Along the Watchtower" (gira en A menor) deslizando 3 trastes hacia arriba desde A — comprueba tu respuesta antes de seguir.',
                 hint: 'Relative major is always 3 frets UP from a minor root — the mirror image of sliding 3 frets down to find a relative minor.',
                 hint_es: 'La relativa mayor siempre está 3 trastes ARRIBA de una raíz menor — la imagen espejo de deslizar 3 trastes abajo para encontrar una relativa menor.',
                 skills: [3],
@@ -395,8 +395,8 @@ SETS.push(
               },
               {
                 label: 'Why "Luna"\'s solo is in D minor', label_es: 'Por qué el solo de "Luna" está en D menor',
-                text: 'Try it on "Luna": its solo lives in D minor pentatonic even though the song is in F major. Work out why using what you just learned about relative keys.',
-                text_es: 'Pruébalo con "Luna": su solo vive en la pentatónica menor de D aunque la canción esté en F mayor. Descubre por qué usando lo que acabas de aprender sobre tonalidades relativas.',
+                text: 'Work out why "Luna"\'s solo lives in D minor pentatonic even though the song is in F major, using what you just learned about relative keys.',
+                text_es: 'Descubre por qué el solo de "Luna" vive en la pentatónica menor de D aunque la canción esté en F mayor, usando lo que acabas de aprender sobre tonalidades relativas.',
                 hint: 'D minor is exactly 3 frets down from F — the same relative relationship you just used on "Watchtower".',
                 hint_es: 'D menor está exactamente 3 trastes abajo de F — la misma relación relativa que acabas de usar en "Watchtower".',
                 skills: [6],
@@ -672,8 +672,8 @@ SETS.push(
             steps: [
               {
                 label: 'Ear training: bright vs. dark', label_es: 'Oído: brillante vs. oscuro',
-                text: 'Listen for it: play a major chord, then its parallel minor, back and forth. Notice which one sounds "bright" and which sounds "dark" — this is the ear-training foundation for everything else today.',
-                text_es: 'Escucha esto: toca un acorde mayor, luego su paralela menor, alternando. Fíjate cuál suena "brillante" y cuál suena "oscuro" — esta es la base de entrenamiento auditivo para todo lo demás de hoy.',
+                text: 'Play a major chord, then its parallel minor, back and forth. Notice which one sounds "bright" and which sounds "dark" — this is the ear-training foundation for everything else today.',
+                text_es: 'Toca un acorde mayor, luego su paralela menor, alternando. Fíjate cuál suena "brillante" y cuál suena "oscuro" — esta es la base de entrenamiento auditivo para todo lo demás de hoy.',
                 hint: 'You\'ve been hearing this distinction since Module 4 — today you\'re naming it and using it deliberately.',
                 hint_es: 'Has estado escuchando esta distinción desde el Módulo 4 — hoy la estás nombrando y usando a propósito.',
                 skills: [4],
@@ -693,8 +693,8 @@ SETS.push(
             steps: [
               {
                 label: 'Move box 1 up two frets', label_es: 'Mueve la caja 1 dos trastes',
-                text: 'Now try it: take minor pentatonic box 1 and move it up two frets from wherever you\'re starting. Say out loud what key it\'s in now before you check.',
-                text_es: 'Ahora pruébalo: toma la caja 1 de pentatónica menor y muévela dos trastes hacia arriba desde donde estés empezando. Di en voz alta en qué tonalidad está ahora antes de comprobarlo.',
+                text: 'Take minor pentatonic box 1 and move it up two frets from wherever you\'re starting. Say out loud what key it\'s in now before you check.',
+                text_es: 'Toma la caja 1 de pentatónica menor y muévela dos trastes hacia arriba desde donde estés empezando. Di en voz alta en qué tonalidad está ahora antes de comprobarlo.',
                 hint: 'The pattern itself never changes shape — only the fret you start it on, which is what "transposing" means.',
                 hint_es: 'El patrón en sí nunca cambia de forma — solo el traste en el que lo empiezas, que es lo que significa "transponer."',
                 skills: [2],

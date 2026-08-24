@@ -2440,7 +2440,7 @@ function isSpicyLevelUpSection(sec){
   return /^Level-up — the "Sweet Child/.test(sec.title || '');
 }
 function isSpicyLevelUpStep(s){
-  return /^Try it: learn the most famous riff/.test(s.text || '');
+  return /^Learn the most famous riff/.test(s.text || '');
 }
 
 /* ── Stations ── */

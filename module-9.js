@@ -140,8 +140,8 @@ SETS.push(
             steps: [
               {
                 label: 'How to mark each re-test', label_es: 'Cómo marcar cada repaso',
-                text: 'How this works:<ol><li>Play each re-test below.</li><li>Mark its skill on the checklist.</li><li>Clear it → "I\'ve got it!". Struggle → "Still working on it".</li></ol>That\'s not a failure, it\'s your practice list, and the pointer next to each re-test tells you exactly which module rebuilds it.',
-                text_es: 'Cómo funciona:<ol><li>Toca cada repaso de abajo.</li><li>Marca su destreza en la lista de verificación.</li><li>Lo apruebas → "¡Ya lo tengo!". Te cuesta → "Todavía en proceso".</li></ol>Eso no es un fracaso, es tu lista de práctica, y el enlace junto a cada repaso te dice exactamente cuál módulo lo reconstruye.',
+                text: '<ol><li>Play each re-test below.</li><li>Mark its skill on the checklist.</li><li>Clear it → "I\'ve got it!". Struggle → "Still working on it".</li></ol>That\'s not a failure, it\'s your practice list, and the pointer next to each re-test tells you exactly which module rebuilds it.',
+                text_es: '<ol><li>Toca cada repaso de abajo.</li><li>Marca su destreza en la lista de verificación.</li><li>Lo apruebas → "¡Ya lo tengo!". Te cuesta → "Todavía en proceso".</li></ol>Eso no es un fracaso, es tu lista de práctica, y el enlace junto a cada repaso te dice exactamente cuál módulo lo reconstruye.',
                 hint: 'Be strict. A generous self-check here just hides work that will come back in Module 10.',
                 hint_es: 'Sé estricto. Una autoevaluación generosa aquí solo esconde trabajo que reaparecerá en el Módulo 10.'
               },
@@ -196,8 +196,8 @@ SETS.push(
               },
               {
                 label: 'Fast round: record all six', label_es: 'Ronda rápida: grábate los seis',
-                text: 'The fast round:<ol><li>Record yourself playing all six re-tests back to back.</li><li>Then listen with the checklist open and settle any you weren\'t sure about.</li></ol>Cleared all six? Module 9 proper starts at Set 2. Flagged some? Spend a session with the practice spots listed above first — they come back fast.',
-                text_es: 'La ronda rápida:<ol><li>Grábate tocando los seis repasos seguidos.</li><li>Luego escucha con la lista de verificación abierta y resuelve cualquiera del que no estuvieras seguro.</li></ol>¿Aprobaste los seis? El Módulo 9 propiamente empieza en la Unidad 2. ¿Marcaste algunos? Dedica una sesión a los puntos de práctica listados arriba primero — vuelven rápido.',
+                text: '<ol><li>Record yourself playing all six re-tests back to back.</li><li>Then listen with the checklist open and settle any you weren\'t sure about.</li></ol>Cleared all six? Module 9 proper starts at Set 2. Flagged some? Spend a session with the practice spots listed above first — they come back fast.',
+                text_es: '<ol><li>Grábate tocando los seis repasos seguidos.</li><li>Luego escucha con la lista de verificación abierta y resuelve cualquiera del que no estuvieras seguro.</li></ol>¿Aprobaste los seis? El Módulo 9 propiamente empieza en la Unidad 2. ¿Marcaste algunos? Dedica una sesión a los puntos de práctica listados arriba primero — vuelven rápido.',
                 hint: 'The recording shows exactly how you really sounded — that\'s exactly why it\'s useful.',
                 hint_es: 'La grabación muestra exactamente cómo sonaste de verdad — por eso es tan útil.'
               }
@@ -325,8 +325,8 @@ SETS.push(
             steps: [
               {
                 label: 'Name notes up the D and G strings', label_es: 'Nombra las notas por las cuerdas Re y Sol',
-                text: 'Listen for it:<ol><li>Play up the D string one fret at a time, saying each note name OUT LOUD before you check a chart.</li><li>Then do the same up the G string.</li><li>Notice where you hesitate — that\'s tonight\'s target.</li></ol>',
-                text_es: 'Escucha esto:<ol><li>Toca hacia arriba por la cuerda Re un traste a la vez, diciendo cada nombre de nota EN VOZ ALTA antes de revisar un diagrama.</li><li>Luego haz lo mismo en la cuerda Sol.</li><li>Fíjate dónde dudas — ese es tu objetivo de esta noche.</li></ol>',
+                text: '<ol><li>Play up the D string one fret at a time, saying each note name OUT LOUD before you check a chart.</li><li>Then do the same up the G string.</li><li>Notice where you hesitate — that\'s tonight\'s target.</li></ol>',
+                text_es: '<ol><li>Toca hacia arriba por la cuerda Re un traste a la vez, diciendo cada nombre de nota EN VOZ ALTA antes de revisar un diagrama.</li><li>Luego haz lo mismo en la cuerda Sol.</li><li>Fíjate dónde dudas — ese es tu objetivo de esta noche.</li></ol>',
                 hint: 'Naming a note before you check it (not after) is what actually builds the recall — reading a chart at the same time you say the name just trains you to read the chart.',
                 hint_es: 'Nombrar una nota antes de revisarla (no después) es lo que realmente construye la memoria — leer un diagrama al mismo tiempo que dices el nombre solo te entrena a leer el diagrama.',
                 skills: [1, 2],
@@ -346,8 +346,8 @@ SETS.push(
             steps: [
               {
                 label: 'Octave shape: find the twin note', label_es: 'Forma de octava: la nota gemela',
-                text: 'Now try it:<ol><li>Starting from any note you already know on the low E or A string, use the octave shape (two strings down, two frets up) to find its twin on the D or G string.</li><li>Try it from three different starting notes.</li></ol>',
-                text_es: 'Ahora pruébalo:<ol><li>Empezando desde cualquier nota que ya conozcas en la cuerda Mi grave o La, usa la forma de octava (dos cuerdas hacia abajo, dos trastes hacia arriba) para encontrar su gemela en la cuerda Re o Sol.</li><li>Pruébalo desde tres notas de partida distintas.</li></ol>',
+                text: '<ol><li>Starting from any note you already know on the low E or A string, use the octave shape (two strings down, two frets up) to find its twin on the D or G string.</li><li>Try it from three different starting notes.</li></ol>',
+                text_es: '<ol><li>Empezando desde cualquier nota que ya conozcas en la cuerda Mi grave o La, usa la forma de octava (dos cuerdas hacia abajo, dos trastes hacia arriba) para encontrar su gemela en la cuerda Re o Sol.</li><li>Pruébalo desde tres notas de partida distintas.</li></ol>',
                 hint: 'This is the whole point of the octave shape — it turns one memorized note into a second one for free, anywhere on the neck.',
                 hint_es: 'Este es todo el sentido de la forma de octava — convierte una nota memorizada en una segunda gratis, en cualquier parte del mástil.',
                 skills: [4, 6],
@@ -361,8 +361,8 @@ SETS.push(
               },
               {
                 label: 'Try fret 12 on D and G', label_es: 'Prueba el traste 12 en Re y Sol',
-                text: 'Try the top of the neck:<ol><li>Play fret 12 on the D string, then fret 12 on the G string.</li><li>Say what you notice about fret 12 compared to the open string.</li></ol>',
-                text_es: 'Prueba la parte alta del mástil:<ol><li>Toca el traste 12 en la cuerda Re, y luego el traste 12 en la cuerda Sol.</li><li>Di qué notas sobre el traste 12 comparado con la cuerda al aire.</li></ol>',
+                text: '<ol><li>Play fret 12 on the D string, then fret 12 on the G string.</li><li>Say what you notice about fret 12 compared to the open string.</li></ol>',
+                text_es: '<ol><li>Toca el traste 12 en la cuerda Re, y luego el traste 12 en la cuerda Sol.</li><li>Di qué notas sobre el traste 12 comparado con la cuerda al aire.</li></ol>',
                 hint: 'Fret 12 is the octave marker on every string — look for the double-dot inlay as your landmark.',
                 hint_es: 'El traste 12 es el marcador de octava en cada cuerda — busca el incrustado de doble punto como tu referencia.',
                 skills: [1, 2],
@@ -623,8 +623,8 @@ SETS.push(
             steps: [
               {
                 label: 'Name the dot-fret landmarks', label_es: 'Nombra los trastes con punto',
-                text: 'Listen for it: play the dot-fret landmarks (3, 5, 7, 9, 12) across all six strings and say each note out loud before checking a chart. These five frets are your fastest shortcuts anywhere on the neck.',
-                text_es: 'Escucha esto: toca las referencias de los trastes con punto (3, 5, 7, 9, 12) en las seis cuerdas y di cada nota en voz alta antes de revisar un diagrama. Estos cinco trastes son tus atajos más rápidos en cualquier parte del mástil.',
+                text: 'Play the dot-fret landmarks (3, 5, 7, 9, 12) across all six strings and say each note out loud before checking a chart. These five frets are your fastest shortcuts anywhere on the neck.',
+                text_es: 'Toca las referencias de los trastes con punto (3, 5, 7, 9, 12) en las seis cuerdas y di cada nota en voz alta antes de revisar un diagrama. Estos cinco trastes son tus atajos más rápidos en cualquier parte del mástil.',
                 hint: 'You already know these dots as fretting landmarks — today you\'re also learning what they\'re called on every string.',
                 hint_es: 'Ya conoces estos puntos como referencias de trasteo — hoy también aprendes cómo se llaman en cada cuerda.',
                 skills: [6],
@@ -644,8 +644,8 @@ SETS.push(
             steps: [
               {
                 label: 'Find one note on all six strings', label_es: 'Encuentra una nota en las 6 cuerdas',
-                text: 'Now try it: pick any note name and find it on all six strings, one string at a time, using the octave shape (remembering the B-string bump) rather than counting from open every time.',
-                text_es: 'Ahora pruébalo: elige el nombre de cualquier nota y encuéntrala en las seis cuerdas, una cuerda a la vez, usando la forma de octava (recordando el desfase de la cuerda Si) en vez de contar desde el aire cada vez.',
+                text: 'Pick any note name and find it on all six strings, one string at a time, using the octave shape (remembering the B-string bump) rather than counting from open every time.',
+                text_es: 'Elige el nombre de cualquier nota y encuéntrala en las seis cuerdas, una cuerda a la vez, usando la forma de octava (recordando el desfase de la cuerda Si) en vez de contar desde el aire cada vez.',
                 hint: 'This is the moment the whole fretboard suddenly makes sense — one note, six places to find it.',
                 hint_es: 'Este es el momento en que todo el mástil de repente tiene sentido — una nota, seis lugares para encontrarla.',
                 skills: [3, 4],
@@ -903,8 +903,8 @@ SETS.push(
             steps: [
               {
                 label: 'Spot chords inside the TAB', label_es: 'Encuentra acordes en el TAB',
-                text: 'Listen for it: as you read through a TAB\'d riff, notice where single notes stack into a chord (a vertical column) versus where they stay a single melodic line.',
-                text_es: 'Escucha esto: mientras lees un riff en TAB, fíjate dónde las notas sueltas se apilan en un acorde (una columna vertical) frente a dónde se quedan como una sola línea melódica.',
+                text: 'Read through a TAB\'d riff and notice where single notes stack into a chord (a vertical column) versus where they stay a single melodic line.',
+                text_es: 'Lee un riff en TAB y fíjate dónde las notas sueltas se apilan en un acorde (una columna vertical) frente a dónde se quedan como una sola línea melódica.',
                 hint: 'Spotting the difference between a melody line and a stacked chord in TAB is what lets you read faster.',
                 hint_es: 'Distinguir entre una línea melódica y un acorde apilado en el TAB es lo que te permite leer más rápido.',
                 skills: [1],
@@ -924,8 +924,8 @@ SETS.push(
             steps: [
               {
                 label: 'G/B: find the lowest note', label_es: 'G/B: encuentra la nota más grave',
-                text: 'Now try it: look up a chord chart for G/B and figure out, before checking, which note has to be the LOWEST one you strum.',
-                text_es: 'Ahora pruébalo: busca un diagrama de acorde para G/B y descubre, antes de revisar, cuál nota tiene que ser la MÁS GRAVE que rasgueas.',
+                text: 'Look up a chord chart for G/B and figure out, before checking, which note has to be the LOWEST one you strum.',
+                text_es: 'Busca un diagrama de acorde para G/B y descubre, antes de revisar, cuál nota tiene que ser la MÁS GRAVE que rasgueas.',
                 hint: 'Read the slash like a fraction: chord name first, bass note second.',
                 hint_es: 'Lee la barra diagonal como una fracción: primero el nombre del acorde, luego la nota grave.',
                 skills: [4],
@@ -1003,8 +1003,8 @@ SETS.push(
               },
               {
                 label: 'Challenge — Higher Still (the real up-high read)', label_es: 'Reto — Todavía más alto (la verdadera lectura arriba)',
-                text: 'The "Luna" read above was your warm-up, down at frets 0–3 — now for the up-high part.<ul><li>Cold-read the 8-note line below — it lives entirely at frets 5–10, anchored around 5th position with a stretch up to fret 10, crossing the D, G, and B strings. No one walks you through it first; trust the numbers.</li></ul>You\'ve got it when: you play all eight notes in order, in tune, reading only the TAB.',
-                text_es: 'La lectura de "Luna" de arriba fue tu calentamiento, abajo en los trastes 0–3 — ahora la parte de arriba.<ul><li>Lee a primera vista la línea de 8 notas de abajo — vive completamente en los trastes 5–10, anclada alrededor de la 5ª posición con un estiramiento hasta el traste 10, cruzando las cuerdas Re, Sol y Si. Nadie te lo explica primero; confía en los números.</li></ul>Lo tienes cuando: tocas las ocho notas en orden, afinado, leyendo solo el TAB.',
+                text: '<ul><li>Cold-read the 8-note line below — the up-high follow-up to the "Luna" warm-up above (frets 0–3). It lives entirely at frets 5–10, anchored around 5th position with a stretch up to fret 10, crossing the D, G, and B strings. No one walks you through it first; trust the numbers.</li></ul>You\'ve got it when: you play all eight notes in order, in tune, reading only the TAB.',
+                text_es: '<ul><li>Lee a primera vista la línea de 8 notas de abajo — la continuación en posición alta de la lectura de calentamiento de "Luna" de arriba (trastes 0–3). Vive completamente en los trastes 5–10, anclada alrededor de la 5ª posición con un estiramiento hasta el traste 10, cruzando las cuerdas Re, Sol y Si. Nadie te lo explica primero; confía en los números.</li></ul>Lo tienes cuando: tocas las ocho notas en orden, afinado, leyendo solo el TAB.',
                 hint: 'The shapes feel unfamiliar this high up, but the rule never changes: top line = thinnest string, numbers = frets. Find fret 5 (two frets past the fret-3 dot) and anchor your hand there.',
                 hint_es: 'Las formas se sienten poco familiares tan arriba, pero la regla nunca cambia: línea superior = cuerda más delgada, números = trastes. Encuentra el traste 5 (dos trastes después del punto del traste 3) y ancla tu mano ahí.',
                 stuck: 'Play it one note at a time and say each fret out loud before you fret it — decode first, speed later.',
