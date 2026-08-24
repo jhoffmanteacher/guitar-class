@@ -138,8 +138,8 @@ window.CLASS_ACTIVITIES = [
     number: 2,
     title:    'Playing Happy Birthday — Practice',
     title_es: 'Tocando Happy Birthday — Práctica',
-    intro:    'You already know the shape. Today: drill it string by string, put it together, then push the tempo as far as it\'ll go.',
-    intro_es: 'Ya conoces el patrón. Hoy: practícalo cuerda por cuerda, júntalo todo, y después empuja el tempo todo lo que puedas.',
+    intro:    'You already know the shape. Today: put a number on every finger, drill the song string by string, put it together, then push the tempo as far as it\'ll go.',
+    intro_es: 'Ya conoces el patrón. Hoy: ponle un número a cada dedo, practica la canción cuerda por cuerda, júntalo todo, y después empuja el tempo todo lo que puedas.',
     steps: [
       {
         figure: 'img/ca-hb-low-e.svg',
@@ -152,8 +152,12 @@ window.CLASS_ACTIVITIES = [
         text_es: 'El mismo patrón, una cuerda hacia abajo: la cuerda La. Trastes 2, 4, 5 y ahora también el 7 — los puntos en el 5 y el 7 son tus marcas de referencia.',
       },
       {
-        text: 'This line is every note on the low E string. Set your BPM to 70 and play it through.\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'Esta línea son todas las notas de la cuerda Mi grave. Pon tu BPM en 70 y tócala completa.\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'Your fretting fingers have numbers: 1 = index, 2 = middle, 3 = ring, 4 = pinky. The thumb has no number — it stays behind the neck. For this song your hand sits in one spot: finger 1 covers fret 2, finger 3 covers fret 4, finger 4 covers fret 5. Hold that spot, say a finger number out loud, and land it on its fret.\nYou\'ve got it when: you can call 1, 3, or 4 in any order and land the right fret — three times in a row, no buzz.',
+        text_es: 'Los dedos de tu mano de trastear tienen números: 1 = índice, 2 = medio, 3 = anular, 4 = meñique. El pulgar no tiene número — se queda detrás del mástil. Para esta canción tu mano se queda en un solo lugar: el dedo 1 cubre el traste 2, el dedo 3 cubre el traste 4, el dedo 4 cubre el traste 5. Mantén esa posición, di un número de dedo en voz alta, y colócalo en su traste.\nLo tienes cuando: puedes decir 1, 3 o 4 en cualquier orden y caer en el traste correcto — tres veces seguidas, sin zumbido.',
+      },
+      {
+        text: 'This line is every note on the low E string. The fingers are: open, open, 1, open, 4, 3 — say each one as you play it. Set your BPM to 70 and play it through.\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'Esta línea son todas las notas de la cuerda Mi grave. Los dedos son: al aire, al aire, 1, al aire, 4, 3 — di cada uno mientras lo tocas. Pon tu BPM en 70 y tócala completa.\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'E string only — no jumps',
           caption_es: 'Solo cuerda Mi grave — sin saltos',
@@ -168,8 +172,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Same drill, the A string this time.\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'El mismo ejercicio, ahora en la cuerda La.\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'Same drill, the A string this time — and the same fingers: 4, 4, 3, open, 1, open.\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'El mismo ejercicio, ahora en la cuerda La — y los mismos dedos: 4, 4, 3, al aire, 1, al aire.\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'A string only — same idea, one string over',
           caption_es: 'Solo cuerda La — la misma idea, una cuerda hacia abajo',
@@ -218,8 +222,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Add the second half — start to finish, no stopping in between. The leap to fret 7 on the A string is the one tricky spot; it\'s a dot, so let your eye catch it before your finger jumps.\nYou\'ve got it when: all four phrases back to back, any speed, without stopping.',
-        text_es: 'Agrega la segunda mitad — de principio a fin, sin detenerte entre medio. El salto al traste 7 en la cuerda La es el único punto difícil; es un punto en el diapasón, así que deja que lo capte tu ojo antes de que salte tu dedo.\nLo tienes cuando: las cuatro frases seguidas, a cualquier velocidad, sin detenerte.',
+        text: 'Add the second half — start to finish, no stopping in between. The leap to fret 7 on the A string is the one tricky spot; it\'s a dot, so let your eye catch it before finger 4 jumps.\nYou\'ve got it when: all four phrases back to back, any speed, without stopping.',
+        text_es: 'Agrega la segunda mitad — de principio a fin, sin detenerte entre medio. El salto al traste 7 en la cuerda La es el único punto difícil; es un punto en el diapasón, así que deja que lo capte tu ojo antes de que salte tu dedo 4.\nLo tienes cuando: las cuatro frases seguidas, a cualquier velocidad, sin detenerte.',
         tab: {
           caption: 'Whole song · the jump to fret 7 is the hard part',
           caption_es: 'Canción completa · el salto al traste 7 es la parte difícil',
