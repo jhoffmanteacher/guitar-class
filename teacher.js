@@ -570,8 +570,12 @@ function renderTeacherActivities(){
         const renameNote=renamed
           ? `<span class="t-act-title-hint">Renamed — students see this in both languages until the Spanish twin ships. Was: ${escHtml(a.title)}</span>`
           : '';
+        // The raw ca-<n> id, shown muted after the title for teacher
+        // reference only (Jonathan, 2026-08-24) — students never see it, and
+        // it stays put through renames and `number` resequencing since the
+        // id is the one permanent handle.
         titleCell=`<td class="nc" data-open-activity data-id="${escAttr(a.id)}" style="cursor:pointer" title="${escAttr(num+shown)}">`
-          +`${escHtml(num+shown)} `
+          +`${escHtml(num+shown)} <span style="opacity:.55;font-size:.85em">(${escHtml(a.id)})</span> `
           +`<button class="t-act-pencil" data-rename-activity data-id="${escAttr(a.id)}" title="Rename this activity" aria-label="Rename ${escAttr(shown)}">&#x270E;</button>`
           +`${renameNote}</td>`;
       }
@@ -680,7 +684,7 @@ function renderTeacherActivityDetail(id){
     return `<div class="tr-card ca-prev-step" style="margin-bottom:12px"><div class="tr-name">Step ${si+1}</div>${wrapGotItWhen(s.text||'')}${media.join('')}</div>`;
   }).join('');
   box.innerHTML=`${back}
-    <div class="stu-section-head" style="margin-top:0">${a.number?`#${Number(a.number)} - `:''}${escHtml(teacherActivityTitle(a,teacherClassConfig))}</div>
+    <div class="stu-section-head" style="margin-top:0">${a.number?`#${Number(a.number)} - `:''}${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
     ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
     ${stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>'}`;
 }

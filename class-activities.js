@@ -138,29 +138,24 @@ window.CLASS_ACTIVITIES = [
     number: 2,
     title:    'Playing Happy Birthday — Practice',
     title_es: 'Tocando Happy Birthday — Práctica',
-    intro:    'You already know the shape. Today: put a number on every finger, drill the song string by string, put it together, then push the tempo as far as it\'ll go.',
-    intro_es: 'Ya conoces el patrón. Hoy: ponle un número a cada dedo, practica la canción cuerda por cuerda, júntalo todo, y después empuja el tempo todo lo que puedas.',
+    intro:    'You played phrase 1 already. Today: put a number on every finger, climb to the fret-7 dot for phrase 2, and push the first half of the song as fast as it\'ll go.',
+    intro_es: 'Ya tocaste la frase 1. Hoy: ponle un número a cada dedo, sube al punto del traste 7 para la frase 2, y empuja la primera mitad de la canción todo lo que puedas.',
     steps: [
       {
-        figure: 'img/ca-hb-low-e.svg',
-        text: 'Open string is home base. Frets 2, 4, 5 make the shape on the low E string — the dot at fret 5 is your landing mark.',
-        text_es: 'La cuerda al aire es tu punto de partida. Los trastes 2, 4 y 5 forman el patrón en la cuerda Mi grave — el punto en el traste 5 es tu marca de referencia.',
-      },
-      {
-        figure: 'img/ca-hb-a.svg',
-        text: 'Same shape, one string over: the A string. Frets 2, 4, 5, and now 7 — the dots at 5 and 7 are your landing marks.',
-        text_es: 'El mismo patrón, una cuerda hacia abajo: la cuerda La. Trastes 2, 4, 5 y ahora también el 7 — los puntos en el 5 y el 7 son tus marcas de referencia.',
+        figure: 'img/ca-hb-low-e-full.svg',
+        text: 'Everything today lives on the low E string. Frets 2, 4, 5 make the shape you know — and today the map grows one dot: fret 7. The dots at 5 and 7 are your landing marks.',
+        text_es: 'Todo lo de hoy vive en la cuerda Mi grave. Los trastes 2, 4 y 5 forman el patrón que ya conoces — y hoy el mapa crece un punto: el traste 7. Los puntos en el 5 y el 7 son tus marcas de referencia.',
       },
       {
         text: 'Your fretting fingers have numbers: 1 = index, 2 = middle, 3 = ring, 4 = pinky. The thumb has no number — it stays behind the neck. For this song your hand sits in one spot: finger 1 covers fret 2, finger 3 covers fret 4, finger 4 covers fret 5. Hold that spot, say a finger number out loud, and land it on its fret.\nYou\'ve got it when: you can call 1, 3, or 4 in any order and land the right fret — three times in a row, no buzz.',
         text_es: 'Los dedos de tu mano de trastear tienen números: 1 = índice, 2 = medio, 3 = anular, 4 = meñique. El pulgar no tiene número — se queda detrás del mástil. Para esta canción tu mano se queda en un solo lugar: el dedo 1 cubre el traste 2, el dedo 3 cubre el traste 4, el dedo 4 cubre el traste 5. Mantén esa posición, di un número de dedo en voz alta, y colócalo en su traste.\nLo tienes cuando: puedes decir 1, 3 o 4 en cualquier orden y caer en el traste correcto — tres veces seguidas, sin zumbido.',
       },
       {
-        text: 'This line is every note on the low E string. The fingers are: open, open, 1, open, 4, 3 — say each one as you play it. Set your BPM to 70 and play it through.\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'Esta línea son todas las notas de la cuerda Mi grave. Los dedos son: al aire, al aire, 1, al aire, 4, 3 — di cada uno mientras lo tocas. Pon tu BPM en 70 y tócala completa.\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'This is phrase 1 — the line you learned last time, all in the home spot. The fingers are: open, open, 1, open, 4, 3 — say each one as you play it. Set your BPM to 70 and play it through.\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'Esta es la frase 1 — la línea que aprendiste la vez pasada, toda en la posición base. Los dedos son: al aire, al aire, 1, al aire, 4, 3 — di cada uno mientras lo tocas. Pon tu BPM en 70 y tócala completa.\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
-          caption: 'E string only — no jumps',
-          caption_es: 'Solo cuerda Mi grave — sin saltos',
+          caption: 'Phrase 1 · stays in the home spot',
+          caption_es: 'Frase 1 · se queda en la posición base',
           notes: [
             { string: 'E', fret: 0, note: 'E',  midi: 40 },
             { string: 'E', fret: 0, note: 'E',  midi: 40 },
@@ -172,27 +167,27 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Same drill, the A string this time — and the same fingers: 4, 4, 3, open, 1, open.\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'El mismo ejercicio, ahora en la cuerda La — y los mismos dedos: 4, 4, 3, al aire, 1, al aire.\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'Phrase 2 starts exactly like phrase 1 — open, open, 1, open — but the ending climbs. Finger 4 jumps past its home fret to the dot at fret 7, then finger 1 takes the dot at fret 5. Two dots, two fingers: let your eye find fret 7 before finger 4 leaves the ground.\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La frase 2 empieza exactamente igual que la frase 1 — al aire, al aire, 1, al aire — pero el final sube. El dedo 4 salta más allá de su traste base hasta el punto del traste 7, y luego el dedo 1 toma el punto del traste 5. Dos puntos, dos dedos: deja que tu ojo encuentre el traste 7 antes de que el dedo 4 despegue.\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
-          caption: 'A string only — same idea, one string over',
-          caption_es: 'Solo cuerda La — la misma idea, una cuerda hacia abajo',
+          caption: 'Phrase 2 · the ending climbs to the fret-7 dot',
+          caption_es: 'Frase 2 · el final sube al punto del traste 7',
           notes: [
-            { string: 'A', fret: 5, note: 'D',  midi: 50 },
-            { string: 'A', fret: 5, note: 'D',  midi: 50 },
-            { string: 'A', fret: 4, note: 'C#', midi: 49 },
-            { string: 'A', fret: 0, note: 'A',  midi: 45 },
-            { string: 'A', fret: 2, note: 'B',  midi: 47 },
-            { string: 'A', fret: 0, note: 'A',  midi: 45 }
+            { string: 'E', fret: 0, note: 'E',  midi: 40 },
+            { string: 'E', fret: 0, note: 'E',  midi: 40 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 },
+            { string: 'E', fret: 0, note: 'E',  midi: 40 },
+            { string: 'E', fret: 7, note: 'B',  midi: 47 },
+            { string: 'E', fret: 5, note: 'A',  midi: 45 }
           ]
         },
       },
       {
-        text: 'Play the two strings back to back — this is the first half of the song.\nYou\'ve got it when: phrase 1 and phrase 2, four times through, without stopping.',
-        text_es: 'Toca las dos cuerdas seguidas — esta es la primera mitad de la canción.\nLo tienes cuando: la frase 1 y la frase 2, cuatro veces seguidas, sin detenerte.',
+        text: 'Play the two phrases back to back — this is the first half of the song.\nYou\'ve got it when: phrase 1 and phrase 2, four times through, without stopping.',
+        text_es: 'Toca las dos frases seguidas — esta es la primera mitad de la canción.\nLo tienes cuando: la frase 1 y la frase 2, cuatro veces seguidas, sin detenerte.',
         tab: {
-          caption: 'First half · E string into A string, no pause',
-          caption_es: 'Primera mitad · de la cuerda Mi grave a la cuerda La, sin pausa',
+          caption: 'First half · same string, watch the fret-7 jump',
+          caption_es: 'Primera mitad · la misma cuerda, ojo con el salto al traste 7',
           phrases: [
             {
               label: '"Hap-py birth-day to you"',
@@ -214,75 +209,16 @@ window.CLASS_ACTIVITIES = [
                 { string: 'E', fret: 0, note: 'E',  midi: 40 },
                 { string: 'E', fret: 2, note: 'F#', midi: 42 },
                 { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'A', fret: 2, note: 'B',  midi: 47 },
-                { string: 'A', fret: 0, note: 'A',  midi: 45 }
+                { string: 'E', fret: 7, note: 'B',  midi: 47 },
+                { string: 'E', fret: 5, note: 'A',  midi: 45 }
               ]
             }
           ]
         },
       },
       {
-        text: 'Add the second half — start to finish, no stopping in between. The leap to fret 7 on the A string is the one tricky spot; it\'s a dot, so let your eye catch it before finger 4 jumps.\nYou\'ve got it when: all four phrases back to back, any speed, without stopping.',
-        text_es: 'Agrega la segunda mitad — de principio a fin, sin detenerte entre medio. El salto al traste 7 en la cuerda La es el único punto difícil; es un punto en el diapasón, así que deja que lo capte tu ojo antes de que salte tu dedo 4.\nLo tienes cuando: las cuatro frases seguidas, a cualquier velocidad, sin detenerte.',
-        tab: {
-          caption: 'Whole song · the jump to fret 7 is the hard part',
-          caption_es: 'Canción completa · el salto al traste 7 es la parte difícil',
-          phrases: [
-            {
-              label: '"Hap-py birth-day to you"',
-              label_es: '"Hap-py birth-day to you"',
-              notes: [
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 2, note: 'F#', midi: 42 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 5, note: 'A',  midi: 45 },
-                { string: 'E', fret: 4, note: 'G#', midi: 44 }
-              ]
-            },
-            {
-              label: '"Hap-py birth-day to you" (again)',
-              label_es: '"Hap-py birth-day to you" (otra vez)',
-              notes: [
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 2, note: 'F#', midi: 42 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'A', fret: 2, note: 'B',  midi: 47 },
-                { string: 'A', fret: 0, note: 'A',  midi: 45 }
-              ]
-            },
-            {
-              label: '"Hap-py birth-day dear ______"',
-              label_es: '"Hap-py birth-day dear ______"',
-              notes: [
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                { string: 'A', fret: 7, note: 'E',  midi: 52 },
-                { string: 'A', fret: 4, note: 'C#', midi: 49 },
-                { string: 'A', fret: 0, note: 'A',  midi: 45 },
-                { string: 'E', fret: 4, note: 'G#', midi: 44 },
-                { string: 'E', fret: 2, note: 'F#', midi: 42 }
-              ]
-            },
-            {
-              label: '"Hap-py birth-day to you"',
-              label_es: '"Hap-py birth-day to you"',
-              notes: [
-                { string: 'A', fret: 5, note: 'D',  midi: 50 },
-                { string: 'A', fret: 5, note: 'D',  midi: 50 },
-                { string: 'A', fret: 4, note: 'C#', midi: 49 },
-                { string: 'A', fret: 0, note: 'A',  midi: 45 },
-                { string: 'A', fret: 2, note: 'B',  midi: 47 },
-                { string: 'A', fret: 0, note: 'A',  midi: 45 }
-              ]
-            }
-          ]
-        },
-      },
-      {
-        text: 'Play the full song again, chasing speed this time. Every clean pass, raise the BPM on the player above by 10 and go again.\nYou\'ve got it when: you\'ve raised the tempo at least three times without breaking down.',
-        text_es: 'Toca la canción completa otra vez, esta vez persiguiendo la velocidad. Cada vez que te salga limpia, sube el BPM en el reproductor de arriba 10 puntos y vuelve a intentarlo.\nLo tienes cuando: subiste el tempo al menos tres veces sin perder el ritmo.',
+        text: 'Chase speed on the first half. Every clean pass, raise the BPM on the player above by 10 and go again. Fast already? Say each finger number as you land it.\nYou\'ve got it when: you\'ve raised the tempo at least three times without breaking down — then keep climbing.',
+        text_es: 'Persigue la velocidad con la primera mitad. Cada pasada limpia, sube el BPM en el reproductor de arriba 10 puntos y vuelve a intentarlo. ¿Ya vas rápido? Di cada número de dedo al caer en él.\nLo tienes cuando: subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
       },
     ],
   },
@@ -832,6 +768,179 @@ window.CLASS_ACTIVITIES = [
       {
         text: 'Keep going — there\'s no finish line on this one. Set the player above to 60 BPM and play the phrase with the beat. Every clean pass, raise the BPM by 10.\nYou\'ve got it when: you\'ve raised the BPM twice without breaking down — then keep climbing. Fast already? Say each note\'s name as you land it — E, F#, G#, A.',
         text_es: 'Sigue — aquí no hay meta final. Pon el reproductor de arriba en 60 BPM y toca la frase con el pulso. Con cada pasada limpia, súbele 10 al BPM.\nLo tienes cuando: ya subiste el BPM dos veces sin perder el ritmo — y de ahí, sigue subiendo. ¿Ya vas rápido? Di el nombre de cada nota al caer en ella — E, F#, G#, A.',
+      },
+    ],
+  },
+  {
+    id:    'ca-9',
+    number: 9,
+    title:    'Happy Birthday — Finish the Song',
+    title_es: 'Happy Birthday — Termina la canción',
+    intro:    'You own the first half on one string. Today you cross to a second string — the A string — and play Happy Birthday start to finish.',
+    intro_es: 'Ya dominas la primera mitad en una sola cuerda. Hoy cruzas a una segunda cuerda — la cuerda La — y tocas Happy Birthday de principio a fin.',
+    steps: [
+      {
+        figure: 'img/ca-hb-a.svg',
+        text: 'Meet the A string — one string down from the low E, the second-thickest. Same map: frets 2, 4, 5 and 7, and the dots at 5 and 7 are still your landing marks.',
+        text_es: 'Esta es la cuerda La — una cuerda hacia abajo desde el Mi grave, la segunda más gruesa. El mismo mapa: trastes 2, 4, 5 y 7, y los puntos en el 5 y el 7 siguen siendo tus marcas de referencia.',
+      },
+      {
+        text: 'Pluck the open low E, then the open A, back and forth — no fretting hand yet. The pick moves one string; only one string rings each time. If both sound, slow the pick down and look at where it lands.\nYou\'ve got it when: E, A, E, A — three clean reps in a row, one string per pluck.',
+        text_es: 'Toca el Mi grave al aire, luego el La al aire, ida y vuelta — todavía sin la mano de trastear. La púa se mueve una cuerda; solo una cuerda suena cada vez. Si suenan las dos, mueve la púa más despacio y mira dónde cae.\nLo tienes cuando: Mi, La, Mi, La — tres repeticiones limpias seguidas, una cuerda por toque.',
+        tab: {
+          caption: 'String crossing · open strings only',
+          caption_es: 'Cruce de cuerdas · solo cuerdas al aire',
+          notes: [
+            { string: 'E', fret: 0, note: 'E', midi: 40 },
+            { string: 'A', fret: 0, note: 'A', midi: 45 },
+            { string: 'E', fret: 0, note: 'E', midi: 40 },
+            { string: 'A', fret: 0, note: 'A', midi: 45 }
+          ]
+        },
+      },
+      {
+        text: 'The "day dear" climb lives on the A string. Fretting fingers have numbers — 1 = index, 2 = middle, 3 = ring, 4 = pinky. Finger 4 leaps to the dot at fret 7, finger 3 takes fret 4, then the open string. Three notes, downhill.\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La subida de "day dear" vive en la cuerda La. Los dedos de trastear tienen números — 1 = índice, 2 = medio, 3 = anular, 4 = meñique. El dedo 4 salta al punto del traste 7, el dedo 3 toma el traste 4, y luego la cuerda al aire. Tres notas, cuesta abajo.\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        tab: {
+          caption: 'The climb · fret 7 → 4 → open',
+          caption_es: 'La subida · traste 7 → 4 → al aire',
+          notes: [
+            { string: 'A', fret: 7, note: 'E',  midi: 52 },
+            { string: 'A', fret: 4, note: 'C#', midi: 49 },
+            { string: 'A', fret: 0, note: 'A',  midi: 45 }
+          ]
+        },
+      },
+      {
+        text: 'Phrase 3 is where you sing the name: two open notes on the low E, the climb on the A string, then back to the low E. Finger 3 crosses strings without changing frets — it plays fret 4 on the A, then fret 4 on the E.\nYou\'ve got it when: three clean runs without stopping, saying the words as you play.',
+        text_es: 'La frase 3 es donde cantas el nombre: dos notas al aire en el Mi grave, la subida en la cuerda La, y de vuelta al Mi grave. El dedo 3 cruza de cuerda sin cambiar de traste — toca el traste 4 en La, y luego el traste 4 en Mi.\nLo tienes cuando: tres pasadas limpias sin detenerte, diciendo las palabras mientras tocas.',
+        tab: {
+          caption: '"Hap-py birth-day dear ______" · two strings now',
+          caption_es: '"Hap-py birth-day dear ______" · ahora dos cuerdas',
+          notes: [
+            { string: 'E', fret: 0, note: 'E',  midi: 40 },
+            { string: 'E', fret: 0, note: 'E',  midi: 40 },
+            { string: 'A', fret: 7, note: 'E',  midi: 52 },
+            { string: 'A', fret: 4, note: 'C#', midi: 49 },
+            { string: 'A', fret: 0, note: 'A',  midi: 45 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42 }
+          ]
+        },
+      },
+      {
+        text: 'Phrase 4 lives entirely on the A string, back in the home spot (finger 1 covers fret 2, finger 3 covers fret 4, finger 4 covers fret 5). The fingers are: 4, 4, 3, open, 1, open — say each one as you play it.\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La frase 4 vive completa en la cuerda La, de vuelta en la posición base (el dedo 1 cubre el traste 2, el dedo 3 el traste 4, el dedo 4 el traste 5). Los dedos son: 4, 4, 3, al aire, 1, al aire — di cada uno mientras lo tocas.\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        tab: {
+          caption: 'Phrase 4 · all on the A string',
+          caption_es: 'Frase 4 · todo en la cuerda La',
+          notes: [
+            { string: 'A', fret: 5, note: 'D',  midi: 50 },
+            { string: 'A', fret: 5, note: 'D',  midi: 50 },
+            { string: 'A', fret: 4, note: 'C#', midi: 49 },
+            { string: 'A', fret: 0, note: 'A',  midi: 45 },
+            { string: 'A', fret: 2, note: 'B',  midi: 47 },
+            { string: 'A', fret: 0, note: 'A',  midi: 45 }
+          ]
+        },
+      },
+      {
+        text: 'Phrases 3 and 4 back to back — the whole second half, crossing strings in the middle.\nYou\'ve got it when: phrase 3 into phrase 4, four times through, without stopping.',
+        text_es: 'Las frases 3 y 4 seguidas — toda la segunda mitad, cruzando de cuerda en el medio.\nLo tienes cuando: de la frase 3 a la frase 4, cuatro veces seguidas, sin detenerte.',
+        tab: {
+          caption: 'Second half · the A string carries the ending',
+          caption_es: 'Segunda mitad · la cuerda La lleva el final',
+          phrases: [
+            {
+              label: '"Hap-py birth-day dear ______"',
+              label_es: '"Hap-py birth-day dear ______"',
+              notes: [
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'A', fret: 7, note: 'E',  midi: 52 },
+                { string: 'A', fret: 4, note: 'C#', midi: 49 },
+                { string: 'A', fret: 0, note: 'A',  midi: 45 },
+                { string: 'E', fret: 4, note: 'G#', midi: 44 },
+                { string: 'E', fret: 2, note: 'F#', midi: 42 }
+              ]
+            },
+            {
+              label: '"Hap-py birth-day to you"',
+              label_es: '"Hap-py birth-day to you"',
+              notes: [
+                { string: 'A', fret: 5, note: 'D',  midi: 50 },
+                { string: 'A', fret: 5, note: 'D',  midi: 50 },
+                { string: 'A', fret: 4, note: 'C#', midi: 49 },
+                { string: 'A', fret: 0, note: 'A',  midi: 45 },
+                { string: 'A', fret: 2, note: 'B',  midi: 47 },
+                { string: 'A', fret: 0, note: 'A',  midi: 45 }
+              ]
+            }
+          ]
+        },
+      },
+      {
+        text: 'All four phrases, start to finish — the whole song, two strings, no stopping in between.\nYou\'ve got it when: all four phrases back to back, any speed, without stopping.',
+        text_es: 'Las cuatro frases, de principio a fin — la canción completa, dos cuerdas, sin detenerte entre medio.\nLo tienes cuando: las cuatro frases seguidas, a cualquier velocidad, sin detenerte.',
+        tab: {
+          caption: 'Whole song · phrases 1–4',
+          caption_es: 'Canción completa · frases 1–4',
+          phrases: [
+            {
+              label: '"Hap-py birth-day to you"',
+              label_es: '"Hap-py birth-day to you"',
+              notes: [
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 2, note: 'F#', midi: 42 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                { string: 'E', fret: 4, note: 'G#', midi: 44 }
+              ]
+            },
+            {
+              label: '"Hap-py birth-day to you" (again — the ending climbs higher)',
+              label_es: '"Hap-py birth-day to you" (otra vez — el final sube más alto)',
+              notes: [
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 2, note: 'F#', midi: 42 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 7, note: 'B',  midi: 47 },
+                { string: 'E', fret: 5, note: 'A',  midi: 45 }
+              ]
+            },
+            {
+              label: '"Hap-py birth-day dear ______"',
+              label_es: '"Hap-py birth-day dear ______"',
+              notes: [
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'A', fret: 7, note: 'E',  midi: 52 },
+                { string: 'A', fret: 4, note: 'C#', midi: 49 },
+                { string: 'A', fret: 0, note: 'A',  midi: 45 },
+                { string: 'E', fret: 4, note: 'G#', midi: 44 },
+                { string: 'E', fret: 2, note: 'F#', midi: 42 }
+              ]
+            },
+            {
+              label: '"Hap-py birth-day to you"',
+              label_es: '"Hap-py birth-day to you"',
+              notes: [
+                { string: 'A', fret: 5, note: 'D',  midi: 50 },
+                { string: 'A', fret: 5, note: 'D',  midi: 50 },
+                { string: 'A', fret: 4, note: 'C#', midi: 49 },
+                { string: 'A', fret: 0, note: 'A',  midi: 45 },
+                { string: 'A', fret: 2, note: 'B',  midi: 47 },
+                { string: 'A', fret: 0, note: 'A',  midi: 45 }
+              ]
+            }
+          ]
+        },
+      },
+      {
+        text: 'Chase speed on the whole song. Every clean pass, raise the BPM by 10. Fast already? Play it for the person next to you and have them sing along — it\'s a real song, and someone in this room has a birthday coming.\nYou\'ve got it when: you\'ve raised the tempo at least three times without breaking down — then keep climbing.',
+        text_es: 'Persigue la velocidad con la canción completa. Cada pasada limpia, sube el BPM 10 puntos. ¿Ya vas rápido? Tócala para la persona de al lado y que cante contigo — es una canción de verdad, y alguien en este salón cumple años pronto.\nLo tienes cuando: subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
       },
     ],
   },
