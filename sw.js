@@ -14,7 +14,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-08-25-16e96123c5';
+const CACHE_VERSION = 'guitar-class-2026-08-25-d0b6bbd616';
 
 // Backing-track audio lives in its OWN cache, versioned independently of the
 // shell (see tools/checks.mjs, which fingerprints audio/ separately and
@@ -43,6 +43,7 @@ const ASSETS = [
   './tuner.js',
   './coach.js',
   './teacher.js',
+  './live-quiz.js',
   './config-main.js',
   './firebase-config.js',
   './manifest.json',

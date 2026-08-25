@@ -5,6 +5,25 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-25 — Live quiz: the whole class answers on their Chromebooks
+
+### Added
+
+- **Live quiz** — a whole-class game your teacher runs from the front of the
+  room. When one starts, a **Live quiz** button appears in the left menu and
+  the screen opens by itself; if you close it, a bar at the bottom of the page
+  gets you back in with one tap.
+- The first quiz is **"Which string am I playing?"** Your teacher plays one
+  open string, you tap the string you heard, and the whole class's answers go
+  up on the classroom screen. Then the answer, how the class voted, and the
+  scores.
+- Your first tap is your answer, so listen before you tap. Every correct
+  answer is worth the same 1,000 points — there is no reward for guessing
+  fast before the string has finished ringing.
+- You never see anyone else's answer until the reveal, and nobody sees yours.
+- Everything in the game is in English and Spanish, and the Español button
+  switches it mid-question like the rest of the site.
+
 ## 2026-08-20 — Tuning: which way to turn, and the wrong-letter trap
 
 ### Added

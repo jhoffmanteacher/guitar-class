@@ -23,6 +23,9 @@ rules_version = '2';
                       paused, archived, hiddenActivities, activityDates,
                       activityTitles
                       (teacher writes, students read)
+     liveQuiz/current the whole-class live quiz's state (teacher writes,
+                      students read) + an answers/{uid} subcollection each
+                      student writes their own row of
      issueReports/*   student-filed problem reports
 
    Anything not matched below is denied by default. Do not add a catch-all.
@@ -81,6 +84,63 @@ service cloud.firestore {
     match /config/class {
       allow read:  if isSignedIn();
       allow write: if isTeacher();
+    }
+
+    /* ── Live quiz (live-quiz.js) ──────────────────────────────────────
+       One doc, rewritten from scratch each game. Only the teacher writes
+       it: state, the current question number, the correct answer (written
+       only at reveal) and the running scores. Every signed-in student
+       reads it, which is what makes the game live.
+
+       What that exposes: the `scores` map — every player's display name
+       and points — is readable by any signed-in student, the same
+       trade-off config/class already makes for its uid maps. It is a
+       leaderboard shown on the classroom wall, so this is not a leak of
+       anything private; note that it is class-wide and readable from
+       anywhere, not just from the room.
+
+       Scoped to the specific "current" doc rather than liveQuiz/{doc}, for
+       the same reason config/class is: a wildcard would open every future
+       document under liveQuiz/ to every signed-in user. */
+    match /liveQuiz/current {
+      allow read:  if isSignedIn();
+      allow write: if isTeacher();
+
+      /* One answer doc per student, keyed by uid, overwritten each round.
+
+         Read is teacher-only and there is no exception: if a student could
+         read this collection they could read the rest of the class's
+         answers before the reveal, which is the whole game.
+
+         The three data conditions are what stop a student from scoring
+         themselves. They may only write their OWN uid's doc, only while a
+         question is actually open, and only stamped with the round and
+         session that are open right now — so a late answer after the
+         reveal, or a replayed answer to an earlier question, is rejected
+         by the database rather than merely ignored by the UI. The lobby
+         case is the "I'm here" write that puts a student in the teacher's
+         roster before the first question (qIndex -1, no choice yet).
+
+         hasOnly pins the shape: a client cannot smuggle extra fields (a
+         `pts`, say) into a doc the teacher's scoring pass reads back.
+
+         Deliberately no delete for students: clearing your own answer
+         after seeing the tally would be a free retry. */
+      function live() {
+        return get(/databases/$(database)/documents/liveQuiz/current).data;
+      }
+      match /answers/{userId} {
+        allow read, delete: if isTeacher();
+        allow create, update: if isSignedIn()
+              && request.auth.uid == userId
+              && request.resource.data.uid == request.auth.uid
+              && request.resource.data.keys().hasOnly(['uid','name','sessionId','qIndex','choice','ms','at'])
+              && request.resource.data.sessionId == live().sessionId
+              && (
+                   (live().state == 'question' && request.resource.data.qIndex == live().qIndex)
+                || (live().state == 'lobby'    && request.resource.data.qIndex == -1)
+                 );
+      }
     }
 
     /* Student-filed issue reports. A student may file one under their own

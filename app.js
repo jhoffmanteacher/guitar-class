@@ -323,6 +323,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
   } else {
     currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; progressLoadFailed = false;
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
+    if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
     practiceLog = loadLocalPracticeLog();   // per-skill rep history: back to the local copy on sign-out
     _moduleStripStates = {};   // next user's first strip render is a first paint, not a celebration
     document.getElementById('auth-wall').style.display='block';
@@ -375,6 +376,10 @@ function showApp(user){
   applyGamesAccess();
   maybeShowApp_gamesHash();
   maybeShowCaReminder();
+  // One long-lived listener on the live-quiz session doc, so a game the
+  // teacher starts mid-period reaches a student who's had the site open all
+  // along. Guarded: live-quiz.js is a separate deferred script.
+  if(typeof lqStartListening === 'function') lqStartListening();
 }
 
 /* A bookmarked/reloaded explore-page URL (#games, #songs, #keep-practicing,
@@ -2075,6 +2080,10 @@ const EXPLORE_PAGES = [
   { hash: '#daily-review',    screen: 'sr-screen',              btn: 'sr-btn' },
   { hash: '#my-progress',     screen: 'my-progress-screen',     btn: 'my-progress-btn' },
   { hash: '#class-activities', screen: 'class-activities-screen', btn: 'class-activities-btn' },
+  /* The second overlay, and the one place the choice isn't about browsing
+     comfort: a student answering a live question must not be able to
+     half-see (or mis-tap into) the set panels underneath. */
+  { hash: '#live-quiz',       screen: 'live-quiz-screen',       btn: 'live-quiz-btn', overlay: true },
 ];
 /* Single source of truth for "which explore page is showing": reads the DOM
    rather than tracking state, so it stays right no matter which path opened
@@ -2150,7 +2159,7 @@ function exitExploreHash(){
    panel-only close fns, which don't touch the hash — the hash is already
    whatever we're routing to), then opens the target. */
 let lastRoutedHash = null;
-const EXPLORE_HASHES = ['', '#games', '#songs', '#keep-practicing', '#daily-review', '#my-progress', '#class-activities', '#search'];
+const EXPLORE_HASHES = ['', '#games', '#songs', '#keep-practicing', '#daily-review', '#my-progress', '#class-activities', '#live-quiz', '#search'];
 function routeExploreHash(){
   const h = location.hash;
   // A hash this router doesn't own (e.g. #main-content from the skip link)
@@ -2178,6 +2187,7 @@ function routeExploreHash(){
   if(h !== '#daily-review') srClosePanel();
   if(h !== '#my-progress') mpClosePanel();
   if(h !== '#class-activities') caClosePanel();
+  if(h !== '#live-quiz' && typeof lqClosePanel === 'function') lqClosePanel();
   if(h !== '#search') searchClosePanel();
   if(h === '#games' && typeof openGamesScreen === 'function') openGamesScreen();
   else if(h === '#songs') openSongsScreen();
@@ -2185,6 +2195,7 @@ function routeExploreHash(){
   else if(h === '#daily-review') openDailyReviewScreen();
   else if(h === '#my-progress') openMyProgressScreen();
   else if(h === '#class-activities') openClassActivitiesScreen();
+  else if(h === '#live-quiz' && typeof openLiveQuizScreen === 'function') openLiveQuizScreen();
   else if(h === '#search') openSearchPanel();
   syncExploreNav();
 }
@@ -5996,8 +6007,8 @@ initBackToTop();
 function closeTopPanels(except){
   /* Hash-based full pages close through their own close fns (which clear
      the URL hash); plain drop-over panels just get hidden. */
-  const SCREEN_IDS = { games: 'games-screen', 'songs-hub': 'songs-screen', 'keep-practicing': 'keep-practicing-screen', 'daily-review': 'sr-screen', 'my-progress': 'my-progress-screen', 'class-activities': 'class-activities-screen' };
-  ['games', 'songs-hub', 'search', 'keep-practicing', 'daily-review', 'my-progress', 'class-activities'].forEach(k => {
+  const SCREEN_IDS = { games: 'games-screen', 'songs-hub': 'songs-screen', 'keep-practicing': 'keep-practicing-screen', 'daily-review': 'sr-screen', 'my-progress': 'my-progress-screen', 'class-activities': 'class-activities-screen', 'live-quiz': 'live-quiz-screen' };
+  ['games', 'songs-hub', 'search', 'keep-practicing', 'daily-review', 'my-progress', 'class-activities', 'live-quiz'].forEach(k => {
     if(k === except) return;
     const p = document.getElementById(SCREEN_IDS[k] || k + '-panel');
     if(p && !p.hasAttribute('hidden')){
@@ -6007,6 +6018,7 @@ function closeTopPanels(except){
       if(k === 'daily-review'){ closeDailyReviewScreen(); return; }
       if(k === 'my-progress'){ closeMyProgressScreen(); return; }
       if(k === 'class-activities'){ closeClassActivitiesScreen(); return; }
+      if(k === 'live-quiz' && typeof closeLiveQuizScreen === 'function'){ closeLiveQuizScreen(); return; }
       if(k === 'search'){ closeSearchPanel(); return; }
       p.setAttribute('hidden', '');
       const b = document.getElementById(k + '-btn');
@@ -6020,7 +6032,7 @@ function closeTopPanels(except){
    click "did nothing" as far as the student could see. Close whichever panel
    is covering the page and scroll up so the new set is actually visible. */
 function leaveTopPanelForSet(){
-  const covering = ['games-screen', 'search-panel', 'songs-screen', 'keep-practicing-screen', 'sr-screen', 'my-progress-screen', 'class-activities-screen']
+  const covering = ['games-screen', 'search-panel', 'songs-screen', 'keep-practicing-screen', 'sr-screen', 'my-progress-screen', 'class-activities-screen', 'live-quiz-screen']
     .some(id => { const el = document.getElementById(id); return el && !el.hasAttribute('hidden'); });
   if(!covering) return;
   practiceScrollTop = 0;   // the async popstate below would otherwise restore the OLD set's scroll offset after activateSet scrolls to top

@@ -74,7 +74,7 @@ try {
 } catch { /* no tabs/ dir yet */ }
 
 const SHELL_FILES = [
-  'index.html', '404.html', 'styles.css', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'app.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js', 'config-main.js',
+  'index.html', '404.html', 'styles.css', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'app.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js', 'live-quiz.js', 'config-main.js',
   'firebase-config.js', 'manifest.json', 'icon.svg',
   ...MODULE_FILES,
   ...TAB_PAGES,
@@ -949,7 +949,7 @@ function checkI18nParity() {
    values in coach.js — instead of guessed at.
    ════════════════════════════════════════════════════════════════════ */
 const I18N_SCAN_JS_FILES = ['app.js', 'coach.js', 'fab-tools.js', 'tuner.js', 'teacher.js',
-  'guitar-diagrams.js', 'class-activities.js', 'config-main.js', 'i18n.js'];
+  'live-quiz.js', 'guitar-diagrams.js', 'class-activities.js', 'config-main.js', 'i18n.js'];
 
 // (stripJsComments lives in the shared-helpers block above — i18n.js's own
 // top-of-file "how to add a key" doc comment uses example strings like
@@ -1006,6 +1006,22 @@ function checkMissingI18nKeys(I18N) {
       if (!KEYS.has(k)) { err(`app.js EAR_POOLS['${id}'] has no matching i18n key '${k}'`); problems++; dynamicBad++; }
     }
   } catch (e) { warn(`could not enumerate EAR_POOLS from app.js: ${e.message}`); warnings++; }
+  /* live-quiz.js's LIVE_QUIZZES stores its student-facing text as i18n KEYS
+     (titleKey/promptKey/choice.key) rather than as strings, so a typo or a
+     deleted key would show a student the raw key at the exact moment a whole
+     class is looking at it. Enumerated from the real bank, same as DECKS and
+     EAR_POOLS above — an added quiz is covered automatically. */
+  try {
+    const LIVE_QUIZZES = loadConstObject(readFileSync(join(ROOT, 'live-quiz.js'), 'utf8'), 'LIVE_QUIZZES');
+    for (const id of Object.keys(LIVE_QUIZZES)) {
+      const q = LIVE_QUIZZES[id];
+      const keys = [q.titleKey, q.promptKey, ...(q.choices || []).map(c => c.key)];
+      for (const k of keys) {
+        if (!k) { err(`live-quiz.js LIVE_QUIZZES['${id}'] is missing an i18n key (titleKey/promptKey/choice key)`); problems++; dynamicBad++; continue; }
+        if (!KEYS.has(k)) { err(`live-quiz.js LIVE_QUIZZES['${id}'] references i18n key '${k}' which does not exist`); problems++; dynamicBad++; }
+      }
+    }
+  } catch (e) { warn(`could not enumerate LIVE_QUIZZES from live-quiz.js: ${e.message}`); warnings++; }
   try {
     const FRET_STRING_NAMES = loadConstObject(readFileSync(join(ROOT, 'coach.js'), 'utf8'), 'FRET_STRING_NAMES');
     for (const suffix of Object.values(FRET_STRING_NAMES)) {
@@ -1022,7 +1038,7 @@ function checkMissingI18nKeys(I18N) {
 
   for (const m of missing) { err(`${m.file}:${m.line} references i18n key '${m.key}' which does not exist`); problems++; }
   if (missing.length === 0 && dynamicBad === 0) {
-    ok(`every i18n key reference across ${I18N_SCAN_JS_FILES.length + MODULE_FILES.length + htmlFiles.length} files (+ the dynamic deck/ear/fret-string families) resolves`);
+    ok(`every i18n key reference across ${I18N_SCAN_JS_FILES.length + MODULE_FILES.length + htmlFiles.length} files (+ the dynamic deck/ear/fret-string/live-quiz families) resolves`);
   }
 }
 
@@ -1036,7 +1052,7 @@ function checkMissingI18nKeys(I18N) {
    ════════════════════════════════════════════════════════════════════ */
 const DUPLICATE_GLOBALS_ALLOWED = new Set(['isTuningWarmupSection']);
 const CLASSIC_SCRIPTS = ['app.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js',
-  'config-main.js', 'guitar-diagrams.js', 'class-activities.js', ...MODULE_FILES];
+  'live-quiz.js', 'config-main.js', 'guitar-diagrams.js', 'class-activities.js', ...MODULE_FILES];
 
 function checkDuplicateGlobals() {
   head('1g. Duplicate top-level globals');

@@ -2274,3 +2274,178 @@ body.games-open{overflow:hidden}
 .resume-go{flex:none;background:var(--purple-accent);color:#fff;border:0;font-weight:700;
   font-size:0.875rem;padding:8px 16px;border-radius:999px;cursor:pointer;min-height:38px}
 .resume-go:hover{background:var(--purple-text)}
+
+/* ══════════════════════════════════════════════════════════════════════
+   LIVE QUIZ (live-quiz.js) — the whole-class game.
+
+   Two surfaces, one prefix:
+     .lq-screen / .lq-body …   the student overlay on a Chromebook. Reuses
+                               the arcade's .games-screen shell and only
+                               re-tints it, so the two overlays can't drift
+                               apart structurally.
+     .lq-shell / .lq-stage …   the teacher's dashboard view. This one is on
+                               a classroom projector, so it is sized for
+                               reading from the back row (clamp()-scaled
+                               display type) rather than for a laptop, and
+                               the controls under it are deliberately small
+                               — they're for Jonathan, not for the room.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── Student overlay ── */
+.lq-screen{background:linear-gradient(160deg,#1f2a4d 0%,#2f2159 100%)}
+.lq-body{background:var(--bg);border-radius:18px;padding:20px 18px 24px;box-shadow:0 14px 44px rgba(0,0,0,0.4)}
+.lq-quiz-title{font-family:var(--font-display);font-size:1.25rem;font-weight:600;
+  text-align:center;color:var(--text);margin-bottom:14px;line-height:1.25}
+.lq-qnum{text-align:center;font-size:0.8125rem;font-weight:700;letter-spacing:0.06em;
+  text-transform:uppercase;color:var(--text2)}
+.lq-prompt{text-align:center;font-size:1.375rem;font-weight:700;color:var(--text);
+  margin:4px 0 16px;line-height:1.3}
+.lq-timer{margin:0 auto 14px;width:64px;height:64px;border-radius:50%;
+  border:3px solid var(--blue-text);color:var(--blue-text);
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums}
+.lq-timer.out{border-color:var(--red-text);color:var(--red-text);font-size:1rem}
+
+/* Two columns, big targets: a Chromebook trackpad and a thumb on a phone
+   both have to hit these under time pressure without aiming. */
+.lq-choices{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.lq-choice{background:var(--lq-c);color:#fff;border:0;border-radius:14px;
+  font-family:inherit;font-size:1.125rem;font-weight:700;line-height:1.2;
+  min-height:76px;padding:10px 12px;cursor:pointer;
+  box-shadow:0 3px 0 rgba(0,0,0,0.22);transition:transform .08s,filter .12s}
+.lq-choice:hover{filter:brightness(1.08)}
+.lq-choice:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,0.22)}
+.lq-choice[disabled]{opacity:.45;cursor:default;box-shadow:none}
+@media(max-width:380px){.lq-choices{grid-template-columns:1fr}.lq-choice{min-height:60px}}
+
+.lq-wait{text-align:center;padding:18px 0 6px}
+.lq-wait-txt{font-size:1.0625rem;color:var(--text2);margin-top:12px}
+.lq-pulse{display:flex;gap:8px;justify-content:center}
+.lq-pulse span{width:12px;height:12px;border-radius:50%;background:var(--purple-accent);
+  animation:lq-bounce 1.1s infinite ease-in-out}
+.lq-pulse span:nth-child(2){animation-delay:.15s}
+.lq-pulse span:nth-child(3){animation-delay:.3s}
+@keyframes lq-bounce{0%,70%,100%{transform:translateY(0);opacity:.45}35%{transform:translateY(-8px);opacity:1}}
+@media(prefers-reduced-motion:reduce){.lq-pulse span{animation:none;opacity:.7}}
+
+.lq-locked{text-align:center;padding:6px 0}
+.lq-locked-lbl{font-size:0.8125rem;font-weight:700;letter-spacing:0.06em;
+  text-transform:uppercase;color:var(--text2)}
+.lq-locked-pick{display:inline-block;margin:8px 0 12px;padding:14px 28px;border-radius:14px;
+  color:#fff;font-size:1.375rem;font-weight:700}
+.lq-locked-wait{color:var(--text2);font-size:0.9375rem}
+.lq-note{margin-top:12px;font-size:0.8125rem;color:var(--text2)}
+.lq-note-bad{color:var(--red-text);font-weight:600}
+
+.lq-verdict{text-align:center;font-size:1.5rem;font-weight:700;line-height:1.25;
+  border-radius:14px;padding:14px 12px}
+.lq-v-yes{background:var(--green-bg);color:var(--green-text)}
+.lq-v-no{background:var(--red-bg);color:var(--red-text)}
+.lq-v-none{background:var(--bg3);color:var(--text2);font-size:1.125rem}
+.lq-plus{font-variant-numeric:tabular-nums}
+.lq-answer{text-align:center;font-size:1.125rem;font-weight:600;color:var(--text);margin:12px 0 4px}
+.lq-scoreline{text-align:center;color:var(--text2);font-size:0.9375rem;margin-top:12px}
+
+/* Answer spread. Same builder paints this on the student's device and on the
+   projector, so it has to hold up at both sizes — hence the flexible track
+   with fixed-width label and count columns. */
+.lq-tally{margin-top:14px;display:flex;flex-direction:column;gap:7px}
+.lq-bar{display:flex;align-items:center;gap:10px;font-size:0.9375rem}
+.lq-bar-lbl{flex:0 0 8.5em;color:var(--text2);text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lq-bar-track{flex:1;height:20px;border-radius:10px;background:var(--bg3);overflow:hidden}
+.lq-bar-fill{display:block;height:100%;border-radius:10px;min-width:2px;transition:width .35s ease-out}
+.lq-bar-n{flex:0 0 2.2em;text-align:left;font-variant-numeric:tabular-nums;color:var(--text2)}
+.lq-bar.right .lq-bar-lbl{color:var(--green-text);font-weight:700}
+.lq-bar.right .lq-bar-n{color:var(--green-text);font-weight:700}
+.lq-bar.mine .lq-bar-track{outline:2px solid var(--text3);outline-offset:1px}
+@media(prefers-reduced-motion:reduce){.lq-bar-fill{transition:none}}
+
+.lq-lb{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:5px}
+.lq-lb li{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;
+  background:var(--bg3);font-size:0.9375rem}
+.lq-lb li.me{background:var(--purple-bg);font-weight:700}
+.lq-lb-rank{flex:0 0 1.6em;text-align:center;font-weight:700;color:var(--text2);font-variant-numeric:tabular-nums}
+.lq-lb-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lq-lb-pts{font-variant-numeric:tabular-nums;font-weight:700}
+.lq-final{text-align:center}
+.lq-final-title{font-family:var(--font-display);font-size:1.375rem;font-weight:600;margin-bottom:10px}
+.lq-final-rank{font-size:1.75rem;font-weight:700;color:var(--purple-text)}
+.lq-final-pts{color:var(--text2);font-size:1rem;margin-top:2px}
+.lq-empty{text-align:center;padding:26px 8px}
+.lq-empty-title{font-family:var(--font-display);font-size:1.25rem;font-weight:600;margin-bottom:8px}
+.lq-empty p{color:var(--text2);font-size:0.9375rem;line-height:1.5}
+
+/* The "a game is running, get in" banner. Fixed above everything so it finds
+   a student wherever they are on the page — including inside a set panel
+   they've scrolled a long way down. */
+.lq-banner{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:130;
+  display:flex;align-items:center;gap:10px;padding:10px 12px 10px 16px;border-radius:999px;
+  background:#2f2159;color:#fff;box-shadow:0 8px 28px rgba(0,0,0,0.35);
+  font-size:0.9375rem;max-width:calc(100vw - 24px)}
+.lq-banner-dot{width:9px;height:9px;border-radius:50%;background:#7ee0a8;flex:none;
+  animation:lq-blink 1.4s infinite}
+@keyframes lq-blink{0%,100%{opacity:1}50%{opacity:.3}}
+@media(prefers-reduced-motion:reduce){.lq-banner-dot{animation:none}}
+.lq-banner-txt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lq-banner-btn{flex:none;font-family:inherit;font-size:0.875rem;font-weight:700;
+  padding:7px 16px;border-radius:999px;border:0;background:#fff;color:#2f2159;cursor:pointer}
+.lq-banner-btn:hover{background:#e9e6f7}
+/* The rail item only appears while a game is on (live-quiz.js lqSyncNav),
+   so it gets the one accent nothing else in the list uses. */
+.nav-btn.lq-nav .ico{color:var(--purple-accent)}
+
+/* ── Teacher stage (projector) ── */
+.lq-shell{display:flex;flex-direction:column;gap:14px}
+.lq-stage{background:var(--bg);border:1px solid var(--border);border-radius:16px;
+  padding:clamp(18px,3vw,40px);text-align:center;min-height:340px;
+  display:flex;flex-direction:column;justify-content:center;gap:10px}
+/* Fullscreen strips the page background out from under it, so repaint it. */
+.lq-stage:fullscreen{background:var(--bg);border-radius:0;justify-content:center}
+.lq-st-title{font-family:var(--font-display);font-size:clamp(1.75rem,4vw,3.25rem);
+  font-weight:600;line-height:1.15}
+.lq-st-title-es,.lq-st-prompt-es,.lq-st-answer-es{color:var(--text2);
+  font-size:clamp(1rem,1.9vw,1.65rem);font-weight:500;margin-top:4px}
+.lq-st-qnum{font-size:clamp(0.875rem,1.4vw,1.125rem);font-weight:700;letter-spacing:0.08em;
+  text-transform:uppercase;color:var(--text2)}
+.lq-st-prompt{font-size:clamp(1.5rem,3.6vw,3rem);font-weight:700;line-height:1.2}
+.lq-st-answer{font-size:clamp(1.75rem,4.4vw,3.5rem);font-weight:700;color:var(--green-text);line-height:1.15}
+.lq-st-join{font-size:clamp(1rem,2vw,1.5rem);color:var(--text2)}
+.lq-st-count{display:flex;flex-direction:column;align-items:center;gap:2px}
+.lq-st-big{font-size:clamp(2.75rem,8vw,6rem);font-weight:700;line-height:1;
+  font-variant-numeric:tabular-nums;color:var(--purple-text)}
+.lq-st-cap{font-size:clamp(0.875rem,1.5vw,1.125rem);color:var(--text2);
+  text-transform:uppercase;letter-spacing:0.08em}
+.lq-st-timer{margin:0 auto;width:clamp(72px,9vw,132px);height:clamp(72px,9vw,132px);
+  border-radius:50%;border:5px solid var(--blue-text);color:var(--blue-text);
+  display:flex;align-items:center;justify-content:center;
+  font-size:clamp(1.75rem,4vw,3.25rem);font-weight:700;font-variant-numeric:tabular-nums}
+.lq-st-idle-title{font-family:var(--font-display);font-size:1.75rem;font-weight:600}
+.lq-st-idle-sub{color:var(--text2);margin-top:6px}
+.lq-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:6px}
+.lq-chip{background:var(--bg3);border-radius:999px;padding:4px 12px;font-size:0.9375rem}
+/* Reveal shows the spread and the standings side by side; one column on a
+   laptop-width dashboard, two once there's room for both to stay legible. */
+.lq-st-split{display:grid;grid-template-columns:1fr;gap:18px;text-align:left;margin-top:8px}
+@media(min-width:820px){.lq-st-split{grid-template-columns:1.35fr 1fr;align-items:start}}
+.lq-lb-stage li{font-size:clamp(0.9375rem,1.5vw,1.25rem);background:var(--bg3)}
+
+/* Deliberately understated: this strip is also on the projector, and the six
+   mark-the-answer buttons must read as a neutral row of string names — never
+   as a hint about which one is right. */
+.lq-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px;
+  background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:10px 12px}
+.lq-ctl{font-family:inherit;font-size:0.875rem;font-weight:600;padding:8px 16px;
+  border-radius:999px;border:1px solid var(--border2);background:var(--bg);
+  color:var(--text);cursor:pointer;min-height:38px}
+.lq-ctl:hover{background:var(--bg3)}
+.lq-ctl[disabled]{opacity:.5;cursor:default}
+.lq-ctl.go{background:var(--purple-accent);border-color:var(--purple-accent);color:#fff}
+.lq-ctl.go:hover{background:var(--purple-text)}
+.lq-ctl.ghost{color:var(--text2)}
+.lq-ctl.mark{background:var(--lq-c);border-color:var(--lq-c);color:#fff}
+.lq-ctl.mark:hover{filter:brightness(1.1);background:var(--lq-c)}
+.lq-ctl-marks{display:flex;flex-wrap:wrap;gap:6px}
+.lq-ctl-lbl{font-size:0.875rem;color:var(--text2);display:inline-flex;align-items:center;gap:6px}
+.lq-ctl-lbl select{font-family:inherit;font-size:0.875rem;padding:6px 8px;
+  border-radius:8px;border:1px solid var(--border2);background:var(--bg);color:var(--text)}
+.lq-ctl-hint{flex-basis:100%;font-size:0.8125rem;color:var(--text3)}

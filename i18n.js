@@ -1961,7 +1961,41 @@
     'rec.checkTitle':        { en: 'Listen back and ask yourself:', es: 'Escucha la grabación y pregúntate:' },
     'rec.checkBeat':         { en: 'Did every chord change land on the beat?', es: '¿Cada cambio de acorde cayó en el tiempo?' },
     'rec.checkBuzz':         { en: 'Any buzzing or muted strings?', es: '¿Se oye algún zumbido o alguna cuerda apagada?' },
-    'rec.checkTempo':        { en: 'Did the tempo stay steady from start to finish?', es: '¿El tempo se mantuvo estable de principio a fin?' }
+    'rec.checkTempo':        { en: 'Did the tempo stay steady from start to finish?', es: '¿El tempo se mantuvo estable de principio a fin?' },
+
+    /* ── Live quiz (live-quiz.js) — the whole-class game the teacher runs
+       from the projector. The quiz bank's titles, prompts and choice labels
+       are keys here rather than text in live-quiz.js, so they get the same
+       en/es parity check as the rest of the shell; tools/checks.mjs walks
+       LIVE_QUIZZES and fails the push if one of them goes missing. ── */
+    'lq.navTitle':           { en: 'Live quiz', es: 'Concurso en vivo' },
+    'lq.screenAria':         { en: 'Live quiz', es: 'Concurso en vivo' },
+    'lq.bannerTitle':        { en: 'Live quiz in progress', es: 'Concurso en vivo en curso' },
+    'lq.bannerJoin':         { en: 'Join', es: 'Entrar' },
+    'lq.waiting':            { en: "You're in. Wait for the first question.", es: 'Ya estás dentro. Espera la primera pregunta.' },
+    'lq.noneTitle':          { en: 'No live quiz right now', es: 'No hay ningún concurso en vivo ahora' },
+    'lq.noneBody':           { en: 'This page wakes up when your teacher starts a game in class.', es: 'Esta página se activa cuando tu maestro empieza un juego en clase.' },
+    'lq.qLabel':             { en: 'Question {n}', es: 'Pregunta {n}' },
+    'lq.locked':             { en: 'Locked in', es: 'Respuesta enviada' },
+    'lq.lockedWait':         { en: 'Waiting for the rest of the class…', es: 'Esperando al resto de la clase…' },
+    'lq.correct':            { en: 'Correct!', es: '¡Correcto!' },
+    'lq.wrong':              { en: 'Not this time', es: 'Esta vez no' },
+    'lq.noAnswer':           { en: "You didn't answer this one", es: 'No respondiste esta' },
+    'lq.answerIs':           { en: 'Answer: {answer}', es: 'Respuesta: {answer}' },
+    'lq.points':             { en: '{n} points', es: '{n} puntos' },
+    'lq.rank':               { en: 'Place {n} of {total}', es: 'Lugar {n} de {total}' },
+    'lq.finalTitle':         { en: 'Final scores', es: 'Puntajes finales' },
+    'lq.timeUp':             { en: 'Time!', es: '¡Tiempo!' },
+    'lq.saveFailed':         { en: "That answer didn't send — tap again.", es: 'Esa respuesta no se envió: toca de nuevo.' },
+    'lq.devBypass':          { en: 'Dev bypass cannot join the live quiz — nothing saves.', es: 'El modo de prueba no puede entrar al concurso en vivo: nada se guarda.' },
+    'lq.title.stringId':     { en: 'Which string am I playing?', es: '¿Qué cuerda estoy tocando?' },
+    'lq.prompt.stringId':    { en: 'Which string did you hear?', es: '¿Qué cuerda escuchaste?' },
+    'lq.string.lowE':        { en: 'low E', es: 'cuerda Mi grave' },
+    'lq.string.a':           { en: 'A', es: 'cuerda La' },
+    'lq.string.d':           { en: 'D', es: 'cuerda Re' },
+    'lq.string.g':           { en: 'G', es: 'cuerda Sol' },
+    'lq.string.b':           { en: 'B', es: 'cuerda Si' },
+    'lq.string.highE':       { en: 'high e', es: 'cuerda mi aguda' }
   };
 
   let lang = 'en';
@@ -1979,6 +2013,18 @@
       });
     }
     return str;
+  }
+
+  /* Same lookup as t(), but for an EXPLICIT language rather than the one the
+     reader picked. Exactly one caller: the live quiz's projected stage, which
+     shows the question in English and Spanish at the same time because the
+     whole room reads it off the wall together (each student's own device
+     still renders in their own language through t()). No {param} support —
+     nothing bilingual on that stage is parameterised. */
+  function tIn(key, l){
+    const entry = I18N[key];
+    if(!entry) return key;
+    return (l === 'es' ? entry.es : entry.en) || entry.en;
   }
 
   // "Set 1" / "Set 2" … are literal strings baked into each module-N.js
@@ -2046,6 +2092,7 @@
   function getLang(){ return lang; }
 
   window.t = t;
+  window.tIn = tIn;
   window.tSetLabel = tSetLabel;
   window.setLang = setLang;
   window.getLang = getLang;

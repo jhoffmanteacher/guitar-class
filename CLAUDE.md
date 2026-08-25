@@ -11,6 +11,8 @@ all git mechanics without him needing to remember commands.
 Plain static HTML/JS/CSS — no build step, no framework. Content lives in
 `index.html` and per-module JS (`module-1.js`…`module-13.js`, `config-main.js`).
 Firebase auth + Firestore progress. Deployed by pushing to GitHub.
+`live-quiz.js` holds the whole live-quiz feature (student + teacher) — see
+its own section below.
 Module 13 (String Changing) is a *single-flow* module — `stations.b` only,
 custom tab labels, checklist = graded assessment.
 
@@ -207,6 +209,33 @@ re-renders, languages and students), catch-alls pinned via `MC_PINNED`, fewer
 than 3 choices left alone. The two MC paths store differently: the graded step
 persists the choice **text**, the practice panel persists the **index**. Don't
 "simplify" that away. Write `answer: 0` freely — students never see it that way.
+
+## Live quiz — the whole-class game
+
+All of it is in `live-quiz.js`: the quiz bank, the student overlay, and the
+teacher's projected stage (`?teacher=true` → **Live quiz**). One game runs at
+a time, in `liveQuiz/current` (+ an `answers/{uid}` subcollection).
+
+- **The teacher is the only judge.** There is no answer key in the bank —
+  Jonathan marks the correct choice at reveal time. That's deliberate: the
+  dashboard is on the classroom projector, so anything the app knew in
+  advance would either spoil the round or need hiding from the room.
+- **Nothing on the stage may reveal the answer before the reveal.** During a
+  question the projector shows the prompt and an answered-count, nothing else.
+  Any new stage content gets checked against that.
+- **New quiz = a new entry in `LIVE_QUIZZES`**, with its student-facing text
+  as `i18n.js` KEYS (`titleKey` / `promptKey` / `choices[].key`), not strings.
+  `checks.mjs` 1f walks the bank and fails the push on a key that doesn't
+  exist, the same way it does for `DECKS` and `EAR_POOLS`.
+- **`speedBonus` stays off** for any quiz where the teacher makes the sound
+  after the question opens — scoring by reaction time there just punishes
+  whoever waited to hear it properly.
+
+### ⚠️ Editing `firestore.rules` changes nothing until it's pasted into Firebase
+GitHub Pages doesn't deploy Firestore rules. After any push that touches
+`firestore.rules`, open Firebase console → Firestore Database → Rules, paste
+the file, Publish. Until that happens the live quiz's answer writes are
+rejected and the game looks broken with no error students can see.
 
 ## Videos
 

@@ -129,6 +129,11 @@
           <div class="nav-list">
             <!-- ca-nav: amber icon tint (styles.css) marks this as class work,
                  not module work — see the In-Class Activities work order. -->
+            <!-- Live quiz: hidden until the teacher actually starts a game
+                 (live-quiz.js lqSyncNav). First in the list because when it
+                 IS showing, it's the thing the whole class needs right now. -->
+            <button type="button" class="nav-btn lq-nav" id="live-quiz-btn" onclick="toggleLiveQuiz()" aria-expanded="false" aria-controls="live-quiz-screen" style="display:none">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span><span data-i18n="lq.navTitle">Live quiz</span></button>
             <button type="button" class="nav-btn ca-nav" id="class-activities-btn" onclick="toggleClassActivities()">
               <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 3h6v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/><path d="m9 13 2 2 4-4"/></svg></span><span data-i18n="nav.classActivities">In-Class Activities</span></button>
             <button type="button" class="nav-btn active" id="practice-nav-btn" aria-current="page" onclick="returnToPractice()">
@@ -312,6 +317,26 @@
           <div class="games-stage"><div class="games-panel" id="games-panel"></div></div>
         </div>
       </div>
+      <!-- Live quiz: the second deliberate overlay (see the Games note above).
+           It covers the rail and header for the same reason — while a
+           whole-class game is running, nothing else on the page matters, and
+           a stray tap on a set panel underneath would pull a student out of
+           it mid-question. Reuses the arcade's shell classes; .lq-screen only
+           re-tints it so the two are never mistaken for each other. -->
+      <div class="games-screen lq-screen" id="live-quiz-screen" role="dialog" aria-modal="true" aria-label="Live quiz" data-i18n-attr="aria-label:lq.screenAria" hidden>
+        <div class="games-shell">
+          <div class="games-topbar">
+            <button type="button" class="games-exit" onclick="closeLiveQuizScreen()">&larr; <span data-i18n="btn.backToPractice">Back to practice</span></button>
+            <div class="games-logo" data-i18n="lq.navTitle">Live quiz</div>
+            <span class="games-topbar-spacer"></span>
+          </div>
+          <!-- aria-live: the screen repaints itself when the teacher opens a
+               question and again at the reveal, with no interaction from the
+               student to announce it. Without this a screen-reader user would
+               sit in silence through a round they can't see. -->
+          <div class="lq-body" id="live-quiz-body" aria-live="polite"></div>
+        </div>
+      </div>
       <div class="daily5-panel" id="search-panel" hidden></div>
       <!-- Songs · Keep practicing · My progress: the same page shell as the
            Games arcade above, minus the arcade styling. -->
@@ -454,6 +479,7 @@
 <script defer src="tuner.js"></script>
 <script defer src="coach.js"></script>
 <script defer src="teacher.js"></script>
+<script defer src="live-quiz.js"></script>
 <!--
 ╔════════════════════════════════════════════════════════════════════╗
 ║                 FIREBASE SETUP — ONE TIME, ~15 MINUTES              ║
