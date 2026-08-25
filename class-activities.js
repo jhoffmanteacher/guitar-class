@@ -147,6 +147,7 @@ window.CLASS_ACTIVITIES = [
         text_es: 'Todo lo de hoy vive en la cuerda Mi grave. Los trastes 2, 4 y 5 forman el patrón que ya conoces — y hoy el mapa crece un punto: el traste 7. Los puntos en el 5 y el 7 son tus marcas de referencia.',
       },
       {
+        figure: 'img/ca-hb-fingers.svg',
         text: 'Your fretting fingers have numbers — the thumb has none, it stays behind the neck.<ul><li>1 = index, 2 = middle, 3 = ring, 4 = pinky</li><li>Home spot: finger 1 → fret 2, finger 3 → fret 4, finger 4 → fret 5</li><li>Say a finger number out loud, land it on its fret</li></ul>You\'ve got it when: you can call 1, 3, or 4 in any order and land the right fret — three times in a row, no buzz.',
         text_es: 'Los dedos de tu mano de trastear tienen números — el pulgar no tiene, se queda detrás del mástil.<ul><li>1 = índice, 2 = medio, 3 = anular, 4 = meñique</li><li>Posición base: dedo 1 → traste 2, dedo 3 → traste 4, dedo 4 → traste 5</li><li>Di un número de dedo en voz alta y colócalo en su traste</li></ul>Lo tienes cuando: puedes decir 1, 3 o 4 en cualquier orden y caer en el traste correcto — tres veces seguidas, sin zumbido.',
       },
@@ -829,6 +830,7 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
+        figure: 'img/ca-hb-fingers-a.svg',
         text: 'Phrase 4 lives entirely on the A string, back in the home spot.<ul><li>Home spot: finger 1 → fret 2, finger 3 → fret 4, finger 4 → fret 5</li><li>Fingers: 4, 4, 3, open, 1, open — say each one as you play it</li></ul>You\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
         text_es: 'La frase 4 vive completa en la cuerda La, de vuelta en la posición base.<ul><li>Posición base: dedo 1 → traste 2, dedo 3 → traste 4, dedo 4 → traste 5</li><li>Dedos: 4, 4, 3, al aire, 1, al aire — di cada uno mientras lo tocas</li></ul>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
