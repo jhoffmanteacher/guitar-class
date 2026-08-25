@@ -441,7 +441,11 @@ window.addEventListener('load', function(){
     // A signed-out resolution still settles the boot race: anything rated
     // before this point belongs to nobody we can write for, and must NOT be
     // held for whoever signs in next.
-    if(!user){ authSettled = true; pendingSave = false; setSaveMsg('journey.signin'); return; }
+    if(!user){
+      authSettled = true; pendingSave = false; setSaveMsg('journey.signin');
+      if(typeof lqStopListening === 'function') lqStopListening();
+      return;
+    }
     // A DIFFERENT student just signed in (shared Chromebook, another tab).
     // Drop the previous student's unsaved ratings rather than writing them
     // into this one's doc, and clear the local-click guard so the read below
@@ -455,6 +459,15 @@ window.addEventListener('load', function(){
       fbDb = firebase.firestore();
       fbUser = user;
       setSaveMsg('');
+      /* Live quiz (../live-quiz.js): a student parked on a Journey page while
+         the class starts a game would otherwise miss the whole thing in
+         silence. This page can't show a question, so all it gets is the
+         "a game is running" banner, which takes them to the page that can —
+         see lqCanPlayHere() over there. Started from here rather than from
+         live-quiz.js's own auth hook because this page's Firebase boot (and
+         its Firestore SDK load) is journey.js's, and by this line both have
+         actually landed. */
+      if(typeof lqStartListening === 'function') lqStartListening();
       /* Anything rated while we were still booting has been sitting in the
          DOM unsaved — write it now, before the read below, so a student who
          taps a layer the second the page appears keeps that rating. The set

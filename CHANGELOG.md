@@ -21,6 +21,8 @@ see `WORKFLOW.md` and the git commit log.
   answer is worth the same 1,000 points — there is no reward for guessing
   fast before the string has finished ringing.
 - You never see anyone else's answer until the reveal, and nobody sees yours.
+- The Song Journey pages show the join bar too, so a game can't start without
+  you noticing while you're deep in a song.
 - Everything in the game is in English and Spanish, and the Español button
   switches it mid-question like the rest of the site.
 

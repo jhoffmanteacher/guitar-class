@@ -8,9 +8,19 @@
    ── Why it lives in one file ──
    Student side and teacher side are two halves of one protocol; splitting
    them across app.js and teacher.js would put the wire format in two
-   places. Loaded as a plain <script defer> AFTER teacher.js, so it can use
-   globals from everywhere (escHtml/escAttr/ensureDb/db/currentUser from
-   app.js, t()/applyI18n from i18n.js) — all resolved at call time.
+   places. Loaded as a plain <script defer> AFTER teacher.js on index.html.
+
+   ── It also loads on the Song Journey pages ──
+   tabs/*.html get this file too, for the "a game is running" banner — a
+   student parked on a Journey page would otherwise miss the whole quiz in
+   silence. Those pages have no app.js, so nothing here may DEPEND on app.js:
+   the Firestore handle comes from lqEnsureDb(), the uid from lqUid(), and
+   every render path early-returns when the game UI isn't on the page
+   (lqCanPlayHere). What it does use is available on both: t()/applyI18n from
+   i18n.js, and the `firebase` compat global. Where a helper is app.js-only
+   (escHtml, goExploreHash) the call is either behind lqCanPlayHere() or has
+   a fallback. Keeping ONE definition of "a game is live" was the point —
+   the alternative was copying the staleness rules into journey.js to drift.
 
    ── The wire format (Firestore) ──
      liveQuiz/current                one doc, the whole game state.
@@ -74,7 +84,40 @@ const LIVE_QUIZZES = {
 const LQ_DEFAULT_QUIZ = 'string-id';
 function lqQuiz(id){ return LIVE_QUIZZES[id] || LIVE_QUIZZES[LQ_DEFAULT_QUIZ]; }
 function lqChoice(quiz, id){ return quiz.choices.find(c=>c.id===id) || null; }
-function lqDoc(){ return db.collection('liveQuiz').doc('current'); }
+function lqDoc(){ return lqDb.collection('liveQuiz').doc('current'); }
+
+/* ── Firestore, from whichever page we're on ──
+   index.html has app.js's ensureDb(); a Song Journey page (tabs/*.html) has
+   no app.js at all but has already loaded the SDK itself before it calls
+   lqStartListening(). Resolving whatever is actually present — rather than
+   assuming app.js — is what lets the same listener, and the same one
+   definition of "a game is live", run on both. */
+let lqDb = null;
+async function lqEnsureDb(){
+  if(lqDb) return lqDb;
+  if(typeof ensureDb === 'function') lqDb = await ensureDb();
+  else if(typeof firebase !== 'undefined' && firebase.firestore) lqDb = firebase.firestore();
+  return lqDb;
+}
+/* True only where the full game UI exists (index.html). A Song Journey page
+   loads this file for the "a game is running" banner and nothing else: it
+   can't show a question, so it must not announce the student into the lobby
+   or auto-open anything — they'd be counted as playing from a page they
+   cannot answer on. Tapping the banner takes them somewhere they can. */
+function lqCanPlayHere(){ return !!document.getElementById('live-quiz-body'); }
+// The signed-in uid / display name, or '' where there is no app.js to hold
+// one. Capped: it goes onto a doc the whole class's leaderboard reads.
+function lqUid(){ return (typeof currentUser !== 'undefined' && currentUser) ? currentUser.uid : ''; }
+function lqName(){
+  if(typeof currentUser === 'undefined' || !currentUser) return '';
+  return String(currentUser.displayName || currentUser.email || '').slice(0, 60);
+}
+// index.html, resolved against THIS script's own URL — so the banner's link
+// is right whether the host page is at the root or inside tabs/.
+const LQ_HOME_URL = (function(){
+  try { return new URL('index.html', document.currentScript ? document.currentScript.src : location.href).href + '#live-quiz'; }
+  catch(e){ return 'index.html#live-quiz'; }
+})();
 
 /* A game nobody ended keeps showing forever otherwise — a student opening
    the site that evening would find a live quiz waiting. Both sides treat a
@@ -139,8 +182,8 @@ let lqTick      = null;   // countdown interval, only while limitSec > 0
 function lqStartListening(){
   if(lqUnsub) return;
   if(typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) return;   // the dashboard has its own listeners
-  ensureDb().then(()=>{
-    if(!db || lqUnsub) return;
+  lqEnsureDb().then(()=>{
+    if(!lqDb || lqUnsub) return;
     lqUnsub = lqDoc().onSnapshot(
       snap => lqOnSession(snap.exists ? (snap.data() || null) : null),
       err  => { console.warn('[live-quiz] session listener stopped', err); }
@@ -151,6 +194,7 @@ function lqStopListening(){
   if(lqUnsub){ try{ lqUnsub(); }catch(e){} lqUnsub = null; }
   lqSession = null; lqMyAnswer = null; lqJoinedId = null;
   lqStopTick();
+  lqSyncNav(); lqSyncBanner();
 }
 
 function lqOnSession(data){
@@ -178,17 +222,18 @@ function lqOnSession(data){
 function lqAnnouncePresence(s){
   if(s.state !== 'lobby') return;              // mid-game arrivals join by answering
   if(lqJoinedId === s.sessionId) return;
-  if(!currentUser || (typeof isDevBypassUser === 'function' && isDevBypassUser())) return;
+  if(!lqCanPlayHere() || !lqUid()) return;
+  if(typeof isDevBypassUser === 'function' && isDevBypassUser()) return;
   lqJoinedId = s.sessionId;
   lqWriteAnswer(s, -1, null, 0).catch(()=>{ lqJoinedId = null; });
 }
 
 function lqWriteAnswer(s, qIndex, choice, ms){
-  return ensureDb().then(()=>{
-    if(!db) throw new Error('no db');
-    return lqDoc().collection('answers').doc(currentUser.uid).set({
-      uid: currentUser.uid,
-      name: String(currentUser.displayName || currentUser.email || '').slice(0, 60),
+  return lqEnsureDb().then(()=>{
+    if(!lqDb) throw new Error('no db');
+    return lqDoc().collection('answers').doc(lqUid()).set({
+      uid: lqUid(),
+      name: lqName(),
       sessionId: s.sessionId,
       qIndex: qIndex,
       choice: choice,
@@ -203,7 +248,7 @@ function lqWriteAnswer(s, qIndex, choice, ms){
    closing it, not asking to be thrown back in every few seconds. */
 function lqMaybeAutoOpen(live){
   if(!live || (live.state !== 'lobby' && live.state !== 'question')) return;
-  if(document.hidden) return;
+  if(!lqCanPlayHere() || document.hidden) return;
   const appEl = document.getElementById('app');
   if(!appEl || appEl.style.display === 'none') return;
   let seen = null;
@@ -228,19 +273,38 @@ function lqSyncBanner(){
   const show = !!live && !onScreen && live.state !== 'ended';
   let el = document.getElementById('lq-banner');
   if(!show){ if(el) el.remove(); return; }
-  if(!el){
-    el = document.createElement('div');
-    el.id = 'lq-banner';
-    el.className = 'lq-banner';
-    el.innerHTML =
-      `<span class="lq-banner-dot" aria-hidden="true"></span>` +
-      `<span class="lq-banner-txt" data-i18n="lq.bannerTitle">${escHtml(t('lq.bannerTitle'))}</span>` +
-      `<button type="button" class="lq-banner-btn" onclick="lqOpenFromBanner()" data-i18n="lq.bannerJoin">${escHtml(t('lq.bannerJoin'))}</button>`;
-    document.body.appendChild(el);
-    if(typeof applyI18n === 'function') applyI18n(el);
-  }
+  if(el) return;
+  // Built as nodes rather than innerHTML: this is the one piece that also
+  // runs on the Song Journey pages, which have no escHtml() of their own.
+  // data-i18n is still set on both text nodes so a language switch
+  // re-translates the banner in place, same as everywhere else.
+  el = document.createElement('div');
+  el.id = 'lq-banner';
+  el.className = 'lq-banner';
+  const dot = document.createElement('span');
+  dot.className = 'lq-banner-dot';
+  dot.setAttribute('aria-hidden', 'true');
+  const txt = document.createElement('span');
+  txt.className = 'lq-banner-txt';
+  txt.setAttribute('data-i18n', 'lq.bannerTitle');
+  txt.textContent = t('lq.bannerTitle');
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'lq-banner-btn';
+  btn.setAttribute('data-i18n', 'lq.bannerJoin');
+  btn.textContent = t('lq.bannerJoin');
+  btn.addEventListener('click', lqOpenFromBanner);
+  el.append(dot, txt, btn);
+  document.body.appendChild(el);
+  if(typeof applyI18n === 'function') applyI18n(el);
 }
-function lqOpenFromBanner(){ goExploreHash('live-quiz'); }
+/* On index.html this opens the overlay in place. Anywhere else — a Song
+   Journey page — there is no overlay to open, so it navigates to the one
+   that has it. */
+function lqOpenFromBanner(){
+  if(lqCanPlayHere() && typeof goExploreHash === 'function') goExploreHash('live-quiz');
+  else location.href = LQ_HOME_URL;
+}
 
 /* ── The student screen (an overlay, like the Games arcade) ── */
 function toggleLiveQuiz(){
@@ -326,7 +390,7 @@ function lqStudentQuestionHtml(s, quiz){
 function lqStudentRevealHtml(s, quiz){
   const correct = lqChoice(quiz, s.correct);
   const mine = (lqMyAnswer && lqMyAnswer.qIndex === s.qIndex) ? lqMyAnswer.choice : null;
-  const me = (s.scores || {})[currentUser ? currentUser.uid : ''] || null;
+  const me = (s.scores || {})[lqUid()] || null;
   let verdict;
   if(!mine){
     verdict = `<div class="lq-verdict lq-v-none" data-i18n="lq.noAnswer">${escHtml(t('lq.noAnswer'))}</div>`;
@@ -345,7 +409,7 @@ function lqStudentRevealHtml(s, quiz){
 
 function lqStudentEndedHtml(s){
   const rows = lqRanked(s.scores);
-  const me = rows.find(r => currentUser && r.uid === currentUser.uid) || null;
+  const me = rows.find(r => r.uid && r.uid === lqUid()) || null;
   const top = rows.slice(0, 5).map(r =>
     `<li class="lq-lb-row${me && r.uid === me.uid ? ' me' : ''}"><span class="lq-lb-rank">${r.rank}</span>`
     + `<span class="lq-lb-name">${escHtml(r.name || '—')}</span>`
@@ -376,7 +440,7 @@ function lqTallyHtml(s, quiz, mine){
 
 function lqScoreLineHtml(s){
   const rows = lqRanked(s.scores);
-  const me = rows.find(r => currentUser && r.uid === currentUser.uid);
+  const me = rows.find(r => r.uid && r.uid === lqUid());
   if(!me) return '';
   return `<div class="lq-scoreline"><span data-i18n="lq.points" data-i18n-params="${escAttr(JSON.stringify({n:me.pts||0}))}">${escHtml(t('lq.points',{n:me.pts||0}))}</span>`
     + ` · <span data-i18n="lq.rank" data-i18n-params="${escAttr(JSON.stringify({n:me.rank,total:rows.length}))}">${escHtml(t('lq.rank',{n:me.rank,total:rows.length}))}</span></div>`;
@@ -424,7 +488,7 @@ function lqAnswer(choiceId){
   if(!s || s.state !== 'question') return;
   if(lqMyAnswer && lqMyAnswer.qIndex === s.qIndex) return;
   if(Number(s.limitSec) && lqSecsLeft(s) === 0) return;
-  if(!currentUser) return;
+  if(!lqUid()) return;
   if(typeof isDevBypassUser === 'function' && isDevBypassUser()){
     lqSendError = false; lqMyAnswer = { qIndex: s.qIndex, choice: choiceId };
     lqRenderStudent(); return;
@@ -477,8 +541,8 @@ function renderTeacherLiveQuiz(){
 
 function lqTeacherListen(){
   if(lqTUnsubDoc) return;
-  ensureDb().then(()=>{
-    if(!db || lqTUnsubDoc) return;
+  lqEnsureDb().then(()=>{
+    if(!lqDb || lqTUnsubDoc) return;
     lqTUnsubDoc = lqDoc().onSnapshot(snap => {
       lqTSession = snap.exists ? (snap.data() || null) : null;
       if(teacherView === 'livequiz'){ lqPaintStage(); lqPaintControls(); }
@@ -627,8 +691,8 @@ async function lqWrite(patch, replace){
   if(lqTBusy) return false;
   lqTBusy = true; lqPaintControls();
   try{
-    await ensureDb();
-    if(!db) throw new Error('no db');
+    await lqEnsureDb();
+    if(!lqDb) throw new Error('no db');
     // A full set() (no options) for a new game, so it can't inherit a field
     // from the last one; a merge for every in-game update.
     if(replace) await lqDoc().set(patch);

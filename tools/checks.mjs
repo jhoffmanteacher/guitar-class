@@ -1292,7 +1292,7 @@ function checkFirestoreRules() {
 }
 
 function checkSdkVersion() {
-  const FILES = ['app.js', 'sw.js', 'index.html', ...TAB_PAGES];
+  const FILES = ['app.js', 'live-quiz.js', 'sw.js', 'index.html', ...TAB_PAGES];
   const found = new Map();   // version → Set(files)
   for (const file of FILES) {
     let src;

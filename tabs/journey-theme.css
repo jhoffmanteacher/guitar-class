@@ -199,3 +199,22 @@ footer{margin-top:36px;font-size:0.7813rem;color:var(--text3);border-top:1px sol
 .rung-title small{font-weight:600;font-size:0.75rem;color:var(--text3)}
 .rung .branch{margin-top:0}
 
+
+/* ── Live quiz banner (../live-quiz.js) ──
+   A Journey page gets the banner and nothing else — it can't show a
+   question, so tapping it navigates to the main site's live-quiz screen.
+   These rules mirror the .lq-banner block in ../styles.css, which this page
+   doesn't load; same duplication arrangement as fab-tools.css. Keep the two
+   in step if either is restyled. */
+.lq-banner{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:130;
+  display:flex;align-items:center;gap:10px;padding:10px 12px 10px 16px;border-radius:999px;
+  background:#2f2159;color:#fff;box-shadow:0 8px 28px rgba(0,0,0,0.35);
+  font-family:inherit;font-size:0.9375rem;max-width:calc(100vw - 24px)}
+.lq-banner-dot{width:9px;height:9px;border-radius:50%;background:#7ee0a8;flex:none;
+  animation:lq-blink 1.4s infinite}
+@keyframes lq-blink{0%,100%{opacity:1}50%{opacity:.3}}
+@media(prefers-reduced-motion:reduce){.lq-banner-dot{animation:none}}
+.lq-banner-txt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lq-banner-btn{flex:none;font-family:inherit;font-size:0.875rem;font-weight:700;
+  padding:7px 16px;border-radius:999px;border:0;background:#fff;color:#2f2159;cursor:pointer}
+.lq-banner-btn:hover{background:#e9e6f7}

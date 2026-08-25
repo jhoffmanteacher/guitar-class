@@ -230,6 +230,14 @@ a time, in `liveQuiz/current` (+ an `answers/{uid}` subcollection).
 - **`speedBonus` stays off** for any quiz where the teacher makes the sound
   after the question opens — scoring by reaction time there just punishes
   whoever waited to hear it properly.
+- **`live-quiz.js` also ships on the six `tabs/*.html` Journey pages**, where
+  it shows the "a game is running" banner and nothing else (`lqCanPlayHere()`
+  gates the rest). Those pages have no `app.js`, so nothing in that file may
+  come to depend on one — Firestore through `lqEnsureDb()`, the uid through
+  `lqUid()`, and an app.js-only helper only behind a guard or a fallback.
+  `journey.js` starts the listener once its own Firebase boot has landed.
+  The banner's CSS is mirrored in `tabs/journey-theme.css` (those pages don't
+  load `styles.css`) — restyle both or neither.
 
 ### ⚠️ Editing `firestore.rules` changes nothing until it's pasted into Firebase
 GitHub Pages doesn't deploy Firestore rules. After any push that touches
