@@ -192,9 +192,9 @@ function lqStartListening(){
 }
 function lqStopListening(){
   if(lqUnsub){ try{ lqUnsub(); }catch(e){} lqUnsub = null; }
-  lqSession = null; lqMyAnswer = null; lqJoinedId = null;
+  lqSession = null; lqMyAnswer = null; lqJoinedId = null; lqInviteAnsweredId = null;
   lqStopTick();
-  lqSyncNav(); lqSyncBanner();
+  lqSyncNav(); lqSyncBanner(); lqSyncInvite();
 }
 
 function lqOnSession(data){
@@ -204,16 +204,19 @@ function lqOnSession(data){
   // A new game (or a new round) clears last round's pick and restarts the
   // student's own clock — never trust the server timestamp for this, a
   // student on slow wifi would be scored for their neighbour's connection.
-  if(!live || !prev || prev.sessionId !== live.sessionId){ lqMyAnswer = null; lqJoinedId = null; }
+  if(!live || !prev || prev.sessionId !== live.sessionId){
+    lqMyAnswer = null; lqJoinedId = null;
+    if(live && (!prev || prev.sessionId !== live.sessionId)) lqInviteAnsweredId = null;
+  }
   if(live && live.state === 'question' && (!prev || prev.sessionId !== live.sessionId || prev.qIndex !== live.qIndex)){
     lqMyAnswer = null; lqSendError = false; lqQOpenedAt = performance.now();
   }
   lqSyncNav();
   lqSyncBanner();
+  lqSyncInvite();
   lqRenderStudent();
   lqSyncTick();
   if(live && (live.state === 'lobby' || live.state === 'question')) lqAnnouncePresence(live);
-  lqMaybeAutoOpen(live);
 }
 
 /* Puts the student in the teacher's lobby list without them having to do
@@ -243,21 +246,112 @@ function lqWriteAnswer(s, qIndex, choice, ms){
   });
 }
 
-/* The classic Kahoot moment: the game starts and the screen is just there.
-   Once per session only (remembered per tab) — a student who closes it is
-   closing it, not asking to be thrown back in every few seconds. */
-function lqMaybeAutoOpen(live){
-  if(!live || (live.state !== 'lobby' && live.state !== 'question')) return;
-  if(!lqCanPlayHere() || document.hidden) return;
-  const appEl = document.getElementById('app');
-  if(!appEl || appEl.style.display === 'none') return;
-  let seen = null;
-  try { seen = sessionStorage.getItem('lq-autoopened'); } catch(e){}
-  if(seen === live.sessionId) return;
-  try { sessionStorage.setItem('lq-autoopened', live.sessionId); } catch(e){}
-  const screen = document.getElementById('live-quiz-screen');
-  if(screen && screen.hasAttribute('hidden')) goExploreHash('live-quiz');
+/* ── The invite ──
+   A game starting used to silently throw the screen open, which had one bad
+   failure: it bailed on document.hidden and never retried, so a student
+   whose tab was in the BACKGROUND when the game started — the common case,
+   since nobody is staring at the site when the teacher says "we're playing"
+   — came back to a page with nothing on it but a small bar at the bottom.
+
+   So: a real dialog instead, shown until the student acts on it, and
+   re-checked whenever the tab becomes visible. A modal is also the honest
+   thing to do to someone who might be mid-video: it asks rather than
+   yanking. Dismissing leaves the bottom banner as the quiet way back in.
+
+   Shown on Journey pages too (where Join navigates rather than opening) —
+   missing the game entirely is the thing worth preventing. */
+/* "Has this student already answered the invite for this game?" — held in a
+   variable FIRST and sessionStorage second. Storage is the part that
+   survives a reload, but it's also the part that can silently do nothing: a
+   Chromebook with site data blocked makes setItem a no-op and getItem always
+   null, and then tapping "Not now" wouldn't dismiss anything — the dialog
+   would come straight back and the student would be stuck behind it. The
+   in-memory copy is what actually makes the button work. */
+let lqInviteAnsweredId = null;
+function lqInviteDismissed(){
+  if(lqInviteAnsweredId) return lqInviteAnsweredId;
+  try { return sessionStorage.getItem('lq-invite-dismissed'); } catch(e){ return null; }
 }
+function lqMarkInviteAnswered(sessionId){
+  if(!sessionId) return;
+  lqInviteAnsweredId = sessionId;
+  try { sessionStorage.setItem('lq-invite-dismissed', sessionId); } catch(e){}
+}
+function lqDismissInvite(){
+  if(lqSession) lqMarkInviteAnswered(lqSession.sessionId);
+  lqSyncInvite();
+}
+function lqSyncInvite(){
+  const live = lqSessionIsLive(lqSession) ? lqSession : null;
+  const screen = document.getElementById('live-quiz-screen');
+  const onScreen = screen && !screen.hasAttribute('hidden');
+  const show = !!live && live.state !== 'ended' && !onScreen
+            && lqInviteDismissed() !== live.sessionId;
+  let el = document.getElementById('lq-invite');
+  if(!show){ if(el){ el.remove(); document.body.classList.remove('lq-invite-open'); } return; }
+  if(el) return;
+
+  // DOM nodes, not innerHTML — this runs on the Journey pages too, which
+  // have no escHtml(). data-i18n on every string so a language switch
+  // re-translates it in place.
+  const quiz = lqQuiz(live.quizId);
+  el = document.createElement('div');
+  el.id = 'lq-invite';
+  el.className = 'lq-invite';
+  const card = document.createElement('div');
+  card.className = 'lq-invite-card';
+  card.setAttribute('role', 'dialog');
+  card.setAttribute('aria-modal', 'true');
+  card.setAttribute('aria-labelledby', 'lq-invite-title');
+
+  const title = document.createElement('div');
+  title.className = 'lq-invite-title';
+  title.id = 'lq-invite-title';
+  title.setAttribute('data-i18n', 'lq.inviteTitle');
+  title.textContent = t('lq.inviteTitle');
+
+  const body = document.createElement('p');
+  body.className = 'lq-invite-body';
+  body.setAttribute('data-i18n', 'lq.inviteBody');
+  body.textContent = t('lq.inviteBody');
+
+  // Which quiz, so a student can tell one game from the next.
+  const which = document.createElement('div');
+  which.className = 'lq-invite-quiz';
+  which.setAttribute('data-i18n', quiz.titleKey);
+  which.textContent = t(quiz.titleKey);
+
+  const join = document.createElement('button');
+  join.type = 'button';
+  join.className = 'lq-invite-join';
+  join.setAttribute('data-i18n', 'lq.inviteJoin');
+  join.textContent = t('lq.inviteJoin');
+  join.addEventListener('click', lqOpenFromBanner);
+
+  const later = document.createElement('button');
+  later.type = 'button';
+  later.className = 'lq-invite-later';
+  later.setAttribute('data-i18n', 'lq.inviteLater');
+  later.textContent = t('lq.inviteLater');
+  later.addEventListener('click', lqDismissInvite);
+
+  card.append(title, which, body, join, later);
+  el.appendChild(card);
+  // Escape dismisses, and a click on the dim backdrop (never on the card
+  // itself) does the same — standard dialog behaviour, so nobody feels
+  // trapped by it.
+  el.addEventListener('click', ev => { if(ev.target === el) lqDismissInvite(); });
+  el.addEventListener('keydown', ev => { if(ev.key === 'Escape') lqDismissInvite(); });
+  document.body.appendChild(el);
+  document.body.classList.add('lq-invite-open');
+  if(typeof applyI18n === 'function') applyI18n(el);
+  try { join.focus(); } catch(e){}
+}
+/* The fix for the bug above: a tab that was hidden when the game started
+   gets the invite the moment the student actually looks at it. Snapshots
+   only arrive on state changes, so without this there is nothing to
+   re-trigger the check. */
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) lqSyncInvite(); });
 
 /* ── The rail item and the "join" banner ──
    Both exist only while a game is on. The banner is how a student who
@@ -318,8 +412,10 @@ function openLiveQuizScreen(){
   if(!screen || !screen.hasAttribute('hidden')) return;
   closeTopPanels('live-quiz');
   screen.removeAttribute('hidden');
+  if(lqSession) lqMarkInviteAnswered(lqSession.sessionId);   // opening it counts as answering the invite
   syncExploreNav();
   lqSyncBanner();
+  lqSyncInvite();
   lqRenderStudent();
   lqSyncTick();
   const exit = screen.querySelector('.games-exit');
@@ -337,6 +433,7 @@ function lqClosePanel(){
   if(btn && wasOpen && btn.style.display !== 'none') btn.focus();
   syncExploreNav();
   lqSyncBanner();
+  lqSyncInvite();
   lqSyncTick();
 }
 
@@ -508,7 +605,7 @@ function lqAnswer(choiceId){
 
 // The screen is built once per state change, so a language switch has to
 // rebuild it — same reasoning as data-i18n-params everywhere else.
-window.addEventListener('gc-langchange', ()=>{ lqRenderStudent(); lqSyncBanner(); if(typeof teacherView !== 'undefined' && teacherView === 'livequiz') renderTeacherLiveQuiz(); });
+window.addEventListener('gc-langchange', ()=>{ lqRenderStudent(); lqSyncBanner(); lqSyncInvite(); if(typeof teacherView !== 'undefined' && teacherView === 'livequiz') renderTeacherLiveQuiz(); });
 
 /* ══════════════════════════════════════════════════════════════
    TEACHER SIDE — the projected screen plus a small control strip

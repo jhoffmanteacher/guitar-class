@@ -227,6 +227,12 @@ a time, in `liveQuiz/current` (+ an `answers/{uid}` subcollection).
   as `i18n.js` KEYS (`titleKey` / `promptKey` / `choices[].key`), not strings.
   `checks.mjs` 1f walks the bank and fails the push on a key that doesn't
   exist, the same way it does for `DECKS` and `EAR_POOLS`.
+- **Students are invited, not teleported.** `lqSyncInvite()` puts up a modal
+  with a Join button; it is re-checked on `visibilitychange`, because the
+  first version silently auto-opened the screen, bailed on `document.hidden`
+  and never retried — so a backgrounded tab (the common case: nobody is
+  staring at the site when the teacher says "we're playing") got nothing.
+  Any new "get their attention" path needs that same visibility re-check.
 - **`speedBonus` stays off** for any quiz where the teacher makes the sound
   after the question opens — scoring by reaction time there just punishes
   whoever waited to hear it properly.

@@ -10,9 +10,11 @@ see `WORKFLOW.md` and the git commit log.
 ### Added
 
 - **Live quiz** — a whole-class game your teacher runs from the front of the
-  room. When one starts, a **Live quiz** button appears in the left menu and
-  the screen opens by itself; if you close it, a bar at the bottom of the page
-  gets you back in with one tap.
+  room. When one starts, a **Live quiz!** pop-up appears over whatever you're
+  doing with a **Join the game** button — including if the site was sitting in
+  a background tab, in which case you get it the moment you look back at it.
+  Tap **Not now** and a small bar stays at the bottom of the page so you can
+  still get in, plus a **Live quiz** button in the left menu.
 - The first quiz is **"Which string am I playing?"** Your teacher plays one
   open string, you tap the string you heard, and the whole class's answers go
   up on the classroom screen. Then the answer, how the class voted, and the

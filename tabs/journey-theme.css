@@ -218,3 +218,26 @@ footer{margin-top:36px;font-size:0.7813rem;color:var(--text3);border-top:1px sol
 .lq-banner-btn{flex:none;font-family:inherit;font-size:0.875rem;font-weight:700;
   padding:7px 16px;border-radius:999px;border:0;background:#fff;color:#2f2159;cursor:pointer}
 .lq-banner-btn:hover{background:#e9e6f7}
+/* ── Live quiz invite dialog (live-quiz.js lqSyncInvite) ──
+   Replaced a silent auto-open that skipped any backgrounded tab and never
+   retried. Sits above the join banner (130) because it supersedes it. */
+.lq-invite{position:fixed;inset:0;z-index:140;display:flex;align-items:center;
+  justify-content:center;padding:20px;background:rgba(20,16,40,0.62);
+  backdrop-filter:blur(2px);animation:lq-fade .16s ease-out}
+body.lq-invite-open{overflow:hidden}
+.lq-invite-card{background:var(--bg);border-radius:20px;padding:28px 24px 20px;
+  width:min(400px,100%);text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.45)}
+.lq-invite-title{font-family:var(--font-display);font-size:1.75rem;font-weight:600;
+  line-height:1.15;color:var(--text)}
+.lq-invite-quiz{margin-top:8px;font-size:1.0625rem;font-weight:700;color:var(--purple-text)}
+.lq-invite-body{margin-top:6px;font-size:0.9375rem;color:var(--text2);line-height:1.45}
+.lq-invite-join{display:block;width:100%;margin-top:20px;font-family:inherit;
+  font-size:1.0625rem;font-weight:700;padding:14px 20px;border:0;border-radius:14px;
+  background:#2f2159;color:#fff;cursor:pointer;min-height:52px}
+.lq-invite-join:hover{background:#3d2b73}
+.lq-invite-later{margin-top:10px;font-family:inherit;font-size:0.875rem;
+  background:none;border:0;color:var(--text2);cursor:pointer;padding:8px 12px;
+  border-radius:8px}
+.lq-invite-later:hover{color:var(--text);background:var(--bg3)}
+@keyframes lq-fade{from{opacity:0}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.lq-invite{animation:none}}
