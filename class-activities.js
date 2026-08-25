@@ -147,12 +147,12 @@ window.CLASS_ACTIVITIES = [
         text_es: 'Todo lo de hoy vive en la cuerda Mi grave. Los trastes 2, 4 y 5 forman el patrón que ya conoces — y hoy el mapa crece un punto: el traste 7. Los puntos en el 5 y el 7 son tus marcas de referencia.',
       },
       {
-        text: 'Your fretting fingers have numbers: 1 = index, 2 = middle, 3 = ring, 4 = pinky. The thumb has no number — it stays behind the neck. For this song your hand sits in one spot: finger 1 covers fret 2, finger 3 covers fret 4, finger 4 covers fret 5. Hold that spot, say a finger number out loud, and land it on its fret.\nYou\'ve got it when: you can call 1, 3, or 4 in any order and land the right fret — three times in a row, no buzz.',
-        text_es: 'Los dedos de tu mano de trastear tienen números: 1 = índice, 2 = medio, 3 = anular, 4 = meñique. El pulgar no tiene número — se queda detrás del mástil. Para esta canción tu mano se queda en un solo lugar: el dedo 1 cubre el traste 2, el dedo 3 cubre el traste 4, el dedo 4 cubre el traste 5. Mantén esa posición, di un número de dedo en voz alta, y colócalo en su traste.\nLo tienes cuando: puedes decir 1, 3 o 4 en cualquier orden y caer en el traste correcto — tres veces seguidas, sin zumbido.',
+        text: 'Your fretting fingers have numbers — the thumb has none, it stays behind the neck.<ul><li>1 = index, 2 = middle, 3 = ring, 4 = pinky</li><li>Home spot: finger 1 → fret 2, finger 3 → fret 4, finger 4 → fret 5</li><li>Say a finger number out loud, land it on its fret</li></ul>You\'ve got it when: you can call 1, 3, or 4 in any order and land the right fret — three times in a row, no buzz.',
+        text_es: 'Los dedos de tu mano de trastear tienen números — el pulgar no tiene, se queda detrás del mástil.<ul><li>1 = índice, 2 = medio, 3 = anular, 4 = meñique</li><li>Posición base: dedo 1 → traste 2, dedo 3 → traste 4, dedo 4 → traste 5</li><li>Di un número de dedo en voz alta y colócalo en su traste</li></ul>Lo tienes cuando: puedes decir 1, 3 o 4 en cualquier orden y caer en el traste correcto — tres veces seguidas, sin zumbido.',
       },
       {
-        text: 'This is phrase 1 — the line you learned last time, all in the home spot. The fingers are: open, open, 1, open, 4, 3 — say each one as you play it. Set your BPM to 70 and play it through.\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'Esta es la frase 1 — la línea que aprendiste la vez pasada, toda en la posición base. Los dedos son: al aire, al aire, 1, al aire, 4, 3 — di cada uno mientras lo tocas. Pon tu BPM en 70 y tócala completa.\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'Phrase 1 — the line you learned last time, all in the home spot.<ul><li>Fingers: open, open, 1, open, 4, 3 — say each one as you play it</li><li>BPM 70, play it through</li></ul>You\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La frase 1 — la línea que aprendiste la vez pasada, toda en la posición base.<ul><li>Dedos: al aire, al aire, 1, al aire, 4, 3 — di cada uno mientras lo tocas</li><li>BPM 70, tócala completa</li></ul>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'Phrase 1 · stays in the home spot',
           caption_es: 'Frase 1 · se queda en la posición base',
@@ -167,8 +167,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Phrase 2 starts exactly like phrase 1 — open, open, 1, open — but the ending climbs. Finger 4 jumps past its home fret to the dot at fret 7, then finger 1 takes the dot at fret 5. Two dots, two fingers: let your eye find fret 7 before finger 4 leaves the ground.\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'La frase 2 empieza exactamente igual que la frase 1 — al aire, al aire, 1, al aire — pero el final sube. El dedo 4 salta más allá de su traste base hasta el punto del traste 7, y luego el dedo 1 toma el punto del traste 5. Dos puntos, dos dedos: deja que tu ojo encuentre el traste 7 antes de que el dedo 4 despegue.\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'Phrase 2.<ul><li>Starts like phrase 1: open, open, 1, open</li><li>New ending: finger 4 → fret 7, then finger 1 → fret 5</li><li>Eyes on fret 7 <em>before</em> finger 4 moves</li></ul>You\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La frase 2.<ul><li>Empieza como la frase 1: al aire, al aire, 1, al aire</li><li>Final nuevo: dedo 4 → traste 7, luego dedo 1 → traste 5</li><li>Ojos en el traste 7 <em>antes</em> de mover el dedo 4</li></ul>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'Phrase 2 · the ending climbs to the fret-7 dot',
           caption_es: 'Frase 2 · el final sube al punto del traste 7',
@@ -217,8 +217,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Chase speed on the first half. Every clean pass, raise the BPM on the player above by 10 and go again. Fast already? Say each finger number as you land it.\nYou\'ve got it when: you\'ve raised the tempo at least three times without breaking down — then keep climbing.',
-        text_es: 'Persigue la velocidad con la primera mitad. Cada pasada limpia, sube el BPM en el reproductor de arriba 10 puntos y vuelve a intentarlo. ¿Ya vas rápido? Di cada número de dedo al caer en él.\nLo tienes cuando: subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
+        text: 'Chase speed on the first half.<ul><li>Every clean pass: raise the BPM by 10 and go again</li><li>Fast already? Say each finger number as you land it</li></ul>You\'ve got it when: you\'ve raised the tempo at least three times without breaking down — then keep climbing.',
+        text_es: 'Persigue la velocidad con la primera mitad.<ul><li>Cada pasada limpia: sube el BPM 10 puntos y vuelve a intentarlo</li><li>¿Ya vas rápido? Di cada número de dedo al caer en él</li></ul>Lo tienes cuando: subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
       },
     ],
   },
@@ -236,8 +236,8 @@ window.CLASS_ACTIVITIES = [
         text_es: 'Este es el gimnasio: los primeros cinco trastes de la cuerda Mi grave (la más gruesa). Un traste es el espacio entre dos barras de metal — el traste 1 es el más cercano a las clavijas.',
       },
       {
-        text: 'Event 1 — the Ladder. One finger per fret: index on 1, middle on 2, ring on 3, pinky on 4. Fingertips on their tips, thumb behind the neck. Set the BPM to 50, one note per click.\nYou\'ve got it when: all four notes ring clean — no buzz — three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'Evento 1 — la Escalera. Un dedo por traste: índice en el 1, medio en el 2, anular en el 3, meñique en el 4. Puntas de los dedos, pulgar detrás del mástil. Pon el BPM en 50, una nota por clic.\nLo tienes cuando: las cuatro notas suenan limpias — sin zumbido — tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'Event 1 — the Ladder. One finger per fret.<ul><li>Index → fret 1, middle → 2, ring → 3, pinky → 4</li><li>Fingertips on their tips, thumb behind the neck</li><li>BPM 50, one note per click</li></ul>You\'ve got it when: all four notes ring clean — no buzz — three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'Evento 1 — la Escalera. Un dedo por traste.<ul><li>Índice → traste 1, medio → 2, anular → 3, meñique → 4</li><li>Puntas de los dedos, pulgar detrás del mástil</li><li>BPM 50, una nota por clic</li></ul>Lo tienes cuando: las cuatro notas suenan limpias — sin zumbido — tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'The Ladder · position 1',
           caption_es: 'La Escalera · posición 1',
@@ -250,8 +250,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Add the shift: climb 1-2-3-4, slide your whole hand up one fret, climb 2-3-4-5. The hand moves as one piece — the fingers keep their spacing.\nYou\'ve got it when: two full climbs back to back and your thumb stays behind the neck the whole way.',
-        text_es: 'Agrega el cambio: sube 1-2-3-4, desliza toda la mano un traste hacia arriba, y sube 2-3-4-5. La mano se mueve como una sola pieza — los dedos mantienen su separación.\nLo tienes cuando: dos subidas completas seguidas y tu pulgar se queda detrás del mástil todo el tiempo.',
+        text: 'Add the shift.<ul><li>Climb 1-2-3-4</li><li>Slide the whole hand up one fret — fingers keep their spacing</li><li>Climb 2-3-4-5</li></ul>You\'ve got it when: two full climbs back to back and your thumb stays behind the neck the whole way.',
+        text_es: 'Agrega el cambio.<ul><li>Sube 1-2-3-4</li><li>Desliza toda la mano un traste hacia arriba — los dedos mantienen su separación</li><li>Sube 2-3-4-5</li></ul>Lo tienes cuando: dos subidas completas seguidas y tu pulgar se queda detrás del mástil todo el tiempo.',
         tab: {
           caption: 'The Ladder · with the shift',
           caption_es: 'La Escalera · con el cambio',
@@ -268,8 +268,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Event 2 — the Spider. Same four fingers, but now they alternate between two strings: low E, A, low E, A. The trap: finger 3 wants to follow finger 2 onto the A string — send it back down to the low E. Then shift up one fret and repeat.\nYou\'ve got it when: one full pass with every note on the right string, any speed.',
-        text_es: 'Evento 2 — la Araña. Los mismos cuatro dedos, pero ahora alternan entre dos cuerdas: Mi grave, La, Mi grave, La. La trampa: el dedo 3 quiere seguir al dedo 2 hacia la cuerda La — mándalo de vuelta a la cuerda Mi grave. Después sube un traste y repite.\nLo tienes cuando: una pasada completa con cada nota en la cuerda correcta, a cualquier velocidad.',
+        text: 'Event 2 — the Spider. Same four fingers, two strings.<ul><li>Alternate: low E, A, low E, A</li><li>The trap: finger 3 wants to follow finger 2 onto the A string — send it back to the low E</li><li>Shift up one fret and repeat</li></ul>You\'ve got it when: one full pass with every note on the right string, any speed.',
+        text_es: 'Evento 2 — la Araña. Los mismos cuatro dedos, dos cuerdas.<ul><li>Alterna: Mi grave, La, Mi grave, La</li><li>La trampa: el dedo 3 quiere seguir al dedo 2 hacia la cuerda La — mándalo de vuelta al Mi grave</li><li>Sube un traste y repite</li></ul>Lo tienes cuando: una pasada completa con cada nota en la cuerda correcta, a cualquier velocidad.',
         tab: {
           caption: 'The Spider · cross the strings',
           caption_es: 'La Araña · cruza las cuerdas',
@@ -286,8 +286,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Event 3 — the Reach. Plant finger 1 on fret 1 and leave it there. Reach your pinky to fret 5, then bring it back. Stretch, never pain — if it hurts, stop. Reaching fret 4 instead counts too; the stretch grows over weeks.\nYou\'ve got it when: four reaches in a row and finger 1 never lifts.',
-        text_es: 'Evento 3 — el Estiramiento. Planta el dedo 1 en el traste 1 y déjalo ahí. Estira el meñique hasta el traste 5, y regrésalo. Estira sin dolor — si duele, detente. Llegar al traste 4 también cuenta; el estiramiento crece con las semanas.\nLo tienes cuando: cuatro estiramientos seguidos y el dedo 1 nunca se levanta.',
+        text: 'Event 3 — the Reach.<ul><li>Plant finger 1 on fret 1 — it stays there</li><li>Reach your pinky to fret 5, then bring it back (fret 4 counts too)</li><li>Stretch, never pain — if it hurts, stop</li></ul>You\'ve got it when: four reaches in a row and finger 1 never lifts.',
+        text_es: 'Evento 3 — el Estiramiento.<ul><li>Planta el dedo 1 en el traste 1 — se queda ahí</li><li>Estira el meñique hasta el traste 5 y regrésalo (el traste 4 también cuenta)</li><li>Estira sin dolor — si duele, detente</li></ul>Lo tienes cuando: cuatro estiramientos seguidos y el dedo 1 nunca se levanta.',
         tab: {
           caption: 'The Reach · finger 1 stays down',
           caption_es: 'El Estiramiento · el dedo 1 no se levanta',
@@ -319,8 +319,8 @@ window.CLASS_ACTIVITIES = [
         text_es: 'El mismo gimnasio que la vez pasada: los primeros cinco trastes. Lo que cambia hoy es la dirección en la que te mueves y cuántas cuerdas usas.',
       },
       {
-        text: 'The Ladder backwards. Pinky on fret 4 first, then ring on 3, middle on 2, index on 1. Set the BPM to 50. Your pinky is the weakest finger and it goes first — that\'s the whole point.\nYou\'ve got it when: all four notes ring clean — no buzz — three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'La Escalera al revés. Primero el meñique en el traste 4, después el anular en el 3, el medio en el 2 y el índice en el 1. Pon el BPM en 50. Tu meñique es el dedo más débil y va primero — de eso se trata.\nLo tienes cuando: las cuatro notas suenan limpias — sin zumbido — tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'The Ladder backwards — the pinky is the weakest finger, so it goes first.<ul><li>Pinky → fret 4, ring → 3, middle → 2, index → 1</li><li>BPM 50</li></ul>You\'ve got it when: all four notes ring clean — no buzz — three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La Escalera al revés — el meñique es el dedo más débil, por eso va primero.<ul><li>Meñique → traste 4, anular → 3, medio → 2, índice → 1</li><li>BPM 50</li></ul>Lo tienes cuando: las cuatro notas suenan limpias — sin zumbido — tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'Down the Ladder · pinky leads',
           caption_es: 'Bajando la Escalera · el meñique va primero',
@@ -409,8 +409,8 @@ window.CLASS_ACTIVITIES = [
         text_es: 'Los puntos en el mástil son tus marcas de referencia: los trastes 5, 7, 9 y el punto doble en el 12. Aprende a encontrarlos con la vista antes de que llegue tu mano.',
       },
       {
-        text: 'The Ladder in 5th position: index on fret 5, one finger per fret up to 8. Your index finger sits on a dot — that\'s how you know you\'re home. BPM 50.\nYou\'ve got it when: all four notes clean, no buzz, three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'La Escalera en la 5.ª posición: índice en el traste 5, un dedo por traste hasta el 8. Tu índice queda sobre un punto — así sabes que estás en tu lugar. BPM 50.\nLo tienes cuando: las cuatro notas limpias, sin zumbido, tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'The Ladder in 5th position.<ul><li>Index on fret 5 — it sits on a dot, that\'s how you know you\'re home</li><li>One finger per fret, up to 8</li><li>BPM 50</li></ul>You\'ve got it when: all four notes clean, no buzz, three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La Escalera en la 5.ª posición.<ul><li>Índice en el traste 5 — queda sobre un punto, así sabes que estás en tu lugar</li><li>Un dedo por traste, hasta el 8</li><li>BPM 50</li></ul>Lo tienes cuando: las cuatro notas limpias, sin zumbido, tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: '5th position · index on the dot',
           caption_es: '5.ª posición · el índice sobre el punto',
@@ -423,8 +423,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Add the shift, two frets up this time: climb 5-6-7-8, slide the whole hand to 7, climb 7-8-9-10. The hand travels as one piece.\nYou\'ve got it when: two full climbs back to back and your thumb stays behind the neck the whole way.',
-        text_es: 'Agrega el cambio, esta vez dos trastes: sube 5-6-7-8, desliza toda la mano al 7 y sube 7-8-9-10. La mano viaja como una sola pieza.\nLo tienes cuando: dos subidas completas seguidas y tu pulgar se queda detrás del mástil todo el tiempo.',
+        text: 'Add the shift, two frets up this time.<ul><li>Climb 5-6-7-8</li><li>Slide the whole hand to 7 — it travels as one piece</li><li>Climb 7-8-9-10</li></ul>You\'ve got it when: two full climbs back to back and your thumb stays behind the neck the whole way.',
+        text_es: 'Agrega el cambio, esta vez dos trastes.<ul><li>Sube 5-6-7-8</li><li>Desliza toda la mano al 7 — viaja como una sola pieza</li><li>Sube 7-8-9-10</li></ul>Lo tienes cuando: dos subidas completas seguidas y tu pulgar se queda detrás del mástil todo el tiempo.',
         tab: {
           caption: '5th position into 7th',
           caption_es: 'De la 5.ª posición a la 7.ª',
@@ -441,8 +441,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Play the jump: index on fret 1, then straight to fret 5, then to fret 9 — one note each, no walking up. Look at the dot, then move. After three tries, look away and let your hand find it.\nYou\'ve got it when: you can look away and land all three, three times out of three.',
-        text_es: 'Toca el salto: índice en el traste 1, después directo al 5, después al 9 — una nota en cada uno, sin caminar. Mira el punto y muévete. Después de tres intentos, voltea la mirada y deja que tu mano lo encuentre.\nLo tienes cuando: puedes voltear la mirada y caer en los tres, tres de tres veces.',
+        text: 'Play the jump — one note each, no walking up.<ul><li>Index: fret 1 → fret 5 → fret 9</li><li>Look at the dot, then move</li><li>After three tries: look away and let your hand find it</li></ul>You\'ve got it when: you can look away and land all three, three times out of three.',
+        text_es: 'Toca el salto — una nota en cada uno, sin caminar.<ul><li>Índice: traste 1 → traste 5 → traste 9</li><li>Mira el punto y muévete</li><li>Después de tres intentos: voltea la mirada y deja que tu mano lo encuentre</li></ul>Lo tienes cuando: puedes voltear la mirada y caer en los tres, tres de tres veces.',
         tab: {
           caption: 'Jump · fret 1 to 5 to 9',
           caption_es: 'Salto · del traste 1 al 5 al 9',
@@ -487,8 +487,8 @@ window.CLASS_ACTIVITIES = [
         text_es: 'De vuelta a los primeros cinco trastes. Las notas son las mismas del Gimnasio 1 — lo que cambia es que nada se levanta.',
       },
       {
-        text: 'Plant-as-you-go. Climb 1-2-3-4, but each finger stays where it lands. By the last note all four fingers are on the string at once. BPM 50.\nYou\'ve got it when: at fret 4 all four fingers are still touching, three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'Planta y sigue. Sube 1-2-3-4, pero cada dedo se queda donde cayó. En la última nota los cuatro dedos están sobre la cuerda a la vez. BPM 50.\nLo tienes cuando: al llegar al traste 4 los cuatro dedos siguen apoyados, tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'Plant-as-you-go.<ul><li>Climb 1-2-3-4 — each finger stays where it lands</li><li>By the last note, all four fingers are on the string at once</li><li>BPM 50</li></ul>You\'ve got it when: at fret 4 all four fingers are still touching, three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'Planta y sigue.<ul><li>Sube 1-2-3-4 — cada dedo se queda donde cayó</li><li>En la última nota, los cuatro dedos están sobre la cuerda a la vez</li><li>BPM 50</li></ul>Lo tienes cuando: al llegar al traste 4 los cuatro dedos siguen apoyados, tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'Plant as you go · nothing lifts',
           caption_es: 'Planta y sigue · nada se levanta',
@@ -501,8 +501,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Pair 1-3: alternate index on fret 1 and ring on fret 3, back and forth. The two fingers not playing stay down on their frets. This is finger independence — one finger moving while the others don\'t.\nYou\'ve got it when: eight clean alternations in a row.',
-        text_es: 'Pareja 1-3: alterna el índice en el traste 1 y el anular en el traste 3, de ida y vuelta. Los dos dedos que no tocan se quedan abajo en sus trastes. Esto es independencia de dedos — un dedo se mueve mientras los otros no.\nLo tienes cuando: ocho alternancias limpias seguidas.',
+        text: 'Pair 1-3 — finger independence: one finger moves while the others don\'t.<ul><li>Alternate: finger 1 on fret 1, finger 3 on fret 3, back and forth</li><li>The two fingers not playing stay down on their frets</li></ul>You\'ve got it when: eight clean alternations in a row.',
+        text_es: 'Pareja 1-3 — independencia de dedos: un dedo se mueve mientras los otros no.<ul><li>Alterna: dedo 1 en el traste 1, dedo 3 en el traste 3, ida y vuelta</li><li>Los dos dedos que no tocan se quedan abajo en sus trastes</li></ul>Lo tienes cuando: ocho alternancias limpias seguidas.',
         tab: {
           caption: 'Pair 1-3',
           caption_es: 'Pareja 1-3',
@@ -515,8 +515,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Pair 3-4 — ring and pinky, the hardest pair on the hand. They share a tendon, so they want to move together. Go slow enough that only one moves at a time.\nYou\'ve got it when: eight in a row, no buzz, and the other fingers never leave the string.',
-        text_es: 'Pareja 3-4 — anular y meñique, la pareja más difícil de la mano. Comparten un tendón, así que quieren moverse juntos. Ve lo suficientemente lento para que solo uno se mueva a la vez.\nLo tienes cuando: ocho seguidas, sin zumbido, y los otros dedos nunca dejan la cuerda.',
+        text: 'Pair 3-4 — ring and pinky, the hardest pair on the hand.<ul><li>They share a tendon, so they want to move together</li><li>Go slow enough that only one moves at a time</li></ul>You\'ve got it when: eight in a row, no buzz, and the other fingers never leave the string.',
+        text_es: 'Pareja 3-4 — anular y meñique, la pareja más difícil de la mano.<ul><li>Comparten un tendón, así que quieren moverse juntos</li><li>Ve lo suficientemente lento para que solo uno se mueva a la vez</li></ul>Lo tienes cuando: ocho seguidas, sin zumbido, y los otros dedos nunca dejan la cuerda.',
         tab: {
           caption: 'Pair 3-4 · the hard one',
           caption_es: 'Pareja 3-4 · la difícil',
@@ -562,8 +562,8 @@ window.CLASS_ACTIVITIES = [
         text_es: 'Hoy el gimnasio crece: tres cuerdas de profundidad — Mi grave, La y Re — y un traste más de ancho, hasta el traste 6. Ahora la distancia también es de lado, además de a lo largo del mástil.',
       },
       {
-        text: 'The skip. Index on the low E string at fret 1, then ring on the D string at fret 3 — jumping over the A string without letting it sound. Pick straight down onto the string you want.\nYou\'ve got it when: eight jumps in a row and the A string never rings. Hear it ring twice? Drop the BPM by 10 and try again.',
-        text_es: 'El salto. Índice en la cuerda Mi grave, traste 1, después anular en la cuerda Re, traste 3 — saltando por encima de la cuerda La sin dejarla sonar. Pulsa directo hacia abajo sobre la cuerda que quieres.\nLo tienes cuando: ocho saltos seguidos y la cuerda La nunca suena. ¿La oyes sonar dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'The skip.<ul><li>Index → low E string, fret 1; ring → D string, fret 3</li><li>Jump over the A string — it stays silent</li><li>Pick straight down onto the string you want</li></ul>You\'ve got it when: eight jumps in a row and the A string never rings. Hear it ring twice? Drop the BPM by 10 and try again.',
+        text_es: 'El salto.<ul><li>Índice → cuerda Mi grave, traste 1; anular → cuerda Re, traste 3</li><li>Salta por encima de la cuerda La — se queda en silencio</li><li>Pulsa directo hacia abajo sobre la cuerda que quieres</li></ul>Lo tienes cuando: ocho saltos seguidos y la cuerda La nunca suena. ¿La oyes sonar dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'The skip · over the A string',
           caption_es: 'El salto · por encima de la cuerda La',
@@ -594,8 +594,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'The wide Reach. Index plants on fret 1 and stays. Pinky goes to fret 6 — one farther than last time. Stretch, never pain; if the wrist hurts, stop. Fret 5 still counts, and it still gets you stronger.\nYou\'ve got it when: four reaches in a row and finger 1 never lifts.',
-        text_es: 'El Estiramiento ancho. El índice se planta en el traste 1 y se queda. El meñique va al traste 6 — uno más que la vez pasada. Estira sin dolor; si te duele la muñeca, detente. El traste 5 sigue contando, y sigue haciéndote más fuerte.\nLo tienes cuando: cuatro estiramientos seguidos y el dedo 1 nunca se levanta.',
+        text: 'The wide Reach.<ul><li>Index plants on fret 1 — it stays</li><li>Pinky goes to fret 6, one farther than last time (fret 5 still counts)</li><li>Stretch, never pain — if the wrist hurts, stop</li></ul>You\'ve got it when: four reaches in a row and finger 1 never lifts.',
+        text_es: 'El Estiramiento ancho.<ul><li>El índice se planta en el traste 1 — se queda</li><li>El meñique va al traste 6, uno más que la vez pasada (el traste 5 sigue contando)</li><li>Estira sin dolor — si te duele la muñeca, detente</li></ul>Lo tienes cuando: cuatro estiramientos seguidos y el dedo 1 nunca se levanta.',
         tab: {
           caption: 'Wide Reach · fret 1 to fret 6',
           caption_es: 'Estiramiento ancho · del traste 1 al 6',
@@ -608,8 +608,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Reach across strings: index on the low E at fret 2, pinky on the A string at fret 5. Both notes ring together if you can hold the shape — a stretch that builds the reach and control you\'ll need for power chords (their real shape is a bit different; Module 3 teaches it).\nYou\'ve got it when: both notes ring at the same time, four times in a row.',
-        text_es: 'Estiramiento entre cuerdas: índice en la cuerda Mi grave, traste 2, y meñique en la cuerda La, traste 5. Las dos notas suenan juntas si puedes sostener la forma — un estiramiento que construye el alcance y el control que vas a necesitar para los acordes de potencia (su forma real es un poco distinta; el Módulo 3 la enseña).\nLo tienes cuando: las dos notas suenan al mismo tiempo, cuatro veces seguidas.',
+        text: 'Reach across strings.<ul><li>Index → low E, fret 2; pinky → A string, fret 5</li><li>Hold the shape so both notes ring together</li><li>This builds the reach you\'ll need for power chords (Module 3 teaches their real shape)</li></ul>You\'ve got it when: both notes ring at the same time, four times in a row.',
+        text_es: 'Estiramiento entre cuerdas.<ul><li>Índice → Mi grave, traste 2; meñique → cuerda La, traste 5</li><li>Sostén la forma para que las dos notas suenen juntas</li><li>Esto construye el alcance que vas a necesitar para los acordes de potencia (el Módulo 3 enseña su forma real)</li></ul>Lo tienes cuando: las dos notas suenan al mismo tiempo, cuatro veces seguidas.',
         tab: {
           caption: 'Across the strings · both notes ringing',
           caption_es: 'Entre cuerdas · las dos notas suenan',
@@ -675,8 +675,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Reach endurance — eight reaches without stopping, twice as many as usual. The hand will start to complain around six; that\'s the part that builds strength. Pain is different from work: if it hurts, stop.\nYou\'ve got it when: eight reaches without stopping and finger 1 never lifts.',
-        text_es: 'Resistencia en el Estiramiento — ocho estiramientos sin detenerte, el doble de lo normal. La mano va a empezar a quejarse cerca del sexto; esa es la parte que construye fuerza. El dolor es distinto del esfuerzo: si duele, detente.\nLo tienes cuando: ocho estiramientos sin detenerte y el dedo 1 nunca se levanta.',
+        text: 'Reach endurance — eight reaches without stopping, twice the usual.<ul><li>The hand starts to complain around six — that\'s the part that builds strength</li><li>Pain is different from work: if it hurts, stop</li></ul>You\'ve got it when: eight reaches without stopping and finger 1 never lifts.',
+        text_es: 'Resistencia en el Estiramiento — ocho estiramientos sin detenerte, el doble de lo normal.<ul><li>La mano empieza a quejarse cerca del sexto — esa es la parte que construye fuerza</li><li>El dolor es distinto del esfuerzo: si duele, detente</li></ul>Lo tienes cuando: ocho estiramientos sin detenerte y el dedo 1 nunca se levanta.',
         tab: {
           caption: 'Reach endurance · eight in a row',
           caption_es: 'Resistencia · ocho seguidos',
@@ -697,8 +697,8 @@ window.CLASS_ACTIVITIES = [
         text_es: 'El circuito completo, dos veces, sin bajar la guitarra entre series. Escalera ×4, Araña ×4, Estiramiento ×4, y otra vez.\nLo tienes cuando: dos series seguidas sin descanso entre ellas.',
       },
       {
-        text: 'Record attempt. Set the BPM to your record and go up by 10 every clean set. Stop when a set breaks down — the last clean number is your new record. Write it down.\nYou\'ve got it when: you\'ve written down a number and you know whether it beat the old one.',
-        text_es: 'Intento de récord. Pon el BPM en tu récord y súbelo 10 puntos con cada serie limpia. Detente cuando una serie se rompa — el último número limpio es tu récord nuevo. Anótalo.\nLo tienes cuando: anotaste un número y sabes si superó el anterior.',
+        text: 'Record attempt.<ul><li>Set the BPM to your record; go up by 10 every clean set</li><li>A set breaks down? The last clean number is your new record</li><li>Write it down</li></ul>You\'ve got it when: you\'ve written down a number and you know whether it beat the old one.',
+        text_es: 'Intento de récord.<ul><li>Pon el BPM en tu récord; súbelo 10 puntos con cada serie limpia</li><li>¿Se rompió una serie? El último número limpio es tu récord nuevo</li><li>Anótalo</li></ul>Lo tienes cuando: anotaste un número y sabes si superó el anterior.',
       },
     ],
   },
@@ -712,8 +712,8 @@ window.CLASS_ACTIVITIES = [
     steps: [
       {
         figure: 'img/ca-hb-low-e.svg',
-        text: 'This is the low E string — the thick one, closest to your face. The whole phrase lives here: the open string (0 = no finger) is the note E, fret 2 is F#, fret 4 is G#, and fret 5 is A. The faint dots on the neck — frets 3, 5, 7, 9 and 12 — are a map, and the dot at fret 5 is your landing mark.',
-        text_es: 'Esta es la cuerda Mi grave — la más gruesa, la que queda más cerca de tu cara. Toda la frase vive aquí: la cuerda al aire (0 = sin dedo) es la nota E, el traste 2 es F#, el traste 4 es G# y el traste 5 es A. Los puntos tenues del mástil — trastes 3, 5, 7, 9 y 12 — son un mapa, y el punto en el traste 5 es tu marca para caer.',
+        text: 'This is the low E string — the thick one, closest to your face.<ul><li>The whole phrase lives here: open (0 = no finger) is E, fret 2 is F#, fret 4 is G#, fret 5 is A</li><li>The faint dots — frets 3, 5, 7, 9 and 12 — are a map; the dot at fret 5 is your landing mark</li></ul>',
+        text_es: 'Esta es la cuerda Mi grave — la más gruesa, la que queda más cerca de tu cara.<ul><li>Toda la frase vive aquí: al aire (0 = sin dedo) es E, el traste 2 es F#, el traste 4 es G# y el traste 5 es A</li><li>Los puntos tenues — trastes 3, 5, 7, 9 y 12 — son un mapa; el punto del traste 5 es tu marca para caer</li></ul>',
       },
       {
         text: '<ol><li>Fingertip just behind fret 5 — next to the metal strip, not on top of it. Thumb behind the neck.</li><li>Pluck it. A rattly, dead sound is a buzz — slide the fingertip closer to the fret and press again.</li><li>Pluck the open string, then land on fret 5 and pluck again. Let the dot catch your eye before your finger jumps.</li></ol>You\'ve got it when: three landings in a row on A ring clean, no buzz. Buzz twice? Slide the fingertip closer to the fret and press with the very tip.',
@@ -744,8 +744,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Play the four notes you just learned — "Hap-py birth-day" — then two more for "to you": fret 5, then fret 4, right next door. Six notes, and that\'s the first line of the song.\nYou\'ve got it when: three clean runs without stopping, saying the words as you play.',
-        text_es: 'Toca las cuatro notas que acabas de aprender — "Hap-py birth-day" — y luego dos más para "to you": traste 5 y luego traste 4, justo al lado. Seis notas, y esa es la primera línea de la canción.\nLo tienes cuando: tres pasadas limpias sin detenerte, diciendo las palabras mientras tocas.',
+        text: 'Put the first line together.<ul><li>Play the four notes you know — "Hap-py birth-day"</li><li>Add two for "to you": fret 5, then fret 4 right next door</li><li>Six notes — that\'s the first line of the song</li></ul>You\'ve got it when: three clean runs without stopping, saying the words as you play.',
+        text_es: 'Arma la primera línea.<ul><li>Toca las cuatro notas que ya sabes — "Hap-py birth-day"</li><li>Agrega dos para "to you": traste 5 y luego traste 4, justo al lado</li><li>Seis notas — esa es la primera línea de la canción</li></ul>Lo tienes cuando: tres pasadas limpias sin detenerte, diciendo las palabras mientras tocas.',
         tab: {
           caption: 'Phrase 1 · all on the low E string',
           caption_es: 'Frase 1 · todo en la cuerda Mi grave',
@@ -766,8 +766,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Keep going — there\'s no finish line on this one. Set the player above to 60 BPM and play the phrase with the beat. Every clean pass, raise the BPM by 10.\nYou\'ve got it when: you\'ve raised the BPM twice without breaking down — then keep climbing. Fast already? Say each note\'s name as you land it — E, F#, G#, A.',
-        text_es: 'Sigue — aquí no hay meta final. Pon el reproductor de arriba en 60 BPM y toca la frase con el pulso. Con cada pasada limpia, súbele 10 al BPM.\nLo tienes cuando: ya subiste el BPM dos veces sin perder el ritmo — y de ahí, sigue subiendo. ¿Ya vas rápido? Di el nombre de cada nota al caer en ella — E, F#, G#, A.',
+        text: 'Keep going — there\'s no finish line on this one.<ul><li>Set the player above to 60 BPM and play with the beat</li><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Say each note\'s name as you land it — E, F#, G#, A</li></ul>You\'ve got it when: you\'ve raised the BPM twice without breaking down — then keep climbing. Fast already? Say each note\'s name as you land it — E, F#, G#, A.',
+        text_es: 'Sigue — aquí no hay meta final.<ul><li>Pon el reproductor de arriba en 60 BPM y toca con el pulso</li><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Di el nombre de cada nota al caer en ella — E, F#, G#, A</li></ul>Lo tienes cuando: ya subiste el BPM dos veces sin perder el ritmo — y de ahí, sigue subiendo. ¿Ya vas rápido? Di el nombre de cada nota al caer en ella — E, F#, G#, A.',
       },
     ],
   },
@@ -785,8 +785,8 @@ window.CLASS_ACTIVITIES = [
         text_es: 'Esta es la cuerda La — una cuerda hacia abajo desde el Mi grave, la segunda más gruesa. El mismo mapa: trastes 2, 4, 5 y 7, y los puntos en el 5 y el 7 siguen siendo tus marcas de referencia.',
       },
       {
-        text: 'Pluck the open low E, then the open A, back and forth — no fretting hand yet. The pick moves one string; only one string rings each time. If both sound, slow the pick down and look at where it lands.\nYou\'ve got it when: E, A, E, A — three clean reps in a row, one string per pluck.',
-        text_es: 'Toca el Mi grave al aire, luego el La al aire, ida y vuelta — todavía sin la mano de trastear. La púa se mueve una cuerda; solo una cuerda suena cada vez. Si suenan las dos, mueve la púa más despacio y mira dónde cae.\nLo tienes cuando: Mi, La, Mi, La — tres repeticiones limpias seguidas, una cuerda por toque.',
+        text: 'Pluck the open low E, then the open A, back and forth — no fretting hand yet.<ul><li>The pick moves one string; only one string rings each time</li><li>Both sound? Slow the pick down and look at where it lands</li></ul>You\'ve got it when: E, A, E, A — three clean reps in a row, one string per pluck.',
+        text_es: 'Toca el Mi grave al aire, luego el La al aire, ida y vuelta — todavía sin la mano de trastear.<ul><li>La púa se mueve una cuerda; solo una cuerda suena cada vez</li><li>¿Suenan las dos? Mueve la púa más despacio y mira dónde cae</li></ul>Lo tienes cuando: Mi, La, Mi, La — tres repeticiones limpias seguidas, una cuerda por toque.',
         tab: {
           caption: 'String crossing · open strings only',
           caption_es: 'Cruce de cuerdas · solo cuerdas al aire',
@@ -799,8 +799,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'The "day dear" climb lives on the A string. Fretting fingers have numbers — 1 = index, 2 = middle, 3 = ring, 4 = pinky. Finger 4 leaps to the dot at fret 7, finger 3 takes fret 4, then the open string. Three notes, downhill.\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'La subida de "day dear" vive en la cuerda La. Los dedos de trastear tienen números — 1 = índice, 2 = medio, 3 = anular, 4 = meñique. El dedo 4 salta al punto del traste 7, el dedo 3 toma el traste 4, y luego la cuerda al aire. Tres notas, cuesta abajo.\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'The "day dear" climb lives on the A string.<ul><li>Finger numbers: 1 = index, 2 = middle, 3 = ring, 4 = pinky</li><li>Finger 4 → the dot at fret 7, finger 3 → fret 4, then the open string</li><li>Three notes, downhill</li></ul>You\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La subida de "day dear" vive en la cuerda La.<ul><li>Números de dedos: 1 = índice, 2 = medio, 3 = anular, 4 = meñique</li><li>Dedo 4 → el punto del traste 7, dedo 3 → traste 4, y luego la cuerda al aire</li><li>Tres notas, cuesta abajo</li></ul>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'The climb · fret 7 → 4 → open',
           caption_es: 'La subida · traste 7 → 4 → al aire',
@@ -812,8 +812,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Phrase 3 is where you sing the name: two open notes on the low E, the climb on the A string, then back to the low E. Finger 3 crosses strings without changing frets — it plays fret 4 on the A, then fret 4 on the E.\nYou\'ve got it when: three clean runs without stopping, saying the words as you play.',
-        text_es: 'La frase 3 es donde cantas el nombre: dos notas al aire en el Mi grave, la subida en la cuerda La, y de vuelta al Mi grave. El dedo 3 cruza de cuerda sin cambiar de traste — toca el traste 4 en La, y luego el traste 4 en Mi.\nLo tienes cuando: tres pasadas limpias sin detenerte, diciendo las palabras mientras tocas.',
+        text: 'Phrase 3 is where you sing the name.<ul><li>Two open notes on the low E → the climb on the A → back to the low E</li><li>Finger 3 crosses strings without changing frets: fret 4 on the A, then fret 4 on the E</li></ul>You\'ve got it when: three clean runs without stopping, saying the words as you play.',
+        text_es: 'La frase 3 es donde cantas el nombre.<ul><li>Dos notas al aire en el Mi grave → la subida en la cuerda La → de vuelta al Mi grave</li><li>El dedo 3 cruza de cuerda sin cambiar de traste: traste 4 en La, y luego traste 4 en Mi</li></ul>Lo tienes cuando: tres pasadas limpias sin detenerte, diciendo las palabras mientras tocas.',
         tab: {
           caption: '"Hap-py birth-day dear ______" · two strings now',
           caption_es: '"Hap-py birth-day dear ______" · ahora dos cuerdas',
@@ -829,8 +829,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Phrase 4 lives entirely on the A string, back in the home spot (finger 1 covers fret 2, finger 3 covers fret 4, finger 4 covers fret 5). The fingers are: 4, 4, 3, open, 1, open — say each one as you play it.\nYou\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'La frase 4 vive completa en la cuerda La, de vuelta en la posición base (el dedo 1 cubre el traste 2, el dedo 3 el traste 4, el dedo 4 el traste 5). Los dedos son: 4, 4, 3, al aire, 1, al aire — di cada uno mientras lo tocas.\nLo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'Phrase 4 lives entirely on the A string, back in the home spot.<ul><li>Home spot: finger 1 → fret 2, finger 3 → fret 4, finger 4 → fret 5</li><li>Fingers: 4, 4, 3, open, 1, open — say each one as you play it</li></ul>You\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La frase 4 vive completa en la cuerda La, de vuelta en la posición base.<ul><li>Posición base: dedo 1 → traste 2, dedo 3 → traste 4, dedo 4 → traste 5</li><li>Dedos: 4, 4, 3, al aire, 1, al aire — di cada uno mientras lo tocas</li></ul>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'Phrase 4 · all on the A string',
           caption_es: 'Frase 4 · todo en la cuerda La',
@@ -939,8 +939,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Chase speed on the whole song. Every clean pass, raise the BPM by 10. Fast already? Play it for the person next to you and have them sing along — it\'s a real song, and someone in this room has a birthday coming.\nYou\'ve got it when: you\'ve raised the tempo at least three times without breaking down — then keep climbing.',
-        text_es: 'Persigue la velocidad con la canción completa. Cada pasada limpia, sube el BPM 10 puntos. ¿Ya vas rápido? Tócala para la persona de al lado y que cante contigo — es una canción de verdad, y alguien en este salón cumple años pronto.\nLo tienes cuando: subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
+        text: 'Chase speed on the whole song.<ul><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Play it for the person next to you and have them sing along — someone in this room has a birthday coming</li></ul>You\'ve got it when: you\'ve raised the tempo at least three times without breaking down — then keep climbing.',
+        text_es: 'Persigue la velocidad con la canción completa.<ul><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Tócala para la persona de al lado y que cante contigo — alguien en este salón cumple años pronto</li></ul>Lo tienes cuando: subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
       },
     ],
   },
