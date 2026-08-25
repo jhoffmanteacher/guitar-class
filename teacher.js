@@ -89,6 +89,8 @@ async function showTeacherApp(user){
       if(archived){ teacherSetStudentArchived(archived.dataset.uid, archived.dataset.state); return; }
       const actHidden=e.target.closest('[data-set-activity-hidden]');
       if(actHidden){ teacherSetActivityHidden(actHidden.dataset.id, actHidden.dataset.state); return; }
+      const sortTh=e.target.closest('[data-sort-activities]');
+      if(sortTh){ teacherSetActivitySort(sortTh.dataset.sortActivities); return; }
       // Rename controls sit INSIDE the title cell, which is itself the
       // data-open-activity link — so they have to be matched before it, or
       // clicking the pencil would navigate away instead of opening the editor.
@@ -364,6 +366,12 @@ let activityDetailId=null;
 // Which row (if any) currently has its rename box open. Purely local view
 // state, cleared on every save/cancel and whenever the tab is re-entered.
 let activityEditId=null;
+// Class activities table sort: which column drives the order, and which way.
+// Purely local view state (not persisted) — defaults reproduce the table's
+// original fixed order (newest-dated first) so switching to this UI didn't
+// change anyone's expectations.
+let activitySortKey='date';   // 'date' | 'number'
+let activitySortDir='desc';   // 'asc' | 'desc'
 function applyTeacherViewChrome(v){
   document.querySelectorAll('.t-vt').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
   const legend=document.getElementById('t-legend'); if(legend) legend.style.display = v==='skills' ? '' : 'none';
@@ -514,15 +522,22 @@ function renderTeacherActivities(){
     const hidden=cfg.hiddenActivities||{};
     const dates=cfg.activityDates||{};
     const today=dayStr(new Date());
-    // Dated activities first (newest date first), then undated ones, each
-    // group tiebroken by number descending — id localeCompare would misorder
-    // ca-10 before ca-2, so this sorts on the numeric field instead.
+    // Sortable by either column, either direction — driven by
+    // activitySortKey/activitySortDir (toggled by clicking a header, see
+    // teacherSetActivitySort). 'number' sorts purely on the numeric field
+    // (id localeCompare would misorder ca-10 before ca-2). 'date' always
+    // keeps dated activities ahead of undated ones regardless of direction —
+    // an activity with no date isn't "earlier" or "later" than a dated one,
+    // so flipping the arrow shouldn't shuffle it in among them — and
+    // tiebreaks/undated activities fall back to number in the same direction.
+    const dirMul = activitySortDir==='asc' ? 1 : -1;
     const sorted=[...activities].sort((a,b)=>{
+      if(activitySortKey==='number') return dirMul*(a.number-b.number);
       const da=dates[a.id]||'', db=dates[b.id]||'';
-      if(da && db) return db.localeCompare(da) || (b.number-a.number);
       if(da && !db) return -1;
       if(!da && db) return 1;
-      return b.number-a.number;
+      if(da && db) return dirMul*da.localeCompare(db) || dirMul*(a.number-b.number);
+      return dirMul*(a.number-b.number);
     });
     const total=allStudents.length;
     const rows=sorted.map(a=>{
@@ -583,8 +598,13 @@ function renderTeacherActivities(){
         <td><details><summary>Who hasn't finished (${notDone.length})</summary>${listHtml}</details></td>
         <td><div class="tg-seg">${visBtns}</div></td></tr>`;
     }).join('');
-    box.innerHTML=`<div class="tg-note">An activity with no date set is invisible to students — that's its normal starting state, not an error; set one here to publish it. Hidden activities disappear for students regardless of date, same as if they hadn't been pushed yet. Use Hidden to pull back something already live; un-hide any time. The &#x270E; next to a title renames the activity for everyone.</div>`+
-      `<div class="t-grid-wrap t-act-wrap"><table><thead><tr><th>Date</th><th class="nc">Activity</th><th>Done</th><th>Not yet</th><th>Visibility</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+    // Arrow shows only on whichever column is currently driving the sort.
+    const sortArrow=key=> activitySortKey===key ? (activitySortDir==='asc'?' ▲':' ▼') : '';
+    box.innerHTML=`<div class="tg-note">An activity with no date set is invisible to students — that's its normal starting state, not an error; set one here to publish it. Hidden activities disappear for students regardless of date, same as if they hadn't been pushed yet. Use Hidden to pull back something already live; un-hide any time. The &#x270E; next to a title renames the activity for everyone. Click Date or Activity below to sort by it; click again to flip the order.</div>`+
+      `<div class="t-grid-wrap t-act-wrap"><table><thead><tr>`
+      +`<th class="t-sort-th" data-sort-activities="date" title="Sort by date">Date${sortArrow('date')}</th>`
+      +`<th class="nc t-sort-th" data-sort-activities="number" title="Sort by activity number">Activity${sortArrow('number')}</th>`
+      +`<th>Done</th><th>Not yet</th><th>Visibility</th></tr></thead><tbody>${rows}</tbody></table></div>`;
     // Opening the editor is a full re-render, so focus has to be re-placed
     // afterwards or the pencil click would leave you looking at a box you
     // still have to click into. select() so typing replaces the old name.
@@ -593,6 +613,15 @@ function renderTeacherActivities(){
       if(inp){ inp.focus(); inp.select(); }
     }
   });
+}
+// Clicking a sort header: same column clicked again flips direction,
+// switching columns picks a sensible default for that column (newest date
+// first, lowest activity number first) rather than carrying over whatever
+// direction the previous column was left on.
+function teacherSetActivitySort(key){
+  if(activitySortKey===key) activitySortDir = activitySortDir==='asc' ? 'desc' : 'asc';
+  else { activitySortKey=key; activitySortDir = key==='date' ? 'desc' : 'asc'; }
+  renderTeacherActivities();
 }
 /* The name to SHOW for an activity in the console: the teacher's rename if
    one is live, otherwise the title class-activities.js ships. Deliberately
