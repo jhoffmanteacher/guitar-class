@@ -805,10 +805,15 @@ function strumChord(chordName, btnEl){
    fret numbers placed on the relevant string and a row of clickable
    note-name buttons below that play the corresponding pitch. */
 const TAB_STRINGS = ['e','B','G','D','A','E'];
-function renderTabBlock(notes, seqOffset){
+function renderTabBlock(notes, seqOffset, padTo){
   if (!notes || !notes.length) return '';
   const off = seqOffset || 0;   // sequential index across phrases — the beat cursor's address
-  const cols = notes.length;
+  /* padTo: the note count of the longest phrase in this tab. Short phrases get
+     trailing empty columns so every board in a multi-phrase tab is the same
+     width — the string lines just run on to the end, the way printed TAB does,
+     instead of leaving a ragged right edge down the card. Padded cells carry no
+     data-seq, so the beat cursor never lands on one. */
+  const cols = Math.max(notes.length, padTo || 0);
   const rows = TAB_STRINGS.map(strLabel => {
     const cells = [`<div class="tab-str-label">${strLabel}</div>`];
     notes.forEach((n, ci) => {
@@ -825,6 +830,7 @@ function renderTabBlock(notes, seqOffset){
         cells.push(`<div class="tab-cell" data-seq="${off + ci}"></div>`);
       }
     });
+    for (let pi = notes.length; pi < cols; pi++) cells.push('<div class="tab-cell"></div>');
     return cells.join('');
   }).join('');
   const noteBtns = ['<div></div>'];
@@ -833,6 +839,7 @@ function renderTabBlock(notes, seqOffset){
     const midisAttr = escAttr(JSON.stringify(midis));
     noteBtns.push(`<button type="button" class="tab-note-btn" data-seq="${off + ci}" data-midis="${midisAttr}" onclick="playBeat(this)" title="${escAttr(t('tab.playNote',{note:n.note}))}">${escHtml(n.note)}<span class="tab-spkr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 8a5 5 0 0 1 0 8"/></svg></span></button>`);
   });
+  for (let pi = notes.length; pi < cols; pi++) noteBtns.push('<div></div>');
   return `
     <div class="tab-board">
       <div class="tab-grid" style="grid-template-columns:22px repeat(${cols},30px)">
@@ -909,11 +916,12 @@ function buildTab(spec, opts){
   }
   if (spec.phrases && spec.phrases.length) {
     let seqOff = 0;
+    const widest = spec.phrases.reduce((m, p) => Math.max(m, (p.notes || []).length), 0);
     const blocks = spec.phrases.map(p => {
       const block = `
       <div class="tab-phrase">
         ${p.label ? `<div class="tab-phrase-label">${escHtml(tf(p,'label'))}</div>` : ''}
-        ${renderTabBlock(p.notes, seqOff)}
+        ${renderTabBlock(p.notes, seqOff, widest)}
       </div>`;
       seqOff += (p.notes || []).length;
       return block;
