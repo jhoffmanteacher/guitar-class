@@ -83,14 +83,14 @@ SETS.push(
             title_es: 'Escucha y encuentra notas de oído',
             steps: [
               {
-                label: 'Ear: find "Happy Birthday" notes', label_es: 'Oído: notas de "Happy Birthday"',
-                text: 'Listen to the opening of "Happy Birthday" — press ▶ to hear it, then hum along and see if you can identify which notes of the melody live on the E or A string.',
-                text_es: 'Escucha el inicio de "Happy Birthday" — presiona ▶ para escucharlo, luego tararea y trata de identificar qué notas de la melodía viven en la cuerda Mi o La.',
-                hint: 'Don\'t worry about playing it yet — just train your ear to connect sounds to strings.',
-                hint_es: 'No te preocupes todavía por tocarla — solo entrena tu oído para conectar sonidos con cuerdas.',
-                playSeq: { label: 'Hear the opening', label_es: 'Escucha el inicio', bpm: 60, notes: [40, 40, 42, 40, 45, 44] },
-                response: { type: 'short', placeholder: 'Which note(s) did you find first? Where on the fretboard?',
-                  placeholder_es: '¿Qué nota(s) encontraste primero? ¿Dónde en el diapasón?' }
+                label: 'Ear: find the "Seven Nation Army" notes', label_es: 'Oído: notas de "Seven Nation Army"',
+                text: 'Listen to the "Seven Nation Army" riff — press ▶ to hear it, then hum along and see if you can identify which notes of the riff live on the low E string, and roughly where.',
+                text_es: 'Escucha el riff de "Seven Nation Army" — presiona ▶ para escucharlo, luego tararea y trata de identificar qué notas del riff viven en la cuerda Mi grave, y más o menos dónde.',
+                hint: 'Don\'t worry about playing it yet — just train your ear to connect sounds to frets. The riff starts high on the neck and walks down toward the nut.',
+                hint_es: 'No te preocupes todavía por tocarlo — solo entrena tu oído para conectar sonidos con trastes. El riff empieza arriba en el mástil y baja caminando hacia la cejuela.',
+                playSeq: { label: 'Hear the riff', label_es: 'Escucha el riff', bpm: 60, notes: [47, 47, 50, 47, 45, 43, 42] },
+                response: { type: 'short', placeholder: 'Which note(s) did you find first? Which fret on the low E?',
+                  placeholder_es: '¿Qué nota(s) encontraste primero? ¿Qué traste en la cuerda Mi grave?' }
               }
             ]
           },
@@ -484,28 +484,28 @@ SETS.push(
             title_es: 'Practica la lectura de TAB y notas limpias',
             steps: [
               {
-                label: 'Read TAB: "Happy Birthday"', label_es: 'Lee el TAB: "Happy Birthday"',
-                text: 'Read this TAB: the opening of "Happy Birthday" written out on the low E string:<ol><li>Look at the fret numbers on the bottom line and try to play it.</li><li>Click any note name below the TAB to hear how it should sound.</li></ol>',
-                text_es: 'Lee este TAB: el inicio de "Happy Birthday" escrito en la cuerda Mi grave:<ol><li>Mira los números de traste en la línea de abajo e intenta tocarlo.</li><li>Haz clic en cualquier nombre de nota debajo del TAB para escuchar cómo debe sonar.</li></ol>',
+                label: 'Read TAB: "Smoke on the Water"', label_es: 'Lee el TAB: "Smoke on the Water"',
+                text: 'Read this TAB: the "Smoke on the Water" riff written out on the low E string:<ol><li>Look at the fret numbers on the bottom line and try to play it.</li><li>Click any note name below the TAB to hear how it should sound.</li></ol>',
+                text_es: 'Lee este TAB: el riff de "Smoke on the Water" escrito en la cuerda Mi grave:<ol><li>Mira los números de traste en la línea de abajo e intenta tocarlo.</li><li>Haz clic en cualquier nombre de nota debajo del TAB para escuchar cómo debe sonar.</li></ol>',
                 hint: 'Read left-to-right, one note per beat. The numbers tell you which fret to press on the low E string. See a # (sharp)? You met those in Set 1 — a sharp is just one fret higher than the plain note, so F# is one fret above F. (Flats, which go the other way, come later.) For now, just trust the fret numbers.',
                 hint_es: 'Lee de izquierda a derecha, una nota por pulso. Los números te dicen qué traste presionar en la cuerda Mi grave. ¿Ves un # (sostenido)? Ya los viste en la Unidad 1 — un sostenido es simplemente un traste más arriba que la nota simple, así que F# es un traste arriba de F. (Los bemoles, que van en la dirección contraria, vienen más adelante.) Por ahora, solo confía en los números de traste.',
                 skills: [4, 5],
                 tab: {
-                  caption: '"Happy Birthday" — first two phrases · Low E string',
-                  caption_es: '"Happy Birthday" — primeras dos frases · cuerda Mi grave',
+                  caption: '"Smoke on the Water" — main riff · Low E string',
+                  caption_es: '"Smoke on the Water" — riff principal · cuerda Mi grave',
                   notes: [
                     { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                    { string: 'E', fret: 2, note: 'F#', midi: 42 },
-                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'E', fret: 3, note: 'G',  midi: 43 },
                     { string: 'E', fret: 5, note: 'A',  midi: 45 },
-                    { string: 'E', fret: 4, note: 'G#', midi: 44 },
                     { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'E', fret: 3, note: 'G',  midi: 43 },
+                    { string: 'E', fret: 6, note: 'A#', midi: 46 },
+                    { string: 'E', fret: 5, note: 'A',  midi: 45 },
                     { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                    { string: 'E', fret: 2, note: 'F#', midi: 42 },
-                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                    { string: 'E', fret: 7, note: 'B',  midi: 47 },
-                    { string: 'E', fret: 5, note: 'A',  midi: 45 }
+                    { string: 'E', fret: 3, note: 'G',  midi: 43 },
+                    { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                    { string: 'E', fret: 3, note: 'G',  midi: 43 },
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 }
                   ]
                 }
               },
@@ -664,57 +664,32 @@ SETS.push(
             }
           },
           {
-            label: 'Challenge 2 — "Happy Birthday" Full Melody at 60 BPM', label_es: 'Reto 2 — "Happy Birthday" melodía completa a 60 BPM',
-            text: 'Using the TAB:<ul><li>Play "Happy Birthday" on the E & A strings at 60 BPM, one note per beat.</li></ul>You\'ve got it when: the whole melody start to finish, in time, no buzz. Click any note name to hear how it should sound.',
-            text_es: 'Usando el TAB:<ul><li>Toca "Happy Birthday" en las cuerdas Mi y La a 60 BPM, una nota por pulso.</li></ul>Lo tienes cuando: la melodía completa de principio a fin, a tiempo, sin zumbido. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar.',
+            label: 'Challenge 2 — "Smoke on the Water" Riff at 60 BPM', label_es: 'Reto 2 — Riff de "Smoke on the Water" a 60 BPM',
+            text: 'Using the TAB:<ul><li>Play the "Smoke on the Water" riff on the low E string at 60 BPM, one note per beat, looping it four times.</li></ul>You\'ve got it when: four clean loops in a row, in time, no buzz. Click any note name to hear how it should sound.',
+            text_es: 'Usando el TAB:<ul><li>Toca el riff de "Smoke on the Water" en la cuerda Mi grave a 60 BPM, una nota por pulso, repitiéndolo cuatro veces.</li></ul>Lo tienes cuando: cuatro vueltas limpias seguidas, a tiempo, sin zumbido. Haz clic en cualquier nombre de nota para escuchar cómo debe sonar.',
             hint: 'If you buzz on a note, stop, fix your finger position, then continue. Don\'t just play through the buzz.',
             hint_es: 'Si zumbas en una nota, párate, arregla la posición del dedo, y luego continúa. No sigas tocando con el zumbido.',
-            stuck: 'Play just the first phrase ("Hap-py birth-day to you") until it\'s smooth, then add the second.',
-            stuck_es: 'Toca solo la primera frase ("Hap-py birth-day to you") hasta que salga suave, y luego agrega la segunda.',
+            stuck: 'Play just the first three notes (0 · 3 · 5) until they\'re smooth, then add the 0 · 3 · 6 · 5 answer.',
+            stuck_es: 'Toca solo las primeras tres notas (0 · 3 · 5) hasta que salgan suaves, y luego agrega la respuesta 0 · 3 · 6 · 5.',
             levelUp: 'Play it through with no note names showing, or bump the metronome to 80 BPM.',
-            levelUp_es: 'Tócala completa sin mostrar los nombres de las notas, o sube el metrónomo a 80 BPM.',
+            levelUp_es: 'Tócalo completo sin mostrar los nombres de las notas, o sube el metrónomo a 80 BPM.',
             skills: [4, 5],
             tab: {
-              caption: '"Happy Birthday" — full melody · E & A strings · 60 BPM',
-              caption_es: '"Happy Birthday" — melodía completa · cuerdas Mi y La · 60 BPM',
-              phrases: [
-                {
-                  label: '"Hap-py birth-day to you · Hap-py birth-day to you"',
-                  label_es: '"Hap-py birth-day to you · Hap-py birth-day to you"',
-                  notes: [
-                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                    { string: 'E', fret: 2, note: 'F#', midi: 42 },
-                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                    { string: 'E', fret: 5, note: 'A',  midi: 45 },
-                    { string: 'E', fret: 4, note: 'G#', midi: 44 },
-                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                    { string: 'E', fret: 2, note: 'F#', midi: 42 },
-                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                    { string: 'A', fret: 2, note: 'B',  midi: 47 },
-                    { string: 'A', fret: 0, note: 'A',  midi: 45 }
-                  ]
-                },
-                {
-                  label: '"Hap-py birth-day dear ___ · Hap-py birth-day to you"',
-                  label_es: '"Hap-py birth-day dear ___ · Hap-py birth-day to you"',
-                  notes: [
-                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
-                    { string: 'A', fret: 7, note: 'E',  midi: 52 },
-                    { string: 'A', fret: 4, note: 'C#', midi: 49 },
-                    { string: 'A', fret: 0, note: 'A',  midi: 45 },
-                    { string: 'E', fret: 4, note: 'G#', midi: 44 },
-                    { string: 'E', fret: 2, note: 'F#', midi: 42 },
-                    { string: 'A', fret: 5, note: 'D',  midi: 50 },
-                    { string: 'A', fret: 5, note: 'D',  midi: 50 },
-                    { string: 'A', fret: 4, note: 'C#', midi: 49 },
-                    { string: 'A', fret: 0, note: 'A',  midi: 45 },
-                    { string: 'A', fret: 2, note: 'B',  midi: 47 },
-                    { string: 'A', fret: 0, note: 'A',  midi: 45 }
-                  ]
-                }
+              caption: '"Smoke on the Water" — main riff · Low E string · 60 BPM',
+              caption_es: '"Smoke on the Water" — riff principal · cuerda Mi grave · 60 BPM',
+              notes: [
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 3, note: 'G',  midi: 43 },
+                { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 3, note: 'G',  midi: 43 },
+                { string: 'E', fret: 6, note: 'A#', midi: 46 },
+                { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 3, note: 'G',  midi: 43 },
+                { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                { string: 'E', fret: 3, note: 'G',  midi: 43 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 }
               ]
             }
           },
@@ -998,10 +973,10 @@ SETS.push(
           explain_es: 'Dos cosas tienen que salir bien: G es el traste 3 de la cuerda Mi grave, y la Mi grave es la línea de ABAJO del TAB — así que es un "3" escrito en esa línea de abajo. Un "3" una línea más arriba es C en la cuerda La, un "0" en la línea de abajo es la Mi grave al aire, y la línea de arriba es la mi aguda delgada.' } },
       { id: 'm2w2-s5', text: 'Play a 4-bar melody in time at 60 BPM',
         text_es: 'Tocar una melodía de 4 compases a tiempo a 60 BPM',
-        gotItWhen: 'you can play the "Happy Birthday" phrase all the way through at 60 BPM without stopping to find a note.',
-        gotItWhen_es: 'puedes tocar la frase de "Happy Birthday" completa a 60 BPM sin detenerte a buscar una nota.',
-        practice: { type: 'pr', prompt: '<ol><li>Play the "Happy Birthday" phrase start to finish with no stops.</li><li>Start at 60 BPM and raise the metronome +5 at a time.</li><li>Log your fastest CLEAN run.</li></ol>',
-          prompt_es: '<ol><li>Toca la frase de "Happy Birthday" de principio a fin sin detenerte.</li><li>Empieza a 60 BPM y sube el metrónomo de 5 en 5.</li><li>Anota tu pasada LIMPIA más rápida.</li></ol>',
+        gotItWhen: 'you can play the "Smoke on the Water" riff — or the "Mary Had a Little Lamb" warm-up — all the way through at 60 BPM without stopping to find a note.',
+        gotItWhen_es: 'puedes tocar el riff de "Smoke on the Water" — o el calentamiento de "Mary Had a Little Lamb" — completo a 60 BPM sin detenerte a buscar una nota.',
+        practice: { type: 'pr', prompt: '<ol><li>Play the "Smoke on the Water" riff start to finish with no stops.</li><li>Start at 60 BPM and raise the metronome +5 at a time.</li><li>Log your fastest CLEAN run.</li></ol>',
+          prompt_es: '<ol><li>Toca el riff de "Smoke on the Water" de principio a fin sin detenerte.</li><li>Empieza a 60 BPM y sube el metrónomo de 5 en 5.</li><li>Anota tu pasada LIMPIA más rápida.</li></ol>',
           unit: 'BPM', placeholder: 'e.g. 70 — try for a higher number next session', placeholder_es: 'p. ej. 70 — intenta superarlo la próxima sesión' } },
       { id: 'm2w2-s6', text: 'Keep thumb behind the neck throughout',
         text_es: 'Mantener el pulgar detrás del mástil todo el tiempo',
@@ -1038,9 +1013,7 @@ MODULE_SONGS[2] = [
       { name: '"Let It Be" — The Beatles', meta: 'Play the bassline as single-note roots (C G A F)', meta_es: 'Toca la línea de bajo como notas individuales (C G A F)', type: 'Core', core: true, journeyUrl: 'tabs/let-it-be.html',
         originalUrl: 'https://www.youtube.com/watch?v=CGj85pVzRJs',
         tutorialUrl: 'https://www.youtube.com/watch?v=_Kw4subj5z8' },
-      { name: '"Happy Birthday"', meta: 'Play full melody on E & A strings from TAB', meta_es: 'Toca la melodía completa en las cuerdas Mi y La usando el TAB', type: 'Supp', core: false,
-        tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w&start=46' },
-      { name: '"Smoke on the Water" — Deep Purple', meta: 'E string TAB — iconic beginner riff', meta_es: 'TAB en la cuerda Mi — un riff icónico para principiantes', type: 'Choice', core: false, level: 1,
+      { name: '"Smoke on the Water" — Deep Purple', meta: 'Read the riff from TAB on the low E and take it to 60 BPM (Challenge 2)', meta_es: 'Lee el riff en TAB en la cuerda Mi grave y llévalo a 60 BPM (Reto 2)', type: 'Choice', core: false, level: 1,
         originalUrl: 'https://www.youtube.com/watch?v=Q2FzZSBD5LE',
         tutorialUrl: 'https://www.youtube.com/watch?v=QkT5yLP5VQA' },
       { name: '"La Bamba" — Ritchie Valens', meta: 'Iconic single-note intro riff · C–F–G roots', meta_es: 'Riff de intro icónico con notas individuales · notas graves C–F–G', type: 'Choice', core: false, level: 2,

@@ -5,6 +5,22 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-26 — "Happy Birthday" is now part of your Module 1 assessment
+
+### Changed
+
+- **"Happy Birthday" joins the Module 1 assessment.** Alongside the tune-up,
+  the string names, and the open strings, you'll now play the whole song —
+  all four phrases on the low E string, the way you learned it in Class
+  Activities #1 and #2 — at a steady pulse, start to finish, no stops. The
+  review page and its heads-up popup list it with the other three tasks.
+- **The song lives in class now, not in the modules.** The "first phrase"
+  step in Module 1 is gone, and Module 2 no longer teaches it — the two
+  in-class activities are the place to learn and practise it.
+- **Module 2 picks up "Smoke on the Water" instead.** The TAB-reading step
+  and Challenge 2 in Set 2 now use the Smoke on the Water riff on the low E
+  string, and the Set 1 ear-training step uses the Seven Nation Army riff.
+
 ## 2026-08-26 — Happy Birthday, all on one string
 
 ### Changed

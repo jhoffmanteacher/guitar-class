@@ -234,7 +234,7 @@ SETS.push(
       { name: '"Luna" — Peso Pluma, Junior H', meta: 'Listen — our Latin core song, back all course long', meta_es: 'Escucha — nuestra canción principal en español, presente durante todo el curso', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',
         originalUrl: 'https://www.youtube.com/watch?v=LExSwglVFIw',
         tutorialUrl: 'https://www.youtube.com/watch?v=jtbqYAWMfok' },
-      { name: '"Happy Birthday"', meta: 'First real song — melody on the low E string', meta_es: 'Tu primera canción real — melodía en la cuerda Mi grave', type: 'Supp', core: false,
+      { name: '"Happy Birthday"', meta: 'First real song — you learn it in class (Class Activities #1–#2) and play it for your Module 1 assessment', meta_es: 'Tu primera canción real — la aprendes en clase (Actividades de clase #1–#2) y la tocas en tu evaluación del Módulo 1', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w&start=46' }
     ],
 
@@ -623,19 +623,6 @@ SETS.push(
             playSeq: { label: 'Hear the target note (low E, fret 3)', label_es: 'Escucha la nota objetivo (Mi grave, traste 3)', bpm: 60, notes: [43] }
           },
           {
-            label: '"Happy Birthday" on the low E', label_es: '"Happy Birthday" en la Mi grave',
-            text: 'Play the FIRST phrase of "Happy Birthday" on the low E string — your first real song, all on one string:<ol><li>"Hap-py birth-day to you" — frets 0 · 0 · 2 · 0 · 5 · 4.</li><li>Press ▶ to hear it, then match it one note at a time.</li><li>Practice with the Metronome (in the tools at the bottom of the left menu) set to 60 BPM — beats per minute, one click a second — to keep steady.</li></ol>You\'ve got it when: those six notes start to finish, clean and on the beat. The rest of the melody climbs past fret 10 on this same string — you\'ll play the whole thing in class, and Module 2 shows you a second way to play it across two strings.',
-            text_es: 'Toca la PRIMERA frase de "Happy Birthday" en la cuerda Mi grave — tu primera canción de verdad, toda en una sola cuerda:<ol><li>"Hap-py birth-day to you" — trastes 0 · 0 · 2 · 0 · 5 · 4.</li><li>Presiona ▶ para escucharla, y luego iguálala una nota a la vez.</li><li>Practica con el Metrónomo (en las herramientas al final del menú izquierdo) puesto en 60 BPM — pulsos por minuto, un clic por segundo — para mantenerte constante.</li></ol>Lo tienes cuando: esas seis notas de principio a fin, limpias y a tiempo. El resto de la melodía sube más allá del traste 10 en esta misma cuerda — la vas a tocar completa en clase, y el Módulo 2 te enseña una segunda forma de tocarla en dos cuerdas.',
-            hint: 'Go slow. Clean notes matter more than speed right now. The tutorial video in the Songs tab walks through the whole melody if you want to hear where it goes.',
-            hint_es: 'Ve despacio. Las notas limpias importan más que la velocidad por ahora. El video tutorial en la pestaña de Canciones recorre la melodía completa si quieres escuchar hacia dónde va.',
-            stuck: 'Take it three notes at a time — 0 · 0 · 2, then 0 · 5 · 4 — and join the halves once each one is clean. Drop the metronome to 50 BPM until the notes are smooth.',
-            stuck_es: 'Tómala de tres notas a la vez — 0 · 0 · 2, y luego 0 · 5 · 4 — y une las mitades cuando cada una salga limpia. Baja el metrónomo a 50 BPM hasta que las notas salgan parejas.',
-            levelUp: 'Raise the metronome to 70 BPM keeping every note clean, or play the phrase from memory with your eyes on the fretboard instead of the numbers.',
-            levelUp_es: 'Sube el metrónomo a 70 BPM manteniendo cada nota limpia, o toca la frase de memoria con los ojos en el diapasón en vez de en los números.',
-            skills: [6],
-            playSeq: { label: 'Hear the first phrase', label_es: 'Escucha la primera frase', bpm: 60, notes: [40, 40, 42, 40, 45, 44] }
-          },
-          {
             label: 'Challenge 3 — "Seven Nation Army" Riff (try it!)', label_es: 'Reto 3 — Riff de "Seven Nation Army" (¡pruébalo!)',
             text: '<ul><li>Play the "Seven Nation Army" riff on the low E string — slow and clean.</li></ul>You\'ve got it when: all 7 notes in the right order, each ringing clean — speed comes later. No score on this one, just try it. Click any note name below the TAB to hear how it should sound.',
             text_es: '<ul><li>Toca el riff de "Seven Nation Army" en la cuerda Mi grave — despacio y limpio.</li></ul>Lo tienes cuando: las 7 notas en el orden correcto, cada una sonando limpia — la velocidad viene después. Este no tiene puntaje, solo pruébalo. Haz clic en cualquier nombre de nota debajo del TAB para escuchar cómo debe sonar.',
@@ -670,7 +657,7 @@ SETS.push(
       { name: '"Seven Nation Army" — The White Stripes', meta: 'Play the low-E riff — your first core-thread riff', meta_es: 'Toca el riff en la Mi grave — tu primer riff del hilo principal', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
-      { name: '"Happy Birthday"', meta: 'Play the first phrase on the low E string — first real song! (the whole melody comes in class, and again in Module 2)', meta_es: 'Toca la primera frase en la cuerda Mi grave — ¡tu primera canción real! (la melodía completa llega en clase, y otra vez en el Módulo 2)', type: 'Supp', core: false,
+      { name: '"Happy Birthday"', meta: 'Your Module 1 assessment song — all four phrases on the low E string, learned in Class Activities #1–#2', meta_es: 'Tu canción de la evaluación del Módulo 1 — las cuatro frases en la cuerda Mi grave, aprendida en las Actividades de clase #1–#2', type: 'Supp', core: false,
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w&start=46' },
       { name: '"Sailor Song" — Gigi Perez', meta: 'Listen — fingerpicked vs. strummed guitar', meta_es: 'Escucha — guitarra punteada con los dedos vs. rasgueada', type: 'Choice', core: false, level: 3,
         originalUrl: 'https://www.youtube.com/watch?v=1lrFsXkT_rM',
@@ -690,11 +677,11 @@ SETS.push(
     ],
 
     assessment: {
-      goal: 'Names 5+ parts of the guitar · Holds guitar with correct posture · Holds pick with correct grip · Tunes all 6 strings · Names all 6 strings from memory · Plays a short melody on the E string with clean, steady notes',
-      goal_es: 'Nombra 5+ partes de la guitarra · Sostiene la guitarra con postura correcta · Sostiene la púa con el agarre correcto · Afina las 6 cuerdas · Nombra las 6 cuerdas de memoria · Toca una melodía corta en la cuerda Mi con notas limpias y estables',
-      performance: 'Record yourself tuning all six strings, then playing each open string cleanly low to high while naming it. Listen back and self-check: every string green, every note clean, every name right.',
-      selfCheck: 'Can you name 5 parts of the guitar? Can you tune all 6 strings with a tuner? Can you play a short melody on the E string cleanly with no buzzing?',
-      selfCheck_es: '¿Puedes nombrar 5 partes de la guitarra? ¿Puedes afinar las 6 cuerdas con un afinador? ¿Puedes tocar una melodía corta en la cuerda Mi limpiamente sin zumbidos?',
+      goal: 'Names 5+ parts of the guitar · Holds guitar with correct posture · Holds pick with correct grip · Tunes all 6 strings · Names all 6 strings from memory · Plays "Happy Birthday" on the low E string with clean, steady notes',
+      goal_es: 'Nombra 5+ partes de la guitarra · Sostiene la guitarra con postura correcta · Sostiene la púa con el agarre correcto · Afina las 6 cuerdas · Nombra las 6 cuerdas de memoria · Toca "Happy Birthday" en la cuerda Mi grave con notas limpias y estables',
+      performance: 'Record yourself tuning all six strings, playing each open string cleanly low to high while naming it, then playing "Happy Birthday" — all four phrases on the low E string — at a steady pulse from start to finish without stopping. Listen back and self-check: every string green, every note clean, every name right, the whole song in one go.',
+      selfCheck: 'Can you name 5 parts of the guitar? Can you tune all 6 strings with a tuner? Can you play all of "Happy Birthday" on the low E string with no buzzing and no stops?',
+      selfCheck_es: '¿Puedes nombrar 5 partes de la guitarra? ¿Puedes afinar las 6 cuerdas con un afinador? ¿Puedes tocar "Happy Birthday" completa en la cuerda Mi grave sin zumbidos y sin detenerte?',
       standards: ['Pr.4a', 'Pr.5a']
     },
 
@@ -744,10 +731,10 @@ SETS.push(
         gotItWhen_es: 'puedes tomar una guitarra desafinada y poner las 6 cuerdas en verde en el afinador en menos de 2 minutos sin ayuda.',
         practice: { type: 'playSeq', label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50,
           notes: [40, 45, 50, 55, 59, 64] } },
-      { id: 'w2-s6', text: 'Play a short melody on the E string with clean, steady notes',
-        text_es: 'Tocar una melodía corta en la cuerda Mi con notas limpias y constantes',
-        gotItWhen: 'you can play a short E-string melody — the warm-up line below, or the first phrase of "Happy Birthday" — all the way through with clean notes and a steady pulse, at 60 BPM with the metronome.',
-        gotItWhen_es: 'puedes tocar una melodía corta en la cuerda Mi — la línea de calentamiento de abajo, o la primera frase de "Happy Birthday" — de principio a fin con notas limpias y un pulso constante, a 60 BPM con el metrónomo.',
+      { id: 'w2-s6', text: 'Play "Happy Birthday" on the low E string with clean, steady notes',
+        text_es: 'Tocar "Happy Birthday" en la cuerda Mi grave con notas limpias y constantes',
+        gotItWhen: 'you can play all four phrases of "Happy Birthday" on the low E string — the way you learned it in Class Activities #1 and #2 — start to finish at a steady pulse, every note clean, no stops. The warm-up line below is a good way to loosen up first.',
+        gotItWhen_es: 'puedes tocar las cuatro frases de "Happy Birthday" en la cuerda Mi grave — como la aprendiste en las Actividades de clase #1 y #2 — de principio a fin a un pulso constante, cada nota limpia, sin detenerte. La línea de calentamiento de abajo es una buena forma de soltar la mano primero.',
         practice: { type: 'playSeq', label: 'E string warm-up melody', label_es: 'Melodía de calentamiento en la cuerda Mi', bpm: 60,
           notes: [40, 41, 43, 45, 43, 41, 40] } }
     ]
@@ -763,19 +750,21 @@ MODULE_REVIEWS[1] = {
     { id: 'mr1-s1', text: 'I can describe why I want to learn guitar', text_es: 'Puedo describir por qué quiero aprender guitarra', set: 'w1' },
     { id: 'mr1-s2', text: 'I can name 5+ parts of the guitar', text_es: 'Puedo nombrar 5 o más partes de la guitarra', set: 'w2' },
     { id: 'mr1-s3', text: 'I can tune all 6 strings with a tuner', text_es: 'Puedo afinar las 6 cuerdas con un afinador', set: 'w2' },
-    { id: 'mr1-s4', text: 'I can play a short melody on the E string with clean, steady notes', text_es: 'Puedo tocar una melodía corta en la cuerda Mi con notas limpias y constantes', set: 'w2' },
+    { id: 'mr1-s4', text: 'I can play "Happy Birthday" on the low E string with clean, steady notes', text_es: 'Puedo tocar "Happy Birthday" en la cuerda Mi grave con notas limpias y constantes', set: 'w2' },
     { id: 'mr1-s5', text: 'I can hold the guitar and pick correctly and make every open string ring clean', text_es: 'Puedo sostener la guitarra y la púa correctamente, y hacer que cada cuerda al aire suene limpia', set: 'w2' },
     { id: 'mr1-s6', text: 'I can name all 6 strings from memory (E A D G B e) — in order and at random', text_es: 'Puedo nombrar las 6 cuerdas de memoria (E A D G B e) — en orden y al azar', set: 'w2' }
   ],
   assessItems: [
     'Tune all 6 strings to green in under 2 minutes, without restarting',
     'Name all 6 strings from memory, low to high, high to low, and at random',
-    'Play each open string with correct posture and pick grip — using relaxed down-strokes — every string ringing full and clean with no accidental muting from either hand'
+    'Play each open string with correct posture and pick grip — using relaxed down-strokes — every string ringing full and clean with no accidental muting from either hand',
+    'Play "Happy Birthday" — all four phrases on the low E string — at a steady pulse from start to finish without stopping, every note clean'
   ],
   assessItems_es: [
     'Afinar las 6 cuerdas en verde en menos de 2 minutos, sin reiniciar',
     'Nombrar las 6 cuerdas de memoria, de grave a aguda, de aguda a grave, y al azar',
-    'Tocar cada cuerda al aire con la postura y el agarre de púa correctos — con golpes hacia abajo relajados — cada cuerda sonando plena y limpia sin que ninguna mano la apague sin querer'
+    'Tocar cada cuerda al aire con la postura y el agarre de púa correctos — con golpes hacia abajo relajados — cada cuerda sonando plena y limpia sin que ninguna mano la apague sin querer',
+    'Tocar "Happy Birthday" — las cuatro frases en la cuerda Mi grave — a un pulso constante de principio a fin sin detenerte, cada nota limpia'
   ],
   forward: 'You\'ve got a guitar that\'s in tune, a goal, and your first clean notes — <strong>Module 2 puts names on the frets</strong> so riffs and TAB start making sense.',
   forward_es: 'Ya tienes una guitarra afinada, una meta, y tus primeras notas limpias — <strong>el Módulo 2 les pone nombre a los trastes</strong> para que los riffs y el TAB empiecen a tener sentido.',
