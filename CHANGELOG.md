@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-26 — Happy Birthday, all on one string
+
+### Changed
+
+- **Activity #2 now teaches the whole song on the low E string first.** The
+  melody never leaves that one string: it climbs to the double dot at fret 12
+  for "Hap-py birth-day dear ______" and walks back home. The four phrases
+  are labeled A, B, C and D, the same way they are labeled on the board in
+  class. New step: finding the dots at 9 and 12 before you have to play them.
+- **The A-string version is now the level-up, not the main road.** Once the
+  one-string song is yours, the card shows you the second way to play the
+  back half — the one that stays inside the first seven frets by crossing to
+  the A string. Same song, same phrase names, both versions playable and
+  checkable with the Listening Coach.
+- **TAB blocks in a multi-phrase tab now line up.** Phrases with fewer notes
+  used to draw a shorter staff, so the right edge came out ragged; every
+  block in a tab is now the same width.
+
 ## 2026-08-26 — Clearer directions on the activity cards and Song Journeys
 
 ### Changed
