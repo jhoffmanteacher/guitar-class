@@ -60,9 +60,12 @@
    text — tools/checks.mjs walks this object and fails the push if one of
    them is missing from i18n.js (the same enumerate-the-real-source trick it
    already uses for DECKS and EAR_POOLS).
-   `speedBonus:false` because the teacher plays the note AFTER the question
-   opens, sometimes more than once — scoring by reaction time would just
-   punish whoever waited to hear it properly. */
+   `speedBonus:false` sets this quiz's default Scoring dropdown to flat
+   (the teacher can still switch it) — the teacher plays the note AFTER the
+   question opens, sometimes more than once, so scoring by reaction time
+   would just punish whoever waited to hear it properly. Omit the field, or
+   set it true, and the quiz defaults to speed scoring — see
+   `lqDefaultScoring()`. */
 const LIVE_QUIZZES = {
   'string-id': {
     id: 'string-id',
@@ -84,6 +87,12 @@ const LIVE_QUIZZES = {
 const LQ_DEFAULT_QUIZ = 'string-id';
 function lqQuiz(id){ return LIVE_QUIZZES[id] || LIVE_QUIZZES[LQ_DEFAULT_QUIZ]; }
 function lqChoice(quiz, id){ return quiz.choices.find(c=>c.id===id) || null; }
+// Speed scoring is the overall default — a fast, correct answer should beat
+// a slow, correct one. A quiz opts OUT with `speedBonus: false` (e.g.
+// string-id, where the teacher's note sounds AFTER the question opens, so
+// reaction time would just measure who heard the string first). Anything
+// that doesn't explicitly opt out defaults to speed.
+function lqDefaultScoring(quizId){ return lqQuiz(quizId).speedBonus === false ? 'flat' : 'speed'; }
 function lqDoc(){ return lqDb.collection('liveQuiz').doc('current'); }
 
 /* ── Firestore, from whichever page we're on ──
@@ -141,10 +150,12 @@ function lqSessionIsLive(s){
   return !started || (Date.now() - started) < LQ_MAX_AGE_MS;
 }
 
-/* Points. With speedBonus off (the default, and the only quiz so far) every
-   correct answer is 1000 — no reaction-time race. With it on, 1000 for an
-   instant answer sliding to 500 at the buzzer, which is roughly Kahoot's
-   curve and keeps a late-but-right answer clearly worth having. */
+/* Points. Speed scoring is the overall default (see `lqDefaultScoring()`):
+   1000 for an instant correct answer, sliding to 500 at the buzzer, which is
+   roughly Kahoot's curve and keeps a late-but-right answer clearly worth
+   having. speedBonus off — the string-id quiz's default, since the teacher's
+   note sounds after the question opens — scores every correct answer 1000
+   flat, no reaction-time race. */
 const LQ_MAX_POINTS = 1000;
 function lqPoints(ms, s){
   if(!s || !s.speedBonus) return LQ_MAX_POINTS;
@@ -618,7 +629,7 @@ window.addEventListener('gc-langchange', ()=>{ lqRenderStudent(); lqSyncBanner()
 let lqTSession = null;      // teacher's copy of liveQuiz/current
 let lqTAnswers = [];        // every answer doc, filtered by sessionId at use
 let lqTUnsubDoc = null, lqTUnsubAns = null;
-let lqTScoring = 'flat';    // 'flat' | 'speed' — picked before Start
+let lqTScoring = lqDefaultScoring(LQ_DEFAULT_QUIZ);   // 'flat' | 'speed' — picked before Start
 let lqTBusy = false;        // one write at a time; the buttons gate on it
 
 function renderTeacherLiveQuiz(){
@@ -749,7 +760,7 @@ function lqPaintControls(){
       </select></label>`;
     const closeBtn = (s && s.state === 'ended')
       ? `<button type="button" class="lq-ctl ghost" onclick="lqTeacherClose()"${busy}>Clear the board</button>` : '';
-    el.innerHTML = `<label class="lq-ctl-lbl">Quiz <select id="lq-quiz-pick">${opts}</select></label>${scoring}`
+    el.innerHTML = `<label class="lq-ctl-lbl">Quiz <select id="lq-quiz-pick" onchange="lqTScoring=lqDefaultScoring(this.value);lqPaintControls()">${opts}</select></label>${scoring}`
       + `<button type="button" class="lq-ctl go" onclick="lqTeacherStart()"${busy}>Start game</button>${closeBtn}${full}`
       + `<div class="lq-ctl-hint">${escHtml(lqQuiz(LQ_DEFAULT_QUIZ).teacherHint)}</div>`;
     return;
