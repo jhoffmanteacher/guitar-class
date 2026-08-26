@@ -5,6 +5,39 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-26 — Clearer directions on the activity cards and Song Journeys
+
+### Changed
+
+- **Two Finger Gym activities have new names.** "Finger Gym 2 — Down and
+  Across" is now **"Finger Gym 2 — Down the Ladder"**, and "Finger Gym 5 —
+  Skip and Stretch" is now **"Finger Gym 5 — The Skip"**. Same activities,
+  same order, same work — the names just say what the day is.
+  "Finger Gym 4 — Leave Them Down" is now **"Finger Gym 4 — Fingers Down"**.
+- **Directions across every activity card are shorter and more direct.**
+  Steps that used to be a paragraph are now a few short lines, one thing to
+  do per line, and every card has one rule in CAPITALS — the one thing that
+  makes or breaks that day: the pinky goes FIRST, the thumb stays BEHIND the
+  neck, the A string stays SILENT, if it hurts, STOP.
+- **Every Finger Gym now tells you what your BPM is for.** The circuit step
+  ends the same way Finger Gym 1 always did: the best clean tempo you write
+  down today is your record to beat next Finger Gym day.
+- **On the Song Journey pages, the Respond and Connect questions come with a
+  sentence to finish** — "The guitar sound is ___ because ___." Same
+  questions, but now there's a way in if you're not sure how to start.
+- **Two confusing headings on the Song Journey pages got plain names.**
+  "Dress the notes" is now **"Hammer-ons and pull-offs"** and "Connect the
+  two boxes" is now **"The two-octave climb"** — they always taught exactly
+  that.
+
+### Fixed
+
+- **"Happy Birthday — First Notes"** printed the same "Fast already?" tip
+  twice in its last step. Now it appears once.
+- Some Spanish read as a translation rather than as guitar Spanish: plucking
+  a string is now **pulsar**, a *shape* is **una forma**, and strings are
+  named as strings (**la cuerda Sol**, not a bare **Sol**).
+
 ## 2026-08-25 — Seven Nation Army: The Riff, a new in-class activity
 
 ### Added
