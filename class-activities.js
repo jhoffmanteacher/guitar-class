@@ -459,19 +459,19 @@ window.CLASS_ACTIVITIES = [
   {
     id:    'ca-3',
     number: 4,
-    title:    'Finger Gym 2 — Down and Across',
-    title_es: 'Gimnasio de Dedos 2 — Bajando y cruzando',
+    title:    'Finger Gym 2 — Down the Ladder',
+    title_es: 'Gimnasio de Dedos 2 — Bajando la Escalera',
     intro:    'Last Gym went up. Today you come back down, then take the Ladder onto all six strings. Going down is harder than going up — the pinky has to lead.',
     intro_es: 'El Gimnasio pasado subiste. Hoy vas a bajar, y después vas a llevar la Escalera a las seis cuerdas. Bajar es más difícil que subir — el meñique tiene que ir primero.',
     steps: [
       {
         figure: 'img/ca-fg-gym-zone.svg',
-        text: 'Same gym as last time: the first five frets. What changes today is the direction you travel and how many strings you use.',
-        text_es: 'El mismo gimnasio que la vez pasada: los primeros cinco trastes. Lo que cambia hoy es la dirección en la que te mueves y cuántas cuerdas usas.',
+        text: 'This is the same gym as last time: the first five frets. Two things change today — the direction you travel, and how many strings you use.',
+        text_es: 'Este es el mismo gimnasio que la vez pasada: los primeros cinco trastes. Hoy cambian dos cosas — la dirección en la que te mueves, y cuántas cuerdas usas.',
       },
       {
-        text: 'The Ladder backwards — the pinky is the weakest finger, so it goes first.<ul><li>Pinky → fret 4, ring → 3, middle → 2, index → 1</li><li>BPM 50</li></ul>You\'ve got it when: all four notes ring clean — no buzz — three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'La Escalera al revés — el meñique es el dedo más débil, por eso va primero.<ul><li>Meñique → traste 4, anular → 3, medio → 2, índice → 1</li><li>BPM 50</li></ul>Lo tienes cuando: las cuatro notas suenan limpias — sin zumbido — tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'The Ladder backwards. Your pinky is the weakest finger, so it goes FIRST.<ul><li>Set the BPM to 50</li><li>Pinky → fret 4, ring → 3, middle → 2, index → 1</li></ul>You\'ve got it when: all four notes ring clean — no buzz — three times in a row. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La Escalera al revés. Tu meñique es el dedo más débil, por eso va PRIMERO.<ul><li>Pon el BPM en 50</li><li>Meñique → traste 4, anular → 3, medio → 2, índice → 1</li></ul>Lo tienes cuando: las cuatro notas suenan limpias — sin zumbido — tres veces seguidas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'Down the Ladder · pinky leads',
           caption_es: 'Bajando la Escalera · el meñique va primero',
@@ -484,8 +484,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Up and straight back down, no pause at the top. The turnaround is the tricky spot — fret 4 gets played once, not twice.\nYou\'ve got it when: four times through without stopping.',
-        text_es: 'Sube y baja de inmediato, sin pausa arriba. La vuelta es el punto difícil — el traste 4 se toca una sola vez, no dos.\nLo tienes cuando: cuatro veces seguidas sin detenerte.',
+        text: 'Climb up, then come straight back down — no pause at the top.<ul><li>Frets 1 → 2 → 3 → 4, then 3 → 2 → 1</li><li>Fret 4 gets played once, not twice</li></ul>You\'ve got it when: four times through without stopping.',
+        text_es: 'Sube y después baja de inmediato — sin pausa arriba.<ul><li>Trastes 1 → 2 → 3 → 4, y después 3 → 2 → 1</li><li>El traste 4 se toca una sola vez, no dos</li></ul>Lo tienes cuando: cuatro veces seguidas sin detenerte.',
         tab: {
           caption: 'Up and back · one turnaround',
           caption_es: 'Subir y bajar · una vuelta',
@@ -501,8 +501,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Move the same climb over: the A string, then the D string. The shape never changes — only which string your fingers land on.\nYou\'ve got it when: no buzz on any of the four notes, on both strings.',
-        text_es: 'Mueve la misma subida: la cuerda La, y después la cuerda Re. El patrón nunca cambia — solo cambia en qué cuerda caen tus dedos.\nLo tienes cuando: sin zumbido en ninguna de las cuatro notas, en las dos cuerdas.',
+        text: 'Move the same climb over to a new string.<ul><li>The A string first, then the D string</li><li>The shape never changes — only which string your fingers land on</li></ul>You\'ve got it when: no buzz on any of the four notes, on both strings.',
+        text_es: 'Mueve la misma subida a otra cuerda.<ul><li>Primero la cuerda La, después la cuerda Re</li><li>La forma nunca cambia — solo cambia en qué cuerda caen tus dedos</li></ul>Lo tienes cuando: sin zumbido en ninguna de las cuatro notas, en las dos cuerdas.',
         tab: {
           caption: 'A string, then D string',
           caption_es: 'Cuerda La, después cuerda Re',
@@ -519,8 +519,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Move to the three thin strings — G, B, and high e. They buzz more easily because they\'re thinner, so press just behind the fret, not on top of it.\nYou\'ve got it when: all three strings, no stopping, any speed.',
-        text_es: 'Muévete a las tres cuerdas delgadas — Sol, Si y Mi aguda. Zumban más fácil porque son más delgadas, así que presiona justo detrás del traste, no encima.\nLo tienes cuando: las tres cuerdas, sin detenerte, a cualquier velocidad.',
+        text: 'Move to the three thin strings — G, B, and high e.<ul><li>Press just behind the fret, not on top of it</li><li>Thin strings buzz more easily than thick ones</li></ul>You\'ve got it when: all three strings, no stopping, any speed.',
+        text_es: 'Muévete a las tres cuerdas delgadas — la cuerda Sol, la cuerda Si y la cuerda Mi aguda.<ul><li>Presiona justo detrás del traste, no encima</li><li>Las cuerdas delgadas zumban más fácil que las gruesas</li></ul>Lo tienes cuando: las tres cuerdas, sin detenerte, a cualquier velocidad.',
         tab: {
           caption: 'G · B · high e — thin strings buzz easier',
           caption_es: 'Sol · Si · Mi aguda — las delgadas zumban más fácil',
