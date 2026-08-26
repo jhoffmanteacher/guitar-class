@@ -922,4 +922,68 @@ window.CLASS_ACTIVITIES = [
       },
     ],
   },
+  {
+    id:    'ca-10',
+    number: 9,
+    title:    'Seven Nation Army — The Riff',
+    title_es: 'Seven Nation Army — El riff',
+    intro:    'Your fingers trained for this. One riff, one string, seven notes — and five of them sit right on the neck dots you already know.',
+    intro_es: 'Tus dedos entrenaron para esto. Un riff, una cuerda, siete notas — y cinco de ellas caen justo sobre los puntos del mástil que ya conoces.',
+    steps: [
+      {
+        figure: 'img/ca-sna-riff-map.svg',
+        text: 'This is where the riff lives: the A string — the one just below the thickest string. The circled letters are the riff\'s notes; the small gray dots between them are the neck\'s own landmark dots at frets 3, 5, 7, and 9.',
+        text_es: 'Aquí vive el riff: la cuerda La — la que está justo debajo de la cuerda Mi grave. Las letras en círculo son las notas del riff; los puntos grises pequeños son las marcas del mástil en los trastes 3, 5, 7 y 9.',
+      },
+      {
+        text: 'The opening call: 7 – 7 – 10 – 7.<ul><li>finger 1 → fret 7 (the third dot) — play it twice</li><li>finger 1 stays planted; reach the pinky → fret 10, one fret past the 9-dot — this is the Reach from Finger Gym</li><li>back to fret 7</li></ul>The hard part: the pinky wants to drag finger 1 with it — finger 1 never lifts.\nYou\'ve got it when: 7-7-10-7 three times in a row, no buzz.',
+        text_es: 'La llamada inicial: 7 – 7 – 10 – 7.<ul><li>dedo 1 → traste 7 (el tercer punto) — tócalo dos veces</li><li>el dedo 1 se queda plantado; estira el meñique → traste 10, un traste después del punto del 9 — este es el Estiramiento del Gimnasio de Dedos</li><li>de vuelta al traste 7</li></ul>La parte difícil: el meñique quiere arrastrar al dedo 1 — el dedo 1 no se levanta.\nLo tienes cuando: 7-7-10-7 tres veces seguidas, sin zumbido.',
+        tab: {
+          caption: 'The call · finger 1 planted, pinky to 10',
+          caption_es: 'La llamada · dedo 1 plantado, meñique al 10',
+          notes: [
+            { string: 'A', fret: 7,  note: 'E', midi: 52 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52 },
+            { string: 'A', fret: 10, note: 'G', midi: 55 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52 }
+          ]
+        },
+      },
+      {
+        text: 'The walk-down: 7 – 5 – 3 – 2. Finger 1 does all of it, sliding down the string.<ul><li>finger 1 → fret 7, then → fret 5, then → fret 3 — dot to dot to dot</li><li>finger 1 → fret 2 — the only landing without a dot</li></ul>You\'ve got it when: 7-5-3-2 three clean passes in a row, no buzz.',
+        text_es: 'El descenso: 7 – 5 – 3 – 2. El dedo 1 lo hace todo, deslizándose por la cuerda.<ul><li>dedo 1 → traste 7, después → traste 5, después → traste 3 — de punto en punto</li><li>dedo 1 → traste 2 — la única parada sin punto</li></ul>Lo tienes cuando: 7-5-3-2, tres pasadas limpias seguidas, sin zumbido.',
+        tab: {
+          caption: 'The walk-down · dot to dot',
+          caption_es: 'El descenso · de punto en punto',
+          notes: [
+            { string: 'A', fret: 7, note: 'E', midi: 52 },
+            { string: 'A', fret: 5, note: 'D', midi: 50 },
+            { string: 'A', fret: 3, note: 'C', midi: 48 },
+            { string: 'A', fret: 2, note: 'B', midi: 47 }
+          ]
+        },
+      },
+      {
+        text: 'Put it together — the whole riff, one breath: 7 – 7 – 10 – 7 – 5 – 3 – 2.\nYou\'ve got it when: four times through without stopping, any speed.',
+        text_es: 'Júntalo todo — el riff completo, de un tirón: 7 – 7 – 10 – 7 – 5 – 3 – 2.\nLo tienes cuando: cuatro veces seguidas sin detenerte, a cualquier velocidad.',
+        tab: {
+          caption: 'The whole riff · 7-7-10-7-5-3-2',
+          caption_es: 'El riff completo · 7-7-10-7-5-3-2',
+          notes: [
+            { string: 'A', fret: 7,  note: 'E', midi: 52 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52 },
+            { string: 'A', fret: 10, note: 'G', midi: 55 },
+            { string: 'A', fret: 7,  note: 'E', midi: 52 },
+            { string: 'A', fret: 5,  note: 'D', midi: 50 },
+            { string: 'A', fret: 3,  note: 'C', midi: 48 },
+            { string: 'A', fret: 2,  note: 'B', midi: 47 }
+          ]
+        },
+      },
+      {
+        text: 'Chase it.<ul><li>Every clean pass: raise the BPM by 10 and go again</li><li>Got speed? Make it groove — hold the first note of each pair longer, like the recording</li><li>Then open the Seven Nation Army Song Journey page and play it over the backing track</li></ul>You\'ve got it when: you\'ve raised the tempo at least three times without breaking down — then keep climbing.',
+        text_es: 'Persíguelo.<ul><li>Cada pasada limpia: sube el BPM 10 puntos y vuelve a intentarlo</li><li>¿Ya tienes velocidad? Dale ritmo — sostén más la primera nota de cada pareja, como en la grabación</li><li>Después abre el Recorrido de la canción de Seven Nation Army y tócalo sobre la pista de acompañamiento</li></ul>Lo tienes cuando: subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
+      },
+    ],
+  },
 ];

@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-25 — Seven Nation Army: The Riff, a new in-class activity
+
+### Added
+
+- **"Seven Nation Army — The Riff" in-class activity.** Learn the whole
+  riff on the A string in four chunks: the opening call (finger 1 planted,
+  pinky reaching to fret 10 — the same reach you trained in Finger Gym),
+  the walk-down from fret 7 to fret 2, the two joined together, then
+  chasing the tempo up while you groove it, before playing it over the
+  Song Journey backing track. Like every in-class activity, it stays
+  invisible until its day is scheduled from the teacher console.
+
 ## 2026-08-25 — Live quiz: the whole class answers on their Chromebooks
 
 ### Added
