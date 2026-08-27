@@ -629,7 +629,10 @@ window.addEventListener('gc-langchange', ()=>{ lqRenderStudent(); lqSyncBanner()
 let lqTSession = null;      // teacher's copy of liveQuiz/current
 let lqTAnswers = [];        // every answer doc, filtered by sessionId at use
 let lqTUnsubDoc = null, lqTUnsubAns = null;
+let lqTQOpenedAt = 0;       // performance.now() when THIS round opened, on the teacher's own clock
+let lqTTick = null;         // stage countdown interval, only while a timed question is on screen
 let lqTScoring = lqDefaultScoring(LQ_DEFAULT_QUIZ);   // 'flat' | 'speed' — picked before Start
+let lqTPickedQuizId = LQ_DEFAULT_QUIZ;                 // whichever quiz is chosen in the pre-start picker
 let lqTBusy = false;        // one write at a time; the buttons gate on it
 
 function renderTeacherLiveQuiz(){
@@ -645,6 +648,30 @@ function renderTeacherLiveQuiz(){
   lqTeacherListen();
   lqPaintStage();
   lqPaintControls();
+  lqStageSyncTick();
+}
+
+/* One shared 250ms tick for the projector's own countdown circle — mirrors
+   lqSyncTick() on the student side, but keyed off lqTQOpenedAt (the
+   teacher's own clock) since the stage has no server round-trip to wait on. */
+function lqStageSyncTick(){
+  const s = lqTSession && lqTSession.state ? lqTSession : null;
+  const need = !!(s && s.state === 'question' && Number(s.limitSec) && teacherView === 'livequiz' && document.getElementById('lq-st-timer'));
+  if(need && !lqTTick) lqTTick = setInterval(lqStageUpdateTimer, 250);
+  if(!need) lqStageStopTick();
+  if(need) lqStageUpdateTimer();
+}
+function lqStageStopTick(){ if(lqTTick){ clearInterval(lqTTick); lqTTick = null; } }
+function lqStageUpdateTimer(){
+  const el = document.getElementById('lq-st-timer');
+  const s = lqTSession && lqTSession.state === 'question' ? lqTSession : null;
+  if(!el || !s){ lqStageStopTick(); return; }
+  const limit = Number(s.limitSec) || 0;
+  const gone = (performance.now() - lqTQOpenedAt) / 1000;
+  const left = Math.max(0, Math.ceil(limit - gone));
+  el.textContent = left === 0 ? t('lq.timeUp') : String(left);
+  el.classList.toggle('out', left === 0);
+  if(left === 0) lqStageStopTick();
 }
 
 function lqTeacherListen(){
@@ -652,8 +679,16 @@ function lqTeacherListen(){
   lqEnsureDb().then(()=>{
     if(!lqDb || lqTUnsubDoc) return;
     lqTUnsubDoc = lqDoc().onSnapshot(snap => {
+      const prev = lqTSession;
       lqTSession = snap.exists ? (snap.data() || null) : null;
+      // Same rule as the student clock: never trust a server timestamp for
+      // this, so a new question (or a new game) restarts the projector's
+      // own local clock.
+      if(lqTSession && lqTSession.state === 'question' && (!prev || prev.sessionId !== lqTSession.sessionId || prev.qIndex !== lqTSession.qIndex)){
+        lqTQOpenedAt = performance.now();
+      }
       if(teacherView === 'livequiz'){ lqPaintStage(); lqPaintControls(); }
+      lqStageSyncTick();
     }, e => console.warn('[live-quiz] teacher session listener stopped', e));
     lqTUnsubAns = lqDoc().collection('answers').onSnapshot(snap => {
       lqTAnswers = snap.docs.map(d => d.data() || {});
@@ -752,7 +787,7 @@ function lqPaintControls(){
   const full = `<button type="button" class="lq-ctl ghost" onclick="lqToggleFullscreen()">Full screen</button>`;
   if(!s || !s.state || s.state === 'off' || s.state === 'ended'){
     const opts = Object.keys(LIVE_QUIZZES).map(id =>
-      `<option value="${escAttr(id)}">${escHtml(tIn(LIVE_QUIZZES[id].titleKey, 'en'))}</option>`).join('');
+      `<option value="${escAttr(id)}"${id === lqTPickedQuizId ? ' selected' : ''}>${escHtml(tIn(LIVE_QUIZZES[id].titleKey, 'en'))}</option>`).join('');
     const scoring = `<label class="lq-ctl-lbl">Scoring
       <select id="lq-scoring" onchange="lqTScoring=this.value">
         <option value="flat"${lqTScoring === 'flat' ? ' selected' : ''}>Every correct answer = 1000</option>
@@ -760,9 +795,9 @@ function lqPaintControls(){
       </select></label>`;
     const closeBtn = (s && s.state === 'ended')
       ? `<button type="button" class="lq-ctl ghost" onclick="lqTeacherClose()"${busy}>Clear the board</button>` : '';
-    el.innerHTML = `<label class="lq-ctl-lbl">Quiz <select id="lq-quiz-pick" onchange="lqTScoring=lqDefaultScoring(this.value);lqPaintControls()">${opts}</select></label>${scoring}`
+    el.innerHTML = `<label class="lq-ctl-lbl">Quiz <select id="lq-quiz-pick" onchange="lqTPickedQuizId=this.value;lqTScoring=lqDefaultScoring(this.value);lqPaintControls()">${opts}</select></label>${scoring}`
       + `<button type="button" class="lq-ctl go" onclick="lqTeacherStart()"${busy}>Start game</button>${closeBtn}${full}`
-      + `<div class="lq-ctl-hint">${escHtml(lqQuiz(LQ_DEFAULT_QUIZ).teacherHint)}</div>`;
+      + `<div class="lq-ctl-hint">${escHtml(lqQuiz(lqTPickedQuizId).teacherHint)}</div>`;
     return;
   }
   const quiz = lqQuiz(s.quizId);

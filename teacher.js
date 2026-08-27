@@ -222,6 +222,8 @@ async function loadAllStudents(){
       Object.keys(raw).forEach(k=>{
         if(raw[k]===true) skills[k]='gotit';
         else if(raw[k]==='working'||raw[k]==='gotit') skills[k]=raw[k];
+        else if(raw[k]==='1'||raw[k]==='2'||raw[k]==='3') skills[k]=raw[k];
+        else if((k.endsWith('-reflection')||k.endsWith('-performance')) && raw[k] && typeof raw[k]==='object') skills[k]=raw[k];
         else skills[k]='none';
       });
       const gamesData=doc.data().games||{};

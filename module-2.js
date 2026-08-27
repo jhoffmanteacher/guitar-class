@@ -849,7 +849,18 @@ SETS.push(
                 stuck_es: 'Quédate solo en el F: pulsa, escucha, ajusta, hasta que salgan cinco seguidas. Luego agrega la A al aire — esa es gratis.',
                 levelUp: 'Trade the open A for fret 5 on the low E — same note, new position. Want the simplified requinto intro line (a requinto is a small, higher-pitched guitar that plays the lead melody)? It\'s the bonus Layer 6 on the "Luna" Song Journey.',
                 levelUp_es: 'Cambia la A al aire por el traste 5 de la Mi grave — la misma nota, una posición nueva. ¿Quieres la línea de intro simplificada de requinto (un requinto es una guitarra pequeña y de tono más agudo que toca la melodía principal)? Es la Capa 6 extra en el Recorrido de la canción de "Luna".',
-                skills: [1, 2, 5]
+                skills: [1, 2, 5],
+                tab: {
+                  caption: '"Luna" — bass roots (F &rarr; A) · 60 BPM',
+                  caption_es: '"Luna" — raíces de bajo (F &rarr; A) · 60 BPM',
+                  notes: [
+                    { string: 'E', fret: 1, note: 'F', midi: 41 },
+                    { string: 'E', fret: 1, note: 'F', midi: 41 },
+                    { string: 'A', fret: 0, note: 'A', midi: 45 },
+                    { string: 'A', fret: 0, note: 'A', midi: 45 }
+                  ]
+                },
+                response: { type: 'short', prompt: 'How many clean laps of F → A did you land in a row?', prompt_es: '¿Cuántas vueltas limpias de F → A lograste seguidas?', placeholder: 'e.g. 4 — try for a higher number next session', placeholder_es: 'ej. 4 — intenta superarlo la próxima sesión' }
               },
               {
                 label: 'Challenge — "Let It Be," bass line', label_es: 'Reto — "Let It Be," línea de bajo',

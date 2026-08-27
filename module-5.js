@@ -531,8 +531,8 @@ SETS.push(
             steps: [
           {
             label: 'Challenge 1 — Pivot Finger (Am ↔ C)', label_es: 'Reto 1 — Dedo pivote (Am ↔ C)',
-            text: '<ul><li>Switch Am ↔ C keeping your index finger planted on the B string, fret 1, moving only the other fingers.</li></ul>You\'ve got it when: clean changes both ways without ever lifting the pivot finger.',
-            text_es: '<ul><li>Cambia Am ↔ C manteniendo tu dedo índice plantado en la cuerda Si, traste 1, moviendo solo los otros dedos.</li></ul>Lo tienes cuando: cambios limpios en ambas direcciones sin levantar nunca el dedo pivote.',
+            text: '<ul><li>Switch Am ↔ C keeping your index finger planted on the B string, fret 1, and your middle finger planted on the D string, fret 2 — only your ring finger moves.</li></ul>You\'ve got it when: clean changes both ways without ever lifting either pivot finger.',
+            text_es: '<ul><li>Cambia Am ↔ C manteniendo tu dedo índice plantado en la cuerda Si, traste 1, y tu dedo medio plantado en la cuerda Re, traste 2 — solo se mueve el anular.</li></ul>Lo tienes cuando: cambios limpios en ambas direcciones sin levantar nunca ninguno de los dos dedos pivote.',
             hint: 'Common-finger pivots cut your transition time in half. Look for other chords in this group that share a finger position.',
             hint_es: 'Los pivotes de dedo común reducen tu tiempo de transición a la mitad. Busca otros acordes de este grupo que compartan una posición de dedo.',
             stuck: 'Rest your index lightly on the B string / fret 1 and refuse to lift it — your middle finger stays put on the D string / fret 2 as well, so the only finger that moves is your ring finger.',
@@ -1627,8 +1627,8 @@ SETS.push(
           prompt_es: '¿Cuál de estos acordes es del Grupo 2?',
           choices: ['C major', 'G major', 'D major', 'F major'],
           choices_es: ['C mayor', 'G mayor', 'D mayor', 'F mayor'], answer: 2,
-          explain: 'Group 2 is the second batch of open chords you learned — D, A, Em, and Bm — so D major is the one here. C, G, and F all came earlier, in Group 1.',
-          explain_es: 'El Grupo 2 es la segunda tanda de acordes abiertos que aprendiste — D, A, Em y Bm — así que D mayor es el de aquí. C, G y F llegaron antes, en el Grupo 1.' } },
+          explain: 'Group 2 bundles D, A, Em, and Bm together for review — so D major is the one here, even though Em itself was actually one of the very first chords you learned, back in Set 1 with Am. C, G, and F are Group 1, taught in Set 2.',
+          explain_es: 'El Grupo 2 junta D, A, Em y Bm para repasar — así que D mayor es el de aquí, aunque Em en realidad fue uno de los primerísimos acordes que aprendiste, allá en el Set 1 junto con Am. C, G y F son el Grupo 1, enseñados en el Set 2.' } },
       { id: 'm5w4-s5', text: 'Perform a core song from memory, all the way through without stopping',
         text_es: 'Interpretar una canción principal de memoria, de principio a fin sin detenerse',
         gotItWhen: 'you can play your core song ("Let It Be", "Luna", or "the cure") from memory with no chart in front of you — fingers arched, thumb behind the neck, the shapes held through the whole song — and even with mistakes you keep going and stay in time.',

@@ -598,14 +598,14 @@
     'drill.checkedOff':      { en: 'Checked off', es: 'Marcada' },
 
     // ── Card Deck drill (the digital twin of the paper flashcard piles) ──
-    'deck.numerals-C':       { en: 'Numeral deck — key of C', es: 'Baraja de números — tono de C' },
+    'deck.numerals-C':       { en: 'Numeral deck — key of C', es: 'Baraja de números — tonalidad de C' },
     'deck.numerals-letitbe': { en: 'Numeral deck — I · V · vi · IV', es: 'Baraja de números — I · V · vi · IV' },
     'deck.relative-pairs':   { en: 'Relative pairs', es: 'Pares relativos' },
-    'deck.minor-keys-box1':  { en: 'Minor keys — box 1', es: 'Tonos menores — caja 1' },
+    'deck.minor-keys-box1':  { en: 'Minor keys — box 1', es: 'Tonalidades menores — caja 1' },
     'deck.naturals':         { en: 'Natural note deck', es: 'Baraja de notas naturales' },
     'deck.naturals-plus':    { en: 'Natural + sharp/flat note deck', es: 'Baraja de notas naturales + sostenidos/bemoles' },
-    'deck.keys-IIVV':        { en: 'Key deck — I–IV–V', es: 'Baraja de tonos — I–IV–V' },
-    'deck.key-inventory':    { en: 'Key-detective deck', es: 'Baraja detective de tonos' },
+    'deck.keys-IIVV':        { en: 'Key deck — I–IV–V', es: 'Baraja de tonalidades — I–IV–V' },
+    'deck.key-inventory':    { en: 'Key-detective deck', es: 'Baraja detective de tonalidades' },
     'deck.power-chord-shapes':{ en: 'Power chord shape deck', es: 'Baraja de formas de acorde de potencia' },
     'deck.e5-vs-emajor':     { en: 'Power vs. full chord deck', es: 'Baraja de acorde de potencia vs. completo' },
     'deck.chords-group1':    { en: 'Group 1 chord deck', es: 'Baraja de acordes del grupo 1' },
@@ -628,9 +628,9 @@
     'deck.again':            { en: 'Shuffle again', es: 'Barajar de nuevo' },
     'deck.kNumeral':         { en: 'play this numeral', es: 'toca este número' },
     'deck.kChord':           { en: 'that chord is', es: 'ese acorde es' },
-    'deck.kMajorKey':        { en: 'major key', es: 'tono mayor' },
+    'deck.kMajorKey':        { en: 'major key', es: 'tonalidad mayor' },
     'deck.kRelMinor':        { en: 'relative minor', es: 'menor relativa' },
-    'deck.kKey':             { en: 'key', es: 'tono' },
+    'deck.kKey':             { en: 'key', es: 'tonalidad' },
     'deck.kBoxFret':         { en: 'box 1 starts at fret', es: 'la caja 1 empieza en el traste' },
     'deck.kNote':            { en: 'find this note', es: 'encuentra esta nota' },
     'deck.kChordSet':        { en: 'chord set', es: 'conjunto de acordes' },
@@ -947,7 +947,7 @@
     'coach.micOn': { en: 'mic on',
       es: 'micrófono activo' },
     'coach.micOnDevice': { en: 'Listening — {device}',
-      es: '[REVISAR] Escuchando — {device}' },
+      es: 'Escuchando — {device}' },
     'coach.overall.good': { en: 'Good try — look how much is already green.',
       es: 'Buen intento — mira cuánto ya está en verde.' },
     'coach.overall.great': { en: 'That was great — seriously.',
@@ -965,9 +965,9 @@
     'coach.report.couldntHearMelody': { en: 'I couldn’t hear that clearly — try again somewhere quieter, with the guitar closer to the mic, and pick each note firmly.',
       es: 'No pude escucharlo con claridad — inténtalo de nuevo en un lugar más silencioso, con la guitarra más cerca del micrófono, y toca cada nota con firmeza.' },
     'coach.report.micHint': { en: 'Playing but not being heard? Check that the right microphone is selected.',
-      es: '[REVISAR] ¿Estás tocando pero no se te escucha? Revisa que esté seleccionado el micrófono correcto.' },
+      es: '¿Estás tocando pero no se te escucha? Revisa que esté seleccionado el micrófono correcto.' },
     'coach.report.micHintMac': { en: 'On a Mac, also check that Mic Mode in Control Center is set to Standard — Voice Isolation filters out guitars.',
-      es: '[REVISAR] En una Mac, revisa también que el Modo de micrófono en el Centro de Control esté en Estándar — el modo Aislamiento de voz filtra el sonido de la guitarra.' },
+      es: 'En una Mac, revisa también que el Modo de micrófono en el Centro de Control esté en Estándar — el modo Aislamiento de voz filtra el sonido de la guitarra.' },
     'coach.reportDone': { en: 'Done',
       es: 'Listo' },
     'coach.start': { en: 'Start the check',
@@ -2004,7 +2004,7 @@
         // split/join, not .replace() — a replacement string containing
         // $&, $', $` or $1 would otherwise be treated as a special pattern
         // (e.g. a student's raw search query echoed back through t()).
-        str = str.split('{'+k+'}').join(params[k]);
+        str = str.split('{'+k+'}').join(String(params[k]));
       });
     }
     return str;

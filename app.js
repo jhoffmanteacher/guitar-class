@@ -4568,7 +4568,13 @@ function dkNext(key, ok){
   const firstTry = !st.seen.has(c);
   st.seen.add(c);
   if(ok){ if(firstTry) st.hit++; }
-  else { st.deck.splice(Math.min(st.deck.length, st.i + 3), 0, c); }
+  else {
+    // Only requeue if at least one other card can land between this draw and
+    // the redeal — otherwise (a miss on the last card of the pass) there's
+    // nothing to interpose and splicing here would redeal it immediately.
+    const remaining = st.deck.length - st.i - 1;
+    if(remaining > 0) st.deck.splice(Math.min(st.deck.length, st.i + 3), 0, c);
+  }
   st.i++; st.shown = false;
   if(st.i >= st.deck.length){ st.phase='done'; if(!isSetPeeking(st.cfg.wid)) dkSaveBest(st.cfg.id, st.hit); dkBox(key).innerHTML = dkDoneHtml(key); }
   else dkBox(key).innerHTML = dkRunHtml(key);
@@ -5003,7 +5009,7 @@ function coachGateMarkAnyway(sid, wid){
     games.coachSkill[sid] = Object.assign({}, prev, {
       level: prev.level || 0,
       override: true,
-      overrideAt: new Date().toISOString().slice(0,10)
+      overrideAt: dayStr(new Date())
     });
     if(typeof saveGames === 'function' && currentUser && !isDevBypassUser()) saveGames();
   }

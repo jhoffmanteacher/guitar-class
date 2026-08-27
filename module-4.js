@@ -483,7 +483,7 @@ SETS.push(
 
   {
     id: 'm4w2',
-    songThread: [{ name: '"Sweet Child O\' Mine"', journey: 'tabs/sweet-child-o-mine.html', layer: 4, note: 'solo territory' }],
+    songThread: [{ name: '"Sweet Child O\' Mine"', journey: 'tabs/sweet-child-o-mine.html', layer: 4, note: 'solo territory' }, { name: '"the cure"', journey: 'tabs/the-cure.html', layer: 4, note: 'a whisper-quiet solo' }],
     label: 'Set 2',
     locked: false,
     module: 'Major / Minor / Blues Pentatonic Scales',

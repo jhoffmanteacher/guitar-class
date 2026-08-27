@@ -978,9 +978,9 @@ function coachRenderReport(){
   const overallLevel = greats === applicable.length ? 3
     : (greats >= (applicable.length === 2 ? 1 : 2) ? 2 : 1);
   let overall;
-  if (greats === applicable.length) overall = '&#x1F31F; ' + t('coach.overall.great');
-  else if (greats >= 2)             overall = '&#x1F4AA; ' + t('coach.overall.good');
-  else                              overall = '&#x1F3B8; ' + t('coach.overall.practice');
+  if (overallLevel === 3)      overall = '&#x1F31F; ' + t('coach.overall.great');
+  else if (overallLevel === 2) overall = '&#x1F4AA; ' + t('coach.overall.good');
+  else                         overall = '&#x1F3B8; ' + t('coach.overall.practice');
 
   /* Streak: a "clear" = perfect pitch score and nothing at Needs work. */
   const clear = crits[0].level === 3 && applicable.every(c => c.level >= 2);
@@ -4999,9 +4999,8 @@ async function srStart(){
     return;
   }
   await coachEnsureRunning();
-  if (!srBody()){ coachReleaseMicIfIdle(); return; }   // panel closed during the prompt
+  if (sr !== s || !srBody()){ coachReleaseMicIfIdle(); return; }   // a new session started under us, or the panel closed during the prompt
   if (document.hidden){ coachMicOff(); gamesShow('hub'); return; }   // backgrounded during the prompt
-  if (sr !== s){ coachReleaseMicIfIdle(); return; }    // a new session started under us
   stopAllDemoAudio();
   s.micOn = true;
   window.coachMicLive = true;   // stream may already be open from a prior owner

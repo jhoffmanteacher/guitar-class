@@ -257,8 +257,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Phrase D starts higher than any other phrase, then walks home.<ul><li>Finger 2 on fret 10, finger 1 on fret 9 — those two dots sit right next to each other up there</li><li>Shift down: finger 1 → fret 5, finger 3 → fret 7</li><li>The frets are narrow that high, so keep your fingertips on their tips or they\'ll crowd each other</li></ul>You\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'La frase D empieza más arriba que cualquier otra frase, y después regresa caminando a casa.<ul><li>Dedo 2 en el traste 10, dedo 1 en el traste 9 — allá arriba esos dos puntos quedan pegaditos</li><li>Baja: dedo 1 → traste 5, dedo 3 → traste 7</li><li>Allá arriba los trastes son angostos, así que mantén los dedos sobre las puntas o se van a chocar entre sí</li></ul>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'Phrase D starts higher than any other phrase, then walks home.<ul><li>Finger 2 on fret 10, finger 1 on fret 9 — right next to the 9-dot marker up there</li><li>Shift down: finger 1 → fret 5, finger 3 → fret 7</li><li>The frets are narrow that high, so keep your fingertips on their tips or they\'ll crowd each other</li></ul>You\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La frase D empieza más arriba que cualquier otra frase, y después regresa caminando a casa.<ul><li>Dedo 2 en el traste 10, dedo 1 en el traste 9 — justo junto al punto marcador del traste 9, allá arriba</li><li>Baja: dedo 1 → traste 5, dedo 3 → traste 7</li><li>Allá arriba los trastes son angostos, así que mantén los dedos sobre las puntas o se van a chocar entre sí</li></ul>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'Phrase D · starts at fret 10, walks home',
           caption_es: 'Frase D · empieza en el traste 10 y regresa a casa',
