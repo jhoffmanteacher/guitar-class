@@ -57,6 +57,19 @@ const COACH_ATTACK_SKIP   = 70;     // ms after an onset before pitch readings s
 const COACH_EVENT_TAIL    = 340;    // ms of pitch readings collected after an onset
 const COACH_MAX_SLOTS     = 32;
 const COACH_BEATS_PER_CHORD = 4;
+/* How long the listening window stays open — see coachListenDeadline. The
+   original rule closed it a flat 1.5 beats after the last slot, measured
+   from the RIGID listenStart, which is the one grid the scorer never reads:
+   coachMatchEvent eases gridOffset toward the student, so a player sitting
+   behind the click kept getting matched on the adapted grid right up until
+   the window shut on the rigid one — and the tail of the drill came back
+   "miss" for notes they were still in the middle of playing (student issue
+   report, 2026-08-27). The deadline now rides the same adapted grid the
+   matcher does, the grace after the last slot is wider, and a take that is
+   still landing notes holds the mic open past it. */
+const COACH_TAIL_BEATS    = 3;      // grace beats after the final slot
+const COACH_STALL_BEATS   = 2.5;    // ...and keep listening this long after the last matched note
+const COACH_MAX_LISTEN_X  = 2.5;    // backstop: never listen past this × the nominal window
 /* Visual beat-pulse fade (listening phase only — see coachPulseFadeThreshold
    and coachMatchEvent). No audio: the mic is live the whole time the Coach
    is listening, so an audible click here (unlike Riff Runner's, which is
@@ -191,7 +204,7 @@ function coachOpen(btn){
     skillIds: (btn.dataset.coachskills || '').split(',').filter(Boolean),
     events: [], pending: null,
     gridOffset: 0, listenStart: 0, timeouts: [],
-    smoothRms: 0, smoothHf: 0, lastOnsetT: -1e9, lastPitchT: 0,
+    smoothRms: 0, smoothHf: 0, lastOnsetT: -1e9, lastPitchT: 0, lastMatchT: 0,
     pulseStreak: 0, pulseMuted: false   // visual beat-pulse fade state
   };
   coachRenderReady();
@@ -354,7 +367,7 @@ async function coachStartCheck(){
   coach.slots.forEach(s => { s.state = 'pending'; s.hit = null; });
   coach.events = []; coach.pending = null;
   coach.gridOffset = 0; coach.smoothRms = 0; coach.smoothHf = 0; coach.lastOnsetT = -1e9;
-  coach.lastPulse = -1; coach.frameNo = 0; coach.lastPitchT = 0;
+  coach.lastPulse = -1; coach.frameNo = 0; coach.lastPitchT = 0; coach.lastMatchT = 0;
   coach.pulseStreak = 0; coach.pulseMuted = false;
 
   /* Count-in: 4 clicks, last one higher = "go". The tab stays on screen so
@@ -681,6 +694,36 @@ function coachPulseFadeThreshold(slotCount){
   return Math.min(slotCount, Math.max(3, Math.min(8, Math.ceil(slotCount * 0.5))));
 }
 
+/* When the listening window closes — the moment coachLoop stops the mic and
+   grades what it heard. Three clocks; the take runs to whichever
+   of them makes sense:
+
+     · nominal — the last slot plus COACH_TAIL_BEATS of grace, measured on
+       the ADAPTED grid (listenStart + gridOffset). gridOffset is the
+       matcher's running estimate of how far behind (or ahead) the student
+       actually is, so a player dragging half a beat gets that half beat
+       back at the end instead of having it eaten.
+     · stall — the mic stays open COACH_STALL_BEATS past the last note that
+       MATCHED a slot. Someone still working through the drill is still
+       playing it; ending on them is exactly the "it cut me off" complaint.
+       Keyed to a matched event, not a raw onset, so a noisy classroom
+       can't hold the window open by itself.
+     · hard — a backstop at COACH_MAX_LISTEN_X × the nominal window, in case
+       something keeps feeding matches forever.
+
+   The stall clock can only be pushed once per slot (every match fills one,
+   and a full board ends the take through allHit), so the extension is
+   bounded even before the backstop. Nothing here softens the grading: the
+   tempo criterion reads raw event times, so a student who dragged still
+   gets told they dragged — they just get graded on the whole take. */
+function coachListenDeadline(){
+  const nominalLen = (coach.slots.length + COACH_TAIL_BEATS) * coach.beatMs;
+  const nominal = coach.listenStart + coach.gridOffset + nominalLen;
+  const stall   = coach.lastMatchT ? coach.lastMatchT + COACH_STALL_BEATS * coach.beatMs : 0;
+  const hard    = coach.listenStart + nominalLen * COACH_MAX_LISTEN_X;
+  return Math.min(hard, Math.max(nominal, stall));
+}
+
 /* ══════════ Detection loop ══════════ */
 
 function coachLoop(){
@@ -772,9 +815,14 @@ function coachLoop(){
       }
     }
 
-    /* Done? Everything matched, or the window (plus grace) has passed. */
+    /* Done? Everything matched, or the listening window (see
+       coachListenDeadline) has closed — except never mid-note: an onset
+       whose pitch readings are still being collected gets its full
+       COACH_EVENT_TAIL before the take is graded, so the last note of a
+       drill isn't scored off half a window. */
     const allHit = coach.slots.every(s => s.state !== 'pending');
-    if (allHit || now > coach.listenStart + (coach.slots.length + 1.5) * coach.beatMs){
+    const pendingEvent = coach.pending && now - coach.pending.t <= COACH_EVENT_TAIL;
+    if (allHit || (now > coachListenDeadline() && !pendingEvent)){
       coachFinish();
       return;
     }
@@ -894,6 +942,7 @@ function coachMatchEvent(ev){
                Math.abs(ev.midi - s.midi) % 12 === 0) ? 'oct' : 'ok';
   } else s.state = 'wrong';
   s.hit = ev;
+  coach.lastMatchT = ev.t;      // feeds coachListenDeadline's stall clock
   coach.gridOffset += dev * 0.15;
   coachChipRefresh(best);
 
