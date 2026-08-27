@@ -100,8 +100,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
               {
                 label: 'Pick your weakest re-test', label_es: 'Elige tu repaso más débil',
@@ -377,13 +377,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
               {
                 label: 'Which string stuck faster?', label_es: '¿Cuál cuerda se te quedó más rápido?',
-                text: 'Station Wrap-Up — which string\'s notes stuck faster today, D or G, and what trick helped?',
-                text_es: 'Cierre de la estación — ¿las notas de cuál cuerda se te quedaron más rápido hoy, Re o Sol, y qué truco ayudó?',
+                text: 'Checkpoint — which string\'s notes stuck faster today, D or G, and what trick helped?',
+                text_es: 'Punto de control — ¿las notas de cuál cuerda se te quedaron más rápido hoy, Re o Sol, y qué truco ayudó?',
                 response: { type: 'short', placeholder: 'e.g. G was easier — its B–C half step gave me a landmark at fret 4; the octave shape helped me check myself',
                   placeholder_es: 'p. ej. G fue más fácil — su semitono B–C me dio una referencia en el traste 4; la forma de octava me ayudó a comprobarme' }
               }
@@ -487,8 +487,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Which fret still slows you?', label_es: '¿Cuál traste todavía te frena?',
@@ -675,13 +675,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
               {
                 label: 'Where are you slowest?', label_es: '¿Dónde eres más lento?',
-                text: 'Station Wrap-Up — where on the neck are you still slowest? Name the string and fret zone.',
-                text_es: 'Cierre de la estación — ¿dónde en el mástil todavía eres más lento? Nombra la cuerda y la zona de trastes.',
+                text: 'Checkpoint — where on the neck are you still slowest? Name the string and fret zone.',
+                text_es: 'Punto de control — ¿dónde en el mástil todavía eres más lento? Nombra la cuerda y la zona de trastes.',
                 response: { type: 'short', placeholder: 'e.g. B string frets 6–10 — I still count up from fret 5',
                   placeholder_es: 'p. ej. cuerda Si, trastes 6–10 — todavía cuento desde el traste 5' }
               }
@@ -774,8 +774,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Counting up or octave shape?', label_es: '¿Contar o la forma de octava?',
@@ -955,13 +955,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
               {
                 label: 'Frets or rhythm: which was harder?', label_es: '¿Trastes o ritmo: qué fue más difícil?',
-                text: 'Station Wrap-Up — what was hardest about writing TAB: finding the frets, or spacing the rhythm?',
-                text_es: 'Cierre de la estación — ¿qué fue lo más difícil de escribir TAB: encontrar los trastes, o espaciar el ritmo?',
+                text: 'Checkpoint — what was hardest about writing TAB: finding the frets, or spacing the rhythm?',
+                text_es: 'Punto de control — ¿qué fue lo más difícil de escribir TAB: encontrar los trastes, o espaciar el ritmo?',
                 response: { type: 'short', placeholder: 'e.g. I knew the frets but my spacing squished bar 3',
                   placeholder_es: 'p. ej. sabía los trastes pero mi espaciado apretó el compás 3' }
               }
@@ -1111,8 +1111,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Could a stranger play your TAB?', label_es: '¿Podría un desconocido tocar tu TAB?',

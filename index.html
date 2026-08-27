@@ -97,7 +97,7 @@
 </div>
 <div id="app" style="display:none">
   <div class="app-layout">
-    <!-- ══ LEFT NAV RAIL — module picker, progress, station switcher, Explore ══ -->
+    <!-- ══ LEFT NAV RAIL — module picker, progress, set switcher, Explore ══ -->
     <aside class="rail" id="nav-rail" aria-label="Course navigation" data-i18n-attr="aria-label:nav.railAria">
       <div class="rail-scroll">
         <div class="preview-note" id="preview-note" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg> <span data-i18n-html="nav.previewNoteHtml"><strong>Preview mode</strong> &mdash; set locks are off for you. Students still see them.</span></div>
@@ -114,10 +114,7 @@
           <span class="rail-sec-label" id="rail-set-label" data-i18n="nav.thisSet">This set</span>
           <div class="rail-station-list" id="rail-stations">
             <button type="button" class="rail-station st-b" data-station="station-b" onclick="railStation('station-b')">
-              <span class="rs-num">B</span><span class="rs-text"><span class="rs-title" data-i18n="nav.stationBTitle">Station B</span><span class="rs-sub" data-i18n="nav.stationBSub">Watch &middot; Listen &middot; Practice</span></span>
-            </button>
-            <button type="button" class="rail-station st-c" data-station="station-c" onclick="railStation('station-c')">
-              <span class="rs-num">C</span><span class="rs-text"><span class="rs-title" data-i18n="nav.stationCTitle">Station C</span><span class="rs-sub" data-i18n="nav.stationCSub">Independent drill</span></span>
+              <span class="rs-num">1</span><span class="rs-text"><span class="rs-title" data-i18n="nav.lessonTitle">The lesson</span><span class="rs-sub" data-i18n="nav.lessonSub">Watch &middot; Listen &middot; Practice</span></span>
             </button>
             <button type="button" class="rail-station st-chk" data-station="checklist" onclick="railStation('checklist')">
               <span class="rs-num rs-check" aria-hidden="true"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7 12l3 3 7-7"/></svg></span><span class="rs-text"><span class="rs-title" data-i18n="nav.checklistTitle">My skills checklist</span><span class="rs-sub" data-i18n="nav.checklistSub">Track what you can do</span></span>

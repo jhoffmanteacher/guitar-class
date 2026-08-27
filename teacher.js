@@ -1000,7 +1000,10 @@ function setShortResponses(w){
       const chal=(st.label||'').match(/Challenge\s*\d+\s*[—–-]\s*([^:(]+)/);
       const ph=st.response.placeholder||'';
       if(isPR) label=chal?('PR — '+chal[1].trim()):'Personal record (BPM)';
-      else if(/wrap-?up|reflect/i.test(st.text||'')) label='Wrap-up reflection';
+      // "Station Wrap-Up" split into a mid-set "Checkpoint" and an end-of-set
+      // "Wrap-Up" when the B/C stations merged into one ladder — match both, or
+      // 32 of these slots silently fall through to the generic label below.
+      else if(/wrap-?up|checkpoint|reflect/i.test(st.text||'')) label='Wrap-up reflection';
       else if(prompt) label=prompt.replace(/\s+/g,' ').slice(0,70);
       else if(ph && !/^e\.g\./i.test(ph)) label=ph.replace(/\s+/g,' ').slice(0,70); // placeholder is the question, not an example
       else label=chal?chal[1].trim():'Written response';

@@ -1734,9 +1734,10 @@ function setCompletion(w){
 
 /* ── "Pick up where you left off" resume card ──
    One card above the set panels, filled once per page load (onModuleChange's
-   first completed run), so a student sitting down at Station C lands on a
-   one-tap route back to exactly where they stopped — the right station tab
-   in their current set, and the Song Journey they touched most recently.
+   first completed run), so a student sitting back down lands on a one-tap
+   route back to exactly where they stopped — the lesson ladder or the
+   checklist in their current set, and the Song Journey they touched most
+   recently.
    Session-only: dismissing or using it removes it until the next page load,
    which on a class Chromebook means the next class period. Read-only over
    `completed` / `songReady` — it never writes progress. */
@@ -1751,42 +1752,42 @@ const SONG_JOURNEYS = [
 let _resumeCardBuilt = false;    // build once per page load…
 let _resumeCardClosed = false;   // …and never resurrect after dismiss/use
 
-/* Steps done / total for one station of a set — a standalone twin of
-   buildStations' stationStepCounts (same ns-per-section key scheme, same
-   tuning-warm-up exclusion), kept separate because the resume card needs
-   counts for BOTH stations, not just the panel being built. If the key
-   scheme ever changes, change both. */
-function resumeStationCounts(w, stationId){
-  const s = w.stations && w.stations[stationId];
-  if(!s) return null;
+/* Steps done / total across a set's whole lesson ladder — a standalone twin of
+   buildLesson's lessonStepCounts (same ns-per-section key scheme, same
+   tuning-warm-up exclusion), kept separate because the resume card runs before
+   any panel is built. If the key scheme ever changes, change both. */
+function resumeLessonCounts(w){
   let total=0, done=0;
   const count=(steps,ns)=>steps.forEach((st,idx)=>{
     total++;
     if(completed[`${w.id}-${ns}-${idx}`]===true) done++;
   });
-  if(s.sections && s.sections.length){
-    s.sections.filter(sec=>!isTuningWarmupSection(sec, w.moduleNum))
-      .forEach((sec,gi)=>count(sec.steps, `${stationId}-sec${gi}`));
-  } else if(s.steps){
-    count(s.steps, stationId);
-  }
-  return { total, done };
+  ['b','c'].forEach(stationId=>{
+    const s = w.stations && w.stations[stationId];
+    if(!s) return;
+    if(s.sections && s.sections.length){
+      s.sections.filter(sec=>!isTuningWarmupSection(sec, w.moduleNum))
+        .forEach((sec,gi)=>count(sec.steps, `${stationId}-sec${gi}`));
+    } else if(s.steps){
+      count(s.steps, stationId);
+    }
+  });
+  return total ? { total, done } : null;
 }
 
-/* The module row's target: first station (B before C) with steps left, else
-   the skills checklist. null for module reviews / coming-soon panels — those
-   restore on their own and have no station tabs to point at. */
+/* The module row's target: the lesson ladder while it still has steps left,
+   else the skills checklist. null for module reviews / coming-soon panels —
+   those restore on their own and have no tabs to point at. */
 function resumeModuleTarget(){
   const panel = activeWeekPanel();
   if(!panel) return null;
   const w = SETS.find(x=>x.id===panel.dataset.id);
   if(!w || w.comingSoon) return null;
-  for(const st of ['b','c']){
-    const p = resumeStationCounts(w, st);
-    if(p && p.total && p.done < p.total) return { w, station:st, tab:'station-'+st, done:p.done, total:p.total };
-  }
-  const pb = resumeStationCounts(w, 'b');
-  return (pb && pb.total) ? { w, station:null, tab:'checklist' } : null;
+  const p = resumeLessonCounts(w);
+  if(!p) return null;
+  return (p.done < p.total)
+    ? { w, lesson:true, tab:LESSON_TAB, done:p.done, total:p.total }
+    : { w, lesson:false, tab:'checklist' };
 }
 
 /* The song row: the most recently touched Journey that still has unchecked
@@ -1817,8 +1818,8 @@ function renderResumeCard(){
   if(!mod && !song){ host.hidden = true; host.innerHTML=''; return; }
   const rows = [];
   if(mod){
-    const meta = mod.station
-      ? `${t(mod.station==='b' ? 'nav.stationBTitle' : 'nav.stationCTitle')} · ${t('progress.stepsDone',{done:mod.done,total:mod.total})}`
+    const meta = mod.lesson
+      ? `${t('nav.lessonTitle')} · ${t('progress.stepsDone',{done:mod.done,total:mod.total})}`
       : t('resume.checklistNext');
     rows.push(`<div class="resume-row">
       <div class="resume-what"><strong>${escHtml(tSetLabel(mod.w.label))}</strong><span class="resume-meta">${escHtml(meta)}</span></div>
@@ -2002,14 +2003,18 @@ function activateSet(id, opts){
   if(isMr) maybeShowMrAssess(parseInt(id.slice(2),10));
 }
 
-/* ── Rail station switcher ─────────────────────────────────────────────
-   The per-set station tabs (Station B/C · checklist · Songs) now live in the
-   left rail instead of inside each set panel. The in-panel .tabs block still
-   exists in the DOM (hidden via CSS) so switchTab/switchTabById/panelFooter/
-   print all keep working unchanged — these helpers just drive it and mirror
-   the active state back into the rail. */
+/* ── Rail set switcher ─────────────────────────────────────────────────
+   The per-set switcher (the lesson ladder · the checklist) lives in the left
+   rail. It is the ONLY switcher — the in-panel tab bar it replaced is gone —
+   so these helpers drive switchTabById() and mirror the active panel back
+   onto the rail buttons. */
+/* The one tab-panel suffix the merged ladder lives under. Kept as 'station-b'
+   rather than renamed: every stored deep link, every `${wid}-station-b` lookup
+   and the print stylesheet already address it, and the id is invisible to
+   students. Changing it would buy nothing and break all three. */
+const LESSON_TAB = 'station-b';
 function activeWeekPanel(){ return document.querySelector('.week-panel.active'); }
-/* The rail's Station B sub-label was a hardcoded "Watch · Listen · Practice"
+/* The lesson's rail sub-label was a hardcoded "Watch · Listen · Practice"
    while the set's own panel header could say something else — Module 1 Set 1
    reads "…Reflect" (nothing is played in that set; the skills are all "I can
    describe…"), and Module 9 Set 1 reads "Where do I start?". Both are
@@ -2017,12 +2022,13 @@ function activeWeekPanel(){ return document.querySelector('.week-panel.active');
    whatever follows the em-dash in "Computer station — X" (same shape in both
    languages, so no per-language parsing), falling back to the generic label
    for a title that carries no dash. Read through tf(), so a language switch
-   re-derives it — same pattern as the single-flow tabSub override below. */
-function railStationBSub(w){
+   re-derives it — same pattern as the single-flow tabSub override below, and
+   as the B→C seam divider in buildLesson(). */
+function lessonSubLabel(w){
   const raw = (w && w.stations && w.stations.b && w.stations.b.title) ? tf(w.stations.b, 'title') : '';
   const i = raw.indexOf('—');
   const tail = i >= 0 ? raw.slice(i + 1).trim() : '';
-  return tail || t('nav.stationBSub');
+  return tail || t('nav.lessonSub');
 }
 function railStation(tab){
   const panel = activeWeekPanel();
@@ -2035,31 +2041,29 @@ function syncRailStations(){
   const list  = document.getElementById('rail-stations');
   if(!group || !list) return;   // teacher view / pre-init: nothing to do
   const panel = activeWeekPanel();
-  const hasTabs = panel && panel.querySelector('.tabs .tabs-card');
-  if(!hasTabs){ group.hidden = true; return; }   // module-review / coming-soon: no stations
+  // Module-review and coming-soon panels carry no .tab-panel, so there is
+  // nothing for the rail's "This set" group to switch between.
+  const hasPanels = panel && panel.querySelector('.tab-panel');
+  if(!hasPanels){ group.hidden = true; return; }
   group.hidden = false;
   const wid = panel.dataset.id;
   const w = (typeof SETS !== 'undefined') ? SETS.find(s=>s.id===wid) : null;
   const label = document.getElementById('rail-set-label');
   if(label) label.textContent = t('nav.thisSet') + (w && w.label ? ' · ' + tSetLabel(w.label) : '');
-  /* Single-flow sets (only station b): hide the Station C rail button and
-     mirror the set's own tab labels onto the rail. applyI18n restores the
-     defaults on language switch, then this override re-applies (the
-     gc-langchange listener calls syncRailStations after applyI18n). */
+  /* Single-flow sets (only station b) mirror the set's own tab labels onto the
+     rail. applyI18n restores the defaults on language switch, then this
+     override re-applies (the gc-langchange listener calls syncRailStations
+     after applyI18n). */
   const single = !!(w && w.stations && w.stations.b && !w.stations.c && !w.comingSoon);
-  const stC = list.querySelector('.rail-station.st-c');
-  if(stC) stC.hidden = single;
-  const bNum = list.querySelector('.rail-station.st-b .rs-num');
   const bTitle = list.querySelector('.rail-station.st-b .rs-title');
   const bSub = list.querySelector('.rail-station.st-b .rs-sub');
-  if(bNum) bNum.textContent = single ? '1' : 'B';
-  if(bTitle) bTitle.textContent = (single && w.stations.b.tabTitle) ? tf(w.stations.b,'tabTitle') : t('nav.stationBTitle');
-  if(bSub) bSub.textContent = (single && w.stations.b.tabSub) ? tf(w.stations.b,'tabSub') : railStationBSub(w);
+  if(bTitle) bTitle.textContent = (single && w.stations.b.tabTitle) ? tf(w.stations.b,'tabTitle') : t('nav.lessonTitle');
+  if(bSub) bSub.textContent = (single && w.stations.b.tabSub) ? tf(w.stations.b,'tabSub') : lessonSubLabel(w);
   const chkSubEl = list.querySelector('.rail-station.st-chk .rs-sub');
   if(chkSubEl) chkSubEl.textContent = (single && w.checklistSub) ? tf(w,'checklistSub') : t('nav.checklistSub');
   // Reflect whichever tab-panel is currently active back onto the rail buttons.
   const activePanel = panel.querySelector('.tab-panel.active');
-  const activeTab = activePanel ? activePanel.id.slice(wid.length + 1) : 'station-b';
+  const activeTab = activePanel ? activePanel.id.slice(wid.length + 1) : LESSON_TAB;
   list.querySelectorAll('.rail-station').forEach(b=>{
     const on = b.dataset.station === activeTab;
     b.classList.toggle('active', on);
@@ -2296,71 +2300,22 @@ function buildSet(w){
       <span class="set-peek-banner-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
       <div>${isModuleGateCase(w) ? t('gate.peekBannerModule', prevModuleGateParams(w)) : t('gate.peekBanner', { prev: tSetLabel(prevSetLabel(w)) })}</div>
     </div>`;
-  /* Single-flow sets (e.g. Module 13 · String Changing): only station b
-     exists — one "learn the process" card straight into the checklist, no
-     Station B/C framing. The card's labels come from the set's own fields
-     (tabTitle/tabSub on stations.b, checklistSub on the set, + _es twins). */
-  const single = !!(w.stations && w.stations.b && !w.stations.c);
-  const bTabTitle = (single && w.stations.b.tabTitle) ? tf(w.stations.b,'tabTitle') : t('nav.stationBTitle');
-  const bTabSub   = (single && w.stations.b.tabSub)   ? tf(w.stations.b,'tabSub')   : t('nav.stationBSub');
-  const chkSub    = (single && w.checklistSub) ? tf(w,'checklistSub') : t('nav.checklistSub');
-  const stationCards = single
-    ? `<button type="button" class="tabs-card tab-station-b active" onclick="switchTab(this,'${w.id}','station-b')">
-          <span class="tabs-card-title"><span class="tabs-card-num">1</span>${bTabTitle}</span>
-          <span class="tabs-card-sub">${bTabSub}</span>
-        </button>`
-    : `<button type="button" class="tabs-card tab-station-b active" onclick="switchTab(this,'${w.id}','station-b')">
-          <span class="tabs-card-title"><span class="tabs-card-num">1</span>${t('nav.stationBTitle')}</span>
-          <span class="tabs-card-sub">${t('nav.stationBSub')}</span>
-        </button>
-        <button type="button" class="tabs-card tab-station-c" onclick="switchTab(this,'${w.id}','station-c')">
-          <span class="tabs-card-title"><span class="tabs-card-num">2</span>${t('nav.stationCTitle')}</span>
-          <span class="tabs-card-sub">${t('nav.stationCSub')}</span>
-        </button>`;
+  /* A set is two panels now: the lesson ladder and the skills checklist. The
+     in-panel tab bar that used to switch between them was hidden site-wide
+     when the rail took over the job — it survived only as a place to hang an
+     .active class nobody could see, so it's gone and switchTabById() drives
+     the panels directly. The per-set Songs tab went with it: it was reachable
+     only from that hidden bar, and the Songs hub (rail → Songs) already lists
+     every song it did, Module 1's included, with the same play buttons. */
   return `${peekBanner}${eyebrow}
-  <div class="tabs">
-    <div class="tabs-songbar">
-      ${w.songs ? `<button type="button" class="tabs-songs tab-songs" onclick="switchTab(this,'${w.id}','songs')">&#9835; ${t('nav.songs')}</button>` : ''}
-    </div>
-    <div class="tabs-main">
-      <div class="tabs-stations-col">
-        ${stationCards}
-      </div>
-      <div class="tabs-arrow" aria-hidden="true">&rarr;</div>
-      <button type="button" class="tabs-card tab-checklist" onclick="switchTab(this,'${w.id}','checklist')">
-        <span class="tabs-card-title"><span class="tabs-card-num">${single ? 2 : 3}</span>${t('nav.checklistTitle')}</span>
-        <span class="tabs-card-sub">${chkSub}</span>
-      </button>
-    </div>
-  </div>
-  <div id="${w.id}-station-b" class="tab-panel tp-station-b active">${buildStations(w,'b')}${panelFooter(w,'station-b')}</div>
-  ${single ? '' : `<div id="${w.id}-station-c" class="tab-panel tp-station-c">${buildStations(w,'c')}${panelFooter(w,'station-c')}</div>`}
-  <div id="${w.id}-songs"    class="tab-panel tp-songs">${w.songs ? buildSongs(w) + panelFooter(w,'songs') : ''}</div>
+  <div id="${w.id}-${LESSON_TAB}" class="tab-panel tp-station-b active">${buildLesson(w)}${panelFooter(w,LESSON_TAB)}</div>
   <div id="${w.id}-checklist" class="tab-panel tp-checklist">${buildChecklist(w)}${panelFooter(w,'checklist')}</div>`;
 }
 
-function switchTab(el,wid,tab){
-  // Same reasoning as activateSet(): the tab-panel we're switching away from
-  // (e.g. Station B) might be hiding a still-running inline Coach check —
-  // close it so its mic doesn't keep running unseen. No-op if none is open.
-  if (typeof coachClose === 'function') coachClose();
-  // A running Shuffle Drill on the tab we're leaving keeps its interval alive
-  // under display:none otherwise — same reasoning as activateSet()'s sweep.
-  if(typeof shuffleDrills === 'object' && typeof sdStop === 'function'){
-    Object.keys(shuffleDrills).forEach(k=>sdStop(k));
-  }
-  const panel=document.querySelector(`.week-panel[data-id="${wid}"]`);
-  panel.querySelectorAll('.tabs > .tabs-main .tabs-card, .tabs > .tabs-songbar > .tabs-songs').forEach(t=>t.classList.remove('active'));
-  panel.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById(`${wid}-${tab}`).classList.add('active');
-  if(typeof syncRailStations === 'function') syncRailStations();   // mirror onto the rail switcher
-}
-
 /* Print one set as a clean one-pager (for days the Chromebooks/Wi-Fi fail).
-   The @media print stylesheet does the heavy lifting — it force-shows BOTH
-   station panels (regardless of which tab is open) and hides the songs/
-   checklist tabs and all on-screen chrome — so this just fires the dialog. */
+   The @media print stylesheet does the heavy lifting — it force-shows the
+   lesson ladder and the checklist (regardless of which tab is open) and hides
+   the songs tab and all on-screen chrome — so this just fires the dialog. */
 function printSet(wid){ window.print(); }
 /* Printed handouts must show the collapsed hint/stuck/level-up prose —
    hidden fold panels don't print, so unhide them for the print pass and
@@ -2419,7 +2374,7 @@ function toggleStepFold(btn){
    code that maps a section index back to rendered DOM (search, teacher
    dashboard response keys) must filter with this same predicate first, or
    its indexes drift from what's actually on screen. Kept at module scope
-   (not a buildStations() closure) so buildSearchIndex() can share it. */
+   (not a buildLesson() closure) so buildSearchIndex() can share it. */
 function isTuningWarmupSection(sec, moduleNum){
   return sec.title === 'Warm-up — tuning check (Module 1)' && moduleNum !== 1;
 }
@@ -2431,7 +2386,7 @@ const ICO_BOLT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" str
   'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ' +
   'style="width:1em;height:1em;vertical-align:-0.15em"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>';
 
-/* Ear Spark — the optional ear-training bonus at the end of a station. Matched
+/* Ear Spark — the optional ear-training bonus at the end of a ladder. Matched
    on the English title the same way isTuningWarmupSection() does, so the _es
    twin and any future translation come along for free. The step's own lead-in
    is matched on the untranslated `text` for the same reason. */
@@ -2462,8 +2417,16 @@ function isSpicyLevelUpStep(s){
   return /^Learn the most famous riff/.test(s.text || '');
 }
 
-/* ── Stations ── */
-function buildStations(w, stationId){
+/* ── The lesson ladder ──
+   The classroom no longer runs a three-group B/C rotation — one group is with
+   the teacher, one is on the site — so a set's job here is a single, linear
+   work block. Stations B and C are therefore MERGED IN DISPLAY ONLY: B's
+   sections then C's (document order), one continuous run of step numbers, one
+   `.dp` card. The data layer is untouched — every step key still carries its
+   own station's namespace (`${w.id}-b-sec{gi}-{i}` / `${w.id}-c-sec{gi}-{i}`),
+   so no student loses a checkmark. `stations.b` / `stations.c` in the module
+   files are unchanged. */
+function buildLesson(w){
   /* Focus mode is a site-wide view pref, read once per build: it only changes
      which rows the card SHOWS, never which one is `.cur` (that stays "first
      not-done step"), so the same markup serves both views and the toggle can
@@ -2610,105 +2573,133 @@ function buildStations(w, stationId){
      starts with the tune-up): render a pointer card above the numbered
      sections instead of taking a numbered slot itself. */
   const isTuningWarmup = sec => isTuningWarmupSection(sec, w.moduleNum);
-  // Steps done / total for a station's progress pill — mirrors stepsHtml's ns-per-section scheme.
-  const stationStepCounts = (id,s) => {
+  /* Every renderable section of the whole ladder, in order, each carrying the
+     storage namespace its steps are keyed under. A station with flat `steps:`
+     (no sections) becomes one untitled pseudo-section whose ns is the bare
+     station letter — exactly the key shape stepsHtml() already wrote for it. */
+  const groups = ['b','c'].map(id => ({ id, s: w.stations && w.stations[id] })).filter(g => !!g.s)
+    .map(g => ({
+      ...g,
+      secs: (g.s.sections && g.s.sections.length)
+        ? g.s.sections.filter(sec => !isTuningWarmup(sec)).map((sec,gi) => ({ sec, ns: `${g.id}-sec${gi}` }))
+        : (g.s.steps ? [{ sec: { title:'', steps: g.s.steps }, ns: g.id }] : [])
+    }));
+  const flat = groups.flatMap(g => g.secs);
+  // Steps done / total for the ladder's progress pill — mirrors stepsHtml's
+  // ns-per-section scheme, now summed across BOTH stations (one card, one pill).
+  const lessonStepCounts = () => {
     let total=0, done=0;
-    const count=(steps,ns)=>steps.forEach((st,idx)=>{
+    flat.forEach(({sec,ns}) => sec.steps.forEach((st,idx)=>{
       total++;
       if(completed[`${w.id}-${ns}-${idx}`]===true) done++;
-    });
-    if(s.sections && s.sections.length){
-      s.sections.filter(sec=>!isTuningWarmup(sec)).forEach((sec,gi)=>count(sec.steps, `${id}-sec${gi}`));
-    } else if(s.steps){
-      count(s.steps, id);
-    }
+    }));
     return {total,done};
   };
-  const sectionsHtml=(sections,baseNs)=>{
-    const reminder = sections.some(isTuningWarmup)
+  /* The B→C seam. Station-level titles ("Computer station — …" / "Practice
+     station — …") are no longer rendered — the room has no stations to name —
+     but the practice half's title carries real content ("melodies & TAB",
+     "requinto texture & your performance pattern"), so the seam keeps it:
+     whatever follows the em-dash, same shape in both languages (so no
+     per-language parsing), read through tf() so a language switch re-derives
+     it. Same trick as lessonSubLabel() on the rail. */
+  const stationTail = s => {
+    const raw = (s && s.title) ? (tf(s,'title') || '') : '';
+    const k = raw.indexOf('—');
+    return k >= 0 ? raw.slice(k + 1).trim() : '';
+  };
+  const dividerHtml = s => {
+    const tail = stationTail(s);
+    return `<div class="stp-divider"><span class="stp-divider-label">${escHtml(t('lesson.nowPractice'))}${tail ? ' — ' + escHtml(tail) : ''}</span></div>`;
+  };
+  const ladderHtml=()=>{
+    const reminder = groups.some(g => (g.s.sections||[]).some(isTuningWarmup))
       ? `<div class="daily5-inline">${t('daily5.tuneWarmupHtml',{btn:`<button type="button" class="daily5-inline-btn" onclick="openDaily5Here()">${ICO_BOLT} ${t('daily5.openToday')}</button>`})}</div>`
       : '';
-    const real = sections.filter(sec => !isTuningWarmup(sec));
     // Sections are plain group labels now, not their own accordion — every
-    // step across the whole station is a row from the start (Concept B: one
-    // level of chunking, not two). `.stp-sec` still wraps each group so
-    // deep links can address "section N, step K" without needing a card look.
-    // Numbering runs continuously across sections (offset carries the running
-    // total) even though storage keys stay section-local (`ns` + local `i`).
-    // Only ONE step should be open at a time across the whole station, not
-    // one per section — once an earlier section's current step has claimed
-    // it, every later section (even ones with their own incomplete steps)
-    // stays fully collapsed until the student works down to it.
+    // step in the whole ladder is a row from the start (Concept B: one level
+    // of chunking, not two). `.stp-sec` still wraps each group so deep links
+    // can address "station S, section N, step K" — hence data-ns, which is the
+    // section's storage namespace and the only stable handle now that DOM
+    // position spans two stations.
+    // Numbering runs continuously across sections AND across the old B→C
+    // boundary (offset carries the running total) even though storage keys
+    // stay section-local (`ns` + local `i`).
+    // Only ONE step should be open at a time across the whole LADDER, not one
+    // per section and not one per station — once an earlier section's current
+    // step has claimed it, every later section (even ones with their own
+    // incomplete steps) stays fully collapsed until the student works down.
     // Focus mode hides every section label except the one holding the open
     // step (`.sec-cur`, kept in sync by syncStationFocus() as the student
     // moves) — the heading of the group you're actually in, nothing else.
-    let numOffset = 0, foundCur = false;
-    const noneLeft = focusMode && !real.some((sec,gi)=>sec.steps.some((st,idx)=>completed[`${w.id}-${baseNs}-sec${gi}-${idx}`]!==true));
-    return reminder + real.map((sec,gi)=>{
-    const ns = `${baseNs}-sec${gi}`;
-    const allowCur = !foundCur;
-    const hasCur = allowCur && sec.steps.some((st,idx)=>completed[`${w.id}-${ns}-${idx}`]!==true);
-    const openIfNoCur = noneLeft && gi === 0;   // whole station done → section 1, step 1 stays open
-    const html = `<div class="stp-sec${(hasCur || openIfNoCur) ? ' sec-cur' : ''}">
-      <div class="stp-sec-label">${isEarSparkSection(sec) ? ICO_BOLT + ' ' : isSpicyLevelUpSection(sec) ? ICO_CHILI + ' ' : ''}${tf(sec,'title')}</div>
+    const noneLeft = focusMode && !flat.some(({sec,ns}) => sec.steps.some((st,idx)=>completed[`${w.id}-${ns}-${idx}`]!==true));
+    let numOffset = 0, foundCur = false, curNs = null;
+    const rendered = new Map();
+    flat.forEach(({sec,ns}, k)=>{
+      const allowCur = !foundCur;
+      const hasCur = allowCur && sec.steps.some((st,idx)=>completed[`${w.id}-${ns}-${idx}`]!==true);
+      const openIfNoCur = noneLeft && k === 0;   // whole ladder done → section 1, step 1 stays open
+      if(hasCur || openIfNoCur) curNs = ns;
+      const title = tf(sec,'title');
+      const html = `<div class="stp-sec${(hasCur || openIfNoCur) ? ' sec-cur' : ''}" data-ns="${escAttr(ns)}">
+      ${title ? `<div class="stp-sec-label">${isEarSparkSection(sec) ? ICO_BOLT + ' ' : isSpicyLevelUpSection(sec) ? ICO_CHILI + ' ' : ''}${title}</div>` : ''}
       <ul class="steps">${stepsHtml(sec.steps, ns, numOffset, allowCur, openIfNoCur)}</ul>
     </div>`;
-    if(hasCur) foundCur = true;
-    numOffset += sec.steps.length;
-    return html;
-  }).join('');
+      if(hasCur) foundCur = true;
+      numOffset += sec.steps.length;
+      rendered.set(ns, html);
+    });
+    /* One wrapper per station so the seam divider can hide itself in focus
+       mode until the student is actually in the practice half (syncStationFocus
+       toggles .div-cur) — a lone divider floating above a hidden step reads as
+       a heading for nothing. */
+    /* .div-cur has to be baked in, not left to syncStationFocus(): a fresh
+       render is the common case (every set open, every language switch) and a
+       student resuming inside the practice half would otherwise get a seam
+       that only appears once they touch something. */
+    return reminder + groups.map(g =>
+      `<div class="stp-group${g.secs.some(({ns}) => ns === curNs) ? ' div-cur' : ''}" data-group="${g.id}">`
+      + (g.id === 'c' ? dividerHtml(g.s) : '')
+      + g.secs.map(({ns}) => rendered.get(ns)).join('')
+      + `</div>`).join('');
   };
-  const dp=(id,cls,badge,badgeClass,s)=>{
-    const body = (s.sections && s.sections.length)
-      ? sectionsHtml(s.sections, id)
-      : `<ul class="steps">${stepsHtml(s.steps, id, 0, true, focusMode)}</ul>`;
-    /* Stations don't have to happen in one sitting: first pass should be
-       B→C (B teaches what C drills), but returning straight to C on a
-       later day is spaced practice — say so, so nobody feels off-track. */
-    const flexNote = (id==='c' && w.stations && w.stations.b)
-      ? `<div class="st-flex-note">${t('note.firstTimeHtml',{btn:`<button type="button" class="st-note-link" onclick="switchTabById('${w.id}','station-b')">${t('nav.stationBTitle')}</button>`})}</div>`
-      : '';
-    const {total: stepTotal, done: stepDone} = stationStepCounts(id, s);
-    const pillHtml = stepTotal > 0 ? `<span class="prog-pill-wrap">`
-      + `<span class="prog-pill" data-i18n="progress.stepsDone" data-i18n-params="${escAttr(JSON.stringify({done:stepDone,total:stepTotal}))}">${t('progress.stepsDone',{done:stepDone,total:stepTotal})}</span>`
-      + `<span class="prog-mini"><i style="width:${Math.round(stepDone/stepTotal*100)}%"></i></span>`
-      + `</span>` : '';
-    /* Stepper bar: where-am-I counter (focus mode only) + the view toggle,
-       which stays visible in BOTH views — it's the only way back to focus. */
-    const countParams = {n: openNum || 1, m: stepTotal};
-    const toggleKey = focusMode ? 'fm.listView' : 'fm.focusView';
-    const stepperHtml = stepTotal > 0 ? `<div class="dp-stepper">`
-      + `<span class="fm-count" aria-live="polite" data-i18n="fm.stepOf" data-i18n-params="${escAttr(JSON.stringify(countParams))}">${t('fm.stepOf', countParams)}</span>`
-      + `<button type="button" class="fm-toggle" onclick="toggleStationView()" data-i18n="${toggleKey}">${t(toggleKey)}</button>`
-      + `</div>` : '';
-    /* Back/Next lives once per card at the very end: in focus mode every other
-       row is display:none, so it lands directly under the open step's detail
-       (no per-step copies to keep in sync). Hidden entirely in list mode. */
-    const navHtml = stepTotal > 1 ? `<div class="dp-stepnav">`
-      + `<button type="button" class="fm-nav fm-back" onclick="stationStepNav(this,-1)" data-i18n="fm.back"${(openNum || 1) <= 1 ? ' hidden' : ''}>${t('fm.back')}</button>`
-      + `<button type="button" class="fm-nav fm-next" onclick="stationStepNav(this,1)" data-i18n="fm.next"${(openNum || 1) >= stepTotal ? ' hidden' : ''}>${t('fm.next')}</button>`
-      + `</div>` : '';
-    // .at-end drives whether the panel's "Next: My skills checklist" footer
-    // shows in focus mode (CSS, styles.css) — only once there's no further
-    // step to advance to, kept live by syncStationFocus() as the student moves.
-    const atEnd = (openNum || 1) >= stepTotal;
-    return `
-    <div class="dp${cls}${focusMode ? ' focus' : ''}${atEnd ? ' at-end' : ''}" id="${w.id}-dp-${id}">
-      <div class="dp-head"><span class="st-badge ${badgeClass}">${badge}</span><h3 class="dp-title">${tf(s,'title')}</h3>${pillHtml}</div>
+  /* Single-flow sets (e.g. Module 13 · String Changing) have no practice half
+     to merge, so they keep their own process title on the card; merged sets
+     show no station title at all (the seam divider carries C's words). */
+  const single = !(w.stations && w.stations.c);
+  const body = ladderHtml();
+  const {total: stepTotal, done: stepDone} = lessonStepCounts();
+  const pillHtml = stepTotal > 0 ? `<span class="prog-pill-wrap">`
+    + `<span class="prog-pill" data-i18n="progress.stepsDone" data-i18n-params="${escAttr(JSON.stringify({done:stepDone,total:stepTotal}))}">${t('progress.stepsDone',{done:stepDone,total:stepTotal})}</span>`
+    + `<span class="prog-mini"><i style="width:${Math.round(stepDone/stepTotal*100)}%"></i></span>`
+    + `</span>` : '';
+  const titleHtml = (single && w.stations.b && w.stations.b.title) ? `<h3 class="dp-title">${tf(w.stations.b,'title')}</h3>` : '';
+  const headHtml = (titleHtml || pillHtml) ? `<div class="dp-head">${titleHtml}${pillHtml}</div>` : '';
+  /* Stepper bar: where-am-I counter (focus mode only) + the view toggle,
+     which stays visible in BOTH views — it's the only way back to focus. */
+  const countParams = {n: openNum || 1, m: stepTotal};
+  const toggleKey = focusMode ? 'fm.listView' : 'fm.focusView';
+  const stepperHtml = stepTotal > 0 ? `<div class="dp-stepper">`
+    + `<span class="fm-count" aria-live="polite" data-i18n="fm.stepOf" data-i18n-params="${escAttr(JSON.stringify(countParams))}">${t('fm.stepOf', countParams)}</span>`
+    + `<button type="button" class="fm-toggle" onclick="toggleStationView()" data-i18n="${toggleKey}">${t(toggleKey)}</button>`
+    + `</div>` : '';
+  /* Back/Next lives once per card at the very end: in focus mode every other
+     row is display:none, so it lands directly under the open step's detail
+     (no per-step copies to keep in sync). Hidden entirely in list mode. */
+  const navHtml = stepTotal > 1 ? `<div class="dp-stepnav">`
+    + `<button type="button" class="fm-nav fm-back" onclick="stationStepNav(this,-1)" data-i18n="fm.back"${(openNum || 1) <= 1 ? ' hidden' : ''}>${t('fm.back')}</button>`
+    + `<button type="button" class="fm-nav fm-next" onclick="stationStepNav(this,1)" data-i18n="fm.next"${(openNum || 1) >= stepTotal ? ' hidden' : ''}>${t('fm.next')}</button>`
+    + `</div>` : '';
+  // .at-end drives whether the panel's "Next: My skills checklist" footer
+  // shows in focus mode (CSS, styles.css) — only once there's no further
+  // step to advance to, kept live by syncStationFocus() as the student moves.
+  const atEnd = (openNum || 1) >= stepTotal;
+  return `
+    <div class="dp${focusMode ? ' focus' : ''}${atEnd ? ' at-end' : ''}" id="${w.id}-dp-b">
+      ${headHtml}
       ${stepperHtml}
-      ${flexNote}
       ${body}
       ${navHtml}
     </div>`;
-  };
-  // buildStations() is always called with an explicit stationId ('b' or
-  // 'c' — confirmed by grep, both call sites pass one), so this used to
-  // branch on a station-picker grid (with openSt() as its onclick handler)
-  // that could never render. Removed 2026-07-26; openSt() removed with it.
-  const s = stationId === 'b' ? w.stations.b : w.stations.c;
-  const badge = stationId === 'b' ? t('nav.stationBTitle') : t('nav.stationCTitle');
-  const badgeClass = stationId === 'b' ? 'bb' : 'bc';
-  return dp(stationId, '', badge, badgeClass, s);
 }
 
 // "Mark done" ⇄ "✓ Done" — a state-and-language-dependent label, so the
@@ -2792,6 +2783,9 @@ function syncStationFocus(dp){
   const open = dp.querySelector('li.step:not(.collapsed)');
   const idx = open ? steps.indexOf(open) : -1;
   dp.querySelectorAll('.stp-sec').forEach(sec=>sec.classList.toggle('sec-cur', !!open && sec.contains(open)));
+  // Same rule one level up: in focus mode the B→C seam divider only shows
+  // while the open step is in the practice half it introduces.
+  dp.querySelectorAll('.stp-group').forEach(g=>g.classList.toggle('div-cur', !!open && g.contains(open)));
   const count = dp.querySelector('.fm-count');
   if(count){
     const params = {n: open ? (Number(open.dataset.num) || idx + 1) : 1, m: steps.length};
@@ -2931,24 +2925,6 @@ function updateProgressPill(li){
 }
 
 /* ── Songs ── */
-function diffLabel(level){
-  return level===1 ? t('songs.diff1') : level===2 ? t('songs.diff2') : level===3 ? t('songs.diff3') : '';
-}
-function diffDotsHtml(level){
-  if(!level) return '';
-  const lbl = diffLabel(level);
-  const filled = '●'.repeat(level);            // ●
-  const empty  = '○'.repeat(Math.max(0,3-level)); // ○
-  const title = `${t('songs.difficulty')}: ${lbl}`;
-  return `<span class="song-diff diff-${level}" title="${escAttr(title)}" aria-label="${escAttr(title)}">${filled}<span class="song-diff-empty">${empty}</span></span> `;
-}
-function songVidButtonsHtml(s, onclickFor){
-  const vids = [];
-  if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="${onclickFor('original')}" title="${escAttr(t('songs.opensYoutube'))}"><span class="svb-play">&#x25B6;</span>${t('songs.original')} <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
-  if(s.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="${onclickFor('tutorial')}"><span class="svb-play">&#x25B6;</span>${t('songs.tutorial')}</button>`);
-  if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="${onclickFor('backing')}" title="${escAttr(t('songs.jamTrackTitle'))}"><span class="svb-play">&#x25B6;</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> ${t('songs.backingTrack')}${s.backingKey?` (${s.backingKey})`:''}</button>`);
-  return vids;
-}
 /* Song-list badge ("Core" / "Choice" / "Focus" / "Supp"). The type lives in the
    module data as an English keyword, so it has to go through i18n here or the
    badge stays English in Español mode — which it did site-wide until 2026-08-08.
@@ -2959,25 +2935,7 @@ function songTypeLabel(type, core){
   if(key) return t(key);
   return type || t(core ? 'hub.tagCore' : 'hub.tagChoice');
 }
-function buildSongs(w){
-  const rows=w.songs.map((s,i)=>{
-    const nameEl = s.url ? `<button class="rp-trigger" onclick="loadSong('${w.id}',${i})">${s.name}</button>` : s.name;
-    const vids = songVidButtonsHtml(s, kind=>`loadSongVid('${w.id}',${i},'${kind}')`);
-    // Song Journey pages are same-origin (tabs/*.html), opened in a new tab so app state stays put.
-    if(s.journeyUrl) vids.push(`<button class="song-vid-btn journey" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="${escAttr(t('songs.oneSongLayers'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> ${t('songs.songJourney')}</button>`);
-    const vidsEl = vids.length ? `<div class="song-vids">${vids.join('')}</div>` : '';
-    return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div class="song-name-col"><div class="sname">${nameEl}</div><div class="smeta">${diffDotsHtml(s.level)}${tf(s,'meta')}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${escHtml(songTypeLabel(s.type, s.core))}</span></div>`;
-  }).join('');
-  const requestSlot = `<div class="song-row song-request"><div class="song-request-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg></div><div><div class="sname">${t('songs.yourPick')}</div><div class="smeta">${t('songs.yourPickBody')}</div></div></div>`;
-  const diffLegend = `<div class="leg"><span class="song-diff diff-1">&#x25CF;<span class="song-diff-empty">&#x25CB;&#x25CB;</span></span>&#x2192;<span class="song-diff diff-3">&#x25CF;&#x25CF;&#x25CF;</span> ${t('songs.diffLegend')}</div>`;
-  return `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('songs.core')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('songs.choice')}</div>${diffLegend}</div><div class="card">${rows}${requestSlot}</div>`;
-}
 
-function loadSong(wid, idx){
-  const w=SETS.find(x=>x.id===wid); if(!w) return;
-  const s=w.songs[idx]; if(!s||!s.url) return;
-  loadPanel('youtube', s.url, s.name, s.type);
-}
 
 /* THE song-video launcher — every song list (per-set, Songs hub)
    routes through this so the kind dispatch and subtitles can't drift. */
@@ -2987,10 +2945,6 @@ function openSongVid(s, kind){
   if(kind==='original'){ if(s.originalUrl) window.open(s.originalUrl, '_blank', 'noopener'); return; }
   if(kind==='backing'){ if(s.backingUrl) loadPanel(/\.(mp3|m4a|ogg|wav)(\?|$)/i.test(s.backingUrl)?'audio':'youtube', s.backingUrl, s.name, t('songs.backingTrackHint')); return; }
   if(s.tutorialUrl) loadPanel('youtube', s.tutorialUrl, s.name, t('songs.tutorial'));
-}
-function loadSongVid(wid, idx, kind){
-  const w=SETS.find(x=>x.id===wid); if(!w) return;
-  openSongVid(w.songs[idx], kind);
 }
 /* ── 10-Minute Routine card (module review) + Daily 5 panel ──
    Both assemble themselves from the module's already-loaded SETS data, so
@@ -3109,7 +3063,7 @@ function buildDaily5(){
   return `<div class="daily5-head"><div style="display:flex;align-items:center;gap:8px"><h3 style="font:inherit;margin:0">${ICO_BOLT} ${t('daily5.title')}</h3>${streakChip}</div><button type="button" class="tp-close" onclick="closeDaily5()" aria-label="${escAttr(t('daily5.closeAria'))}">&#x2715;</button></div>
     <ol class="routine-list">${items}</ol>`;
 }
-/* Station C's warm-up card opens the Daily 5 as a popup over the activities —
+/* The ladder's warm-up card opens the Daily 5 as a popup over the activities —
    close it and you're exactly where you left off, no scrolling to the top. */
 function openDaily5Here(){
   closeDaily5();
@@ -4883,8 +4837,8 @@ function closeCoachGate(){
   document.removeEventListener('keydown', coachGateEscClose);
 }
 /* "Practice it now" → close the gate and open that skill's practice panel,
-   where the Listening Coach button lives. The gate can open from any station
-   tab (Station C offers inline check-offs), but the practice panel lives in
+   where the Listening Coach button lives. The gate can open from any set
+   tab (the ladder offers inline check-offs), but the practice panel lives in
    the checklist tab — switch there first or everything below happens inside
    display:none. */
 function coachGatePractice(sid, wid){
@@ -4998,15 +4952,15 @@ function drillGatePractice(sid, wid){
   closeDrillGate();
   const hit = skillDrillStep(sid);
   const useWid = (hit && hit.w.id) || wid;
-  /* switchTabById resolves `${wid}-${tab}`, and the station panels are
-     `${wid}-station-b` / `-station-c`. Passing the bare letter looked up an
-     id that does not exist, so the tab never switched and the scroll below
-     silently targeted a display:none element. */
-  if(hit) switchTabById(useWid, 'station-' + hit.station, true);
+  /* switchTabById resolves `${wid}-${tab}`, and the lesson panel is
+     `${wid}-station-b`. Passing the bare station letter looked up an id that
+     does not exist, so the tab never switched and the scroll below silently
+     targeted a display:none element. */
+  switchTabById(useWid, LESSON_TAB, true);
   const box = document.querySelector(`.week-panel[data-id="${useWid}"] .sdr[data-skill="${CSS.escape(sid)}"]`);
   if(!box){
-    /* Never dead-end the student: land them on the station at least. */
-    const stn = hit && document.getElementById(`${useWid}-station-${hit.station}`);
+    /* Never dead-end the student: land them on the ladder at least. */
+    const stn = document.getElementById(`${useWid}-${LESSON_TAB}`);
     if(stn) stn.scrollIntoView({ block:'start', behavior:'smooth' });
     return;
   }
@@ -5192,10 +5146,6 @@ document.addEventListener('DOMContentLoaded', syncTranslateBtn);
 // any _es fields available get picked up (a module still mid-translation
 // just falls back to English again, same as before this rebuild existed).
 // Cheap: only touches modules the student actually opened this session.
-const TAB_SUFFIX_SELECTOR = {
-  'station-b': '.tab-station-b', 'station-c': '.tab-station-c',
-  'songs': '.tab-songs', 'checklist': '.tab-checklist'
-};
 function rebuildModuleContentPanels(){
   document.querySelectorAll('#week-panels .week-panel').forEach(panel=>{
     const wid = panel.dataset.id;
@@ -5204,17 +5154,16 @@ function rebuildModuleContentPanels(){
     const mr = MODULE_REVIEWS[num];
     if(w && wid===w.id){
       // Remember which tab was open so rebuilding doesn't bounce the
-      // student back to Station B.
+      // student back to the lesson ladder.
       const activeEl = panel.querySelector('.tab-panel.active');
       const activeSuffix = activeEl ? activeEl.id.slice(wid.length+1) : null;
       panel.innerHTML = w.comingSoon ? buildComingSoon(w) : buildSet(w);
-      if(activeSuffix && activeSuffix !== 'station-b'){
-        panel.querySelectorAll('.tabs > .tabs-main .tabs-card, .tabs > .tabs-songbar > .tabs-songs').forEach(t=>t.classList.remove('active'));
-        panel.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+      if(activeSuffix && activeSuffix !== LESSON_TAB){
         const targetPanel = document.getElementById(`${wid}-${activeSuffix}`);
-        const targetBtn = TAB_SUFFIX_SELECTOR[activeSuffix] ? panel.querySelector(TAB_SUFFIX_SELECTOR[activeSuffix]) : null;
-        if(targetPanel) targetPanel.classList.add('active');
-        if(targetBtn) targetBtn.classList.add('active');
+        if(targetPanel){
+          panel.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+          targetPanel.classList.add('active');
+        }
       }
     } else if(mr && wid===`mr${num}`){
       panel.innerHTML = buildModuleReview(mr);
@@ -5866,19 +5815,14 @@ function clampViewer(box){
    checklist→lesson jumps, Songs hub, site search
    ══════════════════════════════════════════════ */
 
-/* "Keep going" footer for each set tab-panel: the bottom of a long station
+/* "Keep going" footer for each set tab-panel: the bottom of a long ladder
    used to be a dead end — you had to scroll back up to continue. */
 function panelFooter(w, tab){
   const btn = (labelHtml, onclick) =>
     `<button type="button" class="panel-next-btn" onclick="${onclick}">${labelHtml} &rarr;</button>`;
   const span = key => `<span data-i18n="${key}">${escHtml(t(key))}</span>`;
   let inner = '';
-  if(tab === 'station-b'){
-    // Single-flow sets have no Station C — the process goes straight to the checklist.
-    inner = (w.stations && !w.stations.c)
-      ? btn(span('btn.nextChecklist'), `switchTabById('${w.id}','checklist')`)
-      : btn(span('btn.nextStationC'), `switchTabById('${w.id}','station-c')`);
-  } else if(tab === 'station-c' || tab === 'songs'){
+  if(tab === LESSON_TAB){
     inner = btn(span('btn.nextChecklist'), `switchTabById('${w.id}','checklist')`);
   } else if(tab === 'checklist'){
     const sets = SETS.filter(x => x.moduleNum === w.moduleNum && !x.comingSoon);
@@ -5896,22 +5840,34 @@ function panelFooter(w, tab){
   return inner ? `<div class="panel-next">${inner}</div>` : '';
 }
 
-/* Switch a set's tab from anywhere (footer buttons, skill jumps) by finding
-   the real tabs-card button so active-state styling stays consistent. */
+/* Switch a set's panel from anywhere — the rail, the footer buttons, skill
+   jumps, search deep links. The single entry point since the hidden tab bar
+   was removed; the rail reads the active state back off .tab-panel.active. */
 function switchTabById(wid, tab, keepScroll){
   const panel = document.getElementById(`${wid}-${tab}`);
-  if(!panel) return;
-  const wrap = panel.closest('.week-panel');
-  const cardBtn = wrap && wrap.querySelector(tab === 'songs' ? '.tabs-songs' : `.tabs-card.tab-${tab}`);
-  if(cardBtn) switchTab(cardBtn, wid, tab);
-  if(!keepScroll){
-    const tabs = wrap && wrap.querySelector('.tabs');
-    (tabs || panel).scrollIntoView({ block: 'start', behavior: 'smooth' });
+  const wrap = panel && panel.closest('.week-panel');
+  if(!wrap) return;
+  // Same reasoning as activateSet(): the panel we're leaving might be hiding a
+  // still-running inline Coach check — close it so its mic doesn't keep running
+  // unseen. Ditto a Shuffle Drill, whose interval survives display:none.
+  if(typeof coachClose === 'function') coachClose();
+  if(typeof shuffleDrills === 'object' && typeof sdStop === 'function'){
+    Object.keys(shuffleDrills).forEach(k=>sdStop(k));
   }
+  wrap.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  panel.classList.add('active');
+  if(typeof syncRailStations === 'function') syncRailStations();   // mirror onto the rail
+  /* Scroll the panel we just opened to the top. This used to target the tab
+     bar and fall back to the panel — but the bar was display:none, so
+     scrollIntoView() silently did nothing and "Next: My skills checklist" at
+     the bottom of a long ladder left the student stranded at the bottom. */
+  if(!keepScroll) panel.scrollIntoView({ block: 'start', behavior: 'smooth' });
 }
 
-/* Which station (if any) teaches set-skill number n? Steps tag themselves
-   with skills:[n] in the module data. */
+/* Does any step in this set teach set-skill number n (and if so, in which
+   half of the ladder)? Steps tag themselves with skills:[n] in the module
+   data. The letter is now only used as a "yes, it's taught here" answer —
+   both halves render into the same panel. */
 function skillTaughtStation(w, n){
   for(const st of ['b','c']){
     const stn = w.stations && w.stations[st];
@@ -5924,15 +5880,14 @@ function skillTaughtStation(w, n){
   return null;
 }
 
-/* Checklist "Show me where": switch to the station that teaches the skill,
-   expand the sections holding its steps, scroll there and flash them. */
+/* Checklist "Show me where": switch to the lesson ladder, expand the sections
+   holding the skill's steps, scroll there and flash them. */
 function showSkillLesson(wid, n){
   const w = SETS.find(x => x.id === wid);
   if(!w) return;
-  const st = skillTaughtStation(w, Number(n));
-  if(!st) return;
-  switchTabById(wid, `station-${st}`, true);
-  const panel = document.getElementById(`${wid}-station-${st}`);
+  if(!skillTaughtStation(w, Number(n))) return;
+  switchTabById(wid, LESSON_TAB, true);
+  const panel = document.getElementById(`${wid}-${LESSON_TAB}`);
   if(!panel) return;
   const matches = [...panel.querySelectorAll('li.step[data-skills]')]
     .filter(li => li.dataset.skills.split(',').includes(String(n)));
@@ -5949,23 +5904,22 @@ function showSkillLesson(wid, n){
 }
 
 /* Deep-link to one step (used by search results): activate module + set,
-   switch to its station tab, scroll + flash the step. */
+   open the lesson ladder, scroll + flash the step. Addressed by the section's
+   STORAGE namespace (`b-sec3`, `c-sec0`, or a bare `b` for a section-less
+   station), never by DOM position: the ladder now runs both stations' sections
+   through one panel, so position no longer identifies a section. */
 async function jumpToStep(moduleNum, wid, station, secIdx, stepIdx){
   if(await gatedJumpGuard(moduleNum, wid)) return;
   const sel = document.getElementById('module-select');
   if(sel) sel.value = String(moduleNum);
   await onModuleChange(moduleNum, wid);
   saveProgress();
-  switchTabById(wid, `station-${station}`, true);
-  const panel = document.getElementById(`${wid}-station-${station}`);
+  switchTabById(wid, LESSON_TAB, true);
+  const panel = document.getElementById(`${wid}-${LESSON_TAB}`);
   if(!panel) return;
-  const sections = panel.querySelectorAll('.stp-sec');
-  let li = null;
-  if(sections.length && sections[secIdx]){
-    li = sections[secIdx].querySelectorAll('li.step')[stepIdx];
-  } else {
-    li = panel.querySelectorAll('li.step')[stepIdx];
-  }
+  const sec = panel.querySelector(`.stp-sec[data-ns="${station}-sec${secIdx}"]`)
+           || panel.querySelector(`.stp-sec[data-ns="${station}"]`);
+  const li = sec ? sec.querySelectorAll('li.step')[stepIdx] : null;
   if(li){
     expandStepEl(li);
     flashClass(li, 'step-flash', 2600);
@@ -6011,7 +5965,7 @@ initBackToTop();
 
 /* ── Top-bar panels (Songs hub · Search) — one open at a time, and they
       close Games too so the top of the page stays tidy. (The Daily 5 is a
-      popup opened from Station C now, not a top-bar panel.) ── */
+      popup opened from the lesson ladder now, not a top-bar panel.) ── */
 function closeTopPanels(except){
   /* Hash-based full pages close through their own close fns (which clear
      the URL hash); plain drop-over panels just get hidden. */
@@ -6256,7 +6210,11 @@ async function buildSearchIndex(){
       sections.forEach((sec, secIdx) => (sec.steps || []).forEach((step, stepIdx) => {
         const text = stripTags(tf(step, 'text') || '');
         const hayExtra = [stripTags(step.text_es || ''), stripTags(step.label_es || ''), sec.title_es || ''].filter(Boolean).join(' ');
-        if(text) ix.push(searchEntry({ kind: 'step', moduleNum: w.moduleNum, wid: w.id, label: w.label, station: st, secIdx, stepIdx, secTitle: sec.title || '', title: stripTags(tf(step, 'label') || '') || (sec.title || ''), text, hayExtra }));
+        // secTitle is the always-English title (it feeds `hay`, which must
+        // match English queries in either language); secLabel is what the
+        // result line SHOWS, so it goes through tf(). The index is thrown away
+        // and rebuilt on gc-langchange, so a stale language can't stick.
+        if(text) ix.push(searchEntry({ kind: 'step', moduleNum: w.moduleNum, wid: w.id, label: w.label, station: st, secIdx, stepIdx, secTitle: sec.title || '', secLabel: tf(sec, 'title') || '', title: stripTags(tf(step, 'label') || '') || (sec.title || ''), text, hayExtra }));
       }));
     });
   });
@@ -6464,7 +6422,7 @@ function runSearch(q){
     const where = e.kind === 'song'
       ? t('search.whereSong', {n:e.moduleNum})
       : t('search.whereSet', {n:e.moduleNum, label:escHtml(e.label || '')}) +
-        (e.kind === 'step' ? t('search.whereStation', {station:e.station.toUpperCase()}) : e.kind === 'skill' ? t('search.whereSkill') : '');
+        (e.kind === 'step' && e.secLabel ? t('search.whereSection', {section:escHtml(e.secLabel)}) : e.kind === 'skill' ? t('search.whereSkill') : '');
     const onclick = e.kind === 'step'
       ? `searchGo(${e.moduleNum},'${e.wid}','${e.station}',${e.secIdx},${e.stepIdx})`
       : e.kind === 'skill' && e.skillNum != null

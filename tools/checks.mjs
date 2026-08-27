@@ -405,6 +405,41 @@ function checkBlockedTabSites() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1n. RETIRED STATION WORDING — the classroom's three-group B/C
+   rotation ended 2026-08-27 (Work Order 7). The room is two groups now
+   (one with the teacher, one on the site), so a set renders as ONE
+   linear ladder and nothing student-facing names a station. That sweep
+   retired 208 instances: 94 "Station Wrap-Up", 104 "Cierre de la
+   estación", 10 "Station wrap-up", plus the nav/search i18n keys.
+   The mid-set reflection card is "Checkpoint" / "Punto de control";
+   the end-of-set one is "Wrap-Up" / "Cierre".
+   The DATA layer keeps `stations.b` / `stations.c` and their progress
+   keys untouched, so this only looks at text students read — quoted
+   string literals in the module files and i18n.js, and visible text in
+   index.html / the Journey pages. Fix by naming the work, not the
+   station. (The student tour was deleted rather than rewritten — it was
+   the last surface still teaching the B/C model, and Jonathan is building a
+   new one against the merged ladder.)
+   ════════════════════════════════════════════════════════════════════ */
+function checkRetiredStationWording() {
+  head('1n. Retired station wording in student-facing text');
+  const RE = /\b(?:Station|Estaci[oó]n)\s+[BC]\b|Station Wrap-?Up|Cierre de la estaci[oó]n/gi;
+  let bad = 0;
+  for (const file of [...MODULE_FILES, 'class-activities.js', 'i18n.js', 'index.html', ...TAB_PAGES]) {
+    let lines;
+    try { lines = readFileSync(join(ROOT, file), 'utf8').split('\n'); } catch { continue; }
+    lines.forEach((line, li) => {
+      if (/^\s*(\/\/|\*|\/\*|<!--)/.test(line)) return;   // a comment may still discuss the old model
+      for (const m of line.matchAll(RE)) {
+        err(`${file}:${li + 1}: retired station wording — "${line.slice(Math.max(0, m.index - 25), m.index + m[0].length + 25).trim()}" (the ladder is one linear block; use Checkpoint / Wrap-Up)`);
+        problems++; bad++;
+      }
+    });
+  }
+  if (bad === 0) ok('no retired station wording in student-facing text');
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1m. NARRATIVE LEAD-INS IN STEP TEXT — a step's `text`/`text_es` opens
    directly with the verb, not an announcement that an instruction is
    coming. A 2026-08-24 sweep removed ~45 instances of a handful of
@@ -1544,6 +1579,7 @@ async function liveCheck() {
   checkNumberedStrings();
   checkBlockedTabSites();
   checkNarrativeLeadIns();
+  checkRetiredStationWording();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

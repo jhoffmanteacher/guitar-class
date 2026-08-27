@@ -214,10 +214,12 @@
     'nav.classActivities':{ en: 'In-Class Activities', es: 'Actividades de clase' },
     'nav.moduleReview':   { en: 'Module review', es: 'Repaso del módulo' },
     'nav.setN':           { en: 'Set {n}', es: 'Unidad {n}' },
-    'nav.stationBTitle':  { en: 'Station B', es: 'Estación B' },
-    'nav.stationBSub':    { en: 'Watch · Listen · Practice', es: 'Mira · Escucha · Practica' },
-    'nav.stationCTitle':  { en: 'Station C', es: 'Estación C' },
-    'nav.stationCSub':    { en: 'Independent drill', es: 'Ejercicio independiente' },
+    // The room's B/C station rotation retired in 2026-08: one group is with the
+    // teacher, one is on the site, so a set is a single linear work block. These
+    // two label the one rail button that opens it. nav.lessonSub is only the
+    // fallback — lessonSubLabel() normally mirrors the set's own wording.
+    'nav.lessonTitle':    { en: 'The lesson', es: 'La lección' },
+    'nav.lessonSub':      { en: 'Watch · Listen · Practice', es: 'Mira · Escucha · Practica' },
     'nav.checklistTitle': { en: 'My skills checklist', es: 'Mi lista de destrezas' },
     'nav.checklistSub':   { en: 'Track what you can do', es: 'Lleva el registro de lo que ya sabes hacer' },
     'nav.previewNoteHtml':{ en: '<strong>Preview mode</strong> — set locks are off for you. Students still see them.',
@@ -345,7 +347,6 @@
     'btn.doneWord':          { en: 'Done', es: 'Hecho' },
     'btn.printSet':          { en: 'Print this set', es: 'Imprimir esta unidad' },
     'btn.printSetTitle':     { en: 'Print this set as a one-page handout', es: 'Imprimir esta unidad como hoja de una página' },
-    'btn.nextStationC':      { en: 'Next: Station C — practice it', es: 'Siguiente: Estación C — a practicar' },
     'btn.nextChecklist':     { en: 'Next: My skills checklist', es: 'Siguiente: Mi lista de destrezas' },
     'btn.next':              { en: 'Next:', es: 'Siguiente:' },
     'btn.nextModuleReview':  { en: 'Next: Module Review', es: 'Siguiente: Repaso del módulo' },
@@ -408,7 +409,7 @@
                                 es: 'Nada coincide con todas las palabras de “{q}” — resultados más cercanos:' },
     'search.whereSong':      { en: 'Module {n} · Song', es: 'Módulo {n} · Canción' },
     'search.whereSet':       { en: 'Module {n} · {label}', es: 'Módulo {n} · {label}' },
-    'search.whereStation':   { en: ' · Station {station}', es: ' · Estación {station}' },
+    'search.whereSection':   { en: ' · {section}', es: ' · {section}' },
     'search.whereSkill':     { en: ' · Skill', es: ' · Destreza' },
 
     // ── Step folds & responses (module content phase 2 — chrome around
@@ -429,14 +430,7 @@
     // ── Assessment block (standards label) ──
     'assess.standards':      { en: 'NAfME standards', es: 'Estándares NAfME' },
 
-    // ── Songs list (per-set and per-module "🎵 Songs") ──
-    'songs.core':            { en: 'Core — everyone', es: 'Básica — para todos' },
-    'songs.choice':          { en: 'Choice menu — pick 1', es: 'Menú a elección — elige 1' },
-    'songs.diffLegend':      { en: 'easier → harder', es: 'más fácil → más difícil' },
-    'songs.difficulty':      { en: 'Difficulty', es: 'Dificultad' },
-    'songs.diff1':           { en: 'Beginner', es: 'Principiante' },
-    'songs.diff2':           { en: 'Intermediate', es: 'Intermedio' },
-    'songs.diff3':           { en: 'Advanced', es: 'Avanzado' },
+    // ── Song rows (the Songs hub, and the video overlay it opens) ──
     'songs.original':        { en: 'Original', es: 'Original' },
     'songs.tutorial':        { en: 'Tutorial', es: 'Tutorial' },
     'songs.backingTrack':    { en: 'Backing track', es: 'Pista de acompañamiento' },
@@ -444,12 +438,7 @@
                                 es: 'Pista de acompañamiento — se repite sola; presiona play e improvisa (solo) encima' },
     'songs.songJourney':     { en: 'Song Journey', es: 'Recorrido de la canción' },
     'songs.openLayerTitle':  { en: 'Open this layer on the Song Journey page', es: 'Abrir esta capa en la página del Recorrido de la canción' },
-    'songs.yourPick':        { en: 'Your pick — bring your own song!', es: 'Tu elección — ¡trae tu propia canción!' },
-    'songs.yourPickBody':    { en: "Got a song you want to learn? Search YouTube for a beginner tutorial and use this module's skills on it.",
-                                es: '¿Tienes una canción que quieres aprender? Busca en YouTube un tutorial para principiantes y aplica las destrezas de este módulo.' },
     'songs.opensYoutube':    { en: 'Opens in YouTube', es: 'Se abre en YouTube' },
-    'songs.jamTrackTitle':   { en: 'Jam track — backing music to play along with; make up your own melody (solo) over it',
-                                es: 'Pista de acompañamiento — música de fondo para tocar junto con ella; improvisa tu propia melodía (solo) encima.' },
     // Song Journey pages' own playalong button — different copy from
     // songs.jamTrackTitle above (this one names the layer, not a solo), so it
     // needs its own key rather than a reuse.
@@ -534,8 +523,10 @@
     'thread.grows':          { en: 'This set grows:', es: 'Esta unidad hace crecer:' },
 
     // ── "First time on this set?" flex-practice note ──
-    'note.firstTimeHtml':    { en: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5L10 14l1.5-4.5L16 8z"/></svg> <strong>First time on this set?</strong> Do {btn} first — watch the lessons, then come back here and drill. Back on another day just to practice? Perfect — practicing on different days helps you remember.',
-                                es: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.5L10 14l1.5-4.5L16 8z"/></svg> <strong>¿Primera vez en esta unidad?</strong> Primero haz {btn} — mira las lecciones y luego vuelve aquí a practicar. ¿Volviste otro día solo a practicar? Perfecto — practicar en días distintos te ayuda a recordar mejor.' },
+    /* The B→C seam in the merged lesson ladder. Everything after the em-dash
+       is the set's OWN practice-half wording, pulled from the module data at
+       render time — this key is only the lead-in. */
+    'lesson.nowPractice':    { en: 'Now practice it', es: 'Ahora practícalo' },
     'daily5.tuneWarmupHtml': { en: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> <strong>Tune and warm up first:</strong> today’s Daily 5 has tuning, a finger warm-up, and one drill (a short exercise you repeat to build a skill) from this module — five minutes and your hands are ready. {btn}',
                                 es: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg> <strong>Primero afina y calienta:</strong> el Daily 5 de hoy tiene afinación, un calentamiento de dedos, y un ejercicio de este módulo — cinco minutos y tus manos estarán listas. {btn}' },
     'daily5.openToday':      { en: 'Open today’s Daily 5', es: 'Abrir el Daily 5 de hoy' },

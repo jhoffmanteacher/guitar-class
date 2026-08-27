@@ -16,6 +16,30 @@ its own section below.
 Module 13 (String Changing) is a *single-flow* module — `stations.b` only,
 custom tab labels, checklist = graded assessment.
 
+**Stations B and C are merged in DISPLAY ONLY** (2026-08-27, Work Order 7).
+The room runs two groups now — one with the teacher, one on the site — so a
+set renders as ONE continuous step ladder: B's sections, a seam divider
+carrying C's own title words, then C's sections, numbered straight through.
+`stations.b` / `stations.c` in the module files are unchanged and so is every
+progress key (`${w.id}-b-sec{gi}-{i}` / `${w.id}-c-sec{gi}-{i}`) — never
+"simplify" the data to match the display. `buildLesson()` in `app.js` is the
+renderer; the single tab-panel suffix is `LESSON_TAB` (still the literal
+`'station-b'`, so old deep links resolve). Sections are addressed by
+`data-ns`, never by DOM position. Don't reintroduce "Station B/C" wording in
+student-facing text — the mid-set reflection card is **Checkpoint / Punto de
+control**, the end-of-set one is **Wrap-Up / Cierre**; checks.mjs 1n fails the
+push on a relapse.
+
+**There is no student tour.** `tour.html` + `tour-img/` were deleted 2026-08-27
+(they taught the retired B/C model and every screenshot was stale). Jonathan is
+building a new one — don't resurrect the old file from git.
+
+**The set has no in-panel tab bar.** The rail is the only switcher;
+`switchTabById()` drives `.tab-panel` directly. A set is exactly two panels,
+the lesson ladder and the checklist — the per-set Songs tab was removed
+2026-08-27 (unreachable since the rail took over, and the Songs hub already
+lists the same songs, Module 1's included).
+
 **Live preview:** VS Code Live Server — right-click `index.html` → "Open with
 Live Server". No commit needed.
 
@@ -258,8 +282,9 @@ rejected and the game looks broken with no error students can see.
   (`https://www.youtube.com/oembed?url=…&format=json` → JSON for valid, 404 for
   dead). Batch verifications in parallel. If you can't verify one, drop the link
   rather than inventing it. (In May 2026 ~60 recalled URLs were 404s.)
-- **Station B video pairs:** aim for video #2 from a *different* instructor than
-  #1, same skill. Same-channel pairs are fine when the alternative is worse.
+- **Watch-half video pairs** (`stations.b`): aim for video #2 from a *different*
+  instructor than #1, same skill. Same-channel pairs are fine when the
+  alternative is worse.
 - **Prefer diverse creators.** Before settling on Marty Music / JustinGuitar /
   Andy Guitar, spend one extra search on a comparable lesson from a woman, a
   creator of colour, or a Spanish-language channel. Already verified on the

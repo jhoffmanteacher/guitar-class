@@ -120,13 +120,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
               {
                 label: 'Wrap-up: what is a key?', label_es: 'Cierre: ¿qué es una tonalidad?',
-                text: 'Station Wrap-Up — in your own words: what does it mean when someone says a song is "in the key of G"?',
-                text_es: 'Cierre de la estación — con tus propias palabras: ¿qué significa cuando alguien dice que una canción está "en la tonalidad de G"?',
+                text: 'Checkpoint — in your own words: what does it mean when someone says a song is "in the key of G"?',
+                text_es: 'Punto de control — con tus propias palabras: ¿qué significa cuando alguien dice que una canción está "en la tonalidad de G"?',
                 response: { type: 'short', placeholder: 'e.g. its notes and chords come from the G major scale — G feels like home',
                   placeholder_es: 'p. ej. sus notas y acordes vienen de la escala de G mayor — G se siente como el hogar' }
               }
@@ -219,8 +219,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: do you know the recipe?', label_es: 'Cierre: ¿sabes la receta?',
@@ -411,13 +411,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
               {
                 label: 'Wrap-up: explain relative minor', label_es: 'Cierre: explica la relativa menor',
-                text: 'Station Wrap-Up — explain relative minor in one sentence, as if to a friend.',
-                text_es: 'Cierre de la estación — explica la relativa menor en una oración, como si fuera para un amigo.',
+                text: 'Checkpoint — explain relative minor in one sentence, as if to a friend.',
+                text_es: 'Punto de control — explica la relativa menor en una oración, como si fuera para un amigo.',
                 response: { type: 'short', placeholder: 'e.g. it\'s the minor key hiding inside every major key — same notes, sadder home',
                   placeholder_es: 'p. ej. es la tonalidad menor escondida dentro de cada tonalidad mayor — mismas notas, un hogar más triste' }
               }
@@ -498,8 +498,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: relative key and the b5', label_es: 'Cierre: la relativa y la b5',
@@ -644,8 +644,8 @@ SETS.push(
               },
               {
                 label: 'Watch: find melodies by ear', label_es: 'Mira: encuentra melodías de oído',
-                text: 'Watch: <a href="https://youtu.be/bd8M2fhK6Z8" target="_blank">5\' Guitar Exercise: Find Melodies You Know – JustinGuitar</a>. This is the exact sing-it-then-find-it habit today\'s Station C drill is built around.',
-                text_es: 'Mira: <a href="https://youtu.be/bd8M2fhK6Z8" target="_blank">5\' Guitar Exercise: Find Melodies You Know – JustinGuitar</a>. Este es exactamente el hábito de cantarlo-y-luego-encontrarlo alrededor del cual está construido el ejercicio de la Estación C de hoy.',
+                text: 'Watch: <a href="https://youtu.be/bd8M2fhK6Z8" target="_blank">5\' Guitar Exercise: Find Melodies You Know – JustinGuitar</a>. This is the exact sing-it-then-find-it habit the drill later in this set is built around.',
+                text_es: 'Mira: <a href="https://youtu.be/bd8M2fhK6Z8" target="_blank">5\' Guitar Exercise: Find Melodies You Know – JustinGuitar</a>. Este es exactamente el hábito de cantarlo-y-luego-encontrarlo alrededor del cual está construido el ejercicio de más adelante en esta unidad.',
                 hint: 'This is the single most useful guitar habit you can build: sing what you hear first, then let your hands catch up.',
                 hint_es: 'Este es el hábito más útil que puedes construir en la guitarra: canta primero lo que escuchas, y luego deja que tus manos te alcancen.',
                 skills: [3],
@@ -659,8 +659,8 @@ SETS.push(
               },
               {
                 label: 'Optional watch: building your ear', label_es: 'Opcional: desarrolla tu oído',
-                text: 'Optional bonus watch: <a href="https://youtu.be/rPSRH3tf5B8" target="_blank">How To Develop The World\'s Greatest Ear – Rick Beato</a> — a producer\'s view of the exact skill this set trains. You don\'t need the advanced parts: the opening idea (ears are built by a little practice every day, not talent) is the main point — then go do the Station C echo drills.',
-                text_es: 'Video extra opcional: <a href="https://youtu.be/rPSRH3tf5B8" target="_blank">How To Develop The World\'s Greatest Ear – Rick Beato</a> — la visión de un productor sobre exactamente la destreza que entrena esta unidad. No necesitas las partes avanzadas: la idea inicial (el oído se construye con un poco de práctica cada día, no con talento) es el punto principal — y luego ve a hacer los ejercicios de eco de la Estación C.',
+                text: 'Optional bonus watch: <a href="https://youtu.be/rPSRH3tf5B8" target="_blank">How To Develop The World\'s Greatest Ear – Rick Beato</a> — a producer\'s view of the exact skill this set trains. You don\'t need the advanced parts: the opening idea (ears are built by a little practice every day, not talent) is the main point — then go do the echo drills later in this set.',
+                text_es: 'Video extra opcional: <a href="https://youtu.be/rPSRH3tf5B8" target="_blank">How To Develop The World\'s Greatest Ear – Rick Beato</a> — la visión de un productor sobre exactamente la destreza que entrena esta unidad. No necesitas las partes avanzadas: la idea inicial (el oído se construye con un poco de práctica cada día, no con talento) es el punto principal — y luego ve a hacer los ejercicios de eco de más adelante en esta unidad.',
                 response: { type: 'short', placeholder: 'One idea from this video worth borrowing for your own practice: …',
                   placeholder_es: 'Una idea de este video que vale la pena tomar prestada para tu propia práctica: …' }
               }
@@ -724,13 +724,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
               {
                 label: 'Wrap-up: which was harder?', label_es: 'Cierre: ¿qué fue más difícil?',
-                text: 'Station Wrap-Up — which was harder today, moving the pattern to a new key, or echoing by ear? Why?',
-                text_es: 'Cierre de la estación — ¿qué fue más difícil hoy, mover el patrón a una nueva tonalidad, o repetir de oído? ¿Por qué?',
+                text: 'Checkpoint — which was harder today, moving the pattern to a new key, or echoing by ear? Why?',
+                text_es: 'Punto de control — ¿qué fue más difícil hoy, mover el patrón a una nueva tonalidad, o repetir de oído? ¿Por qué?',
                 response: { type: 'short', placeholder: 'e.g. echoing — I could sing it but took a while to find the starting fret',
                   placeholder_es: 'p. ej. repetir de oído — podía cantarlo pero me tomó tiempo encontrar el traste inicial' }
               }
@@ -829,8 +829,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: box 1 and finding notes', label_es: 'Cierre: caja 1 y notas de oído',
