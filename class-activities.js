@@ -41,7 +41,9 @@
    activities get authored in — an activity written late can be taught first.
    Resequencing `number` is therefore expected and safe: nothing is keyed to
    it (ids are), it only drives the "#N - " prefix and the sort tiebreak in
-   app.js / teacher.js. Keep the set contiguous 1..N with no gaps or
+   app.js / teacher.js — and it can be resequenced from the teacher console
+   too, without a push (see RENUMBERING FROM THE CONSOLE below). Keep the set
+   contiguous 1..N with no gaps or
    duplicates — checks.mjs (1d) enforces that, and enforces id uniqueness
    separately. Renumbering ids to match is the one thing that would break
    students' saved progress; don't.
@@ -75,6 +77,20 @@
    shadow a newly translated title. If you see a name in the console that
    isn't in this file, that's a rename waiting to be folded in. See caTitle()
    in app.js and teacherActivityTitle() in teacher.js.
+
+   RENUMBERING FROM THE CONSOLE works the same way, on the same doc: typing
+   over the "#N" in the Class activities table moves that activity in the
+   teaching order and renumbers everything around it, writing
+   config/class.activityNumbers as { id -> { n, base } } — one row per
+   activity that no longer sits on its shipped number, `base` being the
+   shipped number it was moved from. Students see the new "#N - " prefix
+   immediately, in both languages (a number needs no translating, so unlike a
+   rename there's nothing owed to Spanish afterwards). Folding the order in
+   here — retype the `number` fields to match what the console shows — expires
+   those overrides automatically, exactly like a rename. Until it's folded in,
+   the file and the console disagree about the order and the CONSOLE is what
+   students see. See caNumberMap()/caNumber() in app.js and
+   teacherSetActivityNumber() in teacher.js.
 
    Every display string carries an `_es` twin, same convention as module
    files — rendered through tf(obj, field) in app.js (see the "field on a
@@ -567,7 +583,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-3',
-    number: 4,
+    number: 5,
     title:    'Finger Gym 2 — Down the Ladder',
     title_es: 'Gimnasio de Dedos 2 — Bajando la Escalera',
     intro:    'Last Gym went up. Today you come back down, then take the Ladder onto all six strings. Going down is harder than going up — the pinky has to lead.',
@@ -657,7 +673,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-4',
-    number: 5,
+    number: 6,
     title:    'Finger Gym 3 — Up the Neck',
     title_es: 'Gimnasio de Dedos 3 — Subiendo el mástil',
     intro:    'So far the gym has lived in the first five frets. Today you move it up the neck. The frets get narrower as you climb, so the same shape feels different in every position.',
@@ -735,7 +751,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-5',
-    number: 6,
+    number: 7,
     title:    'Finger Gym 4 — Fingers Down',
     title_es: 'Gimnasio de Dedos 4 — Dedos abajo',
     intro:    'Until now your fingers took turns. Today they stay down. Every finger that has already played keeps touching the string — that\'s what makes chords possible later.',
@@ -810,7 +826,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-6',
-    number: 7,
+    number: 8,
     title:    'Finger Gym 5 — The Skip',
     title_es: 'Gimnasio de Dedos 5 — El salto',
     intro:    'Two new demands today: skipping over a string without hitting it, and reaching one fret farther than your hand wants to go.',
@@ -887,7 +903,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-7',
-    number: 8,
+    number: 9,
     title:    'Finger Gym 6 — The Meet',
     title_es: 'Gimnasio de Dedos 6 — La competencia',
     intro:    'Meet day. Nothing new to learn — everything you\'ve built, run back to back, at the fastest tempo you can keep clean. Bring your record from last Gym.',
@@ -1033,7 +1049,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-10',
-    number: 9,
+    number: 4,
     title:    'Seven Nation Army — The Riff',
     title_es: 'Seven Nation Army — El riff',
     intro:    'Your fingers trained for this. One riff, one string, seven notes — and five of them sit right on the neck dots you already know.',

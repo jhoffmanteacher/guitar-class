@@ -138,6 +138,7 @@ let accountPaused = false; // teacher put this student on hold (see loadClassCon
 let hiddenActivityIds = {}; // In-Class Activities the teacher has temporarily hidden (see loadClassConfig) — id -> true
 let activityDates = {}; // In-Class Activities release dates, teacher-set in the console (see loadClassConfig) — id -> 'YYYY-MM-DD'
 let activityTitles = {}; // In-Class Activity renames, teacher-set in the console (see loadClassConfig / caTitle) — id -> { en, base }
+let activityNumbers = {}; // In-Class Activity renumbering, teacher-set in the console (see loadClassConfig / caNumber) — id -> { n, base }
 let saveTimer   = null;
 
 /* ── Lazy module loading ──
@@ -321,7 +322,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
       if(accountPaused) showPausedScreen(user); else showApp(user);
     }
   } else {
-    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; progressLoadFailed = false;
+    currentUser = null; progress = {}; responses = {}; completed = {}; completedDeletes = new Set(); classActivities = {}; classActivitiesDeletes = new Set(); games = {}; streak = { count:0, lastDay:null }; gamesAccessOn = true; hiddenActivityIds = {}; activityDates = {}; activityTitles = {}; activityNumbers = {}; progressLoadFailed = false;
     if(typeof gamesResetForUser === 'function') gamesResetForUser();   // Note Runner's module caches must not leak into the next signed-in user
     if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
     practiceLog = loadLocalPracticeLog();   // per-skill rep history: back to the local copy on sign-out
@@ -443,6 +444,7 @@ async function loadClassConfig(){
   hiddenActivityIds = {};
   activityDates = {};
   activityTitles = {};
+  activityNumbers = {};
   try{
     await ensureDb();
     if(!db){ restoreActivityDatesFromCache(); return; }
@@ -475,6 +477,10 @@ async function loadClassConfig(){
     // dates: losing a rename shows the shipped title, which is a cosmetic
     // fallback, not a leak of unreleased content. See caTitle().
     activityTitles = d.activityTitles || {};
+    // Teacher renumbering (same view) — id -> { n, base }. Fails open to
+    // {} like the renames: losing it shows the shipped teaching order,
+    // which is a cosmetic fallback. See caNumber().
+    activityNumbers = d.activityNumbers || {};
   }catch(e){ restoreActivityDatesFromCache(); /* leave games on, nothing hidden */ }
 }
 // A student who has loaded config at least once keeps seeing that last-known
@@ -6893,7 +6899,8 @@ function caActivityCardHtml(a){
   const openStepIdx = caStepOpen[a.id] !== undefined ? caStepOpen[a.id] : caDefaultOpenStep(a);
   const stepsHtml = (a.steps || []).map((s, si) => caStepHtml(a, s, si, si === openStepIdx, caStepDone[`${a.id}:${si}`] === true)).join('');
   const markLabel = done ? t('ca.completed') : t('ca.markComplete');
-  const titleHtml = (a.number ? `#${Number(a.number)} - ` : '') + escHtml(caTitle(a));
+  const num = caNumber(a);
+  const titleHtml = (num ? `#${num} - ` : '') + escHtml(caTitle(a));
   return `<details class="ca-card" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary">
       <span class="ca-chip">${escHtml(caFormatDate(caDate(a)))}</span>
@@ -6994,6 +7001,51 @@ function caTitle(a){
   }
   return tf(a,'title');
 }
+/* ── Teaching-order numbers ──
+   `number` in class-activities.js is the teaching order the class actually
+   runs in, and it drives the "#N - " prefix students read. The teacher can
+   resequence it from the console (teacher.js Class activities view), which
+   lands in config/class.activityNumbers as id -> { n, base }.
+
+   `base` is the SHIPPED number the renumbering was typed against, and it
+   plays exactly the role it plays for renames (see caTitle): the override
+   applies only while the shipped number still equals `base`, so folding the
+   new order into class-activities.js expires it by itself — no Firestore
+   cleanup, and no forgotten override quietly shadowing a hand-set order.
+
+   caNumberMap() takes the whole list rather than one activity because the
+   thing being resolved is an ORDER, not a value: it sorts by the effective
+   number and hands back positions 1..N. That normalisation is what keeps the
+   prefix honest through a partial expiry — if a push folds in some of the
+   overrides and not others, the raw numbers can briefly collide or leave a
+   gap, and students would otherwise see two #5s. Ties break on the shipped
+   number, then the id, so the result is stable across renders and clients.
+   Exported plainly (not a closure) because teacher.js calls it too, with the
+   config doc it already has in hand instead of this file's student-side
+   globals — same split as caTitle/teacherActivityTitle, minus the copy. */
+function caNumberMap(activities, overrides){
+  const ov = overrides || {};
+  const shipped = a => { const n = Number(a.number); return Number.isFinite(n) ? n : Infinity; };
+  const effective = a => {
+    const o = ov[a.id];
+    return (o && Number.isFinite(Number(o.n)) && Number(o.base) === shipped(a)) ? Number(o.n) : shipped(a);
+  };
+  const map = {};
+  [...(activities||[])]
+    .sort((x, y) => (effective(x) - effective(y)) || (shipped(x) - shipped(y)) || String(x.id).localeCompare(String(y.id)))
+    .forEach((a, i) => { map[a.id] = i + 1; });
+  return map;
+}
+// The map is rebuilt only when activityNumbers is REPLACED (loadClassConfig
+// assigns a fresh object every time, and so does the sign-out reset), not on
+// every card — renderClassActivities' comparator alone would otherwise sort
+// the whole list once per comparison.
+let caNumberCache = null;
+function caNumber(a){
+  if(!caNumberCache || caNumberCache.src !== activityNumbers)
+    caNumberCache = { src: activityNumbers, map: caNumberMap(window.CLASS_ACTIVITIES || [], activityNumbers) };
+  return caNumberCache.map[a.id] || Number(a.number) || 0;
+}
 /* An activity is visible to students once its console-set release date has
    arrived (local calendar day) — same "hidden until it happens" default as
    the reminder popup below, so an activity with no date set yet (every
@@ -7016,7 +7068,7 @@ function renderClassActivities(){
   // Treat null as '' so an undated entry sinks to the bottom of the sort
   // instead of localeCompare throwing on a non-string.
   const list = (window.CLASS_ACTIVITIES || []).filter(caIsVisible)
-    .sort((a, b) => (caDate(b) || '').localeCompare(caDate(a) || '') || (b.number - a.number));
+    .sort((a, b) => (caDate(b) || '').localeCompare(caDate(a) || '') || (caNumber(b) - caNumber(a)));
   if(!list.length){
     bodyEl.innerHTML = `<div class="coach-tip" data-i18n="ca.empty">${escHtml(t('ca.empty'))}</div>`;
   } else {

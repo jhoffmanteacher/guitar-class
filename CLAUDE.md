@@ -135,7 +135,11 @@ reading. What a series must be is contiguous 1..N in teaching order, EN and ES,
 which checks.mjs 1l enforces; inserting one in the middle means retyping every
 later title's digit plus any "same as Gym 1" / "del Gimnasio 1" cross-reference
 in another activity's step text, in the SAME edit. Ids (`ca-<n>`) never move —
-student progress is keyed to them.
+student progress is keyed to them. The teaching-order `number` can also be
+resequenced from the teacher console (type over the `#N` in the Class
+activities table) — that writes `config/class.activityNumbers` as
+`{ id -> { n, base } }` and expires by itself once the new order is folded
+into `class-activities.js`, same `base` rule as a console rename.
 
 ### ⚠️ Editing a module's skills? Update `MODULE_MANIFEST` in `config-main.js`
 Add or remove a `skills:` entry and you must bump that module's `skillCount`.

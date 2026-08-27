@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-27 — Seven Nation Army moves up the activity list
+
+### Changed
+
+- **Seven Nation Army — The Riff is now activity #4**, right after Finger
+  Gym 1, instead of sitting at the end of the list. The Finger Gyms after it
+  shift down one number each — Finger Gym 2 is now #5, and so on through
+  Finger Gym 6 at #9. Only the "#N" in front of the name changed: the
+  activities themselves, and anything you have already finished, are
+  untouched. (Finger Gym 2 is still Finger Gym 2 — the number in the name
+  counts the Gyms, not the class days.)
+
 ## 2026-08-27 — Two fixes from your problem reports
 
 ### Fixed

@@ -21,7 +21,7 @@ rules_version = '2';
                       games, streak, practiceLog, name, email
      config/class     one shared doc: gamesEnabled, gameOverrides,
                       paused, archived, hiddenActivities, activityDates,
-                      activityTitles
+                      activityTitles, activityNumbers
                       (teacher writes, students read)
      liveQuiz/current the whole-class live quiz's state (teacher writes,
                       students read) + an answers/{uid} subcollection each

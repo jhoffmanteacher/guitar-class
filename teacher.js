@@ -107,6 +107,11 @@ async function showTeacherApp(user){
       if(actSave){ teacherSaveActivityTitle(actSave.dataset.id); return; }
       const actReset=e.target.closest('[data-rename-reset]');
       if(actReset){ teacherSetActivityTitle(actReset.dataset.id, ''); return; }
+      // The number box sits inside the title cell too, and it's a live input
+      // rather than a button — swallow the click so aiming at it doesn't
+      // navigate to the detail page out from under the cursor. The write
+      // happens on 'change', below.
+      if(e.target.closest('[data-set-activity-number]')) return;
       const openAct=e.target.closest('[data-open-activity]');
       if(openAct){ openActivityDetail(openAct.dataset.id); return; }
       if(e.target.closest('[data-back-to-activities]')){ backToActivitiesList(); return; }
@@ -118,11 +123,17 @@ async function showTeacherApp(user){
     // this listener doesn't need to.
     shell.addEventListener('change', e=>{
       const actDate=e.target.closest('[data-set-activity-date]');
-      if(actDate) teacherSetActivityDate(actDate.dataset.id, actDate.value);
+      if(actDate){ teacherSetActivityDate(actDate.dataset.id, actDate.value); return; }
+      const actNum=e.target.closest('[data-set-activity-number]');
+      if(actNum) teacherSetActivityNumber(actNum.dataset.id, actNum.value);
     });
     // Enter saves, Escape backs out — the rename box is a one-line field in a
     // table cell, not a form, so there's no submit event to lean on.
     shell.addEventListener('keydown', e=>{
+      // A number box isn't in a form either, so Enter has nothing to submit —
+      // blur it, which fires the 'change' the writer above listens for.
+      const numBox=e.target.closest('.t-act-num-input');
+      if(numBox){ if(e.key==='Enter'){ e.preventDefault(); numBox.blur(); } return; }
       const box=e.target.closest('.t-act-title-edit');
       if(!box) return;
       if(e.key==='Enter'){ e.preventDefault(); teacherSaveActivityTitle(box.dataset.id); }
@@ -530,23 +541,28 @@ function renderTeacherActivities(){
     if(!cfg) return;                         // superseded by a newer toggle
     const hidden=cfg.hiddenActivities||{};
     const dates=cfg.activityDates||{};
+    // Teaching-order numbers with the console's own resequencing applied —
+    // id -> 1..N, see teacherActivityNumbers below. Everything in this view
+    // that shows or sorts by a number reads THIS, never a.number, or the
+    // table would disagree with the students' cards the moment one is moved.
+    const nums=teacherActivityNumbers(cfg);
     const today=dayStr(new Date());
     // Sortable by either column, either direction — driven by
     // activitySortKey/activitySortDir (toggled by clicking a header, see
-    // teacherSetActivitySort). 'number' sorts purely on the numeric field
-    // (id localeCompare would misorder ca-10 before ca-2). 'date' always
+    // teacherSetActivitySort). 'number' sorts on the resolved teaching-order
+    // position, never the id (localeCompare would misorder ca-10 before ca-2). 'date' always
     // keeps dated activities ahead of undated ones regardless of direction —
     // an activity with no date isn't "earlier" or "later" than a dated one,
     // so flipping the arrow shouldn't shuffle it in among them — and
     // tiebreaks/undated activities fall back to number in the same direction.
     const dirMul = activitySortDir==='asc' ? 1 : -1;
     const sorted=[...activities].sort((a,b)=>{
-      if(activitySortKey==='number') return dirMul*(a.number-b.number);
+      if(activitySortKey==='number') return dirMul*(nums[a.id]-nums[b.id]);
       const da=dates[a.id]||'', db=dates[b.id]||'';
       if(da && !db) return -1;
       if(!da && db) return 1;
-      if(da && db) return dirMul*da.localeCompare(db) || dirMul*(a.number-b.number);
-      return dirMul*(a.number-b.number);
+      if(da && db) return dirMul*da.localeCompare(db) || dirMul*(nums[a.id]-nums[b.id]);
+      return dirMul*(nums[a.id]-nums[b.id]);
     });
     const total=allStudents.length;
     const rows=sorted.map(a=>{
@@ -569,9 +585,15 @@ function renderTeacherActivities(){
       const dateCell=`<input type="date" class="t-date-input" data-set-activity-date data-id="${escAttr(a.id)}" value="${escAttr(dateVal)}">${dateNote}`;
       // Same "#N - Title" form the student card (app.js) and the activity
       // detail page use, so the number reads as part of the name rather than
-      // the column needing its own.
-      const num=a.number?`#${Number(a.number)} - `:'';
+      // the column needing its own. Two renderings of the same thing: plain
+      // text while the rename editor is open (one editable thing per cell),
+      // and a live number box otherwise — typing a new position there moves
+      // the activity, exactly the way the date input publishes it.
       const shown=teacherActivityTitle(a,cfg);
+      const num=nums[a.id]?`#${nums[a.id]} - `:'';
+      const numCell=nums[a.id]
+        ? `#<input type="number" class="t-act-num-input" data-set-activity-number data-id="${escAttr(a.id)}" value="${nums[a.id]}" min="1" max="${activities.length}" step="1" title="Teaching-order number — type a new one to move this activity" aria-label="Teaching-order number for ${escAttr(shown)}"> - `
+        : '';
       const renamed=shown!==a.title;
       let titleCell;
       if(activityEditId===a.id){
@@ -599,7 +621,7 @@ function renderTeacherActivities(){
         // it stays put through renames and `number` resequencing since the
         // id is the one permanent handle.
         titleCell=`<td class="nc" data-open-activity data-id="${escAttr(a.id)}" style="cursor:pointer" title="${escAttr(num+shown)}">`
-          +`${escHtml(num+shown)} <span style="opacity:.55;font-size:.85em">(${escHtml(a.id)})</span> `
+          +`${numCell}${escHtml(shown)} <span style="opacity:.55;font-size:.85em">(${escHtml(a.id)})</span> `
           +`<button class="t-act-pencil" data-rename-activity data-id="${escAttr(a.id)}" title="Rename this activity" aria-label="Rename ${escAttr(shown)}">&#x270E;</button>`
           +`${renameNote}</td>`;
       }
@@ -609,7 +631,7 @@ function renderTeacherActivities(){
     }).join('');
     // Arrow shows only on whichever column is currently driving the sort.
     const sortArrow=key=> activitySortKey===key ? (activitySortDir==='asc'?' ▲':' ▼') : '';
-    box.innerHTML=`<div class="tg-note">An activity with no date set is invisible to students — that's its normal starting state, not an error; set one here to publish it. Hidden activities disappear for students regardless of date, same as if they hadn't been pushed yet. Use Hidden to pull back something already live; un-hide any time. The &#x270E; next to a title renames the activity for everyone. Click Date or Activity below to sort by it; click again to flip the order.</div>`+
+    box.innerHTML=`<div class="tg-note">An activity with no date set is invisible to students — that's its normal starting state, not an error; set one here to publish it. Hidden activities disappear for students regardless of date, same as if they hadn't been pushed yet. Use Hidden to pull back something already live; un-hide any time. The &#x270E; next to a title renames the activity for everyone. Type over the #number to move an activity in the teaching order — everything else renumbers around it, for students too. (That only moves the &#8220;#N&#8221; prefix: a number inside a title, like Finger Gym 2, is part of the name and stays put.) Click Date or Activity below to sort by it; click again to flip the order.</div>`+
       `<div class="t-grid-wrap t-act-wrap"><table><thead><tr>`
       +`<th class="t-sort-th" data-sort-activities="date" title="Sort by date">Date${sortArrow('date')}</th>`
       +`<th class="nc t-sort-th" data-sort-activities="number" title="Sort by activity number">Activity${sortArrow('number')}</th>`
@@ -688,6 +710,78 @@ async function teacherSetActivityTitle(id, value){
   }
   if(teacherView==='activities') renderTeacherActivities();
 }
+/* Teaching-order numbers for the whole list, id -> 1..N, with the console's
+   resequencing applied. caNumberMap() in app.js does the work and students
+   read the same function through caNumber(), so a number shown here is the
+   number on their card — this wrapper only feeds it the config doc this view
+   already holds instead of app.js's student-side globals. (teacher.js loads
+   after app.js and already leans on its helpers; unlike teacherActivityTitle
+   there's nothing to fork, because the resolution rule is identical.) */
+function teacherActivityNumbers(cfg){
+  return caNumberMap(window.CLASS_ACTIVITIES||[], (cfg&&cfg.activityNumbers)||{});
+}
+/* Move an activity to position n, and renumber everything around it.
+
+   Written as a whole-list rewrite rather than one id -> n row because the
+   set has to stay 1..N with no gaps or duplicates — the same contract
+   checks.mjs (1d) holds class-activities.js to. Storing just "ca-10 is now
+   #4" would leave the old #4 to be resolved by a tiebreak, i.e. by luck.
+   So: take the order currently on screen, pull this activity out, splice it
+   back in at n, and write the result. Positions that land back on the
+   shipped number are DELETED rather than stored, so the map holds only the
+   rows that actually differ from the file and empties itself when the order
+   is folded back into class-activities.js.
+
+   Each row carries the shipped number it was typed against as `base`, which
+   is what expires the override on that fold-in — see caNumberMap in app.js.
+   Nothing is keyed to `number` (ids are), so this is safe in a way that
+   renumbering ids never would be. */
+async function teacherSetActivityNumber(id, value){
+  const activities=(window.CLASS_ACTIVITIES||[]);
+  const a=activities.find(x=>x.id===id);
+  if(!a) return;
+  const n=Math.round(Number(value));
+  const cur=teacherActivityNumbers(teacherClassConfig);
+  // Out of range, unparseable, or already there: repaint, which puts the old
+  // number back in the box, and write nothing.
+  if(!Number.isFinite(n) || n<1 || n>activities.length || n===cur[id]){
+    if(teacherView==='activities') renderTeacherActivities();
+    return;
+  }
+  const order=activities.slice().sort((x,y)=>cur[x.id]-cur[y.id]).filter(x=>x.id!==id);
+  order.splice(n-1, 0, a);
+  const prev=teacherClassConfig.activityNumbers||{};
+  const next={};          // what config/class should hold afterwards
+  const drop=[];          // rows to clear, because they're back on their shipped number
+  order.forEach((x,i)=>{
+    const pos=i+1, base=Number(x.number);
+    if(pos===base){ if(Object.prototype.hasOwnProperty.call(prev,x.id)) drop.push(x.id); }
+    else next[x.id]={n:pos, base};
+  });
+  // Overrides for ids no longer in class-activities.js (a retired activity)
+  // are carried over untouched — this is a reorder, not a cleanup pass, and
+  // caNumberMap ignores them anyway.
+  Object.keys(prev).forEach(k=>{ if(!(k in next) && drop.indexOf(k)<0) next[k]=prev[k]; });
+  teacherClassConfig.activityNumbers=next;
+  try{
+    await ensureDb();
+    // FieldValue only exists once ensureDb has pulled in the Firestore SDK —
+    // same reason every other writer in this file reaches for it in here.
+    const fv=firebase.firestore.FieldValue;
+    const patch={};
+    Object.keys(next).forEach(k=>{ patch[k]=next[k]; });
+    drop.forEach(k=>{ patch[k]=fv.delete(); });
+    if(Object.keys(patch).length)
+      await db.collection('config').doc('class').set({activityNumbers:patch},{merge:true});
+  }catch(e){
+    teacherClassConfig.activityNumbers=prev;
+    alert('Could not save that order — check your connection and Firestore rules.');
+  }
+  // Rendering only after the write lands: renderTeacherActivities re-reads
+  // config/class, so painting first would just pull the pre-write copy back
+  // over the optimistic state. Same order as every other writer here.
+  if(teacherView==='activities') renderTeacherActivities();
+}
 // One activity's full content, read-only — the actual "click to go to the
 // activity" destination. Built straight from window.CLASS_ACTIVITIES (the
 // same source the student-facing card in app.js reads), not from
@@ -706,6 +800,7 @@ function renderTeacherActivityDetail(id){
   const back=`<button type="button" class="stu-back" data-back-to-activities>&#x2190; All activities</button>`;
   const a=(window.CLASS_ACTIVITIES||[]).find(x=>x.id===id);
   if(!a){ box.innerHTML=`${back}<div class="t-loading">Could not find that activity — it may have been renamed or removed.</div>`; return; }
+  const num=teacherActivityNumbers(teacherClassConfig)[a.id];
   const stepsHtml=(a.steps||[]).map((s,si)=>{
     const media=[];
     if(s.figure) media.push(`<span class="step-figure"><img src="${escAttr(s.figure)}" alt=""></span>`);
@@ -722,7 +817,7 @@ function renderTeacherActivityDetail(id){
     return `<div class="tr-card ca-prev-step" style="margin-bottom:12px"><div class="tr-name">Step ${si+1}</div>${wrapGotItWhen(s.text||'')}${media.join('')}</div>`;
   }).join('');
   box.innerHTML=`${back}
-    <div class="stu-section-head" style="margin-top:0">${a.number?`#${Number(a.number)} - `:''}${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
+    <div class="stu-section-head" style="margin-top:0">${num?`#${num} - `:''}${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
     ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
     ${stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>'}`;
 }
