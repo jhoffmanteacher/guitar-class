@@ -138,13 +138,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
               {
-                label: 'Station wrap-up', label_es: 'Cierre de la estación',
-                text: 'Station Wrap-Up — pause and think: which note or fret felt fuzziest today, and what (if anything) started to make sense?',
-                text_es: 'Cierre de la estación — pausa y piensa: ¿qué nota o traste se sintió más confuso hoy, y qué (si acaso) empezó a tener sentido?',
+                label: 'Checkpoint', label_es: 'Punto de control',
+                text: 'Checkpoint — pause and think: which note or fret felt fuzziest today, and what (if anything) started to make sense?',
+                text_es: 'Punto de control — pausa y piensa: ¿qué nota o traste se sintió más confuso hoy, y qué (si acaso) empezó a tener sentido?',
                 response: { type: 'short', placeholder: 'e.g. fret 8 on the low E — kept mixing up B and C',
                   placeholder_es: 'ej. el traste 8 en la Mi grave — seguía confundiendo B y C' }
               }
@@ -315,11 +315,11 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
-                label: 'Station wrap-up', label_es: 'Cierre de la estación',
+                label: 'Wrap-up', label_es: 'Cierre',
                 text: 'Which fret made you stop and count today? Write it below — that\'s your first thing to drill next time you practice.',
                 text_es: '¿Qué traste te hizo detenerte y contar hoy? Escríbelo abajo — eso es lo primero que debes practicar la próxima vez.',
                 response: { type: 'short', placeholder: 'e.g. A string fret 7 — I keep guessing D vs E',
@@ -562,13 +562,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
               {
-                label: 'Station wrap-up', label_es: 'Cierre de la estación',
-                text: 'Station Wrap-Up — pause and think: what tripped you up most today — reading the TAB, or getting a clean note with no buzz? What felt easier than you expected?',
-                text_es: 'Cierre de la estación — pausa y piensa: ¿qué te costó más hoy — leer el TAB, o lograr una nota limpia sin zumbido? ¿Qué se sintió más fácil de lo que esperabas?',
+                label: 'Checkpoint', label_es: 'Punto de control',
+                text: 'Checkpoint — pause and think: what tripped you up most today — reading the TAB, or getting a clean note with no buzz? What felt easier than you expected?',
+                text_es: 'Punto de control — pausa y piensa: ¿qué te costó más hoy — leer el TAB, o lograr una nota limpia sin zumbido? ¿Qué se sintió más fácil de lo que esperabas?',
                 response: { type: 'short', placeholder: 'e.g. reading TAB was fine, but fret 1 kept buzzing',
                   placeholder_es: 'ej. leer el TAB estuvo bien, pero el traste 1 seguía zumbando' }
               }
@@ -908,11 +908,11 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
-                label: 'Station wrap-up', label_es: 'Cierre de la estación',
+                label: 'Wrap-up', label_es: 'Cierre',
                 text: 'Which part of your "Watchtower" assessment riff still needs work? Write it below — that\'s your warm-up target next time you practice.',
                 text_es: '¿Qué parte de tu riff de evaluación de "Watchtower" todavía necesita trabajo? Escríbelo abajo — ese es tu objetivo de calentamiento la próxima vez que practiques.',
                 response: { type: 'short', placeholder: 'e.g. the F-to-G change on frets 1 and 3 is shaky',

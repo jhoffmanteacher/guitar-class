@@ -291,9 +291,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .tabs-card.tab-station-b.active{border-color:var(--blue-text);background:var(--blue-bg)}
 .tabs-card.tab-station-b.active .tabs-card-title{color:var(--blue-text)}
 .tabs-card.tab-station-b.active .tabs-card-num{background:var(--blue-text);color:#fff}
-.tabs-card.tab-station-c.active{border-color:var(--green-text);background:var(--green-bg)}
-.tabs-card.tab-station-c.active .tabs-card-title{color:var(--green-text)}
-.tabs-card.tab-station-c.active .tabs-card-num{background:var(--green-text);color:#fff}
 .tabs-card.tab-checklist.active{border-color:var(--amber-text);background:var(--amber-bg)}
 .tabs-card.tab-checklist.active .tabs-card-title{color:var(--amber-text)}
 .tabs-card.tab-checklist.active .tabs-card-num{background:var(--amber-text);color:#fff}
@@ -306,9 +303,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .tabs-card .tabs-card-title{font-size:0.9375rem}
 }
 .tab-panel{display:none}.tab-panel.active{display:block}
-.st-badge{font-size:0.75rem;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:10px;display:inline-block;margin-bottom:6px}
-.bb{background:var(--green-bg);color:var(--green-text)}
-.bc{background:var(--amber-bg);color:var(--amber-text)}
 .dp{background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--purple-accent);border-top-left-radius:0;border-bottom-left-radius:0;border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
 .dp.hidden{display:none}
 .dp-head{display:flex;align-items:center;gap:8px;margin-bottom:14px}
@@ -649,7 +643,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    above) covers the unpicked-row hover state. Active goes to a single
    purple wash (below), same selection metaphor as sets and Explore. */
 .rail-station.st-b .rs-num{background:var(--blue-bg);color:var(--blue-text)}
-.rail-station.st-c .rs-num{background:var(--green-bg);color:var(--green-text)}
 .rail-station.st-chk .rs-num{background:var(--amber-bg);color:var(--amber-text)}
 /* Active station = the same purple wash as sets and Explore — one selection
    metaphor for the whole rail. The .rs-num badge keeps its own station
@@ -1062,9 +1055,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .tab-choice-content{display:none}
 .tab-choice-content.expanded{display:block;margin-top:2px}
 .tab-choice-content .tab{margin-top:0}
-/* Station step-list sections (Concept B): plain group-label dividers, not
-   their own accordion — every step is a row from the start. */
+/* Step-list sections (Concept B): plain group-label dividers, not their own
+   accordion — every step is a row from the start. */
 .stp-sec-label{padding:16px 2px 6px;margin-top:2px;font-size:0.75rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);border-top:2px solid var(--border2)}
+/* The one seam in a merged ladder: where the watch/listen half hands off to
+   the drill half. Heavier than a section label (it divides halves, not groups)
+   and it carries the practice half's own words. The section label immediately
+   below it drops its own rule so the two don't stack. */
+.stp-divider{display:flex;align-items:center;gap:10px;margin:26px 0 2px}
+.stp-divider::before,.stp-divider::after{content:'';flex:1;height:2px;background:var(--purple-accent);opacity:.35;border-radius:2px}
+.stp-divider-label{font-size:0.8125rem;font-weight:700;letter-spacing:.02em;color:var(--purple-text);text-align:center}
+.stp-divider + .stp-sec > .stp-sec-label{border-top:0;padding-top:8px}
+/* Focus mode shows one step, so a seam with nothing under it would read as a
+   heading for empty space — it appears only once the open step is past it.
+   .div-cur is toggled by syncStationFocus() as the student moves. */
+.dp.focus .stp-divider{display:none}
+.dp.focus .stp-group.div-cur .stp-divider{display:flex}
 .chord-popup{position:absolute;z-index:1000;background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:10px 12px;box-shadow:0 4px 18px rgba(0,0,0,0.20);pointer-events:none;display:none;flex-direction:column;align-items:center;gap:4px;max-width:220px}
 .chord-popup.wide{max-width:360px}
 .chord-popup.visible{display:flex}
@@ -1114,17 +1120,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .fab-group,.tabs,.save-ind,
   #google_translate_element,.btn-translate,.user-area,
   .print-set-btn,.daily5-panel,.daily5-overlay,.games-screen,.page-screen,
-  .back-to-top,.panel-next,.sk-where-btn,.st-flex-note,
+  .back-to-top,.panel-next,.sk-where-btn,
   .step-done-row,.mr-rec,.mr-locked-banner,.set-peek-banner{display:none !important}
 
-  /* Only the active set prints; expand BOTH stations + the checklist, drop songs */
+  /* Only the active set prints; expand the lesson ladder + the checklist, drop songs */
   .week-panel{display:none !important}
   .week-panel.active{display:block !important}
   .tab-panel{display:none !important}
   .week-panel.active .tab-panel.tp-station-b,
-  .week-panel.active .tab-panel.tp-station-c,
   .week-panel.active .tab-panel.tp-checklist{display:block !important}
-  .tab-panel.tp-station-c,.tab-panel.tp-checklist{page-break-before:always}
+  .tab-panel.tp-checklist{page-break-before:always}
 
   /* Checklist prints as a clean blank tick-sheet — drop the interactive toggles,
      "Practice this" expandos, and the live progress bar (those are screen-only). */
@@ -1144,6 +1149,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   /* Focus mode is a screen-only view: a printed handout is the whole station,
      every row and every section label, exactly as it printed before it existed. */
   .dp.focus li.step{display:list-item !important}
+  .dp.focus .stp-divider{display:flex !important}
   .dp.focus .step + .step{border-top:1px solid var(--border) !important}
   .dp.focus .stp-sec-label{display:block !important}
   .dp-stepper,.dp-stepnav{display:none !important}
@@ -1379,8 +1385,6 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 .search-mark{background:var(--blue-bg);color:var(--blue-text);font-weight:700;border-radius:3px;padding:0 1px}
 .search-count{font-size:0.75rem;font-weight:700;color:var(--muted);letter-spacing:.2px;padding:0 2px 2px}
 .search-count.search-loose{color:var(--blue-text);font-weight:600;letter-spacing:0;line-height:1.35}
-.st-flex-note{font-size:0.875rem;color:var(--text2);background:var(--bg3);border-radius:8px;padding:11px 14px;margin:2px 0 8px;line-height:1.55}
-.st-note-link{font-family:inherit;font-size:inherit;font-weight:600;padding:0;background:none;border:none;color:var(--blue-text);cursor:pointer;text-decoration:underline}
 
 /* ── Design pass: pressable primary buttons (Duolingo-style tactile press) ── */
 .coach-start,.panel-next-btn,.mr-rec-btn.primary{box-shadow:0 3px 0 rgba(0,0,0,0.22)}
@@ -2009,10 +2013,10 @@ body.games-open{overflow:hidden}
 /* Overlay hit area, capped at 36px tall — controls that sit inline with text
    or in tight rows, where a full 44px halo would swallow neighbors' taps */
 .song-vid-btn,.play-seq-btn,.coach-btn,.step-done-btn,.sk-toggle,
-.sk-where-btn,.mr-review-link,.st-note-link,.sk-practice-btn,.rp-trigger,.step-fold-pill{position:relative}
+.sk-where-btn,.mr-review-link,.sk-practice-btn,.rp-trigger,.step-fold-pill{position:relative}
 .song-vid-btn::after,.play-seq-btn::after,.coach-btn::after,.step-done-btn::after,
 .sk-toggle::after,.sk-where-btn::after,.mr-review-link::after,
-.st-note-link::after,.sk-practice-btn::after,.rp-trigger::after,.step-fold-pill::after{
+.sk-practice-btn::after,.rp-trigger::after,.step-fold-pill::after{
   content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   width:max(100%,44px);height:max(100%,36px)}
 

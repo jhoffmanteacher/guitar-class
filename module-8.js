@@ -124,13 +124,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
             label: 'Wrap-up: your trickiest finger', label_es: 'Cierre: tu dedo más difícil',
-            text: 'Station Wrap-Up — pause and think: which finger felt the most awkward today, and what helped it land more evenly?',
-            text_es: 'Cierre de la estación — pausa y piensa: ¿cuál dedo se sintió más incómodo hoy, y qué ayudó a que cayera más parejo?',
+            text: 'Checkpoint — pause and think: which finger felt the most awkward today, and what helped it land more evenly?',
+            text_es: 'Punto de control — pausa y piensa: ¿cuál dedo se sintió más incómodo hoy, y qué ayudó a que cayera más parejo?',
             response: { type: 'short', placeholder: 'e.g. the ring (a) finger was weakest — slowing down and watching it helped',
               placeholder_es: 'p. ej. el dedo anular (a) era el más débil — ir más despacio y observarlo ayudó' }
           }
@@ -237,8 +237,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: wrist or volume?', label_es: 'Cierre: ¿muñeca o volumen?',
@@ -430,13 +430,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
             label: 'Wrap-up: is it automatic yet?', label_es: 'Cierre: ¿ya es automático?',
-            text: 'Station Wrap-Up — pause and think: did the pattern start to feel automatic, or were you still thinking through each finger? What would make it smoother?',
-            text_es: 'Cierre de la estación — pausa y piensa: ¿el patrón empezó a sentirse automático, o todavía estabas pensando en cada dedo? ¿Qué lo haría más fluido?',
+            text: 'Checkpoint — pause and think: did the pattern start to feel automatic, or were you still thinking through each finger? What would make it smoother?',
+            text_es: 'Punto de control — pausa y piensa: ¿el patrón empezó a sentirse automático, o todavía estabas pensando en cada dedo? ¿Qué lo haría más fluido?',
             response: { type: 'short', placeholder: 'e.g. still counting each finger — slowing the metronome down helped it flow',
               placeholder_es: 'p. ej. todavía cuento cada dedo — bajar el metrónomo ayudó a que fluyera' }
           }
@@ -573,8 +573,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: your top clean tempo', label_es: 'Cierre: tu tempo limpio máximo',
@@ -768,13 +768,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
             label: 'Wrap-up: pattern or chord changes?', label_es: 'Cierre: ¿patrón o cambios?',
-            text: 'Station Wrap-Up — pause and think: across the whole module, which is harder for you — keeping the picking pattern steady, or changing chords cleanly underneath it? What\'s your plan for the harder one?',
-            text_es: 'Cierre de la estación — pausa y piensa: a lo largo de todo el módulo, ¿qué se te hace más difícil — mantener el patrón de punteo estable, o cambiar de acorde limpiamente debajo de él? ¿Cuál es tu plan para lo más difícil?',
+            text: 'Checkpoint — pause and think: across the whole module, which is harder for you — keeping the picking pattern steady, or changing chords cleanly underneath it? What\'s your plan for the harder one?',
+            text_es: 'Punto de control — pausa y piensa: a lo largo de todo el módulo, ¿qué se te hace más difícil — mantener el patrón de punteo estable, o cambiar de acorde limpiamente debajo de él? ¿Cuál es tu plan para lo más difícil?',
             response: { type: 'short', placeholder: 'e.g. chord changes break my pattern — I\'ll practice moving the fretting hand a beat early',
               placeholder_es: 'p. ej. los cambios de acorde rompen mi patrón — voy a practicar mover la mano de trastear un tiempo antes' }
           }
@@ -937,8 +937,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: halfway-point reflection', label_es: 'Cierre: reflexión de medio curso',

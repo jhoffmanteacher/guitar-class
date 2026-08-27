@@ -84,13 +84,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
             label: 'Wrap-up: what slows your TAB reading', label_es: 'Cierre: qué te frena al leer TAB',
-            text: 'Station Wrap-Up — pause and think: TAB packs a lot into one line (which string, which fret, chord-or-melody, how long the note lasts). Which part still slows you down most when you sight-read a new riff?',
-            text_es: 'Cierre de la estación — pausa y piensa: el TAB mete mucha información en una sola línea (qué cuerda, qué traste, acorde o melodía, cuánto dura la nota). ¿Qué parte todavía te frena más cuando lees a primera vista un riff nuevo?',
+            text: 'Checkpoint — pause and think: TAB packs a lot into one line (which string, which fret, chord-or-melody, how long the note lasts). Which part still slows you down most when you sight-read a new riff?',
+            text_es: 'Punto de control — pausa y piensa: el TAB mete mucha información en una sola línea (qué cuerda, qué traste, acorde o melodía, cuánto dura la nota). ¿Qué parte todavía te frena más cuando lees a primera vista un riff nuevo?',
             response: { type: 'short', placeholder: 'e.g. the rhythm symbols — I can find the notes but not the timing',
               placeholder_es: 'p. ej. los símbolos de ritmo — encuentro las notas pero no el tiempo' }
           }
@@ -214,8 +214,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: name your trickiest move', label_es: 'Cierre: tu movimiento más difícil',
@@ -392,13 +392,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
             label: 'Wrap-up: one small win today', label_es: 'Cierre: una pequeña mejora de hoy',
-            text: 'Station Wrap-Up — barre chords are a strength skill that takes weeks, not minutes. What is one small thing that improved today, even if the whole chord isn\'t ringing yet?',
-            text_es: 'Cierre de la estación — los acordes con cejilla son una destreza de fuerza que toma semanas, no minutos. ¿Qué pequeña cosa mejoró hoy, aunque el acorde completo todavía no suene?',
+            text: 'Checkpoint — barre chords are a strength skill that takes weeks, not minutes. What is one small thing that improved today, even if the whole chord isn\'t ringing yet?',
+            text_es: 'Punto de control — los acordes con cejilla son una destreza de fuerza que toma semanas, no minutos. ¿Qué pequeña cosa mejoró hoy, aunque el acorde completo todavía no suene?',
             response: { type: 'short', placeholder: 'e.g. the low strings ring now — just the B string left to fix', placeholder_es: 'p. ej. las cuerdas graves ya suenan — solo falta arreglar la cuerda Si' }
           }
             ]
@@ -539,8 +539,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: find your buzzing string', label_es: 'Cierre: tu cuerda que zumba',
@@ -694,13 +694,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
             label: 'Wrap-up: E-shape or A-shape?', label_es: 'Cierre: ¿forma de E o forma de A?',
-            text: 'Station Wrap-Up — you now know both barre shapes. Which feels harder right now — the E-shape (root on the low E string) or the A-shape (root on the A string) — and what makes it tougher for your hand?',
-            text_es: 'Cierre de la estación — ahora conoces las dos formas de cejilla. ¿Cuál se siente más difícil ahora mismo — la forma de E (raíz en la cuerda Mi grave) o la forma de A (raíz en la cuerda La) — y qué la hace más dura para tu mano?',
+            text: 'Checkpoint — you now know both barre shapes. Which feels harder right now — the E-shape (root on the low E string) or the A-shape (root on the A string) — and what makes it tougher for your hand?',
+            text_es: 'Punto de control — ahora conoces las dos formas de cejilla. ¿Cuál se siente más difícil ahora mismo — la forma de E (raíz en la cuerda Mi grave) o la forma de A (raíz en la cuerda La) — y qué la hace más dura para tu mano?',
             response: { type: 'short', placeholder: 'e.g. the A-shape — stacking three fingers on the D, G, and B strings is awkward', placeholder_es: 'p. ej. la forma de A — apilar tres dedos en las cuerdas Re, Sol y Si se siente incómodo' }
           }
             ]
@@ -886,8 +886,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: which barre needs more work', label_es: 'Cierre: qué cejilla necesita más práctica',

@@ -106,13 +106,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
             label: 'Wrap-up: today\'s hardest part', label_es: 'Cierre: lo más difícil de hoy',
-            text: 'Station Wrap-Up — pause and think: which felt harder today — getting both notes to ring clean, or building the shape quickly from the diagram? What started to help?',
-            text_es: 'Cierre de la estación — pausa y piensa: ¿qué se sintió más difícil hoy — lograr que las dos notas suenen limpias, o armar la forma rápido a partir del diagrama? ¿Qué empezó a ayudarte?',
+            text: 'Checkpoint — pause and think: which felt harder today — getting both notes to ring clean, or building the shape quickly from the diagram? What started to help?',
+            text_es: 'Punto de control — pausa y piensa: ¿qué se sintió más difícil hoy — lograr que las dos notas suenen limpias, o armar la forma rápido a partir del diagrama? ¿Qué empezó a ayudarte?',
             response: { type: 'short', placeholder: 'e.g. building the shape — my fingers kept landing one string off',
               placeholder_es: 'p. ej. armar la forma — mis dedos seguían cayendo una cuerda al lado' }
           }
@@ -350,8 +350,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: your shaky spot', label_es: 'Cierre: tu punto inestable',
@@ -520,13 +520,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
             label: 'Wrap-up: where the loop breaks', label_es: 'Cierre: dónde se desarma la vuelta',
-            text: 'Station Wrap-Up — pause and think: at what tempo does your loop start to fall apart, and which part breaks down first — the change, the strum, or the muting?',
-            text_es: 'Cierre de la estación — pausa y piensa: ¿a qué tempo tu vuelta empieza a desarmarse, y qué parte falla primero — el cambio, el rasgueo, o el silenciado?',
+            text: 'Checkpoint — pause and think: at what tempo does your loop start to fall apart, and which part breaks down first — the change, the strum, or the muting?',
+            text_es: 'Punto de control — pausa y piensa: ¿a qué tempo tu vuelta empieza a desarmarse, y qué parte falla primero — el cambio, el rasgueo, o el silenciado?',
             response: { type: 'short', placeholder: 'e.g. around 75 BPM the F5 change gets late',
               placeholder_es: 'p. ej. cerca de 75 BPM el cambio a F5 se atrasa' }
           }
@@ -836,8 +836,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: your top clean tempo', label_es: 'Cierre: tu tempo limpio máximo',

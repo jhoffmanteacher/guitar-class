@@ -68,13 +68,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
             label: 'Wrap-up: chord diagram parts', label_es: 'Cierre: partes del diagrama',
-            text: 'Station Wrap-Up — pause and think: of everything on a chord diagram (X, O, dots, finger numbers), which part still feels least automatic when you sit down to read one?',
-            text_es: 'Cierre de la estación — pausa y piensa: de todo lo que hay en un diagrama de acorde (X, O, puntos, números de dedo), ¿qué parte todavía se siente menos automática cuando te sientas a leer uno?',
+            text: 'Checkpoint — pause and think: of everything on a chord diagram (X, O, dots, finger numbers), which part still feels least automatic when you sit down to read one?',
+            text_es: 'Punto de control — pausa y piensa: de todo lo que hay en un diagrama de acorde (X, O, puntos, números de dedo), ¿qué parte todavía se siente menos automática cuando te sientas a leer uno?',
             response: { type: 'short', placeholder: 'e.g. I still pause on which number means which finger',
               placeholder_es: 'p. ej. todavía me detengo en pensar qué número es qué dedo' }
           }
@@ -198,8 +198,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: clean vs. switching', label_es: 'Cierre: limpio vs. cambiar',
@@ -406,13 +406,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
             label: 'Wrap-up: your toughest chord', label_es: 'Cierre: tu acorde más difícil',
-            text: 'Station Wrap-Up — pause and think: which of these four chords (C, G, Am, F) is fighting you most right now, and is it the shape itself or getting to it in time?',
-            text_es: 'Cierre de la estación — pausa y piensa: ¿cuál de estos cuatro acordes (C, G, Am, F) te está costando más ahora mismo, y es la forma en sí o el llegar a ella a tiempo?',
+            text: 'Checkpoint — pause and think: which of these four chords (C, G, Am, F) is fighting you most right now, and is it the shape itself or getting to it in time?',
+            text_es: 'Punto de control — pausa y piensa: ¿cuál de estos cuatro acordes (C, G, Am, F) te está costando más ahora mismo, y es la forma en sí o el llegar a ella a tiempo?',
             response: { type: 'short', placeholder: 'e.g. F — the shape is fine but I\'m slow getting into it',
               placeholder_es: 'p. ej. F — la forma está bien pero soy lento para llegar a ella' }
           }
@@ -806,8 +806,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: your hardest transition', label_es: 'Cierre: tu transición más difícil',
@@ -1039,13 +1039,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
             label: 'Wrap-up: your Group 2 weak spot', label_es: 'Cierre: tu punto débil del Grupo 2',
-            text: 'Station Wrap-Up — pause and think: you now know two whole chord groups. Which Group 2 chord (D, A, Em, Bm) feels furthest from automatic, and what specifically trips it up?',
-            text_es: 'Cierre de la estación — pausa y piensa: ahora conoces dos grupos completos de acordes. ¿Qué acorde del Grupo 2 (D, A, Em, Bm) se siente más lejos de ser automático, y qué específicamente lo hace tropezar?',
+            text: 'Checkpoint — pause and think: you now know two whole chord groups. Which Group 2 chord (D, A, Em, Bm) feels furthest from automatic, and what specifically trips it up?',
+            text_es: 'Punto de control — pausa y piensa: ahora conoces dos grupos completos de acordes. ¿Qué acorde del Grupo 2 (D, A, Em, Bm) se siente más lejos de ser automático, y qué específicamente lo hace tropezar?',
             response: { type: 'short', placeholder: 'e.g. D — the high e string keeps getting muted by my ring finger',
               placeholder_es: 'p. ej. D — mi dedo anular sigue silenciando la cuerda mi aguda' }
           }
@@ -1239,8 +1239,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: your hardest cross-group change', label_es: 'Cierre: tu cambio entre grupos más difícil',
@@ -1429,13 +1429,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
             label: 'Wrap-up: your practice priority', label_es: 'Cierre: tu prioridad de práctica',
-            text: 'Station Wrap-Up — pause and think: with the assessment ahead, what will eat most of your practice time between now and then — a specific chord, a transition, or keeping the strum steady?',
-            text_es: 'Cierre de la estación — pausa y piensa: con la evaluación por delante, ¿qué se va a llevar la mayor parte de tu tiempo de práctica de aquí a entonces — un acorde específico, una transición, o mantener el rasgueo constante?',
+            text: 'Checkpoint — pause and think: with the assessment ahead, what will eat most of your practice time between now and then — a specific chord, a transition, or keeping the strum steady?',
+            text_es: 'Punto de control — pausa y piensa: con la evaluación por delante, ¿qué se va a llevar la mayor parte de tu tiempo de práctica de aquí a entonces — un acorde específico, una transición, o mantener el rasgueo constante?',
             response: { type: 'short', placeholder: 'e.g. the B7→E change, and not rushing the strum',
               placeholder_es: 'p. ej. el cambio B7→E, y no apurar el rasgueo' }
           }
@@ -1578,8 +1578,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: your pressure point', label_es: 'Cierre: tu punto débil bajo presión',

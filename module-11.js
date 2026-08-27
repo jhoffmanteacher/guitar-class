@@ -120,13 +120,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
               {
                 label: 'Wrap-up: your song\'s home chord', label_es: 'Cierre: el acorde base de tu canción',
-                text: 'Station Wrap-Up — pick any core song: which numeral is its home chord, and is it major or minor?',
-                text_es: 'Cierre de la estación — elige cualquier canción principal: ¿qué número romano es su acorde base, y es mayor o menor?',
+                text: 'Checkpoint — pick any core song: which numeral is its home chord, and is it major or minor?',
+                text_es: 'Punto de control — elige cualquier canción principal: ¿qué número romano es su acorde base, y es mayor o menor?',
                 response: { type: 'short', placeholder: 'e.g. "Watchtower"\'s home is Am — the vi of C, or "i" if you call the key A minor',
                   placeholder_es: 'p. ej. la base de "Watchtower" es Am — el vi de C, o "i" si llamas a la tonalidad A menor' }
               }
@@ -224,8 +224,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: why is Am lowercase?', label_es: 'Cierre: ¿por qué Am va en minúscula?',
@@ -415,13 +415,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
               {
                 label: 'Wrap-up: the home-chord feeling', label_es: 'Cierre: la sensación del acorde base',
-                text: 'Station Wrap-Up — describe the "home chord" feeling in your own words.',
-                text_es: 'Cierre de la estación — describe con tus propias palabras la sensación del "acorde base."',
+                text: 'Checkpoint — describe the "home chord" feeling in your own words.',
+                text_es: 'Punto de control — describe con tus propias palabras la sensación del "acorde base."',
                 response: { type: 'short', placeholder: 'e.g. like the last word of a sentence — the loop can finally stop there',
                   placeholder_es: 'p. ej. como la última palabra de una oración — el loop finalmente puede detenerse ahí' }
               }
@@ -536,8 +536,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: mystery key and G/B', label_es: 'Cierre: tonalidad misteriosa y G/B',
@@ -730,13 +730,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
               {
                 label: 'Wrap-up: open shapes or barres?', label_es: 'Cierre: ¿formas abiertas o cejillas?',
-                text: 'Station Wrap-Up — open shapes or barre shapes: which would you pick for "Let It Be", and why? (Don\'t stop — the 12-bar blues section is below!)',
-                text_es: 'Cierre de la estación — formas abiertas o formas con cejilla: ¿cuál elegirías para "Let It Be", y por qué? (¡No pares — la sección de blues de 12 compases está abajo!)',
+                text: 'Checkpoint — open shapes or barre shapes: which would you pick for "Let It Be", and why? (Don\'t stop — the 12-bar blues section is below!)',
+                text_es: 'Punto de control — formas abiertas o formas con cejilla: ¿cuál elegirías para "Let It Be", y por qué? (¡No pares — la sección de blues de 12 compases está abajo!)',
                 response: { type: 'short', placeholder: 'e.g. open — it rings better; but the barre F is better than the mini-F once my hand is warm',
                   placeholder_es: 'p. ej. abierta — suena mejor; pero la F con cejilla es mejor que la mini-F una vez que mi mano está caliente' }
               }
@@ -858,8 +858,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: two homes for C major', label_es: 'Cierre: dos lugares para C mayor',

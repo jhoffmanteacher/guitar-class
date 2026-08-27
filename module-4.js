@@ -138,13 +138,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
             label: 'Wrap-up: the finger or the sound?', label_es: 'Cierre: ¿el dedo o el sonido?',
-            text: 'Station Wrap-Up — pause and think: when you positioned Pattern 1 today, what told you whether you were set up for MAJOR or MINOR — the finger on the root, or the sound? Which felt more reliable?',
-            text_es: 'Cierre de la estación — pausa y piensa: cuando posicionaste el Patrón 1 hoy, ¿qué te decía si estabas listo para MAYOR o para MENOR — el dedo en la raíz, o el sonido? ¿Cuál se sintió más confiable?',
+            text: 'Checkpoint — pause and think: when you positioned Pattern 1 today, what told you whether you were set up for MAJOR or MINOR — the finger on the root, or the sound? Which felt more reliable?',
+            text_es: 'Punto de control — pausa y piensa: cuando posicionaste el Patrón 1 hoy, ¿qué te decía si estabas listo para MAYOR o para MENOR — el dedo en la raíz, o el sonido? ¿Cuál se sintió más confiable?',
             response: { type: 'short', placeholder: 'e.g. I trusted the finger (4th = major, 1st = minor) more than my ear so far',
               placeholder_es: 'p. ej. confié más en el dedo (4º = mayor, 1º = menor) que en mi oído hasta ahora' }
           }
@@ -405,8 +405,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: what felt harder?', label_es: 'Cierre: ¿qué fue más difícil?',
@@ -602,13 +602,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
             label: 'Wrap-up: your go-to expressive tool', label_es: 'Cierre: tu herramienta expresiva',
-            text: 'Station Wrap-Up — pause and think: which expressive tool felt most natural today — dynamics (loud/soft), timbre (bright/warm), or the hammer-on? Which one will you lean on in your solos?',
-            text_es: 'Cierre de la estación — pausa y piensa: ¿qué herramienta expresiva se sintió más natural hoy — la dinámica (fuerte/suave), el timbre (brillante/cálido), o el hammer-on? ¿En cuál te vas a apoyar en tus solos?',
+            text: 'Checkpoint — pause and think: which expressive tool felt most natural today — dynamics (loud/soft), timbre (bright/warm), or the hammer-on? Which one will you lean on in your solos?',
+            text_es: 'Punto de control — pausa y piensa: ¿qué herramienta expresiva se sintió más natural hoy — la dinámica (fuerte/suave), el timbre (brillante/cálido), o el hammer-on? ¿En cuál te vas a apoyar en tus solos?',
             response: { type: 'short', placeholder: 'e.g. dynamics came easily; hammer-ons still feel unreliable',
               placeholder_es: 'p. ej. la dinámica salió fácil; los hammer-ons todavía se sienten poco confiables' }
           }
@@ -747,8 +747,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: phrasing or note names?', label_es: 'Cierre: ¿fraseo o nombres de nota?',
@@ -948,13 +948,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
             label: 'Wrap-up: which theory clicked?', label_es: 'Cierre: ¿qué teoría tuvo sentido?',
-            text: 'Station Wrap-Up — pause and think: you can now explain how the pentatonic is built, add the blues note, and use vibrato. Which piece of theory finally made sense today, and which still feels fuzzy?',
-            text_es: 'Cierre de la estación — pausa y piensa: ahora puedes explicar cómo se construye la pentatónica, agregar la nota de blues, y usar vibrato. ¿Qué parte de la teoría finalmente tuvo sentido hoy, y cuál todavía se siente confusa?',
+            text: 'Checkpoint — pause and think: you can now explain how the pentatonic is built, add the blues note, and use vibrato. Which piece of theory finally made sense today, and which still feels fuzzy?',
+            text_es: 'Punto de control — pausa y piensa: ahora puedes explicar cómo se construye la pentatónica, agregar la nota de blues, y usar vibrato. ¿Qué parte de la teoría finalmente tuvo sentido hoy, y cuál todavía se siente confusa?',
             response: { type: 'short', placeholder: 'e.g. relative major/minor made sense; the ♭5 blue note still feels random to me',
               placeholder_es: 'p. ej. la relativa mayor/menor tuvo sentido; la nota de blues ♭5 todavía se siente aleatoria para mí' }
           }
@@ -1082,8 +1082,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: reflect on your solo', label_es: 'Cierre: reflexiona sobre tu solo',

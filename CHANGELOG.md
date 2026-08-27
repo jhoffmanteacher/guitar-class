@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-27 — One set, one list of steps
+
+### Changed
+
+- **Station B and Station C are now a single list.** Every set used to split
+  its work into two panels you had to switch between — one for the videos,
+  one for the drills. They're one continuous ladder now: the watching steps
+  first, then a line that reads "Now practice it — …", then the drills, with
+  the step numbers running straight through (Step 9 of 17, not Step 3 of 8
+  in a second panel). Nothing was added or removed — every step, every
+  video, every challenge is exactly where it was, and everything you'd
+  already checked off is still checked off.
+- **The menu is simpler.** "This set" now has two buttons instead of three:
+  **The lesson** and **My skills checklist**.
+- **The two reflection cards have clearer names.** The one in the middle of
+  the set is now **Checkpoint** (*Punto de control*); the one at the end is
+  **Wrap-Up** (*Cierre*). They used to both be called "Station Wrap-Up",
+  which was confusing when you met two of them in one set.
+- **"Tune and warm up first" moved to the top.** The Daily 5 reminder now
+  greets you at the start of the set instead of halfway down it.
+
 ## 2026-08-26 — "Happy Birthday" is now part of your Module 1 assessment
 
 ### Changed

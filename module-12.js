@@ -105,13 +105,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
               {
-                label: 'Station wrap-up', label_es: 'Cierre de la estación',
-                text: 'Station Wrap-Up — pause and think: in your own words, why does the thumb count as "the drummer" in Travis picking — what breaks if it stops?',
-                text_es: 'Cierre de la estación — pausa y piensa: con tus propias palabras, ¿por qué el pulgar cuenta como "el baterista" del Travis picking — qué se rompe si se detiene?',
+                label: 'Checkpoint', label_es: 'Punto de control',
+                text: 'Checkpoint — pause and think: in your own words, why does the thumb count as "the drummer" in Travis picking — what breaks if it stops?',
+                text_es: 'Punto de control — pausa y piensa: con tus propias palabras, ¿por qué el pulgar cuenta como "el baterista" del Travis picking — qué se rompe si se detiene?',
                 response: { type: 'short', placeholder: 'e.g. the bass is the beat — if the thumb stops, the whole groove collapses',
                   placeholder_es: 'p. ej. el bajo es el pulso — si el pulgar se detiene, todo el groove se derrumba' }
               }
@@ -233,8 +233,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: write your tempo target', label_es: 'Cierre: escribe tu objetivo de tempo',
@@ -251,8 +251,8 @@ SETS.push(
             steps: [
               {
                 label: 'Play-along: the Travis pattern', label_es: 'Toca junto al video: patrón Travis',
-                text: 'Play-along:<ol><li>Open <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">Station B\'s Travis pattern lesson video</a> (the Practice Playalong section, 8:59–11:16).</li><li>Set YouTube\'s speed to 0.75×.</li><li>Pick along for the ENTIRE demo section without stopping.</li></ol>You\'ve got it when: you finish a full pass with the video — dropped pinches and all, don\'t stop.',
-                text_es: 'Toca junto al video:<ol><li>Abre <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">el video de la lección del patrón Travis de la Estación B</a> (la sección Practice Playalong, 8:59–11:16).</li><li>Pon la velocidad de YouTube en 0.75×.</li><li>Toca junto a la TOTALIDAD de la sección de demostración sin detenerte.</li></ol>Lo tienes cuando: terminas una pasada completa con el video — con pellizcos fallados y todo, no te detengas.',
+                text: 'Play-along:<ol><li>Open <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">the Travis pattern lesson video you watched earlier</a> (the Practice Playalong section, 8:59–11:16).</li><li>Set YouTube\'s speed to 0.75×.</li><li>Pick along for the ENTIRE demo section without stopping.</li></ol>You\'ve got it when: you finish a full pass with the video — dropped pinches and all, don\'t stop.',
+                text_es: 'Toca junto al video:<ol><li>Abre <a href="https://www.youtube.com/watch?v=JvtFd7vkea0" target="_blank">el video de la lección del patrón Travis que viste antes</a> (la sección Practice Playalong, 8:59–11:16).</li><li>Pon la velocidad de YouTube en 0.75×.</li><li>Toca junto a la TOTALIDAD de la sección de demostración sin detenerte.</li></ol>Lo tienes cuando: terminas una pasada completa con el video — con pellizcos fallados y todo, no te detengas.',
                 hint: 'Not stopping is the skill. If the thumb stumbles, let the fills go and keep the bass walking until you\'re back in.',
                 hint_es: 'No detenerte es la destreza. Si el pulgar tropieza, deja ir los rellenos y mantén el bajo caminando hasta que vuelvas a estar dentro.'
               }
@@ -451,13 +451,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
               {
-                label: 'Station wrap-up', label_es: 'Cierre de la estación',
-                text: 'Station Wrap-Up — pause and think: how would you explain to a friend the difference between counting in 4 and counting in 3, without playing a note?',
-                text_es: 'Cierre de la estación — pausa y piensa: ¿cómo le explicarías a un amigo la diferencia entre contar en 4 y contar en 3, sin tocar una sola nota?',
+                label: 'Checkpoint', label_es: 'Punto de control',
+                text: 'Checkpoint — pause and think: how would you explain to a friend the difference between counting in 4 and counting in 3, without playing a note?',
+                text_es: 'Punto de control — pausa y piensa: ¿cómo le explicarías a un amigo la diferencia entre contar en 4 y contar en 3, sin tocar una sola nota?',
                 response: { type: 'short', placeholder: 'e.g. in 3 the bass comes back one beat sooner — ONE-two-three instead of ONE-two-three-four',
                   placeholder_es: 'p. ej. en 3 el bajo regresa un tiempo antes — UN-dos-tres en lugar de UN-dos-tres-cuatro' }
               }
@@ -557,8 +557,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: picking in 4 vs. in 3', label_es: 'Cierre: puntear en 4 vs. en 3',
@@ -730,13 +730,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
               {
-                label: 'Station wrap-up', label_es: 'Cierre de la estación',
-                text: 'Station Wrap-Up — pause and think: what does the requinto add to a sierreño song that strummed chords alone can\'t?',
-                text_es: 'Cierre de la estación — pausa y piensa: ¿qué le aporta el requinto a una canción de sierreño que los acordes rasgueados por sí solos no pueden?',
+                label: 'Checkpoint', label_es: 'Punto de control',
+                text: 'Checkpoint — pause and think: what does the requinto add to a sierreño song that strummed chords alone can\'t?',
+                text_es: 'Punto de control — pausa y piensa: ¿qué le aporta el requinto a una canción de sierreño que los acordes rasgueados por sí solos no pueden?',
                 response: { type: 'short', placeholder: 'e.g. the melody — it sings the line a voice would carry',
                   placeholder_es: 'p. ej. la melodía — canta la línea que llevaría una voz' }
               }
@@ -855,8 +855,8 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Wrap-Up',
+            title_es: 'Cierre',
             steps: [
               {
                 label: 'Wrap-up: your performance song', label_es: 'Cierre: tu canción de interpretación',

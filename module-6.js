@@ -117,13 +117,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
-            label: 'Station wrap-up', label_es: 'Cierre de la estación',
-            text: 'Station Wrap-Up — pause and think: which was harder to keep steady today — your strum hand swinging non-stop like a pendulum, or counting "1 + 2 + 3 + 4 +" out loud the whole time? What started to feel easier?',
-            text_es: 'Cierre de la estación — pausa y piensa: ¿qué se sintió más difícil mantener estable hoy — tu mano de rasgueo balanceándose sin parar como un péndulo, o contar "1 + 2 + 3 + 4 +" en voz alta todo el tiempo? ¿Qué empezó a sentirse más fácil?',
+            label: 'Checkpoint', label_es: 'Punto de control',
+            text: 'Checkpoint — pause and think: which was harder to keep steady today — your strum hand swinging non-stop like a pendulum, or counting "1 + 2 + 3 + 4 +" out loud the whole time? What started to feel easier?',
+            text_es: 'Punto de control — pausa y piensa: ¿qué se sintió más difícil mantener estable hoy — tu mano de rasgueo balanceándose sin parar como un péndulo, o contar "1 + 2 + 3 + 4 +" en voz alta todo el tiempo? ¿Qué empezó a sentirse más fácil?',
             response: { type: 'short', placeholder: 'e.g. my hand kept freezing on the chord change — slowing to 50 BPM helped it keep swinging',
               placeholder_es: 'p. ej. mi mano se congelaba en el cambio de acorde — bajar a 50 BPM ayudó a que siguiera balanceándose' }
           }
@@ -520,13 +520,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
-            label: 'Station wrap-up', label_es: 'Cierre de la estación',
-            text: 'Station Wrap-Up — pause and think: in the D-DU-UDU pattern, what trips you up more right now — skipping a strum while the wrist keeps moving, or landing the accents on beats 2 and 4? What helped today?',
-            text_es: 'Cierre de la estación — pausa y piensa: en el patrón D-DU-UDU, ¿qué te confunde más ahora mismo — saltarte un rasgueo mientras la muñeca sigue en movimiento, o hacer caer los acentos en los tiempos 2 y 4? ¿Qué te ayudó hoy?',
+            label: 'Checkpoint', label_es: 'Punto de control',
+            text: 'Checkpoint — pause and think: in the D-DU-UDU pattern, what trips you up more right now — skipping a strum while the wrist keeps moving, or landing the accents on beats 2 and 4? What helped today?',
+            text_es: 'Punto de control — pausa y piensa: en el patrón D-DU-UDU, ¿qué te confunde más ahora mismo — saltarte un rasgueo mientras la muñeca sigue en movimiento, o hacer caer los acentos en los tiempos 2 y 4? ¿Qué te ayudó hoy?',
             response: { type: 'short', placeholder: 'e.g. I keep actually hitting the strings on the skip — pulling the pick back just slightly fixed it',
               placeholder_es: 'p. ej. sigo tocando las cuerdas en el rasgueo que debo saltarme — alejar la púa un poco lo arregló' }
           }
@@ -660,8 +660,8 @@ SETS.push(
             steps: [
               {
                 label: 'Play-along at 0.75×', label_es: 'Toca junto a 0.75×',
-                text: '<ol><li>Open Station B\'s D-DU-UDU lesson video.</li><li>Set YouTube\'s speed to 0.75×.</li><li>Strum along for the ENTIRE demo section without stopping.</li></ol>You\'ve got it when: you finish a full pass with the video — flubbed changes and all, don\'t stop.',
-                text_es: '<ol><li>Abre el video de la lección D-DU-UDU de la Estación B.</li><li>Pon la velocidad de YouTube en 0.75×.</li><li>Rasguea junto con él durante TODA la sección de demostración sin detenerte.</li></ol>Lo tienes cuando: terminas un pase completo con el video — con cambios fallidos y todo, no te detengas.',
+                text: '<ol><li>Open the D-DU-UDU lesson video you watched earlier in this set.</li><li>Set YouTube\'s speed to 0.75×.</li><li>Strum along for the ENTIRE demo section without stopping.</li></ol>You\'ve got it when: you finish a full pass with the video — flubbed changes and all, don\'t stop.',
+                text_es: '<ol><li>Abre el video de la lección D-DU-UDU que viste antes en esta unidad.</li><li>Pon la velocidad de YouTube en 0.75×.</li><li>Rasguea junto con él durante TODA la sección de demostración sin detenerte.</li></ol>Lo tienes cuando: terminas un pase completo con el video — con cambios fallidos y todo, no te detengas.',
                 hint: 'Not stopping is the skill. Real songs don\'t wait for you, and neither does the video — keeping going after a mistake is better than starting over.',
                 hint_es: 'No detenerte es la destreza. Las canciones reales no te esperan, y el video tampoco — seguir adelante después de un error es mejor que volver a empezar.'
               }
@@ -825,13 +825,13 @@ SETS.push(
             ]
           },
           {
-            title: 'Station Wrap-Up',
-            title_es: 'Cierre de la estación',
+            title: 'Checkpoint',
+            title_es: 'Punto de control',
             steps: [
           {
-            label: 'Station wrap-up', label_es: 'Cierre de la estación',
-            text: 'Station Wrap-Up — pause and think: of the three feels you tried — folk, rock, reggae — which was hardest to make sound convincing on your guitar, and what gave it away as "not quite right"?',
-            text_es: 'Cierre de la estación — pausa y piensa: de las tres sensaciones que probaste — folk, rock, reggae — ¿cuál fue la más difícil de hacer sonar convincente en tu guitarra, y qué la delataba como "no del todo correcta"?',
+            label: 'Checkpoint', label_es: 'Punto de control',
+            text: 'Checkpoint — pause and think: of the three feels you tried — folk, rock, reggae — which was hardest to make sound convincing on your guitar, and what gave it away as "not quite right"?',
+            text_es: 'Punto de control — pausa y piensa: de las tres sensaciones que probaste — folk, rock, reggae — ¿cuál fue la más difícil de hacer sonar convincente en tu guitarra, y qué la delataba como "no del todo correcta"?',
             response: { type: 'short', placeholder: 'e.g. reggae — my offbeat upstrokes were too heavy, so it sounded like rock with gaps',
               placeholder_es: 'p. ej. reggae — mis golpes hacia arriba en el contratiempo eran demasiado pesados, así que sonaba como rock con huecos' }
           }
