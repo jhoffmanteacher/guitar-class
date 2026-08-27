@@ -81,23 +81,23 @@ SETS.push(
             label: 'Find your song on YouTube', label_es: 'Busca tu canción en YouTube',
             text: '<ol><li>Find a YouTube clip of your song — the one that means something to you (any song you love with guitar in it works).</li><li>As you listen, follow the guitar only — ignore the singing and drums for 30 seconds and track what the guitar is doing.</li></ol>You\'ve got it when: you can describe the guitar\'s job in the song in one sentence.',
             text_es: '<ol><li>Busca en YouTube un clip de tu canción — la que significa algo para ti (sirve cualquier canción que ames que tenga guitarra).</li><li>Mientras escuchas, sigue solo la guitarra — ignora la voz y la batería durante 30 segundos y fíjate en qué está haciendo la guitarra.</li></ol>Lo tienes cuando: puedes describir en una oración el papel de la guitarra en la canción.',
-            hint: 'Is it strumming chords? Playing a melody? Both? Just listen — you don\'t need to know the names yet.',
-            hint_es: '¿Está rasgueando acordes? ¿Tocando una melodía? ¿Ambas cosas? Solo escucha — todavía no necesitas saber los nombres.',
+            hint: 'Two words you need for the options below. Strumming is when the pick sweeps across several strings at once and they ring together. A melody is single notes, one at a time — the part of a song you hum along to. Plenty of songs have both, so pick whichever the guitar is doing MOST of.',
+            hint_es: 'Dos palabras que necesitas para las opciones de abajo. Rasguear es cuando la púa barre varias cuerdas a la vez y suenan juntas. Una melodía son notas individuales, una a la vez — la parte de la canción que tararearías. Muchas canciones tienen las dos cosas, así que elige lo que la guitarra hace la MAYOR parte del tiempo.',
             levelUp: 'Listen a second time and try to tap along with just the guitar\'s rhythm, ignoring everything else.',
             levelUp_es: 'Escucha una segunda vez e intenta llevar el ritmo solo con el de la guitarra, ignorando todo lo demás.',
             skills: [2, 3],
             response: { type: 'mc', prompt: 'In the clip you watched, what was the guitar doing?',
               prompt_es: 'En el clip que viste, ¿qué estaba haciendo la guitarra?', choices: [
-              'Strumming chords',
-              'Playing a melody (single notes)',
-              'Both strumming and single notes',
-              'Mostly rhythm or percussive sounds'
+              'Strumming chords — the pick sweeps across several strings at once',
+              'Playing a melody — single notes, one at a time, like a tune you hum',
+              'Both — some strumming, some single notes',
+              'Mostly rhythm — short, chopped, percussive sounds'
             ],
               choices_es: [
-              'Rasgueando acordes',
-              'Tocando una melodía (notas individuales)',
-              'Ambas cosas: rasgueo y notas individuales',
-              'Sobre todo ritmo o sonidos percusivos'
+              'Rasgueando acordes — la púa barre varias cuerdas a la vez',
+              'Tocando una melodía — notas individuales, una a la vez, como algo que tarareas',
+              'Ambas cosas — a ratos rasgueo, a ratos notas individuales',
+              'Sobre todo ritmo — sonidos cortos, secos y percusivos'
             ] }
           }
             ]

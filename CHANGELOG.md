@@ -5,6 +5,21 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-27 — Two fixes from your problem reports
+
+### Fixed
+
+- **The Listening Coach waits for you now.** If you were playing a little
+  behind the click, it used to stop listening while you still had notes to
+  go and mark the last few as missed. It now follows your timing and keeps
+  the mic open while you are still landing notes, so the whole take gets
+  scored. It still tells you honestly if you dragged.
+- **Module 1, Set 1: the listening question explains its own answers.** The
+  question about what the guitar is doing in your song used words you had
+  not met yet. Each choice now says what it means — strumming is the pick
+  sweeping several strings at once, a melody is single notes one at a time
+  — and the hint defines both before you pick.
+
 ## 2026-08-27 — The old site tour is gone
 
 ### Removed
