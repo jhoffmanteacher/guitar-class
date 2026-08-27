@@ -755,16 +755,14 @@ MODULE_REVIEWS[1] = {
     { id: 'mr1-s6', text: 'I can name all 6 strings from memory (E A D G B e) — in order and at random', text_es: 'Puedo nombrar las 6 cuerdas de memoria (E A D G B e) — en orden y al azar', set: 'w2' }
   ],
   assessItems: [
-    'Tune all 6 strings to green in under 2 minutes, without restarting',
-    'Name all 6 strings from memory, low to high, high to low, and at random',
-    'Play each open string with correct posture and pick grip — using relaxed down-strokes — every string ringing full and clean with no accidental muting from either hand',
-    'Play "Happy Birthday" — all four phrases on the low E string — at a steady pulse from start to finish without stopping, every note clean'
+    'Tune all 6 strings accurately',
+    'Name all 6 strings from memory',
+    'Play "Happy Birthday" on the low E string at a steady pace from start to finish'
   ],
   assessItems_es: [
-    'Afinar las 6 cuerdas en verde en menos de 2 minutos, sin reiniciar',
-    'Nombrar las 6 cuerdas de memoria, de grave a aguda, de aguda a grave, y al azar',
-    'Tocar cada cuerda al aire con la postura y el agarre de púa correctos — con golpes hacia abajo relajados — cada cuerda sonando plena y limpia sin que ninguna mano la apague sin querer',
-    'Tocar "Happy Birthday" — las cuatro frases en la cuerda Mi grave — a un pulso constante de principio a fin sin detenerte, cada nota limpia'
+    'Afinar las 6 cuerdas con precisión',
+    'Nombrar las 6 cuerdas de memoria',
+    'Tocar "Happy Birthday" en la cuerda Mi grave a un pulso constante de principio a fin'
   ],
   forward: 'You\'ve got a guitar that\'s in tune, a goal, and your first clean notes — <strong>Module 2 puts names on the frets</strong> so riffs and TAB start making sense.',
   forward_es: 'Ya tienes una guitarra afinada, una meta, y tus primeras notas limpias — <strong>el Módulo 2 les pone nombre a los trastes</strong> para que los riffs y el TAB empiecen a tener sentido.',

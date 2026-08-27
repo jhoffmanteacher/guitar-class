@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-27 — Module 1 assessment is three tasks
+
+### Changed
+
+- **The Module 1 assessment now lists exactly three tasks**, in Mr. Hoffman's
+  words: tune all 6 strings accurately, name all 6 strings from memory, and
+  play "Happy Birthday" on the low E string at a steady pace from start to
+  finish. The open-string posture and pick-grip item is gone, and the other
+  three lost their extra conditions. Nothing else about Module 1 changed.
+
 ## 2026-08-27 — Seven Nation Army moves up the activity list
 
 ### Changed
