@@ -417,8 +417,9 @@ function checkBlockedTabSites() {
    keys untouched, so this only looks at text students read — quoted
    string literals in the module files and i18n.js, and visible text in
    index.html / the Journey pages. Fix by naming the work, not the
-   station. (tour.html is exempt: it still teaches the old model and is
-   blocked on re-shot screenshots — a tracked open item.)
+   station. (The student tour was deleted rather than rewritten — it was
+   the last surface still teaching the B/C model, and Jonathan is building a
+   new one against the merged ladder.)
    ════════════════════════════════════════════════════════════════════ */
 function checkRetiredStationWording() {
   head('1n. Retired station wording in student-facing text');

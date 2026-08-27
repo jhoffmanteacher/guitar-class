@@ -27,8 +27,18 @@ renderer; the single tab-panel suffix is `LESSON_TAB` (still the literal
 `'station-b'`, so old deep links resolve). Sections are addressed by
 `data-ns`, never by DOM position. Don't reintroduce "Station B/C" wording in
 student-facing text — the mid-set reflection card is **Checkpoint / Punto de
-control**, the end-of-set one is **Wrap-Up / Cierre**. `tour.html` still
-teaches the old B/C model and needs re-shot screenshots — open item.
+control**, the end-of-set one is **Wrap-Up / Cierre**; checks.mjs 1n fails the
+push on a relapse.
+
+**There is no student tour.** `tour.html` + `tour-img/` were deleted 2026-08-27
+(they taught the retired B/C model and every screenshot was stale). Jonathan is
+building a new one — don't resurrect the old file from git.
+
+**The set has no in-panel tab bar.** The rail is the only switcher;
+`switchTabById()` drives `.tab-panel` directly. A set is exactly two panels,
+the lesson ladder and the checklist — the per-set Songs tab was removed
+2026-08-27 (unreachable since the rail took over, and the Songs hub already
+lists the same songs, Module 1's included).
 
 **Live preview:** VS Code Live Server — right-click `index.html` → "Open with
 Live Server". No commit needed.

@@ -430,14 +430,7 @@
     // ── Assessment block (standards label) ──
     'assess.standards':      { en: 'NAfME standards', es: 'Estándares NAfME' },
 
-    // ── Songs list (per-set and per-module "🎵 Songs") ──
-    'songs.core':            { en: 'Core — everyone', es: 'Básica — para todos' },
-    'songs.choice':          { en: 'Choice menu — pick 1', es: 'Menú a elección — elige 1' },
-    'songs.diffLegend':      { en: 'easier → harder', es: 'más fácil → más difícil' },
-    'songs.difficulty':      { en: 'Difficulty', es: 'Dificultad' },
-    'songs.diff1':           { en: 'Beginner', es: 'Principiante' },
-    'songs.diff2':           { en: 'Intermediate', es: 'Intermedio' },
-    'songs.diff3':           { en: 'Advanced', es: 'Avanzado' },
+    // ── Song rows (the Songs hub, and the video overlay it opens) ──
     'songs.original':        { en: 'Original', es: 'Original' },
     'songs.tutorial':        { en: 'Tutorial', es: 'Tutorial' },
     'songs.backingTrack':    { en: 'Backing track', es: 'Pista de acompañamiento' },
@@ -445,12 +438,7 @@
                                 es: 'Pista de acompañamiento — se repite sola; presiona play e improvisa (solo) encima' },
     'songs.songJourney':     { en: 'Song Journey', es: 'Recorrido de la canción' },
     'songs.openLayerTitle':  { en: 'Open this layer on the Song Journey page', es: 'Abrir esta capa en la página del Recorrido de la canción' },
-    'songs.yourPick':        { en: 'Your pick — bring your own song!', es: 'Tu elección — ¡trae tu propia canción!' },
-    'songs.yourPickBody':    { en: "Got a song you want to learn? Search YouTube for a beginner tutorial and use this module's skills on it.",
-                                es: '¿Tienes una canción que quieres aprender? Busca en YouTube un tutorial para principiantes y aplica las destrezas de este módulo.' },
     'songs.opensYoutube':    { en: 'Opens in YouTube', es: 'Se abre en YouTube' },
-    'songs.jamTrackTitle':   { en: 'Jam track — backing music to play along with; make up your own melody (solo) over it',
-                                es: 'Pista de acompañamiento — música de fondo para tocar junto con ella; improvisa tu propia melodía (solo) encima.' },
     // Song Journey pages' own playalong button — different copy from
     // songs.jamTrackTitle above (this one names the layer, not a solo), so it
     // needs its own key rather than a reuse.

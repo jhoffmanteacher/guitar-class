@@ -2004,11 +2004,10 @@ function activateSet(id, opts){
 }
 
 /* ── Rail set switcher ─────────────────────────────────────────────────
-   The per-set tabs (the lesson ladder · checklist · Songs) live in the left
-   rail instead of inside each set panel. The in-panel .tabs block still exists
-   in the DOM (hidden via CSS) so switchTab/switchTabById/panelFooter/print all
-   keep working unchanged — these helpers just drive it and mirror the active
-   state back into the rail. */
+   The per-set switcher (the lesson ladder · the checklist) lives in the left
+   rail. It is the ONLY switcher — the in-panel tab bar it replaced is gone —
+   so these helpers drive switchTabById() and mirror the active panel back
+   onto the rail buttons. */
 /* The one tab-panel suffix the merged ladder lives under. Kept as 'station-b'
    rather than renamed: every stored deep link, every `${wid}-station-b` lookup
    and the print stylesheet already address it, and the id is invisible to
@@ -2042,8 +2041,10 @@ function syncRailStations(){
   const list  = document.getElementById('rail-stations');
   if(!group || !list) return;   // teacher view / pre-init: nothing to do
   const panel = activeWeekPanel();
-  const hasTabs = panel && panel.querySelector('.tabs .tabs-card');
-  if(!hasTabs){ group.hidden = true; return; }   // module-review / coming-soon: no stations
+  // Module-review and coming-soon panels carry no .tab-panel, so there is
+  // nothing for the rail's "This set" group to switch between.
+  const hasPanels = panel && panel.querySelector('.tab-panel');
+  if(!hasPanels){ group.hidden = true; return; }
   group.hidden = false;
   const wid = panel.dataset.id;
   const w = (typeof SETS !== 'undefined') ? SETS.find(s=>s.id===wid) : null;
@@ -2299,56 +2300,16 @@ function buildSet(w){
       <span class="set-peek-banner-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span>
       <div>${isModuleGateCase(w) ? t('gate.peekBannerModule', prevModuleGateParams(w)) : t('gate.peekBanner', { prev: tSetLabel(prevSetLabel(w)) })}</div>
     </div>`;
-  /* Stations B and C are one merged ladder now (see buildLesson) — the set has
-     exactly two steps to its process: do the lesson, then check off what you
-     can do. Single-flow sets (e.g. Module 13 · String Changing) still override
-     the card's labels from the set's own fields (tabTitle/tabSub on stations.b,
-     checklistSub on the set, + _es twins). */
-  const single = !!(w.stations && w.stations.b && !w.stations.c);
-  const lessonTitle = (single && w.stations.b.tabTitle) ? tf(w.stations.b,'tabTitle') : t('nav.lessonTitle');
-  const lessonSub   = (single && w.stations.b.tabSub)   ? tf(w.stations.b,'tabSub')   : lessonSubLabel(w);
-  const chkSub      = (single && w.checklistSub) ? tf(w,'checklistSub') : t('nav.checklistSub');
-  const stationCards = `<button type="button" class="tabs-card tab-station-b active" onclick="switchTab(this,'${w.id}','station-b')">
-          <span class="tabs-card-title"><span class="tabs-card-num">1</span>${lessonTitle}</span>
-          <span class="tabs-card-sub">${lessonSub}</span>
-        </button>`;
+  /* A set is two panels now: the lesson ladder and the skills checklist. The
+     in-panel tab bar that used to switch between them was hidden site-wide
+     when the rail took over the job — it survived only as a place to hang an
+     .active class nobody could see, so it's gone and switchTabById() drives
+     the panels directly. The per-set Songs tab went with it: it was reachable
+     only from that hidden bar, and the Songs hub (rail → Songs) already lists
+     every song it did, Module 1's included, with the same play buttons. */
   return `${peekBanner}${eyebrow}
-  <div class="tabs">
-    <div class="tabs-songbar">
-      ${w.songs ? `<button type="button" class="tabs-songs tab-songs" onclick="switchTab(this,'${w.id}','songs')">&#9835; ${t('nav.songs')}</button>` : ''}
-    </div>
-    <div class="tabs-main">
-      <div class="tabs-stations-col">
-        ${stationCards}
-      </div>
-      <div class="tabs-arrow" aria-hidden="true">&rarr;</div>
-      <button type="button" class="tabs-card tab-checklist" onclick="switchTab(this,'${w.id}','checklist')">
-        <span class="tabs-card-title"><span class="tabs-card-num">2</span>${t('nav.checklistTitle')}</span>
-        <span class="tabs-card-sub">${chkSub}</span>
-      </button>
-    </div>
-  </div>
   <div id="${w.id}-${LESSON_TAB}" class="tab-panel tp-station-b active">${buildLesson(w)}${panelFooter(w,LESSON_TAB)}</div>
-  <div id="${w.id}-songs"    class="tab-panel tp-songs">${w.songs ? buildSongs(w) + panelFooter(w,'songs') : ''}</div>
   <div id="${w.id}-checklist" class="tab-panel tp-checklist">${buildChecklist(w)}${panelFooter(w,'checklist')}</div>`;
-}
-
-function switchTab(el,wid,tab){
-  // Same reasoning as activateSet(): the tab-panel we're switching away from
-  // (e.g. the lesson ladder) might be hiding a still-running inline Coach check —
-  // close it so its mic doesn't keep running unseen. No-op if none is open.
-  if (typeof coachClose === 'function') coachClose();
-  // A running Shuffle Drill on the tab we're leaving keeps its interval alive
-  // under display:none otherwise — same reasoning as activateSet()'s sweep.
-  if(typeof shuffleDrills === 'object' && typeof sdStop === 'function'){
-    Object.keys(shuffleDrills).forEach(k=>sdStop(k));
-  }
-  const panel=document.querySelector(`.week-panel[data-id="${wid}"]`);
-  panel.querySelectorAll('.tabs > .tabs-main .tabs-card, .tabs > .tabs-songbar > .tabs-songs').forEach(t=>t.classList.remove('active'));
-  panel.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById(`${wid}-${tab}`).classList.add('active');
-  if(typeof syncRailStations === 'function') syncRailStations();   // mirror onto the rail switcher
 }
 
 /* Print one set as a clean one-pager (for days the Chromebooks/Wi-Fi fail).
@@ -2964,24 +2925,6 @@ function updateProgressPill(li){
 }
 
 /* ── Songs ── */
-function diffLabel(level){
-  return level===1 ? t('songs.diff1') : level===2 ? t('songs.diff2') : level===3 ? t('songs.diff3') : '';
-}
-function diffDotsHtml(level){
-  if(!level) return '';
-  const lbl = diffLabel(level);
-  const filled = '●'.repeat(level);            // ●
-  const empty  = '○'.repeat(Math.max(0,3-level)); // ○
-  const title = `${t('songs.difficulty')}: ${lbl}`;
-  return `<span class="song-diff diff-${level}" title="${escAttr(title)}" aria-label="${escAttr(title)}">${filled}<span class="song-diff-empty">${empty}</span></span> `;
-}
-function songVidButtonsHtml(s, onclickFor){
-  const vids = [];
-  if(s.originalUrl) vids.push(`<button class="song-vid-btn" onclick="${onclickFor('original')}" title="${escAttr(t('songs.opensYoutube'))}"><span class="svb-play">&#x25B6;</span>${t('songs.original')} <span style="font-size:0.6875rem;opacity:0.6">&#x2197;</span></button>`);
-  if(s.tutorialUrl) vids.push(`<button class="song-vid-btn tut" onclick="${onclickFor('tutorial')}"><span class="svb-play">&#x25B6;</span>${t('songs.tutorial')}</button>`);
-  if(s.backingUrl) vids.push(`<button class="song-vid-btn" onclick="${onclickFor('backing')}" title="${escAttr(t('songs.jamTrackTitle'))}"><span class="svb-play">&#x25B6;</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> ${t('songs.backingTrack')}${s.backingKey?` (${s.backingKey})`:''}</button>`);
-  return vids;
-}
 /* Song-list badge ("Core" / "Choice" / "Focus" / "Supp"). The type lives in the
    module data as an English keyword, so it has to go through i18n here or the
    badge stays English in Español mode — which it did site-wide until 2026-08-08.
@@ -2992,25 +2935,7 @@ function songTypeLabel(type, core){
   if(key) return t(key);
   return type || t(core ? 'hub.tagCore' : 'hub.tagChoice');
 }
-function buildSongs(w){
-  const rows=w.songs.map((s,i)=>{
-    const nameEl = s.url ? `<button class="rp-trigger" onclick="loadSong('${w.id}',${i})">${s.name}</button>` : s.name;
-    const vids = songVidButtonsHtml(s, kind=>`loadSongVid('${w.id}',${i},'${kind}')`);
-    // Song Journey pages are same-origin (tabs/*.html), opened in a new tab so app state stays put.
-    if(s.journeyUrl) vids.push(`<button class="song-vid-btn journey" onclick="window.open('${s.journeyUrl}','_blank','noopener')" title="${escAttr(t('songs.oneSongLayers'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> ${t('songs.songJourney')}</button>`);
-    const vidsEl = vids.length ? `<div class="song-vids">${vids.join('')}</div>` : '';
-    return `<div class="song-row"><div class="dot ${s.core?'dc':'dch'}"></div><div class="song-name-col"><div class="sname">${nameEl}</div><div class="smeta">${diffDotsHtml(s.level)}${tf(s,'meta')}</div></div>${vidsEl}<span class="stag ${s.core?'stag-core':''}"${vids.length?'':' style="margin-left:auto"'}>${escHtml(songTypeLabel(s.type, s.core))}</span></div>`;
-  }).join('');
-  const requestSlot = `<div class="song-row song-request"><div class="song-request-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg></div><div><div class="sname">${t('songs.yourPick')}</div><div class="smeta">${t('songs.yourPickBody')}</div></div></div>`;
-  const diffLegend = `<div class="leg"><span class="song-diff diff-1">&#x25CF;<span class="song-diff-empty">&#x25CB;&#x25CB;</span></span>&#x2192;<span class="song-diff diff-3">&#x25CF;&#x25CF;&#x25CF;</span> ${t('songs.diffLegend')}</div>`;
-  return `<div class="legend"><div class="leg"><div class="dot dc" style="margin-top:0"></div>${t('songs.core')}</div><div class="leg"><div class="dot dch" style="margin-top:0"></div>${t('songs.choice')}</div>${diffLegend}</div><div class="card">${rows}${requestSlot}</div>`;
-}
 
-function loadSong(wid, idx){
-  const w=SETS.find(x=>x.id===wid); if(!w) return;
-  const s=w.songs[idx]; if(!s||!s.url) return;
-  loadPanel('youtube', s.url, s.name, s.type);
-}
 
 /* THE song-video launcher — every song list (per-set, Songs hub)
    routes through this so the kind dispatch and subtitles can't drift. */
@@ -3020,10 +2945,6 @@ function openSongVid(s, kind){
   if(kind==='original'){ if(s.originalUrl) window.open(s.originalUrl, '_blank', 'noopener'); return; }
   if(kind==='backing'){ if(s.backingUrl) loadPanel(/\.(mp3|m4a|ogg|wav)(\?|$)/i.test(s.backingUrl)?'audio':'youtube', s.backingUrl, s.name, t('songs.backingTrackHint')); return; }
   if(s.tutorialUrl) loadPanel('youtube', s.tutorialUrl, s.name, t('songs.tutorial'));
-}
-function loadSongVid(wid, idx, kind){
-  const w=SETS.find(x=>x.id===wid); if(!w) return;
-  openSongVid(w.songs[idx], kind);
 }
 /* ── 10-Minute Routine card (module review) + Daily 5 panel ──
    Both assemble themselves from the module's already-loaded SETS data, so
@@ -5225,10 +5146,6 @@ document.addEventListener('DOMContentLoaded', syncTranslateBtn);
 // any _es fields available get picked up (a module still mid-translation
 // just falls back to English again, same as before this rebuild existed).
 // Cheap: only touches modules the student actually opened this session.
-const TAB_SUFFIX_SELECTOR = {
-  'station-b': '.tab-station-b',
-  'songs': '.tab-songs', 'checklist': '.tab-checklist'
-};
 function rebuildModuleContentPanels(){
   document.querySelectorAll('#week-panels .week-panel').forEach(panel=>{
     const wid = panel.dataset.id;
@@ -5242,12 +5159,11 @@ function rebuildModuleContentPanels(){
       const activeSuffix = activeEl ? activeEl.id.slice(wid.length+1) : null;
       panel.innerHTML = w.comingSoon ? buildComingSoon(w) : buildSet(w);
       if(activeSuffix && activeSuffix !== LESSON_TAB){
-        panel.querySelectorAll('.tabs > .tabs-main .tabs-card, .tabs > .tabs-songbar > .tabs-songs').forEach(t=>t.classList.remove('active'));
-        panel.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
         const targetPanel = document.getElementById(`${wid}-${activeSuffix}`);
-        const targetBtn = TAB_SUFFIX_SELECTOR[activeSuffix] ? panel.querySelector(TAB_SUFFIX_SELECTOR[activeSuffix]) : null;
-        if(targetPanel) targetPanel.classList.add('active');
-        if(targetBtn) targetBtn.classList.add('active');
+        if(targetPanel){
+          panel.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+          targetPanel.classList.add('active');
+        }
       }
     } else if(mr && wid===`mr${num}`){
       panel.innerHTML = buildModuleReview(mr);
@@ -5906,7 +5822,7 @@ function panelFooter(w, tab){
     `<button type="button" class="panel-next-btn" onclick="${onclick}">${labelHtml} &rarr;</button>`;
   const span = key => `<span data-i18n="${key}">${escHtml(t(key))}</span>`;
   let inner = '';
-  if(tab === LESSON_TAB || tab === 'songs'){
+  if(tab === LESSON_TAB){
     inner = btn(span('btn.nextChecklist'), `switchTabById('${w.id}','checklist')`);
   } else if(tab === 'checklist'){
     const sets = SETS.filter(x => x.moduleNum === w.moduleNum && !x.comingSoon);
@@ -5924,18 +5840,28 @@ function panelFooter(w, tab){
   return inner ? `<div class="panel-next">${inner}</div>` : '';
 }
 
-/* Switch a set's tab from anywhere (footer buttons, skill jumps) by finding
-   the real tabs-card button so active-state styling stays consistent. */
+/* Switch a set's panel from anywhere — the rail, the footer buttons, skill
+   jumps, search deep links. The single entry point since the hidden tab bar
+   was removed; the rail reads the active state back off .tab-panel.active. */
 function switchTabById(wid, tab, keepScroll){
   const panel = document.getElementById(`${wid}-${tab}`);
-  if(!panel) return;
-  const wrap = panel.closest('.week-panel');
-  const cardBtn = wrap && wrap.querySelector(tab === 'songs' ? '.tabs-songs' : `.tabs-card.tab-${tab}`);
-  if(cardBtn) switchTab(cardBtn, wid, tab);
-  if(!keepScroll){
-    const tabs = wrap && wrap.querySelector('.tabs');
-    (tabs || panel).scrollIntoView({ block: 'start', behavior: 'smooth' });
+  const wrap = panel && panel.closest('.week-panel');
+  if(!wrap) return;
+  // Same reasoning as activateSet(): the panel we're leaving might be hiding a
+  // still-running inline Coach check — close it so its mic doesn't keep running
+  // unseen. Ditto a Shuffle Drill, whose interval survives display:none.
+  if(typeof coachClose === 'function') coachClose();
+  if(typeof shuffleDrills === 'object' && typeof sdStop === 'function'){
+    Object.keys(shuffleDrills).forEach(k=>sdStop(k));
   }
+  wrap.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  panel.classList.add('active');
+  if(typeof syncRailStations === 'function') syncRailStations();   // mirror onto the rail
+  /* Scroll the panel we just opened to the top. This used to target the tab
+     bar and fall back to the panel — but the bar was display:none, so
+     scrollIntoView() silently did nothing and "Next: My skills checklist" at
+     the bottom of a long ladder left the student stranded at the bottom. */
+  if(!keepScroll) panel.scrollIntoView({ block: 'start', behavior: 'smooth' });
 }
 
 /* Does any step in this set teach set-skill number n (and if so, in which
