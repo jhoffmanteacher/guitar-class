@@ -5,6 +5,22 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-28 — TAB diagrams are much easier to read
+
+### Changed
+
+- **Every TAB on the site now looks like the TAB on the classroom screen.** The
+  six string lines are boxed at both ends, the fret numbers are big and black
+  (cut into the line, the way printed TAB does it), and the note names
+  underneath are bold blue. The notes spread all the way across the card
+  instead of huddling on the left.
+- **No more sliding a TAB sideways to see the end of it.** A riff too long for
+  one line now breaks onto a second staff underneath, like a printed songbook,
+  with the fret spacing lined up between the rows. This was worst on a phone,
+  where longer riffs used to run off the screen.
+- The speaker icon on each note name now appears when you point at it or tab to
+  it with the keyboard; the name itself still plays the note when you click it.
+
 ## 2026-08-27 — Module 1 assessment is three tasks
 
 ### Changed

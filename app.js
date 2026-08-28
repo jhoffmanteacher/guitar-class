@@ -811,18 +811,22 @@ function strumChord(chordName, btnEl){
    fret numbers placed on the relevant string and a row of clickable
    note-name buttons below that play the corresponding pitch. */
 const TAB_STRINGS = ['e','B','G','D','A','E'];
-function renderTabBlock(notes, seqOffset, padTo){
-  if (!notes || !notes.length) return '';
-  const off = seqOffset || 0;   // sequential index across phrases — the beat cursor's address
-  /* padTo: the note count of the longest phrase in this tab. Short phrases get
-     trailing empty columns so every board in a multi-phrase tab is the same
-     width — the string lines just run on to the end, the way printed TAB does,
-     instead of leaving a ragged right edge down the card. Padded cells carry no
-     data-seq, so the beat cursor never lands on one. */
-  const cols = Math.max(notes.length, padTo || 0);
+/* Notes per system before the TAB wraps onto a new staff. The board never
+   scrolls sideways: a phrase longer than this breaks into stacked systems the
+   way printed TAB breaks into lines. Rows in one tab are balanced
+   (rows = ceil(N/TAB_MAX_COLS), perRow = ceil(N/rows)) and every system in a
+   tab uses the same column count, so fret spacing lines up row to row. */
+const TAB_MAX_COLS = 8;
+/* One six-line system: the six string rows, the note-name row under them, and
+   the staff box (an absolutely-positioned grid child, so it spans the six
+   string rows without occupying a cell and can't be knocked out of line by a
+   padded column or a chord cell). `cols` is the column count every system in
+   this tab shares; a short final chunk pads with empty cells that carry no
+   data-seq, so the beat cursor never lands on one. */
+function renderTabSystem(chunk, off, cols){
   const rows = TAB_STRINGS.map(strLabel => {
     const cells = [`<div class="tab-str-label">${strLabel}</div>`];
-    notes.forEach((n, ci) => {
+    chunk.forEach((n, ci) => {
       let fret;
       if (Array.isArray(n.frets)) {
         const hit = n.frets.find(([s]) => s === strLabel);
@@ -836,38 +840,42 @@ function renderTabBlock(notes, seqOffset, padTo){
         cells.push(`<div class="tab-cell" data-seq="${off + ci}"></div>`);
       }
     });
-    for (let pi = notes.length; pi < cols; pi++) cells.push('<div class="tab-cell"></div>');
+    for (let pi = chunk.length; pi < cols; pi++) cells.push('<div class="tab-cell"></div>');
     return cells.join('');
   }).join('');
   const noteBtns = ['<div></div>'];
-  notes.forEach((n, ci) => {
+  chunk.forEach((n, ci) => {
     const midis = (Array.isArray(n.midi) ? n.midi : [n.midi]).map(Number);
     const midisAttr = escAttr(JSON.stringify(midis));
     noteBtns.push(`<button type="button" class="tab-note-btn" data-seq="${off + ci}" data-midis="${midisAttr}" onclick="playBeat(this)" title="${escAttr(t('tab.playNote',{note:n.note}))}">${escHtml(n.note)}<span class="tab-spkr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 8a5 5 0 0 1 0 8"/></svg></span></button>`);
   });
-  for (let pi = notes.length; pi < cols; pi++) noteBtns.push('<div></div>');
+  for (let pi = chunk.length; pi < cols; pi++) noteBtns.push('<div></div>');
   return `
-    <div class="tab-board">
-      <div class="tab-grid" style="grid-template-columns:22px repeat(${cols},30px)">
+      <div class="tab-grid" style="grid-template-columns:34px repeat(${cols},1fr)">
+        <div class="tab-box" style="grid-column:2/${cols + 2};grid-row:1/7"></div>
         ${rows}
         ${noteBtns.join('')}
-      </div>
+      </div>`;
+}
+function renderTabBlock(notes, seqOffset, padTo){
+  if (!notes || !notes.length) return '';
+  const off = seqOffset || 0;   // sequential index across phrases and systems — the beat cursor's address
+  /* padTo: the note count of the longest phrase in this tab. Every phrase in a
+     multi-phrase tab is laid out on the same column grid, so short phrases get
+     trailing empty columns instead of a ragged right edge — the string lines
+     just run on to the end, the way printed TAB does. When the widest phrase is
+     itself long enough to wrap, perRow comes from its split and the short
+     phrase pads to that. */
+  const widest = Math.max(notes.length, padTo || 0);
+  const perRow = Math.ceil(widest / Math.ceil(widest / TAB_MAX_COLS));
+  const grids = [];
+  for (let s = 0; s < notes.length; s += perRow) {
+    grids.push(renderTabSystem(notes.slice(s, s + perRow), off + s, perRow));
+  }
+  return `
+    <div class="tab-board">${grids.join('')}
     </div>`;
 }
-/* A wide TAB grid scrolls via .tab-board's overflow-x:auto, but macOS hides
-   the scrollbar and a plain two-finger swipe defaults to vertical — so a
-   student's normal scroll gesture over the grid just moves the page and the
-   grid looks frozen. Redirect vertical wheel input into horizontal scroll
-   whenever the cursor is over a grid that actually overflows, so the same
-   gesture that scrolls everything else scrolls this too. Genuine horizontal
-   swipes (trackpad deltaX) pass through untouched. */
-document.addEventListener('wheel', e => {
-  const tb = e.target.closest && e.target.closest('.tab-board');
-  if (!tb || tb.scrollWidth <= tb.clientWidth) return;
-  if (Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;
-  tb.scrollLeft += e.deltaY;
-  e.preventDefault();
-}, { passive: false });
 function buildTab(spec, opts){
   if (!spec) return '';
   const keyPrefix = (opts && opts.keyPrefix) || '';

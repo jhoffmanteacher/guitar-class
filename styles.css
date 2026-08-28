@@ -951,7 +951,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .note-link{display:inline;color:var(--amber-text);cursor:pointer;border-bottom:1px dotted var(--amber-text);font-weight:500;padding:0 1px;border-radius:2px;transition:background 0.1s}
 .note-link:hover{background:var(--amber-bg)}
 /* ── Inline TAB diagram ── */
-.tab{display:inline-block;max-width:100%;margin:8px 0 4px;border-radius:10px;overflow:hidden;border:1px solid var(--border2);background:var(--bg);box-shadow:0 1px 0 var(--border),0 4px 14px rgba(24,95,165,0.10)}
+.tab{display:block;max-width:100%;margin:8px 0 4px;border-radius:10px;overflow:hidden;border:1px solid var(--border2);background:var(--bg);box-shadow:0 1px 0 var(--border),0 4px 14px rgba(24,95,165,0.10)}
 .tab-head{background:var(--brand);color:#fff;padding:7px 14px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:0.8438rem;line-height:1.3}
 .tab-head .tab-icon{font-size:0.9375rem;flex-shrink:0}
 .tab-head .tab-title{flex:1;min-width:0}
@@ -965,19 +965,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .tab-phrase{margin-top:8px}
 .tab-phrase:first-of-type{margin-top:0}
 .tab-phrase-label{font-size:0.8125rem;color:var(--text2);font-style:italic;margin-bottom:2px;padding-left:2px}
-.tab-board{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 8px;overflow-x:auto;display:inline-block;max-width:100%;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
-/* macOS hides scrollbars by default, so a TAB wider than its box otherwise
-   looks like it simply stops — a persistent (if slim) bar signals there's
-   more to see even before the student tries to scroll. */
-.tab-board::-webkit-scrollbar{height:7px}
-.tab-board::-webkit-scrollbar-track{background:transparent}
-.tab-board::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
-.tab-board::-webkit-scrollbar-thumb:hover{background:var(--text3)}
-.tab-grid{display:grid;align-items:center;gap:0;min-width:max-content}
-.tab-str-label{font-family:'Courier New',ui-monospace,monospace;font-size:0.75rem;font-weight:700;color:var(--text);text-align:right;padding-right:5px;line-height:1}
-.tab-cell{position:relative;height:11px;display:flex;align-items:center;justify-content:center}
-.tab-cell::before{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:var(--text3);z-index:0}
-.tab-cell .tab-fret{position:relative;z-index:1;background:var(--bg);padding:0 3px;color:var(--blue-text);font-weight:700;font-size:0.75rem;font-family:'Courier New',ui-monospace,monospace;line-height:1}
+/* The TAB board never scrolls sideways: it fills the card and a long phrase
+   wraps into stacked systems (renderTabBlock, TAB_MAX_COLS). --tab-cell-h is
+   the string-row height; the staff box reads it too, so one override resizes
+   the whole system. */
+.tab-board{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:5px 8px;overflow:visible;display:block;width:100%;max-width:100%}
+.tab-grid{display:grid;align-items:center;gap:0;position:relative;width:100%;--tab-cell-h:26px}
+.tab-grid + .tab-grid{margin-top:18px}
+/* Staff box: absolutely positioned, so it defines its rectangle from its grid
+   area (fret columns, string rows only) without occupying a cell — padded
+   columns and chord cells can't leave a gap in it. Inset half a row top and
+   bottom so the verticals meet the top and bottom string lines exactly. */
+.tab-box{position:absolute;top:calc(var(--tab-cell-h) / 2);bottom:calc(var(--tab-cell-h) / 2);left:0;right:0;border-left:1.5px solid var(--text);border-right:1.5px solid var(--text);pointer-events:none;z-index:1}
+.tab-str-label{font-family:inherit;font-size:0.8125rem;font-weight:700;color:var(--text2);text-align:right;padding-right:8px;line-height:1}
+.tab-cell{position:relative;height:var(--tab-cell-h);display:flex;align-items:center;justify-content:center}
+.tab-cell::before{content:'';position:absolute;top:50%;left:0;right:0;height:1.5px;background:var(--text);z-index:0}
+.tab-cell .tab-fret{position:relative;z-index:1;background:var(--bg);padding:0 6px;color:var(--text);font-weight:600;font-size:1.5rem;font-family:inherit;line-height:1}
 .play-seq-btn{font-family:inherit;font-size:0.9375rem;font-weight:600;padding:3px 9px;margin-left:6px;background:transparent;border:1px solid var(--blue-text);border-radius:14px;color:var(--blue-text);cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;line-height:1;vertical-align:baseline}
 .play-seq-btn:hover{background:var(--blue-bg)}
 .play-seq-btn:active{transform:scale(0.96)}
@@ -1000,16 +1003,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .bpm-slider{width:96px}
   .bpm-readout{font-size:0.75rem;min-width:48px}
 }
-.tab-note-btn{font-family:inherit;font-size:0.75rem;font-weight:600;padding:6px 4px;min-width:26px;margin:2px 0 0;background:var(--bg2);border:1px solid var(--border);border-radius:3px;color:var(--text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:1px;white-space:nowrap;line-height:1}
-.tab-note-btn:hover{background:var(--blue-bg);border-color:var(--blue-text);color:var(--blue-text)}
+.tab-note-btn{font-family:inherit;font-size:1rem;font-weight:700;padding:4px 6px;margin:14px 0 0;background:transparent;border:1px solid transparent;border-radius:6px;color:var(--blue-text);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:2px;white-space:nowrap;line-height:1}
+.tab-note-btn:hover,.tab-note-btn:focus-visible{background:var(--blue-bg);border-color:var(--blue-text)}
 .tab-note-btn:active{transform:scale(0.94)}
 .tab-spkr{font-size:0.75rem;color:var(--blue-text);opacity:0.85}
-.tab-note-btn:hover .tab-spkr{color:var(--blue-text);opacity:1}
+/* The speaker glyph is the hover/focus affordance only — at rest a note name
+   reads as the slide's plain blue text. (.tab-spkr is shared with .rp-trigger,
+   so the hide is scoped to the note buttons.) It collapses to zero width rather
+   than just going transparent: a note button is the widest thing in its column,
+   so an invisible 14px glyph sets the grid's minimum column width and pushed
+   eight columns past a 390px screen. */
+.tab-note-btn .tab-spkr{opacity:0;max-width:0;overflow:hidden;transition:max-width .12s,opacity .12s}
+.tab-note-btn:hover .tab-spkr,.tab-note-btn:focus-visible .tab-spkr{color:var(--blue-text);opacity:1;max-width:1.4em}
 @media (max-width:600px){
-  .tab-str-label{font-size:0.75rem;padding-right:3px}
-  .tab-cell{height:10px}
-  .tab-cell .tab-fret{font-size:0.75rem;padding:0 2px}
-  .tab-note-btn{font-size:0.75rem;padding:2px 2px}
+  .tab-grid{--tab-cell-h:22px}
+  .tab-str-label{font-size:0.75rem;padding-right:5px}
+  .tab-cell .tab-fret{font-size:1.25rem;padding:0 4px}
+  .tab-note-btn{font-size:0.9375rem;padding:2px 2px}
   .tab-spkr{font-size:0.75rem}
 }
 /* Expandable TAB choice (used when a step offers multiple TABs) */
@@ -1211,13 +1221,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .coach-lane-foot .rn-metro-status{font-size:0.75rem;font-weight:400;color:var(--text3)}
 .coach-lane .coach-tab,.coach-lane .coach-strip{margin:0}
 .coach-lane .tab-board{border:none;background:transparent;padding:0}
-/* The beat column. box-shadow bridges the gap between grid rows so six
-   separate cells read as one continuous band. */
-.tab-cell.coach-col{background:var(--green-bg);border-radius:3px;box-shadow:0 -3px 0 var(--green-bg),0 3px 0 var(--green-bg)}
+/* The lane's ground is --bg2, not --bg, so the fret knockout has to follow it
+   or every number sits in a pale box. Invisible at the old 0.75rem; not at 1.5rem. */
+.coach-lane .tab-cell .tab-fret{background:var(--bg2)}
+/* The beat column. Each of the six cells is rounded; the paired box-shadows
+   are offset copies that fill the notches where they meet, so the column reads
+   as one continuous band with rounded ends. */
+.tab-cell.coach-col{background:var(--green-bg);border-radius:4px;box-shadow:0 -4px 0 var(--green-bg),0 4px 0 var(--green-bg)}
 .tab-cell.coach-col .tab-fret{background:var(--green-bg)}
 .tab-note-btn.coach-col{background:var(--green-bg);border-color:var(--green-text);color:var(--green-text)}
 .coach-chip.coach-col{border-color:var(--green-text);background:var(--green-bg);color:var(--green-text)}
-.coach-lane.beat .tab-cell.coach-col{background:var(--green-text);box-shadow:0 -3px 0 var(--green-text),0 3px 0 var(--green-text)}
+.coach-lane.beat .tab-cell.coach-col{background:var(--green-text);box-shadow:0 -4px 0 var(--green-text),0 4px 0 var(--green-text)}
 .coach-lane.beat .tab-cell.coach-col .tab-fret{background:var(--green-text);color:var(--bg)}
 .coach-lane.beat .tab-note-btn.coach-col,.coach-lane.beat .coach-chip.coach-col{background:var(--green-text);border-color:var(--green-text);color:var(--bg)}
 /* No prefers-reduced-motion exception: the flash is a color change, not
@@ -1406,9 +1420,9 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 .song-echo.show{opacity:1}
 
 /* ── Tier 3: beat cursor — the sounding TAB column lights up during ▶ Play ── */
-.tab-cell.beat-now{background:var(--blue-bg);border-radius:3px}
-.tab-cell.beat-now .tab-fret{color:var(--blue-text);font-weight:700}
-.tab-note-btn.beat-now{background:var(--blue-text);color:#fff;border-color:var(--blue-text)}
+.tab-cell.beat-now{background:var(--blue-bg);border-radius:4px;box-shadow:0 -4px 0 var(--blue-bg),0 4px 0 var(--blue-bg)}
+.tab-cell.beat-now .tab-fret{background:var(--blue-bg);color:var(--blue-text);font-weight:700}
+.tab-note-btn.beat-now,.tab-note-btn.beat-now:hover{background:var(--blue-text);color:#fff;border-color:var(--blue-text)}
 .tab-note-btn.beat-now .tab-spkr{color:#fff}
 
 /* ── Tier 3: one-thing-per-screen — supporting prose folds behind a tap.
@@ -1527,14 +1541,10 @@ body.explore-open #week-panels{display:none}
 .ca-step:not(.ca-step-collapsed) .ca-step-chev{transform:rotate(90deg)}
 .ca-step-detail{padding:2px 4px 14px 56px;font-size:0.9375rem;line-height:1.55}
 .ca-step.ca-step-collapsed .ca-step-detail{display:none}
-/* Activity-step tab widgets: the shared .tab is inline-block and lands mid-line
-   after step text — force block + left edge here, and a size up so fret numbers
-   read from a music stand. Scoped to activities only; module pages unchanged. */
-.ca-step-detail .tab{display:block;width:fit-content;margin:12px 0 8px}
-.ca-step-detail .tab-cell{height:14px}
-.ca-step-detail .tab-cell .tab-fret{font-size:0.9375rem}
-.ca-step-detail .tab-str-label{font-size:0.875rem}
-.ca-step-detail .tab-note-btn{font-size:0.875rem;min-width:32px;padding:7px 6px}
+/* Activity-step tab widgets: just the vertical rhythm after step text. The
+   shared .tab is block-level and full-width, and the default system is already
+   sized to read from a music stand, so no size-up here. */
+.ca-step-detail .tab{margin:12px 0 8px}
 .ca-step-done-row{margin-top:10px}
 .ca-step-donebtn{font-family:inherit;font-size:0.8438rem;font-weight:600;padding:7px 14px;border-radius:16px;border:1px solid var(--ca-accent);background:transparent;color:var(--ca-accent);cursor:pointer}
 .ca-step-donebtn:hover{background:var(--ca-accent-bg)}

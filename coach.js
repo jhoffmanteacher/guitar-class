@@ -183,7 +183,7 @@ function coachOpen(btn){
   if (mode === 'melody' && tabNotes){
     const tabBody = anchor.closest('.tab-body');
     if (tabBody){
-      /* A class, not [hidden]: .tab-board sets display:inline-block, which
+      /* A class, not [hidden]: .tab-board sets its own display, which
          out-specifies the UA's [hidden]{display:none} — the attribute did
          nothing here. */
       tabBody.querySelectorAll(':scope > .tab-board, :scope > .tab-phrase').forEach(el => {
