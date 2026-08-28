@@ -174,50 +174,13 @@ window.CLASS_ACTIVITIES = [
     intro_es: 'Ya tocaste la frase A. Hoy tocas las cuatro frases sin salirte nunca de la cuerda Mi grave — la melodía sube hasta el punto doble del traste 12 y regresa caminando. Cuando ya sea tuya, hay una segunda forma de tocar la segunda mitad que nunca se sale de los primeros cinco trastes.',
     steps: [
       {
-        figure: 'img/ca-hb-low-e-full.svg',
-        text: 'The whole song lives on the low E string (the thickest one). Frets 2, 4, 5 make the shape you know — and today the map grows: fret 7 first, then higher still. The dots at 5 and 7 are your landing marks.',
-        text_es: 'La canción completa vive en la cuerda Mi grave (la más gruesa). Los trastes 2, 4 y 5 arman la forma que ya conoces — y hoy el mapa crece: primero el traste 7, y después más arriba. Los puntos en el 5 y el 7 son tus marcas de referencia.',
-      },
-      {
         figure: 'img/ca-hb-fingers.svg',
-        text: 'Your fretting fingers have numbers — the thumb has none, it stays behind the neck.<ul><li>1 = index, 2 = middle, 3 = ring, 4 = pinky</li><li>Home spot: finger 1 → fret 2, finger 3 → fret 4, finger 4 → fret 5</li><li>Say a finger number out loud, land it on its fret</li></ul>You\'ve got it when: you can call 1, 3, or 4 in any order and land the right fret — three times in a row, no buzz.',
-        text_es: 'Los dedos de tu mano de trastear tienen números — el pulgar no tiene, se queda detrás del mástil.<ul><li>1 = índice, 2 = medio, 3 = anular, 4 = meñique</li><li>Posición base: dedo 1 → traste 2, dedo 3 → traste 4, dedo 4 → traste 5</li><li>Di un número de dedo en voz alta y colócalo en su traste</li></ul>Lo tienes cuando: puedes decir 1, 3 o 4 en cualquier orden y caer en el traste correcto — tres veces seguidas, sin zumbido.',
+        text: 'The whole song lives on the low E string (the thickest one), and your fretting fingers have numbers — 1 = index, 2 = middle, 3 = ring, 4 = pinky. The thumb has none; it stays behind the neck. Home spot: finger 1 → fret 2, finger 3 → fret 4, finger 4 → fret 5. Today the map grows past the home spot — fret 7 first, then higher still. The dots at 5 and 7 are your landing marks.',
+        text_es: 'La canción completa vive en la cuerda Mi grave (la más gruesa), y los dedos de tu mano de trastear tienen números — 1 = índice, 2 = medio, 3 = anular, 4 = meñique. El pulgar no tiene; se queda detrás del mástil. Posición base: dedo 1 → traste 2, dedo 3 → traste 4, dedo 4 → traste 5. Hoy el mapa crece más allá de la posición base — primero el traste 7, y después más arriba. Los puntos en el 5 y el 7 son tus marcas de referencia.',
       },
       {
-        text: 'Phrase A — the line you learned last time, all in the home spot.<ul><li>Fingers: open, open, 1, open, 4, 3 — say each one as you play it</li><li>BPM 70, play it through</li></ul>You\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'La frase A — la línea que aprendiste la vez pasada, toda en la posición base.<ul><li>Dedos: al aire, al aire, 1, al aire, 4, 3 — di cada uno mientras lo tocas</li><li>BPM 70, tócala completa</li></ul>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
-        tab: {
-          caption: 'Phrase A · stays in the home spot',
-          caption_es: 'Frase A · se queda en la posición base',
-          notes: [
-            { string: 'E', fret: 0, note: 'E',  midi: 40 },
-            { string: 'E', fret: 0, note: 'E',  midi: 40 },
-            { string: 'E', fret: 2, note: 'F#', midi: 42 },
-            { string: 'E', fret: 0, note: 'E',  midi: 40 },
-            { string: 'E', fret: 5, note: 'A',  midi: 45 },
-            { string: 'E', fret: 4, note: 'G#', midi: 44 }
-          ]
-        },
-      },
-      {
-        text: 'Phrase B.<ul><li>Starts like phrase A: open, open, 1, open</li><li>New ending: finger 4 → fret 7, then finger 1 → fret 5</li><li>Eyes on fret 7 <em>before</em> finger 4 moves</li></ul>You\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'La frase B.<ul><li>Empieza como la frase A: al aire, al aire, 1, al aire</li><li>Final nuevo: dedo 4 → traste 7, luego dedo 1 → traste 5</li><li>Ojos en el traste 7 <em>antes</em> de mover el dedo 4</li></ul>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
-        tab: {
-          caption: 'Phrase B · the ending climbs to the fret-7 dot',
-          caption_es: 'Frase B · el final sube al punto del traste 7',
-          notes: [
-            { string: 'E', fret: 0, note: 'E',  midi: 40 },
-            { string: 'E', fret: 0, note: 'E',  midi: 40 },
-            { string: 'E', fret: 2, note: 'F#', midi: 42 },
-            { string: 'E', fret: 0, note: 'E',  midi: 40 },
-            { string: 'E', fret: 7, note: 'B',  midi: 47 },
-            { string: 'E', fret: 5, note: 'A',  midi: 45 }
-          ]
-        },
-      },
-      {
-        text: 'Play phrases A and B back to back — this is the first half of the song.\nYou\'ve got it when: phrase A and phrase B, four times through, without stopping.',
-        text_es: 'Toca las frases A y B seguidas — esta es la primera mitad de la canción.\nLo tienes cuando: la frase A y la frase B, cuatro veces seguidas, sin detenerte.',
+        text: 'The first half of the song — phrase A is the line you learned last time, phrase B starts the same and ends higher.<ul><li>Phrase A, fingers: open, open, 1, open, 4, 3 — say each one as you play it</li><li>Phrase B: open, open, 1, open, then finger 4 → fret 7, finger 1 → fret 5. Eyes on fret 7 <em>before</em> finger 4 moves</li><li>BPM 70. Loop each phrase alone until it\'s clean, then play them back to back</li></ul>You\'ve got it when: phrase A into phrase B, four times through, without stopping. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La primera mitad de la canción — la frase A es la línea que aprendiste la vez pasada, la frase B empieza igual y termina más arriba.<ul><li>Frase A, dedos: al aire, al aire, 1, al aire, 4, 3 — di cada uno mientras lo tocas</li><li>Frase B: al aire, al aire, 1, al aire, luego dedo 4 → traste 7, dedo 1 → traste 5. Ojos en el traste 7 <em>antes</em> de mover el dedo 4</li><li>BPM 70. Repite cada frase sola hasta que salga limpia, y después tócalas seguidas</li></ul>Lo tienes cuando: de la frase A a la frase B, cuatro veces seguidas, sin detenerte. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'First half · phrases A and B',
           caption_es: 'Primera mitad · frases A y B',
@@ -265,41 +228,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Phrase C is where you sing the name — and it makes the biggest jump in the song.<ul><li>Two open notes, then your hand travels: finger 1 on fret 9, finger 4 reaching the double dot at 12</li><li>Walk down 12 → 9, then shift back home</li><li>Home again: finger 4 → fret 5, finger 3 → fret 4, finger 1 → fret 2</li></ul>You\'ve got it when: three clean runs without stopping, saying the words as you play. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'La frase C es donde cantas el nombre — y es la que da el salto más grande de la canción.<ul><li>Dos notas al aire, y luego tu mano viaja: dedo 1 en el traste 9, dedo 4 estirándose al punto doble del 12</li><li>Baja del 12 al 9, y después regresa a la posición base</li><li>De vuelta en casa: dedo 4 → traste 5, dedo 3 → traste 4, dedo 1 → traste 2</li></ul>Lo tienes cuando: tres pasadas limpias sin detenerte, diciendo las palabras mientras tocas. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
-        tab: {
-          caption: 'Phrase C · "Hap-py birth-day dear ______" · up to the double dot',
-          caption_es: 'Frase C · "Hap-py birth-day dear ______" · hasta el punto doble',
-          notes: [
-            { string: 'E', fret: 0,  note: 'E',  midi: 40 },
-            { string: 'E', fret: 0,  note: 'E',  midi: 40 },
-            { string: 'E', fret: 12, note: 'E',  midi: 52 },
-            { string: 'E', fret: 9,  note: 'C#', midi: 49 },
-            { string: 'E', fret: 5,  note: 'A',  midi: 45 },
-            { string: 'E', fret: 4,  note: 'G#', midi: 44 },
-            { string: 'E', fret: 2,  note: 'F#', midi: 42 }
-          ]
-        },
-      },
-      {
-        text: 'Phrase D starts higher than any other phrase, then walks home.<ul><li>Finger 2 on fret 10, finger 1 on fret 9 — right next to the 9-dot marker up there</li><li>Shift down: finger 1 → fret 5, finger 3 → fret 7</li><li>The frets are narrow that high, so keep your fingertips on their tips or they\'ll crowd each other</li></ul>You\'ve got it when: three clean reps in a row, no buzz. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'La frase D empieza más arriba que cualquier otra frase, y después regresa caminando a casa.<ul><li>Dedo 2 en el traste 10, dedo 1 en el traste 9 — justo junto al punto marcador del traste 9, allá arriba</li><li>Baja: dedo 1 → traste 5, dedo 3 → traste 7</li><li>Allá arriba los trastes son angostos, así que mantén los dedos sobre las puntas o se van a chocar entre sí</li></ul>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbido. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
-        tab: {
-          caption: 'Phrase D · starts at fret 10, walks home',
-          caption_es: 'Frase D · empieza en el traste 10 y regresa a casa',
-          notes: [
-            { string: 'E', fret: 10, note: 'D',  midi: 50 },
-            { string: 'E', fret: 10, note: 'D',  midi: 50 },
-            { string: 'E', fret: 9,  note: 'C#', midi: 49 },
-            { string: 'E', fret: 5,  note: 'A',  midi: 45 },
-            { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-            { string: 'E', fret: 5,  note: 'A',  midi: 45 }
-          ]
-        },
-      },
-      {
-        text: 'Phrases C and D back to back — the whole second half, one trip up the neck and back.\nYou\'ve got it when: phrase C into phrase D, four times through, without stopping.',
-        text_es: 'Las frases C y D seguidas — toda la segunda mitad, un viaje mástil arriba y de regreso.\nLo tienes cuando: de la frase C a la frase D, cuatro veces seguidas, sin detenerte.',
+        text: 'The second half — phrase C is where you sing the name and makes the biggest jump in the song; phrase D starts higher than any other phrase, then walks home.<ul><li>Phrase C: two open notes, then your hand travels — finger 1 on fret 9, finger 4 reaching the double dot at 12. Walk down 12 → 9, then shift home: finger 4 → fret 5, finger 3 → fret 4, finger 1 → fret 2</li><li>Phrase D: finger 2 on fret 10, finger 1 on fret 9, then shift down — finger 1 → fret 5, finger 3 → fret 7. The frets are narrow that high, so stay on your fingertips or they\'ll crowd each other</li><li>Loop each phrase alone until it\'s clean, saying the words as you play, then play them back to back</li></ul>You\'ve got it when: phrase C into phrase D, four times through, without stopping. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'La segunda mitad — la frase C es donde cantas el nombre y da el salto más grande de la canción; la frase D empieza más arriba que cualquier otra frase, y después regresa caminando a casa.<ul><li>Frase C: dos notas al aire, y luego tu mano viaja — dedo 1 en el traste 9, dedo 4 estirándose al punto doble del 12. Baja del 12 al 9, y después regresa a la posición base: dedo 4 → traste 5, dedo 3 → traste 4, dedo 1 → traste 2</li><li>Frase D: dedo 2 en el traste 10, dedo 1 en el traste 9, y luego baja — dedo 1 → traste 5, dedo 3 → traste 7. Allá arriba los trastes son angostos, así que quédate sobre las puntas de los dedos o se van a chocar entre sí</li><li>Repite cada frase sola hasta que salga limpia, diciendo las palabras mientras tocas, y después tócalas seguidas</li></ul>Lo tienes cuando: de la frase C a la frase D, cuatro veces seguidas, sin detenerte. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'Second half · phrases C and D · low E string only',
           caption_es: 'Segunda mitad · frases C y D · solo la cuerda Mi grave',
@@ -443,8 +373,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'The whole song the A-string way — same four phrases, two strings, no stopping in between.\nYou\'ve got it when: phrases A, B, C and D back to back, any speed, without stopping.',
-        text_es: 'La canción completa en la versión con la cuerda La — las mismas cuatro frases, dos cuerdas, sin detenerte entre medio.\nLo tienes cuando: las frases A, B, C y D seguidas, a cualquier velocidad, sin detenerte.',
+        text: 'The whole song the A-string way — same four phrases, two strings, no stopping in between. Then chase speed on whichever version you play cleanest.<ul><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Play it for the person next to you and have them sing along — someone in this room has a birthday coming</li></ul>You\'ve got it when: you\'ve played the A-string way start to finish and raised the tempo at least three times without breaking down — then keep climbing.',
+        text_es: 'La canción completa en la versión con la cuerda La — las mismas cuatro frases, dos cuerdas, sin detenerte entre medio. Después persigue la velocidad con la versión que te salga más limpia.<ul><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Tócala para la persona de al lado y que cante contigo — alguien en este salón cumple años pronto</li></ul>Lo tienes cuando: tocaste la versión con la cuerda La de principio a fin y subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
         tab: {
           caption: 'Whole song · phrases A–D · low E and A strings',
           caption_es: 'Canción completa · frases A–D · cuerdas Mi grave y La',
@@ -500,10 +430,6 @@ window.CLASS_ACTIVITIES = [
             }
           ]
         },
-      },
-      {
-        text: 'Chase speed on whichever version you play cleanest.<ul><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Play it for the person next to you and have them sing along — someone in this room has a birthday coming</li></ul>You\'ve got it when: you\'ve raised the tempo at least three times without breaking down — then keep climbing.',
-        text_es: 'Persigue la velocidad con la versión que te salga más limpia.<ul><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Tócala para la persona de al lado y que cante contigo — alguien en este salón cumple años pronto</li></ul>Lo tienes cuando: subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
       },
     ],
   },
