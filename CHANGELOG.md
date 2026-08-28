@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+
+## 2026-08-28 — Song Journey pages: the sign-in note stays on the screen
+
+### Fixed
+
+- **On a phone, the "Sign in on the class site to save your ratings" line no
+  longer runs off the right edge** of every Song Journey page. The top row now
+  wraps, so the note drops under the Back / Español controls instead of forcing
+  the whole page to scroll sideways.
+
 ## 2026-08-28 — Finger Gym tabs show which finger to use
 
 ### Changed
