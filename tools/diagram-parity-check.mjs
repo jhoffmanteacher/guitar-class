@@ -5,7 +5,11 @@
    The ref is REQUIRED and must be a commit from BEFORE the extraction
    (i.e. one where app.js still contained the renderers). Exits non-zero
    on any mismatch. Kept as reproducible evidence for the split; it is
-   not part of the pre-push battery. */
+   not part of the pre-push battery.
+
+   As of WO8 (2026-08-28) the css theme is boosted to GD_SITE_BOOST, so this
+   check fails against any post-WO8 head by design; run it only from a
+   pre-WO8 checkout if the split ever needs re-proving. */
 import { execSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 import vm from 'node:vm';

@@ -10,34 +10,40 @@
    longer carries a copy, so the two can never drift.
 
    ── Themes ──
-   Default is `css`: the site's CSS custom properties, so browser
-   output is byte-for-byte what app.js produced before the split.
-   Pass a theme when rendering OUTSIDE the site, where var(--…)
-   resolves to nothing:
-     'slide'  cream #FAF6EF ground, stroke/font ×1.35 for projection
-     'web'    the site's light-mode hex, unboosted
-   A theme also switches on standalone mode: an explicit background
-   rect, a font-family on the root <svg>, and width/height attrs.
-   Geometry never changes — only colour, weight, and framing.
+   Default is `css`: the site's CSS custom properties, so the board
+   picks up dark mode. Pass a theme when rendering OUTSIDE the site,
+   where var(--…) resolves to nothing:
+     'slide'  cream #FAF6EF ground, for projection
+     'web'    the site's light-mode hex
+   All three draw at the same weight, GD_SITE_BOOST (WO8, 2026-08-28),
+   so a board on a slide and the same board on the site differ only in
+   ground colour. A theme also switches on standalone mode: an explicit
+   background rect, a font-family on the root <svg>, and width/height
+   attrs. Geometry never changes — only colour, weight, and framing.
    ══════════════════════════════════════════════════════════════ */
 
+/* One weight for site and slides. Standing rule 2026-08-28: the site's
+   css theme and the CLI's web theme share this so they can't drift. */
+var GD_SITE_BOOST = 1.35;
+
 var GUITAR_DIAGRAM_THEMES = {
-  /* Site rendering. Do not change these strings — they are what
-     keeps the in-browser output identical to the pre-split app.js. */
+  /* Site rendering. Colors are CSS variables so dark mode works; weight is
+     GD_SITE_BOOST (WO8, 2026-08-28) — the pre-split parity guarantee no
+     longer applies. */
   css: {
     bg: 'var(--bg)', text: 'var(--text)', text2: 'var(--text2)',
     text3: 'var(--text3)', green: 'var(--green-text)',
-    boost: 1, standalone: false,
+    boost: GD_SITE_BOOST, standalone: false,
   },
   slide: {
     bg: '#FAF6EF', text: '#1a1a18', text2: '#5e5e58',
     text3: '#585852', green: '#3b6d11',
-    boost: 1.35, standalone: true,
+    boost: GD_SITE_BOOST, standalone: true,
   },
   web: {
     bg: '#ffffff', text: '#1a1a18', text2: '#5e5e58',
     text3: '#585852', green: '#3b6d11',
-    boost: 1, standalone: true,
+    boost: GD_SITE_BOOST, standalone: true,
   },
 };
 
@@ -103,7 +109,11 @@ function chordDiagramSVG(cfg, opts){
   var boxW = W - padL - padR, boxH = (H - labelH) - 20 - padB;
   var strGap = boxW / 5, fretGap = boxH / NUM_FRETS;
   var pos = cfg.position || 0, isOpen = pos === 0;
-  var dotR = Math.min(strGap, fretGap) * 0.36;
+  /* The finger numeral inside the dot is t.b(9), so the dot has to grow with it
+     or the digit spills (WO8). Capped at 0.42 of a string gap so two dots on
+     adjacent strings at the same fret keep a visible seam and a three-finger
+     shape like A never reads as a barre. */
+  var dotR = Math.min(t.b(Math.min(strGap, fretGap) * 0.36), strGap * 0.42);
   var ind = {}, chordArr = cfg.chord || [];
   chordArr.forEach(function(e){ ind[e[0]] = { fret: e[1], finger: e[2] }; });
 
@@ -127,7 +137,7 @@ function chordDiagramSVG(cfg, opts){
         s += '<text x="' + x + '" y="' + (padT - 7) + '" text-anchor="middle" dominant-baseline="middle" font-size="'
           +  t.b(11) + '" fill="' + t.text2 + '"' + gdFF(t, 'sans-serif') + '>×</text>';
       } else if (st.fret === 0) {
-        s += '<circle cx="' + x + '" cy="' + (padT - 8) + '" r="3.2" fill="none" stroke="' + t.text2
+        s += '<circle cx="' + x + '" cy="' + (padT - 8) + '" r="' + t.b(3.2) + '" fill="none" stroke="' + t.text2
           +  '" stroke-width="' + t.b(1.1) + '"/>';
       }
     }
@@ -272,7 +282,11 @@ function localStringFretboardSvg(kind, opts){
   var sNum = STRING_KIND_TO_NUM[kind];
   if (!sNum) return null;
   var t = gdTheme(opts);
-  var W = 280, H = 80, padL = 36, padR = 10, padT = 7, padB = 16;
+  /* WO8: padL and padB carry the 1.35x gutters — a wider one for the string
+     labels ('high E', 'Mi aguda') and a taller one so the fret-number row
+     clears the boosted open-string ring on the bottom string. The drawn board
+     is unchanged: fretW and boxH both subtract the growth back out. */
+  var W = 300, H = 92, padL = 56, padR = 10, padT = 7, padB = 28;
   var openW = 16, maxFret = 12;
   var fretW = (W - padL - padR - openW) / maxFret;
   var boxH = H - padT - padB;
@@ -284,10 +298,10 @@ function localStringFretboardSvg(kind, opts){
 
   FRETBOARD_INLAYS.forEach(function(f){
     var cx = nutX + (f - 0.5) * fretW, cy = padT + boxH / 2;
-    s += '<circle cx="' + cx + '" cy="' + cy + '" r="2" fill="' + t.text3 + '" opacity="0.35"/>';
+    s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + t.b(2) + '" fill="' + t.text3 + '" opacity="0.35"/>';
     if (f === 12) {
-      s += '<circle cx="' + cx + '" cy="' + (cy - 8) + '" r="2" fill="' + t.text3 + '" opacity="0.35"/>';
-      s += '<circle cx="' + cx + '" cy="' + (cy + 8) + '" r="2" fill="' + t.text3 + '" opacity="0.35"/>';
+      s += '<circle cx="' + cx + '" cy="' + (cy - 8) + '" r="' + t.b(2) + '" fill="' + t.text3 + '" opacity="0.35"/>';
+      s += '<circle cx="' + cx + '" cy="' + (cy + 8) + '" r="' + t.b(2) + '" fill="' + t.text3 + '" opacity="0.35"/>';
     }
   });
 
@@ -312,11 +326,11 @@ function localStringFretboardSvg(kind, opts){
   }
 
   var targetY = padT + (sNum - 1) * strGap, openX = padL + openW / 2;
-  s += '<circle cx="' + openX + '" cy="' + targetY + '" r="4.5" fill="none" stroke="' + t.green + '" stroke-width="' + t.b(1.5) + '"/>';
+  s += '<circle cx="' + openX + '" cy="' + targetY + '" r="' + t.b(4.5) + '" fill="none" stroke="' + t.green + '" stroke-width="' + t.b(1.5) + '"/>';
 
   for (var f2 = 0; f2 <= maxFret; f2++) {
     var cx2 = f2 === 0 ? openX : nutX + (f2 - 0.5) * fretW;
-    s += '<text x="' + cx2 + '" y="' + (padT + boxH + 10) + '" text-anchor="middle" font-size="' + t.b(7.5)
+    s += '<text x="' + cx2 + '" y="' + (padT + boxH + 20) + '" text-anchor="middle" font-size="' + t.b(7.5)
       +  '" fill="' + t.text2 + '">' + f2 + '</text>';
   }
 
@@ -372,10 +386,10 @@ function localStringNotesSvg(kind, notes, opts){
 
   FRETBOARD_INLAYS.filter(function(f){ return f <= maxFret; }).forEach(function(f){
     var cx = nutX + (f - 0.5) * fretW;
-    s += '<circle cx="' + cx + '" cy="' + midY + '" r="3" fill="' + t.text3 + '" opacity="0.35"/>';
+    s += '<circle cx="' + cx + '" cy="' + midY + '" r="' + t.b(3) + '" fill="' + t.text3 + '" opacity="0.35"/>';
     if (f === 12) {
-      s += '<circle cx="' + cx + '" cy="' + (midY - strGap) + '" r="3" fill="' + t.text3 + '" opacity="0.35"/>';
-      s += '<circle cx="' + cx + '" cy="' + (midY + strGap) + '" r="3" fill="' + t.text3 + '" opacity="0.35"/>';
+      s += '<circle cx="' + cx + '" cy="' + (midY - strGap) + '" r="' + t.b(3) + '" fill="' + t.text3 + '" opacity="0.35"/>';
+      s += '<circle cx="' + cx + '" cy="' + (midY + strGap) + '" r="' + t.b(3) + '" fill="' + t.text3 + '" opacity="0.35"/>';
     }
   });
 
@@ -404,7 +418,7 @@ function localStringNotesSvg(kind, notes, opts){
     var fret = pair[0], note = pair[1];
     var cx = fret === 0 ? openX : nutX + (fret - 0.5) * fretW;
     var isOpen = fret === 0;
-    s += '<circle cx="' + cx + '" cy="' + targetY + '" r="12" fill="' + (isOpen ? t.bg : NATURALS_LIGHT_GREEN)
+    s += '<circle cx="' + cx + '" cy="' + targetY + '" r="' + t.b(12) + '" fill="' + (isOpen ? t.bg : NATURALS_LIGHT_GREEN)
       +  '" stroke="' + t.green + '" stroke-width="' + t.b(1.8) + '"/>';
   });
   s += '<g font-size="' + t.b(13) + '" font-weight="700" fill="' + t.text + '" text-anchor="middle" dominant-baseline="central">';
@@ -418,7 +432,7 @@ function localStringNotesSvg(kind, notes, opts){
   s += '<g font-size="' + t.b(12) + '" fill="' + t.text2 + '" text-anchor="middle">';
   for (var f2 = 0; f2 <= maxFret; f2++) {
     var cx2 = f2 === 0 ? openX : nutX + (f2 - 0.5) * fretW;
-    s += '<text x="' + cx2 + '" y="' + (padT + boxH + 22) + '">' + f2 + '</text>';
+    s += '<text x="' + cx2 + '" y="' + (padT + boxH + 30) + '">' + f2 + '</text>';
   }
   s += '</g>';
 
@@ -454,7 +468,8 @@ function localNoteSvg(kind, fret, note, opts){
   if (isNaN(fr) || fr < 0) return null;
   var t = gdTheme(opts);
 
-  var W = 280, H = 80, padL = 36, padR = 10, padT = 7, padB = 16;
+  /* Same 1.35x gutters as localStringFretboardSvg — see the note there. */
+  var W = 300, H = 92, padL = 56, padR = 10, padT = 7, padB = 28;
   var openW = 16;
   var maxFret = Math.max(8, fr + 1);
   var fretW = (W - padL - padR - openW) / maxFret;
@@ -467,10 +482,10 @@ function localNoteSvg(kind, fret, note, opts){
 
   FRETBOARD_INLAYS.filter(function(f){ return f <= maxFret; }).forEach(function(f){
     var cx = nutX + (f - 0.5) * fretW, cy = padT + boxH / 2;
-    s += '<circle cx="' + cx + '" cy="' + cy + '" r="2" fill="' + t.text3 + '" opacity="0.35"/>';
+    s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + t.b(2) + '" fill="' + t.text3 + '" opacity="0.35"/>';
     if (f === 12) {
-      s += '<circle cx="' + cx + '" cy="' + (cy - 8) + '" r="2" fill="' + t.text3 + '" opacity="0.35"/>';
-      s += '<circle cx="' + cx + '" cy="' + (cy + 8) + '" r="2" fill="' + t.text3 + '" opacity="0.35"/>';
+      s += '<circle cx="' + cx + '" cy="' + (cy - 8) + '" r="' + t.b(2) + '" fill="' + t.text3 + '" opacity="0.35"/>';
+      s += '<circle cx="' + cx + '" cy="' + (cy + 8) + '" r="' + t.b(2) + '" fill="' + t.text3 + '" opacity="0.35"/>';
     }
   });
 
@@ -491,7 +506,7 @@ function localNoteSvg(kind, fret, note, opts){
 
   for (var f2 = 0; f2 <= maxFret; f2++) {
     var cx2 = f2 === 0 ? padL + openW / 2 : nutX + (f2 - 0.5) * fretW;
-    s += '<text x="' + cx2 + '" y="' + (padT + boxH + 10) + '" text-anchor="middle" font-size="' + t.b(7.5)
+    s += '<text x="' + cx2 + '" y="' + (padT + boxH + 20) + '" text-anchor="middle" font-size="' + t.b(7.5)
       +  '" fill="' + t.text2 + '">' + f2 + '</text>';
   }
 
@@ -499,9 +514,9 @@ function localNoteSvg(kind, fret, note, opts){
   var targetX = fr === 0 ? padL + openW / 2 : nutX + (fr - 0.5) * fretW;
   var isOpenNote = fr === 0;
   if (isOpenNote) {
-    s += '<circle cx="' + targetX + '" cy="' + targetY + '" r="6.5" fill="none" stroke="' + t.text + '" stroke-width="' + t.b(1.4) + '"/>';
+    s += '<circle cx="' + targetX + '" cy="' + targetY + '" r="' + t.b(6.5) + '" fill="none" stroke="' + t.text + '" stroke-width="' + t.b(1.4) + '"/>';
   } else {
-    s += '<circle cx="' + targetX + '" cy="' + targetY + '" r="6.5" fill="' + t.text + '"/>';
+    s += '<circle cx="' + targetX + '" cy="' + targetY + '" r="' + t.b(6.5) + '" fill="' + t.text + '"/>';
   }
   if (note) {
     var textFill = isOpenNote ? t.text : t.bg;
@@ -551,7 +566,7 @@ function chordSvg(name, opts){
 /* Node entry point (tools/guitar-diagrams-cli.mjs). No effect in a browser. */
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
-    GUITAR_DIAGRAM_THEMES, CHORD_DIAGRAMS, STRING_DIAGRAMS, STRING_LABELS,
+    GUITAR_DIAGRAM_THEMES, GD_SITE_BOOST, CHORD_DIAGRAMS, STRING_DIAGRAMS, STRING_LABELS,
     STRING_KIND_TO_NUM, STRING_SHORT_LABEL, STRING_NUM_TO_LABEL, FRETBOARD_INLAYS,
     STRING_NATURALS,
     chordDiagramSVG, localChordSvg, localStringSvg, localStringFretboardSvg,

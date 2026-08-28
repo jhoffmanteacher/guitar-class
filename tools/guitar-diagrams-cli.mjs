@@ -12,8 +12,8 @@
      node tools/guitar-diagrams-cli.mjs sheet -o all-chords.png
      node tools/guitar-diagrams-cli.mjs list
 
-   --theme slide (default) cream ground, strokes/fonts x1.35 for a projector
-   --theme web             the site's light-mode hex, unboosted
+   --theme slide (default) cream ground, same weight as the site
+   --theme web             the site's light-mode hex, same weight as the site (GD_SITE_BOOST)
 
    SVG output needs nothing. PNG output needs `sharp` (npm i -g sharp);
    without it, write .svg and convert however you like. PowerPoint does not

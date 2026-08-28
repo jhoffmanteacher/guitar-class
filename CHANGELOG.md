@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-28 — Fretboard and chord diagrams drawn at slide weight
+
+### Changed
+
+- **Every fretboard, note board and chord diagram is drawn heavier.** The
+  diagrams on the site were drawn thinner than the same diagrams on the
+  classroom projector — same shapes, lighter lines and smaller letters. They now
+  use the projector's weight everywhere, so a diagram on the classroom screen
+  and the same diagram on your own screen read as one thing.
+- **Note letters fit their circles.** The circles grew with the type instead of
+  staying fixed, so letters like `F#` and finger numbers on a chord chart sit
+  inside their circles instead of spilling over them.
+- **Fret numbers no longer collide with the notes above them.** On the low E
+  and A note maps the `0` and `1` used to sit jammed under the E and F circles;
+  the number row moved down and clears them.
+- **The string names on the small pop-up fretboards no longer get cut off** —
+  in Spanish, `Mi grave` and `Mi aguda` were losing their first word at the left
+  edge.
+- The eight natural-note maps and the in-class activity fretboard figures were
+  redrawn at the new weight.
+
 ## 2026-08-28 — "Seven Nation Army" now lives on the A string
 
 ### Changed

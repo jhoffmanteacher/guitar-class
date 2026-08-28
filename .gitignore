@@ -1,3 +1,6 @@
 # Claude Code local state — do not commit (but DO share the project permissions file)
 .claude/*
 !.claude/settings.json
+
+# Screenshot output from local visual checks — never committed
+screens/
