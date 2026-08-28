@@ -106,16 +106,18 @@ warning on every commit while looking installed (fixed 2026-08-20). If you ever
 see that warning, the hook is a no-op — run `node tools/checks.mjs` by hand.
 Keep the candidate-path list identical in both hooks.
 
-### ⚠️ Parallel sessions: a worktree pushes its OWN branch, never `main`
+### ⚠️ Parallel sessions: worktrees share one `origin`
 Jonathan runs several sessions at once in `.claude/worktrees/*` (gitignored, so
 they never leak into a commit). Worktrees isolate *files* — they still share one
-repository and one `origin`, so isolation ends at the push. A session in a
-worktree pushes its own branch (`git push -u origin <branch>`); landing on
-`main` is a separate, deliberate act. On 2026-08-20 a worktree session merged
-`main` into its branch and pushed that merge straight onto `origin/main`, which
-is how a feature-branch commit became `main`'s tip. Before pushing, always
-`git fetch` and check `git log --oneline HEAD..origin/main` — another session
-may have moved things since the turn began.
+repository and one `origin`, so isolation ends at the push. On 2026-08-20 a
+worktree session merged `main` into its branch and pushed that merge straight
+onto `origin/main`, which is how a feature-branch commit became `main`'s tip.
+The lesson there is *don't push a merge you didn't intend* — not *don't push to
+main*. A clean fast-forward (`git push origin HEAD:main`) is the normal way work
+ships from a worktree; see the push rule under "How to work with Jonathan".
+Before pushing, always `git fetch` and check
+`git log --oneline HEAD..origin/main` — another session may have moved things
+since the turn began.
 
 ### ⚠️ Sweep findings ratchet into checks.mjs
 Any sweep or audit that finds **3+ instances of a mechanically-detectable error
@@ -379,8 +381,15 @@ implement it?".
   tracks everything. Treat "can you…", "how do I…", "should this be…" about code
   as *do it*, not *ask first*.
 - **Still pause for:** a genuine fork where the choice changes the outcome (use
-  AskUserQuestion), or irreversible / outward-facing actions — pushing to GitHub,
-  deleting files, touching the live site.
+  AskUserQuestion), or irreversible / outward-facing actions — deleting files,
+  touching the live site.
+- **Pushing to `main` is NOT one of those** (Jonathan, 2026-08-28). When the
+  checks pass and a fast-forward onto `main` is what you'd recommend anyway,
+  just push it — don't ask first, and never offer "push the branch instead" as
+  a coin flip. Push, say what landed, then confirm with `checks.mjs --live`.
+  Still ask when main is *not* what you'd recommend: a merge rather than a
+  fast-forward, another session's commits in the way, checks failing, or work
+  you don't think is ready for students.
 - When in doubt: pick the sensible default, proceed, say what you did and why.
 
 **Sub-agent sweeps need an adversarial audit budgeted in.** On any content sweep
