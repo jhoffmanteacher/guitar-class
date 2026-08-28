@@ -18,7 +18,7 @@ SETS.push(
 
   {
     id: 'm2w1',
-    songThread: [{ name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 2, note: 'the riff on your low E string' }],
+    songThread: [{ name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 2, note: 'the riff in time at 60 BPM' }],
     label: 'Set 1',
     locked: false,
     module: 'Notes on the E & A Strings',
@@ -84,8 +84,8 @@ SETS.push(
             steps: [
               {
                 label: 'Ear: find the "Seven Nation Army" notes', label_es: 'Oído: notas de "Seven Nation Army"',
-                text: 'Listen to the "Seven Nation Army" riff — press ▶ to hear it, then hum along and see if you can identify which notes of the riff live on the low E string, and roughly where.',
-                text_es: 'Escucha el riff de "Seven Nation Army" — presiona ▶ para escucharlo, luego tararea y trata de identificar qué notas del riff viven en la cuerda Mi grave, y más o menos dónde.',
+                text: 'Listen to the "Seven Nation Army" riff — press ▶ to hear it, then hum along and see if you can identify which notes of the riff live on the A string, and roughly where.',
+                text_es: 'Escucha el riff de "Seven Nation Army" — presiona ▶ para escucharlo, luego tararea y trata de identificar qué notas del riff viven en la cuerda La, y más o menos dónde.',
                 hint: 'Don\'t worry about playing it yet — just train your ear to connect sounds to frets. The riff starts high on the neck and walks down toward the nut.',
                 hint_es: 'No te preocupes todavía por tocarlo — solo entrena tu oído para conectar sonidos con trastes. El riff empieza arriba en el mástil y baja caminando hacia la cejuela.',
                 playSeq: { label: 'Hear the riff', label_es: 'Escucha el riff', bpm: 60, notes: [47, 47, 50, 47, 45, 43, 42] },
@@ -203,8 +203,8 @@ SETS.push(
               },
               {
                 label: 'Ear: name that riff', label_es: 'Oído: adivina el riff',
-                text: 'Name That Riff (try it!): pick out the "Seven Nation Army" or "Smoke on the Water" main riff (a riff = a short musical phrase that repeats) by ear on the low E string. No score — just try it.',
-                text_es: 'Adivina el riff (¡pruébalo!): saca de oído el riff principal de "Seven Nation Army" o "Smoke on the Water" (un riff = una frase musical corta que se repite) en la cuerda Mi grave. Sin puntaje — solo pruébalo.',
+                text: 'Name That Riff (try it!): pick out the "Smoke on the Water" main riff (a riff = a short musical phrase that repeats) by ear on the low E string, or the "Seven Nation Army" riff on the A string. No score — just try it.',
+                text_es: 'Adivina el riff (¡pruébalo!): saca de oído el riff principal de "Smoke on the Water" (un riff = una frase musical corta que se repite) en la cuerda Mi grave, o el riff de "Seven Nation Army" en la cuerda La. Sin puntaje — solo pruébalo.',
                 hint: 'Use the low-E note map from the play-along step (frets 0 · 1 · 3 · 5 · 7 · 8 · 10 · 12). Don\'t worry about getting it perfect — the attempt trains your ear.',
                 hint_es: 'Usa el mapa de notas de la Mi grave del paso para tocar junto (trastes 0 · 1 · 3 · 5 · 7 · 8 · 10 · 12). No te preocupes por hacerlo perfecto — el intento entrena tu oído.',
               }
@@ -272,27 +272,32 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge — "Seven Nation Army," moved down to the low E string', label_es: 'Reto — "Seven Nation Army," movido a la cuerda Mi grave',
-                text: '<ul><li>Take the riff you know from the A string and play the same shape one string lower, on the low E.</li><li>Say each note name out loud as you play it — B · B · D · B · A · G · F#.</li></ul>You\'ve got it when: one clean lap, no chart, every note named correctly. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                text_es: '<ul><li>Toma el riff que ya conoces en la cuerda La y toca la misma forma una cuerda más abajo, en la Mi grave.</li><li>Di cada nombre de nota en voz alta mientras lo tocas — B · B · D · B · A · G · F#.</li></ul>Lo tienes cuando: una vuelta limpia, sin tabla, cada nota nombrada correctamente. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
-                hint: 'Same frets, same moves, one string lower — and every note name changes. That\'s the point: the shape is the shape, but WHERE you are decides what it\'s called. Name it, then play it.',
-                hint_es: 'Los mismos trastes, los mismos movimientos, una cuerda más abajo — y cada nombre de nota cambia. De eso se trata: la forma es la forma, pero DÓNDE estás decide cómo se llama. Nómbralo, luego tócalo.',
-                stuck: 'Do it in two halves: name-and-play B B D B, then A G F#. Join them once each half is automatic.',
-                stuck_es: 'Hazlo en dos mitades: nombra y toca B B D B, luego A G F#. Únelas una vez que cada mitad sea automática.',
-                levelUp: 'Close your eyes for a lap, then go straight back to the A-string version and name those notes too.',
-                levelUp_es: 'Cierra los ojos para una vuelta, y luego regresa a la versión en la cuerda La y nombra también esas notas.',
+                label: 'Challenge — \"Smoke on the Water,\" a head start', label_es: 'Reto — \"Smoke on the Water,\" una ventaja',
+                text: '<ul><li>Play the riff on the low E string — frets 0 → 3 → 5, then 0 → 3 → 6 → 5, then 0 → 3 → 5 → 3 → 0.</li><li>Say each note name out loud as you play it — E · G · A · E · G · A# · A · E · G · A · G · E.</li></ul>You\'ve got it when: one clean lap, no chart, every note named correctly. Set 2 takes this same riff to 60 BPM.',
+                text_es: '<ul><li>Toca el riff en la cuerda Mi grave — trastes 0 → 3 → 5, luego 0 → 3 → 6 → 5, luego 0 → 3 → 5 → 3 → 0.</li><li>Di cada nombre de nota en voz alta mientras lo tocas — E · G · A · E · G · A# · A · E · G · A · G · E.</li></ul>Lo tienes cuando: una vuelta limpia, sin tabla, cada nota nombrada correctamente. En la Unidad 2 este mismo riff va a 60 BPM.',
+                hint: 'Every note is one you just named on the low E string — the only new one is fret 6, A#: one fret past A. The shape is the shape; WHERE you are decides what it\'s called. Name it, then play it.',
+                hint_es: 'Cada nota es una que acabas de nombrar en la cuerda Mi grave — la única nueva es el traste 6, A#: un traste después de A. La forma es la forma; DÓNDE estás decide cómo se llama. Nómbralo, luego tócalo.',
+                stuck: 'Do it in three pieces: name-and-play E G A, then E G A# A, then E G A G E. Join them once each piece is automatic.',
+                stuck_es: 'Hazlo en tres partes: nombra y toca E G A, luego E G A# A, luego E G A G E. Únelas una vez que cada parte sea automática.',
+                levelUp: 'Close your eyes for a lap. Then play it again with no note names — just the sound.',
+                levelUp_es: 'Cierra los ojos para una vuelta. Luego tócalo otra vez sin nombrar las notas — solo el sonido.',
                 skills: [2, 3],
                 tab: {
-                  caption: '"Seven Nation Army" — riff moved down to the low E string · say each note name',
-                  caption_es: '"Seven Nation Army" — riff movido a la cuerda Mi grave · di cada nombre de nota',
+                  caption: '\"Smoke on the Water\" — main riff · Low E string · say each note name',
+                  caption_es: '\"Smoke on the Water\" — riff principal · cuerda Mi grave · di cada nombre de nota',
                   notes: [
-                    { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-                    { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-                    { string: 'E', fret: 10, note: 'D',  midi: 50 },
-                    { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-                    { string: 'E', fret: 5,  note: 'A',  midi: 45 },
-                    { string: 'E', fret: 3,  note: 'G',  midi: 43 },
-                    { string: 'E', fret: 2,  note: 'F#', midi: 42 }
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'E', fret: 3, note: 'G',  midi: 43 },
+                    { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'E', fret: 3, note: 'G',  midi: 43 },
+                    { string: 'E', fret: 6, note: 'A#', midi: 46 },
+                    { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                    { string: 'E', fret: 3, note: 'G',  midi: 43 },
+                    { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                    { string: 'E', fret: 3, note: 'G',  midi: 43 },
+                    { string: 'E', fret: 0, note: 'E',  midi: 40 }
                   ]
                 },
                 response: { type: 'short', prompt: 'A lap without looking at the chart — clean or not yet? What note still needs a look at the chart?', prompt_es: 'Una vuelta sin mirar la tabla — ¿limpia o todavía no? ¿Qué nota todavía necesita una miradita a la tabla?', placeholder: 'e.g. clean! / still peeking at the G', placeholder_es: 'ej. ¡limpia! / todavía miro la G' }
@@ -785,19 +790,19 @@ SETS.push(
                 response: { type: 'short', prompt: 'How many clean laps in a row did you get at 60 BPM?', prompt_es: '¿Cuántas vueltas limpias seguidas lograste a 60 BPM?', placeholder: 'e.g. 4 — try for a higher number next session', placeholder_es: 'ej. 4 — intenta superarlo la próxima sesión' }
               },
               {
-                label: 'Challenge — "Seven Nation Army," true pitch', label_es: 'Reto — "Seven Nation Army," tono real',
-                text: '<ul><li>Play the riff where the record actually lives — on the A string — E · E · G · E · D · C · B at 60 BPM.</li></ul>You\'ve got it when: two clean laps, and you can say which string version sounds like the recording. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                text_es: '<ul><li>Toca el riff donde realmente vive en la grabación — en la cuerda La — E · E · G · E · D · C · B a 60 BPM.</li></ul>Lo tienes cuando: dos vueltas limpias, y puedes decir qué versión de cuerda suena como la grabación. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
-                hint: 'Same riff, new string, new note names. Notice how the shape of the moves feels the same even though every name changed.',
-                hint_es: 'El mismo riff, una nueva cuerda, nuevos nombres de notas. Fíjate en cómo la forma de los movimientos se siente igual aunque cada nombre cambió.',
+                label: 'Challenge — "Seven Nation Army" at 60 BPM', label_es: 'Reto — "Seven Nation Army" a 60 BPM',
+                text: '<ul><li>Play the riff on the A string — E · E · G · E · D · C · B — with the metronome at 60 BPM, one note per beat.</li></ul>You\'ve got it when: two clean laps in a row, in time, every note named. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text_es: '<ul><li>Toca el riff en la cuerda La — E · E · G · E · D · C · B — con el metrónomo a 60 BPM, una nota por pulso.</li></ul>Lo tienes cuando: dos vueltas limpias seguidas, a tiempo, cada nota nombrada. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+                hint: 'You know this riff from Module 1. Now the click is the boss: land each note right on the beat, and let the open A string ring between phrases.',
+                hint_es: 'Ya conoces este riff del Módulo 1. Ahora manda el clic: cae en cada nota justo en el pulso, y deja sonar la cuerda La al aire entre frases.',
                 stuck: 'Play one lap of the low-E version from Set 1 to remind your hand of the moves, then bring it back to the A string.',
                 stuck_es: 'Toca una vuelta de la versión en la Mi grave de la Unidad 1 para recordarle a tu mano los movimientos, y luego regrésalo a la cuerda La.',
                 levelUp: 'Alternate laps: one on low E, one on the A string, without stopping between.',
                 levelUp_es: 'Alterna vueltas: una en la Mi grave, una en la cuerda La, sin parar entre ellas.',
                 skills: [1, 2, 4, 5, 6],
                 tab: {
-                  caption: '"Seven Nation Army" — riff at true pitch · A string · 60 BPM',
-                  caption_es: '"Seven Nation Army" — riff en tono real · cuerda La · 60 BPM',
+                  caption: '"Seven Nation Army" — main riff · A string · 60 BPM',
+                  caption_es: '"Seven Nation Army" — riff principal · cuerda La · 60 BPM',
                   notes: [
                     { string: 'A', fret: 7,  note: 'E', midi: 52 },
                     { string: 'A', fret: 7,  note: 'E', midi: 52 },
@@ -1009,7 +1014,7 @@ MODULE_SONGS[2] = [
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Play bass-note riff on low E string from memory', meta_es: 'Toca de memoria el riff de notas graves en la cuerda Mi grave', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'A string TAB — great first riff, plus the low-E transposition', meta_es: 'TAB en la cuerda La — un gran primer riff, más la versión en la Mi grave', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'A string TAB — great first riff, now in time with the metronome', meta_es: 'TAB en la cuerda La — un gran primer riff, ahora a tiempo con el metrónomo', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Luna" — Peso Pluma, Junior H', meta: 'Listen ahead — our Latin core song; you play its bass roots this module', meta_es: 'Escucha con anticipación — nuestra canción principal en español; tocas sus notas graves este módulo', type: 'Core', core: true, journeyUrl: 'tabs/luna.html',

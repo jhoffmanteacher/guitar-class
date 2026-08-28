@@ -5,6 +5,22 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-28 — "Seven Nation Army" is A-string only; Module 2 Set 1 previews "Smoke on the Water"
+
+### Changed
+
+- **The low-E version of "Seven Nation Army" is gone everywhere.** Module 2
+  Set 1's "moved down to the low E string" challenge is now a head start on
+  "Smoke on the Water" on the low E string — the same riff Set 2 takes to
+  60 BPM — with every note named as you play (the only new note is A# at
+  fret 6).
+- **Module 2 Set 2's riff challenge is now simply "Seven Nation Army" at
+  60 BPM** with the metronome; it no longer asks you to compare two string
+  versions, because there is only one.
+- Set 1's ear exercise and "Name That Riff" try-it now point to the A string
+  for "Seven Nation Army" and the low E string for "Smoke on the Water."
+- Module 2's header note and song list no longer mention a low-E
+  transposition.
 
 ## 2026-08-28 — Song Journey pages: the sign-in note stays on the screen
 
