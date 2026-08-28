@@ -207,7 +207,7 @@ SETS.push(
             levelUp: 'Switch every bar instead of every 2 bars, or climb to 75 BPM with the strum still unbroken.',
             levelUp_es: 'Cambia cada compás en lugar de cada 2, o sube a 75 BPM con el rasgueo aún sin interrupciones.',
             skills: [4, 5, 6],
-            response: { type: 'short', prompt: 'Personal record — strum unbroken through Em↔Am: play it cleanly at 60 BPM, then go +10 at a time. Your fastest CLEAN switch today (BPM)?', prompt_es: 'Récord personal — rasgueo sin interrupciones a través de Em↔Am: tócalo limpio a 60 BPM, y luego sube de 10 en 10. ¿Tu cambio LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next time', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima vez' },
+            response: { type: 'short', pr: 'bpm', prompt: 'Personal record — strum unbroken through Em↔Am: play it cleanly at 60 BPM, then go +10 at a time. Your fastest CLEAN switch today (BPM)?', prompt_es: 'Récord personal — rasgueo sin interrupciones a través de Em↔Am: tócalo limpio a 60 BPM, y luego sube de 10 en 10. ¿Tu cambio LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next time', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima vez' },
             playSeq: { label: 'Em → Am roots (2 beats each)', label_es: 'Raíces Em → Am (2 tiempos cada una)', bpm: 60, notes: [40, 40, 45, 45] },
             chords: [
               { name: 'Em', chord: [[6,0],[5,2,'2'],[4,2,'3'],[3,0],[2,0],[1,0]], position: 0 },
@@ -305,7 +305,7 @@ SETS.push(
               { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 }
             ],
             playSeq: { label: 'Em·Am roots (one chord per beat)', label_es: 'Raíces Em·Am (un acorde por tiempo)', bpm: 60, notes: [40, 45, 40, 45, 40, 45, 40, 45] },
-            response: { type: 'short', prompt: 'Your fastest CLEAN one-chord-per-beat Em↔Am today (BPM)?', prompt_es: '¿Tu Em↔Am más rápido y LIMPIO hoy, un acorde por tiempo (BPM)?', placeholder: 'e.g. 60 — 65 next session', placeholder_es: 'p. ej. 60 — 65 la próxima sesión' }
+            response: { type: 'short', pr: 'bpm', prompt: 'Your fastest CLEAN one-chord-per-beat Em↔Am today (BPM)?', prompt_es: '¿Tu Em↔Am más rápido y LIMPIO hoy, un acorde por tiempo (BPM)?', placeholder: 'e.g. 60 — 65 next session', placeholder_es: 'p. ej. 60 — 65 la próxima sesión' }
           }
             ]
           },
@@ -336,7 +336,7 @@ SETS.push(
                 levelUp: 'Sing or hum a line over your own strumming, or speed up to 70 BPM with the 8ths still even.',
                 levelUp_es: 'Canta o tararea una línea sobre tu propio rasgueo, o acelera a 70 BPM manteniendo las corcheas parejas.',
                 skills: [2, 4],
-                response: { type: 'short', prompt: 'Personal record — full laps in a row with the strum hand never stopping. Your count today?', prompt_es: 'Récord personal — vueltas completas seguidas con la mano de rasgueo sin detenerse nunca. ¿Tu cuenta de hoy?', placeholder: 'e.g. 3 — try for a higher number next time', placeholder_es: 'p. ej. 3 — intenta superarlo la próxima vez' }
+                response: { type: 'short', pr: 'count', prompt: 'Personal record — full laps in a row with the strum hand never stopping. Your count today?', prompt_es: 'Récord personal — vueltas completas seguidas con la mano de rasgueo sin detenerse nunca. ¿Tu cuenta de hoy?', placeholder: 'e.g. 3 — try for a higher number next time', placeholder_es: 'p. ej. 3 — intenta superarlo la próxima vez' }
               }
             ]
           }
@@ -604,7 +604,7 @@ SETS.push(
             levelUp: 'Add a third chord (G → D → Em), or run it at 75 BPM with no break at the change.',
             levelUp_es: 'Agrega un tercer acorde (G → D → Em), o tócalo a 75 BPM sin interrupción en el cambio.',
             skills: [1, 4],
-            response: { type: 'short', prompt: 'Personal record — D-DU-UDU through the G→D change: play it cleanly at 60 BPM, then go +10 at a time. Your fastest CLEAN loop today (BPM)?', prompt_es: 'Récord personal — D-DU-UDU a través del cambio G→D: tócalo limpio a 60 BPM, y luego sube de 10 en 10. ¿Tu vuelta LIMPIA más rápida hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next time', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima vez' }
+            response: { type: 'short', pr: 'bpm', prompt: 'Personal record — D-DU-UDU through the G→D change: play it cleanly at 60 BPM, then go +10 at a time. Your fastest CLEAN loop today (BPM)?', prompt_es: 'Récord personal — D-DU-UDU a través del cambio G→D: tócalo limpio a 60 BPM, y luego sube de 10 en 10. ¿Tu vuelta LIMPIA más rápida hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next time', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima vez' }
           }
             ]
           },

@@ -179,7 +179,7 @@ SETS.push(
                 levelUp: 'Add one strum on each chord before you switch, or swap in Am→C instead.',
                 levelUp_es: 'Agrega un rasgueo en cada acorde antes de cambiar, o cambia a Am→C en su lugar.',
                 skills: [5, 6],
-                response: { type: 'short', prompt: 'Personal record — clean Am↔Em changes in 60 seconds. Your count today?', prompt_es: 'Récord personal — cambios limpios Am↔Em en 60 segundos. ¿Tu cuenta hoy?', placeholder: 'e.g. 22 — try for a higher number next time', placeholder_es: 'p. ej. 22 — intenta superarlo la próxima vez' }
+                response: { type: 'short', pr: 'count', prompt: 'Personal record — clean Am↔Em changes in 60 seconds. Your count today?', prompt_es: 'Récord personal — cambios limpios Am↔Em en 60 segundos. ¿Tu cuenta hoy?', placeholder: 'e.g. 22 — try for a higher number next time', placeholder_es: 'p. ej. 22 — intenta superarlo la próxima vez' }
               }
             ]
           },
@@ -594,7 +594,7 @@ SETS.push(
                 levelUp: 'Run Am↔F instead — the hardest pair in this group.',
                 levelUp_es: 'Prueba Am↔F en su lugar — el par más difícil de este grupo.',
                 skills: [3, 6],
-                response: { type: 'short', prompt: 'Personal record — clean C↔G changes in 60 seconds. Your count today?', prompt_es: 'Récord personal — cambios limpios C↔G en 60 segundos. ¿Tu cuenta hoy?', placeholder: 'e.g. 18 — try for a higher number next time', placeholder_es: 'p. ej. 18 — intenta superarlo la próxima vez' }
+                response: { type: 'short', pr: 'count', prompt: 'Personal record — clean C↔G changes in 60 seconds. Your count today?', prompt_es: 'Récord personal — cambios limpios C↔G en 60 segundos. ¿Tu cuenta hoy?', placeholder: 'e.g. 18 — try for a higher number next time', placeholder_es: 'p. ej. 18 — intenta superarlo la próxima vez' }
               }
             ]
           },
@@ -721,7 +721,7 @@ SETS.push(
                   { midi: [53,57,60,65], beats: 2 },
                   { midi: [47,50,55,59,67], beats: 2 }
                 ] },
-                response: { type: 'short', prompt: 'Your cleanest tempo on the "the cure" loop today (BPM)?', prompt_es: '¿Tu tempo más limpio hoy en la vuelta de "the cure" (BPM)?', placeholder: 'e.g. 65 — 70 next session', placeholder_es: 'p. ej. 65 — 70 la próxima sesión' }
+                response: { type: 'short', pr: 'bpm', prompt: 'Your cleanest tempo on the "the cure" loop today (BPM)?', prompt_es: '¿Tu tempo más limpio hoy en la vuelta de "the cure" (BPM)?', placeholder: 'e.g. 65 — 70 next session', placeholder_es: 'p. ej. 65 — 70 la próxima sesión' }
               }
             ]
           },
@@ -801,7 +801,7 @@ SETS.push(
               { name: 'F',  chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
             ],
             playSeq: { label: 'Hear it — C·G·Am·F (one chord per beat)', label_es: 'Escúchalo — C·G·Am·F (un acorde por tiempo)', bpm: 60, notes: [[48,52,55,60,64],[43,47,50,55,59,67],[45,52,57,60,64],[53,57,60,65],[48,52,55,60,64],[43,47,50,55,59,67],[45,52,57,60,64],[53,57,60,65]] },
-            response: { type: 'short', prompt: 'Your fastest CLEAN one-chord-per-beat C–G–Am–F today (BPM)?', prompt_es: '¿Tu C–G–Am–F a un-acorde-por-tiempo LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 60 — 65 next session', placeholder_es: 'p. ej. 60 — 65 la próxima sesión' }
+            response: { type: 'short', pr: 'bpm', prompt: 'Your fastest CLEAN one-chord-per-beat C–G–Am–F today (BPM)?', prompt_es: '¿Tu C–G–Am–F a un-acorde-por-tiempo LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 60 — 65 next session', placeholder_es: 'p. ej. 60 — 65 la próxima sesión' }
           }
             ]
           },
@@ -1188,7 +1188,7 @@ SETS.push(
                 levelUp: 'Run Em↔A instead, or add a down-up strum on each chord.',
                 levelUp_es: 'Prueba Em↔A en su lugar, o agrega un rasgueo abajo-arriba en cada acorde.',
                 skills: [5, 6],
-                response: { type: 'short', prompt: 'Personal record — clean G↔D changes in 60 seconds. Your count today?', prompt_es: 'Récord personal — cambios limpios G↔D en 60 segundos. ¿Tu cuenta hoy?', placeholder: 'e.g. 20 — try for a higher number next time', placeholder_es: 'p. ej. 20 — intenta superarlo la próxima vez' }
+                response: { type: 'short', pr: 'count', prompt: 'Personal record — clean G↔D changes in 60 seconds. Your count today?', prompt_es: 'Récord personal — cambios limpios G↔D en 60 segundos. ¿Tu cuenta hoy?', placeholder: 'e.g. 20 — try for a higher number next time', placeholder_es: 'p. ej. 20 — intenta superarlo la próxima vez' }
               }
             ]
           },
@@ -1234,7 +1234,7 @@ SETS.push(
                   { midi: [48,52,55,60,64], beats: 4 },
                   { midi: [43,47,50,55,59,67], beats: 4 }
                 ] },
-                response: { type: 'short', prompt: 'How did it feel playing along with the actual 125 BPM record after practicing slower?', prompt_es: '¿Cómo se sintió tocar junto con la grabación real a 125 BPM después de practicar más despacio?', placeholder: 'e.g. the changes felt rushed at first, then locked in', placeholder_es: 'p. ej. los cambios se sintieron apurados al principio, y luego encajaron' }
+                response: { type: 'short', pr: false, prompt: 'How did it feel playing along with the actual 125 BPM record after practicing slower?', prompt_es: '¿Cómo se sintió tocar junto con la grabación real a 125 BPM después de practicar más despacio?', placeholder: 'e.g. the changes felt rushed at first, then locked in', placeholder_es: 'p. ej. los cambios se sintieron apurados al principio, y luego encajaron' }
               }
             ]
           },
@@ -1518,7 +1518,7 @@ SETS.push(
                 levelUp: 'Add a strum on each chord before switching, or run E→Am→B7.',
                 levelUp_es: 'Agrega un rasgueo en cada acorde antes de cambiar, o prueba E→Am→B7.',
                 skills: [1, 2],
-                response: { type: 'short', prompt: 'Personal record — clean E↔B7 changes in 60 seconds. Your count today?', prompt_es: 'Récord personal — cambios limpios E↔B7 en 60 segundos. ¿Tu cuenta hoy?', placeholder: 'e.g. 14 — try for a higher number next time', placeholder_es: 'p. ej. 14 — intenta superarlo la próxima vez' }
+                response: { type: 'short', pr: 'count', prompt: 'Personal record — clean E↔B7 changes in 60 seconds. Your count today?', prompt_es: 'Récord personal — cambios limpios E↔B7 en 60 segundos. ¿Tu cuenta hoy?', placeholder: 'e.g. 14 — try for a higher number next time', placeholder_es: 'p. ej. 14 — intenta superarlo la próxima vez' }
               }
             ]
           },

@@ -33,7 +33,7 @@
    Exit code is non-zero if anything fails, so a push can be aborted.
    ════════════════════════════════════════════════════════════════════ */
 
-import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
@@ -74,7 +74,7 @@ try {
 } catch { /* no tabs/ dir yet */ }
 
 const SHELL_FILES = [
-  'index.html', '404.html', 'styles.css', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'app.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js', 'live-quiz.js', 'config-main.js',
+  'index.html', '404.html', 'mood-chart.html', 'styles.css', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'app.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js', 'live-quiz.js', 'config-main.js',
   'firebase-config.js', 'manifest.json', 'icon.svg',
   ...MODULE_FILES,
   ...TAB_PAGES,
@@ -520,6 +520,226 @@ function checkTabNoScroll() {
     flag(`app.js: TAB_MAX_COLS is ${max[1]} — outside the 2..12 range a staff stays readable in`);
 
   if (bad === 0) ok('inline TAB cannot scroll sideways (board, grid, columns, note-button width, wrap constant)');
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1p. CHALLENGE-LABEL REGEX PARITY — two files parse the "Challenge N —
+   Title" prefix out of a step, and they had drifted. app.js's stepLabel()
+   used \d* (number optional); teacher.js's setShortResponses() used \d+.
+   84 of the 201 challenge labels in module data use the UNNUMBERED
+   "Challenge — Title" form, so teacher.js matched none of them and the
+   PR slots fell through to the hard-coded 'Personal record (BPM)' — m3w2
+   showed the teacher five identical rows with no way to tell which
+   challenge each belonged to (found 2026-08-28).
+
+   This does not compare the two regexes textually — they legitimately
+   differ (app.js strips from prose and needs the trailing colon;
+   teacher.js reads step.label, which has none). It extracts whichever
+   regex each file is ACTUALLY using and runs it against every real
+   challenge label, so any future edit that stops matching one of them
+   fails the push here rather than silently in the dashboard.
+   ════════════════════════════════════════════════════════════════════ */
+function checkChallengeLabelParity() {
+  head('1p. Challenge-label parsing matches every challenge label');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+
+  // Pull the live regex out of each consumer rather than hard-coding a copy.
+  const consumers = [
+    { file: 'teacher.js', re: /match\((\/Challenge[^/]+\/)\)/, what: 'setShortResponses PR-slot label' },
+    { file: 'app.js', re: /match\((\/\^\(\?:Challenge\|Reto\)[^/]+\/)\)/, what: 'stepLabel challenge-title strip' },
+  ].map(c => {
+    const src = readFileSync(join(ROOT, c.file), 'utf8');
+    const m = src.match(c.re);
+    if (!m) { flag(`${c.file}: could not find the ${c.what} regex — if it was renamed or removed, update checks.mjs 1p to match`); return null; }
+    let re;
+    try { re = eval(m[1]); } catch { flag(`${c.file}: the ${c.what} regex did not compile: ${m[1]}`); return null; }
+    return { ...c, re, src: m[1] };
+  }).filter(Boolean);
+
+  // Every challenge label students actually see, straight from module data.
+  const labels = new Map();   // label -> "file:line"
+  for (const file of MODULE_FILES) {
+    readFileSync(join(ROOT, file), 'utf8').split('\n').forEach((line, li) => {
+      for (const m of line.matchAll(/label:\s*'((?:[^'\\]|\\.)*)'/g)) {
+        if (/^(?:Challenge|Reto)\b/.test(m[1]) && !labels.has(m[1])) labels.set(m[1], `${file}:${li + 1}`);
+      }
+    });
+  }
+  if (labels.size === 0) flag('no "Challenge …" step labels found in any module file — the authoring convention changed, or this detector\'s scan broke');
+
+  for (const c of consumers) {
+    // app.js reads prose (label + ':'), teacher.js reads the bare label.
+    const subject = c.file === 'app.js' ? (l => l + ':') : (l => l);
+    const missed = [...labels.keys()].filter(l => !c.re.test(subject(l)));
+    if (missed.length) {
+      flag(`${c.file}: the ${c.what} regex ${c.src} misses ${missed.length} of ${labels.size} challenge labels — those steps lose their title in the UI. First: "${missed[0]}" (${labels.get(missed[0])})`);
+    }
+  }
+  if (bad === 0) ok(`${labels.size} challenge labels parse in both app.js and teacher.js`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1s. PERSONAL-RECORD SLOTS DECLARE THEIR UNIT — a step's short response is
+   a record only if it says so: `pr: 'bpm'` or `pr: 'count'` on the response
+   object (mirroring practice.unit, which has always been declared rather
+   than guessed). Until 2026-08-28 app.js and teacher.js each ran their own
+   copy of /personal record/i || /\bBPM\b/i over the prompt, which:
+     · swept in a prose reflection that merely mentions "125 BPM" and a
+       compound "which song, and at what BPM" question, storing both as
+       8-entry record histories they were never meant to be, and
+     · had no idea 10 of the 31 slots ask for a COUNT, so the teacher's
+       dashboard rendered "22 clean Am↔Em changes in 60 seconds" as "22 BPM".
+
+   The check runs the retired heuristic as a TRIPWIRE: anything that looks
+   like a record prompt must have made a decision about it. That way a new
+   prompt written in the old house style can't silently go back to being
+   guessed at, and deliberately opting one out (`pr: false`) is explicit and
+   survives review. Storage depends on this — a record stores an array of
+   {value,date}, a plain response stores a string — so a wrong answer here
+   is a data-shape bug, not a cosmetic one.
+   ════════════════════════════════════════════════════════════════════ */
+function checkPrDeclarations(allSets) {
+  head('1s. Personal-record slots declare their unit');
+  if (!allSets) { warn('module data did not load — skipping'); warnings++; return; }
+  const LOOKS_LIKE_RECORD = p => /personal record/i.test(p) || /\bBPM\b/i.test(p);
+  const VALID = ['bpm', 'count', false];
+  let bad = 0, declared = 0, optedOut = 0;
+
+  for (const w of allSets) {
+    for (const stationId of ['b', 'c']) {
+      const stn = w.stations && w.stations[stationId];
+      if (!stn) continue;
+      const steps = stn.sections
+        ? stn.sections.flatMap((sec, gi) => (sec.steps || []).map((st, i) => ({ st, ns: `${stationId}-sec${gi}`, i })))
+        : (stn.steps || []).map((st, i) => ({ st, ns: stationId, i }));
+      for (const { st, ns, i } of steps) {
+        const r = st.response;
+        if (!r || r.type !== 'short') continue;
+        const where = `${w.id}-${ns}-${i}`;
+        const has = Object.prototype.hasOwnProperty.call(r, 'pr');
+        if (has && !VALID.includes(r.pr)) {
+          err(`${where}: response.pr is ${JSON.stringify(r.pr)} — must be 'bpm', 'count', or false`);
+          problems++; bad++; continue;
+        }
+        if (has) { r.pr === false ? optedOut++ : declared++; continue; }
+        if (LOOKS_LIKE_RECORD(r.prompt || '')) {
+          err(`${where}: "${String(r.prompt).slice(0, 60)}…" reads as a personal-record prompt but declares no unit — add pr: 'bpm' (a tempo), pr: 'count' (laps/changes), or pr: false if it isn't a record at all`);
+          problems++; bad++;
+        }
+      }
+    }
+  }
+  // A prompt that declares a unit but reads like neither is the reverse
+  // mistake, and the tripwire above cannot see it — so state the totals and
+  // let a drifting number be noticed.
+  if (bad === 0) ok(`${declared} record slots declare bpm/count, ${optedOut} explicitly opted out`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1q. ORPHAN CSS CUSTOM PROPERTIES — `var(--foo)` with no fallback, where
+   --foo is defined nowhere, is invalid at computed-value time: the WHOLE
+   declaration is thrown away, not just the colour. It fails silently and
+   looks fine in review, because the property simply reverts to its
+   initial value. Two shipped instances on 2026-08-28: `border:1px solid
+   var(--accent)` on the teacher's activity-rename input computed to
+   border-style:none (no border at all), and `color:var(--muted)` on the
+   search-results count line inherited full-strength body text where a
+   quiet label was intended.
+
+   Definitions are collected from every shipped stylesheet, page and
+   script (including JS setProperty calls, which is how the theme sets
+   some of them). A var() WITH a fallback is fine by construction and is
+   not flagged.
+   ════════════════════════════════════════════════════════════════════ */
+function checkOrphanCssVars() {
+  head('1q. CSS custom properties resolve');
+  let bad = 0;
+  const FILES = [...new Set([
+    'styles.css', 'index.html', '404.html', 'mood-chart.html',
+    'app.js', 'teacher.js', 'fab-tools.js', 'tuner.js', 'coach.js',
+    'live-quiz.js', 'guitar-diagrams.js',
+    ...TAB_PAGES,
+  ])];
+
+  const defined = new Set();
+  const used = new Map();   // --name -> ["file:line", …]
+  for (const file of FILES) {
+    let lines;
+    try { lines = readFileSync(join(ROOT, file), 'utf8').split('\n'); } catch { continue; }
+    lines.forEach((line, li) => {
+      for (const m of line.matchAll(/(--[A-Za-z0-9_-]+)\s*:/g)) defined.add(m[1]);
+      for (const m of line.matchAll(/setProperty\(\s*['"](--[A-Za-z0-9_-]+)['"]/g)) defined.add(m[1]);
+      for (const m of line.matchAll(/var\(\s*(--[A-Za-z0-9_-]+)\s*(,)?/g)) {
+        if (m[2]) continue;   // a fallback is supplied — can't compute to nothing
+        if (!used.has(m[1])) used.set(m[1], []);
+        used.get(m[1]).push(`${file}:${li + 1}`);
+      }
+    });
+  }
+
+  for (const [name, where] of [...used].sort()) {
+    if (defined.has(name)) continue;
+    err(`${where[0]}: var(${name}) is defined nowhere and has no fallback — the whole declaration is dropped${where.length > 1 ? ` (${where.length} uses)` : ''}`);
+    problems++; bad++;
+  }
+  if (bad === 0) ok(`${used.size} custom properties used without a fallback — all defined`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1r. STUDENT-FACING FILES OUTSIDE THE OFFLINE SHELL — CACHE_VERSION is a
+   fingerprint of SHELL_FILES + TAB_PAGES + IMG_FILES + AUDIO_FILES, and
+   the service worker serves every same-origin GET cache-first. A file a
+   student can reach that is in NEITHER the fingerprint nor sw.js ASSETS
+   is served stale after an edit, with nothing to bump.
+
+   Found 2026-08-28: mood-chart.html (opened from the nav rail, in no list
+   at all — a mood-chart-only push never reached a returning student), and
+   img/m1-note-circle-{en,es}.svg (fingerprinted, so edits landed, but the
+   only two of 47 images left out of the precache).
+   ════════════════════════════════════════════════════════════════════ */
+function checkShippedFileCoverage() {
+  head('1r. Reachable files are in the offline shell');
+  let bad = 0;
+  const swSrc = readFileSync(join(ROOT, 'sw.js'), 'utf8');
+  const m = swSrc.match(/const ASSETS = \[([\s\S]*?)\];/);
+  const assets = m ? [...m[1].matchAll(/'\.\/([^']+)'/g)].map(x => x[1]) : [];
+  if (!m) { err('could not find ASSETS in sw.js'); problems++; return; }
+
+  const REFERRERS = [...new Set(['index.html', '404.html', 'app.js', 'class-activities.js', ...MODULE_FILES, ...TAB_PAGES])];
+  const sources = REFERRERS.map(file => {
+    try { return { file, src: readFileSync(join(ROOT, file), 'utf8') }; } catch { return null; }
+  }).filter(Boolean);
+
+  const rootPages = new Map();   // page -> referrer
+  for (const { file, src } of sources) {
+    for (const r of src.matchAll(/['"(](?:\.\/)?([a-z0-9][a-z0-9-]*\.html)['")]/gi)) {
+      if (!rootPages.has(r[1]) && existsSync(join(ROOT, r[1]))) rootPages.set(r[1], file);
+    }
+  }
+
+  /* Match images by BASENAME, not by an 'img/…' path: Module 13's eight
+     string-changing photos are passed to an m13Photo() helper that prepends
+     the directory itself, so a path-prefix scan silently misses all eight —
+     exactly the kind of blind spot this detector exists to close. */
+  const images = new Map();      // img/x -> referrer
+  for (const img of IMG_FILES) {
+    const base = img.slice(img.indexOf('/') + 1);
+    const from = sources.find(s => s.src.includes(base));
+    if (from) images.set(img, from.file);
+  }
+
+  for (const [page, from] of [...rootPages].sort()) {
+    if (SHELL_FILES.includes(page)) continue;
+    err(`${page} is reachable (referenced by ${from}) but is in neither SHELL_FILES nor the CACHE_VERSION fingerprint — an edit to it would never reach a returning student. Add it to SHELL_FILES in checks.mjs and to ASSETS in sw.js`);
+    problems++; bad++;
+  }
+  for (const [img, from] of [...images].sort()) {
+    if (assets.includes(img)) continue;
+    err(`${img} is shipped (referenced by ${from}) but missing from sw.js ASSETS — it won't be precached, so it breaks for a student who goes offline before first viewing it`);
+    problems++; bad++;
+  }
+  if (bad === 0) ok(`${rootPages.size} reachable pages and ${images.size} referenced images are all in the offline shell`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -1654,7 +1874,7 @@ async function liveCheck() {
   console.log(`${C.bold}Guitar Class — pre-push checks${C.reset}${CHECK_ONLY ? `  ${C.dim}(check-only)${C.reset}` : ''}`);
   syntaxCheck();
   renderCheck();
-  validateModules();
+  const allSets = validateModules();
   validateClassActivities();
   const i18nTable = checkI18nParity();
   checkMissingI18nKeys(i18nTable);
@@ -1665,6 +1885,10 @@ async function liveCheck() {
   checkNarrativeLeadIns();
   checkRetiredStationWording();
   checkTabNoScroll();
+  checkChallengeLabelParity();
+  checkOrphanCssVars();
+  checkShippedFileCoverage();
+  checkPrDeclarations(allSets);
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

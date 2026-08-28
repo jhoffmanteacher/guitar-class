@@ -190,7 +190,7 @@ SETS.push(
             levelUp_es: 'Tócalo al revés (a-m-i-p), o cierra los ojos y mantén cada dedo en su cuerda.',
             skills: [3, 4, 5],
             playSeq: { label: 'Hear p-i-m-a on open strings', label_es: 'Escucha p-i-m-a en cuerdas al aire', bpm: 60, notes: [40, 55, 59, 64] },
-            response: { type: 'short', prompt: 'Personal record: play it cleanly at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, even p-i-m-a lap (one full time through the pattern) today (BPM)?', prompt_es: 'Récord personal: tócalo limpio a 60 BPM, y luego sube el metrónomo de 10 en 10. ¿Tu vuelta p-i-m-a más rápida, LIMPIA y pareja (una vuelta = un recorrido completo del patrón) hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next time', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima vez' }
+            response: { type: 'short', pr: 'bpm', prompt: 'Personal record: play it cleanly at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, even p-i-m-a lap (one full time through the pattern) today (BPM)?', prompt_es: 'Récord personal: tócalo limpio a 60 BPM, y luego sube el metrónomo de 10 en 10. ¿Tu vuelta p-i-m-a más rápida, LIMPIA y pareja (una vuelta = un recorrido completo del patrón) hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next time', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima vez' }
           }
             ]
           },
@@ -527,7 +527,7 @@ SETS.push(
             levelUp: 'Push past 80 BPM, or play the pattern over Am at the same tempo with the thumb relocating.',
             levelUp_es: 'Supera los 80 BPM, o toca el patrón sobre Am al mismo tempo con el pulgar reubicándose.',
             skills: [2, 5],
-            response: { type: 'short', prompt: 'Personal record: play it cleanly at 70 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, even pattern today (BPM)?', prompt_es: 'Récord personal: tócalo limpio a 70 BPM, y luego sube el metrónomo de 10 en 10. ¿Tu patrón más rápido, LIMPIO y parejo hoy (BPM)?', placeholder: 'e.g. 90 — try for a higher number next time', placeholder_es: 'p. ej. 90 — intenta superarlo la próxima vez' }
+            response: { type: 'short', pr: 'bpm', prompt: 'Personal record: play it cleanly at 70 BPM, then raise the metronome +10 at a time. Your fastest CLEAN, even pattern today (BPM)?', prompt_es: 'Récord personal: tócalo limpio a 70 BPM, y luego sube el metrónomo de 10 en 10. ¿Tu patrón más rápido, LIMPIO y parejo hoy (BPM)?', placeholder: 'e.g. 90 — try for a higher number next time', placeholder_es: 'p. ej. 90 — intenta superarlo la próxima vez' }
           }
             ]
           },
@@ -835,7 +835,7 @@ SETS.push(
             skills: [1, 3, 4],
             playSeq: { label: 'Am · C · D · F bass roots', label_es: 'Raíces graves Am · C · D · F', bpm: 60,
               notes: [45, 48, 50, 53] },
-            response: { type: 'short', prompt: 'Personal record: play it cleanly at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN lap of the progression today (BPM)?', prompt_es: 'Récord personal: tócalo limpio a 60 BPM, y luego sube el metrónomo de 10 en 10. ¿Tu vuelta más rápida y LIMPIA de la progresión hoy (BPM)?', placeholder: 'e.g. 75 — try for a higher number next time', placeholder_es: 'p. ej. 75 — intenta superarlo la próxima vez' }
+            response: { type: 'short', pr: 'bpm', prompt: 'Personal record: play it cleanly at 60 BPM, then raise the metronome +10 at a time. Your fastest CLEAN lap of the progression today (BPM)?', prompt_es: 'Récord personal: tócalo limpio a 60 BPM, y luego sube el metrónomo de 10 en 10. ¿Tu vuelta más rápida y LIMPIA de la progresión hoy (BPM)?', placeholder: 'e.g. 75 — try for a higher number next time', placeholder_es: 'p. ej. 75 — intenta superarlo la próxima vez' }
           }
             ]
           },

@@ -186,7 +186,7 @@ SETS.push(
                 levelUp_es: 'Una vuelta limpia a 80 BPM, o empieza en el traste 12 y nombra tu camino hacia abajo.',
                 skills: [2],
                 playSeq: { label: 'Play all', label_es: 'Tocar todo', bpm: 60, notes: [40, 41, 43, 45, 47, 48, 50, 52] },
-                response: { type: 'short', prompt: 'Personal record: play it cleanly at 60, then raise the metronome +10 at a time. What\'s your fastest CLEAN lap today (BPM)?', prompt_es: 'Récord personal: tócalo limpio a 60, y luego sube el metrónomo de 10 en 10. ¿Cuál es tu vuelta LIMPIA más rápida hoy (BPM)?', placeholder: 'e.g. 90 — try for a higher number next session', placeholder_es: 'ej. 90 — intenta superarlo la próxima sesión' }
+                response: { type: 'short', pr: 'bpm', prompt: 'Personal record: play it cleanly at 60, then raise the metronome +10 at a time. What\'s your fastest CLEAN lap today (BPM)?', prompt_es: 'Récord personal: tócalo limpio a 60, y luego sube el metrónomo de 10 en 10. ¿Cuál es tu vuelta LIMPIA más rápida hoy (BPM)?', placeholder: 'e.g. 90 — try for a higher number next session', placeholder_es: 'ej. 90 — intenta superarlo la próxima sesión' }
               },
               {
                 label: 'Quick check: low E notes', label_es: 'Revisión rápida: notas de Mi grave',
@@ -226,7 +226,7 @@ SETS.push(
                 levelUp_es: 'Haz la vuelta a 80 BPM. Luego prueba la baraja de autoevaluación con cartas de abajo para trastes al azar en lugar de un orden memorizado.',
                 skills: [3],
                 playSeq: { label: 'Play all', label_es: 'Tocar todo', bpm: 60, notes: [45, 47, 48, 50, 52, 53, 55, 57] },
-                response: { type: 'short', prompt: 'Personal record: play it cleanly at 60, then raise the metronome +10 at a time. Your fastest CLEAN A-string lap today (BPM)?', prompt_es: 'Récord personal: tócalo limpio a 60, y luego sube el metrónomo de 10 en 10. ¿Cuál es tu vuelta LIMPIA más rápida en la cuerda La hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next session', placeholder_es: 'ej. 80 — intenta superarlo la próxima sesión' }
+                response: { type: 'short', pr: 'bpm', prompt: 'Personal record: play it cleanly at 60, then raise the metronome +10 at a time. Your fastest CLEAN A-string lap today (BPM)?', prompt_es: 'Récord personal: tócalo limpio a 60, y luego sube el metrónomo de 10 en 10. ¿Cuál es tu vuelta LIMPIA más rápida en la cuerda La hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next session', placeholder_es: 'ej. 80 — intenta superarlo la próxima sesión' }
               },
               {
                 label: 'Quick check: A string notes', label_es: 'Revisión rápida: notas de la La',
@@ -723,7 +723,7 @@ SETS.push(
                 { string: 'E', fret: 3, note: 'G', midi: 43 }
               ]
             },
-            response: { type: 'short', prompt: 'Personal record: once it loops clean at 60, raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', prompt_es: 'Récord personal: una vez que el bucle salga limpio a 60, sube el metrónomo de 10 en 10. ¿Cuál es tu bucle LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 100 — try for a higher number next session', placeholder_es: 'ej. 100 — intenta superarlo la próxima sesión' }
+            response: { type: 'short', pr: 'bpm', prompt: 'Personal record: once it loops clean at 60, raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', prompt_es: 'Récord personal: una vez que el bucle salga limpio a 60, sube el metrónomo de 10 en 10. ¿Cuál es tu bucle LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 100 — try for a higher number next session', placeholder_es: 'ej. 100 — intenta superarlo la próxima sesión' }
           },
           {
             label: 'Bonus: "Sweet Child O\' Mine" roots', label_es: 'Extra: raíces de "Sweet Child O\' Mine"',
@@ -787,7 +787,7 @@ SETS.push(
                     { string: 'E', fret: 3, note: 'G', midi: 43 }
                   ]
                 },
-                response: { type: 'short', prompt: 'How many clean laps in a row did you get at 60 BPM?', prompt_es: '¿Cuántas vueltas limpias seguidas lograste a 60 BPM?', placeholder: 'e.g. 4 — try for a higher number next session', placeholder_es: 'ej. 4 — intenta superarlo la próxima sesión' }
+                response: { type: 'short', pr: 'count', prompt: 'How many clean laps in a row did you get at 60 BPM?', prompt_es: '¿Cuántas vueltas limpias seguidas lograste a 60 BPM?', placeholder: 'e.g. 4 — try for a higher number next session', placeholder_es: 'ej. 4 — intenta superarlo la próxima sesión' }
               },
               {
                 label: 'Challenge — "Seven Nation Army" at 60 BPM', label_es: 'Reto — "Seven Nation Army" a 60 BPM',

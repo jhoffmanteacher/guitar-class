@@ -434,6 +434,26 @@ function loadFirestoreSdk(){
   });
 }
 
+/* The paused message, matching app.js's showPausedScreen(). These pages have
+   no app.js and no styles.css, so the markup is rebuilt here and the CSS is
+   mirrored in journey-theme.css — restyle both or neither, same rule as the
+   live-quiz banner. data-i18n is what makes the Español button re-translate
+   it (i18n.js's applyI18n runs on setLang; the data-es sweep is separate). */
+function showJourneyPaused(){
+  var wrap = document.querySelector('.wrap');
+  if(!wrap) return;
+  wrap.innerHTML =
+    '<div class="paused-screen">'
+    + '<div class="paused-card">'
+    + '<h2 data-i18n="paused.title">' + t('paused.title') + '</h2>'
+    + '<p data-i18n="paused.body">' + t('paused.body') + '</p>'
+    + '<p class="paused-safe" data-i18n="paused.safe">' + t('paused.safe') + '</p>'
+    + '<p><a class="paused-back" href="../index.html" data-i18n="journey.backToClass">'
+      + t('journey.backToClass') + '</a></p>'
+    + '</div></div>';
+  document.title = t('paused.title');
+}
+
 window.addEventListener('load', function(){
   if(typeof firebase === 'undefined' || typeof firebaseConfig === 'undefined') return;
   firebase.initializeApp(firebaseConfig);
@@ -467,6 +487,27 @@ window.addEventListener('load', function(){
          live-quiz.js's own auth hook because this page's Firebase boot (and
          its Firestore SDK load) is journey.js's, and by this line both have
          actually landed. */
+      /* The teacher's hold (config/class.paused, set from teacher.js's Manage
+         view) was enforced only in app.js, so a paused student who was on a
+         Journey page — or who reached one from a bookmark — kept full access
+         here and kept writing ratings to Firestore, while the Manage view
+         promised they'd see the paused message "instead of the site"
+         (fixed 2026-08-28). Fails OPEN on a read error, matching app.js's
+         loadClassConfig: this is classroom management, not the security
+         boundary — that's the Firestore rules, and they're unchanged. */
+      return fbDb.collection('config').doc('class').get()
+        .then(function(cfg){
+          var d = (cfg && cfg.exists) ? (cfg.data() || {}) : {};
+          return (d.paused || {})[user.uid] === true;
+        })
+        .catch(function(){ return false; });
+    }).then(function(paused){
+      if(paused){
+        pendingSave = false; dirty = false; clearTimeout(saveTimer);
+        if(typeof lqStopListening === 'function') lqStopListening();
+        showJourneyPaused();
+        return null;
+      }
       if(typeof lqStartListening === 'function') lqStartListening();
       /* Anything rated while we were still booting has been sitting in the
          DOM unsaved — write it now, before the read below, so a student who
@@ -477,6 +518,7 @@ window.addEventListener('load', function(){
       else pendingSave = false;
       return fbDb.collection('progress').doc(user.uid).get();
     }).then(function(doc){
+      if(!doc) return;   // paused — nothing to paint
       var data = doc && doc.exists ? doc.data() : null;
       applyReady(data && data.songReady && data.songReady[SONG_ID]);
     }).catch(function(){

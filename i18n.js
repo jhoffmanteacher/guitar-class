@@ -798,6 +798,11 @@
     'journey.saveFailed':    { en: 'Save failed — check connection', es: 'No se pudo guardar — revisa tu conexión' },
     'journey.signin':        { en: 'Sign in on the class site to save your ratings',
                                es: 'Inicia sesión en el sitio de la clase para guardar tus evaluaciones' },
+    /* Only shown on the Journey pages' paused screen (journey.js
+       showJourneyPaused), which replaces the whole page — including the
+       crumb row's own hand-written back link. Same wording as that link. */
+    'journey.backToClass':   { en: '← Back to class site',
+                               es: '← Volver al sitio de la clase' },
     'journey.slow':          { en: 'Slow ({bpm} BPM)', es: 'Lento ({bpm} BPM)' },
     'journey.playalongTitle':{ en: 'Play-along backing track', es: 'Pista de acompañamiento para tocar encima' },
     'journey.trackFabAria':  { en: 'Play backing track', es: 'Reproducir pista de acompañamiento' },

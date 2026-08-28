@@ -5,6 +5,33 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-28 — "Pick up where you left off" works from anywhere; offline fixes
+
+### Fixed
+
+- **The "Continue" button on the pick-up-where-you-left-off card works no
+  matter where you are.** It only ever worked if you hadn't moved yet — once
+  you'd switched sets, changed modules, or opened Songs or Games, pressing it
+  did nothing at all. It now takes you back to the right module, the right
+  set, and the right tab.
+- **The "Next" button at the bottom of a checklist no longer half-moves you
+  into a set you haven't unlocked yet.** You'd get the "finish the one before
+  it first" message, but the rail would already be highlighting the locked
+  set as though you were in it.
+- **The Mood Chart page updates when it changes.** It was outside the
+  offline-cache bookkeeping, so once your phone or Chromebook had loaded it
+  once, it kept showing you that old copy no matter how many times the page
+  was improved.
+- **Module 1's note-circle diagram now works offline.** It was the only
+  picture on the site that hadn't been saved for offline use, so it came up
+  blank if you opened that step for the first time with no connection.
+- **If Mr. Hoffman has paused your account, the Song Journey pages now say
+  so** instead of letting you keep going and quietly saving nothing.
+- The "N results" line above search results is a quiet grey again instead of
+  the same weight as the results themselves.
+- The "how did it feel playing along at full speed?" reflection in Module 5
+  is treated as a written answer again, not as a numbered record.
+
 ## 2026-08-28 — "Seven Nation Army" is A-string only; Module 2 Set 1 previews "Smoke on the Water"
 
 ### Changed

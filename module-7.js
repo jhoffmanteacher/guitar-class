@@ -131,7 +131,7 @@ SETS.push(
             levelUp: 'Play it at 90 BPM, or add the closing phrase that answers the riff and completes the full version: 3/5 — 6/8 — 8/10, then 6/8 — 3/5.',
             levelUp_es: 'Tócalo a 90 BPM, o agrega la frase de cierre que responde al riff y completa la versión completa: 3/5 — 6/8 — 8/10, y luego 6/8 — 3/5.',
             skills: [1, 4, 5],
-            response: { type: 'short', prompt: 'Personal record — play it cleanly at 70 BPM, then go +10 at a time. Your fastest CLEAN "Smoke" lap (one full time through the riff) today (BPM)?', prompt_es: 'Récord personal — tócalo limpio a 70 BPM, y luego sube de 10 en 10. ¿Tu vuelta LIMPIA más rápida de "Smoke" (una vuelta = un recorrido completo del riff) hoy (BPM)?', placeholder: 'e.g. 100 — try for a higher number next time', placeholder_es: 'p. ej. 100 — intenta superarlo la próxima vez' },
+            response: { type: 'short', pr: 'bpm', prompt: 'Personal record — play it cleanly at 70 BPM, then go +10 at a time. Your fastest CLEAN "Smoke" lap (one full time through the riff) today (BPM)?', prompt_es: 'Récord personal — tócalo limpio a 70 BPM, y luego sube de 10 en 10. ¿Tu vuelta LIMPIA más rápida de "Smoke" (una vuelta = un recorrido completo del riff) hoy (BPM)?', placeholder: 'e.g. 100 — try for a higher number next time', placeholder_es: 'p. ej. 100 — intenta superarlo la próxima vez' },
             tab: {
               caption: '"Smoke on the Water" — main riff · low E + A strings together',
               caption_es: '"Smoke on the Water" — riff principal · cuerdas Mi grave + La juntas',
@@ -511,7 +511,7 @@ SETS.push(
                 levelUp: 'Add A (fret 5) and cycle F→G→A, or run it with a down-up strum.',
                 levelUp_es: 'Agrega A (traste 5) y cicla F→G→A, o tócalo con un rasgueo abajo-arriba.',
                 skills: [4, 6],
-                response: { type: 'short', prompt: 'Personal record — clean F↔G barre changes in 60 seconds. Your count today?', prompt_es: 'Récord personal — cambios de cejilla F↔G limpios en 60 segundos. ¿Tu cuenta de hoy?', placeholder: 'e.g. 8 — try for a higher number next time', placeholder_es: 'p. ej. 8 — intenta superarlo la próxima vez' }
+                response: { type: 'short', pr: 'count', prompt: 'Personal record — clean F↔G barre changes in 60 seconds. Your count today?', prompt_es: 'Récord personal — cambios de cejilla F↔G limpios en 60 segundos. ¿Tu cuenta de hoy?', placeholder: 'e.g. 8 — try for a higher number next time', placeholder_es: 'p. ej. 8 — intenta superarlo la próxima vez' }
               }
             ]
           },
@@ -792,7 +792,7 @@ SETS.push(
             levelUp: 'Run it with the D-DU-UDU strum, or push to 75 BPM.',
             levelUp_es: 'Tócalo con el rasgueo D-DU-UDU, o sube a 75 BPM.',
             skills: [5, 6],
-            response: { type: 'short', prompt: 'Personal record — play the F–C–G–D switch cleanly at 60 BPM, then go +5 at a time. Your fastest CLEAN loop today (BPM)?', prompt_es: 'Récord personal — toca el cambio F–C–G–D limpio a 60 BPM, y luego sube de 5 en 5. ¿Tu vuelta LIMPIA más rápida hoy (BPM)?', placeholder: 'e.g. 70 — try for a higher number next time', placeholder_es: 'p. ej. 70 — intenta superarlo la próxima vez' },
+            response: { type: 'short', pr: 'bpm', prompt: 'Personal record — play the F–C–G–D switch cleanly at 60 BPM, then go +5 at a time. Your fastest CLEAN loop today (BPM)?', prompt_es: 'Récord personal — toca el cambio F–C–G–D limpio a 60 BPM, y luego sube de 5 en 5. ¿Tu vuelta LIMPIA más rápida hoy (BPM)?', placeholder: 'e.g. 70 — try for a higher number next time', placeholder_es: 'p. ej. 70 — intenta superarlo la próxima vez' },
             chords: [
               { name: 'F', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
               { name: 'C', chord: [[6,'x'],[5,3,'1'],[4,5,'2'],[3,5,'3'],[2,5,'4'],[1,3,'1']], position: 3 },
@@ -853,7 +853,7 @@ SETS.push(
                 chords: [
                   { name: 'Am (E-shape)', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,5,'1'],[2,5,'1'],[1,5,'1']], position: 5 }
                 ],
-                response: { type: 'short', prompt: 'Personal record — clean all-barre "Watchtower" laps in a row. Your count today?', prompt_es: 'Récord personal — vueltas seguidas de "Watchtower" solo con cejillas y limpias. ¿Tu cuenta de hoy?', placeholder: 'e.g. 2 — the F still buzzes', placeholder_es: 'p. ej. 2 — el F todavía zumba' }
+                response: { type: 'short', pr: 'count', prompt: 'Personal record — clean all-barre "Watchtower" laps in a row. Your count today?', prompt_es: 'Récord personal — vueltas seguidas de "Watchtower" solo con cejillas y limpias. ¿Tu cuenta de hoy?', placeholder: 'e.g. 2 — the F still buzzes', placeholder_es: 'p. ej. 2 — el F todavía zumba' }
               },
               {
                 label: 'Challenge — "Luna", full barre F', label_es: 'Reto — "Luna", cejilla completa de F',

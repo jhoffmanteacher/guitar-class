@@ -820,11 +820,19 @@ function lqPaintControls(){
     + `<button type="button" class="lq-ctl ghost" onclick="lqTeacherEnd()"${busy}>End game</button>${full}`;
 }
 
+/* Fullscreen the SHELL, not the stage. The control strip is a sibling of
+   #lq-stage, so fullscreening the stage alone rendered none of it — including
+   "Mark the correct answer", "Next question", "End game" and the Full-screen
+   toggle itself — and the only way back was Esc, once per round, re-entering
+   fullscreen each time (fixed 2026-08-28). The strip gives nothing away: it
+   lists the choices in their fixed order and never marks which is correct
+   (the teacher is the only judge — there is no answer key in the bank), so it
+   is safe on the classroom projector. */
 function lqToggleFullscreen(){
-  const stage = document.getElementById('lq-stage');
-  if(!stage) return;
+  const shell = document.getElementById('lq-shell');
+  if(!shell) return;
   if(document.fullscreenElement) document.exitFullscreen();
-  else if(stage.requestFullscreen) stage.requestFullscreen().catch(()=>{});
+  else if(shell.requestFullscreen) shell.requestFullscreen().catch(()=>{});
 }
 
 // Every teacher write goes through here: one at a time, buttons greyed while

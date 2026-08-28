@@ -200,6 +200,21 @@ footer{margin-top:36px;font-size:0.7813rem;color:var(--text3);border-top:1px sol
 .rung .branch{margin-top:0}
 
 
+/* ── Paused hold (journey.js showJourneyPaused) ──
+   The teacher's hold replaces the whole page here, same message app.js shows
+   on the main site. Mirrors the .paused-screen / .paused-card block in
+   ../styles.css, which this page doesn't load — keep the two in step if
+   either is restyled. One deliberate difference: there it starts hidden and
+   is revealed by script, here it is only ever built when it should be shown. */
+.paused-screen{display:block;padding:48px 20px}
+.paused-card{max-width:520px;margin:0 auto;text-align:center;padding:32px 28px;
+  border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg2)}
+.paused-card h2{margin:0 0 12px;font-size:1.375rem}
+.paused-card p{margin:0 0 12px;color:var(--text2);line-height:1.6}
+.paused-card .paused-safe{font-size:0.875rem}
+.paused-card .paused-back{color:var(--brand);font-weight:600;text-decoration:none}
+.paused-card .paused-back:hover{text-decoration:underline}
+
 /* ── Live quiz banner (../live-quiz.js) ──
    A Journey page gets the banner and nothing else — it can't show a
    question, so tapping it navigates to the main site's live-quiz screen.

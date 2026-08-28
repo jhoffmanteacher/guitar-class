@@ -298,7 +298,7 @@ SETS.push(
               { name: 'G5',  chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
               { name: 'F5',  chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 1 }
             ],
-            response: { type: 'short', prompt: 'Personal record: play it cleanly at 60, then raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', prompt_es: 'Récord personal: tócala limpia a 60, y luego sube el metrónomo de 10 en 10. ¿Tu vuelta LIMPIA más rápida hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next session', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima sesión' }
+            response: { type: 'short', pr: 'bpm', prompt: 'Personal record: play it cleanly at 60, then raise the metronome +10 at a time. Your fastest CLEAN loop today (BPM)?', prompt_es: 'Récord personal: tócala limpia a 60, y luego sube el metrónomo de 10 en 10. ¿Tu vuelta LIMPIA más rápida hoy (BPM)?', placeholder: 'e.g. 80 — try for a higher number next session', placeholder_es: 'p. ej. 80 — intenta superarlo la próxima sesión' }
           }
             ]
           },
@@ -630,7 +630,7 @@ SETS.push(
               { name: 'F5', chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 1 }
             ],
             playSeq: { label: 'Hear it — A5·G5·F5·G5 (one chord per beat)', label_es: 'Escúchalo — A5·G5·F5·G5 (un acorde por tiempo)', bpm: 60, notes: [[45,52],[43,50],[41,48],[43,50],[45,52],[43,50],[41,48],[43,50]] },
-            response: { type: 'short', prompt: 'Your fastest CLEAN one-chord-per-beat "Watchtower" today (BPM)?', prompt_es: '¿Tu "Watchtower" a un-acorde-por-tiempo LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 70 — 80 next session', placeholder_es: 'p. ej. 70 — 80 la próxima sesión' }
+            response: { type: 'short', pr: 'bpm', prompt: 'Your fastest CLEAN one-chord-per-beat "Watchtower" today (BPM)?', prompt_es: '¿Tu "Watchtower" a un-acorde-por-tiempo LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 70 — 80 next session', placeholder_es: 'p. ej. 70 — 80 la próxima sesión' }
           }
             ]
           },
@@ -684,7 +684,7 @@ SETS.push(
             levelUp: 'Hold it clean at 80 BPM, or play it straight through a full song excerpt from the songs list.',
             levelUp_es: 'Mantenlo limpio a 80 BPM, o tócalo de corrido en un fragmento completo de canción de la lista.',
             skills: [3, 4],
-            response: { type: 'short', prompt: 'Personal record: once it\'s clean at 60, raise the metronome +5 at a time. Your fastest CLEAN tempo today (BPM)?', prompt_es: 'Récord personal: una vez que esté limpio a 60, sube el metrónomo de 5 en 5. ¿Tu tempo LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 75 — try for a higher number next session', placeholder_es: 'p. ej. 75 — intenta superarlo la próxima sesión' }
+            response: { type: 'short', pr: 'bpm', prompt: 'Personal record: once it\'s clean at 60, raise the metronome +5 at a time. Your fastest CLEAN tempo today (BPM)?', prompt_es: 'Récord personal: una vez que esté limpio a 60, sube el metrónomo de 5 en 5. ¿Tu tempo LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 75 — try for a higher number next session', placeholder_es: 'p. ej. 75 — intenta superarlo la próxima sesión' }
           },
           {
             label: 'Challenge 3 — Split Strum ("boom-chick")', label_es: 'Reto 3 — Rasgueo dividido ("boom-chick")',
@@ -735,7 +735,7 @@ SETS.push(
               { name: 'A5', chord: [[6,5,'1'],[5,7,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 5 }
             ],
             playSeq: { label: 'Hear F5 → A5 (roots F · A)', label_es: 'Escucha F5 → A5 (raíces F · A)', bpm: 60, notes: [41, 45] },
-            response: { type: 'short', prompt: 'Your fastest CLEAN F5↔A5 today (BPM)?', prompt_es: '¿Tu F5↔A5 LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 70 — 80 next session', placeholder_es: 'p. ej. 70 — 80 la próxima sesión' }
+            response: { type: 'short', pr: 'bpm', prompt: 'Your fastest CLEAN F5↔A5 today (BPM)?', prompt_es: '¿Tu F5↔A5 LIMPIO más rápido hoy (BPM)?', placeholder: 'e.g. 70 — 80 next session', placeholder_es: 'p. ej. 70 — 80 la próxima sesión' }
           }
             ]
           },
@@ -759,7 +759,7 @@ SETS.push(
               { name: 'C5', chord: [[6,'x'],[5,3,'1'],[4,5,'3'],[3,'x'],[2,'x'],[1,'x']], position: 3 },
               { name: 'G5', chord: [[6,3,'1'],[5,5,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 3 }
             ],
-            response: { type: 'short', prompt: 'Clean laps of D5–C5–G5 at 60 BPM?', prompt_es: '¿Vueltas limpias de D5–C5–G5 a 60 BPM?', placeholder: 'e.g. 3 — the G5 jump lags', placeholder_es: 'p. ej. 3 — el salto a G5 se atrasa' }
+            response: { type: 'short', pr: 'count', prompt: 'Clean laps of D5–C5–G5 at 60 BPM?', prompt_es: '¿Vueltas limpias de D5–C5–G5 a 60 BPM?', placeholder: 'e.g. 3 — the G5 jump lags', placeholder_es: 'p. ej. 3 — el salto a G5 se atrasa' }
           }
             ]
           },
@@ -788,7 +788,7 @@ SETS.push(
                     { frets: [['A', 5], ['E', 3]], note: 'G5', midi: [50, 43] }
                   ]
                 },
-                response: { type: 'short', prompt: 'Clean laps in a row at 60 BPM — your count?', prompt_es: 'Vueltas limpias seguidas a 60 BPM — ¿tu cuenta?', placeholder: 'e.g. 3 — F5 keeps buzzing', placeholder_es: 'p. ej. 3 — F5 sigue zumbando' }
+                response: { type: 'short', pr: 'count', prompt: 'Clean laps in a row at 60 BPM — your count?', prompt_es: 'Vueltas limpias seguidas a 60 BPM — ¿tu cuenta?', placeholder: 'e.g. 3 — F5 keeps buzzing', placeholder_es: 'p. ej. 3 — F5 sigue zumbando' }
               },
               {
                 label: 'Challenge — "the cure" as power chords', label_es: 'Reto — "the cure" como acordes de potencia',
@@ -831,7 +831,7 @@ SETS.push(
                     { frets: [['A', 7], ['E', 5]], note: 'A5', midi: [52, 45] }
                   ]
                 },
-                response: { type: 'short', prompt: 'Which song did you land power chords in today, and at what BPM?', prompt_es: '¿En qué canción lograste los acordes de potencia hoy, y a qué BPM?', placeholder: 'e.g. "Luna" at 60 — clean', placeholder_es: 'p. ej. "Luna" a 60 — limpio' }
+                response: { type: 'short', pr: false, prompt: 'Which song did you land power chords in today, and at what BPM?', prompt_es: '¿En qué canción lograste los acordes de potencia hoy, y a qué BPM?', placeholder: 'e.g. "Luna" at 60 — clean', placeholder_es: 'p. ej. "Luna" a 60 — limpio' }
               }
             ]
           },

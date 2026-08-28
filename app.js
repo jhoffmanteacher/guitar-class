@@ -534,6 +534,22 @@ function prLatestValue(raw){
   if(Array.isArray(raw)) return raw.length ? (raw[raw.length-1].value || '') : '';
   return raw || '';
 }
+/* What a short response's number MEANS — declared per prompt in the module
+   data as `pr: 'bpm' | 'count' | false`, absent for anything that isn't a
+   record. Until 2026-08-28 both this file and teacher.js each guessed with
+   /personal record/i || /\bBPM\b/i, which swept in a prose reflection that
+   merely mentions "125 BPM" and a compound "which song + what BPM" question
+   (both stored as record histories they aren't), and told the teacher that
+   "22 clean Am↔Em changes in 60 seconds" was "22 BPM" — 10 of the 31 slots
+   are counts, not tempos. Guessing from prose is what broke it; the prompt
+   now says which it is. checks.mjs 1s fails the push on a record prompt that
+   doesn't declare, so a new one can't quietly go back to being guessed at.
+   NB: read from `prompt`, never `prompt_es` — the declaration, like the old
+   heuristic, is language-independent. */
+function prUnit(resp){
+  if(!resp || resp.type !== 'short') return null;
+  return (resp.pr === 'bpm' || resp.pr === 'count') ? resp.pr : null;
+}
 const _prEditingKeys = new Set();
 function onResponseChange(key, value, isPR){
   if(isPR){
@@ -1873,8 +1889,27 @@ function dismissResumeCard(){
   const host = document.getElementById('resume-card');
   if(host){ host.hidden = true; host.innerHTML=''; }
 }
-function resumeGoModule(setId, tab){
+/* The card is built once per page load (_resumeCardBuilt) and names whichever
+   set the student was restored into, so by the time they press Continue they
+   may have moved to another set, another module, or opened an explore page.
+   switchTabById() alone only toggles .tab-panel classes INSIDE that set's own
+   .week-panel — if the set isn't the active one (or its module was never
+   rendered, or an explore page is covering #week-panels) nothing visible
+   happens and the button reads as dead. Take the same route reviewJump()
+   takes: leave the explore page, render/select the module, activate the set,
+   then switch the tab. (Fixed 2026-08-28.) */
+async function resumeGoModule(setId, tab){
   dismissResumeCard();
+  if(typeof closeTopPanels === 'function') closeTopPanels();
+  const w = SETS.find(x=>x.id===setId);
+  if(!w){ switchTabById(setId, tab); return; }
+  if(w.moduleNum !== lastModuleNum){
+    const sel = document.getElementById('module-select');
+    if(sel) sel.value = String(w.moduleNum);
+    await onModuleChange(w.moduleNum, setId);
+  }
+  if(!activateSet(setId)) return;
+  saveProgress();
   switchTabById(setId, tab);
 }
 function resumeGoSong(url){
@@ -1995,11 +2030,15 @@ function activateSet(id, opts){
   // Sequential-gate backstop: never open a set that's still locked (e.g. from a
   // stale search deep-link) UNLESS this is an intentional peek. Module Review
   // (mrN) is intentionally preview-openable while locked, so it's exempt too.
+  // Returns false when the gate bounced this call and nothing opened, true
+  // otherwise. Callers that record "where the student is" MUST check it —
+  // goToSet() used to assign lastSetId before calling and left the rail
+  // highlighting a set that never opened (fixed 2026-08-28).
   if(w && isSetLocked(w) && !peek){
     gateToast(isModuleGateCase(w)
       ? t('gate.finishFirstShortModule', { set: tSetLabel(w.label), ...prevModuleGateParams(w) })
       : t('gate.finishFirstShort', { set: tSetLabel(w.label), prev: tSetLabel(prevSetLabel(w)) }));
-    return;
+    return false;
   }
   if(!peek) lastSetId = id;
   if (typeof stopAnyRec === 'function') stopAnyRec({keepFab:true});
@@ -2030,6 +2069,7 @@ function activateSet(id, opts){
   scrollPaneTop();
   // Opening the Module Review pops the assessment heads-up (once per visit).
   if(isMr) maybeShowMrAssess(parseInt(id.slice(2),10));
+  return true;
 }
 
 /* ── Rail set switcher ─────────────────────────────────────────────────
@@ -2534,8 +2574,12 @@ function buildLesson(w){
       : '';
     const respHtml = s.response ? (()=>{
       const key = `${w.id}-${ns}-${i}`;
-      const isPR = s.response.type === 'short' && (/personal record/i.test(s.response.prompt||'') || /\bBPM\b/i.test(s.response.prompt||''));
-      const stored = isPR ? prLatestValue(responses[key]) : (responses[key] || '');
+      const isPR = !!prUnit(s.response);
+      // prLatestValue on BOTH paths: a prompt that stops being a record (the
+      // two that were only ever swept in by the old heuristic) still has an
+      // array of {value,date} in some students' saved responses, and reading
+      // that as a plain string would put "[object Object]" in their textarea.
+      const stored = prLatestValue(responses[key]);
       const promptHtml = s.response.prompt ? `<div class="step-resp-prompt">${escHtml(tf(s.response,'prompt'))}</div>` : '';
       const labelHtml = `<div class="step-resp-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> ${t('step.yourResponse')}</div>`;
       if(s.response.type === 'short'){
@@ -3245,10 +3289,16 @@ function closeMrAssess(){
   if(ov) ov.remove();
   document.removeEventListener('keydown', mrAssessEscClose);
 }
-/* Jump from a module-review skill back to the lesson set that teaches it. */
+/* Jump from a module-review skill back to the lesson set that teaches it.
+   Also the checklist footer's "Next: <set>" button, which renders for every
+   following non-comingSoon set WITHOUT a lock check — so this is routinely
+   called on a set the gate will bounce. activateSet() assigns lastSetId
+   itself on the way through; assigning it here as well (as this did until
+   2026-08-28) committed the move before the gate could refuse it, leaving
+   the rail marking a locked set as "you are here" and persisting a place
+   the student can't open. */
 function goToSet(setId){
-  lastSetId = setId;
-  activateSet(setId);
+  if(!activateSet(setId)) return;
   saveProgress();
   const pill = document.querySelector(`.wpill[data-id="${setId}"]`);
   if(pill) pill.scrollIntoView({block:'nearest', inline:'nearest'});

@@ -1071,6 +1071,19 @@ function prEntries(raw){
   return [];
 }
 function prNum(v){ const m=String(v).match(/\d{2,3}/); return m?m[0]:null; }
+/* A record slot's unit, declared in the module data (see prUnit in app.js).
+   'count' slots used to render here as "22 BPM" because the suffix was
+   hard-coded — 10 of the 31 record prompts ask for a number of laps or
+   changes, not a tempo (fixed 2026-08-28). The words match the student
+   side's pr.unitBpm / pr.unitCount; this console is English-only, so they
+   are literals here rather than t() calls. */
+function prUnitLabel(unit){ return unit==='count' ? ' times' : ' BPM'; }
+/* A plain (non-record) answer may still be an array in a student's saved
+   doc if its prompt used to be classified as a record. Read both shapes. */
+function respText(raw){
+  if(Array.isArray(raw)) return raw.length ? String(raw[raw.length-1].value||'') : '';
+  return raw==null ? '' : String(raw);
+}
 
 /* Enumerate every short free-text response slot in a set, in display order,
    rebuilding the exact keys the student app saves under
@@ -1089,14 +1102,23 @@ function setShortResponses(w){
     const pushStep=(st,ns,i)=>{
       if(!st.response||st.response.type!=='short') return;
       const prompt=st.response.prompt||'';
-      const isPR=/personal record/i.test(prompt)||/\bBPM\b/i.test(prompt);
+      // Declared in the module data, not guessed from the prompt — see
+      // prUnit() in app.js for what that replaced and why.
+      const unit=prUnit(st.response);
+      const isPR=!!unit;
       let label;
       // The "Challenge N — Title" prefix lives in step.label now (text opens
       // straight into directions per the current content-authoring
       // convention) — match against label, not text, or this never fires.
-      const chal=(st.label||'').match(/Challenge\s*\d+\s*[—–-]\s*([^:(]+)/);
+      // The number is OPTIONAL: 84 of the 201 challenge labels use the
+      // unnumbered "Challenge — Title" form, and a \d+ here missed every one
+      // of them, collapsing 12 of 31 PR slots to the generic label below (five
+      // identical "Personal record (BPM)" rows in m3w2). app.js's stepLabel()
+      // has always used \d* — this was the copy that never caught up.
+      // checks.mjs 1p fails the push if the two ever drift again.
+      const chal=(st.label||'').match(/Challenge\s*\d*\s*[—–-]\s*([^:(]+)/);
       const ph=st.response.placeholder||'';
-      if(isPR) label=chal?('PR — '+chal[1].trim()):'Personal record (BPM)';
+      if(isPR) label=chal?('PR — '+chal[1].trim()):('Personal record ('+(unit==='count'?'count':'BPM')+')');
       // "Station Wrap-Up" split into a mid-set "Checkpoint" and an end-of-set
       // "Wrap-Up" when the B/C stations merged into one ladder — match both, or
       // 32 of these slots silently fall through to the generic label below.
@@ -1104,7 +1126,7 @@ function setShortResponses(w){
       else if(prompt) label=prompt.replace(/\s+/g,' ').slice(0,70);
       else if(ph && !/^e\.g\./i.test(ph)) label=ph.replace(/\s+/g,' ').slice(0,70); // placeholder is the question, not an example
       else label=chal?chal[1].trim():'Written response';
-      out.push({key:`${w.id}-${ns}-${i}`, label, isPR});
+      out.push({key:`${w.id}-${ns}-${i}`, label, isPR, unit});
     };
     if(stn.sections) stn.sections.filter(sec=>!isTuningWarmupSection(sec,w.moduleNum)).forEach((sec,gi)=>(sec.steps||[]).forEach((st,i)=>pushStep(st,`${stationId}-sec${gi}`,i)));
     else if(stn.steps) stn.steps.forEach((st,i)=>pushStep(st,stationId,i));
@@ -1130,9 +1152,9 @@ function renderTeacherResponses(){
         const n=prNum(latest);
         const trendHtml = entries.length>1
           ? `<span class="tr-lbl" style="opacity:.7">${entries.slice(-3).map(e=>escHtml(prNum(e.value)||e.value)).join(' &#x2192; ')}</span>` : '';
-        return `<div class="tr-item"><span class="tr-pr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg> ${escHtml(sl.label)}</span><span class="tr-prval">${n?escHtml(n)+' BPM':escHtml(latest)}</span>${trendHtml}</div>`;
+        return `<div class="tr-item"><span class="tr-pr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg> ${escHtml(sl.label)}</span><span class="tr-prval">${n?escHtml(n)+prUnitLabel(sl.unit):escHtml(latest)}</span>${trendHtml}</div>`;
       }
-      const val=(stu.responses&&stu.responses[sl.key]||'').trim();
+      const val=respText(stu.responses&&stu.responses[sl.key]).trim();
       if(!val) return '';
       return `<div class="tr-item"><span class="tr-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> ${escHtml(sl.label)}</span><span class="tr-txt">${escHtml(val)}</span></div>`;
     }).filter(Boolean).join('');
@@ -1364,9 +1386,9 @@ function renderTeacherStudentDetail(uid){
           const n=prNum(latest);
           const trendHtml=entries.length>1
             ? `<span class="tr-lbl" style="opacity:.7">${entries.slice(-3).map(e=>escHtml(prNum(e.value)||e.value)).join(' &#x2192; ')}</span>` : '';
-          return `<div class="tr-item"><span class="tr-pr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg> ${escHtml(sl.label)}</span><span class="tr-prval">${n?escHtml(n)+' BPM':escHtml(latest)}</span>${trendHtml}</div>`;
+          return `<div class="tr-item"><span class="tr-pr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="0.8" fill="currentColor" stroke="none"/></svg> ${escHtml(sl.label)}</span><span class="tr-prval">${n?escHtml(n)+prUnitLabel(sl.unit):escHtml(latest)}</span>${trendHtml}</div>`;
         }
-        const val=(stu.responses&&stu.responses[sl.key]||'').trim();
+        const val=respText(stu.responses&&stu.responses[sl.key]).trim();
         if(!val) return '';
         return `<div class="tr-item"><span class="tr-lbl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"/></svg> ${escHtml(sl.label)}</span><span class="tr-txt">${escHtml(val)}</span></div>`;
       }).filter(Boolean).join('');
