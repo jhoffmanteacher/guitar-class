@@ -1015,11 +1015,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    eight columns past a 390px screen. */
 .tab-note-btn .tab-spkr{opacity:0;max-width:0;overflow:hidden;transition:max-width .12s,opacity .12s}
 .tab-note-btn:hover .tab-spkr,.tab-note-btn:focus-visible .tab-spkr{color:var(--blue-text);opacity:1;max-width:1.4em}
+/* Finger circle (Finger Gym): a note with `finger` shows the fretting finger
+   in a light-purple circle where the note name would sit — the teacher-deck
+   convention (fret on the line, circled finger below, no note names). Ink
+   text on the purple tint, same ring as the staff; the beat cursor and the
+   Coach column recolor it through the shared .beat-now / .coach-col rules. */
+.tab-note-btn.has-finger{justify-self:center;padding:0;margin-top:12px;width:100%;max-width:30px;aspect-ratio:1/1;height:auto;box-sizing:border-box;border-radius:50%;background:var(--purple-bg);border:1.5px solid var(--text);color:var(--text);font-size:1.0625rem}
+.tab-note-btn.has-finger:hover,.tab-note-btn.has-finger:focus-visible{background:var(--purple-border);border-color:var(--text)}
+.tab-note-btn.has-finger.beat-now,.tab-note-btn.has-finger.beat-now:hover{background:var(--blue-text);border-color:var(--blue-text);color:#fff}
+.tab-finger{line-height:1}
 @media (max-width:600px){
   .tab-grid{--tab-cell-h:22px}
   .tab-str-label{font-size:0.75rem;padding-right:5px}
   .tab-cell .tab-fret{font-size:1.25rem;padding:0 4px}
   .tab-note-btn{font-size:0.9375rem;padding:2px 2px}
+  /* 8 columns in a 390px card leave ~22px each — the circle shrinks with the
+     column (width:100%) rather than forcing the grid wider. */
+  .tab-note-btn.has-finger{max-width:26px;font-size:0.9375rem;padding:0;margin-top:10px}
   .tab-spkr{font-size:0.75rem}
 }
 /* Expandable TAB choice (used when a step offers multiple TABs) */

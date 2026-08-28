@@ -809,7 +809,10 @@ function strumChord(chordName, btnEl){
    string is the TAB label: 'e' (high), 'B', 'G', 'D', 'A', 'E' (low).
    Renders all 6 string lines so students see real TAB layout, with
    fret numbers placed on the relevant string and a row of clickable
-   note-name buttons below that play the corresponding pitch. */
+   note-name buttons below that play the corresponding pitch. A note may
+   also carry `finger` (1-4, the fretting finger): then the button under
+   that column shows the finger in a circle INSTEAD of the note name —
+   the Finger Gym convention (see renderTabSystem). */
 const TAB_STRINGS = ['e','B','G','D','A','E'];
 /* Notes per system before the TAB wraps onto a new staff. The board never
    scrolls sideways: a phrase longer than this breaks into stacked systems the
@@ -847,7 +850,19 @@ function renderTabSystem(chunk, off, cols){
   chunk.forEach((n, ci) => {
     const midis = (Array.isArray(n.midi) ? n.midi : [n.midi]).map(Number);
     const midisAttr = escAttr(JSON.stringify(midis));
-    noteBtns.push(`<button type="button" class="tab-note-btn" data-seq="${off + ci}" data-midis="${midisAttr}" onclick="playBeat(this)" title="${escAttr(t('tab.playNote',{note:n.note}))}">${escHtml(n.note)}<span class="tab-spkr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 8a5 5 0 0 1 0 8"/></svg></span></button>`);
+    /* A note carrying `finger` (1-4) shows the FINGER in a light-purple circle
+       under the staff instead of its note name — the Finger Gym convention
+       Jonathan settled on for the teacher deck (2026-08-26): fret on the line,
+       finger circled below, no note names. The button still plays the pitch
+       and its tooltip still names the note; `note` stays in the data for the
+       Coach card. No speaker glyph inside a circle — it would stretch it on
+       hover; the tooltip and the hover ring are the affordance there. */
+    const hasFinger = n.finger != null;
+    const label = hasFinger
+      ? `<span class="tab-finger">${escHtml(String(n.finger))}</span>`
+      : `${escHtml(n.note)}<span class="tab-spkr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 8a5 5 0 0 1 0 8"/></svg></span>`;
+    const tip = hasFinger ? t('tab.playFinger',{n:n.finger, note:n.note}) : t('tab.playNote',{note:n.note});
+    noteBtns.push(`<button type="button" class="tab-note-btn${hasFinger ? ' has-finger' : ''}" data-seq="${off + ci}" data-midis="${midisAttr}" onclick="playBeat(this)" title="${escAttr(tip)}" aria-label="${escAttr(tip)}">${label}</button>`);
   });
   for (let pi = chunk.length; pi < cols; pi++) noteBtns.push('<div></div>');
   return `

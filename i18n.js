@@ -514,6 +514,7 @@
     'tab.playTab':           { en: 'Play tab', es: 'Tocar el tab' },
     'tab.playTabTitle':      { en: 'Play this tab', es: 'Tocar este tab' },
     'tab.playNote':          { en: 'Play {note}', es: 'Tocar {note}' },
+    'tab.playFinger':        { en: 'Finger {n} · play {note}', es: 'Dedo {n} · tocar {note}' },
     'tab.defaultTitle':      { en: 'Tab', es: 'Tab' },
     'tab.showTabLabel':      { en: 'Show TAB:', es: 'Mostrar TAB:' },
 

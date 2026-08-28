@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-28 — Finger Gym tabs show which finger to use
+
+### Changed
+
+- **Every Finger Gym tab now shows finger numbers, not note names.** Under each
+  fret number there's a small purple circle with the finger that plays it —
+  1 = index, 2 = middle, 3 = ring, 4 = pinky — exactly like the Finger Gym
+  slides on the classroom screen. The note names are gone from those tabs:
+  in the gym, what matters is which finger lands where, not what the note is
+  called. The circles still play the note when you tap them, and the moving
+  highlight during ▶ Play tab still follows them.
+- The fingering follows the same rule the slides use: finger = fret inside the
+  hand position, and after a shift the count starts over at finger 1 — so in
+  the Ladder-with-shift, fret 2 is finger 2 the first time and finger 1 after
+  the slide. The Spider repeats 1-2-3-4 every round; the Reach drills are
+  fingers 1 and 4; the Skip is 1 and 3; the Jump rides finger 1 the whole way.
+- Every other tab on the site is unchanged and still shows note names.
+
 ## 2026-08-28 — Fretboard and chord diagrams drawn at slide weight
 
 ### Changed

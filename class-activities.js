@@ -144,6 +144,15 @@
            // (string one of e/B/G/D/A/E). Renders via the existing
            // buildTab() — Play-tab, BPM control, beat cursor, Listening
            // Coach button all come for free, no new audio code.
+           // Optional `finger: 1-4` on a note swaps the note-name button
+           // under that column for the fretting finger in a light-purple
+           // circle — the Finger Gym convention (fret on the line, circled
+           // finger below, NO note name; Jonathan 2026-08-26, matching the
+           // Finger Gym teacher deck). Keep `note` anyway — the Coach card
+           // and the button tooltip still use it. Fingering rule: finger =
+           // fret within the hand position, a shift restarts at finger 1,
+           // the Spiders repeat 1-2-3-4 every round. checks.mjs (1c) fails
+           // the push on a finger outside 1-4.
            notes: [ { string: 'E', fret: 0, note: 'E', midi: 40 } ],
          },
        },
@@ -518,10 +527,10 @@ window.CLASS_ACTIVITIES = [
           caption: 'The Ladder · position 1',
           caption_es: 'La Escalera · posición 1',
           notes: [
-            { string: 'E', fret: 1, note: 'F',  midi: 41 },
-            { string: 'E', fret: 2, note: 'F#', midi: 42 },
-            { string: 'E', fret: 3, note: 'G',  midi: 43 },
-            { string: 'E', fret: 4, note: 'G#', midi: 44 }
+            { string: 'E', fret: 1, note: 'F',  midi: 41, finger: 1 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42, finger: 2 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43, finger: 3 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44, finger: 4 }
           ]
         },
       },
@@ -532,14 +541,14 @@ window.CLASS_ACTIVITIES = [
           caption: 'The Ladder · with the shift',
           caption_es: 'La Escalera · con el cambio',
           notes: [
-            { string: 'E', fret: 1, note: 'F',  midi: 41 },
-            { string: 'E', fret: 2, note: 'F#', midi: 42 },
-            { string: 'E', fret: 3, note: 'G',  midi: 43 },
-            { string: 'E', fret: 4, note: 'G#', midi: 44 },
-            { string: 'E', fret: 2, note: 'F#', midi: 42 },
-            { string: 'E', fret: 3, note: 'G',  midi: 43 },
-            { string: 'E', fret: 4, note: 'G#', midi: 44 },
-            { string: 'E', fret: 5, note: 'A',  midi: 45 }
+            { string: 'E', fret: 1, note: 'F',  midi: 41, finger: 1 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42, finger: 2 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43, finger: 3 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44, finger: 4 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42, finger: 1 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43, finger: 2 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44, finger: 3 },
+            { string: 'E', fret: 5, note: 'A',  midi: 45, finger: 4 }
           ]
         },
       },
@@ -550,14 +559,14 @@ window.CLASS_ACTIVITIES = [
           caption: 'The Spider · cross the strings',
           caption_es: 'La Araña · cruza las cuerdas',
           notes: [
-            { string: 'E', fret: 1, note: 'F',  midi: 41 },
-            { string: 'A', fret: 2, note: 'B',  midi: 47 },
-            { string: 'E', fret: 3, note: 'G',  midi: 43 },
-            { string: 'A', fret: 4, note: 'C#', midi: 49 },
-            { string: 'E', fret: 2, note: 'F#', midi: 42 },
-            { string: 'A', fret: 3, note: 'C',  midi: 48 },
-            { string: 'E', fret: 4, note: 'G#', midi: 44 },
-            { string: 'A', fret: 5, note: 'D',  midi: 50 }
+            { string: 'E', fret: 1, note: 'F',  midi: 41, finger: 1 },
+            { string: 'A', fret: 2, note: 'B',  midi: 47, finger: 2 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43, finger: 3 },
+            { string: 'A', fret: 4, note: 'C#', midi: 49, finger: 4 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42, finger: 1 },
+            { string: 'A', fret: 3, note: 'C',  midi: 48, finger: 2 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44, finger: 3 },
+            { string: 'A', fret: 5, note: 'D',  midi: 50, finger: 4 }
           ]
         },
       },
@@ -568,10 +577,10 @@ window.CLASS_ACTIVITIES = [
           caption: 'The Reach · finger 1 stays down',
           caption_es: 'El Estiramiento · el dedo 1 no se levanta',
           notes: [
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'E', fret: 5, note: 'A', midi: 45 },
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'E', fret: 5, note: 'A', midi: 45 }
+            { string: 'E', fret: 1, note: 'F', midi: 41, finger: 1 },
+            { string: 'E', fret: 5, note: 'A', midi: 45, finger: 4 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, finger: 1 },
+            { string: 'E', fret: 5, note: 'A', midi: 45, finger: 4 }
           ]
         },
       },
@@ -601,10 +610,10 @@ window.CLASS_ACTIVITIES = [
           caption: 'Down the Ladder · pinky leads',
           caption_es: 'Bajando la Escalera · el meñique va primero',
           notes: [
-            { string: 'E', fret: 4, note: 'G#', midi: 44 },
-            { string: 'E', fret: 3, note: 'G',  midi: 43 },
-            { string: 'E', fret: 2, note: 'F#', midi: 42 },
-            { string: 'E', fret: 1, note: 'F',  midi: 41 }
+            { string: 'E', fret: 4, note: 'G#', midi: 44, finger: 4 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43, finger: 3 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42, finger: 2 },
+            { string: 'E', fret: 1, note: 'F',  midi: 41, finger: 1 }
           ]
         },
       },
@@ -615,13 +624,13 @@ window.CLASS_ACTIVITIES = [
           caption: 'Up and back · one turnaround',
           caption_es: 'Subir y bajar · una vuelta',
           notes: [
-            { string: 'E', fret: 1, note: 'F',  midi: 41 },
-            { string: 'E', fret: 2, note: 'F#', midi: 42 },
-            { string: 'E', fret: 3, note: 'G',  midi: 43 },
-            { string: 'E', fret: 4, note: 'G#', midi: 44 },
-            { string: 'E', fret: 3, note: 'G',  midi: 43 },
-            { string: 'E', fret: 2, note: 'F#', midi: 42 },
-            { string: 'E', fret: 1, note: 'F',  midi: 41 }
+            { string: 'E', fret: 1, note: 'F',  midi: 41, finger: 1 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42, finger: 2 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43, finger: 3 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44, finger: 4 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43, finger: 3 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42, finger: 2 },
+            { string: 'E', fret: 1, note: 'F',  midi: 41, finger: 1 }
           ]
         },
       },
@@ -632,14 +641,14 @@ window.CLASS_ACTIVITIES = [
           caption: 'A string, then D string',
           caption_es: 'Cuerda La, después cuerda Re',
           notes: [
-            { string: 'A', fret: 1, note: 'A#', midi: 46 },
-            { string: 'A', fret: 2, note: 'B',  midi: 47 },
-            { string: 'A', fret: 3, note: 'C',  midi: 48 },
-            { string: 'A', fret: 4, note: 'C#', midi: 49 },
-            { string: 'D', fret: 1, note: 'D#', midi: 51 },
-            { string: 'D', fret: 2, note: 'E',  midi: 52 },
-            { string: 'D', fret: 3, note: 'F',  midi: 53 },
-            { string: 'D', fret: 4, note: 'F#', midi: 54 }
+            { string: 'A', fret: 1, note: 'A#', midi: 46, finger: 1 },
+            { string: 'A', fret: 2, note: 'B',  midi: 47, finger: 2 },
+            { string: 'A', fret: 3, note: 'C',  midi: 48, finger: 3 },
+            { string: 'A', fret: 4, note: 'C#', midi: 49, finger: 4 },
+            { string: 'D', fret: 1, note: 'D#', midi: 51, finger: 1 },
+            { string: 'D', fret: 2, note: 'E',  midi: 52, finger: 2 },
+            { string: 'D', fret: 3, note: 'F',  midi: 53, finger: 3 },
+            { string: 'D', fret: 4, note: 'F#', midi: 54, finger: 4 }
           ]
         },
       },
@@ -650,18 +659,18 @@ window.CLASS_ACTIVITIES = [
           caption: 'G · B · high e — thin strings buzz easier',
           caption_es: 'Sol · Si · Mi aguda — las delgadas zumban más fácil',
           notes: [
-            { string: 'G', fret: 1, note: 'G#', midi: 56 },
-            { string: 'G', fret: 2, note: 'A',  midi: 57 },
-            { string: 'G', fret: 3, note: 'A#', midi: 58 },
-            { string: 'G', fret: 4, note: 'B',  midi: 59 },
-            { string: 'B', fret: 1, note: 'C',  midi: 60 },
-            { string: 'B', fret: 2, note: 'C#', midi: 61 },
-            { string: 'B', fret: 3, note: 'D',  midi: 62 },
-            { string: 'B', fret: 4, note: 'D#', midi: 63 },
-            { string: 'e', fret: 1, note: 'F',  midi: 65 },
-            { string: 'e', fret: 2, note: 'F#', midi: 66 },
-            { string: 'e', fret: 3, note: 'G',  midi: 67 },
-            { string: 'e', fret: 4, note: 'G#', midi: 68 }
+            { string: 'G', fret: 1, note: 'G#', midi: 56, finger: 1 },
+            { string: 'G', fret: 2, note: 'A',  midi: 57, finger: 2 },
+            { string: 'G', fret: 3, note: 'A#', midi: 58, finger: 3 },
+            { string: 'G', fret: 4, note: 'B',  midi: 59, finger: 4 },
+            { string: 'B', fret: 1, note: 'C',  midi: 60, finger: 1 },
+            { string: 'B', fret: 2, note: 'C#', midi: 61, finger: 2 },
+            { string: 'B', fret: 3, note: 'D',  midi: 62, finger: 3 },
+            { string: 'B', fret: 4, note: 'D#', midi: 63, finger: 4 },
+            { string: 'e', fret: 1, note: 'F',  midi: 65, finger: 1 },
+            { string: 'e', fret: 2, note: 'F#', midi: 66, finger: 2 },
+            { string: 'e', fret: 3, note: 'G',  midi: 67, finger: 3 },
+            { string: 'e', fret: 4, note: 'G#', midi: 68, finger: 4 }
           ]
         },
       },
@@ -691,10 +700,10 @@ window.CLASS_ACTIVITIES = [
           caption: '5th position · index on the dot',
           caption_es: '5.ª posición · el índice sobre el punto',
           notes: [
-            { string: 'E', fret: 5, note: 'A',  midi: 45 },
-            { string: 'E', fret: 6, note: 'A#', midi: 46 },
-            { string: 'E', fret: 7, note: 'B',  midi: 47 },
-            { string: 'E', fret: 8, note: 'C',  midi: 48 }
+            { string: 'E', fret: 5, note: 'A',  midi: 45, finger: 1 },
+            { string: 'E', fret: 6, note: 'A#', midi: 46, finger: 2 },
+            { string: 'E', fret: 7, note: 'B',  midi: 47, finger: 3 },
+            { string: 'E', fret: 8, note: 'C',  midi: 48, finger: 4 }
           ]
         },
       },
@@ -705,14 +714,14 @@ window.CLASS_ACTIVITIES = [
           caption: '5th position into 7th',
           caption_es: 'De la 5.ª posición a la 7.ª',
           notes: [
-            { string: 'E', fret: 5,  note: 'A',  midi: 45 },
-            { string: 'E', fret: 6,  note: 'A#', midi: 46 },
-            { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-            { string: 'E', fret: 8,  note: 'C',  midi: 48 },
-            { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-            { string: 'E', fret: 8,  note: 'C',  midi: 48 },
-            { string: 'E', fret: 9,  note: 'C#', midi: 49 },
-            { string: 'E', fret: 10, note: 'D',  midi: 50 }
+            { string: 'E', fret: 5,  note: 'A',  midi: 45, finger: 1 },
+            { string: 'E', fret: 6,  note: 'A#', midi: 46, finger: 2 },
+            { string: 'E', fret: 7,  note: 'B',  midi: 47, finger: 3 },
+            { string: 'E', fret: 8,  note: 'C',  midi: 48, finger: 4 },
+            { string: 'E', fret: 7,  note: 'B',  midi: 47, finger: 1 },
+            { string: 'E', fret: 8,  note: 'C',  midi: 48, finger: 2 },
+            { string: 'E', fret: 9,  note: 'C#', midi: 49, finger: 3 },
+            { string: 'E', fret: 10, note: 'D',  midi: 50, finger: 4 }
           ]
         },
       },
@@ -723,9 +732,9 @@ window.CLASS_ACTIVITIES = [
           caption: 'Jump · fret 1 to 5 to 9',
           caption_es: 'Salto · del traste 1 al 5 al 9',
           notes: [
-            { string: 'E', fret: 1, note: 'F',  midi: 41 },
-            { string: 'E', fret: 5, note: 'A',  midi: 45 },
-            { string: 'E', fret: 9, note: 'C#', midi: 49 }
+            { string: 'E', fret: 1, note: 'F',  midi: 41, finger: 1 },
+            { string: 'E', fret: 5, note: 'A',  midi: 45, finger: 1 },
+            { string: 'E', fret: 9, note: 'C#', midi: 49, finger: 1 }
           ]
         },
       },
@@ -736,10 +745,10 @@ window.CLASS_ACTIVITIES = [
           caption: '9th position · narrowest frets',
           caption_es: '9.ª posición · los trastes más angostos',
           notes: [
-            { string: 'E', fret: 9,  note: 'C#', midi: 49 },
-            { string: 'E', fret: 10, note: 'D',  midi: 50 },
-            { string: 'E', fret: 11, note: 'D#', midi: 51 },
-            { string: 'E', fret: 12, note: 'E',  midi: 52 }
+            { string: 'E', fret: 9,  note: 'C#', midi: 49, finger: 1 },
+            { string: 'E', fret: 10, note: 'D',  midi: 50, finger: 2 },
+            { string: 'E', fret: 11, note: 'D#', midi: 51, finger: 3 },
+            { string: 'E', fret: 12, note: 'E',  midi: 52, finger: 4 }
           ]
         },
       },
@@ -769,10 +778,10 @@ window.CLASS_ACTIVITIES = [
           caption: 'Plant as you go · nothing lifts',
           caption_es: 'Planta y sigue · nada se levanta',
           notes: [
-            { string: 'E', fret: 1, note: 'F',  midi: 41 },
-            { string: 'E', fret: 2, note: 'F#', midi: 42 },
-            { string: 'E', fret: 3, note: 'G',  midi: 43 },
-            { string: 'E', fret: 4, note: 'G#', midi: 44 }
+            { string: 'E', fret: 1, note: 'F',  midi: 41, finger: 1 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42, finger: 2 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43, finger: 3 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44, finger: 4 }
           ]
         },
       },
@@ -783,10 +792,10 @@ window.CLASS_ACTIVITIES = [
           caption: 'Pair 1-3',
           caption_es: 'Pareja 1-3',
           notes: [
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'E', fret: 3, note: 'G', midi: 43 },
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'E', fret: 3, note: 'G', midi: 43 }
+            { string: 'E', fret: 1, note: 'F', midi: 41, finger: 1 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, finger: 3 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, finger: 1 },
+            { string: 'E', fret: 3, note: 'G', midi: 43, finger: 3 }
           ]
         },
       },
@@ -797,10 +806,10 @@ window.CLASS_ACTIVITIES = [
           caption: 'Pair 3-4 · the hard one',
           caption_es: 'Pareja 3-4 · la difícil',
           notes: [
-            { string: 'E', fret: 3, note: 'G',  midi: 43 },
-            { string: 'E', fret: 4, note: 'G#', midi: 44 },
-            { string: 'E', fret: 3, note: 'G',  midi: 43 },
-            { string: 'E', fret: 4, note: 'G#', midi: 44 }
+            { string: 'E', fret: 3, note: 'G',  midi: 43, finger: 3 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44, finger: 4 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43, finger: 3 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44, finger: 4 }
           ]
         },
       },
@@ -811,10 +820,10 @@ window.CLASS_ACTIVITIES = [
           caption: 'Out of order · 1-3-2-4',
           caption_es: 'Fuera de orden · 1-3-2-4',
           notes: [
-            { string: 'E', fret: 1, note: 'F',  midi: 41 },
-            { string: 'E', fret: 3, note: 'G',  midi: 43 },
-            { string: 'E', fret: 2, note: 'F#', midi: 42 },
-            { string: 'E', fret: 4, note: 'G#', midi: 44 }
+            { string: 'E', fret: 1, note: 'F',  midi: 41, finger: 1 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43, finger: 3 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42, finger: 2 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44, finger: 4 }
           ]
         },
       },
@@ -844,10 +853,10 @@ window.CLASS_ACTIVITIES = [
           caption: 'The skip · over the A string',
           caption_es: 'El salto · por encima de la cuerda La',
           notes: [
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'D', fret: 3, note: 'F', midi: 53 },
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'D', fret: 3, note: 'F', midi: 53 }
+            { string: 'E', fret: 1, note: 'F', midi: 41, finger: 1 },
+            { string: 'D', fret: 3, note: 'F', midi: 53, finger: 3 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, finger: 1 },
+            { string: 'D', fret: 3, note: 'F', midi: 53, finger: 3 }
           ]
         },
       },
@@ -858,14 +867,14 @@ window.CLASS_ACTIVITIES = [
           caption: 'Spider · low E to D, skipping A',
           caption_es: 'Araña · de Mi grave a Re, saltando La',
           notes: [
-            { string: 'E', fret: 1, note: 'F',  midi: 41 },
-            { string: 'D', fret: 2, note: 'E',  midi: 52 },
-            { string: 'E', fret: 3, note: 'G',  midi: 43 },
-            { string: 'D', fret: 4, note: 'F#', midi: 54 },
-            { string: 'E', fret: 2, note: 'F#', midi: 42 },
-            { string: 'D', fret: 3, note: 'F',  midi: 53 },
-            { string: 'E', fret: 4, note: 'G#', midi: 44 },
-            { string: 'D', fret: 5, note: 'G',  midi: 55 }
+            { string: 'E', fret: 1, note: 'F',  midi: 41, finger: 1 },
+            { string: 'D', fret: 2, note: 'E',  midi: 52, finger: 2 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43, finger: 3 },
+            { string: 'D', fret: 4, note: 'F#', midi: 54, finger: 4 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42, finger: 1 },
+            { string: 'D', fret: 3, note: 'F',  midi: 53, finger: 2 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44, finger: 3 },
+            { string: 'D', fret: 5, note: 'G',  midi: 55, finger: 4 }
           ]
         },
       },
@@ -876,10 +885,10 @@ window.CLASS_ACTIVITIES = [
           caption: 'Wide Reach · fret 1 to fret 6',
           caption_es: 'Estiramiento ancho · del traste 1 al 6',
           notes: [
-            { string: 'E', fret: 1, note: 'F',  midi: 41 },
-            { string: 'E', fret: 6, note: 'A#', midi: 46 },
-            { string: 'E', fret: 1, note: 'F',  midi: 41 },
-            { string: 'E', fret: 6, note: 'A#', midi: 46 }
+            { string: 'E', fret: 1, note: 'F',  midi: 41, finger: 1 },
+            { string: 'E', fret: 6, note: 'A#', midi: 46, finger: 4 },
+            { string: 'E', fret: 1, note: 'F',  midi: 41, finger: 1 },
+            { string: 'E', fret: 6, note: 'A#', midi: 46, finger: 4 }
           ]
         },
       },
@@ -890,8 +899,8 @@ window.CLASS_ACTIVITIES = [
           caption: 'Across the strings · both notes ringing',
           caption_es: 'Entre cuerdas · las dos notas suenan',
           notes: [
-            { string: 'E', fret: 2, note: 'F#', midi: 42 },
-            { string: 'A', fret: 5, note: 'D',  midi: 50 }
+            { string: 'E', fret: 2, note: 'F#', midi: 42, finger: 1 },
+            { string: 'A', fret: 5, note: 'D',  midi: 50, finger: 4 }
           ]
         },
       },
@@ -921,14 +930,14 @@ window.CLASS_ACTIVITIES = [
           caption: 'Warm-up · Ladder with the shift',
           caption_es: 'Calentamiento · Escalera con el cambio',
           notes: [
-            { string: 'E', fret: 1, note: 'F',  midi: 41 },
-            { string: 'E', fret: 2, note: 'F#', midi: 42 },
-            { string: 'E', fret: 3, note: 'G',  midi: 43 },
-            { string: 'E', fret: 4, note: 'G#', midi: 44 },
-            { string: 'E', fret: 2, note: 'F#', midi: 42 },
-            { string: 'E', fret: 3, note: 'G',  midi: 43 },
-            { string: 'E', fret: 4, note: 'G#', midi: 44 },
-            { string: 'E', fret: 5, note: 'A',  midi: 45 }
+            { string: 'E', fret: 1, note: 'F',  midi: 41, finger: 1 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42, finger: 2 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43, finger: 3 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44, finger: 4 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42, finger: 1 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43, finger: 2 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44, finger: 3 },
+            { string: 'E', fret: 5, note: 'A',  midi: 45, finger: 4 }
           ]
         },
       },
@@ -939,14 +948,14 @@ window.CLASS_ACTIVITIES = [
           caption: 'Spider · at your record BPM',
           caption_es: 'Araña · a tu BPM récord',
           notes: [
-            { string: 'E', fret: 1, note: 'F',  midi: 41 },
-            { string: 'A', fret: 2, note: 'B',  midi: 47 },
-            { string: 'E', fret: 3, note: 'G',  midi: 43 },
-            { string: 'A', fret: 4, note: 'C#', midi: 49 },
-            { string: 'E', fret: 2, note: 'F#', midi: 42 },
-            { string: 'A', fret: 3, note: 'C',  midi: 48 },
-            { string: 'E', fret: 4, note: 'G#', midi: 44 },
-            { string: 'A', fret: 5, note: 'D',  midi: 50 }
+            { string: 'E', fret: 1, note: 'F',  midi: 41, finger: 1 },
+            { string: 'A', fret: 2, note: 'B',  midi: 47, finger: 2 },
+            { string: 'E', fret: 3, note: 'G',  midi: 43, finger: 3 },
+            { string: 'A', fret: 4, note: 'C#', midi: 49, finger: 4 },
+            { string: 'E', fret: 2, note: 'F#', midi: 42, finger: 1 },
+            { string: 'A', fret: 3, note: 'C',  midi: 48, finger: 2 },
+            { string: 'E', fret: 4, note: 'G#', midi: 44, finger: 3 },
+            { string: 'A', fret: 5, note: 'D',  midi: 50, finger: 4 }
           ]
         },
       },
@@ -957,14 +966,14 @@ window.CLASS_ACTIVITIES = [
           caption: 'Reach endurance · eight in a row',
           caption_es: 'Resistencia · ocho seguidos',
           notes: [
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'E', fret: 5, note: 'A', midi: 45 },
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'E', fret: 5, note: 'A', midi: 45 },
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'E', fret: 5, note: 'A', midi: 45 },
-            { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'E', fret: 5, note: 'A', midi: 45 }
+            { string: 'E', fret: 1, note: 'F', midi: 41, finger: 1 },
+            { string: 'E', fret: 5, note: 'A', midi: 45, finger: 4 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, finger: 1 },
+            { string: 'E', fret: 5, note: 'A', midi: 45, finger: 4 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, finger: 1 },
+            { string: 'E', fret: 5, note: 'A', midi: 45, finger: 4 },
+            { string: 'E', fret: 1, note: 'F', midi: 41, finger: 1 },
+            { string: 'E', fret: 5, note: 'A', midi: 45, finger: 4 }
           ]
         },
       },

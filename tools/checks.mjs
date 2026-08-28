@@ -253,12 +253,22 @@ function validateModules() {
    beat. Default is 1 and every existing entry omits it, so this only
    fires on the new field — nothing else about note shape is checked.
    ════════════════════════════════════════════════════════════════════ */
+/* A tab note may also carry `finger` — the fretting finger, drawn in a circle
+   under the staff in place of the note name (Finger Gym convention, 2026-08-28).
+   Only 1-4 are fingers; a 0 (open) or a 5 is a typo, or a fret number pasted
+   into the wrong field. Shared by the module-file walk here and the
+   class-activities walk further down. */
+function checkFinger(where, n) {
+  if (n && n.finger !== undefined && !(Number.isInteger(n.finger) && n.finger >= 1 && n.finger <= 4))
+    { err(`${where}: "finger" ${JSON.stringify(n.finger)} is not a fretting finger 1-4`); problems++; }
+}
 function validateNoteBeats(allSets) {
-  head('1c. Note "beats" field shape');
+  head('1c. Note "beats" / "finger" field shape');
   const checkBeats = (where, n) => {
     if (!n || typeof n !== 'object' || Array.isArray(n)) return;
     if (n.beats !== undefined && !(typeof n.beats === 'number' && n.beats > 0))
       { err(`${where}: "beats" should be a positive number`); problems++; }
+    checkFinger(where, n);
   };
   const checkTabNotes = (where, notes) => {
     (notes || []).forEach((n, i) => checkBeats(`${where} · notes[${i}]`, n));
@@ -293,7 +303,7 @@ function validateNoteBeats(allSets) {
     }
   }
 
-  if (problems === 0) ok('all note "beats" fields (where present) are valid');
+  if (problems === 0) ok('all note "beats" / "finger" fields (where present) are valid');
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -785,6 +795,7 @@ function validateClassActivities() {
             if (!Number.isInteger(n.fret) || n.fret < 0) { err(`${where}: fret "${n.fret}" is not an integer >= 0`); problems++; }
             if (!hasVal(n.note)) { err(`${where}: missing "note"`); problems++; }
             if (typeof n.midi !== 'number') { err(`${where}: midi "${n.midi}" is not numeric`); problems++; }
+            checkFinger(where, n);
           };
           if (Array.isArray(s.tab.phrases)) {
             s.tab.phrases.forEach((p, pi) => {
