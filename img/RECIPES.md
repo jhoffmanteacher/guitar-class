@@ -30,7 +30,6 @@ committed files don't have.
 | `m9-high-e-naturals.svg` | `naturals highE 12` |
 | `ca-hb-low-e.svg` | `notes lowE "0:E,2:F#,4:G#,5:A"` |
 | `ca-hb-low-e-all.svg` | `notes lowE "0:E,2:F#,4:G#,5:A,7:B,9:C#,10:D,12:E"` |
-| `ca-hb-low-e-full.svg` | `notes lowE "0:E,2:F#,4:G#,5:A,7:B"` |
 | `ca-hb-a.svg` | `notes A "0:A,2:B,4:C#,5:D,7:E"` |
 | `ca-hb-fingers.svg` | `notes lowE "2:1,4:3,5:4"` |
 | `ca-hb-fingers-a.svg` | `notes A "2:1,4:3,5:4"` |
