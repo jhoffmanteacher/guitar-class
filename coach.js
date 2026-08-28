@@ -5362,7 +5362,7 @@ const RN_SONGS = [
     subKey: 'games.riff.song.sna.sub',
     hintKey: 'games.riff.song.sna.hint',
     bpm: 60, bpb: 4, loopBeats: 8, laps: 4,
-    notes: [[6,7,0,'B'],[6,7,1,'B'],[6,10,2,'D'],[6,7,3,'B'],[6,5,4,'A'],[6,3,5,'G'],[6,2,6,'F#']] },
+    notes: [[5,7,0,'E'],[5,7,1,'E'],[5,10,2,'G'],[5,7,3,'E'],[5,5,4,'D'],[5,3,5,'C'],[5,2,6,'B']] },
   { id: 'watchtower', title: '"All Along the Watchtower"',
     subKey: 'games.riff.song.watchtower.sub',
     hintKey: 'games.riff.song.watchtower.hint',

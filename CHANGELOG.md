@@ -5,6 +5,27 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-28 — "Seven Nation Army" now lives on the A string
+
+### Changed
+
+- **The riff is on the A string from day one.** You used to learn it on the low
+  E string, where it sounded a fourth lower than the record and wouldn't line up
+  with the recording until Module 2 moved it. Now Module 1 teaches it where the
+  song actually lives — frets 7-7-10-7-5-3-2 on the A string, note names
+  E · E · G · E · D · C · B — so the very first time you play it, it matches the
+  record.
+- **Module 2's E-string challenge is now about moving the riff, not learning
+  it.** Same shape, one string lower, and every note name changes — that's the
+  point of it now. Naming low-E notes is still the skill it checks.
+- **Module 4's real-rhythm riff moved with it.** Both play-along versions —
+  the straight teaching count and the record's real timing — are on the A
+  string now.
+- **The Song Journey page shows one riff instead of two.** Layer 2 used to
+  print a low-E TAB and an A-string TAB side by side and ask you to learn both.
+  It's one TAB now.
+- **Riff Runner plays the A-string version** in the games arcade.
+
 ## 2026-08-28 — TAB diagrams are much easier to read
 
 ### Changed

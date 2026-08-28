@@ -324,42 +324,42 @@ SETS.push(
                 text_es: '<ol><li>Presiona los dos botones &#x25B6; de abajo para escuchar la diferencia antes de aplaudirlo.</li><li>Escucha la grabación una y otra vez.</li><li>Aplaude el ritmo del riff sin guitarra — algunas notas cortas, algunas sostenidas más — hasta que esté en tus manos.</li><li>Vuelve a agregar los trastes una vez que tengas la sensación.</li></ol>Lo tienes cuando: puedes repetir el riff junto con la grabación y mantenerte sincronizado con su groove (el groove = la sensación rítmica que te hace mover el cuerpo). <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: vuelve a la Capa 2 de 5</a>.',
                 hint: 'You\'ve played this riff since Module 1 as straight, even quarter notes — but the record swings it looser than that. For now, trust your ear: don\'t reach for counts or note values yet — this is ear training, the same way you learned to clap "Watchtower"\'s rhythm. Your ear already knows this riff; you\'re just teaching your hands to match it.',
                 hint_es: 'Has tocado este riff desde el Módulo 1 como negras parejas y rectas — pero la grabación lo balancea más suelto que eso. Por ahora, confía en tu oído: no busques contar tiempos o valores de nota todavía — esto es entrenamiento de oído, igual que aprendiste a aplaudir el ritmo de "Watchtower". Tu oído ya conoce este riff; solo estás enseñándole a tus manos a igualarlo.',
-                stuck: 'Clap just the first half of the riff (B · B · D · B) on loop until that half locks with the record, then add the second half (A · G · F#).',
-                stuck_es: 'Aplaude solo la primera mitad del riff (B · B · D · B) en bucle hasta que esa mitad encaje con la grabación, y luego agrega la segunda mitad (A · G · F#).',
+                stuck: 'Clap just the first half of the riff (E · E · G · E) on loop until that half locks with the record, then add the second half (D · C · B).',
+                stuck_es: 'Aplaude solo la primera mitad del riff (E · E · G · E) en bucle hasta que esa mitad encaje con la grabación, y luego agrega la segunda mitad (D · C · B).',
                 levelUp: 'Play it as power chords instead of single notes, keeping the same swung feel — same trick as "Watchtower"\'s real-rhythm level-up.',
                 levelUp_es: 'Tócalo como acordes de potencia en vez de notas sueltas, manteniendo la misma sensación de balanceo — el mismo truco que el nivel superior del ritmo real de "Watchtower".',
                 tabs: [
                   {
                     title: 'How you learned it — straight teaching count',
                     title_es: 'Cómo lo aprendiste — conteo de enseñanza recto',
-                    caption: '"Seven Nation Army" — main riff · Low E string · straight quarter notes',
-                    caption_es: '"Seven Nation Army" — riff principal · cuerda Mi grave · negras rectas y parejas',
+                    caption: '"Seven Nation Army" — main riff · A string · straight quarter notes',
+                    caption_es: '"Seven Nation Army" — riff principal · cuerda La · negras rectas y parejas',
                     bpm: 60,
                     notes: [
-                      { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-                      { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-                      { string: 'E', fret: 10, note: 'D',  midi: 50 },
-                      { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-                      { string: 'E', fret: 5,  note: 'A',  midi: 45 },
-                      { string: 'E', fret: 3,  note: 'G',  midi: 43 },
-                      { string: 'E', fret: 2,  note: 'F#', midi: 42 }
+                      { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                      { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                      { string: 'A', fret: 10, note: 'G', midi: 55 },
+                      { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                      { string: 'A', fret: 5,  note: 'D', midi: 50 },
+                      { string: 'A', fret: 3,  note: 'C', midi: 48 },
+                      { string: 'A', fret: 2,  note: 'B', midi: 47 }
                     ]
                   },
                   {
-                    title: 'How the record\'s rhythm goes — low-E version',
-                    title_es: 'Cómo va el ritmo de la grabación — versión en la Mi grave',
-                    caption: '"Seven Nation Army" — main riff · Low E string · the record\'s real durations (close to the record\'s feel, not note-perfect). Same low-E frets as above, so it still sounds lower than the record — the A-string version from Module 2 is the true pitch.',
-                    caption_es: '"Seven Nation Army" — riff principal · cuerda Mi grave · las duraciones reales de la grabación (cercano a la sensación de la grabación, no nota por nota). Los mismos trastes de la Mi grave que arriba, así que sigue sonando más grave que la grabación — la versión en la cuerda La del Módulo 2 es el tono real.',
+                    title: 'How the record\'s rhythm goes',
+                    title_es: 'Cómo va el ritmo de la grabación',
+                    caption: '"Seven Nation Army" — main riff · A string · the record\'s real durations (close to the record\'s feel, not note-perfect). Same frets as above — only the timing changes.',
+                    caption_es: '"Seven Nation Army" — riff principal · cuerda La · las duraciones reales de la grabación (cercano a la sensación de la grabación, no nota por nota). Los mismos trastes que arriba — solo cambia el tiempo.',
                     bpm: 60,
                     maxBpm: 130,
                     notes: [
-                      { string: 'E', fret: 7,  note: 'B',  midi: 47, beats: 1.5 },
-                      { string: 'E', fret: 7,  note: 'B',  midi: 47, beats: 0.5 },
-                      { string: 'E', fret: 10, note: 'D',  midi: 50, beats: 0.5 },
-                      { string: 'E', fret: 7,  note: 'B',  midi: 47, beats: 0.5 },
-                      { string: 'E', fret: 5,  note: 'A',  midi: 45, beats: 0.5 },
-                      { string: 'E', fret: 3,  note: 'G',  midi: 43, beats: 2 },
-                      { string: 'E', fret: 2,  note: 'F#', midi: 42, beats: 2.5 }
+                      { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 1.5 },
+                      { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
+                      { string: 'A', fret: 10, note: 'G', midi: 55, beats: 0.5 },
+                      { string: 'A', fret: 7,  note: 'E', midi: 52, beats: 0.5 },
+                      { string: 'A', fret: 5,  note: 'D', midi: 50, beats: 0.5 },
+                      { string: 'A', fret: 3,  note: 'C', midi: 48, beats: 2 },
+                      { string: 'A', fret: 2,  note: 'B', midi: 47, beats: 2.5 }
                     ]
                   }
                 ],

@@ -225,7 +225,7 @@ SETS.push(
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', meta_es: 'Escucha e identifica los sonidos de la guitarra', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Listen — the low-E riff (a short musical phrase that repeats) you\'ll build all course long', meta_es: 'Escucha — el riff en la Mi grave (una frase musical corta que se repite) que vas a construir durante todo el curso', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'Listen — the riff (a short musical phrase that repeats) you\'ll build all course long', meta_es: 'Escucha — el riff en la Mi grave (una frase musical corta que se repite) que vas a construir durante todo el curso', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Listen — a riff-driven song we return to later', meta_es: 'Escucha — una canción basada en un riff a la que volveremos más adelante', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',
@@ -543,28 +543,28 @@ SETS.push(
             steps: [
           {
             label: 'Preview the "Seven Nation Army" riff', label_es: 'Adelanto del riff de "Seven Nation Army"',
-            text: '<ol><li>Click the note names below the TAB (the little chart below — each number is a fret to press on the low E string; 0 = open) to hear how it should sound.</li><li>Then try just the first few notes to get the feel.</li></ol>You\'ve got it when: you can match the first three notes to what you heard. This song grows with you through the whole course — <a href="tabs/seven-nation-army.html" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> Song Journey: this is Layer 1 of 5</a>.',
-            text_es: '<ol><li>Haz clic en los nombres de las notas debajo del TAB (el pequeño diagrama de abajo — cada número es un traste que debes presionar en la cuerda Mi grave; 0 = al aire) para escuchar cómo debe sonar.</li><li>Luego prueba solo las primeras notas para agarrar la sensación.</li></ol>Lo tienes cuando: puedes hacer coincidir las primeras tres notas con lo que escuchaste. Esta canción crece contigo durante todo el curso — <a href="tabs/seven-nation-army.html" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> Recorrido de la canción: esto es la Capa 1 de 5</a>.',
-            hint: 'You\'ll play the whole riff at the practice station — this is just the preview. Heads up: this site teaches it as straight, even quarter notes — one per beat — to make it easy to count while you\'re learning it; the actual record swings it a bit looser than that, which you\'ll start to hear naturally once the shape feels solid. It also sits a fourth lower than the record here on the low E string, so it won\'t line up with the recording yet — Module 2 moves it up to true pitch on the A string. Listen first, then match it — one note at a time. To fret a note, set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',
-            hint_es: 'Vas a tocar el riff completo en la estación de práctica — esto es solo el adelanto. Aviso: aquí se enseña con negras rectas y parejas — una nota por pulso — para que sea fácil de contar mientras lo aprendes; la grabación original lo toca con un poco más de swing (vaivén) que eso, algo que empezarás a notar de oído en cuanto domines bien la forma. Además, aquí en la cuerda Mi grave suena una cuarta más abajo que la grabación, así que todavía no va a coincidir con ella — el Módulo 2 lo sube a su tono real en la cuerda La. Escucha primero y luego iguálalo — una nota a la vez. Para trastear una nota, coloca la punta del dedo justo detrás del traste y presiona firme; si zumba, acércate un poco más al traste o presiona más fuerte.',
-            stuck: 'Just the first two notes: click a note name to hear it, then find it on the low E string. Get those solid before adding the next.',
-            stuck_es: 'Solo las primeras dos notas: haz clic en el nombre de una nota para escucharla, y luego encuéntrala en la cuerda Mi grave. Deja esas bien firmes antes de agregar la siguiente.',
+            text: '<ol><li>Click the note names below the TAB (the little chart below — each number is a fret to press on the A string, the one just below the thickest string) to hear how it should sound.</li><li>Then try just the first few notes to get the feel.</li></ol>You\'ve got it when: you can match the first three notes to what you heard. This song grows with you through the whole course — <a href="tabs/seven-nation-army.html" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> Song Journey: this is Layer 1 of 5</a>.',
+            text_es: '<ol><li>Haz clic en los nombres de las notas debajo del TAB (el pequeño diagrama de abajo — cada número es un traste que debes presionar en la cuerda La, la que está justo debajo de la cuerda más gruesa) para escuchar cómo debe sonar.</li><li>Luego prueba solo las primeras notas para agarrar la sensación.</li></ol>Lo tienes cuando: puedes hacer coincidir las primeras tres notas con lo que escuchaste. Esta canción crece contigo durante todo el curso — <a href="tabs/seven-nation-army.html" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> Recorrido de la canción: esto es la Capa 1 de 5</a>.',
+            hint: 'You\'ll play the whole riff at the practice station — this is just the preview. Heads up: this site teaches it as straight, even quarter notes — one per beat — to make it easy to count while you\'re learning it; the actual record swings it a bit looser than that, which you\'ll start to hear naturally once the shape feels solid. It sits on the A string, which is where the riff lives at true pitch, so it lines up with the record. Listen first, then match it — one note at a time. To fret a note, set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',
+            hint_es: 'Vas a tocar el riff completo en la estación de práctica — esto es solo el adelanto. Aviso: aquí se enseña con negras rectas y parejas — una nota por pulso — para que sea fácil de contar mientras lo aprendes; la grabación original lo toca con un poco más de swing (vaivén) que eso, algo que empezarás a notar de oído en cuanto domines bien la forma. Además, vive en la cuerda La, que es donde el riff suena en su tono real, así que sí coincide con la grabación. Escucha primero y luego iguálalo — una nota a la vez. Para trastear una nota, coloca la punta del dedo justo detrás del traste y presiona firme; si zumba, acércate un poco más al traste o presiona más fuerte.',
+            stuck: 'Just the first two notes: click a note name to hear it, then find it on the A string. Get those solid before adding the next.',
+            stuck_es: 'Solo las primeras dos notas: haz clic en el nombre de una nota para escucharla, y luego encuéntrala en la cuerda La. Deja esas bien firmes antes de agregar la siguiente.',
             levelUp: 'Play the first four notes in a row, in time, humming the riff as you go.',
             levelUp_es: 'Toca las primeras cuatro notas seguidas, a tiempo, tarareando el riff mientras tocas.',
             response: { type: 'short', placeholder: 'How did the riff sound, and which note was hardest to find?',
               placeholder_es: '¿Cómo sonó el riff, y qué nota fue la más difícil de encontrar?' },
             tab: {
               bpm: 40,
-              caption: '"Seven Nation Army" — main riff · Low E string · 7 notes',
-              caption_es: '"Seven Nation Army" — riff principal · cuerda Mi grave · 7 notas',
+              caption: '"Seven Nation Army" — main riff · A string · 7 notes',
+              caption_es: '"Seven Nation Army" — riff principal · cuerda La · 7 notas',
               notes: [
-                { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-                { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-                { string: 'E', fret: 10, note: 'D',  midi: 50 },
-                { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-                { string: 'E', fret: 5,  note: 'A',  midi: 45 },
-                { string: 'E', fret: 3,  note: 'G',  midi: 43 },
-                { string: 'E', fret: 2,  note: 'F#', midi: 42 }
+                { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                { string: 'A', fret: 10, note: 'G', midi: 55 },
+                { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                { string: 'A', fret: 5,  note: 'D', midi: 50 },
+                { string: 'A', fret: 3,  note: 'C', midi: 48 },
+                { string: 'A', fret: 2,  note: 'B', midi: 47 }
               ]
             }
           }
@@ -624,26 +624,26 @@ SETS.push(
           },
           {
             label: 'Challenge 3 — "Seven Nation Army" Riff (try it!)', label_es: 'Reto 3 — Riff de "Seven Nation Army" (¡pruébalo!)',
-            text: '<ul><li>Play the "Seven Nation Army" riff on the low E string — slow and clean.</li></ul>You\'ve got it when: all 7 notes in the right order, each ringing clean — speed comes later. No score on this one, just try it. Click any note name below the TAB to hear how it should sound.',
-            text_es: '<ul><li>Toca el riff de "Seven Nation Army" en la cuerda Mi grave — despacio y limpio.</li></ul>Lo tienes cuando: las 7 notas en el orden correcto, cada una sonando limpia — la velocidad viene después. Este no tiene puntaje, solo pruébalo. Haz clic en cualquier nombre de nota debajo del TAB para escuchar cómo debe sonar.',
-            hint: 'Slow and clean is better than fast and buzzy. One note at a time. Set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder. Two heads-ups about how this version sounds: we play it as straight, even quarter notes — one per beat — so it\'s easy to count, and on the low E string it sits a fourth lower than the record, so it won\'t line up with the recording yet. Module 2 moves it up to true pitch on the A string.',
-            hint_es: 'Despacio y limpio es mejor que rápido y con zumbido. Una nota a la vez. Coloca la punta del dedo justo detrás del traste y presiona firme; si zumba, acércate un poco más al traste o presiona más fuerte. Dos avisos sobre cómo suena esta versión: la tocamos con negras rectas y parejas — una por pulso — para que sea fácil de contar, y en la cuerda Mi grave suena una cuarta más abajo que la grabación, así que todavía no va a coincidir con ella. El Módulo 2 lo sube a su tono real en la cuerda La.',
+            text: '<ul><li>Play the "Seven Nation Army" riff on the A string — slow and clean.</li></ul>You\'ve got it when: all 7 notes in the right order, each ringing clean — speed comes later. No score on this one, just try it. Click any note name below the TAB to hear how it should sound.',
+            text_es: '<ul><li>Toca el riff de "Seven Nation Army" en la cuerda La — despacio y limpio.</li></ul>Lo tienes cuando: las 7 notas en el orden correcto, cada una sonando limpia — la velocidad viene después. Este no tiene puntaje, solo pruébalo. Haz clic en cualquier nombre de nota debajo del TAB para escuchar cómo debe sonar.',
+            hint: 'Slow and clean is better than fast and buzzy. One note at a time. Set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder. Two heads-ups about how this version sounds: we play it as straight, even quarter notes — one per beat — so it\'s easy to count, and it sits on the A string, where the riff lives at true pitch, so it lines up with the record.',
+            hint_es: 'Despacio y limpio es mejor que rápido y con zumbido. Una nota a la vez. Coloca la punta del dedo justo detrás del traste y presiona firme; si zumba, acércate un poco más al traste o presiona más fuerte. Dos avisos sobre cómo suena esta versión: la tocamos con negras rectas y parejas — una por pulso — para que sea fácil de contar, y vive en la cuerda La, donde el riff suena en su tono real, así que sí coincide con la grabación.',
             stuck: 'Break the 7 notes into two chunks and learn the first chunk cold. Click each note name to hear its pitch, then find it before you play on.',
             stuck_es: 'Divide las 7 notas en dos partes y apréndete bien la primera parte. Haz clic en cada nombre de nota para escuchar su tono, y encuéntrala antes de seguir tocando.',
             levelUp: 'Play all 7 notes in time with a slow metronome at 60 BPM, keeping each one clean.',
             levelUp_es: 'Toca las 7 notas a tiempo con el metrónomo despacio a 60 BPM, manteniendo cada una limpia.',
             tab: {
               bpm: 40,
-              caption: '"Seven Nation Army" — main riff · Low E string · 7 notes',
-              caption_es: '"Seven Nation Army" — riff principal · cuerda Mi grave · 7 notas',
+              caption: '"Seven Nation Army" — main riff · A string · 7 notes',
+              caption_es: '"Seven Nation Army" — riff principal · cuerda La · 7 notas',
               notes: [
-                { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-                { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-                { string: 'E', fret: 10, note: 'D',  midi: 50 },
-                { string: 'E', fret: 7,  note: 'B',  midi: 47 },
-                { string: 'E', fret: 5,  note: 'A',  midi: 45 },
-                { string: 'E', fret: 3,  note: 'G',  midi: 43 },
-                { string: 'E', fret: 2,  note: 'F#', midi: 42 }
+                { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                { string: 'A', fret: 10, note: 'G', midi: 55 },
+                { string: 'A', fret: 7,  note: 'E', midi: 52 },
+                { string: 'A', fret: 5,  note: 'D', midi: 50 },
+                { string: 'A', fret: 3,  note: 'C', midi: 48 },
+                { string: 'A', fret: 2,  note: 'B', midi: 47 }
               ]
             }
           }
@@ -654,7 +654,7 @@ SETS.push(
     },
 
     songs: [
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Play the low-E riff — your first core-thread riff', meta_es: 'Toca el riff en la Mi grave — tu primer riff del hilo principal', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'Play the A-string riff — your first core-thread riff', meta_es: 'Toca el riff en la cuerda La — tu primer riff del hilo principal', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Happy Birthday"', meta: 'Your Module 1 assessment song — all four phrases on the low E string, learned in Class Activities #1–#2', meta_es: 'Tu canción de la evaluación del Módulo 1 — las cuatro frases en la cuerda Mi grave, aprendida en las Actividades de clase #1–#2', type: 'Supp', core: false,
