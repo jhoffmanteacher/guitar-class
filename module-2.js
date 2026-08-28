@@ -88,9 +88,9 @@ SETS.push(
                 text_es: 'Escucha el riff de "Seven Nation Army" — presiona ▶ para escucharlo, luego tararea y trata de identificar qué notas del riff viven en la cuerda La, y más o menos dónde.',
                 hint: 'Don\'t worry about playing it yet — just train your ear to connect sounds to frets. The riff starts high on the neck and walks down toward the nut.',
                 hint_es: 'No te preocupes todavía por tocarlo — solo entrena tu oído para conectar sonidos con trastes. El riff empieza arriba en el mástil y baja caminando hacia la cejuela.',
-                playSeq: { label: 'Hear the riff', label_es: 'Escucha el riff', bpm: 60, notes: [47, 47, 50, 47, 45, 43, 42] },
-                response: { type: 'short', placeholder: 'Which note(s) did you find first? Which fret on the low E?',
-                  placeholder_es: '¿Qué nota(s) encontraste primero? ¿Qué traste en la cuerda Mi grave?' }
+                playSeq: { label: 'Hear the riff', label_es: 'Escucha el riff', bpm: 60, notes: [52, 52, 55, 52, 50, 48, 47] },
+                response: { type: 'short', placeholder: 'Which note(s) did you find first? Which fret on the A string?',
+                  placeholder_es: '¿Qué nota(s) encontraste primero? ¿Qué traste en la cuerda La?' }
               }
             ]
           },
@@ -272,7 +272,7 @@ SETS.push(
             title_es: 'Llévalo a una canción',
             steps: [
               {
-                label: 'Challenge — \"Smoke on the Water,\" a head start', label_es: 'Reto — \"Smoke on the Water,\" una ventaja',
+                label: 'Challenge — \"Smoke on the Water,\" a head start', label_es: 'Reto — \"Smoke on the Water,\" un adelanto',
                 text: '<ul><li>Play the riff on the low E string — frets 0 → 3 → 5, then 0 → 3 → 6 → 5, then 0 → 3 → 5 → 3 → 0.</li><li>Say each note name out loud as you play it — E · G · A · E · G · A# · A · E · G · A · G · E.</li></ul>You\'ve got it when: one clean lap, no chart, every note named correctly. Set 2 takes this same riff to 60 BPM.',
                 text_es: '<ul><li>Toca el riff en la cuerda Mi grave — trastes 0 → 3 → 5, luego 0 → 3 → 6 → 5, luego 0 → 3 → 5 → 3 → 0.</li><li>Di cada nombre de nota en voz alta mientras lo tocas — E · G · A · E · G · A# · A · E · G · A · G · E.</li></ul>Lo tienes cuando: una vuelta limpia, sin tabla, cada nota nombrada correctamente. En la Unidad 2 este mismo riff va a 60 BPM.',
                 hint: 'Every note is one you just named on the low E string — the only new one is fret 6, A#: one fret past A. The shape is the shape; WHERE you are decides what it\'s called. Name it, then play it.',
@@ -795,10 +795,10 @@ SETS.push(
                 text_es: '<ul><li>Toca el riff en la cuerda La — E · E · G · E · D · C · B — con el metrónomo a 60 BPM, una nota por pulso.</li></ul>Lo tienes cuando: dos vueltas limpias seguidas, a tiempo, cada nota nombrada. <a href="tabs/seven-nation-army.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'You know this riff from Module 1. Now the click is the boss: land each note right on the beat, and let the open A string ring between phrases.',
                 hint_es: 'Ya conoces este riff del Módulo 1. Ahora manda el clic: cae en cada nota justo en el pulso, y deja sonar la cuerda La al aire entre frases.',
-                stuck: 'Play one lap of the low-E version from Set 1 to remind your hand of the moves, then bring it back to the A string.',
-                stuck_es: 'Toca una vuelta de la versión en la Mi grave de la Unidad 1 para recordarle a tu mano los movimientos, y luego regrésalo a la cuerda La.',
-                levelUp: 'Alternate laps: one on low E, one on the A string, without stopping between.',
-                levelUp_es: 'Alterna vueltas: una en la Mi grave, una en la cuerda La, sin parar entre ellas.',
+                stuck: 'Turn the metronome off and play one free lap to remind your hand of the moves, then turn the click back on and match it.',
+                stuck_es: 'Apaga el metrónomo y toca una vuelta libre para recordarle a tu mano los movimientos, luego vuelve a encender el clic y síguelo.',
+                levelUp: 'Play two laps without looking at the TAB, then a third with your eyes closed — still landing on the beat.',
+                levelUp_es: 'Toca dos vueltas sin mirar la TAB, luego una tercera con los ojos cerrados — cayendo igual en el pulso.',
                 skills: [1, 2, 4, 5, 6],
                 tab: {
                   caption: '"Seven Nation Army" — main riff · A string · 60 BPM',
@@ -813,7 +813,7 @@ SETS.push(
                     { string: 'A', fret: 2,  note: 'B', midi: 47 }
                   ]
                 },
-                response: { type: 'short', prompt: 'Which version do you like playing more — low E or A string — and why?', prompt_es: '¿Qué versión te gusta más tocar — Mi grave o cuerda La — y por qué?', placeholder: 'e.g. A string, it sounds like the song', placeholder_es: 'ej. cuerda La, suena como la canción' }
+                response: { type: 'short', prompt: 'Which note pulls you off the beat most often — and what did you do about it?', prompt_es: '¿Qué nota te saca del pulso más seguido — y qué hiciste al respecto?', placeholder: 'e.g. the G at fret 10 — I slowed down and reset', placeholder_es: 'ej. la G del traste 10 — bajé la velocidad y reinicié' }
               },
               {
                 label: 'Challenge — "the cure," root line', label_es: 'Reto — "the cure," línea de raíces',

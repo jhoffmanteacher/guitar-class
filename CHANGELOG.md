@@ -22,6 +22,16 @@ see `WORKFLOW.md` and the git commit log.
 - Module 2's header note and song list no longer mention a low-E
   transposition.
 
+### Fixed
+
+- **The Set 1 ear exercise now plays the riff you are asked to find.** The ▶
+  button was still playing the old low-E version while the directions pointed
+  at the A string — two of those notes do not exist on the A string at all, so
+  the exercise could not be completed as written.
+- **Set 2's riff challenge no longer sends you back to a version that is gone.**
+  Its stuck hint, level-up and reflection question all still referred to the
+  low-E "Seven Nation Army" from Set 1; they now work on timing instead.
+
 ## 2026-08-28 — Song Journey pages: the sign-in note stays on the screen
 
 ### Fixed
