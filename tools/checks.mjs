@@ -440,6 +440,79 @@ function checkRetiredStationWording() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1o. TAB CAN SCROLL SIDEWAYS AGAIN — the inline TAB board is laid out to
+   fill its card and wrap a long phrase onto a second staff (WO7,
+   2026-08-28). Nothing about it may scroll horizontally: a student on a
+   phone who has to swipe a riff sideways mostly doesn't discover there IS
+   a sideways.
+
+   The 2026-08-28 sweep (all 495 tab specs at 1100/768/390px) found 14
+   tabs still overflowing a 390px screen, all from one cause: an
+   invisible speaker glyph inside .tab-note-btn was still occupying
+   layout width, and a grid column can never be narrower than the widest
+   thing in it — so eight columns couldn't fit however small the frets
+   got. Four mechanical preconditions have to hold or the scrolling comes
+   back; each is greppable, so catch a relapse of exactly those.
+
+   HONEST LIMIT: this proves the preconditions, not the absence of
+   overflow — only a real browser can measure layout, and the repo has no
+   build step or node_modules to hang a headless one off. A new element
+   added inside a note button with a rest width would slip past this and
+   reintroduce the exact 2026-08-28 bug. If that happens, the fix is the
+   same shape: keep it out of flow at rest.
+   ════════════════════════════════════════════════════════════════════ */
+function checkTabNoScroll() {
+  head('1o. Inline TAB horizontal-scroll preconditions');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+
+  let css, appjs;
+  try { css = readFileSync(join(ROOT, 'styles.css'), 'utf8'); } catch { css = ''; }
+  try { appjs = readFileSync(join(ROOT, 'app.js'), 'utf8'); } catch { appjs = ''; }
+
+  const rule = (src, selector) => {
+    const i = src.indexOf(selector + '{');
+    return i === -1 ? null : src.slice(i + selector.length + 1, src.indexOf('}', i));
+  };
+
+  // 1. The board must not reintroduce its own scroller.
+  const board = rule(css, '.tab-board');
+  if (board === null) flag('styles.css: .tab-board rule not found — the TAB layout was restructured; re-verify this check');
+  else if (/overflow(-x)?\s*:\s*(auto|scroll)/.test(board))
+    flag('styles.css: .tab-board scrolls again (overflow auto/scroll) — a long phrase must wrap to a new staff, not scroll');
+
+  // 2. min-width:max-content on the grid is what forced scrolling before WO7.
+  const grid = rule(css, '.tab-grid');
+  if (grid === null) flag('styles.css: .tab-grid rule not found — the TAB layout was restructured; re-verify this check');
+  else if (/min-width\s*:\s*max-content/.test(grid))
+    flag('styles.css: .tab-grid has min-width:max-content — that is exactly what forced the TAB to scroll before WO7');
+
+  // 3. Columns must stay fractional; fixed px per column can outgrow the card.
+  const tmpl = appjs.match(/grid-template-columns:[^"'`]*/g) || [];
+  const tabTmpl = tmpl.filter(t => /repeat\(/.test(t));
+  if (!tabTmpl.length) flag('app.js: no TAB grid-template-columns found — renderTabSystem was restructured; re-verify this check');
+  for (const t of tabTmpl) {
+    if (/repeat\([^)]*,\s*\d+px\s*\)/.test(t))
+      flag(`app.js: TAB columns are a fixed px width (${t.trim()}) — use 1fr so N columns always share the card width`);
+  }
+
+  // 4. Nothing inside a note button may hold layout width at rest: a note
+  //    button is the widest item in its column, so it sets the column floor.
+  const spkr = rule(css, '.tab-note-btn .tab-spkr');
+  if (spkr === null) flag('styles.css: .tab-note-btn .tab-spkr rule not found — if the glyph is back in flow at rest it sets the minimum column width (see 2026-08-28)');
+  else if (!/max-width\s*:\s*0/.test(spkr))
+    flag('styles.css: the speaker glyph holds layout width at rest (no max-width:0) — that is the 2026-08-28 bug: 14 tabs overflowed a 390px screen');
+
+  // 5. The wrap constant must still exist and be sane.
+  const max = appjs.match(/const\s+TAB_MAX_COLS\s*=\s*(\d+)/);
+  if (!max) flag('app.js: TAB_MAX_COLS is gone — without it a long phrase has nothing to wrap at');
+  else if (+max[1] < 2 || +max[1] > 12)
+    flag(`app.js: TAB_MAX_COLS is ${max[1]} — outside the 2..12 range a staff stays readable in`);
+
+  if (bad === 0) ok('inline TAB cannot scroll sideways (board, grid, columns, note-button width, wrap constant)');
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1m. NARRATIVE LEAD-INS IN STEP TEXT — a step's `text`/`text_es` opens
    directly with the verb, not an announcement that an instruction is
    coming. A 2026-08-24 sweep removed ~45 instances of a handful of
@@ -1580,6 +1653,7 @@ async function liveCheck() {
   checkBlockedTabSites();
   checkNarrativeLeadIns();
   checkRetiredStationWording();
+  checkTabNoScroll();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();
