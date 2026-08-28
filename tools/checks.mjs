@@ -243,6 +243,7 @@ function validateModules() {
   checkI18nCompleteness(manifest, allSets, reviewsByModule, moduleSongsByModule);
   validateNoteBeats(allSets);
   checkMcAnswerTells(allSets);
+  checkPlaySeqStrings(allSets);
   return allSets;
 }
 
@@ -520,6 +521,75 @@ function checkTabNoScroll() {
     flag(`app.js: TAB_MAX_COLS is ${max[1]} — outside the 2..12 range a staff stays readable in`);
 
   if (bad === 0) ok('inline TAB cannot scroll sideways (board, grid, columns, note-button width, wrap constant)');
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1p. playSeq PITCHES MUST EXIST ON THE STRING THE STEP NAMES — a step
+   whose wording names exactly one string, then plays a ▶ sequence
+   containing a note BELOW that string's open pitch, is asking for a
+   sound the student cannot produce there. On 2026-08-28 the Module 2
+   Set 1 ear exercise shipped exactly that: the text moved from the low
+   E string to the A string, the playSeq stayed on the old low-E
+   transposition, and two of its seven notes (G2, F#2) sat below the
+   open A string — unplayable, so the exercise could not be completed
+   as written. 1b/1c validate playSeq SHAPE; nothing checked that the
+   audio agreed with the prose. Only the physically-impossible case is
+   flagged (below the open string); high frets, unnamed steps and
+   steps naming several strings are left alone.
+   ════════════════════════════════════════════════════════════════════ */
+function checkPlaySeqStrings(allSets) {
+  head('1p. playSeq pitches playable on the named string');
+  const OPEN = { 'low e': 40, a: 45, d: 50, g: 55, b: 59, 'high e': 64 };
+  const NAMES = { 40: 'low E', 45: 'A', 50: 'D', 55: 'G', 59: 'B', 64: 'high e' };
+  let checked = 0, bad = 0;
+
+  // Directions only: an <img alt> describes a diagram (often a scale box
+  // spanning every string) and must not be read as "this step is on the D
+  // string". Tags go too, so markup can't split a phrase.
+  const prose = t => String(t).replace(/<img\b[^>]*>/gi, ' ').replace(/<[^>]+>/g, ' ');
+
+  const namedStrings = raw => {
+    const text = prose(raw);
+    const found = new Set();
+    // Plural "strings", or "the E or A string", means the step deliberately
+    // spans more than one — there is no single string to judge the pitches against.
+    if (/\bstrings\b/i.test(text)) return found;
+    if (/\b[EADGBe]\s*(?:,|\/|\bor\b|\band\b)\s*[EADGBe][- ]string\b/.test(text)) return found;
+    if (/\blow[ -]E[- ]string\b/i.test(text)) found.add(OPEN['low e']);
+    if (/\bhigh[ -]e[- ]string\b/i.test(text)) found.add(OPEN['high e']);
+    for (const m of text.matchAll(/\b([ADGB])[- ]string\b/g)) {
+      if (/(?:low|high) $/i.test(text.slice(Math.max(0, m.index - 6), m.index))) continue;
+      found.add(OPEN[m[1].toLowerCase()]);
+    }
+    // a bare "E string" could be either E — too ambiguous to judge
+    if (/\bE[- ]string\b/.test(text) && !/(?:low|high)[ -]e[- ]string/i.test(text)) found.add(-1);
+    return found;
+  };
+
+  for (const w of allSets) {
+    for (const stId of Object.keys(w.stations || {})) {
+      const st = w.stations[stId];
+      const sections = st.sections || (st.steps ? [{ steps: st.steps }] : []);
+      sections.forEach((sec, gi) => (sec.steps || []).forEach((step, i) => {
+        const ps = step.playSeq;
+        if (!ps || !Array.isArray(ps.notes) || !ps.notes.length) return;
+        const pitches = ps.notes
+          .map(n => (n && typeof n === 'object' ? n.midi : n))
+          .filter(n => typeof n === 'number');
+        if (!pitches.length) return;
+        const strings = namedStrings([step.label, step.text, ps.label].filter(Boolean).join(' '));
+        if (strings.size !== 1 || strings.has(-1)) return;   // unnamed, ambiguous, or crosses strings
+        checked++;
+        const open = [...strings][0];
+        const low = Math.min(...pitches);
+        if (low < open) {
+          err(`set "${w.id}" · station "${stId}" · section ${gi + 1} · step ${i + 1}: playSeq drops to MIDI ${low}, below the open ${NAMES[open]} string (${open}) that its wording names — unplayable there`);
+          problems++; bad++;
+        }
+      }));
+    }
+  }
+  if (bad === 0) ok(`${checked} single-string playSeq sequences all sit at or above their open string`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
