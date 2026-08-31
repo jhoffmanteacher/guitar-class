@@ -218,6 +218,27 @@ got-it-when styling are both render-time, so new cards inherit them and neither
 can regress. Reach for the renderer first whenever a change is about how
 something looks or is ordered rather than what it says.
 
+### ⚠️ There are TWO step renderers — patch both, or the teacher can't see it
+A class-activity step is rendered twice by different code: `caStepHtml()` in
+`app.js` for students, and `renderTeacherActivityDetail()` in `teacher.js` for
+the console's Class activities preview. They do NOT share a code path — each
+has its own `if(step.figure)` / `video` / `tab` / `drill` chain — so a field
+wired into one is silently invisible in the other. On 2026-08-31 the ca-11
+drills shipped student-side and the teacher preview showed nothing, because
+only `caStepHtml()` learned about `drill`.
+
+**Adding or changing a step field means editing both, in the same edit.** The
+preview is where Jonathan checks the day's activity before class, so it has to
+show what the room will see. Nothing enforces this yet — grep both functions
+whenever you touch either.
+
+Legitimate differences are only about what can't work outside `#app`: the
+preview uses a real YouTube link instead of the in-app `loadPanel()` panel,
+passes `suppressCoach:true` to `buildTab`, and drills there skip the
+best-score write (`sdSaveBest`/`dkSaveBest` bail on `IS_TEACHER_MODE`, so
+previewing isn't practising). Keep new exceptions to that shape, and comment
+them.
+
 **Strings are named, never numbered, in student-facing text** (Jonathan,
 2026-08-06): low E · A · D · G · B · high e; ES uses solfège (cuerda Mi grave …
 cuerda mi aguda). Chord-chart shorthand like `xx4432` is notation and stays.
