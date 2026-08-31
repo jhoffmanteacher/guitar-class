@@ -984,7 +984,7 @@ window.CLASS_ACTIVITIES = [
   },
   {
     id:    'ca-10',
-    number: 4,
+    number: 10,
     title:    'Seven Nation Army — The Riff',
     title_es: 'Seven Nation Army — El riff',
     intro:    'Your fingers trained for this. One riff, one string, seven notes — and five of them sit right on the neck dots you already know.',
@@ -1043,6 +1043,81 @@ window.CLASS_ACTIVITIES = [
       {
         text: 'Chase it.<ul><li>Every clean pass: raise the BPM by 10 and go again</li><li>Got speed? Make it groove — hold the first note of each pair longer, like the recording</li><li>Then open the Seven Nation Army Song Journey page and play it over the backing track</li></ul>You\'ve got it when: you\'ve raised the tempo at least three times without breaking down — then keep climbing.',
         text_es: 'Persíguelo.<ul><li>Cada pasada limpia: sube el BPM 10 puntos y vuelve a intentarlo</li><li>¿Ya tienes velocidad? Dale ritmo — sostén más la primera nota de cada pareja, como en la grabación</li><li>Después abre el Recorrido de la canción de Seven Nation Army y tócalo sobre la pista de acompañamiento</li></ul>Lo tienes cuando: subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
+      },
+    ],
+  },
+  {
+    id:    'ca-11',
+    number: 4,
+    title:    'Notes on the Low E String',
+    title_es: 'Notas en la cuerda Mi grave',
+    intro:    'You\'ve been landing on frets for Happy Birthday. Today those landings get names — every natural note on the low E string, from open E to the E at fret 12.',
+    intro_es: 'Ya has estado cayendo en trastes para Happy Birthday. Hoy esas caídas reciben nombres — todas las notas naturales de la cuerda Mi grave, desde E al aire hasta E en el traste 12.',
+    steps: [
+      {
+        figure: 'img/ca-lowe-naturals.svg',
+        text: 'This is the low E string — the thick one — with its natural notes circled: the plain letter names, no sharps.<ul><li>E F G A B C D E: it starts on open E (0 = no finger) and lands on E again at fret 12 — same name, higher sound. That repeat is called an octave</li><li>The neck dots are your map: the dots at frets 3, 5 and 7 carry G, A and B, and the double dot at 12 is E again, an octave up</li></ul>',
+        text_es: 'Esta es la cuerda Mi grave — la más gruesa — con sus notas naturales en círculos: los nombres de letra simples, sin sostenidos.<ul><li>E F G A B C D E: empieza al aire (0 = sin dedo) con E y vuelve a caer en E en el traste 12 — mismo nombre, sonido más agudo. Esa repetición se llama octava</li><li>Los puntos del mástil son tu mapa: los puntos de los trastes 3, 5 y 7 llevan G, A y B, y el punto doble del 12 es E otra vez, una octava arriba</li></ul>',
+      },
+      {
+        text: 'Start with the dot notes — the four easiest to find.<ol><li>Pluck the open string and say "E" out loud while it rings</li><li>Fingertip just behind fret 3 — the first dot — pluck and say "G"</li><li>Dot at fret 5: "A". Dot at fret 7: "B"</li></ol>Saying the name while the note rings is the memorizing — don\'t skip it.\nYou\'ve got it when: E–G–A–B in order, out loud, without looking at the diagram. Missed a name? Look once, then start again from open E.',
+        text_es: 'Empieza con las notas de los puntos — las cuatro más fáciles de encontrar.<ol><li>Pulsa la cuerda al aire y di "E" en voz alta mientras suena</li><li>La punta del dedo justo detrás del traste 3 — el primer punto — pulsa y di "G"</li><li>Punto del traste 5: "A". Punto del traste 7: "B"</li></ol>Decir el nombre mientras la nota suena es lo que la graba en la memoria — no te lo saltes.\nLo tienes cuando: E–G–A–B en orden, en voz alta, sin mirar el diagrama. ¿Fallaste un nombre? Mira una vez y empieza de nuevo desde la cuerda al aire.',
+        tab: {
+          caption: 'The dot notes · E G A B',
+          caption_es: 'Las notas de los puntos · E G A B',
+          notes: [
+            { string: 'E', fret: 0, note: 'E', midi: 40 },
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 },
+            { string: 'E', fret: 7, note: 'B', midi: 47 }
+          ]
+        },
+      },
+      {
+        text: 'Four more fill in the row.<ul><li>F at fret 1 — right next door to open E</li><li>C at fret 8 — one fret past the 7-dot</li><li>D at fret 10 — one past the 9-dot</li><li>E at fret 12 — the double dot, back where you started</li></ul>Walk the whole string up and back with the player, saying every name as you land it.\nYou\'ve got it when: up and down — E F G A B C D E and back — without stopping, every name out loud. Lost the thread? Find the nearest dot note and restart from there.',
+        text_es: 'Cuatro más completan la fila.<ul><li>F en el traste 1 — justo al lado de la cuerda al aire</li><li>C en el traste 8 — un traste después del punto del 7</li><li>D en el traste 10 — uno después del punto del 9</li><li>E en el traste 12 — el punto doble, de vuelta a donde empezaste</li></ul>Recorre toda la cuerda subiendo y bajando con el reproductor, diciendo el nombre de cada nota al caer en ella.\nLo tienes cuando: subes y bajas — E F G A B C D E y de regreso — sin detenerte, cada nombre en voz alta. ¿Perdiste el hilo? Busca la nota del punto más cercano y arranca de ahí otra vez.',
+        tab: {
+          caption: 'The whole octave · up and back',
+          caption_es: 'La octava completa · subir y bajar',
+          phrases: [
+            {
+              label: 'Going up',
+              label_es: 'Subiendo',
+              notes: [
+                { string: 'E', fret: 0,  note: 'E', midi: 40 },
+                { string: 'E', fret: 1,  note: 'F', midi: 41 },
+                { string: 'E', fret: 3,  note: 'G', midi: 43 },
+                { string: 'E', fret: 5,  note: 'A', midi: 45 },
+                { string: 'E', fret: 7,  note: 'B', midi: 47 },
+                { string: 'E', fret: 8,  note: 'C', midi: 48 },
+                { string: 'E', fret: 10, note: 'D', midi: 50 },
+                { string: 'E', fret: 12, note: 'E', midi: 52 }
+              ]
+            },
+            {
+              label: 'Coming down',
+              label_es: 'Bajando',
+              notes: [
+                { string: 'E', fret: 12, note: 'E', midi: 52 },
+                { string: 'E', fret: 10, note: 'D', midi: 50 },
+                { string: 'E', fret: 8,  note: 'C', midi: 48 },
+                { string: 'E', fret: 7,  note: 'B', midi: 47 },
+                { string: 'E', fret: 5,  note: 'A', midi: 45 },
+                { string: 'E', fret: 3,  note: 'G', midi: 43 },
+                { string: 'E', fret: 1,  note: 'F', midi: 41 },
+                { string: 'E', fret: 0,  note: 'E', midi: 40 }
+              ]
+            }
+          ]
+        },
+      },
+      {
+        text: 'Play them from memory this time.<ol><li>Cover the screen or turn away from it</li><li>A partner calls a note name — any of the eight. Land on it and pluck it. No partner? Write the eight names on paper, shuffle the order, and call them yourself</li><li>Lift your hand off the neck between calls, so every landing starts from nothing</li></ol>You\'ve got it when: five called notes in a row, no peeking, no buzz. Had to peek? That note goes back in the pile — it comes up again.',
+        text_es: 'Tócalas de memoria esta vez.<ol><li>Tapa la pantalla o dale la espalda</li><li>Un compañero dice el nombre de una nota — cualquiera de las ocho. Cae en ella y púlsala. ¿Sin compañero? Escribe los ocho nombres en papel, revuelve el orden y dilos tú mismo</li><li>Levanta la mano del mástil entre nota y nota, para que cada caída empiece desde cero</li></ol>Lo tienes cuando: cinco notas seguidas al azar, sin mirar, sin zumbido. ¿Tuviste que mirar? Esa nota vuelve al montón — te va a tocar otra vez.',
+      },
+      {
+        text: 'Keep going — no finish line here.<ul><li>Set the player above to 60 BPM and land one note per beat, up and back</li><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Say the names backwards — E D C B A G F E, from the double dot down</li><li>Then quiz a partner and catch their misses</li></ul>You\'ve got it when: you\'ve cleared a full pass at a faster BPM than you started — then keep climbing.',
+        text_es: 'Sigue — aquí no hay meta final.<ul><li>Pon el reproductor de arriba en 60 BPM y cae en una nota por tiempo, subiendo y bajando</li><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Di los nombres al revés — E D C B A G F E, desde el punto doble hacia abajo</li><li>Después ponle una prueba a un compañero y atrapa sus fallos</li></ul>Lo tienes cuando: ya completaste una pasada entera a un BPM más alto que al empezar — y de ahí, sigue subiendo.',
       },
     ],
   },
