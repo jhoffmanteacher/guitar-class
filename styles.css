@@ -110,6 +110,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .btn-translate.active{background:var(--blue-bg);color:var(--blue-text);border-color:var(--blue-text)}
 #google_translate_element{display:none}
 .auth-wall{max-width:400px;margin:80px auto;padding:0 20px;text-align:center}
+/* "Checking your sign-in…" note shown while Firebase resolves the previous
+   session (see index.html #auth-checking) — quiet on purpose, so it reads as
+   a beat of loading rather than a page asking for anything. */
+.auth-checking p{font-size:1rem;color:var(--text2);margin:24px 0;animation:authCheckPulse 1.6s ease-in-out infinite}
+@keyframes authCheckPulse{0%,100%{opacity:.55}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.auth-checking p{animation:none}}
 .auth-wall h2{font-size:1.5rem;font-weight:500;margin-bottom:10px;font-family:var(--font-display)}
 .auth-wall p{font-size:1rem;color:var(--text2);line-height:1.6;margin-bottom:28px}
 .btn-google{display:inline-flex;align-items:center;gap:10px;padding:10px 20px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);font-size:1rem;cursor:pointer}

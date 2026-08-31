@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-31 — Signing in no longer bounces you back to the sign-in page
+
+### Fixed
+
+- **The site sometimes signed you in with Google, flashed back to the sign-in
+  page, and made you do it all again.** That was the site updating itself to a
+  new version at the worst possible moment — right in the middle of your
+  sign-in. Now it waits until your sign-in finishes before refreshing.
+- While the site checks whether you're already signed in, it now says
+  "Checking your sign-in…" instead of showing the sign-in buttons. So a quick
+  refresh no longer looks like you were logged out when you weren't.
+
 ## 2026-08-31 — The Low E String activity gets two self-quizzes
 
 ### Added

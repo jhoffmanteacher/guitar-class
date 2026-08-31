@@ -182,6 +182,7 @@
     'header.translateTitle': { en: 'Translate to Spanish', es: 'Cambiar a inglés' },
 
     // ── Auth wall ──
+    'auth.checking':      { en: 'Checking your sign-in…', es: 'Comprobando tu inicio de sesión…' },
     'auth.title':         { en: 'Welcome to Guitar Class', es: 'Bienvenido a la clase de guitarra' },
     'auth.body':          { en: 'Sign in with your school Google account to access practice materials and assessment information for class.',
                              es: 'Inicia sesión con tu cuenta de Google de la escuela para acceder a los materiales de práctica y la información de evaluación de la clase.' },

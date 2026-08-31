@@ -269,12 +269,19 @@ function signIn(){
   // ready to load progress the moment they're back. Errors are ignored — the
   // real load attempt (ensureDb) will surface any problem.
   loadFirestoreSdk().catch(()=>{});
+  // Flag read by the service-worker update handler at the bottom of this file:
+  // a post-deploy auto-reload while the Google popup is open destroys the
+  // pending signInWithPopup promise, so the student finishes the popup and
+  // lands back on the sign-in wall having signed in for nothing — the
+  // "signed me in, then made me do it again" bug. The reload waits for this.
+  window.__authPopupPending = true;
   auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
     .catch(e=>{
       // The student just closed/cancelled the popup — not an error worth nagging about.
       if(e && (e.code==='auth/popup-closed-by-user' || e.code==='auth/cancelled-popup-request')) return;
       showAuthError(t('auth.signInFailed'));
-    });
+    })
+    .finally(()=>{ window.__authPopupPending = false; });
 }
 /* Sign-out on a shared Chromebook has to be a hard reset, not a state reset.
    Two things went wrong when it wasn't:
@@ -313,7 +320,27 @@ if(IS_LOCALHOST){
   if(_devBtn) _devBtn.style.display='';
 }
 
+/* The auth wall boots in a neutral "Checking your sign-in…" state
+   (#auth-checking, index.html) and only shows the Sign in with Google buttons
+   once Firebase has actually answered "signed out". Without this, the sign-in
+   wall was the default on every page load — so the automatic post-deploy
+   reload (service worker, bottom of this file) flashed it at students whose
+   session was about to restore fine, and they'd start a second sign-in they
+   didn't need. The 6 s timer is a safety net: if onAuthStateChanged somehow
+   never fires (it always should once the SDK is up), the student still gets
+   a sign-in button rather than an eternal spinner. showFirebaseLoadError()
+   replaces the whole wall, so the blocked-SDK path is unaffected. */
+function revealAuthWallSignIn(){
+  const c = document.getElementById('auth-checking');
+  const s = document.getElementById('auth-signin');
+  if(c) c.hidden = true;
+  if(s) s.hidden = false;
+}
+let _authRevealTimer = firebaseReady ? setTimeout(revealAuthWallSignIn, 6000) : null;
+if(!firebaseReady) revealAuthWallSignIn();   // wall content is being replaced anyway — don't strand the checking note
+
 if(auth) auth.onAuthStateChanged(async user=>{
+  clearTimeout(_authRevealTimer);
   if(user){
     currentUser = user;
     if(IS_TEACHER_MODE){ showTeacherApp(user); }
@@ -327,6 +354,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     if(typeof lqStopListening === 'function') lqStopListening();       // and the live-quiz listener must not keep firing under the next student
     practiceLog = loadLocalPracticeLog();   // per-skill rep history: back to the local copy on sign-out
     _moduleStripStates = {};   // next user's first strip render is a first paint, not a celebration
+    revealAuthWallSignIn();   // a real "signed out" answer — checking is over, show the buttons
     document.getElementById('auth-wall').style.display='block';
     document.getElementById('app').style.display='none';
     document.getElementById('teacher-app').style.display='none';
@@ -7181,8 +7209,12 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
       if (!hadController || window.__swReloading) return;
       window.__swReloading = true;
       const reload = () => {
-        // Don't yank the page out from under a live mic check / count-in.
-        if (window.coachMicLive) { setTimeout(reload, 1500); return; }
+        // Don't yank the page out from under a live mic check / count-in —
+        // and never while a Google sign-in popup is open (__authPopupPending,
+        // set in signIn()): reloading the opener destroys the pending
+        // signInWithPopup promise, so the student would finish the popup and
+        // land back on the sign-in wall, forced to sign in a second time.
+        if (window.coachMicLive || window.__authPopupPending) { setTimeout(reload, 1500); return; }
         location.reload();
       };
       reload();
