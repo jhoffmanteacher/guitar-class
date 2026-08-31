@@ -4085,7 +4085,10 @@ function sdSaveBest(c, n){
     if((parseInt(sessionStorage.getItem(sdSessionKey(c)), 10) || 0) < n) sessionStorage.setItem(sdSessionKey(c), String(n));
   } catch(e){}
   // Firestore rejects the dev-bypass uid — session best above still counts.
+  // Teacher mode is previewing a student's activity, not practising: the
+  // session best above is enough, nothing is filed on the teacher's own doc.
   if(!currentUser || (typeof isDevBypassUser === 'function' && isDevBypassUser())) return;
+  if(typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) return;
   if(!games.sd) games.sd = {};
   if((games.sd[sdPileKey(c)] || 0) >= n) return;
   games.sd[sdPileKey(c)] = n;
@@ -4532,6 +4535,7 @@ function dkBest(id){
 function dkSaveBest(id, n){
   try{ if((parseInt(sessionStorage.getItem('dkBest:'+id),10)||0) < n) sessionStorage.setItem('dkBest:'+id, String(n)); }catch(e){}
   if(!currentUser || (typeof isDevBypassUser === 'function' && isDevBypassUser())) return;
+  if(typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) return;   // preview, not practice — see sdSaveBest
   if(!games.dk) games.dk = {};
   if((games.dk[id]||0) >= n) return;
   games.dk[id] = n;

@@ -814,6 +814,14 @@ function renderTeacherActivityDetail(id){
     // suppressCoach: the Listening Coach mic-check button opens a panel
     // that's also inside #app — pointless (and confusing) to show here.
     if(s.tab) media.push(buildTab(s.tab,{keyPrefix:`bpm:ca-preview:${a.id}:${si}:tab`,suppressCoach:true}));
+    // Drills are playable in the preview — this is where the day's activity
+    // gets checked before class, and a quiz you can't try isn't previewed.
+    // Own key namespace (`ca-preview-…`) so a drill open here and the same
+    // one in the student panel don't share state; sdSaveBest/dkSaveBest skip
+    // the write in teacher mode, so a teacher trying it doesn't file a best
+    // score on their own doc. No teardown needed on the way out: sdTick
+    // stops itself once its box leaves the DOM.
+    if(s.drill && typeof renderShuffleDrill==='function') media.push(renderShuffleDrill(s.drill,`ca-preview-${a.id}-s${si}`,null));
     return `<div class="tr-card ca-prev-step" style="margin-bottom:12px"><div class="tr-name">Step ${si+1}</div>${wrapGotItWhen(s.text||'')}${media.join('')}</div>`;
   }).join('');
   box.innerHTML=`${back}
