@@ -9,12 +9,11 @@ see `WORKFLOW.md` and the git commit log.
 
 ### Added
 
-- **"Notes on the Low E String" (activity #4) now quizzes you two ways.** The
-  "play them from memory" step deals you a note name to go find on the string,
-  and a new step after it flips the question around: it deals you a fret and
-  you name the note before the three-second ring runs out. Ten rounds, and the
-  results screen lists exactly which frets tripped you up, so you know what to
-  run again.
+- **"Notes on the Low E String" (activity #4) now quizzes you two ways.** First
+  a fret quiz: it deals you a fret and you name the note before the
+  three-second ring runs out, ten rounds, with a results screen listing exactly
+  which frets tripped you up. Then it flips around and goes back to the guitar
+  — a deck deals you a note name and you go find it on the string.
 - Your best score on the fret quiz is saved, so you can come back and beat it.
 
 ### Changed
