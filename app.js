@@ -6856,6 +6856,13 @@ function caClosePanel(){
   if(screen) screen.setAttribute('hidden', '');
   const btn = document.getElementById('class-activities-btn');
   if(btn && wasOpen) btn.focus();   // return focus to where the page was opened
+  /* A Shuffle Drill in an activity step keeps its countdown interval (and any
+     pending "next card" timeout) running once this screen is merely hidden —
+     nothing rebuilds it on the way out. Same teardown, and same reasoning, as
+     the set-switch in switchTabById; a no-op for drills not mid-round. */
+  if(typeof shuffleDrills === 'object' && typeof sdStop === 'function'){
+    Object.keys(shuffleDrills).forEach(k => sdStop(k));
+  }
   syncExploreNav();
 }
 function openClassActivitiesScreen(){
@@ -6902,6 +6909,15 @@ function caStepHtml(a, step, si, isOpen, isDone){
     parts.push(`<button type="button" class="rp-trigger" onclick="loadPanel('youtube','${escAttr(url)}','${escAttr(t('nav.classActivities'))}','YouTube')">&#x25B6; ${vLabel}</button>`);
   }
   if(step.tab) parts.push(buildTab(step.tab, { keyPrefix: `bpm:ca:${a.id}:${si}:tab` }));
+  /* Same step-level drill widgets the module sets get (shuffle/deck/ear) —
+     activities replace paper self-quizzes the same way module steps do. The
+     key namespace is `<activityId>-s<i>`, which can't collide with the
+     module keys (`<setId>-<ns>-<i>`) sharing these state maps. No `wid`:
+     that's a module set id, used only for the peek check (a missing one
+     reads as "not peeking", which is right — activities have no peek mode)
+     and for the skill check-off, which activity drills don't offer since
+     `drill.skill` is a module skill id and activities have none. */
+  if(step.drill) parts.push(renderShuffleDrill(step.drill, `${a.id}-s${si}`, null));
   // Step text is first-party authored HTML, same trust level as module step
   // content — trusted (not escHtml'd) so <ol>/<ul> markup renders per the
   // house list rule, and wrapGotItWhen() can style the got-it-when sentence.

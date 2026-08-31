@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-31 — The Low E String activity gets two self-quizzes
+
+### Added
+
+- **"Notes on the Low E String" (activity #4) now quizzes you two ways.** The
+  "play them from memory" step deals you a note name to go find on the string,
+  and a new step after it flips the question around: it deals you a fret and
+  you name the note before the three-second ring runs out. Ten rounds, and the
+  results screen lists exactly which frets tripped you up, so you know what to
+  run again.
+- Your best score on the fret quiz is saved, so you can come back and beat it.
+
+### Changed
+
+- That step no longer asks you to write the note names on paper and shuffle
+  them — the deck on screen does it for you, and it re-deals anything you miss.
+
 ## 2026-08-28 — "Seven Nation Army" is A-string only; Module 2 Set 1 previews "Smoke on the Water"
 
 ### Changed
