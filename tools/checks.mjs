@@ -846,6 +846,7 @@ function validateClassActivities() {
         const sWhere = `${where} · steps[${si}]`;
         if (!s || typeof s !== 'object') { err(`${sWhere}: not an object`); problems++; return; }
         reqEs(sWhere, s, 'text');
+        reqEs(sWhere, s, 'label');   // optional step head ("Step 4: Tune it back")
         if (s.figure) {
           try { readFileSync(join(ROOT, s.figure)); }
           catch { err(`${sWhere}: figure "${s.figure}" does not exist`); problems++; }

@@ -6932,6 +6932,16 @@ function caFormatDate(iso){
   const lang = (typeof getLang === 'function' && getLang() === 'es') ? 'es' : 'en';
   return d.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { weekday:'short', month:'numeric', day:'numeric' });
 }
+/* "Step 4" on its own, or "Step 4: Tune it back" when the step carries an
+   optional `label`/`label_es`. The label is what makes a collapsed ladder
+   scannable — a student looking for the tuning stop shouldn't have to open
+   four steps to find it. Plain text, escaped, no markup. Mirrored in
+   teacher.js's renderTeacherActivityDetail() (two renderers, see CLAUDE.md). */
+function caStepHeadText(step, si){
+  const n = t('ca.stepLabel', {n: si + 1});
+  const label = step && step.label ? tf(step, 'label') : '';
+  return label ? `${n}: ${label}` : n;
+}
 function caStepHtml(a, step, si, isOpen, isDone){
   const parts = [];
   if(step.figure) parts.push(`<span class="step-figure"><img src="${escAttr(step.figure)}" alt=""></span>`);
@@ -6958,7 +6968,7 @@ function caStepHtml(a, step, si, isOpen, isDone){
   return `<li class="ca-step${isDone ? ' ca-step-done' : ''}${isOpen ? '' : ' ca-step-collapsed'}" data-idx="${si}">`
     + `<button type="button" class="ca-step-head" aria-expanded="${isOpen}" onclick="caToggleStepOpen(this)">`
     + `<span class="ca-step-status" aria-hidden="true">${caStepStatusHtml(si + 1, isDone)}</span>`
-    + `<span class="ca-step-label">${escHtml(t('ca.stepLabel', {n: si + 1}))}</span>`
+    + `<span class="ca-step-label">${escHtml(caStepHeadText(step, si))}</span>`
     + `<span class="ca-step-chev" aria-hidden="true">&#9656;</span>`
     + `</button>`
     + `<div class="ca-step-detail">${detailHtml}</div>`

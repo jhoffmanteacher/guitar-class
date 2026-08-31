@@ -18,6 +18,12 @@ see `WORKFLOW.md` and the git commit log.
 - Everything on it is already on the site, so you can run it even if you
   haven't finished the earlier activities.
 
+### Changed
+
+- **Activity steps can now carry a name, so a closed step reads "Step 4: Tune
+  it back" instead of just "Step 4".** You can see what a stop is before you
+  open it, and jump straight to the one you want.
+
 ## 2026-08-31 — Signing in no longer bounces you back to the sign-in page
 
 ### Fixed
