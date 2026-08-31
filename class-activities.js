@@ -1127,4 +1127,100 @@ window.CLASS_ACTIVITIES = [
       },
     ],
   },
+  {
+    id:    'ca-12',
+    number: 11,
+    title:    'Sub Day Circuit',
+    title_es: 'Circuito para el día con suplente',
+    intro:    'Your teacher is out today, so this one runs itself: seven stops, in order, start to finish. Note names, tuning, and Happy Birthday from memory — everything here you have already met, and today you do it without anyone walking you through it.',
+    intro_es: 'Hoy tu maestro no está, así que este circuito se maneja solo: siete paradas, en orden, de principio a fin. Nombres de notas, afinación y Happy Birthday de memoria — todo lo de aquí ya lo conociste, y hoy lo haces sin que nadie te lleve de la mano.',
+    steps: [
+      {
+        figure: 'img/ca-lowe-naturals.svg',
+        text: 'The low E string — the thick one — with its natural notes circled: the plain letter names, no sharps.<ul><li>E F G A B C D E, from open E (0 = no finger) up to the E at fret 12 — same name, higher sound</li><li>The neck dots are your map: the dots at frets 3, 5 and 7 carry G, A and B, and the double dot at 12 is E again</li></ul>The next two stops test exactly this with the diagram covered. Read it once, then cover it.',
+        text_es: 'La cuerda Mi grave — la más gruesa — con sus notas naturales en círculos: los nombres de letra simples, sin sostenidos.<ul><li>E F G A B C D E, desde la cuerda al aire (0 = sin dedo) hasta el E del traste 12 — mismo nombre, sonido más agudo</li><li>Los puntos del mástil son tu mapa: los puntos de los trastes 3, 5 y 7 llevan G, A y B, y el punto doble del 12 es E otra vez</li></ul>Las dos paradas que siguen prueban exactamente esto con el diagrama tapado. Léelo una vez y después tápalo.',
+      },
+      {
+        text: 'Cover the diagram and test the names cold — the quiz deals you a fret and you name the note, three seconds a card.<ol><li>Guitar in your lap, diagram covered or scrolled off the screen</li><li>Say the note out loud first, then press its button — saying it is the skill</li><li>Play the fret too, so your hand and your mouth learn the name together</li></ol>You\'ve got it when: 9 of 10 in time. A couple of frets tripping you? The results screen lists exactly which — run it again watching for those.',
+        text_es: 'Tapa el diagrama y prueba los nombres en frío — el juego te reparte un traste y tú dices la nota, tres segundos por carta.<ol><li>Guitarra en las piernas, diagrama tapado o desplazado fuera de la pantalla</li><li>Di la nota en voz alta primero, y después presiona su botón — decirla es la habilidad</li><li>Toca el traste también, para que tu mano y tu boca aprendan el nombre juntas</li></ol>Lo tienes cuando: 9 de 10 dentro del tiempo. ¿Hay un par de trastes que te traban? La pantalla de resultados te dice cuáles — repite el juego vigilando esos.',
+        drill: { type: 'shuffle', string: 'lowE', maxFret: 12, rounds: 10, seconds: 3, pile: 'naturals' },
+      },
+      {
+        text: 'Flip it around and put it in your hands — the deck deals you a note name, and you go find it on the string.<ol><li>Deal a card, land on that note, pluck it. Next card once it rings clean</li><li>Lift your hand off the neck between cards, so every landing starts from nothing</li><li>E lives in two places — fret 0 and fret 12. Either one counts</li></ol>You\'ve got it when: five cards in a row, no peeking, no buzz. Had to peek? Deal that one again before you move on.',
+        text_es: 'Dale la vuelta y llévalo a las manos — el mazo te reparte el nombre de una nota, y tú la buscas en la cuerda.<ol><li>Reparte una carta, cae en esa nota y púlsala. Otra carta cuando suene limpia</li><li>Levanta la mano del mástil entre carta y carta, para que cada caída empiece desde cero</li><li>E vive en dos lugares — traste 0 y traste 12. Cualquiera de los dos cuenta</li></ol>Lo tienes cuando: cinco cartas seguidas, sin mirar, sin zumbido. ¿Tuviste que mirar? Reparte esa otra vez antes de seguir.',
+        drill: { type: 'deck', deck: 'naturals' },
+      },
+      {
+        text: 'Take the guitar out of tune on purpose, then put it back — all six strings, under two minutes.<ol><li>Loosen every string about half a turn: low E, A, D, G, B, high e. The pitch drops as you loosen. Loosening only, so every fix from here is a tighten</li><li>Clip the tuner on and start a timer at 2:00</li><li>One string at a time, in that order: pluck, read the letter, turn the peg a tiny amount, pluck again</li><li>Went past it, too sharp? Loosen back below the note and come up to it — never keep tightening past your target</li></ol>You\'ve got it when: all six strings read their own letter, in green, inside 2:00. Ran out of clock? Reset the timer and run it again — the second pass is always faster.',
+        text_es: 'Desafina la guitarra a propósito, y después vuelve a afinarla — las seis cuerdas, en menos de dos minutos.<ol><li>Afloja cada cuerda como media vuelta: Mi grave (E), La (A), Re (D), Sol (G), Si (B), mi aguda (E). El tono baja mientras aflojas. Solo aflojar, para que de aquí en adelante toda corrección sea apretar</li><li>Pon el afinador de pinza y arranca un temporizador en 2:00</li><li>Una cuerda a la vez, en ese orden: pulsa, lee la letra, gira la clavija muy poquito, pulsa otra vez</li><li>¿Te pasaste y quedó muy aguda? Afloja por debajo de la nota y sube hasta ella — nunca sigas apretando de largo</li></ol>Lo tienes cuando: las seis cuerdas marcan su propia letra, en verde, dentro de 2:00. ¿Se te acabó el tiempo? Reinicia el temporizador y hazlo otra vez — la segunda pasada siempre sale más rápida.',
+      },
+      {
+        text: 'Happy Birthday, all four phrases, on the low E string. Play it once with the tab below, then cover the screen and play the whole song again from memory.<ul><li>Phrase A: open, open, fret 2, open, fret 5, fret 4</li><li>Phrase B starts the same and ends higher — fret 7, then fret 5</li><li>Phrase C makes the big jump: open, open, fret 12, fret 9, then walk home 5, 4, 2</li><li>Phrase D starts highest of all: 10, 10, 9, 5, 7, 5</li></ul>The A-string version counts too — if that is the one you know, play that one from memory instead.\nYou\'ve got it when: all four phrases start to finish, from memory, at any speed, without stopping. Lost the thread? Uncover the tab for that one phrase, then start the whole song over.',
+        text_es: 'Happy Birthday, las cuatro frases, en la cuerda Mi grave. Tócala una vez con la tablatura de abajo, y después tapa la pantalla y toca la canción completa otra vez, de memoria.<ul><li>Frase A: al aire, al aire, traste 2, al aire, traste 5, traste 4</li><li>La frase B empieza igual y termina más arriba — traste 7, y luego traste 5</li><li>La frase C da el salto grande: al aire, al aire, traste 12, traste 9, y de ahí regresa caminando 5, 4, 2</li><li>La frase D empieza más arriba que ninguna: 10, 10, 9, 5, 7, 5</li></ul>La versión con la cuerda La también cuenta — si esa es la que sabes, toca esa de memoria.\nLo tienes cuando: las cuatro frases de principio a fin, de memoria, a cualquier velocidad, sin detenerte. ¿Perdiste el hilo? Destapa la tablatura solo de esa frase, y después empieza la canción completa otra vez.',
+        tab: {
+          caption: 'Whole song · phrases A–D · low E string only',
+          caption_es: 'Canción completa · frases A–D · solo la cuerda Mi grave',
+          phrases: [
+            {
+              label: 'Phrase A — "Hap-py birth-day to you"',
+              label_es: 'Frase A — "Hap-py birth-day to you"',
+              notes: [
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 2, note: 'F#', midi: 42 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 5, note: 'A',  midi: 45 },
+                { string: 'E', fret: 4, note: 'G#', midi: 44 }
+              ]
+            },
+            {
+              label: 'Phrase B — "Hap-py birth-day to you" (the ending climbs higher)',
+              label_es: 'Frase B — "Hap-py birth-day to you" (el final sube más alto)',
+              notes: [
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 2, note: 'F#', midi: 42 },
+                { string: 'E', fret: 0, note: 'E',  midi: 40 },
+                { string: 'E', fret: 7, note: 'B',  midi: 47 },
+                { string: 'E', fret: 5, note: 'A',  midi: 45 }
+              ]
+            },
+            {
+              label: 'Phrase C — "Hap-py birth-day dear ______"',
+              label_es: 'Frase C — "Hap-py birth-day dear ______"',
+              notes: [
+                { string: 'E', fret: 0,  note: 'E',  midi: 40 },
+                { string: 'E', fret: 0,  note: 'E',  midi: 40 },
+                { string: 'E', fret: 12, note: 'E',  midi: 52 },
+                { string: 'E', fret: 9,  note: 'C#', midi: 49 },
+                { string: 'E', fret: 5,  note: 'A',  midi: 45 },
+                { string: 'E', fret: 4,  note: 'G#', midi: 44 },
+                { string: 'E', fret: 2,  note: 'F#', midi: 42 }
+              ]
+            },
+            {
+              label: 'Phrase D — "Hap-py birth-day to you"',
+              label_es: 'Frase D — "Hap-py birth-day to you"',
+              notes: [
+                { string: 'E', fret: 10, note: 'D',  midi: 50 },
+                { string: 'E', fret: 10, note: 'D',  midi: 50 },
+                { string: 'E', fret: 9,  note: 'C#', midi: 49 },
+                { string: 'E', fret: 5,  note: 'A',  midi: 45 },
+                { string: 'E', fret: 7,  note: 'B',  midi: 47 },
+                { string: 'E', fret: 5,  note: 'A',  midi: 45 }
+              ]
+            }
+          ]
+        },
+      },
+      {
+        text: 'Play it from memory again, this time chasing the sound instead of the notes.<ul><li>The fingertip lands right behind the fret — not on top of the metal, not halfway back toward the last one</li><li>One string per pluck. A second string ringing means the pick is going too far; slow it down and watch where it lands</li><li>Let the notes ring into each other: keep the finger down until the next note starts</li></ul>You\'ve got it when: a full pass from memory with no buzz and no accidental second string. Buzzing on one note? Play that note ten times alone, moving your fingertip closer to the fret each try.',
+        text_es: 'Tócala de memoria otra vez, ahora persiguiendo el sonido en lugar de las notas.<ul><li>La punta del dedo cae justo detrás del traste — no encima del metal, ni a medio camino del traste anterior</li><li>Una cuerda por pulsación. Si suena una segunda cuerda es que la púa se está pasando de largo; muévela más despacio y mira dónde cae</li><li>Deja que las notas se enlacen: mantén el dedo puesto hasta que empiece la siguiente</li></ul>Lo tienes cuando: una pasada entera de memoria sin zumbido y sin una segunda cuerda accidental. ¿Zumba una nota en particular? Toca esa nota sola diez veces, acercando la punta del dedo al traste en cada intento.',
+      },
+      {
+        text: 'Keep going — no finish line here, and no reason to sit once you are through the circuit.<ul><li>Set the player above to 60 BPM and play Happy Birthday one note per beat, from memory. Every clean pass, raise it by 10</li><li>Or open an activity you never finished and work it to the end</li><li>Or open your module and run the next section</li><li>Or teach the low E note names to someone at your table and quiz them from the diagram</li></ul>You\'ve got it when: you have cleared a full pass at a faster BPM than you started — then keep climbing.',
+        text_es: 'Sigue — aquí no hay meta final, ni razón para quedarte sentado cuando termines el circuito.<ul><li>Pon el reproductor de arriba en 60 BPM y toca Happy Birthday una nota por tiempo, de memoria. Cada pasada limpia, súbelo 10 puntos</li><li>O abre una actividad que nunca terminaste y llévala hasta el final</li><li>O abre tu módulo y haz la sección que sigue</li><li>O enséñale los nombres de las notas de la cuerda Mi grave a alguien de tu mesa y ponle una prueba con el diagrama</li></ul>Lo tienes cuando: ya completaste una pasada entera a un BPM más alto que al empezar — y de ahí, sigue subiendo.',
+      },
+    ],
+  },
 ];

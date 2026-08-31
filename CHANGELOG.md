@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-31 — A circuit you can run without a teacher in the room
+
+### Added
+
+- **"Sub Day Circuit" — a new activity you work through on your own, in
+  order, seven stops start to finish.** Name the notes on the low E string
+  two ways (a fret quiz, then a deck that sends you back to the guitar),
+  take your guitar out of tune on purpose and get all six strings back in
+  under two minutes, play Happy Birthday from memory, then play it again
+  chasing clean tone. The last stop has no finish line.
+- Everything on it is already on the site, so you can run it even if you
+  haven't finished the earlier activities.
+
 ## 2026-08-31 — Signing in no longer bounces you back to the sign-in page
 
 ### Fixed
