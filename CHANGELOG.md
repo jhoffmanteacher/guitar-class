@@ -5,6 +5,20 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-31 — Signing in once is enough
+
+### Fixed
+
+- **Signing in no longer looks like it didn't work.** After you finished the
+  Google window, the site still had to fetch your progress — and on slow
+  school Wi-Fi that took several seconds with the "Sign in with Google" page
+  still on screen, so it looked like nothing had happened and you'd sign in
+  again. Now the moment you're in, your name appears in the top corner and the
+  page says "Signed in — loading your progress…" until your work is on screen.
+- **Clicking Sign in a second time can't undo the first one.** It used to
+  cancel the sign-in already in progress, which is what actually forced the
+  second trip through Google. Extra clicks now do nothing.
+
 ## 2026-08-31 — Print an in-class activity
 
 ### Added

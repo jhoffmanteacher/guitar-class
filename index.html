@@ -86,17 +86,27 @@
   </div>
 </header>
 <div id="auth-wall" class="auth-wall">
-  <!-- Two states, swapped by app.js. #auth-checking shows first: on every page
-       load Firebase needs a moment to decide whether a previous session is
-       still good (the first onAuthStateChanged callback). Before this split,
-       the full "Sign in with Google" wall was the default — so every reload,
-       including the automatic post-deploy one from the service worker, flashed
-       the sign-in page at students who were already signed in, and they'd
-       start a whole second sign-in. Now they see a quiet checking note until
-       auth actually resolves; revealAuthWallSignIn() (app.js) swaps to the
-       buttons only on a real signed-out answer (or a 6 s safety timeout). -->
+  <!-- Two states, swapped by app.js. #auth-checking is the button-free one, and
+       it shows both on the way in and on the way through:
+
+         1. On every page load Firebase needs a moment to decide whether a
+            previous session is still good (the first onAuthStateChanged
+            callback). Before this split, the full "Sign in with Google" wall
+            was the default — so every reload, including the automatic
+            post-deploy one from the service worker, flashed the sign-in page
+            at students who were already signed in.
+         2. Once auth answers "signed in", showApp() is still two Firestore
+            round trips away (SDK download → progress → class config). On
+            school Wi-Fi that is 5-15 seconds, and the sign-in button used to
+            sit there live the whole time — so a student who had just finished
+            the Google popup saw the sign-in page and clicked it again. That is
+            the "it made me sign in twice" bug. setAuthWallChecking() swaps the
+            line to auth.loading and takes the button away.
+
+       revealAuthWallSignIn() (app.js) brings the buttons back only on a real
+       signed-out answer (or a 6 s safety timeout). -->
   <div id="auth-checking" class="auth-checking">
-    <p data-i18n="auth.checking">Checking your sign-in&hellip;</p>
+    <p id="auth-checking-msg" data-i18n="auth.checking">Checking your sign-in&hellip;</p>
   </div>
   <div id="auth-signin" hidden>
     <h2 data-i18n="auth.title">Welcome to Guitar Class</h2>

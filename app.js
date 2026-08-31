@@ -264,6 +264,14 @@ function showFirebaseLoadError(){
   if(typeof applyI18n === 'function') applyI18n(wall);
 }
 function signIn(){
+  /* Re-entrancy guard. A second click is never useful and is sometimes
+     destructive: a second signInWithPopup while the first is still open makes
+     Firebase reject the FIRST one with auth/cancelled-popup-request, so the
+     student's completed sign-in is thrown away and they have to start over —
+     the "it signed me in and then made me do it again" report. The header
+     button and the wall button both land here, and both are reachable while a
+     sign-in is already in flight. */
+  if(window.__authPopupPending || currentUser) return;
   showAuthError('');
   // Pre-warm the Firestore SDK while the student is in the Google popup, so it's
   // ready to load progress the moment they're back. Errors are ignored — the
@@ -272,16 +280,23 @@ function signIn(){
   // Flag read by the service-worker update handler at the bottom of this file:
   // a post-deploy auto-reload while the Google popup is open destroys the
   // pending signInWithPopup promise, so the student finishes the popup and
-  // lands back on the sign-in wall having signed in for nothing — the
-  // "signed me in, then made me do it again" bug. The reload waits for this.
+  // lands back on the sign-in wall having signed in for nothing. The reload
+  // waits for this.
   window.__authPopupPending = true;
-  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
-    .catch(e=>{
-      // The student just closed/cancelled the popup — not an error worth nagging about.
-      if(e && (e.code==='auth/popup-closed-by-user' || e.code==='auth/cancelled-popup-request')) return;
-      showAuthError(t('auth.signInFailed'));
-    })
-    .finally(()=>{ window.__authPopupPending = false; });
+  try{
+    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+      .catch(e=>{
+        // The student just closed/cancelled the popup — not an error worth nagging about.
+        if(e && (e.code==='auth/popup-closed-by-user' || e.code==='auth/cancelled-popup-request')) return;
+        showAuthError(t('auth.signInFailed'));
+      })
+      .finally(()=>{ window.__authPopupPending = false; });
+  } catch(e){
+    // Nothing attached the .finally() above, so clear the flag here or the
+    // guard would lock the button out for the rest of the visit.
+    window.__authPopupPending = false;
+    showAuthError(t('auth.signInFailed'));
+  }
 }
 /* Sign-out on a shared Chromebook has to be a hard reset, not a state reset.
    Two things went wrong when it wasn't:
@@ -320,16 +335,37 @@ if(IS_LOCALHOST){
   if(_devBtn) _devBtn.style.display='';
 }
 
-/* The auth wall boots in a neutral "Checking your sign-in…" state
-   (#auth-checking, index.html) and only shows the Sign in with Google buttons
-   once Firebase has actually answered "signed out". Without this, the sign-in
-   wall was the default on every page load — so the automatic post-deploy
-   reload (service worker, bottom of this file) flashed it at students whose
-   session was about to restore fine, and they'd start a second sign-in they
-   didn't need. The 6 s timer is a safety net: if onAuthStateChanged somehow
-   never fires (it always should once the SDK is up), the student still gets
-   a sign-in button rather than an eternal spinner. showFirebaseLoadError()
-   replaces the whole wall, so the blocked-SDK path is unaffected. */
+/* The auth wall has two states (index.html): a button-free note
+   (#auth-checking) and the Sign in with Google buttons (#auth-signin). The
+   note is the default and the buttons appear only once Firebase has actually
+   answered "signed out".
+
+   Both directions exist to stop a student signing in twice:
+   - Before this split the sign-in wall was the default on every page load, so
+     the automatic post-deploy reload (service worker, bottom of this file)
+     flashed it at students whose session was about to restore fine.
+   - And a "signed in" answer is not the end of it — showApp() only runs after
+     loadProgress() + loadClassConfig(), i.e. a ~100 KB Firestore SDK download
+     and two reads. On school Wi-Fi that leaves the student looking at a live
+     Sign in with Google button for 5-15 seconds AFTER they finished the Google
+     popup, which is exactly when they click it again. So the signed-in branch
+     of onAuthStateChanged puts the wall back into the note state
+     ('auth.loading') before it awaits anything.
+
+   The 6 s timer is a safety net: if onAuthStateChanged somehow never fires (it
+   always should once the SDK is up), the student still gets a sign-in button
+   rather than an eternal note. showFirebaseLoadError() replaces the whole
+   wall, so the blocked-SDK path is unaffected. */
+function setAuthWallChecking(key){
+  const c = document.getElementById('auth-checking');
+  const p = document.getElementById('auth-checking-msg');
+  const s = document.getElementById('auth-signin');
+  // Retag for i18n as well as retitle, so a language switch mid-load re-renders
+  // the line that's actually showing rather than snapping back to 'auth.checking'.
+  if(p){ p.setAttribute('data-i18n', key); p.textContent = t(key); }
+  if(c) c.hidden = false;
+  if(s) s.hidden = true;
+}
 function revealAuthWallSignIn(){
   const c = document.getElementById('auth-checking');
   const s = document.getElementById('auth-signin');
@@ -343,6 +379,15 @@ if(auth) auth.onAuthStateChanged(async user=>{
   clearTimeout(_authRevealTimer);
   if(user){
     currentUser = user;
+    // They're in — but showApp() is still two Firestore round trips away.
+    // Take BOTH sign-in buttons off the screen NOW, before the awaits below,
+    // or the student spends that whole wait looking at a sign-in page they
+    // just came back from and signs in a second time. See setAuthWallChecking().
+    // The header goes straight to the real user header rather than blank: their
+    // own name appearing is the clearest possible "it worked, stop clicking",
+    // and it's the same markup showApp()/showTeacherApp() is about to write.
+    setAuthWallChecking('auth.loading');
+    document.getElementById('user-area').innerHTML = userHeaderHtml(user);
     if(IS_TEACHER_MODE){ showTeacherApp(user); }
     else {
       await loadProgress(); await loadClassConfig();
