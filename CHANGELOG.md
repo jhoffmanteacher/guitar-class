@@ -5,6 +5,21 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-08-31 — Print an in-class activity
+
+### Added
+
+- **Every in-class activity now has a print button.** Tap the printer icon on
+  an activity and you get that one activity as a paper handout — every step
+  opened up, with the diagrams and the tab, and none of the site around it.
+  Useful when the Chromebooks or the Wi-Fi aren't cooperating.
+
+### Fixed
+
+- **Printing no longer cuts off after the first page.** Anything longer than a
+  page — a set, a practice routine, an activity — printed only its first page
+  and quietly dropped the rest.
+
 ## 2026-08-31 — A circuit you can run without a teacher in the room
 
 ### Added

@@ -1155,8 +1155,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   /* Video buttons become plain text labels */
   .rp-trigger{color:var(--text) !important;border:none !important;background:none !important;padding:0 !important}
 
-  /* Layout: single column, no sticky, allow full height */
-  .app-layout{display:block !important}
+  /* Layout: single column, no sticky, allow full height.
+     #app is the scroll lock on screen — height:calc(100dvh - var(--hdr)) with
+     overflow:hidden (see its rule above). Left alone for print that clips the
+     handout to a single page and silently drops everything past it, because
+     `dvh` resolves against the page box; the inner scrollport just isn't
+     there to scroll. Unlock it here, for every print path. */
+  #app{height:auto !important;overflow:visible !important}
+  .app-layout{display:block !important;height:auto !important}
   .main{max-width:100% !important;width:100% !important;flex:none !important;padding:0 !important;overflow:visible !important}
   .set-eyebrow{position:static !important}
   /* The "About this set" panel floats via position:absolute on screen (see
@@ -1182,6 +1188,33 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   body.print-routine .routine-card{border:1px solid #000;page-break-inside:avoid}
   body.print-routine .routine-print-btn,body.print-routine .mr-review-link{display:none !important}
   body.print-routine .week-panel.active::before{content:'Guitar Class — 10-Minute Practice Routine'}
+
+  /* Activity-only print (a card's own 🖨 button adds body.print-activity and
+     tags its card .ca-print-target). In-Class Activities is a .page-screen,
+     which the "hide all on-screen chrome" rule above blanks for every other
+     print — un-hide just this one, and hide the practice panels underneath
+     it so the handout is the activity and nothing else. printActivity()
+     force-opens the card and every collapsed step before the dialog. */
+  body.print-activity .page-screen.ca-screen{display:block !important}
+  body.print-activity .page-topbar,body.print-activity #week-panels,
+  body.print-activity .resume-card{display:none !important}
+  body.print-activity .ca-card:not(.ca-print-target){display:none !important}
+  body.print-activity .ca-print-target{border:1px solid #000}
+  body.print-activity .ca-card-summary{cursor:auto}
+  body.print-activity .ca-card-summary::before{display:none !important}
+  /* Every step's body, not just the one the accordion had open on screen. */
+  body.print-activity .ca-step-detail{display:block !important}
+  body.print-activity .ca-step{break-inside:avoid;page-break-inside:avoid}
+  /* Screen-only: the print button itself, the done buttons, the accordion
+     chevrons, and the drill widgets (a quiz that deals cards can't print —
+     its directions still do). */
+  body.print-activity .ca-print-btn,body.print-activity .ca-mark-btn,
+  body.print-activity .ca-step-chev,body.print-activity .ca-step-done-row,
+  body.print-activity .sdr{display:none !important}
+  body.print-activity #class-activities-body::before{
+    content:'Guitar Class — Sequoia HS';
+    display:block;font-size:11pt;color:#555;margin-bottom:6px
+  }
 }
 
 /* ══════════════════════════════════════════════
@@ -1537,6 +1570,11 @@ body.explore-open #week-panels{display:none}
 .ca-card[open] .ca-card-summary::before{transform:rotate(45deg)}
 .ca-card-title{font-weight:600;flex:1;min-width:0}
 .ca-done-mark{color:var(--green-text);flex-shrink:0;display:flex}
+/* Sits inside the <summary>, so printActivity() has to swallow the click —
+   see the note on that function in app.js. */
+.ca-print-btn{flex-shrink:0;display:flex;align-items:center;justify-content:center;width:30px;height:30px;padding:0;border:1px solid var(--border2);border-radius:8px;background:var(--bg2);color:var(--text3);cursor:pointer}
+.ca-print-btn svg{width:15px;height:15px}
+.ca-print-btn:hover{color:var(--text);border-color:var(--text2)}
 .ca-card-body{padding:0 14px 14px}
 .ca-chip{font-size:0.75rem;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--ca-accent-bg);color:var(--ca-accent);white-space:nowrap;flex-shrink:0}
 .ca-steps{list-style:none;margin:8px 0 12px;padding:0;font-size:0.9375rem;line-height:1.55}
@@ -2006,10 +2044,11 @@ body.games-open{overflow:hidden}
 /* Overlay hit area, capped at 36px tall — controls that sit inline with text
    or in tight rows, where a full 44px halo would swallow neighbors' taps */
 .song-vid-btn,.play-seq-btn,.coach-btn,.step-done-btn,.sk-toggle,
-.sk-where-btn,.mr-review-link,.sk-practice-btn,.rp-trigger,.step-fold-pill{position:relative}
+.sk-where-btn,.mr-review-link,.sk-practice-btn,.rp-trigger,.step-fold-pill,
+.ca-print-btn{position:relative}
 .song-vid-btn::after,.play-seq-btn::after,.coach-btn::after,.step-done-btn::after,
 .sk-toggle::after,.sk-where-btn::after,.mr-review-link::after,
-.sk-practice-btn::after,.rp-trigger::after,.step-fold-pill::after{
+.sk-practice-btn::after,.rp-trigger::after,.step-fold-pill::after,.ca-print-btn::after{
   content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   width:max(100%,44px);height:max(100%,36px)}
 

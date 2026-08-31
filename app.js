@@ -6982,11 +6982,16 @@ function caActivityCardHtml(a){
   const markLabel = done ? t('ca.completed') : t('ca.markComplete');
   const num = caNumber(a);
   const titleHtml = (num ? `#${num} - ` : '') + escHtml(caTitle(a));
+  // Undated activities only reach a screen under dev bypass (caIsVisible
+  // gates students on the date) — but an empty chip renders as a stray amber
+  // dash, on the printed handout as much as on screen, so skip it entirely.
+  const dateLabel = caFormatDate(caDate(a));
   return `<details class="ca-card" ${open ? 'open' : ''} data-id="${escAttr(a.id)}" ontoggle="caOnToggle(this)">
     <summary class="ca-card-summary">
-      <span class="ca-chip">${escHtml(caFormatDate(caDate(a)))}</span>
+      ${dateLabel ? `<span class="ca-chip">${escHtml(dateLabel)}</span>` : ''}
       <span class="ca-card-title">${titleHtml}</span>
       ${done ? `<span class="ca-done-mark" aria-hidden="true">${TCK_CHECK_SVG_INLINE}</span>` : ''}
+      <button type="button" class="ca-print-btn" onclick="printActivity(event,'${escAttr(a.id)}')" title="${escAttr(t('ca.printTitle'))}" aria-label="${escAttr(t('ca.print'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg></button>
     </summary>
     <div class="ca-card-body">
       <p class="coach-tip">${escHtml(tf(a,'intro'))}</p>
@@ -6994,6 +6999,38 @@ function caActivityCardHtml(a){
       <button type="button" class="ca-mark-btn ${done ? 'done' : ''}" onclick="caToggleComplete('${escAttr(a.id)}')">${escHtml(markLabel)}</button>
     </div>
   </details>`;
+}
+/* Print ONE activity as a handout — the paper version of the circuit, for
+   days the Chromebooks or the Wi-Fi fail, or for a sub who wants it on a
+   clipboard. Same shape as printRoutine(): a body class scopes the @media
+   print rules to the one card, restored on afterprint.
+
+   Two bits of state have to be forced open and put back, because a closed
+   <details> and a collapsed step both print nothing: the card itself, and
+   the step accordion (only one step is ever open on screen — a handout that
+   printed just that one would be worse than useless). afterprint fires on
+   cancel as well as on a real print, so the restore runs either way; it's
+   `once` so a second print doesn't stack listeners. */
+function printActivity(ev, id){
+  // The button lives inside the <summary>, whose default action toggles the
+  // card — swallow it or printing would also collapse what we just opened.
+  if(ev){ ev.preventDefault(); ev.stopPropagation(); }
+  const card = document.querySelector(`.ca-card[data-id="${CSS.escape(id)}"]`);
+  if(!card) return;
+  const wasOpen = card.open;
+  const collapsed = Array.from(card.querySelectorAll('.ca-step.ca-step-collapsed'));
+  card.open = true;
+  collapsed.forEach(li => li.classList.remove('ca-step-collapsed'));
+  card.classList.add('ca-print-target');
+  document.body.classList.add('print-activity');
+  const done = () => {
+    document.body.classList.remove('print-activity');
+    card.classList.remove('ca-print-target');
+    collapsed.forEach(li => li.classList.add('ca-step-collapsed'));
+    card.open = wasOpen;
+  };
+  window.addEventListener('afterprint', done, { once: true });
+  window.print();
 }
 // The .dp card builder's ✓ glyph, borrowed as a plain inline SVG so this
 // renderer doesn't have to pull in station-card CSS classes for one icon.

@@ -268,6 +268,8 @@
     'ca.reminderLater':        { en: 'Not now', es: 'Ahora no' },
     'ca.watchVideo':           { en: 'Watch video', es: 'Ver video' },
     'ca.stepLabel':            { en: 'Step {n}', es: 'Paso {n}' },
+    'ca.print':                { en: 'Print this activity', es: 'Imprimir esta actividad' },
+    'ca.printTitle':           { en: 'Print this activity as a handout', es: 'Imprimir esta actividad como hoja de trabajo' },
     'skill.gettingIt':         { en: 'Getting it', es: 'Ya le voy agarrando' },
     'skill.gotItShort':        { en: 'Got it', es: 'Ya lo tengo' },
     'skill.checklistIntro':    { en: 'Check each skill as you practice. Use "Still working on it" while you\'re learning, then mark "I\'ve got it!" once you can do it consistently.',
