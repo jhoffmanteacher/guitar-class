@@ -186,6 +186,10 @@
     // Shown between "signed in" and the app appearing, in place of the sign-in
     // button — see setAuthWallChecking() in app.js.
     'auth.loading':       { en: 'Signed in — loading your progress…', es: 'Sesión iniciada: cargando tu progreso…' },
+    // The 20 s escape hatch under that line — there is no sign-in button during
+    // the load, so this is the student's only way out of a stalled network.
+    'auth.stalled':       { en: 'This is taking longer than usual — the network may be slow. Your work is safe.',
+                             es: 'Esto está tardando más de lo normal — la red puede estar lenta. Tu trabajo está guardado.' },
     'auth.title':         { en: 'Welcome to Guitar Class', es: 'Bienvenido a la clase de guitarra' },
     'auth.body':          { en: 'Sign in with your school Google account to access practice materials and assessment information for class.',
                              es: 'Inicia sesión con tu cuenta de Google de la escuela para acceder a los materiales de práctica y la información de evaluación de la clase.' },

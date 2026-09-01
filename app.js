@@ -365,12 +365,39 @@ function setAuthWallChecking(key){
   if(p){ p.setAttribute('data-i18n', key); p.textContent = t(key); }
   if(c) c.hidden = false;
   if(s) s.hidden = true;
+  clearAuthStallTimer();   // whichever wait this is, it starts over
 }
 function revealAuthWallSignIn(){
   const c = document.getElementById('auth-checking');
   const s = document.getElementById('auth-signin');
+  clearAuthStallTimer();
   if(c) c.hidden = true;
   if(s) s.hidden = false;
+}
+
+/* Escape hatch for a wait that stops being normal. Hiding the sign-in button
+   during the post-sign-in load is what fixes the double sign-in, but it leaves
+   the student with no button at all — and loadProgress() can wait indefinitely,
+   because a Firestore get() on a network that accepts connections and then
+   stalls retries forever rather than rejecting. So after 20 s, offer a reload.
+   Reloading is safe here and always the right move: the sign-in is already
+   persisted (they come back signed in, not to the wall), and progress writes
+   go through a debounce that has nothing queued this early. 20 s is well past
+   a slow-but-working school-Wi-Fi load, so a student who is merely waiting
+   never sees it. */
+let _authStallTimer = null;
+function startAuthStallTimer(){
+  clearTimeout(_authStallTimer);
+  _authStallTimer = setTimeout(()=>{
+    const el = document.getElementById('auth-stalled');
+    // showFirebaseLoadError() rewrites the whole wall, so the node can be gone.
+    if(el) el.hidden = false;
+  }, 20000);
+}
+function clearAuthStallTimer(){
+  clearTimeout(_authStallTimer); _authStallTimer = null;
+  const el = document.getElementById('auth-stalled');
+  if(el) el.hidden = true;
 }
 let _authRevealTimer = firebaseReady ? setTimeout(revealAuthWallSignIn, 6000) : null;
 if(!firebaseReady) revealAuthWallSignIn();   // wall content is being replaced anyway — don't strand the checking note
@@ -388,9 +415,11 @@ if(auth) auth.onAuthStateChanged(async user=>{
     // and it's the same markup showApp()/showTeacherApp() is about to write.
     setAuthWallChecking('auth.loading');
     document.getElementById('user-area').innerHTML = userHeaderHtml(user);
-    if(IS_TEACHER_MODE){ showTeacherApp(user); }
+    startAuthStallTimer();   // ...but don't strand them there if the load never finishes
+    if(IS_TEACHER_MODE){ showTeacherApp(user); clearAuthStallTimer(); }
     else {
       await loadProgress(); await loadClassConfig();
+      clearAuthStallTimer();   // cleared here, not inside showApp/showPausedScreen, so every exit from the wait is covered
       if(accountPaused) showPausedScreen(user); else showApp(user);
     }
   } else {

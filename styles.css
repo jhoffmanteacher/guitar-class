@@ -116,6 +116,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .auth-checking p{font-size:1rem;color:var(--text2);margin:24px 0;animation:authCheckPulse 1.6s ease-in-out infinite}
 @keyframes authCheckPulse{0%,100%{opacity:.55}50%{opacity:1}}
 @media(prefers-reduced-motion:reduce){.auth-checking p{animation:none}}
+/* The 20 s stall escape (index.html #auth-stalled). Deliberately does NOT
+   inherit the pulse above it: that animation reads as "still working", and
+   this is the opposite — something to read and act on. */
+.auth-stalled{margin-top:28px;padding-top:22px;border-top:1px solid var(--border2)}
+.auth-checking .auth-stalled p{animation:none;opacity:1;font-size:0.9375rem;margin:0 0 16px}
 .auth-wall h2{font-size:1.5rem;font-weight:500;margin-bottom:10px;font-family:var(--font-display)}
 .auth-wall p{font-size:1rem;color:var(--text2);line-height:1.6;margin-bottom:28px}
 .btn-google{display:inline-flex;align-items:center;gap:10px;padding:10px 20px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);font-size:1rem;cursor:pointer}

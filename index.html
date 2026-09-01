@@ -107,6 +107,16 @@
        signed-out answer (or a 6 s safety timeout). -->
   <div id="auth-checking" class="auth-checking">
     <p id="auth-checking-msg" data-i18n="auth.checking">Checking your sign-in&hellip;</p>
+    <!-- Revealed by the 20 s stall timer (app.js). Taking the sign-in button
+         away during the load is what fixes the double sign-in, but it also
+         removes the student's only button — so if Firestore hangs (it retries
+         forever rather than failing) they'd have no way out at all. This is
+         that way out, and reloading is safe: progress is written on a debounce
+         and the sign-in itself is already persisted. -->
+    <div id="auth-stalled" class="auth-stalled" hidden>
+      <p data-i18n="auth.stalled">This is taking longer than usual &mdash; the network may be slow. Your work is safe.</p>
+      <button class="btn-google" onclick="location.reload()" data-i18n="auth.tryAgain">Try again</button>
+    </div>
   </div>
   <div id="auth-signin" hidden>
     <h2 data-i18n="auth.title">Welcome to Guitar Class</h2>

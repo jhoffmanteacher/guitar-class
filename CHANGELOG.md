@@ -18,6 +18,9 @@ see `WORKFLOW.md` and the git commit log.
 - **Clicking Sign in a second time can't undo the first one.** It used to
   cancel the sign-in already in progress, which is what actually forced the
   second trip through Google. Extra clicks now do nothing.
+- **If that loading screen ever gets stuck, there's a way out of it.** After
+  20 seconds it tells you the network is being slow, says your work is safe,
+  and gives you a Try again button.
 
 ## 2026-08-31 — Print an in-class activity
 
