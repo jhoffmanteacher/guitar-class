@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-01 — Finishing a Module Review now says so
+
+### Added
+
+- **A finish button at the bottom of every Module Review.** The page used to
+  just stop: you'd rate every skill, write your reflections, and get no sign
+  that you were done or that the next module had opened up. Now the bottom of
+  the review tells you how many ratings are left, and once they're all in,
+  "I've finished this review →" marks it complete and takes you straight to
+  the next module. The review turns green and keeps a "Go to Module N →"
+  button, so you can always find your way forward again.
+
 ## 2026-08-31 — Signing in once is enough
 
 ### Fixed

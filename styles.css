@@ -154,9 +154,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .week-panel.mr-locked .reflection-ta,
 .week-panel.mr-locked .mr-play-song,
 .week-panel.mr-locked .mr-rec-btn,
+.week-panel.mr-locked .mr-done-btn,
 .week-panel.mr-locked .mr-rec-stop{pointer-events:none;opacity:.55}
 .week-panel.mr-locked .reflection-ta,
 .week-panel.mr-locked .mr-play-song{background:var(--bg3)}
+/* Module Review finish line — "I've finished this review" + where next. */
+.mr-done{margin-top:18px;padding:14px 16px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg2);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.mr-done-text{flex:1 1 240px}
+.mr-done-head{font-weight:600}
+.mr-done-body{color:var(--text2);font-size:0.9375rem;line-height:1.5;margin-top:2px}
+.mr-done-check{color:var(--green-text);font-weight:700}
+.mr-done .mr-done-btn{flex:0 0 auto}
+.mr-done-btn[disabled]{opacity:.5;cursor:not-allowed;box-shadow:none}
+.mr-done-btn[disabled]:hover{background:var(--brand)}
+.mr-done-btn[disabled]:active{transform:none;box-shadow:none}
+.mr-done.is-done{border-color:var(--green-text);background:var(--green-bg)}
+.mr-done.is-done .mr-done-body{color:var(--green-text)}
 .mr-locked-banner{display:none}
 .week-panel.mr-locked .mr-locked-banner{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1px solid var(--red-text-bright);background:var(--red-bg-bright);border-radius:var(--radius);color:var(--red-text-bright);font-size:0.9375rem;line-height:1.5;margin-bottom:14px}
 .mr-locked-banner-icon{font-size:1.125rem;line-height:1.4;flex-shrink:0}
@@ -1119,7 +1132,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .fab-group,.save-ind,
   #google_translate_element,.btn-translate,.user-area,
   .print-set-btn,.daily5-panel,.daily5-overlay,.games-screen,.page-screen,
-  .back-to-top,.panel-next,.sk-where-btn,
+  .back-to-top,.panel-next,.mr-done,.sk-where-btn,
   .step-done-row,.mr-rec,.mr-locked-banner,.set-peek-banner{display:none !important}
 
   /* Only the active set prints; expand the lesson ladder + the checklist, drop songs */

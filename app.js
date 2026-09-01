@@ -2067,7 +2067,7 @@ function renderPills(moduleNum){
   if(MODULE_REVIEWS[moduleNum]){
     const locked = isModuleReviewLocked(moduleNum);
     const rbtn = document.createElement('button');
-    rbtn.className='wpill review-pill'+(locked?' locked':'');
+    rbtn.className='wpill review-pill'+(locked?' locked':'')+(!locked&&isMrComplete(moduleNum)?' complete':'');
     rbtn.dataset.id=`mr${moduleNum}`;
     rbtn.textContent=t('nav.moduleReview');
     rbtn.setAttribute('data-i18n','nav.moduleReview');
@@ -3302,7 +3302,83 @@ function buildModuleReview(mr){
       <div class="albl">${t('assess.standards')}</div>
       <div>${mr.standards.map(s=>`<span class="spill">${s}</span>`).join('')}</div>
     </div>
+    <div class="mr-done${isMrComplete(mr.moduleNum)?' is-done':''}" id="${mrId}-done">${buildMrDoneInner(mr.moduleNum)}</div>
     <div class="save-ind" id="${mrId}-save-ind" style="margin-top:10px" aria-live="polite"></div>`;
+}
+
+/* ── The review's finish line: "I've finished this review" ──
+   The panel used to just stop. A student could rate every row, write both
+   reflections, and get no signal that they were done or that the next module
+   was now theirs — the only way on was to notice the dropdown had un-locked.
+   The button is enabled by the SAME condition the cross-module gate uses
+   (every self-rating row rated — see isModuleGateLocked), so what it promises
+   and what actually unlocks can't drift apart.
+   The mrN-complete key it writes is a DISPLAY state only: nothing gates on it.
+   That's deliberate — students who finished a review before this button
+   existed must never be sent back to press it, and a gate that could be
+   un-pressed is a gate that can re-lock someone out of work they finished. */
+function mrRowsLeft(moduleNum){
+  const mr = MODULE_REVIEWS[moduleNum];
+  if(!mr) return 0;
+  return (mr.skills||[]).filter(s=>{ const v=progress[s.id]; return !(v==='1'||v==='2'||v==='3'); }).length;
+}
+/* Stored as 'gotit' rather than true: loadProgress() normalizes any value it
+   doesn't recognize down to 'none', and 'gotit' round-trips through both it
+   and the teacher console's copy of the same normalizer. */
+function isMrComplete(moduleNum){ return progress[`mr${moduleNum}-complete`]==='gotit'; }
+/* The module after this one, or null at the end of the course. Module 13
+   (String Changing) IS a legitimate "next" here — it sits outside the
+   sequential gate, not outside the course; it just has no review of its own. */
+function nextModuleAfter(moduleNum){
+  return (typeof MODULE_MANIFEST!=='undefined' ? MODULE_MANIFEST.find(m=>m.num===moduleNum+1) : null) || null;
+}
+function buildMrDoneInner(moduleNum){
+  const left = mrRowsLeft(moduleNum);
+  const done = isMrComplete(moduleNum);
+  const next = nextModuleAfter(moduleNum);
+  const nextLine = next
+    ? t('review.doneNext', { num: next.num, mod: escHtml(tf(next,'name')) })
+    : t('review.doneLast');
+  const head = done ? t('review.doneTitleDone', { n: moduleNum })
+             : left ? t('review.doneTitleTodo')
+                    : t('review.doneTitleReady');
+  const body = left ? t('review.doneLeft', { n: left }) : nextLine;
+  const btn = done
+    ? (next ? `<button type="button" class="panel-next-btn mr-done-btn" onclick="goToNextModule(${moduleNum})">${escHtml(t('review.doneGo',{num:next.num}))} &rarr;</button>` : '')
+    : `<button type="button" class="panel-next-btn mr-done-btn"${left?' disabled':''} onclick="finishModuleReview(${moduleNum})">${escHtml(t('review.doneBtn'))} &rarr;</button>`;
+  return `<div class="mr-done-text">
+      <div class="mr-done-head">${done?'<span class="mr-done-check" aria-hidden="true">&#10003;</span> ':''}${head}</div>
+      <div class="mr-done-body">${body}</div>
+    </div>${btn}`;
+}
+/* Re-render the card in place — the last unrated row becoming rated is what
+   flips the button on, and that happens without rebuilding the panel. */
+function syncMrDone(moduleNum){
+  const el = document.getElementById(`mr${moduleNum}-done`);
+  if(!el) return;
+  el.classList.toggle('is-done', isMrComplete(moduleNum));
+  el.innerHTML = buildMrDoneInner(moduleNum);
+}
+function finishModuleReview(moduleNum){
+  if(isReviewPanelLocked(`mr${moduleNum}`)) return;   // preview panel — not theirs to finish
+  const left = mrRowsLeft(moduleNum);
+  if(left){ gateToast(t('review.doneLeftToast',{n:left})); return; }
+  progress[`mr${moduleNum}-complete`]='gotit';
+  saveProgress();
+  syncMrDone(moduleNum);
+  renderPills(moduleNum);              // the review pill goes green
+  gateToast(t('review.doneToast',{n:moduleNum}));
+  goToNextModule(moduleNum);
+}
+/* Move the student on. Same path the module dropdown takes, so everything
+   that hangs off a module change (panels, pills, resume card) still runs. */
+function goToNextModule(moduleNum){
+  const next = nextModuleAfter(moduleNum);
+  if(!next) return;                    // last module: the card says so, no button
+  const sel = document.getElementById('module-select');
+  if(sel) sel.value = String(next.num);
+  onModuleChange(next.num);
+  saveProgress();
 }
 
 /* ── Assessment pop-up, every time the review is opened ──
@@ -3391,6 +3467,9 @@ function setSkillLevel(sid, mrId, level){
   // (pill rail) drop without a reload.
   renderPills(lastModuleNum);
   populateModuleDropdown();
+  // ...and the finish-line card at the bottom of this very panel: rating the
+  // last row is what enables its button.
+  if(/^mr\d+$/.test(mrId)) syncMrDone(Number(mrId.slice(2)));
   saveProgress();
 }
 

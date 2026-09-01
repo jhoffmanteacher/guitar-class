@@ -503,6 +503,22 @@
     'review.reviewThis':     { en: 'Review this', es: 'Repasar esto' },
     'review.backToLesson':   { en: 'Go back to the lesson for this skill', es: 'Volver a la lección de esta destreza' },
 
+    // ── Module Review finish line ("I've finished this review") ──
+    'review.doneTitleTodo':  { en: 'Almost there', es: 'Ya casi' },
+    'review.doneTitleReady': { en: "That's everything — ready to close this one out?",
+                                es: '¡Eso es todo! ¿Listo para cerrar este repaso?' },
+    'review.doneTitleDone':  { en: 'Module {n} review complete', es: 'Repaso del módulo {n} completado' },
+    'review.doneLeft':       { en: 'Rate every skill above to finish this review — {n} still to rate.',
+                                es: 'Califícate en todas las destrezas de arriba para terminar este repaso — te faltan {n}.' },
+    'review.doneNext':       { en: 'Up next: Module {num} — {mod}', es: 'Sigue: Módulo {num} — {mod}' },
+    'review.doneLast':       { en: "That's the last module review of the course — nice work.",
+                                es: 'Este es el último repaso de módulo del curso — buen trabajo.' },
+    'review.doneBtn':        { en: "I've finished this review", es: 'Terminé este repaso' },
+    'review.doneGo':         { en: 'Go to Module {num}', es: 'Ir al Módulo {num}' },
+    'review.doneLeftToast':  { en: 'Rate every skill above first — {n} still to rate.',
+                                es: 'Primero califícate en todas las destrezas de arriba — te faltan {n}.' },
+    'review.doneToast':      { en: 'Module {n} review complete — nice work!', es: '¡Repaso del módulo {n} completado — buen trabajo!' },
+
     // ── 10-minute practice routine card (module review) ──
     'routine.title':         { en: 'Your 10-minute practice routine', es: 'Tu rutina de práctica de 10 minutos' },
     'routine.print':         { en: 'Print', es: 'Imprimir' },
