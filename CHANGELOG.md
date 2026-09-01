@@ -5,6 +5,26 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-01 — The Listening Coach forgives loose timing
+
+### Changed
+
+- **Playing a note late no longer makes it a wrong note.** The Listening Coach
+  used to charge you three times for the same wobble: a note that drifted too
+  far off the click wasn't matched to its beat at all, so it came back as a
+  note you never played, and "On the beat," "Steady tempo" and "Chord changes"
+  all marked you down on top of that. Now the Coach listens in a wider window,
+  and a note you fretted right counts as right wherever it lands in the bar.
+- **"On the beat" is a coaching note now, not a failing grade.** Those three
+  timing rows still tell you what happened — and you still need them green for
+  a ⭐ Great — but on their own they can no longer drop a take below 💪 Good,
+  so a take with the right notes gets you your check-off. Where the notes were
+  right but late or early, the report says so up front, tells you how many
+  drifted, and asks you to try it again with your foot tapping.
+- **The result strip shows which notes drifted.** A note that counted but
+  landed off the pulse is still green — now with a dashed outline, so you can
+  see at a glance which ones to aim at next time.
+
 ## 2026-09-01 — Finishing a Module Review now says so
 
 ### Added

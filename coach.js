@@ -15,6 +15,11 @@
      1. Right notes (pitch)   2. On the beat (timing)   3. Steady tempo
      4. Chord changes         5. Played it through (completion)
 
+   Criteria 2, 3 and 4 are `soft`: they all measure WHERE in the bar the
+   notes landed, so they coach rather than fail. A note played at the right
+   pitch counts as the right note no matter how loosely it sat against the
+   click — see the timing-forgiveness block above COACH_MATCH_FRAC.
+
    Detection reuses the tuner's approach: mic → highpass/lowpass →
    AnalyserNode. Onsets come from RMS jumps (energy flux + refractory
    window); pitch from a trimmed YIN (tau capped at the guitar's range so
@@ -75,10 +80,44 @@ const COACH_MAX_LISTEN_X  = 2.5;    // backstop: never listen past this × the n
    is listening, so an audible click here (unlike Riff Runner's, which is
    keys/taps only) could bleed from the speakers back into the pitch/onset
    detector. A "tight" hit is one whose timing deviation is well inside the
-   ±0.75×beatMs window coachMatchEvent already requires just to MATCH a slot
+   coachMatchWinMs() window coachMatchEvent already requires just to MATCH a slot
    — a fraction of that, not the whole thing, so "tight" stays meaningfully
    stricter than merely "counted". */
 const COACH_PULSE_TIGHT_FRAC = 0.2;   // fraction of coach.beatMs counted as "tight" timing
+/* ── Timing forgiveness (2026-09-01) ──
+   A note played at the right pitch is the right note, even when it lands
+   off the pulse. Three separate knobs used to punish loose timing on top of
+   the "On the beat" criterion that exists to talk about it:
+     · the match window — a hit outside it doesn't land on ANY slot, so a
+       note the student really played came back "miss" and dragged the
+       pitch ratio and the completion score down with it;
+     · the "on the beat" threshold, tight enough that an ordinary beginner
+       take read Needs work;
+     · the overall level, which took the worst of all five criteria, so
+       loose timing alone could sink a take with every note right.
+   The fix is not to stop measuring timing — it's to stop double-counting
+   it. The window is wider, the threshold is wider, timing/tempo/changes
+   are flagged `soft` so they coach rather than fail (see
+   coachRenderReport), and the report says outright that the notes counted
+   and the beat is the next thing to work on. */
+const COACH_MATCH_FRAC    = 0.9;    // slot match window, as a fraction of a beat (was 0.75)
+const COACH_MATCH_MIN_MS  = 320;    // ...with an absolute floor, so fast tempos stay reachable
+const COACH_ON_BEAT_FRAC  = 0.25;   // "on the beat" for the timing criterion (was 0.18)
+const COACH_ON_BEAT_MIN_MS = 120;   // ...and its absolute floor (was 90)
+
+/* Half-width of the window an onset must land in to be matched to a slot.
+   Capped at a full beat: wider than that and a hit could leapfrog the slot
+   on the far side of the one it belongs to. */
+function coachMatchWinMs(){
+  return Math.min(coach.beatMs, Math.max(coach.beatMs * COACH_MATCH_FRAC, COACH_MATCH_MIN_MS));
+}
+
+/* How close to the beat still counts as "on" it. Shared by the timing
+   criterion and the per-chip `loose` marker so the report and the strip
+   can never disagree about which hits were on the pulse. */
+function coachOnBeatMs(){
+  return Math.max(COACH_ON_BEAT_MIN_MS, coach.beatMs * COACH_ON_BEAT_FRAC);
+}
 /* Chromebook built-in mics commonly capture noticeably quieter than a
    MacBook's, and getUserMedia is requested with autoGainControl:false (see
    coachAcquireMicInner) — deliberately, since browser AGC pumps up the
@@ -364,7 +403,7 @@ async function coachStartCheck(){
   }
 
   /* Fresh attempt state */
-  coach.slots.forEach(s => { s.state = 'pending'; s.hit = null; });
+  coach.slots.forEach(s => { s.state = 'pending'; s.hit = null; s.loose = false; });
   coach.events = []; coach.pending = null;
   coach.gridOffset = 0; coach.smoothRms = 0; coach.smoothHf = 0; coach.lastOnsetT = -1e9;
   coach.lastPulse = -1; coach.frameNo = 0; coach.lastPitchT = 0; coach.lastMatchT = 0;
@@ -657,8 +696,20 @@ function coachStripHtml(){
   /* data-seq mirrors the TAB's beat addressing so the listening lane can
      light chord-mode's strip with the exact same column code. */
   return `<div class="coach-strip">` + coach.slots.map((s, i) =>
-    `<span class="coach-chip ${s.state}" id="coach-chip-${i}" data-seq="${i}" title="${escAttr(s.chordName || s.label)}">${escHtml(s.label)}</span>`
+    `<span class="coach-chip ${coachChipClasses(s)}" id="coach-chip-${i}" data-seq="${i}" title="${escAttr(coachChipTitle(s))}">${escHtml(s.label)}</span>`
   ).join('') + `</div>`;
+}
+
+/* A chip's classes: its pitch verdict, plus `loose` when the note counted
+   but sat off the pulse (dashed outline — still green, still correct). */
+function coachChipClasses(s){
+  return s.state + (s.loose && (s.state === 'ok' || s.state === 'oct') ? ' loose' : '');
+}
+
+function coachChipTitle(s){
+  const base = s.chordName || s.label;
+  return s.loose && (s.state === 'ok' || s.state === 'oct')
+    ? base + ' — ' + t('coach.chip.loose') : base;
 }
 
 function coachChipRefresh(i){
@@ -669,7 +720,7 @@ function coachChipRefresh(i){
      strip from it a beat later. */
   if (coach.phase === 'listening') return;
   const el = document.getElementById('coach-chip-' + i);
-  if (el) el.className = 'coach-chip ' + coach.slots[i].state;
+  if (el) el.className = 'coach-chip ' + coachChipClasses(coach.slots[i]);
 }
 
 /* Reflects coach.pulseMuted into the status text — fires once, right when
@@ -901,9 +952,11 @@ function coachToneShare(ev, slot){
 }
 
 /* Greedy time-window matcher: an event lands on the nearest unfilled slot
-   within ±1 slot of where the grid says it should be. The grid offset then
-   eases toward the student (EMA), so mild drift keeps matching — the drift
-   itself is scored by the tempo criterion, local scatter by the timing one. */
+   within ±1 slot of where the grid says it should be, if it falls inside
+   coachMatchWinMs() of that slot. The grid offset then eases toward the
+   student (EMA), so mild drift keeps matching — the drift itself is scored
+   by the tempo criterion, local scatter by the timing one. A matched hit
+   is judged on PITCH alone; how far off the beat it was only sets s.loose. */
 function coachMatchEvent(ev){
   const rel = ev.t - coach.listenStart - coach.gridOffset;
   const guess = Math.round(rel / coach.beatMs);
@@ -912,7 +965,7 @@ function coachMatchEvent(ev){
     const s = coach.slots[i];
     if (s.state !== 'pending') continue;
     const dev = rel - i * coach.beatMs;
-    if (Math.abs(dev) > coach.beatMs * 0.75) continue;
+    if (Math.abs(dev) > coachMatchWinMs()) continue;
     const classOk = coach.mode === 'chords'
       ? coachToneShare(ev, s) >= 0.20
       : ev.midi != null && s.classes.indexOf(((ev.midi % 12) + 12) % 12) >= 0;
@@ -942,6 +995,11 @@ function coachMatchEvent(ev){
                Math.abs(ev.midi - s.midi) % 12 === 0) ? 'oct' : 'ok';
   } else s.state = 'wrong';
   s.hit = ev;
+  /* Counted, but not on the pulse: the slot keeps its pitch verdict (ok /
+     oct / wrong — timing never turns a right note into a wrong one), and
+     the strip marks it so the student can SEE which notes were the loose
+     ones. Scored by coachScoreTiming, never by coachScorePitch. */
+  s.loose = Math.abs(dev) > coachOnBeatMs();
   coach.lastMatchT = ev.t;      // feeds coachListenDeadline's stall clock
   coach.gridOffset += dev * 0.15;
   coachChipRefresh(best);
@@ -1024,15 +1082,33 @@ function coachRenderReport(){
      0 in melody mode, and timing/tempo can bail too), where requiring 2
      greats is unreachable without also being a perfect 3. Drop to >=1 only
      in that case so the middle tier stays reachable. */
-  const overallLevel = greats === applicable.length ? 3
+  let overallLevel = greats === applicable.length ? 3
     : (greats >= (applicable.length === 2 ? 1 : 2) ? 2 : 1);
+  /* Timing forgiveness floor (2026-09-01). The three `soft` criteria — on
+     the beat, steady tempo, chord changes — all measure the same thing:
+     WHERE in the bar the notes landed. They stay in the report, they still
+     hold a take back from Great, but they can no longer drag one down to
+     Needs work on their own: if the notes themselves were right (pitch) and
+     the student got through the drill (completion), the take is at least
+     Good, and the coaching lives in those criteria's sentences instead of
+     in the badge. Without this, a student who could play every note but sat
+     behind the click failed the check-off gate (COACH_GATE_MIN_LEVEL) on
+     timing alone — and one loose take marked down all three soft criteria at
+     once, so the same fault was charged three times. */
+  const hard = applicable.filter(c => !c.soft);
+  if (overallLevel < 2 && hard.length && hard.every(c => c.level >= 2)) overallLevel = 2;
   let overall;
   if (overallLevel === 3)      overall = '&#x1F31F; ' + t('coach.overall.great');
   else if (overallLevel === 2) overall = '&#x1F4AA; ' + t('coach.overall.good');
   else                         overall = '&#x1F3B8; ' + t('coach.overall.practice');
 
-  /* Streak: a "clear" = perfect pitch score and nothing at Needs work. */
-  const clear = crits[0].level === 3 && applicable.every(c => c.level >= 2);
+  /* Streak: a "clear" = perfect pitch score, nothing HARD at Needs work,
+     and timing at least in the ballpark. Loose timing costs the streak only
+     when it's badly loose — level 1 there now means most hits sat more than
+     twice the (already widened) on-beat window off the pulse. Tempo drift
+     and late chord changes no longer break a streak at all: they're coached
+     in the report instead. */
+  const clear = crits[0].level === 3 && hard.every(c => c.level >= 2) && crits[1].level !== 1;
   let streak = 0;
   try {
     streak = clear ? (parseInt(sessionStorage.getItem(coach.streakKey), 10) || 0) + 1 : 0;
@@ -1047,6 +1123,16 @@ function coachRenderReport(){
     ? games.coach[coach.drillId] : null;
   const compareHtml = prevCoach
     ? `<div class="coach-tip">${t('coach.compare', {last: LVL[prevCoach.level] || '—', now: LVL[overallLevel]})}</div>` : '';
+
+  /* The other half of the forgiveness: SAY it. When the notes were right
+     and the only thing short of Great is where they sat in the bar, the
+     report leads with "those all counted" and then asks for the beat —
+     otherwise a student reading three yellow rows has no way to tell that
+     the pitch part was already banked. */
+  const looseCount = coach.slots.filter(s => s.loose && (s.state === 'ok' || s.state === 'oct')).length;
+  const softShort = crits.some(c => c.soft && c.level > 0 && c.level < 3);
+  const notesHtml = (crits[0].level >= 2 && softShort && looseCount > 0)
+    ? `<div class="coach-tip">&#x1F44D; ${t('coach.tip.countedLoose', { n: looseCount })}</div>` : '';
 
   /* Compact per-drill result → the student's progress doc, so the next visit
      can show the line above. Skipped in dev bypass (Firestore rejects that uid). */
@@ -1074,6 +1160,7 @@ function coachRenderReport(){
 
   coachBody().innerHTML =
     `<div class="coach-report"><div class="coach-overall">${overall}</div>
+     ${notesHtml}
      ${compareHtml}
      ${coachStripHtml()}
      <div class="coach-crits">` +
@@ -1164,31 +1251,46 @@ function coachScorePitch(){
   return { name, icon, level, sentence };
 }
 
-/* ── Criterion 2: On the beat ── */
+/* ── Criterion 2: On the beat ──
+   `soft: true` — this criterion COACHES, it doesn't fail a take. See the
+   overall-level floor in coachRenderReport: notes played at the right pitch
+   count as right notes no matter where they landed in the bar, and this is
+   the one place the report talks about where they landed. Thresholds
+   deliberately generous (COACH_ON_BEAT_*): a beginner sitting a fifth of a
+   beat off the click is playing the drill, not failing it. */
 function coachScoreTiming(){
   const name = t('coach.crit.timing.name'), icon = '&#x1F941;';
   const devs = coach.slots.filter(s => s.hit && s.hit.devMs != null).map(s => s.hit.devMs);
-  if (devs.length < 3) return { name, icon, level: 0, sentence: t('coach.crit.timing.notEnough') };
-  const onMs = Math.max(90, coach.beatMs * 0.18), closeMs = onMs * 2;
+  if (devs.length < 3) return { name, icon, soft: true, level: 0, sentence: t('coach.crit.timing.notEnough') };
+  const onMs = coachOnBeatMs(), closeMs = onMs * 2;
   const on = devs.filter(d => Math.abs(d) <= onMs).length;
   const close = devs.filter(d => Math.abs(d) <= closeMs).length;
   const mean = devs.reduce((a, b) => a + b, 0) / devs.length;
   const lean = Math.abs(mean) < onMs * 0.6 ? '' : (mean < 0 ? 'early' : 'late');
   let level, sentence;
-  if (on / devs.length >= 0.70){
+  if (on / devs.length >= 0.6){
     level = 3; sentence = t('coach.crit.timing.great', { on, total: devs.length });
-  } else if (close / devs.length >= 0.6){
+  } else if (close / devs.length >= 0.5){
     level = 2;
     sentence = lean
       ? t(lean === 'early' ? 'coach.crit.timing.leanEarly' : 'coach.crit.timing.leanLate')
       : t('coach.crit.timing.scattered');
   } else {
-    level = 1; sentence = t('coach.crit.timing.needsWork');
+    /* Still "Needs work", never "wrong": the sentence names the notes that
+       DID count before it asks for the beat, so the tier reads as the next
+       thing to practise rather than as a verdict on the notes. */
+    level = 1;
+    sentence = lean
+      ? t(lean === 'early' ? 'coach.crit.timing.countedEarly' : 'coach.crit.timing.countedLate', { total: devs.length })
+      : t('coach.crit.timing.needsWork', { total: devs.length });
   }
-  return { name, icon, level, sentence };
+  return { name, icon, soft: true, level, sentence };
 }
 
 /* ── Criterion 3: Steady tempo ──
+   `soft: true`, like "On the beat" — drifting is something to work on, not
+   a reason to hand back a take whose notes were all right (see the
+   overall-level floor in coachRenderReport).
    Measured from the student's own hit-to-hit intervals, NOT the grid slots:
    the matcher assigns notes to the beats they landed on, so a rush/drag is
    invisible in slot indices — but it's plain as day in the raw event times.
@@ -1203,11 +1305,11 @@ function coachScoreTempo(){
      it in and make greats === applicable.length unreachable, so a 4–5 note
      melody drill (never 6 events) could never score Great no matter how well
      it was played — and games.coachSkill[sid].level stayed capped at 2. */
-  if (ts.length < 6) return { name, icon, level: 0, sentence: t('coach.crit.tempo.tooShort') };
+  if (ts.length < 6) return { name, icon, soft: true, level: 0, sentence: t('coach.crit.tempo.tooShort') };
   const iois = [];
   for (let i = 1; i < ts.length; i++) iois.push(ts[i] - ts[i - 1]);
   const med = tunerMedian(iois);
-  if (!(med > 0)) return { name, icon, level: 0, sentence: t('coach.crit.tempo.unclear') };
+  if (!(med > 0)) return { name, icon, soft: true, level: 0, sentence: t('coach.crit.tempo.unclear') };
   const pos = [0];
   for (const d of iois) pos.push(pos[pos.length - 1] + Math.max(1, Math.round(d / med)));
   const pts = ts.map((t, i) => ({ x: pos[i], y: t }));
@@ -1222,7 +1324,7 @@ function coachScoreTempo(){
     return beat > 0 ? 60000 / beat : null;
   };
   const b1 = bpmOf(pts.slice(0, half)), b2 = bpmOf(pts.slice(-half)), bAll = bpmOf(pts);
-  if (!b1 || !b2 || !bAll) return { name, icon, level: 0, sentence: t('coach.crit.tempo.unclear') };   // degenerate fit — same "can't judge" as above
+  if (!b1 || !b2 || !bAll) return { name, icon, soft: true, level: 0, sentence: t('coach.crit.tempo.unclear') };   // degenerate fit — same "can't judge" as above
   const drift = Math.abs(b2 - b1) / coach.bpm;
   let level, sentence;
   if (drift <= 0.07){
@@ -1234,17 +1336,20 @@ function coachScoreTempo(){
     level = 1;
     sentence = t(b2 > b1 ? 'coach.crit.tempo.spedUp' : 'coach.crit.tempo.slowedDown', { b1: Math.round(b1), b2: Math.round(b2) });
   }
-  return { name, icon, level, sentence };
+  return { name, icon, soft: true, level, sentence };
 }
 
-/* ── Criterion 4: Chord changes ── */
+/* ── Criterion 4: Chord changes ──
+   `soft: true` — this is the chord-mode half of "On the beat" (it asks
+   whether the CHANGE landed on the beat), so it gets the same treatment:
+   a late change is coached, it doesn't fail the take. */
 function coachScoreChanges(){
   const name = t('coach.crit.changes.name'), icon = '&#x1F504;';
   if (coach.mode !== 'chords'){
-    return { name, icon, level: 0, sentence: t('coach.crit.changes.notApplicable') };
+    return { name, icon, soft: true, level: 0, sentence: t('coach.crit.changes.notApplicable') };
   }
   const bounds = coach.slots.filter(s => s.isChange);
-  if (!bounds.length) return { name, icon, level: 0, sentence: t('coach.crit.changes.onlyOne') };
+  if (!bounds.length) return { name, icon, soft: true, level: 0, sentence: t('coach.crit.changes.onlyOne') };
   const closeMs = Math.max(140, coach.beatMs * 0.24);
   const onTime = bounds.filter(s => s.hit && Math.abs(s.hit.devMs) <= closeMs && s.state !== 'wrong');
   const late = bounds.find(s => !(s.hit && Math.abs(s.hit.devMs) <= closeMs && s.state !== 'wrong'));
@@ -1260,7 +1365,7 @@ function coachScoreChanges(){
     level = 1;
     sentence = t('coach.crit.changes.late');
   }
-  return { name, icon, level, sentence };
+  return { name, icon, soft: true, level, sentence };
 }
 
 /* ── Criterion 5: Played it through ── */
