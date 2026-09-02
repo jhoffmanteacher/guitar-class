@@ -225,7 +225,7 @@ SETS.push(
       { name: '"All Along the Watchtower" — Dylan / Hendrix', meta: 'Listen and identify guitar sounds', meta_es: 'Escucha e identifica los sonidos de la guitarra', type: 'Core', core: true, journeyUrl: 'tabs/all-along-the-watchtower.html',
         originalUrl: 'https://www.youtube.com/watch?v=bT7Hj-ea0VE',
         tutorialUrl: 'https://www.youtube.com/watch?v=Tnm1jWVLaC8' },
-      { name: '"Seven Nation Army" — The White Stripes', meta: 'Listen — the riff (a short musical phrase that repeats) you\'ll build all course long', meta_es: 'Escucha — el riff en la Mi grave (una frase musical corta que se repite) que vas a construir durante todo el curso', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
+      { name: '"Seven Nation Army" — The White Stripes', meta: 'Listen — the riff (a short musical phrase that repeats) you\'ll build all course long', meta_es: 'Escucha — el riff (una frase musical corta que se repite) que vas a construir durante todo el curso', type: 'Core', core: true, journeyUrl: 'tabs/seven-nation-army.html',
         originalUrl: 'https://www.youtube.com/watch?v=0J2QdDbelmY',
         tutorialUrl: 'https://www.youtube.com/watch?v=YaR6mzdNjOw' },
       { name: '"Sweet Child O\' Mine" — Guns N\' Roses', meta: 'Listen — a riff-driven song we return to later', meta_es: 'Escucha — una canción basada en un riff a la que volveremos más adelante', type: 'Core', core: true, journeyUrl: 'tabs/sweet-child-o-mine.html',

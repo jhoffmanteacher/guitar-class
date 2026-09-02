@@ -203,8 +203,8 @@ SETS.push(
               },
               {
                 label: 'Ear: name that riff', label_es: 'Oído: adivina el riff',
-                text: 'Name That Riff (try it!): pick out the "Smoke on the Water" main riff (a riff = a short musical phrase that repeats) by ear on the low E string, or the "Seven Nation Army" riff on the A string. No score — just try it.',
-                text_es: 'Adivina el riff (¡pruébalo!): saca de oído el riff principal de "Smoke on the Water" (un riff = una frase musical corta que se repite) en la cuerda Mi grave, o el riff de "Seven Nation Army" en la cuerda La. Sin puntaje — solo pruébalo.',
+                text: 'Name That Riff (try it!): pick out the "Smoke on the Water" main riff (a riff = a short musical phrase that repeats) by ear on the low E string. No score — just try it.',
+                text_es: 'Adivina el riff (¡pruébalo!): saca de oído el riff principal de "Smoke on the Water" (un riff = una frase musical corta que se repite) en la cuerda Mi grave. Sin puntaje — solo pruébalo.',
                 hint: 'Use the low-E note map from the play-along step (frets 0 · 1 · 3 · 5 · 7 · 8 · 10 · 12). Don\'t worry about getting it perfect — the attempt trains your ear.',
                 hint_es: 'Usa el mapa de notas de la Mi grave del paso para tocar junto (trastes 0 · 1 · 3 · 5 · 7 · 8 · 10 · 12). No te preocupes por hacerlo perfecto — el intento entrena tu oído.',
               }
@@ -264,6 +264,13 @@ SETS.push(
                 levelUp: 'Run the Shuffle deck on the A string too, or name a full lap going down the string (12 → 0) without counting.',
                 levelUp_es: 'Haz la baraja de cartas en la cuerda La también, o nombra una vuelta completa bajando por la cuerda (12 → 0) sin contar.',
                 skills: [2, 4]
+              },
+              {
+                label: 'Ear: find the "Seven Nation Army" riff', label_es: 'Oído: encuentra el riff de "Seven Nation Army"',
+                text: 'Name That Riff (try it!): pick out the "Seven Nation Army" riff (a riff = a short musical phrase that repeats) by ear on the A string — the same string you just mapped. No score — just try it.',
+                text_es: 'Adivina el riff (¡pruébalo!): saca de oído el riff de "Seven Nation Army" (un riff = una frase musical corta que se repite) en la cuerda La — la misma cuerda que acabas de mapear. Sin puntaje — solo pruébalo.',
+                hint: 'Use the A-string note map from the Challenge 2 chart (frets 0 · 2 · 3 · 5 · 7 · 8 · 10 · 12). Don\'t worry about getting it perfect — the attempt trains your ear.',
+                hint_es: 'Usa el mapa de notas de la cuerda La de la tabla del Reto 2 (trastes 0 · 2 · 3 · 5 · 7 · 8 · 10 · 12). No te preocupes por hacerlo perfecto — el intento entrena tu oído.',
               }
             ]
           },

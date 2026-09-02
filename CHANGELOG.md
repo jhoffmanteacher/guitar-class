@@ -5,6 +5,28 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-02 — "Seven Nation Army" only shows up once you are on the A string
+
+### Changed
+
+- **The riff moved out of the low E string lesson.** In Module 2 Set 1, the
+  "Name that riff" try-it sat in the low E string section but asked you to find
+  "Seven Nation Army" — which lives on the A string. Worse, its hint handed you
+  the low E note map, which cannot find that riff at all. That section now sticks
+  to "Smoke on the Water" on the low E, and "Seven Nation Army" gets its own
+  try-it in the A string section, right after you have finished mapping that
+  string — with the A string note map as the hint.
+
+### Fixed
+
+- **The Spanish song list no longer puts the riff on the wrong string.** Module 1
+  Set 1 told Spanish readers the riff was "en la Mi grave." It is on the A string,
+  and the English text never claimed otherwise.
+- **Module 4 stopped referring to a version of the riff that no longer exists.**
+  The soloing challenge warned you about "the low-E version you learned first"
+  and called the A string one "the true-pitch one from Module 2." There has been
+  only one version since August, and you meet it in Module 1.
+
 ## 2026-09-01 — The Listening Coach forgives loose timing
 
 ### Changed
