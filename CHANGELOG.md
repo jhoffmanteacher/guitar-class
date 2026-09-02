@@ -5,6 +5,15 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-02 — "Sweet Child O' Mine" is no longer listed with a key
+
+### Fixed
+
+- **Module 10 listed "Sweet Child O' Mine" as D and B minor.** That did not
+  match the song: its verse is D–C–G, and the solo you play over it in Module 4
+  uses E minor pentatonic. The relative-pairs skill now covers the songs that do
+  have a clean pair — Seven Nation Army, Watchtower, Luna, Let It Be and "the
+  cure" — and leaves Sweet Child out. Its chords are unchanged everywhere.
 ## 2026-09-02 — Three pages that did not work offline now do
 
 ### Fixed
