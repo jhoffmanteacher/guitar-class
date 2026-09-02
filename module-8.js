@@ -665,7 +665,7 @@ SETS.push(
 
   {
     id: 'm8w3',
-    songThread: [{ name: '"Let It Be"', journey: 'tabs/let-it-be.html', note: 'the fingerpicked arrangement' }],
+    songThread: [{ name: '"Let It Be"', journey: 'tabs/let-it-be.html', layer: 6, bonus: true, note: 'the fingerpicked arrangement' }],
     label: 'Set 3',
     locked: false,
     module: 'Finger Picking',

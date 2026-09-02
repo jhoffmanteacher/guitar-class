@@ -74,7 +74,7 @@ try {
 } catch { /* no tabs/ dir yet */ }
 
 const SHELL_FILES = [
-  'index.html', '404.html', 'styles.css', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'app.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js', 'live-quiz.js', 'config-main.js',
+  'index.html', '404.html', 'mood-chart.html', 'styles.css', 'i18n.js', 'guitar-diagrams.js', 'class-activities.js', 'app.js', 'fab-tools.js', 'tuner.js', 'coach.js', 'teacher.js', 'live-quiz.js', 'config-main.js',
   'firebase-config.js', 'manifest.json', 'icon.svg',
   ...MODULE_FILES,
   ...TAB_PAGES,
@@ -1427,6 +1427,44 @@ function checkSwAssets(src) {
   if (bad === 0) ok(`sw.js ASSETS ↔ shell files in sync (${assets.length} assets)`);
 }
 
+/* Ratchet (2026-09-02 audit): a local file that shipped content REFERENCES but
+   sw.js never precaches breaks offline for any student who goes offline before
+   first viewing it — then self-heals on their next online view, so it is nearly
+   invisible in normal testing. checkSwAssets() above only walks ASSETS→disk and
+   SHELL_FILES→ASSETS, and SHELL_FILES carries no img/ or standalone-page
+   entries, so this whole class slipped past it. Three were live at once:
+   img/m1-note-circle-{en,es}.svg (module-1.js's tuner note-circle figure) and
+   mood-chart.html (a student nav button in index.html). Walk the actual
+   references rather than a hand-maintained list, so a new figure or page is
+   caught the first time it ships.
+
+   tabs/ is deliberately exempt: those pages are runtime-cached cache-first and
+   fingerprinted via TAB_PAGES, not precached. Dangling references are left to
+   the asset checks — this one only asks "is what we ship also cached?" */
+function checkPrecacheCoverage(src) {
+  const m = src.match(/const ASSETS = \[([\s\S]*?)\];/);
+  if (!m) return;                     // checkSwAssets already reported the parse failure
+  const assets = new Set([...m[1].matchAll(/'\.\/([^']+)'/g)].map(x => x[1]));
+
+  const refs = new Map();             // referenced path -> first file referencing it
+  const re = /(?:^|['"(\s])(?:\.\/)?(img\/[A-Za-z0-9._-]+\.(?:svg|jpg|jpeg|png|gif|webp)|[A-Za-z0-9._-]+\.html)/g;
+  for (const file of ['index.html', 'app.js', 'class-activities.js', ...MODULE_FILES]) {
+    let text;
+    try { text = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    for (const r of text.matchAll(re)) if (!refs.has(r[1])) refs.set(r[1], file);
+  }
+
+  let bad = 0;
+  for (const [p, from] of refs) {
+    try { readFileSync(join(ROOT, p)); } catch { continue; }   // not on disk — another check's job
+    if (!assets.has(p)) {
+      err(`${from} references './${p}' but sw.js ASSETS doesn't precache it — a student who goes offline before opening it gets nothing`);
+      problems++; bad++;
+    }
+  }
+  if (bad === 0) ok(`every referenced img/ file and standalone page is precached (${refs.size} checked)`);
+}
+
 /* Journey pages are referenced by ~30 hand-typed 'tabs/*.html' strings across
    module files and config — none previously validated (the link checker only
    covers external URLs). A renamed/removed journey page shipped a 404 with no
@@ -1541,6 +1579,7 @@ function bumpServiceWorker() {
   let src = readFileSync(swPath, 'utf8');
   checkJourneyPaths();
   checkSwAssets(src);
+  checkPrecacheCoverage(src);
   checkSdkVersion();
   checkFirestoreRules();
 

@@ -5,6 +5,37 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-02 — Three pages that did not work offline now do
+
+### Fixed
+
+- **The Mood chart works offline.** It is one tap from the sidebar, but it was
+  never saved for offline use — if you opened it for the first time without a
+  connection, you got nothing.
+- **Module 1's tuner note-circle diagrams work offline** for the same reason.
+- **The "page not found" screen is fully in Spanish now.** Its heading stayed in
+  English even when the rest of the page switched.
+## 2026-09-02 — Content sweep: a handful of corrections
+
+### Fixed
+
+- **A Spanish strumming hint told you to change chords a bar too early.**
+  Module 6: Am and C each get two full bars, and the English said so — the
+  Spanish said the change came in the next bar.
+- **Module 10 credited G/B to the wrong module.** You learn to play G/B in
+  Module 5, alongside the other chords in that hint. Module 9 is where you
+  learn to *read* it written as a slash chord.
+- **"the cure" jam-track note now names the key the way the rest of the site**
+  **does** — A minor, not "La menor." Key names stay letters everywhere;
+  solfege is for string names.
+- **A Module 9 skill promised more than it asked.** The "Sweet Child O' Mine"
+  fragment title said to name every note, but the fragment reaches onto the B
+  string, whose names do not arrive until later — as the skill's own
+  "you've got it when" already said.
+- **A Module 4 note about unfamiliar strings was incomplete.** Pentatonic
+  Pattern 1 crosses the B and high e strings too, not only D and G.
+- **"Let It Be" in Module 8 now jumps straight to its Fingerpicked Verse**
+  **layer** on the Song Journey page, the way the other fingerpicking sets do.
 ## 2026-09-02 — "Seven Nation Army" only shows up once you are on the A string
 
 ### Changed

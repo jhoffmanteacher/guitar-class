@@ -242,7 +242,7 @@ function togglePlayalong(btn){
     if(box.dataset.audio){
       var a = ensurePlayer();
       if(a) a.play().catch(function(){ /* autoplay may be blocked — the controls still work */ });
-    } else {
+    } else if(box.dataset.video){
       var f = document.createElement('iframe');
       f.src = 'https://www.youtube.com/embed/' + box.dataset.video;
       f.title = t('journey.playalongTitle');

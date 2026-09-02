@@ -332,7 +332,7 @@ SETS.push(
                 hint: 'Dylan built this song to support a voice — soft, even 8ths are the whole job. If an upstroke catches the strings, let the pick graze just the top 3–4 strings.',
                 hint_es: 'Dylan construyó esta canción para apoyar una voz — corcheas suaves y parejas son todo el trabajo. Si un golpe hacia arriba engancha las cuerdas, deja que la púa roce solo las 3–4 cuerdas más agudas.',
                 stuck: 'Am and C each get two full bars, so those are your breathing room — no change to make until the bar after next. G → D, D → Am, Am → G, D → C, and C → G all reset the whole hand, so loop those one at a time.',
-                stuck_es: 'Am y C se sostienen cada uno durante dos compases completos, así que esos son tu momento de respiro — no hay que cambiar hasta el compás siguiente. G → D, D → Am, Am → G, D → C, y C → G reinician toda la mano, así que repite esos uno a la vez.',
+                stuck_es: 'Am y C se sostienen cada uno durante dos compases completos, así que esos son tu momento de respiro — no hay que cambiar hasta dentro de dos compases. G → D, D → Am, Am → G, D → C, y C → G reinician toda la mano, así que repite esos uno a la vez.',
                 levelUp: 'Sing or hum a line over your own strumming, or speed up to 70 BPM with the 8ths still even.',
                 levelUp_es: 'Canta o tararea una línea sobre tu propio rasgueo, o acelera a 70 BPM manteniendo las corcheas parejas.',
                 skills: [2, 4],

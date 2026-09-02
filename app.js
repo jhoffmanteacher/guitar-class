@@ -5878,7 +5878,6 @@ function loadPanel(type,url,title,subtitle){
   viewerReturnFocus = document.activeElement;
   const modal = overlay.querySelector('.video-modal');
   if(modal) modal.focus();
-  document.body.classList.add('viewer-open');   // hides the FAB pills (they covered the player's controls)
   clampViewer(overlay);   // a drag on a bigger window could strand it off-screen
   content.classList.add('visible'); newtab.classList.add('visible'); close.classList.add('visible');
   newtab.href=url;
@@ -5961,7 +5960,6 @@ function clearPanel(){
   content.classList.remove('visible'); newtab.classList.remove('visible'); close.classList.remove('visible');
   wrap.className='rp-iframe-wrap'; wrap.innerHTML='';   // removing the iframe stops playback
   if(overlay) overlay.hidden=true;
-  document.body.classList.remove('viewer-open');
   /* Hand focus back to whatever opened the player. The document.contains guard
      matters: the trigger usually lives in step HTML that gets re-rendered on a
      language switch or a set change, so the element we saved may be detached —
