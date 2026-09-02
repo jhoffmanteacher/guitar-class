@@ -1080,7 +1080,7 @@ SETS.push(
                 levelUp_es: 'Desliza la misma forma de tres cuerdas dos trastes hacia arriba y nombra el nuevo acorde que forma.',
                 skills: [5],
                 chords: [
-                  { name: 'D (partial — top 3 strings)', chord: [[6,'x'],[5,'x'],[4,'x'],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 }
+                  { name: 'D (partial — top 3 strings)', name_es: 'D (parcial — tres cuerdas agudas)', chord: [[6,'x'],[5,'x'],[4,'x'],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 }
                 ],
                 response: { type: 'mc', prompt: 'On this partial-shape chart, which strings actually ring when you play it?',
                   prompt_es: 'En este diagrama de forma parcial, ¿cuáles cuerdas realmente suenan cuando lo tocas?',

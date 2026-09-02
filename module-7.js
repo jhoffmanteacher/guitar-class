@@ -446,7 +446,7 @@ SETS.push(
             levelUp_es: 'Desliza toda la forma hasta el traste 7 (B mayor) y mantén todas las cuerdas sonando.',
             skills: [2, 3, 4],
             chords: [
-              { name: 'A major', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,6,'2'],[2,5,'1'],[1,5,'1']], position: 5 }
+              { name: 'A major', name_es: 'A mayor', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,6,'2'],[2,5,'1'],[1,5,'1']], position: 5 }
             ]
           }
             ]
@@ -468,7 +468,7 @@ SETS.push(
             skills: [4, 5],
             chords: [
               { name: 'F5', chord: [[6,1,'1'],[5,3,'3'],[4,'x'],[3,'x'],[2,'x'],[1,'x']], position: 0 },
-              { name: 'F major', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
+              { name: 'F major', name_es: 'F mayor', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
             ]
           }
             ]
@@ -489,9 +489,9 @@ SETS.push(
             levelUp_es: 'Agrega B en el traste 7 como un 4to acorde, o cambia F→G→A a tiempo a 70 BPM.',
             skills: [4, 5, 6],
             chords: [
-              { name: 'F major', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
-              { name: 'G major', chord: [[6,3,'1'],[5,5,'3'],[4,5,'4'],[3,4,'2'],[2,3,'1'],[1,3,'1']], position: 3 },
-              { name: 'A major', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,6,'2'],[2,5,'1'],[1,5,'1']], position: 5 }
+              { name: 'F major', name_es: 'F mayor', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
+              { name: 'G major', name_es: 'G mayor', chord: [[6,3,'1'],[5,5,'3'],[4,5,'4'],[3,4,'2'],[2,3,'1'],[1,3,'1']], position: 3 },
+              { name: 'A major', name_es: 'A mayor', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,6,'2'],[2,5,'1'],[1,5,'1']], position: 5 }
             ]
           }
             ]
@@ -531,9 +531,9 @@ SETS.push(
                 levelUp_es: 'Toca el loop con un rasgueo abajo-arriba, o tararea la melodía de la estrofa sobre tus propios acordes.',
                 skills: [5, 6],
                 chords: [
-                  { name: 'D (E-shape)', chord: [[6,10,'1'],[5,12,'3'],[4,12,'4'],[3,11,'2'],[2,10,'1'],[1,10,'1']], position: 10 },
-                  { name: 'C (E-shape)', chord: [[6,8,'1'],[5,10,'3'],[4,10,'4'],[3,9,'2'],[2,8,'1'],[1,8,'1']], position: 8 },
-                  { name: 'G (E-shape)', chord: [[6,3,'1'],[5,5,'3'],[4,5,'4'],[3,4,'2'],[2,3,'1'],[1,3,'1']], position: 3 }
+                  { name: 'D (E-shape)', name_es: 'D (forma de E)', chord: [[6,10,'1'],[5,12,'3'],[4,12,'4'],[3,11,'2'],[2,10,'1'],[1,10,'1']], position: 10 },
+                  { name: 'C (E-shape)', name_es: 'C (forma de E)', chord: [[6,8,'1'],[5,10,'3'],[4,10,'4'],[3,9,'2'],[2,8,'1'],[1,8,'1']], position: 8 },
+                  { name: 'G (E-shape)', name_es: 'G (forma de E)', chord: [[6,3,'1'],[5,5,'3'],[4,5,'4'],[3,4,'2'],[2,3,'1'],[1,3,'1']], position: 3 }
                 ]
               }
             ]
@@ -601,7 +601,7 @@ SETS.push(
         gotItWhen_es: 'puedes puntear cada una de las 6 cuerdas por separado en tu cejilla de A y todas suenan — sin ninguna cuerda apagada por un dedo acalambrado.',
         practice: { type: 'chord', label: 'A major — E-shape barre at fret 5', label_es: 'A mayor — cejilla en forma de E en el traste 5',
           chords: [
-            { name: 'A major', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,6,'2'],[2,5,'1'],[1,5,'1']], position: 5 }
+            { name: 'A major', name_es: 'A mayor', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,6,'2'],[2,5,'1'],[1,5,'1']], position: 5 }
           ] } },
       { id: 'm7w2-s4', text: 'Play F major barre at the 1st fret',
         text_es: 'Tocar la cejilla de F mayor en el traste 1',
@@ -609,7 +609,7 @@ SETS.push(
         gotItWhen_es: 'tu cejilla de F en el traste 1 suena limpia en al menos 5 de las 6 cuerdas — incluyendo la cuerda Si, que es la más difícil para la cejilla.',
         practice: { type: 'chord', label: 'F major — E-shape barre at fret 1', label_es: 'F mayor — cejilla en forma de E en el traste 1',
           chords: [
-            { name: 'F major', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
+            { name: 'F major', name_es: 'F mayor', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
           ] } },
       { id: 'm7w2-s5', text: 'Name an E-shape barre chord by its root note on the low E string',
         text_es: 'Nombrar un acorde con cejilla en forma de E por su nota raíz en la cuerda Mi grave',
@@ -727,7 +727,7 @@ SETS.push(
             levelUp_es: 'Desliza toda la forma de A hasta C (traste 3) y mantenla limpia. O prueba el atajo que usan muchos guitarristas: aplana solo tu dedo anular sobre las cuerdas Re, Sol y Si como una sub-cejilla pequeña. Se agarra más rápido, pero normalmente se acuesta sobre la cuerda mi aguda y la apaga — solo cuéntalo cuando la mi aguda siga sonando.',
             skills: [1, 2, 3],
             chords: [
-              { name: 'B major', chord: [[6,'x'],[5,2,'1'],[4,4,'2'],[3,4,'3'],[2,4,'4'],[1,2,'1']], position: 2 }
+              { name: 'B major', name_es: 'B mayor', chord: [[6,'x'],[5,2,'1'],[4,4,'2'],[3,4,'3'],[2,4,'4'],[1,2,'1']], position: 2 }
             ]
           }
             ]
@@ -771,8 +771,8 @@ SETS.push(
             levelUp_es: 'Encuentra ambos hogares para G (forma de E traste 3, forma de A traste 10) y para C (forma de A traste 3, forma de E traste 8).',
             skills: [5, 6],
             chords: [
-              { name: 'F (E-shape)', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
-              { name: 'F (A-shape)', chord: [[6,'x'],[5,8,'1'],[4,10,'2'],[3,10,'3'],[2,10,'4'],[1,8,'1']], position: 8 }
+              { name: 'F (E-shape)', name_es: 'F (forma de E)', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
+              { name: 'F (A-shape)', name_es: 'F (forma de A)', chord: [[6,'x'],[5,8,'1'],[4,10,'2'],[3,10,'3'],[2,10,'4'],[1,8,'1']], position: 8 }
             ]
           }
             ]
@@ -836,7 +836,7 @@ SETS.push(
                 levelUp_es: 'Toca también el coro (D · A · Bm · G) como cejillas — la canción entera sin acordes abiertos.',
                 skills: [1, 2],
                 chords: [
-                  { name: 'Bm (full barre)', chord: [[6,'x'],[5,2,'1'],[4,4,'3'],[3,4,'4'],[2,3,'2'],[1,2,'1']], position: 2 }
+                  { name: 'Bm (full barre)', name_es: 'Bm (cejilla completa)', chord: [[6,'x'],[5,2,'1'],[4,4,'3'],[3,4,'4'],[2,3,'2'],[1,2,'1']], position: 2 }
                 ]
               },
               {
@@ -851,7 +851,7 @@ SETS.push(
                 levelUp_es: 'Tócalo con D-DU-UDU, o alterna una vuelta de acordes abiertos con una vuelta de cejillas y escucha la diferencia.',
                 skills: [5, 6],
                 chords: [
-                  { name: 'Am (E-shape)', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,5,'1'],[2,5,'1'],[1,5,'1']], position: 5 }
+                  { name: 'Am (E-shape)', name_es: 'Am (forma de E)', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,5,'1'],[2,5,'1'],[1,5,'1']], position: 5 }
                 ],
                 response: { type: 'short', prompt: 'Personal record — clean all-barre "Watchtower" laps in a row. Your count today?', prompt_es: 'Récord personal — vueltas seguidas de "Watchtower" solo con cejillas y limpias. ¿Tu cuenta de hoy?', placeholder: 'e.g. 2 — the F still buzzes', placeholder_es: 'p. ej. 2 — el F todavía zumba' }
               },
@@ -867,7 +867,7 @@ SETS.push(
                 levelUp_es: 'Desliza la misma forma de cejilla al traste 5 — eso es A mayor, y de repente puedes tocar todos los acordes mayores del mástil.',
                 skills: [6],
                 chords: [
-                  { name: 'F major (E-shape)', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
+                  { name: 'F major (E-shape)', name_es: 'F mayor (forma de E)', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
                 ]
               }
             ]
@@ -913,8 +913,8 @@ SETS.push(
                 levelUp_es: 'Escúchalas en música real: F# está por toda "Hotel California"; Bb es el cuarto acorde de la tonalidad (el acorde IV) en "Hey Jude". O desliza cada forma un traste hacia arriba y nombra el acorde nuevo (G, y B).',
                 skills: [3, 4, 5],
                 chords: [
-                  { name: 'F# major (E-shape)', chord: [[6,2,'1'],[5,4,'3'],[4,4,'4'],[3,3,'2'],[2,2,'1'],[1,2,'1']], position: 2 },
-                  { name: 'Bb major (A-shape)', chord: [[6,'x'],[5,1,'1'],[4,3,'2'],[3,3,'3'],[2,3,'4'],[1,1,'1']], position: 1 }
+                  { name: 'F# major (E-shape)', name_es: 'F# mayor (forma de E)', chord: [[6,2,'1'],[5,4,'3'],[4,4,'4'],[3,3,'2'],[2,2,'1'],[1,2,'1']], position: 2 },
+                  { name: 'Bb major (A-shape)', name_es: 'Bb mayor (forma de A)', chord: [[6,'x'],[5,1,'1'],[4,3,'2'],[3,3,'3'],[2,3,'4'],[1,1,'1']], position: 1 }
                 ],
                 playSeq: { label: 'Hear F# major, then Bb major', label_es: 'Escucha F# mayor, y luego Bb mayor', bpm: 50, notes: [[42,49,54,58,61,66],[46,53,58,62,65]] },
                 response: { type: 'short', prompt: 'Which of the two low barres — F# or Bb — rings less cleanly right now? Name it for your next warm-up.', prompt_es: '¿Cuál de las dos cejillas bajas — F# o Bb — suena menos limpia ahora mismo? Nómbrala para tu próximo calentamiento.', placeholder: 'e.g. Bb — my pinky on the B string keeps leaning on the high e', placeholder_es: 'p. ej. Bb — mi meñique en la cuerda Si se sigue recargando en la mi aguda' }
@@ -941,7 +941,7 @@ SETS.push(
         gotItWhen_es: 'tu cejilla de B suena limpia desde la cuerda La hacia abajo — y la cuerda Mi grave está silenciada por tu dedo índice para que no suene por accidente.',
         practice: { type: 'chord', label: 'B major — A-shape barre at fret 2', label_es: 'B mayor — cejilla en forma de A en el traste 2',
           chords: [
-            { name: 'B major', chord: [[6,'x'],[5,2,'1'],[4,4,'2'],[3,4,'3'],[2,4,'4'],[1,2,'1']], position: 2 }
+            { name: 'B major', name_es: 'B mayor', chord: [[6,'x'],[5,2,'1'],[4,4,'2'],[3,4,'3'],[2,4,'4'],[1,2,'1']], position: 2 }
           ] } },
       { id: 'm7w3-s2', text: 'Mute the low E string when playing an A-shape barre',
         text_es: 'Silenciar la cuerda Mi grave al tocar una cejilla en forma de A',

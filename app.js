@@ -2603,7 +2603,7 @@ function buildLesson(w){
       return `<div class="step-folds"><div class="step-folds-row">${pills}</div>${panels}</div>`;
     })() : '';
     const chordsHtml = (s.chords&&s.chords.length)
-      ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}${c.name?`<div class="chord-box-label">${c.name}</div>`:''}</div>`).join('')}</div>` + coachChordBtnRowHtml(s.chords, stepSkillIds(w, s))
+      ? `<div class="chord-diagrams">${s.chords.map(c=>`<div class="chord-box">${chordDiagramSVG(c)}${c.name?`<div class="chord-box-label">${escHtml(tf(c,'name'))}</div>`:''}</div>`).join('')}</div>` + coachChordBtnRowHtml(s.chords, stepSkillIds(w, s))
       : '';
     // One step, one Listening Coach button: a step's chord-check button
     // (above) already covers this step, so the melody/tab Coach buttons
@@ -3153,7 +3153,7 @@ function buildModuleRoutine(moduleNum){
   if(chordWork && chordWork!==drill){
     const c=chordWork.step;
     const inner=c.chords && c.chords.length
-      ? `&mdash; ${escHtml(truncateText(stripTags(tf(c,'text')),180))} ${setLink(chordWork)}<div class="chord-diagrams">${c.chords.map(ch=>`<div class="chord-box">${chordDiagramSVG(ch)}${ch.name?`<div class="chord-box-label">${ch.name}</div>`:''}</div>`).join('')}</div>`
+      ? `&mdash; ${escHtml(truncateText(stripTags(tf(c,'text')),180))} ${setLink(chordWork)}<div class="chord-diagrams">${c.chords.map(ch=>`<div class="chord-box">${chordDiagramSVG(ch)}${ch.name?`<div class="chord-box-label">${escHtml(tf(ch,'name'))}</div>`:''}</div>`).join('')}</div>`
       : `&mdash; ${escHtml(truncateText(stripTags(tf(c,'text')),180))} ${setLink(chordWork)}<br>${routinePlaySeq(c.playSeq, `bpm:routine:${moduleNum}:chords`)}`;
     items+=li(3,t('routine.chordScaleWork'),inner);
   }
@@ -3788,7 +3788,7 @@ function renderPracticePanel(practice, skillId, wid){
     // Trusted HTML, same as step text: fields — module data is repo-authored.
     const promptHtml = practice.label ? `<div class="sk-practice-prompt">${tf(practice,'label')}</div>` : '';
     const boxes = practice.chords.map(c =>
-      `<div class="chord-box">${chordDiagramSVG(c)}${c.name ? `<div class="chord-box-label">${escHtml(c.name)}</div>` : ''}</div>`).join('');
+      `<div class="chord-box">${chordDiagramSVG(c)}${c.name ? `<div class="chord-box-label">${escHtml(tf(c,'name'))}</div>` : ''}</div>`).join('');
     return `<div class="sk-practice-panel" id="pp-${skillId}" hidden>` +
       `<div class="sk-practice-title">${t('step.practiceThis')}</div>` +
       renderRepStrip(skillId) +
@@ -5776,7 +5776,7 @@ function coachBtnHtml(midisJson, tabNotesJson, skillIds){
    specs (same fret math as chordMidis — frets are absolute). */
 function coachChordBtnRowHtml(chords, skillIds){
   const spec = (chords||[]).filter(c=>c && c.name && Array.isArray(c.chord)).map(c=>({
-    n: c.name,
+    n: tf(c,'name'),
     m: chordSpecMidis(c.chord)
   })).filter(c=>c.m.length);
   if(!spec.length) return '';

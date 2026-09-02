@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-02 — Chord diagram labels now switch to Spanish
+
+### Fixed
+
+- **The labels under chord diagrams stayed in English.** Every diagram whose
+  label carried an English word — "A major", "F (E-shape)", "Bm (full barre)",
+  "Travis C", "D (partial — top 3 strings)" — kept that word in Spanish mode.
+  All 25 of them now read in Spanish: "A mayor", "F (forma de E)", "Bm (cejilla
+  completa)", "C de Travis", "D (parcial — tres cuerdas agudas)". They also
+  switch inside the Listening Coach, which shows the same names.
+- Plain chord symbols — Am, C, G/B, D5, A7 — are unchanged, because a chord
+  symbol reads the same in both languages.
 ## 2026-09-02 — "Sweet Child O' Mine" is no longer listed with a key
 
 ### Fixed

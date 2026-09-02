@@ -873,7 +873,7 @@ SETS.push(
             levelUp_es: 'Agrega la pulsación de i en cada "+", o lleva el pulgar alternante a través de un cambio C → Am sin que tropiece.',
             skills: [2, 5],
             chords: [
-              { name: 'Travis C', chord: [[6,3,'4'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 }
+              { name: 'Travis C', name_es: 'C de Travis', chord: [[6,3,'4'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 }
             ]
           }
             ]

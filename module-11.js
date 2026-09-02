@@ -851,7 +851,7 @@ SETS.push(
                 levelUp_es: 'Explica en voz alta por qué Bm es el acorde vi de D mayor — revisa el inventario: tanto Bm como A viven en la familia de D — usando lo que aprendiste en la Unidad 1.',
                 skills: [6],
                 chords: [
-                  { name: 'Bm (A-shape barre)', chord: [[6,'x'],[5,2,'1'],[4,4,'3'],[3,4,'4'],[2,3,'2'],[1,2,'1']], position: 2 },
+                  { name: 'Bm (A-shape barre)', name_es: 'Bm (cejilla en forma de A)', chord: [[6,'x'],[5,2,'1'],[4,4,'3'],[3,4,'4'],[2,3,'2'],[1,2,'1']], position: 2 },
                   { name: 'A', chord: [[6,'x'],[5,0],[4,2,'1'],[3,2,'2'],[2,2,'3'],[1,0]], position: 0 }
                 ]
               }
@@ -949,9 +949,9 @@ SETS.push(
         gotItWhen_es: 'puedes deslizar una cejilla en forma de E hasta F, G y A sin cambiar los dedos, nombrando cada raíz al llegar a ella.',
         practice: { type: 'chord', label: 'One E-shape, three roots — F · G · A', label_es: 'Una forma de E, tres raíces — F · G · A',
           chords: [
-            { name: 'F major', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
-            { name: 'G major', chord: [[6,3,'1'],[5,5,'3'],[4,5,'4'],[3,4,'2'],[2,3,'1'],[1,3,'1']], position: 3 },
-            { name: 'A major', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,6,'2'],[2,5,'1'],[1,5,'1']], position: 5 }
+            { name: 'F major', name_es: 'F mayor', chord: [[6,1,'1'],[5,3,'3'],[4,3,'4'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 },
+            { name: 'G major', name_es: 'G mayor', chord: [[6,3,'1'],[5,5,'3'],[4,5,'4'],[3,4,'2'],[2,3,'1'],[1,3,'1']], position: 3 },
+            { name: 'A major', name_es: 'A mayor', chord: [[6,5,'1'],[5,7,'3'],[4,7,'4'],[3,6,'2'],[2,5,'1'],[1,5,'1']], position: 5 }
           ] } },
       { id: 'm11w3-s5', text: 'Explain why one movable shape equals twelve chords',
         text_es: 'Explicar por qué una forma movible equivale a doce acordes',
