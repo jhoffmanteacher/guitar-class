@@ -207,15 +207,6 @@ SETS.push(
       }
     },
 
-    assessment: {
-      goal: 'Clears all six re-tests in one focused session — or leaves with a named practice list and knows exactly which module rebuilds each flagged skill',
-      goal_es: 'Aprueba los seis repasos en una sesión enfocada — o termina con una lista de práctica nombrada y sabe exactamente cuál módulo reconstruye cada destreza marcada',
-      performance: 'Fast round: record all six re-tests back to back, listen back with the checklist open, and mark each skill honestly — cleared skills "got it," flagged skills "still working" with where to practice them noted.',
-      selfCheck: 'Can you still play all six without re-learning anything? Which one faded the most over the break — and which module does it live in?',
-      selfCheck_es: '¿Todavía puedes tocar los seis sin tener que volver a aprender nada? ¿Cuál se desvaneció más durante el receso — y en cuál módulo vive?',
-      standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
-    },
-
     skills: [
       { id: 'm9w0-s1', text: 'RE-TEST: Switch C → G → Am → F smoothly at 60 BPM',
         text_es: 'REPASO: Cambiar C → G → Am → F sin problemas a 60 BPM',
@@ -503,15 +494,6 @@ SETS.push(
       }
     },
 
-    assessment: {
-      goal: 'Names naturals on D & G through fret 12 · Finds a named note within 5 seconds · Uses the octave shape as a shortcut',
-      goal_es: 'Nombra las notas naturales en Re y Sol hasta el traste 12 · Encuentra una nota nombrada en menos de 5 segundos · Usa la forma de octava como atajo',
-      performance: 'Deal the full 7-card natural-note deck, switching strings halfway through, and find each on the D or G string within 5 seconds — film yourself, then check every spot against a fretboard chart. Goal: 6 out of 7 correct.',
-      selfCheck: 'Can you find C on the G string without counting up from open? Can you name the note two strings down and two frets up from any E-string note you know?',
-      selfCheck_es: '¿Puedes encontrar C en la cuerda Sol sin contar desde el aire? ¿Puedes nombrar la nota que está dos cuerdas hacia abajo y dos trastes hacia arriba de cualquier nota de la cuerda Mi grave que conozcas?',
-      standards: ['Pr.4a', 'Pr.6a']
-    },
-
     skills: [
       { id: 'm9w1-s1', text: 'Name the natural notes on the D string, frets 0–12, in order',
         text_es: 'Nombrar las notas naturales de la cuerda Re, trastes 0–12, en orden',
@@ -788,15 +770,6 @@ SETS.push(
           }
         ]
       }
-    },
-
-    assessment: {
-      goal: 'Names naturals on all six strings · Locates any named note on the neck · Plays a melody crossing 3+ strings cleanly',
-      goal_es: 'Nombra las notas naturales en las seis cuerdas · Ubica cualquier nota nombrada en el mástil · Toca una melodía que cruce 3 o más cuerdas de forma limpia',
-      performance: 'Name every string at the fret-5 dot, then every string at the fret-7 dot, no chart, within 5 seconds each — then play "Luna"\'s fingerpicked intro fragment (D, G, B, open e) cleanly in order, naming each note as you play it.',
-      selfCheck: 'Can you name all six strings at the 5th-fret dot? Can you find B on three different strings?',
-      selfCheck_es: '¿Puedes nombrar las seis cuerdas en el punto del traste 5? ¿Puedes encontrar B en tres cuerdas distintas?',
-      standards: ['Pr.4a', 'Pr.6a']
     },
 
     skills: [
@@ -1125,15 +1098,6 @@ SETS.push(
           }
         ]
       }
-    },
-
-    assessment: {
-      goal: 'Reads TAB above fret 5 · Writes a playable 4-bar TAB · Reads a slash chord from a chart',
-      goal_es: 'Lee TAB arriba del traste 5 · Escribe un TAB de 4 compases que se pueda tocar · Lee un acorde con barra diagonal de un diagrama',
-      performance: 'The cold-read test: play your own hand-written TAB at least a day after writing it, exactly as written. If the page alone reproduces the riff, the TAB passes.',
-      selfCheck: 'Could a stranger play your TAB without hearing the song first? Can you explain what G/B means in one sentence?',
-      selfCheck_es: '¿Podría un desconocido tocar tu TAB sin haber escuchado la canción primero? ¿Puedes explicar qué significa G/B en una oración?',
-      standards: ['Pr.4a', 'Pr.6a', 'Cn.10a']
     },
 
     skills: [

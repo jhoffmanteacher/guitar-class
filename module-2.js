@@ -355,15 +355,6 @@ SETS.push(
       }
     },
 
-    assessment: {
-      goal: 'Names all notes on E string (frets 0–12) · Names all notes on A string (frets 0–12) · Points to a named note on the fretboard · Reads a basic fretboard note chart',
-      goal_es: 'Nombra todas las notas en la cuerda Mi (trastes 0–12) · Nombra todas las notas en la cuerda La (trastes 0–12) · Señala una nota nombrada en el diapasón · Lee una tabla básica de notas del diapasón',
-      performance: 'Self-quiz with the shuffle deck: it deals you a random natural fret and you name the note before the ring runs out — three seconds a card, ten rounds. Run it on the low E string, then on the A string. Then reverse it with the Find the Note drill: it names a note and you put your finger on it. 9 of 10 each way.',
-      selfCheck: 'Can you name every natural note on the E string without looking? Can you find any note on E or A within 3 seconds when the Find the Note drill calls it out?',
-      selfCheck_es: '¿Puedes nombrar cada nota natural en la cuerda Mi sin mirar? ¿Puedes encontrar cualquier nota en Mi o La en 3 segundos cuando el ejercicio "Encuentra la nota" te la pide?',
-      standards: ['Re.7a', 'Pr.4a']
-    },
-
     skills: [
       { id: 'm2w1-s1', text: 'Recite the musical alphabet (A B C D E F G) from memory',
         text_es: 'Recitar el alfabeto musical (A B C D E F G) de memoria',
@@ -945,15 +936,6 @@ SETS.push(
           }
         ]
       }
-    },
-
-    assessment: {
-      goal: 'Module-end recording: (1) Play the "All Along the Watchtower" bass-note line on the low E string from memory, to the metronome at 60 BPM, with clean tone and correct fingering — or the alternate single-note root line from "the cure." (2) Sight-read a short 2-bar bass line from TAB.',
-      goal_es: 'Grabación de fin de módulo: (1) Toca la línea de bajo de "All Along the Watchtower" en la cuerda Mi grave de memoria, con el metrónomo a 60 BPM, con tono limpio y digitación correcta — o la línea alterna de raíces de una sola nota de "the cure." (2) Lee a primera vista una línea corta de bajo de 2 compases desde el TAB.',
-      performance: 'Self-check: record yourself playing the "Watchtower" low-E line from memory at 60 BPM, then sight-read and play a short 2-bar bass line from TAB. Listen back and name one thing to improve.',
-      selfCheck: 'Can you press a note cleanly with no buzzing? Can you read a basic TAB? Can you play a 4-bar melody in time at 60 BPM?',
-      selfCheck_es: '¿Puedes presionar una nota limpia sin zumbido? ¿Puedes leer un TAB básico? ¿Puedes tocar una melodía de 4 compases a tiempo a 60 BPM?',
-      standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Re.7a']
     },
 
     skills: [

@@ -421,15 +421,6 @@ SETS.push(
       }
     },
 
-    assessment: {
-      goal: 'Plays minor pentatonic ascending and descending · Plays major pentatonic on E & A strings · Uses alternate picking · Improvises a 4-bar phrase over a backing track · Identifies minor vs major pentatonic by ear',
-      goal_es: 'Toca la pentatónica menor subiendo y bajando · Toca la pentatónica mayor en las cuerdas Mi y La · Usa púa alterna · Improvisa una frase de 4 compases sobre una pista de acompañamiento · Identifica pentatónica menor vs mayor de oído',
-      performance: 'Solo: record yourself improvising 4 bars over an Am backing track — either "All Along the Watchtower" or "the cure" ▶ &#x1F3B5; Backing track button in the &#x1F3B5; Songs list at the bottom of Module 4 (both are in Am) — then listen back. Goal is one clear phrase, not speed.',
-      selfCheck: 'Can you play Pattern 1 up and down without stopping? Can you position it for both Am and Em pentatonic?',
-      selfCheck_es: '¿Puedes tocar el Patrón 1 subiendo y bajando sin detenerte? ¿Puedes posicionarlo tanto para Am como para Em pentatónica?',
-      standards: ['Cr.1a', 'Pr.4a', 'Pr.5a']
-    },
-
     skills: [
       { id: 'm4w1-s1', text: 'Play Pentatonic Pattern 1 ascending and descending from memory',
         text_es: 'Tocar el Patrón pentatónico 1 subiendo y bajando de memoria',
@@ -775,15 +766,6 @@ SETS.push(
       }
     },
 
-    assessment: {
-      goal: 'Varies dynamics on purpose (p, mf, f) · Changes timbre by shifting picking-hand position · Performs a hammer-on and pull-off · Shapes a note\'s "envelope" (attack and length) · Plays a call-and-response phrase (call unresolved, response lands on root) · Names all natural notes on the D & G strings',
-      goal_es: 'Varía la dinámica a propósito (p, mf, f) · Cambia el timbre moviendo la posición de la mano de pulsar · Ejecuta un hammer-on y un pull-off · Da forma a la "envolvente" de una nota (ataque y duración) · Toca una frase de llamada y respuesta (la llamada sin resolver, la respuesta aterriza en la raíz) · Nombra todas las notas naturales en las cuerdas Re y Sol',
-      performance: 'Solo check: record a call-and-response phrase over the Am jam track — a 2-bar call, a 1-bar pause, then a 2-bar response — then listen back and judge: does the response resolve at the end?',
-      selfCheck: 'Can you vary your dynamics on purpose (loud vs soft)? Can you play a clear call-and-response phrase where the "answer" lands on the root?',
-      selfCheck_es: '¿Puedes variar tu dinámica a propósito (fuerte vs suave)? ¿Puedes tocar una frase clara de llamada y respuesta donde la "respuesta" aterrice en la raíz?',
-      standards: ['Cr.1a', 'Pr.4a', 'Pr.5b']
-    },
-
     skills: [
       { id: 'm4w2-s1', text: 'Vary dynamics consciously: play the same note at p, mf, and f (the letters musicians use for volume: p = piano, quiet · mf = mezzo-forte, medium · f = forte, loud)',
         text_es: 'Variar la dinámica de forma consciente: tocar la misma nota en p, mf y f (las letras que usan los músicos para el volumen: p = piano, suave · mf = mezzo-forte, medio · f = forte, fuerte)',
@@ -1096,15 +1078,6 @@ SETS.push(
           }
         ]
       }
-    },
-
-    assessment: {
-      goal: 'Module-end (two tasks): (1) Perform an original 4-bar solo over a course-song backing track, holding the track\'s pulse start to finish — use the full minor pentatonic box, include at least one hammer-on, pull-off, or vibrato, and follow a named phrasing strategy (call-and-response or four-phrase). (2) Read a short 4-bar pentatonic lick from TAB and play it.',
-      goal_es: 'Fin de módulo (dos tareas): (1) Toca un solo original de 4 compases sobre la pista de acompañamiento de una canción del curso, sosteniendo el pulso de la pista de principio a fin — usa la caja completa de pentatónica menor, incluye al menos un hammer-on, pull-off, o vibrato, y sigue una estrategia de fraseo nombrada (llamada y respuesta o cuatro frases). (2) Lee un lick pentatónico corto de 4 compases del TAB y tócalo.',
-      performance: 'Solo: record your original 4-bar solo over a core-song backing track, saying your phrasing strategy (call-and-response or four-phrase) out loud on the recording, then listen back; then sight-read and play a short 4-bar pentatonic lick from TAB.',
-      selfCheck: 'Can you explain the difference between major and minor pentatonic? Can you add the blues note? Can you perform your original solo without looking at your notes?',
-      selfCheck_es: '¿Puedes explicar la diferencia entre pentatónica mayor y menor? ¿Puedes agregar la nota de blues? ¿Puedes tocar tu solo original sin mirar tus notas?',
-      standards: ['Cr.1a', 'Cr.2a', 'Pr.6a']
     },
 
     skills: [

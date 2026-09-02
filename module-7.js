@@ -260,15 +260,6 @@ SETS.push(
       }
     },
 
-    assessment: {
-      goal: 'Reads stacked-number TAB (chords) · Reads rhythm symbols above TAB · Plays a real riff built from double-stops · Identifies hammer-on / pull-off / slide markings',
-      goal_es: 'Lee TAB de números apilados (acordes) · Lee los símbolos de ritmo arriba del TAB · Toca un riff real hecho de dobles cuerdas · Identifica las marcas de hammer-on / pull-off / deslizamiento',
-      performance: 'Record yourself playing the "Smoke on the Water" riff at 70 BPM, then listen back for both notes ringing together evenly on every double-stop.',
-      selfCheck: 'Can you look at a new TAB and play it without someone telling you the rhythm? Can you tell a chord from a melody just by looking at the TAB?',
-      selfCheck_es: '¿Puedes mirar un TAB nuevo y tocarlo sin que alguien te diga el ritmo? ¿Puedes distinguir un acorde de una melodía con solo mirar el TAB?',
-      standards: ['Re.7a', 'Pr.4a', 'Pr.5a']
-    },
-
     skills: [
       { id: 'm7w1-s1', text: 'Read stacked TAB numbers as a chord (play simultaneously)',
         text_es: 'Leer números apilados en el TAB como un acorde (tocarlos al mismo tiempo)',
@@ -563,15 +554,6 @@ SETS.push(
           }
         ]
       }
-    },
-
-    assessment: {
-      goal: 'Bars all 6 strings cleanly with index finger · Forms E-shape barre with no buzzing · Plays F, G, A barre chords cleanly · Names a barre chord by its root note on the low E string · Switches between F, G, and A barre chords in time',
-      goal_es: 'Hace cejilla limpia en las 6 cuerdas con el dedo índice · Forma la cejilla en forma de E sin zumbido · Toca los acordes con cejilla F, G, A de forma limpia · Nombra un acorde con cejilla por su nota raíz en la cuerda Mi grave · Cambia entre los acordes con cejilla F, G y A a tiempo',
-      performance: 'Solo: record yourself playing F barre, slide to G barre, slide to A barre — one strum each, all clean. Listen back and check for buzz on the B and high E strings.',
-      selfCheck: 'Can your F barre ring without buzzing? Can you name the chord when you see an E-shape barre at the 7th fret? (Answer: B major.)',
-      selfCheck_es: '¿Puede tu cejilla de F sonar sin zumbido? ¿Puedes nombrar el acorde cuando ves una cejilla en forma de E en el traste 7? (Respuesta: B mayor.)',
-      standards: ['Pr.4a', 'Pr.5a']
     },
 
     skills: [
@@ -923,15 +905,6 @@ SETS.push(
           }
         ]
       }
-    },
-
-    assessment: {
-      goal: 'Forms an A-shape barre cleanly (B major) · Plays C, D, E as A-shape barre · Names an A-shape barre by its root on the A string · Switches between E-shape and A-shape barre in a progression · Plays a full song using only barre chords',
-      goal_es: 'Forma la cejilla en forma de A de manera limpia (B mayor) · Toca C, D, E como cejilla en forma de A · Nombra una cejilla en forma de A por su raíz en la cuerda La · Cambia entre cejilla en forma de E y de A en una progresión · Toca una canción completa usando solo acordes con cejilla',
-      performance: 'Solo: record yourself playing a 4-chord progression (e.g., F-C-G-D or Am-G-F-C) entirely with barre chords, 2 bars each, at 60 BPM. Listen back for clean tone on every chord.',
-      selfCheck: 'Can you play the same chord (say F major) two different ways — as E-shape and as A-shape? Can you switch between the two shapes mid-song without thinking?',
-      selfCheck_es: '¿Puedes tocar el mismo acorde (digamos F mayor) de dos formas distintas — como forma de E y como forma de A? ¿Puedes cambiar entre las dos formas a mitad de la canción sin pensarlo?',
-      standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
     },
 
     skills: [

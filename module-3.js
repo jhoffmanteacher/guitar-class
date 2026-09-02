@@ -380,15 +380,6 @@ SETS.push(
       }
     },
 
-    assessment: {
-      goal: 'Frets a clean 2-finger power chord · Moves shape along E string without buzzing · Moves shape along A string · Mutes unused strings cleanly · Plays a chord on the beat · Reads a power chord TAB',
-      goal_es: 'Trastea un acorde de potencia limpio con dos dedos · Mueve la forma por la cuerda Mi sin zumbido · Mueve la forma por la cuerda La · Silencia las cuerdas que no usa de forma limpia · Toca un acorde a tiempo · Lee un TAB de acordes de potencia',
-      performance: 'Record yourself playing the A5–G5–F5–G5 loop at 60 BPM, then climb the power chord shape up the A string (A5-B5-C5-D5-E5-F5-G5, open through fret 10), naming each root — listen back for muting and timing.',
-      selfCheck: 'Can you fret a power chord with no buzzing from unused strings? Can you move the shape to 3 different positions without pausing?',
-      selfCheck_es: '¿Puedes trastear un acorde de potencia sin zumbido de las cuerdas que no usas? ¿Puedes mover la forma a 3 posiciones distintas sin pausar?',
-      standards: ['Pr.4a', 'Pr.5a', 'Re.7a']
-    },
-
     skills: [
       { id: 'm3w1-s1', text: 'Fret a clean 2-finger power chord (root + 5th) with no buzzing',
         text_es: 'Trastear un acorde de potencia limpio con dos dedos (raíz + quinta) sin zumbido',
@@ -850,15 +841,6 @@ SETS.push(
           }
         ]
       }
-    },
-
-    assessment: {
-      goal: 'Module-end (three tasks): (1) Play a core-song excerpt to the metronome — e.g., the "Seven Nation Army" riff, "All Along the Watchtower"\'s A5–G5–F5, or "Sweet Child"\'s D5–C5–G5 (which switches between E- and A-string roots on the same fret) — at 80 BPM, holding it for at least 15 seconds. (2) Read a three-chord (I–IV–V) progression from chord symbols / TAB using a named strumming pattern (straight-eighths or split strum), and name power chords from a chord chart. (3) Clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes.',
-      goal_es: 'Fin de módulo (tres tareas): (1) Toca un fragmento de canción principal con el metrónomo — p. ej., el riff de "Seven Nation Army", el A5–G5–F5 de "All Along the Watchtower", o el D5–C5–G5 de "Sweet Child" (que cambia entre raíces de las cuerdas Mi y La en el mismo traste) — a 80 BPM, sosteniéndolo por al menos 15 segundos. (2) Lee una progresión de tres acordes (I–IV–V) a partir de símbolos de acorde / TAB usando un patrón de rasgueo nombrado (corcheas rectas o rasgueo dividido), y nombra acordes de potencia a partir de un diagrama de acordes. (3) Aplaude y cuenta un ritmo de 4 compases usando redondas, blancas, negras y corcheas.',
-      performance: 'Record yourself: play a core-song excerpt with the metronome — changes on beat 1 at 80 BPM, held for at least 15 seconds; read a three-chord (I–IV–V) progression from chord symbols with your named strum; then clap and count a 4-bar rhythm. Listen back and note one thing to improve.',
-      selfCheck: 'Can you change chords on beat 1 and hold 80 BPM for at least 15 seconds? Can you read a I–IV–V progression from chord symbols and name power chords from a chart? Can you clap and count a 4-bar rhythm using whole, half, quarter, and eighth notes?',
-      selfCheck_es: '¿Puedes cambiar de acorde en el tiempo 1 y sostener 80 BPM por al menos 15 segundos? ¿Puedes leer una progresión I–IV–V a partir de símbolos de acorde y nombrar acordes de potencia a partir de un diagrama? ¿Puedes aplaudir y contar un ritmo de 4 compases usando redondas, blancas, negras y corcheas?',
-      standards: ['Pr.4a', 'Pr.5b', 'Pr.6a']
     },
 
     skills: [

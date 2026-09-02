@@ -253,15 +253,6 @@ SETS.push(
       }
     },
 
-    assessment: {
-      goal: 'Holds correct fingerpicking hand position · Assigns p to bass, i-m-a to G-B-e · Plucks each open string with the correct finger · Plays through p-i-m-a in order without looking',
-      goal_es: 'Mantiene una posición correcta de la mano de fingerpicking · Asigna p al bajo, i-m-a a Sol, Si y mi aguda · Pulsa cada cuerda al aire con el dedo correcto · Toca p-i-m-a en orden sin mirar',
-      performance: 'Play p-i-m-a on open strings at 60 BPM for 8 reps. Check your own hand position in a mirror or on your device\'s camera — wrist arched, fingers curved.',
-      selfCheck: 'Can you pluck a string with your "a" finger without looking? Can you keep your wrist arched for 30 seconds without it collapsing?',
-      selfCheck_es: '¿Puedes pulsar una cuerda con tu dedo "a" sin mirar? ¿Puedes mantener tu muñeca arqueada durante 30 segundos sin que se colapse?',
-      standards: ['Pr.4a', 'Pr.5a']
-    },
-
     skills: [
       { id: 'm8w1-s1', text: 'Hold a relaxed fingerpicking hand position — wrist arched, fingers curved',
         text_es: 'Mantener una posición relajada de la mano de fingerpicking — muñeca arqueada, dedos curvados',
@@ -599,15 +590,6 @@ SETS.push(
           }
         ]
       }
-    },
-
-    assessment: {
-      goal: 'Plays p-i-m-a-m-i pattern cleanly over one chord · Even volume across all fingers · Pattern stays steady at 70 BPM · Adapts to a different chord by moving only the thumb',
-      goal_es: 'Toca el patrón p-i-m-a-m-i de forma limpia sobre un acorde · Volumen parejo en todos los dedos · El patrón se mantiene estable a 70 BPM · Se adapta a un acorde distinto moviendo solo el pulgar',
-      performance: 'Play the 6-note pattern over Em at 70 BPM, then try 80. Record yourself and listen back for even volume on every finger, especially the "a" finger landing right on its beat.',
-      selfCheck: 'Can you play 8 bars of the pattern without losing your place? Can you switch from Em to Am bass without breaking the picking?',
-      selfCheck_es: '¿Puedes tocar 8 compases del patrón sin perder tu lugar? ¿Puedes cambiar del bajo de Em al de Am sin romper el punteo?',
-      standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
     },
 
     skills: [
@@ -951,15 +933,6 @@ SETS.push(
           }
         ]
       }
-    },
-
-    assessment: {
-      goal: 'Fingerpicks through a full 4-chord progression · Pattern stays steady through chord changes · Demonstrates Travis picking (alternating bass thumb) · Performs one full fingerpicked song from start to finish',
-      goal_es: 'Toca con fingerpicking una progresión completa de 4 acordes · El patrón se mantiene estable a través de los cambios de acorde · Demuestra Travis picking (pulgar de bajo alternante) · Interpreta una canción completa con fingerpicking de principio a fin',
-      performance: 'Perform one full song — from this module\'s song list or another fingerpicked song you know (like "Hallelujah" from Module 5) — using fingerpicking from start to finish, for family, a friend, or a recording you share. Listen back for pattern consistency, chord changes, and timing.',
-      selfCheck: 'Can you play a 4-chord song with fingerpicking and not break the pattern at any chord change? Can your thumb alternate between two bass strings for 4 bars without confusion?',
-      selfCheck_es: '¿Puedes tocar una canción de 4 acordes con fingerpicking sin romper el patrón en ningún cambio de acorde? ¿Puede tu pulgar alternar entre dos cuerdas graves durante 4 compases sin confundirse?',
-      standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
     },
 
     skills: [

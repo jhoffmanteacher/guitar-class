@@ -111,9 +111,15 @@
   across module-1.js…module-13.js, plus the now-pointless `checks.mjs`
   validation for it (`skillFocus`/`unit` already cover that ground live, per
   the `buildSet()` comment in app.js). `assessment` (`goal`/`performance`/
-  `selfCheck`/`standards`) was left in place — still dead code-wise, but
-  Jonathan confirmed its content (which songs/chords are assessed) is
-  meaningful to him even unrendered, so don't delete it without asking.
+  `selfCheck`/`standards`) was left in place at the time — still dead
+  code-wise, but Jonathan confirmed its content (which songs/chords are
+  assessed) was meaningful to him even unrendered. **Reversed 2026-09-02:**
+  asked again, and Jonathan chose deletion — all 35 blocks removed across
+  `module-1.js`…`module-12.js` (m13w1 never had one). Nothing student- or
+  teacher-facing changed, because nothing ever read the field; the text is
+  recoverable from git if it is ever wanted. The assessment content that
+  DOES render is `MODULE_REVIEWS[n].assessItems` / `.standards` in the
+  Module Review — a different, per-module object, untouched.
   - [x] `module-5.js` (m5w2) — Dm and G/B now have real teaching content:
         two new challenge cards ("Fret Dm cleanly", "Play the G/B bass
         turnaround") with diagrams, hint/stuck/levelUp prose, and two new

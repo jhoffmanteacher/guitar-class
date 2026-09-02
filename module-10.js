@@ -235,15 +235,6 @@ SETS.push(
       }
     },
 
-    assessment: {
-      goal: 'Says the recipe from memory · Builds C and G major on one string · Explains where the pentatonic comes from',
-      goal_es: 'Dice la receta de memoria · Construye C mayor y G mayor en una sola cuerda · Explica de dónde viene la pentatónica',
-      performance: 'Build C major on one string using only the recipe — no chart — saying each whole/half step out loud as you go.',
-      selfCheck: 'Can you spell G major out loud, including its sharp? Can you say which two scale notes pentatonic drops?',
-      selfCheck_es: '¿Puedes deletrear G mayor en voz alta, incluyendo su sostenido? ¿Puedes decir cuáles dos notas de la escala quita la pentatónica?',
-      standards: ['Pr.4a', 'Cn.10a']
-    },
-
     skills: [
       { id: 'm10w1-s1', text: 'Say the major-scale recipe (W-W-H-W-W-W-H) from memory',
         text_es: 'Decir la receta de la escala mayor (T-T-S-T-T-T-S) de memoria',
@@ -527,15 +518,6 @@ SETS.push(
           }
         ]
       }
-    },
-
-    assessment: {
-      goal: 'Finds any key\'s relative minor · Explains relative vs parallel · Builds and plays the blues scale at 60 BPM · Solos over a 12-bar blues loop, following the form',
-      goal_es: 'Encuentra la relativa menor de cualquier tonalidad · Explica la relativa frente a la paralela · Construye y toca la escala de blues a 60 BPM · Improvisa sobre un loop de blues de 12 compases, siguiendo la forma',
-      performance: 'Fast round: run the relative-pairs deck and answer each relative minor in rhythm — no pauses, then flip to check. Then add the b5 to A minor pentatonic box 1 and play the blues scale ascending and descending at 60 BPM, matching the play button. Finish by recording the 12-bar blues form in A, looping it, and soloing over it with the blues scale — one chorus comping, one chorus soloing.',
-      selfCheck: 'What\'s the relative minor of F ("Luna"\'s key)? Which single note makes a pentatonic a blues scale?',
-      selfCheck_es: '¿Cuál es la relativa menor de F (la tonalidad de "Luna")? ¿Cuál nota única convierte una pentatónica en una escala de blues?',
-      standards: ['Pr.4a', 'Pr.6a', 'Cn.10a']
     },
 
     skills: [
@@ -843,15 +825,6 @@ SETS.push(
           }
         ]
       }
-    },
-
-    assessment: {
-      goal: 'Transposes box 1 to a named key · Sings then plays a 3-note pattern · Tells major from minor by ear',
-      goal_es: 'Transpone la caja 1 a una tonalidad nombrada · Canta y luego toca un patrón de 3 notas · Distingue mayor de menor de oído',
-      performance: 'Run the minor-keys-box1 deck, slide box 1 to the key drawn, and play it. Then four echo rounds by ear — the play button for round 1, your own self-recorded random patterns for rounds 2–4 — singing each pattern back before you play it. Goal: 3 out of 4 matched correctly.',
-      selfCheck: 'Where does box 1 sit for D minor? Can you sing a phrase from a core song and find its first note?',
-      selfCheck_es: '¿Dónde se ubica la caja 1 para D menor? ¿Puedes cantar una frase de una canción principal y encontrar su primera nota?',
-      standards: ['Pr.4a', 'Pr.6a', 'Re.7b']
     },
 
     skills: [

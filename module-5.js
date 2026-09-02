@@ -240,15 +240,6 @@ SETS.push(
       }
     },
 
-    assessment: {
-      goal: 'Reads a chord diagram correctly · Identifies X, O, and finger numbers on chart · Frets Am cleanly · Frets Em cleanly · Strums 4 beats per bar in time · Finds any chord shown on a chart',
-      goal_es: 'Lee correctamente un diagrama de acorde · Identifica X, O y números de dedo en el diagrama · Trastea Am limpio · Trastea Em limpio · Rasguea 4 tiempos por compás a tiempo · Encuentra cualquier acorde mostrado en un diagrama',
-      performance: 'Solo: record yourself strumming Am for 4 bars, then Em for 4 bars, counting aloud at 60 BPM. Listen back for clean tone on every string.',
-      selfCheck: 'Can you read a chord diagram and find the right fingers without help? Can you strum Am and Em with no buzzing?',
-      selfCheck_es: '¿Puedes leer un diagrama de acorde y encontrar los dedos correctos sin ayuda? ¿Puedes rasguear Am y Em sin zumbido?',
-      standards: ['Re.7a', 'Pr.4a']
-    },
-
     skills: [
       { id: 'm5w1-s1', text: 'Read a chord diagram: identify X (mute), O (open), dots (finger placement), and numbers (which finger)',
         text_es: 'Leer un diagrama de acorde: identificar X (silenciar), O (al aire), puntos (colocación de dedos), y números (qué dedo)',
@@ -855,15 +846,6 @@ SETS.push(
       }
     },
 
-    assessment: {
-      goal: 'Frets C, F, Am, G with clean tone · Switches C to G in time at 70 BPM · Switches Am to F in time at 70 BPM · Uses common-finger pivot (Am–C) · Strums a down-up pattern in time · Plays a full verse of a C–G–Am–F song',
-      goal_es: 'Trastea C, F, Am, G con tono limpio · Cambia de C a G a tiempo a 70 BPM · Cambia de Am a F a tiempo a 70 BPM · Usa el pivote de dedo común (Am–C) · Rasguea un patrón abajo-arriba a tiempo · Toca una estrofa completa de una canción C–G–Am–F',
-      performance: 'Solo: record a full verse of "Let It Be" with open chords and down-up strum, then listen back for clean transitions on every change.',
-      selfCheck: 'Can you switch from Am to C without lifting your index finger? Can you play the C–G–Am–F loop at 70 BPM without stopping?',
-      selfCheck_es: '¿Puedes cambiar de Am a C sin levantar tu dedo índice? ¿Puedes tocar la vuelta C–G–Am–F a 70 BPM sin detenerte?',
-      standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
-    },
-
     skills: [
       { id: 'm5w2-s1', text: 'Fret C major with clean tone on the B string',
         text_es: 'Trastear C mayor con tono limpio en la cuerda Si',
@@ -1276,15 +1258,6 @@ SETS.push(
       }
     },
 
-    assessment: {
-      goal: 'Frets the Group 2 chords (D, A, Em, and the four-finger Bm) with clean tone · Switches D to A in time · Switches Em to Bm in time · Connects Group 1 and Group 2 chords · Plays a song using Group 2 chords · Identifies chord group from a chord chart',
-      goal_es: 'Trastea los acordes del Grupo 2 (D, A, Em y el Bm de cuatro dedos) con tono limpio · Cambia de D a A a tiempo · Cambia de Em a Bm a tiempo · Conecta acordes del Grupo 1 y del Grupo 2 · Toca una canción usando acordes del Grupo 2 · Identifica el grupo de un acorde a partir de un diagrama',
-      performance: 'Solo: run the chord deck (mixes Group 1 and Group 2, plus Dm and the G/B turnaround) for three cards in a row, then play them in sequence for 8 bars at 70 BPM — record it and listen back for clean changes.',
-      selfCheck: 'Can you look at a chord chart and know immediately which "group" each chord belongs to? Can you switch D–A and Em–Bm on beat 1, working the tempo up toward 70 BPM?',
-      selfCheck_es: '¿Puedes ver un diagrama de acordes y saber de inmediato a qué "grupo" pertenece cada acorde? ¿Puedes cambiar D–A y Em–Bm en el tiempo 1, subiendo el tempo hacia 70 BPM?',
-      standards: ['Pr.4a', 'Pr.5a', 'Cn.11b']
-    },
-
     skills: [
       { id: 'm5w3-s1', text: 'Fret D major cleanly — triangular shape, top four strings',
         text_es: 'Trastear D mayor limpio — forma triangular, las cuatro cuerdas más agudas',
@@ -1591,15 +1564,6 @@ SETS.push(
           }
         ]
       }
-    },
-
-    assessment: {
-      goal: 'Module 5 assessment — perform one CORE open-chord song from memory: "Let It Be" (C–G–Am–F), "Luna" (F–Am–Dm), or "the cure" (Am–C–Dm–F–G/B). Also: play three chords in an 8-bar progression at 70 BPM with clean changes, and name chords on an unlabelled chord chart. Evaluated on chord accuracy, timing, smooth transitions, and musicality. (Separate and ungraded: your written "My Guitar Adventure — Semester 1 Check-in" reflection — just for you, not part of the assessment score.)',
-      goal_es: 'Evaluación del Módulo 5 — interpreta una canción PRINCIPAL de acordes al aire de memoria: "Let It Be" (C–G–Am–F), "Luna" (F–Am–Dm) o "the cure" (Am–C–Dm–F–G/B). Además: toca tres acordes en una progresión de 8 compases a 70 BPM con cambios limpios, y nombra acordes en un diagrama sin etiquetar. Se evalúa la precisión de los acordes, el tiempo, las transiciones suaves y la musicalidad. (Aparte y sin calificar: tu reflexión escrita "Mi aventura con la guitarra — Check-in del Semestre 1" — solo para ti, no forma parte del puntaje de la evaluación.)',
-      performance: 'Module 5 assessment performance. Student records a full run of the core song from memory (or plays it for family or friends), then reviews the recording for chord accuracy, timing, transitions, and expression.',
-      selfCheck: 'Can you play your core song from memory — no chart in front of you — all the way through without stopping? Can you name every chord in it and which group it belongs to?',
-      selfCheck_es: '¿Puedes tocar tu canción principal de memoria — sin ningún diagrama delante — de principio a fin sin detenerte? ¿Puedes nombrar cada acorde y a qué grupo pertenece?',
-      standards: ['Pr.4a', 'Pr.5b', 'Pr.6a', 'Re.9a']
     },
 
     skills: [

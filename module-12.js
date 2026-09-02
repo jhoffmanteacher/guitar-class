@@ -298,15 +298,6 @@ SETS.push(
       }
     },
 
-    assessment: {
-      goal: 'Alternating thumb in steady quarters · Clean pinch on the downbeat · Pattern survives an Am↔C change',
-      goal_es: 'Pulgar alternante en negras constantes · Pellizco limpio en el tiempo fuerte · El patrón sobrevive un cambio Am↔C',
-      performance: 'Record yourself thumb-drumming at 60 BPM for 8 bars; listen back for your thumb stopping when the fills enter.',
-      selfCheck: 'Can your thumb keep going while you talk? Does the pinch land exactly together, or does one note leak first?',
-      selfCheck_es: '¿Puede tu pulgar seguir sonando mientras hablas? ¿El pellizco cae exactamente junto, o se escapa primero una nota?',
-      standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
-    },
-
     skills: [
       { id: 'm12w1-s1', text: 'Alternate the thumb between two bass strings in steady quarter notes',
         text_es: 'Alternar el pulgar entre dos cuerdas graves en negras constantes',
@@ -571,15 +562,6 @@ SETS.push(
           }
         ]
       }
-    },
-
-    assessment: {
-      goal: 'Picks a 3/4 pattern in time · Plays "the cure" or "Let It Be" fingerstyle with the pattern unbroken · Explains "native style"',
-      goal_es: 'Puntea un patrón en 3/4 en tiempo · Toca "the cure" o "Let It Be" con fingerstyle sin interrupciones en el patrón · Explica el "estilo nativo"',
-      performance: 'Record yourself playing the 3/4 pattern (bass-pluck-pluck) on one chord, counting aloud at 60 BPM. Then fingerpick "the cure" (Am-C-Dm-F) or "Let It Be" (C-G-Am-F), one bar each, with the pattern unbroken through every chord change.',
-      selfCheck: 'Can you count aloud while picking in 3? Does your pattern survive the F chord?',
-      selfCheck_es: '¿Puedes contar en voz alta mientras punteas en 3? ¿Tu patrón sobrevive el acorde F?',
-      standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Re.8a']
     },
 
     skills: [
@@ -869,15 +851,6 @@ SETS.push(
           }
         ]
       }
-    },
-
-    assessment: {
-      goal: 'Plays the "Luna" intro rolls · Blends melody over a steady thumb · Performs one full fingerpicked verse, recovering from mistakes',
-      goal_es: 'Toca los floreos de la intro de "Luna" · Combina melodía sobre un pulgar constante · Interpreta una estrofa completa con fingerpicking, recuperándose de errores',
-      performance: 'Mini-performance, solo edition: record one verse, listen back, and name one strength + one target yourself — and share the recording with someone if you like.',
-      selfCheck: 'Can you keep the thumb going while the melody enters? Did you finish the verse even where you slipped?',
-      selfCheck_es: '¿Puedes mantener el pulgar sonando mientras entra la melodía? ¿Terminaste la estrofa incluso donde te resbalaste?',
-      standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Cn.11a']
     },
 
     skills: [

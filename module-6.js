@@ -344,15 +344,6 @@ SETS.push(
       }
     },
 
-    assessment: {
-      goal: 'Keeps a steady down-up 8th-note pulse for 8+ bars · Counts "1 + 2 + 3 + 4 +" aloud while strumming · Switches between Em and Am without stopping the strum hand · Strums evenly (downstrokes and upstrokes same volume)',
-      goal_es: 'Mantiene un pulso de corcheas abajo-arriba constante durante 8+ compases · Cuenta "1 + 2 + 3 + 4 +" en voz alta mientras rasguea · Cambia entre Em y Am sin detener la mano de rasgueo · Rasguea de forma pareja (golpes hacia abajo y hacia arriba con el mismo volumen)',
-      performance: 'Strum Em for 4 bars, then Am for 4 bars, with a steady down-up pulse at 60 BPM, counting aloud the whole time. Record 20 seconds on your phone and listen back for the strum hand never stopping — especially at the change.',
-      selfCheck: 'Can you keep your strum hand moving even during a chord change? Can you count the 8th-note pulse out loud without slowing down?',
-      selfCheck_es: '¿Puedes mantener tu mano de rasgueo en movimiento incluso durante un cambio de acorde? ¿Puedes contar el pulso de corcheas en voz alta sin ir más despacio?',
-      standards: ['Pr.4a', 'Pr.5a']
-    },
-
     skills: [
       { id: 'm6w1-s1', text: 'Move my strumming wrist like a pendulum — continuous motion, even between strums',
         text_es: 'Mover mi muñeca de rasgueo como un péndulo — movimiento continuo, incluso entre rasgueos',
@@ -671,15 +662,6 @@ SETS.push(
       }
     },
 
-    assessment: {
-      goal: 'Plays the D-DU-UDU pattern cleanly at 60 BPM (70+ is the push goal) · Accents beats 2 and 4 (backbeat) · Keeps pattern steady through a chord change · Applies pattern to a real song',
-      goal_es: 'Toca el patrón D-DU-UDU de forma limpia a 60 BPM (70+ es la meta de empuje) · Acentúa los tiempos 2 y 4 (contratiempo) · Mantiene el patrón estable a través de un cambio de acorde · Aplica el patrón a una canción real',
-      performance: 'Strum D-DU-UDU on G for 2 bars, then switch to D for 2 more, looping for 3 minutes without the pattern breaking at the change. With someone around, trade off instead: one plays G, the other takes over on D, and the pattern must not break at the handoff.',
-      selfCheck: 'Can you play D-DU-UDU without thinking about which strum is next? Can you keep the pattern going through a G-to-D change?',
-      selfCheck_es: '¿Puedes tocar D-DU-UDU sin pensar en cuál rasgueo sigue? ¿Puedes mantener el patrón a través de un cambio de G a D?',
-      standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
-    },
-
     skills: [
       { id: 'm6w2-s1', text: 'Play the D-DU-UDU pattern cleanly at 60 BPM',
         text_es: 'Tocar el patrón D-DU-UDU de forma limpia a 60 BPM',
@@ -979,15 +961,6 @@ SETS.push(
           }
         ]
       }
-    },
-
-    assessment: {
-      goal: 'Plays folk, rock, and reggae strum styles on demand · Switches between two patterns mid-song · Chooses a pattern that fits a song\'s style · Applies pattern to a full chord progression',
-      goal_es: 'Toca los estilos de rasgueo folk, rock y reggae a pedido · Cambia entre dos patrones a mitad de la canción · Elige un patrón que se ajuste al estilo de una canción · Aplica un patrón a una progresión de acordes completa',
-      performance: 'Solo: pick one song and one strum style (folk, rock, or reggae). Play 8 bars with that pattern. Then switch to a different style for the next 8 bars. Same chords, two feels.',
-      selfCheck: 'Can you play the same chord progression three different ways (folk, rock, reggae) and have them actually sound different? Can you pick the right pattern for a new song by ear?',
-      selfCheck_es: '¿Puedes tocar la misma progresión de acordes de tres formas distintas (folk, rock, reggae) y que en verdad suenen diferentes? ¿Puedes elegir de oído el patrón correcto para una canción nueva?',
-      standards: ['Pr.4a', 'Pr.5a', 'Pr.6a', 'Re.7a']
     },
 
     skills: [

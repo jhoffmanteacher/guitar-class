@@ -240,15 +240,6 @@ SETS.push(
       }
     },
 
-    assessment: {
-      goal: 'Builds triads from a scale · Labels a progression with numerals · Lists a key\'s chord family',
-      goal_es: 'Construye tríadas a partir de una escala · Etiqueta una progresión con números romanos · Enumera la familia de acordes de una tonalidad',
-      performance: 'Write yourself a 4-chord progression in C (any four family chords), label it in numerals, then play it.',
-      selfCheck: 'What\'s the vi chord of G major? Can you explain why Am is lowercase?',
-      selfCheck_es: '¿Cuál es el acorde vi de G mayor? ¿Puedes explicar por qué Am va en minúscula?',
-      standards: ['Pr.4a', 'Cn.10a', 'Re.9a']
-    },
-
     skills: [
       { id: 'm11w1-s1', text: 'Build a triad from a scale (root–3rd–5th)',
         text_es: 'Construir una tríada a partir de una escala (raíz–3ª–5ª)',
@@ -550,15 +541,6 @@ SETS.push(
           }
         ]
       }
-    },
-
-    assessment: {
-      goal: 'Finds a key from a chord inventory · Recognizes I–IV–V and I–V–vi–IV · Decodes a slash chord',
-      goal_es: 'Encuentra una tonalidad a partir de un inventario de acordes · Reconoce I–IV–V y I–V–vi–IV · Descifra un acorde con barra diagonal',
-      performance: 'Key detective: pull up the chord list of a real song you haven\'t analyzed yet; deduce the key and defend your answer.',
-      selfCheck: 'A song uses D, G, A, and Bm — what key? What does the B in G/B do?',
-      selfCheck_es: 'Una canción usa D, G, A y Bm — ¿qué tonalidad? ¿Qué hace la B en G/B?',
-      standards: ['Pr.4a', 'Cn.10a', 'Re.9a']
     },
 
     skills: [
@@ -907,15 +889,6 @@ SETS.push(
           }
         ]
       }
-    },
-
-    assessment: {
-      goal: 'Names any barre chord from its root fret · Moves one shape to three named roots · Plays I–IV–V in a named key · Comps a 12-bar blues in A with shuffle feel, including the quick-change and turnaround',
-      goal_es: 'Nombra cualquier acorde con cejilla a partir del traste de su raíz · Mueve una forma a tres raíces nombradas · Toca I–IV–V en una tonalidad nombrada · Acompaña un blues de 12 compases en A con sensación de shuffle, incluyendo el cambio rápido y el giro',
-      performance: 'Draw a key at random; play its I–IV–V using at least one barre shape, changes in time at 60 BPM. Then play the 12-bar blues in A (A7–D7–E7) from memory at 60 BPM with a shuffle strum, landing the turnaround in bar 12 without stopping.',
-      selfCheck: 'Where are the two places to play C major as a barre? Which shape is friendlier to your hand today? What does the quick-change do in bar 2 of a 12-bar blues?',
-      selfCheck_es: '¿Cuáles son los dos lugares para tocar C mayor como cejilla? ¿Cuál forma es más amigable para tu mano hoy? ¿Qué hace el cambio rápido en el compás 2 de un blues de 12 compases?',
-      standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
     },
 
     skills: [

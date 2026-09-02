@@ -238,15 +238,6 @@ SETS.push(
         tutorialUrl: 'https://www.youtube.com/watch?v=wwiLAOjj16w&start=46' }
     ],
 
-    assessment: {
-      goal: 'Can describe why they want to learn guitar · Can name one song that matters to them · Can describe what the guitar is doing in a song they love',
-      goal_es: 'Puede describir por qué quiere aprender guitarra · Puede nombrar una canción que le importa · Puede describir qué está haciendo la guitarra en una canción que le gusta',
-      performance: 'Type your guitar goal and your song reflection into the response boxes, then say your "why guitar?" answer out loud in one or two sentences — if you can say it without hesitating, you\'ve learned it.',
-      selfCheck: 'Can you name one reason you want to play? Can you name one song you\'d love to play by the end of the year?',
-      selfCheck_es: '¿Puedes nombrar una razón por la que quieres tocar? ¿Puedes nombrar una canción que te encantaría tocar para fin de año?',
-      standards: ['Pr.1a', 'Cn.11a']
-    },
-
     skills: [
       { id: 'w1-s1', text: 'I can describe why I want to learn guitar',
         text_es: 'Puedo describir por qué quiero aprender guitarra',
@@ -675,15 +666,6 @@ SETS.push(
         originalUrl: 'https://www.youtube.com/watch?v=aPzS3QYb868',
         tutorialUrl: 'https://www.youtube.com/watch?v=lGwNWYzYuIk&start=24&end=149' }
     ],
-
-    assessment: {
-      goal: 'Names 5+ parts of the guitar · Holds guitar with correct posture · Holds pick with correct grip · Tunes all 6 strings · Names all 6 strings from memory · Plays "Happy Birthday" on the low E string with clean, steady notes',
-      goal_es: 'Nombra 5+ partes de la guitarra · Sostiene la guitarra con postura correcta · Sostiene la púa con el agarre correcto · Afina las 6 cuerdas · Nombra las 6 cuerdas de memoria · Toca "Happy Birthday" en la cuerda Mi grave con notas limpias y estables',
-      performance: 'Record yourself tuning all six strings, playing each open string cleanly low to high while naming it, then playing "Happy Birthday" — all four phrases on the low E string — at a steady pulse from start to finish without stopping. Listen back and self-check: every string green, every note clean, every name right, the whole song in one go.',
-      selfCheck: 'Can you name 5 parts of the guitar? Can you tune all 6 strings with a tuner? Can you play all of "Happy Birthday" on the low E string with no buzzing and no stops?',
-      selfCheck_es: '¿Puedes nombrar 5 partes de la guitarra? ¿Puedes afinar las 6 cuerdas con un afinador? ¿Puedes tocar "Happy Birthday" completa en la cuerda Mi grave sin zumbidos y sin detenerte?',
-      standards: ['Pr.4a', 'Pr.5a']
-    },
 
     skills: [
       { id: 'w2-s1', text: 'Name 5+ parts of the guitar (body, neck, headstock, frets, strings, tuning pegs, nut, saddle, bridge)',
