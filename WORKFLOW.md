@@ -41,11 +41,20 @@
   PowerShell twin of the hook). Activate after editing the hook with `/hooks` or a
   restart.
 - **Cloud Cowork sessions can't push (and must not git-write through the
-  device bridge).** Established 2026-07-23: the cloud session's GitHub access
-  is read-only for this repo, and running `git am`/`merge` against the Mac
-  clone through the connected-folder bridge fails (the bridge can't unlink
-  git's lock files — stale locks had to be swept to `_to_delete/`). The
-  working pattern instead: build + verify in the cloud (full `checks.mjs`
+  device bridge).** Established 2026-07-23. Scope narrowed 2026-09-04: this
+  is about **Cowork specifically**, not "the cloud" — a Claude Code on the
+  web session has its own writable clone and authenticated HTTPS to origin,
+  and pushed `d0e3dfa` (the Journey tab-card restyle) straight to `main`
+  with no patch pair. What it still can't do is reach the live site — the
+  agent proxy returned HTTP 403 for `jhoffmanteacher.github.io/…/sw.js`, so
+  `checks.mjs --live` can't confirm a deploy from there, and the link
+  check's ~240 YouTube fetches all 403 as non-blocking warnings (they prove
+  nothing about the links either way; a real dead-link sweep needs a local
+  run). Cowork's constraint is a different one and is unchanged: its GitHub
+  access is read-only for this repo, and running `git am`/`merge` against
+  the Mac clone through the connected-folder bridge fails (the bridge can't
+  unlink git's lock files — stale locks had to be swept to `_to_delete/`).
+  The working pattern instead: build + verify in the cloud (full `checks.mjs`
   run pre-handoff so `CACHE_VERSION` ships pre-bumped) → commit → deliver
   `git format-patch` output **always paired with its own `APPLY-*.md`**
   (canonical step list lives in CLAUDE.md's cloud-sessions section: fast
@@ -1451,8 +1460,9 @@ that would make the service worker download every jam track at install time.
 
 - Clone read-only: `git clone --depth 1 https://github.com/jhoffmanteacher/guitar-class.git`
   (no `gh` CLI in the sandbox). Shell cwd resets between calls — use absolute
-  paths. The stop-hook "unpushed commits" warning is expected: cloud sessions
-  ship patch pairs, they never push.
+  paths. The stop-hook "unpushed commits" warning is expected in a **Cowork**
+  session: those ship patch pairs and never push. A Claude Code on the web
+  session pushes normally, so there the same warning means what it says.
 - Playwright lives at `/home/claude/.npm-global/lib/node_modules/playwright`
   (CommonJS), browsers at `/opt/pw-browsers`. Serve with `python3 -m http.server`,
   then `devBypass()` → `onModuleChange(N)` → `switchTabById('<setId>','station-c')`.

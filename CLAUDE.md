@@ -57,13 +57,27 @@ whatever platform the current session reports — don't assume.
 | "Push to GitHub" | Run pre-push checks, fix what they flag, add/commit/push, confirm |
 | "Save progress with a note: [msg]" | Same, committing with that message |
 
-**Cloud (Cowork) sessions can't push** — GitHub access is read-only and git
-writes through the device-bridge folder fail on lock files. Never attempt them.
-Instead: run full `node tools/checks.mjs`, commit, `git format-patch`, and ship
-**every patch as a pair with its own `APPLY-<name>.md`** stating the base commit,
-apply order, and steps (`git status` → `git am` → `checks.mjs --check
---skip-links` → `git push` → `checks.mjs --live`). Afterwards, hard-reset the
-cloud clone to origin — never re-merge. (Full rationale: `WORKFLOW.md`.)
+**There are two kinds of cloud session and only one of them can push.** Work
+out which one you're in before planning a handoff: the old blanket "cloud
+can't push" rule was written for Cowork and would send a web session into a
+patch-pair handoff it doesn't need.
+
+- **Claude Code on the web pushes normally.** It runs in its own ephemeral
+  container with a writable clone and authenticated HTTPS to `origin`, so the
+  ordinary "push to GitHub" workflow applies, `main` included. Two limits:
+  there is no `gh` CLI (use the GitHub MCP tools instead), and the sandbox
+  proxy blocks the live site, so `checks.mjs --live` comes back HTTP 403 —
+  the deploy has to be confirmed from a local machine. (Verified 2026-09-04,
+  pushing the Journey tab-card restyle.)
+- **Cowork sessions can't push** — GitHub access is read-only and git writes
+  through the device-bridge folder fail on lock files. Never attempt them.
+  Instead: run full `node tools/checks.mjs`, commit, `git format-patch`, and
+  ship **every patch as a pair with its own `APPLY-<name>.md`** stating the
+  base commit, apply order, and steps (`git status` → `git am` → `checks.mjs
+  --check --skip-links` → `git push` → `checks.mjs --live`). Afterwards,
+  hard-reset the cloud clone to origin — never re-merge.
+
+(Full rationale: `WORKFLOW.md`.)
 
 ### ⚠️ Run the pre-push checks before EVERY code push
 
