@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-04 — Song Journey tabs match the rest of the site
+
+### Changed
+
+- **The tab boxes on the six Song Journey pages were dark grey panels** that
+  looked nothing like the tabs inside a module. They now use the same card the
+  rest of the site does: a plum header strip carrying the tab's title and a
+  "Tab" badge, over a light board holding the six strings. Same look in dark
+  mode, and the highlighted fret numbers — the notes a layer adds — are now
+  readable blue instead of the old washed-out yellow.
+- Nothing about the tabs themselves changed: same strings, same frets, same
+  titles in both languages.
+
 ## 2026-09-02 — Chord diagram labels now switch to Spanish
 
 ### Fixed

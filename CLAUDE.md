@@ -125,8 +125,8 @@ class** must add a permanent detector for that class to `checks.mjs` in the same
 session. Never leave a detector script in a session scratchpad — the 2026-07-31
 MC-tell audit died that way and the class recurred in the next sweep. Ratchets
 so far: MC answer-length tells (1h), watch-range labels ↔ `t=` params (1i),
-activity title series numbering (1l), video-title drift (inside the link
-check).
+activity title series numbering (1l), Journey tab-card markup (1q), video-title
+drift (inside the link check).
 
 ### ⚠️ A number in an activity title is a SERIES number, not `number`
 `number` in `class-activities.js` drives the "#N - " prefix students see. A
@@ -217,6 +217,23 @@ byte-for-byte.**
 got-it-when styling are both render-time, so new cards inherit them and neither
 can regress. Reach for the renderer first whenever a change is about how
 something looks or is ordered rather than what it says.
+
+### ⚠️ Journey tabs are hand-typed copies of the app's tab card
+A tab inside a set is built by `buildTab()` in `app.js`; a tab on a
+`tabs/*.html` Journey page is hand-written HTML, because those pages have no
+`app.js`. Since 2026-09-04 the 63 Journey tabs use the same markup the app
+emits — `.tab` > `.tab-head` (icon + `.tab-title` + "Tab" pill) > `.tab-body` >
+a board — with `.tab-ascii` standing in for the app's rendered `.tab-board`
+grid (Journey tabs are ASCII, and stay ASCII). Write a new one that way:
+checks.mjs 1q fails the push on a bare `<pre class="tab">`, on a card missing
+one of its four parts, and on a `.tab-title` with no `data-es`.
+
+The `.tab` CSS in `tabs/journey-theme.css` is a hand-kept copy of the `.tab`
+rules in `styles.css` — same mirroring as the live-quiz banner, and nothing
+can check that the two still look alike. **Restyle both or neither.** The one
+deliberate difference is `--tab-head-bg`: Journey's `--brand` doubles as the
+link colour and goes light in dark mode, so the header carries its own token
+that tracks `styles.css`'s `--brand` instead.
 
 ### ⚠️ There are TWO step renderers — patch both, or the teacher can't see it
 A class-activity step is rendered twice by different code: `caStepHtml()` in

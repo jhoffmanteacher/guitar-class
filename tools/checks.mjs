@@ -524,6 +524,57 @@ function checkTabNoScroll() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1q. JOURNEY-PAGE TAB CARDS MUST KEEP THE APP'S SHAPE — a tab inside a
+   set is rendered by buildTab() in app.js; a tab on a tabs/*.html Journey
+   page is hand-typed HTML. Until 2026-09-04 the Journey ones were bare
+   <pre class="tab"> dark panels that looked nothing like the app card, and
+   all 63 were converted to the same head/body/board markup.
+
+   Nothing generates that markup, so the next hand-written tab can easily
+   be typed the old way and be the one block on the site that still looks
+   wrong. Two things are greppable: the retired <pre class="tab"> form, and
+   whether each card carries the four parts the CSS styles.
+
+   HONEST LIMIT: this checks structure, not appearance — the tab-card rules
+   in tabs/journey-theme.css are a hand-kept copy of the .tab rules in
+   styles.css (the Journey pages don't load styles.css), and only an eye on
+   both can tell you they still match.
+   ════════════════════════════════════════════════════════════════════ */
+function checkJourneyTabCards() {
+  head('1q. Journey-page tab cards');
+  let bad = 0;
+  const flag = m => { err(m); problems++; bad++; };
+
+  let files = [];
+  try { files = readdirSync(join(ROOT, 'tabs')).filter(f => f.endsWith('.html')).sort(); }
+  catch { ok('no tabs/ directory'); return; }
+
+  let cards = 0;
+  for (const f of files) {
+    const src = readFileSync(join(ROOT, 'tabs', f), 'utf8');
+    for (const _ of src.matchAll(/<pre class="tab"/g))
+      flag(`tabs/${f}: a bare <pre class="tab"> — Journey tabs use the app's card markup (see the 2026-09-04 conversion), not a raw dark panel`);
+    for (const m of src.matchAll(/<div class="tab">([\s\S]*?)<\/pre><\/div>/g)) {
+      cards++;
+      for (const part of ['tab-head', 'tab-title', 'tab-body', 'tab-ascii']) {
+        if (!m[1].includes(`class="${part}"`) && !m[1].includes(` ${part}"`))
+          flag(`tabs/${f}: a tab card is missing its .${part} — the card needs head + title + body + board to match the app`);
+      }
+      if (!/<span class="tab-title" data-es="/.test(m[1]))
+        flag(`tabs/${f}: a tab card's title has no data-es — its heading would stay in English in Spanish mode`);
+    }
+  }
+
+  // The CSS the cards depend on has to exist, or every one of them renders bare.
+  let css = '';
+  try { css = readFileSync(join(ROOT, 'tabs', 'journey-theme.css'), 'utf8'); } catch {}
+  for (const sel of ['.tab{', '.tab-head{', '.tab-body{', '.tab-ascii{'])
+    if (!css.includes(sel)) flag(`tabs/journey-theme.css: no ${sel.slice(0, -1)} rule — the Journey tab cards render unstyled without it`);
+
+  if (bad === 0) ok(`Journey tab cards match the app's markup (${cards} cards across ${files.length} pages)`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1p. playSeq PITCHES MUST EXIST ON THE STRING THE STEP NAMES — a step
    whose wording names exactly one string, then plays a ▶ sequence
    containing a note BELOW that string's open pitch, is asking for a
@@ -1775,6 +1826,7 @@ async function liveCheck() {
   checkNarrativeLeadIns();
   checkRetiredStationWording();
   checkTabNoScroll();
+  checkJourneyTabCards();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();
