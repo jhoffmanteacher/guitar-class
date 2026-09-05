@@ -1,9 +1,10 @@
 # Check list — the 2026-09-05 audit work
 
-Everything in `OPUSPLAN-site-audit-2026-09-05.md` is implemented and pushed to
-`claude/website-errors-improvements-ikrjah` (4 commits). All offline checks
-pass and a headless browser walked every set in both languages, all 16 games,
-and both colour themes with no page errors.
+Everything in `OPUSPLAN-site-audit-2026-09-05.md` is implemented and **merged
+to `main`**, along with two of the three items that plan deferred (the Mood
+chart's Spanish and dark-mode figure art). All offline checks pass and a
+headless browser walked every set in both languages, all 16 games, and both
+colour themes with no page errors.
 
 This is what a machine in a sandbox **could not** verify. Roughly in the order
 worth doing.
@@ -23,11 +24,13 @@ still register. If they don't, the new type checks are the first suspect:
 on this branch:
 
 ```
+git pull origin main           # the work is already on main
 node tools/checks.mjs          # the real YouTube link check — all 180 links
                                # returned HTTP 403 through the cloud proxy,
-                               # so they were never actually verified today
-git push origin HEAD:main      # when you're happy with it
-node tools/checks.mjs --live   # a minute later: confirms the deploy landed
+                               # so they were never actually verified from here
+node tools/checks.mjs --live   # confirms the deploy landed (the sandbox
+                               # cannot reach the live site, so this has not
+                               # been run for any of today's pushes)
 ```
 
 ---
@@ -65,8 +68,8 @@ light mode should look **identical**. Worth confirming both.
   badges were both too faint; the badge numerals now flip dark-on-light.
 - **The Mood chart** (sidebar → Mood Chart) — it was a white page in dark mode
   and now has a full dark palette. Check the pop-up definition card.
-- **A step figure** (any diagram) — dimmed slightly instead of glaring white.
-  This is a stopgap; see item 6.
+- **A step figure** — the fretboard/note diagrams now render light-on-dark
+  (green dots still green); the hand photos are only softened. See item 6.
 
 ## 4. Try the keyboard, once
 
@@ -89,13 +92,22 @@ few times and Escape.
 
 ## 6. Decisions I left to you
 
-- **The Mood chart is still English-only.** Translating it means 280 strings
-  including a definition for every mood word — a module-sized job. Want it as
-  its own session?
-- **The figure art isn't themed.** The ~40 SVGs in `img/` are drawn
-  dark-on-light with the background baked in; dark mode dims them rather than
-  redrawing them. Properly theming means regenerating each from
-  `img/RECIPES.md` with CSS colours. Worth doing, but it's an art job.
+- **~~The Mood chart is still English-only.~~ Now translated — please have a
+  Spanish-speaking student or colleague skim it.** 230 phrases: every mood
+  word, every Dynamics / Tempo / Rhythm / Texture option, and the definition
+  behind each one. Nobody on your side reads Spanish, so this is the one piece
+  of today's work with no second pair of eyes on it. A few judgement calls
+  worth a glance: *Content* → "Contento", *Ominous* → "Siniestro" (kept
+  distinct from *Menacing* → "Amenazante"), *Swelling* → "En oleada" vs
+  *Growing* → "Creciente", and texture words in the feminine ("la textura").
+  Anything that reads oddly, tell me the word and I'll change it.
+- **~~The figure art isn't themed.~~ Done differently than planned — check it
+  looks right.** Rather than regenerating 40 SVGs, dark mode now flips the
+  line art (invert + hue-rotate), so it renders light-on-dark with the green
+  note dots still green; photographs keep the gentler dimming instead, since
+  inverted skin tones would be worse than the glare. Look at a fretboard
+  diagram and a hand photo in dark mode. If the flip reads wrong on any
+  diagram, regenerating from `img/RECIPES.md` is still the option.
 - **The projector's Spanish twin.** I deleted three CSS rules
   (`.lq-st-title-es` and friends) that styled a Spanish line under each
   live-quiz question on the projected stage. Nothing ever rendered them — but
@@ -105,9 +117,16 @@ few times and Escape.
   by colour. They do differ in fill weight and the score is written beside
   them, so I left them alone rather than redesigning a game's score row blind.
   Your eye on the running game would settle it.
-- **Two open tabs, one student.** If a student has the site open twice, the
-  next save from either tab still overwrites the other's keys. Fixable, but it
-  changes the save path and I didn't want it riding along in a cleanup commit.
+- **Two open tabs, one student** — smaller than I first wrote it. Firestore
+  merges a map key by key, so a second tab's ADDED work is never lost; only a
+  key both tabs already hold can go stale. Fixing that means tracking
+  dirtiness per key instead of per category, which is a change to the save
+  path. `flushSave` now documents the real behaviour.
+- **The teacher console re-reads `config/class` on every repaint** (each sort
+  click, each rename open/cancel). Cheap to cache, but telling a post-write
+  repaint from a plain one is exactly what the existing ticket system guards,
+  and I can't open the real console from here to prove I got it right. Say the
+  word and I'll do it with you watching.
 
 ## 7. Things I changed that you might disagree with
 
@@ -117,6 +136,7 @@ Flag any of these and I'll revert them:
   conspicuously shortest option. Module 2's alphabet question now offers four
   plain letters (`G#` / `A` / `A#` / `C`) instead of the old "It starts over at
   C" catch-all. Nothing about what's taught changed, but the wording is yours.
+- **The Mood chart's Spanish** is mine, unreviewed — see item 6.
 - **One Module 13 photo was re-exported** (1.9 MB → 194 KB, 1200 px → 720 px to
   match its seven siblings). Compare it against the others; the original is in
   git if the detail loss matters.

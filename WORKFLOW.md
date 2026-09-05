@@ -82,7 +82,17 @@
 - [x] **2026-09-05 site audit — work order at `OPUSPLAN-site-audit-2026-09-05.md`.**
   **All six phases are done and pushed** (four commits, one per phase group).
   The plan's closing section lists the handful of items deliberately left
-  undone and why.
+  undone and why. **Merged to `main` 2026-09-05**, and two of the three
+  deferred items landed after the merge: the Mood chart is now fully
+  bilingual (230 phrases; English stays the lookup key so `DATA.defs` /
+  `DATA.hear` still resolve), and dark-mode figures flip the SVG line art
+  (invert + hue-rotate, so the green note dots stay green) while photos
+  keep the gentler dim. Still open on purpose: caching `config/class` in
+  the teacher console (needs the live console to prove a post-write
+  repaint from a plain one), per-key save dirtiness, and Note Hunt's
+  colour-only round dots. `CHECK-BEFORE-YOU-TRUST-IT-2026-09-05.md` is
+  the running list of what still needs Jonathan's eyes — the Mood chart's
+  Spanish above all, since nothing on his side reads it.
   A Claude Code on the web session ran `checks.mjs` (all offline checks
   green), a headless-Chromium walk of all 36 sets in EN + ES plus the 16
   games (no renderer exceptions), an adversarial read of the app JS, an
