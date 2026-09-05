@@ -23,6 +23,23 @@
   --rhythm:#f4c0d1; --rhythm-tint:#fbeaf0; --rhythm-dark:#493a3f;
   --texture:#fac775; --texture-tint:#faeeda; --texture-dark:#4b3c23;
   --radius:10px;
+  --card:#ffffff;            /* popover surface */
+  --hover:rgba(0,0,0,.05);
+  --press:rgba(0,0,0,.12);
+}
+/* Dark mode. The mood chips keep their pastel fill and dark text — a badge
+   reads fine either way — but the page surface, the text, the four column
+   tints and the popover all have to flip, or a student in dark mode gets
+   dark text on a pale tint (or a white card in the middle of a dark page).
+   The *-dark tokens above were already defined for this. */
+@media(prefers-color-scheme:dark){
+  :root{
+    --ink:#e8e6df; --gray:#a3a39a; --bg:#1e1e1c;
+    --card:#272724;
+    --hover:rgba(255,255,255,.08);
+    --press:rgba(255,255,255,.16);
+    --dyn-tint:#26332e; --tempo-tint:#382c28; --rhythm-tint:#372b30; --texture-tint:#382e1c;
+  }
 }
 *{box-sizing:border-box}
 body{
@@ -46,7 +63,7 @@ h1{font-size:clamp(1.6rem,3.5vw,2.1rem); margin:0 0 4px; letter-spacing:-0.01em}
   padding:6px 12px; border-radius:999px;
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.14);
 }
-.crumb a:hover{color:var(--ink); background:rgba(0,0,0,.05)}
+.crumb a:hover{color:var(--ink); background:var(--hover)}
 .crumb a:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
 
 /* ---------- matrix ---------- */
@@ -83,14 +100,14 @@ h1{font-size:clamp(1.6rem,3.5vw,2.1rem); margin:0 0 4px; letter-spacing:-0.01em}
   font:inherit; font-size:.92rem; padding:3px 7px; border-radius:6px;
   cursor:pointer; text-align:left;
 }
-.word:hover{background:rgba(0,0,0,.07)}
+.word:hover{background:var(--hover)}
 .word:focus-visible{outline:2px solid var(--ink); outline-offset:1px}
-.word[aria-expanded="true"]{background:rgba(0,0,0,.12)}
+.word[aria-expanded="true"]{background:var(--press)}
 
 /* ---------- popover ---------- */
 .pop{
   position:absolute; z-index:50; max-width:290px; min-width:220px;
-  background:#fff; border-radius:12px; padding:13px 15px 14px;
+  background:var(--card); border-radius:12px; padding:13px 15px 14px;
   box-shadow:0 6px 24px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.06);
   border-top:5px solid var(--gray);
 }

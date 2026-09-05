@@ -165,6 +165,52 @@ function loadModuleData(num){
   });
   return _moduleLoads[num];
 }
+/* ── Deferred scripts: loaded on first use, not on every page load ──
+   index.html used to ship 1.29 MB of first-party JS before the auth wall
+   could do anything, and two of the biggest pieces are things most page
+   loads never touch: coach.js (375 KB — the games arcade and the Listening
+   Coach, first needed on a click) and teacher.js (99 KB — meaningful only
+   with ?teacher). On a school Chromebook's first visit that is most of the
+   wait, and it is spent on code the student may never run.
+
+   Both are still precached by the service worker, so the deferred fetch is
+   a cache hit for anyone who has loaded the site before, online or off.
+
+   Safe because every OTHER reference to these files across app.js is
+   `typeof x === 'function'` guarded, and each of those is a teardown call
+   (coachClose, gamesStopMic, gamesClosePanel, coachInterrupt,
+   gamesResetForUser): with the script unloaded there is nothing running to
+   tear down, so skipping is the correct behaviour, not a silent failure.
+   The render-time helpers the step ladder calls unguarded — coachBtnHtml,
+   coachChordBtnRowHtml, coachSkillsAttr, coachSkillBest — all live in THIS
+   file, so the renderer never depends on coach.js at all. What's left is
+   the handful of entry points below, which load it and then act. */
+const _lazyScripts = {};
+function loadScriptOnce(src){
+  if(_lazyScripts[src]) return _lazyScripts[src];
+  _lazyScripts[src] = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = () => resolve();
+    // Same retry shape as loadModuleData: drop the promise AND the dead tag,
+    // so a later attempt isn't stuck on a failed load.
+    s.onerror = () => { s.remove(); delete _lazyScripts[src]; reject(new Error(src + ' failed to load')); };
+    document.head.appendChild(s);
+  });
+  return _lazyScripts[src];
+}
+function ensureCoachJs(){ return loadScriptOnce('coach.js'); }
+function ensureTeacherJs(){ return loadScriptOnce('teacher.js'); }
+/* Every ▶ Listening Coach button in generated markup calls this instead of
+   coachOpen directly — it's the one entry point that exists before coach.js
+   does. Keeps the element, not just its data, so coachOpen sees exactly what
+   it always saw. */
+function coachOpenLazy(btn){
+  ensureCoachJs()
+    .then(() => coachOpen(btn))
+    .catch(() => { if(typeof gateToast === 'function') gateToast(t('coach.loadFailed')); });
+}
+
 // Once a module is marked i18nComplete, every field checks.mjs requires has a
 // real Spanish twin — hide the whole panel from Google Translate so it can't
 // re-translate (or mangle) our own hand-written Spanish. Modules still mid-
@@ -427,7 +473,7 @@ if(auth) auth.onAuthStateChanged(async user=>{
     setAuthWallChecking('auth.loading');
     document.getElementById('user-area').innerHTML = userHeaderHtml(user);
     startAuthStallTimer();   // ...but don't strand them there if the load never finishes
-    if(IS_TEACHER_MODE){ showTeacherApp(user); clearAuthStallTimer(); }
+    if(IS_TEACHER_MODE){ await ensureTeacherJs(); showTeacherApp(user); clearAuthStallTimer(); }
     else {
       await loadProgress(); await loadClassConfig();
       clearAuthStallTimer();   // cleared here, not inside showApp/showPausedScreen, so every exit from the wait is covered
@@ -2418,7 +2464,10 @@ function routeExploreHash(){
   if(h !== '#class-activities') caClosePanel();
   if(h !== '#live-quiz' && typeof lqClosePanel === 'function') lqClosePanel();
   if(h !== '#search') searchClosePanel();
-  if(h === '#games' && typeof openGamesScreen === 'function') openGamesScreen();
+  if(h === '#games'){
+    // coach.js owns the arcade and is loaded on demand — see ensureCoachJs().
+    ensureCoachJs().then(() => openGamesScreen()).catch(()=>{});
+  }
   else if(h === '#songs') openSongsScreen();
   else if(h === '#keep-practicing') openKeepPracticingScreen();
   else if(h === '#daily-review') openDailyReviewScreen();
@@ -5893,7 +5942,7 @@ function stepSkillIds(w, step){
 }
 function coachBtnHtml(midisJson, tabNotesJson, skillIds){
   const tabAttr = tabNotesJson ? ` data-tabnotes="${escAttr(tabNotesJson)}"` : '';
-  return `<button type="button" class="coach-btn" data-midis="${escAttr(midisJson)}"${tabAttr}${coachSkillsAttr(skillIds)} onclick="coachOpen(this)" title="${escAttr(t('coach.btnTitle'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="coach.btn">${t('coach.btn')}</span></button>`;
+  return `<button type="button" class="coach-btn" data-midis="${escAttr(midisJson)}"${tabAttr}${coachSkillsAttr(skillIds)} onclick="coachOpenLazy(this)" title="${escAttr(t('coach.btnTitle'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="coach.btn">${t('coach.btn')}</span></button>`;
 }
 /* Chord steps: build [{n:name, m:[midis]}] from the step's own diagram
    specs (same fret math as chordMidis — frets are absolute). */
@@ -5903,7 +5952,7 @@ function coachChordBtnRowHtml(chords, skillIds){
     m: chordSpecMidis(c.chord)
   })).filter(c=>c.m.length);
   if(!spec.length) return '';
-  return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}"${coachSkillsAttr(skillIds)} onclick="coachOpen(this)" title="${escAttr(t('coach.chordBtnTitle'))}" data-i18n-attr="title:coach.chordBtnTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="coach.btn">${t('coach.btn')}</span></button></div>`;
+  return `<div class="coach-chord-row"><button type="button" class="coach-btn" data-chords="${escAttr(JSON.stringify(spec))}"${coachSkillsAttr(skillIds)} onclick="coachOpenLazy(this)" title="${escAttr(t('coach.chordBtnTitle'))}" data-i18n-attr="title:coach.chordBtnTitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/><path d="M12 17v4M9 21h6"/></svg> <span data-i18n="coach.btn">${t('coach.btn')}</span></button></div>`;
 }
 // Escape closes the video/games overlays (a11y). Tool-popup closing
 // (metronome/timer/tuner) is handled by fab-tools.js's own Escape listener.

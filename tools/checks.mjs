@@ -1672,6 +1672,21 @@ function checkSwAssets(src) {
   for (const f of SHELL_FILES) {
     if (!assets.includes(f)) { err(`shell file '${f}' is missing from sw.js ASSETS — it won't be precached for offline`); problems++; bad++; }
   }
+  /* PRECACHE_CRITICAL is the must-succeed tier of the install (sw.js splits
+     the rest into a best-effort allSettled pass). An entry that isn't in
+     ASSETS would be fetched by the install but skipped by every check above,
+     including the ASSETS→disk one — so a typo there could hard-fail the
+     install for the whole class with nothing to show for it. */
+  const cm = src.match(/const PRECACHE_CRITICAL = \[([\s\S]*?)\];/);
+  if (!cm) { err('could not find PRECACHE_CRITICAL in sw.js'); problems++; bad++; }
+  else {
+    const critical = [...cm[1].matchAll(/'\.\/([^']*)'/g)].map(x => x[1]);
+    for (const c of critical) {
+      if (!assets.includes(c) && c !== '')
+        { err(`sw.js PRECACHE_CRITICAL lists './${c}' but ASSETS doesn't — the install would fetch a file nothing else checks`); problems++; bad++; }
+    }
+    if (bad === 0) ok(`${critical.length} critical precache entries all present in ASSETS`);
+  }
   if (bad === 0) ok(`sw.js ASSETS ↔ shell files in sync (${assets.length} assets)`);
 }
 

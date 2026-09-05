@@ -376,6 +376,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .sh{font-size:0.875rem;color:var(--text2);margin-top:3px}
 .step-figure{display:block;margin:12px 0 4px;max-width:640px}
 .step-figure img{display:block;width:100%;height:auto;border-radius:10px;border:1px solid var(--border2);background:#fff}
+/* Every figure in img/ is drawn dark-on-light and ships with a light
+   background baked in, so on a dark card each one is a glaring white slab.
+   Properly themed art means regenerating them from img/RECIPES.md with CSS
+   colours — until then, take the glare off: dim slightly and let the border
+   carry the edge. Photographs (the .jpg hand shots) get the same treatment;
+   it reads as "lit a bit lower", not as a filter. */
+@media(prefers-color-scheme:dark){
+  .step-figure img{filter:brightness(0.86) contrast(1.04)}
+}
 .step-figure.dual{display:flex;gap:10px}
 .step-figure.dual img{width:calc(50% - 5px)}
 @media(max-width:520px){.step-figure.dual{flex-wrap:wrap}.step-figure.dual img{width:100%}}

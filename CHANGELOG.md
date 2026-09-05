@@ -5,6 +5,34 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-05 — The site loads quicker and updates more reliably
+
+### Changed
+
+- **The site starts faster.** It used to download the games arcade and the
+  teacher dashboard on every single visit — 474 KB of code most visits never
+  use. They now load the moment you actually open a game or the Listening
+  Coach, which on a school Chromebook's first visit is about a third less to
+  wait for. Everything still works offline once you've been on the site.
+- **One of the string-changing photos was 1.9 MB** — thirty times the size of
+  the other seven, and every device re-downloaded it on every update. Same
+  picture, a tenth the size.
+- **An update no longer fails silently.** The site saves itself for offline
+  use in one go, and a single dropped file used to abandon the whole update —
+  leaving you on the old version with nothing to show it. The essentials are
+  saved first now, and the rest can retry on its own.
+- **An installed shortcut can rotate to landscape** — useful for TAB, which
+  is wide.
+
+### Fixed
+
+- **Pictures no longer make the page jump** as they load, and they are dimmed
+  slightly in dark mode instead of glaring white.
+- **The Mood chart works in dark mode.** It was a bright white page whatever
+  your device was set to. (It is still English-only — Spanish is coming.)
+- **The browser tab's title switches to Spanish** with the rest of the site,
+  on the main page and the Song Journey pages.
+
 ## 2026-09-05 — Dark mode, keyboard use, and bigger things to tap
 
 ### Fixed

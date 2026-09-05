@@ -14,7 +14,7 @@
    progress-saving behave exactly as before.
    ════════════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'guitar-class-2026-09-05-1d26a49b97';
+const CACHE_VERSION = 'guitar-class-2026-09-05-5ff7d97f15';
 
 // Backing-track audio lives in its OWN cache, versioned independently of the
 // shell (see tools/checks.mjs, which fingerprints audio/ separately and
@@ -27,6 +27,24 @@ const CACHE_VERSION = 'guitar-class-2026-09-05-1d26a49b97';
 // still invalidates it (both versions are swept the same way at activate).
 const AUDIO_CACHE_VERSION = 'guitar-class-audio-2026-07-27-d6169a1b0b';
 const AUDIO_RE = /\.(mp3|m4a|wav|ogg)$/i;
+
+/* The subset of ASSETS whose absence means the app cannot render at all.
+   These must land for an install to count (see the install handler); the
+   rest of ASSETS is best-effort. Keep this list SHORT — every entry is one
+   more chance for a flaky network to block the update. checks.mjs asserts
+   every entry here also appears in ASSETS. */
+const PRECACHE_CRITICAL = [
+  './',
+  './index.html',
+  './styles.css',
+  './i18n.js',
+  './config-main.js',
+  './firebase-config.js',
+  './guitar-diagrams.js',
+  './app.js',
+  './fab-tools.js',
+  './fonts/fraunces.woff2'
+];
 
 // Static shell — everything needed to render the practice content offline.
 const ASSETS = [
@@ -134,7 +152,26 @@ self.addEventListener('install', event => {
       // still serving from max-age — the student auto-reloads onto a cache
       // that looks current and is stale. That is exactly how a pushed fix
       // fails to reach the class.
-      .then(cache => cache.addAll(ASSETS.map(u => new Request(u, { cache: 'reload' }))))
+      .then(cache => {
+        /* Two tiers, because addAll() is all-or-nothing: ONE failed request
+           out of 93 used to reject the whole install, so the new service
+           worker never activated and that student silently stayed on the
+           old build — no retry, no error they could see. On school Wi-Fi
+           with ~90 requests in flight that is not a rare event.
+
+           So the shell (what the app needs to render at all) still uses
+           addAll and must succeed; everything else — module content, the
+           games, the teacher dashboard, images, icons, the Journey pages —
+           is precached best-effort with allSettled. Anything that misses is
+           simply fetched and cached on first use by the fetch handler
+           below, exactly as it would be on a first visit. */
+        const critical = ASSETS.filter(u => PRECACHE_CRITICAL.includes(u));
+        const rest = ASSETS.filter(u => !PRECACHE_CRITICAL.includes(u));
+        return cache.addAll(critical.map(u => new Request(u, { cache: 'reload' })))
+          .then(() => Promise.allSettled(
+            rest.map(u => cache.add(new Request(u, { cache: 'reload' })))
+          ));
+      })
       // New SW takes over without waiting for all tabs to close.
       .then(() => self.skipWaiting())
   );

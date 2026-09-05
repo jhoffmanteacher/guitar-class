@@ -9,8 +9,10 @@
 // ── Step photos (2026-07-27). Eight hand-sketched panels of the full
 //    process, one figure per step. Art only — the captions live in the step
 //    text so they translate with everything else. ──
+// All eight panels are exported at the same size; the attributes give the
+// browser the box before the file arrives, so a step doesn't jump as it loads.
 const m13Photo = (file, alt) =>
-  `<span class="step-figure"><img src="img/${file}" alt="${alt}"></span>`;
+  `<span class="step-figure"><img src="img/${file}" alt="${alt}" width="720" height="540"></span>`;
 
 const M13_P1_EN = m13Photo('m13-step-1-loosen.png', 'Sketch of a hand turning a tuning key at a classical headstock, arrows showing the string going slack.');
 const M13_P1_ES = m13Photo('m13-step-1-loosen.png', 'Dibujo de una mano girando una clavija en un clavijero clásico, con flechas que muestran la cuerda aflojándose.');
