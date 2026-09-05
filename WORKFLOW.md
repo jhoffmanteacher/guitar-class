@@ -79,6 +79,23 @@
 
 ## Open work
 
+- [ ] **2026-09-05 site audit — work order at `OPUSPLAN-site-audit-2026-09-05.md`.**
+  A Claude Code on the web session ran `checks.mjs` (all offline checks
+  green), a headless-Chromium walk of all 36 sets in EN + ES plus the 16
+  games (no renderer exceptions), an adversarial read of the app JS, an
+  HTML/CSS/contrast/PWA pass, and scripted EN↔ES and music-theory checks.
+  Six phases, bugs first: the dev-bypass `flushSave` crash (confirmed
+  live), the bare `IS_TEACHER_MODE` read in the auth callback, the
+  warm-up-section title that every progress key silently depends on, the
+  SW auto-reload that can discard in-flight saves/recordings, two regex
+  lookbehinds that break Safari < 16.4, the phone-width play-sequence
+  overflow (confirmed at 375 px), then rules hardening (one item needs
+  Jonathan's call on restricting sign-in to `seq.org`), modal focus
+  management, four dark-mode contrast failures, precache size (a 1.9 MB
+  PNG + all-or-nothing `addAll`), and lazy-loading `teacher.js`/`coach.js`.
+  Three new checks.mjs ratchets are specified. The YouTube link check and
+  `--live` could not run from the cloud (proxy 403) — do them locally.
+
 - [x] **2026-07-26 deep site audit — remaining backlog.** Three parallel
   agents (core app JS · modules 8–13 · modules 1–7) plus a live browser pass
   found ~90 issues beyond what `tools/checks.mjs` can catch. All 9 Critical
