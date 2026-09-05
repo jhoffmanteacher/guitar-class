@@ -584,6 +584,159 @@ function checkTabNoScroll() {
    styles.css (the Journey pages don't load styles.css), and only an eye on
    both can tell you they still match.
    ════════════════════════════════════════════════════════════════════ */
+/* ════════════════════════════════════════════════════════════════════
+   1s. TEXT CONTRAST IN BOTH PALETTES — styles.css defines its colours as
+   tokens and redefines a dozen of them under
+   @media(prefers-color-scheme:dark). A rule that hard-codes `color:#fff`
+   over `background:var(--something)` therefore only gets checked in the
+   light palette by eye, and silently fails in dark mode when that token
+   flips light: the 2026-09-05 audit found six such rules, worst at
+   1.84:1 — white on the light blue used for the note under a playing
+   TAB's beat cursor, i.e. invisible exactly while a student is following
+   along. The site's own fix idiom is `color:var(--bg)`, which is #fff in
+   light mode and near-black in dark.
+
+   So: resolve every rule that sets BOTH a colour and a background,
+   through each palette, and fail under 4.5:1.
+
+   HONEST LIMITS — both err on the side of not crying wolf:
+   · a translucent background (rgba/transparent) is skipped, because the
+     real contrast depends on what it sits over and this parses one rule
+     at a time;
+   · WCAG allows 3:1 for large text, so a legitimately large-text pair
+     between 3 and 4.5 would need adding to ALLOW below. Nothing on the
+     site is in that band today.
+   ════════════════════════════════════════════════════════════════════ */
+const CONTRAST_ALLOW = new Set([
+  // 'selector'  — large text (≥24px, or ≥18.7px bold) cleared at 3:1
+]);
+function checkContrast() {
+  head('1s. Text contrast in both palettes');
+  let css;
+  try { css = readFileSync(join(ROOT, 'styles.css'), 'utf8'); }
+  catch { warn('styles.css unreadable — contrast NOT checked'); warnings++; return; }
+
+  const tokensIn = block => {
+    const out = {};
+    for (const m of block.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)) out[m[1]] = m[2].trim();
+    return out;
+  };
+  const light = tokensIn((css.match(/:root\{([\s\S]*?)\}/) || [])[1] || '');
+  const dark = { ...light, ...tokensIn((css.match(/@media\(prefers-color-scheme:dark\)\{\s*:root\{([\s\S]*?)\}/) || [])[1] || '') };
+  if (!Object.keys(light).length || !Object.keys(dark).length) {
+    warn('could not read the :root palettes — contrast NOT checked'); warnings++; return;
+  }
+  const resolve = (v, pal, d = 0) => {
+    if (!v || d > 6) return null;
+    const m = v.trim().match(/^var\((--[\w-]+)(?:\s*,\s*([^)]+))?\)$/);
+    return m ? resolve(pal[m[1]] || m[2], pal, d + 1) : v.trim();
+  };
+  const rgb = c => {
+    if (!c) return null;
+    c = c.trim().toLowerCase();
+    if (c === 'white') c = '#ffffff';
+    if (c === 'black') c = '#000000';
+    let m = c.match(/^#([0-9a-f]{3})$/);
+    if (m) return [0, 1, 2].map(i => parseInt(m[1][i] + m[1][i], 16));
+    m = c.match(/^#([0-9a-f]{6})$/);
+    if (m) return [0, 2, 4].map(i => parseInt(m[1].slice(i, i + 2), 16));
+    return null;   // rgba()/transparent/gradients: not compositable here
+  };
+  const lum = c => {
+    const [r, g, b] = c.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const ratio = (a, b) => { const [hi, lo] = [lum(a), lum(b)].sort((p, q) => q - p); return (hi + 0.05) / (lo + 0.05); };
+
+  let bad = 0, pairs = 0;
+  for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const sel = m[1].trim().replace(/\s+/g, ' ');
+    if (/^@|^:root/.test(sel) || CONTRAST_ALLOW.has(sel)) continue;
+    const fg = (m[2].match(/(?:^|;|\s)color\s*:\s*([^;]+)/) || [])[1];
+    const bg = (m[2].match(/(?:^|;|\s)background(?:-color)?\s*:\s*([^;]+)/) || [])[1];
+    if (!fg || !bg) continue;
+    for (const [mode, pal] of [['light', light], ['dark', dark]]) {
+      const f = rgb(resolve(fg, pal)), b = rgb(resolve(bg.split(/\s+/)[0], pal));
+      if (!f || !b) continue;
+      pairs++;
+      const r = ratio(f, b);
+      if (r < 4.5) {
+        err(`styles.css: ${sel} — ${r.toFixed(2)}:1 in ${mode} mode (${resolve(fg, pal)} on ${resolve(bg.split(/\s+/)[0], pal)}); needs 4.5. If the text is genuinely large, add the selector to CONTRAST_ALLOW.`);
+        problems++; bad++;
+      }
+    }
+  }
+  if (!bad) ok(`${pairs} colour pairs checked across both palettes — all ≥ 4.5:1`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1t. JOURNEY THEME ↔ APP THEME — the six Song Journey pages don't load
+   styles.css, so tabs/journey-theme.css hand-copies the rules for the
+   tab card and the live-quiz banner. CLAUDE.md's rule is "restyle both
+   or neither", and until now nothing could check it: by 2026-09-05 the
+   copies had drifted in four places (a margin, a missing display, a
+   missing font-family, and the documented --tab-head-bg).
+
+   Compares only selectors DEFINED IN BOTH files. One-sided selectors are
+   deliberate and plentiful — the app renders a real `.tab-grid` of note
+   buttons, Journey ships `.tab-ascii` text — so requiring both files to
+   carry the same selector list would be wrong.
+   ════════════════════════════════════════════════════════════════════ */
+const JOURNEY_SHARED_PREFIXES = [/^\.tab(\b|[.:\s>])/, /^\.lq-banner/, /^\.lq-invite/];
+/* The differences that are meant to be there. Both are documented at the
+   rule itself in journey-theme.css; anything else is drift. */
+const JOURNEY_ALLOWED_DIFFS = new Set(['.tab', '.tab-head']);
+function cssRuleMap(css) {
+  const out = new Map();
+  const clean = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  let i = 0;
+  const parse = (ctx) => {
+    let buf = '';
+    while (i < clean.length) {
+      const c = clean[i++];
+      if (c === '}') return;
+      if (c !== '{') { buf += c; continue; }
+      const sel = buf.trim(); buf = '';
+      if (sel.startsWith('@')) { parse(ctx ? ctx + ' ' + sel : sel); continue; }
+      let body = '', depth = 1;
+      while (i < clean.length && depth > 0) {
+        const d = clean[i++];
+        if (d === '{') depth++;
+        else if (d === '}') { depth--; if (!depth) break; }
+        body += d;
+      }
+      for (const s of sel.split(',').map(x => x.trim()).filter(Boolean)) {
+        out.set((ctx ? ctx + ' ' : '') + s, body.replace(/\s+/g, ' ').trim());
+      }
+    }
+  };
+  parse('');
+  return out;
+}
+function checkJourneyThemeDrift() {
+  head('1t. Journey theme matches the app theme');
+  let appCss, jCss;
+  try {
+    appCss = readFileSync(join(ROOT, 'styles.css'), 'utf8');
+    jCss = readFileSync(join(ROOT, 'tabs/journey-theme.css'), 'utf8');
+  } catch { warn('stylesheets unreadable — drift NOT checked'); warnings++; return; }
+  const app = cssRuleMap(appCss), jour = cssRuleMap(jCss);
+  const bare = k => k.replace(/^@media[^{]*?\)\s*/, '');
+  let shared = 0, bad = 0;
+  for (const [sel, aBody] of app) {
+    if (!JOURNEY_SHARED_PREFIXES.some(re => re.test(bare(sel)))) continue;
+    if (!jour.has(sel)) continue;      // one-sided by design
+    shared++;
+    if (JOURNEY_ALLOWED_DIFFS.has(sel)) continue;
+    const jBody = jour.get(sel);
+    if (aBody !== jBody) {
+      err(`"${sel}" has drifted between styles.css and tabs/journey-theme.css — restyle both or neither (CLAUDE.md).\n      styles.css : ${aBody.slice(0, 150)}\n      journey    : ${jBody.slice(0, 150)}`);
+      problems++; bad++;
+    }
+  }
+  if (!bad) ok(`${shared} shared tab/live-quiz rules identical across both stylesheets (${JOURNEY_ALLOWED_DIFFS.size} documented exceptions)`);
+}
+
 function checkJourneyTabCards() {
   head('1q. Journey-page tab cards');
   let bad = 0;
@@ -1900,6 +2053,8 @@ async function liveCheck() {
   checkNarrativeLeadIns();
   checkRetiredStationWording();
   checkTabNoScroll();
+  checkContrast();
+  checkJourneyThemeDrift();
   checkJourneyTabCards();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');

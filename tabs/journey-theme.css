@@ -4,8 +4,10 @@
 @font-face{font-family:'Fraunces';src:url('../fonts/fraunces.woff2') format('woff2');
   font-weight:400 700;font-display:swap}
 :root{
+  /* see styles.css — themes the browser's own widgets in dark mode */
+  color-scheme:light dark;
   --bg:#ffffff; --bg2:#faf9f5; --bg3:#f0eee6;
-  --text:#1a1a18; --text2:#6b6b65; --text3:#63635d;
+  --text:#1a1a18; --text2:#5e5e58; --text3:#585852;   /* == styles.css; were #6b6b65/#63635d */
   --border:rgba(0,0,0,0.09); --border2:rgba(0,0,0,0.16);
   --brand:#514a7d;
   /* The app header/tab-card plum. Journey --brand doubles as the link
@@ -13,7 +15,13 @@
      so white text on the tab header keeps its contrast in both modes. */
   --tab-head-bg:#514a7d;
   --focus:#185fa5;
-  --l1:#7c5cbf; --l2:#2f7fbf; --l3:#c2703d; --l4:#3f9464; --l5:#b04a6e; --l6:#2f9e93; --l7:#a07b23;
+  /* Layer accents. Two jobs with opposite needs: they back the white-on-
+     accent .layer-num badges, and they ARE the text/border of .rung-num on
+     the page background. So the light set is dark enough for white text
+     (--l2/3/4/6/7 were 3.3-4.3:1 and are nudged down), and the dark set
+     below is light enough to read as text on #1e1e1c. .layer-num takes
+     color:var(--bg) so its numeral flips with the palette. */
+  --l1:#7c5cbf; --l2:#2d79b5; --l3:#ab6336; --l4:#378258; --l5:#b04a6e; --l6:#278279; --l7:#927020;
   --font-display:'Fraunces',ui-serif,Georgia,serif;
   /* Below: only needed by the floating Tuner/Timer/Metronome tools
      (fab-tools.css) — matches the main app's styles.css exactly. */
@@ -28,9 +36,10 @@
 @media (prefers-color-scheme:dark){
   :root{
     --bg:#1e1e1c; --bg2:#272724; --bg3:#313130;
-    --text:#e8e6df; --text2:#888880; --text3:#8c8c84;
+    --text:#e8e6df; --text2:#9a9a91; --text3:#9e9e95;   /* == styles.css; were #888880/#8c8c84 (3.7:1 on --bg3) */
     --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
     --brand:#8f85e8;
+    --l1:#9479cb; --l2:#448cc5; --l3:#c37341; --l4:#439667; --l5:#c06e8b; --l6:#2f9e93; --l7:#a5822e;
     --tab-head-bg:#494370;
     --focus:#93c4f0;
     --blue-bg:#0c3a6b; --blue-text:#93c4f0;
@@ -81,11 +90,16 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:4px
 .songmap b{font-weight:600}
 .songmap-more{margin-top:8px}
 .songmap-more summary{cursor:pointer;font-size:0.8125rem;color:var(--brand);font-weight:600}
+/* Touch targets: these two are small text links a thumb has to hit. Same
+   ::after halo idiom styles.css uses in the app. */
+.crumb a,.songmap-more summary{position:relative;display:inline-block}
+.crumb a::after,.songmap-more summary::after{content:'';position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);width:max(100%,44px);height:max(100%,44px)}
 .layer{border:1px solid var(--border);border-radius:12px;margin-bottom:22px;overflow:hidden}
 .layer-h{font:inherit}
 .layer-head{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:12px 16px;background:var(--bg2);border:0;border-bottom:1px solid var(--border);font:inherit;color:inherit;text-align:left;cursor:pointer}
 .layer-head:hover{background:var(--bg3)}
-.layer-num{width:26px;height:26px;border-radius:50%;color:#fff;font-size:0.8125rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+.layer-num{width:26px;height:26px;border-radius:50%;color:var(--bg);font-size:0.8125rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
 .layer-title{font-family:var(--font-display);font-size:1.0625rem;font-weight:600}
 .layer-unit{margin-left:auto;font-size:0.75rem;color:var(--text2);white-space:nowrap}
 .layer-rate-chip{font-size:0.75rem;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--green-bg,var(--bg3));color:var(--green-text,var(--text2));white-space:nowrap}
@@ -116,6 +130,11 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:4px
    rendered staff grid, so .tab-ascii stands in for .tab-board — but the
    card chrome around it matches styles.css rule for rule, so a tab reads
    the same on a Journey page as it does inside a set. */
+/* Two deliberate differences from the same rules in styles.css, and only
+   two — checks.mjs (1t) fails the push on any other. (1) margin-bottom:
+   these cards stack down a Journey page and need the air; in the app one
+   sits inside a step body that supplies its own. (2) --tab-head-bg, see
+   the token above. Everything else here must match byte for byte. */
 .tab{display:block;max-width:100%;margin:8px 0 12px;border-radius:10px;overflow:hidden;border:1px solid var(--border2);background:var(--bg);box-shadow:0 1px 0 var(--border),0 4px 14px rgba(24,95,165,0.10)}
 .tab-head{background:var(--tab-head-bg);color:#fff;padding:7px 14px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:0.8438rem;line-height:1.3}
 .tab-head .tab-icon{font-size:0.9375rem;flex-shrink:0;display:inline-flex}

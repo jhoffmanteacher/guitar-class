@@ -1607,6 +1607,65 @@ function buildIssueModalHtml(){
       <button type="button" class="panel-next-btn" id="issue-submit-btn" onclick="submitIssueReport()">${t('issue.submit')}</button>
     </div>`;
 }
+/* Smooth scrolling is motion, and the CSS `prefers-reduced-motion` blanket
+   in styles.css cannot reach a scroll the code starts itself. Every
+   scrollIntoView on the site goes through this, so "reduce motion" in the OS
+   means an instant jump rather than a slide. (coach.js reads this too; the
+   one call on the Journey pages inlines the same check, because those pages
+   don't load app.js.) */
+function scrollBehavior(){
+  return (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 'auto' : 'smooth';
+}
+
+/* ══════════ Shared modal plumbing ══════════
+   Six overlays (report a problem, Daily 5, module assessment, the Coach and
+   drill check-off gates, the class-activity reminder) declare
+   role="dialog" aria-modal="true" — a promise to assistive tech that the
+   rest of the page is unavailable while they're up. Only one of them was
+   keeping it: five never moved focus in, none moved it back, and nothing
+   marked the page behind them inert. A student on a keyboard who hit the
+   check-off gate kept focus on the step underneath, could Tab through the
+   whole page behind the dim, and landed on <body> when it closed.
+
+   openOverlay/closeOverlay do the three things every dialog owes: move
+   focus in, keep Tab inside, put focus back where it came from. The Escape
+   handling each overlay already had is left alone. The header sits outside
+   #app, so both are marked inert — matching how the rail drawer already
+   does it on narrow screens. */
+let _overlayReturnFocus = null;
+const OVERLAY_FOCUSABLE = 'a[href],button:not([disabled]),textarea:not([disabled]),input:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])';
+function _overlayBehind(){
+  return [document.getElementById('app'), document.querySelector('header.header')].filter(Boolean);
+}
+function openOverlay(ov, firstFocus){
+  _overlayReturnFocus = document.activeElement;
+  _overlayBehind().forEach(el => { el.inert = true; });
+  ov.addEventListener('keydown', overlayTrapTab);
+  const target = firstFocus || ov.querySelector(OVERLAY_FOCUSABLE);
+  // preventScroll: focusing a control inside a fixed overlay must not scroll
+  // the page underneath it back to the top.
+  if(target && target.focus) { try{ target.focus({preventScroll:true}); }catch(e){ target.focus(); } }
+}
+function closeOverlay(){
+  _overlayBehind().forEach(el => { el.inert = false; });
+  const back = _overlayReturnFocus;
+  _overlayReturnFocus = null;
+  // The element may have been re-rendered away while the dialog was open
+  // (marking a skill rebuilds its row), so check it's still in the document.
+  if(back && document.contains(back) && back.focus){
+    try{ back.focus({preventScroll:true}); }catch(e){ back.focus(); }
+  }
+}
+function overlayTrapTab(e){
+  if(e.key !== 'Tab') return;
+  const items = [...e.currentTarget.querySelectorAll(OVERLAY_FOCUSABLE)]
+    .filter(el => el.offsetWidth || el.offsetHeight || el === document.activeElement);
+  if(!items.length) return;
+  const first = items[0], last = items[items.length - 1];
+  if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+}
+
 function openIssueModal(){
   closeIssueModal();
   const ov=document.createElement('div');
@@ -1616,14 +1675,15 @@ function openIssueModal(){
   ov.addEventListener('click', e=>{ if(e.target===ov) closeIssueModal(); });
   document.body.appendChild(ov);
   document.addEventListener('keydown', issueEscClose);
-  const ta = document.getElementById('issue-text');
-  if(ta) ta.focus();
+  openOverlay(ov, document.getElementById('issue-text'));
 }
 function issueEscClose(e){ if(e.key==='Escape') closeIssueModal(); }
 function closeIssueModal(){
   const ov=document.getElementById('issue-overlay');
-  if(ov) ov.remove();
+  if(!ov) return;
+  ov.remove();
   document.removeEventListener('keydown', issueEscClose);
+  closeOverlay();
 }
 async function submitIssueReport(){
   const ta = document.getElementById('issue-text');
@@ -3252,12 +3312,15 @@ function openDaily5Here(){
   ov.addEventListener('click', e=>{ if(e.target===ov) closeDaily5(); });
   document.body.appendChild(ov);
   document.addEventListener('keydown', daily5EscClose);
+  openOverlay(ov);
 }
 function daily5EscClose(e){ if(e.key==='Escape') closeDaily5(); }
 function closeDaily5(){
   const ov=document.getElementById('daily5-overlay');
-  if(ov) ov.remove();
+  if(!ov) return;
+  ov.remove();
   document.removeEventListener('keydown', daily5EscClose);
+  closeOverlay();
 }
 
 /* ── Module Review (self-assessment) ── */
@@ -3448,6 +3511,7 @@ function maybeShowMrAssess(moduleNum){
   ov.addEventListener('click', e => { if(e.target === ov) closeMrAssess(); });
   document.body.appendChild(ov);
   document.addEventListener('keydown', mrAssessEscClose);
+  openOverlay(ov);
 }
 /* Modal body, split out so a language switch can re-render it in place —
    same treatment setLang gives the Daily 5 overlay. */
@@ -3467,8 +3531,10 @@ function buildMrAssessPop(moduleNum){
 function mrAssessEscClose(e){ if(e.key === 'Escape') closeMrAssess(); }
 function closeMrAssess(){
   const ov = document.getElementById('mr-assess-overlay');
-  if(ov) ov.remove();
+  if(!ov) return;
+  ov.remove();
   document.removeEventListener('keydown', mrAssessEscClose);
+  closeOverlay();
 }
 /* Jump from a module-review skill back to the lesson set that teaches it. */
 function goToSet(setId){
@@ -4805,7 +4871,11 @@ function dkRunHtml(key){
   const sub = st.shown && def.back ? c.f : '';
   return dkHead(key, t('deck.cardOf', { n: st.i + 1, total: st.deck.length })) +
     `<div class="sdr-body">` +
-      `<div class="dkr-card${st.shown ? ' flipped' : ''}"${st.shown ? '' : ` onclick="dkFlip('${key}')"`}>` +
+      /* role/tabindex only while it IS clickable (an unflipped card): the
+   delegated Enter/Space handler below picks up any [role="button"], and a
+   flipped card has no onclick to reach. The Start button underneath does
+   the same job, so this is about the card being the obvious big target. */
+      `<div class="dkr-card${st.shown ? ' flipped' : ''}"${st.shown ? '' : ` role="button" tabindex="0" onclick="dkFlip('${key}')"`}>` +
         `<div class="sdr-card-kicker">${escHtml(t(kicker))}</div>` +
         `<div class="dkr-face">${escHtml(front)}</div>` +
         (sub ? `<div class="dkr-sub">${escHtml(sub)}</div>` : '') +
@@ -5068,7 +5138,7 @@ async function reviewJump(sid, wid){
   const panel = document.getElementById('pp-' + sid);
   if(btn && panel && panel.hasAttribute('hidden')) togglePracticePanel(sid, btn);
   setTimeout(()=>{
-    row.scrollIntoView({ behavior:'smooth', block:'center' });
+    row.scrollIntoView({ behavior: scrollBehavior(), block:'center' });
     flashClass(row, 'review-flash', 1800);
     // Keyboard path: closing the Daily Review page bounced focus back to the
     // rail button (srClosePanel) — move it to the row we just jumped to.
@@ -5096,12 +5166,15 @@ function openCoachGate(sid, wid){
   ov.addEventListener('click', e => { if(e.target === ov) closeCoachGate(); });
   document.body.appendChild(ov);
   document.addEventListener('keydown', coachGateEscClose);
+  openOverlay(ov);
 }
 function coachGateEscClose(e){ if(e.key === 'Escape') closeCoachGate(); }
 function closeCoachGate(){
   const ov = document.getElementById('coach-gate-overlay');
-  if(ov) ov.remove();
+  if(!ov) return;
+  ov.remove();
   document.removeEventListener('keydown', coachGateEscClose);
+  closeOverlay();
 }
 /* "Practice it now" → close the gate and open that skill's practice panel,
    where the Listening Coach button lives. The gate can open from any set
@@ -5116,7 +5189,7 @@ function coachGatePractice(sid, wid){
   panel.removeAttribute('hidden');
   const btn = document.querySelector(`[aria-controls="pp-${CSS.escape(sid)}"]`);
   if(btn) btn.setAttribute('aria-expanded','true');
-  panel.scrollIntoView({block:'center', behavior:'smooth'});
+  panel.scrollIntoView({block:'center', behavior: scrollBehavior()});
   const coachBtn = panel.querySelector('.coach-btn');
   if(coachBtn) flashClass(coachBtn, 'gate-attn', 1200);
 }
@@ -5206,12 +5279,15 @@ function openDrillGate(sid, wid){
   ov.addEventListener('click', e => { if(e.target === ov) closeDrillGate(); });
   document.body.appendChild(ov);
   document.addEventListener('keydown', drillGateEscClose);
+  openOverlay(ov);
 }
 function drillGateEscClose(e){ if(e.key === 'Escape') closeDrillGate(); }
 function closeDrillGate(){
   const ov = document.getElementById('drill-gate-overlay');
-  if(ov) ov.remove();
+  if(!ov) return;
+  ov.remove();
   document.removeEventListener('keydown', drillGateEscClose);
+  closeOverlay();
 }
 /* "Take me to the deck" → switch to the station tab that holds it, expand
    the step if it's collapsed, and scroll the deck into view. */
@@ -5228,7 +5304,7 @@ function drillGatePractice(sid, wid){
   if(!box){
     /* Never dead-end the student: land them on the ladder at least. */
     const stn = document.getElementById(`${useWid}-${LESSON_TAB}`);
-    if(stn) stn.scrollIntoView({ block:'start', behavior:'smooth' });
+    if(stn) stn.scrollIntoView({ block:'start', behavior: scrollBehavior() });
     return;
   }
   const li = box.closest('li.step');
@@ -5237,7 +5313,7 @@ function drillGatePractice(sid, wid){
     if(head) head.click();
   }
   setTimeout(()=>{
-    box.scrollIntoView({ block:'center', behavior:'smooth' });
+    box.scrollIntoView({ block:'center', behavior: scrollBehavior() });
     flashClass(box, 'gate-attn', 1200);
   }, 60);
 }
@@ -6126,7 +6202,7 @@ function switchTabById(wid, tab, keepScroll){
      bar and fall back to the panel — but the bar was display:none, so
      scrollIntoView() silently did nothing and "Next: My skills checklist" at
      the bottom of a long ladder left the student stranded at the bottom. */
-  if(!keepScroll) panel.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  if(!keepScroll) panel.scrollIntoView({ block: 'start', behavior: scrollBehavior() });
 }
 
 /* Does any step in this set teach set-skill number n (and if so, in which
@@ -6165,7 +6241,7 @@ function showSkillLesson(wid, n){
     expandStepEl(li, i > 0);
     flashClass(li, 'step-flash', 2600);
   });
-  matches[0].scrollIntoView({ block: 'center', behavior: 'smooth' });
+  matches[0].scrollIntoView({ block: 'center', behavior: scrollBehavior() });
 }
 
 /* Deep-link to one step (used by search results): activate module + set,
@@ -6188,7 +6264,7 @@ async function jumpToStep(moduleNum, wid, station, secIdx, stepIdx){
   if(li){
     expandStepEl(li);
     flashClass(li, 'step-flash', 2600);
-    li.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    li.scrollIntoView({ block: 'center', behavior: scrollBehavior() });
   }
 }
 
@@ -7280,7 +7356,7 @@ function caMarkStepDone(btn, id, si){
     next.classList.remove('ca-step-collapsed');
     const nh = next.querySelector('.ca-step-head');
     if(nh) nh.setAttribute('aria-expanded', 'true');
-    next.scrollIntoView({behavior: 'smooth', block: 'nearest'});
+    next.scrollIntoView({behavior: scrollBehavior(), block: 'nearest'});
   }
 }
 function caToggleComplete(id){
@@ -7419,13 +7495,16 @@ function maybeShowCaReminder(){
   ov.addEventListener('click', e => { if(e.target === ov) closeCaReminder(); });
   document.body.appendChild(ov);
   document.addEventListener('keydown', caReminderEscClose);
+  openOverlay(ov);
   try{ sessionStorage.setItem('caReminderShown', '1'); }catch(e){}
 }
 function caReminderEscClose(e){ if(e.key === 'Escape') closeCaReminder(); }
 function closeCaReminder(){
   const ov = document.getElementById('ca-reminder-overlay');
-  if(ov) ov.remove();
+  if(!ov) return;
+  ov.remove();
   document.removeEventListener('keydown', caReminderEscClose);
+  closeOverlay();
 }
 function caReminderGo(){
   closeCaReminder();

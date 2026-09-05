@@ -7,6 +7,11 @@
 /* Site-wide keyboard focus indicator (a11y) */
 :focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 :root{
+  /* Both palettes exist here, so the browser themes its OWN widgets to
+     match — select popups, checkboxes, range tracks, <audio> controls,
+     <details> markers, scrollbars. Without it they stay light on the
+     dark background. */
+  color-scheme:light dark;
   --bg:#ffffff;--bg2:#faf9f5;--bg3:#f0eee6;
   --text:#1a1a18;--text2:#5e5e58;--text3:#585852;
   --border:rgba(0,0,0,0.09);--border2:rgba(0,0,0,0.16);
@@ -17,12 +22,12 @@
   /* Brighter red for the two student-facing "Preview" banners (mr-locked,
      set-peek) — more saturated than --red-bg/--red-text above, which stay
      the muted tone used for wrong-answer feedback elsewhere on the site. */
-  --red-bg-bright:#fdd8d3;--red-text-bright:#c81e0f;
+  --red-bg-bright:#fdd8d3;--red-text-bright:#b8180a;   /* 5.0:1 on --red-bg-bright; #c81e0f was 4.4 */
   /* In-Class Activities accent — deliberately a different amber than
      --amber-text/--amber-bg above (which already mean "working" on the
      skill checklist): this one has to read as "class work", not module
      progress. See the In-Class Activities work order. */
-  --ca-accent:#b45309;--ca-accent-soft:#e0a25c;--ca-accent-bg:#fbf0de;
+  --ca-accent:#b45309;--ca-accent-soft:#e0a25c;--ca-accent-bg:#fdf5e8;   /* bg lightened: 4.6:1 under --ca-accent, was 4.45 */
   --purple-bg:#eeedfe;--purple-bg2:#f6f5fe;--purple-text:#3c3489;
   --purple-border:#c5c0ee;--purple-accent:#5b52a8;
   --shadow-card:0 1px 5px rgba(30,27,70,0.07);
@@ -51,7 +56,7 @@
     --green-bg:#1e4208;--green-text:#a8d070;
     --amber-bg:#4a2a04;--amber-text:#f0b84a;
     --red-bg:#4a1710;--red-text:#f0968a;
-    --red-bg-bright:#5c160c;--red-text-bright:#ff5240;
+    --red-bg-bright:#5c160c;--red-text-bright:#ff7565;   /* 5.1:1 on --red-bg-bright; #ff5240 was 4.2 */
     --ca-accent:#f2a33d;--ca-accent-soft:#8a5a1e;--ca-accent-bg:#3a2708;
     --purple-bg:#2b2752;--purple-bg2:#262244;--purple-text:#c7c1f5;
     --purple-border:#4a4390;--purple-accent:#8f85e8;
@@ -74,7 +79,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    here" against the purple bar */
 .header-search-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;
   border-radius:16px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.92);
-  color:var(--text2);font-family:inherit;font-size:0.8125rem;cursor:pointer;
+  /* Pinned, not var(--text2): the pill keeps its near-white fill in dark
+     mode, where --text2 flips to a light grey and leaves 2.5:1 text. */
+  color:#5e5e58;font-family:inherit;font-size:0.8125rem;cursor:pointer;
   transition:background .13s,box-shadow .13s}
 .header-search-btn .ico{width:15px;height:15px;flex:0 0 15px;display:flex}
 .header-search-btn:hover{background:#fff}
@@ -358,7 +365,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .step-head:hover{background:var(--bg2)}
 .step-head:focus-visible{outline:2px solid var(--blue-text);outline-offset:2px}
 .step-status{width:22px;height:22px;border-radius:50%;background:var(--bg3);color:var(--text2);font-size:0.8125rem;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.step.cur .step-status{background:var(--purple-accent);color:#fff}
+.step.cur .step-status{background:var(--purple-accent);color:var(--bg)}
 .step.step-done .step-status{background:var(--green-bg);color:var(--green-text)}
 .step-label{flex:1;min-width:0;line-height:1.4}
 .step.step-done .step-label{text-decoration:line-through;color:var(--text2);opacity:.65}
@@ -895,7 +902,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    and Across"), so there ellipsis hid the part that identifies the row. Wrap
    instead of truncating, and let the column take a third of the table. */
 .t-act-wrap th.nc,.t-act-wrap td.nc{width:34%;min-width:220px;max-width:none;white-space:normal;line-height:1.35}
-.t-act-title-edit{width:100%;box-sizing:border-box;font:inherit;color:inherit;background:var(--bg);border:1px solid var(--accent);border-radius:5px;padding:5px 7px}
+.t-act-title-edit{width:100%;box-sizing:border-box;font:inherit;color:inherit;background:var(--bg);border:1px solid var(--purple-accent);border-radius:5px;padding:5px 7px}
 /* The "#N" in front of an activity's name is a live box: typing a new
    position moves the activity in the teaching order (teacher.js
    teacherSetActivityNumber). Sized and coloured to sit inside the title line
@@ -985,7 +992,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 /* ── Inline TAB diagram ── */
 .tab{display:block;max-width:100%;margin:8px 0 4px;border-radius:10px;overflow:hidden;border:1px solid var(--border2);background:var(--bg);box-shadow:0 1px 0 var(--border),0 4px 14px rgba(24,95,165,0.10)}
 .tab-head{background:var(--brand);color:#fff;padding:7px 14px;display:flex;align-items:center;gap:10px;font-weight:600;font-size:0.8438rem;line-height:1.3}
-.tab-head .tab-icon{font-size:0.9375rem;flex-shrink:0}
+.tab-head .tab-icon{font-size:0.9375rem;flex-shrink:0;display:inline-flex}
 .tab-head .tab-title{flex:1;min-width:0}
 .tab-head .tab-kind{font-size:0.75rem;font-weight:700;letter-spacing:0.1em;background:rgba(255,255,255,0.22);padding:2px 7px;border-radius:10px;text-transform:uppercase;flex-shrink:0}
 .tab-body{padding:10px 14px 12px}
@@ -1023,7 +1030,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .play-seq-btn{font-family:inherit;font-size:0.9375rem;font-weight:600;padding:4px 9px;margin-left:6px;background:transparent;border:1px solid var(--blue-text);border-radius:14px;color:var(--blue-text);cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:normal;text-align:left;max-width:100%;min-width:0;line-height:1.25;vertical-align:middle}
 .play-seq-btn:hover{background:var(--blue-bg)}
 .play-seq-btn:active{transform:scale(0.96)}
-.play-seq-btn.playing{background:var(--blue-text);color:#fff}
+.play-seq-btn.playing{background:var(--blue-text);color:var(--bg)}
 /* ── BPM slider next to Play All / Play Tab ── */
 .bpm-control-group{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;vertical-align:middle;max-width:100%;min-width:0}
 .bpm-control{display:inline-flex;align-items:center;gap:6px}
@@ -1054,6 +1061,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    eight columns past a 390px screen. */
 .tab-note-btn .tab-spkr{opacity:0;max-width:0;overflow:hidden;transition:max-width .12s,opacity .12s}
 .tab-note-btn:hover .tab-spkr,.tab-note-btn:focus-visible .tab-spkr{color:var(--blue-text);opacity:1;max-width:1.4em}
+/* On a touch device there is no hover, so nothing said these blue note
+   names play the note. The glyph can't simply be shown — its width is
+   what pushed eight columns off a 390px screen (see above, and 1o in
+   checks.mjs) — so mark them with an underline, which costs no layout
+   width at all. */
+@media (hover:none){
+  .tab-note-btn{text-decoration:underline dotted;text-underline-offset:3px}
+}
 /* Finger circle (Finger Gym): a note with `finger` shows the fretting finger
    in a light-purple circle where the note name would sit — the teacher-deck
    convention (fret on the line, circled finger below, no note names). Ink
@@ -1061,7 +1076,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    Coach column recolor it through the shared .beat-now / .coach-col rules. */
 .tab-note-btn.has-finger{justify-self:center;padding:0;margin-top:12px;width:100%;max-width:30px;aspect-ratio:1/1;height:auto;box-sizing:border-box;border-radius:50%;background:var(--purple-bg);border:1.5px solid var(--text);color:var(--text);font-size:1.0625rem}
 .tab-note-btn.has-finger:hover,.tab-note-btn.has-finger:focus-visible{background:var(--purple-border);border-color:var(--text)}
-.tab-note-btn.has-finger.beat-now,.tab-note-btn.has-finger.beat-now:hover{background:var(--blue-text);border-color:var(--blue-text);color:#fff}
+.tab-note-btn.has-finger.beat-now,.tab-note-btn.has-finger.beat-now:hover{background:var(--blue-text);border-color:var(--blue-text);color:var(--bg)}
 .tab-finger{line-height:1}
 @media (max-width:600px){
   .tab-grid{--tab-cell-h:22px}
@@ -1451,7 +1466,7 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 .search-hit-where{font-size:0.75rem;font-weight:700;color:var(--blue-text);letter-spacing:.2px}
 .search-hit-text{font-size:0.8438rem;color:var(--text);line-height:1.4}
 .search-mark{background:var(--blue-bg);color:var(--blue-text);font-weight:700;border-radius:3px;padding:0 1px}
-.search-count{font-size:0.75rem;font-weight:700;color:var(--muted);letter-spacing:.2px;padding:0 2px 2px}
+.search-count{font-size:0.75rem;font-weight:700;color:var(--text3);letter-spacing:.2px;padding:0 2px 2px}
 .search-count.search-loose{color:var(--blue-text);font-weight:600;letter-spacing:0;line-height:1.35}
 
 /* ── Design pass: pressable primary buttons (Duolingo-style tactile press) ── */
@@ -1511,8 +1526,8 @@ li.step.step-flash{animation:stepFlash 2.6s ease-out}
 /* ── Tier 3: beat cursor — the sounding TAB column lights up during ▶ Play ── */
 .tab-cell.beat-now{background:var(--blue-bg);border-radius:4px;box-shadow:0 -4px 0 var(--blue-bg),0 4px 0 var(--blue-bg)}
 .tab-cell.beat-now .tab-fret{background:var(--blue-bg);color:var(--blue-text);font-weight:700}
-.tab-note-btn.beat-now,.tab-note-btn.beat-now:hover{background:var(--blue-text);color:#fff;border-color:var(--blue-text)}
-.tab-note-btn.beat-now .tab-spkr{color:#fff}
+.tab-note-btn.beat-now,.tab-note-btn.beat-now:hover{background:var(--blue-text);color:var(--bg);border-color:var(--blue-text)}
+.tab-note-btn.beat-now .tab-spkr{color:var(--bg)}
 
 /* ── Tier 3: one-thing-per-screen — supporting prose folds behind a tap.
    Hint / Stuck? / Level up pills sit side by side in a FIXED row; the open
@@ -1616,7 +1631,7 @@ body.explore-open #week-panels{display:none}
 .ca-card-body{padding:0 14px 14px}
 .ca-chip{font-size:0.75rem;font-weight:600;padding:2px 8px;border-radius:10px;background:var(--ca-accent-bg);color:var(--ca-accent);white-space:nowrap;flex-shrink:0}
 .ca-steps{list-style:none;margin:8px 0 12px;padding:0;font-size:0.9375rem;line-height:1.55}
-.ca-mark-btn{font-family:inherit;font-size:0.875rem;font-weight:600;padding:9px 16px;border-radius:20px;border:1px solid var(--ca-accent);background:var(--ca-accent);color:#fff;cursor:pointer}
+.ca-mark-btn{font-family:inherit;font-size:0.875rem;font-weight:600;padding:9px 16px;border-radius:20px;border:1px solid var(--ca-accent);background:var(--ca-accent);color:var(--bg);cursor:pointer}
 .ca-mark-btn:hover{opacity:0.88}
 .ca-mark-btn.done{background:var(--ca-accent-bg);color:var(--ca-accent);font-weight:500}
 /* Per-step accordion — independent of the module-station .dp builder's
@@ -2083,12 +2098,22 @@ body.games-open{overflow:hidden}
    or in tight rows, where a full 44px halo would swallow neighbors' taps */
 .song-vid-btn,.play-seq-btn,.coach-btn,.step-done-btn,.sk-toggle,
 .sk-where-btn,.mr-review-link,.sk-practice-btn,.rp-trigger,.step-fold-pill,
-.ca-print-btn{position:relative}
+.ca-print-btn,
+/* added 2026-09-05 — the audit found these under 44px with no halo */
+.resume-close,.review-go-btn,.rep-log-btn,.fg-start-btn,.set-about summary,
+.lq-invite-later,.rr-skip,.sdr-pill,.dkr-btn,.tab-note-btn{position:relative}
 .song-vid-btn::after,.play-seq-btn::after,.coach-btn::after,.step-done-btn::after,
 .sk-toggle::after,.sk-where-btn::after,.mr-review-link::after,
-.sk-practice-btn::after,.rp-trigger::after,.step-fold-pill::after,.ca-print-btn::after{
+.sk-practice-btn::after,.rp-trigger::after,.step-fold-pill::after,.ca-print-btn::after,
+.resume-close::after,.review-go-btn::after,.rep-log-btn::after,.fg-start-btn::after,
+.set-about summary::after,.lq-invite-later::after,.rr-skip::after,.sdr-pill::after,
+.dkr-btn::after,.tab-note-btn::after{
   content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
   width:max(100%,44px);height:max(100%,36px)}
+/* ...except the TAB note buttons, which sit in an 8-column grid: widening
+   their hit area sideways would overlap the neighbouring note (and checks.mjs
+   1o pins the grid's width maths). Grow only vertically. */
+.tab-note-btn::after{width:100%}
 
 
 /* ── Rail module progress bar — always-visible version of the done/total
@@ -2163,9 +2188,9 @@ body.games-open{overflow:hidden}
 .sdr-pills{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:13px}
 .sdr-pill{padding:6px 13px;border:1px solid var(--border2);background:var(--bg);color:var(--text2);
   border-radius:20px;font-size:0.8125rem;font-family:inherit;cursor:pointer}
-.sdr-pill.active{background:var(--purple-accent);border-color:var(--purple-accent);color:#fff}
+.sdr-pill.active{background:var(--purple-accent);border-color:var(--purple-accent);color:var(--bg)}
 .sdr-start{padding:10px 22px;border:none;border-radius:22px;background:var(--purple-accent);
-  color:#fff;font-size:0.9375rem;font-family:inherit;font-weight:600;cursor:pointer}
+  color:var(--bg);font-size:0.9375rem;font-family:inherit;font-weight:600;cursor:pointer}
 .sdr-start:hover{filter:brightness(1.08)}
 .sdr-best{font-size:0.8125rem;color:var(--text2);margin-top:10px}
 .sdr-stage{display:flex;align-items:center;justify-content:center;gap:18px;
@@ -2345,7 +2370,7 @@ body.games-open{overflow:hidden}
 .resume-what{display:flex;flex-direction:column;gap:2px;min-width:0}
 .resume-what strong{color:var(--text);font-size:0.9375rem}
 .resume-meta{color:var(--text2);font-size:0.8125rem}
-.resume-go{flex:none;background:var(--purple-accent);color:#fff;border:0;font-weight:700;
+.resume-go{flex:none;background:var(--purple-accent);color:var(--bg);border:0;font-weight:700;
   font-size:0.875rem;padding:8px 16px;border-radius:999px;cursor:pointer;min-height:38px}
 .resume-go:hover{background:var(--purple-text)}
 
@@ -2455,7 +2480,7 @@ body.games-open{overflow:hidden}
 .lq-banner{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;z-index:130;
   display:flex;align-items:center;gap:10px;padding:10px 12px 10px 16px;border-radius:999px;
   background:#2f2159;color:#fff;box-shadow:0 8px 28px rgba(0,0,0,0.35);
-  font-size:0.9375rem;max-width:calc(100vw - 24px)}
+  font-family:inherit;font-size:0.9375rem;max-width:calc(100vw - 24px)}
 .lq-banner-dot{width:9px;height:9px;border-radius:50%;background:#7ee0a8;flex:none;
   animation:lq-blink 1.4s infinite}
 @keyframes lq-blink{0%,100%{opacity:1}50%{opacity:.3}}
@@ -2477,8 +2502,6 @@ body.games-open{overflow:hidden}
 .lq-stage:fullscreen{background:var(--bg);border-radius:0;justify-content:center}
 .lq-st-title{font-family:var(--font-display);font-size:clamp(1.75rem,4vw,3.25rem);
   font-weight:600;line-height:1.15}
-.lq-st-title-es,.lq-st-prompt-es,.lq-st-answer-es{color:var(--text2);
-  font-size:clamp(1rem,1.9vw,1.65rem);font-weight:500;margin-top:4px}
 .lq-st-qnum{font-size:clamp(0.875rem,1.4vw,1.125rem);font-weight:700;letter-spacing:0.08em;
   text-transform:uppercase;color:var(--text2)}
 .lq-st-prompt{font-size:clamp(1.5rem,3.6vw,3rem);font-weight:700;line-height:1.2}
@@ -2513,7 +2536,7 @@ body.games-open{overflow:hidden}
   color:var(--text);cursor:pointer;min-height:38px}
 .lq-ctl:hover{background:var(--bg3)}
 .lq-ctl[disabled]{opacity:.5;cursor:default}
-.lq-ctl.go{background:var(--purple-accent);border-color:var(--purple-accent);color:#fff}
+.lq-ctl.go{background:var(--purple-accent);border-color:var(--purple-accent);color:var(--bg)}
 .lq-ctl.go:hover{background:var(--purple-text)}
 .lq-ctl.ghost{color:var(--text2)}
 .lq-ctl.mark{background:var(--lq-c);border-color:var(--lq-c);color:#fff}

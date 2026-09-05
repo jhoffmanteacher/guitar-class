@@ -247,7 +247,7 @@ function coachOpen(btn){
     pulseStreak: 0, pulseMuted: false   // visual beat-pulse fade state
   };
   coachRenderReady();
-  card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  card.scrollIntoView({ block: 'nearest', behavior: scrollBehavior() });
 }
 
 function coachChordSlots(chords){

@@ -15,3 +15,6 @@ exclude:
   - "*.md"                      # WORKFLOW, SONG_SWAP, CHANGELOG, CLAUDE — internal notes
   - "archive/"                  # superseded planning docs
   - "Relevant reference docs/"  # curriculum Google-Doc links + archived prototypes
+  - "tools/"                    # checks.mjs and friends — dev tooling, never served
+  - "firestore.rules"           # pasted into the Firebase console by hand; Pages can't use it
+  - "firebase.json"             # ditto — config for a deploy path this site doesn't take

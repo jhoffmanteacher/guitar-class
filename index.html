@@ -31,9 +31,18 @@
 ">
 <title>Guitar Class · Sequoia HS</title>
 <meta name="description" content="Sequoia High School Beginning Guitar — independent practice and skills tracker.">
+<!-- Tells the browser this page has both palettes, so its OWN widgets —
+     <select> popups, checkboxes, range tracks, <audio> controls, <details>
+     markers, scrollbars — follow the system theme instead of staying light
+     on our dark background. -->
+<meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#514a7d">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#494370">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<!-- PNG first as the fallback Safari will actually use: it does not render
+     an SVG favicon, so the emoji one below left those tabs blank. -->
+<link rel="icon" type="image/png" href="icon-192.png">
 <!-- Guitar-emoji SVG favicon: zero extra requests -->
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>%F0%9F%8E%B8</text></svg>">
 <meta property="og:title" content="Guitar Class · Sequoia HS">

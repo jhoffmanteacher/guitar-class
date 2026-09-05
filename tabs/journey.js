@@ -92,7 +92,10 @@ function openLayer(section, scroll){
   section.classList.remove('closed');
   var btn = section.querySelector('.layer-head');
   if(btn) btn.setAttribute('aria-expanded', 'true');
-  if(scroll) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  // Same rule as app.js's scrollBehavior(): an OS "reduce motion" setting
+  // means jump, not slide. Inlined because these pages don't load app.js.
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(scroll) section.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
 }
 
 function toggleLayer(btn){

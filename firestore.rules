@@ -122,7 +122,25 @@ service cloud.firestore {
          roster before the first question (qIndex -1, no choice yet).
 
          hasOnly pins the shape: a client cannot smuggle extra fields (a
-         `pts`, say) into a doc the teacher's scoring pass reads back.
+         `pts`, say) into a doc the teacher's scoring pass reads back. The
+         type conditions under it pin the CONTENTS, which hasOnly does not:
+         without them `ms` could be a string or a wild number, and `name`
+         (capped at 60 chars only by lqName() in the client) could be any
+         length — and the teacher's scoring pass copies that name into
+         liveQuiz/current.scores, which the whole class reads. Rendering is
+         escaped everywhere, so this is about junk and abuse, not XSS.
+
+         `ms` is checked as a number rather than an int on purpose: the
+         client rounds it today, and a rule that rejected a fractional value
+         would fail answers silently mid-game — the worst possible failure in
+         a room of 30 students.
+
+         HONEST LIMIT: none of this stops a student who opens DevTools and
+         writes a truthful-looking `ms: 0` for maximum speed points. Only
+         timing the answer server-side (against liveQuiz/current.askedAt)
+         would, and that needs a Cloud Function this project doesn't have.
+         Scoring is flat (`speedBonus: false`) for every quiz in the bank
+         today, so nothing currently reads `ms` for points at all.
 
          Deliberately no delete for students: clearing your own answer
          after seeing the tally would be a free retry. */
@@ -135,6 +153,14 @@ service cloud.firestore {
               && request.auth.uid == userId
               && request.resource.data.uid == request.auth.uid
               && request.resource.data.keys().hasOnly(['uid','name','sessionId','qIndex','choice','ms','at'])
+              && request.resource.data.name is string
+              && request.resource.data.name.size() <= 60
+              && request.resource.data.qIndex is int
+              && request.resource.data.ms is number
+              && request.resource.data.ms >= 0
+              && (request.resource.data.choice == null
+                  || (request.resource.data.choice is string
+                      && request.resource.data.choice.size() <= 64))
               && request.resource.data.sessionId == live().sessionId
               && (
                    (live().state == 'question' && request.resource.data.qIndex == live().qIndex)

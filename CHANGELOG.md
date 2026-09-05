@@ -5,6 +5,34 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-05 — Dark mode, keyboard use, and bigger things to tap
+
+### Fixed
+
+- **Several buttons were unreadable in dark mode.** White text on a light
+  background: the "Mark done" button on every In-Class Activity, the note
+  under a playing TAB's beat cursor (invisible exactly while you were
+  following along), the number on the step you are currently on, and the
+  Shuffle/Deck start buttons. They all read properly now, in both themes.
+  The Song Journey pages got the same treatment — their grey sub-text and
+  their layer number badges were too faint to read.
+- **The browser's own menus stayed white in dark mode** — the module picker,
+  checkboxes, sliders, the audio player on a Song Journey page. They follow
+  the theme now.
+- **Pop-up boxes now behave for keyboard and screen-reader users.** Opening
+  one (Daily 5, the check-off gate, "Report a problem", the module
+  assessment) puts your cursor inside it, keeps Tab from wandering onto the
+  page behind it, and puts you back where you were when it closes.
+- **More things are big enough to tap.** A dozen small buttons — the close
+  X on the "keep going" bar, "Log a rep", the Finger Gym start, the deck
+  buttons, the note names in a TAB — now have a full-size tap area even
+  though they still look small.
+- **On a touch screen, the tappable note names in a TAB are underlined**, so
+  you can tell they play the note. On a computer they still light up on
+  hover.
+- **If your device is set to reduce motion**, the site now jumps instead of
+  sliding when it scrolls you to a step.
+
 ## 2026-09-05 — Phone layout, older iPhones, and never losing work to an update
 
 ### Fixed
