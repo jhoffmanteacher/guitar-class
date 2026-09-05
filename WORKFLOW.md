@@ -79,8 +79,10 @@
 
 ## Open work
 
-- [~] **2026-09-05 site audit — work order at `OPUSPLAN-site-audit-2026-09-05.md`.**
-  **Phase 1 (bugs) is done and pushed; phases 2–6 are open.**
+- [x] **2026-09-05 site audit — work order at `OPUSPLAN-site-audit-2026-09-05.md`.**
+  **All six phases are done and pushed** (four commits, one per phase group).
+  The plan's closing section lists the handful of items deliberately left
+  undone and why.
   A Claude Code on the web session ran `checks.mjs` (all offline checks
   green), a headless-Chromium walk of all 36 sets in EN + ES plus the 16
   games (no renderer exceptions), an adversarial read of the app JS, an

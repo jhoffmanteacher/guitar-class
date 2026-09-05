@@ -184,9 +184,9 @@ up so a synchronous call at load can't throw.
 
 ---
 
-## Phase 2 — Security & rules
+## Phase 2 — Security & rules — ✅ DONE 2026-09-05 (2.1 closed by decision)
 
-### 2.1 Any Google account can sign in and appear in the roster — ⚠️ ask Jonathan
+### 2.1 Any Google account can sign in — ❌ NOT DOING (Jonathan, 2026-09-05: "It's okay for anyone to log in")
 **Where:** `app.js` `signIn()` builds `new firebase.auth.GoogleAuthProvider()`
 with no `hd`; `firestore.rules` `isSignedIn()` is `request.auth != null`.
 **What happens:** any Gmail account can sign in, create a `progress/{uid}`
@@ -224,7 +224,7 @@ No `og:image`/`og:url` either — low.
 
 ---
 
-## Phase 3 — Accessibility & dark mode
+## Phase 3 — Accessibility & dark mode — ✅ DONE 2026-09-05
 
 ### 3.1 Modal overlays claim `aria-modal` but don't manage focus
 **Where:** `app.js` — `openDaily5Here`, `openMrAssess`, `openCoachGate`,
@@ -322,7 +322,7 @@ reach it — Journey pages have no `app.js`.)
 
 ---
 
-## Phase 4 — Offline, PWA, performance
+## Phase 4 — Offline, PWA, performance — ✅ DONE 2026-09-05 (4.4's themed art deferred)
 
 ### 4.1 Every deploy re-downloads 6.7 MB, and one failed fetch blocks the update
 **Where:** `sw.js` `ASSETS` (93 entries, 6,736,493 bytes measured) installed
@@ -389,7 +389,7 @@ together.
 
 ---
 
-## Phase 5 — Content (small, Jonathan's call on the optional ones)
+## Phase 5 — Content — ✅ DONE 2026-09-05 (both optional items approved and done)
 
 - `module-1.js` w2 / lesson / sec0 / step4 `text_es`: the EN has three
   `<em>` (*tiny*, *toward*, *away*); the ES has two — "Si se alejó" lost its
@@ -415,7 +415,7 @@ together.
 
 ---
 
-## Phase 6 — Cleanups (one commit, no behaviour change)
+## Phase 6 — Cleanups — ✅ DONE 2026-09-05
 
 - `app.js`: `renderChordBoxes()` is a no-op called 6×; `maybeShowApp_gamesHash`
   is a pass-through wrapper; `printSet(wid)` ignores its argument; `beep()`
@@ -462,3 +462,37 @@ together.
    Publish, then run one live-quiz round with a student account.
 7. `CHANGELOG.md` entry for the student-facing set (phone layout, dark-mode
    buttons, focus in dialogs, faster updates), plain English, dated.
+
+
+---
+
+## What was left undone, and why
+
+Everything else in this plan is implemented and pushed. These are the
+deliberate exceptions:
+
+- **2.1 sign-in restriction** — Jonathan's call: any Google account may sign
+  in. Not a pending item.
+- **4.4, themed figure art** — the 40-odd SVGs in `img/` are drawn dark-on-
+  light with the background baked in. Properly theming them means
+  regenerating each from `img/RECIPES.md` with CSS-variable colours (and
+  keeping the EN/ES pairs in step) — a content job of its own. Interim: they
+  are dimmed in dark mode so they don't glare. The CLS half (intrinsic
+  width/height on all 47 figures) is done.
+- **4.5, the Mood chart in Spanish** — its `DATA` block is 280 strings
+  including a definition for every mood word. That is a module-sized
+  translation and deserves its own session; a half-translated page would be
+  the same defect the 2026-09-02 push fixed on `404.html`. Dark mode for that
+  page IS done.
+- **`.fret-dot.hit` / `.miss` (3.8)** — looked at and left. They differ in
+  fill weight, not only hue (solid green vs pale amber), the round score is
+  written out beside them, and reshaping them blind risked making the Note
+  Hunt row worse. Worth Jonathan's eye in the running game.
+- **`flushSave` sends whole maps (6)** — two tabs open for one student still
+  last-write-wins on the next flush. Sending only the dirty keys is a real
+  change to the save path and wasn't worth bundling into a cleanup commit.
+- **`renderTeacherActivities` re-reads `config/class` per repaint (6)** — a
+  teacher-side perf nit; the refactor needs the console open to verify.
+- **The SW's offline navigation fallback** — a miss still serves
+  `index.html`. Left alone: all six Journey pages are precached, so the case
+  only arises for a URL that was never valid.
