@@ -5,6 +5,33 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-05 — Phone layout, older iPhones, and never losing work to an update
+
+### Fixed
+
+- **On a phone, the play and Listening Coach buttons ran off the side of the
+  card.** Their labels are full sentences, and they were set never to wrap, so
+  on a narrow screen everything after them — the tempo slider, the Coach
+  button itself — sat off the edge with no way to scroll to it. They wrap onto
+  a second line now and everything stays reachable. Same for the "About this
+  set" panel, which was wider than any phone screen.
+- **The site works on older iPhones again.** Two pieces of pattern-matching
+  used syntax that iPhones on iOS 16.3 and earlier cannot read — and because
+  it stopped the main file loading at all, those students got a blank site
+  rather than one missing feature. Rewritten so every phone can read it.
+- **An update no longer interrupts you.** When a new version of the site goes
+  out, open tabs pick it up automatically. That refresh now waits until you
+  are not mid-drill or mid-recording, and saves anything you have just marked
+  before it happens — a step you ticked a second earlier used to be able to
+  vanish with it.
+- **Signing in no longer depends on a file students never use.** If the
+  teacher dashboard's file failed to arrive on a flaky connection, every
+  student was left stuck on "Signed in — loading…". It has nothing to do with
+  signing in, and no longer sits in the way of it.
+- **On a phone, the tools at the bottom of the menu drawer** (Tuner, Timer,
+  Metronome) could end up underneath the browser's own bar, where they
+  couldn't be tapped.
+
 ## 2026-09-04 — Song Journey tabs match the rest of the site
 
 ### Changed

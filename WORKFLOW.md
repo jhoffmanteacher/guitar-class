@@ -79,7 +79,8 @@
 
 ## Open work
 
-- [ ] **2026-09-05 site audit — work order at `OPUSPLAN-site-audit-2026-09-05.md`.**
+- [~] **2026-09-05 site audit — work order at `OPUSPLAN-site-audit-2026-09-05.md`.**
+  **Phase 1 (bugs) is done and pushed; phases 2–6 are open.**
   A Claude Code on the web session ran `checks.mjs` (all offline checks
   green), a headless-Chromium walk of all 36 sets in EN + ES plus the 16
   games (no renderer exceptions), an adversarial read of the app JS, an
@@ -95,6 +96,18 @@
   PNG + all-or-nothing `addAll`), and lazy-loading `teacher.js`/`coach.js`.
   Three new checks.mjs ratchets are specified. The YouTube link check and
   `--live` could not run from the cloud (proxy 403) — do them locally.
+  **Phase 1 landed 2026-09-05**: the dev-bypass/offline `flushSave` crash, the
+  bare `IS_TEACHER_MODE` read, the warm-up-title-dependent progress keys (all
+  27 sections now carry `kind:'tuning-warmup'`, ratchet 1r), the SW reload now
+  waiting on live drills/recordings and flushing queued saves first, both
+  Safari-breaking regex lookbehinds (ratchet in check 0), the teacher
+  drill-gate drift, and the phone-width overflow of the play/Coach buttons,
+  the About panel and the rail drawer. Verified in headless Chromium — see the
+  plan's Phase 1 section for what each test showed. **Caught in passing:**
+  moving `IS_TEACHER_MODE` into app.js broke the render smoke test's stub, and
+  0b only *warns* when its harness fails to load, so the check went silently
+  untested while everything else stayed green — stub fixed, and promoting that
+  warning to a hard failure is now a Phase 6 item.
 
 - [x] **2026-07-26 deep site audit — remaining backlog.** Three parallel
   agents (core app JS · modules 8–13 · modules 1–7) plus a live browser pass

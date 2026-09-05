@@ -121,6 +121,7 @@ SETS.push(
         title_es: 'Estación de práctica — apruébalo o márcalo',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
@@ -387,6 +388,7 @@ SETS.push(
         title_es: 'Estación de práctica — las cuerdas Re y Sol',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
@@ -676,6 +678,7 @@ SETS.push(
         title_es: 'Estación de práctica — todo el mástil',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
@@ -947,6 +950,7 @@ SETS.push(
         title_es: 'Estación de práctica — leer, escribir y leer TAB a primera vista',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [

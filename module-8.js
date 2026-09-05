@@ -143,6 +143,7 @@ SETS.push(
         title_es: 'Estación de práctica — asignación de dedos',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
@@ -440,6 +441,7 @@ SETS.push(
         title_es: 'Estación de práctica — el patrón de 6 notas',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
@@ -769,6 +771,7 @@ SETS.push(
         title_es: 'Estación de práctica — progresiones completas e interpretación',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [

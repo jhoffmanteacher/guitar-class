@@ -244,7 +244,51 @@ function validateModules() {
   validateNoteBeats(allSets);
   checkMcAnswerTells(allSets);
   checkPlaySeqStrings(allSets);
+  checkTuningWarmupTag(allSets);
   return allSets;
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   1r. TUNING-WARMUP TAG ↔ TITLE — app.js's isTuningWarmupSection() drops
+   these sections from the ladder BEFORE sections are numbered, so every
+   stored progress key in the 27 sets that carry one
+   (`${set}-b-sec{gi}-{i}`) is a post-filter index. The predicate used to
+   match the English title alone, which made a copy edit to that one
+   string silently renumber every later section in those sets — moving
+   students' done-marks, MC picks and written responses onto the wrong
+   steps, with nothing to notice it.
+
+   The predicate now matches `kind: 'tuning-warmup'` and keeps the title
+   as a backstop. That only helps while the two agree, so assert both
+   directions: a section titled like a tuning warm-up must carry the tag,
+   and a tagged section must still be titled that way. Retitling one is
+   then a two-line edit that fails loudly if half-done, instead of a
+   one-line edit that corrupts progress quietly.
+   ════════════════════════════════════════════════════════════════════ */
+const TUNING_WARMUP_TITLE = 'Warm-up — tuning check (Module 1)';
+function checkTuningWarmupTag(allSets) {
+  head('1r. Tuning warm-up sections carry their kind tag');
+  let bad = 0, tagged = 0;
+  for (const w of allSets) {
+    for (const stId of Object.keys(w.stations || {})) {
+      const sections = (w.stations[stId] || {}).sections || [];
+      sections.forEach((sec, si) => {
+        const where = `${w.id} · station "${stId}" · section ${si + 1}`;
+        const looksLikeWarmup = /^Warm-?up\s*[—-]\s*tuning check/i.test(sec.title || '');
+        if (sec.kind === 'tuning-warmup') {
+          tagged++;
+          if (sec.title !== TUNING_WARMUP_TITLE) {
+            err(`${where}: tagged 'tuning-warmup' but titled "${sec.title}" — app.js keeps the exact title as a backstop, so update both or neither`);
+            problems++; bad++;
+          }
+        } else if (looksLikeWarmup && Number(w.moduleNum) !== 1) {
+          err(`${where}: looks like a tuning warm-up ("${sec.title}") but has no kind:'tuning-warmup' — without the tag it is filtered by title alone, and every later section's progress keys ride on that string`);
+          problems++; bad++;
+        }
+      });
+    }
+  }
+  if (bad === 0) ok(`${tagged} tuning warm-up sections tagged and titled consistently`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -1663,6 +1707,33 @@ function syntaxCheck() {
     }
   }
   if (!bad) ok(`${files.length} shipped .js files parse clean`);
+  checkNoLookbehind(files);
+}
+
+/* Regex lookbehind — `(?<=` / `(?<!` — is a SyntaxError in Safari before
+   16.4 (iOS 16.3 and earlier). node --check above happily accepts it, and so
+   does every Chromebook, so a lookbehind can ship looking fine and then take
+   the entire file down on an older iPhone: not one broken feature, but a file
+   that never parses, so nothing in it runs — including the global error
+   banner meant to explain the failure. app.js carried two until 2026-09-05
+   (a note-sequence matcher and the hint bullet splitter); both were rewritten
+   with a captured boundary character, the idiom CHORD_RE already used.
+   LookAHEAD (`(?=`, `(?!`) is fine everywhere and is used all over — only the
+   `<` forms are caught here. */
+function checkNoLookbehind(files) {
+  let bad = 0;
+  for (const f of files) {
+    let lines;
+    try { lines = readFileSync(join(ROOT, f), 'utf8').split('\n'); } catch { continue; }
+    lines.forEach((line, li) => {
+      if (/^\s*(\/\/|\*|\/\*)/.test(line)) return;   // a comment may name the syntax
+      for (const m of line.matchAll(/\(\?<[=!]/g)) {
+        err(`${f}:${li + 1}: regex lookbehind "${m[0]}" — a SyntaxError in Safari < 16.4, which stops this whole file from parsing. Capture the preceding character instead (see CHORD_RE / NOTE_SEQ_RE in app.js).`);
+        problems++; bad++;
+      }
+    });
+  }
+  if (!bad) ok('no regex lookbehind in shipped .js (Safari < 16.4 can\'t parse it)');
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -1729,6 +1800,9 @@ function renderCheck() {
       close(){}
     },
     performance: { now: () => 0 },
+    // Web APIs app.js touches at load time. URLSearchParams is Node's own —
+    // a vm context gets no globals of its own, so it has to be handed in.
+    URLSearchParams, URL, TextEncoder, TextDecoder,
     addEventListener(){}, removeEventListener(){}, dispatchEvent(){}, scrollTo(){},
     innerWidth: 1280, innerHeight: 800, devicePixelRatio: 1,
   };

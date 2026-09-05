@@ -11,7 +11,8 @@
 /* ══════════════════════════════════════════════
    TEACHER DASHBOARD
    ══════════════════════════════════════════════ */
-const IS_TEACHER_MODE=new URLSearchParams(window.location.search).has('teacher');
+/* IS_TEACHER_MODE is declared in app.js, not here: app.js's auth callback
+   reads it before this file is guaranteed to have loaded. */
 let teacherSetId=null, allStudents=[];
 /* Archived students are hidden from every dashboard view without touching
    their progress doc. allStudentsRaw holds the full roster straight from
@@ -69,10 +70,10 @@ async function showTeacherApp(user){
     legend.insertAdjacentHTML('beforeend', `<div class="t-leg" data-leg="coach-verified"><span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:2px solid var(--blue-text)">${TCK_CHECK_SVG}</span> Listening Coach verified</div>`);
   }
   if(legend && !legend.querySelector('[data-leg="deck-verified"]')){
-    legend.insertAdjacentHTML('beforeend', `<div class="t-leg" data-leg="deck-verified" title="The skill's shuffle deck was passed at 9 of 10 within the time limit — the app checked it, not the honor system."><span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:2px solid var(--green-text)">${TCK_CHECK_SVG}</span> Shuffle-deck verified</div>`);
+    legend.insertAdjacentHTML('beforeend', `<div class="t-leg" data-leg="deck-verified" title="The skill's shuffle deck was passed at 90% or better within the time limit — the app checked it, not the honor system."><span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:2px solid var(--green-text)">${TCK_CHECK_SVG}</span> Shuffle-deck verified</div>`);
   }
   if(legend && !legend.querySelector('[data-leg="coach-override"]')){
-    legend.insertAdjacentHTML('beforeend', `<div class="t-leg" data-leg="coach-override" title="Marked without a passing Listening Coach check or a 9-of-10 deck run — for Coach skills usually a mic or room issue, not a sign the student can't play it."><span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:2px dashed var(--text3)">${TCK_CHECK_SVG}</span> Marked without a Coach pass / deck run</div>`);
+    legend.insertAdjacentHTML('beforeend', `<div class="t-leg" data-leg="coach-override" title="Marked without a passing Listening Coach check or a qualifying deck run — for Coach skills usually a mic or room issue, not a sign the student can't play it."><span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border:2px dashed var(--text3)">${TCK_CHECK_SVG}</span> Marked without a Coach pass / deck run</div>`);
   }
   // Students-view clicks (a roster row, the skills grid's name cell, the
   // detail page's back link) go through data-uid + one delegated listener
@@ -306,23 +307,39 @@ function coachLevelLabel(n){ return COACH_LEVEL_LABEL[n]||null; }
    level against the same COACH_GATE_MIN_LEVEL (2 = "Good") app.js uses to
    let a skill past the gate FIRST, and only fall back to the override
    marker when the record hasn't reached that bar. */
-const TEACHER_COACH_GATE_MIN_LEVEL=2; // keep in sync with app.js COACH_GATE_MIN_LEVEL
 /* Same one-way-override caveat applies to games.drillSkill records (app.js
    drillGateMarkAnyway / sdRecordSkillBest): `best` only ever goes up, but
-   `override` is never cleared even after a later 9-of-10 run. So a qualifying
-   best must outrank a stale override — check best FIRST. */
-const TEACHER_DRILL_GATE_MIN=9; // keep in sync with app.js DRILL_GATE_MIN
-function tckSpanHtml(status, coachRec, drillRec){
+   `override` is never cleared even after a later qualifying run. So a
+   qualifying best must outrank a stale override — check best FIRST.
+
+   Both thresholds are READ FROM app.js (loaded first) rather than copied
+   here. This file used to carry its own drill-gate constant of 9, under a
+   "keep in sync with app.js DRILL_GATE_MIN" comment naming a constant that
+   does not exist: app.js scales DRILL_GATE_PCT (0.9) by each drill's own
+   `rounds`. The two agree only while every shuffle drill uses rounds:10, so
+   the first drill with a different count would verify for the student and
+   still read as unverified on this dashboard. */
+function teacherDrillGate(sid){
+  const hit = skillDrillStep(sid);
+  const rounds = (hit && hit.drill && hit.drill.rounds) || SD_ROUNDS;
+  return { min: drillGateThreshold(sid), rounds };
+}
+function tckSpanHtml(status, coachRec, drillRec, sid){
+  /* Lazy: skillDrillStep() walks every set, and this function runs once per
+     student per skill (30 students x ~25 skills on the grid). Only a skill
+     that actually HAS a drill record ever needs the numbers. */
+  let _gate = null;
+  const drillGate = () => (_gate || (_gate = teacherDrillGate(sid)));
   if(status==='gotit'){
-    if(coachRec && coachRec.level>=TEACHER_COACH_GATE_MIN_LEVEL){
+    if(coachRec && coachRec.level>=COACH_GATE_MIN_LEVEL){
       const lvl=coachLevelLabel(coachRec.level)||'checked';
       const dateStr=coachRec.at||'';
       const title=`Listening Coach verified — ${lvl}${dateStr?(' · '+dateStr):''}`;
       return `<span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:2px solid var(--blue-text)" title="${escAttr(title)}">${TCK_CHECK_SVG}</span>`;
     }
-    if(drillRec && (drillRec.best||0)>=TEACHER_DRILL_GATE_MIN){
+    if(drillRec && (drillRec.best||0)>=drillGate().min){
       const dateStr=drillRec.at||'';
-      const title=`Shuffle-deck verified — ${drillRec.best} of 10 within the time limit${dateStr?(' · '+dateStr):''}`;
+      const title=`Shuffle-deck verified — ${drillRec.best} of ${drillGate().rounds} within the time limit${dateStr?(' · '+dateStr):''}`;
       return `<span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:2px solid var(--green-text)" title="${escAttr(title)}">${TCK_CHECK_SVG}</span>`;
     }
     if(coachRec && coachRec.override){
@@ -334,8 +351,8 @@ function tckSpanHtml(status, coachRec, drillRec){
     }
     if(drillRec && drillRec.override){
       const dateStr=drillRec.overrideAt||drillRec.at||'';
-      const priorPart=(drillRec.best||0)?` Best deck run so far: ${drillRec.best} of 10.`:' No deck run recorded.';
-      const title=`Marked "I’ve got it!" without a 9-of-10 shuffle-deck run${dateStr?(' on '+dateStr):''}.${priorPart} The deck takes under a minute — worth a quick check-in if you’re not sure.`;
+      const priorPart=(drillRec.best||0)?` Best deck run so far: ${drillRec.best} of ${drillGate().rounds}.`:' No deck run recorded.';
+      const title=`Marked "I’ve got it!" without a ${drillGate().min}-of-${drillGate().rounds} shuffle-deck run${dateStr?(' on '+dateStr):''}.${priorPart} The deck takes under a minute — worth a quick check-in if you’re not sure.`;
       return `<span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:2px dashed var(--text3)" title="${escAttr(title)}">${TCK_CHECK_SVG}</span>`;
     }
     return `<span class="tck yes" style="display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px">${TCK_CHECK_SVG}</span>`;
@@ -357,7 +374,7 @@ function renderTeacherGrid(){
     const pct=Math.round(done/total*100);
     const pillClass=pct===100?'pp-hi':pct>=50?'pp-mid':'pp-lo';
     const displayName=stu.name||stu.email||stu.uid.slice(0,8)+'…';
-    const cells=w.skills.map(s=>`<td>${tckSpanHtml(stu.skills[s.id]||'none', stu.coachSkill&&stu.coachSkill[s.id], stu.drillSkill&&stu.drillSkill[s.id])}</td>`).join('');
+    const cells=w.skills.map(s=>`<td>${tckSpanHtml(stu.skills[s.id]||'none', stu.coachSkill&&stu.coachSkill[s.id], stu.drillSkill&&stu.drillSkill[s.id], s.id)}</td>`).join('');
     // The name cell doubles as a link into the Students detail page — handled
     // by the delegated data-uid listener in showTeacherApp. cursor:pointer is
     // the only visual cue, by design: a restrained "clickable row", not a link.
@@ -1464,7 +1481,7 @@ function renderTeacherStudentDetail(uid){
     SETS.forEach(w=>{
       if(w.moduleNum!==m.num || !w.skills || !w.skills.length) return;
       skillsHtml+=`<div class="stu-set-head">${escHtml(w.label)}</div>`;
-      w.skills.forEach(sk=>{ skillsHtml+=`<div class="stu-skill-row">${tckSpanHtml(stu.skills[sk.id]||'none', stu.coachSkill&&stu.coachSkill[sk.id], stu.drillSkill&&stu.drillSkill[sk.id])}<span>${escHtml(sk.text)}</span></div>`; });
+      w.skills.forEach(sk=>{ skillsHtml+=`<div class="stu-skill-row">${tckSpanHtml(stu.skills[sk.id]||'none', stu.coachSkill&&stu.coachSkill[sk.id], stu.drillSkill&&stu.drillSkill[sk.id], sk.id)}<span>${escHtml(sk.text)}</span></div>`; });
     });
   });
   if(!skillsHtml) skillsHtml='<div class="stu-empty">No skills started yet.</div>';

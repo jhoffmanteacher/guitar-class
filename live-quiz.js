@@ -183,6 +183,11 @@ let lqSession   = null;   // last snapshot of liveQuiz/current
 let lqUnsub     = null;   // the student's session listener
 let lqMyAnswer  = null;   // {qIndex, choice} — this round's locked-in pick
 let lqJoinedId  = null;   // sessionId we've already announced ourselves for
+// sessionId whose invite this student has already answered. Declared up here
+// with the rest of the session state because lqStopListening() clears it —
+// left further down the file it was a temporal-dead-zone error waiting for
+// the first caller that ran before the script finished. See lqInviteDismissed().
+let lqInviteAnsweredId = null;
 let lqQOpenedAt = 0;      // performance.now() when THIS round opened locally
 let lqSendError = false;
 let lqTick      = null;   // countdown interval, only while limitSec > 0
@@ -277,8 +282,8 @@ function lqWriteAnswer(s, qIndex, choice, ms){
    Chromebook with site data blocked makes setItem a no-op and getItem always
    null, and then tapping "Not now" wouldn't dismiss anything — the dialog
    would come straight back and the student would be stuck behind it. The
-   in-memory copy is what actually makes the button work. */
-let lqInviteAnsweredId = null;
+   in-memory copy is what actually makes the button work.
+   (lqInviteAnsweredId itself is declared with the session state above.) */
 function lqInviteDismissed(){
   if(lqInviteAnsweredId) return lqInviteAnsweredId;
   try { return sessionStorage.getItem('lq-invite-dismissed'); } catch(e){ return null; }

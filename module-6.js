@@ -136,6 +136,7 @@ SETS.push(
         title_es: 'Estación de práctica — ejercicio para la mano de rasgueo (un ejercicio corto que repites)',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [

@@ -139,6 +139,7 @@ SETS.push(
         title_es: 'Estación de práctica — construir la escala mayor',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
@@ -421,6 +422,7 @@ SETS.push(
         title_es: 'Estación de práctica — tonalidades relativas y la escala de blues',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
@@ -725,6 +727,7 @@ SETS.push(
         title_es: 'Estación de práctica — transponer y entrenamiento auditivo',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [

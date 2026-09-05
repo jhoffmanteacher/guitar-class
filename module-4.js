@@ -157,6 +157,7 @@ SETS.push(
         title_es: 'Estación de práctica — ejercicio del patrón y primera improvisación',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
@@ -612,6 +613,7 @@ SETS.push(
         title_es: 'Estación de práctica — fraseo y cuerdas Re/Sol',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
@@ -949,6 +951,7 @@ SETS.push(
         title_es: 'Estación de práctica — teoría en acción y solo original',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [

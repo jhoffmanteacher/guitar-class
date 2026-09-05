@@ -124,6 +124,7 @@ SETS.push(
         title_es: 'Estación de práctica — pulgar alternante y el pellizco',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
@@ -461,6 +462,7 @@ SETS.push(
         title_es: 'Estación de práctica — el patrón de vals y las canciones en su estilo nativo',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
@@ -731,6 +733,7 @@ SETS.push(
         title_es: 'Estación de práctica — la textura del requinto y tu patrón de interpretación',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [

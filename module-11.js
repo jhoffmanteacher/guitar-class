@@ -139,6 +139,7 @@ SETS.push(
         title_es: 'Estación de práctica — tríadas y números romanos',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
@@ -425,6 +426,7 @@ SETS.push(
         title_es: 'Estación de práctica — encontrar la tonalidad',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
@@ -769,6 +771,7 @@ SETS.push(
         title_es: 'Estación de práctica — acordes con cejilla como herramientas de armonía',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [

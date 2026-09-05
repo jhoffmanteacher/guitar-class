@@ -33,7 +33,39 @@ after the push, and anything that needs a real guitar or a real phone.
 
 ---
 
-## Phase 1 — Bugs (push first)
+## Phase 1 — Bugs — ✅ DONE 2026-09-05
+
+All ten items are fixed, verified in headless Chromium, and pushed. What was
+verified, and how:
+
+- **1.1** un-marking a step in dev bypass raises no error banner (was
+  reproducible); the same ordering bug also hit any student whose Firestore
+  SDK hadn't loaded, which is why the sentinels now build inside the `try`.
+- **1.2** with `teacher.js` blocked at the network layer the app still boots,
+  `IS_TEACHER_MODE` is defined, zero page errors.
+- **1.3** the `kind:'tuning-warmup'` tag is on all 27 sections; ratchet **1r**
+  was proved to fail both ways (tag without the title, title without the tag).
+- **1.4** with a drill mid-round a `controllerchange` no longer reloads; the
+  reload fires once the round ends. Queued saves are flushed first.
+- **1.5** both rewrites are byte-identical to the originals across 3,897
+  shipped strings (2 note-sequence matches, 226 multi-bullet hints); a
+  lookbehind ratchet was added to check 0 and proved to fail on a relapse.
+- **1.6** the dashboard threshold now follows a drill's own `rounds`: forcing
+  `rounds:6` moved it to 6-of-6 (it was permanently 9); today's numbers are
+  unchanged at 9-of-10.
+- **1.7/1.8/1.9** at 375px, `m5w2`, `m12w1` and `mr1` have zero overflowing
+  elements; the tempo slider and Coach button are on screen; the About panel
+  is 349px wide inside 375. Desktop is visually unchanged.
+- **1.10** the declaration is hoisted to the session-state block.
+
+⚠️ **Lesson for the next phase.** Moving `IS_TEACHER_MODE` into `app.js` added
+a load-time `URLSearchParams` call, and the render smoke test (0b) quietly
+degraded to a *warning* — "renderer NOT smoke-tested" — while every other
+check stayed green. The stub now gets `URLSearchParams`/`URL`/`TextEncoder`,
+and all 36 sets render again. Watch for that warning after any change to
+app.js's top level; consider promoting it from `warn` to `problem` so the
+safety net can't be lost silently (added to Phase 6).
+
 
 ### 1.1 Dev bypass: un-marking a step crashes the save loop ✅ confirmed live
 **Where:** `app.js` `flushSave()` — the two lines that build
@@ -398,6 +430,11 @@ together.
 - `journey-theme.css` `.fab-track{display:inline-flex}` beats the `hidden`
   attribute `journey.js` sets when a page has no audio. Latent (every page
   has audio today) — add `.fab-track[hidden]{display:none}`.
+- **`checks.mjs` 0b degrades silently.** When the render harness can't load it
+  calls `warn()`, so the push still passes with the renderer untested — which
+  is exactly the failure 0b exists to catch (see the Phase 1 note). Promote it
+  to `problem`, or make the "harness could not load" path fail unless an
+  explicit flag is passed.
 - The renderer-parity check (`caStepHtml` vs `renderTeacherActivityDetail`)
   found no drift: both handle `figure`, `video`, `tab`, `drill`, `label`.
   Nothing to do; recorded so the next audit can skip it.

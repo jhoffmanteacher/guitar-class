@@ -288,8 +288,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .set-about summary::before{content:'▸';font-size:0.75rem;transition:transform .15s}
 .set-about[open] summary::before{transform:rotate(90deg)}
 .set-about summary:hover,.set-about[open] summary{color:var(--text);border-color:var(--text2)}
+/* min-width is capped to the viewport: a flat 560px overflowed every phone,
+   and .main is overflow-x:clip, so the right-hand side of the panel was cut
+   off with no way to scroll to it. */
 .set-eyebrow .set-about[open] .set-about-panel{
-  position:absolute;top:100%;left:-6px;min-width:560px;max-width:720px;
+  position:absolute;top:100%;left:-6px;min-width:min(560px, calc(100vw - 32px));max-width:720px;
   z-index:51;background:var(--bg);border:1px solid var(--border);
   border-radius:12px;padding:8px 14px 12px;box-shadow:var(--shadow-raised)}
 .set-about .obj-skill-list{margin-top:10px}
@@ -676,8 +679,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 @media(max-width:760px){
   .app-layout{flex-direction:column;position:relative}
   .rail-toggle{display:inline-flex}
+  /* dvh, matching #app: with 100vh the drawer is taller than the visible
+     viewport while mobile Safari's bottom bar is showing, so the Tuner /
+     Timer / Metronome dock pinned to its foot sits under the browser chrome
+     and can't be tapped. The vh line stays first as the fallback. */
   .rail{width:82vw;max-width:300px;flex:none;position:fixed;top:var(--hdr);left:0;
-    height:calc(100vh - var(--hdr));border-right:1px solid var(--border);border-bottom:none;
+    height:calc(100vh - var(--hdr));
+    height:calc(100dvh - var(--hdr));border-right:1px solid var(--border);border-bottom:none;
     transform:translateX(-100%);transition:transform 0.2s ease;z-index:60;box-shadow:var(--shadow-raised)}
   body.rail-open .rail{transform:translateX(0)}
   body.rail-open .rail-backdrop{display:block}
@@ -1005,12 +1013,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .tab-cell{position:relative;height:var(--tab-cell-h);display:flex;align-items:center;justify-content:center}
 .tab-cell::before{content:'';position:absolute;top:50%;left:0;right:0;height:1.5px;background:var(--text);z-index:0}
 .tab-cell .tab-fret{position:relative;z-index:1;background:var(--bg);padding:0 6px;color:var(--text);font-weight:600;font-size:1.5rem;font-family:inherit;line-height:1}
-.play-seq-btn{font-family:inherit;font-size:0.9375rem;font-weight:600;padding:3px 9px;margin-left:6px;background:transparent;border:1px solid var(--blue-text);border-radius:14px;color:var(--blue-text);cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;line-height:1;vertical-align:baseline}
+/* The label is a whole sentence on many cards ("▶ Hear one p-i-m-a lap on Am,
+   then C — loop it 2 bars each"), so it MUST be allowed to wrap: with
+   white-space:nowrap this button measured 446px inside a 240px step body on a
+   375px screen, and .main is overflow-x:clip — so the BPM slider and the
+   Listening Coach button sitting after it were simply unreachable, with no
+   sideways scroll to discover. min-width:0 lets it shrink inside the flex
+   group; text-align:left keeps a wrapped second line from centring. */
+.play-seq-btn{font-family:inherit;font-size:0.9375rem;font-weight:600;padding:4px 9px;margin-left:6px;background:transparent;border:1px solid var(--blue-text);border-radius:14px;color:var(--blue-text);cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:normal;text-align:left;max-width:100%;min-width:0;line-height:1.25;vertical-align:middle}
 .play-seq-btn:hover{background:var(--blue-bg)}
 .play-seq-btn:active{transform:scale(0.96)}
 .play-seq-btn.playing{background:var(--blue-text);color:#fff}
 /* ── BPM slider next to Play All / Play Tab ── */
-.bpm-control-group{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;vertical-align:middle}
+.bpm-control-group{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap;vertical-align:middle;max-width:100%;min-width:0}
 .bpm-control{display:inline-flex;align-items:center;gap:6px}
 .bpm-slider{-webkit-appearance:none;appearance:none;width:120px;height:18px;background:transparent;cursor:pointer;margin:0;padding:0}
 .bpm-slider:focus{outline:none}
@@ -1239,7 +1254,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    LISTENING COACH (coach.js) — "Check me" buttons,
    inline coach card, count-in, live strip, report
    ══════════════════════════════════════════════ */
-.coach-btn{font-family:inherit;font-size:0.875rem;font-weight:600;padding:3px 9px;margin-left:6px;background:transparent;border:1px solid var(--green-text);border-radius:14px;color:var(--green-text);cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;line-height:1.2;vertical-align:baseline}
+/* Wraps for the same reason .play-seq-btn does: the label is a sentence
+   ("Listening Coach — click here to get feedback"), which measured 340px
+   inside a 240px step body on a 375px screen and pushed itself off the
+   edge of an overflow-x:clip column. */
+.coach-btn{font-family:inherit;font-size:0.875rem;font-weight:600;padding:4px 9px;margin-left:6px;background:transparent;border:1px solid var(--green-text);border-radius:14px;color:var(--green-text);cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:normal;text-align:left;max-width:100%;min-width:0;line-height:1.25;vertical-align:middle}
 .coach-btn:hover{background:var(--green-bg)}
 .coach-btn:active{transform:scale(0.96)}
 .coach-chord-row{margin-top:8px}

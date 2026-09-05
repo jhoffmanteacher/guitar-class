@@ -317,6 +317,17 @@ async function signOut(){
   location.reload();
 }
 
+/* Which mode is this page in? Both flags live here, in the first script that
+   needs them.
+
+   IS_TEACHER_MODE used to be declared in teacher.js, which loads AFTER app.js
+   — and the auth callback below reads it bare. That made every student's
+   sign-in depend on teacher.js having arrived: one dropped request on school
+   Wi-Fi and the callback threw a ReferenceError for the whole class, leaving
+   them on "Signed in — loading…" forever (the stall prompt's reload just
+   repeats it). Declaring it here means the student path never depends on the
+   teacher script at all. */
+const IS_TEACHER_MODE = new URLSearchParams(window.location.search).has('teacher');
 // Dev bypass is for local UI testing only. Only show/allow it when the site is
 // running on localhost — never on the live (GitHub Pages) site.
 const IS_LOCALHOST = ['localhost','127.0.0.1','[::1]'].includes(location.hostname);
@@ -695,6 +706,12 @@ function queueSave(...keys){
   // "Saved ✓" (or arm a flush with nothing in it).
   if(!_dirtyKeys.size){ setSaveMsg('save.notSaving'); return; }
   if(_dirtyKeys.has('place')) saveLocalPlace();   // local mirror, immediate
+  /* Dev bypass never signs in to Firebase Auth, so every Firestore write under
+     that uid is rejected by the rules — arming a flush only buys five failed
+     retries and a "save failed" flash. Say plainly that nothing is being saved
+     (the local place mirror above still runs, which is what devBypass's
+     restoreLocalPlace() reads back). */
+  if(isDevBypassUser()){ _dirtyKeys.clear(); setSaveMsg('save.notSaving'); return; }
   _saveFailCount = 0;   // a fresh user action gets its own full retry budget
   clearTimeout(saveTimer);
   setSaveMsg('save.saving');
@@ -710,27 +727,30 @@ async function flushSave(){
   if(keys.has('responses')) payload.responses = responses;
   let sentDeletes = null;
   let sentCaDeletes = null;
-  if(keys.has('completed')){
-    // Copy, so the FieldValue.delete() sentinels never leak into local state.
-    payload.completed = Object.assign({}, completed);
-    if(completedDeletes.size){
-      sentDeletes = [...completedDeletes];
-      sentDeletes.forEach(k=>{ payload.completed[k] = firebase.firestore.FieldValue.delete(); });
-    }
-  }
-  if(keys.has('classActivities')){
-    // Copy, so the FieldValue.delete() sentinels never leak into local state.
-    payload.classActivities = Object.assign({}, classActivities);
-    if(classActivitiesDeletes.size){
-      sentCaDeletes = [...classActivitiesDeletes];
-      sentCaDeletes.forEach(k=>{ payload.classActivities[k] = firebase.firestore.FieldValue.delete(); });
-    }
-  }
+  // Copies, so the FieldValue.delete() sentinels stamped in below never leak
+  // into local state.
+  if(keys.has('completed'))       payload.completed       = Object.assign({}, completed);
+  if(keys.has('classActivities')) payload.classActivities = Object.assign({}, classActivities);
   if(keys.has('games'))     payload.games     = games;
   if(keys.has('streak'))    payload.streak    = streak;
   if(keys.has('practiceLog')) payload.practiceLog = practiceLog;
   try{
     await ensureDb();
+    /* The delete sentinels are stamped in HERE, after ensureDb(), and not
+       where the payload is assembled: `firebase.firestore` doesn't exist
+       until the Firestore SDK has actually loaded, so building them earlier
+       threw a TypeError from OUTSIDE this try — an unhandled rejection that
+       raised the global "Something went wrong" banner instead of the ordinary
+       save-failed retry. Un-marking a step with the SDK still unloaded (a
+       first visit that went offline, or a blocked CDN) was enough to do it. */
+    if(payload.completed && completedDeletes.size){
+      sentDeletes = [...completedDeletes];
+      sentDeletes.forEach(k=>{ payload.completed[k] = firebase.firestore.FieldValue.delete(); });
+    }
+    if(payload.classActivities && classActivitiesDeletes.size){
+      sentCaDeletes = [...classActivitiesDeletes];
+      sentCaDeletes.forEach(k=>{ payload.classActivities[k] = firebase.firestore.FieldValue.delete(); });
+    }
     await db.collection('progress').doc(currentUser.uid).set(payload,{merge:true});
     // Only now that the write landed: retire the deletes it carried. Keys
     // un-marked DURING the write stay queued for the next flush.
@@ -1158,14 +1178,20 @@ const STRING_NOTE_FRETS = {
 };
 
 /* Sequence of 3+ standalone natural-note letters joined by " · " (middle dot).
-   The lookarounds keep "G · Down-up" or chord names like "Am" from matching. */
-const NOTE_SEQ_RE = /(?<![A-Za-z0-9])[A-G](?:\s*[·•]\s*[A-G](?![A-Za-z0-9])){2,}/g;
+   The lookarounds keep "G · Down-up" or chord names like "Am" from matching.
+   The leading boundary is a CAPTURED character rather than a lookbehind
+   (group 1, exactly as CHORD_RE does it): regex lookbehind is a parse error
+   in Safari before 16.4, and a parse error in this file takes the whole app
+   down on an older iPhone — including the error banner meant to explain it.
+   Callers skip past m[1] and read the sequence from m[2]. */
+const NOTE_SEQ_RE = /(^|[^A-Za-z0-9])([A-G](?:\s*[·•]\s*[A-G](?![A-Za-z0-9])){2,})/g;
 function findNoteSequenceMatches(text, stringMatches){
   const out = [];
   const re = new RegExp(NOTE_SEQ_RE.source, 'g');
   let m;
   while ((m = re.exec(text)) !== null) {
-    const seqStart = m.index;
+    const seq = m[2];
+    const seqStart = m.index + m[1].length;
     const ctx = stringMatches
       .filter(s => s.end <= seqStart)
       .sort((a, b) => b.end - a.end)[0];
@@ -1175,7 +1201,7 @@ function findNoteSequenceMatches(text, stringMatches){
     let lastFret = -1;
     const letterRe = /[A-G]/g;
     let lm;
-    while ((lm = letterRe.exec(m[0])) !== null) {
+    while ((lm = letterRe.exec(seq)) !== null) {
       const letter = lm[0];
       const positions = fretMap[letter];
       if (!positions) continue;
@@ -2505,9 +2531,20 @@ function toggleStepFold(btn){
    code that maps a section index back to rendered DOM (search, teacher
    dashboard response keys) must filter with this same predicate first, or
    its indexes drift from what's actually on screen. Kept at module scope
-   (not a buildLesson() closure) so buildSearchIndex() can share it. */
+   (not a buildLesson() closure) so buildSearchIndex() can share it.
+
+   Matched on the section's own `kind` tag, NOT on its title. Because the
+   filter runs BEFORE sections are numbered, every stored progress key in
+   these sets (`${set}-b-sec{gi}-{i}`) is a post-filter index — so a copy edit
+   to the title alone used to shift every later section's namespace by one in
+   27 sets across 11 modules, quietly moving students' done-marks, MC picks
+   and written responses onto the wrong steps. The title is now free to
+   change. The title clause stays as a backstop for a section that somehow
+   ships without the tag; checks.mjs (1r) fails the push when the tag and the
+   title disagree in either direction, so the two can't drift apart. */
 function isTuningWarmupSection(sec, moduleNum){
-  return sec.title === 'Warm-up — tuning check (Module 1)' && moduleNum !== 1;
+  if(moduleNum === 1) return false;
+  return sec.kind === 'tuning-warmup' || sec.title === 'Warm-up — tuning check (Module 1)';
 }
 
 /* The bolt that marks the Daily 5 and the Ear Spark cards. Lives here rather
@@ -2589,7 +2626,17 @@ function buildLesson(w){
     const folds = [];
     if(s.hint){
       const hint = tf(s,'hint');
-      const bullets = hint.split(/(?<=\.(?=\s))(?=\s*[A-ZÁÉÍÓÚÜÑ¿¡])|\n/).map(b=>b.trim()).filter(Boolean);
+      /* Split a multi-sentence hint into bullets: after a full stop that is
+         followed by whitespace and then a capital (or ¿/¡), and at newlines.
+         Done by marking the split points and splitting on the marker, rather
+         than with a lookbehind — Safari before 16.4 can't parse a lookbehind
+         literal, and this file failing to parse takes the whole app down on
+         an older iPhone. U+0000 can't occur in authored content. */
+      const SPLIT_MARK = '\u0000';
+      const bullets = hint
+        .replace(/\.(?=\s+[A-ZÁÉÍÓÚÜÑ¿¡])/g, '.' + SPLIT_MARK)
+        .split(/\u0000|\n/)
+        .map(b=>b.trim()).filter(Boolean);
       const inner = bullets.length <= 1 ? `<div class="sh">${hint}</div>`
         : `<ul class="sh-list">${bullets.map(b=>`<li>${b}</li>`).join('')}</ul>`;
       folds.push({key:'hint', icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.7.6 1 1.4 1 2.5h6c0-1.1.3-1.9 1-2.5A6 6 0 0 0 12 3z"/></svg>', label:t('step.hint'), body:inner});
@@ -4269,7 +4316,7 @@ function sdSaveBest(c, n){
   // Teacher mode is previewing a student's activity, not practising: the
   // session best above is enough, nothing is filed on the teacher's own doc.
   if(!currentUser || (typeof isDevBypassUser === 'function' && isDevBypassUser())) return;
-  if(typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) return;
+  if(IS_TEACHER_MODE) return;
   if(!games.sd) games.sd = {};
   if((games.sd[sdPileKey(c)] || 0) >= n) return;
   games.sd[sdPileKey(c)] = n;
@@ -4716,7 +4763,7 @@ function dkBest(id){
 function dkSaveBest(id, n){
   try{ if((parseInt(sessionStorage.getItem('dkBest:'+id),10)||0) < n) sessionStorage.setItem('dkBest:'+id, String(n)); }catch(e){}
   if(!currentUser || (typeof isDevBypassUser === 'function' && isDevBypassUser())) return;
-  if(typeof IS_TEACHER_MODE !== 'undefined' && IS_TEACHER_MODE) return;   // preview, not practice — see sdSaveBest
+  if(IS_TEACHER_MODE) return;   // preview, not practice — see sdSaveBest
   if(!games.dk) games.dk = {};
   if((games.dk[id]||0) >= n) return;
   games.dk[id] = n;
@@ -7406,13 +7453,43 @@ if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       if (!hadController || window.__swReloading) return;
       window.__swReloading = true;
-      const reload = () => {
-        // Don't yank the page out from under a live mic check / count-in —
-        // and never while a Google sign-in popup is open (__authPopupPending,
-        // set in signIn()): reloading the opener destroys the pending
-        // signInWithPopup promise, so the student would finish the popup and
-        // land back on the sign-in wall, forced to sign in a second time.
-        if (window.coachMicLive || window.__authPopupPending) { setTimeout(reload, 1500); return; }
+      /* Everything the reload must not walk over. Jonathan pushes during
+         class, so this fires while students are mid-task — and a reload here
+         costs whatever is still only in memory.
+
+         Waits, but not forever: a drill left open on an abandoned Chromebook
+         would otherwise pin that tab to the old build for the rest of the
+         day. The sign-in popup is the one unbounded case — reloading the
+         opener destroys the pending signInWithPopup promise, so the student
+         finishes the popup and lands back on the sign-in wall, forced to
+         sign in a second time. */
+      const SW_RELOAD_MAX_WAIT = 5 * 60 * 1000;
+      const startedWaiting = Date.now();
+      const anyValue = (obj, fn) => Object.keys(obj || {}).some(k => obj[k] && fn(obj[k]));
+      const busyReason = () => {
+        // A live mic check / count-in (coach.js), or a take still recording:
+        // a MediaRecorder blob lives in memory until the student keeps it.
+        if (window.coachMicLive) return 'mic';
+        if (anyValue(recState, s => s.starting || s.recording)) return 'recording';
+        // Mid-round in a Shuffle ('play') / Deck or Ear ('run') drill: the
+        // round's score is only written when it finishes.
+        if (anyValue(shuffleDrills, s => s.phase === 'play')) return 'drill';
+        if (anyValue(deckDrills,    s => s.phase === 'run'))  return 'drill';
+        if (anyValue(earDrills,     s => s.phase === 'run'))  return 'drill';
+        return null;
+      };
+      const reload = async () => {
+        if (window.__authPopupPending) { setTimeout(reload, 1500); return; }
+        if (busyReason() && Date.now() - startedWaiting < SW_RELOAD_MAX_WAIT) { setTimeout(reload, 1500); return; }
+        /* A step marked done half a second ago is still inside queueSave's
+           800 ms debounce (or its retry backoff) and would simply vanish —
+           pagehide's flush is a Firestore write started during unload and is
+           not reliably delivered. Send it now, then reload either way: one
+           real attempt beats waiting on a save that may never succeed. */
+        if (_dirtyKeys.size || saveTimer) {
+          clearTimeout(saveTimer);
+          try { await flushSave(); } catch(e){ /* reload regardless — nothing better is available */ }
+        }
         location.reload();
       };
       reload();

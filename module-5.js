@@ -87,6 +87,7 @@ SETS.push(
         title_es: 'Estación de práctica — formas de acordes y primeros rasgueos',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
@@ -416,6 +417,7 @@ SETS.push(
         title_es: 'Estación de práctica — transiciones de acorde y rasgueo',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
@@ -1040,6 +1042,7 @@ SETS.push(
         title_es: 'Estación de práctica — acordes del Grupo 2 y conexiones entre grupos',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
@@ -1421,6 +1424,7 @@ SETS.push(
         title_es: 'Estación de práctica — acordes del Grupo 3 y preparación para la evaluación',
         sections: [
           {
+            kind: 'tuning-warmup',
             title: 'Warm-up — tuning check (Module 1)',
             title_es: 'Calentamiento — revisión de afinación (Módulo 1)',
             steps: [
