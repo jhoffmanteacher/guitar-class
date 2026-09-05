@@ -383,7 +383,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
    carry the edge. Photographs (the .jpg hand shots) get the same treatment;
    it reads as "lit a bit lower", not as a filter. */
 @media(prefers-color-scheme:dark){
+  /* Two different problems, two treatments.
+
+     The SVG figures are line art — dark ink and a white ground, with a few
+     accent colours. invert() flips the lightness so the ink goes light on a
+     dark ground (which is what the art would look like if it had been drawn
+     for dark mode), and hue-rotate(180deg) puts the accent HUES back where
+     they started, so the green note dots stay green. This is the standard
+     pair; on greyscale-plus-accent art it is close to a real redraw.
+
+     Photographs (the .jpg hand shots and the m13 sketches) must NOT be
+     inverted — inverted skin is ghastly — so they only come down a little,
+     enough to stop a white slab glaring out of a dark page. */
   .step-figure img{filter:brightness(0.86) contrast(1.04)}
+  .step-figure img[src$=".svg"]{filter:invert(1) hue-rotate(180deg) brightness(1.06)}
 }
 .step-figure.dual{display:flex;gap:10px}
 .step-figure.dual img{width:calc(50% - 5px)}

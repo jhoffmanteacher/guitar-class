@@ -763,6 +763,15 @@ async function flushSave(){
   if(!currentUser) return;
   const keys = _dirtyKeys; _dirtyKeys = new Set();
   if(!keys.size) return;
+  /* Each category is sent WHOLE, not just the keys this tab touched. What
+     that does and doesn't cost, since the audit's phrasing overstated it:
+     Firestore's {merge:true} merges a map field key by key (which is exactly
+     why removing one needs the FieldValue.delete() sentinels below — omitting
+     it would not remove it). So a second tab's ADDED keys are never lost. The
+     one real exposure is a key BOTH tabs hold: this tab's copy, read when it
+     loaded, overwrites the other tab's newer value. Fixing that properly means
+     tracking dirtiness per key rather than per category — a change to the save
+     path, not a comment. Left alone deliberately. */
   const payload = { name:currentUser.displayName||'', email:currentUser.email||'' };
   if(keys.has('skills'))    payload.skills    = progress;
   if(keys.has('place')){    payload.lastModule = lastModuleNum; payload.lastSet = lastSetId||null; }

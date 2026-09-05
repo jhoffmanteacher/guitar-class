@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-05 — The Mood chart speaks Spanish, and diagrams suit dark mode
+
+### Added
+
+- **The Mood chart is fully in Spanish.** All six moods and their describing
+  words, every Dynamics / Tempo / Rhythm / Texture option, the definition
+  behind each word, the column headings and the page itself — 230 phrases in
+  all. It follows the Español button like the rest of the site. The names of
+  the listening examples stay as they are, since those are titles.
+
+### Fixed
+
+- **Diagrams look like they belong in dark mode.** The fretboard and note
+  diagrams were drawn with dark ink on white, so on a dark screen each one was
+  a white slab. They are now shown light-on-dark — with the green note dots
+  still green. Photographs are left as photographs, just a little softer.
+
 ## 2026-09-05 — A few quiz questions and one activity card
 
 ### Fixed

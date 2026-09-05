@@ -179,6 +179,306 @@ document.getElementById("back-link").addEventListener("click", e => {
 
 const DATA = {"moods": [{"name": "Peaceful", "specifics": ["Calm", "Serene", "Dreamy", "Gentle", "Floating", "Content"]}, {"name": "Inspiring", "specifics": ["Triumphant", "Heroic", "Uplifting", "Majestic", "Determined", "Soaring"]}, {"name": "Joyful", "specifics": ["Playful", "Celebratory", "Sunny", "Hopeful", "Cheerful", "Carefree"]}, {"name": "Sorrowful", "specifics": ["Melancholy", "Mournful", "Lonely", "Wistful", "Grieving", "Weary"]}, {"name": "Dark", "specifics": ["Ominous", "Menacing", "Eerie", "Brooding", "Haunting", "Uneasy"]}, {"name": "Aggressive", "specifics": ["Angry", "Frantic", "Relentless", "Defiant", "Fierce", "Bitter"]}], "dynamics": [["Soft", "Smooth", "Even", "Barely there"], ["Full", "Swelling", "Powerful", "Booming"], ["Light", "Bursting", "Growing", "Accented"], ["Hushed", "Faint", "Dying away", "Small swells"], ["Quiet", "Subdued", "Creeping louder", "Sudden loud"], ["Loud", "Blasting", "Crashing", "Slamming"]], "tempo": [["Slow", "Unhurried", "Relaxed", "Drifting"], ["Broad", "Stately", "Measured", "Gathering"], ["Brisk", "Lively", "Quickening", "Dancing"], ["Slow", "Stretched", "Dragging", "Halting"], ["Slow", "Deliberate", "Crawling", "Lurching"], ["Fast", "Driving", "Racing", "Breakneck"]], "rhythm": [["Rocking", "Swaying", "Breathing", "Steady pulse"], ["Marching", "Long-short", "Strong beats", "Rolling"], ["Bouncy", "Skipping", "Off-beat", "Chattering"], ["Sparse", "Uneven", "Heartbeat", "Sighing"], ["Irregular", "Repeating", "Sudden stops", "Ticking pulse"], ["Jagged", "Chopped", "Off-balance", "Hammering"]], "texture": [["Open", "Airy", "Simple", "Flowing"], ["Thick", "Layered", "Rich", "Unison"], ["Busy", "Bubbly", "Interlocking", "Call-and-answer"], ["Thin", "Bare", "Solo", "Empty"], ["Murky", "Hollow", "Low", "Rumbling"], ["Dense", "Grinding", "Crushing", "Wall of sound"]], "defs": {"Dynamics": {"Soft": "gentle, low volume", "Smooth": "no bumps or sudden changes in volume", "Even": "stays at one level the whole time", "Barely there": "so quiet you almost lose it", "Full": "big, room-filling volume", "Swelling": "grows louder in one long wave", "Powerful": "strong and loud without strain", "Booming": "huge and thundering", "Light": "quiet, with a delicate touch", "Bursting": "quick pops of sudden loudness", "Growing": "gets louder little by little", "Accented": "some notes punched harder than others", "Hushed": "quiet, like a whisper", "Faint": "so soft it seems far away", "Dying away": "trails off to silence", "Small swells": "little rises that sink back down", "Quiet": "low volume", "Subdued": "held back, kept under a lid", "Creeping louder": "slowly, steadily rising", "Sudden loud": "a jump-scare hit out of the quiet", "Loud": "high volume", "Blasting": "about as loud as it gets", "Crashing": "heavy slams of sound", "Slamming": "every hit lands at full force"}, "Tempo": {"Slow": "below walking pace", "Unhurried": "no rush at all", "Relaxed": "an easygoing speed", "Drifting": "floats along with no push", "Broad": "a big, wide, spacious pace", "Stately": "dignified, like a procession", "Measured": "calm and evenly paced", "Gathering": "slowly picking up speed", "Brisk": "quick and energetic", "Lively": "upbeat and always moving", "Quickening": "speeding up", "Dancing": "moves like feet on a dance floor", "Stretched": "time pulled longer than feels natural", "Dragging": "heavy and effortful, behind the beat", "Halting": "keeps hesitating and pausing", "Deliberate": "slow on purpose, step by step", "Crawling": "about as slow as music moves", "Lurching": "staggers - surges, then stalls", "Fast": "well above walking pace", "Driving": "pushes forward without letting up", "Racing": "sprinting speed", "Breakneck": "dangerously, thrillingly fast"}, "Texture": {"Open": "lots of room between the sounds", "Airy": "light, with space to float", "Simple": "just a part or two", "Flowing": "one smooth, connected line", "Thick": "many sounds at once", "Layered": "parts stacked on top of each other", "Rich": "full and deep", "Unison": "everyone playing the same thing together", "Busy": "lots of parts moving at once", "Bubbly": "quick little parts fizzing around", "Interlocking": "parts fitting together like gears", "Call-and-answer": "one part asks, another replies", "Thin": "only a little sound", "Bare": "stripped down to almost nothing", "Solo": "one voice alone", "Empty": "mostly silence around one sound", "Murky": "blurred and hard to see into", "Hollow": "something missing in the middle", "Low": "everything down in the deep register", "Rumbling": "a shaking layer underneath everything", "Dense": "packed tight with no gaps", "Grinding": "low parts churning against each other", "Crushing": "a piled-up weight of sound", "Wall of sound": "everything, everywhere, all at once"}, "Rhythm": {"Rocking": "Gently tips back and forth between two notes or chords, like a cradle.", "Swaying": "A smooth side-to-side feel in threes, like slow dancing.", "Breathing": "Phrases stretch and settle like slow, deep breaths - no hard beat.", "Steady pulse": "The same soft beat over and over, never rushing.", "Marching": "Crisp, even beats you could walk in step to.", "Long-short": "A proud strut: LONG-short, LONG-short (a dotted rhythm).", "Strong beats": "Heavy hits everyone can stomp or clap along to.", "Rolling": "Notes keep tumbling forward in even waves, like wheels turning.", "Bouncy": "Notes spring up off the beat like a ball bouncing.", "Skipping": "A quick, light triple feel - skipping instead of walking.", "Off-beat": "Hits land between the main beats - the reggae upstroke “and.”", "Chattering": "Fast, light, repeated notes, like excited talk.", "Sparse": "Only a few notes, far apart, with silence in between.", "Uneven": "Notes drift in unsteady time instead of a strict beat.", "Heartbeat": "A slow, heavy pulse that keeps aching forward.", "Sighing": "Two-note pairs that fall like a sigh - strong, then soft.", "Irregular": "The pattern keeps changing, so you never know where the next hit lands.", "Repeating": "One short pattern loops over and over until it feels menacing.", "Sudden stops": "The music slams into silence without warning.", "Ticking pulse": "A dry, clock-like tick that never lets up.", "Jagged": "Sharp bursts of fast notes with sudden jabs and turns.", "Chopped": "Short, cut-off chords with the ring choked - like palm-muted strums.", "Off-balance": "The count feels lopsided, like walking with a limp (this one is in 7).", "Hammering": "The same heavy hit pounded again and again, machine-steady."}}, "hear": {"Rocking": {"title": "Brahms, Lullaby", "url": "https://www.youtube.com/watch?v=3nNvz8UFEHY"}, "Swaying": {"title": "Henry Mancini, Moon River", "url": "https://www.youtube.com/watch?v=Ozg3P3LrJs8"}, "Breathing": {"title": "Barber, Adagio for Strings", "url": "https://www.youtube.com/watch?v=VLR7s8Rq7Dw"}, "Steady pulse": {"title": "Satie, Gymnopedie No. 1", "url": "https://www.youtube.com/watch?v=cic1RNHXa-k"}, "Marching": {"title": "Sousa, Stars and Stripes Forever", "url": "https://www.youtube.com/watch?v=a-7XWhyvIpE"}, "Long-short": {"title": "Elgar, Pomp and Circumstance", "url": "https://www.youtube.com/watch?v=Spx4kmY67Wc"}, "Strong beats": {"title": "Queen, We Will Rock You", "url": "https://www.youtube.com/watch?v=-tJYN-eG1zk"}, "Rolling": {"title": "Journey, Don't Stop Believin'", "url": "https://www.youtube.com/watch?v=1k8craCGpgs"}, "Bouncy": {"title": "Katrina and the Waves, Walking on Sunshine", "url": "https://www.youtube.com/watch?v=iPUmE-tne5U"}, "Skipping": {"title": "The Irish Washerwoman jig", "url": "https://www.youtube.com/watch?v=r_Ti0FbbWZU"}, "Off-beat": {"title": "Bob Marley, Stir It Up", "url": "https://www.youtube.com/watch?v=1hwL3S3Gtzs"}, "Chattering": {"title": "The Beatles, Ob-La-Di Ob-La-Da", "url": "https://www.youtube.com/watch?v=_J9NpHKrKMw"}, "Sparse": {"title": "Miles Davis, Blue in Green", "url": "https://www.youtube.com/watch?v=TLDflhhdPCg"}, "Uneven": {"title": "Billie Holiday, Strange Fruit", "url": "https://www.youtube.com/watch?v=U-EhtNjUJAU"}, "Heartbeat": {"title": "Mozart, Requiem Lacrimosa", "url": "https://www.youtube.com/watch?v=mhYCaQkbkyw"}, "Sighing": {"title": "Purcell, Dido's Lament", "url": "https://www.youtube.com/watch?v=PeB4cpRq16M"}, "Irregular": {"title": "Stravinsky, Rite of Spring Augurs of Spring", "url": "https://www.youtube.com/watch?v=jwcPdC548dM"}, "Repeating": {"title": "John Williams, Jaws theme", "url": "https://www.youtube.com/watch?v=b-ot470Cmjk"}, "Sudden stops": {"title": "Beethoven, Symphony No. 5 opening", "url": "https://www.youtube.com/watch?v=I7AQeN-x_Xs"}, "Ticking pulse": {"title": "Pink Floyd, Time", "url": "https://www.youtube.com/watch?v=Qr0-7Ds79zo"}, "Jagged": {"title": "Rush, YYZ", "url": "https://www.youtube.com/watch?v=ftVTWDrtrlc"}, "Chopped": {"title": "AC/DC, Back in Black", "url": "https://www.youtube.com/watch?v=pAgnJDJN4VA"}, "Off-balance": {"title": "Pink Floyd, Money", "url": "https://www.youtube.com/watch?v=-0kcet4aPpQ"}, "Hammering": {"title": "Metallica, One", "url": "https://www.youtube.com/watch?v=WM8bTdBs-cw"}}};
 
+/* ── Spanish ──────────────────────────────────────────────────────────
+   This page is standalone (no i18n.js), so it follows 404.html's pattern:
+   the Español toggle on the main site stores 'gc-lang', and we read it.
+
+   English stays the KEY everywhere — data-word, DATA.defs, DATA.hear — and
+   only the text on screen is swapped. That way the lookups, the listening
+   links and any saved state keep working, and a missing translation falls
+   back to English rather than breaking a cell. The piece titles under
+   "Escúchalo" stay in their original language: they are proper nouns.
+   ─────────────────────────────────────────────────────────────────── */
+const ES_WORDS = {
+  "Peaceful": "Apacible",
+  "Inspiring": "Inspirador",
+  "Joyful": "Alegre",
+  "Sorrowful": "Triste",
+  "Dark": "Oscuro",
+  "Aggressive": "Agresivo",
+  "Calm": "Tranquilo",
+  "Serene": "Sereno",
+  "Dreamy": "Soñador",
+  "Gentle": "Suave",
+  "Floating": "Flotante",
+  "Content": "Contento",
+  "Triumphant": "Triunfal",
+  "Heroic": "Heroico",
+  "Uplifting": "Alentador",
+  "Majestic": "Majestuoso",
+  "Determined": "Decidido",
+  "Soaring": "Elevado",
+  "Playful": "Juguetón",
+  "Celebratory": "Festivo",
+  "Sunny": "Radiante",
+  "Hopeful": "Esperanzado",
+  "Cheerful": "Animado",
+  "Carefree": "Despreocupado",
+  "Melancholy": "Melancólico",
+  "Mournful": "Afligido",
+  "Lonely": "Solitario",
+  "Wistful": "Nostálgico",
+  "Grieving": "Desconsolado",
+  "Weary": "Cansado",
+  "Ominous": "Siniestro",
+  "Menacing": "Amenazante",
+  "Eerie": "Inquietante",
+  "Brooding": "Sombrío",
+  "Haunting": "Fantasmal",
+  "Uneasy": "Intranquilo",
+  "Angry": "Enojado",
+  "Frantic": "Frenético",
+  "Relentless": "Implacable",
+  "Defiant": "Desafiante",
+  "Fierce": "Feroz",
+  "Bitter": "Amargo",
+  "Soft": "Suave",
+  "Smooth": "Parejo",
+  "Even": "Constante",
+  "Barely there": "Apenas audible",
+  "Full": "Lleno",
+  "Swelling": "En oleada",
+  "Powerful": "Potente",
+  "Booming": "Retumbante",
+  "Light": "Ligero",
+  "Bursting": "Con estallidos",
+  "Growing": "Creciente",
+  "Accented": "Acentuado",
+  "Hushed": "Susurrado",
+  "Faint": "Tenue",
+  "Dying away": "Que se apaga",
+  "Small swells": "Pequeñas oleadas",
+  "Quiet": "Bajo",
+  "Subdued": "Contenido",
+  "Creeping louder": "Sube poco a poco",
+  "Sudden loud": "Golpe repentino",
+  "Loud": "Fuerte",
+  "Blasting": "Estruendoso",
+  "Crashing": "Estrepitoso",
+  "Slamming": "Golpeado",
+  "Slow": "Lento",
+  "Unhurried": "Sin prisa",
+  "Relaxed": "Relajado",
+  "Drifting": "A la deriva",
+  "Broad": "Amplio",
+  "Stately": "Solemne",
+  "Measured": "Medido",
+  "Gathering": "Que toma impulso",
+  "Brisk": "Ágil",
+  "Lively": "Vivo",
+  "Quickening": "Acelerando",
+  "Dancing": "Bailable",
+  "Stretched": "Estirado",
+  "Dragging": "Arrastrado",
+  "Halting": "Entrecortado",
+  "Deliberate": "Pausado",
+  "Crawling": "Lentísimo",
+  "Lurching": "A tumbos",
+  "Fast": "Rápido",
+  "Driving": "Con empuje",
+  "Racing": "Veloz",
+  "Breakneck": "Vertiginoso",
+  "Rocking": "Acunado",
+  "Swaying": "Balanceo",
+  "Breathing": "Respiración",
+  "Steady pulse": "Pulso constante",
+  "Marching": "Marcha",
+  "Long-short": "Largo-corto",
+  "Strong beats": "Tiempos fuertes",
+  "Rolling": "Rodante",
+  "Bouncy": "Saltarín",
+  "Skipping": "Brincado",
+  "Off-beat": "A contratiempo",
+  "Chattering": "Parloteo",
+  "Sparse": "Escaso",
+  "Uneven": "Desparejo",
+  "Heartbeat": "Latido",
+  "Sighing": "Suspiros",
+  "Irregular": "Irregular",
+  "Repeating": "Repetitivo",
+  "Sudden stops": "Paradas repentinas",
+  "Ticking pulse": "Tictac",
+  "Jagged": "Quebrado",
+  "Chopped": "Cortado",
+  "Off-balance": "Desequilibrado",
+  "Hammering": "Martilleo",
+  "Open": "Abierta",
+  "Airy": "Aireada",
+  "Simple": "Simple",
+  "Flowing": "Fluida",
+  "Thick": "Espesa",
+  "Layered": "En capas",
+  "Rich": "Rica",
+  "Unison": "Al unísono",
+  "Busy": "Movida",
+  "Bubbly": "Burbujeante",
+  "Interlocking": "Entrelazada",
+  "Call-and-answer": "Llamada y respuesta",
+  "Thin": "Delgada",
+  "Bare": "Desnuda",
+  "Solo": "Sola",
+  "Empty": "Vacía",
+  "Murky": "Turbia",
+  "Hollow": "Hueca",
+  "Low": "Grave",
+  "Rumbling": "Retumbo",
+  "Dense": "Densa",
+  "Grinding": "Rechinante",
+  "Crushing": "Aplastante",
+  "Wall of sound": "Muro de sonido"
+};
+const ES_DEFS = {
+  "Dynamics": {
+    "Soft": "volumen bajo y delicado",
+    "Smooth": "sin saltos ni cambios repentinos de volumen",
+    "Even": "se mantiene en un mismo nivel todo el tiempo",
+    "Barely there": "tan bajo que casi lo pierdes",
+    "Full": "un volumen grande que llena el salón",
+    "Swelling": "crece en una sola ola larga",
+    "Powerful": "fuerte y potente sin forzar",
+    "Booming": "enorme y atronador",
+    "Light": "bajo, con un toque delicado",
+    "Bursting": "estallidos rápidos de volumen repentino",
+    "Growing": "sube de volumen poco a poco",
+    "Accented": "algunas notas se tocan más fuerte que las demás",
+    "Hushed": "bajo, como un susurro",
+    "Faint": "tan suave que parece venir de lejos",
+    "Dying away": "se va apagando hasta el silencio",
+    "Small swells": "pequeñas subidas que vuelven a bajar",
+    "Quiet": "volumen bajo",
+    "Subdued": "contenido, como guardado bajo una tapa",
+    "Creeping louder": "sube lenta y constantemente",
+    "Sudden loud": "un golpe de susto que sale del silencio",
+    "Loud": "volumen alto",
+    "Blasting": "casi lo más fuerte que se puede",
+    "Crashing": "golpes pesados de sonido",
+    "Slamming": "cada golpe cae con toda la fuerza"
+  },
+  "Tempo": {
+    "Slow": "más lento que caminar",
+    "Unhurried": "sin ninguna prisa",
+    "Relaxed": "una velocidad tranquila",
+    "Drifting": "flota sin que nada lo empuje",
+    "Broad": "un paso grande, ancho y espacioso",
+    "Stately": "digno, como una procesión",
+    "Measured": "calmado y de paso parejo",
+    "Gathering": "va tomando velocidad poco a poco",
+    "Brisk": "rápido y con energía",
+    "Lively": "animado y siempre en movimiento",
+    "Quickening": "acelerando",
+    "Dancing": "se mueve como los pies en una pista de baile",
+    "Stretched": "el tiempo se estira más de lo natural",
+    "Dragging": "pesado y con esfuerzo, atrás del pulso",
+    "Halting": "se detiene y duda una y otra vez",
+    "Deliberate": "lento a propósito, paso a paso",
+    "Crawling": "casi lo más lento que se mueve la música",
+    "Lurching": "da tumbos: arranca y se atasca",
+    "Fast": "bastante más rápido que caminar",
+    "Driving": "empuja hacia adelante sin ceder",
+    "Racing": "a toda velocidad",
+    "Breakneck": "peligrosa y emocionantemente rápido"
+  },
+  "Texture": {
+    "Open": "mucho espacio entre los sonidos",
+    "Airy": "ligera, con aire para flotar",
+    "Simple": "solo una parte o dos",
+    "Flowing": "una sola línea suave y conectada",
+    "Thick": "muchos sonidos a la vez",
+    "Layered": "partes apiladas una sobre otra",
+    "Rich": "llena y profunda",
+    "Unison": "todos tocando lo mismo al mismo tiempo",
+    "Busy": "muchas partes moviéndose a la vez",
+    "Bubbly": "partecitas rápidas burbujeando por todos lados",
+    "Interlocking": "partes que encajan como engranes",
+    "Call-and-answer": "una parte pregunta y otra responde",
+    "Thin": "muy poco sonido",
+    "Bare": "reducida a casi nada",
+    "Solo": "una sola voz, sin compañía",
+    "Empty": "casi puro silencio alrededor de un solo sonido",
+    "Murky": "borrosa y difícil de distinguir",
+    "Hollow": "le falta algo en el centro",
+    "Low": "todo abajo, en el registro grave",
+    "Rumbling": "una capa que retumba por debajo de todo",
+    "Dense": "apretada, sin huecos",
+    "Grinding": "partes graves rechinando una contra otra",
+    "Crushing": "un peso de sonido amontonado",
+    "Wall of sound": "todo, en todas partes, al mismo tiempo"
+  },
+  "Rhythm": {
+    "Rocking": "Se mece suavemente entre dos notas o acordes, como una cuna.",
+    "Swaying": "Un balanceo suave de lado a lado en tres, como bailar despacio.",
+    "Breathing": "Las frases se estiran y se asientan como respiraciones lentas y profundas — sin pulso marcado.",
+    "Steady pulse": "El mismo pulso suave una y otra vez, sin apurarse nunca.",
+    "Marching": "Tiempos nítidos y parejos que podrías caminar al paso.",
+    "Long-short": "Un andar orgulloso: LARGO-corto, LARGO-corto (un ritmo con puntillo).",
+    "Strong beats": "Golpes pesados que todos pueden zapatear o aplaudir.",
+    "Rolling": "Las notas ruedan hacia adelante en olas parejas, como ruedas girando.",
+    "Bouncy": "Las notas rebotan fuera del pulso como una pelota.",
+    "Skipping": "Un aire ternario rápido y ligero — brincar en vez de caminar.",
+    "Off-beat": "Los golpes caen entre los tiempos principales — el rasgueo del reggae.",
+    "Chattering": "Notas rápidas, ligeras y repetidas, como plática emocionada.",
+    "Sparse": "Solo unas pocas notas, muy separadas, con silencio en medio.",
+    "Uneven": "Las notas van en un tiempo inestable en vez de un pulso estricto.",
+    "Heartbeat": "Un pulso lento y pesado que sigue doliendo hacia adelante.",
+    "Sighing": "Pares de dos notas que caen como un suspiro — fuerte, luego suave.",
+    "Irregular": "El patrón cambia todo el tiempo, así que nunca sabes dónde cae el siguiente golpe.",
+    "Repeating": "Un patrón corto se repite una y otra vez hasta que se siente amenazante.",
+    "Sudden stops": "La música se estrella contra el silencio sin avisar.",
+    "Ticking pulse": "Un tictac seco, de reloj, que no para nunca.",
+    "Jagged": "Ráfagas filosas de notas rápidas con jabs y giros repentinos.",
+    "Chopped": "Acordes cortos y cortados, con el sonido ahogado — como rasgueos con la palma apagando.",
+    "Off-balance": "La cuenta se siente chueca, como caminar cojeando (esta va en 7).",
+    "Hammering": "El mismo golpe pesado martillado una y otra vez, parejo como una máquina."
+  }
+};
+const ES_CATS = {
+  "Dynamics": {
+    "name": "Dinámica",
+    "q": "¿Qué tan fuerte?"
+  },
+  "Tempo": {
+    "name": "Tempo",
+    "q": "¿Qué tan rápido?"
+  },
+  "Rhythm": {
+    "name": "Ritmo",
+    "q": "¿Qué patrón?"
+  },
+  "Texture": {
+    "name": "Textura",
+    "q": "¿Gruesa o delgada?"
+  }
+};
+const ES_UI = {
+  "title": "El ánimo y cómo se construye",
+  "back": "&larr; Volver al sitio de la clase",
+  "sub": "Elige un ánimo y luego una opción de cada columna. Toca cualquier palabra para ver qué significa — las palabras de ritmo traen un ejemplo para escuchar.",
+  "close": "Cerrar",
+  "hear": "Escúchalo"
+};
+let LANG = 'en';
+try { if (localStorage.getItem('gc-lang') === 'es') LANG = 'es'; } catch (e) {}
+const isES = () => LANG === 'es';
+/* word as the student reads it (English is the key) */
+const tw = w => (isES() && ES_WORDS[w]) || w;
+const tcat = c => (isES() && ES_CATS[c] && ES_CATS[c].name) || c;
+const tq = (c, q) => (isES() && ES_CATS[c] && ES_CATS[c].q) || q;
+const tdef = (c, w) => (isES() && ES_DEFS[c] && ES_DEFS[c][w]) || DATA.defs[c][w];
+const tui = k => (isES() && ES_UI[k]) || null;
+
+if (isES()) {
+  document.documentElement.lang = 'es';
+  document.title = ES_UI.title;
+  document.addEventListener('DOMContentLoaded', () => {
+    const h1 = document.querySelector('h1');
+    const sub = document.querySelector('.sub');
+    const back = document.getElementById('back-link');
+    if (h1) h1.textContent = ES_UI.title;
+    if (sub) sub.textContent = ES_UI.sub;
+    if (back) back.innerHTML = ES_UI.back;
+  });
+}
+
 const CATS = [
   {key:"dynamics", name:"Dynamics", q:"How loud?", cls:"dyn"},
   {key:"tempo",    name:"Tempo",    q:"How fast?", cls:"tempo"},
@@ -191,19 +491,19 @@ const backdrop = document.getElementById("backdrop");
 
 /* headers */
 chart.insertAdjacentHTML("beforeend", '<div class="spacer"></div>' + CATS.map(c =>
-  `<div class="colhead ${c.cls}"><b>${c.name}</b><span>${c.q}</span></div>`).join(""));
+  `<div class="colhead ${c.cls}"><b>${tcat(c.name)}</b><span>${tq(c.name, c.q)}</span></div>`).join(""));
 
 /* rows */
 DATA.moods.forEach((m, i) => {
   const slug = m.name.toLowerCase();
   const moodHtml =
-    `<div class="mood ${slug}"><h2>${m.name}</h2><ul>` +
-    m.specifics.map(s => `<li>${s}</li>`).join("") + `</ul></div>`;
+    `<div class="mood ${slug}"><h2>${tw(m.name)}</h2><ul>` +
+    m.specifics.map(s => `<li>${tw(s)}</li>`).join("") + `</ul></div>`;
   const cells = CATS.map(c => {
     const words = DATA[c.key][i].map(w =>
-      `<button class="word" type="button" data-cat="${c.name}" data-word="${w}" aria-expanded="false" aria-haspopup="dialog">${w}</button>`
+      `<button class="word" type="button" data-cat="${c.name}" data-word="${w}" aria-expanded="false" aria-haspopup="dialog">${tw(w)}</button>`
     ).join("");
-    return `<div class="cell ${c.cls}"><span class="cat">${c.name} &mdash; ${c.q}</span>${words}</div>`;
+    return `<div class="cell ${c.cls}"><span class="cat">${tcat(c.name)} &mdash; ${tq(c.name, c.q)}</span>${words}</div>`;
   }).join("");
 
   chart.insertAdjacentHTML("beforeend", `<div class="moodgroup">${moodHtml}${cells}</div>`);
@@ -222,20 +522,20 @@ function closePop(){
 function openPop(btn){
   closePop();
   const cat = btn.dataset.cat, word = btn.dataset.word;
-  let def = DATA.defs[cat][word];
+  let def = tdef(cat, word);
   def = def.charAt(0).toUpperCase() + def.slice(1);
   if (!/[.!?]$/.test(def)) def += ".";
   const q = CATS.find(c => c.name === cat).q;
   const hear = (cat === "Rhythm" && DATA.hear[word])
-    ? `<a class="hear" href="${DATA.hear[word].url}" target="_blank" rel="noopener">Hear it: ${DATA.hear[word].title} &rarr;</a>` : "";
+    ? `<a class="hear" href="${DATA.hear[word].url}" target="_blank" rel="noopener">${tui('hear') || 'Hear it'}: ${DATA.hear[word].title} &rarr;</a>` : "";
   pop = document.createElement("div");
   pop.className = "pop";
   pop.dataset.cat = cat;
   pop.setAttribute("role","dialog");
-  pop.setAttribute("aria-label", word);
+  pop.setAttribute("aria-label", tw(word));
   pop.innerHTML =
-    `<button class="close" type="button" aria-label="Close">&times;</button>` +
-    `<p class="eyebrow">${cat} &mdash; ${q}</p><h3>${word}</h3><p>${def}</p>${hear}`;
+    `<button class="close" type="button" aria-label="${tui('close') || 'Close'}">&times;</button>` +
+    `<p class="eyebrow">${tcat(cat)} &mdash; ${tq(cat, q)}</p><h3>${tw(word)}</h3><p>${def}</p>${hear}`;
   document.body.appendChild(pop);
 
   const small = window.matchMedia("(max-width:640px)").matches;
