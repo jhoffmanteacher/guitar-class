@@ -44,16 +44,16 @@ SETS.push(
               explain: '"p" is the thumb (from Spanish "pulgar"). The rest: i = index, m = middle, a = ring.',
               explain_es: '"p" es el pulgar. El resto: i = índice, m = medio, a = anular.',
               choices: [
-              'Index finger',
-              'Middle finger',
+              'Index',
+              'Middle',
               'Thumb',
-              'Ring finger'
+              'Ring'
             ],
               choices_es: [
-              'Dedo índice',
-              'Dedo medio',
+              'Índice',
+              'Medio',
               'Pulgar',
-              'Dedo anular'
+              'Anular'
             ] }
           },
           {

@@ -352,13 +352,25 @@ function validateNoteBeats(allSets) {
 }
 
 /* ════════════════════════════════════════════════════════════════════
-   1h. MC ANSWER-LENGTH TELLS — a keyed choice that is markedly the
-   longest lets students guess without knowing the material. Two sweeps
-   (2026-07-31, 2026-08-01) found and fixed this class by hand; this
-   makes it structural. Flags any 3+-choice MC, in EITHER language,
-   whose keyed answer is strictly longest, ≥1.3× the runner-up, and
-   ≥8 characters longer. Fix by trimming the keyed answer or giving a
-   distractor the same level of detail — not by padding with filler.
+   1h. MC ANSWER-LENGTH TELLS — a keyed choice that stands out by
+   LENGTH lets students guess without knowing the material. Two sweeps
+   (2026-07-31, 2026-08-01) found and fixed the longest-answer form by
+   hand; this makes it structural. Flags any 3+-choice MC, in EITHER
+   language, whose keyed answer is strictly longest OR strictly
+   shortest, by ≥1.3× and ≥8 characters.
+
+   The shortest form was added 2026-09-05, after an audit found five
+   cards where the right answer was the conspicuously short one — "Thumb"
+   among three "... finger" options, "vi–I–ii–IV" among three numeral
+   strings that each carried their reasoning. Same tell, mirrored, and
+   the original check couldn't see it.
+
+   Both bounds need the ≥8-character floor as well as the ratio: without
+   it, one-word answers ("Em" against "G", 9 chars against 5) trip a
+   ratio test constantly and mean nothing to a student.
+
+   Fix by giving the odd one out the same level of detail as the rest —
+   not by padding with filler.
    ════════════════════════════════════════════════════════════════════ */
 function checkMcAnswerTells(allSets) {
   head('1h. MC answer-length tells');
@@ -368,7 +380,13 @@ function checkMcAnswerTells(allSets) {
   const checkLang = (choices, answer, where, lang) => {
     const lens = choices.map(c => String(c).length);
     const key = lens[answer];
-    const second = Math.max(...lens.filter((_, i) => i !== answer));
+    const others = lens.filter((_, i) => i !== answer);
+    const shortest = Math.min(...others);
+    if (key < shortest && shortest >= RATIO * key && shortest - key >= MIN_DIFF) {
+      err(`${where} [${lang}]: keyed answer is the giveaway-shortest choice (${key} vs ${shortest} chars) — "${String(choices[answer]).slice(0, 50)}…"`);
+      problems++; bad++;
+    }
+    const second = Math.max(...others);
     if (key > second && key >= RATIO * second && key - second >= MIN_DIFF) {
       err(`${where} [${lang}]: keyed answer is the giveaway-longest choice (${key} vs ${second} chars) — "${String(choices[answer]).slice(0, 50)}…"`);
       problems++; bad++;
@@ -1982,8 +2000,13 @@ function renderCheck() {
     vm.createContext(ctx);
     for (const f of FILES) vm.runInContext(readFileSync(join(ROOT, f), 'utf8'), ctx, { filename: f });
   } catch (e) {
-    warn(`render harness could not load (${e.message}) — renderer NOT smoke-tested`);
-    console.log(`${C.dim}  if app.js gained a new load-time browser dependency, extend the stub in renderCheck()${C.reset}`);
+    /* A hard failure, not a warning. On 2026-09-05 a new load-time
+       URLSearchParams call in app.js dropped this harness, and because it
+       only warned, the push stayed green with the renderer never smoke-
+       tested — exactly the silence 0b exists to break. */
+    err(`render harness could not load (${e.message}) — renderer NOT smoke-tested`);
+    problems++;
+    console.log(`${C.dim}  app.js probably gained a load-time browser dependency: add it to the stub in renderCheck()${C.reset}`);
     warnings++;
     return;
   }

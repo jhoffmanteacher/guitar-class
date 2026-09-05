@@ -5,6 +5,19 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-05 — A few quiz questions and one activity card
+
+### Fixed
+
+- **Five quiz questions gave themselves away.** In each one the right answer
+  was the noticeably shortest option — "Thumb" among three "… finger"
+  answers, "vi–I–ii–IV" among three that each explained their reasoning. You
+  could pick the odd one out without knowing the answer. The options are
+  evened up; nothing about what is being taught changed.
+- **Finger Gym (activity 7), event 2** ran two separate instructions together
+  in one paragraph. It's a numbered list now, like the rest.
+- A missing bit of emphasis in the Spanish tuner instructions.
+
 ## 2026-09-05 — The site loads quicker and updates more reliably
 
 ### Changed

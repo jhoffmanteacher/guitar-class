@@ -878,8 +878,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Event 2 at your record tempo. Set the BPM to the number you wrote down last Gym and play the Spider there.\nYou\'ve got it when: one clean pass at your record BPM, every note on the right string. Buzz twice? Drop the BPM by 10 and try again.',
-        text_es: 'Evento 2 a tu tempo récord. Pon el BPM en el número que anotaste el Gimnasio pasado y toca la Araña ahí.\nLo tienes cuando: una pasada limpia a tu BPM récord, con cada nota en la cuerda correcta. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
+        text: 'Event 2 at your record tempo:<ol><li>Set the BPM to the number you wrote down last Gym.</li><li>Play the Spider there.</li></ol>You\'ve got it when: one clean pass at your record BPM, every note on the right string. Buzz twice? Drop the BPM by 10 and try again.',
+        text_es: 'Evento 2 a tu tempo récord:<ol><li>Pon el BPM en el número que anotaste el Gimnasio pasado.</li><li>Toca la Araña ahí.</li></ol>Lo tienes cuando: una pasada limpia a tu BPM récord, con cada nota en la cuerda correcta. ¿Zumbó dos veces? Baja el BPM 10 puntos y vuelve a intentarlo.',
         tab: {
           caption: 'Spider · at your record BPM',
           caption_es: 'Araña · a tu BPM récord',

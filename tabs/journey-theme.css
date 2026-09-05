@@ -180,6 +180,9 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:4px
 /* Floating backing-track pill — same shape as the top .playalong-btn but
    filled brand purple so it stands out from the white tool pills below it. */
 .fab-track{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;font:inherit;font-size:0.8438rem;font-weight:700;color:#fff;background:var(--brand);border:1px solid var(--brand);border-radius:20px;cursor:pointer;box-shadow:0 4px 14px rgba(81,74,125,0.35);align-self:flex-end}
+/* journey.js sets .hidden on this button when a page has no audio; a bare
+   display:inline-flex outranks the UA's [hidden] rule, so say it here. */
+.fab-track[hidden]{display:none}
 @media (prefers-color-scheme:dark){
   /* dark-mode --brand is a light purple — white text loses contrast on it,
      so use the purple chip palette instead */

@@ -534,18 +534,14 @@ function showApp(user){
   document.getElementById('user-area').innerHTML=userHeaderHtml(user);
   renderAll();
   applyGamesAccess();
-  maybeShowApp_gamesHash();
+  // A bookmarked/reloaded explore-page URL (#games, #songs, #keep-practicing,
+  // #daily-review, #my-progress) opens that page once the app is on screen.
+  routeExploreHash();
   maybeShowCaReminder();
   // One long-lived listener on the live-quiz session doc, so a game the
   // teacher starts mid-period reaches a student who's had the site open all
   // along. Guarded: live-quiz.js is a separate deferred script.
   if(typeof lqStartListening === 'function') lqStartListening();
-}
-
-/* A bookmarked/reloaded explore-page URL (#games, #songs, #keep-practicing,
-   #daily-review, #my-progress) opens that page once the app is on screen. */
-function maybeShowApp_gamesHash(){
-  routeExploreHash();
 }
 
 /* ── Firestore ── */
@@ -893,7 +889,6 @@ let _fullModuleDataQueued = false;
 function renderAll(){
   populateModuleDropdown();
   onModuleChange(lastModuleNum||1, lastSetId);
-  renderChordBoxes();
   syncPreviewNote();
   // The dropdown's 🔒 lock marker (isModuleGateLocked) judges "previous
   // module complete" from that module's own SETS/MODULE_REVIEWS data — lazy-
@@ -923,7 +918,6 @@ function syncPreviewNote(){
    single source shared with the teacher slide decks. chordDiagramSVG,
    CHORD_DIAGRAMS, localChordSvg, localStringSvg, localStringFretboardSvg,
    localNoteSvg, noteFullLabel and ordinal are globals from there. */
-function renderChordBoxes(){} /* legacy no-op — diagrams now render inline */
 
 /* ══════════════════════════════════════════════
    AUTO CHORD LINKS — scan step text for chord
@@ -2258,7 +2252,6 @@ function activateSet(id, opts){
     p.classList.toggle('active', isTarget);
     if(isTarget) p.classList.toggle('set-peek', peek);
   });
-  renderChordBoxes();
   syncRailStations();   // refresh the rail's "This set" station switcher for the new set
   // Every set opens at the top, every time — no scroll-position memory.
   scrollPaneTop();
@@ -2522,7 +2515,7 @@ function buildSet(w){
   // Compact eyebrow line — "Set N" pill, topic, Print — carries identity;
   // skill bullets and the song-thread link fold behind "About this set"
   // (the old "I CAN…" objective line is no longer shown).
-  const printBtn = `<button type="button" class="print-set-btn" onclick="printSet('${w.id}')" title="${escAttr(t('btn.printSetTitle'))}" aria-label="${escAttr(t('btn.printSet'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg></button>`;
+  const printBtn = `<button type="button" class="print-set-btn" onclick="printSet()" title="${escAttr(t('btn.printSetTitle'))}" aria-label="${escAttr(t('btn.printSet'))}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="7" rx="1"/></svg></button>`;
   const setTag = w.title ? `<span class="obj-set-tag" data-i18n-setlabel="${escAttr(w.title)}" translate="no">${escHtml(tSetLabel(w.title))}</span>` : '';
   const titleSpan = w.unit ? `<span class="set-eyebrow-title">${tf(w,'unit')}</span>` : '';
   const items = (tf(w,'skillFocus')||'').split(' · ')
@@ -2582,7 +2575,8 @@ function buildSet(w){
    The @media print stylesheet does the heavy lifting — it force-shows the
    lesson ladder and the checklist (regardless of which tab is open) and hides
    the songs tab and all on-screen chrome — so this just fires the dialog. */
-function printSet(wid){ window.print(); }
+// The print stylesheet scopes what lands on the page, so this needs no id.
+function printSet(){ window.print(); }
 /* Printed handouts must show the collapsed hint/stuck/level-up prose —
    hidden fold panels don't print, so unhide them for the print pass and
    restore afterwards. */
@@ -3033,7 +3027,6 @@ function toggleStationView(){
   const focus = !stationViewIsFocus();
   try{ localStorage.setItem('stationView', focus ? 'focus' : 'list'); }catch(e){}
   document.querySelectorAll('.dp').forEach(dp=>applyStationView(dp, focus));
-  renderChordBoxes();
 }
 function applyStationView(dp, focus){
   dp.classList.toggle('focus', focus);
@@ -3148,7 +3141,6 @@ function toggleStepOpen(btn){
   li.classList.toggle('collapsed', !willOpen);
   btn.setAttribute('aria-expanded', String(willOpen));
   syncStationFocus(dp);
-  renderChordBoxes();
   if(willOpen) nudgeStepIntoView(li);
 }
 
@@ -3162,7 +3154,6 @@ function expandStepEl(li, keepOthers){
   const head = li.querySelector('.step-head');
   if(head) head.setAttribute('aria-expanded','true');
   syncStationFocus(li.closest('.dp'));
-  renderChordBoxes();
 }
 
 // Mark done: collapse this row, drop its .cur badge, and open the next not-done step.
@@ -3196,7 +3187,6 @@ function collapseAndAdvance(li){
     if(focus) nudgeStepIntoView(next);
   }
   syncStationFocus(dp);
-  renderChordBoxes();
 }
 
 function updateProgressPill(li){
@@ -5623,6 +5613,8 @@ window.addEventListener('gc-langchange', function(){
    ══════════════════════════════════════════════ */
 let audioCtx=null;
 function getAudioCtx(){ if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)(); return audioCtx; }
+/* Used only by coach.js, but it lives here on purpose: coach.js is loaded on
+   demand (see ensureCoachJs) and app.js is always present. */
 function beep(freq,dur,gain){ const ctx=getAudioCtx(); const o=ctx.createOscillator(),g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=freq; g.gain.setValueAtTime(gain==null?0.4:gain,ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+dur); o.start(); o.stop(ctx.currentTime+dur); }
 /* Every synthesized pluck goes through one shared bus, so a single gain
    node can silence notes that are already sounding — see killRingingPlucks. */

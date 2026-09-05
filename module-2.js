@@ -363,7 +363,7 @@ SETS.push(
         gotItWhen_es: 'puedes decir A B C D E F G — y lo que viene después de G — sin pausar ni mirar nada.',
         practice: { type: 'mc', prompt: 'In the musical alphabet, what note (letter) comes after G?',
           prompt_es: 'En el alfabeto musical, ¿qué nota (letra) viene después de G?',
-          choices: ['G#', 'A', 'A#', 'It starts over at C'], choices_es: ['G#', 'A', 'A#', 'Vuelve a empezar en C'], answer: 1,
+          choices: ['G#', 'A', 'A#', 'C'], choices_es: ['G#', 'A', 'A#', 'C'], answer: 1,
           explain: 'The musical alphabet only runs A through G, then loops straight back to A. G# is a real note, but it sits between G and A — it isn\'t the next letter.',
           explain_es: 'El alfabeto musical solo va de A a G, y luego vuelve directo a A. G# sí es una nota real, pero está entre G y A — no es la siguiente letra.' } },
       { id: 'm2w1-s2', text: 'Name all natural notes on the E string (frets 0–12)',
