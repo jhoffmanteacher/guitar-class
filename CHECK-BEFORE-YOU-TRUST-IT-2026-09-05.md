@@ -13,12 +13,19 @@ worth doing.
 
 ## 1. Two things that must happen outside the repo
 
-**A. Paste `firestore.rules` into Firebase.** Console → Firestore Database →
-Rules → paste the file → Publish. Until you do, the live-quiz answer rules are
-unchanged (nothing breaks — the new lines only *tighten* what a student may
-write). Then run one live-quiz round with a student account and confirm answers
-still register. If they don't, the new type checks are the first suspect:
-`ms is number`, `name.size() <= 60`, `qIndex is int`, `choice` a string or null.
+**A. ~~Paste `firestore.rules` into Firebase.~~ DONE 2026-09-05 (Jonathan).**
+Still outstanding: **run one live-quiz round with a student account** and
+confirm answers register. The client's write shape was re-checked against every
+published condition and matches (7 keys exactly, name sliced to 60, ms a
+non-negative rounded integer, choice null or a 2-char id, qIndex always
+integral), so this should be a formality — but it is the one change that can
+only fail in front of a class, so it is worth one round before a lesson.
+
+If answers stop registering, `qIndex is int` is the first suspect: JavaScript
+has no integer type, and the rule depends on the Firestore SDK encoding an
+integral number as an integer rather than a double. The fix is one word —
+`is number` instead of `is int` — and the equality check on the next line
+already pins the value, so nothing is lost by relaxing it.
 
 **B. Run the two checks the sandbox can't.** From your Mac or Windows machine,
 on this branch:
