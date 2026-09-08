@@ -9,6 +9,21 @@ colour themes with no page errors.
 This is what a machine in a sandbox **could not** verify. Roughly in the order
 worth doing.
 
+> **2026-09-09.** The follow-up review of that audit work (`OPUSPLAN-review-
+> followups-2026-09-07.md`) has been executed in full and is on `main` —
+> commits `92ef877` and `1dd8e8f`. That plan file and the original
+> `OPUSPLAN-site-audit-2026-09-05.md` were deleted once done; this check list
+> survives because the items below still need a person. Two notes from
+> executing it that change what's written further down:
+>
+> - **Item 3's "hand photos"** — only `img/m6-strum-pendulum.jpg` is actually a
+>   photograph. The rest of the `.jpg`/`.png` figures are drawings (your pencil
+>   sketches, and the eight m13 ink drawings). Dark mode now inverts the line
+>   art and dims only the sketches and that one photo.
+> - **Item 7's Module 2 alphabet question** kept its four plain letters, but
+>   its explanation now says why `C` is wrong — the alphabet you already know
+>   starts over at C, the musical one starts over at A.
+
 ---
 
 ## 1. Two things that must happen outside the repo
@@ -40,17 +55,14 @@ node tools/checks.mjs --live   # confirms the deploy landed (the sandbox
                                # ever be run from your machine)
 ```
 
-**`--live` ran clean on 2026-09-08** — but note it compares the LIVE `sw.js`
-against your LOCAL one, so it only confirms whatever you had checked out at the
-time. The teacher-console change (`c4b61e1`) landed after, and bumped the
-version to **`guitar-class-2026-09-08-32cfb9082c`**. Pull and re-run `--live`
-once more to confirm that one actually deployed.
+**~~Run the two checks the sandbox can't.~~ DONE 2026-09-09**, from a local
+session, twice over:
 
-**Still never run from anywhere: the full link check.** `node tools/checks.mjs`
-(no flags) is the only thing that tests the ~180 YouTube and Docs links, and
-all of them 403 through the cloud proxy. CLAUDE.md records ~60 recalled URLs
-being dead in May 2026, so this is the largest genuinely unverified risk left
-in the audit.
+- **The full link check ran for real.** All 180 YouTube / Docs links reachable,
+  and every anchor text still matches its video's real title. This was called
+  "the largest genuinely unverified risk left in the audit" — it is closed.
+- **`--live` confirmed the current deploy** (`guitar-class-2026-09-08-e91233e102`),
+  after the follow-up work below.
 
 ---
 
@@ -182,3 +194,9 @@ Flag any of these and I'll revert them:
   theme drift (1t), the tuning warm-up tag (1r), and regex lookbehind (in 0).
   Check 1h now catches shortest-answer tells as well as longest, and check 0b
   now fails rather than warns if it can't smoke-test the renderer.
+- **2026-09-09: five of those could not actually fail.** The follow-up review
+  found 1s reading only one of the four stylesheets, 1t blind to a selector
+  written twice, the syntax and lookbehind scans skipping every inline
+  `<script>`, 1q blind to a card with an extra attribute, and two totals
+  printed but never pinned. All fixed and re-proved by breaking the guarded
+  thing; a sixth check (1v, figure sizes across both renderers) was added.
