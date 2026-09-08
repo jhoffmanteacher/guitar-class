@@ -13,7 +13,7 @@ worth doing.
 
 ## 1. Two things that must happen outside the repo
 
-**A. ~~Paste `firestore.rules` into Firebase.~~ DONE 2026-09-05 (Jonathan).**
+**A. ~~Paste `firestore.rules` into Firebase.~~ DONE 2026-09-08 (Jonathan).**
 Still outstanding: **run one live-quiz round with a student account** and
 confirm answers register. The client's write shape was re-checked against every
 published condition and matches (7 keys exactly, name sliced to 60, ms a
@@ -36,9 +36,21 @@ node tools/checks.mjs          # the real YouTube link check — all 180 links
                                # returned HTTP 403 through the cloud proxy,
                                # so they were never actually verified from here
 node tools/checks.mjs --live   # confirms the deploy landed (the sandbox
-                               # cannot reach the live site, so this has not
-                               # been run for any of today's pushes)
+                               # cannot reach the live site, so this can only
+                               # ever be run from your machine)
 ```
+
+**`--live` ran clean on 2026-09-08** — but note it compares the LIVE `sw.js`
+against your LOCAL one, so it only confirms whatever you had checked out at the
+time. The teacher-console change (`c4b61e1`) landed after, and bumped the
+version to **`guitar-class-2026-09-08-32cfb9082c`**. Pull and re-run `--live`
+once more to confirm that one actually deployed.
+
+**Still never run from anywhere: the full link check.** `node tools/checks.mjs`
+(no flags) is the only thing that tests the ~180 YouTube and Docs links, and
+all of them 403 through the cloud proxy. CLAUDE.md records ~60 recalled URLs
+being dead in May 2026, so this is the largest genuinely unverified risk left
+in the audit.
 
 ---
 
@@ -130,7 +142,7 @@ few times and Escape.
   dirtiness per key instead of per category, which is a change to the save
   path. `flushSave` now documents the real behaviour.
 - **~~The teacher console re-reads `config/class` on every repaint.~~ Done
-  2026-09-05 — worth one pass in the real console.** The five repaints that
+  2026-09-08 — worth one pass in the real console.** The five repaints that
   change nothing in Firestore (sort click, rename open/cancel/Escape, a
   rejected number entry) now paint from memory; everything that follows a
   write still re-reads. In the console, please check: **sorting** by number
