@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-08 — Song Journey pages print like the rest of the site
+
+### Fixed
+
+- **The floating buttons no longer print over the first page.** Backing track,
+  Tuner, Timer and Metronome were being printed on top of the text in the
+  corner of page 1, hiding a line or two of it. They're screen-only now, the
+  way they already were everywhere else.
+
+### Changed
+
+- **Song Journey pages print smaller and on fewer sheets**, matching the change
+  the rest of the site got yesterday: slightly smaller text, the page's own
+  margins instead of a wide screen gutter on top of them, and no layer pushed
+  to a fresh sheet while there's still room on the current one. "Seven Nation
+  Army" went from 8 sheets to 7; a picture, a TAB or a single rung of a ladder
+  still never gets split across a break.
+
 ## 2026-09-08 — "the cure" root line moves to the low E string
 
 ### Changed

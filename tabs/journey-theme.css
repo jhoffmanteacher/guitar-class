@@ -202,12 +202,51 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:4px
    same look; aria-pressed is maintained for assistive tech only. */
 footer{margin-top:36px;font-size:0.7813rem;color:var(--text3);border-top:1px solid var(--border);padding-top:14px}
 @media (max-width:480px){ h1{font-size:1.5rem} .tab-ascii{font-size:0.75rem} .tab-body{padding:8px 10px 10px} body{padding-left:16px;padding-right:16px} }
+/* Printed Journey page — same pass the app's handout got in styles.css
+   (2026-09-07): one notch smaller, the page's own margins doing the
+   gutter, and nothing pushed to a fresh sheet while the current one still
+   has room. The `.tab` rule below is mirrored in styles.css and compared
+   by checks.mjs 1t — restyle both or neither. */
 @media print{
+  @page{size:portrait;margin:11mm}
+  /* The app scales its handout 16px -> 14px. These pages read at 18px (a
+     deliberately larger measure for a phone at a music stand), so matching
+     the app's ~12% cut means 16px here, NOT the app's 87.5% — that would be
+     a 22% cut and put the body text under 10pt. */
+  html{font-size:16px}
+  /* body's 96px side gutter is a reading measure for a screen. On paper the
+     @page margin already supplies it, and carrying both threw away two
+     inches of line length — which is lines, which is sheets. */
+  body{padding:0}
+  /* The floating tool pills (Backing track / Tuner / Timer / Metronome) are
+     position:fixed, so they printed on top of page 1 and covered the text
+     under them — the app's print pass has hidden its own .fab-group since
+     the beginning; these pages never got the same rule. */
   .btn-translate,.layer-chevron,#save-msg,.playalong{display:none}
-  .layer{break-inside:avoid;margin-bottom:16px}
+  /* !important because fab-tools.css loads AFTER this file, so its own
+     .fab-group rule wins the cascade at equal specificity — a plain
+     display:none here printed the pills anyway (verified in the PDF). */
+  .fab-group,.tool-popup{display:none !important}
+  /* A layer is a whole section of the page, so "don't break inside it" threw
+     the entire layer to the next sheet and left the rest of the current one
+     blank — the same fault `.stp-sec` had in the app. Layers break where they
+     must; what stays whole is the small stuff a reader needs in one piece. */
+  .layer{break-inside:auto;margin-bottom:10px}
   .tab{break-inside:avoid;page-break-inside:avoid;box-shadow:none}
+  .rung,.story,.chord-card,.anatomy-row,.branch,.fold{break-inside:avoid;page-break-inside:avoid}
+  h1,h2,.layer-head,.rung-title,.story>summary{break-after:avoid;page-break-after:avoid}
+  p,li{orphans:2;widows:2}
   .layer.closed .layer-body{display:block}
-  .layer-head{cursor:default}
+  /* Touch-target and card padding, trimmed for paper only. */
+  .layer-head{cursor:default;min-height:0;padding:7px 11px}
+  .layer-body{padding:10px 11px}
+  .layer-body p{margin-bottom:7px}
+  .story-body{padding:9px 11px}
+  .anatomy{padding:8px 11px;margin:-8px 0 14px}
+  .rung{margin-bottom:12px}
+  .crumb{margin-bottom:9px}
+  header.song{padding-bottom:10px;margin-bottom:6px}
+  footer{margin-top:16px;padding-top:9px}
 }
 
 /* Song anatomy roadmap — v2 depth pass, shared by all journey pages */
