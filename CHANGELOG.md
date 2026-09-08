@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-08 — Watchtower page: readable anatomy table, corrected bass tab
+
+### Fixed
+
+- **The Watchtower "Song anatomy" table lines up in columns again.** Section
+  name, description, and the "Layers" note each have their own column, so a
+  long description no longer pushes its layer note onto a line of its own. On
+  a phone the section name sits on its own line above the description.
+- **The Layer 2 bass tab now shows each root note played twice**, which is how
+  the loop actually goes — two beats per chord, one note per beat. The tab
+  reads A A G G | F F G G across two bars instead of four single notes.
+
 ## 2026-09-08 — Plainer language on the Song Journey pages and in the modules
 
 ### Changed

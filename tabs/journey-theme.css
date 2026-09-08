@@ -213,11 +213,12 @@ footer{margin-top:36px;font-size:0.7813rem;color:var(--text3);border-top:1px sol
 /* Song anatomy roadmap — v2 depth pass, shared by all journey pages */
 .anatomy{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin:-14px 0 30px}
 .anatomy-lead{margin:0 0 6px;font-size:0.875rem;font-weight:600}
-.anatomy-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;padding:5px 0;border-top:1px dashed var(--border);font-size:0.8438rem}
+.anatomy-row{display:grid;grid-template-columns:108px minmax(0,1fr) max-content;align-items:baseline;column-gap:12px;row-gap:2px;padding:5px 0;border-top:1px dashed var(--border);font-size:0.8438rem}
 .anatomy-row:first-of-type{border-top:0}
-.anatomy-row>b{flex:0 0 108px;font-weight:600}
+.anatomy-row>b{font-weight:600}
 .anatomy-row>span{color:var(--text2)}
-.anatomy-row .an-layers{margin-left:auto;color:var(--text3);font-size:0.7813rem;white-space:nowrap;padding-left:8px}
+.anatomy-row .an-layers{color:var(--text3);font-size:0.7813rem;white-space:nowrap;text-align:right}
+@media (max-width:560px){ .anatomy-row{grid-template-columns:minmax(0,1fr) max-content} .anatomy-row>b{grid-column:1 / -1} }
 
 /* Story card — context & listening, deliberately separate from the rated
    layers: a plain <details>, so journey.js (pill count, accordion) never
