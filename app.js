@@ -7284,7 +7284,12 @@ function caStepHeadText(step, si){
 }
 function caStepHtml(a, step, si, isOpen, isDone){
   const parts = [];
-  if(step.figure) parts.push(`<span class="step-figure"><img src="${escAttr(step.figure)}" alt=""></span>`);
+  /* width/height reserve the figure's box before the SVG arrives — without
+     them the card jumps as each one loads. Every img/ca-*.svg is drawn on the
+     same 640x244 board; checks.mjs (1v) fails the push if one isn't, and if
+     this line and renderTeacherActivityDetail() in teacher.js ever disagree.
+     TWO RENDERERS — patch both (CLAUDE.md). */
+  if(step.figure) parts.push(`<span class="step-figure"><img src="${escAttr(step.figure)}" alt="" width="640" height="244"></span>`);
   if(step.video && step.video.id){
     const url = `https://www.youtube.com/watch?v=${encodeURIComponent(step.video.id)}${step.video.start ? `&start=${Number(step.video.start)}` : ''}`;
     const vLabel = step.video.label ? escHtml(tf(step.video, 'label')) : escHtml(t('ca.watchVideo'));

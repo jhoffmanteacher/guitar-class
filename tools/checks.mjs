@@ -33,11 +33,12 @@
    Exit code is non-zero if anything fails, so a push can be aborted.
    ════════════════════════════════════════════════════════════════════ */
 
-import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, readdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { tmpdir } from 'node:os';
 import vm from 'node:vm';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -266,6 +267,7 @@ function validateModules() {
    one-line edit that corrupts progress quietly.
    ════════════════════════════════════════════════════════════════════ */
 const TUNING_WARMUP_TITLE = 'Warm-up — tuning check (Module 1)';
+const TUNING_WARMUP_COUNT = 27;
 function checkTuningWarmupTag(allSets) {
   head('1r. Tuning warm-up sections carry their kind tag');
   let bad = 0, tagged = 0;
@@ -287,6 +289,15 @@ function checkTuningWarmupTag(allSets) {
         }
       });
     }
+  }
+  /* Pinned. Both branches above pass if a section's title AND its tag are
+     removed in the same edit — which is precisely the state that breaks
+     things: isTuningWarmupSection() stops filtering it, and every later
+     section in that station shifts its positional progress keys. Only a
+     deliberate edit to this number can lower the total. */
+  if (tagged !== TUNING_WARMUP_COUNT) {
+    err(`${tagged} sections carry kind:'tuning-warmup', expected ${TUNING_WARMUP_COUNT} — if a warm-up was genuinely added or removed, update TUNING_WARMUP_COUNT in checks.mjs in the same commit. A drop usually means a section lost its tag AND its title together, which silently reshuffles every later progress key in that station.`);
+    problems++; bad++;
   }
   if (bad === 0) ok(`${tagged} tuning warm-up sections tagged and titled consistently`);
 }
@@ -625,66 +636,216 @@ function checkTabNoScroll() {
      between 3 and 4.5 would need adding to ALLOW below. Nothing on the
      site is in that band today.
    ════════════════════════════════════════════════════════════════════ */
-const CONTRAST_ALLOW = new Set([
-  // 'selector'  — large text (≥24px, or ≥18.7px bold) cleared at 3:1
+/* Selectors held to 3:1 instead of 4.5:1, each with the reason. These are
+   still CHECKED — an entry lowers the bar, it does not switch the selector
+   off — so a colour change that drops one below 3:1 still fails the push.
+   3:1 is the WCAG floor for large text (≥24px, or ≥18.7px bold) and for
+   non-text graphics such as an icon glyph. */
+const CONTRAST_ALLOW = new Map([
+  // an 18px SVG icon inside the rail button, not a text glyph (1.4.11)
+  ['.nav-btn.active .ico', 'an 18px SVG icon, not text'],
 ]);
+/* Every stylesheet 1s reads. Until 2026-09-08 it read styles.css and nothing
+   else, so the Journey pages and the two standalone pages — which carry their
+   own palettes and their own dark blocks — were never checked at all. That is
+   how .btn-translate.active shipped at 4.15:1 and the Mood chart's phone
+   column labels at 1.25:1. */
+const CONTRAST_SOURCES = [
+  //  file,                      where the CSS is,  whose palette it uses
+  ['styles.css',              'css',  null],
+  ['tabs/journey-theme.css',  'css',  null],
+  ['mood-chart.html',         'html', null],
+  // 404.html has no :root of its own — it <link>s styles.css and its inline
+  // block reads that palette's tokens.
+  ['404.html',                'html', 'styles.css'],
+];
+const isDarkMedia = m => /prefers-color-scheme\s*:\s*dark/.test(m);
+const isLightMedia = m => /prefers-color-scheme\s*:\s*light/.test(m);
+const isPrintMedia = m => /@media[^{]*\bprint\b/.test(m);
+/* Split a value on top-level whitespace: "var(--bg2) url(a b) no-repeat"
+   is three tokens, and rgb(0, 0, 0) stays one. */
+function cssTokens(v) {
+  const out = []; let depth = 0, buf = '';
+  for (const ch of String(v)) {
+    if (ch === '(') depth++;
+    else if (ch === ')') depth--;
+    if (depth === 0 && /\s/.test(ch)) { if (buf) out.push(buf); buf = ''; continue; }
+    buf += ch;
+  }
+  if (buf) out.push(buf);
+  return out;
+}
+/* Resolve var(), including a var() nested inside another's fallback. The old
+   version's fallback group was ([^)]+), so var(--x, rgb(1,2,3)) never matched
+   and the pair was silently skipped. */
+function cssVar(v, pal, d = 0) {
+  if (v == null || d > 8) return null;
+  v = String(v).replace(/\s*!\s*important\s*$/i, '').trim();
+  const m = /^var\(\s*(--[\w-]+)\s*(?:,([\s\S]*))?\)$/.exec(v);
+  if (!m) return v;
+  if (pal[m[1]] != null) return cssVar(pal[m[1]], pal, d + 1);
+  return m[2] != null ? cssVar(m[2].trim(), pal, d + 1) : null;
+}
+/* #rgb / #rrggbb / #rrggbbaa / rgb() / rgba() / hsl() / hsla() / white / black.
+   Anything translucent returns null — it would have to be composited against
+   whatever is behind it, which this check cannot know. */
+function cssRGB(c) {
+  if (c == null) return null;
+  c = String(c).trim().toLowerCase();
+  if (c === 'white') c = '#ffffff';
+  if (c === 'black') c = '#000000';
+  let m = /^#([0-9a-f]{3})$/.exec(c);
+  if (m) return [0, 1, 2].map(i => parseInt(m[1][i] + m[1][i], 16));
+  m = /^#([0-9a-f]{6})$/.exec(c);
+  if (m) return [0, 2, 4].map(i => parseInt(m[1].slice(i, i + 2), 16));
+  m = /^#([0-9a-f]{8})$/.exec(c);
+  if (m) return parseInt(m[1].slice(6, 8), 16) < 254 ? null
+    : [0, 2, 4].map(i => parseInt(m[1].slice(i, i + 2), 16));
+  m = /^rgba?\(([^)]*)\)$/.exec(c);
+  if (m) {
+    const p = m[1].split(/[\s,/]+/).filter(Boolean);
+    if (p.length < 3) return null;
+    if (p.length > 3 && parseFloat(p[3]) < 0.995) return null;
+    const v = p.slice(0, 3).map(t => t.endsWith('%') ? parseFloat(t) * 2.55 : parseFloat(t));
+    return v.some(n => Number.isNaN(n)) ? null : v.map(n => Math.max(0, Math.min(255, Math.round(n))));
+  }
+  m = /^hsla?\(([^)]*)\)$/.exec(c);
+  if (m) {
+    const p = m[1].split(/[\s,/]+/).filter(Boolean);
+    if (p.length < 3) return null;
+    if (p.length > 3 && parseFloat(p[3]) < 0.995) return null;
+    const h = ((parseFloat(p[0]) % 360) + 360) % 360 / 360;
+    const sat = parseFloat(p[1]) / 100, li = parseFloat(p[2]) / 100;
+    if ([h, sat, li].some(n => Number.isNaN(n))) return null;
+    const q = li < 0.5 ? li * (1 + sat) : li + sat - li * sat, pp = 2 * li - q;
+    const ch = t => {
+      t = (t + 1) % 1;
+      if (t < 1 / 6) return pp + (q - pp) * 6 * t;
+      if (t < 1 / 2) return q;
+      if (t < 2 / 3) return pp + (q - pp) * (2 / 3 - t) * 6;
+      return pp;
+    };
+    return [ch(h + 1 / 3), ch(h), ch(h - 1 / 3)].map(n => Math.round(n * 255));
+  }
+  return null;   // transparent, currentColor, gradients, named colours
+}
 function checkContrast() {
   head('1s. Text contrast in both palettes');
-  let css;
-  try { css = readFileSync(join(ROOT, 'styles.css'), 'utf8'); }
-  catch { warn('styles.css unreadable — contrast NOT checked'); warnings++; return; }
-
-  const tokensIn = block => {
-    const out = {};
-    for (const m of block.matchAll(/(--[\w-]+)\s*:\s*([^;]+);/g)) out[m[1]] = m[2].trim();
-    return out;
-  };
-  const light = tokensIn((css.match(/:root\{([\s\S]*?)\}/) || [])[1] || '');
-  const dark = { ...light, ...tokensIn((css.match(/@media\(prefers-color-scheme:dark\)\{\s*:root\{([\s\S]*?)\}/) || [])[1] || '') };
-  if (!Object.keys(light).length || !Object.keys(dark).length) {
-    warn('could not read the :root palettes — contrast NOT checked'); warnings++; return;
-  }
-  const resolve = (v, pal, d = 0) => {
-    if (!v || d > 6) return null;
-    const m = v.trim().match(/^var\((--[\w-]+)(?:\s*,\s*([^)]+))?\)$/);
-    return m ? resolve(pal[m[1]] || m[2], pal, d + 1) : v.trim();
-  };
-  const rgb = c => {
-    if (!c) return null;
-    c = c.trim().toLowerCase();
-    if (c === 'white') c = '#ffffff';
-    if (c === 'black') c = '#000000';
-    let m = c.match(/^#([0-9a-f]{3})$/);
-    if (m) return [0, 1, 2].map(i => parseInt(m[1][i] + m[1][i], 16));
-    m = c.match(/^#([0-9a-f]{6})$/);
-    if (m) return [0, 2, 4].map(i => parseInt(m[1].slice(i, i + 2), 16));
-    return null;   // rgba()/transparent/gradients: not compositable here
-  };
   const lum = c => {
     const [r, g, b] = c.map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   };
   const ratio = (a, b) => { const [hi, lo] = [lum(a), lum(b)].sort((p, q) => q - p); return (hi + 0.05) / (lo + 0.05); };
 
-  let bad = 0, pairs = 0;
-  for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
-    const sel = m[1].trim().replace(/\s+/g, ' ');
-    if (/^@|^:root/.test(sel) || CONTRAST_ALLOW.has(sel)) continue;
-    const fg = (m[2].match(/(?:^|;|\s)color\s*:\s*([^;]+)/) || [])[1];
-    const bg = (m[2].match(/(?:^|;|\s)background(?:-color)?\s*:\s*([^;]+)/) || [])[1];
-    if (!fg || !bg) continue;
-    for (const [mode, pal] of [['light', light], ['dark', dark]]) {
-      const f = rgb(resolve(fg, pal)), b = rgb(resolve(bg.split(/\s+/)[0], pal));
-      if (!f || !b) continue;
-      pairs++;
-      const r = ratio(f, b);
-      if (r < 4.5) {
-        err(`styles.css: ${sel} — ${r.toFixed(2)}:1 in ${mode} mode (${resolve(fg, pal)} on ${resolve(bg.split(/\s+/)[0], pal)}); needs 4.5. If the text is genuinely large, add the selector to CONTRAST_ALLOW.`);
-        problems++; bad++;
+  let bad = 0, pairs = 0, files = 0;
+  const flag = m => { err(m); problems++; bad++; };
+
+  /* cssRuleMap strips comments and keeps the @media context as its own key,
+     so a leading block comment can no longer end up glued to the selector
+     (which used to make CONTRAST_ALLOW unmatchable and print the comment in
+     the error text), and a spaced @media (prefers-color-scheme: dark) reads
+     the same as an unspaced one. */
+  const maps = new Map();
+  for (const [name, kind] of CONTRAST_SOURCES) {
+    let src;
+    try { src = readFileSync(join(ROOT, name), 'utf8'); }
+    catch { warn(`${name} unreadable — contrast NOT checked there`); warnings++; continue; }
+    const css = kind === 'html'
+      ? [...src.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)].map(m => m[1]).join('\n')
+      : src;
+    if (!css.trim()) { flag(`${name}: no CSS found — 1s cannot check this file`); continue; }
+    maps.set(name, cssRuleMap(css));
+  }
+  const paletteOf = name => {
+    const rootByMedia = maps.get(name) && maps.get(name).get(':root');
+    const baseRoot = rootByMedia && rootByMedia.get('');
+    if (!baseRoot || !baseRoot.size) return { err: 'no :root palette found' };
+    const light = Object.fromEntries(baseRoot);
+    const darkKey = [...rootByMedia.keys()].find(isDarkMedia);
+    /* Hard failure, not a skip. The palettes are spread dark = {...light},
+       so "no dark block" could never trip the old guard — reformatting one
+       @media line would have quietly turned 1s into a light-only check. */
+    if (!darkKey) return { err: 'no dark :root block — without one 1s would silently check only the light palette' };
+    return { light, dark: { ...light, ...Object.fromEntries(rootByMedia.get(darkKey)) } };
+  };
+
+  for (const [name, , paletteFrom] of CONTRAST_SOURCES) {
+    const map = maps.get(name);
+    if (!map) continue;
+    const pals = paletteOf(paletteFrom || name);
+    if (pals.err) { flag(`${paletteFrom || name}: ${pals.err}`); continue; }
+    const { light, dark } = pals;
+    files++;
+
+    /* Declarations for one selector in one media context, with any
+       prefers-color-scheme:dark override for the SAME selector folded in when
+       we are judging dark mode. Media-aware both ways: a dark-only rule is
+       judged against the dark palette (journey's .fab-track override was a
+       false positive that way), and a dark override that fixes a base rule is
+       no longer missed (that was a false negative). */
+    const effOf = (key, media, mode) => {
+      const bm = map.get(key);
+      const base = bm && bm.get(media);
+      if (!base) return null;
+      if (mode !== 'dark' || isDarkMedia(media)) return base;
+      const ovs = [...bm].filter(([k]) => isDarkMedia(k));
+      if (!ovs.length) return base;
+      const out = new Map(base);
+      for (const [, d] of ovs) for (const [k, v] of d) out.set(k, v);
+      return out;
+    };
+    const bgOf = d => d ? (d.has('background') ? d.get('background') : d.get('background-color')) : null;
+    /* The surface a descendant sits on. ".pop .hear" sets a colour but no
+       background — the card behind it is painted by ".pop". Scope alone would
+       not have caught the two worst dark-mode bugs of 2026-09-05 (the Mood
+       chart's phone column labels, and the "Hear it" link in all 24 Rhythm
+       popovers): both colour a descendant of the element that paints the
+       surface, so the old same-rule-only pairing never saw either. Walks the
+       selector's own prefixes, nothing else. */
+    const ancestorBg = (sel, media, mode) => {
+      const parts = sel.split(/\s+(?:[>+~]\s+)?/).filter(Boolean);
+      for (let i = parts.length - 1; i >= 1; i--) {
+        const anc = parts.slice(0, i).join(' ');
+        for (const m of [media, '']) {
+          const bg = bgOf(effOf(anc, m, mode));
+          if (bg != null) return bg;
+        }
+      }
+      return null;
+    };
+
+    for (const [sel, byMedia] of map) {
+      if (sel.startsWith(':root')) continue;
+      const why = CONTRAST_ALLOW.get(sel);
+      const need = why ? 3 : 4.5;
+      for (const [media] of byMedia) {
+        if (isPrintMedia(media)) continue;          // print swaps the palette wholesale
+        const modes = isDarkMedia(media) ? ['dark'] : isLightMedia(media) ? ['light'] : ['light', 'dark'];
+        for (const mode of modes) {
+          const pal = mode === 'dark' ? dark : light;
+          const eff = effOf(sel, media, mode);
+          if (!eff) continue;
+          const fgRaw = eff.get('color');
+          const bgRaw = bgOf(eff) ?? ancestorBg(sel, media, mode);
+          if (fgRaw == null || bgRaw == null) continue;
+          const fgV = cssVar(fgRaw, pal);
+          let bgV = null;
+          for (const tok of cssTokens(bgRaw)) {
+            const r = cssVar(tok, pal);
+            if (cssRGB(r)) { bgV = r; break; }
+          }
+          const f = cssRGB(fgV), b = cssRGB(bgV);
+          if (!f || !b) continue;
+          pairs++;
+          const r = ratio(f, b);
+          if (r < need) {
+            flag(`${name}: ${media ? media + ' { ' : ''}${sel} — ${r.toFixed(2)}:1 in ${mode} mode (${fgV} on ${bgV}); needs ${need}${why ? ` (${why})` : ''}. If the text is genuinely large, or the colour is an icon rather than a glyph, add the selector to CONTRAST_ALLOW.`);
+          }
+        }
       }
     }
   }
-  if (!bad) ok(`${pairs} colour pairs checked across both palettes — all ≥ 4.5:1`);
+  if (!bad) ok(`${pairs} colour pairs checked across both palettes in ${files} stylesheets — all ≥ 4.5:1`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -701,8 +862,6 @@ function checkContrast() {
    carry the same selector list would be wrong.
    ════════════════════════════════════════════════════════════════════ */
 const JOURNEY_SHARED_PREFIXES = [/^\.tab(\b|[.:\s>])/, /^\.lq-banner/, /^\.lq-invite/];
-/* The differences that are meant to be there. Both are documented at the
-   rule itself in journey-theme.css; anything else is drift. */
 /* The differences that are meant to be there — per PROPERTY, not per rule.
    Exempting a whole rule (which this did until 2026-09-08) meant every other
    declaration in it could drift unseen: journey's .tab-head padding could
@@ -818,6 +977,76 @@ function checkJourneyThemeDrift() {
   if (!bad) ok(`${shared} shared tab/live-quiz rules identical across both stylesheets (${exempt} documented per-property exceptions)`);
 }
 
+/* Per-page tab-card counts, pinned. See the note where they're compared. */
+const JOURNEY_TAB_COUNTS = {
+  'all-along-the-watchtower.html': 10,
+  'let-it-be.html': 11,
+  'luna.html': 13,
+  'seven-nation-army.html': 9,
+  'sweet-child-o-mine.html': 10,
+  'the-cure.html': 10,
+};
+/* ════════════════════════════════════════════════════════════════════
+   1v. FIGURES RESERVE THEIR SPACE — an <img> with no width/height has no
+   intrinsic size until it loads, so the card it sits in grows the moment
+   it arrives and everything below jumps. The 2026-09-05 CLS pass gave all
+   47 module-data figures a width/height pair and stopped there; the ten
+   img/ca-*.svg class-activity figures are emitted by the RENDERERS, not
+   written in the data, so they kept jumping in both the student card and
+   the teacher console preview.
+
+   Three things, because a size is only right if it matches the art:
+   1. every <img> written into module data or class-activities.js carries
+      width AND height;
+   2. every img/ca-*.svg really is the 640x244 board the renderers assume;
+   3. BOTH renderers emit that pair — caStepHtml() in app.js and
+      renderTeacherActivityDetail() in teacher.js are separate code paths
+      (CLAUDE.md's two-renderer rule), and a fix to one is invisible in
+      the other.
+   ════════════════════════════════════════════════════════════════════ */
+const CA_FIGURE_BOX = [640, 244];
+function checkFigureDimensions() {
+  head('1v. Figures carry their intrinsic size');
+  let bad = 0, imgs = 0;
+  const flag = m => { err(m); problems++; bad++; };
+
+  for (const f of [...MODULE_FILES, 'class-activities.js']) {
+    let src;
+    try { src = maskComments(readFileSync(join(ROOT, f), 'utf8')); } catch { continue; }
+    for (const m of src.matchAll(/<img\b[^>]*>/g)) {
+      imgs++;
+      const miss = [['width', /\bwidth\s*=/], ['height', /\bheight\s*=/]].filter(([, re]) => !re.test(m[0])).map(([a]) => a);
+      if (miss.length)
+        flag(`${f}: <img> with no ${miss.join('/')} — "${m[0].slice(0, 70)}…". Without both, the card resizes when the figure loads and everything under it jumps.`);
+    }
+  }
+
+  const [W, H] = CA_FIGURE_BOX;
+  let cas = 0;
+  try {
+    for (const f of readdirSync(join(ROOT, 'img')).filter(x => /^ca-.*\.svg$/.test(x)).sort()) {
+      cas++;
+      const vb = (readFileSync(join(ROOT, 'img', f), 'utf8').match(/viewBox\s*=\s*"([^"]+)"/) || [])[1] || '';
+      const n = vb.trim().split(/[\s,]+/).map(Number);
+      if (n.length !== 4 || n[2] !== W || n[3] !== H)
+        flag(`img/${f}: viewBox "${vb}" is not the ${W}x${H} board both class-activity renderers hardcode — either redraw it to the board or teach the renderers (and CA_FIGURE_BOX here) about a per-figure size.`);
+    }
+  } catch { flag('img/ is unreadable — class-activity figure sizes NOT checked'); }
+
+  /* The two renderers, by name, so this can say which one drifted. */
+  for (const [f, fn] of [['app.js', 'caStepHtml'], ['teacher.js', 'renderTeacherActivityDetail']]) {
+    let src;
+    try { src = readFileSync(join(ROOT, f), 'utf8'); } catch { flag(`${f} unreadable`); continue; }
+    // the <img> each renderer builds around escAttr(step.figure) / escAttr(s.figure)
+    const emit = src.match(/<img src="\$\{escAttr\((?:step|s)\.figure\)\}"[^>]*>/);
+    if (!emit) { flag(`${f}: no step-figure <img> found — ${fn}() is where class-activity figures are rendered; if it moved, update 1v`); continue; }
+    if (!new RegExp(`width="${W}"`).test(emit[0]) || !new RegExp(`height="${H}"`).test(emit[0]))
+      flag(`${f}: ${fn}() emits a class-activity figure without width="${W}" height="${H}" — the other renderer has it, and CLAUDE.md's two-renderer rule says patch both in the same edit.`);
+  }
+
+  if (bad === 0) ok(`${imgs} figures in module data carry width+height; ${cas} class-activity figures match the ${W}x${H} board in both renderers`);
+}
+
 function checkJourneyTabCards() {
   head('1q. Journey-page tab cards');
   let bad = 0;
@@ -832,8 +1061,12 @@ function checkJourneyTabCards() {
     const src = readFileSync(join(ROOT, 'tabs', f), 'utf8');
     for (const _ of src.matchAll(/<pre class="tab"/g))
       flag(`tabs/${f}: a bare <pre class="tab"> — Journey tabs use the app's card markup (see the 2026-09-04 conversion), not a raw dark panel`);
-    for (const m of src.matchAll(/<div class="tab">([\s\S]*?)<\/pre><\/div>/g)) {
-      cards++;
+    /* [^>]* — the opening tag was matched exactly, so a card that grew any
+       extra attribute (an id, a data-*) became invisible to every check
+       below AND to the total, which would just quietly read 62. */
+    let pageCards = 0;
+    for (const m of src.matchAll(/<div class="tab"[^>]*>([\s\S]*?)<\/pre><\/div>/g)) {
+      cards++; pageCards++;
       for (const part of ['tab-head', 'tab-title', 'tab-body', 'tab-ascii']) {
         if (!m[1].includes(`class="${part}"`) && !m[1].includes(` ${part}"`))
           flag(`tabs/${f}: a tab card is missing its .${part} — the card needs head + title + body + board to match the app`);
@@ -841,6 +1074,15 @@ function checkJourneyTabCards() {
       if (!/<span class="tab-title" data-es="/.test(m[1]))
         flag(`tabs/${f}: a tab card's title has no data-es — its heading would stay in English in Spanish mode`);
     }
+    /* Pinned counts. Without them a card could vanish — deleted, or just
+       stopped matching — and 1q would still say "all good", only with a
+       smaller number nobody reads. Editing a page's tabs means editing this
+       number in the same commit, on purpose. */
+    const want = JOURNEY_TAB_COUNTS[f];
+    if (want === undefined)
+      flag(`tabs/${f}: no pinned tab-card count — add one to JOURNEY_TAB_COUNTS so a card can't disappear silently`);
+    else if (want !== pageCards)
+      flag(`tabs/${f}: ${pageCards} tab cards, expected ${want} — if that change is deliberate, update JOURNEY_TAB_COUNTS in checks.mjs in the same commit`);
   }
 
   // The CSS the cards depend on has to exist, or every one of them renders bare.
@@ -1802,13 +2044,21 @@ function fingerprint(files) {
    two silent ways — a new shell file that never gets precached (breaks
    offline), or a stale entry for a deleted file (cache.addAll rejects and
    the whole SW install fails). Parse ASSETS out of sw.js and check both. */
+/* One regex for both lists. ASSETS used [^']+ and PRECACHE_CRITICAL [^']*,
+   so './' — the site root, and the first entry in both — was captured on the
+   critical side and then special-cased away, and never captured on the ASSETS
+   side at all. The one entry the install depends on most was the one entry
+   the cross-check couldn't see. */
+const SW_ENTRY_RE = /'\.\/([^']*)'/g;
+const swEntries = block => [...block.matchAll(SW_ENTRY_RE)].map(x => x[1]);
 function checkSwAssets(src) {
   const m = src.match(/const ASSETS = \[([\s\S]*?)\];/);
   if (!m) { err('could not find ASSETS in sw.js'); problems++; return; }
-  const assets = [...m[1].matchAll(/'\.\/([^']+)'/g)].map(x => x[1]);
+  const assets = swEntries(m[1]);
   let bad = 0;
   for (const a of assets) {
-    try { readFileSync(join(ROOT, a)); }
+    // './' is the site root: GitHub Pages serves index.html for it.
+    try { readFileSync(join(ROOT, a === '' ? 'index.html' : a)); }
     catch { err(`sw.js ASSETS lists './${a}' but the file doesn't exist — SW install would fail`); problems++; bad++; }
   }
   // Every fingerprinted shell file belongs in the precache (icons/manifest
@@ -1821,15 +2071,19 @@ function checkSwAssets(src) {
      ASSETS would be fetched by the install but skipped by every check above,
      including the ASSETS→disk one — so a typo there could hard-fail the
      install for the whole class with nothing to show for it. */
+  /* Its own counter. Sharing `bad` meant an unrelated failure above silently
+     suppressed a true "criticals fine" line, so a green run and a run whose
+     criticals were never confirmed looked the same. */
+  let critBad = 0;
   const cm = src.match(/const PRECACHE_CRITICAL = \[([\s\S]*?)\];/);
-  if (!cm) { err('could not find PRECACHE_CRITICAL in sw.js'); problems++; bad++; }
+  if (!cm) { err('could not find PRECACHE_CRITICAL in sw.js'); problems++; critBad++; }
   else {
-    const critical = [...cm[1].matchAll(/'\.\/([^']*)'/g)].map(x => x[1]);
+    const critical = swEntries(cm[1]);
     for (const c of critical) {
-      if (!assets.includes(c) && c !== '')
-        { err(`sw.js PRECACHE_CRITICAL lists './${c}' but ASSETS doesn't — the install would fetch a file nothing else checks`); problems++; bad++; }
+      if (!assets.includes(c))
+        { err(`sw.js PRECACHE_CRITICAL lists './${c}' but ASSETS doesn't — the install would fetch a file nothing else checks`); problems++; critBad++; }
     }
-    if (bad === 0) ok(`${critical.length} critical precache entries all present in ASSETS`);
+    if (critBad === 0) ok(`${critical.length} critical precache entries all present in ASSETS`);
   }
   if (bad === 0) ok(`sw.js ASSETS ↔ shell files in sync (${assets.length} assets)`);
 }
@@ -1854,22 +2108,40 @@ function checkPrecacheCoverage(src) {
   const assets = new Set([...m[1].matchAll(/'\.\/([^']+)'/g)].map(x => x[1]));
 
   const refs = new Map();             // referenced path -> first file referencing it
-  const re = /(?:^|['"(\s])(?:\.\/)?(img\/[A-Za-z0-9._-]+\.(?:svg|jpg|jpeg|png|gif|webp)|[A-Za-z0-9._-]+\.html)/g;
-  for (const file of ['index.html', 'app.js', 'class-activities.js', ...MODULE_FILES]) {
+  /* The trailing lookahead matters: without it `label.htmlFor='…'` in
+     teacher.js reads as a reference to a file called label.html. */
+  const re = /(?:^|['"(\s])(?:\.\/)?(img\/[A-Za-z0-9._-]+\.(?:svg|jpg|jpeg|png|gif|webp)|[A-Za-z0-9._-]+\.html)(?![A-Za-z0-9._-])/g;
+  for (const file of ['index.html', 'app.js', 'teacher.js', 'class-activities.js', ...MODULE_FILES]) {
     let text;
     try { text = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    /* Comments masked first. class-activities.js documents its own schema in
+       a 176-line header comment whose example figure path is deliberately
+       fictional — reading it as a real reference would fail every push. */
+    text = file.endsWith('.html')
+      ? text.replace(/<!--[\s\S]*?-->/g, '')
+      : maskComments(text);
     for (const r of text.matchAll(re)) if (!refs.has(r[1])) refs.set(r[1], file);
   }
 
-  let bad = 0;
+  let bad = 0, missing = 0;
   for (const [p, from] of refs) {
-    try { readFileSync(join(ROOT, p)); } catch { continue; }   // not on disk — another check's job
+    /* Does it exist at all? Nothing asked this before 2026-09-08: this walk
+       skipped anything not on disk as "another check's job", and there was no
+       other check — so a figure path with a typo would have shipped as a
+       broken image in a student's card with every check green. */
+    try { readFileSync(join(ROOT, p)); }
+    catch {
+      err(`${from} references './${p}' but no such file exists — it would ship as a broken image`);
+      problems++; bad++; missing++;
+      continue;
+    }
     if (!assets.has(p)) {
       err(`${from} references './${p}' but sw.js ASSETS doesn't precache it — a student who goes offline before opening it gets nothing`);
       problems++; bad++;
     }
   }
-  if (bad === 0) ok(`every referenced img/ file and standalone page is precached (${refs.size} checked)`);
+  if (bad === 0) ok(`every referenced img/ file and standalone page exists and is precached (${refs.size} checked)`);
+  else if (!missing) ok(`all ${refs.size} referenced files exist on disk`);
 }
 
 /* Journey pages are referenced by ~30 hand-typed 'tabs/*.html' strings across
@@ -2009,6 +2281,7 @@ function bumpServiceWorker() {
 function syntaxCheck() {
   head('0. JS syntax (node --check)');
   const files = [...SHELL_FILES.filter(f => f.endsWith('.js')), 'sw.js'];
+  const inline = inlineScripts();
   let bad = 0;
   for (const f of files) {
     const r = spawnSync(process.execPath, ['--check', join(ROOT, f)], { encoding: 'utf8' });
@@ -2018,34 +2291,139 @@ function syntaxCheck() {
       bad++; problems++;
     }
   }
-  if (!bad) ok(`${files.length} shipped .js files parse clean`);
-  checkNoLookbehind(files);
+  /* The inline <script> blocks in the shipped HTML were checked by nothing at
+     all until 2026-09-08 — not node --check, not the lookbehind scan below —
+     even though a shared Journey link is exactly where an older iPhone lands,
+     and those eight pages carry their whole boot in an inline block. */
+  let tmp = null;
+  try {
+    tmp = mkdtempSync(join(tmpdir(), 'gc-inline-'));
+    for (const b of inline) {
+      const f = join(tmp, `s${b.n}.${b.module ? 'mjs' : 'js'}`);
+      writeFileSync(f, b.code);
+      const r = spawnSync(process.execPath, ['--check', f], { encoding: 'utf8' });
+      if (r.status !== 0) {
+        err(`syntax error: ${b.file} — inline <script> starting at line ${b.line}`);
+        console.log(`${C.dim}${(r.stderr || '').trim().split('\n').slice(0, 4).join('\n')}${C.reset}`);
+        bad++; problems++;
+      }
+    }
+  } catch (e) {
+    warn(`could not syntax-check inline <script> blocks (${e.message})`); warnings++;
+  } finally {
+    if (tmp) { try { rmSync(tmp, { recursive: true, force: true }); } catch {} }
+  }
+  if (!bad) ok(`${files.length} shipped .js files + ${inline.length} inline <script> blocks parse clean`);
+  checkNoLookbehind(files, inline);
 }
 
-/* Regex lookbehind — `(?<=` / `(?<!` — is a SyntaxError in Safari before
-   16.4 (iOS 16.3 and earlier). node --check above happily accepts it, and so
-   does every Chromebook, so a lookbehind can ship looking fine and then take
-   the entire file down on an older iPhone: not one broken feature, but a file
-   that never parses, so nothing in it runs — including the global error
-   banner meant to explain the failure. app.js carried two until 2026-09-05
-   (a note-sequence matcher and the hint bullet splitter); both were rewritten
-   with a captured boundary character, the idiom CHORD_RE already used.
-   LookAHEAD (`(?=`, `(?!`) is fine everywhere and is used all over — only the
-   `<` forms are caught here. */
-function checkNoLookbehind(files) {
-  let bad = 0;
-  for (const f of files) {
-    let lines;
-    try { lines = readFileSync(join(ROOT, f), 'utf8').split('\n'); } catch { continue; }
-    lines.forEach((line, li) => {
-      if (/^\s*(\/\/|\*|\/\*)/.test(line)) return;   // a comment may name the syntax
-      for (const m of line.matchAll(/\(\?<[=!]/g)) {
-        err(`${f}:${li + 1}: regex lookbehind "${m[0]}" — a SyntaxError in Safari < 16.4, which stops this whole file from parsing. Capture the preceding character instead (see CHORD_RE / NOTE_SEQ_RE in app.js).`);
-        problems++; bad++;
-      }
-    });
+/* Every inline <script> in the shipped HTML, with the line it starts on so a
+   failure can be reported against the real file. Skips src= (that's a shipped
+   .js, already covered) and non-JS types like application/json. */
+function inlineScripts() {
+  const out = [];
+  let n = 0;
+  for (const f of SHELL_FILES.filter(x => x.endsWith('.html'))) {
+    let src;
+    try { src = readFileSync(join(ROOT, f), 'utf8'); } catch { continue; }
+    for (const m of src.matchAll(/<script([^>]*)>([\s\S]*?)<\/script\s*>/gi)) {
+      const attrs = m[1] || '';
+      if (/\bsrc\s*=/i.test(attrs)) continue;
+      const type = (attrs.match(/\btype\s*=\s*["']?([^"'\s>]+)/i) || [])[1];
+      if (type && !/^(module|text\/javascript|application\/javascript)$/i.test(type)) continue;
+      if (!m[2].trim()) continue;
+      out.push({
+        file: f, n: n++, code: m[2], module: /^module$/i.test(type || ''),
+        line: src.slice(0, m.index + m[0].indexOf('>') + 1).split('\n').length,
+        offset: m.index + m[0].indexOf('>') + 1,
+      });
+    }
   }
-  if (!bad) ok('no regex lookbehind in shipped .js (Safari < 16.4 can\'t parse it)');
+  return out;
+}
+
+/* Blank out comments, preserving length and newlines so offsets stay exact.
+   Deliberately biased toward NOT stripping: if the scanner can't tell a regex
+   literal from division it leaves the text alone, because a wrong strip could
+   HIDE a lookbehind, while a missed strip only risks a false positive that a
+   human will read in two seconds. */
+function maskComments(src) {
+  const out = src.split('');
+  const blank = (a, b) => { for (let k = a; k < b && k < out.length; k++) if (out[k] !== '\n') out[k] = ' '; };
+  /* Stack of {t:'tmpl'} for a template literal and {t:'sub',depth} for the
+     code inside its ${…}. A template can hold code that holds another
+     template — app.js:2922 nests one two deep — so treating ` as a plain
+     quote and scanning to the next ` closed the OUTER literal on the INNER
+     one's opening backtick and put everything after it out of phase. */
+  const stack = [];
+  let i = 0, prev = '';
+  const top = () => stack[stack.length - 1];
+  const isRegexPos = () => !prev || /[({[,;:!&|?+\-*/%~^=<>]$|\b(return|typeof|instanceof|in|of|new|delete|void|case|do|else|yield|await)$/.test(prev);
+  while (i < src.length) {
+    const c = src[i];
+    if (top() && top().t === 'tmpl') {              // inside `…`, not code
+      if (c === '\\') { i += 2; continue; }
+      if (c === '`') { stack.pop(); prev = 'x'; i++; continue; }
+      if (c === '$' && src[i + 1] === '{') { stack.push({ t: 'sub', depth: 0 }); prev = '{'; i += 2; continue; }
+      i++; continue;
+    }
+    if (c === '/' && src[i + 1] === '/') { const e = src.indexOf('\n', i); const z = e < 0 ? src.length : e; blank(i, z); i = z; continue; }
+    if (c === '/' && src[i + 1] === '*') { const e = src.indexOf('*/', i + 2); const z = e < 0 ? src.length : e + 2; blank(i, z); i = z; continue; }
+    if (c === '"' || c === "'") {
+      const q = c; i++;
+      while (i < src.length) { if (src[i] === '\\') { i += 2; continue; } if (src[i] === q || src[i] === '\n') { i++; break; } i++; }
+      prev = 'x'; continue;
+    }
+    if (c === '`') { stack.push({ t: 'tmpl' }); i++; continue; }
+    if (c === '{' && top() && top().t === 'sub') { top().depth++; prev = '{'; i++; continue; }
+    if (c === '}' && top() && top().t === 'sub') {
+      if (top().depth === 0) stack.pop(); else top().depth--;
+      prev = '}'; i++; continue;
+    }
+    /* Deliberately biased toward NOT stripping: if this can't tell a regex
+       literal from division it leaves the text alone, because a wrong strip
+       could HIDE a lookbehind, while a missed strip only risks a false
+       positive a human reads in two seconds. */
+    if (c === '/' && isRegexPos()) {
+      let j = i + 1, cls = false, closed = false;
+      while (j < src.length) {
+        const d = src[j];
+        if (d === '\\') { j += 2; continue; }
+        if (d === '\n') break;                      // unterminated: not a regex
+        if (cls) { if (d === ']') cls = false; }
+        else if (d === '[') cls = true;
+        else if (d === '/') { closed = true; j++; break; }
+        j++;
+      }
+      if (closed) { i = j; prev = 'x'; continue; }
+    }
+    if (!/\s/.test(c)) prev = (prev + c).slice(-12);
+    i++;
+  }
+  return out.join('');
+}
+function checkNoLookbehind(files, inline = []) {
+  let bad = 0;
+  const flag = (where, tok) => {
+    err(`${where}: regex lookbehind "${tok}" — a SyntaxError in Safari < 16.4, which stops this whole file from parsing. Capture the preceding character instead (see CHORD_RE / NOTE_SEQ_RE in app.js).`);
+    problems++; bad++;
+  };
+  /* Comments are masked by a real scanner, not by line shape. The old
+     /^\s*(\/\/|\*|\/\*)/ test both over- and under-matched: a trailing
+     `// (?<=` on a line of code false-positived, and a lookbehind on a
+     block-comment line that didn't start with * did too. */
+  const scan = (text, where, lineBase = 1) => {
+    const masked = maskComments(text);
+    for (const m of masked.matchAll(/\(\?<[=!]/g))
+      flag(`${where}:${lineBase - 1 + masked.slice(0, m.index).split('\n').length}`, m[0]);
+  };
+  for (const f of files) {
+    let src;
+    try { src = readFileSync(join(ROOT, f), 'utf8'); } catch { continue; }
+    scan(src, f);
+  }
+  for (const b of inline) scan(b.code, `${b.file} (inline <script>)`, b.line);
+  if (!bad) ok(`no regex lookbehind in shipped .js or inline <script> (Safari < 16.4 can't parse it)`);
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -2064,10 +2442,13 @@ function checkNoLookbehind(files) {
    node_modules) — the stub only needs to be good enough for app.js to
    reach its string-building code, which is where content bugs live.
 
-   If app.js grows a load-time dependency the stub doesn't cover, this
-   reports "harness could not load" as a WARNING rather than failing the
-   push — a stale harness must never block a good push. A set that throws
-   or renders suspiciously short IS a hard failure.
+   Every way this check can end up testing NOTHING is a hard failure, not a
+   warning: the harness failing to load (app.js grew a load-time dependency
+   the stub doesn't cover), and the harness loading but finding no SETS or no
+   buildSet() (something was renamed). Both were silent once, and the point of
+   0b is to break silence. A stale stub blocking a good push is the cheaper
+   mistake — extend the stub. A set that throws or renders suspiciously short
+   is a hard failure too.
    ════════════════════════════════════════════════════════════════════ */
 function renderCheck() {
   head('0b. Render smoke test (build every set)');
@@ -2133,15 +2514,17 @@ function renderCheck() {
     err(`render harness could not load (${e.message}) — renderer NOT smoke-tested`);
     problems++;
     console.log(`${C.dim}  app.js probably gained a load-time browser dependency: add it to the stub in renderCheck()${C.reset}`);
-    warnings++;
     return;
   }
 
   const sets = vm.runInContext('typeof SETS !== "undefined" ? SETS : []', ctx) || [];
   const buildSet = vm.runInContext('typeof buildSet === "function" ? buildSet : null', ctx);
   if (!sets.length || !buildSet) {
-    warn('render harness loaded but found no SETS/buildSet — renderer NOT smoke-tested');
-    warnings++;
+    /* Also a hard failure, for the same reason as the load path above:
+       renaming buildSet (or SETS) left the push green with the renderer
+       never smoke-tested. Both silences now fail. */
+    err(`render harness loaded but found ${sets.length ? '' : 'no SETS'}${!sets.length && !buildSet ? ' and ' : ''}${buildSet ? '' : 'no buildSet()'} — renderer NOT smoke-tested`);
+    problems++;
     return;
   }
 
@@ -2221,6 +2604,7 @@ async function liveCheck() {
   checkContrast();
   checkJourneyThemeDrift();
   checkJourneyTabCards();
+  checkFigureDimensions();
   if (!SKIP_LINKS) await checkLinks();
   else warn('skipping link check (--skip-links)');
   bumpServiceWorker();

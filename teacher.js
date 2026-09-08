@@ -837,7 +837,9 @@ function renderTeacherActivityDetail(id){
   const num=teacherActivityNumbers(teacherClassConfig)[a.id];
   const stepsHtml=(a.steps||[]).map((s,si)=>{
     const media=[];
-    if(s.figure) media.push(`<span class="step-figure"><img src="${escAttr(s.figure)}" alt=""></span>`);
+    /* width/height: see caStepHtml() in app.js — same 640x244 board, and
+       checks.mjs (1v) fails the push if the two renderers disagree. */
+    if(s.figure) media.push(`<span class="step-figure"><img src="${escAttr(s.figure)}" alt="" width="640" height="244"></span>`);
     if(s.video && s.video.id){
       const url=`https://www.youtube.com/watch?v=${encodeURIComponent(s.video.id)}${s.video.start?`&start=${Number(s.video.start)}`:''}`;
       const vLabel=s.video.label?escHtml(s.video.label):'Watch video';

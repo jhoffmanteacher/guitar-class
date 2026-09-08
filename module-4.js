@@ -823,7 +823,7 @@ SETS.push(
         gotItWhen_es: 'al escuchar la grabación puedes oír la pregunta (llamada) y la respuesta — la llamada se siente sin resolver, la respuesta se siente como si llegara.',
         practice: { type: 'mc', prompt: 'In a call-and-response phrase, where should the RESPONSE end?',
           prompt_es: 'En una frase de llamada y respuesta, ¿dónde debe terminar la RESPUESTA?',
-          choices: ['On any note that feels right', 'On the root of the key', 'On a note that is not the root', 'On the highest note of the scale'], choices_es: ['En cualquier nota que se sienta bien', 'En la raíz de la tonalidad', 'En una nota que no sea la raíz', 'En la nota más aguda de la escala'], answer: 1,
+          choices: ['On any note that feels right', 'On the root note of the key', 'On a note that is not the root', 'On the highest note of the scale'], choices_es: ['En cualquier nota que suene bien', 'En la nota raíz de la tonalidad', 'En una nota que no sea la raíz', 'En la nota más aguda de la escala'], answer: 1,
           explain: 'Landing on the root is what makes the response feel like an answer — the root is the note the ear hears as home. The call deliberately ends somewhere else, which is what keeps it sounding like a question.',
           explain_es: 'Aterrizar en la raíz es lo que hace que la respuesta se sienta como una respuesta — la raíz es la nota que el oído escucha como nota base. La llamada termina a propósito en otro lugar, y eso es lo que la mantiene sonando como una pregunta.' } },
       { id: 'm4w2-s7', text: 'Name all natural notes on the D string (frets 0–10) and G string (frets 0–10)',

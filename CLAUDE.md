@@ -139,8 +139,18 @@ class** must add a permanent detector for that class to `checks.mjs` in the same
 session. Never leave a detector script in a session scratchpad — the 2026-07-31
 MC-tell audit died that way and the class recurred in the next sweep. Ratchets
 so far: MC answer-length tells (1h), watch-range labels ↔ `t=` params (1i),
-activity title series numbering (1l), Journey tab-card markup (1q), video-title
-drift (inside the link check).
+activity title series numbering (1l), Journey tab-card markup (1q), text
+contrast in both palettes across all four stylesheets (1s), Journey↔app CSS
+drift (1t), figure intrinsic sizes and the two class-activity renderers (1v),
+video-title drift (inside the link check).
+
+**A ratchet that can't fail is not a ratchet.** Every detector added or changed
+gets proved by *breaking the guarded thing* in a scratch copy and watching the
+check go red, then restoring. The 2026-09-07 review found five that were green
+because they could not see what they guarded — a selector written twice, an
+`@media` prefix, an inline `<script>`, an exact-match opening tag, a count that
+was printed but never pinned. Where a total is meaningful, **pin it** (63
+Journey tab cards, 27 tuning warm-ups) so it cannot drop silently.
 
 ### ⚠️ A number in an activity title is a SERIES number, not `number`
 `number` in `class-activities.js` drives the "#N - " prefix students see. A
@@ -243,11 +253,13 @@ checks.mjs 1q fails the push on a bare `<pre class="tab">`, on a card missing
 one of its four parts, and on a `.tab-title` with no `data-es`.
 
 The `.tab` CSS in `tabs/journey-theme.css` is a hand-kept copy of the `.tab`
-rules in `styles.css` — same mirroring as the live-quiz banner, and nothing
-can check that the two still look alike. **Restyle both or neither.** The one
-deliberate difference is `--tab-head-bg`: Journey's `--brand` doubles as the
-link colour and goes light in dark mode, so the header carries its own token
-that tracks `styles.css`'s `--brand` instead.
+rules in `styles.css` — same mirroring as the live-quiz banner. **Restyle both
+or neither.** checks.mjs 1t compares them PROPERTY by property, inside each
+`@media` context, and fails the push on a one-sided rule too; the two
+deliberate differences are one property each (`margin` on `.tab`,
+`background` on `.tab-head`, whose Journey value is `--tab-head-bg` because
+Journey's `--brand` doubles as the link colour and goes light in dark mode).
+Adding a third means adding it to `JOURNEY_ALLOWED_DIFFS` on purpose.
 
 ### ⚠️ There are TWO step renderers — patch both, or the teacher can't see it
 A class-activity step is rendered twice by different code: `caStepHtml()` in
@@ -270,6 +282,10 @@ best-score write (`sdSaveBest`/`dkSaveBest` bail on `IS_TEACHER_MODE`, so
 previewing isn't practising). Keep new exceptions to that shape, and comment
 them.
 
+checks.mjs 1v now enforces this for the one field it can see mechanically —
+the class-activity figure's `width`/`height` — and fails the push if only one
+renderer has them. Everything else is still grep-both-by-hand.
+
 **Strings are named, never numbered, in student-facing text** (Jonathan,
 2026-08-06): low E · A · D · G · B · high e; ES uses solfège (cuerda Mi grave …
 cuerda mi aguda). Chord-chart shorthand like `xx4432` is notation and stays.
@@ -286,11 +302,21 @@ scissors, index cards or a pen. Three `step.drill` types share one dispatcher:
 partner line from any card that gets a deck; no paper-fallback line.
 
 **Quiz answers are shuffled at render time** by `mcOrder(choices, seed)` —
-deterministic (seeded on the English prompt, so order is stable across
-re-renders, languages and students), catch-alls pinned via `MC_PINNED`, fewer
-than 3 choices left alone. The two MC paths store differently: the graded step
-persists the choice **text**, the practice panel persists the **index**. Don't
-"simplify" that away. Write `answer: 0` freely — students never see it that way.
+deterministic, catch-alls pinned via `MC_PINNED`, fewer than 3 choices left
+alone. The two MC paths store differently: the graded step persists the choice
+**text**, the practice panel persists the **index**. Don't "simplify" that
+away. Write `answer: 0` freely — students never see it that way.
+
+- **The seed is the prompt PLUS the joined choices** (`mcSeed`), so order is
+  stable across re-renders, languages and students, but **rewording any choice
+  re-rolls the display order**. Never name an option by its position in an
+  `explain` ("the last option") — name it by content. m11w2-s3 was right only
+  by luck after a 2026-09-05 reword.
+- **Rewording a GRADED MC's choices after students reach it orphans their
+  stored picks** — the graded path persists the choice text, so an old string
+  renders as "answered, nothing selected". Reword before they get there, or
+  map old→new in the renderer. The 2026-09-05 m8w1 reword was safe only
+  because the live roster's furthest student was in Module 1.
 
 ## Live quiz — the whole-class game
 

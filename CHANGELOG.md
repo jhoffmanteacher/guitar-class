@@ -5,6 +5,34 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-09 — Clearer quiz wording, and diagrams that don't make the page jump
+
+### Fixed
+
+- **Diagrams in an in-class activity made the card jump.** The picture had no
+  reserved space, so everything under it shifted down the moment it finished
+  loading. It now holds its place from the start — in the activity you see and
+  in the teacher's preview.
+- **Two quiz questions gave the answer away by being shortest.** In "where
+  should the response end?" (Module 4) and the melody-and-bass question
+  (Module 12), the right answer stood out by length before you read a word of
+  it. The wording is evened out; the answers haven't changed.
+- **"What comes after G?" now explains why C is wrong** — the alphabet you
+  already know starts over at C, the musical one starts over at A. Both
+  languages.
+- **A Module 11 explanation pointed at "the last option"**, which isn't stable:
+  answer order is shuffled. It now names the option by what it says.
+- **Six wording fixes on the Mood chart in Spanish**, including an English word
+  left in a definition, "palm-muted" now matching the term used everywhere else
+  on the site, the reggae off-beat description getting its upstroke and its
+  count back, and two different English words no longer collapsing to the same
+  Spanish one in the Peaceful row.
+- **Drawings in dark mode.** The line drawings — the posture check, the eight
+  string-changing steps, and every diagram — now read as light lines on the
+  dark page instead of sitting in a bright white box. The pencil sketches and
+  the one photograph are dimmed instead, since inverting a drawn hand looks
+  wrong.
+
 ## 2026-09-09 — Dark mode fixes on the Mood chart and the Song Journey pages
 
 ### Fixed

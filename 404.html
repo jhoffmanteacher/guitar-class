@@ -22,21 +22,31 @@
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#514a7d">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#494370">
-<link rel="icon" type="image/png" href="icon-192.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png" id="nf-icon">
+<link rel="apple-touch-icon" href="apple-touch-icon.png" id="nf-apple">
+<link rel="manifest" href="manifest.json" id="nf-manifest">
 <meta name="description" content="That page isn't here — but your guitar class is.">
 <link rel="stylesheet" href="styles.css" id="nf-css">
 <script>
 /* GitHub Pages serves this page AT the missing URL, so the document base is
    whatever broken path was requested — a nested miss like /guitar-class/tabs/x
-   would resolve the relative styles.css / index.html links against /tabs/.
+   would resolve the relative styles.css / icon / manifest / index.html
+   links against /tabs/.
    Compute the site root instead: on *.github.io the site lives one segment
    deep (/guitar-class/); on Live Server it's just /. The relative attributes
    above and below stay as the no-JS fallback (correct for top-level misses).
    No hardcoded repo name — the first path segment IS the repo on Pages. */
 (function(){
   var root = location.pathname.split('/').slice(0, location.hostname.endsWith('github.io') ? 2 : 1).join('/') + '/';
-  document.getElementById('nf-css').href = root + 'styles.css';
+  /* Every document-relative href in the head needs this, not just the
+     stylesheet: from a nested miss like /guitar-class/tabs/typo.html the icon
+     and manifest links resolve against /tabs/ and 404 as well. */
+  [['nf-css', 'styles.css'], ['nf-icon', 'icon-192.png'],
+   ['nf-apple', 'apple-touch-icon.png'], ['nf-manifest', 'manifest.json']]
+    .forEach(function(pair){
+      var el = document.getElementById(pair[0]);
+      if (el) el.href = root + pair[1];
+    });
   document.addEventListener('DOMContentLoaded', function(){
     document.getElementById('nf-home').href = root + 'index.html';
   });
