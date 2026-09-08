@@ -5,6 +5,18 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-08 — The Games button works again
+
+### Fixed
+
+- **Clicking Games showed "Something went wrong" instead of the arcade.** The
+  first click put up the error banner, and every click after that did
+  nothing until the page was reloaded. The site had recently started loading
+  the games code only when it was needed, and the Games button was still
+  reaching for it before it had arrived. The button now fetches the arcade
+  first and then opens it. Nothing about your progress or scores was
+  affected.
+
 ## 2026-09-05 — The Mood chart speaks Spanish, and diagrams suit dark mode
 
 ### Added

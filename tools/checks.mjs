@@ -1544,6 +1544,69 @@ function checkDuplicateGlobals() {
   if (bad === 0) ok('no unexpected duplicate top-level function names across shipped classic scripts');
 }
 
+/* coach.js and teacher.js are loaded on first use (ensureCoachJs /
+   ensureTeacherJs in app.js), so a function that lives only in one of them
+   does not exist yet when the page first paints. An inline on*= handler in
+   index.html that calls one throws a ReferenceError on the first click — the
+   global safety net shows "Something went wrong", and every click after that
+   fails silently. The Games button shipped exactly that way on 2026-09-08
+   (toggleGames lived in coach.js). Handlers INSIDE the region a lazy script
+   owns are fine: the games screen and the teacher console can only be on
+   screen once their script has loaded. */
+const LAZY_SCRIPTS = { 'coach.js': ['games-screen'], 'teacher.js': ['teacher-app', 'teacher-denied'] };
+
+// [start, end) of the element whose opening tag contains `attrIndex`, by
+// counting same-name open/close tags from there. Only the region roots
+// (plain <div>s) are looked up this way, so no void/self-closing handling.
+function elementRange(html, attrIndex) {
+  const open = html.lastIndexOf('<', attrIndex);
+  const tag = /^<([a-zA-Z0-9-]+)/.exec(html.slice(open))[1];
+  const re = new RegExp(`<(/?)${tag}\\b`, 'g');
+  re.lastIndex = open;
+  let depth = 0, m;
+  while ((m = re.exec(html))) {
+    depth += m[1] ? -1 : 1;
+    if (depth === 0) return [open, html.indexOf('>', m.index) + 1];
+  }
+  return [open, html.length];
+}
+
+function checkLazyHandlers() {
+  head('1u. Inline handlers in index.html reach only into eagerly-loaded scripts');
+  const html = readFileSync(join(ROOT, 'index.html'), 'utf8');
+  const eager = new Set();
+  for (const file of [...CLASSIC_SCRIPTS, 'i18n.js', 'firebase-config.js']) {
+    if (LAZY_SCRIPTS[file]) continue;
+    let src;
+    try { src = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    for (const d of topLevelFunctionDecls(src)) eager.add(d.name);
+  }
+  const lazyOnly = new Map();   // name → script file
+  const safeRanges = [];        // [start, end, file]
+  for (const [file, rootIds] of Object.entries(LAZY_SCRIPTS)) {
+    for (const d of topLevelFunctionDecls(readFileSync(join(ROOT, file), 'utf8'))) {
+      if (!eager.has(d.name)) lazyOnly.set(d.name, file);
+    }
+    for (const id of rootIds) {
+      const i = html.indexOf(`id="${id}"`);
+      if (i < 0) { err(`index.html has no #${id} — the ${file} region 1u expects is gone; update LAZY_SCRIPTS`); problems++; continue; }
+      safeRanges.push([...elementRange(html, i), file]);
+    }
+  }
+  let bad = 0;
+  for (const m of html.matchAll(/\son[a-z]+="([^"]*)"/g)) {
+    for (const call of m[1].matchAll(/([A-Za-z_$][A-Za-z0-9_$]*)\s*\(/g)) {
+      const file = lazyOnly.get(call[1]);
+      if (!file) continue;
+      if (safeRanges.some(([a, b, f]) => f === file && m.index >= a && m.index < b)) continue;
+      const line = html.slice(0, m.index).split('\n').length;
+      err(`index.html:${line} handler calls ${call[1]}(), which exists only in lazily-loaded ${file} — define an app.js entry point that loads it first (see coachOpenLazy / toggleGames)`);
+      problems++; bad++;
+    }
+  }
+  if (bad === 0) ok('every inline handler resolves before coach.js / teacher.js have loaded');
+}
+
 /* ════════════════════════════════════════════════════════════════════
    2. LINKS — verify external YouTube / Google-Docs URLs still resolve
    ════════════════════════════════════════════════════════════════════ */
@@ -2085,6 +2148,7 @@ async function liveCheck() {
   const i18nTable = checkI18nParity();
   checkMissingI18nKeys(i18nTable);
   checkDuplicateGlobals();
+  checkLazyHandlers();
   checkWatchRanges();
   checkNumberedStrings();
   checkBlockedTabSites();

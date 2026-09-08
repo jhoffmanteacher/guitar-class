@@ -1720,12 +1720,8 @@ function fretRender(){
    One of the four EXPLORE_PAGES in app.js, and the only one flagged
    `overlay: true` — it covers the rail and header rather than loading into
    the main column. See that table for why. */
-function toggleGames(){
-  const screen = document.getElementById('games-screen');
-  if (!screen) return;
-  if (screen.hasAttribute('hidden')) goExploreHash('games');
-  else closeGamesScreen();
-}
+/* toggleGames() — the header button's handler — is defined in app.js, next
+   to coachOpenLazy: the button is on the page before this file has loaded. */
 function openGamesScreen(){
   const screen = document.getElementById('games-screen');
   if (!screen || !screen.hasAttribute('hidden')) return;

@@ -210,6 +210,22 @@ function coachOpenLazy(btn){
     .then(() => coachOpen(btn))
     .catch(() => { if(typeof gateToast === 'function') gateToast(t('coach.loadFailed')); });
 }
+/* The header's Games button. It lives HERE, not in coach.js, for the same
+   reason as coachOpenLazy: the button exists on every page load and coach.js
+   does not. When toggleGames was defined in coach.js, the first click on
+   Games threw a ReferenceError — the global safety net put up "Something
+   went wrong", and every later click threw silently (the banner shows once),
+   so Games looked dead until a reload (2026-09-08). Opening goes through the
+   hash router, which loads coach.js and then calls openGamesScreen; closing
+   only happens with the screen open, by which point coach.js is loaded.
+   checks.mjs 1u fails the push on any other inline handler in index.html
+   that reaches into a lazily-loaded script. */
+function toggleGames(){
+  const screen = document.getElementById('games-screen');
+  if (!screen) return;
+  if (screen.hasAttribute('hidden')) goExploreHash('games');
+  else if (typeof closeGamesScreen === 'function') closeGamesScreen();
+}
 
 // Once a module is marked i18nComplete, every field checks.mjs requires has a
 // real Spanish twin — hide the whole panel from Google Translate so it can't
