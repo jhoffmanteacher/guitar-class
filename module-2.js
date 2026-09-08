@@ -816,32 +816,32 @@ SETS.push(
               },
               {
                 label: 'Challenge — "the cure," root line', label_es: 'Reto — "the cure," línea de raíces',
-                text: '<ul><li>Play the roots of Olivia Rodrigo\'s "the cure" across both strings — A · C · D · F · G — two beats per note at 60 BPM.</li></ul>You\'ve got it when: two clean laps crossing between the A and E strings without looking down. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
-                text_es: '<ul><li>Toca las raíces de "the cure" de Olivia Rodrigo cruzando ambas cuerdas — A · C · D · F · G — dos pulsos por nota a 60 BPM.</li></ul>Lo tienes cuando: dos vueltas limpias cruzando entre las cuerdas La y Mi sin mirar hacia abajo. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
+                text: '<ul><li>Play the roots of Olivia Rodrigo\'s "the cure" on the low E string only — A · C · D · F · G at frets 5 · 8 · 10 · 1 · 3 — two beats per note at 60 BPM.</li></ul>You\'ve got it when: two clean laps with the hand landing on fret 8 and back on fret 1 without looking down. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 2 of 5</a>.',
+                text_es: '<ul><li>Toca las raíces de "the cure" de Olivia Rodrigo solo en la cuerda Mi grave — A · C · D · F · G en los trastes 5 · 8 · 10 · 1 · 3 — dos tiempos por nota a 60 BPM.</li></ul>Lo tienes cuando: dos vueltas limpias con la mano cayendo en el traste 8 y de regreso en el traste 1 sin mirar hacia abajo. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 2 de 5</a>.',
                 hint: 'This is the simplest outline of the song — next module these exact roots become power chords. Learn where they live now and Module 3 is half done.',
                 hint_es: 'Este es el esquema más simple de la canción — en el próximo módulo estas mismas raíces se convierten en acordes de potencia. Aprende dónde viven ahora y el Módulo 3 estará medio hecho.',
-                stuck: 'Split it by string: A · C · D on the A string first, then F · G on the low E, then join them.',
-                stuck_es: 'Divídelo por cuerda: A · C · D en la cuerda La primero, luego F · G en la Mi grave, y luego únelas.',
-                levelUp: 'Play the lap with the play button keeping the beat, or say each note name out loud as you land it.',
-                levelUp_es: 'Toca la vuelta con el botón de reproducir marcando el pulso, o di en voz alta cada nombre de nota al aterrizarla.',
+                stuck: 'Split it in two: F · G · A at frets 1 · 3 · 5 first — the Watchtower hand — then C · D at frets 8 · 10 with your index on 8. Join them when the jump back from 10 to 1 is automatic.',
+                stuck_es: 'Divídelo en dos: primero F · G · A en los trastes 1 · 3 · 5 — la misma mano que Watchtower — y luego C · D en los trastes 8 · 10 con el índice en el 8. Únelas cuando el salto de regreso del 10 al 1 sea automático.',
+                levelUp: 'Play the same five roots across two strings: A · C · D on the A string (open · 3 · 5), then F · G on the low E (1 · 3). Same names — a string cross instead of a jump.',
+                levelUp_es: 'Toca las mismas cinco raíces en dos cuerdas: A · C · D en la cuerda La (al aire · 3 · 5), y luego F · G en la cuerda Mi grave (1 · 3). Los mismos nombres — un cruce de cuerda en vez de un salto.',
                 skills: [1, 2, 4, 5, 6],
                 tab: {
-                  caption: '"the cure" — root line (teaching arrangement) · 60 BPM',
-                  caption_es: '"the cure" — línea de raíces (arreglo didáctico) · 60 BPM',
+                  caption: '"the cure" — root line, low E only (teaching arrangement) · 60 BPM',
+                  caption_es: '"the cure" — línea de raíces, solo la cuerda Mi grave (arreglo didáctico) · 60 BPM',
                   notes: [
-                    { string: 'A', fret: 0, note: 'A', midi: 45 },
-                    { string: 'A', fret: 0, note: 'A', midi: 45 },
-                    { string: 'A', fret: 3, note: 'C', midi: 48 },
-                    { string: 'A', fret: 3, note: 'C', midi: 48 },
-                    { string: 'A', fret: 5, note: 'D', midi: 50 },
-                    { string: 'A', fret: 5, note: 'D', midi: 50 },
+                    { string: 'E', fret: 5, note: 'A', midi: 45 },
+                    { string: 'E', fret: 5, note: 'A', midi: 45 },
+                    { string: 'E', fret: 8, note: 'C', midi: 48 },
+                    { string: 'E', fret: 8, note: 'C', midi: 48 },
+                    { string: 'E', fret: 10, note: 'D', midi: 50 },
+                    { string: 'E', fret: 10, note: 'D', midi: 50 },
                     { string: 'E', fret: 1, note: 'F', midi: 41 },
                     { string: 'E', fret: 1, note: 'F', midi: 41 },
                     { string: 'E', fret: 3, note: 'G', midi: 43 },
                     { string: 'E', fret: 3, note: 'G', midi: 43 }
                   ]
                 },
-                response: { type: 'short', prompt: 'Which move was harder — crossing strings from D down to F, or walking up the same string from F to G?', prompt_es: '¿Qué movimiento fue más difícil — cruzar de cuerda de D a F, o subir por la misma cuerda de F a G?', placeholder: 'e.g. D to F — big jump', placeholder_es: 'ej. D a F — un salto grande' }
+                response: { type: 'short', prompt: 'Which move was harder — the jump down from D at fret 10 to F at fret 1, or the slide up from A at fret 5 to C at fret 8?', prompt_es: '¿Qué movimiento fue más difícil — el salto hacia abajo de D en el traste 10 a F en el traste 1, o el deslizamiento hacia arriba de A en el traste 5 a C en el traste 8?', placeholder: 'e.g. D to F — big jump', placeholder_es: 'ej. D a F — un salto grande' }
               },
               {
                 label: 'Challenge — "Luna," bass roots', label_es: 'Reto — "Luna," raíces de bajo',

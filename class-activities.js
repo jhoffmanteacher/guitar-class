@@ -1252,87 +1252,94 @@ window.CLASS_ACTIVITIES = [
     number: 12,
     title:    '"the cure" — The Root Line',
     title_es: '"the cure" — La línea de raíces',
-    intro:    'The Watchtower line stayed on one string. This one doesn\'t. Every chord in "the cure" has a root note, and the five roots — A, C, D, F, G — make a bassline that starts on the A string and crosses down to the low E in the middle. That cross is the new thing today.',
-    intro_es: 'La línea de Watchtower se quedaba en una sola cuerda. Esta no. Cada acorde de "the cure" tiene una nota raíz, y las cinco raíces — A, C, D, F, G — forman una línea de bajo que empieza en la cuerda La y cruza hacia la cuerda Mi grave a la mitad. Ese cruce es lo nuevo de hoy.',
+    intro:    'The Watchtower line stayed on one string, and so does this one. Every chord in "the cure" has a root note, and the five roots — A, C, D, F, G — make a bassline you can play on the low E string alone. Two of the frets are new, and the hand has to move to reach them. That move is the new thing today.',
+    intro_es: 'La línea de Watchtower se quedaba en una sola cuerda, y esta también. Cada acorde de "the cure" tiene una nota raíz, y las cinco raíces — A, C, D, F, G — forman una línea de bajo que puedes tocar solo en la cuerda Mi grave. Dos de los trastes son nuevos, y la mano tiene que moverse para llegar a ellos. Ese movimiento es lo nuevo de hoy.',
     steps: [
       {
-        label:    'The A string half',
-        label_es: 'La mitad de la cuerda La',
-        figure: 'img/ca-cure-roots-a.svg',
-        text: 'The A string is the second-thickest one, right next to the low E. Three of today\'s roots live on it: <b>A</b> open, <b>C</b> at fret 3, <b>D</b> at fret 5 — the first neck dot. Same idea as the low E notes you already named, one string over.',
-        text_es: 'La cuerda La es la segunda más gruesa, justo al lado de la cuerda Mi grave. Tres de las raíces de hoy viven ahí: <b>A</b> al aire, <b>C</b> en el traste 3, <b>D</b> en el traste 5 — el primer punto del mástil. La misma idea que las notas de la cuerda Mi grave que ya nombraste, una cuerda al lado.',
+        label:    'The low E map',
+        label_es: 'El mapa de la cuerda Mi grave',
+        figure: 'img/ca-cure-roots-lowe.svg',
+        text: 'All five roots on the thickest string. Three you already know from Watchtower: <b>F</b> at fret 1, <b>G</b> at fret 3, <b>A</b> at fret 5 — the first neck dot. Two are new and higher up: <b>C</b> at fret 8, one past the fret-7 dot, and <b>D</b> at fret 10, one past the fret-9 dot.',
+        text_es: 'Las cinco raíces en la cuerda más gruesa. Tres ya las conoces de Watchtower: <b>F</b> en el traste 1, <b>G</b> en el traste 3, <b>A</b> en el traste 5 — el primer punto del mástil. Dos son nuevas y están más arriba: <b>C</b> en el traste 8, uno después del punto del traste 7, y <b>D</b> en el traste 10, uno después del punto del traste 9.',
       },
       {
-        label:    'The low E half',
-        label_es: 'La mitad de la cuerda Mi grave',
-        figure: 'img/ca-cure-roots-e.svg',
-        text: 'The other two roots are back on the low E, and you already know both: <b>F</b> at fret 1 and <b>G</b> at fret 3 — the same G you land on for the Watchtower line.',
-        text_es: 'Las otras dos raíces vuelven a estar en la cuerda Mi grave, y ya conoces las dos: <b>F</b> en el traste 1 y <b>G</b> en el traste 3 — el mismo G en el que caes para la línea de Watchtower.',
-      },
-      {
-        label:    'A · C · D',
-        label_es: 'A · C · D',
-        text: 'Play the A string half by itself.<ol><li>Pluck the open A string and say "A" out loud while it rings</li><li>Finger 1 just behind fret 3: "C"</li><li>Finger 3 on the dot at fret 5: "D"</li></ol>Two beats per note at 60 BPM. Keep finger 1 hovering over fret 3 while you play the D — the hand stays in one place.<br>You\'ve got it when: three clean reps in a row, no buzz, names out loud. Buzzing? Move your fingertip closer to the fret wire, not further from it.',
-        text_es: 'Toca por separado la mitad de la cuerda La.<ol><li>Pulsa la cuerda La al aire y di "A" en voz alta mientras suena</li><li>Dedo 1 justo detrás del traste 3: "C"</li><li>Dedo 3 en el punto del traste 5: "D"</li></ol>Dos tiempos por nota a 60 BPM. Deja el dedo 1 flotando sobre el traste 3 mientras tocas el D — la mano se queda en un solo lugar.<br>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbidos, con los nombres en voz alta. ¿Zumba? Acerca la punta del dedo al traste, no la alejes.',
+        label:    'F · G · A',
+        label_es: 'F · G · A',
+        text: 'Play the three low roots the same way you play Watchtower.<ol><li>Finger 1 just behind fret 1: "F"</li><li>Finger 3 behind fret 3: "G"</li><li>Finger 4 (the pinky) on the dot at fret 5: "A"</li></ol>Two beats per note at 60 BPM, names out loud. The hand stays in one place — every finger has its own fret.<br>You\'ve got it when: three clean reps in a row, no buzz. Pinky buzzing on the A? Bring your thumb lower behind the neck so the pinky can stand on its tip.',
+        text_es: 'Toca las tres raíces graves igual que tocas Watchtower.<ol><li>Dedo 1 justo detrás del traste 1: "F"</li><li>Dedo 3 detrás del traste 3: "G"</li><li>Dedo 4 (el meñique) en el punto del traste 5: "A"</li></ol>Dos tiempos por nota a 60 BPM, con los nombres en voz alta. La mano se queda en un solo lugar — cada dedo tiene su propio traste.<br>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbidos. ¿Zumba el meñique en el A? Baja el pulgar detrás del mástil para que el meñique pueda pararse en la punta.',
         tab: {
-          caption: 'A string only · A C D',
-          caption_es: 'Solo la cuerda La · A C D',
-          notes: [
-            { string: 'A', fret: 0, note: 'A', midi: 45 },
-            { string: 'A', fret: 3, note: 'C', midi: 48 },
-            { string: 'A', fret: 5, note: 'D', midi: 50 }
-          ]
-        },
-      },
-      {
-        label:    'F · G',
-        label_es: 'F · G',
-        text: 'Switch to the low E half.<ol><li>Finger 1 just behind fret 1: "F"</li><li>Finger 3 behind fret 3: "G"</li></ol>Two beats each at 60 BPM. F is the tightest squeeze on the whole neck — the frets are widest down here, so let your hand come with the finger instead of stretching for it.<br>You\'ve got it when: three clean reps in a row, no buzz, names out loud. Dead note on the F? Check that finger 3 isn\'t leaning on the string behind it.',
-        text_es: 'Cambia a la mitad de la cuerda Mi grave.<ol><li>Dedo 1 justo detrás del traste 1: "F"</li><li>Dedo 3 detrás del traste 3: "G"</li></ol>Dos tiempos por nota a 60 BPM. El F es el punto más apretado de todo el mástil — aquí abajo los trastes son más anchos, así que deja que la mano acompañe al dedo en vez de estirarte.<br>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbidos, con los nombres en voz alta. ¿El F sale muerto? Revisa que el dedo 3 no esté recargado sobre la cuerda detrás de él.',
-        tab: {
-          caption: 'Low E only · F G',
-          caption_es: 'Solo la cuerda Mi grave · F G',
+          caption: 'Low E only · F G A',
+          caption_es: 'Solo la cuerda Mi grave · F G A',
           notes: [
             { string: 'E', fret: 1, note: 'F', midi: 41 },
-            { string: 'E', fret: 3, note: 'G', midi: 43 }
+            { string: 'E', fret: 3, note: 'G', midi: 43 },
+            { string: 'E', fret: 5, note: 'A', midi: 45 }
           ]
         },
       },
       {
-        label:    'The cross',
-        label_es: 'El cruce',
-        text: 'The hard part is the two notes either side of the string change: <b>D</b> on the A string, then <b>F</b> on the low E. Your hand slides down the neck and your pick jumps up a string, at the same time.<ul><li>Play D, then F, then stop. Do it slowly, watching the pick, not the fingers</li><li>Then do it without looking — feel the low E as the outside string</li></ul>You\'ve got it when: eight clean D-to-F crossings in a row without looking down. Hitting the wrong string? Rest your pick against the low E before you play it.',
-        text_es: 'La parte difícil son las dos notas a cada lado del cambio de cuerda: <b>D</b> en la cuerda La, y luego <b>F</b> en la cuerda Mi grave. La mano se desliza hacia el traste 1 y la púa salta a la cuerda de al lado, al mismo tiempo.<ul><li>Toca D, luego F, y para. Hazlo despacio, mirando la púa, no los dedos</li><li>Después hazlo sin mirar — siente la cuerda Mi grave como la cuerda de afuera</li></ul>Lo tienes cuando: ocho cruces limpios de D a F seguidos, sin mirar hacia abajo. ¿Le pegas a la cuerda equivocada? Apoya la púa en la cuerda Mi grave antes de tocarla.',
+        label:    'C · D — up the neck',
+        label_es: 'C · D — más arriba del mástil',
+        text: 'Slide the whole hand up so finger 1 sits behind fret 8.<ol><li>Finger 1 behind fret 8: "C"</li><li>Finger 3 behind fret 10: "D"</li></ol>Two beats each at 60 BPM. The frets are closer together up here, so the hand feels smaller — keep the thumb behind the neck and let the fingers stand on their tips.<br>You\'ve got it when: three clean reps in a row, no buzz, names out loud. Landing on the wrong fret? Find the fret-7 dot and go one past it.',
+        text_es: 'Desliza toda la mano hacia arriba para que el dedo 1 quede detrás del traste 8.<ol><li>Dedo 1 detrás del traste 8: "C"</li><li>Dedo 3 detrás del traste 10: "D"</li></ol>Dos tiempos por nota a 60 BPM. Aquí arriba los trastes están más juntos, así que la mano se siente más chica — mantén el pulgar detrás del mástil y deja que los dedos se paren en la punta.<br>Lo tienes cuando: tres repeticiones limpias seguidas, sin zumbidos, con los nombres en voz alta. ¿Caes en el traste equivocado? Busca el punto del traste 7 y ve uno más allá.',
         tab: {
-          caption: 'The string cross · D to F',
-          caption_es: 'El cruce de cuerdas · de D a F',
+          caption: 'Low E only · C D',
+          caption_es: 'Solo la cuerda Mi grave · C D',
           notes: [
-            { string: 'A', fret: 5, note: 'D', midi: 50 },
-            { string: 'E', fret: 1, note: 'F', midi: 41 }
+            { string: 'E', fret: 8,  note: 'C', midi: 48 },
+            { string: 'E', fret: 10, note: 'D', midi: 50 }
+          ]
+        },
+      },
+      {
+        label:    'The two hand moves',
+        label_es: 'Los dos movimientos de la mano',
+        text: 'Two places where the hand moves. The small one: after <b>A</b> at fret 5, the hand slides up so finger 1 lands on fret 8 for <b>C</b>. The big one: after <b>D</b> at fret 10, the hand jumps nine frets down so finger 1 lands on fret 1 for <b>F</b>.<ul><li>Play D, then F, then stop. Do it slowly, watching where finger 1 lands</li><li>Then A, then C, then stop — the same idea going up</li><li>Then do both without looking</li></ul>You\'ve got it when: eight clean D-to-F jumps in a row without looking down. Landing short? Aim finger 1 at the nut and let it stop at fret 1.',
+        text_es: 'Dos lugares donde la mano se mueve. El chico: después del <b>A</b> en el traste 5, la mano se desliza hacia arriba para que el dedo 1 caiga en el traste 8 para el <b>C</b>. El grande: después del <b>D</b> en el traste 10, la mano salta nueve trastes hacia abajo para que el dedo 1 caiga en el traste 1 para el <b>F</b>.<ul><li>Toca D, luego F, y para. Hazlo despacio, mirando dónde cae el dedo 1</li><li>Luego A, luego C, y para — la misma idea hacia arriba</li><li>Después haz los dos sin mirar</li></ul>Lo tienes cuando: ocho saltos limpios de D a F seguidos, sin mirar hacia abajo. ¿Te quedas corto? Apunta el dedo 1 hacia la cejuela y deja que se detenga en el traste 1.',
+        tab: {
+          caption: 'The hand moves · D to F, then A to C',
+          caption_es: 'Los movimientos de la mano · de D a F, luego de A a C',
+          phrases: [
+            {
+              label: 'The jump — D F',
+              label_es: 'El salto — D F',
+              notes: [
+                { string: 'E', fret: 10, note: 'D', midi: 50 },
+                { string: 'E', fret: 1,  note: 'F', midi: 41 }
+              ]
+            },
+            {
+              label: 'The slide — A C',
+              label_es: 'El deslizamiento — A C',
+              notes: [
+                { string: 'E', fret: 5, note: 'A', midi: 45 },
+                { string: 'E', fret: 8, note: 'C', midi: 48 }
+              ]
+            }
           ]
         },
       },
       {
         label:    'The whole line',
         label_es: 'La línea completa',
-        text: 'Join the two halves: <b>A · C · D · F · G</b>, two beats per note at 60 BPM. The G is a short turnaround — it sends you straight back to the A to start the loop again.<br>You\'ve got it when: two clean laps (a lap = one full time through) without stopping and without looking down. Falling apart at the cross? Go back to the D-to-F step for a minute, then try the whole line again.',
-        text_es: 'Une las dos mitades: <b>A · C · D · F · G</b>, dos tiempos por nota a 60 BPM. El G es un giro corto — te manda directo de regreso al A para empezar el ciclo otra vez.<br>Lo tienes cuando: dos vueltas limpias (una vuelta = una pasada completa) sin detenerte y sin mirar hacia abajo. ¿Se te desarma en el cruce? Regresa un minuto al paso de D a F y después intenta la línea completa otra vez.',
+        text: 'Join it all: <b>A · C · D · F · G</b>, two beats per note at 60 BPM, every note on the low E. The G is a short turnaround — it sends you straight back to the A to start the loop again.<br>You\'ve got it when: two clean laps (a lap = one full time through) without stopping and without looking down. Falling apart at the jump? Go back to the hand-moves step for a minute, then try the whole line again.',
+        text_es: 'Únelo todo: <b>A · C · D · F · G</b>, dos tiempos por nota a 60 BPM, cada nota en la cuerda Mi grave. El G es un giro corto — te manda directo de regreso al A para empezar el ciclo otra vez.<br>Lo tienes cuando: dos vueltas limpias (una vuelta = una pasada completa) sin detenerte y sin mirar hacia abajo. ¿Se te desarma en el salto? Regresa un minuto al paso de los movimientos de la mano y después intenta la línea completa otra vez.',
         tab: {
-          caption: 'Root line · 2 beats per note · G turns it around',
-          caption_es: 'Línea de raíces · 2 tiempos por nota · el G hace el giro',
+          caption: 'Root line on the low E · 2 beats per note · G turns it around',
+          caption_es: 'Línea de raíces en la cuerda Mi grave · 2 tiempos por nota · el G hace el giro',
           phrases: [
             {
-              label: 'A string — A C D',
-              label_es: 'Cuerda La — A C D',
+              label: 'Up the neck — A C D',
+              label_es: 'Hacia arriba — A C D',
               notes: [
-                { string: 'A', fret: 0, note: 'A', midi: 45 },
-                { string: 'A', fret: 3, note: 'C', midi: 48 },
-                { string: 'A', fret: 5, note: 'D', midi: 50 }
+                { string: 'E', fret: 5,  note: 'A', midi: 45 },
+                { string: 'E', fret: 8,  note: 'C', midi: 48 },
+                { string: 'E', fret: 10, note: 'D', midi: 50 }
               ]
             },
             {
-              label: 'Low E — F G',
-              label_es: 'Cuerda Mi grave — F G',
+              label: 'Back down — F G',
+              label_es: 'De regreso — F G',
               notes: [
                 { string: 'E', fret: 1, note: 'F', midi: 41 },
                 { string: 'E', fret: 3, note: 'G', midi: 43 }
@@ -1344,8 +1351,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Keep going',
         label_es: 'Sigue adelante',
-        text: 'Three ways to push it, in any order:<ul><li>Play the loop against the song\'s backing track on its Song Journey page — this line is Layer 2 of 5</li><li>Climb the tempo: +10 BPM every time you get two clean laps</li><li>Find all five roots on the low E string alone — frets 5, 8, 10, 1, 3. Same names, new map</li></ul>You\'ve got it when: you can play the loop with the track for a full verse without dropping out.',
-        text_es: 'Tres formas de exigirte más, en el orden que quieras:<ul><li>Toca el ciclo contra la pista de acompañamiento de la canción en su página de Recorrido de la canción — esta línea es la Capa 2 de 5</li><li>Sube el tempo: +10 BPM cada vez que logres dos vueltas limpias</li><li>Encuentra las cinco raíces solo en la cuerda Mi grave — trastes 5, 8, 10, 1 y 3. Los mismos nombres, un mapa nuevo</li></ul>Lo tienes cuando: puedes tocar el ciclo con la pista durante una estrofa completa sin salirte.',
+        text: 'Three ways to push it, in any order:<ul><li>Play the loop against the song\'s backing track on its Song Journey page — this line is Layer 2 of 5</li><li>Climb the tempo: +10 BPM every time you get two clean laps</li><li>Play the same five roots across two strings: A · C · D on the A string (open · 3 · 5), then F · G on the low E (1 · 3). Same names — a string cross instead of a jump</li></ul>You\'ve got it when: you can play the loop with the track for a full verse without dropping out.',
+        text_es: 'Tres formas de exigirte más, en el orden que quieras:<ul><li>Toca el ciclo contra la pista de acompañamiento de la canción en su página de Recorrido de la canción — esta línea es la Capa 2 de 5</li><li>Sube el tempo: +10 BPM cada vez que logres dos vueltas limpias</li><li>Toca las mismas cinco raíces en dos cuerdas: A · C · D en la cuerda La (al aire · 3 · 5), y luego F · G en la cuerda Mi grave (1 · 3). Los mismos nombres — un cruce de cuerda en vez de un salto</li></ul>Lo tienes cuando: puedes tocar el ciclo con la pista durante una estrofa completa sin salirte.',
       },
     ],
   },

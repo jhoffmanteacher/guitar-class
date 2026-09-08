@@ -5,6 +5,24 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-08 — "the cure" root line moves to the low E string
+
+### Changed
+
+- **"the cure" root line is now played on the low E string only** — A · C ·
+  D · F · G at frets 5 · 8 · 10 · 1 · 3, the same string as the Watchtower
+  line. The Song Journey page (Layer 2), the Module 2 challenge, and class
+  activity #12 all teach this version now. The hand slides up to fret 8 for
+  C and D and jumps back down to fret 1 for F — that jump is the new skill.
+- **Layer 3 power chords use the matching E-root shapes** — one two-finger
+  shape (root on the low E, fifth two frets up on the A string) that slides
+  to all five spots.
+- **The old two-string version (A string 0 · 3 · 5, low E 1 · 3) is now the
+  Level up** on Layer 2, Layer 3, the Module 2 challenge, and the class
+  activity — same notes, a string cross instead of a jump.
+- Spanish rewritten to match on every changed line. New figure
+  `img/ca-cure-roots-lowe.svg` (all five roots on the low E).
+
 ## 2026-09-08 — Watchtower page: readable anatomy table, corrected bass tab
 
 ### Fixed
