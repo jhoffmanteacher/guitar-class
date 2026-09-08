@@ -142,7 +142,8 @@ so far: MC answer-length tells (1h), watch-range labels ↔ `t=` params (1i),
 activity title series numbering (1l), Journey tab-card markup (1q), text
 contrast in both palettes across all four stylesheets (1s), Journey↔app CSS
 drift (1t), figure intrinsic sizes and the two class-activity renderers (1v),
-video-title drift (inside the link check).
+video-title drift (inside the link check), slang and figurative phrasing in
+student-facing text (1w).
 
 **A ratchet that can't fail is not a ratchet.** Every detector added or changed
 gets proved by *breaking the guarded thing* in a scratch copy and watching the

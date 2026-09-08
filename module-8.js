@@ -875,8 +875,8 @@ SETS.push(
                 hint_es: '¿Ocho notas siguen siendo demasiadas? Toca el p-i-m-a de cuatro notas de la Unidad 1, una nota por tiempo — cuatro notas llenan un compás de 4/4 exactamente. Con cualquiera de los dos tamaños, anticipa como te mostró el segundo video de la lección: la mano de trastear empieza a moverse en la última nota del patrón, así que el tiempo 1 siempre cae listo. (Un compás por acorde es un conteo de enseñanza lento — la grabación en realidad siente cada acorde en dos tiempos, casi el doble de rápido.)',
                 stuck: 'Strum each chord once to check it rings, then loop just C → G — the only change where the thumb crosses to the low E.',
                 stuck_es: 'Rasguea cada acorde una vez para revisar que suene, y luego repite solo C → G — el único cambio donde el pulgar cruza hacia la Mi grave.',
-                levelUp: 'Add a pinch (p + a together) on beat 1 of each chord and hear the verse bloom, or sing it over your own picking.',
-                levelUp_es: 'Agrega un pellizco (p + a juntos) en el tiempo 1 de cada acorde y escucha cómo florece la estrofa, o cántala sobre tu propio punteo.',
+                levelUp: 'Add a pinch (p + a together) on beat 1 of each chord and hear the verse sound fuller, or sing it over your own picking.',
+                levelUp_es: 'Agrega un pellizco (p + a juntos) en el tiempo 1 de cada acorde y escucha cómo la estrofa suena más llena, o cántala sobre tu propio punteo.',
                 skills: [1, 3],
                 tab: {
                   caption: '"Let It Be" — fingerstyle bass roots · C · G · Am · F · one bar each · 60 BPM',
@@ -1042,7 +1042,7 @@ MODULE_REVIEWS[8] = {
     'Toca con fingerpicking una progresión de 4 acordes con el arpegio, manteniendo el patrón sin interrupciones en cada cambio de acorde',
     'Interpreta una canción completa con fingerpicking de la lista de canciones de principio a fin, recuperándote de cualquier error sin detenerte'
   ],
-  forward: 'You\'ve got the full first-half toolkit — notes, chords, power chords, lead, barre, strumming, and fingerpicking. <strong>The second half of the course goes deeper:</strong> Module 9 finishes the fretboard (all six strings) and teaches you to write your own TAB — the first step toward learning any song on your own.',
-  forward_es: 'Ya tienes el kit de herramientas completo de la primera mitad — notas, acordes, acordes de potencia, solos, cejilla, rasgueo y fingerpicking. <strong>La segunda mitad del curso profundiza más:</strong> el Módulo 9 termina el mástil (las seis cuerdas) y te enseña a escribir tu propio TAB — el primer paso hacia aprender cualquier canción por tu cuenta.',
+  forward: 'You now have the full first-half skill set — notes, chords, power chords, lead, barre, strumming, and fingerpicking. <strong>The second half of the course goes deeper:</strong> Module 9 finishes the fretboard (all six strings) and teaches you to write your own TAB — the first step toward learning any song on your own.',
+  forward_es: 'Ya tienes el conjunto completo de destrezas de la primera mitad — notas, acordes, acordes de potencia, solos, cejilla, rasgueo y fingerpicking. <strong>La segunda mitad del curso profundiza más:</strong> el Módulo 9 termina el mástil (las seis cuerdas) y te enseña a escribir tu propio TAB — el primer paso hacia aprender cualquier canción por tu cuenta.',
   standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
 };

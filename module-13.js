@@ -69,8 +69,8 @@ SETS.push(
           choices: ['Tie the traditional knot anyway, as always', 'Thread it through and let the ball seat flat', 'Glue the string in place at the block', 'Wrap it around the saddle twice to hold'],
           choices_es: ['Hacer el nudo tradicional de todos modos, como siempre', 'Pasarla por el agujero y dejar que la bolita quede plana', 'Pegar la cuerda con pegamento en el bloque', 'Darle dos vueltas a la selleta para que aguante'],
           answer: 1,
-          explain: 'The ball does the knot\'s job. Pull the string snug until the ball sits flat against the back of the tie block — that\'s the whole trick.',
-          explain_es: 'La bolita hace el trabajo del nudo. Tensa la cuerda hasta que la bolita quede plana contra la parte trasera del bloque — ese es todo el truco.' } },
+          explain: 'The ball does the knot\'s job. Pull the string snug until the ball sits flat against the back of the tie block — that\'s the important part.',
+          explain_es: 'La bolita hace el trabajo del nudo. Tensa la cuerda hasta que la bolita quede plana contra la parte trasera del bloque — esa es la parte importante.' } },
       { id: 'm13w1-s2',
         text: 'Wound — neat wraps in one direction, tail locked, no crossovers, excess trimmed',
         text_es: 'Enrollada — vueltas ordenadas en una sola dirección, punta atrapada, sin cruces y con el sobrante recortado',
@@ -108,8 +108,8 @@ SETS.push(
           choices: ['Raise your hand right away — the strings are what count', 'Coil the old strings into the trash and put the tools back', 'Start loosening them again to double-check', 'Leave the old strings for whoever cleans up'],
           choices_es: ['Levantar la mano de inmediato — lo que cuenta son las cuerdas', 'Enrollar las cuerdas viejas en la basura y guardar las herramientas', 'Empezar a aflojarlas otra vez para revisar', 'Dejar las cuerdas viejas para quien limpie'],
           answer: 1,
-          explain: 'The clock does not stop until the station is clear. Old string ends are sharp, and a loose string on the floor finds someone\'s foot — clearing up is part of finishing the job.',
-          explain_es: 'El reloj no se detiene hasta que el lugar está recogido. Las puntas de las cuerdas viejas son filosas, y una cuerda suelta en el piso encuentra el pie de alguien — recoger es parte de terminar el trabajo.' } }
+          explain: 'The clock does not stop until the station is clear. Old string ends are sharp, and a loose string on the floor can cut someone\'s foot — clearing up is part of finishing the job.',
+          explain_es: 'El reloj no se detiene hasta que el lugar está recogido. Las puntas de las cuerdas viejas son filosas, y una cuerda suelta en el piso puede cortar el pie de alguien — recoger es parte de terminar el trabajo.' } }
     ],
 
     stations: {
@@ -204,8 +204,8 @@ SETS.push(
               },
               {
                 label: 'Coil and toss', label_es: 'Enrolla y a la basura',
-                text: 'Deal with the old string the moment it comes off:<ol><li>Coil it into a loop (wrap it around your hand a few times).</li><li>Put it straight in the trash — string ends are sharp, and a loose string on the floor finds someone\'s foot.</li></ol>Do this each time rather than saving six for the end; a pile of old strings is how a station ends up not clear at 40 minutes. You\'ve got it when: no old string ever touches the floor.' + M13_P8_EN,
-                text_es: 'Ocúpate de la cuerda vieja en cuanto sale:<ol><li>Enróllala en un aro (dale unas vueltas alrededor de tu mano).</li><li>Ponla directo en la basura — las puntas son filosas, y una cuerda suelta en el piso encuentra el pie de alguien.</li></ol>Hazlo cada vez en lugar de juntar seis para el final; un montón de cuerdas viejas es justo lo que deja un lugar sin recoger a los 40 minutos. Lo tienes cuando: ninguna cuerda vieja toca el piso.' + M13_P8_ES,
+                text: 'Deal with the old string the moment it comes off:<ol><li>Coil it into a loop (wrap it around your hand a few times).</li><li>Put it straight in the trash — string ends are sharp, and a loose string on the floor can cut someone\'s foot.</li></ol>Do this each time rather than saving six for the end; a pile of old strings is how a station ends up not clear at 40 minutes. You\'ve got it when: no old string ever touches the floor.' + M13_P8_EN,
+                text_es: 'Ocúpate de la cuerda vieja en cuanto sale:<ol><li>Enróllala en un aro (dale unas vueltas alrededor de tu mano).</li><li>Ponla directo en la basura — las puntas son filosas, y una cuerda suelta en el piso puede cortar el pie de alguien.</li></ol>Hazlo cada vez en lugar de juntar seis para el final; un montón de cuerdas viejas es justo lo que deja un lugar sin recoger a los 40 minutos. Lo tienes cuando: ninguna cuerda vieja toca el piso.' + M13_P8_ES,
                 skills: [4]
               }
             ]

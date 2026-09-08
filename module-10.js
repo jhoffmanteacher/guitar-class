@@ -191,8 +191,8 @@ SETS.push(
                 label: 'Challenge 3 — Recipe by Heart (your assessment piece)', label_es: 'Reto 3 — La Receta de Memoria (tu pieza de evaluación)',
                 text: '<ul><li>Play the C major scale while saying "whole, whole, half, whole, whole, whole, half" out loud, no chart, no hesitating.</li></ul>You\'ve got it when: you can say the whole recipe from memory before you even touch the guitar.',
                 text_es: '<ul><li>Toca la escala de C mayor mientras dices "tono, tono, semitono, tono, tono, tono, semitono" en voz alta, sin diagrama, sin dudar.</li></ul>Lo tienes cuando: puedes decir toda la receta de memoria antes incluso de tocar la guitarra.',
-                hint: 'If you can say the recipe from memory, you can build ANY major scale on the spot — that\'s the whole point of memorizing it as words, not just frets.',
-                hint_es: 'Si puedes decir la receta de memoria, puedes construir CUALQUIER escala mayor al instante — ese es el punto de memorizarla como palabras, no solo como trastes.',
+                hint: 'If you can say the recipe from memory, you can build ANY major scale on the spot — that\'s the reason for memorizing it as words, not just frets.',
+                hint_es: 'Si puedes decir la receta de memoria, puedes construir CUALQUIER escala mayor al instante — esa es la razón para memorizarla como palabras, no solo como trastes.',
                 stuck: 'Say the recipe alone, away from the guitar, until it\'s automatic — then add the fretting hand back in.',
                 stuck_es: 'Di la receta sola, lejos de la guitarra, hasta que sea automática — y luego agrega de nuevo la mano de trastear.',
                 levelUp: 'Say the recipe starting from a key you haven\'t tried yet (D, or A) and build it on the spot.',
@@ -209,8 +209,8 @@ SETS.push(
                 label: 'Challenge — "Let It Be", in the scale', label_es: 'Reto — "Let It Be", dentro de la escala',
                 text: '<ol><li>Hum the "Let It Be" melody while playing the C major walk underneath it.</li><li>Notice every note of the tune lives inside the scale you just built.</li></ol>',
                 text_es: '<ol><li>Tararea la melodía de "Let It Be" mientras tocas la caminata de C mayor debajo.</li><li>Fíjate cómo cada nota de la melodía vive dentro de la escala que acabas de construir.</li></ol>',
-                hint: 'This is the payoff of today\'s whole set — a song\'s melody isn\'t random, it\'s built from the same key\'s scale.',
-                hint_es: 'Esta es la recompensa de toda la unidad de hoy — la melodía de una canción no es aleatoria, está construida a partir de la escala de su misma tonalidad.',
+                hint: 'This is what today\'s whole set was building toward — a song\'s melody isn\'t random, it\'s built from the same key\'s scale.',
+                hint_es: 'Esto es hacia lo que apuntaba toda la unidad de hoy — la melodía de una canción no es aleatoria, está construida a partir de la escala de su misma tonalidad.',
                 stuck: 'Just hum the first line of the melody on its own first, then play the C major walk separately, then try them together.',
                 stuck_es: 'Primero tararea sola la primera línea de la melodía, luego toca la caminata de C mayor por separado, y después intenta ambas juntas.',
                 levelUp: 'Find where in the walk the melody\'s highest note lives, and name it.',
@@ -338,8 +338,8 @@ SETS.push(
                 response: { type: 'mc', prompt: 'The blues scale is the minor pentatonic plus which extra note?',
                   prompt_es: '¿La escala de blues es la pentatónica menor más cuál nota extra?',
                   answer: 1,
-                  explain: 'One sour-sweet note — the flat five — turns the pentatonic blue.',
-                  explain_es: 'Una nota agridulce — la quinta bemol — convierte la pentatónica en blues.',
+                  explain: 'One added note — the flat five — gives the pentatonic scale its blues sound.',
+                  explain_es: 'Una nota añadida — la quinta bemol — le da a la escala pentatónica su sonido de blues.',
                   choices: ['The 2nd', 'The b5', 'The major 7th', 'The 4th'],
                   choices_es: ['El 2º', 'La b5', 'La 7ª mayor', 'El 4º'] }
               }
@@ -941,7 +941,7 @@ MODULE_REVIEWS[10] = {
     'Nombrar la relativa menor de una tonalidad mayor dada',
     'Identificar mayor vs. menor — y repetir un patrón corto — de oído'
   ],
-  forward: 'You can build scales, name keys, and trust your ear. <strong>Module 11 does the same for chords:</strong> you\'ll see why "Let It Be"\'s four chords work, number any progression like a pro, and unlock twelve chords from one barre shape.',
-  forward_es: 'Puedes construir escalas, nombrar tonalidades, y confiar en tu oído. <strong>El Módulo 11 hace lo mismo con los acordes:</strong> verás por qué funcionan los cuatro acordes de "Let It Be", numerarás cualquier progresión como un profesional, y desbloquearás doce acordes a partir de una sola forma de cejilla.',
+  forward: 'You can build scales, name keys, and trust your ear. <strong>Module 11 does the same for chords:</strong> you\'ll see why "Let It Be"\'s four chords work, number any progression confidently, and unlock twelve chords from one barre shape.',
+  forward_es: 'Puedes construir escalas, nombrar tonalidades, y confiar en tu oído. <strong>El Módulo 11 hace lo mismo con los acordes:</strong> verás por qué funcionan los cuatro acordes de "Let It Be", numerarás cualquier progresión con confianza, y desbloquearás doce acordes a partir de una sola forma de cejilla.',
   standards: ['Pr.4a', 'Pr.6a', 'Cn.10a']
 };

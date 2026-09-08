@@ -403,7 +403,7 @@ SETS.push(
             steps: [
           {
             label: 'Wrap-up: your toughest chord', label_es: 'Cierre: tu acorde más difícil',
-            text: 'Checkpoint — pause and think: which of these four chords (C, G, Am, F) is fighting you most right now, and is it the shape itself or getting to it in time?',
+            text: 'Checkpoint — pause and think: which of these four chords (C, G, Am, F) gives you the most trouble right now, and is it the shape itself or getting to it in time?',
             text_es: 'Punto de control — pausa y piensa: ¿cuál de estos cuatro acordes (C, G, Am, F) te está costando más ahora mismo, y es la forma en sí o el llegar a ella a tiempo?',
             response: { type: 'short', placeholder: 'e.g. F — the shape is fine but I\'m slow getting into it',
               placeholder_es: 'p. ej. F — la forma está bien pero soy lento para llegar a ella' }
@@ -669,7 +669,7 @@ SETS.push(
                   { name: 'C', chord: [[6,'x'],[5,3,'3'],[4,2,'2'],[3,0],[2,1,'1'],[1,0]], position: 0 },
                   { name: 'F', chord: [[6,'x'],[5,'x'],[4,3,'3'],[3,2,'2'],[2,1,'1'],[1,1,'1']], position: 0 }
                 ],
-                response: { type: 'short', prompt: 'Which chord change still fights you in "Let It Be"?', prompt_es: '¿Qué cambio de acorde todavía te cuesta en "Let It Be"?', placeholder: 'e.g. C to F — fingers arrive late', placeholder_es: 'p. ej. de C a F — los dedos llegan tarde' }
+                response: { type: 'short', prompt: 'Which chord change still gives you trouble in "Let It Be"?', prompt_es: '¿Qué cambio de acorde todavía te cuesta en "Let It Be"?', placeholder: 'e.g. C to F — fingers arrive late', placeholder_es: 'p. ej. de C a F — los dedos llegan tarde' }
               },
               {
                 label: 'Challenge — "Watchtower", open-chord version', label_es: 'Reto — "Watchtower", versión con acordes al aire',
@@ -697,8 +697,8 @@ SETS.push(
                 hint_es: 'El metrónomo de la pista base marca 144, pero se siente a la mitad de esa velocidad — así que 70 BPM aquí ya te acerca bastante al ritmo real de la grabación. Acabas de aprender Dm y el giro G/B arriba — Am, C y F son todos acordes del Grupo 1 que ya conoces.',
                 stuck: 'Get Am · C · Dm · F clean in open position first, then add the G/B turnaround — or drop back to a plain G if the bass-string skip trips you up, and swap in G/B once the loop is steady.',
                 stuck_es: 'Deja Am · C · Dm · F limpios en posición abierta primero, y luego agrega el giro G/B — o vuelve a un G normal si saltarte la cuerda grave te complica, y cambia a G/B cuando la vuelta esté firme.',
-                levelUp: 'Switch to a down-up strum. Ready for the real thing? Press &#x25B6; on the Song Journey page and play along with the actual 144 BPM backing track.',
-                levelUp_es: 'Cambia a un rasgueo abajo-arriba. ¿Listo para lo real? Presiona &#x25B6; en la página de Recorrido de la canción y toca junto con la pista base real a 144 BPM.',
+                levelUp: 'Switch to a down-up strum. Ready for the full-tempo version? Press &#x25B6; on the Song Journey page and play along with the actual 144 BPM backing track.',
+                levelUp_es: 'Cambia a un rasgueo abajo-arriba. ¿Listo para la versión a tempo completo? Presiona &#x25B6; en la página de Recorrido de la canción y toca junto con la pista base real a 144 BPM.',
                 skills: [6, 7, 8],
                 chords: [
                   { name: 'Am', chord: [[6,'x'],[5,0],[4,2,'2'],[3,2,'3'],[2,1,'1'],[1,0]], position: 0 },
@@ -970,8 +970,8 @@ SETS.push(
             label: 'Watch: the A chord', label_es: 'Mira: el acorde de A',
             text: 'Watch: <a href="https://youtu.be/VkkOFLouQDs" target="_blank">The A Chord (BC-112) – JustinGuitar</a> (0:00–4:00).',
             text_es: 'Mira: <a href="https://youtu.be/VkkOFLouQDs" target="_blank">The A Chord (BC-112) – JustinGuitar</a> (0:00–4:00).',
-            hint: 'Pause the video the moment his A chord is fully formed and count what has to share space in there. How he packs and angles those fingers is the whole trick — copy the arrangement, not just the fret numbers.',
-            hint_es: 'Pausa el video en el momento en que su acorde A esté completamente formado y cuenta qué tiene que compartir espacio ahí. Cómo acomoda e inclina esos dedos es todo el truco — copia el acomodo, no solo los números de traste.',
+            hint: 'Pause the video the moment his A chord is fully formed and count what has to share space in there. How he packs and angles those fingers is the key step — copy the arrangement, not just the fret numbers.',
+            hint_es: 'Pausa el video en el momento en que su acorde A esté completamente formado y cuenta qué tiene que compartir espacio ahí. Cómo acomoda e inclina esos dedos es el paso clave — copia el acomodo, no solo los números de traste.',
             skills: [2, 4],
             response: { type: 'mc', prompt: 'What makes the A chord awkward for most beginners?',
               prompt_es: '¿Qué hace que el acorde A sea incómodo para la mayoría de los principiantes?',

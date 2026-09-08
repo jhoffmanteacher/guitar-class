@@ -288,8 +288,8 @@ SETS.push(
                 label: 'Challenge — Solo over "Watchtower"', label_es: 'Reto — Solo sobre "Watchtower"',
                 text: 'The song\'s loop is Am · G · F · G — and A minor pentatonic Pattern 1 (the box you just learned) fits every bar of it:<ol><li>Improvise four bars using only the three notes marked below.</li><li>Then improvise four more, adding a fourth note of your choice from Pattern 1.</li></ol>You\'ve got it when: eight bars where every phrase starts or ends on A. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
                 text_es: 'La vuelta de la canción es Am · G · F · G — y el Patrón pentatónico 1 de A menor (la caja que acabas de aprender) encaja en cada compás:<ol><li>Improvisa cuatro compases usando solo las tres notas marcadas abajo.</li><li>Luego improvisa cuatro más, agregando una cuarta nota de tu elección del Patrón 1.</li></ol>Lo tienes cuando: ocho compases donde cada frase empieza o termina en A. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 4 de 5</a>.',
-                hint: 'This is the same box from your Pattern 1 drill — you\'re not learning anything new, you\'re USING it. That\'s the whole point of today.',
-                hint_es: 'Esta es la misma caja de tu ejercicio del Patrón 1 — no estás aprendiendo nada nuevo, la estás USANDO. Ese es todo el punto de hoy.',
+                hint: 'This is the same box from your Pattern 1 drill — you\'re not learning anything new, you\'re USING it. That\'s what today is for.',
+                hint_es: 'Esta es la misma caja de tu ejercicio del Patrón 1 — no estás aprendiendo nada nuevo, la estás USANDO. Para esto sirve el trabajo de hoy.',
                 stuck: 'Freeze the rhythm: only quarter notes, only the three marked notes, until an idea shows up on its own.',
                 stuck_es: 'Congela el ritmo: solo negras, solo las tres notas marcadas, hasta que una idea aparezca por sí sola.',
                 levelUp: 'Start a phrase during the F bar and resolve it on the Am bar — that\'s real tension and release.',
@@ -310,8 +310,8 @@ SETS.push(
                 label: 'Challenge — "Watchtower", the real rhythm', label_es: 'Reto — "Watchtower", el ritmo real',
                 text: '<ol><li>Listen to the recording.</li><li>Work out the rhythm by ear: count "1 2 3 4" along with the record and catch which count each new root lands on — verse first, then chorus.</li><li>Play it the way the record actually goes: in the verses the G sneaks in on beat 4 (both rounds — A holds beats 1–3, then G; F holds beats 1–3, then G). In the chorus the change comes on beat 3 — exactly the two-beats-per-chord version you played in Module 3.</li></ol>You\'ve got it when: you can loop A · G · F · G along with the record — verse timing and chorus timing — and stay locked with it. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Song Journey: revisit Layer 2 of 5</a>.',
                 text_es: '<ol><li>Escucha la grabación.</li><li>Descifra el ritmo de oído: cuenta "1 2 3 4" junto con la grabación y detecta en qué cuenta cae cada raíz nueva — primero la estrofa, luego el coro.</li><li>Tócalo como realmente suena en el disco: en las estrofas la G se cuela en el tiempo 4 (las dos veces — A sostiene los tiempos 1–3, luego G; F sostiene los tiempos 1–3, luego G). En el coro el cambio llega en el tiempo 3 — exactamente la versión de dos tiempos por acorde que tocaste en el Módulo 3.</li></ol>Lo tienes cuando: puedes repetir A · G · F · G junto con la grabación — con el ritmo de la estrofa y el del coro — y mantenerte sincronizado. <a href="tabs/all-along-the-watchtower.html" target="_blank">&#x1F9F5; Recorrido de la canción: vuelve a la Capa 2 de 5</a>.',
-                hint: 'In Module 3 you played this loop with each root held two beats — that\'s the chorus timing. The verses hold the first root longer and sneak the G in a beat later; your ear will catch it before your hands do. What\'s new here is where the rhythm comes FROM: you pull it out of the record with your own ear instead of being told it, and you lock to the record instead of a metronome. A click waits for nobody but stays perfectly even; a record breathes, and you have to follow it.',
-                hint_es: 'En el Módulo 3 tocaste esta vuelta con cada raíz sostenida dos tiempos — ese es el ritmo del coro. Las estrofas sostienen la primera raíz más tiempo y cuelan la G un tiempo después; tu oído lo va a captar antes que tus manos. Lo nuevo aquí es DE DÓNDE viene el ritmo: lo sacas de la grabación con tu propio oído en vez de que te lo digan, y te sincronizas con la grabación en vez de con un metrónomo. Un clic no espera a nadie pero se mantiene perfectamente parejo; una grabación respira, y tú tienes que seguirla.',
+                hint: 'In Module 3 you played this loop with each root held two beats — that\'s the chorus timing. The verses hold the first root longer and bring the G in a beat later; your ear will catch it before your hands do. What\'s new here is where the rhythm comes FROM: you pull it out of the record with your own ear instead of being told it, and you lock to the record instead of a metronome. A click waits for nobody but stays perfectly even; a record breathes, and you have to follow it.',
+                hint_es: 'En el Módulo 3 tocaste esta vuelta con cada raíz sostenida dos tiempos — ese es el ritmo del coro. Las estrofas sostienen la primera raíz más tiempo y traen la G un tiempo después; tu oído lo va a captar antes que tus manos. Lo nuevo aquí es DE DÓNDE viene el ritmo: lo sacas de la grabación con tu propio oído en vez de que te lo digan, y te sincronizas con la grabación en vez de con un metrónomo. Un clic no espera a nadie pero se mantiene perfectamente parejo; una grabación respira, y tú tienes que seguirla.',
                 stuck: 'Clap the record\'s rhythm first, no guitar — one clap per root, holding through the silence — then add the frets back once your hands know the shape of the timing.',
                 stuck_es: 'Primero aplaude el ritmo de la grabación, sin guitarra — un aplauso por raíz, sosteniendo durante el silencio — y luego vuelve a agregar los trastes una vez que tus manos conozcan la forma del tiempo.',
                 levelUp: 'Play it as power chords instead of single notes — same two-beat holds, fuller sound.',
@@ -327,8 +327,8 @@ SETS.push(
                 hint_es: 'Has tocado este riff desde el Módulo 1 como negras parejas y rectas — pero la grabación lo balancea más suelto que eso. Por ahora, confía en tu oído: no busques contar tiempos o valores de nota todavía — esto es entrenamiento de oído, igual que aprendiste a aplaudir el ritmo de "Watchtower". Tu oído ya conoce este riff; solo estás enseñándole a tus manos a igualarlo.',
                 stuck: 'Clap just the first half of the riff (E · E · G · E) on loop until that half locks with the record, then add the second half (D · C · B).',
                 stuck_es: 'Aplaude solo la primera mitad del riff (E · E · G · E) en bucle hasta que esa mitad encaje con la grabación, y luego agrega la segunda mitad (D · C · B).',
-                levelUp: 'Play it as power chords instead of single notes, keeping the same swung feel — same trick as "Watchtower"\'s real-rhythm level-up.',
-                levelUp_es: 'Tócalo como acordes de potencia en vez de notas sueltas, manteniendo la misma sensación de balanceo — el mismo truco que el nivel superior del ritmo real de "Watchtower".',
+                levelUp: 'Play it as power chords instead of single notes, keeping the same swung feel — the same method as "Watchtower"\'s real-rhythm level-up.',
+                levelUp_es: 'Tócalo como acordes de potencia en vez de notas sueltas, manteniendo la misma sensación de balanceo — el mismo método que el nivel superior del ritmo real de "Watchtower".',
                 tabs: [
                   {
                     title: 'How you learned it — straight teaching count',
@@ -475,7 +475,7 @@ SETS.push(
 
   {
     id: 'm4w2',
-    songThread: [{ name: '"Sweet Child O\' Mine"', journey: 'tabs/sweet-child-o-mine.html', layer: 4, note: 'solo territory' }, { name: '"the cure"', journey: 'tabs/the-cure.html', layer: 4, note: 'a whisper-quiet solo' }],
+    songThread: [{ name: '"Sweet Child O\' Mine"', journey: 'tabs/sweet-child-o-mine.html', layer: 4, note: 'soloing over this song' }, { name: '"the cure"', journey: 'tabs/the-cure.html', layer: 4, note: 'a very quiet solo' }],
     label: 'Set 2',
     locked: false,
     module: 'Major / Minor / Blues Pentatonic Scales',
@@ -512,8 +512,8 @@ SETS.push(
             label: 'Watch: hammer-ons and pull-offs', label_es: 'Mira: hammer-ons y pull-offs',
             text: 'Watch: <a href="https://youtu.be/7hDdZAjKBjY" target="_blank">Hammer-Ons Explained + Exercise For Beginners – JustinGuitar</a> (0:00–3:00). The video covers the hammer-on; the pull-off is the same move in reverse — try both on your own guitar:<ol><li>Pick the open D string.</li><li>Then hammer your finger onto the 2nd fret without picking again — that\'s the hammer-on.</li><li>Fret the D string at the 2nd fret and pick it, then flick that finger sideways off the string so the open D rings on its own — no second pick. That\'s the pull-off, the same move backwards.</li></ol>',
             text_es: 'Mira: <a href="https://youtu.be/7hDdZAjKBjY" target="_blank">Hammer-Ons Explained + Exercise For Beginners – JustinGuitar</a> (0:00–3:00). El video cubre el hammer-on; el pull-off es el mismo movimiento al revés — prueba los dos en tu propia guitarra:<ol><li>Pulsa la cuerda Re al aire.</li><li>Luego martilla tu dedo sobre el traste 2 sin pulsar de nuevo — eso es el hammer-on.</li><li>Trastea la cuerda Re en el traste 2 y púlsala, y luego saca ese dedo de la cuerda de un tirón hacia el costado para que la Re al aire suene sola — sin un segundo golpe de púa. Eso es el pull-off, el mismo movimiento al revés.</li></ol>',
-            hint: 'These are your first "expressive" techniques. A hammer-on connects two notes with one pick stroke — it changes the shape (envelope) of the notes. A pull-off is the same trick going down: your finger plucks the string on its way off, so the lower note sounds with no pick at all.',
-            hint_es: 'Estas son tus primeras técnicas "expresivas." Un hammer-on conecta dos notas con un solo golpe de púa — cambia la forma (envolvente) de las notas. Un pull-off es el mismo truco pero bajando: tu dedo pulsa la cuerda al salir, así que la nota más grave suena sin ningún golpe de púa.',
+            hint: 'These are your first "expressive" techniques. A hammer-on connects two notes with one pick stroke — it changes the shape (envelope) of the notes. A pull-off does the same thing in the other direction: your finger plucks the string on its way off, so the lower note sounds with no pick at all.',
+            hint_es: 'Estas son tus primeras técnicas "expresivas." Un hammer-on conecta dos notas con un solo golpe de púa — cambia la forma (envolvente) de las notas. Un pull-off hace lo mismo en la dirección contraria: tu dedo pulsa la cuerda al salir, así que la nota más grave suena sin ningún golpe de púa.',
             skills: [3, 4],
             response: { type: 'mc', prompt: 'A hammer-on connects two notes using how many pick strokes?',
               prompt_es: '¿Un hammer-on conecta dos notas usando cuántos golpes de púa?',
@@ -726,14 +726,14 @@ SETS.push(
               },
               {
                 label: 'Challenge — Solo over "the cure"', label_es: 'Reto — Solo sobre "the cure"',
-                text: 'Olivia\'s song is soft — so your solo has to be too. Improvise eight bars in Am pentatonic Pattern 1 at a whisper:<ul><li>Light pick.</li><li>Slow phrases.</li><li>Lots of space.</li></ul>You\'ve got it when: eight bars where the quietest note is as clean as your loudest. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
-                text_es: 'La canción de Olivia es suave — así que tu solo también tiene que serlo. Improvisa ocho compases en el Patrón pentatónico 1 de Am en un susurro:<ul><li>Púa ligera.</li><li>Frases lentas.</li><li>Mucho espacio.</li></ul>Lo tienes cuando: ocho compases donde la nota más suave está tan limpia como la más fuerte. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 4 de 5</a>.',
+                text: 'Olivia\'s song is soft — so your solo has to be too. Improvise eight bars in Am pentatonic Pattern 1 as quietly as you can:<ul><li>Light pick.</li><li>Slow phrases.</li><li>Lots of space.</li></ul>You\'ve got it when: eight bars where the quietest note is as clean as your loudest. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Song Journey: this is Layer 4 of 5</a>.',
+                text_es: 'La canción de Olivia es suave — así que tu solo también tiene que serlo. Improvisa ocho compases en el Patrón pentatónico 1 de Am lo más suave que puedas:<ul><li>Púa ligera.</li><li>Frases lentas.</li><li>Mucho espacio.</li></ul>Lo tienes cuando: ocho compases donde la nota más suave está tan limpia como la más fuerte. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 4 de 5</a>.',
                 hint: 'Playing quietly is a skill, not a limitation. Every buzz and mistake hides at loud volume and shows at soft — this is an honesty check.',
                 hint_es: 'Tocar suave es una destreza, no una limitación. Cada zumbido y error se esconde a volumen fuerte y se nota a volumen suave — esto es una prueba de honestidad.',
                 stuck: 'Rule of 3 at half speed: three notes, whisper volume, one phrase per two bars.',
                 stuck_es: 'Regla de 3 a media velocidad: tres notas, volumen susurrado, una frase cada dos compases.',
-                levelUp: 'Build one long crescendo across all eight bars — start at a whisper, end singing, never harsh.',
-                levelUp_es: 'Construye un solo crescendo largo a lo largo de los ocho compases — empieza en un susurro, termina cantando, nunca áspero.',
+                levelUp: 'Build one long crescendo across all eight bars — start as quietly as you can, end singing, never harsh.',
+                levelUp_es: 'Construye un solo crescendo largo a lo largo de los ocho compases — empieza lo más suave que puedas, termina cantando, nunca áspero.',
                 skills: [5, 6],
                 response: { type: 'short', prompt: 'Rate your quiet control 1–3, and name one note that buzzed when soft.', prompt_es: 'Califica tu control del volumen suave del 1 al 3, y nombra una nota que zumbó cuando tocaste suave.', placeholder: 'e.g. 2 — the G on the D string buzzes', placeholder_es: 'p. ej. 2 — el G en la cuerda Re zumba' }
               }
@@ -758,8 +758,8 @@ SETS.push(
             steps: [
               {
                 label: 'Ear Spark: sing and find the note', label_es: 'Chispa auditiva: canta y encuentra la nota',
-                text: 'Ear Spark (optional, 2 min):<ol><li>Press play below — the deck draws three notes from the low E string, frets 0–5, and plays them for you.</li><li>Sing each note back and hold it, then find it on the string — singing first is the whole trick.</li><li>Check yourself last.</li></ol>',
-                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Presiona reproducir abajo — la baraja saca tres notas de la cuerda Mi grave, trastes 0–5, y las toca por ti.</li><li>Canta cada nota de vuelta y sostenla, y luego encuéntrala en la cuerda — cantar primero es todo el truco.</li><li>Revísate al final.</li></ol>',
+                text: 'Ear Spark (optional, 2 min):<ol><li>Press play below — the deck draws three notes from the low E string, frets 0–5, and plays them for you.</li><li>Sing each note back and hold it, then find it on the string — singing first is the important part.</li><li>Check yourself last.</li></ol>',
+                text_es: 'Chispa auditiva (opcional, 2 min):<ol><li>Presiona reproducir abajo — la baraja saca tres notas de la cuerda Mi grave, trastes 0–5, y las toca por ti.</li><li>Canta cada nota de vuelta y sostenla, y luego encuéntrala en la cuerda — cantar primero es la parte importante.</li><li>Revísate al final.</li></ol>',
                 drill: { type: 'ear', pool: 'lowEFrets', draw: 3 },
               }
             ]
@@ -815,8 +815,8 @@ SETS.push(
           prompt_es: 'Tu solo está atascado en UNA sola nota durante 8 compases. ¿Qué mantiene interesado al oyente?',
           choices: ['Nothing — you need more notes to be interesting', 'Playing that note as fast as possible the whole time', 'Changing the rhythm, volume, and note length as you go', 'Holding one long note for all 8 bars'],
           choices_es: ['Nada — necesitas más notas para ser interesante', 'Tocar esa nota lo más rápido posible todo el tiempo', 'Ir cambiando el ritmo, el volumen y la duración de la nota', 'Sostener una sola nota larga durante los 8 compases'], answer: 2,
-          explain: 'Rhythm, dynamics, and space are expression tools that don\'t need new notes — that\'s the whole point of the one-note solo.',
-          explain_es: 'El ritmo, la dinámica y el espacio son herramientas de expresión que no necesitan notas nuevas — ese es todo el punto del solo de una nota.' } },
+          explain: 'Rhythm, dynamics, and space are expression tools that don\'t need new notes — that\'s what the one-note solo is for.',
+          explain_es: 'El ritmo, la dinámica y el espacio son herramientas de expresión que no necesitan notas nuevas — para eso sirve el solo de una nota.' } },
       { id: 'm4w2-s6', text: 'Improvise a call-and-response phrase (call ends off root; response lands on root)',
         text_es: 'Improvisar una frase de llamada y respuesta (la llamada termina fuera de la raíz; la respuesta aterriza en la raíz)',
         gotItWhen: 'on playback you can hear the question (call) and the answer (response) — the call feels unresolved, the response feels like it arrives.',

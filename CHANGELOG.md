@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-08 — Plainer language on the Song Journey pages and in the modules
+
+### Changed
+
+- **The Song Journey pages now describe the recordings in plain words.** The
+  Watchtower "Song anatomy" table and Story section say what each part of the
+  band does — plays louder, answers between the sung lines, continues as the
+  recording fades out — instead of using slang like "slams the loop" or
+  "flies over the top." The same cleanup ran across all six song pages,
+  including the shared lick paragraphs ("learn them exactly, then change
+  them").
+- **Modules and class activities lost their figures of speech.** Phrases like
+  "the whole trick," "nail it," "for real," "fights you," and "rock solid" now
+  say exactly what they mean. Music words you need — riff, lick, loop, slide,
+  wah, box — are unchanged and still defined the first time you see them.
+- Spanish was rewritten to match on every changed line.
+
 ## 2026-09-07 — Printed handouts are smaller and shorter
 
 ### Changed

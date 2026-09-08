@@ -8,7 +8,7 @@ SETS.push(
 
   {
     id: 'm6w1',
-    songThread: [{ name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', note: 'your strumming patterns power this song' }],
+    songThread: [{ name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', note: 'this song runs on your strumming patterns' }],
     label: 'Set 1',
     locked: false,
     module: 'Strumming Patterns with Chords',
@@ -35,8 +35,8 @@ SETS.push(
             label: 'Watch: the strumming wrist', label_es: 'Mira: la muñeca de rasgueo',
             text: 'Watch: <a href="https://www.youtube.com/watch?v=SdLsQuvsuO0" target="_blank">Guitar Strumming Patterns for Beginners – Lauren Bateman (0:00–4:00)</a>. Same lesson in Spanish: <a href="https://www.youtube.com/watch?v=zEDxLaZi9Ug" target="_blank">Rasgueos de Guitarra / Lección para Principiantes – Christianvib</a>. Your task while you watch: keep your eyes on the strumming wrist and count how many times it changes direction in one bar.',
             text_es: 'Mira: <a href="https://www.youtube.com/watch?v=SdLsQuvsuO0" target="_blank">Guitar Strumming Patterns for Beginners – Lauren Bateman (0:00–4:00)</a> (en inglés). La misma lección en español: <a href="https://www.youtube.com/watch?v=zEDxLaZi9Ug" target="_blank">Rasgueos de Guitarra / Lección para Principiantes – Christianvib</a>. Tu tarea mientras miras: mantén los ojos en la muñeca de rasgueo y cuenta cuántas veces cambia de dirección en un compás.',
-            hint: 'Pay close attention to the wrist on screen — it never stops moving, even between hits on the strings. The pendulum motion is the secret.',
-            hint_es: 'Presta mucha atención a la muñeca en pantalla — nunca deja de moverse, incluso entre golpes a las cuerdas. El movimiento de péndulo es el secreto.',
+            hint: 'Pay close attention to the wrist on screen — it never stops moving, even between hits on the strings. The pendulum motion is what makes it work.',
+            hint_es: 'Presta mucha atención a la muñeca en pantalla — nunca deja de moverse, incluso entre golpes a las cuerdas. El movimiento de péndulo es lo que lo hace funcionar.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'What is the SINGLE most important habit for good strumming?',
               prompt_es: '¿Cuál es el ÚNICO hábito más importante para un buen rasgueo?',
@@ -430,8 +430,8 @@ SETS.push(
             label: 'Watch: the D-DU-UDU pattern', label_es: 'Mira: el patrón D-DU-UDU',
             text: 'Watch: <a href="https://youtu.be/6LmQCdt_ZhQ" target="_blank">The Most Common Strumming Pattern of All Time! – JustinGuitar</a> (0:00–4:00). Your task while you watch: air-strum along and find the two moments the pick misses — the wrist keeps swinging, but on purpose it skips one upstroke and one downstroke.',
             text_es: 'Mira: <a href="https://youtu.be/6LmQCdt_ZhQ" target="_blank">The Most Common Strumming Pattern of All Time! – JustinGuitar</a> (0:00–4:00). Tu tarea mientras miras: rasguea en el aire junto con él y encuentra los dos momentos en que la púa falla a propósito — la muñeca sigue balanceándose, pero se salta un golpe hacia arriba y uno hacia abajo a propósito.',
-            hint: 'You already met this pattern in Module 5, where it was called the folk strum (D · D U · U D U) — it\'s the same six strums. What\'s new here is naming it, counting it out loud, and making it survive a chord change. Justin calls it the pattern you can always rely on — D-DU-UDU. Listen for which strums he skips: the wrist still moves, but the pick doesn\'t hit the strings on those two slots.',
-            hint_es: 'Ya conociste este patrón en el Módulo 5, donde se llamaba el rasgueo folk (D · D U · U D U) — son los mismos seis rasgueos. Lo nuevo aquí es nombrarlo, contarlo en voz alta, y lograr que sobreviva a un cambio de acorde. Justin lo llama el patrón en el que siempre puedes confiar — D-DU-UDU. Escucha cuáles rasgueos se salta: la muñeca sigue moviéndose, pero la púa no toca las cuerdas en esos dos espacios.',
+            hint: 'You already met this pattern in Module 5, where it was called the folk strum (D · D U · U D U) — it\'s the same six strums. What\'s new here is naming it, counting it out loud, and keeping it going through a chord change. Justin calls it the pattern you can always rely on — D-DU-UDU. Listen for which strums he skips: the wrist still moves, but the pick doesn\'t hit the strings on those two slots.',
+            hint_es: 'Ya conociste este patrón en el Módulo 5, donde se llamaba el rasgueo folk (D · D U · U D U) — son los mismos seis rasgueos. Lo nuevo aquí es nombrarlo, contarlo en voz alta, y lograr que siga sonando durante un cambio de acorde. Justin lo llama el patrón en el que siempre puedes confiar — D-DU-UDU. Escucha cuáles rasgueos se salta: la muñeca sigue moviéndose, pero la púa no toca las cuerdas en esos dos espacios.',
             skills: [1, 2],
             response: { type: 'mc', prompt: 'In the D-DU-UDU pattern, which UPSTROKE is skipped (the wrist swings up but the pick misses)?',
               prompt_es: 'En el patrón D-DU-UDU, ¿cuál GOLPE HACIA ARRIBA se salta (la muñeca sube pero la púa falla)?',
@@ -502,8 +502,8 @@ SETS.push(
             label: 'Form G and D', label_es: 'Forma G y D',
             text: 'Form <strong>G</strong> and <strong>D</strong> from the diagram — today\'s pattern lands on these two — and strum once cleanly before you add the D-DU-UDU rhythm.',
             text_es: 'Forma <strong>G</strong> y <strong>D</strong> a partir del diagrama — el patrón de hoy cae sobre estos dos — y rasguea una vez de forma limpia antes de agregar el ritmo D-DU-UDU.',
-            hint: 'G is a full six-string chord; D skips the two lowest strings (the X marks). Get them ringing clean first — the rhythm is easier when the chord isn\'t fighting you.',
-            hint_es: 'G es un acorde completo de seis cuerdas; D se salta las dos cuerdas más graves (las marcas X). Primero logra que suenen limpios — el ritmo es más fácil cuando el acorde no está peleando contigo.',
+            hint: 'G is a full six-string chord; D skips the two lowest strings (the X marks). Get them ringing clean first — the rhythm is easier when the chord isn\'t giving you trouble.',
+            hint_es: 'G es un acorde completo de seis cuerdas; D se salta las dos cuerdas más graves (las marcas X). Primero logra que suenen limpios — el ritmo es más fácil cuando el acorde no te está dando problemas.',
             chords: [
               { name: 'G', chord: [[6,3,'2'],[5,2,'1'],[4,0],[3,0],[2,0],[1,3,'3']], position: 0 },
               { name: 'D', chord: [[6,'x'],[5,'x'],[4,0],[3,2,'1'],[2,3,'3'],[1,2,'2']], position: 0 }
@@ -625,8 +625,8 @@ SETS.push(
                 hint_es: 'El Bm pequeño es la versión más fácil para principiantes — el Bm con cejilla completa (un dedo presionado plano sobre varias cuerdas) llega en el Módulo 7. Por ahora el patrón importa más que la forma.',
                 stuck: 'Loop just the A → Bm change with one strum per bar until the landing is clean, then add the pattern.',
                 stuck_es: 'Repite solo el cambio A → Bm con un rasgueo por compás hasta que la llegada salga limpia, y luego agrega el patrón.',
-                levelUp: 'Lean into the up-strums a little — that extra offbeat push is the Latin feel.',
-                levelUp_es: 'Inclínate un poco más hacia los golpes hacia arriba — ese empuje extra de contratiempo es la sensación latina.',
+                levelUp: 'Play the up-strums a little stronger — that extra offbeat push is the Latin feel.',
+                levelUp_es: 'Toca los golpes hacia arriba un poco más fuerte — ese empuje extra de contratiempo es la sensación latina.',
                 skills: [3, 5],
                 chords: [
                   { name: 'Bm', chord: [[6,'x'],[5,'x'],[4,4,'4'],[3,4,'3'],[2,3,'2'],[1,2,'1']], position: 2 }
@@ -834,8 +834,8 @@ SETS.push(
                 label: 'Warm-up: all three feels', label_es: 'Calentamiento: las tres sensaciones',
                 text: 'Tune to green, then on a G chord play 2 bars each of:<ol><li>Steady down-up (folk).</li><li>Heavy down-up (rock).</li><li>Up-only on the "+" (reggae).</li></ol>You\'ve got it when: in tune and your hand remembers all three feels before you refine them.',
                 text_es: 'Afina hasta que esté en verde, y luego con un acorde G toca 2 compases de cada uno:<ol><li>Abajo-arriba constante (folk).</li><li>Abajo-arriba pesado (rock).</li><li>Solo arriba en el "+" (reggae).</li></ol>Lo tienes cuando: estás afinado y tu mano recuerda las tres sensaciones antes de refinarlas.',
-                hint: 'A quick 60-second pass through all three styles wakes up the patterns you\'ll polish this set.',
-                hint_es: 'Un repaso rápido de 60 segundos por los tres estilos despierta los patrones que vas a pulir en esta unidad.',
+                hint: 'A quick 60-second pass through all three styles refreshes the patterns you\'ll polish this set.',
+                hint_es: 'Un repaso rápido de 60 segundos por los tres estilos refresca los patrones que vas a pulir en esta unidad.',
                 playSeq: { label: 'Hear all 6 strings in tune', label_es: 'Escucha las 6 cuerdas afinadas', bpm: 50, notes: [40, 45, 50, 55, 59, 64] }
               }
             ]
@@ -999,8 +999,8 @@ SETS.push(
           prompt_es: 'Escuchas una canción con una sensación lenta, suave, acústica y un aire de cantautor. ¿Qué rasgueo le queda mejor?',
           choices: ['Heavy rock chops on every downstroke', 'Reggae offbeat upstrokes', 'Gentle folk strum (soft down-up)', 'No strum at all'],
           choices_es: ['Golpes pesados de rock en cada golpe hacia abajo', 'Golpes hacia arriba de contratiempo reggae', 'Rasgueo folk suave (abajo-arriba suave)', 'Sin rasgueo alguno'], answer: 2,
-          explain: 'Match the strum to the energy of the song: a soft, slow song wants a gentle folk strum that sits under the singer. Rock chops or a reggae offbeat would fight the mood.',
-          explain_es: 'Ajusta el rasgueo a la energía de la canción: una canción suave y lenta pide un rasgueo folk suave que se quede debajo del cantante. Los golpes de rock o el contratiempo reggae chocarían con el ambiente.' } },
+          explain: 'Match the strum to the energy of the song: a soft, slow song wants a gentle folk strum that stays quieter than the singer. Rock chops or a reggae offbeat would clash with the mood.',
+          explain_es: 'Ajusta el rasgueo a la energía de la canción: una canción suave y lenta pide un rasgueo folk suave que se mantenga más bajo que el cantante. Los golpes de rock o el contratiempo reggae chocarían con el ambiente.' } },
       { id: 'm6w3-s5', text: 'Switch strum patterns mid-song (e.g., verse vs. chorus)',
         text_es: 'Cambiar de patrón de rasgueo a mitad de la canción (p. ej., estrofa vs. coro)',
         gotItWhen: 'you can play 8 bars of one pattern, then switch cleanly to a different pattern for the next 8 bars — without losing the beat at the transition.',
@@ -1083,7 +1083,7 @@ MODULE_REVIEWS[6] = {
     'Repite G durante 2 compases, y luego D durante 2 compases, tocando D-DU-UDU con el patrón idéntico a través del cambio',
     'Toma G–D–Em–C y tócalo de dos formas — folk, y luego rock — cambiando la sensación sin interrupción en la costura'
   ],
-  forward: 'Module 7 is the <strong>barre-chord</strong> module — and every steady strum hand you just built is what carries you through it. The rhythm keeps going even while your fretting hand fights the hardest shapes in the course. The groove you own now is what makes a clamped, buzzy first barre still sound like music.',
-  forward_es: 'El Módulo 7 es el módulo de <strong>acordes con cejilla</strong> — y cada mano de rasgueo estable que acabas de construir es lo que te lleva a través de él. El ritmo sigue adelante incluso mientras tu mano de trastear lucha con las formas más difíciles del curso. El groove que ahora dominas es lo que hace que una primera cejilla apretada y con zumbido siga sonando a música.',
+  forward: 'Module 7 is the <strong>barre-chord</strong> module — and every steady strum hand you just built is what carries you through it. The rhythm keeps going even while your fretting hand works on the hardest shapes in the course. The groove you can now play reliably is what makes a clamped, buzzy first barre still sound like music.',
+  forward_es: 'El Módulo 7 es el módulo de <strong>acordes con cejilla</strong> — y cada mano de rasgueo estable que acabas de construir es lo que te lleva a través de él. El ritmo sigue adelante incluso mientras tu mano de trastear trabaja en las formas más difíciles del curso. El groove que ahora puedes tocar de forma confiable es lo que hace que una primera cejilla apretada y con zumbido siga sonando a música.',
   standards: ['Pr.4a', 'Pr.5a', 'Pr.6a']
 };

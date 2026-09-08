@@ -571,8 +571,8 @@ SETS.push(
           },
           {
             label: 'Challenge — Three-Chord Half-Bar (3 chords)', label_es: 'Reto — Medio compás con tres acordes (3 acordes)',
-            text: '<ul><li>Play three shapes now, still two beats each — G5 · C5 · D5, then back to G5, looping at 60 BPM.</li></ul>That\'s a I–IV–V in the key of G (say it "one–four–five" — musicians number the chords of a key by counting up the musical alphabet from its home note, so in G, G is I, C is IV and D is V), the backbone of thousands of songs, moving at chorus speed. You\'ve got it when: two clean laps, every change on the beat.',
-            text_es: '<ul><li>Toca ahora tres formas, todavía dos tiempos cada una — G5 · C5 · D5, y de vuelta a G5, repitiendo a 60 BPM.</li></ul>Eso es un I–IV–V en la tonalidad de G (se dice "uno-cuatro-cinco" — los músicos numeran los acordes de una tonalidad contando hacia arriba en el alfabeto musical desde su nota base, así que en G, G es I, C es IV y D es V), la columna vertebral de miles de canciones, moviéndose a velocidad de coro. Lo tienes cuando: dos vueltas limpias, cada cambio a tiempo.',
+            text: '<ul><li>Play three shapes now, still two beats each — G5 · C5 · D5, then back to G5, looping at 60 BPM.</li></ul>That\'s a I–IV–V in the key of G (say it "one–four–five" — musicians number the chords of a key by counting up the musical alphabet from its home note, so in G, G is I, C is IV and D is V), the harmonic basis of thousands of songs, moving at chorus speed. You\'ve got it when: two clean laps, every change on the beat.',
+            text_es: '<ul><li>Toca ahora tres formas, todavía dos tiempos cada una — G5 · C5 · D5, y de vuelta a G5, repitiendo a 60 BPM.</li></ul>Eso es un I–IV–V en la tonalidad de G (se dice "uno-cuatro-cinco" — los músicos numeran los acordes de una tonalidad contando hacia arriba en el alfabeto musical desde su nota base, así que en G, G es I, C es IV y D es V), la base armónica de miles de canciones, moviéndose a velocidad de coro. Lo tienes cuando: dos vueltas limpias, cada cambio a tiempo.',
             hint: 'C5 and D5 are both A-string roots two frets apart (frets 3 and 5); G5 drops to the low E string (fret 3). Group the two A-string shapes in your mind, then the hop down to G5.',
             hint_es: 'C5 y D5 son ambas raíces de la cuerda La a dos trastes de distancia (trastes 3 y 5); G5 baja a la cuerda Mi grave (traste 3). Agrupa mentalmente las dos formas de la cuerda La, y luego el salto a G5.',
             stuck: 'Loop just C5 → D5 (the same-string, two-fret slide) until it\'s automatic, then add the G5 hop.',
@@ -788,8 +788,8 @@ SETS.push(
                 text_es: 'Esta canción acústica y suave normalmente no se toca así — ese es el punto. Lleva la marca ◐, nuestra señal para una canción tocada en contra de su estilo natural.<ul><li>Toca su progresión como acordes de potencia — A5 · C5 · D5 · F5 — dos tiempos por acorde a 60 BPM, suavemente.</li></ul>Lo tienes cuando: dos vueltas limpias Y suaves — los acordes de potencia no tienen que ser fuertes. Sin puntaje — solo pruébalo. <a href="tabs/the-cure.html" target="_blank">&#x1F9F5; Recorrido de la canción: esto es la Capa 3 de 5</a>.',
                 hint: 'You already know these roots from Module 2. The challenge here is touch: light pick, both strings ringing, no harsh sound.',
                 hint_es: 'Ya conoces estas raíces del Módulo 2. El reto aquí es el toque: púa ligera, ambas cuerdas sonando, sin sonido áspero.',
-                stuck: 'Roots-only at a whisper first — get the dynamics, then add the fifths.',
-                stuck_es: 'Solo raíces en un susurro primero — consigue la dinámica, y luego agrega las quintas.',
+                stuck: 'Roots-only as quietly as you can first — get the dynamics, then add the fifths.',
+                stuck_es: 'Solo raíces lo más suave que puedas primero — consigue la dinámica, y luego agrega las quintas.',
                 levelUp: 'Add G5 before looping back to A5, or play one lap loud and one lap soft and hear the difference.',
                 levelUp_es: 'Agrega G5 antes de volver a A5, o toca una vuelta fuerte y una vuelta suave y escucha la diferencia.',
                 tab: {
@@ -969,7 +969,7 @@ MODULE_REVIEWS[3] = {
     'Lee una progresión de tres acordes (I–IV–V) a partir de símbolos de acorde / TAB con un patrón de rasgueo nombrado (corcheas rectas o el rasgueo dividido), y nombra acordes de potencia a partir de un diagrama de acordes',
     'Aplaude y cuenta un ritmo de 4 compases usando redondas, blancas, negras y corcheas'
   ],
-  forward: 'The two-finger shape and the muting you just locked in are the backbone of rhythm guitar. The E &amp; A string roots you slide between also become your <strong>starting point for the pentatonic patterns in Module 4</strong> — that\'s where you\'ll play lead lines and solos over these very same power chords.',
-  forward_es: 'La forma de dos dedos y el silenciado que acabas de dominar son la columna vertebral de la guitarra rítmica. Las raíces de las cuerdas Mi &amp; La entre las que te deslizas también se convierten en tu <strong>punto de partida para los patrones pentatónicos del Módulo 4</strong> — ahí es donde vas a tocar líneas melódicas y solos sobre estos mismos acordes de potencia.',
+  forward: 'The two-finger shape and the muting you just locked in are the foundation of rhythm guitar. The E &amp; A string roots you slide between also become your <strong>starting point for the pentatonic patterns in Module 4</strong> — that\'s where you\'ll play lead lines and solos over these very same power chords.',
+  forward_es: 'La forma de dos dedos y el silenciado que acabas de dominar son la base de la guitarra rítmica. Las raíces de las cuerdas Mi &amp; La entre las que te deslizas también se convierten en tu <strong>punto de partida para los patrones pentatónicos del Módulo 4</strong> — ahí es donde vas a tocar líneas melódicas y solos sobre estos mismos acordes de potencia.',
   standards: ['Pr.4a', 'Pr.5a', 'Pr.5b', 'Pr.6a', 'Re.7a']
 };

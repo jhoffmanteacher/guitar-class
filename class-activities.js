@@ -180,8 +180,8 @@ window.CLASS_ACTIVITIES = [
     number: 2,
     title:    'Playing Happy Birthday — The Whole Song',
     title_es: 'Tocando Happy Birthday — La canción completa',
-    intro:    'You played phrase A already. Today you play all four phrases without ever leaving the low E string — the melody climbs to the double dot at fret 12 and walks back home. Once that\'s yours, there\'s a second way to play the back half that never leaves the first five frets.',
-    intro_es: 'Ya tocaste la frase A. Hoy tocas las cuatro frases sin salirte nunca de la cuerda Mi grave — la melodía sube hasta el punto doble del traste 12 y regresa caminando. Cuando ya sea tuya, hay una segunda forma de tocar la segunda mitad que nunca se sale de los primeros cinco trastes.',
+    intro:    'You played phrase A already. Today you play all four phrases without ever leaving the low E string — the melody climbs to the double dot at fret 12 and walks back home. Once you can play that reliably, there\'s a second way to play the back half that never leaves the first five frets.',
+    intro_es: 'Ya tocaste la frase A. Hoy tocas las cuatro frases sin salirte nunca de la cuerda Mi grave — la melodía sube hasta el punto doble del traste 12 y regresa caminando. Cuando ya la puedas tocar con seguridad, hay una segunda forma de tocar la segunda mitad que nunca se sale de los primeros cinco trastes.',
     steps: [
       {
         figure: 'img/ca-hb-fingers.svg',
@@ -383,8 +383,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'The whole song the A-string way — same four phrases, two strings, no stopping in between. Then chase speed on whichever version you play cleanest.<ul><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Play it for the person next to you and have them sing along — someone in this room has a birthday coming</li></ul>You\'ve got it when: you\'ve played the A-string way start to finish and raised the tempo at least three times without breaking down — then keep climbing.',
-        text_es: 'La canción completa en la versión con la cuerda La — las mismas cuatro frases, dos cuerdas, sin detenerte entre medio. Después persigue la velocidad con la versión que te salga más limpia.<ul><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Tócala para la persona de al lado y que cante contigo — alguien en este salón cumple años pronto</li></ul>Lo tienes cuando: tocaste la versión con la cuerda La de principio a fin y subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
+        text: 'The whole song the A-string way — same four phrases, two strings, no stopping in between. Then raise the tempo on whichever version you play cleanest.<ul><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Play it for the person next to you and have them sing along — someone in this room has a birthday coming</li></ul>You\'ve got it when: you\'ve played the A-string way start to finish and raised the tempo at least three times without breaking down — then keep climbing.',
+        text_es: 'La canción completa en la versión con la cuerda La — las mismas cuatro frases, dos cuerdas, sin detenerte entre medio. Después sube el tempo con la versión que te salga más limpia.<ul><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Tócala para la persona de al lado y que cante contigo — alguien en este salón cumple años pronto</li></ul>Lo tienes cuando: tocaste la versión con la cuerda La de principio a fin y subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
         tab: {
           caption: 'Whole song · phrases A–D · low E and A strings',
           caption_es: 'Canción completa · frases A–D · cuerdas Mi grave y La',
@@ -489,8 +489,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Event 2 — the Spider. Same four fingers, two strings.<ul><li>Alternate: low E, A, low E, A</li><li>The trap: finger 3 wants to follow finger 2 onto the A string — send it back to the low E</li><li>Shift up one fret and repeat</li></ul>You\'ve got it when: one full pass with every note on the right string, any speed.',
-        text_es: 'Evento 2 — la Araña. Los mismos cuatro dedos, dos cuerdas.<ul><li>Alterna: Mi grave, La, Mi grave, La</li><li>La trampa: el dedo 3 quiere seguir al dedo 2 hacia la cuerda La — mándalo de vuelta al Mi grave</li><li>Sube un traste y repite</li></ul>Lo tienes cuando: una pasada completa con cada nota en la cuerda correcta, a cualquier velocidad.',
+        text: 'Event 2 — the Spider. Same four fingers, two strings.<ul><li>Alternate: low E, A, low E, A</li><li>Watch for this: finger 3 tends to follow finger 2 onto the A string — keep it on the low E</li><li>Shift up one fret and repeat</li></ul>You\'ve got it when: one full pass with every note on the right string, any speed.',
+        text_es: 'Evento 2 — la Araña. Los mismos cuatro dedos, dos cuerdas.<ul><li>Alterna: Mi grave, La, Mi grave, La</li><li>Ojo con esto: el dedo 3 tiende a seguir al dedo 2 hacia la cuerda La — mantenlo en el Mi grave</li><li>Sube un traste y repite</li></ul>Lo tienes cuando: una pasada completa con cada nota en la cuerda correcta, a cualquier velocidad.',
         tab: {
           caption: 'The Spider · cross the strings',
           caption_es: 'La Araña · cruza las cuerdas',
@@ -774,8 +774,8 @@ window.CLASS_ACTIVITIES = [
     number: 8,
     title:    'Finger Gym 5 — The Skip',
     title_es: 'Gimnasio de Dedos 5 — El salto',
-    intro:    'Two new demands today: skipping over a string without hitting it, and reaching one fret farther than your hand wants to go.',
-    intro_es: 'Hoy hay dos exigencias nuevas: saltar sobre una cuerda sin tocarla, y estirar un traste más allá de donde tu mano quiere llegar.',
+    intro:    'Two new demands today: skipping over a string without hitting it, and reaching one fret farther than is comfortable.',
+    intro_es: 'Hoy hay dos exigencias nuevas: saltar sobre una cuerda sin tocarla, y estirar un traste más allá de lo cómodo.',
     steps: [
       {
         figure: 'img/ca-fg-gym-zone-skip.svg',
@@ -896,8 +896,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Reach endurance — eight reaches without stopping, twice the usual.<ul><li>The hand starts to complain around six — that\'s the part that builds strength</li><li>Pain is different from work: if it hurts, STOP</li></ul>You\'ve got it when: eight reaches without stopping and finger 1 never lifts.',
-        text_es: 'Resistencia en el Estiramiento — ocho estiramientos sin detenerte, el doble de lo normal.<ul><li>La mano empieza a quejarse cerca del sexto — esa es la parte que construye fuerza</li><li>El dolor es distinto del esfuerzo: si duele, DETENTE</li></ul>Lo tienes cuando: ocho estiramientos sin detenerte y el dedo 1 nunca se levanta.',
+        text: 'Reach endurance — eight reaches without stopping, twice the usual.<ul><li>The hand starts to tire around six — that\'s the part that builds strength</li><li>Pain is different from work: if it hurts, STOP</li></ul>You\'ve got it when: eight reaches without stopping and finger 1 never lifts.',
+        text_es: 'Resistencia en el Estiramiento — ocho estiramientos sin detenerte, el doble de lo normal.<ul><li>La mano empieza a cansarse cerca del sexto — esa es la parte que construye fuerza</li><li>El dolor es distinto del esfuerzo: si duele, DETENTE</li></ul>Lo tienes cuando: ocho estiramientos sin detenerte y el dedo 1 nunca se levanta.',
         tab: {
           caption: 'Reach endurance · eight in a row',
           caption_es: 'Resistencia · ocho seguidos',
@@ -987,8 +987,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Keep going — there\'s no finish line on this one.<ul><li>Set the player above to 60 BPM and play with the beat</li><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Say each note\'s name as you land it — E, F#, G#, A</li></ul>You\'ve got it when: you\'ve raised the BPM twice without breaking down — then keep climbing.',
-        text_es: 'Sigue — aquí no hay meta final.<ul><li>Pon el reproductor de arriba en 60 BPM y toca con el pulso</li><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Di el nombre de cada nota al caer en ella — E, F#, G#, A</li></ul>Lo tienes cuando: ya subiste el BPM dos veces sin perder el ritmo — y de ahí, sigue subiendo.',
+        text: 'Keep going — there\'s no set stopping point on this one.<ul><li>Set the player above to 60 BPM and play with the beat</li><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Say each note\'s name as you land it — E, F#, G#, A</li></ul>You\'ve got it when: you\'ve raised the BPM twice without breaking down — then keep climbing.',
+        text_es: 'Sigue — aquí no hay un punto de parada fijo.<ul><li>Pon el reproductor de arriba en 60 BPM y toca con el pulso</li><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Di el nombre de cada nota al caer en ella — E, F#, G#, A</li></ul>Lo tienes cuando: ya subiste el BPM dos veces sin perder el ritmo — y de ahí, sigue subiendo.',
       },
     ],
   },
@@ -1034,8 +1034,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Put it together — the whole riff, one breath: 7 – 7 – 10 – 7 – 5 – 3 – 2.\nYou\'ve got it when: four times through without stopping, any speed.',
-        text_es: 'Júntalo todo — el riff completo, de un tirón: 7 – 7 – 10 – 7 – 5 – 3 – 2.\nLo tienes cuando: cuatro veces seguidas sin detenerte, a cualquier velocidad.',
+        text: 'Put it together — the whole riff, straight through without stopping: 7 – 7 – 10 – 7 – 5 – 3 – 2.\nYou\'ve got it when: four times through without stopping, any speed.',
+        text_es: 'Júntalo todo — el riff completo, seguido sin parar: 7 – 7 – 10 – 7 – 5 – 3 – 2.\nLo tienes cuando: cuatro veces seguidas sin detenerte, a cualquier velocidad.',
         tab: {
           caption: 'The whole riff · 7-7-10-7-5-3-2',
           caption_es: 'El riff completo · 7-7-10-7-5-3-2',
@@ -1051,8 +1051,8 @@ window.CLASS_ACTIVITIES = [
         },
       },
       {
-        text: 'Chase it.<ul><li>Every clean pass: raise the BPM by 10 and go again</li><li>Got speed? Make it groove — hold the first note of each pair longer, like the recording</li><li>Then open the Seven Nation Army Song Journey page and play it over the backing track</li></ul>You\'ve got it when: you\'ve raised the tempo at least three times without breaking down — then keep climbing.',
-        text_es: 'Persíguelo.<ul><li>Cada pasada limpia: sube el BPM 10 puntos y vuelve a intentarlo</li><li>¿Ya tienes velocidad? Dale ritmo — sostén más la primera nota de cada pareja, como en la grabación</li><li>Después abre el Recorrido de la canción de Seven Nation Army y tócalo sobre la pista de acompañamiento</li></ul>Lo tienes cuando: subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
+        text: 'Raise the tempo.<ul><li>Every clean pass: raise the BPM by 10 and go again</li><li>Playing it fast already? Add the feel — hold the first note of each pair longer, like the recording</li><li>Then open the Seven Nation Army Song Journey page and play it over the backing track</li></ul>You\'ve got it when: you\'ve raised the tempo at least three times without breaking down — then keep climbing.',
+        text_es: 'Sube el tempo.<ul><li>Cada pasada limpia: sube el BPM 10 puntos y vuelve a intentarlo</li><li>¿Ya lo tocas rápido? Dale la sensación — sostén más la primera nota de cada pareja, como en la grabación</li><li>Después abre el Recorrido de la canción de Seven Nation Army y tócalo sobre la pista de acompañamiento</li></ul>Lo tienes cuando: subiste el tempo al menos tres veces sin perder el ritmo — y de ahí, sigue subiendo.',
       },
     ],
   },
@@ -1132,8 +1132,8 @@ window.CLASS_ACTIVITIES = [
         drill: { type: 'deck', deck: 'naturals' },
       },
       {
-        text: 'Keep going — no finish line here.<ul><li>Set the player above to 60 BPM and land one note per beat, up and back</li><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Say the names backwards — E D C B A G F E, from the double dot down</li><li>Then quiz a partner and catch their misses</li></ul>You\'ve got it when: you\'ve cleared a full pass at a faster BPM than you started — then keep climbing.',
-        text_es: 'Sigue — aquí no hay meta final.<ul><li>Pon el reproductor de arriba en 60 BPM y cae en una nota por tiempo, subiendo y bajando</li><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Di los nombres al revés — E D C B A G F E, desde el punto doble hacia abajo</li><li>Después ponle una prueba a un compañero y atrapa sus fallos</li></ul>Lo tienes cuando: ya completaste una pasada entera a un BPM más alto que al empezar — y de ahí, sigue subiendo.',
+        text: 'Keep going — there is no set stopping point here.<ul><li>Set the player above to 60 BPM and land one note per beat, up and back</li><li>Every clean pass: raise the BPM by 10</li><li>Fast already? Say the names backwards — E D C B A G F E, from the double dot down</li><li>Then quiz a partner and catch their misses</li></ul>You\'ve got it when: you\'ve cleared a full pass at a faster BPM than you started — then keep climbing.',
+        text_es: 'Sigue — aquí no hay un punto de parada fijo.<ul><li>Pon el reproductor de arriba en 60 BPM y cae en una nota por tiempo, subiendo y bajando</li><li>Cada pasada limpia: sube el BPM 10 puntos</li><li>¿Ya vas rápido? Di los nombres al revés — E D C B A G F E, desde el punto doble hacia abajo</li><li>Después ponle una prueba a un compañero y atrapa sus fallos</li></ul>Lo tienes cuando: ya completaste una pasada entera a un BPM más alto que al empezar — y de ahí, sigue subiendo.',
       },
     ],
   },
@@ -1242,8 +1242,8 @@ window.CLASS_ACTIVITIES = [
       {
         label:    'Keep going',
         label_es: 'Sigue',
-        text: 'No finish line here. Pick one and keep working:<ul><li>Happy Birthday at 60 BPM, one note per beat. Every clean pass, add 10</li><li>An activity you never finished</li><li>The next section of your module</li><li>Teach the note names to someone at your table and quiz them</li></ul>You\'ve got it when: you\'ve cleared a pass at a faster BPM than you started — then keep climbing.',
-        text_es: 'Aquí no hay meta final. Escoge uno y sigue trabajando:<ul><li>Happy Birthday a 60 BPM, una nota por tiempo. Cada pasada limpia, súbele 10</li><li>Una actividad que nunca terminaste</li><li>La sección que sigue de tu módulo</li><li>Enséñale los nombres de las notas a alguien de tu mesa y ponle una prueba</li></ul>Lo tienes cuando: completaste una pasada a un BPM más alto que al empezar — y de ahí, sigue subiendo.',
+        text: 'There is no set stopping point here. Pick one and keep working:<ul><li>Happy Birthday at 60 BPM, one note per beat. Every clean pass, add 10</li><li>An activity you never finished</li><li>The next section of your module</li><li>Teach the note names to someone at your table and quiz them</li></ul>You\'ve got it when: you\'ve cleared a pass at a faster BPM than you started — then keep climbing.',
+        text_es: 'Aquí no hay un punto de parada fijo. Escoge uno y sigue trabajando:<ul><li>Happy Birthday a 60 BPM, una nota por tiempo. Cada pasada limpia, súbele 10</li><li>Una actividad que nunca terminaste</li><li>La sección que sigue de tu módulo</li><li>Enséñale los nombres de las notas a alguien de tu mesa y ponle una prueba</li></ul>Lo tienes cuando: completaste una pasada a un BPM más alto que al empezar — y de ahí, sigue subiendo.',
       },
     ],
   },

@@ -8,7 +8,7 @@ SETS.push(
 
   {
     id: 'w1',
-    songThread: [{ name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', layer: 1, note: 'meet the song' }],
+    songThread: [{ name: '"All Along the Watchtower"', journey: 'tabs/all-along-the-watchtower.html', layer: 1, note: 'first listen' }],
     label: 'Set 1',
     locked: false,
     module: 'Introductions: You and The Guitar',
@@ -274,7 +274,7 @@ SETS.push(
 
   {
     id: 'w2',
-    songThread: [{ name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 1, note: 'meet the riff' }],
+    songThread: [{ name: '"Seven Nation Army"', journey: 'tabs/seven-nation-army.html', layer: 1, note: 'first look at the riff' }],
     label: 'Set 2',
     locked: false,
     module: 'Introductions: You and The Guitar',
@@ -499,8 +499,8 @@ SETS.push(
           },
           {
             label: 'Quick try: play and name each string', label_es: 'Prueba rápida: toca y nombra cada cuerda',
-            text: 'Play each open string once, low E to high e, saying the name out loud as you pluck — just a quick preview; you\'ll drill these for real at the practice station. You\'ve got it when: you can name each string out loud the instant you pluck it.',
-            text_es: 'Toca cada cuerda al aire una vez, de Mi grave a mi aguda, diciendo el nombre en voz alta al pulsarla — es solo un adelanto rápido; las vas a practicar de verdad en la estación de práctica. Lo tienes cuando: puedes nombrar cada cuerda en voz alta al instante de pulsarla.',
+            text: 'Play each open string once, low E to high e, saying the name out loud as you pluck — just a quick preview; you\'ll drill these properly at the practice station. You\'ve got it when: you can name each string out loud the instant you pluck it.',
+            text_es: 'Toca cada cuerda al aire una vez, de Mi grave a mi aguda, diciendo el nombre en voz alta al pulsarla — es solo un adelanto rápido; las vas a practicar bien en la estación de práctica. Lo tienes cuando: puedes nombrar cada cuerda en voz alta al instante de pulsarla.',
             hint: 'Hearing + saying + playing helps you memorize it faster than just watching.',
             hint_es: 'Escuchar + decir + tocar te ayuda a memorizar más rápido que solo mirar.',
             stuck: 'Go low to high slowly, checking the mnemonic after each one: E, A, D, G, B, e. Do it twice before you speed up.',
@@ -536,7 +536,7 @@ SETS.push(
             label: 'Preview the "Seven Nation Army" riff', label_es: 'Adelanto del riff de "Seven Nation Army"',
             text: '<ol><li>Click the note names below the TAB (the little chart below — each number is a fret to press on the A string, the one just below the thickest string) to hear how it should sound.</li><li>Then try just the first few notes to get the feel.</li></ol>You\'ve got it when: you can match the first three notes to what you heard. This song grows with you through the whole course — <a href="tabs/seven-nation-army.html" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> Song Journey: this is Layer 1 of 5</a>.',
             text_es: '<ol><li>Haz clic en los nombres de las notas debajo del TAB (el pequeño diagrama de abajo — cada número es un traste que debes presionar en la cuerda La, la que está justo debajo de la cuerda más gruesa) para escuchar cómo debe sonar.</li><li>Luego prueba solo las primeras notas para agarrar la sensación.</li></ol>Lo tienes cuando: puedes hacer coincidir las primeras tres notas con lo que escuchaste. Esta canción crece contigo durante todo el curso — <a href="tabs/seven-nation-army.html" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8c0 6 14 2 14 8"/></svg> Recorrido de la canción: esto es la Capa 1 de 5</a>.',
-            hint: 'You\'ll play the whole riff at the practice station — this is just the preview. Heads up: this site teaches it as straight, even quarter notes — one per beat — to make it easy to count while you\'re learning it; the actual record swings it a bit looser than that, which you\'ll start to hear naturally once the shape feels solid. It sits on the A string, which is where the riff lives at true pitch, so it lines up with the record. Listen first, then match it — one note at a time. To fret a note, set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',
+            hint: 'You\'ll play the whole riff at the practice station — this is just the preview. Note: this site teaches it as straight, even quarter notes — one per beat — to make it easy to count while you\'re learning it; the actual record swings it a bit looser than that, which you\'ll start to hear naturally once the shape feels solid. It sits on the A string, which is where the riff lives at true pitch, so it lines up with the record. Listen first, then match it — one note at a time. To fret a note, set your fingertip just behind the fret and press firm; if it buzzes, move a little closer to the fret or press harder.',
             hint_es: 'Vas a tocar el riff completo en la estación de práctica — esto es solo el adelanto. Aviso: aquí se enseña con negras rectas y parejas — una nota por pulso — para que sea fácil de contar mientras lo aprendes; la grabación original lo toca con un poco más de swing (vaivén) que eso, algo que empezarás a notar de oído en cuanto domines bien la forma. Además, vive en la cuerda La, que es donde el riff suena en su tono real, así que sí coincide con la grabación. Escucha primero y luego iguálalo — una nota a la vez. Para trastear una nota, coloca la punta del dedo justo detrás del traste y presiona firme; si zumba, acércate un poco más al traste o presiona más fuerte.',
             stuck: 'Just the first two notes: click a note name to hear it, then find it on the A string. Get those solid before adding the next.',
             stuck_es: 'Solo las primeras dos notas: haz clic en el nombre de una nota para escucharla, y luego encuéntrala en la cuerda La. Deja esas bien firmes antes de agregar la siguiente.',

@@ -1194,6 +1194,86 @@ function checkNarrativeLeadIns() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1w. SLANG AND FIGURATIVE PHRASING IN STUDENT-FACING TEXT — copy tells
+   students what happens: louder, quieter, higher, in front of,
+   underneath. It does not describe a sound through a metaphor ("the
+   band slams the loop; the lead flies over the top") or an informal
+   idiom ("nail it", "for real", "rock solid"). The 2026-09-08 sweep
+   rewrote ~120 such phrases across the six Song Journey pages, every
+   module, class-activities.js and i18n.js; this catches a relapse of
+   the exact phrases it retired.
+
+   What this does NOT ban: standard music vocabulary the course defines
+   in context — riff, lick, hook, loop, lap, solo, wah, slide,
+   hammer-on, pull-off, palm-mute, chug, vamp, requinto, barre,
+   pentatonic box, backing track, call and response, turnaround, fill,
+   roll, groove, shuffle — nor the UI conventions ("Stuck?", "Level
+   up", "Finger Gym", "You've got it when"), nor the figurative lick
+   nicknames on the Journey pages ("the taunt", "the dive"), which are
+   titles beside a diagram rather than instructions.
+
+   Spanish is exempt by construction: the Journey scan blanks every
+   data-es="…" attribute before matching (keeping line numbers intact),
+   the module scan reads only the EN field names, and i18n.js is read
+   through its `en:` values only.
+   ════════════════════════════════════════════════════════════════════ */
+const SLANG_PHRASES = [
+  'slams the loop', 'flies over the top', 'straight out of the box', 'played bigger',
+  'pure stomp', 'tore through', 'hit hard', 'out front', 'the whole ride', 'sneak them',
+  'sneak the', 'steal them', 'sound like a record', 'for real', 'nail it',
+  'the whole trick', 'the same trick', 'whisper-quiet', 'at a whisper', 'fights you',
+  'fight the', 'toolkit', 'payoff', 'pays off', 'backbone', 'slam your', 'slam a finger',
+  'rock solid', 'like a pro', 'wants to be played', 'dialed down', 'the boss',
+  'big finish', 'gets bigger every time', 'skinny',
+];
+function checkSlangPhrasing() {
+  head('1w. Slang and figurative phrasing in student-facing text');
+  const RE = new RegExp(
+    '\\b(?:' + SLANG_PHRASES.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')\\b',
+    'gi');
+  let bad = 0;
+  const flag = (file, li, phrase) => {
+    err(`${file}:${li + 1} — "${phrase}"`);
+    problems++; bad++;
+  };
+
+  /* Journey pages — English text nodes only. Blanking each data-es="…"
+     in place (spaces, newlines kept) leaves every line number correct. */
+  for (const file of TAB_PAGES.filter(f => f.endsWith('.html'))) {
+    let raw;
+    try { raw = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    const en = raw.replace(/data-es="[^"]*"/g, m => m.replace(/[^\n]/g, ' '));
+    en.split('\n').forEach((line, li) => {
+      if (/^\s*<!--/.test(line)) return;
+      for (const m of line.matchAll(RE)) flag(file, li, m[0]);
+    });
+  }
+
+  /* Module content + class activities — the EN authoring fields only. */
+  const FIELD_RE =
+    /\b(text|hint|stuck|levelUp|gotItWhen|explain|forward|subtitle|meta|intro|note):\s*'((?:\\.|[^'\\])*)'/g;
+  for (const file of [...MODULE_FILES, 'class-activities.js']) {
+    let lines;
+    try { lines = readFileSync(join(ROOT, file), 'utf8').split('\n'); } catch { continue; }
+    lines.forEach((line, li) => {
+      for (const f of line.matchAll(FIELD_RE))
+        for (const m of f[2].matchAll(RE)) flag(file, li, m[0]);
+    });
+  }
+
+  /* i18n.js — the en: side of each key. */
+  const EN_RE = /\ben:\s*(?:'((?:\\.|[^'\\])*)'|"((?:\\.|[^"\\])*)")/g;
+  try {
+    readFileSync(join(ROOT, 'i18n.js'), 'utf8').split('\n').forEach((line, li) => {
+      for (const e of line.matchAll(EN_RE))
+        for (const m of (e[1] ?? e[2] ?? '').matchAll(RE)) flag('i18n.js', li, m[0]);
+    });
+  } catch { /* checked elsewhere */ }
+
+  if (bad === 0) ok('no banned slang phrases in student-facing text');
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1i. WATCH-RANGE LABELS ↔ URL TIME PARAMS — lesson links carry a
    "(M:SS–M:SS)" label (inside the anchor text or right after </a>)
    telling students what part of the video the card uses, and the URL
@@ -2599,6 +2679,7 @@ async function liveCheck() {
   checkNumberedStrings();
   checkBlockedTabSites();
   checkNarrativeLeadIns();
+  checkSlangPhrasing();
   checkRetiredStationWording();
   checkTabNoScroll();
   checkContrast();
