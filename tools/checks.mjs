@@ -2163,10 +2163,25 @@ async function checkLinks() {
 /* ════════════════════════════════════════════════════════════════════
    3. SW BUMP — make CACHE_VERSION a fingerprint of the shell files
    ════════════════════════════════════════════════════════════════════ */
+/* Text files are normalised to LF before hashing. On a checkout with
+   core.autocrlf=true (the Windows main checkout) git stores LF but writes
+   CRLF to disk, while a worktree can hold LF — so hashing raw bytes made
+   CACHE_VERSION depend on WHICH checkout ran the checks, and the two would
+   overwrite each other’s bump forever. Found 2026-09-08, when a docs-only
+   edit in the main checkout demanded a bump. Binary files (audio, raster
+   icons) are still hashed byte-exact, so a re-exported track bumps the
+   audio version exactly as before. */
+const TEXT_FOR_HASH = /\.(js|mjs|css|html|json|svg|md|txt|rules|webmanifest)$/i;
 function fingerprint(files) {
   const h = createHash('sha256');
   for (const f of files) {
-    try { h.update(f + '\0'); h.update(readFileSync(join(ROOT, f))); }
+    try {
+      const raw = readFileSync(join(ROOT, f));
+      h.update(f + '\0');
+      h.update(TEXT_FOR_HASH.test(f)
+        ? Buffer.from(raw.toString('utf8').replace(/\r\n/g, '\n'), 'utf8')
+        : raw);
+    }
     catch { /* file may not exist (e.g. optional icon) — skip */ }
   }
   return h.digest('hex').slice(0, 10);
