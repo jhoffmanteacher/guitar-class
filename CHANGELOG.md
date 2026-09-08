@@ -20,6 +20,12 @@ see `WORKFLOW.md` and the git commit log.
   "the whole trick," "nail it," "for real," "fights you," and "rock solid" now
   say exactly what they mean. Music words you need — riff, lick, loop, slide,
   wah, box — are unchanged and still defined the first time you see them.
+- **The licks on the Song Journey pages are named by what they do.** The two
+  licks on each song page used to have a nickname each — "the taunt", "the
+  wail", "the dive", "the sigh". They are now labelled **ascending lick**,
+  **descending lick**, or **down and back up**, so the same shape has the same
+  name on every page: once you can play the ascending lick in "Luna" you can
+  see it is the same idea in "Sweet Child O' Mine".
 - Spanish was rewritten to match on every changed line.
 
 ## 2026-09-07 — Printed handouts are smaller and shorter

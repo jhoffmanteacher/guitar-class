@@ -1274,6 +1274,58 @@ function checkSlangPhrasing() {
 }
 
 /* ════════════════════════════════════════════════════════════════════
+   1w2. JOURNEY LICK LABELS NAME THE SHAPE — the 12 "Lick N — …" tab
+   cards across the six Song Journey pages used to carry a nickname
+   each ("the taunt", "the dive", "the wail", "the run-up", "the
+   roll-down", "the sigh", "the reach", "the lift", "the fall", "the
+   climb", "the answer"). Twelve names for what are really only four
+   shapes — and one of them was wrong: luna's "the fall" is the same
+   down-then-back-up figure as "the roll-down" and "the taunt", not a
+   fall. Renamed 2026-09-08 so a student who learns "ascending lick"
+   on one page recognises it on the next.
+
+   A free-text ban can't guard this: "the reach" is also a Finger Gym
+   event and "the climb"/"the fall" are ordinary words elsewhere on
+   these very pages. So pin it positively instead — every lick label
+   must use one of the four approved descriptors, in both languages,
+   and the total is pinned so a card can't quietly disappear.
+   ════════════════════════════════════════════════════════════════════ */
+const LICK_LABELS_EN = ['down and back up', 'ascending lick', 'descending lick', 'the slide-in'];
+const LICK_LABELS_ES = ['baja y vuelve a subir', 'lick ascendente', 'lick descendente', 'el deslizado'];
+const LICK_CARD_COUNT = 12;
+function checkJourneyLickLabels() {
+  head('1w2. Journey lick labels name the shape');
+  const TITLE_RE = /<span class="tab-title"[^>]*data-es="([^"]*)"[^>]*>([^<]*)</g;
+  const descriptor = s => s.replace(/^Lick \d+ —\s*/, '').split('&middot;')[0].trim();
+  let bad = 0, seen = 0;
+  for (const file of TAB_PAGES.filter(f => f.endsWith('.html'))) {
+    let raw;
+    try { raw = readFileSync(join(ROOT, file), 'utf8'); } catch { continue; }
+    raw.split('\n').forEach((line, li) => {
+      for (const m of line.matchAll(TITLE_RE)) {
+        const [es, en] = [m[1], m[2]];
+        if (!/^Lick \d+ —/.test(en)) continue;
+        seen++;
+        const dEn = descriptor(en), dEs = descriptor(es);
+        if (!LICK_LABELS_EN.includes(dEn)) {
+          err(`${file}:${li + 1}: lick label "${dEn}" is not one of ${LICK_LABELS_EN.map(s => `"${s}"`).join(', ')} — name the shape, not a nickname`);
+          problems++; bad++;
+        }
+        if (!LICK_LABELS_ES.includes(dEs)) {
+          err(`${file}:${li + 1}: Spanish lick label "${dEs}" is not one of ${LICK_LABELS_ES.map(s => `"${s}"`).join(', ')}`);
+          problems++; bad++;
+        }
+      }
+    });
+  }
+  if (seen !== LICK_CARD_COUNT) {
+    err(`expected ${LICK_CARD_COUNT} "Lick N — …" cards across the Journey pages, found ${seen}`);
+    problems++; bad++;
+  }
+  if (bad === 0) ok(`${seen} Journey lick labels name their shape in both languages`);
+}
+
+/* ════════════════════════════════════════════════════════════════════
    1i. WATCH-RANGE LABELS ↔ URL TIME PARAMS — lesson links carry a
    "(M:SS–M:SS)" label (inside the anchor text or right after </a>)
    telling students what part of the video the card uses, and the URL
@@ -2680,6 +2732,7 @@ async function liveCheck() {
   checkBlockedTabSites();
   checkNarrativeLeadIns();
   checkSlangPhrasing();
+  checkJourneyLickLabels();
   checkRetiredStationWording();
   checkTabNoScroll();
   checkContrast();
