@@ -102,8 +102,8 @@ async function showTeacherApp(user){
       // data-open-activity link — so they have to be matched before it, or
       // clicking the pencil would navigate away instead of opening the editor.
       const actRename=e.target.closest('[data-rename-activity]');
-      if(actRename){ activityEditId=actRename.dataset.id; renderTeacherActivities(); return; }
-      if(e.target.closest('[data-rename-cancel]')){ activityEditId=null; renderTeacherActivities(); return; }
+      if(actRename){ activityEditId=actRename.dataset.id; renderTeacherActivities({cached:true}); return; }
+      if(e.target.closest('[data-rename-cancel]')){ activityEditId=null; renderTeacherActivities({cached:true}); return; }
       const actSave=e.target.closest('[data-rename-save]');
       if(actSave){ teacherSaveActivityTitle(actSave.dataset.id); return; }
       const actReset=e.target.closest('[data-rename-reset]');
@@ -138,7 +138,7 @@ async function showTeacherApp(user){
       const box=e.target.closest('.t-act-title-edit');
       if(!box) return;
       if(e.key==='Enter'){ e.preventDefault(); teacherSaveActivityTitle(box.dataset.id); }
-      else if(e.key==='Escape'){ e.preventDefault(); activityEditId=null; renderTeacherActivities(); }
+      else if(e.key==='Escape'){ e.preventDefault(); activityEditId=null; renderTeacherActivities({cached:true}); }
     });
   }
   // The teacher grid spans every set, so load all module data first. Sequential
@@ -540,7 +540,24 @@ function renderTeacherTrouble(){
    This table lists every activity regardless of date — deliberate, so a
    future or not-yet-dated activity can be pushed and reviewed here ahead of
    its lesson. See loadClassConfig() in app.js for the student-facing read. */
-function renderTeacherActivities(){
+/* opts.cached: repaint from the config already in memory instead of going
+   back to Firestore.
+
+   Only for repaints that changed NOTHING in Firestore — a sort click, opening
+   or cancelling the rename box, a rejected number entry. Every repaint that
+   FOLLOWS A WRITE must stay fresh, and deliberately so: the failure paths in
+   teacherSetActivityHidden/Date roll their optimistic change back in memory
+   and then repaint to show what Firestore actually holds, and
+   teacherSetActivityNumber notes that painting before the read would pull the
+   pre-write copy back over the new state. Fresh is therefore the DEFAULT, so
+   a call site I misjudged costs one extra read rather than showing the
+   teacher stale data.
+
+   The win is not really the read — it is that a sort click no longer blanks
+   the table to "Loading…" and waits on a network round trip to redraw rows it
+   already has. */
+function renderTeacherActivities(opts){
+  const cached = !!(opts && opts.cached) && teacherClassConfigLoaded;
   const box=document.getElementById('t-grid-container');
   if(activityDetailId){ renderTeacherActivityDetail(activityDetailId); return; }
   const activities=(window.CLASS_ACTIVITIES||[]);
@@ -552,8 +569,8 @@ function renderTeacherActivities(){
     box.innerHTML='<div class="t-loading">No student data yet — students need to sign in first.</div>';
     return;
   }
-  box.innerHTML='<div class="t-loading">Loading…</div>';
-  loadTeacherClassConfig().then(cfg=>{
+  if(!cached) box.innerHTML='<div class="t-loading">Loading…</div>';
+  (cached ? Promise.resolve(teacherClassConfig) : loadTeacherClassConfig()).then(cfg=>{
     if(teacherView!=='activities') return;   // switched views mid-flight
     if(!cfg) return;                         // superseded by a newer toggle
     const hidden=cfg.hiddenActivities||{};
@@ -669,7 +686,7 @@ function renderTeacherActivities(){
 function teacherSetActivitySort(key){
   if(activitySortKey===key) activitySortDir = activitySortDir==='asc' ? 'desc' : 'asc';
   else { activitySortKey=key; activitySortDir = key==='date' ? 'desc' : 'asc'; }
-  renderTeacherActivities();
+  renderTeacherActivities({cached:true});   // sorting rows we already have
 }
 /* The name to SHOW for an activity in the console: the teacher's rename if
    one is live, otherwise the title class-activities.js ships. Deliberately
@@ -762,7 +779,7 @@ async function teacherSetActivityNumber(id, value){
   // Out of range, unparseable, or already there: repaint, which puts the old
   // number back in the box, and write nothing.
   if(!Number.isFinite(n) || n<1 || n>activities.length || n===cur[id]){
-    if(teacherView==='activities') renderTeacherActivities();
+    if(teacherView==='activities') renderTeacherActivities({cached:true});   // nothing was written
     return;
   }
   const order=activities.slice().sort((x,y)=>cur[x.id]-cur[y.id]).filter(x=>x.id!==id);
@@ -909,6 +926,12 @@ let teacherClassConfig = { gamesEnabled:true, gameOverrides:{} };
 // takes a ticket; only the most recently issued one may touch state or return
 // a config to render from. A stale response resolves to null and is dropped.
 let teacherClassConfigReq = 0;
+/* Has a real config ever landed? teacherClassConfig starts as a DEFAULT
+   ({gamesEnabled:true, gameOverrides:{}}) with none of the activity maps, so
+   a cached repaint before the first load would silently paint every activity
+   as visible and undated. Cached paints fall back to a fresh read until this
+   is true. */
+let teacherClassConfigLoaded = false;
 async function loadTeacherClassConfig(){
   const req = ++teacherClassConfigReq;
   let cfg;
@@ -920,6 +943,7 @@ async function loadTeacherClassConfig(){
   if(!cfg.gameOverrides) cfg.gameOverrides = {};
   if(req !== teacherClassConfigReq) return null;   // a newer request is in flight — discard this one
   teacherClassConfig = cfg;
+  teacherClassConfigLoaded = true;
   return teacherClassConfig;
 }
 function renderTeacherGames(){
