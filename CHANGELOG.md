@@ -5,6 +5,23 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-07 — Printed handouts are smaller and shorter
+
+### Changed
+
+- **Printing a set now uses fewer sheets of paper.** The text prints one notch
+  smaller than it looks on screen, the margins are a little narrower, and the
+  spacing that exists so you can tap things with a finger is trimmed away on
+  paper. Nothing is left out — it just fits in less room.
+- **The skills checklist no longer starts its own page.** It used to jump to a
+  fresh sheet every time, even when half the previous one was empty; now it
+  follows straight on unless the page is genuinely full.
+- **A set's sections flow across the page break instead of being pushed whole
+  to the next one**, which used to leave a third of a sheet blank. A single
+  step, a TAB, a chord diagram and a checklist row still stay in one piece, so
+  no set of directions gets split down the middle.
+- Same for printing a practice routine or an in-class activity.
+
 ## 2026-09-09 — Clearer quiz wording, and diagrams that don't make the page jump
 
 ### Fixed

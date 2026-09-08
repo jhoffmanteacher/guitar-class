@@ -1189,8 +1189,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
     --amber-bg:#faeeda;--amber-text:#854f0b;
   }
   *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important}
-  @page{size:portrait;margin:14mm}
+  @page{size:portrait;margin:11mm}
   body{background:#fff !important}
+
+  /* One notch smaller than the screen, and a narrower margin, because a
+     handout is a reference sheet a student scans while holding a guitar —
+     not reading copy. Everything on the site sizes in rem off the root, so
+     scaling the root scales prose, headings, TAB and chord labels together
+     instead of leaving one layer at screen size. Keep it mild: below ~13px
+     the TAB fret numbers stop being readable across a music stand. */
+  html{font-size:87.5%}
 
   /* Hide all on-screen chrome */
   .header,.rail,.rail-backdrop,.skip-link,.module-select-wrap,.week-pills,
@@ -1209,7 +1217,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .tab-panel{display:none !important}
   .week-panel.active .tab-panel.tp-station-b,
   .week-panel.active .tab-panel.tp-checklist{display:block !important}
-  .tab-panel.tp-checklist{page-break-before:always}
+  /* The checklist used to open its own page unconditionally, which routinely
+     spent a sheet on a half-empty tick list. It now flows on from the ladder
+     and only breaks when the page is genuinely full. */
+  .tab-panel.tp-checklist{break-before:auto;page-break-before:auto}
 
   /* Checklist prints as a clean blank tick-sheet — drop the interactive toggles,
      "Practice this" expandos, and the live progress bar (those are screen-only). */
@@ -1258,8 +1269,34 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   .set-about[open] .set-about-panel{position:static !important;box-shadow:none !important;
     border:none !important;padding:0 !important;max-width:none !important;min-width:0 !important}
 
-  /* Avoid awkward breaks mid-step / mid-diagram */
-  .step,.tab,.chord-diagrams,.obj-card,.stp-sec,.set-eyebrow,.set-about{break-inside:avoid;page-break-inside:avoid}
+  /* Break rules: keep one instruction whole, but never push a break just to
+     keep a big container together. `.stp-sec` used to be in this list — a
+     section is a dozen steps, so avoiding a break inside it threw the whole
+     section to the next page and left a third of a sheet blank. Sections and
+     the ladder itself now break wherever they must; the individual step, TAB,
+     diagram and checklist row are what stay intact. A heading never prints as
+     the last thing on a page. */
+  .step,.tab,.chord-diagrams,.obj-card,.skill-row,.set-eyebrow,.set-about{break-inside:avoid;page-break-inside:avoid}
+  .stp-sec,.stp-group,.dp,.cl-grid-wrap{break-inside:auto;page-break-inside:auto}
+  .stp-sec-label,.stp-divider,.dp-head,.dp-title{break-after:avoid;page-break-after:avoid}
+  p,li{orphans:2;widows:2}
+
+  /* Spacing is screen ergonomics: 48px touch targets, a 56px step indent and
+     16px card padding all buy nothing on paper and cost lines. Trimmed here
+     only — the screen keeps its breathing room. */
+  .dp,.obj-card{padding:9px 11px;margin-bottom:9px}
+  .dp-head{margin-bottom:7px}
+  .step-head{min-height:0 !important;padding:2px 4px}
+  .step-detail{padding:0 4px 7px 34px}
+  .stp-sec-label{padding:8px 2px 3px}
+  .stp-divider{margin:11px 0 2px}
+  .step-figure{margin:7px 0 3px;max-width:420px}
+  .step-branch,.sk-helper{padding:3px 8px}
+  .sk-helper{margin-top:4px}
+  .sktxt{padding:5px 10px}
+  .skchk-cell{min-height:0}
+  .cl-grid-wrap{margin-bottom:8px}
+  .week-panel.active .tab-panel{margin-bottom:0}
   /* The TAB card's drop shadow prints as a grey smear. tabs/journey-theme.css
      has dropped it since the cards were converted; the app hadn't. */
   .tab{box-shadow:none}
@@ -1294,6 +1331,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
   /* Every step's body, not just the one the accordion had open on screen. */
   body.print-activity .ca-step-detail{display:block !important}
   body.print-activity .ca-step{break-inside:avoid;page-break-inside:avoid}
+  body.print-activity .ca-card-body{padding:0 11px 10px}
+  body.print-activity .ca-steps{margin:6px 0 8px}
+  body.print-activity .ca-step-head{min-height:0 !important;padding:2px 4px}
+  body.print-activity .ca-step-detail{padding:0 4px 8px 34px}
   /* Screen-only: the print button itself, the done buttons, the accordion
      chevrons, and the drill widgets (a quiz that deals cards can't print —
      its directions still do). */
