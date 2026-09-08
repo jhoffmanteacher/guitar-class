@@ -22,7 +22,7 @@ see `WORKFLOW.md` and the git commit log.
   no set of directions gets split down the middle.
 - Same for printing a practice routine or an in-class activity.
 
-## 2026-09-09 — Clearer quiz wording, and diagrams that don't make the page jump
+## 2026-09-07 — Clearer quiz wording, and diagrams that don't make the page jump
 
 ### Fixed
 
@@ -50,7 +50,7 @@ see `WORKFLOW.md` and the git commit log.
   the one photograph are dimmed instead, since inverting a drawn hand looks
   wrong.
 
-## 2026-09-09 — Dark mode fixes on the Mood chart and the Song Journey pages
+## 2026-09-07 — Dark mode fixes on the Mood chart and the Song Journey pages
 
 ### Fixed
 
@@ -73,7 +73,7 @@ see `WORKFLOW.md` and the git commit log.
 - **TAB diagrams were cramped on a narrow phone.** They now use the same
   slimmer padding the Journey pages already used, giving the notes more room.
 
-## 2026-09-08 — The Games button works again
+## 2026-09-07 — The Games button works again
 
 ### Fixed
 
