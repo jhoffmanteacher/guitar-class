@@ -22,10 +22,18 @@
   --tempo:#f5c4b3; --tempo-tint:#faece7; --tempo-dark:#4a3b36;
   --rhythm:#f4c0d1; --rhythm-tint:#fbeaf0; --rhythm-dark:#493a3f;
   --texture:#fac775; --texture-tint:#faeeda; --texture-dark:#4b3c23;
+  /* *-dark is text on the PASTEL chip (.colhead), which stays pastel in dark
+     mode; *-label is the same word printed on the *-tint cell background and
+     on the popover card, both of which flip. Two tokens, because one colour
+     cannot sit on two surfaces that go opposite ways. */
+  --dyn-label:#32433d; --tempo-label:#4a3b36;
+  --rhythm-label:#493a3f; --texture-label:#4b3c23;
   --radius:10px;
   --card:#ffffff;            /* popover surface */
   --hover:rgba(0,0,0,.05);
   --press:rgba(0,0,0,.12);
+  --hairline:rgba(0,0,0,.14);       /* the crumb pill's ring */
+  --hairline-soft:rgba(0,0,0,.06);  /* popover ring, phone group outline */
 }
 /* Dark mode. The mood chips keep their pastel fill and dark text — a badge
    reads fine either way — but the page surface, the text, the four column
@@ -39,6 +47,13 @@
     --hover:rgba(255,255,255,.08);
     --press:rgba(255,255,255,.16);
     --dyn-tint:#26332e; --tempo-tint:#382c28; --rhythm-tint:#372b30; --texture-tint:#382e1c;
+    /* On the flipped tints and the flipped card, the column label and the
+       "Hear it" link become the pastel itself (8.5:1 or better). The chips
+       keep --*-dark, so .colhead is untouched. */
+    --dyn-label:#a8decb; --tempo-label:#f5c4b3;
+    --rhythm-label:#f4c0d1; --texture-label:#fac775;
+    --hairline:rgba(255,255,255,.18);
+    --hairline-soft:rgba(255,255,255,.10);
   }
 }
 *{box-sizing:border-box}
@@ -61,7 +76,7 @@ h1{font-size:clamp(1.6rem,3.5vw,2.1rem); margin:0 0 4px; letter-spacing:-0.01em}
   display:inline-flex; align-items:center; gap:6px;
   font-size:.88rem; font-weight:600; color:var(--gray); text-decoration:none;
   padding:6px 12px; border-radius:999px;
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,.14);
+  box-shadow:inset 0 0 0 1px var(--hairline);
 }
 .crumb a:hover{color:var(--ink); background:var(--hover)}
 .crumb a:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
@@ -108,7 +123,7 @@ h1{font-size:clamp(1.6rem,3.5vw,2.1rem); margin:0 0 4px; letter-spacing:-0.01em}
 .pop{
   position:absolute; z-index:50; max-width:290px; min-width:220px;
   background:var(--card); border-radius:12px; padding:13px 15px 14px;
-  box-shadow:0 6px 24px rgba(0,0,0,.18), 0 0 0 1px rgba(0,0,0,.06);
+  box-shadow:0 6px 24px rgba(0,0,0,.18), 0 0 0 1px var(--hairline-soft);
   border-top:5px solid var(--gray);
 }
 .pop[data-cat="Dynamics"]{border-top-color:var(--dyn)}
@@ -118,7 +133,7 @@ h1{font-size:clamp(1.6rem,3.5vw,2.1rem); margin:0 0 4px; letter-spacing:-0.01em}
 .pop .eyebrow{font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--gray); margin:0 0 3px}
 .pop h3{margin:0 0 5px; font-size:1.1rem}
 .pop p{margin:0; font-size:.92rem}
-.pop .hear{display:inline-block; margin-top:9px; font-size:.88rem; font-weight:600; color:var(--rhythm-dark); text-decoration:underline; text-underline-offset:2px}
+.pop .hear{display:inline-block; margin-top:9px; font-size:.88rem; font-weight:600; color:var(--rhythm-label); text-decoration:underline; text-underline-offset:2px}
 .pop .close{
   position:absolute; top:6px; right:8px; appearance:none; border:0; background:none;
   font-size:1.05rem; line-height:1; color:var(--gray); cursor:pointer; padding:4px;
@@ -130,15 +145,15 @@ h1{font-size:clamp(1.6rem,3.5vw,2.1rem); margin:0 0 4px; letter-spacing:-0.01em}
 @media (max-width:900px){
   .chart{grid-template-columns:1fr; gap:14px}
   .colhead,.spacer{display:none}
-  .moodgroup{display:block; border-radius:var(--radius); overflow:hidden; box-shadow:0 0 0 1px rgba(0,0,0,.05)}
+  .moodgroup{display:block; border-radius:var(--radius); overflow:hidden; box-shadow:0 0 0 1px var(--hairline-soft)}
   .mood{border-radius:0}
   .mood ul{grid-template-columns:repeat(2,1fr)}
   .cell{border-radius:0; padding:10px 14px}
   .cell .cat{display:block; font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; font-weight:700; margin-bottom:2px}
-  .cell.dyn .cat{color:var(--dyn-dark)}
-  .cell.tempo .cat{color:var(--tempo-dark)}
-  .cell.rhythm .cat{color:var(--rhythm-dark)}
-  .cell.texture .cat{color:var(--texture-dark)}
+  .cell.dyn .cat{color:var(--dyn-label)}
+  .cell.tempo .cat{color:var(--tempo-label)}
+  .cell.rhythm .cat{color:var(--rhythm-label)}
+  .cell.texture .cat{color:var(--texture-label)}
   .cell{flex-direction:row; flex-wrap:wrap; align-items:center; gap:2px 4px}
   .cell .cat{flex-basis:100%}
 }

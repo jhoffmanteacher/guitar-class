@@ -5,6 +5,29 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-09 — Dark mode fixes on the Mood chart and the Song Journey pages
+
+### Fixed
+
+- **The Mood chart was missing two things in dark mode.** The column labels
+  a phone shows above each list — Dynamics, Tempo, Rhythm, Texture — were
+  printed in a colour so close to the background behind them that they were
+  effectively invisible, and so was the "Hear it" listening link inside every
+  Rhythm popover, which is the whole reason those popovers exist. Both now
+  read clearly. The thin outlines around the back link, the popover and each
+  mood block had also disappeared into the dark page; they are back.
+- **"More about this song" lost its little triangle** on the six Song Journey
+  pages, so nothing showed it could be opened. The open/close triangle is back.
+- **The Español button was hard to read** on a Journey page once it was
+  switched on, in dark mode. The purple it and the page's links use is lighter
+  now.
+- **Note names in a TAB were underlined on phones and tablets — including the
+  Finger Gym circles**, where the number is a fretting finger, not a note. The
+  dotted underline means "tap to hear this note", so it now appears only where
+  tapping plays something.
+- **TAB diagrams were cramped on a narrow phone.** They now use the same
+  slimmer padding the Journey pages already used, giving the notes more room.
+
 ## 2026-09-08 — The Games button works again
 
 ### Fixed

@@ -703,7 +703,56 @@ function checkContrast() {
 const JOURNEY_SHARED_PREFIXES = [/^\.tab(\b|[.:\s>])/, /^\.lq-banner/, /^\.lq-invite/];
 /* The differences that are meant to be there. Both are documented at the
    rule itself in journey-theme.css; anything else is drift. */
-const JOURNEY_ALLOWED_DIFFS = new Set(['.tab', '.tab-head']);
+/* The differences that are meant to be there — per PROPERTY, not per rule.
+   Exempting a whole rule (which this did until 2026-09-08) meant every other
+   declaration in it could drift unseen: journey's .tab-head padding could
+   walk away from the app's and 1t stayed green. Both entries below are
+   documented at the rule itself in journey-theme.css. */
+const JOURNEY_ALLOWED_DIFFS = new Map([
+  // these cards stack down a Journey page and need the air; in the app the
+  // step body around them supplies it (the shorthand, not margin-bottom)
+  ['.tab', new Set(['margin'])],
+  // journey's --brand doubles as the link colour and lightens in dark mode,
+  // so the header strip tracks styles.css's --brand through its own token
+  ['.tab-head', new Set(['background'])],
+]);
+/* Split a declaration block into a property -> value map.
+   Later declarations win per property, so a selector written twice (the
+   tap-target add-on group at styles.css:2126 plus the full rule further
+   down) merges the way the browser sees it rather than the second body
+   simply replacing the first. Splitting is paren-aware: max(100%,44px) and
+   translate(-50%,-50%) carry commas, and url(a;b) could carry a semicolon. */
+function cssDecls(body) {
+  const out = new Map();
+  let depth = 0, buf = '', parts = [];
+  for (const ch of body) {
+    if (ch === '(') depth++;
+    else if (ch === ')') depth--;
+    if (ch === ';' && depth === 0) { parts.push(buf); buf = ''; continue; }
+    buf += ch;
+  }
+  parts.push(buf);
+  for (const raw of parts) {
+    const d = raw.trim();
+    if (!d) continue;
+    let i = -1, dep = 0;
+    for (let k = 0; k < d.length; k++) {
+      const c = d[k];
+      if (c === '(') dep++;
+      else if (c === ')') dep--;
+      else if (c === ':' && dep === 0) { i = k; break; }
+    }
+    if (i < 0) continue;
+    out.set(d.slice(0, i).trim(), d.slice(i + 1).replace(/\s+/g, ' ').trim());
+  }
+  return out;
+}
+/* selector -> (media context -> declaration map). Keeping the @media context
+   as its own key, rather than gluing it onto the selector and stripping it
+   back off with a regex, is what lets 1t see a rule that exists inside a
+   media query on one side only (the .tab-body phone padding was journey-only
+   for four days) — and it can't be fooled by a compound query or by a
+   selector that contains its own parentheses, e.g. :not(.has-finger). */
 function cssRuleMap(css) {
   const out = new Map();
   const clean = css.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -714,7 +763,7 @@ function cssRuleMap(css) {
       const c = clean[i++];
       if (c === '}') return;
       if (c !== '{') { buf += c; continue; }
-      const sel = buf.trim(); buf = '';
+      const sel = buf.trim().replace(/\s+/g, ' '); buf = '';
       if (sel.startsWith('@')) { parse(ctx ? ctx + ' ' + sel : sel); continue; }
       let body = '', depth = 1;
       while (i < clean.length && depth > 0) {
@@ -724,7 +773,11 @@ function cssRuleMap(css) {
         body += d;
       }
       for (const s of sel.split(',').map(x => x.trim()).filter(Boolean)) {
-        out.set((ctx ? ctx + ' ' : '') + s, body.replace(/\s+/g, ' ').trim());
+        if (!out.has(s)) out.set(s, new Map());
+        const byMedia = out.get(s);
+        if (!byMedia.has(ctx)) byMedia.set(ctx, new Map());
+        const decls = byMedia.get(ctx);
+        for (const [k, v] of cssDecls(body)) decls.set(k, v);
       }
     }
   };
@@ -739,20 +792,30 @@ function checkJourneyThemeDrift() {
     jCss = readFileSync(join(ROOT, 'tabs/journey-theme.css'), 'utf8');
   } catch { warn('stylesheets unreadable — drift NOT checked'); warnings++; return; }
   const app = cssRuleMap(appCss), jour = cssRuleMap(jCss);
-  const bare = k => k.replace(/^@media[^{]*?\)\s*/, '');
+  const label = m => m ? `${m} { ` : '';
   let shared = 0, bad = 0;
-  for (const [sel, aBody] of app) {
-    if (!JOURNEY_SHARED_PREFIXES.some(re => re.test(bare(sel)))) continue;
-    if (!jour.has(sel)) continue;      // one-sided by design
-    shared++;
-    if (JOURNEY_ALLOWED_DIFFS.has(sel)) continue;
-    const jBody = jour.get(sel);
-    if (aBody !== jBody) {
-      err(`"${sel}" has drifted between styles.css and tabs/journey-theme.css — restyle both or neither (CLAUDE.md).\n      styles.css : ${aBody.slice(0, 150)}\n      journey    : ${jBody.slice(0, 150)}`);
-      problems++; bad++;
+  const flag = m => { err(m); problems++; bad++; };
+  for (const [sel, appByMedia] of app) {
+    if (!JOURNEY_SHARED_PREFIXES.some(re => re.test(sel))) continue;
+    const jourByMedia = jour.get(sel);
+    if (!jourByMedia) continue;        // selector one-sided by design
+    const allow = JOURNEY_ALLOWED_DIFFS.get(sel) || new Set();
+    for (const media of new Set([...appByMedia.keys(), ...jourByMedia.keys()])) {
+      const a = appByMedia.get(media), j = jourByMedia.get(media);
+      if (!a || !j) {
+        flag(`"${label(media)}${sel}" exists only in ${a ? 'styles.css' : 'tabs/journey-theme.css'} — a one-sided rule is drift too (CLAUDE.md: restyle both or neither).`);
+        continue;
+      }
+      shared++;
+      for (const prop of new Set([...a.keys(), ...j.keys()])) {
+        if (allow.has(prop)) continue;
+        if (a.get(prop) === j.get(prop)) continue;
+        flag(`"${label(media)}${sel}" — "${prop}" has drifted between styles.css and tabs/journey-theme.css — restyle both or neither (CLAUDE.md).\n      styles.css : ${a.has(prop) ? a.get(prop) : '(absent)'}\n      journey    : ${j.has(prop) ? j.get(prop) : '(absent)'}`);
+      }
     }
   }
-  if (!bad) ok(`${shared} shared tab/live-quiz rules identical across both stylesheets (${JOURNEY_ALLOWED_DIFFS.size} documented exceptions)`);
+  const exempt = [...JOURNEY_ALLOWED_DIFFS].reduce((n, [, ps]) => n + ps.size, 0);
+  if (!bad) ok(`${shared} shared tab/live-quiz rules identical across both stylesheets (${exempt} documented per-property exceptions)`);
 }
 
 function checkJourneyTabCards() {

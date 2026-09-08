@@ -38,7 +38,10 @@
     --bg:#1e1e1c; --bg2:#272724; --bg3:#313130;
     --text:#e8e6df; --text2:#9a9a91; --text3:#9e9e95;   /* == styles.css; were #888880/#8c8c84 (3.7:1 on --bg3) */
     --border:rgba(255,255,255,0.08); --border2:rgba(255,255,255,0.14);
-    --brand:#8f85e8;
+    /* Lifted from #8f85e8, which put .btn-translate.active (brand on --bg3)
+       at 4.15:1. Now 5.3:1 there, 6.8:1 on --bg. Journey-only token — the
+       app's dark --brand is #494370 and reaches here as --tab-head-bg. */
+    --brand:#a49bef;
     --l1:#9479cb; --l2:#448cc5; --l3:#c37341; --l4:#439667; --l5:#c06e8b; --l6:#2f9e93; --l7:#a5822e;
     --tab-head-bg:#494370;
     --focus:#93c4f0;
@@ -92,7 +95,12 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:4px
 .songmap-more summary{cursor:pointer;font-size:0.8125rem;color:var(--brand);font-weight:600}
 /* Touch targets: these two are small text links a thumb has to hit. Same
    ::after halo idiom styles.css uses in the app. */
-.crumb a,.songmap-more summary{position:relative;display:inline-block}
+/* No display: here. position:relative alone carries the ::after halo, and
+   inline-block strips a <summary>'s native disclosure triangle (it only
+   draws one at display:list-item) — .songmap-more had no open/close
+   affordance left. On .crumb a the declaration was dead anyway: it is a
+   flex item, so its display is blockified. */
+.crumb a,.songmap-more summary{position:relative}
 .crumb a::after,.songmap-more summary::after{content:'';position:absolute;left:50%;top:50%;
   transform:translate(-50%,-50%);width:max(100%,44px);height:max(100%,44px)}
 .layer{border:1px solid var(--border);border-radius:12px;margin-bottom:22px;overflow:hidden}
@@ -131,7 +139,8 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:4px
    card chrome around it matches styles.css rule for rule, so a tab reads
    the same on a Journey page as it does inside a set. */
 /* Two deliberate differences from the same rules in styles.css, and only
-   two — checks.mjs (1t) fails the push on any other. (1) margin-bottom:
+   two — checks.mjs (1t) compares these rules PROPERTY by property and fails
+   the push on any third one. (1) the margin shorthand:
    these cards stack down a Journey page and need the air; in the app one
    sits inside a step body that supplies its own. (2) --tab-head-bg, see
    the token above. Everything else here must match byte for byte. */
@@ -180,7 +189,8 @@ h1{font-family:var(--font-display);font-size:1.875rem;font-weight:650;margin:4px
 /* Floating backing-track pill — same shape as the top .playalong-btn but
    filled brand purple so it stands out from the white tool pills below it. */
 .fab-track{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;font:inherit;font-size:0.8438rem;font-weight:700;color:#fff;background:var(--brand);border:1px solid var(--brand);border-radius:20px;cursor:pointer;box-shadow:0 4px 14px rgba(81,74,125,0.35);align-self:flex-end}
-/* journey.js sets .hidden on this button when a page has no audio; a bare
+/* journey.js sets the hidden attribute on this button when a page has no
+   audio; a bare
    display:inline-flex outranks the UA's [hidden] rule, so say it here. */
 .fab-track[hidden]{display:none}
 @media (prefers-color-scheme:dark){
@@ -276,9 +286,13 @@ body.lq-invite-open{overflow:hidden}
   font-size:1.0625rem;font-weight:700;padding:14px 20px;border:0;border-radius:14px;
   background:#2f2159;color:#fff;cursor:pointer;min-height:52px}
 .lq-invite-join:hover{background:#3d2b73}
-.lq-invite-later{margin-top:10px;font-family:inherit;font-size:0.875rem;
+.lq-invite-later{position:relative;margin-top:10px;font-family:inherit;font-size:0.875rem;
   background:none;border:0;color:var(--text2);cursor:pointer;padding:8px 12px;
   border-radius:8px}
+/* Tap halo — mirrors the .lq-invite-later entry in the styles.css
+   tap-target group (the 36px-capped variant, for controls inline with text). */
+.lq-invite-later::after{content:'';position:absolute;left:50%;top:50%;
+  transform:translate(-50%,-50%);width:max(100%,44px);height:max(100%,36px)}
 .lq-invite-later:hover{color:var(--text);background:var(--bg3)}
 @keyframes lq-fade{from{opacity:0}to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.lq-invite{animation:none}}
