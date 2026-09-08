@@ -129,11 +129,16 @@ few times and Escape.
   key both tabs already hold can go stale. Fixing that means tracking
   dirtiness per key instead of per category, which is a change to the save
   path. `flushSave` now documents the real behaviour.
-- **The teacher console re-reads `config/class` on every repaint** (each sort
-  click, each rename open/cancel). Cheap to cache, but telling a post-write
-  repaint from a plain one is exactly what the existing ticket system guards,
-  and I can't open the real console from here to prove I got it right. Say the
-  word and I'll do it with you watching.
+- **~~The teacher console re-reads `config/class` on every repaint.~~ Done
+  2026-09-05 — worth one pass in the real console.** The five repaints that
+  change nothing in Firestore (sort click, rename open/cancel/Escape, a
+  rejected number entry) now paint from memory; everything that follows a
+  write still re-reads. In the console, please check: **sorting** by number
+  and by date both ways, **the pencil** (open a rename, cancel it, Escape out
+  of one), then a **rename**, a **hide/show**, a **date change** and a
+  **number change** — those four must still show the saved value, including
+  when one fails (turn the Wi-Fi off and try: the row should snap back to
+  what Firestore actually holds, not to what you typed).
 
 ## 7. Things I changed that you might disagree with
 
