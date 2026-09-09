@@ -20,9 +20,81 @@ let teacherSetId=null, allStudents=[];
    already reads, so archiving needs no changes in those views. Flip
    teacherShowArchived (Manage view) to fold them back in. */
 let allStudentsRaw=[], teacherShowArchived=false;
+/* ── Class period (4 or 7) ───────────────────────────────────────────────
+   A student's effective period is the teacher's override if there is one,
+   else the student's own answer, else nothing. The two halves are stored
+   apart on purpose: the student's answer is a field on their own progress
+   doc, which firestore.rules lets the teacher READ but not write, so a
+   correction has to land somewhere the teacher can write — config/class,
+   next to paused/archived/gameOverrides. Nothing here is derived and
+   stored; it is recomputed wherever it's shown.
+
+   Named teacherStudentPeriod, not studentPeriod: app.js already declares a
+   `let studentPeriod` at script scope, and both files share one global
+   scope — a top-level `function studentPeriod(){}` here would collide with
+   that lexical binding and throw before a single line of this file ran. */
+function teacherStudentPeriod(stu){
+  const ov=(teacherClassConfig&&teacherClassConfig.periodOverrides)||{};
+  return ov[stu.uid] || stu.period || '';
+}
+// Is the shown period the teacher's correction rather than the student's
+// own answer? Drives the "set" marker in the Manage table.
+function teacherPeriodIsOverride(stu){
+  const ov=(teacherClassConfig&&teacherClassConfig.periodOverrides)||{};
+  return !!ov[stu.uid];
+}
+// Small "P4" tag beside a student's name in the Students list and on their
+// detail page. Silent when the student has no period yet — an empty pill
+// beside every name would read as a rendering bug rather than as "untagged",
+// and the Unassigned filter is where you go looking for those.
+function teacherPeriodPillHtml(stu){
+  const p=teacherStudentPeriod(stu);
+  return p?` <span class="stu-period" title="Class period ${escAttr(p)}">P${escHtml(p)}</span>`:'';
+}
+/* 'all' | '4' | '7' | 'none'. Persisted per-device so a mid-period reload
+   comes back to the class the teacher was actually looking at. */
+let teacherPeriodFilter=(function(){
+  let v=null;
+  try{ v=localStorage.getItem('gc-teacher-period'); }catch(e){}
+  return (v==='4'||v==='7'||v==='none') ? v : 'all';
+})();
+/* Every dashboard view renders from allStudents, so both roster filters
+   are applied in this one place and the whole console — skills grid,
+   summary cards, responses, trouble spots, students list — follows. The
+   Manage view is the deliberate exception: it renders from allStudentsRaw,
+   because it is where you FIX a wrong period and must show everyone. */
 function teacherApplyRosterFilter(){
   const arch=(teacherClassConfig&&teacherClassConfig.archived)||{};
-  allStudents = teacherShowArchived ? [...allStudentsRaw] : allStudentsRaw.filter(s=>!arch[s.uid]);
+  const onRoster = teacherShowArchived ? [...allStudentsRaw] : allStudentsRaw.filter(s=>!arch[s.uid]);
+  allStudents = teacherPeriodFilter==='all' ? onRoster
+    : teacherPeriodFilter==='none' ? onRoster.filter(s=>!teacherStudentPeriod(s))
+    : onRoster.filter(s=>teacherStudentPeriod(s)===teacherPeriodFilter);
+  renderTeacherPeriodFilter(onRoster);
+}
+/* The segmented control itself. Repainted from teacherApplyRosterFilter so
+   the Unassigned count follows every override the teacher sets, and lives
+   beside the view toggle rather than inside one view — the filter is
+   class-wide, and burying it in Manage would hide it from the four views
+   that actually benefit. */
+function renderTeacherPeriodFilter(onRoster){
+  const box=document.getElementById('t-period-filter');
+  if(!box) return;
+  const arch=(teacherClassConfig&&teacherClassConfig.archived)||{};
+  const list=onRoster||(teacherShowArchived?allStudentsRaw:allStudentsRaw.filter(s=>!arch[s.uid]));
+  const unassigned=list.filter(s=>!teacherStudentPeriod(s)).length;
+  const seg=(val,label)=>`<button class="tg-seg-btn ${teacherPeriodFilter===val?'on':''}" data-set-period-filter data-period="${val}">${label}</button>`;
+  // The Unassigned segment disappears at zero rather than sitting there as a
+  // dead "(0)" — once everyone is tagged it is a filter onto an empty room.
+  box.innerHTML=seg('all','All')+seg('4','P4')+seg('7','P7')
+    +(unassigned?seg('none',`Unassigned (${unassigned})`):'');
+}
+function teacherSetPeriodFilter(v){
+  if(v!=='all'&&v!=='4'&&v!=='7'&&v!=='none') return;
+  teacherPeriodFilter=v;
+  try{ localStorage.setItem('gc-teacher-period', v); }catch(e){}
+  teacherApplyRosterFilter();
+  if(teacherView==='manage') renderTeacherManage();   // Manage shows everyone, but its filter chrome still repaints
+  else { renderTeacherBody(); renderTeacherSummary(); }
 }
 
 async function showTeacherApp(user){
@@ -60,6 +132,14 @@ async function showTeacherApp(user){
   if(toggle && !toggle.querySelector('[data-view="reports"]')){
     toggle.insertAdjacentHTML('beforeend', `<button class="t-vt" data-view="reports" onclick="setTeacherView('reports')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4"/><circle cx="12" cy="17" r="0.6" fill="currentColor" stroke="none"/></svg> Reports</button>`);
   }
+  /* Class-period filter — a sibling of the view toggle, not a member of it:
+     it narrows the roster every view renders from rather than switching
+     views, so it must not pick up .t-vt's aria-pressed group behaviour.
+     Injected here like its neighbours, and filled in by
+     renderTeacherPeriodFilter once the roster has loaded. */
+  if(toggle && !document.getElementById('t-period-filter')){
+    toggle.insertAdjacentHTML('afterend', `<div class="tg-seg t-period-filter" id="t-period-filter" role="group" aria-label="Filter by class period"></div>`);
+  }
   // Two extra legend rows for the skills grid's got-it markers — the plain
   // green check (index.html's static legend) doesn't distinguish a Coach
   // pass or a gate override from a self-declared "I've got it!". Inserted
@@ -94,6 +174,10 @@ async function showTeacherApp(user){
       if(paused){ teacherSetStudentPaused(paused.dataset.uid, paused.dataset.state); return; }
       const archived=e.target.closest('[data-set-archived]');
       if(archived){ teacherSetStudentArchived(archived.dataset.uid, archived.dataset.state); return; }
+      const periodFilter=e.target.closest('[data-set-period-filter]');
+      if(periodFilter){ teacherSetPeriodFilter(periodFilter.dataset.period); return; }
+      const period=e.target.closest('[data-set-period]');
+      if(period){ teacherSetStudentPeriod(period.dataset.uid, period.dataset.value); return; }
       const actHidden=e.target.closest('[data-set-activity-hidden]');
       if(actHidden){ teacherSetActivityHidden(actHidden.dataset.id, actHidden.dataset.state); return; }
       const sortTh=e.target.closest('[data-sort-activities]');
@@ -243,7 +327,7 @@ async function loadAllStudents(){
         else skills[k]='none';
       });
       const gamesData=doc.data().games||{};
-      allStudentsRaw.push({uid:doc.id,skills,name:doc.data().name||'',email:doc.data().email||'',responses:doc.data().responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:doc.data().classActivities||{},exitChecks:doc.data().exitChecks||{}});
+      allStudentsRaw.push({uid:doc.id,skills,name:doc.data().name||'',email:doc.data().email||'',responses:doc.data().responses||{},coachSkill:gamesData.coachSkill||{},drillSkill:gamesData.drillSkill||{},classActivities:doc.data().classActivities||{},exitChecks:doc.data().exitChecks||{},period:doc.data().period||''});
     });
     // Pause/archive flags live in config/class, so it has to be in hand
     // before the roster is filtered — otherwise the first paint shows
@@ -1147,10 +1231,17 @@ function renderTeacherManage(){
           <button class="tg-seg-btn ${teacherShowArchived?'on':''}" data-toggle-archived>${teacherShowArchived?'Hiding nothing':'Show archived'}${archCount?` (${archCount})`:''}</button>
         </div>
       </div>
-      <div class="tg-note"><strong>Paused</strong> students can sign in but see a "your access is paused" message instead of the site — use it for a temporary hold, then un-pause. <strong>Archived</strong> students are hidden from every dashboard view; their work is kept and comes back if you restore them. Pausing takes effect the next time that student loads the site.</div>`;
+      <div class="tg-note"><strong>Paused</strong> students can sign in but see a "your access is paused" message instead of the site — use it for a temporary hold, then un-pause. <strong>Archived</strong> students are hidden from every dashboard view; their work is kept and comes back if you restore them. Pausing takes effect the next time that student loads the site. <strong>Period</strong> is whatever the student picked when they first signed in — set 4 or 7 here to correct a wrong tap, or Auto to go back to their own answer. This list always shows everyone, whatever the period filter above is set to.</div>`;
     if(allStudentsRaw.length===0){ box.innerHTML=head+'<div class="t-loading">No students yet — they’ll appear here once they sign in.</div>'; return; }
+    const nameOf=s=>(s.name||s.email||s.uid);
+    // Period first, then name — this is the table you scan when a student
+    // says "I'm in 4th, not 7th", so the two classes group together.
+    // Ranked numerically rather than by localeCompare: untagged students sort
+    // LAST, and a sentinel string wouldn't get that (ICU collation puts
+    // punctuation ahead of digits, so '~' landed them first).
+    const perRank=s=>{ const p=teacherStudentPeriod(s); return p?Number(p):Infinity; };
     const list=(teacherShowArchived?allStudentsRaw:allStudentsRaw.filter(s=>!arch[s.uid]))
-      .sort((a,b)=>(a.name||a.email||a.uid).localeCompare(b.name||b.email||b.uid));
+      .sort((a,b)=>(perRank(a)-perRank(b))||nameOf(a).localeCompare(nameOf(b)));
     if(list.length===0){ box.innerHTML=head+'<div class="t-loading">Every student is archived. Use “Show archived” to bring them back.</div>'; return; }
     const rows=list.map(stu=>{
       const name=stu.name||stu.email||stu.uid.slice(0,8)+'…';
@@ -1161,10 +1252,21 @@ function renderTeacherManage(){
         `<button class="tg-seg-btn ${!isPaused?'on':''}" data-set-paused data-uid="${escAttr(stu.uid)}" data-state="active">Active</button>`+
         `<button class="tg-seg-btn ${isPaused?'on':''}" data-set-paused data-uid="${escAttr(stu.uid)}" data-state="paused">Paused</button>`;
       const archBtn=`<button class="tg-seg-btn ${isArch?'on':''}" data-set-archived data-uid="${escAttr(stu.uid)}" data-state="${isArch?'restore':'archive'}">${isArch?'Restore':'Archive'}</button>`;
+      /* Period: 4 · 7 · Auto. "Auto" clears the override and falls back to
+         whatever the student answered for themselves — which is why the
+         highlighted button is the EFFECTIVE period either way, and the
+         "set" marker beside it is what tells you the value is yours rather
+         than theirs. Same data-uid + delegated listener as its neighbours. */
+      const per=teacherStudentPeriod(stu), perSet=teacherPeriodIsOverride(stu);
+      const perBtn=(v,label)=>`<button class="tg-seg-btn ${per===v?'on':''}" data-set-period data-uid="${escAttr(stu.uid)}" data-value="${v}">${label}</button>`;
+      const periodCell=`<div class="tg-seg">${perBtn('4','4')}${perBtn('7','7')}`+
+        `<button class="tg-seg-btn ${perSet?'':'on'}" data-set-period data-uid="${escAttr(stu.uid)}" data-value="auto" title="Use the student's own answer">Auto</button></div>`+
+        (perSet?`<span class="tg-set-mark" title="You set this period — the student answered ${escAttr(stu.period||'nothing')}">set</span>`:'');
       const archIco='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="3" y="6" width="18" height="4" rx="1"/><path d="M4 10v9a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-9"/><path d="M10 14h4"/></svg>';
       const pauseIco='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:1em;height:1em;vertical-align:-0.15em"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
       const status=isArch?`${archIco} archived`:isPaused?`${pauseIco} paused`:'&#x2713; active';
       return `<tr${isArch?' style="opacity:.55"':''}><td class="tg-name" title="${escAttr(name)}">${escHtml(name)}</td>`+
+        `<td class="tg-period">${periodCell}</td>`+
         `<td><div class="tg-seg">${pauseBtns}</div></td>`+
         `<td><div class="tg-seg">${archBtn}</div></td>`+
         `<td class="tg-eff">${status}</td></tr>`;
@@ -1172,7 +1274,7 @@ function renderTeacherManage(){
     const summary=(pausedCount||archCount)
       ? `<div class="tg-note">${pausedCount} paused · ${archCount} archived</div>` : '';
     box.innerHTML=head+
-      `<div class="tg-grid-wrap"><table class="tg-table"><thead><tr><th>Student</th><th>Access</th><th>Roster</th><th>Right now</th></tr></thead><tbody>${rows}</tbody></table></div>`+summary;
+      `<div class="tg-grid-wrap"><table class="tg-table"><thead><tr><th>Student</th><th>Period</th><th>Access</th><th>Roster</th><th>Right now</th></tr></thead><tbody>${rows}</tbody></table></div>`+summary;
   });
 }
 async function teacherSetStudentPaused(uid, state){
@@ -1207,6 +1309,34 @@ async function teacherSetStudentArchived(uid, state){
     await db.collection('config').doc('class').set(patch,{merge:true});
   }catch(e){
     if(had) teacherClassConfig.archived[uid]=prev; else delete teacherClassConfig.archived[uid];
+    alert('Could not save that change — check your connection and Firestore rules.');
+  }
+  teacherApplyRosterFilter();
+  if(teacherView==='manage') renderTeacherManage();
+  else renderTeacherBody();   // roster changed under whichever view is showing
+}
+/* Structurally identical to teacherSetStudentArchived above — optimistic
+   local mutation, one merge write to config/class, roll back and say so on
+   a throw. 'auto' clears the key with FieldValue.delete() rather than
+   writing '' or null, so config/class doesn't accumulate a dead row for
+   every student whose period was ever corrected (and so the read side's
+   `override || own answer` fallback works by absence, not by a falsy
+   sentinel it would also have to know about). */
+async function teacherSetStudentPeriod(uid, value){
+  const clear = value==='auto';
+  if(!clear && value!=='4' && value!=='7') return;
+  if(!teacherClassConfig.periodOverrides) teacherClassConfig.periodOverrides={};
+  const had = Object.prototype.hasOwnProperty.call(teacherClassConfig.periodOverrides, uid);
+  const prev = teacherClassConfig.periodOverrides[uid];
+  if(clear) delete teacherClassConfig.periodOverrides[uid];
+  else teacherClassConfig.periodOverrides[uid]=value;
+  try{
+    await ensureDb();
+    const fv=firebase.firestore.FieldValue;
+    const patch = clear ? {periodOverrides:{[uid]:fv.delete()}} : {periodOverrides:{[uid]:value}};
+    await db.collection('config').doc('class').set(patch,{merge:true});
+  }catch(e){
+    if(had) teacherClassConfig.periodOverrides[uid]=prev; else delete teacherClassConfig.periodOverrides[uid];
     alert('Could not save that change — check your connection and Firestore rules.');
   }
   teacherApplyRosterFilter();
@@ -1497,7 +1627,7 @@ function renderTeacherStudents(){
       ? `<span class="stu-mod">&mdash;</span><span class="stu-count">0 / ${universe.total}</span>`
       : `<span class="stu-mod">M${tally.furthest}</span><span class="stu-count">${tally.got} / ${universe.total}</span>`;
     return `<button type="button" class="stu-row" data-open-student data-uid="${escAttr(stu.uid)}">
-        <div class="stu-name" title="${escAttr(displayName)}">${escHtml(displayName)}</div>
+        <div class="stu-name" title="${escAttr(displayName)}">${escHtml(displayName)}${teacherPeriodPillHtml(stu)}</div>
         ${teacherBarFillHtml(tally.got,tally.working,universe.total)}
         <div class="stu-right">${rightLbl}</div>
       </button>`;
@@ -1653,7 +1783,7 @@ function renderTeacherStudentDetail(uid){
 
   box.innerHTML = `
     ${back}
-    <div class="stu-detail-name">${escHtml(displayName)}</div>
+    <div class="stu-detail-name">${escHtml(displayName)}${teacherPeriodPillHtml(stu)}</div>
     <div class="stu-detail-email">${escHtml(email)}</div>
     <div class="stu-chart" style="margin-bottom:22px">
       ${teacherAxisHeaderHtml(universe)}

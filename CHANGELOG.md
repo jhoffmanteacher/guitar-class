@@ -5,6 +5,16 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-09 — Telling the site which class you're in
+
+### Added
+
+- **A one-time question when you sign in: Period 4 or Period 7?** Tap the one
+  you're in and it's saved — you won't be asked again. It has to be answered
+  before the site opens, so if you're on a Chromebook someone else is still
+  signed in on, use "Not you? Sign out" instead of guessing. Tapped the wrong
+  one? Mr. Hoffman can fix it, and you won't be asked a second time.
+
 ## 2026-09-09 — Watchtower power chords, strummed twice each
 
 ### Changed

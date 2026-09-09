@@ -929,6 +929,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica N
 .tg-table th{font-weight:600;color:var(--text2)}
 .tg-name{font-weight:500}
 .tg-eff{color:var(--text2);white-space:nowrap}
+/* Manage view's Period column + the "set" marker that says the shown value
+   is the teacher's correction rather than the student's own answer. */
+.tg-period{white-space:nowrap}
+.tg-set-mark{font-size:0.6875rem;color:var(--text2);margin-left:6px;vertical-align:1px}
+/* Class-period filter — sits beside the view toggle, so it carries the
+   toggle's bottom margin to stay on the same baseline as it. */
+.t-period-filter{margin:0 0 16px 10px;vertical-align:top}
+/* "P4" tag beside a student's name in the Students list and detail page. */
+.stu-period{font-size:0.6875rem;font-weight:600;color:var(--text2);border:1px solid var(--border2);border-radius:9px;padding:0 6px;margin-left:6px;vertical-align:1px}
 /* Paused-student screen (teacher hold — app.js showPausedScreen) */
 .paused-screen{display:none;padding:48px 20px}
 .paused-card{max-width:520px;margin:0 auto;text-align:center;padding:32px 28px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg2)}
