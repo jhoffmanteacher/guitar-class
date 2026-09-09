@@ -267,6 +267,11 @@
     // ── In-Class Activities (teacher-curated, day-specific work) ──
     'ca.empty':                { en: 'Nothing here yet — activities will appear when your class does them.',
                                  es: 'Todavía no hay nada aquí — las actividades aparecerán cuando tu clase las haga.' },
+    // The link a teacher posts ('#class-activities/ca-15') pointed at
+    // something not published yet, or was mistyped — the page opened anyway,
+    // so this heads the archive rather than replacing it.
+    'ca.linkMissing':          { en: 'That link points to an activity that isn’t posted yet. Everything your class has done is below.',
+                                 es: 'Ese enlace apunta a una actividad que todavía no está publicada. Abajo está todo lo que tu clase ya hizo.' },
     'ca.markComplete':         { en: 'Mark complete', es: 'Marcar como completado' },
     'ca.completed':            { en: 'Completed ✓ — tap to un-mark', es: 'Completado ✓ — toca para desmarcar' },
     'ca.reminderTitle':        { en: 'In-class activities to finish', es: 'Actividades de clase por terminar' },

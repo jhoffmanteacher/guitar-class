@@ -5,6 +5,17 @@ Notable changes to the Guitar Class site. Newest first.
 For the full session-by-session history (and the reasoning behind each change),
 see `WORKFLOW.md` and the git commit log.
 
+## 2026-09-09 — A link that opens one activity
+
+### Added
+
+- **Direct links to a single activity or exit check.** A link your teacher
+  posts now opens the site straight to that one card, already expanded and
+  scrolled to, instead of dropping you at the top of the activities list.
+  Everything else is still under it, so you can keep scrolling. If the link
+  points at something that isn't posted yet, the page says so and shows you
+  the rest.
+
 ## 2026-09-09 — Exit checks: a five-question turn-in at the end of class
 
 ### Added

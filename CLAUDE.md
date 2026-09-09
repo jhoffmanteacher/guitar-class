@@ -395,6 +395,15 @@ skips them, which covers `caNumber` and `teacherActivityNumbers` at once, and
 doc the teacher already reads whole. About one check per week is the intended
 pace (Jonathan, 2026-09-09).
 
+**Post one with its own link:** `#class-activities/<id>` (e.g.
+`…/index.html#class-activities/ca-15`) opens the Class activities page with
+that card expanded and scrolled to — `caFocusActivity()` in `app.js`. The
+teacher console's Class activities table has a **Copy link** button per row
+(and the same link spelled out on each detail page) so the URL never has to
+be typed. The hash router splits on `/` (`exploreHashBase` / `exploreHashTail`),
+so a new deep link takes that shape rather than a query param. An id that
+isn't published yet gets `ca.linkMissing` above the archive, not a dead end.
+
 Two rules that are easy to break without noticing:
 
 - **Seed the MC shuffle on language-stable data.** `ecChoicesHtml` seeds on

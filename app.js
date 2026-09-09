@@ -2459,8 +2459,24 @@ function exitExploreHash(){
    whatever we're routing to), then opens the target. */
 let lastRoutedHash = null;
 const EXPLORE_HASHES = ['', '#games', '#songs', '#keep-practicing', '#daily-review', '#my-progress', '#class-activities', '#live-quiz', '#search'];
+/* A hash may carry a deep-link target after a slash — today only
+   '#class-activities/ca-15', the shareable link to one activity or exit
+   check (see caFocusActivity). Everything that decides WHICH page a hash
+   means reads the base; only the class-activities branch looks at the tail.
+   Keep new deep links to this shape rather than adding query params: the
+   whole router, the Back button and the depth counter already work on
+   hashes. */
+function exploreHashBase(h){
+  const i = (h || '').indexOf('/');
+  return i === -1 ? (h || '') : h.slice(0, i);
+}
+function exploreHashTail(h){
+  const i = (h || '').indexOf('/');
+  return i === -1 ? '' : decodeURIComponent(h.slice(i + 1));
+}
 function routeExploreHash(){
-  const h = location.hash;
+  const full = location.hash;
+  const h = exploreHashBase(full);
   // A hash this router doesn't own (e.g. #main-content from the skip link)
   // must fall through untouched — otherwise it would close every explore
   // panel + search out from under whatever the student was reading.
@@ -2469,8 +2485,8 @@ function routeExploreHash(){
      in most browsers, and goExploreHash routes by hand on top of that.
      Routing is idempotent, but the scroll stash below is not — so bail on a
      repeat of the hash we already routed to. */
-  if(h === lastRoutedHash) return;
-  lastRoutedHash = h;
+  if(full === lastRoutedHash) return;
+  lastRoutedHash = full;
   /* Remember the student's place in the set BEFORE anything is shown or
      hidden — once a screen is in the flow, .main's scrollTop has already
      been shifted by scroll anchoring and no longer means what it says.
@@ -2496,7 +2512,7 @@ function routeExploreHash(){
   else if(h === '#keep-practicing') openKeepPracticingScreen();
   else if(h === '#daily-review') openDailyReviewScreen();
   else if(h === '#my-progress') openMyProgressScreen();
-  else if(h === '#class-activities') openClassActivitiesScreen();
+  else if(h === '#class-activities') openClassActivitiesScreen(exploreHashTail(full));
   else if(h === '#live-quiz' && typeof openLiveQuizScreen === 'function') openLiveQuizScreen();
   else if(h === '#search') openSearchPanel();
   syncExploreNav();
@@ -7225,7 +7241,8 @@ function toggleClassActivities(){
   else closeClassActivitiesScreen();
 }
 function closeClassActivitiesScreen(){
-  if(location.hash === '#class-activities'){ exitExploreHash(); return; }  // the router finishes the job
+  // Base compare: a deep link ('#class-activities/ca-15') is the same page.
+  if(exploreHashBase(location.hash) === '#class-activities'){ exitExploreHash(); return; }  // the router finishes the job
   caClosePanel();
 }
 function caClosePanel(){
@@ -7247,15 +7264,52 @@ function caClosePanel(){
   if(typeof stopAllDemoAudio === 'function') stopAllDemoAudio();
   syncExploreNav();
 }
-function openClassActivitiesScreen(){
+function openClassActivitiesScreen(focusId){
   const screen = document.getElementById('class-activities-screen');
-  if(!screen || !screen.hasAttribute('hidden')) return;
-  closeTopPanels('class-activities');
-  screen.removeAttribute('hidden');
-  syncExploreNav();
-  const exit = screen.querySelector('.page-exit');
-  if(exit) exit.focus();
+  if(!screen) return;
+  if(screen.hasAttribute('hidden')){
+    closeTopPanels('class-activities');
+    screen.removeAttribute('hidden');
+    syncExploreNav();
+    const exit = screen.querySelector('.page-exit');
+    if(exit) exit.focus();
+  }
+  /* Already open is not "nothing to do": a second deep link (a student
+     tapping the next check's URL while this page is up) still has to move
+     the page to that card, so the focus pass runs either way. */
+  if(focusId) caFocusActivity(focusId);
+  else { caLinkMissingId = null; renderClassActivities(); }
+}
+/* ── Deep link to ONE activity: '#class-activities/ca-15' ──
+   The link Jonathan posts in Classroom for a specific exit check. Opens the
+   Class activities page with that card expanded and scrolled to; the rest of
+   the archive is still under it, so a mistyped or not-yet-published id is a
+   note at the top of a working page rather than a dead end. Copy one from
+   the teacher console's Class activities table ("Copy link"). */
+let caLinkMissingId = null;   // an id from the URL that isn't on the page
+function caFocusActivity(id){
+  const found = (window.CLASS_ACTIVITIES || []).find(a => a.id === id && caIsVisible(a));
+  caLinkMissingId = found ? null : id;
+  caOpenId = found ? id : caOpenId;
   renderClassActivities();
+  if(!found) return;
+  caScrollToActivity(id);
+}
+/* Bring one card to the top of whatever is actually scrolling — the .main
+   pane on a laptop, the document on a phone — without this needing to know
+   which. Twice on purpose: the first pass runs a frame after the cards are
+   written, and the second at 350ms catches the case that made a cold deep
+   link land short — arriving straight from a page load, .main's own height
+   is still settling (the explore-open swap, web fonts) while the first
+   scroll is animating, so it stops partway. A second scroll to a card
+   already in place is a no-op. */
+function caScrollToActivity(id){
+  const go = () => {
+    const card = document.querySelector(`.ca-card[data-id="${CSS.escape(id)}"]`);
+    if(card) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  requestAnimationFrame(go);
+  setTimeout(go, 350);
 }
 // Which activity card is expanded, so a re-render (Mark complete, language
 // switch) doesn't collapse the one the student is looking at.
@@ -7815,10 +7869,15 @@ function renderClassActivities(){
   // instead of localeCompare throwing on a non-string.
   const list = (window.CLASS_ACTIVITIES || []).filter(caIsVisible)
     .sort((a, b) => (caDate(b) || '').localeCompare(caDate(a) || '') || (caNumber(b) - caNumber(a)));
+  // A deep link whose id isn't published (or is mistyped) says so, above the
+  // archive it did open — see caFocusActivity.
+  const missing = caLinkMissingId
+    ? `<div class="coach-tip" data-i18n="ca.linkMissing">${escHtml(t('ca.linkMissing'))}</div>`
+    : '';
   if(!list.length){
-    bodyEl.innerHTML = `<div class="coach-tip" data-i18n="ca.empty">${escHtml(t('ca.empty'))}</div>`;
+    bodyEl.innerHTML = missing + `<div class="coach-tip" data-i18n="ca.empty">${escHtml(t('ca.empty'))}</div>`;
   } else {
-    bodyEl.innerHTML = list.map(caActivityCardHtml).join('');
+    bodyEl.innerHTML = missing + list.map(caActivityCardHtml).join('');
   }
   if(typeof applyI18n === 'function') applyI18n(bodyEl);
 }

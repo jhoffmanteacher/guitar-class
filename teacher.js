@@ -101,6 +101,10 @@ async function showTeacherApp(user){
       // Rename controls sit INSIDE the title cell, which is itself the
       // data-open-activity link — so they have to be matched before it, or
       // clicking the pencil would navigate away instead of opening the editor.
+      // Also inside the title cell, so it's matched before the open-detail
+      // link below for the same reason the rename controls are.
+      const actLink=e.target.closest('[data-copy-activity-link]');
+      if(actLink){ teacherCopyActivityLink(actLink.dataset.id, actLink); return; }
       const actRename=e.target.closest('[data-rename-activity]');
       if(actRename){ activityEditId=actRename.dataset.id; renderTeacherActivities({cached:true}); return; }
       if(e.target.closest('[data-rename-cancel]')){ activityEditId=null; renderTeacherActivities({cached:true}); return; }
@@ -556,6 +560,33 @@ function renderTeacherTrouble(){
    The win is not really the read — it is that a sort click no longer blanks
    the table to "Loading…" and waits on a network round trip to redraw rows it
    already has. */
+/* ── The link a student can be handed ──
+   '#class-activities/ca-15' opens the Class activities page with that one
+   card expanded and scrolled to (caFocusActivity in app.js) — the URL to
+   paste into Classroom next to "do this exit check". Built off
+   pathname, never location.href, so the console's own ?teacher=true doesn't
+   ride along into a student's link. */
+function activityStudentLink(id){
+  return location.origin + location.pathname + '#class-activities/' + encodeURIComponent(id);
+}
+function teacherCopyActivityLink(id, btn){
+  const url = activityStudentLink(id);
+  const flash = ok => {
+    if(!btn) return;
+    const was = btn.textContent;
+    btn.textContent = ok ? 'Copied \u2713' : 'Copy failed';
+    setTimeout(() => { btn.textContent = was; }, 1400);
+  };
+  /* navigator.clipboard needs a secure context — https or localhost, which
+     covers the live site and Live Server. The prompt() fallback is for
+     anything else (a file:// open, an older browser): the teacher still gets
+     the URL, just with a manual Ctrl+C. */
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(() => flash(true), () => window.prompt('Copy this link:', url));
+    return;
+  }
+  window.prompt('Copy this link:', url);
+}
 function renderTeacherActivities(opts){
   const cached = !!(opts && opts.cached) && teacherClassConfigLoaded;
   const box=document.getElementById('t-grid-container');
@@ -679,6 +710,7 @@ function renderTeacherActivities(opts){
         titleCell=`<td class="nc" data-open-activity data-id="${escAttr(a.id)}" style="cursor:pointer" title="${escAttr(num+shown)}">`
           +`${numCell}${escHtml(shown)} <span style="opacity:.55;font-size:.85em">(${escHtml(a.id)})</span> `
           +`<button class="t-act-pencil" data-rename-activity data-id="${escAttr(a.id)}" title="Rename this activity" aria-label="Rename ${escAttr(shown)}">&#x270E;</button>`
+          +`<button class="tg-seg-btn t-act-link" data-copy-activity-link data-id="${escAttr(a.id)}" title="Copy the student link straight to this ${isCheck?'exit check':'activity'}" aria-label="Copy the student link to ${escAttr(shown)}">Copy link</button>`
           +`${renameNote}</td>`;
       }
       return `<tr${isHidden?' style="opacity:.55"':''}><td>${dateCell}</td>${titleCell}<td>${doneCell}</td>
@@ -687,7 +719,7 @@ function renderTeacherActivities(opts){
     }).join('');
     // Arrow shows only on whichever column is currently driving the sort.
     const sortArrow=key=> activitySortKey===key ? (activitySortDir==='asc'?' ▲':' ▼') : '';
-    box.innerHTML=`<div class="tg-note">An activity with no date set is invisible to students — that's its normal starting state, not an error; set one here to publish it. Hidden activities disappear for students regardless of date, same as if they hadn't been pushed yet. Use Hidden to pull back something already live; un-hide any time. The &#x270E; next to a title renames the activity for everyone. Type over the #number to move an activity in the teaching order — everything else renumbers around it, for students too. (That only moves the &#8220;#N&#8221; prefix: a number inside a title, like Finger Gym 2, is part of the name and stays put.) Click Date or Activity below to sort by it; click again to flip the order.</div>`+
+    box.innerHTML=`<div class="tg-note">An activity with no date set is invisible to students — that's its normal starting state, not an error; set one here to publish it. Hidden activities disappear for students regardless of date, same as if they hadn't been pushed yet. Use Hidden to pull back something already live; un-hide any time. The &#x270E; next to a title renames the activity for everyone. Copy link gives you a URL that opens the site straight to that one activity, card already open — paste it into Classroom when you want students on a specific exit check. Type over the #number to move an activity in the teaching order — everything else renumbers around it, for students too. (That only moves the &#8220;#N&#8221; prefix: a number inside a title, like Finger Gym 2, is part of the name and stays put.) Click Date or Activity below to sort by it; click again to flip the order.</div>`+
       `<div class="t-grid-wrap t-act-wrap"><table><thead><tr>`
       +`<th class="t-sort-th" data-sort-activities="date" title="Sort by date">Date${sortArrow('date')}</th>`
       +`<th class="nc t-sort-th" data-sort-activities="number" title="Sort by activity number">Activity${sortArrow('number')}</th>`
@@ -855,6 +887,10 @@ async function teacherSetActivityNumber(id, value){
 // classes(.stu-back/.stu-section-head/.tr-card/.coach-tip/.step-figure) so
 // it needs no CSS of its own. English-only, like the rest of teacher.js —
 // activity titles/text aren't run through tf() here either.
+/* The same shareable link as the table's Copy link button, spelled out on
+   the detail page so it can be read (and pasted by hand) as well as copied. */
+const linkRow=a=>`<div class="tg-note">Student link: <code>${escHtml(activityStudentLink(a.id))}</code> `
+  +`<button class="tg-seg-btn t-act-link" data-copy-activity-link data-id="${escAttr(a.id)}">Copy link</button></div>`;
 function renderTeacherActivityDetail(id){
   const box=document.getElementById('t-grid-container');
   const back=`<button type="button" class="stu-back" data-back-to-activities>&#x2190; All activities</button>`;
@@ -894,6 +930,7 @@ function renderTeacherActivityDetail(id){
   }).join('');
   box.innerHTML=`${back}
     <div class="stu-section-head" style="margin-top:0">${num?`#${num} - `:''}${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
+    ${linkRow(a)}
     ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
     ${stepsHtml || '<div class="stu-empty">No steps on this activity yet.</div>'}`;
 }
@@ -948,6 +985,7 @@ function renderTeacherCheckDetail(a, back){
   box.innerHTML=`${back}
     <div class="stu-section-head" style="margin-top:0">Exit check &middot; ${escHtml(teacherActivityTitle(a,teacherClassConfig))} <span style="opacity:.55;font-size:.72em">(${escHtml(a.id)})</span></div>
     <div class="tg-note">${dateNote}. ${withRes.length} of ${allStudents.length} turned in. Checks take no #number — they never enter the teaching-order run.</div>
+    ${linkRow(a)}
     ${a.intro?`<div class="coach-tip" style="margin:0 2px 16px">${escHtml(a.intro)}</div>`:''}
     ${table}
     <div class="stu-section-head">Preview</div>
